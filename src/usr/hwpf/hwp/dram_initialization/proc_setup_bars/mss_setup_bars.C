@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_setup_bars.C,v 1.44 2015/03/19 15:30:38 gpaulraj Exp $
+// $Id: mss_setup_bars.C,v 1.45 2015/04/24 06:25:04 gpaulraj Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
@@ -40,6 +40,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.45   | gpaulraj | 04/24/15| fix for SW304630
 //  1.43   | gpaulraj | 03/19/15| fix SW296125 - modified k as k = 0
 //  1.42   | gpaulraj | 05/21/14| fixed on 1 MCS mirror BAR EN  issue -SW261358
 //  1.40   | gpaulraj | 05/06/14| fixed on mirror configuration issue
