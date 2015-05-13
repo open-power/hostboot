@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -121,7 +123,12 @@ msg_t* msg_allocate()
 
 int msg_send(msg_q_t q, msg_t* msg)
 {
-    return (int64_t)_syscall2(MSG_SEND, q, msg);
+    int64_t rc = 0;
+    do
+    {
+        rc = (int64_t)_syscall2(MSG_SEND, q, msg);
+    } while( rc == -EAGAIN );
+    return rc;
 }
 
 int msg_sendrecv(msg_q_t q, msg_t* msg)

@@ -44,6 +44,8 @@
 #include <arch/ppc.H>
 #include <errl/errlmanager.H>
 #include <sys/misc.h>
+#include <errl/errludprintk.H>
+#include <errno.h>
 
 // Local functions
 namespace MBOX
@@ -1893,7 +1895,8 @@ errlHndl_t MBOX::send(queue_id_t i_q_id, msg_t * i_msg,int i_node)
 
             // node means Hb instance number in this context
             INTR::PIR_t my_pir (KernelIpc::ipc_data_area.pir);
-            if(my_pir.nodeId == i_node)
+            if( (my_pir.nodeId == i_node)
+                && (MBOX::HB_TEST_MSGQ != i_q_id) ) //use IPC for tests
             {
                 // Message is to this node - don't use IPC path
                 // MBOX sp can look up msgQ
@@ -1904,8 +1907,8 @@ errlHndl_t MBOX::send(queue_id_t i_q_id, msg_t * i_msg,int i_node)
                 int rc = msg_send(reinterpret_cast<msg_q_t>(q_handle),
                                   i_msg);
                 TRACFCOMP(g_trac_mboxmsg,INFO_MRK
-                          "MBOXSP IPC SENT. This PIR 0x%x",
-                          KernelIpc::ipc_data_area.pir);
+                          "MBOXSP IPC SENT. This PIR 0x%x, rc=%d",
+                          KernelIpc::ipc_data_area.pir, rc);
 
 
                 if(rc)
@@ -1915,22 +1918,27 @@ errlHndl_t MBOX::send(queue_id_t i_q_id, msg_t * i_msg,int i_node)
                      * @moduleid        MBOX::MOD_MBOX_SEND
                      * @reasoncode      MBOX::RC_INVALID_QUEUE
                      * @userdata1       returncode from msg_send()
+                     * @userdata2       q_handle
                      *
-                     * @devdesc         Invalid message or message queue
+                     * @devdesc         Error sending IPC message
+                     * @custdesc        A problem occurred during the IPL
+                     *                  of the system
                      *
                      */
                     err = new ERRORLOG::ErrlEntry
                         (
                          ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,  //  severity
-                         MBOX::MOD_MBOX_SEND,                //  moduleid
-                         MBOX::RC_INVALID_QUEUE,             // reason Code
-                         rc,                                 // msg_send errno
-                         q_handle,                           //  msg queue id
+                         MBOX::MOD_MBOX_SEND,              //  moduleid
+                         MBOX::RC_INVALID_QUEUE,           // reason Code
+                         rc,                               // rc from msg_send
+                         q_handle,                         //  msg queue id
                          true //Add HB Software Callout
                         );
 
                     // This Trace has the msg
                     err->collectTrace(MBOXMSG_TRACE_NAME);
+
+                    ERRORLOG::ErrlUserDetailsPrintk().addToLog(err);
                 }
             }
         }

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -334,6 +336,7 @@ class MboxSPTest : public CxxTest::TestSuite
        */
       void testIPC(void)
       {
+          TRACFCOMP(g_trac_mbox,"testIPC>");
           errlHndl_t err = NULL;
           msg_t * msg = msg_allocate();
           msg_t * tmsg = msg_allocate();
@@ -384,6 +387,7 @@ class MboxSPTest : public CxxTest::TestSuite
           msg_q_destroy(msgQ);
           msg_free(rmsg);
           msg_free(tmsg);
+          TRACFCOMP(g_trac_mbox,"<testIPC");
       }
 };
 

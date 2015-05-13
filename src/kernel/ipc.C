@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -25,12 +27,13 @@
 #include <kernel/cpu.H>
 #include <kernel/intmsghandler.H>
 #include <kernel/console.H>
+#include <errno.h>
 
 using namespace KernelIpc;
 
 namespace KernelIpc
 {
-    void send(uint64_t i_q, msg_t * i_msg);
+    int send(uint64_t i_q, msg_t * i_msg);
 };
 
 /**
@@ -43,7 +46,7 @@ KernelIpc::ipc_data_area_t KernelIpc::ipc_data_area;
 //    Two potential issues:
 //    1. The destination node is not there - memory location is nonexistant.
 //    2. The destination node never responds, potentially hanging this thread.
-void KernelIpc::send(uint64_t i_q, msg_t * i_msg)
+int KernelIpc::send(uint64_t i_q, msg_t * i_msg)
 {
     // @note
     // Point to memory in the destination image.
@@ -69,13 +72,12 @@ void KernelIpc::send(uint64_t i_q, msg_t * i_msg)
         reinterpret_cast<ipc_data_area_t*>(dest_addr);
 
     // get lock on IPC data area in other node
-    while(false == __sync_bool_compare_and_swap(&(p_dest->msg_queue_id),
+    if(false == __sync_bool_compare_and_swap(&(p_dest->msg_queue_id),
                                                 IPC_DATA_AREA_CLEAR,
                                                 IPC_DATA_AREA_LOCKED))
     {
-        setThreadPriorityLow();
+        return -EAGAIN;
     }
-    setThreadPriorityHigh();
 
     p_dest->msg_payload = *i_msg;  // copy in message
     lwsync();
@@ -94,6 +96,6 @@ void KernelIpc::send(uint64_t i_q, msg_t * i_msg)
     // code and freed here in kernel space. The assumption is that this is OK.
     msg_free(i_msg);
 
-    return;
+    return 0;
 }
 

@@ -43,10 +43,11 @@
 #include <kernel/heapmgr.H>
 #include <kernel/intmsghandler.H>
 #include <sys/sync.h>
+#include <errno.h>
 
 namespace KernelIpc
 {
-    void send(uint64_t i_q, msg_t * i_msg);
+    int send(uint64_t i_q, msg_t * i_msg);
 };
 
 extern "C"
@@ -315,11 +316,11 @@ namespace Systemcalls
     {
         uint64_t q_handle = TASK_GETARG0(t);
         msg_t* m = (msg_t*) TASK_GETARG1(t);
+        int rc = 0;
 
         if(((q_handle >> 32) & MSGQ_TYPE_IPC) != 0)
         {
-            // IPC message
-            KernelIpc::send(q_handle, m);
+            rc = KernelIpc::send(q_handle, m);
         }
         else
         {
@@ -362,7 +363,7 @@ namespace Systemcalls
 
             mq->lock.unlock();
         }
-        TASK_SETRTN(t, 0);
+        TASK_SETRTN(t, rc);
     }
 
     void MsgSendRecv(task_t* t)
