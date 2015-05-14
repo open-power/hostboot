@@ -288,6 +288,7 @@ hbicore_DATA_MODULES += p8.psi.scom.if
 hbicore_DATA_MODULES += p8.tpbridge.scom.if
 hbicore_DATA_MODULES += p8.cxa.scom.if
 hbicore_DATA_MODULES += p8.a_x_pci_dmi_fir.scom.if
+hbicore_DATA_MODULES += p8.npu.scom.if
 
 hbicore_test_OBJECTS += ${hbicore_OBJECTS}
 hbicore_test_MODULES += ${hbicore_MODULES}

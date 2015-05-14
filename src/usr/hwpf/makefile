@@ -282,6 +282,7 @@ HWP_INITFILES += hwp/initfiles/p8.psi.scom.initfile
 HWP_INITFILES += hwp/initfiles/p8.tpbridge.scom.initfile
 HWP_INITFILES += hwp/initfiles/p8.cxa.scom.initfile
 HWP_INITFILES += hwp/initfiles/p8.a_x_pci_dmi_fir.scom.initfile
+HWP_INITFILES += hwp/initfiles/p8.npu.scom.initfile
 
 HWP_IF_DEFINE_DIR = hwp/initfiles
 
