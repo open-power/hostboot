@@ -39,7 +39,6 @@ include ${TARGETING_REL_PATH}/hostboot_common.mk
 ATTR_RP_OBJS += attrrp.o
 ATTR_RP_OBJS += attrsync.o
 ATTR_RP_OBJS += targplatutil.o
-ATTR_RP_OBJS += attrPlatOverride.o
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
 
 ENTRY_POINT_OBJS += targetservicestart.o
@@ -49,6 +48,7 @@ DEBUG_OBJS += attributestrings.o
 HOSTBOOT_SPECIFIC_OBJS += ${ENTRY_POINT_OBJS}
 HOSTBOOT_SPECIFIC_OBJS += ${ATTR_RP_OBJS}
 HOSTBOOT_SPECIFIC_OBJS += ${DEBUG_OBJS}
+HOSTBOOT_SPECIFIC_OBJS += ${HOSTBOOT_RT_IPL_COMMON_OBJS}
 HOSTBOOT_SPECIFIC_OBJS += namedtarget.o
 
 

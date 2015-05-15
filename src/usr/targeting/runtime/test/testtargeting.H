@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -22,11 +24,14 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #include <cxxtest/TestSuite.H>
 #include <targeting/common/commontargeting.H>
+#include <runtime/interface.h>
 #include <runtime/rt_targeting.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <targeting/common/trace.H>
 #include <targeting/common/utilFilter.H>
+#include <targeting/attrPlatOverride.H>
+#include <hwpf/plat/fapiPlatAttrOverrideSync.H>
 
 class TargetingTestSuite : public CxxTest::TestSuite
 {
@@ -111,5 +116,109 @@ class TargetingTestSuite : public CxxTest::TestSuite
                             target);
                 }
             }
+        }
+
+        void testApplyAttrOverrides()
+        {
+            using namespace TARGETING;
+            TRACFCOMP(g_trac_targeting,"testApplyAttrOverrides");
+            do
+            {
+
+                // Get the address of the runtime apply overrides function
+                runtimeInterfaces_t* rt_intf = getRuntimeInterfaces();
+                if(rt_intf == NULL)
+                {
+                    TS_FAIL("runtimeIntfaces not set");
+                    break;
+                }
+                if( rt_intf->apply_attr_override == NULL )
+                {
+                    TS_FAIL("runtimeInterfaces->apply_attr_override not set");
+                    break;
+                }
+
+                // Get the initial value of the test attribute
+                TargetService& l_targetService = targetService();
+                TARGETING::Target* l_pTarget = NULL;
+                (void) l_targetService.getTopLevelTarget(l_pTarget);
+                if (l_pTarget == NULL)
+                {
+                    TS_FAIL("Top level target handle is NULL");
+                    break;
+                }
+                uint8_t l_attrVal =
+                         l_pTarget->getAttr<TARGETING::ATTR_SCRATCH_UINT8_1>();
+                uint8_t l_attrOverrideVal = l_attrVal + 1;
+                TRACFCOMP(g_trac_targeting,
+                      "apply_attr_override attribute value = 0x%02x",
+                      l_attrVal);
+
+                // Set up attribute override binary blob
+                const uint64_t l_attrBlobSizeMax = 4096;
+                uint8_t l_pAttrOverrideBlob[l_attrBlobSizeMax] = {0xff};
+                AttributeTank l_TargetTank;
+                l_TargetTank.setAttribute(ATTR_SCRATCH_UINT8_1,
+                                      TYPE_SYS,
+                                      AttributeTank::ATTR_POS_NA,
+                                      AttributeTank::ATTR_UNIT_POS_NA,
+                                      AttributeTank::ATTR_NODE_NA,
+                                      0,
+                                      sizeof(l_attrOverrideVal),
+                                      &l_attrOverrideVal);
+                AttributeTank::AttributeSerializedChunks_t l_attributes;
+                l_TargetTank.serializeAttributes(
+                             AttributeTank::ALLOC_TYPE_NEW,
+                             l_attrBlobSizeMax,
+                             l_attributes);
+                // Copy override chunk to form attribute override section
+                AttributeTank::AttributeSerializedChunk l_chunk;
+                AttrOverrideSection * l_pAttrOverSec = NULL;
+                uint32_t l_tmpIndex = 0;
+                for (AttributeTank::AttributeSerializedChunks_t::iterator
+                        chunkIter = l_attributes.begin();
+                        chunkIter != l_attributes.end();
+                        ++chunkIter)
+                {
+                    l_chunk = *chunkIter;
+                    l_pAttrOverSec = reinterpret_cast<AttrOverrideSection *>
+                                        (l_pAttrOverrideBlob + l_tmpIndex);
+                    l_pAttrOverSec->iv_layer = AttributeTank::TANK_LAYER_TARG;
+                    l_pAttrOverSec->iv_size = l_chunk.iv_size;
+                    memcpy(&l_pAttrOverSec->iv_chunk, l_chunk.iv_pAttributes,
+                        l_chunk.iv_size);
+                    l_tmpIndex += sizeof(AttrOverrideSection)+
+                                        l_pAttrOverSec->iv_size;
+                }
+                // Add termination section
+                l_pAttrOverSec = reinterpret_cast<AttrOverrideSection *>
+                                        (l_pAttrOverrideBlob + l_tmpIndex);
+                l_pAttrOverSec->iv_layer = AttributeTank::TANK_LAYER_TERM;
+                l_pAttrOverSec->iv_size = 0;
+                l_tmpIndex += sizeof(AttrOverrideSection);
+                // call runtime override attributes
+                int rc = rt_intf->apply_attr_override(
+                                    l_pAttrOverrideBlob,
+                                    l_tmpIndex);
+                if (rc)
+                {
+                    TS_FAIL("apply_attr_override empty list failed rc=%x",rc);
+                    break;
+                }
+                // verify the overriden value
+                uint8_t l_attrNewVal =
+                         l_pTarget->getAttr<TARGETING::ATTR_SCRATCH_UINT8_1>();
+                TRACFCOMP(g_trac_targeting,
+                      "apply_attr_override overriden attribute value = 0x%02x",
+                      l_attrNewVal);
+                if (l_attrNewVal != l_attrOverrideVal)
+                {
+                    TS_FAIL("apply_attr_override value=0x%02x expected=0x%02x",
+                       l_attrNewVal,l_attrOverrideVal);
+                    break;
+                }
+                TRACFCOMP(g_trac_targeting,"testApplyAttrOverrides SUCCESS");
+
+            } while (0);
         }
 };

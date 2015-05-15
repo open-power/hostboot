@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,6 +67,9 @@ const std::pair<AttributeTank::TankLayer, PNOR::SectionId>
  * the appropriate attribute tank. It also calls writePermAttributes() to write
  * permanent attribute overrides. Currently there are 3 attribute tanks,
  * FAPI, Targeting, and Permanent.
+ *
+ * For runtime attribute updates, a PNOR::SectionInfo is set up to point to the
+ * passed attribute update binary blob instead of being a 'real' pnor section.
  *
  * @param[in] i_sectionInfo   PNOR::SectionInfo_t to look for overrides
  * @param[in] io_tanks        Array of pointers to Attribute tanks, used for

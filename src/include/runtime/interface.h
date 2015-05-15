@@ -454,6 +454,17 @@ typedef struct runtimeInterfaces
      */
     int (*enable_occ_actuation)(int i_occ_activation);
 
+
+    /**
+     * @brief Apply a set of attribute overrides
+     * @param[in] pointer to binary override data
+     * @param[in] length of override data (bytes)
+     * @returns  0 on success, or return code if the command failed
+     * @platform OpenPower
+     */
+    int (*apply_attr_override)(uint8_t* i_data,
+                               size_t i_size );
+
     // Reserve some space for future growth.
     void (*reserved[32])(void);
 

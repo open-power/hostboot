@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,8 +36,11 @@ HOSTBOOT_RUNTIME_SPECIFIC_OBJS += attrrp_rt.o
 HOSTBOOT_RUNTIME_SPECIFIC_OBJS += start_rt.o
 HOSTBOOT_RUNTIME_SPECIFIC_OBJS += targplatutil.o
 HOSTBOOT_RUNTIME_SPECIFIC_OBJS += rt_targeting.o
+HOSTBOOT_RUNTIME_SPECIFIC_OBJS += attrPlatOverride_rt.o
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
 
 OBJS += ${COMMON_TARGETING_OBJS}
+OBJS += ${HOSTBOOT_RT_IPL_COMMON_OBJS}
 OBJS += ${HOSTBOOT_RUNTIME_SPECIFIC_OBJS}
 
 include $(ROOTPATH)/config.mk

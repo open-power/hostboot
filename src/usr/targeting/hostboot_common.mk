@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,3 +32,4 @@ VPATH += ${TARGETING_REL_PATH}/adapters
 VPATH += ${COMMON_TARGETING_REL_PATH}
 VPATH += ${addprefix ${COMMON_TARGETING_REL_PATH}/, ${COMMON_TARGETING_SUBDIRS}}
 
+HOSTBOOT_RT_IPL_COMMON_OBJS += attrPlatOverride.o
