@@ -23,6 +23,7 @@
 #
 # IBM_PROLOG_END_TAG
 # common objects with runtime
+OBJS += vpd_common.o
 OBJS += ipvpd.o
 OBJS += mvpd.o
 OBJS += cvpd.o

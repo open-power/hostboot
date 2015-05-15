@@ -343,6 +343,14 @@ void*    call_host_runtime_setup( void    *io_pArgs )
 
         if( is_sapphire_load() && (!INITSERVICE::spBaseServicesEnabled()) )
         {
+            // Update the VPD switches for golden side boot
+            // Must do this before building the devtree
+            l_err = VPD::goldenSwitchUpdate();
+            if ( l_err )
+            {
+                break;
+            }
+
             // Write the devtree out in Sapphire mode when SP Base Services not
             // enabled
             l_err = DEVTREE::build_flatdevtree();
@@ -354,28 +362,14 @@ void*    call_host_runtime_setup( void    *io_pArgs )
                 break;
             }
 
-#ifdef CONFIG_PNOR_TWO_SIDE_SUPPORT
-            // We also need to wipe the cache out after booting from the
-            //  golden side of pnor
-            PNOR::SideInfo_t l_pnorInfo;
-            l_err = PNOR::getSideInfo( PNOR::WORKING, l_pnorInfo );
-            if( l_err )
+            // Invalidate the VPD cache for golden side boot
+            // Also invalidate in manufacturing mode
+            // Must do this after building the devtree
+            l_err = VPD::goldenCacheInvalidate();
+            if ( l_err )
             {
-                // commit the error but keep going
-                errlCommit(l_err, ISTEP_COMP_ID);
-                // force the caches to get wiped out just in case
-                l_pnorInfo.isGolden = true;
+                break;
             }
-            if( l_pnorInfo.isGolden )
-            {
-                // Invalidate the VPD Caches for all targets
-                l_err = VPD::invalidateAllPnorCaches(true);
-                if (l_err)
-                {
-                    break;
-                }
-            }
-#endif
 
         }
         else if( is_sapphire_load() )

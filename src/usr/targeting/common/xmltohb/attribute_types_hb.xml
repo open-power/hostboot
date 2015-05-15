@@ -279,7 +279,7 @@
 <attribute>
     <id>HB_EXISTING_IMAGE</id>
     <description>Indicates which logical nodes have a hostboot image.</description>
-    <!-- Bit position [0-7] (left to right) represents logical node. 
+    <!-- Bit position [0-7] (left to right) represents logical node.
     '1' means the logical node has an active hostboot image.
     -->
     <simpleType>
@@ -801,10 +801,27 @@
             <default>0</default>
         </field>
         <field>
+            <name>pnorCacheValidRT</name>
+            <description>See pnorCacheValid. Allows runtime version to be
+                set separately from common version.
+            </description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default>
+        </field>
+        <field>
+            <name>disableWriteToPnorRT</name>
+            <description>Set to disable write-thru to PNOR at runtime
+            </description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default>
+        </field>
+        <field>
             <name>reserved</name>
             <description>Reserved for future expansion</description>
             <type>uint8_t</type>
-            <bits>7</bits>
+            <bits>5</bits>
             <default>0</default>
         </field>
     </complexType>

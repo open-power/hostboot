@@ -82,7 +82,7 @@ errlHndl_t bld_vpd_image(PNOR::SectionId vpd_type,
              * @moduleid         VPD::VPD_BLD_RT_IMAGE
              * @userdata1        Size provided
              * @userdata2        vpd_type | Size required
-             * @devdesc          Reserved size in memory insufficient 
+             * @devdesc          Reserved size in memory insufficient
              *                   for runtime VPD
              */
             err = new ERRORLOG::ErrlEntry
@@ -152,6 +152,57 @@ errlHndl_t VPD::vpd_load_rt_image(uint64_t & o_vpd_addr)
 
         mm_block_unmap(vptr);
 
+    } while( 0 );
+
+    return err;
+}
+
+// External function see vpd_if.H
+errlHndl_t VPD::goldenSwitchUpdate(void)
+{
+    errlHndl_t err = NULL;
+
+    do
+    {
+#ifdef CONFIG_PNOR_TWO_SIDE_SUPPORT
+        // Do not write to the PNOR at runtime after booting from the
+        //  golden side of pnor
+        PNOR::SideInfo_t l_pnorInfo;
+        err = PNOR::getSideInfo( PNOR::WORKING, l_pnorInfo );
+        if( err )
+        {
+            break;
+        }
+        else if( l_pnorInfo.isGolden )
+        {
+            TARGETING::ATTR_VPD_SWITCHES_type l_switch;
+
+            // Find all the targets with VPD switches
+            for (TARGETING::TargetIterator target =
+                 TARGETING::targetService().begin();
+                 target != TARGETING::targetService().end();
+                 ++target)
+            {
+                if(target->tryGetAttr<TARGETING::ATTR_VPD_SWITCHES>(l_switch))
+                {
+                    l_switch.disableWriteToPnorRT = 1;
+                    target->setAttr<TARGETING::ATTR_VPD_SWITCHES>( l_switch );
+                }
+            }
+        }
+#endif
+    } while( 0 );
+
+    return err;
+}
+
+// External function see vpd_if.H
+errlHndl_t VPD::goldenCacheInvalidate(void)
+{
+    errlHndl_t err = NULL;
+
+    do
+    {
         bool l_invalidateCaches = false;
 
         // In manufacturing mode the VPD PNOR cache needs to be cleared

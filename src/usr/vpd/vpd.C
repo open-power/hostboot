@@ -39,10 +39,9 @@
 #include "ipvpd.H"
 
 // ----------------------------------------------
-// Trace definitions
+// Trace - defined in vpd_common
 // ----------------------------------------------
-trace_desc_t* g_trac_vpd = NULL;
-TRAC_INIT( & g_trac_vpd, "VPD", KILOBYTE );
+extern trace_desc_t* g_trac_vpd;
 
 // ------------------------
 // Macros for unit testing
@@ -53,29 +52,6 @@ TRAC_INIT( & g_trac_vpd, "VPD", KILOBYTE );
 
 namespace VPD
 {
-
-// ------------------------------------------------------------------
-// getVpdLocation
-// ------------------------------------------------------------------
-errlHndl_t getVpdLocation ( int64_t & o_vpdLocation,
-                            TARGETING::Target * i_target )
-{
-    errlHndl_t err = NULL;
-
-    TRACSSCOMP( g_trac_vpd,
-                ENTER_MRK"getVpdLocation()" );
-
-    o_vpdLocation = i_target->getAttr<TARGETING::ATTR_VPD_REC_NUM>();
-    TRACUCOMP( g_trac_vpd,
-               INFO_MRK"Using VPD location: %d",
-               o_vpdLocation );
-
-    TRACSSCOMP( g_trac_vpd,
-                EXIT_MRK"getVpdLocation()" );
-
-    return err;
-}
-
 
 // ------------------------------------------------------------------
 // getPnorAddr
@@ -351,78 +327,6 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
                 EXIT_MRK"sendMboxWriteMsg()" );
 
     return l_err;
-}
-
-
-// ------------------------------------------------------------------
-// resolveVpdSource
-// ------------------------------------------------------------------
-bool resolveVpdSource( TARGETING::Target * i_target,
-                       bool i_rwPnorEnabled,
-                       bool i_rwHwEnabled,
-                       vpdCmdTarget i_vpdCmdTarget,
-                       vpdCmdTarget& o_vpdSource )
-{
-    bool badConfig = false;
-    o_vpdSource = VPD::INVALID_LOCATION;
-
-    if( i_vpdCmdTarget == VPD::PNOR )
-    {
-        if( i_rwPnorEnabled )
-        {
-            o_vpdSource = VPD::PNOR;
-        }
-        else
-        {
-            badConfig = true;
-            TRACFCOMP(g_trac_vpd,"resolveVpdSource: VpdCmdTarget=PNOR but READ/WRITE PNOR CONFIG is disabled");
-        }
-    }
-    else if( i_vpdCmdTarget == VPD::SEEPROM )
-    {
-        if( i_rwHwEnabled )
-        {
-            o_vpdSource = VPD::SEEPROM;
-        }
-        else
-        {
-            badConfig = true;
-            TRACFCOMP(g_trac_vpd,"resolveVpdSource: VpdCmdTarget=SEEPROM but READ/WRITE HW CONFIG is disabled");
-        }
-    }
-    else  // i_vpdCmdTarget == VPD::AUTOSELECT
-    {
-        if( i_rwPnorEnabled &&
-            i_rwHwEnabled )
-        {
-            // PNOR needs to be loaded before we can use it
-            TARGETING::ATTR_VPD_SWITCHES_type vpdSwitches =
-                    i_target->getAttr<TARGETING::ATTR_VPD_SWITCHES>();
-            if( vpdSwitches.pnorCacheValid )
-            {
-                o_vpdSource = VPD::PNOR;
-            }
-            else
-            {
-                o_vpdSource = VPD::SEEPROM;
-            }
-        }
-        else if( i_rwPnorEnabled )
-        {
-            o_vpdSource = VPD::PNOR;
-        }
-        else if( i_rwHwEnabled )
-        {
-            o_vpdSource = VPD::SEEPROM;
-        }
-        else
-        {
-            badConfig = true;
-            TRACFCOMP(g_trac_vpd,"resolveVpdSource: READ/WRITE PNOR CONFIG and READ/WRITE HW CONFIG disabled");
-        }
-    }
-
-    return badConfig;
 }
 
 
@@ -815,10 +719,11 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
             }
         }
 
-        // Set target attribute switch that says VPD is loaded into PNOR
+        // Set target attribute switches that say VPD is loaded into PNOR
         TARGETING::ATTR_VPD_SWITCHES_type vpdSwitches =
                     i_target->getAttr<TARGETING::ATTR_VPD_SWITCHES>();
         vpdSwitches.pnorCacheValid = 1;
+        vpdSwitches.pnorCacheValidRT = 1;
         i_target->setAttr<TARGETING::ATTR_VPD_SWITCHES>( vpdSwitches );
 
     } while(0);
@@ -876,6 +781,7 @@ void setVpdConfigFlagsHW ( )
 {
     Singleton<MvpdFacade>::instance().setConfigFlagsHW();
     Singleton<CvpdFacade>::instance().setConfigFlagsHW();
+    Singleton<PvpdFacade>::instance().setConfigFlagsHW();
     SPD::setConfigFlagsHW();
 }
 
@@ -889,13 +795,6 @@ errlHndl_t invalidateAllPnorCaches ( bool i_setHwOnly )
     errlHndl_t l_err = NULL;
 
     do {
-        // Reset the PNOR config flags to HW - MVPD/CVPD/SPD
-        // Checks for PNOR caching mode before reset
-        if( i_setHwOnly )
-        {
-            VPD::setVpdConfigFlagsHW();
-        }
-
         // Find all the targets with VPD switches
         for (TARGETING::TargetIterator target =
              TARGETING::targetService().begin();
@@ -920,6 +819,13 @@ errlHndl_t invalidateAllPnorCaches ( bool i_setHwOnly )
         if (l_err)
         {
             break;
+        }
+
+        // Reset the PNOR config flags to HW - MVPD/CVPD/SPD
+        // Checks for PNOR caching mode before reset
+        if( i_setHwOnly )
+        {
+            VPD::setVpdConfigFlagsHW();
         }
 
     } while(0);

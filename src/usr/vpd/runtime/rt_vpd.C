@@ -37,11 +37,7 @@
 #include "cvpd.H"
 #include "spd.H"
 
-// ----------------------------------------------
-// Trace definitions
-// ----------------------------------------------
-trace_desc_t* g_trac_vpd = NULL;
-TRAC_INIT( & g_trac_vpd, "VPD", KILOBYTE );
+extern trace_desc_t* g_trac_vpd;
 
 // ------------------------
 // Macros for unit testing
@@ -50,30 +46,39 @@ TRAC_INIT( & g_trac_vpd, "VPD", KILOBYTE );
 //#define TRACSSCOMP(args...)  TRACFCOMP(args)
 #define TRACSSCOMP(args...)
 
+
 namespace VPD
 {
 
 // ------------------------------------------------------------------
-// getVpdLocation
+// rtVpdInit
 // ------------------------------------------------------------------
-errlHndl_t getVpdLocation ( int64_t & o_vpdLocation,
-                            TARGETING::Target * i_target )
+struct rtVpdInit
 {
-    errlHndl_t err = NULL;
+    rtVpdInit()
+    {
+        // The VPD code that is common to IPL and runtime uses the
+        // pnorCacheValid switch.  During a golden-side boot this switch
+        // gets cleared when the VPD cache is invalidated.  At runtime
+        // we may need to use the VPD cache (really the devtree data in
+        // memory) so we copy the RT switch to the common switch.
 
-    TRACSSCOMP( g_trac_vpd,
-                ENTER_MRK"getVpdLocation()" );
-
-    o_vpdLocation = i_target->getAttr<TARGETING::ATTR_VPD_REC_NUM>();
-    TRACUCOMP( g_trac_vpd,
-               INFO_MRK"Using VPD location: %d",
-               o_vpdLocation );
-
-    TRACSSCOMP( g_trac_vpd,
-                EXIT_MRK"getVpdLocation()" );
-
-    return err;
-}
+        // Find all the targets with VPD switches
+        for (TARGETING::TargetIterator target =
+            TARGETING::targetService().begin();
+            target != TARGETING::targetService().end();
+            ++target)
+        {
+            TARGETING::ATTR_VPD_SWITCHES_type l_switch;
+            if(target->tryGetAttr<TARGETING::ATTR_VPD_SWITCHES>(l_switch))
+            {
+                l_switch.pnorCacheValid = l_switch.pnorCacheValidRT;
+                target->setAttr<TARGETING::ATTR_VPD_SWITCHES>( l_switch );
+            }
+        }
+    }
+};
+rtVpdInit g_rtVpdInit;
 
 // ------------------------------------------------------------------
 // Fake getPnorAddr - VPD image is in memory
@@ -347,7 +352,7 @@ errlHndl_t writePNOR ( uint64_t i_byteAddr,
         // Check if the VPD PNOR cache is loaded for this target
         TARGETING::ATTR_VPD_SWITCHES_type vpdSwitches =
                 i_target->getAttr<TARGETING::ATTR_VPD_SWITCHES>();
-        if( vpdSwitches.pnorCacheValid )
+        if( vpdSwitches.pnorCacheValid && !(vpdSwitches.disableWriteToPnorRT) )
         {
             PNOR::SectionInfo_t info;
             writeAddr = NULL;
@@ -384,21 +389,6 @@ errlHndl_t writePNOR ( uint64_t i_byteAddr,
             {
                 break;
             }
-        }
-
-        //------------------------
-        // Write HW version of VPD
-        //------------------------
-        err = DeviceFW::deviceOp( DeviceFW::WRITE,
-                                  i_target,
-                                  i_data,
-                                  i_numBytes,
-                                  DEVICE_EEPROM_ADDRESS(
-                                      EEPROM::VPD_PRIMARY,
-                                      i_byteAddr ) );
-        if( err )
-        {
-            break;
         }
 
     } while(0);
@@ -452,74 +442,6 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
     err->collectTrace( "VPD", 256);
 
     return err;
-}
-
-// ------------------------------------------------------------------
-// resolveVpdSource
-// ------------------------------------------------------------------
-bool resolveVpdSource( TARGETING::Target * i_target,
-                       bool i_readFromPnorEnabled,
-                       bool i_readFromHwEnabled,
-                       vpdCmdTarget i_vpdCmdTarget,
-                       vpdCmdTarget& o_vpdSource )
-{
-    bool badConfig = false;
-    o_vpdSource = VPD::INVALID_LOCATION;
-
-    if( i_vpdCmdTarget == VPD::PNOR )
-    {
-        if( i_readFromPnorEnabled )
-        {
-            o_vpdSource = VPD::PNOR;
-        }
-        else
-        {
-            badConfig = true;
-        }
-    }
-    else if( i_vpdCmdTarget == VPD::SEEPROM )
-    {
-        if( i_readFromHwEnabled )
-        {
-            o_vpdSource = VPD::SEEPROM;
-        }
-        else
-        {
-            badConfig = true;
-        }
-    }
-    else
-    {
-        if( i_readFromPnorEnabled &&
-            i_readFromHwEnabled )
-        {
-            // PNOR needs to be loaded before we can use it
-            TARGETING::ATTR_VPD_SWITCHES_type vpdSwitches =
-                    i_target->getAttr<TARGETING::ATTR_VPD_SWITCHES>();
-            if( vpdSwitches.pnorCacheValid )
-            {
-                o_vpdSource = VPD::PNOR;
-            }
-            else
-            {
-                o_vpdSource = VPD::SEEPROM;
-            }
-        }
-        else if( i_readFromPnorEnabled )
-        {
-            o_vpdSource = VPD::PNOR;
-        }
-        else if( i_readFromHwEnabled )
-        {
-            o_vpdSource = VPD::SEEPROM;
-        }
-        else
-        {
-            badConfig = true;
-        }
-    }
-
-    return badConfig;
 }
 
 

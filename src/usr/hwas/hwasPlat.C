@@ -396,12 +396,30 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
     }
     if( l_pnorInfo.isGolden )
     {
-        errl = VPD::invalidateAllPnorCaches(false);
+#ifdef CONFIG_DJVPD_WRITE_TO_PNOR
+        errl = PNOR::clearSection( PNOR::DIMM_JEDEC_VPD );
         if( errl )
         {
             // commit the error but keep going
             errlCommit(errl, HWAS_COMP_ID);
         }
+#endif
+#ifdef CONFIG_MVPD_WRITE_TO_PNOR
+        errl = PNOR::clearSection( PNOR::MODULE_VPD );
+        if( errl )
+        {
+            // commit the error but keep going
+            errlCommit(errl, HWAS_COMP_ID);
+        }
+#endif
+#ifdef CONFIG_CVPD_WRITE_TO_PNOR
+        errl = PNOR::clearSection( PNOR::CENTAUR_VPD );
+        if( errl )
+        {
+            // commit the error but keep going
+            errlCommit(errl, HWAS_COMP_ID);
+        }
+#endif
     }
 #endif
 

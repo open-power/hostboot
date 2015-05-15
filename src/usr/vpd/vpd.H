@@ -83,6 +83,21 @@ union VpdWriteMsg_t
 
 
 /**
+ * @brief This function is used to query the attribute code to get the VPD
+ *      Location value for the target provided.
+ *
+ * @param[out] o_vpdLocation - The value of the VPD Location attribute.
+ *
+ * @param[in] i_target - The target to query.
+ *
+ * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+ *      Error log.
+ */
+errlHndl_t getVpdLocation ( int64_t & o_vpdLocation,
+                            TARGETING::Target * i_target );
+
+
+/**
  * @brief This function will query the PNOR RP to get the offset of the
  *      section requested.  It will then set global variables to save this
  *      value away for later use.  This function only needs to be called once.

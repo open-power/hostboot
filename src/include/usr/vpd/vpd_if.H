@@ -112,6 +112,22 @@ namespace VPD
      */
     errlHndl_t invalidateAllPnorCaches ( bool i_setHwOnly );
 
+    /**
+     * @brief This function checks for golden-side boot and updates
+     *        the VPD SWITCHES attribute if true
+     * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+     *      error log.
+     */
+    errlHndl_t goldenSwitchUpdate ( void );
+
+    /**
+     * @brief This function checks for manufacturing mode or
+     *        golden-side boot and invalidates VPD PNOR cache if true
+     * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+     *      error log.
+     */
+    errlHndl_t goldenCacheInvalidate ( void );
+
 }; //end vpd namespace
 
 #endif
