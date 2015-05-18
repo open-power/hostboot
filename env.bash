@@ -32,7 +32,7 @@ if [ -n "${OPENPOWER_BUILD}" ]; then
     export SKIP_BINARY_FILES=1
     export JAILCMD=""
 else
-    export FAKEROOT=${FAKEROOT:-/opt/mcp/shared/powerpc64-gcc-20130412}
+    export FAKEROOT=${FAKEROOT:-/opt/mcp/shared/powerpc64-gcc-20150516}
     export CROSS_PREFIX=${CROSS_PREFIX:-${FAKEROOT}/wrappers/powerpc64-unknown-linux-gnu-}
     export HOST_PREFIX=${HOST_PREFIX:-${FAKEROOT}/wrappers/x86_64-pc-linux-gnu-}
     export PATH=${FAKEROOT}/wrappers:${PATH}

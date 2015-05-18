@@ -37,9 +37,9 @@ endif
 
 COMMONFLAGS += $(OPT_LEVEL) -nostdlib
 CFLAGS += $(COMMONFLAGS) -mcpu=power7 -nostdinc -g -mno-vsx -mno-altivec\
-          -Wall -Werror -mtraceback=no -pipe \
+          -Wall -Werror -mtraceback=no -pipe -mabi=elfv1 \
 	  -ffunction-sections -fdata-sections -ffreestanding -mbig-endian
-ASMFLAGS += $(COMMONFLAGS) -mcpu=power7 -mbig-endian
+ASMFLAGS += $(COMMONFLAGS) -mcpu=power7 -mbig-endian -ffreestanding -mabi=elfv1
 CXXFLAGS += $(CFLAGS) -nostdinc++ -fno-rtti -fno-exceptions -Wall \
 	    -fuse-cxa-atexit -std=gnu++11
 LDFLAGS += --nostdlib --sort-common -EB $(COMMONFLAGS)
