@@ -102,11 +102,6 @@ namespace   INITSERVICE
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
-                ISTEPNAME(18,09,"sys_proc_fab_iovalid"),
-                NULL,
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
-        },
-        {
                 ISTEPNAME(18,10,""),
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
@@ -121,22 +116,6 @@ namespace   INITSERVICE
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
-
-// To reduce extended image size for VPO, don't run these isteps in VPO
-#ifndef CONFIG_VPO_COMPILE
-        {
-                ISTEPNAME(18,13,"proc_tod_setup"),
-                TOD::call_tod_setup,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false,
-                        STARTING_OS }
-        },
-        {
-                ISTEPNAME(18,14,"proc_tod_init"),
-                TOD::call_tod_init,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
-        },
-#endif
-
 };
 
 const DepModInfo g_istep18Dependancies = {

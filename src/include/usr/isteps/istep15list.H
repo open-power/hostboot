@@ -68,16 +68,6 @@ namespace   INITSERVICE
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true,
                         SEC_PROCESSOR_INIT }
         },
-        {
-                ISTEPNAME(15,02,"proc_set_pore_bar"),
-                BUILD_WINKLE_IMAGES::call_proc_set_pore_bar,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
-        },
-        {
-                ISTEPNAME(15,03,"p8_poreslw_init"),
-                BUILD_WINKLE_IMAGES::call_p8_poreslw_init,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
-        },
 #endif        
 
 };

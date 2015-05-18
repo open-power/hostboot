@@ -71,46 +71,6 @@ namespace   INITSERVICE
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
-        {
-                ISTEPNAME(08,01,"fabric_erepair"),
-                EDI_EI_INITIALIZATION::call_fabric_erepair,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
-        },
-        {
-                ISTEPNAME(08,02,"fabric_io_dccal"),
-                EDI_EI_INITIALIZATION::call_fabric_io_dccal,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
-        },
-        {
-                ISTEPNAME(08,03,"fabric_pre_trainadv"),
-                EDI_EI_INITIALIZATION::call_fabric_pre_trainadv,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
-        },
-        {
-                ISTEPNAME(08,04,"fabric_io_run_training"),
-                EDI_EI_INITIALIZATION::call_fabric_io_run_training,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
-        },
-        {
-                ISTEPNAME(08,05,"fabric_post_trainadv"),
-                EDI_EI_INITIALIZATION::call_fabric_post_trainadv,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
-        },
-        {
-                ISTEPNAME(08,06,"host_startprd_pbus"),
-                EDI_EI_INITIALIZATION::call_host_startprd_pbus,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
-        },
-        {
-                ISTEPNAME(08,07,"host_attnlisten_proc"),
-                EDI_EI_INITIALIZATION::call_host_attnlisten_proc,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
-        },
-        {
-                ISTEPNAME(08,08,"proc_fab_iovalid"),
-                EDI_EI_INITIALIZATION::call_proc_fab_iovalid,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
 };
 
 const DepModInfo g_istep08Dependancies = {

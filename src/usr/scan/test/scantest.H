@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -50,7 +52,8 @@ public:
 
   void test_SCANreadWrite_proc(void)
   {
-
+/*
+      //FIXME: RTC 129630
       TRACFCOMP( g_trac_scandd, "scanTest::test_SCANreadWrite_proc> Start" );
 
       uint64_t fails = 0;
@@ -220,7 +223,7 @@ public:
       }
 
       TRACFCOMP( g_trac_scandd, "scanTest::test_SCANreadWrite_proc> %d/%d fails", fails, total );
-
+*/
   }
 
 

@@ -102,54 +102,9 @@ const   TaskInfo    g_istep06[]  =   {
                         BASE_INITIALIZATION }
         },
         {
-                ISTEPNAME(06,04,"host_set_ipl_parms"),
-                HWAS::host_set_ipl_parms,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
-        },
-        {
                 ISTEPNAME(06,05,"host_discover_targets"),
                 HWAS::host_discover_targets,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
-        },
-        {
-                ISTEPNAME(06,06, "host_gard"),
-                HWAS::host_gard,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
-        },
-        {
-                ISTEPNAME(06,07,"host_cancontinue_clear"),
-                HWAS::host_cancontinue_clear,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
-        },
-        {
-                ISTEPNAME(06,08,"proc_revert_sbe_mcs_setup"),
-                SLAVE_SBE::call_proc_revert_sbe_mcs_setup,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
-        },
-        {
-                ISTEPNAME(06,09,"host_slave_sbe_config"),
-                SLAVE_SBE::call_host_slave_sbe_config,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
-        },
-        {
-                ISTEPNAME(06,10,"host_sbe_start"),
-                SLAVE_SBE::call_host_sbe_start,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
-        },
-        {
-                ISTEPNAME(06,11,"proc_check_slave_sbe_seeprom_complete"),
-                SLAVE_SBE::call_proc_check_slave_sbe_seeprom_complete,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
-        },
-        {
-                ISTEPNAME(06,12,"proc_cen_ref_clk_enable"),
-                SLAVE_SBE::call_proc_cen_ref_clk_enable,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
-        },
-        {
-                ISTEPNAME(06,13,"proc_xmit_sbe"),
-                SLAVE_SBE::call_proc_xmit_sbe,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
 };
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,19 +61,6 @@ namespace   INITSERVICE
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
-// Reduce ext img for VPO
-#ifndef CONFIG_VPO_COMPILE
-        {
-                ISTEPNAME(09,01,"proc_build_smp"),
-                ACTIVATE_POWERBUS::call_proc_build_smp,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(09,02,"host_slave_sbe_update"),
-                ACTIVATE_POWERBUS::call_host_slave_sbe_update,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-#endif
 };
 
 const DepModInfo  g_istep09Dependancies = {

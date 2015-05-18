@@ -75,49 +75,9 @@ namespace   INITSERVICE
 // Reduce ext img for VPO
 #ifndef CONFIG_VPO_COMPILE
         {
-                ISTEPNAME(14,01,"host_startprd_dram"),
-                DRAM_INITIALIZATION::call_host_startprd_dram,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(14,02,"mss_extent_setup"),
-                DRAM_INITIALIZATION::call_mss_extent_setup,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(14,03,"mss_memdiag"),
-                DRAM_INITIALIZATION::call_mss_memdiag,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(14,04,"mss_thermal_init"),
-                DRAM_INITIALIZATION::call_mss_thermal_init,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(14,05,"proc_pcie_config"),
-                DRAM_INITIALIZATION::call_proc_pcie_config,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(14,06,"mss_power_cleanup"),
-                DRAM_INITIALIZATION::call_mss_power_cleanup,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
                 ISTEPNAME(14,07,"proc_setup_bars"),
                 DRAM_INITIALIZATION::call_proc_setup_bars,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(14,08,"proc_exit_cache_contained"),
-                DRAM_INITIALIZATION::call_proc_exit_cache_contained,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
-        },
-        {
-                ISTEPNAME(14,09,"host_mpipl_service"),
-                DRAM_INITIALIZATION::call_host_mpipl_service,
-                { START_FN, EXT_IMAGE, MPIPL_OP, true }
         },
 #endif
     };

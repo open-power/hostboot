@@ -206,9 +206,10 @@ TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testdump)
 TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testsecureboot)
 TESTCASE_MODULES += $(if $(CONFIG_TPMDD),testtrusted)
 TESTCASE_MODULES += testfsiscom
-TESTCASE_MODULES += testrtloader
-TESTCASE_MODULES += testsbe
-TESTCASE_MODULES += testlpc
+#FIXME: RTC 129630
+#TESTCASE_MODULES += testrtloader
+#TESTCASE_MODULES += testsbe
+#TESTCASE_MODULES += testlpc
 TESTCASE_MODULES += $(if $(CONFIG_HTMGT),testhtmgt)
 TESTCASE_MODULES += $(if $(CONFIG_AST2400), testsio)
 
