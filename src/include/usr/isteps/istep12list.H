@@ -91,12 +91,8 @@ const   TaskInfo    g_istep12[]  =   {
                 MC_CONFIG::call_mss_eff_config,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-        {
-                ISTEPNAME(12,05,"mss_attr_update"),
-                MC_CONFIG::call_mss_attr_update,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
 #endif
+
 };
 
 const DepModInfo g_istep12Dependancies = {

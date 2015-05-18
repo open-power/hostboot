@@ -69,21 +69,6 @@ namespace   INITSERVICE
                 CORE_ACTIVATE::call_host_activate_master,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
         },
-        {
-                ISTEPNAME(16,02,"host_activate_slave_cores"),
-                CORE_ACTIVATE::call_host_activate_slave_cores,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
-        },
-        {
-                ISTEPNAME(16,03,"mss_scrub"),
-                CORE_ACTIVATE::call_mss_scrub,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
-        },
-        {
-                ISTEPNAME(16,04,"host_ipl_complete"),
-                CORE_ACTIVATE::call_host_ipl_complete,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
-        },
 };
 
 const DepModInfo g_istep16Dependancies = {
