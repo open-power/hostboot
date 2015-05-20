@@ -26,6 +26,7 @@
 #include    <stdint.h>
 
 #include    <occ/occ_common.H>
+#include    <occ/occAccess.H>
 
 #include    <initservice/taskargs.H>
 #include    <errl/errlentry.H>
@@ -121,8 +122,101 @@ namespace HBOCC
         return l_errl;
     }
 
+#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+    errlHndl_t loadOCCImageDuringIpl( TARGETING::Target* i_target,
+                                        void* i_occVirtAddr)
+    {
+        TRACUCOMP( g_fapiTd,
+                   ENTER_MRK"loadOCCImageDuringIpl(%p)",
+                   i_occVirtAddr);
+
+        errlHndl_t l_errl = NULL;
+        size_t lidSize = 0;
+        do {
+            UtilLidMgr lidMgr(HBOCC::OCC_LIDID);
+
+            l_errl = lidMgr.getLidSize(lidSize);
+            if(l_errl)
+            {
+                TRACFCOMP( g_fapiImpTd,
+                           ERR_MRK"loadOCCImageDuringIpl: Error getting lid size. lidId=0x%.8x",
+                           OCC_LIDID);
+                break;
+            }
+
+            // get the full OCC LID and then copy them.
+            l_errl = lidMgr.getLid(i_occVirtAddr, lidSize);
+            if(l_errl)
+            {
+                TRACFCOMP( g_fapiImpTd,
+                           ERR_MRK"loadOCCImageDuringIpl: Error getting lid. lidId=0x%.8x",
+                           OCC_LIDID);
+                break;
+            }
+
+            // OCC Boot Image is now at the start of that L3 region.
+            size_t l_length = 0; // length of this section
+            size_t l_startOffset = 0; // offset to start of the section
+            size_t l_offsetToLength = 0x48; // offset to length of the section
+
+            char *l_tmpStart = reinterpret_cast<char *>(i_occVirtAddr) +
+                                l_startOffset;
+            uint32_t *ptrToLength = (uint32_t *)(l_tmpStart + l_offsetToLength);
+            l_length = *ptrToLength;
+
+            // OCC Main Application
+            l_startOffset = l_length; // after the Boot image
+            l_tmpStart = reinterpret_cast<char *>(i_occVirtAddr) +
+                            l_startOffset;
+            ptrToLength = (uint32_t *)(l_tmpStart + l_offsetToLength);
+            l_length = *ptrToLength;
+
+            // write the IPL flag and the nest FREQ for OCC.
+            // IPL_FLAG is a two byte field.  OR a 1 into these two bytes.
+            // FREQ is the 4 byte nest frequency value that goes into
+            //  the same field in the HOMER.
+            TARGETING::TargetService & tS = TARGETING::targetService();
+            TARGETING::Target * sysTarget = NULL;
+            tS.getTopLevelTarget( sysTarget );
+            assert( sysTarget != NULL );
+
+            uint16_t *ptrToIplFlag =
+                    (uint16_t *)((char *)l_tmpStart + OCC_OFFSET_IPL_FLAG);
+            uint32_t *ptrToFreq =
+                    (uint32_t *)((char *)l_tmpStart + OCC_OFFSET_FREQ);
+            *ptrToIplFlag |= 0x0001;
+            *ptrToFreq = sysTarget->getAttr<ATTR_FREQ_PB>();
+
+            ecmdDataBufferBase l_occAppData(l_length * 8 /* bits */);
+            uint32_t rc = l_occAppData.insert((uint32_t *)l_tmpStart, 0,
+                                l_length * 8 /* bits */);
+            if (rc)
+            {
+                TRACFCOMP( g_fapiImpTd,
+                           ERR_MRK"loadOCCImageDuringIpl: Error %d doing insert",
+                           rc);
+                // create l_errl
+                break;
+            }
+            const uint32_t l_SramAddrApp = OCC_SRAM_ADDRESS;
+            l_errl = HBOCC::writeSRAM(i_target, l_SramAddrApp, l_occAppData);
+            if(l_errl)
+            {
+                TRACFCOMP( g_fapiImpTd,
+                           ERR_MRK"loadOCCImageDuringIpl: Error in writeSRAM of app");
+                break;
+            }
+
+        }while(0);
+
+        TRACUCOMP( g_fapiTd,
+                   EXIT_MRK"loadOCCImageDuringIpl");
+        return l_errl;
+    }
+#endif
+
     /**
-     * @brief Sets up OCC Host data
+     * @brief Sets up OCC Host data in Homer
      */
     errlHndl_t loadHostDataToHomer( TARGETING::Target* i_proc,
                                     void* i_occHostDataVirtAddr)
@@ -192,27 +286,124 @@ namespace HBOCC
                    EXIT_MRK"loadHostDataToHomer");
 
         return l_errl;
-    }
+    } // loadHostDataToHomer
+
+#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+#ifndef __HOSTBOOT_RUNTIME
+    /**
+     * @brief Sets up OCC Host data in SRAM
+     */
+    errlHndl_t loadHostDataToSRAM( TARGETING::Target* i_proc,
+                                    const PRDF::HwInitialized_t i_curHw)
+    {
+        TRACUCOMP( g_fapiTd,
+                   ENTER_MRK"loadHostDataToSRAM i_curHw=%d",i_curHw);
+
+        errlHndl_t  l_errl  =   NULL;
+
+        //Treat virtual address as starting pointer
+        //for config struct
+        HBOCC::occHostConfigDataArea_t * config_data =
+                    new HBOCC::occHostConfigDataArea_t();
+
+        // Get top level system target
+        TARGETING::TargetService & tS = TARGETING::targetService();
+        TARGETING::Target * sysTarget = NULL;
+        tS.getTopLevelTarget( sysTarget );
+        assert( sysTarget != NULL );
+
+        uint32_t nestFreq =  sysTarget->getAttr<ATTR_FREQ_PB>();
+
+        config_data->version = HBOCC::OccHostDataVersion;
+        config_data->nestFrequency = nestFreq;
+
+        // Figure out the interrupt type
+        if( INITSERVICE::spBaseServicesEnabled() )
+        {
+            config_data->interruptType = USE_FSI2HOST_MAILBOX;
+        }
+        else
+        {
+            config_data->interruptType = USE_PSIHB_COMPLEX;
+        }
+
+        config_data->firMaster = IS_FIR_MASTER;
+        l_errl = PRDF::writeHomerFirData( config_data->firdataConfig,
+                                          sizeof(config_data->firdataConfig),
+                                          i_curHw);
+        if (l_errl)
+        {
+            TRACFCOMP( g_fapiImpTd,
+                       ERR_MRK"loadHostDataToSRAM: Error in writeHomerFirData");
+        }
+        else
+        {
+            const uint32_t l_SramAddrFir = OCC_SRAM_FIR_DATA;
+            ecmdDataBufferBase l_occFirData(OCC_SRAM_FIR_LENGTH * 8 /* bits */);
+            /// copy config_data in here
+            uint32_t rc = l_occFirData.insert((uint32_t *)config_data, 0,
+                                    sizeof(*config_data) * 8 /* bits */);
+            if (rc)
+            {
+                TRACFCOMP( g_fapiImpTd,
+                           ERR_MRK"loadHostDataToSRAM: Error %d doing insert",
+                           rc);
+                /*@
+                 * @errortype
+                 * @moduleid     fapi::MOD_OCC_LOAD_HOST_DATA_TO_SRAM
+                 * @reasoncode   fapi::RC_ECMD_INSERT_FAILED
+                 * @userdata1    Return Code
+                 * @userdata2    0
+                 * @devdesc      ecmd insert failed for l_occFirData
+                 * @custdesc     A problem occurred during the IPL
+                 *               of the system.
+                 */
+                l_errl = new ERRORLOG::ErrlEntry(
+                                          ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          fapi::MOD_OCC_LOAD_HOST_DATA_TO_SRAM,
+                                          fapi::RC_ECMD_INSERT_FAILED,
+                                          rc, 0);
+            }
+            else
+            {
+                l_errl = HBOCC::writeSRAM(i_proc, l_SramAddrFir, l_occFirData);
+                if(l_errl)
+                {
+                    TRACFCOMP( g_fapiImpTd,
+                               ERR_MRK"loadHostDataToSRAM: Error in writeSRAM");
+                }
+            }
+        }
+
+        TRACUCOMP( g_fapiTd,
+                   EXIT_MRK"loadHostDataToSRAM");
+
+        return l_errl;
+    } // loadHostDataToSRAM
+#endif
+#endif
 
      errlHndl_t loadOCC(TARGETING::Target* i_target,
                     uint64_t i_occImgPaddr,
-                    uint64_t i_occImgVaddr,
-                    uint64_t i_commonPhysAddr)
+                    uint64_t i_occImgVaddr, // dest
+                    uint64_t i_commonPhysAddr,
+                    bool i_useSRAM)
     {
         errlHndl_t  l_errl  =   NULL;
+
         TRACFCOMP( g_fapiTd,
-                   ENTER_MRK"loadOCC" );
+                   ENTER_MRK"loadOCC(0x%08X, 0x%08X, 0x%08X, %d)",
+                        i_occImgPaddr, i_occImgVaddr, i_commonPhysAddr,
+                        i_useSRAM);
         do{
             // Remember where we put things
-            if( i_target )
-            {
-                // Subtract HOMER_OFFSET_TO_OCC_IMG to be technically
-                // correct though HOMER_OFFSET_TO_OCC_IMG happens to be zero
-                i_target->setAttr<ATTR_HOMER_PHYS_ADDR>
-                    (i_occImgPaddr - HOMER_OFFSET_TO_OCC_IMG);
-                i_target->setAttr<ATTR_HOMER_VIRT_ADDR>
-                    (i_occImgVaddr - HOMER_OFFSET_TO_OCC_IMG);
-            }
+            // Subtract HOMER_OFFSET_TO_OCC_IMG to be technically
+            // correct though HOMER_OFFSET_TO_OCC_IMG happens to be zero
+            i_target->setAttr<ATTR_HOMER_PHYS_ADDR>
+                (i_occImgPaddr - HOMER_OFFSET_TO_OCC_IMG);
+            i_target->setAttr<ATTR_HOMER_VIRT_ADDR>
+                (i_occImgVaddr - HOMER_OFFSET_TO_OCC_IMG);
+
             // cast OUR type of target to a FAPI type of target.
             const fapi::Target l_fapiTarg(fapi::TARGET_TYPE_PROC_CHIP,
                     (const_cast<Target*>(i_target)));
@@ -242,7 +433,6 @@ namespace HBOCC
                            ERR_MRK"loadOCC: Bar0 config failed!" );
                 l_errl->collectTrace(FAPI_TRACE_NAME,256);
                 l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
-
                 break;
             }
 
@@ -264,7 +454,6 @@ namespace HBOCC
                            ERR_MRK"loadOCC: Bar1 config failed!" );
                 l_errl->collectTrace(FAPI_TRACE_NAME,256);
                 l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
-
                 break;
             }
 
@@ -286,34 +475,60 @@ namespace HBOCC
                              VMM_OCC_COMMON_SIZE_IN_MB,
                              PBA_CMD_SCOPE_NODAL );
 
-            if ( l_errl != NULL )
+            if ( l_errl )
             {
                 TRACFCOMP( g_fapiImpTd,
                            ERR_MRK"loadOCC: Bar3 config failed!" );
                 l_errl->collectTrace(FAPI_TRACE_NAME,256);
                 l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
-
                 break;
             }
 
+#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+          if (i_useSRAM)
+          {
+            void* occVirt = reinterpret_cast<void *>(i_occImgVaddr);
+            l_errl = loadOCCImageDuringIpl( i_target, occVirt );
+            if( l_errl )
+            {
+                TRACFCOMP(g_fapiImpTd,
+                        ERR_MRK"loadOCC: loadOCCImageDuringIpl failed!");
+                break;
+            }
+          }
+          else
+#endif
+          {
             //==============================
             //Load the OCC HOMER image
             //==============================
+
+#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+            // clear (up to and including) the IPL Flag
+            const uint32_t l_SramAddrApp = OCC_SRAM_ADDRESS;
+            ecmdDataBufferBase l_occAppData((OCC_OFFSET_IPL_FLAG + 6) * 8 /* bits */);
+            l_errl = HBOCC::writeSRAM(i_target, l_SramAddrApp, l_occAppData);
+            if(l_errl)
+            {
+                TRACFCOMP( g_fapiImpTd,
+                           ERR_MRK"loadOCC: Error in writeSRAM of 0");
+                break;
+            }
+#endif
             void* occVirt = reinterpret_cast<void *>(i_occImgVaddr);
             l_errl = loadOCCImageToHomer( occVirt );
-            if( l_errl != NULL )
+            if( l_errl )
             {
                 TRACFCOMP(g_fapiImpTd,
                         ERR_MRK"loadOCC: loadOCCImageToHomer failed!");
                 break;
             }
+          }
         }while(0);
 
         TRACFCOMP( g_fapiTd,
                    EXIT_MRK"loadOCC");
-
         return l_errl;
-
     }
 
     /**
@@ -434,6 +649,7 @@ namespace HBOCC
                    EXIT_MRK"startOCC");
         return l_errl;
     }
+
     /**
      * @brief Stop OCC for specified DCM pair of processors.
      *        If 2nd input is NULL, OCC will be setup on just

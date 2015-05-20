@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -82,6 +82,10 @@
 #include <dump/dumpif.H>
 #include <vfs/vfs.H>
 
+#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+    #include    <occ/occ_common.H>
+#endif
+
 namespace   DRAM_INITIALIZATION
 {
 
@@ -131,6 +135,19 @@ void*    call_host_startprd_dram( void    *io_pArgs )
                    "SUCCESS : .........." );
     }
     // @@@@@    END CUSTOM BLOCK:   @@@@@
+#endif
+
+#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+    // update firdata inputs for OCC
+    TARGETING::Target* masterproc = NULL;
+    TARGETING::targetService().masterProcChipTargetHandle(masterproc);
+    l_errl = HBOCC::loadHostDataToSRAM(masterproc,
+                                        PRDF::ALL_PROC_MEM_MASTER_CORE);
+    if (l_errl)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "Error returned from call to HBOCC::loadHostDataToSRAM");
+    }
 #endif
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,

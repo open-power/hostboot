@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/occ_firdata/prdfWriteHomerFirData.H $       */
+/* $Source: src/include/usr/diag/prdf/prdfWriteHomerFirData.H $           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,6 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+#ifndef __prdfWriteHomerFirData_H
+#define __prdfWriteHomerFirData_H
+
 #include <errl/errlentry.H>
 
 namespace PRDF
@@ -41,9 +44,12 @@ enum HwInitialized_t
  *          the OCC to capture in the event of a system checkstop.
  *  @param  i_hBuf     SRAM pointer to the beginning of the HOMER data buffer.
  *  @param  i_hBufSize Total size of the HOMER data buffer.
+ *  @param  i_curHW    enum indicating which HW is currently known
  *  @return An error log on failure. NULL on success.
  */
 errlHndl_t writeHomerFirData( uint8_t * i_hBuf, size_t i_hBufSize,
                               const HwInitialized_t i_curHw = ALL_HARDWARE );
 }; // end namespace PRDF
+
+#endif // __prdfWriteHomerFirData_H
 

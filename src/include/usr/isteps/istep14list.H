@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -129,6 +129,9 @@ const DepModInfo g_istep14Dependancies = {
         DEP_LIB(libdram_training.so),
         DEP_LIB(libdump.so),
         DEP_LIB(libnest_chiplets.so),
+#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+        DEP_LIB(libocc.so),
+#endif
 #endif
         NULL
     }

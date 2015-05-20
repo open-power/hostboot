@@ -27,6 +27,7 @@
 
 #include <limits.h>
 #include <errl/errlentry.H>
+#include <diag/prdf/prdfWriteHomerFirData.H>
 
 namespace HBOCC
 {
@@ -69,7 +70,19 @@ namespace HBOCC
 
         // FIR Master
         NOT_FIR_MASTER = 0x00000000,
-        IS_FIR_MASTER  = 0x00000001
+        IS_FIR_MASTER  = 0x00000001,
+
+        // SRAM Address for OCC Main App
+        OCC_SRAM_ADDRESS = 0xFFF80000,
+
+        // SRAM Address and length for FIR HOMER data
+        OCC_SRAM_FIR_DATA   = 0xFFFF5000,
+        OCC_SRAM_FIR_LENGTH = 0x1000,
+
+        // offsets for OCC loading during IPL
+        OCC_OFFSET_IPL_FLAG = 0x82,
+        OCC_OFFSET_FREQ     = 0x84,
+
     };
 
     enum occAction_t
@@ -78,7 +91,7 @@ namespace HBOCC
         OCC_STOP,
     };
     /**
-     * @brief Sets up OCC Host data
+     * @brief Sets up OCC Host data in Homer
      *
      * @param[in] i_proc:         target processor to load
      * @param[in] i_occHostDataVirtAddr Virtual
@@ -89,6 +102,19 @@ namespace HBOCC
      */
     errlHndl_t loadHostDataToHomer(TARGETING::Target* i_proc,
                                    void* i_occHostDataVirtAddr);
+
+#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+    /**
+     * @brief Sets up OCC Host data in SRAM
+     *
+     * @param[in] i_proc:   target processor to load
+     * @param[in] i_curHW:  enum indicating which HW is currently known
+     *
+     * @return errlHndl_t   Error log Host data setup failed
+     */
+    errlHndl_t loadHostDataToSRAM(TARGETING::Target* i_proc,
+                    const PRDF::HwInitialized_t i_curHw = PRDF::ALL_HARDWARE);
+#endif
 
     /**
      * @brief Execute procedures and steps required to load
@@ -101,12 +127,15 @@ namespace HBOCC
      *                                 proc's OCC image int the homer
      * @param[in] i_commonPhysAddr: Physical address of common
      *                              OCC region
+     * @param[in] i_useSRAM: bool - use SRAM for OCC image, ie during IPL
+     *     true if duringIPL, false if at end of IPL (default)
      * @return errlHndl_t  Error log if loadOCC failed
      */
     errlHndl_t loadOCC(TARGETING::Target* i_target,
                        uint64_t i_occImgPaddr,
                        uint64_t i_occImgVaddr,
-                       uint64_t i_commonPhysAddr);
+                       uint64_t i_commonPhysAddr,
+                       bool i_useSRAM = false);
 
     /**
      * @brief Start OCC for specified DCM pair of processors.

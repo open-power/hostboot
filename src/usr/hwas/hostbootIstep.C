@@ -75,6 +75,9 @@
 #include <config.h>
 
 #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+  #include <hwpf/hwp/occ/occ.H>
+  #include <hwpf/hwp/occ/occ_common.H>
+
   #include <diag/attn/attn.H>
 #endif
 
@@ -357,7 +360,17 @@ void* host_cancontinue_clear( void *io_pArgs )
                 "host_cancontinue_clear entry" );
     errlHndl_t errl = NULL;
 
-    // stub -- nothing here currently
+#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+    // TODO RTC 115587: current place; could change
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "host_cancontinue_clear: calling activateOCCs" );
+    errl = HBOCC::activateOCCs(true);
+    if (errl)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "activateOCCs failed");
+    }
+#endif
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "host_cancontinue_clear exit" );
@@ -450,9 +463,31 @@ void* host_prd_hwreconfig( void *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                     "Successfully ran proc_enable_reconfig HWP on "
                     "MCS target HUID %.8X", l_currMcsHuid);
+        } // for
+
+#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+        // update firdata inputs for OCC
+        TARGETING::Target* masterproc = NULL;
+        TARGETING::targetService().masterProcChipTargetHandle(masterproc);
+        errl = HBOCC::loadHostDataToSRAM(masterproc,
+                                            PRDF::MASTER_PROC_CORE);
+        if (errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Error returned from call to HBOCC::loadHostDataToSRAM");
+
+            //Create IStep error log and cross reference error that occurred
+            l_stepError.addErrorDetails(errl);
+
+            // Commit Error
+            errlCommit(errl, HWPF_COMP_ID);
+            break;
         }
+#endif
+
     }
     while(0);
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "host_prd_hwreconfig exit" );
     // end task, returning any errorlogs to IStepDisp

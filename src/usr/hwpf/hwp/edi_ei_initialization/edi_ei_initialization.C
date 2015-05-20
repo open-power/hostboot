@@ -85,6 +85,10 @@
 // eRepair Restore
 #include <erepairAccessorHwpFuncs.H>
 
+#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+    #include    <occ/occ_common.H>
+#endif
+
 namespace   EDI_EI_INITIALIZATION
 {
 
@@ -687,28 +691,46 @@ void*    call_host_startprd_pbus( void    *io_pArgs )
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_startprd_pbus entry" );
 
-    l_errl = PRDF::initialize();
-
-    if (l_errl)
+    do
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "Error returned from call to PRDF::initialize");
-    }
+        l_errl = PRDF::initialize();
+        if (l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Error returned from call to PRDF::initialize");
+            break;
+        }
 
-    // Perform calculated deconfiguration of procs based on
-    // bus endpoint deconfigurations, and perform SMP node
-    // balancing
-    l_errl = HWAS::theDeconfigGard().deconfigureAssocProc();
+        // Perform calculated deconfiguration of procs based on
+        // bus endpoint deconfigurations, and perform SMP node
+        // balancing
+        l_errl = HWAS::theDeconfigGard().deconfigureAssocProc();
+        if (l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Error returned from call to "
+                    "HWAS::theDeconfigGard().deconfigureAssocProc");
+            break;
+        }
 
-    if (l_errl)
-    {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "Error returned from call to "
-                "HWAS::theDeconfigGard().deconfigureAssocProc");
-    }
+#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+        // update firdata inputs for OCC
+        TARGETING::Target* masterproc = NULL;
+        TARGETING::targetService().masterProcChipTargetHandle(masterproc);
+        l_errl = HBOCC::loadHostDataToSRAM(masterproc,
+                                            PRDF::ALL_PROC_MASTER_CORE);
+        if (l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Error returned from call to HBOCC::loadHostDataToSRAM");
+            break;
+        }
+#endif
+
+    }while(0);
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_startprd_pbus exit" );
+           "call_host_startprd_pbus exit" );
 
     // end task, returning any errorlogs to IStepDisp
     return l_errl;

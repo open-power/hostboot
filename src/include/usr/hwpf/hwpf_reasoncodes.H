@@ -83,6 +83,7 @@ namespace fapi
         MOD_GET_WOF_FREQ_UPLIFT_SELECTED           = 0x29,
         MOD_SET_NEST_FREQ                          = 0x2A,
         MOD_FIND_MAX_DMI_SPD                       = 0x2B,
+        MOD_OCC_LOAD_HOST_DATA_TO_SRAM             = 0x2C,
     };
 
     /**
@@ -143,6 +144,7 @@ namespace fapi
         RC_NO_SINGLE_NODE             = HWPF_COMP_ID | 0x3A,
         RC_INVALID_ULTRA_TURBO_FREQ   = HWPF_COMP_ID | 0x3B,
         RC_INVALID_WOF_INDEX          = HWPF_COMP_ID | 0x3C,
+        RC_ECMD_INSERT_FAILED         = HWPF_COMP_ID | 0x3D,
     };
 
     /**

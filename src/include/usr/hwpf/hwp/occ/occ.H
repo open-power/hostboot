@@ -35,17 +35,22 @@ namespace HBOCC {
      *
      * @param[out] o_failedOccTarget: Pointer to the target failing
      *                       loadnStartAllOccs
+     * @param[in] i_useSRAM: bool - use SRAM for OCC image, ie during IPL
+     *     true if during IPL, false if at end of IPL (default)
      * @return errlHndl_t  Error log if OCC load failed
      */
-    errlHndl_t loadnStartAllOccs(TARGETING::Target *& o_failedOccTarget);
+    errlHndl_t loadnStartAllOccs(TARGETING::Target *& o_failedOccTarget,
+                                 bool i_useSRAM = false);
 
     /**
      * @brief Starts OCCs on all Processors in the node
      *        This is intended to be used for Open Power.
      *
+     * @param[in] i_useSRAM: bool - use SRAM for OCC image, ie during IPL
+     *     true if during IPL, false if at end of IPL (default)
      * @return errlHndl_t  Error log if OCC load failed
      */
-    errlHndl_t activateOCCs();
+    errlHndl_t activateOCCs(bool i_useSRAM = false);
 
 } //end OCC namespace
 

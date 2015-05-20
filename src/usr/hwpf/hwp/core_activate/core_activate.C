@@ -85,6 +85,10 @@
 #include    <diag/prdf/prdfMain.H>
 #include <util/misc.H>
 
+#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+    #include    <occ/occ_common.H>
+#endif
+
 namespace   CORE_ACTIVATE
 {
 
@@ -636,6 +640,28 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
     }   // end if
 
     // @@@@@    END CUSTOM BLOCK:   @@@@@
+
+#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+    if( l_stepError.isNull() )
+    {
+        // update firdata inputs for OCC
+        TARGETING::Target* masterproc = NULL;
+        TARGETING::targetService().masterProcChipTargetHandle(masterproc);
+        l_errl = HBOCC::loadHostDataToSRAM(masterproc,
+                                            PRDF::ALL_HARDWARE);
+        if (l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Error returned from call to HBOCC::loadHostDataToSRAM");
+
+            //Create IStep error log and cross reference error that occurred
+            l_stepError.addErrorDetails(l_errl);
+
+            // Commit Error
+            errlCommit(l_errl, HWPF_COMP_ID);
+        }
+    }
+#endif
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_activate_slave_cores exit" );

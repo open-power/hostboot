@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,6 @@
 #include <targeting/common/commontargeting.H>
 #include <fapi.H>
 
-#ifdef CONFIG_HTMGT
 namespace HBOCC
 {
 
@@ -69,6 +68,5 @@ namespace HBOCC
                               ecmdDataBufferBase & i_dataBuf);
 
 } //end OCC namespace
-#endif // CONFIG_HTMGT
 
 #endif

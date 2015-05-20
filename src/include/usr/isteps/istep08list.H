@@ -122,6 +122,9 @@ const DepModInfo g_istep08Dependancies = {
         DEP_LIB(libslave_sbe.so),
         DEP_LIB(libsbe.so),
         DEP_LIB(libbuild_winkle_images.so),
+#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+        DEP_LIB(libocc.so),
+#endif
         NULL
     }
 };

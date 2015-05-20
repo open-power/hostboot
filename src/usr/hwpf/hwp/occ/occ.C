@@ -84,82 +84,116 @@ namespace HBOCC
      * @param[in] i_homerPhysAddrBase
      *                      IPL: Base Physical address of all HOMER images
      *                      Runtime: Ignored - Determined using Attributes
+     * @param[in] i_useSRAM: bool - use SRAM for OCC image, ie during IPL
+     *     true if during IPL, false if at end of IPL (default)
      *
      * @return errlHndl_t  Error log
      */
 
     errlHndl_t primeAndLoadOcc (Target* i_target,
                                 void* i_homerVirtAddrBase,
-                                uint64_t i_homerPhysAddrBase)
+                                uint64_t i_homerPhysAddrBase,
+                                bool i_useSRAM)
     {
          errlHndl_t  l_errl  =   NULL;
 
          TRACUCOMP( g_fapiTd,
-                   ENTER_MRK"primeAndLoadOcc" );
-
+                   ENTER_MRK"primeAndLoadOcc(%d)", i_useSRAM);
 
         do {
             //==============================
             //Setup Addresses
             //==============================
+            uint64_t occImgPaddr, occImgVaddr;
+            uint64_t commonPhysAddr, homerHostVirtAddr;
 
 #ifndef __HOSTBOOT_RUNTIME
-            uint8_t  procPos    = i_target->getAttr<ATTR_POSITION>();
-            uint64_t procOffset = (procPos * VMM_HOMER_INSTANCE_SIZE);
-            uint64_t occImgPaddr  =
+            const uint8_t  procPos    = i_target->getAttr<ATTR_POSITION>();
+            const uint64_t procOffset = (procPos * VMM_HOMER_INSTANCE_SIZE);
+
+            if (i_useSRAM)
+            {
+                occImgVaddr = reinterpret_cast<uint64_t>(i_homerVirtAddrBase);
+            }
+            else
+            {
+                occImgVaddr = reinterpret_cast<uint64_t>(i_homerVirtAddrBase) +
+                    procOffset + HOMER_OFFSET_TO_OCC_IMG;
+            }
+
+            occImgPaddr =
                 i_homerPhysAddrBase + procOffset + HOMER_OFFSET_TO_OCC_IMG;
 
-            uint64_t occImgVaddr  = reinterpret_cast<uint64_t>
-                (i_homerVirtAddrBase) + procOffset + HOMER_OFFSET_TO_OCC_IMG;
-
-            uint64_t commonPhysAddr =
+            commonPhysAddr =
                 i_homerPhysAddrBase + VMM_HOMER_REGION_SIZE;
 
-            uint64_t homerHostVirtAddr = reinterpret_cast<uint64_t>
+            homerHostVirtAddr = reinterpret_cast<uint64_t>
                 (i_homerVirtAddrBase) + procOffset +
                 HOMER_OFFSET_TO_OCC_HOST_DATA;
 #else
             uint64_t homerPaddr = i_target->getAttr<ATTR_HOMER_PHYS_ADDR>();
             uint64_t homerVaddr = i_target->getAttr<ATTR_HOMER_VIRT_ADDR>();
 
-            uint64_t occImgPaddr = homerPaddr + HOMER_OFFSET_TO_OCC_IMG;
-            uint64_t occImgVaddr = homerVaddr + HOMER_OFFSET_TO_OCC_IMG;
+            occImgPaddr = homerPaddr + HOMER_OFFSET_TO_OCC_IMG;
+            occImgVaddr = homerVaddr + HOMER_OFFSET_TO_OCC_IMG;
 
             TARGETING::Target* sys = NULL;
             TARGETING::targetService().getTopLevelTarget(sys);
-            uint64_t commonPhysAddr =
+            commonPhysAddr =
                      sys->getAttr<ATTR_OCC_COMMON_AREA_PHYS_ADDR>();
 
-            uint64_t homerHostVirtAddr =
+            homerHostVirtAddr =
                 homerVaddr + HOMER_OFFSET_TO_OCC_HOST_DATA;
-
 #endif
 
             //==============================
             // Load OCC
             //==============================
-            l_errl=  HBOCC::loadOCC(i_target,
+            l_errl = HBOCC::loadOCC(i_target,
                                     occImgPaddr,
                                     occImgVaddr,
-                                    commonPhysAddr);
+                                    commonPhysAddr,
+                                    i_useSRAM);
             if(l_errl != NULL)
             {
                 TRACFCOMP( g_fapiImpTd, ERR_MRK"primeAndLoadOcc: loadOCC failed" );
                 break;
             }
 
-            //==============================
-            //Setup host data area of HOMER;
-            //==============================
-            void* occHostVirt = reinterpret_cast<void*>(homerHostVirtAddr);
-            l_errl = HBOCC::loadHostDataToHomer(i_target,occHostVirt);
-            if( l_errl != NULL )
+#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+#ifndef __HOSTBOOT_RUNTIME
+            if (i_useSRAM)
             {
-                TRACFCOMP( g_fapiImpTd, ERR_MRK"loading Host Data Area failed!" );
-                break;
+                //==============================
+                //Setup host data area in SRAM
+                //==============================
+                l_errl = HBOCC::loadHostDataToSRAM(i_target,
+                                        PRDF::MASTER_PROC_CORE);
+                if( l_errl != NULL )
+                {
+                    TRACFCOMP( g_fapiImpTd, ERR_MRK"loading Host Data Area failed!" );
+                    break;
+                }
+            }
+            else
+#endif
+#endif
+            {
+                //==============================
+                //Setup host data area of HOMER;
+                //==============================
+                void* occHostVirt = reinterpret_cast<void*>(homerHostVirtAddr);
+                l_errl = HBOCC::loadHostDataToHomer(i_target,occHostVirt);
+                if( l_errl != NULL )
+                {
+                    TRACFCOMP( g_fapiImpTd, ERR_MRK"loading Host Data Area failed!" );
+                    break;
+                }
             }
         } while (0);
 
+        TRACUCOMP( g_fapiTd,
+                   EXIT_MRK"primeAndLoadOcc" );
         return l_errl;
      }
 
@@ -169,9 +203,12 @@ namespace HBOCC
      *
      * @param[out] o_failedOccTarget: Pointer to the target failing
      *                       loadnStartAllOccs
+     * @param[in] i_useSRAM: bool - use SRAM for OCC image, ie during IPL
+     *     true if during IPL, false if at end of IPL (default)
      * @return errlHndl_t  Error log if OCC load failed
      */
-    errlHndl_t loadnStartAllOccs(TARGETING::Target *& o_failedOccTarget)
+    errlHndl_t loadnStartAllOccs(TARGETING::Target *& o_failedOccTarget,
+                                    bool i_useSRAM)
     {
         errlHndl_t  l_errl  =   NULL;
         void* homerVirtAddrBase = NULL;
@@ -179,7 +216,7 @@ namespace HBOCC
         bool winkle_loaded = false;
 
         TRACUCOMP( g_fapiTd,
-                   ENTER_MRK"loadnStartAllOccs" );
+                   ENTER_MRK"loadnStartAllOccs(%d)", i_useSRAM);
 
         do {
 #ifndef __HOSTBOOT_RUNTIME
@@ -201,22 +238,71 @@ namespace HBOCC
             assert(VMM_HOMER_REGION_SIZE <= THIRTYTWO_GB,
                    "loadnStartAllOccs: Unsupported HOMER Region size");
 
-            //If running Sapphire need to place this at the top of memory
-            if(TARGETING::is_sapphire_load())
+            if (!i_useSRAM)
             {
-                homerPhysAddrBase = TARGETING::get_top_mem_addr();
-                assert (homerPhysAddrBase != 0,
-                        "loadnStartAllOccs: Top of memory was 0!");
-                homerPhysAddrBase -= VMM_ALL_HOMER_OCC_MEMORY_SIZE;
+                //If running Sapphire need to place this at the top of memory
+                if(TARGETING::is_sapphire_load())
+                {
+                    homerPhysAddrBase = TARGETING::get_top_mem_addr();
+                    assert (homerPhysAddrBase != 0,
+                            "loadnStartAllOccs: Top of memory was 0!");
+                    homerPhysAddrBase -= VMM_ALL_HOMER_OCC_MEMORY_SIZE;
+                }
+                TRACFCOMP( g_fapiTd, "HOMER is at %.16X", homerPhysAddrBase );
+
+                //Map entire homer region into virtual memory
+                homerVirtAddrBase =
+                  mm_block_map(reinterpret_cast<void*>(homerPhysAddrBase),
+                               VMM_HOMER_REGION_SIZE);
+                TRACFCOMP( g_fapiTd, "HOMER virtaddrbase %.16X", homerVirtAddrBase );
             }
-            TRACFCOMP( g_fapiTd, "HOMER is at %.16X", homerPhysAddrBase );
-
-            //Map entire homer region into virtual memory
-            homerVirtAddrBase =
-              mm_block_map(reinterpret_cast<void*>(homerPhysAddrBase),
-                           VMM_HOMER_REGION_SIZE);
-
+            else
+            {
+                // malloc space big enough for all of OCC
+                homerVirtAddrBase = (void *)malloc(1 * MEGABYTE);
+                homerPhysAddrBase = mm_virt_to_phys(homerVirtAddrBase);
+            }
 #endif
+
+            if (i_useSRAM)
+            {
+                // OCC is going into L3 and SRAM so only need 1 prime and load
+                // into the Master Proc
+                TargetService & tS = targetService();
+                Target * sysTarget = NULL;
+                tS.getTopLevelTarget( sysTarget );
+                assert( sysTarget != NULL );
+                Target* masterproc = NULL;
+                tS.masterProcChipTargetHandle( masterproc );
+
+                /******* SETUP AND LOAD **************/
+                l_errl =  primeAndLoadOcc   (masterproc,
+                                             homerVirtAddrBase,
+                                             homerPhysAddrBase,
+                                             i_useSRAM);
+                if(l_errl)
+                {
+                    o_failedOccTarget = masterproc;
+                    TRACFCOMP( g_fapiImpTd, ERR_MRK
+                     "loadnStartAllOccs:primeAndLoadOcc failed");
+                    free(homerVirtAddrBase);
+                    break;
+                }
+
+                /********* START OCC *************/
+                l_errl = HBOCC::startOCC (masterproc, NULL, o_failedOccTarget);
+
+                // it either started or errored; either way, free the memory
+                free(homerVirtAddrBase);
+
+                if (l_errl)
+                {
+                    TRACFCOMP( g_fapiImpTd, ERR_MRK"loadnStartAllOccs: startOCC failed");
+                    break;
+                }
+            }
+            else
+            {
 
             TargetHandleList procChips;
             getAllChips(procChips, TYPE_PROC, true);
@@ -233,6 +319,7 @@ namespace HBOCC
                        INFO_MRK"loadnStartAllOccs: %d procs found",
                        procChips.size());
 
+            TargetHandleList::iterator itr1 = procChips.begin();
             //The OCC Procedures require processors within a DCM be
             //setup together.  So, first checking if any proc has
             //DCM installed attribute set.  If not, we can iterate
@@ -241,9 +328,6 @@ namespace HBOCC
             //If DCM installed is set, we work under the assumption
             //that each nodeID is a DCM.  So sort the list by NodeID
             //then call OCC Procedures on NodeID pairs.
-
-            TargetHandleList::iterator itr1 = procChips.begin();
-
             if(0 ==
                (*itr1)->getAttr<ATTR_PROC_DCM_INSTALLED>())
             {
@@ -257,12 +341,13 @@ namespace HBOCC
                     /******* SETUP AND LOAD **************/
                     l_errl =  primeAndLoadOcc   (*itr,
                                                  homerVirtAddrBase,
-                                                 homerPhysAddrBase);
+                                                 homerPhysAddrBase,
+                                                 i_useSRAM);
                     if(l_errl)
                     {
                         o_failedOccTarget = *itr;
                         TRACFCOMP( g_fapiImpTd, ERR_MRK
-                         "loadnStartAllOccs:loadnStartOcc failed");
+                         "loadnStartAllOccs:primeAndLoadOcc failed");
                         break;
                     }
 
@@ -270,7 +355,7 @@ namespace HBOCC
                     l_errl = HBOCC::startOCC (*itr, NULL, o_failedOccTarget);
                     if (l_errl)
                     {
-                        TRACFCOMP( g_fapiImpTd, ERR_MRK"loadnStartAllOcc: start failed");
+                        TRACFCOMP( g_fapiImpTd, ERR_MRK"loadnStartAllOccs: startOCC failed");
                         break;
                     }
                 }
@@ -326,7 +411,8 @@ namespace HBOCC
                     /********** Setup and load targ0 ***********/
                     l_errl =  primeAndLoadOcc   (targ0,
                                                  homerVirtAddrBase,
-                                                 homerPhysAddrBase);
+                                                 homerPhysAddrBase,
+                                                 i_useSRAM);
                     if(l_errl)
                     {
                         o_failedOccTarget = targ0;
@@ -339,7 +425,8 @@ namespace HBOCC
                     /*********** Setup and load targ1 **********/
                     l_errl =  primeAndLoadOcc   (targ1,
                                                  homerVirtAddrBase,
-                                                 homerPhysAddrBase);
+                                                 homerPhysAddrBase,
+                                                 i_useSRAM);
                     if(l_errl)
                     {
                         o_failedOccTarget = targ1;
@@ -363,7 +450,7 @@ namespace HBOCC
                     break;
                 }
             }
-
+            }
         } while(0);
 
         errlHndl_t  l_tmpErrl  =   NULL;
@@ -441,16 +528,16 @@ namespace HBOCC
      *
      * @return errlHndl_t  Error log if OCC load failed
      */
-    errlHndl_t activateOCCs()
+    errlHndl_t activateOCCs(bool i_useSRAM)
     {
-        TRACUCOMP( g_fapiTd,ENTER_MRK"activateOCCs" );
+        TRACUCOMP( g_fapiTd,ENTER_MRK"activateOCCs(%d)", i_useSRAM );
         errlHndl_t l_errl    = NULL;
         TARGETING::Target* l_failedOccTarget = NULL;
 #ifdef CONFIG_HTMGT
         bool occStartSuccess = true;
 #endif
 
-        l_errl = loadnStartAllOccs (l_failedOccTarget);
+        l_errl = loadnStartAllOccs (l_failedOccTarget, i_useSRAM);
         if (l_errl)
         {
             errlCommit (l_errl, HWPF_COMP_ID);
@@ -467,7 +554,10 @@ namespace HBOCC
 
 #ifdef CONFIG_HTMGT
         // Report OCC status to HTMGT
-        HTMGT::processOccStartStatus(occStartSuccess,l_failedOccTarget);
+        if (!i_useSRAM)
+        {
+            HTMGT::processOccStartStatus(occStartSuccess,l_failedOccTarget);
+        }
 #endif
         TRACUCOMP( g_fapiTd,EXIT_MRK"activateOCC" );
         return l_errl;
