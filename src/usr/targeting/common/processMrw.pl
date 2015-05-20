@@ -1086,7 +1086,7 @@ sub processMembuf
             $addr_map[$map] = $field;
         }
     }
-    $targetObj->setAttribute($targetObj->{targeting}->{SYS}[0]->{KEY},
+    $targetObj->setAttribute($target,
             "MRW_MEM_SENSOR_CACHE_ADDR_MAP","0x".join("",@addr_map));
 
     ## Update bus speeds
