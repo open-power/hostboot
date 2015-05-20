@@ -188,6 +188,13 @@ public:
      */
      static bool errlCommittedThisBoot();
 
+
+    /**
+     * @brief   Value to determine what logs are to be skipped. Mirrors
+     *          what is currently set in ATTR_HIDDEN_ERRLOGS_ENABLE
+     */
+    static uint8_t iv_hiddenErrLogsEnable;
+
 protected:
     /**
      * @brief   Destructor

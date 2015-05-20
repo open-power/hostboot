@@ -305,6 +305,7 @@
     <attribute><id>FRU_ID</id></attribute>
     <attribute><id>BMC_FRU_ID</id></attribute>
     <attribute><id>BRAZOS_RX_FIFO_OVERRIDE</id></attribute>
+    <attribute><id>HIDDEN_ERRLOGS_ENABLE</id></attribute>
 </targetType>
 
 <targetType>

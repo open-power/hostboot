@@ -401,6 +401,7 @@ public:
      */
     uint64_t getUserData2() const;
 
+
    /**
      * @brief Allows the caller to add a chunk of FFDC data in a log
      *
@@ -722,6 +723,22 @@ private:
     void addPartAndSerialNumbersToErrLog(const TARGETING::Target * i_target);
 
     /**
+     * @brief set iv_skipShowingLogs
+     *
+     * @return nothing
+     */
+    void setSkipShowingLog(bool i_showLog);
+
+    /**
+     * @brief get iv_skipShowingLogs
+     *
+     * @return true if the log should be skipped, false otherwise
+     */
+    bool getSkipShowingLog();
+
+
+
+    /**
       * @brief   Disabled copy constructor and assignment operator
       */
     ErrlEntry(const ErrlEntry& i_right);
@@ -742,6 +759,10 @@ private:
 
    // when true, the severity has been set "final" and can not be changed.
    bool iv_sevFinal;
+
+   //when true, the current error log will not be saved to PNOR, sent to the
+   //BMC, or displayed in the console
+   bool iv_skipShowingLog;
 
 };
 
@@ -872,6 +893,21 @@ inline void ErrlEntry::setSrcType(const srcType_t i_srcType)
 {
     iv_Src.iv_srcType = i_srcType;
     return;
+}
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+inline void ErrlEntry::setSkipShowingLog(bool i_showLog)
+{
+    iv_skipShowingLog = i_showLog;
+    return;
+}
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+inline bool ErrlEntry::getSkipShowingLog()
+{
+    return iv_skipShowingLog;
 }
 
 } // End namespace

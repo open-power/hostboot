@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -51,13 +51,13 @@
 // I n c l u d e s
 /*****************************************************************************/
 #include <trace/interface.H>
+#include <errldisplay/errldisplay.H>
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
 #include <errl/errlud.H>
 #include <errl/errludtarget.H>
 #include <errl/errlsctn.H>
 #include <errl/errlreasoncodes.H>
-#include <errldisplay/errldisplay.H>
 #include <stdlib.h>
 #include <string.h>
 #include <initservice/taskargs.H>
@@ -301,58 +301,68 @@ void ErrLogDisplay::msgDisplay (const errlHndl_t &i_err,
 {
     TRACDCOMP( g_trac_errldisp, ENTER_MRK "ErrLogDisplay::msgDisplay" );
 
-    const errLogInfo *info = findErrLogInfo ( i_err->moduleId(),
+
+    do
+    {
+        // Decide whether or not to skip the error log
+        if( i_err->getSkipShowingLog() )
+        {
+            TRACDCOMP( g_trac_errldisp, INFO_MRK"msgDisplay: %.8X is INFORMATIONAL/RECOVERED; skipping...", i_err->eid());
+            break;
+        }
+        const errLogInfo *info = findErrLogInfo ( i_err->moduleId(),
                                               i_err->reasonCode());
 
-    CONSOLE::displayf(NULL,
-                      "================================================");
-    CONSOLE::displayf(NULL, "Error reported by %s (0x%04X)",
-                     findComponentName( i_committerComp ),
-                     i_committerComp );
-    CONSOLE::displayf(NULL, "  %s", info->descriptString);
-    CONSOLE::displayf(NULL, "  ModuleId   0x%02x %s",
-                      i_err->moduleId(), info->moduleName);
-    CONSOLE::displayf(NULL, "  ReasonCode 0x%04x %s",
-                      i_err->reasonCode(), info->reasonString);
-    CONSOLE::displayf(NULL, "  UserData1  %s : 0x%016lx",
-                      info->userData1String, i_err->getUserData1());
-    CONSOLE::displayf(NULL, "  UserData2  %s : 0x%016lx",
-                      info->userData2String, i_err->getUserData2());
+        CONSOLE::displayf(NULL,
+                          "================================================");
+        CONSOLE::displayf(NULL, "Error reported by %s (0x%04X)",
+                         findComponentName( i_committerComp ),
+                         i_committerComp );
+        CONSOLE::displayf(NULL, "  %s", info->descriptString);
+        CONSOLE::displayf(NULL, "  ModuleId   0x%02x %s",
+                          i_err->moduleId(), info->moduleName);
+        CONSOLE::displayf(NULL, "  ReasonCode 0x%04x %s",
+                          i_err->reasonCode(), info->reasonString);
+        CONSOLE::displayf(NULL, "  UserData1  %s : 0x%016lx",
+                          info->userData1String, i_err->getUserData1());
+        CONSOLE::displayf(NULL, "  UserData2  %s : 0x%016lx",
+                          info->userData2String, i_err->getUserData2());
 
-    // Loop through and print all of the user data sections.
-    for ( size_t i = 0; i < i_err->iv_SectionVector.size(); ++i )
-    {
-        ERRORLOG::ErrlUD *user_data = i_err->iv_SectionVector[i];
-        CONSOLE::displayf(NULL, "User Data Section %d, type %c%c", (int) i,
-                         (user_data->iv_header.iv_sid >> 8) & 0xff,
-                         user_data->iv_header.iv_sid & 0xff );
-        CONSOLE::displayf(NULL, "  Subsection type 0x%02x",
-                         user_data->iv_header.iv_sst );
-        CONSOLE::displayf(NULL, "  ComponentId %s (0x%04x)",
-                         findComponentName( user_data->iv_header.iv_compId ),
-                         user_data->iv_header.iv_compId );
-        switch ( user_data->iv_header.iv_sst )
+        // Loop through and print all of the user data sections.
+        for ( size_t i = 0; i < i_err->iv_SectionVector.size(); ++i )
         {
-            case ERRORLOG::ERRL_UDT_TARGET:
-                CONSOLE::displayf(NULL, "  TARGET" );
-                displayTarget( user_data->iv_pData, user_data->iv_Size );
-                break;
-            case ERRORLOG::ERRL_UDT_CALLOUT:
-                CONSOLE::displayf(NULL, "  CALLOUT" );
-                displayCallout( user_data->iv_pData, user_data->iv_Size );
-                break;
-            case ERRORLOG::ERRL_UDT_STRING:
-                CONSOLE::displayf(NULL, "  STRING" );
-                CONSOLE::displayf(NULL,
-                    "  %s",
-                    reinterpret_cast<char*>( user_data->iv_pData ) );
-                break;
+            ERRORLOG::ErrlUD *user_data = i_err->iv_SectionVector[i];
+            CONSOLE::displayf(NULL, "User Data Section %d, type %c%c", (int) i,
+                             (user_data->iv_header.iv_sid >> 8) & 0xff,
+                             user_data->iv_header.iv_sid & 0xff );
+            CONSOLE::displayf(NULL, "  Subsection type 0x%02x",
+                             user_data->iv_header.iv_sst );
+            CONSOLE::displayf(NULL, "  ComponentId %s (0x%04x)",
+                             findComponentName( user_data->iv_header.iv_compId ),
+                             user_data->iv_header.iv_compId );
+            switch ( user_data->iv_header.iv_sst )
+            {
+                case ERRORLOG::ERRL_UDT_TARGET:
+                    CONSOLE::displayf(NULL, "  TARGET" );
+                    displayTarget( user_data->iv_pData, user_data->iv_Size );
+                    break;
+                case ERRORLOG::ERRL_UDT_CALLOUT:
+                    CONSOLE::displayf(NULL, "  CALLOUT" );
+                    displayCallout( user_data->iv_pData, user_data->iv_Size );
+                    break;
+                case ERRORLOG::ERRL_UDT_STRING:
+                    CONSOLE::displayf(NULL, "  STRING" );
+                    CONSOLE::displayf(NULL,
+                        "  %s",
+                        reinterpret_cast<char*>( user_data->iv_pData ) );
+                    break;
+            }
         }
-    }
 
-    CONSOLE::displayf(NULL,
+        CONSOLE::displayf(NULL,
                       "================================================" );
-    CONSOLE::flush();
+        CONSOLE::flush();
+    }while( 0 );
 
     TRACDCOMP( g_trac_errldisp, EXIT_MRK "ErrLogDisplay::msgDisplay" );
 }

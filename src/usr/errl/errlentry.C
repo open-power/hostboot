@@ -181,7 +181,8 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
     // iv_Src assigns the epubSubSystem_t; example, 80 in SRC B180xxxx
     iv_Src( SRC_ERR_INFO, i_modId, i_reasonCode, i_user1, i_user2 ),
     iv_termState(TERM_STATE_UNKNOWN),
-    iv_sevFinal(false)
+    iv_sevFinal(false),
+    iv_skipShowingLog(true)
 {
     #ifdef CONFIG_ERRL_ENTRY_TRACE
     TRACDCOMP( g_trac_errl, ERR_MRK"Error created : PLID=%.8X, RC=%.4X, Mod=%.2X, Userdata=%.16X %.16X", plid(), i_reasonCode, i_modId, i_user1, i_user2 );

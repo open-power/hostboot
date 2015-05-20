@@ -61,6 +61,10 @@ extern trace_desc_t* g_trac_errl;
 // Store error logs in this memory buffer in L3 RAM.
 char* g_ErrlStorage = new char[ ERRL_STORAGE_SIZE ];
 
+// Allow Hidden error logs to be shown by default
+uint8_t ErrlManager::iv_hiddenErrLogsEnable =
+            TARGETING::HIDDEN_ERRLOGS_ENABLE_ALLOW_ALL_LOGS;
+
 /**
 * @brief
 * In storage, the flattened error logs are interspersed with "markers."
@@ -264,6 +268,11 @@ void ErrlManager::errlogMsgHndlr ()
                     //  do we NOT need to send the error?
                     TARGETING::Target * sys = NULL;
                     TARGETING::targetService().getTopLevelTarget( sys );
+
+                    // set whether we want to skip certain error logs or not.
+                    iv_hiddenErrLogsEnable =
+                          sys->getAttr<TARGETING::ATTR_HIDDEN_ERRLOGS_ENABLE>();
+
                     TARGETING::SpFunctions spfn;
 
                     if (!(sys &&
@@ -425,6 +434,55 @@ void ErrlManager::errlogMsgHndlr ()
                     // Extract error log handle from the message. We need the
                     // error log handle to pass along
                     errlHndl_t l_err = (errlHndl_t) theMsg->extra_data;
+
+                    // Decide if we need to skip the error log
+                    // Note: iv_skipShowingLog is set to True by default
+                    //0 = Prevent INFORMATIONAL/RECOVERED error logs from being processed.
+                    //1 = Send only INFORMATIONAL error logs.
+                    //2 = Send only RECOVERED error logs.
+                    //3 = Allow all hidden error logs to be processed.
+
+                    //Check severity
+                    switch (l_err->sev())
+                    {
+                        case ERRORLOG::ERRL_SEV_INFORMATIONAL:
+
+                            // check if we are allowing info logs through.
+                            if((iv_hiddenErrLogsEnable ==
+                                TARGETING::
+                                    HIDDEN_ERRLOGS_ENABLE_ALLOW_INFORMATIONAL)||
+                               (iv_hiddenErrLogsEnable ==
+                                TARGETING::
+                                    HIDDEN_ERRLOGS_ENABLE_ALLOW_ALL_LOGS))
+                            {
+                                l_err->setSkipShowingLog(false);
+                            }
+                            break;
+
+                        case ERRORLOG::ERRL_SEV_RECOVERED:
+
+                            // check if we are allowing recovered logs through.
+                            if(((iv_hiddenErrLogsEnable ==
+                               TARGETING::
+                                    HIDDEN_ERRLOGS_ENABLE_ALLOW_RECOVERED) ||
+                               (iv_hiddenErrLogsEnable ==
+                                TARGETING::
+                                    HIDDEN_ERRLOGS_ENABLE_ALLOW_ALL_LOGS)) &&
+                                !iv_isSpBaseServices)
+                            {
+                                //Recovered error logs that are encountered
+                                //before targeting and initservice are loaded,
+                                //will still be queued for sending to PNOR/IPMI
+                                l_err->setSkipShowingLog(false);
+                            }
+                            break;
+
+                        default:
+
+                            // For any error log that is not INFORMATIONAL
+                            // or RECOVERED, we want to show the log
+                            l_err->setSkipShowingLog(false);
+                    }
 
                     // Ask the ErrlEntry to assign commit component, commit time
                     l_err->commit( (compId_t) theMsg->data[0] );
@@ -1131,15 +1189,15 @@ bool ErrlManager::saveErrLogToPnor( errlHndl_t& io_err)
     bool rc = false;
     TRACFCOMP( g_trac_errl, ENTER_MRK"saveErrLogToPnor eid=%.8x", io_err->eid());
 
-    // actually, if it's an INFORMATIONAL log, we don't want to waste the write
-    // cycles, so we'll just 'say' that we saved it and go on.
-    if (io_err->sev() == ERRORLOG::ERRL_SEV_INFORMATIONAL)
+    do
     {
-        TRACDCOMP( g_trac_errl, INFO_MRK"saveErrLogToPnor: INFORMATIONAL log, skipping");
-        rc = true;
-    }
-    else
-    {
+        // Decide whether or not to skip error log
+        if( io_err->getSkipShowingLog() )
+        {
+            TRACFCOMP( g_trac_errl, INFO_MRK"saveErrLogToPnor: INFORMATIONAL/RECOVERED log, skipping");
+            break;
+        }
+
         // save our current slot, and see if there's an open slot
         uint32_t l_previousSlot = iv_pnorOpenSlot;  // in case flatten fails
 
@@ -1183,7 +1241,8 @@ bool ErrlManager::saveErrLogToPnor( errlHndl_t& io_err)
             rc = true;
         }
         // else no open slot - return false
-    }
+    } while( 0 );
+
     TRACFCOMP( g_trac_errl, EXIT_MRK"saveErrLogToPnor returning %s",
         rc ? "true" : "false");
     return rc;

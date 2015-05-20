@@ -12071,7 +12071,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
         <description>
         MFG_Guard policy:
         Used in MFG only to prevent and disable the following:
-        . Storing or creation of new Guard records from Diagnostic or other
+        . Storing or creation of new Guard records from Diagno`stic or other
             faults through error logs. This is all domains, CEC
             processor/memory, VPD, FSP, etc.
         . Storing or creation of Manual Guard record from user.
@@ -15463,9 +15463,10 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
             <default>0</default>
         </uint8_t>
     </simpleType>
-        <persistency>non-volatile</persistency>
-        <readable/>
+    <persistency>non-volatile</persistency>
+    <readable/>
 </attribute>
+
 
 <attribute>
     <id>BRAZOS_RX_FIFO_OVERRIDE</id>

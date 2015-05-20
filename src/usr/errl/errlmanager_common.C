@@ -42,15 +42,14 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err)
 
     do {
 
-        // if it's an INFORMATIONAL log, we don't want to waste the cycles
-        if (io_err->sev() == ERRORLOG::ERRL_SEV_INFORMATIONAL)
+        // Decide whether we want to skip the error log
+        if( io_err->getSkipShowingLog() )
         {
-            TRACFCOMP( g_trac_errl, INFO_MRK
-                    "sendErrLogToBmc: %.8X is INFORMATIONAL; skipping",
+            TRACDCOMP( g_trac_errl, INFO_MRK
+                    "sendErrLogToBmc: %.8X is INFORMATIONAL/RECOVERED; skipping",
                     io_err->eid());
             break;
         }
-
         // look thru the errlog for any Callout UserDetail sections
         //  to determine the sensor information for the SEL
         uint8_t l_sensorNumber = TARGETING::UTIL::INVALID_IPMI_SENSOR;
