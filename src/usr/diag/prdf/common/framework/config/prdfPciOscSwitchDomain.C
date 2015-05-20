@@ -340,11 +340,13 @@ void PciOscSwitchDomain::addHwCalloutAndSignature( STEP_CODE_DATA_STRUCT & i_sc,
         }
         else
         {
+            // Pci Osc endpoints are not supported as gardable
+            // so instead, we'll need to callout/gard the source PCI OSC
             i_sc.service_data->SetCallout( procTgt, MRU_MED, NO_GARD);
             i_sc.service_data->SetCallout( l_nodeTgt, MRU_LOW , NO_GARD );
-            i_sc.service_data->SetCallout( it->pciOscCard, MRU_HIGH, NO_GARD );
-            i_sc.service_data->SetCallout( it->procPciEndPoint, MRU_MEDA );
-            i_sc.service_data->SetCallout( it->oscPciEndPoint, MRU_MEDA );
+            i_sc.service_data->SetCallout( it->pciOscCard, MRU_HIGH );
+            //i_sc.service_data->SetCallout( it->procPciEndPoint, MRU_MEDA );
+            //i_sc.service_data->SetCallout( it->oscPciEndPoint, MRU_MEDA );
 
             if( 0 == it->pciOscPosition )
             {
