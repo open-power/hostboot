@@ -24,7 +24,7 @@
 #
 # IBM_PROLOG_END_TAG
 
-# $Id: fapiParseErrorInfo.pl,v 1.33 2015/04/15 18:43:54 dcrowell Exp $
+# $Id: fapiParseErrorInfo.pl,v 1.34 2015/05/27 17:10:16 rjknight Exp $
 # Purpose:  This perl script will parse HWP Error XML files and create required
 #           FAPI code.
 #
@@ -72,6 +72,8 @@
 #                  mjjones   03/26/14  Generate HWP error on unknown SBE error
 #                  maploetz  06/11/14  Callout deconfig/gard target on all SBE
 #                                      errors
+#                  rjknight  05/27/15  Include hwInstance parsing for PCI clock
+#                                      callouts
 #
 # End Change Log *****************************************************
 #
@@ -583,6 +585,18 @@ foreach my $argnum (1 .. $#ARGV)
                 {
                     $eiEntryStr .= "  l_entries[$eiEntryCount].hw_callout.iv_refObjIndex = 0xff; \\\n";
                 }
+
+                if (exists $callout->{hw}->{hwInstance})
+                {
+                    # Add the Targets to the objectlist if they don't already exist
+                    my $objNum = addEntryToArray(\@eiObjects, $callout->{hw}->{hwInstance});
+                    $eiEntryStr .= "  l_entries[$eiEntryCount].hw_callout.iv_objPosIndex = $objNum; \\\n";
+                }
+                else
+                {
+                    $eiEntryStr .= "  l_entries[$eiEntryCount].hw_callout.iv_objPosIndex = 0xff; \\\n"
+                }
+
                 $eiEntryCount++;
                 $elementsFound++;
             }
