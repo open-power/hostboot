@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -176,7 +176,17 @@ class LpcDD
 
         ECCB_RESET_LPC_FAST_RESET = 1ULL << 62, /**< bit 1 = Fast reset */
 
+        #ifndef CONFIG_SFC_IS_IBM_DPSS
+        // Intel spec requires no LPC timeout during boot, however that guidance
+        // presumes the system can still boot without the LPC, which is not true
+        // for systems that require PNOR access.  Therefore we'll allow plenty
+        // of time for delays to work themselves out, but still flag an error
+        // ahead of the watchdog timer expiring, so that it's easier to debug
+        // any problems.
+        ECCB_POLL_TIME_NS = 90000000, /**< max time should be 90s */
+        #else
         ECCB_POLL_TIME_NS = 400000, /**< max time should be 400ms */
+        #endif
         ECCB_POLL_INCR_NS = 10, /**< minimum increment during poll */
 
         LPCHC_SYNC_CYCLE_COUNTER_INFINITE = 0xFF000000
