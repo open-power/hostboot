@@ -169,15 +169,9 @@ else
         "libslave_sbe.so",
         "libnest_chiplets.so" ,
         "libedi_ei_initialization.so" ,
-        "libactivate_powerbus.so" ,
         "libmc_config.so" ,
-        "libdram_training.so" ,
-        "libdram_initialization.so" ,
-        "libsbe_centaur_init.so" ,
-        "libdmi_training.so" ,
         "libbuild_winkle_images.so" ,
         "libcore_activate.so" ,
-        "libtod_init.so" ,
         "libstart_payload.so" ,
         "libocc.so" ,
     );
@@ -223,18 +217,12 @@ my $resident_modules = {
 # has with library to istep list file were the DepMod array is kept
 my $istepFiles = {
     "libslave_sbe.so"               => "istep06list.H" ,
-    "libnest_chiplets.so"           => "istep07list.H" ,
-    "libedi_ei_initialization.so"   => "istep08list.H" ,
-    "libactivate_powerbus.so"       => "istep09list.H" ,
-    "libsbe_centaur_init.so"        => "istep10list.H" ,
-    "libdmi_training.so"            => "istep11list.H" ,
-    "libmc_config.so"               => "istep12list.H" ,
-    "libdram_training.so"           => "istep13list.H" ,
-    "libdram_initialization.so"     => "istep14list.H" ,
+    "libmc_config.so"               => "istep07list.H" ,
+    "libnest_chiplets.so"           => "istep08list.H" ,
+    "libedi_ei_initialization.so"   => "istep09list.H" ,
     "libocc.so"                     => "istep15list.H" ,
     "libbuild_winkle_images.so"     => "istep15list.H" ,
     "libcore_activate.so"           => "istep16list.H" ,
-    "libtod_init.so"                => "istep18list.H" ,
     "libstart_payload.so"           => "istep21list.H" ,
 };
 

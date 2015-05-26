@@ -29,16 +29,7 @@
  * @file    istep18list.H
  *
  *  IStep 18    Establish System SMP
- *  IPL FLow Doc        v1.39 (12/09/13)
- *
- *    18.13    proc_tod_setup
- *          : Create TOD topology
- *    18.14    proc_tod_init
- *          : Start TOD to running state
- *
- *  *****************************************************************
- *  THIS FILE WAS PARTIALLY GENERATED ON 2012-04-11:1611
- *  *****************************************************************
+ *  IPL FLow Doc        v0.60 (06/02/15)
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -120,9 +111,6 @@ namespace   INITSERVICE
 
 const DepModInfo g_istep18Dependancies = {
     {
-#ifndef CONFIG_VPO_COMPILE
-        DEP_LIB(libtod_init.so),
-#endif
         NULL
     }
 };

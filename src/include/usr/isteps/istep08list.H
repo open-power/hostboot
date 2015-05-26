@@ -28,29 +28,39 @@
 /**
  * @file    istep08list.H
  *
- *  IStep 08    EDI, EI Initialization
- *  IPL FLow Doc        v1.28 (12/03/12)
+ *  IStep 08        Nest Chiplets
+ *  IPL FLow Doc    v0.60 (06/02/15)
  *
- *    08.1    fabric_erepair
- *          : Restore Fabric/EDI Bus eRepair data
- *    08.2    fabric_io_dccal
- *          : Calibrate Fabric/EDI interfaces
- *    08.3    fabric_pre_trainadv
- *          : Advanced pre EI/EDI training
- *    08.4    fabric_io_run_training
- *          : Run training on internal buses
- *    08.5    fabric_post_trainadv
- *          : Advanced post EI/EDI training
- *    08.6    host_startprd_pbus
- *          : Load prd for powerbus domain
- *    08.7    host_attnlisten_proc
- *          : Start listening for attentions
- *    08.8    proc_fab_iovalid
- *          : Lower functional fences on local SMP
- *
- *  *****************************************************************
- *  THIS FILE WAS GENERATED ON 2012-04-11:1606
- *  *****************************************************************
+ *    08.01    host_slave_sbe_config
+ *           : Configure host slave sbe
+ *    08.02    host_setup_sbe
+ *           : Setup host sbe
+ *    08.03    host_cbs_start
+ *           : Start cbs
+ *    08.04    proc_check_slave_sbe_seeprom_complete
+ *           : Check Slave SBE Complete
+ *    08.05    proc_cen_ref_clk_enable
+ *           : Setup centaur ref clocks
+ *    08.06    proc_attr_update
+ *           : Proc ATTR Update
+ *    08.07    proc_enable_osclite
+ *           : Enable Osclite
+ *    08.08    proc_chiplet_scominit
+ *           : Scom inits to all chiplets (sans Quad)
+ *    08.09    proc_xbus_scominit
+ *           : Apply scom inits to Xbus
+ *    08.10    proc_abus_scominit
+ *           : Apply scom inits to Abus
+ *    08.11    proc_obus_scominit
+ *           : Apply scom inits to Obus
+ *    08.12    proc_npu_scominit
+ *           : Apply scom inits to Npu
+ *    08.13    proc_pcie_scominit
+ *           : Apply scom inits to PCIechiplets
+ *    08.14    proc_scomoverride_chiplets
+ *           : Apply sequenced scom inits
+ *    08.15    proc_chiplet_enable_ridi
+ *           : Enable RI/DI chip wide
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -61,7 +71,8 @@
 #include    <initservice/initsvcreasoncodes.H>
 
 //  include prototypes file
-#include    "../../../usr/hwpf/hwp/edi_ei_initialization/edi_ei_initialization.H"
+#include    "../../../usr/hwpf/hwp/nest_chiplets/nest_chiplets.H"
+#include    "../../../usr/hwpf/hwp/slave_sbe/slave_sbe.H"
 
 namespace   INITSERVICE
 {
@@ -71,20 +82,90 @@ namespace   INITSERVICE
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
+        {
+                ISTEPNAME(08,01,"host_slave_sbe_config"),
+                SLAVE_SBE::call_host_slave_sbe_config,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+        {
+                ISTEPNAME(08,02,"host_setup_sbe"),
+                SLAVE_SBE::call_host_setup_sbe,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+        {
+                ISTEPNAME(08,03,"host_cbs_start"),
+                SLAVE_SBE::call_host_cbs_start,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+        {
+                ISTEPNAME(08,04,"proc_check_slave_sbe_seeprom_complete"),
+                SLAVE_SBE::call_proc_check_slave_sbe_seeprom_complete,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
+        },
+        {
+                ISTEPNAME(08,05,"proc_cen_ref_clk_enable"),
+                SLAVE_SBE::call_proc_cen_ref_clk_enable,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+        {
+                ISTEPNAME(08,06,"proc_attr_update"),
+                NEST_CHIPLETS::call_proc_attr_update,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+        {
+                ISTEPNAME(08,07,"proc_enable_osclite"),
+                NEST_CHIPLETS::call_proc_enable_osclite,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+        {
+                ISTEPNAME(08,08,"proc_chiplet_scominit"),
+                NEST_CHIPLETS::call_proc_chiplet_scominit,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+        {
+                ISTEPNAME(08,09,"proc_xbus_scominit"),
+                NEST_CHIPLETS::call_proc_xbus_scominit,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+        {
+                ISTEPNAME(08,10,"proc_abus_scominit"),
+                NEST_CHIPLETS::call_proc_abus_scominit,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+        {
+                ISTEPNAME(08,11,"proc_obus_scominit"),
+                NEST_CHIPLETS::call_proc_obus_scominit,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+        {
+                ISTEPNAME(08,12,"proc_npu_scominit"),
+                NEST_CHIPLETS::call_proc_npu_scominit,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+        {
+                ISTEPNAME(08,13,"proc_pcie_scominit"),
+                NEST_CHIPLETS::call_proc_pcie_scominit,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+        {
+                ISTEPNAME(08,14,"proc_scomoverride_chiplets"),
+                NEST_CHIPLETS::call_proc_scomoverride_chiplets,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+        {
+                ISTEPNAME(08,15,"proc_chiplet_enable_ridi"),
+                NEST_CHIPLETS::call_proc_chiplet_enable_ridi,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+
 };
 
 const DepModInfo g_istep08Dependancies = {
     {
-        DEP_LIB(libedi_ei_initialization.so),
-        DEP_LIB(libdmi_training.so),
         DEP_LIB(libnest_chiplets.so),
-        DEP_LIB(libsecure_boot.so),
         DEP_LIB(libslave_sbe.so),
         DEP_LIB(libsbe.so),
-        DEP_LIB(libbuild_winkle_images.so),
-#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
-        DEP_LIB(libocc.so),
-#endif
+        DEP_LIB(libpstates.so),
         NULL
     }
 };

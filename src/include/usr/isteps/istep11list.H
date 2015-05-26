@@ -26,35 +26,9 @@
 #define __ISTEPS_ISTEP11LIST_H
 
 /**
- * list of functions called for DMI Training - ISTEP 11 according to Dean's
- *  IPL Flow Doc        v1.35 (04/11/13)
+ * list of functions called for ISTEP 11 according to Dean's
+ *  IPL Flow Doc        v0.60 (06/02/15)
  *
- * 11.1  mss_getecid
- *       :  Read out ECID orff all Centaurs
- * 11.2  dmi_attr_update
- *       :DMI ATTR update
- * 11.3  proc_dmi_scominit
- *       :  DMI Scom setup on P8 MCS
- * 11.4  dmi_scominit
- *       :  Scom setup on centaur
- * 11.5  dmi_erepair
- *          : Restore EDI Bus eRepair data
- * 11.6  dmi_io_dccal
- *       : Calibrate DMI interfaces
- * 11.7  dmi_pre_trainadv
- *       : Advanced pre DMI training
- * 11.8  dmi_io_run_training
- *       : Run training on MC buses
- * 11.9  dmi_post_trainadv
- *       : Advanced post DMI training
- * 11.10 proc_cen_framelock
- *       : Initialize EDI Frame
- * 11.11 host_startprd_dmi
- *       : Load prd for DMI domain
- * 11.12 host_attnlisten_cen
- *       : Start listening for attentions
- * 11.13 cen_set_inband_addr
- *       : Set the Inband base addresses
  */
 
 /**
@@ -86,13 +60,6 @@ const   TaskInfo    g_istep11[]  =   {
 
 const DepModInfo g_istep11Dependancies = {
     {
-#ifndef CONFIG_VPO_COMPILE
-        DEP_LIB(libdmi_training.so),
-        DEP_LIB(libedi_ei_initialization.so),
-        DEP_LIB(libnest_chiplets.so),
-        DEP_LIB(libsecure_boot.so),
-        DEP_LIB(libslave_sbe.so),
-#endif
         NULL
     }
 };

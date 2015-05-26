@@ -29,26 +29,18 @@
  * @file    istep07list.H
  *
  *  IStep 07    Nest Chiplets
- *  IPL FLow Doc        v1.35 (04/11/13)
+ *  IPL FLow Doc        v0.60 (06/02/15)
  *
- *    07.1    proc_attr_update
- *          : Proc attr update
- *    07.2    proc_a_x_pci_dmi_pll_initf
- *          : PLL Initfile for A, X, PCIe, DMI
- *    07.3    proc_a_x_pci_dmi_pll_setup
- *          : Setup PLL for A, X, PCIe, DMI
- *    07.4    proc_startclock_chiplets
- *          : Start clocks on A, X, PCIe chiplets
- *    07.5    proc_chiplet_scominit
- *          : Apply scom inits to chiplets
- *    07.6    proc_xbus_scominit
- *          : Apply scom inits to Xbus
- *    07.7    proc_abus_scominit
- *          : Apply scom inits to Abus
- *    07.8    proc_pcie_scominit
- *          : Apply scom inits to PCIE  chiplets
- *    07.9    proc_scomoverride_chiplets
- *          : Apply sequenced scom inits
+ *    07.1    host_collect_dimm_spd
+ *          : Collect Master dimm SPD
+ *    07.2    mss_volt
+ *          : Calc dimm voltage
+ *    07.3    mss_freq
+ *          : Calc dimm frequency
+ *    07.4    mss_eff_config
+ *          : Determine effective config
+ *    07.5    mss_attr_update
+ *          : MSS ATTR update
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -59,7 +51,7 @@
 #include    <initservice/initsvcreasoncodes.H>
 
 //  include prototypes file
-#include    "../../../usr/hwpf/hwp/nest_chiplets/nest_chiplets.H"
+#include    "../../../usr/hwpf/hwp/mc_config/mc_config.H"
 
 namespace   INITSERVICE
 {
@@ -69,14 +61,38 @@ namespace   INITSERVICE
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
+        {
+                ISTEPNAME(07,01,"host_collect_dimm_spd"),
+                MC_CONFIG::call_host_collect_dimm_spd,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
+        {
+                ISTEPNAME(07,02,"mss_volt"),
+                MC_CONFIG::call_mss_volt,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
+        {
+                ISTEPNAME(07,03,"mss_freq"),
+                MC_CONFIG::call_mss_freq,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
+        {
+                ISTEPNAME(07,04,"mss_eff_config"),
+                MC_CONFIG::call_mss_eff_config,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
+        {
+                ISTEPNAME(07,05,"mss_attr_update"),
+                MC_CONFIG::call_mss_attr_update,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
 };
 
 
 const DepModInfo g_istep07Dependancies = {
     {
-        DEP_LIB(libnest_chiplets.so),
-        DEP_LIB(libslave_sbe.so),
-        DEP_LIB(libsecure_boot.so),
+        DEP_LIB(libmc_config.so),
+        DEP_LIB(libsbe.so),
         NULL
     }
 };

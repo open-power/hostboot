@@ -39,10 +39,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
 ##  NOTE: add a new EXTRAINCDIR when you add a new HWP
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_start_clocks_chiplets
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_chiplet_scominit
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_scomoverride_chiplets
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_a_x_pci_dmi_pll_setup
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_pcie_scominit
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_cen_ref_clk_enable
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_pcie_slot_power
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/secure_boot
@@ -50,23 +47,15 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/secure_boot
 ##  NOTE: add new object files when you add a new HWP
 OBJS += nest_chiplets.o
 OBJS += proc_start_clocks_chiplets.o
-OBJS += proc_chiplet_scominit.o
-OBJS += proc_scomoverride_chiplets.o
 OBJS += proc_a_x_pci_dmi_pll_initf.o
 OBJS += proc_a_x_pci_dmi_pll_setup.o
-OBJS += proc_pcie_scominit.o
-OBJS += proc_abus_scominit.o
-OBJS += proc_xbus_scominit.o
 OBJS += proc_a_x_pci_dmi_pll_utils.o
 OBJS += proc_pcie_slot_power.o
 
         
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_start_clocks_chiplets
-VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_chiplet_scominit
-VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_scomoverride_chiplets
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_a_x_pci_dmi_pll_setup
-VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_pcie_scominit
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_pcie_slot_power
 
 include ${ROOTPATH}/config.mk

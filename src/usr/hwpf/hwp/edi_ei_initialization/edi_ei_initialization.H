@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -30,10 +32,6 @@
  *
  *  All of the following routines are "named isteps" - they are invoked as
  *  tasks by the @ref IStepDispatcher.
- *
- *  *****************************************************************
- *  THIS FILE WAS GENERATED ON 2012-04-11:1606
- *  *****************************************************************
  *
  *  HWP_IGNORE_VERSION_CHECK
  *
@@ -173,6 +171,18 @@ void*    call_fabric_io_run_training( void    *io_pArgs );
  *
  */
 void*    call_fabric_post_trainadv( void    *io_pArgs );
+
+
+
+/**
+ *  @brief   proc_smp_link_layer
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep
+ *
+ */
+void*   call_proc_smp_link_layer( void    *io_pArgs );
 
 
 

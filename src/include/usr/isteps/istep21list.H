@@ -31,7 +31,7 @@
  * @file    istep21list.H
  *
  *  IStep 21    Start Payload
- *  IPL FLow Doc        v1.18 (10/18/12)
+ *  IPL FLow Doc        v0.60 (06/02/15)
  *
  *    21.1    host_runtime_setup
  *          :  Start Payload
@@ -40,9 +40,6 @@
  *    21.3    host_start_payload
  *          :  Start Payload
  *
- *  *****************************************************************
- *  THIS FILE WAS GENERATED ON 2012-04-11:1613
- *  *****************************************************************
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -64,9 +61,6 @@ namespace   INITSERVICE
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
-
-// To reduce extended image size for VPO, don't run these isteps in VPO
-#ifndef CONFIG_VPO_COMPILE
         {
                 ISTEPNAME(21,01,"host_runtime_setup"),
                 START_PAYLOAD::call_host_runtime_setup,
@@ -82,7 +76,6 @@ namespace   INITSERVICE
                 START_PAYLOAD::call_host_start_payload,
                 { START_FN, EXT_IMAGE, MPIPL_OP | NORMAL_IPL_OP, false }
         },
-#endif
 
 };
 

@@ -58,10 +58,7 @@
 #include <fapi.H>
 #include <fapiPlatHwpInvoker.H>
 
-#include "proc_cen_ref_clk_enable.H"
 #include "slave_sbe.H"
-#include "proc_revert_sbe_mcs_setup.H"
-#include "proc_check_slave_sbe_seeprom_complete.H"
 #include "proc_getecid.H"
 #include "proc_spless_sbe_startWA.H"
 #include <sbe/sbeif.H>
@@ -82,56 +79,6 @@ uint8_t getMembufsAttachedBitMask( TARGETING::Target * i_procChipHandle  );
 void fenceAttachedMembufs( TARGETING::Target * i_procChipHandle  );
 
 //******************************************************************************
-// call_proc_revert_sbe_mcs_setup function
-//******************************************************************************
-void* call_proc_revert_sbe_mcs_setup(void *io_pArgs)
-{
-    errlHndl_t  l_errl = NULL;
-    IStepError  l_stepError;
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_proc_revert_sbe_mcs_setup entry" );
-
-    // Note: Even though Cronus trace shows this HWP runs on all proc,
-    // this should be done only for Master chip per Dean.
-
-    TARGETING::Target* l_pProcTarget = NULL;
-    TARGETING::targetService().masterProcChipTargetHandle(l_pProcTarget);
-
-    fapi::Target l_fapiProcTarget(fapi::TARGET_TYPE_PROC_CHIP, l_pProcTarget);
-
-    // Invoke the HWP
-    FAPI_INVOKE_HWP(l_errl, proc_revert_sbe_mcs_setup, l_fapiProcTarget);
-
-    if (l_errl)
-    {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "ERROR : failed executing proc_revert_sbe_mcs_setup "
-                  "returning error");
-
-        // capture the target data in the elog
-        ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_errl );
-
-        // Create IStep error log and cross reference error that occurred
-        l_stepError.addErrorDetails( l_errl );
-
-        errlCommit( l_errl, HWPF_COMP_ID );
-    }
-    else
-    {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "SUCCESS : proc_revert_sbe_mcs_setup completed ok");
-    }
-
-    TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-              "call_proc_revert_sbe_mcs_setup exit");
-
-    // end task, returning any errorlogs to IStepDisp
-    return l_stepError.getErrorHandle();
-}
-
-
-//******************************************************************************
 // call_host_slave_sbe function
 //******************************************************************************
 void* call_host_slave_sbe_config(void *io_pArgs)
@@ -142,7 +89,13 @@ void* call_host_slave_sbe_config(void *io_pArgs)
                "call_host_slave_sbe_config entry" );
 
     // execute proc_read_nest_freq.C
-    // execute proc_setup_sbe_config.C
+    // execute p9_setup_sbe_config.C
+    // FAPI_INVOKE_HWP(l_errl,p9_setup_sbe_config);
+    if(l_errl)
+    {
+        l_stepError.addErrorDetails(l_errl);
+        errlCommit(l_errl, HWPF_COMP_ID);
+    }
 
 #ifdef CONFIG_HTMGT
     // Set system frequency attributes
@@ -203,6 +156,50 @@ void* call_host_slave_sbe_config(void *io_pArgs)
     // end task, returning any errorlogs to IStepDisp
     return l_stepError.getErrorHandle();
 
+}
+
+//******************************************************************************
+// call_host_setup_sbe()
+//******************************************************************************
+void* call_host_setup_sbe(void *io_pArgs)
+{
+    errlHndl_t l_errl = NULL;
+    IStepError  l_stepError;
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_host_setup_sbe entry" );
+
+    //call host_setup_sbe
+    //FAPI_INVOKE_HWP(l_errl,p9_set_fsi_gp_shadow);
+    if(l_errl)
+    {
+        l_stepError.addErrorDetails(l_errl);
+        errlCommit(l_errl, HWPF_COMP_ID);
+    }
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_host_setup_sbe exit" );
+    return l_stepError.getErrorHandle();
+}
+
+//******************************************************************************
+// call_host_cbs_start()
+//******************************************************************************
+void* call_host_cbs_start(void *io_pArgs)
+{
+    errlHndl_t l_errl = NULL;
+    IStepError  l_stepError;
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_host_cbs_start entry" );
+
+    //call host_cbs_start
+    //FAPI_INVOKE_HWP(l_errl,p9_start_cbs);
+    if(l_errl)
+    {
+        l_stepError.addErrorDetails(l_errl);
+        errlCommit(l_errl, HWPF_COMP_ID);
+    }
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_host_cbs_start exit" );
+    return l_stepError.getErrorHandle();
 }
 
 
@@ -440,17 +437,17 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
     IStepError  l_stepError;
     void* sbeImgPtr = NULL;
     size_t sbeImgSize = 0;
-    size_t l_wait_time = MS_TO_WAIT_OTHERS;
+    //size_t l_wait_time = MS_TO_WAIT_OTHERS;
 
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_check_slave_sbe_seeprom_complete entry" );
 
     //If in FSPless environment -- give time for SBE to complete on first chip
-    if (!INITSERVICE::spBaseServicesEnabled())
+    /*if (!INITSERVICE::spBaseServicesEnabled())
     {
         l_wait_time = MS_TO_WAIT_FIRST;
-    }
+    }*/
 
     //
     //  get the master Proc target, we want to IGNORE this one.
@@ -501,11 +498,11 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
 
         // Invoke the HWP
         fapi::ReturnCode rc_fapi = fapi::FAPI_RC_SUCCESS;
-        FAPI_EXEC_HWP(rc_fapi,
-                      proc_check_slave_sbe_seeprom_complete,
+        /*FAPI_EXEC_HWP(rc_fapi,
+                      p9_check_slave_sbe_seeprom_complete,
                       l_fapiProcTarget,
                       sbeImgPtr,
-                      l_wait_time);
+                      l_wait_time);*/
 
         // check for re ipl request
         if(static_cast<uint32_t>(rc_fapi) ==
@@ -559,7 +556,7 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
         }
 
         //after first one default to quick check time
-        l_wait_time = MS_TO_WAIT_OTHERS;
+        //l_wait_time = MS_TO_WAIT_OTHERS;
     }   // endfor
 
 
@@ -705,9 +702,10 @@ void* call_proc_cen_ref_clk_enable(void *io_pArgs )
 
             // Invoke the HWP passing in the proc target and
             // a bit mask indicating connected centaurs
-            FAPI_INVOKE_HWP(l_errl,
-                    proc_cen_ref_clk_enable,
-                    l_fapiProcTarget, l_membufsAttached );
+            // Cumulus only
+            //FAPI_INVOKE_HWP(l_errl,
+            //        p9_proc_cen_ref_clk_enable,
+            //        l_fapiProcTarget, l_membufsAttached );
 
             if (l_errl)
             {

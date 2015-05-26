@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -98,6 +100,16 @@ void* host_discover_targets( void *io_pArgs );
  *  return  any error logs to istep
  */
 void* host_gard( void *io_pArgs );
+
+/**
+ *  @brief p9_revert_sbe_mcs_setup
+ *
+ *  Clean up MCS Extent regs
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return any error logs to istep
+ */
+void* call_p9_revert_sbe_mcs_setup(void *io_pArgs);
 
 /**
  * @brief   host_cancontinue_clear  Clear deconfigured status

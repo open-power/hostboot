@@ -30,40 +30,10 @@
  * @file    istep10list.H
  *
  *  Step 10 Hostboot SBE Centaur Init
- *  IPL FLow Doc        v1.28 (12/03/12)
+ *  IPL FLow Doc        v0.60 (06/02/15)
  *
- *    10.1    host_prd_hwreconfig
- *          : Hook for prd to handle reconfig
- *    10.2    cen_sbe_tp_chiplet_init1
- *          : TP Chiplet init
- *    10.3    cen_sbe_pll_initf
- *          : Program Nest PLL
- *    10.4    cen_sbe_pll_setup
- *          : Setup Nest PLL
- *    10.5    cen_sbe_tp_chiplet_init2
- *          : Cen TP Chiplet init 2
- *    10.6    cen_sbe_tp_arrayinit 
- *          : Cen TP Chiplet array init
- *    10.7    cen_sbe_tp_chiplet_init3
- *          : Cen TP Chiplet Start clocks
- *    10.8    cen_sbe_chiplet_init
- *          : Cen Chiplet Init
- *    10.9    cen_sbe_arrayinit
- *          : Chiplet arrayinit
- *    10.10   cen_sbe_dts_init
- *          : Cen DTS init
- *    10.11   cen_sbe_initf
- *          : Cen Scan overrides
- *    10.12   cen_sbe_do_manual_inits
- *          : Manual Cen Scans
- *    10.13   cen_sbe_nest_startclocks
- *          : Start Cen Nest
- *    10.14   cen_sbe_scominits
- *          : Perform any Cen scom inits
-
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
- *
  */
 
 #include    <initservice/initsvcstructs.H>
@@ -86,18 +56,6 @@ const   TaskInfo    g_istep10[]  =   {
 
 const DepModInfo g_istep10Dependancies = {
     {
-#ifndef CONFIG_VPO_COMPILE
-        DEP_LIB(libsbe_centaur_init.so),
-        DEP_LIB(libfapiporeve.so),
-        DEP_LIB(libporeve.so),
-        DEP_LIB(libbuild_winkle_images.so),
-        DEP_LIB(libsbe.so),
-        DEP_LIB(libproc_hwreconfig.so),
-        DEP_LIB(libslave_sbe.so),
-#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
-        DEP_LIB(libocc.so),
-#endif
-#endif
         NULL
     }
 };
