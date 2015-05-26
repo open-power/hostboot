@@ -226,6 +226,16 @@ uint8_t UnsupportedLanesx40[] = {0x4,0x5,0x8,0x9,0xA,0xB,0xC};
 void * call_proc_attr_update( void * io_pArgs );
 
 /**
+ *  @brief proc_enable_osclite
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return any error logs to istep
+ *
+ */
+void* call_proc_enable_osclite(void *io_pArgs);
+
+/**
  *  @brief  proc_a_x_pci_dmi_pll_initf
  *
  *           PLL init file for A, X, PCIe, DMI
@@ -299,6 +309,28 @@ void*    call_proc_xbus_scominit( void    *io_pArgs );
 void*    call_proc_abus_scominit( void    *io_pArgs );
 
 /**
+ *  @brief   proc_obus_scominit
+ *
+ *           Apply scom inits to OBUS
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any error logs to istep
+ */
+void*    call_proc_obus_scominit( void     *io_pArgs );
+
+/**
+ *  @brief   proc_npu_scominit
+ *
+ *           Apply scom inits to NPU
+ *
+ *  param[in.out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any error logs to istep
+ */
+void*    call_proc_npu_scominit( void     *io_pArgs );
+
+/**
  *  @brief   proc_pcie_scominit
  *
  *           Apply scom inits to PCIe chiplets
@@ -321,6 +353,16 @@ void*    call_proc_pcie_scominit( void    *io_pArgs );
  *
  */
 void*    call_proc_scomoverride_chiplets( void    *io_pArgs );
+
+/**
+ *  @brief   proc_chiplet_enable_ridi
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any error logs to istep
+ *
+ */
+void*    call_proc_chiplet_enable_ridi( void    *io_pArgs );
 
 /**
  *  @brief Setup the ATTR_CHIP_REGIONS_TO_ENABLE attribute for input proc.

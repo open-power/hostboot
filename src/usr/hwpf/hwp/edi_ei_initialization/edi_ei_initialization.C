@@ -29,10 +29,6 @@
  *  Support file for IStep: edi_ei_initialization
  *   EDI, EI Initialization
  *
- *  *****************************************************************
- *  THIS FILE WAS GENERATED ON 2012-04-11:1606
- *  *****************************************************************
- *
  *  HWP_IGNORE_VERSION_CHECK
  *
  */
@@ -218,11 +214,11 @@ void*    call_fabric_erepair( void    *io_pArgs )
                 // call the io_restore_erepair HWP to restore eRepair
                 // lanes of endp1
 
-                FAPI_INVOKE_HWP(l_errl,
-                                io_restore_erepair,
-                                l_fapi_endp1_target,
-                                l_endp1_txFaillanes,
-                                l_endp1_rxFaillanes);
+                //FAPI_INVOKE_HWP(l_errl,
+                //                p9_io_restore_erepair,
+                //                l_fapi_endp1_target,
+                //                l_endp1_txFaillanes,
+                //                l_endp1_rxFaillanes);
             }
 
             if(l_errl)
@@ -371,7 +367,7 @@ void*    call_fabric_io_dccal( void    *io_pArgs )
                    (const_cast<TARGETING::Target*>(l_itr->second)));
 
             //  call the HWP with each bus connection
-            FAPI_INVOKE_HWP( l_errl, fabric_io_dccal, l_fapi_endp1_target );
+            //FAPI_INVOKE_HWP( l_errl, io_dccal, l_fapi_endp1_target );
 
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "%s : %cbus connection fabric_io_dccal. Target 0x%.8X",
@@ -463,7 +459,8 @@ void*    call_fabric_pre_trainadv( void    *io_pArgs )
                    (const_cast<TARGETING::Target*>(l_itr->second)));
 
             //  call the HWP with each bus connection
-            FAPI_INVOKE_HWP( l_errl, io_pre_trainadv, l_fapi_endp1_target );
+            //FAPI_INVOKE_HWP( l_errl, p9_io_pre_trainadv,
+            //l_fapi_endp1_target );
 
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "%s : %cbus connection fabric_pre_trainadv. Target 0x%.8X",
@@ -559,8 +556,8 @@ void*    call_fabric_io_run_training( void    *io_pArgs )
                    (const_cast<TARGETING::Target*>(l_itr->second)));
 
             //  call the HWP with each bus connection
-            FAPI_INVOKE_HWP( l_errl, fabric_io_run_training,
-                             l_fapi_endp1_target, l_fapi_endp2_target );
+            //FAPI_INVOKE_HWP( l_errl, p9_io_run_training,
+            //                 l_fapi_endp1_target, l_fapi_endp2_target );
 
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "%s : %cbus connection io_run_training",
@@ -630,7 +627,8 @@ void*    call_fabric_post_trainadv( void    *io_pArgs )
                    (const_cast<TARGETING::Target*>(l_itr->second)));
 
             //  call the HWP with each bus connection
-            FAPI_INVOKE_HWP( l_errl, io_post_trainadv, l_fapi_endp1_target );
+            //FAPI_INVOKE_HWP( l_errl, p9_io_post_trainadv,
+            //l_fapi_endp1_target );
 
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "%s : %cbus connection fabric_post_trainadv. Target 0x%.8X",
@@ -680,6 +678,26 @@ void*    call_fabric_post_trainadv( void    *io_pArgs )
     return l_StepError.getErrorHandle();
 }
 
+//
+// Wrapper function to call proc_smp_link_layer
+//
+void*   call_proc_smp_link_layer( void    *io_pArgs )
+{
+    errlHndl_t  l_errl  =   NULL;
+    IStepError  l_StepError;
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_proc_smp_link_layer entry" );
+    //call HWP
+    //FAPI_INVOKE_HWP(l_errl,p9_smp_link_layer);
+    if(l_errl)
+    {
+        l_StepError.addErrorDetails(l_errl);
+        errlCommit(l_errl, HWPF_COMP_ID);
+    }
+    return l_StepError.getErrorHandle();
+
+}
 
 //
 //  Wrapper function to call host_startprd_pbus
@@ -894,7 +912,7 @@ void*    call_proc_fab_iovalid( void    *io_pArgs )
 
     if (!l_errl)
     {
-        FAPI_INVOKE_HWP( l_errl, proc_fab_iovalid, l_smp, true );
+        //FAPI_INVOKE_HWP( l_errl, p9_fab_iovalid, l_smp, true );
 
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 "%s : proc_fab_iovalid HWP.",

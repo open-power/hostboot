@@ -384,6 +384,9 @@ void*    call_host_collect_dimm_spd( void *io_pArgs )
         const fapi::Target l_fapiMba1Target(TARGET_TYPE_MBA_CHIPLET,
                 (const_cast<TARGETING::Target*>(l_presMbas[1])));
         //  call the HWP with each fapi::Target
+        //FAPI_INVOKE_HWP(l_err, p9_mss_attr_cleanup, l_fapiCentaurTarget,
+        //                l_fapiMba0Target, l_fapiMba1Target);
+        //Remove when above HWP is working:
         FAPI_INVOKE_HWP(l_err, mss_attr_cleanup, l_fapiCentaurTarget,
                         l_fapiMba0Target, l_fapiMba1Target);
         if (l_err)
@@ -725,9 +728,13 @@ void  call_mss_volt_hwp (std::vector<TARGETING::ATTR_VMEM_ID_type>& i_VmemList,
             }
         }
 
-        TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Calling mss_volt_hwp...");
-        FAPI_INVOKE_HWP(l_err, mss_volt_hwp, l_membufFapiTargets);
+        //now have the a list of fapi membufs with just the one VmemId
+        //call the HWP on the list of fapi targets
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                            "=====  mss_volt HWP( vector )" );
+        //FAPI_INVOKE_HWP(l_err, p9_mss_volt, l_membufFapiTargets);
+        //Remove when above HWP is working:
+        FAPI_INVOKE_HWP(l_err, mss_volt, l_membufFapiTargets);
 
         //  process return code.
         if ( l_err )
@@ -1319,6 +1326,8 @@ void*    call_mss_freq( void *io_pArgs )
         fapi::Target l_fapi_membuf_target(fapi::TARGET_TYPE_MEMBUF_CHIP,
                     (const_cast<TARGETING::Target*>(l_membuf_target)) );
 
+        //FAPI_INVOKE_HWP(l_err, p9_mss_freq, l_fapi_membuf_target);
+        //Remove when above HWP is working:
         FAPI_INVOKE_HWP(l_err, mss_freq, l_fapi_membuf_target);
 
         //  process return code.
@@ -1413,7 +1422,10 @@ errlHndl_t call_mss_eff_grouping()
             l_associated_centaurs.push_back(l_fapi_centaur_target);
         }
 
-        FAPI_INVOKE_HWP(l_err, mss_eff_grouping,
+        //FAPI_INVOKE_HWP(l_err, p9_mss_eff_grouping,
+                        //l_fapi_cpu_target, l_associated_centaurs);
+        //Remove when above HWP is working
+        FAPI_INVOKE_HWP(l_err,mss_eff_grouping,
                         l_fapi_cpu_target, l_associated_centaurs);
 
         //  process return code.
@@ -1462,7 +1474,9 @@ errlHndl_t call_opt_memmap( bool i_initBase )
         l_fapi_procs.push_back(l_fapi_target);
     }
 
-    FAPI_INVOKE_HWP(l_err, opt_memmap, l_fapi_procs, i_initBase);
+    //FAPI_INVOKE_HWP(l_err, p9_opt_memmap, l_fapi_procs, i_initBase);
+    //Remove when above HWP is working
+    FAPI_INVOKE_HWP(l_err,opt_memmap, l_fapi_procs,i_initBase);
 
     if ( l_err )
     {
@@ -1477,6 +1491,41 @@ errlHndl_t call_opt_memmap( bool i_initBase )
 
     return l_err;
 }
+
+errlHndl_t call_mss_eff_mb_interleave()
+{
+    errlHndl_t l_err = NULL;
+
+    TARGETING::TargetHandleList l_membufTargetList;
+    getAllChips(l_membufTargetList, TYPE_MEMBUF);
+    for (TargetHandleList::const_iterator
+            l_membuf_iter = l_membufTargetList.begin();
+            l_membuf_iter != l_membufTargetList.end();
+            ++l_membuf_iter)
+    {
+        const TARGETING::Target* l_membuf_target = *l_membuf_iter;
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "=====  Running mss_eff_mb_interleave HWP on HUID %.8X",
+                TARGETING::get_huid(l_membuf_target));
+        fapi::Target l_membuf_fapi_target(fapi::TARGET_TYPE_MEMBUF_CHIP,
+                    (const_cast<TARGETING::Target*>(l_membuf_target)) );
+        FAPI_INVOKE_HWP(l_err, mss_eff_mb_interleave, l_membuf_fapi_target);
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR 0x%.8X: mss_eff_mb_interleave HWP returns error",
+                      l_err->reasonCode());
+        }
+        else
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "Successfully ran mss_eff_mb_interleave HWP on HUID %.8X",
+                      TARGETING::get_huid(l_membuf_target));
+        }
+    }
+    return l_err;
+}
+
 
 //
 //  Wrapper function to call mss_eff_config
@@ -1525,9 +1574,15 @@ void*    call_mss_eff_config( void *io_pArgs )
         const fapi::Target l_fapi_mba_target(fapi::TARGET_TYPE_MBA_CHIPLET,
             (const_cast<TARGETING::Target*>(l_mba_target)));
 
+        // Call the mss_eff_config_vpd_decode HWP
+        //FAPI_INVOKE_HWP(l_err,p9_mss_eff_config_vpd_decode,
+        //l_fapi_mba_target);
+
         // Call the mss_eff_config HWP
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "=====  mss_eff_config HWP. MBA HUID %.8X", l_huid);
+        //FAPI_INVOKE_HWP(l_err, p9_mss_eff_config, l_fapi_mba_target);
+        //Remove when above HWP is working:
         FAPI_INVOKE_HWP(l_err, mss_eff_config, l_fapi_mba_target);
 
         if (l_err)
@@ -1548,7 +1603,8 @@ void*    call_mss_eff_config( void *io_pArgs )
             // Call the mss_eff_config_thermal HWP
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "=====  mss_eff_config_thermal HWP. MBA HUID %.8X", l_huid);
-            FAPI_INVOKE_HWP(l_err, mss_eff_config_thermal, l_fapi_mba_target);
+            //FAPI_INVOKE_HWP(l_err, p9_mss_eff_config_thermal,
+            //l_fapi_mba_target);
 
             if (l_err)
             {
@@ -1587,6 +1643,12 @@ void*    call_mss_eff_config( void *io_pArgs )
                 {
                     // Stack the memory again based on system-wide positions
                     l_err = call_mss_eff_grouping();
+
+                      /*if(!l_err) //Cumulus only
+                      {
+                          l_err = call_mss_eff_mb_interleave();
+                      }*/
+
                 }
             }
         }
@@ -1602,35 +1664,11 @@ void*    call_mss_eff_config( void *io_pArgs )
     // Calling mss_eff_mb_interleave
     if (l_StepError.isNull())
     {
-        TARGETING::TargetHandleList l_membufTargetList;
-        getAllChips(l_membufTargetList, TYPE_MEMBUF);
-        for (TargetHandleList::const_iterator
-                l_membuf_iter = l_membufTargetList.begin();
-                l_membuf_iter != l_membufTargetList.end();
-                ++l_membuf_iter)
+        l_err = call_mss_eff_mb_interleave();
+        if(l_err)
         {
-            const TARGETING::Target* l_membuf_target = *l_membuf_iter;
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "=====  Running mss_eff_mb_interleave HWP on HUID %.8X",
-                    TARGETING::get_huid(l_membuf_target));
-            fapi::Target l_membuf_fapi_target(fapi::TARGET_TYPE_MEMBUF_CHIP,
-                        (const_cast<TARGETING::Target*>(l_membuf_target)) );
-            FAPI_INVOKE_HWP(l_err, mss_eff_mb_interleave, l_membuf_fapi_target);
-            if (l_err)
-            {
-               TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                         "ERROR 0x%.8X: mss_eff_mb_interleave HWP returns error",
-                         l_err->reasonCode());
-               ErrlUserDetailsTarget(l_membuf_target).addToLog(l_err);
-               l_StepError.addErrorDetails(l_err);
-               errlCommit(l_err, HWPF_COMP_ID);
-            }
-            else
-            {
-               TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Successfully ran mss_eff_mb_interleave HWP on HUID %.8X",
-                    TARGETING::get_huid(l_membuf_target));
-            }
+            l_StepError.addErrorDetails(l_err);
+            errlCommit( l_err, HWPF_COMP_ID );
         }
     }
 
@@ -1645,8 +1683,16 @@ void*    call_mss_attr_update( void *io_pArgs )
 {
 
     IStepError l_StepError;
+    errlHndl_t l_err = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_attr_update entry");
+    //FAPI_INVOKE_HWP(l_err, p9_mss_attr_update);
+    if(l_err)
+    {
+        l_StepError.addErrorDetails(l_err);
+        errlCommit( l_err, HWPF_COMP_ID );
+    }
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_attr_update exit" );
 
     return l_StepError.getErrorHandle();

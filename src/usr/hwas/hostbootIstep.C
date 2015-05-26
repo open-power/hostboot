@@ -364,6 +364,53 @@ void* host_gard( void *io_pArgs )
 }
 
 //******************************************************************************
+// call_p9_revert_sbe_mcs_setup function
+//******************************************************************************
+void* call_p9_revert_sbe_mcs_setup(void *io_pArgs)
+{
+    errlHndl_t  l_errl = NULL;
+    IStepError  l_stepError;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_p9_revert_sbe_mcs_setup entry" );
+
+    TARGETING::Target* l_pProcTarget = NULL;
+    TARGETING::targetService().masterProcChipTargetHandle(l_pProcTarget);
+
+    fapi::Target l_fapiProcTarget(fapi::TARGET_TYPE_PROC_CHIP, l_pProcTarget);
+
+    // Invoke the HWP
+    // FAPI_INVOKE_HWP(l_errl, p9_revert_sbe_mcs_setup, l_fapiProcTarget);
+
+    if (l_errl)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "ERROR : failed executing p9_revert_sbe_mcs_setup "
+                  "returning error");
+
+        // capture the target data in the elog
+        ERRORLOG::ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_errl );
+
+        // Create IStep error log and cross reference error that occurred
+        l_stepError.addErrorDetails( l_errl );
+
+        errlCommit( l_errl, HWPF_COMP_ID );
+    }
+    else
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "SUCCESS : p9_revert_sbe_mcs_setup completed ok");
+    }
+
+    TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+              "call_p9_revert_sbe_mcs_setup exit");
+
+    // end task, returning any errorlogs to IStepDisp
+    return l_stepError.getErrorHandle();
+}
+
+
+//******************************************************************************
 // host_cancontinue_clear function
 //******************************************************************************
 void* host_cancontinue_clear( void *io_pArgs )

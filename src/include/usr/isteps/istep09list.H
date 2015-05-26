@@ -30,16 +30,24 @@
  * @file    istep09list.H
  *
  *  IStep 09    Activate PowerBus
- *  IPL FLow Doc        v1.28 (12/03/12)
+ *  IPL FLow Doc        v0.60 (06/02/15)
  *
- *    09.1    proc_build_smp
- *          : Integrate PgP Islands into SMP
- *    09.2    host_slave_sbe_update
- *          : placeholder for secure boot
- *
- *  *****************************************************************
- *  THIS FILE WAS GENERATED ON 2012-04-11:1607
- *  *****************************************************************
+ *    09.1    fabric_erepair
+ *          : Restore Fabric Bus eRepair data
+ *    09.2    fabric_io_dccal
+ *          : Calibrate Fabric interfaces
+ *    09.3    fabric_pre_trainadv
+ *          : Advanced pre training
+ *    09.4    fabric_io_run_training
+ *          : Run training on internal buses
+ *    09.5    fabric_post_trainadv
+ *          : Advanced post EI/EDI training
+ *    09.6    proc_smp_link_layer
+ *          : Start SMP link layer
+ *    09.7    host_startprd_pbus
+ *          : Load PRD for powerbus domain
+ *    09.9    proc_fab_iovalid
+ *          : Lower functional fences on local SMP
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -50,7 +58,7 @@
 #include    <initservice/initsvcreasoncodes.H>
 
 //  include prototypes file
-#include    "../../../usr/hwpf/hwp/activate_powerbus/activate_powerbus.H"
+#include "../../../usr/hwpf/hwp/edi_ei_initialization/edi_ei_initialization.H"
 #include <config.h>
 
 namespace   INITSERVICE
@@ -61,16 +69,57 @@ namespace   INITSERVICE
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
+        {
+                ISTEPNAME(09,01,"fabric_erepair"),
+                EDI_EI_INITIALIZATION::call_fabric_erepair,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+        {
+                ISTEPNAME(09,02,"fabric_io_dccal"),
+                EDI_EI_INITIALIZATION::call_fabric_io_dccal,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+        {
+                ISTEPNAME(09,03,"fabric_pre_trainadv"),
+                EDI_EI_INITIALIZATION::call_fabric_pre_trainadv,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+        {
+                ISTEPNAME(09,04,"fabric_io_run_training"),
+                EDI_EI_INITIALIZATION::call_fabric_io_run_training,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+        {
+                ISTEPNAME(09,05,"fabric_post_trainadv"),
+                EDI_EI_INITIALIZATION::call_fabric_post_trainadv,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+        {
+                ISTEPNAME(09,06,"proc_smp_link_layer"),
+                EDI_EI_INITIALIZATION::call_proc_smp_link_layer,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+        {
+                ISTEPNAME(09,07,"host_startprd_pbus"),
+                EDI_EI_INITIALIZATION::call_host_startprd_pbus,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+        {
+                ISTEPNAME(09,08,"host_attnlisten_proc"),
+                EDI_EI_INITIALIZATION::call_host_attnlisten_proc,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+        {
+                ISTEPNAME(09,09,"proc_fab_iovalid"),
+                EDI_EI_INITIALIZATION::call_proc_fab_iovalid,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
 };
 
 const DepModInfo  g_istep09Dependancies = {
     {
-#ifndef CONFIG_VPO_COMPILE
-        DEP_LIB(libactivate_powerbus.so),
-        DEP_LIB(libdram_initialization.so),
+        DEP_LIB(libedi_ei_initialization.so),
         DEP_LIB(libsbe.so),
-        DEP_LIB(libbuild_winkle_images.so),
-#endif
         NULL
     }
 };

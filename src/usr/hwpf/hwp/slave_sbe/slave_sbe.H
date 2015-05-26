@@ -48,12 +48,6 @@
  *  @istepdesc      Slave SBE
  *
  *  @{
- *      @substepnum     8
- *      @substepname    proc_revert_sbe_mcs_setup
- *      @substepdesc    : Clean up MCS Extent regs
- *          @target_sched   serial
- *  @}
- *  @{
  *      @substepnum     9
  *      @substepname    host_slave_sbe_config
  *      @substepdesc    : 
@@ -78,24 +72,31 @@ namespace SLAVE_SBE
 {
 
 /**
- *  @brief proc_revert_sbe_mcs_setup
- *
- *  Clean up MCS Extent regs
+ *  @brief host_slave_sbe_config
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return any error logs to istep
  */
-void* call_proc_revert_sbe_mcs_setup(void *io_pArgs);
+void* call_host_slave_sbe_config(void *io_pArgs);
 
 /**
- *  @brief host_slave_sbe_config
+ *  @brief call_host_setup_sbe
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
- *  return any error logs to istep 
+ *  return any error logs to istep
  */
-void* call_host_slave_sbe_config(void *io_pArgs);
+void* call_host_setup_sbe(void *io_pArgs);
+
+/**
+ *  @brief call_host_cbs_start
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return any error logs to istep
+ */
+void* call_host_cbs_start(void *io_pArgs);
 
 
 /**

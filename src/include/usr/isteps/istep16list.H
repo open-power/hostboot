@@ -30,20 +30,10 @@
  * @file    istep16list.H
  *
  *  IStep 16    Core Activate
- *  IPL FLow Doc        v1.41 (11/08/13)
+ *  IPL FLow Doc        v0.60 (06/02/15)
  *
  *    16.1    host_activate_master
  *          : Activate master core
- *    16.2    host_activate_slave_cores
- *          : Activate slave cores
- *    16.3    mss_scrub
- *          : Start background scrub
- *    16.4    host_ipl_complete
- *          : Notify FSP drawer ipl complete
- *
- *  *****************************************************************
- *  THIS FILE WAS GENERATED ON 2012-04-11:1609
- *  *****************************************************************
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.

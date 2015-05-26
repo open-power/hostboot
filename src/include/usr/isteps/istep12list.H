@@ -29,23 +29,8 @@
 /**
  * @file    istep12list.H
  *
- *  IStep 12    Step 12 MC Config
- *  IPL FLow Doc        v1.35 (04/11/13)
- *
- *  12.1      host_collect_dimm_spd
- *  	: Collect Master dimm SPD
-  *  12.2     mss_volt
- *  	: Calc dimm voltage
- *  12.3      mss_freq
- *  	: Calc dimm frequency
- *  12.4      mss_eff_config
- *  	: Determine effective config
- *  12.5      mss_attr_update
- *      : MSS ATTR update
-*
-*  *****************************************************************
- *  THIS FILE WAS GENERATED ON 2012-03-01:1032
- *  *****************************************************************
+ *  IStep 12    Step 12 DMI Training
+ *  IPL FLow Doc        v0.60 (06/02/15)
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -69,40 +54,11 @@ const   TaskInfo    g_istep12[]  =   {
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
-// To reduce extended image size for VPO
-#ifndef CONFIG_VPO_COMPILE
-        {
-                ISTEPNAME(12,01,"host_collect_dimm_spd"),
-                MC_CONFIG::call_host_collect_dimm_spd,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(12,02,"mss_volt"),
-                MC_CONFIG::call_mss_volt,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(12,03,"mss_freq"),
-                MC_CONFIG::call_mss_freq,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(12,04,"mss_eff_config"),
-                MC_CONFIG::call_mss_eff_config,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-#endif
 
 };
 
 const DepModInfo g_istep12Dependancies = {
     {
-// To reduce extended image size for VPO
-#ifndef CONFIG_VPO_COMPILE
-        DEP_LIB(libmc_config.so),
-#endif
-        DEP_LIB(libsbe.so),
-        DEP_LIB(libbuild_winkle_images.so),
         NULL
     }
 };

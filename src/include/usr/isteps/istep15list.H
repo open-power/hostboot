@@ -29,15 +29,10 @@
  * @file    istep15list.H
  *
  *  IStep 15    Build Winkle Images
- *  IPL FLow Doc        v1.28 (12/03/12)
+ *  IPL FLow Doc        v0.60 (06/02/15)
  *
  *    15.1    host_build_winkle
  *          : Build runtime winkle images
- *    15.2    proc_set_pore_bar
- *          : Tell SLW Eng where winkle image is
- *    15.3    proc_poreslw_init
- *          : Initialize the PORE-SLW engine
- *
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -60,25 +55,20 @@ namespace   INITSERVICE
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
 
-// To reduce extended image size for VPO, don't run these isteps in VPO
-#ifndef CONFIG_VPO_COMPILE
         {
                 ISTEPNAME(15,01,"host_build_winkle"),
                 BUILD_WINKLE_IMAGES::call_host_build_winkle,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true,
                         SEC_PROCESSOR_INIT }
         },
-#endif        
 
 };
 
 
 const DepModInfo g_istep15Dependancies = {
     {
-#ifndef CONFIG_VPO_COMPILE
         DEP_LIB(libocc.so),
         DEP_LIB(libbuild_winkle_images.so),
-#endif
         NULL
     }
 };

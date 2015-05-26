@@ -68,13 +68,8 @@
 //  #include    "nest_chiplets_custom.H"
 #include    "nest_chiplets.H"
 #include    "proc_start_clocks_chiplets/proc_start_clocks_chiplets.H"
-#include    "proc_chiplet_scominit/proc_chiplet_scominit.H"
-#include    "proc_chiplet_scominit/proc_xbus_scominit.H"
-#include    "proc_chiplet_scominit/proc_abus_scominit.H"
-#include    "proc_scomoverride_chiplets/proc_scomoverride_chiplets.H"
 #include    "proc_a_x_pci_dmi_pll_setup/proc_a_x_pci_dmi_pll_setup.H"
 #include    "proc_a_x_pci_dmi_pll_setup/proc_a_x_pci_dmi_pll_initf.H"
-#include    "proc_pcie_scominit/proc_pcie_scominit.H"
 #include    "../bus_training/pbusLinkSvc.H"
 #include    <fapiHwpExecInitFile.H>
 #include    "proc_pcie_slot_power.H"
@@ -97,9 +92,17 @@ using   namespace   fapi;
 void * call_proc_attr_update( void * io_pArgs )
 {
     IStepError l_StepError;
+    errlHndl_t l_err = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_proc_attr_update entry" );
+
+    //FAPI_INVOKE_HWP(l_err,p9_attr_update);
+    if(l_err)
+    {
+        l_StepError.addErrorDetails(l_err);
+        errlCommit(l_err, HWPF_COMP_ID);
+    }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_proc_attr_update exit" );
@@ -107,6 +110,30 @@ void * call_proc_attr_update( void * io_pArgs )
     return l_StepError.getErrorHandle();
 
 }
+
+//*****************************************************************************
+// wrapper function to call proc_enable_osclite
+//*****************************************************************************
+void* call_proc_enable_osclite(void *io_pArgs)
+{
+    errlHndl_t l_errl = NULL;
+    IStepError  l_stepError;
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_proc_enable_osclite" );
+
+    //call p9_enable_osclite
+    //Cumulus only
+    //FAPI_INVOKE_HWP(l_errl,p9_enable_osclite);
+    if(l_errl)
+    {
+        l_stepError.addErrorDetails(l_errl);
+        errlCommit(l_errl, HWPF_COMP_ID);
+    }
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_proc_enable_osclite" );
+    return l_stepError.getErrorHandle();
+}
+
 //*****************************************************************************
 // wrapper function to call proc_a_x_pci_dmi_pll_initf
 //*****************************************************************************
@@ -702,7 +729,7 @@ void*    call_proc_chiplet_scominit( void    *io_pArgs )
                 "target HUID %.8X", TARGETING::get_huid(l_cpu_target));
 
             //  call the HWP with each fapi::Target
-            FAPI_INVOKE_HWP(l_err, proc_chiplet_scominit, l_fapi_proc_target);
+            //FAPI_INVOKE_HWP(l_err, p9_chiplet_scominit, l_fapi_proc_target);
             if (l_err)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : "
@@ -719,6 +746,8 @@ void*    call_proc_chiplet_scominit( void    *io_pArgs )
                 // after committing
                 errlCommit(l_err, HWPF_COMP_ID);
             }
+            //call p9_psi_scominit
+            //FAPI_INVOKE_HWP(l_err,p9_psi_scominit);
         }
 
     } while (0);
@@ -787,8 +816,8 @@ void* call_proc_xbus_scominit( void    *io_pArgs )
                        TARGET_TYPE_XBUS_ENDPOINT,
                        (const_cast<TARGETING::Target*>(l_connectedXbusTarget)));
 
-            FAPI_INVOKE_HWP(l_err, proc_xbus_scominit,
-                            l_thisXbusFapiTarget, l_connectedXbusFapiTarget);
+            //FAPI_INVOKE_HWP(l_err, p9_xbus_scominit,
+            //                l_thisXbusFapiTarget, l_connectedXbusFapiTarget);
             if (l_err)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -892,9 +921,9 @@ void* call_proc_abus_scominit( void    *io_pArgs )
                 TARGETING::get_huid(l_thisAbusTarget),
                 TARGETING::get_huid(l_connectedAbusTarget));
 
-            FAPI_INVOKE_HWP(l_err, proc_abus_scominit,
-                            l_fapi_this_abus_target,
-                            l_fapi_connected_abus_target);
+            //FAPI_INVOKE_HWP(l_err, p9_abus_scominit,
+            //                l_fapi_this_abus_target,
+            //                l_fapi_connected_abus_target);
             if (l_err)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -919,6 +948,56 @@ void* call_proc_abus_scominit( void    *io_pArgs )
         } // End abus list loop
 
     } while (0);
+
+    return l_StepError.getErrorHandle();
+}
+
+//******************************************************************************
+// wrapper function to call proc_obus_scominit
+//******************************************************************************
+void* call_proc_obus_scominit( void *io_pArgs )
+{
+
+    errlHndl_t l_err = NULL;
+    IStepError l_StepError;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_proc_obus_scominit entry" );
+    //Call HWP
+    //FAPI_INVOKE_HWP(l_err,p9_obus_scominit);
+    if(l_err)
+    {
+        l_StepError.addErrorDetails(l_err);
+        errlCommit(l_err, HWPF_COMP_ID);
+    }
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_proc_obus_scominit exit");
+
+    return l_StepError.getErrorHandle();
+}
+
+//******************************************************************************
+// wrapper function to call proc_npu_scominit
+//******************************************************************************
+void* call_proc_npu_scominit( void *io_pArgs )
+{
+
+    errlHndl_t l_err = NULL;
+    IStepError l_StepError;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_proc_npu_scominit entry" );
+    //Call HWP
+    //FAPI_INVOKE_HWP(l_err,p9_npu_scominit);
+    if(l_err)
+    {
+        l_StepError.addErrorDetails(l_err);
+        errlCommit(l_err, HWPF_COMP_ID);
+    }
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_proc_npu_scominit exit");
 
     return l_StepError.getErrorHandle();
 }
@@ -1921,7 +2000,7 @@ void*    call_proc_pcie_scominit( void    *io_pArgs )
                 "target HUID %.8X", TARGETING::get_huid(l_proc_target));
 
         //  call the HWP with each fapi::Target
-        FAPI_INVOKE_HWP(l_errl, proc_pcie_scominit, l_fapi_proc_target);
+        //FAPI_INVOKE_HWP(l_errl, p9_pcie_scominit, l_fapi_proc_target);
 
         if (l_errl)
         {
@@ -1965,7 +2044,7 @@ void*    call_proc_scomoverride_chiplets( void    *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                     "call_proc_scomoverride_chiplets entry" );
 
-    FAPI_INVOKE_HWP(l_errl, proc_scomoverride_chiplets);
+    //FAPI_INVOKE_HWP(l_errl, p9_scomoverride_chiplets);
 
     if (l_errl)
     {
@@ -1993,5 +2072,29 @@ void*    call_proc_scomoverride_chiplets( void    *io_pArgs )
     return l_StepError.getErrorHandle();
 }
 
+//******************************************************************************
+// wrapper function to call proc_chiplet_enable_ridi
+//******************************************************************************
+void* call_proc_chiplet_enable_ridi( void *io_pArgs )
+{
+
+    errlHndl_t l_err = NULL;
+    IStepError l_StepError;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_proc_chiplet_enable_ridi entry" );
+    //Call HWP
+    //FAPI_INVOKE_HWP(l_err,p9_chiplet_enable_ridi);
+    if(l_err)
+    {
+        l_StepError.addErrorDetails(l_err);
+        errlCommit(l_err, HWPF_COMP_ID);
+    }
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_proc_chiplet_enable_ridi");
+
+    return l_StepError.getErrorHandle();
+}
 
 };   // end namespace

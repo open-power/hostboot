@@ -30,36 +30,8 @@
 /**
  * @file    istep13list.H
  *
- *  IStep 13    Step 13 DRAM Training
- *  IPL FLow Doc        v1.37 (08/13/13)
- *
- *  13.1      host_disable_vddr
- *      : Disable VDDR on CanContinue loops
- *  13.2      mem_pll_initf
- *      : PLL Initfile for MBAs
- *  13.3      mem_pll_setup
- *      : Setup PLL for MBAs
- *  13.4      mem_startclocks
- *      : Start clocks on MBAs
- *  13.5      host_enable_vddr
- *      : Enable the VDDR3 Voltage Rail
- *  13.6      mss_scominit
- *      : Perform scom inits to MC and PHY
- *  13.7      mss_ddr_phy_reset
- *      : Soft reset of DDR PHY macros
- *  13.8      mss_draminit
- *      : Dram initialize
- *  13.9      mss_draminit_training
- *      : Dram training
- *  13.10     mss_draminit_trainadv
- *      : Advanced dram training
- *  13.11     mss_draminit_mc
- *      : Hand off control to MC
- *  13.12 mss_dimm_power_test
- *
- *  *****************************************************************
- *  THIS FILE WAS GENERATED ON 2012-02-27:2142
- *  *****************************************************************
+ *  IStep 13    Step 13
+ *  IPL FLow Doc        v0.60 (06/02/15)
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -85,11 +57,6 @@ const   TaskInfo    g_istep13[]  =   {
 
 const DepModInfo g_istep13Dependancies = {
     {
-#ifndef CONFIG_VPO_COMPILE
-        DEP_LIB(libdram_training.so),
-        DEP_LIB(libdram_initialization.so),
-        DEP_LIB(libmc_config.so),
-#endif
         NULL
     }
 };
