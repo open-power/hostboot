@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -99,7 +99,7 @@ void __assert(AssertBehavior i_assertb, int i_line);
 
 // Macro tricks to determine if there is a custom string.
 #define __ASSERT_HAS_TRACE_(_1, _2, ...) _2
-#define __ASSERT_HAS_TRACE(...) __ASSERT_HAS_TRACE_(0, ##__VA_ARGS__, 0)
+#define __ASSERT_HAS_TRACE(...) __ASSERT_HAS_TRACE_(0 , ##__VA_ARGS__, 0)
 
 /**
  * @brief Macro to do the custom trace if one is provided.
