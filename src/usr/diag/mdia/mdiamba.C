@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -200,7 +202,7 @@ TargetHandleList getMemTargetsForQueryOrClear(
 
         if( targetList.empty() )
         {
-            MDIA_FAST(FUNC"no connected centaur "
+            MDIA_FAST(FUNC "no connected centaur "
                     "for mba: %x", get_huid(i_mba));
             break;
         }
@@ -244,7 +246,7 @@ TargetHandleList getMemTargetsForQueryOrClear(
 
                     if(HWAS_CHANGED_BIT_MEMDIAG & hwChangeFlag)
                     {
-                        MDIA_FAST(FUNC"hwChangedState is not cleared "
+                        MDIA_FAST(FUNC "hwChangedState is not cleared "
                                   "for dimm: %x", get_huid(*target));
                         centaur = NULL; // don't add centaur and mcs
                         break;
@@ -275,7 +277,7 @@ TargetHandleList getMemTargetsForQueryOrClear(
 
     } while(0);
 
-    MDIA_DBG(FUNC"mba: %x, size: %d",
+    MDIA_DBG(FUNC "mba: %x, size: %d",
              get_huid(i_mba), o_list.size());
 
     return o_list;
