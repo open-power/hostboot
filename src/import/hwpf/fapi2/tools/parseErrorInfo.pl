@@ -1173,8 +1173,12 @@ foreach my $argnum (0 .. $#ARGV)
         else
         {
             # Void expression keeps the compiler from complaining about the unused arguments.
+            # We want to set the i_rc to the RC if we're empty. This otherwise gets done in _setHwpError()
             print ECFILE "    $class_name(fapi2::errlSeverity_t i_sev = fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE, fapi2::ReturnCode& i_rc = fapi2::current_err)\n";
-            print ECFILE "    {static_cast<void>(i_sev); static_cast<void>(i_rc);}\n\n";
+            print ECFILE "    {\n";
+            print ECFILE "        static_cast<void>(i_sev);\n";
+            print ECFILE "        i_rc = $err->{rc};\n";
+            print ECFILE "    }\n\n";
         }
 
         # Methods
@@ -1190,13 +1194,15 @@ foreach my $argnum (0 .. $#ARGV)
         if ($arg_empty_ffdc eq undef)
         {
             print ECFILE "    {\n";
-            print ECFILE "        FAPI_SET_HWP_ERROR(iv_rc, $err->{rc});\n" if ($arg_empty_ffdc eq undef);
-            print ECFILE "        fapi2::logError(iv_rc, (i_sev == fapi2::FAPI2_ERRL_SEV_UNDEFINED) ? iv_sev : i_sev);\n" if ($arg_empty_ffdc eq undef);
+            print ECFILE "        FAPI_SET_HWP_ERROR(iv_rc, $err->{rc});\n";
+            print ECFILE "        fapi2::logError(iv_rc, (i_sev == fapi2::FAPI2_ERRL_SEV_UNDEFINED) ? iv_sev : i_sev);\n";
             print ECFILE "    }\n\n";
         }
         else
         {
-            print ECFILE "    {static_cast<void>(i_sev);}\n\n";
+            print ECFILE "    {\n";
+            print ECFILE "        static_cast<void>(i_sev);\n";
+            print ECFILE "    }\n\n";
         }
 
         # Instance variables
