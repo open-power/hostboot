@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -97,7 +99,7 @@ extern uint64_t g_ModulesCompleted;
 #define _TS_CATCH_ABORT(b)
 
 // TS_TRACE
-#define  TS_TRACE(...)  TRACDCOMP( g_trac_test, "TS_TRACE> "__VA_ARGS__ );     \
+#define  TS_TRACE(...)  TRACDCOMP( g_trac_test, "TS_TRACE> " __VA_ARGS__ );     \
     CxxTest::doTrace( )
 
 
