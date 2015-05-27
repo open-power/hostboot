@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,9 +42,9 @@ extern trace_desc_t * slowTd;
 
 }
 
-#define ATTN_DBG( _fmt_, _args_...) TRACDCOMP( ATTN::fastTd, INFO_MRK""_fmt_, ##_args_)
-#define ATTN_FAST( _fmt_, _args_...) TRACFCOMP( ATTN::fastTd, INFO_MRK""_fmt_, ##_args_)
-#define ATTN_SLOW( _fmt_, _args_...) TRACFCOMP( ATTN::slowTd, INFO_MRK""_fmt_, ##_args_)
-#define ATTN_ERR( _fmt_, _args_...) TRACFCOMP( ATTN::slowTd, ERR_MRK""_fmt_, ##_args_)
+#define ATTN_DBG( _fmt_, _args_...) TRACDCOMP( ATTN::fastTd, INFO_MRK _fmt_, ##_args_)
+#define ATTN_FAST( _fmt_, _args_...) TRACFCOMP( ATTN::fastTd, INFO_MRK _fmt_, ##_args_)
+#define ATTN_SLOW( _fmt_, _args_...) TRACFCOMP( ATTN::slowTd, INFO_MRK _fmt_, ##_args_)
+#define ATTN_ERR( _fmt_, _args_...) TRACFCOMP( ATTN::slowTd, ERR_MRK _fmt_, ##_args_)
 
 #endif
