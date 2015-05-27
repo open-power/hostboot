@@ -1389,7 +1389,8 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
             // section count in the PH section and re-flatten it.
             // count is the PH, UH, PS, and the optionals.
             iv_Private.iv_sctns = 3 + l_sectionCount;
-            l_cb = iv_Private.flatten( pPHBuffer, l_sizeRemaining );
+            // use ph size, since this is overwriting flattened data
+            l_cb = iv_Private.flatten( pPHBuffer, iv_Private.flatSize() );
             if( 0 == l_cb )
             {
                 TRACFCOMP( g_trac_errl, ERR_MRK"ph.flatten error");
