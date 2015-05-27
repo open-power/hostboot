@@ -61,7 +61,7 @@ void MfgThreshold::setup()
         l_sysTarget = PlatServices::getSystemTarget();
         if(NULL == l_sysTarget)
         {
-            PRDF_ERR(PRDF_FUNC"No System target!");
+            PRDF_ERR(PRDF_FUNC "No System target!");
             break;
         }
 

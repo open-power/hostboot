@@ -55,7 +55,7 @@ void sendPageGardRequest( uint64_t i_systemAddress )
     {
         if( !g_hostInterfaces || !g_hostInterfaces->memory_error )
         {
-            PRDF_ERR(PRDF_FUNC" memory_error() interface is not defined");
+            PRDF_ERR(PRDF_FUNC " memory_error() interface is not defined");
             break;
         }
 
@@ -64,7 +64,7 @@ void sendPageGardRequest( uint64_t i_systemAddress )
                                                       MEMORY_ERROR_CE );
         if( SUCCESS != rc )
         {
-            PRDF_ERR(PRDF_FUNC" memory_error() failed");
+            PRDF_ERR(PRDF_FUNC " memory_error() failed");
             break;
         }
     }while(0);
@@ -88,7 +88,7 @@ void sendDynMemDeallocRequest( uint64_t i_startAddr, uint64_t i_endAddr )
     {
         if( !g_hostInterfaces || !g_hostInterfaces->memory_error )
         {
-            PRDF_ERR(PRDF_FUNC" memory_error() interface is not defined");
+            PRDF_ERR(PRDF_FUNC " memory_error() interface is not defined");
             break;
         }
 
@@ -97,7 +97,7 @@ void sendDynMemDeallocRequest( uint64_t i_startAddr, uint64_t i_endAddr )
                                                      MEMORY_ERROR_UE );
         if( SUCCESS != rc )
         {
-            PRDF_ERR(PRDF_FUNC" memory_error() failed");
+            PRDF_ERR(PRDF_FUNC " memory_error() failed");
             break;
         }
     }while(0);

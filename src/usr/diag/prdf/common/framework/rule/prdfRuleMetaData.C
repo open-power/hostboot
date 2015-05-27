@@ -1086,7 +1086,7 @@ ExtensibleChipFunction *RuleMetaData::getExtensibleFunction(
             // stage during system Initialize and this scenario should fail
             // basic validation.
             // So aborting system at this point.
-            PRDF_ERR( PRDF_FUNC"NULL Function for plugin:%s chip %s",
+            PRDF_ERR( PRDF_FUNC "NULL Function for plugin:%s chip %s",
                       i_func, cv_fileName );
 
             PRDF_ASSERT( NULL != plugin );

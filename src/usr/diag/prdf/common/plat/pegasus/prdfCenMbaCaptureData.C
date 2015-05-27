@@ -66,13 +66,13 @@ void addMemChipletFirRegs( ExtensibleChip * i_membChip, CaptureData & io_cd )
     {
         if ( NULL == i_membChip )
         {
-            PRDF_ERR( PRDF_FUNC"Given target is NULL" );
+            PRDF_ERR( PRDF_FUNC "Given target is NULL" );
             break;
         }
 
         if ( TYPE_MEMBUF != getTargetType(i_membChip->GetChipHandle()) )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid target type: i_membChip=0x%08x",
+            PRDF_ERR( PRDF_FUNC "Invalid target type: i_membChip=0x%08x",
                       i_membChip->GetId() );
             break;
         }
@@ -84,7 +84,7 @@ void addMemChipletFirRegs( ExtensibleChip * i_membChip, CaptureData & io_cd )
         l_rc  = cs_global->Read() | re_global->Read() | spa_global->Read();
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Failed to read a GLOBAL register on "
+            PRDF_ERR( PRDF_FUNC "Failed to read a GLOBAL register on "
                       "0x%08x", i_membChip->GetId() );
             break;
         }
@@ -107,7 +107,7 @@ void addMemChipletFirRegs( ExtensibleChip * i_membChip, CaptureData & io_cd )
             ExtensibleChip * mbaChip = membdb->getMbaChip(i);
             if ( NULL == mbaChip )
             {
-                PRDF_ERR( PRDF_FUNC"MEM_CHIPLET registers indicated an "
+                PRDF_ERR( PRDF_FUNC "MEM_CHIPLET registers indicated an "
                           "attention but no chip found: i_membChip=0x%08x "
                           "i=%d", i_membChip->GetId(), i );
                 continue;
@@ -181,12 +181,12 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_mbaTrgt,
         rc = getMasterRanks( i_mbaTrgt, masterRanks );
         if ( SUCCESS != rc )
         {
-            PRDF_ERR( PRDF_FUNC"getMasterRanks() failed" );
+            PRDF_ERR( PRDF_FUNC "getMasterRanks() failed" );
             break;
         }
         if( masterRanks.empty() )
         {
-            PRDF_ERR( PRDF_FUNC"Master Rank list size is 0");
+            PRDF_ERR( PRDF_FUNC "Master Rank list size is 0");
             break;;
         }
         uint8_t spareConfig = ENUM_ATTR_VPD_DIMM_SPARE_NO_SPARE;
@@ -195,7 +195,7 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_mbaTrgt,
         rc = getDimmSpareConfig( i_mbaTrgt, masterRanks[0], 0, spareConfig );
         if( SUCCESS != rc )
         {
-            PRDF_ERR( PRDF_FUNC"getDimmSpareConfig() failed" );
+            PRDF_ERR( PRDF_FUNC "getDimmSpareConfig() failed" );
             break;
         }
 
@@ -211,7 +211,7 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_mbaTrgt,
             rc = mssGetMarkStore( i_mbaTrgt, *it, mark );
             if ( SUCCESS != rc )
             {
-                PRDF_ERR( PRDF_FUNC"mssGetMarkStore() Failed");
+                PRDF_ERR( PRDF_FUNC "mssGetMarkStore() Failed");
                 continue;
             }
 
@@ -220,7 +220,7 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_mbaTrgt,
             rc = mssGetSteerMux( i_mbaTrgt, *it, sp0, sp1, ecc );
             if ( SUCCESS != rc )
             {
-                PRDF_ERR( PRDF_FUNC"mssGetSteerMux() failed");
+                PRDF_ERR( PRDF_FUNC "mssGetSteerMux() failed");
                 continue;
             }
 
@@ -272,7 +272,7 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_mbaTrgt,
     }while(0);
 
     if( FAIL == rc )
-        PRDF_ERR( PRDF_FUNC"Failed for MBA 0x%08X", getHuid( i_mbaTrgt ) );
+        PRDF_ERR( PRDF_FUNC "Failed for MBA 0x%08X", getHuid( i_mbaTrgt ) );
 
     #undef PRDF_FUNC
 }
@@ -295,13 +295,13 @@ void captureDramRepairsVpd( TargetHandle_t i_mbaTrgt, CaptureData & io_cd )
         rc = getMasterRanks( i_mbaTrgt, masterRanks );
         if ( SUCCESS != rc )
         {
-            PRDF_ERR( PRDF_FUNC"getMasterRanks() failed" );
+            PRDF_ERR( PRDF_FUNC "getMasterRanks() failed" );
             break;
         }
 
         if( masterRanks.empty() )
         {
-            PRDF_ERR( PRDF_FUNC"Master Rank list size is 0");
+            PRDF_ERR( PRDF_FUNC "Master Rank list size is 0");
             break;
         }
 
@@ -325,7 +325,7 @@ void captureDramRepairsVpd( TargetHandle_t i_mbaTrgt, CaptureData & io_cd )
 
             if ( SUCCESS != getBadDqBitmap(i_mbaTrgt, *it, bitmap, true) )
             {
-                PRDF_ERR( PRDF_FUNC"getBadDqBitmap() failed: MBA=0x%08x"
+                PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed: MBA=0x%08x"
                           " rank=%d", getHuid(i_mbaTrgt), rank );
                 continue; // skip this rank
             }
@@ -354,7 +354,7 @@ void captureDramRepairsVpd( TargetHandle_t i_mbaTrgt, CaptureData & io_cd )
     }while(0);
 
     if( FAIL == rc )
-        PRDF_ERR( PRDF_FUNC"Failed for MBA 0x%08X", getHuid( i_mbaTrgt ) );
+        PRDF_ERR( PRDF_FUNC "Failed for MBA 0x%08X", getHuid( i_mbaTrgt ) );
 
     #undef PRDF_FUNC
 }

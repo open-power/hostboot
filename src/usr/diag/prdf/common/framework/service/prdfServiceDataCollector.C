@@ -212,7 +212,7 @@ void ServiceDataCollector::AddSignatureList( TargetHandle_t i_target,
     {
         if ( NULL == i_target )
         {
-            PRDF_ERR( PRDF_FUNC"Given target is NULL" );
+            PRDF_ERR( PRDF_FUNC "Given target is NULL" );
             break;
         }
 
@@ -252,7 +252,7 @@ void ServiceDataCollector::AddSignatureList( ErrorSignature & i_sig )
      }
      else
      {
-        PRDF_ERR( PRDF_FUNC"Failed to get target Handle for "
+        PRDF_ERR( PRDF_FUNC "Failed to get target Handle for "
                           "chip:0x%08X", i_sig.getChipId() );
      }
     #undef PRDF_FUNC

@@ -101,7 +101,7 @@ int32_t CenMbaIplCeStats::collectStats( const CenRank & i_stopRank )
         o_rc = MemUtils::collectCeStats( iv_mbaChip, i_stopRank, symData, junk);
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"MemUtils::collectCeStats() failed. MBA:0X%08X",
+            PRDF_ERR( PRDF_FUNC "MemUtils::collectCeStats() failed. MBA:0X%08X",
                       getHuid( iv_mbaChip->GetChipHandle() ) );
             break;
         }
@@ -171,7 +171,7 @@ int32_t CenMbaIplCeStats::analyzeStats( bool & o_callOutsMade )
         o_rc = calloutCePerDram( o_callOutsMade );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC" calloutCePerDram() failed. MBA:0X%08X",
+            PRDF_ERR( PRDF_FUNC " calloutCePerDram() failed. MBA:0X%08X",
                       getHuid( mbaTrgt ) );
             break;
         }
@@ -179,7 +179,7 @@ int32_t CenMbaIplCeStats::analyzeStats( bool & o_callOutsMade )
         o_rc = calloutCePerRank( o_callOutsMade );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"calloutCePerRank() failed. MBA:0X%08X",
+            PRDF_ERR( PRDF_FUNC "calloutCePerRank() failed. MBA:0X%08X",
                       getHuid( mbaTrgt ) );
             break;
         }
@@ -187,7 +187,7 @@ int32_t CenMbaIplCeStats::analyzeStats( bool & o_callOutsMade )
         o_rc = calloutCePerDs( o_callOutsMade );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC" calloutCePerDs() failed. MBA:0X%08X",
+            PRDF_ERR( PRDF_FUNC " calloutCePerDs() failed. MBA:0X%08X",
                       getHuid( mbaTrgt ) );
             break;
         }
@@ -211,7 +211,7 @@ int32_t CenMbaIplCeStats::calloutHardCes( const CenRank & i_stopRank )
         o_rc = MemUtils::collectCeStats( iv_mbaChip, i_stopRank, symData, junk);
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"MemUtils::collectCeStats() failed. MBA:0X%08X",
+            PRDF_ERR( PRDF_FUNC "MemUtils::collectCeStats() failed. MBA:0X%08X",
                       getHuid( iv_mbaChip->GetChipHandle() ) );
             break;
         }

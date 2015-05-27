@@ -149,7 +149,7 @@ errlHndl_t readPnorData( uint8_t * & o_pBuf, size_t & o_pBufSize )
     errlHndl_t errl = PNOR::getSectionInfo( PNOR::FIRDATA, info );
     if ( NULL != errl )
     {
-        PRDF_ERR( FUNC"getSectionInfo() failed" );
+        PRDF_ERR( FUNC "getSectionInfo() failed" );
     }
     else
     {
@@ -183,7 +183,7 @@ errlHndl_t readPnorFirData( bool & o_validData, PnorTrgtMap & o_trgtMap,
         errl = readPnorData( pBuf, sz_pBuf );
         if ( NULL != errl )
         {
-            PRDF_ERR( FUNC"readPnorData() failed" );
+            PRDF_ERR( FUNC "readPnorData() failed" );
             break;
         }
 
@@ -214,7 +214,7 @@ errlHndl_t readPnorFirData( bool & o_validData, PnorTrgtMap & o_trgtMap,
             TargetHandle_t trgtHndl = getTargetHandle( pTrgt );
             if ( NULL == trgtHndl )
             {
-                PRDF_ERR( FUNC"getTargetHandle() failed" );
+                PRDF_ERR( FUNC "getTargetHandle() failed" );
 
                 /*@
                  * @errortype
@@ -268,7 +268,7 @@ errlHndl_t readPnorFirData( bool & o_validData, PnorTrgtMap & o_trgtMap,
 
     if ( full )
     {
-        PRDF_ERR( FUNC"Needed more data than availabe in PNOR (%d bytes)",
+        PRDF_ERR( FUNC "Needed more data than availabe in PNOR (%d bytes)",
                   sz_pBuf );
         /*@
          * @errortype

@@ -79,13 +79,13 @@ class PrdfTest_MfgSync: public CxxTest::TestSuite
         l_err = getSimMfgSync().syncMfgTraceToFsp(&l_errSig, l_pfaData);
         if (l_err)
         {
-            PRDF_ERR(PRDF_FUNC" MfgTraceSync test1 failed to sync to FSP");
+            PRDF_ERR(PRDF_FUNC " MfgTraceSync test1 failed to sync to FSP");
             PRDF_COMMIT_ERRL(l_err, ERRL_ACTION_REPORT);
-            TS_FAIL(PRDF_FUNC" MfgTraceSync test1 failed to sync to FSP");
+            TS_FAIL(PRDF_FUNC " MfgTraceSync test1 failed to sync to FSP");
         }
         else
         {
-            PRDF_TRAC(PRDF_FUNC" MfgTraceSync test1 is a success.");
+            PRDF_TRAC(PRDF_FUNC " MfgTraceSync test1 is a success.");
         }
 
         getSimMfgSync().setMailBoxStatus(true);
@@ -94,13 +94,13 @@ class PrdfTest_MfgSync: public CxxTest::TestSuite
         l_err = getSimMfgSync().syncMfgTraceToFsp(&l_errSig, l_pfaData);
         if (l_err)
         {
-            PRDF_ERR(PRDF_FUNC" MfgTraceSync test2 failed to sync to FSP");
+            PRDF_ERR(PRDF_FUNC " MfgTraceSync test2 failed to sync to FSP");
             PRDF_COMMIT_ERRL(l_err, ERRL_ACTION_REPORT);
-            TS_FAIL(PRDF_FUNC" MfgTraceSync test2 failed to sync to FSP");
+            TS_FAIL(PRDF_FUNC " MfgTraceSync test2 failed to sync to FSP");
         }
         else
         {
-            PRDF_TRAC(PRDF_FUNC" MfgTraceSync test2 is a success.");
+            PRDF_TRAC(PRDF_FUNC " MfgTraceSync test2 is a success.");
         }
 
         // Test 3: Test with mailbox status enabled and max MRU List count
@@ -115,13 +115,13 @@ class PrdfTest_MfgSync: public CxxTest::TestSuite
         l_err = getSimMfgSync().syncMfgTraceToFsp(&l_errSig, l_pfaData);
         if (l_err)
         {
-            PRDF_TRAC(PRDF_FUNC" MfgTraceSync test3 failed to sync to FSP.");
+            PRDF_TRAC(PRDF_FUNC " MfgTraceSync test3 failed to sync to FSP.");
             PRDF_COMMIT_ERRL(l_err, ERRL_ACTION_REPORT);
-            TS_FAIL(PRDF_FUNC" MfgTraceSync test3 failed to sync to FSP");
+            TS_FAIL(PRDF_FUNC " MfgTraceSync test3 failed to sync to FSP");
         }
         else
         {
-            PRDF_TRAC(PRDF_FUNC" MfgTraceSync test3 is a success.");
+            PRDF_TRAC(PRDF_FUNC " MfgTraceSync test3 is a success.");
         }
 
         // Test 4: Test with mailbox status enabled and zero MRU List count
@@ -129,13 +129,13 @@ class PrdfTest_MfgSync: public CxxTest::TestSuite
         l_err = getSimMfgSync().syncMfgTraceToFsp(&l_errSig, l_pfaData);
         if (l_err)
         {
-            PRDF_TRAC(PRDF_FUNC" MfgTraceSync test4 failed to sync to FSP.");
+            PRDF_TRAC(PRDF_FUNC " MfgTraceSync test4 failed to sync to FSP.");
             PRDF_COMMIT_ERRL(l_err, ERRL_ACTION_REPORT);
-            TS_FAIL(PRDF_FUNC" MfgTraceSync test4 failed to sync to FSP");
+            TS_FAIL(PRDF_FUNC " MfgTraceSync test4 failed to sync to FSP");
         }
         else
         {
-            PRDF_TRAC(PRDF_FUNC" MfgTraceSync test4 is a success.");
+            PRDF_TRAC(PRDF_FUNC " MfgTraceSync test4 is a success.");
         }
 
         getSimMfgSync().setMailBoxStatus(false);

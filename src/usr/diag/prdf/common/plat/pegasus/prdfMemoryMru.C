@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2008,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -62,7 +64,7 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
 
         if ( NULL == system )
         {
-            PRDF_ERR( PRDF_FUNC"Could not find system target" );
+            PRDF_ERR( PRDF_FUNC "Could not find system target" );
             break;
         }
 
@@ -70,7 +72,7 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
                                                  iv_memMruMeld.s.nodePos );
         if ( NULL == node )
         {
-            PRDF_ERR( PRDF_FUNC"Could not find functional node attached to "
+            PRDF_ERR( PRDF_FUNC "Could not find functional node attached to "
                       "system at pos: %u", iv_memMruMeld.s.nodePos );
             break;
         }
@@ -79,7 +81,7 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
                                                  iv_memMruMeld.s.procPos );
         if ( NULL == proc )
         {
-            PRDF_ERR( PRDF_FUNC"Could not find functional  proc attached to "
+            PRDF_ERR( PRDF_FUNC "Could not find functional  proc attached to "
                       "node 0x%08X at pos: %u", getHuid( node ),
                        iv_memMruMeld.s.procPos );
             break;
@@ -89,7 +91,7 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
                                                    iv_memMruMeld.s.cenPos );
         if ( NULL == membuff )
         {
-            PRDF_ERR( PRDF_FUNC"Could not find functional  membuff attached to "
+            PRDF_ERR( PRDF_FUNC "Could not find functional  membuff attached to "
                       "proc 0x%08X at pos: %u", getHuid( proc ),
                        iv_memMruMeld.s.cenPos );
             break;
@@ -99,7 +101,7 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
                                           iv_memMruMeld.s.mbaPos );
         if ( NULL == iv_mbaTarget )
         {
-            PRDF_ERR( PRDF_FUNC"Could not find functional MBA attached to "
+            PRDF_ERR( PRDF_FUNC "Could not find functional MBA attached to "
                       "membuff 0x%08X at pos: %u", getHuid( membuff ),
                        iv_memMruMeld.s.mbaPos );
             break;
@@ -121,7 +123,7 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
         {
             if ( SYMBOLS_PER_RANK <= iv_memMruMeld.s.symbol )
             {
-                PRDF_ERR( PRDF_FUNC"Invalid symbol value :%u",
+                PRDF_ERR( PRDF_FUNC "Invalid symbol value :%u",
                                     iv_memMruMeld.s.symbol );
                 break;
             }
@@ -131,7 +133,7 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
                                                iv_memMruMeld.s.pins );
             if ( !iv_symbol.isValid() )
             {
-                PRDF_ERR( PRDF_FUNC"fromSymbol() failed" );
+                PRDF_ERR( PRDF_FUNC "fromSymbol() failed" );
                 break;
             }
 
@@ -143,7 +145,7 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
 
             if ( type != CEN_SYMBOL::WiringType (iv_memMruMeld.s.wiringType))
             {
-                PRDF_ERR( PRDF_FUNC"Wiring Type does not match type:%u "
+                PRDF_ERR( PRDF_FUNC "Wiring Type does not match type:%u "
                                     "iv_memMruMeld.s.wiringType :%u",
                                     type, iv_memMruMeld.s.wiringType);
                 break;
@@ -175,7 +177,7 @@ MemoryMru::MemoryMru( TARGETING::TargetHandle_t i_mbaTarget,
         TargetHandle_t node = getConnectedParent( iv_mbaTarget, TYPE_NODE );
         if ( NULL == node )
         {
-            PRDF_ERR( PRDF_FUNC"Could not find node attached to MBA 0x%08x",
+            PRDF_ERR( PRDF_FUNC "Could not find node attached to MBA 0x%08x",
                       getHuid(iv_mbaTarget) );
             break;
         }
@@ -183,7 +185,7 @@ MemoryMru::MemoryMru( TARGETING::TargetHandle_t i_mbaTarget,
         TargetHandle_t proc = getConnectedParent( iv_mbaTarget, TYPE_PROC );
         if ( NULL == proc )
         {
-            PRDF_ERR( PRDF_FUNC"Could not find proc attached to MBA 0x%08x",
+            PRDF_ERR( PRDF_FUNC "Could not find proc attached to MBA 0x%08x",
                       getHuid(iv_mbaTarget) );
             break;
         }
@@ -192,7 +194,7 @@ MemoryMru::MemoryMru( TARGETING::TargetHandle_t i_mbaTarget,
                                                      TYPE_MEMBUF );
         if ( NULL == memBuff )
         {
-            PRDF_ERR( PRDF_FUNC"Could not find memBuff attached to MBA 0x%08x",
+            PRDF_ERR( PRDF_FUNC "Could not find memBuff attached to MBA 0x%08x",
                       getHuid(iv_mbaTarget) );
             break;
         }
@@ -233,7 +235,7 @@ MemoryMru::MemoryMru( TARGETING::TargetHandle_t i_mbaTarget,
         TargetHandle_t node = getConnectedParent( iv_mbaTarget, TYPE_NODE );
         if ( NULL == node )
         {
-            PRDF_ERR( PRDF_FUNC"Could not find node attached to MBA 0x%08x",
+            PRDF_ERR( PRDF_FUNC "Could not find node attached to MBA 0x%08x",
                       getHuid(iv_mbaTarget) );
             break;
         }
@@ -241,7 +243,7 @@ MemoryMru::MemoryMru( TARGETING::TargetHandle_t i_mbaTarget,
         TargetHandle_t proc = getConnectedParent( iv_mbaTarget, TYPE_PROC );
         if ( NULL == proc )
         {
-            PRDF_ERR( PRDF_FUNC"Could not find proc attached to MBA 0x%08x",
+            PRDF_ERR( PRDF_FUNC "Could not find proc attached to MBA 0x%08x",
                       getHuid(iv_mbaTarget) );
             break;
         }
@@ -250,7 +252,7 @@ MemoryMru::MemoryMru( TARGETING::TargetHandle_t i_mbaTarget,
                                                      TYPE_MEMBUF );
         if ( NULL == memBuff )
         {
-            PRDF_ERR( PRDF_FUNC"Could not find memBuff attached to MBA 0x%08x",
+            PRDF_ERR( PRDF_FUNC "Could not find memBuff attached to MBA 0x%08x",
                       getHuid(iv_mbaTarget) );
             break;
         }
@@ -282,7 +284,7 @@ TargetHandleList MemoryMru::getCalloutList() const
 
     if ( 0 == iv_memMruMeld.s.valid )
     {
-        PRDF_ERR( PRDF_FUNC"MemoryMru 0x%08x not valid.", iv_memMruMeld.u );
+        PRDF_ERR( PRDF_FUNC "MemoryMru 0x%08x not valid.", iv_memMruMeld.u );
     }
     else
     {
@@ -303,7 +305,7 @@ TargetHandleList MemoryMru::getCalloutList() const
                     o_list = CalloutUtil::getConnectedDimms( iv_mbaTarget );
                     break;
                 default:
-                    PRDF_ERR( PRDF_FUNC"MemoryMruData::Callout 0x%02x not "
+                    PRDF_ERR( PRDF_FUNC "MemoryMruData::Callout 0x%02x not "
                               "supported", iv_special );
             }
         }

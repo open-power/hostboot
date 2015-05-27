@@ -92,7 +92,7 @@ void GetProcPllErrRegList(ExtensibleChip * i_chip,
         TargetHandleList::iterator itr = exList.begin();
         for( ; itr != exList.end(); ++itr)
         {
-            PRDF_DTRAC(PRDF_FUNC"EX: 0x%.8X", getHuid(*itr));
+            PRDF_DTRAC(PRDF_FUNC "EX: 0x%.8X", getHuid(*itr));
             exChip = (ExtensibleChip *)systemPtr->GetChip( *itr );
             if( NULL == exChip ) continue;
 
@@ -142,7 +142,7 @@ int32_t QueryProcPll( ExtensibleChip * i_chip,
             rc = (*itr).errReg->Read();
             if (rc != SUCCESS)
             {
-                PRDF_ERR(PRDF_FUNC"ERROR_REG read failed"
+                PRDF_ERR(PRDF_FUNC "ERROR_REG read failed"
                          "for chip: 0x%08x, type: 0x%08x",
                          (*itr).chip->GetId(), (*itr).type);
                 break;
@@ -151,7 +151,7 @@ int32_t QueryProcPll( ExtensibleChip * i_chip,
             rc = (*itr).configReg->Read();
             if (rc != SUCCESS)
             {
-                PRDF_ERR(PRDF_FUNC"CONFIG_REG read failed"
+                PRDF_ERR(PRDF_FUNC "CONFIG_REG read failed"
                          "for chip: 0x%08x, type: 0x%08x",
                          (*itr).chip->GetId(), (*itr).type);
                 break;
@@ -187,7 +187,7 @@ int32_t QueryProcPll( ExtensibleChip * i_chip,
 
     if( rc != SUCCESS )
     {
-        PRDF_ERR(PRDF_FUNC"failed for proc: 0x%.8X",
+        PRDF_ERR(PRDF_FUNC "failed for proc: 0x%.8X",
                  i_chip->GetId());
     }
 
@@ -222,7 +222,7 @@ int32_t QueryPll( ExtensibleChip * i_chip,
         rc = TP_LFIR->Read();
         if (rc != SUCCESS)
         {
-            PRDF_ERR(PRDF_FUNC"TP_LFIR read failed"
+            PRDF_ERR(PRDF_FUNC "TP_LFIR read failed"
                      "for 0x%08x", i_chip->GetId());
             break;
         }
@@ -230,7 +230,7 @@ int32_t QueryPll( ExtensibleChip * i_chip,
         rc = TP_LFIRmask->Read();
         if (rc != SUCCESS)
         {
-            PRDF_ERR(PRDF_FUNC"TP_LFIR_MASK read failed"
+            PRDF_ERR(PRDF_FUNC "TP_LFIR_MASK read failed"
                      "for 0x%08x", i_chip->GetId());
             break;
         }
@@ -249,7 +249,7 @@ int32_t QueryPll( ExtensibleChip * i_chip,
 
     if( rc != SUCCESS )
     {
-        PRDF_ERR(PRDF_FUNC"failed for proc: 0x%.8X",
+        PRDF_ERR(PRDF_FUNC "failed for proc: 0x%.8X",
                  i_chip->GetId());
     }
 
@@ -297,7 +297,7 @@ int32_t ClearPll( ExtensibleChip * i_chip,
             tmpRC = (*itr).errReg->Write();
             if (tmpRC != SUCCESS)
             {
-                PRDF_ERR(PRDF_FUNC"ERROR_REG write failed"
+                PRDF_ERR(PRDF_FUNC "ERROR_REG write failed"
                          "for chip: 0x%08x, type: 0x%08x",
                          (*itr).chip->GetId(), (*itr).type);
                 rc |= tmpRC;
@@ -312,7 +312,7 @@ int32_t ClearPll( ExtensibleChip * i_chip,
         tmpRC = TP_LFIRand->Write();
         if (tmpRC != SUCCESS)
         {
-            PRDF_ERR(PRDF_FUNC"TP_LFIR_AND write failed"
+            PRDF_ERR(PRDF_FUNC "TP_LFIR_AND write failed"
                      "for chip: 0x%08x", i_chip->GetId());
             rc |= tmpRC;
         }
@@ -325,7 +325,7 @@ int32_t ClearPll( ExtensibleChip * i_chip,
 
     if( rc != SUCCESS )
     {
-        PRDF_ERR(PRDF_FUNC"failed for proc: 0x%.8X",
+        PRDF_ERR(PRDF_FUNC "failed for proc: 0x%.8X",
                  i_chip->GetId());
     }
 
@@ -376,7 +376,7 @@ int32_t MaskPll( ExtensibleChip * i_chip,
             tmpRC = (*itr).configReg->Write();
             if (tmpRC != SUCCESS)
             {
-                PRDF_ERR(PRDF_FUNC"CONFIG_REG write failed"
+                PRDF_ERR(PRDF_FUNC "CONFIG_REG write failed"
                          "for chip: 0x%08x, type: 0x%08x",
                          (*itr).chip->GetId(), (*itr).type);
                 rc |= tmpRC;
@@ -396,7 +396,7 @@ int32_t MaskPll( ExtensibleChip * i_chip,
 
     if( rc != SUCCESS )
     {
-        PRDF_ERR(PRDF_FUNC"failed for proc: 0x%.8X",
+        PRDF_ERR(PRDF_FUNC "failed for proc: 0x%.8X",
                     i_chip->GetId());
     }
 
@@ -498,7 +498,7 @@ int32_t CheckParityErr( ExtensibleChip * i_chip,
         rc = pciErrReg->Read();
         if (rc != SUCCESS)
         {
-            PRDF_ERR(PRDF_FUNC"PCI_ERROR_REG read failed"
+            PRDF_ERR(PRDF_FUNC "PCI_ERROR_REG read failed"
                      "for 0x%08x", i_chip->GetId());
             break;
         }
@@ -506,7 +506,7 @@ int32_t CheckParityErr( ExtensibleChip * i_chip,
         rc = pciConfigReg->Read();
         if (rc != SUCCESS)
         {
-            PRDF_ERR(PRDF_FUNC"PCI_CONFIG_REG read failed"
+            PRDF_ERR(PRDF_FUNC "PCI_CONFIG_REG read failed"
                      "for 0x%08x", i_chip->GetId());
             break;
         }
@@ -530,7 +530,7 @@ int32_t CheckParityErr( ExtensibleChip * i_chip,
             rc = (*itr).errReg->Read();
             if (rc != SUCCESS)
             {
-                PRDF_ERR(PRDF_FUNC"ERROR_REG read failed"
+                PRDF_ERR(PRDF_FUNC "ERROR_REG read failed"
                          "for chip: 0x%08x, type: 0x%08x",
                          (*itr).chip->GetId(), (*itr).type);
                 break;
@@ -539,7 +539,7 @@ int32_t CheckParityErr( ExtensibleChip * i_chip,
             rc = (*itr).configReg->Read();
             if (rc != SUCCESS)
             {
-                PRDF_ERR(PRDF_FUNC"CONFIG_REG read failed"
+                PRDF_ERR(PRDF_FUNC "CONFIG_REG read failed"
                          "for chip: 0x%08x, type: 0x%08x",
                          (*itr).chip->GetId(), (*itr).type);
                 break;
@@ -557,13 +557,13 @@ int32_t CheckParityErr( ExtensibleChip * i_chip,
 
     if( ! o_parityErr )
     {
-        PRDF_ERR(PRDF_FUNC"no parity error found for proc: 0x%.8X",
+        PRDF_ERR(PRDF_FUNC "no parity error found for proc: 0x%.8X",
                  i_chip->GetId());
     }
 
     if( rc != SUCCESS )
     {
-        PRDF_ERR(PRDF_FUNC"failed for proc: 0x%.8X", i_chip->GetId());
+        PRDF_ERR(PRDF_FUNC "failed for proc: 0x%.8X", i_chip->GetId());
     }
 
     return rc;
@@ -614,7 +614,7 @@ int32_t MaskParityErr( ExtensibleChip * i_chip,
                 tmpRC = (*itr).configReg->Write();
                 if (tmpRC != SUCCESS)
                 {
-                    PRDF_ERR(PRDF_FUNC"CONFIG_REG write failed"
+                    PRDF_ERR(PRDF_FUNC "CONFIG_REG write failed"
                              "for chip: 0x%08x, type: 0x%08x",
                              (*itr).chip->GetId(), (*itr).type);
                     rc |= tmpRC;
@@ -635,7 +635,7 @@ int32_t MaskParityErr( ExtensibleChip * i_chip,
             tmpRC = pciConfigReg->Write();
             if (tmpRC != SUCCESS)
             {
-                PRDF_ERR(PRDF_FUNC"PCI_CONFIG_REG write failed"
+                PRDF_ERR(PRDF_FUNC "PCI_CONFIG_REG write failed"
                          "for 0x%08x", i_chip->GetId());
                 rc |= tmpRC;
             }
@@ -649,7 +649,7 @@ int32_t MaskParityErr( ExtensibleChip * i_chip,
 
     if( rc != SUCCESS )
     {
-        PRDF_ERR(PRDF_FUNC"failed for proc: 0x%.8X",
+        PRDF_ERR(PRDF_FUNC "failed for proc: 0x%.8X",
                  i_chip->GetId());
     }
 
@@ -692,7 +692,7 @@ int32_t ClearParityErr( ExtensibleChip * i_chip,
             tmpRC = (*itr).errReg->Write();
             if (tmpRC != SUCCESS)
             {
-                PRDF_ERR(PRDF_FUNC"ERROR_REG write failed"
+                PRDF_ERR(PRDF_FUNC "ERROR_REG write failed"
                          "for chip: 0x%08x, type: 0x%08x",
                          (*itr).chip->GetId(), (*itr).type);
                 rc |= tmpRC;
@@ -706,7 +706,7 @@ int32_t ClearParityErr( ExtensibleChip * i_chip,
         tmpRC = pciErrReg->Write();
         if (tmpRC != SUCCESS)
         {
-            PRDF_ERR(PRDF_FUNC"PCI_ERROR_REG write failed"
+            PRDF_ERR(PRDF_FUNC "PCI_ERROR_REG write failed"
                      "for 0x%08x", i_chip->GetId());
             rc |= tmpRC;
         }
@@ -720,7 +720,7 @@ int32_t ClearParityErr( ExtensibleChip * i_chip,
         tmpRC = TP_LFIR_and->Write();
         if (tmpRC != SUCCESS)
         {
-            PRDF_ERR(PRDF_FUNC"TP_LFIR_AND write failed"
+            PRDF_ERR(PRDF_FUNC "TP_LFIR_AND write failed"
                      "for 0x%08x", i_chip->GetId());
             rc |= tmpRC;
         }
@@ -728,7 +728,7 @@ int32_t ClearParityErr( ExtensibleChip * i_chip,
 
     if( rc != SUCCESS )
     {
-        PRDF_ERR(PRDF_FUNC"failed for proc: 0x%.8X",
+        PRDF_ERR(PRDF_FUNC "failed for proc: 0x%.8X",
                  i_chip->GetId());
     }
 
@@ -777,7 +777,7 @@ int32_t AnalyzeParityErr( ExtensibleChip * i_chip,
 
     if( rc != SUCCESS )
     {
-        PRDF_ERR(PRDF_FUNC"failed for proc: 0x%.8X", i_chip->GetId());
+        PRDF_ERR(PRDF_FUNC "failed for proc: 0x%.8X", i_chip->GetId());
     }
 
     return rc;

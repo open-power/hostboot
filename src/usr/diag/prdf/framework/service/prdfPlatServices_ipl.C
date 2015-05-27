@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -83,7 +83,7 @@ int32_t mdiaSendEventMsg( TargetHandle_t i_mbaTarget,
         TYPE l_type = getTargetType(i_mbaTarget);
         if ( TYPE_MBA != l_type )
         {
-            PRDF_ERR( PRDF_FUNC"unsupported target type %d", l_type );
+            PRDF_ERR( PRDF_FUNC "unsupported target type %d", l_type );
             o_rc = FAIL;
             break;
         }
@@ -97,7 +97,7 @@ int32_t mdiaSendEventMsg( TargetHandle_t i_mbaTarget,
         errlHndl_t errl = MDIA::processEvent( l_mdiaEvent );
         if ( NULL != errl )
         {
-            PRDF_ERR( PRDF_FUNC"MDIA::processEvent() failed" );
+            PRDF_ERR( PRDF_FUNC "MDIA::processEvent() failed" );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
             o_rc = FAIL;
             break;
@@ -107,7 +107,7 @@ int32_t mdiaSendEventMsg( TargetHandle_t i_mbaTarget,
 
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Failed: i_target=0x%08x i_eventType=%d",
+        PRDF_ERR( PRDF_FUNC "Failed: i_target=0x%08x i_eventType=%d",
                   getHuid(i_mbaTarget), i_eventType );
     }
 
@@ -160,7 +160,7 @@ int32_t mssIplUeIsolation( TargetHandle_t i_mba, const CenRank & i_rank,
                       i_rank.getMaster(), data );
     if ( NULL != errl )
     {
-        PRDF_ERR( PRDF_FUNC"mss_IPL_UE_isolation() failed: MBA=0x%08x "
+        PRDF_ERR( PRDF_FUNC "mss_IPL_UE_isolation() failed: MBA=0x%08x "
                   "rank=%d", getHuid(i_mba), i_rank.getMaster() );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;

@@ -77,7 +77,7 @@ errlHndl_t MfgSync::syncMfgTraceToFsp( ErrorSignature *i_esig,
 
         if( NULL != l_err )
         {
-            PRDF_ERR( PRDF_FUNC" failed to send mbox msg" );
+            PRDF_ERR( PRDF_FUNC " failed to send mbox msg" );
             break;
         }
     }while(0);
@@ -122,7 +122,7 @@ errlHndl_t MfgSync::sendMboxMsg( msg_t * i_msg, bool i_expectResponse )
 
     if( NULL != l_errl )
     {
-        PRDF_TRAC(FUNC" failed to send mbox msg");
+        PRDF_TRAC(FUNC " failed to send mbox msg");
     }
 
     PRDF_EXIT( FUNC );

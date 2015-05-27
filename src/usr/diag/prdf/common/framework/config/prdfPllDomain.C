@@ -190,7 +190,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
             }
             else
             {
-                PRDF_ERR(PRDF_FUNC"getOscPos returned error for chip: "
+                PRDF_ERR(PRDF_FUNC "getOscPos returned error for chip: "
                          "0x%08x", l_chip->GetId());
             }
         }
@@ -261,7 +261,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
 
         if (( false == oscSource[0] ) && ( false == oscSource[1] ))
         {
-            PRDF_ERR(PRDF_FUNC"can't threshold IO domain due to no available "
+            PRDF_ERR(PRDF_FUNC "can't threshold IO domain due to no available "
                                "pcie osc source - count:%d, chip 0x%08x",
                                count, chip()[0]->GetId());
         }
@@ -303,7 +303,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
 
             if (( false == oscSource[0] ) && ( false == oscSource[1] ))
             {
-                PRDF_ERR(PRDF_FUNC"can't mask pcie pll error due to no "
+                PRDF_ERR(PRDF_FUNC "can't mask pcie pll error due to no "
                     "available pcie osc source - count:%d, chip 0x%08x",
                     count, chip()[0]->GetId());
             }

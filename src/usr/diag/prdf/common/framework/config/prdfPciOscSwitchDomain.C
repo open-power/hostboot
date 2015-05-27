@@ -93,13 +93,13 @@ bool PciOscSwitchDomain::Query(ATTENTION_TYPE attentionType)
 
                 if( PRD_POWER_FAULT == rc )
                 {
-                    PRDF_ERR( PRDF_FUNC"Power Fault detected!" );
+                    PRDF_ERR( PRDF_FUNC "Power Fault detected!" );
                     break;
                 }
 
                 if( SUCCESS != rc )
                 {
-                    PRDF_ERR( PRDF_FUNC"SCOM fail. RC=%x", rc );
+                    PRDF_ERR( PRDF_FUNC "SCOM fail. RC=%x", rc );
                 }
             }
         }
@@ -134,7 +134,7 @@ int32_t PciOscSwitchDomain::Analyze( STEP_CODE_DATA_STRUCT & i_sc,
 
         if( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Query failed HUID: 0x%08x", l_chip->GetId() );
+            PRDF_ERR( PRDF_FUNC "Query failed HUID: 0x%08x", l_chip->GetId() );
             break;
         }
 
@@ -149,7 +149,7 @@ int32_t PciOscSwitchDomain::Analyze( STEP_CODE_DATA_STRUCT & i_sc,
 
             if( SUCCESS != o_rc )
             {
-                PRDF_ERR(PRDF_FUNC" PCI CLK Switch over analysis failed" );
+                PRDF_ERR(PRDF_FUNC " PCI CLK Switch over analysis failed" );
                 break;
             }
 
@@ -193,7 +193,7 @@ int32_t PciOscSwitchDomain::analyzePciOscSwitch(
 
         if( NULL == nodeTgt )
         {
-            PRDF_ERR( PRDF_FUNC"unable to get node HUID: 0x%08x ",
+            PRDF_ERR( PRDF_FUNC "unable to get node HUID: 0x%08x ",
                        i_chip->GetId() );
             o_rc = FAIL;
             break;
@@ -208,7 +208,7 @@ int32_t PciOscSwitchDomain::analyzePciOscSwitch(
 
             if( NULL == l_procChip )
             {
-                PRDF_ERR( PRDF_FUNC" could not find chip 0x%08x",
+                PRDF_ERR( PRDF_FUNC " could not find chip 0x%08x",
                           getHuid(*it) );
                 continue;
             }
@@ -234,7 +234,7 @@ int32_t PciOscSwitchDomain::analyzePciOscSwitch(
                                  ( o_pciOscSwitchData ));
             if( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"analysis failed HUID: 0x%08x",
+                PRDF_ERR( PRDF_FUNC "analysis failed HUID: 0x%08x",
                           l_procChip->GetId() );
                 break;
             }
@@ -249,7 +249,7 @@ int32_t PciOscSwitchDomain::analyzePciOscSwitch(
 
         if( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC" Failed to clear PCI Osc error" );
+            PRDF_ERR( PRDF_FUNC " Failed to clear PCI Osc error" );
             break;
         }
 
@@ -304,7 +304,7 @@ void PciOscSwitchDomain::addHwCalloutAndSignature( STEP_CODE_DATA_STRUCT & i_sc,
 
         if( 0 == listSize )
         {
-            PRDF_ERR( PRDF_FUNC"PCI Osc Switch Over: Analysis failed");
+            PRDF_ERR( PRDF_FUNC "PCI Osc Switch Over: Analysis failed");
             i_sc.service_data->SetCallout( NextLevelSupport_ENUM,
                                            MRU_MED, NO_GARD );
             signature = PRDFSIG_PCI_OSC_ANL_FAILED;
@@ -329,7 +329,7 @@ void PciOscSwitchDomain::addHwCalloutAndSignature( STEP_CODE_DATA_STRUCT & i_sc,
 
             if( checkMultiOscFailure( i_pciOscSwitchData ) )
             {
-                PRDF_ERR( PRDF_FUNC"Multiple pci Osc failures detected");
+                PRDF_ERR( PRDF_FUNC "Multiple pci Osc failures detected");
                 signature = PRDFSIG_PCI_MULTIPLE_OSC_FO;
                 i_sc.service_data->SetCallout( NextLevelSupport_ENUM,
                                                MRU_MED, NO_GARD );
@@ -383,7 +383,7 @@ int32_t PciOscSwitchDomain::clearPciSwitchError(
 
         if( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC" Failed to clear PCI clk error bits"
+            PRDF_ERR( PRDF_FUNC " Failed to clear PCI clk error bits"
                       "HUID: 0x%08x", it->pciParentProc->GetId() );
             break;
         }

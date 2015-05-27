@@ -91,7 +91,7 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
                                              i_busType, i_busPos );
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getBusEndpoints() failed" );
+            PRDF_ERR( PRDF_FUNC "getBusEndpoints() failed" );
             break;
         }
 
@@ -99,7 +99,7 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
         l_rc = readErepair(rxBusTgt, rx_lanes);
         if (SUCCESS != l_rc)
         {
-            PRDF_ERR( PRDF_FUNC"readErepair() failed: rxBusTgt=0x%08x",
+            PRDF_ERR( PRDF_FUNC "readErepair() failed: rxBusTgt=0x%08x",
                       getHuid(rxBusTgt) );
             break;
         }
@@ -108,7 +108,7 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
         for (std::vector<uint8_t>::iterator lane = rx_lanes.begin();
              lane != rx_lanes.end(); ++lane)
         {
-            PRDF_INF( PRDF_FUNC"New failed lane on RX HUID 0x%08x: %d",
+            PRDF_INF( PRDF_FUNC "New failed lane on RX HUID 0x%08x: %d",
                       getHuid(rxBusTgt), *lane);
             if (*lane < 64)
                 l_newLaneMap0to63.Set(*lane);
@@ -116,7 +116,7 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
                 l_newLaneMap64to127.Set(*lane - 64);
             else
             {
-                PRDF_ERR( PRDF_FUNC"Invalid lane number %d: rxBusTgt=0x%08x",
+                PRDF_ERR( PRDF_FUNC "Invalid lane number %d: rxBusTgt=0x%08x",
                           *lane, getHuid(rxBusTgt) );
                 l_rc = FAIL; break;
             }
@@ -139,7 +139,7 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
             l_rc = getVpdFailedLanes(rxBusTgt, rx_vpdLanes, tx_vpdLanes);
             if (SUCCESS != l_rc)
             {
-                PRDF_ERR( PRDF_FUNC"getVpdFailedLanes() failed: "
+                PRDF_ERR( PRDF_FUNC "getVpdFailedLanes() failed: "
                           "rxBusTgt=0x%08x", getHuid(rxBusTgt) );
                 break;
             }
@@ -154,7 +154,7 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
                     l_vpdLaneMap64to127.Set(*lane - 64);
                 else
                 {
-                    PRDF_ERR( PRDF_FUNC"Invalid VPD lane number %d: "
+                    PRDF_ERR( PRDF_FUNC "Invalid VPD lane number %d: "
                               "rxBusTgt=0x%08x", *lane, getHuid(rxBusTgt) );
                     l_rc = FAIL; break;
                 }
@@ -178,7 +178,7 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
                                          rx_lanes, thrExceeded);
                 if (SUCCESS != l_rc)
                 {
-                    PRDF_ERR( PRDF_FUNC"setVpdFailedLanes() failed: "
+                    PRDF_ERR( PRDF_FUNC "setVpdFailedLanes() failed: "
                               "rxBusTgt=0x%08x txBusTgt=0x%08x",
                               getHuid(rxBusTgt), getHuid(txBusTgt) );
                     break;
@@ -198,7 +198,7 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
             l_rc = getVpdFailedLanes(rxBusTgt, rx_vpdLanes, tx_vpdLanes);
             if (SUCCESS != l_rc)
             {
-                PRDF_ERR( PRDF_FUNC"getVpdFailedLanes() before power down "
+                PRDF_ERR( PRDF_FUNC "getVpdFailedLanes() before power down "
                           "failed: rxBusTgt=0x%08x", getHuid(rxBusTgt) );
                 break;
             }
@@ -207,7 +207,7 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
             l_rc = powerDownLanes(rxBusTgt, rx_vpdLanes, tx_vpdLanes);
             if (SUCCESS != l_rc)
             {
-                PRDF_ERR( PRDF_FUNC"powerDownLanes() failed: rxBusTgt=0x%08x",
+                PRDF_ERR( PRDF_FUNC "powerDownLanes() failed: rxBusTgt=0x%08x",
                           getHuid(rxBusTgt) );
                 break;
             }
@@ -237,7 +237,7 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
     // return SUCCESS.
     if ( SUCCESS != l_rc )
     {
-        PRDF_ERR( PRDF_FUNC"i_chip: 0x%08x i_busType:%d i_busPos:%d",
+        PRDF_ERR( PRDF_FUNC "i_chip: 0x%08x i_busType:%d i_busPos:%d",
                   i_chip->GetId(), i_busType, i_busPos );
 
         i_sc.service_data->SetErrorSig( PRDFSIG_ERepair_ERROR );

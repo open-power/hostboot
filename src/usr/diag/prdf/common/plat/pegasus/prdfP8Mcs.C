@@ -129,7 +129,7 @@ int32_t PostAnalysis( ExtensibleChip * i_mcsChip,
         l_rc = MemUtils::chnlCsCleanup( membChip, i_sc );
         if( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"ChnlCsCleanup() failed for Membuf:0x%08X",
+            PRDF_ERR( PRDF_FUNC "ChnlCsCleanup() failed for Membuf:0x%08X",
                       membChip->GetId() );
         }
     }
@@ -193,7 +193,7 @@ int32_t ClearMbsSecondaryBits( ExtensibleChip * i_chip,
 
         if( NULL == mbsAndFir )
         {
-            PRDF_ERR( PRDF_FUNC"Can not find MBSFIR_AND "
+            PRDF_ERR( PRDF_FUNC "Can not find MBSFIR_AND "
                        "for 0x%08x", membChip->GetId());
             break;
         }
@@ -204,7 +204,7 @@ int32_t ClearMbsSecondaryBits( ExtensibleChip * i_chip,
         l_rc = mbsAndFir->Write();
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"MBSFIR_AND write failed"
+            PRDF_ERR( PRDF_FUNC "MBSFIR_AND write failed"
                        "for 0x%08x", membChip->GetId());
             break;
         }
@@ -310,7 +310,7 @@ int32_t handleMirrorAction( ExtensibleChip * i_mcsChip,
         ExtensibleChip * primcs = mcsdb->getPrimaryMirroredMcs();
         if ( NULL == primcs )
         {
-            PRDF_ERR( PRDF_FUNC"getPrimaryMirroredMcs() failed: "
+            PRDF_ERR( PRDF_FUNC "getPrimaryMirroredMcs() failed: "
                       "i_mcsChip=0x%08x", i_mcsChip->GetId() );
             break;
         }
@@ -323,7 +323,7 @@ int32_t handleMirrorAction( ExtensibleChip * i_mcsChip,
         l_rc = reg->Read();
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Read() failed on MCHWFM: primcs=0x%08x",
+            PRDF_ERR( PRDF_FUNC "Read() failed on MCHWFM: primcs=0x%08x",
                       primcs->GetId() );
             break;
         }
@@ -352,7 +352,7 @@ int32_t handleMirrorAction( ExtensibleChip * i_mcsChip,
             l_rc = reg->Write();
             if ( SUCCESS != l_rc )
             {
-                PRDF_ERR( PRDF_FUNC"Write() failed on MCHWFM: primcs=0x%08x",
+                PRDF_ERR( PRDF_FUNC "Write() failed on MCHWFM: primcs=0x%08x",
                           primcs->GetId() );
                 break;
             }

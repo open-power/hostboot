@@ -70,7 +70,7 @@ int32_t QueryPll( ExtensibleChip * i_chip,
         rc = TP_LFIR->Read();
         if (rc != SUCCESS)
         {
-            PRDF_ERR(PRDF_FUNC"TP_LFIR read failed"
+            PRDF_ERR(PRDF_FUNC "TP_LFIR read failed"
                  "for 0x%08x", i_chip->GetId());
             break;
         }
@@ -78,7 +78,7 @@ int32_t QueryPll( ExtensibleChip * i_chip,
         rc = TP_LFIRmask->Read();
         if (rc != SUCCESS)
         {
-            PRDF_ERR(PRDF_FUNC"TP_LFIR_MASK read failed"
+            PRDF_ERR(PRDF_FUNC "TP_LFIR_MASK read failed"
                  "for 0x%08x", i_chip->GetId());
             break;
         }
@@ -121,7 +121,7 @@ int32_t ClearPll( ExtensibleChip * i_chip,
         rc = TP_LFIR->Write();
         if (rc != SUCCESS)
         {
-            PRDF_ERR(PRDF_FUNC"TP_LFIR_AND write failed"
+            PRDF_ERR(PRDF_FUNC "TP_LFIR_AND write failed"
                  "for 0x%08x", i_chip->GetId());
         }
     }
@@ -155,7 +155,7 @@ int32_t MaskPll( ExtensibleChip * i_chip,void * unused)
     rc = TP_LFIR_maskOr->Write();
     if (rc != SUCCESS)
     {
-        PRDF_ERR(PRDF_FUNC"TP_LFIR_MASK_OR write failed"
+        PRDF_ERR(PRDF_FUNC "TP_LFIR_MASK_OR write failed"
                  "for 0x%08x", i_chip->GetId());
     }
 

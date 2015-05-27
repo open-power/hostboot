@@ -393,12 +393,12 @@ void setHWStateChanged(TARGETING::TargetHandle_t i_target)
         }
         else
         {
-            PRDF_ERR(PRDF_FUNC"invalid target type: 0x%08x", type);
+            PRDF_ERR(PRDF_FUNC "invalid target type: 0x%08x", type);
         }
     }
     else
     {
-        PRDF_ERR(PRDF_FUNC"i_target is null");
+        PRDF_ERR(PRDF_FUNC "i_target is null");
     }
 
     #undef PRDF_FUNC
@@ -596,7 +596,7 @@ int32_t getAssociationType( TARGETING::TargetHandle_t i_target,
     {
         if ( NULL == i_target )
         {
-            PRDF_ERR( PRDF_FUNC"Given target is null" );
+            PRDF_ERR( PRDF_FUNC "Given target is null" );
             o_rc = FAIL; break;
         }
 
@@ -611,7 +611,7 @@ int32_t getAssociationType( TARGETING::TargetHandle_t i_target,
         if ( (it == lookups + sz_lookups) || // off the end
              (type != it->from) || (i_connType != it->to) ) // not equals
         {
-            PRDF_ERR( PRDF_FUNC"Look-up failed: i_target=0x%08x i_connType=%d",
+            PRDF_ERR( PRDF_FUNC "Look-up failed: i_target=0x%08x i_connType=%d",
                       getHuid(i_target), i_connType );
             o_rc = FAIL; break;
         }
@@ -637,7 +637,7 @@ TargetHandleList getConnAssoc( TargetHandle_t i_target, TYPE i_connType,
     {
         if ( NULL == i_target )
         {
-            PRDF_ERR( PRDF_FUNC"Given target is null" );
+            PRDF_ERR( PRDF_FUNC "Given target is null" );
             break;
         }
 
@@ -704,7 +704,7 @@ TargetHandle_t getConnectedParent( TargetHandle_t i_target, TYPE i_connType )
 
         if ( TargetService::PARENT_BY_AFFINITY != assocType )
         {
-            PRDF_ERR( PRDF_FUNC"Unsupported parent connection: i_target=0x%08x "
+            PRDF_ERR( PRDF_FUNC "Unsupported parent connection: i_target=0x%08x "
                       "i_connType=%d", getHuid(i_target), i_connType );
             break;
         }
@@ -712,7 +712,7 @@ TargetHandle_t getConnectedParent( TargetHandle_t i_target, TYPE i_connType )
         TargetHandleList list = getConnAssoc( i_target, i_connType, assocType );
         if ( 1 != list.size() ) // Should be one and only one parent
         {
-            PRDF_ERR( PRDF_FUNC"Could not find parent: i_target=0x%08x "
+            PRDF_ERR( PRDF_FUNC "Could not find parent: i_target=0x%08x "
                       "i_connType=%d", getHuid(i_target), i_connType );
             break;
         }
@@ -743,7 +743,7 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
 
         if ( TargetService::CHILD_BY_AFFINITY != assocType )
         {
-            PRDF_ERR( PRDF_FUNC"Unsupported child connection: i_target=0x%08x "
+            PRDF_ERR( PRDF_FUNC "Unsupported child connection: i_target=0x%08x "
                     "i_connType=%d", getHuid(i_target), i_connType );
             break;
         }
@@ -788,7 +788,7 @@ TargetHandle_t getConnectedPeerTarget( TargetHandle_t i_target )
     {
         if ( NULL == i_target )
         {
-            PRDF_ERR( PRDF_FUNC"Given target is NULL" );
+            PRDF_ERR( PRDF_FUNC "Given target is NULL" );
             break;
         }
 
@@ -805,7 +805,7 @@ TargetHandle_t getConnectedPeerTarget( TargetHandle_t i_target )
                 break;
 
             default:
-                PRDF_ERR( PRDF_FUNC"Target type not supported: i_target=0x%08x "
+                PRDF_ERR( PRDF_FUNC "Target type not supported: i_target=0x%08x "
                           "type=0x%x", getHuid(i_target), type );
         }
 
@@ -830,7 +830,7 @@ TargetHandle_t getConnectedPeerProc( TargetHandle_t i_procTarget,
     {
         if ( NULL == i_procTarget || TYPE_PROC != getTargetType(i_procTarget) )
         {
-            PRDF_ERR( PRDF_FUNC"Given target is not of TYPE_PROC: "
+            PRDF_ERR( PRDF_FUNC "Given target is not of TYPE_PROC: "
                       "i_procTarget=0x%08x", getHuid(i_procTarget) );
             break;
         }
@@ -994,7 +994,7 @@ uint32_t getTargetPosition( TARGETING::TargetHandle_t i_target )
                     uint16_t tmpPos = 0;
                     if ( !i_target->tryGetAttr<ATTR_POSITION>(tmpPos) )
                     {
-                        PRDF_ERR( PRDF_FUNC"Failed to get ATTR_POSITION" );
+                        PRDF_ERR( PRDF_FUNC "Failed to get ATTR_POSITION" );
                     }
                     else
                         o_pos = (uint32_t)tmpPos;
@@ -1006,7 +1006,7 @@ uint32_t getTargetPosition( TARGETING::TargetHandle_t i_target )
                     break;
 
                 default:
-                    PRDF_ERR( PRDF_FUNC"Unsupported type: %d", l_type );
+                    PRDF_ERR( PRDF_FUNC "Unsupported type: %d", l_type );
             }
             break;
         }
@@ -1016,7 +1016,7 @@ uint32_t getTargetPosition( TARGETING::TargetHandle_t i_target )
             uint8_t tmpPos = 0;
             if ( !i_target->tryGetAttr<ATTR_CHIP_UNIT>(tmpPos) )
             {
-                PRDF_ERR( PRDF_FUNC"Failed to get ATTR_CHIP_UNIT" );
+                PRDF_ERR( PRDF_FUNC "Failed to get ATTR_CHIP_UNIT" );
             }
             else
                 o_pos = (uint32_t)tmpPos;
@@ -1028,12 +1028,12 @@ uint32_t getTargetPosition( TARGETING::TargetHandle_t i_target )
             break;
 
         default:
-            PRDF_ERR( PRDF_FUNC"Unsupported class: %d", l_class );
+            PRDF_ERR( PRDF_FUNC "Unsupported class: %d", l_class );
     }
 
     if ( INVALID_POSITION_BOUND == o_pos )
     {
-        PRDF_ERR( PRDF_FUNC"Failed: target=0x%08x", getHuid(i_target) );
+        PRDF_ERR( PRDF_FUNC "Failed: target=0x%08x", getHuid(i_target) );
     }
 
     #undef PRDF_FUNC
@@ -1089,7 +1089,7 @@ TARGETING::MODEL getProcModel( TARGETING::TargetHandle_t i_proc )
     }
     else
     {
-        PRDF_ERR( PRDF_FUNC"Invalid Target Huid = 0x%08x", getHuid( i_proc ) );
+        PRDF_ERR( PRDF_FUNC "Invalid Target Huid = 0x%08x", getHuid( i_proc ) );
     }
 
     return l_model;
@@ -1111,7 +1111,7 @@ uint32_t getPhbConfig( TARGETING::TargetHandle_t i_proc )
     }
     else
     {
-        PRDF_ERR( PRDF_FUNC"Invalid Target Huid = 0x%08x", getHuid(i_proc) );
+        PRDF_ERR( PRDF_FUNC "Invalid Target Huid = 0x%08x", getHuid(i_proc) );
     }
 
     return l_pciConfig;
@@ -1142,20 +1142,20 @@ int32_t getMasterRanks( TargetHandle_t i_memTrgt,
         TargetHandle_t mbaTrgt = getConnectedParent( i_memTrgt, TYPE_MBA );
         if ( NULL == mbaTrgt )
         {
-            PRDF_ERR( PRDF_FUNC"getConnectedParent() failed" );
+            PRDF_ERR( PRDF_FUNC "getConnectedParent() failed" );
             break;
         }
 
         if( MAX_DIMM_PER_PORT < i_ds )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid value for Dimm Slct:%u", i_ds );
+            PRDF_ERR( PRDF_FUNC "Invalid value for Dimm Slct:%u", i_ds );
             break;
         }
 
         uint8_t info[MAX_PORT_PER_MBA][MAX_DIMM_PER_PORT];
         if ( !mbaTrgt->tryGetAttr<ATTR_EFF_DIMM_RANKS_CONFIGED>(info) )
         {
-            PRDF_ERR( PRDF_FUNC"Failed to get ATTR_EFF_DIMM_RANKS_CONFIGED" );
+            PRDF_ERR( PRDF_FUNC "Failed to get ATTR_EFF_DIMM_RANKS_CONFIGED" );
             break;
         }
 
@@ -1192,7 +1192,7 @@ int32_t getMasterRanks( TargetHandle_t i_memTrgt,
 
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Failed: i_memTrgt=0x%08x", getHuid(i_memTrgt) );
+        PRDF_ERR( PRDF_FUNC "Failed: i_memTrgt=0x%08x", getHuid(i_memTrgt) );
     }
 
     return o_rc;
@@ -1217,7 +1217,7 @@ uint32_t getMemChnl( TARGETING::TargetHandle_t i_memTarget )
         TargetHandle_t mcsTarget = getConnectedParent( i_memTarget, TYPE_MCS );
         if ( NULL == mcsTarget )
         {
-            PRDF_ERR( PRDF_FUNC"getConnectedParent() failed" );
+            PRDF_ERR( PRDF_FUNC "getConnectedParent() failed" );
             break;
         }
 
@@ -1227,7 +1227,7 @@ uint32_t getMemChnl( TARGETING::TargetHandle_t i_memTarget )
 
     if ( MAX_MCS_PER_PROC <= o_chnl ) // Real MCS position check.
     {
-        PRDF_ERR( PRDF_FUNC"Failed: i_memTarget=0x%08x",
+        PRDF_ERR( PRDF_FUNC "Failed: i_memTarget=0x%08x",
                   getHuid(i_memTarget) );
     }
 
@@ -1298,7 +1298,7 @@ int32_t getDramGen( TARGETING::TargetHandle_t i_mba, uint8_t & o_dramGen )
     {
         if ( TYPE_MBA != getTargetType( i_mba ) )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid Target. HUID:0X%08X",
+            PRDF_ERR( PRDF_FUNC "Invalid Target. HUID:0X%08X",
                       getHuid( i_mba ) );
             break;
         }
@@ -1326,7 +1326,7 @@ int32_t getDimmRowCol( TARGETING::TargetHandle_t i_mba, uint8_t & o_rowNum,
     {
         if ( TYPE_MBA != getTargetType( i_mba ) )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid Target. HUID:0X%08X",
+            PRDF_ERR( PRDF_FUNC "Invalid Target. HUID:0X%08X",
                       getHuid( i_mba ) );
             break;
         }
@@ -1362,7 +1362,7 @@ uint8_t getRanksPerDimm( TargetHandle_t i_mba, uint8_t i_ds )
     {
         if ( MAX_DIMM_PER_PORT <= i_ds )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid parameters i_ds:%u", i_ds );
+            PRDF_ERR( PRDF_FUNC "Invalid parameters i_ds:%u", i_ds );
             break;
         }
 
@@ -1373,7 +1373,7 @@ uint8_t getRanksPerDimm( TargetHandle_t i_mba, uint8_t i_ds )
         ATTR_EFF_NUM_RANKS_PER_DIMM_type attr;
         if ( !i_mba->tryGetAttr<ATTR_EFF_NUM_RANKS_PER_DIMM>(attr) )
         {
-            PRDF_ERR( PRDF_FUNC"failed to get ATTR_EFF_NUM_RANKS_PER_DIMM" );
+            PRDF_ERR( PRDF_FUNC "failed to get ATTR_EFF_NUM_RANKS_PER_DIMM" );
             break;
         }
 
@@ -1411,7 +1411,7 @@ TARGETING::TargetHandle_t getClockId(TARGETING::TargetHandle_t
     {
         if ( i_oscPos >= MAX_PCIE_OSC_PER_NODE )
         {
-            PRDF_ERR(PRDF_FUNC"target: 0x%.8X - invalid "
+            PRDF_ERR(PRDF_FUNC "target: 0x%.8X - invalid "
                 "i_oscPos: %d", getHuid(i_pGivenTarget), i_oscPos);
             break;
         }
@@ -1422,7 +1422,7 @@ TARGETING::TargetHandle_t getClockId(TARGETING::TargetHandle_t
             l_target = getConnectedParent(i_pGivenTarget, TYPE_PROC);
             if(NULL == l_target)
             {
-                PRDF_ERR(PRDF_FUNC"failed to get proc target "
+                PRDF_ERR(PRDF_FUNC "failed to get proc target "
                          "connected to membuf 0x%.8X",
                          getHuid(l_target));
                 break;
@@ -1451,7 +1451,7 @@ TARGETING::TargetHandle_t getClockId(TARGETING::TargetHandle_t
             l_itr != l_clockCardlist.end();
             ++l_itr)
         {
-            PRDF_TRAC(PRDF_FUNC"OSC 0x%.8X, pos: %d is connected to "
+            PRDF_TRAC(PRDF_FUNC "OSC 0x%.8X, pos: %d is connected to "
              "proc 0x%.8X, inputOscPos: %d", getHuid(*l_itr),
              getTargetPosition(*l_itr), getHuid(l_target), i_oscPos);
 

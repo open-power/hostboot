@@ -57,13 +57,13 @@ void SimFspSyncSvc::processRequestMsg(msg_t * i_msg)
             pError = processMfgTrace(i_msg);
             if(NULL != pError)
             {
-                PRDF_ERR(FUNC" processMfgTrace returned error");
+                PRDF_ERR(FUNC " processMfgTrace returned error");
                 PRDF_COMMIT_ERRL(pError, ERRL_ACTION_REPORT);
             }
             break;
 
         default:
-            PRDF_ERR(FUNC" Invalid Message Type received from HB :"
+            PRDF_ERR(FUNC " Invalid Message Type received from HB :"
                  "[0x%08X]", i_msg->type);
     }
 

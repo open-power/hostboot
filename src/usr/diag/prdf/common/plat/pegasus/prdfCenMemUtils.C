@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,7 +89,7 @@ int32_t collectCeStats( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
     {
         if ( 0 == i_thr ) // Must be non-zero
         {
-            PRDF_ERR( PRDF_FUNC"i_thr %d is invalid", i_thr );
+            PRDF_ERR( PRDF_FUNC "i_thr %d is invalid", i_thr );
             o_rc = FAIL; break;
         }
 
@@ -98,14 +98,14 @@ int32_t collectCeStats( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
         ExtensibleChip * membufChip = mbadb->getMembChip();
         if ( NULL == membufChip )
         {
-            PRDF_ERR( PRDF_FUNC"getMembChip() failed" );
+            PRDF_ERR( PRDF_FUNC "getMembChip() failed" );
             o_rc = FAIL; break;
         }
 
         uint8_t mbaPos = getTargetPosition( mbaTrgt );
         if ( MAX_MBA_PER_MEMBUF <= mbaPos )
         {
-            PRDF_ERR( PRDF_FUNC"mbaPos %d is invalid", mbaPos );
+            PRDF_ERR( PRDF_FUNC "mbaPos %d is invalid", mbaPos );
             o_rc = FAIL; break;
         }
 
@@ -116,7 +116,7 @@ int32_t collectCeStats( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
         o_rc = mssGetSteerMux( mbaTrgt, i_rank, sp0, sp1, ecc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"mssGetSteerMux() failed." );
+            PRDF_ERR( PRDF_FUNC "mssGetSteerMux() failed." );
             break;
         }
 
@@ -134,7 +134,7 @@ int32_t collectCeStats( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
             o_rc = reg->Read();
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"Read() failed on %s", reg_str );
+                PRDF_ERR( PRDF_FUNC "Read() failed on %s", reg_str );
                 break;
             }
 
@@ -164,7 +164,7 @@ int32_t collectCeStats( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
                                             sym, CEN_SYMBOL::BOTH_SYMBOL_DQS );
                     if ( !symData.symbol.isValid() )
                     {
-                        PRDF_ERR( PRDF_FUNC"CenSymbol() failed: symbol=%d",
+                        PRDF_ERR( PRDF_FUNC "CenSymbol() failed: symbol=%d",
                                   sym );
                         o_rc = FAIL;
                         break;
@@ -236,7 +236,7 @@ int32_t collectCeStats( ExtensibleChip * i_mbaChip, const CenRank & i_rank,
 
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Failed: i_mbaChip=0x%08x i_rank=m%ds%d i_thr=%d",
+        PRDF_ERR( PRDF_FUNC "Failed: i_mbaChip=0x%08x i_rank=m%ds%d i_thr=%d",
                   i_mbaChip->GetId(), i_rank.getMaster(), i_rank.getSlave(),
                   i_thr );
     }
@@ -258,7 +258,7 @@ int32_t clearPerSymbolCounters( ExtensibleChip * i_membChip, uint32_t i_mbaPos )
     {
         if ( MAX_MBA_PER_MEMBUF <= i_mbaPos )
         {
-            PRDF_ERR( PRDF_FUNC"i_mbaPos %d is invalid", i_mbaPos );
+            PRDF_ERR( PRDF_FUNC "i_mbaPos %d is invalid", i_mbaPos );
             o_rc = FAIL;
             break;
         }
@@ -276,7 +276,7 @@ int32_t clearPerSymbolCounters( ExtensibleChip * i_membChip, uint32_t i_mbaPos )
             o_rc = reg->Write();
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"Write() failed on %s", reg_str );
+                PRDF_ERR( PRDF_FUNC "Write() failed on %s", reg_str );
                 break;
             }
         }
@@ -287,7 +287,7 @@ int32_t clearPerSymbolCounters( ExtensibleChip * i_membChip, uint32_t i_mbaPos )
 
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Failed. i_membChip=0x%08x i_mbaPos=%d",
+        PRDF_ERR( PRDF_FUNC "Failed. i_membChip=0x%08x i_mbaPos=%d",
                   i_membChip->GetId(), i_mbaPos );
     }
 
@@ -312,7 +312,7 @@ int32_t getDramSize( ExtensibleChip *i_mbaChip, uint8_t & o_size )
         ExtensibleChip * membufChip = mbadb->getMembChip();
         if ( NULL == membufChip )
         {
-            PRDF_ERR( PRDF_FUNC"getMembChip() failed: MBA=0x%08x",
+            PRDF_ERR( PRDF_FUNC "getMembChip() failed: MBA=0x%08x",
                       getHuid(mbaTrgt) );
             o_rc = FAIL; break;
         }
@@ -324,7 +324,7 @@ int32_t getDramSize( ExtensibleChip *i_mbaChip, uint8_t & o_size )
         o_rc = reg->Read();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Read() failed on %s. Target=0x%08x",
+            PRDF_ERR( PRDF_FUNC "Read() failed on %s. Target=0x%08x",
                       reg_str, getHuid(mbaTrgt) );
             break;
         }
@@ -355,7 +355,7 @@ int32_t checkMcsChannelFail( ExtensibleChip * i_mcsChip,
         // Must be an MCS.
         if ( TYPE_MCS != getTargetType(i_mcsChip->GetChipHandle()) )
         {
-            PRDF_ERR( PRDF_FUNC"i_mcsChip is not TYPE_MCS" );
+            PRDF_ERR( PRDF_FUNC "i_mcsChip is not TYPE_MCS" );
             o_rc = FAIL; break;
         }
 
@@ -364,7 +364,7 @@ int32_t checkMcsChannelFail( ExtensibleChip * i_mcsChip,
         o_rc = mcifir->Read();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Read() failed on MCIFIR" );
+            PRDF_ERR( PRDF_FUNC "Read() failed on MCIFIR" );
             break;
         }
 
@@ -380,7 +380,7 @@ int32_t checkMcsChannelFail( ExtensibleChip * i_mcsChip,
         ExtensibleChip * membChip = mcsdb->getMembChip();
         if ( NULL == membChip )
         {
-            PRDF_ERR( PRDF_FUNC"getMembChip() returned NULL" );
+            PRDF_ERR( PRDF_FUNC "getMembChip() returned NULL" );
             o_rc = FAIL; break;
         }
         CenMembufDataBundle * mbdb = getMembufDataBundle( membChip );
@@ -390,7 +390,7 @@ int32_t checkMcsChannelFail( ExtensibleChip * i_mcsChip,
 
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Failed: i_mcsChip=0x%08x", i_mcsChip->GetId() );
+        PRDF_ERR( PRDF_FUNC "Failed: i_mcsChip=0x%08x", i_mcsChip->GetId() );
     }
 
     return o_rc;
@@ -412,7 +412,7 @@ int32_t chnlCsCleanup( ExtensibleChip *i_mbChip,
         if( (  NULL == i_mbChip ) ||
             ( TYPE_MEMBUF != getTargetType( i_mbChip->GetChipHandle() )))
         {
-            PRDF_ERR( PRDF_FUNC"Invalid parameters" );
+            PRDF_ERR( PRDF_FUNC "Invalid parameters" );
             o_rc = FAIL; break;
         }
 
@@ -430,7 +430,7 @@ int32_t chnlCsCleanup( ExtensibleChip *i_mbChip,
         ExtensibleChip * mcsChip = mbdb->getMcsChip();
         if ( NULL == mcsChip )
         {
-            PRDF_ERR( PRDF_FUNC"MCS chip is NULL for Membuf:0x%08X",
+            PRDF_ERR( PRDF_FUNC "MCS chip is NULL for Membuf:0x%08X",
                       i_mbChip->GetId() );
             o_rc = FAIL; break;
         }
@@ -442,7 +442,7 @@ int32_t chnlCsCleanup( ExtensibleChip *i_mbChip,
 
         if ( NULL == proc )
         {
-            PRDF_ERR( PRDF_FUNC"Proc is NULL for Mcs:0x%08X", getHuid( mcs ) );
+            PRDF_ERR( PRDF_FUNC "Proc is NULL for Mcs:0x%08X", getHuid( mcs ) );
             o_rc = FAIL; break;
         }
 
@@ -450,7 +450,7 @@ int32_t chnlCsCleanup( ExtensibleChip *i_mbChip,
 
         if( NULL == procChip )
         {
-            PRDF_ERR( PRDF_FUNC"Can not find Proc chip for HUID:0x%08X",
+            PRDF_ERR( PRDF_FUNC "Can not find Proc chip for HUID:0x%08X",
                       getHuid( proc) );
             o_rc = FAIL; break;
         }
@@ -514,7 +514,7 @@ int32_t chnlCsCleanup( ExtensibleChip *i_mbChip,
                     int32_t l_rc = mdiaSendEventMsg( mba, MDIA::SKIP_MBA );
                     if ( SUCCESS != l_rc )
                     {
-                        PRDF_ERR( PRDF_FUNC"mdiaSendEventMsg(0x%08x, SKIP_MBA) "
+                        PRDF_ERR( PRDF_FUNC "mdiaSendEventMsg(0x%08x, SKIP_MBA) "
                                   "failed", getHuid( mba ) );
                         o_rc |= l_rc;
                     }
@@ -522,7 +522,7 @@ int32_t chnlCsCleanup( ExtensibleChip *i_mbChip,
                     int32_t l_rc = DEALLOC::mbaGard( mbaChip  );
                     if ( SUCCESS != l_rc )
                     {
-                        PRDF_ERR( PRDF_FUNC"mbaGard failed. HUID: 0x%08x",
+                        PRDF_ERR( PRDF_FUNC "mbaGard failed. HUID: 0x%08x",
                                   getHuid( mba ) );
                         o_rc |= l_rc;
                     }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,7 +55,7 @@ int32_t mcifirCleanup( ExtensibleChip *i_mbChip,
         ExtensibleChip * mcsChip = mbdb->getMcsChip();
         if ( NULL == mcsChip )
         {
-            PRDF_ERR( PRDF_FUNC"CenMembufDataBundle::getMcsChip() failed" );
+            PRDF_ERR( PRDF_FUNC "CenMembufDataBundle::getMcsChip() failed" );
             l_rc = FAIL;
             break;
         }
@@ -75,7 +75,7 @@ int32_t mcifirCleanup( ExtensibleChip *i_mbChip,
         l_rc = firand->Write();
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"MCIFIR_AND write failed" );
+            PRDF_ERR( PRDF_FUNC "MCIFIR_AND write failed" );
             break;
         }
 

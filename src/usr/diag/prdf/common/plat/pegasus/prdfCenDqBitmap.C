@@ -72,7 +72,7 @@ int32_t CenDqBitmap::badDqs( uint8_t i_portSlct, bool & o_badDqs ) const
     {
         if ( PORT_SLCT_PER_MBA <= i_portSlct )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid parameter: i_portSlct=%d", i_portSlct );
+            PRDF_ERR( PRDF_FUNC "Invalid parameter: i_portSlct=%d", i_portSlct );
             o_rc = FAIL; break;
         }
 
@@ -104,13 +104,13 @@ int32_t CenDqBitmap::setDq( uint8_t i_dq, uint8_t i_portSlct )
     {
         if ( DQS_PER_DIMM <= i_dq )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid parameter: i_dq=%d", i_dq );
+            PRDF_ERR( PRDF_FUNC "Invalid parameter: i_dq=%d", i_dq );
             o_rc = FAIL; break;
         }
 
         if ( PORT_SLCT_PER_MBA <= i_portSlct )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid parameter: i_portSlct=%d", i_portSlct );
+            PRDF_ERR( PRDF_FUNC "Invalid parameter: i_portSlct=%d", i_portSlct );
             o_rc = FAIL; break;
         }
 
@@ -141,7 +141,7 @@ int32_t CenDqBitmap::setSymbol( const CenSymbol & i_symbol, uint8_t i_pins )
         o_rc = getPortByteBitIdx( i_symbol, portSlct, byteIdx, bitIdx );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getPortByteBitIdx() failed" );
+            PRDF_ERR( PRDF_FUNC "getPortByteBitIdx() failed" );
             break;
         }
 
@@ -171,7 +171,7 @@ int32_t CenDqBitmap::setDram( const CenSymbol & i_symbol, uint8_t i_pins )
         o_rc = getPortByteBitIdx( i_symbol, portSlct, byteIdx, bitIdx );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getPortByteBitIdx() failed" );
+            PRDF_ERR( PRDF_FUNC "getPortByteBitIdx() failed" );
             break;
         }
 
@@ -210,7 +210,7 @@ int32_t CenDqBitmap::isChipMark( const CenSymbol & i_symbol, bool & o_cm )
         o_rc = getPortByteBitIdx( i_symbol, portSlct, byteIdx, bitIdx );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getPortByteBitIdx() failed" );
+            PRDF_ERR( PRDF_FUNC "getPortByteBitIdx() failed" );
             break;
         }
 
@@ -252,7 +252,7 @@ int32_t CenDqBitmap::setDramSpare( uint8_t i_portSlct, uint8_t i_pins )
     {
         if ( PORT_SLCT_PER_MBA <= i_portSlct )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid parameter: i_portSlct=%d", i_portSlct );
+            PRDF_ERR( PRDF_FUNC "Invalid parameter: i_portSlct=%d", i_portSlct );
             o_rc = FAIL; break;
         }
 
@@ -261,13 +261,13 @@ int32_t CenDqBitmap::setDramSpare( uint8_t i_portSlct, uint8_t i_pins )
                                    spareConfig );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getDimmSpareConfig() failed" );
+            PRDF_ERR( PRDF_FUNC "getDimmSpareConfig() failed" );
             o_rc = FAIL; break;
         }
 
         if ( ENUM_ATTR_VPD_DIMM_SPARE_NO_SPARE == spareConfig )
         {
-            PRDF_ERR( PRDF_FUNC"DRAM Spare is not avaiable" );
+            PRDF_ERR( PRDF_FUNC "DRAM Spare is not avaiable" );
             o_rc = FAIL; break;
         }
 
@@ -307,7 +307,7 @@ int32_t CenDqBitmap::setEccSpare( uint8_t i_pins )
     {
         if ( !iv_x4Dram )
         {
-            PRDF_ERR( PRDF_FUNC"MBA 0x %08x does not support x4 ECC spare",
+            PRDF_ERR( PRDF_FUNC "MBA 0x %08x does not support x4 ECC spare",
                       getHuid(iv_mba) );
             o_rc = FAIL; break;
         }
@@ -337,7 +337,7 @@ int32_t CenDqBitmap::isDramSpareAvailable( uint8_t i_portSlct,
     {
         if ( PORT_SLCT_PER_MBA <= i_portSlct )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid parameter: i_portSlct=%d", i_portSlct );
+            PRDF_ERR( PRDF_FUNC "Invalid parameter: i_portSlct=%d", i_portSlct );
             o_rc = FAIL; break;
         }
 
@@ -346,7 +346,7 @@ int32_t CenDqBitmap::isDramSpareAvailable( uint8_t i_portSlct,
                                    spareConfig );
         if( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getDimmSpareConfig() failed" );
+            PRDF_ERR( PRDF_FUNC "getDimmSpareConfig() failed" );
             break;
         }
 
@@ -431,7 +431,7 @@ int32_t CenDqBitmap::getPortByteBitIdx( const CenSymbol & i_symbol,
     {
         if ( !i_symbol.isValid() )
         {
-            PRDF_ERR( PRDF_FUNC"i_symbol is invalid" );
+            PRDF_ERR( PRDF_FUNC "i_symbol is invalid" );
             o_rc = FAIL; break;
         }
 

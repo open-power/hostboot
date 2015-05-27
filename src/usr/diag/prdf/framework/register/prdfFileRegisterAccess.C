@@ -61,7 +61,7 @@ errlHndl_t FileScomAccessor::Access(
             bs.SetFieldJustify(32, 32, data      );
             break;
         default:
-            PRDF_ERR(PRDF_FUNC"Wrong Operation:%u", operation);
+            PRDF_ERR(PRDF_FUNC "Wrong Operation:%u", operation);
     }
 
     return errlH;

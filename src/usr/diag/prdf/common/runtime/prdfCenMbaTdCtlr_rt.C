@@ -86,7 +86,7 @@ int32_t CenMbaTdCtlr::handleCmdCompleteEvent( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = initialize();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"initialize() failed" );
+            PRDF_ERR( PRDF_FUNC "initialize() failed" );
             break;
         }
 
@@ -99,7 +99,7 @@ int32_t CenMbaTdCtlr::handleCmdCompleteEvent( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = getCenMaintStartAddr( iv_mbaChip, stopAddr );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getCenMaintStartAddr() failed" );
+            PRDF_ERR( PRDF_FUNC "getCenMaintStartAddr() failed" );
             break;
         }
 
@@ -107,14 +107,14 @@ int32_t CenMbaTdCtlr::handleCmdCompleteEvent( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = getCenMaintEndAddr( iv_mbaChip, endAddr );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getCenMaintEndAddr() failed" );
+            PRDF_ERR( PRDF_FUNC "getCenMaintEndAddr() failed" );
             break;
         }
 
         // Call analysis function based on state.
         if ( NULL == cv_cmdCompleteFuncs[iv_tdState] )
         {
-            PRDF_ERR( PRDF_FUNC"Function for state %d not supported",
+            PRDF_ERR( PRDF_FUNC "Function for state %d not supported",
                       iv_tdState );
             o_rc = FAIL; break;
         }
@@ -123,7 +123,7 @@ int32_t CenMbaTdCtlr::handleCmdCompleteEvent( STEP_CODE_DATA_STRUCT & io_sc )
                                                          endAddr );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Failed to continue analysis" );
+            PRDF_ERR( PRDF_FUNC "Failed to continue analysis" );
             break;
         }
 
@@ -131,12 +131,12 @@ int32_t CenMbaTdCtlr::handleCmdCompleteEvent( STEP_CODE_DATA_STRUCT & io_sc )
 
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Failed." );
+        PRDF_ERR( PRDF_FUNC "Failed." );
         badPathErrorHandling( io_sc );
 
         int32_t l_rc = cleanupPrevCmd( io_sc ); // Just in case.
         if ( SUCCESS != l_rc )
-            PRDF_ERR( PRDF_FUNC"cleanupPrevCmd() failed" );
+            PRDF_ERR( PRDF_FUNC "cleanupPrevCmd() failed" );
 
         // Will not resume background scrubbing because that may be the root
         // cause of the failure.
@@ -167,7 +167,7 @@ int32_t CenMbaTdCtlr::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
         o_rc = initialize();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"initialize() failed" );
+            PRDF_ERR( PRDF_FUNC "initialize() failed" );
             break;
         }
 
@@ -183,7 +183,7 @@ int32_t CenMbaTdCtlr::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
 
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Failed to add TD queue entry" );
+            PRDF_ERR( PRDF_FUNC "Failed to add TD queue entry" );
             break;
         }
 
@@ -208,14 +208,14 @@ int32_t CenMbaTdCtlr::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
                                       iv_mbaTrgt, CenRank(0), 0 );
             if ( NULL == iv_mssCmd )
             {
-                PRDF_ERR( PRDF_FUNC"createMssCmd() failed" );
+                PRDF_ERR( PRDF_FUNC "createMssCmd() failed" );
                 break;
             }
 
             o_rc = iv_mssCmd->stopCmd();
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"stopCmd() failed" );
+                PRDF_ERR( PRDF_FUNC "stopCmd() failed" );
                 break;
             }
 
@@ -229,7 +229,7 @@ int32_t CenMbaTdCtlr::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = iv_mssCmd->stopCmd();
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"stopCmd() failed" );
+                PRDF_ERR( PRDF_FUNC "stopCmd() failed" );
                 break;
             }
         }
@@ -243,7 +243,7 @@ int32_t CenMbaTdCtlr::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = maskFetchAttns();
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"maskFetchAttns() failed" );
+                PRDF_ERR( PRDF_FUNC "maskFetchAttns() failed" );
                 break;
             }
         }
@@ -259,7 +259,7 @@ int32_t CenMbaTdCtlr::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
         o_rc = getCenMaintStartAddr( iv_mbaChip, stopAddr );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getCenMaintStartAddr() failed" );
+            PRDF_ERR( PRDF_FUNC "getCenMaintStartAddr() failed" );
             break;
         }
 
@@ -267,14 +267,14 @@ int32_t CenMbaTdCtlr::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
         o_rc = getCenMaintEndAddr( iv_mbaChip, endAddr );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getCenMaintEndAddr() failed" );
+            PRDF_ERR( PRDF_FUNC "getCenMaintEndAddr() failed" );
             break;
         }
 
         o_rc = analyzeCmdComplete( io_sc, stopAddr, endAddr );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"analyzeCmdComplete() failed" );
+            PRDF_ERR( PRDF_FUNC "analyzeCmdComplete() failed" );
             break;
         }
 
@@ -282,7 +282,7 @@ int32_t CenMbaTdCtlr::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
 
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Failed: i_event=%d i_rank=m%ds%d i_banTps=%c",
+        PRDF_ERR( PRDF_FUNC "Failed: i_event=%d i_rank=m%ds%d i_banTps=%c",
                   i_event, i_rank.getMaster(), i_rank.getSlave(),
                   i_banTps ? 'T' : 'F' );
 
@@ -290,7 +290,7 @@ int32_t CenMbaTdCtlr::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
 
         int32_t l_rc = cleanupPrevCmd( io_sc ); // Just in case.
         if ( SUCCESS != l_rc )
-            PRDF_ERR( PRDF_FUNC"cleanupPrevCmd() failed" );
+            PRDF_ERR( PRDF_FUNC "cleanupPrevCmd() failed" );
     }
     else
     {
@@ -330,7 +330,7 @@ int32_t CenMbaTdCtlr::handleRrFo()
         o_rc = mbmsr->Read();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Read() failed on MBMSR");
+            PRDF_ERR( PRDF_FUNC "Read() failed on MBMSR");
             break;
         }
 
@@ -343,7 +343,7 @@ int32_t CenMbaTdCtlr::handleRrFo()
         o_rc = mbaSpa->Read();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Read() failed on MBASPA");
+            PRDF_ERR( PRDF_FUNC "Read() failed on MBASPA");
             break;
         }
 
@@ -354,7 +354,7 @@ int32_t CenMbaTdCtlr::handleRrFo()
         o_rc = initialize();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"initialize() failed" );
+            PRDF_ERR( PRDF_FUNC "initialize() failed" );
             break;
         }
 
@@ -370,7 +370,7 @@ int32_t CenMbaTdCtlr::handleRrFo()
         o_rc = startNextTd( sdc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"startBgScrub() failed" );
+            PRDF_ERR( PRDF_FUNC "startBgScrub() failed" );
             break;
         }
     } while (0);
@@ -397,7 +397,7 @@ int32_t CenMbaTdCtlr::initialize()
         o_rc = CenMbaTdCtlrCommon::initialize();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"CenMbaTdCtlrCommon::initialize() failed" );
+            PRDF_ERR( PRDF_FUNC "CenMbaTdCtlrCommon::initialize() failed" );
             break;
         }
 
@@ -405,7 +405,7 @@ int32_t CenMbaTdCtlr::initialize()
         o_rc = iv_masterRanks.initialize( iv_mbaTrgt );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"TdRankList::initialize() failed" );
+            PRDF_ERR( PRDF_FUNC "TdRankList::initialize() failed" );
             break;
         }
 
@@ -414,7 +414,7 @@ int32_t CenMbaTdCtlr::initialize()
         o_rc = unmaskFetchAttns();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"unmaskFetchAttns() failed" );
+            PRDF_ERR( PRDF_FUNC "unmaskFetchAttns() failed" );
             break;
         }
 
@@ -444,7 +444,7 @@ int32_t CenMbaTdCtlr::initialize()
             o_rc = mssGetMarkStore( iv_mbaTrgt, rank, markData );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"mssGetMarkStore() failed." );
+                PRDF_ERR( PRDF_FUNC "mssGetMarkStore() failed." );
                 o_rc = FAIL; break;
             }
 
@@ -456,7 +456,7 @@ int32_t CenMbaTdCtlr::initialize()
             o_rc = getBadDqBitmap( iv_mbaTrgt, rank, bitmap );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"getBadDqBitmap() failed" );
+                PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed" );
                 break;
             }
 
@@ -464,7 +464,7 @@ int32_t CenMbaTdCtlr::initialize()
             o_rc = bitmap.isChipMark( markData.getCM(), vpdCM );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"isChipMark() failed" );
+                PRDF_ERR( PRDF_FUNC "isChipMark() failed" );
                 break;
             }
 
@@ -474,7 +474,7 @@ int32_t CenMbaTdCtlr::initialize()
                 o_rc = addTdQueueEntryVCM( rank );
                 if ( SUCCESS != o_rc )
                 {
-                    PRDF_ERR( PRDF_FUNC"addTdQueueEntryVCM() failed" );
+                    PRDF_ERR( PRDF_FUNC "addTdQueueEntryVCM() failed" );
                     break;
                 }
 
@@ -491,7 +491,7 @@ int32_t CenMbaTdCtlr::initialize()
             o_rc = firand->Write();
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"Write() failed on %s", reg_str );
+                PRDF_ERR( PRDF_FUNC "Write() failed on %s", reg_str );
                 break;
             }
         }
@@ -523,7 +523,7 @@ int32_t CenMbaTdCtlr::analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc,
     {
         if ( NO_OP != iv_tdState )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid state machine configuration" );
+            PRDF_ERR( PRDF_FUNC "Invalid state machine configuration" );
             o_rc = FAIL; break;
         }
 
@@ -536,7 +536,7 @@ int32_t CenMbaTdCtlr::analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc,
         o_rc = iv_masterRanks.setInterruptedRank( iv_rank );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"setInterruptedRank() failed" );
+            PRDF_ERR( PRDF_FUNC "setInterruptedRank() failed" );
             break;
         }
 
@@ -545,7 +545,7 @@ int32_t CenMbaTdCtlr::analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc,
         o_rc = checkEccErrors( eccErrorMask, io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"checkEccErrors() failed" );
+            PRDF_ERR( PRDF_FUNC "checkEccErrors() failed" );
             break;
         }
 
@@ -560,7 +560,7 @@ int32_t CenMbaTdCtlr::analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = handleSoftIntCeEte_NonTd( io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"handleSoftIntCeEte_NonTd() failed" );
+                PRDF_ERR( PRDF_FUNC "handleSoftIntCeEte_NonTd() failed" );
                 break;
             }
         }
@@ -570,7 +570,7 @@ int32_t CenMbaTdCtlr::analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = handleHardCeEte_NonTd( io_sc, i_stopAddr );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"handleHardCeEte_NonTd() failed" );
+                PRDF_ERR( PRDF_FUNC "handleHardCeEte_NonTd() failed" );
                 break;
             }
         }
@@ -580,7 +580,7 @@ int32_t CenMbaTdCtlr::analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = handleRceEte_NonTd( io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"handleRceEte_NonTd() failed" );
+                PRDF_ERR( PRDF_FUNC "handleRceEte_NonTd() failed" );
                 break;
             }
         }
@@ -590,7 +590,7 @@ int32_t CenMbaTdCtlr::analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = handleMpe_NonTd( io_sc, i_stopAddr );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"handleMpe_NonTd() failed" );
+                PRDF_ERR( PRDF_FUNC "handleMpe_NonTd() failed" );
                 break;
             }
         }
@@ -600,7 +600,7 @@ int32_t CenMbaTdCtlr::analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = handleUe_NonTd( io_sc, i_stopAddr );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"handleUe_NonTd() failed" );
+                PRDF_ERR( PRDF_FUNC "handleUe_NonTd() failed" );
                 break;
             }
         }
@@ -624,7 +624,7 @@ int32_t CenMbaTdCtlr::analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc,
                 o_rc = startBgScrub( io_sc );
                 if ( SUCCESS != o_rc )
                 {
-                    PRDF_ERR( PRDF_FUNC"startBgScrub() failed" );
+                    PRDF_ERR( PRDF_FUNC "startBgScrub() failed" );
                     break;
                 }
             }
@@ -634,7 +634,7 @@ int32_t CenMbaTdCtlr::analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc,
                 o_rc = resumeScrub( io_sc, eccErrorMask );
                 if ( SUCCESS != o_rc )
                 {
-                    PRDF_ERR( PRDF_FUNC"resumeScrub() failed" );
+                    PRDF_ERR( PRDF_FUNC "resumeScrub() failed" );
                     break;
                 }
             }
@@ -645,7 +645,7 @@ int32_t CenMbaTdCtlr::analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = startNextTd( io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"startNextTd() failed" );
+                PRDF_ERR( PRDF_FUNC "startNextTd() failed" );
                 break;
             }
         }
@@ -671,7 +671,7 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc,
     {
         if ( VCM_PHASE_1 != iv_tdState )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid state machine configuration" );
+            PRDF_ERR( PRDF_FUNC "Invalid state machine configuration" );
             o_rc = FAIL; break;
         }
 
@@ -683,7 +683,7 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc,
         o_rc = checkEccErrors( eccErrorMask, io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"checkEccErrors() failed" );
+            PRDF_ERR( PRDF_FUNC "checkEccErrors() failed" );
             break;
         }
 
@@ -692,7 +692,7 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = handleUe_Td( io_sc, i_stopAddr );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"handleUe_Td() failed" );
+                PRDF_ERR( PRDF_FUNC "handleUe_Td() failed" );
                 break;
             }
 
@@ -706,7 +706,7 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = handleRceEte_Td( io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"handleRceEte_Td() failed" );
+                PRDF_ERR( PRDF_FUNC "handleRceEte_Td() failed" );
                 break;
             }
         }
@@ -723,7 +723,7 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = startVcmPhase2( io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"startVcmPhase2() failed" );
+                PRDF_ERR( PRDF_FUNC "startVcmPhase2() failed" );
                 break;
             }
         }
@@ -733,7 +733,7 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = resumeScrub( io_sc, eccErrorMask );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"resumeScrub() failed" );
+                PRDF_ERR( PRDF_FUNC "resumeScrub() failed" );
                 break;
             }
         }
@@ -746,7 +746,7 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc,
         o_rc = handleTdComplete( io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"handleTdComplete() failed" );
+            PRDF_ERR( PRDF_FUNC "handleTdComplete() failed" );
         }
     }
 
@@ -769,7 +769,7 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc,
     {
         if ( VCM_PHASE_2 != iv_tdState )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid state machine configuration" );
+            PRDF_ERR( PRDF_FUNC "Invalid state machine configuration" );
             o_rc = FAIL; break;
         }
 
@@ -781,7 +781,7 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc,
         o_rc = checkEccErrors( eccErrorMask, io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"checkEccErrors() failed" );
+            PRDF_ERR( PRDF_FUNC "checkEccErrors() failed" );
             break;
         }
 
@@ -790,7 +790,7 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = handleUe_Td( io_sc, i_stopAddr );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"handleUe_Td() failed" );
+                PRDF_ERR( PRDF_FUNC "handleUe_Td() failed" );
                 break;
             }
 
@@ -804,7 +804,7 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = handleRceEte_Td( io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"handleRceEte_Td() failed" );
+                PRDF_ERR( PRDF_FUNC "handleRceEte_Td() failed" );
                 break;
             }
         }
@@ -816,7 +816,7 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = handleMCE_VCM2( io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"handleMCE_VCM2() failed" );
+                PRDF_ERR( PRDF_FUNC "handleMCE_VCM2() failed" );
                 break;
             }
         }
@@ -843,7 +843,7 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc,
                 o_rc = handleMCE_VCM2( io_sc );
                 if ( SUCCESS != o_rc )
                 {
-                    PRDF_ERR( PRDF_FUNC"handleMCE_VCM2() failed" );
+                    PRDF_ERR( PRDF_FUNC "handleMCE_VCM2() failed" );
                 }
             }
             else
@@ -862,7 +862,7 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc,
                                         allowWriteBlocked );
                 if ( SUCCESS != o_rc )
                 {
-                    PRDF_ERR( PRDF_FUNC"mssSetMarkStore() failed" );
+                    PRDF_ERR( PRDF_FUNC "mssSetMarkStore() failed" );
                     break;
                 }
 
@@ -875,7 +875,7 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = resumeScrub( io_sc, eccErrorMask );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"resumeScrub() failed" );
+                PRDF_ERR( PRDF_FUNC "resumeScrub() failed" );
                 break;
             }
         }
@@ -888,7 +888,7 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc,
         o_rc = handleTdComplete( io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"handleTdComplete() failed" );
+            PRDF_ERR( PRDF_FUNC "handleTdComplete() failed" );
         }
     }
 
@@ -911,7 +911,7 @@ int32_t CenMbaTdCtlr::analyzeDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc,
     {
         if ( DSD_PHASE_1 != iv_tdState )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid state machine configuration" );
+            PRDF_ERR( PRDF_FUNC "Invalid state machine configuration" );
             o_rc = FAIL; break;
         }
 
@@ -923,7 +923,7 @@ int32_t CenMbaTdCtlr::analyzeDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc,
         o_rc = checkEccErrors( eccErrorMask, io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"checkEccErrors() failed" );
+            PRDF_ERR( PRDF_FUNC "checkEccErrors() failed" );
             break;
         }
 
@@ -932,7 +932,7 @@ int32_t CenMbaTdCtlr::analyzeDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = handleUe_Td( io_sc, i_stopAddr );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"handleUe_Td() failed" );
+                PRDF_ERR( PRDF_FUNC "handleUe_Td() failed" );
                 break;
             }
 
@@ -946,7 +946,7 @@ int32_t CenMbaTdCtlr::analyzeDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = handleRceEte_Td( io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"handleRceEte_Td() failed" );
+                PRDF_ERR( PRDF_FUNC "handleRceEte_Td() failed" );
                 break;
             }
         }
@@ -971,7 +971,7 @@ int32_t CenMbaTdCtlr::analyzeDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc,
                                     allowWriteBlocked );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"mssSetMarkStore() failed" );
+                PRDF_ERR( PRDF_FUNC "mssSetMarkStore() failed" );
                 break;
             }
 
@@ -984,7 +984,7 @@ int32_t CenMbaTdCtlr::analyzeDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = resumeScrub( io_sc, eccErrorMask );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"resumeScrub() failed" );
+                PRDF_ERR( PRDF_FUNC "resumeScrub() failed" );
                 break;
             }
         }
@@ -998,7 +998,7 @@ int32_t CenMbaTdCtlr::analyzeDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc,
         o_rc = handleTdComplete( io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"handleTdComplete() failed" );
+            PRDF_ERR( PRDF_FUNC "handleTdComplete() failed" );
         }
     }
 
@@ -1021,7 +1021,7 @@ int32_t CenMbaTdCtlr::analyzeTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc,
     {
         if ( TPS_PHASE_1 != iv_tdState )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid state machine configuration" );
+            PRDF_ERR( PRDF_FUNC "Invalid state machine configuration" );
             o_rc = FAIL; break;
         }
 
@@ -1029,7 +1029,7 @@ int32_t CenMbaTdCtlr::analyzeTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc,
         o_rc = mssGetMarkStore( iv_mbaTrgt, iv_rank, iv_mark );
         if ( SUCCESS != o_rc )
         {
-           PRDF_ERR( PRDF_FUNC"mssGetMarkStore() failed." );
+           PRDF_ERR( PRDF_FUNC "mssGetMarkStore() failed." );
            break;
         }
 
@@ -1040,7 +1040,7 @@ int32_t CenMbaTdCtlr::analyzeTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc,
         o_rc = checkEccErrors( eccErrorMask, io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"checkEccErrors() failed" );
+            PRDF_ERR( PRDF_FUNC "checkEccErrors() failed" );
             break;
         }
 
@@ -1058,7 +1058,7 @@ int32_t CenMbaTdCtlr::analyzeTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = handleMpe_Tps( io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"handleMpe_Tps() failed" );
+                PRDF_ERR( PRDF_FUNC "handleMpe_Tps() failed" );
                 break;
             }
 
@@ -1083,7 +1083,7 @@ int32_t CenMbaTdCtlr::analyzeTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = handleCeEte_Tps( io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"handleCeEte_Tps() failed" );
+                PRDF_ERR( PRDF_FUNC "handleCeEte_Tps() failed" );
                 break;
             }
         }
@@ -1093,7 +1093,7 @@ int32_t CenMbaTdCtlr::analyzeTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = handleRceEte_Td( io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"handleRceEte_Td() failed" );
+                PRDF_ERR( PRDF_FUNC "handleRceEte_Td() failed" );
                 break;
             }
         }
@@ -1103,7 +1103,7 @@ int32_t CenMbaTdCtlr::analyzeTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = handleUe_Td( io_sc, i_stopAddr, false ); // No TPS request.
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"handleUe_Td() failed" );
+                PRDF_ERR( PRDF_FUNC "handleUe_Td() failed" );
                 break;
             }
         }
@@ -1119,7 +1119,7 @@ int32_t CenMbaTdCtlr::analyzeTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc,
                 o_rc = handleTpsFalseAlarm( io_sc );
                 if ( SUCCESS != o_rc )
                 {
-                    PRDF_ERR( PRDF_FUNC"handleTpsFalseAlarm() failed" );
+                    PRDF_ERR( PRDF_FUNC "handleTpsFalseAlarm() failed" );
                     break;
                 }
             }
@@ -1134,7 +1134,7 @@ int32_t CenMbaTdCtlr::analyzeTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc,
         o_rc = resumeScrub( io_sc, eccErrorMask );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"resumeScrub() failed" );
+            PRDF_ERR( PRDF_FUNC "resumeScrub() failed" );
             break;
         }
 
@@ -1154,7 +1154,7 @@ int32_t CenMbaTdCtlr::analyzeTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc,
         o_rc = handleTdComplete( io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"handleTdComplete() failed" );
+            PRDF_ERR( PRDF_FUNC "handleTdComplete() failed" );
         }
     }
 
@@ -1183,14 +1183,14 @@ int32_t CenMbaTdCtlr::startVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = mssGetMarkStore( iv_mbaTrgt, iv_rank, iv_mark );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"mssGetMarkStore() failed");
+            PRDF_ERR( PRDF_FUNC "mssGetMarkStore() failed");
             break;
         }
 
         o_rc = prepareNextCmd( io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"prepareNextCmd() failed" );
+            PRDF_ERR( PRDF_FUNC "prepareNextCmd() failed" );
             break;
         }
 
@@ -1198,7 +1198,7 @@ int32_t CenMbaTdCtlr::startVcmPhase1( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = doTdScrubCmd( COND_RT_VCM_DSD );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"doTdScrubCmd() failed" );
+            PRDF_ERR( PRDF_FUNC "doTdScrubCmd() failed" );
             break;
         }
 
@@ -1228,7 +1228,7 @@ int32_t CenMbaTdCtlr::startVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = prepareNextCmd( io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"prepareNextCmd() failed" );
+            PRDF_ERR( PRDF_FUNC "prepareNextCmd() failed" );
             break;
         }
 
@@ -1236,7 +1236,7 @@ int32_t CenMbaTdCtlr::startVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = doTdScrubCmd( COND_RT_VCM_DSD | mss_MaintCmd::STOP_ON_MCE );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"doTdScrubCmd() failed" );
+            PRDF_ERR( PRDF_FUNC "doTdScrubCmd() failed" );
             break;
         }
 
@@ -1266,7 +1266,7 @@ int32_t CenMbaTdCtlr::startDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = prepareNextCmd( io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"prepareNextCmd() failed" );
+            PRDF_ERR( PRDF_FUNC "prepareNextCmd() failed" );
             break;
         }
 
@@ -1275,7 +1275,7 @@ int32_t CenMbaTdCtlr::startDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc )
                                iv_isEccSteer );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"mssSetSteerMux() failed" );
+            PRDF_ERR( PRDF_FUNC "mssSetSteerMux() failed" );
             break;
         }
 
@@ -1283,7 +1283,7 @@ int32_t CenMbaTdCtlr::startDsdPhase1( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = doTdScrubCmd( COND_RT_VCM_DSD );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"doTdScrubCmd() failed" );
+            PRDF_ERR( PRDF_FUNC "doTdScrubCmd() failed" );
             break;
         }
 
@@ -1316,7 +1316,7 @@ int32_t CenMbaTdCtlr::startTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = prepareNextCmd( io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"prepareNextCmd() failed" );
+            PRDF_ERR( PRDF_FUNC "prepareNextCmd() failed" );
             break;
         }
 
@@ -1324,7 +1324,7 @@ int32_t CenMbaTdCtlr::startTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = setTpsThresholds();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"setTpsThresholds() failed" );
+            PRDF_ERR( PRDF_FUNC "setTpsThresholds() failed" );
             break;
         }
 
@@ -1339,7 +1339,7 @@ int32_t CenMbaTdCtlr::startTpsPhase1( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = doTdScrubCmd( stopCond, mss_MaintCmdWrapper::SLAVE_RANK_ONLY );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"doTdScrubCmd() failed" );
+            PRDF_ERR( PRDF_FUNC "doTdScrubCmd() failed" );
             break;
         }
 
@@ -1371,7 +1371,7 @@ int32_t CenMbaTdCtlr::startBgScrub( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = prepareNextCmd( io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"prepareNextCmd() failed" );
+            PRDF_ERR( PRDF_FUNC "prepareNextCmd() failed" );
             break;
         }
 
@@ -1379,7 +1379,7 @@ int32_t CenMbaTdCtlr::startBgScrub( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = setRtEteThresholds();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"setRtEteThresholds() failed" );
+            PRDF_ERR( PRDF_FUNC "setRtEteThresholds() failed" );
             break;
         }
 
@@ -1388,7 +1388,7 @@ int32_t CenMbaTdCtlr::startBgScrub( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = unmaskFetchAttns();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"unmaskFetchAttns() failed" );
+            PRDF_ERR( PRDF_FUNC "unmaskFetchAttns() failed" );
             break;
         }
 
@@ -1427,7 +1427,7 @@ int32_t CenMbaTdCtlr::startBgScrub( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = doBgScrubCmd( COND_BG_SCRUB );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"doBgScrubCmd() failed" );
+            PRDF_ERR( PRDF_FUNC "doBgScrubCmd() failed" );
             break;
         }
 
@@ -1454,7 +1454,7 @@ int32_t CenMbaTdCtlr::startNextTd( STEP_CODE_DATA_STRUCT & io_sc )
             o_rc = startBgScrub( io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"startBgScrub() failed" );
+                PRDF_ERR( PRDF_FUNC "startBgScrub() failed" );
                 break;
             }
         }
@@ -1472,7 +1472,7 @@ int32_t CenMbaTdCtlr::startNextTd( STEP_CODE_DATA_STRUCT & io_sc )
             }
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"failed to start procedure for event %d",
+                PRDF_ERR( PRDF_FUNC "failed to start procedure for event %d",
                           entry.type );
                 break;
             }
@@ -1485,7 +1485,7 @@ int32_t CenMbaTdCtlr::startNextTd( STEP_CODE_DATA_STRUCT & io_sc )
             o_rc = maskFetchAttns();
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"maskFetchAttns() failed" );
+                PRDF_ERR( PRDF_FUNC "maskFetchAttns() failed" );
                 break;
             }
 
@@ -1513,7 +1513,7 @@ int32_t CenMbaTdCtlr::resumeScrub( STEP_CODE_DATA_STRUCT & io_sc,
              (VCM_PHASE_1 != iv_tdState) && (VCM_PHASE_2 != iv_tdState) &&
              (DSD_PHASE_1 != iv_tdState) && (TPS_PHASE_1 != iv_tdState) )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid state machine configuration" );
+            PRDF_ERR( PRDF_FUNC "Invalid state machine configuration" );
             o_rc = FAIL; break;
         }
 
@@ -1521,7 +1521,7 @@ int32_t CenMbaTdCtlr::resumeScrub( STEP_CODE_DATA_STRUCT & io_sc,
         o_rc = clearCeCounters( i_eccErrorMask );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"clearCeCounters() failed" );
+            PRDF_ERR( PRDF_FUNC "clearCeCounters() failed" );
             break;
         }
 
@@ -1530,7 +1530,7 @@ int32_t CenMbaTdCtlr::resumeScrub( STEP_CODE_DATA_STRUCT & io_sc,
         o_rc = prepareNextCmd( io_sc, false );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"prepareNextCmd() failed" );
+            PRDF_ERR( PRDF_FUNC "prepareNextCmd() failed" );
             break;
         }
 
@@ -1538,14 +1538,14 @@ int32_t CenMbaTdCtlr::resumeScrub( STEP_CODE_DATA_STRUCT & io_sc,
         iv_mssCmd = createIncAddrMssCmd( iv_mbaTrgt );
         if ( NULL == iv_mssCmd )
         {
-            PRDF_ERR( PRDF_FUNC"createIncAddrMssCmd returned NULL" );
+            PRDF_ERR( PRDF_FUNC "createIncAddrMssCmd returned NULL" );
             o_rc = FAIL; break;
         }
 
         o_rc = iv_mssCmd->setupAndExecuteCmd();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"setupAndExecuteCmd() failed" );
+            PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() failed" );
             break;
         }
 
@@ -1554,7 +1554,7 @@ int32_t CenMbaTdCtlr::resumeScrub( STEP_CODE_DATA_STRUCT & io_sc,
         o_rc = getCenMaintStartAddr( iv_mbaChip, addr );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getCenMaintStartAddr() failed" );
+            PRDF_ERR( PRDF_FUNC "getCenMaintStartAddr() failed" );
             break;
         }
 
@@ -1562,7 +1562,7 @@ int32_t CenMbaTdCtlr::resumeScrub( STEP_CODE_DATA_STRUCT & io_sc,
         o_rc = prepareNextCmd( io_sc, false );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"prepareNextCmd() failed" );
+            PRDF_ERR( PRDF_FUNC "prepareNextCmd() failed" );
             break;
         }
 
@@ -1610,7 +1610,7 @@ int32_t CenMbaTdCtlr::resumeScrub( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = doBgScrubCmd( stopCond, flags, &addr );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"doBgScrubCmd() failed" );
+                PRDF_ERR( PRDF_FUNC "doBgScrubCmd() failed" );
                 break;
             }
         }
@@ -1620,7 +1620,7 @@ int32_t CenMbaTdCtlr::resumeScrub( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = doTdScrubCmd( stopCond, flags, &addr );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"doTdScrubCmd() failed" );
+                PRDF_ERR( PRDF_FUNC "doTdScrubCmd() failed" );
                 break;
             }
         }
@@ -1661,7 +1661,7 @@ int32_t CenMbaTdCtlr::handleTdComplete( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = removeTdQueueEntry();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"removeTdQueueEntry() failed" );
+            PRDF_ERR( PRDF_FUNC "removeTdQueueEntry() failed" );
             break;
         }
 
@@ -1669,7 +1669,7 @@ int32_t CenMbaTdCtlr::handleTdComplete( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = startNextTd( io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"startNextTd() failed" );
+            PRDF_ERR( PRDF_FUNC "startNextTd() failed" );
             break;
         }
 
@@ -1695,12 +1695,12 @@ int32_t CenMbaTdCtlr::addTdQueueEntryVCM( const CenRank & i_rank )
         o_rc = mssGetMarkStore( iv_mbaTrgt, i_rank, mark );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"mssGetMarkStore() failed");
+            PRDF_ERR( PRDF_FUNC "mssGetMarkStore() failed");
             break;
         }
         if ( !mark.getCM().isValid() )
         {
-            PRDF_ERR( PRDF_FUNC"VCM event but no valid chip mark" );
+            PRDF_ERR( PRDF_FUNC "VCM event but no valid chip mark" );
             o_rc = FAIL; break;
         }
 
@@ -1711,7 +1711,7 @@ int32_t CenMbaTdCtlr::addTdQueueEntryVCM( const CenRank & i_rank )
         o_rc = iv_masterRanks.setBad( i_rank );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"setBad() failed" );
+            PRDF_ERR( PRDF_FUNC "setBad() failed" );
             break;
         }
 
@@ -1719,7 +1719,7 @@ int32_t CenMbaTdCtlr::addTdQueueEntryVCM( const CenRank & i_rank )
 
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Failed: i_rank=m%ds%d",
+        PRDF_ERR( PRDF_FUNC "Failed: i_rank=m%ds%d",
                   i_rank.getMaster(), i_rank.getSlave() );
     }
 
@@ -1752,7 +1752,7 @@ int32_t CenMbaTdCtlr::addTdQueueEntryTPS( const CenRank & i_rank,
         o_rc = mssGetMarkStore( iv_mbaTrgt, i_rank, mark );
         if ( SUCCESS != o_rc )
         {
-           PRDF_ERR( PRDF_FUNC"mssGetMarkStore() failed." );
+           PRDF_ERR( PRDF_FUNC "mssGetMarkStore() failed." );
            break;
         }
         if ( mark.getCM().isValid() &&
@@ -1763,7 +1763,7 @@ int32_t CenMbaTdCtlr::addTdQueueEntryTPS( const CenRank & i_rank,
             o_rc |= checkForAvailableSpares( 1, port1Available );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"checkForAvailableSpares() failed." );
+                PRDF_ERR( PRDF_FUNC "checkForAvailableSpares() failed." );
                 break;
             }
 
@@ -1791,7 +1791,7 @@ int32_t CenMbaTdCtlr::addTdQueueEntryTPS( const CenRank & i_rank,
         o_rc = iv_masterRanks.setBad( i_rank );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"setBad() failed" );
+            PRDF_ERR( PRDF_FUNC "setBad() failed" );
             break;
         }
 
@@ -1799,7 +1799,7 @@ int32_t CenMbaTdCtlr::addTdQueueEntryTPS( const CenRank & i_rank,
 
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Failed: i_rank=m%ds%d i_banTps=%c",
+        PRDF_ERR( PRDF_FUNC "Failed: i_rank=m%ds%d i_banTps=%c",
                   i_rank.getMaster(), i_rank.getSlave(),
                   i_banTps ? 'T' : 'F' );
     }
@@ -1825,7 +1825,7 @@ int32_t CenMbaTdCtlr::removeTdQueueEntry()
     {
         o_rc = iv_masterRanks.setGood( iv_rank );
         if ( SUCCESS != o_rc )
-            PRDF_ERR( PRDF_FUNC"setGood() failed" );
+            PRDF_ERR( PRDF_FUNC "setGood() failed" );
     }
 
     return o_rc;
@@ -1892,7 +1892,7 @@ int32_t CenMbaTdCtlr::handleUe_Td( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc =  DEALLOC::lmbGard( iv_mbaChip, i_stopAddr, false );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"lmbGard() failed" );
+                PRDF_ERR( PRDF_FUNC "lmbGard() failed" );
                 break;
             }
         }
@@ -1903,7 +1903,7 @@ int32_t CenMbaTdCtlr::handleUe_Td( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = addTdQueueEntryTPS( i_stopAddr.getRank(), io_sc, true );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"addTdQueueEntryTPS() failed" );
+                PRDF_ERR( PRDF_FUNC "addTdQueueEntryTPS() failed" );
                 break;
             }
         }
@@ -1962,7 +1962,7 @@ int32_t CenMbaTdCtlr::handleMpe_Tps( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = addTdQueueEntryVCM( iv_rank );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"addTdQueueEntryVCM() failed" );
+            PRDF_ERR( PRDF_FUNC "addTdQueueEntryVCM() failed" );
             break;
         }
 
@@ -1978,7 +1978,7 @@ int32_t CenMbaTdCtlr::handleMpe_Tps( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = fir->Write();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Write() failed on %s", fir_str );
+            PRDF_ERR( PRDF_FUNC "Write() failed on %s", fir_str );
             break;
         }
 
@@ -2001,7 +2001,7 @@ int32_t CenMbaTdCtlr::handleCeEte_Tps( STEP_CODE_DATA_STRUCT & io_sc )
     {
         if ( TPS_PHASE_1 != iv_tdState )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid state machine configuration" );
+            PRDF_ERR( PRDF_FUNC "Invalid state machine configuration" );
             o_rc = FAIL; break;
         }
 
@@ -2010,7 +2010,7 @@ int32_t CenMbaTdCtlr::handleCeEte_Tps( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = getTpsCeThr( thr );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getTpsCeThr() failed." );
+            PRDF_ERR( PRDF_FUNC "getTpsCeThr() failed." );
             break;
         }
 
@@ -2020,7 +2020,7 @@ int32_t CenMbaTdCtlr::handleCeEte_Tps( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = collectCeStats( iv_mbaChip, iv_rank, symData, targetCM, thr );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"collectCeStats() failed." );
+            PRDF_ERR( PRDF_FUNC "collectCeStats() failed." );
             break;
         }
 
@@ -2045,7 +2045,7 @@ int32_t CenMbaTdCtlr::handleCeEte_Tps( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = getBadDqBitmap( iv_mbaTrgt, iv_rank, bitmap );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getBadDqBitmap() failed" );
+            PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed" );
             break;
         }
 
@@ -2058,7 +2058,7 @@ int32_t CenMbaTdCtlr::handleCeEte_Tps( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = setBadDqBitmap( iv_mbaTrgt, iv_rank, bitmap );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"setBadDqBitmap() failed" );
+            PRDF_ERR( PRDF_FUNC "setBadDqBitmap() failed" );
             break;
         }
 
@@ -2073,7 +2073,7 @@ int32_t CenMbaTdCtlr::handleCeEte_Tps( STEP_CODE_DATA_STRUCT & io_sc )
                 o_rc = tpsChipMark( io_sc );
                 if ( SUCCESS != o_rc )
                 {
-                    PRDF_ERR( PRDF_FUNC"tpsChipMark() failed." );
+                    PRDF_ERR( PRDF_FUNC "tpsChipMark() failed." );
                     break;
                 }
 
@@ -2091,7 +2091,7 @@ int32_t CenMbaTdCtlr::handleCeEte_Tps( STEP_CODE_DATA_STRUCT & io_sc )
                         o_rc = tpsChipMark( io_sc );
                         if ( SUCCESS != o_rc )
                         {
-                            PRDF_ERR( PRDF_FUNC"tpsChipMark() failed." );
+                            PRDF_ERR( PRDF_FUNC "tpsChipMark() failed." );
                             break;
                         }
 
@@ -2117,7 +2117,7 @@ int32_t CenMbaTdCtlr::handleCeEte_Tps( STEP_CODE_DATA_STRUCT & io_sc )
             o_rc = tpsSymbolMark( io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"tpsSymbolMark() failed." );
+                PRDF_ERR( PRDF_FUNC "tpsSymbolMark() failed." );
                 break;
             }
         }
@@ -2139,7 +2139,7 @@ int32_t CenMbaTdCtlr::handleCeEte_Tps( STEP_CODE_DATA_STRUCT & io_sc )
                                             available );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"checkForAvailableSpares() failed" );
+                PRDF_ERR( PRDF_FUNC "checkForAvailableSpares() failed" );
                 break;
             }
 
@@ -2184,7 +2184,7 @@ int32_t CenMbaTdCtlr::handleUe_NonTd( STEP_CODE_DATA_STRUCT & io_sc,
         o_rc = addTdQueueEntryTPS( iv_rank, io_sc, true );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"addTdQueueEntryTPS() failed" );
+            PRDF_ERR( PRDF_FUNC "addTdQueueEntryTPS() failed" );
             break;
         }
 
@@ -2192,7 +2192,7 @@ int32_t CenMbaTdCtlr::handleUe_NonTd( STEP_CODE_DATA_STRUCT & io_sc,
         o_rc =  DEALLOC::lmbGard( iv_mbaChip, i_addr, false );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"lmbGard() failed" );
+            PRDF_ERR( PRDF_FUNC "lmbGard() failed" );
             break;
         }
 
@@ -2224,7 +2224,7 @@ int32_t CenMbaTdCtlr::handleMpe_NonTd( STEP_CODE_DATA_STRUCT & io_sc,
         o_rc = addTdQueueEntryVCM( iv_rank );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"addTdQueueEntryVCM() failed" );
+            PRDF_ERR( PRDF_FUNC "addTdQueueEntryVCM() failed" );
             break;
         }
 
@@ -2233,7 +2233,7 @@ int32_t CenMbaTdCtlr::handleMpe_NonTd( STEP_CODE_DATA_STRUCT & io_sc,
         o_rc = mssGetMarkStore( iv_mbaTrgt, iv_rank, mark );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"mssGetMarkStore() failed");
+            PRDF_ERR( PRDF_FUNC "mssGetMarkStore() failed");
             break;
         }
 
@@ -2274,7 +2274,7 @@ int32_t CenMbaTdCtlr::handleRceEte_NonTd( STEP_CODE_DATA_STRUCT & io_sc )
             o_rc = mbsec1->Read();
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"Read() failed on %s", reg_str );
+                PRDF_ERR( PRDF_FUNC "Read() failed on %s", reg_str );
                 break;
             }
 
@@ -2292,7 +2292,7 @@ int32_t CenMbaTdCtlr::handleRceEte_NonTd( STEP_CODE_DATA_STRUCT & io_sc )
             o_rc = addTdQueueEntryTPS( iv_rank, io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"addTdQueueEntryTPS() failed" );
+                PRDF_ERR( PRDF_FUNC "addTdQueueEntryTPS() failed" );
                 break;
             }
         }
@@ -2321,7 +2321,7 @@ int32_t CenMbaTdCtlr::handleHardCeEte_NonTd( STEP_CODE_DATA_STRUCT & io_sc,
         o_rc = DEALLOC::pageGard( iv_mbaChip, i_addr );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"pageGard() failed" );
+            PRDF_ERR( PRDF_FUNC "pageGard() failed" );
             break;
         }
 
@@ -2332,13 +2332,13 @@ int32_t CenMbaTdCtlr::handleHardCeEte_NonTd( STEP_CODE_DATA_STRUCT & io_sc,
         o_rc = collectCeStats( iv_mbaChip, iv_rank, symData, junk );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"collectCeStats() failed." );
+            PRDF_ERR( PRDF_FUNC "collectCeStats() failed." );
             break;
         }
 
         if ( 1 != symData.size() )
         {
-            PRDF_ERR( PRDF_FUNC"collectCeStats() return size %d, but was "
+            PRDF_ERR( PRDF_FUNC "collectCeStats() return size %d, but was "
                       "expecting size 1", symData.size() );
             o_rc = FAIL;
             break;
@@ -2357,7 +2357,7 @@ int32_t CenMbaTdCtlr::handleHardCeEte_NonTd( STEP_CODE_DATA_STRUCT & io_sc,
             o_rc = addTdQueueEntryTPS( iv_rank, io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"addTdQueueEntryTPS() failed" );
+                PRDF_ERR( PRDF_FUNC "addTdQueueEntryTPS() failed" );
                 break;
             }
         }
@@ -2394,7 +2394,7 @@ int32_t CenMbaTdCtlr::handleSoftIntCeEte_NonTd( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = addTdQueueEntryTPS( iv_rank, io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"addTdQueueEntryTPS() failed" );
+            PRDF_ERR( PRDF_FUNC "addTdQueueEntryTPS() failed" );
             break;
         }
 
@@ -2419,7 +2419,7 @@ int32_t CenMbaTdCtlr::handleTpsFalseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
     {
         if ( TPS_PHASE_1 != iv_tdState )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid state machine configuration" );
+            PRDF_ERR( PRDF_FUNC "Invalid state machine configuration" );
             o_rc = FAIL; break;
         }
 
@@ -2428,7 +2428,7 @@ int32_t CenMbaTdCtlr::handleTpsFalseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = collectCeStats( iv_mbaChip, iv_rank, symData, junk );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"collectCeStats() failed." );
+            PRDF_ERR( PRDF_FUNC "collectCeStats() failed." );
             break;
         }
 
@@ -2472,7 +2472,7 @@ int32_t CenMbaTdCtlr::handleTpsFalseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
             o_rc = tpsSymbolMark( io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"tpsSymbolMark() failed." );
+                PRDF_ERR( PRDF_FUNC "tpsSymbolMark() failed." );
                 break;
             }
 
@@ -2481,7 +2481,7 @@ int32_t CenMbaTdCtlr::handleTpsFalseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
             o_rc = getBadDqBitmap( iv_mbaTrgt, iv_rank, bitmap );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"getBadDqBitmap() failed" );
+                PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed" );
                 break;
             }
 
@@ -2490,7 +2490,7 @@ int32_t CenMbaTdCtlr::handleTpsFalseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
             o_rc = setBadDqBitmap( iv_mbaTrgt, iv_rank, bitmap );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"setBadDqBitmap() failed" );
+                PRDF_ERR( PRDF_FUNC "setBadDqBitmap() failed" );
                 break;
             }
         }
@@ -2501,7 +2501,7 @@ int32_t CenMbaTdCtlr::handleTpsFalseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
             o_rc = tpsChipMark( io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"tpsChipMark() failed" );
+                PRDF_ERR( PRDF_FUNC "tpsChipMark() failed" );
                 break;
             }
         }
@@ -2531,7 +2531,7 @@ int32_t CenMbaTdCtlr::getTpsCeThr( uint16_t & o_thr )
     {
         if ( TPS_PHASE_1 != iv_tdState )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid state machine configuration" );
+            PRDF_ERR( PRDF_FUNC "Invalid state machine configuration" );
             o_rc = FAIL;
             break;
         }
@@ -2545,7 +2545,7 @@ int32_t CenMbaTdCtlr::getTpsCeThr( uint16_t & o_thr )
             o_rc = getScrubCeThreshold( iv_mbaChip, iv_rank, o_thr );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"getScrubCeThreshold() failed." );
+                PRDF_ERR( PRDF_FUNC "getScrubCeThreshold() failed." );
                 break;
             }
         }
@@ -2569,7 +2569,7 @@ int32_t CenMbaTdCtlr::setTpsThresholds()
     {
         if ( TPS_PHASE_1 != iv_tdState )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid state machine configuration" );
+            PRDF_ERR( PRDF_FUNC "Invalid state machine configuration" );
             o_rc = FAIL;
             break;
         }
@@ -2581,7 +2581,7 @@ int32_t CenMbaTdCtlr::setTpsThresholds()
         o_rc = mbstr->ForceRead();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"ForceRead() failed on %s", reg_str );
+            PRDF_ERR( PRDF_FUNC "ForceRead() failed on %s", reg_str );
             break;
         }
 
@@ -2608,7 +2608,7 @@ int32_t CenMbaTdCtlr::setTpsThresholds()
         o_rc = mbstr->Write();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Write() failed on %s", reg_str );
+            PRDF_ERR( PRDF_FUNC "Write() failed on %s", reg_str );
             break;
         }
 
@@ -2633,7 +2633,7 @@ int32_t CenMbaTdCtlr::tpsChipMark( STEP_CODE_DATA_STRUCT & io_sc )
     {
         if ( TPS_PHASE_1 != iv_tdState )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid state machine configuration" );
+            PRDF_ERR( PRDF_FUNC "Invalid state machine configuration" );
             o_rc = FAIL; break;
         }
 
@@ -2644,7 +2644,7 @@ int32_t CenMbaTdCtlr::tpsChipMark( STEP_CODE_DATA_STRUCT & io_sc )
                                 allowWriteBlocked );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"mssSetMarkStore() failed" );
+            PRDF_ERR( PRDF_FUNC "mssSetMarkStore() failed" );
             break;
         }
 
@@ -2662,7 +2662,7 @@ int32_t CenMbaTdCtlr::tpsChipMark( STEP_CODE_DATA_STRUCT & io_sc )
             o_rc = addTdQueueEntryVCM( iv_rank );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"addTdQueueEntryVCM() failed" );
+                PRDF_ERR( PRDF_FUNC "addTdQueueEntryVCM() failed" );
                 break;
             }
         }
@@ -2688,7 +2688,7 @@ int32_t CenMbaTdCtlr::tpsSymbolMark( STEP_CODE_DATA_STRUCT & io_sc )
     {
         if ( TPS_PHASE_1 != iv_tdState )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid state machine configuration" );
+            PRDF_ERR( PRDF_FUNC "Invalid state machine configuration" );
             o_rc = FAIL; break;
         }
 
@@ -2699,7 +2699,7 @@ int32_t CenMbaTdCtlr::tpsSymbolMark( STEP_CODE_DATA_STRUCT & io_sc )
                                 allowWriteBlocked );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"mssSetMarkStore() failed." );
+            PRDF_ERR( PRDF_FUNC "mssSetMarkStore() failed." );
             o_rc = FAIL; break;
         }
 
@@ -2709,7 +2709,7 @@ int32_t CenMbaTdCtlr::tpsSymbolMark( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = addTdQueueEntryVCM( iv_rank );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"addTdQueueEntryVCM() failed" );
+            PRDF_ERR( PRDF_FUNC "addTdQueueEntryVCM() failed" );
             break;
         }
 
@@ -2722,7 +2722,7 @@ int32_t CenMbaTdCtlr::tpsSymbolMark( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = firand->Write();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Write() failed on %s", reg_str );
+            PRDF_ERR( PRDF_FUNC "Write() failed on %s", reg_str );
             break;
         }
 
@@ -2732,7 +2732,7 @@ int32_t CenMbaTdCtlr::tpsSymbolMark( STEP_CODE_DATA_STRUCT & io_sc )
         o_rc = mssSetMarkStore( iv_mbaTrgt, iv_rank, iv_mark, blocked );
         if ( SUCCESS != o_rc )
         {
-           PRDF_ERR( PRDF_FUNC"mssSetMarkStore() failed on retry." );
+           PRDF_ERR( PRDF_FUNC "mssSetMarkStore() failed on retry." );
            break;
         }
 
@@ -2768,7 +2768,7 @@ int32_t CenMbaTdCtlr::maskFetchAttns()
         o_rc = reg->Write();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Write() failed on %s", reg_str );
+            PRDF_ERR( PRDF_FUNC "Write() failed on %s", reg_str );
             break;
         }
 
@@ -2812,14 +2812,14 @@ int32_t CenMbaTdCtlr::unmaskFetchAttns()
         o_rc = fir->Write();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Write() failed on %s", fir_str );
+            PRDF_ERR( PRDF_FUNC "Write() failed on %s", fir_str );
             break;
         }
 
         o_rc = msk->Write();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Write() failed on %s", msk_str );
+            PRDF_ERR( PRDF_FUNC "Write() failed on %s", msk_str );
             break;
         }
 
@@ -2851,7 +2851,7 @@ int32_t CenMbaTdCtlr::clearCeCounters( uint32_t i_eccErrorMask )
         o_rc = ec0Reg->Read();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Read() failed on %s", ec0Reg_str );
+            PRDF_ERR( PRDF_FUNC "Read() failed on %s", ec0Reg_str );
             break;
         }
 
@@ -2881,7 +2881,7 @@ int32_t CenMbaTdCtlr::clearCeCounters( uint32_t i_eccErrorMask )
             o_rc = clearPerSymbolCounters( iv_membChip, iv_mbaPos );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"clearCeStats() failed " );
+                PRDF_ERR( PRDF_FUNC "clearCeStats() failed " );
                 break;
             }
         }
@@ -2897,7 +2897,7 @@ int32_t CenMbaTdCtlr::clearCeCounters( uint32_t i_eccErrorMask )
             o_rc = ec1Reg->Read();
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"Read() failed on %s", ec1Reg_str );
+                PRDF_ERR( PRDF_FUNC "Read() failed on %s", ec1Reg_str );
                 break;
             }
 
@@ -2906,7 +2906,7 @@ int32_t CenMbaTdCtlr::clearCeCounters( uint32_t i_eccErrorMask )
             o_rc = ec1Reg->Write();
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"Write() failed on %s", ec1Reg_str );
+                PRDF_ERR( PRDF_FUNC "Write() failed on %s", ec1Reg_str );
                 break;
             }
         }
@@ -2916,7 +2916,7 @@ int32_t CenMbaTdCtlr::clearCeCounters( uint32_t i_eccErrorMask )
             o_rc = ec0Reg->Write();
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"Write() failed on %s", ec0Reg_str );
+                PRDF_ERR( PRDF_FUNC "Write() failed on %s", ec0Reg_str );
                 break;
             }
         }
@@ -2948,14 +2948,14 @@ int32_t CenMbaTdCtlr::doBgScrubCmd( uint32_t i_stopCond, uint32_t i_flags,
                                   cmdSpeed, i_flags, i_sAddrOverride );
         if ( NULL == iv_mssCmd )
         {
-            PRDF_ERR( PRDF_FUNC"createMssCmd() failed");
+            PRDF_ERR( PRDF_FUNC "createMssCmd() failed");
             o_rc = FAIL; break;
         }
 
         o_rc = iv_mssCmd->setupAndExecuteCmd();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"setupAndExecuteCmd() failed" );
+            PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() failed" );
             break;
         }
 
@@ -2986,14 +2986,14 @@ int32_t CenMbaTdCtlr::doTdScrubCmd( uint32_t i_stopCond, uint32_t i_flags,
                                   cmdSpeed, i_flags, i_sAddrOverride );
         if ( NULL == iv_mssCmd )
         {
-            PRDF_ERR( PRDF_FUNC"createMssCmd() failed");
+            PRDF_ERR( PRDF_FUNC "createMssCmd() failed");
             o_rc = FAIL; break;
         }
 
         o_rc = iv_mssCmd->setupAndExecuteCmd();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"setupAndExecuteCmd() failed" );
+            PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() failed" );
             break;
         }
 
@@ -3023,7 +3023,7 @@ int32_t CenMbaTdCtlr::checkForAvailableSpares( uint8_t i_ps, bool & o_avail )
         o_rc = getBadDqBitmap( iv_mbaTrgt, iv_rank, bitmap );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getBadDqBitmap() failed" );
+            PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed" );
             break;
         }
 
@@ -3031,7 +3031,7 @@ int32_t CenMbaTdCtlr::checkForAvailableSpares( uint8_t i_ps, bool & o_avail )
         o_rc = bitmap.isDramSpareAvailable( i_ps, dramSparePossible );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"isDramSpareAvailable() failed" );
+            PRDF_ERR( PRDF_FUNC "isDramSpareAvailable() failed" );
             break;
         }
 
@@ -3043,7 +3043,7 @@ int32_t CenMbaTdCtlr::checkForAvailableSpares( uint8_t i_ps, bool & o_avail )
         o_rc = mssGetSteerMux( iv_mbaTrgt, iv_rank, sp0, sp1, ecc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"mssGetSteerMux() failed" );
+            PRDF_ERR( PRDF_FUNC "mssGetSteerMux() failed" );
             break;
         }
 

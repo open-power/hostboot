@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -93,7 +95,7 @@ int32_t MaintCmdComplete( ExtensibleChip * i_mbaChip,
     l_rc = mbadb->iv_tdCtlr.handleCmdCompleteEvent( i_sc );
     if ( SUCCESS != l_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Failed: i_mbaChip=0x%08x", i_mbaChip->GetId() );
+        PRDF_ERR( PRDF_FUNC "Failed: i_mbaChip=0x%08x", i_mbaChip->GetId() );
         CalloutUtil::defaultError( i_sc );
     }
 

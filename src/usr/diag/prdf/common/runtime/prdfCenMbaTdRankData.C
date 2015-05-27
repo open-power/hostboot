@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,14 +54,14 @@ int32_t TdRankList::initialize( TargetHandle_t i_mbaTrgt )
         o_rc = getMasterRanks( i_mbaTrgt, ranks );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getMasterRanks() failed" );
+            PRDF_ERR( PRDF_FUNC "getMasterRanks() failed" );
             break;
         }
 
         // Make sure the list is not empty for some reason.
         if ( ranks.empty() )
         {
-            PRDF_ERR( PRDF_FUNC"getMasterRanks() returned an empty list" );
+            PRDF_ERR( PRDF_FUNC "getMasterRanks() returned an empty list" );
             o_rc = FAIL; break;
         }
 
@@ -125,7 +125,7 @@ int32_t TdRankList::setInterruptedRank( const CenRank & i_rank )
     ListItr it = findRank( i_rank );
     if ( iv_list.end() == it )
     {
-        PRDF_ERR( PRDF_FUNC"findRank() failed: i_rank=%d", i_rank.getMaster() );
+        PRDF_ERR( PRDF_FUNC "findRank() failed: i_rank=%d", i_rank.getMaster() );
         o_rc = FAIL;
     }
     else
@@ -149,7 +149,7 @@ int32_t TdRankList::setRankStatus( const CenRank & i_rank, bool i_isGood )
     ListItr it = findRank( i_rank );
     if ( iv_list.end() == it )
     {
-        PRDF_ERR( PRDF_FUNC"findRank() failed: i_rank=%d i_isGood=%c",
+        PRDF_ERR( PRDF_FUNC "findRank() failed: i_rank=%d i_isGood=%c",
                   i_rank.getMaster(), i_isGood ? 'T' : 'F' );
         o_rc = FAIL;
     }

@@ -253,7 +253,7 @@ int32_t PreAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc,
         o_rc = fir->Read();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Failed to read GLOBAL_CS_FIR on 0x%08x",
+            PRDF_ERR( PRDF_FUNC "Failed to read GLOBAL_CS_FIR on 0x%08x",
                       i_mbChip->GetId() );
             break;
         }
@@ -298,13 +298,13 @@ int32_t PostAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc )
     l_rc = MemUtils::mcifirCleanup( i_mbChip, i_sc );
     if( SUCCESS != l_rc )
     {
-        PRDF_ERR( PRDF_FUNC"mcifirCleanup() failed");
+        PRDF_ERR( PRDF_FUNC "mcifirCleanup() failed");
     }
 
     l_rc = MemUtils::chnlCsCleanup( i_mbChip, i_sc );
     if( SUCCESS != l_rc )
     {
-        PRDF_ERR( PRDF_FUNC"ChnlCsCleanup() failed");
+        PRDF_ERR( PRDF_FUNC "ChnlCsCleanup() failed");
     }
 
     return SUCCESS;
@@ -400,7 +400,7 @@ int32_t AnalyzeFetchMpe( ExtensibleChip * i_membChip,
         mbaChip = membdb->getMbaChip( i_mbaPos );
         if ( NULL == mbaChip )
         {
-            PRDF_ERR( PRDF_FUNC"getMbaChip() returned NULL" );
+            PRDF_ERR( PRDF_FUNC "getMbaChip() returned NULL" );
             l_rc = FAIL; break;
         }
 
@@ -411,7 +411,7 @@ int32_t AnalyzeFetchMpe( ExtensibleChip * i_membChip,
         l_rc = getCenReadAddr( i_membChip, i_mbaPos, READ_MPE_ADDR, addr );
         if ( SUCCESS != l_rc )
         {
-           PRDF_ERR( PRDF_FUNC"getCenReadAddr() failed" );
+           PRDF_ERR( PRDF_FUNC "getCenReadAddr() failed" );
            break;
         }
 
@@ -431,13 +431,13 @@ int32_t AnalyzeFetchMpe( ExtensibleChip * i_membChip,
         l_rc = mssGetMarkStore( mbaTrgt, rank, mark );
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"mssGetMarkStore() failed");
+            PRDF_ERR( PRDF_FUNC "mssGetMarkStore() failed");
             break;
         }
 
         if ( !mark.getCM().isValid() )
         {
-            PRDF_ERR( PRDF_FUNC"FIR bit set but no valid chip mark" );
+            PRDF_ERR( PRDF_FUNC "FIR bit set but no valid chip mark" );
             l_rc = FAIL; break;
         }
 
@@ -449,7 +449,7 @@ int32_t AnalyzeFetchMpe( ExtensibleChip * i_membChip,
                                                CenMbaTdCtlrCommon::VCM_EVENT );
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"handleTdEvent() failed." );
+            PRDF_ERR( PRDF_FUNC "handleTdEvent() failed." );
             break;
         }
 
@@ -461,7 +461,7 @@ int32_t AnalyzeFetchMpe( ExtensibleChip * i_membChip,
 
     if ( SUCCESS != l_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Failed: i_membChip=0x%08x i_mbaPos=%d i_rank=%d",
+        PRDF_ERR( PRDF_FUNC "Failed: i_membChip=0x%08x i_mbaPos=%d i_rank=%d",
                   i_membChip->GetId(), i_mbaPos, i_rank );
         CalloutUtil::defaultError( i_sc );
     }
@@ -495,7 +495,7 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
         mbaChip = membdb->getMbaChip( i_mbaPos );
         if ( NULL == mbaChip )
         {
-            PRDF_ERR( PRDF_FUNC"getMbaChip() returned NULL" );
+            PRDF_ERR( PRDF_FUNC "getMbaChip() returned NULL" );
             l_rc = FAIL; break;
         }
         TargetHandle_t mbaTrgt = mbaChip->GetChipHandle();
@@ -504,7 +504,7 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
         l_rc = getCenReadAddr( i_membChip, i_mbaPos, READ_NCE_ADDR, addr );
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getCenReadAddr() failed" );
+            PRDF_ERR( PRDF_FUNC "getCenReadAddr() failed" );
             break;
         }
         CenRank rank = addr.getRank();
@@ -526,7 +526,7 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
             l_rc = reg->Read();
             if ( SUCCESS != l_rc )
             {
-                PRDF_ERR( PRDF_FUNC"Read() failed on %s", reg_str );
+                PRDF_ERR( PRDF_FUNC "Read() failed on %s", reg_str );
                 break;
             }
 
@@ -537,7 +537,7 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
                                                       mask );
             if ( !symbol.isValid() )
             {
-                PRDF_ERR( PRDF_FUNC"Failed to create symbol: galois=0x%02x "
+                PRDF_ERR( PRDF_FUNC "Failed to create symbol: galois=0x%02x "
                           "mask=0x%02x", galois, mask );
                 break;
             }
@@ -547,7 +547,7 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
             l_rc = mssGetSteerMux( mbaTrgt, rank, sp0, sp1, ecc );
             if ( SUCCESS != l_rc )
             {
-                PRDF_ERR( PRDF_FUNC"mssGetSteerMux() failed. HUID: 0x%08x "
+                PRDF_ERR( PRDF_FUNC "mssGetSteerMux() failed. HUID: 0x%08x "
                         "rank: %d", getHuid(mbaTrgt), rank.getMaster() );
                 break;
             }
@@ -578,7 +578,7 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
                 l_rc = getMnfgMemCeTh( mbaChip, rank, dramTh, hrTh, dimmTh );
                 if ( SUCCESS != l_rc )
                 {
-                    PRDF_ERR( PRDF_FUNC"getMnfgMemCeTh() failed: rank=m%ds%d",
+                    PRDF_ERR( PRDF_FUNC "getMnfgMemCeTh() failed: rank=m%ds%d",
                               rank.getMaster(), rank.getSlave() );
                     break;
                 }
@@ -659,7 +659,7 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
                                                 CenMbaTdCtlrCommon::TPS_EVENT );
                 if ( SUCCESS != l_rc )
                 {
-                    PRDF_ERR( PRDF_FUNC"handleTdEvent() failed: rank=m%ds%d",
+                    PRDF_ERR( PRDF_FUNC "handleTdEvent() failed: rank=m%ds%d",
                               rank.getMaster(), rank.getSlave() );
                     break;
                 }
@@ -674,7 +674,7 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
 
     if ( SUCCESS != l_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Failed: i_membChip=0x%08x i_mbaPos=%d",
+        PRDF_ERR( PRDF_FUNC "Failed: i_membChip=0x%08x i_mbaPos=%d",
                   i_membChip->GetId(), i_mbaPos );
         CalloutUtil::defaultError( i_sc );
     }
@@ -710,7 +710,7 @@ int32_t AnalyzeFetchRcePue( ExtensibleChip * i_membChip,
         mbaChip = membdb->getMbaChip( i_mbaPos );
         if ( NULL == mbaChip )
         {
-            PRDF_ERR( PRDF_FUNC"getMbaChip() returned NULL" );
+            PRDF_ERR( PRDF_FUNC "getMbaChip() returned NULL" );
             l_rc = FAIL; break;
         }
 
@@ -726,7 +726,7 @@ int32_t AnalyzeFetchRcePue( ExtensibleChip * i_membChip,
         l_rc = getCenReadAddr( i_membChip, i_mbaPos, READ_UE_ADDR, addr );
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getCenReadAddr() failed" );
+            PRDF_ERR( PRDF_FUNC "getCenReadAddr() failed" );
             break;
         }
         CenRank rank = addr.getRank();
@@ -744,7 +744,7 @@ int32_t AnalyzeFetchRcePue( ExtensibleChip * i_membChip,
                                              CenMbaTdCtlrCommon::TPS_EVENT );
             if ( SUCCESS != l_rc )
             {
-                PRDF_ERR( PRDF_FUNC"handleTdEvent() failed." );
+                PRDF_ERR( PRDF_FUNC "handleTdEvent() failed." );
                 break;
             }
         }
@@ -757,7 +757,7 @@ int32_t AnalyzeFetchRcePue( ExtensibleChip * i_membChip,
 
     if ( SUCCESS != l_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Failed: i_membChip=0x%08x i_mbaPos=%d "
+        PRDF_ERR( PRDF_FUNC "Failed: i_membChip=0x%08x i_mbaPos=%d "
                   "i_isRceError=%c", i_membChip->GetId(), i_mbaPos,
                   i_isRceError ? 'T' : 'F' );
         CalloutUtil::defaultError( i_sc );
@@ -797,7 +797,7 @@ int32_t AnalyzeFetchUe( ExtensibleChip * i_membChip,
         mbaChip = membdb->getMbaChip( i_mbaPos );
         if ( NULL == mbaChip )
         {
-            PRDF_ERR( PRDF_FUNC"getMbaChip() returned NULL" );
+            PRDF_ERR( PRDF_FUNC "getMbaChip() returned NULL" );
             l_rc = FAIL; break;
         }
 
@@ -805,7 +805,7 @@ int32_t AnalyzeFetchUe( ExtensibleChip * i_membChip,
         l_rc = getCenReadAddr( i_membChip, i_mbaPos, READ_UE_ADDR, addr );
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getCenReadAddr() failed" );
+            PRDF_ERR( PRDF_FUNC "getCenReadAddr() failed" );
             break;
         }
         CenRank rank = addr.getRank();
@@ -828,7 +828,7 @@ int32_t AnalyzeFetchUe( ExtensibleChip * i_membChip,
                                                   true );
             if ( SUCCESS != l_rc )
             {
-                PRDF_ERR( PRDF_FUNC"handleTdEvent() failed: rank=m%ds%d",
+                PRDF_ERR( PRDF_FUNC "handleTdEvent() failed: rank=m%ds%d",
                           rank.getMaster(), rank.getSlave() );
                 // We are not adding break here as we still want to do lmbGard
                 // If you want to add any code after this which depends on
@@ -840,7 +840,7 @@ int32_t AnalyzeFetchUe( ExtensibleChip * i_membChip,
             int32_t lmbRc =  DEALLOC::lmbGard( mbaChip, addr );
             if ( SUCCESS != lmbRc )
             {
-                PRDF_ERR( PRDF_FUNC"lmbGard() failed" );
+                PRDF_ERR( PRDF_FUNC "lmbGard() failed" );
                 l_rc = lmbRc; break;
             }
             #endif
@@ -854,7 +854,7 @@ int32_t AnalyzeFetchUe( ExtensibleChip * i_membChip,
 
     if ( SUCCESS != l_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Failed: i_membChip=0x%08x i_mbaPos=%d",
+        PRDF_ERR( PRDF_FUNC "Failed: i_membChip=0x%08x i_mbaPos=%d",
                   i_membChip->GetId(), i_mbaPos );
         CalloutUtil::defaultError( i_sc );
     }
@@ -891,7 +891,7 @@ int32_t ClearMbsSecondaryBits( ExtensibleChip * i_chip,
         l_rc |= mbsFirMask->Read();
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"MBSFIR/MBSFIR_MASK read failed"
+            PRDF_ERR( PRDF_FUNC "MBSFIR/MBSFIR_MASK read failed"
                      "for 0x%08x", i_chip->GetId());
             break;
         }
@@ -916,7 +916,7 @@ int32_t ClearMbsSecondaryBits( ExtensibleChip * i_chip,
                 // Do not break from here, just print error trace.
                 // If there are other secondary bits ( e.g. 26, 27 ),
                 // we want to clear them.
-                PRDF_ERR( PRDF_FUNC"MBIFIR/MASK read failed"
+                PRDF_ERR( PRDF_FUNC "MBIFIR/MASK read failed"
                          "for 0x%08x", i_chip->GetId());
             }
             else if ( mbiFir->IsBitSet( 0 ) && ( ! mbiFirMask->IsBitSet( 0 )) )
@@ -929,7 +929,7 @@ int32_t ClearMbsSecondaryBits( ExtensibleChip * i_chip,
         l_rc = mbsFirAnd->Write();
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"MBSFIR_AND write failed"
+            PRDF_ERR( PRDF_FUNC "MBSFIR_AND write failed"
                      "for 0x%08x", i_chip->GetId());
             break;
         }
@@ -965,7 +965,7 @@ int32_t ClearMbaCalSecondaryBits( ExtensibleChip * i_chip,
         l_rc |= mbsFirMask->Read();
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"MBSFIR/MBSFIR_MASK read failed"
+            PRDF_ERR( PRDF_FUNC "MBSFIR/MBSFIR_MASK read failed"
                      "for 0x%08x", i_chip->GetId());
             break;
         }
@@ -984,7 +984,7 @@ int32_t ClearMbaCalSecondaryBits( ExtensibleChip * i_chip,
             {
                 // Do not break. Just print error trace and look for
                 // other MBA.
-                PRDF_ERR( PRDF_FUNC"MBACALFIR read failed"
+                PRDF_ERR( PRDF_FUNC "MBACALFIR read failed"
                          "for 0x%08x", mbaChip->GetId());
                 continue;
             }
@@ -1005,7 +1005,7 @@ int32_t ClearMbaCalSecondaryBits( ExtensibleChip * i_chip,
             {
                 // Do not break. Just print error trace and look for
                 // other MBA.
-                PRDF_ERR( PRDF_FUNC"MBACALFIR_AND write failed"
+                PRDF_ERR( PRDF_FUNC "MBACALFIR_AND write failed"
                               "for 0x%08x", mbaChip->GetId());
             }
         }
@@ -1040,7 +1040,7 @@ int32_t MaskMbsSecondaryBits( ExtensibleChip * i_chip,
         l_rc = mbsFirMaskOr->Write();
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"MBSFIR_MASK_OR write failed"
+            PRDF_ERR( PRDF_FUNC "MBSFIR_MASK_OR write failed"
                      "for 0x%08x", i_chip->GetId());
             break;
         }
@@ -1086,7 +1086,7 @@ int32_t MaskMbaCalSecondaryBits( ExtensibleChip * i_chip,
             {
                 // Do not break. Just print error trace and look for
                 // other MBA.
-                PRDF_ERR( PRDF_FUNC"MBACALFIR_MASK_OR write failed"
+                PRDF_ERR( PRDF_FUNC "MBACALFIR_MASK_OR write failed"
                          "for 0x%08x", mbaChip->GetId());
             }
         }
@@ -1138,7 +1138,7 @@ int32_t handleMcsChnlCs( ExtensibleChip * i_membChip,
 
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"MCIFIR/MCIFIR_MASK read failed for 0x%08x",
+            PRDF_ERR( PRDF_FUNC "MCIFIR/MCIFIR_MASK read failed for 0x%08x",
                       mcsChip->GetId());
             break;
         }
@@ -1236,7 +1236,7 @@ int32_t CaptureL4CacheErr( ExtensibleChip * i_mbChip,
 
         if ( SUCCESS != mbcelogReg->Write() )
         {
-            PRDF_ERR( PRDF_FUNC"MBCELOG write failed for 0x%08x",
+            PRDF_ERR( PRDF_FUNC "MBCELOG write failed for 0x%08x",
                       i_mbChip->GetId());
             break;
         }

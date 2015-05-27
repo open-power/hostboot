@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -124,7 +124,7 @@ bool processRepairedRanks( TargetHandle_t i_mba, uint8_t i_repairedRankMask )
     int32_t l_rc = isMembufOnDimm( i_mba, isCen );
     if ( SUCCESS != l_rc )
     {
-        PRDF_ERR( PRDF_FUNC"isMembufOnDimm() failed" );
+        PRDF_ERR( PRDF_FUNC "isMembufOnDimm() failed" );
         analysisErrors = true;
     }
     else
@@ -143,7 +143,7 @@ bool processRepairedRanks( TargetHandle_t i_mba, uint8_t i_repairedRankMask )
 
             if ( SUCCESS != mssGetMarkStore(i_mba, rank, mark) )
             {
-                PRDF_ERR( PRDF_FUNC"mssGetMarkStore() failed: MBA=0x%08x "
+                PRDF_ERR( PRDF_FUNC "mssGetMarkStore() failed: MBA=0x%08x "
                           "rank=%d", getHuid(i_mba), rank.getMaster() );
                 analysisErrors = true;
                 continue; // skip this rank
@@ -153,7 +153,7 @@ bool processRepairedRanks( TargetHandle_t i_mba, uint8_t i_repairedRankMask )
 
             if ( SUCCESS != mssGetSteerMux(i_mba, rank, sp0, sp1, ecc) )
             {
-                PRDF_ERR( PRDF_FUNC"mssGetSteerMux() failed: MBA=0x%08x "
+                PRDF_ERR( PRDF_FUNC "mssGetSteerMux() failed: MBA=0x%08x "
                           "rank=%d", getHuid(i_mba), rank.getMaster() );
                 analysisErrors = true;
                 continue; // skip this rank
@@ -218,14 +218,14 @@ bool processBadDimms( TargetHandle_t i_mba, uint8_t i_badDimmMask )
 
         if ( SUCCESS != getMbaPort(*i, port) )
         {
-            PRDF_ERR( PRDF_FUNC"getMbaPort() failed: DIMM=0x%08x", getHuid(*i));
+            PRDF_ERR( PRDF_FUNC "getMbaPort() failed: DIMM=0x%08x", getHuid(*i));
             analysisErrors = true;
             continue; // skip this dimm
         }
 
         if ( SUCCESS != getMbaDimm(*i, dimm) )
         {
-            PRDF_ERR( PRDF_FUNC"getMbaDimm() failed: DIMM=0x%08x", getHuid(*i));
+            PRDF_ERR( PRDF_FUNC "getMbaDimm() failed: DIMM=0x%08x", getHuid(*i));
             analysisErrors = true;
             continue; // skip this dimm
         }
@@ -282,7 +282,7 @@ bool screenBadDqs( TargetHandle_t i_mba, const std::vector<CenRank> & i_ranks )
         CenDqBitmap bitmap;
         if ( SUCCESS != getBadDqBitmap(i_mba, *rank, bitmap, true) )
         {
-            PRDF_ERR( PRDF_FUNC"getBadDqBitmap() failed: MBA=0x%08x rank=%d",
+            PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed: MBA=0x%08x rank=%d",
                       getHuid(i_mba), rank->getMaster() );
             analysisErrors = true;
             continue; // skip this rank
@@ -344,7 +344,7 @@ int32_t restoreDramRepairs( TargetHandle_t i_mba )
 {
     #define PRDF_FUNC "PRDF::restoreDramRepairs"
 
-    PRDF_ENTER( PRDF_FUNC"(0x%08x)", getHuid(i_mba) );
+    PRDF_ENTER( PRDF_FUNC "(0x%08x)", getHuid(i_mba) );
 
     // will unlock when going out of scope
     PRDF_SYSTEM_SCOPELOCK;
@@ -357,7 +357,7 @@ int32_t restoreDramRepairs( TargetHandle_t i_mba )
         int32_t l_rc = getMasterRanks( i_mba, ranks );
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( "["PRDF_FUNC"] getMasterRanks() failed" );
+            PRDF_ERR( "[" PRDF_FUNC "] getMasterRanks() failed" );
 
             RDR::commitSoftError( PRDF_DETECTED_FAIL_SOFTWARE, i_mba,
                                   PRDFSIG_RdrInternalFail, true );
@@ -389,7 +389,7 @@ int32_t restoreDramRepairs( TargetHandle_t i_mba )
             // This is an error. The MNFG spare DRAM deply bit is set, but DRAM
             // Repairs have not been disabled.
 
-            PRDF_ERR( "["PRDF_FUNC"] MNFG spare deploy enabled, but DRAM "
+            PRDF_ERR( "[" PRDF_FUNC "] MNFG spare deploy enabled, but DRAM "
                       "repairs are not disabled" );
 
             RDR::commitSoftError( PRDF_INVALID_CONFIG, i_mba,
@@ -402,7 +402,7 @@ int32_t restoreDramRepairs( TargetHandle_t i_mba )
         if ( SUCCESS != mssRestoreDramRepairs(i_mba, rankMask, dimmMask) )
         {
             // Can't check anything if this doesn't work.
-            PRDF_ERR( "["PRDF_FUNC"] mssRestoreDramRepairs() failed" );
+            PRDF_ERR( "[" PRDF_FUNC "] mssRestoreDramRepairs() failed" );
             break;
         }
 
@@ -414,7 +414,7 @@ int32_t restoreDramRepairs( TargetHandle_t i_mba )
 
     } while(0);
 
-    PRDF_EXIT( PRDF_FUNC"(0x%08x)", getHuid(i_mba) );
+    PRDF_EXIT( PRDF_FUNC "(0x%08x)", getHuid(i_mba) );
 
     return calloutMade ? FAIL : SUCCESS;
 

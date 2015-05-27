@@ -419,14 +419,14 @@ int32_t maxSparesExceeded_MCS( ExtensibleChip * i_procChip,
         mcsTrgt = getConnectedChild( procTrgt, TYPE_MCS, i_mcsPos );
         if ( NULL == mcsTrgt )
         {
-            PRDF_ERR( PRDF_FUNC"getConnectedChild() returned NULL" );
+            PRDF_ERR( PRDF_FUNC "getConnectedChild() returned NULL" );
             l_rc = FAIL; break;
         }
 
         mcsChip = (ExtensibleChip *)systemPtr->GetChip( mcsTrgt );
         if ( NULL == mcsChip )
         {
-            PRDF_ERR( PRDF_FUNC"GetChip() returned NULL" );
+            PRDF_ERR( PRDF_FUNC "GetChip() returned NULL" );
             l_rc = FAIL; break;
         }
 
@@ -434,7 +434,7 @@ int32_t maxSparesExceeded_MCS( ExtensibleChip * i_procChip,
         l_rc = MemUtils::checkMcsChannelFail( mcsChip, i_sc );
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"checkMcsChannelFail() failed" );
+            PRDF_ERR( PRDF_FUNC "checkMcsChannelFail() failed" );
             break;
         }
 
@@ -443,7 +443,7 @@ int32_t maxSparesExceeded_MCS( ExtensibleChip * i_procChip,
                                       false );
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"handleLaneRepairEvent() failed" );
+            PRDF_ERR( PRDF_FUNC "handleLaneRepairEvent() failed" );
             break;
         }
 
@@ -452,7 +452,7 @@ int32_t maxSparesExceeded_MCS( ExtensibleChip * i_procChip,
         membChip = mcsdb->getMembChip();
         if ( NULL == membChip )
         {
-            PRDF_ERR( PRDF_FUNC"getMembChip() returned NULL" );
+            PRDF_ERR( PRDF_FUNC "getMembChip() returned NULL" );
             l_rc = FAIL; break;
         }
 
@@ -460,7 +460,7 @@ int32_t maxSparesExceeded_MCS( ExtensibleChip * i_procChip,
         l_rc = MemUtils::chnlCsCleanup( membChip, i_sc );
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"chnlCsCleanup() failed" );
+            PRDF_ERR( PRDF_FUNC "chnlCsCleanup() failed" );
             break;
         }
 
@@ -468,7 +468,7 @@ int32_t maxSparesExceeded_MCS( ExtensibleChip * i_procChip,
 
     if ( SUCCESS != l_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Failed: i_procChip=0x%08x i_mcsPos=%d",
+        PRDF_ERR( PRDF_FUNC "Failed: i_procChip=0x%08x i_mcsPos=%d",
                   i_procChip->GetId(), i_mcsPos );
         CalloutUtil::defaultError( i_sc );
     }
@@ -606,7 +606,7 @@ int32_t phbConfigured(ExtensibleChip * i_chip,
     {
         if( i_phbPos >= MAX_PCI_NUM )
         {
-            PRDF_ERR( PRDF_FUNC"invalid PCI number: %d", i_phbPos );
+            PRDF_ERR( PRDF_FUNC "invalid PCI number: %d", i_phbPos );
             break;
         }
 
@@ -615,7 +615,7 @@ int32_t phbConfigured(ExtensibleChip * i_chip,
 
         if(NULL == etuResetReg)
         {
-            PRDF_ERR( PRDF_FUNC"getRegister() Failed for register:%s",
+            PRDF_ERR( PRDF_FUNC "getRegister() Failed for register:%s",
                          pciEtuResetReg[i_phbPos] );
             break;
         }
@@ -623,7 +623,7 @@ int32_t phbConfigured(ExtensibleChip * i_chip,
         o_rc = etuResetReg->Read();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"%s Read() failed. Target=0x%08x",
+            PRDF_ERR( PRDF_FUNC "%s Read() failed. Target=0x%08x",
                       pciEtuResetReg[i_phbPos], i_chip->GetId() );
             break;
         }
@@ -671,7 +671,7 @@ int32_t deadManTimerCalloutAndFFDC( ExtensibleChip * i_chip,
     TargetHandle_t l_masterCore = PlatServices::getMasterCore( l_procTgt );
     if( NULL == l_masterCore )
     {
-        PRDF_ERR( PRDF_FUNC"Failed to get master core: PROC = 0x%08x",
+        PRDF_ERR( PRDF_FUNC "Failed to get master core: PROC = 0x%08x",
                   i_chip->GetId() );
     }
     else
@@ -711,28 +711,28 @@ int32_t combinedResponseCallout( ExtensibleChip * i_chip,
         l_rc = reg->Read();
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Read() failed on PB_CENT_CR_ERROR" );
+            PRDF_ERR( PRDF_FUNC "Read() failed on PB_CENT_CR_ERROR" );
             break;
         }
 
         uint32_t tmp = reg->GetBitFieldJustified(0,3);
         if ( 0x02 != tmp ) // Must be 0b010 to continue
         {
-            PRDF_ERR( PRDF_FUNC"Unsupported reason code: 0x%02x", tmp );
+            PRDF_ERR( PRDF_FUNC "Unsupported reason code: 0x%02x", tmp );
             l_rc = FAIL; break;
         }
 
         tmp = reg->GetBitFieldJustified(38,5);
         if ( 0x00 != tmp ) // Must be 0b00000 to continue
         {
-            PRDF_ERR( PRDF_FUNC"Unsupported combined response encoding: 0x%02x",
+            PRDF_ERR( PRDF_FUNC "Unsupported combined response encoding: 0x%02x",
                       tmp );
             l_rc = FAIL; break;
         }
 
         if ( reg->IsBitSet(22) ) // Must be 0b0 to continue
         {
-            PRDF_ERR( PRDF_FUNC"Operation not sourced by an EX chiplet" );
+            PRDF_ERR( PRDF_FUNC "Operation not sourced by an EX chiplet" );
             l_rc = FAIL; break;
         }
 
@@ -741,7 +741,7 @@ int32_t combinedResponseCallout( ExtensibleChip * i_chip,
         TargetHandle_t exTrgt = getConnectedChild( procTrgt, TYPE_EX, tmp );
         if ( NULL == exTrgt )
         {
-            PRDF_ERR( PRDF_FUNC"No connected EX chiplet at position %d", tmp );
+            PRDF_ERR( PRDF_FUNC "No connected EX chiplet at position %d", tmp );
             l_rc = FAIL; break;
         }
 
@@ -752,7 +752,7 @@ int32_t combinedResponseCallout( ExtensibleChip * i_chip,
 
     if ( SUCCESS != l_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Unable to isolate to an EX chiplet. Calling out "
+        PRDF_ERR( PRDF_FUNC "Unable to isolate to an EX chiplet. Calling out "
                   "PROC 0x%08x instead.", i_chip->GetId() );
 
         io_sc.service_data->SetCallout( procTrgt, MRU_LOW );
@@ -864,7 +864,7 @@ int32_t calloutPhb( ExtensibleChip * i_procChip, STEP_CODE_DATA_STRUCT & io_sc,
     {
         if ( SUCCESS != getConfiguredPHB(procTrgt, i_iopciIdx, 0, phbATrgt) )
         {
-            PRDF_ERR( PRDF_FUNC"getConfiguredPHB(0) failed: i_procChip=0x%08x "
+            PRDF_ERR( PRDF_FUNC "getConfiguredPHB(0) failed: i_procChip=0x%08x "
                       "i_iopciIdx=%d", i_procChip->GetId(), i_iopciIdx );
             l_rc = FAIL;
         }
@@ -879,7 +879,7 @@ int32_t calloutPhb( ExtensibleChip * i_procChip, STEP_CODE_DATA_STRUCT & io_sc,
     {
         if ( SUCCESS != getConfiguredPHB(procTrgt, i_iopciIdx, 1, phbBTrgt) )
         {
-            PRDF_ERR( PRDF_FUNC"getConfiguredPHB(1) failed: i_procChip=0x%08x "
+            PRDF_ERR( PRDF_FUNC "getConfiguredPHB(1) failed: i_procChip=0x%08x "
                       "i_iopciIdx=%d", i_procChip->GetId(), i_iopciIdx );
             l_rc = FAIL;
         }

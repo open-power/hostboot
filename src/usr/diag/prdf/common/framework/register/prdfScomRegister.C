@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1996,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -147,7 +149,7 @@ uint32_t ScomRegister::ForceRead() const
         if ( ( ACCESS_NONE == iv_operationType ) &&
                 ( ACCESS_WO == iv_operationType ) )
         {
-            PRDF_ERR( PRDF_FUNC"Write-only register: 0x%08x 0x%016llx",
+            PRDF_ERR( PRDF_FUNC "Write-only register: 0x%08x 0x%016llx",
                       getChip()->GetId(), iv_scomAddress );
             break;
         }
@@ -183,7 +185,7 @@ uint32_t ScomRegister::Write()
         if ( ( ACCESS_NONE == iv_operationType ) &&
                  ( ACCESS_RO == iv_operationType ) )
         {
-            PRDF_ERR( PRDF_FUNC"Read-only register: 0x%08x 0x%016llx",
+            PRDF_ERR( PRDF_FUNC "Read-only register: 0x%08x 0x%016llx",
                       getChip()->GetId(), iv_scomAddress );
             break;
         }
@@ -193,7 +195,7 @@ uint32_t ScomRegister::Write()
         {
             // Something bad happened and there was nothing in the cache to
             // write to hardware.
-            PRDF_ERR( PRDF_FUNC"No entry found in cache: 0x%08x 0x%016llx",
+            PRDF_ERR( PRDF_FUNC "No entry found in cache: 0x%08x 0x%016llx",
                       getChip()->GetId(), iv_scomAddress );
             break;
         }

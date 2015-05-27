@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,7 +81,7 @@ int32_t PostAnalysis( ExtensibleChip * i_mbaChip,
                                          mbadb->iv_cmdCompleteMsgData );
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"PlatServices::mdiaSendEventMsg() failed" );
+            PRDF_ERR( PRDF_FUNC "PlatServices::mdiaSendEventMsg() failed" );
         }
     }
 

@@ -70,7 +70,7 @@ int32_t isPllUnlockCausedByPciOscFo( ExtensibleChip * i_chip,
 
         if( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"PCI Status register Read failed 0x%08x",
+            PRDF_ERR( PRDF_FUNC "PCI Status register Read failed 0x%08x",
                       i_chip->GetId() );
             break;
         }
@@ -115,7 +115,7 @@ int32_t QueryPciPll( ExtensibleChip * i_chip,
         rc = pciErrReg->Read();
         if (rc != SUCCESS)
         {
-            PRDF_ERR(PRDF_FUNC"PCI_ERROR_REG read failed"
+            PRDF_ERR(PRDF_FUNC "PCI_ERROR_REG read failed"
                      "for 0x%08x", i_chip->GetId());
             break;
         }
@@ -123,7 +123,7 @@ int32_t QueryPciPll( ExtensibleChip * i_chip,
         rc = pciConfigReg->Read();
         if (rc != SUCCESS)
         {
-            PRDF_ERR(PRDF_FUNC"PCI_CONFIG_REG read failed"
+            PRDF_ERR(PRDF_FUNC "PCI_CONFIG_REG read failed"
                      "for 0x%08x", i_chip->GetId());
             break;
         }
@@ -138,7 +138,7 @@ int32_t QueryPciPll( ExtensibleChip * i_chip,
 
     if( rc != SUCCESS )
     {
-        PRDF_ERR(PRDF_FUNC"failed for proc: 0x%.8X",
+        PRDF_ERR(PRDF_FUNC "failed for proc: 0x%.8X",
                  i_chip->GetId());
     }
 
@@ -173,7 +173,7 @@ int32_t QueryPllIo( ExtensibleChip * i_chip,
         rc = TP_LFIR->Read();
         if (rc != SUCCESS)
         {
-            PRDF_ERR(PRDF_FUNC"TP_LFIR read failed"
+            PRDF_ERR(PRDF_FUNC "TP_LFIR read failed"
                      "for 0x%08x", i_chip->GetId());
             break;
         }
@@ -181,7 +181,7 @@ int32_t QueryPllIo( ExtensibleChip * i_chip,
         rc = TP_LFIRmask->Read();
         if (rc != SUCCESS)
         {
-            PRDF_ERR(PRDF_FUNC"TP_LFIR_MASK read failed"
+            PRDF_ERR(PRDF_FUNC "TP_LFIR_MASK read failed"
                      "for 0x%08x", i_chip->GetId());
             break;
         }
@@ -200,7 +200,7 @@ int32_t QueryPllIo( ExtensibleChip * i_chip,
 
     if( rc != SUCCESS )
     {
-        PRDF_ERR(PRDF_FUNC"failed for proc: 0x%.8X",
+        PRDF_ERR(PRDF_FUNC "failed for proc: 0x%.8X",
                  i_chip->GetId());
     }
 
@@ -234,7 +234,7 @@ int32_t ClearPllIo( ExtensibleChip * i_chip,
         tmpRC = pciErrReg->Read();
         if (tmpRC != SUCCESS)
         {
-            PRDF_ERR(PRDF_FUNC"PCI_ERROR_REG read failed"
+            PRDF_ERR(PRDF_FUNC "PCI_ERROR_REG read failed"
                      "for chip: 0x%08x", i_chip->GetId());
             rc |= tmpRC;
         }
@@ -247,7 +247,7 @@ int32_t ClearPllIo( ExtensibleChip * i_chip,
 
             if ( SUCCESS != tmpRC )
             {
-                PRDF_ERR( PRDF_FUNC"Write() failed on PCI Error register: "
+                PRDF_ERR( PRDF_FUNC "Write() failed on PCI Error register: "
                           "proc=0x%08x", i_chip->GetId() );
                 rc |= tmpRC;
             }
@@ -261,7 +261,7 @@ int32_t ClearPllIo( ExtensibleChip * i_chip,
         tmpRC = TP_LFIRand->Write();
         if (tmpRC != SUCCESS)
         {
-            PRDF_ERR(PRDF_FUNC"TP_LFIR_AND write failed"
+            PRDF_ERR(PRDF_FUNC "TP_LFIR_AND write failed"
                      "for chip: 0x%08x", i_chip->GetId());
             rc |= tmpRC;
         }
@@ -272,7 +272,7 @@ int32_t ClearPllIo( ExtensibleChip * i_chip,
         tmpRC = oscCerrReg->Read();
         if (tmpRC != SUCCESS)
         {
-            PRDF_ERR(PRDF_FUNC"OSCERR read failed"
+            PRDF_ERR(PRDF_FUNC "OSCERR read failed"
                      "for 0x%08x", i_chip->GetId());
             rc |= tmpRC;
         }
@@ -281,7 +281,7 @@ int32_t ClearPllIo( ExtensibleChip * i_chip,
         tmpRC = oscCerrReg->Write();
         if (tmpRC != SUCCESS)
         {
-            PRDF_ERR(PRDF_FUNC"oscCerrReg write failed"
+            PRDF_ERR(PRDF_FUNC "oscCerrReg write failed"
                      "for chip: 0x%08x", i_chip->GetId());
             rc |= tmpRC;
         }
@@ -290,7 +290,7 @@ int32_t ClearPllIo( ExtensibleChip * i_chip,
 
     if( rc != SUCCESS )
     {
-        PRDF_ERR(PRDF_FUNC"failed for proc: 0x%.8X",
+        PRDF_ERR(PRDF_FUNC "failed for proc: 0x%.8X",
                  i_chip->GetId());
     }
 
@@ -325,7 +325,7 @@ int32_t MaskPllIo( ExtensibleChip * i_chip,
 
         if ( i_oscPos >= MAX_PCIE_OSC_PER_NODE )
         {
-            PRDF_ERR(PRDF_FUNC"invalid oscPos: %d for chip: "
+            PRDF_ERR(PRDF_FUNC "invalid oscPos: %d for chip: "
                      "0x%08x", i_oscPos, i_chip->GetId());
             rc = FAIL;
             break;
@@ -335,7 +335,7 @@ int32_t MaskPllIo( ExtensibleChip * i_chip,
 
         if ( oscPos != i_oscPos )
         {
-            PRDF_DTRAC(PRDF_FUNC"skip masking for chip: 0x%08x, "
+            PRDF_DTRAC(PRDF_FUNC "skip masking for chip: 0x%08x, "
                       "oscPos: %d, i_oscPos: %d",
                       i_chip->GetId(), oscPos, i_oscPos);
             break;
@@ -348,7 +348,7 @@ int32_t MaskPllIo( ExtensibleChip * i_chip,
         rc = pciConfigReg->Read();
         if (rc != SUCCESS)
         {
-            PRDF_ERR(PRDF_FUNC"PCI_CONFIG_REG read failed"
+            PRDF_ERR(PRDF_FUNC "PCI_CONFIG_REG read failed"
                      "for 0x%08x", i_chip->GetId());
             break;
         }
@@ -359,7 +359,7 @@ int32_t MaskPllIo( ExtensibleChip * i_chip,
             rc = pciConfigReg->Write();
             if (rc != SUCCESS)
             {
-                PRDF_ERR(PRDF_FUNC"PCI_CONFIG_REG write failed"
+                PRDF_ERR(PRDF_FUNC "PCI_CONFIG_REG write failed"
                          "for chip: 0x%08x",
                          i_chip->GetId());
             }
@@ -415,7 +415,7 @@ int32_t CalloutPllIo( ExtensibleChip * i_chip,
 
         if( SUCCESS != rc )
         {
-            PRDF_ERR( PRDF_FUNC"PCI Osc switch analysis failed" );
+            PRDF_ERR( PRDF_FUNC "PCI Osc switch analysis failed" );
             break;
         }
 
@@ -437,12 +437,12 @@ int32_t CalloutPllIo( ExtensibleChip * i_chip,
 
         if ( NULL == connectedOsc )
         {
-            PRDF_ERR(PRDF_FUNC"Failed to get connected PCIe OSC for "
+            PRDF_ERR(PRDF_FUNC "Failed to get connected PCIe OSC for "
                  "chip 0x%08x, oscPos: %d",i_chip->GetId(), oscPos );
             connectedOsc = i_chip->GetChipHandle();
         }
 
-        PRDF_DTRAC(PRDF_FUNC"PCIe OSC: 0x%08x connected to "
+        PRDF_DTRAC(PRDF_FUNC "PCIe OSC: 0x%08x connected to "
                  "proc: 0x%08x", getHuid(connectedOsc), i_chip->GetId());
 
         // callout the clock source
@@ -486,7 +486,7 @@ uint32_t getIoOscPos( ExtensibleChip * i_chip,
         rc = pcieOscSwitchReg->Read();
         if (rc != SUCCESS)
         {
-            PRDF_ERR(PRDF_FUNC"PCIE_OSC_SWITCH read failed"
+            PRDF_ERR(PRDF_FUNC "PCIE_OSC_SWITCH read failed"
                      "for 0x%08x", i_chip->GetId());
             break;
         }

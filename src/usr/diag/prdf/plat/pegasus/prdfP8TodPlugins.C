@@ -46,7 +46,7 @@ namespace Proc
 #define PLUGIN_TOD_UNEXPECTED_ATTN( FUNC ) \
 int32_t FUNC( ExtensibleChip * i_procChip, STEP_CODE_DATA_STRUCT & i_sc ) \
 { \
-    PRDF_ERR( "["#FUNC"] Unexpected attention due to TOD errors on" \
+    PRDF_ERR( "["#FUNC "] Unexpected attention due to TOD errors on" \
               "Hostboot: HUID=0x%08x", i_procChip->GetId() ); \
     CalloutUtil::defaultError( i_sc ); \
     return SUCCESS; \

@@ -68,7 +68,7 @@ int32_t analyzeIplCEStats( TargetHandle_t i_mba, bool &o_calloutMade )
 {
     #define PRDF_FUNC "PRDF::analyzeIplCEStats"
 
-    PRDF_ENTER( PRDF_FUNC"(0x%08x)", getHuid(i_mba) );
+    PRDF_ENTER( PRDF_FUNC "(0x%08x)", getHuid(i_mba) );
 
     // will unlock when going out of scope
     PRDF_SYSTEM_SCOPELOCK;
@@ -83,7 +83,7 @@ int32_t analyzeIplCEStats( TargetHandle_t i_mba, bool &o_calloutMade )
 
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( "["PRDF_FUNC"] analyzeStats() failed");
+        PRDF_ERR( "[" PRDF_FUNC "] analyzeStats() failed");
 
         // Get user data
         uint64_t ud12 = PRDF_GET_UINT64_FROM_UINT32( getHuid(i_mba),      0 );
@@ -106,7 +106,7 @@ int32_t analyzeIplCEStats( TargetHandle_t i_mba, bool &o_calloutMade )
         ERRORLOG::errlCommit( errl, PRDF_COMP_ID );
     }
 
-    PRDF_EXIT( PRDF_FUNC"(0x%08x), o_calloutMade:%u",
+    PRDF_EXIT( PRDF_FUNC "(0x%08x), o_calloutMade:%u",
                getHuid(i_mba), o_calloutMade );
 
     return o_rc;
@@ -138,7 +138,7 @@ errlHndl_t startScrub()
         // This shouldn't return any error but if it does, break out
         if(NULL != o_errl)
         {
-            PRDF_ERR( PRDF_FUNC"noLock_refresh() failed" );
+            PRDF_ERR( PRDF_FUNC "noLock_refresh() failed" );
             break;
         }
 
@@ -146,23 +146,23 @@ errlHndl_t startScrub()
         TargetHandleList list = getFunctionalTargetList( TYPE_NODE );
         if ( 1 != list.size() )
         {
-            PRDF_ERR( PRDF_FUNC"getFunctionalTargetList(TYPE_NODE) failed" );
+            PRDF_ERR( PRDF_FUNC "getFunctionalTargetList(TYPE_NODE) failed" );
             l_rc = FAIL; break;
         }
         nodeId = getHuid(list[0]);
 
-        PRDF_ENTER( PRDF_FUNC"HUID=0x%08x", nodeId );
+        PRDF_ENTER( PRDF_FUNC "HUID=0x%08x", nodeId );
 
         // Start scrubbing on all MBAs.
         MbaDomain * domain = (MbaDomain *)systemPtr->GetDomain(MBA_DOMAIN);
         if ( NULL == domain )
         {
-            PRDF_ERR( PRDF_FUNC"MBA_DOMAIN not found. nodeId=0x%08x", nodeId );
+            PRDF_ERR( PRDF_FUNC "MBA_DOMAIN not found. nodeId=0x%08x", nodeId );
             l_rc = FAIL; break;
         }
         l_rc = domain->startScrub();
 
-        PRDF_EXIT( PRDF_FUNC"HUID=0x%08x", nodeId );
+        PRDF_EXIT( PRDF_FUNC "HUID=0x%08x", nodeId );
 
     } while (0);
 

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -98,13 +100,13 @@ int32_t getConfiguredPHB( TargetHandle_t i_procTrgt, uint32_t i_iopciIdx,
         // Check parameters
         if ( MAX_FIRS <= i_iopciIdx )
         {
-            PRDF_ERR( PRDF_FUNC"i_iopciIdx is unsupported: %d", i_iopciIdx );
+            PRDF_ERR( PRDF_FUNC "i_iopciIdx is unsupported: %d", i_iopciIdx );
             o_rc = FAIL; break;
         }
 
         if ( MAX_CLOCKS <= i_clkIdx )
         {
-            PRDF_ERR( PRDF_FUNC"i_clkIdx is unsupported: %d", i_clkIdx );
+            PRDF_ERR( PRDF_FUNC "i_clkIdx is unsupported: %d", i_clkIdx );
             o_rc = FAIL; break;
         }
 
@@ -116,7 +118,7 @@ int32_t getConfiguredPHB( TargetHandle_t i_procTrgt, uint32_t i_iopciIdx,
             case MODEL_MURANO: modelIdx = MURANO_IDX; break;
             case MODEL_VENICE: modelIdx = VENICE_IDX; break;
             default:
-                PRDF_ERR( PRDF_FUNC"unsupported processor model: %d", model );
+                PRDF_ERR( PRDF_FUNC "unsupported processor model: %d", model );
                 o_rc = FAIL;
         }
         if ( SUCCESS != o_rc ) break;
@@ -125,7 +127,7 @@ int32_t getConfiguredPHB( TargetHandle_t i_procTrgt, uint32_t i_iopciIdx,
         uint32_t phbConfig = getPhbConfig( i_procTrgt );
         if ( MAX_CONFIGS <= phbConfig )
         {
-            PRDF_ERR( PRDF_FUNC"unsupportd PHB config: %d", phbConfig );
+            PRDF_ERR( PRDF_FUNC "unsupportd PHB config: %d", phbConfig );
             o_rc = FAIL; break;
         }
 
@@ -136,7 +138,7 @@ int32_t getConfiguredPHB( TargetHandle_t i_procTrgt, uint32_t i_iopciIdx,
             o_phbTrgt = getConnectedChild( i_procTrgt, TYPE_PCI, phbPos );
             if ( NULL == o_phbTrgt ) // Target should exist.
             {
-                PRDF_ERR( PRDF_FUNC"getConnectedChild(%d) failed", phbPos );
+                PRDF_ERR( PRDF_FUNC "getConnectedChild(%d) failed", phbPos );
                 o_rc = FAIL; break;
             }
         }
@@ -145,7 +147,7 @@ int32_t getConfiguredPHB( TargetHandle_t i_procTrgt, uint32_t i_iopciIdx,
 
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Failed: i_procTrgt=0x%08x i_iopciIdx=%d "
+        PRDF_ERR( PRDF_FUNC "Failed: i_procTrgt=0x%08x i_iopciIdx=%d "
                   "i_clkIdx=%d", getHuid(i_procTrgt), i_iopciIdx, i_clkIdx );
     }
 

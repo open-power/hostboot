@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -56,7 +58,7 @@ int32_t MbaDomain::startScrub()
             int32_t l_rc = mbadb->iv_tdCtlr.startInitialBgScrub();
             if ( SUCCESS != l_rc )
             {
-                PRDF_ERR( PRDF_FUNC"startInitialBgScrub() failed: MBA=0x%08x",
+                PRDF_ERR( PRDF_FUNC "startInitialBgScrub() failed: MBA=0x%08x",
                           mbaChip->GetId() );
                 o_rc = FAIL; continue; // Keep going.
             }

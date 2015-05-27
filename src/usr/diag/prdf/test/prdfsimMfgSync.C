@@ -65,7 +65,7 @@ errlHndl_t SimMfgSync::syncMfgTraceToFsp(ErrorSignature *i_esig,
 
         if(NULL != l_err)
         {
-            PRDF_TRAC( PRDF_FUNC" syncMfgTraceToFsp failed" );
+            PRDF_TRAC( PRDF_FUNC " syncMfgTraceToFsp failed" );
         }
 
     } while(0);
@@ -84,7 +84,7 @@ errlHndl_t SimMfgSync::sendMboxMsg( msg_t * i_msg, bool i_expectResponse )
     errlHndl_t l_errl = NULL;
 
     // send a sync message
-    PRDF_TRAC(FUNC" sending sync mbox msg" );
+    PRDF_TRAC(FUNC " sending sync mbox msg" );
     PRDF_TRAC( "type:  0x%04x", i_msg->type );
     PRDF_TRAC( "data0: 0x%016llx", i_msg->data[0] );
     PRDF_TRAC( "data1: 0x%016llx", i_msg->data[1] );

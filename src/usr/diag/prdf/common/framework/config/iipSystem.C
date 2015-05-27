@@ -324,7 +324,7 @@ int32_t System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
 
                         if(rc == PRD_POWER_FAULT)
                         {
-                            PRDF_ERR( PRDF_FUNC"Power Fault detected!" );
+                            PRDF_ERR( PRDF_FUNC "Power Fault detected!" );
                             break;
                         }
                     }
@@ -341,7 +341,7 @@ int32_t System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                         // anything for error isolation pass.
                         if ( NULL != l_temp_sdc )
                         {
-                            PRDF_ERR( PRDF_FUNC"l_temp_sdc is not NULL" );
+                            PRDF_ERR( PRDF_FUNC "l_temp_sdc is not NULL" );
                             continue;
                         }
 

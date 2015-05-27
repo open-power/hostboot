@@ -159,7 +159,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         // Do nothing. Saved SDCs only supported on FSP.
 
         #ifdef __HOSTBOOT_RUNTIME
-        PRDF_ERR( PRDF_FUNC"HBRT should NOT have any CS attns!" );
+        PRDF_ERR( PRDF_FUNC "HBRT should NOT have any CS attns!" );
         #endif
 
         #else
@@ -175,7 +175,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                                                   &sdcSaveFlags, sz_uint8 );
             if (errorLog)
             {
-                PRDF_ERR( PRDF_FUNC"Failure in SDC flag Registry read" );
+                PRDF_ERR( PRDF_FUNC "Failure in SDC flag Registry read" );
                 PRDF_COMMIT_ERRL(errorLog, ERRL_ACTION_REPORT);
             }
             else if (sdcSaveFlags & SDC_SAVE_UE_FLAG) //check if UE log stored
@@ -183,7 +183,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                 bool l_rc = SdcRetrieve(SDC_SAVE_UE_FLAG, sdcBuffer);
                 if (l_rc)
                 {
-                    PRDF_ERR( PRDF_FUNC"Failure in UE SDC Retrieve Function" );
+                    PRDF_ERR( PRDF_FUNC "Failure in UE SDC Retrieve Function" );
                 }
                 else
                 {
@@ -208,7 +208,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                 bool l_rc = SdcRetrieve(SDC_SAVE_SUE_FLAG, sdcBuffer);
                 if (l_rc)
                 {
-                    PRDF_ERR( PRDF_FUNC"Failure in SUE SDC Retrieve Function" );
+                    PRDF_ERR( PRDF_FUNC "Failure in SUE SDC Retrieve Function" );
                 }
                 else
                 {
@@ -246,7 +246,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             bool l_rc = SdcSave(SDC_SAVE_UE_FLAG, io_sdc);
             if (l_rc)
             {
-                PRDF_ERR( PRDF_FUNC"Failure in UE SDC Save Function" );
+                PRDF_ERR( PRDF_FUNC "Failure in UE SDC Save Function" );
             }
         }
         else if //Sue-Re RECOVERABLE condition.
@@ -258,7 +258,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             bool l_rc = SdcSave(SDC_SAVE_SUE_FLAG, io_sdc);
             if (l_rc)
             {
-                PRDF_ERR( PRDF_FUNC"Failure in SUE SDC Save Function" );
+                PRDF_ERR( PRDF_FUNC "Failure in SUE SDC Save Function" );
             }
         }
 #endif  // if not __HOSTBOOT_MODULE
@@ -555,7 +555,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         {
             thisProcedureID = epubProcedureID(thiscallout.flatten());
 
-            PRDF_DTRAC( PRDF_FUNC"thisProcedureID: %x, thispriority: %x, severityParm: %x",
+            PRDF_DTRAC( PRDF_FUNC "thisProcedureID: %x, thispriority: %x, severityParm: %x",
                    thisProcedureID, thispriority,severityParm );
 
             PRDF_HW_ADD_PROC_CALLOUT(thisProcedureID,
@@ -567,7 +567,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             // Add a Second Level Support procedure callout Low, for this case.
             if (HW == false && SW == true && SecondLevel == false)
             {
-                PRDF_DTRAC( PRDF_FUNC"thisProcedureID= %x, thispriority=%x, severityParm=%x",
+                PRDF_DTRAC( PRDF_FUNC "thisProcedureID= %x, thispriority=%x, severityParm=%x",
                    EPUB_PRC_LVL_SUPP, MRU_LOW, severityParm );
 
                 PRDF_HW_ADD_PROC_CALLOUT(EPUB_PRC_LVL_SUPP,
@@ -705,7 +705,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                 o_dumpErrl = iv_errl;
                 iv_errl = NULL;
                 o_dumpErrlActions = actionFlag;
-                PRDF_TRAC( PRDF_FUNC"for target: 0x%08x, i_errl: 0x%08x, "
+                PRDF_TRAC( PRDF_FUNC "for target: 0x%08x, i_errl: 0x%08x, "
                            "i_errlActions: 0x%08x", getHuid(o_dumpTrgt),
                            ERRL_GETRC_SAFE(o_dumpErrl), o_dumpErrlActions );
             }
@@ -721,7 +721,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     errlHndl_t reg_errl = UtilReg::read ("prdf/RasServices", &sdcSaveFlags, sz_uint8);
     if (reg_errl)
     {
-        PRDF_ERR( PRDF_FUNC"Failure in SDC Sync flag Registry read" );
+        PRDF_ERR( PRDF_FUNC "Failure in SDC Sync flag Registry read" );
         PRDF_COMMIT_ERRL(reg_errl, ERRL_ACTION_REPORT);
     }
     else
@@ -731,13 +731,13 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         reg_errl = UtilReg::write ("prdf/RasServices", &sdcSaveFlags, sz_uint8);
         if (reg_errl)
         {
-            PRDF_ERR( PRDF_FUNC"Failure in SDC Sync flag Registry write" );
+            PRDF_ERR( PRDF_FUNC "Failure in SDC Sync flag Registry write" );
             PRDF_COMMIT_ERRL(reg_errl, ERRL_ACTION_REPORT);
         }
     }
 #endif
 
-    PRDF_INF( PRDF_FUNC"PRD called to analyze an error: 0x%08x 0x%08x",
+    PRDF_INF( PRDF_FUNC "PRD called to analyze an error: 0x%08x 0x%08x",
               esig->getChipId(), esig->getSigId() );
 
     // Reset iv_errl to NULL. This is done to catch logical bug in our code.
@@ -916,13 +916,13 @@ bool ErrDataService::SdcSave( sdcSaveFlagsEnum i_saveFlag,
         else
         {
             //Should not get here - code error
-            PRDF_ERR( PRDF_FUNC"Failure - incorrect SDC save flag" );
+            PRDF_ERR( PRDF_FUNC "Failure - incorrect SDC save flag" );
             rc = true;
             break;
         }
         if (errorLog)
         {
-            PRDF_ERR( PRDF_FUNC"Failure in getting SDC file path" );
+            PRDF_ERR( PRDF_FUNC "Failure in getting SDC file path" );
             PRDF_COMMIT_ERRL(errorLog, ERRL_ACTION_REPORT);
             rc = true;
             break;
@@ -938,7 +938,7 @@ bool ErrDataService::SdcSave( sdcSaveFlagsEnum i_saveFlag,
         errorLog = UtilReg::read ("prdf/RasServices", &sdcSaveFlags, sz_uint8);
         if (errorLog)
         {
-            PRDF_ERR( PRDF_FUNC"Failure in SDC flag Registry read" );
+            PRDF_ERR( PRDF_FUNC "Failure in SDC flag Registry read" );
             PRDF_COMMIT_ERRL(errorLog, ERRL_ACTION_REPORT);
             rc = true;
             break;
@@ -949,7 +949,7 @@ bool ErrDataService::SdcSave( sdcSaveFlagsEnum i_saveFlag,
         errorLog = UtilReg::write ("prdf/RasServices", &sdcSaveFlags, sz_uint8);
         if (errorLog)
         {
-            PRDF_ERR( PRDF_FUNC"Failure in SDC flag Registry write" );
+            PRDF_ERR( PRDF_FUNC "Failure in SDC flag Registry write" );
             PRDF_COMMIT_ERRL(errorLog, ERRL_ACTION_REPORT);
             rc = true;
             break;
@@ -992,13 +992,13 @@ bool ErrDataService::SdcRetrieve(sdcSaveFlagsEnum i_saveFlag, void * o_buffer)
         else
         {
             //Should not get here - code error
-            PRDF_ERR(PRDF_FUNC"Failure - incorrect SDC save flag" );
+            PRDF_ERR(PRDF_FUNC "Failure - incorrect SDC save flag" );
             rc = true;
             break;
         }
         if (errorLog)
         {
-            PRDF_ERR( PRDF_FUNC"Failure in getting SDC file path" );
+            PRDF_ERR( PRDF_FUNC "Failure in getting SDC file path" );
             PRDF_COMMIT_ERRL(errorLog, ERRL_ACTION_REPORT);
             rc = true;
             break;
@@ -1086,7 +1086,7 @@ void ErrDataService::deallocateDimms( const SDC_MRU_LIST & i_mruList )
         int32_t rc = DEALLOC::dimmListGard( dimmList );
         if ( SUCCESS != rc )
         {
-            PRDF_ERR( PRDF_FUNC"dimmListGard failed" );
+            PRDF_ERR( PRDF_FUNC "dimmListGard failed" );
             break;
         }
 

@@ -67,7 +67,7 @@ int32_t PllPostAnalysis( ExtensibleChip * i_cenChip,
         o_rc = MemUtils::mcifirCleanup( i_cenChip, i_sc );
         if( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"mcifirCleanup() failed");
+            PRDF_ERR( PRDF_FUNC "mcifirCleanup() failed");
             break;
         }
 
@@ -84,7 +84,7 @@ int32_t PllPostAnalysis( ExtensibleChip * i_cenChip,
         TargetHandleList list = getConnected( cenTrgt, TYPE_MBA );
         if ( 0 == list.size() )
         {
-            PRDF_ERR( PRDF_FUNC"getConnected(0x%08x, TYPE_MBA) failed",
+            PRDF_ERR( PRDF_FUNC "getConnected(0x%08x, TYPE_MBA) failed",
                       getHuid(cenTrgt) );
             o_rc = FAIL; break;
         }
@@ -96,7 +96,7 @@ int32_t PllPostAnalysis( ExtensibleChip * i_cenChip,
             int32_t l_rc = mdiaSendEventMsg( *mbaIt, MDIA::SKIP_MBA );
             if ( SUCCESS != l_rc )
             {
-                PRDF_ERR( PRDF_FUNC"mdiaSendEventMsg(0x%08x, SKIP_MBA) failed",
+                PRDF_ERR( PRDF_FUNC "mdiaSendEventMsg(0x%08x, SKIP_MBA) failed",
                           getHuid(*mbaIt) );
                 o_rc |= FAIL;
                 continue; // keep going

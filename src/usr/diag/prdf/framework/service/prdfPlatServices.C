@@ -126,7 +126,7 @@ TARGETING::TargetHandle_t getMasterCore( TARGETING::TargetHandle_t i_procTgt )
 {
     #define PRDF_FUNC "[PlatServices::getMasterCore] "
 
-    PRDF_ERR( PRDF_FUNC"MasterCore info not available in hostboot: PROC = "
+    PRDF_ERR( PRDF_FUNC "MasterCore info not available in hostboot: PROC = "
               "0x%08x ",getHuid( i_procTgt ) );
     return NULL;
 
@@ -158,7 +158,7 @@ int32_t getCfam( ExtensibleChip * i_chip,
 
             if( l_pMasterProcChip == l_procTgt )
             {
-                PRDF_DTRAC( PRDF_FUNC"can't access CFAM from master "
+                PRDF_DTRAC( PRDF_FUNC "can't access CFAM from master "
                             "proc: 0x%.8X", i_chip->GetId() );
                 break;
             }
@@ -180,7 +180,7 @@ int32_t getCfam( ExtensibleChip * i_chip,
         else
         {
             rc = FAIL;
-            PRDF_ERR( PRDF_FUNC"chip: 0x%.8X, failed to get cfam address: "
+            PRDF_ERR( PRDF_FUNC "chip: 0x%.8X, failed to get cfam address: "
                       "0x%X", i_chip->GetId(), i_addr );
             PRDF_COMMIT_ERRL(errH, ERRL_ACTION_SA|ERRL_ACTION_REPORT);
             break;

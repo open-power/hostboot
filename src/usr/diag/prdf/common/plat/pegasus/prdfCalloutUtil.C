@@ -111,7 +111,7 @@ TargetHandleList getConnectedDimms( TargetHandle_t i_mba,
 
     if ( TYPE_MBA != getTargetType(i_mba) )
     {
-        PRDF_ERR( PRDF_FUNC"Invalid target type: HUID=0x%08x", getHuid(i_mba) );
+        PRDF_ERR( PRDF_FUNC "Invalid target type: HUID=0x%08x", getHuid(i_mba) );
     }
     else
     {
@@ -123,7 +123,7 @@ TargetHandleList getConnectedDimms( TargetHandle_t i_mba,
             int32_t l_rc = getMbaDimm( *dimmIt, dimmSlct );
             if ( SUCCESS != l_rc )
             {
-                PRDF_ERR( PRDF_FUNC"getMbaDimm(0x%08x) failed",
+                PRDF_ERR( PRDF_FUNC "getMbaDimm(0x%08x) failed",
                           getHuid(*dimmIt) );
                 continue;
             }
@@ -176,7 +176,7 @@ TargetHandleList getConnectedDimms( TargetHandle_t i_mba,
         int32_t l_rc = getMbaPort( *dimmIt, portSlct );
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getMbaPort(0x%08x) failed",
+            PRDF_ERR( PRDF_FUNC "getMbaPort(0x%08x) failed",
                       getHuid(*dimmIt) );
             continue;
         }
@@ -210,7 +210,7 @@ TargetHandleList getConnectedDimms( TargetHandle_t i_mba,
         int32_t l_rc = getMbaPort( *dimmIt, portSlct );
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getMbaPort(0x%08x) failed",
+            PRDF_ERR( PRDF_FUNC "getMbaPort(0x%08x) failed",
                       getHuid(*dimmIt) );
             continue;
         }
@@ -272,7 +272,7 @@ int32_t getBusEndpoints( ExtensibleChip * i_chip,
 
     if ( NULL == o_rxTrgt || NULL == o_txTrgt )
     {
-        PRDF_ERR( PRDF_FUNC"i_chip:0x%08x o_rxTrgt:0x%08x o_txTrgt:0x%08x "
+        PRDF_ERR( PRDF_FUNC "i_chip:0x%08x o_rxTrgt:0x%08x o_txTrgt:0x%08x "
                   "i_busType:%d i_busPos:%d", getHuid(chipTrgt),
                   getHuid(o_rxTrgt), getHuid(o_txTrgt), i_busType, i_busPos );
         rc = FAIL;
@@ -297,7 +297,7 @@ int32_t calloutBusInterface( TargetHandle_t i_rxTrgt, TargetHandle_t i_txTrgt,
         // Check for valid targets.
         if ( NULL == i_rxTrgt || NULL == i_txTrgt )
         {
-            PRDF_ERR( PRDF_FUNC"Given target(s) are NULL" );
+            PRDF_ERR( PRDF_FUNC "Given target(s) are NULL" );
             rc = FAIL; break;
         }
 
@@ -322,7 +322,7 @@ int32_t calloutBusInterface( TargetHandle_t i_rxTrgt, TargetHandle_t i_txTrgt,
         }
         else
         {
-            PRDF_ERR( PRDF_FUNC"Unsupported target types" );
+            PRDF_ERR( PRDF_FUNC "Unsupported target types" );
             rc = FAIL; break;
         }
 
@@ -331,7 +331,7 @@ int32_t calloutBusInterface( TargetHandle_t i_rxTrgt, TargetHandle_t i_txTrgt,
         errl = ServiceGeneratorClass::ThisServiceGenerator().getErrl();
         if ( NULL == errl )
         {
-            PRDF_ERR( PRDF_FUNC"Failed to get the global error log" );
+            PRDF_ERR( PRDF_FUNC "Failed to get the global error log" );
             rc = FAIL; break;
         }
 
@@ -342,7 +342,7 @@ int32_t calloutBusInterface( TargetHandle_t i_rxTrgt, TargetHandle_t i_txTrgt,
 
     if ( SUCCESS != rc )
     {
-        PRDF_ERR( PRDF_FUNC"i_rxTrgt:0x%08x i_txTrgt:0x%08x i_priority:%d",
+        PRDF_ERR( PRDF_FUNC "i_rxTrgt:0x%08x i_txTrgt:0x%08x i_priority:%d",
                   getHuid(i_rxTrgt), getHuid(i_txTrgt), i_priority );
     }
 
@@ -374,7 +374,7 @@ int32_t calloutBusInterface( ExtensibleChip * i_chip, PRDpriority i_priority,
 
     if ( SUCCESS != rc )
     {
-        PRDF_ERR( PRDF_FUNC"i_chip:0x%08x i_busType:%d i_busPos:%d "
+        PRDF_ERR( PRDF_FUNC "i_chip:0x%08x i_busType:%d i_busPos:%d "
                   "i_priority:%d", i_chip->GetId(), i_busType, i_busPos,
                   i_priority );
     }

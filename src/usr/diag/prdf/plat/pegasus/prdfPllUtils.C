@@ -55,7 +55,7 @@ int32_t  queryPciOscErr( ExtensibleChip * i_procChip,
 
     int32_t o_rc = FAIL;
     o_pciClkSwitchOver = false;
-    PRDF_TRAC( PRDF_FUNC"PCI Osc Switch over not expected during hostboot "
+    PRDF_TRAC( PRDF_FUNC "PCI Osc Switch over not expected during hostboot "
                "HUID: 0x%08x", i_procChip->GetId() );
 
     return o_rc;
@@ -76,7 +76,7 @@ int32_t analyzePciClkFailover( ExtensibleChip * i_procChip,
     #define PRDF_FUNC "Proc::analyzePciClkFailover "
 
     int32_t o_rc = FAIL;
-    PRDF_TRAC( PRDF_FUNC"PCI Osc Switch over not expected during hostboot "
+    PRDF_TRAC( PRDF_FUNC "PCI Osc Switch over not expected during hostboot "
                "HUID: 0x%08x", i_procChip->GetId() );
     return o_rc;
 
@@ -97,7 +97,7 @@ int32_t clearPciOscFailOver( ExtensibleChip * i_procChip,
     #define PRDF_FUNC "Proc::clearPciOscFailOver "
 
     int32_t o_rc = FAIL;
-    PRDF_TRAC( PRDF_FUNC"PCI Osc Switch over not expected during hostboot "
+    PRDF_TRAC( PRDF_FUNC "PCI Osc Switch over not expected during hostboot "
                "HUID: 0x%08x", i_procChip->GetId() );
     return o_rc;
 

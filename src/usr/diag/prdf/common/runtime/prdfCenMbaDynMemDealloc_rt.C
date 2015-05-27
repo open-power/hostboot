@@ -71,7 +71,7 @@ int32_t getCenPhyAddr( ExtensibleChip * i_mbaChip, ExtensibleChip * i_mbChip,
         o_rc = getDimmRowCol( mba, rowNum, colNum );
         if( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getDimmConfig() failed. HUID:0x%08X",
+            PRDF_ERR( PRDF_FUNC "getDimmConfig() failed. HUID:0x%08X",
                       i_mbaChip->GetId());
             break;
         }
@@ -83,7 +83,7 @@ int32_t getCenPhyAddr( ExtensibleChip * i_mbaChip, ExtensibleChip * i_mbChip,
         o_rc = getMasterRanks( mba, configuredRanks, rank.getDimmSlct() );
         if( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getMasterRanks() failed. HUID:0x%08X",
+            PRDF_ERR( PRDF_FUNC "getMasterRanks() failed. HUID:0x%08X",
                       i_mbaChip->GetId() );
             break;
         }
@@ -96,7 +96,7 @@ int32_t getCenPhyAddr( ExtensibleChip * i_mbaChip, ExtensibleChip * i_mbChip,
         o_rc = mbaxcr->Read();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Read() failed on %s. HUID:0X%08X",
+            PRDF_ERR( PRDF_FUNC "Read() failed on %s. HUID:0X%08X",
                       reg_str, i_mbChip->GetId() );
             break;
         }
@@ -105,7 +105,7 @@ int32_t getCenPhyAddr( ExtensibleChip * i_mbaChip, ExtensibleChip * i_mbChip,
         uint8_t hash = mbaxcr->GetBitFieldJustified( 10, 2 );
         if ( 3 <= hash )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid value for hash. Hash:%u HUID:0X%08X",
+            PRDF_ERR( PRDF_FUNC "Invalid value for hash. Hash:%u HUID:0X%08X",
                       hash, i_mbaChip->GetId() );
             o_rc = FAIL;   break;
         }
@@ -208,7 +208,7 @@ int32_t getCenPhyAddr( ExtensibleChip * i_mbaChip, ExtensibleChip * i_mbChip,
         o_rc = mbsxcr->Read();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Read() failed on MBSXCR. HUID:0x%08X",
+            PRDF_ERR( PRDF_FUNC "Read() failed on MBSXCR. HUID:0x%08X",
                       i_mbChip->GetId() ) ;
             break;
         }
@@ -220,7 +220,7 @@ int32_t getCenPhyAddr( ExtensibleChip * i_mbaChip, ExtensibleChip * i_mbChip,
         {
             if ( ( ilMode > 25 ) || ( ilMode < 16 ))
             {
-                PRDF_ERR( PRDF_FUNC"Invalid value for IL bit Mode :%u",
+                PRDF_ERR( PRDF_FUNC "Invalid value for IL bit Mode :%u",
                           ilMode );
                 o_rc = FAIL; break;
             }
@@ -272,13 +272,13 @@ int32_t getSystemAddr( ExtensibleChip * i_mbaChip, CenAddr i_addr,
         o_rc = getDramGen( mba, dramGen );
         if( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getDramGen() failed. HUID:0x%08X",
+            PRDF_ERR( PRDF_FUNC "getDramGen() failed. HUID:0x%08X",
                       i_mbaChip->GetId());
             break;
         }
         if( fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR3 != dramGen )
         {
-            PRDF_ERR( PRDF_FUNC"page Gard is only supported for DDR3."
+            PRDF_ERR( PRDF_FUNC "page Gard is only supported for DDR3."
                       "HUID:0x%08X  DRAM Generation : %u",
                       i_mbaChip->GetId(), dramGen );
             o_rc = FAIL; break;
@@ -288,7 +288,7 @@ int32_t getSystemAddr( ExtensibleChip * i_mbaChip, CenAddr i_addr,
         ExtensibleChip *mbChip = mbadb->getMembChip();
         if( NULL == mbChip )
         {
-            PRDF_ERR( PRDF_FUNC" Null Membuf chip for mba. HUID:0x%08X",
+            PRDF_ERR( PRDF_FUNC " Null Membuf chip for mba. HUID:0x%08X",
                                  i_mbaChip->GetId() );
             o_rc = FAIL; break;
         }
@@ -297,7 +297,7 @@ int32_t getSystemAddr( ExtensibleChip * i_mbaChip, CenAddr i_addr,
 
         if( NULL == mbChip )
         {
-            PRDF_ERR( PRDF_FUNC" Null Mcs chip for Membuf. HUID:0x%08X",
+            PRDF_ERR( PRDF_FUNC " Null Mcs chip for Membuf. HUID:0x%08X",
                       mbChip->GetId() );
             o_rc = FAIL; break;
         }
@@ -305,7 +305,7 @@ int32_t getSystemAddr( ExtensibleChip * i_mbaChip, CenAddr i_addr,
         o_rc = getCenPhyAddr( i_mbaChip, mbChip, i_addr, cenAddr);
         if( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getCenPhyAddr() failed. MBA:0x%08X "
+            PRDF_ERR( PRDF_FUNC "getCenPhyAddr() failed. MBA:0x%08X "
                       "Membuf:0x%08X", i_mbaChip->GetId(), mbChip->GetId());
             break;
         }
@@ -315,7 +315,7 @@ int32_t getSystemAddr( ExtensibleChip * i_mbaChip, CenAddr i_addr,
         o_rc = mcgfp->Read();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"Read() failed on MCFGP. HUID:0x%08X",
+            PRDF_ERR( PRDF_FUNC "Read() failed on MCFGP. HUID:0x%08X",
                       mcsChip->GetId() ) ;
             break;
         }
@@ -362,7 +362,7 @@ int32_t rankGard( ExtensibleChip * i_mbaChip, CenRank i_rank )
         o_rc = getMemAddrRange( mba, i_rank, startAddr, endAddr );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getMemAddrRange() Failed. HUID:0x%08X",
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange() Failed. HUID:0x%08X",
                       i_mbaChip->GetId() );
             break;
         }
@@ -374,13 +374,13 @@ int32_t rankGard( ExtensibleChip * i_mbaChip, CenRank i_rank )
         o_rc |= getSystemAddr( i_mbaChip, endAddr, seAddr );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getSystemAddr() failed. HUID:0x%08X",
+            PRDF_ERR( PRDF_FUNC "getSystemAddr() failed. HUID:0x%08X",
                       i_mbaChip->GetId() );
             break;
         }
         // Send the address range to HV
         sendDynMemDeallocRequest( ssAddr, seAddr );
-        PRDF_TRAC( PRDF_FUNC"Rank gard for Start Addr: 0x%016llx "
+        PRDF_TRAC( PRDF_FUNC "Rank gard for Start Addr: 0x%016llx "
                    "End Addr: 0x%016llX", ssAddr, seAddr );
 
     } while( 0 );
@@ -412,13 +412,13 @@ int32_t pageGard( ExtensibleChip * i_mbaChip, CenAddr i_addr )
         o_rc = getSystemAddr( i_mbaChip, i_addr, sysAddr);
         if( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getSystemAddr() failed. HUID:0x%08X",
+            PRDF_ERR( PRDF_FUNC "getSystemAddr() failed. HUID:0x%08X",
                       i_mbaChip->GetId() );
             break;
         }
 
         sendPageGardRequest( sysAddr );
-        PRDF_TRAC( PRDF_FUNC"Page gard for address: 0x%016llX", sysAddr );
+        PRDF_TRAC( PRDF_FUNC "Page gard for address: 0x%016llX", sysAddr );
 
     } while( 0 );
 
@@ -443,7 +443,7 @@ int32_t lmbGard( ExtensibleChip * i_mbaChip, CenAddr i_addr, bool i_isFetch )
             o_rc = rankGard( i_mbaChip, i_addr.getRank() );
             if( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"rankGard() failed. HUID:0x%08X",
+                PRDF_ERR( PRDF_FUNC "rankGard() failed. HUID:0x%08X",
                           i_mbaChip->GetId() );
                 break;
             }
@@ -453,13 +453,13 @@ int32_t lmbGard( ExtensibleChip * i_mbaChip, CenAddr i_addr, bool i_isFetch )
             o_rc = getSystemAddr( i_mbaChip, i_addr, sysAddr);
             if( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"getSystemAddr() failed. HUID:0x%08X",
+                PRDF_ERR( PRDF_FUNC "getSystemAddr() failed. HUID:0x%08X",
                           i_mbaChip->GetId() );
                 break;
             }
 
             sendLmbGardRequest( sysAddr, i_isFetch );
-            PRDF_TRAC( PRDF_FUNC"LMB gard for address: 0x%016llX", sysAddr );
+            PRDF_TRAC( PRDF_FUNC "LMB gard for address: 0x%016llX", sysAddr );
         }
 
     } while( 0 );
@@ -484,7 +484,7 @@ int32_t mbaGard( ExtensibleChip * i_mbaChip )
         o_rc = getMemAddrRange( mba, startAddr, endAddr );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getMemAddrRange() Failed. HUID:0x%08X",
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange() Failed. HUID:0x%08X",
                       i_mbaChip->GetId() );
             break;
         }
@@ -496,14 +496,14 @@ int32_t mbaGard( ExtensibleChip * i_mbaChip )
         o_rc |= getSystemAddr( i_mbaChip, endAddr, seAddr );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getSystemAddr() failed. HUID:0x%08X",
+            PRDF_ERR( PRDF_FUNC "getSystemAddr() failed. HUID:0x%08X",
                       i_mbaChip->GetId() );
             break;
         }
 
         // Send the address range to PHYP
         sendDynMemDeallocRequest( ssAddr, seAddr );
-        PRDF_TRAC( PRDF_FUNC"MBA gard for Start Addr: 0x%016llx "
+        PRDF_TRAC( PRDF_FUNC "MBA gard for Start Addr: 0x%016llx "
                    "End Addr: 0x%016llX", ssAddr, seAddr );
 
     } while (0);
@@ -528,7 +528,7 @@ int32_t dimmSlctGard( TargetHandle_t  i_dimm )
         ExtensibleChip * mbaChip = (ExtensibleChip *)systemPtr->GetChip( mba );
         if ( NULL == mbaChip )
         {
-            PRDF_ERR( PRDF_FUNC"No MBA chip behind DIMM" );
+            PRDF_ERR( PRDF_FUNC "No MBA chip behind DIMM" );
             o_rc = FAIL; break;
         }
         // Find the largest address range
@@ -541,14 +541,14 @@ int32_t dimmSlctGard( TargetHandle_t  i_dimm )
         o_rc = getMbaDimm( i_dimm, dimmSlct );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getMbaDimm() failed" );
+            PRDF_ERR( PRDF_FUNC "getMbaDimm() failed" );
             break;
         }
 
         o_rc = getMasterRanks( mba, masterRanks, dimmSlct );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getMasterRanks() failed" );
+            PRDF_ERR( PRDF_FUNC "getMasterRanks() failed" );
             break;
         }
 
@@ -559,7 +559,7 @@ int32_t dimmSlctGard( TargetHandle_t  i_dimm )
             o_rc = getMemAddrRange( mba, *it, startAddr, endAddr );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"getMemAddrRange() Failed. HUID:0x%08X",
+                PRDF_ERR( PRDF_FUNC "getMemAddrRange() Failed. HUID:0x%08X",
                           mbaChip->GetId() );
                 break;
             }
@@ -571,7 +571,7 @@ int32_t dimmSlctGard( TargetHandle_t  i_dimm )
             o_rc |= getSystemAddr( mbaChip, endAddr, seAddr );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"getSystemAddr() failed. HUID:0x%08X",
+                PRDF_ERR( PRDF_FUNC "getSystemAddr() failed. HUID:0x%08X",
                           mbaChip->GetId() );
                 break;
             }
@@ -582,14 +582,14 @@ int32_t dimmSlctGard( TargetHandle_t  i_dimm )
 
         // Send the address range to PHYP
         sendDynMemDeallocRequest( smallestAddr, largestAddr );
-        PRDF_TRAC( PRDF_FUNC"DIMM Slct gard for Start Addr: 0x%016llx "
+        PRDF_TRAC( PRDF_FUNC "DIMM Slct gard for Start Addr: 0x%016llx "
                    "End Addr: 0x%016llX", smallestAddr, largestAddr );
 
     } while (0);
 
     if( FAIL == o_rc )
     {
-        PRDF_ERR( PRDF_FUNC"failed. DIMM:0x%08X", getHuid( i_dimm ) );
+        PRDF_ERR( PRDF_FUNC "failed. DIMM:0x%08X", getHuid( i_dimm ) );
     }
 
     return o_rc;
@@ -612,7 +612,7 @@ bool isDimmPair( TargetHandle_t i_dimm1, TargetHandle_t i_dimm2 )
 
         if( SUCCESS != rc )
         {
-            PRDF_ERR( PRDF_FUNC" getMbaDimm() failed" );
+            PRDF_ERR( PRDF_FUNC " getMbaDimm() failed" );
             break;
         }
         isDimmPair = ( ( dimm1Slct == dimm2Slct ) &&
@@ -640,7 +640,7 @@ bool compareDimms( TargetHandle_t i_dimm1, TargetHandle_t i_dimm2 )
 
         if( SUCCESS != rc )
         {
-            PRDF_ERR( PRDF_FUNC" getMbaDimm() failed" );
+            PRDF_ERR( PRDF_FUNC " getMbaDimm() failed" );
             break;
         }
         TargetHandle_t mba1 = getConnectedParent( i_dimm1, TYPE_MBA );
@@ -673,7 +673,7 @@ int32_t dimmListGard( TargetHandleList  & i_dimmList )
         int32_t l_rc = dimmSlctGard( *it );
         if( SUCCESS != l_rc )
         {
-            PRDF_ERR(PRDF_FUNC"Failed for DIMM 0x:%08X", getHuid( *it ) );
+            PRDF_ERR(PRDF_FUNC "Failed for DIMM 0x:%08X", getHuid( *it ) );
             o_rc |= l_rc;
         }
     }

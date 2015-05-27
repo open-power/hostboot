@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,7 +67,7 @@ CenSymbol CenSymbol::fromSymbol( TargetHandle_t i_mba, const CenRank & i_rank,
     {
         if ( TYPE_MBA != getTargetType(i_mba) )
         {
-            PRDF_ERR( PRDF_FUNC"i_mba is invalid: i_mba=0x%08x",
+            PRDF_ERR( PRDF_FUNC "i_mba is invalid: i_mba=0x%08x",
                       getHuid(i_mba) );
             break;
         }
@@ -76,13 +76,13 @@ CenSymbol CenSymbol::fromSymbol( TargetHandle_t i_mba, const CenRank & i_rank,
         int32_t l_rc = getWiringType( i_mba, i_rank, wiringType );
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getWiringType() failed" );
+            PRDF_ERR( PRDF_FUNC "getWiringType() failed" );
             break;
         }
 
         if ( BOTH_SYMBOL_DQS < i_pins )
         {
-            PRDF_ERR( PRDF_FUNC"i_pins is invalid" );
+            PRDF_ERR( PRDF_FUNC "i_pins is invalid" );
             break;
         }
 
@@ -109,7 +109,7 @@ CenSymbol CenSymbol::fromDimmDq( TargetHandle_t i_mba, const CenRank & i_rank,
     {
         if ( TYPE_MBA != getTargetType(i_mba) )
         {
-            PRDF_ERR( PRDF_FUNC"i_mba is invalid" );
+            PRDF_ERR( PRDF_FUNC "i_mba is invalid" );
             break;
         }
 
@@ -117,7 +117,7 @@ CenSymbol CenSymbol::fromDimmDq( TargetHandle_t i_mba, const CenRank & i_rank,
         int32_t l_rc = getWiringType( i_mba, i_rank, wiringType );
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getWiringType() failed" );
+            PRDF_ERR( PRDF_FUNC "getWiringType() failed" );
             break;
         }
 
@@ -125,7 +125,7 @@ CenSymbol CenSymbol::fromDimmDq( TargetHandle_t i_mba, const CenRank & i_rank,
         l_rc = getSymbol( i_rank, wiringType, i_dimmDq, i_portSlct, symbol );
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getSymbol() failed" );
+            PRDF_ERR( PRDF_FUNC "getSymbol() failed" );
             break;
         }
 
@@ -155,7 +155,7 @@ CenSymbol CenSymbol::fromGalois( TargetHandle_t i_mba, const CenRank & i_rank,
     {
         if ( TYPE_MBA != getTargetType(i_mba) )
         {
-            PRDF_ERR( PRDF_FUNC"i_mba=0x%08x is invalid", getHuid(i_mba) );
+            PRDF_ERR( PRDF_FUNC "i_mba=0x%08x is invalid", getHuid(i_mba) );
             break;
         }
 
@@ -163,7 +163,7 @@ CenSymbol CenSymbol::fromGalois( TargetHandle_t i_mba, const CenRank & i_rank,
         int32_t l_rc = getWiringType( i_mba, i_rank, wiringType );
         if ( SUCCESS != l_rc )
         {
-            PRDF_ERR( PRDF_FUNC"getWiringType() failed" );
+            PRDF_ERR( PRDF_FUNC "getWiringType() failed" );
             break;
         }
 
@@ -211,7 +211,7 @@ int32_t CenSymbol::getWiringType( TargetHandle_t i_mba, const CenRank & i_rank,
 
         if( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC" isMembufOnDimm() Failed " );
+            PRDF_ERR( PRDF_FUNC " isMembufOnDimm() Failed " );
             break;
         }
 
@@ -222,7 +222,7 @@ int32_t CenSymbol::getWiringType( TargetHandle_t i_mba, const CenRank & i_rank,
 
             if( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC"getMemBufRawCardType returned error" );
+                PRDF_ERR( PRDF_FUNC "getMemBufRawCardType returned error" );
                 o_type = WIRING_INVALID;
                 break;
             }
@@ -258,13 +258,13 @@ int32_t CenSymbol::getSymbol( const CenRank & i_rank, WiringType i_wiringType,
     {
         if ( DQS_PER_DIMM <= i_dimmDq )
         {
-            PRDF_ERR( PRDF_FUNC"i_dimmDq is invalid" );
+            PRDF_ERR( PRDF_FUNC "i_dimmDq is invalid" );
             o_rc = FAIL; break;
         }
 
         if ( PORT_SLCT_PER_MBA <= i_portSlct )
         {
-            PRDF_ERR( PRDF_FUNC"i_portSlct is invalid" );
+            PRDF_ERR( PRDF_FUNC "i_portSlct is invalid" );
             o_rc = FAIL; break;
         }
 
@@ -280,7 +280,7 @@ int32_t CenSymbol::getSymbol( const CenRank & i_rank, WiringType i_wiringType,
 
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Failed: i_rank=M%dS%d i_wiringType=%d i_dimmDq=%d "
+        PRDF_ERR( PRDF_FUNC "Failed: i_rank=M%dS%d i_wiringType=%d i_dimmDq=%d "
                   "i_portSlct=%d", i_rank.getMaster(), i_rank.getSlave(),
                   i_wiringType, i_dimmDq, i_portSlct );
     }
@@ -301,7 +301,7 @@ int32_t CenSymbol::setPins( uint8_t i_pins )
     {
         if ( BOTH_SYMBOL_DQS < i_pins )
         {
-            PRDF_ERR( PRDF_FUNC"i_pins %u is invalid", i_pins );
+            PRDF_ERR( PRDF_FUNC "i_pins %u is invalid", i_pins );
             o_rc = FAIL;
             break;
         }

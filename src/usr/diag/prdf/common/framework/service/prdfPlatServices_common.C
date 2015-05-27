@@ -273,7 +273,7 @@ int32_t erepairFirIsolation(TargetHandle_t i_rxBusTgt)
 
     if(NULL != err)
     {
-        PRDF_ERR( PRDF_FUNC"rxHUID: 0x%08x committing io_fir_isolation log",
+        PRDF_ERR( PRDF_FUNC "rxHUID: 0x%08x committing io_fir_isolation log",
                   getHuid(i_rxBusTgt));
         PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
     }
@@ -303,14 +303,14 @@ int32_t getMemAddrRange( TargetHandle_t i_mba, uint8_t i_mrank,
         // Check parameters.
         if ( TYPE_MBA != getTargetType(i_mba) )
         {
-            PRDF_ERR( PRDF_FUNC"The given target is not TYPE_MBA" );
+            PRDF_ERR( PRDF_FUNC "The given target is not TYPE_MBA" );
             o_rc = FAIL; break;
         }
 
         if ( (MSS_ALL_RANKS != i_mrank && MASTER_RANKS_PER_MBA <= i_mrank) ||
              (SLAVE_RANKS_PER_MASTER_RANK <= i_srank) )
         {
-            PRDF_ERR( PRDF_FUNC"The given rank is not valid" );
+            PRDF_ERR( PRDF_FUNC "The given rank is not valid" );
             o_rc = FAIL; break;
         }
 
@@ -333,7 +333,7 @@ int32_t getMemAddrRange( TargetHandle_t i_mba, uint8_t i_mrank,
 
         if ( NULL != errl )
         {
-            PRDF_ERR( PRDF_FUNC"mss_get_address_range() failed" );
+            PRDF_ERR( PRDF_FUNC "mss_get_address_range() failed" );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
             o_rc = FAIL; break;
         }
@@ -342,7 +342,7 @@ int32_t getMemAddrRange( TargetHandle_t i_mba, uint8_t i_mrank,
         if ( 64 != o_startAddr.getBitLength() ||
              64 != o_endAddr.getBitLength() )
         {
-            PRDF_ERR( PRDF_FUNC"Addresses returned from "
+            PRDF_ERR( PRDF_FUNC "Addresses returned from "
                       "mss_get_address_range() are not 64-bit" );
             o_rc = FAIL; break;
         }
@@ -351,7 +351,7 @@ int32_t getMemAddrRange( TargetHandle_t i_mba, uint8_t i_mrank,
 
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Failed: i_mba=0x%08x i_mrank=%d i_srank=%d "
+        PRDF_ERR( PRDF_FUNC "Failed: i_mba=0x%08x i_mrank=%d i_srank=%d "
                   "i_slaveOnly=%s", getHuid(i_mba), i_mrank, i_srank,
                   i_slaveOnly ? "true" : "false" );
     }
@@ -388,7 +388,7 @@ int32_t getBadDqBitmap( TargetHandle_t i_mba, const CenRank & i_rank,
             errlHndl_t errl = fapi::fapiRcToErrl(l_rc);
             if ( NULL != errl )
             {
-                PRDF_ERR( PRDF_FUNC"dimmGetBadDqBitmap() failed: MBA=0x%08x "
+                PRDF_ERR( PRDF_FUNC "dimmGetBadDqBitmap() failed: MBA=0x%08x "
                           "ps=%d ds=%d rs=%d", getHuid(i_mba), ps,
                           i_rank.getDimmSlct(), i_rank.getRankSlct() );
                 PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
@@ -429,7 +429,7 @@ int32_t setBadDqBitmap( TargetHandle_t i_mba, const CenRank & i_rank,
                               data[ps] );
             if ( NULL != errl )
             {
-                PRDF_ERR( PRDF_FUNC"dimmSetBadDqBitmap() failed: MBA=0x%08x "
+                PRDF_ERR( PRDF_FUNC "dimmSetBadDqBitmap() failed: MBA=0x%08x "
                           "ps=%d ds=%d rs=%d", getHuid(i_mba), ps,
                           i_rank.getDimmSlct(), i_rank.getRankSlct() );
                 PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
@@ -461,7 +461,7 @@ int32_t mssGetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
 
         if ( NULL != errl )
         {
-            PRDF_ERR( PRDF_FUNC"mss_get_mark_store() failed. HUID: 0x%08x "
+            PRDF_ERR( PRDF_FUNC "mss_get_mark_store() failed. HUID: 0x%08x "
                       "rank: %d", getHuid(i_mba), i_rank.getMaster() );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
             o_rc = FAIL; break;
@@ -475,7 +475,7 @@ int32_t mssGetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
         o_rc = mssGetSteerMux( i_mba, i_rank, sp0, sp1, ecc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"mssGetSteerMux() failed. HUID: 0x%08x "
+            PRDF_ERR( PRDF_FUNC "mssGetSteerMux() failed. HUID: 0x%08x "
                       "rank: %d", getHuid(i_mba), i_rank.getMaster() );
             break;
         }
@@ -537,7 +537,7 @@ int32_t mssSetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
         o_rc = mssGetMarkStore( i_mba, i_rank, hwMark );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"mssGetMarkStore() failed." );
+            PRDF_ERR( PRDF_FUNC "mssGetMarkStore() failed." );
         }
         else
         {
@@ -550,7 +550,7 @@ int32_t mssSetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
         errl = fapi::fapiRcToErrl(l_rc);
         if ( NULL != errl )
         {
-            PRDF_ERR( PRDF_FUNC"mss_put_mark_store() failed. HUID: 0x%08x "
+            PRDF_ERR( PRDF_FUNC "mss_put_mark_store() failed. HUID: 0x%08x "
                       "rank: %d sm: %d cm: %d", getHuid(i_mba),
                       i_rank.getMaster(), sm, cm );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
@@ -636,7 +636,7 @@ int32_t getMemAddrRange( TargetHandle_t i_mba, CenAddr & o_startAddr,
     int32_t o_rc = getMemAddrRange( i_mba, MSS_ALL_RANKS, startAddr, endAddr );
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Failed: i_mba=0x%08x", getHuid(i_mba) );
+        PRDF_ERR( PRDF_FUNC "Failed: i_mba=0x%08x", getHuid(i_mba) );
     }
     else
     {
@@ -663,7 +663,7 @@ int32_t getMemAddrRange( TargetHandle_t i_mba, const CenRank & i_rank,
                                     i_rank.getSlave(), i_slaveOnly );
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC"Failed: i_mba=0x%08x i_rank=M%dS%d i_slaveOnly=%s",
+        PRDF_ERR( PRDF_FUNC "Failed: i_mba=0x%08x i_rank=M%dS%d i_slaveOnly=%s",
                   getHuid(i_mba), i_rank.getMaster(), i_rank.getSlave(),
                   i_slaveOnly ? "true" : "false" );
     }
@@ -694,13 +694,13 @@ int32_t getDimmSpareConfig( TargetHandle_t i_mba, CenRank i_rank,
     {
         if( TYPE_MBA != getTargetType( i_mba ) )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid Target:0x%08X", getHuid( i_mba ) );
+            PRDF_ERR( PRDF_FUNC "Invalid Target:0x%08X", getHuid( i_mba ) );
             o_rc = FAIL; break;
         }
 
         if ( MAX_PORT_PER_MBA <= i_ps )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid parameters i_ps:%u", i_ps );
+            PRDF_ERR( PRDF_FUNC "Invalid parameters i_ps:%u", i_ps );
             o_rc = FAIL; break;
         }
 
@@ -709,7 +709,7 @@ int32_t getDimmSpareConfig( TargetHandle_t i_mba, CenRank i_rank,
         errlHndl_t errl = fapi::fapiRcToErrl(l_rc);
         if ( NULL != errl )
         {
-            PRDF_ERR( PRDF_FUNC"Failed to get ATTR_VPD_DIMM_SPARE for Target:"
+            PRDF_ERR( PRDF_FUNC "Failed to get ATTR_VPD_DIMM_SPARE for Target:"
                       "0x%08X", getHuid( i_mba ) );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
             o_rc = FAIL; break;
@@ -728,7 +728,7 @@ int32_t getDimmSpareConfig( TargetHandle_t i_mba, CenRank i_rank,
 
         if ( ( isX4Dram && isFullByte ) || ( !isX4Dram && !isFullByte ) )
         {
-            PRDF_ERR( PRDF_FUNC"Invalid Configuration: o_spareConfig:%u",
+            PRDF_ERR( PRDF_FUNC "Invalid Configuration: o_spareConfig:%u",
                       o_spareConfig );
             o_rc = FAIL; break;
         }
@@ -754,7 +754,7 @@ int32_t getMemBufRawCardType( TargetHandle_t i_mba,
     {
         if ( TYPE_MBA != getTargetType(i_mba) )
         {
-            PRDF_ERR( PRDF_FUNC"Target 0x%08x is not an MBA", getHuid(i_mba) );
+            PRDF_ERR( PRDF_FUNC "Target 0x%08x is not an MBA", getHuid(i_mba) );
             o_rc = FAIL; break;
         }
 
@@ -762,14 +762,14 @@ int32_t getMemBufRawCardType( TargetHandle_t i_mba,
         o_rc = isMembufOnDimm( i_mba, isCenDimm );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC"isMembufOnDimm() failed on MBA 0x%08x",
+            PRDF_ERR( PRDF_FUNC "isMembufOnDimm() failed on MBA 0x%08x",
                       getHuid(i_mba) );
             break;
         }
 
         if ( !isCenDimm )
         {
-            PRDF_ERR( PRDF_FUNC"MBA 0x%08x is not on a buffered DIMM",
+            PRDF_ERR( PRDF_FUNC "MBA 0x%08x is not on a buffered DIMM",
                       getHuid(i_mba) );
             o_rc = FAIL; break;
         }
@@ -777,7 +777,7 @@ int32_t getMemBufRawCardType( TargetHandle_t i_mba,
         TargetHandleList l_dimmList = getConnected( i_mba, TYPE_DIMM );
         if ( 0 == l_dimmList.size() )
         {
-            PRDF_ERR( PRDF_FUNC"No DIMMs connected to MBA 0x%08x",
+            PRDF_ERR( PRDF_FUNC "No DIMMs connected to MBA 0x%08x",
                       getHuid(i_mba) );
             o_rc = FAIL; break;
         }
@@ -796,7 +796,7 @@ int32_t getMemBufRawCardType( TargetHandle_t i_mba,
 
         if ( NULL != errl )
         {
-            PRDF_ERR( PRDF_FUNC"fapiPlatGetSpdModspecComRefRawCard() failed on"
+            PRDF_ERR( PRDF_FUNC "fapiPlatGetSpdModspecComRefRawCard() failed on"
                       "DIMM 0x%08X", getHuid(l_dimmList[0]) );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
             o_rc = FAIL; break;
@@ -867,7 +867,7 @@ int32_t mss_MaintCmdWrapper::setupAndExecuteCmd()
     if ( NULL != errl )
     {
         PRDF_GET_REASONCODE( errl, o_rc );
-        PRDF_ERR( PRDF_FUNC"setupAndExecuteCmd() failed: rc=0x%x", o_rc );
+        PRDF_ERR( PRDF_FUNC "setupAndExecuteCmd() failed: rc=0x%x", o_rc );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
@@ -890,7 +890,7 @@ int32_t mss_MaintCmdWrapper::stopCmd()
     if ( NULL != errl )
     {
         PRDF_GET_REASONCODE( errl, o_rc );
-        PRDF_ERR( PRDF_FUNC"stopCmd() failed: rc=0x%x", o_rc );
+        PRDF_ERR( PRDF_FUNC "stopCmd() failed: rc=0x%x", o_rc );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
@@ -913,7 +913,7 @@ int32_t mss_MaintCmdWrapper::cleanupCmd()
     if ( NULL != errl )
     {
         PRDF_GET_REASONCODE( errl, o_rc );
-        PRDF_ERR( PRDF_FUNC"cleanupCmd() failed: rc=0x%x", o_rc );
+        PRDF_ERR( PRDF_FUNC "cleanupCmd() failed: rc=0x%x", o_rc );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
@@ -957,7 +957,7 @@ mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
                                          i_endAddr, i_stopCond, false );
             break;
         default:
-            PRDF_ERR( PRDF_FUNC"Unsupported command type: 0x%x", i_cmdType );
+            PRDF_ERR( PRDF_FUNC "Unsupported command type: 0x%x", i_cmdType );
     }
 
     if ( NULL != cmd )

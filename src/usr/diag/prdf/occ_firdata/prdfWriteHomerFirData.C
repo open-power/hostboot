@@ -487,7 +487,7 @@ errlHndl_t getHwConfig( HOMER_Data_t & o_data )
         errl = PNOR::getSectionInfo( PNOR::FIRDATA, sectionInfo );
         if ( NULL != errl )
         {
-            PRDF_ERR( FUNC"getSectionInfo() failed" );
+            PRDF_ERR( FUNC "getSectionInfo() failed" );
             break;
         }
 
@@ -507,7 +507,7 @@ errlHndl_t getHwConfig( HOMER_Data_t & o_data )
         TargetHandle_t masterProc = getMasterProc();
         if ( NULL == masterProc )
         {
-            PRDF_ERR( FUNC"master PROC is NULL" );
+            PRDF_ERR( FUNC "master PROC is NULL" );
 
             /*@
              * @errortype
@@ -613,7 +613,7 @@ errlHndl_t writeHomerFirData( uint8_t * i_hBuf, size_t i_hBufSize )
         errl = getHwConfig( data );
         if ( NULL != errl )
         {
-            PRDF_ERR( FUNC"getHwConfig() failed" );
+            PRDF_ERR( FUNC "getHwConfig() failed" );
             break;
         }
 
@@ -643,7 +643,7 @@ errlHndl_t writeHomerFirData( uint8_t * i_hBuf, size_t i_hBufSize )
         // Verify data will fit in HOMER.
         if ( i_hBufSize < sz_hBuf )
         {
-            PRDF_ERR( FUNC"Required data size %d is greater that available "
+            PRDF_ERR( FUNC "Required data size %d is greater that available "
                       "HOMER data %d", sz_hBuf, i_hBufSize );
             /*@
              * @errortype

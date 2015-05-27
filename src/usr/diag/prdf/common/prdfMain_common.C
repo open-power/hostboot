@@ -135,7 +135,7 @@ errlHndl_t noLock_initialize()
             delete systemPtr;
             systemPtr = NULL;
             g_initialized = false;
-            PRDF_ERR(PRDF_FUNC"failed to buid object model");
+            PRDF_ERR(PRDF_FUNC "failed to buid object model");
         }
         //systemPtr is populated in configurator
         else if( systemPtr != NULL )
