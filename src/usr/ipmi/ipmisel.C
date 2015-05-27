@@ -42,7 +42,7 @@
 //Defined in ipmidd.C
 extern trace_desc_t * g_trac_ipmi;
 #define IPMI_TRAC(printf_string,args...) \
-    TRACFCOMP(g_trac_ipmi,"sel: "printf_string,##args)
+    TRACFCOMP(g_trac_ipmi,"sel: " printf_string,##args)
 
 // local functions
 /*

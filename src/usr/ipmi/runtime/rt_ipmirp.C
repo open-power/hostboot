@@ -52,7 +52,7 @@ trace_desc_t * g_trac_ipmi;
 TRAC_INIT(&g_trac_ipmi, IPMI_COMP_NAME, 6*KILOBYTE, TRACE::BUFFER_SLOW);
 
 #define IPMI_TRAC(printf_string,args...) \
-    TRACFCOMP(g_trac_ipmi,"rt: "printf_string,##args)
+    TRACFCOMP(g_trac_ipmi,"rt: " printf_string,##args)
 
 namespace IPMI
 {

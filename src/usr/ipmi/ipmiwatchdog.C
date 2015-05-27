@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,7 @@
 // Defined in ipmidd.C
 extern trace_desc_t * g_trac_ipmi;
 #define IPMI_TRAC(printf_string,args...) \
-    TRACFCOMP(g_trac_ipmi,"wd: "printf_string,##args)
+    TRACFCOMP(g_trac_ipmi,"wd: " printf_string,##args)
 
 namespace IPMIWATCHDOG
 {
