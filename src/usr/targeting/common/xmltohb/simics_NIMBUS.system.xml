@@ -1,0 +1,1912 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/targeting/common/xmltohb/simics_NIMBUS.system.xml $   -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<attributes>
+
+<!-- =====================================================================
+     HOST BOOT TARGET INSTANCES
+     Contains target instance declarations for the Simics NIMBUS
+     configuration
+     * Amount of maximum Nimbus chips in this Simics model is TBD.
+     * Currently created for 1 chip and will be expanded as needed.
+     * Each Nimbus has 6 EQ units
+     *     Each EQ unit has 2 EX units (a total of 12 per chip)
+     *         Each EX has 2 cores, 1 L2, 1 L3 (a total of 24 cores per chip)
+     * Each Nimbus has 4 MCS
+     *     Each MCS has 2 MCA units (a total of 8 per chip)
+     * Each Nimbus has 2 MCBIST units (1 per MCU)
+     * Each Nimbus has 3 PECs
+     *     Each PEC has 6 PHBs
+     * Each Nimbus has 1 XBUS chiplet
+     * Each Nimbus has 2 OBUS (OB0 and OB3)
+     * Each Nimbus has 2 NVBUS
+     * Each Nimbus has 21 PPE units (including the SBE):
+     *    1 SBE, 1 Powerbus/Fabric PPE, 4 GPEs, 12 CMEs, and 3 IO PPEs.     * 
+     * Each chiplet existing in a Nimbus has 1 equivalent PERV unit
+     * Each Nimbus has 2 CAPP units
+     * Each Nimbus has 1 SBE unit
+     * Each Nimbus has 1 OCC unit
+     * Nimbus does not have ABUS, MI or DMI (under MI) chiplets.
+     ================================================================= -->
+
+<!-- System -->
+<targetInstance>
+    <id>sys0</id>
+    <type>sys-sys-power9</type>
+    <attribute>
+        <id>MODEL</id>
+        <default>POWER9</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0</default>
+    </attribute>
+    <attribute>
+        <id>EXECUTION_PLATFORM</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<!-- System node 0 -->
+<targetInstance>
+    <id>sys0node0</id>
+    <type>enc-node-power9</type>
+    <attribute>
+        <id>MODEL</id>
+        <default>POWER9</default>
+    </attribute>
+    <attribute><id>HUID</id><default>0x00020000</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0</default>
+    </attribute>
+</targetInstance>
+
+<!-- Nimbus n0p0 processor chip -->
+<targetInstance>
+    <id>sys0node0proc0</id>
+    <type>chip-processor-nimbus</type>
+    <attribute><id>HUID</id><default>0x00050000</default></attribute>
+    <attribute><id>POSITION</id><default>4</default></attribute>
+    <attribute><id>SCOM_SWITCHES</id>
+        <default>
+            <field><id>useFsiScom</id><value>1</value></field>
+            <field><id>useXscom</id><value>0</value></field>
+            <field><id>useInbandScom</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0</default>
+    </attribute>
+    <attribute>
+        <id>FRU_ID</id>
+        <default>1</default>
+    </attribute>
+    <!-- No FSI connection -->
+    <attribute>
+        <id>FSI_MASTER_TYPE</id>
+        <default>NO_MASTER</default>
+    </attribute>
+    <attribute>
+        <id>FSI_SLAVE_CASCADE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FSI_OPTION_FLAGS</id>
+        <default>
+        <field><id>flipPort</id><value>1</value></field>
+        <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <!-- FSI-A is not connected -->
+    <attribute>
+        <id>FSI_MASTER_CHIP</id>
+        <default>physical:sys</default><!-- no A path -->
+    </attribute>
+    <attribute>
+        <id>FSI_MASTER_PORT</id>
+        <default>0xFF</default><!-- no A path -->
+    </attribute>
+    <!-- FSI-B is not connected -->
+    <attribute>
+        <id>ALTFSI_MASTER_CHIP</id>
+        <default>physical:sys</default><!-- no B path -->
+    </attribute>
+    <attribute>
+        <id>ALTFSI_MASTER_PORT</id>
+        <default>0xFF</default><!-- no B path -->
+    </attribute>
+    <!-- End FSI connections -->
+    <attribute>
+        <id>FABRIC_NODE_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FABRIC_CHIP_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
+    <attribute><id>FSP_BASE_ADDR</id>
+        <default>0x0000000000000000</default>
+    </attribute>
+    <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
+        <default>0x0000000000000000</default>
+    </attribute>
+    <attribute><id>INTP_BASE_ADDR</id>
+        <default>0x0003FFFF80300000</default>
+    </attribute>
+    <attribute><id>PHB_BASE_ADDRS</id>
+        <default>
+            0x0003FFFE40C00000,0x0003FFFE40D00000,
+            0x0003FFFE40E00000,0x0003FFFE40F00000
+        </default>
+    </attribute>
+    <attribute><id>PCI_BASE_ADDRS_64</id>
+        <default>
+            0x0003D0C000000000,0x0003D0D000000000,
+            0x0003D0E000000000,0x0003D0F000000000
+        </default>
+    </attribute>
+    <attribute><id>PCI_BASE_ADDRS_32</id>
+        <default>
+            0x0003FF8600000000,0x0003FF8680000000,
+            0x0003FF8700000000,0x0003FF8780000000
+        </default>
+    </attribute>
+    <attribute><id>RNG_BASE_ADDR</id>
+        <default>0x0003FFFF40003000</default>
+    </attribute>
+    <attribute><id>IBSCOM_PROC_BASE_ADDR</id>
+        <default>0x0003E50000000000</default>
+    </attribute>
+    <attribute><id>PROC_DCM_INSTALLED</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<!-- Nimbus n0p0 EQ units -->
+<targetInstance>
+    <id>sys0node0proc0eq0</id>
+    <type>unit-eq-power9</type>
+    <attribute><id>HUID</id><default>0x00200000</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq1</id>
+    <type>unit-eq-power9</type>
+    <attribute><id>HUID</id><default>0x00200001</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq2</id>
+    <type>unit-eq-power9</type>
+    <attribute><id>HUID</id><default>0x00200002</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-2</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-2</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq3</id>
+    <type>unit-eq-power9</type>
+    <attribute><id>HUID</id><default>0x00200003</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-3</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-3</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq4</id>
+    <type>unit-eq-power9</type>
+    <attribute><id>HUID</id><default>0x00200004</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-4</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-4</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq5</id>
+    <type>unit-eq-power9</type>
+    <attribute><id>HUID</id><default>0x00200005</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-5</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-5</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
+</targetInstance>
+
+<!-- nimbus n0p0eq0 EX units -->
+<targetInstance>
+    <id>sys0node0proc0eq0ex0</id>
+    <type>unit-ex-power9</type>
+    <attribute><id>HUID</id><default>0x00061000</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-0/ex-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-0/ex-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq0ex1</id>
+    <type>unit-ex-power9</type>
+    <attribute><id>HUID</id><default>0x00061001</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-0/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-0/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<!-- nimbus n0p0eq1 EX units -->
+<targetInstance>
+    <id>sys0node0proc0eq1ex0</id>
+    <type>unit-ex-power9</type>
+    <attribute><id>HUID</id><default>0x00061002</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-1/ex-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-1/ex-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq1ex1</id>
+    <type>unit-ex-power9</type>
+    <attribute><id>HUID</id><default>0x00061003</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-1/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-1/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
+    </attribute>
+</targetInstance>
+
+<!-- nimbus n0p0eq2 EX units -->
+<targetInstance>
+    <id>sys0node0proc0eq2ex0</id>
+    <type>unit-ex-power9</type>
+    <attribute><id>HUID</id><default>0x00061004</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-2/ex-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-2/ex-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq2ex1</id>
+    <type>unit-ex-power9</type>
+    <attribute><id>HUID</id><default>0x00061005</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-2/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-2/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
+</targetInstance>
+
+<!-- nimbus n0p0eq3 EX units -->
+<targetInstance>
+    <id>sys0node0proc0eq3ex0</id>
+    <type>unit-ex-power9</type>
+    <attribute><id>HUID</id><default>0x00061006</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-3/ex-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-3/ex-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq3ex1</id>
+    <type>unit-ex-power9</type>
+    <attribute><id>HUID</id><default>0x00061007</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-3/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-3/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>7</default>
+    </attribute>
+</targetInstance>
+
+<!-- nimbus n0p0eq4 EX units -->
+<targetInstance>
+    <id>sys0node0proc0eq4ex0</id>
+    <type>unit-ex-power9</type>
+    <attribute><id>HUID</id><default>0x00061008</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-4/ex-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-4/ex-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>8</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq4ex1</id>
+    <type>unit-ex-power9</type>
+    <attribute><id>HUID</id><default>0x00061009</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-4/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-4/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>9</default>
+    </attribute>
+</targetInstance>
+
+<!-- nimbus n0p0eq5 EX units -->
+<targetInstance>
+    <id>sys0node0proc0eq5ex0</id>
+    <type>unit-ex-power9</type>
+    <attribute><id>HUID</id><default>0x0006100A</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-5/ex-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-5/ex-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>10</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq5ex1</id>
+    <type>unit-ex-power9</type>
+    <attribute><id>HUID</id><default>0x0006100B</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-5/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-5/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>11</default>
+    </attribute>
+</targetInstance>
+
+<!-- nimbus n0p0eq0ex0 CORE units -->
+<targetInstance>
+    <id>sys0node0proc0eq0ex0core0</id>
+    <type>unit-core-power9</type>
+    <attribute><id>HUID</id><default>0x00071000</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-0/ex-0/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-0/ex-0/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq0ex0core1</id>
+    <type>unit-core-power9</type>
+    <attribute><id>HUID</id><default>0x00071001</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-0/ex-0/core-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-0/ex-0/core-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<!-- nimbus n0p0eq0ex1 CORE units -->
+<targetInstance>
+    <id>sys0node0proc0eq0ex1core0</id>
+    <type>unit-core-power9</type>
+    <attribute><id>HUID</id><default>0x00071002</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-0/ex-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-0/ex-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq0ex1core1</id>
+    <type>unit-core-power9</type>
+    <attribute><id>HUID</id><default>0x00071003</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-0/ex-1/core-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-0/ex-1/core-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
+    </attribute>
+</targetInstance>
+
+<!-- nimbus n0p0eq1ex0 CORE units -->
+<targetInstance>
+    <id>sys0node0proc0eq1ex0core0</id>
+    <type>unit-core-power9</type>
+    <attribute><id>HUID</id><default>0x00071004</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-1/ex-0/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-1/ex-0/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq1ex0core1</id>
+    <type>unit-core-power9</type>
+    <attribute><id>HUID</id><default>0x00071005</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-1/ex-0/core-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-1/ex-0/core-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
+</targetInstance>
+
+<!-- nimbus n0p0eq1ex1 CORE units -->
+<targetInstance>
+    <id>sys0node0proc0eq1ex1core0</id>
+    <type>unit-core-power9</type>
+    <attribute><id>HUID</id><default>0x00071006</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-1/ex-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-1/ex-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq1ex1core1</id>
+    <type>unit-core-power9</type>
+    <attribute><id>HUID</id><default>0x00071007</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-1/ex-1/core-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-1/ex-1/core-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>7</default>
+    </attribute>
+</targetInstance>
+
+<!-- nimbus n0p0eq2ex0 CORE units -->
+<targetInstance>
+    <id>sys0node0proc0eq2ex0core0</id>
+    <type>unit-core-power9</type>
+    <attribute><id>HUID</id><default>0x00071008</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-2/ex-0/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-2/ex-0/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>8</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq2ex0core1</id>
+    <type>unit-core-power9</type>
+    <attribute><id>HUID</id><default>0x00071009</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-2/ex-0/core-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-2/ex-0/core-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>9</default>
+    </attribute>
+</targetInstance>
+
+<!-- nimbus n0p0eq2ex1 CORE units -->
+<targetInstance>
+    <id>sys0node0proc0eq2ex1core0</id>
+    <type>unit-core-power9</type>
+    <attribute><id>HUID</id><default>0x0007100A</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-2/ex-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-2/ex-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>10</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq2ex1core1</id>
+    <type>unit-core-power9</type>
+    <attribute><id>HUID</id><default>0x0007100B</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-2/ex-1/core-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-2/ex-1/core-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>11</default>
+    </attribute>
+</targetInstance>
+
+<!-- nimbus n0p0eq3ex0 CORE units -->
+<targetInstance>
+    <id>sys0node0proc0eq3ex0core0</id>
+    <type>unit-core-power9</type>
+    <attribute><id>HUID</id><default>0x0007100C</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-3/ex-0/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-3/ex-0/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>12</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq3ex0core1</id>
+    <type>unit-core-power9</type>
+    <attribute><id>HUID</id><default>0x0007100D</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-3/ex-0/core-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-3/ex-0/core-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>13</default>
+    </attribute>
+</targetInstance>
+
+<!-- nimbus n0p0eq3ex1 CORE units -->
+<targetInstance>
+    <id>sys0node0proc0eq3ex1core0</id>
+    <type>unit-core-power9</type>
+    <attribute><id>HUID</id><default>0x0007100E</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-3/ex-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-3/ex-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>14</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq3ex1core1</id>
+    <type>unit-core-power9</type>
+    <attribute><id>HUID</id><default>0x0007100F</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-3/ex-1/core-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-3/ex-1/core-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>15</default>
+    </attribute>
+</targetInstance>
+
+<!-- nimbus n0p0eq4ex0 CORE units -->
+<targetInstance>
+    <id>sys0node0proc0eq4ex0core0</id>
+    <type>unit-core-power9</type>
+    <attribute><id>HUID</id><default>0x00071010</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-4/ex-0/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-4/ex-0/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>16</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq4ex0core1</id>
+    <type>unit-core-power9</type>
+    <attribute><id>HUID</id><default>0x00071011</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-4/ex-0/core-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-4/ex-0/core-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>17</default>
+    </attribute>
+</targetInstance>
+
+<!-- nimbus n0p0eq4ex1 CORE units -->
+<targetInstance>
+    <id>sys0node0proc0eq4ex1core0</id>
+    <type>unit-core-power9</type>
+    <attribute><id>HUID</id><default>0x00071012</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-4/ex-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-4/ex-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>18</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq4ex1core1</id>
+    <type>unit-core-power9</type>
+    <attribute><id>HUID</id><default>0x00071013</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-4/ex-1/core-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-4/ex-1/core-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>19</default>
+    </attribute>
+</targetInstance>
+
+<!-- nimbus n0p0eq5ex0 CORE units -->
+<targetInstance>
+    <id>sys0node0proc0eq5ex0core0</id>
+    <type>unit-core-power9</type>
+    <attribute><id>HUID</id><default>0x00071014</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-5/ex-0/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-5/ex-0/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>20</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq5ex0core1</id>
+    <type>unit-core-power9</type>
+    <attribute><id>HUID</id><default>0x00071015</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-5/ex-0/core-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-5/ex-0/core-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>21</default>
+    </attribute>
+</targetInstance>
+
+<!-- nimbus n0p0eq5ex1 CORE units -->
+<targetInstance>
+    <id>sys0node0proc0eq5ex1core0</id>
+    <type>unit-core-power9</type>
+    <attribute><id>HUID</id><default>0x00071016</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-5/ex-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-5/ex-1/core-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>22</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0eq5ex1core1</id>
+    <type>unit-core-power9</type>
+    <attribute><id>HUID</id><default>0x00071017</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/eq-5/ex-1/core-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/eq-5/ex-1/core-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>23</default>
+    </attribute>
+</targetInstance>
+
+<!-- nimbus n0p0 MCS units -->
+<targetInstance>
+    <id>sys0node0proc0mcs0</id>
+    <type>unit-mcs-nimbus</type>
+    <attribute><id>HUID</id><default>0x000B0100</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcs-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <default>0x0003E58000000000</default>
+    </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0mcs1</id>
+    <type>unit-mcs-nimbus</type>
+    <attribute><id>HUID</id><default>0x000B0101</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcs-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <default>0x0003E5A000000000</default>
+    </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0mcs2</id>
+    <type>unit-mcs-nimbus</type>
+    <attribute><id>HUID</id><default>0x000B0102</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcs-2</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-2</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <default>0x0003E5C000000000</default>
+    </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0mcs3</id>
+    <type>unit-mcs-nimbus</type>
+    <attribute><id>HUID</id><default>0x000B0103</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcs-3</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-3</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
+    </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <default>0x0003E5E000000000</default>
+    </attribute>
+    <attribute><id>EI_BUS_TX_MSBSWAP</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<!-- Nimbus n0p0mcs0 MCA units -->
+<targetInstance>
+    <id>sys0node0proc0mcs0mca0</id>
+    <type>unit-mca-nimbus</type>
+    <attribute><id>HUID</id><default>0x000D0100</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcs-0/mca-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-0/mca-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0mcs0mca1</id>
+    <type>unit-mca-nimbus</type>
+    <attribute><id>HUID</id><default>0x000D0101</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcs-0/mca-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-0/mca-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<!-- Nimbus n0p0mcs1 MCA units -->
+<targetInstance>
+    <id>sys0node0proc0mcs1mca0</id>
+    <type>unit-mca-nimbus</type>
+    <attribute><id>HUID</id><default>0x000D0102</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcs-1/mca-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-1/mca-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0mcs1mca1</id>
+    <type>unit-mca-nimbus</type>
+    <attribute><id>HUID</id><default>0x000D0103</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcs-1/mca-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-1/mca-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
+    </attribute>
+</targetInstance>
+
+<!-- Nimbus n0p0mcs2 MCA units -->
+<targetInstance>
+    <id>sys0node0proc0mcs2mca0</id>
+    <type>unit-mca-nimbus</type>
+    <attribute><id>HUID</id><default>0x000D0104</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcs-2/mca-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-2/mca-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0mcs2mca1</id>
+    <type>unit-mca-nimbus</type>
+    <attribute><id>HUID</id><default>0x000D0105</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcs-2/mca-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-2/mca-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
+</targetInstance>
+
+<!-- Nimbus n0p0mcs3 MCA units -->
+<targetInstance>
+    <id>sys0node0proc0mcs3mca0</id>
+    <type>unit-mca-nimbus</type>
+    <attribute><id>HUID</id><default>0x000D0106</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcs-3/mca-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-3/mca-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0mcs3mca1</id>
+    <type>unit-mca-nimbus</type>
+    <attribute><id>HUID</id><default>0x000D0107</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcs-3/mca-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-3/mca-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>7</default>
+    </attribute>
+</targetInstance>
+
+<!-- Nimbus n0p0 MCBIST units -->
+<targetInstance>
+    <id>sys0node0proc0mcbist0</id>
+    <type>unit-mcbist-nimbus</type>
+    <attribute><id>HUID</id><default>0x000D0000</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcbist-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcbist-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0mcbist1</id>
+    <type>unit-mcbist-nimbus</type>
+    <attribute><id>HUID</id><default>0x000D0001</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcbist-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcbist-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<!-- Nimbus n0p0 PEC units -->
+<targetInstance>
+    <id>sys0node0proc0pec0</id>
+    <type>unit-pec-power9</type>
+    <attribute><id>HUID</id><default>0x000E0000</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/pec-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/pec-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0pec1</id>
+    <type>unit-pec-power9</type>
+    <attribute><id>HUID</id><default>0x000E0001</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/pec-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/pec-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0pec2</id>
+    <type>unit-pec-power9</type>
+    <attribute><id>HUID</id><default>0x000E0002</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/pec-2</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/pec-2</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
+</targetInstance>
+
+<!-- Nimbus n0p0pec0 PHB units -->
+<targetInstance>
+    <id>sys0node0proc0pec0phb0</id>
+    <type>unit-phb-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E0100</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/pec-0/phb-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/pec-0/phb-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0pec0phb1</id>
+    <type>unit-phb-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E0101</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/pec-0/phb-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/pec-0/phb-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0pec0phb2</id>
+    <type>unit-phb-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E0102</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/pec-0/phb-2</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/pec-0/phb-2</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0pec0phb3</id>
+    <type>unit-phb-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E0103</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/pec-0/phb-3</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/pec-0/phb-3</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0pec0phb4</id>
+    <type>unit-phb-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E0104</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/pec-0/phb-4</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/pec-0/phb-4</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>4</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0pec0phb5</id>
+    <type>unit-phb-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E0105</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/pec-0/phb-5</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/pec-0/phb-5</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>5</default>
+    </attribute>
+</targetInstance>
+
+<!-- Nimbus n0p0pec1 PHB units -->
+<targetInstance>
+    <id>sys0node0proc0pec1phb0</id>
+    <type>unit-phb-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E0106</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/pec-1/phb-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/pec-1/phb-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>6</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0pec1phb1</id>
+    <type>unit-phb-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E0107</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/pec-1/phb-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/pec-1/phb-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>7</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0pec1phb2</id>
+    <type>unit-phb-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E0108</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/pec-1/phb-2</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/pec-1/phb-2</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>8</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0pec1phb3</id>
+    <type>unit-phb-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E0109</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/pec-1/phb-3</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/pec-1/phb-3</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>9</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0pec1phb4</id>
+    <type>unit-phb-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E010A</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/pec-1/phb-4</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/pec-1/phb-4</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>10</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0pec1phb5</id>
+    <type>unit-phb-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E010B</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/pec-1/phb-5</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/pec-1/phb-5</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>11</default>
+    </attribute>
+</targetInstance>
+
+<!-- Nimbus n0p0pec2 PHB units -->
+<targetInstance>
+    <id>sys0node0proc0pec2phb0</id>
+    <type>unit-phb-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E010C</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/pec-2/phb-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/pec-2/phb-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>12</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0pec2phb1</id>
+    <type>unit-phb-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E010D</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/pec-2/phb-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/pec-2/phb-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>13</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0pec2phb2</id>
+    <type>unit-phb-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E010E</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/pec-2/phb-2</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/pec-2/phb-2</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>14</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0pec2phb3</id>
+    <type>unit-phb-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E010F</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/pec-2/phb-3</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/pec-2/phb-3</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>15</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0pec2phb4</id>
+    <type>unit-phb-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E0110</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/pec-2/phb-4</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/pec-2/phb-4</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>16</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0pec2phb5</id>
+    <type>unit-phb-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E0111</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/pec-2/phb-5</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/pec-2/phb-5</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>17</default>
+    </attribute>
+</targetInstance>
+
+<!-- Nimbus n0p0 OBUS units -->
+<targetInstance>
+    <id>sys0node0proc0obus0</id>
+    <type>unit-obus-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E0200</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/obus-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/obus-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0obus3</id>
+    <type>unit-obus-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E0201</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/obus-3</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/obus-3</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<!-- Nimbus n0p0 NVBUS units -->
+<targetInstance>
+    <id>sys0node0proc0nvbus0</id>
+    <type>unit-nvbus-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E0300</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/nvbus-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/nvbus-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0nvbus1</id>
+    <type>unit-nvbus-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E0301</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/nvbus-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/nvbus-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<!-- Nimbus n0p0 PPE units
+     Up to 18 PPEs per Nimbus, only create 2 in this config for now -->
+<targetInstance>
+    <id>sys0node0proc0ppe0</id>
+    <type>unit-ppe-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E0400</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/ppe-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/ppe-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0ppe1</id>
+    <type>unit-ppe-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E0401</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/ppe-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/ppe-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<!-- Nimbus n0p0 PERV units
+     Multiple per Nimbus, only create 2 in this config for now -->
+<targetInstance>
+    <id>sys0node0proc0perv0</id>
+    <type>unit-perv-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E0500</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/perv-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/perv-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0perv1</id>
+    <type>unit-perv-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E0501</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/perv-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/perv-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<!-- nimbus n0p0 XBUS units -->
+<targetInstance>
+    <id>sys0node0proc0xbus0</id>
+    <type>unit-xbus-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E0601</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/xbus-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/xbus-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-1/xbus-1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0xbus1</id>
+    <type>unit-xbus-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E0602</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/xbus-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/xbus-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-2/xbus-1</default>
+    </attribute>
+</targetInstance>
+
+<!-- nimbus n0p0 CAPP units -->
+<targetInstance>
+    <id>sys0node0proc0capp0</id>
+    <type>unit-capp-nimbus</type>
+    <attribute><id>HUID</id><default>0x00210000</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/capp-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/capp-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0capp1</id>
+    <type>unit-capp-nimbus</type>
+    <attribute><id>HUID</id><default>0x00210001</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/capp-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/capp-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<!-- Nimbus n0p0 SBE units -->
+<targetInstance>
+    <id>sys0node0proc0sbe0</id>
+    <type>unit-sbe-nimbus</type>
+    <attribute><id>HUID</id><default>0x00220000</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/sbe-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/sbe-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+
+<!-- nimbus n0p0 OCC units -->
+<targetInstance>
+    <id>sys0node0proc0occ0</id>
+    <type>occ</type>
+        <attribute><id>HUID</id><default>0x00230000</default></attribute>
+        <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/occ-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/occ-0</default>
+    </attribute>
+    <attribute>
+        <id>OCC_MASTER_CAPABLE</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+</attributes>

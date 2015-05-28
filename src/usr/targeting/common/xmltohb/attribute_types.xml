@@ -216,14 +216,63 @@
         <name>FSI</name>
         <value>34</value>
     </enumerator>
-    <!-- add any new types here, and increment TEST_FAIL and LAST_IN_RANGE -->
+    <!-- Add P9 targets -->
     <enumerator>
-        <name>TEST_FAIL</name>
+        <name>EQ</name>
         <value>35</value>
     </enumerator>
     <enumerator>
-        <name>LAST_IN_RANGE</name>
+        <name>MCA</name>
         <value>36</value>
+    </enumerator>
+    <enumerator>
+        <name>MCBIST</name>
+        <value>37</value>
+    </enumerator>
+    <enumerator>
+        <name>MI</name>
+        <value>38</value>
+    </enumerator>
+    <enumerator>
+        <name>DMI</name>
+        <value>39</value>
+    </enumerator>
+    <enumerator>
+        <name>OBUS</name>
+        <value>40</value>
+    </enumerator>
+    <enumerator>
+        <name>NVBUS</name>
+        <value>41</value>
+    </enumerator>
+    <enumerator>
+        <name>SBE</name>
+        <value>42</value>
+    </enumerator>
+    <enumerator>
+        <name>PPE</name>
+        <value>43</value>
+    </enumerator>
+    <enumerator>
+        <name>PERV</name>
+        <value>44</value>
+    </enumerator>
+    <enumerator>
+        <name>PEC</name>
+        <value>45</value>
+    </enumerator>
+    <enumerator>
+        <name>PHB</name>
+        <value>46</value>
+    </enumerator>
+    <!-- add any new types here, and increment TEST_FAIL and LAST_IN_RANGE -->
+    <enumerator>
+        <name>TEST_FAIL</name>
+        <value>47</value>
+    </enumerator>
+    <enumerator>
+        <name>LAST_IN_RANGE</name>
+        <value>48</value>
     </enumerator>
     <default>NA</default>
 </enumerationType>
@@ -249,6 +298,12 @@
         <name>NAPLES</name>
     </enumerator>
     <enumerator>
+        <name>NIMBUS</name>
+    </enumerator>
+    <enumerator>
+        <name>CUMULUS</name>
+    </enumerator>
+    <enumerator>
         <name>CENTAUR</name>
         <value>48</value>
     </enumerator>
@@ -259,9 +314,15 @@
     <enumerator>
         <name>CDIMM</name>
     </enumerator>
+    <!-- POWER8 is system/node model, not processor chip level -->
     <enumerator>
         <name>POWER8</name>
         <value>112</value>
+    </enumerator>
+    <!-- POWER9 is system/node model, not processor chip level -->
+    <enumerator>
+        <name>POWER9</name>
+        <value>144</value>
     </enumerator>
     <default>NA</default>
 </enumerationType>
@@ -15331,6 +15392,8 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
         Number of PCIe PHB units present on target
         Murano/Venice: 3
         Naples: 4
+        Nimbus: 6
+        Cumulus: 6
   </description>
   <simpleType>
       <uint8_t></uint8_t>
