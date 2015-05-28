@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -399,12 +401,30 @@ const char* EntityPath::pathElementTypeAsString(
             return "CAPP";
         case TYPE_FSI:
             return "FSI";
-//        case TYPE_FSI_LINK:
-//            return "FSI-link";
-//        case TYPE_CFAM:
-//            return "CFAM";
-//        case TYPE_ENGINE:
-//            return "Engine";
+        case TYPE_EQ:
+            return "EQ";
+        case TYPE_MCA:
+            return "MCA";
+        case TYPE_MCBIST:
+            return "MCBIST";
+        case TYPE_MI:
+            return "MI";
+        case TYPE_DMI:
+            return "DMI";
+        case TYPE_OBUS:
+            return "OBUS";
+        case TYPE_NVBUS:
+            return "NVBUS";
+        case TYPE_SBE:
+            return "SBE";
+        case TYPE_PPE:
+            return "PPE";
+        case TYPE_PERV:
+            return "PERV";
+        case TYPE_PEC:
+            return "PEC";
+        case TYPE_PHB:
+            return "PHB";
         default:
             return "Unknown path type";
     }
