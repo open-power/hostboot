@@ -183,7 +183,7 @@ namespace fapi2
                               const scanRingId_t i_address,
                               const variable_buffer& i_data,
                               const RingMode i_ringMode = 0);
-#endif
+
 
     /// @brief Read-modify-write a ring on a chip.
     /// @tparam K template parameter, passed in target.
@@ -200,6 +200,7 @@ namespace fapi2
                                  const variable_buffer& i_data,
                                  const ChipOpModifyMode i_modifyMode,
                                  const RingMode i_ringMode = 0);
+#endif
 
 #ifdef FAPI_SUPPORT_MULTI_SCOM
     /// @brief Performs a multiple SCOM operation
