@@ -3135,10 +3135,18 @@ void getMasterInfo( const TARGETING::Target* i_chip,
                     std::list<MasterInfo_t>& o_info )
 {
     TRACDCOMP(g_trac_i2c,"getMasterInfo(%.8X)",TARGETING::get_huid(i_chip));
+    TARGETING::TYPE l_type = i_chip->getAttr<TARGETING::ATTR_TYPE>();
     for( uint32_t engine = 0;
          engine < I2C_BUS_ATTR_MAX_ENGINE;
          engine++ )
     {
+        // Only support engine 0 for centaur
+        if ( ( engine != 0 ) &&
+             ( l_type == TARGETING::TYPE_MEMBUF ) )
+        {
+            continue;
+        }
+
         MasterInfo_t info;
         info.scomAddr = 0x000A0000 + engine*0x20;
         info.engine = engine;
@@ -3146,6 +3154,8 @@ void getMasterInfo( const TARGETING::Target* i_chip,
         // PIB_CLK = NEST_FREQ /4
         // Local Bus = PIB_CLK / 4
         info.freq = info.freq/16; //convert nest to local bus
+
+        TRACDCOMP(g_trac_i2c,"getMasterInfo(%.8X): pushing back engine=%d, scomAddr=0x%X",TARGETING::get_huid(i_chip), engine, info.scomAddr);
 
         o_info.push_back(info);
     }
