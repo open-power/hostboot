@@ -377,6 +377,16 @@ int32_t getDimmRowCol( TARGETING::TargetHandle_t i_mba, uint8_t & o_rowNum,
  */
 uint8_t getRanksPerDimm( TARGETING::TargetHandle_t i_mbaTarget, uint8_t i_ds );
 
+/**
+ * @brief   Obtains number of MASTER ranks per DIMM select.
+ * @param   i_mbaTarget MBA target.
+ * @param   i_ds        DIMM select for DIMM.
+ * @return  Number of MASTER ranks confgured per DIMM select. If internal function
+ *          fails it will return 0.
+ */
+uint8_t getMasterRanksPerDimm( TARGETING::TargetHandle_t i_mbaTarget,
+                               uint8_t i_ds );
+
 //##############################################################################
 //##
 //##                        Clock specific functions

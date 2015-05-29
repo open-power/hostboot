@@ -1390,6 +1390,43 @@ uint8_t getRanksPerDimm( TargetHandle_t i_mba, uint8_t i_ds )
 
 //------------------------------------------------------------------------------
 
+uint8_t getMasterRanksPerDimm( TARGETING::TargetHandle_t i_mbaTarget,
+                               uint8_t i_ds )
+{
+    #define PRDF_FUNC "[PlatServices::getMasterRanksPerDimm] "
+
+    uint8_t rankCount = 0; // default if something fails
+
+    do
+    {
+        if ( MAX_DIMM_PER_PORT <= i_ds )
+        {
+            PRDF_ERR( PRDF_FUNC"Invalid parameters i_ds:%u", i_ds );
+            break;
+        }
+
+        // NOTE: Unable to use getAttr() because it is not able to return an
+        //       array. Otherwise, all of the following would be able to fit in
+        //       one line of code. The targeting may fix this later.
+
+        ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_type  attr;
+        if (!i_mbaTarget->tryGetAttr<ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM>(attr))
+        {
+            PRDF_ERR(PRDF_FUNC"fail get ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM");
+            break;
+        }
+
+        // Note that DIMMs are plugged in pairs so the rank numbers should be
+        // the same for each port.
+        rankCount = attr[0][i_ds];
+
+    } while(0);
+
+    return rankCount;
+
+    #undef PRDF_FUNC
+}
+
 //##############################################################################
 //##
 //##                        Clock specific functions

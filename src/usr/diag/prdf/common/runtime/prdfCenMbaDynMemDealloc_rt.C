@@ -49,6 +49,257 @@ using namespace PlatServices;
 namespace DEALLOC
 {
 
+enum
+{
+    DDR3 = fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR3,
+    DDR4 = fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
+
+    HASH_MODE_128B = 0,
+    HASH_MODE_256B,
+};
+
+/** @brief  Combines the rank and bank together. Note that the rank/bank will be
+ *          split in two to make room for the row and column. This function will
+ *          return the rank/bank in both parts (right justified).
+ *  @param  i_ds             DIMM select (D).
+ *  @param  i_mrnk           Master rank (M0-M2).
+ *  @param  i_srnk           Slave rank  (S0-S2).
+ *  @param  i_numDs          Number of configured DIMM select bits.
+ *  @param  i_numMrnk        Number of configured master rank bits.
+ *  @param  i_numSrnk        Number of configured slave rank bits.
+ *  @param  i_bnk            Bank (DDR3: B2-B0, DDR4: BG1-BG0,B1-B0).
+ *  @param  i_ddrVer         DDR version (DDR3 or DDR4).
+ *  @param  i_hash           Hash value (0, 1, or 2).
+ *  @param  o_upperRnkBnk    Upper rank/bank bits (right justified).
+ *  @param  o_numUpperRnkBnk Number of configured upper rank/bank bits.
+ *  @param  o_lowerRnkBnk    Lower rank/bank bits (right justified).
+ *  @param  o_numLowerRnkBnk Number of configured lower rank/bank bits.
+ */
+void getRankBank( uint64_t i_ds,    uint64_t i_mrnk,    uint64_t i_srnk,
+                  uint64_t i_numDs, uint64_t i_numMrnk, uint64_t i_numSrnk,
+                  uint64_t i_bnk,   uint64_t i_ddrVer,  uint64_t i_hash,
+                  uint64_t & o_upperRnkBnk, uint64_t & o_numUpperRnkBnk,
+                  uint64_t & o_lowerRnkBnk, uint64_t & o_numLowerRnkBnk )
+{
+    // The number of bank bits can be determined from the DDR version.
+    uint64_t numBnk = (DDR3 == i_ddrVer) ? 3 : 4;
+
+    // Calculate the number of combined rank/bank bits.
+    uint64_t numRnkBnk = i_numDs + i_numMrnk + i_numSrnk + numBnk;
+
+    // Build the rank (D,M0-M2,S0-S2)
+    uint64_t rnk = i_ds;
+    rnk <<= i_numMrnk; rnk |= i_mrnk;
+    rnk <<= i_numSrnk; rnk |= i_srnk;
+
+    // Get the rank components
+    uint64_t upperRnk = (rnk & ~0x1) << numBnk;
+    uint64_t lowerRnk = (rnk &  0x1) << numBnk;
+
+    // Get the bank components
+    uint64_t upperBnk = 0, lowerBnk = 0;
+    if ( DDR3 == i_ddrVer )
+    {
+        upperBnk = i_bnk & 0x4; // B2
+        lowerBnk = i_bnk & 0x3; // B1-B0
+    }
+    else // DDR4
+    {
+        upperBnk = (i_bnk & 0x3) << 2; // B1-B0
+        lowerBnk = (i_bnk & 0xC) >> 2; // BG1-BG0
+    }
+
+    // The last bit of the rank and the upper part of the bank will be swapped
+    // in certain conditions.
+    bool swap = ( (0 != i_hash)    || // Normal case:  hash is non-zero
+                  (0 != i_numSrnk) || // Special case: any slave ranks
+                  (3 == i_numMrnk) ); // Special case: 8 master ranks (3 bits)
+
+    // Combine rank and bank.
+    uint64_t rnkBnk = upperRnk                              |
+                      lowerRnk >> (swap ? (numBnk - 2) : 0) |
+                      upperBnk << (swap ? 1            : 0) |
+                      lowerBnk;
+
+    // The combined rank/bank will need to be split to insert the column and
+    // row bits.
+    uint64_t shift = numBnk + i_hash;
+    if ( 0 != i_numSrnk ) shift += i_numSrnk; // Special case: any slave ranks
+    if ( 3 == i_numMrnk ) shift += i_numMrnk; // Special case: 8 master ranks
+
+    uint64_t mask = (0xffffffffffffffffull >> shift) << shift;
+
+    o_upperRnkBnk = (rnkBnk &  mask) >> shift;
+    o_lowerRnkBnk =  rnkBnk & ~mask;
+
+    o_numUpperRnkBnk = numRnkBnk - shift;
+    o_numLowerRnkBnk = shift;
+}
+
+/** @brief  Takes the combined rank/bank and adds the row and column. This will
+ *          give us bits 0:32 of the Centaur address as described in sections
+ *          5.6 and 5.7 of Centaur chip spec.
+ *  @param  i_upperRnkBnk    Upper rank/bank bits (right justified).
+ *  @param  i_numUpperRnkBnk Number of configured upper rank/bank bits.
+ *  @param  i_lowerRnkBnk    Lower rank/bank bits (right justified).
+ *  @param  i_numLowerRnkBnk Number of configured lower rank/bank bits.
+ *  @param  i_row       Row (R18-R0)
+ *  @param  i_numRow    Number of configured row bits.
+ *  @param  i_col       Column (C13,C11,C9-C3,C2-C0)
+ *  @param  i_numCol    Number of configured column bits.
+ *  @param  i_ddrVer    DDR version (DDR3 or DDR4).
+ *  @param  i_mbaIlMode MBA interleave mode.     (from MBAXCR[12])
+ *  @return Bits 0-34 of the Centaur address (right justified).
+ */
+uint64_t combineComponents( uint64_t i_upperRnkBnk, uint64_t i_numUpperRnkBnk,
+                            uint64_t i_lowerRnkBnk, uint64_t i_numLowerRnkBnk,
+                            uint64_t i_row, uint64_t i_numRow,
+                            uint64_t i_col, uint64_t i_numCol,
+                            uint64_t i_ddrVer, uint64_t i_mbaIlMode )
+{
+    // Get the row components.
+    uint64_t r17 = 0; // DDR4 only
+    uint64_t upperRow = 0, numUpperRow = 0;
+    uint64_t lowerRow = 0, numLowerRow = 0;
+    if ( DDR3 == i_ddrVer )
+    {
+        // upper:r16-r15 lower:r14-r0
+        upperRow = (i_row & 0x18000) >> 15; numUpperRow = i_numRow - 15;
+        lowerRow =  i_row & 0x07fff;        numLowerRow = 15;
+    }
+    else // DDR4
+    {
+        // upper:r16-r14 lower:r13-r0
+        r17      = (i_row & 0x20000) >> 17;
+        upperRow = (i_row & 0x1c000) >> 14; numUpperRow = i_numRow - 14;
+        lowerRow =  i_row & 0x03fff;        numLowerRow = 14;
+
+        if ( 18 == i_numRow ) numUpperRow -= 1; // r17 is not in numUpperRow
+    }
+
+    // Get the column components. Note c2-c1 will be added later. Also c0 is
+    // tied to 0 and not used at all.
+    uint64_t upperCol = (i_col & 0x00ff0) >> 4;
+    uint64_t c3       = (i_col & 0x00008) >> 3;
+
+    uint64_t numUpperCol = i_numCol - 4;
+    uint64_t numC3       = 1;
+
+    // Start building the address.
+    uint64_t addr = r17;
+    addr <<= i_numUpperRnkBnk; addr |= i_upperRnkBnk;
+    addr <<=   numUpperRow;    addr |=   upperRow;
+    addr <<=   numUpperCol;    addr |=   upperCol;
+
+    if ( HASH_MODE_128B == i_mbaIlMode )
+    {
+        addr <<=   numC3;          addr |=   c3;
+        addr <<= i_numLowerRnkBnk; addr |= i_lowerRnkBnk;
+
+    }
+    else // HASH_MODE_256B
+    {
+        addr <<= i_numLowerRnkBnk; addr |= i_lowerRnkBnk;
+        addr <<=   numC3;          addr |=   c3;
+    }
+
+    // Insert the fixed row bits.
+    addr = (addr & 0xfffffffffffffc00ull) << numLowerRow |
+           lowerRow                       << 10          |
+           (addr & 0x00000000000003ffull);
+
+    return addr;
+}
+
+/** @brief  Translates a physical address (rank, bank, row, col) to a 40 bit
+ *          Centaur address. The algorithm is derived from Sections 5.4, 5.6,
+ *          and 5.7 of Centaur chip spec.
+ *  @param  i_ds        DIMM select (D).
+ *  @param  i_mrnk      Master rank (M0-M2).
+ *  @param  i_srnk      Slave rank  (S0-S2).
+ *  @param  i_numMrnk   Number of configured master rank bits.
+ *  @param  i_numSrnk   Number of configured slave rank bits.
+ *  @param  i_row       Row (R18-R0)
+ *  @param  i_numRow    Number of configured row bits.
+ *  @param  i_col       Column (C13,C11,C9-C3,C2-C0)
+ *  @param  i_numCol    Number of configured column bits.
+ *  @param  i_bnk       Bank (DDR3: B2-B0, DDR4: BG1-BG0,B1-B0).
+ *  @param  i_mba       MBA position (0 or 1)
+ *  @param  i_ddrVer    DDR version (DDR3 or DDR4).
+ *  @param  i_cenIlMode Centaur interleave mode. (from MBSXCR[0:4])
+ *  @param  i_mbaIlMode MBA interleave mode.     (from MBAXCR[12])
+ *  @param  i_hash      Rank hash.               (from MBAXCR[10:11])
+ *  @param  i_cfg       Rank config.             (from MBAXCR[8])
+ *  @return The returned 40-bit Cenaur address.
+ */
+uint64_t transPhysToCenAddr( uint64_t i_ds,  uint64_t i_mrnk, uint64_t i_srnk,
+                             uint64_t i_numMrnk, uint64_t i_numSrnk,
+                             uint64_t i_row, uint64_t i_numRow,
+                             uint64_t i_col, uint64_t i_numCol,
+                             uint64_t i_bnk, uint64_t i_mba,
+                             uint64_t i_ddrVer,
+                             uint64_t i_cenIlMode, uint64_t i_mbaIlMode,
+                             uint64_t i_hash, uint64_t i_cfg )
+{
+    // Get the combine rank/bank.
+    uint64_t upperRnkBnk, numUpperRnkBnk;
+    uint64_t lowerRnkBnk, numLowerRnkBnk;
+    getRankBank( i_ds,  i_mrnk,    i_srnk,
+                 i_cfg, i_numMrnk, i_numSrnk,
+                 i_bnk, i_ddrVer,  i_hash,
+                 upperRnkBnk, numUpperRnkBnk,
+                 lowerRnkBnk, numLowerRnkBnk );
+
+    // Get bits 0:32 as described in sections 5.6 and 5.7 of the Centaur spec.
+    uint64_t addr = combineComponents( upperRnkBnk, numUpperRnkBnk,
+                                       lowerRnkBnk, numLowerRnkBnk,
+                                       i_row, i_numRow, i_col, i_numCol,
+                                       i_ddrVer, i_mbaIlMode );
+
+    // Adjust for Centaur interleave mode as described in sections 5.4.1 of the
+    // Centaur spec.
+    if ( 0 != i_cenIlMode )
+    {
+        // MBSXCR[0] just indicates there is interleaving so that can be
+        // ignored and we'll just use MBSXCR[1:4].
+        i_cenIlMode &= 0xf;
+
+        // Now, a value of 0 indicates bit 23 is interleaved and a value of 9
+        // indicates bit 32 is interleaved. So we should be able to invert it to
+        // give us the shift value.
+        uint64_t shift = 9 - i_cenIlMode;
+        uint64_t mask  = (0xffffffffffffffffull >> shift) << shift;
+
+        // Insert the MBA bit.
+        addr = (addr & mask) << 1 | i_mba << shift | (addr & ~mask);
+    }
+
+    // Add c2-c1 to the end (bits 33:34).
+    addr <<= 2; addr |= (i_col & 0x00006) >> 1;
+
+    // Bits 35:39 are zero.
+    addr <<= 5;
+
+    return addr;
+}
+
+// Given the number of configured ranks, return the number of configured rank
+// bits (i.e. 1 rank=0 bits, 2 ranks=1 bit, 4 ranks=2 bits, 8 ranks=3 bits).
+// This could be achieved with log2() from math.h, but we don't want to mess
+// with floating point numbers (FSP uses C++ standard).
+uint64_t ranks2bits( uint64_t i_numRnks )
+{
+    switch ( i_numRnks )
+    {
+        case 1: return 0;
+        case 2: return 1;
+        case 4: return 2;
+        case 8: return 3;
+    }
+
+    return 0;
+}
+
 // The code in this function is based on section 5.4.1 and 5.6 of Centaur
 // chip spec.
 int32_t getCenPhyAddr( ExtensibleChip * i_mbaChip, ExtensibleChip * i_mbChip,
@@ -57,154 +308,65 @@ int32_t getCenPhyAddr( ExtensibleChip * i_mbaChip, ExtensibleChip * i_mbChip,
     #define PRDF_FUNC "[DEALLOC::getCenPhyAddr] "
 
     int32_t o_rc = SUCCESS;
+
     o_addr = 0;
+
+    TargetHandle_t mba    = i_mbaChip->GetChipHandle();
+    uint64_t       mbaPos = getTargetPosition( mba );
+
+    uint64_t ds   = i_addr.getRank().getDimmSlct(); // D
+    uint64_t mrnk = i_addr.getRank().getRankSlct(); // M0-M2
+    uint64_t srnk = i_addr.getRank().getSlave();    // S0-S2
+
+    uint64_t row  = i_addr.getRow();    // R18-R0
+    uint64_t col  = i_addr.getCol();    // C13,C11,C9-C3,C2-C0
+    uint64_t bnk  = i_addr.getBank();   // DDR3: B2-B0, DDR4: BG1-BG0,B1-B0
+
     do
     {
-        TargetHandle_t mba = i_mbaChip->GetChipHandle();
-        uint8_t rowNum = 0;
-        uint8_t colNum = 0;
-        uint8_t numRanks = 0;
-        uint32_t row = i_addr.getRow();
-        uint32_t col = i_addr.getCol();
-        uint32_t bank = i_addr.getBank();
-        uint8_t bankNum = 3;
-        o_rc = getDimmRowCol( mba, rowNum, colNum );
-        if( SUCCESS != o_rc )
+        // Get the number of configured address bits for the master and slave
+        // ranks.
+        uint64_t num_mrnk = getMasterRanksPerDimm( mba, ds );
+        if ( 0 == num_mrnk )
+        {
+            PRDF_ERR( PRDF_FUNC "getMasterRanksPerDimm() failed. HUID:0X%08X",
+                      i_mbChip->GetId() );
+            break;
+        }
+
+        uint64_t num_srnk = getRanksPerDimm( mba, ds ) / num_mrnk;
+        if ( 0 == num_srnk )
+        {
+            PRDF_ERR( PRDF_FUNC "getRanksPerDimm() failed. HUID:0X%08X",
+                      i_mbChip->GetId() );
+            break;
+        }
+
+        uint64_t mrnkBits = ranks2bits( num_mrnk );
+        uint64_t srnkBits = ranks2bits( num_srnk );
+
+        // Get the number of configured address bits for the row and column.
+        uint8_t rowBits, colBits;
+        o_rc = getDimmRowCol( mba, rowBits, colBits );
+        if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getDimmConfig() failed. HUID:0x%08X",
                       i_mbaChip->GetId());
             break;
         }
 
-        CenRank rank = i_addr.getRank();
-
-        // Get  master ranks for this MBA.
-        std::vector<CenRank> configuredRanks;
-        o_rc = getMasterRanks( mba, configuredRanks, rank.getDimmSlct() );
-        if( SUCCESS != o_rc )
+        // Get the DDR verion of the DIMM (DDR3, DDR4, etc...)
+        uint8_t ddrVer;
+        o_rc = getDramGen( mba, ddrVer );
+        if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "getMasterRanks() failed. HUID:0x%08X",
+            PRDF_ERR( PRDF_FUNC "getDramGen() failed. HUID:0x%08X",
                       i_mbaChip->GetId() );
             break;
         }
-        numRanks = configuredRanks.size();
 
-        uint8_t mbaPos = getTargetPosition( mba );
-        const char * reg_str = ( 0 == mbaPos ) ? "MBA0_MBAXCR" : "MBA1_MBAXCR";
-        SCAN_COMM_REGISTER_CLASS * mbaxcr = i_mbChip->getRegister( reg_str );
-
-        o_rc = mbaxcr->Read();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "Read() failed on %s. HUID:0X%08X",
-                      reg_str, i_mbChip->GetId() );
-            break;
-        }
-
-        // Get the hash mode
-        uint8_t hash = mbaxcr->GetBitFieldJustified( 10, 2 );
-        if ( 3 <= hash )
-        {
-            PRDF_ERR( PRDF_FUNC "Invalid value for hash. Hash:%u HUID:0X%08X",
-                      hash, i_mbaChip->GetId() );
-            o_rc = FAIL;   break;
-        }
-        // Get the slot configuration. 0 - Only one slot is populated
-        // 1 - Both slots are populated
-
-        uint8_t cfg = mbaxcr->GetBitFieldJustified( 8, 1 );
-
-        // HW currently using 256 byte hash mode. In 256 byte
-        // hash mode, C3 becomes 32nd bit.
-        // There is no plan to have support for 128 bye hash mode.
-        // But in 128 byte hash mode, bank bits map to 32nd bit.
-        // For compliance perspective supporting both 128 and 256
-        // byte hash modes.
-        // Interleaving (IL) is general concept for placing consecutive
-        // addresses at different locations for performance
-        // improvement and is done at different levels.
-        // The position of 32 bit defines Interleaving at MBA level.
-        // We will use interleaving bit in MBAXSCR to get this
-        // information.
-        uint8_t mbaIlMode = mbaxcr->GetBitFieldJustified( 12, 1 );
-
-        // The address components are defined as such:
-        //   row:  18 bits ordered r17-r0
-        //   col:  12 bits ordered c13,c11,c9-c3,c2-c0
-        //   bank: DDR3: 3 bits ordered b2-b0
-        //         DDR4: 4 bits ordered bg1-bg0,b1-b0
-
-        uint64_t r17_r15 = (row & 0x38000) >> 15;
-        uint64_t r14_r0  =  row & 0x07fff;
-        uint64_t c13_c4  = (col & 0x00ff0) >> 4;
-        uint64_t c3   = (col & 0x00008 ) >> 3;
-        uint64_t c2_c1   = (col & 0x00006 ) >> 1;
-        // c0 currently is not used.
-
-        o_addr   = r17_r15;             // Start with upper row bits
-        o_addr <<= (colNum - 4);        // Make room for upper column bits
-        o_addr  |= c13_c4;              // Add upper column bits
-        // If IL is not supported, put c3 along with c4.
-        if( 0 == mbaIlMode )
-        {
-            o_addr <<= 1;                   // Make room for C3 bit
-            o_addr |= c3;                   // Add C3 bit
-        }
-        o_addr <<= (bankNum + hash);   // Make room for the bank bits and hash
-
-
-        // Add the bank bits and adjust for the hash type.
-        if ( 0 == hash )
-            o_addr |= bank;
-        else
-        {
-            o_addr |= (bank & 0x4) << 1;
-            o_addr |=  bank & 0x3;
-        }
-
-        // In IL mode, c3 will come after bank bits.
-        if( mbaIlMode )
-        {
-            o_addr <<= 1;                   // Make room for C3 bit
-            o_addr |= c3;                   // Add C3 bit
-        }
-        // Add the lower row bits in the middle.
-        uint64_t upper = (o_addr & 0x3fc00) << 15;
-        uint64_t lower =  o_addr & 0x003ff;
-        o_addr = upper | (r14_r0 << 10) | lower;
-
-
-        // Get Dmmm Slct and Rank bits
-        // LSB is created by ranks bits and MSB is created by dimmSlct bit.
-        // If this is only one rank DIMM, we will only have dimm Slct bit.
-        // For 2 rank DIMM, we will have one bit for rank slct. For 4 ranks DIMM
-        // we will have 2 bits. Once ranks slct bits are placed, we will place
-        // DIMM slct bit.
-        uint8_t dimmRankBits = rank.getRankSlct() & ( numRanks - 1 );
-
-        if( 1 == cfg )
-            dimmRankBits =  dimmRankBits |
-                            ( rank.getDimmSlct()  <<  ( numRanks / 2 ));
-
-        // In hash mode. low order bits comes towards LSB of MBA address
-        if( hash > 0 )
-            o_addr = o_addr | ( dimmRankBits & 0x1 ) << 2;
-
-        if( hash == 2 )
-            o_addr = o_addr | ( dimmRankBits & 0x2 ) << 4;
-
-        // Fill up MSB
-        o_addr = o_addr |
-                 ( dimmRankBits >> hash ) << ( rowNum + ( colNum - 3 )
-                                               + hash + bankNum );
-
-        // Change it to 40 bit address. Keep last 5 bits as zero
-        o_addr = ( o_addr << 7 ) | ( ( c2_c1 ) << 5 );
-
-        // Find MBA Interleaving bit information on Centaur.
-
-        SCAN_COMM_REGISTER_CLASS * mbsxcr = i_mbChip->getRegister ("MBSXCR");
-
+        // Get the Centaur interleave mode (MBSXCR[0:4]).
+        SCAN_COMM_REGISTER_CLASS * mbsxcr = i_mbChip->getRegister("MBSXCR");
         o_rc = mbsxcr->Read();
         if ( SUCCESS != o_rc )
         {
@@ -213,42 +375,37 @@ int32_t getCenPhyAddr( ExtensibleChip * i_mbaChip, ExtensibleChip * i_mbChip,
             break;
         }
 
-        // Get MBA Interleaving mode information and adjust address
-        // accordingly.
-        uint8_t ilMode = mbsxcr->GetBitFieldJustified( 0, 5 );
-        if( 0 != ilMode )
+        uint64_t cenIlMode = mbsxcr->GetBitFieldJustified( 0, 5 );
+
+        // Get the rank config (MBAXCR[8]), rank hash (MBAXCR[10:11]), and
+        // MBA interleave mode (MBAXCR[12]).
+        const char * reg_str = ( 0 == mbaPos ) ? "MBA0_MBAXCR" : "MBA1_MBAXCR";
+        SCAN_COMM_REGISTER_CLASS * mbaxcr = i_mbChip->getRegister( reg_str );
+        o_rc = mbaxcr->Read();
+        if ( SUCCESS != o_rc )
         {
-            if ( ( ilMode > 25 ) || ( ilMode < 16 ))
-            {
-                PRDF_ERR( PRDF_FUNC "Invalid value for IL bit Mode :%u",
-                          ilMode );
-                o_rc = FAIL; break;
-            }
-            // Interleaving mode at Centaur level  is used to divide address
-            // across MBA for performance reason. As there are only two mba per
-            // Centaur, only one bit is required to support IL. Position of IL
-            // bit decide which consecutive address will go on a particular MBA.
-            // ilMode is 5 bit field
-            // 1xxxx tells MBA interleaving is supported.
-            // Value 16 suggest bit 23 is the IL bit.
-            // Value 25 suggets bit 32 is IL bit.
-            // The Centaur address is 40 bits. To get the appropriate shift
-            // value for IL bit, we will have to adjust by a factor of 7.
-
-            uint8_t ilBitPos = ilMode + 7;
-            uint8_t shiftVal = (40 - 1) - ilBitPos;
-
-            // Split the address to make room for the interleave bit.
-            uint64_t upper = (o_addr >> shiftVal) << (shiftVal + 1);
-            uint64_t lower = o_addr & (0xffffffffffffffffull >> (64-shiftVal));
-            uint64_t ilBit = mbaPos << shiftVal;
-
-            // Put the address back together.
-            o_addr = upper | ilBit | lower;
+            PRDF_ERR( PRDF_FUNC "Read() failed on %s. HUID:0X%08X",
+                      reg_str, i_mbChip->GetId() );
+            break;
         }
 
-    }while(0);
+        uint8_t cfg       = mbaxcr->GetBitFieldJustified(  8, 1 );
+        uint8_t hash      = mbaxcr->GetBitFieldJustified( 10, 2 );
+        uint8_t mbaIlMode = mbaxcr->GetBitFieldJustified( 12, 1 );
+
+        // Form the address from info gathered above
+        o_addr = transPhysToCenAddr( ds, mrnk, srnk,
+                                     mrnkBits, srnkBits,
+                                     row, rowBits, col, colBits,
+                                     bnk, mbaPos,
+                                     ddrVer,
+                                     cenIlMode, mbaIlMode,
+                                     hash, cfg );
+
+    } while(0);
+
     return o_rc;
+
     #undef PRDF_FUNC
 }
 
