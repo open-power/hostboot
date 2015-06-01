@@ -697,7 +697,7 @@
     <description>HTMGT PSTATE data</description>
     <simpleType>
         <uint8_t></uint8_t>
-        <array>1904</array>
+        <array>3656</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -709,7 +709,7 @@
     <description>HTMGT PSTATE data for mfg</description>
     <simpleType>
         <uint8_t></uint8_t>
-        <array>1904</array>
+        <array>3656</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>

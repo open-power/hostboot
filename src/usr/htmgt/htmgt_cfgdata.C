@@ -33,6 +33,7 @@
 #include <htmgt/htmgt_reasoncodes.H>
 
 
+
 using namespace TARGETING;
 
 
@@ -40,10 +41,16 @@ using namespace TARGETING;
 //#define TRACUCOMP(args...)  TMGT_INF(args)
 #define TRACUCOMP(args...)
 
-#define FRAC(f) ( int((f - int(f)) * 100.0) )
-
 namespace HTMGT
 {
+    void getWofCoreFrequencyData(const TargetHandle_t i_occ,
+                                 uint8_t* o_data,
+                                 uint64_t & o_size);
+    void getWofVrmEfficiencyData(uint8_t* o_data,
+                                 uint64_t & o_size);
+
+    bool G_wofSupported = true;
+
     // Send config format data to all OCCs
     void sendOccConfigData(const occCfgDataFormat i_requestedFormat)
     {
@@ -179,6 +186,15 @@ namespace HTMGT
                                                              cmdDataLen);
                                 break;
 
+                            case OCC_CFGDATA_WOF_CORE_FREQ:
+                                getWofCoreFrequencyData(occ->getTarget(),
+                                                        cmdData, cmdDataLen);
+                                break;
+
+                            case OCC_CFGDATA_WOF_VRM_EFF:
+                                getWofVrmEfficiencyData(cmdData, cmdDataLen);
+                                break;
+
                             default:
                                 TMGT_ERR("send_occ_config_data: Unsupported"
                                          " format type 0x%02X",
@@ -235,13 +251,15 @@ namespace HTMGT
 enum occCfgDataVersion
 {
     OCC_CFGDATA_PSTATE_VERSION       = 0x10,
-    OCC_CFGDATA_FREQ_POINT_VERSION   = 0x10,
+    OCC_CFGDATA_FREQ_POINT_VERSION   = 0x11,
     OCC_CFGDATA_APSS_VERSION         = 0x10,
     OCC_CFGDATA_MEM_CONFIG_VERSION   = 0x10,
     OCC_CFGDATA_PCAP_CONFIG_VERSION  = 0x10,
     OCC_CFGDATA_SYS_CONFIG_VERSION   = 0x10,
     OCC_CFGDATA_MEM_THROTTLE_VERSION = 0x10,
-    OCC_CFGDATA_TCT_CONFIG_VERSION   = 0x10
+    OCC_CFGDATA_TCT_CONFIG_VERSION   = 0x10,
+    OCC_CFGDATA_WOF_CORE_FREQ_VERSION = 0x10,
+    OCC_CFGDATA_WOF_VRM_EFF_VERSION  = 0x10
 };
 
 void getMemConfigMessageData(const TargetHandle_t i_occ,
@@ -659,7 +677,8 @@ void getFrequencyPointMessageData(uint8_t* o_data,
 {
     uint64_t index   = 0;
     uint16_t min     = 0;
-    uint16_t max     = 0;
+    uint16_t turbo   = 0;
+    uint16_t ultra   = 0;
     uint16_t nominal = 0;
     Target* sys = NULL;
 
@@ -679,7 +698,7 @@ void getFrequencyPointMessageData(uint8_t* o_data,
             ConstTargetHandle_t procTarget = getParentChip(occTarget);
             assert(procTarget != NULL);
             const fapi::Target fapiTarget(fapi::TARGET_TYPE_PROC_CHIP,
-                                          &procTarget);
+                               (const_cast<TARGETING::Target*>(procTarget)));
             uint32_t biasUp   = 0;
             uint32_t biasDown = 0;
             int rc = FAPI_ATTR_GET(ATTR_FREQ_EXT_BIAS_UP,&fapiTarget,biasUp);
@@ -688,13 +707,13 @@ void getFrequencyPointMessageData(uint8_t* o_data,
             {
                 if ((biasDown > 0) && (biasUp == 0))
                 {
-                    TMGT_INF("FREQ_EXT_BIAS_DOWN=%d (in 0.5% units)", biasDown);
+                    TMGT_INF("FREQ_EXT_BIAS_DOWN=%d (in 0.5%% units)",biasDown);
                     biasFactor = -(biasDown);
                 }
                 else if ((biasUp > 0) && (biasDown == 0))
                 {
                     biasFactor = biasUp;
-                    TMGT_INF("FREQ_EXT_BIAS_UP=%d (in 0.5% units)", biasUp);
+                    TMGT_INF("FREQ_EXT_BIAS_UP=%d (in 0.5%% units)", biasUp);
                 }
                 else if ((biasUp > 0) && (biasDown > 0))
                 {
@@ -750,30 +769,56 @@ void getFrequencyPointMessageData(uint8_t* o_data,
     memcpy(&o_data[index], &nominal, 2);
     index += 2;
 
-    //Maximum Frequency in MHz
     uint8_t turboAllowed =
         sys->getAttr<ATTR_OPEN_POWER_TURBO_MODE_SUPPORTED>();
-
-    //If Turbo isn't allowed, then we send up the
-    //nominal frequency for this value.
     if (turboAllowed)
     {
-        max = sys->getAttr<ATTR_FREQ_CORE_MAX>();
+        turbo = sys->getAttr<ATTR_FREQ_CORE_MAX>();
+
+        //Ultra Turbo Frequency in MHz
+        const uint16_t wofSupported = sys->getAttr<ATTR_WOF_ENABLED>();
+        if (0 != wofSupported)
+        {
+            ultra = sys->getAttr<ATTR_ULTRA_TURBO_FREQ_MHZ>();
+            if (0 != ultra)
+            {
+                if (biasFactor)
+                {
+                    TMGT_INF("Pre-biased Ultra=%dMhz", ultra);
+                    // % change = (biasFactor/2) / 100
+                    ultra += ((ultra * biasFactor) / 200);
+                }
+            }
+            else
+            {
+                TMGT_INF("getFrequencyPoint: WOF enabled, but freq is 0");
+                G_wofSupported = false;
+            }
+        }
+        else
+        {
+            TMGT_INF("getFrequencyPoint: WOF not enabled");
+            G_wofSupported = false;
+        }
     }
     else
     {
-        max = nominal;
+        // If turbo not supported, send nominal for turbo
+        // and 0 for ultra-turbo (no WOF support)
+        TMGT_INF("getFrequencyPoint: Turbo/WOF not supported");
+        turbo = nominal;
+        G_wofSupported = false;
     }
     if (biasFactor)
     {
-        TMGT_INF("Pre-biased Max=%dMhz", max);
+        TMGT_INF("Pre-biased Turbo=%dMhz", turbo);
         // % change = (biasFactor/2) / 100
-        max += ((max * biasFactor) / 200);
+        turbo += ((turbo * biasFactor) / 200);
     }
 
-    memcpy(&o_data[index], &max, 2);
+    //Turbo Frequency in MHz
+    memcpy(&o_data[index], &turbo, 2);
     index += 2;
-
 
     //Minimum Frequency in MHz
     min = sys->getAttr<ATTR_MIN_FREQ_MHZ>();
@@ -786,8 +831,12 @@ void getFrequencyPointMessageData(uint8_t* o_data,
     memcpy(&o_data[index], &min, 2);
     index += 2;
 
-    TMGT_INF("Frequency Points: Nominal %d, Max %d, Min %d",
-             (uint32_t)nominal, (uint32_t)max, (uint32_t)min);
+    //Ultra Turbo Frequency in MHz
+    memcpy(&o_data[index], &ultra, 2);
+    index += 2;
+
+    TMGT_INF("Frequency Points: Min %d, Nominal %d, Turbo %d, Ultra %d MHz",
+             min, nominal, turbo, ultra);
 
     o_size = index;
 }
@@ -923,4 +972,122 @@ void getApssMessageData(uint8_t* o_data,
 
     o_size = idx;
 }
+
+void getWofCoreFrequencyData(const TargetHandle_t i_occ,
+                             uint8_t * o_data,
+                             uint64_t & o_size)
+{
+    assert(o_data != NULL);
+    uint64_t index = 0;
+    Target* sys = NULL;
+    targetService().getTopLevelTarget(sys);
+    assert(sys != NULL);
+    ConstTargetHandle_t proc = getParentChip(i_occ);
+    assert(proc != NULL);
+
+    // Count the number of cores that are good on each chip without
+    // regard to being GARDED.  Cores that are deconfigured do not
+    // affect this number. This is the number of present cores
+    // (max - partial bad).
+    TARGETING::TargetHandleList l_presCoreList;
+    getChildAffinityTargetsByState(l_presCoreList,
+                                   proc,
+                                   TARGETING::CLASS_UNIT,
+                                   TARGETING::TYPE_CORE,
+                                   TARGETING::UTIL_FILTER_PRESENT);
+    const uint8_t maxCoresPerChip = l_presCoreList.size();
+
+    o_data[index++] = OCC_CFGDATA_WOF_CORE_FREQ;
+    o_data[index++] = OCC_CFGDATA_WOF_CORE_FREQ_VERSION;
+    o_data[index++] = maxCoresPerChip;
+    memset(&o_data[index], 0, 3); // reserved
+    index += 3;
+
+    uint8_t numRows = 0;
+    uint8_t numColumns = 0;
+    const uint16_t tablesize=sizeof(ATTR_WOF_FREQUENCY_UPLIFT_SELECTED_type);
+    if (G_wofSupported)
+    {
+        numRows = 22;
+        numColumns = 13;
+        TMGT_INF("getWofCoreFrequencyData: %d rows, %d cols (0x%04X bytes)",
+                 numRows, numColumns, tablesize);
+        assert(tablesize == numRows * numColumns * 2);
+    }
+    o_data[index++] = numRows;
+    o_data[index++] = numColumns;
+
+    if (G_wofSupported)
+    {
+        // Host Boot will determine correct chip sort and pick correct
+        // frequncy uplift table
+        ATTR_WOF_FREQUENCY_UPLIFT_SELECTED_type * upliftTable =
+            reinterpret_cast<ATTR_WOF_FREQUENCY_UPLIFT_SELECTED_type*>
+            (&o_data[index]);
+
+        proc->tryGetAttr<ATTR_WOF_FREQUENCY_UPLIFT_SELECTED>(*upliftTable);
+        TMGT_BIN("WOF CoreFrequency Data", upliftTable, tablesize);
+
+        // first table entry must be 0s
+        memset(&o_data[index], 0, 2);
+
+        index += tablesize;
+    }
+
+    o_size = index;
+
+} // end getWofCoreFrequencyData()
+
+
+void getWofVrmEfficiencyData(uint8_t* o_data,
+                             uint64_t & o_size)
+{
+    assert(o_data != NULL);
+    uint64_t index = 0;
+    Target* sys = NULL;
+    targetService().getTopLevelTarget(sys);
+    assert(sys != NULL);
+
+    o_data[index++] = OCC_CFGDATA_WOF_VRM_EFF;
+    o_data[index++] = OCC_CFGDATA_WOF_VRM_EFF_VERSION;
+    memset(&o_data[index], 0, 4); // reserved
+    index += 4;
+
+    uint8_t numRows = 0;
+    uint8_t numColumns = 0;
+    const uint16_t tablesize = sizeof(ATTR_WOF_REGULATOR_EFFICIENCIES_type);
+    if (G_wofSupported)
+    {
+        numRows = 3;
+        numColumns = 14;
+        TMGT_INF("getWofVrmEfficiencyData: %d rows, %d cols (0x%04X bytes)",
+                 numRows, numColumns, tablesize);
+        assert(tablesize == numRows * numColumns * 2);
+    }
+    o_data[index++] = numRows;
+    o_data[index++] = numColumns;
+
+    if (G_wofSupported)
+    {
+        // VRM efficiency table is unique per system
+
+        ATTR_WOF_REGULATOR_EFFICIENCIES_type * regEffDataPtr =
+            reinterpret_cast<ATTR_WOF_REGULATOR_EFFICIENCIES_type*>
+            (&o_data[index]);
+
+        sys->tryGetAttr<ATTR_WOF_REGULATOR_EFFICIENCIES>(*regEffDataPtr);
+        TMGT_BIN("WOF VRM Efficiency Data", regEffDataPtr, tablesize);
+
+        // first table entry must be 0s
+        memset(&o_data[index], 0, 2);
+
+        index += tablesize;
+    }
+
+    o_size = index;
+
+} // end getWofVrmEfficiencyData()
+
+
+
 }

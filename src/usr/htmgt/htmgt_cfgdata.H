@@ -46,6 +46,8 @@ namespace HTMGT
         OCC_CFGDATA_SYS_CONFIG     = 0x0F,  // System Configuration
         OCC_CFGDATA_MEM_THROTTLE   = 0x12,  // Memory Throttle Settings
         OCC_CFGDATA_TCT_CONFIG     = 0x13,  // Thermal Control Treshold
+        OCC_CFGDATA_WOF_CORE_FREQ  = 0x30,  // WOF Core Frequency Data
+        OCC_CFGDATA_WOF_VRM_EFF    = 0x31,  // WOF VRM Efficiency Data
 
         OCC_CFGDATA_FORMAT_END,             // Marker to indicate last entry
         OCC_CFGDATA_CLEAR_ALL      = 0xFF,  // Clear All Active Config Data
@@ -99,13 +101,15 @@ namespace HTMGT
     {
         { OCC_CFGDATA_SYS_CONFIG,     TARGET_ALL,    TO_20SEC, CFGSTATE_ALL },
         { OCC_CFGDATA_APSS_CONFIG,    TARGET_ALL,    TO_20SEC, CFGSTATE_ALL },
-        { OCC_CFGDATA_OCC_ROLE,       TARGET_ALL,  TO_20SEC, CFGSTATE_STANDBY },
+        { OCC_CFGDATA_OCC_ROLE,       TARGET_ALL,  TO_20SEC,CFGSTATE_STANDBY },
         { OCC_CFGDATA_PSTATE_SSTRUCT, TARGET_ALL,  TO_20SEC, CFGSTATE_SBYOBS },
-        { OCC_CFGDATA_FREQ_POINT,     TARGET_MASTER, TO_20SEC, CFGSTATE_ALL },
+        { OCC_CFGDATA_FREQ_POINT,    TARGET_MASTER,TO_20SEC, CFGSTATE_SBYOBS },
         { OCC_CFGDATA_MEM_CONFIG,     TARGET_ALL,    TO_20SEC, CFGSTATE_ALL },
         { OCC_CFGDATA_PCAP_CONFIG,    TARGET_MASTER, TO_20SEC, CFGSTATE_ALL },
         { OCC_CFGDATA_MEM_THROTTLE,   TARGET_ALL,    TO_20SEC, CFGSTATE_ALL },
-        { OCC_CFGDATA_TCT_CONFIG,     TARGET_ALL,    TO_20SEC, CFGSTATE_ALL }
+        { OCC_CFGDATA_TCT_CONFIG,     TARGET_ALL,    TO_20SEC, CFGSTATE_ALL },
+        { OCC_CFGDATA_WOF_CORE_FREQ,  TARGET_ALL,  TO_20SEC, CFGSTATE_SBYOBS },
+        { OCC_CFGDATA_WOF_VRM_EFF,    TARGET_ALL,  TO_20SEC, CFGSTATE_SBYOBS }
     };
     const size_t OCC_CONFIG_TABLE_SIZE = sizeof(occCfgDataTable) /
         sizeof(occCfgDataTable_t);
