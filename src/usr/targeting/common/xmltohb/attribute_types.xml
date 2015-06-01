@@ -3337,6 +3337,11 @@
         <name>FSP_UPDATE_SBE_IMAGE</name>
         <value>0x00020000</value>
     </enumerator>
+    <enumerator>
+        <!-- Update both sides of SBE Image if update is needed -->
+        <name>UPDATE_BOTH_SIDES_OF_SBE</name>
+        <value>0x00040000</value>
+    </enumerator>
 </enumerationType>
 
 <!-- Support for pm_hwp_attributes.xml -->

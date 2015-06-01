@@ -409,6 +409,26 @@ namespace SBE
     errlHndl_t decisionTreeForUpdates(sbeTargetState_t& io_sbeState,
                                       uint8_t i_system_situation);
 
+
+
+    /**
+     * @brief Provides the decisionTreeForUpdates() functionality in the
+     *        case that both sides of the SBE should be updated
+     *        simultaneously.
+     *
+     * @param[io/out] io_actions   SBE Update actions required for the target
+     *
+     * @param[io/out] io_sbeState   Struct containing SBE State of the target
+     *                              and is updated based on the situation
+     *
+     * @param[in] i_system_situation SBE Situation of the target that requires
+     *                               analysis to determine Update Actions
+     *
+     */
+    void decisionTreeForUpdatesSimultaneous(uint32_t& io_actions,
+                                            sbeTargetState_t& io_sbeState,
+                                            uint8_t& i_system_situation );
+
     /**
      * @brief Deconfigures any Targets whose version does not match the
      *        Master Target's Version
