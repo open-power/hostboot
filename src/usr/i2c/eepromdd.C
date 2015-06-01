@@ -1543,7 +1543,7 @@ void getEEPROMs( std::list<EepromInfo_t>& o_info )
     }
 
     // #4 - DIMMs
-    TARGETING::PredicateCTM dimms( TARGETING::CLASS_CARD,
+    TARGETING::PredicateCTM dimms( TARGETING::CLASS_LOGICAL_CARD,
                                    TARGETING::TYPE_DIMM,
                                    TARGETING::MODEL_NA );
     TARGETING::PredicatePostfixExpr l_dimmFilter;
