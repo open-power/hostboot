@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +27,7 @@
 #
 # Purpose:  This perl script will parse HWP Error XML files and create a
 #           file containing functions that parses the return code and FFDC
-#           data in HWP error logs
+#           data in HWP error logs.
 #
 # Author: Mike Jones
 #
@@ -145,7 +147,7 @@ print TGFILE "    const uint32_t CFAM_DATA_LEN = 4;\n";
 print TGFILE "    const uint32_t SCOM_DATA_LEN = 8;\n";
 print TGFILE "    const uint32_t POS_LEN = 4;\n";
 print TGFILE "    uint8_t * l_pBuffer = static_cast<uint8_t *>(i_pBuffer);\n";
-print TGFILE "    int32_t l_buflen = i_buflen;\n\n";
+print TGFILE "    uint32_t l_buflen = i_buflen;\n\n";
 print TGFILE "    // The first uint32_t is the FFDC ID\n";
 print TGFILE "    uint32_t * l_pFfdcId = static_cast<uint32_t *>(i_pBuffer);\n";
 print TGFILE "    uint32_t l_ffdcId = ntohl(*l_pFfdcId);\n";
