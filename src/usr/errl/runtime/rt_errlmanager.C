@@ -33,6 +33,7 @@
 #include <string.h>
 #include <runtime/interface.h>
 #include <targeting/common/targetservice.H>
+#include <pnor/pnorif.H>
 
 namespace ERRORLOG
 {
@@ -61,21 +62,27 @@ bool rt_processCallout(errlHndl_t &io_errl,
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-ErrlManager::ErrlManager()
-    :
+ErrlManager::ErrlManager() :
         iv_currLogId(0),
         iv_pStorage(NULL),
         iv_hwasProcessCalloutFn(NULL),
-        iv_msgQ(NULL)
+        iv_pnorAddr(NULL),
+        iv_maxErrlInPnor(0),
+        iv_pnorOpenSlot(0),
+        iv_isSpBaseServices(false),
+#ifdef CONFIG_BMC_IPMI
+        iv_isIpmiEnabled(true)
+#else
+        iv_isIpmiEnabled(false)
+#endif
 {
-    TRACFCOMP( g_trac_errl, ENTER_MRK "ErrlManager::ErrlManager constructor" );
-
+    TRACFCOMP( g_trac_errl, ENTER_MRK "ErrlManager::ErrlManager constructor." );
 
     iv_hwasProcessCalloutFn = rt_processCallout;
 
+    // determine starting PLID value
     TARGETING::Target * sys = NULL;
     TARGETING::targetService().getTopLevelTarget( sys );
-
     if(sys)
     {
         iv_currLogId = sys->getAttr<TARGETING::ATTR_HOSTSVC_PLID>();
@@ -90,9 +97,33 @@ ErrlManager::ErrlManager()
     }
     else
     {
-        iv_currLogId = 0x9fbad000;
+        iv_currLogId = 0x89bad000;
         TRACFCOMP( g_trac_errl, ERR_MRK"HOSTSVC_PLID not available" );
     }
+
+#if 1
+// TODO: RTC 131067
+// for now do this. but the real code should be the #else below.
+#ifdef CONFIG_BMC_IPMI
+        // setup so that we can write the error log to PNOR
+        setupPnorInfo();
+#endif
+#else
+    // check if there's an FSP. if not, then we write to PNOR
+    TARGETING::SpFunctions spfn;
+    if (!(sys &&
+          sys->tryGetAttr<TARGETING::ATTR_SP_FUNCTIONS>(spfn) &&
+          spfn.baseServices))
+    {
+        iv_isSpBaseServices = false;
+        TRACFCOMP( g_trac_errl, INFO_MRK"no baseServices, setting up to save to pnor" );
+        setupPnorInfo();
+    }
+    else
+    {
+        iv_isSpBaseServices = true;
+    }
+#endif
 
     TRACFCOMP( g_trac_errl, EXIT_MRK "ErrlManager::ErrlManager constructor." );
 }
@@ -102,44 +133,60 @@ ErrlManager::ErrlManager()
 ErrlManager::~ErrlManager()
 {
     TRACFCOMP( g_trac_errl, INFO_MRK"ErrlManager::ErrlManager destructor" );
+#if 1
+// TODO: RTC 131067
+// for now do this. but the real code should be the #else below.
+#ifdef CONFIG_BMC_IPMI
+        // if we saved to PNOR, we need to flush
+        TRACFCOMP( g_trac_errl, INFO_MRK"flushing pnor" );
+        PNOR::flush(PNOR::HB_ERRLOGS);
+#endif
+#else
+    if (!iv_isSpBaseServices)
+    {
+        // if we saved to PNOR, we need to flush
+        TRACFCOMP( g_trac_errl, INFO_MRK"no baseServices, flushing pnor" );
+        PNOR::flush(PNOR::HB_ERRLOGS);
+    }
+#endif
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// ErrlManager::msgQueueInit()
-///////////////////////////////////////////////////////////////////////////////
-void ErrlManager::msgQueueInit ( void )
-{
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// ErrlManager::startup()
-///////////////////////////////////////////////////////////////////////////////
-void * ErrlManager::startup ( void* i_self )
-{
-    return NULL;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-// ErrlManager::errlogMsgHndlr()
-///////////////////////////////////////////////////////////////////////////////
-void ErrlManager::errlogMsgHndlr ( void )
-{
-    // Not used in HB_RUNTIME
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // ErrlManager::sendMboxMsg()
 ///////////////////////////////////////////////////////////////////////////////
 void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
 {
-    TRACFCOMP( g_trac_errl, ENTER_MRK"ErrlManager::sendToHypervisor" );
     do
     {
+#if 1
+// TODO: RTC 131067
+// for now do this. but the real code should be the #else below.
+#ifdef CONFIG_BMC_IPMI
+        bool l_savedToPnor = saveErrLogToPnor(io_err);
+        if (!l_savedToPnor)
+        {
+            TRACFCOMP( g_trac_errl, ENTER_MRK"saveErrLogToPnor didn't save 0x%X",
+                io_err->eid());
+        }
+#endif
+#else
+        if (!iv_isSpBaseServices)
+        {
+            // save to PNOR
+            TRACFCOMP( g_trac_errl, INFO_MRK"no baseServices, saving to pnor" );
+            bool l_savedToPnor = saveErrLogToPnor(io_err);
+            if (!l_savedToPnor)
+            {
+                TRACFCOMP( g_trac_errl, ENTER_MRK"saveErrLogToPnor didn't save 0x%X",
+                    io_err->eid());
+            }
+        }
+#endif
+
 #ifdef CONFIG_BMC_IPMI
         TRACFCOMP(g_trac_errl,INFO_MRK"Send msg to BMC for errlogId [0x%08x]",
                   io_err->plid() );
+
         // convert to SEL/eSEL and send to BMC over IPMI
         sendErrLogToBmc(io_err);
 #else
@@ -225,62 +272,10 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err, compId_t i_committerComp )
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// ErrlManager::saveErrLogEntry()
-///////////////////////////////////////////////////////////////////////////////
-void ErrlManager::saveErrLogEntry( errlHndl_t& io_err )
-{
-    return;
-}
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Atomically increment log id and return it.
-uint32_t ErrlManager::getUniqueErrId()
-{
-    return (__sync_add_and_fetch(&iv_currLogId, 1));
-}
-
-///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 void ErrlManager::setHwasProcessCalloutFn(HWAS::processCalloutFn i_fn)
 {
     ERRORLOG::theErrlManager::instance().iv_hwasProcessCalloutFn = i_fn;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-// Global function (not a method on an object) to commit the error log.
-void errlCommit(errlHndl_t& io_err, compId_t i_committerComp )
-{
-    ERRORLOG::theErrlManager::instance().commitErrLog(io_err, i_committerComp );
-    return;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-// Global function (not a method on an object) to get the hidden logs flag.
-uint8_t getHiddenLogsEnable( )
-{
-    return ERRORLOG::theErrlManager::instance().iv_hiddenErrLogsEnable;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-// ErrlManager::sendErrlogToMessageQueue()
-///////////////////////////////////////////////////////////////////////////////
-void ErrlManager::sendErrlogToMessageQueue ( errlHndl_t& io_err,
-                                             compId_t i_committerComp )
-{
-    return;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// ErrlManager::errlogShutdown()
-///////////////////////////////////////////////////////////////////////////////
-void ErrlManager::errlogShutdown(void)
-{
-    return;
 }
 
 //  Runtime processCallout
@@ -307,6 +302,12 @@ bool rt_processCallout(errlHndl_t &io_errl,
 
     }
     return true;
+}
+
+void ErrlManager::errlAckErrorlog(uint32_t i_eid)
+{
+    ERRORLOG::theErrlManager::instance().ackErrLogInPnor(i_eid);
+    return;
 }
 
 } // End namespace

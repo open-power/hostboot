@@ -255,8 +255,13 @@ private:
      */
     enum ERRORLOG_PLID_OFFSET
     {
+#ifdef __HOSTBOOT_RUNTIME
+        ERRLOG_PLID_BASE        = 0x80000000,// Hostboot Runtime Base PLID Offset
+        ERRLOG_PLID_BASE_MASK   = 0x89000000,// mask of just the id
+#else
         ERRLOG_PLID_BASE        = 0x90000000,// Hostboot Base PLID Offset
         ERRLOG_PLID_BASE_MASK   = 0x9F000000,// mask of just the id
+#endif
         ERRLOG_PLID_NODE_SHIFT  = 24,        // shift to put node number 0x9#
         ERRLOG_PLID_MASK        = 0x00FFFFFF,// mask to find log number
         ERRLOG_PLID_INITIAL     = 0x00FF0000,// initial big id number
@@ -346,6 +351,7 @@ private:
      */
     void sendMboxMsg ( errlHndl_t& io_err );
 
+#ifdef STORE_ERRL_IN_L3
     /**
      * @brief Save errlog entry in the memory
      *
@@ -354,6 +360,7 @@ private:
      *
      */
     void saveErrLogEntry( errlHndl_t& io_err );
+#endif
 
     /**
      * @brief Shutdown error log manager

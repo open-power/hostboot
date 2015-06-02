@@ -182,10 +182,6 @@ void process_esel(msg_t *i_msg)
         IPMI_TRAC(ERR_MRK "DELETING l_err 0x%.8X", l_err->eid());
         delete l_err;
         l_err = NULL;
-
-        // TODO RTC: 123419 investigate adding a 'iv_isIpmiEnabled' flag and setting
-        // that to false somehow, so that we can commit error logs in this path
-        // and future calls wont try to send them down.
 #else
         l_err->collectTrace(IPMI_COMP_NAME);
         errlCommit(l_err, IPMI_COMP_ID);
@@ -194,13 +190,9 @@ void process_esel(msg_t *i_msg)
     else if((l_cc == IPMI::CC_OK) &&        // no error
             (l_eid != 0))                   // and it's an errorlog
     {
-#ifdef __HOSTBOOT_RUNTIME
-        // TODO RTC: 123419 story to add storing errlog to PNOR in HBRT if IPMI
-#else
-        // eSEL successfully sent to the BMC - send an ack to the errlmanager
+        // eSEL successfully sent to the BMC - 'send' an ack to the errlmanager
         IPMI_TRAC(INFO_MRK "Sending ack for eid 0x%.8X", l_eid);
         ERRORLOG::ErrlManager::errlAckErrorlog(l_eid);
-#endif
     }
 
     delete l_data;

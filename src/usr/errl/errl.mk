@@ -38,4 +38,4 @@ OBJS += errludbacktrace.o
 OBJS += errludattribute.o
 OBJS += errludlogregister.o
 OBJS += errludcallout.o
-OBJS += $(if $(CONFIG_BMC_IPMI),errlmanager_common.o)
+OBJS += errlmanager_common.o
