@@ -159,10 +159,14 @@ bool processRepairedRanks( TargetHandle_t i_mba, uint8_t i_repairedRankMask )
                 continue; // skip this rank
             }
 
-            if ( mark.getCM().isValid()                       && // chip mark
-                 ( isCen || mark.getSM().isValid()          ) && // symbol mark
-                 (!isCen || (sp0.isValid() || sp1.isValid())) && // DRAM spare
-                 (!isX4  || ecc.isValid()                   ) )  // ECC spare
+            bool isCm  = mark.getCM().isValid();            // chip mark
+            bool isSm  = mark.getSM().isValid();            // symbol mark
+            bool isSp  = (sp0.isValid() || sp1.isValid());  // either DRAM spare
+            bool isEcc = ecc.isValid();                     // ECC spare
+
+            if ( isCm &&                                    // CM used
+                 ( ( isCen && isSp && (!isX4 || isEcc)) ||  // all spares used
+                   (!isCen &&         ( isSm || isEcc)) ) ) // SM or ECC used
             {
                 // This rank has both a steer and a chip mark. Call out the DIMM
                 // with the chip mark.

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,7 +65,7 @@ PRDR_ERROR_SIGNATURE(RdrInvalidConfig, 0xffff0041, "", "RDR: Invalid config");
 PRDR_ERROR_SIGNATURE(RdrScreenBadDqs,  0xffff0042, "",
                      "RDR: DRAM repairs disabled and VPD found");
 PRDR_ERROR_SIGNATURE(RdrRepairsUsed,   0xffff0043, "",
-                     "RDR: Both spare and chip mark used");
+                     "RDR: All repairs used");
 PRDR_ERROR_SIGNATURE(RdrRepairUnavail, 0xffff0044, "",
                      "RDR: Repairs needed but unavailable");
 
