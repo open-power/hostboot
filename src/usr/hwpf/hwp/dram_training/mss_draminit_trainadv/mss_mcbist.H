@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist.H,v 1.46 2014/12/16 11:34:58 sasethur Exp $
+// $Id: mss_mcbist.H,v 1.47 2015/02/16 19:56:22 sglancy Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -40,7 +40,8 @@
 //-------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
-//	 1.46  |preeragh|12/15/14| Revert back, removed rwheeler changes
+//   1.47  |sglancy |12/16/14| Merged FW comments with lab debugging needs
+//   1.46  |preeragh|12/15/14| Revert back, removed rwheeler changes
 //   1.43  |rwheeler|11/19/14|option to pass in rotate data seed
 //   1.42  |mjjones |01/20/14 |RAS Review Updates
 //   1.41  |aditya  |12/17/13 |Updated mcb_error_map function parameters
@@ -328,7 +329,8 @@ fapi::ReturnCode mcb_reset_trap(const fapi::Target & i_target_mba);
 
 fapi::ReturnCode cfg_mcb_dgen(const fapi::Target & i_target_mba,
                               mcbist_data_gen i_datamode,
-                              uint8_t i_mcbrotate);
+                              uint8_t i_mcbrotate,
+			      uint64_t i_mcbrotdata);
 
 fapi::ReturnCode cfg_byte_mask(const fapi::Target & i_target_mba);
 
@@ -337,7 +339,9 @@ fapi::ReturnCode start_mcb(const fapi::Target & i_target_mba);
 fapi::ReturnCode setup_mcbist(const fapi::Target & i_target_mba,
                               mcbist_byte_mask i_mcbbytemask,
                               uint8_t i_mcbrotate,
-                             struct Subtest_info l_sub_info[30]);
+                              uint64_t i_mcbrotdata,
+                              struct Subtest_info l_sub_info[30],
+			      char * l_str_cust_addr);
 
 fapi::ReturnCode  mcb_error_map_print(const fapi::Target & i_target_mba,
                                       ecmdDataBufferBase & l_mcb_fail_160,

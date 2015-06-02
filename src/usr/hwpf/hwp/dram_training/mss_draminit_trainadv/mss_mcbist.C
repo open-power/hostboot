@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist.C,v 1.51 2015/02/09 15:54:47 sglancy Exp $
+// $Id: mss_mcbist.C,v 1.55 2015/05/13 19:32:22 sglancy Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -40,6 +40,10 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
+//   1.55  |sglancy |05/13/15| Fixed FW compile issue
+//   1.54  |sglancy |05/05/15| Fixed FW compile issue
+//   1.53  |sglancy |05/05/15| Added #ifdefs around non-FW compliant code
+//   1.52  |sglancy |02/16/15| Merged in FW comments with lab needs
 //   1.51  |sglancy |02/09/15| Fixed FW comments and adjusted whitespace
 //   1.50  |preeragh|01/16/15| Fixed FW comments
 //   1.48  |preeragh|01/05/15| Added FW workaround for drand
@@ -382,10 +386,12 @@ fapi::ReturnCode cfg_mcb_test_mem(const fapi::Target & i_target_mba,
 //     const fapi::Target & i_target_mba      Centaur.mba
 //     mcbist_data_gen i_datamode       MCBIST Data mode 
 //     uint8_t i_mcbrotate              Provides the number of bit to shift per burst
+//     uint64_t i_mcbrotdata            Provides the data seed to shift per burst
 //****************************************************************/
 fapi::ReturnCode cfg_mcb_dgen(const fapi::Target & i_target_mba,
                               mcbist_data_gen i_datamode,
-                              uint8_t i_mcbrotate)
+                              uint8_t i_mcbrotate,
+                              uint64_t i_mcbrotdata)
 {
     uint8_t l_print = 0;
 
@@ -744,7 +750,7 @@ fapi::ReturnCode cfg_mcb_dgen(const fapi::Target & i_target_mba,
             }
         }
         else if (i_datamode == MCBIST_2D_CUP_PAT8)
-        { //FAPI_DBG(" Inside MCBIST_2D_CUP_PAT8 !");
+        {
             l_var = 0xFFFFFFFFFFFFFFFFull;
             l_var1 = 0x0000000000000000ull;
             l_spare = 0xFFFF0000FFFF0000ull;
@@ -949,7 +955,7 @@ fapi::ReturnCode cfg_mcb_dgen(const fapi::Target & i_target_mba,
     }
 
     if (l_random_flag == 1)
-    { //FAPI_DBG("Inside l_rand_flag !");
+    {
         for (l_index = 0; l_index < MAX_BYTE; l_index++)
         {
 
@@ -982,11 +988,12 @@ fapi::ReturnCode cfg_mcb_dgen(const fapi::Target & i_target_mba,
         }
     }
     
-    //struct drand48_data randBuffer;
-    //double l_rand_D = 0;
-    uint8_t l_rand_l = 0;
-	uint8_t l_rand_array[8] = {48,52,56,60,64,68,72,76};	
-    //uint64_t l_data_buffer_64_value = 0;
+    #ifdef FAPI_MSSLABONLY
+    struct drand48_data randBuffer;
+    double l_rand_D = 0;
+    uint8_t l_rand_l = 0; 
+    #endif
+    uint64_t l_data_buffer_64_value = 0;
 
     // get the rotate value loaded into reg, if rotate value 0 / not defined the default to rotate =13
     if(i_mcbrotate == 0)
@@ -998,34 +1005,53 @@ fapi::ReturnCode cfg_mcb_dgen(const fapi::Target & i_target_mba,
     {
         l_rotnum = i_mcbrotate;
     }
-	rc_num = rc_num | l_data_buffer_64.flushTo0();
+	
+	
+    rc_num = rc_num | l_data_buffer_64.flushTo0();
+    
     // get the rotate data seed loaded into reg, if rotate data value = 0 / not defined the default rotate pttern is randomlly generated.    
-
-	   // generate the random number
-	FAPI_DBG("FW workaround for drand !");
+    if(i_mcbrotdata == 0)
+    {   // generate the random number
+        
+	#ifdef FAPI_MSSLABONLY
      	for(l_index1 = 0; l_index1 < 8; l_index1++)
      	{
      	   //l_rand_8 = drand48_r();
-		   
-     	   //drand48_r(&randBuffer, &l_rand_D);
+     	   drand48_r(&randBuffer, &l_rand_D);
      	   //l_rand_l = (uint8_t)l_rand_D;
-     	   //l_rand_l = static_cast<unsigned int>((l_rand_D * 100) + 0.5);
-     	   /*if(l_rand_l == 0x00)
+     	   l_rand_l = static_cast<unsigned int>((l_rand_D * 100) + 0.5);
+     	   if(l_rand_l == 0x00)
      	   {
      	      l_rand_l = 0xFF;
      	   }
-		   */
-		   l_rand_l = l_rand_array[l_index1];
-     	   FAPI_DBG("%s:Value of seed drand48_r : %02X",i_target_mba.toEcmdString(), l_rand_l  );
+     	   //FAPI_INF("%s:Value of seed drand48_r : %02X",i_target_mba.toEcmdString(), l_rand_l  );
      	   rc_num = rc_num | l_data_buffer_64.insert(l_rand_l,8*l_index1,8);	   // Source start in sn is given as 24 -- need to ask
-		  
+	   if (rc_num)
+           {
+              FAPI_ERR( "cfg_mcb_dgen: setting up mcbrotate data error");       // Error setting up buffers
+              rc.setEcmdError(rc_num);
+              return rc;
+           }
      	}
-    
-   if (rc_num)
+        #else
+	   rc_num = rc_num | l_data_buffer_64.setDoubleWord(0,0x863A822CDF2924C4ull);
+	   if (rc_num)
+           {
+              FAPI_ERR( "cfg_mcb_dgen: setting up mcbrotate data error");       // Error setting up buffers
+              rc.setEcmdError(rc_num);
+              return rc;
+           }
+	#endif
+    }
+    else
     {
-		FAPI_ERR( "cfg_mcb_dgen:");       // Error setting up buffers
-		rc.setEcmdError(rc_num);
-        return rc;
+     	rc_num = rc_num | l_data_buffer_64.setDoubleWord(0,i_mcbrotdata);	
+	if (rc_num)
+        {
+          FAPI_ERR( "cfg_mcb_dgen:");       // Error setting up buffers
+          rc.setEcmdError(rc_num);
+          return rc;
+       }
     }
     
     // load the mcbist and mba with rotnum and rotdata.
@@ -1033,10 +1059,10 @@ fapi::ReturnCode cfg_mcb_dgen(const fapi::Target & i_target_mba,
     if(l_mbaPosition == 0)
     {
        rc = fapiPutScom(i_target_centaur, 0x0201167F , l_data_buffer_64); if(rc) return rc;
-       //l_data_buffer_64_value = l_data_buffer_64.getDoubleWord (0);
-       //FAPI_INF("%s:Value of Rotate data seed %016llX for reg %08X",i_target_mba.toEcmdString(), l_data_buffer_64_value, l_mbs01_mcb_random[l_index] );
+       l_data_buffer_64_value = l_data_buffer_64.getDoubleWord (0);
+       FAPI_INF("%s:Value of Rotate data seed %016llX for reg %08X",i_target_mba.toEcmdString(), l_data_buffer_64_value, 0x0201167F );
        
-       rc_num = l_data_buffer_16.insert(l_data_buffer_64,0,16); 
+       rc_num = rc_num | l_data_buffer_16.insert(l_data_buffer_64,0,16); 
        rc = fapiGetScom(i_target_centaur, 0x02011680 , l_data_buffer_64); if(rc) return rc;
        rc_num = rc_num | l_data_buffer_64.insert(l_rotnum,0,4,4);
        rc_num = rc_num | l_data_buffer_64.insert(l_data_buffer_16,4,16);
@@ -1052,8 +1078,8 @@ fapi::ReturnCode cfg_mcb_dgen(const fapi::Target & i_target_mba,
     else
     {
        rc = fapiPutScom(i_target_centaur, 0x0201177F , l_data_buffer_64); if(rc) return rc;//added
-       //l_data_buffer_64_value = l_data_buffer_64.getDoubleWord (0);
-       //FAPI_INF("%s:Value of Rotate data seed %016llX for reg %08X",i_target_mba.toEcmdString(), l_data_buffer_64_value, l_mbs23_mcb_random[l_index] );
+       l_data_buffer_64_value = l_data_buffer_64.getDoubleWord (0);
+       FAPI_INF("%s:Value of Rotate data seed %016llX for reg %08X",i_target_mba.toEcmdString(), l_data_buffer_64_value, 0x0201177F );
 
        rc_num = rc_num | l_data_buffer_16.insert(l_data_buffer_64,0,16);        
        rc = fapiGetScom(i_target_centaur, 0x02011780 , l_data_buffer_64); if(rc) return rc;

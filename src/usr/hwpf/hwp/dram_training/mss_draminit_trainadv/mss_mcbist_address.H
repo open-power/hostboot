@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist_address.H,v 1.7 2014/12/16 11:35:52 sasethur Exp $
+// $Id: mss_mcbist_address.H,v 1.8 2015/02/16 19:54:23 sglancy Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998, 2013
 // *!           All Rights Reserved -- Property of IBM
@@ -43,6 +43,7 @@
 //  1.4    |preeragh|17-Dec-14| Removed unwanted header includes
 //  1.5    |mjjones |20-Jan-14| RAS Review Updates
 //  1.7    |preeragh|15-Dec-14| Fix FW review comments
+//  1.8    |preeragh|16-FEB-14| Added in lab needs
 // --------|--------|---------|--------------------------------------------------
 //------------------------------------------------------------------------------
 #ifndef MSS_MCBIST_ADDRESS_H
@@ -77,7 +78,8 @@ fapi::ReturnCode address_generation(const fapi:: Target & i_target_mba,
                                     interleave_type i_add_inter_type,
                                     uint8_t i_rank,
                                     uint64_t &io_start_address,
-                                    uint64_t &io_end_address);
+                                    uint64_t &io_end_address,
+				    char * l_str_cust_addr);
 
 fapi::ReturnCode parse_addr(const fapi:: Target & i_target_mba,
                             char addr_string[],

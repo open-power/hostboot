@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-// $Id: mss_generic_shmoo.C,v 1.92 2014/12/16 11:36:15 sasethur Exp $
+// $Id: mss_generic_shmoo.C,v 1.93 2015/02/16 19:59:13 sglancy Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -42,6 +42,7 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
+//   1.93  |sglancy |16-Feb-15| Merged FW comments with lab needs
 //   1.92  |preeragh|15-Dec-14| Reverted Changes to v.1.87
 //   1.88  |rwheeler|10-Nov-14| Updated setup_mcbist for added variable.
 //   1.87  |abhijsau|7-Feb-14| added sanity check and error call out for schmoo's , removed printing of disconnected DQS. 
@@ -4306,6 +4307,7 @@ fapi::ReturnCode generic_shmoo::schmoo_setup_mcb(const fapi::Target & i_target)
     uint32_t l_pattern = 0;
     uint32_t l_testtype = 0;
     mcbist_byte_mask i_mcbbytemask1;
+    char l_str_cust_addr[] = "ba0,ba1,mr3,mr2,mr1,mr0,ba2,ba3,cl2,cl3,cl4,cl5,cl6,cl7,cl8,cl9,cl11,cl13,r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16,sl2,sl1,sl0";
 
     i_mcbbytemask1 = UNMASK_ALL;
 
@@ -4335,7 +4337,7 @@ fapi::ReturnCode generic_shmoo::schmoo_setup_mcb(const fapi::Target & i_target)
         if (rc) return rc;//---------i_mcbtest------->run
     }
 
-    rc = setup_mcbist(i_target, i_mcbbytemask1, 0, l_sub_info);
+    rc = setup_mcbist(i_target, i_mcbbytemask1, 0,0x0ull ,l_sub_info,l_str_cust_addr);
     if (rc) return rc;
 
     return rc;

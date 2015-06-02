@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist_address.C,v 1.17 2014/12/16 11:35:38 sasethur Exp $
+// $Id: mss_mcbist_address.C,v 1.18 2015/02/16 19:55:40 sglancy Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998, 2013
 // *!           All Rights Reserved -- Property of IBM
@@ -40,6 +40,7 @@
 //-------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
+// 1.17    |sglancy |16-FEB-15| Merged FW comments with lab debugging needs
 // 1.17    |preeragh|15-Dec-14| Fix FW Review Comments
 // 1.16    |rwheeler|10-Nov-14| Update to address_generation for custom address string
 // 1.15    |preeragh|03-Nov-14| Fix for 128GB Schmoo
@@ -70,7 +71,8 @@ fapi::ReturnCode address_generation(const fapi::Target & i_target_mba,
                                     interleave_type i_add_inter_type,
                                     uint8_t i_rank,
                                     uint64_t &io_start_address,
-                                    uint64_t &io_end_address)
+                                    uint64_t &io_end_address,
+				    char * l_str_cust_addr)
 {
     fapi::ReturnCode rc;
     uint8_t l_num_ranks_per_dimm[MAX_VALUE_TWO][MAX_VALUE_TWO];
@@ -196,9 +198,18 @@ fapi::ReturnCode address_generation(const fapi::Target & i_target_mba,
     //FAPI_INF("ATTR_EFF_DRAM_WIDTH is %d ",l_dram_width);
     //FAPI_INF("ATTR_ADDR_INTER Mode is %d ",l_addr_inter);
     //FAPI_INF("--- BANK-RANK  Address interleave ---");
-    rc = parse_addr(i_target_mba, S0, mr3_valid, mr2_valid, mr1_valid,
+    //custom addressing string is not to be used
+    if(l_addr_inter != 4) {
+       rc = parse_addr(i_target_mba, S0, mr3_valid, mr2_valid, mr1_valid,
                     l_dram_rows, l_dram_cols, l_addr_inter);
-    if (rc) return rc;
+       if (rc) return rc;
+    }
+    else {
+       FAPI_DBG("Custom addressing flag was selected");
+       rc = parse_addr(i_target_mba, l_str_cust_addr, mr3_valid, mr2_valid, mr1_valid,
+                    l_dram_rows, l_dram_cols, l_addr_inter);
+       if (rc) return rc;
+    }
 
     return rc;
 }

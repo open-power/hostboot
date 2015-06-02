@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist_common.C,v 1.72 2015/02/09 15:54:57 sglancy Exp $
+// $Id: mss_mcbist_common.C,v 1.73 2015/02/16 19:53:37 sglancy Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -40,6 +40,7 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
+//   1.73  |sglancy |02/16/15|Merged in lab needs
 //   1.72  |sglancy |02/09/15|Fixed FW comments and addressed bugs
 //   1.71  |preeragh|01/16/15|Fixed FW comments
 //   1.70  |preeragh|12/16/14|Revert to FW build v.1.66
@@ -111,8 +112,9 @@
 #include <mss_access_delay_reg.H>
 #include <fapiTestHwpDq.H>
 #include <dimmBadDqBitmapFuncs.H>
-
-
+#ifdef FAPI_MSSLABONLY
+#include <mss_cen_dimm_temp_sensor.H>
+#endif
 extern "C"
 {
 using namespace fapi;
@@ -148,6 +150,7 @@ const uint64_t FOUR = 0x0000000000000004ull;
 //     mcbist_test_mem i_mcbtest        subtest Type
 //     mcbist_byte_mask i_mcbbytemask   It is used to mask bad bits read from SPD
 //     uint8_t i_mcbrotate              Provides the number of bit to shift per burst
+//     uint64_t i_mcbrotdata            Provides the rotate data to shift per burst
 
 //     uint8_t i_pattern                Data Pattern
 //     uint8_t i_test_type              Subtest Type
@@ -161,14 +164,16 @@ const uint64_t FOUR = 0x0000000000000004ull;
 fapi::ReturnCode setup_mcbist(const fapi::Target & i_target_mba,
                               mcbist_byte_mask i_mcbbytemask,
                               uint8_t i_mcbrotate,
-                              struct Subtest_info l_sub_info[30])
+                              uint64_t i_mcbrotdata,
+                              struct Subtest_info l_sub_info[30],
+			      char * l_str_cust_addr)
 {
     fapi::ReturnCode rc;
     uint32_t rc_num = 0;
     uint8_t l_bit32 = 0;
 
     FAPI_DBG("%s:Function Setup_MCBIST", i_target_mba.toEcmdString());
-
+    FAPI_DBG("Custom Addr Mode %s",l_str_cust_addr);
     ecmdDataBufferBase l_data_buffer_64(64);
     ecmdDataBufferBase l_data_bufferx1_64(64);
     ecmdDataBufferBase l_data_bufferx2_64(64);
@@ -370,7 +375,7 @@ fapi::ReturnCode setup_mcbist(const fapi::Target & i_target_mba,
 
     rc = cfg_mcb_test_mem(i_target_mba, i_mcbtest1, l_sub_info);
     if (rc) return rc;
-    rc = cfg_mcb_dgen(i_target_mba, i_mcbpatt1, i_mcbrotate);
+    rc = cfg_mcb_dgen(i_target_mba, i_mcbpatt1, i_mcbrotate, i_mcbrotdata);
     if (rc) return rc;
     uint8_t i_port = 0;
     uint8_t i_rank = 0;
@@ -383,7 +388,7 @@ fapi::ReturnCode setup_mcbist(const fapi::Target & i_target_mba,
     if (l_new_addr != 0)
     {
         rc = address_generation(i_target_mba, i_port, SF, BANK_RANK, i_rank,
-                                io_start_address, io_end_address);
+                                io_start_address, io_end_address, l_str_cust_addr);
         if (rc)
         {
             FAPI_DBG("%s:BAD - RC ADDR Generation\n", i_target_mba.toEcmdString());
@@ -655,7 +660,9 @@ fapi::ReturnCode poll_mcb(const fapi::Target & i_target_mba,
                 l_time_count = 0;
                 FAPI_DBG("%s:POLLING STATUS:POLLING IN PROGRESS...........",
                          i_target_mba.toEcmdString());
-		//rc = mss_cen_dimm_temp_sensor(i_target_centaur);if (rc) return rc;
+		#ifdef FAPI_MSSLABONLY
+		rc = mss_cen_dimm_temp_sensor(i_target_centaur);if (rc) return rc;
+		#endif
 		rc = fapiGetScom(i_target_centaur, 0x02050000, l_data_buffer_64);if (rc) return rc;
                 rc_num = l_data_buffer_64.extractToRight(&l_dts_0, 0, 12);
                 rc_num = rc_num | l_data_buffer_64.extractToRight(&l_dts_1, 16, 12);
@@ -2795,6 +2802,10 @@ fapi::ReturnCode mss_conversion_testtype(const fapi::Target & i_target_mba,
     case 47:
         i_mcbtest = SHMOO_STRESS_INFINITE;
         FAPI_INF("%s:TESTTYPE :SHMOO_STRESS_INFINITE", i_target_mba.toEcmdString());
+        break;
+    case 48:
+        i_mcbtest = HYNIX_1_COL;
+        FAPI_INF("%s:TESTTYPE :HYNIX_1_COL", i_target_mba.toEcmdString());
         break;
 
     default:
