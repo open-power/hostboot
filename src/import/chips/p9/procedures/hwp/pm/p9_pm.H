@@ -25,7 +25,7 @@
 // *HWP Backup HWP Owner: Greg Still <stillgs@us.ibm.com>
 // *HWP FW Owner        : Bilicon Patil <bilpatil@in.ibm.com>
 // *HWP Team            : PM
-// *HWP Level           : 1
+// *HWP Level           : 2
 // *HWP Consumed by     : HS
 
 #ifndef _P9_PM_H_
@@ -35,9 +35,15 @@
 // Includes
 //------------------------------------------------------------------------------
 
-#if 0 // Use appropriate scom address file
-    #include <abc_scom_addresses.H>
-#endif
+//------------------------------------------------------------------------------
+// Macro Defintions
+//------------------------------------------------------------------------------
+
+// Create a multi-bit mask of @a n bits starting at bit @a b
+#define BITS(b, n) ((0xffffffffffffffffull << (64 - (n))) >> (b))
+
+// Create a single bit mask at bit @a b
+#define BIT(b) BITS((b), 1)
 
 //------------------------------------------------------------------------------
 // Constant definitions
@@ -58,5 +64,6 @@ enum PM_FLOW_MODE
 };
 
 } // end of namespace p9pm
+
 
 #endif // _P9_PM_H_
