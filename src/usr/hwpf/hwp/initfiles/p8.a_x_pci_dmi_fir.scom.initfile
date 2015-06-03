@@ -1,4 +1,4 @@
-#-- $Id: p8.a_x_pci_dmi_fir.scom.initfile,v 1.12 2014/11/18 17:21:01 jmcgill Exp $
+#-- $Id: p8.a_x_pci_dmi_fir.scom.initfile,v 1.13 2015/03/18 22:54:37 jmcgill Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -663,7 +663,8 @@ scom 0x08010C07 {
 #-- NVBUS0.BUSCTL.SCOM.FIR_MASK_REG
 scom 0x08010C03 {
     bits, scom_data,          expr;
-    0:63, 0xDFFFFFFFFFFFC000, (abus_enabled);
+    0:63, 0xDFFFFFFFFFFFC000, (abus_enabled) && (!nv_present);
+    0:63, 0x1FFFFFFFFFFFC000, (abus_enabled) && (nv_present);
 }
 
 #-- NVBUS1.BUSCTL.SCOM.FIR_ACTION0_REG
@@ -681,7 +682,7 @@ scom 0x08010C47 {
 #-- NVBUS1.BUSCTL.SCOM.FIR_MASK_REG
 scom 0x08010C43 {
     bits, scom_data,          expr;
-    0:63, 0xDFFFFFFFFFFFC000, (abus_enabled) && (nv_present);
+    0:63, 0x1FFFFFFFFFFFC000, (abus_enabled) && (nv_present);
 }
 
 #-- ABUS bus initialization/powerdown settings

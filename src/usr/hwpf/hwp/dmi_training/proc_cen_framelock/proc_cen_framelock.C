@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_cen_framelock.C,v 1.29 2015/01/08 16:04:52 bwieman Exp $
+// $Id: proc_cen_framelock.C,v 1.31 2015/03/31 20:53:36 baysah Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_cen_framelock.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -40,6 +40,11 @@
 // Change Log
 // Version | who      |Date     | Comment
 // -----------------------------------------------------------------------------
+//         |          |         |
+//   1.31  | baysah   |31-MAR-15| Defect SW298496 was rejected by mustfix board due to assumed risk with no real benefits of the function to customers.
+//         |          |         |
+//   1.30  | baysah   |24-MAR-15| Defect SW298496 required MCIFIR(32) to be unmasked and set as recoverable to allow PRD
+//         |          |         | to threshold on Mirror channel before shutting down a channel.
 //         |          |         |
 //   1.29  | bwieman  |08-jan-14| revert of 1.28
 //   1.28  | baysah   |12-DEC-14| Masked MCIFIR(26) MCIFIRQ_POWERBUS_PROTOCOL_ERROR due to CAPI defect HW281374
@@ -2013,6 +2018,7 @@ fapi::ReturnCode proc_cen_framelock_cloned(const fapi::Target& i_pu_target,
    // l_ecmdRc |= mci_data.setBit(23);    //Replay Buffer Overrun
     l_ecmdRc |= mci_data.setBit(24);    //MCIFIRQ_MCS_RECOVERABLE_ERROR
     l_ecmdRc |= mci_data.setBit(27);    //MCS Command List Timeout due to PowerBus
+    //l_ecmdRc |= mci_data.setBit(32);    //MCIFIRQ_MIRROR_ACTION_OCCURRED
     l_ecmdRc |= mci_data.setBit(35);    //PowerBus Write Data Buffer CE
     l_ecmdRc |= mci_data.setBit(36);    //PowerBus Write Data Buffer UE
 
@@ -2087,6 +2093,7 @@ fapi::ReturnCode proc_cen_framelock_cloned(const fapi::Target& i_pu_target,
     l_ecmdRc |= mci_data.setBit(28);    //Multiple RCMD or CRESP active
     l_ecmdRc |= mci_data.setBit(29);    //Inband Bar Hit with Incorrect TTYPE (xstop)
     l_ecmdRc |= mci_data.setBit(30);    //Multiple Bar Hit (xstop)
+    //l_ecmdRc |= mci_data.setBit(32);    //MCIFIRQ_MIRROR_ACTION_OCCURRED
     l_ecmdRc |= mci_data.setBit(33);    //Invalid Foreign Bar Access (xstop)
     l_ecmdRc |= mci_data.setBit(35);    //PowerBus Write Data Buffer CE
     l_ecmdRc |= mci_data.setBit(36);    //PowerBus Write Data Buffer UE
@@ -2127,6 +2134,7 @@ fapi::ReturnCode proc_cen_framelock_cloned(const fapi::Target& i_pu_target,
     l_ecmdRc |= mci_data.clearBit(28);    //Multiple RCMD or CRESP active
     l_ecmdRc |= mci_data.clearBit(29);    //Inband Bar Hit with Incorrect TTYPE (xstop)
     l_ecmdRc |= mci_data.clearBit(30);    //Multiple Bar Hit (xstop)
+    //l_ecmdRc |= mci_data.clearBit(32);    //MCIFIRQ_MIRROR_ACTION_OCCURRED
     l_ecmdRc |= mci_data.clearBit(33);    //Invalid Foreign Bar Access (xstop)
     l_ecmdRc |= mci_data.clearBit(35);    //PowerBus Write Data Buffer CE
     l_ecmdRc |= mci_data.clearBit(36);    //PowerBus Write Data Buffer UE
