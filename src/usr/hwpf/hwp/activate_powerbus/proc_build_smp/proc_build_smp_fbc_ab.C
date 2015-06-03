@@ -22,13 +22,13 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_fbc_ab.C,v 1.13 2014/11/18 17:41:03 jmcgill Exp $
+// $Id: proc_build_smp_fbc_ab.C,v 1.14 2015/04/21 22:29:53 jhuynh1 Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_fbc_ab.C,v $
+
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
-// *! ***  ***
 // *|
 // *! TITLE       : proc_build_smp_fbc_ab.C
 // *! DESCRIPTION : Fabric configuration (hotplug, AB) functions (FAPI)
@@ -75,7 +75,8 @@ const uint32_t PB_HP_MODE_A_CMD_RATE_MAX_VALUE = 0x7F;
 const uint32_t PB_HP_MODE_A_GATHER_ENABLE_BIT = 32;
 const uint32_t PB_HP_MODE_A_GATHER_DLY_CNT_START_BIT = 33;
 const uint32_t PB_HP_MODE_A_GATHER_DLY_CNT_END_BIT = 37;
-const uint32_t PB_HP_MODE_PCIE3_NOT_DSMP_BIT = 40;
+const uint32_t PB_HP_MODE_CFG_P2_X8TOK = 39;
+const uint32_t PB_HP_MODE_CFG_P3_X8TOK = 40;
 const uint32_t PB_HP_MODE_GATHER_ENABLE_BIT_PCIE3_PRESENT = 41;
 const uint32_t PB_HP_MODE_GATHER_ENABLE_BIT_PCIE3_NOT_PRESENT = 40;
 const uint32_t PB_HP_MODE_F_AGGREGATE_BIT = 55;
@@ -1471,8 +1472,11 @@ fapi::ReturnCode proc_build_smp_set_pb_hp_mode(
 
         if (i_smp_chip.num_phb > 3)
         {
+            // pb_cfg_p2_x8tok
+            rc_ecmd |= data.clearBit(PB_HP_MODE_CFG_P2_X8TOK);
+
             // pb_cfg_p3_x8tok
-            rc_ecmd |= data.setBit(PB_HP_MODE_PCIE3_NOT_DSMP_BIT);
+            rc_ecmd |= data.clearBit(PB_HP_MODE_CFG_P3_X8TOK);
 
             // pb_cfg_gather_enable
             rc_ecmd |= data.writeBit(PB_HP_MODE_GATHER_ENABLE_BIT_PCIE3_PRESENT,

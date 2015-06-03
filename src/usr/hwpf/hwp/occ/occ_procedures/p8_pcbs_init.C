@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pcbs_init.C,v 1.29 2014/10/10 02:01:32 cmolsen Exp $
+// $Id: p8_pcbs_init.C,v 1.31 2015/05/13 03:47:51 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pcbs_init.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -1574,6 +1574,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_pcbs_init.C,v $
+Revision 1.31  2015/05/13 03:47:51  stillgs
+Revert to previous version due to erroneous commit
+
 Revision 1.29  2014/10/10 02:01:32  cmolsen
 SW280752: Updated to capture more FFDC data on RC_PROC_PCBS_CODE_SAFE_FSM_TIMEOUT
 

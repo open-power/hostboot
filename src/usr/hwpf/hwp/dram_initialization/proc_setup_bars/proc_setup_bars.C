@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_setup_bars.C,v 1.27 2015/02/02 18:58:18 jmcgill Exp $
+// $Id: proc_setup_bars.C,v 1.28 2015/04/14 22:19:55 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_setup_bars.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -2392,7 +2392,7 @@ proc_setup_bars_write_local_chip_region_bars(
                     i_smp_chip.chip->this_chip,
                     PROC_SETUP_BARS_NPU_CHIP_NON_MIRRORED_BAR[u],
                     common_nf_scope_bar_reg_def,
-                    i_smp_chip.mirrored_range);
+                    i_smp_chip.non_mirrored_range);
                 if (!rc.ok())
                 {
                     FAPI_ERR("proc_setup_bars_write_local_chip_region_bars: Error from proc_setup_bars_common_write_bar_reg");
@@ -2403,7 +2403,6 @@ proc_setup_bars_write_local_chip_region_bars(
             {
                 break;
             }
-
         }
 
         // NPU (mirrored)
@@ -2766,7 +2765,7 @@ proc_setup_bars_write_local_node_region_bars(
                     i_smp_chip.chip->this_chip,
                     PROC_SETUP_BARS_NPU_NODE_NON_MIRRORED_BAR[u],
                     common_nf_scope_bar_reg_def,
-                    i_smp_node.mirrored_range);
+                    i_smp_node.non_mirrored_range);
                 if (!rc.ok())
                 {
                     FAPI_ERR("proc_setup_bars_write_local_node_region_bars: Error from proc_setup_bars_common_write_bar_reg");

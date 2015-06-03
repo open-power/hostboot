@@ -22,12 +22,13 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_extract_sbe_rc.C,v 830.1 2015-04-20 13:55:16 dcrowell Exp $
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/fw830/procedures/ipl/fapi/proc_extract_sbe_rc.C,v $
+// $Id: proc_extract_sbe_rc.C,v 1.24 2015/05/14 22:27:29 jmcgill Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_extract_sbe_rc.C,v $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
+// *! ***  ***
 // *|
 // *! TITLE       : proc_extract_sbe_rc.C
 // *! DESCRIPTION : Create return code for PORE (SBE/SLW) error
