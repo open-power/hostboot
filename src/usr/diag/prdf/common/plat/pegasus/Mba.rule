@@ -65,7 +65,7 @@ chip Mba
 
     register MBAFIR
     {
-        name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBAFIRQ";
+        name        "MBU.MBA_MCBIST.SCOMFIR.MBAFIRQ";
         scomaddr    0x03010600;
         reset       (&, 0x03010601);
         mask        (|, 0x03010605);
@@ -75,7 +75,7 @@ chip Mba
 
     register MBAFIR_MASK
     {
-        name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBAFIRMASK";
+        name        "MBU.MBA_MCBIST.SCOMFIR.MBAFIRMASK";
         scomaddr    0x03010603;
         capture     group FirRegs;
         capture     group MemChipletRegs;
@@ -83,7 +83,7 @@ chip Mba
 
     register MBAFIR_ACT0
     {
-        name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBAFIRACT0";
+        name        "MBU.MBA_MCBIST.SCOMFIR.MBAFIRACT0";
         scomaddr    0x03010606;
         capture     group FirRegs;
         capture     group MemChipletRegs;
@@ -92,7 +92,7 @@ chip Mba
 
     register MBAFIR_ACT1
     {
-        name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBAFIRACT1";
+        name        "MBU.MBA_MCBIST.SCOMFIR.MBAFIRACT1";
         scomaddr    0x03010607;
         capture     group FirRegs;
         capture     group MemChipletRegs;
@@ -107,7 +107,7 @@ chip Mba
     # mask or change the state of the action registers.
     register MBASECUREFIR
     {
-        name        "MBU.MBA01.MBA_SRQ.MBASIRQ";
+        name        "MBU.MBA_SRQ.MBASIRQ";
         scomaddr    0x0301041b;
         reset       (&, 0x0301041c);
         capture     group FirRegs;
@@ -120,7 +120,7 @@ chip Mba
 
     register MBADDRPHYFIR
     {
-        name        "DPHY01.PHY01_DDRPHY_FIR_REG";
+        name        "DDRPHY_FIR_REG";
         scomaddr    0x800200900301143F;
         reset       (&, 0x800200910301143F);
         mask        (|, 0x800200950301143F);
@@ -130,7 +130,7 @@ chip Mba
 
     register MBADDRPHYFIR_AND
     {
-        name        "DPHY01.PHY01_DDRPHY_FIR_REG_AND";
+        name        "DDRPHY_FIR_REG_AND";
         scomaddr    0x800200910301143F;
         capture     group never;
         access      write_only;
@@ -138,7 +138,7 @@ chip Mba
 
     register MBADDRPHYFIR_MASK
     {
-        name        "DPHY01.PHY01_DDRPHY_FIR_MASK_REG";
+        name        "DDRPHY_FIR_MASK_REG";
         scomaddr    0x800200930301143F;
         capture     group FirRegs;
         capture     group MemChipletRegs;
@@ -146,7 +146,7 @@ chip Mba
 
     register MBADDRPHYFIR_ACT0
     {
-        name        "DPHY01.PHY01_DDRPHY_FIR_ACTION0_REG";
+        name        "DDRPHY_FIR_ACTION0_REG";
         scomaddr    0x800200960301143F;
         capture     group FirRegs;
         capture     group MemChipletRegs;
@@ -155,7 +155,7 @@ chip Mba
 
     register MBADDRPHYFIR_ACT1
     {
-        name        "DPHY01.PHY01_DDRPHY_FIR_ACTION1_REG";
+        name        "DDRPHY_FIR_ACTION1_REG";
         scomaddr    0x800200970301143F;
         capture     group FirRegs;
         capture     group MemChipletRegs;
@@ -168,7 +168,7 @@ chip Mba
 
     register MBACALFIR
     {
-        name        "MBU.MBA01.MBA_SRQ.MBACALFIRQ";
+        name        "MBU.MBA_SRQ.MBACALFIRQ";
         scomaddr    0x03010400;
         reset       (&, 0x03010401);
         mask        (|, 0x03010405);
@@ -178,7 +178,7 @@ chip Mba
 
     register MBACALFIR_AND
     {
-        name        "MBU.MBA01.MBA_SRQ.MBACALFIRQ AND";
+        name        "MBU.MBA_SRQ.MBACALFIRQ AND";
         scomaddr    0x03010401;
         capture     group never;
         access      write_only;
@@ -186,7 +186,7 @@ chip Mba
 
     register MBACALFIR_MASK
     {
-        name        "MBU.MBA01.MBA_SRQ.MBACALFIR_MASK";
+        name        "MBU.MBA_SRQ.MBACALFIR_MASK";
         scomaddr    0x03010403;
         capture     group FirRegs;
         capture     group MemChipletRegs;
@@ -194,7 +194,7 @@ chip Mba
 
     register MBACALFIR_MASK_OR
     {
-        name        "MBU.MBA01.MBA_SRQ.MBACALFIR_MASK OR";
+        name        "MBU.MBA_SRQ.MBACALFIR_MASK OR";
         scomaddr    0x03010405;
         capture     group never;
         access      write_only;
@@ -202,7 +202,7 @@ chip Mba
 
     register MBACALFIR_ACT0
     {
-        name        "MBU.MBA01.MBA_SRQ.MBACALFIR_ACTION0";
+        name        "MBU.MBA_SRQ.MBACALFIR_ACTION0";
         scomaddr    0x03010406;
         capture     group FirRegs;
         capture     group MemChipletRegs;
@@ -211,7 +211,7 @@ chip Mba
 
     register MBACALFIR_ACT1
     {
-        name        "MBU.MBA01.MBA_SRQ.MBACALFIR_ACTION1";
+        name        "MBU.MBA_SRQ.MBACALFIR_ACTION1";
         scomaddr    0x03010407;
         capture     group FirRegs;
         capture     group MemChipletRegs;
@@ -224,7 +224,7 @@ chip Mba
 
     register MBASPA
     {
-        name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBSPAQ";
+        name        "MBU.MBA_MCBIST.SCOMFIR.MBSPAQ";
         scomaddr    0x03010611;
         reset       (&, 0x03010612);
         mask        (|, 0x03010614);
@@ -234,7 +234,7 @@ chip Mba
 
     register MBASPA_AND
     {
-        name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBSPAQ_AND";
+        name        "MBU.MBA_MCBIST.SCOMFIR.MBSPAQ_AND";
         scomaddr    0x03010612;
         capture     group never;
         access      write_only;
@@ -242,7 +242,7 @@ chip Mba
 
     register MBASPA_MASK
     {
-        name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBSPAMSKQ";
+        name        "MBU.MBA_MCBIST.SCOMFIR.MBSPAMSKQ";
         scomaddr    0x03010614;
         capture     group FirRegs;
         capture     group MemChipletRegs;
@@ -254,7 +254,7 @@ chip Mba
 
     register MBA_ERR_REPORT
     {
-        name        "MBU.MBA01.MBA_SRQ.MBA_ERR_REPORTQ";
+        name        "MBU.MBA_SRQ.MBA_ERR_REPORTQ";
         scomaddr    0x0301041A;
         capture     group CerrRegs;
         capture     group MemChipletRegs;
@@ -262,7 +262,7 @@ chip Mba
 
     register MBA_MCBERRPTQ
     {
-        name        "MBU.MBA01.MBA_MCBIST.SCOMFIR.MBA_MCBERRPTQ";
+        name        "MBU.MBA_MCBIST.SCOMFIR.MBA_MCBERRPTQ";
         scomaddr    0x030106E7;
         capture     group CerrRegs;
         capture     group MemChipletRegs;
@@ -270,7 +270,7 @@ chip Mba
 
     register DDRPHY_APB_FIR_ERR0_P0
     {
-        name        "DPHY01.DDRPHY_APB_FIR_ERR0_P0";
+        name        "DDRPHY_APB_FIR_ERR0_P0";
         scomaddr    0x8000D0060301143F;
         capture     group CerrRegs;
         capture     group MemChipletRegs;
@@ -278,7 +278,7 @@ chip Mba
 
     register DDRPHY_APB_FIR_ERR1_P0
     {
-        name        "DPHY01.DDRPHY_APB_FIR_ERR1_P0";
+        name        "DDRPHY_APB_FIR_ERR1_P0";
         scomaddr    0x8000D0070301143F;
         capture     group CerrRegs;
         capture     group MemChipletRegs;
@@ -286,7 +286,7 @@ chip Mba
 
     register DDRPHY_APB_FIR_ERR0_P1
     {
-        name        "DPHY01.DDRPHY_APB_FIR_ERR0_P1";
+        name        "DDRPHY_APB_FIR_ERR0_P1";
         scomaddr    0x8001D0060301143F;
         capture     group CerrRegs;
         capture     group MemChipletRegs;
@@ -294,7 +294,7 @@ chip Mba
 
     register DDRPHY_APB_FIR_ERR1_P1
     {
-        name        "DPHY01.DDRPHY_APB_FIR_ERR1_P1";
+        name        "DDRPHY_APB_FIR_ERR1_P1";
         scomaddr    0x8001D0070301143F;
         capture     group CerrRegs;
         capture     group MemChipletRegs;
@@ -591,32 +591,32 @@ rule MbaDdrPhyFir
 group gMbaDdrPhyFir filter singlebit, secondarybits( 53 )
 {
     /** MBADDRPHYFIR[48]
-     *  PHY01_DDRPHY_FIR_REG_DDR0_FSM_CKSTP
+     *  DDRPHY_FIR_REG_DDR0_FSM_CKSTP
      */
     (MbaDdrPhyFir, bit(48)) ? SelfMedThr1;
 
     /** MBADDRPHYFIR[49]
-     *  PHY01_DDRPHY_FIR_REG_DDR0_PARITY_CKSTP
+     *  DDRPHY_FIR_REG_DDR0_PARITY_CKSTP
      */
     (MbaDdrPhyFir, bit(49)) ? SelfMedThr1;
 
     /** MBADDRPHYFIR[50]
-     *  PHY01_DDRPHY_FIR_REG_DDR0_CALIBRATION_ERROR
+     *  DDRPHY_FIR_REG_DDR0_CALIBRATION_ERROR
      */
     (MbaDdrPhyFir, bit(50)) ? defaultMaskedError;
 
     /** MBADDRPHYFIR[51]
-     *  PHY01_DDRPHY_FIR_REG_DDR0_FSM_ERR
+     *  DDRPHY_FIR_REG_DDR0_FSM_ERR
      */
     (MbaDdrPhyFir, bit(51)) ? SelfMedThr32PerDay;
 
     /** MBADDRPHYFIR[52]
-     *  PHY01_DDRPHY_FIR_REG_DDR0_PARITY_ERR
+     *  DDRPHY_FIR_REG_DDR0_PARITY_ERR
      */
     (MbaDdrPhyFir, bit(52)) ? SelfMedThr32PerDay;
 
     /** MBADDRPHYFIR[53]
-     *  PHY01_DDRPHY_FIR_REG_DDR01_FIR_PARITY_ERR
+     *  DDRPHY_FIR_REG_DDR01_FIR_PARITY_ERR
      */
     (MbaDdrPhyFir, bit(53)) ? thresholdAndMask_self;
 
@@ -626,27 +626,27 @@ group gMbaDdrPhyFir filter singlebit, secondarybits( 53 )
     (MbaDdrPhyFir, bit(54|55)) ? defaultMaskedError;
 
     /** MBADDRPHYFIR[56]
-     *  PHY01_DDRPHY_FIR_REG_DDR1_FSM_CKSTP
+     *  DDRPHY_FIR_REG_DDR1_FSM_CKSTP
      */
     (MbaDdrPhyFir, bit(56)) ? SelfMedThr1;
 
     /** MBADDRPHYFIR[57]
-     *  PHY01_DDRPHY_FIR_REG_DDR1_PARITY_CKSTP
+     *  DDRPHY_FIR_REG_DDR1_PARITY_CKSTP
      */
     (MbaDdrPhyFir, bit(57)) ? SelfMedThr1;
 
     /** MBADDRPHYFIR[58]
-     *  PHY01_DDRPHY_FIR_REG_DDR1_CALIBRATION_ERROR
+     *  DDRPHY_FIR_REG_DDR1_CALIBRATION_ERROR
      */
     (MbaDdrPhyFir, bit(58)) ? defaultMaskedError;
 
     /** MBADDRPHYFIR[59]
-     *  PHY01_DDRPHY_FIR_REG_DDR1_FSM_ERR
+     *  DDRPHY_FIR_REG_DDR1_FSM_ERR
      */
     (MbaDdrPhyFir, bit(59)) ? SelfMedThr32PerDay;
 
     /** MBADDRPHYFIR[60]
-     *  PHY01_DDRPHY_FIR_REG_DDR1_PARITY_ERR
+     *  DDRPHY_FIR_REG_DDR1_PARITY_ERR
      */
     (MbaDdrPhyFir, bit(60)) ? SelfMedThr32PerDay;
 };
