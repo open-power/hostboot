@@ -20,11 +20,11 @@
 /// @file  p9_pm_occ_control.H
 /// @brief Reset and halt control of the OCC PPC405
 ///
-/// *HWP HWP Owner: Greg Still <stillgs @us.ibm.com>
-/// *HWP FW Owner: Sangeetha T S <sangeet2@in.ibm.com>
-/// *HWP Team: PM
-/// *HWP Level: 1
-/// *HWP Consumed by: FSP:HS
+// *HWP HWP Owner: Greg Still <stillgs @us.ibm.com>
+// *HWP FW Owner: Sangeetha T S <sangeet2@in.ibm.com>
+// *HWP Team: PM
+// *HWP Level: 2
+// *HWP Consumed by: FSP:HS
 ///
 /// @verbatim
 /// High-level procedure flow:
@@ -39,13 +39,13 @@
 ///            Initialize to Branch Absolute 0x00000010
 ///       - If (i_ppc405_boot_ctrl = PPC405_BOOT_OLD)
 ///            initialize to Branch Relative -16
-/// - Write PPC405 rese/halt bits per parameteri_ppc405_reset_ctrl (OCR, OJCFG)
+/// - Write PPC405 reset/halt bits based on i_ppc405_reset_ctrl (OCR, OJCFG)
 ///     - if PPC405_RESET_NULL , do nothing
 ///     - if PPC405_RESET_OFF  , write reset bit to 0 (PPC405 not reset)
 ///     - if PPC405_RESET_ON   , write reset bit to 1 (PPC405 reset)
 ///     - if PPC405_HALT_OFF   , write halt bit to 0  (PPC405 not halted)
 ///     - if PPC405_HALT_ON    , write halt bit to 1  (PPC405 halted)
-///     - if PPC405_RESET_SEQUENCE , Safe halt/reset of OCC (See comments)
+///     - if PPC405_RESET_SEQUENCE , Perform the safe halt->reset sequence
 ///
 /// Procedure Prereq:
 ///   - System clocks are running
@@ -61,7 +61,6 @@
 #include <fapi2.H>
 #include <p9_pm.H>
 #include <p9_misc_scom_addresses.H>
-#include <p9_perv_scom_addresses.H>
 
 // -----------------------------------------------------------------------------
 //  ENUMS
@@ -101,17 +100,8 @@ extern "C" {
 
 /// @brief Control the operation of the OCC PPC405
 /// @param [in]  i_target            Chip Target
-/// @param [in]  i_ppc405_reset_ctrl PPC405_RESET_NULL   : do nothing
-///                                  PPC405_RESET_OFF    : set ppc405 reset=0
-///                                  PPC405_RESET_ON     : set ppc405 reset=1
-///                                  PPC405_HALT_OFF     : set ppc405 halt=0
-///                                  PPC405_HALT_ON      : set ppc405 halt=1
-///                                  PPC405_RESET_SEQUENCE : gracefully stop by
-///                                                          halt and then reset
-/// @param [in]  i_ppc405_boot_ctrl  PPC405_BOOT_NULL    : do nothing
-///                                  PPC405_BOOT_SRAM    : boot from sram
-///                                  PPC405_BOOT_MEM     : boot from memory
-///                                  PPC405_BOOT_OLD     : boot from sram
+/// @param [in]  i_ppc405_reset_ctrl Actionto be taken on PPC405
+/// @param [in]  i_ppc405_boot_ctrl  Location of boot instruction
 ///
 /// @return FAPI_RC_SUCCESS on success or error return code
     fapi2::ReturnCode p9_pm_occ_control(

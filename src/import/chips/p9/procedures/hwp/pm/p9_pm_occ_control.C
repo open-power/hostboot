@@ -20,12 +20,11 @@
 /// @file  p9_pm_occ_control.C
 /// @brief Initialize boot vector registers and control PPC405
 ///
-/// *HWP HWP Owner: Greg Still <stillgs @us.ibm.com>
-/// *HWP FW Owner: Sangeetha T S <sangeet2@in.ibm.com>
-/// *HWP Team: PM
-/// *HWP Level: 1
-/// *HWP Consumed by: FSP:HS
-///
+// *HWP HWP Owner: Greg Still <stillgs @us.ibm.com>
+// *HWP FW Owner: Sangeetha T S <sangeet2@in.ibm.com>
+// *HWP Team: PM
+// *HWP Level: 2
+// *HWP Consumed by: FSP:HS
 
 // -----------------------------------------------------------------------------
 //  Includes
@@ -36,7 +35,7 @@
 //  Constant Defintions
 // -----------------------------------------------------------------------------
 
-enum PPCC_BRANCH_INSTR
+enum PPC_BRANCH_INSTR
 {
     // Branch Absolute 0xFFF80040  (boot from sram)
     PPC405_BRANCH_SRAM_INSTR = 0x4BF80042,
@@ -52,6 +51,16 @@ enum DELAY_VALUE
     SIM_CYCLE_DELAY = 10000
 };
 
+//TODO: Should be removed when the scom addresses are added to a
+//      scom address header.
+enum FIR_SCOM_ADDRESS
+{
+    OCCLFIR_REG = 0x0000000001010800,
+    OCCLFIR_REG_AND = 0x0000000001010801,
+    OCCLFIR_MASK_REG = 0x0000000001010803,
+    OCCLFIR_MASK_REG_OR = 0x0000000001010805
+};
+
 // -----------------------------------------------------------------------------
 //   Procedure Defintion
 // -----------------------------------------------------------------------------
@@ -62,6 +71,125 @@ fapi2::ReturnCode p9_pm_occ_control
 {
     FAPI_IMP("Entering p9_pm_occ_control ....");
 
+    fapi2::buffer<uint64_t> l_data64;
+    fapi2::buffer<uint64_t> l_firMask;
+    fapi2::buffer<uint64_t> l_occfir;
+
+    // Set up Boot Vector Registers in SRAM
+    //    - set bv0-2 to all 0's (illegal instructions)
+    //    - set bv3 to proper branch instruction
+
+    if (i_ppc405_boot_ctrl != p9occ_ctrl::PPC405_BOOT_NULL)
+    {
+        FAPI_DBG("Writing to Boot Vector 0-2 Registers");
+        FAPI_TRY(fapi2::putScom(i_target, PU_SRAM_SRBV0_SCOM, l_data64));
+        FAPI_TRY(fapi2::putScom(i_target, PU_SRAM_SRBV1_SCOM, l_data64));
+        FAPI_TRY(fapi2::putScom(i_target, PU_SRAM_SRBV2_SCOM, l_data64));
+
+        FAPI_DBG("Writing to Boot Vector 3 Register");
+
+        if (i_ppc405_boot_ctrl == p9occ_ctrl::PPC405_BOOT_SRAM)
+        {
+            l_data64.flush<0>().insertFromRight(PPC405_BRANCH_SRAM_INSTR, 0, 32);
+        }
+        else if (i_ppc405_boot_ctrl == p9occ_ctrl::PPC405_BOOT_MEM)
+        {
+            l_data64.flush<0>().insertFromRight(PPC405_BRANCH_MEM_INSTR, 0, 32);
+        }
+        else
+        {
+            l_data64.flush<0>().insertFromRight(PPC405_BRANCH_OLD_INSTR, 0, 32);
+        }
+
+        FAPI_TRY(fapi2::putScom(i_target, PU_SRAM_SRBV3_SCOM, l_data64));
+    }
+    else
+    {
+        FAPI_INF("Boot instruction location not specified");
+    }
+
+    // Handle the i_ppc405_reset_ctrl parameter
+    switch (i_ppc405_reset_ctrl)
+    {
+        case p9occ_ctrl::PPC405_RESET_NULL:
+            FAPI_INF("No action to be taken for PPC405");
+            break;
+
+        case p9occ_ctrl::PPC405_RESET_OFF:
+            FAPI_TRY(fapi2::putScom(i_target, PU_OCB_PIB_OCR_CLEAR, ~BIT(0)));
+            break;
+
+        case p9occ_ctrl::PPC405_RESET_ON:
+            FAPI_TRY(fapi2::putScom(i_target, PU_OCB_PIB_OCR_OR, BIT(0)));
+            break;
+
+        case p9occ_ctrl::PPC405_HALT_OFF:
+            FAPI_TRY(fapi2::putScom(i_target, PU_JTG_PIB_OJCFG_AND, ~BIT(6)));
+            break;
+
+        case p9occ_ctrl::PPC405_HALT_ON:
+            FAPI_TRY(fapi2::putScom(i_target, PU_JTG_PIB_OJCFG_OR, BIT(6)));
+            break;
+
+        case p9occ_ctrl::PPC405_RESET_SEQUENCE:
+
+            /// It is unsafe in general to simply reset the 405, as this is an
+            /// asynchronous reset that can leave OCI slaves in unrecoverable
+            /// states.
+            /// This is a "safe" reset-entry sequence that includes
+            /// halting the 405 (a synchronous operation) before issuing the
+            /// reset. Since this sequence halts/unhalts the 405 and modifies
+            /// FIRs it is called apart from the simple PPC405_RESET_OFF
+            /// that simply sets the 405 reset bit.
+            ///
+            /// The sequence:
+            ///
+            /// 1. Mask the "405 halted" FIR bit to avoid FW thinking the halt
+            /// we are about to inject on the 405 is an error.
+            ///
+            /// 2. Halt the 405. If the 405 does not halt in 1ms we note that
+            /// but press on, hoping (probably in vain) that any subsequent
+            /// reset actions will clear up the issue.
+            /// To check if the 405 halted we must clear the FIR and verify
+            /// that the FIR is set again.
+            ///
+            /// 3. Put the 405 into reset.
+            ///
+            /// 4. Clear the halt bit.
+            ///
+            /// 5. Restore the original FIR mask
+            /// Save the FIR mask, and mask the halted FIR
+
+            FAPI_DBG("Performing the RESET SEQUENCE");
+            FAPI_TRY(fapi2::getScom(i_target, OCCLFIR_MASK_REG, l_firMask));
+            FAPI_TRY(fapi2::putScom(i_target, OCCLFIR_MASK_REG_OR, BIT(25)));
+            // Halt the 405 and verify that it is halted
+            FAPI_TRY(fapi2::putScom(i_target, PU_JTG_PIB_OJCFG_OR, BIT(6)));
+
+            FAPI_TRY(fapi2::delay(NS_DELAY, SIM_CYCLE_DELAY));
+
+            FAPI_TRY(fapi2::putScom(i_target, OCCLFIR_REG_AND, ~BIT(25)));
+
+            FAPI_TRY(fapi2::getScom(i_target, OCCLFIR_REG, l_occfir));
+
+            if (!(l_occfir & BIT(25)))
+            {
+                FAPI_ERR("OCC will not halt. Pressing on, hoping for the best.");
+            }
+
+            // Put 405 into reset, unhalt 405 and clear the halted FIR bit.
+            FAPI_TRY(fapi2::putScom(i_target, PU_OCB_PIB_OCR_OR, BIT(0)));
+            FAPI_TRY(fapi2::putScom(i_target, PU_JTG_PIB_OJCFG_AND, ~BIT(6)));
+            FAPI_TRY(fapi2::putScom(i_target, OCCLFIR_REG_AND, ~BIT(25)));
+            // Restore the original FIR mask
+            FAPI_TRY(fapi2::putScom(i_target, OCCLFIR_MASK_REG, l_firMask));
+            break;
+
+        default:
+            break;
+    }
+
+fapi_try_exit:
     FAPI_IMP("Exiting p9_pm_occ_control ....");
     return fapi2::current_err;
 }
