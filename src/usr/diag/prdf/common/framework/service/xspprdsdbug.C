@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -311,24 +311,26 @@ void SYSTEM_DEBUG_CLASS::SetPrdSrcPointer(uint32_t* src_ptr)
 // -------------------------------------------------------------------
 
 void SYSTEM_DEBUG_CLASS::CalloutThoseAtAttention(
-                                    STEP_CODE_DATA_STRUCT & serviceData) const
+                                    STEP_CODE_DATA_STRUCT & serviceData ) const
 {
     ServiceDataCollector * sdc = serviceData.service_data;
 
     CaptureData & capture = sdc->GetCaptureData();
 
+    // This routine gets invoked for DD02 and DD23 errors.
+    // So both will now callout 2nd level high and additional
+    // hardware as low.
     for( AttnList::const_iterator i = g_AttnDataList.begin();
          i != g_AttnDataList.end(); ++i )
     {
-        sdc->SetCallout((*i).targetHndl);
+        sdc->SetCallout((*i).targetHndl, MRU_LOW, NO_GARD);
         AttnData ad(*i);
         BitString cbs(sizeof(AttnData)*8,(CPU_WORD *)&ad);
 
         capture.Add(PlatServices::getSystemTarget(),0,cbs);
     }
 
-    sdc->SetCallout(NextLevelSupport_ENUM);
-
+    sdc->SetCallout(NextLevelSupport_ENUM, MRU_HIGH);
 }
 
 // -------------------------------------------------------------------

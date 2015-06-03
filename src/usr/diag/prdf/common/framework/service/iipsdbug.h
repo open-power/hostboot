@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -246,7 +246,7 @@ public:
    <br><b>Parameters:  </b> ServiceData
    <br><b>Returns:     </b> None.
    <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> None.
+   <br><b>Promises:    </b> Hardware called out low and 2nd level support high
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */

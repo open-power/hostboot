@@ -339,7 +339,7 @@ errlHndl_t RuleMetaData::loadRuleFile( ScanFacility & i_scanFactory ,
         // data yet.
         Resolution & l_defaultResolution =
                         i_reslFactory.getCalloutGardResol( NULL,
-                                                            MRU_MED, GARD );
+                                                            MRU_LOW, NO_GARD );
         for (int i = 0; i < l_chip->cv_groupCount; i++)
         {
             iv_groupList.push_back( new Group( l_defaultResolution ) );
