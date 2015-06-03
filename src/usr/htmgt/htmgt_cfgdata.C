@@ -307,6 +307,8 @@ void getMemConfigMessageData(const TargetHandle_t i_occ,
 
             //Centaur #
             centPos = (*centaur)->getAttr<ATTR_POSITION>();
+            // ATTR_POSITION is system wide. Must be 0-7 on each OCC
+            centPos = centPos % 8;
             o_data[index++] = centPos;
 
             //Dimm # (0xFF since a centaur)
@@ -425,6 +427,8 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
     for (centaur=centaurs.begin(); centaur!=centaurs.end(); ++centaur)
     {
         centPos = (*centaur)->getAttr<ATTR_POSITION>();
+        // ATTR_POSITION is system wide. Must 0-7 on each OCC
+        centPos = centPos % 8;
 
         mbas.clear();
         getChildAffinityTargets(mbas, *centaur,
