@@ -96,6 +96,11 @@ errlHndl_t DeconfigGard::platClearGardRecords(
     {
         HWAS_INF("Clear all GARD Records");
     }
+    else
+    {
+        l_targetId = i_pTarget->getAttr<ATTR_PHYS_PATH>();
+        HWAS_INF("Clear GARD Records for %.8X", get_huid(i_pTarget));
+    }
 
     HWAS_MUTEX_LOCK(iv_mutex);
     l_pErr = _GardRecordIdSetup(iv_platDeconfigGard);
@@ -154,6 +159,10 @@ errlHndl_t DeconfigGard::platGetGardRecords(
     if (!i_pTarget)
     {
         HWAS_INF("Get all GARD Records");
+    }
+    else
+    {
+        l_targetId = i_pTarget->getAttr<ATTR_PHYS_PATH>();
     }
 
     HWAS_MUTEX_LOCK(iv_mutex);
