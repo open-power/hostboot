@@ -1,0 +1,385 @@
+#!/usr/bin/perl
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/build/tools/parse-pnor $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2015
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+use strict;
+use XML::Simple;
+use Data::Dumper;
+use Getopt::Long qw(:config pass_through);
+use File::Basename;
+
+################################################################################
+# Set PREFERRED_PARSER to XML::Parser. Otherwise it uses XML::SAX which contains
+# bugs that result in XML parse errors that can be fixed by adjusting white-
+# space (i.e. parse errors that do not make sense).
+################################################################################
+$XML::Simple::PREFERRED_PARSER = 'XML::Parser';
+
+
+my $debug = 0;
+my $help = 0;
+
+my %pnorLayout;
+my %PhysicalOffsets;
+my %globals = ( "branch" => "master" );
+
+GetOptions("debug!" => \$debug,
+           "help" => \$help);
+
+my %commands = ( "display" => \&execute_display,
+                 "help" => \&execute_help,
+               );
+
+if ($help)
+{
+    execute_help();
+}
+
+my $command = shift @ARGV;
+if ($commands{$command})
+{
+    &{$commands{$command}}();
+}
+else
+{
+    execute_help();
+}
+
+foreach my $arg (@ARGV)
+{
+    print "Unprocessed arg: $arg\n" if $debug;
+}
+
+############################## Begin Actions ##################################
+
+sub execute_help
+{
+ my $command = shift @ARGV;
+
+    if ($command eq "")
+    {
+        print "parse-pnor:\n";
+        print "    Parse a PNOR XML and get useful information\n";
+        print "\n";
+        print "    Syntax:\n";
+        print "        parse-pnor [options] <tool>\n";
+        print "\n";
+        print "    Available subtools:\n";
+        foreach my $key (sort keys %commands)
+        {
+            print "        $key\n";
+        }
+        print "\n";
+        print "    Global options:\n";
+        print "        --debug                      Enable debug mode.\n";
+        print "        --help                       Display help on a specific tool.\n";
+    }
+    elsif (not defined $commands{$command})
+    {
+        die "Unknown subcommand: $command.\n";
+    }
+    else
+    {
+        my %help = (
+            "display" =>
+q(
+        Display the XML pnor layout in an easier to read format
+
+        Use option '--gaps' to find unused space
+
+    Options:
+        --layout=<xml-file>     Full path to PNOR layout file [required].
+        --gaps                  Display where gaps are [default=false].
+        --verbose               Display more of the PNOR layout [default=false].
+),
+        );
+
+        print "parse-pnor $command:";
+        print $help{$command};
+    }
+}
+
+sub execute_display
+{
+    my $pnorFile = "";
+    my $verbose = 0;
+    my $gaps = 0;
+
+    GetOptions("layout:s" => \$pnorFile,
+               "verbose" => \$verbose,
+               "gaps" => \$gaps);
+
+    die "Missing pnor layout" if ($pnorFile eq "");
+    checkFile($pnorFile);
+
+    my $rc = loadLayout($pnorFile, \%pnorLayout, \%PhysicalOffsets);
+    die "Error detected from call to loadLayout()" if($rc);
+
+    if (!$verbose)
+    {
+        print "-------------------------------------------------------- \n";
+        print "Name-physicalOffset-physicalRegionSize-physicalRegionEnd \n";
+        print "-------------------------------------------------------- \n";
+    }
+
+    my $curOffset = 0;
+    my $totalFree = 0;
+    # Iterate through all sections of PNOR, including TOC's
+    foreach my $section (sort {$a <=> $b} keys %{$pnorLayout{sections}})
+    {
+        # Get hex format for each value
+        my $offset = sprintf("0x%X",$pnorLayout{sections}{$section}{physicalOffset});
+        my $size = sprintf("0x%X",$pnorLayout{sections}{$section}{physicalRegionSize});
+        my $end = sprintf("0x%X",hex($offset)+hex($size));
+
+        # Check if there is a gap between sections
+        if ($gaps && ($curOffset < hex($offset)))
+        {
+            print "  > Gap Found: addr = ".sprintf("0x%X",$curOffset);
+
+            # Display address and size of gap
+            my $gapSize = hex($offset)-$curOffset;
+            print " size = ".sprintf("0x%X",$gapSize)."\n";
+            $totalFree += $gapSize;
+            $curOffset = hex($offset) + hex($size);
+        }
+        else
+        {
+            $curOffset += hex($size);
+        }
+
+        # Print sections
+        if ($verbose)
+        {
+            print $pnorLayout{sections}{$section}{eyeCatch}."\n";
+            print Dumper $pnorLayout{sections}{$section};
+            print "\n";
+        }
+        else
+        {
+            print $pnorLayout{sections}{$section}{eyeCatch}."-$offset-$size-$end\n";
+        }
+    }
+
+    # Display total free space
+    if($gaps)
+    {
+        my $hexVal = sprintf("0x%X",$totalFree);
+        my $kiloBytes = $totalFree/1024;
+        print "\n---Total Free Space = ".$totalFree." Bytes or ".$kiloBytes." KB";
+        print " (".$hexVal.")\n";
+    }
+}
+
+#########################  Begin Utility Subroutines ###########################
+
+# sub checkFile
+#
+# Check if file exists and is of type XML
+#
+# @param [in] i_layoutFile - PNOR layout file
+# @return - N/A Die on failure
+#
+sub checkFile
+{
+    my $i_layoutFile = shift;
+
+    my($filename, $dirs, $suffix) = fileparse($i_layoutFile,".xml");
+
+    unless(-e $i_layoutFile)
+    {
+        die "File not found: $i_layoutFile";
+    }
+    if ($suffix ne ".xml")
+    {
+        die "File not type XML: $i_layoutFile";
+    }
+}
+
+# sub align_down
+#
+# Align the input to the lower end of the PNOR side
+#
+# @param [in] i_addr - PNOR address to align
+# @param [in] i_sideSize - PNOR side size
+# @return integer - aligned PNOR address
+#
+sub align_down
+{
+    my ($i_addr,$i_sideSize) = @_;
+    return (($i_addr) - ($i_addr)%($i_sideSize));
+}
+
+# sub align_up
+#
+# Align the input address to the higher end of the PNOR side
+#
+# @param [in] i_addr - PNOR address to align
+# @param [in] i_sideSize - PNOR side size
+# @return integer - aligned PNOR address
+#
+sub align_up
+{
+    my ($i_addr,$i_sideSize) = @_;
+    return ((($i_addr) + ($i_sideSize-1)) & ~($i_sideSize-1));
+}
+
+# sub loadLayout
+#
+# Load PNOR XML into hashes
+#
+# @param [in] i_pnorFile - PNOR XML file
+# @param [in] i_pnorLayoutRef - PNOR layout hash
+# @param [in] i_physicalOffsets - PNOR physical offset hash
+# @return NA
+#
+sub loadLayout
+{
+    my ($i_pnorFile, $i_pnorLayoutRef, $i_physicalOffsets) = @_;
+
+    #parse the input XML file
+    my $xs = new XML::Simple(keyattr=>[], forcearray => 1);
+    my $xml = $xs->XMLin($i_pnorFile);
+
+    #Iterate over the <section> elements.
+    foreach my $sectionEl (@{$xml->{section}})
+    {
+        my $description = $sectionEl->{description}[0];
+        my $eyeCatch = $sectionEl->{eyeCatch}[0];
+        my $physicalOffset = $sectionEl->{physicalOffset}[0];
+        my $physicalRegionSize = $sectionEl->{physicalRegionSize}[0];
+        my $side = $sectionEl->{side}[0];
+
+        print "description = $description, eyeCatch=$eyeCatch, physicalOffset = $physicalOffset, physicalRegionSize=$physicalRegionSize, side=$side\n" if $debug;
+
+        $physicalOffset = hex($physicalOffset);
+        $physicalRegionSize = hex($physicalRegionSize);
+
+        $$i_pnorLayoutRef{sections}{$physicalOffset}{description} = $description;
+        $$i_pnorLayoutRef{sections}{$physicalOffset}{eyeCatch} = $eyeCatch;
+        $$i_pnorLayoutRef{sections}{$physicalOffset}{physicalOffset} = $physicalOffset;
+        $$i_pnorLayoutRef{sections}{$physicalOffset}{physicalRegionSize} = $physicalRegionSize;
+        $$i_pnorLayoutRef{sections}{$physicalOffset}{side} = $side;
+
+        #store the physical offsets of each section in a hash, so, it is easy
+        #to search physicalOffsets based on the name of the section (eyeCatch)
+        if ($side eq "sideless")
+        {
+            foreach my $metadata (@{$xml->{metadata}})
+            {
+                foreach my $sides (@{$metadata->{side}})
+                {
+                    $$i_physicalOffsets{side}{$sides->{id}[0]}{eyeCatch}{$eyeCatch} = $physicalOffset;
+                }
+            }
+        }
+        else
+        {
+            $$i_physicalOffsets{side}{$side}{eyeCatch}{$eyeCatch} = $physicalOffset;
+        }
+    }
+    # Save the metadata - imageSize, blockSize, toc Information etc.
+    foreach my $metadataEl (@{$xml->{metadata}})
+    {
+        # Get meta data
+        # Get meta data
+        my $imageSize   = $metadataEl->{imageSize}[0];
+        my $tocSize     = $metadataEl->{tocSize}[0];
+        my $arrangement = $metadataEl->{arrangement}[0];
+        $imageSize      = hex($imageSize);
+        $tocSize        = hex($tocSize);
+        $$i_pnorLayoutRef{metadata}{imageSize}   = $imageSize;
+        $$i_pnorLayoutRef{metadata}{tocSize}     = $tocSize;
+        $$i_pnorLayoutRef{metadata}{arrangement} = $arrangement;
+
+        my $numOfSides  = scalar (@{$metadataEl->{side}});
+        my $sideSize = ($imageSize)/($numOfSides);
+
+        print "metadata: imageSize = $imageSize, arrangement = $arrangement, numOfSides: $numOfSides, sideSize: $sideSize, tocSize: $tocSize\n" if $debug;
+
+        #determine the TOC offsets from the arrangement and side Information
+        #stored in the layout xml
+        #
+        #Arrangement A-B-D means that the layout had Primary TOC (A), then backup TOC (B), then Data (pnor section information).
+        #Similaryly, arrangement A-D-B means that primary toc is followed by the data (section information) and then
+        #the backup TOC.
+        if ($arrangement eq "A-B-D")
+        {
+            my $count = 0;
+            foreach my $side (@{$metadataEl->{side}})
+            {
+                my $sideId     = $side->{id}[0];
+                my $primaryTOC = ($sideSize)*($count);
+                my $backupTOC  = ($primaryTOC)+($tocSize);
+
+                $$i_pnorLayoutRef{metadata}{sides}{$sideId}{toc}{primary} = $primaryTOC;
+                $$i_pnorLayoutRef{metadata}{sides}{$sideId}{toc}{backup}  = $backupTOC;
+
+                # Fill out TOC info
+                $$i_pnorLayoutRef{sections}{$primaryTOC}{eyeCatch} = "TOCPRIMARY";
+                $$i_pnorLayoutRef{sections}{$backupTOC}{eyeCatch} = "TOCBACKUP";
+                $$i_pnorLayoutRef{sections}{$primaryTOC}{physicalOffset} = $primaryTOC;
+                $$i_pnorLayoutRef{sections}{$backupTOC}{physicalOffset} = $backupTOC;
+                $$i_pnorLayoutRef{sections}{$primaryTOC}{physicalRegionSize} = $tocSize;
+                $$i_pnorLayoutRef{sections}{$backupTOC}{physicalRegionSize} = $tocSize;
+
+                $count = $count + 1;
+                print "A-B-D: side:$sideId primaryTOC:$primaryTOC, backupTOC:$backupTOC\n" if $debug;
+            }
+        }
+        elsif ($arrangement eq "A-D-B")
+        {
+            foreach my $side (@{$metadataEl->{side}})
+            {
+                my $sideId     = $side->{id}[0];
+                my $hbbAddr    = $$i_physicalOffsets{side}{$sideId}{eyeCatch}{"HBB"};
+                my $primaryTOC = align_down($hbbAddr, $sideSize);
+                my $backupTOC  = align_up($hbbAddr, $sideSize) - $tocSize;
+
+                $$i_pnorLayoutRef{metadata}{sides}{$sideId}{toc}{primary} = $primaryTOC;
+                $$i_pnorLayoutRef{metadata}{sides}{$sideId}{toc}{backup}  = $backupTOC;
+
+                # Fill out TOC info
+                $$i_pnorLayoutRef{sections}{$primaryTOC}{eyeCatch} = "TOCPRIMARY";
+                $$i_pnorLayoutRef{sections}{$backupTOC}{eyeCatch} = "TOCBACKUP";
+                $$i_pnorLayoutRef{sections}{$primaryTOC}{physicalOffset} = $primaryTOC;
+                $$i_pnorLayoutRef{sections}{$backupTOC}{physicalOffset} = $backupTOC;
+                $$i_pnorLayoutRef{sections}{$primaryTOC}{physicalRegionSize} = $tocSize;
+                $$i_pnorLayoutRef{sections}{$backupTOC}{physicalRegionSize} = $tocSize;
+
+                print "A-D-B: side:$sideId HBB:$hbbAddr, primaryTOC:$primaryTOC, backupTOC:$backupTOC\n" if $debug;
+            }
+        }
+        else
+        {
+            print "Arrangement:$arrangement is not supported" if $debug;
+            exit(1);
+        }
+    }
+
+    print Dumper %pnorLayout if $debug;
+    print Dumper %PhysicalOffsets if $debug;
+    return 0;
+}
