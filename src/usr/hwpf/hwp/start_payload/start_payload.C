@@ -1060,6 +1060,14 @@ errlHndl_t enableCoreCheckstops()
     void* l_slwPtr = NULL;
     int mm_rc = 0;
 
+    // for OpenPower systems, leave core checkstops as system checkstops
+    if( is_sapphire_load() && (!INITSERVICE::spBaseServicesEnabled()) )
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Leaving local core checkstops as escalating to system checkstop" );
+        return NULL;
+    }
+    //@todo-RTC:130092 Remove this when Opal support is in place
+
     // loop thru all proc and find all functional ex units
     TARGETING::TargetHandleList l_procTargetList;
     getAllChips(l_procTargetList, TYPE_PROC);
