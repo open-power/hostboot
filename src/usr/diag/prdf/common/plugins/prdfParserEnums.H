@@ -171,6 +171,7 @@ namespace CEN_SYMBOL
         CEN_TYPE_B          = 1,
         CEN_TYPE_D          = 2,
         CEN_TYPE_C          = 3,
+        CEN_TYPE_B4         = 4,
         WIRING_INVALID      = 7, // An invalid card type
     };
 

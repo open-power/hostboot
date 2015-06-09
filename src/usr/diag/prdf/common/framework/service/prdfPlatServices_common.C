@@ -802,6 +802,14 @@ int32_t getMemBufRawCardType( TargetHandle_t i_mba,
             o_rc = FAIL; break;
         }
 
+        uint8_t   l_version = 0;
+        o_rc = getDramGen(i_mba, l_version);
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR(PRDF_FUNC "Fail DramVers x%08X"" HUID:x%08X",
+                     l_version, getHuid(i_mba) );
+            break;
+        }
         // Centaur raw card types are only used for DRAM site locations. If an
         // invalid wiring type is passed to the error log parser, the parser
         // will simply print out the symbol and other data instead of
@@ -817,7 +825,18 @@ int32_t getMemBufRawCardType( TargetHandle_t i_mba,
                 break;
 
             case ENUM_ATTR_SPD_MODSPEC_COM_REF_RAW_CARD_B:
-                o_cardType = CEN_TYPE_B;
+                if (ENUM_ATTR_EFF_DRAM_GEN_DDR3 == l_version)
+                {
+                    o_cardType = CEN_TYPE_B;
+                } // end if DDR3
+                else if (ENUM_ATTR_EFF_DRAM_GEN_DDR4 == l_version)
+                {
+                    o_cardType = CEN_TYPE_B4;
+                } // end else if DDR4
+                else
+                {   // don't know what this is
+                    o_cardType = WIRING_INVALID;
+                } // end else unknown DRAM version
                 break;
 
             case ENUM_ATTR_SPD_MODSPEC_COM_REF_RAW_CARD_C:
