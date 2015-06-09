@@ -43,10 +43,11 @@
 
 #include <hwp_executor.H>
 
+#include <mvpd_access.H>
+
 // Block of headers not currently in fapi2
 #ifdef FAPI2_MISSING_HEADERS
-  #include <mvpdAccess.H>
-  #include <mbvpdAccess.H>
+    #include <mbvpdAccess.H>
 #endif
 
 #endif // __FAPI2_TOP_LEVEL__
