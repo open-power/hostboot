@@ -52,6 +52,7 @@
 #include <hwas/common/hwas_reasoncodes.H>
 #include <targeting/common/utilFilter.H>
 
+
 namespace HWAS
 {
 
@@ -114,6 +115,82 @@ void enableHwasState(Target *i_target,
     hwasState.present       = i_present;
     hwasState.functional    = i_functional;
     i_target->setAttr<ATTR_HWAS_STATE>( hwasState );
+}
+
+
+/**
+ * @brief       simple helper fn to check IOX/PBIOX pairs in PG XBUS data
+ *
+ * @param[in]   i_pgData        XBUS data from PG keyword VPD
+ *
+ * @return bool                 pairs are valid
+ *
+ */
+bool areIoxPairsValid(uint16_t i_pgData)
+{
+    bool l_valid = true;
+
+    // Check that pairs are valid, that is, both good or both bad
+    for (uint8_t l_pair = 0;
+         l_pair <= 2;
+         l_pair++)
+    {
+        // Check if both are good in the pair
+        if ((i_pgData & VPD_CP00_PG_XBUS_IOX_PAIR[l_pair]) == 0)
+        {
+            continue;
+        }
+
+        // Check if both are bad in the pair
+        if ((i_pgData & VPD_CP00_PG_XBUS_IOX_PAIR[l_pair]) ==
+            VPD_CP00_PG_XBUS_IOX_PAIR[l_pair])
+        {
+            continue;
+        }
+
+        l_valid = false;
+        break;
+    }
+
+    return l_valid;
+}
+
+
+/**
+ * @brief simple helper fn to check L3/L2/REFR triplets in PG EPx data
+ *
+ * @param[in] i_pgData EPx data from PG keyword VPD
+ *
+ * @return bool triplets are valid
+ *
+ */
+bool areL3L2REFRtripletsValid(uint16_t i_pgData)
+{
+    bool l_valid = true;
+
+    // Check that triplets are valid, that is, all good or all bad
+    for (uint8_t l_triplet = 0;
+         l_triplet <= 1;
+         l_triplet++)
+    {
+        // Check if all are good in the triplet
+        if ((i_pgData & VPD_CP00_PG_EPx_L3L2REFR[l_triplet]) == 0)
+        {
+            continue;
+        }
+
+        // Check if all are bad in the triplet
+        if ((i_pgData & VPD_CP00_PG_EPx_L3L2REFR[l_triplet]) ==
+            VPD_CP00_PG_EPx_L3L2REFR[l_triplet])
+        {
+            continue;
+        }
+
+        l_valid = false;
+        break;
+    }
+
+    return l_valid;
 }
 
 
@@ -251,40 +328,13 @@ errlHndl_t discoverTargets()
                         // errl is now NULL
                     }
                     else
-                    // look at the 'nest' logic to override the functionality
-                    //  of this proc
-                    if (pgData[VPD_CP00_PG_PIB_INDEX] !=
-                                    VPD_CP00_PG_PIB_GOOD)
                     {
-                        HWAS_INF("pTarget %.8X - PIB pgPdata[%d]: expected 0x%04X - bad",
-                            pTarget->getAttr<ATTR_HUID>(),
-                            VPD_CP00_PG_PIB_INDEX,
-                            VPD_CP00_PG_PIB_GOOD);
-                        chipFunctional = false;
-                    }
-                    else
-                    if (pgData[VPD_CP00_PG_PERVASIVE_INDEX] !=
-                                    VPD_CP00_PG_PERVASIVE_GOOD)
-                    {
-                        HWAS_INF("pTarget %.8X - Pervasive pgPdata[%d]: expected 0x%04X - bad",
-                            pTarget->getAttr<ATTR_HUID>(),
-                            VPD_CP00_PG_PERVASIVE_INDEX,
-                            VPD_CP00_PG_PERVASIVE_GOOD);
-                        chipFunctional = false;
-                    }
-                    else
-                    if ((pgData[VPD_CP00_PG_POWERBUS_INDEX] &
-                             VPD_CP00_PG_POWERBUS_BASE) !=
-                                    VPD_CP00_PG_POWERBUS_BASE)
-                    {
-                        HWAS_INF("pTarget %.8X - PowerBus pgPdata[%d]: expected 0x%04X - bad",
-                            pTarget->getAttr<ATTR_HUID>(),
-                            VPD_CP00_PG_POWERBUS_INDEX,
-                            VPD_CP00_PG_POWERBUS_BASE);
-                        chipFunctional = false;
-                    }
-                    else
-                    {
+                      // look at the 'nest' logic to override the functionality
+                      //  of this proc
+                      chipFunctional = isChipFunctional(pTarget, pgData);
+
+                      if (chipFunctional)
+                      {
                         // read the PR keywords that we need, so that if
                         //  we have errors, we can handle them as approprite.
                         uint8_t prData[VPD_VINI_PR_DATA_LENGTH/sizeof(uint8_t)];
@@ -324,6 +374,7 @@ errlHndl_t discoverTargets()
                                     pTarget->getAttr<ATTR_HUID>());
                             }
                         }
+                      }
                     }
                 } // TYPE_PROC
             } // CLASS_CHIP
@@ -346,87 +397,11 @@ errlHndl_t discoverTargets()
                 bool descFunctional = chipFunctional;
 
                 if (chipFunctional)
-                {   // if the chip is functional, the look through the
+                {   // if the chip is functional, then look through the
                     //  partialGood vector to see if its chiplets
                     //  are functional
-                    if ((pDesc->getAttr<ATTR_TYPE>() == TYPE_XBUS) &&
-                        (pgData[VPD_CP00_PG_XBUS_INDEX] !=
-                            VPD_CP00_PG_XBUS_GOOD))
-                    {
-                        HWAS_INF("pDesc %.8X - XBUS  pgPdata[%d]: expected 0x%04X - bad",
-                            pDesc->getAttr<ATTR_HUID>(),
-                            VPD_CP00_PG_XBUS_INDEX,
-                            VPD_CP00_PG_XBUS_GOOD);
-                        descFunctional = false;
-                    }
-                    else
-                    if ((pDesc->getAttr<ATTR_TYPE>() == TYPE_ABUS) &&
-                        (pgData[VPD_CP00_PG_ABUS_INDEX] !=
-                            VPD_CP00_PG_ABUS_GOOD))
-                    {
-                        HWAS_INF("pDesc %.8X - ABUS pgPdata[%d]: expected 0x%04X - bad",
-                            pDesc->getAttr<ATTR_HUID>(),
-                            VPD_CP00_PG_ABUS_INDEX,
-                            VPD_CP00_PG_ABUS_GOOD);
-                        descFunctional = false;
-                    }
-                    else
-                    if ((pDesc->getAttr<ATTR_TYPE>() == TYPE_PCI) &&
-                        (pgData[VPD_CP00_PG_PCIE_INDEX] !=
-                            VPD_CP00_PG_PCIE_GOOD))
-                    {
-                        HWAS_INF("pDesc %.8X - PCIe pgPdata[%d]: expected 0x%04X - bad",
-                            pDesc->getAttr<ATTR_HUID>(),
-                            VPD_CP00_PG_PCIE_INDEX,
-                            VPD_CP00_PG_PCIE_GOOD);
-                        descFunctional = false;
-                    }
-                    else
-                    if ((pDesc->getAttr<ATTR_TYPE>() == TYPE_EX) ||
-                        (pDesc->getAttr<ATTR_TYPE>() == TYPE_CORE)
-                       )
-                    {
-                      ATTR_CHIP_UNIT_type indexEX =
-                                pDesc->getAttr<ATTR_CHIP_UNIT>();
-                      if (pgData[VPD_CP00_PG_EX0_INDEX + indexEX] !=
-                            VPD_CP00_PG_EX0_GOOD)
-                      {
-                        HWAS_INF("pDesc %.8X - CORE/EX%d pgPdata[%d]: expected 0x%04X - bad",
-                            pDesc->getAttr<ATTR_HUID>(), indexEX,
-                            VPD_CP00_PG_EX0_INDEX + indexEX,
-                            VPD_CP00_PG_EX0_GOOD);
-                        descFunctional = false;
-                      }
-                    }
-                    else
-                    if (pDesc->getAttr<ATTR_TYPE>() == TYPE_MCS)
-                    {
-                      ATTR_CHIP_UNIT_type indexMCS =
-                                pDesc->getAttr<ATTR_CHIP_UNIT>();
-                      // check: MCS 0..3 in MCL, MCS 4..7 in MCR
-                      if (((indexMCS >=0) && (indexMCS <=3)) &&
-                          ((pgData[VPD_CP00_PG_POWERBUS_INDEX] &
-                            VPD_CP00_PG_POWERBUS_MCL) == 0))
-                      {
-                        HWAS_INF("pDesc %.8X - MCS%d pgPdata[%d]: MCL expected 0x%04X - bad",
-                            pDesc->getAttr<ATTR_HUID>(), indexMCS,
-                            VPD_CP00_PG_POWERBUS_INDEX,
-                            VPD_CP00_PG_POWERBUS_MCL);
-                        descFunctional = false;
-                      }
-                      else
-                      if (((indexMCS >=4) && (indexMCS <=7)) &&
-                          ((pgData[VPD_CP00_PG_POWERBUS_INDEX] &
-                            VPD_CP00_PG_POWERBUS_MCR) == 0))
-                      {
-                        HWAS_INF("pDesc %.8X - MCS%d pgPdata[%d]: MCR expected 0x%04X - bad",
-                            pDesc->getAttr<ATTR_HUID>(), indexMCS,
-                            VPD_CP00_PG_POWERBUS_INDEX,
-                            VPD_CP00_PG_POWERBUS_MCR);
-                        descFunctional = false;
-                      }
-                    }
-                } // chipFunctional
+                    descFunctional = isDescFunctional(pDesc, pgData);
+                }
 
                 // for sub-parts, if it's not functional, it's not present.
                 enableHwasState(pDesc, descFunctional, descFunctional,
@@ -498,6 +473,450 @@ errlHndl_t discoverTargets()
     }
     return errl;
 } // discoverTargets
+
+
+bool isChipFunctional(const TARGETING::TargetHandle_t &i_target,
+                      const uint16_t i_pgData[])
+{
+    bool l_chipFunctional = true;
+
+    // Check all bits in FSI entry
+    if (i_pgData[VPD_CP00_PG_FSI_INDEX] !=
+        VPD_CP00_PG_FSI_GOOD)
+    {
+        HWAS_INF("pTarget %.8X - FSI pgData[%d]: "
+                 "actual 0x%04X, expected 0x%04X - bad",
+                 i_target->getAttr<ATTR_HUID>(),
+                 VPD_CP00_PG_FSI_INDEX,
+                 i_pgData[VPD_CP00_PG_FSI_INDEX],
+                 VPD_CP00_PG_FSI_GOOD);
+        l_chipFunctional = false;
+    }
+    else
+    // Check all bits in PRV entry
+    if (i_pgData[VPD_CP00_PG_PERVASIVE_INDEX] !=
+        VPD_CP00_PG_PERVASIVE_GOOD)
+    {
+        HWAS_INF("pTarget %.8X - Pervasive pgData[%d]: "
+                 "actual 0x%04X, expected 0x%04X - bad",
+                 i_target->getAttr<ATTR_HUID>(),
+                 VPD_CP00_PG_PERVASIVE_INDEX,
+                 i_pgData[VPD_CP00_PG_PERVASIVE_INDEX],
+                 VPD_CP00_PG_PERVASIVE_GOOD);
+        l_chipFunctional = false;
+    }
+    else
+    // Check all bits in N0 entry
+    if (i_pgData[VPD_CP00_PG_N0_INDEX] != VPD_CP00_PG_N0_GOOD)
+    {
+        HWAS_INF("pTarget %.8X - N0 pgData[%d]: "
+                 "actual 0x%04X, expected 0x%04X - bad",
+                 i_target->getAttr<ATTR_HUID>(),
+                 VPD_CP00_PG_N0_INDEX,
+                 i_pgData[VPD_CP00_PG_N0_INDEX],
+                 VPD_CP00_PG_N0_GOOD);
+        l_chipFunctional = false;
+    }
+    else
+    // Check bits in N1 entry except those in partial good region
+    if ((i_pgData[VPD_CP00_PG_N1_INDEX] &
+         ~VPD_CP00_PG_N1_PG_MASK) != VPD_CP00_PG_N1_GOOD)
+    {
+        HWAS_INF("pTarget %.8X - N1 pgData[%d]: "
+                 "actual 0x%04X, expected 0x%04X - bad",
+                 i_target->getAttr<ATTR_HUID>(),
+                 VPD_CP00_PG_N1_INDEX,
+                 i_pgData[VPD_CP00_PG_N1_INDEX],
+                 VPD_CP00_PG_N1_GOOD);
+        l_chipFunctional = false;
+    }
+    else
+    // Check all bits in N2 entry
+    if (i_pgData[VPD_CP00_PG_N2_INDEX] != VPD_CP00_PG_N2_GOOD)
+    {
+        HWAS_INF("pTarget %.8X - N2 pgData[%d]: "
+                 "actual 0x%04X, expected 0x%04X - bad",
+                 i_target->getAttr<ATTR_HUID>(),
+                 VPD_CP00_PG_N2_INDEX,
+                 i_pgData[VPD_CP00_PG_N2_INDEX],
+                 VPD_CP00_PG_N2_GOOD);
+        l_chipFunctional = false;
+    }
+    else
+    // Check bits in N3 entry except those in partial good region
+    if ((i_pgData[VPD_CP00_PG_N3_INDEX] &
+         ~VPD_CP00_PG_N3_PG_MASK) != VPD_CP00_PG_N3_GOOD)
+    {
+        HWAS_INF("pTarget %.8X - N3 pgData[%d]: "
+                 "actual 0x%04X, expected 0x%04X - bad",
+                 i_target->getAttr<ATTR_HUID>(),
+                 VPD_CP00_PG_N3_INDEX,
+                 i_pgData[VPD_CP00_PG_N3_INDEX],
+                 VPD_CP00_PG_N3_GOOD);
+        l_chipFunctional = false;
+    }
+    else
+    // Check bits in XBUS entry, validating pairs in partial good region
+    if (((i_pgData[VPD_CP00_PG_XBUS_INDEX] &
+          ~VPD_CP00_PG_XBUS_PG_MASK) != VPD_CP00_PG_XBUS_GOOD)
+        ||
+        (!areIoxPairsValid(i_pgData[VPD_CP00_PG_XBUS_INDEX])))
+    {
+        HWAS_INF("pTarget %.8X - XBUS pgData[%d]: "
+                 "actual 0x%04X, expected 0x%04X - bad",
+                 i_target->getAttr<ATTR_HUID>(),
+                 VPD_CP00_PG_XBUS_INDEX,
+                 i_pgData[VPD_CP00_PG_XBUS_INDEX],
+                 VPD_CP00_PG_XBUS_GOOD);
+        l_chipFunctional = false;
+    }
+
+    return l_chipFunctional;
+} // isChipFunctional
+
+
+bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
+                      const uint16_t i_pgData[])
+{
+    bool l_descFunctional = true;
+
+    if (i_desc->getAttr<ATTR_TYPE>() == TYPE_XBUS)
+    {
+        ATTR_CHIP_UNIT_type indexXB =
+            i_desc->getAttr<ATTR_CHIP_UNIT>();
+        // Check pair of bits in XBUS entry
+        if ((i_pgData[VPD_CP00_PG_XBUS_INDEX] &
+             VPD_CP00_PG_XBUS_IOX_PAIR[indexXB]) != 0)
+        {
+            HWAS_INF("pDesc %.8X - XBUS%d pgData[%d]: "
+                     "actual 0x%04X, expected 0x%04X - bad",
+                     i_desc->getAttr<ATTR_HUID>(), indexXB,
+                     VPD_CP00_PG_XBUS_INDEX,
+                     i_pgData[VPD_CP00_PG_XBUS_INDEX],
+                     (i_pgData[VPD_CP00_PG_XBUS_INDEX] &
+                      ~VPD_CP00_PG_XBUS_IOX_PAIR[indexXB]));
+            l_descFunctional = false;
+        }
+    }
+    else
+    if (i_desc->getAttr<ATTR_TYPE>() == TYPE_OBUS)
+    {
+        ATTR_CHIP_UNIT_type indexOB =
+            i_desc->getAttr<ATTR_CHIP_UNIT>();
+        // Check all bits in OBUSx entry
+        if (i_pgData[VPD_CP00_PG_OB0_INDEX + indexOB] !=
+            VPD_CP00_PG_OBUS_GOOD)
+        {
+            HWAS_INF("pDesc %.8X - OB%d pgData[%d]: "
+                     "actual 0x%04X, expected 0x%04X - bad",
+                     i_desc->getAttr<ATTR_HUID>(), indexOB,
+                     VPD_CP00_PG_OB0_INDEX + indexOB,
+                     i_pgData[VPD_CP00_PG_OB0_INDEX + indexOB],
+                     VPD_CP00_PG_OBUS_GOOD);
+            l_descFunctional = false;
+        }
+        else
+        // Check PBIOO0 bit in N1 entry
+        // @TODO RTC:134608 PBIOO0 seems to be good with Nimbus and Cumulus
+        //                  except Nimbus Sforza (without optics and NVLINK)
+        //                  so is it associated with all OBUS entries or just
+        //                  with OBUS0 and OBUS3 -- verify this
+        if ((i_pgData[VPD_CP00_PG_N1_INDEX] &
+              VPD_CP00_PG_N1_PBIOO0) != 0)
+        {
+            HWAS_INF("pDesc %.8X - OB%d pgData[%d]: "
+                     "actual 0x%04X, expected 0x%04X - bad",
+                     i_desc->getAttr<ATTR_HUID>(), indexOB,
+                     VPD_CP00_PG_N1_INDEX,
+                     i_pgData[VPD_CP00_PG_N1_INDEX],
+                     (i_pgData[VPD_CP00_PG_N1_INDEX] &
+                      ~VPD_CP00_PG_N1_PBIOO0));
+            l_descFunctional = false;
+        }
+        else
+        // Check PBIOO1 bit in N1 entry if second or third OBUS
+        // @TODO RTC:134608 PBIOO1 seems to be associated with OBUS1 and OBUS2
+        //                  which only are valid on a Cumulus -- verify this
+        if (((1 == indexOB) || (2 == indexOB)) &&
+            ((i_pgData[VPD_CP00_PG_N1_INDEX] &
+              VPD_CP00_PG_N1_PBIOO1) != 0))
+        {
+            HWAS_INF("pDesc %.8X - OB%d pgData[%d]: "
+                     "actual 0x%04X, expected 0x%04X - bad",
+                     i_desc->getAttr<ATTR_HUID>(), indexOB,
+                     VPD_CP00_PG_N1_INDEX,
+                     i_pgData[VPD_CP00_PG_N1_INDEX],
+                     (i_pgData[VPD_CP00_PG_N1_INDEX] &
+                      ~VPD_CP00_PG_N1_PBIOO1));
+            l_descFunctional = false;
+        }
+    }
+    else
+    if (i_desc->getAttr<ATTR_TYPE>() == TYPE_PEC)
+    {
+        ATTR_CHIP_UNIT_type indexPCI =
+            i_desc->getAttr<ATTR_CHIP_UNIT>();
+        // Check all bits in PCIx entry
+        if (i_pgData[VPD_CP00_PG_PCI0_INDEX + indexPCI] !=
+            VPD_CP00_PG_PCIx_GOOD[indexPCI])
+        {
+            HWAS_INF("pDesc %.8X - PCI%d pgData[%d]: "
+                     "actual 0x%04X, expected 0x%04X - bad",
+                     i_desc->getAttr<ATTR_HUID>(), indexPCI,
+                     VPD_CP00_PG_PCI0_INDEX + indexPCI,
+                     i_pgData[VPD_CP00_PG_PCI0_INDEX + indexPCI],
+                     VPD_CP00_PG_PCIx_GOOD[indexPCI]);
+            l_descFunctional = false;
+        }
+    }
+    else
+    if (i_desc->getAttr<ATTR_TYPE>() == TYPE_EQ)
+    {
+        ATTR_CHIP_UNIT_type indexEP =
+            i_desc->getAttr<ATTR_CHIP_UNIT>();
+        // Check bits in EPx entry, validating triplets in partial good region
+        if (((i_pgData[VPD_CP00_PG_EP0_INDEX + indexEP]
+              & ~VPD_CP00_PG_EPx_PG_MASK) !=
+              VPD_CP00_PG_EPx_GOOD) ||
+            (!areL3L2REFRtripletsValid(i_pgData[VPD_CP00_PG_EP0_INDEX +
+                                       indexEP])))
+        {
+            HWAS_INF("pDesc %.8X - EQ%d pgData[%d]: "
+                     "actual 0x%04X, expected 0x%04X - bad",
+                     i_desc->getAttr<ATTR_HUID>(), indexEP,
+                     VPD_CP00_PG_EP0_INDEX + indexEP,
+                     i_pgData[VPD_CP00_PG_EP0_INDEX + indexEP],
+                     VPD_CP00_PG_EPx_GOOD);
+            l_descFunctional = false;
+        }
+    }
+    else
+    if (i_desc->getAttr<ATTR_TYPE>() == TYPE_EX)
+    {
+        ATTR_CHIP_UNIT_type indexEX =
+            i_desc->getAttr<ATTR_CHIP_UNIT>();
+        // 2 EX chiplets per EP/EQ chiplet
+        size_t indexEP = indexEX / 2;
+        // 2 L3/L2/REFR triplets per EX chiplet
+        size_t indexL3L2REFR = indexEX % 2;
+        // Check triplet of bits in EPx entry
+        if ((i_pgData[VPD_CP00_PG_EP0_INDEX + indexEP] &
+             VPD_CP00_PG_EPx_L3L2REFR[indexL3L2REFR]) != 0)
+        {
+            HWAS_INF("pDesc %.8X - EX%d pgData[%d]: "
+                     "actual 0x%04X, expected 0x%04X - bad",
+                     i_desc->getAttr<ATTR_HUID>(), indexEX,
+                     VPD_CP00_PG_EP0_INDEX + indexEP,
+                     i_pgData[VPD_CP00_PG_EP0_INDEX + indexEP],
+                     (i_pgData[VPD_CP00_PG_EP0_INDEX + indexEP] &
+                      ~VPD_CP00_PG_EPx_L3L2REFR[indexL3L2REFR]));
+            l_descFunctional = false;
+        }
+    }
+    else
+    if (i_desc->getAttr<ATTR_TYPE>() == TYPE_CORE)
+    {
+        ATTR_CHIP_UNIT_type indexEC =
+            i_desc->getAttr<ATTR_CHIP_UNIT>();
+        // Check all bits in ECxx entry
+        if (i_pgData[VPD_CP00_PG_EC00_INDEX + indexEC] !=
+            VPD_CP00_PG_ECxx_GOOD)
+        {
+            HWAS_INF("pDesc %.8X - CORE/EC%2.2d pgData[%d]: "
+                     "actual 0x%04X, expected 0x%04X - bad",
+                     i_desc->getAttr<ATTR_HUID>(), indexEC,
+                     VPD_CP00_PG_EC00_INDEX + indexEC,
+                     i_pgData[VPD_CP00_PG_EC00_INDEX + indexEC],
+                     VPD_CP00_PG_ECxx_GOOD);
+            l_descFunctional = false;
+        }
+    }
+    else
+    if (i_desc->getAttr<ATTR_TYPE>() == TYPE_MCBIST)
+    {
+        ATTR_CHIP_UNIT_type indexMCBIST =
+            i_desc->getAttr<ATTR_CHIP_UNIT>();
+        // 2 MCS chiplets per MCBIST / MCU
+        size_t indexMCS = indexMCBIST * 2;
+        // Check MCS01 bit in N3 entry if first MCBIST / MCU
+        if ((0 == indexMCBIST) &&
+            ((i_pgData[VPD_CP00_PG_N3_INDEX] &
+              VPD_CP00_PG_N3_MCS01) != 0))
+        {
+            HWAS_INF("pDesc %.8X - MCBIST%d pgData[%d]: "
+                     "actual 0x%04X, expected 0x%04X - bad",
+                     i_desc->getAttr<ATTR_HUID>(), indexMCBIST,
+                     VPD_CP00_PG_N3_INDEX,
+                     i_pgData[VPD_CP00_PG_N3_INDEX],
+                     (i_pgData[VPD_CP00_PG_N3_INDEX] &
+                      ~VPD_CP00_PG_N3_MCS01));
+            l_descFunctional = false;
+        }
+        else
+        // Check MCS23 bit in N1 entry if second MCBIST / MCU
+        if ((1 == indexMCBIST) &&
+            ((i_pgData[VPD_CP00_PG_N1_INDEX] &
+              VPD_CP00_PG_N1_MCS23) != 0))
+        {
+            HWAS_INF("pDesc %.8X - MCBIST%d pgData[%d]: "
+                     "actual 0x%04X, expected 0x%04X - bad",
+                     i_desc->getAttr<ATTR_HUID>(), indexMCBIST,
+                     VPD_CP00_PG_N1_INDEX,
+                     i_pgData[VPD_CP00_PG_N1_INDEX],
+                     (i_pgData[VPD_CP00_PG_N1_INDEX] &
+                      ~VPD_CP00_PG_N1_MCS23));
+            l_descFunctional = false;
+        }
+        else
+        // Check bits in MCxx entry except those in partial good region
+        if ((i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]]
+             & ~VPD_CP00_PG_MCxx_PG_MASK) !=
+             VPD_CP00_PG_MCxx_GOOD)
+        {
+            HWAS_INF("pDesc %.8X - MCBIST%d pgData[%d]: "
+                     "actual 0x%04X, expected 0x%04X - bad",
+                     i_desc->getAttr<ATTR_HUID>(), indexMCBIST,
+                     VPD_CP00_PG_MCxx_INDEX[indexMCS],
+                     i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]],
+                     VPD_CP00_PG_MCxx_GOOD);
+            l_descFunctional = false;
+        }
+    }
+    else
+    if (i_desc->getAttr<ATTR_TYPE>() == TYPE_MCS)
+    {
+        ATTR_CHIP_UNIT_type indexMCS =
+            i_desc->getAttr<ATTR_CHIP_UNIT>();
+        // Check MCS01 bit in N3 entry if first or second MCS
+        if (((0 == indexMCS) || (1 == indexMCS)) &&
+            ((i_pgData[VPD_CP00_PG_N3_INDEX] &
+              VPD_CP00_PG_N3_MCS01) != 0))
+        {
+            HWAS_INF("pDesc %.8X - MCS%d pgData[%d]: "
+                     "actual 0x%04X, expected 0x%04X - bad",
+                     i_desc->getAttr<ATTR_HUID>(), indexMCS,
+                     VPD_CP00_PG_N3_INDEX,
+                     i_pgData[VPD_CP00_PG_N3_INDEX],
+                     (i_pgData[VPD_CP00_PG_N3_INDEX] &
+                      ~VPD_CP00_PG_N3_MCS01));
+            l_descFunctional = false;
+        }
+        else
+        // Check MCS23 bit in N1 entry if third or fourth MCS
+        if (((2 == indexMCS) || (3 == indexMCS)) &&
+            ((i_pgData[VPD_CP00_PG_N1_INDEX] &
+              VPD_CP00_PG_N1_MCS23) != 0))
+        {
+            HWAS_INF("pDesc %.8X - MCS%d pgData[%d]: "
+                     "actual 0x%04X, expected 0x%04X - bad",
+                     i_desc->getAttr<ATTR_HUID>(), indexMCS,
+                     VPD_CP00_PG_N1_INDEX,
+                     i_pgData[VPD_CP00_PG_N1_INDEX],
+                     (i_pgData[VPD_CP00_PG_N1_INDEX] &
+                      ~VPD_CP00_PG_N1_MCS23));
+            l_descFunctional = false;
+        }
+        else
+        // Check bits in MCxx entry including specific IOM bit,
+        // but not other bits in partial good region
+        if ((i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]]
+             & ~(VPD_CP00_PG_MCxx_PG_MASK
+                 & ~VPD_CP00_PG_MCxx_IOMyy[indexMCS])) !=
+             VPD_CP00_PG_MCxx_GOOD)
+        {
+            HWAS_INF("pDesc %.8X - MCS%d pgData[%d]: "
+                     "actual 0x%04X, expected 0x%04X - bad",
+                     i_desc->getAttr<ATTR_HUID>(), indexMCS,
+                     VPD_CP00_PG_MCxx_INDEX[indexMCS],
+                     i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]],
+                     (i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]] &
+                      ~VPD_CP00_PG_MCxx_IOMyy[indexMCS]));
+            l_descFunctional = false;
+        }
+    }
+    else
+    if (i_desc->getAttr<ATTR_TYPE>() == TYPE_MCA)
+    {
+        ATTR_CHIP_UNIT_type indexMCA =
+            i_desc->getAttr<ATTR_CHIP_UNIT>();
+        // 2 MCA chiplets per MCS
+        size_t indexMCS = indexMCA / 2;
+        // Check IOM bit in MCxx entry
+        if ((i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]]
+             & VPD_CP00_PG_MCxx_IOMyy[indexMCS]) != 0)
+        {
+            HWAS_INF("pDesc %.8X - MCA%d pgData[%d]: "
+                     "actual 0x%04X, expected 0x%04X - bad",
+                     i_desc->getAttr<ATTR_HUID>(), indexMCA,
+                     VPD_CP00_PG_MCxx_INDEX[indexMCS],
+                     i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]],
+                     (i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMCS]] &
+                      ~VPD_CP00_PG_MCxx_IOMyy[indexMCS]));
+            l_descFunctional = false;
+        }
+    }
+    else
+    if (i_desc->getAttr<ATTR_TYPE>() == TYPE_NVBUS)
+    {
+        // Check NPU bit in N3 entry
+        if ((i_pgData[VPD_CP00_PG_N3_INDEX] &
+             VPD_CP00_PG_N3_NPU) != 0)
+        {
+            HWAS_INF("pDesc %.8X - NVBUS pgData[%d]: "
+                     "actual 0x%04X, expected 0x%04X - bad",
+                     i_desc->getAttr<ATTR_HUID>(),
+                     VPD_CP00_PG_N3_INDEX,
+                     i_pgData[VPD_CP00_PG_N3_INDEX],
+                     (i_pgData[VPD_CP00_PG_N3_INDEX] &
+                      ~VPD_CP00_PG_N3_NPU));
+            l_descFunctional = false;
+        }
+    }
+    else
+    if (i_desc->getAttr<ATTR_TYPE>() == TYPE_PERV)
+    {
+        // Loop through PG entries from PRV entry to last used entry
+        for (uint8_t l_pgDataIndex =
+               VPD_CP00_PG_PERVASIVE_INDEX;
+             l_pgDataIndex <= VPD_CP00_PG_MAX_USED_INDEX;
+             ++l_pgDataIndex)
+        {
+            // Skip reserved entries between EP5 entry and EC00 entry
+            if ((l_pgDataIndex > VPD_CP00_PG_EP5_INDEX) &&
+                (l_pgDataIndex < VPD_CP00_PG_EC00_INDEX))
+            {
+                continue;
+            }
+
+            // Skip OB1 and OB2 entries on NIMBUS (region doesn't exist)
+            if ((i_desc->getAttr<ATTR_MODEL>() ==
+                 MODEL_NIMBUS) &&
+                (l_pgDataIndex > VPD_CP00_PG_OB0_INDEX) &&
+                (l_pgDataIndex < VPD_CP00_PG_OB3_INDEX))
+            {
+                continue;
+            }
+
+            // Check PERV bit in the entry
+            if ((i_pgData[l_pgDataIndex]
+                 & VPD_CP00_PG_xxx_PERV) != 0)
+            {
+                HWAS_INF("pDesc %.8X - PERV pgData[%d]: "
+                         "actual 0x%04X, expected 0x%04X - bad",
+                         i_desc->getAttr<ATTR_HUID>(),
+                         l_pgDataIndex,
+                         i_pgData[l_pgDataIndex],
+                         (i_pgData[l_pgDataIndex] &
+                          ~VPD_CP00_PG_xxx_PERV));
+                l_descFunctional = false;
+                break;
+            }
+        }
+    }
+
+    return l_descFunctional;
+} // isDescFunctional
+
 
 
 errlHndl_t restrictEXunits(
@@ -998,7 +1417,7 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
         if (l_dimms.empty())
         {
             HWAS_ERR( "Insufficient hardware to continue IPL (func DIMM)");
-                
+
             if(o_bootable)
             {
                 *o_bootable = false;

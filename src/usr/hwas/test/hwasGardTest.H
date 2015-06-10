@@ -46,7 +46,7 @@
 using namespace HWAS;
 using namespace TARGETING;
 
-bool compareAffinity(const TargetInfo t1, const TargetInfo t2)
+bool compareAffinityCXX(const TargetInfo t1, const TargetInfo t2)
 {
         return t1.affinityPath < t2.affinityPath;
 }
@@ -3434,7 +3434,7 @@ public:
 
         // Check result
         std::sort(l_targToDeconfig.begin(), l_targToDeconfig.end(),
-              compareAffinity);
+              compareAffinityCXX);
         if ((l_targToDeconfig.size() == 4) &&
             (l_targToDeconfig[0].affinityPath == l_ep[0]) &&
             (l_targToDeconfig[1].affinityPath == l_ep[1]) &&
@@ -3517,7 +3517,7 @@ public:
 
         // Check result
         std::sort(l_targToDeconfig.begin(), l_targToDeconfig.end(),
-              compareAffinity);
+              compareAffinityCXX);
         if ((l_targToDeconfig.size() == 1) &&
             (l_targToDeconfig[0].affinityPath == l_ep[0]) )
         {
@@ -3615,7 +3615,7 @@ public:
 
         // Check result
         std::sort(l_targToDeconfig.begin(), l_targToDeconfig.end(),
-              compareAffinity);
+              compareAffinityCXX);
         if ((l_targToDeconfig.size() == 3) &&
             (l_targToDeconfig[0].affinityPath == l_ep[4]) && // 10 MEMBUF
             (l_targToDeconfig[1].affinityPath == l_ep[3]) && // 100 MBA
@@ -3673,7 +3673,7 @@ public:
 
         // Check result
         std::sort(l_targToDeconfig.begin(), l_targToDeconfig.end(),
-              compareAffinity);
+              compareAffinityCXX);
         if ((l_targToDeconfig.size() == 2) &&
             (l_targToDeconfig[0].affinityPath == l_ep[0]) && // 0 MCS
             (l_targToDeconfig[1].affinityPath == l_ep[1]) )  // 00 MEMBUF
@@ -3732,7 +3732,7 @@ public:
 
         // Check result
         std::sort(l_targToDeconfig.begin(), l_targToDeconfig.end(),
-              compareAffinity);
+              compareAffinityCXX);
         if ((l_targToDeconfig.size() == 2) &&
             (l_targToDeconfig[0].affinityPath == l_ep[0]) && // 00 MEMBUF
             (l_targToDeconfig[1].affinityPath == l_ep[1]) )  // 000 MBA
@@ -3793,7 +3793,7 @@ public:
 
         // Check result
         std::sort(l_targToDeconfig.begin(), l_targToDeconfig.end(),
-              compareAffinity);
+              compareAffinityCXX);
         if ((l_targToDeconfig.size() == 2) &&
             (l_targToDeconfig[0].affinityPath == l_ep[0]) && // 000 MBA
             (l_targToDeconfig[1].affinityPath == l_ep[1]) )  // 0000 DIMM
@@ -3874,7 +3874,7 @@ public:
 
         // Check result
         std::sort(l_targToDeconfig.begin(), l_targToDeconfig.end(),
-              compareAffinity);
+              compareAffinityCXX);
         if ((l_targToDeconfig.size() == 1) &&
             (l_targToDeconfig[0].affinityPath == l_ep[4]) ) // 001 MBA
         {
@@ -3991,7 +3991,7 @@ public:
 
         // Check result
         std::sort(l_targToDeconfig.begin(), l_targToDeconfig.end(),
-              compareAffinity);
+              compareAffinityCXX);
         if ((l_targToDeconfig.size() == 6) &&
             (l_targToDeconfig[0].affinityPath == l_ep[0]) && // 0 MCS
             (l_targToDeconfig[1].affinityPath == l_ep[1]) && // 00 MEMBUF
@@ -4089,7 +4089,7 @@ public:
 
         // Check result
         std::sort(l_targToDeconfig.begin(), l_targToDeconfig.end(),
-              compareAffinity);
+              compareAffinityCXX);
         if ((l_targToDeconfig.size() == 6) &&
             (l_targToDeconfig[0].affinityPath == l_ep[0]) &&
             (l_targToDeconfig[1].affinityPath == l_ep[1]) &&
