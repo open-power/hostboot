@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -86,6 +88,15 @@ void IStepError::addErrorDetails( const errlHndl_t i_err )
 
     // grab the istep's trace and add to the input elog
     i_err->collectTrace("ISTEPS_TRACE", 1024);
+
+    // the istep error is causing the IPL to fail (UNRECOVERABLE), so 
+    // if this error was less severe than UNRECOVERABLE (ie, INFORMATIONAL,
+    //  RECOVERED, PREDICTIVE) change to UNRECOVERABLE so that it is
+    // visible as well as the istep error log.
+    if (i_err->sev() < ERRORLOG::ERRL_SEV_UNRECOVERABLE)
+    {
+        i_err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+    }
 
     // add some details from the input elog to the istep error object
     ISTEP_ERROR::HwpUserDetailsIstep errorDetails( i_err );
