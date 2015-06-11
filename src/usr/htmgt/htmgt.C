@@ -68,8 +68,8 @@ namespace HTMGT
         if (i_startCompleted)
         {
             // Query functional OCCs
-            const uint8_t numOccs = OccManager::buildOccs();
-            if (numOccs > 0)
+            l_err = OccManager::buildOccs();
+            if (NULL == l_err)
             {
                 if (NULL != OccManager::getMasterOcc())
                 {
@@ -146,24 +146,16 @@ namespace HTMGT
                      */
                     bldErrLog(l_err, HTMGT_MOD_LOAD_START_STATUS,
                               HTMGT_RC_OCC_MASTER_NOT_FOUND,
-                              numOccs, 0, 0, 0,
+                              OccManager::getNumOccs(), 0, 0, 0,
                               ERRORLOG::ERRL_SEV_INFORMATIONAL);
                 }
             }
             else
             {
-                TMGT_ERR("Unable to find any functional OCCs");
-                /*@
-                 * @errortype
-                 * @reasoncode      HTMGT_RC_OCC_UNAVAILABLE
-                 * @moduleid        HTMGT_MOD_LOAD_START_STATUS
-                 * @userdata1[0:7]  load/start completed
-                 * @devdesc         No functional OCCs were found
-                 */
-                bldErrLog(l_err, HTMGT_MOD_LOAD_START_STATUS,
-                          HTMGT_RC_OCC_UNAVAILABLE,
-                          i_startCompleted, 0, 0, 0,
-                          ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                // Failed to find functional OCCs, no need to try again
+                // Set original error log  as unrecoverable and commit
+                l_err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
             }
         }
         else
@@ -231,48 +223,56 @@ namespace HTMGT
         }
 
         bool polledOneOcc = false;
-        OccManager::buildOccs();
-
-        if (i_procTarget != NULL)
+        errlHndl_t err = OccManager::buildOccs();
+        if (NULL == err)
         {
-            const uint32_t l_huid =
-                i_procTarget->getAttr<TARGETING::ATTR_HUID>();
-            TMGT_INF("processOccError(HUID=0x%08X) called", l_huid);
-
-            TARGETING::TargetHandleList pOccs;
-            getChildChiplets(pOccs, i_procTarget, TARGETING::TYPE_OCC);
-            if (pOccs.size() > 0)
+            if (i_procTarget != NULL)
             {
-                // Poll specified OCC flushing any errors
-                errlHndl_t err = OccManager::sendOccPoll(true, pOccs[0]);
+                const uint32_t l_huid =
+                    i_procTarget->getAttr<TARGETING::ATTR_HUID>();
+                TMGT_INF("processOccError(HUID=0x%08X) called", l_huid);
+
+                TARGETING::TargetHandleList pOccs;
+                getChildChiplets(pOccs, i_procTarget, TARGETING::TYPE_OCC);
+                if (pOccs.size() > 0)
+                {
+                    // Poll specified OCC flushing any errors
+                    errlHndl_t err = OccManager::sendOccPoll(true, pOccs[0]);
+                    if (err)
+                    {
+                        ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+                    }
+                    polledOneOcc = true;
+                }
+            }
+
+            if ((OccManager::getNumOccs() > 1) || (false == polledOneOcc))
+            {
+                // Send POLL command to all OCCs to flush any other errors
+                errlHndl_t err = OccManager::sendOccPoll(true);
                 if (err)
                 {
                     ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
                 }
-                polledOneOcc = true;
+            }
+
+            if (OccManager::occNeedsReset())
+            {
+                TMGT_ERR("processOccError(): OCCs need to be reset");
+                // Don't pass failed target as OCC should have already
+                // been marked as failed during the poll.
+                errlHndl_t err = OccManager::resetOccs(NULL);
+                if(err)
+                {
+                    ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+                }
             }
         }
-
-        if ((OccManager::getNumOccs() > 1) || (false == polledOneOcc))
+        else
         {
-            // Send POLL command to all OCCs to flush any other errors
-            errlHndl_t err = OccManager::sendOccPoll(true);
-            if (err)
-            {
-                ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
-            }
-        }
-
-        if (OccManager::occNeedsReset())
-        {
-            TMGT_ERR("processOccError(): OCCs need to be reset");
-            // Don't pass failed target as OCC should have already
-            // been marked as failed during the poll.
-            errlHndl_t err = OccManager::resetOccs(NULL);
-            if(err)
-            {
-                ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
-            }
+            // OCC build failed...
+            TMGT_ERR("processOccError() called, but unable to find OCCs");
+            ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
         }
 
     } // end processOccError()

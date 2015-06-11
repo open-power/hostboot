@@ -313,7 +313,6 @@ namespace HTMGT
                                 const occErrlCallout_t     i_callout,
                                 uint8_t &                  io_callout_num);
 
-
         protected:
             // Instance number of this OCC: 0 = first physical OCC
             uint8_t         iv_instance;
@@ -390,9 +389,9 @@ namespace HTMGT
             /**
              * @brief Query the functional OCCs and build OCC objects
              *
-             * @return  Return the number of OCC objects that were created
+             * @return NULL on success, or error handle on failure
              */
-            static uint32_t buildOccs();
+            static errlHndl_t buildOccs();
 
 
             /**
@@ -499,6 +498,15 @@ namespace HTMGT
             static bool occNeedsReset();
 
 
+            /**
+             * @brief Update error log with safe mode callouts and set
+             *        attribute indicating system is in safe mode.
+             *
+             * @param[in,out] io_err  Error log to be updated
+             * */
+            void updateForSafeMode(errlHndl_t & io_err);
+
+
         private:
 
             typedef std::vector<Occ*> occList_t;
@@ -521,7 +529,7 @@ namespace HTMGT
 
 
             /* See buildOccs() above */
-            uint32_t _buildOccs();
+            errlHndl_t _buildOccs();
 
 
             /* See getNumOccs() above */
