@@ -306,6 +306,13 @@ void deployDramSpares( TargetHandle_t i_mba,
 {
     bool x4 = isDramWidthX4(i_mba);
 
+    bool cenDimm = false;
+    if ( SUCCESS != isMembufOnDimm(i_mba, cenDimm) )
+    {
+        // Traces will be printed. Assume no spare DRAMs for now.
+        cenDimm = false;
+    }
+
     for ( std::vector<CenRank>::const_iterator rank = i_ranks.begin();
           rank != i_ranks.end(); rank++ )
     {
@@ -318,8 +325,11 @@ void deployDramSpares( TargetHandle_t i_mba,
 
         int32_t l_rc = SUCCESS;
 
-        l_rc  = mssSetSteerMux( i_mba, *rank, symPort0, false );
-        l_rc |= mssSetSteerMux( i_mba, *rank, symPort1, false );
+        if ( cenDimm )
+        {
+            l_rc |= mssSetSteerMux( i_mba, *rank, symPort0, false );
+            l_rc |= mssSetSteerMux( i_mba, *rank, symPort1, false );
+        }
 
         if ( x4 )
             l_rc |= mssSetSteerMux( i_mba, *rank, symEccSp, true );
