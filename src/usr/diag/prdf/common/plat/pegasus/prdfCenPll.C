@@ -112,7 +112,7 @@ int32_t ClearPll( ExtensibleChip * i_chip,
     #define PRDF_FUNC "[Membuf::ClearPll] "
     int32_t rc = SUCCESS;
 
-    if (CHECK_STOP != i_sc.service_data->GetAttentionType())
+    if (CHECK_STOP != i_sc.service_data->getPrimaryAttnType())
     {
         SCAN_COMM_REGISTER_CLASS * TP_LFIR = i_chip->getRegister("TP_LFIR_AND");
         TP_LFIR->setAllBits();

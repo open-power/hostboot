@@ -197,7 +197,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                     // This is a checkstop attention so some values will need
                     // to be overridden.
 
-                    io_sdc.SetAttentionType( origSdc.GetAttentionType() );
+                    io_sdc.setPrimaryAttnType( origSdc.getPrimaryAttnType() );
 
                     if ( origSdc.Terminate() )
                         io_sdc.SetFlag(ServiceDataCollector::TERMINATE);
@@ -222,7 +222,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                     // This is a checkstop attention so some values will need
                     // to be overridden.
 
-                    io_sdc.SetAttentionType( origSdc.GetAttentionType() );
+                    io_sdc.setPrimaryAttnType( origSdc.getPrimaryAttnType() );
 
                     if ( origSdc.Terminate() )
                         io_sdc.SetFlag(ServiceDataCollector::TERMINATE);
@@ -424,8 +424,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         PRD_Reason_Code = PRDF_DETECTED_FAIL_HARDWARE_PROBABLE;
     }
 
-    SrcWord7  = io_sdc.GetAttentionType() << 8;
-    SrcWord7 |= io_sdc.GetCauseAttentionType();
+    SrcWord7  = io_sdc.getPrimaryAttnType() << 8;
+    SrcWord7 |= io_sdc.getSecondaryAttnType();
 
     //--------------------------------------------------------------------------
     // Check for IPL Diag Mode and set up for Deferred Deconfig
@@ -805,7 +805,7 @@ void ErrDataService::initPfaData( const ServiceDataCollector & i_sdc,
 
     // Attention types
     o_pfa.priAttnType = i_attnType;
-    o_pfa.secAttnType = i_sdc.GetCauseAttentionType();
+    o_pfa.secAttnType = i_sdc.getSecondaryAttnType();
 
     // Build the MRU list into PFA data.
     const SDC_MRU_LIST & mruList = i_sdc.getMruList();

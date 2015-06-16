@@ -336,12 +336,12 @@ public:
    <br><b>Parameters:  </b> attention type.
    <br><b>Returns:     </b> None.
    <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> GetAttentionType() == attention,
+   <br><b>Promises:    </b> getPrimaryAttnType() == attention,
                             If(attention == MACHINE_CHECK) IsServiceCall() == true
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-  void SetAttentionType(ATTENTION_TYPE attention);
+  void setPrimaryAttnType(ATTENTION_TYPE attention);
 
   /**
    Set the cause attention type
@@ -349,35 +349,35 @@ public:
    <br><b>Parameters:  </b> attention type.
    <br><b>Returns:     </b> None.
    <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> GetCauseAttentionType() == attention
+   <br><b>Promises:    </b> getSecondaryAttnType() == attention
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-  void SetCauseAttentionType(ATTENTION_TYPE attention);  // rc09a
+  void setSecondaryAttnType(ATTENTION_TYPE attention);  // rc09a
 
   /**
    Get the global attention type
    <ul>
    <br><b>Parameters:  </b> None.
    <br><b>Returns:     </b> Attention type [MACHINE_CHECK | RECOVERABLE | SPECIAL]
-   <br><b>Requirements:</b> SetAttentionType()
+   <br><b>Requirements:</b> setPrimaryAttnType()
    <br><b>Promises:    </b> None.
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-  ATTENTION_TYPE GetAttentionType(void) const { return attentionType; }
+  ATTENTION_TYPE getPrimaryAttnType(void) const { return attentionType; }
 
   /**
    Get the cause attention type
    <ul>
    <br><b>Parameters:  </b> None.
    <br><b>Returns:     </b> Attention type [MACHINE_CHECK | RECOVERABLE | SPECIAL]
-   <br><b>Requirements:</b> SetCauseAttentionType()
+   <br><b>Requirements:</b> setSecondaryAttnType()
    <br><b>Promises:    </b> None.
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-  ATTENTION_TYPE GetCauseAttentionType(void) const { return causeAttentionType; }  // rc09a
+  ATTENTION_TYPE getSecondaryAttnType(void) const { return causeAttentionType; }
 
   /**
    Set the mask id of the error to mask at threshold
@@ -630,7 +630,7 @@ public:
    <ul>
    <br><b>Parameters    </b> None.
    <br><b>Returns:     </b> GardAction::ErrorType
-   <br><b>Requirements:</b> SetAttentionType()
+   <br><b>Requirements:</b> setPrimaryAttnType()
    <br><b>Promises     </b> ErrorType set by Gard or NoGard
    <br><b>Notes:       </b>
    </ul><br>

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 1996,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -107,9 +109,9 @@ ResetAndMaskErrorRegister::Reset(const BitKey & bit_list,
 {
     int32_t rc = SUCCESS;
     // Don't do reset on CS.
-    if ((CHECK_STOP != error.service_data->GetAttentionType()) && //@pw01
-        (UNIT_CS != error.service_data->GetAttentionType()) &&
-        (UNIT_CS != error.service_data->GetCauseAttentionType()))
+    if ((CHECK_STOP != error.service_data->getPrimaryAttnType()) && //@pw01
+        (UNIT_CS != error.service_data->getPrimaryAttnType()) &&
+        (UNIT_CS != error.service_data->getSecondaryAttnType()))
     {
       #ifndef __HOSTBOOT_MODULE
       ServiceDataCollector & sdc = *(error.service_data);

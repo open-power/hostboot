@@ -75,7 +75,7 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
     do
     {
         #ifdef __HOSTBOOT_MODULE
-        if ( CHECK_STOP == i_sc.service_data->GetAttentionType() )
+        if ( CHECK_STOP == i_sc.service_data->getPrimaryAttnType() )
         {
             // This would only happen on OpenPOWER machines when we are doing
             // the post IPL analysis. In this case, we do not have the FFDC to

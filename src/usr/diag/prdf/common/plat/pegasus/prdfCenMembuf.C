@@ -142,7 +142,7 @@ int32_t MBA1_Starvation( ExtensibleChip * i_membChip,
             // Get the mem chiplet register
             SCAN_COMM_REGISTER_CLASS * l_memcFir = NULL;
             uint32_t l_checkBits = 0;
-            switch ( i_sc.service_data->GetCauseAttentionType() )
+            switch ( i_sc.service_data->getSecondaryAttnType() )
             {
                 case CHECK_STOP:
                     l_memcFir = i_membChip->getRegister("MEM_CHIPLET_CS_FIR");
@@ -187,7 +187,7 @@ int32_t MBA1_Starvation( ExtensibleChip * i_membChip,
 
             // Analyze MBA1
             return mba1Chip->Analyze( i_sc,
-                                i_sc.service_data->GetCauseAttentionType() );
+                                i_sc.service_data->getSecondaryAttnType() );
         }
         else
         {
@@ -242,7 +242,7 @@ int32_t PreAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc,
         // This is a required for a rare scenario when Centaur CS bit comes
         // up after attention has called PRD and PRD was still at start of
         // analysis.
-        if ( SPECIAL == i_sc.service_data->GetAttentionType() )
+        if ( SPECIAL == i_sc.service_data->getPrimaryAttnType() )
             break;
 
         // MCIFIR[31] is not always reliable if the unit CS originated on the
@@ -265,7 +265,7 @@ int32_t PreAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc,
         i_sc.service_data->SetThresholdMaskId(0);
 
         // Set the cause attention type
-        i_sc.service_data->SetCauseAttentionType(UNIT_CS);
+        i_sc.service_data->setSecondaryAttnType(UNIT_CS);
 
         // Indicate that cleanup is required.
         mbdb->iv_doChnlFailCleanup = true;
@@ -819,7 +819,7 @@ int32_t AnalyzeFetchUe( ExtensibleChip * i_membChip,
                            MemoryMruData::CALLOUT_RANK );
         i_sc.service_data->SetCallout( memmru );
 
-        if ( CHECK_STOP != i_sc.service_data->GetAttentionType() )
+        if ( CHECK_STOP != i_sc.service_data->getPrimaryAttnType() )
         {
             // Add a TPS request to the TD queue and ban any further TPS
             // requests for this rank.
@@ -1155,7 +1155,7 @@ int32_t handleMcsChnlCs( ExtensibleChip * i_membChip,
         if ( mciFirBits & ~mciFirMaskBits & chnlCsBitsMask )
         {
             l_rc = mcsChip->Analyze( i_sc,
-                        i_sc.service_data->GetCauseAttentionType() );
+                        i_sc.service_data->getSecondaryAttnType() );
 
             if( SUCCESS == l_rc ) break;
         }

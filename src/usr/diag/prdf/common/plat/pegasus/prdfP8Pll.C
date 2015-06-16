@@ -273,7 +273,7 @@ int32_t ClearPll( ExtensibleChip * i_chip,
 
     int32_t rc = SUCCESS;
 
-    if (CHECK_STOP != i_sc.service_data->GetAttentionType())
+    if (CHECK_STOP != i_sc.service_data->getPrimaryAttnType())
     {
         // Clear proc osc error reg bits
         P8DataBundle * procdb = getDataBundle( i_chip );
@@ -349,7 +349,7 @@ int32_t MaskPll( ExtensibleChip * i_chip,
 
     int32_t rc = SUCCESS;
 
-    if (CHECK_STOP != i_sc.service_data->GetAttentionType())
+    if (CHECK_STOP != i_sc.service_data->getPrimaryAttnType())
     {
         int32_t tmpRC = SUCCESS;
 
@@ -585,7 +585,7 @@ int32_t MaskParityErr( ExtensibleChip * i_chip,
 
     int32_t rc = SUCCESS;
 
-    if (CHECK_STOP != i_sc.service_data->GetAttentionType())
+    if (CHECK_STOP != i_sc.service_data->getPrimaryAttnType())
     {
         // fence off proc osc error reg bits
         P8DataBundle * procdb = getDataBundle( i_chip );
@@ -671,7 +671,7 @@ int32_t ClearParityErr( ExtensibleChip * i_chip,
 
     int32_t rc = SUCCESS;
 
-    if (CHECK_STOP != i_sc.service_data->GetAttentionType())
+    if (CHECK_STOP != i_sc.service_data->getPrimaryAttnType())
     {
         // Clear proc osc error reg bits
         P8DataBundle * procdb = getDataBundle( i_chip );

@@ -52,7 +52,7 @@ ServiceDataCollector::ServiceDataCollector() :
 // ---------------------------------------------------------------
 
 inline
-void ServiceDataCollector::SetAttentionType( ATTENTION_TYPE attention )
+void ServiceDataCollector::setPrimaryAttnType( ATTENTION_TYPE attention )
 {
     attentionType = attention;
     if( MACHINE_CHECK == attention )
@@ -64,7 +64,7 @@ void ServiceDataCollector::SetAttentionType( ATTENTION_TYPE attention )
 // ---------------------------------------------------------------
 
 inline
-void ServiceDataCollector::SetCauseAttentionType(ATTENTION_TYPE attention)
+void ServiceDataCollector::setSecondaryAttnType(ATTENTION_TYPE attention)
 {
   causeAttentionType = attention;
 }

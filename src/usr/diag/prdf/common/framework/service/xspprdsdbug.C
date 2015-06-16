@@ -271,7 +271,7 @@ TargetHandle_t SYSTEM_DEBUG_CLASS::getTargetWithAttn
 
 // -------------------------------------------------------------------
 
-uint8_t SYSTEM_DEBUG_CLASS::GetAttentionType( TargetHandle_t i_chipTgt ) const
+uint8_t SYSTEM_DEBUG_CLASS::getPrimaryAttnType( TargetHandle_t i_chipTgt ) const
 {
     uint8_t type = INVALID_ATTENTION_TYPE;
     AttnList::iterator it;
@@ -381,8 +381,9 @@ const uint32_t *SYSTEM_DEBUG_CLASS::GetPrdSrcPointer(void) const
     return g_src;
 }
 
-void SYSTEM_DEBUG_CLASS::SetAttentionType(TARGETING::TargetHandle_t i_pTargetHandle,
-                                          ATTENTION_VALUE_TYPE i_eAttnType)
+void SYSTEM_DEBUG_CLASS::setPrimaryAttnType(TARGETING::TargetHandle_t
+                                            i_pTargetHandle,
+                                            ATTENTION_VALUE_TYPE i_eAttnType)
 {
     if(i_eAttnType  > INVALID_ATTENTION_TYPE)
     {

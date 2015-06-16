@@ -186,7 +186,7 @@ int32_t AnalyzeChipResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 {
     // mk442956 a
     return xChip.Analyze( io_serviceData,
-                          io_serviceData.service_data->GetCauseAttentionType() );
+                          io_serviceData.service_data->getSecondaryAttnType() );
 }
 
 // ********************************************************************
@@ -312,7 +312,7 @@ int32_t AnalyzeConnected::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
     // Analyze chip.
     if ( NULL != connChip )
         return connChip->Analyze( io_serviceData,
-                        io_serviceData.service_data->GetCauseAttentionType() );
+                        io_serviceData.service_data->getSecondaryAttnType() );
     else
         return PRD_UNRESOLVED_CHIP_CONNECTION;
 }

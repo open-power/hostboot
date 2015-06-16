@@ -372,7 +372,7 @@ int32_t checkMcsChannelFail( ExtensibleChip * i_mcsChip,
 
         // Set unit checkstop flag and cause attention type.
         io_sc.service_data->SetFlag(ServiceDataCollector::UNIT_CS);
-        io_sc.service_data->SetCauseAttentionType(UNIT_CS);
+        io_sc.service_data->setSecondaryAttnType(UNIT_CS);
         io_sc.service_data->SetThresholdMaskId(0);
 
         // Indicate that cleanup is required.
@@ -417,7 +417,7 @@ int32_t chnlCsCleanup( ExtensibleChip *i_mbChip,
         }
 
         if (( ! i_sc.service_data->IsUnitCS() ) ||
-              (CHECK_STOP == i_sc.service_data->GetAttentionType()) )
+              (CHECK_STOP == i_sc.service_data->getPrimaryAttnType()) )
             break;
 
         CenMembufDataBundle * mbdb = getMembufDataBundle( i_mbChip );

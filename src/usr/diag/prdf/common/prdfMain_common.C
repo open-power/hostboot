@@ -251,7 +251,7 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
         // flush Cache so that SCR reads access hardware
         RegDataCache::getCachedRegisters().flush();
 
-        serviceData.SetAttentionType(i_attentionType);
+        serviceData.setPrimaryAttnType(i_attentionType);
 
         // Set the time in which PRD handled the error.
         Timer timeOfError;

@@ -294,7 +294,7 @@ int32_t System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                 domainAtAttentionPtr = ((*domainIterator)->Query(atnType)) ? (*domainIterator) : NULL;
                 if(domainAtAttentionPtr != NULL)
                 {
-                    serviceData.service_data->SetCauseAttentionType(atnType);
+                    serviceData.service_data->setSecondaryAttnType(atnType);
                     rc = domainAtAttentionPtr->Analyze(serviceData, atnType);
                     if((rc == PRD_SCAN_COMM_REGISTER_ZERO) ||
                         (rc == PRD_POWER_FAULT) )

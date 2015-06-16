@@ -144,7 +144,7 @@ int32_t ErrorRegister::Analyze( STEP_CODE_DATA_STRUCT & io_sdc )
 
     // Get Data from hardware
     const BIT_STRING_CLASS &bs =
-                Read( io_sdc.service_data->GetCauseAttentionType() );
+                Read( io_sdc.service_data->getSecondaryAttnType() );
     BitKey bl;     // null bit list has length 0
 
     if ( scr_rc == SUCCESS )

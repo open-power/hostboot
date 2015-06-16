@@ -451,7 +451,7 @@ int32_t RuleMetaData::Analyze( STEP_CODE_DATA_STRUCT & i_serviceData,
        l_rc = PRD_SCAN_COMM_REGISTER_ZERO;    //@jl07
 
     // Don't do reset or mask on CS. @pw03
-    if (CHECK_STOP != i_serviceData.service_data->GetAttentionType()) //@pw04
+    if (CHECK_STOP != i_serviceData.service_data->getPrimaryAttnType()) //@pw04
     {
         #ifndef __HOSTBOOT_MODULE
         SyncAnalysis (i_sdc);  //mp01 Add call to Sync SDC

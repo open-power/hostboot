@@ -224,7 +224,7 @@ int32_t ClearPllIo( ExtensibleChip * i_chip,
 
     int32_t rc = SUCCESS;
 
-    if (CHECK_STOP != i_sc.service_data->GetAttentionType())
+    if (CHECK_STOP != i_sc.service_data->getPrimaryAttnType())
     {
         // Clear pci osc error reg bit
         int32_t tmpRC = SUCCESS;
@@ -318,7 +318,7 @@ int32_t MaskPllIo( ExtensibleChip * i_chip,
 
     do
     {
-        if (CHECK_STOP == i_sc.service_data->GetAttentionType())
+        if (CHECK_STOP == i_sc.service_data->getPrimaryAttnType())
         {
             break;
         }

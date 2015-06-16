@@ -175,7 +175,7 @@ public:
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-  uint8_t GetAttentionType(TARGETING::TargetHandle_t i_ptargetHandle ) const;
+  uint8_t getPrimaryAttnType(TARGETING::TargetHandle_t i_ptargetHandle ) const;
 
     /**
      * @brief Get the first target of a specified target type with given
@@ -198,7 +198,7 @@ public:
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-//  uint8_t GetAttentionType(const CHIP_CLASS & chip) const;
+//  uint8_t getPrimaryAttnType(const CHIP_CLASS & chip) const;
 
   /**
    Get the global(overall) attention type
@@ -287,13 +287,13 @@ public:
    <br><b>Parameters:  </b> i_pTargetHandle, ATTENTION_TYPE
    <br><b>Returns:     </b> None.
    <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> GetAttentionType() == at
+   <br><b>Promises:    </b> getPrimaryAttnType() == at
    <br><b>Exceptions:  </b> None.
    <br><b>Notes:       </b> Available in PRD simulator only
    </ul><br>
    */
-  void SetAttentionType( TARGETING::TargetHandle_t i_pTargetHandle,
-                         ATTENTION_VALUE_TYPE i_eAttentionType );
+  void setPrimaryAttnType( TARGETING::TargetHandle_t i_pTargetHandle,
+                           ATTENTION_VALUE_TYPE i_eAttentionType );
 
   /**
    * @brief   Adds a chip to the list of chips reporting attention.

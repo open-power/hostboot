@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -105,7 +107,7 @@ int32_t RuleChip::Analyze( STEP_CODE_DATA_STRUCT & i_serviceData,
 
     // Set current ATTN type to input value.
     // If we don't do this, then the AttnRegisters don't work.
-    i_sdc.SetCauseAttentionType(i_attnType);
+    i_sdc.setSecondaryAttnType(i_attnType);
     // Set Signature Chip Id.
     l_errSig.setChipId( GetId() );
     l_rc = iv_pRuleData->Analyze( i_serviceData, i_attnType );

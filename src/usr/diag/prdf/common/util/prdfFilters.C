@@ -196,11 +196,11 @@ bool SecondaryBitsFilter::Apply( BitKey & io_bitList,
 
         // This filter should only be applied if the primary attention type is
         // CHECK_STOP.
-        if ( CHECK_STOP != io_sdc.service_data->GetAttentionType() ) break;
+        if ( CHECK_STOP != io_sdc.service_data->getPrimaryAttnType() ) break;
 
         // This filter should only be applied if the the secondary attention
         // type is RECOVERABLE.
-        if ( RECOVERABLE != io_sdc.service_data->GetCauseAttentionType()) break;
+        if ( RECOVERABLE != io_sdc.service_data->getSecondaryAttnType()) break;
 
         //if there is no secondary bit position to flip or if no bit is set in
         //bit key then let us skip this apply.
