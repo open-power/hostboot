@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_thermal.C,v 1.31 2015/04/06 22:33:11 pardeik Exp $
+// $Id: mss_eff_config_thermal.C,v 1.32 2015/06/16 21:57:30 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config_thermal.C,v $
 //------------------------------------------------------------------------------
@@ -55,6 +55,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.32  | pardeik  | 06/16/15| fix for ISDIMM systems to prevent a zero
+//         |          |         |   ATTR_MSS_MEM_WATT_TARGET value
+//         |          |         | Removed unneeded TODO commented section
 //   1.31  | pardeik  | 04/06/15 | attribute name changed for adjustment enable
 //   1.30  | pardeik  |12-FEB-15| CDIMM DDR4 throttle updates (set Nmba to Nchip)
 //         |          |         | Support for vmem regulator power adjustment
@@ -131,10 +134,6 @@
 //         |          |         | case. 
 //   1.1   | pardeik  |01-NOV-11| First Draft.
 
-/*
-TODO ITEMS:
-1.  Update ISDIMM power table after hardware measurements are done (GA3)
-*/
 
 //------------------------------------------------------------------------------
 //  My Includes
@@ -583,6 +582,11 @@ extern "C" {
 //------------------------------------------------------------------------------
 
 // adjust the regulator power limit per dimm if enabled and use this if less than the thermal limit
+// If reg power limit is zero, then set to thermal limit - needed for ISDIMM systems since some of these MRW attributes are not defined
+	if (l_dimm_reg_power_limit_per_dimm == 0)
+	{
+	    l_dimm_reg_power_limit_per_dimm = dimm_thermal_power_limit;
+	}
 	l_dimm_reg_power_limit_per_dimm_adj = l_dimm_reg_power_limit_per_dimm;
 	if (l_dimm_reg_power_limit_adj_enable == fapi::ENUM_ATTR_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE_TRUE)
 	{
