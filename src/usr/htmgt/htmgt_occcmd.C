@@ -811,20 +811,23 @@ namespace HTMGT
                     // TODO RTC 124739 - HB elogs are only 4K
                 }
 
+                TMGT_BIN("OCC Exception Data (up to 64 bytes)",
+                         sramRspPtr, std::min(exceptionLength,(uint32_t)64));
                 /*@
                  * @errortype
                  * @reasoncode HTMGT_RC_INTERNAL_ERROR
                  * @moduleid HTMGT_MOD_HANLDE_OCC_EXCEPTION
-                 * @userdata1[0-15] rsp status
-                 * @userdata1[16-31] exception data length
-                 * @userdata2[0-15] OCC instance
+                 * @userdata1[0-31] rsp status
+                 * @userdata1[32-63] exception data length
+                 * @userdata2[0-31] OCC instance
+                 * @userdata2[32-63] exception data
                  * @devdesc OCC reported exception
                  */
                 errlHndl_t l_excErr = NULL;
                 bldErrLog(l_excErr, HTMGT_MOD_HANLDE_OCC_EXCEPTION,
                           (htmgtReasonCode)(OCCC_COMP_ID | exceptionType),
                           exceptionType, exceptionDataLength,
-                          iv_Occ->iv_instance, 0,
+                          iv_Occ->iv_instance, UINT32_GET(&sramRspPtr[5]),
                           ERRORLOG::ERRL_SEV_UNRECOVERABLE);
                 l_excErr->addFFDC(OCCC_COMP_ID,
                                   sramRspPtr,

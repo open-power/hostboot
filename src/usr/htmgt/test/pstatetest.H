@@ -89,12 +89,22 @@ class pstateTest: public CxxTest::TestSuite
                 }
             }
 
-            l_errl = genPstateTables();
+            // generate normal pstate tables
+            l_errl = genPstateTables(true);
 
             if( l_errl )
             {
                 errlCommit(l_errl,HTMGT_COMP_ID);
-                TS_FAIL("verifyPstate failed");
+                TS_FAIL("verifyNormalPstate failed");
+            }
+
+            // generate mfg pstate tables
+            l_errl = genPstateTables(false);
+
+            if( l_errl )
+            {
+                errlCommit(l_errl,HTMGT_COMP_ID);
+                TS_FAIL("verifyMfgPstate failed");
             }
 
             // TODO RTC 123180 check eyecatcher in pstate table

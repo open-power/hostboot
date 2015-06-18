@@ -140,6 +140,39 @@ namespace RT_OCC
 
     //------------------------------------------------------------------------
 
+    int htmgt_pass_thru (uint16_t   i_cmdLength,
+                             uint8_t *  i_cmdData,
+                             uint16_t * o_rspLength,
+                             uint8_t *  o_rspData)
+    {
+        int rc = 0;
+#ifdef CONFIG_HTMGT
+        errlHndl_t err = HTMGT::passThruCommand(i_cmdLength, i_cmdData,
+                                                *o_rspLength, o_rspData);
+        if (err)
+        {
+            rc = err->reasonCode();
+            if (0 == rc)
+            {
+                // If there was a failure, be sure to return non-zero status
+                rc = -1;
+            }
+            if ((i_cmdLength > 0) && (NULL != i_cmdData))
+            {
+                TRACFCOMP (g_fapiTd,ERR_MRK"htmgt_pass_thru: command 0x%02X"
+                           " (%d bytes) failed with rc=0x%04X",
+                           i_cmdData[0], i_cmdLength, err->reasonCode());
+            }
+            errlCommit (err, HWPF_COMP_ID);
+        }
+#else
+        o_rspLength = 0;
+#endif
+        return rc;
+    }
+
+    //------------------------------------------------------------------------
+
     int executeLoadOCC(uint64_t i_homer_addr_phys,
                        uint64_t i_homer_addr_va,
                        uint64_t i_common_addr_phys,
@@ -427,6 +460,7 @@ namespace RT_OCC
             rt_intf->process_occ_error  = &process_occ_error;
             rt_intf->process_occ_reset  = &process_occ_reset;
             rt_intf->enable_occ_actuation  = &enable_occ_actuation;
+            rt_intf->mfg_htmgt_pass_thru = &htmgt_pass_thru;
 
             // If we already loaded OCC during the IPL we need to fix up
             //  the virtual address because we're now not using virtual

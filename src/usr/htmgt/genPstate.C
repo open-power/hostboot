@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,9 +41,15 @@ using namespace TARGETING;
 
 namespace HTMGT
 {
-errlHndl_t genPstateTables()
+errlHndl_t genPstateTables(bool i_normalTables)
 {
     errlHndl_t err = NULL;
+
+    // pstate table attribute must be big enough to hold the pstate structure
+    CPPASSERT(sizeof(ATTR_PSTATE_TABLE_type) >= sizeof(PstateSuperStructure));
+    // normal and mfg pstate tables are the same size
+    CPPASSERT(sizeof(ATTR_PSTATE_TABLE_type) ==
+              sizeof(ATTR_PSTATE_TABLE_MFG_type));
 
     TargetHandleList processors;
 
@@ -66,18 +72,20 @@ errlHndl_t genPstateTables()
 
         if(occs.size() > 0)
         {
+            const char * tableType = i_normalTables?"normal":"mfg";
             PstateSuperStructure pstate_data;
             Target * occTarget = occs[0];
             ATTR_HUID_type huid = occTarget->getAttr<ATTR_HUID>();
 
-            TMGT_INF("Building pstate table for huid 0x%x", huid);
+            TMGT_INF("genPstateTables: Building %s pstate tables for "
+                     "huid 0x%x", tableType, huid);
 
             err = FREQVOLTSVC::runP8BuildPstateDataBlock( procTarget,
                                                           &pstate_data);
 
             if(err)
             {
-                TMGT_ERR( "tmgtProcessAppGenPstateTable: Failed to"
+                TMGT_ERR( "genPstateTables: Failed to"
                           " generate PSTATE data for OCC "
                           "(huid=%x).",
                           huid
@@ -89,14 +97,24 @@ errlHndl_t genPstateTables()
             }
             else
             {
-                ATTR_PSTATE_TABLE_type * pstateData =
-                    reinterpret_cast<ATTR_PSTATE_TABLE_type*>
-                    (&pstate_data);
+                TMGT_INF("genPstateTables: %s pstate tables completed for "
+                         "huid 0x%x", tableType, huid);
+                if (i_normalTables)
+                {
+                    ATTR_PSTATE_TABLE_type * pstateData =
+                        reinterpret_cast<ATTR_PSTATE_TABLE_type*>
+                        (&pstate_data);
 
-                CPPASSERT(sizeof(ATTR_PSTATE_TABLE_type) ==
-                          sizeof(PstateSuperStructure));
+                    occTarget->setAttr<ATTR_PSTATE_TABLE>(*pstateData);
+                }
+                else
+                {
+                    ATTR_PSTATE_TABLE_MFG_type * pstateData =
+                        reinterpret_cast<ATTR_PSTATE_TABLE_MFG_type*>
+                        (&pstate_data);
 
-                occTarget->setAttr<ATTR_PSTATE_TABLE>(*pstateData);
+                    occTarget->setAttr<ATTR_PSTATE_TABLE_MFG>(*pstateData);
+                }
             }
         }
     }

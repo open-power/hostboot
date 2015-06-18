@@ -49,7 +49,7 @@
 #define    TMGT_BIN( _fmt_, _args_...) \
                TRACFBIN(  g_trac_htmgt, _fmt_, ##_args_ )
 
-#ifndef __HOSTBOOT_RUNTIME
+#if defined(CONFIG_CONSOLE) && !defined(__HOSTBOOT_RUNTIME)
 #define TMGT_CONSOLE( _fmt_, _args_...) \
     CONSOLE::displayf( HTMGT_COMP_NAME, _fmt_, ##_args_ )
 #else
@@ -119,6 +119,12 @@ namespace HTMGT
         // 0xE0-0xEF are reserved for OCC Exceptions
     };
 
+    enum htmgtPassThruCmds
+    {
+        PASSTHRU_OCC_STATUS             = 0x01,
+        PASSTHRU_GENERATE_MFG_PSTATE    = 0x81,
+        PASSTHRU_LOAD_PSTATE            = 0x82
+    };
 
     /**
      * @brief Create/Build an Error log and add HTMGT component trace

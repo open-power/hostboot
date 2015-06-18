@@ -499,6 +499,46 @@ namespace HTMGT
 
 
             /**
+             * @brief Collect FFDC debug data for HTMGT and OCCs
+             *
+             * @param[out] o_length Length of data returned in o_data
+             * @param[out] o_data   Buffer of 256 bytes where data will
+             *                      be copied
+             */
+            static void getOccData(uint16_t & o_length, uint8_t *o_data);
+
+
+            /**
+             * @brief Load specified pstate tables for all OCCs.
+             *        This will reset all OCCs so they pick up the new
+             *        tables.
+             *
+             * @param[in] i_normalPstates true to generate normal pstate tables
+             *                            false to generate mfg pstate tables
+             *
+             * @return NULL on success, else error handle
+             */
+            static errlHndl_t loadPstates(bool i_normalPstates);
+
+
+            /**
+             * @brief Determine if normal pstate tables should be used
+             *
+             * @return true if normal pstates should be used
+             */
+            static bool isNormalPstate();
+
+
+            /**
+             * @brief Determine if normal pstate tables should be used
+             *
+             * @param[in] i_useNormal  Set to true if normal pstate table
+             *                         should be used (vs MFG table)
+             */
+            static void setPstateTable(bool i_useNormal);
+
+
+            /**
              * @brief Update error log with safe mode callouts and set
              *        attribute indicating system is in safe mode.
              *
@@ -524,6 +564,8 @@ namespace HTMGT
             occStateId              iv_state;
             occStateId              iv_targetState;
             uint8_t                 iv_resetCount;
+            bool                    iv_normalPstateTables;
+
 
             /**
              * @brief SRC that caused system to enter safe mode
@@ -582,8 +624,13 @@ namespace HTMGT
 
             void _waitForOccCheckpoint();
 
-            /** See resetOccs() above */
-            errlHndl_t _resetOccs(TARGETING::Target * i_failedOccTarget);
+            /* See resetOccs() above */
+            /* @param[in] i_skipCountIncrement  true will prevent incrementing
+             *            the system reset count (used in loadPstate)
+             *            false (default) will increment counts as normal
+             */
+            errlHndl_t _resetOccs(TARGETING::Target * i_failedOccTarget,
+                                  bool i_skipCountIncrement = false);
 
             /** See sendOccPoll() above */
             errlHndl_t
@@ -599,6 +646,25 @@ namespace HTMGT
 
             /** See occFailed() above */
             bool _occFailed();
+
+            /** See getOccData() above */
+            void _getOccData(uint16_t & o_length, uint8_t *o_data);
+
+            /** See loadPstates() above */
+            errlHndl_t _loadPstates(bool i_normalPstates);
+
+            /** See isNormalPstate() above */
+            bool _isNormalPstate()
+            {
+                return(true == iv_normalPstateTables);
+            };
+
+            /** See setPstateTable() above */
+            void _setPstateTable(bool i_useNormal)
+            {
+                iv_normalPstateTables = i_useNormal;
+            };
+
     };
 
     typedef Singleton<OccManager> occMgr;

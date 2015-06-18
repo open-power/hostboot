@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/htmgt/runtime/makefile $
+# $Source: src/usr/hwpf/hwp/pstates/runtime/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2015
+# Contributors Listed Below - COPYRIGHT 2015
 # [+] International Business Machines Corp.
 #
 #
@@ -22,19 +22,17 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-# common objects between hostboot and hbrt
 
 HOSTBOOT_RUNTIME = 1
-ROOTPATH = ../../../..
-MODULE = htmgt_rt
 
-#include common objects between hostboot and hostboot runtime
-include ../htmgt_common.mk
+ROOTPATH = ../../../../../..
+VPATH += ../
 
-#include unique object modules
-#OBJS +=
+MODULE = pstates_rt
 
-#SUBDIRS += test.d
+## Objects unique to HBRT
 
-VPATH += ..
-include $(ROOTPATH)/config.mk
+## Objects common to HBRT and HB IPL
+include ../pstates_common.mk
+
+include ${ROOTPATH}/config.mk

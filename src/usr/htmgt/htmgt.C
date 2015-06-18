@@ -28,9 +28,7 @@
 #include "htmgt_activate.H"
 #include "htmgt_cfgdata.H"
 #include "htmgt_utility.H"
-#ifndef __HOSTBOOT_RUNTIME
 #include "genPstate.H"
-#endif
 #include "htmgt_memthrottles.H"
 #include "htmgt_poll.H"
 #include <devicefw/userif.H>
@@ -78,8 +76,8 @@ namespace HTMGT
                     do
                     {
 #ifndef __HOSTBOOT_RUNTIME
-                        // Build pstate tables (once per IPL)
-                        l_err = genPstateTables();
+                        // Build normal pstate tables (once per IPL)
+                        l_err = genPstateTables(true);
                         if(l_err)
                         {
                             break;
@@ -143,12 +141,12 @@ namespace HTMGT
                      * @errortype
                      * @reasoncode      HTMGT_RC_OCC_MASTER_NOT_FOUND
                      * @moduleid        HTMGT_MOD_LOAD_START_STATUS
-                     * @userdata1[0:7]  number of OCCs
+                     * @userdata1       number of OCCs
                      * @devdesc         No OCC master was found
                      */
                     bldErrLog(l_err, HTMGT_MOD_LOAD_START_STATUS,
                               HTMGT_RC_OCC_MASTER_NOT_FOUND,
-                              OccManager::getNumOccs(), 0, 0, 0,
+                              0, OccManager::getNumOccs(), 0, 0,
                               ERRORLOG::ERRL_SEV_INFORMATIONAL);
                 }
             }
@@ -172,7 +170,7 @@ namespace HTMGT
              */
             bldErrLog(l_err, HTMGT_MOD_LOAD_START_STATUS,
                       HTMGT_RC_OCC_START_FAIL,
-                      l_huid, 0, 0, 0,
+                      0, l_huid, 0, 0,
                       ERRORLOG::ERRL_SEV_INFORMATIONAL);
         }
 
@@ -328,13 +326,13 @@ namespace HTMGT
              * @errortype
              * @reasoncode      HTMGT_RC_INVALID_PARAMETER
              * @moduleid        HTMGT_MOD_PROCESS_OCC_RESET
-             * @userdata1[0:7]  Processor HUID
+             * @userdata1       Processor HUID
              * @devdesc         No OCC target found for proc Target,
              */
             bldErrLog(errl,
                       HTMGT_MOD_PROCESS_OCC_RESET,
                       HTMGT_RC_INVALID_PARAMETER,
-                      huid, 0, 0, 1,
+                      0, huid, 0, 1,
                       ERRORLOG::ERRL_SEV_INFORMATIONAL);
 
             // Add HB firmware callout
@@ -436,6 +434,114 @@ namespace HTMGT
         return l_err;
 
     } // end enableOccActuation()
+
+
+
+    // Send pass-thru command to HTMGT
+    errlHndl_t passThruCommand(uint16_t   i_cmdLength,
+                               uint8_t *  i_cmdData,
+                               uint16_t & o_rspLength,
+                               uint8_t *  o_rspData)
+    {
+        errlHndl_t err = NULL;
+        htmgtReasonCode failingSrc = HTMGT_RC_NO_ERROR;
+        o_rspLength = 0;
+
+        if ((i_cmdLength > 0) && (NULL != i_cmdData))
+        {
+            switch (i_cmdData[0])
+            {
+                case PASSTHRU_OCC_STATUS:
+                    TMGT_INF("passThruCommand: OCC Status");
+                    OccManager::getOccData(o_rspLength, o_rspData);
+                    break;
+
+                case PASSTHRU_GENERATE_MFG_PSTATE:
+                    if (i_cmdLength == 1)
+                    {
+                        TMGT_INF("passThruCommand: Generate MFG pstate tables",
+                                 i_cmdData[1]);
+                        err = genPstateTables(false);
+                    }
+                    else
+                    {
+                        TMGT_ERR("passThruCommand: invalid generate pstate "
+                                 "command length %d", i_cmdLength);
+                        /*@
+                         * @errortype
+                         * @reasoncode   HTMGT_RC_INVALID_LENGTH
+                         * @moduleid     HTMGT_MOD_PASS_THRU
+                         * @userdata1    command data[0-7]
+                         * @userdata2    command data length
+                         * @devdesc      Invalid pass thru command data length
+                         */
+                        failingSrc = HTMGT_RC_INVALID_LENGTH;
+                    }
+                    break;
+
+                case PASSTHRU_LOAD_PSTATE:
+                    if (i_cmdLength == 2)
+                    {
+                        const uint8_t pstateType = i_cmdData[1];
+                        if ((0 == pstateType) || (1 == pstateType))
+                        {
+                            TMGT_INF("passThruCommand: Load pstate tables "
+                                     "(type: %d)", pstateType);
+                            // 0 = Normal Pstate Tables
+                            err = OccManager::loadPstates(0 == pstateType);
+                        }
+                        else
+                        {
+                            TMGT_ERR("passThruCommand: invalid pstate type "
+                                     "specified: %d", pstateType);
+                            /*@
+                             * @errortype
+                             * @reasoncode   HTMGT_RC_INVALID_PARAMETER
+                             * @moduleid     HTMGT_MOD_PASS_THRU
+                             * @userdata1    command data[0-7]
+                             * @userdata2    command data length
+                             * @devdesc      Invalid load pstate table type
+                             */
+                            failingSrc = HTMGT_RC_INVALID_PARAMETER;
+                        }
+                    }
+                    else
+                    {
+                        TMGT_ERR("passThruCommand: invalid load pstate "
+                                 "command length %d", i_cmdLength);
+                        failingSrc = HTMGT_RC_INVALID_LENGTH;
+                    }
+                    break;
+
+                default:
+                    TMGT_ERR("passThruCommand: Invalid command 0x%08X "
+                             "(%d bytes)", UINT32_GET(i_cmdData), i_cmdLength);
+                    /*@
+                     * @errortype
+                     * @reasoncode   HTMGT_RC_INVALID_DATA
+                     * @moduleid     HTMGT_MOD_PASS_THRU
+                     * @userdata1    command data[0-7]
+                     * @userdata2    command data length
+                     * @devdesc      Invalid pass thru command
+                     */
+                    failingSrc = HTMGT_RC_INVALID_DATA;
+                    break;
+            }
+
+            if ((HTMGT_RC_NO_ERROR != failingSrc) && (NULL == err))
+            {
+                bldErrLog(err, HTMGT_MOD_PASS_THRU,
+                          failingSrc,
+                          UINT32_GET(i_cmdData),
+                          UINT32_GET(&i_cmdData[4]),
+                          0, i_cmdLength,
+                          ERRORLOG::ERRL_SEV_INFORMATIONAL);
+            }
+        }
+
+        return err;
+
+    } // end passThruCommand()
 
 
 }

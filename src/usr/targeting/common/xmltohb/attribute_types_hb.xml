@@ -705,6 +705,18 @@
 </attribute>
 
 <attribute>
+    <id>PSTATE_TABLE_MFG</id>
+    <description>HTMGT PSTATE data for mfg</description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>1904</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
     <id>OCC_CONTROL_DATA</id>
     <description>OCC operational data
     </description>

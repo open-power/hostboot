@@ -107,6 +107,30 @@ namespace HTMGT
      */
     errlHndl_t enableOccActuation(bool i_occActivation);
 
+
+
+    /**
+     * @brief Send a pass-through command to HTMGT
+     *
+     * @details  This is a blocking call that will send a command
+     *           to HTMGT.
+     *
+     * @note     The maximum response data returned will be 4096 bytes
+     *
+     * @param[in]    i_cmdLength  number of bytes in pass-thru command data
+     * @param[in]   *i_cmdData    pointer to pass-thru command data
+     * @param[out]   o_rspLength  number of bytes returned in o_rspData
+     * @param[out]  *o_rspData    pointer to a 4096 byte buffer that will
+     *                            contain the response data from the command
+     *
+     * @returns  NULL on success, or an error handle if the state did not
+     *           change.
+     */
+    errlHndl_t passThruCommand(uint16_t   i_cmdLength,
+                               uint8_t *  i_cmdData,
+                               uint16_t & o_rspLength,
+                               uint8_t *  o_rspData);
+
 }
 
 #endif // HTMGT_H

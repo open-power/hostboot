@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,9 +36,11 @@ namespace HTMGT
  * @note Attributes will not be written if the corresponding pstate table
  *       could not be generated.
  * @note this function is only available at IPL time
+ * @param[in] i_normalTables  true to generate normal pstate tables
+ *                            false to generate mfg pstate tables
  * @return error log handle on error, otherwise NULL
  */
-errlHndl_t genPstateTables();
+errlHndl_t genPstateTables(bool i_normalTables);
 
 };
 #endif

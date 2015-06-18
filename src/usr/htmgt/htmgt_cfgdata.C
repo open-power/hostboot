@@ -29,6 +29,8 @@
 #include "htmgt_utility.H"
 #include "htmgt_poll.H"
 #include "ipmi/ipmisensor.H"
+#include "fapiPlatAttributeService.H"
+#include <htmgt/htmgt_reasoncodes.H>
 
 
 using namespace TARGETING;
@@ -37,6 +39,8 @@ using namespace TARGETING;
 //for unit testing
 //#define TRACUCOMP(args...)  TMGT_INF(args)
 #define TRACUCOMP(args...)
+
+#define FRAC(f) ( int((f - int(f)) * 100.0) )
 
 namespace HTMGT
 {
@@ -663,15 +667,88 @@ void getFrequencyPointMessageData(uint8_t* o_data,
     assert(sys != NULL);
     assert(o_data != NULL);
 
+    int32_t biasFactor = 0;
+    if (false == OccManager::isNormalPstate())
+    {
+        // Only apply bias if using mfg pstate tables
+        Occ *master = OccManager::getMasterOcc();
+        if (NULL != master)
+        {
+            errlHndl_t err = NULL;
+            TARGETING::TargetHandle_t occTarget = master->getTarget();
+            ConstTargetHandle_t procTarget = getParentChip(occTarget);
+            assert(procTarget != NULL);
+            const fapi::Target fapiTarget(fapi::TARGET_TYPE_PROC_CHIP,
+                                          &procTarget);
+            uint32_t biasUp   = 0;
+            uint32_t biasDown = 0;
+            int rc = FAPI_ATTR_GET(ATTR_FREQ_EXT_BIAS_UP,&fapiTarget,biasUp);
+            rc |= FAPI_ATTR_GET(ATTR_FREQ_EXT_BIAS_DOWN,&fapiTarget,biasDown);
+            if (0 == rc)
+            {
+                if ((biasDown > 0) && (biasUp == 0))
+                {
+                    TMGT_INF("FREQ_EXT_BIAS_DOWN=%d (in 0.5% units)", biasDown);
+                    biasFactor = -(biasDown);
+                }
+                else if ((biasUp > 0) && (biasDown == 0))
+                {
+                    biasFactor = biasUp;
+                    TMGT_INF("FREQ_EXT_BIAS_UP=%d (in 0.5% units)", biasUp);
+                }
+                else if ((biasUp > 0) && (biasDown > 0))
+                {
+                    TMGT_ERR("Invalid bias values: BIAS_UP=%d and BIAS_DOWN=%d",
+                             biasUp, biasDown);
+                    /*@
+                     * @errortype
+                     * @reasoncode  HTMGT_RC_INVALID_PARAMETER
+                     * @moduleid    HTMGT_MOD_CFG_FREQ_POINTS
+                     * @userdata1   ATTR_FREQ_EXT_BIAS_UP
+                     * @userdata2   ATTR_FREQ_EXT_BIAS_DOWN
+                     * @devdesc     Invalid ATTR_FREQ_EXT_BIAS attribute values
+                     */
+                    bldErrLog(err, HTMGT_MOD_CFG_FREQ_POINTS,
+                              HTMGT_RC_INVALID_PARAMETER,
+                              0, biasUp, 0, biasDown,
+                              ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                    ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+                }
+            }
+            else
+            {
+                TMGT_ERR("Unable to read ATTR_FREQ_EXT_BIAS values rc=%d", rc);
+                /*@
+                 * @errortype
+                 * @reasoncode       HTMGT_RC_ATTRIBUTE_ERROR
+                 * @moduleid         HTMGT_MOD_CFG_FREQ_POINTS
+                 * @userdata1[0-31]  rc
+                 * @userdata1[32-63] ATTR_FREQ_EXT_BIAS_UP
+                 * @userdata2        ATTR_FREQ_EXT_BIAS_DOWN
+                 * @devdesc          Unable to read FREQ_EXT_BIAS attributes
+                 */
+                bldErrLog(err, HTMGT_MOD_CFG_FREQ_POINTS,
+                          HTMGT_RC_ATTRIBUTE_ERROR,
+                          rc, biasUp, 0, biasDown,
+                          ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+            }
+        }
+    }
+
     o_data[index++] = OCC_CFGDATA_FREQ_POINT;
     o_data[index++] = OCC_CFGDATA_FREQ_POINT_VERSION;
 
-
     //Nominal Frequency in MHz
     nominal = sys->getAttr<ATTR_NOMINAL_FREQ_MHZ>();
+    if (biasFactor)
+    {
+        TMGT_INF("Pre-biased Nominal=%dMhz", nominal);
+        // % change = (biasFactor/2) / 100
+        nominal += ((nominal * biasFactor) / 200);
+    }
     memcpy(&o_data[index], &nominal, 2);
     index += 2;
-
 
     //Maximum Frequency in MHz
     uint8_t turboAllowed =
@@ -687,6 +764,12 @@ void getFrequencyPointMessageData(uint8_t* o_data,
     {
         max = nominal;
     }
+    if (biasFactor)
+    {
+        TMGT_INF("Pre-biased Max=%dMhz", max);
+        // % change = (biasFactor/2) / 100
+        max += ((max * biasFactor) / 200);
+    }
 
     memcpy(&o_data[index], &max, 2);
     index += 2;
@@ -694,6 +777,12 @@ void getFrequencyPointMessageData(uint8_t* o_data,
 
     //Minimum Frequency in MHz
     min = sys->getAttr<ATTR_MIN_FREQ_MHZ>();
+    if (biasFactor)
+    {
+        TMGT_INF("Pre-biased Min=%dMhz", min);
+        // % change = (biasFactor/2) / 100
+        min += ((min * biasFactor) / 200);
+    }
     memcpy(&o_data[index], &min, 2);
     index += 2;
 
@@ -708,6 +797,7 @@ void getPstateTableMessageData(const TargetHandle_t i_occTarget,
                                uint8_t* o_data,
                                uint64_t & io_size)
 {
+    // normal and mfg pstate tables are the same size: see genPstateTables()
     uint64_t msg_size = sizeof(ATTR_PSTATE_TABLE_type) + 4;
     assert(io_size >= msg_size);
 
@@ -721,11 +811,23 @@ void getPstateTableMessageData(const TargetHandle_t i_occTarget,
     o_data[2] = 0;  // reserved
     o_data[3] = 0;  // reserved
 
-    // Read data from attribute for specified occ
-    ATTR_PSTATE_TABLE_type * pstateDataPtr =
-        reinterpret_cast<ATTR_PSTATE_TABLE_type*>(o_data + 4);
+    if (OccManager::isNormalPstate())
+    {
+        TMGT_INF("getPstateTableMessageData: Sending normal tables");
+        // Read data from attribute for specified occ
+        ATTR_PSTATE_TABLE_type * pstateDataPtr =
+            reinterpret_cast<ATTR_PSTATE_TABLE_type*>(o_data + 4);
 
-    i_occTarget->tryGetAttr<ATTR_PSTATE_TABLE>(*pstateDataPtr);
+        i_occTarget->tryGetAttr<ATTR_PSTATE_TABLE>(*pstateDataPtr);
+    }
+    else
+    {
+        TMGT_INF("getPstateTableMessageData: Sending MFG tables");
+        ATTR_PSTATE_TABLE_MFG_type * pstateDataPtr =
+            reinterpret_cast<ATTR_PSTATE_TABLE_MFG_type*>(o_data + 4);
+
+        i_occTarget->tryGetAttr<ATTR_PSTATE_TABLE_MFG>(*pstateDataPtr);
+    }
 }
 
 

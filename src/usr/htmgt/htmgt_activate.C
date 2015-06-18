@@ -232,7 +232,7 @@ namespace HTMGT
             }
             else
             {
-                //The OCC knows it isn't active by getting a value of 0.
+                //The OCC knows cap isn't active by getting a value of 0.
                 limit = 0;
             }
 

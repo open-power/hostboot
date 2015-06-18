@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014
+# Contributors Listed Below - COPYRIGHT 2014,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -22,6 +22,15 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_eff_config
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/pstates/pstates
+
 # common objects between hostboot and hbrt
 OBJS += htmgt.o
 OBJS += htmgt_occ.o
@@ -31,9 +40,4 @@ OBJS += htmgt_poll.o
 OBJS += htmgt_utility.o
 OBJS += htmgt_cfgdata.o
 OBJS += occError.o
-
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_eff_config
+OBJS += genPstate.o

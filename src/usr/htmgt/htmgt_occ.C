@@ -122,10 +122,10 @@ namespace HTMGT
                      * @errortype
                      * @moduleid HTMGT_MOD_OCC_SET_STATE
                      * @reasoncode HTMGT_RC_OCC_CMD_FAIL
-                     * @userdata1[0-15] OCC instance
-                     * @userdata1[16-31] Requested state
-                     * @userdata2[0-15] OCC response status
-                     * @userdata2[16-31] current OCC state
+                     * @userdata1[0-31] OCC instance
+                     * @userdata1[32-63] Requested state
+                     * @userdata2[0-31] OCC response status
+                     * @userdata2[32-63] current OCC state
                      * @devdesc Set of OCC state failed
                      */
                     bldErrLog(l_err, HTMGT_MOD_OCC_SET_STATE,
@@ -143,13 +143,13 @@ namespace HTMGT
              * @errortype
              * @moduleid HTMGT_MOD_OCC_SET_STATE
              * @reasoncode HTMGT_RC_INTERNAL_ERROR
-             * @userdata1[0-15] OCC instance
-             * @userdata1[16-31] Requested state
+             * @userdata1  OCC instance
+             * @userdata2  Requested state
              * @devdesc Set state only allowed on master OCC
              */
             bldErrLog(l_err, HTMGT_MOD_OCC_SET_STATE,
                       HTMGT_RC_INTERNAL_ERROR,
-                      iv_instance, i_state, 0, 0,
+                      0, iv_instance, 0, i_state,
                       ERRORLOG::ERRL_SEV_INFORMATIONAL);
         }
 
@@ -250,7 +250,8 @@ namespace HTMGT
         :iv_occMaster(NULL),
         iv_state(OCC_STATE_UNKNOWN),
         iv_targetState(OCC_STATE_ACTIVE),
-        iv_resetCount(0)
+        iv_resetCount(0),
+        iv_normalPstateTables(true)
     {
     }
 
@@ -603,15 +604,15 @@ namespace HTMGT
                              * @errortype
                              * @moduleid HTMGT_MOD_OCCMGR_SET_STATE
                              * @reasoncode HTMGT_RC_OCC_UNEXPECTED_STATE
-                             * @userdata1[0-15] requested state
-                             * @userdata1[16-31] OCC state
-                             * @userdata2[0-15] OCC instance
+                             * @userdata1[0-31] requested state
+                             * @userdata1[32-63] OCC state
+                             * @userdata2 OCC instance
                              * @devdesc OCC did not change to requested state
                              */
                             bldErrLog(l_err, HTMGT_MOD_OCCMGR_SET_STATE,
                                       HTMGT_RC_OCC_UNEXPECTED_STATE,
                                       requestedState, (*pOcc)->getState(),
-                                      (*pOcc)->getInstance(), 0,
+                                      0, (*pOcc)->getInstance(),
                                       ERRORLOG::ERRL_SEV_INFORMATIONAL);
                             break;
                         }
@@ -645,12 +646,12 @@ namespace HTMGT
              * @errortype
              * @moduleid HTMGT_MOD_OCCMGR_SET_STATE
              * @reasoncode HTMGT_RC_INVALID_DATA
-             * @userdata1[0-15] requested state
+             * @userdata1 requested state
              * @devdesc Invalid OCC state requested
              */
             bldErrLog(l_err, HTMGT_MOD_OCCMGR_SET_STATE,
                       HTMGT_RC_INVALID_DATA,
-                      requestedState, 0, 0, 0,
+                      0, requestedState, 0, 0,
                       ERRORLOG::ERRL_SEV_INFORMATIONAL);
         }
 
@@ -659,7 +660,8 @@ namespace HTMGT
     } // end OccManager::_setOccState()
 
 
-    errlHndl_t OccManager::_resetOccs(TARGETING::Target * i_failedOccTarget)
+    errlHndl_t OccManager::_resetOccs(TARGETING::Target * i_failedOccTarget,
+                                      bool i_skipCountIncrement)
     {
         errlHndl_t err = NULL;
         bool atThreshold = false;
@@ -699,7 +701,7 @@ namespace HTMGT
                 }
             }
 
-            if (false == _occFailed())
+            if ((false == i_skipCountIncrement) && (false == _occFailed()))
             {
                 // No OCC has been marked failed, increment system reset count
                 ++iv_resetCount;
@@ -947,6 +949,97 @@ namespace HTMGT
     }
 
 
+    // Collect HTMGT Status Information for debug
+    // NOTE: o_data is pointer to 4096 byte buffer
+    void OccManager::_getOccData(uint16_t & o_length, uint8_t *o_data)
+    {
+        uint16_t index = 0;
+
+        // If the system is in safemode then can't talk to OCCs (no build/poll)
+        TARGETING::Target* sys = NULL;
+        TARGETING::targetService().getTopLevelTarget(sys);
+        uint8_t safeMode = 0;
+        if (sys &&
+            sys->tryGetAttr<TARGETING::ATTR_HTMGT_SAFEMODE>(safeMode) &&
+            (0 == safeMode))
+        {
+            // Make sure OCCs were built first (so data is valid)
+            errlHndl_t err = _buildOccs(); // if not a already built.
+            if (err)
+            {
+                TMGT_ERR("_getOccData: failed to build OCC structures "
+                         "rc=0x%04X", err->reasonCode());
+                ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+            }
+            // Send poll to confirm comm, update states and flush errors
+            err = _sendOccPoll(true, NULL);
+            if (err)
+            {
+                TMGT_ERR("_getOccData: Poll OCCs failed.");
+                ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+            }
+        }
+
+        // First add HTMGT specific data
+        o_data[index++] = _getNumOccs();
+        o_data[index++] = (NULL!=iv_occMaster)?iv_occMaster->getInstance():0xFF;
+        o_data[index++] = iv_state;
+        o_data[index++] = iv_targetState;
+        o_data[index++] = iv_resetCount;
+        o_data[index++] = iv_normalPstateTables ? 0 : 1;
+        index += 1; // reserved for expansion
+        o_data[index++] = safeMode;
+        UINT32_PUT(&o_data[index], cv_safeReturnCode);
+        index += 4;
+        UINT32_PUT(&o_data[index], cv_safeOccInstance);
+        index += 4;
+
+        // Now add OCC specific data (for each OCC)
+        for (std::vector<Occ*>::iterator pOcc = iv_occArray.begin();
+             (pOcc < iv_occArray.end()) && (index+16 < 4096);
+             pOcc++)
+        {
+            o_data[index++] = (*pOcc)->getInstance();
+            o_data[index++] = (*pOcc)->getState();
+            o_data[index++] = (*pOcc)->getRole();
+            o_data[index++] = (*pOcc)->iv_masterCapable;
+            o_data[index++] = (*pOcc)->iv_commEstablished;
+            index += 3; // reserved for expansion
+            o_data[index++] = (*pOcc)->iv_failed;
+            o_data[index++] = (*pOcc)->needsReset();
+            o_data[index++] = (*pOcc)->iv_resetReason;
+            o_data[index++] = (*pOcc)->iv_resetCount;
+            if ((*pOcc)->iv_lastPollValid)
+            {
+                memcpy(&o_data[index], (*pOcc)->iv_lastPollResponse, 4);
+            }
+            else
+            {
+                memset(&o_data[index], 0xFF, 4);
+            }
+            index += 4;
+        }
+
+        o_length = index;
+    }
+
+
+    // Set default pstate table type and reset all OCCs to pick them up
+    errlHndl_t OccManager::_loadPstates(bool i_normalPstates)
+    {
+        errlHndl_t err = NULL;
+
+        // Set default pstate table type
+        _setPstateTable(i_normalPstates);
+
+        // Reset OCCs to pick up new tables (skip incrementing reset count)
+        TMGT_INF("_loadPstates: Resetting OCCs");
+        err = _resetOccs(NULL, true);
+
+        return err;
+    }
+
+
     uint8_t  OccManager::getNumOccs()
     {
         return Singleton<OccManager>::instance()._getNumOccs();
@@ -1010,6 +1103,27 @@ namespace HTMGT
     {
         return Singleton<OccManager>::instance()._occFailed();
     }
+
+    void OccManager::getOccData(uint16_t & o_length, uint8_t *o_data)
+    {
+        Singleton<OccManager>::instance()._getOccData(o_length, o_data);
+    }
+
+    errlHndl_t OccManager::loadPstates(bool i_normalPstates)
+    {
+        return Singleton<OccManager>::instance()._loadPstates(i_normalPstates);
+    }
+
+    bool OccManager::isNormalPstate()
+    {
+        return Singleton<OccManager>::instance()._isNormalPstate();
+    }
+
+    void OccManager::setPstateTable(bool i_useNormal)
+    {
+        Singleton<OccManager>::instance()._setPstateTable(i_useNormal);
+    }
+
 
 } // end namespace
 

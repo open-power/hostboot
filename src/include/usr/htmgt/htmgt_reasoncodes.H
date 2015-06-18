@@ -40,6 +40,8 @@ namespace HTMGT
         HTMGT_MOD_PROCESS_OCC_RESET     = 0x06,
         HTMGT_MOD_OCC_RESET             = 0x07,
         HTMGT_MOD_BUILD_OCCS            = 0x08,
+        HTMGT_MOD_PASS_THRU             = 0x09,
+        HTMGT_MOD_CFG_FREQ_POINTS       = 0x0A,
         HTMGT_MOD_OCC_POLL              = 0x76,
         HTMGT_MOD_BAD_FRU_CALLOUTS      = 0x7D,
         HTMGT_MOD_MISMATCHING_SEVERITY  = 0x7F,
@@ -54,11 +56,13 @@ namespace HTMGT
 
     enum htmgtReasonCode
     {
+        HTMGT_RC_NO_ERROR              = 0x00,
         HTMGT_RC_INTERNAL_ERROR        = HTMGT_COMP_ID | 0x01,
         HTMGT_RC_THROTTLE_UTIL_ERROR   = HTMGT_COMP_ID | 0x02,
         HTMGT_RC_THROTTLE_INVALID_N    = HTMGT_COMP_ID | 0x03,
         HTMGT_RC_OT_THROTTLE_INVALID_N = HTMGT_COMP_ID | 0x04,
         HTMGT_RC_OCC_NOT_READY         = HTMGT_COMP_ID | 0x05,
+        HTMGT_RC_ATTRIBUTE_ERROR       = HTMGT_COMP_ID | 0x06,
         HTMGT_RC_NO_SUPPORT            = HTMGT_COMP_ID | 0x0F,
         HTMGT_RC_OCC_RESET             = HTMGT_COMP_ID | 0x15,
         HTMGT_RC_OCC_CRIT_FAILURE      = HTMGT_COMP_ID | 0x16,

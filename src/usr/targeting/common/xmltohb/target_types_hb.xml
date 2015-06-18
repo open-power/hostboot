@@ -210,6 +210,9 @@
     <attribute>
         <id>PSTATE_TABLE</id>
     </attribute>
+    <attribute>
+        <id>PSTATE_TABLE_MFG</id>
+    </attribute>
     <attribute><id>IPMI_SENSORS</id></attribute>
 </targetTypeExtension>
 

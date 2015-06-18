@@ -27,39 +27,11 @@ ROOTPATH = ../../../../..
 
 MODULE = pstates
 
-##      support for Targeting and fapi
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/initservice
+SUBDIRS += runtime.d
 
-## pointer to common HWP files
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
+# objects common to hostboot and hbrt
+include pstates_common.mk
 
-##  NOTE: add the base istep dir here.
-##@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/@istepname
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/pstates
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe
-##  Include sub dirs
-##  NOTE: add a new EXTRAINCDIR when you add a new HWP
-##@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/???
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/pstates/pstates
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/build_winkle_images/p8_set_pore_bar/
-
-
-##  NOTE: add new object files when you add a new HWP
-OBJS += gpstCheckByte.o
-OBJS += lab_pstates.o
-OBJS += p8_build_pstate_datablock.o
-OBJS += proc_get_voltage.o
-OBJS += pstates.o
-OBJS += pstate_tables.o
-OBJS += freqVoltageSvc.o
-OBJS += proc_set_max_pstate.o
-
-##  NOTE: add a new directory onto the vpaths when you add a new HWP
-##@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/???
-VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/pstates/pstates
+# objects unique to hostboot
 
 include ${ROOTPATH}/config.mk

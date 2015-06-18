@@ -106,6 +106,7 @@ namespace HTMGT
             {OCC_CMD_CLEAR_ERROR_LOG, "CLEAR_ELOG"},
             {OCC_CMD_SET_STATE, "SET_STATE"},
             {OCC_CMD_SETUP_CFG_DATA, "SET_CFG_DATA"},
+            {OCC_CMD_SET_POWER_CAP, "SET_POWER_CAP"},
             {OCC_CMD_RESET_PREP, "RESET_PREP"},
             {OCC_CMD_GET_FIELD_DEBUG_DATA, "GET_FIELD_DEBUG_DATA"},
             // OCC_CMD_END_OF_TABLE should be the last entry
