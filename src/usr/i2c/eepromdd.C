@@ -631,6 +631,32 @@ errlHndl_t eepromWrite ( TARGETING::Target * i_target,
             break;
         }
 
+        // Check for writePageSize of zero
+        if ( i_i2cInfo.writePageSize == 0 )
+        {
+            TRACFCOMP( g_trac_eeprom,
+                       ERR_MRK"eepromWrite(): writePageSize is 0!");
+
+            /*@
+             * @errortype
+             * @reasoncode     EEPROM_I2C_WRITE_PAGE_SIZE_ZERO
+             * @severity       ERRL_SEV_UNRECOVERABLE
+             * @moduleid       EEPROM_WRITE
+             * @userdata1      HUID of target
+             * @userdata2      Chip to Access
+             * @devdesc        I2C write page size is zero.
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           EEPROM_WRITE,
+                                           EEPROM_I2C_WRITE_PAGE_SIZE_ZERO,
+                                           TARGETING::get_huid(i_target),
+                                           i_i2cInfo.chip,
+                                           true /*Add HB SW Callout*/ );
+
+            err->collectTrace( EEPROM_COMP_NAME );
+
+            break;
+        }
 
         // EEPROM devices have write page boundaries, so when necessary
         // need to split up command into multiple write operations
