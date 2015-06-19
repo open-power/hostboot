@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,9 +22,74 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_a_x_pci_dmi_pll_setup_errors.xml,v 1.7 2014/02/04 18:55:02 mfred Exp $ -->
-<!-- Halt codes for proc_a_x_pci_dmi_pll_setup --> 
+<!-- $Id: proc_a_x_pci_dmi_pll_setup_errors.xml,v 1.10 2015/06/01 01:54:08 rjknight Exp $ -->
+<!-- Halt codes for proc_a_x_pci_dmi_pll_setup -->
 <hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P8_PLL_UTILS_SBE_STOPPED</rc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>SBE_CONTROL</ffdc>
+    <description>SBE is not running, unable to service scan request.</description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P8_PLL_UTILS_SBE_TIMEOUT_ERROR</rc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>POLL_COUNT</ffdc>
+    <ffdc>SBE_VITAL</ffdc>
+    <description>After requesting SBE scan operation, timed out waiting for SBE to attain ready state.</description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P8_PLL_UTILS_SBE_SCAN_ERROR</rc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>PLL_RING_ADDR</ffdc>
+    <ffdc>PLL_RING_OP</ffdc>
+    <ffdc>PLL_BUS_ID</ffdc>
+    <ffdc>MBOX1_DATA</ffdc>
+    <description>SBE scan service indicated scan failure.</description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
+      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P8_PLL_UTILS_INVALID_OPERATION</rc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>PLL_RING_ADDR</ffdc>
+    <ffdc>PLL_RING_OP</ffdc>
+    <ffdc>PLL_BUS_ID</ffdc>
+    <ffdc>INVALID_RING_ADDRESS</ffdc>
+    <ffdc>INVALID_RING_OP</ffdc>
+    <ffdc>INVALID_BUS_ID</ffdc>
+    <description>Invalid PLL configuration action requested.</description>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_PROC_A_X_PCI_DMI_PLL_SETUP_ABUS_PLL_NO_LOCK</rc>
@@ -40,7 +107,7 @@
         <priority>HIGH</priority>
     </callout>
     <callout>
-        <target>CHIP_IN_ERROR</target>  
+        <target>CHIP_IN_ERROR</target>
         <priority>MEDIUM</priority>
     </callout>
     <callout>
@@ -74,7 +141,7 @@
         <priority>HIGH</priority>
     </callout>
     <callout>
-        <target>CHIP_IN_ERROR</target>  
+        <target>CHIP_IN_ERROR</target>
         <priority>MEDIUM</priority>
     </callout>
     <callout>
@@ -108,20 +175,12 @@
         <priority>HIGH</priority>
     </callout>
     <callout>
-        <target>CHIP_IN_ERROR</target>  
+        <target>CHIP_IN_ERROR</target>
         <priority>MEDIUM</priority>
     </callout>
     <callout>
         <procedure>CODE </procedure>
         <priority>LOW</priority>
     </callout>
-    <!-- Deconfigure CHIP_IN_ERROR -->
-    <deconfigure>
-      <target>CHIP_IN_ERROR</target>
-    </deconfigure>
-    <!-- Create GARD record for CHIP_IN_ERROR -->
-    <gard>
-      <target>CHIP_IN_ERROR</target>
-    </gard>
   </hwpError>
 </hwpErrors>
