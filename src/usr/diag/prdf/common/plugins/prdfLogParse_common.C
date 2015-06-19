@@ -40,12 +40,13 @@
 #include <utilmem.H>
 
 #include <prdfCalloutsData.H>   // For MruType enum
+#include <prdfMain_common.H>    // For ATTENTION_VALUE_TYPE enum
 
 #include <srcisrc.H>
 
 #include <errlplugins.H>
 #include <errlusrparser.H>
-#include <attributeenums.H> // For TARGETING::TYPE enum
+#include <attributeenums.H>     // For TARGETING::TYPE enum
 
 #include <prdfCenLogParse.H>
 #include <prdfProcLogParse.H>
@@ -465,6 +466,34 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
 
 //------------------------------------------------------------------------------
 
+const char * attnTypeToStr( uint32_t i_attnType )
+{
+    switch ( i_attnType )
+    {
+        case MACHINE_CHECK: return "SYSTEM_CS";
+        case UNIT_CS:       return "UNIT_CS";
+        case RECOVERABLE:   return "RECOVERABLE";
+        case SPECIAL:       return "SPECIAL";
+        default:            return "";
+    }
+}
+
+//------------------------------------------------------------------------------
+
+const char * errlSevTypeToStr( uint32_t i_errlSev )
+{
+    switch ( i_errlSev )
+    {
+        case ERRL_SEV_INFORMATIONAL: return "INFORMATIONAL";
+        case ERRL_SEV_RECOVERED:     return "RECOVERED";
+        case ERRL_SEV_PREDICTIVE:    return "PREDICTIVE";
+        case ERRL_SEV_UNRECOVERABLE: return "UNRECOVERABLE";
+        default:                     return "";
+    }
+}
+
+//------------------------------------------------------------------------------
+
 bool parsePfaData( void * i_buffer, uint32_t i_buflen,
                    ErrlUsrParser & i_parser )
 {
@@ -503,8 +532,13 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
         i_parser.PrintBool("  Secondary Error",        pfa.SECONDARY_ERROR    );
 
         // Attention types
-        i_parser.PrintNumber("Primary ATTN type",   "0x%02X", pfa.priAttnType);
-        i_parser.PrintNumber("Secondary ATTN type", "0x%02X", pfa.secAttnType);
+        snprintf( tmp, 50, "%s (0x%02X)", attnTypeToStr(pfa.priAttnType),
+                pfa.priAttnType );
+        i_parser.PrintString( "Primary ATTN Type", tmp );
+
+        snprintf( tmp, 50, "%s (0x%02X)", attnTypeToStr(pfa.secAttnType),
+                pfa.secAttnType );
+        i_parser.PrintString( "Secondary ATTN Type", tmp );
 
         // Thresholding
         snprintf( tmp, 50, "%d of %d", pfa.errorCount, pfa.threshold );
@@ -516,16 +550,8 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
 
         // Error log actions and severity
         i_parser.PrintNumber( "ERRL Actions", "0x%04x", pfa.errlActions );
-
-        tmpStr = "Undefined";
-        switch ( pfa.errlSeverity )
-        {
-            case ERRL_SEV_INFORMATIONAL: tmpStr = "INFORMATIONAL"; break;
-            case ERRL_SEV_RECOVERED:     tmpStr = "RECOVERED";     break;
-            case ERRL_SEV_PREDICTIVE:    tmpStr = "PREDICTIVE";    break;
-            case ERRL_SEV_UNRECOVERABLE: tmpStr = "UNRECOVERABLE"; break;
-        }
-        snprintf( tmp, 50, "ERRL_SEV_%s (0x%x) ", tmpStr, pfa.errlSeverity );
+        snprintf( tmp, 50, "%s (0x%x) ",
+                  errlSevTypeToStr(pfa.errlSeverity), pfa.errlSeverity );
         i_parser.PrintString( "ERRL Severity", tmp );
 
         // GARD info
@@ -606,12 +632,16 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
 
             for ( uint32_t i = 0; i < pfa.sigListCount; ++i )
             {
+                char header[25];
                 char sigDesc[256];
+
+                snprintf( header, 25, "  0x%08x 0x%08x",
+                          pfa.sigList[i].chipId, pfa.sigList[i].signature );
 
                 getSigDesc( pfa.sigList[i].chipId, pfa.sigList[i].signature,
                             256, sigDesc );
 
-                i_parser.PrintString( "", sigDesc );
+                i_parser.PrintString( header, sigDesc );
             }
         }
     }
