@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_volt_vpp_offset.C,v 1.18 2014/09/12 15:37:51 sglancy Exp $
+// $Id: mss_volt_vpp_offset.C,v 1.20 2015/07/22 14:15:06 sglancy Exp $
 /* File mss_volt_vpp_offset.C created by Stephen Glancy on Tue 20 May 2014. */
 
 //------------------------------------------------------------------------------
@@ -45,6 +45,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:   | Comment:
 //---------|----------|----------|-----------------------------------------------
+//  1.20   | sglancy  | 07/22/15 | DDR4 updates allowing both DDR3 and DDR4 DIMMs on the same VPP plane
+//  1.19   | sglancy  | 04/21/15 | Added support for mixed voltage plane configurations.  still checks for mixed centaur bugs
 //  1.18   | sglancy  | 09/12/14 | Removed references to EFF attributes
 //  1.17   | sglancy  | 09/12/14 | Fixed bugs
 //  1.16   | sglancy  | 09/11/14 | Fixed bugs
@@ -90,13 +92,16 @@ fapi::ReturnCode mss_volt_vpp_offset(std::vector<fapi::Target> & i_targets)
     uint32_t vpp_slope, vpp_intercept;
     uint8_t dram_width, enable, dram_gen;
     uint8_t cur_dram_gen, is_functional; 
+    bool dram_gen_found_mc = false;
     bool dram_gen_found = false;
+    bool dram_gen_ddr4 = false;
     uint8_t num_spares[2][2][4];
     uint8_t rank_config, num_non_functional;
     num_non_functional = 0;
     std::vector<fapi::Target>  l_mbaChiplets;
     std::vector<fapi::Target>  l_dimm_targets;
-    
+    std::vector<uint8_t> dram_gen_vector; //used to ID whether an MC needs to be used in the VPP offset calculations
+
     //checks to make sure that all of the DRAM generation attributes are the same, if not error out
     for(uint32_t i = 0; i < i_targets.size();i++) {
        //gets the functional attribute to check for an active centaur
@@ -108,7 +113,9 @@ fapi::ReturnCode mss_volt_vpp_offset(std::vector<fapi::Target> & i_targets)
        if(is_functional != fapi::ENUM_ATTR_FUNCTIONAL_FUNCTIONAL) {
           num_non_functional++;
        }
-       
+
+       dram_gen_found_mc = false;
+
        //loops through all MBA chiplets to compare the DRAM technology generation attribute
        l_mbaChiplets.clear();
        l_rc=fapiGetChildChiplets(i_targets[i], fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets, fapi::TARGET_STATE_PRESENT);
@@ -147,12 +154,13 @@ fapi::ReturnCode mss_volt_vpp_offset(std::vector<fapi::Target> & i_targets)
 	     }
 	     //if this is the first DIMM that has a valid DRAM Technology level, then set the level and continue
 	     //otherwise throw an error and exit
-	     if(!dram_gen_found) {
+	     if(!dram_gen_found_mc) {
 	        dram_gen = cur_dram_gen;
 		dram_gen_found = true;
+		dram_gen_found_mc = true;
 	     } //end if
 	     else {
-	        //values are not equal -> set the fapi RC and exit out
+	        //values are not equal for one given centaur -> set the fapi RC and exit out
     	  	if(cur_dram_gen != dram_gen){
     	  	   // this just needs to be deconfiged at the dimm level
     	  	   const uint8_t &DRAM_GEN_MISCOMPARE = cur_dram_gen;
@@ -163,9 +171,23 @@ fapi::ReturnCode mss_volt_vpp_offset(std::vector<fapi::Target> & i_targets)
     	  	   FAPI_ERR("Not all DRAM technology generations are the same.\nExiting....");
     	  	   return l_rc;
     	  	}//end if
+		//is a DDR4 type, go and set the DDR4 flag -> means that the vpp offset flag will be set
+		if(cur_dram_gen == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR4) {
+		   dram_gen_ddr4 = true;
+		}
 	     }//end else
 	  }
        }//end for
+
+       //if a DRAM gen was not found for this MC, then assume that this is a DDR4 DIMM to err on the side of caution
+       //please note: dram_gen_ddr4 flag is not set here intentionally, this is because the voltage offset is only desirable if a card is confirmed as DDR4
+       if(!dram_gen_found_mc) {
+          dram_gen_vector.push_back(fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR4);
+       }
+       //otherwise, do the current DRAM gen for the card
+       else {
+          dram_gen_vector.push_back(cur_dram_gen);
+       }
     }//end for
     
     //found a bad VPD
@@ -189,7 +211,7 @@ fapi::ReturnCode mss_volt_vpp_offset(std::vector<fapi::Target> & i_targets)
     }
     
     //checks to see if the DIMMs are DDR3 DIMMs if so, return 0 and exit
-    if(dram_gen == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR3) {
+    if(!dram_gen_ddr4) {
        uint32_t param_vpp_voltage_mv = 0; 
        //debug output statement
        FAPI_INF("ATTR_MSS_VPP_OFFSET: %d",param_vpp_voltage_mv);
@@ -210,9 +232,9 @@ fapi::ReturnCode mss_volt_vpp_offset(std::vector<fapi::Target> & i_targets)
     if(enable == fapi::ENUM_ATTR_MSS_VPP_OFFSET_DISABLE_DISABLE) return l_rc;
 
     //gets the slope and intercepts
-    l_rc = FAPI_ATTR_GET(ATTR_MSS_VPP_SLOPE,NULL,vpp_slope); 
+    l_rc = FAPI_ATTR_GET(ATTR_MSS_VPP_SLOPE,&i_targets[0],vpp_slope);
     if(l_rc) return l_rc;
-    l_rc = FAPI_ATTR_GET(ATTR_MSS_VPP_SLOPE_INTERCEPT,NULL,vpp_intercept); 
+    l_rc = FAPI_ATTR_GET(ATTR_MSS_VPP_SLOPE_INTERCEPT,&i_targets[0],vpp_intercept);
     if(l_rc) return l_rc;
     //checks to make sure that none of the values are zeros.  If any of the values are 0's then 0 * any other value = 0
     if((vpp_slope * vpp_intercept) == 0) {
@@ -222,12 +244,15 @@ fapi::ReturnCode mss_volt_vpp_offset(std::vector<fapi::Target> & i_targets)
        FAPI_ERR("One or more dynamic VPP attributes is 0.\nExiting....");
        return l_rc;
     }
-    
+
 
     //continues computing VPP for DDR4
     //loops through all DIMMs
     num_chips=0;
     for(uint32_t i=0;i<i_targets.size();i++) {
+       //skips the curent target if it's not DDR4 (no DRAMs drawing power)
+       if(dram_gen_vector[i] != fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR4) continue;
+
        //resets the number of ranks and spares
        l_mbaChiplets.clear();
        l_rc=fapiGetChildChiplets(i_targets[i], fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets, fapi::TARGET_STATE_PRESENT);

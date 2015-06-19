@@ -795,6 +795,20 @@ fapi::ReturnCode fapiPlatGetTpVitlSpyLengthAttr(
 fapi::ReturnCode fapiPlatGetTpVitlSpyOffsetAttr(
                                const fapi::Target * i_pProcTarget,
                                uint32_t (&o_data)[SPY_OFFSET_SIZE]);
+/*
+ * @brief This function is called by the FAPI_ATTR_GET macro when getting
+ * certain memory attributes
+ * It should not be called directly.
+ *
+ *  @param[in]  i_pTarget   Target Centaur pointer
+ *  @param[in]  i_attr      Attribute Id
+ *  @param[out] o_val       Attribute Value
+ *  @return     ReturnCode. Zero on success, else platform specified error
+ */
+fapi::ReturnCode fapiPlatGetMemAttrData (
+                                const fapi::Target * i_pTarget,
+                                const TARGETING::ATTRIBUTE_ID i_attr,
+                                uint32_t & o_val);
 
 } // namespace platAttrSvc
 
@@ -2747,5 +2761,79 @@ fapi::ReturnCode fapiPlatGetTpVitlSpyOffsetAttr(
 #define ATTR_PROC_TP_VITL_SPY_OFFSETS_GETMACRO(ID, PTARGET, VAL) \
     fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? fapi::FAPI_RC_SUCCESS : \
     fapi::platAttrSvc::fapiPlatGetTpVitlSpyOffsetAttr(PTARGET, VAL)
+
+//------------------------------------------------------------------------------
+//  MACROS to support Memory Attributes at node level
+//------------------------------------------------------------------------------
+#define ATTR_MSS_VDD_SLOPE_ACTIVE_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? \
+        fapi::FAPI_RC_SUCCESS : \
+        fapi::platAttrSvc::fapiPlatGetMemAttrData(\
+              PTARGET, TARGETING::ATTR_MSS_CENT_VDD_SLOPE_ACTIVE, VAL)
+#define ATTR_MSS_VDD_SLOPE_INACTIVE_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? \
+        fapi::FAPI_RC_SUCCESS : \
+        fapi::platAttrSvc::fapiPlatGetMemAttrData(\
+            PTARGET, TARGETING::ATTR_MSS_CENT_VDD_SLOPE_INACTIVE, VAL)
+#define ATTR_MSS_VDD_SLOPE_INTERCEPT_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? \
+        fapi::FAPI_RC_SUCCESS : \
+        fapi::platAttrSvc::fapiPlatGetMemAttrData(\
+            PTARGET, TARGETING::ATTR_MSS_CENT_VDD_INTERCEPT, VAL)
+#define ATTR_MSS_VCS_SLOPE_ACTIVE_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? \
+        fapi::FAPI_RC_SUCCESS : \
+        fapi::platAttrSvc::fapiPlatGetMemAttrData(\
+            PTARGET, TARGETING::ATTR_MSS_CENT_VCS_SLOPE_ACTIVE, VAL)
+#define ATTR_MSS_VCS_SLOPE_INACTIVE_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? \
+        fapi::FAPI_RC_SUCCESS : \
+        fapi::platAttrSvc::fapiPlatGetMemAttrData(\
+            PTARGET, TARGETING::ATTR_MSS_CENT_VCS_SLOPE_INACTIVE, VAL)
+#define ATTR_MSS_VCS_SLOPE_INTERCEPT_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? \
+        fapi::FAPI_RC_SUCCESS : \
+        fapi::platAttrSvc::fapiPlatGetMemAttrData(\
+            PTARGET, TARGETING::ATTR_MSS_CENT_VCS_INTERCEPT, VAL)
+#define ATTR_MSS_VPP_SLOPE_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? \
+        fapi::FAPI_RC_SUCCESS : \
+        fapi::platAttrSvc::fapiPlatGetMemAttrData(\
+            PTARGET, TARGETING::ATTR_MSS_VOLT_VPP_SLOPE_EFF_CONFIG, VAL)
+#define ATTR_MSS_VPP_SLOPE_INTERCEPT_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? \
+        fapi::FAPI_RC_SUCCESS : \
+        fapi::platAttrSvc::fapiPlatGetMemAttrData(\
+            PTARGET, TARGETING::ATTR_MSS_VOLT_VPP_INTERCEPT_EFF_CONFIG, VAL)
+#define ATTR_MSS_DDR3_VDDR_SLOPE_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? \
+        fapi::FAPI_RC_SUCCESS : \
+        fapi::platAttrSvc::fapiPlatGetMemAttrData(\
+            PTARGET, TARGETING::ATTR_MSS_VOLT_DDR3_VDDR_SLOPE_EFF_CONFIG, VAL)
+#define ATTR_MSS_DDR3_VDDR_INTERCEPT_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? \
+        fapi::FAPI_RC_SUCCESS : \
+        fapi::platAttrSvc::fapiPlatGetMemAttrData(PTARGET,\
+            TARGETING::ATTR_MSS_VOLT_DDR3_VDDR_INTERCEPT_EFF_CONFIG, VAL)
+#define ATTR_MRW_DDR3_VDDR_MAX_LIMIT_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? \
+        fapi::FAPI_RC_SUCCESS : \
+        fapi::platAttrSvc::fapiPlatGetMemAttrData(\
+            PTARGET, TARGETING::ATTR_MRW_DDR3_VDDR_MAX_LIMIT_EFF_CONFIG, VAL)
+#define ATTR_MSS_DDR4_VDDR_SLOPE_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? \
+        fapi::FAPI_RC_SUCCESS : \
+        fapi::platAttrSvc::fapiPlatGetMemAttrData(\
+            PTARGET, TARGETING::ATTR_MSS_VOLT_DDR4_VDDR_SLOPE_EFF_CONFIG, VAL)
+#define ATTR_MSS_DDR4_VDDR_INTERCEPT_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? \
+        fapi::FAPI_RC_SUCCESS : \
+        fapi::platAttrSvc::fapiPlatGetMemAttrData(PTARGET,\
+            TARGETING::ATTR_MSS_VOLT_DDR4_VDDR_INTERCEPT_EFF_CONFIG, VAL)
+#define ATTR_MRW_DDR4_VDDR_MAX_LIMIT_GETMACRO(ID, PTARGET, VAL) \
+    fapi::AttrOverrideSync::getAttrOverrideFunc(fapi::ID, PTARGET, &VAL) ? \
+        fapi::FAPI_RC_SUCCESS : \
+        fapi::platAttrSvc::fapiPlatGetMemAttrData(\
+            PTARGET, TARGETING::ATTR_MRW_DDR4_VDDR_MAX_LIMIT_EFF_CONFIG, VAL)
 
 #endif // FAPIPLATATTRIBUTESERVICE_H_

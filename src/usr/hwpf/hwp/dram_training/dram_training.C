@@ -79,6 +79,8 @@ const uint8_t VPO_NUM_OF_MEMBUF_TO_RUN = UNLIMITED_RUN;
 #include    "mss_draminit_trainadv/mss_draminit_training_advanced.H"
 #include    "mss_draminit_mc/mss_draminit_mc.H"
 #include    "proc_throttle_sync.H"
+#include    "../mc_config/mc_config.H"
+
 
 namespace   DRAM_TRAINING
 {
@@ -530,6 +532,75 @@ void*  call_mss_ddr_phy_reset( void *io_pArgs )
     return l_stepError.getErrorHandle();
 }
 
+//
+//  Wrapper function to call mss_post_draminit
+//
+void   mss_post_draminit( IStepError & l_stepError )
+{
+    errlHndl_t l_err = NULL;
+    bool rerun_vddr = false;
+
+    do {
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "mss_post_draminit entry" );
+
+    set_eff_config_attrs_helper(MC_CONFIG::POST_DRAM_INIT, rerun_vddr);
+
+    if ( rerun_vddr == false )
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "mss_post_draminit: nothing to do" );
+        break;
+    }
+
+    // Call mss_volt_vddr_offset to recalculate VDDR voltage
+
+    l_err = MC_CONFIG::setMemoryVoltageDomainOffsetVoltage<
+        TARGETING::ATTR_MSS_VOLT_VDDR_OFFSET_DISABLE,
+        TARGETING::ATTR_MEM_VDDR_OFFSET_MILLIVOLTS,
+        TARGETING::ATTR_VMEM_ID>();
+    if(l_err)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "mss_post_draminit: "
+            "ERROR 0x%08X: setMemoryVoltageDomainOffsetVoltage for VDDR domain",
+            l_err->reasonCode());
+        l_stepError.addErrorDetails(l_err);
+        errlCommit(l_err,HWPF_COMP_ID);
+        break;
+    }
+    else
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "mss_post_draminit: mss_volt_vddr_offset(): SUCCESS");
+    }
+
+    // Call HWSV to call POWR code
+    // This fuction has compile-time binding for different platforms
+    l_err = platform_adjust_vddr_post_dram_init();
+
+    if( l_err )
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "ERROR 0x%.8X: mss_post_draminit: "
+                  "platform_adjust_vddr_post_dram_init() returns error",
+                  l_err->reasonCode());
+
+        // Create IStep error log and cross reference to error that occurred
+        l_stepError.addErrorDetails( l_err );
+
+        // Commit Error
+        errlCommit( l_err, HWPF_COMP_ID );
+    }
+
+    } while(0);
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "mss_post_draminit exit" );
+
+    return;
+}
+
+
 
 //
 //  Wrapper function to call mss_draminit
@@ -592,6 +663,12 @@ void*    call_mss_draminit( void *io_pArgs )
         }
 
     }   // endfor   mba's
+
+    // call POST_DRAM_INIT function
+    if(INITSERVICE::spBaseServicesEnabled())
+    {
+        mss_post_draminit(l_stepError);
+    }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit exit" );
 

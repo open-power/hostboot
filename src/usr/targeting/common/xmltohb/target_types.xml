@@ -263,12 +263,6 @@
     <attribute><id>MSS_CENT_AVDD_SLOPE_ACTIVE</id></attribute>
     <attribute><id>MSS_CENT_AVDD_SLOPE_INACTIVE</id></attribute>
     <attribute><id>MSS_CENT_AVDD_INTERCEPT</id></attribute>
-    <attribute><id>MSS_CENT_VDD_SLOPE_ACTIVE</id></attribute>
-    <attribute><id>MSS_CENT_VDD_SLOPE_INACTIVE</id></attribute>
-    <attribute><id>MSS_CENT_VDD_INTERCEPT</id></attribute>
-    <attribute><id>MSS_CENT_VCS_SLOPE_ACTIVE</id></attribute>
-    <attribute><id>MSS_CENT_VCS_SLOPE_INACTIVE</id></attribute>
-    <attribute><id>MSS_CENT_VCS_INTERCEPT</id></attribute>
     <attribute><id>MSS_VOLT_VPP_SLOPE</id></attribute>
     <attribute><id>MSS_VOLT_VPP_INTERCEPT</id></attribute>
     <attribute><id>MSS_VOLT_DDR3_VDDR_SLOPE</id></attribute>
@@ -920,6 +914,28 @@
     <attribute><id>TPM_BACKUP_INFO</id></attribute>
     <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
     <attribute><id>VPD_REC_NUM</id></attribute>
+    <attribute><id>MSS_CENT_VDD_SLOPE_ACTIVE</id></attribute>
+    <attribute><id>MSS_CENT_VDD_SLOPE_INACTIVE</id></attribute>
+    <attribute><id>MSS_CENT_VDD_INTERCEPT</id></attribute>
+    <attribute><id>MSS_CENT_VCS_SLOPE_ACTIVE</id></attribute>
+    <attribute><id>MSS_CENT_VCS_SLOPE_INACTIVE</id></attribute>
+    <attribute><id>MSS_CENT_VCS_INTERCEPT</id></attribute>
+    <attribute><id>MSS_VOLT_VPP_SLOPE_POST_DRAM_INIT</id></attribute>
+    <attribute><id>MSS_VOLT_VPP_INTERCEPT_POST_DRAM_INIT</id></attribute>
+    <attribute><id>MSS_VOLT_VPP_SLOPE_EFF_CONFIG</id></attribute>
+    <attribute><id>MSS_VOLT_VPP_INTERCEPT_EFF_CONFIG</id></attribute>
+    <attribute><id>MRW_DDR3_VDDR_MAX_LIMIT_POST_DRAM_INIT</id></attribute>
+    <attribute><id>MRW_DDR4_VDDR_MAX_LIMIT_POST_DRAM_INIT</id></attribute>
+    <attribute><id>MRW_DDR3_VDDR_MAX_LIMIT_EFF_CONFIG</id></attribute>
+    <attribute><id>MRW_DDR4_VDDR_MAX_LIMIT_EFF_CONFIG</id></attribute>
+    <attribute><id>MSS_VOLT_DDR3_VDDR_SLOPE_POST_DRAM_INIT</id></attribute>
+    <attribute><id>MSS_VOLT_DDR3_VDDR_INTERCEPT_POST_DRAM_INIT</id></attribute>
+    <attribute><id>MSS_VOLT_DDR3_VDDR_SLOPE_EFF_CONFIG</id></attribute>
+    <attribute><id>MSS_VOLT_DDR3_VDDR_INTERCEPT_EFF_CONFIG</id></attribute>
+    <attribute><id>MSS_VOLT_DDR4_VDDR_SLOPE_POST_DRAM_INIT</id></attribute>
+    <attribute><id>MSS_VOLT_DDR4_VDDR_INTERCEPT_POST_DRAM_INIT</id></attribute>
+    <attribute><id>MSS_VOLT_DDR4_VDDR_SLOPE_EFF_CONFIG</id></attribute>
+    <attribute><id>MSS_VOLT_DDR4_VDDR_INTERCEPT_EFF_CONFIG</id></attribute>
 </targetType>
 
 <targetType>

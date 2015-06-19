@@ -223,7 +223,7 @@ void HBVddrMsg::addMemoryVoltageDomains(
 ///////////////////////////////////////////////////////////////////////////////
 
 void HBVddrMsg::createVddrData(
-    const VDDR_MSG_TYPE     i_requestType,
+          VDDR_MSG_TYPE     i_requestType,
           RequestContainer& io_request) const
 {
     TRACFCOMP( g_trac_volt, ENTER_MRK "HBVddrMsg::createVddrData" );
@@ -302,7 +302,8 @@ void HBVddrMsg::createVddrData(
             io_request.erase(pInvalidEntries,io_request.end());
         }
 
-        if(   (i_requestType == HB_VDDR_ENABLE)
+        if( ( (i_requestType == HB_VDDR_ENABLE) ||
+              (i_requestType == HB_VDDR_POST_DRAM_INIT_ENABLE) )
            && (!membufTargetList.empty())      )
         {
             // Inhibit sending any request to turn on a domain with no voltage.
@@ -322,7 +323,7 @@ void HBVddrMsg::createVddrData(
 ///////////////////////////////////////////////////////////////////////////////
 // HBVddrMsg::sendMsg
 ///////////////////////////////////////////////////////////////////////////////
-errlHndl_t HBVddrMsg::sendMsg(uint32_t i_msgType) const
+errlHndl_t HBVddrMsg::sendMsg(VDDR_MSG_TYPE i_msgType) const
 {
     errlHndl_t l_err = NULL;
 
@@ -333,13 +334,9 @@ errlHndl_t HBVddrMsg::sendMsg(uint32_t i_msgType) const
     {
         RequestContainer l_request;
 
-        if ( (i_msgType == HB_VDDR_ENABLE) || (i_msgType == HB_VDDR_DISABLE) )
-        {
-            VDDR_MSG_TYPE msgType = (i_msgType == HB_VDDR_ENABLE)
-                ? HB_VDDR_ENABLE : HB_VDDR_DISABLE;
-            createVddrData(msgType, l_request);
-        }
-        else
+        if ( ! ( (i_msgType == HB_VDDR_ENABLE) ||
+                 (i_msgType == HB_VDDR_DISABLE) ||
+                 (i_msgType == HB_VDDR_POST_DRAM_INIT_ENABLE) ) )
         {
             TRACFCOMP(g_trac_volt, ERR_MRK "hbVddrMsg::send msg with non-"
                       "valid msg type%08X",i_msgType);
@@ -358,6 +355,8 @@ errlHndl_t HBVddrMsg::sendMsg(uint32_t i_msgType) const
                          fapi::RC_INCORRECT_MSG_TYPE, i_msgType);
             break;
         }
+        createVddrData(i_msgType, l_request);
+
 
         size_t l_dataCount = l_request.size();
 
@@ -544,7 +543,8 @@ errlHndl_t HBVddrMsg::processMsg(msg_t* i_Msg) const
             TRACFCOMP( g_trac_volt, INFO_MRK
                        "HBVddrMsg::processMsg l_msgType=x%08X",l_msgType );
             if ( (l_msgType == HB_VDDR_ENABLE) ||
-                 (l_msgType == HB_VDDR_DISABLE) )
+                 (l_msgType == HB_VDDR_DISABLE)||
+                 (l_msgType == HB_VDDR_POST_DRAM_INIT_ENABLE) )
             {
                 //process a VDDR message    
                 l_errLog=processVDDRmsg(i_Msg);
@@ -653,7 +653,7 @@ errlHndl_t platform_enable_vddr()
                        "SUCCESS :  host_enable_vddr()" );
         }
     }
-    else // simics stand-alone TULETTA
+    else // no FSP/mbox services available
     {
         TRACFCOMP(g_trac_volt,"call_host_enable_vddr"
                 "no-op because mbox not available");
@@ -683,9 +683,39 @@ errlHndl_t platform_disable_vddr()
                        "SUCCESS :  host_disable_vddr()" );
         }
     }
-    else  // simics stand-along TULETTA
+    else  // no FSP/mbox services available
     {
         TRACFCOMP(g_trac_volt,"call_host_disable_vddr"
+                "no-op because mbox not available");
+    }
+
+    return l_err;
+}
+
+errlHndl_t platform_adjust_vddr_post_dram_init()
+{
+    errlHndl_t l_err = NULL;
+    if(INITSERVICE::spBaseServicesEnabled())
+    {
+        HBVddrMsg l_hbVddr;
+
+        l_err = l_hbVddr.sendMsg(HBVddrMsg::HB_VDDR_POST_DRAM_INIT_ENABLE);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_volt,
+                      "ERROR 0x%.8X: call_host_adjust_vddr_post_dram_init to "
+                      "sendMsg returns error",
+                      l_err->reasonCode());
+        }
+        else
+        {
+            TRACFCOMP( g_trac_volt,
+                       "SUCCESS :  host_adjust_vddr_post_dram_init()" );
+        }
+    }
+    else  // no FSP/mbox services available
+    {
+        TRACFCOMP(g_trac_volt,"call_host_adjust_vddr_post_dram_init()"
                 "no-op because mbox not available");
     }
 

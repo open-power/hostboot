@@ -1799,6 +1799,211 @@ fapi::ReturnCode fapiPlatGetTpVitlSpyOffsetAttr(
     return l_rc;
 }
 
+fapi::ReturnCode fapiPlatGetMemAttrData (
+                              const fapi::Target * i_pTarget,
+                              const TARGETING::ATTRIBUTE_ID i_attr,
+                              uint32_t & o_val)
+{
+
+    FAPI_DBG("fapiPlatGetMemAttrData: START: i_attr=0x%X", i_attr);
+
+    fapi::ReturnCode l_rc;
+    TARGETING::Target * l_pTgt = NULL;
+
+    do {
+
+        // Get non-FAPI Centaur Target
+        l_rc = getTargetingTarget(i_pTarget, l_pTgt,
+                                  TARGETING::TYPE_MEMBUF);
+
+        if (l_rc)
+        {
+            FAPI_ERR("fapiPlatGetMemAttrData: Error from getTargetingTarget");
+            break;
+        }
+
+        // Get NODE from MEMBUF target
+        TARGETING::TargetHandleList l_nodeList;
+        TARGETING::TargetService& tS = TARGETING::targetService();
+
+        TARGETING::PredicateCTM isaNode(TARGETING::CLASS_ENC,
+                                        TARGETING::TYPE_NODE);
+        tS.getAssociated( l_nodeList,
+                          l_pTgt,
+                          TARGETING::TargetService::PARENT,
+                          TARGETING::TargetService::ALL,
+                          &isaNode);
+
+        // Node list should only have 1 tgt
+        if (l_nodeList.size() != 1 )
+        {
+            FAPI_ERR("fapiPlatGetMemAttrData: expect 1 node %d ",
+                     l_nodeList.size());
+
+            /*@
+             * @errortype
+             * @moduleid     MOD_PLAT_ATTR_SVC_GET_MEM_ATTR_DATA
+             * @reasoncode   RC_NO_SINGLE_NODE
+             * @userdata1    Number of Nodes
+             * @userdata2    MEMBUF Target HUID
+             * @devdesc      fapiPlatGetMemAttrData could not find the single
+             *               node associated with this membuf target
+             */
+            const bool hbSwError = true;
+            errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                MOD_PLAT_ATTR_SVC_GET_MEM_ATTR_DATA,
+                RC_NO_SINGLE_NODE,
+                l_nodeList.size(),
+                TARGETING::get_huid(l_pTgt),
+                hbSwError);
+
+            // Attach the error log to the fapi::ReturnCode
+            l_rc.setPlatError(reinterpret_cast<void *> (l_pError));
+            break;
+        }
+
+        // Get the attribute from the node level
+        // NOTE: Using switch statement to explicitly track the attributes
+        //       that need to do this lookup.
+        bool l_success = false;
+
+        switch ( i_attr )
+        {
+            case TARGETING::ATTR_MSS_CENT_VDD_SLOPE_ACTIVE:
+                l_success =
+                    l_nodeList[0]->tryGetAttr<
+                        TARGETING::ATTR_MSS_CENT_VDD_SLOPE_ACTIVE>(o_val);
+                break;
+
+            case TARGETING::ATTR_MSS_CENT_VDD_SLOPE_INACTIVE:
+                l_success =
+                    l_nodeList[0]->tryGetAttr<
+                        TARGETING::ATTR_MSS_CENT_VDD_SLOPE_INACTIVE>(o_val);
+                break;
+
+            case TARGETING::ATTR_MSS_CENT_VDD_INTERCEPT:
+                l_success =
+                    l_nodeList[0]->tryGetAttr<
+                        TARGETING::ATTR_MSS_CENT_VDD_INTERCEPT>(o_val);
+                break;
+
+            case TARGETING::ATTR_MSS_CENT_VCS_SLOPE_ACTIVE:
+                l_success =
+                    l_nodeList[0]->tryGetAttr<
+                        TARGETING::ATTR_MSS_CENT_VCS_SLOPE_ACTIVE>(o_val);
+                break;
+
+            case TARGETING::ATTR_MSS_CENT_VCS_SLOPE_INACTIVE:
+                l_success =
+                    l_nodeList[0]->tryGetAttr<
+                        TARGETING::ATTR_MSS_CENT_VCS_SLOPE_INACTIVE>(o_val);
+                break;
+
+            case TARGETING::ATTR_MSS_CENT_VCS_INTERCEPT:
+                l_success = l_nodeList[0]->tryGetAttr<
+                            TARGETING::ATTR_MSS_CENT_VCS_INTERCEPT>(o_val);
+                break;
+
+            case TARGETING::ATTR_MSS_VOLT_VPP_SLOPE_EFF_CONFIG:
+                l_success =
+                    l_nodeList[0]->tryGetAttr<
+                        TARGETING::ATTR_MSS_VOLT_VPP_SLOPE_EFF_CONFIG>(o_val);
+                break;
+
+            case TARGETING::ATTR_MSS_VOLT_VPP_INTERCEPT_EFF_CONFIG:
+                l_success =
+                    l_nodeList[0]->tryGetAttr<
+                        TARGETING::ATTR_MSS_VOLT_VPP_INTERCEPT_EFF_CONFIG>
+                            (o_val);
+                break;
+
+            case TARGETING::ATTR_MSS_VOLT_DDR3_VDDR_SLOPE_EFF_CONFIG:
+                l_success =
+                    l_nodeList[0]->tryGetAttr<
+                        TARGETING::ATTR_MSS_VOLT_DDR3_VDDR_SLOPE_EFF_CONFIG>
+                            (o_val);
+                break;
+
+            case TARGETING::ATTR_MSS_VOLT_DDR3_VDDR_INTERCEPT_EFF_CONFIG:
+                l_success =
+                    l_nodeList[0]->tryGetAttr<
+                        TARGETING::ATTR_MSS_VOLT_DDR3_VDDR_INTERCEPT_EFF_CONFIG
+                        >(o_val);
+                break;
+
+            case TARGETING::ATTR_MRW_DDR3_VDDR_MAX_LIMIT_EFF_CONFIG:
+                l_success =
+                    l_nodeList[0]->tryGetAttr<
+                        TARGETING::ATTR_MRW_DDR3_VDDR_MAX_LIMIT_EFF_CONFIG>
+                            (o_val);
+                break;
+
+            case TARGETING::ATTR_MSS_VOLT_DDR4_VDDR_SLOPE_EFF_CONFIG:
+                l_success =
+                    l_nodeList[0]->tryGetAttr<
+                        TARGETING::ATTR_MSS_VOLT_DDR4_VDDR_SLOPE_EFF_CONFIG>
+                            (o_val);
+                break;
+
+            case TARGETING::ATTR_MSS_VOLT_DDR4_VDDR_INTERCEPT_EFF_CONFIG:
+                l_success =
+                    l_nodeList[0]->tryGetAttr<
+                        TARGETING::ATTR_MSS_VOLT_DDR4_VDDR_INTERCEPT_EFF_CONFIG
+                        >(o_val);
+                break;
+
+            case TARGETING::ATTR_MRW_DDR4_VDDR_MAX_LIMIT_EFF_CONFIG:
+                l_success =
+                    l_nodeList[0]->tryGetAttr<
+                        TARGETING::ATTR_MRW_DDR4_VDDR_MAX_LIMIT_EFF_CONFIG>
+                            (o_val);
+                break;
+
+            default:
+                // Use error creation below
+                l_success = false;
+                break;
+        }
+
+        if (!l_success)
+        {
+            FAPI_ERR("fapiPlatGetMemAttrData: Error from _tryGetAttr");
+
+            /*@
+             *  @errortype
+             *  @moduleid   MOD_PLAT_ATTR_SVC_GET_MEM_ATTR_DATA
+             *  @reasoncode RC_FAILED_TO_ACCESS_ATTRIBUTE
+             *  @userdata1[0:31]  Platform attribute ID
+             *  @userdata1[32:64] MEMBUF Target
+             *  @userdata2  FAPI target type, or NULL if system target
+             *  @devdesc    Failed to get requested attribute.
+             *      Possible causes: Invalid target, attribute not implemented,
+             *          attribute not present on given target, target service
+             *          not initialized
+             */
+            const bool hbSwError = true;
+            errlHndl_t l_pError = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                MOD_PLAT_ATTR_SVC_GET_MEM_ATTR_DATA,
+                RC_FAILED_TO_ACCESS_ATTRIBUTE,
+                TWO_UINT32_TO_UINT64(
+                    i_attr,
+                    TARGETING::get_huid(l_pTgt)),
+                i_pTarget ? i_pTarget->getType(): NULL,
+                hbSwError);
+            l_rc.setPlatError(reinterpret_cast<void *>(l_pError));
+        }
+
+    } while (0);
+
+    FAPI_DBG("fapiPlatGetMemAttrData: EXIT: i_attr=0x%X --> o_val = %d (0x%X)",
+             i_attr, o_val, o_val);
+
+    return l_rc;
+
+}
+
 } // End platAttrSvc namespace
 
 } // End fapi namespace

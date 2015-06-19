@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -136,6 +138,7 @@ public:
     {
         HB_VDDR_ENABLE = 0x40000041,
         HB_VDDR_DISABLE = 0x40000042,
+        HB_VDDR_POST_DRAM_INIT_ENABLE = 0x40000043,
     };
 
     /**
@@ -180,7 +183,7 @@ public:
      *  @return N/A
      */
     void createVddrData(
-        const VDDR_MSG_TYPE     i_requestType,
+              VDDR_MSG_TYPE     i_requestType,
               RequestContainer& io_request) const;
 
     /**
@@ -199,7 +202,7 @@ public:
       *              return errl ==  NULL  -> success
       *              return errl !=  NULL  -> failure
      */
-    errlHndl_t sendMsg(uint32_t i_msgType) const;
+    errlHndl_t sendMsg(VDDR_MSG_TYPE i_msgType) const;
 
 private:
 

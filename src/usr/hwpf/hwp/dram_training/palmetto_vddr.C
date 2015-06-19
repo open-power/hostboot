@@ -356,3 +356,10 @@ errlHndl_t platform_disable_vddr()
     return for_each_vddr_domain_with_functional_memory(
         disableVddrViaGpioPinStrategy);
 }
+
+errlHndl_t platform_adjust_vddr_post_dram_init()
+{
+    // Not supported on palmetto
+    return NULL;
+}
+

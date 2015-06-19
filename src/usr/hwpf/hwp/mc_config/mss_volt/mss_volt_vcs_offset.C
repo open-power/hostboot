@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_volt_vcs_offset.C,v 1.7 2014/06/19 16:06:11 dcadiga Exp $
+// $Id: mss_volt_vcs_offset.C,v 1.8 2015/07/22 14:15:46 sglancy Exp $
 /* File mss_volt_vcs_offset.C created by Stephen Glancy on Tue 20 May 2014. */
 
 //------------------------------------------------------------------------------
@@ -45,6 +45,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:   | Comment:
 //---------|----------|----------|-----------------------------------------------
+//  1.8    | sglancy  | 03/24/15 | Updated for 2Z/3Z ATTR update
 //  1.7    | sglancy  | 06/19/14 | Includes update to force the VCS to be 100 mV higher than the VDD
 //  1.6    | sglancy  | 06/18/14 | Updated errors
 //  1.5    | sglancy  | 06/09/14 | Updated debug statements
@@ -90,12 +91,14 @@ fapi::ReturnCode mss_volt_vcs_offset(std::vector<fapi::Target> & i_targets)
     }
     
     //computes vcs value
-    //gets the necessary attributes and checks for errors
-    l_rc = FAPI_ATTR_GET(ATTR_MSS_VCS_SLOPE_ACTIVE,NULL,slope_active); 
+    //gets the necessary attributes and checks for errors - attributes should be the same accross each node
+    //attributes are stored at the centaur level, only the first centaur in the vector is grabbed
+    // this code should only be called with 1 or more centaur's configured, so this is a valid assumption to make
+    l_rc = FAPI_ATTR_GET(ATTR_MSS_VCS_SLOPE_ACTIVE,&i_targets[0],slope_active);
     if(l_rc) return l_rc;
-    l_rc = FAPI_ATTR_GET(ATTR_MSS_VCS_SLOPE_INACTIVE,NULL,slope_inactive); 
+    l_rc = FAPI_ATTR_GET(ATTR_MSS_VCS_SLOPE_INACTIVE,&i_targets[0],slope_inactive);
     if(l_rc) return l_rc;
-    l_rc = FAPI_ATTR_GET(ATTR_MSS_VCS_SLOPE_INTERCEPT,NULL,intercept); 
+    l_rc = FAPI_ATTR_GET(ATTR_MSS_VCS_SLOPE_INTERCEPT,&i_targets[0],intercept);
     if(l_rc) return l_rc;
 
     //checks to make sure that none of the values are zeros.  If any of the values are 0's then 0 * any other value = 0

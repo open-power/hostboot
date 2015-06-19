@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -41,6 +41,12 @@ errlHndl_t platform_enable_vspd();
  * @return NULL | error handle on error
  */
 errlHndl_t platform_enable_vddr();
+
+/**
+ * @brief Adjust vddr on DIMMS with POST DRAM INITs
+ * @return NULL | error handle on error
+ */
+errlHndl_t platform_adjust_vddr_post_dram_init();
 
 /**
  * @brief Disable vddr on DIMMS

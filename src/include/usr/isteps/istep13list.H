@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -152,6 +152,7 @@ const DepModInfo g_istep13Dependancies = {
 #ifndef CONFIG_VPO_COMPILE
         DEP_LIB(libdram_training.so),
         DEP_LIB(libdram_initialization.so),
+        DEP_LIB(libmc_config.so),
 #endif
         NULL
     }

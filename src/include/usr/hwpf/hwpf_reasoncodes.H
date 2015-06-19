@@ -79,6 +79,7 @@ namespace fapi
         MOD_GET_VER_ONE_VOLTAGE_BUCKET_DATA        = 0x25,
         MOD_PLAT_MVPD_GET_VLTG_BUCKET_ATTR         = 0x26,
         MOD_PLAT_ATTR_SVC_CEN_DQ_TO_DIMM_CONN_DQ   = 0x27,
+        MOD_PLAT_ATTR_SVC_GET_MEM_ATTR_DATA        = 0x28,
 
     };
 
@@ -137,6 +138,7 @@ namespace fapi
         RC_INVALID_PARAM              = HWPF_COMP_ID | 0x37,
         RC_DATA_MISMATCH              = HWPF_COMP_ID | 0x38,
         RC_DATA_NOT_SUPPORTED         = HWPF_COMP_ID | 0x39,
+        RC_NO_SINGLE_NODE             = HWPF_COMP_ID | 0x3A,
     };
 
     /**

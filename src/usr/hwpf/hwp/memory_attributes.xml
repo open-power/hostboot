@@ -2654,7 +2654,7 @@ Will be set at an MBA level with one policy to be used</description>
 
 <attribute>
     <id>ATTR_MSS_VDD_SLOPE_ACTIVE</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Slope value used to determine the dynamic VID VDD adjustment for ACTIVE parts. In uV/Centaur.</description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -2663,7 +2663,7 @@ Will be set at an MBA level with one policy to be used</description>
 
 <attribute>
     <id>ATTR_MSS_VDD_SLOPE_INACTIVE</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Slope value used to determine the dynamic VID VDD adjustment for INACTIVE parts. In uV/Centaur.</description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -2672,7 +2672,7 @@ Will be set at an MBA level with one policy to be used</description>
 
 <attribute>
     <id>ATTR_MSS_VDD_SLOPE_INTERCEPT</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Intercept value used to determine the dynamic VID VDD adjustment for all parts. In mV.</description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -2681,7 +2681,7 @@ Will be set at an MBA level with one policy to be used</description>
 
 <attribute>
     <id>ATTR_MSS_VCS_SLOPE_ACTIVE</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Slope value used to determine the dynamic VID VCS adjustment for ACTIVE parts. In uV/Centaur.</description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -2690,7 +2690,7 @@ Will be set at an MBA level with one policy to be used</description>
 
 <attribute>
     <id>ATTR_MSS_VCS_SLOPE_INACTIVE</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Slope value used to determine the dynamic VID VCS adjustment for INACTIVE parts. In uV/Centaur.</description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -2699,7 +2699,7 @@ Will be set at an MBA level with one policy to be used</description>
 
 <attribute>
     <id>ATTR_MSS_VCS_SLOPE_INTERCEPT</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Intercept value used to determine the dynamic VID VCS adjustment for all parts. In mV.</description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -2708,7 +2708,7 @@ Will be set at an MBA level with one policy to be used</description>
 
 <attribute>
     <id>ATTR_MSS_VPP_SLOPE</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Slope value used to determine the dynamic VID VPP adjustment for all parts. In uV/Centaur.</description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -2717,7 +2717,7 @@ Will be set at an MBA level with one policy to be used</description>
 
 <attribute>
     <id>ATTR_MSS_VPP_SLOPE_INTERCEPT</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Intercept value used to determine the dynamic VID VPP adjustment for all parts. In mV.</description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -2726,7 +2726,7 @@ Will be set at an MBA level with one policy to be used</description>
 
 <attribute>
     <id>ATTR_MSS_DDR3_VDDR_SLOPE</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Slope value used to determine the dynamic VID DDR3 VDDR adjustment for all parts. In uV/Centaur.</description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -2735,7 +2735,7 @@ Will be set at an MBA level with one policy to be used</description>
 
 <attribute>
     <id>ATTR_MSS_DDR3_VDDR_INTERCEPT</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Intercept value used to determine the dynamic VID DDR3 VDDR adjustment for all parts. In mV.</description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -2744,7 +2744,7 @@ Will be set at an MBA level with one policy to be used</description>
 
 <attribute>
     <id>ATTR_MSS_DDR4_VDDR_SLOPE</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Slope value used to determine the dynamic VID DDR3 VDDR adjustment for all parts. In uV/Centaur.</description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -2753,7 +2753,7 @@ Will be set at an MBA level with one policy to be used</description>
 
 <attribute>
     <id>ATTR_MSS_DDR4_VDDR_INTERCEPT</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Intercept value used to determine the dynamic VID DDR3 VDDR adjustment for all parts. In mV.</description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -2880,7 +2880,7 @@ Will be set at an MBA level with one policy to be used</description>
 
 <attribute>
     <id>ATTR_MRW_DDR3_VDDR_MAX_LIMIT</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Maximum voltage limit for the dynamic VID DDR3 VDDR voltage setpoint. In mV.</description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -2889,7 +2889,7 @@ Will be set at an MBA level with one policy to be used</description>
 
 <attribute>
     <id>ATTR_MRW_DDR4_VDDR_MAX_LIMIT</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Maximum voltage limit for the dynamic VID DDR4 VDDR voltage setpoint. In mV.</description>
     <valueType>uint32</valueType>
     <platInit/>

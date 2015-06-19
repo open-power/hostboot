@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -178,6 +180,32 @@ void*    call_mss_eff_config( void * io_pArgs );
  *
  */
 void*    call_mss_attr_update( void *io_pArgs );
+
+
+/**
+ *  @brief Enum specifying what attributes should be used to set the
+ *         memory _EFF_CONFIG attributes
+ *
+ */
+enum EFF_CONFIG_ATTRIBUTES_BASE
+{
+    DEFAULT         = 0x00, ///< Use System Defaults
+    POST_DRAM_INIT  = 0x01, ///< Use POST_DRAM_INIT attributes if non-zero
+};
+
+
+/**
+ * @brief  Helper function to set memory _EFF_CONFIG attributes for HWPs
+ *
+ *  param[in]  i_base - Determines base of EFF_CONFIG attributes values
+ *
+ *  param[out] o_post_dram_inits_found - if i_base==POST_DRAM_INIT and
+ *                                          POST_DRAM_INIT attributes were
+ *                                          found return TRUE;
+ *                                       else, return FALSE
+ */
+void set_eff_config_attrs_helper( const EFF_CONFIG_ATTRIBUTES_BASE i_base,
+                                  bool & o_post_dram_inits_found);
 
 
 };   // end namespace

@@ -156,6 +156,7 @@ my $sysPolicy = parse_xml_file($system_policy_file,
 my $reqPol = $sysPolicy->{"required-policy-settings"};
 
 my @systemAttr; # Repeated {ATTR, VAL, ATTR, VAL, ATTR, VAL...}
+my @nodeAttr; # Repeated {ATTR, VAL, ATTR, VAL, ATTR, VAL...}
 
 #No mirroring supported yet so the policy is just based on multi-node or not
 my $placement = 0x0; #NORMAL
@@ -316,66 +317,86 @@ if ($MAXNODE > 1 && $sysname !~ m/mfg/)
 my $optMrwPolicies = $sysPolicy->{"optional-policy-settings"};
 use constant MRW_NAME => 'mrw-name';
 
-my %optTargPolicies = ();
-$optTargPolicies{'MIN_FREQ_MHZ'}{MRW_NAME}
+my %optSysPolicies = ();
+my %optNodePolicies = ();
+
+# Add the optional system-level attributes
+$optSysPolicies{'MIN_FREQ_MHZ'}{MRW_NAME}
     = "minimum-frequency" ;
-$optTargPolicies{'NOMINAL_FREQ_MHZ'}{MRW_NAME}
+$optSysPolicies{'NOMINAL_FREQ_MHZ'}{MRW_NAME}
     = "nominal-frequency" ;
-$optTargPolicies{'FREQ_CORE_MAX'}{MRW_NAME}
+$optSysPolicies{'FREQ_CORE_MAX'}{MRW_NAME}
     = "maximum-frequency" ;
-$optTargPolicies{'MSS_CENT_AVDD_OFFSET_DISABLE'}{MRW_NAME}
+$optSysPolicies{'MSS_CENT_AVDD_OFFSET_DISABLE'}{MRW_NAME}
     = "mem_avdd_offset_disable" ;
-$optTargPolicies{'MSS_CENT_VDD_OFFSET_DISABLE'}{MRW_NAME}
+$optSysPolicies{'MSS_CENT_VDD_OFFSET_DISABLE'}{MRW_NAME}
     = "mem_vdd_offset_disable" ;
-$optTargPolicies{'MSS_CENT_VCS_OFFSET_DISABLE'}{MRW_NAME}
+$optSysPolicies{'MSS_CENT_VCS_OFFSET_DISABLE'}{MRW_NAME}
     = "mem_vcs_offset_disable" ;
-$optTargPolicies{'MSS_VOLT_VPP_OFFSET_DISABLE'}{MRW_NAME}
+$optSysPolicies{'MSS_VOLT_VPP_OFFSET_DISABLE'}{MRW_NAME}
     = "mem_vpp_offset_disable" ;
-$optTargPolicies{'MSS_VOLT_VDDR_OFFSET_DISABLE'}{MRW_NAME}
+$optSysPolicies{'MSS_VOLT_VDDR_OFFSET_DISABLE'}{MRW_NAME}
     = "mem_vddr_offset_disable" ;
-$optTargPolicies{'MSS_CENT_AVDD_SLOPE_ACTIVE'}{MRW_NAME}
+$optSysPolicies{'MSS_CENT_AVDD_SLOPE_ACTIVE'}{MRW_NAME}
     = "mem_avdd_slope_active" ;
-$optTargPolicies{'MSS_CENT_AVDD_SLOPE_INACTIVE'}{MRW_NAME}
+$optSysPolicies{'MSS_CENT_AVDD_SLOPE_INACTIVE'}{MRW_NAME}
     = "mem_avdd_slope_inactive" ;
-$optTargPolicies{'MSS_CENT_AVDD_INTERCEPT'}{MRW_NAME}
+$optSysPolicies{'MSS_CENT_AVDD_INTERCEPT'}{MRW_NAME}
     = "mem_avdd_intercept" ;
-$optTargPolicies{'MSS_CENT_VDD_SLOPE_ACTIVE'}{MRW_NAME}
-    = "mem_vdd_slope_active" ;
-$optTargPolicies{'MSS_CENT_VDD_SLOPE_INACTIVE'}{MRW_NAME}
-    = "mem_vdd_slope_inactive" ;
-$optTargPolicies{'MSS_CENT_VDD_INTERCEPT'}{MRW_NAME}
-    = "mem_vdd_intercept" ;
-$optTargPolicies{'MSS_CENT_VCS_SLOPE_ACTIVE'}{MRW_NAME}
-    = "mem_vcs_slope_active" ;
-$optTargPolicies{'MSS_CENT_VCS_SLOPE_INACTIVE'}{MRW_NAME}
-    = "mem_vcs_slope_inactive" ;
-$optTargPolicies{'MSS_CENT_VCS_INTERCEPT'}{MRW_NAME}
-    = "mem_vcs_intercept" ;
-$optTargPolicies{'MSS_VOLT_VPP_SLOPE'}{MRW_NAME}
+$optSysPolicies{'MSS_VOLT_VPP_SLOPE'}{MRW_NAME}
     = "mem_vpp_slope" ;
-$optTargPolicies{'MSS_VOLT_VPP_INTERCEPT'}{MRW_NAME}
+$optSysPolicies{'MSS_VOLT_VPP_INTERCEPT'}{MRW_NAME}
     = "mem_vpp_intercept" ;
-$optTargPolicies{'MSS_VOLT_DDR3_VDDR_SLOPE'}{MRW_NAME}
+$optSysPolicies{'MSS_VOLT_DDR3_VDDR_SLOPE'}{MRW_NAME}
     = "mem_ddr3_vddr_slope" ;
-$optTargPolicies{'MSS_VOLT_DDR3_VDDR_INTERCEPT'}{MRW_NAME}
+$optSysPolicies{'MSS_VOLT_DDR3_VDDR_INTERCEPT'}{MRW_NAME}
     = "mem_ddr3_vddr_intercept" ;
-$optTargPolicies{'MSS_VOLT_DDR4_VDDR_SLOPE'}{MRW_NAME}
+$optSysPolicies{'MSS_VOLT_DDR4_VDDR_SLOPE'}{MRW_NAME}
     = "mem_ddr4_vddr_slope" ;
-$optTargPolicies{'MSS_VOLT_DDR4_VDDR_INTERCEPT'}{MRW_NAME}
+$optSysPolicies{'MSS_VOLT_DDR4_VDDR_INTERCEPT'}{MRW_NAME}
     = "mem_ddr4_vddr_intercept" ;
-$optTargPolicies{'MRW_DDR3_VDDR_MAX_LIMIT'}{MRW_NAME}
+$optSysPolicies{'MRW_DDR3_VDDR_MAX_LIMIT'}{MRW_NAME}
     = "mem_ddr3_vddr_max_limit" ;
-$optTargPolicies{'MRW_DDR4_VDDR_MAX_LIMIT'}{MRW_NAME}
+$optSysPolicies{'MRW_DDR4_VDDR_MAX_LIMIT'}{MRW_NAME}
     = "mem_ddr4_vddr_max_limit" ;
 
-foreach my $policy ( keys %optTargPolicies )
+
+# Add the optional node-level attributes
+$optNodePolicies{'MSS_CENT_VDD_SLOPE_ACTIVE'}{MRW_NAME}
+    = "mem_vdd_slope_active" ;
+$optNodePolicies{'MSS_CENT_VDD_SLOPE_INACTIVE'}{MRW_NAME}
+    = "mem_vdd_slope_inactive" ;
+$optNodePolicies{'MSS_CENT_VDD_INTERCEPT'}{MRW_NAME}
+    = "mem_vdd_intercept" ;
+$optNodePolicies{'MSS_CENT_VCS_SLOPE_ACTIVE'}{MRW_NAME}
+    = "mem_vcs_slope_active" ;
+$optNodePolicies{'MSS_CENT_VCS_SLOPE_INACTIVE'}{MRW_NAME}
+    = "mem_vcs_slope_inactive" ;
+$optNodePolicies{'MSS_CENT_VCS_INTERCEPT'}{MRW_NAME}
+    = "mem_vcs_intercept" ;
+
+
+# Add System Attributes
+foreach my $policy ( keys %optSysPolicies )
 {
-    if(exists $optMrwPolicies->{ $optTargPolicies{$policy}{MRW_NAME}})
+    if(exists $optMrwPolicies->{ $optSysPolicies{$policy}{MRW_NAME}})
     {
         push @systemAttr, [ $policy ,
-          $optMrwPolicies->{$optTargPolicies{$policy}{MRW_NAME}}];
+          $optMrwPolicies->{$optSysPolicies{$policy}{MRW_NAME}}];
     }
 }
+
+# Add Node Attribues
+foreach my $policy ( keys %optNodePolicies )
+{
+    if(exists $optMrwPolicies->{ $optNodePolicies{$policy}{MRW_NAME}})
+    {
+        push @nodeAttr, [ $policy ,
+          $optMrwPolicies->{$optNodePolicies{$policy}{MRW_NAME}}];
+    }
+}
+
+
 #OpenPOWER policies
 foreach my $policy (keys %{$optMrwPolicies->{"open_power"}})
 {
@@ -2672,6 +2693,9 @@ sub generate_system_node
         <default>instance:$computeNodeList{$node}->{'instancePath'}</default>
     </compileAttribute>";
 
+    print "    <!-- Node Attributes from MRW -->\n";
+    addNodeAttrs();
+
         # $TODO RTC:110399
         # hardcode for now both palmetto and habenaro are
         # currently the same - this will change though
@@ -4961,6 +4985,33 @@ sub addSysAttrs
         }
     }
 }
+
+sub addNodeAttrs
+{
+    for my $i (0 .. $#nodeAttr)
+    {
+        my $j =0;
+        my $nodeAttrArraySize=$#{$nodeAttr[$i]};
+        while ($j<$nodeAttrArraySize)
+        {
+            # nodeAttr is an array of pairs
+            #  even index is the attribute id
+            #  odd index has its default value
+            my $l_default = $nodeAttr[$i][$j+1];
+            if (substr($l_default,0,2) eq "0b") #convert bin to hex
+            {
+                $l_default = sprintf('0x%X', oct($l_default));
+            }
+            print "    <attribute>\n";
+            print "        <id>$nodeAttr[$i][$j]</id>\n";
+            print "        <default>$l_default</default>\n";
+            print "    </attribute>\n";
+            $j+=2; # next attribute id and default pair
+        }
+    }
+}
+
+
 
 sub addProcPmAttrs
 {

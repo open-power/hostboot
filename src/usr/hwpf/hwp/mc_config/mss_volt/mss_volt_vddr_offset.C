@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_volt_vddr_offset.C,v 1.24 2015/01/21 18:13:30 sglancy Exp $
+// $Id: mss_volt_vddr_offset.C,v 1.25 2015/07/22 14:16:02 sglancy Exp $
 /* File mss_volt_vddr_offset.C created by Stephen Glancy on Tue 20 May 2014. */
 
 //------------------------------------------------------------------------------
@@ -45,6 +45,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:   | Comment:
 //---------|----------|----------|-----------------------------------------------
+//  1.25   | sglancy  | 07/22/15 | Updates for 2z/3z and DDR4
 //  1.24   | sglancy  | 01/21/15 | Updated for addition of ATTR_CENTAUR_EC_DISABLE_VDDR_DYNAMIC_VID
 //  1.23   | sglancy  | 11/20/14 | Updated for rounding
 //  1.22   | sglancy  | 11/20/14 | Fixed compile issue
@@ -235,20 +236,20 @@ fapi::ReturnCode mss_volt_vddr_offset(std::vector<fapi::Target> & i_targets)
     
     //gets the attributes and computes var_power_on based upon whether the DRAM type is DDR3 or DDR4
     if(dram_gen == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR3) {
-       l_rc = FAPI_ATTR_GET(ATTR_MSS_DDR3_VDDR_SLOPE,NULL,volt_slope); 
+       l_rc = FAPI_ATTR_GET(ATTR_MSS_DDR3_VDDR_SLOPE,&i_targets[0],volt_slope);
        if(l_rc) return l_rc;
-       l_rc = FAPI_ATTR_GET(ATTR_MSS_DDR3_VDDR_INTERCEPT,NULL,volt_intercept); 
+       l_rc = FAPI_ATTR_GET(ATTR_MSS_DDR3_VDDR_INTERCEPT,&i_targets[0],volt_intercept);
        if(l_rc) return l_rc;
-       l_rc = FAPI_ATTR_GET(ATTR_MRW_DDR3_VDDR_MAX_LIMIT,NULL,vddr_max_limit_mv); 
+       l_rc = FAPI_ATTR_GET(ATTR_MRW_DDR3_VDDR_MAX_LIMIT,&i_targets[0],vddr_max_limit_mv);
        if(l_rc) return l_rc;
     }
     //ddr4
     else {
-       l_rc = FAPI_ATTR_GET(ATTR_MSS_DDR4_VDDR_SLOPE,NULL,volt_slope); 
+       l_rc = FAPI_ATTR_GET(ATTR_MSS_DDR4_VDDR_SLOPE,&i_targets[0],volt_slope);
        if(l_rc) return l_rc;
-       l_rc = FAPI_ATTR_GET(ATTR_MSS_DDR4_VDDR_INTERCEPT,NULL,volt_intercept); 
+       l_rc = FAPI_ATTR_GET(ATTR_MSS_DDR4_VDDR_INTERCEPT,&i_targets[0],volt_intercept);
        if(l_rc) return l_rc;
-       l_rc = FAPI_ATTR_GET(ATTR_MRW_DDR4_VDDR_MAX_LIMIT,NULL,vddr_max_limit_mv); 
+       l_rc = FAPI_ATTR_GET(ATTR_MRW_DDR4_VDDR_MAX_LIMIT,&i_targets[0],vddr_max_limit_mv);
        if(l_rc) return l_rc;
     }
     
