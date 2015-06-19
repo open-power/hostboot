@@ -289,7 +289,7 @@ done
 
 echo "====> waiting for shutdown..."
 loopcount=0
-while [ "$loopcount" -lt 6 ]; do
+while [ "$loopcount" -lt 8 ]; do
     autosim $NOWIN --simcmd   "print ((system_cmp0.phys_mem).read 0x$shutdown_status 0x08)"     1> $SBXHOME/shutdown_status.log  2> /dev/null
     shutdown_yet=`cat $SBXHOME/shutdown_status.log |  awk '/0x/ {print strtonum($1)}'`
     if [ "$shutdown_yet" -ne 0 ];  then
