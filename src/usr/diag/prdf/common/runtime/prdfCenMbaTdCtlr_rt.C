@@ -470,6 +470,9 @@ int32_t CenMbaTdCtlr::initialize()
 
             if ( !vpdCM )
             {
+                PRDF_INF( PRDF_FUNC "Adding CM to queue: huid=0x%08x rank=%d",
+                          iv_mbaChip->GetId(), rank.getMaster() );
+
                 // Chip mark is not present in VPD. Add it to queue.
                 o_rc = addTdQueueEntryVCM( rank );
                 if ( SUCCESS != o_rc )
@@ -3028,14 +3031,14 @@ int32_t CenMbaTdCtlr::checkForAvailableSpares( uint8_t i_ps, bool & o_avail )
         }
 
         bool dramSparePossible = false;
-        o_rc = bitmap.isDramSpareAvailable( i_ps, dramSparePossible );
+        bool eccSparePossible  = false;
+        o_rc = bitmap.isSpareAvailable( i_ps, dramSparePossible,
+                                        eccSparePossible );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "isDramSpareAvailable() failed" );
             break;
         }
-
-        if ( !dramSparePossible ) break;
 
         // Second, query hardware for the any available spares.
 
@@ -3047,8 +3050,9 @@ int32_t CenMbaTdCtlr::checkForAvailableSpares( uint8_t i_ps, bool & o_avail )
             break;
         }
 
-        if ( (0 == i_ps ? !sp0.isValid() : !sp1.isValid()) ||
-             (iv_x4Dimm && !ecc.isValid()) )
+        if ( ( dramSparePossible &&
+               (0 == i_ps ? !sp0.isValid() : !sp1.isValid()) ) ||
+             ( eccSparePossible && !ecc.isValid() ) )
         {
            o_avail = true;
         }

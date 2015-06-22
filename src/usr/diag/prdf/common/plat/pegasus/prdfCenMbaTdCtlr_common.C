@@ -471,31 +471,25 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
                 // spares. Note that a x4 DIMM has DRAM spares and ECC spares,
                 // so check for availability on both.
                 bool dramSparePossible = false;
-                o_rc = bitmap.isDramSpareAvailable( ps, dramSparePossible );
+                bool eccSparePossible  = false;
+                o_rc = bitmap.isSpareAvailable( ps, dramSparePossible,
+                                                eccSparePossible );
                 if ( SUCCESS != o_rc )
                 {
                     PRDF_ERR( PRDF_FUNC "isDramSpareAvailable() failed" );
                     break;
                 }
 
-                if ( dramSparePossible )
+                if ( dramSparePossible &&
+                     (0 == ps ? !sp0.isValid() : !sp1.isValid()) )
                 {
-                    if ( 0 == ps ? !sp0.isValid() : !sp1.isValid() )
-                    {
-                        // A spare DRAM is available.
-                        startDsdProcedure = true;
-                    }
-                    else if ( isDramWidthX4(iv_mbaTrgt) && !ecc.isValid() )
-                    {
-                        startDsdProcedure = true;
-                        iv_isEccSteer = true;
-                    }
-                    else
-                    {
-                        // Chip mark and DRAM spare are both used.
-                        io_sc.service_data->SetErrorSig(PRDFSIG_VcmCmAndSpare);
-                        io_sc.service_data->SetServiceCall();
-                    }
+                    // A spare DRAM is available.
+                    startDsdProcedure = true;
+                }
+                else if ( eccSparePossible && !ecc.isValid() )
+                {
+                    startDsdProcedure = true;
+                    iv_isEccSteer = true;
                 }
                 else
                 {

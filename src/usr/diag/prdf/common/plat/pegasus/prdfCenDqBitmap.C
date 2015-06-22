@@ -324,14 +324,15 @@ int32_t CenDqBitmap::setEccSpare( uint8_t i_pins )
 
 //------------------------------------------------------------------------------
 
-int32_t CenDqBitmap::isDramSpareAvailable( uint8_t i_portSlct,
-                                           bool & o_available )
+int32_t CenDqBitmap::isSpareAvailable( uint8_t i_portSlct,
+                                       bool & o_dramSpare, bool & o_eccSpare )
 {
     #define PRDF_FUNC "[CenDqBitmap::isDramSpareAvailable] "
 
     int32_t o_rc = SUCCESS;
 
-    o_available = false;
+    o_dramSpare = false;
+    o_eccSpare  = false;
 
     do
     {
@@ -357,29 +358,26 @@ int32_t CenDqBitmap::isDramSpareAvailable( uint8_t i_portSlct,
             // Check for DRAM spare
             if ( ENUM_ATTR_VPD_DIMM_SPARE_LOW_NIBBLE  == spareConfig )
             {
-                o_available = ( 0 == ( spareDqBits & 0xf0 ) );
+                o_dramSpare = ( 0 == ( spareDqBits & 0xf0 ) );
             }
             else if ( ENUM_ATTR_VPD_DIMM_SPARE_HIGH_NIBBLE  == spareConfig )
             {
-                o_available = ( 0 == ( spareDqBits & 0x0f ) );
+                o_dramSpare = ( 0 == ( spareDqBits & 0x0f ) );
             }
 
             // Check for ECC spare
-            if ( !o_available )
-            {
-                uint8_t eccDqBits = iv_data[ECC_SPARE_PORT][ECC_SPARE_BYTE];
-                o_available = ( 0 == (eccDqBits & 0x0f) );
-            }
+            uint8_t eccDqBits = iv_data[ECC_SPARE_PORT][ECC_SPARE_BYTE];
+            o_eccSpare = ( 0 == (eccDqBits & 0x0f) );
         }
         else
         {
             if ( ENUM_ATTR_VPD_DIMM_SPARE_NO_SPARE == spareConfig )
             {
                 // spare is not available.
-                o_available = false;
+                o_dramSpare = false;
             }
             else
-                o_available = ( 0 == spareDqBits );
+                o_dramSpare = ( 0 == spareDqBits );
         }
 
     } while (0);
