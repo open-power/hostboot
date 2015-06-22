@@ -80,6 +80,8 @@
 <targetTypeExtension>
     <id>enc-node-power8</id>
     <attribute><id>IPMI_SENSORS</id></attribute>
+    <attribute><id>PART_NUMBER</id></attribute>
+    <attribute><id>SERIAL_NUMBER</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>

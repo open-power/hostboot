@@ -212,8 +212,24 @@ class IpmiFruInv
                           bool i_ascii,
                           bool i_typeLengthByte);
 
-  private:
+    /**
+     * @brief Add attribute data to IPMI Fru Inventory record
+     * @param[in/out] data, The container with record data
+     * @param[in] attrData, Pointer to attribute data
+     * @param[in] length,   Length of data to add
+     */
+    void addCommonAttrData( std::vector<uint8_t> &io_data,
+                            uint8_t * i_pAttrData,
+                            size_t    i_length);
 
+    // The ATTR_SERIAL_NUMBER and ATTR_PART_NUMBER are 18 bytes but the
+    // vpd data size is only 16. Only want to add the vpd data, not the pad.
+    enum vpdSize
+    {
+        VPD_SN_PN_VPD_SIZE = 16,
+    };
+
+  private:
     /**
      * @brief Compute and Add data checsum to data record
      *

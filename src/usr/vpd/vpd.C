@@ -38,7 +38,6 @@
 #include "spd.H"
 #include "ipvpd.H"
 
-
 // ----------------------------------------------
 // Trace definitions
 // ----------------------------------------------
@@ -446,6 +445,10 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
             {
                 l_ipvpd = &(Singleton<CvpdFacade>::instance());
             }
+            else if(l_type == TARGETING::TYPE_NODE)
+            {
+                l_ipvpd = &(Singleton<PvpdFacade>::instance());
+            }
 
             IpVpdFacade::input_args_t l_args;
 
@@ -627,6 +630,50 @@ errlHndl_t getPnAndSnRecordAndKeywords( TARGETING::Target * i_target,
             io_keywordPN = SPD::MODULE_PART_NUMBER;
             io_keywordSN = SPD::MODULE_SERIAL_NUMBER;
         }
+        else if( i_type == TARGETING::TYPE_NODE )
+        {
+#if defined(CONFIG_PVPD_READ_FROM_HW) && defined(CONFIG_PVPD_READ_FROM_PNOR)
+            IpVpdFacade* l_ipvpd     = &(Singleton<PvpdFacade>::instance());
+            io_record    = PVPD::OPFR;
+            io_keywordPN = PVPD::VP;
+            io_keywordSN = PVPD::VS;
+
+            bool l_zeroPN;
+            l_err = l_ipvpd->cmpSeepromToZero( i_target,
+                                               io_record,
+                                               io_keywordPN,
+                                               l_zeroPN );
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_vpd,ERR_MRK"VPD::getPnAndSnRecordAndKeywords: Error checking if OPFR:VP == 0");
+                break;
+            }
+
+            bool l_zeroSN;
+            l_err = l_ipvpd->cmpSeepromToZero( i_target,
+                                               io_record,
+                                               io_keywordSN,
+                                               l_zeroSN );
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_vpd,ERR_MRK"VPD::getPnAndSnRecordAndKeywords: Error checking if OPFR:VS == 0");
+                break;
+            }
+
+            // If VP and VS are zero, use VINI instead
+            if( l_zeroPN && l_zeroSN )
+            {
+                TRACFCOMP(g_trac_vpd, "setting cvpd to VINI PN SN");
+                io_record    = PVPD::VINI;
+                io_keywordPN = PVPD::PN;
+                io_keywordSN = PVPD::SN;
+            }
+#else
+            io_record    = PVPD::VINI;
+            io_keywordPN = PVPD::PN;
+            io_keywordSN = PVPD::SN;
+#endif
+        }
         else
         {
             TRACFCOMP(g_trac_vpd,ERR_MRK"VPD::getPnAndSnRecordAndKeywords() Unexpected target type, huid=0x%X",TARGETING::get_huid(i_target));
@@ -673,6 +720,10 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
     {
         l_ipvpd = &(Singleton<CvpdFacade>::instance());
     }
+    else if(l_type == TARGETING::TYPE_NODE)
+    {
+        l_ipvpd = &(Singleton<PvpdFacade>::instance());
+    }
     do
     {
         // Get the correct Part and serial numbers
@@ -683,7 +734,7 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
                                              l_keywordSN );
         if( l_err )
         {
-            TRACDCOMP(g_trac_vpd, "VPD::ensureCacheIsInSync: Error getting part and serial numbers");
+            TRACFCOMP(g_trac_vpd, "VPD::ensureCacheIsInSync: Error getting part and serial numbers");
             break;
         }
 
@@ -714,6 +765,7 @@ errlHndl_t ensureCacheIsInSync ( TARGETING::Target * i_target )
         // Compare the Serial Numbers in PNOR/SEEPROM
         bool l_matchSN = false;
         if( ( l_type == TARGETING::TYPE_PROC   ) ||
+            ( l_type == TARGETING::TYPE_NODE   ) ||
             ( l_type == TARGETING::TYPE_MEMBUF ) )
         {
             l_err = l_ipvpd->cmpPnorToSeeprom( i_target,
@@ -795,6 +847,10 @@ errlHndl_t invalidatePnorCache ( TARGETING::Target * i_target )
     else if( l_type == TARGETING::TYPE_MEMBUF )
     {
         l_err = Singleton<CvpdFacade>::instance().invalidatePnor( i_target );
+    }
+    else if( l_type == TARGETING::TYPE_NODE )
+    {
+        l_err = Singleton<PvpdFacade>::instance().invalidatePnor( i_target );
     }
     else if( l_type == TARGETING::TYPE_DIMM )
     {

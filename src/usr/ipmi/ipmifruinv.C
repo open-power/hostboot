@@ -747,13 +747,36 @@ errlHndl_t backplaneIpmiFruInv::buildBoardInfoArea(
         if (l_errl) { break; }
 
         //Set Product Serial number - ascii formatted data
-        //TODO RTC:117702 use attribute when 122890 is available
-        l_errl = addVpdData(io_data, PVPD::OPFR, PVPD::VS, true);
-        if (l_errl) { break; }
+        TARGETING::ATTR_SERIAL_NUMBER_type l_sn = {'0'};
+        if( !( iv_target->
+                 tryGetAttr<TARGETING::ATTR_SERIAL_NUMBER>
+                     ( l_sn) ) )
+        {
+            // Should not fail. Need to use tryGetAttr due to complex type.
+            // Use zeros if fails.
+            TRACFCOMP(g_trac_ipmi,"backplaneIpmiFruInv::buildBoardInfoArea - "
+                  "Error getting serial number attribute");
+        }
+        // The attribute size is 18. The vpd is 16. Only use 16.
+        addCommonAttrData(io_data,
+                          (uint8_t *)&l_sn,
+                          VPD_SN_PN_VPD_SIZE);
 
         //Set Product Part number - ascii formatted data
-        //TODO RTC:117702 use attribute when 122890 is available
-        l_errl = addVpdData(io_data, PVPD::OPFR, PVPD::VP, true);
+        TARGETING::ATTR_PART_NUMBER_type l_pn = {'0'};
+        if( !( iv_target->
+                 tryGetAttr<TARGETING::ATTR_PART_NUMBER>
+                     ( l_pn) ) )
+        {
+            // Should not fail. Need to use tryGetAttr due to complex type.
+            // Use zeros if fails.
+            TRACFCOMP(g_trac_ipmi,"backplaneIpmiFruInv::buildBoardInfoArea - "
+                  "Error getting part number attribute");
+        }
+        // The attribute size is 18. The vpd is 16. Only use 16.
+        addCommonAttrData(io_data,
+                          (uint8_t *)&l_pn,
+                          VPD_SN_PN_VPD_SIZE);
 
         //Push Fru File ID Byte - NULL
         io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
@@ -1051,14 +1074,36 @@ errlHndl_t membufIpmiFruInv::buildBoardInfoArea(
         if (l_errl) { break; }
 
         //Set Product Serial number - ascii formatted data
-        //TODO RTC:117702 use attribute when 122890 is available
-        l_errl = addVpdData(io_data, CVPD::OPFR, CVPD::VS, true);
-        if (l_errl) { break; }
+        TARGETING::ATTR_SERIAL_NUMBER_type l_sn = {'0'};
+        if( !( iv_target->
+                 tryGetAttr<TARGETING::ATTR_SERIAL_NUMBER>
+                     ( l_sn) ) )
+        {
+            // Should not fail. Need to use tryGetAttr due to complex type.
+            // Use zeros if fails.
+            TRACFCOMP(g_trac_ipmi,"membufIpmiFruInv::buildBoardInfoArea - "
+                  "Error getting serial number attribute");
+        }
+        // The attribute size is 18. The vpd is 16. Only use 16.
+        addCommonAttrData(io_data,
+                          (uint8_t *)&l_sn,
+                          VPD_SN_PN_VPD_SIZE);
 
         //Set Product Part number - ascii formatted data
-        //TODO RTC:117702 use attribute when 122890 is available
-        l_errl = addVpdData(io_data, CVPD::OPFR, CVPD::VP, true);
-        if (l_errl) { break; }
+        TARGETING::ATTR_PART_NUMBER_type l_pn = {'0'};
+        if( !( iv_target->
+                 tryGetAttr<TARGETING::ATTR_PART_NUMBER>
+                     ( l_pn) ) )
+        {
+            // Should not fail. Need to use tryGetAttr due to complex type.
+            // Use zeros if fails.
+            TRACFCOMP(g_trac_ipmi,"membufIpmiFruInv::buildBoardInfoArea - "
+                  "Error getting part number attribute");
+        }
+        // The attribute size is 18. The vpd is 16. Only use 16.
+        addCommonAttrData(io_data,
+                          (uint8_t *)&l_pn,
+                          VPD_SN_PN_VPD_SIZE);
 
         //Push Fru File ID Byte - NULL
         io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
@@ -1267,6 +1312,24 @@ errlHndl_t IpmiFruInv::addCommonVpdData(
 
     return l_errl;
 }
+
+void IpmiFruInv::addCommonAttrData( std::vector<uint8_t> &io_data,
+                                    uint8_t * i_pAttrData,
+                                    size_t    i_length)
+{
+    uint8_t l_offset = io_data.size();
+
+    //Determine how big data is and expand it to handle the attr data
+    //and the typelength byte
+    io_data.resize(l_offset + 1 + i_length);
+
+    //Add the type/length byte indicating ascii data.
+    io_data.at(l_offset) = i_length + IPMIFRUINV::TYPELENGTH_BYTE_ASCII;
+
+    //copy attr data
+    memcpy (&io_data[l_offset+1],i_pAttrData,i_length);
+}
+
 
 void IPMIFRUINV::clearData(uint8_t i_fruId)
 {

@@ -43,6 +43,8 @@
 #include "pvpd.H"
 #include "cvpd.H"
 #include "vpd.H"
+#include <initservice/initserviceif.H>
+
 
 // ----------------------------------------------
 // Trace definitions
@@ -270,6 +272,13 @@ errlHndl_t nodePresenceDetect(DeviceFW::OperationType i_opType,
         pvpd_present = true;
     }
 #endif
+
+    //Fsp sets PN/SN so if there is none, do it here
+    if(!INITSERVICE::spBaseServicesEnabled())
+    {
+        // set part and serial number attributes for current target
+        VPD::setPartAndSerialNumberAttributes( i_target );
+    }
 
     // Always return presence.
     // A returned error deconfigures the node and stops the IPL.
