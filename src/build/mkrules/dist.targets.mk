@@ -185,6 +185,7 @@ simics.tar_CONTENTS = \
     img/dimmspd.dat \
     img/procmvpd.dat \
     img/procmvpd_ven.dat \
+    img/procmvpd_p9n.dat \
     img/cvpd.dat \
     obj/genfiles/fapiAttrInfo.csv \
     obj/genfiles/fapiAttrEnumInfo.csv \

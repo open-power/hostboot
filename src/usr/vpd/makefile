@@ -36,11 +36,13 @@ OBJS += rtvpd_load.o
 SUBDIRS += test.d
 SUBDIRS += runtime.d
 
-
 BINARY_FILES = $(IMGDIR)/dimmspd.dat:3a9f53e3684e57401ed0aed75f25980fca99f40b
-#Updated mvpd to contain VRML so the part/serial numbers can be found for procs CCIN 54E3
+#Updated mvpd to contain VRML so that part/serial numbers can be
+#found for procs CCIN 54E3
 BINARY_FILES += $(IMGDIR)/procmvpd.dat:65759fa4aebd2e3b42b25309504a3007b3b51036
 BINARY_FILES += $(IMGDIR)/procmvpd_ven.dat:dd8507bec946283260f82af212ed32feaeb3363a
+BINARY_FILES += $(IMGDIR)/procmvpd_p9n.dat:c459021cad3335d42274fbf151ecd3647d0df578
+
 
 #Update to Centaur DD2.0 for CCIN 31E8
 BINARY_FILES += $(IMGDIR)/cvpd.dat:2e33352ca95279b992927336567adf960dca7d46
