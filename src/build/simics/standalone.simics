@@ -6,14 +6,12 @@
 
 # @todo-RTC:127341 Standalaone VPD support
 # Preload VPD in PNOR
-#foreach $pnor in (get-object-list Lpc2SpiFpgaCmp) {
-#    try {
-#        run-python-file (lookup-file hbfw/hb-pnor-vpd-preload.py)
-#            ($pnor).sfc_master_mem.load-file ./sysmvpd.dat.ecc 0x1C5000
-#            ($pnor).sfc_master_mem.load-file ./sysspd.dat.ecc 0x17D000
-#            ($pnor).sfc_master_mem.load-file ./syscvpd.dat.ecc 0x255000
-#    } except { echo "ERROR: Failed to preload VPD into PNOR." }
-#}
+    try {
+        run-python-file (lookup-file hbfw/hb-pnor-vpd-preload.py)
+            ($hb_pnor).sfc_master_mem.load-file ./sysmvpd.dat.ecc 0x1C5000
+            ($hb_pnor).sfc_master_mem.load-file ./sysspd.dat.ecc 0x17D000
+            ($hb_pnor).sfc_master_mem.load-file ./syscvpd.dat.ecc 0x255000
+    } except { echo "ERROR: Failed to preload VPD into PNOR." }
 
 # Uncomment when PNOR is supported
 # @todo-RTC:130182 Enable PNOR access

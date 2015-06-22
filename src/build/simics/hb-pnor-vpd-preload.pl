@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -32,7 +32,7 @@ my $numProcs;
 my $numCentPerProc;
 my $dataPath = ".";
 my $outputPath = ".";
-my $machine = "MURANO";
+my $machine = "NIMBUS";
 my $procConfig = "uninit";
 my $centConfig = "uninit";
 my $maxProcs = 8;
@@ -54,6 +54,7 @@ my $emptyCVPD;
 
 my $mvpdFile = "procmvpd.dat";
 my $mvpdFile_ven = "procmvpd_ven.dat";
+my $mvpdFile_p9n = "procmvpd_p9n.dat";
 my $cvpdFile = "cvpd.dat";
 my $spdFile = "dimmspd.dat";
 my $sysMVPD = "sysmvpd.dat";
@@ -216,7 +217,7 @@ sub examples
     print "   --dataPath <path to input dat files>\n";
     print "\n";
     print "Create a VPO image with explicit Proc and Centaur plugging\n";
-    print "   This will result in VPD for the first to proc and Centuars\n";
+    print "   This will result in VPD for the first to proc and Centaurs\n";
     print "   behind MCS0 and MCS1 on each processor\n";
     print "   NOTE: for VPO, maxProcs must be set to 4\n";
     print "$0 --maxProcs 4 --forceProc 1100 --forceCent 11000000";
@@ -284,6 +285,10 @@ sub createMVPDData
             if( $machine eq "VENICE" )
             {
                 $sourceFile = "$dataPath/$mvpdFile_ven";
+            }
+            elsif( $machine eq "NIMBUS")
+            {
+                $sourceFile = "$dataPath/$mvpdFile_p9n";
             }
             else
             {
@@ -512,6 +517,11 @@ sub getCentaurConfig
                         $mcsArray[$mcs] = 1;
                     }
                 }
+            }
+            elsif( $machine eq "NIMBUS")
+            {
+            #as there are no centaurs within a NIMBUS machine NO configuration
+            #for centaur chips is required 
             }
             else
             {

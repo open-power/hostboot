@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,8 +31,8 @@ import shlex
 #------------------------------------------------------------------------------
 toolLoc = os.environ.get("HB_TOOLPATH");
 thisSys = os.environ.get("HB_MACHINE").upper();
-numProcs = os.environ.get( "GFW_P8_%s_NUM_PROCS" % thisSys );
-numCentaurPerProc = os.environ.get( "GFW_P8_%s_CENTAURS_PER_PROC" % thisSys );
+numProcs = os.environ.get( "GFW_P9_%s_NUM_PROCS" % thisSys );
+numCentaurPerProc = os.environ.get( "GFW_P9_%s_CENTAURS_PER_PROC" % thisSys );
 cmd = toolLoc + "/hb-pnor-vpd-preload.pl --numProcs " + numProcs + " --numCentPerProc " + numCentaurPerProc + " --machine " + thisSys + " --dataPath " + toolLoc
 print "Generate PNOR VPD for " + numProcs + " processor(s), and " + numCentaurPerProc + " Centaur(s) per Processor.";
 args = shlex.split( cmd );

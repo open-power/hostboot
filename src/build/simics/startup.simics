@@ -13,23 +13,13 @@ $hb_masterproc = ""
 @simenv.hb_masterproc = quiet_run_command("get-master-proc")[0]
 echo "Master Proc is: "+$hb_masterproc
 
-# Uncomment when PNOR is supported
-# @todo-RTC:130182 Enable PNOR access
-#$hb_pnor = ""
-#@simenv.hb_pnor = quiet_run_command("get-master-pnor")[0]
-#try {
-#    @SIM_get_object(simenv.hb_pnor[0])
-#} except {
-#    try {
-#        # Attempt to use the Brazos name
-#        @SIM_get_object("cecdrawer0_fpga0")
-#        $hb_pnor = "cecdrawer0_fpga0"
-#    } except {
-#        # Default to Tuleta/Orlena name
-#        $hb_pnor = "fpga0"
-#    }
-#}
-#echo "Master PNOR is: "+$hb_pnor
+$hb_pnor = ""
+
+foreach $pnor in (get-object-list - all BmcCmp) {
+  $hb_pnor = ($pnor)
+}
+
+echo "Master PNOR is: "+$hb_pnor
 
 # Choose a default core to start with
 $hb_cpu = "system_cmp0.cpu0_0_00_0"
