@@ -499,6 +499,7 @@ hb_errlparser()
     fi
 
     ${HOSTBOOTROOT}/src/build/citest/build-errl-parsers
+    return $?
 }
 
 hb_cachesync()
