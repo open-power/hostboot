@@ -31,6 +31,7 @@
 #include <kernel/scheduler.H>
 #include <kernel/taskmgr.H>
 #include <kernel/console.H>
+#include <kernel/doorbell.H>
 
 void MessageHandler::sendMessage(msg_sys_types_t i_type, void* i_key,
                                  void* i_data, task_t* i_task)
@@ -108,6 +109,7 @@ void MessageHandler::sendMessage(msg_sys_types_t i_type, void* i_key,
         current->cpu->scheduler->addTask(current);
         TaskManager::setCurrentTask(ready_task);
         ready_task = NULL;
+        doorbell_broadcast();
     }
 
     // Insert pending info into our queue until response is recv'd.
@@ -169,6 +171,7 @@ int MessageHandler::recvMessage(msg_t* i_msg)
             else // Add other deferred tasks to scheduler ready queue.
             {
                 deferred_task->cpu->scheduler->addTask(deferred_task);
+                doorbell_broadcast();
             }
         }
         else if (UNHANDLED_RC == rc)

@@ -73,6 +73,7 @@ DIRECT_BOOT_OBJECTS += kernel.o
 DIRECT_BOOT_OBJECTS += taskmgr.o
 DIRECT_BOOT_OBJECTS += cpumgr.o
 DIRECT_BOOT_OBJECTS += syscall.o
+DIRECT_BOOT_OBJECTS += doorbell.o
 DIRECT_BOOT_OBJECTS += scheduler.o
 DIRECT_BOOT_OBJECTS += exception.o
 DIRECT_BOOT_OBJECTS += vmmmgr.o

@@ -42,6 +42,7 @@
 #include <kernel/stacksegment.H>
 #include <kernel/heapmgr.H>
 #include <kernel/intmsghandler.H>
+#include <kernel/doorbell.H>
 #include <sys/sync.h>
 #include <errno.h>
 
@@ -49,6 +50,22 @@ namespace KernelIpc
 {
     int send(uint64_t i_q, msg_t * i_msg);
 };
+
+extern "C"
+void kernel_execute_hype_doorbell()
+{
+    task_t* t = TaskManager::getCurrentTask();
+
+    if (t->cpu->idle_task == t)
+    {
+        t->cpu->scheduler->returnRunnable();
+        t->cpu->scheduler->setNextRunnable();
+    }
+
+    DeferredQueue::execute();
+
+    doorbell_clear();
+}
 
 extern "C"
 void kernel_execute_decrementer()
@@ -188,6 +205,8 @@ namespace Systemcalls
         t->cpu->scheduler->addTask(newTask);
 
         TASK_SETRTN(t, newTask->tid);
+
+        doorbell_broadcast();
     }
 
     void TaskEnd(task_t* t)
@@ -210,6 +229,7 @@ namespace Systemcalls
         // Move task to master CPU and pick a new task.
         t->cpu->scheduler->addTaskMasterCPU(t);
         t->cpu->scheduler->setNextRunnable();
+        doorbell_broadcast();
     }
 
     void TaskWait(task_t* t)
@@ -359,6 +379,7 @@ namespace Systemcalls
             {
                 TASK_SETRTN(waiter, (uint64_t) m);
                 waiter->cpu->scheduler->addTask(waiter);
+                doorbell_broadcast();
             }
 
             mq->lock.unlock();
@@ -424,6 +445,7 @@ namespace Systemcalls
                                            // back to scheduler.
             {
                 t->cpu->scheduler->addTask(t);
+                doorbell_broadcast();
             }
             TaskManager::setCurrentTask(waiter);
         }
@@ -455,6 +477,7 @@ namespace Systemcalls
                 if (TaskManager::getCurrentTask() != t)
                 {
                     t->cpu->scheduler->addTask(t);
+                    doorbell_broadcast();
                 }
             }
             // Pseudo-sync messages are handled by pushing the response onto
@@ -477,6 +500,7 @@ namespace Systemcalls
                 {
                     TASK_SETRTN(client, (uint64_t) m);
                     client->cpu->scheduler->addTask(client);
+                    doorbell_broadcast();
                 }
 
                 mq2->lock.unlock();
@@ -492,6 +516,7 @@ namespace Systemcalls
 
                 TASK_SETRTN(t,0);
                 t->cpu->scheduler->addTask(t);
+                doorbell_broadcast();
             }
         }
         else

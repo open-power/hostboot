@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,6 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #include <kernel/deferred.H>
 #include <kernel/cpumgr.H>
+#include <kernel/doorbell.H>
 #include <util/singleton.H>
 #include <assert.h>
 #include <arch/ppc.H>
@@ -228,6 +229,7 @@ void DeferredWork::start()
 
 void DeferredWork::_waitForCpus()
 {
+    doorbell_broadcast();
     iv_barrier.wait();
 }
 
