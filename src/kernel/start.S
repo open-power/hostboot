@@ -208,7 +208,17 @@ UNIMPL_INTERRUPT_STUB(hype_data_storage, 0xE00)
 UNIMPL_INTERRUPT_STUB(hype_inst_storage, 0xE20)
 STD_INTERRUPT_STUB(hype_emu_assist, 0xE40)
 UNIMPL_INTERRUPT_STUB(hype_maint, 0xE60)
+
+;// Hypervisor Doorbell Exception Vector
+;//
+;// There isn't enough room here for a "normal" stub, so jump out to 'stub2'
+;// where there is some space.
+.org _start + 0xE80
+intvect_syscall_hype_doorbell_stub:
+    b intvect_syscall_hype_doorbell_stub2
+
 STD_INTERRUPT_STUB(hypervisor_external, 0xEA0)
+
 UNIMPL_INTERRUPT_STUB(perf_monitor, 0xF00)
 UNIMPL_INTERRUPT_STUB(vector_unavail, 0xF20)
 UNIMPL_INTERRUPT_STUB(vsx_unavail, 0xF40)
@@ -877,6 +887,22 @@ UNIMPL_INTERRUPT_NOADDR(trace, 0xD00)
 UNIMPL_INTERRUPT_NOADDR(hype_data_storage, 0xE00)
 UNIMPL_INTERRUPT_NOADDR(hype_inst_storage, 0xE20)
 UNIMPL_INTERRUPT_NOADDR(hype_maint, 0xE60)
+
+;// Hypervisor Doorbell Exception (part 2).
+;//
+;// Doorbells come in with the HSSR[01] registers, since they are Hypervisor
+;// exceptions, instead of the SRR[01] registers that the normal exception
+;// code deals with.  Copy the contents of HSSR[01] -> SRR[01] first.
+;//
+intvect_syscall_hype_doorbell_stub2:
+    mtsprg0 r1
+    mfspr r1,HSRR0
+    mtsrr0 r1
+    mfspr r1,HSRR1
+    mtsrr1 r1
+    mfsprg0 r1
+STD_INTERRUPT_NOADDR(hype_doorbell)
+
 UNIMPL_INTERRUPT_NOADDR(perf_monitor, 0xF00)
 UNIMPL_INTERRUPT_NOADDR(vector_unavail, 0xF20)
 UNIMPL_INTERRUPT_NOADDR(vsx_unavail, 0xF40)

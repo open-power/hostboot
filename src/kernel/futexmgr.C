@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -31,7 +33,7 @@
 #include <kernel/scheduler.H>
 #include <kernel/futexmgr.H>
 #include <util/singleton.H>
-
+#include <kernel/doorbell.H>
 
 //-----------------------------------------------------------------------------
 
@@ -145,6 +147,10 @@ uint64_t FutexManager::_wake(uint64_t * i_futex1, uint64_t i_count1,
         }
     }
 
+    if(started)
+    {
+        doorbell_broadcast();
+    }
 
     iv_lock.unlock();
 
