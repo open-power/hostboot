@@ -552,7 +552,7 @@ namespace SENSOR
             INITSERVICE::firmwareProgressPhase phase )
     {
         // event data 2 holds the progress info
-        iv_msg->iv_event_data[2] = phase;
+        iv_msg->iv_event_data[1] = phase;
 
         return writeSensorData();
     };
