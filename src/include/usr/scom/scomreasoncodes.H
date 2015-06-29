@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -34,6 +36,7 @@ namespace SCOM
         SCOM_PERFORM_TRANSLATE          = 0x02,
         SCOM_FIND_PARENT_TARGET         = 0x03,
         SCOM_CHECK_INDIRECT_AND_DO_SCOM = 0x04,
+        SCOM_TRANSLATE_P9               = 0x05,
     };
 
     enum scomReasonCode
@@ -46,6 +49,11 @@ namespace SCOM
         SCOM_INDIRECT_READ_TIMEOUT  = SCOM_COMP_ID | 0x06,
         SCOM_INDIRECT_WRITE_FAIL    = SCOM_COMP_ID | 0x07,
         SCOM_INDIRECT_WRITE_TIMEOUT = SCOM_COMP_ID | 0x08,
+        SCOM_P9_TRANS_INVALID_TYPE  = SCOM_COMP_ID | 0x09,
+        SCOM_INVALID_TRANSLATION    = SCOM_COMP_ID | 0x0A,
+        SCOM_TRANS_CANT_FIND_PARENT = SCOM_COMP_ID | 0x0B,
+        SCOM_TARGET_ADDR_MISMATCH   = SCOM_COMP_ID | 0x0C,
+        SCOM_ISCHIPUNITSCOM_INVALID = SCOM_COMP_ID | 0x0D,
     };
 };
 
