@@ -1,25 +1,19 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: $                                                             */
+/* $Source: hwpf/fapi2/include/buffer.H $                                 */
 /*                                                                        */
-/* OpenPOWER HostBoot Project                                             */
+/* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* EKB Project                                                            */
+/*                                                                        */
+/* COPYRIGHT 2012,2015                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
-/* Licensed under the Apache License, Version 2.0 (the "License");        */
-/* you may not use this file except in compliance with the License.       */
-/* You may obtain a copy of the License at                                */
-/*                                                                        */
-/*     http://www.apache.org/licenses/LICENSE-2.0                         */
-/*                                                                        */
-/* Unless required by applicable law or agreed to in writing, software    */
-/* distributed under the License is distributed on an "AS IS" BASIS,      */
-/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
-/* implied. See the License for the specific language governing           */
-/* permissions and limitations under the License.                         */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
@@ -36,11 +30,11 @@
 
 namespace fapi2
 {
-    /// @brief Class representing a FAPI buffer<T>
-    /// @tparam T, the integral type of the buffer (uint16_t, uint64_t, etc.)
-    template <typename T, typename TT = bufferTraits<T> >
-    class buffer
-    {
+/// @brief Class representing a FAPI buffer<T>
+/// @tparam T, the integral type of the buffer (uint16_t, uint64_t, etc.)
+template <typename T, typename TT = bufferTraits<T> >
+class buffer
+{
     public:
         /// Shortcut typedef to get to our traits class
         typedef typename TT::bits_type bits_type;
@@ -52,40 +46,54 @@ namespace fapi2
         ///
         inline buffer(T i_value = 0):
             iv_data(i_value)
-            {
-            }
+        {
+        }
 
         ~buffer(void) = default;
 
-#if !defined(DOXYGEN) && defined(FAPI2_DEBUG)
+        #if !defined(DOXYGEN) && defined(FAPI2_DEBUG)
         /// @brief Print the contents of the buffer to stdout
         inline void print(void) const
-        { TT::print(iv_data); }
-#endif
+        {
+            TT::print(iv_data);
+        }
+        #endif
 
         ///
         /// @brief Get the contents of the buffer
         /// @return The contents of the buffer
         ///
-        inline operator T() const { return iv_data; }
+        inline operator T() const
+        {
+            return iv_data;
+        }
 
         ///
         /// @brief Get the contents of the buffer
         /// @return The contents of the buffer
         ///
-        inline operator T&() { return iv_data; }
+        inline operator T&()
+        {
+            return iv_data;
+        }
 
         ///
         /// @brief Get the contents of the buffer
         /// @return The contents of the buffer
         ///
-        inline T& operator()(void) { return iv_data; }
+        inline T& operator()(void)
+        {
+            return iv_data;
+        }
 
         ///
         /// @brief Get the contents of the buffer
         /// @return Reference to the contents of the buffer
         ///
-        inline const T& operator()(void) const { return iv_data; }
+        inline const T& operator()(void) const
+        {
+            return iv_data;
+        }
 
         /// @name Buffer Manipulation Functions
         ///@{
@@ -118,11 +126,14 @@ namespace fapi2
             // Create mask if part of this byte is not in the valid part of the buffer,
             // Shift it left by the amount of unused bits,
             // Clear the unused bits
-            if (((i_offset + 1) == length) && (bit_length % bits_in_value)) {
-                i_value &= parameterTraits<OT>::mask() << ((bits_in_value * length) - bit_length);
+            if (((i_offset + 1) == length) && (bit_length % bits_in_value))
+            {
+                i_value &= parameterTraits<OT>::mask() << ((bits_in_value * length) -
+                           bit_length);
             }
 
-            parameterTraits<OT>::template write_element<typename TT::unit_type>(TT::get_address(iv_data), i_value, i_offset);
+            parameterTraits<OT>::template write_element<typename TT::unit_type>
+            (TT::get_address(iv_data), i_value, i_offset);
             return FAPI2_RC_SUCCESS;
         }
 
@@ -134,7 +145,9 @@ namespace fapi2
         /// @return Length in bits
         ///
         inline constexpr uint32_t getBitLength(void) const
-            { return TT::bit_length(iv_data); }
+        {
+            return TT::bit_length(iv_data);
+        }
 
         ///
         /// @brief Return the length of the buffer in OT units
@@ -167,7 +180,8 @@ namespace fapi2
             // This would be a candidate for a fast_mask (see variable_buffer) but
             // we'd need tables for all the integral types which maybe we need to
             // do ...
-            iv_data |= (T(~0) >> (TT::bits_per_unit() - C)) << (TT::bits_per_unit() - B - C);
+            iv_data |= (T(~0) >> (TT::bits_per_unit() - C)) << (TT::bits_per_unit() - B -
+                       C);
             return *this;
         }
 
@@ -178,14 +192,16 @@ namespace fapi2
         /// @note 0 is left-most
         /// @return FAPI2_RC_SUCCESS if OK
         ///
-        inline fapi2::ReturnCode setBit(const bits_type& i_bit, const bits_type& i_count = 1)
+        inline fapi2::ReturnCode setBit(const bits_type& i_bit,
+                                        const bits_type& i_count = 1)
         {
             if ((i_count + i_bit - 1) >= TT::bits_per_unit())
             {
                 return FAPI2_RC_INVALID_PARAMETER;
             }
 
-            iv_data |= (T(~0) >> (TT::bits_per_unit() - i_count)) << (TT::bits_per_unit() - i_bit - i_count);
+            iv_data |= (T(~0) >> (TT::bits_per_unit() - i_count)) <<
+                       (TT::bits_per_unit() - i_bit - i_count);
 
             return FAPI2_RC_SUCCESS;
         }
@@ -216,7 +232,8 @@ namespace fapi2
         /// @note 0 is left-most
         /// @return FAPI2_RC_SUCCESS if OK
         ///
-        inline fapi2::ReturnCode clearBit(const bits_type& i_bit, const bits_type& i_count = 1)
+        inline fapi2::ReturnCode clearBit(const bits_type& i_bit,
+                                          const bits_type& i_count = 1)
         {
             if ((i_count + i_bit - 1) >= TT::bits_per_unit())
             {
@@ -282,9 +299,9 @@ namespace fapi2
         ///
         template< bits_type B, bits_type C = 1>
         inline bool getBit(void) const
-            {
-                return buffer<T>().setBit<B, C>() & iv_data;
-            }
+        {
+            return buffer<T>().setBit<B, C>() & iv_data;
+        }
 
         ///
         /// @brief Set and entire buffer to X's
@@ -294,25 +311,31 @@ namespace fapi2
         ///
         template< uint8_t X >
         inline buffer& flush(void)
-            {
-                static_assert( (X == 1) || (X == 0), "bad argument to flush" );
-                (0 == X) ? TT::clear(iv_data) : TT::set(iv_data);
-                return *this;
-            }
+        {
+            static_assert( (X == 1) || (X == 0), "bad argument to flush" );
+            (0 == X) ? TT::clear(iv_data) : TT::set(iv_data);
+            return *this;
+        }
 
         ///
         /// @brief Invert entire buffer
         /// @return buffer_base&, Useful for method chaining
         ///
         inline buffer& invert(void)
-            { TT::invert(iv_data); return *this; }
+        {
+            TT::invert(iv_data);
+            return *this;
+        }
 
         ///
         /// @brief Bit reverse entire buffer
         /// @return buffer_base&, Useful for method chaining
         ///
         inline buffer& reverse(void)
-            { TT::reverse(iv_data); return *this; }
+        {
+            TT::reverse(iv_data);
+            return *this;
+        }
 
 
         ///@}
@@ -324,7 +347,10 @@ namespace fapi2
         /// @brief Get a pointer to the buffer bits
         /// @return Pointer to the buffer itself
         ///
-        inline T* pointer(void) { return &iv_data; }
+        inline T* pointer(void)
+        {
+            return &iv_data;
+        }
 
         // Note: Many (all?) of these are not needed and the compiler complains
         // as the cast to T yields a better operator. There are here mainly for
@@ -333,86 +359,86 @@ namespace fapi2
         ///
         /// @brief operator>>()
         ///
-#ifdef DOXYGEN
+        #ifdef DOXYGEN
         inline buffer<T>& operator>>(bits_type i_shiftnum);
-#endif
+        #endif
 
         ///
         /// @brief operator<<()
         ///
-#ifdef DOXYGEN
+        #ifdef DOXYGEN
         inline buffer<T>& operator<<(bits_type i_shiftnum);
-#endif
+        #endif
 
         ///
         /// @brief operator+()
         ///
-#ifdef DOXYGEN
+        #ifdef DOXYGEN
         inline buffer<T>& operator+(const T& rhs);
-#endif
+        #endif
 
         ///
         /// @brief operator+=()
         ///
-#ifdef DOXYGEN
+        #ifdef DOXYGEN
         inline buffer<T>& operator+=(const T& rhs);
-#endif
+        #endif
 
         ///
         /// @brief operator|=()
         ///
-#ifdef DOXYGEN
+        #ifdef DOXYGEN
         inline buffer<T>& operator|=(const T& rhs);
-#endif
+        #endif
 
         ///
         /// @brief operator&=()
         ///
-#ifdef DOXYGEN
+        #ifdef DOXYGEN
         inline buffer<T>& operator&=(const T& rhs);
-#endif
+        #endif
 
         ///
         /// @brief operator|()
         ///
-#ifdef DOXYGEN
+        #ifdef DOXYGEN
         inline buffer<T>& operator|(const T& rhs);
-#endif
+        #endif
 
         ///
         /// @brief operator&()
         ///
-#ifdef DOXYGEN
+        #ifdef DOXYGEN
         inline buffer<T>& operator&(const T& rhs);
-#endif
+        #endif
 
         ///
         /// @brief operator^=()
         ///
-#ifdef DOXYGEN
+        #ifdef DOXYGEN
         inline buffer<T>& operator^=(const T& rhs);
-#endif
+        #endif
 
         ///
         /// @brief operator~()
         ///
-#ifdef DOXYGEN
+        #ifdef DOXYGEN
         inline buffer<T>& operator~(const T& rhs) const;
-#endif
+        #endif
 
         ///
         /// @brief operator==()
         ///
-#ifdef DOXYGEN
+        #ifdef DOXYGEN
         inline bool operator==(const T& rhs) const;
-#endif
+        #endif
 
         ///
         /// @brief operator!=()
         ///
-#ifdef DOXYGEN
+        #ifdef DOXYGEN
         inline bool operator!=(const T& rhs) const;
-#endif
+        #endif
 
         ///
         /// @brief Copy part of a OT into the DataBuffer
@@ -444,15 +470,19 @@ namespace fapi2
             uint64_t source = static_cast<uint64_t>(i_datain);
             const uint64_t target = static_cast<uint64_t>(iv_data);
 
-            const bits_type source_start = parameterTraits<uint64_t>::bit_length() - (source_length - SS);
-            const bits_type target_start = parameterTraits<uint64_t>::bit_length() - (target_length - TS);
+            const bits_type source_start = parameterTraits<uint64_t>::bit_length() -
+                                           (source_length - SS);
+            const bits_type target_start = parameterTraits<uint64_t>::bit_length() -
+                                           (target_length - TS);
 
             // Get mask value for Target buffer
             // Note: Need "& 0UL" because bit shift left for Target buffer doesn't roll off
-            uint64_t mask = ((~0UL << (parameterTraits<uint64_t>::bit_length() - L)) & ~0UL) >> target_start;
+            uint64_t mask = ((~0UL << (parameterTraits<uint64_t>::bit_length() - L)) & ~0UL)
+                            >> target_start;
 
             // Align the source to the target. Make things signed so we know which way to shift.
             int32_t shift = source_start - target_start;
+
             if (shift > 0)
             {
                 source <<= shift;
@@ -514,15 +544,19 @@ namespace fapi2
             uint64_t source = static_cast<uint64_t>(i_datain);
             const uint64_t target = static_cast<uint64_t>(iv_data);
 
-            const bits_type source_start = parameterTraits<uint64_t>::bit_length() - (source_length - i_sourceStart);
-            const bits_type target_start = parameterTraits<uint64_t>::bit_length() - (target_length - i_targetStart);
+            const bits_type source_start = parameterTraits<uint64_t>::bit_length() -
+                                           (source_length - i_sourceStart);
+            const bits_type target_start = parameterTraits<uint64_t>::bit_length() -
+                                           (target_length - i_targetStart);
 
             // Get mask value for Target buffer
             // Note: Need "& 0UL" because bit shift left for Target buffer doesn't roll off
-            uint64_t mask = ((~0UL << (parameterTraits<uint64_t>::bit_length() - i_len)) & ~0UL) >> target_start;
+            uint64_t mask = ((~0UL << (parameterTraits<uint64_t>::bit_length() - i_len)) &
+                             ~0UL) >> target_start;
 
             // Align the source to the target. Make things signed so we know which way to shift.
             int32_t shift = source_start - target_start;
+
             if (shift > 0)
             {
                 source <<= shift;
@@ -573,7 +607,8 @@ namespace fapi2
         /// @note Data is assumed to be aligned on the word boundary of L
         ///
         template<typename OT>
-        fapi2::ReturnCode insertFromRight(const OT i_datain, const bits_type i_targetStart,
+        fapi2::ReturnCode insertFromRight(const OT i_datain,
+                                          const bits_type i_targetStart,
                                           const bits_type i_len)
         {
             // Error if input data don't make sense
@@ -595,7 +630,28 @@ namespace fapi2
                 return FAPI2_RC_INVALID_PARAMETER;
             }
 
-            return this->insert(i_datain, i_targetStart, i_len, parameterTraits<OT>::bit_length() - i_len);
+            return this->insert(i_datain, i_targetStart, i_len,
+                                parameterTraits<OT>::bit_length() - i_len);
+        }
+
+        ///
+        /// @brief Copy data from this buffer into an OT
+        /// @tparam SS Start bit in source
+        /// @tparam L Length of bits to insert
+        /// @tparam TS Start bit to insert into (target start)
+        /// @tparam OT the type of the outgoing (target)
+        /// @param[out] o_out OT to copy into - data is placed left aligned
+        /// @return const buffer& Useful for method chaining
+        ///
+        template<bits_type SS, bits_type L, bits_type TS = 0, typename OT>
+        inline const buffer& extract(OT& o_out) const
+        {
+            // Extraction is just an insert into o_out
+
+            buffer<OT> out(o_out);
+            out.insert<TS, L, SS>(iv_data);
+            o_out = out;
+            return *this;
         }
 
         ///
@@ -629,18 +685,35 @@ namespace fapi2
         ///
         template<typename OT>
         fapi2::ReturnCode extract(OT& o_out, const bits_type i_sourceStart,
-                                  const bits_type i_len, const bits_type i_targetStart = 0)
+                                  const bits_type i_len, const bits_type i_targetStart = 0) const
         {
             // Extraction is just an insert into o_out
 
             buffer<OT> out(o_out);
-            if (out.insert(iv_data, i_targetStart, i_len, i_sourceStart) != FAPI2_RC_SUCCESS)
+
+            if (out.insert(iv_data, i_targetStart, i_len,
+                           i_sourceStart) != FAPI2_RC_SUCCESS)
             {
                 return FAPI2_RC_INVALID_PARAMETER;
             }
 
             o_out = out;
             return FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Copy data from this buffer into an OT and right justify
+        /// @tparam SS Start bit to insert into (source start)
+        /// @tparam L Length of bits to extract
+        /// @tparam OT the type of the outgoing (target)
+        /// @param[out] o_out OT to copy into - data is placed right aligned
+        /// @return const buffer& Useful for method chaining
+        ///
+        template<bits_type SS, bits_type L, typename OT>
+        inline const buffer& extractToRight(OT& o_out) const
+        {
+            extract<SS, L, parameterTraits<OT>::bit_length() - L>(o_out);
+            return *this;
         }
 
         ///
@@ -668,9 +741,10 @@ namespace fapi2
         ///
         template<typename OT>
         fapi2::ReturnCode extractToRight(OT& o_out, const bits_type i_sourceStart,
-                                         const bits_type i_len)
+                                         const bits_type i_len) const
         {
-            return extract(o_out, i_sourceStart, i_len, parameterTraits<OT>::bit_length() - i_len);
+            return extract(o_out, i_sourceStart, i_len,
+                           parameterTraits<OT>::bit_length() - i_len);
         }
 
         ///@}
@@ -678,7 +752,7 @@ namespace fapi2
     private:
         /// The contents of the buffer
         T iv_data;
-    };
+};
 }
 
 #endif
