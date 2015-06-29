@@ -245,6 +245,9 @@ errlHndl_t populate_system_attributes( uint64_t i_nodes )
     do {
         TRACDCOMP( g_trac_runtime, "-SYSTEM-" );
 
+        // Wipe out our cache of the NACA/SPIRA pointers
+        RUNTIME::rediscover_hdat();
+
         // find our memory range and fill it with some junk data
         uint64_t sys_data_addr = 0;
         uint64_t sys_data_size = 0;
@@ -414,6 +417,9 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum )
     do {
         TRACDCOMP( g_trac_runtime, "-NODE-" );
         TRACFCOMP( g_trac_runtime, "populate_node_attributes(node=%d)", i_nodeNum );
+
+        // Wipe out our cache of the NACA/SPIRA pointers
+        RUNTIME::rediscover_hdat();
 
         // allocate memory and fill it with some junk data
         uint64_t node_data_addr = 0;

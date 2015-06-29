@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -134,6 +136,12 @@ void add_host_data_ffdc( SectionId i_section,
  * @param[in] i_payloadAddress in MEGABYTES
  */
 void setPayloadBaseAddress(uint64_t i_payloadAddress);
+
+/*
+ * @brief Clear out any cached data and rediscover the location
+ *        of the HDAT memory
+ */
+void rediscover_hdat( void );
 
 }
 

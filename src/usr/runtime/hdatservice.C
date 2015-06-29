@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -337,13 +337,7 @@ hdatService::hdatService(void)
 
 hdatService::~hdatService(void)
 {
-    for(memRegionItr region = iv_mem_regions.begin();
-        (region != iv_mem_regions.end()); ++region)
-    {
-         mm_block_unmap((*region).virt_addr);
-    }
-
-    iv_mem_regions.clear();
+    rediscoverHDAT();
 }
 
 errlHndl_t hdatService::mapRegion(uint64_t i_addr, size_t i_bytes,
@@ -1442,6 +1436,26 @@ void hdatService::addFFDC( SectionId i_section,
     }
 }
 
+/*
+ * @brief Clear out any cached data and rediscover the location
+ *        of the HDAT memory
+ */
+void hdatService::rediscoverHDAT( void )
+{
+    // Clear out the pointers we cached
+    iv_spiraS = NULL;
+    iv_spiraL = NULL;
+    iv_spiraH = NULL;
+
+    // Clear out our cache of memory regions
+    for(memRegionItr region = iv_mem_regions.begin();
+        (region != iv_mem_regions.end()); ++region)
+    {
+         mm_block_unmap((*region).virt_addr);
+    }
+    iv_mem_regions.clear();
+}
+
 /********************
  Public Methods
  ********************/
@@ -1487,6 +1501,11 @@ void add_host_data_ffdc( SectionId i_section,
                          errlHndl_t& io_errlog )
 {
     return Singleton<hdatService>::instance().addFFDC(i_section,io_errlog);
+}
+
+void rediscover_hdat( void )
+{
+    Singleton<hdatService>::instance().rediscoverHDAT();
 }
 
 };

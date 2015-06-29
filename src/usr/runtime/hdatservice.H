@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -118,6 +120,12 @@ namespace RUNTIME
          */
         void addFFDC( SectionId i_section,
                       errlHndl_t& io_errlog );
+
+        /*
+         * @brief Clear out any cached data and rediscover the location
+         *        of the HDAT memory
+         */
+        void rediscoverHDAT( void );
 
       protected:
         /**
