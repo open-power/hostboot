@@ -191,6 +191,7 @@ TESTCASE_MODULES += testerrl
 TESTCASE_MODULES += testhwas
 TESTCASE_MODULES += testvpd
 TESTCASE_MODULES += testsyslib
+TESTCASE_MODULES += testscom
 
 #Requires main store memory @TODO RTC: 132577
 #TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testdump)
@@ -215,8 +216,6 @@ TESTCASE_MODULES += testsyslib
 #@TODO RTC: 138226 (p9 work in progress)
 #TESTCASE_MODULES += testsbe
 
-#@TODO RTC: 118804
-#TESTCASE_MODULES += testscom
 
 #*******************************************************
 #These modules do not work and are not tracked by any stories

@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2016
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,6 +22,14 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-# common objects between hostboot and runtime hostboot
+
+
+VPATH += ${ROOTPATH}/src/import/chips/p9/common/scominfo/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/scominfo/
+
+# Local Objects
 OBJS += scom.o
 OBJS += scomtrans.o
+
+# Objects From Import Directory
+OBJS += p9_scominfo.o

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,7 +44,12 @@
 
 extern trace_desc_t* g_trac_scom;
 
-
+namespace SCOM
+{
+extern errlHndl_t scomTranslate(TARGETING::Target* &i_target,
+                         uint64_t &io_addr,
+                         TARGETING::Target* io_target_SW);
+}
 class ScomTest: public CxxTest::TestSuite
 {
 public:
@@ -64,7 +69,6 @@ public:
 
       // Setup some targets to use
       enum {
-          PROCWRAP,
           PROC1,
           NUM_TARGETS
       };
@@ -74,15 +78,10 @@ public:
           scom_targets[x] = NULL;
       }
 
-      // Target Proc 9 - the FSI wrap-back connection in simics
+      // processor target (physical:sys-0/node-0/proc-1)
       TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
       epath.addLast(TARGETING::TYPE_SYS,0);
       epath.addLast(TARGETING::TYPE_NODE,0);
-      epath.addLast(TARGETING::TYPE_PROC,9);
-      scom_targets[PROCWRAP] = TARGETING::targetService().toTarget(epath);
-
-      // other processor target (physical:sys-0/node-0/proc-1)
-      epath.removeLast();
       epath.addLast(TARGETING::TYPE_PROC,1);
       scom_targets[PROC1] = TARGETING::targetService().toTarget(epath);
 
@@ -121,12 +120,8 @@ public:
           uint64_t addr;
           uint64_t data;
       } test_data[] = {
-          { scom_targets[PROCWRAP], 0x120F0000 ,0xFEEDB0B000001234},
-          { scom_targets[PROCWRAP], 0x120F0166, 0xFEDCBA9876543210},
-          { scom_targets[PROCWRAP], 0x01010803, 0x0000000000000000},
-          { scom_targets[PROCWRAP], 0x02040004, 0xFFFFFFFFFFFFFFFF},
-          { scom_targets[PROC1],    0x01010803, 0x1234567887654321},
-          { scom_targets[PROC1],    0x02040004, 0x1122334455667788},
+          { scom_targets[PROC1],    0x040110C4, 0x1234567887654321},
+          { scom_targets[PROC1],    0x02040008, 0x1122334455667788},
       };
       const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
 
@@ -387,1291 +382,557 @@ public:
    * @brief SCOM test Indirect SCOM
    *
    */
-
-  void test_IndirectScom(void)
-  {
-      TRACFCOMP( g_trac_scom, "ScomTest::test_IndirectScomReadWrite> Start" );
-
-      uint64_t fails = 0;
-      uint64_t total = 0;
-      errlHndl_t l_err = NULL;
-
-      //@VBU workaround - Disable Indirect SCOM test case o
-      //Test case read/writes to valid addresses and is
-      //potentially destructive on VBU
-      if (TARGETING::is_vpo())
-      {
-           return;
-      }
-
-      // Setup some targets to use
-      enum {
-          myPROC0,
-          NUM_TARGETS
-      };
-      TARGETING::Target* scom_targets[NUM_TARGETS];
-      for( uint64_t x = 0; x < NUM_TARGETS; x++ )
-      {
-          scom_targets[x] = NULL;
-      }
-
-
-      // Target Proc 9 - the FSI wrap-back connection in simics
-      TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
-      epath.addLast(TARGETING::TYPE_SYS,0);
-      epath.addLast(TARGETING::TYPE_NODE,0);
-      epath.addLast(TARGETING::TYPE_PROC,0);
-
-      scom_targets[myPROC0] = TARGETING::targetService().toTarget(epath);
-
-      for( uint64_t x = 0; x < NUM_TARGETS; x++ )
-      {
-          //only run if the target exists
-          if(scom_targets[x] == NULL)
-          {
-              TRACDCOMP( g_trac_scom, "ScomTest - TARGET = NULL - 1 x = %d", x);
-              continue;
-          }
-          else if ((scom_targets[x]->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useXscom == 0) &&
-                   (scom_targets[x]->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useFsiScom == 0))
-          {
-              // If both FSI and XSCOM are not enabled.. then ignore..
-              TRACDCOMP(g_trac_scom, "INDIRECT SCOM>> SKIPPING ");
-              scom_targets[x] = NULL; //remove from our list
-          }
-          else if (scom_targets[x]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
-          {
-              TRACDCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> Target %d is not functional", x );
-              scom_targets[x] = NULL; //remove from our list
-          }
-
-
-      }
-
-      // scratch data to use
-      //@fixme: Need to either fabricate some fake registers to use or save off data before modifying SCOMs to avoid
-      //   corrupting the HW.
-
-      struct {
-          TARGETING::Target* target;
-          uint64_t addr;
-          uint64_t data;
-      } test_data[] = {
-          { scom_targets[myPROC0], 0x8000F06002011E3F ,0x1234432112344321},
-          { scom_targets[myPROC0], 0x8000086002011E3F, 0x123443211234ABAB},
-      };
-      const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
-
-
-      size_t op_size = sizeof(uint32_t);
-
-      // write all the test registers
-      for( uint64_t x = 0; x < NUM_ADDRS; x++ )
-      {
-          //only run if the target exists
-          if(test_data[x].target == NULL)
-          {
-              continue;
-          }
-
-          op_size = sizeof(uint64_t);
-
-          total++;
-          l_err = deviceWrite( test_data[x].target,
-                               &(test_data[x].data),
-                               op_size,
-                               DEVICE_SCOM_ADDRESS(test_data[x].addr) );
-          if( l_err )
-          {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScom_proc> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-              TS_FAIL( "ScomTest::test_IndirectScom_proc> ERROR : Unexpected error log from write1" );
-              fails++;
-              errlCommit(l_err,SCOM_COMP_ID);
-          }
-      }
-
-      // allocate space for read data
-      uint64_t read_data[NUM_ADDRS];
-
-      memset(read_data, 0, sizeof read_data);
-
-      // read all the test registers
-      for( uint64_t x = 0; x < NUM_ADDRS; x++ )
-      {
-          //only run if the target exists
-          if(test_data[x].target == NULL)
-          {
-              continue;
-          }
-
-          op_size = sizeof(uint64_t);
-
-          total++;
-          l_err = deviceRead( test_data[x].target,
-                              &(read_data[x]),
-                              op_size,
-                              DEVICE_SCOM_ADDRESS(test_data[x].addr) );
-
-          if( l_err )
-          {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScomreadWrite_proc> [%d] Read: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-              TS_FAIL( "ScomTest::test_IndirectScomreadWrite_proc> ERROR : Unexpected error log from write1" );
-              fails++;
-              errlCommit(l_err,SCOM_COMP_ID);
-          }
-          else if((read_data[x] & 0x000000000000FFFF) != (test_data[x].data & 0x000000000000FFFF))
-          {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScomreadWrite_proc> [%d] Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
-              TS_FAIL( "ScomTest::test_IndirectScomreadWrite_proc> ERROR : Data miss-match between read and expected data" );
-              fails++;
-          }
-
-      }
-
-      TRACFCOMP( g_trac_scom, "ScomTest::test_IndirectScomreadWrite_proc> %d/%d fails", fails, total );
-
-  }
-
-
-
-
-
- void test_TranslateScom_EX(void)
-  {
-
-      TRACFCOMP( g_trac_scom, "ScomTest::test_TranslateScom> Start" );
-
-      uint64_t fails = 0;
-      uint64_t total = 0;
-      errlHndl_t l_err = NULL;
-
-
-      //@VBU workaround - Disable Indirect SCOM test case o
-      //Test case read/writes to valid addresses and is
-      //potentially destructive on VBU
-      if (TARGETING::is_vpo())
-      {
-           return;
-      }
-
-      // Setup some targets to use
-      enum {
-          myProc0,
-          myEX1,
-          myEX5,
-          NUM_TARGETS
-      };
-
-      TARGETING::Target* scom_targets[NUM_TARGETS];
-      for( uint64_t x = 0; x < NUM_TARGETS; x++ )
-      {
-          scom_targets[x] = NULL;
-      }
-
-      // Target Proc 0 - to make sure we have XSCOM and FSISCOM attributes
-      TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
-      epath.addLast(TARGETING::TYPE_SYS,0);
-      epath.addLast(TARGETING::TYPE_NODE,0);
-      epath.addLast(TARGETING::TYPE_PROC,0);
-
-      scom_targets[myProc0] = TARGETING::targetService().toTarget(epath);
-
-      // Only check the Proc or Membuf targets to look at the SCOM attributes
-      if ((scom_targets[myProc0] != NULL) &&
-          (scom_targets[myProc0]->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useXscom == 0) &&
-          (scom_targets[myProc0]->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useFsiScom == 0))
-      {
-            // If both FSI and XSCOM are not enabled.. then ignore..
-            TRACDCOMP(g_trac_scom, "TRANSLATE SCOM>> SKIPPING ");
-            scom_targets[myProc0] = NULL; //remove from our list
-      }
-
-
-      if (scom_targets[myProc0] != NULL)
-      {
-          // Add the Ex1 to the path and  create new target
-          epath.addLast(TARGETING::TYPE_EX,1);
-          scom_targets[myEX1] = TARGETING::targetService().toTarget(epath);
-
-          // remote EX1 target (off of sys-0/node-0/proc-0/EX1)
-          epath.removeLast();
-
-          // add EX5 target.
-          epath.addLast(TARGETING::TYPE_EX,5);
-          scom_targets[myEX5] = TARGETING::targetService().toTarget(epath);
-      }
-      // scratch data to use
-      //@fixme: Need to either fabricate some fake registers to use or save off data before modifying SCOMs to avoid
-      //   corrupting the HW.
-
-      struct {
-          TARGETING::Target* target;
-          uint64_t addr;
-          uint64_t data;
-      } test_data[] = {
-          { scom_targets[myEX1], 0x10040000 ,0x7676767676767676},
-          { scom_targets[myEX5], 0x10040002, 0x9191919191919191},
-          { scom_targets[myEX5], 0x13040002, 0xabcdabcdabcdabcd},   // invalid unit 0 address
-          { scom_targets[myEX1], 0x000F0166, 0xabcdabcdabcdabcd},   // invalid address range for target
-      };
-      const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
-
-      size_t op_size = sizeof(uint32_t);
-
-      // write all the test registers
-      for( uint64_t x = 0; x < NUM_ADDRS; x++ )
-      {
-          //only run if the target exists
-          if(test_data[x].target == NULL)
-          {
-              continue;
-          }
-          // check to see if the target is functional.. if not.. skip this target
-          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
-          {
-              TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_EX> Target %d is not functional", x );
-              continue;
-          }
-
-
-          op_size = sizeof(uint64_t);
-
-          total++;
-          l_err = deviceWrite( test_data[x].target,
-                               &(test_data[x].data),
-                               op_size,
-                               DEVICE_SCOM_ADDRESS(test_data[x].addr) );
-          if( l_err )
-          {
-              // last 2 writes have expected failure conditions.
-              if ((x == NUM_ADDRS-1) || (x == NUM_ADDRS-2))
-              {
-                  TRACDCOMP( g_trac_scom, "ScomTest::test_translate_EX.. Expected Error log returned> " );
-              }
-              else
-              {
-                  TRACFCOMP(g_trac_scom, "ScomTest::test_translate_scom_EX> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-                  TS_FAIL( "ScomTest::test_translate_EX> ERROR : Unexpected error log from write1" );
-                  fails++;
-                  errlCommit(l_err,SCOM_COMP_ID);
-              }
-
-              delete l_err;
-          }
-      }
-
-      // allocate space for read data
-      uint64_t read_data[NUM_ADDRS];
-
-      memset(read_data, 0, sizeof (read_data));
-
-
-      // read all the test registers
-      for( uint64_t x = 0; x < NUM_ADDRS-2; x++ )
-      {
-          //only run if the target exists
-          if(test_data[x].target == NULL)
-          {
-              continue;
-          }
-
-          op_size = sizeof(uint64_t);
-
-          total++;
-          l_err = deviceRead( test_data[x].target,
-                              &(read_data[x]),
-                              op_size,
-                              DEVICE_SCOM_ADDRESS(test_data[x].addr) );
-
-          if( l_err )
-          {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_translate_scom_EX> [%d] Read: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-              TS_FAIL( "ScomTest::test_translate_scom_EX> ERROR : Unexpected error log from write1" );
-              fails++;
-              errlCommit(l_err,SCOM_COMP_ID);
-          }
-          else if((read_data[x]) != (test_data[x].data))
-          {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_translate_scom_EX> [%d] Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
-              TS_FAIL( "ScomTest::test_translate_scom_EX> ERROR : Data miss-match between read and expected data" );
-              fails++;
-          }
-
-      }
-
-      TRACFCOMP( g_trac_scom, "ScomTest::test_translateScom_EX> %d/%d fails", fails, total );
-
- }
-
-
- void test_TranslateScom_MCS(void)
-  {
-
-      TRACFCOMP( g_trac_scom, "ScomTest::test_TranslateScom_MCS Start" );
-      errlHndl_t l_err = NULL;
-
-      uint64_t fails = 0;
-      uint64_t total = 0;
-
-
-
-      //@VBU workaround - Disable Indirect SCOM test case o
-      //Test case read/writes to valid addresses and is
-      //potentially destructive on VBU
-      if (TARGETING::is_vpo())
-      {
-           return;
-      }
-
-      // Setup some targets to use
-      enum {
-          myProc0,
-          myMCS1,
-          myMCS2,
-          myMCS7,
-          myMCS4,
-          NUM_TARGETS
-      };
-
-      TARGETING::Target* scom_targets[NUM_TARGETS];
-      for( uint64_t x = 0; x < NUM_TARGETS; x++ )
-      {
-          scom_targets[x] = NULL;
-      }
-
-      // Target Proc 0 - to make sure we have XSCOM and FSISCOM attributes
-      TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
-      epath.addLast(TARGETING::TYPE_SYS,0);
-      epath.addLast(TARGETING::TYPE_NODE,0);
-      epath.addLast(TARGETING::TYPE_PROC,0);
-
-      scom_targets[myProc0] = TARGETING::targetService().toTarget(epath);
-
-      // Only check the Proc or Membuf targets to look at the SCOM attributes
-      if ((scom_targets[myProc0] != NULL) &&
-          (scom_targets[myProc0]->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useXscom == 0) &&
-          (scom_targets[myProc0]->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useFsiScom == 0))
-      {
-            // If both FSI and XSCOM are not enabled.. then ignore..
-            TRACDCOMP(g_trac_scom, "TRANSLATE_SCOM_MCS>> SKIPPING ");
-            scom_targets[myProc0] = NULL; //remove from our list
-      }
-
-
-      if (scom_targets[myProc0] != NULL)
-      {
-          // Add the MCS(1) to the path and  create new target
-          epath.addLast(TARGETING::TYPE_MCS,1);
-          scom_targets[myMCS1] = TARGETING::targetService().toTarget(epath);
-
-          // remote MCS(1) (off of sys-0/node-0/proc-0/MCS1)
-          epath.removeLast();
-
-          // add MCS4 target.
-          epath.addLast(TARGETING::TYPE_MCS,4);
-          scom_targets[myMCS4] = TARGETING::targetService().toTarget(epath);
-
-          // remote MCS4 target (off of sys-0/node-0/proc-0/MCS4)
-          epath.removeLast();
-
-          // add MCS2 target.
-          epath.addLast(TARGETING::TYPE_MCS,2);
-          scom_targets[myMCS2] = TARGETING::targetService().toTarget(epath);
-
-          // remove MCS2 target (off of sys-0/node-0/proc-0/MCS4)
-          epath.removeLast();
-
-          // add MCS7 target.
-          epath.addLast(TARGETING::TYPE_MCS,7);
-          scom_targets[myMCS7] = TARGETING::targetService().toTarget(epath);
-      }
-
-      // scratch data to use
-      //@fixme: Need to either fabricate some fake registers to use or save off data before modifying SCOMs to avoid
-      //   corrupting the HW.
-      struct {
-          TARGETING::Target* target;
-          uint64_t addr;
-          uint64_t data;
-      } test_data[] = {
-          { scom_targets[myMCS1], 0x0201184A ,0x1111111122222222},
-          { scom_targets[myMCS4], 0x0201184A, 0x3333333344444444},
-          { scom_targets[myMCS2], 0x0201184A, 0x5555555566666666},
-          { scom_targets[myMCS7], 0x0201184A, 0x7777777788888888},
-          { scom_targets[myMCS4], 0x0601184A, 0x0101010101010101},  // invalid address range
-          { scom_targets[myMCS4], 0x0200184A, 0x2323232323232323},  // Invalid address range for target
-      };
-      const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
-
-      size_t op_size = sizeof(uint32_t);
-
-      // write all the test registers
-      for( uint64_t x = 0; x < NUM_ADDRS; x++ )
-      {
-          //only run if the target exists
-          if(test_data[x].target == NULL)
-          {
-              continue;
-          }
-          // check to see if the target is functional.. if not.. skip this target
-          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
-          {
-              TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_MCS> Target %d is not functional", x );
-              continue;
-          }
-
-          op_size = sizeof(uint64_t);
-
-          total++;
-          l_err = deviceWrite( test_data[x].target,
-                               &(test_data[x].data),
-                               op_size,
-                               DEVICE_SCOM_ADDRESS(test_data[x].addr) );
-          if( l_err )
-          {
-              if ((x == NUM_ADDRS-1) || (x==NUM_ADDRS-2))
-              {
-                  TRACDCOMP( g_trac_scom, "ScomTest::test_translate MCS.. Expected Error log returned> x = %d", x );
-              }
-              else
-              {
-                  TRACFCOMP(g_trac_scom, "ScomTest::test_translate_Scom_MCS> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-                  TS_FAIL( "ScomTest::test_Translate_SCOM_mcs> ERROR : Unexpected error log from write1" );
-                  fails++;
-                  errlCommit(l_err,SCOM_COMP_ID);
-              }
-
-              delete l_err;
-          }
-      }
-
-      // allocate space for read data
-      uint64_t read_data[NUM_ADDRS];
-
-      memset(read_data, 0, sizeof read_data);
-
-      // read all the test registers
-      for( uint64_t x = 0; x < NUM_ADDRS-2; x++ )
-      {
-          //only run if the target exists
-          if(test_data[x].target == NULL)
-          {
-              continue;
-          }
-
-          op_size = sizeof(uint64_t);
-
-          total++;
-          l_err = deviceRead( test_data[x].target,
-                              &(read_data[x]),
-                              op_size,
-                              DEVICE_SCOM_ADDRESS(test_data[x].addr) );
-
-          if( l_err )
-          {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_TranslateScom_MCS> [%d] Read: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-              TS_FAIL( "ScomTest::test_TranslateScom_MCS> ERROR : Unexpected error log from write1" );
-              fails++;
-              errlCommit(l_err,SCOM_COMP_ID);
-          }
-          else if((read_data[x]) != (test_data[x].data))
-          {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_TranslateScom_MCS> [%d] Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
-
-              //temp workaround for MCSs that have been turned off (RTC Issue 84907)
-              if (read_data[x] != 0x0)
-              {
-                   TS_FAIL( "ScomTest::test_TranslateScom_MCS> ERROR : Data miss-match between read and expected data" );
-                   fails++;
-              }
-          }
-
-      }
-
-      TRACFCOMP( g_trac_scom, "ScomTest::test_translateScom_MCS> %d/%d fails", fails, total );
-
- }
-
-
- void test_TranslateScom_MCS_DMI(void)
+// @TODO RTC 142928 Enable Indirect Scoms in Simics
+//   void _test_IndirectScom(void)
+//   {
+//       TRACFCOMP( g_trac_scom, "ScomTest::test_IndirectScomReadWrite> Start" );
+//
+//       uint64_t fails = 0;
+//       uint64_t total = 0;
+//       errlHndl_t l_err = NULL;
+//
+//       //@VBU workaround - Disable Indirect SCOM test case o
+//       //Test case read/writes to valid addresses and is
+//       //potentially destructive on VBU
+//       if (TARGETING::is_vpo())
+//       {
+//            return;
+//       }
+//
+//       // Setup some targets to use
+//       enum {
+//           myPROC0,
+//           NUM_TARGETS
+//       };
+//       TARGETING::Target* scom_targets[NUM_TARGETS];
+//       for( uint64_t x = 0; x < NUM_TARGETS; x++ )
+//       {
+//           scom_targets[x] = NULL;
+//       }
+//
+//
+//       // Target Proc 9 - the FSI wrap-back connection in simics
+//       TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
+//       epath.addLast(TARGETING::TYPE_SYS,0);
+//       epath.addLast(TARGETING::TYPE_NODE,0);
+//       epath.addLast(TARGETING::TYPE_PROC,0);
+//
+//       scom_targets[myPROC0] = TARGETING::targetService().toTarget(epath);
+//
+//       for( uint64_t x = 0; x < NUM_TARGETS; x++ )
+//       {
+//           //only run if the target exists
+//           if(scom_targets[x] == NULL)
+//           {
+//               TRACDCOMP( g_trac_scom, "ScomTest - TARGET = NULL - 1 x = %d", x);
+//               continue;
+//           }
+//           else if ((scom_targets[x]->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useXscom == 0) &&
+//                    (scom_targets[x]->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useFsiScom == 0))
+//           {
+//               // If both FSI and XSCOM are not enabled.. then ignore..
+//               TRACDCOMP(g_trac_scom, "INDIRECT SCOM>> SKIPPING ");
+//               scom_targets[x] = NULL; //remove from our list
+//           }
+//           else if (scom_targets[x]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
+//           {
+//               TRACDCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> Target %d is not functional", x );
+//               scom_targets[x] = NULL; //remove from our list
+//           }
+//
+//
+//       }
+//
+//       // scratch data to use
+//       //@fixme: Need to either fabricate some fake registers to use or save off data before modifying SCOMs to avoid
+//       //   corrupting the HW.
+//
+//       struct {
+//           TARGETING::Target* target;
+//           uint64_t addr;
+//           uint64_t data;
+//       } test_data[] = {
+//           { scom_targets[myPROC0], 0x8000F06002011E3F ,0x1234432112344321},
+//           { scom_targets[myPROC0], 0x8000086002011E3F, 0x123443211234ABAB},
+//       };
+//       const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
+//
+//
+//       size_t op_size = sizeof(uint32_t);
+//
+//       // write all the test registers
+//       for( uint64_t x = 0; x < NUM_ADDRS; x++ )
+//       {
+//           //only run if the target exists
+//           if(test_data[x].target == NULL)
+//           {
+//               continue;
+//           }
+//
+//           op_size = sizeof(uint64_t);
+//
+//           total++;
+//           l_err = deviceWrite( test_data[x].target,
+//                                &(test_data[x].data),
+//                                op_size,
+//                                DEVICE_SCOM_ADDRESS(test_data[x].addr) );
+//           if( l_err )
+//           {
+//               TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScom_proc> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
+//               TS_FAIL( "ScomTest::test_IndirectScom_proc> ERROR : Unexpected error log from write1" );
+//               fails++;
+//               errlCommit(l_err,SCOM_COMP_ID);
+//           }
+//       }
+//
+//       // allocate space for read data
+//       uint64_t read_data[NUM_ADDRS];
+//
+//       memset(read_data, 0, sizeof read_data);
+//
+//       // read all the test registers
+//       for( uint64_t x = 0; x < NUM_ADDRS; x++ )
+//       {
+//           //only run if the target exists
+//           if(test_data[x].target == NULL)
+//           {
+//               continue;
+//           }
+//
+//           op_size = sizeof(uint64_t);
+//
+//           total++;
+//           l_err = deviceRead( test_data[x].target,
+//                               &(read_data[x]),
+//                               op_size,
+//                               DEVICE_SCOM_ADDRESS(test_data[x].addr) );
+//
+//           if( l_err )
+//           {
+//               TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScomreadWrite_proc> [%d] Read: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
+//               TS_FAIL( "ScomTest::test_IndirectScomreadWrite_proc> ERROR : Unexpected error log from write1" );
+//               fails++;
+//               errlCommit(l_err,SCOM_COMP_ID);
+//           }
+//           else if((read_data[x] & 0x000000000000FFFF) != (test_data[x].data & 0x000000000000FFFF))
+//           {
+//               TRACFCOMP(g_trac_scom, "ScomTest::test_IndirectScomreadWrite_proc> [%d] Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
+//               TS_FAIL( "ScomTest::test_IndirectScomreadWrite_proc> ERROR : Data miss-match between read and expected data" );
+//               fails++;
+//           }
+//
+//       }
+//
+//       TRACFCOMP( g_trac_scom, "ScomTest::test_IndirectScomreadWrite_proc> %d/%d fails", fails, total );
+//
+//   }
+
+
+  //@TODO RTC: 131502
+  //write tests to verify connection between XSCOM and FSISCOM
+  //write error path testcase for FSI scom using bad address
+
+  void test_P9_ScomTranslations(void)
 {
+    TRACFCOMP( g_trac_scom, "ScomTest::test_P9_ScomTranslations> Start" );
 
-      TRACFCOMP( g_trac_scom, "ScomTest::test_TranslateScom_MCS_DMI Start" );
-      errlHndl_t l_err = NULL;
+    uint64_t fails = 0;
+    uint64_t total = 0;
+    errlHndl_t l_err = NULL;
 
-      uint64_t fails = 0;
-      uint64_t total = 0;
+    // Setup some targets to use
+    enum {
+        myEX0,
+        myEX1,
+        myCORE0,
+        myCORE1,
+        myEQ0,
+        myEQ5,
+        myMCS0,
+        myMCS3,
+        myXBUS1,
+        myMCBIST0,
+        myMCBIST1,
+        myMCA0,
+        myMCA1,
+        myPERV1,
+        myPERV32,
+        myPEC0,
+        myPEC1,
+        myPHB0,
+        myPHB5,
+        myOBUS0,
+        myOBUS3,
+        myNVBUS0,
+        myNVBUS1,
+        myPPE0,
+        myPPE1,
+        myOCC0,
+        myOCC1,
+        mySBE0,
+        mySBE1,
+        NUM_TARGETS
+    };
 
 
+    TARGETING::Target* scom_targets[NUM_TARGETS];
+    for( uint64_t x = 0; x < NUM_TARGETS; x++ )
+    {
+        scom_targets[x] = NULL;
+    }
 
-      //@VBU workaround - Disable Indirect SCOM test case o
-      //Test case read/writes to valid addresses and is
-      //potentially destructive on VBU
-      if (TARGETING::is_vpo())
+
+    /////////////////////////////////////////////////////////////////
+    // Set up targets
+    /////////////////////////////////////////////////////////////////
+
+    // Target Proc 0
+    TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
+    epath.addLast(TARGETING::TYPE_SYS,0);
+    epath.addLast(TARGETING::TYPE_NODE,0);
+    epath.addLast(TARGETING::TYPE_PROC,0);
+
+    epath.addLast(TARGETING::TYPE_EQ,0);
+    scom_targets[myEQ0] = TARGETING::targetService().toTarget(epath);
+
+    //add EX0 target
+    epath.addLast(TARGETING::TYPE_EX,0);
+    scom_targets[myEX0] = TARGETING::targetService().toTarget(epath);
+
+    //add CORE0 target
+    epath.addLast(TARGETING::TYPE_CORE,0);
+    scom_targets[myCORE0] = TARGETING::targetService().toTarget(epath);
+
+    // remove CORE0 target
+    epath.removeLast();
+
+    // add CORE1 target.
+    epath.addLast(TARGETING::TYPE_CORE,1);
+    scom_targets[myCORE1] = TARGETING::targetService().toTarget(epath);
+
+    // remove CORE1 target
+    epath.removeLast();
+
+    // remove EX0 target
+    epath.removeLast();
+
+    // add EX1 target.
+    epath.addLast(TARGETING::TYPE_EX,1);
+    scom_targets[myEX1] = TARGETING::targetService().toTarget(epath);
+
+    // remove EX1 target
+    epath.removeLast();
+
+    // remove EQ0 target
+    epath.removeLast();
+
+    // add EQ5 target.
+    epath.addLast(TARGETING::TYPE_EQ,5);
+    scom_targets[myEQ5] = TARGETING::targetService().toTarget(epath);
+
+    // remove EQ5 target
+    epath.removeLast();
+
+    //add MCS0 target
+    epath.addLast(TARGETING::TYPE_MCS,0);
+    scom_targets[myMCS0] = TARGETING::targetService().toTarget(epath);
+
+    //add MCA0 target
+    epath.addLast(TARGETING::TYPE_MCA,0);
+    scom_targets[myMCA0] = TARGETING::targetService().toTarget(epath);
+
+    // remove MCA0 target
+    epath.removeLast();
+
+    // add MCA1 target.
+    epath.addLast(TARGETING::TYPE_MCA,1);
+    scom_targets[myMCA1] = TARGETING::targetService().toTarget(epath);
+
+    // remove MCA1 target
+    epath.removeLast();
+
+    // remove MCS0 target
+    epath.removeLast();
+
+    // add MCS3 target.
+    epath.addLast(TARGETING::TYPE_MCS,3);
+    scom_targets[myMCS3] = TARGETING::targetService().toTarget(epath);
+
+    // remove MCS3 target
+    epath.removeLast();
+
+    //add XBUS1 target
+    epath.addLast(TARGETING::TYPE_XBUS,0);
+    scom_targets[myXBUS1] = TARGETING::targetService().toTarget(epath);
+
+    // remove XBUS1 target
+    epath.removeLast();
+
+    //add MCBIST0 target
+    epath.addLast(TARGETING::TYPE_MCBIST,0);
+    scom_targets[myMCBIST0] = TARGETING::targetService().toTarget(epath);
+
+    // remove MCBIST0 target
+    epath.removeLast();
+
+    // add MCBIST1 target.
+    epath.addLast(TARGETING::TYPE_MCBIST,1);
+    scom_targets[myMCBIST1] = TARGETING::targetService().toTarget(epath);
+
+    // remove MCBIST1 target
+    epath.removeLast();
+
+    //add PERV1 target
+    epath.addLast(TARGETING::TYPE_PERV,1);
+    scom_targets[myPERV1] = TARGETING::targetService().toTarget(epath);
+
+    // remove PERV1 target
+    epath.removeLast();
+
+    // add PERV32 target.
+    epath.addLast(TARGETING::TYPE_PERV,32);
+    scom_targets[myPERV32] = TARGETING::targetService().toTarget(epath);
+
+    // remove PERV32 target
+    epath.removeLast();
+
+    //add PEC0 target
+    epath.addLast(TARGETING::TYPE_PEC,0);
+    scom_targets[myPEC0] = TARGETING::targetService().toTarget(epath);
+
+    //add PHB0 target
+    epath.addLast(TARGETING::TYPE_PHB,0);
+    scom_targets[myPHB0] = TARGETING::targetService().toTarget(epath);
+
+    // remove PHB0 target
+    epath.removeLast();
+
+    // add PHB5 target.
+    epath.addLast(TARGETING::TYPE_PHB,5);
+    scom_targets[myPHB5] = TARGETING::targetService().toTarget(epath);
+
+    // remove PHB5 target
+    epath.removeLast();
+
+    // remove PEC0 target
+    epath.removeLast();
+
+    // add PEC1 target.
+    epath.addLast(TARGETING::TYPE_PEC,1);
+    scom_targets[myPEC1] = TARGETING::targetService().toTarget(epath);
+
+    // remove PEC1 target
+    epath.removeLast();
+
+    //add OBUS0 target
+    epath.addLast(TARGETING::TYPE_OBUS,0);
+    scom_targets[myOBUS0] = TARGETING::targetService().toTarget(epath);
+
+    // remove OBUS0 target
+    epath.removeLast();
+
+    // add OBUS3 target.
+    epath.addLast(TARGETING::TYPE_OBUS,3);
+    scom_targets[myOBUS3] = TARGETING::targetService().toTarget(epath);
+
+    // remove OBUS3 target
+    epath.removeLast();
+
+    //add NVBUS0 target
+    epath.addLast(TARGETING::TYPE_NVBUS,0);
+    scom_targets[myNVBUS0] = TARGETING::targetService().toTarget(epath);
+
+    // remove NVBUS0 target
+    epath.removeLast();
+
+    // add NVBUS1 target.
+    epath.addLast(TARGETING::TYPE_NVBUS,1);
+    scom_targets[myNVBUS1] = TARGETING::targetService().toTarget(epath);
+
+    // remove NVBUS1 target
+    epath.removeLast();
+
+    //add PPE0 target
+    epath.addLast(TARGETING::TYPE_PPE,0);
+    scom_targets[myPPE0] = TARGETING::targetService().toTarget(epath);
+
+    // remove PPE0 target
+    epath.removeLast();
+
+    // add PPE1 target.
+    epath.addLast(TARGETING::TYPE_PPE,1);
+    scom_targets[myPPE1] = TARGETING::targetService().toTarget(epath);
+
+    // remove PPE1 target
+    epath.removeLast();
+
+    //add OCC0 target
+    epath.addLast(TARGETING::TYPE_OCC,0);
+    scom_targets[myOCC0] = TARGETING::targetService().toTarget(epath);
+
+    // remove OCC0 target
+    epath.removeLast();
+
+    // add OCC1 target.
+    epath.addLast(TARGETING::TYPE_OCC,1);
+    scom_targets[myOCC1] = TARGETING::targetService().toTarget(epath);
+
+    // remove OCC1 target
+    epath.removeLast();
+
+    //add SBE0 target
+    epath.addLast(TARGETING::TYPE_SBE,0);
+    scom_targets[mySBE0] = TARGETING::targetService().toTarget(epath);
+
+    // remove SBE0 target
+    epath.removeLast();
+
+    // add SBE1 target.
+    epath.addLast(TARGETING::TYPE_SBE,1);
+    scom_targets[mySBE1] = TARGETING::targetService().toTarget(epath);
+
+    // remove SBE1 target
+    epath.removeLast();
+
+    struct {
+    TARGETING::Target* target;
+    uint64_t initAddr;
+    uint64_t expectedAddr;
+    bool     expectError;
+    } test_data[] = {
+      //Target            Address       Expected    error
+    { scom_targets[myEX0], 0x21000000 , 0x21000000, false},
+    { scom_targets[myEX0], 0x0FFFFFFF, 0x0FFFFFFF, true},
+    { scom_targets[myEX1], 0x21000000, 0x23000000, false},
+    { scom_targets[myEX1], 0x0FFFFFFF, 0x0FFFFFFF ,true},
+    { scom_targets[myEX1], 0x10012400, 0x10012800, false},
+    { scom_targets[myCORE0], 0x20010A46, 0x20010A46, false},
+    { scom_targets[myCORE0], 0x0FFFFFFF, 0x0FFFFFFF, true},
+    { scom_targets[myCORE1], 0x20010A46, 0x21010A46, false},
+    { scom_targets[myCORE1], 0x0FFFFFFF, 0x0FFFFFFF ,true},
+    { scom_targets[myCORE0], 0x12012826, 0x12012826, true},
+    { scom_targets[myEQ0], 0x10000008 , 0x10000008, false},
+    { scom_targets[myEQ0], 0x0FFFFFFF, 0x0FFFFFFF, true},
+    { scom_targets[myEQ5], 0x10000008, 0x15000008, false},
+    { scom_targets[myEQ5], 0x0FFFFFFF, 0x0FFFFFFF ,true},
+    { scom_targets[myEQ5], 0x24030008, 0x24030008, true},
+    { scom_targets[myMCS0], 0x05010800 , 0x05010800, false},
+    { scom_targets[myMCS0], 0x0FFFFFFF, 0x0FFFFFFF, true},
+    { scom_targets[myMCS3], 0x05010800, 0x03010880, false},
+    { scom_targets[myMCS3], 0x0FFFFFFF, 0x0FFFFFFF ,true},
+    { scom_targets[myMCS0], 0x12012826, 0x12012826, true},
+    { scom_targets[myMCS3], 0x24030008, 0x24030008, true},
+    { scom_targets[myXBUS1], 0x0FFFFFFFFFFFFFFF , 0x0FFFFFFFFFFFFFFF, true},
+    { scom_targets[myXBUS1], 0x12012826, 0x12012826, true},
+    { scom_targets[myXBUS1], 0x24030008, 0x24030008, true},
+//TODO: RTC 143005 Add MCBIST Targets to scomtest.H
+//     { scom_targets[myMCBIST0], 0x07010F15 ,0x07010F15 , false},
+//     { scom_targets[myMCBIST0], 0x0FFFFFFF, 0x0FFFFFFF, true},
+//     { scom_targets[myMCBIST1], 0x07010F15,0x08010F15 , false},
+//     { scom_targets[myMCBIST1], 0x0FFFFFFF, 0x0FFFFFFF ,true},
+//     { scom_targets[myMCBIST0], 0x12012826, 0x12012826, true},
+//     { scom_targets[myMCBIST1], 0x24030008, 0x24030008, true},
+     { scom_targets[myMCA0], 0x07010915, 0x07010915, false},
+     { scom_targets[myMCA0], 0x0FFFFFFF, 0x0FFFFFFF, true},
+     { scom_targets[myMCA1], 0x07010915, 0x07010955, false},
+     { scom_targets[myMCA1], 0x0FFFFFFF, 0x0FFFFFFF ,true},
+     { scom_targets[myMCA0], 0x12012826, 0x12012826, true},
+     { scom_targets[myMCA1], 0x24030008, 0x24030008, true},
+    { scom_targets[myPERV1], 0x00030009, 0x01030009, false},
+    { scom_targets[myPERV1], 0x0FF6FFFF, 0x0FF6FFFF, true},
+    { scom_targets[myPERV32], 0x00030009, 0x20030009, false},
+    { scom_targets[myPERV32], 0x0FF6FFFF, 0x0FF6FFFF ,true},
+    { scom_targets[myPERV1], 0x07010A0A, 0x32010A0A, true},
+    { scom_targets[myPERV32], 0x0D010400, 0x0D010400, true},
+    { scom_targets[myPEC0], 0x04010C03, 0x04010C03, false},
+    { scom_targets[myPEC1], 0x04010C03, 0x04011003 ,false},
+    { scom_targets[myPEC0], 0x0FFFFFFF, 0x0FFFFFFF, true},
+    { scom_targets[myPEC1], 0x0FFFFFFF, 0x0FFFFFFF ,true},
+    { scom_targets[myPEC0], 0x12012826, 0x12012826, true},
+    { scom_targets[myPEC1], 0x24030008, 0x24030008, true},
+    { scom_targets[myPHB0], 0x04010C4E, 0x04010C4E, false},
+    { scom_targets[myPHB5], 0x04010C4E, 0x04010C4E ,false},
+    { scom_targets[myPHB0], 0x0FFFFFFF, 0x0FFFFFFF, true},
+    { scom_targets[myPHB5], 0x0FFFFFFF, 0x0FFFFFFF ,true},
+    { scom_targets[myPHB0], 0x12012826, 0x12012826, true},
+    { scom_targets[myPHB5], 0x24030008, 0x24030008, true},
+    { scom_targets[myOBUS0], 0x09010C55, 0x09010C55, false},
+    { scom_targets[myOBUS3], 0x09010C55, 0x0C010C55 ,false},
+    { scom_targets[myOBUS0], 0x12012826, 0x12012826, true},
+    { scom_targets[myOBUS3], 0x24030008, 0x24030008, true},
+    { scom_targets[myNVBUS0], 0x050110D4, 0x050110D4, false},
+    { scom_targets[myNVBUS1], 0x050110D4, 0x050110F4,false},
+    { scom_targets[myNVBUS0], 0x12012826, 0x12012826, true},
+    { scom_targets[myNVBUS1], 0x24030008, 0x24030008, true},
+// @TODO RTC 131502 Scom Translation Test Updates
+//      SBE TARGETS
+//     { scom_targets[mySBE0], 0x000D0060, 0x000D0060, false},
+//     { scom_targets[mySBE0], 0x12012826, 0x12012826, true},
+//     { scom_targets[mySBE0], 0x24030008, 0x24030008, true},
+//     PPE TARGETS
+//     { scom_targets[myPPE0], 0x00060010, 0x00060010, false},
+//     { scom_targets[myPPE1], 0x00060010, 0x00000000 ,false},
+//     { scom_targets[myPPE0], 0x12012826, 0x12012826, true},
+//     { scom_targets[myPPE1], 0x24030008, 0x24030008, true},
+//     Maybe OCC TARGETS?
+//     { scom_targets[myOCC0], 0x0006C070, 0x0006C070, false},
+//     { scom_targets[myOCC0], 0x12012826, 0x12012826, true},
+//     { scom_targets[myOCC0], 0x24030008, 0x24030008, true},
+    };
+
+    int numOfAddr = sizeof test_data / sizeof(test_data[0]);
+
+    for (int i = 0; i < numOfAddr; i++)
       {
-           return;
-      }
+        if(test_data[i].target != NULL)
+        {
+            total++;
+            uint64_t tempAddr = test_data[i].initAddr;
+            l_err  = SCOM::scomTranslate(test_data[i].target,
+                    tempAddr,
+                    NULL);
 
-      // Setup some targets to use
-      enum {
-          myProc0,
-          myMCS1,
-          myMCS2,
-          myMCS7,
-          myMCS4,
-          NUM_TARGETS
-      };
-
-      TARGETING::Target* scom_targets[NUM_TARGETS];
-      for( uint64_t x = 0; x < NUM_TARGETS; x++ )
-      {
-          scom_targets[x] = NULL;
-      }
-
-      // Target Proc 0 - to make sure we have XSCOM and FSISCOM attributes
-      TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
-      epath.addLast(TARGETING::TYPE_SYS,0);
-      epath.addLast(TARGETING::TYPE_NODE,0);
-      epath.addLast(TARGETING::TYPE_PROC,0);
-
-      scom_targets[myProc0] = TARGETING::targetService().toTarget(epath);
-
-      // Only check the Proc or Membuf targets to look at the SCOM attributes
-      if ((scom_targets[myProc0] != NULL) &&
-          (scom_targets[myProc0]->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useXscom == 0) &&
-          (scom_targets[myProc0]->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useFsiScom == 0))
-      {
-            // If both FSI and XSCOM are not enabled.. then ignore..
-            TRACDCOMP(g_trac_scom, "TRANSLATE_SCOM_MCS_DMI>> SKIPPING ");
-            scom_targets[myProc0] = NULL; //remove from our list
-      }
-
-
-      if (scom_targets[myProc0] != NULL)
-      {
-          // Add the MCS(1) to the path and  create new target
-          epath.addLast(TARGETING::TYPE_MCS,1);
-          scom_targets[myMCS1] = TARGETING::targetService().toTarget(epath);
-
-          // remote MCS(1) (off of sys-0/node-0/proc-0/MCS1)
-          epath.removeLast();
-
-          // add MCS4 target.
-          epath.addLast(TARGETING::TYPE_MCS,4);
-          scom_targets[myMCS4] = TARGETING::targetService().toTarget(epath);
-
-          // remote MCS4 target (off of sys-0/node-0/proc-0/MCS4)
-          epath.removeLast();
-
-          // add MCS2 target.
-          epath.addLast(TARGETING::TYPE_MCS,2);
-          scom_targets[myMCS2] = TARGETING::targetService().toTarget(epath);
-
-          // remove MCS2 target (off of sys-0/node-0/proc-0/MCS4)
-          epath.removeLast();
-
-          // add MCS7 target.
-          epath.addLast(TARGETING::TYPE_MCS,7);
-          scom_targets[myMCS7] = TARGETING::targetService().toTarget(epath);
-      }
-
-      // scratch data to use
-      //@fixme: Need to either fabricate some fake registers to use or save off data before modifying SCOMs to avoid
-      //   corrupting the HW.
-      struct {
-          TARGETING::Target* target;
-          uint64_t addr;
-          uint64_t data;
-      } test_data[] = {
-          { scom_targets[myMCS1], 0x800EAC6002011A3F ,0x1111111122222222},
-          { scom_targets[myMCS4], 0x800EAC6002011A3F, 0x3333333344444444},
-          { scom_targets[myMCS2], 0x800EAC6002011A3F, 0x5555555566666666},
-          { scom_targets[myMCS7], 0x800EAC6002011A3F, 0x7777777788888888},
-          { scom_targets[myMCS4], 0x800EAC0002011A3F, 0x0101010101010101},  // invalid address range
-          { scom_targets[myMCS4], 0x800EAC4002011E3F, 0x2323232323232323},  // Invalid address range for target
-      };
-      const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
-
-      size_t op_size = sizeof(uint32_t);
-
-      // write all the test registers
-      for( uint64_t x = 0; x < NUM_ADDRS; x++ )
-      {
-          //only run if the target exists
-          if(test_data[x].target == NULL)
-          {
-              continue;
-          }
-
-          // check to see if the target is functional.. if not.. skip this target
-          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
-          {
-              TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_MCS_DMI> Target %d is not functional", x );
-              continue;
-          }
-
-          op_size = sizeof(uint64_t);
-
-          total++;
-          l_err = deviceWrite( test_data[x].target,
-                               &(test_data[x].data),
-                               op_size,
-                               DEVICE_SCOM_ADDRESS(test_data[x].addr) );
-          if( l_err )
-          {
-            if ((x == NUM_ADDRS-1) || (x==NUM_ADDRS-2))
+            if( l_err && !test_data[i].expectError)
             {
-                TRACDCOMP( g_trac_scom, "ScomTest::test_translate MCS_DMI.. Expected Error log returned> x = %d", x );
+                TRACFCOMP(g_trac_scom, "ScomTest::test_P9_translate_scom> Write: Error from device : addr=0x%X, HUID 0x%X, RC=%X",
+                          test_data[i].initAddr,
+                          TARGETING::get_huid(test_data[i].target),
+                          l_err->reasonCode() );
+                TS_FAIL( "ScomTest::test_P9_translate> ERROR : Unexpected error log from write1" );
+                fails++;
+                errlCommit(l_err,SCOM_COMP_ID);
+
+                delete l_err;
             }
-            else
+            else if(l_err == NULL && test_data[i].expectError)
             {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_translate_Scom_MCS_DMI> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-              TS_FAIL( "ScomTest::test_Translate_SCOM_mcs_DMI> ERROR : Unexpected error log from write1" );
-              fails++;
-              errlCommit(l_err,SCOM_COMP_ID);
-             }
-
-              delete l_err;
-          }
-      }
-
-      // allocate space for read data
-      uint64_t read_data[NUM_ADDRS];
-
-      memset(read_data, 0, sizeof read_data);
-
-      // read all the test registers
-      for( uint64_t x = 0; x < NUM_ADDRS-2; x++ )
-      {
-          //only run if the target exists
-          if(test_data[x].target == NULL)
-          {
-              continue;
-          }
-
-          op_size = sizeof(uint64_t);
-
-          total++;
-          l_err = deviceRead( test_data[x].target,
-                              &(read_data[x]),
-                              op_size,
-                              DEVICE_SCOM_ADDRESS(test_data[x].addr) );
-
-          if( l_err )
-          {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_TranslateScom_MCS_DMI> [%d] Read: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-              TS_FAIL( "ScomTest::test_TranslateScom_MCS_DMI> ERROR : Unexpected error log from write1" );
-              fails++;
-              errlCommit(l_err,SCOM_COMP_ID);
-              delete l_err;
-          }
-          else if((read_data[x] & 0x000000000000FFFF) != (test_data[x].data & 0x000000000000FFFF))
-       //   else if((read_data[x]) != (test_data[x].data))
-          {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_TranslateScom_MCS_DMI> [%d] Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
-              //temp workaround for MCSs that have been turned off (RTC Issue 84907)
-              if (read_data[x] != 0x0)
-              {
-                   TS_FAIL( "ScomTest::test_TranslateScom_MCS_DMI> ERROR : Data miss-match between read and expected data" );
-                   fails++;
-              }
-          }
-
-      }
-
-      TRACFCOMP( g_trac_scom, "ScomTest::test_translateScom_MCS_DMI> %d/%d fails", fails, total );
-
- }
-
- void test_TranslateScom_MBA_MBS(void)
-  {
-      TRACFCOMP( g_trac_scom, "ScomTest::test_TranslateScom_MBA_MBS Start" );
-
-      uint64_t fails = 0;
-      uint64_t total = 0;
-      errlHndl_t l_err = NULL;
-
-      //@VBU workaround - Disable Indirect SCOM test case o
-      //Test case read/writes to valid addresses and is
-      //potentially destructive on VBU
-      if (TARGETING::is_vpo())
-      {
-           return;
-      }
-
-      // Setup some targets to use
-      enum {
-          myMembuf0,
-          myMBA0,
-          myMBA1,
-          NUM_TARGETS
-      };
-
-
-      TARGETING::Target* scom_targets[NUM_TARGETS];
-      for( uint64_t x = 0; x < NUM_TARGETS; x++ )
-      {
-          scom_targets[x] = NULL;
-      }
-
-      // Target Proc 0 - to make sure we have XSCOM and FSISCOM attributes
-      TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
-      epath.addLast(TARGETING::TYPE_SYS,0);
-      epath.addLast(TARGETING::TYPE_NODE,0);
-      epath.addLast(TARGETING::TYPE_MEMBUF,0);
-
-      scom_targets[myMembuf0] = TARGETING::targetService().toTarget(epath);
-
-      if ( (scom_targets[myMembuf0] != NULL) &&
-          (scom_targets[myMembuf0]->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useXscom == 0) &&
-          (scom_targets[myMembuf0]->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useFsiScom == 0))
-      {
-            // If both FSI and XSCOM are not enabled.. then ignore..
-            TRACDCOMP(g_trac_scom, "TRANSLATE_SCOM_MBA_MBS>> SKIPPING ");
-            scom_targets[myMembuf0] = NULL; //remove from our list
-      }
-
-      if(scom_targets[myMembuf0] != NULL)
-      {
-
-          // add MBA0 target.
-          epath.addLast(TARGETING::TYPE_MBA,0);
-          scom_targets[myMBA0] = TARGETING::targetService().toTarget(epath);
-
-          // remote MBA0 target (off of sys-0/node-0/membuf-0/MBA0)
-          epath.removeLast();
-
-          // Add MBA1 to the path and  create new target
-          epath.addLast(TARGETING::TYPE_MBA,1);
-          scom_targets[myMBA1] = TARGETING::targetService().toTarget(epath);
-      }
-      // scratch data to use
-      //@fixme: Need to either fabricate some fake registers to use or save off data before modifying SCOMs to avoid
-      //   corrupting the HW.
-      struct {
-          TARGETING::Target* target;
-          uint64_t addr;
-          uint64_t data;
-      } test_data[] = {
-          { scom_targets[myMBA0], 0x03010655 ,0x111111111111DDDD},
-          { scom_targets[myMBA1], 0x03010655, 0x333333334444EEEE},
-          { scom_targets[myMBA0], 0x8000C0140301143F,0x1111111111111212},
-          { scom_targets[myMBA1], 0x8000C0140301143F, 0x333333334444abcd},
-          { scom_targets[myMBA0], 0x8000C0140301183F,0x111111111111ccee}, // invalid non zero indirect address
-          { scom_targets[myMBA0], 0x03010E55, 0x010101010101CCCC},  // invalid passing in a non-0 unit address
-      };
-      const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
-
-      size_t op_size = sizeof(uint32_t);
-
-      // write all the test registers
-      for( uint64_t x = 0; x < NUM_ADDRS; x++ )
-      {
-          //only run if the target exists
-          if(test_data[x].target == NULL)
-          {
-              continue;
-          }
-
-          // check to see if the target is functional.. if not.. skip this target
-          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
-          {
-              TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_MBA_MBS> Target %d is not functional", x );
-              continue;
-          }
-
-          op_size = sizeof(uint64_t);
-
-          total++;
-          l_err = deviceWrite( test_data[x].target,
-                               &(test_data[x].data),
-                               op_size,
-                               DEVICE_SCOM_ADDRESS(test_data[x].addr) );
-          if( l_err )
-          {
-            // checking the read of NUM_ADDRs - 1 because the last entry written above failed as expected.
-            if ((x == NUM_ADDRS-1) || (x==NUM_ADDRS-2))
-            {
-                TRACDCOMP( g_trac_scom, "ScomTest::test_translate MBA_MBS.. Expected Errorlog Returned> x = %d", x );
+                TRACFCOMP(g_trac_scom,  "ScomTest::test_P9_translate> ERROR : Expected an error and did not recieve one for : addr=0x%X, HUID 0x%X",
+                          test_data[i].initAddr,
+                          TARGETING::get_huid(test_data[i].target))
+                TS_FAIL( "ScomTest::test_P9_translate> ERROR : Expected an error and did not recieve one" );
+                fails++;
             }
-            else
+            else if(tempAddr!= test_data[i].expectedAddr &&
+                    l_err == NULL && !test_data[i].expectError)
             {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_translate_Scom_MBA_MBS> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-              TS_FAIL( "ScomTest::test_Translate_SCOM_MBA_MBS> ERROR : Unexpected error log from write1" );
-              fails++;
-              errlCommit(l_err,SCOM_COMP_ID);
-             }
-
-              delete l_err;
-          }
-      }
-
-      // allocate space for read data
-      uint64_t read_data[NUM_ADDRS];
-
-      // read all the test registers
-      for( uint64_t x = 0; x < NUM_ADDRS-2; x++ )
-      {
-          memset(read_data, 0, sizeof read_data);
-
-          //only run if the target exists
-          if(test_data[x].target == NULL)
-          {
-              continue;
-          }
-          // check to see if the target is functional.. if not.. skip this target
-          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
-          {
-              TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_MBA_MBS> Target %d is not functional", x );
-              continue;
-          }
-
-          op_size = sizeof(uint64_t);
-
-          total++;
-          l_err = deviceRead( test_data[x].target,
-                              &(read_data[x]),
-                              op_size,
-                              DEVICE_SCOM_ADDRESS(test_data[x].addr) );
-
-
-          if( l_err )
-          {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_TranslateScom_MBA_MBS> [%d] Read: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-              TS_FAIL( "ScomTest::test_TranslateScom_MBA_MBS> ERROR : Unexpected error log from write1" );
-              fails++;
-              errlCommit(l_err,SCOM_COMP_ID);
-          }
-          else if ((x == 2) || (x==3))
-          {
-              if((read_data[x] & 0x000000000000FFFF) != (test_data[x].data & 0x000000000000FFFF))
-
-              {
-                  TRACFCOMP(g_trac_scom, "ScomTest::test_TranslateScom_ABUS> [%d] Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
-                  TS_FAIL( "ScomTest::test_TranslateScom_ABUS> ERROR : Data miss-match between read and expected data" );
-                  fails++;
-              }
-          }
-          else if((read_data[x]) != (test_data[x].data))
-          {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_TranslateScom_MBA_MBS> [%d] Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
-              TS_FAIL( "ScomTest::test_TranslateScom_MBA_MBS> ERROR : Data miss-match between read and expected data" );
-              fails++;
-          }
-
-      }
-
-      TRACFCOMP( g_trac_scom, "ScomTest::test_translateScom_MBA_MBS> %d/%d fails", fails, total );
-
- }
-
-
- void test_TranslateScom_ABUS(void)
-{
-/*
-      //FIXME: RTC 129630
-      TRACFCOMP( g_trac_scom, "ScomTest::test_TranslateScom_ABUS Start" );
-      errlHndl_t l_err = NULL;
-
-      uint64_t fails = 0;
-      uint64_t total = 0;
-
-      //@VBU workaround - Disable Indirect SCOM test case o
-      //Test case read/writes to valid addresses and is
-      //potentially destructive on VBU
-      if (TARGETING::is_vpo())
-      {
-           return;
-      }
-
-      // Setup some targets to use
-      enum {
-          myProc0,
-          myABUS0,
-          myABUS1,
-          myABUS2,
-          NUM_TARGETS
-      };
-
-      TARGETING::Target* scom_targets[NUM_TARGETS];
-      for( uint64_t x = 0; x < NUM_TARGETS; x++ )
-      {
-          scom_targets[x] = NULL;
-      }
-
-      // Target Proc 0 - to make sure we have XSCOM and FSISCOM attributes
-      TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
-      epath.addLast(TARGETING::TYPE_SYS,0);
-      epath.addLast(TARGETING::TYPE_NODE,0);
-      epath.addLast(TARGETING::TYPE_PROC,0);
-
-      scom_targets[myProc0] = TARGETING::targetService().toTarget(epath);
-
-      // Only check the Proc or Membuf targets to look at the SCOM attributes
-      if ((scom_targets[myProc0] != NULL) &&
-          (scom_targets[myProc0]->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useXscom == 0) &&
-          (scom_targets[myProc0]->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useFsiScom == 0))
-      {
-            // If both FSI and XSCOM are not enabled.. then ignore..
-            TRACDCOMP(g_trac_scom, "TRANSLATE_SCOM_ABUS>> SKIPPING ");
-            scom_targets[myProc0] = NULL; //remove from our list
-      }
-
-
-      if (scom_targets[myProc0] != NULL)
-      {
-          // Add the ABUS 0 to the path and  create new target
-          epath.addLast(TARGETING::TYPE_ABUS,0);
-          scom_targets[myABUS0] = TARGETING::targetService().toTarget(epath);
-
-          // remote ABUS 0 (off of sys-0/node-0/proc-0/ABUS0)
-          epath.removeLast();
-
-          // add ABUS 1 target.
-          epath.addLast(TARGETING::TYPE_ABUS,1);
-          scom_targets[myABUS1] = TARGETING::targetService().toTarget(epath);
-
-          // remote ABUS1 target (off of sys-0/node-0/proc-0/ABUS1)
-          epath.removeLast();
-
-          // add ABUS2 target.
-          epath.addLast(TARGETING::TYPE_ABUS,2);
-          scom_targets[myABUS2] = TARGETING::targetService().toTarget(epath);
-
-      }
-
-      // scratch data to use
-      //@fixme: Need to either fabricate some fake registers to use or save off data before modifying SCOMs to avoid
-      //   corrupting the HW.
-      struct {
-          TARGETING::Target* target;
-          uint64_t addr;
-          uint64_t data;
-      } test_data[] = {
-
-          { scom_targets[myABUS0], 0x800C4C0008010C3F ,0x1111111101010101},
-          { scom_targets[myABUS1], 0x8000B00108010C3F, 0x3333333311111111},
-          { scom_targets[myABUS2], 0x800C4C0008010C3F, 0x5555555521212121},
-          { scom_targets[myABUS0], 0x800C4C2008010C3F, 0x0101010101010101},  // invalid address range - non zero
-          { scom_targets[myABUS2], 0x800C4C0004010C3F, 0x2323232323232323},  // Invalid address range for target
-      };
-      const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
-
-      size_t op_size = sizeof(uint32_t);
-
-      // write all the test registers
-      for( uint64_t x = 0; x < NUM_ADDRS; x++ )
-      {
-          //only run if the target exists
-          if(test_data[x].target == NULL)
-          {
-              continue;
-          }
-
-          // check to see if the target is functional.. if not.. skip this target
-          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
-          {
-              TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_ABUS> Target %d is not functional", x );
-              continue;
-          }
-
-          op_size = sizeof(uint64_t);
-
-          total++;
-          l_err = deviceWrite( test_data[x].target,
-                               &(test_data[x].data),
-                               op_size,
-                               DEVICE_SCOM_ADDRESS(test_data[x].addr) );
-          if( l_err )
-          {
-              if ((x == NUM_ADDRS-1) || (x==NUM_ADDRS-2))
-              {
-                  TRACDCOMP( g_trac_scom, "ScomTest::test_translate ABUS.. Expected Error log returned> x = %d", x );
-              }
-              else
-              {
-                  TRACFCOMP(g_trac_scom, "ScomTest::test_translate_Scom_ABUS> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-                  TS_FAIL( "ScomTest::test_Translate_SCOM_ABUS> ERROR : Unexpected error log from write1" );
-                  fails++;
-                  errlCommit(l_err,SCOM_COMP_ID);
-              }
-
-              delete l_err;
-          }
-      }
-
-      // allocate space for read data
-      uint64_t read_data[NUM_ADDRS];
-
-      memset(read_data, 0, sizeof read_data);
-
-      // read all the test registers
-      for( uint64_t x = 0; x < NUM_ADDRS-2; x++ )
-      {
-          //only run if the target exists
-          if(test_data[x].target == NULL)
-          {
-              continue;
-          }
-          // check to see if the target is functional.. if not.. skip this target
-          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
-          {
-              TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_ABUS> Target %d is not functional", x );
-              continue;
-          }
-
-          op_size = sizeof(uint64_t);
-
-          total++;
-          l_err = deviceRead( test_data[x].target,
-                              &(read_data[x]),
-                              op_size,
-                              DEVICE_SCOM_ADDRESS(test_data[x].addr) );
-
-          if( l_err )
-          {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_TranslateScom_ABUS> [%d] Read: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-              TS_FAIL( "ScomTest::test_TranslateScom_ABUS> ERROR : Unexpected error log from write1" );
-              fails++;
-              errlCommit(l_err,SCOM_COMP_ID);
-              delete l_err;
-          }
-          else if((read_data[x] & 0x000000000000FFFF) != (test_data[x].data & 0x000000000000FFFF))
-          {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_TranslateScom_ABUS> [%d] Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
-              TS_FAIL( "ScomTest::test_TranslateScom_ABUS> ERROR : Data miss-match between read and expected data" );
-              fails++;
-          }
-
-      }
-
-      TRACFCOMP( g_trac_scom, "ScomTest::test_translateScom_ABUS> %d/%d fails", fails, total );
-*/
- }
-
-
- void test_TranslateScom_XBUS(void)
-{
-
-      TRACFCOMP( g_trac_scom, "ScomTest::test_TranslateScom_XBUS Start" );
-      errlHndl_t l_err = NULL;
-
-      uint64_t fails = 0;
-      uint64_t total = 0;
-
-      //@VBU workaround - Disable Indirect SCOM test case o
-      //Test case read/writes to valid addresses and is
-      //potentially destructive on VBU
-      if (TARGETING::is_vpo())
-      {
-           return;
-      }
-
-
-      // Setup some targets to use
-      enum {
-          myProc0,
-          myXBUS0,
-          myXBUS1,
-          myXBUS2,
-          myXBUS3,
-          NUM_TARGETS
-      };
-
-      TARGETING::Target* scom_targets[NUM_TARGETS];
-      for( uint64_t x = 0; x < NUM_TARGETS; x++ )
-      {
-          scom_targets[x] = NULL;
-      }
-
-      // Target Proc 0 - to make sure we have XSCOM and FSISCOM attributes
-      TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
-      epath.addLast(TARGETING::TYPE_SYS,0);
-      epath.addLast(TARGETING::TYPE_NODE,0);
-      epath.addLast(TARGETING::TYPE_PROC,0);
-
-      scom_targets[myProc0] = TARGETING::targetService().toTarget(epath);
-
-      // Only check the Proc or Membuf targets to look at the SCOM attributes
-      if ((scom_targets[myProc0] != NULL) &&
-          (scom_targets[myProc0]->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useXscom == 0) &&
-          (scom_targets[myProc0]->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useFsiScom == 0))
-      {
-            // If both FSI and XSCOM are not enabled.. then ignore..
-            TRACDCOMP(g_trac_scom, "TRANSLATE_SCOM_XBUS>> SKIPPING ");
-            scom_targets[myProc0] = NULL; //remove from our list
-      }
-
-
-      if (scom_targets[myProc0] != NULL)
-      {
-          // Add the XBUS 0 to the path and  create new target
-          epath.addLast(TARGETING::TYPE_XBUS,0);
-          scom_targets[myXBUS0] = TARGETING::targetService().toTarget(epath);
-
-          // remove XBUS 0 (off of sys-0/node-0/proc-0/XBUS0)
-          epath.removeLast();
-
-          // add XBUS 1 target.
-          epath.addLast(TARGETING::TYPE_XBUS,1);
-          scom_targets[myXBUS1] = TARGETING::targetService().toTarget(epath);
-
-          // remove XBUS1 target (off of sys-0/node-0/proc-0/XBUS1)
-          epath.removeLast();
-
-          // add XBUS2 target.
-          epath.addLast(TARGETING::TYPE_XBUS,2);
-          scom_targets[myXBUS2] = TARGETING::targetService().toTarget(epath);
-
-          // remove XBUS2 target (off of sys-0/node-0/proc-0/XBUS2)
-          epath.removeLast();
-
-          // add XBUS3 target.
-          epath.addLast(TARGETING::TYPE_XBUS,3);
-          scom_targets[myXBUS3] = TARGETING::targetService().toTarget(epath);
-
-      }
-
-      // scratch data to use
-      //@fixme: Need to either fabricate some fake registers to use or save off data before modifying SCOMs to avoid
-      //   corrupting the HW.
-      struct {
-          TARGETING::Target* target;
-          uint64_t addr;
-          uint64_t data;
-      } test_data[] = {
-
-          { scom_targets[myXBUS0], 0x800000200401103F ,0x1111111101010101},
-          { scom_targets[myXBUS1], 0x800000200401103F, 0x3333333311111111},
-          { scom_targets[myXBUS2], 0x800000200401103F, 0x555555552121aaaa},
-          { scom_targets[myXBUS3], 0x800000200401103F, 0x555555552121bbbb},
-      { scom_targets[myXBUS0], 0x8000002004011C3F, 0x0101010101010101},  // invalid address range - non zero
-      { scom_targets[myXBUS2], 0x800000200401003F, 0x2323232323232323},  // Invalid address range for target
-      };
-      const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
-
-      size_t op_size = sizeof(uint32_t);
-
-      // write all the test registers
-      for( uint64_t x = 0; x < NUM_ADDRS; x++ )
-      {
-          //only run if the target exists
-          if(test_data[x].target == NULL)
-      {
-              continue;
-          }
-          // check to see if the target is functional.. if not.. skip this target
-          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
-          {
-              TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_XBUS> Target %d is not functional", x );
-              continue;
-          }
-          // TODO: engd data for s1 supports XBUS1 only.
-          // TODO: RTC 109249, check XBUS for Naples
-          // For now check if murano or naples chip and target is not XBUS1, then skip this target.
-          // Long term solution would be to change HWAS per RTC 45796.
-          else if ( ((scom_targets[myProc0]->getAttr<TARGETING::ATTR_MODEL>() ==
-                      TARGETING::MODEL_MURANO) && (x != 1)) ||
-                    ((scom_targets[myProc0]->getAttr<TARGETING::ATTR_MODEL>() ==
-                      TARGETING::MODEL_NAPLES) && (x != 1)) )
-          {
-              TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_XBUS> Processor is Murano"
-                  " - skipping Target %d", x );
-              continue;
-          }
-
-          op_size = sizeof(uint64_t);
-
-          total++;
-          l_err = deviceWrite( test_data[x].target,
-                               &(test_data[x].data),
-                               op_size,
-                               DEVICE_SCOM_ADDRESS(test_data[x].addr) );
-          if( l_err )
-          {
-            if ((x == NUM_ADDRS-1) || (x==NUM_ADDRS-2))
-            {
-                TRACDCOMP( g_trac_scom, "ScomTest::test_translate XBUS.. Expected Error log returned> x = %d", x );
+                TRACFCOMP(g_trac_scom, "ScomTest::test_P9_translate_scom> Incorrect translation of: 0x%X produced: 0x%X  expected: 0x%X",
+                    test_data[i].initAddr, tempAddr, test_data[i].expectedAddr);
+                TS_FAIL( "ScomTest::test_P9_translate> ERROR : Unexpected error log from write1" );
+                fails++;
             }
-            else
+            else if(l_err && test_data[i].expectError)
             {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_translate_Scom_XBUS> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-              TS_FAIL( "ScomTest::test_Translate_SCOM_XBUS> ERROR : Unexpected error log from write1" );
-              fails++;
-              errlCommit(l_err,SCOM_COMP_ID);
-             }
-
-              delete l_err;
-          }
+                delete l_err;
+                 TRACFCOMP(g_trac_scom, "ScomTest::test_P9_translate_scom> Previous error expected");
+            }
+        }
+        else
+        {
+          TRACFCOMP(g_trac_scom, "ScomTest::test_P9_translate_scom> Target %d in the list of targets does not exist in the system", i);
+        }
       }
-
-      // allocate space for read data
-      uint64_t read_data[NUM_ADDRS];
-
-      memset(read_data, 0, sizeof read_data);
-
-      // read all the test registers
-      for( uint64_t x = 0; x < NUM_ADDRS-2; x++ )
-      {
-          //only run if the target exists
-          if(test_data[x].target == NULL)
-          {
-              continue;
-          }
-          // check to see if the target is functional.. if not.. skip this target
-          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
-          {
-              TRACDCOMP( g_trac_scom, "ScomTest::test_TranslateScom_XBUS> Target %d is not functional", x );
-              continue;
-          }
-          // TODO: engd data for s1 supports XBUS1 only.
-          // TODO: RTC 109249, check XBUS for Naples
-          // For now check if murano chip and target is not XBUS1, then skip this target.
-          // Long term solution would be to change HWAS per RTC 45796.
-          else if ( ((scom_targets[myProc0]->getAttr<TARGETING::ATTR_MODEL>() ==
-                      TARGETING::MODEL_MURANO) && (x != 1)) ||
-                    ((scom_targets[myProc0]->getAttr<TARGETING::ATTR_MODEL>() ==
-                      TARGETING::MODEL_NAPLES) && (x != 1)) )
-          {
-              TRACDCOMP( g_trac_scom, "ScomTest::test_TranslateScom_XBUS> Processor is Murano"
-                  " - skipping Target %d", x );
-              continue;
-          }
-
-          op_size = sizeof(uint64_t);
-
-          total++;
-          l_err = deviceRead( test_data[x].target,
-                              &(read_data[x]),
-                              op_size,
-                              DEVICE_SCOM_ADDRESS(test_data[x].addr) );
-
-          if( l_err )
-          {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_TranslateScom_XBUS> [%d] Read: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-              TS_FAIL( "ScomTest::test_TranslateScom_XBUS> ERROR : Unexpected error log from write1" );
-              fails++;
-              errlCommit(l_err,SCOM_COMP_ID);
-              delete l_err;
-          }
-          else if((read_data[x] & 0x000000000000FFFF) != (test_data[x].data & 0x000000000000FFFF))
-          {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_TranslateScom_XBUS> [%d] Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
-              TS_FAIL( "ScomTest::test_TranslateScom_XBUS> ERROR : Data miss-match between read and expected data" );
-              fails++;
-          }
-
-      }
-
-      TRACFCOMP( g_trac_scom, "ScomTest::test_translateScom_XBUS> %d/%d fails", fails, total );
-
- }
-  //@todo - write tests to verify connection between XSCOM and FSISCOM
-
-  //@todo - write error path testcase for FSI scom using bad address
-
-
-
+         TRACFCOMP( g_trac_scom, "ScomTest::test_P9_translateScom_SBE> %d/%d fails", fails, total );
+}
 
 
   /**
@@ -1711,7 +972,8 @@ public:
           {
               continue;
           }
-          else if (scom_targets[x]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
+          else if
+          (scom_targets[x]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
           {
               TRACDCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_proc> Target %d is not functional", x );
               scom_targets[x] = NULL; //remove from our list
