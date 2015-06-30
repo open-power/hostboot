@@ -504,7 +504,7 @@ sub processProcessor
     else
     {
         $targetObj->setAttribute($target, "PROC_MASTER_TYPE",
-            "MASTER_CANDIDATE");
+            "NOT_MASTER");
     }
     ## Update bus speeds
     processI2cSpeeds($targetObj,$target);
@@ -667,15 +667,15 @@ sub processXbus
         $targetObj->getAttribute($target, "PHYS_PATH"));
         $targetObj->setAttribute($target, "PEER_TARGET",
         $targetObj->getAttribute($xbus_child_conn, "PHYS_PATH"));
-        
+
         $targetObj->setAttribute($xbus_child_conn, "PEER_TARGET",
         $targetObj->getAttribute($target, "PHYS_PATH"));
         $targetObj->setAttribute($target, "PEER_TARGET",
         $targetObj->getAttribute($xbus_child_conn, "PHYS_PATH"));
-      
+
         $found_xbus = 1;
     }
-        
+
 }
 
 #--------------------------------------------------
