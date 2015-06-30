@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,6 +74,8 @@ enum    InitServiceReasonCode
     //termination_rc
     SBE_EXTRACT_RC_REQUEST_REIPL =   INITSVC_COMP_ID | 0x0e,
     RECONFIG_LOOP_TEST_RC        =   INITSVC_COMP_ID | 0x0f,
+    //termination_rc
+    SHUTDOWN_NOT_RECONFIG_LOOP   =   INITSVC_COMP_ID | 0x10,
 };
 
 enum InitServiceUserDetailDataSubSection

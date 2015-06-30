@@ -96,6 +96,10 @@ const uint8_t OUTER_STOP_STEP = 14;
 const uint8_t OUTER_STOP_SUBSTEP = 5;
 const uint8_t HB_START_ISTEP = 6;
 
+// @todo RTC 124679 - Remove Once BMC Monitors Shutdown Attention
+// Set Watchdog Timer To 15 seconds before calling doShutdown()
+const uint16_t SET_WD_TIMER_IN_SECS = 15;
+
 /**
  * _start() task entry procedure using the macro in taskargs.H
  */
@@ -506,14 +510,57 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                 }
                 else
                 {
-                    // Reconfig loop required, but the istep is either outside
-                    // of the reconfig loop, too many reconfigs have been
-                    // attempted, in manufacturing mode, or in MPIPL.
-                    // Return an error to cause termination
+
                     if (!err)
                     {
-                        err = failedDueToDeconfig(istep, substep,
-                                                  newIstep, newSubstep);
+                        // Reconfig loop required, but the istep is either outside
+                        // of the reconfig loop, too many reconfigs have been
+                        // attempted, in manufacturing mode, or in MPIPL.
+                        // Return an error to cause termination on FSP systems
+                        if (iv_spBaseServicesEnabled)
+                        {
+                            err = failedDueToDeconfig(istep, substep,
+                                                      newIstep, newSubstep);
+                        }
+                        // Otherwise increment the reboot count and shutdown
+                        else
+                        {
+                            #ifdef CONFIG_BMC_IPMI
+                            uint16_t l_count = 0;
+                            SENSOR::RebootCountSensor l_sensor;
+
+                            // Read reboot count sensor
+                            err = l_sensor.getRebootCount(l_count);
+                            if (err)
+                            {
+                                TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: getRebootCount failed");
+                                break;
+                            }
+                            // Increment reboot count
+                            l_count++;
+                            err = l_sensor.setRebootCount(l_count);
+                            if (err)
+                            {
+                                TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: setRebootCount to %d failed", l_count);
+                                break;
+                            }
+
+                            // @TODO RTC:124679 - Remove Once BMC Monitors
+                            // Shutdown Attention
+                            // Set Watchdog Timer before calling doShutdown()
+                            TRACFCOMP( g_trac_initsvc,"executeAllISteps: "
+                                       "Set Watch Dog Timer To %d Seconds",
+                                       SET_WD_TIMER_IN_SECS);
+
+                            err = IPMIWATCHDOG::setWatchDogTimer(
+                               SET_WD_TIMER_IN_SECS,  // new time
+                               static_cast<uint8_t>
+                                          (IPMIWATCHDOG::DO_NOT_STOP |
+                                           IPMIWATCHDOG::BIOS_FRB2), // default
+                                           IPMIWATCHDOG::TIMEOUT_HARD_RESET);
+                            #endif
+                            shutdownDuringIpl();
+                        }
                     }
                     // else return the error from doIstep
                 }
@@ -1260,27 +1307,49 @@ void IStepDispatcher::shutdownDuringIpl()
 {
     TRACFCOMP(g_trac_initsvc, ENTER_MRK"IStepDispatcher::shutdownDuringIpl");
 
-    // Create and commit error log for FFDC
+    // Create and commit error log for FFDC and call doShutdown with the RC
+    // to initiate a TI
+    if (iv_spBaseServicesEnabled)
+    {
+        /*@
+         * @errortype
+         * @reasoncode       SHUTDOWN_REQUESTED_BY_FSP
+         * @severity         ERRORLOG::ERRL_SEV_INFORMATIONAL
+         * @moduleid         ISTEP_INITSVC_MOD_ID
+         * @userdata1        Current IStep
+         * @userdata2        Current SubStep
+         * @devdesc          Received shutdown request from FSP
+         */
+        errlHndl_t err = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_INFORMATIONAL,
+            ISTEP_INITSVC_MOD_ID,
+            SHUTDOWN_REQUESTED_BY_FSP,
+            this->iv_curIStep, this->iv_curSubStep);
 
-    /*@
-     * @errortype
-     * @reasoncode       SHUTDOWN_REQUESTED_BY_FSP
-     * @severity         ERRORLOG::ERRL_SEV_INFORMATIONAL
-     * @moduleid         ISTEP_INITSVC_MOD_ID
-     * @userdata1        Current IStep
-     * @userdata2        Current SubStep
-     * @devdesc          Received shutdown request from FSP
-     */
-    errlHndl_t err = new ERRORLOG::ErrlEntry(
-        ERRORLOG::ERRL_SEV_INFORMATIONAL,
-        ISTEP_INITSVC_MOD_ID,
-        SHUTDOWN_REQUESTED_BY_FSP,
-        this->iv_curIStep, this->iv_curSubStep);
+        errlCommit(err, INITSVC_COMP_ID);
+        INITSERVICE::doShutdown(SHUTDOWN_REQUESTED_BY_FSP);
+    }
+    else
+    {
+        /*@
+         * @errortype
+         * @reasoncode       SHUTDOWN_NOT_RECONFIG_LOOP
+         * @severity         ERRORLOG::ERRL_SEV_INFORMATIONAL
+         * @moduleid         ISTEP_INITSVC_MOD_ID
+         * @userdata1        Current IStep
+         * @userdata2        Current SubStep
+         * @devdesc          Received shutdown request due to deconfigure
+         *                   outside of reconfig loop
+         */
+        errlHndl_t err = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_INFORMATIONAL,
+            ISTEP_INITSVC_MOD_ID,
+            SHUTDOWN_NOT_RECONFIG_LOOP,
+            this->iv_curIStep, this->iv_curSubStep);
 
-    errlCommit(err, INITSVC_COMP_ID);
-
-    // Call doShutdown with the RC to initiate a TI
-    INITSERVICE::doShutdown(SHUTDOWN_REQUESTED_BY_FSP);
+        errlCommit(err, INITSVC_COMP_ID);
+        INITSERVICE::doShutdown(SHUTDOWN_NOT_RECONFIG_LOOP);
+    }
 
 }
 
