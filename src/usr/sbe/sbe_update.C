@@ -3893,6 +3893,8 @@ namespace SBE
                 break;
             }
 
+            PNOR::flush( PNOR::SBE_IPL );
+
         }while(0);
 
 
