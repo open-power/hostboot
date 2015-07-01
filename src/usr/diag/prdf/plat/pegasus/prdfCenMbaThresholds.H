@@ -44,8 +44,17 @@ class ExtensibleChip;
  */
 inline uint8_t getMnfgCeTh()
 {
+    #ifndef __HOSTBOOT_RUNTIME
+
     return MfgThresholdMgr::getInstance()->
             getThreshold( TARGETING::ATTR_MNFG_TH_CEN_MBA_IPL_SOFT_CE_TH_ALGO );
+
+    #else
+
+    return MfgThresholdMgr::getInstance()->
+            getThreshold( TARGETING::ATTR_MNFG_TH_CEN_MBA_RT_SOFT_CE_TH_ALGO );
+
+    #endif
 
 }
 
