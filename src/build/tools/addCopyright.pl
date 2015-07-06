@@ -81,10 +81,12 @@ use constant IBM => 'International Business Machines Corp.';
 use constant GOOGLE => 'Google Inc.';
 
 # Create mapping for git contrubitors to companies
-my %fileContributorsCompany = ();
-$fileContributorsCompany{"ibm.com"} = IBM;
-$fileContributorsCompany{"google.com"} = GOOGLE;
-$fileContributorsCompany{"Google Shared Technology"} = GOOGLE;
+my %fileContributorsCompany = (
+    "ibm.com" => IBM,
+    "ozlabs.org" => IBM,
+    "google.com" => GOOGLE,
+    "Google Shared Technology" => GOOGLE,
+);
 
 ## note that these use single ticks so that the escape chars are NOT evaluated yet.
 my  $OLD_DELIMITER_END      =   'IBM_PROLOG_END';
