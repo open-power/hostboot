@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* [+] <jk@ozlabs.org                                                     */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -242,7 +243,7 @@ namespace CONSOLE
                 l_errl = writeSIOReg( 0x60, (g_uartBase >> 8) & 0xFF );
                 if (l_errl) { break; }
 
-                l_errl = writeSIOReg( 61, (g_uartBase & 0xFF) );
+                l_errl = writeSIOReg( 0x61, (g_uartBase & 0xFF) );
                 if (l_errl) { break; }
 
                 // Set the SerIRQ
