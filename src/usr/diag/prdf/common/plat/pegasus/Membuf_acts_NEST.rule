@@ -594,7 +594,7 @@ group gMbsFir filter singlebit, secondarybits( 3, 9, 12, 26, 29, 33, 34 )
     /** MBSFIR[4]
      *  MBS_FIR_REG_INTERNAL_TIMEOUT
      */
-    (MbsFir, bit(4)) ? SelfMedThr1;
+    (MbsFir, bit(4)) ? internalTimeout;
 
     /** MBSFIR[3,4]
      *  MBS_FIR_REG_EXTERNAL_TIMEOUT
@@ -1268,6 +1268,12 @@ actionclass calloutDmiBus
 actionclass replayTimeOutError
 {
     try( funccall("handleMcsChnlCs"), clearSecMbsBitsCalloutDmiBusTh1UE );
+};
+
+/** Handles MBACAL parity err if present, else handles MBS Internal Timeout */
+actionclass internalTimeout
+{
+    try( funccall("handleMbaCalParityErr"),  SelfMedThr1);
 };
 
 /** Clear MBS SecondaryBits and calloutDmiBusTh1UE */

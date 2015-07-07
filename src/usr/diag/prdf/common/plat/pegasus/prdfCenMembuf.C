@@ -1172,6 +1172,83 @@ int32_t handleMcsChnlCs( ExtensibleChip * i_membChip,
 //------------------------------------------------------------------------------
 
 /**
+ * @brief Handles MBACALFIR RCD Parity error bits, if they exist.
+ *
+ * @param  i_membChip   The Centaur chip.
+ * @param  i_sc         ServiceDataCollector.
+ *
+ * @return SUCCESS if MBACALFIR Parity error is present and properly
+ *         handled, FAIL otherwise.
+ */
+int32_t handleMbaCalParityErr( ExtensibleChip * i_membChip,
+                               STEP_CODE_DATA_STRUCT & i_sc )
+{
+    #define PRDF_FUNC "[handleMbaCalParityErr] "
+
+    // We will return FAIL from this function if MBACALFIR parity error bits are
+    // not set. If MBACALFIR parity error bits are set, we will try to analyze
+    // the MBACALFIR. If MBACALFIR is not analyzed properly, we will return
+    // FAIL. This will trigger rule code to execute alternate resolution.
+
+    int32_t l_rc;
+
+    CenMembufDataBundle * mbdb = getMembufDataBundle( i_membChip );
+
+    // We will loop through to check all MBA if necessary until one is found
+    // with parity error bits set
+    for ( uint32_t i = 0; i < MAX_MBA_PER_MEMBUF; i++)
+    {
+        l_rc = SUCCESS;
+
+        ExtensibleChip * mbaChip = mbdb->getMbaChip(i);
+        if ( NULL == mbaChip )
+        {
+            l_rc = FAIL;
+            continue;
+        }
+
+        SCAN_COMM_REGISTER_CLASS * mbaCalFir =
+                                    mbaChip->getRegister("MBACALFIR");
+        SCAN_COMM_REGISTER_CLASS * mbaCalMask =
+                                    mbaChip->getRegister("MBACALFIR_MASK");
+
+        l_rc  = mbaCalFir->Read();
+        l_rc |= mbaCalMask->Read();
+
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "MBACALFIR/MBACALFIR_MASK read failed for"
+                      "0x%08x", mbaChip->GetId());
+            continue;
+        }
+
+        // If any of the MBACALFIR parity error bits are set, we will
+        // analyze the MBA.
+        // bits 4 and 7 are parity error bits
+        bool bit4  = mbaCalFir->IsBitSet(4);
+        bool mask4 = mbaCalMask->IsBitSet(4);
+
+        bool bit7  = mbaCalFir->IsBitSet(7);
+        bool mask7 = mbaCalMask->IsBitSet(7);
+
+        if ( ( bit4 && !mask4 ) || ( bit7 && !mask7 ) )
+        {
+            l_rc = mbaChip->Analyze( i_sc,
+                        i_sc.service_data->getSecondaryAttnType() );
+            if ( SUCCESS == l_rc ) break;
+        }
+
+        l_rc = FAIL;
+    }
+
+    return l_rc;
+    #undef PRDF_FUNC
+
+} PRDF_PLUGIN_DEFINE( Membuf, handleMbaCalParityErr );
+
+//------------------------------------------------------------------------------
+
+/**
  * @brief   When not in MNFG mode, clear the service call flag so that
  *          thresholding will still be done, but no visible error log committed.
  * @param   i_chip Centaur chip
