@@ -53,6 +53,7 @@ namespace SECUREBOOT
     enum class ProcSecurity : uint64_t
     {
         SabBit = 0x8000000000000000ull,
+        SeepromLockBit = 0x800000000000000ull,
         SwitchRegister = 0x00010005ull,
     };
 

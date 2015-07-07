@@ -596,6 +596,14 @@ namespace SBE
     uint32_t trimBitMask(uint32_t i_mask,
                          size_t i_maxBits);
 
+    /**
+     * @brief Turns on SEEPROM write protection security bits for a processor
+     *
+     * @param[in] i_proc      Target processor
+     *
+     * @return errlHndl_t     Error log handle on failure.
+     */
+    errlHndl_t enableSeepromWriteProtect(TARGETING::Target *i_proc);
 
     /**
      * @brief Calculates ECC size for a block of code or data allowing for

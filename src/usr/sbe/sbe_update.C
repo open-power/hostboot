@@ -49,6 +49,7 @@
 #include <initservice/initserviceif.H>
 #include <console/consoleif.H>
 #include <config.h>
+#include <secureboot/service.H>
 #include <sbe/sbeif.H>
 #include <sbe/sbereasoncodes.H>
 #include "sbe_update.H"
@@ -456,6 +457,40 @@ namespace SBE
                    End hack to fix SBE Boot Select changing to 1 and never
                    being reset back to 0.  @TODO RTC:167179 for removal.
                    --------------------------------------------------------- */
+
+#ifdef CONFIG_SBE_UPDATE_PROTECT_SEEPROM
+                err = enableSeepromWriteProtect( sbeState.target );
+                if ( err )
+                {
+                    errlCommit( err, SBE_COMP_ID );
+                }
+
+#ifdef CONFIG_SBE_UPDATE_PROTECT_SEEPROM_VERIFY
+                // Verify that a write attempt to the EEPROM fails.
+                uint8_t tmpu8 = 0xba;
+                size_t tmpsize = sizeof(tmpu8);
+                err = deviceWrite( sbeState.target,
+                                   &tmpu8,
+                                   tmpsize,
+                                   DEVICE_EEPROM_ADDRESS(
+                                       EEPROM::SBE_BACKUP,
+                                       SBE_VERSION_SEEPROM_ADDRESS));
+                if( err )
+                {
+                    delete err;  // should fail, so consume error
+                    err = NULL;
+                }
+                else
+                {
+                    TRACFCOMP( g_trac_sbe,
+                               ERR_MRK"updateProcessorSbeSeeproms() - Error "
+                               "write succeeded after protect but shouldn't "
+                               "have: HUID=0x%.8X",
+                               TARGETING::get_huid( sbeState.target ));
+                    break;
+                }
+#endif
+#endif
 
                 // Push this sbeState onto the vector
                 sbeStates_vector.push_back(sbeState);
@@ -4781,5 +4816,31 @@ namespace SBE
         TRACUCOMP(g_trac_sbe,EXIT_MRK "Exit getBootMcSyncMode()");
 
         return l_err;
+    }
+
+/////////////////////////////////////////////////////////////////////
+    errlHndl_t enableSeepromWriteProtect(TARGETING::Target *i_proc)
+    {
+        errlHndl_t err;
+        // Read existing security state.
+        size_t scom_size = sizeof(uint64_t);
+        uint64_t security_switch_reg = 0;
+        err = deviceOp( DeviceFW::READ,
+                        i_proc,
+                        &security_switch_reg,
+                        scom_size,
+                        DEVICE_SCOM_ADDRESS(SECUREBOOT::ProcSecurity::SwitchRegister));
+        if (err)
+        {
+            return err;
+        }
+
+        // enable SeepromLockBit
+        security_switch_reg |= SECUREBOOT::ProcSecurity::SeepromLockBit;
+        return deviceOp( DeviceFW::WRITE,
+                         i_proc,
+                         &security_switch_reg,
+                         scom_size,
+                         DEVICE_SCOM_ADDRESS(SECUREBOOT::ProcSecurity::SwitchRegister));
     }
 } //end SBE Namespace
