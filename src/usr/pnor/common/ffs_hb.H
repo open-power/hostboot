@@ -66,6 +66,7 @@ enum
     /* Miscellaneous Bits : 1 byte */
     FFS_MISC_PRESERVED     = 0x80,    /**< Preserved across code updates */
     FFS_MISC_READ_ONLY     = 0x40,    /**< Read only section */
+    FFS_MISC_PSEUDO        = 0x20,    /**< Pseudo partition */
     FFS_MISC_GOLDEN        = 0x01,    /**< Golden side of PNOR */
     FFS_MISC_UNUSED        = 0x1E,    /**< Unused MISC Flags */
 };

@@ -627,6 +627,16 @@ sub addTOCInfo
                 trace(0, "Call to add partition $backup_part failed.  rc=$rc.  Aborting!");
                 exit;
             }
+            #indicate that this is a puesdo-partition and should be skipped on code update
+            my $userflags1 = 0x20;
+            $userflags1 = $userflags1 << 16;
+            trace(1, "$g_fpartCmd --target $i_pnorBinName --partition-offset $toc_offset --user 1 --name $backup_part --value $userflags1 --force");
+            $rc =    `$g_fpartCmd --target $i_pnorBinName --partition-offset $toc_offset --user 1 --name $backup_part --value $userflags1 --force`;
+            if($rc != 0)
+            {
+                trace(0, "Call to set BACKUP_PART as pseudo failed.  rc=$rc.  Aborting!");
+                exit;
+            }
 
             #Don't add OTHER_SIDE section if there is only one side in PNOR
             if ((scalar keys % {$$i_pnorLayout{metadata}{sides}}) > 1)
@@ -638,6 +648,14 @@ sub addTOCInfo
                 if($rc)
                 {
                     trace(0, "Call to add partition $other_side failed.  rc=$rc.  Aborting!");
+                    exit;
+                }
+                #indicate that this is a puesdo-partition and should be skipped on code update
+                trace(1, "$g_fpartCmd --target $i_pnorBinName --partition-offset $toc_offset --user 1 --name $other_side --value $userflags1 --force");
+                $rc =    `$g_fpartCmd --target $i_pnorBinName --partition-offset $toc_offset --user 1 --name $other_side --value $userflags1 --force`;
+                if($rc != 0)
+                {
+                    trace(0, "Call to set OTHER_SIDE as pseudo failed.  rc=$rc.  Aborting!");
                     exit;
                 }
             }
