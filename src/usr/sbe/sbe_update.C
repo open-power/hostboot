@@ -457,6 +457,40 @@ namespace SBE
                    being reset back to 0.  @TODO RTC:167179 for removal.
                    --------------------------------------------------------- */
 
+#ifdef CONFIG_SBE_UPDATE_PROTECT_SEEPROM
+                err = enableSeepromWriteProtect( sbeState.target );
+                if ( err )
+                {
+                    errlCommit( err, SBE_COMP_ID );
+                }
+
+#ifdef CONFIG_SBE_UPDATE_PROTECT_SEEPROM_VERIFY
+                // Verify that a write attempt to the EEPROM fails.
+                uint8_t tmpu8 = 0xba;
+                size_t tmpsize = sizeof(tmpu8);
+                err = deviceWrite( sbeState.target,
+                                   &tmpu8,
+                                   tmpsize,
+                                   DEVICE_EEPROM_ADDRESS(
+                                       EEPROM::SBE_BACKUP,
+                                       SBE_VERSION_SEEPROM_ADDRESS));
+                if( err )
+                {
+                    delete err;  // should fail, so consume error
+                    err = NULL;
+                }
+                else
+                {
+                    TRACFCOMP( g_trac_sbe,
+                               ERR_MRK"updateProcessorSbeSeeproms() - Error "
+                               "write succeeded after protect but shouldn't "
+                               "have: HUID=0x%.8X",
+                               TARGETING::get_huid( sbeState.target ));
+                    break;
+                }
+#endif
+#endif
+
                 // Push this sbeState onto the vector
                 sbeStates_vector.push_back(sbeState);
 
@@ -4781,5 +4815,32 @@ namespace SBE
         TRACUCOMP(g_trac_sbe,EXIT_MRK "Exit getBootMcSyncMode()");
 
         return l_err;
+    }
+
+/////////////////////////////////////////////////////////////////////
+    errlHndl_t enableSeepromWriteProtect(TARGETING::Target *i_proc)
+    {
+        const uint64_t OTPC_M_SECURITY_SWITCH_0x00010005 = 0x00010005;
+        errlHndl_t err;
+        // Read existing security state.
+        size_t scom_size = sizeof(uint64_t);
+        uint64_t security_switch_reg = 0;
+        err = deviceOp( DeviceFW::READ,
+                        i_proc,
+                        &security_switch_reg,
+                        scom_size,
+                        DEVICE_SCOM_ADDRESS(OTPC_M_SECURITY_SWITCH_0x00010005));
+        if (err)
+        {
+            return err;
+        }
+
+        // enable SECURITY_SWITCH_PROT_I2C_PROM bit 7 (sticky)
+        security_switch_reg |= 0x0100000000000000ULL;
+        return deviceOp( DeviceFW::WRITE,
+                         i_proc,
+                         &security_switch_reg,
+                         scom_size,
+                         DEVICE_SCOM_ADDRESS(OTPC_M_SECURITY_SWITCH_0x00010005));
     }
 } //end SBE Namespace
