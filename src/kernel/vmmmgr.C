@@ -32,9 +32,11 @@
 #include <kernel/basesegment.H>
 #include <kernel/stacksegment.H>
 #include <kernel/devicesegment.H>
+#include <config.h>
 
 
 extern void* data_load_address;
+uint64_t VmmManager::g_patb[2];
 
 VmmManager::VmmManager() : lock()
 {
@@ -56,8 +58,12 @@ void VmmManager::init()
     SegmentManager::initSLB();
 
     v.initPTEs();
-    v.initSDR1();
 
+#ifdef CONFIG_P9_PAGE_TABLE
+    v.initPartitionTable();
+#else
+    v.initSDR1();
+#endif
 };
 
 void VmmManager::init_slb()
@@ -65,7 +71,11 @@ void VmmManager::init_slb()
     VmmManager& v = Singleton<VmmManager>::instance();
     SegmentManager::initSLB();
 
+#ifdef CONFIG_P9_PAGE_TABLE
+    v.initPartitionTable();
+#else
     v.initSDR1();
+#endif
 }
 
 bool VmmManager::pteMiss(task_t* t, uint64_t effAddr, bool store)
@@ -107,6 +117,22 @@ void VmmManager::initPTEs()
 
     // There is no need to add PTE entries because the PTE-miss page fault
     // handler will add as-needed.
+}
+
+void VmmManager::initPartitionTable()
+{
+    // Use SLB, not In-Memory Segment Tables (Process Table)
+    // Set LPCR[41] (UPRT) = 0
+    setLPCR(getLPCR() & (~0x0000000000400000));
+
+    // Set the first partition table entry (PATE)
+    // HTABORG, HTABSIZE = 0 (11 bits, 256k table)
+    g_patb[0] = HTABORG();
+    g_patb[1] = 0x0;
+
+    // Init the PTCR reg
+    // PATB, PATS = 0 (4k table)
+    setPTCR( reinterpret_cast<uint64_t>(g_patb) );
 }
 
 void VmmManager::initSDR1()

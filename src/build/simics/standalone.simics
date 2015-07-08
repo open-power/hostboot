@@ -41,18 +41,6 @@ foreach $cc in (get-object-list p9_proc) {
     ($cc).proc_chip.invoke parallel_store STARTSBEREGS 0 "80000000" 32
 }
 
-# Workaround to set the sim_ctrl1 reg to enable the
-# old HPT SDR1 translation, not the new PTCR translation
-# SIM_CTRL1_P9_SDR1    0x0010000000000000
-# @todo-RTC:126640  Remove with P9 page table support
-system_cmp0.cpu0_0_00_0.write-reg sim_ctrl1 0x4230000000000000
-system_cmp0.cpu0_0_00_1.write-reg sim_ctrl1 0x4230000000000000
-system_cmp0.cpu0_0_00_2.write-reg sim_ctrl1 0x4230000000000000
-system_cmp0.cpu0_0_00_3.write-reg sim_ctrl1 0x4230000000000000
-system_cmp0.cpu0_0_01_0.write-reg sim_ctrl1 0x4230000000000000
-system_cmp0.cpu0_0_01_1.write-reg sim_ctrl1 0x4230000000000000
-system_cmp0.cpu0_0_01_2.write-reg sim_ctrl1 0x4230000000000000
-system_cmp0.cpu0_0_01_3.write-reg sim_ctrl1 0x4230000000000000
 system_cmp0.cpu0_0_00_0.enable
 
 ###################################

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -26,6 +28,7 @@
 #include <stdint.h>
 #include <util/lockfree/stack.H>
 #include <kernel/vmmmgr.H>
+#include <config.h>
 
 /**
  * @class PageTableManager
@@ -191,7 +194,52 @@ class PageTableManager
      */
     char* ivTABLE;
 
+#ifdef CONFIG_P9_PAGE_TABLE
+    /**
+     * Represents a single entry in the page table
+     */
+    struct PageTableEntry
+    {
+        /**
+         * Dword0
+         */
+        union {
+            struct {  /**< Dword0 Attributes */
+                uint64_t rsv0:12; /**< 0:11  Reserved */
+                uint64_t AVA:45;  /**< 12:56  Abbrev VA, VA w/o bottom bits */
+                uint64_t SW:1;    /**< 57 =SW[0] - Reserved  */
+                uint64_t R2:1;    /**< 58 =SW[1] - Shadow R bit  */
+                uint64_t LRU:2;   /**< 59:60 =SW[2:3] Used for LRU algorithm */
+                uint64_t L:1;     /**< 61    Virtual page size  */
+                uint64_t H:1;     /**< 62    Hash function identifier  */
+                uint64_t V:1;     /**< 63    Entry valid  */
+            };
+            uint64_t dword0;  /**< Full Dword0 */
+        };
 
+        /**
+         * Dword1
+         */
+        union {
+            struct {  /**< Dword1 Attributes */
+                uint64_t pp0:1;    /**< 0     Page Protection bit 0  */
+                uint64_t TS:1;     /**< 1     Tag Set bit  */
+                uint64_t key0_1:2; /**< 2:3   KEY bits 0:1  <unused>  */
+                uint64_t B:2;      /**< 4:5   Segment Size  */
+                uint64_t rsv1:1;   /**< 6     Reserved */
+                uint64_t PN:45;    /**< 7:51  Abbrev RPN + Large Page Size  */
+                uint64_t key2_4:3; /**< 52:54 KEY bits 2:4  <unused>  */
+                uint64_t R:1;      /**< 55    Reference bit  */
+                uint64_t C:1;      /**< 56    Change bit  */
+                uint64_t WIMG:4;   /**< 57:60 Storage control bits  */
+                uint64_t N:1;      /**< 61    No-execute page (N==1)  */
+                uint64_t pp1_2:2;  /**< 62:63 Page Protection bits 1:2  */
+            };
+            uint64_t dword1;  /**< Full Dword1 */
+        };
+    } PACKED;
+    enum { PTE_AVA_MASK = 0x1FFFFFFFFFFF };
+#else
     /**
      * Represents a single entry in the page table
      */
@@ -203,10 +251,10 @@ class PageTableManager
         union {
             struct {  /**< Dword0 Attributes */
                 uint64_t B:2;    /**< 0:1   Segment Size  */
-                uint64_t AVA:55; /**< 2:56  Abbreviated Virtual Address = VA w/o bottom 23 bits  */
-                uint64_t SW:1;   /**< 57 =SW[] - Reserved  */
+                uint64_t AVA:55; /**< 2:56  Abbrev VA, VA w/o bottom 23 bits */
+                uint64_t SW:1;   /**< 57 =SW[0] - Reserved  */
                 uint64_t R2:1;   /**< 58 =SW[1] - Shadow R bit  */
-                uint64_t LRU:2;  /**< 59:60 =SW[2:3] - Used for LRU algorithm  */
+                uint64_t LRU:2;  /**< 59:60 =SW[2:3]  Used for LRU algorithm */
                 uint64_t L:1;    /**< 61    Virtual page size  */
                 uint64_t H:1;    /**< 62    Hash function identifier  */
                 uint64_t V:1;    /**< 63    Entry valid  */
@@ -222,7 +270,7 @@ class PageTableManager
                 uint64_t pp0:1;    /**< 0     Page Protection bit 0  */
                 uint64_t rsv:1;    /**< 1     Reserved  */
                 uint64_t key0_1:2; /**< 2:3   KEY bits 0:1  <unused>  */
-                uint64_t PN:48;    /**< 4:52  Abbreviated Real Page Number + Large page size selector  */
+                uint64_t PN:48;    /**< 4:52  Abbrev RPN + Large Page Size  */
                 uint64_t key2_4:3; /**< 53:54 KEY bits 2:4  <unused>  */
                 uint64_t R:1;      /**< 55    Reference bit  */
                 uint64_t C:1;      /**< 56    Change bit  */
@@ -233,6 +281,8 @@ class PageTableManager
             uint64_t dword1;  /**< Full Dword1 */
         };
     } PACKED;
+    enum { PTE_AVA_MASK = 0x7FFFFFFFFFFFFF };
+#endif
 
     /**
      * Internal Constants

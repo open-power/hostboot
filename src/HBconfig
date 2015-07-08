@@ -13,3 +13,8 @@ config P9_SYSTEM
     default y
     help
         Compile with P9 configurations
+
+config P9_PAGE_TABLE
+    default y
+    help
+        Use the P9 version of the page table setup

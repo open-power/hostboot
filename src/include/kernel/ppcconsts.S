@@ -164,6 +164,7 @@
                 .set HSRR0,314
                 .set HSRR1,315
                 .set HMER,336
+                .set PTCR,464
                 .set HID0,1008
                 .set PIR, 1023
 

@@ -58,8 +58,7 @@ class VmmManager
             /** We need to reserve a hole in heap memory for the page table,
              *  etc.  Use these constants to define the hole. */
             FIRST_RESERVED_PAGE = INITIAL_PT_OFFSET,
-            END_RESERVED_PAGE = INITIAL_PT_OFFSET +
-                                 PTSIZE + MBOX_DMA_SIZE,
+            END_RESERVED_PAGE = INITIAL_PT_OFFSET + PTSIZE + MBOX_DMA_SIZE,
 
             // Tells processor to ignore HRMOR
             FORCE_PHYS_ADDR = 0x8000000000000000,
@@ -226,9 +225,17 @@ class VmmManager
         static Spinlock* getLock();
 
     private:
+
+        // Partition Table
+        // 4K-aligned, each entry is 2 double words
+        // We only need one entry in the table
+        // So just use a 4K-aligned variable
+        static uint64_t g_patb[2] __attribute__ ((aligned (4096)));
+
         Spinlock lock;
 
         void initPTEs();
+        void initPartitionTable();
         void initSDR1();
 
         bool _pteMiss(task_t*, uint64_t, bool);
@@ -236,7 +243,7 @@ class VmmManager
         /** See findPhysicalAddress */
         uint64_t _findPhysicalAddress(uint64_t i_vaddr);
 
-        /* See mmSetPermission */
+        /** See mmSetPermission */
         int _mmSetPermission(void* i_va,uint64_t i_size, uint64_t i_access_type);
 
         /** See castOutPages */
