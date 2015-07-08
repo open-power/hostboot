@@ -1,4 +1,4 @@
 config NO_DMI_EREPAIR
-    default n
+    default y if(!CVPD_WRITE || !CVPD_READ)
     help
         Do not apply erepair information on the DMI bus during boot
