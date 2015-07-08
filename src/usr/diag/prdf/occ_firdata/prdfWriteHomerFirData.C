@@ -133,8 +133,6 @@ static uint32_t proc_reg[] =
     0x09012800, // PCICLOCKFIR_2
 
     // PLL registers
-    0x00001007, // CFAM_FSI_STATUS
-    0x00002816, // CFAM_FSI_GP7
     0x00050019, // PCIE_OSC_SWITCH
     0x01020019, // OSCERR
 
@@ -192,7 +190,7 @@ static uint32_t proc_reg[] =
     0x020130A3, // NXCQFIR_ERROR_REPORT_1
     0x020130EB, // NXASFIR_IN_ERROR_HOLD_REPORT
     0x020130FF, // NXASFIR_ERROR_HOLD_REPORT
-    0x0201314E, // NXASFIR_EG_ERROR_HOLD_REPORT
+    //0x0201314E, // NXASFIR_EG_ERROR_HOLD_REPORT (Murano DD1.0 only)
     0x0201314F, // NXASFIR_CE_HOLD_REPORT
     0x02013419, // MCDFIR_ERROR_REPORT
     0x020F001E, // PB_CONFIG_REG
@@ -368,9 +366,6 @@ static uint32_t memb_reg[] =
     // FIRs for FFDC only
     0x02010880, // NESTFBISTFIR
     0x0201141e, // MBSSECUREFIR
-
-    // PLL registers
-    0x00001007, // CFAM_FSI_STATUS
 
     // c_err_rpt and extra FFDC registers
     0x01030009, // TP_ERROR_STATUS
