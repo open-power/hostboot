@@ -83,11 +83,11 @@ namespace CONSOLE
 
             do{
 
-                l_err = _writeReg( SIO_ADDR_REG_2E, i_data );
+                l_err = _writeReg( SIO_ADDR_REG_2E, i_reg );
 
                 if(l_err) { break; }
 
-                l_err = _writeReg( SIO_DATA_REG_2F, i_reg );
+                l_err = _writeReg( SIO_DATA_REG_2F, i_data );
 
             }while(0);
 
