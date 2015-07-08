@@ -273,6 +273,21 @@ inline uint64_t getHRMOR()
 }
 
 ALWAYS_INLINE
+inline uint64_t getPTCR()
+{
+    register uint64_t ptcr = 0;
+    asm volatile("mfspr %0, 464" : "=r" (ptcr));
+    return ptcr;
+}
+
+ALWAYS_INLINE
+inline void setPTCR(uint64_t _ptcr)
+{
+    register uint64_t ptcr = _ptcr;
+    asm volatile("mtspr 464, %0; isync" :: "r" (ptcr));
+}
+
+ALWAYS_INLINE
 inline void setThreadPriorityLow()
 {
     asm volatile("or 1,1,1");

@@ -345,7 +345,7 @@ void PageTableManager::invalidatePT( void )
     uint64_t num_ptes = getSize() / sizeof(PageTableEntry);
     for( uint64_t x = 0; x < num_ptes; x++ )
     {
-        pte->AVA = 0xFFFFFFFFFFFF;
+        pte->AVA = (uint64_t)PTE_AVA_MASK;
         pte->V = 0;
         pte++;
     }
