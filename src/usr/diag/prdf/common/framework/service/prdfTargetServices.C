@@ -1537,6 +1537,12 @@ bool isMnfgFlagSet( uint32_t i_flag )
 bool mfgMode()
 { return isMnfgFlagSet( MNFG_FLAG_THRESHOLDS      ); }
 
+bool isFabeRepairDisabled()
+{ return isMnfgFlagSet( MNFG_FLAG_DISABLE_FABRIC_eREPAIR ); }
+
+bool isMemeRepairDisabled()
+{ return isMnfgFlagSet( MNFG_FLAG_DISABLE_MEMORY_eREPAIR ); }
+
 bool mnfgTerminate()
 { return isMnfgFlagSet( MNFG_FLAG_SRC_TERM        ); }
 

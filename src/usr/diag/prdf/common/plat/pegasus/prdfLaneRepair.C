@@ -133,7 +133,11 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
                                   i_chip->getSignatureOffset() ),
                                 l_newLaneMap64to127);
 
-        if (!mfgMode()) // Don't read/write VPD in mfg mode
+        // Don't read/write VPD in mfg mode if erepair is disabled
+        if ( !(((i_busType == TYPE_ABUS || i_busType == TYPE_XBUS)
+                && isFabeRepairDisabled())
+            || ((i_busType == TYPE_MCS || i_busType == TYPE_MEMBUF)
+                && isMemeRepairDisabled())) )
         {
             // Read Failed Lanes from VPD
             l_rc = getVpdFailedLanes(rxBusTgt, rx_vpdLanes, tx_vpdLanes);
