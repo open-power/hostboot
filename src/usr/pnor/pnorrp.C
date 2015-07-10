@@ -46,6 +46,7 @@
 #include <config.h>
 #include "pnor_common.H"
 #include <hwas/common/hwasCallout.H>
+#include <console/consoleif.H>
 
 extern trace_desc_t* g_trac_pnor;
 
@@ -1095,6 +1096,7 @@ errlHndl_t PnorRP::readFromDevice( uint64_t i_offset,
             if( ecc_stat == PNOR::ECC::UNCORRECTABLE )
             {
                 TRACFCOMP( g_trac_pnor, "PnorRP::readFromDevice> Uncorrectable ECC error : chip=%d,offset=0x%.X", i_chip, i_offset );
+                CONSOLE::displayf( NULL, "ECC error in PNOR flash in section offset 0x%.8X\n", i_offset );
 
                 // Need to shutdown here instead of creating an error log
                 //  because the bad page could be critical to the regular
