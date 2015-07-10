@@ -126,6 +126,7 @@ HWP_ERROR_XML_FILES += hwp/dram_training/mss_draminit/memory_mss_draminit.xml
 HWP_ERROR_XML_FILES += hwp/dram_training/mss_draminit_mc/memory_mss_draminit_mc.xml
 HWP_ERROR_XML_FILES += hwp/dram_training/mss_draminit_trainadv/memory_mss_access_delay_reg.xml
 HWP_ERROR_XML_FILES += hwp/dram_training/mss_draminit_trainadv/memory_mss_draminit_training_advanced.xml
+HWP_ERROR_XML_FILES += hwp/dram_training/mss_draminit_trainadv/memory_mss_mss_ddr4_pda_errors.xml
 HWP_ERROR_XML_FILES += hwp/dram_training/mss_draminit_trainadv/memory_mss_generic_shmoo.xml
 HWP_ERROR_XML_FILES += hwp/dram_training/mss_draminit_trainadv/memory_mss_mcbist.xml
 HWP_ERROR_XML_FILES += hwp/mc_config/mss_eff_config/memory_mss_eff_config.xml

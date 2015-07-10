@@ -78,6 +78,7 @@ OBJS += mss_mcbist_common.o
 OBJS += mss_mcbist_address.o
 OBJS += mss_lrdimm_funcs.o
 OBJS += cen_stopclocks.o
+OBJS += mss_ddr4_pda.o
 
 
 #
