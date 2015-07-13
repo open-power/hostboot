@@ -152,6 +152,10 @@ namespace PNOR
         RC_INVALID_WORKING_TOC       = PNOR_COMP_ID | 0x28,
         RC_INVALID_TOC               = PNOR_COMP_ID | 0x29,
         RC_WRONG_SIZE_FROM_READ      = PNOR_COMP_ID | 0x2A,
+
+        //@fixme-RTC:131607-Temporary value to allow HWSV compile
+        //termination_rc
+        RC_PNOR_CORRUPTION           = PNOR_COMP_ID | 0x99,
     };
 
     enum UserDetailsTypes
