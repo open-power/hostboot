@@ -259,11 +259,12 @@ static bool getAttrEnumDataFromMap(const char * i_attrString,
      *        binary blob of attribute data
      *
      * @param[in] i_file Ref to File containing Overrides/Syncs
+     * @param[in] i_injectECC Indicates whether to inject ECC
      *
      * @return bool - True if there was an error, False otherwise
      */
      static bool attrTextToBinaryBlob( std::ifstream& i_file,
-                                       bool i_injectECC );
+                                       bool i_injectECC);
 
 };
 

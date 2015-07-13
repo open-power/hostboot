@@ -158,6 +158,9 @@ const T* findAttribute(const T* array,
 //global to allow debug logs
 bool g_showDebugLogs = false;
 
+//global to indicate if tool is generated permanent overrides
+bool g_permOverride = false;
+
 using namespace AttrOverrideSyncConstants;
 
 
@@ -1016,6 +1019,22 @@ bool AttrTextToBinaryBlob::getAttrDataFromMap(const char * i_attrString,
             o_tankLayer = AttributeTank::TANK_LAYER_FAPI;
         }
 
+        // If generating a permanent override, set tank layer accordingly
+        if (g_permOverride)
+        {
+            if (o_tankLayer == AttributeTank::TANK_LAYER_FAPI)
+            {
+                printf("Cannot create a permanent override for FAPI attributes - attr = %s\n",
+                    i_attrString);
+                l_success = false;
+                break;
+            }
+            else
+            {
+                o_tankLayer = AttributeTank::TANK_LAYER_PERM;
+            }
+        }
+
         if (NULL == currentAttr)
         {
             printf("Attribute data not present for the attribute %s!\n",
@@ -1072,7 +1091,7 @@ int main(int argc, char *argv[])
     const char * l_attributeString;
 
     int opt;
-    while((opt = getopt(argc, argv, "dfht")) != -1)
+    while((opt = getopt(argc, argv, "dfhtp")) != -1)
     {
         switch (opt)
         {
@@ -1086,7 +1105,9 @@ int main(int argc, char *argv[])
             case 't':
                 l_injectECC = true;
                 break;
-
+            case 'p':
+                g_permOverride = true;
+                break;
             case 'h':
                 printf("%s [options] <file>:\n", argv[0]);
                 printf("\nExpected args:\n\t Attribute text file of the "
@@ -1114,6 +1135,7 @@ int main(int argc, char *argv[])
                        "\t\t'-h' - display help text.\n"
                        "\t\t'-f' - prevent ECC bytes from being inserted.\n"
                        "\t\t'-t' - allow ECC bytes to be inserted.\n"
+                       "\t\t'-p' - permanent override. [FAPI attributes not allowed]\n"
                        "\t\tno option - same as 't' option.\n\n");
 
                 return 0;
