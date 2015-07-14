@@ -379,6 +379,20 @@
 </attribute>
 
 <attribute>
+    <id>OCC_COMMON_AREA_PHYS_ADDR</id>
+    <description>
+        Physical address where OCC Common Area is placed in mainstore.
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
+<attribute>
     <id>HOMER_PHYS_ADDR</id>
     <description>
         Physical address where HOMER image is placed in mainstore.

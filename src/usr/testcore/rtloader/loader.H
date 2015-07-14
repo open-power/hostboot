@@ -309,7 +309,8 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
         }
 
         //--------------------------------------------------------------------
-        static uint64_t rt_get_reserved_mem(const char* i_region)
+        static uint64_t rt_get_reserved_mem(const char* i_region,
+                                            uint32_t i_instance)
         {
             if (0 == strcmp(i_region, "ibm,hbrt-vpd-image"))
                 return rt_get_vpd();

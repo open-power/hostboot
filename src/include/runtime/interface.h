@@ -153,9 +153,10 @@ typedef struct hostInterfaces
     /** Get the address of a reserved memory region by its devtree name.
      *
      *  @param[in] Devtree name (ex. "ibm,hbrt-vpd-image")
+     *  @param[in] Devtree instance
      *  @return physical address of region (or NULL).
      **/
-    uint64_t (*get_reserved_mem)(const char*);
+    uint64_t (*get_reserved_mem)(const char *name, uint32_t instance);
 
     /**
      * @brief  Force a core to be awake, or clear the force

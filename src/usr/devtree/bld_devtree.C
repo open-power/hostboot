@@ -60,6 +60,8 @@ namespace DEVTREE
 {
 using   namespace   TARGETING;
 
+typedef std::pair<uint64_t,uint64_t> homerAddr_t;
+
 #define CHIPID_EXTRACT_NODE(i_chipid) (i_chipid >> CHIPID_NODE_SHIFT)
 #define CHIPID_EXTRACT_PROC(i_chipid) (i_chipid & CHIPID_PROC_MASK)
 
@@ -185,27 +187,24 @@ uint32_t getMembChipId(const TARGETING::Target * i_pMemb)
     return l_membId;
 }
 
-
-uint64_t getHomerPhysAddr(const TARGETING::Target * i_pProc)
+uint64_t getOccCommonAddr()
 {
-    //If running Sapphire need to place this at the top of memory
-    uint64_t homerPhysAddrBase = VMM_HOMER_REGION_START_ADDR;
-    if(TARGETING::is_sapphire_load())
-    {
-        homerPhysAddrBase = TARGETING::get_top_mem_addr();
-        assert (homerPhysAddrBase != 0,
-                "bld_devtree: Top of memory was 0!");
-        homerPhysAddrBase -= VMM_ALL_HOMER_OCC_MEMORY_SIZE;
-    }
+    TARGETING::Target* sys = NULL;
+    TARGETING::targetService().getTopLevelTarget(sys);
+    uint64_t l_physAddr = sys->getAttr<ATTR_OCC_COMMON_AREA_PHYS_ADDR>();
+    return l_physAddr;
+}
 
-    uint8_t tmpPos = i_pProc->getAttr<ATTR_POSITION>();
-    uint64_t tmpOffset = tmpPos*VMM_HOMER_INSTANCE_SIZE;
-    uint64_t targHomer = homerPhysAddrBase + tmpOffset;
+homerAddr_t getHomerPhysAddr(const TARGETING::Target * i_pProc)
+{
+    uint64_t l_homerPhysAddrBase = i_pProc->getAttr<ATTR_HOMER_PHYS_ADDR>();
+    uint8_t  l_Pos = i_pProc->getAttr<ATTR_POSITION>();
 
-    TRACFCOMP( g_trac_devtree, "proc ChipID [%X] HOMER is at %.16X",
-               getProcChipId(i_pProc), targHomer );
+    TRACFCOMP( g_trac_devtree, "proc ChipID [%X] HOMER is at %.16X"
+                               " instance %d",
+               getProcChipId(i_pProc), l_homerPhysAddrBase, l_Pos );
 
-    return targHomer;
+    return homerAddr_t(l_homerPhysAddrBase, l_Pos);
 }
 
 void add_i2c_info( const TARGETING::Target* i_targ,
@@ -946,14 +945,18 @@ uint32_t bld_intr_node(devTree * i_dt, dtOffset_t & i_parentNode,
 
 
 void add_reserved_mem(devTree * i_dt,
-                      std::vector<uint64_t>& i_homerAddr,
+                      std::vector<homerAddr_t>& i_homerAddr,
                       uint64_t i_extraAddr[],
                       uint64_t i_extraSize[],
                       const char* i_extraStr[],
                       uint64_t i_extraCnt)
 {
     /*
-     * The reserved-names and reserve-names properties work hand in hand.
+     * TODO RTC: 131056 remove non-node reserved memory entries
+     *     - reserved-names and reserved-ranges
+     *     - reserved map ??
+     *     hints are provided for the scope of code to remove
+     * The reserved-names and reserve-ranges properties work hand in hand.
      * The first one is a list of strings providing a "name" for each entry
      * in the second one using the traditional "vendor,name" format.
      *
@@ -966,6 +969,10 @@ void add_reserved_mem(devTree * i_dt,
      * Corresponding entries must also be created in the "reserved map" part
      * of the flat device-tree (which is a binary list in the header of the
      * fdt).
+     * **** remove to here
+     *
+     * Reserved memory is passed in a node-based format. An instance
+     * number distinquishes homer regions.
      *
      * Unless a component (skiboot or Linux) specifically knows about a region
      * (usually based on its name) and decides to change or remove it, all
@@ -977,6 +984,7 @@ void add_reserved_mem(devTree * i_dt,
 
     size_t l_num = i_homerAddr.size();
 
+    // 131056: Won't need these
     const char* homerStr = "ibm,slw-occ-image";
     const char* reserve_strs[l_num+i_extraCnt+1];
     uint64_t ranges[l_num+i_extraCnt][2];
@@ -984,13 +992,42 @@ void add_reserved_mem(devTree * i_dt,
     uint64_t res_mem_addrs[l_num+i_extraCnt];
     uint64_t res_mem_sizes[l_num+i_extraCnt];
 
+    // create the nodes for the node based format
+    dtOffset_t rootMemNode = i_dt->addNode(rootNode, "ibm,hostboot");
+    i_dt->addPropertyCell32(rootMemNode, "#address-cells", 2);
+    i_dt->addPropertyCell32(rootMemNode, "#size-cells", 2);
+    dtOffset_t reservedMemNode = i_dt->addNode(rootMemNode, "reserved-memory");
+    i_dt->addPropertyCell32(reservedMemNode, "#address-cells", 2);
+    i_dt->addPropertyCell32(reservedMemNode, "#size-cells", 2);
+    i_dt->addProperty(reservedMemNode, "ranges");
+
     for(size_t i = 0; i<l_num; i++)
     {
+        uint64_t l_homerAddr = i_homerAddr[i].first;
+        uint64_t l_homerInstance = i_homerAddr[i].second;
+        TRACFCOMP( g_trac_devtree, "Reserved Region %s @ %lx, %lx instance %d",
+                       homerStr,
+                       l_homerAddr,
+                       VMM_HOMER_INSTANCE_SIZE,
+                       l_homerInstance);
+
+        // 131056: Won't need these
         reserve_strs[i] = homerStr;
-        ranges[i][0] = i_homerAddr[i];
+        ranges[i][0] = l_homerAddr;
         ranges[i][1] = VMM_HOMER_INSTANCE_SIZE;
-        res_mem_addrs[i] = i_homerAddr[i];
+        res_mem_addrs[i] = l_homerAddr;
         res_mem_sizes[i] = VMM_HOMER_INSTANCE_SIZE;
+
+        // add node style inclulding homer instance.
+        dtOffset_t homerNode = i_dt->addNode(reservedMemNode,
+                                               "ibm,homer-image",
+                                               l_homerAddr);
+        uint64_t propertyCells[2]={l_homerAddr, VMM_HOMER_INSTANCE_SIZE};
+        i_dt->addPropertyCells64(homerNode, "reg", propertyCells, 2);
+        const char* propertyStrs[] = {"ibm,homer-image", NULL};
+        i_dt->addPropertyStrings(homerNode, "ibm,prd-label",propertyStrs);
+        i_dt->addPropertyCell32(homerNode, "ibm,prd-instance",
+                                            l_homerInstance);
     }
 
     for(size_t i = 0; i < i_extraCnt; i++)
@@ -1000,22 +1037,44 @@ void add_reserved_mem(devTree * i_dt,
             TRACFCOMP( g_trac_devtree, "Reserved Region %s @ %lx, %lx",
                        i_extraStr[i], i_extraAddr[i], i_extraSize[i]);
 
+            // 131056: Won't need these
             reserve_strs[l_num] = i_extraStr[i];
             ranges[l_num][0] = i_extraAddr[i];
             ranges[l_num][1] = i_extraSize[i];
-
             res_mem_addrs[l_num] = i_extraAddr[i];
             res_mem_sizes[l_num] = i_extraSize[i];
-
             l_num++;
+
+            // add node style entry
+            dtOffset_t extraNode = i_dt->addNode(reservedMemNode,
+                                               i_extraStr[i],
+                                               i_extraAddr[i]);
+            uint64_t propertyCells[2]={i_extraAddr[i],i_extraSize[i]};
+            i_dt->addPropertyCells64(extraNode, "reg", propertyCells, 2);
+            const char* propertyStrs[] = {i_extraStr[i], NULL};
+            i_dt->addPropertyStrings(extraNode, "ibm,prd-label",propertyStrs);
         }
         else
         {
             cell_count -= sizeof(ranges[0]);
         }
     }
-    reserve_strs[l_num] = NULL;
+    // add node style occ common node
+    const char* occStr = "ibm,occ-common-area";
+    uint64_t l_occCommonPhysAddr = getOccCommonAddr();
+    uint64_t l_occCommonPhysSize = VMM_OCC_COMMON_SIZE;
+    TRACFCOMP( g_trac_devtree, "Reserved Region %s @ %lx, %lx",
+                       occStr, l_occCommonPhysAddr, l_occCommonPhysSize);
+    dtOffset_t occNode = i_dt->addNode(reservedMemNode,
+                                       occStr,
+                                       l_occCommonPhysAddr);
+    uint64_t propertyCells[2]={l_occCommonPhysAddr, l_occCommonPhysSize};
+    i_dt->addPropertyCells64(occNode, "reg", propertyCells, 2);
+    const char* propertyStrs[] = {occStr, NULL};
+    i_dt->addPropertyStrings(occNode, "ibm,prd-label",propertyStrs);
 
+    // 131056: Won't need the rest
+    reserve_strs[l_num] = NULL;
     i_dt->addPropertyStrings(rootNode, "reserved-names", reserve_strs);
     i_dt->addPropertyCells64(rootNode, "reserved-ranges",
                              reinterpret_cast<uint64_t*>(ranges),
@@ -1283,7 +1342,7 @@ errlHndl_t bld_fdt_system(devTree * i_dt, bool i_smallTree)
 
 
 errlHndl_t bld_fdt_cpu(devTree * i_dt,
-                       std::vector<uint64_t>& o_homerRegions,
+                       std::vector<homerAddr_t>& o_homerRegions,
                        bool i_smallTree)
 {
     // Nothing to do for small trees currently.
@@ -1356,7 +1415,7 @@ errlHndl_t bld_fdt_cpu(devTree * i_dt,
 }
 
 errlHndl_t bld_fdt_reserved_mem(devTree * i_dt,
-                                std::vector<uint64_t>& i_homerRegions,
+                                std::vector<homerAddr_t>& i_homerRegions,
                                 bool i_smallTree)
 {
     errlHndl_t errhdl = NULL;
@@ -1982,7 +2041,7 @@ errlHndl_t build_flatdevtree( uint64_t i_dtAddr, size_t i_dtSize,
             break;
         }
 
-        std::vector<uint64_t> l_homerRegions;
+        std::vector<homerAddr_t> l_homerRegions;
 
         TRACFCOMP( g_trac_devtree, "---devtree cpu ---" );
         errhdl = bld_fdt_cpu(dt, l_homerRegions, i_smallTree);

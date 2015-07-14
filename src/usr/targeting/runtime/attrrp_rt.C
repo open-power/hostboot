@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,7 +43,7 @@ namespace TARGETING
         do
         {
             TargetingHeader* l_header = reinterpret_cast<TargetingHeader*>(
-                g_hostInterfaces->get_reserved_mem("ibm,hbrt-target-image"));
+                g_hostInterfaces->get_reserved_mem("ibm,hbrt-target-image",0));
 
             if ((NULL == l_header) ||
                 (l_header->eyeCatcher != PNOR_TARG_EYE_CATCHER))

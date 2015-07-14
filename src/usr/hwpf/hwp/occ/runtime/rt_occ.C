@@ -431,11 +431,6 @@ namespace RT_OCC
             // If we already loaded OCC during the IPL we need to fix up
             //  the virtual address because we're now not using virtual
             //  memory
-            // Note: We called our memory "ibm,slw-occ-image" but OPAL
-            //  created their own range that subsumed ours
-            //@todo-RTC:124392-solve this naming issue...
-            uint64_t l_base_homer =
-              g_hostInterfaces->get_reserved_mem("ibm,homer-image");
 
             TargetHandleList procChips;
             getAllChips(procChips, TYPE_PROC, true);
@@ -443,10 +438,11 @@ namespace RT_OCC
                  itr != procChips.end();
                  ++itr)
             {
-                uint64_t l_offset = (*itr)->getAttr<ATTR_POSITION>()
-                  * VMM_HOMER_INSTANCE_SIZE;
-                (*itr)->setAttr<ATTR_HOMER_VIRT_ADDR>
-                  (l_base_homer+l_offset);
+                uint64_t l_instance = (*itr)->getAttr<ATTR_POSITION>();
+                uint64_t l_homerAddr =
+                         g_hostInterfaces->get_reserved_mem("ibm,homer-image",
+                                                           l_instance);
+                (*itr)->setAttr<ATTR_HOMER_VIRT_ADDR>(l_homerAddr);
             }
         }
     };

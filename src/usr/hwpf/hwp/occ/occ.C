@@ -102,10 +102,10 @@ namespace HBOCC
             //==============================
             //Setup Addresses
             //==============================
-            uint8_t  procPos    = i_target->getAttr<ATTR_POSITION>();
-            uint64_t procOffset = (procPos * VMM_HOMER_INSTANCE_SIZE);
 
 #ifndef __HOSTBOOT_RUNTIME
+            uint8_t  procPos    = i_target->getAttr<ATTR_POSITION>();
+            uint64_t procOffset = (procPos * VMM_HOMER_INSTANCE_SIZE);
             uint64_t occImgPaddr  =
                 i_homerPhysAddrBase + procOffset + HOMER_OFFSET_TO_OCC_IMG;
 
@@ -125,14 +125,15 @@ namespace HBOCC
             uint64_t occImgPaddr = homerPaddr + HOMER_OFFSET_TO_OCC_IMG;
             uint64_t occImgVaddr = homerVaddr + HOMER_OFFSET_TO_OCC_IMG;
 
-            uint64_t commonPhysAddr =  // After homer region
-                (homerPaddr - procOffset) + VMM_HOMER_REGION_SIZE;
+            TARGETING::Target* sys = NULL;
+            TARGETING::targetService().getTopLevelTarget(sys);
+            uint64_t commonPhysAddr =
+                     sys->getAttr<ATTR_OCC_COMMON_AREA_PHYS_ADDR>();
 
             uint64_t homerHostVirtAddr =
                 homerVaddr + HOMER_OFFSET_TO_OCC_HOST_DATA;
 
 #endif
-
 
             //==============================
             // Load OCC

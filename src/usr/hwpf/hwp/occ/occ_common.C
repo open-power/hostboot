@@ -270,6 +270,10 @@ namespace HBOCC
 
            // BAR3 is the OCC Common Area
            // Bar size is in MB, obtained value of 8MB from Tim Hallett
+            TARGETING::Target* sys = NULL;
+            TARGETING::targetService().getTopLevelTarget(sys);
+            sys->setAttr<ATTR_OCC_COMMON_AREA_PHYS_ADDR>(i_commonPhysAddr);
+
             TRACUCOMP( g_fapiImpTd,
                        INFO_MRK"loadOCC: OCC Common Addr: 0x%.8X,size=0x%.8X",
                        i_commonPhysAddr,VMM_OCC_COMMON_SIZE_IN_MB);
