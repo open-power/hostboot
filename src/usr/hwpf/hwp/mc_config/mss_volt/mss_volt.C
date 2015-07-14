@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_volt.C,v 1.21 2015/04/29 21:18:40 jdsloat Exp $
+// $Id: mss_volt.C,v 1.22 2015/05/01 15:14:45 jdsloat Exp $
 /* File mss_volt.C created by JEFF SABROWSKI on Fri 21 Oct 2011. */
 
 //------------------------------------------------------------------------------
@@ -64,6 +64,7 @@
 //  1.19   | jdsloat  | 04/07/15 | Called out dimms configured for 1.5V unless specified in ATTR_MSS_VOLT_COMPLIANT_DIMMS
 //  1.20   | jdsloat  | 04/08/15 | Added fapi:: to Enums used with ATTR_MSS_VOLT_COMPLIANT_DIMMS
 //  1.21   | jdsloat  | 04/29/15 | Made the error return for compliant unique and added a return RC
+//  1.22   | jdsloat  | 05/01/15 | Fixed initialization of dimm_spd and Enum use for DDR4 dimms, Added FAPI_INF message
 
 // This procedure takes a vector of Centaurs behind a voltage domain,
 // reads in supported DIMM voltages from SPD and determines optimal
@@ -93,7 +94,7 @@ fapi::ReturnCode mss_volt(std::vector<fapi::Target> & i_targets_memb)
     uint8_t l_dimm_functionality=0;
     uint8_t l_spd_dramtype=0;
     uint8_t l_spd_volts=0;
-    uint8_t l_spd_volts_all_dimms=0x06;  //start assuming all voltages supported
+    uint8_t l_spd_volts_all_dimms=0xFF;  //start assuming all voltages supported
     uint8_t l_dram_ddr3_found_flag=0;
     uint8_t l_dram_ddr4_found_flag=0;
     uint8_t l_volt_override = 0x00;
@@ -257,9 +258,11 @@ fapi::ReturnCode mss_volt(std::vector<fapi::Target> & i_targets_memb)
             break;
         }
 
+	FAPI_INF( "Bitwise and of all DIMM_SPD: 0x%02x", l_spd_volts_all_dimms);
+
 	// If we are going to land on using 1.5V and we are not enabling that usage via attribute.
 	if ( ((l_spd_volts_all_dimms & fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_35) != fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_35) &&
-	     ((l_spd_volts_all_dimms & fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_2X) != fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_2X) && 
+	     ((l_spd_volts_all_dimms & fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_2V) != fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_2V) && 
 	     ((l_spd_volts_all_dimms & fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_NOTOP1_5) != fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_NOTOP1_5) &&
 	     (l_compliant_dimm_voltages == fapi::ENUM_ATTR_MSS_VOLT_COMPLIANT_DIMMS_PROCEDURE_DEFINED) )
         {	
@@ -340,7 +343,7 @@ fapi::ReturnCode mss_volt(std::vector<fapi::Target> & i_targets_memb)
             l_selected_dram_voltage=1350;
 	    l_selected_dram_voltage_vpp = DDR3_VPP_VOLT;
         }
-        else if (l_dram_ddr4_found_flag && ((l_spd_volts_all_dimms & fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_2X) == fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_2X))
+        else if (l_dram_ddr4_found_flag && ((l_spd_volts_all_dimms & fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_2V) == fapi::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OP1_2V))
         {
             l_selected_dram_voltage=1200;
             l_selected_dram_voltage_vpp = DDR4_VPP_VOLT;
