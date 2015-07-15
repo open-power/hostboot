@@ -15221,6 +15221,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
       <uint8_t>
+        <default>1</default>
       </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -15236,6 +15237,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
       <uint8_t>
+        <default>1</default>
       </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -15251,6 +15253,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
       <uint8_t>
+        <default>3</default>
       </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -15266,6 +15269,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
       <uint8_t>
+        <default>1</default>
       </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -15281,6 +15285,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
       <uint8_t>
+        <default>6</default>
       </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -15296,6 +15301,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
       <uint8_t>
+        <default>6</default>
       </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -15311,6 +15317,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
       <uint8_t>
+        <default>7</default>
       </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -15326,6 +15333,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
       <uint8_t>
+        <default>7</default>
       </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -15341,6 +15349,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
       <uint8_t>
+        <default>0</default>
       </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -15356,6 +15365,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
       <uint8_t>
+        <default>0</default>
       </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -15371,6 +15381,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
       <uint8_t>
+        <default>0</default>
       </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -15386,6 +15397,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
       <uint8_t>
+        <default>0</default>
       </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -15401,6 +15413,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
       <uint8_t>
+        <default>2</default>
       </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -15416,6 +15429,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
       <uint8_t>
+        <default>2</default>
       </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -15431,6 +15445,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
       <uint8_t>
+        <default>2</default>
       </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -15445,6 +15460,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
       <uint8_t>
+        <default>2</default>
       </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
