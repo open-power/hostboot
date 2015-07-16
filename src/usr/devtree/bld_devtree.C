@@ -90,7 +90,69 @@ enum BuildConstants
     CEN_ID_TAG          = 0x80000000,
 };
 
+//   Opal will set this FIR bit any time a non-checkstop hardware error
+//   leads to a crash.  PRD will use this FIR bit to analyze appropriately.
+void bld_swCheckstopFir (devTree * i_dt, dtOffset_t & i_parentNode)
+{
+    const uint32_t PBEASTFIR_OR       = 0x02010c82;
+    const uint32_t PBEASTFIR_MASK_AND = 0x02010c84;
+    const uint32_t PBEASTFIR_ACT0     = 0x02010c86;
+    const uint32_t PBEASTFIR_ACT1     = 0x02010c87;
+    uint64_t BIT_31_MASK        = 0xfffffffeffffffff;
+    uint64_t l_data = 0;
 
+    errlHndl_t l_errl = NULL;
+
+    do
+    {
+        TARGETING::Target * l_proc =   NULL;
+        (void)TARGETING::targetService().masterProcChipTargetHandle(l_proc);
+        size_t opsize = sizeof(uint64_t);
+
+        // clear PBEASTFIR_ACT0 bit 31
+        l_errl = deviceRead( l_proc,
+                        &l_data,
+                        opsize,
+                        DEVICE_SCOM_ADDRESS(PBEASTFIR_ACT0) );
+        if (l_errl) break;
+        l_data &= BIT_31_MASK;
+        l_errl = deviceWrite( l_proc,
+                        &l_data,
+                        opsize,
+                        DEVICE_SCOM_ADDRESS(PBEASTFIR_ACT0) );
+        if (l_errl) break;
+
+        // clear PBEASTFIR_ACT1 bit 31
+        l_errl = deviceRead( l_proc,
+                        &l_data,
+                        opsize,
+                        DEVICE_SCOM_ADDRESS(PBEASTFIR_ACT1) );
+        if (l_errl) break;
+        l_data &= BIT_31_MASK;
+        l_errl = deviceWrite( l_proc,
+                        &l_data,
+                        opsize,
+                        DEVICE_SCOM_ADDRESS(PBEASTFIR_ACT1) );
+        if (l_errl) break;
+
+        // clear PBEASTFIR_MASK bit 31 using the AND register
+        l_errl = deviceWrite( l_proc,
+                        &BIT_31_MASK,
+                        opsize,
+                        DEVICE_SCOM_ADDRESS(PBEASTFIR_MASK_AND) );
+        if (l_errl) break;
+
+        // add devtree property
+        uint32_t cellProperties [2] = {PBEASTFIR_OR,31};  // PBEASTFIR[31]
+        i_dt->addPropertyCells32(i_parentNode,
+                                 "ibm,sw-checkstop-fir",
+                                 cellProperties, 2);
+    } while (0);
+    if (l_errl) // commit error and keep going
+    {
+        errlCommit(l_errl, DEVTREE_COMP_ID);
+    }
+}
 
 //@todo-RTC:123043 -- Should use the functions in RT_TARG
 uint32_t getProcChipId(const TARGETING::Target * i_pProc)
@@ -1031,6 +1093,9 @@ errlHndl_t bld_fdt_system(devTree * i_dt, bool i_smallTree)
     // Nothing to do for small trees currently.
     if (!i_smallTree)
     {
+        /* Add devtree property for checkstop escalation  */
+        bld_swCheckstopFir(i_dt,rootNode);
+
         //===== compatible =====
         /* Fetch the MRW-defined compatible model from attributes */
         ATTR_OPAL_MODEL_type l_model = {0};
