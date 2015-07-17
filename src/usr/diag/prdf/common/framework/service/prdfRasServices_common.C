@@ -490,11 +490,23 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // software generated the attention. This will be determined if there is a
     // software callout with higher priority than a hardware callout.
     if ( sappSwNoGardReq && sappHwNoGardReq &&          // Gard requirements met
-         isHyprConfigOpal() && isHyprRunning() &&       // OPAL is running
+         isHyprConfigOpal() &&                          // OPAL is used
          !isMfgAvpEnabled() && !isMfgHdatAvpEnabled() ) // No AVPs running
     {
-        gardErrType = HWAS::GARD_NULL;
-        prdGardErrType = GardAction::NoGard;
+        #ifdef __HOSTBOOT_MODULE
+        // TODO RTC 119791: With the current implementation, we know the
+        // checkstop occured at runtime if we are doing checkstop analysis.
+        // Eventually we will add checkstop handling during the IPL. In this
+        // case, we will need to add a flag to the FIRDATA indicating when the
+        // FIRDATA was collected.
+        if ( isHyprRunning() || (MACHINE_CHECK == i_attnType) )
+        #else
+        if ( isHyprRunning() )
+        #endif
+        {
+            gardErrType    = HWAS::GARD_NULL;
+            prdGardErrType = GardAction::NoGard;
+        }
     }
 
     for ( SDC_MRU_LIST::const_iterator it = mruList.begin();
