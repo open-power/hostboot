@@ -317,6 +317,15 @@ namespace IPMI
                           "completion code %x",
                           iv_netfun, iv_cmd, iv_seq, iv_cc);
 
+                if (iv_cc == IPMI::CC_CMDSPC1)
+                {
+                    // We got a completion code with 0x80, which is no data
+                    // Let's trace the event, but not log an error.
+                    IPMI_TRAC(ERR_MRK "SEL returned with no data, not logging "
+                              "an error");
+                    break;
+                }
+
                 /* @errorlog tag
                  * @errortype       ERRL_SEV_INFORMATIONAL
                  * @moduleid        IPMI::MOD_IPMISRV_REPLY
@@ -338,7 +347,7 @@ namespace IPMI
                 errlCommit(err, IPMI_COMP_ID);
                 break;
             }
-
+ 
             // Before we self destruct, we need to turn the data collected in to
             // a record we can pass to the waiting event handler.
             Singleton<IpmiRP>::instance().postEvent(new IPMI::oemSEL(iv_data));

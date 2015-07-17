@@ -62,6 +62,7 @@ namespace IPMI
         CHASSIS_POWER_OFF = 0x00,
         CHASSIS_POWER_SOFT_RESET = 0x01,
         CHASSIS_POWER_CYCLE = 0x02,
+        CHASSIS_POWER_RESET = 0x03,
     };
 
     // Used in the factory for creating the proper subclass.

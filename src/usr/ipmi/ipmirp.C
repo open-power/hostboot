@@ -438,13 +438,13 @@ void IpmiRP::handlePowerMessage( IPMI::oemSEL* i_event )
 #endif
 
         }
-        // If the event type is a power soft reset aka power cycle
+        // If the event type is a power soft reset, send a chasis reset
         // update the modifier to send to the BMC
         else if( i_event->iv_cmd[1] == IPMI::CHASSIS_POWER_SOFT_RESET )
         {
-            // handle the message as a power cycle request
-            IPMI_TRAC("IPMI power cycle request received");
-            iv_chassis_power_mod = IPMI::CHASSIS_POWER_CYCLE;
+            // handle the message as a power reset request
+            IPMI_TRAC("IPMI power reset request received");
+            iv_chassis_power_mod = IPMI::CHASSIS_POWER_RESET;
 #ifdef CONFIG_CONSOLE
             CONSOLE::displayf(NULL, "IPMI: power cycle requested");
             CONSOLE::flush();
