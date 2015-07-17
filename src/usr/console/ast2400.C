@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* [+] <jk@ozlabs.org                                                     */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
