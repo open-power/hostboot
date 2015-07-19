@@ -1,4 +1,4 @@
-#-- $Id: p8.pe.phase2.scom.initfile,v 1.7 2015/02/16 22:21:07 ricmata Exp $
+#-- $Id: p8.pe.phase2.scom.initfile,v 1.8 2015/06/11 20:32:23 ricmata Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -43,6 +43,7 @@ define enable_dmar_ooo         = (ATTR_CHIP_EC_FEATURE_ENABLE_PCI_DMAR_OOO != 0)
 #-- PBCQ Mode Control Register
 scom 0x0201200B {
     bits,    scom_data,    expr;
+    6:7,     0b00,	   (phb0);				    #-- disable wr-cache-inject mode for TCPIP performance (SW275459)
     12,      0b1,          (phb0);                                  #-- disable group scope on TCE read requests
     26,      0b1,          (phb0 && enable_enh_ive_ordering);       #-- enable enhanced IVE performance ordering only where supported (HW226407)
     27,      0b1,          (phb0);                                  #-- force IVE write operations to system scope
@@ -50,6 +51,7 @@ scom 0x0201200B {
 
 scom 0x0201240B {
     bits,    scom_data,    expr;
+    6:7,     0b00,	   (phb1);
     12,      0b1,          (phb1);
     26,      0b1,          (phb1 && enable_enh_ive_ordering);
     27,      0b1,          (phb1);
@@ -57,6 +59,7 @@ scom 0x0201240B {
 
 scom 0x0201280B {
     bits,    scom_data,    expr;
+    6:7,     0b00,	   (phb2);
     12,      0b1,          (phb2);
     26,      0b1,          (phb2 && enable_enh_ive_ordering);
     27,      0b1,          (phb2);
@@ -64,6 +67,7 @@ scom 0x0201280B {
 
 scom 0x02012C0B {
     bits,    scom_data,    expr;
+    6:7,     0b00,	   (phb3);
     12,      0b1,          (phb3);                             
     26,      0b1,          (phb3 && enable_enh_ive_ordering);
     27,      0b1,          (phb3);
