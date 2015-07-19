@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,6 +81,7 @@ enum istepReasonCode
     ISTEP_INVALID_TARGET_TYPE                   = ISTEP_COMP_ID | 0x0A,
     ISTEP_INVALID_ATTR_VALUE                    = ISTEP_COMP_ID | 0x0B,
     ISTEP_INVALID_CONFIGURATION                 = ISTEP_COMP_ID | 0x0C,
+    ISTEP_INVALID_PCIE_IOP_LANE_CONFIG          = ISTEP_COMP_ID | 0x0D,
 };  // end ISTEP
 
 }

@@ -74,7 +74,7 @@ enum BuildConstants
     CHIPID_NODE_SHIFT   =3,            /*CHIPID is NNNCCC, shift 3*/
     CHIPID_PROC_MASK    =0x7,            /*CHIPID is NNNCCC, shift 3*/
     PHB0_MASK           =0x80,
-    MAX_PHBs            =3,             /*Max PHBs per chip is 3*/
+    MAX_PHBs            =4,             /*Max PHBs per chip is 4*/
     THREADPERCORE       =8,             /*8 threads per core*/
     MHZ                 =1000000,
 

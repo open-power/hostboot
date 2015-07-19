@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -97,7 +97,7 @@
  *          @target_sched   serial
  *  @}
  *
- */ 
+ */
 
 /******************************************************************************/
 // Includes
@@ -123,7 +123,8 @@ typedef std::list<uint32_t> BifurcatedIopsContainer;
 enum IopLanesPerProc
 {
     IOP_LANES_PER_PROC_24X = 24,// 24 Lanes per proc
-    IOP_LANES_PER_PROC_32X = 32 // 32 Lanes per proc
+    IOP_LANES_PER_PROC_32X = 32,// 32 Lanes per proc
+    IOP_LANES_PER_PROC_40X = 40,// 40 Lanes per proc
 };
 
 /**
@@ -136,10 +137,10 @@ struct LaneSet
 };
 
 /**
- *  @brief Max possible IOPs per processor; invarient across all POWER8
- *      processors
+ *  @brief Max possible IOPs per processor; P8+ has 3
+ *         P8 has 2
  */
-static const size_t MAX_IOPS_PER_PROC = 2;
+static const size_t MAX_IOPS_PER_PROC = 3;
 
 /**
  *  @brief Lane groups per IOP; invarient across all POWER8 processors
@@ -161,7 +162,8 @@ struct laneConfigRow
     // PHB active mask (see PhbActiveMask enum)
     // PHB0 = 0x80
     // PHB1 = 0x40
-    // PHB1 = 0x20
+    // PHB2 = 0x20
+    // PHB3 = 0x10
     uint8_t phbActive;
 };
 
@@ -203,7 +205,13 @@ enum PhbActiveMask
     PHB0_MASK   = 0x80, ///< PHB0 enabled
     PHB1_MASK   = 0x40, ///< PHB1 enabled
     PHB2_MASK   = 0x20, ///< PHB2 enabled
+    PHB3_MASK   = 0x10, ///< PHB3 enabled
 };
+
+/**
+ *  @brief Array of unsupported lanes configs for x40 lanes
+ */
+uint8_t UnsupportedLanesx40[] = {0x4,0x5,0x8,0x9,0xA,0xB,0xC};
 
 /**
  *  @brief  call_proc_attr_update

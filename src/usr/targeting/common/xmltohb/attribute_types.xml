@@ -14792,7 +14792,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <simpleType>
         <uint16_t>
         </uint16_t>
-        <array>2,2</array>
+        <array>3,2</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -14813,7 +14813,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <simpleType>
         <uint8_t>
         </uint8_t>
-        <array>2,2</array>
+        <array>3,2</array>
         </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -14836,7 +14836,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <simpleType>
         <uint8_t>
         </uint8_t>
-        <array>2,2</array>
+        <array>3,2</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -14858,7 +14858,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <simpleType>
         <uint8_t>
         </uint8_t>
-        <array>2,2</array>
+        <array>3,2</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -14880,7 +14880,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
         <uint8_t></uint8_t>
-        <array>2,2</array>
+        <array>3,2</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -14904,7 +14904,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <simpleType>
         <uint16_t>
         </uint16_t>
-        <array>2,2</array>
+        <array>3,2</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -14925,7 +14925,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <simpleType>
         <uint8_t>
         </uint8_t>
-        <array>2,2</array>
+        <array>3,2</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -14947,7 +14947,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
         <uint8_t></uint8_t>
-        <array>2,2</array>
+        <array>3,2</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -14969,7 +14969,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <simpleType>
         <uint16_t>
         </uint16_t>
-        <array>2,2</array>
+        <array>3,2</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -15015,7 +15015,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <simpleType>
         <uint8_t>
         </uint8_t>
-        <array>2,2</array>
+        <array>3,2</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>

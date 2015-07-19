@@ -1011,10 +1011,11 @@ void _deconfigPhbsBasedOnPciState(
         // PCI-0 => PHB0
         // PCI-1 => PHB1
         // PCI-2 => PHB2
+        // PCI-3 => PHB3
         //
         // Further, io_phbActiveMask and activePciMask are bitmasks whose
-        // leftmost bit corresponds to PHB0, followed by bits for PHB1 and PHB2.
-        // The remaining bits are ignored.
+        // leftmost bit corresponds to PHB0, followed by bits for PHB1, PHB2
+        // and PHB3. The remaining bits are ignored.
 
         // Compensate for the fact that PHB mask bits start on left side of the
         // mask
@@ -1133,24 +1134,24 @@ errlHndl_t computeProcPcieConfigAttrs(
         i_pProcChipTarget ?
             i_pProcChipTarget->getAttr<TARGETING::ATTR_HUID>() : 0);
 
-    // TODO:
-    // RTC 109249: Update comments for 40 lanes in Naples 
-
-    // Currently there are two IOP config tables, one for procs with 24 usable
-    // PCIE lanes and one for proces with 32 usable PCIE lanes.  In general, the
-    // code accumulates the current configuration of the IOPs from the MRW and
-    // other dynamic information (such as bifurcation, etc.), then matches that
-    // config to one of the rows in the table.  Once a match is discovered, the
-    // IOP config value is pulled from the matching row and set in the
-    // attributes.
+    // Currently there are three IOP config tables, one for procs with 24, 32
+    // or 40 usable PCIE lanes. In general, the code accumulates the current
+    // configuration of the IOPs from the MRW and other dynamic information
+    // (such as bifurcation, etc.), then matches that config to one of the
+    // rows in the table.  Once a match is discovered, the IOP config value is
+    // pulled from the matching row and set in the attributes.
     const laneConfigRow x24_laneConfigTable[] =
         {{{{{LANE_WIDTH_16X,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}},
            {{LANE_WIDTH_8X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
+           {{LANE_WIDTH_NC,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}}},
              0x0,PHB0_MASK|PHB1_MASK},
 
          {{{{LANE_WIDTH_16X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
+           {{LANE_WIDTH_NC,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}},
            {{LANE_WIDTH_NC,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}}},
@@ -1159,10 +1160,14 @@ errlHndl_t computeProcPcieConfigAttrs(
          {{{{LANE_WIDTH_16X,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}},
            {{LANE_WIDTH_8X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
+           {{LANE_WIDTH_NC,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}}},
              0x1,PHB0_MASK|PHB1_MASK},
 
          {{{{LANE_WIDTH_16X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
+           {{LANE_WIDTH_NC,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}},
            {{LANE_WIDTH_NC,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}}},
@@ -1171,17 +1176,23 @@ errlHndl_t computeProcPcieConfigAttrs(
          {{{{LANE_WIDTH_8X,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}},
            {{LANE_WIDTH_8X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
+           {{LANE_WIDTH_NC,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}}},
              0x2,PHB0_MASK|PHB1_MASK},
 
          {{{{LANE_WIDTH_8X,DSMP_DISABLE},
             {LANE_WIDTH_8X,DSMP_DISABLE}},
            {{LANE_WIDTH_8X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
+           {{LANE_WIDTH_NC,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}}},
              0x3,PHB0_MASK|PHB1_MASK|PHB2_MASK},
 
          {{{{LANE_WIDTH_8X,DSMP_DISABLE},
             {LANE_WIDTH_8X,DSMP_DISABLE}},
+           {{LANE_WIDTH_NC,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
            {{LANE_WIDTH_NC,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}}},
              0x3,PHB0_MASK|PHB2_MASK},
@@ -1189,54 +1200,72 @@ errlHndl_t computeProcPcieConfigAttrs(
          {{{{LANE_WIDTH_8X,DSMP_DISABLE},
             {LANE_WIDTH_8X,DSMP_ENABLE}},
            {{LANE_WIDTH_8X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
+           {{LANE_WIDTH_NC,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}}},
              0x4,PHB0_MASK|PHB1_MASK},
 
          {{{{LANE_WIDTH_8X,DSMP_DISABLE},
             {LANE_WIDTH_8X,DSMP_ENABLE}},
            {{LANE_WIDTH_8X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
+           {{LANE_WIDTH_NC,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}}},
              0x5,PHB0_MASK|PHB1_MASK},
 
          {{{{LANE_WIDTH_16X,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}},
            {{LANE_WIDTH_8X,DSMP_ENABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
+           {{LANE_WIDTH_NC,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}}},
              0x6,PHB1_MASK},
 
          {{{{LANE_WIDTH_8X,DSMP_DISABLE},
             {LANE_WIDTH_8X,DSMP_DISABLE}},
            {{LANE_WIDTH_8X,DSMP_ENABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
+           {{LANE_WIDTH_NC,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}}},
              0x7,PHB1_MASK|PHB2_MASK},
 
          {{{{LANE_WIDTH_8X,DSMP_ENABLE},
             {LANE_WIDTH_8X,DSMP_ENABLE}},
            {{LANE_WIDTH_8X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
+           {{LANE_WIDTH_NC,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}}},
              0x8,PHB1_MASK},
 
          {{{{LANE_WIDTH_8X,DSMP_ENABLE},
             {LANE_WIDTH_8X,DSMP_ENABLE}},
            {{LANE_WIDTH_8X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
+           {{LANE_WIDTH_NC,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}}},
              0x9,PHB1_MASK},
 
          {{{{LANE_WIDTH_8X,DSMP_ENABLE},
             {LANE_WIDTH_8X,DSMP_DISABLE}},
            {{LANE_WIDTH_8X,DSMP_ENABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
+           {{LANE_WIDTH_NC,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}}},
              0xA,PHB2_MASK},
 
          {{{{LANE_WIDTH_8X,DSMP_DISABLE},
             {LANE_WIDTH_8X,DSMP_ENABLE}},
            {{LANE_WIDTH_8X,DSMP_ENABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
+           {{LANE_WIDTH_NC,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}}},
              0xB,PHB1_MASK},
 
          {{{{LANE_WIDTH_8X,DSMP_ENABLE},
             {LANE_WIDTH_8X,DSMP_DISABLE}},
            {{LANE_WIDTH_8X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
+           {{LANE_WIDTH_NC,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}}},
              0xC,PHB1_MASK|PHB2_MASK},
         };
@@ -1249,67 +1278,141 @@ errlHndl_t computeProcPcieConfigAttrs(
         {{{{{LANE_WIDTH_16X,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}},
            {{LANE_WIDTH_16X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
+           {{LANE_WIDTH_NC,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}}},
              0x0,PHB0_MASK|PHB1_MASK},
 
          {{{{LANE_WIDTH_16X,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}},
            {{LANE_WIDTH_8X,DSMP_DISABLE},
-            {LANE_WIDTH_8X,DSMP_DISABLE}}},
+            {LANE_WIDTH_8X,DSMP_DISABLE}},
+           {{LANE_WIDTH_NC,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}}},
              0x1,PHB0_MASK|PHB1_MASK|PHB2_MASK},
 
          {{{{LANE_WIDTH_8X,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}},
            {{LANE_WIDTH_16X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
+           {{LANE_WIDTH_NC,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}}},
              0x2,PHB0_MASK|PHB1_MASK},
 
          {{{{LANE_WIDTH_8X,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}},
            {{LANE_WIDTH_8X,DSMP_DISABLE},
-            {LANE_WIDTH_8X,DSMP_DISABLE}}},
+            {LANE_WIDTH_8X,DSMP_DISABLE}},
+           {{LANE_WIDTH_NC,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}}},
              0x3,PHB0_MASK|PHB1_MASK|PHB2_MASK},
 
          {{{{LANE_WIDTH_8X,DSMP_DISABLE},
             {LANE_WIDTH_8X,DSMP_ENABLE}},
            {{LANE_WIDTH_16X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
+           {{LANE_WIDTH_NC,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}}},
              0x4,PHB0_MASK|PHB1_MASK},
 
          {{{{LANE_WIDTH_8X,DSMP_DISABLE},
             {LANE_WIDTH_8X,DSMP_ENABLE}},
            {{LANE_WIDTH_8X,DSMP_DISABLE},
-            {LANE_WIDTH_8X,DSMP_DISABLE}}},
+            {LANE_WIDTH_8X,DSMP_DISABLE}},
+           {{LANE_WIDTH_NC,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}}},
              0x5,PHB0_MASK|PHB1_MASK|PHB2_MASK},
 
          {{{{LANE_WIDTH_8X,DSMP_ENABLE},
             {LANE_WIDTH_8X,DSMP_DISABLE}},
            {{LANE_WIDTH_16X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
+           {{LANE_WIDTH_NC,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}}},
              0x6,PHB0_MASK|PHB1_MASK},
 
          {{{{LANE_WIDTH_8X,DSMP_ENABLE},
             {LANE_WIDTH_8X,DSMP_DISABLE}},
            {{LANE_WIDTH_8X,DSMP_DISABLE},
-            {LANE_WIDTH_8X,DSMP_DISABLE}}},
+            {LANE_WIDTH_8X,DSMP_DISABLE}},
+           {{LANE_WIDTH_NC,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}}},
              0x7,PHB0_MASK|PHB1_MASK|PHB2_MASK},
 
          {{{{LANE_WIDTH_8X,DSMP_ENABLE},
             {LANE_WIDTH_8X,DSMP_ENABLE}},
            {{LANE_WIDTH_16X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
+           {{LANE_WIDTH_NC,DSMP_DISABLE},
             {LANE_WIDTH_NC,DSMP_DISABLE}}},
              0x8,PHB1_MASK},
 
          {{{{LANE_WIDTH_8X,DSMP_ENABLE},
             {LANE_WIDTH_8X,DSMP_ENABLE}},
            {{LANE_WIDTH_8X,DSMP_DISABLE},
-            {LANE_WIDTH_8X,DSMP_DISABLE}}},
+            {LANE_WIDTH_8X,DSMP_DISABLE}},
+           {{LANE_WIDTH_NC,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}}},
              0x9,PHB1_MASK|PHB2_MASK},
         };
 
     const laneConfigRow* x32_end = x32_laneConfigTable +
         (  sizeof(x32_laneConfigTable)
          / sizeof(x32_laneConfigTable[0]));
+
+    const laneConfigRow x40_laneConfigTable[] =
+        {{{{{LANE_WIDTH_16X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
+           {{LANE_WIDTH_16X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
+           {{LANE_WIDTH_8X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}}},
+             0x0,PHB0_MASK|PHB1_MASK|PHB3_MASK},
+
+         {{{{LANE_WIDTH_16X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
+           {{LANE_WIDTH_8X,DSMP_DISABLE},
+            {LANE_WIDTH_8X,DSMP_DISABLE}},
+           {{LANE_WIDTH_8X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}}},
+             0x1,PHB0_MASK|PHB1_MASK|PHB2_MASK|PHB3_MASK},
+
+         {{{{LANE_WIDTH_8X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
+           {{LANE_WIDTH_16X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
+           {{LANE_WIDTH_8X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}}},
+             0x2,PHB0_MASK|PHB1_MASK|PHB3_MASK},
+
+         {{{{LANE_WIDTH_8X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
+           {{LANE_WIDTH_8X,DSMP_DISABLE},
+            {LANE_WIDTH_8X,DSMP_DISABLE}},
+           {{LANE_WIDTH_8X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}}},
+             0x3,PHB0_MASK|PHB1_MASK|PHB2_MASK|PHB3_MASK},
+
+         {{{{LANE_WIDTH_NC,DSMP_DISABLE},
+            {LANE_WIDTH_8X,DSMP_DISABLE}},
+           {{LANE_WIDTH_16X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}},
+           {{LANE_WIDTH_8X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}}},
+             0x6,PHB0_MASK|PHB1_MASK|PHB3_MASK},
+
+         {{{{LANE_WIDTH_NC,DSMP_DISABLE},
+            {LANE_WIDTH_8X,DSMP_DISABLE}},
+           {{LANE_WIDTH_8X,DSMP_DISABLE},
+            {LANE_WIDTH_8X,DSMP_DISABLE}},
+           {{LANE_WIDTH_8X,DSMP_DISABLE},
+            {LANE_WIDTH_NC,DSMP_DISABLE}}},
+             0x7,PHB0_MASK|PHB1_MASK|PHB2_MASK|PHB3_MASK},
+        };
+
+    const laneConfigRow* x40_end = x40_laneConfigTable +
+        (  sizeof(x40_laneConfigTable)
+         / sizeof(x40_laneConfigTable[0]));
 
     errlHndl_t pError = NULL;
     const laneConfigRow* pLaneConfigTableBegin = NULL;
@@ -1408,17 +1511,66 @@ errlHndl_t computeProcPcieConfigAttrs(
             pLaneConfigTableBegin = x24_laneConfigTable;
             pLaneConfigTableEnd = x24_end;
         }
+        else if(   i_pProcChipTarget->getAttr<
+                       TARGETING::ATTR_PROC_PCIE_NUM_LANES>()
+                == IOP_LANES_PER_PROC_40X)
+        {
+            // Only certain IOP lane configs are supported for 40 lanes
+            // Error out if they are selected
+            uint8_t mrwIopConfig = i_pProcChipTarget->getAttr<
+                       TARGETING::ATTR_PROC_PCIE_IOP_CONFIG>();
+            for (uint8_t i=0; i<sizeof(UnsupportedLanesx40); i++)
+            {
+               if (mrwIopConfig == UnsupportedLanesx40[i])
+               {
+                   TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                   ERR_MRK "computeProcPcieConfigAttrs> Code bug!"
+                   "Input IOP lane config is not supported.  "
+                   "IOP config = 0x%08X, HUID = 0x%08X",
+                   i_pProcChipTarget->getAttr<
+                       TARGETING::ATTR_PROC_PCIE_IOP_CONFIG>(),
+                   i_pProcChipTarget->getAttr<TARGETING::ATTR_HUID>());
 
-        // TODO:
-        // RTC 109249: Support Naples with 40 lanes
+                   /*@
+                    * @errortype
+                    * @moduleid         ISTEP_COMPUTE_PCIE_CONFIG_ATTRS
+                    * @reasoncode       ISTEP_INVALID_PCIE_IOP_LANE_CONFIG
+                    * @userdata1[0:31]  Target's HUID
+                    * @userdata1[32:63] ATTR_PROC_PCIE_IOP_CONFIG attribute
+                    *                   value
+                    * @devdesc          Illegal ATTR_PROC_PCIE_IOP_CONFIG attr
+                    *                   read from a processor chip target.
+                    * @custdesc         A problem isolated to firmware or
+                    *                   firmware customization occurred during
+                    *                   the IPL of the system.
+                    */
+                   pError = new ERRORLOG::ErrlEntry(
+                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                       ISTEP_COMPUTE_PCIE_CONFIG_ATTRS,
+                       ISTEP_INVALID_PCIE_IOP_LANE_CONFIG,
+                       TWO_UINT32_TO_UINT64(
+                           i_pProcChipTarget->getAttr<TARGETING::ATTR_HUID>(),
+                           i_pProcChipTarget->getAttr<
+                                TARGETING::ATTR_PROC_PCIE_IOP_CONFIG>()),
+                       0,
+                       true);
+                   ERRORLOG::ErrlUserDetailsTarget
+                       (i_pProcChipTarget).addToLog(pError);
+                   pError->collectTrace(ISTEP_COMP_NAME);
+                   break;
+               }
 
+               pLaneConfigTableBegin = x40_laneConfigTable;
+               pLaneConfigTableEnd = x40_end;
+            }
+        }
         else
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 ERR_MRK "computeProcPcieConfigAttrs> "
                 "Code bug! Unsupported ATTR_PROC_PCIE_NUM_LANES attribute for "
-                "processor with HUID of 0x%08X.  Expected 24 or 32, but read "
-                "value of %d.",
+                "processor with HUID of 0x%08X.  Expected 24, 32 or 40, but "
+                "read a value of %d.",
                 i_pProcChipTarget->getAttr<TARGETING::ATTR_HUID>(),
                 i_pProcChipTarget->getAttr<
                     TARGETING::ATTR_PROC_PCIE_NUM_LANES>());
@@ -1506,8 +1658,12 @@ errlHndl_t computeProcPcieConfigAttrs(
         TARGETING::ATTR_PROC_PCIE_IOP_SWAP_type
             effectiveLaneSwap = {0};
 
+        // Get the actual number of IOPs for this proc
+        size_t iopsPerProc = (i_pProcChipTarget->getAttr<
+            TARGETING::ATTR_PROC_PCIE_NUM_IOP>());
+
         // Apply the non-bifurcated lane swap
-        for(size_t iop = 0; iop<MAX_IOPS_PER_PROC; ++iop)
+        for(size_t iop = 0; iop<iopsPerProc; ++iop)
         {
             uint8_t laneSwap = 0;
             for(size_t laneGroup = 0;
@@ -1555,12 +1711,12 @@ errlHndl_t computeProcPcieConfigAttrs(
             memcpy(
                 &effectiveLaneReversal[iop][0],
                 &laneReversalBifurcated[iop][0],
-                sizeof(effectiveLaneReversal)/MAX_IOPS_PER_PROC);
+                sizeof(effectiveLaneReversal)/iopsPerProc);
 
             memcpy(
                 &effectiveLaneMask[iop][0],
                 &laneMaskBifurcated[iop][0],
-                sizeof(effectiveLaneMask)/MAX_IOPS_PER_PROC);
+                sizeof(effectiveLaneMask)/iopsPerProc);
 
             uint8_t laneSwap = 0;
             for(size_t laneGroup=0;
@@ -1601,12 +1757,14 @@ errlHndl_t computeProcPcieConfigAttrs(
             {{{{LANE_WIDTH_NC,DSMP_DISABLE},
                 {LANE_WIDTH_NC,DSMP_DISABLE}},
                {{LANE_WIDTH_NC,DSMP_DISABLE},
+                {LANE_WIDTH_NC,DSMP_DISABLE}},
+               {{LANE_WIDTH_NC,DSMP_DISABLE},
                 {LANE_WIDTH_NC,DSMP_DISABLE}}},
                0x0,PHB_MASK_NA};
 
         // Transform effective config to match lane config table format
         for(size_t iop = 0;
-            iop < MAX_IOPS_PER_PROC;
+            iop < iopsPerProc;
             ++iop)
         {
             for(size_t laneGroup = 0;
@@ -1642,7 +1800,7 @@ errlHndl_t computeProcPcieConfigAttrs(
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 ERR_MRK "computeProcPcieConfigAttrs> "
                 "Code bug! Proc PCIE IOP configuration not found.  Continuing "
-                "with no PHBs active.  "
+                "with no PHBs active. "
                 "IOP0 Lane set 0: Lane mask = 0x%04X, DSMP enable = 0x%02X.  "
                 "IOP0 Lane set 1: Lane mask = 0x%04X, DSMP enable = 0x%02X.  ",
                 effectiveLaneMask[0][0],dsmpCapable[0][0],
@@ -1653,6 +1811,11 @@ errlHndl_t computeProcPcieConfigAttrs(
                 effectiveLaneMask[1][0],dsmpCapable[1][0],
                 effectiveLaneMask[1][1],dsmpCapable[1][1]);
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "IOP2 Lane set 0: Lane mask = 0x%04X, DSMP enable = 0x%02X.  "
+                "IOP2 Lane set 1: Lane mask = 0x%04X, DSMP enable = 0x%02X.  ",
+                effectiveLaneMask[2][0],dsmpCapable[2][0],
+                effectiveLaneMask[2][1],dsmpCapable[2][1]);
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 "Proc chip target HUID = 0x%08X.",
                 i_pProcChipTarget->getAttr<TARGETING::ATTR_HUID>());
             /*@
@@ -1660,14 +1823,12 @@ errlHndl_t computeProcPcieConfigAttrs(
              * @moduleid         ISTEP_COMPUTE_PCIE_CONFIG_ATTRS
              * @reasoncode       ISTEP_INVALID_CONFIGURATION
              * @userdata1[0:31]  Target processor chip's HUID
-             * @userdata1[32:39] IOP 0 lane set 0 DSMP enable
-             * @userdata1[40:47] IOP 0 lane set 1 DSMP enable
-             * @userdata1[48:55] IOP 1 lane set 0 DSMP enable
-             * @userdata1[56:63] IOP 1 lane set 1 DSMP enable
-             * @userdata2[0:15]  IOP 0 lane set 0 lane mask
-             * @userdata2[16:31] IOP 0 lane set 1 lane mask
-             * @userdata2[32:47] IOP 1 lane set 0 lane mask
-             * @userdata2[48:63] IOP 1 lane set 1 lane mask
+             * @userdata1[32:47] IOP 0 lane set 0 lane mask
+             * @userdata1[48:63] IOP 0 lane set 1 lane mask
+             * @userdata2[0:15]  IOP 1 lane set 0 lane mask
+             * @userdata2[16:31] IOP 1 lane set 1 lane mask
+             * @userdata2[32:47] IOP 2 lane set 0 lane mask
+             * @userdata2[48:63] IOP 2 lane set 1 lane mask
              * @devdesc          No valid PCIE IOP configuration found.  All
              *                   PHBs on the processor will be disabled.
              * @custdesc         A problem isolated to firmware or firmware
@@ -1680,16 +1841,14 @@ errlHndl_t computeProcPcieConfigAttrs(
                 ISTEP_INVALID_CONFIGURATION,
                 TWO_UINT32_TO_UINT64(
                     i_pProcChipTarget->getAttr<TARGETING::ATTR_HUID>(),
-                    FOUR_UINT8_TO_UINT32(
-                        dsmpCapable[0][0],
-                        dsmpCapable[0][1],
-                        dsmpCapable[1][0],
-                        dsmpCapable[1][1])),
+                    TWO_UINT16_TO_UINT32(
+                        effectiveLaneMask[0][0],
+                        effectiveLaneMask[0][1])),
                 FOUR_UINT16_TO_UINT64(
-                    effectiveLaneMask[0][0],
-                    effectiveLaneMask[0][1],
                     effectiveLaneMask[1][0],
-                    effectiveLaneMask[1][1]),
+                    effectiveLaneMask[1][1],
+                    effectiveLaneMask[2][0],
+                    effectiveLaneMask[2][1]),
                 true);
             ERRORLOG::ErrlUserDetailsTarget(i_pProcChipTarget).addToLog(pError);
             pError->collectTrace(ISTEP_COMP_NAME);

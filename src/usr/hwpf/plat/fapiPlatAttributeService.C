@@ -60,6 +60,7 @@
 #include <hwpf/hwp/tp_dbg_data_accessors/getTpDbgDataAttr.H>
 #include <fapiAttributeIds.H>
 #include <hwas/common/hwasCommon.H>
+#include <proc_setup_bars_defs.H>
 
 // The following file checks at compile time that all HWPF attributes are
 // handled by Hostboot. This is done to ensure that the HTML file listing
@@ -949,7 +950,7 @@ fapi::ReturnCode fapiPlatGetProcPcieBarEnable (
         //  BAR # 0 are the PCIE Mem 64
         //  BAR # 1 are the PCIE Mem 32
         //  BAR # 2 are the PHB REGS
-        for( uint8_t u=0; u<3; u++ )
+        for( uint8_t u=0; u< PROC_SETUP_BARS_PCIE_NUM_UNITS; u++ )
         {
             if( phyp_mode )
             {
@@ -1030,7 +1031,7 @@ fapi::ReturnCode fapiPlatGetProcPcieBarBaseAddr (
 
             //We will change the base addr down 4 bits, but need to keep
             //the proc/node offsets the same
-            for ( uint8_t u=0; u < 3; u++ )
+            for ( uint8_t u=0; u < PROC_SETUP_BARS_PCIE_NUM_UNITS; u++ )
             {
                if(TARGETING::is_sapphire_load())
                {
@@ -1077,7 +1078,7 @@ fapi::ReturnCode fapiPlatGetProcPcieBarSize (
     {
         //  NOTE: supported BAR0/1 sizes are from 64KB-1PB
         //  NOTE: only supported BAR2 size is 4KB
-        for ( uint8_t u=0; u < 3; u++ )
+        for ( uint8_t u=0; u < PROC_SETUP_BARS_PCIE_NUM_UNITS; u++ )
         {
            o_pcieBarSize[u][0]  =   PCIE_BAR0_SIZE ;
            o_pcieBarSize[u][1]  =   PCIE_BAR1_SIZE ;
