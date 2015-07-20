@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -47,9 +47,9 @@
 // C o n s t a n t s
 /*****************************************************************************/
 
-// By default we well use the top of the cache 4MB-8MB
+// By default we will use the top of the cache 4MB-10MB
 #define FAKE_PNOR_START (4*MEGABYTE)
-#define FAKE_PNOR_END   (8*MEGABYTE)
+#define FAKE_PNOR_END   (10*MEGABYTE)
 #define FAKE_PNOR_SIZE  (FAKE_PNOR_END-FAKE_PNOR_START)
 
 

@@ -479,15 +479,19 @@ errlHndl_t PnorRP::findTOC()
         //while TOC not found and we are within the flash size
         while((!l_foundTOC) && (l_tempHBB > 0) && (l_tempHBB < PNOR_SIZE))
         {
+            printk("l_tempHBB=%lX\n",l_tempHBB); //@fixme RTC 132400
             //Align HBB down -- looking at 0x0 or 0x2000000
             l_toc = ALIGN_DOWN_X(l_tempHBB, l_shiftAmount*MEGABYTE);
+            printk("1) read l_toc=%lX\n",l_toc); //@fixme RTC 132400
             l_err = readFromDevice(l_toc, l_chip, false, l_tocBuffer,
                     l_fatalError);
             if(l_err)
             {
+                printk("**error**\n"); //@fixme RTC 132400
                 TRACFCOMP(g_trac_pnor,"findTOC: readFromDevice failed "
                         "searching for primaryTOC");
-                break;
+                delete l_err; //@fixme RTC 132401
+                //break; //@fixme RTC 132401
             }
 
             l_ffs_hdr  = (ffs_hdr*)l_tocBuffer;
@@ -498,13 +502,15 @@ errlHndl_t PnorRP::findTOC()
                 //If TOC not found at 0x0 or 0x2000000
                 //Align HBB down + 8000 -- looking at 0x8000 or 0x2008000
                 l_toc += TOC_SIZE;
+                printk("2) read l_toc=%lX\n",l_toc); //@fixme RTC 132400
                 l_err = readFromDevice(l_toc, l_chip, false, l_tocBuffer,
                     l_fatalError);
                 if(l_err)
                 {
                     TRACFCOMP(g_trac_pnor,"findTOC: readFromDevice failed "
                             "searching for backupTOC for A-B-D arrangement");
-                    break;
+                    delete l_err; //@fixme RTC 132401
+                    //break; //@fixme RTC 132401
                 }
 
                 l_ffs_hdr  = (ffs_hdr*)l_tocBuffer;
@@ -520,13 +526,15 @@ errlHndl_t PnorRP::findTOC()
                 // -- looking at 0x1FF8000 or 0x3FF8000
                 l_toc = ALIGN_X(l_tempHBB, l_shiftAmount*MEGABYTE);
                 l_toc -= TOC_SIZE;
+                printk("3) read l_toc=%lX\n",l_toc); //@fixme RTC 132400
                 l_err = readFromDevice(l_toc, l_chip, false, l_tocBuffer,
                     l_fatalError);
                 if(l_err)
                 {
                     TRACFCOMP(g_trac_pnor,"findTOC: readFromDevice failed"
                             "searching for backupTOC for A-D-B arrangement");
-                    break;
+                    delete l_err; //@fixme RTC 132401
+                    //break; //@fixme RTC 132401
                 }
 
                 l_ffs_hdr  = (ffs_hdr*)l_tocBuffer;
@@ -548,17 +556,27 @@ errlHndl_t PnorRP::findTOC()
         //found at least one TOC
         if(l_foundTOC)
         {
+            printk("valid toc - l_foundTOC=%d, l_toc=%lX\n",
+                l_foundTOC, l_toc); //@fixme RTC 132400
             TRACFCOMP(g_trac_pnor, "findTOC> found at least one toc at 0x%X", l_toc);
 
             //look for BACKUP_PART and read it
             uint64_t l_backupTOC = INVALID_OFFSET;
             PNOR::findPhysicalOffset(l_ffs_hdr,"BACKUP_PART",l_backupTOC);
+            printk("look for BACKUP_PART and read it - l_backupTOC=%lX\n",l_backupTOC); //@fixme RTC 132400
+            printk("l_ffs_hdr=%p\n",l_ffs_hdr); //@fixme RTC 132400
 
             //figure out if the toc found belongs to the side we booted from
             //or if it belongs to the other side
             uint64_t l_foundHBB;
             PNOR::findPhysicalOffset(l_ffs_hdr, "HBB", l_foundHBB);
             bool l_isActiveTOC = (l_foundHBB == l_hbbAddr);
+            printk("figure out side - l_foundHBB=%lX, l_hbbAddr=%lX, l_isActiveTOC=%d\n",l_foundHBB,
+                l_hbbAddr, l_isActiveTOC); //@fixme RTC 132400
+            printk("l_ffs_hdr=%p\n",l_ffs_hdr); //@fixme RTC 132400
+            l_isActiveTOC = 1; //@fixme RTC 132401
+            printk("forced to true - l_isActiveTOC=%d\n",
+                l_isActiveTOC); //@fixme RTC 132400
 
 #ifdef CONFIG_PNOR_TWO_SIDE_SUPPORT
             uint64_t l_otherPrimaryTOC = INVALID_OFFSET;
@@ -682,6 +700,7 @@ errlHndl_t PnorRP::findTOC()
                 TRACFCOMP(g_trac_pnor,"findTOC>No valid TOC found, looked"
                        "at following addresses PrimaryTOC:0x%08X, BackupTOC:"
                        "0x%08X", l_toc, l_backupTOC);
+                printk("hitting INITSERVICE::doShutdown(PNOR::RC_PARTITION_TABLE_CORRUPTED)\n"); //@fixme RTC 132400
                 INITSERVICE::doShutdown(PNOR::RC_PARTITION_TABLE_CORRUPTED);
             }
 
@@ -689,11 +708,14 @@ errlHndl_t PnorRP::findTOC()
         }
         else
         {
+            printk("no valid toc - l_foundTOC=%d, l_toc=%lX\n",l_foundTOC, l_toc); //@fixme RTC 132400
+            printk("l_tocBuffer=%p\n",l_tocBuffer); //@fixme RTC 132400
+            sync();
             //no valid TOC found
             TRACFCOMP(g_trac_pnor, "No valid TOC found");
             if (l_err)
             {
-                errlCommit(l_err, PNOR_COMP_ID);
+                //errlCommit(l_err, PNOR_COMP_ID); //@fixme RTC 132401
             }
             INITSERVICE::doShutdown(PNOR::RC_PARTITION_TABLE_NOT_FOUND);
         }

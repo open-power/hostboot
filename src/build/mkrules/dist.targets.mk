@@ -58,6 +58,7 @@ COPY_FILES = \
     src/build/vpo/VBU_Cacheline.pm:vpo \
     src/build/simics/hb-pnor-vpd-preload.pl:vpo \
     src/build/buildpnor/pnorLayoutVpo.xml:vpo \
+    src/build/buildpnor/pnorLayoutFake.xml:vpo \
     img/errlparser:tools,vpo,openpower \
     img/hbotStringFile:tools,vpo,openpower \
     img/isteplist.csv:tools,vpo,openpower \
@@ -202,6 +203,7 @@ fsp.tar_CONTENTS = \
     src/build/buildpnor/buildSbePart.pl \
     src/build/buildpnor/buildpnor.pl \
     src/build/buildpnor/defaultPnorLayout.xml \
+    $(if $(FAKEPNOR), src/build/buildpnor/pnorLayoutFake.xml, ) \
     img/simics_MURANO_targeting.bin \
     img/simics_VENICE_targeting.bin \
     img/simics_NAPLES_targeting.bin \

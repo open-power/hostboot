@@ -33,6 +33,7 @@
 #include <initservice/initserviceif.H>
 #include <util/align.H>
 #include <errl/errlmanager.H>
+#include <config.h>        // @FIXME RTC 132398
 
 // Trace definition
 trace_desc_t* g_trac_pnor = NULL;
@@ -119,6 +120,7 @@ errlHndl_t  PNOR::mmioToPhysicalOffset(uint64_t& o_hbbAddress)
     errlHndl_t l_err = NULL;
     do
     {
+#ifndef CONFIG_SFC_IS_FAKE // @FIXME RTC 132398
         uint64_t l_hbbMMIO = 0;
         size_t l_size = sizeof(uint64_t);
         TARGETING::Target* l_masterProc =
@@ -138,6 +140,9 @@ errlHndl_t  PNOR::mmioToPhysicalOffset(uint64_t& o_hbbAddress)
         l_hbbMMIO    = (l_hbbMMIO >> 32) & PNOR::LPC_TOP_OF_FLASH_OFFSET;
         o_hbbAddress = ((9*l_hbbMMIO) - (9*PNOR::LPC_SFC_MMIO_OFFSET)
                                  - PNOR::PNOR_SIZE) /8;
+#else                      // @FIXME RTC 132398
+        o_hbbAddress = 1;  // @FIXME RTC 132398
+#endif                     // @FIXME RTC 132398
     } while (0);
     return l_err;
 }
