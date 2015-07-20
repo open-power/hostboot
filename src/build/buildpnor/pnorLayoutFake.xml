@@ -1,0 +1,118 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/build/buildpnor/pnorLayoutFake.xml $                      -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!--
+Layout Description
+<metadata> Element -> Contains high-level information about the PNOR layout.
+    <imageSize>    -> Size of PNOR image in bytes.
+    <blockSize>    -> size of erase blocks in bytes.
+    <tocSize>      -> size of each partition table
+    <sideAOffset>  -> Location of Side A Partition Table
+    <sideBOffset>  -> Location of Side B Partition Table
+    <side>         -> Contains information about the side
+        <id>            -> Id of the side (A or B)
+        <arrangement>   -> Tag that specifies the arrangement of the side
+                           (A-B-D or A-D-B)
+                           A-B-D: Primary TOC (A),Backup TOC (B), and Section Information (Data - D)
+                           A-D-B: Primary TOC (A), Section Information (Data - D), Backup TOC (B)
+        <golden/> -> Indicates that the side of the PNOR is golden
+</metadata>
+<section> Element -> Contains information about a PNOR Partition
+    <description>   -> Text description of the partition.
+                       Does not have to be machine readable.
+    <eyeCatch>      -> Name of the Partition
+    <physicalOffset>-> Offset of the Partition in PNOR
+                       in bytes.
+    <physicalSize>  -> Size of the Partition in bytes.
+    <side>          -> Side that this section is associated with.
+                       could be (A, B, or sideless)
+                       A - Section is associated with side A
+                       B - Section is associated with side B
+                       sideless - Indicates partition will be in both TOCs but
+                                  only one copy of the partition should be created
+    <testonly/>     -> Indicates partition is used for internal testing only.
+                       Partition should be skipped in production environments.
+    <ecc/>          -> Indicates Partition should be ECC protected
+    <sha512Version/>-> Indicates Partition uses SHA512 for version information.
+    <sha512perEC/>  -> Indicates SHA512 is used to indicate version for each
+                       EC-specific image within the Partition.
+    <preserved/>    -> Indicates Partition is preserved across code updates.
+</section>
+-->
+
+<pnor>
+    <metadata>
+        <!-- NOTE: buildpnor expects power of 2 size, go to 8M for 6M image -->
+        <!-- @FIXME RTC 132396                                              -->
+        <imageSize>0x800000</imageSize>
+        <blockSize>0x1000</blockSize>
+        <tocSize>0x1000</tocSize>
+        <sideAOffset>0x0</sideAOffset>
+        <sideBOffset>0x1000</sideBOffset>
+        <arrangement>A-B-D</arrangement>
+        <side>
+            <id>A</id>
+        </side>
+    </metadata>
+    <section>
+        <!-- NOTE: smaller than official layout  for fake-PNOR  -->
+        <description>Module VPD (256K) -only supports 4 processors</description>
+        <eyeCatch>MVPD</eyeCatch>
+        <physicalOffset>0x2000</physicalOffset>
+        <physicalRegionSize>0x40000</physicalRegionSize>
+        <side>sideless</side>
+    </section>
+    <section>
+        <!-- NOTE: smaller than official layout  for fake-PNOR  -->
+        <description>DIMM JEDEC (128K) -only supports 4 processors</description>
+        <eyeCatch>DJVPD</eyeCatch>
+        <physicalOffset>0x42000</physicalOffset>
+        <physicalRegionSize>0x20000</physicalRegionSize>
+        <side>sideless</side>
+    </section>
+    <section>
+        <!-- NOTE: smaller than official layout  for fake-PNOR  -->
+        <description>Hostboot Extended image (3MB)</description>
+        <eyeCatch>HBI</eyeCatch>
+        <physicalOffset>0x62000</physicalOffset>
+        <physicalRegionSize>0x500000</physicalRegionSize>
+        <side>sideless</side>
+    </section>
+    <section>
+        <!-- NOTE: smaller than official layout  for fake-PNOR  -->
+        <description>Hostboot Error Logs (64K)</description>
+        <eyeCatch>HBEL</eyeCatch>
+        <physicalOffset>0x562000</physicalOffset>
+        <physicalRegionSize>0x10000</physicalRegionSize>
+        <side>sideless</side>
+    </section>
+    <section>
+        <!-- NOTE: smaller than official layout  for fake-PNOR  -->
+        <description>Attribute Data (128k)</description>
+        <eyeCatch>HBD</eyeCatch>
+        <physicalOffset>0x572000</physicalOffset>
+        <physicalRegionSize>0x20000</physicalRegionSize>
+        <side>sideless</side>
+    </section>
+</pnor>

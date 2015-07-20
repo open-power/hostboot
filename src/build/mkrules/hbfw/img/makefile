@@ -53,6 +53,7 @@ ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
 #################################################
 BASE_IMAGE = hostboot.bin
 EXT_IMAGE =  hostboot_extended.bin
+EXT_FAKE_IMAGE = hostboot_extended.bin.fake
 HBRT_IMAGE = hostboot_runtime.bin
 HBRT_SHA_IMAGE = hostboot_runtime.sha.bin
 HBRT_HEADER_IMAGE = hostboot_runtime.header.bin
@@ -71,10 +72,13 @@ TEMP_IMAGE = hostboot.temp.bin
 TESTDATA = hbtestdata.bin
 TESTDATA_ECC = hbtestdata.bin.ecc
 HBEL_ECC_IMAGE = hbel.bin.ecc
+HBEL_IMAGE = hbel.bin
 GUARD_ECC_IMAGE = guard.bin.ecc
 GLOBAL_ECC_IMAGE = global.bin.ecc
 DJVPD_ECC_IMAGE = djvpd.bin.ecc
+DJVPD_IMAGE = djvpd.bin
 MVPD_ECC_IMAGE = mvpd.bin.ecc
+MVPD_IMAGE = mvpd.bin
 CVPD_ECC_IMAGE = cvpd.bin.ecc
 PAYLOAD_ECC_IMAGE = payload.bin.ecc
 
@@ -90,6 +94,7 @@ ALL_HB_IMAGES = ${BASE_IMAGES} \
                 ${TESTDATA} ${TESTDATA_ECC} \
                 ${HBEL_ECC_IMAGE} ${GUARD_ECC_IMAGE} ${GLOBAL_ECC_IMAGE} \
                 ${DJVPD_ECC_IMAGE} ${MVPD_ECC_IMAGE} ${CVPD_ECC_IMAGE} \
+                ${HBEL_IMAGE} ${DJVPD_IMAGE} ${MVPD_IMAGE} \
                 ${PAYLOAD_ECC_IMAGE}
 
 cp_hbfiles: .SPECTARG
@@ -108,6 +113,9 @@ cp_hbfiles: .SPECTARG
 	# dd command will pad image up to the next 4K page
 	dd if=${EXT_IMAGE} of=${EXT_PAD_IMAGE} ibs=4k count=1280 conv=sync
 	ecc --inject ${EXT_PAD_IMAGE} --output ${EXT_ECC_IMAGE} --p8
+        .if(${FAKEPNOR} != "")
+	dd if=${EXT_IMAGE} of=${EXT_FAKE_IMAGE} ibs=5120k conv=sync
+        .endif
 	# Add version header w/ HBRT sha hash
 	echo -en VERSION\\0 > ${HBRT_SHA_IMAGE}
 	sha512sum ${HBRT_IMAGE} | awk '{print $$1}' | xxd -pr -r >> ${HBRT_SHA_IMAGE}
@@ -137,6 +145,9 @@ cp_hbfiles: .SPECTARG
 	# Fill the following partitions with FF's and then ECC them
 	dd if=/dev/zero bs=128K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
 	ecc --inject ${TEMP_IMAGE} --output ${HBEL_ECC_IMAGE} --p8
+        .if(${FAKEPNOR} != "")
+	dd if=/dev/zero bs=64K count=1 | tr "\000" "\377" > ${HBEL_IMAGE}
+        .endif
 	# GUARD partition
 	dd if=/dev/zero bs=16K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
 	ecc --inject ${TEMP_IMAGE} --output ${GUARD_ECC_IMAGE} --p8
@@ -146,9 +157,15 @@ cp_hbfiles: .SPECTARG
 	# DJVPD partition
 	dd if=/dev/zero bs=256K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
 	ecc --inject ${TEMP_IMAGE} --output ${DJVPD_ECC_IMAGE} --p8
+        .if(${FAKEPNOR} != "")
+	dd if=/dev/zero bs=128K count=1 | tr "\000" "\377" > ${DJVPD_IMAGE}
+        .endif
 	# MVPD partition
 	dd if=/dev/zero bs=512K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
 	ecc --inject ${TEMP_IMAGE} --output ${MVPD_ECC_IMAGE} --p8
+        .if(${FAKEPNOR} != "")
+	dd if=/dev/zero bs=256K count=1 | tr "\000" "\377" > ${MVPD_IMAGE}
+        .endif
 	# CVPD partition
 	dd if=/dev/zero bs=256K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
 	ecc --inject ${TEMP_IMAGE} --output ${CVPD_ECC_IMAGE} --p8
@@ -233,6 +250,7 @@ PNOR_BUILD_SCRIPT = ${buildpnor.pl:P}
 .tryinclude <${.PATH:Ffips_pnor.mk}>
 
 HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_W_HEADER_ECC_IMAGE},HBI=${EXT_ECC_HEADER_IMAGE},HBRT=${HBRT_ECC_HEADER_IMAGE},TEST=${TESTDATA_ECC},TESTRO=${TESTDATA_ECC},HBEL=${HBEL_ECC_IMAGE},GUARD=${GUARD_ECC_IMAGE},GLOBAL=${GLOBAL_ECC_IMAGE},PAYLOAD=${PAYLOAD_ECC_IMAGE},CVPD=${CVPD_ECC_IMAGE},MVPD=${MVPD_ECC_IMAGE},DJVPD=${DJVPD_ECC_IMAGE}
+HOSTBOOT_FAKEPNOR_SECTIONS = HBI=${EXT_FAKE_IMAGE},HBEL=${HBEL_IMAGE},MVPD=${MVPD_IMAGE},DJVPD=${DJVPD_IMAGE}
 
 
 HBFW_OBJPATH = ${.PATH:M*obj*}
@@ -245,6 +263,7 @@ MURANO_TARG_IMG_ECC = simics_MURANO_targeting.bin.ecc
 NAPLES_TARG_IMG_ECC = simics_NAPLES_targeting.bin.ecc
 VENICE_TARG_IMG_ECC = simics_VENICE_targeting.bin.ecc
 NIMBUS_TARG_IMG_ECC = simics_NIMBUS_targeting.bin.ecc
+NIMBUS_TARG_IMG_FAKE = simics_NIMBUS_targeting.bin.fake
 MURANO_SLW_IMG = ${ENGD_OBJPATH:Fs1.ref_image.hdr.bin}
 NAPLES_SLW_IMG = ${ENGD_OBJPATH:Fs1.ref_image.hdr.bin}
 VENICE_SLW_IMG = ${ENGD_OBJPATH:Fp8.ref_image.hdr.bin}
@@ -284,6 +303,8 @@ inject_ecc: build_sbe_partitions
 	ecc --inject ${TEMP_IMG} --output ${VENICE_TARG_IMG_ECC} --p8; \
 	dd if=${${NIMBUS_TARG_IMG}:P} of=${TEMP_IMG} ibs=1024k conv=sync; \
 	ecc --inject ${TEMP_IMG} --output ${NIMBUS_TARG_IMG_ECC} --p8; \
+	#for NIMBUS fake pnor skip version header
+	dd if=${${NIMBUS_TARG_IMG}:P} of=${NIMBUS_TARG_IMG_FAKE} ibs=4k count=32 skip=1 conv=sync; \
 	# SBE partition
 	dd if=${${MURANO_SBE_IMG}:P} of=${TEMP_IMG} ibs=256k conv=sync; \
 	ecc --inject ${TEMP_IMG} --output ${MURANO_SBE_IMG_ECC} --p8; \
@@ -311,13 +332,23 @@ MURANO_SECT = HBD=${MURANO_TARG_IMG_ECC},SBE=${MURANO_SBE_IMG_ECC},SBEC=${SBEC_I
 NAPLES_SECT = HBD=${NAPLES_TARG_IMG_ECC},SBE=${NAPLES_SBE_IMG_ECC},SBEC=${SBEC_IMG_ECC},WINK=${NAPLES_LOCAL_SLW_IMG_ECC}
 VENICE_SECT = HBD=${VENICE_TARG_IMG_ECC},SBE=${VENICE_SBE_IMG_ECC},SBEC=${SBEC_IMG_ECC},WINK=${VENICE_LOCAL_SLW_IMG_ECC}
 NIMBUS_SECT = HBD=${NIMBUS_TARG_IMG_ECC},SBE=${NIMBUS_SBE_IMG_ECC},SBEC=${SBEC_IMG_ECC},WINK=${NIMBUS_LOCAL_SLW_IMG_ECC}
+FAKE_SECT = HBD=${NIMBUS_TARG_IMG_FAKE}
 
+# To build fake PNOR, set FAKEPNOR to filename of file to build,
+#    ie, 'export FAKEPNOR=fake8m.pnor'
+# To not build fake PNOR, do not set FAKEPNOR or clear its setting,
+#    ie, 'export FAKEPNOR='
+.if(${FAKEPNOR} != "")
+    FAKE_PNOR_IMG_INFO = \
+        ${FAKEPNOR}:pnorLayoutFake.xml:${FAKE_SECT},${HOSTBOOT_FAKEPNOR_SECTIONS}
+.endif
 
 PNOR_IMG_INFO = \
    murano.pnor:defaultPnorLayout.xml:${MURANO_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
    naples.pnor:defaultPnorLayout.xml:${NAPLES_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
    venice.pnor:defaultPnorLayout.xml:${VENICE_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
    nimbus.pnor:defaultPnorLayout.xml:${NIMBUS_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
+   ${FAKE_PNOR_IMG_INFO} \
    ${FIPS_PNOR_INFO}
 
 
@@ -341,10 +372,19 @@ BUILD_SPECIFIC_IMAGE: .SPECTARG ${IMAGE_TARGET}
 
 
 ${IMAGE_TARGET}: ${IMAGE_LAYOUT} ${IMAGE_BINS} ${PNOR_BUILD_SCRIPT}
-	.if(${PNOR} == ${IMAGE_TARGET} || ${PNOR} == "")
-		${PNOR_BUILD_SCRIPT} --pnorOutBin ${IMAGE_TARGET} \
-			${TARGET_TEST:b--test} --pnorLayout ${IMAGE_LAYOUT} \
-			${IMAGE_BIN_OPTION} --fpartCmd "fpart" --fcpCmd "fcp"
+	.if empty(FFSCMD)
+		.if(${PNOR} == ${IMAGE_TARGET} || ${PNOR} == "" || \
+                    ${FAKEPNOR} == ${IMAGE_TARGET})
+			${PNOR_BUILD_SCRIPT} --pnorOutBin ${IMAGE_TARGET} \
+				${TARGET_TEST:b--test} --pnorLayout ${IMAGE_LAYOUT} \
+				${IMAGE_BIN_OPTION} --fpartCmd "fpart" --fcpCmd "fcp"
+		.endif
+	.else
+		.if(${PNOR} == ${IMAGE_TARGET})
+			${PNOR_BUILD_SCRIPT} --pnorOutBin ${IMAGE_TARGET} \
+				${TARGET_TEST:b--test} --pnorLayout ${IMAGE_LAYOUT} \
+				${IMAGE_BIN_OPTION} --ffsCmd "ffs"
+		.endif
 	.endif
 .endif
 
@@ -353,19 +393,26 @@ build_pnor_images:.SPECTARG ${PNOR_IMG_INFO:S/^/__IMAGE_BUILD\//g}
 clobber_build_pnor_images:
 	${PNOR_IMG_INFO:@image@${pnorimg:!rm -f ${image:s/:/ /g:xs/ .*//};!e}@}
 
-
 #################################################
 #Special target to copy images to flash dir for simics
 #################################################
 FLASH_DEST = $(MAKETOP)$(OBJECTDIRTOP)../images/$(CONTEXT)/lab/flash
 FLASH_IMG = ${BASE_IMAGE} ${BASE_ECC_IMAGE}
+FAKE_PNOR = fake6m.pnor
 
 update_images_for_sandbox: inject_ecc build_sbe_partitions build_pnor_images
 	mkdir -p ${FLASH_DEST}
 	#Copy hostboot base image to flash dir
 	${FLASH_IMG:@image@${baseimg:!cd ${FLASH_DEST}; cp -f ${.PATH:F${image}} ${image};!e}@}
+	#Truncate fake pnor image down to 6MB and copy to flash dir
+	${FAKE_PNOR_IMG_INFO:@image@${pnorimg:!dd if=${image:s/:/ /g:xs/ .*//} of=${FAKE_PNOR} bs=6M count=1; \
+	    cp -f ${FAKE_PNOR} ${FLASH_DEST}/${FAKE_PNOR};!e}@}
 	#Copy pnor images to flash dir
-	${PNOR_IMG_INFO:@image@${pnorimg:!cd ${FLASH_DEST}; if [ "${PNOR}" == "${image:s/:/ /g:xs/ .*//}" ] || [ "${PNOR}" == "" ]; then cp -f ${.PATH:F${image:s/:/ /g:xs/ .*//}} ${image:s/:/ /g:xs/ .*//}; fi !e}@}
+	${PNOR_IMG_INFO:@image@${pnorimg:!cd ${FLASH_DEST}; \
+            if [ "${PNOR}" == "${image:s/:/ /g:xs/ .*//}" ] || \
+               [ "${PNOR}" == "" ] || \
+               [ "${FAKEPNOR}" == "${image:s/:/ /g:xs/ .*//}" ]; \
+            then cp -f ${.PATH:F${image:s/:/ /g:xs/ .*//}} ${image:s/:/ /g:xs/ .*//}; fi !e}@}
 
 .endif
 
