@@ -819,9 +819,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 
     mutex_lock(&iv_mutex);
 
-    uint64_t monitorId = getMonitor().addMonitor(mbaTO);
-
-    i_wfp.timer = monitorId;
+    uint64_t monitorId = CommandMonitor::INVALID_MONITOR_ID;
     i_wfp.timeoutCnt = 0; // reset for new work item
     workItem = *i_wfp.workItem;
     restart = i_wfp.restartCommand;
@@ -1010,9 +1008,16 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 
         // Command and address configured.
         // Invoke the command.
-
         fapirc = cmd->setupAndExecuteCmd();
         err = fapiRcToErrl(fapirc);
+
+        // Start a timeout monitor
+        mutex_lock(&iv_mutex);
+
+        monitorId = getMonitor().addMonitor(mbaTO);
+        i_wfp.timer = monitorId;
+
+        mutex_unlock(&iv_mutex);
 
         if(err)
         {
@@ -1022,18 +1027,18 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 
     } while(0);
 
-    mutex_lock(&iv_mutex);
-
     if(err)
     {
+        mutex_lock(&iv_mutex);
+
         MDIA_FAST("sm: Running Maint Cmd failed");
 
         getMonitor().removeMonitor(monitorId);
 
         i_wfp.data = NULL;
-    }
 
-    mutex_unlock(&iv_mutex);
+        mutex_unlock(&iv_mutex);
+    }
 
     if(err && cmd)
     {
