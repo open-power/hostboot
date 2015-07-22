@@ -1,8 +1,10 @@
-#-- $Id: mba_def.initfile,v 1.74 2015/04/13 18:33:12 yctschan Exp $
+/#-- $Id: mba_def.initfile,v 1.76 2015/07/16 22:50:59 asaetow Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.76|asaetow |07/16/15| Fixed define of def_RDODT_start_udimm and def_RDODT_start_rdimm which currently effects Habanero dual-drop and 128G CDIMM termination.
+#--     1.75|yctschan| 6/09/15| Updated Fast/Slow exit power down settings for MBAPC1Q and MBAREF1Q register
 #--     1.74|yctschan| 4/10/15| SW302059 - turn off row hammer when ATTR_CENTAUR_EC_ENABLE_ROW_HAMMER_FEATURE is 1
 #--     1.73|yctschan| 4/01/15| SW302059 - turn off row hammer
 #--     1.72|yctschan| 3/24/15| Added support for 2N mode for DDR4 parts for timing parms
@@ -1889,8 +1891,8 @@ define def_WL_AL0 = (ATTR_EFF_DRAM_CWL - 7);
 define def_WL_AL_MINUS1 = (ATTR_EFF_DRAM_CWL + ATTR_EFF_DRAM_CL - 1 - 7);
 define def_WL_AL_MINUS2 = (ATTR_EFF_DRAM_CWL + ATTR_EFF_DRAM_CL - 2 - 7);
 
-define def_RDODT_start_udimm  = (ATTR_EFF_DRAM_CL - ATTR_EFF_DRAM_CWL + 1);
-define def_RDODT_start_rdimm  = (ATTR_EFF_DRAM_CL - ATTR_EFF_DRAM_CWL + 2);
+define def_RDODT_start_udimm  = (ATTR_EFF_DRAM_CL - ATTR_EFF_DRAM_CWL);
+define def_RDODT_start_rdimm  = (ATTR_EFF_DRAM_CL - ATTR_EFF_DRAM_CWL);
 define def_RDODT_start_lrdimm = (ATTR_EFF_DRAM_CL - ATTR_EFF_DRAM_CWL + 6);
 define def_RDODT_duration = (5);
 
@@ -1969,8 +1971,8 @@ scom 0x03010432    {
 #
 scom 0x03010434    {
     bits    ,   scom_data   ,       ATTR_FUNCTIONAL,   expr;
-    2       ,   0b0       ,           1            ,   (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 0); # cfg_min_max_domains       36
-    2       ,   0b1       ,           1            ,   (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED != 0); # cfg_min_max_domains       36
+    2       ,   0b0       ,           1            ,   (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 0) || ((SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 1) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 0 || CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 2)) || ((SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 0 || CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 1)); # cfg_min_max_domains       36
+    2       ,   0b1       ,           1            ,   ((SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 1) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 1 || CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 3)) || ((SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 2 || CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 3)); # cfg_min_max_domains       36
 #    3:5     ,   0b001       ,           1            ,   any; # cfg_min_max_domains       36
     6:10    ,   0b00100  + def_margin_pup_slow   ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly4  == 1) && (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 1) && ((CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 1) || (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 3)); # MBARPC0Q_cfg_pup_avail   - performance enhancemnt
     6:10    ,   0b00011  + def_margin_pup_fast   ,           1            ,   (def_MBARPC0Q_cfg_pup_avail_dly4  == 1) && (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && ((CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 2) || (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 3)); # MBARPC0Q_cfg_pup_avail   - performance enhancemnt
@@ -2002,8 +2004,8 @@ scom 0x03010434    {
     16:20   ,   0b00100     ,           1            ,   (def_MBARPC0Q_cfg_pup_pdn_dly4 == 1); # MBARPC0Q_cfg_pup_pdn       38
     16:20   ,   0b00101     ,           1            ,   (def_MBARPC0Q_cfg_pup_pdn_dly5 == 1); # MBARPC0Q_cfg_pup_pdn       38
     16:20   ,   0b00110     ,           1            ,   (def_MBARPC0Q_cfg_pup_pdn_dly6 == 1); # MBARPC0Q_cfg_pup_pdn       38
-    22      ,   0b0         ,           1            ,   (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 0);
-    22      ,   0b1         ,           1            ,   (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED != 0);
+    22      ,   0b0       ,           1            ,   (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 0) || ((SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 1) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 0 || CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 2)) || ((SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 0 || CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 1)); # cfg_min_max_domains       36
+    22      ,   0b1       ,           1            ,   ((SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 1) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 1 || CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 3)) || ((SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 2 || CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 3)); # cfg_min_max_domains       36
     23:32   ,   0b0000000011,           1            ,   any; # Set min doman reduction time to 30.7 us (10.245us * 3)
     42      ,   0b1         ,           1            ,   any; # Force SpareCKE sync
     43      ,   0b1         ,           1            ,   any; # Use 1 in 8k 2:1 cycle pulses for min domain reduction time interval
@@ -2030,258 +2032,17 @@ define shift_pwr_map15 = (ATTR_VPD_CKE_PWR_MAP >> 4);
 #
 scom 0x03010435    {
     bits    ,   scom_data   ,       ATTR_FUNCTIONAL,   expr;
-    0:3    ,   shift_pwr_map1 ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 1) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 2); # slow exit pdown
-    0:3     ,   0x8         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1a        == 1); # cfg_mrnk0_rd_cke    36
-    0:3     ,   0xC         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b1dimm   == 1);
-    0:3     ,   0xD         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b2dimm   == 1);
-    0:3     ,   0x8         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1bcdimm   == 1);
-    0:3     ,   0x9         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c2dimm   == 1);
-    0:3     ,   0xC         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c1dimm   == 1);
-    0:3     ,   0xC         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1ccdimm   == 1);
-    0:3     ,   0xF         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx82dimm == 1);
-    0:3     ,   0xC         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx4      == 1);
-    0:3     ,   0x8         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_2abc      == 1);
-    0:3     ,   0x8         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56781lrdm == 1);
-    0:3     ,   0x8         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56782lrdm == 1);
-    0:3     ,   0xC         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d1dimm   == 1);
-    0:3     ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d2dimm   == 1); # cfg_mrnk0_rd_cke    36
-    4:7    ,   shift_pwr_map2 ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 1) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 2); # slow exit pdown
-    4:7     ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1a        == 1); # cfg_mrnk1_rd_cke    36
-    4:7     ,   0xC         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b1dimm   == 1);
-    4:7     ,   0xE         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b2dimm   == 1);
-    4:7     ,   0x4         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1bcdimm   == 1);
-    4:7     ,   0x5         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c2dimm   == 1);
-    4:7     ,   0xC         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c1dimm   == 1);
-    4:7     ,   0xC         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1ccdimm   == 1);
-    4:7     ,   0x7         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx82dimm == 1);
-    4:7     ,   0xC         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx4      == 1);
-    4:7     ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_2abc      == 1);
-    4:7     ,   0x4         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56781lrdm == 1);
-    4:7     ,   0x4         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56782lrdm == 1);
-    4:7     ,   0xC         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d1dimm   == 1);
-    4:7     ,   0xF         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d2dimm   == 1);
-    8:11   ,   shift_pwr_map3 ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 1) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 2); # slow exit pdown
-   8:11    ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1a        == 1); # cfg_mrnk2_rd_cke    36
-   8:11    ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b1dimm   == 1);
-   8:11    ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b2dimm   == 1);
-   8:11    ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1bcdimm   == 1);
-   8:11    ,   0x9         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c2dimm   == 1);
-   8:11    ,   0xC         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c1dimm   == 1);
-   8:11    ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1ccdimm   == 1);
-   8:11    ,   0xF         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx82dimm == 1);
-   8:11    ,   0xC         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx4      == 1);
-   8:11    ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_2abc      == 1);
-   8:11    ,   0x8         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56781lrdm == 1);
-   8:11    ,   0x8         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56782lrdm == 1);
-   8:11    ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d1dimm   == 1);
-   8:11    ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d2dimm   == 1);
-   12:15   ,   shift_pwr_map4 ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 1) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 2); # slow exit pdown
-   12:15   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1a        == 1); # cfg_mrnk3_rd_cke    36
-   12:15   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b1dimm   == 1);
-   12:15   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b2dimm   == 1);
-   12:15   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1bcdimm   == 1);
-   12:15   ,   0x5         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c2dimm   == 1);
-   12:15   ,   0xC         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c1dimm   == 1);
-   12:15   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1ccdimm   == 1);
-   12:15   ,   0x7         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx82dimm == 1);
-   12:15   ,   0xC         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx4      == 1);
-   12:15   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_2abc      == 1);
-   12:15   ,   0x4         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56781lrdm == 1);
-   12:15   ,   0x4         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56782lrdm == 1);
-   12:15   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d1dimm   == 1);
-   12:15   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d2dimm   == 1);
-   16:19   ,   shift_pwr_map5 ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 1) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 2); # slow exit pdown
-   16:19   ,   0x2         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1a        == 1); # cfg_mrnk4_rd_cke    36
-   16:19   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b1dimm   == 1);
-   16:19   ,   0x7         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b2dimm   == 1);
-   16:19   ,   0x2         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1bcdimm   == 1);
-   16:19   ,   0xA         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c2dimm   == 1);
-   16:19   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c1dimm   == 1);
-   16:19   ,   0x3         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1ccdimm   == 1);
-   16:19   ,   0xF         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx82dimm == 1);
-   16:19   ,   0x2         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx4      == 1);
-   16:19   ,   0x2         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_2abc      == 1);
-   16:19   ,   0x2         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_2abc      == 1);
-   16:19   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56781lrdm == 1);
-   16:19   ,   0x2         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56782lrdm == 1);
-   16:19   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d1dimm   == 1);
-   16:19   ,   0xF         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d2dimm   == 1);
-   20:23   ,   shift_pwr_map6 ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 1) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 2); # slow exit pdown
-   20:23   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1a        == 1); # cfg_mrnk5_rd_cke    36
-   20:23   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b1dimm   == 1);
-   20:23   ,   0xB         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b2dimm   == 1);
-   20:23   ,   0x1         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1bcdimm   == 1);
-   20:23   ,   0x9         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c2dimm   == 1);
-   20:23   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c1dimm   == 1);
-   20:23   ,   0x3         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1ccdimm   == 1);
-   20:23   ,   0xD         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx82dimm == 1);
-   20:23   ,   0x1         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx4      == 1);
-   20:23   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_2abc      == 1);
-   20:23   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56781lrdm == 1);
-   20:23   ,   0x1         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56782lrdm == 1);
-   20:23   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d1dimm   == 1);
-   20:23   ,   0xF         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d2dimm   == 1);
+    0:15   ,   shift_pwr_map4 ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 1) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 1 || CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 3); # slow exit pdown
+    0:15   ,   ATTR_VPD_CKE_PRI_MAP[0],  1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 2 || CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 3); # fast exit pdown
+   16:31   ,   shift_pwr_map8 ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 1) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 1 || CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 3); # slow exit pdown
+   16:31   ,   ATTR_VPD_CKE_PRI_MAP[1],  1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 2 || CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 3); # fast exit pdown
+   32:47   ,   shift_pwr_map12,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 1) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 1 || CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 3); # slow exit pdown
+   32:47   ,   ATTR_VPD_CKE_PRI_MAP[0],  1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 2 || CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 3); # fast exit pdown
+   48:63   ,   ATTR_VPD_CKE_PWR_MAP,     1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 1) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 1 || CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 3); # slow exit pdown
+   48:63   ,   ATTR_VPD_CKE_PRI_MAP[1],  1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 2 || CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE == 3); # fast exit pdown
 }
 
 
-scom 0x03010435    {
-    bits    ,   scom_data   ,       ATTR_FUNCTIONAL,   expr;
-   24:27   ,   shift_pwr_map7 ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 1) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 2); # slow exit pdown
-   24:27   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1a        == 1); # cfg_mrnk6_rd_cke    37
-   24:27   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b1dimm   == 1);
-   24:27   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b2dimm   == 1);
-   24:27   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1bcdimm   == 1);
-   24:27   ,   0xA         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c2dimm   == 1);
-   24:27   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c1dimm   == 1);
-   24:27   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1ccdimm   == 1);
-   24:27   ,   0xF         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx82dimm == 1);
-   24:27   ,   0x2         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx4      == 1);
-   24:27   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_2abc      == 1);
-   24:27   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56781lrdm == 1);
-   24:27   ,   0x2         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56782lrdm == 1);
-   24:27   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d1dimm   == 1);
-   24:27   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d2dimm   == 1);
-   28:31   ,   shift_pwr_map8 ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 1) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 2); # slow exit pdown
-   28:31   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1a        == 1); # cfg_mrnk7_rd_cke    37
-   28:31   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b1dimm   == 1);
-   28:31   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b2dimm   == 1);
-   28:31   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1bcdimm   == 1);
-   28:31   ,   0x9         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c2dimm   == 1);
-   28:31   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c1dimm   == 1);
-   28:31   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1ccdimm   == 1);
-   28:31   ,   0xD         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx82dimm == 1);
-   28:31   ,   0x1         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx4      == 1);
-   28:31   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_2abc      == 1);
-   28:31   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56781lrdm == 1);
-   28:31   ,   0x1         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56782lrdm == 1);
-   28:31   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d1dimm   == 1);
-   28:31   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d2dimm   == 1);
-   32:35   ,   shift_pwr_map9 ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 1) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 2); # slow exit pdown
-   32:35   ,   0x8         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1a        == 1); # cfg_mrnk0_wr_cke    38
-   32:35   ,   0x8         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b1dimm   == 1);
-   32:35   ,   0xD         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b2dimm   == 1);
-   32:35   ,   0x8         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1bcdimm   == 1);
-   32:35   ,   0xA         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c2dimm   == 1);
-   32:35   ,   0xC         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c1dimm   == 1);
-   32:35   ,   0xC         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1ccdimm   == 1);
-   32:35   ,   0xF         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx82dimm == 1);
-   32:35   ,   0xC         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx4      == 1);
-   32:35   ,   0x8         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_2abc      == 1);
-   32:35   ,   0x8         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56781lrdm == 1);
-   32:35   ,   0x8         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56782lrdm == 1);
-   32:35   ,   0xC         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d1dimm   == 1);
-   36:39   ,   shift_pwr_map10,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 1) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 2); # slow exit pdown
-   32:35   ,   0xF         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d2dimm   == 1); # cfg_mrnk0_wr_cke    38
-   36:39   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1a        == 1);
-   36:39   ,   0x4         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b1dimm   == 1);
-   36:39   ,   0xE         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b2dimm   == 1);
-   36:39   ,   0x4         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1bcdimm   == 1);
-   36:39   ,   0x6         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c2dimm   == 1);
-   36:39   ,   0xC         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c1dimm   == 1);
-   36:39   ,   0xC         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1ccdimm   == 1);
-   36:39   ,   0x7         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx82dimm == 1);
-   36:39   ,   0xC         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx4      == 1);
-   36:39   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_2abc      == 1);
-   36:39   ,   0x4         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56781lrdm == 1);
-   36:39   ,   0x4         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56782lrdm == 1);
-   36:39   ,   0xC         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d1dimm   == 1);
-   36:39   ,   0xF         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d2dimm   == 1);
-   40:43   ,   shift_pwr_map11,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 1) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 2); # slow exit pdown
-   40:43   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1a        == 1); # cfg_mrnk2_wr_cke    38
-   40:43   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b1dimm   == 1);
-   40:43   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b2dimm   == 1);
-   40:43   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1bcdimm   == 1);
-   40:43   ,   0xA         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c2dimm   == 1);
-   40:43   ,   0xC         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c1dimm   == 1);
-   40:43   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1ccdimm   == 1);
-   40:43   ,   0xF         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx82dimm == 1);
-   40:43   ,   0xC         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx4      == 1);
-   40:43   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_2abc      == 1);
-   40:43   ,   0x8         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56781lrdm == 1);
-   40:43   ,   0x8         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56782lrdm == 1);
-   40:43   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d1dimm   == 1);
-   40:43   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d2dimm   == 1);
-   44:47   ,   shift_pwr_map12,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 1) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 2); # slow exit pdown
-   44:47   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1a        == 1); # cfg_mrnk3_wr_cke    38
-   44:47   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b1dimm   == 1);
-   44:47   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b2dimm   == 1);
-   44:47   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1bcdimm   == 1);
-   44:47   ,   0x6         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c2dimm   == 1);
-   44:47   ,   0xC         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c1dimm   == 1);
-   44:47   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1ccdimm   == 1);
-   44:47   ,   0x7         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx82dimm == 1);
-   44:47   ,   0xC         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx4      == 1);
-   44:47   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_2abc      == 1);
-   44:47   ,   0x4         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56781lrdm == 1);
-   44:47   ,   0x4         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56782lrdm == 1);
-   44:47   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d1dimm   == 1);
-   44:47   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d2dimm   == 1);
-}
-
-
-scom 0x03010435    {
-    bits    ,   scom_data   ,       ATTR_FUNCTIONAL,   expr;
-   48:51   ,   shift_pwr_map13,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 1) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 2); # slow exit pdown
-   48:51   ,   0x2         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1a        == 1); # cfg_mrnk4_wr_cke    38
-   48:51   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b1dimm   == 1);
-   48:51   ,   0x7         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b2dimm   == 1);
-   48:51   ,   0x2         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1bcdimm   == 1);
-   48:51   ,   0x6         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c2dimm   == 1);
-   48:51   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c1dimm   == 1);
-   48:51   ,   0x3         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1ccdimm   == 1);
-   48:51   ,   0xF         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx82dimm == 1);
-   48:51   ,   0x2         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx4      == 1);
-   48:51   ,   0x2         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_2abc      == 1);
-   48:51   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56781lrdm == 1);
-   48:51   ,   0x2         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56782lrdm == 1);
-   48:51   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d1dimm   == 1);
-   48:51   ,   0xF         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d2dimm   == 1);
-   52:55   ,   shift_pwr_map14,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 1) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 2); # slow exit pdown
-   52:55   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1a        == 1); # cfg_mrnk5_wr_cke    38
-   52:55   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b1dimm   == 1);
-   52:55   ,   0xB         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b2dimm   == 1);
-   52:55   ,   0x1         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1bcdimm   == 1);
-   52:55   ,   0x5         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c2dimm   == 1);
-   52:55   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c1dimm   == 1);
-   52:55   ,   0x3         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1ccdimm   == 1);
-   52:55   ,   0xD         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx82dimm == 1);
-   52:55   ,   0x1         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx4      == 1);
-   52:55   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_2abc      == 1);
-   52:55   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56781lrdm == 1);
-   52:55   ,   0x1         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56782lrdm == 1);
-   52:55   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d1dimm   == 1);
-   52:55   ,   0xF         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d2dimm   == 1);
-   56:59   ,   shift_pwr_map15,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 1) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 2); # slow exit pdown
-   56:59   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1a        == 1); # cfg_mrnk6_wr_cke    38
-   56:59   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b1dimm   == 1);
-   56:59   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b2dimm   == 1);
-   56:59   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1bcdimm   == 1);
-   56:59   ,   0x6         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c2dimm   == 1);
-   56:59   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c1dimm   == 1);
-   56:59   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1ccdimm   == 1);
-   56:59   ,   0xF         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx82dimm == 1);
-   56:59   ,   0x2         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx4      == 1);
-   56:59   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_2abc      == 1);
-   56:59   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56781lrdm == 1);
-   56:59   ,   0x2         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56782lrdm == 1);
-   56:59   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d1dimm   == 1);
-   56:59   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d2dimm   == 1);
-   60:63   ,   ATTR_VPD_CKE_PWR_MAP,     1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 1) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 2); # slow exit pdown
-   60:63   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1a        == 1); # cfg_mrnk7_wr_cke    38
-   60:63   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b1dimm   == 1);
-   60:63   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1b2dimm   == 1);
-   60:63   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1bcdimm   == 1);
-   60:63   ,   0x5         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c2dimm   == 1);
-   60:63   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1c1dimm   == 1);
-   60:63   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1ccdimm   == 1);
-   60:63   ,   0xD         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx82dimm == 1);
-   60:63   ,   0x1         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_1dx4      == 1);
-   60:63   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_2abc      == 1);
-   60:63   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56781lrdm == 1);
-   60:63   ,   0x1         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_56782lrdm == 1);
-   60:63   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d1dimm   == 1);
-   60:63   ,   0x0         ,          1            ,    (SYS.ATTR_MRW_POWER_CONTROL_REQUESTED == 2) && (CENTAUR.ATTR_VPD_POWER_CONTROL_CAPABLE != 1) && (def_odt_mapping_5d2dimm   == 1);
-}
 
 ###########################
 # MBA CKE mapping tables  #
