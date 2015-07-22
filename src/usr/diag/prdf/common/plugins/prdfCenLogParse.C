@@ -456,7 +456,7 @@ static const char ** dramSiteMap_rcA
 // DRAM site tables for RAW CARD B
 //##############################################################################
 
-static const char * dramSiteCardBPortARank0[] =
+static const char * dramSiteCardBPortARank01[] =
 {
     "DA07.d3", "DA07.d0", "DA07.d2", "DA07.d1",
     "DA02.d2", "DA02.d0", "DA02.d3", "DA02.d1",
@@ -489,7 +489,7 @@ static const char * dramSiteCardBPortARank0[] =
     "",         "",         "",         "",
 };
 
-static const char * dramCardBPortARank0[] =
+static const char * dramCardBPortARank01[] =
 {
     "DA07", "DA02", "DA03", "DA04", "DA12", "DA06", "DA11", "DA05",
     "DA14", "DA18", "DA13", "DA19", "DA09", "DA16", "DA08", "DA15",
@@ -498,7 +498,7 @@ static const char * dramCardBPortARank0[] =
 
 //------------------------------------------------------------------------------
 
-static const char * dramSiteCardBPortARank4[] =
+static const char * dramSiteCardBPortARank45[] =
 {
     "DA27.d2", "DA27.d1", "DA27.d3", "DA27.d0",
     "DA22.d3", "DA22.d1", "DA22.d2", "DA22.d0",
@@ -531,7 +531,7 @@ static const char * dramSiteCardBPortARank4[] =
     "",         "",         "",         "",
 };
 
-static const char * dramCardBPortARank4[] =
+static const char * dramCardBPortARank45[] =
 {
     "DA27", "DA22", "DA23", "DA24", "DA32", "DA26", "DA31", "DA25",
     "DA34", "DA38", "DA33", "DA39", "DA29", "DA36", "DA28", "DA35",
@@ -540,7 +540,7 @@ static const char * dramCardBPortARank4[] =
 
 //------------------------------------------------------------------------------
 
-static const char * dramSiteCardBPortBRank0[] =
+static const char * dramSiteCardBPortBRank01[] =
 {
     "DB13.d0", "DB13.d2", "DB13.d3", "DB13.d1",
     "DB16.d3", "DB16.d2", "DB16.d1", "DB16.d0",
@@ -573,7 +573,7 @@ static const char * dramSiteCardBPortBRank0[] =
     "",         "",         "",         "",
 };
 
-static const char * dramCardBPortBRank0[] =
+static const char * dramCardBPortBRank01[] =
 {
     "DB13", "DB16", "DB14", "DB17", "DB01", "DB15", "DB11", "DB19",
     "DB04", "DB03", "DB05", "DB07", "DB06", "DB09", "DB08", "DB18",
@@ -582,7 +582,7 @@ static const char * dramCardBPortBRank0[] =
 
 //------------------------------------------------------------------------------
 
-static const char * dramSiteCardBPortBRank4[] =
+static const char * dramSiteCardBPortBRank45[] =
 {
     "DB33.d1", "DB33.d3", "DB33.d2", "DB33.d0",
     "DB36.d2", "DB36.d3", "DB36.d0", "DB36.d1",
@@ -615,7 +615,7 @@ static const char * dramSiteCardBPortBRank4[] =
     "",         "",         "",         "",
 };
 
-static const char * dramCardBPortBRank4[] =
+static const char * dramCardBPortBRank45[] =
 {
     "DB33", "DB36", "DB34", "DB37", "DB21", "DB35", "DB31", "DB39",
     "DB24", "DB23", "DB25", "DB27", "DB26", "DB29", "DB28", "DB38",
@@ -624,7 +624,7 @@ static const char * dramCardBPortBRank4[] =
 
 //------------------------------------------------------------------------------
 
-static const char * dramSiteCardBPortCRank0[] =
+static const char * dramSiteCardBPortCRank01[] =
 {
     "DC18.d3", "DC18.d1", "DC18.d0", "DC18.d2",
     "DC09.d2", "DC09.d1", "DC09.d0", "DC09.d3",
@@ -657,7 +657,7 @@ static const char * dramSiteCardBPortCRank0[] =
     "",         "",         "",         "",
 };
 
-static const char * dramCardBPortCRank0[] =
+static const char * dramCardBPortCRank01[] =
 {
     "DC18", "DC09", "DC08", "DC07", "DC16", "DC17", "DC19", "DC01",
     "DC12", "DC02", "DC13", "DC14", "DC11", "DC03", "DC04", "DC15",
@@ -666,7 +666,7 @@ static const char * dramCardBPortCRank0[] =
 
 //------------------------------------------------------------------------------
 
-static const char * dramSiteCardBPortCRank4[] =
+static const char * dramSiteCardBPortCRank45[] =
 {
     "DC38.d2", "DC38.d0", "DC38.d1", "DC38.d3",
     "DC29.d3", "DC29.d0", "DC29.d1", "DC29.d2",
@@ -699,7 +699,7 @@ static const char * dramSiteCardBPortCRank4[] =
     "",         "",         "",         "",
 };
 
-static const char * dramCardBPortCRank4[] =
+static const char * dramCardBPortCRank45[] =
 {
     "DC38", "DC29", "DC28", "DC27", "DC36", "DC37", "DC39", "DC21",
     "DC32", "DC22", "DC33", "DC34", "DC31", "DC23", "DC24", "DC35",
@@ -708,7 +708,7 @@ static const char * dramCardBPortCRank4[] =
 
 //------------------------------------------------------------------------------
 
-static const char * dramSiteCardBPortDRank0[] =
+static const char * dramSiteCardBPortDRank01[] =
 {
     "DD13.d0", "DD13.d2", "DD13.d1", "DD13.d3",
     "DD16.d2", "DD16.d0", "DD16.d1", "DD16.d3",
@@ -741,7 +741,7 @@ static const char * dramSiteCardBPortDRank0[] =
     "",         "",         "",         "",
 };
 
-static const char * dramCardBPortDRank0[] =
+static const char * dramCardBPortDRank01[] =
 {
     "DD13", "DD16", "DD19", "DD15", "DD14", "DD12", "DD11", "DD18",
     "DD08", "DD03", "DD04", "DD01", "DD05", "DD02", "DD06", "DD07",
@@ -750,7 +750,7 @@ static const char * dramCardBPortDRank0[] =
 
 //------------------------------------------------------------------------------
 
-static const char * dramSiteCardBPortDRank4[] =
+static const char * dramSiteCardBPortDRank45[] =
 {
     "DD33.d1", "DD33.d3", "DD33.d0", "DD33.d2",
     "DD36.d3", "DD36.d1", "DD36.d0", "DD36.d2",
@@ -783,7 +783,7 @@ static const char * dramSiteCardBPortDRank4[] =
     "",         "",         "",         "",
 };
 
-static const char * dramCardBPortDRank4[] =
+static const char * dramCardBPortDRank45[] =
 {
     "DD33", "DD36", "DD39", "DD35", "DD34", "DD32", "DD31", "DD38",
     "DD28", "DD23", "DD24", "DD21", "DD25", "DD22", "DD26", "DD27",
@@ -797,30 +797,30 @@ static const char ** dqSiteMap_rcB
 {
     { // MBA 0
         { // Port 0
-            dramSiteCardBPortARank0,  NULL, // Ranks 0-1
-            NULL,                     NULL, // Ranks 2-3
-            dramSiteCardBPortARank4,  NULL, // Ranks 4-5
-            NULL,                     NULL, // Ranks 6-7
+            dramSiteCardBPortARank01, dramSiteCardBPortARank01, // Ranks 0-1
+            NULL,                     NULL,                     // Ranks 2-3
+            dramSiteCardBPortARank45, dramSiteCardBPortARank45, // Ranks 4-5
+            NULL,                     NULL,                     // Ranks 6-7
         },
         { // Port 1
-            dramSiteCardBPortBRank0,  NULL, // Ranks 0-1
-            NULL,                     NULL, // Ranks 2-3
-            dramSiteCardBPortBRank4,  NULL, // Ranks 4-5
-            NULL,                     NULL, // Ranks 6-7
+            dramSiteCardBPortBRank01, dramSiteCardBPortBRank01, // Ranks 0-1
+            NULL,                     NULL,                     // Ranks 2-3
+            dramSiteCardBPortBRank45, dramSiteCardBPortBRank45, // Ranks 4-5
+            NULL,                     NULL,                     // Ranks 6-7
         },
     },
     { // MBA 1
         { // Port 0
-            dramSiteCardBPortCRank0,  NULL, // Ranks 0-1
-            NULL,                     NULL, // Ranks 2-3
-            dramSiteCardBPortCRank4,  NULL, // Ranks 4-5
-            NULL,                     NULL, // Ranks 6-7
+            dramSiteCardBPortCRank01, dramSiteCardBPortCRank01, // Ranks 0-1
+            NULL,                     NULL,                     // Ranks 2-3
+            dramSiteCardBPortCRank45, dramSiteCardBPortCRank45, // Ranks 4-5
+            NULL,                     NULL,                     // Ranks 6-7
         },
         { // Port 1
-            dramSiteCardBPortDRank0,  NULL, // Ranks 0-1
-            NULL,                     NULL, // Ranks 2-3
-            dramSiteCardBPortDRank4,  NULL, // Ranks 4-5
-            NULL,                     NULL, // Ranks 6-7
+            dramSiteCardBPortDRank01, dramSiteCardBPortDRank01, // Ranks 0-1
+            NULL,                     NULL,                     // Ranks 2-3
+            dramSiteCardBPortDRank45, dramSiteCardBPortDRank45, // Ranks 4-5
+            NULL,                     NULL,                     // Ranks 6-7
         },
     },
 };
@@ -830,30 +830,30 @@ static const char ** dramSiteMap_rcB
 {
     { // MBA 0
         { // Port 0
-            dramCardBPortARank0,  NULL, // Ranks 0-1
-            NULL,                 NULL, // Ranks 2-3
-            dramCardBPortARank4,  NULL, // Ranks 4-5
-            NULL,                 NULL, // Ranks 6-7
+            dramCardBPortARank01, dramCardBPortARank01, // Ranks 0-1
+            NULL,                 NULL,                 // Ranks 2-3
+            dramCardBPortARank45, dramCardBPortARank45, // Ranks 4-5
+            NULL,                 NULL,                 // Ranks 6-7
         },
         { // Port 1
-            dramCardBPortBRank0,  NULL, // Ranks 0-1
-            NULL,                 NULL, // Ranks 2-3
-            dramCardBPortBRank4,  NULL, // Ranks 4-5
-            NULL,                 NULL, // Ranks 6-7
+            dramCardBPortBRank01, dramCardBPortBRank01, // Ranks 0-1
+            NULL,                 NULL,                 // Ranks 2-3
+            dramCardBPortBRank45, dramCardBPortBRank45, // Ranks 4-5
+            NULL,                 NULL,                 // Ranks 6-7
         },
     },
     { // MBA 1
         { // Port 0
-            dramCardBPortCRank0,  NULL, // Ranks 0-1
-            NULL,                 NULL, // Ranks 2-3
-            dramCardBPortCRank4,  NULL, // Ranks 4-5
-            NULL,                 NULL, // Ranks 6-7
+            dramCardBPortCRank01, dramCardBPortCRank01, // Ranks 0-1
+            NULL,                 NULL,                 // Ranks 2-3
+            dramCardBPortCRank45, dramCardBPortCRank45, // Ranks 4-5
+            NULL,                 NULL,                 // Ranks 6-7
         },
         { // Port 1
-            dramCardBPortDRank0,  NULL, // Ranks 0-1
-            NULL,                 NULL, // Ranks 2-3
-            dramCardBPortDRank4,  NULL, // Ranks 4-5
-            NULL,                 NULL, // Ranks 6-7
+            dramCardBPortDRank01, dramCardBPortDRank01, // Ranks 0-1
+            NULL,                 NULL,                 // Ranks 2-3
+            dramCardBPortDRank45, dramCardBPortDRank45, // Ranks 4-5
+            NULL,                 NULL,                 // Ranks 6-7
         },
     },
 };
