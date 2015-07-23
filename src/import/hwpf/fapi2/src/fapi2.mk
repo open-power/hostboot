@@ -30,7 +30,7 @@ FAPI2_MODULE_OBJS += fapi2_attribute_service.o
 #TODO RTC 134733: Can't find the basic XML for attributes, so
 #                 fapi2_chip_ec_feature.C doesn't compile.
 #FAPI2_MODULE_OBJS += fapi2_chip_ec_feature.o
-FAPI2_MODULE_OBJS += collect_reg_ffdc.o
+#FAPI2_MODULE_OBJS += collect_reg_ffdc.o
 
 # Define common source and include paths.
 define FAPI2_MODULE_INCLUDES

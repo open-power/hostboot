@@ -1,25 +1,19 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: $                                                             */
+/* $Source: hwpf/fapi2/include/fapi2_error_scope.H $                      */
 /*                                                                        */
-/* OpenPOWER HostBoot Project                                             */
+/* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* EKB Project                                                            */
+/*                                                                        */
+/* COPYRIGHT 2012,2015                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
-/* Licensed under the Apache License, Version 2.0 (the "License");        */
-/* you may not use this file except in compliance with the License.       */
-/* You may obtain a copy of the License at                                */
-/*                                                                        */
-/*     http://www.apache.org/licenses/LICENSE-2.0                         */
-/*                                                                        */
-/* Unless required by applicable law or agreed to in writing, software    */
-/* distributed under the License is distributed on an "AS IS" BASIS,      */
-/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
-/* implied. See the License for the specific language governing           */
-/* permissions and limitations under the License.                         */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
@@ -32,7 +26,6 @@
 
 #include <stdint.h>
 #include <plat_error_scope.H>
-#include <return_code.H>
 #include <hwp_ffdc_classes.H>
 
 /// @cond
@@ -61,9 +54,9 @@
 /// FSP operational states.
 ///
 #ifdef DOXYGEN
-#define FAPI_TRY(__operation__, ...) FAPI_TRY_IMPL
+    #define FAPI_TRY(__operation__, ...) FAPI_TRY_IMPL
 #else
-#define FAPI_TRY(...) FAPI_TRY_IMPL(FAPI_VA_NARGS(__VA_ARGS__), __VA_ARGS__)
+    #define FAPI_TRY(...) FAPI_TRY_IMPL(FAPI_VA_NARGS(__VA_ARGS__), __VA_ARGS__)
 #endif
 
 ///

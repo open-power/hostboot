@@ -184,8 +184,29 @@ class Target
         ///
         inline constexpr bool isChip(void) const
         {
-            return ( (K == TARGET_TYPE_PROC_CHIP) ||
-                     (K == TARGET_TYPE_MEMBUF_CHIP) );
+            return (isChip(K));
+        }
+
+        ///
+        /// @brief Static function check if a Target type value is that of
+        ///        a chip. It will return false for compound types that
+        ///        include non-chip Target type bits
+        ///
+        /// @param[in] i_type  The value of the Target type.
+        /// @return Return true if this type is of a chip, false otherwise
+        ///
+        static inline bool isChip(const TargetType i_type)
+        {
+            bool l_retVal = false;
+
+            // Target type must have only chip type bits set
+            if ( ((i_type & TARGET_TYPE_CHIPS) != 0) &&
+                 ((i_type & ~TARGET_TYPE_CHIPS) == 0) )
+            {
+                l_retVal = true;
+            }
+
+            return l_retVal;
         }
 
         ///
@@ -194,25 +215,29 @@ class Target
         ///
         inline constexpr bool isChiplet(void) const
         {
-            return ( (K == TARGET_TYPE_EX) ||
-                     (K == TARGET_TYPE_MBA) ||
-                     (K == TARGET_TYPE_MCS) ||
-                     (K == TARGET_TYPE_XBUS) ||
-                     (K == TARGET_TYPE_ABUS) ||
-                     (K == TARGET_TYPE_L4) ||
-                     (K == TARGET_TYPE_CORE) ||
-                     (K == TARGET_TYPE_EQ) ||
-                     (K == TARGET_TYPE_MCA) ||
-                     (K == TARGET_TYPE_MCBIST) ||
-                     (K == TARGET_TYPE_MI) ||
-                     (K == TARGET_TYPE_DMI) ||
-                     (K == TARGET_TYPE_OBUS) ||
-                     (K == TARGET_TYPE_NV) ||
-                     (K == TARGET_TYPE_SBE) ||
-                     (K == TARGET_TYPE_PPE) ||
-                     (K == TARGET_TYPE_PERV) ||
-                     (K == TARGET_TYPE_PEC) ||
-                     (K == TARGET_TYPE_PHB) );
+            return (isChiplet(K));
+        }
+
+        ///
+        /// @brief Static function check if a Target type value is that of
+        ///        a chiplet. It will return false for compound types that
+        ///        include non-chiplet Target type bits
+        ///
+        /// @param[in] i_type  The value of the Target type.
+        /// @return Return true if this type is of a chiplet, false otherwise
+        ///
+        static inline bool isChiplet(const TargetType i_type)
+        {
+            bool l_retVal = false;
+
+            // Target type must have only chiplet type bits set
+            if ( ((i_type & TARGET_TYPE_CHIPLETS) != 0) &&
+                 ((i_type & ~TARGET_TYPE_CHIPLETS) == 0) )
+            {
+                l_retVal = true;
+            }
+
+            return l_retVal;
         }
 
         ///

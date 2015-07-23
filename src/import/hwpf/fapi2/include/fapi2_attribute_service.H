@@ -1,3 +1,21 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: hwpf/fapi2/include/fapi2_attribute_service.H $                */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* EKB Project                                                            */
+/*                                                                        */
+/* COPYRIGHT 2015                                                         */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 ///
 /// @file src/include/usr/hwpf/fapi2/fapi2_attribute_service.H
 ///
@@ -10,6 +28,7 @@
 #define FAPI2ATTRIBUTESERVICE_H_
 #include <stdint.h>
 #include <attribute_ids.H>
+#include <return_code.H>
 #include <target.H>
 #include <target_types.H>
 #include <plat_attribute_service.H>
@@ -95,7 +114,7 @@ namespace fapi2
 template< TargetType K >
 ReturnCode getInitFileAttr(const AttributeId i_id,
                            const Target<K>& i_target,
-                           uint64_t & o_val,
+                           uint64_t& o_val,
                            const uint32_t i_arrayIndex1 = 0,
                            const uint32_t i_arrayIndex2 = 0,
                            const uint32_t i_arrayIndex3 = 0,
@@ -107,7 +126,7 @@ ReturnCode getInitFileAttr(const AttributeId i_id,
  * This is called by FAPI code to check at compile time that a FAPI attribute
  * access is using the correct data type and a valid AttributeId
  */
-template<typename T> inline void checkIdType(AttributeId, T &) {}
+template<typename T> inline void checkIdType(AttributeId, T&) {}
 
 /**
  * @brief Fail if attribute privileged
@@ -118,7 +137,7 @@ template<typename T> inline void checkIdType(AttributeId, T &) {}
 class ErrorAccessingPrivilegedAttribute;
 template<const bool PRIVILEGED> void failIfPrivileged()
 {
-   ErrorAccessingPrivilegedAttribute();
+    ErrorAccessingPrivilegedAttribute();
 }
 template <> inline void failIfPrivileged<false>() {}
 

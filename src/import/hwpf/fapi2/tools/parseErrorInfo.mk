@@ -28,7 +28,7 @@ SOURCES += $(GENPATH)/empty_error.xml
 TARGETS += hwp_return_codes.H
 TARGETS += hwp_error_info.H
 TARGETS += hwp_ffdc_classes.H
-TARGETS += collect_reg_ffdc.C
+TARGETS += collect_reg_ffdc.H
 TARGETS += set_sbe_error.H
 
 define parseErrorInfo_RUN

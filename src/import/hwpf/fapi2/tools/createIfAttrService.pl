@@ -273,7 +273,6 @@ if ($attCount > 0)
 }
 print ASFILE "    {\n";
 print ASFILE "        FAPI_ERR(\"getInitFileAttr: Unrecognized attr ID: 0x%x\", i_id);\n";
-#print ASFILE "        @thi TODO: - Resolve FFDC\n";
 print ASFILE "    }\n\n";
 print ASFILE "    if (l_rc)\n";
 print ASFILE "    {\n";

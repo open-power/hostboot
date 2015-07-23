@@ -66,6 +66,30 @@ enum TargetType
 
     TARGET_TYPE_ALL           = 0xFFFFFFFF, ///< Any/All types
 
+    // Compound target types
+    TARGET_TYPE_CHIPS         = TARGET_TYPE_PROC_CHIP |
+                                TARGET_TYPE_MEMBUF_CHIP,
+
+    TARGET_TYPE_CHIPLETS      = TARGET_TYPE_EX     |
+                                TARGET_TYPE_MBA    |
+                                TARGET_TYPE_MCS    |
+                                TARGET_TYPE_XBUS   |
+                                TARGET_TYPE_ABUS   |
+                                TARGET_TYPE_L4     |
+                                TARGET_TYPE_CORE   |
+                                TARGET_TYPE_EQ     |
+                                TARGET_TYPE_MCA    |
+                                TARGET_TYPE_MCBIST |
+                                TARGET_TYPE_MI     |
+                                TARGET_TYPE_DMI    |
+                                TARGET_TYPE_OBUS   |
+                                TARGET_TYPE_NV     |
+                                TARGET_TYPE_SBE    |
+                                TARGET_TYPE_PPE    |
+                                TARGET_TYPE_PERV   |
+                                TARGET_TYPE_PEC    |
+                                TARGET_TYPE_PHB,
+
     // Mappings to target types found in the error xml files
     TARGET_TYPE_EX_CHIPLET    = TARGET_TYPE_EX,
     TARGET_TYPE_MBA_CHIPLET   = TARGET_TYPE_MBA,

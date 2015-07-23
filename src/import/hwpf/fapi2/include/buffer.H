@@ -26,7 +26,7 @@
 
 #include <buffer_parameters.H>
 #include <buffer_traits.H>
-#include <return_code.H>
+#include <return_code_defs.H>
 
 namespace fapi2
 {
@@ -108,7 +108,7 @@ class buffer
         ///    variable_buffer into a variable_buffer, use insert()
         ///
         template< typename OT>
-        inline fapi2::ReturnCode set(OT i_value, const bits_type i_offset = 0)
+        inline fapi2::ReturnCodes set(OT i_value, const bits_type i_offset = 0)
         {
             // Compile time check to make sure OT is integral
             static_assert( std::is_integral<OT>::value,
@@ -192,8 +192,8 @@ class buffer
         /// @note 0 is left-most
         /// @return FAPI2_RC_SUCCESS if OK
         ///
-        inline fapi2::ReturnCode setBit(const bits_type& i_bit,
-                                        const bits_type& i_count = 1)
+        inline fapi2::ReturnCodes setBit(const bits_type& i_bit,
+                                         const bits_type& i_count = 1)
         {
             if ((i_count + i_bit - 1) >= TT::bits_per_unit())
             {
@@ -232,8 +232,8 @@ class buffer
         /// @note 0 is left-most
         /// @return FAPI2_RC_SUCCESS if OK
         ///
-        inline fapi2::ReturnCode clearBit(const bits_type& i_bit,
-                                          const bits_type& i_count = 1)
+        inline fapi2::ReturnCodes clearBit(const bits_type& i_bit,
+                                           const bits_type& i_count = 1)
         {
             if ((i_count + i_bit - 1) >= TT::bits_per_unit())
             {
@@ -509,8 +509,8 @@ class buffer
         /// @return FAPI2_RC_SUCCESS if successful
         ///
         template<typename OT>
-        fapi2::ReturnCode insert(const OT i_datain, const bits_type i_targetStart,
-                                 const bits_type i_len, const bits_type i_sourceStart = 0)
+        fapi2::ReturnCodes insert(const OT i_datain, const bits_type i_targetStart,
+                                  const bits_type i_len, const bits_type i_sourceStart = 0)
         {
             const bits_type target_length = parameterTraits<T>::bit_length();
             const bits_type source_length = parameterTraits<OT>::bit_length();
@@ -607,9 +607,9 @@ class buffer
         /// @note Data is assumed to be aligned on the word boundary of L
         ///
         template<typename OT>
-        fapi2::ReturnCode insertFromRight(const OT i_datain,
-                                          const bits_type i_targetStart,
-                                          const bits_type i_len)
+        fapi2::ReturnCodes insertFromRight(const OT i_datain,
+                                           const bits_type i_targetStart,
+                                           const bits_type i_len)
         {
             // Error if input data don't make sense
             if ((i_targetStart + i_len) > parameterTraits<T>::bit_length())
@@ -684,8 +684,8 @@ class buffer
         /// @return FAPI2_RC_SUCCESS if ok
         ///
         template<typename OT>
-        fapi2::ReturnCode extract(OT& o_out, const bits_type i_sourceStart,
-                                  const bits_type i_len, const bits_type i_targetStart = 0) const
+        fapi2::ReturnCodes extract(OT& o_out, const bits_type i_sourceStart,
+                                   const bits_type i_len, const bits_type i_targetStart = 0) const
         {
             // Extraction is just an insert into o_out
 
@@ -740,8 +740,8 @@ class buffer
         /// @return FAPI2_RC_SUCCESS if ok
         ///
         template<typename OT>
-        fapi2::ReturnCode extractToRight(OT& o_out, const bits_type i_sourceStart,
-                                         const bits_type i_len) const
+        fapi2::ReturnCodes extractToRight(OT& o_out, const bits_type i_sourceStart,
+                                          const bits_type i_len) const
         {
             return extract(o_out, i_sourceStart, i_len,
                            parameterTraits<OT>::bit_length() - i_len);
