@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_pcie_config.H,v 1.5 2014/11/18 17:41:59 jmcgill Exp $
+// $Id: proc_pcie_config.H,v 1.7 2015/07/01 21:15:04 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_pcie_config.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -91,6 +91,14 @@ const uint32_t PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION1[PROC_PCIE_CONFIG_NUM_PHB] 
     PCIE3_FIR_ACTION1_0x02012C07
 };
 
+const uint32_t PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION2[PROC_PCIE_CONFIG_NUM_PHB] =
+{
+    PCIE0_FIR_ACTION2_0x02012020,
+    PCIE1_FIR_ACTION2_0x02012420,
+    PCIE2_FIR_ACTION2_0x02012820,
+    PCIE3_FIR_ACTION2_0x02012C20
+};
+
 const uint32_t PROC_PCIE_CONFIG_PCIE_NEST_FIR_MASK[PROC_PCIE_CONFIG_NUM_PHB] =
 {
     PCIE0_FIR_MASK_0x02012003,
@@ -101,6 +109,7 @@ const uint32_t PROC_PCIE_CONFIG_PCIE_NEST_FIR_MASK[PROC_PCIE_CONFIG_NUM_PHB] =
 
 const uint64_t PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION0_VAL = 0x5B0F819000000000ULL;
 const uint64_t PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION1_VAL = 0x7F0F819000000000ULL;
+const uint64_t PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION2_VAL = 0xEFF07E0800000000ULL;
 const uint64_t PROC_PCIE_CONFIG_PCIE_NEST_FIR_MASK_VAL = 0x0030006E00000000ULL;
 
 

@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scom_addresses.H,v 1.195 2015/05/01 17:40:55 belldi Exp $
+// $Id: p8_scom_addresses.H,v 1.197 2015/06/29 01:43:56 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -441,6 +441,9 @@ CONST_UINT64_T( OCC_ITP_DEBUG_HALT_EN0_0x0006A00E     , ULL(0x0006A00E) );
 CONST_UINT64_T( OCC_ITP_DEBUG_HALT_EN1_0x0006A01E     , ULL(0x0006A01E) );
 CONST_UINT64_T( OCC_ITP_UNCOND_DEBUG_EN0_0x0006A00C   , ULL(0x0006A00C) );
 CONST_UINT64_T( OCC_ITP_UNCOND_DEBUG_EN1_0x0006A01C   , ULL(0x0006A01C) );
+CONST_UINT64_T( OCC_ITP_MISC_0x0006A020               , ULL(0x0006A020) );
+CONST_UINT64_T( OCC_ITP_MISC_AND_0x0006A021           , ULL(0x0006A021) );
+CONST_UINT64_T( OCC_ITP_MISC_OR_0x0006A022            , ULL(0x0006A022) );
 CONST_UINT64_T( OCC_ITP_TIMER0_0x0006A100             , ULL(0x0006A100) );
 CONST_UINT64_T( OCC_ITP_TIMER1_0x0006A101             , ULL(0x0006A101) );
 
@@ -1078,6 +1081,7 @@ CONST_UINT64_T( PCIE0_FIR_AND_0x02012001              , ULL(0x02012001) );
 CONST_UINT64_T( PCIE0_FIR_MASK_0x02012003             , ULL(0x02012003) );
 CONST_UINT64_T( PCIE0_FIR_ACTION0_0x02012006          , ULL(0x02012006) );
 CONST_UINT64_T( PCIE0_FIR_ACTION1_0x02012007          , ULL(0x02012007) );
+CONST_UINT64_T( PCIE0_FIR_ACTION2_0x02012020          , ULL(0x02012020) );
 CONST_UINT64_T( PCIE0_FIR_WOF_0x02012008              , ULL(0x02012008) );
 CONST_UINT64_T( PCIE0_NODAL_BAR0_0x02012010           , ULL(0x02012010) );
 CONST_UINT64_T( PCIE0_NODAL_BAR1_0x02012011           , ULL(0x02012011) );
@@ -1099,6 +1103,7 @@ CONST_UINT64_T( PCIE1_FIR_AND_0x02012401              , ULL(0x02012401) );
 CONST_UINT64_T( PCIE1_FIR_MASK_0x02012403             , ULL(0x02012403) );
 CONST_UINT64_T( PCIE1_FIR_ACTION0_0x02012406          , ULL(0x02012406) );
 CONST_UINT64_T( PCIE1_FIR_ACTION1_0x02012407          , ULL(0x02012407) );
+CONST_UINT64_T( PCIE1_FIR_ACTION2_0x02012420          , ULL(0x02012420) );
 CONST_UINT64_T( PCIE1_FIR_WOF_0x02012408              , ULL(0x02012408) );
 CONST_UINT64_T( PCIE1_NODAL_BAR0_0x02012410           , ULL(0x02012410) );
 CONST_UINT64_T( PCIE1_NODAL_BAR1_0x02012411           , ULL(0x02012411) );
@@ -1120,6 +1125,7 @@ CONST_UINT64_T( PCIE2_FIR_AND_0x02012801              , ULL(0x02012801) );
 CONST_UINT64_T( PCIE2_FIR_MASK_0x02012803             , ULL(0x02012803) );
 CONST_UINT64_T( PCIE2_FIR_ACTION0_0x02012806          , ULL(0x02012806) );
 CONST_UINT64_T( PCIE2_FIR_ACTION1_0x02012807          , ULL(0x02012807) );
+CONST_UINT64_T( PCIE2_FIR_ACTION2_0x02012820          , ULL(0x02012820) );
 CONST_UINT64_T( PCIE2_FIR_WOF_0x02012808              , ULL(0x02012808) );
 CONST_UINT64_T( PCIE2_NODAL_BAR0_0x02012810           , ULL(0x02012810) );
 CONST_UINT64_T( PCIE2_NODAL_BAR1_0x02012811           , ULL(0x02012811) );
@@ -1141,6 +1147,7 @@ CONST_UINT64_T( PCIE3_FIR_AND_0x02012C01              , ULL(0x02012C01) );
 CONST_UINT64_T( PCIE3_FIR_MASK_0x02012C03             , ULL(0x02012C03) );
 CONST_UINT64_T( PCIE3_FIR_ACTION0_0x02012C06          , ULL(0x02012C06) );
 CONST_UINT64_T( PCIE3_FIR_ACTION1_0x02012C07          , ULL(0x02012C07) );
+CONST_UINT64_T( PCIE3_FIR_ACTION2_0x02012C20          , ULL(0x02012C20) );
 CONST_UINT64_T( PCIE3_FIR_WOF_0x02012C08              , ULL(0x02012C08) );
 CONST_UINT64_T( PCIE3_NODAL_BAR0_0x02012C10           , ULL(0x02012C10) );
 CONST_UINT64_T( PCIE3_NODAL_BAR1_0x02012C11           , ULL(0x02012C11) );
@@ -2255,6 +2262,12 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.197  2015/06/29 01:43:56  jmcgill
+add definition for PCIE NEST FIR Action2 Registers (Naples only)
+
+Revision 1.196  2015/05/19 19:19:40  jmcgill
+add OCC core external interrupt register
+
 Revision 1.195  2015/05/01 17:40:55  belldi
 
 - Added constant: CONST_UINT64_T( CAPP_APC_MASTER_CAPI_CTL_0x02013019   , ULL(0x02013019) );

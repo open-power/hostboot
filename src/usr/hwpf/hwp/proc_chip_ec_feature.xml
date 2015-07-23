@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_chip_ec_feature.xml,v 1.61 2014/11/18 17:48:26 jmcgill Exp $ -->
+<!-- $Id: proc_chip_ec_feature.xml,v 1.62 2015/06/29 01:45:13 jmcgill Exp $ -->
 <!-- Defines the attributes that are based on EC level -->
 <attributes>
   <!-- ********************************************************************* -->
@@ -110,6 +110,24 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Returns if a chip contains NV chiplet/link logic.  True if:
+      Naples EC 0x10 or greater
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_PCI_NEST_FIR_ACTION2_PRESENT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Returns if a chip contains PCI Nest FIR Action2 register.  True if:
       Naples EC 0x10 or greater
     </description>
     <chipEcFeature>

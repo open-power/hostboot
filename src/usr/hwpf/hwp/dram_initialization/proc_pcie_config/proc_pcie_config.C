@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_pcie_config.C,v 1.10 2014/11/18 17:41:59 jmcgill Exp $
+// $Id: proc_pcie_config.C,v 1.11 2015/06/29 01:47:49 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_pcie_config.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -135,7 +135,7 @@ fapi::ReturnCode proc_pcie_config_pbcq_fir(
                      i, PROC_PCIE_CONFIG_PCIE_NEST_FIR[i]);
             break;
         }
-    
+
         // clear FIR WOF
         rc = fapiPutScom(i_target,
                          PROC_PCIE_CONFIG_PCIE_NEST_FIR_WOF[i],
@@ -146,7 +146,7 @@ fapi::ReturnCode proc_pcie_config_pbcq_fir(
                      i, PROC_PCIE_CONFIG_PCIE_NEST_FIR_WOF[i]);
             break;
         }
-    
+
         // set action0
         rc_ecmd |= data.setDoubleWord(0, PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION0_VAL);
         if (rc_ecmd)
@@ -156,7 +156,7 @@ fapi::ReturnCode proc_pcie_config_pbcq_fir(
             rc.setEcmdError(rc_ecmd);
             break;
         }
-    
+
         rc = fapiPutScom(i_target,
                          PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION0[i],
                          data);
@@ -166,7 +166,7 @@ fapi::ReturnCode proc_pcie_config_pbcq_fir(
                      i, PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION0[i]);
             break;
         }
-    
+
         // set action1
         rc_ecmd |= data.setDoubleWord(0, PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION1_VAL);
         if (rc_ecmd)
@@ -176,7 +176,7 @@ fapi::ReturnCode proc_pcie_config_pbcq_fir(
             rc.setEcmdError(rc_ecmd);
             break;
         }
-    
+
         rc = fapiPutScom(i_target,
                          PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION1[i],
                          data);
@@ -186,7 +186,37 @@ fapi::ReturnCode proc_pcie_config_pbcq_fir(
                      i, PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION1[i]);
             break;
         }
-    
+
+        // set action2
+        fapi::ATTR_CHIP_EC_FEATURE_PCI_NEST_FIR_ACTION2_PRESENT_Type action2_present = 0;
+        rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_PCI_NEST_FIR_ACTION2_PRESENT, &i_target, action2_present);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_pcie_config_pbcq_fir: fapiGetAttribute of ATTR_CHIP_EC_FEATURE_PCI_NEST_FIR_ACTION2_PRESENT failed");
+            break;
+        }
+        if (action2_present)
+        {
+            rc_ecmd |= data.setDoubleWord(0, PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION2_VAL);
+            if (rc_ecmd)
+            {
+                FAPI_ERR("proc_pcie_config_pbcq_fir: Error 0x%x setting up PCIE Nest FIR Action2 register data buffer",
+                         rc_ecmd);
+                rc.setEcmdError(rc_ecmd);
+                break;
+            }
+
+            rc = fapiPutScom(i_target,
+                             PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION2[i],
+                             data);
+            if (!rc.ok())
+            {
+                FAPI_ERR("proc_pcie_config_pbcq_fir: Error from fapiPutScom (PCIE%zd_FIR_ACTION2_0x%08X)",
+                         i, PROC_PCIE_CONFIG_PCIE_NEST_FIR_ACTION2[i]);
+                break;
+            }
+        }
+
         // set mask
         rc_ecmd |= data.setDoubleWord(0, PROC_PCIE_CONFIG_PCIE_NEST_FIR_MASK_VAL);
         if (rc_ecmd)
@@ -196,7 +226,7 @@ fapi::ReturnCode proc_pcie_config_pbcq_fir(
             rc.setEcmdError(rc_ecmd);
             break;
         }
-    
+
         rc = fapiPutScom(i_target,
                          PROC_PCIE_CONFIG_PCIE_NEST_FIR_MASK[i],
                          data);
