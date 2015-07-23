@@ -34,6 +34,7 @@
 #define FAPI2ATTRIBUTESERVICE_H_
 #include <stdint.h>
 #include <attribute_ids.H>
+#include <return_code.H>
 #include <target.H>
 #include <target_types.H>
 #include <plat_attribute_service.H>
@@ -119,7 +120,7 @@ namespace fapi2
 template< TargetType K >
 ReturnCode getInitFileAttr(const AttributeId i_id,
                            const Target<K>& i_target,
-                           uint64_t & o_val,
+                           uint64_t& o_val,
                            const uint32_t i_arrayIndex1 = 0,
                            const uint32_t i_arrayIndex2 = 0,
                            const uint32_t i_arrayIndex3 = 0,
@@ -131,7 +132,7 @@ ReturnCode getInitFileAttr(const AttributeId i_id,
  * This is called by FAPI code to check at compile time that a FAPI attribute
  * access is using the correct data type and a valid AttributeId
  */
-template<typename T> inline void checkIdType(AttributeId, T &) {}
+template<typename T> inline void checkIdType(AttributeId, T&) {}
 
 /**
  * @brief Fail if attribute privileged
@@ -142,7 +143,7 @@ template<typename T> inline void checkIdType(AttributeId, T &) {}
 class ErrorAccessingPrivilegedAttribute;
 template<const bool PRIVILEGED> void failIfPrivileged()
 {
-   ErrorAccessingPrivilegedAttribute();
+    ErrorAccessingPrivilegedAttribute();
 }
 template <> inline void failIfPrivileged<false>() {}
 
