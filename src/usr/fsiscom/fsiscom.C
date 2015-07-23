@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -109,7 +109,10 @@ void pib_error_handler( TARGETING::Target* i_target,
     else
     {
         //Add the callouts for the specific PCB/PIB error
+        //Take bits 17-19 from the 32-bit pib error data
+
         uint32_t pib_error = i_status >> 12;
+        pib_error = pib_error & 0x7;
         PIB::addFruCallouts( i_target,
                              pib_error,
                              i_scomAddr,
