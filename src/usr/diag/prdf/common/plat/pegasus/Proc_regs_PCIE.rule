@@ -286,6 +286,48 @@
     };
 
     ############################################################################
+    # PCIE Chiplet IOPCIFIR_2
+    ############################################################################
+
+    register IOPCIFIR_2
+    {
+        name        "IOP.IOP_X882.IOP_PMA0.IOP_PMA_PLL0.IOP_PMA_PLL_RLM.IOP_PMA_PLL_REG_CONTROL.FIR_STATUS_REG";
+        scomaddr    0x09011C40;
+        reset       (&, 0x09011C41);
+        mask        (|, 0x09011C45);
+        capture     req funccall("isNaplesProc");
+        capture     group default;
+    };
+
+    register IOPCIFIR_2_MASK
+    {
+        name        "IOP.IOP_X882.IOP_PMA0.IOP_PMA_PLL0.IOP_PMA_PLL_RLM.IOP_PMA_PLL_REG_CONTROL.FIR_MASK_REG";
+        scomaddr    0x09011C43;
+        capture     req funccall("isNaplesProc");
+        capture     group default;
+    };
+
+    register IOPCIFIR_2_ACT0
+    {
+        name        "IOP.IOP_X882.IOP_PMA0.IOP_PMA_PLL0.IOP_PMA_PLL_RLM.IOP_PMA_PLL_REG_CONTROL.FIR_ACTION0_REG";
+        scomaddr    0x09011C46;
+        capture     type secondary;
+        capture     req funccall("isNaplesProc");
+        capture     group default;
+        capture     req nonzero("IOPCIFIR_2");
+    };
+
+    register IOPCIFIR_2_ACT1
+    {
+        name        "IOP.IOP_X882.IOP_PMA0.IOP_PMA_PLL0.IOP_PMA_PLL_RLM.IOP_PMA_PLL_REG_CONTROL.FIR_ACTION1_REG";
+        scomaddr    0x09011C47;
+        capture     type secondary;
+        capture     req funccall("isNaplesProc");
+        capture     group default;
+        capture     req nonzero("IOPCIFIR_2");
+    };
+
+    ############################################################################
     # PCIE Chiplet PLL Registers
     ############################################################################
 

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -39,7 +41,7 @@ namespace Proc
 /**
  * @brief  Returns PHB target associated with given IOPCIFR and clock.
  * @param  i_procTrgt The target processor.
- * @param  i_iopciIdx IOPCIFIR instance number (0,1)
+ * @param  i_iopciIdx IOPCIFIR instance number (0-2)
  * @param  i_clkIdx   The target clock within the IOPCIFIR (0-1)
  * @param  o_phbTrgt  NULL if the PHB does not exist. Otherwise the PHB target.
  * @return NULL if no configured PHB found, otherwise the target PHB.

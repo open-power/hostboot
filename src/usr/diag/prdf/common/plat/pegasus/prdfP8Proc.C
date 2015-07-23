@@ -618,7 +618,7 @@ int32_t phbConfigured( ExtensibleChip * i_chip, uint32_t i_phbPos,
     {
         if ( maxPhbs <= i_phbPos )
         {
-            PRDF_ERR( PRDF_FUNC "invalid PCI number: %d", i_phbPos );
+            // This PHB doesn't exist, return false
             break;
         }
 
@@ -932,6 +932,8 @@ PLUGIN_CALLOUT_PHB( A, 0, true, false )
 PLUGIN_CALLOUT_PHB( B, 0, false, true )
 PLUGIN_CALLOUT_PHB( A, 1, true, false )
 PLUGIN_CALLOUT_PHB( B, 1, false, true )
+PLUGIN_CALLOUT_PHB( A, 2, true, false )
+PLUGIN_CALLOUT_PHB( B, 2, false, true )
 
 #undef PLUGIN_CALLOUT_PHB
 
@@ -946,6 +948,7 @@ PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, calloutPhbBothClks_##IOPCI );
 
 PLUGIN_CALLOUT_PHB( 0 )
 PLUGIN_CALLOUT_PHB( 1 )
+PLUGIN_CALLOUT_PHB( 2 )
 
 #undef PLUGIN_CALLOUT_PHB
 

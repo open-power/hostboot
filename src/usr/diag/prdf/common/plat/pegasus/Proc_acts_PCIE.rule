@@ -30,9 +30,9 @@
 rule PcieChipletFir
 {
   CHECK_STOP:
-     (PCIE_CHIPLET_CS_FIR       & `1EE0000000000000`) & ~PCIE_CHIPLET_FIR_MASK;
+     (PCIE_CHIPLET_CS_FIR       & `1FF0000000000000`) & ~PCIE_CHIPLET_FIR_MASK;
   RECOVERABLE:
-    ((PCIE_CHIPLET_RE_FIR >> 2) & `1EE0000000000000`) & ~PCIE_CHIPLET_FIR_MASK;
+    ((PCIE_CHIPLET_RE_FIR >> 2) & `1FF0000000000000`) & ~PCIE_CHIPLET_FIR_MASK;
 };
 
 group gPcieChipletFir filter singlebit
@@ -42,10 +42,10 @@ group gPcieChipletFir filter singlebit
      */
     (PcieChipletFir, bit(3)) ? analyze(gPcieLFir);
 
-    /** PCIE_CHIPLET_FIR[4|5|6]
-     *  Attention from PCICLOCKFIR (0-2)
+    /** PCIE_CHIPLET_FIR[4|5|6|7]
+     *  Attention from PCICLOCKFIR (0-3)
      */
-    (PcieChipletFir, bit(4|5|6)) ? defaultMaskedError;
+    (PcieChipletFir, bit(4|5|6|7)) ? defaultMaskedError;
 
     /** PCIE_CHIPLET_FIR[8]
      *  Attention from PBFFIR
@@ -57,6 +57,11 @@ group gPcieChipletFir filter singlebit
      *  Attention from IOPCIFIR (0-1)
      */
     (PcieChipletFir, bit(9|10)) ? analyze(gIopPciFir);
+
+    /** PCIE_CHIPLET_FIR[11]
+     *  Attention from IOPCIFIR_2
+     */
+    (PcieChipletFir, bit(11)) ? analyze(gIopPciFir_2);
 };
 
 rule PcieChipletSpa
@@ -279,6 +284,62 @@ group gIopPciFir filter singlebit
     (IopPciFir_1, bit(8)) ? defaultMaskedError;
 };
 
+rule IopPciFir_2
+{
+  CHECK_STOP:
+    IOPCIFIR_2 & ~IOPCIFIR_2_MASK & ~IOPCIFIR_2_ACT0 & ~IOPCIFIR_2_ACT1;
+  RECOVERABLE:
+    IOPCIFIR_2 & ~IOPCIFIR_2_MASK & ~IOPCIFIR_2_ACT0 &  IOPCIFIR_2_ACT1;
+};
+
+group gIopPciFir_2 filter singlebit
+{
+    /** IOPCIFIR_2[0]
+     * FIR_STATUS_REG_G2_PLL_CCERR_STATUS
+     */
+    (IopPciFir_2, bit(0)) ? calloutPhbBothClks_2;
+
+    /** IOPCIFIR_2[1]
+     *  FIR_STATUS_REG_G3_PLL_CCERR_STATUS
+     */
+    (IopPciFir_2, bit(1)) ? calloutPhbBothClks_2;
+
+    /** IOPCIFIR_2[2]
+     *  FIR_STATUS_REG_TX_A_ERR_STATUS
+     */
+    (IopPciFir_2, bit(2)) ? calloutPhbClkA_2_noGard;
+
+    /** IOPCIFIR_2[3]
+     *  FIR_STATUS_REG_TX_B_ERR_STATUS
+     */
+    (IopPciFir_2, bit(3)) ? calloutPhbClkB_2_noGard;
+
+    /** IOPCIFIR_2[4]
+     *  FIR_STATUS_REG_RX_A_ERR_STATUS
+     */
+    (IopPciFir_2, bit(4)) ? calloutPhbClkA_2_noGard;
+
+    /** IOPCIFIR_2[5]
+     *  FIR_STATUS_REG_RX_B_ERR_STATUS
+     */
+    (IopPciFir_2, bit(5)) ? calloutPhbClkB_2_noGard;
+
+    /** IOPCIFIR_2[6]
+     *  FIR_STATUS_REG_ZCAL_B_ERR_STATUS
+     */
+    (IopPciFir_2, bit(6)) ? calloutPhbBothClks_2;
+
+    /** IOPCIFIR_2[7]
+     *  FIR_STATUS_REG_SCOM_FIR_PERR0_STATUS
+     */
+    (IopPciFir_2, bit(7)) ? defaultMaskedError;
+
+    /** IOPCIFIR_2[8]
+     *  FIR_STATUS_REG_SCOM_FIR_PERR1_STATUS
+     */
+    (IopPciFir_2, bit(8)) ? defaultMaskedError;
+};
+
 ################################################################################
 # Actions specific to PCIE chiplet
 ################################################################################
@@ -311,6 +372,20 @@ actionclass calloutPhbClkB_1_noGard
     threshold1;
 };
 
+/**callout PHB associated with IOPCIFIR2 clkA, no garding */
+actionclass calloutPhbClkA_2_noGard
+{
+    funccall("calloutPhbClkA_2");
+    threshold1;
+};
+
+/**callout PHB associated with IOPCIFIR2 clkB, no garding */
+actionclass calloutPhbClkB_2_noGard
+{
+    funccall("calloutPhbClkB_2");
+    threshold1;
+};
+
 /** callout all PHB associated with IOPCIFIR0, no garding */
 actionclass calloutPhbBothClks_0
 {
@@ -322,6 +397,13 @@ actionclass calloutPhbBothClks_0
 actionclass calloutPhbBothClks_1
 {
     funccall("calloutPhbBothClks_1");
+    threshold1;
+};
+
+/** callout all PHB associated with IOPCIFIR2, no garding */
+actionclass calloutPhbBothClks_2
+{
+    funccall("calloutPhbBothClks_2");
     threshold1;
 };
 

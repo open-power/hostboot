@@ -49,15 +49,18 @@ int32_t getConfiguredPHB( TargetHandle_t i_procTrgt, uint32_t i_iopciIdx,
 
     o_phbTrgt = NULL;
 
+    // Reference PCI Express Controller Functional Spec
+    // (pe_P8spec_master104.pdf). Tables in chapter 6: IO Operation Modes
     enum TableBounds
     {
         MAX_CONFIGS = 14,
-        MAX_FIRS    =  2,
+        MAX_FIRS    =  3,
         MAX_CLOCKS  =  2,
 
         // Array index for the processor models.
         MURANO_IDX = 0,
         VENICE_IDX,
+        NAPLES_IDX,
         MAX_MODELS,
     };
 
@@ -67,6 +70,7 @@ int32_t getConfiguredPHB( TargetHandle_t i_procTrgt, uint32_t i_iopciIdx,
         PHB0 = 0,
         PHB1,
         PHB2,
+        PHB3,
 
         // The dSMP connections are not used but we will still list them in the
         // table just in case the are needed later.
@@ -75,24 +79,64 @@ int32_t getConfiguredPHB( TargetHandle_t i_procTrgt, uint32_t i_iopciIdx,
         SMP1 = MAX_PHB_PER_PROC,
     };
 
-    static const uint8_t table[MAX_CONFIGS][MAX_MODELS][MAX_FIRS][MAX_CLOCKS] =
+    static const uint8_t table[MAX_MODELS][MAX_CONFIGS][MAX_FIRS][MAX_CLOCKS] =
     {
-        //----------Murano------------||-----------Venice-----------||
-        //--IOPCIFIR-0-||-IOPCIFIR-1--||--IOPCIFIR-0-||-IOPCIFIR-1--||
-        //----A--|--B--||--A--|--B----||----A--|--B--||--A--|--B----||
-        { { {PHB0,PHB0}, {PHB1,NONE} }, { {PHB0,PHB0}, {PHB1,PHB1} }, }, // 0x0
-        { { {PHB0,PHB0}, {PHB1,NONE} }, { {PHB0,PHB0}, {PHB1,PHB2} }, }, // 0x1
-        { { {PHB0,NONE}, {PHB1,NONE} }, { {PHB0,NONE}, {PHB1,PHB1} }, }, // 0x2
-        { { {PHB0,PHB2}, {PHB1,NONE} }, { {PHB0,NONE}, {PHB1,PHB2} }, }, // 0x3
-        { { {PHB0,SMP0}, {PHB1,NONE} }, { {PHB0,SMP0}, {PHB1,PHB1} }, }, // 0x4
-        { { {PHB0,SMP0}, {PHB1,NONE} }, { {PHB0,SMP0}, {PHB1,PHB2} }, }, // 0x5
-        { { {PHB1,PHB1}, {SMP1,NONE} }, { {SMP1,PHB0}, {PHB1,PHB1} }, }, // 0x6
-        { { {PHB1,PHB2}, {SMP1,NONE} }, { {SMP1,PHB0}, {PHB1,PHB2} }, }, // 0x7
-        { { {SMP1,SMP0}, {PHB1,NONE} }, { {SMP1,SMP0}, {PHB1,PHB1} }, }, // 0x8
-        { { {SMP1,SMP0}, {PHB1,NONE} }, { {SMP1,SMP0}, {PHB1,PHB2} }, }, // 0x9
-        { { {SMP1,PHB2}, {SMP0,NONE} }, { {SMP1,SMP0}, {PHB1,PHB2} }, }, // 0xA
-        { { {PHB1,SMP0}, {SMP1,NONE} }, { {SMP1,SMP0}, {PHB1,PHB2} }, }, // 0xB
-        { { {SMP1,PHB2}, {PHB1,NONE} }, { {SMP1,PHB0}, {PHB1,PHB2} }, }, // 0xC
+      {
+        //-------------------Murano------------------|
+        //--IOPCIFIR-0-||-IOPCIFIR-1--||-IOPCIFIR-2--|
+        //---A--|--B---||---A--|--B---||---A--|--B---|
+        { {PHB0, PHB0},  {PHB1,NONE},  {NONE, NONE} }, // 0x0
+        { {PHB0, PHB0},  {PHB1,NONE},  {NONE, NONE} }, // 0x1
+        { {PHB0, NONE},  {PHB1,NONE},  {NONE, NONE} }, // 0x2
+        { {PHB0, PHB2},  {PHB1,NONE},  {NONE, NONE} }, // 0x3
+        { {PHB0, SMP0},  {PHB1,NONE},  {NONE, NONE} }, // 0x4
+        { {PHB0, SMP0},  {PHB1,NONE},  {NONE, NONE} }, // 0x5
+        { {PHB1, PHB1},  {SMP1,NONE},  {NONE, NONE} }, // 0x6
+        { {PHB1, PHB2},  {SMP1,NONE},  {NONE, NONE} }, // 0x7
+        { {SMP1, SMP0},  {PHB1,NONE},  {NONE, NONE} }, // 0x8
+        { {SMP1, SMP0},  {PHB1,NONE},  {NONE, NONE} }, // 0x9
+        { {SMP1, PHB2},  {SMP0,NONE},  {NONE, NONE} }, // 0xA
+        { {PHB1, SMP0},  {SMP1,NONE},  {NONE, NONE} }, // 0xB
+        { {SMP1, PHB2},  {PHB1,NONE},  {NONE, NONE} }, // 0xC
+      },
+
+      {
+        //------------------Venice-------------------|
+        //--IOPCIFIR-0-||-IOPCIFIR-1--||-IOPCIFIR-2--|
+        //---A--|--B---||---A--|--B---||---A--|--B---|
+        { {PHB0, PHB0},  {PHB1, PHB1},  {NONE, NONE} }, // 0x0
+        { {PHB0, PHB0},  {PHB1, PHB2},  {NONE, NONE} }, // 0x1
+        { {PHB0, NONE},  {PHB1, PHB1},  {NONE, NONE} }, // 0x2
+        { {PHB0, NONE},  {PHB1, PHB2},  {NONE, NONE} }, // 0x3
+        { {PHB0, SMP0},  {PHB1, PHB1},  {NONE, NONE} }, // 0x4
+        { {PHB0, SMP0},  {PHB1, PHB2},  {NONE, NONE} }, // 0x5
+        { {SMP1, PHB0},  {PHB1, PHB1},  {NONE, NONE} }, // 0x6
+        { {SMP1, PHB0},  {PHB1, PHB2},  {NONE, NONE} }, // 0x7
+        { {SMP1, SMP0},  {PHB1, PHB1},  {NONE, NONE} }, // 0x8
+        { {SMP1, SMP0},  {PHB1, PHB2},  {NONE, NONE} }, // 0x9
+        { {SMP1, SMP0},  {PHB1, PHB2},  {NONE, NONE} }, // 0xA
+        { {SMP1, SMP0},  {PHB1, PHB2},  {NONE, NONE} }, // 0xB
+        { {SMP1, PHB0},  {PHB1, PHB2},  {NONE, NONE} }, // 0xC
+      },
+
+      {
+        //------------------Naples-------------------|
+        //--IOPCIFIR-0-||-IOPCIFIR-1--||-IOPCIFIR-2--|
+        //---A--|--B---||---A--|--B---||---A--|--B---|
+        { {PHB0, PHB0},  {PHB1, PHB1},  {PHB3, NONE} }, // 0x0
+        { {PHB0, PHB0},  {PHB1, PHB2},  {PHB3, NONE} }, // 0x1
+        { {PHB0, NONE},  {PHB1, PHB1},  {PHB3, NONE} }, // 0x2
+        { {PHB0, NONE},  {PHB1, PHB2},  {PHB3, NONE} }, // 0x3
+        { {PHB0, NONE},  {PHB1, PHB1},  {PHB3, NONE} }, // 0x4
+        { {PHB0, NONE},  {PHB1, PHB2},  {PHB3, NONE} }, // 0x5
+        { {NONE, PHB0},  {PHB1, PHB1},  {PHB3, NONE} }, // 0x6
+        { {NONE, PHB0},  {PHB1, PHB2},  {PHB3, NONE} }, // 0x7
+        { {NONE, NONE},  {PHB1, PHB1},  {PHB3, NONE} }, // 0x8
+        { {NONE, NONE},  {PHB1, PHB2},  {PHB3, NONE} }, // 0x9
+        { {NONE, NONE},  {PHB1, PHB2},  {PHB3, NONE} }, // 0xA
+        { {NONE, NONE},  {PHB1, PHB2},  {PHB3, NONE} }, // 0xB
+        { {NONE, PHB0},  {PHB1, PHB2},  {PHB3, NONE} }, // 0xC
+      },
     };
 
     do
@@ -117,6 +161,7 @@ int32_t getConfiguredPHB( TargetHandle_t i_procTrgt, uint32_t i_iopciIdx,
         {
             case MODEL_MURANO: modelIdx = MURANO_IDX; break;
             case MODEL_VENICE: modelIdx = VENICE_IDX; break;
+            case MODEL_NAPLES: modelIdx = NAPLES_IDX; break;
             default:
                 PRDF_ERR( PRDF_FUNC "unsupported processor model: %d", model );
                 o_rc = FAIL;
@@ -132,7 +177,7 @@ int32_t getConfiguredPHB( TargetHandle_t i_procTrgt, uint32_t i_iopciIdx,
         }
 
         // Get the PHB target, if it exists.
-        uint8_t phbPos = table[phbConfig][modelIdx][i_iopciIdx][i_clkIdx];
+        uint8_t phbPos = table[modelIdx][phbConfig][i_iopciIdx][i_clkIdx];
         if ( MAX_PHB_PER_PROC > phbPos )
         {
             o_phbTrgt = getConnectedChild( i_procTrgt, TYPE_PCI, phbPos );
