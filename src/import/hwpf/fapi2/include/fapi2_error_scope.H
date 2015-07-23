@@ -32,7 +32,6 @@
 
 #include <stdint.h>
 #include <plat_error_scope.H>
-#include <return_code.H>
 #include <hwp_ffdc_classes.H>
 
 /// @cond
@@ -61,9 +60,9 @@
 /// FSP operational states.
 ///
 #ifdef DOXYGEN
-#define FAPI_TRY(__operation__, ...) FAPI_TRY_IMPL
+    #define FAPI_TRY(__operation__, ...) FAPI_TRY_IMPL
 #else
-#define FAPI_TRY(...) FAPI_TRY_IMPL(FAPI_VA_NARGS(__VA_ARGS__), __VA_ARGS__)
+    #define FAPI_TRY(...) FAPI_TRY_IMPL(FAPI_VA_NARGS(__VA_ARGS__), __VA_ARGS__)
 #endif
 
 ///
