@@ -12,7 +12,7 @@ parseErrorInfo.pl [--empty-ffdc-classes] [--use-variable-buffers] --output-dir=<
 - This perl script will parse HWP Error XML files and creates the following files:
 - hwp_return_codes.H. HwpReturnCode enumeration (HWP generated errors)
 - hwp_error_info.H.   Error information (used by FAPI_SET_HWP_ERROR when a HWP generates an error)
-- collect_reg_ffdc.C. Function to collect register FFDC
+- collect_reg_ffdc.H. Function to collect register FFDC
 - set_sbe_error.H.    Macro to create an SBE error
 
 The --empty-ffdc-classes option is for platforms which don't collect FFDC. It will generate stub classes which
