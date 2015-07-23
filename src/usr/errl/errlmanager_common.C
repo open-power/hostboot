@@ -50,10 +50,11 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err)
                     io_err->eid());
             break;
         }
+
         // look thru the errlog for any Callout UserDetail sections
         //  to determine the sensor information for the SEL
-        uint8_t l_sensorNumber = TARGETING::UTIL::INVALID_IPMI_SENSOR;
-        uint8_t l_sensorType = TARGETING::UTIL::INVALID_IPMI_SENSOR;
+        std::vector<uint8_t> l_sensorNumbers;
+        std::vector<uint8_t> l_sensorTypes;
         HWAS::callOutPriority l_priority = HWAS::SRCI_PRIORITY_NONE;
         for(std::vector<ErrlUD*>::const_iterator
                 it = io_err->iv_SectionVector.begin();
@@ -70,7 +71,7 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err)
                 (HWAS::HW_CALLOUT == l_ud->type)
                )
             {
-                // if this callout is higher than any previous
+                // if this callout is higher than any previous callout
                 if (l_ud->priority > l_priority)
                 {
                     // get the sensor number for the target
@@ -80,32 +81,56 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err)
                             l_target, io_err);
                     if (!l_err)
                     {
+                        //remove previous sensor data
+                        l_sensorNumbers.clear();
+
                         // got a target, now get the sensor number
-                        l_sensorNumber =
-                                SENSOR::getFaultSensorNumber(l_target);
+                        l_sensorNumbers.push_back(
+                                        SENSOR::getFaultSensorNumber(l_target));
 
                         // and update the priority
                         l_priority = l_ud->priority;
+                    }
+                // if this callout is equal to any previous callout
+                }else if(l_ud->priority == l_priority)
+                {
+                    //get the sensor number for the target
+                    uint8_t * l_uData = (uint8_t *)(l_ud + 1);
+                    TARGETING::Target *l_target = NULL;
+                    bool l_err = HWAS::retrieveTarget(l_uData,
+                            l_target, io_err);
+                    if(!l_err)
+                    {
+                        //add sensor data to array
+                        l_sensorNumbers.push_back(
+                                        SENSOR::getFaultSensorNumber(l_target));
                     }
                 }
             }
         } // for each SectionVector
 
-        if (l_sensorNumber != TARGETING::UTIL::INVALID_IPMI_SENSOR)
+        std::vector<uint8_t>::const_iterator l_sensorIter;
+        for(l_sensorIter = l_sensorNumbers.begin();
+            l_sensorIter != l_sensorNumbers.end();
+            l_sensorIter++)
         {
             uint8_t unused = 0;
+            uint8_t l_getSensorType;
             errlHndl_t e =
-                SENSOR::SensorBase::getSensorType( l_sensorNumber,
-                                                   l_sensorType, unused );
+                SENSOR::SensorBase::getSensorType(
+                                *l_sensorIter,
+                                l_getSensorType,unused);
+            l_sensorTypes.push_back(l_getSensorType);
             if( e )
             {
                 TRACFCOMP(g_trac_errl,
-                        ERR_MRK"Failed to get sensor type for sensor %d",
-                        l_sensorNumber);
+                          ERR_MRK"Failed to get sensor type for sensor %d",
+                          *l_sensorIter);
                 // since we are in the commit path, lets just delete this
                 // error and move on.
                 delete e;
             }
+
         }
 
         // flatten into buffer, truncate to max eSEL size
@@ -162,15 +187,22 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err)
         }
 
         // send it to the BMC over IPMI
-        TRACFCOMP(g_trac_errl, INFO_MRK
-                "sendErrLogToBmc: sensor %.2x/%.2x event %x/%x, size %d",
-                l_sensorType, l_sensorNumber,
-                l_eventDirType, l_eventOffset,
-                l_pelSize);
-        IPMISEL::sendESEL(l_pelData, l_pelSize,
-                            io_err->eid(),
-                            l_eventDirType, l_eventOffset,
-                            l_sensorType, l_sensorNumber);
+        for(uint8_t l_sendIdx=0;l_sendIdx < l_sensorNumbers.size();l_sendIdx++)
+        {
+            TRACFCOMP(g_trac_errl, INFO_MRK
+                    "sendErrLogToBmc: creating ESEL for sensor #%d",l_sendIdx);
+            TRACFCOMP(g_trac_errl, INFO_MRK
+                    "sendErrLogToBmc: sensor %.2x/%.2x event %x/%x, size %d",
+                    l_sensorTypes.at(l_sendIdx), l_sensorNumbers.at(l_sendIdx),
+                    l_eventDirType, l_eventOffset,
+                    ((l_sendIdx==0)?l_pelSize:0));
+
+            IPMISEL::sendESEL(l_pelData, ((l_sendIdx==0) ? l_pelSize:0),
+                                io_err->eid(),
+                                l_eventDirType, l_eventOffset,
+                                l_sensorTypes.at(l_sendIdx),
+                                l_sensorNumbers.at(l_sendIdx));
+        }
 
         // free the buffer
         delete [] l_pelData;
