@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_chiplet_scominit.C,v 1.27 2014/12/11 21:11:43 szhong Exp $
+// $Id: proc_chiplet_scominit.C,v 1.28 2015/03/17 18:54:28 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_chiplet_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -437,36 +437,62 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
                          i_target.toEcmdString());
                 break;
             }
-            //execute NV scominit file
-            FAPI_INF("proc_chiplet_scominit: Executing  %s on %s",
-                     PROC_CHIPLET_SCOMINIT_NPU_IF, i_target.toEcmdString());
-            uint8_t exist_NV=0x00;
-            rc=FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_NV_PRESENT, &i_target, exist_NV);
-            if(!rc.ok())
+
+            // execute NV scominit file
+            uint8_t exist_NV = 0x00;
+            rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_NV_PRESENT, &i_target, exist_NV);
+            if (!rc.ok())
             {
-                    FAPI_ERR("proc_chiplet_scominit: error getting attribute value ATTR_CHIP_EC_FEATURE_NV_PRESENT");
-                    break;
+                FAPI_ERR("proc_chiplet_scominit: Error getting attribute value ATTR_CHIP_EC_FEATURE_NV_PRESENT");
+                break;
             }
-            if(exist_NV)
+            if (exist_NV)
             {
-                    FAPI_INF("NV link exist, run npu scominit");
-                    FAPI_EXEC_HWP(
-                            rc,
-                            fapiHwpExecInitFile,
-                            initfile_targets,
-                            PROC_CHIPLET_SCOMINIT_NPU_IF);
-                    if (!rc.ok())
-                    {
-                            FAPI_ERR("proc_chiplet_scominit: Error from fapiHwpExecInitfile executing %s on %s",
-                                     PROC_CHIPLET_SCOMINIT_NPU_IF,
-                                     i_target.toEcmdString());
-                            break;
-                    }
+                FAPI_INF("proc_chiplet_scominit: Executing  %s on %s",
+                         PROC_CHIPLET_SCOMINIT_NPU_IF, i_target.toEcmdString());
+                FAPI_EXEC_HWP(
+                        rc,
+                        fapiHwpExecInitFile,
+                        initfile_targets,
+                        PROC_CHIPLET_SCOMINIT_NPU_IF);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_chiplet_scominit: Error from fapiHwpExecInitfile executing %s on %s",
+                             PROC_CHIPLET_SCOMINIT_NPU_IF,
+                             i_target.toEcmdString());
+                    break;
+                }
+
+                // cleanup FIR bit (NPU FIR bit 27) caused by NDL/NTL parity error
+                rc_ecmd = data.flushTo1();
+                rc_ecmd = data.clearBit(NPU_FIR_NTL_DL2TL_PARITY_ERR_BIT);
+                if (rc_ecmd)
+                {
+                    FAPI_ERR("proc_chiplet_scominit: Error 0x%Xforming NPU FIR cleanup data buffer",
+                  	   rc_ecmd);
+                    rc.setEcmdError(rc_ecmd);
+                    break;
+                }
+                rc = fapiPutScom(i_target, NPU_FIR_AND_0x08013D81, data);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_chiplet_scominit: fapiPutScom error (NPU_FIR_AND_0x08013D81) on %s",
+                             i_target.toEcmdString());
+                    break;
+                }
+                rc = fapiPutScom(i_target, NPU_FIR_MASK_AND_0x08013D84, data);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_chiplet_scominit: fapiPutScom error (NPU_FIR_MASK_AND_0x08013D84) on %s",
+                             i_target.toEcmdString());
+                    break;
+                }
             }
             else
             {
-                    FAPI_INF("NV link does not exist, skip npu scominit");
+                FAPI_INF("proc_chiplet_scominit: NV link logic not present, scom initfile processing skipped");
             }
+
             // determine set of functional MCS chiplets
             rc = fapiGetChildChiplets(i_target,
                                       fapi::TARGET_TYPE_MCS_CHIPLET,

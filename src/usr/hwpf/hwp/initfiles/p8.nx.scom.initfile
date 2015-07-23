@@ -1,4 +1,4 @@
-#-- $Id: p8.nx.scom.initfile,v 1.14 2014/06/26 21:00:42 johnre Exp $
+#-- $Id: p8.nx.scom.initfile,v 1.15 2015/03/19 20:45:09 johnre Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -26,21 +26,29 @@ define sym_ci  = ( ((8*ATTR_FABRIC_NODE_ID) + (ATTR_FABRIC_CHIP_ID) + 1) * 4) ;
 define asym_ci = ( ((8*ATTR_FABRIC_NODE_ID) + (ATTR_FABRIC_CHIP_ID) + 1) * 16);
 
 
+#-- Naples does not have AMF engines.  Using chip attribute to identify Naples
+define def_amf_available     = (ATTR_CHIP_EC_FEATURE_NV_PRESENT == 0) ;
+
+
 #--------------------------------------------------------------------------------
 #-- SCOM initializations
 #--------------------------------------------------------------------------------
 
 #-- Engine Enable Register (0x02013041)
 scom 0x02013041 {
-    bits  ,  scom_data      ;
-    53    ,  0b1            ;  #-- ch7 ASYM enable
-    54    ,  0b1            ;  #-- ch6 ASYM enable
-    55    ,  0b1            ;  #-- ch5 ASYM enable
-    56    ,  0b1            ;  #-- ch4 ASYM enable
-    57    ,  0b1            ;  #-- ch3 SYM enable
-    58    ,  0b1            ;  #-- ch2 SYM enable
-    62    ,  0b1            ;  #-- ch1 842 enable
-    63    ,  0b1            ;  #-- ch0 842 enable
+    bits  , scom_data , expr                 ;
+    53    ,  0b0      , (!def_amf_available) ;  #-- ch7 ASYM enable
+    53    ,  0b1      , ( def_amf_available) ;
+    54    ,  0b0      , (!def_amf_available) ;  #-- ch6 ASYM enable
+    54    ,  0b1      , ( def_amf_available) ;
+    55    ,  0b0      , (!def_amf_available) ;  #-- ch5 ASYM enable
+    55    ,  0b1      , ( def_amf_available) ;
+    56    ,  0b0      , (!def_amf_available) ;  #-- ch4 ASYM enable
+    56    ,  0b1      , ( def_amf_available) ;
+    57    ,  0b1      , any                  ;  #-- ch3 SYM enable
+    58    ,  0b1      , any                  ;  #-- ch2 SYM enable
+    62    ,  0b1      , any                  ;  #-- ch1 842 enable
+    63    ,  0b1      , any                  ;  #-- ch0 842 enable
 }
 
 
@@ -80,11 +88,12 @@ scom 0x0201308A {
 
 #-- Asymmetric Coprocessor Config Register (0x0201308B)
 scom 0x0201308B {
-    bits  ,  scom_data      ;
-     2:14 ,  asym_ci        ;  #-- asym CI. function of node, chip id
-    18:23 ,  0b000010       ;  #-- asym CT
-    32:55 ,  0xfffff8       ;  #-- asym FC mask. enable 0-20
-    63    ,  0b1            ;  #-- asym enable
+    bits  ,  scom_data , expr                 ;
+     2:14 ,  asym_ci   , any                  ;  #-- asym CI. function of node, chip id
+    18:23 ,  0b000010  , any                  ;  #-- asym CT
+    32:55 ,  0xfffff8  , any                  ;  #-- asym FC mask. enable 0-20
+    63    ,  0b0       , (!def_amf_available) ;  #-- asym enable
+    63    ,  0b1       , ( def_amf_available) ;
 }
 
 
@@ -305,35 +314,41 @@ scom 0x02013107 {
 
 #-- DMA/Engine FIR Mask Register (0x02013103)
 scom 0x02013103 {
-    bits  ,  scom_data      ;
-     0    ,  0b1            ;   #-- mask      Reserved
-     1    ,  0b0            ;   #--           ICS invalid state error FIR bit
-     2:3  ,  0b11           ;   #-- mask      Reserved
-     4    ,  0b0            ;   #--           Channel 0 842 array corrected ECC error FIR bit" ;
-     5    ,  0b0            ;   #--           Channel 0 842 array uncorrectable ECC error FIR bit" ;
-     6    ,  0b0            ;   #--           Channel 1 842 array corrected ECC error FIR bit" ;
-     7    ,  0b0            ;   #--           Channel 1 842 array uncorrectable ECC error FIR bit" ;
-     8    ,  0b1            ;   #-- mask      DMA non-zero CSB CC detected FIR bit.  Programming error." ;
-     9    ,  0b0            ;   #--           DMA array correctable ECC error FIR bit" ;
-    10    ,  0b0            ;   #--           DMA outbound write/inbound read correctable ECC error FIR bit" ;
-    11:13 ,  0b000          ;   #--           Channel 5,6,7 AMF array corrected ECC error FIR bit" ;
-    14    ,  0b1            ;   #-- mask      Error from other SCOM satellites FIR bit" ;
-    15    ,  0b0            ;   #--           DMA invalid state error FIR bit.  Unrecoverable despite name" ;
-    16    ,  0b0            ;   #--           DMA invalid state error FIR bit" ;
-    17    ,  0b0            ;   #--           DMA array uncorrectable ECC error FIR bit" ;
-    18    ,  0b0            ;   #--           DMA outbound write/inbound read uncorrectable ECC error FIR bit" ;
-    19    ,  0b0            ;   #--           DMA inbound read error FIR bit" ;
-    20:27 ,  0b00000000     ;   #--           Channel 0-7 invalid state error FIR bit" ;
-    28:30 ,  0b000          ;   #--           Channel 5,6,7 AMF array uncorrectable ECC error FIR bit" ;
-    31    ,  0b0            ;   #--           UE error on CRB(CSB address, CCB) FIR bit" ;
-    32    ,  0b0            ;   #--           SUE error on CRB(CSB address, CCB) FIR bit" ;
-    33    ,  0b1            ;   #-- mask      SUE error on something other than CRB(CSB address, CCB) FIR bit" ;
-    34    ,  0b1            ;   #-- mask      Reserved
-    35    ,  0b1            ;   #-- mask      Reserved
-    36    ,  0b0            ;   #--           Channel 4 AMF array corrected ECC error FIR bit" ;
-    37    ,  0b0            ;   #--           Channel 4 AMF array uncorrectable ECC error FIR bit" ;
-    38    ,  0b0            ;   #--           PHYP uses to signal PRD during NX freeze
-    39:47 ,  0b111111111    ;   #-- mask      Reserved
-    48    ,  0b1            ;   #-- mask      FIR/SCOM satellite parity error FIR bit" ;
-    49    ,  0b1            ;   #-- mask      FIR/SCOM satellite parity error FIR bit duplicate"
+    bits  ,  scom_data      , expr                 ;
+     0    ,  0b1            , any                  ;   #-- mask      Reserved
+     1    ,  0b0            , any                  ;   #--           ICS invalid state error FIR bit
+     2:3  ,  0b11           , any                  ;   #-- mask      Reserved
+     4    ,  0b0            , any                  ;   #--           Channel 0 842 array corrected ECC error FIR bit" ;
+     5    ,  0b0            , any                  ;   #--           Channel 0 842 array uncorrectable ECC error FIR bit" ;
+     6    ,  0b0            , any                  ;   #--           Channel 1 842 array corrected ECC error FIR bit" ;
+     7    ,  0b0            , any                  ;   #--           Channel 1 842 array uncorrectable ECC error FIR bit" ;
+     8    ,  0b1            , any                  ;   #-- mask      DMA non-zero CSB CC detected FIR bit.  Programming error." ;
+     9    ,  0b0            , any                  ;   #--           DMA array correctable ECC error FIR bit" ;
+    10    ,  0b0            , any                  ;   #--           DMA outbound write/inbound read correctable ECC error FIR bit" ;
+    11:13 ,  0b111          , (!def_amf_available) ;   #--           Channel 5,6,7 AMF array corrected ECC error FIR bit" ;
+    11:13 ,  0b000          , ( def_amf_available) ;
+    14    ,  0b1            , any                  ;   #-- mask      Error from other SCOM satellites FIR bit" ;
+    15    ,  0b0            , any                  ;   #--           DMA invalid state error FIR bit.  Unrecoverable despite name" ;
+    16    ,  0b0            , any                  ;   #--           DMA invalid state error FIR bit" ;
+    17    ,  0b0            , any                  ;   #--           DMA array uncorrectable ECC error FIR bit" ;
+    18    ,  0b0            , any                  ;   #--           DMA outbound write/inbound read uncorrectable ECC error FIR bit" ;
+    19    ,  0b0            , any                  ;   #--           DMA inbound read error FIR bit" ;
+    20:23 ,  0b0000         , any                  ;   #--           Channel 0-3 invalid state error FIR bit" ;
+    24:27 ,  0b1111         , (!def_amf_available) ;   #--           Channel 4-7 invalid state error FIR bit" ;
+    24:27 ,  0b0000         , ( def_amf_available) ;
+    28:30 ,  0b111          , (!def_amf_available) ;   #--           Channel 5,6,7 AMF array uncorrectable ECC error FIR bit" ;
+    28:30 ,  0b000          , ( def_amf_available) ;
+    31    ,  0b0            , any                  ;   #--           UE error on CRB(CSB address, CCB) FIR bit" ;
+    32    ,  0b0            , any                  ;   #--           SUE error on CRB(CSB address, CCB) FIR bit" ;
+    33    ,  0b1            , any                  ;   #-- mask      SUE error on something other than CRB(CSB address, CCB) FIR bit" ;
+    34    ,  0b1            , any                  ;   #-- mask      Reserved
+    35    ,  0b1            , any                  ;   #-- mask      Reserved
+    36    ,  0b1            , (!def_amf_available) ;   #--           Channel 4 AMF array corrected ECC error FIR bit" ;
+    36    ,  0b0            , ( def_amf_available) ;
+    37    ,  0b1            , (!def_amf_available) ;   #--           Channel 4 AMF array uncorrectable ECC error FIR bit" ;
+    37    ,  0b0            , ( def_amf_available) ;
+    38    ,  0b0            , any                  ;   #--           PHYP uses to signal PRD during NX freeze
+    39:47 ,  0b111111111    , any                  ;   #-- mask      Reserved
+    48    ,  0b1            , any                  ;   #-- mask      FIR/SCOM satellite parity error FIR bit" ;
+    49    ,  0b1            , any                  ;   #-- mask      FIR/SCOM satellite parity error FIR bit duplicate"
 }

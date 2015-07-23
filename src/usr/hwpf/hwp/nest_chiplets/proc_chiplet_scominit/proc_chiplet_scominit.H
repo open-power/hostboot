@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_chiplet_scominit.H,v 1.16 2014/12/11 21:11:59 szhong Exp $
+// $Id: proc_chiplet_scominit.H,v 1.17 2015/03/17 18:54:30 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_chiplet_scominit.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -75,6 +75,8 @@ const uint32_t MCSMODE0_EN_CENTAUR_SYNC_BIT = 61;
 const uint32_t CAPP_APC_MASTER_LCO_TARGET_MIN_START_BIT = 13;
 const uint32_t CAPP_APC_MASTER_LCO_TARGET_MIN_END_BIT = 15;
 
+// NPU FIR Register field/bit definitions
+const uint32_t NPU_FIR_NTL_DL2TL_PARITY_ERR_BIT = 27;
 
 //------------------------------------------------------------------------------
 // Structure definitions

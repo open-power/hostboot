@@ -1,4 +1,4 @@
-#-- $Id: p8.npu.scom.initfile,v 1.2 2014/12/11 00:24:12 camille Exp $
+#-- $Id: p8.npu.scom.initfile,v 1.6 2015/03/16 14:33:36 lonny Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -17,11 +17,109 @@ SyntaxVersion = 1
 #--******************************************************************************
 # -- ESNPUFIR
 #--******************************************************************************
-# spy name  ES.NPU.NP_AT.REG.FIR_MASK_REG
+# spy name  ES.NPU.NP_AT.REG.NPU_AT_ERR_HOLD
+# scom 0x0000000008013DA8 {
+#      bits,   	 scom_data        ;
+#     0:63,  	0x0000000000000001      ;
+#     }
+# 
+# # spy name  ES.NPU.NP_AT.REG.FIR_REG
+# scom 0x0000000008013D81 {
+#      bits,   	 scom_data        ;
+#     0:63,  	0x0000000000000000      ;
+#     }
+
+# start up procedure for the dl2tl parity error 
+#mask error bit 27
+# spy name  ES.NPU.NP_AT.REG.FIR_MASK_REG   
 scom 0x0000000008013D83 {
      bits,   	 scom_data        ;
-    0:63,  	0xE0002C02000F5F3F      ;
+    0:63,  	0xE0002C12000F5F3F      ;
     }
+
+# set the clock speed in the gp0 registers
+# spy name  Perf register to set IOValids for nvlink (bits 54:57) and nvlink ref clock (52) 2:1 nvlink speed (18:19) = 0b01.
+scom 0x0000000008000004 {
+     bits,   	 scom_data        ;
+    0:63,  	0xFFFFDFFFFFFFFFFF      ;
+    }
+
+# # spy name  Perf register to set IOValids for nvlink (bits 54:57) and nvlink ref clock (52) 2:1 nvlink speed (18:19) = 0b01.
+# scom 0x0000000008000005 {
+#      bits,   	 scom_data        ;
+#     0:63,  	0x0000100000000000      ;
+#     }
+# 
+# # turn on the nvlink refclocks
+# # spy name  Perf register to set IOValids for nvlink (bits 54:57) and nvlink ref clock (52) 2:1 nvlink speed (18:19) = 0b01.
+# scom 0x0000000008000005 {
+#      bits,   	 scom_data        ;
+#     0:63,  	0x0000000000000800      ;
+#     }
+
+# turn on the iovalids
+# spy name  Perf register to set IOValids for nvlink (bits 54:57) and nvlink ref clock (52) 2:1 nvlink speed (18:19) = 0b01.
+scom 0x0000000008000005 {
+     bits,   	 scom_data        ;
+    0:63,  	0x0000100000000BC0      ;
+    }
+
+#  clear the first error and c_err_rpt hold registers
+# # spy name  ES.NPU.SL_WRAP0.NTL_WRAP0.NTL_ER_HOLD
+scom 0x0000000008013C29 {
+     bits,   	 scom_data        ;
+    0:63,  	0x0000000000000000      ;
+    }
+
+# spy name  ES.NPU.SL_WRAP0.NTL_WRAP0.NTL_FST_ERR_REG
+scom 0x0000000008013C2A {
+     bits,   	 scom_data        ;
+    0:63,  	0x0000000000000000      ;
+    }
+
+# spy name  ES.NPU.SL_WRAP0.NTL_WRAP1.NTL_ER_HOLD
+scom 0x0000000008013C69 {
+     bits,   	 scom_data        ;
+    0:63,  	0x0000000000000000      ;
+    }
+
+# spy name  ES.NPU.SL_WRAP0.NTL_WRAP1.NTL_FST_ERR_REG
+scom 0x0000000008013C6A {
+     bits,   	 scom_data        ;
+    0:63,  	0x0000000000000000      ;
+    }
+
+# spy name  ES.NPU.SL_WRAP2.NTL_WRAP0.NTL_ER_HOLD
+scom 0x0000000008013D29 {
+     bits,   	 scom_data        ;
+    0:63,  	0x0000000000000000      ;
+    }
+
+# spy name  ES.NPU.SL_WRAP2.NTL_WRAP0.NTL_FST_ERR_REG
+scom 0x0000000008013D2A {
+     bits,   	 scom_data        ;
+    0:63,  	0x0000000000000000      ;
+    }
+
+# spy name  ES.NPU.SL_WRAP2.NTL_WRAP1.NTL_ER_HOLD
+scom 0x0000000008013D69 {
+     bits,   	 scom_data        ;
+    0:63,  	0x0000000000000000      ;
+    }
+
+# spy name  ES.NPU.SL_WRAP2.NTL_WRAP1.NTL_FST_ERR_REG
+scom 0x0000000008013D6A {
+     bits,   	 scom_data        ;
+    0:63,  	0x0000000000000000      ;
+    }
+
+
+# unmask error bit 27
+# # spy name  ES.NPU.NP_AT.REG.FIR_MASK_REG
+# scom 0x0000000008013D83 {
+#      bits,   	 scom_data        ;
+#     0:63,  	0xE0002C02000F5F3F      ;
+#     }
 
 # spy name  ES.NPU.NP_AT.REG.FIR_ACTION0_REG
 scom 0x0000000008013D86 {
@@ -34,6 +132,26 @@ scom 0x0000000008013D87 {
    bits,   	 scom_data   	      ;
     0:63,  	0xFFFFFFFFFFFFFFFF      ;
     }
+
+# # spy name  ES.NPU.NP_AT.REG.FIR_WOF_REG
+# scom 0x0000000008013D88 {
+#      bits,   	 scom_data        ;
+#     0:63,  	0x0000000000000000      ;
+#     }
+
+
+# spy name  ES.NPU.NP_AT.REG.NPU_AT_CNFG0
+scom 0x0000000008013DAB {
+   bits,   	 scom_data   	      ;
+    0:63,  	0x0211000043500000      ;
+    }
+
+# If only 1 GPU will need to configure as below.
+# scom 0x0000000008013DAB {
+#    bits,   	 scom_data   	      ;
+#     0:63,  	0x0210000043510000      ;
+#     }
+
 
 # spy name  ES.NPU.NP_AT.REG.NPU_AT_LR_ER    (Lem enable)
 scom 0x0000000008013D9C {
@@ -59,13 +177,105 @@ scom 0x0000000008013D9F {
     0:63,  	0x1CBFC1FCB7F0A000      ;
     }
 
+# spy name  ES.NPU.SL_WRAP0.NP_CQ.NP_CQ_LNK0.NXCQ_SCOM.NX_MISC_CONTROL_REG (hang pulses)
+scom 0x0000000008013C09 {
+    bits  ,  scom_data;
+    4:7   ,  0b0000;  #-- HANG_POLL_SCALE
+    8:11  ,  0b0011;  #-- HANG_DATA_SCALE
+   12:15  ,  0b1011;  #-- HANG_SHM_SCALE
+}
+
+# spy name  ES.NPU.SL_WRAP0.NP_CQ.NP_CQ_LNK1.NXCQ_SCOM.NX_MISC_CONTROL_REG (hang pulses)
+scom 0x0000000008013C49 {
+    bits  ,  scom_data;
+    4:7   ,  0b0000;  #-- HANG_POLL_SCALE
+    8:11  ,  0b0011;  #-- HANG_DATA_SCALE
+   12:15  ,  0b1011;  #-- HANG_SHM_SCALE
+}
+
+# spy name  ES.NPU.SL_WRAP2.NP_CQ.NP_CQ_LNK0.NXCQ_SCOM.NX_MISC_CONTROL_REG (hang pulses)
+scom 0x0000000008013D09 {
+    bits  ,  scom_data;
+    4:7   ,  0b0000;  #-- HANG_POLL_SCALE
+    8:11  ,  0b0011;  #-- HANG_DATA_SCALE
+   12:15  ,  0b1011;  #-- HANG_SHM_SCALE
+}
+
+# spy name  ES.NPU.SL_WRAP2.NP_CQ.NP_CQ_LNK1.NXCQ_SCOM.NX_MISC_CONTROL_REG (hang pulses)
+scom 0x0000000008013D49 {
+    bits  ,  scom_data;
+    4:7   ,  0b0000;  #-- HANG_POLL_SCALE
+    8:11  ,  0b0011;  #-- HANG_DATA_SCALE
+   12:15  ,  0b1011;  #-- HANG_SHM_SCALE
+}
+
+# spy name  ES.NPU.NP_AT.REG.NPU_AT_DEBUG  (Debug/trace control)
+scom 0x0000000008013DA9 {
+     bits,   	 scom_data        ;
+    0:63,  	0x7000000000000000      ;
+    }
+
+# spy name  ES.NPU.NP_AT.REG.NPU_AT_PMU_CTRL    (at pmu counter)
+scom 0x0000000008013DA6 {
+     bits,   	 scom_data        ;
+    0:63,  	0xF210145000000000      ;
+    }
+
+# spy name  ES.NPU.SL_WRAP0.NP_CQ.NP_CQ_LNK0.NXCQ_SCOM.NX_PB_ERR_RPT_0
+# scom 0x0000000008013C00 {
+#      bits,   	 scom_data        ;
+#     0:63,  	0x0000000000000000      ;
+#     }
+# 
+# # spy name  ES.NPU.SL_WRAP0.NP_CQ.NP_CQ_LNK0.NXCQ_SCOM.NX_PB_ERR_RPT_1
+# scom 0x0000000008013C01 {
+#      bits,   	 scom_data        ;
+#     0:63,  	0x0000000000000000      ;
+#     }
+# 
+# # spy name  ES.NPU.SL_WRAP0.NP_CQ.NP_CQ_LNK1.NXCQ_SCOM.NX_PB_ERR_RPT_0
+# scom 0x0000000008013C40 {
+#      bits,   	 scom_data        ;
+#     0:63,  	0x0000000000000000      ;
+#     }
+# 
+# # spy name  ES.NPU.SL_WRAP0.NP_CQ.NP_CQ_LNK1.NXCQ_SCOM.NX_PB_ERR_RPT_1
+# scom 0x0000000008013C41 {
+#      bits,   	 scom_data        ;
+#     0:63,  	0x0000000000000000      ;
+#     }
+# 
+# spy name  ES.NPU.SL_WRAP2.NP_CQ.NP_CQ_LNK0.NXCQ_SCOM.NX_PB_ERR_RPT_0
+# scom 0x0000000008013D00 {
+#      bits,   	 scom_data        ;
+#     0:63,  	0x0000000000000000      ;
+#     }
+# 
+# # spy name  ES.NPU.SL_WRAP2.NP_CQ.NP_CQ_LNK0.NXCQ_SCOM.NX_PB_ERR_RPT_1
+# scom 0x0000000008013D01 {
+#      bits,   	 scom_data        ;
+#     0:63,  	0x0000000000000000      ;
+#     }
+# 
+# # spy name  ES.NPU.SL_WRAP2.NP_CQ.NP_CQ_LNK1.NXCQ_SCOM.NX_PB_ERR_RPT_0
+# scom 0x0000000008013D40 {
+#      bits,   	 scom_data        ;
+#     0:63,  	0x0000000000000000      ;
+#     }
+# 
+# # spy name  ES.NPU.SL_WRAP2.NP_CQ.NP_CQ_LNK1.NXCQ_SCOM.NX_PB_ERR_RPT_1
+# scom 0x0000000008013D41 {
+#      bits,   	 scom_data        ;
+#     0:63,  	0x0000000000000000      ;
+#     }
+# 
 # spy name  ES.NPU.SL_WRAP0.NTL_WRAP0.NTL_PMU_CONTROL (ntl00 pmu counter)
 scom 0x0000000008013C27 {
      bits,   	 scom_data        ;
     0:63,  	0xF21045C200000000      ;
     }
 
-# spy name  ES.NPU.SL_WRAP0.NTL_WRAP1.NTL_PMU_CONTROL (ntl00 pmu counter)
+# spy name  ES.NPU.SL_WRAP0.NTL_WRAP1.NTL_PMU_CONTROL (ntl01 pmu counter)
 scom 0x0000000008013C67 {
      bits,   	 scom_data        ;
     0:63,  	0xF21045C200000000      ;
@@ -77,37 +287,63 @@ scom 0x0000000008013D27 {
     0:63,  	0xF21045C200000000      ;
     }
 
-# spy name  ES.NPU.SL_WRAP2.NTL_WRAP1.NTL_PMU_CONTROL (ntl20 pmu counter)
+# spy name  ES.NPU.SL_WRAP2.NTL_WRAP1.NTL_PMU_CONTROL (ntl21 pmu counter)
 scom 0x0000000008013D67 {
      bits,   	 scom_data        ;
     0:63,  	0xF21045C200000000      ;
     }
 
-# spy name  ES.NPU.NP_AT.REG.NPU_AT_PMU_CTRL    (at pmu counter)
-scom 0x0000000008013DA6 {
-     bits,   	 scom_data        ;
-    0:63,  	0xF210145000000000      ;
-    }
+# # spy name  ES.NPU.SL_WRAP0.NTL_WRAP0.NTL_ER_HOLD
+# scom 0x0000000008013C29 {
+#      bits,   	 scom_data        ;
+#     0:63,  	0x0000000000000000      ;
+#     }
+# 
+# # spy name  ES.NPU.SL_WRAP0.NTL_WRAP0.NTL_FST_ERR_REG
+# scom 0x0000000008013C2A {
+#      bits,   	 scom_data        ;
+#     0:63,  	0x0000000000000000      ;
+#     }
+# 
+# # spy name  ES.NPU.SL_WRAP0.NTL_WRAP1.NTL_ER_HOLD
+# scom 0x0000000008013C69 {
+#      bits,   	 scom_data        ;
+#     0:63,  	0x0000000000000000      ;
+#     }
+# 
+# spy name  ES.NPU.SL_WRAP0.NTL_WRAP1.NTL_FST_ERR_REG
+# scom 0x0000000008013C6A {
+#      bits,   	 scom_data        ;
+#     0:63,  	0x0000000000000000      ;
+#     }
+# 
+# # spy name  ES.NPU.SL_WRAP2.NTL_WRAP0.NTL_ER_HOLD
+# scom 0x0000000008013D29 {
+#      bits,   	 scom_data        ;
+#     0:63,  	0x0000000000000000      ;
+#     }
+# 
+# # spy name  ES.NPU.SL_WRAP2.NTL_WRAP0.NTL_FST_ERR_REG
+# scom 0x0000000008013D2A {
+#      bits,   	 scom_data        ;
+#     0:63,  	0x0000000000000000      ;
+#     }
+# 
+# # spy name  ES.NPU.SL_WRAP2.NTL_WRAP1.NTL_ER_HOLD
+# scom 0x0000000008013D69 {
+#      bits,   	 scom_data        ;
+#     0:63,  	0x0000000000000000      ;
+#     }
+# 
+# # spy name  ES.NPU.SL_WRAP2.NTL_WRAP1.NTL_FST_ERR_REG
+# scom 0x0000000008013D6A {
+#      bits,   	 scom_data        ;
+#     0:63,  	0x0000000000000000      ;
+#     }
 
-# spy name  ES.NPU.NP_AT.REG.NPU_AT_DEBUG  (Debug/trace control)
-scom 0x0000000008013DAB {
-     bits,   	 scom_data        ;
-    0:63,  	0x7000000000000000      ;
-    }
-
-# spy name  ES.NPU.NP_AT.REG.NPU_AT_CNFG0    (npu bar select)
-scom 0x0000000008013DA9 {
-     bits,   	 scom_data        ;
-    0:63,  	0x0211000043500000      ;
-    }
-
-# spy name  ES.NPU.SL_WRAP0.NP_CQ.NP_CQ_LNK0.NXCQ_SCOM.NP_BUID_REG   (npu bar select)
+# spy name  ES.NPU.SL_WRAP0.NP_CQ.NP_CQ_LNK0.NXCQ_SCOM.NP_BUID_REG    (Interrupt control)
 scom 0x0000000008013C13 {
      bits,   	 scom_data        ;
     0:63,  	0x0800000043500000      ;
     }
-
-
-# NPCQ control register?  scom-only        ??
-# NPCQ Int_lvl_REG register?  scom-only        ??
 
