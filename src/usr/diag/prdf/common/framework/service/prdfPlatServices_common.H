@@ -339,6 +339,15 @@ int32_t getDimmSpareConfig( TARGETING::TargetHandle_t i_mba, CenRank i_rank,
 int32_t getMemBufRawCardType( TARGETING::TargetHandle_t i_mbaTarget,
                               CEN_SYMBOL::WiringType & o_wiringType );
 
+/**
+ * @brief   get DIMM DQ map from FAPI routines
+ * @param   i_target      DIMM target
+ * @param   io_dqMapPtr   Pointer to area to receive DIMM DQ map (80 bytes)
+ * @return  Non-Null if error log occurs
+ */
+errlHndl_t  getFapiDimmDqAttr( TARGETING::TargetHandle_t i_target,
+                               uint8_t *io_dqMapPtr );
+
 //##############################################################################
 //##                    Maintenance Command class wrapper
 //##############################################################################

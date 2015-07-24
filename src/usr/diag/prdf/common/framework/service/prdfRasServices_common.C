@@ -37,6 +37,7 @@
 #include <prdfCallouts.H>
 #include <prdfMemoryMru.H>
 #include <prdfPlatServices.H>
+#include <prdfCenLogParse.H>
 
 // For compression routines
 #define PRDF_COMPRESSBUFFER_COMPRESS_FUNCTIONS
@@ -70,6 +71,8 @@
 #endif
 
 using namespace TARGETING;
+
+
 
 namespace PRDF
 {
@@ -603,6 +606,86 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                                      severityParm,
                                      l_diagUpdate );
             }
+
+            // If we have a valid symbol in the memory MRU object, then we
+            // should have one DIMM called out that we want the DQ map for.
+            // If the symbol is not valid, then we will do nothing.  If the
+            // symbol is valid, but we have multiple callouts, then there is
+            // probably something wrong.
+            CenSymbol l_cenSymbol = memMru.getSymbol();
+            if (l_cenSymbol.isValid())
+            {
+                if (1 == partList.size())
+                {
+                    // Will make extra check that we have a DIMM
+                    TARGETING::TYPE  l_type;
+                    l_type = getTargetType( partList[0] );
+
+                    if (TARGETING::TYPE_DIMM == l_type)
+                    {
+                        // Will be storing the CEN/IS DIMM indicator, cardtype,
+                        // and the 32 bit memmru prior to the 80 byte mapping
+                        memMruDqInfo  l_memData;
+                        memset(&l_memData, 0, sizeof(memMruDqInfo));
+
+                        // Call routine to read the FAPI attribute for DQ map
+                        errlHndl_t  l_fapiElog;
+                        l_fapiElog = getFapiDimmDqAttr(partList[0],
+                                          &(l_memData.dqMapping[0]));
+
+                        if (NULL == l_fapiElog)
+                        {
+                            bool                    l_bufDimm;
+                            CEN_SYMBOL::WiringType  l_cardWireType;
+                            int32_t                 l_chkRc;
+                            // Get MBA target from DIMM
+                            TargetHandle_t l_mba;
+                            l_mba = getConnectedParent(partList[0], TYPE_MBA);
+                            // Track if centaur or IS DIMM
+                            l_chkRc = isMembufOnDimm(l_mba, l_bufDimm);
+                            l_chkRc |= getMemBufRawCardType(l_mba,
+                                                       l_cardWireType);
+
+                            if (SUCCESS == l_chkRc)
+                            {   // Put data into structure
+                                l_memData.bufferedDimm = l_bufDimm;
+                                l_memData.cardType = l_cardWireType;
+                            }
+                            else
+                            {   // unable to determine anything
+                                l_memData.cardType = MEMRU_WIRING_UNKNOWN;
+                            }
+
+                            // Get the 32 bit representation of MemMru
+                            l_memData.memMru32bits = memMru.toUint32();
+
+                            // Add mapping to ELOG and parser will print it
+                            PRDF_ADD_FFDC( iv_errl, (const char*)(&l_memData),
+                                           sizeof(memMruDqInfo),
+                                           ErrlVer1, ErrlMruData_2 );
+                        } // end if success reading attribute
+                        else
+                        {
+                            PRDF_ERR( PRDF_FUNC "Fail on Read DQ mapping");
+                            PRDF_COMMIT_ERRL(l_fapiElog, ERRL_ACTION_REPORT);
+                        } // end else error reading attribute
+
+                    } // end if DIMM target
+                    else
+                    {
+                        PRDF_ERR( PRDF_FUNC "Not DIMM Target (%08X)",
+                                  l_type );
+                    } // end else NOT DIMM
+
+                } // end if just one part called out
+                else
+                {   // more than one part called out
+                    PRDF_ERR( PRDF_FUNC "Valid Symbol with multiple parts (%d)",
+                              partList.size() );
+                } // end else multiple parts called out with valid symbol
+
+            } // if valid centaur symbol
+
         }
         else if ( PRDcalloutData::TYPE_SYMFRU == thiscallout.getType() )
         {

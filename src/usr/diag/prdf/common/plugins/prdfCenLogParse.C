@@ -1961,59 +1961,107 @@ void getBadDqBitmapEntry( uint8_t * i_buffer, char * o_str )
 //------------------------------------------------------------------------------
 
 // Helper function for parseMemMruData()
-int32_t getMemMruDramSite( MemoryMruData::MemMruMeld i_memMruData,
+int32_t getMemMruDramSite( memMruDqInfo &i_memDqStruct,
                            char * o_data )
 {
+    char  l_dqMapBuffer[4];
+    memset (l_dqMapBuffer, 0, 4);
     int32_t o_rc = SUCCESS;
+
+    MemoryMruData::MemMruMeld mm; mm.u = i_memDqStruct.memMru32bits;
 
     do
     {
         // Get the symbol and adjust for ECC spare, if needed.
-        uint8_t symbol = transEccSpare( i_memMruData.s.symbol,
-                                        i_memMruData.s.eccSpared );
+        uint8_t symbol = transEccSpare( mm.s.symbol,
+                                        mm.s.eccSpared );
 
-        uint8_t type   = i_memMruData.s.wiringType;
-        uint8_t mbaPos = i_memMruData.s.mbaPos;
+        uint8_t type   = i_memDqStruct.cardType;
+        uint8_t mbaPos = mm.s.mbaPos;
         uint8_t ps     = symbol2PortSlct( symbol );
-        uint8_t mrank  = i_memMruData.s.mrank;
+        uint8_t mrank  = mm.s.mrank;
 
         // Get the DRAM site location information.
         bool x4Dram;
         const char * cardName;
-        const char ** dqMap;
         const char ** dramMap;
-        o_rc = getDramSiteInfo( type, mbaPos, ps, mrank, x4Dram,
-                                cardName, dqMap, dramMap );
+        const char ** dqMap;
+
+        // This routine will only succeed on CDIMMs
+        if (i_memDqStruct.bufferedDimm)
+        {
+            o_rc = getDramSiteInfo( type, mbaPos, ps, mrank, x4Dram,
+                                    cardName, dqMap, dramMap );
+        }
+
         if ( SUCCESS != o_rc ) break;
 
         // Get the DQ and DRAM indexes for site location tables.
         uint8_t dqIdx = transDramSpare( symbol2CenDq(symbol),
-                                        i_memMruData.s.dramSpared );
+                                        mm.s.dramSpared );
 
         uint8_t dramIdx = dqSiteIdx2DramSiteIdx( dqIdx, x4Dram );
 
         // Add the DRAM site data based on the pin info.
         strcpy( o_data, "" );
 
-        switch ( i_memMruData.s.pins )
+        switch ( mm.s.pins )
         {
             case EVEN_SYMBOL_DQ:
-                strcat( o_data, dqMap[dqIdx] );
+                if (i_memDqStruct.bufferedDimm)
+                {
+                    strcat( o_data, dqMap[dqIdx] );
+                }
+                else
+                {
+                    snprintf( l_dqMapBuffer, 4, "%d",
+                              i_memDqStruct.dqMapping[dqIdx] );
+                    strcat( o_data, l_dqMapBuffer );
+                }
                 break;
 
             case ODD_SYMBOL_DQ:
-                strcat( o_data, dqMap[dqIdx+1] );
+                if (i_memDqStruct.bufferedDimm)
+                {
+                    strcat( o_data, dqMap[dqIdx+1] );
+                }
+                else
+                {
+                    snprintf( l_dqMapBuffer, 4, "%d",
+                              i_memDqStruct.dqMapping[dqIdx+1] );
+                    strcat( o_data, l_dqMapBuffer );
+                }
                 break;
 
             case BOTH_SYMBOL_DQS:
-                strcat( o_data, dqMap[dqIdx] );
-                strcat( o_data, ", " );
-                strcat( o_data, dqMap[dqIdx+1] );
+                if (i_memDqStruct.bufferedDimm)
+                {
+                    strcat( o_data, dqMap[dqIdx] );
+                    strcat( o_data, ", " );
+                    strcat( o_data, dqMap[dqIdx+1] );
+                }
+                else
+                {
+                    snprintf( l_dqMapBuffer, 10, "%d, %d",
+                              i_memDqStruct.dqMapping[dqIdx],
+                              i_memDqStruct.dqMapping[dqIdx+1] );
+                    strcat( o_data, l_dqMapBuffer );
+                }
                 break;
 
             case NO_SYMBOL_DQS:
                 // blaming relevant dram since we aren't sure of DQ
-                strcat( o_data, dramMap[dramIdx] );
+                if (i_memDqStruct.bufferedDimm)
+                {
+                    strcat( o_data, dramMap[dramIdx] );
+                }
+                else
+                {
+                    snprintf( l_dqMapBuffer, 10, "%d, %d",
+                              i_memDqStruct.dqMapping[dqIdx],
+                              i_memDqStruct.dqMapping[dqIdx+1] );
+                    strcat( o_data, l_dqMapBuffer );
+                }
                 break;
 
             default:
@@ -2026,12 +2074,11 @@ int32_t getMemMruDramSite( MemoryMruData::MemMruMeld i_memMruData,
     return o_rc;
 }
 //------------------------------------------------------------------------------
-
-bool parseMemMruData( ErrlUsrParser & i_parser, uint32_t i_memMru )
+bool parseMemMruData( ErrlUsrParser & i_parser, memMruDqInfo &i_memDqStruct )
 {
     bool o_rc = true;
 
-    MemoryMruData::MemMruMeld mm; mm.u = i_memMru;
+    MemoryMruData::MemMruMeld mm; mm.u = i_memDqStruct.memMru32bits;
 
     uint8_t nodePos  =  mm.s.nodePos;
     uint8_t cenPos   = (mm.s.procPos << 3) | mm.s.cenPos;
@@ -2064,13 +2111,25 @@ bool parseMemMruData( ErrlUsrParser & i_parser, uint32_t i_memMru )
             if ( SYMBOLS_PER_RANK > mm.s.symbol )
             {
                 char dramSite_str[DATA_SIZE] = { '\0' };
-                getMemMruDramSite( mm, dramSite_str );
+
+                getMemMruDramSite( i_memDqStruct, dramSite_str );
+
+                char l_sitePinString[5];
+                if  (i_memDqStruct.bufferedDimm)
+                {
+                    strcpy(l_sitePinString, "Site");
+                }
+                else
+                {
+                    strcpy(l_sitePinString, "DQ");
+                }
 
                 snprintf( data, DATA_SIZE,
-                          "Symbol:%d Pins:%d S:%c E:%c Site:%s",
+                          "Symbol:%d Pins:%d S:%c E:%c %s:%s",
                           mm.s.symbol, mm.s.pins,
                           (1 == mm.s.dramSpared) ? 'Y' : 'N',
                           (1 == mm.s.eccSpared)  ? 'Y' : 'N',
+                          l_sitePinString,
                           dramSite_str );
             }
     }
@@ -2078,7 +2137,9 @@ bool parseMemMruData( ErrlUsrParser & i_parser, uint32_t i_memMru )
     // Ouptut should look like:
     // |   mba(n0p0c0)  Rank:M7   : Special: CALLOUT_RANK                    |
     // |   mba(n7p63c1) Rank:M0S7 : Symbol: 71 Pins: 3 Spared: false         |
-    // |   mba(n0p4c0)  Rank:M0S0 : DRAM Site: DA03.d1                       |
+    // |   mba(n0p4c0)  Rank:M0S0 : Site/Pin: DA03.d1                        |
+    //            or for IS DIMM we would see the last line be:
+    // |   mba(n0p4c0)  Rank:M0S0 : Site/Pin: 25                             |
 
     i_parser.PrintString( header, data );
 

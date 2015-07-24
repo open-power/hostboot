@@ -769,6 +769,28 @@ int32_t getDimmSpareConfig( TargetHandle_t i_mba, CenRank i_rank,
 }
 
 //------------------------------------------------------------------------------
+errlHndl_t  getFapiDimmDqAttr( TargetHandle_t i_target,
+                               uint8_t *io_dqMapPtr )
+{
+    uint8_t (&l_wiringData)[DIMM_DQ_NUM_DQS] =
+            *(reinterpret_cast<uint8_t(*)[DIMM_DQ_NUM_DQS]>(io_dqMapPtr));
+
+    // We have a DIMM target to get the DQ map for
+    // (need FAPI target from normal HWSV target)
+    fapi::Target  l_fapiDimm = getFapiTarget(i_target);
+
+    // Read the attribute
+    // (suppose to return a 1:1 mapping for Centaur DIMMs)
+    fapi::ReturnCode l_fapiRc;
+    l_fapiRc = FAPI_ATTR_GET(ATTR_CEN_DQ_TO_DIMM_CONN_DQ,
+                             &l_fapiDimm, l_wiringData );
+
+    errlHndl_t  l_fapiElog = fapi::fapiRcToErrl(l_fapiRc);
+
+    return(l_fapiElog);
+} // end function getFapiDimmDqAttr
+
+//------------------------------------------------------------------------------
 
 int32_t getMemBufRawCardType( TargetHandle_t i_mba,
                               WiringType & o_cardType )

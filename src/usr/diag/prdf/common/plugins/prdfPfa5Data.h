@@ -72,6 +72,7 @@ enum ErrlSubsect
     ErrlCapData_2    = 2,
     ErrlMruData_1    = 61, // This will only be used in non-attenion code when
                            // we want to add MRU.
+    ErrlMruData_2    = 62, // For the 80 byte centaur DQ pin map
     ErrlString       = 10,
 };
 

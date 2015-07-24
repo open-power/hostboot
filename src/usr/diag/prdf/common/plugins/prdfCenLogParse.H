@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,7 @@
 #define __prdfCenLogParse_H
 
 #include <stdint.h>
+#include <prdfMemoryMruData.H>
 
 class ErrlUsrParser;
 
@@ -52,7 +53,7 @@ namespace FSP
  * @param i_parser The error log parser.
  * @param i_memMru The MemoryMru data.
  */
-bool parseMemMruData( ErrlUsrParser & i_parser, uint32_t i_memMru );
+bool parseMemMruData( ErrlUsrParser & i_parser, memMruDqInfo &i_memDqStruct );
 
 /**
  * @brief Parses Memory UE table.

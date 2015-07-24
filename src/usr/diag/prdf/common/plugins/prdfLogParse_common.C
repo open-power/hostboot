@@ -590,7 +590,6 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
                         strcat( data, "(MemoryMru) " );
                         strcat( data, tmpStr );
                         i_parser.PrintString( header, data );
-                        parseMemMruData( i_parser, pfa.mruList[i].callout );
                         break;
 
                     case PRDcalloutData::TYPE_SYMFRU:
@@ -685,12 +684,47 @@ bool parseMemMru( void * i_buffer, uint32_t i_buflen, ErrlUsrParser & i_parser )
         char header[72];
         snprintf( header, 72, "MemoryMru (0x%08x)", memMru );
         i_parser.PrintHeading( header );
-
-        o_rc = parseMemMruData( i_parser, memMru );
     }
 
     return o_rc;
 }
+
+//------------------------------------------------------------------------------
+bool parseDqMap( void * i_buffer, uint32_t i_buflen, ErrlUsrParser & i_parser )
+{
+    bool    o_rc = true;
+    size_t  l_size = sizeof(memMruDqInfo);
+
+    i_parser.PrintBlank();
+
+    if ( i_buflen != l_size )
+    {
+        i_parser.PrintString( "                   ERROR",
+                              "Unable to parse Mem DQ  " );
+        i_parser.PrintBlank();
+    }
+    else
+    {
+        // Data on input::has DQ mapping and a few other fields in a structure
+        memMruDqInfo  l_memData;
+        UtilMem membuf( i_buffer, i_buflen );
+        membuf >> l_memData;
+
+        char header[72];
+        snprintf( header, 72, "MemoryMru (0x%08x)", l_memData.memMru32bits);
+        i_parser.PrintHeading( header );
+
+        o_rc = parseMemMruData( i_parser, l_memData );
+
+    }
+
+    // want to see the bitmap/data in any case
+    i_parser.PrintHexDump( i_buffer, i_buflen );
+
+    return o_rc;
+
+} // end parseDqMap
+
 
 //------------------------------------------------------------------------------
 
@@ -770,6 +804,10 @@ bool logDataParse( ErrlUsrParser & i_parser, void * i_buffer,
 
         case ErrlMruData_1:
             rc = parseMemMru( i_buffer, i_buflen, i_parser );
+            break;
+
+        case ErrlMruData_2:
+            rc = parseDqMap( i_buffer, i_buflen, i_parser );
             break;
 
         default:
@@ -856,4 +894,3 @@ bool srcDataParse( ErrlUsrParser & i_parser, const SrciSrc & i_src )
 
 } //end namespace HOSTBOOT/FSP
 } // end namespace PRDF
-

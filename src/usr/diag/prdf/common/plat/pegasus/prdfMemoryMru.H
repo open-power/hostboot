@@ -32,6 +32,7 @@
 #include <prdfMemoryMruData.H>
 #include <prdfPlatServices.H>
 #include <prdfCenSymbol.H>
+#include <prdfParserEnums.H>
 
 namespace PRDF
 {
@@ -80,6 +81,12 @@ class MemoryMru
 
     /** @return A list of targets that are represented by this MemoryMru. */
     TARGETING::TargetHandleList getCalloutList() const;
+
+    /**
+     * @brief Allows reading the symbol information
+     * @return 'centaur symbol object'
+     */
+    CenSymbol  getSymbol() { return iv_symbol; }
 
   private: // instance variables
 

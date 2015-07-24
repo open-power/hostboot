@@ -37,6 +37,18 @@
 
 namespace PRDF
 {
+// Structure to contain memory DQ mapping and related info
+struct memMruDqInfo
+{
+    uint32_t  memMru32bits;                // 32 bit MemoryMru format
+    uint32_t  cardType              :8;    // cardType for Centaur DIMMs
+    uint32_t  bufferedDimm          :1;    // Centaur DIMM (1) or IS DIMM (0)
+    uint32_t  reserved              :23;   // Future use / nice boundary
+    uint8_t   dqMapping[80];               // CenDQ to DimmDQ mapping
+};
+
+#define  MEMRU_WIRING_UNKNOWN 0xFF
+
 #ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
 namespace HOSTBOOT
 {
@@ -49,7 +61,6 @@ namespace FSP
 
 namespace MemoryMruData
 {
-
 /** Typically a MemoryMru callout is associated with a symbol (single DIMM
  *  callout), however, there are times were we cannot isolate down that far and
  *  instead need to callout a rank (pair of DIMMs) and the associated MBA.
