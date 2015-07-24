@@ -160,6 +160,14 @@ namespace CVPD
         { MM,  "MM" },
         { SS,  "SS" },
         { ET,  "ET" },
+        { VM,  "VM" },
+        { pd1, "#1" },
+        { pdZ, "#Z" },
+        { pd4, "#4" },
+        { pd5, "#5" },
+        { pd6, "#6" },
+        { pd8, "#8" },
+        { pdY, "#Y" },
 
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!

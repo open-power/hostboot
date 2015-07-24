@@ -123,6 +123,14 @@ namespace CVPD
         MM          = 0x3c,
         SS          = 0x3d,
         ET          = 0x3e,
+        VM          = 0x3f,
+        pd1         = 0x40, //#1
+        pdZ         = 0x41, //#Z
+        pd4         = 0x42, //#4
+        pd5         = 0x43, //#5
+        pd6         = 0x44, //#6
+        pd8         = 0x45, //#8
+        pdY         = 0x46, //#Y
 
         // Last Keyword
         CVPD_LAST_KEYWORD,

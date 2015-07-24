@@ -163,7 +163,7 @@ enum
     LRMM_NUM_ROWS                    = SPD_FIRST_MOD_SPEC | 0x0e,
     LRMM_MIRRORING                   = SPD_FIRST_MOD_SPEC | 0x0f,
     LRMM_REVISION_NUM                = SPD_FIRST_MOD_SPEC | 0x10,
-    LRMM_MFR_ID_CODE                 = SPD_FIRST_MOD_SPEC | 0x11,
+    MODSPEC_MM_MFR_ID_CODE           = SPD_FIRST_MOD_SPEC | 0x11,
 
     // ==============================================================
     // Module Specific Keywords (Available for DDR3 DIMMs only)
@@ -309,15 +309,46 @@ enum
     MODSPEC_COM_RAW_CARD_EXT         = SPD_FIRST_MOD_SPEC | 0x9a,
     UMM_CRC                          = SPD_FIRST_MOD_SPEC | 0x9b,
     RMM_ADDR_MAPPING                 = SPD_FIRST_MOD_SPEC | 0x9c,
-    RMM_CRC                          = SPD_FIRST_MOD_SPEC | 0x9d,
-    LRMM_CRC                         = SPD_FIRST_MOD_SPEC | 0x9e,
-    SPD_LAST_MOD_SPEC                = SPD_FIRST_MOD_SPEC | 0x9e,
+    MODSPEC_MM_ATTRIBS               = SPD_FIRST_MOD_SPEC | 0x9d,
+    MODSPEC_MM_ADDR_MAPPING          = SPD_FIRST_MOD_SPEC | 0x9e,
+    MODSPEC_MM_DRV_STRENGTH_CNTL     = SPD_FIRST_MOD_SPEC | 0x9f,
+    MODSPEC_MM_DRV_STRENGTH_CK       = SPD_FIRST_MOD_SPEC | 0xa0,
+    LRMM_VREF_DQ_RANK0               = SPD_FIRST_MOD_SPEC | 0xa1,
+    LRMM_VREF_DQ_RANK1               = SPD_FIRST_MOD_SPEC | 0xa2,
+    LRMM_VREF_DQ_RANK2               = SPD_FIRST_MOD_SPEC | 0xa3,
+    LRMM_VREF_DQ_RANK3               = SPD_FIRST_MOD_SPEC | 0xa4,
+    LRMM_VREF_DQ_FOR_DRAM            = SPD_FIRST_MOD_SPEC | 0xa5,
+    LRMM_MDQ_DRV_LT_1866             = SPD_FIRST_MOD_SPEC | 0xa6,
+    LRMM_MDQ_DRV_1866_2400           = SPD_FIRST_MOD_SPEC | 0xa7,
+    LRMM_MDQ_DRV_2400_3200           = SPD_FIRST_MOD_SPEC | 0xa8,
+    LRMM_DRV_STRENGTH                = SPD_FIRST_MOD_SPEC | 0xa9,
+    LRMM_ODT_RTT_WR_LT_1866          = SPD_FIRST_MOD_SPEC | 0xaa,
+    LRMM_ODT_RTT_NOM_LT_1866         = SPD_FIRST_MOD_SPEC | 0xab,
+    LRMM_ODT_RTT_WR_1866_2400        = SPD_FIRST_MOD_SPEC | 0xac,
+    LRMM_ODT_RTT_NOM_1866_2400       = SPD_FIRST_MOD_SPEC | 0xad,
+    LRMM_ODT_RTT_WR_2400_3200        = SPD_FIRST_MOD_SPEC | 0xae,
+    LRMM_ODT_RTT_NOM_2400_3200       = SPD_FIRST_MOD_SPEC | 0xaf,
+    LRMM_ODT_RTT_PARK_LT_1866        = SPD_FIRST_MOD_SPEC | 0xb0,
+    LRMM_ODT_RTT_PARK_1866_2400      = SPD_FIRST_MOD_SPEC | 0xb1,
+    LRMM_ODT_RTT_PARK_2400_3200      = SPD_FIRST_MOD_SPEC | 0xb2,
+    RMM_CRC                          = SPD_FIRST_MOD_SPEC | 0xb3,
+    LRMM_CRC                         = SPD_FIRST_MOD_SPEC | 0xb4,
+    SPD_LAST_MOD_SPEC                = SPD_FIRST_MOD_SPEC | 0xb5,
 
     // This keyword should be last in the list
     // Invalid Keyword
     ENTIRE_SPD                          = 0xFFFE,  //read entire SPD
     INVALID_SPD_KEYWORD                 = 0xFFFF,
 };
+
+enum
+{   
+    // These are LRDIMM values for Module Type attribute
+    // according to ver3 and ver4 JEDEC specs
+    JEDEC_VER3_LRDIMM_VAL      = 0x0b,
+    JEDEC_VER4_LRDIMM_VAL      = 0x04,
+};
+
 
 };  // end SPD
 

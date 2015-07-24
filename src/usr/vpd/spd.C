@@ -1000,7 +1000,7 @@ errlHndl_t ddr3SpecialCases(const KeywordData & i_kwdData,
         case DRAM_MANUFACTURER_ID:
         case MODULE_CRC:
         case RMM_MFR_ID_CODE:
-        case LRMM_MFR_ID_CODE:
+        case MODSPEC_MM_MFR_ID_CODE:
             // Get MSB
             err = spdFetchData( i_kwdData.offset,
                                 1, /* Read 1 byte at a time */
@@ -1112,7 +1112,7 @@ errlHndl_t ddr4SpecialCases(const KeywordData & i_kwdData,
         case UMM_CRC:
         case RMM_MFR_ID_CODE:
         case RMM_CRC:
-        case LRMM_MFR_ID_CODE:
+        case MODSPEC_MM_MFR_ID_CODE:
         case LRMM_CRC:
             // Get MSB
             err = spdFetchData( i_kwdData.offset,

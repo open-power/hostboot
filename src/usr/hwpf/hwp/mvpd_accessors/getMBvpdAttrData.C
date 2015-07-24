@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdAttrData.C,v 1.4 2015/03/16 18:51:46 janssens Exp $
+// $Id: getMBvpdAttrData.C,v 1.7 2015/09/30 20:44:12 janssens Exp $
 /**
  *  @file getMBvpdAttrData.C
  *
@@ -50,6 +50,42 @@ namespace getAttrData
 
 const MBvpdAttrDef g_MBVPD_ATTR_DEF_array [] =
 {
+
+//----------------------------------------------------------------------------------
+// Attribute exceptions to use with SPDX or VSPD VM keyword
+// Note: Ideally, all new exception will be in this section and be for both
+//       ISDIMMs and CDIMMMs
+//----------------------------------------------------------------------------------
+    {ATTR_VPD_MR_VERSION_BYTE,ALL_DIMM,VM_01,MBVPD_KEYWORD_MR,0,UINT8,0},
+    {ATTR_VPD_MR_DATA_CONTROL_BYTE,ALL_DIMM,VM_01,MBVPD_KEYWORD_MR,1,UINT8,0},
+    {ATTR_VPD_MT_VERSION_BYTE,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,0,UINT8,0},
+    {ATTR_VPD_MT_DATA_CONTROL_BYTE,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,1,UINT8,0},
+    {ATTR_VPD_PERIODIC_MEMCAL_MODE_OPTIONS,ALL_DIMM,VM_01,MBVPD_KEYWORD_MR,50,UINT32_BY2|UINT16_DATA,0},
+    {ATTR_VPD_DRAM_RTT_PARK,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,10,UINT8_BY2_BY2_BY4|XLATE_RTT_WR,0},
+    {ATTR_VPD_RD_CTR_WINDAGE_OFFSET,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,64,UINT32_BY2|UINT16_DATA,0},
+
+    {ATTR_VPD_DIMM_RCD_OUTPUT_TIMING,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,68,UINT8_BY2_BY2|DEFAULT_VALUE,0},
+    {ATTR_VPD_DIMM_RCD_IBT,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,66,UINT32_BY2_BY2|DEFAULT_VALUE,0},
+    {ATTR_VPD_CEN_RD_VREF,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,34,UINT32_BY2|UINT8_DATA|XLATE_RD_VREF,0},
+    {ATTR_VPD_DRAM_WR_VREF,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,35,UINT32_BY2|UINT8_DATA|XLATE_WR_VREF,0},
+    {ATTR_VPD_DRAM_WRDDR4_VREF,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,36,UINT8_BY2,0},
+    {ATTR_VPD_CEN_RCV_IMP_DQ_DQS,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,37,UINT8_BY2,0},
+    {ATTR_VPD_CEN_DRV_IMP_DQ_DQS,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,38,UINT8_BY2,0},
+    {ATTR_VPD_CEN_DRV_IMP_CNTL,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,39,UINT8_BY2,0},
+    {ATTR_VPD_CEN_DRV_IMP_ADDR,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,40,UINT8_BY2,0},
+    {ATTR_VPD_CEN_DRV_IMP_CLK,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,41,UINT8_BY2,0},
+    {ATTR_VPD_CEN_DRV_IMP_SPCKE,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,42,UINT8_BY2,0},
+    {ATTR_VPD_CEN_SLEW_RATE_DQ_DQS,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,43,UINT8_BY2|XLATE_SLEW,0},
+    {ATTR_VPD_CEN_SLEW_RATE_CNTL,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,44,UINT8_BY2|XLATE_SLEW,0},
+    {ATTR_VPD_CEN_SLEW_RATE_ADDR,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,45,UINT8_BY2|XLATE_SLEW,0},
+    {ATTR_VPD_CEN_SLEW_RATE_CLK,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,46,UINT8_BY2|XLATE_SLEW,0},
+    {ATTR_VPD_CEN_SLEW_RATE_SPCKE,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,47,UINT8_BY2|XLATE_SLEW,0},
+    {ATTR_VPD_CKE_PRI_MAP,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,48,UINT32_BY2|UINT16_DATA,0},
+    {ATTR_VPD_CKE_PWR_MAP,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,50,UINT64|MERGE,0},
+    {ATTR_VPD_RLO,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,54,UINT8_BY2|LOW_NIBBLE,0},
+    {ATTR_VPD_WLO,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,54,UINT8_BY2|HIGH_NIBBLE,0},
+    {ATTR_VPD_GPO,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,55,UINT8_BY2,0},
+
 //----------------------------------------------------------------------------------
 // Attribute exceptions to use with SPDX or VSPD VD keyword
 // Note: Ideally, all new exception will be in this section and be for both

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiMBvpdAccess.H,v 1.11 2014/10/23 20:57:58 eliner Exp $
+// $Id: fapiMBvpdAccess.H,v 1.12 2015/09/29 15:59:29 dcrowell Exp $
 /**
  *  @file fapiMBvpdAccess.H
  *
@@ -123,6 +123,17 @@ namespace fapi
         MBVPD_KEYWORD_K6  = 0x39,
         MBVPD_KEYWORD_K7  = 0x3a,
         MBVPD_KEYWORD_K8  = 0x3b,
+        MBVPD_KEYWORD_MM  = 0x3c,
+        MBVPD_KEYWORD_SS  = 0x3d,
+        MBVPD_KEYWORD_ET  = 0x3e,
+        MBVPD_KEYWORD_VM  = 0x3f,
+        MBVPD_KEYWORD_PD1 = 0x40, //#1
+        MBVPD_KEYWORD_PDZ = 0x41, //#Z
+        MBVPD_KEYWORD_PD4 = 0x42, //#4
+        MBVPD_KEYWORD_PD5 = 0x43, //#5
+        MBVPD_KEYWORD_PD6 = 0x44, //#6
+        MBVPD_KEYWORD_PD8 = 0x45, //#8
+        MBVPD_KEYWORD_PDY = 0x46, //#Y
     };
 
 }

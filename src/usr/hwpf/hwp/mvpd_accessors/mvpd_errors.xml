@@ -154,6 +154,62 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <rc>RC_MBVPD_INVALID_VM_DATA_RETURNED</rc>
+    <description>
+        VM keyword data returned is out of range of supported version values.
+        Probably a firmware bug, but could be bad VPD
+    </description>
+    <ffdc>KEYWORD</ffdc>
+    <ffdc>RETURNED_VALUE</ffdc>
+    <ffdc>RECORD_NAME</ffdc>
+    <ffdc>DIMM_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_MBVPD_INVALID_VM_VERSION_RETURNED</rc>
+    <description>
+        VM version returned is out of range of supported version values.
+        Probably a firmware bug, but could be bad VPD
+    </description>
+    <ffdc>KEYWORD</ffdc>
+    <ffdc>RETURNED_VALUE</ffdc>
+    <ffdc>RECORD_NAME</ffdc>
+    <ffdc>DIMM_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_MBVPD_UNEXPECTED_KEYWORD</rc>
+    <description>
+        Unexpected VPD keyword defined for the attribute in
+        attribute look up table , which doesn't have any layout properties.
+    </description>
+    <ffdc>ATTR_ID</ffdc>
+    <ffdc>KEYWORD</ffdc>
+    <ffdc>VERSION</ffdc>
+    <ffdc>DIMM_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
     <rc>RC_MBVPD_SUPPLIER_ID_NOT_IN_MV_VPD</rc>
     <description>
         The Module ID in the #I keyword is not in the list of supplier provided entries in the MV keyword.

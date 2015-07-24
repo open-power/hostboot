@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdSlopeInterceptData.C,v 1.4 2014/02/12 22:12:00 mjjones Exp $
+// $Id: getMBvpdSlopeInterceptData.C,v 1.5 2015/09/29 15:59:42 dcrowell Exp $
 /**
  *  @file getMBvpdSlopeInterceptData.C
  *
@@ -76,10 +78,14 @@ fapi::ReturnCode getMBvpdSlopeInterceptData(
     {
        case MASTER_POWER_SLOPE:
        case MASTER_POWER_INTERCEPT:
+       case MASTER_TOTAL_POWER_SLOPE:
+       case MASTER_TOTAL_POWER_INTERCEPT:
            l_fapirc = getMBvpdMasterData(i_mbTarget, i_attr, o_val);
            break;
        case SUPPLIER_POWER_SLOPE:
        case SUPPLIER_POWER_INTERCEPT:
+       case SUPPLIER_TOTAL_POWER_SLOPE:
+       case SUPPLIER_TOTAL_POWER_INTERCEPT:
            l_fapirc = getMBvpdSupplierData(i_mbTarget, i_attr, o_val);
            break;
        default: // Unlikely, but needs to be caught
@@ -113,7 +119,10 @@ fapi::ReturnCode getMBvpdMasterData(
         uint8_t     masterPowerSlope_LSB;
         uint8_t     masterPowerIntercept_MSB; //big endian order
         uint8_t     masterPowerIntercept_LSB;
-        uint8_t     reserved[4];
+        uint8_t     masterTotalPowerSlope_MSB;     //big endian order
+        uint8_t     masterTotalPowerSlope_LSB;
+        uint8_t     masterTotalPowerIntercept_MSB; //big endian order
+        uint8_t     masterTotalPowerIntercept_LSB;
         uint8_t     tempSensorPrimaryLayout;
         uint8_t     tempSensorSecondaryLayout;
     };
@@ -164,6 +173,14 @@ fapi::ReturnCode getMBvpdMasterData(
                o_val = l_pMwBuffer->masterPowerIntercept_LSB;
                o_val |= (l_pMwBuffer->masterPowerIntercept_MSB << 8);
                break;
+           case MASTER_TOTAL_POWER_SLOPE:  //get each byte to perserve endian
+               o_val = l_pMwBuffer->masterTotalPowerSlope_LSB;
+               o_val |= (l_pMwBuffer->masterTotalPowerSlope_MSB << 8);
+               break;
+           case MASTER_TOTAL_POWER_INTERCEPT:  //get each byte to perserve endian
+               o_val = l_pMwBuffer->masterTotalPowerIntercept_LSB;
+               o_val |= (l_pMwBuffer->masterTotalPowerIntercept_MSB << 8);
+               break;
        default: //i_attr value was checked before call so should not get here
                break;
        }
@@ -193,7 +210,7 @@ fapi::ReturnCode getMBvpdSupplierData(
 
     //#I keyword layout
     const uint32_t  PDI_DDR3_KEYWORD_SIZE = 256;
-    const uint32_t  PDI_DDR4_KEYWORD_SIZE = 512; // assumed size for DDR4
+    const uint32_t  PDI_DDR4_KEYWORD_SIZE = 384; // assumed size for DDR4
     const uint8_t   SPD_DDR3 = 0xB;
     const uint8_t   SPD_DDR4 = 0xC;
     struct pdI_keyword
@@ -214,10 +231,10 @@ fapi::ReturnCode getMBvpdSupplierData(
             } ddr3;
             struct // DDR4 layout of #I
             {
-                uint8_t   filler1[320]; // other fields and reserved bytes
+                uint8_t   filler1[350]; // other fields and reserved bytes
                 uint8_t   moduleID_MSB; // at offset 320. Big endian order
                 uint8_t   moduleID_LSB; //
-                uint8_t   filler2[PDI_DDR4_KEYWORD_SIZE-320-2]; //trailing space
+                uint8_t   filler2[PDI_DDR4_KEYWORD_SIZE-350-2]; //trailing space
             } ddr4;
         } pdI;
     };
@@ -231,7 +248,11 @@ fapi::ReturnCode getMBvpdSupplierData(
         uint8_t   supplierPowerSlope_LSB;
         uint8_t   supplierPowerIntercept_MSB;  // Big endian order
         uint8_t   supplierPowerIntercept_LSB;
-        uint8_t   reserved[4];
+        uint8_t   supplierTotalPowerSlope_MSB;      // Big endian order
+        uint8_t   supplierTotalPowerSlope_LSB;
+        uint8_t   supplierTotalPowerIntercept_MSB;  // Big endian order
+        uint8_t   supplierTotalPowerIntercept_LSB;
+
     };
     struct mv_keyword //variable length. Structure is size of 1 entry.
     {
@@ -431,6 +452,15 @@ fapi::ReturnCode getMBvpdSupplierData(
                    o_val = l_pVendorInfo->supplierPowerIntercept_LSB;
                    o_val |= (l_pVendorInfo->supplierPowerIntercept_MSB << 8);
                    break;
+               case SUPPLIER_TOTAL_POWER_SLOPE:  //get each byte to perserve endian
+                   o_val = l_pVendorInfo->supplierTotalPowerSlope_LSB;
+                   o_val |= (l_pVendorInfo->supplierTotalPowerSlope_MSB << 8);
+                   break;
+               case SUPPLIER_TOTAL_POWER_INTERCEPT: //get each byte to perserve endian
+                   o_val = l_pVendorInfo->supplierTotalPowerIntercept_LSB;
+                   o_val |= (l_pVendorInfo->supplierTotalPowerIntercept_MSB << 8);
+                   break;
+
            default: //i_attr value was checked already so should not get here
                    break;
             }

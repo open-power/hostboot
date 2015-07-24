@@ -154,7 +154,7 @@ const KeywordData ddr3Data[] =
     { LRMM_NUM_ROWS,                    0x3f,   0x01,   0x0c,   0x02, false, false, LRMM },
     { LRMM_MIRRORING,                   0x3f,   0x01,   0x03,   0x00, false, false, LRMM },
     { LRMM_REVISION_NUM,                0x40,   0x01,   0x00,   0x00, false, false, LRMM },
-    { LRMM_MFR_ID_CODE,                 0x42,   0x02,   0x00,   0x00, true,  false, LRMM },
+    { MODSPEC_MM_MFR_ID_CODE,           0x42,   0x02,   0x00,   0x00, true,  false, ALL },
     // Module Specific fields supported on DDR3 only
     { RMM_REG_TYPE,                     0x44,   0x01,   0x07,   0x00, false, false, RMM },
     { RMM_RC1,                          0x45,   0x01,   0xf0,   0x04, false, false, RMM },

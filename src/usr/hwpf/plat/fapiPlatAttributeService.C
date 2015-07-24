@@ -47,6 +47,9 @@
 #include <hwpf/hwp/mvpd_accessors/getMBvpdSlopeInterceptData.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdSpareDramData.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdVersion.H>
+#include <hwpf/hwp/mvpd_accessors/getMBvpdMemoryDataVersion.H>
+#include <hwpf/hwp/mvpd_accessors/getMBvpdSPDXRecordVersion.H>
+#include <hwpf/hwp/mvpd_accessors/getMBvpdVoltageSettingData.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdDram2NModeEnabled.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdSensorMap.H>
 #include <hwpf/hwp/mvpd_accessors/getMBvpdAttr.H>
@@ -306,6 +309,70 @@ fapi::ReturnCode fapiPlatGetSpdAttr(const fapi::Target * i_pFapiTarget,
     FAPI_DBG(EXIT_MRK "fapiPlatGetSpdAttr");
     return l_rc;
 }
+
+//******************************************************************************
+// fapiPlatGetModuleType function.
+//******************************************************************************
+fapi::ReturnCode fapiPlatGetModuleType(const fapi::Target * i_pFapiTarget,
+                                       uint8_t & o_name)
+{
+    fapi::ReturnCode l_rc;
+    TARGETING::Target * l_pHbTarget = NULL;
+    o_name = ENUM_ATTR_NAME_NONE;
+
+    l_rc = getTargetingTarget(i_pFapiTarget, l_pHbTarget ,
+                                          TARGETING::TYPE_DIMM);
+
+    if (l_rc)
+    {
+        FAPI_ERR("fapiPlatGetTargetName: Error from getTargetingTarget");
+    }
+    else
+    {
+        errlHndl_t l_err = NULL;
+        size_t l_len = sizeof(uint8_t);
+        uint8_t l_memType = 0;
+        l_err = deviceRead(l_pHbTarget , &l_memType, l_len,
+                           DEVICE_SPD_ADDRESS(SPD::BASIC_MEMORY_TYPE));
+
+
+        if (l_err)
+        {
+            // Add the error log pointer as data to the ReturnCode
+            FAPI_ERR("fapiPlatGetModuleType: Error from deviceRead")
+            l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+        }
+        else
+        {
+            l_err = deviceRead(l_pHbTarget , &o_name, l_len,
+                           DEVICE_SPD_ADDRESS(SPD::MODULE_TYPE));
+            if (l_err)
+            {
+                // Add the error log pointer as data to the ReturnCode
+                FAPI_ERR("fapiPlatGetModuleType: Error from deviceRead")
+                l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+            }
+            else
+            {
+
+                if(((l_memType == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR4) &&
+                                 (o_name == SPD::JEDEC_VER4_LRDIMM_VAL))||
+                   ((l_memType == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR3)&&
+                                 (o_name == SPD::JEDEC_VER3_LRDIMM_VAL)))
+                {
+                    o_name = fapi::ENUM_ATTR_SPD_MODULE_TYPE_LRDIMM;
+
+                }
+            }
+        }
+    }
+
+    return l_rc;
+}
+
+
+
+
 
 //******************************************************************************
 // fapiPlatSetSpdAttr function.
@@ -1096,6 +1163,34 @@ fapi::ReturnCode fapiPlatGetProcPcieBarSize (
     return  l_rc;
 }
 
+fapi::ReturnCode fapiPlatGetMBvpdMemoryDataVersion(
+    const fapi::Target * i_pTarget,
+    uint32_t & o_val)
+{
+    // Call a VPD Accessor HWP to get the data
+    fapi::ReturnCode l_rc;
+    FAPI_EXEC_HWP(l_rc, getMBvpdMemoryDataVersion, *i_pTarget, o_val);
+    return l_rc;
+}
+fapi::ReturnCode fapiPlatGetMBvpdSPDXRecordVersion(
+    const fapi::Target * i_pTarget,
+    uint32_t & o_val)
+{
+    // Call a VPD Accessor HWP to get the data
+    fapi::ReturnCode l_rc;
+    FAPI_EXEC_HWP(l_rc, getMBvpdSPDXRecordVersion, *i_pTarget, o_val);
+    return l_rc;
+}
+fapi::ReturnCode fapiPlatGetMBvpdVoltageSettingData(
+    const fapi::Target * i_pTarget,
+    uint32_t & o_val)
+{
+    // Call a VPD Accessor HWP to get the data
+    fapi::ReturnCode l_rc;
+    FAPI_EXEC_HWP(l_rc, getMBvpdVoltageSettingData, *i_pTarget, o_val);
+    return l_rc;
+}
+
 fapi::ReturnCode fapiPlatGetSingleMemberEnableAttr(
     const fapi::Target * i_pTarget,
     uint32_t & o_val)
@@ -1811,13 +1906,13 @@ fapi::ReturnCode fapiPlatGetTpVitlSpyOffsetAttr(
     return l_rc;
 }
 
-fapi::ReturnCode fapiPlatGetMemAttrData (
+fapi::ReturnCode fapiPlatGetNodeMemAttrData (
                               const fapi::Target * i_pTarget,
                               const TARGETING::ATTRIBUTE_ID i_attr,
                               uint32_t & o_val)
 {
 
-    FAPI_DBG("fapiPlatGetMemAttrData: START: i_attr=0x%X", i_attr);
+    FAPI_DBG("fapiPlatGetNodeMemAttrData: START: i_attr=0x%X", i_attr);
 
     fapi::ReturnCode l_rc;
     TARGETING::Target * l_pTgt = NULL;
@@ -1830,7 +1925,7 @@ fapi::ReturnCode fapiPlatGetMemAttrData (
 
         if (l_rc)
         {
-            FAPI_ERR("fapiPlatGetMemAttrData: Error from getTargetingTarget");
+            FAPI_ERR("fapiPlatGetNodeMemAttrData: Error from getTargetingTarget");
             break;
         }
 
@@ -1849,7 +1944,7 @@ fapi::ReturnCode fapiPlatGetMemAttrData (
         // Node list should only have 1 tgt
         if (l_nodeList.size() != 1 )
         {
-            FAPI_ERR("fapiPlatGetMemAttrData: expect 1 node %d ",
+            FAPI_ERR("fapiPlatGetNodeMemAttrData: expect 1 node %d ",
                      l_nodeList.size());
 
             /*@
@@ -1858,7 +1953,7 @@ fapi::ReturnCode fapiPlatGetMemAttrData (
              * @reasoncode   RC_NO_SINGLE_NODE
              * @userdata1    Number of Nodes
              * @userdata2    MEMBUF Target HUID
-             * @devdesc      fapiPlatGetMemAttrData could not find the single
+             * @devdesc      fapiPlatGetNodeMemAttrData could not find the single
              *               node associated with this membuf target
              */
             const bool hbSwError = true;
@@ -1980,7 +2075,7 @@ fapi::ReturnCode fapiPlatGetMemAttrData (
 
         if (!l_success)
         {
-            FAPI_ERR("fapiPlatGetMemAttrData: Error from _tryGetAttr");
+            FAPI_ERR("fapiPlatGetNodeMemAttrData: Error from _tryGetAttr");
 
             /*@
              *  @errortype
@@ -2009,7 +2104,7 @@ fapi::ReturnCode fapiPlatGetMemAttrData (
 
     } while (0);
 
-    FAPI_DBG("fapiPlatGetMemAttrData: EXIT: i_attr=0x%X --> o_val = %d (0x%X)",
+    FAPI_DBG("fapiPlatGetNodeMemAttrData: EXIT: i_attr=0x%X --> o_val = %d (0x%X)",
              i_attr, o_val, o_val);
 
     return l_rc;

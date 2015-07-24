@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdSlopeInterceptData.H,v 1.1 2013/07/18 15:35:01 whs Exp $
+// $Id: getMBvpdSlopeInterceptData.H,v 1.2 2015/09/29 15:59:42 dcrowell Exp $
 
 /**
  *  @file getMBvpdSlopeInterceptData.H
@@ -43,6 +45,10 @@ namespace fapi
        MASTER_POWER_INTERCEPT =            0x01,
        SUPPLIER_POWER_SLOPE =              0x02,
        SUPPLIER_POWER_INTERCEPT =          0x03,
+       MASTER_TOTAL_POWER_SLOPE =          0x04,
+       MASTER_TOTAL_POWER_INTERCEPT =      0x05,
+       SUPPLIER_TOTAL_POWER_SLOPE =        0x06,
+       SUPPLIER_TOTAL_POWER_INTERCEPT =    0x07,
     };
 }
 

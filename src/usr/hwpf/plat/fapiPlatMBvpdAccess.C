@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -175,6 +175,17 @@ fapi::ReturnCode MBvpdKeywordXlate(const fapi::MBvpdKeyword i_fapiKeyword,
         CVPD::K6,
         CVPD::K7,
         CVPD::K8,
+        CVPD::MM,
+        CVPD::SS,
+        CVPD::ET,
+        CVPD::VM,
+        CVPD::pd1,
+        CVPD::pdZ,
+        CVPD::pd4,
+        CVPD::pd5,
+        CVPD::pd6,
+        CVPD::pd8,
+        CVPD::pdY,
     };
     const uint8_t NUM_MBVPD_KEYWORDS =
      sizeof(mbvpdFapiKeywordToHbKeyword)/sizeof(mbvpdFapiKeywordToHbKeyword[0]);

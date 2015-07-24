@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdAttr.H,v 1.2 2015/02/24 19:22:26 whs Exp $
+// $Id: getMBvpdAttr.H,v 1.7 2015/10/06 18:04:03 janssens Exp $
 
 /**
  *  @file getMBvpdAttr.H
@@ -35,38 +35,78 @@
 #define    _HWP_MBVPDATTR_
 
 #include   <fapi.H>
+#include    <fapiUtil.H>
 #include   <fapiMBvpdAccess.H>
 
 namespace fapi
 {
 namespace getAttrData
 {
-    //MT and MR keyword layout
+    const uint32_t VM_00_MR_LAYOUT_KW_SIZE = 255;
+    const uint32_t VM_00_MR_LAYOUT_NON_PORT_HEAD_SIZE = 0;
+    const uint32_t VM_00_MR_LAYOUT_PORT_SEC_SIZE = 64;
+    const uint32_t VM_00_MT_LAYOUT_KW_SIZE = 255;
+    const uint32_t VM_00_MT_LAYOUT_NON_PORT_HEAD_SIZE = 0;
+    const uint32_t VM_00_MT_LAYOUT_PORT_SEC_SIZE = 64;
+    const uint32_t VM_01_MR_LAYOUT_KW_SIZE = 255;
+    const uint32_t VM_01_MR_LAYOUT_NON_PORT_HEAD_SIZE =2;
+    const uint32_t VM_01_MR_LAYOUT_PORT_SEC_SIZE = 64;
+    const uint32_t VM_01_MT_LAYOUT_KW_SIZE = 384;
+    const uint32_t VM_01_MT_LAYOUT_NON_PORT_HEAD_SIZE = 2;
+    const uint32_t VM_01_MT_LAYOUT_PORT_SEC_SIZE = 96;
+
+    class keywordLayout
+    {
+        public:
+        virtual uint32_t getKeywordSize()=0;
+        virtual uint32_t getNonPortHeadSize()=0;
+        virtual uint32_t getPortSectionSize()=0;
+        virtual ~keywordLayout() {}
+    };
+    class VM_00_MR_layout : public keywordLayout
+    {
+        public:
+        uint32_t getKeywordSize(){ return VM_00_MR_LAYOUT_KW_SIZE; }
+        uint32_t getNonPortHeadSize(){ return VM_00_MR_LAYOUT_NON_PORT_HEAD_SIZE; }
+        uint32_t getPortSectionSize(){ return VM_00_MR_LAYOUT_PORT_SEC_SIZE; }
+        ~VM_00_MR_layout() {}
+    };
+    class VM_00_MT_layout : public keywordLayout
+    {
+        public:
+        uint32_t getKeywordSize(){ return VM_00_MT_LAYOUT_KW_SIZE; }
+        uint32_t getNonPortHeadSize(){ return VM_00_MT_LAYOUT_NON_PORT_HEAD_SIZE; }
+        uint32_t getPortSectionSize(){ return VM_00_MT_LAYOUT_PORT_SEC_SIZE; }
+        ~VM_00_MT_layout() {}
+    };
+    class VM_01_MR_layout : public keywordLayout
+    {
+        public:
+        uint32_t getKeywordSize(){ return VM_01_MR_LAYOUT_KW_SIZE; }
+        uint32_t getNonPortHeadSize(){ return VM_01_MR_LAYOUT_NON_PORT_HEAD_SIZE; }
+        uint32_t getPortSectionSize(){ return VM_01_MR_LAYOUT_PORT_SEC_SIZE; }
+        ~VM_01_MR_layout() {}
+    };
+    class VM_01_MT_layout : public keywordLayout
+    {
+        public:
+        uint32_t getKeywordSize(){ return VM_01_MT_LAYOUT_KW_SIZE; }
+        uint32_t getNonPortHeadSize(){ return VM_01_MT_LAYOUT_NON_PORT_HEAD_SIZE; }
+        uint32_t getPortSectionSize(){ return VM_01_MT_LAYOUT_PORT_SEC_SIZE; }
+        ~VM_01_MT_layout() {}
+    };
+    class layoutFactory
+    {
+        public:     
+        static keywordLayout* getLayout(const uint32_t &i_keyword ,const uint32_t &i_ver);
+    };
+    
+
+    //MT and MR keyword layout for VM ver 0.
     const uint8_t NUM_MBA =  2;    //There are 2 MBAs per Centaur memory buffer
     const uint8_t NUM_PORTS = 2;   //Each MBA has 2 ports
     const uint8_t NUM_DIMMS = 2;   //Each port has 2 DIMMs
     const uint8_t NUM_RANKS = 4;   //Number of ranks
-    //Each port has 64 bytes of space, but only 62 bytes is useable
-    const uint8_t PORT_SECTION_SIZE = 64; 
-    const uint8_t PORT_SECTION_USED = 62; 
-
-    struct port_attributes
-    {
-       uint8_t port_attr[PORT_SECTION_USED];
-       uint8_t nonport_data[PORT_SECTION_SIZE-PORT_SECTION_USED];
-    };
-    struct mba_attributes
-    {
-        port_attributes mba_port[NUM_PORTS];
-    };
-    struct attr_keyword
-    {
-        mba_attributes mb_mba[NUM_MBA];
-    };
-    // The actual size of the keyword is 255 bytes, which is one byte short
-    // of the attr_keyword struct. One byte is used for the size in the vpd.
-    // As long as there is at least one reserved attribute, then all will fit.
-    const uint32_t ATTR_KEYWORD_SIZE = 255;  // keyword size for attributes
 
     //  DIMM types
     enum DimmType
@@ -76,14 +116,19 @@ namespace getAttrData
         ISDIMM   = 2,
     };
 
+    //Exceptions for MT keyword layout for VM ver 1.
+    
+
     //  Versions to check for
     enum VpdVersion
     {
         VD_VER  = 0x010000,        // Version came from VD keyword
         VZ_VER  = 0x020000,        // Version came from VZ keyword
+        VM_VER  = 0x040000,        // Version came from VM keyword
         ALL_VD  = VD_VER,          // Base value for VD keyword (version=0)
         ALL_VZ  = VZ_VER,          // Base value for VZ keyword (version=0)
-        ALL_VER = VD_VER|VZ_VER,   // Base value for all versions
+        ALL_VM  = VM_VER,          // Base value for VM keyword (version=0)
+        ALL_VER = VD_VER|VZ_VER|VM_VER,   // Base value for all versions
 
         // VZ values
         VZ_10   = VZ_VER | 0x3130, // Version 6.0 is ascii "10"
@@ -91,6 +136,14 @@ namespace getAttrData
 
         // VD values
         VD_01   = VD_VER | 0x3031, // VD version "01"
+ 
+        // VM values
+        VM_01   = VM_VER | 0x0001, // VM version "01" in hex
+
+        // Supported VM version range
+        // As of now only VM_01 is supported
+        VM_SUPPORTED_HIGH_VER = 0x01,
+        VM_NOT_SUPPORTED = 0x00,
 
         VER_MASK= 0xffff,          // Just version
         INVALID_VER = 0,           // Invalid initialization value
@@ -166,6 +219,14 @@ namespace getAttrData
         SPECIAL_PROCESSING_MASK = 0xFF00,
     };
 
+//  VM keyword defination
+    struct MBvpdVMKeyword
+    {
+        uint8_t              iv_version;
+        uint8_t              iv_systemType;
+        uint8_t              iv_systemType_ext;
+        uint8_t              iv_dataVersion;
+    };
 //  Attribute definition
     struct MBvpdAttrDef
     {
@@ -340,6 +401,22 @@ template<>class MBvpdAttrDataType<fapi::ATTR_VPD_CEN_PHASE_ROT_M1_CNTL_ODT0>
     { public: typedef fapi::ATTR_VPD_CEN_PHASE_ROT_M1_CNTL_ODT0_Type Type; };
 template<>class MBvpdAttrDataType<fapi::ATTR_VPD_CEN_PHASE_ROT_M1_CNTL_ODT1>
     { public: typedef fapi::ATTR_VPD_CEN_PHASE_ROT_M1_CNTL_ODT1_Type Type; };
+template<>class MBvpdAttrDataType<fapi::ATTR_VPD_MR_VERSION_BYTE>
+    { public: typedef fapi::ATTR_VPD_MR_VERSION_BYTE_Type Type; };
+template<>class MBvpdAttrDataType<fapi::ATTR_VPD_MR_DATA_CONTROL_BYTE>
+    { public: typedef fapi::ATTR_VPD_MR_DATA_CONTROL_BYTE_Type Type; };
+template<>class MBvpdAttrDataType<fapi::ATTR_VPD_PERIODIC_MEMCAL_MODE_OPTIONS>
+    { public: typedef fapi::ATTR_VPD_PERIODIC_MEMCAL_MODE_OPTIONS_Type Type; };
+template<>class MBvpdAttrDataType<fapi::ATTR_VPD_MT_VERSION_BYTE>
+    { public: typedef fapi::ATTR_VPD_MT_VERSION_BYTE_Type Type; };
+template<>class MBvpdAttrDataType<fapi::ATTR_VPD_MT_DATA_CONTROL_BYTE>
+    { public: typedef fapi::ATTR_VPD_MT_DATA_CONTROL_BYTE_Type Type; };
+template<>class MBvpdAttrDataType<fapi::ATTR_VPD_DRAM_RTT_PARK>
+    { public: typedef fapi::ATTR_VPD_DRAM_RTT_PARK_Type Type; };
+template<>class MBvpdAttrDataType<fapi::ATTR_VPD_RD_CTR_WINDAGE_OFFSET>
+    { public: typedef fapi::ATTR_VPD_RD_CTR_WINDAGE_OFFSET_Type Type; };
+
+
 // There is no ATTR_VPD_DRAM_2N_MODE attribute. getMBvpdAttr is called
 // directly using ATTR_VPD_DRAM_2N_MODE_ENABLED as an ID.
 //template<>class MBvpdAttrDataType<fapi::ATTR_VPD_DRAM_2N_MODE>
@@ -381,6 +458,8 @@ typedef fapi::ReturnCode (*getMBvpdAttr_FP_t)
      (const fapi::Target &, const fapi::AttributeId,
       void *, const size_t);
 
+
+
 extern "C"
 {
 /**
@@ -399,6 +478,16 @@ fapi::ReturnCode getMBvpdAttr(
                               const fapi::AttributeId i_attr,
                               void  * o_pVal,
                               const size_t i_valSize);
+
+/**
+ *  @brief Find dimm info; parent, type, position
+ */
+fapi::ReturnCode findDimmInfo (const fapi::Target   & i_mbaTarget,
+                                     fapi::Target   & o_mbTarget,
+                                     uint8_t        & o_pos,
+                                     fapi::getAttrData::DimmType       & o_dimmType);
+
+
 }
 
 #endif
