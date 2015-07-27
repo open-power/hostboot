@@ -155,10 +155,55 @@ rule IoNvFir_0
 
 group gIoNvFir_0 filter singlebit
 {
-    /** IONVFIR_0[0:63]
-     *  IONVFIR_0 errors
+    /** IONVFIR_0[0]
+     *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoNvFir_0, bit(0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|59|60|61|62|63)) ? defaultMaskedError;
+    (IoNvFir_0, bit(0)) ? SelfMedThr32PerDay;
+
+    /** IONVFIR_0[1]
+     *  FIR_TX_INVALID_STATE_OR_PARITY_ERROR
+     */
+    (IoNvFir_0, bit(1)) ? SelfMedThr32PerDay;
+
+    /** IONVFIR_0[2]
+     *  FIR_GCR_HANG_ERROR
+     */
+    (IoNvFir_0, bit(2)) ? SelfMedThr32PerDay;
+
+    /** IONVFIR_0[3:12]
+     *  RESERVED
+     */
+    (IoNvFir_0, bit(3|4|5|6|7|8|9|10|11|12)) ? defaultMaskedError;
+
+    /** IONVFIR_0[13:22]
+     *  RESERVED
+     */
+    (IoNvFir_0, bit(13|14|15|16|17|18|19|20|21|22)) ? defaultMaskedError;
+
+    /** IONVFIR_0[23:32]
+     *  RESERVED
+     */
+    (IoNvFir_0, bit(23|24|25|26|27|28|29|30|31|32)) ? defaultMaskedError;
+
+    /** IONVFIR_0[33:42]
+     *  RESERVED
+     */
+    (IoNvFir_0, bit(33|34|35|36|37|38|39|40|41|42)) ? defaultMaskedError;
+
+    /** IONVFIR_0[43:47]
+     *  RESERVED
+     */
+    (IoNvFir_0, bit(43|44|45|46|47)) ? defaultMaskedError;
+
+    /** IONVFIR_0[48]
+     *  FIR_SCOMFIR_ERROR
+     */
+    (IoNvFir_0, bit(48)) ? defaultMaskedError;
+
+    /** IONVFIR_0[49]
+     *  FIR_SCOMFIR_ERROR_CLONE
+     */
+    (IoNvFir_0, bit(49)) ? defaultMaskedError;
 };
 
 rule IoNvFir_1
@@ -171,10 +216,55 @@ rule IoNvFir_1
 
 group gIoNvFir_1 filter singlebit
 {
-    /** IONVFIR_1[0:63]
-     *  IONVFIR_1 errors
+    /** IONVFIR_1[0]
+     *  FIR_RX_INVALID_STATE_OR_PARITY_ERROR
      */
-    (IoNvFir_1, bit(0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|59|60|61|62|63)) ? defaultMaskedError;
+    (IoNvFir_1, bit(0)) ? SelfMedThr32PerDay;
+
+    /** IONVFIR_1[1]
+     *  FIR_TX_INVALID_STATE_OR_PARITY_ERROR
+     */
+    (IoNvFir_1, bit(1)) ? SelfMedThr32PerDay;
+
+    /** IONVFIR_1[2]
+     *  FIR_GCR_HANG_ERROR
+     */
+    (IoNvFir_1, bit(2)) ? SelfMedThr32PerDay;
+
+    /** IONVFIR_1[3:12]
+     *  RESERVED
+     */
+    (IoNvFir_1, bit(3|4|5|6|7|8|9|10|11|12)) ? defaultMaskedError;
+
+    /** IONVFIR_1[13:22]
+     *  RESERVED
+     */
+    (IoNvFir_1, bit(13|14|15|16|17|18|19|20|21|22)) ? defaultMaskedError;
+
+    /** IONVFIR_1[23:32]
+     *  RESERVED
+     */
+    (IoNvFir_1, bit(23|24|25|26|27|28|29|30|31|32)) ? defaultMaskedError;
+
+    /** IONVFIR_1[33:42]
+     *  RESERVED
+     */
+    (IoNvFir_1, bit(33|34|35|36|37|38|39|40|41|42)) ? defaultMaskedError;
+
+    /** IONVFIR_1[43:47]
+     *  RESERVED
+     */
+    (IoNvFir_1, bit(43|44|45|46|47)) ? defaultMaskedError;
+
+    /** IONVFIR_1[48]
+     *  FIR_SCOMFIR_ERROR
+     */
+    (IoNvFir_1, bit(48)) ? defaultMaskedError;
+
+    /** IONVFIR_1[49]
+     *  FIR_SCOMFIR_ERROR_CLONE
+     */
+    (IoNvFir_1, bit(49)) ? defaultMaskedError;
 };
 
 rule NpuFir
@@ -185,13 +275,309 @@ rule NpuFir
 
 group gNpuFir filter singlebit
 {
-    /** NPUFIR[0:63]
-     *  NPUFIR errors
+   /** NPUFIR[0]
+     *  TVT Entry Invalid Single PE
      */
-    (NpuFir, bit(0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|59|60|61|62|63)) ? defaultMaskedError;
+    (NpuFir, bit(0)) ? defaultMaskedError;
+
+    /** NPUFIR[1]
+     *  TVT Address Range Error Single PE
+     */
+    (NpuFir, bit(1)) ? defaultMaskedError;
+
+    /** NPUFIR[2]
+     *  TCE Page Access Error Single PE
+     */
+    (NpuFir, bit(2)) ? defaultMaskedError;
+
+    /** NPUFIR[3]
+     *  TCE Cache Multiple Hit Error Fatal Error
+     */
+    (NpuFir, bit(3)) ? defaultMaskedError;
+
+    /** NPUFIR[4]
+     *  TCE Request Timeout Error Fatal Error
+     */
+    (NpuFir, bit(4)) ? defaultMaskedError;
+
+    /** NPUFIR[5]
+     *  TCE Fetch Data Error Fatal Error
+     */
+    (NpuFir, bit(5)) ? defaultMaskedError;
+
+    /** NPUFIR[6]
+     *  TCE Directory Parity Error Informational
+     */
+    (NpuFir, bit(6)) ? calloutSelfMedTh32NoGard;
+
+    /** NPUFIR[7]
+     *  TCE Cache Data Array Parity Error Informational
+     */
+    (NpuFir, bit(7)) ? calloutSelfMedTh32NoGard;
+
+    /** NPUFIR[8]
+     *  Addr Translation Effective Address Array UE Fatal Error
+     */
+    (NpuFir, bit(8)) ? defaultMaskedError;
+
+    /** NPUFIR[9]
+     *  Addr Translation Effective Address Array CE Informational
+     */
+    (NpuFir, bit(9)) ? calloutSelfMedTh32NoGard;
+
+    /** NPUFIR[10]
+     *  TVT Parity Error Fatal Error
+     */
+    (NpuFir, bit(10)) ? defaultMaskedError;
+
+    /** NPUFIR[11]
+     *  LSI Source ID Register Parity Error Fatal Error
+     */
+    (NpuFir, bit(11)) ? defaultMaskedError;
+
+    /** NPUFIR[12]
+     *  Interrupt Represent Timer Register Parity Error Fatal Error
+     */
+    (NpuFir, bit(12)) ? defaultMaskedError;
+
+    /** NPUFIR[13]
+     *  IODA Address Register Parity Error Fatal Error
+     */
+    (NpuFir, bit(13)) ? defaultMaskedError;
+
+    /** NPUFIR[14]
+     *  NPU Control Register Parity Error Fatal Error
+     */
+    (NpuFir, bit(14)) ? defaultMaskedError;
+
+    /** NPUFIR[15]
+     *  NPU Timeout Control Register Parity Error Fatal Error
+     */
+    (NpuFir, bit(15)) ? defaultMaskedError;
+
+    /** NPUFIR[16]
+     *  Invalid IODA Table Select Error Fatal Error
+     */
+    (NpuFir, bit(16)) ? defaultMaskedError;
+
+    /** NPUFIR[17]
+     *  Invalid MMIO Address Decode Fatal Error
+     */
+    (NpuFir, bit(17)) ? defaultMaskedError;
+
+    /** NPUFIR[18]
+     *  TCE Fetch Address Error Single PE
+     */
+    (NpuFir, bit(18)) ? defaultMaskedError;
+
+    /** NPUFIR[19]
+     *  TCE tree walk CE error Informational
+     */
+    (NpuFir, bit(19)) ? calloutSelfMedTh32NoGard;
+
+    /** NPUFIR[20]
+     *  Spare FIR Unused
+     */
+    (NpuFir, bit(20)) ? defaultMaskedError;
+
+    /** NPUFIR[21]
+     *  MMIO/scom register error
+     */
+    (NpuFir, bit(21)) ? defaultMaskedError;
+
+    /** NPUFIR[22]
+     *  NTL Array CE Informational
+     */
+    (NpuFir, bit(22)) ? calloutSelfMedTh32NoGard;
+
+    /** NPUFIR[23]
+     *  NTL Array UE Fatal Error
+     */
+    (NpuFir, bit(23)) ? defaultMaskedError;
+
+    /** NPUFIR[24]
+     *  DMA Timeout Fatal Error
+     */
+    (NpuFir, bit(24)) ? defaultMaskedError;
+
+    /** NPUFIR[25]
+     *  NTL Control Error Fatal Error
+     */
+    (NpuFir, bit(25)) ? defaultMaskedError;
+
+    /** NPUFIR[26]
+     *  Invalid FLIT Received Fatal Error
+     */
+    (NpuFir, bit(26)) ? defaultMaskedError;
+
+    /** NPUFIR[27]
+     *  DL/TL Interface Parity Error
+     */
+    (NpuFir, bit(27)) ? defaultMaskedError;
+
+    /** NPUFIR[28]
+     *  TL Credit Error Fatal Error
+     */
+    (NpuFir, bit(28)) ? defaultMaskedError;
+
+    /** NPUFIR[29]
+     *  TL Packet Overflow Fatal Error
+     */
+    (NpuFir, bit(29)) ? defaultMaskedError;
+
+    /** NPUFIR[30]
+     *  LMD Poison Single PE
+     */
+    (NpuFir, bit(30)) ? defaultMaskedError;
+
+    /** NPUFIR[31]
+     *  LMD Stomp/CRC Error
+     */
+    (NpuFir, bit(31)) ? SelfMedThr32PerDay;
+
+    /** NPUFIR[32]
+     *  CQ Parity Error Fatal Error
+     */
+    (NpuFir, bit(32)) ? defaultMaskedError;
+
+    /** NPUFIR[33]
+     *  PowerBus Data Array CE Informational
+     */
+    (NpuFir, bit(33)) ? calloutSelfMedTh32NoGard;
+
+    /** NPUFIR[34]
+     *  PowerBus Data Array UE Fatal Error
+     */
+    (NpuFir, bit(34)) ? defaultMaskedError;
+
+    /** NPUFIR[35]
+     *  PowerBus Data Array SUE Fatal Error
+     */
+    (NpuFir, bit(35)) ? defaultMaskedError;
+
+    /** NPUFIR[36]
+     *  CQ ECC CE Informational
+     */
+    (NpuFir, bit(36)) ? calloutSelfMedTh32NoGard;
+
+    /** NPUFIR[37]
+     *  CQ ECC UE Fatal Error
+     */
+    (NpuFir, bit(37)) ? defaultMaskedError;
+
+    /** NPUFIR[38]
+     *  PowerBus Data Hang Fatal Error
+     */
+    (NpuFir, bit(38)) ? defaultMaskedError;
+
+    /** NPUFIR[39]
+     *  PowerBus Command Hang Fatal Error
+     */
+    (NpuFir, bit(39)) ? defaultMaskedError;
+
+    /** NPUFIR[40]
+     *  Address Error on Read
+     */
+    (NpuFir, bit(40)) ? defaultMaskedError;
+
+    /** NPUFIR[41]
+     *  PB Address Error non-Read Fatal Error
+     */
+    (NpuFir, bit(41)) ? defaultMaskedError;
+
+    /** NPUFIR[42]
+     *  PowerBus Protocol Error Fatal Error
+     */
+    (NpuFir, bit(42)) ? defaultMaskedError;
+
+    /** NPUFIR[43]
+     *  Register Parity Error Fatal Error
+     */
+    (NpuFir, bit(43)) ? defaultMaskedError;
+
+    /** NPUFIR[44]
+     *  Unused ECC Error Unused
+     */
+    (NpuFir, bit(44)) ? defaultMaskedError;
+
+    /** NPUFIR[45]
+     *  Unused Link Error Unused
+     */
+    (NpuFir, bit(45)) ? defaultMaskedError;
+
+    /** NPUFIR[46]
+     *  Unused Link Error Unused
+     */
+    (NpuFir, bit(46)) ? defaultMaskedError;
+
+    /** NPUFIR[47]
+     *  Unused Link Abort Unused
+     */
+    (NpuFir, bit(47)) ? defaultMaskedError;
+
+    /** NPUFIR[48]
+     *  CQ/NTL Interface Hang Fatal Error
+     */
+    (NpuFir, bit(48)) ? defaultMaskedError;
+
+    /** NPUFIR[49]
+     *  Unused Secure Access Error Unused
+     */
+    (NpuFir, bit(49)) ? defaultMaskedError;
+
+    /** NPUFIR[50]
+     *  Scom Error Fatal Error
+     */
+    (NpuFir, bit(50)) ? defaultMaskedError;
+
+    /** NPUFIR[51]
+     *  CQ spare Unused
+     */
+    (NpuFir, bit(51)) ? defaultMaskedError;
+
+    /** NPUFIR[52]
+     *  Spare FIR Unused
+     */
+    (NpuFir, bit(52)) ? defaultMaskedError;
+
+    /** NPUFIR[53]
+     *  Spare FIR Unused
+     */
+    (NpuFir, bit(53)) ? defaultMaskedError;
+
+    /** NPUFIR[54]
+     *  NDL FIR 0 Single PE
+     */
+    (NpuFir, bit(54)) ? defaultMaskedError;
+
+    /** NPUFIR[55]
+     *  NDL FIR 1 Single PE
+     */
+    (NpuFir, bit(55)) ? defaultMaskedError;
+
+    /** NPUFIR[56]
+     *  Scom Fir Error Fatal Error
+     */
+    (NpuFir, bit(56)) ? defaultMaskedError;
+
+    /** NPUFIR[57]
+     *  Scom Fir Error 2 Fatal Error
+     */
+    (NpuFir, bit(57)) ? defaultMaskedError;
+
+    /** NPUFIR[58:63]
+     *  Reserved Unused
+     */
+    (NpuFir, bit(58|59|60|61|62|63)) ? defaultMaskedError;
 };
 
 ################################################################################
 # Actions specific to NV chiplet
 ################################################################################
 
+/** Callout Self, threshold 32 per day, no garding. */
+actionclass calloutSelfMedTh32NoGard
+{
+    calloutSelfMedNoGard;
+    threshold32pday;
+};
