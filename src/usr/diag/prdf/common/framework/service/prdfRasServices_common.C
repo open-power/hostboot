@@ -154,6 +154,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     ////////////////////////////////////////////////////////////////
     if (i_attnType == MACHINE_CHECK)
     {
+        severityParm = ERRL_SEV_UNRECOVERABLE;
+
         #ifdef __HOSTBOOT_MODULE
 
         // Do nothing. Saved SDCs only supported on FSP.
@@ -163,8 +165,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         #endif
 
         #else
-
-        severityParm = ERRL_SEV_UNRECOVERABLE;
 
         // Check for SUE-CS condition flags.
         if ((!io_sdc.IsUERE() ) &&
