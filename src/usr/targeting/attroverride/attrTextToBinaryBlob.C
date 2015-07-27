@@ -101,7 +101,8 @@ const struct TargStrToType
     {"p8.abus",         fapi::TARGET_TYPE_ABUS_ENDPOINT,TARGETING::TYPE_ABUS},
     {"centaur",         fapi::TARGET_TYPE_MEMBUF_CHIP,  TARGETING::TYPE_MEMBUF},
     {"p8",              fapi::TARGET_TYPE_PROC_CHIP,    TARGETING::TYPE_PROC},
-    {"dimm",            fapi::TARGET_TYPE_DIMM,         TARGETING::TYPE_DIMM}
+    {"dimm",            fapi::TARGET_TYPE_DIMM,         TARGETING::TYPE_DIMM},
+    {"pu",              fapi::TARGET_TYPE_PROC_CHIP,    TARGETING::TYPE_PROC}
 };
 
 bool operator==(const TargStrToType& i, const std::string& v)
@@ -532,10 +533,16 @@ void AttrTextToBinaryBlob::attrFileTargetLineToData(
 
         // Figure out the target type
         const TargStrToType* last =
-            &TARG_STR_TO_TYPE[sizeof(TARG_STR_TO_TYPE)/sizeof(TargStrToType)];
+          &TARG_STR_TO_TYPE[sizeof(TARG_STR_TO_TYPE)/sizeof(TargStrToType) -1];
+
+        //not sure how long the string representing the title will be
+        //therefore we must look up the next colon and take all chars up to
+        //the colon and assume that is the string representation of the target.
+        size_t nextColon = l_line.find(':');
+        std::string l_targetString = l_line.substr(0, nextColon);
 
         const TargStrToType* item =
-            std::find(&TARG_STR_TO_TYPE[0], last, l_line);
+            std::find(&TARG_STR_TO_TYPE[0], last, l_targetString);
 
         if (item != last)
         {
@@ -544,6 +551,7 @@ void AttrTextToBinaryBlob::attrFileTargetLineToData(
             l_line = l_line.substr(strlen(item->iv_pString));
             l_sysTarget = false;
         }
+
 
         // For a non-system target, figure out the position and unit position
         if (l_sysTarget == false)
