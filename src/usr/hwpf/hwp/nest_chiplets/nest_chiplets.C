@@ -23,9 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
-   @file nest_chiplets.C                                                
+   @file nest_chiplets.C
  *
- *  Support file for IStep: nest_chiplets                                                    
+ *  Support file for IStep: nest_chiplets
  *   Nest Chiplets
  *
  *  HWP_IGNORE_VERSION_CHECK
@@ -63,7 +63,7 @@
 
 //  --  prototype   includes    --
 //  Add any customized routines that you don't want overwritten into
-//      "start_clocks_on_nest_chiplets_custom.C" and include 
+//      "start_clocks_on_nest_chiplets_custom.C" and include
 //      the prototypes here.
 //  #include    "nest_chiplets_custom.H"
 #include    "nest_chiplets.H"
@@ -119,6 +119,11 @@ void*    call_proc_a_x_pci_dmi_pll_initf( void    *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_proc_a_x_pci_dmi_pll_initf entry" );
 
+    fapi::ReturnCode rc;
+
+    uint8_t abus_enable_attr = ENUM_ATTR_PROC_A_ENABLE_DISABLE;
+    uint8_t xbus_enable_attr = ENUM_ATTR_PROC_X_ENABLE_DISABLE;
+
     TARGETING::TargetHandleList l_procTargetList;
     getAllChips(l_procTargetList, TYPE_PROC);
 
@@ -139,19 +144,38 @@ void*    call_proc_a_x_pci_dmi_pll_initf( void    *io_pArgs )
         bool l_startAbusPll = false;
         bool l_startPCIEPll = false;
         bool l_startDMIPll = false;
-        
-        TARGETING::TargetHandleList l_xbus;
-        getChildChiplets( l_xbus, l_proc_target, TYPE_XBUS );
-        if (l_xbus.size() > 0)
+
+
+        rc = FAPI_ATTR_GET(ATTR_PROC_X_ENABLE,
+                &l_fapi_proc_target,
+                xbus_enable_attr);
+
+        if (!rc.ok())
         {
-            l_startXbusPll = true;
+            FAPI_ERR("Error querying ATTR_PROC_X_ENABLE");
+            l_err = fapi::fapiRcToErrl(rc);
+            break;
         }
 
-        TARGETING::TargetHandleList l_abus;
-        getChildChiplets( l_abus, l_proc_target, TYPE_ABUS );
-        if (l_abus.size() > 0)
+        if( xbus_enable_attr == fapi::ENUM_ATTR_PROC_X_ENABLE_ENABLE )
         {
-            l_startAbusPll = true;
+           l_startXbusPll = true;
+        }
+
+        rc = FAPI_ATTR_GET(ATTR_PROC_A_ENABLE,
+                &l_fapi_proc_target,
+                abus_enable_attr);
+
+        if (!rc.ok())
+        {
+            FAPI_ERR("Error querying ATTR_PROC_A_ENABLE");
+            l_err = fapi::fapiRcToErrl(rc);
+            break;
+        }
+
+        if( abus_enable_attr == fapi::ENUM_ATTR_PROC_A_ENABLE_ENABLE )
+        {
+           l_startAbusPll = true;
         }
 
         TARGETING::TargetHandleList l_pci;
@@ -170,11 +194,11 @@ void*    call_proc_a_x_pci_dmi_pll_initf( void    *io_pArgs )
 
         //  call proc_a_x_pci_dmi_pll_initf
         FAPI_INVOKE_HWP(l_err, proc_a_x_pci_dmi_pll_initf,
-                        l_fapi_proc_target,
-                        l_startXbusPll,   // xbus
-                        l_startAbusPll,   // abus
-                        l_startPCIEPll,   // pcie
-                        l_startDMIPll);   // dmi
+                l_fapi_proc_target,
+                l_startXbusPll,   // xbus
+                l_startAbusPll,   // abus
+                l_startPCIEPll,   // pcie
+                l_startDMIPll);   // dmi
 
         if (l_err)
         {
@@ -198,6 +222,16 @@ void*    call_proc_a_x_pci_dmi_pll_initf( void    *io_pArgs )
                        "SUCCESS: proc_a_x_pci_dmi_pll_initf HWP( )" );
         }
     }
+
+    if (l_err)
+    {
+        // Create IStep error log and cross reference to error that occurred
+        l_StepError.addErrorDetails( l_err );
+
+        // Commit Error
+        errlCommit( l_err, HWPF_COMP_ID );
+    }
+
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_a_x_pci_dmi_pll_initf exit" );
@@ -493,6 +527,53 @@ void*    call_proc_startclock_chiplets( void    *io_pArgs )
 
             break;
         }
+        uint8_t abus_enable_attr = ENUM_ATTR_PROC_A_ENABLE_DISABLE;
+        uint8_t xbus_enable_attr = ENUM_ATTR_PROC_X_ENABLE_DISABLE;
+
+        fapi::ReturnCode rc;
+        bool l_startXbusPll = false;
+        bool l_startAbusPll = false;
+        bool l_startPCIEPll = false;
+
+        rc = FAPI_ATTR_GET(ATTR_PROC_X_ENABLE,
+                &l_fapi_proc_target,
+                xbus_enable_attr);
+
+        if (!rc.ok())
+        {
+            FAPI_ERR("Error querying ATTR_PROC_X_ENABLE");
+            l_err = fapi::fapiRcToErrl(rc);
+            break;
+        }
+
+        if( xbus_enable_attr == fapi::ENUM_ATTR_PROC_X_ENABLE_ENABLE )
+        {
+           l_startXbusPll = true;
+        }
+
+        rc = FAPI_ATTR_GET(ATTR_PROC_A_ENABLE,
+                &l_fapi_proc_target,
+                abus_enable_attr);
+
+        if (!rc.ok())
+        {
+            FAPI_ERR("Error querying ATTR_PROC_A_ENABLE");
+            l_err = fapi::fapiRcToErrl(rc);
+            break;
+        }
+
+        if( abus_enable_attr == fapi::ENUM_ATTR_PROC_A_ENABLE_ENABLE )
+        {
+           l_startAbusPll = true;
+        }
+
+        TARGETING::TargetHandleList l_pci;
+        getChildChiplets( l_pci, l_proc_target, TYPE_PCI );
+        if (l_pci.size() > 0)
+        {
+            l_startPCIEPll = true;
+        }
+
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "Running proc_startclock_chiplets HWP on "
@@ -501,9 +582,9 @@ void*    call_proc_startclock_chiplets( void    *io_pArgs )
         //  call the HWP with each fapi::Target
         FAPI_INVOKE_HWP(l_err, proc_start_clocks_chiplets,
                         l_fapi_proc_target,
-                        true,   // xbus
-                        true,   // abus
-                        true);  // pcie
+                        l_startXbusPll,   // xbus
+                        l_startAbusPll,   // abus
+                        l_startPCIEPll);  // pcie
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -527,6 +608,16 @@ void*    call_proc_startclock_chiplets( void    *io_pArgs )
                        "SUCCESS :  proc_startclock_chiplets HWP( )" );
         }
     }
+
+    if (l_err)
+    {
+        // Create IStep error log and cross reference to error that occurred
+        l_StepError.addErrorDetails( l_err );
+
+        // Commit Error
+        errlCommit( l_err, HWPF_COMP_ID );
+    }
+
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_startclock_chiplets exit" );
