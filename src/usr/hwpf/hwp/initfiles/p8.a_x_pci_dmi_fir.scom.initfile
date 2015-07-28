@@ -1,4 +1,4 @@
-#-- $Id: p8.a_x_pci_dmi_fir.scom.initfile,v 1.13 2015/03/18 22:54:37 jmcgill Exp $
+#-- $Id: p8.a_x_pci_dmi_fir.scom.initfile,v 1.14 2015/07/17 16:52:32 jmcgill Exp $
 #-------------------------------------------------------------------------------
 #--
 #-- (C) Copyright International Business Machines Corp. 2011
@@ -820,7 +820,8 @@ scom 0x0804000D {
 #-- ES.PBES_WRAP_TOP.TPC.FIR_MASK
 scom 0x08040002 {
     bits, scom_data,          expr;
-    0:63, 0x23FFFFE000000000, (abus_enabled);
+    0:63, 0x23FFFFE000000000, (abus_enabled) && (!nv_present);
+    0:63, 0x20FFFFE000000000, (abus_enabled) && (nv_present);
 }
 
 #-- configure chiplet trace arrays to stop on checkstop
