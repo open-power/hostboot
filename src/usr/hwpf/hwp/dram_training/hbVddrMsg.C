@@ -235,7 +235,19 @@ void HBVddrMsg::createVddrData(
     do{
 
         TARGETING::TargetHandleList membufTargetList;
-        getAllChips(membufTargetList, TYPE_MEMBUF);
+        //When request is a disable command, disable all present Centaurs
+        // in case we go through a reconfigure loop
+        if(i_requestType == HB_VDDR_DISABLE)
+        {
+            getChipResources( membufTargetList, TYPE_MEMBUF,
+                              UTIL_FILTER_PRESENT );
+        }
+        //When the request is an enable command, enable only functional
+        // centaurs.
+        else
+        {
+            getAllChips(membufTargetList, TYPE_MEMBUF);
+        }
 
         TARGETING::Target* pMembuf =NULL;
         for (TARGETING::TargetHandleList::const_iterator

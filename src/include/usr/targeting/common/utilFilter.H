@@ -52,6 +52,8 @@ namespace TARGETING
     };
 
 
+
+
 /**
  * @brief Predicate function to sort by HUID
  *
@@ -132,6 +134,7 @@ void getChipletResources(TARGETING::TargetHandleList & o_vector,
  */
 void getAllChips(TARGETING::TargetHandleList & o_vector,
                       TYPE i_type, bool i_functional = true );
+
 
 /**
  * @brief Populate the o_vector with target chiplet pointers based on the
