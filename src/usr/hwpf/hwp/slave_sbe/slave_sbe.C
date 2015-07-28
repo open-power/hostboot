@@ -591,18 +591,30 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
 
         if (l_errl)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR : proc_getecid",
-                      " failed, returning errorlog" );
+            if (l_pProcTarget->getAttr<ATTR_HWAS_STATE>().functional)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR : proc_getecid",
+                          " failed, returning errorlog" );
 
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_errl );
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_errl );
 
-            // Create IStep error log and cross reference error that occurred
-            l_stepError.addErrorDetails( l_errl );
+                // Create IStep error log, cross reference error that occurred
+                l_stepError.addErrorDetails( l_errl );
 
-            // Commit error log
-            errlCommit( l_errl, HWPF_COMP_ID );
+                // Commit error log
+                errlCommit( l_errl, HWPF_COMP_ID );
+            }
+            else // Not functional, proc deconfigured, don't report error
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR : proc_getecid",
+                          " failed, proc target deconfigured" );
+
+                delete l_errl;
+                l_errl = NULL;
+            }
         }
         else
         {
