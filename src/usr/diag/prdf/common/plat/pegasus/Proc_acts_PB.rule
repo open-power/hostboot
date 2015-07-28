@@ -1182,10 +1182,22 @@ group gPbWestEastFir filter singlebit
      */
     (PbWestFir, bit(29|30|31)) ? defaultMaskedError;
 
-    /** PBEASTFIR[29|30|31]
-     *  PB_EAST_FIR_SPARE_0,1 and 2
+    /** PBEASTFIR[29|30]
+     *  PB_EAST_FIR_SPARE
      */
-    (PbEastFir, bit(29|30|31)) ? defaultMaskedError;
+    (PbEastFir, bit(29|30)) ? defaultMaskedError;
+
+    /** PBEASTFIR[31]
+     *  SW initiated reboot with diagnostics
+     */
+    # Intended to be used by OPAL to initiate a reboot if there is an issue like
+    # a memory UE that prevents OPAL to continue loading. Generally, PRD should
+    # be able to isolate to the memory UE and blame that as the root cause,
+    # however, it is possible there are no hardware errors and OPAL just needs
+    # to force a reboot. Therefore, the callout will be 2nd Level Support. It is
+    # possible that PRD may need to force memory diagnostics on all memory but
+    # that is not a requirement at this time.
+    (PbEastFir, bit(31)) ? callout2ndLvlMedThr1;
 
     /** PBWESTFIR[32]
      *  FIR_SCOM_WEST_ERR
