@@ -1,0 +1,66 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p9/procedures/xml/error_info/p9_pba_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_PBA_COHERENT_UTILS_INVALID_ARGS</rc>
+    <description>
+      Procedure: p9_pba_coherent_utils
+      PBA access or setup not attempted, PBA access or setup is stopped
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>ADDRESS</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_PBA_COHERENT_UTILS_RESET_ERR</rc>
+    <description>
+      Procedure: p9_pba_coherent_utils
+      PBA Reset had a problem, the PBA was not actually reset
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>RDDATA</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_PBA_STATUS_ERR</rc>
+    <description>
+      Procedure: p9_pba_coherent_utils
+      PBA Read Status, Write Status, or Reset Register had a problem, the PBA was still busy
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>RDBUF0</ffdc>
+    <ffdc>RDBUF1</ffdc>
+    <ffdc>RDBUF2</ffdc>
+    <ffdc>RDBUF3</ffdc>
+    <ffdc>RDBUF4</ffdc>
+    <ffdc>RDBUF5</ffdc>
+    <ffdc>WRBUF0</ffdc>
+    <ffdc>WRBUF1</ffdc>
+    <ffdc>SLVRSTDATA</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>
+
