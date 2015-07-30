@@ -193,9 +193,9 @@ sub processIpmiSensors {
 
     my $instance=$targetObj->getAttribute($target,"IPMI_INSTANCE");
     my $name="";
-    if (!$targetObj->isBadAttribute($target,"IPMI_NAME"))
+    if (!$targetObj->isBadAttribute($target,"FRU_NAME"))
     {
-        $name=$targetObj->getAttribute($target,"IPMI_NAME");
+        $name=$targetObj->getAttribute($target,"FRU_NAME");
     }
     my $fru_id="N/A";
     if (!$targetObj->isBadAttribute($target,"FRU_ID"))
