@@ -772,21 +772,30 @@ sub git_commit_deps
 {
     my $base = shift;
     my $commit = shift;
+    chomp($base);
+    chomp($commit);
 
     my @deps = ();
 
     print "Searching for deps for $commit against $base\n" if $debug;
 
-    open COMMAND, "git diff-tree --name-only --no-commit-id -r $commit | ".
-                  "xargs git rev-list $commit~1 ^$base -- |";
-    while (my $line = <COMMAND>)
+    my @files = split('\n',`git diff-tree --name-only --no-commit-id -r $commit`);
+    foreach my $file (@files)
     {
-        print "Found dep: $line" if $debug;
+        # If a commit introduces a new file, don't run rev-list as it fails
+        # when the file does not exists in base.
+        my $file_in_base = `git log $base -n1 --oneline -- $file`;
+        next if ($file_in_base eq "");
 
-        chomp $line;
-        push @deps, $line;
+        my $dep_commit = `git rev-list $commit~1 ^$base $file`;
+        if ($dep_commit ne "")
+        {
+            print "Found dep: $dep_commit" if $debug;
+
+            chomp $dep_commit;
+            push @deps, $dep_commit;
+        }
     }
-    close COMMAND;
 
     return \@deps;
 }
