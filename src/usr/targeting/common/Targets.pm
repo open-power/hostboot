@@ -55,7 +55,7 @@ sub new
             '4' => '7',
             '5' => '6'
         }
-        # TODO RTC: TBD
+        # TODO RTC:132549
         # DMI_FSI_MAP is a lookup table for DMI channel to FSI and ref clock.
         # It is processor specific and needs to be pulled from a
         # processor attribute instead of being hardcoded
@@ -190,18 +190,13 @@ sub printAttribute
     $filter{MODEL}                          = 1;
     $filter{TYPE}                           = 1;
     $filter{CDM_POLICIES}                   = 1;
-    $filter{ALL_MCS_IN_INTERLEAVING_GROUP}  = 1;
-    $filter{MSS_INTERLEAVE_ENABLE}          = 1;
     $filter{CDM_POLICIES_BITMASK}           = 1;
     $filter{ENTITY_ID_LOOKUP}               = 1;
     $filter{ENTITY_INSTANCE}                = 1;
     $filter{MBA_NUM}                        = 1;
-    $filter{IPMI_INSTANCE}                  = 0;
     $filter{IPMI_NAME}                      = 1;
     $filter{INSTANCE_ID}                    = 1;
-    #$filter{ADC_CHANNEL_SENSOR_NUMBERS}     = 1;
     $filter{IO_CONFIG_SELECT}               = 1;
-    #$filter{FRU_ID}                         = 1;
     $filter{FRU_NAME}                       = 1;
 
     if ($filter{$attribute} == 1)
