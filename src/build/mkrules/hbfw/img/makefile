@@ -45,7 +45,6 @@ install_all: inject_ecc build_sbe_partitions build_pnor_images
 HBFW_OBJPATH = ${.PATH:M*obj*}
 ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
 
-
 #################################################
 # Copy Hostboot binary images to obj dir to be grabbed
 # during build flash pass and consumption by HWSV.
@@ -319,14 +318,17 @@ FFSCMD = ${DUMMY:!which ffs 2>/dev/null!i}
 
 ${IMAGE_TARGET}: ${IMAGE_LAYOUT} ${IMAGE_BINS} ${PNOR_BUILD_SCRIPT}
 	.if empty(FFSCMD)
-		${PNOR_BUILD_SCRIPT} --pnorOutBin ${IMAGE_TARGET} \
-			${TARGET_TEST:b--test} --pnorLayout ${IMAGE_LAYOUT} \
-			${IMAGE_BIN_OPTION} --fpartCmd "fpart" --fcpCmd "fcp"
+		.if(${PNOR} == ${IMAGE_TARGET} || ${PNOR} == "")
+			${PNOR_BUILD_SCRIPT} --pnorOutBin ${IMAGE_TARGET} \
+				${TARGET_TEST:b--test} --pnorLayout ${IMAGE_LAYOUT} \
+				${IMAGE_BIN_OPTION} --fpartCmd "fpart" --fcpCmd "fcp"
+		.endif
 	.else
-		${PNOR_BUILD_SCRIPT} --pnorOutBin ${IMAGE_TARGET} \
-			${TARGET_TEST:b--test} --pnorLayout ${IMAGE_LAYOUT} \
-			${IMAGE_BIN_OPTION} --ffsCmd "ffs"
-
+		.if(${PNOR} == ${IMAGE_TARGET})
+			${PNOR_BUILD_SCRIPT} --pnorOutBin ${IMAGE_TARGET} \
+				${TARGET_TEST:b--test} --pnorLayout ${IMAGE_LAYOUT} \
+				${IMAGE_BIN_OPTION} --ffsCmd "ffs"
+		.endif
 	.endif
 
 .endif
@@ -348,7 +350,7 @@ update_images_for_sandbox: inject_ecc build_sbe_partitions build_pnor_images
 	#Copy hostboot base image to flash dir
 	${FLASH_IMG:@image@${baseimg:!cd ${FLASH_DEST}; cp -f ${.PATH:F${image}} ${image};!e}@}
 	#Copy pnor images to flash dir
-	${PNOR_IMG_INFO:@image@${pnorimg:!cd ${FLASH_DEST}; cp -f ${.PATH:F${image:s/:/ /g:xs/ .*//}} ${image:s/:/ /g:xs/ .*//};!e}@}
+	${PNOR_IMG_INFO:@image@${pnorimg:!cd ${FLASH_DEST}; if [ "${PNOR}" == "${image:s/:/ /g:xs/ .*//}" ] || [ "${PNOR}" == "" ]; then cp -f ${.PATH:F${image:s/:/ /g:xs/ .*//}} ${image:s/:/ /g:xs/ .*//}; fi !e}@}
 
 .endif
 
