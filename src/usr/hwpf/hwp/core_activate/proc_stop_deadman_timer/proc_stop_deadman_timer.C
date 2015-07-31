@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: proc_stop_deadman_timer.C,v 1.10 2014/02/10 04:40:32 stillgs Exp $
+// $Id: proc_stop_deadman_timer.C,v 1.14 2015/08/04 19:56:09 thi Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_stop_deadman_timer.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -32,14 +32,14 @@
 // *! ***  ***
 // *|
 // *! TITLE       : proc_stop_deadman_timer.C
-// *! DESCRIPTION : Stops deadman timer and SBE
+// *! DESCRIPTION : Stops deadman timer
 // *!
 // *! OWNER NAME  : Greg Still              Email: stillgs@us.ibm.com
 // *!
 // *! Overview:
 // *!    Notify SBE that HB is alive again
-// *!    Make sure SBE stopped
-// *!    
+// *!    Conditionally stop the SBE
+// *!
 // *!    Here's the flow of SBE_VITAL substeps:
 // *!    SBE (automatic on procedure entry): substep_proc_entry
 // *!    SBE                               : substep_sbe_ready
@@ -58,6 +58,21 @@
 #include <p8_scom_addresses.H>
 #include <p8_istep_num.H>
 #include <proc_sbe_trigger_winkle.H>
+#include <proc_sbe_intr_service.H>
+#include <proc_sbe_utils.H>
+
+
+//------------------------------------------------------------------------------
+// Constant definitions
+//------------------------------------------------------------------------------
+const uint64_t NS_TO_FINISH = 10000000; //(10 ms)
+const uint64_t MS_TO_FINISH = NS_TO_FINISH/1000000;
+const uint64_t SIM_CYCLES_TO_FINISH = 10000000;
+
+const uint64_t MAX_WAIT_TIME_MS = 1000;
+
+const uint8_t  SBE_EXIT_SUCCESS_0xF = 0xF;
+
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -66,147 +81,227 @@
 extern "C"
 {
 
+fapi::ReturnCode proc_stop_deadman_timer(const fapi::Target & i_target,
+                                         bool & o_intr_service_running)
+{
+    // return codes
+    fapi::ReturnCode rc;
+    uint32_t rc_ecmd = 0;
 
-//------------------------------------------------------------------------------
-// function: proc_stop_deadman_timer
-//     Notify SBE that HB is alive again
-//     Force the SBE to stop running
-//
-// parameters: i_target  => chip target
-// returns: FAPI_RC_SUCCESS if operation was successful, else error
-//------------------------------------------------------------------------------
-    fapi::ReturnCode proc_stop_deadman_timer(const fapi::Target & i_target)
+    // mark function entry
+    FAPI_INF("Start");
+
+    do
     {
-        // data buffer to hold register values
-        ecmdDataBufferBase data(64);
+        //
+        // check SBE progress
+        //
 
-        // return codes
-        uint32_t rc_ecmd = 0;
-        fapi::ReturnCode rc;
-
-        // mark function entry
-        FAPI_INF("Entry new\n");
-
-        do
+        // given this procedure is running, the SBE deadman function should have worked
+        // check that the SBE VITAL reached the correct spot
+        bool sbe_running;
+        size_t loop_time = 0;
+        uint8_t halt_code;
+        uint16_t istep_num;
+        uint8_t substep_num;
+        bool intr_service_loop_reached = false;
+        rc = proc_sbe_utils_check_status(
+            i_target,
+            sbe_running,
+            halt_code,
+            istep_num,
+            substep_num);
+        if (!rc.ok())
         {
-            // Given this procedure is running, the SBE deadman function did
-            // its job. Check that for the SBE_VITAL being at the correct spot
-            rc = fapiGetScom(i_target, MBOX_SBEVITAL_0x0005001C, data);
-            if(!rc.ok())
+            FAPI_ERR("Error from proc_check_sbe_state_check_status");
+            break;
+        }
+
+        if (!(sbe_running &&
+              !halt_code &&
+              (istep_num == proc_sbe_trigger_winkle_istep_num) &&
+              (substep_num == SUBSTEP_DEADMAN_WAITING_FOR_HOSTBOOT)))
+        {
+            FAPI_ERR("Expected istep/substep num %llX/%X but found %X/%X",
+                     proc_sbe_trigger_winkle_istep_num,
+                     SUBSTEP_DEADMAN_WAITING_FOR_HOSTBOOT,
+                     istep_num,
+                     substep_num);
+            const fapi::Target & CHIP_IN_ERROR = i_target;
+            const bool & SBE_RUNNING = sbe_running;
+            const uint8_t & HALT_CODE = halt_code;
+            const uint16_t & ISTEP_NUM = istep_num;
+            const uint8_t & SUBSTEP_NUM = substep_num;
+            FAPI_SET_HWP_ERROR(rc, RC_PROC_STOP_DEADMAN_TIMER_UNEXPECTED_INITIAL_STATE);
+            fapiLogError(rc);
+        }
+
+        //
+        // send SBE message -- HOSTBOOT_ALIVE_AGAIN
+        //
+
+        rc = proc_sbe_utils_update_substep(
+            i_target,
+            SUBSTEP_HOSTBOOT_ALIVE_AGAIN);
+        if (!rc.ok())
+        {
+            FAPI_ERR("Error from proc_sbe_utils_update_substep");
+            break;
+        }
+
+        //
+        // Loop until:
+        //   SBE stopped OR
+        //   interrupt serivce ready loop is reached OR
+        //   loop time is exceeded
+        //
+
+        while (sbe_running &&
+               !intr_service_loop_reached &&
+               (loop_time < MAX_WAIT_TIME_MS))
+        {
+            // sleep 10ms, then check again
+            loop_time += MS_TO_FINISH;
+            rc = fapiDelay(NS_TO_FINISH, SIM_CYCLES_TO_FINISH);
+            if (rc)
             {
-                FAPI_ERR("Scom error reading SBE VITAL\n");
+                FAPI_ERR("Error from fapiDelay");
                 break;
             }
 
-            uint32_t istep_num = 0;
-            uint8_t substep_num = 0;
-            rc_ecmd |= data.extractToRight(&istep_num,
-                                           ISTEP_NUM_BIT_POSITION,
-                                           ISTEP_NUM_BIT_LENGTH);
-            rc_ecmd |= data.extractToRight(&substep_num,
-                                           SUBSTEP_NUM_BIT_POSITION,
-                                           SUBSTEP_NUM_BIT_LENGTH);
-            if(rc_ecmd)
+            // retrieve status
+            rc = proc_sbe_utils_check_status(
+                i_target,
+                sbe_running,
+                halt_code,
+                istep_num,
+                substep_num);
+            if (!rc.ok())
             {
-                FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", rc_ecmd);
-                rc.setEcmdError(rc_ecmd);
-                break;
-            }
-            if( istep_num != proc_sbe_trigger_winkle_istep_num )
-            {
-
-                FAPI_ERR("Expected istep num %llX but found %X\n",
-                         proc_sbe_trigger_winkle_istep_num,
-                         istep_num );
-                const fapi::Target & CHIP_IN_ERROR = i_target;
-                ecmdDataBufferBase & SBE_VITAL = data;
-                FAPI_SET_HWP_ERROR(rc, RC_PROC_STOP_DEADMAN_TIMER_BAD_ISTEP_NUM);
-                fapiLogError(rc);
-            }
-
-            if( substep_num != SUBSTEP_DEADMAN_WAITING_FOR_HOSTBOOT )
-            {
-                FAPI_ERR("Expected substep num %X but found %X\n",
-                         SUBSTEP_DEADMAN_WAITING_FOR_HOSTBOOT,
-                         substep_num );
-                const fapi::Target & CHIP_IN_ERROR = i_target;
-                ecmdDataBufferBase & SBE_VITAL = data;
-                FAPI_SET_HWP_ERROR(rc, RC_PROC_STOP_DEADMAN_TIMER_BAD_SUBSTEP_NUM);
-                fapiLogError(rc);
-            }
-
-            //Notify SBE that HB is alive again
-            substep_num = SUBSTEP_HOSTBOOT_ALIVE_AGAIN;
-            rc_ecmd |= data.insertFromRight(&substep_num,
-                                            SUBSTEP_NUM_BIT_POSITION,
-                                            SUBSTEP_NUM_BIT_LENGTH);
-            if(rc_ecmd)
-            {
-                FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", rc_ecmd);
-                rc.setEcmdError(rc_ecmd);
-                break;
-            }
-            rc = fapiPutScom(i_target, MBOX_SBEVITAL_0x0005001C, data);
-            if(!rc.ok())
-            {
-                FAPI_ERR("Scom error updating SBE VITAL\n");
+                FAPI_ERR("Error from proc_check_sbe_state_check_status");
                 break;
             }
 
-            // Stop SBE if needed
+            intr_service_loop_reached =
+                sbe_running &&
+                !halt_code &&
+                (istep_num == PROC_SBE_INTR_SERVICE_ISTEP_NUM) &&
+                (substep_num == SUBSTEP_SBE_READY);
+        }
+
+        // break if we took an error in the while loop
+        if (rc)
+        {
+            break;
+        }
+
+        FAPI_INF("SBE is running [%d], loop time [%zd], interrupt service loop reached [%d]",
+                 sbe_running, loop_time, intr_service_loop_reached);
+
+        // ensure correct halt code is captured
+        if (!sbe_running)
+        {
+            rc = proc_sbe_utils_check_status(
+                i_target,
+                sbe_running,
+                halt_code,
+                istep_num,
+                substep_num);
+            if (!rc.ok())
+            {
+                FAPI_ERR("Error from proc_check_sbe_state_check_status");
+                break;
+            }
+        }
+
+        // handle three valid possibilities:
+        // 1) SBE stopped at end of deadman timer routine (SBE code supports interrupt service, but the service is not enabled)
+        // 2) SBE is running interrupt service routine (SBE code supports interrupt service, and the service is enabled)
+        // 3) SBE is still running deadman timer routine (SBE code does not support interrupt service)
+        // If not in one of those 3 expected states, error out
+        if (!sbe_running &&
+            (halt_code == SBE_EXIT_SUCCESS_0xF) &&
+            (istep_num == proc_sbe_trigger_winkle_istep_num) &&
+            (substep_num == SUBSTEP_HOSTBOOT_ALIVE_AGAIN))
+        {
+            FAPI_INF("SBE halted at end of deadman timer routine, interrupt service is NOT running!");
+            o_intr_service_running = false;
+
+            // reset the SBE so it can be used for MPIPL if needed
+            rc = proc_sbe_utils_reset_sbe(i_target);
+            if (!rc.ok())
+            {
+                FAPI_ERR("Error from proc_sbe_utils_reset_sbe");
+                break;
+            }
+        }
+        else if (intr_service_loop_reached)
+        {
+            FAPI_INF("SBE finished deadman timer routine, interrupt service is running!");
+            o_intr_service_running = true;
+        }
+        else if ( (sbe_running) &&
+                  (istep_num == proc_sbe_trigger_winkle_istep_num) &&
+                  (substep_num == SUBSTEP_HOSTBOOT_ALIVE_AGAIN) )
+         
+        {
+            FAPI_INF("SBE is still running but not SBE interrupt.  Stop and "
+                     "reset the SBE!");
+
+            // Stop the SBE
+            ecmdDataBufferBase data(64);
             rc = fapiGetScom(i_target, PORE_SBE_CONTROL_0x000E0001, data);
-            if(!rc.ok())
+            if (!rc.ok())
             {
-                FAPI_ERR("Scom error reading SBE STATUS\n");
+                FAPI_ERR("Error returned from fapiGetScom, addr 0x%.16llX ",
+                         PORE_SBE_CONTROL_0x000E0001);
                 break;
             }
-            if( data.isBitSet( 0 ) )
-            {
-                FAPI_INF("SBE/Deadman timer successfully stopped\n");
-                break;
-            }
-            else
-            {
-                rc_ecmd |= data.setBit( 0 );
-                if(rc_ecmd)
-                {
-                    FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", rc_ecmd);
-                    rc.setEcmdError(rc_ecmd);
-                    break;
-                }
-                rc = fapiPutScom(i_target, PORE_SBE_CONTROL_0x000E0001, data);
-                if(!rc.ok())
-                {
-                    FAPI_ERR("Scom error stopping SBE\n");
-                    break;
-                }
-            }
-
-            // Reset the SBE so it can be used for MPIPL if needed
-            rc_ecmd |= data.flushTo0();
-            rc_ecmd |= data.setBit(0);
-
-            if(rc_ecmd)
+            rc_ecmd |= data.setBit( 0 );
+            if (rc_ecmd)
             {
                 FAPI_ERR("Error (0x%x) setting up ecmdDataBufferBase", rc_ecmd);
                 rc.setEcmdError(rc_ecmd);
                 break;
             }
-            rc = fapiPutScom(i_target, PORE_SBE_RESET_0x000E0002, data);
-            if(!rc.ok())
+
+            rc = fapiPutScom(i_target, PORE_SBE_CONTROL_0x000E0001, data);
+            if ( !rc.ok() )
             {
-                FAPI_ERR("Scom error resetting SBE\n");
+                FAPI_ERR("Error returned from fapiPutScom to stop "
+                         "SBE, addr 0x%.16llX", PORE_SBE_CONTROL_0x000E0001);
                 break;
             }
-            
-        } while (0);
 
-        // mark function exit
-        FAPI_INF("Exit");
-        return rc;
-    }
+            // Reset the SBE
+            rc = proc_sbe_utils_reset_sbe(i_target);
+            if (!rc.ok())
+            {
+                FAPI_ERR("Error from proc_sbe_utils_reset_sbe");
+                break;
+            }
+
+            // Set flag to indicate SBE interrupt is not running
+            o_intr_service_running = false;
+        }
+        // error
+        else
+        {
+            FAPI_ERR("SBE did not reach acceptable final state!");
+            const fapi::Target & CHIP_IN_ERROR = i_target;
+            const bool & SBE_RUNNING = sbe_running;
+            const uint8_t & HALT_CODE = halt_code;
+            const uint16_t & ISTEP_NUM = istep_num;
+            const uint8_t & SUBSTEP_NUM = substep_num;
+            FAPI_SET_HWP_ERROR(rc, RC_PROC_STOP_DEADMAN_TIMER_UNEXPECTED_FINAL_STATE);
+            break;
+        }
+
+    } while (0);
+
+    // mark function exit
+    FAPI_INF("Exit");
+    return rc;
+}
 
 } // extern "C"
-/* Local Variables: */
-/* c-basic-offset: 4 */
-/* End: */

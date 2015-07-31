@@ -572,11 +572,14 @@ void bld_fdt_pnor(devTree *   i_dt,
 }
 
 void bld_xscom_node(devTree * i_dt, dtOffset_t & i_parentNode,
-                    const TARGETING::Target * i_pProc, uint32_t i_chipid)
+                    const TARGETING::Target * i_pProc,
+                    uint32_t i_chipid,
+                    bool i_smallTree)
 {
     const char* xscomNodeName = "xscom";
     const char* todNodeName = "chiptod";
     const char* pciNodeName = "pbcq";
+    const char* sbeTmrNodeName = "sbe-timer";
 
     // Grab a system object to work with
     TARGETING::Target* sys = NULL;
@@ -604,6 +607,30 @@ void bld_xscom_node(devTree * i_dt, dtOffset_t & i_parentNode,
 
     uint64_t xscom_prop[2] = { l_xscomAddr,  THIRTYTWO_GB};
     i_dt->addPropertyCells64(xscomNode, "reg", xscom_prop, 2);
+
+    // Add SBE interrupt timer (if enabled) for the master processor
+    TARGETING::Target* l_pMasterProc = NULL;
+    TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProc);
+    if ( (sys->getAttr<TARGETING::ATTR_SBE_MASTER_INTR_SERVICE_ENABLED>()) &&
+         (i_pProc == l_pMasterProc)    )
+    {
+        dtOffset_t sbeTmrNode = i_dt->addNode(xscomNode, sbeTmrNodeName,
+                                         0xE000A);
+        uint32_t sbeTmr_prop[6] = {0xE000A, 1,
+                                   0xE0006, 1,
+                                   0x5003A, 1};
+        i_dt->addPropertyCells32(sbeTmrNode, "reg", sbeTmr_prop, 6);
+        const char* sbeTmr_compatStrs[] = {"ibm,power8-sbe-timer",NULL};
+        i_dt->addPropertyStrings(sbeTmrNode, "compatible", sbeTmr_compatStrs);
+        ATTR_SBE_MASTER_INTR_SERVICE_DELAY_US_type l_us =
+               sys->getAttr<TARGETING::ATTR_SBE_MASTER_INTR_SERVICE_DELAY_US>();
+        i_dt->addPropertyCell32(sbeTmrNode, "tick-time-us", l_us);
+    }
+    // Only add SBE interrupt timer for small tree
+    if (i_smallTree)
+    {
+        return;
+    }
 
     // Add proc chip ECIDs
     ATTR_ECID_type ecid;
@@ -1345,18 +1372,19 @@ errlHndl_t bld_fdt_cpu(devTree * i_dt,
                        std::vector<homerAddr_t>& o_homerRegions,
                        bool i_smallTree)
 {
-    // Nothing to do for small trees currently.
-    if (i_smallTree) { return NULL; }
-
     errlHndl_t errhdl = NULL;
 
     /* Find the / node and add a cpus node under it. */
     dtOffset_t rootNode = i_dt->findNode("/");
-    dtOffset_t cpusNode = i_dt->addNode(rootNode, "cpus");
+    dtOffset_t cpusNode = NULL;
+    if (!i_smallTree)
+    {
+        cpusNode = i_dt->addNode(rootNode, "cpus");
 
-    /* Add the # address & size cell properties to /cpus. */
-    i_dt->addPropertyCell32(cpusNode, "#address-cells", 1);
-    i_dt->addPropertyCell32(cpusNode, "#size-cells", 0);
+        /* Add the # address & size cell properties to /cpus. */
+        i_dt->addPropertyCell32(cpusNode, "#address-cells", 1);
+        i_dt->addPropertyCell32(cpusNode, "#size-cells", 0);
+    }
 
     // Get all functional proc chip targets
     TARGETING::TargetHandleList l_procTargetList;
@@ -1368,7 +1396,17 @@ errlHndl_t bld_fdt_cpu(devTree * i_dt,
 
         uint32_t l_chipid = getProcChipId(l_pProc);
 
-        bld_xscom_node(i_dt, rootNode, l_pProc, l_chipid);
+        // For small tree, only add xscom if master processor
+        TARGETING::Target* l_pMasterProc = NULL;
+        TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProc);
+        if((!i_smallTree) || (l_pProc == l_pMasterProc) )
+        {
+            bld_xscom_node(i_dt, rootNode, l_pProc, l_chipid, i_smallTree);
+        }
+        if (i_smallTree) // nothing else for small tree
+        {
+            continue;
+        }
 
         //Each processor will have a HOMER image that needs
         //to be reserved -- save it away

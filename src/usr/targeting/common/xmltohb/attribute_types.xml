@@ -15685,4 +15685,116 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <readable/>
 </attribute>
 
+<attribute>
+    <id>WOF_ENABLED</id>
+    <description>
+        Defines if the Workload Optimization Frequency (WOF) system feature
+        where OCC algorithms will change (typically boost) the operational 
+        frequency based on measured power available and any currently idling 
+        cores.        
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_WOF_ENABLED</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>TRUSTED_SLAVE_SCAN_PATH_ACTIVE</id>
+    <description>
+        Set to indicate state of master->slave scan path.
+        Platform should default to false at beginning of IPL, and set to
+        true once trusted XSCOM path is active to all slave chips in drawer
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_TRUSTED_SLAVE_SCAN_PATH_ACTIVE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>FORCE_SKIP_SBE_MASTER_INTR_SERVICE</id>
+    <description>
+        Set to force skip of SBE interrupt service for master chip.
+        Default is to disable the use of the SBE interrupt service.
+    </description>
+    <simpleType>
+        <uint8_t>
+        <default>1</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FORCE_SKIP_SBE_MASTER_INTR_SERVICE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>FORCE_USE_SBE_SLAVE_SCAN_SERVICE</id>
+    <description>
+        Set to force use of SBE scan service for slave chips.
+        Default is to enable the use of the SBE scan service
+        only for slave chips with security enabled.
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FORCE_USE_SBE_SLAVE_SCAN_SERVICE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SBE_MASTER_INTR_SERVICE_DELAY_CYCLES</id>
+    <description>
+        Cycle delay of SBE master interrupt service loop wait statement.
+        Paces rate of decrementer progress and prevents SBE from consuming PIB.
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SBE_MASTER_INTR_SERVICE_DELAY_CYCLES</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SBE_MASTER_INTR_SERVICE_DELAY_US</id>
+    <description>
+        Execution delay (in microseconds) of SBE master interrupt service loop.
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SBE_MASTER_INTR_SERVICE_DELAY_US</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>

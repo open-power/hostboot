@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_delta_scan_rw.h,v 1.53 2014/09/11 19:01:13 szhong Exp $
+// $Id: p8_delta_scan_rw.h,v 1.55 2015/05/28 20:28:31 jmcgill Exp $
 #define OVERRIDE_OFFSET 8            // Byte offset of forward pointer's addr relative 
                                      //   to base forward pointer's addr.
 #define SIZE_IMAGE_BUF_MAX      5000000 // Max ~5MB image buffer size.
@@ -39,11 +39,24 @@
 #define PROC_PIB_REPR_VECTOR_TOC_NAME     "proc_sbe_pibmem_repair_vector"
 #define NEST_SKEWADJUST_VECTOR_TOC_NAME   "proc_sbe_nest_skewadjust_vector"
 #define SECURITY_SETUP_VECTOR_TOC_NAME    "proc_sbe_security_setup_vector"
+#define PB_BNDY_DMIPLL_REFCLK_SEL_TOC_NAME "pb_bndy_dmipll_refclk_sel_mod"
+#define PB_BNDY_DMIPLL_PFD360_TOC_NAME    "pb_bndy_dmipll_pfd360_mod"
+#define AB_BNDY_PLL_REFCLK_SEL_TOC_NAME   "ab_bndy_pll_refclk_sel_mod"
+#define AB_BNDY_PLL_PFD360_TOC_NAME       "ab_bndy_pll_pfd360_mod"
 #define VALID_BOOT_CORES_MASK_TOC_NAME    "valid_boot_cores_mask"
-#define MAX_PLL_RING_SIZE                  128 // Bytes
+#define PERV_BNDY_PLL_RING_SIZE           128 // Bytes
 #define PERV_BNDY_PLL_RING_TOC_NAME       "perv_bndy_pll_ring"
 #define PERV_BNDY_PLL_RING_ALT_TOC_NAME   "perv_bndy_pll_ring_alt"
-#define MAX_FUNC_L3_RING_LIST_ENTRIES     64  
+#define PB_BNDY_DMIPLL_RING_SIZE          240 // Bytes
+#define PB_BNDY_DMIPLL_RING_TOC_NAME      "pb_bndy_dmipll_ring"
+#define PB_BNDY_DMIPLL_RING_ALT_TOC_NAME  "pb_bndy_dmipll_ring_alt"
+#define AB_BNDY_PLL_RING_SIZE             110 // Bytes
+#define AB_BNDY_PLL_RING_TOC_NAME         "ab_bndy_pll_ring"
+#define AB_BNDY_PLL_RING_ALT_TOC_NAME     "ab_bndy_pll_ring_alt"
+#define PCI_BNDY_PLL_RING_SIZE            110 // Bytes
+#define PCI_BNDY_PLL_RING_TOC_NAME        "pci_bndy_pll_ring"
+#define PCI_BNDY_PLL_RING_ALT_TOC_NAME    "pci_bndy_pll_ring_alt"
+#define MAX_FUNC_L3_RING_LIST_ENTRIES     64
 #define MAX_FUNC_L3_RING_SIZE             7000 // Bytes
 #define MAX_FARY_L2_RING_LIST_ENTRIES     2
 #define MAX_FARY_L2_RING_SIZE             10500 // Bytes
@@ -59,6 +72,9 @@
 #define UNTRUSTED_PBA_BAR_TOC_NAME        "fabric_config_pba"
 #define REFCLOCK_TERM_TOC_NAME            "refclock_term"
 #define PM_SLEEP_ENABLE_TOC_NAME          "pm_sleep_enable"
+#define INTR_DECREMENTER_DELAY_CYCLES_NAME "intr_decrementer_delay_cycles"
+#define INTR_DECREMENTER_DELAY_US_NAME     "intr_decrementer_delay_us"
+
 
 /*****  Scan setting  *****/
 #define OPCG_SCAN_RATIO                     4

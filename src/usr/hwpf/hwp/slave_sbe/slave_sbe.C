@@ -174,6 +174,13 @@ void* call_host_slave_sbe_config(void *io_pArgs)
             errlCommit( l_errl, HWPF_COMP_ID );
 
         }
+
+        // Enable SBE interrupt for OP systems
+        TARGETING::Target* l_sys = NULL;
+        targetService().getTopLevelTarget(l_sys);
+        assert( l_sys != NULL );
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Enabling SBE interrupt for OP systems");
+        l_sys->setAttr<ATTR_FORCE_SKIP_SBE_MASTER_INTR_SERVICE>(0);
     }
 
     // Resolve the side characteristics of the Processor SBE Seeproms

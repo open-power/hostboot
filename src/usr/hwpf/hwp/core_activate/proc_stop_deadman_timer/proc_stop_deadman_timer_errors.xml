@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,15 +22,15 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_stop_deadman_timer_errors.xml,v 1.6 2014/02/10 04:37:29 stillgs Exp $ -->
+<!-- $Id: proc_stop_deadman_timer_errors.xml,v 1.7 2015/07/27 00:46:32 jmcgill Exp $ -->
 <!-- Error definitions for proc_stop_deadman_timer procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_STOP_DEADMAN_TIMER_BAD_ISTEP_NUM</rc>
+    <rc>RC_PROC_STOP_DEADMAN_TIMER_UNEXPECTED_INITIAL_STATE</rc>
     <description>
       Procedure: proc_stop_deadman_timer
-      The SBE is not at the correct istep number to stop the deadman timer
+      The SBE did not reach the correct istep progress to stop the deadman timer
     </description>
     <collectRegisterFfdc>
       <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
@@ -45,20 +47,23 @@
           <target>CHIP_IN_ERROR</target>
           <childType>TARGET_TYPE_EX_CHIPLET</childType>
           <childPosOffsetMultiplier>0x01000000</childPosOffsetMultiplier>
-      </basedOnPresentChildren>     
+      </basedOnPresentChildren>
     </collectRegisterFfdc>
-    <ffdc>SBE_VITAL</ffdc>
+    <ffdc>SBE_RUNNING</ffdc>
+    <ffdc>HALT_CODE</ffdc>
+    <ffdc>ISTEP_NUM</ffdc>
+    <ffdc>SUBSTEP_NUM</ffdc>
      <callout>
-      <procedure>CODE</procedure>      
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_STOP_DEADMAN_TIMER_BAD_SUBSTEP_NUM</rc>
+    <rc>RC_PROC_STOP_DEADMAN_TIMER_UNEXPECTED_FINAL_STATE</rc>
     <description>
       Procedure: proc_stop_deadman_timer
-      The SBE is not at the correct substep number to stop the deadman timer
+      The SBE reached an unexpected final state
     </description>
     <collectRegisterFfdc>
       <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
@@ -75,12 +80,16 @@
           <target>CHIP_IN_ERROR</target>
           <childType>TARGET_TYPE_EX_CHIPLET</childType>
           <childPosOffsetMultiplier>0x01000000</childPosOffsetMultiplier>
-      </basedOnPresentChildren>     
+      </basedOnPresentChildren>
     </collectRegisterFfdc>
-    <ffdc>SBE_VITAL</ffdc>
+    <ffdc>SBE_RUNNING</ffdc>
+    <ffdc>HALT_CODE</ffdc>
+    <ffdc>ISTEP_NUM</ffdc>
+    <ffdc>SUBSTEP_NUM</ffdc>
      <callout>
-      <procedure>CODE</procedure>      
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
+  <!-- *********************************************************************** -->
 </hwpErrors>

@@ -1366,4 +1366,21 @@ ID for the sensor number returned with the elog. -->
     <hbOnly/>
 </attribute>
 
+<attribute>
+    <id>SBE_MASTER_INTR_SERVICE_ENABLED</id>
+    <description>
+       Indicator whether the SBE interupt service is anabled.
+       0=Not Enabled
+       1=Enabled
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
 </attributes>

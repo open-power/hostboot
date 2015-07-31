@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_xip_customize.C,v 1.74 2014/09/11 19:10:16 szhong Exp $
+// $Id: p8_xip_customize.C,v 1.77 2015/07/27 00:31:05 jmcgill Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_xip_customize                                                  */
 /* *! DESCRIPTION : Obtains repair rings from VPD and adds them to either       */
@@ -676,6 +676,163 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
 	  FAPI_INF(" After =0x%016llX\n",myRev64(*(uint64_t*)hostSecuritySetupVec));
 	}
 
+
+  // ==========================================================================
+  // CUSTOMIZE item:    DMI PLL ring modification offsets.
+  // Retrieval method:  Attribute.
+  // System phase:      IPL sysPhase.
+  // Note: TBD
+  // ==========================================================================
+
+	if (i_sysPhase==0)  {
+        // refclk sel
+        fapi::ATTR_PROC_DMI_CUPLL_REFCLKSEL_OFFSET_Type refclksel_offset = {0};
+        void       *hostDMIRefclockSelVec;
+        uint64_t   *hostDMIRefclockSelVec_field;
+        rc = FAPI_ATTR_GET(ATTR_PROC_DMI_CUPLL_REFCLKSEL_OFFSET, &i_target, refclksel_offset);
+        if (rc)
+        {
+            FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_DMI_CUPLL_REFCLKSEL_OFFSET) returned error.\n");
+            return rc;
+        }
+        rcLoc = sbe_xip_find( o_imageOut, PB_BNDY_DMIPLL_REFCLK_SEL_TOC_NAME, &xipTocItem);
+        if (rcLoc)
+        {
+            FAPI_INF("sbe_xip_find() failed w/rc=%i and %s", rcLoc, SBE_XIP_ERROR_STRING(errorStrings, rcLoc));
+            FAPI_INF("Probable cause:");
+            FAPI_INF("\tThe keyword (=%s) was not found.", PB_BNDY_DMIPLL_REFCLK_SEL_TOC_NAME);
+            rcLoc = 0;
+        }
+        else
+        {
+            sbe_xip_pore2host( o_imageOut, xipTocItem.iv_address, &hostDMIRefclockSelVec);
+            FAPI_INF("Dumping [initial] global variable content of %s, and then the updated value:\n",
+                     PB_BNDY_DMIPLL_REFCLK_SEL_TOC_NAME);
+
+            FAPI_INF(" Before=0x%016llX\n",myRev64(*(uint64_t*)hostDMIRefclockSelVec));
+            hostDMIRefclockSelVec_field = (uint64_t*)hostDMIRefclockSelVec;
+
+            for (size_t i = 0; i < 8; i++)
+            {
+                *(hostDMIRefclockSelVec_field + i) = myRev64(refclksel_offset[i]);
+            }
+            FAPI_INF(" After =0x%016llX\n",myRev64(*(uint64_t*)hostDMIRefclockSelVec));
+        }
+
+
+        // pfd360
+        fapi::ATTR_PROC_DMI_CUPLL_PFD360_OFFSET_Type pfd360_offset = {0};
+        void       *hostDMIPFD360Vec;
+        uint64_t   *hostDMIPFD360Vec_field;
+        rc = FAPI_ATTR_GET(ATTR_PROC_DMI_CUPLL_PFD360_OFFSET, &i_target, pfd360_offset);
+        if (rc)
+        {
+            FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_DMI_CUPLL_PFD360_OFFSET) returned error.\n");
+            return rc;
+        }
+        rcLoc = sbe_xip_find( o_imageOut, PB_BNDY_DMIPLL_PFD360_TOC_NAME, &xipTocItem);
+        if (rcLoc)
+        {
+            FAPI_INF("sbe_xip_find() failed w/rc=%i and %s", rcLoc, SBE_XIP_ERROR_STRING(errorStrings, rcLoc));
+            FAPI_INF("Probable cause:");
+            FAPI_INF("\tThe keyword (=%s) was not found.", PB_BNDY_DMIPLL_PFD360_TOC_NAME);
+            rcLoc = 0;
+        }
+        else
+        {
+            sbe_xip_pore2host( o_imageOut, xipTocItem.iv_address, &hostDMIPFD360Vec);
+            FAPI_INF("Dumping [initial] global variable content of %s, and then the updated value:\n",
+                     PB_BNDY_DMIPLL_PFD360_TOC_NAME);
+
+            FAPI_INF(" Before=0x%016llX\n",myRev64(*(uint64_t*)hostDMIPFD360Vec));
+            hostDMIPFD360Vec_field = (uint64_t*)hostDMIPFD360Vec;
+
+            for (size_t i = 0; i < 8; i++)
+            {
+                *(hostDMIPFD360Vec_field + i) = myRev64(pfd360_offset[i]);
+            }
+            FAPI_INF(" After =0x%016llX\n",myRev64(*(uint64_t*)hostDMIPFD360Vec));
+        }
+    }
+
+
+  // ==========================================================================
+  // CUSTOMIZE item:    ABUS PLL ring modification offsets.
+  // Retrieval method:  Attribute.
+  // System phase:      IPL sysPhase.
+  // Note: TBD
+  // ==========================================================================
+
+	if (i_sysPhase==0)  {
+        // refclk sel
+        fapi::ATTR_PROC_ABUS_CUPLL_REFCLKSEL_OFFSET_Type refclksel_offset = {0};
+        void       *hostAbusRefclockSelVec;
+        uint64_t   *hostAbusRefclockSelVec_field;
+        rc = FAPI_ATTR_GET(ATTR_PROC_ABUS_CUPLL_REFCLKSEL_OFFSET, &i_target, refclksel_offset);
+        if (rc)
+        {
+            FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_ABUS_CUPLL_REFCLKSEL_OFFSET) returned error.\n");
+            return rc;
+        }
+        rcLoc = sbe_xip_find( o_imageOut, AB_BNDY_PLL_REFCLK_SEL_TOC_NAME, &xipTocItem);
+        if (rcLoc)
+        {
+            FAPI_INF("sbe_xip_find() failed w/rc=%i and %s", rcLoc, SBE_XIP_ERROR_STRING(errorStrings, rcLoc));
+            FAPI_INF("Probable cause:");
+            FAPI_INF("\tThe keyword (=%s) was not found.", AB_BNDY_PLL_REFCLK_SEL_TOC_NAME);
+            rcLoc = 0;
+        }
+        else
+        {
+            sbe_xip_pore2host( o_imageOut, xipTocItem.iv_address, &hostAbusRefclockSelVec);
+            FAPI_INF("Dumping [initial] global variable content of %s, and then the updated value:\n",
+                     AB_BNDY_PLL_REFCLK_SEL_TOC_NAME);
+
+            FAPI_INF(" Before=0x%016llX\n",myRev64(*(uint64_t*)hostAbusRefclockSelVec));
+            hostAbusRefclockSelVec_field = (uint64_t*)hostAbusRefclockSelVec;
+
+            for (size_t i = 0; i < 3; i++)
+            {
+                *(hostAbusRefclockSelVec_field + i) = myRev64(refclksel_offset[i]);
+            }
+            FAPI_INF(" After =0x%016llX\n",myRev64(*(uint64_t*)hostAbusRefclockSelVec));
+        }
+
+        // pfd360
+        fapi::ATTR_PROC_ABUS_CUPLL_PFD360_OFFSET_Type pfd360_offset = {0};
+        void       *hostAbusPFD360Vec;
+        uint64_t   *hostAbusPFD360Vec_field;
+        rc = FAPI_ATTR_GET(ATTR_PROC_ABUS_CUPLL_PFD360_OFFSET, &i_target, pfd360_offset);
+        if (rc)  {
+            FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_ABUS_CUPLL_PFD360_OFFSET) returned error.\n");
+            return rc;
+        }
+        rcLoc = sbe_xip_find( o_imageOut, AB_BNDY_PLL_PFD360_TOC_NAME, &xipTocItem);
+        if (rcLoc)
+        {
+            FAPI_INF("sbe_xip_find() failed w/rc=%i and %s", rcLoc, SBE_XIP_ERROR_STRING(errorStrings, rcLoc));
+            FAPI_INF("Probable cause:");
+            FAPI_INF("\tThe keyword (=%s) was not found.", AB_BNDY_PLL_PFD360_TOC_NAME);
+            rcLoc = 0;
+        }
+        else
+        {
+            sbe_xip_pore2host( o_imageOut, xipTocItem.iv_address, &hostAbusPFD360Vec);
+            FAPI_INF("Dumping [initial] global variable content of %s, and then the updated value:\n",
+                     AB_BNDY_PLL_PFD360_TOC_NAME);
+
+            FAPI_INF(" Before=0x%016llX\n",myRev64(*(uint64_t*)hostAbusPFD360Vec));
+            hostAbusPFD360Vec_field = (uint64_t*)hostAbusPFD360Vec;
+
+            for (size_t i = 0; i < 3; i++)
+            {
+                *(hostAbusPFD360Vec_field + i) = myRev64(pfd360_offset[i]);
+            }
+            FAPI_INF(" After =0x%016llX\n",myRev64(*(uint64_t*)hostAbusPFD360Vec));
+        }
+    }
+
+
   // ==========================================================================
   // CUSTOMIZE item:    Untrusted bar settings
   // Retrieval method:  Attribute.
@@ -988,8 +1145,8 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
 
   if (i_sysPhase==0)  {
     uint32_t  tmp32Const1, tmp32Const2;
-    uint8_t   attrRingFlush[MAX_PLL_RING_SIZE]={0};
-    uint8_t   attrRingData[MAX_PLL_RING_SIZE]={0};
+    uint8_t   attrRingFlush[PERV_BNDY_PLL_RING_SIZE]={0};
+    uint8_t   attrRingData[PERV_BNDY_PLL_RING_SIZE]={0};
     uint8_t   attrChipletId=0;
     uint32_t  attrScanSelect=0;
     uint32_t  attrRingDataSize=0; // Ring bit size
@@ -1004,7 +1161,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     //
     // Retrieve the raw PLL rings state from attributes.
     //
-    FAPI_INF("XIPC: PLL update: Retrieve the raw PLL ring state from attributes.");
+    FAPI_INF("XIPC: PERV_BNDY_PLL update: Retrieve the raw PLL ring state from attributes.");
     // Get ring size.
     rc = FAPI_ATTR_GET(ATTR_PROC_PERV_BNDY_PLL_LENGTH, &i_target, attrRingDataSize); // This better be in bits.
     FAPI_INF("XIPC: PLL update: PLL ring length (bits) = %i",attrRingDataSize);
@@ -1013,14 +1170,14 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
       FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_PERV_BNDY_PLL_LENGTH) returned error.");
       return rc;
     }
-    if (attrRingDataSize>MAX_PLL_RING_SIZE*8 || attrRingDataSize>i_sizeBuf1*8)  {
+    if (attrRingDataSize>PERV_BNDY_PLL_RING_SIZE*8 || attrRingDataSize>i_sizeBuf1*8)  {
       FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_PERV_BNDY_PLL_LENGTH) returned ring size =%i bits.\n",
                attrRingDataSize);
       FAPI_ERR("But that exceeds either:\n");
-      FAPI_ERR("  the max pll ring size =%i bits, or\n",MAX_PLL_RING_SIZE*8);
+      FAPI_ERR("  the max pll ring size =%i bits, or\n",PERV_BNDY_PLL_RING_SIZE*8);
       FAPI_ERR("  the size of the pre-allocated buf1 =%i bits.", i_sizeBuf1*8);
       uint32_t &DATA_ATTRIBUTE_RING_SIZE=attrRingDataSize;
-      tmp32Const1=8*MAX_PLL_RING_SIZE;
+      tmp32Const1=8*PERV_BNDY_PLL_RING_SIZE;
       tmp32Const2=8*(uint32_t)i_sizeBuf1;
       uint32_t &DATA_MAX_PLL_RING_SIZE=tmp32Const1;
       uint32_t &DATA_SIZE_OF_BUF1=tmp32Const2;
@@ -1049,7 +1206,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
       FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_PERV_BNDY_PLL_SCAN_SELECT) returned error.");
       return rc;
     }
-    
+
     //
     // Calculate the delta scan ring.
     //
@@ -1066,7 +1223,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
       FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_IMGBUILD_ERROR);
       return rc;
     }
-                              
+
     //
     // RS4 compress the delta scan ring.
     //
@@ -1103,7 +1260,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
       FAPI_INF("Compression Successful.");
 
     //
-    // Build the PLL _alt ring block (= ring header + RS4 launcher + RS4 ring). 
+    // Build the PLL _alt ring block (= ring header + RS4 launcher + RS4 ring).
     //
     uint64_t scanChipletAddress=0;
     uint32_t asmBuffer[ASM_RS4_LAUNCH_BUF_SIZE/4];
@@ -1113,7 +1270,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     // Reuse i_buf1 to hold the ring block.
     bufPllRingAltBlock = (DeltaRingLayout*)i_buf1;
     sizePllRingAltBlockMax = i_sizeBuf1;
-    
+
     // Construct RS4 launcher:
     // ...get the RS4 decompress address.
     rcLoc = sbe_xip_get_scalar( o_imageOut, "proc_sbe_decompress_scan_chiplet_address", &scanChipletAddress);
@@ -1151,8 +1308,8 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
       return rc;
     }
     sizeRs4Launch = ctx.lc;
-    
-    // Populate ring header and put ring header, RS4 launcher and RS4 ring into 
+
+    // Populate ring header and put ring header, RS4 launcher and RS4 ring into
     // proper spots in pre-allocated bufPllRingAltBlock buffer.
     //
     uint64_t entryOffsetPllRingAltBlock;
@@ -1184,12 +1341,12 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     // Copy over RS4 launch code which is [already] BE and 8-byte aligned.
     memcpy( (uint8_t*)bufPllRingAltBlock+bufLC, asmBuffer, (size_t)sizeRs4Launch);
     // Copy over RS4 PLL _alt delta scan ring which is [already] 8-byte aligned.
-    bufLC = bufLC + sizeRs4Launch;               
+    bufLC = bufLC + sizeRs4Launch;
     memcpy( (uint8_t*)bufPllRingAltBlock+bufLC, bufPllRingAltRs4, (size_t)sizePllRingAltRs4);
 
     // Now, some post-sanity checks on alignments.
     if ( sizeRs4Launch!=ASM_RS4_LAUNCH_BUF_SIZE ||
-         entryOffsetPllRingAltBlock%8 || 
+         entryOffsetPllRingAltBlock%8 ||
          sizeRs4Launch%8 ||
          sizeOfThisPllRingAltBlock%8)  {
       FAPI_ERR("Member(s) of PLL _alt ring block are not 8-byte aligned:");
@@ -1204,7 +1361,7 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
       return rc;
     }
 
-  
+
     //
     // Append PLL _alt ring to image.
     //
@@ -1228,6 +1385,784 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
     }
 
   }
+
+  // ==========================================================================
+  // CUSTOMIZE item:    Update PLL ring (ab_bndy_pll_ring_alt).
+  // Retrieval method:  Attribute.
+  // System phase:      IPL sysPhase.
+  // ==========================================================================
+
+  if (i_sysPhase==0)  {
+    uint32_t  tmp32Const1, tmp32Const2;
+    uint8_t   attrRingFlush[AB_BNDY_PLL_RING_SIZE]={0};
+    uint8_t   attrRingData[AB_BNDY_PLL_RING_SIZE]={0};
+    uint8_t   attrChipletId=0;
+    uint32_t  attrScanSelect=0;
+    uint32_t  attrRingDataSize=0; // Ring bit size
+    uint32_t  sizeDeltaPllRingAlt=0;
+    uint32_t  sizeRs4Launch=0;
+    uint8_t   *bufDeltaPllRingAlt;
+    CompressedScanData *bufPllRingAltRs4;
+    uint32_t  sizePllRingAltRs4Max, sizePllRingAltRs4, sizePllRingAltBlockMax;
+    DeltaRingLayout *bufPllRingAltBlock;
+    uint32_t  bufLC=0;
+
+    //
+    // Retrieve the raw PLL rings state from attributes.
+    //
+    FAPI_INF("XIPC: AB_BNDY_PLL update: Retrieve the raw PLL ring state from attributes.");
+    // Get ring size.
+    rc = FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_LENGTH, &i_target, attrRingDataSize); // This better be in bits.
+    FAPI_INF("XIPC: PLL update: PLL ring length (bits) = %i",attrRingDataSize);
+    FAPI_INF("XIPC: PLL update: Size of buf1, i_sizeBuf1 (bytes) = %i",i_sizeBuf1);
+    if (rc)  {
+      FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_LENGTH) returned error.");
+      return rc;
+    }
+    if (attrRingDataSize>AB_BNDY_PLL_RING_SIZE*8 || attrRingDataSize>i_sizeBuf1*8)  {
+      FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_LENGTH) returned ring size =%i bits.\n",
+               attrRingDataSize);
+      FAPI_ERR("But that exceeds either:\n");
+      FAPI_ERR("  the max pll ring size =%i bits, or\n",AB_BNDY_PLL_RING_SIZE*8);
+      FAPI_ERR("  the size of the pre-allocated buf1 =%i bits.", i_sizeBuf1*8);
+      uint32_t &DATA_ATTRIBUTE_RING_SIZE=attrRingDataSize;
+      tmp32Const1=8*AB_BNDY_PLL_RING_SIZE;
+      tmp32Const2=8*(uint32_t)i_sizeBuf1;
+      uint32_t &DATA_MAX_PLL_RING_SIZE=tmp32Const1;
+      uint32_t &DATA_SIZE_OF_BUF1=tmp32Const2;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_PLL_RING_SIZE_TOO_LARGE);
+      return rc;
+    }
+    sizeDeltaPllRingAlt = attrRingDataSize; // We already checked it'll fit into buf1.
+    // Get flush and alter (desired) ring state data.
+    rc = FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_FLUSH, &i_target, attrRingFlush);
+    if (rc)  {
+      FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_FLUSH) returned error.");
+      return rc;
+    }
+    rc = FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_DATA, &i_target, attrRingData);
+    if (rc)  {
+      FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_DATA) returned error.");
+      return rc;
+    }
+    rc = FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_CHIPLET_ID, &i_target, attrChipletId);
+    if (rc)  {
+      FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_CHIPLET_ID) returned error.");
+      return rc;
+    }
+    rc = FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_SCAN_SELECT, &i_target, attrScanSelect);
+    if (rc)  {
+      FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_SCAN_SELECT) returned error.");
+      return rc;
+    }
+
+    //
+    // Calculate the delta scan ring.
+    //
+    FAPI_INF("XIPC: PLL update: Calculate the delta scan ring.");
+    bufDeltaPllRingAlt = (uint8_t*)i_buf1;
+    rcLoc = calc_ring_delta_state( (uint32_t*)attrRingFlush,
+                                   (uint32_t*)attrRingData,
+                                   (uint32_t*)bufDeltaPllRingAlt, // Pre-allocated buffer.
+                                   sizeDeltaPllRingAlt );
+    if (rcLoc)  {
+      FAPI_ERR("calc_ring_delta_state() returned error w/rc=%i",rcLoc);
+      FAPI_ERR("Check p8_delta_scan_rw.h for meaning of IMGBUILD_xyz rc code.");
+      uint32_t &RC_LOCAL=rcLoc;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_IMGBUILD_ERROR);
+      return rc;
+    }
+
+    //
+    // RS4 compress the delta scan ring.
+    //
+    FAPI_INF("XIPC: PLL update: RS4 compressing the delta scan ring.");
+    bufPllRingAltRs4 = (CompressedScanData*)i_buf2;
+    sizePllRingAltRs4Max = i_sizeBuf2; // Always supply max buffer space for ring.
+    rcLoc = _rs4_compress(bufPllRingAltRs4,     // Contains PLL _alt RS4 ring on return.
+                          sizePllRingAltRs4Max, // Max size of buffer.
+                          &sizePllRingAltRs4,   // Returned final size of RS4 ring + container.
+                          bufDeltaPllRingAlt,   // Input delta scan ring.
+                          sizeDeltaPllRingAlt,  // Input delta scan ring size.
+                          (uint64_t)attrScanSelect<<32,
+                          0,
+                          attrChipletId,
+                          1 ); // Always flush optimize for base rings.
+    if (rcLoc)  {
+      FAPI_ERR("_rs4_compress() failed w/rc=%i",rcLoc);
+      uint32_t &RC_LOCAL=rcLoc;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_RS4_COMPRESS_ERROR);
+      return rc;
+    }
+    else
+    if (sizePllRingAltRs4!=myRev32(bufPllRingAltRs4->iv_size))  {
+      FAPI_ERR("_rs4_compress() problem with size of RS4 ring (incl container).");
+      FAPI_ERR("Returned size = %i", sizePllRingAltRs4);
+      FAPI_ERR("Size from container = %i", myRev32(bufPllRingAltRs4->iv_size));
+      uint32_t &DATA_SIZE_RS4_COMPRESS_RETURN=sizePllRingAltRs4;
+      tmp32Const1=myRev32(bufPllRingAltRs4->iv_size);
+      uint32_t &DATA_SIZE_RS4_COMPRESS_CONTAINER=tmp32Const1;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_RS4_COMPRESS_SIZE_MESS);
+      return rc;
+    }
+    else
+      FAPI_INF("Compression Successful.");
+
+    //
+    // Build the PLL _alt ring block (= ring header + RS4 launcher + RS4 ring).
+    //
+    uint64_t scanChipletAddress=0;
+    uint32_t asmBuffer[ASM_RS4_LAUNCH_BUF_SIZE/4];
+    PoreInlineContext ctx;
+
+    FAPI_INF("XIPC: PLL update: Building the RS4 PLL ring block.");
+    // Reuse i_buf1 to hold the ring block.
+    bufPllRingAltBlock = (DeltaRingLayout*)i_buf1;
+    sizePllRingAltBlockMax = i_sizeBuf1;
+
+    // Construct RS4 launcher:
+    // ...get the RS4 decompress address.
+    rcLoc = sbe_xip_get_scalar( o_imageOut, "proc_sbe_decompress_scan_chiplet_address", &scanChipletAddress);
+    if (rcLoc)  {
+      FAPI_ERR("sbe_xip_get_scalar() failed w/rc=%i", rcLoc);
+      FAPI_ERR("Probable cause: Key word =proc_sbe_decompress_scan_chiplet_address not found in image.");
+      uint32_t &RC_LOCAL=rcLoc;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_KEYWORD_NOT_FOUND_ERROR);
+      return rc;
+    }
+    if (scanChipletAddress==0)  {
+      FAPI_ERR("Value of key word (=proc_sbe_decompress_scan_chiplet_address=0) not permitted.");
+      uint64_t &DATA_RS4_DECOMPRESS_ADDR=scanChipletAddress;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_ILLEGAL_RS4_DECOMPRESS_ADDR);
+      return rc;
+    }
+    // ... create inline asm code.
+    pore_inline_context_create( &ctx, asmBuffer, ASM_RS4_LAUNCH_BUF_SIZE*4, 0, 0);
+    rcLoc = ctx.error;
+    if (rcLoc)  {
+      FAPI_ERR("pore_inline_context_create() failed w/rc=%i", rcLoc);
+      uint32_t &RC_LOCAL=rcLoc;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_PORE_INLINE_CTX_CREATE_ERROR);
+      return rc;
+    }
+    pore_MR(&ctx, A0, PC);
+    pore_ADDS(&ctx, A0, A0, ASM_RS4_LAUNCH_BUF_SIZE);
+    pore_LI(&ctx, D0, scanChipletAddress);
+    pore_BRAD(&ctx, D0);
+    rcLoc = ctx.error;
+    if (rcLoc)  {
+      FAPI_ERR("pore_MR/ADDS/LI/BRAD() failed w/rc=%i", rcLoc);
+      uint32_t &RC_LOCAL=rcLoc;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_PORE_INLINE_RS4_LAUNCH_CREATE_ERROR);
+      return rc;
+    }
+    sizeRs4Launch = ctx.lc;
+
+    // Populate ring header and put ring header, RS4 launcher and RS4 ring into
+    // proper spots in pre-allocated bufPllRingAltBlock buffer.
+    //
+    uint64_t entryOffsetPllRingAltBlock;
+    uint32_t sizeOfThisPllRingAltBlock;
+    entryOffsetPllRingAltBlock      = calc_ring_layout_entry_offset( 0, 0);
+    bufPllRingAltBlock->entryOffset = myRev64(entryOffsetPllRingAltBlock);
+    bufPllRingAltBlock->backItemPtr  = 0; // Will be updated below, as we don't know yet.
+    sizeOfThisPllRingAltBlock       =  entryOffsetPllRingAltBlock +  // Must be 8-byte aligned.
+                                      sizeRs4Launch +               // Must be 8-byte aligned.
+                                      sizePllRingAltRs4;            // Must be 8-byte aligned.
+    bufPllRingAltBlock->sizeOfThis  = myRev32(sizeOfThisPllRingAltBlock);
+    // Quick check to see if final ring block size will fit in buf1.
+    if (sizeOfThisPllRingAltBlock>sizePllRingAltBlockMax)  {
+      FAPI_ERR("PLL _alt ring block size (=%i) exceeds pre-allocated buf1 size (=%i).",
+        sizeOfThisPllRingAltBlock, sizePllRingAltBlockMax);
+      uint32_t &DATA_RING_BLOCK_SIZEOFTHIS=sizeOfThisPllRingAltBlock;
+      uint32_t &DATA_SIZE_OF_BUF1=sizePllRingAltBlockMax;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_PLL_RING_BLOCK_TOO_LARGE);
+      return rc;
+    }
+    bufPllRingAltBlock->sizeOfMeta  =  0;
+    bufPllRingAltBlock->ddLevel      = myRev32((uint32_t)attrDdLevel);
+    bufPllRingAltBlock->sysPhase     = i_sysPhase;
+    bufPllRingAltBlock->override     = 0;
+    bufPllRingAltBlock->reserved1    = 0;
+    bufPllRingAltBlock->reserved2    = 0;
+    bufLC = (uint32_t)entryOffsetPllRingAltBlock;
+    // Copy over meta data which is zero, so nothing to do in this case!
+    // Copy over RS4 launch code which is [already] BE and 8-byte aligned.
+    memcpy( (uint8_t*)bufPllRingAltBlock+bufLC, asmBuffer, (size_t)sizeRs4Launch);
+    // Copy over RS4 PLL _alt delta scan ring which is [already] 8-byte aligned.
+    bufLC = bufLC + sizeRs4Launch;
+    memcpy( (uint8_t*)bufPllRingAltBlock+bufLC, bufPllRingAltRs4, (size_t)sizePllRingAltRs4);
+
+    // Now, some post-sanity checks on alignments.
+    if ( sizeRs4Launch!=ASM_RS4_LAUNCH_BUF_SIZE ||
+         entryOffsetPllRingAltBlock%8 ||
+         sizeRs4Launch%8 ||
+         sizeOfThisPllRingAltBlock%8)  {
+      FAPI_ERR("Member(s) of PLL _alt ring block are not 8-byte aligned:");
+      FAPI_ERR("  Size of RS4 launch code = %i", sizeRs4Launch);
+      FAPI_ERR("  Entry offset            = %i", (uint32_t)entryOffsetPllRingAltBlock);
+      FAPI_ERR("  Size of ring block      = %i", sizeOfThisPllRingAltBlock);
+      uint32_t &DATA_SIZE_OF_RS4_LAUNCH=sizeRs4Launch;
+      tmp32Const1=(uint32_t)entryOffsetPllRingAltBlock;
+      uint32_t &DATA_RING_BLOCK_ENTRYOFFSET=tmp32Const1;
+      uint32_t &DATA_RING_BLOCK_SIZEOFTHIS=sizeOfThisPllRingAltBlock;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_RING_BLOCK_ALIGN_ERROR);
+      return rc;
+    }
+
+    //
+    // Append PLL _alt ring to image.
+    //
+    SbeXipItem tocItem;
+    rcLoc = sbe_xip_find(o_imageOut, AB_BNDY_PLL_RING_ALT_TOC_NAME, &tocItem);
+    if (rcLoc)
+    {
+      FAPI_INF("Skipping PLL update for %s", AB_BNDY_PLL_RING_ALT_TOC_NAME);
+      rcLoc = 0;
+    }
+    else
+    {
+      FAPI_INF("XIPC: PLL update: Appending RS4 PLL ring block to .rings section.");
+      rcLoc = write_ring_block_to_image( o_imageOut,
+                                         AB_BNDY_PLL_RING_ALT_TOC_NAME,
+                                         bufPllRingAltBlock,
+                                         0,
+                                         0,
+                                         0,
+                                         largeSeeprom? sizeImageOutMax:MAX_SEEPROM_IMAGE_SIZE, // OK, since sysPhase=0.
+                                         SBE_XIP_SECTION_RINGS,
+                                         i_buf2,
+                                         i_sizeBuf2);
+      if (rcLoc)
+      {
+        FAPI_ERR("write_ring_block_to_image() failed for %s w/rc=%i", AB_BNDY_PLL_RING_ALT_TOC_NAME, rcLoc);
+        FAPI_ERR("Check p8_delta_scan_rw.h for meaning of IMGBUILD_xyz rc code.");
+        uint32_t &RC_LOCAL=rcLoc;
+        FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_IMGBUILD_ERROR);
+        return rc;
+      }
+    }
+  }
+
+  // ==========================================================================
+  // CUSTOMIZE item:    Update PLL ring (pci_bndy_pll_ring_alt).
+  // Retrieval method:  Attribute.
+  // System phase:      IPL sysPhase.
+  // ==========================================================================
+
+  if (i_sysPhase==0)  {
+    uint32_t  tmp32Const1, tmp32Const2;
+    uint8_t   attrRingFlush[PCI_BNDY_PLL_RING_SIZE]={0};
+    uint8_t   attrRingData[PCI_BNDY_PLL_RING_SIZE]={0};
+    uint8_t   attrChipletId=0;
+    uint32_t  attrScanSelect=0;
+    uint32_t  attrRingDataSize=0; // Ring bit size
+    uint32_t  sizeDeltaPllRingAlt=0;
+    uint32_t  sizeRs4Launch=0;
+    uint8_t   *bufDeltaPllRingAlt;
+    CompressedScanData *bufPllRingAltRs4;
+    uint32_t  sizePllRingAltRs4Max, sizePllRingAltRs4, sizePllRingAltBlockMax;
+    DeltaRingLayout *bufPllRingAltBlock;
+    uint32_t  bufLC=0;
+
+    //
+    // Retrieve the raw PLL rings state from attributes.
+    //
+    FAPI_INF("XIPC: PCI_BNDY_PLL update: Retrieve the raw PLL ring state from attributes.");
+    // Get ring size.
+    rc = FAPI_ATTR_GET(ATTR_PROC_PCI_BNDY_PLL_LENGTH, &i_target, attrRingDataSize); // This better be in bits.
+    FAPI_INF("XIPC: PLL update: PLL ring length (bits) = %i",attrRingDataSize);
+    FAPI_INF("XIPC: PLL update: Size of buf1, i_sizeBuf1 (bytes) = %i",i_sizeBuf1);
+    if (rc)  {
+      FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_PCI_BNDY_PLL_LENGTH) returned error.");
+      return rc;
+    }
+    if (attrRingDataSize>PCI_BNDY_PLL_RING_SIZE*8 || attrRingDataSize>i_sizeBuf1*8)  {
+      FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_PCI_BNDY_PLL_LENGTH) returned ring size =%i bits.\n",
+               attrRingDataSize);
+      FAPI_ERR("But that exceeds either:\n");
+      FAPI_ERR("  the max pll ring size =%i bits, or\n",PCI_BNDY_PLL_RING_SIZE*8);
+      FAPI_ERR("  the size of the pre-allocated buf1 =%i bits.", i_sizeBuf1*8);
+      uint32_t &DATA_ATTRIBUTE_RING_SIZE=attrRingDataSize;
+      tmp32Const1=8*PCI_BNDY_PLL_RING_SIZE;
+      tmp32Const2=8*(uint32_t)i_sizeBuf1;
+      uint32_t &DATA_MAX_PLL_RING_SIZE=tmp32Const1;
+      uint32_t &DATA_SIZE_OF_BUF1=tmp32Const2;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_PLL_RING_SIZE_TOO_LARGE);
+      return rc;
+    }
+    sizeDeltaPllRingAlt = attrRingDataSize; // We already checked it'll fit into buf1.
+    // Get flush and alter (desired) ring state data.
+    rc = FAPI_ATTR_GET(ATTR_PROC_PCI_BNDY_PLL_FLUSH, &i_target, attrRingFlush);
+    if (rc)  {
+      FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_PCI_BNDY_PLL_FLUSH) returned error.");
+      return rc;
+    }
+    rc = FAPI_ATTR_GET(ATTR_PROC_PCI_BNDY_PLL_DATA, &i_target, attrRingData);
+    if (rc)  {
+      FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_PCI_BNDY_PLL_DATA) returned error.");
+      return rc;
+    }
+    rc = FAPI_ATTR_GET(ATTR_PROC_PCI_BNDY_PLL_CHIPLET_ID, &i_target, attrChipletId);
+    if (rc)  {
+      FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_PCI_BNDY_PLL_CHIPLET_ID) returned error.");
+      return rc;
+    }
+    rc = FAPI_ATTR_GET(ATTR_PROC_PCI_BNDY_PLL_SCAN_SELECT, &i_target, attrScanSelect);
+    if (rc)  {
+      FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_PCI_BNDY_PLL_SCAN_SELECT) returned error.");
+      return rc;
+    }
+
+    //
+    // Calculate the delta scan ring.
+    //
+    FAPI_INF("XIPC: PLL update: Calculate the delta scan ring.");
+    bufDeltaPllRingAlt = (uint8_t*)i_buf1;
+    rcLoc = calc_ring_delta_state( (uint32_t*)attrRingFlush,
+                                   (uint32_t*)attrRingData,
+                                   (uint32_t*)bufDeltaPllRingAlt, // Pre-allocated buffer.
+                                   sizeDeltaPllRingAlt );
+    if (rcLoc)  {
+      FAPI_ERR("calc_ring_delta_state() returned error w/rc=%i",rcLoc);
+      FAPI_ERR("Check p8_delta_scan_rw.h for meaning of IMGBUILD_xyz rc code.");
+      uint32_t &RC_LOCAL=rcLoc;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_IMGBUILD_ERROR);
+      return rc;
+    }
+
+    //
+    // RS4 compress the delta scan ring.
+    //
+    FAPI_INF("XIPC: PLL update: RS4 compressing the delta scan ring.");
+    bufPllRingAltRs4 = (CompressedScanData*)i_buf2;
+    sizePllRingAltRs4Max = i_sizeBuf2; // Always supply max buffer space for ring.
+    rcLoc = _rs4_compress(bufPllRingAltRs4,     // Contains PLL _alt RS4 ring on return.
+                          sizePllRingAltRs4Max, // Max size of buffer.
+                          &sizePllRingAltRs4,   // Returned final size of RS4 ring + container.
+                          bufDeltaPllRingAlt,   // Input delta scan ring.
+                          sizeDeltaPllRingAlt,  // Input delta scan ring size.
+                          (uint64_t)attrScanSelect<<32,
+                          0,
+                          attrChipletId,
+                          1 ); // Always flush optimize for base rings.
+    if (rcLoc)  {
+      FAPI_ERR("_rs4_compress() failed w/rc=%i",rcLoc);
+      uint32_t &RC_LOCAL=rcLoc;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_RS4_COMPRESS_ERROR);
+      return rc;
+    }
+    else
+    if (sizePllRingAltRs4!=myRev32(bufPllRingAltRs4->iv_size))  {
+      FAPI_ERR("_rs4_compress() problem with size of RS4 ring (incl container).");
+      FAPI_ERR("Returned size = %i", sizePllRingAltRs4);
+      FAPI_ERR("Size from container = %i", myRev32(bufPllRingAltRs4->iv_size));
+      uint32_t &DATA_SIZE_RS4_COMPRESS_RETURN=sizePllRingAltRs4;
+      tmp32Const1=myRev32(bufPllRingAltRs4->iv_size);
+      uint32_t &DATA_SIZE_RS4_COMPRESS_CONTAINER=tmp32Const1;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_RS4_COMPRESS_SIZE_MESS);
+      return rc;
+    }
+    else
+      FAPI_INF("Compression Successful.");
+
+    //
+    // Build the PLL _alt ring block (= ring header + RS4 launcher + RS4 ring).
+    //
+    uint64_t scanChipletAddress=0;
+    uint32_t asmBuffer[ASM_RS4_LAUNCH_BUF_SIZE/4];
+    PoreInlineContext ctx;
+
+    FAPI_INF("XIPC: PLL update: Building the RS4 PLL ring block.");
+    // Reuse i_buf1 to hold the ring block.
+    bufPllRingAltBlock = (DeltaRingLayout*)i_buf1;
+    sizePllRingAltBlockMax = i_sizeBuf1;
+
+    // Construct RS4 launcher:
+    // ...get the RS4 decompress address.
+    rcLoc = sbe_xip_get_scalar( o_imageOut, "proc_sbe_decompress_scan_chiplet_address", &scanChipletAddress);
+    if (rcLoc)  {
+      FAPI_ERR("sbe_xip_get_scalar() failed w/rc=%i", rcLoc);
+      FAPI_ERR("Probable cause: Key word =proc_sbe_decompress_scan_chiplet_address not found in image.");
+      uint32_t &RC_LOCAL=rcLoc;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_KEYWORD_NOT_FOUND_ERROR);
+      return rc;
+    }
+    if (scanChipletAddress==0)  {
+      FAPI_ERR("Value of key word (=proc_sbe_decompress_scan_chiplet_address=0) not permitted.");
+      uint64_t &DATA_RS4_DECOMPRESS_ADDR=scanChipletAddress;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_ILLEGAL_RS4_DECOMPRESS_ADDR);
+      return rc;
+    }
+    // ... create inline asm code.
+    pore_inline_context_create( &ctx, asmBuffer, ASM_RS4_LAUNCH_BUF_SIZE*4, 0, 0);
+    rcLoc = ctx.error;
+    if (rcLoc)  {
+      FAPI_ERR("pore_inline_context_create() failed w/rc=%i", rcLoc);
+      uint32_t &RC_LOCAL=rcLoc;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_PORE_INLINE_CTX_CREATE_ERROR);
+      return rc;
+    }
+    pore_MR(&ctx, A0, PC);
+    pore_ADDS(&ctx, A0, A0, ASM_RS4_LAUNCH_BUF_SIZE);
+    pore_LI(&ctx, D0, scanChipletAddress);
+    pore_BRAD(&ctx, D0);
+    rcLoc = ctx.error;
+    if (rcLoc)  {
+      FAPI_ERR("pore_MR/ADDS/LI/BRAD() failed w/rc=%i", rcLoc);
+      uint32_t &RC_LOCAL=rcLoc;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_PORE_INLINE_RS4_LAUNCH_CREATE_ERROR);
+      return rc;
+    }
+    sizeRs4Launch = ctx.lc;
+
+    // Populate ring header and put ring header, RS4 launcher and RS4 ring into
+    // proper spots in pre-allocated bufPllRingAltBlock buffer.
+    //
+    uint64_t entryOffsetPllRingAltBlock;
+    uint32_t sizeOfThisPllRingAltBlock;
+    entryOffsetPllRingAltBlock      = calc_ring_layout_entry_offset( 0, 0);
+    bufPllRingAltBlock->entryOffset = myRev64(entryOffsetPllRingAltBlock);
+    bufPllRingAltBlock->backItemPtr  = 0; // Will be updated below, as we don't know yet.
+    sizeOfThisPllRingAltBlock       =  entryOffsetPllRingAltBlock +  // Must be 8-byte aligned.
+                                      sizeRs4Launch +               // Must be 8-byte aligned.
+                                      sizePllRingAltRs4;            // Must be 8-byte aligned.
+    bufPllRingAltBlock->sizeOfThis  = myRev32(sizeOfThisPllRingAltBlock);
+    // Quick check to see if final ring block size will fit in buf1.
+    if (sizeOfThisPllRingAltBlock>sizePllRingAltBlockMax)  {
+      FAPI_ERR("PLL _alt ring block size (=%i) exceeds pre-allocated buf1 size (=%i).",
+        sizeOfThisPllRingAltBlock, sizePllRingAltBlockMax);
+      uint32_t &DATA_RING_BLOCK_SIZEOFTHIS=sizeOfThisPllRingAltBlock;
+      uint32_t &DATA_SIZE_OF_BUF1=sizePllRingAltBlockMax;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_PLL_RING_BLOCK_TOO_LARGE);
+      return rc;
+    }
+    bufPllRingAltBlock->sizeOfMeta  =  0;
+    bufPllRingAltBlock->ddLevel      = myRev32((uint32_t)attrDdLevel);
+    bufPllRingAltBlock->sysPhase     = i_sysPhase;
+    bufPllRingAltBlock->override     = 0;
+    bufPllRingAltBlock->reserved1    = 0;
+    bufPllRingAltBlock->reserved2    = 0;
+    bufLC = (uint32_t)entryOffsetPllRingAltBlock;
+    // Copy over meta data which is zero, so nothing to do in this case!
+    // Copy over RS4 launch code which is [already] BE and 8-byte aligned.
+    memcpy( (uint8_t*)bufPllRingAltBlock+bufLC, asmBuffer, (size_t)sizeRs4Launch);
+    // Copy over RS4 PLL _alt delta scan ring which is [already] 8-byte aligned.
+    bufLC = bufLC + sizeRs4Launch;
+    memcpy( (uint8_t*)bufPllRingAltBlock+bufLC, bufPllRingAltRs4, (size_t)sizePllRingAltRs4);
+
+    // Now, some post-sanity checks on alignments.
+    if ( sizeRs4Launch!=ASM_RS4_LAUNCH_BUF_SIZE ||
+         entryOffsetPllRingAltBlock%8 ||
+         sizeRs4Launch%8 ||
+         sizeOfThisPllRingAltBlock%8)  {
+      FAPI_ERR("Member(s) of PLL _alt ring block are not 8-byte aligned:");
+      FAPI_ERR("  Size of RS4 launch code = %i", sizeRs4Launch);
+      FAPI_ERR("  Entry offset            = %i", (uint32_t)entryOffsetPllRingAltBlock);
+      FAPI_ERR("  Size of ring block      = %i", sizeOfThisPllRingAltBlock);
+      uint32_t &DATA_SIZE_OF_RS4_LAUNCH=sizeRs4Launch;
+      tmp32Const1=(uint32_t)entryOffsetPllRingAltBlock;
+      uint32_t &DATA_RING_BLOCK_ENTRYOFFSET=tmp32Const1;
+      uint32_t &DATA_RING_BLOCK_SIZEOFTHIS=sizeOfThisPllRingAltBlock;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_RING_BLOCK_ALIGN_ERROR);
+      return rc;
+    }
+
+
+    //
+    // Append PLL _alt ring to image.
+    //
+    SbeXipItem tocItem;
+    rcLoc = sbe_xip_find(o_imageOut, PCI_BNDY_PLL_RING_ALT_TOC_NAME, &tocItem);
+    if (rcLoc)
+    {
+      FAPI_INF("Skipping PLL update for %s", PCI_BNDY_PLL_RING_ALT_TOC_NAME);
+      rcLoc = 0;
+    }
+    else
+    {
+      FAPI_INF("XIPC: PLL update: Appending RS4 PLL ring block to .rings section.");
+      rcLoc = write_ring_block_to_image( o_imageOut,
+                                         PCI_BNDY_PLL_RING_ALT_TOC_NAME,
+                                         bufPllRingAltBlock,
+                                         0,
+                                         0,
+                                         0,
+                                         largeSeeprom? sizeImageOutMax:MAX_SEEPROM_IMAGE_SIZE, // OK, since sysPhase=0.
+                                         SBE_XIP_SECTION_RINGS,
+                                         i_buf2,
+                                         i_sizeBuf2);
+      if (rcLoc)
+      {
+        FAPI_ERR("write_ring_block_to_image() failed for %s w/rc=%i", PCI_BNDY_PLL_RING_ALT_TOC_NAME, rcLoc);
+        FAPI_ERR("Check p8_delta_scan_rw.h for meaning of IMGBUILD_xyz rc code.");
+        uint32_t &RC_LOCAL=rcLoc;
+        FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_IMGBUILD_ERROR);
+        return rc;
+      }
+    }
+
+  }
+
+  // ==========================================================================
+  // CUSTOMIZE item:    Update PLL ring (pb_bndy_dmipll_ring_alt).
+  // Retrieval method:  Attribute.
+  // System phase:      IPL sysPhase.
+  // ==========================================================================
+
+  if (i_sysPhase==0)  {
+    uint32_t  tmp32Const1, tmp32Const2;
+    uint8_t   attrRingFlush[PB_BNDY_DMIPLL_RING_SIZE]={0};
+    uint8_t   attrRingData[PB_BNDY_DMIPLL_RING_SIZE]={0};
+    uint8_t   attrChipletId=0;
+    uint32_t  attrScanSelect=0;
+    uint32_t  attrRingDataSize=0; // Ring bit size
+    uint32_t  sizeDeltaPllRingAlt=0;
+    uint32_t  sizeRs4Launch=0;
+    uint8_t   *bufDeltaPllRingAlt;
+    CompressedScanData *bufPllRingAltRs4;
+    uint32_t  sizePllRingAltRs4Max, sizePllRingAltRs4, sizePllRingAltBlockMax;
+    DeltaRingLayout *bufPllRingAltBlock;
+    uint32_t  bufLC=0;
+
+    //
+    // Retrieve the raw PLL rings state from attributes.
+    //
+    FAPI_INF("XIPC: PB_BNDY_DMIPLL update: Retrieve the raw PLL ring state from attributes.");
+    // Get ring size.
+    rc = FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_DMIPLL_LENGTH, &i_target, attrRingDataSize); // This better be in bits.
+    FAPI_INF("XIPC: PLL update: PLL ring length (bits) = %i",attrRingDataSize);
+    FAPI_INF("XIPC: PLL update: Size of buf1, i_sizeBuf1 (bytes) = %i",i_sizeBuf1);
+    if (rc)  {
+      FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_DMIPLL_LENGTH) returned error.");
+      return rc;
+    }
+    if (attrRingDataSize>PB_BNDY_DMIPLL_RING_SIZE*8 || attrRingDataSize>i_sizeBuf1*8)  {
+      FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_DMIPLL_LENGTH) returned ring size =%i bits.\n",
+               attrRingDataSize);
+      FAPI_ERR("But that exceeds either:\n");
+      FAPI_ERR("  the max pll ring size =%i bits, or\n",PB_BNDY_DMIPLL_RING_SIZE*8);
+      FAPI_ERR("  the size of the pre-allocated buf1 =%i bits.", i_sizeBuf1*8);
+      uint32_t &DATA_ATTRIBUTE_RING_SIZE=attrRingDataSize;
+      tmp32Const1=8*PB_BNDY_DMIPLL_RING_SIZE;
+      tmp32Const2=8*(uint32_t)i_sizeBuf1;
+      uint32_t &DATA_MAX_PLL_RING_SIZE=tmp32Const1;
+      uint32_t &DATA_SIZE_OF_BUF1=tmp32Const2;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_PLL_RING_SIZE_TOO_LARGE);
+      return rc;
+    }
+    sizeDeltaPllRingAlt = attrRingDataSize; // We already checked it'll fit into buf1.
+    // Get flush and alter (desired) ring state data.
+    rc = FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_DMIPLL_FLUSH, &i_target, attrRingFlush);
+    if (rc)  {
+      FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_DMIPLL_FLUSH) returned error.");
+      return rc;
+    }
+    rc = FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_DMIPLL_DATA, &i_target, attrRingData);
+    if (rc)  {
+      FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_DMIPLL_DATA) returned error.");
+      return rc;
+    }
+    rc = FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_DMIPLL_CHIPLET_ID, &i_target, attrChipletId);
+    if (rc)  {
+      FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_DMIPLL_CHIPLET_ID) returned error.");
+      return rc;
+    }
+    rc = FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_DMIPLL_SCAN_SELECT, &i_target, attrScanSelect);
+    if (rc)  {
+      FAPI_ERR("FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_DMIPLL_SCAN_SELECT) returned error.");
+      return rc;
+    }
+
+    //
+    // Calculate the delta scan ring.
+    //
+    FAPI_INF("XIPC: PLL update: Calculate the delta scan ring.");
+    bufDeltaPllRingAlt = (uint8_t*)i_buf1;
+    rcLoc = calc_ring_delta_state( (uint32_t*)attrRingFlush,
+                                   (uint32_t*)attrRingData,
+                                   (uint32_t*)bufDeltaPllRingAlt, // Pre-allocated buffer.
+                                   sizeDeltaPllRingAlt );
+    if (rcLoc)  {
+      FAPI_ERR("calc_ring_delta_state() returned error w/rc=%i",rcLoc);
+      FAPI_ERR("Check p8_delta_scan_rw.h for meaning of IMGBUILD_xyz rc code.");
+      uint32_t &RC_LOCAL=rcLoc;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_IMGBUILD_ERROR);
+      return rc;
+    }
+
+    //
+    // RS4 compress the delta scan ring.
+    //
+    FAPI_INF("XIPC: PLL update: RS4 compressing the delta scan ring.");
+    bufPllRingAltRs4 = (CompressedScanData*)i_buf2;
+    sizePllRingAltRs4Max = i_sizeBuf2; // Always supply max buffer space for ring.
+    rcLoc = _rs4_compress(bufPllRingAltRs4,     // Contains PLL _alt RS4 ring on return.
+                          sizePllRingAltRs4Max, // Max size of buffer.
+                          &sizePllRingAltRs4,   // Returned final size of RS4 ring + container.
+                          bufDeltaPllRingAlt,   // Input delta scan ring.
+                          sizeDeltaPllRingAlt,  // Input delta scan ring size.
+                          (uint64_t)attrScanSelect<<32,
+                          0,
+                          attrChipletId,
+                          1 ); // Always flush optimize for base rings.
+    if (rcLoc)  {
+      FAPI_ERR("_rs4_compress() failed w/rc=%i",rcLoc);
+      uint32_t &RC_LOCAL=rcLoc;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_RS4_COMPRESS_ERROR);
+      return rc;
+    }
+    else
+    if (sizePllRingAltRs4!=myRev32(bufPllRingAltRs4->iv_size))  {
+      FAPI_ERR("_rs4_compress() problem with size of RS4 ring (incl container).");
+      FAPI_ERR("Returned size = %i", sizePllRingAltRs4);
+      FAPI_ERR("Size from container = %i", myRev32(bufPllRingAltRs4->iv_size));
+      uint32_t &DATA_SIZE_RS4_COMPRESS_RETURN=sizePllRingAltRs4;
+      tmp32Const1=myRev32(bufPllRingAltRs4->iv_size);
+      uint32_t &DATA_SIZE_RS4_COMPRESS_CONTAINER=tmp32Const1;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_RS4_COMPRESS_SIZE_MESS);
+      return rc;
+    }
+    else
+      FAPI_INF("Compression Successful.");
+
+    //
+    // Build the PLL _alt ring block (= ring header + RS4 launcher + RS4 ring).
+    //
+    uint64_t scanChipletAddress=0;
+    uint32_t asmBuffer[ASM_RS4_LAUNCH_BUF_SIZE/4];
+    PoreInlineContext ctx;
+
+    FAPI_INF("XIPC: PLL update: Building the RS4 PLL ring block.");
+    // Reuse i_buf1 to hold the ring block.
+    bufPllRingAltBlock = (DeltaRingLayout*)i_buf1;
+    sizePllRingAltBlockMax = i_sizeBuf1;
+
+    // Construct RS4 launcher:
+    // ...get the RS4 decompress address.
+    rcLoc = sbe_xip_get_scalar( o_imageOut, "proc_sbe_decompress_scan_chiplet_address", &scanChipletAddress);
+    if (rcLoc)  {
+      FAPI_ERR("sbe_xip_get_scalar() failed w/rc=%i", rcLoc);
+      FAPI_ERR("Probable cause: Key word =proc_sbe_decompress_scan_chiplet_address not found in image.");
+      uint32_t &RC_LOCAL=rcLoc;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_KEYWORD_NOT_FOUND_ERROR);
+      return rc;
+    }
+    if (scanChipletAddress==0)  {
+      FAPI_ERR("Value of key word (=proc_sbe_decompress_scan_chiplet_address=0) not permitted.");
+      uint64_t &DATA_RS4_DECOMPRESS_ADDR=scanChipletAddress;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_ILLEGAL_RS4_DECOMPRESS_ADDR);
+      return rc;
+    }
+    // ... create inline asm code.
+    pore_inline_context_create( &ctx, asmBuffer, ASM_RS4_LAUNCH_BUF_SIZE*4, 0, 0);
+    rcLoc = ctx.error;
+    if (rcLoc)  {
+      FAPI_ERR("pore_inline_context_create() failed w/rc=%i", rcLoc);
+      uint32_t &RC_LOCAL=rcLoc;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_PORE_INLINE_CTX_CREATE_ERROR);
+      return rc;
+    }
+    pore_MR(&ctx, A0, PC);
+    pore_ADDS(&ctx, A0, A0, ASM_RS4_LAUNCH_BUF_SIZE);
+    pore_LI(&ctx, D0, scanChipletAddress);
+    pore_BRAD(&ctx, D0);
+    rcLoc = ctx.error;
+    if (rcLoc)  {
+      FAPI_ERR("pore_MR/ADDS/LI/BRAD() failed w/rc=%i", rcLoc);
+      uint32_t &RC_LOCAL=rcLoc;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_PORE_INLINE_RS4_LAUNCH_CREATE_ERROR);
+      return rc;
+    }
+    sizeRs4Launch = ctx.lc;
+
+    // Populate ring header and put ring header, RS4 launcher and RS4 ring into
+    // proper spots in pre-allocated bufPllRingAltBlock buffer.
+    //
+    uint64_t entryOffsetPllRingAltBlock;
+    uint32_t sizeOfThisPllRingAltBlock;
+    entryOffsetPllRingAltBlock      = calc_ring_layout_entry_offset( 0, 0);
+    bufPllRingAltBlock->entryOffset = myRev64(entryOffsetPllRingAltBlock);
+    bufPllRingAltBlock->backItemPtr  = 0; // Will be updated below, as we don't know yet.
+    sizeOfThisPllRingAltBlock       =  entryOffsetPllRingAltBlock +  // Must be 8-byte aligned.
+                                      sizeRs4Launch +               // Must be 8-byte aligned.
+                                      sizePllRingAltRs4;            // Must be 8-byte aligned.
+    bufPllRingAltBlock->sizeOfThis  = myRev32(sizeOfThisPllRingAltBlock);
+    // Quick check to see if final ring block size will fit in buf1.
+    if (sizeOfThisPllRingAltBlock>sizePllRingAltBlockMax)  {
+      FAPI_ERR("PLL _alt ring block size (=%i) exceeds pre-allocated buf1 size (=%i).",
+        sizeOfThisPllRingAltBlock, sizePllRingAltBlockMax);
+      uint32_t &DATA_RING_BLOCK_SIZEOFTHIS=sizeOfThisPllRingAltBlock;
+      uint32_t &DATA_SIZE_OF_BUF1=sizePllRingAltBlockMax;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_PLL_RING_BLOCK_TOO_LARGE);
+      return rc;
+    }
+    bufPllRingAltBlock->sizeOfMeta  =  0;
+    bufPllRingAltBlock->ddLevel      = myRev32((uint32_t)attrDdLevel);
+    bufPllRingAltBlock->sysPhase     = i_sysPhase;
+    bufPllRingAltBlock->override     = 0;
+    bufPllRingAltBlock->reserved1    = 0;
+    bufPllRingAltBlock->reserved2    = 0;
+    bufLC = (uint32_t)entryOffsetPllRingAltBlock;
+    // Copy over meta data which is zero, so nothing to do in this case!
+    // Copy over RS4 launch code which is [already] BE and 8-byte aligned.
+    memcpy( (uint8_t*)bufPllRingAltBlock+bufLC, asmBuffer, (size_t)sizeRs4Launch);
+    // Copy over RS4 PLL _alt delta scan ring which is [already] 8-byte aligned.
+    bufLC = bufLC + sizeRs4Launch;
+    memcpy( (uint8_t*)bufPllRingAltBlock+bufLC, bufPllRingAltRs4, (size_t)sizePllRingAltRs4);
+
+    // Now, some post-sanity checks on alignments.
+    if ( sizeRs4Launch!=ASM_RS4_LAUNCH_BUF_SIZE ||
+         entryOffsetPllRingAltBlock%8 ||
+         sizeRs4Launch%8 ||
+         sizeOfThisPllRingAltBlock%8)  {
+      FAPI_ERR("Member(s) of PLL _alt ring block are not 8-byte aligned:");
+      FAPI_ERR("  Size of RS4 launch code = %i", sizeRs4Launch);
+      FAPI_ERR("  Entry offset            = %i", (uint32_t)entryOffsetPllRingAltBlock);
+      FAPI_ERR("  Size of ring block      = %i", sizeOfThisPllRingAltBlock);
+      uint32_t &DATA_SIZE_OF_RS4_LAUNCH=sizeRs4Launch;
+      tmp32Const1=(uint32_t)entryOffsetPllRingAltBlock;
+      uint32_t &DATA_RING_BLOCK_ENTRYOFFSET=tmp32Const1;
+      uint32_t &DATA_RING_BLOCK_SIZEOFTHIS=sizeOfThisPllRingAltBlock;
+      FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_RING_BLOCK_ALIGN_ERROR);
+      return rc;
+    }
+
+
+    //
+    // Append PLL _alt ring to image.
+    //
+    SbeXipItem tocItem;
+    rcLoc = sbe_xip_find(o_imageOut, PB_BNDY_DMIPLL_RING_ALT_TOC_NAME, &tocItem);
+    if (rcLoc)
+    {
+      FAPI_INF("Skipping PLL update for %s", PB_BNDY_DMIPLL_RING_ALT_TOC_NAME);
+      rcLoc = 0;
+    }
+    else
+    {
+      FAPI_INF("XIPC: PLL update: Appending RS4 PLL ring block to .rings section.");
+      rcLoc = write_ring_block_to_image( o_imageOut,
+                                         PB_BNDY_DMIPLL_RING_ALT_TOC_NAME,
+                                         bufPllRingAltBlock,
+                                         0,
+                                         0,
+                                         0,
+                                         largeSeeprom? sizeImageOutMax:MAX_SEEPROM_IMAGE_SIZE, // OK, since sysPhase=0.
+                                         SBE_XIP_SECTION_RINGS,
+                                         i_buf2,
+                                         i_sizeBuf2);
+      if (rcLoc)
+      {
+        FAPI_ERR("write_ring_block_to_image() failed for %s w/rc=%i", PB_BNDY_DMIPLL_RING_ALT_TOC_NAME, rcLoc);
+        FAPI_ERR("Check p8_delta_scan_rw.h for meaning of IMGBUILD_xyz rc code.");
+        uint32_t &RC_LOCAL=rcLoc;
+        FAPI_SET_HWP_ERROR(rc, RC_PROC_XIPC_IMGBUILD_ERROR);
+        return rc;
+      }
+    }
+  }
+
 #endif
 
 
@@ -1397,6 +2332,89 @@ ReturnCode p8_xip_customize( const fapi::Target &i_target,
       sizeImageMax = min(MAX_SEEPROM_IMAGE_SIZE, sizeImageOutMax);
     }
   }
+
+  // ==========================================================================
+  // CUSTOMIZE item:    intr_decrementer_delay*
+  // Retrieval method:  Generated by this code
+  // System phase:      IPL sysPhase.
+  // Note: Customizes SBE interrupt service
+  // ==========================================================================
+  if (i_sysPhase==0)  {
+    // target delay cycles/us
+    void *hostDelayCycles;
+    uint32_t delay_cycles;
+    void *hostDelayUs;
+    uint32_t delay_us;
+
+    // determine nest frequency
+    uint32_t freq_pb;
+    rc = FAPI_ATTR_GET(ATTR_FREQ_PB, NULL, freq_pb);
+    if (!rc.ok())
+    {
+        FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_FREQ_PB)");
+        return rc;
+    }
+
+    // set attributes accordingly
+    delay_us = 10;
+    if (freq_pb == 2000)
+    {
+        delay_cycles = 0x1097;
+    }
+    else
+    {
+        delay_cycles = 0x1460;
+    }
+    rc = FAPI_ATTR_SET(ATTR_SBE_MASTER_INTR_SERVICE_DELAY_CYCLES, NULL, delay_cycles);
+    if (!rc.ok())
+    {
+        FAPI_ERR("Error from FAPI_ATTR_SET (ATTR_SBE_MASTER_INTR_SERVICE_DELAY_CYCLES)");
+        return rc;
+    }
+    rc = FAPI_ATTR_SET(ATTR_SBE_MASTER_INTR_SERVICE_DELAY_US, NULL, delay_us);
+    if (!rc.ok())
+    {
+        FAPI_ERR("Error from FAPI_ATTR_SET (ATTR_SBE_MASTER_INTR_SERVICE_DELAY_US)");
+        return rc;
+    }
+
+    // customize image
+    rcLoc = sbe_xip_find(o_imageOut, INTR_DECREMENTER_DELAY_CYCLES_NAME, &xipTocItem);
+    if (rcLoc)
+    {
+        FAPI_INF("sbe_xip_find() failed w/rc=%i and %s", rcLoc, SBE_XIP_ERROR_STRING(errorStrings, rcLoc));
+        FAPI_INF("Probable cause:");
+        FAPI_INF("\tThe keyword (=%s) was not found.", INTR_DECREMENTER_DELAY_CYCLES_NAME);
+        rcLoc = 0;
+    }
+    else
+    {
+        sbe_xip_pore2host(o_imageOut, xipTocItem.iv_address, &hostDelayCycles);
+        FAPI_INF("Dumping [initial] global variable content of %s, then the updated value:\n", INTR_DECREMENTER_DELAY_CYCLES_NAME);
+        FAPI_INF(" Before=0x%016llX\n",myRev64(*(uint64_t*)hostDelayCycles));
+        *(uint64_t*)hostDelayCycles = myRev64(delay_cycles);
+        FAPI_INF(" After =0x%016llX\n",myRev64(*(uint64_t*)hostDelayCycles));
+    }
+
+    // delay in us
+    rcLoc = sbe_xip_find(o_imageOut, INTR_DECREMENTER_DELAY_US_NAME, &xipTocItem);
+    if (rcLoc)
+    {
+        FAPI_INF("sbe_xip_find() failed w/rc=%i and %s", rcLoc, SBE_XIP_ERROR_STRING(errorStrings, rcLoc));
+        FAPI_INF("Probable cause:");
+        FAPI_INF("\tThe keyword (=%s) was not found.", INTR_DECREMENTER_DELAY_US_NAME);
+        rcLoc = 0;
+    }
+    else
+    {
+        sbe_xip_pore2host(o_imageOut, xipTocItem.iv_address, &hostDelayUs);
+        FAPI_INF("Dumping [initial] global variable content of %s, then the updated value:\n", INTR_DECREMENTER_DELAY_US_NAME);
+        FAPI_INF(" Before=0x%016llX\n",myRev64(*(uint64_t*)hostDelayUs));
+        *(uint64_t*)hostDelayUs = myRev64(delay_us);
+        FAPI_INF(" After =0x%016llX\n",myRev64(*(uint64_t*)hostDelayUs));
+    }
+  }
+
 
   // ==========================================================================
   // CUSTOMIZE item:    valid_boot_cores_mask

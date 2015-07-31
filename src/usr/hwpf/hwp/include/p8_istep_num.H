@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -23,7 +25,7 @@
 #ifndef __P8_ISTEP_NUM_H
 #define __P8_ISTEP_NUM_H
 
-// $Id: p8_istep_num.H,v 1.26 2013/10/03 20:52:47 jeshua Exp $
+// $Id: p8_istep_num.H,v 1.29 2015/05/28 20:45:55 jmcgill Exp $
 
 /// Istep number encoding for all SEEPROM and PNOR procedures.  Used to update
 /// the SBEVITAL register to record procedure progress and to create unique
@@ -35,15 +37,15 @@ CONST_UINT64_T(proc_sbe_security_setup_istep_num,           ULL(0x0201));
 CONST_UINT64_T(proc_sbe_standalone_setup_istep_num,         ULL(0x0202));
 CONST_UINT64_T(proc_sbe_tp_chiplet_init1_istep_num,         ULL(0x0203));
 CONST_UINT64_T(proc_sbe_tp_ld_image_istep_num,              ULL(0x0204));
-CONST_UINT64_T(proc_sbe_nest_skewadjust_istep_num,          ULL(0x0205));
-CONST_UINT64_T(proc_sbe_npll_initf_istep_num,               ULL(0x0206));
-CONST_UINT64_T(proc_sbe_npll_setup_istep_num,               ULL(0x0207));
-CONST_UINT64_T(proc_sbe_tp_switch_gears_istep_num,          ULL(0x0208));
-CONST_UINT64_T(proc_sbe_tp_chiplet_init2_istep_num,         ULL(0x0209));
-CONST_UINT64_T(proc_sbe_tp_arrayinit_istep_num,             ULL(0x020A));
-CONST_UINT64_T(proc_sbe_tp_initf_istep_num,                 ULL(0x020B));
-CONST_UINT64_T(proc_sbe_tp_chiplet_init3_istep_num,         ULL(0x020C));
-CONST_UINT64_T(proc_sbe_chiplet_init_istep_num,             ULL(0x020D));
+CONST_UINT64_T(proc_sbe_npll_initf_istep_num,               ULL(0x0205));
+CONST_UINT64_T(proc_sbe_npll_setup_istep_num,               ULL(0x0206));
+CONST_UINT64_T(proc_sbe_tp_switch_gears_istep_num,          ULL(0x0207));
+CONST_UINT64_T(proc_sbe_tp_chiplet_init2_istep_num,         ULL(0x0208));
+CONST_UINT64_T(proc_sbe_tp_arrayinit_istep_num,             ULL(0x0209));
+CONST_UINT64_T(proc_sbe_tp_initf_istep_num,                 ULL(0x020A));
+CONST_UINT64_T(proc_sbe_tp_chiplet_init3_istep_num,         ULL(0x020B));
+CONST_UINT64_T(proc_sbe_chiplet_init_istep_num,             ULL(0x020C));
+CONST_UINT64_T(proc_sbe_nest_skewadjust_istep_num,          ULL(0x020D));
 CONST_UINT64_T(proc_sbe_arrayinit_istep_num,                ULL(0x020E));
 CONST_UINT64_T(proc_sbe_setup_evid_istep_num,               ULL(0x020F));
 CONST_UINT64_T(proc_sbe_initf_istep_num,                    ULL(0x0210));
@@ -82,6 +84,8 @@ CONST_UINT64_T(proc_sbe_instruct_start_istep_num,           ULL(0x0502));
 
 //NOTE: The following values must stay constant as HB looks for them
 CONST_UINT64_T(proc_sbe_trigger_winkle_istep_num,            ULL(0x0F01));
+CONST_UINT64_T(proc_sbe_scan_service_istep_num,              ULL(0x0FA0));
+CONST_UINT64_T(proc_sbe_intr_service_istep_num,              ULL(0x0FB0));
 CONST_UINT64_T(proc_sbe_check_master_magic_istep_num,        ULL(0x02FF));
 CONST_UINT64_T(proc_sbe_ex_host_runtime_scom_magic_istep_num,ULL(0x04FF));
 CONST_UINT64_T(proc_sbe_enable_pnor_magic_istep_num,         ULL(0x05FF));
@@ -107,6 +111,7 @@ CONST_UINT64_T(slw_deep_winkle_exit_istep_num,              ULL(0x0F87));
 #define PROC_SBE_EX_HOST_RUNTIME_SCOM_ISTEP_NUM proc_sbe_ex_host_runtime_scom_istep_num
 #define PROC_SBE_EX_HOST_RUNTIME_SCOM_MAGIC_ISTEP_NUM proc_sbe_ex_host_runtime_scom_magic_istep_num
 #define PROC_SBE_TP_LD_IMAGE_ISTEP_NUM proc_sbe_tp_ld_image_istep_num
-
+#define PROC_SBE_SCAN_SERVICE_ISTEP_NUM proc_sbe_scan_service_istep_num
+#define PROC_SBE_INTR_SERVICE_ISTEP_NUM proc_sbe_intr_service_istep_num
 
 #endif  // __P8_ISTEP_NUM_H

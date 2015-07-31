@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: system_attributes.xml,v 1.23 2015/01/22 19:32:40 andrewg Exp $ -->
+<!-- $Id: system_attributes.xml,v 1.28 2015/05/28 20:44:22 jmcgill Exp $ -->
 <!--
     XML file specifying HWPF attributes.
     These are platInit attributes associated with the system.
@@ -364,30 +364,109 @@
       <writeable/>
     </attribute>
   <!-- ********************************************************************* -->
-    <attribute>
-      <id>ATTR_REDUNDANT_CLOCKS</id>
-      <targetType>TARGET_TYPE_SYSTEM</targetType>
-      <description>
-          1 = System has redundant clock oscillators
-          0 = System does not have redundant clock oscillators
-          From the Machine Readable Workbook
-      </description>
-      <valueType>uint8</valueType>
-      <platInit/>
-    </attribute>
+  <attribute>
+    <id>ATTR_REDUNDANT_CLOCKS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        1 = System has redundant clock oscillators
+        0 = System does not have redundant clock oscillators
+        From the Machine Readable Workbook
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
   <!-- ********************************************************************* -->
-    <attribute>
-      <id>ATTR_MFG_TRACE_ENABLE</id>
-      <targetType>TARGET_TYPE_SYSTEM</targetType>
-      <description>
-          Override this to a non-zero value to have the FAPI manufacturing
-          traces output to the console or go to a fsp trace buffer when
-          console not enabled.
-          In cronus, setting this to a non-zero will output the FAPI_MFG
-          traces to the same location as your other FAPI traces.
-      </description>
-      <valueType>uint8</valueType>
-      <platInit/>
-    </attribute>
+  <attribute>
+    <id>ATTR_MFG_TRACE_ENABLE</id>
+   <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Override this to a non-zero value to have the FAPI manufacturing
+        traces output to the console or go to a fsp trace buffer when
+        console not enabled.
+        In cronus, setting this to a non-zero will output the FAPI_MFG
+        traces to the same location as your other FAPI traces.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOF_ENABLED</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Defines if the Workload Optimization Frequency (WOF) system feature
+        where OCC algorithms will change (typically boost) the operational 
+        frequency based on measured power available and any currently idling 
+        cores.        
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+        DISABLED = 0x0,
+        ENABLED = 0x1
+    </enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_FORCE_USE_SBE_SLAVE_SCAN_SERVICE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Set to force use of SBE scan service for slave chips.
+        Default is to enable the use of the SBE scan service
+        only for slave chips with security enabled.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE = 0, TRUE = 1</enum>
+    <writeable/>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_TRUSTED_SLAVE_SCAN_PATH_ACTIVE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Set to indicate state of master->slave scan path.
+        Platform should default to false at beginning of IPL, and set to
+        true once trusted XSCOM path is active to all slave chips in drawer
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE = 0, TRUE = 1</enum>
+    <writeable/>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_FORCE_SKIP_SBE_MASTER_INTR_SERVICE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Set to force skip of SBE interrupt service for master chip.
+        Default is to enable the use of the SBE interrupt service.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE = 0, TRUE = 1</enum>
+    <writeable/>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SBE_MASTER_INTR_SERVICE_DELAY_CYCLES</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Cycle delay of SBE master interrupt service loop wait statement.
+        Paces rate of decrementer progress and prevents SBE from consuming PIB.
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SBE_MASTER_INTR_SERVICE_DELAY_US</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Execution delay (in microseconds) of SBE master interrupt service loop.
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+  </attribute>
   <!-- ********************************************************************* -->
 </attributes>

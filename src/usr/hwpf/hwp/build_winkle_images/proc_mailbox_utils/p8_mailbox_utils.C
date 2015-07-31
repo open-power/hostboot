@@ -23,13 +23,12 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 // -*- mode: C++; c-file-style: "linux";  -*-
-// $Id: p8_mailbox_utils.C,v 1.7 2014/11/18 17:35:56 jmcgill Exp $
+// $Id: p8_mailbox_utils.C,v 1.10 2015/08/13 14:22:22 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_mailbox_utils.C,v $
 //------------------------------------------------------------------------------
 // *|
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
-// *! ***  ***
 // *|
 // *! TITLE       : proc_mailbox_utils.C
 // *! DESCRIPTION : Functions to calculate the mailbox values
@@ -680,7 +679,9 @@ fapi::ReturnCode p8_mailbox_utils_get_mbox3( const fapi::Target &i_target, uint3
 //  16:23 -> VCS voltage (1B in VRM-11 encoded form - 6.25mV increments)
 //          note: VPD is in 5mV increments
 //  -current recommended default    =   0x4a
-//  24:27 -> Unused                 =   0x00
+//  24    -> Force use of SBE scan service for slave chips
+//  25    -> Skip use of SBE interrupt service on master chip
+//  25:27 -> Unused                 =   0x0
 //  28    -> Fabric wrap test       =   MNFG wrap test attribute
 //  29:31 -> Fabric node ID         =   Node ID attribute
 //
@@ -697,6 +698,8 @@ fapi::ReturnCode p8_mailbox_utils_get_mbox4( const fapi::Target &i_target, uint3
 
     const uint32_t  BOOT_VOLTAGE_INFO_BIT_POSITION   =   0;
     const uint32_t  BOOT_VOLTAGE_INFO_BIT_LENGTH     =   32;
+    const uint32_t  FORCE_USE_SBE_SLAVE_SCAN_SERVICE = 24;
+    const uint32_t  FORCE_SKIP_SBE_MASTER_INTR_SERVICE = 25;
     const uint32_t  WRAP_TEST_BIT  = 28;
     const uint32_t  NODE_ID_BIT_POSITION   = 29;
     const uint32_t  NODE_ID_BIT_LENGTH     = 3;
@@ -755,8 +758,36 @@ fapi::ReturnCode p8_mailbox_utils_get_mbox4( const fapi::Target &i_target, uint3
         FAPI_INF("Boot Voltage:      VDD = %1.2f mV, VCS = %1.2f mV",
                    (float)l_vdd_mv / 100, (float)l_vcs_mv / 100);
 
+
+        fapi::ATTR_FORCE_USE_SBE_SLAVE_SCAN_SERVICE_Type force_use_scan_service = 0;
+        l_fapirc = FAPI_ATTR_GET(ATTR_FORCE_USE_SBE_SLAVE_SCAN_SERVICE, NULL, force_use_scan_service);
+        if (l_fapirc)
+        {
+                FAPI_ERR("fapiGetAttribute of  ATTR_FORCE_USE_SBE_SLAVE_SCAN_SERVICE failed");
+                break;
+        }
+        FAPI_INF(   "ATTR_FORCE_USE_SBE_SLAVE_SCAN_SERVICE => %d", force_use_scan_service);
+        if (force_use_scan_service == fapi::ENUM_ATTR_FORCE_USE_SBE_SLAVE_SCAN_SERVICE_TRUE)
+        {
+                o_set_data |= 1 << (sizeof(o_set_data)*8 - FORCE_USE_SBE_SLAVE_SCAN_SERVICE - 1);
+        }
+
+        fapi::ATTR_FORCE_SKIP_SBE_MASTER_INTR_SERVICE_Type force_skip_intr_service = 0;
+        l_fapirc = FAPI_ATTR_GET(ATTR_FORCE_SKIP_SBE_MASTER_INTR_SERVICE, NULL, force_skip_intr_service);
+        if (l_fapirc)
+        {
+                FAPI_ERR("fapiGetAttribute of ATTR_FORCE_SKIP_SBE_MASTER_INTR_SERVICE failed");
+                break;
+        }
+        FAPI_INF(   "ATTR_FORCE_SKIP_SBE_MASTER_INTR_SERVICE => %d", force_skip_intr_service);
+        if (force_skip_intr_service == fapi::ENUM_ATTR_FORCE_SKIP_SBE_MASTER_INTR_SERVICE_TRUE)
+        {
+                o_set_data |= 1 << (sizeof(o_set_data)*8 - FORCE_SKIP_SBE_MASTER_INTR_SERVICE - 1);
+        }
+
         if (i_write_fbc_data)
         {
+
             // set wrap test flag (FSP boot)
             fapi::ATTR_MNFG_FLAGS_Type l_mnfg_flags = 0;
             l_fapirc =  FAPI_ATTR_GET(  ATTR_MNFG_FLAGS,
@@ -776,7 +807,7 @@ fapi::ReturnCode p8_mailbox_utils_get_mbox4( const fapi::Target &i_target, uint3
             {
                 FAPI_ERR("fapiGetAttribute of  ATTR_CHIP_EC_FEATURE_SET_LEGACY_NODE_ID_VALID_MBOX_BIT failed");
                 break;
-            }  
+            }
 
             if (((l_mnfg_flags & fapi::ENUM_ATTR_MNFG_FLAGS_MNFG_BRAZOS_WRAP_CONFIG) ==
                  fapi::ENUM_ATTR_MNFG_FLAGS_MNFG_BRAZOS_WRAP_CONFIG) ||

@@ -288,9 +288,11 @@ void*    call_host_activate_master( void    *io_pArgs )
                     TARGETING::get_huid(l_cpu_target) );
 
         //  call the HWP with each fapi::Target
+        bool l_sbeIntrServiceActive = false;
         FAPI_INVOKE_HWP( l_errl,
                          proc_stop_deadman_timer,
-                         l_fapi_cpu_target  );
+                         l_fapi_cpu_target,
+                         l_sbeIntrServiceActive  );
         if ( l_errl )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -308,6 +310,10 @@ void*    call_host_activate_master( void    *io_pArgs )
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "proc_prep_master_winkle SUCCESS"  );
         }
+        TARGETING::Target* sys = NULL;
+        TARGETING::targetService().getTopLevelTarget(sys);
+        sys->setAttr<ATTR_SBE_MASTER_INTR_SERVICE_ENABLED>
+                                                    (l_sbeIntrServiceActive);
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "Enable special wakeup on master core");

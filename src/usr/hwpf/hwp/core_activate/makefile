@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -61,6 +61,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp/utility_procedures
 OBJS += core_activate.o
 OBJS += proc_prep_master_winkle.o
 OBJS += proc_stop_deadman_timer.o
+OBJS += proc_sbe_utils.o
 OBJS += proc_switch_cfsim.o
 OBJS += proc_switch_rec_attn.o
 OBJS += cen_switch_rec_attn.o
