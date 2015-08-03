@@ -1,3 +1,21 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: hwpf/fapi2/include/fapi2_chip_ec_feature.H $                  */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* EKB Project                                                            */
+/*                                                                        */
+/* COPYRIGHT 2015                                                         */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
 ///
 /// @file src/include/usr/hwpf/fapi2/fapi2_chip_ec_feature.H
 ///
@@ -15,6 +33,7 @@
 #include <stdint.h>
 #include <target.H>
 #include <return_code.H>
+#include <attribute_ids.H>
 
 namespace fapi2
 {
@@ -33,7 +52,7 @@ namespace fapi2
 template< TargetType K >
 ReturnCode queryChipEcFeature(AttributeId i_id,
                               const Target<K>& i_target,
-                              uint8_t & o_hasFeature);
+                              uint8_t& o_hasFeature);
 }
 
 #endif
