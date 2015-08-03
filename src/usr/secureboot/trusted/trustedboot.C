@@ -39,11 +39,9 @@
 #include <errl/errludtarget.H>
 #include <errl/errludstring.H>
 #include <targeting/common/targetservice.H>
-#include <devicefw/driverif.H>
-#include <i2c/tpmddif.H>
 #include <secureboot/trustedbootif.H>
-#include <i2c/tpmddreasoncodes.H>
 #include "trustedboot.H"
+#include "trustedTypes.H"
 #include <secureboot/trustedboot_reasoncodes.H>
 
 // ----------------------------------------------
@@ -100,8 +98,13 @@ void* host_update_master_tpm( void *io_pArgs )
                           TPMDD::TPM_PRIMARY);
 
         }
+        else
+        {
+            systemTpms.tpm[TPM_MASTER_INDEX].available = false;
+        }
 
-        if (systemTpms.tpm[TPM_MASTER_INDEX].failed)
+        if (systemTpms.tpm[TPM_MASTER_INDEX].failed ||
+            !systemTpms.tpm[TPM_MASTER_INDEX].available)
         {
 
             /// @todo RTC:134913 Switch to backup chip if backup TPM avail
@@ -131,6 +134,24 @@ void* host_update_master_tpm( void *io_pArgs )
         }
 
 
+        // Lastly we will check on the backup TPM and see if it is enabled
+        //  in the attributes at least
+        TPMDD::tpm_info_t tpmInfo;
+        tpmInfo.chip = TPMDD::TPM_BACKUP;
+        err = TPMDD::tpmReadAttributes(nodeTarget, tpmInfo);
+        if (NULL != err)
+        {
+            break;
+        }
+        else if (!tpmInfo.tpmEnabled)
+        {
+            TRACUCOMP( g_trac_trustedboot,
+                       "host_update_master_tpm() tgt=0x%X "
+                       "Marking backup TPM unavailable",
+                       TARGETING::get_huid(nodeTarget));
+            systemTpms.tpm[TPM_BACKUP_INDEX].available = false;
+        }
+
     } while ( 0 );
 
     if( unlock )
@@ -151,9 +172,6 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target,
                    TPMDD::tpm_chip_types_t i_chip)
 {
     errlHndl_t err = NULL;
-    uint8_t dataBuf[BUFSIZE];
-    size_t dataSize = sizeof(dataBuf);
-    size_t cmdSize = 0;
 
     TRACDCOMP( g_trac_trustedboot,
                ENTER_MRK"tpmInitialize()" );
@@ -164,69 +182,29 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target,
 
     do
     {
+
         // TPM Initialization sequence
 
         io_target.nodeTarget = i_nodeTarget;
         io_target.chip = i_chip;
         io_target.initAttempted = true;
+        io_target.available = true;
         io_target.failed = false;
 
-        // Send the TPM startup command
-        // Build our command block for a startup
-        memset(dataBuf, 0, sizeof(dataBuf));
-
-        TRUSTEDBOOT::TPM2_BaseOut* resp =
-            (TRUSTEDBOOT::TPM2_BaseOut*)dataBuf;
-        TRUSTEDBOOT::TPM2_2ByteIn* cmd =
-            (TRUSTEDBOOT::TPM2_2ByteIn*)dataBuf;
-
-        cmd->base.tag = TRUSTEDBOOT::TPM_ST_NO_SESSIONS;
-        cmd->base.commandSize = sizeof (TRUSTEDBOOT::TPM2_2ByteIn);
-        cmd->base.commandCode = TRUSTEDBOOT::TPM_CC_Startup;
-        cmd->param = TRUSTEDBOOT::TPM_SU_CLEAR;
-        cmdSize = cmd->base.commandSize;
-
-        err = deviceRead(io_target.nodeTarget,
-                         &dataBuf,
-                         dataSize,
-                         DEVICE_TPM_ADDRESS( io_target.chip,
-                                             TPMDD::TPM_OP_TRANSMIT,
-                                             cmdSize) );
-
+        // TPM_STARTUP
+        err = tpmCmdStartup(io_target);
         if (NULL != err)
         {
-            TRACFCOMP( g_trac_trustedboot,
-                       "TPM STARTUP I2C Fail %X : ",
-                       err->reasonCode() );
             break;
-
         }
-        else if (TRUSTEDBOOT::TPM_SUCCESS != resp->responseCode)
+
+        // TPM_GETCAPABILITY to read FW Version
+        err = tpmCmdGetCapFwVersion(io_target);
+        if (NULL != err)
         {
-            TRACFCOMP( g_trac_trustedboot,
-                       "TPM STARTUP OP Fail %X : ",
-                       resp->responseCode);
-
-            /*@
-             * @errortype
-             * @reasoncode     RC_TPM_START_FAIL
-             * @severity       ERRL_SEV_UNRECOVERABLE
-             * @moduleid       MOD_TPM_INITIALIZE
-             * @userdata1      node
-             * @userdata2      returnCode
-             * @devdesc        Invalid operation type.
-             */
-            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           MOD_TPM_INITIALIZE,
-                                           RC_TPM_START_FAIL,
-                                           TARGETING::get_huid(
-                                              io_target.nodeTarget),
-                                           resp->responseCode,
-                                           true /*Add HB SW Callout*/ );
-
-            err->collectTrace( SECURE_COMP_NAME );
             break;
         }
+
 
 
     } while ( 0 );
@@ -235,15 +213,29 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target,
     // If the TPM failed we will mark it not functional
     if (NULL != err)
     {
-        io_target.failed = true;
+        tpmMarkFailed(io_target);
         // Log this failure
         errlCommit(err, SECURE_COMP_ID);
     }
 
     TRACDCOMP( g_trac_trustedboot,
-               EXIT_MRK"tpmInitialize() - %s",
-               ((NULL == err) ? "No Error" : "With Error") );
+               EXIT_MRK"tpmInitialize()");
 
 }
+
+void tpmMarkFailed(TRUSTEDBOOT::TpmTarget & io_target)
+{
+
+    TRACFCOMP( g_trac_trustedboot,
+               ENTER_MRK"tpmMarkFailed() Marking TPM as failed : "
+               "tgt=0x%X chip=%d",
+               TARGETING::get_huid(io_target.nodeTarget),
+               io_target.chip);
+
+    io_target.failed = true;
+    /// @todo RTC:125287 Add fail marker to TPM log and disable TPM access
+
+}
+
 
 } // end TRUSTEDBOOT

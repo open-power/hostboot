@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/secureboot/trusted/makefile $
+# $Source: src/usr/secureboot/trusted/test/makefile $
 #
 # OpenPOWER HostBoot Project
 #
@@ -22,14 +22,9 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../../..
-MODULE = secureboot_trusted
+ROOTPATH = ../../../../..
 
-OBJS += $(if $(CONFIG_TPMDD),trustedboot.o,)
-OBJS += $(if $(CONFIG_TPMDD),trustedbootCmds.o,)
-OBJS += $(if $(CONFIG_TPMDD),trustedTypes.o,)
+MODULE = testtrusted
+TESTS += $(if $(CONFIG_TPMDD),trustedbootTest.H,)
 
-SUBDIRS += $(if $(CONFIG_TPMDD),test.d,)
-
-CFLAGS += -iquote ../
 include ${ROOTPATH}/config.mk

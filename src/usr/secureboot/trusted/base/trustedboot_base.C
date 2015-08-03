@@ -65,6 +65,7 @@ SystemTpms::SystemTpms()
 TpmTarget::TpmTarget()
 {
     memset(this, 0, sizeof(TpmTarget));
+    available = true; // Default to available until we know better
     mutex_init(&tpmMutex);
 }
 

@@ -45,13 +45,14 @@ namespace TRUSTEDBOOT
         TARGETING::Target*      nodeTarget;     ///< Node target ptr
         TPMDD::tpm_chip_types_t chip;           ///< Chip Pri vs Backup
         uint8_t                 initAttempted:1;///< Has TPM init been run
+        uint8_t                 available:1;    ///< Is TPM physically in system
         uint8_t                 failed:1;       ///< Is TPM currently failed
         mutex_t                 tpmMutex;       ///< TPM Mutex
 
         TpmTarget();
     };
 
-   /// TPM PCR designations
+    /// TPM PCR designations
     enum TPM_Pcr
     {
         PCR_0     = 0,
@@ -73,7 +74,7 @@ namespace TRUSTEDBOOT
     void* host_update_master_tpm( void *io_pArgs );
 
     /**
-     * @brief Extend a measurement into the TPMs and log
+     * @brief Extend a measurement into the TPMs and log atomically
      * @param[in] i_pcr PCR to write to
      * @param[in] i_digest Digest value to write to PCR
      * @param[in] i_digestSize Byte size of i_digest data

@@ -38,9 +38,10 @@
 #include <devicefw/driverif.H>
 #include <i2c/tpmddreasoncodes.H>
 #include <targeting/common/commontargeting.H>
+#include "secureboot/trustedbootif.H"
 #include "i2ctest.H"
 #include "../tpmdd.H"
-#include "../../secureboot/trusted/trustedboot.H"
+#include "../../secureboot/trusted/trustedTypes.H"
 
 extern trace_desc_t* g_trac_tpmdd;
 
@@ -541,16 +542,16 @@ class TPMDDTest: public CxxTest::TestSuite
                 memset(data, 0xFE, sizeof(data));
 
                 TRUSTEDBOOT::TPM2_GetCapabilityIn* cmd =
-                    (TRUSTEDBOOT::TPM2_GetCapabilityIn*)data;
+                    reinterpret_cast<TRUSTEDBOOT::TPM2_GetCapabilityIn*>
+                    (data);
 
-                cmd->base.tag = TRUSTEDBOOT::TPM_ST_NO_SESSIONS;
                 cmd->base.commandSize =
                     sizeof (TRUSTEDBOOT::TPM2_GetCapabilityIn);
+                cmd->base.tag = TRUSTEDBOOT::TPM_ST_NO_SESSIONS;
                 cmd->base.commandCode = TRUSTEDBOOT::TPM_CC_GetCapability;
                 cmd->capability = TRUSTEDBOOT::TPM_CAP_TPM_PROPERTIES;
                 cmd->property = TRUSTEDBOOT::TPM_PT_MANUFACTURER;
                 cmd->propertyCount = 1;
-
                 cmdSize = cmd->base.commandSize;
 
                 num_ops++;
@@ -623,97 +624,12 @@ class TPMDDTest: public CxxTest::TestSuite
                     continue;
                 }
 
-                // Build our command block for a startup
-                memset(data, 0xFE, sizeof(data));
-
-                // Test a TPM command underflow
-                TRUSTEDBOOT::TPM2_GetCapabilityIn* cmd =
-                    (TRUSTEDBOOT::TPM2_GetCapabilityIn*)data;
-
-                cmd->base.tag = TRUSTEDBOOT::TPM_ST_NO_SESSIONS;
-                cmd->base.commandSize =
-                    sizeof (TRUSTEDBOOT::TPM2_GetCapabilityIn);
-                cmd->base.commandCode = TRUSTEDBOOT::TPM_CC_GetCapability;
-                cmd->capability = TRUSTEDBOOT::TPM_CAP_TPM_PROPERTIES;
-                cmd->property = TRUSTEDBOOT::TPM_PT_MANUFACTURER;
-                cmd->propertyCount = 1;
-
-                cmdSize = cmd->base.commandSize;
-
-                num_ops++;
-                err = deviceRead(testTarget,
-                                 &data,
-                                 dataSize,
-                                 DEVICE_TPM_ADDRESS( TPM_PRIMARY,
-                                          TPM_OP_TRANSMIT,
-                                          cmdSize - 1) );
-
-                if( NULL == err ||
-                    err->reasonCode() != TPM_UNDERFLOW_ERROR)
-                {
-                    fails++;
-                    TS_FAIL( "testTPMTransmitOverUnder - Error "
-                             "command underflow not detected" );
-                    errlCommit( err,
-                                TPMDD_COMP_ID );
-                    delete err;
-                    err = NULL;
-                }
-                else
-                {
-                    TRACUCOMP(g_trac_tpmdd, "testTPMTransmitOverUnder - "
-                              "CmdUnder Transmit returned as expected. len=%d",
-                              dataSize);
-                }
-
-
-                // Build our command block for a startup
-                dataSize = sizeof(data);
-                memset(data, 0xFE, sizeof(data));
-
-                // Test a TPM command overflow
-
-                cmd->base.tag = TRUSTEDBOOT::TPM_ST_NO_SESSIONS;
-                cmd->base.commandSize =
-                    sizeof (TRUSTEDBOOT::TPM2_GetCapabilityIn);
-                cmd->base.commandCode = TRUSTEDBOOT::TPM_CC_GetCapability;
-                cmd->capability = TRUSTEDBOOT::TPM_CAP_TPM_PROPERTIES;
-                cmd->property = TRUSTEDBOOT::TPM_PT_MANUFACTURER;
-                cmd->propertyCount = 1;
-
-                cmdSize = cmd->base.commandSize;
-
-                num_ops++;
-                err = deviceRead(testTarget,
-                                 &data,
-                                 dataSize,
-                                 DEVICE_TPM_ADDRESS( TPM_PRIMARY,
-                                         TPM_OP_TRANSMIT,
-                                         cmdSize + 1) );
-
-                if( NULL == err ||
-                    err->reasonCode() != TPM_OVERFLOW_ERROR)
-                {
-                    fails++;
-                    TS_FAIL( "testTPMTransmitOverUnder - Error "
-                             "command overflow not detected" );
-                    errlCommit( err,
-                                TPMDD_COMP_ID );
-                    delete err;
-                    err = NULL;
-                }
-                else
-                {
-                    TRACUCOMP(g_trac_tpmdd, "testTPMTransmitOverUnder - "
-                              "CmdOver Transmit returned as expected. len=%d",
-                              dataSize);
-                }
-
-                // Build our command block for a startup
                 dataSize = sizeof(data);
                 memset(data, 0xFE, sizeof(data));
 
                 // Test a TPM data overflow
+                TRUSTEDBOOT::TPM2_GetCapabilityIn* cmd =
+                    reinterpret_cast<TRUSTEDBOOT::TPM2_GetCapabilityIn*>(data);
 
                 cmd->base.tag = TRUSTEDBOOT::TPM_ST_NO_SESSIONS;
                 cmd->base.commandSize =

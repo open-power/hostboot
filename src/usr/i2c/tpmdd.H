@@ -41,15 +41,6 @@
 namespace TPMDD
 {
 
-/**
-* @brief Enumerations to describe the type of devices to be accessed.
-*/
-enum tpm_addr_size_t
-{
-    ONE_BYTE_ADDR   = 1,
-    TWO_BYTE_ADDR   = 2,
-    LAST_DEVICE_TYPE
-};
 
 /// TPM Timeouts listed in ms
 /// Timeout names and durations are as described in the TCG specification
@@ -67,24 +58,6 @@ enum
     MAX_STSVALID_POLLS = 5, ///< Max poll of 50ms (5*10ms)
 };
 
-/**
- * @brief Structure of common parameters needed by different parts of
- *      the code.
- */
-struct tpm_info_t
-{
-    tpm_op_types_t operation;    ///< TPM operation to perform
-    uint64_t port;               ///< I2C Master port
-    uint64_t engine;             ///< I2C Master engin
-    tpm_addr_size_t addrSize;    ///< I2C Addr size
-    TARGETING::EntityPath i2cMasterPath; ///< I2C Master path
-    TARGETING::Target * i2cTarget; ///< I2C Target
-
-    uint8_t  chip;               ///< Chip target, primary/backup
-    uint8_t  tpmEnabled;         ///< Is this TPM available and functional?
-    uint8_t  devAddr;            ///< I2C Address
-    size_t offset;               ///< TPM Device register offset
-};
 
 
 
@@ -255,23 +228,6 @@ errlHndl_t tpmTransmit ( void * io_buffer,
 errlHndl_t tpmPrepareAddress ( void * io_buffer,
                                size_t & o_bufSize,
                                tpm_info_t i_tpmInfo );
-
-/**
- * @brief this function will read all of the associated attributes needed
- *      to access the intended TPM.  These attributes will be used to
- *      determine the type of I2C device as well as how to address it via
- *      the I2C device driver.
- *
- * @param[in] i_target target node.
- *
- * @param[in/out] io_tpmInfo The structure that will contain the attribute data
- *      read from the target device.
- *
- * @return errlHndl_t NULL if successful, otherwise a pointer to the
- *      error log.
- */
-errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
-                               tpm_info_t & io_tpmInfo );
 
 /**
  * @brief This function decides whether or not the target passed into the

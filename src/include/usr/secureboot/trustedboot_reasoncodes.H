@@ -33,7 +33,11 @@ namespace TRUSTEDBOOT
     {
         MOD_HOST_UPDATE_MASTER_TPM      = 0x00,
         MOD_TPM_INITIALIZE              = 0x01,
-    };
+        MOD_TPM_CMD_STARTUP             = 0x02,
+        MOD_TPM_CMD_GETCAPFWVERSION     = 0x03,
+        MOD_TPM_MARSHALCMDDATA          = 0x04,
+        MOD_TPM_UNMARSHALRESPDATA       = 0x05,
+   };
 
     enum TRUSTEDReasonCode
     {
@@ -41,6 +45,14 @@ namespace TRUSTEDBOOT
 
         RC_TPM_START_FAIL               = SECURE_COMP_ID | 0xA0,
         RC_TPM_EXISTENCE_FAIL           = SECURE_COMP_ID | 0xA1,
+        RC_TPM_GETCAP_FAIL              = SECURE_COMP_ID | 0xA2,
+        RC_TPM_GETCAP_FW_INVALID_RESP   = SECURE_COMP_ID | 0xA3,
+        RC_TPM_GETCAP2_FAIL             = SECURE_COMP_ID | 0xA4,
+        RC_TPM_GETCAP2_FW_INVALID_RESP  = SECURE_COMP_ID | 0xA5,
+        RC_TPM_MARSHAL_INVALID_CMD      = SECURE_COMP_ID | 0xA6,
+        RC_TPM_MARSHALING_FAIL          = SECURE_COMP_ID | 0xA7,
+        RC_TPM_UNMARSHAL_INVALID_CMD    = SECURE_COMP_ID | 0xA8,
+        RC_TPM_UNMARSHALING_FAIL        = SECURE_COMP_ID | 0xA9,
     };
 }
 

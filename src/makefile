@@ -204,6 +204,7 @@ TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testruntime)
 TESTCASE_MODULES += testibscom
 TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testdump)
 TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testsecureboot)
+TESTCASE_MODULES += $(if $(CONFIG_TPMDD),testtrusted)
 TESTCASE_MODULES += testfsiscom
 TESTCASE_MODULES += testrtloader
 TESTCASE_MODULES += testsbe

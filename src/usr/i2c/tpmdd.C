@@ -154,16 +154,6 @@ errlHndl_t tpmPerformOp( DeviceFW::OperationType i_opType,
 
 
 
-        // Get i2c master target
-        err = tpmGetI2CMasterTarget( i_target,
-                                     tpmInfo );
-
-        if( err )
-        {
-            break;
-        }
-
-
         // Lock to sequence operations
         mutex_lock( &g_tpmMutex );
         unlock = true;
@@ -319,21 +309,6 @@ bool tpmPresence ( TARGETING::Target * i_target,
         {
             TRACFCOMP(g_trac_tpmdd,
                      ERR_MRK"Error in tpmPresence::tpmReadAttributes() "
-                      "RC 0x%X", err->reasonCode());
-            l_present = false;
-            delete err;
-            err = NULL;
-            break;
-        }
-
-        // Get i2c master target
-        err = tpmGetI2CMasterTarget( i_target,
-                                     tpmInfo );
-
-        if( err )
-        {
-            TRACFCOMP(g_trac_tpmdd,
-                      ERR_MRK"Error in tpmPresence::tpmGetI2Cmaster() "
                       "RC 0x%X", err->reasonCode());
             l_present = false;
             delete err;
@@ -1267,6 +1242,19 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
 
         }
 
+        // Get i2c master target
+        err = tpmGetI2CMasterTarget( i_target,
+                                     io_tpmInfo );
+
+        if( err )
+        {
+            TRACFCOMP(g_trac_tpmdd,
+                      ERR_MRK"Error in tpmReadAttributes::tpmGetI2Cmaster() "
+                      "RC 0x%X", err->reasonCode());
+            break;
+        }
+
+
     } while( 0 );
 
     TRACUCOMP(g_trac_tpmdd,"tpmReadAttributes() tgt=0x%X, %d/%d/0x%X "
@@ -1320,9 +1308,9 @@ errlHndl_t tpmGetI2CMasterTarget ( TARGETING::Target * i_target,
             {
                 // Path element: type:8 instance:8
                 l_epCompressed |=
-                    io_tpmInfo.i2cMasterPath[i].type << (16*(3-i));
+                    io_tpmInfo.i2cMasterPath[i].type << ((16*(3-i))+8);
                 l_epCompressed |=
-                    io_tpmInfo.i2cMasterPath[i].instance << ((16*(3-i))-8);
+                    io_tpmInfo.i2cMasterPath[i].instance << (16*(3-i));
 
                 // Can only fit 4 path elements into 64 bits
                 if ( i == 3 )
@@ -1374,9 +1362,9 @@ errlHndl_t tpmGetI2CMasterTarget ( TARGETING::Target * i_target,
             {
                 // Path element: type:8 instance:8
                 l_epCompressed |=
-                    io_tpmInfo.i2cMasterPath[i].type << (16*(3-i));
+                    io_tpmInfo.i2cMasterPath[i].type << ((16*(3-i))+8);
                 l_epCompressed |=
-                    io_tpmInfo.i2cMasterPath[i].instance << ((16*(3-i))-8);
+                    io_tpmInfo.i2cMasterPath[i].instance << (16*(3-i));
 
                 // Can only fit 4 path elements into 64 bits
                 if ( i == 3 )
