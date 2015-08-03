@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -48,6 +48,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_tp_collect_dbg_data
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/pstates/pstates
 EXTRAINCDIR += ${ROOTPATH}/src/usr/pore/poreve/porevesrc
 EXTRAINCDIR += ${ROOTPATH}/src/usr/pore/poreve/model/
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/secure_boot
+EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_stop_deadman_timer
 
 ##  NOTE: add new object files when you add a new HWP
 OBJS += slave_sbe.o

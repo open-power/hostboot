@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_run_training.C,v 1.65 2014/12/04 02:01:55 thi Exp $
+// $Id: io_run_training.C,v 1.66 2015/05/14 21:03:37 jmcgill Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -60,19 +60,7 @@ extern "C" {
 
     ReturnCode io_training_set_pll_post_wiretest(const Target& target){
         ReturnCode rc;
-        fapi::ATTR_PROC_PB_BNDY_DMIPLL_DATA_Type pb_bndy_dmipll_data={0};
-        fapi::ATTR_PROC_AB_BNDY_PLL_DATA_Type ab_bndy_pll_data={0};
-        fapi::ATTR_MEMB_TP_BNDY_PLL_DATA_Type tp_bndy_pll_data={0};
-
-        // For the PLL Partial updation logic we need PFD360 offsets into the Ring now 
-        uint32_t proc_dmi_cupll_pfd360_offset[8];
-        uint32_t memb_dmi_cupll_pfd360_offset;
-        uint32_t proc_abus_cupll_pfd360_offset[3];
-
-        ecmdDataBufferBase ring_data;
         fapi::Target parent_target;
-        uint32_t ring_length=0;
-        uint32_t rc_ecmd=0;
         uint8_t chip_unit = 0;
 
         FAPI_DBG("Running PLL updation code");
@@ -84,7 +72,7 @@ extern "C" {
         {
             FAPI_DBG("This is a Processor DMI bus using base DMI scom address");
 
-            // Lets get chip unit pos , used for PLL table lookup 
+            // Lets get chip unit pos , used for PLL table lookup
             rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS,
                     &target,
                     chip_unit);
@@ -103,54 +91,12 @@ extern "C" {
                 return(rc);
             }
 
-            // install PLL config
-            rc = FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_DMIPLL_LENGTH, &parent_target, ring_length);	// -- get length of scan ring
-            if (rc)
-            {
-                FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_PB_BNDY_DMIPLL_LENGTH)");
-                return(rc);
-            }
-            rc = FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_DMIPLL_DATA, &parent_target, pb_bndy_dmipll_data);	// -- get scan ring data
-            if (rc)
-            {
-                FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_PB_BNDY_DMIPLL_DATA)");
-                return(rc);
-            }
-
-            // Now we need the partial offset data also . First let us get PFD360 offsets
-            rc = FAPI_ATTR_GET(ATTR_PROC_DMI_CUPLL_PFD360_OFFSET, &parent_target, proc_dmi_cupll_pfd360_offset);
-            if (rc)
-            {
-                FAPI_ERR("Error fetching PFD360 offsets on MCS");
-                return(rc);
-            }
-
-            rc_ecmd |= ring_data.setBitLength(ring_length);
-            if (rc_ecmd)
-            {
-                rc.setEcmdError(rc_ecmd);
-                return(rc);
-            }
-
-            rc =fapiGetRing(parent_target,PB_BNDY_DMIPLL_RING_ADDR ,ring_data,RING_MODE_SET_PULSE);
-            if (rc)
-            {
-                FAPI_ERR("Error performing GetRing operation on PB_BNDY_DMIPLL");
-                return(rc);
-            }
-            FAPI_DBG("PFD bit to be cleared for DMI unit %d is %d",chip_unit,proc_dmi_cupll_pfd360_offset[chip_unit]);
-            rc_ecmd |= ring_data.clearBit(proc_dmi_cupll_pfd360_offset[chip_unit]);
-            // Now 
-            if (rc_ecmd)
-            {
-                rc.setEcmdError(rc_ecmd);
-                return(rc);
-            }
+            // install PLL config (adjust PFD360)
             rc = proc_a_x_pci_dmi_pll_scan_bndy(parent_target,
-                    NEST_CHIPLET_0x02000000,
-                    PB_BNDY_DMIPLL_RING_ADDR,
-                    ring_data,
-                    true);
+                                                RING_ADDRESS_PROC_PB_BNDY_DMIPLL,
+                                                RING_OP_MOD_PFD360,
+                                                static_cast<p8_pll_utils_bus_id>(chip_unit),
+                                                true);
             if (rc)
             {
                 FAPI_ERR("Error from proc_a_x_pci_dmi_pll_scan_bndy");
@@ -163,59 +109,12 @@ extern "C" {
         {
             FAPI_DBG("This is a Centaur DMI bus using base DMI scom address");
 
-            // install PLL config
-            rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_LENGTH, &target, ring_length);	// -- get length of scan ring
-            if (rc)
-            {
-                FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_MEMB_TP_BNDY_PLL_LENGTH)");
-                return(rc);
-            }
-            rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_DATA, &target, tp_bndy_pll_data);	// -- get scan ring data
-            if (rc)
-            {
-                FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_MEMB_TP_BNDY_PLL_DATA)");
-                return(rc);
-            }
-
-            // Now we need the partial offset data also . First let us get PFD360 offsets
-            rc = FAPI_ATTR_GET(ATTR_MEMB_DMI_CUPLL_PFD360_OFFSET, &target, memb_dmi_cupll_pfd360_offset);
-            if (rc)
-            {
-                FAPI_ERR("Error fetching PFD360 offsets on Centaur");
-                return(rc);
-            }
-
-            FAPI_DBG("Centaur PFD offset = %d",memb_dmi_cupll_pfd360_offset);
-
-            FAPI_DBG("Ring length is %d",ring_length);
-            rc_ecmd |= ring_data.setBitLength(ring_length);
-            if (rc_ecmd)
-            {
-                rc.setEcmdError(rc_ecmd);
-                return(rc);
-            }
-
-            rc=fapiGetRing(target,MEMB_TP_BNDY_PLL_RING_ADDR ,ring_data,RING_MODE_SET_PULSE);
-            if (rc)
-            {
-                FAPI_ERR("Get ring error on MEMB ");
-                return(rc);
-            }
-            // rc_ecmd |= ring_data.insert(pb_bndy_dmipll_data, 0, ring_length, 0);		// -- put data into ecmd buffer
-            FAPI_DBG("PFD bit to be cleared for centaur is %d",memb_dmi_cupll_pfd360_offset);
-            rc_ecmd |=ring_data.clearBit(memb_dmi_cupll_pfd360_offset);
-
-            //rc_ecmd |= ring_data.insert(tp_bndy_pll_data, 0, ring_length, 0);		// -- put data into ecmd buffer
-            if (rc_ecmd)
-            {
-                rc.setEcmdError(rc_ecmd);
-                return(rc);
-            }
+            // install PLL config (adjust PFD360)
             rc = proc_a_x_pci_dmi_pll_scan_bndy(target,
-                    TP_CHIPLET_0x01000000,
-                    MEMB_TP_BNDY_PLL_RING_ADDR,
-                    ring_data,
-                    true);
+                                                RING_ADDRESS_MEMB_TP_BNDY_PLL,
+                                                RING_OP_MOD_PFD360,
+                                                RING_BUS_ID_0,
+                                                true);
             if (rc)
             {
                 FAPI_ERR("Error from proc_a_x_pci_dmi_pll_scan_bndy");
@@ -253,54 +152,12 @@ extern "C" {
                 return(rc);
             }
 
-            // install PLL config
-            rc = FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_LENGTH, &parent_target, ring_length);	// -- get length of scan ring
-            if (rc)
-            {
-                FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_AB_BNDY_PLL_LENGTH)");
-                return(rc);
-            }
-            rc = FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_DATA, &parent_target, ab_bndy_pll_data);	// -- get scan ring data
-            if (rc)
-            {
-                FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_AB_BNDY_PLL_DATA)");
-                return(rc);
-            }
-
-
-            // Now we need the partial offset data also . First let us get PFD360 offsets
-            rc = FAPI_ATTR_GET(ATTR_PROC_ABUS_CUPLL_PFD360_OFFSET, &parent_target, proc_abus_cupll_pfd360_offset);
-            if (rc)
-            {
-                FAPI_ERR("Error fetching PFD360 offsets on Abus");
-                return(rc);
-            }
-
-            rc_ecmd |= ring_data.setBitLength(ring_length);
-            if (rc_ecmd)
-            {
-                rc.setEcmdError(rc_ecmd);
-                return(rc);
-            }
-            rc =fapiGetRing(parent_target,AB_BNDY_PLL_RING_ADDR ,ring_data,RING_MODE_SET_PULSE);
-            if (rc)
-            {
-                FAPI_ERR("GetRing error on AB ring");
-                return(rc);
-            }
-            FAPI_DBG("PFD bit to be cleared for Abus number %d is %d",chip_unit,proc_abus_cupll_pfd360_offset[chip_unit]);
-            rc_ecmd|=ring_data.clearBit(proc_abus_cupll_pfd360_offset[chip_unit]);
-
-            if (rc_ecmd)
-            {
-                rc.setEcmdError(rc_ecmd);
-                return(rc);
-            }
+            // install PLL config (adjust PFD360)
             rc = proc_a_x_pci_dmi_pll_scan_bndy(parent_target,
-                    A_BUS_CHIPLET_0x08000000,
-                    AB_BNDY_PLL_RING_ADDR,
-                    ring_data,
-                    true);
+                                                RING_ADDRESS_PROC_AB_BNDY_PLL,
+                                                RING_OP_MOD_PFD360,
+                                                static_cast<p8_pll_utils_bus_id>(chip_unit),
+                                                true);
             if (rc)
             {
                 FAPI_ERR("Error from proc_a_x_pci_dmi_pll_scan_bndy");
@@ -1118,6 +975,7 @@ extern "C" {
                 FAPI_DBG("PLL SETTING FAILED ON MASTER SIDE "); 
                 return rc;
             }
+
             // FAPI_DBG("Waiting for 1s after PLL Update on master");
             //  rc=fapiDelay(1000000,1000); 
             // Run DE Now - as per Gary 

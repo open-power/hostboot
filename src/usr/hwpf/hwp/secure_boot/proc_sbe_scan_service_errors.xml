@@ -1,11 +1,11 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/hwpf/hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete/proc_check_slave_sbe_seeprom_complete_errors.xml $ -->
+<!-- $Source: src/usr/hwpf/hwp/secure_boot/proc_sbe_scan_service_errors.xml $ -->
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015                             -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -22,46 +22,31 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_check_slave_sbe_seeprom_complete_errors.xml,v 1.8 2015/07/27 00:37:13 jmcgill Exp $ -->
-<!-- Error definitions for proc_check_slave_sbe_seeprom_complete procedure -->
+<!-- $Id: proc_sbe_scan_service_errors.xml,v 1.2 2015/05/15 15:25:36 jmcgill Exp $ -->
+<!-- Halt codes for proc_sbe_scan_service -->
 <hwpErrors>
-  <!-- *********************************************************************** -->
+  <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_CHECK_SLAVE_SBE_SEEPROM_COMPLETE_BAD_ISTEP_NUM</rc>
+    <rc>RC_PROC_SBE_SCAN_SERVICE_INVALID_OPERATION</rc>
     <description>
-      Procedure: proc_check_slave_sbe_seeprom_complete
-      The slave SBE is not at the correct istep number
+      Procedure: proc_sbe_scan_service
+      Invalid PLL configuration requested by caller.
     </description>
-    <ffdc>ISTEP_NUM</ffdc>
-    <ffdc>SUBSTEP_NUM</ffdc>
+    <sbeError/>
     <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
+      <id>REG_FFDC_SBE_SCAN_SERVICE</id>
+      <target>CHIP</target>
     </collectRegisterFfdc>
-    <deconfigure>
-      <target>CHIP_IN_ERROR</target>
-    </deconfigure>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
-  <!-- *********************************************************************** -->
-  <hwpError>
-    <rc>RC_PROC_CHECK_SLAVE_SBE_SEEPROM_COMPLETE_UNEXPECTED_FINAL_STATE</rc>
-    <description>
-      Procedure: proc_check_slave_sbe_seeprom_complete
-      The slave SBE did not reach a valid final state
-    </description>
-    <ffdc>SBE_RUNNING</ffdc>
-    <ffdc>HALT_CODE</ffdc>
-    <ffdc>ISTEP_NUM</ffdc>
-    <ffdc>SUBSTEP_NUM</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_STATUS_AND_SBE_VITAL_REGISTERS</id>
-      <id>REG_FFDC_PROC_SBE_REGISTERS</id>
-      <target>CHIP_IN_ERROR</target>
-    </collectRegisterFfdc>
-    <deconfigure>
-      <target>CHIP_IN_ERROR</target>
-    </deconfigure>
-  </hwpError>
-  <!-- *********************************************************************** -->
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>REG_FFDC_SBE_SCAN_SERVICE</id>
+    <scomRegister>MBOX_SCRATCH_REG0_0x00050038</scomRegister>
+    <scomRegister>MBOX_SCRATCH_REG1_0x00050039</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
 </hwpErrors>

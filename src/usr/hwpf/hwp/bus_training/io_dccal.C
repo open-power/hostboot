@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: io_dccal.C,v 1.39 2014/12/02 00:17:33 szhong Exp $
+// $Id: io_dccal.C,v 1.40 2015/05/14 21:03:34 jmcgill Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -766,15 +766,8 @@ ReturnCode io_dccal(const Target& target){
     io_interface_t master_interface=CP_IOMC0_P0;
     uint32_t master_group=0;
 
-    fapi::ATTR_PROC_PB_BNDY_DMIPLL_DATA_Type pb_bndy_dmipll_data={0};
-    fapi::ATTR_PROC_AB_BNDY_PLL_DATA_Type    ab_bndy_pll_data={0};
-    fapi::ATTR_MEMB_TP_BNDY_PLL_DATA_Type    tp_bndy_pll_data={0};
-    ecmdDataBufferBase ring_data;
     fapi::Target parent_target;
-	uint32_t ring_length=0;
-	uint32_t rc_ecmd=0;
-
-const fapi::Target& TARGET = target;
+    const fapi::Target& TARGET = target;
     FAPI_DBG("Running IO DCCAL PROCEDURE");
 
     // This is a DMI/MC bus
@@ -784,36 +777,7 @@ const fapi::Target& TARGET = target;
         master_interface=CP_IOMC0_P0; // base scom for MC bus
         master_group=3; // Design requires us to do this as per scom map and layout
 
-        // obtain parent chip target needed for ring manipulation
-	    rc = fapiGetParentChip(target, parent_target);
-        if (rc)
-        {
-            FAPI_ERR("Error from fapiGetParentChip");
-            return(rc);
-        }
-
-        // install PLL config for dccal operation
-	    rc = FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_DMIPLL_LENGTH, &parent_target, ring_length);	// -- get length of scan ring
-        if (rc)
-        {
-            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_PB_BNDY_DMIPLL_LENGTH)");
-            return(rc);
-        }
-	    rc = FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_DMIPLL_DATA, &parent_target, pb_bndy_dmipll_data);	// -- get scan ring data
-        if (rc)
-        {
-            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_PB_BNDY_DMIPLL_DATA)");
-            return(rc);
-        }
-
-	    rc_ecmd |= ring_data.setBitLength(ring_length);
-	    rc_ecmd |= ring_data.insert(pb_bndy_dmipll_data, 0, ring_length, 0);		// -- put data into ecmd buffer
-        if (rc_ecmd)
-        {
-            rc.setEcmdError(rc_ecmd);
-            return(rc);
-        }
-
+        // determine chip unit position
         uint8_t mcs_pos;
         rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &target, mcs_pos);
         if (rc)
@@ -822,26 +786,19 @@ const fapi::Target& TARGET = target;
             return(rc);
         }
 
-        uint32_t refclksel_offsets[8];
-        rc = FAPI_ATTR_GET(ATTR_PROC_DMI_CUPLL_REFCLKSEL_OFFSET, &parent_target, refclksel_offsets);
+        // obtain parent chip target needed for ring manipulation
+	    rc = fapiGetParentChip(target, parent_target);
         if (rc)
         {
-            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_DMI_CUPLL_REFCLKSEL_OFFSET)");
+            FAPI_ERR("Error from fapiGetParentChip");
             return(rc);
         }
 
-        rc_ecmd |= ring_data.setBit(refclksel_offsets[mcs_pos]);
-        if (rc_ecmd)
-        {
-            rc.setEcmdError(rc_ecmd);
-            return(rc);
-        }
-
-        // update PLL
+        // update PLL for dccal operation
         rc = proc_a_x_pci_dmi_pll_scan_bndy(parent_target,
-                                            NEST_CHIPLET_0x02000000,
-                                            PB_BNDY_DMIPLL_RING_ADDR,
-                                            ring_data,
+                                            RING_ADDRESS_PROC_PB_BNDY_DMIPLL,
+                                            RING_OP_MOD_REFCLK_SEL,
+                                            static_cast<p8_pll_utils_bus_id>(mcs_pos),
                                             true);
         if (rc)
         {
@@ -866,22 +823,10 @@ const fapi::Target& TARGET = target;
         }
 
         // restore PLL config for functional operation
-	    rc = FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_DMIPLL_DATA, &parent_target, pb_bndy_dmipll_data);	// -- get scan ring data
-        if (rc)
-        {
-            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_PB_BNDY_DMIPLL_DATA)");
-            return(rc);
-        }
-	    rc_ecmd |= ring_data.insert(pb_bndy_dmipll_data, 0, ring_length, 0);		// -- put data into ecmd buffer
-        if (rc_ecmd)
-        {
-            rc.setEcmdError(rc_ecmd);
-            return(rc);
-        }
         rc = proc_a_x_pci_dmi_pll_scan_bndy(parent_target,
-                                            NEST_CHIPLET_0x02000000,
-                                            PB_BNDY_DMIPLL_RING_ADDR,
-                                            ring_data,
+                                            RING_ADDRESS_PROC_PB_BNDY_DMIPLL,
+                                            RING_OP_MOD_REFCLK_SEL,
+                                            static_cast<p8_pll_utils_bus_id>(mcs_pos),
                                             true);
         if (rc)
         {
@@ -896,46 +841,10 @@ const fapi::Target& TARGET = target;
         master_group=0;
 
         // install PLL config for dccal operation
-	    rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_LENGTH, &target, ring_length);	// -- get length of scan ring
-        if (rc)
-        {
-            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_MEMB_TP_BNDY_PLL_LENGTH)");
-            return(rc);
-        }
-  	    rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_DATA, &target, tp_bndy_pll_data);	// -- get scan ring data
-        if (rc)
-        {
-            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_MEMB_TP_BNDY_PLL_DATA)");
-            return(rc);
-        }
-	    rc_ecmd |= ring_data.setBitLength(ring_length);
-	    rc_ecmd |= ring_data.insert(tp_bndy_pll_data, 0, ring_length, 0);		// -- put data into ecmd buffer
-        if (rc_ecmd)
-        {
-            rc.setEcmdError(rc_ecmd);
-            return(rc);
-        }
-
-        uint32_t refclksel_offset;
-        rc = FAPI_ATTR_GET(ATTR_MEMB_DMI_CUPLL_REFCLKSEL_OFFSET, &target, refclksel_offset);
-        if (rc)
-        {
-            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_MEMB_DMI_CUPLL_REFCLKSEL_OFFSET)");
-            return(rc);
-        }
-
-        rc_ecmd |= ring_data.setBit(refclksel_offset);
-        if (rc_ecmd)
-        {
-            rc.setEcmdError(rc_ecmd);
-            return(rc);
-        }
-
-        // update PLL
         rc = proc_a_x_pci_dmi_pll_scan_bndy(target,
-                                            TP_CHIPLET_0x01000000,
-                                            MEMB_TP_BNDY_PLL_RING_ADDR,
-                                            ring_data,
+                                            RING_ADDRESS_MEMB_TP_BNDY_PLL,
+                                            RING_OP_MOD_REFCLK_SEL,
+                                            RING_BUS_ID_0,
                                             true);
         if (rc)
         {
@@ -960,23 +869,10 @@ const fapi::Target& TARGET = target;
         }
 
         // restore PLL config for functional operation
-        rc = FAPI_ATTR_GET(ATTR_MEMB_TP_BNDY_PLL_DATA, &target, tp_bndy_pll_data);	// -- get scan ring data
-        if (rc)
-        {
-            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_MEMB_TP_BNDY_PLL_DATA)");
-            return(rc);
-        }
-  	    rc_ecmd |= ring_data.insert(tp_bndy_pll_data, 0, ring_length, 0);		// -- put data into ecmd buffer
-        if (rc_ecmd)
-        {
-            rc.setEcmdError(rc_ecmd);
-            return(rc);
-        }
-
         rc = proc_a_x_pci_dmi_pll_scan_bndy(target,
-                                            TP_CHIPLET_0x01000000,
-                                            MEMB_TP_BNDY_PLL_RING_ADDR,
-                                            ring_data,
+                                            RING_ADDRESS_MEMB_TP_BNDY_PLL,
+                                            RING_OP_MOD_REFCLK_SEL,
+                                            RING_BUS_ID_0,
                                             true);
         if (rc)
         {
@@ -996,6 +892,14 @@ const fapi::Target& TARGET = target;
         master_interface=CP_FABRIC_A0; // base scom for A bus , assume translation to A1 by PLAT
         master_group=0; // Design requires us to do this as per scom map and layout
 
+        uint8_t abus;
+        rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &target, abus);
+        if (rc)
+        {
+            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+            return(rc);
+        }
+
         // obtain parent chip target needed for ring manipulation
 	    rc = fapiGetParentChip(target, parent_target);
         if (rc)
@@ -1005,54 +909,10 @@ const fapi::Target& TARGET = target;
         }
 
         // install PLL config for dccal operation
-  	    rc = FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_LENGTH, &parent_target, ring_length);	// -- get length of scan ring
-        if (rc)
-        {
-            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_AB_BNDY_PLL_LENGTH)");
-            return(rc);
-        }
-	    rc = FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_DATA, &parent_target, ab_bndy_pll_data);	// -- get scan ring data
-        if (rc)
-        {
-            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_AB_BNDY_PLL_DATA)");
-            return(rc);
-        }
-	    rc_ecmd |= ring_data.setBitLength(ring_length);
-	    rc_ecmd |= ring_data.insert(ab_bndy_pll_data, 0, ring_length, 0);		// -- put data into ecmd buffer
-        if (rc_ecmd)
-        {
-            rc.setEcmdError(rc_ecmd);
-            return(rc);
-        }
-
-        uint8_t abus;
-        rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &target, abus);
-        if (rc)
-        {
-            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
-            return(rc);
-        }
-
-        uint32_t refclksel_offsets[3];
-        rc = FAPI_ATTR_GET(ATTR_PROC_ABUS_CUPLL_REFCLKSEL_OFFSET, &parent_target, refclksel_offsets);
-        if (rc)
-        {
-            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_ABUS_CUPLL_REFCLKSEL_OFFSET)");
-            return(rc);
-        }
-
-        rc_ecmd |= ring_data.setBit(refclksel_offsets[abus]);
-        if (rc_ecmd)
-        {
-            rc.setEcmdError(rc_ecmd);
-            return(rc);
-        }
-
-        // update PLL
         rc = proc_a_x_pci_dmi_pll_scan_bndy(parent_target,
-                                            A_BUS_CHIPLET_0x08000000,
-                                            AB_BNDY_PLL_RING_ADDR,
-                                            ring_data,
+                                            RING_ADDRESS_PROC_AB_BNDY_PLL,
+                                            RING_OP_MOD_REFCLK_SEL,
+                                            static_cast<p8_pll_utils_bus_id>(abus),
                                             true);
         if (rc)
         {
@@ -1075,23 +935,10 @@ const fapi::Target& TARGET = target;
         }
 
         // restore PLL config for functional operation
-	    rc = FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_DATA, &parent_target, ab_bndy_pll_data);	// -- get scan ring data
-        if (rc)
-        {
-            FAPI_ERR("Error from FAPI_ATTR_GET (ATTR_PROC_AB_BNDY_PLL_DATA)");
-            return(rc);
-        }
-	    rc_ecmd |= ring_data.setBitLength(ring_length);
-	    rc_ecmd |= ring_data.insert(ab_bndy_pll_data, 0, ring_length, 0);		// -- put data into ecmd buffer
-        if (rc_ecmd)
-        {
-            rc.setEcmdError(rc_ecmd);
-            return(rc);
-        }
         rc = proc_a_x_pci_dmi_pll_scan_bndy(parent_target,
-                                            A_BUS_CHIPLET_0x08000000,
-                                            AB_BNDY_PLL_RING_ADDR,
-                                            ring_data,
+                                            RING_ADDRESS_PROC_AB_BNDY_PLL,
+                                            RING_OP_MOD_REFCLK_SEL,
+                                            static_cast<p8_pll_utils_bus_id>(abus),
                                             true);
         if (rc)
         {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_a_x_pci_dmi_pll_initf.H,v 1.4 2013/09/30 16:09:57 jmcgill Exp $
+// $Id: proc_a_x_pci_dmi_pll_initf.H,v 1.5 2015/05/14 21:03:42 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_a_x_pci_dmi_pll_initf.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -40,10 +40,10 @@
 #ifndef _PROC_A_X_PCI_DMI_PLL_INITF_H_
 #define _PROC_A_X_PCI_DMI_PLL_INITF_H_
 
+
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-
 #include <fapi.H>
 
 
@@ -53,7 +53,10 @@
 
 // function pointer typedef definition for HWP call support
 typedef fapi::ReturnCode (*proc_a_x_pci_dmi_pll_initf_FP_t)(const fapi::Target &,
-                           const bool, const bool, const bool, const bool);
+                                                            const bool,
+                                                            const bool,
+                                                            const bool,
+                                                            const bool);
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -66,18 +69,18 @@ extern "C"
  * @brief Scan PLL settings for A/X/PCI/DMI PLLs
  *
  * @param[in] i_target     Reference to target
- * @param[in] i_startX     True if x_bus PLL should be initalized, else false
+ * @param[in] i_startX     True if X PLL should be initalized, else false
  * @param[in] i_startA     True if A PLL should be initalized, else false
  * @param[in] i_startPCIE  True if PCIE PLL should be initalized, else false
  * @param[in] i_startDMI   True if DMI PLL should be initalized, else false
  *
  * @return ReturnCode
  */
-  fapi::ReturnCode proc_a_x_pci_dmi_pll_initf(const fapi::Target & i_target,
-                                   const bool i_startX,
-                                   const bool i_startA,
-                                   const bool i_startPCIE,
-                                   const bool i_startDMI);
+fapi::ReturnCode proc_a_x_pci_dmi_pll_initf(const fapi::Target & i_target,
+                                            const bool i_startX,
+                                            const bool i_startA,
+                                            const bool i_startPCIE,
+                                            const bool i_startDMI);
 
 } // extern "C"
 

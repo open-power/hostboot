@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_a_x_pci_dmi_pll_initf.C,v 1.19 2014/12/02 00:17:23 szhong Exp $
+// $Id: proc_a_x_pci_dmi_pll_initf.C,v 1.20 2015/05/14 21:03:40 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_a_x_pci_dmi_pll_initf.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -51,7 +51,11 @@
 #include <proc_a_x_pci_dmi_pll_initf.H>
 #include <proc_a_x_pci_dmi_pll_utils.H>
 
-using namespace fapi;
+
+//------------------------------------------------------------------------------
+// Constant definitons
+//------------------------------------------------------------------------------
+const uint32_t DMI_PLL_VCO_WORKAROUND_THRESHOLD_FREQ = 4800;
 
 
 //------------------------------------------------------------------------------
@@ -66,32 +70,27 @@ extern "C"
 // function:
 //      Scan PLL settings for A/X/PCI/DMI PLLs
 //
-// parameters: i_target       =>   chip target
-//             i_startX       =>   True to start X BUS PLL, else false
-//             i_startA       =>   True to start A BUS PLL, else false
-//             i_startPCIE    =>   True to start PCIE PLL, else false
-//             i_startDMI     =>   True to start DMI PLL, else false
+// parameters: i_target    => chip target
+//             i_startX    => True to start X BUS PLL, else false
+//             i_startA    => True to start A BUS PLL, else false
+//             i_startPCIE => True to start PCIE PLL, else false
+//             i_startDMI  => True to start DMI PLL, else false
 // returns: FAPI_RC_SUCCESS if operation was successful, else error
 //------------------------------------------------------------------------------
-fapi::ReturnCode proc_a_x_pci_dmi_pll_initf(const fapi::Target & i_target,
-                                 const bool i_startX,
-                                 const bool i_startA,
-                                 const bool i_startPCIE,
-                                 const bool i_startDMI)
+fapi::ReturnCode proc_a_x_pci_dmi_pll_initf(
+    const fapi::Target & i_target,
+    const bool i_startX,
+    const bool i_startA,
+    const bool i_startPCIE,
+    const bool i_startDMI)
 {
-    // data buffer to hold register values
-    ecmdDataBufferBase scom_data(64);
-    ecmdDataBufferBase ring_data;
+    // attribute data
     uint8_t pcie_enable_attr;
     uint8_t abus_enable_attr;
     uint8_t is_simulation;
     uint8_t lctank_pll_vco_workaround = 0;
-    uint32_t ring_length     = 0;
-    fapi::ATTR_PROC_AB_BNDY_PLL_DATA_Type attrABRingData={0};
-    fapi::ATTR_PROC_PB_BNDY_DMIPLL_DATA_Type attrDMIRingData={0};
-    fapi::ATTR_PROC_PCI_BNDY_PLL_DATA_Type attrPCIRingData={0};
+
     // return codes
-    uint32_t rc_ecmd = 0;
     fapi::ReturnCode rc;
 
     // mark function entry
@@ -169,66 +168,59 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_initf(const fapi::Target & i_target,
         }
         else
         {
-            // Read the ring length attribute value.
-            rc = FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_LENGTH, &i_target, ring_length);
-            if (rc)
-            {
-                FAPI_ERR("Failed to get attribute: ATTR_PROC_AB_BNDY_PLL_LENGTH.");
-                break;
-            }
-            FAPI_DBG("ATTR_PROC_AB_BNDY_PLL_LENGTH attribute is set to : %d.", ring_length);
-
-            // Read the ring data attribute value.
-            rc = FAPI_ATTR_GET(ATTR_PROC_AB_BNDY_PLL_DATA, &i_target, attrABRingData);
-            if (rc)
-            {
-                FAPI_ERR("Failed to get attribute: ATTR_PROC_AB_BNDY_PLL_DATA.");
-                break;
-            }
-
-            // Set the ring_data buffer to the right length for the ring data
-            rc_ecmd |= ring_data.setBitLength(ring_length);
-            if (rc_ecmd)
-            {
-                FAPI_ERR("Error 0x%x setting ecmd data buffer length. Buffer must be set to length of scan chain.",  rc_ecmd);
-                rc.setEcmdError(rc_ecmd);
-                break;
-            }
-
-            // Put the ring data from the attribute into the buffer
-            rc_ecmd |= ring_data.insert(attrABRingData, 0, ring_length, 0);
-            if (rc_ecmd)
-            {
-                FAPI_ERR("Error 0x%x loading scan chain attribute data into buffer.",  rc_ecmd);
-                rc.setEcmdError(rc_ecmd);
-                break;
-            }
-
             // apply workaround for A PLL for all frequencies
             bool a_lctank_pll_vco_workaround = (lctank_pll_vco_workaround != 0);
             FAPI_DBG("A-Bus PLL VCO bug circumvention is %s",
                      (a_lctank_pll_vco_workaround ? "enabled" : "disabled"));
 
-            // scan ab_bndy_pll ring with setpulse
-            FAPI_DBG("Loading the config bits into A BUS PLL");
-            rc = proc_a_x_pci_dmi_pll_scan_pll(
-                    i_target,
-                    A_BUS_CHIPLET_0x08000000,
-                    AB_BNDY_PLL_RING_ADDR,
-                    ring_data,
-                    a_lctank_pll_vco_workaround,
-                    AB_BNDY_PLL_RING_CCALLOAD_OFFSET,
-                    AB_BNDY_PLL_RING_CCALFMIN_OFFSET,
-                    false);
-            if (rc)
+            // establish base ring state
+            rc = proc_a_x_pci_dmi_pll_scan_bndy(i_target,
+                                                RING_ADDRESS_PROC_AB_BNDY_PLL,
+                                                RING_OP_BASE,
+                                                RING_BUS_ID_0,
+                                                false);
+            if (!rc.ok())
             {
-                FAPI_ERR("Error from proc_a_x_pci_dmi_pll_scan_pll");
+                FAPI_ERR("Error from proc_a_x_pci_dmi_pll_scan_bndy");
                 break;
             }
 
+            if (a_lctank_pll_vco_workaround)
+            {
+                rc = proc_a_x_pci_dmi_pll_scan_bndy(i_target,
+                                                    RING_ADDRESS_PROC_AB_BNDY_PLL,
+                                                    RING_OP_MOD_VCO_S1,
+                                                    RING_BUS_ID_0,
+                                                    false);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("Error from proc_a_x_pci_dmi_pll_scan_bndy");
+                    break;
+                }
+
+                // release PLL (skip lock check) & re-scan
+                rc = proc_a_x_pci_dmi_pll_release_pll(i_target,
+                                                      A_BUS_CHIPLET_0x08000000,
+                                                      false);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("Error from proc_a_x_pci_dmi_pll_release_pll");
+                    break;
+                }
+
+                rc = proc_a_x_pci_dmi_pll_scan_bndy(i_target,
+                                                    RING_ADDRESS_PROC_AB_BNDY_PLL,
+                                                    RING_OP_MOD_VCO_S2,
+                                                    RING_BUS_ID_0,
+                                                    false);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("Error from proc_a_x_pci_dmi_pll_scan_bndy");
+                    break;
+                }
+            }
             FAPI_INF("Done setting up A-Bus PLL. ");
         }  // end A PLL
-
 
 
         //----------//
@@ -240,42 +232,6 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_initf(const fapi::Target & i_target,
         }
         else
         {
-            // Read the ring length attribute value.
-            rc = FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_DMIPLL_LENGTH, &i_target, ring_length);
-            if (rc)
-            {
-                FAPI_ERR("Failed to get attribute: ATTR_PROC_PB_BNDY_DMIPLL_LENGTH.");
-                break;
-            }
-            FAPI_DBG("ATTR_PROC_PB_BNDY_DMIPLL_LENGTH attribute is set to : %d.", ring_length);
-
-
-            // Read the ring data attribute value.
-            rc = FAPI_ATTR_GET(ATTR_PROC_PB_BNDY_DMIPLL_DATA, &i_target, attrDMIRingData);
-            if (rc)
-            {
-                FAPI_ERR("Failed to get attribute: ATTR_PROC_PB_BNDY_DMIPLL_DATA.");
-                break;
-            }
-
-            // Set the ring_data buffer to the right length for the ring data
-            rc_ecmd |= ring_data.setBitLength(ring_length);
-            if (rc_ecmd)
-            {
-                FAPI_ERR("Error 0x%x setting ecmd data buffer length. Buffer must be set to length of scan chain.",  rc_ecmd);
-                rc.setEcmdError(rc_ecmd);
-                break;
-            }
-
-            // Put the ring data from the attribute into the buffer
-            rc_ecmd |= ring_data.insert(attrDMIRingData, 0, ring_length, 0);
-            if (rc_ecmd)
-            {
-                FAPI_ERR("Error 0x%x loading scan chain attribute data into buffer.",  rc_ecmd);
-                rc.setEcmdError(rc_ecmd);
-                break;
-            }
-
             // only apply DMI workaround if needed when frequency < 4800 MHz,
             bool dmi_lctank_pll_vco_workaround = (lctank_pll_vco_workaround != 0);
             uint32_t dmi_freq;
@@ -299,26 +255,55 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_initf(const fapi::Target & i_target,
             FAPI_DBG("DMI PLL VCO bug circumvention is %s",
                      (dmi_lctank_pll_vco_workaround ? "enabled" : "disabled"));
 
-            // scan pb_bndy_dmipll ring with setpulse
-            FAPI_DBG("Loading the config bits into DMI PLL");
-            rc = proc_a_x_pci_dmi_pll_scan_pll(
-                    i_target,
-                    NEST_CHIPLET_0x02000000,
-                    PB_BNDY_DMIPLL_RING_ADDR,
-                    ring_data,
-                    dmi_lctank_pll_vco_workaround,
-                    PB_BNDY_DMIPLL_RING_CCALLOAD_OFFSET,
-                    PB_BNDY_DMIPLL_RING_CCALFMIN_OFFSET,
-                    true);
-            if (rc)
+            // establish base ring state
+            rc = proc_a_x_pci_dmi_pll_scan_bndy(i_target,
+                                                RING_ADDRESS_PROC_PB_BNDY_DMIPLL,
+                                                RING_OP_BASE,
+                                                RING_BUS_ID_0,
+                                                true);
+            if (!rc.ok())
             {
-                FAPI_ERR("Error from proc_a_x_pci_dmi_pll_scan_pll");
+                FAPI_ERR("Error from proc_a_x_pci_dmi_pll_scan_bndy");
                 break;
+            }
+
+            if (dmi_lctank_pll_vco_workaround)
+            {
+                rc = proc_a_x_pci_dmi_pll_scan_bndy(i_target,
+                                                    RING_ADDRESS_PROC_PB_BNDY_DMIPLL,
+                                                    RING_OP_MOD_VCO_S1,
+                                                    RING_BUS_ID_0,
+                                                    true);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("Error from proc_a_x_pci_dmi_pll_scan_bndy");
+                    break;
+                }
+
+                // release PLL (skip lock check) & re-scan
+                rc = proc_a_x_pci_dmi_pll_release_pll(i_target,
+                                                      NEST_CHIPLET_0x02000000,
+                                                      false);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("Error from proc_a_x_pci_dmi_pll_release_pll");
+                    break;
+                }
+
+                rc = proc_a_x_pci_dmi_pll_scan_bndy(i_target,
+                                                    RING_ADDRESS_PROC_PB_BNDY_DMIPLL,
+                                                    RING_OP_MOD_VCO_S2,
+                                                    RING_BUS_ID_0,
+                                                    true);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("Error from proc_a_x_pci_dmi_pll_scan_bndy");
+                    break;
+                }
             }
 
             FAPI_INF("Done setting up DMI PLL. ");
         }  // end DMI PLL
-
 
 
         //-----------//
@@ -345,63 +330,20 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_initf(const fapi::Target & i_target,
         }
         else
         {
-            FAPI_DBG("Loading the config bits into PCIE BUS PLL");
-
-            // Read the ring length attribute value.
-            rc = FAPI_ATTR_GET(ATTR_PROC_PCI_BNDY_PLL_LENGTH, &i_target, ring_length);
-            if (rc)
+            // establish base ring state
+            rc = proc_a_x_pci_dmi_pll_scan_bndy(i_target,
+                                                RING_ADDRESS_PROC_PCI_BNDY_PLL,
+                                                RING_OP_BASE,
+                                                RING_BUS_ID_0,
+                                                false);
+            if (!rc.ok())
             {
-                FAPI_ERR("Failed to get attribute: ATTR_PROC_PCI_BNDY_PLL_LENGTH.");
-                break;
-            }
-            FAPI_DBG("ATTR_PROC_PCI_BNDY_PLL_LENGTH attribute is set to : %d.", ring_length);
-
-            // Read the ring data attribute value.
-            rc = FAPI_ATTR_GET(ATTR_PROC_PCI_BNDY_PLL_DATA, &i_target, attrPCIRingData);
-            if (rc)
-            {
-                FAPI_ERR("Failed to get attribute: ATTR_PROC_PCI_BNDY_PLL_DATA.");
-                break;
-            }
-
-            // Set the ring_data buffer to the right length for the ring data
-            rc_ecmd |= ring_data.setBitLength(ring_length);
-            if (rc_ecmd)
-            {
-                FAPI_ERR("Error 0x%x setting ecmd data buffer length. Buffer must be set to length of scan chain.",  rc_ecmd);
-                rc.setEcmdError(rc_ecmd);
-                break;
-            }
-
-            // Put the ring data from the attribute into the buffer
-            rc_ecmd |= ring_data.insert(attrPCIRingData, 0, ring_length, 0);
-            if (rc_ecmd)
-            {
-                FAPI_ERR("Error 0x%x loading scan chain attribute data into buffer.",  rc_ecmd);
-                rc.setEcmdError(rc_ecmd);
-                break;
-            }
-
-            // scan pci_bndy_pll ring with setpulse
-            rc = proc_a_x_pci_dmi_pll_scan_pll(
-                    i_target,
-                    PCIE_CHIPLET_0x09000000,
-                    PCI_BNDY_PLL_RING_ADDR,
-                    ring_data,
-                    false,
-                    PCI_BNDY_PLL_RING_CCALLOAD_OFFSET,
-                    PCI_BNDY_PLL_RING_CCALFMIN_OFFSET,
-                    false);
-            if (rc)
-            {
-                FAPI_ERR("Error from proc_a_x_pci_dmi_pll_scan_pll");
+                FAPI_ERR("Error from proc_a_x_pci_dmi_pll_scan_bndy");
                 break;
             }
 
             FAPI_INF("Done setting up PCIE PLL.");
         }  // end PCIE PLL
-
-
 
     } while (0); // end do
 
@@ -418,6 +360,9 @@ fapi::ReturnCode proc_a_x_pci_dmi_pll_initf(const fapi::Target & i_target,
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: proc_a_x_pci_dmi_pll_initf.C,v $
+Revision 1.20  2015/05/14 21:03:40  jmcgill
+Update to use modified proc_a_x_pci_dmi_pll_utils API
+
 Revision 1.19  2014/12/02 00:17:23  szhong
 remove hardcoded bndy pll length in code
 

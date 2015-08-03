@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_start_clocks_chiplets.C,v 1.18 2014/09/26 19:00:42 jmcgill Exp $
+// $Id: proc_start_clocks_chiplets.C,v 1.19 2015/05/14 21:21:34 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_start_clocks_chiplets.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -188,42 +188,6 @@ fapi::ReturnCode proc_start_clocks_chiplet_set_mux_selects(
     } while(0);
 
     FAPI_DBG("proc_start_clocks_chiplet_set_mux_selects: End");
-
-    return rc;
-}
-
-
-//------------------------------------------------------------------------------
-// function: utility subroutine to clear scan select register
-// parameters: i_target            => chip target
-//             i_chiplet_base_addr => base SCOM address for chiplet
-// returns: FAPI_RC_SUCCESS if operation was successful, else error
-//------------------------------------------------------------------------------
-fapi::ReturnCode proc_start_clocks_chiplet_clear_clk_scansel_reg(
-    const fapi::Target& i_target,
-    const uint32_t i_chiplet_base_addr)
-{
-    fapi::ReturnCode rc;
-    ecmdDataBufferBase zero_data(64);
-    uint32_t scom_addr = i_chiplet_base_addr |
-                         GENERIC_CLK_SCANSEL_0x00030007;
-
-    FAPI_DBG("proc_start_clocks_chiplet_clear_clk_scansel_reg: Start");
-
-    do
-    {
-        // clear chiplet scan select register
-        rc = fapiPutScom(i_target, scom_addr, zero_data);
-        if (rc)
-        {
-            FAPI_ERR("proc_start_clocks_chiplet_clear_clk_scansel_reg: fapiPutScom error (CLK_SCANSEL_0x%08X)",
-                     scom_addr);
-            break;
-        }
-
-    } while(0);
-
-    FAPI_DBG("proc_start_clocks_chiplet_clear_clk_scansel_reg: End");
 
     return rc;
 }
@@ -729,16 +693,6 @@ fapi::ReturnCode proc_start_clocks_generic_chiplet(
         if (rc)
         {
             FAPI_ERR("proc_start_clocks_generic_chiplet: Error writing GP0 AND mask to set functional clock mux selects");
-            break;
-        }
-
-        // clear clock scansel register
-        FAPI_DBG("Clearing clock scansel register ...");
-        rc = proc_start_clocks_chiplet_clear_clk_scansel_reg(i_target,
-                                                             i_chiplet_base_addr);
-        if (rc)
-        {
-            FAPI_ERR("proc_start_clocks_generic_chiplet: Error clearing clock scansel register");
             break;
         }
 

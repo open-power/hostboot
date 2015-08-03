@@ -186,6 +186,8 @@ HWP_ERROR_XML_FILES += hwp/proc_pba_utils_registers.xml
 HWP_ERROR_XML_FILES += hwp/p8_fir_registers.xml
 HWP_ERROR_XML_FILES += hwp/cen_fir_registers.xml
 HWP_ERROR_XML_FILES += hwp/tp_dbg_data_accessors/proc_tp_dbg_data_errors.xml
+HWP_ERROR_XML_FILES += hwp/secure_boot/proc_sbe_scan_service_errors.xml
+HWP_ERROR_XML_FILES += hwp/secure_boot/proc_stop_sbe_scan_service_errors.xml
 
 ## these get generated into obj/genfiles/AttributeIds.H
 HWP_ATTR_XML_FILES += hwp/memory_attributes.xml

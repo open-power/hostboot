@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_getecid.C,v 1.10 2014/10/03 21:56:44 jmcgill Exp $
+// $Id: proc_getecid.C,v 1.11 2015/05/14 21:14:31 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/utils/proc_getecid.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -42,14 +42,11 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <proc_getecid.H>
-
+#include <proc_check_security.H>
 
 //------------------------------------------------------------------------------
 // Constant definitions
 //------------------------------------------------------------------------------
-
-// Security Switch register field/bit definitions
-const uint32_t OTPC_M_SECURITY_SWITCH_TRUSTED_BOOT_BIT = 1;
 
 // OTPROM mode register field/bit definitions
 const uint32_t OTPC_M_MODE_REGISTER_ECC_ENABLE_BIT = 1;
@@ -88,15 +85,12 @@ fapi::ReturnCode proc_getecid(
         // determine if security is enabled
         //
 
-        rc = fapiGetScom(i_target, OTPC_M_SECURITY_SWITCH_0x00010005, security_switch_data);
+        FAPI_EXEC_HWP(rc, proc_check_security, i_target, secure_mode);
         if (!rc.ok())
         {
-            FAPI_ERR("proc_getecid: fapiGetScom error (OTPC_M_SECURITY_SWITCH_0x00010005) for %s",
-                     i_target.toEcmdString());
+            FAPI_ERR("Error from proc_check_security");
             break;
         }
-
-        secure_mode = security_switch_data.isBitSet(OTPC_M_SECURITY_SWITCH_TRUSTED_BOOT_BIT);
 
         //
         // clear ECC enable before reading ECID data (read-modify-write OTPROM Mode register), insecure mode only
@@ -104,7 +98,7 @@ fapi::ReturnCode proc_getecid(
 
         if (!secure_mode)
         {
-            
+
             rc = fapiGetScom(i_target, OTPC_M_MODE_REGISTER_0x00010008, otprom_mode_data);
             if (!rc.ok())
             {
@@ -112,7 +106,7 @@ fapi::ReturnCode proc_getecid(
                          i_target.toEcmdString());
                 break;
             }
-            
+
             rc_ecmd |= otprom_mode_data.clearBit(OTPC_M_MODE_REGISTER_ECC_ENABLE_BIT);
             if (rc_ecmd)
             {
@@ -121,7 +115,7 @@ fapi::ReturnCode proc_getecid(
                 rc.setEcmdError(rc_ecmd);
                 break;
             }
-            
+
             rc = fapiPutScom(i_target, OTPC_M_MODE_REGISTER_0x00010008, otprom_mode_data);
             if (!rc.ok())
             {
@@ -134,7 +128,7 @@ fapi::ReturnCode proc_getecid(
         //
         // extract and manipulate ECID data
         //
-        
+
         rc = fapiGetScom(i_target, ECID_PART_0_0x00018000, ecid_data);
         if (!rc.ok())
         {
@@ -142,13 +136,13 @@ fapi::ReturnCode proc_getecid(
                      i_target.toEcmdString());
             break;
         }
-        
+
         // 0:63 become 63:0
         rc_ecmd |= ecid_data.reverse();
         // copy bits 0:63 from the scom into 0:63 of the fuseString/attribute data
         rc_ecmd |= io_fuseString.insert(ecid_data,  0, 64);
         attr_data[0] = ecid_data.getDoubleWord(0);
-        
+
         if (rc_ecmd)
         {
             FAPI_ERR("proc_getecid: Error 0x%X processing ECID (part 0) data buffer",
@@ -156,7 +150,7 @@ fapi::ReturnCode proc_getecid(
             rc.setEcmdError(rc_ecmd);
             break;
         }
-        
+
         rc = fapiGetScom(i_target, ECID_PART_1_0x00018001, ecid_data);
         if (!rc.ok())
         {
@@ -164,14 +158,14 @@ fapi::ReturnCode proc_getecid(
                      i_target.toEcmdString());
             break;
         }
-        
+
         // 0:63 become 63:0
         rc_ecmd |= ecid_data.reverse();
         // copy bits 0:47 from the scom into 64:111 of the fuseString
         // all bits into attribute data
         rc_ecmd |= io_fuseString.insert(ecid_data, 64, 48);
         attr_data[1] = ecid_data.getDoubleWord(0);
-        
+
         if (rc_ecmd)
         {
             FAPI_ERR("proc_getecid: Error 0x%X processing ECID (part 1) data buffer",
@@ -179,7 +173,7 @@ fapi::ReturnCode proc_getecid(
             rc.setEcmdError(rc_ecmd);
             break;
         }
-        
+
         // push fuse string into attribute
         rc = FAPI_ATTR_SET(ATTR_ECID,
                            &i_target,
@@ -205,7 +199,7 @@ fapi::ReturnCode proc_getecid(
                 rc.setEcmdError(rc_ecmd);
                 break;
             }
-            
+
             rc = fapiPutScom(i_target, OTPC_M_MODE_REGISTER_0x00010008, otprom_mode_data);
             if (!rc.ok())
             {

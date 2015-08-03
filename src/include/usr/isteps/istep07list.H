@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -122,6 +122,7 @@ const DepModInfo g_istep07Dependancies = {
     {
         DEP_LIB(libnest_chiplets.so),
         DEP_LIB(libslave_sbe.so),
+        DEP_LIB(libsecure_boot.so),
         NULL
     }
 };

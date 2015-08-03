@@ -160,6 +160,8 @@ const DepModInfo  g_istep06Dependancies = {
       DEP_LIB(libsbe.so),
       DEP_LIB(libporeve.so),
       DEP_LIB(libpstates.so),
+      DEP_LIB(libcore_activate.so),
+      DEP_LIB(libsecure_boot.so),
       NULL
     }
 };
