@@ -37,7 +37,7 @@ my $arg_output_dir = undef;
 GetOptions("output-dir=s" => \$arg_output_dir);
 
 my $numArgs = $#ARGV + 1;
-if (($numArgs < 3) || ($arg_output_dir eq undef))
+if (($numArgs < 2) || ($arg_output_dir eq undef))
 {
     print ("Usage: createIfAttrService.pl --output-dir=<output dir>\n");
     print ("           [<if-attr-file1> <if-attr-file2> ...]\n");
@@ -57,6 +57,13 @@ if (($numArgs < 3) || ($arg_output_dir eq undef))
 #------------------------------------------------------------------------------
 use XML::Simple;
 my $xml = new XML::Simple (KeyAttr=>[]);
+
+#------------------------------------------------------------------------------
+# Set PREFERRED_PARSER to XML::Parser. Otherwise it uses XML::SAX which contains
+# bugs that result in XML parse errors that can be fixed by adjusting white-
+# space (i.e. parse errors that do not make sense).
+#------------------------------------------------------------------------------
+$XML::Simple::PREFERRED_PARSER = 'XML::Parser';
 
 # Uncomment to enable debug output
 #use Data::Dumper;
