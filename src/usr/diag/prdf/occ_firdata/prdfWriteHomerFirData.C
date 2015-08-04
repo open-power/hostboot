@@ -28,6 +28,7 @@
 #include <prdfErrlUtil.H>
 #include <prdfPlatServices.H>
 #include <prdfTrace.H>
+#include <prdfWriteHomerFirData.H>
 
 #include <fsi/fsiif.H>
 #include <pnor/pnorif.H>
@@ -464,20 +465,17 @@ static uint64_t mba_id_reg[] =
 
 //------------------------------------------------------------------------------
 
-errlHndl_t getHwConfig( HOMER_Data_t & o_data )
+errlHndl_t getPnorInfo( HOMER_Data_t & o_data )
 {
-    #define FUNC "[PRDF::getHwConfig] "
+    #define FUNC "[PRDF::getPnorInfo] "
 
     errlHndl_t errl = NULL;
 
-    o_data = HOMER_getData(); // Initializes data.
-
+    //----------------------------------------------------------------------
+    // Get the PNOR information.
+    //----------------------------------------------------------------------
     do
     {
-        //----------------------------------------------------------------------
-        // Get the PNOR information.
-        //----------------------------------------------------------------------
-
         PNOR::SectionInfo_t sectionInfo;
         errl = PNOR::getSectionInfo( PNOR::FIRDATA, sectionInfo );
         if ( NULL != errl )
@@ -493,7 +491,23 @@ errlHndl_t getHwConfig( HOMER_Data_t & o_data )
         o_data.pnorInfo.pnorSize        = sectionInfo.size;
         o_data.pnorInfo.mmioOffset      = pnorInfo.mmioOffset;
         o_data.pnorInfo.norWorkarounds  = pnorInfo.norWorkarounds;
+    }while(0);
 
+    return errl;
+
+    #undef FUNC
+}
+
+//------------------------------------------------------------------------------
+
+errlHndl_t getHwConfig( HOMER_Data_t & o_data, const HwInitialized_t i_curHw )
+{
+    #define FUNC "[PRDF::getHwConfig] "
+
+    errlHndl_t errl = NULL;
+
+    do
+    {
         //----------------------------------------------------------------------
         // Get hardware config information.
         //----------------------------------------------------------------------
@@ -547,41 +561,44 @@ errlHndl_t getHwConfig( HOMER_Data_t & o_data )
                 o_data.exMasks[procPos] |= 0x8000 >> exPos;
             }
 
-            // Iterate the connected MCSs.
-            TargetHandleList mcsList = getConnected( *procIt, TYPE_MCS );
-            for ( TargetHandleList::iterator mcsIt = mcsList.begin();
-                  mcsIt != mcsList.end(); ++mcsIt )
+            if (ALL_PROC_MEM_MASTER_CORE == i_curHw || ALL_HARDWARE == i_curHw)
             {
-                uint32_t mcsPos = getTargetPosition( *mcsIt );
-                PRDF_ASSERT( mcsPos < MAX_MCS_PER_PROC );
-
-                o_data.mcsMasks[procPos] |= 0x80 >> mcsPos;
-            }
-
-            // Iterate the connected MEMBUFs.
-            TargetHandleList membList = getConnected( *procIt, TYPE_MEMBUF );
-            for ( TargetHandleList::iterator membIt = membList.begin();
-                  membIt != membList.end(); ++membIt )
-            {
-                uint32_t membPos = getTargetPosition(*membIt);
-                PRDF_ASSERT( membPos < MAX_MEMB_PER_PROC );
-
-                o_data.membMasks[procPos] |= 0x80 >> membPos;
-
-                // Get the MEMBUF FSI address.
-                getFsiLinkInfo( *membIt, fsiInfo );
-                o_data.membFsiBaseAddr[procPos][membPos] = fsiInfo.baseAddr;
-
-                // Iterate the connected MBAs.
-                TargetHandleList mbaList = getConnected( *membIt, TYPE_MBA );
-                for ( TargetHandleList::iterator mbaIt = mbaList.begin();
-                      mbaIt != mbaList.end(); ++mbaIt )
+                // Iterate the connected MCSs.
+                TargetHandleList mcsList = getConnected( *procIt, TYPE_MCS );
+                for ( TargetHandleList::iterator mcsIt = mcsList.begin();
+                        mcsIt != mcsList.end(); ++mcsIt )
                 {
-                    uint32_t mbaPos = getTargetPosition(*mbaIt);
-                    uint32_t shift = membPos * MAX_MBA_PER_MEMBUF + mbaPos;
-                    PRDF_ASSERT( shift < MAX_MBA_PER_PROC );
+                    uint32_t mcsPos = getTargetPosition( *mcsIt );
+                    PRDF_ASSERT( mcsPos < MAX_MCS_PER_PROC );
 
-                    o_data.mbaMasks[procPos] |= 0x8000 >> shift;
+                    o_data.mcsMasks[procPos] |= 0x80 >> mcsPos;
+                }
+
+                // Iterate the connected MEMBUFs.
+                TargetHandleList membList = getConnected(*procIt, TYPE_MEMBUF );
+                for ( TargetHandleList::iterator membIt = membList.begin();
+                        membIt != membList.end(); ++membIt )
+                {
+                    uint32_t membPos = getTargetPosition(*membIt);
+                    PRDF_ASSERT( membPos < MAX_MEMB_PER_PROC );
+
+                    o_data.membMasks[procPos] |= 0x80 >> membPos;
+
+                    // Get the MEMBUF FSI address.
+                    getFsiLinkInfo( *membIt, fsiInfo );
+                    o_data.membFsiBaseAddr[procPos][membPos] = fsiInfo.baseAddr;
+
+                    // Iterate the connected MBAs.
+                    TargetHandleList mbaList = getConnected(*membIt, TYPE_MBA );
+                    for ( TargetHandleList::iterator mbaIt = mbaList.begin();
+                            mbaIt != mbaList.end(); ++mbaIt )
+                    {
+                        uint32_t mbaPos = getTargetPosition(*mbaIt);
+                        uint32_t shift = membPos * MAX_MBA_PER_MEMBUF + mbaPos;
+                        PRDF_ASSERT( shift < MAX_MBA_PER_PROC );
+
+                        o_data.mbaMasks[procPos] |= 0x8000 >> shift;
+                    }
                 }
             }
         }
@@ -595,22 +612,15 @@ errlHndl_t getHwConfig( HOMER_Data_t & o_data )
 
 //------------------------------------------------------------------------------
 
-errlHndl_t writeHomerFirData( uint8_t * i_hBuf, size_t i_hBufSize )
+errlHndl_t writeData( uint8_t * i_hBuf, size_t i_hBufSize,
+                      const HwInitialized_t i_curHw, HOMER_Data_t & o_data )
 {
-    #define FUNC "[PRDF::writeHomerFirData] "
+    #define FUNC "[PRDF::writeData] "
 
     errlHndl_t errl = NULL;
 
     do
     {
-        // Get the hardware configuration.
-        HOMER_Data_t data;
-        errl = getHwConfig( data );
-        if ( NULL != errl )
-        {
-            PRDF_ERR( FUNC "getHwConfig() failed" );
-            break;
-        }
 
         // Get the ultimate buffer size.
         size_t s[MAX_TRGTS][MAX_REGS];
@@ -618,28 +628,34 @@ errlHndl_t writeHomerFirData( uint8_t * i_hBuf, size_t i_hBufSize )
 
         size_t sz_hBuf = 0;
 
-        size_t sz_data = sizeof(data);       sz_hBuf += sz_data;
+        size_t sz_data = sizeof(o_data);       sz_hBuf += sz_data;
         s[PROC][GLBL]  = sizeof(proc_glbl);  sz_hBuf += s[PROC][GLBL];
         s[PROC][FIR]   = sizeof(proc_fir);   sz_hBuf += s[PROC][FIR];
         s[PROC][REG]   = sizeof(proc_reg);   sz_hBuf += s[PROC][REG];
         s[EX][GLBL]    = sizeof(ex_glbl);    sz_hBuf += s[EX][GLBL];
         s[EX][FIR]     = sizeof(ex_fir);     sz_hBuf += s[EX][FIR];
         s[EX][REG]     = sizeof(ex_reg);     sz_hBuf += s[EX][REG];
-        s[MCS][FIR]    = sizeof(mcs_fir);    sz_hBuf += s[MCS][FIR];
-        s[MCS][REG]    = sizeof(mcs_reg);    sz_hBuf += s[MCS][REG];
-        s[MEMB][GLBL]  = sizeof(memb_glbl);  sz_hBuf += s[MEMB][GLBL];
-        s[MEMB][FIR]   = sizeof(memb_fir);   sz_hBuf += s[MEMB][FIR];
-        s[MEMB][REG]   = sizeof(memb_reg);   sz_hBuf += s[MEMB][REG];
-        s[MBA][FIR]    = sizeof(mba_fir);    sz_hBuf += s[MBA][FIR];
-        s[MBA][REG]    = sizeof(mba_reg);    sz_hBuf += s[MBA][REG];
-        s[MBA][IDFIR]  = sizeof(mba_id_fir); sz_hBuf += s[MBA][IDFIR];
-        s[MBA][IDREG]  = sizeof(mba_id_reg); sz_hBuf += s[MBA][IDREG];
+
+        if ((ALL_PROC_MEM_MASTER_CORE == i_curHw) || (ALL_HARDWARE == i_curHw))
+        {
+            s[MCS][FIR]    = sizeof(mcs_fir);    sz_hBuf += s[MCS][FIR];
+            s[MCS][REG]    = sizeof(mcs_reg);    sz_hBuf += s[MCS][REG];
+            s[MEMB][GLBL]  = sizeof(memb_glbl);  sz_hBuf += s[MEMB][GLBL];
+            s[MEMB][FIR]   = sizeof(memb_fir);   sz_hBuf += s[MEMB][FIR];
+            s[MEMB][REG]   = sizeof(memb_reg);   sz_hBuf += s[MEMB][REG];
+            s[MBA][FIR]    = sizeof(mba_fir);    sz_hBuf += s[MBA][FIR];
+            s[MBA][REG]    = sizeof(mba_reg);    sz_hBuf += s[MBA][REG];
+            s[MBA][IDFIR]  = sizeof(mba_id_fir); sz_hBuf += s[MBA][IDFIR];
+            s[MBA][IDREG]  = sizeof(mba_id_reg); sz_hBuf += s[MBA][IDREG];
+        }
 
         // Verify data will fit in HOMER.
         if ( i_hBufSize < sz_hBuf )
         {
+
             PRDF_ERR( FUNC "Required data size %d is greater that available "
                       "HOMER data %d", sz_hBuf, i_hBufSize );
+
             /*@
              * @errortype
              * @reasoncode PRDF_INVALID_CONFIG
@@ -663,32 +679,89 @@ errlHndl_t writeHomerFirData( uint8_t * i_hBuf, size_t i_hBufSize )
 
         for ( uint32_t c = FIRST_TRGT; c < MAX_TRGTS; c++ )
         {
-            data.counts[c][GLBL]  = s[c][GLBL]  / u32;
-            data.counts[c][FIR]   = s[c][FIR]   / u32;
-            data.counts[c][REG]   = s[c][REG]   / u32;
-            data.counts[c][IDFIR] = s[c][IDFIR] / u64;
-            data.counts[c][IDREG] = s[c][IDREG] / u64;
+            o_data.counts[c][GLBL]  = s[c][GLBL]  / u32;
+            o_data.counts[c][FIR]   = s[c][FIR]   / u32;
+            o_data.counts[c][REG]   = s[c][REG]   / u32;
+            o_data.counts[c][IDFIR] = s[c][IDFIR] / u64;
+            o_data.counts[c][IDREG] = s[c][IDREG] / u64;
         }
 
         // Add everything to the buffer.
         uint32_t idx = 0;
 
-        memcpy( &i_hBuf[idx], &data,      sz_data       ); idx += sz_data;
+        memcpy( &i_hBuf[idx], &o_data,    sz_data       ); idx += sz_data;
         memcpy( &i_hBuf[idx], proc_glbl,  s[PROC][GLBL] ); idx += s[PROC][GLBL];
         memcpy( &i_hBuf[idx], proc_fir,   s[PROC][FIR]  ); idx += s[PROC][FIR];
         memcpy( &i_hBuf[idx], proc_reg,   s[PROC][REG]  ); idx += s[PROC][REG];
         memcpy( &i_hBuf[idx], ex_glbl,    s[EX][GLBL]   ); idx += s[EX][GLBL];
         memcpy( &i_hBuf[idx], ex_fir,     s[EX][FIR]    ); idx += s[EX][FIR];
         memcpy( &i_hBuf[idx], ex_reg,     s[EX][REG]    ); idx += s[EX][REG];
-        memcpy( &i_hBuf[idx], mcs_fir,    s[MCS][FIR]   ); idx += s[MCS][FIR];
-        memcpy( &i_hBuf[idx], mcs_reg,    s[MCS][REG]   ); idx += s[MCS][REG];
-        memcpy( &i_hBuf[idx], memb_glbl,  s[MEMB][GLBL] ); idx += s[MEMB][GLBL];
-        memcpy( &i_hBuf[idx], memb_fir,   s[MEMB][FIR]  ); idx += s[MEMB][FIR];
-        memcpy( &i_hBuf[idx], memb_reg,   s[MEMB][REG]  ); idx += s[MEMB][REG];
-        memcpy( &i_hBuf[idx], mba_fir,    s[MBA][FIR]   ); idx += s[MBA][FIR];
-        memcpy( &i_hBuf[idx], mba_reg,    s[MBA][REG]   ); idx += s[MBA][REG];
-        memcpy( &i_hBuf[idx], mba_id_fir, s[MBA][IDFIR] ); idx += s[MBA][IDFIR];
-        memcpy( &i_hBuf[idx], mba_id_reg, s[MBA][IDREG] ); idx += s[MBA][IDREG];
+
+        if ((ALL_PROC_MEM_MASTER_CORE == i_curHw) || (ALL_HARDWARE == i_curHw))
+        {
+            memcpy( &i_hBuf[idx], mcs_fir,    s[MCS][FIR]   );
+            idx += s[MCS][FIR];
+            memcpy( &i_hBuf[idx], mcs_reg,    s[MCS][REG]   );
+            idx += s[MCS][REG];
+            memcpy( &i_hBuf[idx], memb_glbl,  s[MEMB][GLBL] );
+            idx += s[MEMB][GLBL];
+            memcpy( &i_hBuf[idx], memb_fir,   s[MEMB][FIR]  );
+            idx += s[MEMB][FIR];
+            memcpy( &i_hBuf[idx], memb_reg,   s[MEMB][REG]  );
+            idx += s[MEMB][REG];
+            memcpy( &i_hBuf[idx], mba_fir,    s[MBA][FIR]   );
+            idx += s[MBA][FIR];
+            memcpy( &i_hBuf[idx], mba_reg,    s[MBA][REG]   );
+            idx += s[MBA][REG];
+            memcpy( &i_hBuf[idx], mba_id_fir, s[MBA][IDFIR] );
+            idx += s[MBA][IDFIR];
+            memcpy( &i_hBuf[idx], mba_id_reg, s[MBA][IDREG] );
+            idx += s[MBA][IDREG];
+        }
+
+    }while(0);
+
+    return errl;
+
+    #undef FUNC
+}
+
+//------------------------------------------------------------------------------
+
+errlHndl_t writeHomerFirData( uint8_t * i_hBuf, size_t i_hBufSize,
+                              const HwInitialized_t i_curHw )
+{
+    #define FUNC "[PRDF::writeHomerFirData] "
+
+    errlHndl_t errl = NULL;
+
+    do
+    {
+        HOMER_Data_t data = HOMER_getData(); // Initializes data
+
+        // Get the PNOR information
+        errl = getPnorInfo( data );
+        if ( NULL != errl )
+        {
+            PRDF_ERR( FUNC "getPnorInfo() failed" );
+            break;
+        }
+
+        // Get the hardware configuration
+        errl = getHwConfig( data, i_curHw );
+        if ( NULL != errl )
+        {
+            PRDF_ERR( FUNC "getHwConfig() failed" );
+            break;
+        }
+
+        // Write the HOMER data
+        errl = writeData( i_hBuf, i_hBufSize, i_curHw, data );
+        if ( NULL != errl )
+        {
+            PRDF_ERR( FUNC "writeData() failed" );
+            break;
+        }
 
     } while (0);
 
@@ -700,6 +773,7 @@ errlHndl_t writeHomerFirData( uint8_t * i_hBuf, size_t i_hBufSize )
     return errl;
 
     #undef FUNC
+
 }
 
 }; // end namespace PRDF

@@ -28,13 +28,22 @@
 namespace PRDF
 {
 
+// enum to determine what hardware is currently initialized
+enum HwInitialized_t
+{
+    MASTER_PROC_CORE,         //master processor and master core
+    ALL_PROC_MASTER_CORE,     //all processors and master core
+    ALL_PROC_MEM_MASTER_CORE, //all processors, all memory, and master core
+    ALL_HARDWARE              //all processors, all memory, and all cores
+};
+
 /** @brief  Writes register lists and hardware config in the HOMER data for
  *          the OCC to capture in the event of a system checkstop.
  *  @param  i_hBuf     SRAM pointer to the beginning of the HOMER data buffer.
  *  @param  i_hBufSize Total size of the HOMER data buffer.
  *  @return An error log on failure. NULL on success.
  */
-errlHndl_t writeHomerFirData( uint8_t * i_hBuf, size_t i_hBufSize );
-
+errlHndl_t writeHomerFirData( uint8_t * i_hBuf, size_t i_hBufSize,
+                              const HwInitialized_t i_curHw = ALL_HARDWARE );
 }; // end namespace PRDF
 

@@ -28,9 +28,11 @@
 #------------------------------------------------------------------------------
 PRD_USR_PATH = ${ROOTPATH}/src/usr/diag/prdf
 PRD_USR_TEST_PATH = ${ROOTPATH}/src/usr/diag/prdf/test
+PRD_INC_PATH = ${ROOTPATH}/src/include/usr/diag/prdf
 
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag/prdf
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag/prdf/common
+EXTRAINCDIR += ${PRD_INC_PATH}
+EXTRAINCDIR += ${PRD_INC_PATH}/common
+
 EXTRAINCDIR += ${PRD_USR_PATH}
 EXTRAINCDIR += ${PRD_USR_PATH}/common
 EXTRAINCDIR += ${PRD_USR_PATH}/common/plugins
@@ -45,6 +47,7 @@ EXTRAINCDIR += ${PRD_USR_PATH}/common/plat/pegasus
 EXTRAINCDIR += ${PRD_USR_PATH}/common/mnfgtools
 EXTRAINCDIR += ${PRD_USR_PATH}/mnfgtools
 EXTRAINCDIR += ${PRD_USR_PATH}/framework/service
+EXTRAINCDIR += ${PRD_USR_PATH}/occ_firdata
 EXTRAINCDIR += ${PRD_USR_PATH}/test
 
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer

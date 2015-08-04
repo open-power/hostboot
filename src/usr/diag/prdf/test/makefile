@@ -33,13 +33,20 @@ include prdf_hb_common_test.mk
 #------------------------------------------------------------------------------
 # paths
 #------------------------------------------------------------------------------
-PRD_USR_PATH = ${ROOTPATH}/src/usr/diag/prdf
+PRD_SRC_PATH = ${ROOTPATH}/src/usr/diag/prdf
+
+VPATH += ${PRD_SRC_PATH}/occ_firdata
 
 #------------------------------------------------------------------------------
 # objects
 #------------------------------------------------------------------------------
 OBJS += prdfsimMfgSync.o
 OBJS += prdfsimFspSyncSvc.o
+
+ifneq (${HOSTBOOT_RUNTIME},1)
+OBJS += prdfWriteHomerFirData.o
+TESTS += prdfTest_WriteHomerFir.H
+endif
 
 TESTS += prdfTest_MfgSync.H
 
