@@ -1260,8 +1260,29 @@ namespace SBE
 
         do{
 
+             TARGETING::Target * l_target=i_target;
+
+#if defined(CONFIG_SBE_UPDATE_INDEPENDENT) || \
+    defined(CONFIG_SBE_UPDATE_SIMULTANEOUS)
+
+            // Get the Master Proc Chip Target for comparisons later
+            TARGETING::Target* masterProcChipTargetHandle = NULL;
+            TargetService& tS = targetService();
+            err = tS.queryMasterProcChipTargetHandle(
+                                                masterProcChipTargetHandle);
+            if ( i_target != masterProcChipTargetHandle )
+            {
+                l_target=masterProcChipTargetHandle;
+                TRACFCOMP( g_trac_sbe, INFO_MRK"getSbeBootSeeprom() "
+                           "using master proc to read SBE_VITAL_REG: "
+                           "i_target=0x%.8x, target=0x%.8x ",
+                           TARGETING::get_huid(i_target),
+                           TARGETING::get_huid(l_target));
+
+            }
+#endif
             size_t op_size = sizeof(scomData);
-            err = deviceRead( i_target,
+            err = deviceRead( l_target,
                               &scomData,
                               op_size,
                               DEVICE_SCOM_ADDRESS(SBE_VITAL_REG_0x0005001C) );
@@ -1271,7 +1292,7 @@ namespace SBE
                            "reading SBE VITAL REG (0x%.8X) from Target :"
                            "HUID=0x%.8X",
                            SBE_VITAL_REG_0x0005001C,
-                           TARGETING::get_huid(i_target));
+                           TARGETING::get_huid(l_target));
                 break;
             }
             if(scomData & SBE_BOOT_SELECT_MASK)
