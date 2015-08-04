@@ -120,7 +120,7 @@ errlHndl_t restrictEXunits(
  *  Error logs will also be created for each hardware module that is not
  *  running.
  *
- * @param[in] i_node  node target to restrict hw check
+ * @param[in] i_nodeOrSys Level of HW check node or system
  * @param[out] o_bootable Indicate whether the system is
  *             is bootable with current configuration.
  *             if o_bootable is not NULL an error for
@@ -129,7 +129,7 @@ errlHndl_t restrictEXunits(
  * @return error log handle
  */
 errlHndl_t checkMinimumHardware(
-    const TARGETING::ConstTargetHandle_t i_node = NULL,
+    const TARGETING::ConstTargetHandle_t i_nodeOrSys = NULL,
     bool *o_bootable = NULL);
 
 /**

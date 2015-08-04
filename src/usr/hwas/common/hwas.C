@@ -748,7 +748,7 @@ void checkCriticalResources(uint32_t & io_commonPlid,
 
 
 
-errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node,
+errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys,
         bool *o_bootable)
 {
     errlHndl_t l_errl = NULL;
@@ -776,7 +776,7 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node,
 
         // top 'starting' point - use first node if no i_node given (hostboot)
         Target *pTop;
-        if (i_node == NULL)
+        if (i_nodeOrSys == NULL)
         {
             Target *pSys;
             targetService().getTopLevelTarget(pSys);
@@ -827,19 +827,29 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node,
             // top level has at least 1 node - and it's our node.
             pTop = l_nodes[0];
 
-            HWAS_INF("checkMinimumHardware: i_node = NULL, using %.8X",
+            HWAS_INF("checkMinimumHardware: i_nodeOrSys = NULL, using %.8X",
                     get_huid(pTop));
         }
         else
         {
-            pTop = const_cast<Target *>(i_node);
-            HWAS_INF("checkMinimumHardware: i_node %.8X",
+            pTop = const_cast<Target *>(i_nodeOrSys);
+            HWAS_INF("checkMinimumHardware: i_nodeOrSys %.8X",
                     get_huid(pTop));
         }
 
         // check for functional Master Proc on this node
         Target* l_pMasterProc = NULL;
-        targetService().queryMasterProcChipTargetHandle(l_pMasterProc, pTop);
+
+        //Get master proc at system level or node level based on target type
+        if(pTop->getAttr<ATTR_TYPE>() == TYPE_SYS)
+        {
+            targetService().queryMasterProcChipTargetHandle(l_pMasterProc);
+        }
+        else
+        {
+            targetService().queryMasterProcChipTargetHandle(l_pMasterProc,
+                                                          pTop);
+        }
 
         if ((l_pMasterProc == NULL) || (!l_functional(l_pMasterProc)))
         {
@@ -1111,7 +1121,7 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_node,
         //  if there is an issue, create and commit an error, and tie it to the
         //  the rest of them with the common plid.
         HWAS::checkCriticalResources(l_commonPlid, pTop);
-        platCheckMinimumHardware(l_commonPlid, i_node, o_bootable);
+        platCheckMinimumHardware(l_commonPlid, i_nodeOrSys, o_bootable);
     }
     while (0);
 

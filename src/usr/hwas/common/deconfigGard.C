@@ -444,7 +444,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
         }
 
         bool l_isSystemBootable = false;
-        l_pErr = checkMinimumHardware(NULL,&l_isSystemBootable);
+        l_pErr = checkMinimumHardware(pSys,&l_isSystemBootable);
         if (l_pErr)
         {
             HWAS_ERR("checkMinimumHardware returned an error");
@@ -525,7 +525,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                 break;
             }
 
-            l_pErr = checkMinimumHardware(NULL,&l_isSystemBootable);
+            l_pErr = checkMinimumHardware(pSys,&l_isSystemBootable);
             if (l_pErr)
             {
                 HWAS_ERR("checkMinimumHardware returned an error");
