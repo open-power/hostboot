@@ -547,6 +547,15 @@ private:
      */
     bool _updateErrlListIter(ErrlListItr_t & io_it);
 
+    /**
+     * @brief helper function to set the 'iv_skipShowingLog' flag of an error
+     * log. this needs to be called when we first get an errl object before we
+     * try to handle it. ie, when it's going to be committed, AND when it's
+     * been unflattened out of PNOR
+     *
+     * @param[in/out]   io_err - errorlog that's being checked and updatd
+     */
+    void setErrlSkipFlag(errlHndl_t io_err);
 };
 
 } // End namespace

@@ -1519,12 +1519,12 @@ uint64_t ErrlEntry::unflatten( const void * i_buffer,  uint64_t i_len )
     uint64_t bytes_used = 0;
     uint64_t rc = 0;
 
-    TRACDCOMP(g_trac_errl, INFO_MRK"Unflatten private section...");
+    TRACDCOMP(g_trac_errl, INFO_MRK"Unflatten Private section...");
     bytes_used = iv_Private.unflatten(l_buf);
     consumed    += bytes_used;
     l_buf       += bytes_used;
 
-    TRACDCOMP(g_trac_errl, INFO_MRK"Unflatten User header section...");
+    TRACDCOMP(g_trac_errl, INFO_MRK"Unflatten User Header section...");
     bytes_used = iv_User.unflatten(l_buf);
     consumed    += bytes_used;
     l_buf       += bytes_used;
@@ -1538,7 +1538,11 @@ uint64_t ErrlEntry::unflatten( const void * i_buffer,  uint64_t i_len )
     iv_btAddrs.clear();
     removeBackTrace();
 
-    while(consumed < i_len)
+    // loop thru the User Data sections (after already doing 3: Private, User
+    // Header, SRC sections) while there's still data to process
+    for (int32_t l_sc = 3;
+            (l_sc < iv_Private.iv_sctns) && (consumed < i_len);
+            l_sc++)
     {
         TRACDCOMP(g_trac_errl, INFO_MRK"Unflatten User data section...");
         const ERRORLOG::pelSectionHeader_t * p =
@@ -1561,6 +1565,13 @@ uint64_t ErrlEntry::unflatten( const void * i_buffer,  uint64_t i_len )
         l_buf       += p->len;
 
         iv_SectionVector.push_back(ud);
+    }
+
+    // if we didn't get as many User Detail sections as the Private header says
+    // we should have, then we have an error
+    if ((iv_SectionVector.size() + 3) != iv_Private.iv_sctns)
+    {
+        rc = -1;
     }
 
     return rc;

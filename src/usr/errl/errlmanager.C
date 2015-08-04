@@ -103,6 +103,7 @@ bool compareEidToPlid(const uint32_t i_plid,
     return (i_pair.first->eid() == i_plid);
 }
 
+
 class AtLoadFunctions
 {
     public:
@@ -436,53 +437,7 @@ void ErrlManager::errlogMsgHndlr ()
                     errlHndl_t l_err = (errlHndl_t) theMsg->extra_data;
 
                     // Decide if we need to skip the error log
-                    // Note: iv_skipShowingLog is set to True by default
-                    //0 = Prevent INFORMATIONAL/RECOVERED error logs from being processed.
-                    //1 = Send only INFORMATIONAL error logs.
-                    //2 = Send only RECOVERED error logs.
-                    //3 = Allow all hidden error logs to be processed.
-
-                    //Check severity
-                    switch (l_err->sev())
-                    {
-                        case ERRORLOG::ERRL_SEV_INFORMATIONAL:
-
-                            // check if we are allowing info logs through.
-                            if((iv_hiddenErrLogsEnable ==
-                                TARGETING::
-                                    HIDDEN_ERRLOGS_ENABLE_ALLOW_INFORMATIONAL)||
-                               (iv_hiddenErrLogsEnable ==
-                                TARGETING::
-                                    HIDDEN_ERRLOGS_ENABLE_ALLOW_ALL_LOGS))
-                            {
-                                l_err->setSkipShowingLog(false);
-                            }
-                            break;
-
-                        case ERRORLOG::ERRL_SEV_RECOVERED:
-
-                            // check if we are allowing recovered logs through.
-                            if(((iv_hiddenErrLogsEnable ==
-                               TARGETING::
-                                    HIDDEN_ERRLOGS_ENABLE_ALLOW_RECOVERED) ||
-                               (iv_hiddenErrLogsEnable ==
-                                TARGETING::
-                                    HIDDEN_ERRLOGS_ENABLE_ALLOW_ALL_LOGS)) &&
-                                !iv_isSpBaseServices)
-                            {
-                                //Recovered error logs that are encountered
-                                //before targeting and initservice are loaded,
-                                //will still be queued for sending to PNOR/IPMI
-                                l_err->setSkipShowingLog(false);
-                            }
-                            break;
-
-                        default:
-
-                            // For any error log that is not INFORMATIONAL
-                            // or RECOVERED, we want to show the log
-                            l_err->setSkipShowingLog(false);
-                    }
+                    setErrlSkipFlag(l_err);
 
                     // Ask the ErrlEntry to assign commit component, commit time
                     l_err->commit( (compId_t) theMsg->data[0] );
@@ -1094,6 +1049,13 @@ void ErrlManager::setupPnorInfo()
                     }
                     else
                     {
+                        // Decide if we need to skip the error log
+                        setErrlSkipFlag(err);
+                        if(err->getSkipShowingLog())
+                        {
+                            // skip it, go to the next one
+                            continue;
+                        }
                         if (iv_isIpmiEnabled)
                         {
                             // convert to SEL/eSEL and send to BMC over IPMI
@@ -1107,14 +1069,18 @@ void ErrlManager::setupPnorInfo()
                                 i, l_id);
                             // Pair with IPMI flag to add to the errlList
                             // so that it'll get sent down when IPMI is up
+#ifdef CONFIG_CONSOLE_OUTPUT_ERRORDISPLAY
+                            ErrlFlagPair_t l_pair(err, IPMI_FLAG | ERRLDISP_FLAG);
+#else
                             ErrlFlagPair_t l_pair(err, IPMI_FLAG);
+#endif
                             iv_errlList.push_back(l_pair);
                         }
                     }
 #else
                     // for FSP system, this shouldn't ever happen.
-#endif
                     setACKInFlattened(i);
+#endif
                 } // not ACKed
             } // not empty
         } // for
@@ -1374,5 +1340,56 @@ bool ErrlManager::_updateErrlListIter(ErrlListItr_t & io_it)
     }
     return l_removed;
 }
+
+void ErrlManager::setErrlSkipFlag(errlHndl_t io_err)
+{
+    // Note: iv_skipShowingLog is set to True by default
+    //0 = Prevent INFORMATIONAL/RECOVERED error logs from being processed.
+    //1 = Send only INFORMATIONAL error logs.
+    //2 = Send only RECOVERED error logs.
+    //3 = Allow all hidden error logs to be processed.
+
+    //Check severity
+    switch (io_err->sev())
+    {
+        case ERRORLOG::ERRL_SEV_INFORMATIONAL:
+
+            // check if we are allowing info logs through.
+            if((iv_hiddenErrLogsEnable ==
+                TARGETING::
+                    HIDDEN_ERRLOGS_ENABLE_ALLOW_INFORMATIONAL)||
+               (iv_hiddenErrLogsEnable ==
+                TARGETING::
+                    HIDDEN_ERRLOGS_ENABLE_ALLOW_ALL_LOGS))
+            {
+                io_err->setSkipShowingLog(false);
+            }
+            break;
+
+        case ERRORLOG::ERRL_SEV_RECOVERED:
+
+            // check if we are allowing recovered logs through.
+            if(((iv_hiddenErrLogsEnable ==
+               TARGETING::
+                    HIDDEN_ERRLOGS_ENABLE_ALLOW_RECOVERED) ||
+               (iv_hiddenErrLogsEnable ==
+                TARGETING::
+                    HIDDEN_ERRLOGS_ENABLE_ALLOW_ALL_LOGS)) &&
+                !iv_isSpBaseServices)
+            {
+                //Recovered error logs that are encountered
+                //before targeting and initservice are loaded,
+                //will still be queued for sending to PNOR/IPMI
+                io_err->setSkipShowingLog(false);
+            }
+            break;
+
+        default:
+
+            // For any error log that is not INFORMATIONAL
+            // or RECOVERED, we want to show the log
+            io_err->setSkipShowingLog(false);
+    }
+} // setErrlSkipFlag
 
 } // End namespace
