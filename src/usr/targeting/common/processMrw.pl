@@ -77,13 +77,12 @@ my $xmldir = dirname($serverwiz_file);
 $targetObj->loadXML($serverwiz_file);
 
 
-
-my $str=sprintf(" %30s | %10s | %6s | %4s | %4s | %4s | %4s | %s\n",
-           "Sensor Name","FRU Name","Ent ID","Type","ID","Inst","FRU","Target");
+my $str=sprintf(" %30s | %10s | %6s | %4s | %4s | %4s | %4s | %10s | %s\n",
+           "Sensor Name","FRU Name","Ent ID","Type","ID","Inst","FRU","HUID","Target");
 $targetObj->writeReport($str);
-$str=sprintf(" %30s | %10s | %6s | %4s | %4s | %4s | %4s | %s\n",
+$str=sprintf(" %30s | %10s | %6s | %4s | %4s | %4s | %4s | %10s | %s\n",
                    "------------------------------","----------",
-                   "------","----","----","----","----","----------");
+                   "------","----","----","----","----","----------","----------");
 $targetObj->writeReport($str);
 #--------------------------------------------------
 ## loop through all targets and do stuff
@@ -202,6 +201,11 @@ sub processIpmiSensors {
     {
         $fru_id=$targetObj->getAttribute($target,"FRU_ID");
     }
+    my $huid="";
+    if (!$targetObj->isBadAttribute($target,"HUID"))
+    {
+        $huid=$targetObj->getAttribute($target,"HUID");
+    }
     my @sensors;
 
     foreach my $child (@{$targetObj->getTargetChildren($target)})
@@ -235,9 +239,9 @@ sub processIpmiSensors {
                 $sensor_id_str = sprintf("0x%02X",oct($sensor_id));
             }
             my $str=sprintf(
-                    " %30s | %10s |  0x%02X  | 0x%02X | %4s | %4d | %4d | %s\n",
+                    " %30s | %10s |  0x%02X  | 0x%02X | %4s | %4d | %4d | %10s | %s\n",
                     $sensor_name,$name,oct($entity_id),oct($sensor_type),
-                    $sensor_id_str,$instance,$fru_id,$target);
+                    $sensor_id_str,$instance,$fru_id,$huid,$target);
             $targetObj->writeReport($str);
         }
     }
@@ -302,9 +306,9 @@ sub processApss {
                 $channel_gains[$channel] = $channel_gain;
             }
             my $str=sprintf(
-                    " %30s | %10s |  0x%02X  | 0x%02X | %4s | %4d | %4d | %s\n",
+                    " %30s | %10s |  0x%02X  | 0x%02X | %4s | %4d | %4d | %10s | %s\n",
                     $name,"",oct($entity_id),oct($sensor_type),
-                    $sensor_id_str,$channel,"",$systemTarget);
+                    $sensor_id_str,$channel,"","",$systemTarget);
             $targetObj->writeReport($str);
         }
     }
