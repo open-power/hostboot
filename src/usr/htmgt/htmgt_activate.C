@@ -232,7 +232,7 @@ namespace HTMGT
             }
             else
             {
-                //The OCC knows it isn't activated by getting a value of 0.
+                //The OCC knows it isn't active by getting a value of 0.
                 limit = 0;
             }
 
@@ -246,6 +246,11 @@ namespace HTMGT
 
                 TMGT_INF("sendOccUserPowerCap:  Sending power cap %d to OCC %d",
                          limit, occ->getInstance());
+                if (limit > 0)
+                {
+                    TMGT_CONSOLE("User power limit has been set to %dW",
+                                 limit);
+                }
 
                 OccCmd cmd(occ, OCC_CMD_SET_POWER_CAP, 2, data);
 

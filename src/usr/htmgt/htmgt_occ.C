@@ -385,6 +385,21 @@ namespace HTMGT
                                   ERRORLOG::ERRL_SEV_UNRECOVERABLE);
                     }
                 }
+
+                if (NULL != iv_occMaster)
+                {
+                    // update master occsPresent bit for each slave OCC
+                    for(occList_t::const_iterator occ = iv_occArray.begin();
+                        occ != iv_occArray.end();
+                        ++occ)
+                    {
+                        if((*occ) != iv_occMaster)
+                        {
+                            iv_occMaster->
+                                updateOccPresentBits((*occ)->getPresentBits());
+                        }
+                    }
+                }
             } // for each processor
         }
         else
@@ -684,9 +699,9 @@ namespace HTMGT
                 }
             }
 
-            if(false == _occNeedsReset())
+            if (false == _occFailed())
             {
-                // No occ target needs reset - increment system reset count
+                // No OCC has been marked failed, increment system reset count
                 ++iv_resetCount;
 
                 TMGT_INF("resetOCCs: Incrementing system OCC reset count to %d",
@@ -696,8 +711,8 @@ namespace HTMGT
                 {
                     atThreshold = true;
                 }
-
             }
+            // else the failed OCC reset count will be incremented automatically
 
             uint64_t retryCount = OCC_RESET_COUNT_THRESHOLD;
             while(retryCount)
@@ -875,14 +890,6 @@ namespace HTMGT
                     TMGT_ERR("waitForOccCheckpoint OCC%d still NOT ready!",
                              (*pOcc)->getInstance());
                 }
-
-                if ((OCC_ROLE_MASTER != (*pOcc)->getRole()) &&
-                    (NULL != iv_occMaster))
-                {
-                    // update master occsPresent bit for each slave OCC
-                    iv_occMaster->
-                        updateOccPresentBits((*pOcc)->getPresentBits());
-                }
             }
         }
 #endif
@@ -917,6 +924,26 @@ namespace HTMGT
         }
 
         return needsReset;
+    }
+
+
+    // Return true if any OCC has been marked as failed
+    bool OccManager::_occFailed()
+    {
+        bool failed = false;
+
+        for (std::vector<Occ*>::iterator pOcc = iv_occArray.begin();
+             pOcc < iv_occArray.end();
+             pOcc++)
+        {
+            if ((*pOcc)->iv_failed)
+            {
+                failed = true;
+                break;
+            }
+        }
+
+        return failed;
     }
 
 
@@ -977,6 +1004,11 @@ namespace HTMGT
     bool OccManager::occNeedsReset()
     {
         return Singleton<OccManager>::instance()._occNeedsReset();
+    }
+
+    bool OccManager::occFailed()
+    {
+        return Singleton<OccManager>::instance()._occFailed();
     }
 
 } // end namespace

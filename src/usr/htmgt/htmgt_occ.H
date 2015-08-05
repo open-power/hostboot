@@ -507,6 +507,14 @@ namespace HTMGT
             void updateForSafeMode(errlHndl_t & io_err);
 
 
+            /**
+             * @brief Check if any OCC has failed
+             *
+             * @return true if any OCC has been marked as failed
+             */
+            static bool occFailed();
+
+
         private:
 
             typedef std::vector<Occ*> occList_t;
@@ -588,6 +596,9 @@ namespace HTMGT
 
             /** See occNeedsReset() above */
             bool _occNeedsReset();
+
+            /** See occFailed() above */
+            bool _occFailed();
     };
 
     typedef Singleton<OccManager> occMgr;
