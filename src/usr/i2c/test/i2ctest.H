@@ -1029,6 +1029,68 @@ class I2CTest: public CxxTest::TestSuite
             }
         }
 
+
+        /**
+         * @brief Verify the functions that create the userdata values
+         */
+        void test_setI2CUserData( void )
+        {
+
+            int64_t fails = 0, num_ops = 0;
+
+            TRACFCOMP( g_trac_i2c,
+                       "test_setI2CUserData - Start" );
+
+
+            // Test userdata_1
+            uint64_t userdata_1 = 0x0;
+            uint64_t userdata_1_result = 0xABCDEFABFFFFFFFF;
+
+            I2C::status_reg_t status_reg;
+            status_reg.value = 0xABCDEFAB55555555;
+
+            userdata_1 = I2C::I2C_SET_USER_DATA_1 (
+                             status_reg,
+                             MASTER_PROCESSOR_CHIP_TARGET_SENTINEL);
+
+            num_ops++;
+            if ( userdata_1 != userdata_1_result )
+            {
+                TS_FAIL( "testI2CUserData - Fail in generating userdata)1: "
+                         "0x%X - should be 0x%X",
+                         userdata_1, userdata_1_result );
+                fails++;
+            }
+
+            // Test userdata_2
+            uint64_t userdata_2 = 0x0;
+            uint64_t userdata_2_result = 0x34679A5D1234FEDC;
+
+            I2C::misc_args_t args;
+            args.engine = 0x34;
+            args.port = 0x67;
+            args.devAddr = 0x1234123412349A5D;
+            args.bus_speed = 0xFFFFFFFFFFFF1234;
+            args.bit_rate_divisor = 0xFEDC;
+
+            userdata_2 = I2C::I2C_SET_USER_DATA_2 ( args );
+
+            num_ops++;
+            if ( userdata_2 != userdata_2_result )
+            {
+                TS_FAIL( "testI2CUserData - Fail in generating userdata_2: "
+                         "0x%X - should be 0x%X",
+                         userdata_2, userdata_2_result );
+                fails++;
+            }
+
+           TRACFCOMP( g_trac_i2c,
+                       "testI2CUserData - End: %d/%d fails",
+                       fails, num_ops );
+
+        }
+
+
 };
 
 #endif

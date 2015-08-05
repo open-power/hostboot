@@ -391,6 +391,19 @@ union residual_length_reg_t
 };
 
 
+/**
+ * @brief Utility Function to capture error log user data consisting of
+          the I2C Master Status Register and the I2C Master Target HUID
+ */
+uint64_t I2C_SET_USER_DATA_1 ( status_reg_t status_reg,
+                               TARGETING::Target * tgt);
+
+/**
+ * @brief Utility Function to capture error log user data consisting of
+          the I2C variables relating to the I2C Master
+ */
+uint64_t I2C_SET_USER_DATA_2 ( misc_args_t args);
+
 
 /**
 *

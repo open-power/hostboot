@@ -945,26 +945,27 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
                     TRACFCOMP( g_trac_i2c,
                                ERR_MRK"i2cRead() - Timed out waiting for data in FIFO!" );
 
-                    uint64_t userdata2 = i_args.port;
-                    userdata2 = (userdata2 << 16) | i_args.engine;
-                    userdata2 = (userdata2 << 16) | i_args.devAddr;
-
                     /*@
                      * @errortype
                      * @reasoncode       I2C_FIFO_TIMEOUT
                      * @severity         ERRL_SEV_UNRECOVERABLE
                      * @moduleid         I2C_READ
-                     * @userdata1        Status Register Value
-                     * @userdata2[0:31]  Master Port
-                     * @userdata2[32:47] Master Engine
-                     * @userdata2[48:63] Slave Device Address
+                     * @userdata1[0:31]  Status Register Value
+                     * @userdata1[32:63] Master Target
+                     * @userdata2[0:7]   Master Engine
+                     * @userdata2[8:15]  Master Port
+                     * @userdata2[16:31] Slave Device Address
+                     * @userdata2[32:47] Bus Speed
+                     * @userdata2[48:63] Bit Rate Devisor
                      * @devdesc          Timed out waiting for data in FIFO to read
                      */
                     err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                    I2C_READ,
                                                    I2C_FIFO_TIMEOUT,
-                                                   status.value,
-                                                   userdata2 );
+                                                   I2C_SET_USER_DATA_1(
+                                                       status,
+                                                       i_target),
+                                                   I2C_SET_USER_DATA_2(i_args));
 
                     // For now limited in what we can call out:
                     // Could be an issue with Processor or its bus
@@ -1291,7 +1292,6 @@ errlHndl_t i2cWaitForCmdComp ( TARGETING::Target * i_target,
                                misc_args_t & i_args)
 {
     errlHndl_t err = NULL;
-    uint64_t engine = i_args.engine;
 
     TRACDCOMP( g_trac_i2c,
                ENTER_MRK"i2cWaitForCmdComp()" );
@@ -1330,18 +1330,25 @@ errlHndl_t i2cWaitForCmdComp ( TARGETING::Target * i_target,
 
                 /*@
                  * @errortype
-                 * @reasoncode     I2C_CMD_COMP_TIMEOUT
-                 * @severity       ERRL_SEV_UNRECOVERABLE
-                 * @moduleid       I2C_WAIT_FOR_CMD_COMP
-                 * @userdata1      Status Register Value
-                 * @userdata2      Master Engine
-                 * @devdesc        Timed out waiting for command complete.
+                 * @reasoncode       I2C_CMD_COMP_TIMEOUT
+                 * @severity         ERRL_SEV_UNRECOVERABLE
+                 * @moduleid         I2C_WAIT_FOR_CMD_COMP
+                 * @userdata1[0:31]  Status Register Value
+                 * @userdata1[32:63] Master Target
+                 * @userdata2[0:7]   Master Engine
+                 * @userdata2[8:15]  Master Port
+                 * @userdata2[16:31] Slave Device Address
+                 * @userdata2[32:47] Bus Speed
+                 * @userdata2[48:63] Bit Rate Devisor
+                 * @devdesc          Timed out waiting for command complete.
                  */
                 err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                I2C_WAIT_FOR_CMD_COMP,
                                                I2C_CMD_COMP_TIMEOUT,
-                                               status.value,
-                                               engine );
+                                               I2C_SET_USER_DATA_1(
+                                                   status,
+                                                   i_target),
+                                               I2C_SET_USER_DATA_2(i_args));
 
 
                 // For now limited in what we can call out:
@@ -1527,30 +1534,19 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
             TRACFCOMP( g_trac_i2c,
                        ERR_MRK"i2cCheckForErrors() - Error(s) found" );
 
-            // Combine the status registers
-            uint64_t userdata1 = (0xFFFFFFFF00000000 & i_statusVal.value);
-            userdata1 |= ( 0xFFFFFFFF00000000 & intRegVal)  >> 32;
-
-
-            // Combine multiple input arguments
-            uint64_t userdata2 = 0;
-            userdata2 = static_cast<uint64_t>(i_args.engine) << 56;
-            userdata2 |= static_cast<uint64_t>(i_args.port) << 48;
-            userdata2 |= static_cast<uint64_t>(i_args.bit_rate_divisor) << 32;
-            userdata2 |= TARGETING::get_huid(i_target);
 
             /*@
              * @errortype
              * @reasoncode       I2C_HW_ERROR_FOUND
              * @severity         ERRL_SEV_UNRECOVERABLE
              * @moduleid         I2C_CHECK_FOR_ERRORS
-             * @userdata1[0:31   Status Register Value
-             * @userdata1[32:63] Interrupt Register Value (only valid in
-             *                   Interrupt case)
-             * @userdata2[0:7]   I2C Master Engine
-             * @userdata2[8:15]  I2C Master Port
-             * @userdata2[16:31] I2C Mode Register Bit Rate Divisor
-             * @userdata2[32:63] I2C Master Target HUID
+             * @userdata1[0:31]  Status Register Value
+             * @userdata1[32:63] Master Target
+             * @userdata2[0:7]   Master Engine
+             * @userdata2[8:15]  Master Port
+             * @userdata2[16:31] Slave Device Address
+             * @userdata2[32:47] Bus Speed
+             * @userdata2[48:63] Bit Rate Devisor
              * @devdesc          Error was found in I2C status register.
              *                   Check userdata to determine what the error was.
              * @custdesc       A problem occurred during the IPL of the system:
@@ -1559,8 +1555,10 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            I2C_CHECK_FOR_ERRORS,
                                            I2C_HW_ERROR_FOUND,
-                                           userdata1,
-                                           userdata2);
+                                           I2C_SET_USER_DATA_1(
+                                               i_statusVal,
+                                               i_target),
+                                           I2C_SET_USER_DATA_2(i_args));
 
             // For now limited in what we can call out:
             // Could be an issue with Processor or its bus
@@ -1587,11 +1585,16 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
 
             /*@
              * @errortype
-             * @reasoncode     I2C_NACK_ONLY_FOUND
-             * @severity       ERRL_SEV_UNRECOVERABLE
-             * @moduleid       I2C_CHECK_FOR_ERRORS
-             * @userdata1      Status Register Value
-             * @userdata2      Interrupt Register Value
+             * @reasoncode       I2C_NACK_ONLY_FOUND
+             * @severity         ERRL_SEV_UNRECOVERABLE
+             * @moduleid         I2C_CHECK_FOR_ERRORS
+             * @userdata1[0:31]  Status Register Value
+             * @userdata1[32:63] Master Target
+             * @userdata2[0:7]   Master Engine
+             * @userdata2[8:15]  Master Port
+             * @userdata2[16:31] Slave Device Address
+             * @userdata2[32:47] Bus Speed
+             * @userdata2[48:63] Bit Rate Devisor
              * @devdesc        a NACK Error was found in the I2C status
              *                 register.
              * @custdesc       A problem occurred during the IPL of the system:
@@ -1601,8 +1604,10 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            I2C_CHECK_FOR_ERRORS,
                                            I2C_NACK_ONLY_FOUND,
-                                           i_statusVal.value,
-                                           intRegVal );
+                                           I2C_SET_USER_DATA_1(
+                                               i_statusVal,
+                                               i_target),
+                                           I2C_SET_USER_DATA_2(i_args));
 
             // For now limited in what we can call out:
             // Could be an issue with Processor or its bus
@@ -1628,11 +1633,16 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
 
             /*@
              * @errortype
-             * @reasoncode     I2C_ARBITRATION_LOST_ONLY_FOUND
-             * @severity       ERRL_SEV_UNRECOVERABLE
-             * @moduleid       I2C_CHECK_FOR_ERRORS
-             * @userdata1      Status Register Value
-             * @userdata2      Interrupt Register Value
+             * @reasoncode       I2C_ARBITRATION_LOST_ONLY_FOUND
+             * @severity         ERRL_SEV_UNRECOVERABLE
+             * @moduleid         I2C_CHECK_FOR_ERRORS
+             * @userdata1[0:31]  Status Register Value
+             * @userdata1[32:63] Master Target
+             * @userdata2[0:7]   Master Engine
+             * @userdata2[8:15]  Master Port
+             * @userdata2[16:31] Slave Device Address
+             * @userdata2[32:47] Bus Speed
+             * @userdata2[48:63] Bit Rate Devisor
              * @devdesc        Bus Arbitration Lost Error was found in
              *                 the I2C status register.
              * @custdesc       A problem occurred during the IPL of the system:
@@ -1642,8 +1652,10 @@ errlHndl_t i2cCheckForErrors ( TARGETING::Target * i_target,
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            I2C_CHECK_FOR_ERRORS,
                                            I2C_ARBITRATION_LOST_ONLY_FOUND,
-                                           i_statusVal.value,
-                                           intRegVal );
+                                           I2C_SET_USER_DATA_1(
+                                               i_statusVal,
+                                               i_target),
+                                           I2C_SET_USER_DATA_2(i_args));
 
             // For now limited in what we can call out:
             // Could be an issue with Processor or its bus
@@ -1734,18 +1746,25 @@ errlHndl_t i2cWaitForFifoSpace ( TARGETING::Target * i_target,
 
                 /*@
                  * @errortype
-                 * @reasoncode     I2C_FIFO_TIMEOUT
-                 * @severity       ERRL_SEV_UNRECOVERABLE
-                 * @moduleid       I2C_WRITE
-                 * @userdata1      Status Register Value
-                 * @userdata2      <UNUSED>
+                 * @reasoncode       I2C_FIFO_TIMEOUT
+                 * @severity         ERRL_SEV_UNRECOVERABLE
+                 * @moduleid         I2C_WRITE
+                 * @userdata1[0:31]  Status Register Value
+                 * @userdata1[32:63] Master Target
+                 * @userdata2[0:7]   Master Engine
+                 * @userdata2[8:15]  Master Port
+                 * @userdata2[16:31] Slave Device Address
+                 * @userdata2[32:47] Bus Speed
+                 * @userdata2[48:63] Bit Rate Devisor
                  * @devdesc        Timed out waiting for space to write into FIFO.
                  */
                 err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                I2C_WRITE,
                                                I2C_FIFO_TIMEOUT,
-                                               status.value,
-                                               0x0 );
+                                               I2C_SET_USER_DATA_1(
+                                                   status,
+                                                   i_target),
+                                               I2C_SET_USER_DATA_2(i_args));
 
                 // For now limited in what we can call out:
                 // Could be an issue with Processor or its bus
@@ -3160,5 +3179,31 @@ void getMasterInfo( const TARGETING::Target* i_chip,
         o_info.push_back(info);
     }
 }
+
+/**
+ * @brief Utility Function to capture error log user data consisting of
+ *        the I2C Master Status Register and the I2C Master Target HUID
+ */
+uint64_t I2C_SET_USER_DATA_1 ( status_reg_t status_reg,
+                               TARGETING::Target * tgt)
+{
+    return TWO_UINT32_TO_UINT64( TO_UINT32( status_reg.value >> 32),
+                                 TARGETING::get_huid(tgt) );
+}
+
+/**
+ * @brief Utility Function to capture error log user data consisting of
+ *        the I2C variables relating to the I2C Master
+ */
+uint64_t I2C_SET_USER_DATA_2 ( misc_args_t args)
+{
+
+    return FOUR_UINT16_TO_UINT64(
+                      TWO_UINT8_TO_UINT16 (args.engine, args.port),
+                      args.devAddr & 0x000000000000FFFF,
+                      args.bus_speed & 0x000000000000FFFF,
+                      args.bit_rate_divisor );
+}
+
 
 } // end namespace I2C
