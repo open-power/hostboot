@@ -46,6 +46,10 @@ extern trace_desc_t* g_trac_vpd;
 //#define TRACSSCOMP(args...)  TRACFCOMP(args)
 #define TRACSSCOMP(args...)
 
+// Global variable to store the location of hbrt-vpd-image returned by the
+// host interface get_reserved_mem function.  We only want to call the
+// function once as memory is allocated with every call.
+static uint64_t g_reserved_mem_addr = 0;
 
 namespace VPD
 {
@@ -88,60 +92,66 @@ errlHndl_t getPnorAddr( pnorInformation & i_pnorInfo,
                         mutex_t * i_mutex )
 {
     errlHndl_t err = NULL;
-    uint64_t vpd_addr = 0;
 
-    if(
-       g_hostInterfaces != NULL &&
-       g_hostInterfaces->get_reserved_mem)
+    // Get the reserved_mem_addr only once
+    if( g_reserved_mem_addr == 0 )
     {
-        vpd_addr = g_hostInterfaces->get_reserved_mem("ibm,hbrt-vpd-image",0);
-        if(vpd_addr == 0)
+        if( g_hostInterfaces != NULL &&
+            g_hostInterfaces->get_reserved_mem)
         {
-            TRACFCOMP(g_trac_vpd,ERR_MRK"rt_vpd: Failed to get VPD addr. "
-                      "vpd_type: %d",
-                      i_pnorInfo.pnorSection);
+            g_reserved_mem_addr =
+                g_hostInterfaces->get_reserved_mem("ibm,hbrt-vpd-image",0);
+
+            if( g_reserved_mem_addr == 0 )
+            {
+                TRACFCOMP(g_trac_vpd,ERR_MRK"rt_vpd: Failed to get VPD addr. "
+                        "vpd_type: %d",
+                        i_pnorInfo.pnorSection);
+                /*@
+                * @errortype
+                * @moduleid     VPD::VPD_RT_GET_ADDR
+                * @reasoncode   VPD::VPD_RT_NULL_VPD_PTR
+                * @userdata1    VPD type
+                * @userdata2    0
+                * @devdesc      Hypervisor returned NULL address for VPD
+                */
+                err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                            VPD::VPD_RT_GET_ADDR,
+                                            VPD::VPD_RT_NULL_VPD_PTR,
+                                            i_pnorInfo.pnorSection,
+                                            0);
+
+                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                        HWAS::SRCI_PRIORITY_HIGH);
+
+                err->collectTrace( "VPD", 256);
+            }
+        }
+        else // interface not set
+        {
+            TRACFCOMP(g_trac_vpd,ERR_MRK"Hypervisor vpd interface not linked");
             /*@
-             * @errortype
-             * @moduleid     VPD::VPD_RT_GET_ADDR
-             * @reasoncode   VPD::VPD_RT_NULL_VPD_PTR
-             * @userdata1    VPD type
-             * @userdata2    0
-             * @devdesc      Hypervisor returned NULL address for VPD
-             */
+            * @errortype
+            * @moduleid     VPD::VPD_RT_GET_ADDR
+            * @reasoncode   VPD::VPD_RT_NOT_INITIALIZED
+            * @userdata1    VPD type
+            * @userdata2    0
+            * @devdesc      Runtime VPD interface not linked.
+            */
             err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                          VPD::VPD_RT_GET_ADDR,
-                                          VPD::VPD_RT_NULL_VPD_PTR,
-                                          i_pnorInfo.pnorSection,
-                                          0);
+                                        VPD::VPD_RT_GET_ADDR,
+                                        VPD::VPD_RT_NOT_INITIALIZED,
+                                        i_pnorInfo.pnorSection,
+                                        0);
 
             err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                     HWAS::SRCI_PRIORITY_HIGH);
+                                    HWAS::SRCI_PRIORITY_HIGH);
 
             err->collectTrace( "VPD", 256);
         }
     }
-    else // interface not set
-    {
-        TRACFCOMP(g_trac_vpd,ERR_MRK"Hypervisor vpd interface not linked");
-        /*@
-         * @errortype
-         * @moduleid     VPD::VPD_RT_GET_ADDR
-         * @reasoncode   VPD::VPD_RT_NOT_INITIALIZED
-         * @userdata1    VPD type
-         * @userdata2    0
-         * @devdesc      Runtime VPD interface not linked.
-         */
-        err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                      VPD::VPD_RT_GET_ADDR,
-                                      VPD::VPD_RT_NOT_INITIALIZED,
-                                      i_pnorInfo.pnorSection,
-                                      0);
 
-        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                 HWAS::SRCI_PRIORITY_HIGH);
-
-        err->collectTrace( "VPD", 256);
-    }
+    uint64_t vpd_addr = g_reserved_mem_addr;
 
     if(!err)
     {
