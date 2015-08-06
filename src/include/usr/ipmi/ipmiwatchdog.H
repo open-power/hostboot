@@ -123,7 +123,7 @@ errlHndl_t setWatchDogTimer(  const uint16_t i_countdown_secs,
                         const uint8_t i_timer_use
                                 = static_cast<uint8_t>(DO_NOT_STOP | BIOS_FRB2),
                         const TIMER_ACTIONS i_timer_action
-                                = TIMEOUT_PWR_CYCLE,
+                                = TIMEOUT_HARD_RESET,
                         const TIMER_USE_CLR_FLAGS i_timer_clr_flag
                                 = BIOS_FRB2_FLAG);
 
