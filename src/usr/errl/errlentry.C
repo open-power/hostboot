@@ -52,6 +52,7 @@
 #include <targeting/common/utilFilter.H>
 #include <config.h>
 #include <initservice/initserviceif.H>
+#include <attributeenums.H>
 
 
 // Hostboot Image ID string
@@ -688,11 +689,67 @@ void ErrlEntry::addHbBuildId()
     ErrlUserDetailsString(l_pString).addToLog(this);
 }
 
+enum {
+    SKIP_INFO_RECOVERABLE_LOGS =
+        TARGETING::HIDDEN_ERRLOGS_ENABLE_NO_HIDDEN_LOGS,
+    ENABLE_INFORMATIONAL_LOGS =
+        TARGETING::HIDDEN_ERRLOGS_ENABLE_ALLOW_INFORMATIONAL,
+    ENABLE_RECOVERABLE_LOGS =
+        TARGETING::HIDDEN_ERRLOGS_ENABLE_ALLOW_RECOVERED,
+    ENABLE_ALL_LOGS =
+        TARGETING::HIDDEN_ERRLOGS_ENABLE_ALLOW_ALL_LOGS
+};
+
+void ErrlEntry::checkHiddenLogsEnable( )
+{
+
+    // Note: iv_skipShowingLog is set to True by default
+    //0 = Prevent INFORMATIONAL/RECOVERED error logs from being processed.
+    //1 = Send only INFORMATIONAL error logs.
+    //2 = Send only RECOVERED error logs.
+    //3 = Allow all hidden error logs to be processed.
+
+    uint8_t l_enableLogs = getHiddenLogsEnable();
+
+    // enable all logs to be displayed
+    if( l_enableLogs == ENABLE_ALL_LOGS )
+    {
+        iv_skipShowingLog = false;
+    }
+    else
+    {
+        // need to check based on severity
+        switch( iv_User.iv_severity )
+        {
+            case ERRL_SEV_INFORMATIONAL:
+
+                if(l_enableLogs == ENABLE_INFORMATIONAL_LOGS )
+                {
+                    iv_skipShowingLog = false;
+                }
+                break;
+
+            case ERRL_SEV_RECOVERED:
+
+                if(l_enableLogs == ENABLE_RECOVERABLE_LOGS )
+                {
+                    iv_skipShowingLog = false;
+                }
+                break;
+
+            default:
+                // For any error log that is not INFORMATIONAL
+                // or RECOVERED, we want to show the log
+                iv_skipShowingLog = false;
+        }
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Called by addHwCallout to get the part and serial numbers from the current
 // target so that it can be appended to the error log
-void ErrlEntry::addPartAndSerialNumbersToErrLog
-                                            (const TARGETING::Target * i_target)
+    void ErrlEntry::addPartAndSerialNumbersToErrLog
+(const TARGETING::Target * i_target)
 {
     TRACDCOMP(g_trac_errl, ENTER_MRK"ErrlEntry::addPartAndSerialNumbersToErrLog()");
 
@@ -704,29 +761,29 @@ void ErrlEntry::addPartAndSerialNumbersToErrLog
     do
     {
         if((l_type != TARGETING::TYPE_PROC ) &&
-           (l_type != TARGETING::TYPE_DIMM ) &&
-           (l_type != TARGETING::TYPE_MEMBUF ))
+                (l_type != TARGETING::TYPE_DIMM ) &&
+                (l_type != TARGETING::TYPE_MEMBUF ))
         {
             TARGETING::PredicatePostfixExpr l_procDimmMembuf;
             TARGETING::TargetHandleList l_pList;
 
             TARGETING::PredicateCTM l_procs(TARGETING::CLASS_CHIP,
-                                            TARGETING::TYPE_PROC);
+                    TARGETING::TYPE_PROC);
 
             TARGETING::PredicateCTM l_dimms(TARGETING::CLASS_CARD,
-                                            TARGETING::TYPE_DIMM);
+                    TARGETING::TYPE_DIMM);
 
             TARGETING::PredicateCTM l_membufs(TARGETING::CLASS_CHIP,
-                                              TARGETING::TYPE_MEMBUF);
+                    TARGETING::TYPE_MEMBUF);
 
             l_procDimmMembuf.push(&l_procs).push(&l_dimms).Or()
-                                           .push(&l_membufs).Or();
+                .push(&l_membufs).Or();
 
             // Search for any parents with TYPE_PROC, TYPE_DIMM, or TYPE_MEMBUF
             TARGETING::targetService().getAssociated( l_pList, l_target,
-                                              TARGETING::TargetService::PARENT,
-                                              TARGETING::TargetService::ALL,
-                                              &l_procDimmMembuf);
+                    TARGETING::TargetService::PARENT,
+                    TARGETING::TargetService::ALL,
+                    &l_procDimmMembuf);
             // If no parent of desired type is present, break
             if(!l_pList.size())
             {
@@ -779,6 +836,9 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
 
     // Add the Hostboot Build ID to the error log
     addHbBuildId();
+
+    // check to see if we should skip info and recoverable errors?
+    checkHiddenLogsEnable();
 
     // If this error was a hardware callout, add the serial and part numbers
     // to the log. FSP provides this data so if there is no FSP, get them here.

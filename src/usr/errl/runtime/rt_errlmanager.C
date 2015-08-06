@@ -37,6 +37,10 @@
 namespace ERRORLOG
 {
 
+// Allow Hidden error logs to be shown by default
+uint8_t ErrlManager::iv_hiddenErrLogsEnable =
+            TARGETING::HIDDEN_ERRLOGS_ENABLE_ALLOW_ALL_LOGS;
+
 extern trace_desc_t* g_trac_errl;
 
 //////////////////////////////////////////////////////////////////////////////
@@ -75,6 +79,14 @@ ErrlManager::ErrlManager()
     if(sys)
     {
         iv_currLogId = sys->getAttr<TARGETING::ATTR_HOSTSVC_PLID>();
+
+        // set whether we want to skip certain error logs or not.
+        iv_hiddenErrLogsEnable =
+            sys->getAttr<TARGETING::ATTR_HIDDEN_ERRLOGS_ENABLE>();
+
+        TRACFCOMP( g_trac_errl,"iv_hiddenErrorLogsEnable = 0x%x",
+                iv_hiddenErrLogsEnable );
+
     }
     else
     {
@@ -243,6 +255,14 @@ void errlCommit(errlHndl_t& io_err, compId_t i_committerComp )
 {
     ERRORLOG::theErrlManager::instance().commitErrLog(io_err, i_committerComp );
     return;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+// Global function (not a method on an object) to get the hidden logs flag.
+uint8_t getHiddenLogsEnable( )
+{
+    return ERRORLOG::theErrlManager::instance().iv_hiddenErrLogsEnable;
 }
 
 

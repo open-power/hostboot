@@ -73,6 +73,16 @@ namespace ERRORLOG
 void errlCommit(errlHndl_t& io_err, compId_t i_committerComp );
 
 /**
+ *  @brief  Global function to determine if INFO and Recovered errors
+ *          should be skipped or forwarded
+ *
+ *  @param[in]     None
+ *
+ *  @return iv_hiddenErrLogsEnable
+ */
+uint8_t getHiddenLogsEnable();
+
+/**
  *  @brief  Global enums used by static errlResourceReady function
  */
 enum errlManagerNeeds

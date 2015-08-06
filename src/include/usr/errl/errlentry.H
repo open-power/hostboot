@@ -644,7 +644,7 @@ private:
      * The ErrlManager is the primary user of this call.
      *
      */
-    void commit( compId_t i_commiterComp );
+    void commit( compId_t i_commiterComp);
 
 
     /**
@@ -736,6 +736,12 @@ private:
      */
     bool getSkipShowingLog();
 
+    /**
+     * @brief Set iv_skipShowingLogs based on the passed in value
+     *
+     * @return nothing
+     */
+    void checkHiddenLogsEnable( );
 
 
     /**

@@ -45,7 +45,7 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err)
         // Decide whether we want to skip the error log
         if( io_err->getSkipShowingLog() )
         {
-            TRACDCOMP( g_trac_errl, INFO_MRK
+            TRACFCOMP( g_trac_errl, INFO_MRK
                     "sendErrLogToBmc: %.8X is INFORMATIONAL/RECOVERED; skipping",
                     io_err->eid());
             break;

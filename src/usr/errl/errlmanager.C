@@ -436,9 +436,6 @@ void ErrlManager::errlogMsgHndlr ()
                     // error log handle to pass along
                     errlHndl_t l_err = (errlHndl_t) theMsg->extra_data;
 
-                    // Decide if we need to skip the error log
-                    setErrlSkipFlag(l_err);
-
                     // Ask the ErrlEntry to assign commit component, commit time
                     l_err->commit( (compId_t) theMsg->data[0] );
 
@@ -780,6 +777,12 @@ void errlCommit(errlHndl_t& io_err, compId_t i_committerComp )
 {
     ERRORLOG::theErrlManager::instance().commitErrLog(io_err, i_committerComp );
     return;
+}
+
+// Global function (not a method on an object) to get the hidden logs flag.
+uint8_t getHiddenLogsEnable( )
+{
+    return ERRORLOG::theErrlManager::instance().iv_hiddenErrLogsEnable;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
