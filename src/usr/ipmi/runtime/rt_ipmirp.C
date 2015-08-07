@@ -111,7 +111,7 @@ namespace IPMI
                           "Failed sending ipmi msg (%x:%x) to bmc rc: %d. ",
                           i_cmd.first, i_cmd.second, rc);
 
-                /* @errorlog tag
+                /*@
                  * @errortype           ERRL_SEV_UNRECOVERABLE
                  * @moduleid            IPMI::MOD_IPMIRT
                  * @reasoncode          IPMI::RC_INVALID_SENDRECV

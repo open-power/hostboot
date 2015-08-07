@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -127,7 +129,7 @@ errlHndl_t PbusLinkSvc::collectPbusConections( TYPE i_busType )
                     TARGETING::get_huid(l_dstTgt));
 
                 // Mixed bus type connection
-                /**
+                /*@
                  * @errortype    ERRL_SEV_UNRECOVERABLE
                  * @moduleid     MOD_EDI_EI_IO_RUN_TRAINING
                  * @reasoncode   RC_MIXED_PBUS_CONNECTION
@@ -157,7 +159,7 @@ errlHndl_t PbusLinkSvc::collectPbusConections( TYPE i_busType )
                     TARGETING::get_huid(l_dstTgt));
 
                 // connection of same chip
-                /**
+                /*@
                  * @errortype    ERRL_SEV_UNRECOVERABLE
                  * @moduleid     MOD_EDI_EI_IO_RUN_TRAINING
                  * @reasoncode   RC_SAME_CHIP_PBUS_CONNECTION
@@ -230,7 +232,7 @@ errlHndl_t PbusLinkSvc::collectPbusConections( TYPE i_busType )
                 }
             }
 
-            /**
+            /*@
              * @errortype    ERRL_SEV_UNRECOVERABLE
              * @moduleid     MOD_EDI_EI_IO_RUN_TRAINING
              * @reasoncode   RC_CONFLICT_PBUS_CONNECTION

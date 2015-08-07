@@ -116,7 +116,7 @@ namespace SENSOR
             {
                 TRACFCOMP(g_trac_ipmi,"bad completion code from BMC=0x%x",cc);
 
-                /* @errorlog tag
+                /*@
                  * @errortype       ERRL_SEV_UNRECOVERABLE
                  * @moduleid        IPMI::MOD_IPMIDCMI
                  * @reasoncode      IPMI::RC_DCMI_CMD_FAILED

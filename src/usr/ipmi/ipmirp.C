@@ -368,9 +368,9 @@ void IpmiRP::postEvent(IPMI::oemSEL* i_event)
 
         if (rc)
         {
-            /* @errorlog tag
+            /*@
              * @errortype       ERRL_SEV_UNRECOVERABLE
-             * @moduleid        IPMI::MOD_IPMISRV_SEND
+             * @moduleid        IPMI::MOD_IPMISRV_POSTEVENT
              * @reasoncode      IPMI::RC_INVALID_SEND
              * @userdata1       rc from msq_send()
              * @devdesc         msg_send() failed
@@ -378,7 +378,7 @@ void IpmiRP::postEvent(IPMI::oemSEL* i_event)
              */
             errlHndl_t err =
                 new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                        IPMI::MOD_IPMISRV_SEND,
+                                        IPMI::MOD_IPMISRV_POSTEVENT,
                                         IPMI::RC_INVALID_SEND,
                                         rc,
                                         0,
@@ -945,7 +945,7 @@ namespace IPMI
         // Otherwise, lets make an errl out of our return code
         else
         {
-            /* @errorlog tag
+            /*@
              * @errortype       ERRL_SEV_UNRECOVERABLE
              * @moduleid        IPMI::MOD_IPMISRV_SEND
              * @reasoncode      IPMI::RC_INVALID_SENDRECV
@@ -999,7 +999,7 @@ namespace IPMI
 
         if (rc)
         {
-            /* @errorlog tag
+            /*@
              * @errortype       ERRL_SEV_UNRECOVERABLE
              * @moduleid        IPMI::MOD_IPMISRV_SEND
              * @reasoncode      IPMI::RC_INVALID_SEND

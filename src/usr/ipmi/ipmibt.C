@@ -258,7 +258,7 @@ namespace IPMI
             // the original request will timeout.
             IPMI_TRAC(ERR_MRK "msg_respond() i/o error (response) %d", rc);
 
-            /* @errorlog tag
+            /*@
              * @errortype       ERRL_SEV_UNRECOVERABLE
              * @moduleid        IPMI::MOD_IPMISRV_REPLY
              * @reasoncode      IPMI::RC_INVALID_QRESPONSE
@@ -326,7 +326,7 @@ namespace IPMI
                     break;
                 }
 
-                /* @errorlog tag
+                /*@
                  * @errortype       ERRL_SEV_INFORMATIONAL
                  * @moduleid        IPMI::MOD_IPMISRV_REPLY
                  * @reasoncode      IPMI::RC_READ_EVENT_FAILURE

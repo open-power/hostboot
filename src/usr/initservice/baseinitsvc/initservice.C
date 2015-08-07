@@ -805,15 +805,15 @@ void InitService::doShutdown(uint64_t i_status,
         if (l_rc)
         {
             TRACFCOMP(g_trac_initsvc, "ERROR: flushing virtual memory");
-            /*
+            /*@
              * @errorlog tag
              * @errortype       ERRL_SEV_CRITICAL_SYS_TERM
              * @moduleid        BASE_INITSVC_MOD_ID
-             * @reasoncode      SHUTDOWN_FLUSH_FAILE D
+             * @reasoncode      SHUTDOWN_FLUSH_FAILED
              * @userdata1       returncode from mm_remove_pages()
              * @userdata2       0
              *
-             * @defdesc         Could not FLUSH virtual memory.
+             * @devdesc         Could not FLUSH virtual memory.
              *
              */
             const bool hbSwError = true;

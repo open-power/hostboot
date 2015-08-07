@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -122,7 +122,7 @@ void memPowerThrottleOT(TargetHandleList & i_mbas,
                     {
                         throttleError = true;
 
-                        /**
+                        /*@
                          * @errortype
                          * @reasoncode       HTMGT_RC_OT_THROTTLE_INVALID_N
                          * @severity         ERRL_SEV_UNRECOVERABLE

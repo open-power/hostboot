@@ -88,7 +88,7 @@ namespace SENSOR
             {
                 case  SENSOR::CC_SENSOR_READING_NOT_SETTABLE:
                 {
-                   /* @errorlog tag
+                   /*@
                     * @errortype       ERRL_SEV_UNRECOVERABLE
                     * @moduleid        IPMI::MOD_IPMISENSOR
                     * @reasoncode      IPMI::RC_SENSOR_NOT_SETTABLE
@@ -106,7 +106,7 @@ namespace SENSOR
 
                 case  SENSOR::CC_EVENT_DATA_BYTES_NOT_SETTABLE:
                 {
-                   /* @errorlog tag
+                   /*@
                     * @errortype       ERRL_SEV_UNRECOVERABLE
                     * @moduleid        IPMI::MOD_IPMISENSOR
                     * @reasoncode      IPMI::RC_EVENT_DATA_NOT_SETTABLE
@@ -124,7 +124,7 @@ namespace SENSOR
 
                 case IPMI::CC_CMDSENSOR:
                 {
-                   /* @errorlog tag
+                   /*@
                     * @errortype       ERRL_SEV_UNRECOVERABLE
                     * @moduleid        IPMI::MOD_IPMISENSOR
                     * @reasoncode      IPMI::RC_INVALID_SENSOR_CMD
@@ -140,7 +140,7 @@ namespace SENSOR
 
                 case IPMI::CC_BADSENSOR:
                 {
-                   /* @errorlog tag
+                   /*@
                     * @errortype       ERRL_SEV_UNRECOVERABLE
                     * @moduleid        IPMI::MOD_IPMISENSOR
                     * @reasoncode      IPMI::RC_SENSOR_NOT_PRESENT
@@ -158,7 +158,7 @@ namespace SENSOR
                 {
                     // lump everything else into a general failure for
                     // now.
-                   /* @errorlog tag
+                   /*@
                     * @errortype       ERRL_SEV_UNRECOVERABLE
                     * @moduleid        IPMI::MOD_IPMISENSOR
                     * @reasoncode      IPMI::RC_SET_SENSOR_FAILURE
@@ -335,7 +335,7 @@ namespace SENSOR
 
                     // something happened log an error to indicate the request
                     // failed
-                    /* @errorlog tag
+                    /*@
                      * @errortype           ERRL_SEV_UNRECOVERABLE
                      * @moduleid            IPMI::MOD_IPMISENSOR
                      * @reasoncode          IPMI::RC_SENSOR_READING_NOT_AVAIL
@@ -420,7 +420,7 @@ namespace SENSOR
             {
                 TRACFCOMP(g_trac_ipmi,"bad completion code from BMC=0x%x",cc);
 
-                /* @errorlog tag
+                /*@
                  * @errortype       ERRL_SEV_INFORMATIONAL
                  * @moduleid        IPMI::MOD_IPMISENSOR
                  * @reasoncode      IPMI::RC_GET_SENSOR_TYPE_CMD_FAILED
