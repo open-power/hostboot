@@ -30,10 +30,13 @@ MODULE = errl_rt
 include ../errl.mk
 
 VPATH += ${ROOTPATH}/src/usr/hwas/common
+VPATH += ${ROOTPATH}/src/usr/hwas
 
 OBJS += rt_errlmanager.o
 OBJS += rt_vfs.o
 OBJS += hwasCallout.o
+OBJS += deconfigGard.o
+OBJS += hwasPlatDeconfigGard.o
 
 SUBDIRS += test.d
 

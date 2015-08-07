@@ -70,6 +70,15 @@ errlHndl_t PNOR::flush( PNOR::SectionId i_section)
     return Singleton<RtPnor>::instance().flush(i_section);
 }
 
+/**
+ * @brief  Returns information about a given side of PNOR
+ */
+errlHndl_t PNOR::getSideInfo( PNOR::SideId i_side,
+                              PNOR::SideInfo_t& o_info)
+{
+    return Singleton<RtPnor>::instance().getSideInfo(i_side,o_info);
+}
+
 /****************Public Methods***************************/
 /**
  * STATIC
@@ -669,4 +678,49 @@ errlHndl_t RtPnor::readTOC ()
 RtPnor& RtPnor::getInstance()
 {
     return Singleton<RtPnor>::instance();
+}
+/***********************************************************/
+errlHndl_t RtPnor::getSideInfo( PNOR::SideId i_side,
+                                PNOR::SideInfo_t& o_info)
+{
+    errlHndl_t l_err = NULL;
+
+    do {
+        // We only support the working side at runtime
+        if( i_side != PNOR::WORKING )
+        {
+            /*@
+             * @errortype
+             * @moduleid           PNOR::MOD_RTPNOR_GETSIDEINFO
+             * @reasoncode         PNOR::RC_INVALID_PNOR_SIDE
+             * @userdata1          Requested SIDE
+             * @userdata2          0
+             * @devdesc            getSideInfo> Side not supported
+             * @custdesc           A problem occurred while accessing the boot flash.
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                             PNOR::MOD_RTPNOR_GETSIDEINFO,
+                             PNOR::RC_INVALID_PNOR_SIDE,
+                             TO_UINT64(i_side),
+                             0,true);
+            break;
+        }
+
+        o_info.id = PNOR::WORKING;
+        o_info.side = (ALIGN_DOWN_X(iv_TOC[PNOR::HB_BASE_CODE].flashAddr,32*MEGABYTE) == 0)
+          ? 'A':'B'; //@fixme TODO RTC:134436
+        //iv_side[i].isGolden = (ffsUserData->miscFlags & FFS_MISC_GOLDEN);
+        o_info.isGolden = false; //@fixme TODO RTC:134436
+        o_info.isGuardPresent = (iv_TOC[PNOR::GUARD_DATA].flashAddr == 0)
+          ? false : true;
+
+        o_info.hasOtherSide = false; //@fixme TODO RTC:134436
+        o_info.primaryTOC = iv_TOC[PNOR::TOC].flashAddr;
+        o_info.backupTOC = 0; //@fixme TODO RTC:134436
+        o_info.hbbAddress = iv_TOC[PNOR::HB_BASE_CODE].flashAddr;
+        o_info.hbbMmioOffset = 0; //@fixme TODO RTC:134436
+    } while(0);
+
+    return l_err;
 }

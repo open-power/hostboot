@@ -87,14 +87,15 @@ namespace PNOR
         // nor_micron.C
         MOD_NORMICRON_MICRONFLAGSTATUS  = 0xA0, /**< micronFlagStatus */
 
-        //rt_pnor.C
+        // rt_pnor.C
         MOD_RTPNOR_GETSECTIONINFO       = 0xB0, /**< RtPnor::getSectionInfo*/
         MOD_RTPNOR_FLUSH                = 0xB1, /**< RtPnor::flush */
         MOD_RTPNOR_READFROMDEVICE       = 0xB2, /**< RtPnor::readFromDevice */
         MOD_RTPNOR_WRITETODEVICE        = 0xB3, /**< RtPnor::writeToDevice */
+        MOD_RTPNOR_GETSIDEINFO          = 0xB4, /**< RtPnor::getSideInfo */
 
-        //pnor_common.C
-        MOD_PNORCOMMON_PARSETOC        = 0xC0, /**< PNOR::parseTOC */
+        // pnor_common.C
+        MOD_PNORCOMMON_PARSETOC         = 0xC0, /**< PNOR::parseTOC */
     };
 
     enum PNORReasonCode

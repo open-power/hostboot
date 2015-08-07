@@ -66,6 +66,17 @@ class RtPnor
        */
         errlHndl_t flush (PNOR::SectionId i_section);
 
+      /**
+       * @brief Returns information about a given side of pnor
+       *        (Called by an external interface PNOR::getSideInfo())
+       * @param[in]  i_side PNOR side
+       * @param[out] o_info side information
+       *
+       * @return errlHndl_t Error log if request was invalid
+       */
+        errlHndl_t getSideInfo( PNOR::SideId i_side,
+                                PNOR::SideInfo_t& o_info);
+
     protected:
        /**
         * @brief Constructor

@@ -58,6 +58,7 @@ namespace HWAS
 using namespace HWAS::COMMON;
 using namespace TARGETING;
 
+#ifndef __HOSTBOOT_RUNTIME
 //******************************************************************************
 errlHndl_t collectGard(const PredicateBase *i_pPredicate)
 {
@@ -100,6 +101,7 @@ errlHndl_t collectGard(const PredicateBase *i_pPredicate)
     }
     return errl;
 } // collectGard
+#endif
 
 //******************************************************************************
 DeconfigGard & theDeconfigGard()
@@ -123,6 +125,8 @@ DeconfigGard::~DeconfigGard()
     HWAS_MUTEX_DESTROY(iv_mutex);
     free(iv_platDeconfigGard);
 }
+
+#ifndef __HOSTBOOT_RUNTIME
 //******************************************************************************
 errlHndl_t DeconfigGard::applyGardRecord(Target *i_pTarget,
         GardRecord &i_gardRecord,
@@ -178,6 +182,7 @@ errlHndl_t DeconfigGard::applyGardRecord(Target *i_pTarget,
     while(0);
     return l_pErr;
 }//applyGardRecord
+
 //******************************************************************************
 errlHndl_t DeconfigGard::clearGardRecordsForReplacedTargets()
 {
@@ -2442,5 +2447,6 @@ void DeconfigGard::_clearFCODeconfigure(ConstTargetHandle_t i_nodeTarget)
         }
     }
 }
+#endif
 } // namespce HWAS
 

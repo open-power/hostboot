@@ -472,6 +472,7 @@ errlHndl_t _GardRecordIdSetup( void *&io_platDeconfigGard)
 
 void _flush(void *i_addr)
 {
+#ifndef __HOSTBOOT_RUNTIME
     HWAS_DBG("flushing GARD in PNOR: addr=%p", i_addr);
     int l_rc = mm_remove_pages(FLUSH, i_addr,
                 sizeof(DeconfigGard::GardRecord));
@@ -480,6 +481,10 @@ void _flush(void *i_addr)
         HWAS_ERR("mm_remove_pages(FLUSH,%p,%d) returned %d",
                 i_addr, sizeof(DeconfigGard::GardRecord),l_rc);
     }
+#else
+    HWAS_DBG("flushing all GARD in PNOR due to addr=%p", i_addr);
+    PNOR::flush(PNOR::GUARD_DATA);
+#endif
 }
 
 errlHndl_t getGardSectionInfo(PNOR::SectionInfo_t& o_sectionInfo)
@@ -510,8 +515,7 @@ errlHndl_t getGardSectionInfo(PNOR::SectionInfo_t& o_sectionInfo)
             }
             if (!l_sideInfo.isGuardPresent)
             {
-                HWAS_INF("getGardSectionInfo: No guard section disabling guard"
-                        " support");
+                HWAS_INF("getGardSectionInfo: No guard section; disabling guard support");
                 delete l_errl;
                 l_errl = NULL;
             }
