@@ -496,6 +496,24 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
                     // Chip mark is in place and sparing is not possible.
                     setTdSignature( io_sc, PRDFSIG_VcmCmAndSpare );
                     io_sc.service_data->SetServiceCall();
+
+                    // The mark has already been added to the callout list.
+                    // Callout the used spares, if they exists.
+                    if ( sp0.isValid() )
+                    {
+                        MemoryMru memmru ( iv_mbaTrgt, iv_rank, sp0 );
+                        io_sc.service_data->SetCallout( memmru );
+                    }
+                    if ( sp1.isValid() )
+                    {
+                        MemoryMru memmru ( iv_mbaTrgt, iv_rank, sp1 );
+                        io_sc.service_data->SetCallout( memmru );
+                    }
+                    if ( ecc.isValid() )
+                    {
+                        MemoryMru memmru ( iv_mbaTrgt, iv_rank, ecc );
+                        io_sc.service_data->SetCallout( memmru );
+                    }
                 }
             }
         }
