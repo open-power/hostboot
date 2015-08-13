@@ -3,3 +3,11 @@ config CONSOLE_OUTPUT_TRACE
     depends on CONSOLE
     help
         Enables output of trace to console.
+
+config CONSOLE_OUTPUT_TRACE_COMP_NAME
+    default n
+    depends on CONSOLE_OUTPUT_TRACE
+    help
+        Limits console output trace to a specific component by name.
+        User needs to add to the config file:
+        set CONSOLE_OUTPUT_TRACE_COMP_NAME "<component_string_name>"

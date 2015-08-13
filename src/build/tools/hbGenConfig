@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014
+# Contributors Listed Below - COPYRIGHT 2014,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -137,9 +137,17 @@ sub parseOverride
         chomp $line;
         $line =~ s/#.*//;
 
-        if ($line =~ m/^\s*set\s*(\S*)/)
+        if ($line =~ m/^\s*set\s*(\S*)\s*(.*)/)
         {
-            $config_set{$1} = 1;
+            if ( $2 eq "" )
+            {
+                $config_set{$1} = 1;
+            }
+            else
+            {
+                $config_set{$1} = $2;
+            }
+
         }
         elsif ($line =~ m/^\s*unset\s*(\S*)/)
         {
@@ -258,7 +266,7 @@ sub outputResults
         if ($config_set{$option})
         {
             print CONFIGMK "CONFIG_$option = yes\n";
-            print CONFIGH "#define CONFIG_$option 1\n";
+            print CONFIGH "#define CONFIG_$option $config_set{$option}\n";
         }
         else
         {

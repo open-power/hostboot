@@ -79,7 +79,15 @@ namespace TRACE
         {
             va_list args;
             va_copy(args, i_args);
-            CONSOLE::vdisplayf(i_td->iv_compName, i_fmt, i_args);
+            #ifdef CONFIG_CONSOLE_OUTPUT_TRACE_COMP_NAME
+            if ( !strcmp(i_td->iv_compName,
+                         CONFIG_CONSOLE_OUTPUT_TRACE_COMP_NAME) )
+            {
+            #endif
+                CONSOLE::vdisplayf(i_td->iv_compName, i_fmt, i_args);
+            #ifdef CONFIG_CONSOLE_OUTPUT_TRACE_COMP_NAME
+            }
+            #endif
             va_end(args);
         }
         #endif
