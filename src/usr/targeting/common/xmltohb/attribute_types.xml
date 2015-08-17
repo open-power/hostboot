@@ -15293,8 +15293,6 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
-</attributes>
-
 <attribute>
     <id>ISTEP_PAUSE_CONFIG</id>
     <description>
@@ -15765,6 +15763,41 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
         <id>ATTR_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+</attribute>
+
+<enumerationType>
+    <id>MRW_NEST_CAPABLE_FREQUENCIES_SYS</id>
+    <description>Enumeration of MRW_NEST_CAPABLE_FREQUENCIES_SYS</description>
+    <enumerator>
+        <name>UNSUPPORTED_FREQ</name>
+        <value>0</value>
+    </enumerator>
+    <enumerator>
+        <name>2000_MHZ</name>
+        <value>1</value>
+    </enumerator>
+    <enumerator>
+        <name>2400_MHZ</name>
+        <value>2</value>
+    </enumerator>
+    <enumerator>
+        <name>2000_MHZ_OR_2400_MHZ</name>
+        <value>3</value>
+    </enumerator>
+</enumerationType>
+
+<attribute>
+    <id>MRW_NEST_CAPABLE_FREQUENCIES_SYS</id>
+    <description>The NEST frequencies that the system can support.  This is a bit-wise value that represents which of the possible nest frequencies are supported : 2.0GHz, 2.4GHz, or both.
+    </description>
+    <simpleType>
+        <enumeration>
+            <id>MRW_NEST_CAPABLE_FREQUENCIES_SYS</id>
+            <default>UNSUPPORTED_FREQ</default>
+        </enumeration>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
 </attribute>
 
 </attributes>
