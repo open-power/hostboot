@@ -73,4 +73,11 @@ typedef enum
 
 } RegType_t;
 
+/** IPL or Runtime flag in HOMER data */
+typedef enum
+{
+    HOMER_RUNTIME_STATE = 0,
+    HOMER_IPL_STATE     = 1
+} Homer_IplRuntime_t;
+
 #endif // __firDataConst_common_h

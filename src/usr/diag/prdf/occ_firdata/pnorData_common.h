@@ -77,7 +77,8 @@ typedef struct __attribute__((packed))
 
     uint32_t trgts    :  8; ///< Number of targets with register data
     uint32_t full     :  1; ///< 1 if PNOR data is full and data may be missing
-    uint32_t reserved : 23;
+    uint32_t iplState :  1; ///< Uses enum Homer_iplRuntime_t
+    uint32_t reserved : 22;
 
 } PNOR_Data_t;
 

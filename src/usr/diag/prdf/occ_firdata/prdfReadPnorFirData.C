@@ -203,6 +203,8 @@ errlHndl_t readPnorFirData( bool & o_validData, PnorTrgtMap & o_trgtMap,
         // Gather FFDC from header data.
         o_ffdc.trgts = data->trgts;
         o_ffdc.full  = (0 == data->full) ? false : true;
+        o_ffdc.iplStateActive = (HOMER_IPL_STATE == data->iplState)
+                                ? true:false;
 
         // Iterate each target and get the register data.
         for ( uint32_t t = 0; t < data->trgts; t++ )

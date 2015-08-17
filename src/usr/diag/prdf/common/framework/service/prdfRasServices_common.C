@@ -54,6 +54,10 @@
 
   #ifdef __HOSTBOOT_RUNTIME
     #include <prdfCenMbaDynMemDealloc_rt.H>
+  #else // Hostboot only
+    #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+      #include <prdfPnorFirDataReader.H>
+    #endif
   #endif
 
 #else
@@ -509,15 +513,18 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
             #elif !defined(__HOSTBOOT_RUNTIME) // Hostboot only
 
-            // Checkstop analysis is only done at the beginning of the IPL,
-            // regardless if the checkstop actually occurred during the IPL or
-            // at runtime. We will need to check the IPL state in FIR data to
-            // determine when the checkstop occurred.
+                #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
 
-            // TODO RTC 119791: With the current implementation we know the
-            // checkstop occured at runtime because we currently do not have
-            // IPL checkstop analysis support.
-            gardPolicy = HWAS::GARD_NULL;
+                // Checkstop analysis is only done at the beginning of the IPL,
+                // regardless if the checkstop actually occurred during the IPL
+                // or at runtime. We will need to check the IPL state in FIR
+                // data to determine when the checkstop occurred.
+
+                // Get access to IPL state info from the FIR data in the PNOR.
+                if ( !(PnorFirDataReader::getPnorFirDataReader().isIplState()) )
+                    gardPolicy = HWAS::GARD_NULL;
+
+                #endif
 
             #endif
         }

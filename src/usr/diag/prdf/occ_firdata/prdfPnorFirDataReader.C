@@ -137,6 +137,12 @@ void PnorFirDataReader::addFfdc( errlHndl_t io_errl ) const
 }
 
 //------------------------------------------------------------------------------
+bool PnorFirDataReader::isIplState() const
+{ // indicates if IPL state or Runtime state when system checkstop'd
+  return( iv_ffdc.iplStateActive );
+}
+
+//------------------------------------------------------------------------------
 
 } // end namespace PRDF
 

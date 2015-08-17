@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/occ_firdata/prdfPnorFirDataReader.H $       */
+/* $Source: src/include/usr/diag/prdf/prdfPnorFirDataReader.H $           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -86,6 +86,12 @@ class PnorFirDataReader
      * @brief Adds FFDC to the given error log.
      */
     void addFfdc( errlHndl_t io_errl ) const;
+
+    /**
+     * @brief Get IPL/Runtime state indicator
+     * @return True if we were in IPL state, False if we were in runtime state
+     */
+    bool isIplState() const;
 
   private:
 

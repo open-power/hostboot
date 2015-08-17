@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/occ_firdata/prdfReadPnorFirData.H $         */
+/* $Source: src/include/usr/diag/prdf/prdfReadPnorFirData.H $             */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -42,8 +42,9 @@ struct PnorFfdc
 {
     uint8_t trgts; ///< Total number of target in the PNOR data.
     bool    full;  ///< True if the PNOR data was unable to capture all regs.
+    bool    iplStateActive; // True if IPL state, false if runtime state
 
-    PnorFfdc() : trgts(0), full(false) {}
+    PnorFfdc() : trgts(0), full(false), iplStateActive(false) {}
     PnorFfdc( uint8_t t, bool f ) : trgts(t), full(f) {}
 };
 

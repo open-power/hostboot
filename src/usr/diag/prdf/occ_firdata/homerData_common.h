@@ -97,7 +97,8 @@ typedef struct __attribute__((packed))
 {
     uint32_t header; ///< Magic number to indicate valid data and version
 
-    uint16_t reserved;
+    uint16_t iplState :  1;  // Uses enum Homer_iplRuntime_t
+    uint16_t reserved : 15;
 
     uint8_t masterProc; ///< The position of the master PROC
 
