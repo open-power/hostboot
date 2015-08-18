@@ -787,7 +787,7 @@ uint32_t bld_cpu_node(devTree * i_dt, dtOffset_t & i_parentNode,
      * of thread 0 of that core.
      */
 
-    uint32_t paFeatures[8] = { 0x6, 0x0, 0xf6, 0x3f, 0xc7, 0x0, 0x80, 0xc0 };
+    uint32_t paFeatures[2] = { 0x0600f63f, 0xc70080c0 };
     uint32_t pageSizes[4] = { 0xc, 0x10, 0x18, 0x22 };
     uint32_t segmentSizes[4] = { 0x1c, 0x28, 0xffffffff, 0xffffffff };
     uint32_t segmentPageSizes[] =
