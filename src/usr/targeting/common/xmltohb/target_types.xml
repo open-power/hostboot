@@ -307,6 +307,7 @@
     <attribute><id>FORCE_USE_SBE_SLAVE_SCAN_SERVICE</id></attribute>
     <attribute><id>SBE_MASTER_INTR_SERVICE_DELAY_CYCLES</id></attribute>
     <attribute><id>SBE_MASTER_INTR_SERVICE_DELAY_US</id></attribute>
+    <attribute><id>CLEAR_DIMM_SPD_ENABLE</id></attribute>
 </targetType>
 
 <targetType>

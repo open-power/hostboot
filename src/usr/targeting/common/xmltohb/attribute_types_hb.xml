@@ -1383,4 +1383,18 @@ ID for the sensor number returned with the elog. -->
     <hbOnly/>
 </attribute>
 
+<attribute>
+    <id>CLEAR_DIMM_SPD_ENABLE</id>
+    <description>
+      Used to enable clearing of SPD on all present DIMMs. This attribute is
+      set via attribute override.
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
 </attributes>
