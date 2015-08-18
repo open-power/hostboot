@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,7 +25,7 @@
 #ifndef __SBE_XIP_IMAGE_H
 #define __SBE_XIP_IMAGE_H
 
-// $Id: sbe_xip_image.h,v 1.24 2013/06/13 20:26:33 bcbrock Exp $
+// $Id: sbe_xip_image.h,v 1.26 2015/07/29 23:40:17 cmolsen Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/sbe/sbe_xip_image.h,v $
 //-----------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -148,6 +148,11 @@
 
 #endif  /* __ASSEMBLER__ */
 
+
+/// Define the PTS version
+///
+/// Note that this should only be done on per PHYP instruction and only here
+#define PTS_VERSION 1
 
 /// Maximum section alignment for SBE-XIP sections
 #define SBE_XIP_MAX_SECTION_ALIGNMENT 128
@@ -343,8 +348,11 @@ typedef struct {
     /// address 
     uint64_t iv_linkAddress;
 
+    /// PTS version
+    uint64_t iv_ptsVersion;
+
     /// Reserved for future expansion
-    uint64_t iv_reserved64[5];
+    uint64_t iv_reserved64[4];
 
     //////////////////////////////////////////////////////////////////////
     // Section Table - 4-byte aligned; 16 entries

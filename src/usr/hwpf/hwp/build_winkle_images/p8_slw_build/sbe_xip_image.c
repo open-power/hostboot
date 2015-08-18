@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: sbe_xip_image.c,v 1.28 2013/12/11 00:12:41 bcbrock Exp $
+// $Id: sbe_xip_image.c,v 1.31 2015/07/29 23:40:06 cmolsen Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/sbe/sbe_xip_image.c,v $
 //-----------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -580,7 +580,7 @@ xipPutSection(const void* i_image,
               SbeXipSection* i_hostSection)
 {
     int rc;
-    SbeXipSection *imageSection;
+    SbeXipSection *imageSection = NULL;
 
     rc = xipGetSectionPointer(i_image, i_sectionId, &imageSection);
 
@@ -598,7 +598,7 @@ XIP_STATIC int
 xipSetSectionOffset(void* io_image, const int i_section, 
                     const uint32_t i_offset)
 {
-    SbeXipSection* section;
+    SbeXipSection* section = NULL;
     int rc;
 
     rc = xipGetSectionPointer(io_image, i_section, &section);
@@ -614,7 +614,7 @@ xipSetSectionOffset(void* io_image, const int i_section,
 XIP_STATIC int
 xipSetSectionSize(void* io_image, const int i_section, const uint32_t i_size)
 {
-    SbeXipSection* section;
+    SbeXipSection* section = NULL;
     int rc;
 
     rc = xipGetSectionPointer(io_image, i_section, &section);
@@ -1030,7 +1030,7 @@ xipHashCollision(SbeXipHashedToc* i_fixedToc, size_t i_entries)
         for (j = i + 1; j < i_entries; j++) {
             if (i_fixedToc[i].iv_hash == i_fixedToc[j].iv_hash) {
                 rc = TRACE_ERRORX(SBE_XIP_HASH_COLLISION,
-                                  "Hash collision at index %d\n",
+                                  "Hash collision at index %zd\n",
                                   i);
                 break;
             }
@@ -1372,7 +1372,7 @@ sbe_xip_validate(void* i_image, const uint32_t i_size)
 
         if (sizeof(SbeXipSection) != SIZE_OF_SBE_XIP_SECTION) {
             rc = TRACE_ERRORX(SBE_XIP_BUG,
-                              "C/Assembler size mismatch(%d/%d) "
+                              "C/Assembler size mismatch(%zd/%d) "
                               "for SbeXipSection\n",
                               sizeof(SbeXipSection), SIZE_OF_SBE_XIP_SECTION);
             break;
@@ -1380,7 +1380,7 @@ sbe_xip_validate(void* i_image, const uint32_t i_size)
                               
         if (sizeof(SbeXipToc) != SIZE_OF_SBE_XIP_TOC) {
             rc = TRACE_ERRORX(SBE_XIP_BUG,
-                              "C/Assembler size mismatch(%d/%d) "
+                              "C/Assembler size mismatch(%zd/%d) "
                               "for SbeXipToc\n",
                               sizeof(SbeXipToc), SIZE_OF_SBE_XIP_TOC);
             break;
@@ -1388,7 +1388,7 @@ sbe_xip_validate(void* i_image, const uint32_t i_size)
 
         if (sizeof(SbeXipHashedToc) != SIZE_OF_SBE_XIP_HASHED_TOC) {
             rc = TRACE_ERRORX(SBE_XIP_BUG,
-                              "C/Assembler size mismatch(%d/%d) "
+                              "C/Assembler size mismatch(%zd/%d) "
                               "for SbeXipHashedToc\n",
                               sizeof(SbeXipHashedToc), 
                               SIZE_OF_SBE_XIP_HASHED_TOC);
@@ -1499,7 +1499,7 @@ sbe_xip_validate2(void* i_image, const uint32_t i_size, const uint32_t i_maskIgn
 
         if (sizeof(SbeXipSection) != SIZE_OF_SBE_XIP_SECTION) {
             rc = TRACE_ERRORX(SBE_XIP_BUG,
-                              "C/Assembler size mismatch(%d/%d) "
+                              "C/Assembler size mismatch(%zd/%d) "
                               "for SbeXipSection\n",
                               sizeof(SbeXipSection), SIZE_OF_SBE_XIP_SECTION);
             break;
@@ -1507,7 +1507,7 @@ sbe_xip_validate2(void* i_image, const uint32_t i_size, const uint32_t i_maskIgn
                               
         if (sizeof(SbeXipToc) != SIZE_OF_SBE_XIP_TOC) {
             rc = TRACE_ERRORX(SBE_XIP_BUG,
-                              "C/Assembler size mismatch(%d/%d) "
+                              "C/Assembler size mismatch(%zd/%d) "
                               "for SbeXipToc\n",
                               sizeof(SbeXipToc), SIZE_OF_SBE_XIP_TOC);
             break;
@@ -1515,7 +1515,7 @@ sbe_xip_validate2(void* i_image, const uint32_t i_size, const uint32_t i_maskIgn
 
         if (sizeof(SbeXipHashedToc) != SIZE_OF_SBE_XIP_HASHED_TOC) {
             rc = TRACE_ERRORX(SBE_XIP_BUG,
-                              "C/Assembler size mismatch(%d/%d) "
+                              "C/Assembler size mismatch(%zd/%d) "
                               "for SbeXipHashedToc\n",
                               sizeof(SbeXipHashedToc), 
                               SIZE_OF_SBE_XIP_HASHED_TOC);
@@ -1706,7 +1706,7 @@ sbe_xip_get_section(const void* i_image,
                     SbeXipSection* o_hostSection)
 {
     int rc;
-    SbeXipSection *imageSection;
+    SbeXipSection *imageSection = NULL;
 
     rc = xipGetSectionPointer(i_image, i_sectionId, &imageSection);
 
@@ -2251,7 +2251,8 @@ sbe_xip_append(void* io_image,
     SbeXipSection section, initialSection;
     int rc, final, restoreOnError;
     void* hostAddress;
-    uint32_t pad, initialSize;
+    uint32_t pad;
+    uint32_t initialSize = 0;
 
     do {
         restoreOnError = 0;
@@ -2487,8 +2488,9 @@ sbe_xip_translate_header(SbeXipHeader* o_dest, const SbeXipHeader* i_src)
     o_dest->iv_magic = xipRevLe64(i_src->iv_magic);
     o_dest->iv_entryOffset = xipRevLe64(i_src->iv_entryOffset);
     o_dest->iv_linkAddress = xipRevLe64(i_src->iv_linkAddress);
+    o_dest->iv_ptsVersion = xipRevLe64(i_src->iv_ptsVersion);
 
-    for (i = 0; i < 5; i++) {
+    for (i = 0; i < 4; i++) {
         o_dest->iv_reserved64[i] = 0;
     }
 
