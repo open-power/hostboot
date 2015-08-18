@@ -1244,4 +1244,126 @@ ID for the sensor number returned with the elog. -->
     <hbOnly/>
 </attribute>
 
+<attribute>
+    <id>MSS_VOLT_VPP_SLOPE_EFF_CONFIG</id>
+    <description>Units: uV/DRAM
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
+<attribute>
+    <id>MSS_VOLT_VPP_INTERCEPT_EFF_CONFIG</id>
+    <description>Units: mV
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
+<attribute>
+    <id>MSS_VOLT_DDR3_VDDR_SLOPE_EFF_CONFIG</id>
+    <description>Units: 1/Amps
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
+<attribute>
+    <id>MSS_VOLT_DDR3_VDDR_INTERCEPT_EFF_CONFIG</id>
+    <description>Units: mV
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
+<attribute>
+    <id>MRW_DDR3_VDDR_MAX_LIMIT_EFF_CONFIG</id>
+    <description>Maximum voltage limit for the dynamic VID DDR3 VDDR
+        voltage setpoint. In mV.
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
+<attribute>
+    <id>MSS_VOLT_DDR4_VDDR_SLOPE_EFF_CONFIG</id>
+    <description>Units: 1/Amps
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
+<attribute>
+    <id>MSS_VOLT_DDR4_VDDR_INTERCEPT_EFF_CONFIG</id>
+    <description>Units: mV
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
+<attribute>
+    <id>MRW_DDR4_VDDR_MAX_LIMIT_EFF_CONFIG</id>
+    <description>Maximum voltage limit for the dynamic VID DDR4 VDDR voltage
+        setpoint. In mV.
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
 </attributes>
