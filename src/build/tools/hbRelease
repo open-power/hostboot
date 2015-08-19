@@ -719,17 +719,19 @@ sub git_commit_history
 
 # sub git_log_changeId
 #
-# Determines if a changeId exists in the current branches git log
+# Determines if a changeId exists in the base
 #
+# @param[in] base
 # @param[in] changeId
 #
 # @return bool - True if in commit history, False otherwise.
 #
 sub git_log_changeId
 {
+    my $base = shift;
     my $changeId = shift;
     my $exists = 0;
-    open COMMAND, "git log --pretty=\"%b\" --grep=\'Change-Id: $changeId\' |";
+    open COMMAND, "git log $base | grep \'Change-Id: $changeId\' |";
     if(<COMMAND> ne "")
     {
         $exists = 1;
@@ -1350,7 +1352,7 @@ sub config_resolve_level_dep
             next;
         }
         # Check if patch already exists in release base
-        if (git_log_changeId($patch))
+        if (git_log_changeId($base, $patch))
         {
             print "Skipping - patch = $patch already exists in release base = $base\n" if $debug;
             next;
@@ -1385,9 +1387,10 @@ sub config_resolve_level_dep
             {
                 $line =~ s/([^:]*):\s*//;
                 chomp($line);
+                print "Found depends-on: $line\n" if $debug;
 
                 # Add dependency if dependency is not already in base release
-                if(!git_log_changeId($line))
+                if(!git_log_changeId($base, $line))
                 {
                     print "Adding forced dependency $patch:$line\n" if $debug;
                     config_add_dep($level, $patch, $line);
@@ -1487,30 +1490,32 @@ sub config_release
     $patches = gerrit_resolve_patches($level_info->{patches});
     $patches = git_order_commits($patches, $level_info);
 
-    if ($debug)
-    {
-        print "Determined patch order as:\n";
-        foreach my $patch (@{$patches})
-        {
-            print "\t$patch\n";
-        }
-    }
-
-    print "Applying patches...\n";
+    print "\n========\nDetermined patch order as:\n";
+    my $i = 1;
     foreach my $patch (@{$patches})
     {
-        print "Applying $patch.\n" if ($debug);
+        print "$i. $patch\n";
+        $i++;
+    }
+
+    print "\n========\nApplying patches...\n";
+    $i = 1;
+    foreach my $patch (@{$patches})
+    {
+        print "\n$i. Cherry-picking commit = $patch.\n\n";
         unless (git_cherry_pick($patch))
         {
+            print `git status`;
             system("git reset HEAD --hard");
             die "Cherry-pick of $patch failed";
         }
+        $i++;
     }
 
-    print "Generating release notes...\n";
+    print "\nGenerating release notes...\n";
     create_release_notes($level_info->{name}, $level_info);
 
-    print "Creating tag...\n";
+    print "\nCreating tag...\n";
     git_create_tag($level_info->{name}, $level_info);
 }
 
