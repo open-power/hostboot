@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: chips/p9/procedures/ipl/hwp/p9_pm_ocb_indir_setup_circular.mk $
+# $Source: chips/p9/procedures/hwp/pm/p9_pm_ocb_indir_setup_circular.mk $
 #
 # IBM CONFIDENTIAL
 #
@@ -17,5 +17,4 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_pm_ocb_indir_setup_circular
-libp9_pm_ocb_indir_setup_circular_DEPLIBS += p9_pm_utils
 $(call BUILD_PROCEDURE)
