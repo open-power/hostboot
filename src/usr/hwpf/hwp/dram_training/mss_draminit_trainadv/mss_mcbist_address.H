@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist_address.H,v 1.8 2015/02/16 19:54:23 sglancy Exp $
+// $Id: mss_mcbist_address.H,v 1.9 2015/06/03 15:09:03 lwmulkey Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998, 2013
 // *!           All Rights Reserved -- Property of IBM
@@ -88,7 +88,7 @@ fapi::ReturnCode parse_addr(const fapi:: Target & i_target_mba,
                             uint8_t mr1_valid,
                             uint8_t l_dram_rows,
                             uint8_t l_dram_cols,
-                            uint8_t l_addr_inter);
+                            uint8_t l_addr_inter,uint8_t sl2_valid,uint8_t sl1_valid,uint8_t sl0_valid);
 
 }
 #endif

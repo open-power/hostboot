@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist_address.C,v 1.18 2015/02/16 19:55:40 sglancy Exp $
+// $Id: mss_mcbist_address.C,v 1.21 2015/06/08 16:39:04 lwmulkey Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998, 2013
 // *!           All Rights Reserved -- Property of IBM
@@ -40,6 +40,7 @@
 //-------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
+// 1.20    |lwmulkey|06-JUN-15| Add slave rank support
 // 1.17    |sglancy |16-FEB-15| Merged FW comments with lab debugging needs
 // 1.17    |preeragh|15-Dec-14| Fix FW Review Comments
 // 1.16    |rwheeler|10-Nov-14| Update to address_generation for custom address string
@@ -86,7 +87,8 @@ fapi::ReturnCode address_generation(const fapi::Target & i_target_mba,
     uint8_t l_addr_inter = 0;
     uint8_t l_num_ranks_p0_dim0, l_num_ranks_p0_dim1, l_num_ranks_p1_dim0,
         l_num_ranks_p1_dim1;
-    uint8_t mr3_valid, mr2_valid, mr1_valid;
+    uint8_t l_master_ranks_p0_dim0;
+    uint8_t mr3_valid, mr2_valid, mr1_valid,sl0_valid,sl1_valid,sl2_valid;
     uint32_t rc_num;
     char S0[] = "b";
     //Choose a default buffer for the below
@@ -140,11 +142,16 @@ fapi::ReturnCode address_generation(const fapi::Target & i_target_mba,
     l_num_ranks_p0_dim1 = l_num_ranks_per_dimm[0][1];
     l_num_ranks_p1_dim0 = l_num_ranks_per_dimm[1][0];
     l_num_ranks_p1_dim1 = l_num_ranks_per_dimm[1][1];
+    l_master_ranks_p0_dim0 = l_num_master_ranks[0][0];
+
 
     //Initial all ranks are invalid
     mr3_valid = 0;
     mr2_valid = 0;
     mr1_valid = 0;
+    sl2_valid = 0;
+    sl1_valid = 0;
+    sl0_valid = 0;
 
     if ((l_num_ranks_p0_dim0 == 1 && l_num_ranks_p0_dim1 == 0) ||
         (l_num_ranks_p1_dim0 == 1 && l_num_ranks_p1_dim1 == 0)) //Single Rank case   -- default0
@@ -185,6 +192,24 @@ fapi::ReturnCode address_generation(const fapi::Target & i_target_mba,
         mr2_valid = 1;
         mr1_valid = 1;
     }
+    else if (((l_num_ranks_p0_dim0 == 4 && l_num_ranks_p0_dim1 == 0) ||
+              (l_num_ranks_p1_dim0 == 4 && l_num_ranks_p1_dim1 == 0)) &&
+               l_master_ranks_p0_dim0 == 1) //1r 4h stack
+    {
+        mr1_valid = 0;
+        sl1_valid = 1;
+        sl2_valid = 1; 
+    } 
+
+    else if (((l_num_ranks_p0_dim0 == 8 && l_num_ranks_p0_dim1 == 0) || 
+              (l_num_ranks_p1_dim0 == 8 && l_num_ranks_p1_dim1 == 0)) && 
+              (l_master_ranks_p0_dim0 == 2)) //2rx4 4h ddr4 3ds
+    {
+        mr3_valid = 1;
+        sl1_valid = 1;
+        sl2_valid = 1;
+    }
+
     else
     {
         FAPI_INF("-- Error ---- mcbist_addr_Check dimm_Config ----- ");
@@ -201,13 +226,13 @@ fapi::ReturnCode address_generation(const fapi::Target & i_target_mba,
     //custom addressing string is not to be used
     if(l_addr_inter != 4) {
        rc = parse_addr(i_target_mba, S0, mr3_valid, mr2_valid, mr1_valid,
-                    l_dram_rows, l_dram_cols, l_addr_inter);
+                    l_dram_rows, l_dram_cols, l_addr_inter,sl2_valid,sl1_valid,sl0_valid);
        if (rc) return rc;
     }
     else {
        FAPI_DBG("Custom addressing flag was selected");
        rc = parse_addr(i_target_mba, l_str_cust_addr, mr3_valid, mr2_valid, mr1_valid,
-                    l_dram_rows, l_dram_cols, l_addr_inter);
+                    l_dram_rows, l_dram_cols, l_addr_inter,sl2_valid,sl1_valid,sl0_valid);
        if (rc) return rc;
     }
 
@@ -221,12 +246,14 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
                             uint8_t mr1_valid,
                             uint8_t l_dram_rows,
                             uint8_t l_dram_cols,
-                            uint8_t l_addr_inter)
+                            uint8_t l_addr_inter,
+			    uint8_t sl2_valid,
+                            uint8_t sl1_valid,
+                            uint8_t sl0_valid)
 {
     fapi::ReturnCode rc;
     uint8_t i = MAX_ADDR_BITS;
 
-    uint8_t l_slave_rank = 0;
     uint8_t l_value;
     uint32_t l_value32 = 0;
     uint32_t l_sbit, rc_num;
@@ -1377,67 +1404,102 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
     l_value = i;
     rc = fapiGetScom(i_target_mba, 0x030106c8, l_data_buffer_64);
     if (rc) return rc;
-    //------- Enable these for later --- for now constant map to zero
-    if (l_slave_rank == 0)
+    if(sl2_valid==1)
     {
-        l_value = 0;
+
+      rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value,l_sbit ,6);
+      if (rc_num)
+      {
+         FAPI_ERR( "Error in function  parse_addr:");
+         rc.setEcmdError(rc_num);
+         return rc;
+      }
+      rc = fapiPutScom(i_target_mba,0x030106c8,l_data_buffer_64);
+      if(rc) return rc;
     }
-    rc_num = l_data_buffer_64.insertFromRight(l_value_zero, l_sbit, 6);
-    if (rc_num)
+    else
     {
-        FAPI_ERR("Error in function  parse_addr:");
-        rc.setEcmdError(rc_num);
-        return rc;
-    }
-    rc = fapiPutScom(i_target_mba, 0x030106c8, l_data_buffer_64);
-    if (rc) return rc;
-    //FAPI_INF("sl2 Invalid");
-   
-    ////FAPI_INF("Value of i = %d",i);
+        rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);
+        if (rc_num)
+        {
+            FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);
+            return rc;
+        }
+        rc = fapiPutScom(i_target_mba,0x030106c8,l_data_buffer_64);
+        if(rc) return rc;
+        FAPI_DBG("%s:sl2 Invalid",i_target_mba.toEcmdString());
+        i--;
+        //FAPI_DBG("%s:Value of i = %d",i);
+     }
+
     ////FAPI_INF("Inside strcmp sl1");
     l_sbit = 30;
     l_value = i;
     rc = fapiGetScom(i_target_mba, 0x030106c8, l_data_buffer_64);
     if (rc) return rc;
     //------- Enable these for later --- for now constant map to zero
-    if (l_slave_rank == 0)
+    if(sl1_valid==1)
     {
-        l_value = 0;
+
+      rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value,l_sbit ,6);
+      if (rc_num)
+      {
+         FAPI_ERR( "Error in function  parse_addr:");
+         rc.setEcmdError(rc_num);
+         return rc;
+      }
+      rc = fapiPutScom(i_target_mba,0x030106c8,l_data_buffer_64);
+      if(rc) return rc;
     }
-    rc_num = l_data_buffer_64.insertFromRight(l_value_zero, l_sbit, 6);
-    if (rc_num)
+    else
     {
-        FAPI_ERR("Error in function  parse_addr:");
-        rc.setEcmdError(rc_num);
-        return rc;
-    }
-    rc = fapiPutScom(i_target_mba, 0x030106c8, l_data_buffer_64);
-    if (rc) return rc;
-    
-    //FAPI_INF("sl1 Invalid");
-    ////FAPI_INF("Value of i = %d",i);
+        rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);
+        if (rc_num)
+        {
+            FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);
+            return rc;
+        }
+        rc = fapiPutScom(i_target_mba,0x030106c8,l_data_buffer_64);
+        if(rc) return rc;
+        FAPI_DBG("%s:sl1 Invalid",i_target_mba.toEcmdString());
+        i--;
+        //FAPI_DBG("%s:Value of i = %d",i);
+     }
     FAPI_INF("Inside strcmp sl0");
     l_sbit = 24;
     l_value = i;
     rc = fapiGetScom(i_target_mba, 0x030106c8, l_data_buffer_64);
     if (rc) return rc;
     //------- Enable these for later --- for now constant map to zero
-    if (l_slave_rank == 0)
+    if(sl0_valid==1)
     {
-        l_value = 0;
+
+      rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value,l_sbit ,6);
+      if (rc_num)
+      {
+         FAPI_ERR( "Error in function  parse_addr:");
+         rc.setEcmdError(rc_num);
+         return rc;
+      }
+      rc = fapiPutScom(i_target_mba,0x030106c8,l_data_buffer_64);  
+      if(rc) return rc;
     }
-    rc_num = l_data_buffer_64.insertFromRight(l_value_zero, l_sbit, 6);
-    if (rc_num)
+    else
     {
-        FAPI_ERR("Error in function  parse_addr:");
-        rc.setEcmdError(rc_num);
-        return rc;
-    }
-    rc = fapiPutScom(i_target_mba, 0x030106c8, l_data_buffer_64);
-    if (rc) return rc;
-    //FAPI_INF("sl0 Invalid");
-    
-    ////FAPI_INF("Value of i = %d",i);
+        rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value_zero,l_sbit ,6);
+        if (rc_num)
+        {
+            FAPI_ERR( "Error in function  parse_addr:");rc.setEcmdError(rc_num);
+            return rc;
+        }
+        rc = fapiPutScom(i_target_mba,0x030106c8,l_data_buffer_64);  
+        if(rc) return rc;
+        FAPI_DBG("%s:sl0 Invalid",i_target_mba.toEcmdString());
+        i--;
+        //FAPI_DBG("%s:Value of i = %d",i);
+     }
+
+
 
     //------ Setting Start and end addr counters
 

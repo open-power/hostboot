@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_scom_addresses.H,v 1.71 2015/02/12 22:05:07 gollub Exp $
+// $Id: cen_scom_addresses.H,v 1.72 2015/06/03 14:04:20 sglancy Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/cen_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -46,6 +46,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.72   | sglancy  |03-JUN-15| Updated to include DQS_OFFSET registers - needed for DDR4 training
 //  1.71   | gollub   |12-FEB-15| Added MBACALFIR_OR, MBACALFIR_AND
 //         |          |         | Added MBA_DSM0
 //         |          |         | Added MBA_FARB0
@@ -1343,6 +1344,21 @@ CONST_UINT64_T( DPHY01_DDRPHY_DP18_DFT_WRAP_STATUS_P1_4_0x8001101D0301143F , ULL
 //------------------------------------------------------------------------------
 //      ADR Output Force ATEST Control Registers
 //------------------------------------------------------------------------------
+CONST_UINT64_T( DPHY01_DDRPHY_DP18_DQSCLK_OFFSET_P0_0_0x800000370301143F , ULL(0x800000370301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_DP18_DQSCLK_OFFSET_P0_1_0x800004370301143F , ULL(0x800004370301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_DP18_DQSCLK_OFFSET_P0_2_0x800008370301143F , ULL(0x800008370301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_DP18_DQSCLK_OFFSET_P0_3_0x80000C370301143F , ULL(0x80000C370301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_DP18_DQSCLK_OFFSET_P0_4_0x800010370301143F , ULL(0x800010370301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_DP18_DQSCLK_OFFSET_P1_0_0x800100370301143F , ULL(0x800100370301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_DP18_DQSCLK_OFFSET_P1_1_0x800104370301143F , ULL(0x800104370301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_DP18_DQSCLK_OFFSET_P1_2_0x800108370301143F , ULL(0x800108370301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_DP18_DQSCLK_OFFSET_P1_3_0x80010C370301143F , ULL(0x80010C370301143F) );
+CONST_UINT64_T( DPHY01_DDRPHY_DP18_DQSCLK_OFFSET_P1_4_0x800110370301143F , ULL(0x800110370301143F) );
+
+
+//------------------------------------------------------------------------------
+//      ADR Output Force ATEST Control Registers
+//------------------------------------------------------------------------------
 CONST_UINT64_T( DPHY01_DDRPHY_ADR_OUTPUT_FORCE_ATEST_CNTL_P0_ADR32S0_0x800080350301143F , ULL(0x800080350301143F) );
 CONST_UINT64_T( DPHY01_DDRPHY_ADR_OUTPUT_FORCE_ATEST_CNTL_P0_ADR32S1_0x800084350301143F , ULL(0x800084350301143F) );
 CONST_UINT64_T( DPHY01_DDRPHY_ADR_OUTPUT_FORCE_ATEST_CNTL_P1_ADR32S0_0x800180350301143F , ULL(0x800180350301143F) );
@@ -1871,6 +1887,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: cen_scom_addresses.H,v $
+Revision 1.72  2015/06/03 14:04:20  sglancy
+Added DQS_OFFSET registers for training.C
+
 Revision 1.71  2015/02/12 22:05:07  gollub
 
 /!/  1.71   | gollub   |12-FEB-15| Added MBACALFIR_OR, MBACALFIR_AND
