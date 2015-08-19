@@ -482,9 +482,11 @@ private:
      * @brief Create an ipmi message with the error log and send it to BMC
      *
      * @param[in,out] io_err Error log handle to be committed
-     *
+     * @param[in]     i_sendSels true if sensor SELs should be sent to BMC,
+     *                           false if not (ie, on read from PNOR, do not
+     *                                 (re)send the SEL to the BMC
      */
-    void sendErrLogToBmc(errlHndl_t &io_err);
+    void sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels = true);
 #endif
 
     /**
@@ -504,16 +506,17 @@ private:
     // Note: When adding a new flag, add to the trace in errlogShutdown()
     enum ERRLOG_FLAGS
     {
-        PNOR_FLAG      = 0x01,
-        MBOX_FLAG      = 0x02,
-        ERRLDISP_FLAG  = 0x04,
-        IPMI_FLAG      = 0x08,
-        ALL_FLAGS      = PNOR_FLAG | MBOX_FLAG
+        PNOR_FLAG       = 0x01,
+        MBOX_FLAG       = 0x02,
+        ERRLDISP_FLAG   = 0x04,
+        IPMI_FLAG       = 0x08,
+        IPMI_NOSEL_FLAG = 0x10,
+        ALL_FLAGS       = PNOR_FLAG | MBOX_FLAG
     #ifdef CONFIG_BMC_IPMI
-                                   | IPMI_FLAG
+                                    | IPMI_FLAG
     #endif
     #ifdef CONFIG_CONSOLE_OUTPUT_ERRORDISPLAY
-                                   | ERRLDISP_FLAG
+                                    | ERRLDISP_FLAG
     #endif
     };
 

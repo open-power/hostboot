@@ -386,6 +386,13 @@ void ErrlManager::errlogMsgHndlr ()
                             // Mark IPMI processing complete
                             _clearFlag(*it, IPMI_FLAG);
                         }
+                        else if (_isFlagSet(*it, IPMI_NOSEL_FLAG))
+                        {
+                            // send errorlog
+                            sendErrLogToBmc(it->first, false);
+                            // Mark IPMI processing complete
+                            _clearFlag(*it, IPMI_NOSEL_FLAG);
+                        }
                         _updateErrlListIter(it);
                     }
 #endif
@@ -759,8 +766,6 @@ void ErrlManager::setHwasProcessCalloutFn(HWAS::processCalloutFn i_fn)
     ERRORLOG::theErrlManager::instance().iv_hwasProcessCalloutFn = i_fn;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// Global function (not a method on an object) to commit the error log.
 void ErrlManager::errlResourceReady(errlManagerNeeds i_needs)
 {
     ERRORLOG::theErrlManager::instance().sendResourcesMsg(i_needs);
@@ -806,39 +811,6 @@ void ErrlManager::sendResourcesMsg(errlManagerNeeds i_needs)
     if ( rc )
     {
         TRACFCOMP( g_trac_errl, ERR_MRK "Failed (rc=%d) to send %d message.", rc, i_needs);
-    }
-    return;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Global function (not a method on an object) to ack that the error log
-// was sent to the BMC.
-void ErrlManager::errlAckErrorlog(uint32_t i_eid)
-{
-    ERRORLOG::theErrlManager::instance().sendAckErrorlog(i_eid);
-    return;
-}
-
-void ErrlManager::sendAckErrorlog(uint32_t i_eid)
-{
-    TRACFCOMP( g_trac_errl, ENTER_MRK"ErrlManager::sendAddErrorlog 0x%.8X",
-            i_eid);
-
-    //Create a message to send to Host boot error message queue.
-    msg_t *msg = msg_allocate();
-    msg->type = ERRLOG_COMMITTED_ACK_RESPONSE_TYPE;
-    //Pass along the eid of the error, shifted up to the first word
-    msg->data[0] = static_cast<uint64_t>(i_eid) << 32;
-
-    //Send the msg asynchronously to error message queue to handle.
-    int rc = msg_send ( ERRORLOG::ErrlManager::iv_msgQ, msg );
-
-    //Return code is non-zero when the message queue is invalid
-    //or the message type is invalid.
-    if ( rc )
-    {
-        TRACFCOMP( g_trac_errl, ERR_MRK "Failed (rc=%d) to send ack 0x%.8X message.",
-                rc, i_eid);
     }
     return;
 }
@@ -918,10 +890,6 @@ void ErrlManager::errlogShutdown()
         iv_errlList.pop_front();
     } // while items on iv_errlList list
 
-    // Ensure that all the error logs are pushed out to PNOR
-    // prior to the PNOR resource provider shutting down.
-    PNOR::flush(PNOR::HB_ERRLOGS);
-
     // Un-register error log message queue from the shutdown
     INITSERVICE::unregisterShutdownEvent( iv_msgQ);
 
@@ -938,6 +906,10 @@ void ErrlManager::errlogShutdown()
     // Leaving this message queue around really isn't a leak because we are
     // shutting down.
     // msg_q_destroy(iv_msgQ);
+
+    // Ensure that all the error logs are pushed out to PNOR
+    // prior to the PNOR resource provider shutting down.
+    PNOR::flush(PNOR::HB_ERRLOGS);
 
     return;
 }

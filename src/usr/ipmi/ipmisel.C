@@ -32,6 +32,7 @@
 #include <ipmi/ipmisel.H>
 #include "ipmiconfig.H"
 #include <ipmi/ipmi_reasoncodes.H>
+#include <ipmi/ipmisensor.H>
 
 #include <sys/task.h>
 #include <initservice/taskargs.H>
@@ -190,8 +191,8 @@ void process_esel(msg_t *i_msg)
     else if((l_cc == IPMI::CC_OK) &&        // no error
             (l_eid != 0))                   // and it's an errorlog
     {
-        // eSEL successfully sent to the BMC - 'send' an ack to the errlmanager
-        IPMI_TRAC(INFO_MRK "Sending ack for eid 0x%.8X", l_eid);
+        // eSEL successfully sent to the BMC - have errlmanager do the ack
+        IPMI_TRAC(INFO_MRK "Doing ack for eid 0x%.8X", l_eid);
         ERRORLOG::ErrlManager::errlAckErrorlog(l_eid);
     }
 
@@ -216,6 +217,14 @@ void send_esel(eselInitData * i_data,
 
     do{
         const size_t l_eSELlen = i_data->dataSize;
+
+        if (l_eSELlen == 0)
+        {
+            IPMI_TRAC(INFO_MRK "no eSEL data present, skipping to SEL");
+            // sending sensor SELs only, not the eSEL
+            break;
+        }
+
         uint8_t reserveID[2] = {0,0};
         // we need to send down the extended sel data (eSEL), which is
         // longer than the protocol buffer, so we need to do a reservation and
@@ -339,41 +348,57 @@ void send_esel(eselInitData * i_data,
     }while(0);
 
     // if eSEL wasn't created due to an error, we don't want to continue
-    if(o_err == NULL)
+    if (o_err == NULL)
     {
-        // if the eSEL wasn't created due to a bad completion code, we will
-        // still try to send down a SEL that we create, which will contain
-        // the eSEL recordID (if it was successful)
-        delete [] data;
-        len = sizeof(IPMISEL::selRecord);
-        data = new uint8_t[len];
-
-        // copy in the SEL event record data
-        memcpy(data, i_data->eSel, sizeof(IPMISEL::selRecord));
-        // copy the eSEL recordID (if it was created) into the extra data area
-        data[offsetof(selRecord,event_data2)] = esel_recordID[1];
-        data[offsetof(selRecord,event_data3)] = esel_recordID[0];
-
-        // use local cc so that we don't corrupt the esel from above
-        IPMI::completion_code l_cc = IPMI::CC_UNKBAD;
-        TRACFBIN( g_trac_ipmi, INFO_MRK"add_sel:", data, len);
-        o_err = IPMI::sendrecv(IPMI::add_sel(),l_cc,len,data);
-        if(o_err)
+        // caller wants us to NOT create sensor SEL
+        if ((i_data->eSel[offsetof(selRecord,sensor_type)] == SENSOR::INVALID_TYPE) &&
+            (i_data->eSel[offsetof(selRecord,sensor_number)] == TARGETING::UTIL::INVALID_IPMI_SENSOR)
+           )
         {
-            IPMI_TRAC(ERR_MRK "error from add_sel");
-        }
-        else if (l_cc != IPMI::CC_OK)
-        {
-            IPMI_TRAC(ERR_MRK "failed add_sel, l_cc %02x", l_cc);
+            IPMI_TRAC(INFO_MRK "Invalid sensor type/number - NOT sending sensor SELs");
         }
         else
         {
-            // if CC_OK, then len = 2 and data contains the recordID of the new SEL
-            storeReserveRecord(sel_recordID,data);
+            // if the eSEL wasn't created due to a bad completion code, we will
+            // still try to send down a SEL that we create, which will contain
+            // the eSEL recordID (if it was successful)
+            if (data)
+            {
+                delete [] data;
+            }
+            len = sizeof(IPMISEL::selRecord);
+            data = new uint8_t[len];
+
+            // copy in the SEL event record data
+            memcpy(data, i_data->eSel, sizeof(IPMISEL::selRecord));
+            // copy the eSEL recordID (if it was created) into the extra data area
+            data[offsetof(selRecord,event_data2)] = esel_recordID[1];
+            data[offsetof(selRecord,event_data3)] = esel_recordID[0];
+
+            // use local cc so that we don't corrupt the esel from above
+            IPMI::completion_code l_cc = IPMI::CC_UNKBAD;
+            TRACFBIN( g_trac_ipmi, INFO_MRK"add_sel:", data, len);
+            o_err = IPMI::sendrecv(IPMI::add_sel(),l_cc,len,data);
+            if(o_err)
+            {
+                IPMI_TRAC(ERR_MRK "error from add_sel");
+            }
+            else if (l_cc != IPMI::CC_OK)
+            {
+                IPMI_TRAC(ERR_MRK "failed add_sel, l_cc %02x", l_cc);
+            }
+            else
+            {
+                // if CC_OK, then len=2 and data contains the recordID of the new SEL
+                storeReserveRecord(sel_recordID,data);
+            }
         }
     }
 
-    delete[] data;
+    if (data)
+    {
+        delete [] data;
+    }
 
     IPMI_TRAC(EXIT_MRK
         "send_esel o_err=%.8X, o_cc=x%.2x, sel recID=x%x%x, esel recID=x%x%x",

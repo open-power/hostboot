@@ -304,10 +304,4 @@ bool rt_processCallout(errlHndl_t &io_errl,
     return true;
 }
 
-void ErrlManager::errlAckErrorlog(uint32_t i_eid)
-{
-    ERRORLOG::theErrlManager::instance().ackErrLogInPnor(i_eid);
-    return;
-}
-
 } // End namespace
