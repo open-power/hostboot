@@ -23,5 +23,4 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_pm_ocb_indir_setup_circular
-libp9_pm_ocb_indir_setup_circular_DEPLIBS += p9_pm_utils
 $(call BUILD_PROCEDURE)
