@@ -1086,7 +1086,7 @@ int main(int argc, char *argv[])
 {
     std::ifstream l_attributeFile;
     bool err = false;
-    bool l_injectECC = true;
+    bool l_injectECC = false;
     char * l_option;
     const char * l_attributeString;
 
@@ -1136,7 +1136,7 @@ int main(int argc, char *argv[])
                        "\t\t'-f' - prevent ECC bytes from being inserted.\n"
                        "\t\t'-t' - allow ECC bytes to be inserted.\n"
                        "\t\t'-p' - permanent override. [FAPI attributes not allowed]\n"
-                       "\t\tno option - same as 't' option.\n\n");
+                       "\t\tno option - same as '-f' option.\n\n");
 
                 return 0;
         }
