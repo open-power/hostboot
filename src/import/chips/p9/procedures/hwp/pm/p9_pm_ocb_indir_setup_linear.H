@@ -26,10 +26,10 @@
 /// @brief  Configure OCB Channel for Linear Streaming or Non-streaming mode
 
 // *HWP HWP Owner       : Amit Kumar <akumar3@us.ibm.com>
-// *HWP Backup HWP Owner:
+// *HWP Backup HWP Owner: Greg Still <stillgs@us.ibm.com>
 // *HWP FW Owner        : Bilicon Patil <bilpatil@in.ibm.com>
 // *HWP Team            : PM
-// *HWP Level           : 1
+// *HWP Level           : 2
 // *HWP Consumed by     : HS
 
 #ifndef _P9_PM_OCB_INDIR_SETUP_LINEAR_H_
@@ -40,8 +40,8 @@
 
 typedef fapi2::ReturnCode (*p9_pm_ocb_indir_setup_linear_FP_t)
 (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
- p9ocb::PM_OCB_CHAN_NUM,
- p9ocb::PM_OCB_CHAN_TYPE,
+ const p9ocb::PM_OCB_CHAN_NUM,
+ const p9ocb::PM_OCB_CHAN_TYPE,
  const uint32_t);
 
 extern "C"
@@ -59,8 +59,8 @@ extern "C"
 
     fapi2::ReturnCode p9_pm_ocb_indir_setup_linear(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        p9ocb::PM_OCB_CHAN_NUM  i_ocb_chan,
-        p9ocb::PM_OCB_CHAN_TYPE i_ocb_type,
+        const p9ocb::PM_OCB_CHAN_NUM  i_ocb_chan,
+        const p9ocb::PM_OCB_CHAN_TYPE i_ocb_type,
         const uint32_t      i_ocb_bar);
 
 } // extern "C"
