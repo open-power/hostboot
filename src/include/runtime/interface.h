@@ -497,9 +497,25 @@ typedef struct runtimeInterfaces
 
 } runtimeInterfaces_t;
 
+// For internal use. These routines are to be called after all other set up
+// is complete.
+// This approach is taken due to complication with linking to rt_main, the
+// order of static global initializers, constructors, and vfs_module_init.
+
 #ifdef __HOSTBOOT_RUNTIME
+struct postInitCalls_t
+{
+    /**
+     * @brief Apply ATTR_TMP overrides
+     *
+     */
+    void (*callApplyTempOverrides)();
+
+};
+
 extern hostInterfaces_t* g_hostInterfaces;
 runtimeInterfaces_t* getRuntimeInterfaces();
+postInitCalls_t* getPostInitCalls();
 #endif
 
 #endif //__HOSTBOOT_RUNTIME_INTERFACE_VERSION_ONLY

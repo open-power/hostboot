@@ -47,6 +47,17 @@ namespace ATTN_RT
      */
     int enableAttns(void)
     {
+        // TODO RTC 134050 Post init setups are temporarily here because
+        // Opal has not set up pnor or ipmi before calling rt_main.
+        static bool onlyCallApplyTempOverridesOnce = false;
+        if (!onlyCallApplyTempOverridesOnce)
+        {
+            ATTN_SLOW("ATTN_RT::enableAttns - call initialzation routines");
+            postInitCalls_t* rtPost = getPostInitCalls();
+            rtPost->callApplyTempOverrides();
+            onlyCallApplyTempOverridesOnce = true;
+        }
+
         ATTN_SLOW(ENTER_MRK"ATTN_RT::enableAttns");
 
         int rc = 0;

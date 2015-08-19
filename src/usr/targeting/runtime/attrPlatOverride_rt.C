@@ -86,6 +86,37 @@ int apply_attr_override(uint8_t* i_data,
     return rc;
 }
 
+void applyTempOverrides()
+{
+    TRACFCOMP(g_trac_targeting, ENTER_MRK"applyTempOverrides");
+    errlHndl_t l_err = NULL;
+    PNOR::SectionInfo_t l_info;
+    // Get temporary attribute overrides from pnor
+    l_err = PNOR::getSectionInfo(PNOR::ATTR_TMP, l_info);
+
+    // Attr override sections are optional so just delete error
+    if (l_err)
+    {
+        TRACFCOMP(g_trac_targeting," HBRT: error getting ATTR_TMP pnor "
+                  "section. Not applying temp attributes.");
+        delete l_err;
+        l_err = NULL;
+    }
+    else
+    {
+        TRACFCOMP(g_trac_targeting," HBRT: processing temporary "
+                  "overrides");
+        l_err = TARGETING::getAttrOverrides(l_info);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_targeting," HBRT: Failed applyTempOverrides:"
+                      " getting temporary overrides");
+            errlCommit( l_err, TARG_COMP_ID );
+        }
+    }
+
+    TRACFCOMP(g_trac_targeting, EXIT_MRK"applyTempOverrides");
+}
 //------------------------------------------------------------------------
 
 struct registerTargRT
@@ -94,6 +125,8 @@ struct registerTargRT
     {
         runtimeInterfaces_t * rt_intf = getRuntimeInterfaces();
         rt_intf->apply_attr_override = &apply_attr_override;
+        postInitCalls_t * rt_post = getPostInitCalls();
+        rt_post->callApplyTempOverrides = &applyTempOverrides;
     }
 };
 

@@ -67,6 +67,12 @@ namespace RT_TARG
      */
     errlHndl_t getHbTarget(rtChipId_t i_rt_chip_id,
                            TARGETING::Target *& o_target);
+
+    /**
+     * @brief Apply ATTR_TMP overrides to be available for run time
+     */
+    void applyTempOverrides( );
+
 };
 
 #endif

@@ -199,10 +199,15 @@ errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
             // Only apply attribute override if in the correct PNOR section
             else
             {
+                TRACFCOMP(g_trac_targeting,"getAttrOverrides:"
+                            " override into TankLayer 0x%X",
+                            l_pAttrOverSec->iv_layer);
+
                 // Get the AttributeTank that corresponds to the TankLayer in
                 // the AttrOverrideSection. Enum starts with TANK_LAYER_NONE
                 // so need to subtract 1
-                AttributeTank* l_ptank = l_pOverTanks[l_pAttrOverSec->iv_layer - 1];
+                AttributeTank* l_ptank =
+                                     l_pOverTanks[l_pAttrOverSec->iv_layer - 1];
 
                 // Create serialized chunck with AttrOverrideSection data
                 AttributeTank::AttributeSerializedChunk l_chunk;
