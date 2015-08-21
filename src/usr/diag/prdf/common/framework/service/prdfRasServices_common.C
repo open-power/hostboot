@@ -134,7 +134,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     HWSV::hwsvDiagUpdate l_diagUpdate = HWSV::HWSV_DIAG_NEEDED;
 
     GardAction::ErrorType prdGardErrType;
-    HWAS::GARD_ErrorType gardErrType = HWAS::GARD_NULL;
+    HWAS::GARD_ErrorType gardPolicy = HWAS::GARD_NULL;
     HWAS::DeconfigEnum deconfigState = HWAS::NO_DECONFIG;
 
     bool ForceTerminate = false;
@@ -311,11 +311,11 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     prdGardErrType = io_sdc.QueryGard();
     switch ( prdGardErrType )
     {
-        case GardAction::NoGard:     gardErrType = HWAS::GARD_NULL;       break;
-        case GardAction::Predictive: gardErrType = HWAS::GARD_Predictive; break;
-        case GardAction::Fatal:      gardErrType = HWAS::GARD_Fatal;      break;
+        case GardAction::NoGard:     gardPolicy = HWAS::GARD_NULL;       break;
+        case GardAction::Predictive: gardPolicy = HWAS::GARD_Predictive; break;
+        case GardAction::Fatal:      gardPolicy = HWAS::GARD_Fatal;      break;
         default:
-            gardErrType = HWAS::GARD_NULL;
+            gardPolicy = HWAS::GARD_NULL;
     }
 
     //**************************************************************
@@ -437,7 +437,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
     // Deferred Deconfig should be used throughout all of Hostboot (both
     // checkForIplAttns() and MDIA).
-    if ( HWAS::GARD_NULL != gardErrType )
+    if ( HWAS::GARD_NULL != gardPolicy )
     {
         deferDeconfig = true;
         deconfigState = HWAS::DECONFIG;
@@ -474,50 +474,84 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         l_diagUpdate = HWSV::HWSV_DIAG_NOT_NEEDED;
     }
 
-    //**************************************************************
-    // Add each mru/callout to the error log.
-    //**************************************************************
+    //--------------------------------------------------------------------------
+    // Get the global gard policy.
+    //--------------------------------------------------------------------------
+
+    // Apply special policies for OPAL.
+    if ( isHyprConfigOpal() &&                          // OPAL is used
+         !isMfgAvpEnabled() && !isMfgHdatAvpEnabled() ) // No AVPs running
+    {
+        // OPAL has requested that we disable garding for predictive errors
+        // found at runtime.
+        if ( HWAS::GARD_Predictive == gardPolicy )
+        {
+            #if !defined(__HOSTBOOT_MODULE) // FSP only
+
+            if ( isHyprRunning() ) gardPolicy = HWAS::GARD_NULL;
+
+            #elif defined(__HOSTBOOT_RUNTIME) // HBRT only
+
+            gardPolicy = HWAS::GARD_NULL;
+
+            #endif
+        }
+        // OPAL has requested that we diable garding for fatal errors (system
+        // checkstops) that could have been caused by a software generated
+        // attention at runtime. This will be determined if there is a software
+        // callout with higher priority than a hardware callout.
+        else if ( HWAS::GARD_Fatal == gardPolicy &&
+                  sappSwNoGardReq && sappHwNoGardReq ) // Gard requirements met
+        {
+            #if !defined(__HOSTBOOT_MODULE) // FSP only
+
+            if ( isHyprRunning() ) gardPolicy = HWAS::GARD_NULL;
+
+            #elif !defined(__HOSTBOOT_RUNTIME) // Hostboot only
+
+            // Checkstop analysis is only done at the beginning of the IPL,
+            // regardless if the checkstop actually occurred during the IPL or
+            // at runtime. We will need to check the IPL state in FIR data to
+            // determine when the checkstop occurred.
+
+            // TODO RTC 119791: With the current implementation we know the
+            // checkstop occured at runtime because we currently do not have
+            // IPL checkstop analysis support.
+            gardPolicy = HWAS::GARD_NULL;
+
+            #endif
+        }
+
+        // Update prdGardErrType to match gardPolicy.
+        if ( HWAS::GARD_NULL == gardPolicy )
+            prdGardErrType = GardAction::NoGard;
+    }
+
+    //--------------------------------------------------------------------------
+    // Get the global deconfig policy (must be done after setting gard policy).
+    //--------------------------------------------------------------------------
 
     // Change deconfigState only based on Gard Types.
     // This only affects FSP code since Hostboot macro is no-op.
     // This is needed for FSP Reconfig Loop to work.
-    if ( HWAS::GARD_NULL != gardErrType )
+    if ( HWAS::GARD_NULL != gardPolicy )
     {
         PRDF_RECONFIG_LOOP(deconfigState);
     }
 
-    // OPAL has requested that we not gard any hardware if it is possible that
-    // software generated the attention. This will be determined if there is a
-    // software callout with higher priority than a hardware callout.
-    if ( sappSwNoGardReq && sappHwNoGardReq &&          // Gard requirements met
-         isHyprConfigOpal() &&                          // OPAL is used
-         !isMfgAvpEnabled() && !isMfgHdatAvpEnabled() ) // No AVPs running
-    {
-        #ifdef __HOSTBOOT_MODULE
-        // TODO RTC 119791: With the current implementation, we know the
-        // checkstop occured at runtime if we are doing checkstop analysis.
-        // Eventually we will add checkstop handling during the IPL. In this
-        // case, we will need to add a flag to the FIRDATA indicating when the
-        // FIRDATA was collected.
-        if ( isHyprRunning() || (MACHINE_CHECK == i_attnType) )
-        #else
-        if ( isHyprRunning() )
-        #endif
-        {
-            gardErrType    = HWAS::GARD_NULL;
-            prdGardErrType = GardAction::NoGard;
-        }
-    }
+    //**************************************************************
+    // Add each mru/callout to the error log.
+    //**************************************************************
 
     for ( SDC_MRU_LIST::const_iterator it = mruList.begin();
           it < mruList.end(); ++it )
     {
         thispriority = it->priority;
         thiscallout = it->callout;
-        HWAS::GARD_ErrorType tmpGard = gardErrType;
+        HWAS::GARD_ErrorType tmpGard = gardPolicy;
         HWAS::DeconfigEnum tmpDeconfig = deconfigState;
 
-        if( HWAS::GARD_NULL != gardErrType )
+        if( HWAS::GARD_NULL != gardPolicy )
         {
             if( NO_GARD == it->gardState )
             {
@@ -598,7 +632,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // We can not check for ERRL severity here as there are some cases
     // e.g. DD02 where we create a Predictive error log but callouts
     // are not predictive.
-    if ( HWAS::GARD_Predictive == gardErrType )
+    if ( HWAS::GARD_Predictive == gardPolicy )
     {
         deallocateDimms( mruList );
     }
