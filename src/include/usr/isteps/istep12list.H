@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -105,6 +105,8 @@ const DepModInfo g_istep12Dependancies = {
 #ifndef CONFIG_VPO_COMPILE
         DEP_LIB(libmc_config.so),
 #endif
+        DEP_LIB(libsbe.so),
+        DEP_LIB(libbuild_winkle_images.so),
         NULL
     }
 };

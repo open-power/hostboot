@@ -2049,6 +2049,7 @@
     <simpleType><uint32_t></uint32_t></simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_FREQ_PB</id>
         <macro>DIRECT</macro>
@@ -2083,6 +2084,7 @@
     <simpleType><uint32_t></uint32_t></simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_FREQ_X</id>
         <macro>DIRECT</macro>
@@ -6120,7 +6122,7 @@ firmware notes: Used as override attribute for pstate procedure
             <default>2000</default>
         </uint32_t>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -15695,7 +15697,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE</id>
-    <description>Machine Readable Workbook enablement of the HWP code to adjust 
+    <description>Machine Readable Workbook enablement of the HWP code to adjust
     the VMEM regulator power limit based on number of installed DIMMs.
     </description>
     <simpleType>
@@ -15731,7 +15733,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM</id>
-    <description>Machine Readable Workbook VMEM regulator power limit per CDIMM 
+    <description>Machine Readable Workbook VMEM regulator power limit per CDIMM
     assuming a full configuration. Units in cW.
     </description>
     <simpleType>
@@ -15770,7 +15772,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>MRW_NEST_CAPABLE_FREQUENCIES_SYS</id>
-    <description>The NEST frequencies that the system can support.  This is a bit-wise value that represents which of the possible nest frequencies are supported : 2.0GHz, 2.4GHz, or both.
+    <description>The NEST frequencies that the system can support.  This is a bit-wise value that represents which of the possible nest frequencies are supported. : 2.0GHz, 2.4GHz, or both. New frequencies should be added in ascending order.
     </description>
     <simpleType>
         <enumeration>

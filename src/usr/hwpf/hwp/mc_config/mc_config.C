@@ -44,16 +44,19 @@
 
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
+#include    <initservice/initserviceif.H>
 #include    <errl/errlentry.H>
 
 #include    <hwpisteperror.H>
+#include    <hwpf/hwpf_reasoncodes.H>
 #include    <errl/errludtarget.H>
 
 #include    <initservice/isteps_trace.H>
-
+#include    <sbe/sbeif.H>
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
+#include    <attributetraits.H>
 
 //  fapi support
 #include    <fapi.H>
@@ -79,6 +82,8 @@
 #include    "mss_volt/mss_volt_dimm_count.H"
 
 #include <config.h>
+#include <util/align.H>
+#include <util/algorithm.H>
 
 namespace   MC_CONFIG
 {
@@ -129,7 +134,8 @@ void set_eff_config_attrs_helper( const EFF_CONFIG_ATTRIBUTES_BASE i_base,
     // Get Node Target
     TARGETING::Target* sysTgt = NULL;
     TARGETING::targetService().getTopLevelTarget(sysTgt);
-    assert(sysTgt != NULL,"System target was NULL.");
+    assert(sysTgt != NULL,"set_eff_config_attrs_helper: "
+                        "System target was NULL.");
 
     TARGETING::TargetHandleList l_nodeList;
 
@@ -467,7 +473,8 @@ errlHndl_t setMemoryVoltageDomainOffsetVoltage()
 
     TARGETING::Target* pSysTarget = NULL;
     TARGETING::targetService().getTopLevelTarget(pSysTarget);
-    assert(pSysTarget != NULL,"System target was NULL.");
+    assert(pSysTarget != NULL,"setMemoryVoltageDomainOffsetVoltage: "
+                                        "System target was NULL.");
 
     typename AttributeTraits< OFFSET_DISABLEMENT_ATTR >::Type
         disableOffsetVoltage =
@@ -717,13 +724,16 @@ void  call_mss_volt_hwp (std::vector<TARGETING::ATTR_VMEM_ID_type>& i_VmemList,
                 l_membufFapiTargets.push_back( l_membuf_fapi_target );
             }
         }
+
+        TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Calling mss_volt_hwp...");
         FAPI_INVOKE_HWP(l_err, mss_volt_hwp, l_membufFapiTargets);
 
         //  process return code.
         if ( l_err )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR 0x%.8X:  mss_volt_dimm_count HWP( ) ",
+                    "ERROR 0x%.8X:  mss_volt HWP( ) ",
                     l_err->reasonCode());
 
             // Create IStep error log and cross reference to error that occurred
@@ -872,7 +882,411 @@ void* call_mss_volt( void *io_pArgs )
 
     return l_StepError.getErrorHandle();
 }
+/**
+ * @brief - this utility function takes in the frequency in
+ *          ATTR_MRW_NEST_CAPABLE_FREQUENCIES_SYS and returns the corresponding
+ *          dmi bus speed from ATTR_MSS_NEST_CAPABLE_FREQUENCIES
+ *
+ * @param[in] i_freq - the input frequency
+ * @param[in/out] io_speed - the corresponding dmi bus speed
+ */
+void sysFreq_to_dmiSpeed(ATTR_MRW_NEST_CAPABLE_FREQUENCIES_SYS_type i_freq,
+                         ATTR_MSS_NEST_CAPABLE_FREQUENCIES_type & io_speed)
+{
+    switch(i_freq)
+    {
+        case TARGETING::MRW_NEST_CAPABLE_FREQUENCIES_SYS_UNSUPPORTED_FREQ:
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Unsupported nest freq!");
+            io_speed = 0;
+            break;
+        case TARGETING::MRW_NEST_CAPABLE_FREQUENCIES_SYS_2000_MHZ:
+            io_speed=fapi::ENUM_ATTR_MSS_NEST_CAPABLE_FREQUENCIES_8_0G;
+            break;
+        case TARGETING::MRW_NEST_CAPABLE_FREQUENCIES_SYS_2400_MHZ:
+            io_speed=fapi::ENUM_ATTR_MSS_NEST_CAPABLE_FREQUENCIES_9_6G;
+            break;
+        case TARGETING::MRW_NEST_CAPABLE_FREQUENCIES_SYS_2000_MHZ_OR_2400_MHZ:
+            io_speed=fapi::ENUM_ATTR_MSS_NEST_CAPABLE_FREQUENCIES_8_0G_OR_9_6G;
+            break;
+        default:
+            io_speed = 0;
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Invalid nest freq!");
+    }
+}
 
+/**
+ * @brief - this utility function takes in the dmi bus speed enumeration
+ *          value as described in MSS_NEST_CAPABLE_FREQUENCIES and outputs
+ *          the actual corresponding nest frequency in MHz supported by the
+ *          given dmi bus speed.
+ *
+ * @param[in] i_speed - the input dmi bus speed
+ * @param[in/out] io_freq - the corresponding frequency in MHz
+ *
+ */
+void dmiSpeed_to_sysFreq(ATTR_MSS_NEST_CAPABLE_FREQUENCIES_type i_speed,
+                         ATTR_NEST_FREQ_MHZ_type & io_freq)
+{
+    switch(i_speed)
+    {
+        case fapi::ENUM_ATTR_MSS_NEST_CAPABLE_FREQUENCIES_8_0G:
+            io_freq = 2000;
+            break;
+        case fapi::ENUM_ATTR_MSS_NEST_CAPABLE_FREQUENCIES_9_6G:
+            io_freq = 2400;
+            break;
+        default:
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Invalid dmi speed!");
+            io_freq = 0;
+    }
+}
+
+
+
+//
+// calloutChildDimms
+//
+void calloutChildDimms(errlHndl_t & io_errl, const TARGETING::Target * i_membuf)
+{
+    TargetHandleList l_dimmList;
+
+    // Get child dimms
+    getChildAffinityTargets( l_dimmList,
+                             i_membuf,
+                             CLASS_NA,
+                             TYPE_DIMM );
+
+    if( !l_dimmList.empty())
+    {
+        // iterate over the DIMMs and call them out
+        TargetHandleList::iterator l_iter = l_dimmList.begin();
+
+        for(;l_iter != l_dimmList.end(); ++l_iter)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "Calling out DIMM Target huid = %x",
+                      get_huid(*l_iter));
+
+            io_errl->addHwCallout( *l_iter,
+                                   HWAS::SRCI_PRIORITY_MED,
+                                   HWAS::DELAYED_DECONFIG,
+                                   HWAS::GARD_NULL );
+        }
+    }
+    else
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "No child DIMMs found!");
+    }
+}
+
+
+// TODO RTC 135720 - Support for mixed DIMM configuration with 32GB DIMMs.
+
+/**
+ * @brief - Recursive utility function for finding the max dmi
+ *          bus speed to run at based on the nest dmi bus speed
+ *          and the membuf's dmi bus speed
+ *
+ * @param[in] i_iter - Iterator over the list of membufs.
+ * @param[in] i_membufs - Pointer to the list of membufs.
+ * @param[in/out] io_currentMaxSpeed - The speed to run at will be returned here
+ * @param[in] i_capableNestDmiBusSpeed - The nest capable dmi bus speed.
+ */
+void findMaxSpdAndDeconfigIncompatible(TargetHandleList::iterator i_iter,
+              TargetHandleList * i_membufs,
+              ATTR_MSS_NEST_CAPABLE_FREQUENCIES_type & io_currentMaxSpeed,
+              ATTR_MSS_NEST_CAPABLE_FREQUENCIES_type i_capableNestDmiBusSpeed )
+{
+    do
+    {
+        // Base Case: If we are at the end of the membuf list return
+        if(i_iter == i_membufs->end())
+        {
+            // find the left most bit of the max speed found. This bit
+            // represents the highest dmi bus speed setting we can support
+            // across the nest and all membufs and the speed we will boot with.
+            io_currentMaxSpeed = ALIGN_POW2_DOWN(io_currentMaxSpeed);
+            break;
+        }
+
+        // Get the current membuf's dmi bus speed
+        ATTR_MSS_NEST_CAPABLE_FREQUENCIES_type l_currentMembufSpd =
+            (*i_iter)->getAttr<TARGETING::ATTR_MSS_NEST_CAPABLE_FREQUENCIES>();
+
+        // update current max speed.
+        // Max is restricted by nest capable dmi bus speed
+        if(((l_currentMembufSpd & i_capableNestDmiBusSpeed) != 0) &&
+                (l_currentMembufSpd > io_currentMaxSpeed))
+        {
+            io_currentMaxSpeed = l_currentMembufSpd;
+        }
+
+        //Save the current membuf for when we come back from recursive call.
+        TARGETING::Target * l_currentMembuf = (*i_iter);
+
+        // Recursive call to go down the list of membufs and find the max
+        // capable dmi speed across the nest and membufs.
+        findMaxSpdAndDeconfigIncompatible(++i_iter,
+                                          i_membufs,
+                                          io_currentMaxSpeed,
+                                          i_capableNestDmiBusSpeed );
+
+        // deconfigure any membufs with incompatible
+        // speeds on the way up the stack
+        if((l_currentMembufSpd & io_currentMaxSpeed) == 0)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Deconfiguring Membuf Huid: %X, membuf speed: %d",
+                    TARGETING::get_huid(l_currentMembuf),
+                    l_currentMembufSpd);
+            // Membuf has incompatible frequency. Deconfigure it.
+            /*@
+             * @errortype
+             * @moduleid    MOD_FIND_MAX_DMI_SPD
+             * @reasoncode  RC_INVALID_FREQ
+             * @userdata1   HUID of membuf
+             * @userdata2   [0:7] membuf frequency enumeration value
+             * @userdata2   [8:15] dmi bus speed enumeration value
+             * @devdesc     Invalid nest frequency found for given membuf
+             * @custdesc    Invalid memory configuration
+             */
+            errlHndl_t l_err = new ERRORLOG::ErrlEntry(
+                                          ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          fapi::MOD_FIND_MAX_DMI_SPD,
+                                          fapi::RC_INVALID_FREQ,
+                                          TARGETING::get_huid(l_currentMembuf),
+                                          TO_UINT64(TWO_UINT8_TO_UINT16
+                                          (l_currentMembufSpd,
+                                           i_capableNestDmiBusSpeed)));
+
+            l_err->addHwCallout(l_currentMembuf, HWAS::SRCI_PRIORITY_HIGH,
+                                          HWAS::DELAYED_DECONFIG,
+                                          HWAS::GARD_NULL );
+            l_err->addProcedureCallout(
+                    HWAS::EPUB_PRC_MEMORY_PLUGGING_ERROR,
+                    HWAS::SRCI_PRIORITY_HIGH );
+
+
+            // add hw callouts for current membuf child DIMMs
+            calloutChildDimms( l_err, l_currentMembuf );
+
+            errlCommit( l_err, HWPF_COMP_ID );
+            l_err = NULL;
+        }
+    }while( 0 );
+}
+
+
+//
+// setNestBasedOffDimms
+//
+errlHndl_t setNestBasedOffDimms()
+{
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ENTER_MRK"mc_config::setNestBasedOffDimms()");
+    errlHndl_t l_err = NULL;
+    bool l_isGoldenSide = false;
+    ATTR_MRW_NEST_CAPABLE_FREQUENCIES_SYS_type l_capableNestFreq =
+            MRW_NEST_CAPABLE_FREQUENCIES_SYS_UNSUPPORTED_FREQ;
+
+    ATTR_MSS_NEST_CAPABLE_FREQUENCIES_type l_selectedBootSpeed =
+            fapi::ENUM_ATTR_MSS_NEST_CAPABLE_FREQUENCIES_NONE;
+
+    ATTR_MSS_NEST_CAPABLE_FREQUENCIES_type l_capableNestDmiBusSpeed =
+            fapi::ENUM_ATTR_MSS_NEST_CAPABLE_FREQUENCIES_NONE;
+
+    ATTR_MSS_NEST_CAPABLE_FREQUENCIES_type l_compatibleSpeed =
+            fapi::ENUM_ATTR_MSS_NEST_CAPABLE_FREQUENCIES_NONE;
+
+    ATTR_NEST_FREQ_MHZ_type l_maxFreqMhz = 0;
+
+    l_isGoldenSide = false;
+
+    do
+    {
+        // First, get the systems capable nest frequency. If 0, then stick with
+        // already set nest frequency
+        TARGETING::Target * l_sys = NULL;
+        targetService().getTopLevelTarget(l_sys);
+
+        uint32_t l_currentSysNestFreq =
+            l_sys->getAttr<TARGETING::ATTR_NEST_FREQ_MHZ>();
+
+        // Check to see if we booted from the Golden side
+        l_err = SBE::isGoldenSide(l_isGoldenSide);
+
+        if(l_err)
+        {
+            // Error getting Golden side. Proceeding as if booting from safe Golden side
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                ERR_MRK"setNestBasedOffDimms::isGoldenSide returned an error");
+            errlCommit( l_err, HWPF_COMP_ID );
+            l_isGoldenSide = true;
+        }
+
+        if(!l_isGoldenSide)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    INFO_MRK"Booting from normal side. use "
+                    "MRW_NEST_CAPABLE_FREQUENCIES_SYS to calculate best freq "
+                    "across  membufs");
+            l_capableNestFreq = l_sys->getAttr
+                                      <ATTR_MRW_NEST_CAPABLE_FREQUENCIES_SYS>();
+        }
+        else
+        {
+            // We booted using the Golden Side. Use NEST_FREQ_MHZ
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                   INFO_MRK"Booting from Golden Side. Use default NEST_FREQ"
+                           "to calculate best freq across membufs");
+            if(l_currentSysNestFreq == 2000)
+            {
+                l_capableNestFreq =
+                      TARGETING::MRW_NEST_CAPABLE_FREQUENCIES_SYS_2000_MHZ;
+            }
+            else if( l_currentSysNestFreq == 2400 )
+            {
+                l_capableNestFreq =
+                      TARGETING::MRW_NEST_CAPABLE_FREQUENCIES_SYS_2400_MHZ;
+            }
+            else
+            {
+                l_capableNestFreq =
+                  TARGETING::MRW_NEST_CAPABLE_FREQUENCIES_SYS_UNSUPPORTED_FREQ;
+            }
+
+        }
+
+        // convert the frequency to its corresponding dmi bus speed
+        sysFreq_to_dmiSpeed( l_capableNestFreq, l_capableNestDmiBusSpeed );
+
+        if(!l_capableNestDmiBusSpeed)
+        {
+            // Unknown frequency was given to sysFreq_to_dmiSpeed
+            // break out of function and proceed with value already in
+            // ATTR_NEST_FREQ_MHZ
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Invalid dmi speed. Proceeding with default value in NEST_FREQ_MHZ.");
+            break;
+        }
+
+        // Get a list of all the membufs
+        TargetHandleList l_membufs;
+        TARGETING::getAllChips(l_membufs, TYPE_MEMBUF);
+        TargetHandleList::iterator l_iter = l_membufs.begin();
+
+
+        // If the nest capable dmi bus speed can only support one setting,
+        // that speed is the speed we want to boot with.
+        // Deconfigure all membufs with incompatible speeds
+        if(Util::Algorithm::isPow2(l_capableNestDmiBusSpeed))
+        {
+            // We are forced to boot with the nest freq.
+            // Save boot freq for later.
+            l_selectedBootSpeed = l_capableNestDmiBusSpeed;
+
+
+            ATTR_MSS_NEST_CAPABLE_FREQUENCIES_type l_membufDmiBusSpeed = 0;
+            for(;l_iter != l_membufs.end(); ++l_iter )
+            {
+                l_membufDmiBusSpeed = (*l_iter)->getAttr
+                               <TARGETING::ATTR_MSS_NEST_CAPABLE_FREQUENCIES>();
+
+                // if the intersection of the membuf's and nest's dmi speed
+                // is zero, the membuf is incompatible with the nest and must be
+                // deconfigured.
+                l_compatibleSpeed = l_membufDmiBusSpeed &
+                                   l_capableNestDmiBusSpeed;
+
+                if(l_compatibleSpeed ==
+                        fapi::ENUM_ATTR_MSS_NEST_CAPABLE_FREQUENCIES_NONE )
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "Deconfiguring Membuf Huid: %X, membuf speed: %d",
+                        TARGETING::get_huid(*l_iter),
+                        l_membufDmiBusSpeed);
+                    // Membuf has incompatible frequency. Deconfigure it.
+                    /*@
+                     * @errortype
+                     * @moduleid    MOD_SET_NEST_FREQ
+                     * @reasoncode  RC_INVALID_FREQ
+                     * @userdata1   HUID of membuf
+                     * @userdata2   [0:7] membuf frequency enumeration value
+                     * @userdata2   [8:15] dmi bus speed enumeration value
+                     * @devdesc     Invalid nest found for given membuf
+                     * @custdesc    Invalid memory configuration
+                     */
+                    l_err = new ERRORLOG::ErrlEntry(
+                                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                             fapi::MOD_SET_NEST_FREQ,
+                                             fapi::RC_INVALID_FREQ,
+                                             TARGETING::get_huid(*l_iter),
+                                             TO_UINT64(TWO_UINT8_TO_UINT16
+                                             (l_membufDmiBusSpeed,
+                                              l_capableNestDmiBusSpeed)));
+
+                    l_err->addHwCallout(*l_iter, HWAS::SRCI_PRIORITY_HIGH,
+                                                   HWAS::DELAYED_DECONFIG,
+                                                   HWAS::GARD_NULL );
+
+
+                    // add hw callouts for current membufs child DIMMs
+                    calloutChildDimms( l_err, *l_iter);
+
+                    errlCommit( l_err, HWPF_COMP_ID );
+                    l_err = NULL;
+                    continue;
+                }
+
+            } // end for-loop
+
+        }
+        else
+        {
+            // The nest supports multiple frequencies. Find the max dmi bus
+            // speed shared by the nest and at least 1 membuf and boot with that
+            // speed.
+            findMaxSpdAndDeconfigIncompatible(l_iter,
+                                              &l_membufs,
+                                              l_selectedBootSpeed,
+                                              l_capableNestDmiBusSpeed);
+
+        }
+
+        //Convert the selected boot speed to frequency
+        dmiSpeed_to_sysFreq(l_selectedBootSpeed, l_maxFreqMhz);
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            "The max supported frequency across the processor and all dimms "
+            "is %d", l_maxFreqMhz );
+
+        if( l_maxFreqMhz == l_currentSysNestFreq)
+        {
+            //do nothing. go with current Nest freq, break.
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            "Nest did not need to change. Proceeding with default NEST_FREQ");
+            break;
+        }
+        else
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+              "DIMM config determined NEST_FREQ needs to be changed to %d",
+              l_maxFreqMhz );
+            //set all the attributes and trigger an sbe update
+            TARGETING::setFrequencyAttributes(l_sys, l_maxFreqMhz);
+            //trigger sbe update so we can update all the frequency attributes
+            l_err = SBE::updateProcessorSbeSeeproms(
+                                    SBE::SBE_UPDATE_ONLY_CHECK_NEST_FREQ);
+
+            if( l_err )
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                            "Error triggering sbe update.");
+            }
+        }
+    }while( 0 );
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "setNestBasedOffDimms exit" );
+    return l_err;
+}
 //
 //  Wrapper function to call mss_freq
 //
@@ -930,6 +1344,21 @@ void*    call_mss_freq( void *io_pArgs )
                      "SUCCESS :  mss_freq HWP");
         }
     } // End memBuf loop
+
+    if(! INITSERVICE::spBaseServicesEnabled() )
+    {
+        //set nest frequency based off present membufs
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            INFO_MRK"Setting Nest Frequency based off Membuf capability.");
+        l_err = setNestBasedOffDimms();
+
+        if( l_err )
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                ERR_MRK"Error: call_mss_freq()::setNestBasedOffDimms()");
+            l_StepError.addErrorDetails(l_err);
+        }
+    }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq exit" );
 

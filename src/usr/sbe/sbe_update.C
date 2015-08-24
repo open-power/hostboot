@@ -3976,6 +3976,68 @@ namespace SBE
 
     }
 
+/////////////////////////////////////////////////////////////////////
+    errlHndl_t isGoldenSide( bool & o_isGolden )
+    {
+        errlHndl_t l_errl = NULL;
+        o_isGolden = false;
+
+#ifndef CONFIG_SBE_UPDATE_SEQUENTIAL
+        do
+        {
+            // Get the master processor
+            TARGETING::Target * l_masterProc = NULL;
+            TARGETING::targetService().masterProcChipTargetHandle(l_masterProc);
+            assert( l_masterProc != NULL );
+
+            sbeSeepromSide_t l_currentSide = SBE_SEEPROM_INVALID;
+
+            // Get Seeprom side
+            l_errl = getSbeBootSeeprom(l_masterProc, l_currentSide);
+
+            if( l_errl )
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK
+                           "isGoldenSide() - Error returned "
+                           "from getSbeBootSeeprom() "
+                           "rc=0x%.4X, Target UID=0x%X",
+                           l_errl->reasonCode(),
+                           TARGETING::get_huid(l_masterProc));
+                break;
+            }
+
+            //Get PNOR Side
+            PNOR::SideId l_pnorSide = PNOR::WORKING;
+            PNOR::SideInfo_t l_sideInfo;
+
+            l_errl = PNOR::getSideInfo( l_pnorSide, l_sideInfo );
+
+            if( l_errl )
+            {
+                TRACFCOMP(g_trac_sbe, ERR_MRK
+                          "isGoldenSide() - Error returned "
+                          "from PNOR::getSideInfo() "
+                          "rc=0x%.4X, Target UID=0x%X",
+                          l_errl->reasonCode(),
+                          TARGETING::get_huid( l_masterProc ));
+                break;
+            }
+
+            // SBE_SEEPROM1 by itself does not imply golden side.
+            // cross reference sbe side with pnor side to make sure.
+            if(( l_currentSide == SBE_SEEPROM1 ) &&
+               (( l_sideInfo.isGolden ) || (l_sideInfo.hasOtherSide == false )))
+            {
+                TRACUCOMP(g_trac_sbe, INFO_MRK
+                          "sbe_update.C::isGoldenSide() - "
+                          "Booted from Golden side!");
+                o_isGolden = true;
+            }
+
+        }while( 0 );
+#endif
+        return l_errl;
+    }
 
 
 /////////////////////////////////////////////////////////////////////

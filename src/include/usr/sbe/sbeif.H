@@ -94,6 +94,22 @@ namespace SBE
      */
     errlHndl_t resolveProcessorSbeSeeproms();
 
+    /**
+     * @brief Determines whether we are on the Golden side or not
+     *
+     * @param[out] o_isGolden boolean, True if we are on Golden side, False
+     *                        otherwise.
+     *
+     * @return errlHndl_t Error log handle on failure.
+     *
+     * NOTE: -Golden Side means we booted from the Golden Seeprom pointing
+     *        at the Golden side of PNOR.
+     *       -Using master processor to make this determination.
+     */
+
+    errlHndl_t isGoldenSide( bool & o_isGolden );
+
+
 
 } //end namespace SBE
 

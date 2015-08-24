@@ -645,6 +645,53 @@ bool Target::uninstallWriteAttributeCallback()
     #undef TARG_FN
 }
 
+
+//******************************************************************************
+// setFrequencyAttributes
+//******************************************************************************
+void setFrequencyAttributes(Target * i_sys, uint32_t i_newNestFreq)
+{
+
+    // Calculate the new value for PIB_I2C_NEST_PLL using old freq attributes.
+    uint32_t l_oldPll = i_sys->getAttr<TARGETING::ATTR_PIB_I2C_NEST_PLL>();
+    uint32_t l_oldNestFreq = i_sys->getAttr<TARGETING::ATTR_NEST_FREQ_MHZ>();
+    uint32_t l_newPll = (i_newNestFreq * l_oldPll)/l_oldNestFreq;
+
+    //NEST_FREQ
+    i_sys->setAttr<TARGETING::ATTR_NEST_FREQ_MHZ>(i_newNestFreq);
+    TRACFCOMP(g_trac_targeting,
+            "ATTR_NEST_FREQ_MHZ getting set from %d to %d",
+            l_oldNestFreq,
+            i_newNestFreq );
+
+    //FREQ_X
+    uint32_t l_freqX = i_newNestFreq * 2;
+    i_sys->setAttr<TARGETING::ATTR_FREQ_X>(l_freqX);
+    TRACFCOMP(g_trac_targeting,
+            "ATTR_FREQ_X getting set to from %d to %d",
+            l_oldNestFreq*2,
+            l_freqX );
+
+    //FREQ_PB
+    uint32_t l_freqPb = i_newNestFreq;
+    i_sys->setAttr<TARGETING::ATTR_FREQ_PB>(l_freqPb);
+    TRACFCOMP(g_trac_targeting,
+            "ATTR_FREQ_PB getting set from %d to %d",
+            l_oldNestFreq,
+            l_freqPb );
+
+    //PIB_I2C_NEST_PLL
+    i_sys->setAttr<TARGETING::ATTR_PIB_I2C_NEST_PLL>(l_newPll);
+    TRACFCOMP(g_trac_targeting,
+            "ATTR_PIB_I2C_NEST_PLL getting set from %x to %x",
+            l_oldPll,
+            l_newPll);
+
+    return;
+}
+
+
+
 //******************************************************************************
 // Attribute Tanks
 //******************************************************************************

@@ -334,7 +334,7 @@ void* fapiPlatMalloc(size_t s)
 {
     if (s > PAGE_SIZE)
     {
-        s = ALIGN_TO_NEXT_POWER_OF_TWO_PAGES(s);
+        s = PAGE_SIZE * ALIGN_POW2(ALIGN_PAGE(s) / PAGE_SIZE);
     }
     return malloc(s);
 }

@@ -81,6 +81,8 @@ namespace fapi
         MOD_PLAT_ATTR_SVC_CEN_DQ_TO_DIMM_CONN_DQ   = 0x27,
         MOD_PLAT_ATTR_SVC_GET_MEM_ATTR_DATA        = 0x28,
         MOD_GET_WOF_FREQ_UPLIFT_SELECTED           = 0x29,
+        MOD_SET_NEST_FREQ                          = 0x2A,
+        MOD_FIND_MAX_DMI_SPD                       = 0x2B,
     };
 
     /**
