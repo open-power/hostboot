@@ -320,7 +320,12 @@ namespace TRACE
             }
 
             // Output full binary dump.
-            CONSOLE::displayf(i_td->iv_compName,"%s",output);
+            #ifdef CONFIG_CONSOLE_OUTPUT_TRACE_COMP_NAME
+            if ( !strcmp(i_td->iv_compName,
+                         CONFIG_CONSOLE_OUTPUT_TRACE_COMP_NAME) )
+            #endif
+            {CONSOLE::displayf(i_td->iv_compName,"%s",output);}
+
             free(output);
 
         }
