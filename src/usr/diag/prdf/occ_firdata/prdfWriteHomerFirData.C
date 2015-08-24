@@ -52,7 +52,7 @@ static uint32_t proc_glbl[] =
     0x570F001B, // GLOBAL_RE_FIR
 };
 
-static uint32_t proc_fir[] =
+static uint32_t proc_common_fir[] =
 {
     0x01010800, // OCCFIR
     0x01010840, // PMCFIR
@@ -82,16 +82,31 @@ static uint32_t proc_fir[] =
     0x04011800, // IOXFIR_3
     0x04011C00, // IOXFIR_2
     0x0404000a, // XBUS_LFIR
-    0x08010800, // PBESFIR
-    0x08010c00, // IOAFIR
-    0x0804000a, // ABUS_LFIR
-    0x09010800, // PBFFIR
     0x09011400, // IOPCIFIR_0
     0x09011840, // IOPCIFIR_1
     0x0904000a, // PCIE_LFIR
 };
 
-static uint32_t proc_reg[] =
+static uint32_t proc_murano_venice_fir[] =
+{
+    0x08010800, // PBESFIR
+    0x08010c00, // IOAFIR
+    0x0804000a, // ABUS_LFIR
+    0x09010800, // PBFFIR
+};
+
+static uint32_t proc_naples_fir[] =
+{
+    0x02012c00, // PCINESTFIR_3
+    0x02013180, // NXCXAFIR_1
+    0x0804000a, // NVLFIR
+    0x08010c00, // IONVFIR_0
+    0x08010c40, // IONVFIR_1
+    0x08013d80, // NPUFIR
+    0x09011c40, // IOPCIFIR_3
+};
+
+static uint32_t proc_common_reg[] =
 {
     // Global FIRs
     0x570F001A, // GLOBAL_SPA (for FFDC only)
@@ -196,15 +211,36 @@ static uint32_t proc_reg[] =
     0x02013419, // MCDFIR_ERROR_REPORT
     0x020F001E, // PB_CONFIG_REG
     0x020F001F, // PB_ERROR_REG
-    0x080F001E, // ABUS_CONFIG_REG
-    0x080F001F, // ABUS_ERROR_REG
-    0x0901083A, // PBFIR_IOF0_ERROR_REPORT
-    0x0901083B, // PBFIR_IOF1_ERROR_REPORT
     0x0901200A, // PCI_ETU_RESET_0
     0x0901240A, // PCI_ETU_RESET_1
     0x0901280A, // PCI_ETU_RESET_2
     0x090F001E, // PCI_CONFIG_REG
     0x090F001F, // PCI_ERROR_REG
+};
+
+static uint32_t proc_murano_venice_reg[] =
+{
+    // c_err_rpt and extra FFDC registers
+    0x0901083A, // PBFIR_IOF0_ERROR_REPORT
+    0x0901083B, // PBFIR_IOF1_ERROR_REPORT
+    0x080F001E, // ABUS_CONFIG_REG
+    0x080F001F, // ABUS_ERROR_REG
+};
+
+static uint32_t proc_naples_reg[] =
+{
+    // FIRs for FFDC only
+    0x09012c00, // PCICLOCKFIR_3
+
+    // c_err_rpt and extra FFDC registers
+    0x02012c1C, // PCINESTFIR3_ERROR_REPORT_0
+    0x02012c1D, // PCINESTFIR3_ERROR_REPORT_1
+    0x02012c1E, // PCINESTFIR3_ERROR_REPORT_2
+    0x0201318A, // NXCXAFIR_SNP_ERROR_REPORT
+    0x0201318B, // NXCXAFIR_APC1_ERROR_REPORT
+    0x0201318C, // NXCXAFIR_XPT_ERROR_REPORT
+    0x0201318D, // NXCXAFIR_TLBI_ERROR_REPORT
+    0x09012C0A, // PCI_ETU_RESET_3
 };
 
 static uint32_t ex_glbl[] =
@@ -621,6 +657,11 @@ errlHndl_t writeData( uint8_t * i_hBuf, size_t i_hBufSize,
 
     do
     {
+        // Check Processor type
+        bool isNaples = false;
+        TargetHandleList list = getFunctionalTargetList( TYPE_PROC );
+        if (list.size() > 0 && MODEL_NAPLES == getProcModel(list[0]))
+            isNaples = true;
 
         // Get the ultimate buffer size.
         size_t s[MAX_TRGTS][MAX_REGS];
@@ -630,8 +671,15 @@ errlHndl_t writeData( uint8_t * i_hBuf, size_t i_hBufSize,
 
         size_t sz_data = sizeof(o_data);       sz_hBuf += sz_data;
         s[PROC][GLBL]  = sizeof(proc_glbl);  sz_hBuf += s[PROC][GLBL];
-        s[PROC][FIR]   = sizeof(proc_fir);   sz_hBuf += s[PROC][FIR];
-        s[PROC][REG]   = sizeof(proc_reg);   sz_hBuf += s[PROC][REG];
+
+        s[PROC][FIR]   = sizeof(proc_common_fir) +
+            isNaples ? sizeof(proc_naples_fir) : sizeof(proc_murano_venice_fir);
+        sz_hBuf += s[PROC][FIR];
+
+        s[PROC][REG]   = sizeof(proc_common_reg) +
+            isNaples ? sizeof(proc_naples_reg) : sizeof(proc_murano_venice_reg);
+        sz_hBuf += s[PROC][REG];
+
         s[EX][GLBL]    = sizeof(ex_glbl);    sz_hBuf += s[EX][GLBL];
         s[EX][FIR]     = sizeof(ex_fir);     sz_hBuf += s[EX][FIR];
         s[EX][REG]     = sizeof(ex_reg);     sz_hBuf += s[EX][REG];
@@ -684,15 +732,27 @@ errlHndl_t writeData( uint8_t * i_hBuf, size_t i_hBufSize,
             o_data.counts[c][REG]   = s[c][REG]   / u32;
             o_data.counts[c][IDFIR] = s[c][IDFIR] / u64;
             o_data.counts[c][IDREG] = s[c][IDREG] / u64;
-        }
+}
 
         // Add everything to the buffer.
         uint32_t idx = 0;
+        uint32_t * notCommon = NULL; //Pointer to array of chip-specific regs
+        uint32_t notCommonSize = 0;  //Size of chip model specific array
 
         memcpy( &i_hBuf[idx], &o_data,    sz_data       ); idx += sz_data;
         memcpy( &i_hBuf[idx], proc_glbl,  s[PROC][GLBL] ); idx += s[PROC][GLBL];
-        memcpy( &i_hBuf[idx], proc_fir,   s[PROC][FIR]  ); idx += s[PROC][FIR];
-        memcpy( &i_hBuf[idx], proc_reg,   s[PROC][REG]  ); idx += s[PROC][REG];
+        memcpy( &i_hBuf[idx], proc_common_fir, sizeof(proc_common_fir) );
+        idx += sizeof(proc_common_fir);
+        notCommon = isNaples ? proc_naples_fir : proc_murano_venice_fir;
+        notCommonSize =
+            isNaples ? sizeof(proc_naples_fir) : sizeof(proc_murano_venice_fir);
+        memcpy( &i_hBuf[idx], notCommon, notCommonSize ); idx += notCommonSize;
+        memcpy( &i_hBuf[idx], proc_common_reg, sizeof(proc_common_reg) );
+        idx += sizeof(proc_common_reg);
+        notCommon = isNaples ? proc_naples_reg : proc_murano_venice_reg ;
+        notCommonSize =
+            isNaples ? sizeof(proc_naples_reg) : sizeof(proc_murano_venice_reg);
+        memcpy( &i_hBuf[idx], notCommon, notCommonSize ); idx += notCommonSize;
         memcpy( &i_hBuf[idx], ex_glbl,    s[EX][GLBL]   ); idx += s[EX][GLBL];
         memcpy( &i_hBuf[idx], ex_fir,     s[EX][FIR]    ); idx += s[EX][FIR];
         memcpy( &i_hBuf[idx], ex_reg,     s[EX][REG]    ); idx += s[EX][REG];
