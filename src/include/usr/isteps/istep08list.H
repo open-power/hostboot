@@ -120,6 +120,8 @@ const DepModInfo g_istep08Dependancies = {
         DEP_LIB(libnest_chiplets.so),
         DEP_LIB(libsecure_boot.so),
         DEP_LIB(libslave_sbe.so),
+        DEP_LIB(libsbe.so),
+        DEP_LIB(libbuild_winkle_images.so),
         NULL
     }
 };

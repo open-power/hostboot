@@ -347,9 +347,12 @@ void * call_host_slave_sbe_update( void * io_pArgs )
     do
     {
 
+        // Slave processors should now use Host I2C Access Method
+        I2C::i2cSetAccessMode( I2C::I2C_SET_ACCESS_MODE_PROC_HOST );
+
         // Reset I2C devices before trying to access the SBE SEEPROMs
         // Any error returned should not fail istep
-        l_errl = I2C::i2cResetActiveMasters( I2C::I2C_PROC_HOST );
+        l_errl = I2C::i2cResetActiveMasters( I2C::I2C_PROC_ALL );
         if (l_errl)
         {
             // Commit error and keep going

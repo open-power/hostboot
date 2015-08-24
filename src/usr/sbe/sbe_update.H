@@ -44,8 +44,20 @@ namespace SBE
     const size_t   SBE_MVPD_SHORT_IMAGE_VERSION_SIZE = 20;
 
     // Version of Struct stored in SEEPROM
-    const uint32_t SBE_SEEPROM_STRUCT_VERSION        = 0x00000001;
+    const uint32_t SBE_SEEPROM_STRUCT_VERSION        = 0x00000002;
     const uint32_t SBE_SEEPROM_STRUCT_SIMICS_VERSION = 0x5A5A5A5A;
+
+    // Number of versions supported
+    const uint8_t SBE_SEEPROM_STRUCT_MAX_VERSIONS    = 0x03;
+
+    // Size of supported versions - must be 8-byte aligned
+    const size_t  SBE_SEEPROM_STRUCT_SIZES[SBE_SEEPROM_STRUCT_MAX_VERSIONS] =
+                      {
+                        0,   // ver0: uninitialized - no size
+                        72,  // ver1: size of struct is 72 bytes
+                        80,  // ver2: size of struct is 80 bytes
+                      };
+
 
     // Constant written to SBE SEEPROM version struct to invalidate the
     // struct and the image - 'INVALID\0'
@@ -126,6 +138,7 @@ namespace SBE
         MVPD_UPDATE_COMPLETE   = 0x00000008,
         UPDATE_SBE             = 0x00000010,
         SBE_UPDATE_COMPLETE    = 0x00000020,
+        UPDATE_NEST_FREQ       = 0x00000100,
         UNSUPPORTED_SITUATION  = 0x80000000,
     };
 
@@ -138,17 +151,24 @@ namespace SBE
      *
      * NOTE: For ECC purposes, this must be 8-byte aligned,
      *       so pad data if necessary
-     *       struct_version 1: size = 4+64+4 = 72 (aligned)
+     *       struct_version 1: size = 4+4+64 = 72 (aligned)
+     *       struct_version 2: size = 4+4+64+4+4 = 80 (aligned)
      */
     struct sbeSeepromVersionInfo_t
     {
+        // The first 64-bits will be read out to check for struct_version
         uint32_t  struct_version;
         uint32_t  data_crc;
         uint8_t   image_version[SBE_IMAGE_VERSION_SIZE];
+
+        // New parameters for version 2: nest_freq_mhz and uin32_t/reserved
+        uint32_t  nest_freq_mhz;
+        uint32_t  reserved;      // reserved; added for alignment
     } PACKED;
 
     // This line forces a compile fail if struct is NOT 8-byte-alaigned
     CPPASSERT(0 == (sizeof(sbeSeepromVersionInfo_t) % 8));
+
 
     /**
      * @brief Struct of individual SBE entry in SBE and SBEC
@@ -208,6 +228,11 @@ namespace SBE
         bool                     seeprom_0_ver_ECC_fail;
         bool                     seeprom_1_ver_ECC_fail;
 
+        bool                     seeprom_0_ver_Nest_Freq_Mismatch;
+        bool                     seeprom_1_ver_Nest_Freq_Mismatch;
+        bool                     cur_seeprom_ver_Nest_Freq_Mismatch;
+        uint32_t                 mproc_nest_freq_mhz;
+
         sbeSeepromSide_t         cur_seeprom_side; // aka 'booted' side
         sbeSeepromSide_t         alt_seeprom_side;
         sbeSeepromSide_t         permanent_seeprom_side;
@@ -231,6 +256,10 @@ namespace SBE
         sbeTargetState_t() :
           target(NULL), target_is_master(false), ec(0x0),
           seeprom_0_ver_ECC_fail(false), seeprom_1_ver_ECC_fail(false),
+          seeprom_0_ver_Nest_Freq_Mismatch(false),
+          seeprom_1_ver_Nest_Freq_Mismatch(false),
+          cur_seeprom_ver_Nest_Freq_Mismatch(false),
+          mproc_nest_freq_mhz(0x0),
           customizedImage_size(0x0), customizedImage_crc(0x0),
           new_readBack_check(false),
           err_plid(0x0), err_eid(0x0), err_rc(0x0)
@@ -248,9 +277,13 @@ namespace SBE
      *
      * @param[io/out] io_sbeState   Struct containing SBE State of the target
      *
+     * @param[io/out] i_check_type  Determines if an early check should be run
+     *                              before collecting all of the information.
+     *
      * @return errlHndl_t    Error log handle on failure.
      */
-    errlHndl_t getSbeInfoState(sbeTargetState_t& io_sbeState);
+    errlHndl_t getSbeInfoState(sbeTargetState_t& io_sbeState,
+                               sbeUpdateCheckType& i_check_type);
 
     /**
      * @brief Analyze and Determine Update Actions for a specific target
@@ -499,6 +532,24 @@ namespace SBE
      */
     uint32_t trimBitMask(uint32_t i_mask,
                          size_t i_maxBits);
+
+
+    /**
+     * @brief Checks the Nest Frequency value stored in the the version struct
+     *        and compares it ot the NEST_FREQ_MHZ attribute of the system
+     *
+     * @param[io/out] io_sbeState   Struct containing SBE State of the target
+     *                              and is updated based on the situation
+     *
+     * @pre   seeprom_0_ver and seeprom_1_ver have been filled in
+     *
+     * @post  seeprom_0_ver_Nest_Freq_Mismatch,
+     *        seeprom_1_ver_Nest_Freq_Mismatch, and nest_freq_check_complete
+     *        are set.
+     *
+     * @return errlHndl_t    Error log handle on failure.
+     */
+    errlHndl_t checkNestFreqSettings(sbeTargetState_t& io_sbeState);
 
 
 } //end namespace SBE

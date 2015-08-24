@@ -444,9 +444,11 @@ class SBEUpdateTest: public CxxTest::TestSuite
             // set bad ec just for comparison to local_ec later
             sbeState.ec = 0xFF;
 
+            // send input part to perform all checks
+            sbeUpdateCheckType i_check_type = SBE_UPDATE_CHECK_ALL;
 
             total++;
-            err = getSbeInfoState(sbeState);
+            err = getSbeInfoState(sbeState, i_check_type);
             if(err)
             {
                 fails++;

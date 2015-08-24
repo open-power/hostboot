@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -52,6 +54,8 @@
 
 #include    <hwas/common/deconfigGard.H>
 #include    <hwas/common/hwasCommon.H>
+
+#include    <sbe/sbeif.H>
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
@@ -101,6 +105,35 @@ void*    call_fabric_erepair( void    *io_pArgs )
     ISTEP_ERROR::IStepError l_StepError;
     errlHndl_t l_errl = NULL;
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_fabric_erepair entry" );
+
+    do {
+
+    // Check if the system can support multiple nest frequencies
+    // and if so, see if an SBE Update is required
+    TARGETING::Target* l_sys = NULL;
+    targetService().getTopLevelTarget(l_sys);
+    assert( l_sys != NULL, "call_fabric_erepair: sys target is NULL" );
+    MRW_NEST_CAPABLE_FREQUENCIES_SYS l_mrw_nest_capable;
+    l_mrw_nest_capable =
+               l_sys->getAttr<ATTR_MRW_NEST_CAPABLE_FREQUENCIES_SYS>();
+    if ( l_mrw_nest_capable ==
+               MRW_NEST_CAPABLE_FREQUENCIES_SYS_2000_MHZ_OR_2400_MHZ )
+    {
+        // Call to check Processor SBE SEEPROM Images against NEST_FREQ_MHZ
+        // attributes and make any necessary updates
+        l_errl = SBE::updateProcessorSbeSeeproms(
+                            SBE::SBE_UPDATE_ONLY_CHECK_NEST_FREQ);
+
+        if (l_errl)
+        {
+            // Create IStep error log and cross reference error that occurred
+            l_StepError.addErrorDetails( l_errl );
+            // Commit error
+            errlCommit( l_errl, HWPF_COMP_ID );
+            break;
+        }
+
+    }
 
     std::vector<uint8_t> l_endp1_txFaillanes;
     std::vector<uint8_t> l_endp1_rxFaillanes;
@@ -277,6 +310,8 @@ void*    call_fabric_erepair( void    *io_pArgs )
             }
         } // end for l_PbusConnections
     } // end for MaxBusSet
+
+    } while (0);
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_fabric_erepair exit" );
 

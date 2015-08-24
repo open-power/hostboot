@@ -668,6 +668,10 @@
         <id>PROC_PCIE_REFCLOCK_ENABLE</id>
         <default>0xE0</default>
     </attribute>
+    <attribute>
+        <id>DEFAULT_PROC_MODULE_NEST_FREQ_MHZ</id>
+        <default>2400</default>
+    </attribute>
 </targetType>
 
 <targetType>
@@ -693,6 +697,10 @@
         <id>PROC_PCIE_REFCLOCK_ENABLE</id>
         <default>0xE0</default>
     </attribute>
+    <attribute>
+        <id>DEFAULT_PROC_MODULE_NEST_FREQ_MHZ</id>
+        <default>2000</default>
+    </attribute>
 </targetType>
 
 <targetType>
@@ -717,6 +725,10 @@
     <attribute>
         <id>PROC_PCIE_REFCLOCK_ENABLE</id>
         <default>0xF0</default>
+    </attribute>
+    <attribute>
+        <id>DEFAULT_PROC_MODULE_NEST_FREQ_MHZ</id>
+        <default>2400</default>
     </attribute>
 </targetType>
 

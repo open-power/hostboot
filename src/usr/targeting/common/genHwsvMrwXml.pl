@@ -2352,6 +2352,25 @@ sub generate_sys
 ";
     }
 
+    # Tuletas can now support multiple nest frequencies
+    if ($sysname =~ /tuleta/)
+    {
+        print "
+    <attribute><id>MRW_NEST_CAPABLE_FREQUENCIES_SYS</id>
+        <default>2000_MHZ_OR_2400_MHZ</default>
+    </attribute>
+";
+    }
+    else
+    {
+        print "
+    <attribute><id>MRW_NEST_CAPABLE_FREQUENCIES_SYS</id>
+        <default>UNSUPPORTED_FREQ</default>
+    </attribute>
+";
+    }
+
+
     if( $haveFSPs == 0 )
     {
         generate_apss_adc_config()

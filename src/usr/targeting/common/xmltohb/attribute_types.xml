@@ -16631,5 +16631,23 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
+<attribute>
+    <id>DEFAULT_PROC_MODULE_NEST_FREQ_MHZ</id>
+    <description>
+        Default Nest frequency in MHz for Processor Modules
+        Default to 2000 MHz for Murano-based Modules
+        Default to 2400 MHz for Venice- and Naples-based Modules
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>2000</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+
+
 
 </attributes>

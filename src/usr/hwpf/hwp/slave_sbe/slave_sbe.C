@@ -194,6 +194,7 @@ void* call_host_slave_sbe_config(void *io_pArgs)
         errlCommit( err, HWPF_COMP_ID );
     }
 
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_slave_sbe_config exit" );
 
@@ -616,16 +617,6 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
 
     }   // endfor
 
-    // Slave processors should now use Host I2C Access Method
-    I2C::i2cSetAccessMode( I2C::I2C_SET_ACCESS_MODE_PROC_HOST );
-
-    // Reset the Processor's I2C Masters
-    l_errl = I2C::i2cResetActiveMasters(I2C::I2C_PROC_ALL);
-    if (l_errl)
-    {
-        // Commit error
-        errlCommit( l_errl, HWPF_COMP_ID );
-    }
 
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
               "call_proc_check_slave_sbe_seeprom_complete exit");

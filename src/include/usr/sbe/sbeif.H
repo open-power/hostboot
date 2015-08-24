@@ -59,14 +59,31 @@ namespace SBE
                              size_t& o_imgSize,
                              sbe_image_version_t* o_version = NULL);
 
+    /**
+     * @enum sbeUpdateCheckType
+     *
+     * @brief Determines what types of checks are performed on the SBE Seeproms
+     *        to determine if an update is necessary.
+     *
+     */
+    enum sbeUpdateCheckType
+    {
+        SBE_UPDATE_CHECK_ALL                   = 0x00,
+        SBE_UPDATE_ONLY_CHECK_NEST_FREQ        = 0x01
+    };
 
     /**
      * @brief Iterates through all the functional processors and updates
      *        the SBE Image in a SEEPROM, if necessary.
      *
+     * @param[in] i_check_type    Indicates what types of checks are performed
+     *                            on the SBE Seeproms to determine if an update
+     *                            is necessary.
+     *
      * @return errlHndl_t    Error log handle on failure.
      */
-    errlHndl_t updateProcessorSbeSeeproms();
+    errlHndl_t updateProcessorSbeSeeproms(
+                   sbeUpdateCheckType i_check_type = SBE_UPDATE_CHECK_ALL);
 
     /**
      * @brief Iterates through all the functional processors and resolves
