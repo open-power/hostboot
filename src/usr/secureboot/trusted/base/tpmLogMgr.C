@@ -1,0 +1,254 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/secureboot/trusted/base/tpmLogMgr.C $                 */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+/**
+ * @file TpmLogMgr.C
+ *
+ * @brief TPM Event log manager
+ */
+
+/////////////////////////////////////////////////////////////////
+// NOTE: This file is exportable as TSS-Lite for skiboot/PHYP  //
+/////////////////////////////////////////////////////////////////
+
+// ----------------------------------------------
+// Includes
+// ----------------------------------------------
+#include <string.h>
+#include "tpmLogMgr.H"
+#ifdef __HOSTBOOT_MODULE
+#include <secureboot/trustedboot_reasoncodes.H>
+#include "../trustedbootUtils.H"
+#include "../trustedboot.H"
+#else
+#include "trustedboot_reasoncodes.H"
+#include "trustedbootUtils.H"
+#include "trustedboot.H"
+#include "trustedTypes.H"
+#endif
+
+#ifdef __cplusplus
+namespace TRUSTEDBOOT
+{
+#endif
+
+    uint32_t TCG_EfiSpecIdEventStruct_size(TCG_EfiSpecIdEventStruct* val)
+    {
+        return (sizeof(TCG_EfiSpecIdEventStruct) + val->vendorInfoSize);
+    }
+
+    errlHndl_t TpmLogMgr_initialize(TpmLogMgr* val)
+    {
+        errlHndl_t err = TB_SUCCESS;
+        const char vendorInfo[] = "IBM";
+        const char eventSignature[] = "Spec ID Event03";
+        TCG_EfiSpecIdEventStruct* eventData = NULL;
+
+        TCG_PCR_EVENT eventLogEntry;
+
+        TRACUCOMP( g_trac_trustedboot, ">>initialize()");
+
+        if (NULL == val)
+        {
+            TRACFCOMP( g_trac_trustedboot,
+                       "TPM LOG INIT FAIL");
+
+                /*@
+                 * @errortype
+                 * @reasoncode     RC_TPMLOGMGR_INIT_FAIL
+                 * @severity       ERRL_SEV_UNRECOVERABLE
+                 * @moduleid       MOD_TPMLOGMGR_INITIALIZE
+                 * @userdata1      0
+                 * @userdata2      0
+                 * @devdesc        TPM log buffer init failure.
+                 */
+                err = tpmCreateErrorLog( MOD_TPMLOGMGR_INITIALIZE,
+                                         RC_TPMLOGMGR_INIT_FAIL, 0, 0);
+
+        }
+        else
+        {
+
+            val->logSize = 0;
+            mutex_init( &val->logMutex );
+            mutex_lock( &val->logMutex );
+
+
+            // Assign our new event pointer to the start
+            val->newEventPtr = val->eventLog;
+            memset(val->eventLog, 0, TPMLOG_BUFFER_SIZE);
+
+            eventData = (TCG_EfiSpecIdEventStruct*) eventLogEntry.event;
+
+            // Add the header event log
+            // Values here come from the PC ClientSpecificPlatformProfile spec
+            eventLogEntry.eventType = EV_NO_ACTION;
+            eventLogEntry.pcrIndex = 0;
+            eventLogEntry.eventSize = sizeof(TCG_EfiSpecIdEventStruct) +
+                sizeof(vendorInfo);
+
+            memcpy(eventData->signature, eventSignature,
+                   sizeof(eventSignature));
+            eventData->platformClass = htole32(TPM_PLATFORM_SERVER);
+            eventData->specVersionMinor = TPM_SPEC_MINOR;
+            eventData->specVersionMajor = TPM_SPEC_MAJOR;
+            eventData->specErrata = TPM_SPEC_ERRATA;
+            eventData->uintnSize = 1;
+            eventData->numberOfAlgorithms = htole32(HASH_COUNT);
+            eventData->digestSizes[0].algorithmId = htole16(TPM_ALG_SHA256);
+            eventData->digestSizes[0].digestSize = htole16(TPM_ALG_SHA256_SIZE);
+            eventData->vendorInfoSize = sizeof(vendorInfo);
+            memcpy(eventData->vendorInfo, vendorInfo, sizeof(vendorInfo));
+
+            val->newEventPtr = TCG_PCR_EVENT_logMarshal(&eventLogEntry,
+                                                        val->newEventPtr);
+
+            // Done, move our pointers
+            val->logSize += TCG_PCR_EVENT_marshalSize(&eventLogEntry);
+
+
+            mutex_unlock( &val->logMutex );
+
+            // Debug display of raw data
+            TRACUBIN(g_trac_trustedboot, "tpmInitialize: Header Entry",
+                     val->eventLog, val->logSize);
+
+            TRACUCOMP( g_trac_trustedboot,
+                       "<<initialize() LS:%d - %s",
+                       val->logSize,
+                       ((TB_SUCCESS == err) ? "No Error" : "With Error") );
+        }
+
+        return err;
+    }
+
+    errlHndl_t TpmLogMgr_addEvent(TpmLogMgr* val,
+                                  TCG_PCR_EVENT2* logEvent)
+    {
+        errlHndl_t err = TB_SUCCESS;
+        size_t newLogSize = TCG_PCR_EVENT2_marshalSize(logEvent);
+        uint8_t* startPtr = val->newEventPtr;
+
+        TRACUCOMP( g_trac_trustedboot,
+                   ">>tpmAddEvent() PCR:%d Type:%d Size:%d",
+                   logEvent->pcrIndex, logEvent->eventType, (int)newLogSize);
+
+        mutex_lock( &val->logMutex );
+
+        do
+        {
+
+            // Need to ensure we have room for the new event
+            // We have to leave room for the log full event as well
+            if (NULL == val->newEventPtr ||
+                val->logSize + newLogSize > TPMLOG_BUFFER_SIZE)
+            {
+                TRACFCOMP( g_trac_trustedboot,
+                           "TPM LOG ADD FAIL PNULL(%d) LS(%d) New LS(%d)",
+                           (NULL == val->newEventPtr ? 0 : 1),
+                           (int)val->logSize, (int)newLogSize);
+
+                /*@
+                 * @errortype
+                 * @reasoncode     RC_TPMLOGMGR_ADDEVENT_FAIL
+                 * @severity       ERRL_SEV_UNRECOVERABLE
+                 * @moduleid       MOD_TPMLOGMGR_ADDEVENT
+                 * @userdata1      Log buffer NULL
+                 * @userdata2[0:31] Current Log Size
+                 * @userdata2[32:63] New entry size
+                 * @devdesc        TPM log buffer add failure.
+                 */
+                err = tpmCreateErrorLog( MOD_TPMLOGMGR_ADDEVENT,
+                                         RC_TPMLOGMGR_ADDEVENT_FAIL,
+                                         (NULL == val->newEventPtr ? 0 : 1),
+                                         (uint64_t)val->logSize << 32 |
+                                         newLogSize);
+
+                break;
+            }
+
+
+            val->newEventPtr = TCG_PCR_EVENT2_logMarshal(logEvent,
+                                                         val->newEventPtr);
+
+            if (NULL == val->newEventPtr)
+            {
+                TRACFCOMP( g_trac_trustedboot,
+                           "TPM LOG MARSHAL Fail");
+
+                /*@
+                 * @errortype
+                 * @reasoncode     RC_TPMLOGMGR_ADDEVENTMARSH_FAIL
+                 * @severity       ERRL_SEV_UNRECOVERABLE
+                 * @moduleid       MOD_TPMLOGMGR_ADDEVENT
+                 * @userdata1      0
+                 * @userdata2      0
+                 * @devdesc        log buffer malloc failure.
+                 */
+                err = tpmCreateErrorLog( MOD_TPMLOGMGR_ADDEVENT,
+                                         RC_TPMLOGMGR_ADDEVENTMARSH_FAIL,
+                                         0,
+                                         0);
+                break;
+            }
+
+            // Debug display of raw data
+            TRACUCOMP(g_trac_trustedboot, "tpmAddEvent: Start %p",
+                      startPtr);
+            TRACUBIN(g_trac_trustedboot, "tpmAddEvent",
+                     startPtr, newLogSize);
+
+
+            val->logSize += newLogSize;
+
+
+        } while ( 0 );
+
+        TRACUCOMP( g_trac_trustedboot,
+                   "<<tpmAddEvent() LS:%d - %s",
+                   (int)val->logSize,
+                   ((TB_SUCCESS == err) ? "No Error" : "With Error") );
+
+        mutex_unlock( &val->logMutex );
+        return err;
+    }
+
+    uint32_t TpmLogMgr_getLogSize(TpmLogMgr* val)
+    {
+        return val->logSize;
+    }
+
+    void TpmLogMgr_dumpLog(TpmLogMgr* val)
+    {
+
+        // Debug display of raw data
+        TRACUCOMP(g_trac_trustedboot, "tpmDumpLog Size : %d\n",
+                  (int)val->logSize);
+        TRACUBIN(g_trac_trustedboot, "tpmDumpLog",
+                 val->eventLog, val->logSize);
+    }
+
+#ifdef __cplusplus
+} // end TRUSTEDBOOT
+#endif

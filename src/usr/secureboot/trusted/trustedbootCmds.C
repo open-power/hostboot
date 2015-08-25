@@ -65,7 +65,7 @@ errlHndl_t tpmTransmitCommand(TpmTarget * io_target,
 
     TRACUCOMP( g_trac_trustedboot,
                ">>TPM TRANSMIT CMD START : BufLen %d : %016llx",
-               i_bufsize,
+               (int)i_bufsize,
                *((uint64_t*)io_buffer)  );
 
     do
@@ -132,7 +132,7 @@ errlHndl_t tpmMarshalCommandData(TPM2_BaseIn* i_cmd,
 
         TRACUCOMP( g_trac_trustedboot,
                    "TPM MARSHAL START : BufLen %d : %016llx",
-                   i_bufsize,
+                   (int)i_bufsize,
                    *((uint64_t*)i_cmd)  );
 
         // Start with the command header
@@ -232,7 +232,8 @@ errlHndl_t tpmMarshalCommandData(TPM2_BaseIn* i_cmd,
              o_outbuf, *o_cmdSize);
 
     TRACUCOMP( g_trac_trustedboot,
-               "TPM MARSHAL END   : CmdSize: %d : %016llx ",  *o_cmdSize,
+               "TPM MARSHAL END   : CmdSize: %d : %016llx ",
+               (int)(*o_cmdSize),
                *((uint64_t*)o_outbuf)  );
 
     TRACDCOMP( g_trac_trustedboot,
@@ -258,7 +259,7 @@ errlHndl_t tpmUnmarshalResponseData(uint32_t i_commandCode,
 
         TRACUCOMP( g_trac_trustedboot,
                    "TPM UNMARSHAL START : RespBufLen %d : OutBufLen %d",
-                   i_respBufSize, i_outBufSize);
+                   (int)i_respBufSize, (int)i_outBufSize);
         TRACUBIN(g_trac_trustedboot,"Unmarshal In",
                  i_respBuf, i_respBufSize);
 
@@ -473,7 +474,7 @@ errlHndl_t tpmCmdGetCapFwVersion(TpmTarget* io_target)
             TRACFCOMP( g_trac_trustedboot,
                        "TPM GETCAP OP Fail %X Size(%d) ",
                        resp->base.responseCode,
-                       dataSize);
+                       (int)dataSize);
 
             /*@
              * @errortype
@@ -555,7 +556,7 @@ errlHndl_t tpmCmdGetCapFwVersion(TpmTarget* io_target)
         if (TB_SUCCESS != err)
         {
             TRACFCOMP( g_trac_trustedboot,
-                       "TPM GETCAP2 Transmit Fail %X");
+                       "TPM GETCAP2 Transmit Fail");
             break;
 
         }
@@ -566,7 +567,7 @@ errlHndl_t tpmCmdGetCapFwVersion(TpmTarget* io_target)
             TRACFCOMP( g_trac_trustedboot,
                        "TPM GETCAP2 OP Fail %X Size(%d) ",
                        resp->base.responseCode,
-                       dataSize);
+                       (int)dataSize);
 
             /*@
              * @errortype

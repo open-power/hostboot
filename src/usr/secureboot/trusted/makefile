@@ -33,4 +33,5 @@ OBJS += $(if $(CONFIG_TPMDD),trustedbootUtils.o,)
 SUBDIRS += $(if $(CONFIG_TPMDD),test.d,)
 
 CFLAGS += -iquote ../
+
 include ${ROOTPATH}/config.mk

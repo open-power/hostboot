@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2015
+# Contributors Listed Below - COPYRIGHT 2013,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -33,6 +33,8 @@ OBJS += purge.o
 OBJS += securerom.o
 OBJS += rom_entry.o
 OBJS += trustedboot_base.o
+OBJS += $(if $(CONFIG_TPMDD),tpmLogMgr.o,)
+OBJS += $(if $(CONFIG_TPMDD),trustedTypes_base.o,)
 
 EXTRAINCDIR += ${ROOTPATH}/src/usr/secureboot/trusted/base
 VPATH += ${ROOTPATH}/src/usr/secureboot/trusted/base

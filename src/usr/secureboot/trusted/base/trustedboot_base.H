@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/secureboot/trusted/trustedbootUtils.H $               */
+/* $Source: src/usr/secureboot/trusted/base/trustedboot_base.H $          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,63 +23,45 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
- * @file trustedbootUtils.H
+ * @file trustedboot_base.H
  *
- * @brief Trustedboot TPM utilities that must be implemented for each
- *  unique implementation
+ * @brief Trustedboot TPM interfaces in HB base
  *
  */
-
-/////////////////////////////////////////////////////////////////
-// NOTE: This file is exportable as TSS-Lite for skiboot/PHYP  //
-/////////////////////////////////////////////////////////////////
-
-#ifndef __TRUSTEDBOOTUTILS_H
-#define __TRUSTEDBOOTUTILS_H
+#ifndef __TRUSTEDBOOT_BASE_H
+#define __TRUSTEDBOOT_BASE_H
 // -----------------------------------------------
 // Includes
 // -----------------------------------------------
-#include "trustedTypes.H"
+#include <secureboot/trustedbootif.H>
+#include "../trustedTypes.H"
 
-#ifdef __cplusplus
 namespace TRUSTEDBOOT
 {
-#endif
+
 
 /**
- * @brief Transmit the command to the TPM
- * @param[in/out] io_target Current TPM target structure
- * @param[in/out] io_buffer Input the command buffer to send, response on exit
- * @param[in] i_cmdSize Size of provided command in bytes
- * @param[in] i_bufsize Size of io_buffer in bytes
- * @return errlHndl_t NULL if successful, otherwise a pointer to the
+ * @brief Verify a functional TPM still exists in the system
+ * @return errlHndl_t NULL if TPM available, otherwise a pointer to the
  *       error log.
- */
-errlHndl_t tpmTransmit(TpmTarget * io_target,
-                       uint8_t* io_buffer,
-                       size_t i_cmdSize,
-                       size_t i_bufsize );
+*/
+errlHndl_t tpmVerifyFunctionalTpmExists();
 
 /**
- * @brief Create an error log entry for potential logging
- * @param[in] i_modId Code Module ID
- * @param[in] i_reasonCode Error Reason Code
- * @param[in] i_user1 User data 1
- * @param[in] i_user2 User data 2
- */
-errlHndl_t tpmCreateErrorLog(const uint8_t i_modId,
-                             const uint16_t i_reasonCode,
-                             const uint64_t i_user1,
-                             const uint64_t i_user2);
-
-/**
- * @brief Mark the TPM as non-functional and take required steps
+ * @brief Extend a measurement into a TPM and log
  * @param[in/out] io_target Current TPM target structure
+ * @param[in] i_pcr PCR to write to
+ * @param[in] i_digest Digest value to write to PCR
+ * @param[in] i_digestSize Byte size of i_digest data
+ * @param[in] i_logMsg Null terminated log message
  */
-void tpmMarkFailed(TpmTarget * io_target);
+void pcrExtendSingleTpm(TpmTarget & io_target,
+                        TPM_Pcr i_pcr,
+                        TPM_Alg_Id i_algId,
+                        uint8_t* i_digest,
+                        size_t  i_digestSize,
+                        const char* i_logMsg);
 
-#ifdef __cplusplus
+
 } // end TRUSTEDBOOT namespace
-#endif
-
 #endif

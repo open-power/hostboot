@@ -44,15 +44,9 @@
 #include "trustedboot.H"
 #include "trustedTypes.H"
 #include "trustedbootCmds.H"
-
-// ----------------------------------------------
-// Trace definitions
-// ----------------------------------------------
-extern trace_desc_t* g_trac_trustedboot;
-
-// Easy macro replace for unit testing
-//#define TRACUCOMP(args...)  TRACFCOMP(args)
-#define TRACUCOMP(args...)
+#include "trustedbootUtils.H"
+#include "base/tpmLogMgr.H"
+#include "base/trustedboot_base.H"
 
 namespace TRUSTEDBOOT
 {
@@ -102,6 +96,20 @@ void* host_update_master_tpm( void *io_pArgs )
         else
         {
             systemTpms.tpm[TPM_MASTER_INDEX].available = false;
+        }
+
+        // Allocate the TPM log if it hasn't been already
+        if (!systemTpms.tpm[TPM_MASTER_INDEX].failed &&
+            systemTpms.tpm[TPM_MASTER_INDEX].available &&
+            NULL == systemTpms.tpm[TPM_MASTER_INDEX].logMgr)
+        {
+            systemTpms.tpm[TPM_MASTER_INDEX].logMgr = new TpmLogMgr;
+            err = TpmLogMgr_initialize(
+                        systemTpms.tpm[TPM_MASTER_INDEX].logMgr);
+            if (NULL != err)
+            {
+                break;
+            }
         }
 
         if (systemTpms.tpm[TPM_MASTER_INDEX].failed ||
@@ -207,34 +215,19 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target,
         }
 
 
-
     } while ( 0 );
 
 
     // If the TPM failed we will mark it not functional
     if (NULL != err)
     {
-        tpmMarkFailed(io_target);
+        tpmMarkFailed(&io_target);
         // Log this failure
         errlCommit(err, SECURE_COMP_ID);
     }
 
     TRACDCOMP( g_trac_trustedboot,
                EXIT_MRK"tpmInitialize()");
-
-}
-
-void tpmMarkFailed(TRUSTEDBOOT::TpmTarget & io_target)
-{
-
-    TRACFCOMP( g_trac_trustedboot,
-               ENTER_MRK"tpmMarkFailed() Marking TPM as failed : "
-               "tgt=0x%X chip=%d",
-               TARGETING::get_huid(io_target.nodeTarget),
-               io_target.chip);
-
-    io_target.failed = true;
-    /// @todo RTC:125287 Add fail marker to TPM log and disable TPM access
 
 }
 
