@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -29,7 +29,7 @@ CLEAN_TARGETS += tracehash tracehash.o
 
 ifdef HOST_BINUTILS_DIR
 BFD_CFLAGS = -I$(HOST_BINUTILS_DIR)/bfd/ -I$(HOST_BINUTILS_DIR)/include/
-BFD_LDFLAGS = $(HOST_BINUTILS_DIR)/bfd/libbfd.a \
+BFD_LDFLAGS = $(HOST_BINUTILS_DIR)/bfd/libbfd.a -ldl \
 	      $(HOST_BINUTILS_DIR)/libiberty/libiberty.a -lz
 else
 BFD_LDFLAGS = -lbfd
