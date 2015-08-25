@@ -39,6 +39,8 @@ my $debug = 0;
 my $help = 0;
 
 my %globals = ( "branch" => "master" );
+# Token used by git-CI-tool @execute_discover, update there too
+my $token = "!@#%^";
 
 GetOptions("debug!" => \$debug,
            "help" => \$help,
@@ -266,7 +268,7 @@ sub execute_release
 
     my $level_info = config_get_level($level);
 
-    config_release($level_info);
+    config_release($level_info,1);
 }
 
 sub execute_publish_cq
@@ -321,15 +323,18 @@ sub execute_fsp_ci
     my $discover = 0;
     my %level = ();
     my $branch = $globals{"branch"};
-    my $basestr = "";
+    my $bbuild_hbRel = "";
 
     GetOptions("level:s" => \$level{name},
                "patches:s" => \$patches,
                "discover" => \$discover,
-               "basestr:s" => \$level{base});
+               "basestr:s" => \$level{base},
+               "bbuild-hbRel:s" => \$bbuild_hbRel);
 
     die "Missing level name" if ($level{name} eq "");
+    die "Missing level base" if ($level{base} eq "");
     die "Missing patches" if ($patches eq "");
+    die "Missing bbuild's hostboot release" if ($bbuild_hbRel eq "");
 
     print "Creating Hostboot CI release...\n" if !$discover;
 
@@ -346,6 +351,45 @@ sub execute_fsp_ci
     $level{released} = $level{base};
     config_add_level(\%level);
 
+    # Get all commits between level base and the bbuilds hb release
+    my @commits = split('\n',`git rev-list $level{base} ^$bbuild_hbRel`);
+    # Check all commits between gerrit/<branch> and bbuild's hbRel for any
+    # cmvc req's that are needed in the discover step only.
+    if ($discover)
+    {
+        # Check each commit message for CMVC reqs
+        foreach my $commit (@commits)
+        {
+            my @msg_lines = split('\n',git_commit_msg($commit));
+            # Search commit message for dependencies
+            foreach my $line (@msg_lines)
+            {
+                # Print out CMVC dependencies
+                if ($line =~ m/cmvc-([a-zA-Z]+):/i)
+                {
+                    print "$token Need ".$line."\n";
+                }
+            }
+        }
+    }
+    # Print out commits that are in the gerrit branch and not the bbuild hbRel
+    else
+    {
+        print "\n========\n";
+        print "Commits in gerrit/$branch but not in bbuild => $bbuild_hbRel\n\n";
+        print "**Note these commits may cause problems too, but since they\n";
+        print "  are merged commits, they should have passed fsp-ci prior.\n";
+        print "  It is done this way to greatly simply dependencies of your\n";
+        print "  commit ontop of a hostboot release\n\n";
+        my $i=1;
+        foreach my $commit (@commits)
+        {
+            print "    $i. $commit\n";
+            $i++;
+        }
+        print "\n";
+    }
+
     # Resolve level dependencies
     config_resolve_level_dep($level{name}, $level{base}, @patches);
 
@@ -353,7 +397,7 @@ sub execute_fsp_ci
     {
         # Create hb release
         my $level_info = config_get_level($level{name});
-        config_release($level_info);
+        config_release($level_info,0);
     }
 }
 
@@ -1346,8 +1390,6 @@ sub config_resolve_level_dep
     my $base = shift;
     my @patches = @_;
     my %level_patches = ();
-    # Token used by git-CI-tool @execute_discover, update there too
-    my $token = "!@#%^";
 
     while (@patches)
     {
@@ -1484,10 +1526,12 @@ sub config_verify_patches
 # Create a branch / tag based on the definition of a release.
 #
 # @param[in] - level info
+# @param[in] - bool to create tag
 #
 sub config_release
 {
     my $level_info = shift;
+    my $create_tag = shift;
 
     print "Creating release branch...\n";
     git_create_branch($level_info->{name}, $level_info->{base});
@@ -1524,8 +1568,11 @@ sub config_release
     print "\nGenerating release notes...\n";
     create_release_notes($level_info->{name}, $level_info);
 
-    print "\nCreating tag...\n";
-    git_create_tag($level_info->{name}, $level_info);
+    if ($create_tag)
+    {
+        print "\nCreating tag...\n";
+        git_create_tag($level_info->{name}, $level_info);
+    }
 }
 
 # sub gerrit_ssh_command
@@ -1825,7 +1872,6 @@ sub cq_hyperlink
 #
 sub json_parse
 {
-    print "Parse JSON object ... \n" if $debug;
     my $line = shift;
 
     die "Invalid JSON format: $line" unless ($line =~ m/^\{.*\}$/);
@@ -1863,11 +1909,9 @@ sub json_parse
             $value = $1;
         }
 
-        print "Adding $key => $value\n" if $debug;
         $object{$key} = $value;
     }
 
-    print "Done parsing JSON object.\n" if $debug;
     return \%object;
 }
 
@@ -1908,7 +1952,6 @@ sub json_parse_array
             $value = $1;
         }
 
-        print "Adding $value\n" if $debug;
         push @array, $value;
         $line =~ s/^,//;
     }
