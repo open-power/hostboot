@@ -55,24 +55,6 @@ namespace TRUSTEDBOOT
                           void* i_chunkPtr,
                           size_t i_chunkSize);
 
-    uint32_t getDigestSize(TPM_Alg_Id i_algId)
-    {
-        uint32_t ret = 0;
-        switch (i_algId)
-        {
-          case TPM_ALG_SHA1:
-            ret = TPM_ALG_SHA1_SIZE;
-            break;
-          case TPM_ALG_SHA256:
-            ret = TPM_ALG_SHA256_SIZE;
-            break;
-          default:
-            ret = 0;
-            break;
-        };
-        return ret;
-    }
-
     uint8_t* unmarshalChunk(uint8_t* i_tpmBuf,
                             size_t * io_tpmBufSize,
                             void* o_chunkPtr,
@@ -161,18 +143,8 @@ namespace TRUSTEDBOOT
 
     size_t TPMT_HA_marshalSize(TPMT_HA* val)
     {
-        return (sizeof(TPMT_HA) - sizeof(TPMU_HA) +
+        return (sizeof(val->algorithmId) +
                 getDigestSize((TPM_Alg_Id)(val->algorithmId)));
-    }
-
-    size_t TPML_DIGEST_VALUES_marshalSize(TPML_DIGEST_VALUES* val)
-    {
-        size_t ret = sizeof(val->count);
-        for (size_t idx = 0; (idx < val->count && idx < HASH_COUNT); idx++)
-        {
-            ret += TPMT_HA_marshalSize(&(val->digests[idx]));
-        }
-        return ret;
     }
 
     size_t TPM_EVENT_FIELD_marshalSize(TPM_EVENT_FIELD* val)
