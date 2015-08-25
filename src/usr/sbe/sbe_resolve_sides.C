@@ -723,11 +723,13 @@ errlHndl_t readSbeImage(TARGETING::Target* i_target,
             break;
         }
 
+        // make sure returned size is 8 byte aligned
+        o_image_size = ALIGN_8(o_image_size);
 
         /*****************************************/
         /*  Do Actual Read                       */
         /*****************************************/
-        image_size_ECC = ALIGN_8((o_image_size*9)/8);
+        image_size_ECC = (o_image_size*9)/8;
 
         assert(image_size_ECC <= SBE_ECC_IMG_MAX_SIZE,
                "getSetSbeImage() SBE Image with ECC too large");
@@ -768,7 +770,7 @@ errlHndl_t readSbeImage(TARGETING::Target* i_target,
                                              (SBE_ECC_IMG_VADDR),
                                          reinterpret_cast<uint8_t*>
                                              (o_imgPtr),
-                                         image_size_ECC);
+                                         o_image_size);
 
         // Fail if uncorrectable ECC
         if ( eccStatus == PNOR::ECC::UNCORRECTABLE )
@@ -936,14 +938,14 @@ errlHndl_t writeSbeImage(TARGETING::Target* i_target,
 
         // Inject ECC
         PNOR::ECC::injectECC(reinterpret_cast<uint8_t*>(i_imgPtr),
-                             ALIGN_8(i_image_size),
+                             i_image_size,
                              reinterpret_cast<uint8_t*>
                                  (SBE_ECC_IMG_VADDR));
 
         /*****************************************/
         /*  Do Actual Write of Image             */
         /*****************************************/
-        image_size_ECC = ALIGN_8((i_image_size*9)/8);
+        image_size_ECC = (i_image_size*9)/8;
 
         assert(image_size_ECC <= SBE_ECC_IMG_MAX_SIZE,
                "writeSbeImage() SBE Image with ECC too large");

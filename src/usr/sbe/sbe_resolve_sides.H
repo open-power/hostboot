@@ -159,6 +159,7 @@ namespace SBE
      * @param[in] i_side          Seeprom Side to access
      *
      * @param[in] o_image_size    The size of the image (non-ECC)
+     *                            NOTE: o_image_size will be 8 byte aligned.
      *
      * @param[in] o_version       SBE Version struct from seeprom (non-ECC)
      *
@@ -178,12 +179,13 @@ namespace SBE
      * @param[in] i_imgPtr    Pointer to SBE image in memory
      *                        Memory for this pointer is expected to be
      *                        pre-alloacted
-     *                        NOTE:  ECC is handled internally in this function
+     *                        NOTE:  ECC is handled internally in this function,
      *                        i_imgPtr points to non-ECC image
      *
      * @param[in] i_side        Seeprom Side to access
      *
      * @param[in] i_image_size  Size of image to write (non-ECC)
+     *                          NOTE: must be 8 byte aligned
      *
      * @param[in] io_version    SBE Version struct to write (non-ECC)
      *                          NOTE: data_crc updated in this function
