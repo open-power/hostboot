@@ -74,11 +74,6 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target,
                    TARGETING::Target* i_nodeTarget,
                    TPMDD::tpm_chip_types_t i_chip);
 
-/**
- * @brief Mark the TPM as non-functional and take required steps
- * @param[in/out] io_target Current TPM target structure
- */
-void tpmMarkFailed(TRUSTEDBOOT::TpmTarget & io_target);
 
 } // end TRUSTEDBOOT namespace
 #endif

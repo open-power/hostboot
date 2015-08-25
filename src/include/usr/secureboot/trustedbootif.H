@@ -39,6 +39,7 @@
 
 namespace TRUSTEDBOOT
 {
+    struct _TpmLogMgr;
 
     /// Track system TPM status
     struct TpmTarget
@@ -48,20 +49,21 @@ namespace TRUSTEDBOOT
         uint8_t                 initAttempted:1;///< Has TPM init been run
         uint8_t                 available:1;    ///< Is TPM physically in system
         uint8_t                 failed:1;       ///< Is TPM currently failed
+        struct _TpmLogMgr*      logMgr;         ///< Event log manager for TPM
         mutex_t                 tpmMutex;       ///< TPM Mutex
 
         TpmTarget();
     };
 
     /// TPM PCR designations
-    enum TPM_Pcr
+    typedef enum
     {
         PCR_0     = 0,
         PCR_1     = 1,
         PCR_4     = 4,
         PCR_DEBUG = 16,
         PCR_MAX   = 16,
-    };
+    } TPM_Pcr;
 
 
     /**

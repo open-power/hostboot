@@ -40,10 +40,10 @@
 // -----------------------------------------------
 #include <stdint.h>
 #ifdef __HOSTBOOT_MODULE
-#include <secureboot/trustedbootif.H>
+#include <builtins.h>
 #else
-#define PACKED __attribute__((__packed__))
 #include "trustedboot.H"
+#define PACKED __attribute__((__packed__))
 #endif
 
 #ifdef __cplusplus
@@ -55,9 +55,18 @@ namespace TRUSTEDBOOT
     /// TPM Algorithm defines
     typedef enum
     {
-        TPM_ALG_SHA1    = 0x0004,
-        TPM_ALG_SHA256  = 0x000B,
+        TPM_ALG_SHA1    = 0x0004,   ///< SHA1 Id
+        TPM_ALG_SHA256  = 0x000B,   ///< SHA256 Id
+        TPM_ALG_INVALID_ID          ///< Used for error checking
     } TPM_Alg_Id;
+
+    typedef enum
+    {
+        TPM_ALG_NUM_SUPPORTED = 1,       ///< Number of algorithms supported
+        TPM_ALG_SHA1_SIZE     = 20,      ///< SHA1 digest byte size
+        TPM_ALG_SHA256_SIZE   = 32,      ///< SHA256 digest byte size
+        TPM_ALG_INVALID_SIZE             ///< Used for error checking
+    } TPM_Alg_Sizes;
 
     /// Common static values
     enum
@@ -68,14 +77,15 @@ namespace TRUSTEDBOOT
         MAX_TPM_LOG_MSG = 128,    ///< Maximum log message size
 
         HASH_COUNT            = 1,       ///< Maximum # of digests
-        TPM_ALG_SHA1_SIZE     = 20,      ///< SHA1 digest byte size
-        TPM_ALG_SHA256_SIZE   = 32,      ///< SHA256 digest byte size
-
-        // Event types
-        EV_NO_ACTION          = 0x3,     ///< Event field contains info
-        EV_ACTION             = 0x5,     ///< Must extend a PCR
-
     };
+
+    typedef enum
+    {
+        EV_NO_ACTION    = 0x3,     ///< Event field contains info
+        EV_SEPARATOR    = 0x4,     ///< Used to indicate an error
+        EV_ACTION       = 0x5,     ///< Must extend a PCR
+        EV_INVALID                 ///< Used for error checking
+    } EventTypes;
 
     /**
      * @brief Get the digest size of the selected hash algorithm
@@ -176,10 +186,14 @@ namespace TRUSTEDBOOT
     } PACKED;
     typedef struct _TCG_PCR_EVENT TCG_PCR_EVENT;
     size_t TCG_PCR_EVENT_marshalSize(TCG_PCR_EVENT* val);
+    uint8_t* TCG_PCR_EVENT_logUnmarshal(TCG_PCR_EVENT* val, uint8_t* i_tpmBuf,
+                                        size_t i_bufSize, bool* o_err);
+    uint8_t* TCG_PCR_EVENT_logMarshal(TCG_PCR_EVENT* val, uint8_t* i_logBuf);
 
     /// Digest union
     union _TPMU_HA
     {
+        uint8_t bytes[0];
         uint8_t sha1[TPM_ALG_SHA1_SIZE];
         uint8_t sha256[TPM_ALG_SHA256_SIZE];
     } PACKED;
@@ -193,6 +207,8 @@ namespace TRUSTEDBOOT
     } PACKED;
     typedef struct _TPMT_HA TPMT_HA;
     size_t TPMT_HA_marshalSize(TPMT_HA* val);
+    uint8_t* TPMT_HA_logMarshal(TPMT_HA* val, uint8_t* i_logBuf);
+
 
     /// Crypto agile digests list
     struct _TPML_DIGEST_VALUES
@@ -202,6 +218,8 @@ namespace TRUSTEDBOOT
     } PACKED;
     typedef struct _TPML_DIGEST_VALUES TPML_DIGEST_VALUES;
     size_t TPML_DIGEST_VALUES_marshalSize(TPML_DIGEST_VALUES* val);
+    uint8_t* TPML_DIGEST_VALUES_logMarshal(TPML_DIGEST_VALUES* val,
+                                           uint8_t* i_logBuf);
 
     /// Event field structure
     struct _TPM_EVENT_FIELD
@@ -211,6 +229,8 @@ namespace TRUSTEDBOOT
     } PACKED;
     typedef struct _TPM_EVENT_FIELD TPM_EVENT_FIELD;
     size_t TPM_EVENT_FIELD_marshalSize(TPM_EVENT_FIELD* val);
+    uint8_t* TPM_EVENT_FIELD_logMarshal(TPM_EVENT_FIELD* val,
+                                        uint8_t* i_logBuf);
 
     /// Crypto agile log entry format
     struct _TCG_PCR_EVENT2
@@ -219,9 +239,11 @@ namespace TRUSTEDBOOT
         uint32_t   eventType;   ///< Type of event
         TPML_DIGEST_VALUES digests; ///< List of digests extended to PCRIndex
         TPM_EVENT_FIELD event;      ///< Event information
-
     } PACKED;
     typedef struct _TCG_PCR_EVENT2 TCG_PCR_EVENT2;
+    uint8_t* TCG_PCR_EVENT2_logMarshal(TCG_PCR_EVENT2* val,
+                                       uint8_t* i_logBuf);
+    size_t TCG_PCR_EVENT2_marshalSize(TCG_PCR_EVENT2* val);
 
     struct _TPM2_BaseIn
     {

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015
+# Contributors Listed Below - COPYRIGHT 2015,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -26,5 +26,6 @@ ROOTPATH = ../../../../..
 
 MODULE = testtrusted
 TESTS += $(if $(CONFIG_TPMDD),trustedbootTest.H,)
+TESTS += $(if $(CONFIG_TPMDD),tpmLogMgrTest.H,)
 
 include ${ROOTPATH}/config.mk
