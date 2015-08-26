@@ -119,6 +119,7 @@ const DepModInfo g_istep08Dependancies = {
         DEP_LIB(libdmi_training.so),
         DEP_LIB(libnest_chiplets.so),
         DEP_LIB(libsecure_boot.so),
+        DEP_LIB(libslave_sbe.so),
         NULL
     }
 };
