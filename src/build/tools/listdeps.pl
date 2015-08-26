@@ -142,7 +142,10 @@ foreach $module_name  (@module_names )
 
         my $function = $values[2];
 
-        %FunctionMap->{ $function } =  $library;
+        if (not defined %FunctionMap->{ $function })
+        {
+            %FunctionMap->{ $function } =  $library;
+        }
     }
 }
 
