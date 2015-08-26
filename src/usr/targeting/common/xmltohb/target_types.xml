@@ -1329,6 +1329,15 @@
     <attribute><id>MSS_UTIL_N_PER_MBA</id></attribute>
     <attribute><id>MSS_EFF_VPD_VERSION</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>MEM</default></attribute>
+    <attribute><id>EFF_DIMM_RCD_CNTL_WORD_X</id></attribute>
+    <attribute><id>MSS_TOTAL_POWER_SLOPE</id></attribute>
+    <attribute><id>MSS_TOTAL_POWER_SLOPE2</id></attribute>
+    <attribute><id>MSS_TOTAL_POWER_INT</id></attribute>
+    <attribute><id>MSS_TOTAL_POWER_INT2</id></attribute>
+    <attribute><id>EFF_DRAM_TCCD_L</id></attribute>
+    <attribute><id>EFF_LRDIMM_WORD_X</id></attribute>
+    <attribute><id>EFF_LRDIMM_ADDITIONAL_CNTL_WORDS</id></attribute>
+    <attribute><id>MCBIST_DDR4_PDA_ENABLE</id></attribute>
 </targetType>
 
 <targetType>
@@ -1508,6 +1517,7 @@
     </attribute>
     <attribute><id>CDM_DOMAIN</id><default>MEM</default></attribute>
     <attribute><id>FRU_ID</id></attribute>
+    <attribute><id>MSS_VREF_CAL_CNTL</id></attribute>
 </targetType>
 
 <!-- Centaur L4 -->

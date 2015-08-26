@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist_address.C,v 1.21 2015/06/08 16:39:04 lwmulkey Exp $
+// $Id: mss_mcbist_address.C,v 1.26 2015/07/24 08:32:13 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998, 2013
 // *!           All Rights Reserved -- Property of IBM
@@ -40,6 +40,9 @@
 //-------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
+// 1.26    |preeragh|22-Jul-15| 64bit compile fix
+// 1.25    |preeragh|22-Jun-15| DDR4 - Mods and fixes
+// 1.24    |lwmulkey|15-JUN-15| Add 2H CDIMM support
 // 1.20    |lwmulkey|06-JUN-15| Add slave rank support
 // 1.17    |sglancy |16-FEB-15| Merged FW comments with lab debugging needs
 // 1.17    |preeragh|15-Dec-14| Fix FW Review Comments
@@ -66,28 +69,19 @@ using namespace fapi;
 
 #define DELIMITERS ","
 
-fapi::ReturnCode address_generation(const fapi::Target & i_target_mba,
-                                    uint8_t i_port,
-                                    mcbist_addr_mode i_addr_type,
-                                    interleave_type i_add_inter_type,
-                                    uint8_t i_rank,
-                                    uint64_t &io_start_address,
-                                    uint64_t &io_end_address,
-				    char * l_str_cust_addr)
+fapi::ReturnCode address_generation(const fapi:: Target & i_target_mba,uint8_t i_port,mcbist_addr_mode i_addr_type,interleave_type i_add_inter_type,uint8_t i_rank,uint64_t &io_start_address, uint64_t &io_end_address, char * l_str_cust_addr)
 {
     fapi::ReturnCode rc;
     uint8_t l_num_ranks_per_dimm[MAX_VALUE_TWO][MAX_VALUE_TWO];
     uint8_t l_num_master_ranks[MAX_VALUE_TWO][MAX_VALUE_TWO];
-    uint8_t l_dram_gen = 0;
     uint8_t l_dram_banks = 0;
     uint8_t l_dram_rows = 0;
     uint8_t l_dram_cols = 0;
-    uint8_t l_dram_density = 0;
-    uint8_t l_dram_width = 0;
+    //uint8_t l_dram_density = 0;
+    //uint8_t l_dram_width = 0;
     uint8_t l_addr_inter = 0;
-    uint8_t l_num_ranks_p0_dim0, l_num_ranks_p0_dim1, l_num_ranks_p1_dim0,
-        l_num_ranks_p1_dim1;
-    uint8_t l_master_ranks_p0_dim0;
+    uint8_t l_num_ranks_p0_dim0,l_num_ranks_p0_dim1,l_num_ranks_p1_dim0,l_num_ranks_p1_dim1;
+    uint8_t l_master_ranks_p0_dim0,l_master_ranks_p0_dim1,l_master_ranks_p1_dim0;
     uint8_t mr3_valid, mr2_valid, mr1_valid,sl0_valid,sl1_valid,sl2_valid;
     uint32_t rc_num;
     char S0[] = "b";
@@ -108,10 +102,7 @@ fapi::ReturnCode address_generation(const fapi::Target & i_target_mba,
 
     rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target_mba, l_num_ranks_per_dimm);
     if (rc) return rc;
-    rc = FAPI_ATTR_GET(ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, &i_target_mba,
-                       l_num_master_ranks);
-    if (rc) return rc;
-    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN, &i_target_mba, l_dram_gen);
+    rc = FAPI_ATTR_GET(ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, &i_target_mba,l_num_master_ranks);
     if (rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_BANKS, &i_target_mba, l_dram_banks);
     if (rc) return rc;
@@ -119,10 +110,10 @@ fapi::ReturnCode address_generation(const fapi::Target & i_target_mba,
     if (rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_COLS, &i_target_mba, l_dram_cols);
     if (rc) return rc;
-    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_DENSITY, &i_target_mba, l_dram_density);
-    if (rc) return rc;
-    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target_mba, l_dram_width);
-    if (rc) return rc;
+    //rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_DENSITY, &i_target_mba, l_dram_density);
+    //if (rc) return rc;
+    //rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target_mba, l_dram_width);
+    //if (rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_MCBIST_ADDR_INTER, &i_target_mba, l_addr_inter);
     if (rc) return rc;
 
@@ -138,76 +129,79 @@ fapi::ReturnCode address_generation(const fapi::Target & i_target_mba,
    //FAPI_INF("ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM l_num_master_p1_dim1 is %d ",l_num_master_ranks[1][1]);
    //-------------------------------------------------------------------------------
 
-    l_num_ranks_p0_dim0 = l_num_ranks_per_dimm[0][0];
-    l_num_ranks_p0_dim1 = l_num_ranks_per_dimm[0][1];
-    l_num_ranks_p1_dim0 = l_num_ranks_per_dimm[1][0];
-    l_num_ranks_p1_dim1 = l_num_ranks_per_dimm[1][1];
-    l_master_ranks_p0_dim0 = l_num_master_ranks[0][0];
+l_num_ranks_p0_dim0 = l_num_ranks_per_dimm[0][0];
+l_num_ranks_p0_dim1 = l_num_ranks_per_dimm[0][1];
+l_num_ranks_p1_dim0 = l_num_ranks_per_dimm[1][0];
+l_num_ranks_p1_dim1 = l_num_ranks_per_dimm[1][1];
+l_master_ranks_p0_dim0 = l_num_master_ranks[0][0];
+l_master_ranks_p0_dim1 = l_num_master_ranks[0][1];
+l_master_ranks_p1_dim0 = l_num_master_ranks[1][0];
+//l_master_ranks_p1_dim1 = l_num_master_ranks[1][1];
+//Initial all ranks are invalid
+mr3_valid = 0;
+mr2_valid = 0;
+mr1_valid = 0;
+sl2_valid = 0;
+sl1_valid = 0;
+sl0_valid = 0;
 
+if( (l_num_ranks_p0_dim0 == 1 && l_num_ranks_p0_dim1 == 0) || (l_num_ranks_p1_dim0 == 1 && l_num_ranks_p1_dim1 == 0) )   //Single Rank case   -- default0
+	{
+		//do rank-only stuff for this
+		FAPI_DBG("%s:--- INSIDE 1R",i_target_mba.toEcmdString());
+		l_addr_inter=3;
+	}
+	
+else if ( (l_num_ranks_p0_dim0 == 1 && l_num_ranks_p0_dim1 == 1) || (l_num_ranks_p1_dim0 == 1 && l_num_ranks_p1_dim1 == 1) )
+{
+	FAPI_DBG("%s:--- INSIDE p0d0 valid and p0d1 valid --- 0 4----  2R",i_target_mba.toEcmdString());
+	mr1_valid=1;
+}
 
-    //Initial all ranks are invalid
-    mr3_valid = 0;
-    mr2_valid = 0;
-    mr1_valid = 0;
-    sl2_valid = 0;
-    sl1_valid = 0;
-    sl0_valid = 0;
+else if ( (l_num_ranks_p0_dim0 == 2 && l_num_ranks_p0_dim1 == 0) || (l_num_ranks_p1_dim0 == 2 && l_num_ranks_p1_dim1 == 0) )
+{
+	FAPI_DBG("%s:--- INSIDE p0d0 valid and p0d1 valid --- 0 1----  2R",i_target_mba.toEcmdString());
+	mr3_valid=1;
+}
+else if (((l_num_ranks_p0_dim0 == 2 && l_num_ranks_p0_dim1 == 2)|| (l_num_ranks_p1_dim0 == 2 && l_num_ranks_p1_dim1 == 2)) && (l_master_ranks_p0_dim0 != 1 && l_master_ranks_p0_dim1 != 1))   //Rank 01 and 45 case
+	{
+		FAPI_DBG("%s:--- INSIDE  --- 2R   0145",i_target_mba.toEcmdString());
+		mr3_valid = 1;
+		mr1_valid=1;
+	}
 
-    if ((l_num_ranks_p0_dim0 == 1 && l_num_ranks_p0_dim1 == 0) ||
-        (l_num_ranks_p1_dim0 == 1 && l_num_ranks_p1_dim1 == 0)) //Single Rank case   -- default0
-    {
-        //do rank-only stuff for this
-        //FAPI_INF("--- INSIDE 1R");
-        l_addr_inter = 3;
-    }
-    else if ((l_num_ranks_p0_dim0 == 1 && l_num_ranks_p0_dim1 == 1) ||
-             (l_num_ranks_p1_dim0 == 1 && l_num_ranks_p1_dim1 == 1))
-    {
-        //FAPI_INF("--- INSIDE p0d0 valid and p0d1 valid --- 0 4----  2R");
-        mr1_valid = 1;
-    }
-    else if ((l_num_ranks_p0_dim0 == 2 && l_num_ranks_p0_dim1 == 0) ||
-             (l_num_ranks_p1_dim0 == 2 && l_num_ranks_p1_dim1 == 0))
-    {
-        //FAPI_INF("--- INSIDE p0d0 valid and p0d1 valid --- 0 1----  2R");
-        mr3_valid = 1;
-    }
-    else if ((l_num_ranks_p0_dim0 == 2 && l_num_ranks_p0_dim1 == 2) ||
-             (l_num_ranks_p1_dim0 == 2 && l_num_ranks_p1_dim1 == 2)) //Rank 01 and 45 case
-    {
-        //FAPI_INF("--- INSIDE  --- 2R   0145");
-        mr3_valid = 1;
-        mr1_valid = 1;
-    }
-    else if ((l_num_ranks_p0_dim0 == 4 && l_num_ranks_p0_dim1 == 0) ||
-             (l_num_ranks_p1_dim0 == 4 && l_num_ranks_p1_dim1 == 0)) //Rank 0123 on single dimm case
-    {
-        mr3_valid = 1;
-        mr2_valid = 1;
-    }
-    else if ((l_num_ranks_p0_dim0 == 4 && l_num_ranks_p0_dim1 == 4) ||
-             (l_num_ranks_p1_dim0 == 4 && l_num_ranks_p1_dim1 == 4)) //Rank 0123 and 4567 case
-    {
-        mr3_valid = 1;
-        mr2_valid = 1;
-        mr1_valid = 1;
-    }
-    else if (((l_num_ranks_p0_dim0 == 4 && l_num_ranks_p0_dim1 == 0) ||
-              (l_num_ranks_p1_dim0 == 4 && l_num_ranks_p1_dim1 == 0)) &&
-               l_master_ranks_p0_dim0 == 1) //1r 4h stack
-    {
-        mr1_valid = 0;
-        sl1_valid = 1;
-        sl2_valid = 1; 
-    } 
+else if((l_num_ranks_p0_dim0 == 4 && l_num_ranks_p0_dim1 == 0 )|| (l_num_ranks_p1_dim0 == 4 && l_num_ranks_p1_dim1 == 0 ))	//Rank 0123 on single dimm case
+	{
+		mr3_valid = 1;mr2_valid = 1;
+	}
+else if (((l_num_ranks_p0_dim0 == 4 && l_num_ranks_p0_dim1 == 4) || (l_num_ranks_p1_dim0 == 4 && l_num_ranks_p1_dim1 == 4)) && l_master_ranks_p0_dim0 == 1) //1r 4h stack
+{
+        mr1_valid = 0; //DDC
+	sl1_valid = 1;
+	sl2_valid = 1;
+}
 
-    else if (((l_num_ranks_p0_dim0 == 8 && l_num_ranks_p0_dim1 == 0) || 
-              (l_num_ranks_p1_dim0 == 8 && l_num_ranks_p1_dim1 == 0)) && 
-              (l_master_ranks_p0_dim0 == 2)) //2rx4 4h ddr4 3ds
+else if (((l_num_ranks_p0_dim0 == 8 && l_num_ranks_p0_dim1 == 0) || (l_num_ranks_p1_dim0 == 8 && l_num_ranks_p1_dim1 == 0)) && ((l_master_ranks_p0_dim0 == 2) || (l_master_ranks_p0_dim1 == 0 && l_master_ranks_p1_dim0 == 2))) //2rx4 4h ddr4 3ds 
+{
+	l_addr_inter = 4;
+	//l_str_cust_addr = "sl2,sl1,ba0,mr3,cl3,cl4,cl5,ba1,cl6,cl7,cl8,ba2,r0,r1,r2,ba3,cl2,cl9,cl11,cl13,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16,sl0,mr2,mr1,mr0"; //DDC
+        mr3_valid = 1; //DDC
+	sl1_valid = 1;
+	sl2_valid = 1;
+}
+else if ((l_num_ranks_p0_dim0 == 4 && l_num_ranks_p0_dim1 == 4) || (l_num_ranks_p1_dim0 == 4 && l_num_ranks_p1_dim1 == 4)) //Rank 0123 and 4567 case
+{
+	mr3_valid = 1;
+	mr2_valid = 1;
+	mr1_valid = 1;
+}
+    else if (((l_num_ranks_p0_dim0 == 2 && l_num_ranks_p0_dim1 == 2) ||
+              (l_num_ranks_p1_dim0 == 2 && l_num_ranks_p1_dim1 == 2)) &&
+              (l_master_ranks_p0_dim0 == 1 && l_master_ranks_p0_dim1 == 1)) //1rx4 2h ddr4 3ds 2 dimm, CDIMM
     {
-        mr3_valid = 1;
-        sl1_valid = 1;
+        sl1_valid = 0;
         sl2_valid = 1;
+	mr1_valid = 1;
     }
 
     else
@@ -269,12 +263,15 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
     uint8_t l_attr_addr_mode = 0;
     uint8_t l_num_cols = 0;
     uint8_t l_num_rows = 0;
-
+	uint8_t l_dram_gen = 0;
+	
     rc = FAPI_ATTR_GET(ATTR_EFF_SCHMOO_ADDR_MODE, &i_target_mba, l_attr_addr_mode);
     if (rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_MCBIST_ADDR_NUM_COLS, &i_target_mba, l_num_cols);
     if (rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_MCBIST_ADDR_NUM_ROWS, &i_target_mba, l_num_rows);
+    if (rc) return rc;
+	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN, &i_target_mba, l_dram_gen);
     if (rc) return rc;
 
     if (l_num_cols == 0)
@@ -327,42 +324,8 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
     rc = fapiPutScom(i_target_mba, 0x030106c8, l_data_buffer_64);
     if (rc) return rc;
     i--;
-
-    ////FAPI_INF("Inside strcmp ba2");
-    l_sbit = 48;
-    l_value = i;
-    rc = fapiGetScom(i_target_mba, 0x030106c8, l_data_buffer_64);
-    if (rc) return rc;
-    rc_num = l_data_buffer_64.insertFromRight(l_value, l_sbit, 6);
-    if (rc_num)
-    {
-        FAPI_ERR("Error in function  parse_addr:");
-        rc.setEcmdError(rc_num);
-        return rc;
-    }
-    rc = fapiPutScom(i_target_mba, 0x030106c8, l_data_buffer_64);
-    if (rc) return rc;
-    i--;
-
-    ////FAPI_INF("Inside strcmp ba3");
-    l_sbit = 42;
-    l_value = i;
-    //------- Enable these for DDR4 --- for now constant map to zero
-    rc = fapiGetScom(i_target_mba, 0x030106c8, l_data_buffer_64);
-    if (rc) return rc;
-    //FAPI_INF("ba3 Invalid");
-    rc_num = l_data_buffer_64.insertFromRight(l_value_zero, l_sbit, 6);
-    if (rc_num)
-    {
-        FAPI_ERR("Error in function  parse_addr:");
-        rc.setEcmdError(rc_num);
-        return rc;
-    }
-    rc = fapiPutScom(i_target_mba, 0x030106c8, l_data_buffer_64);
-    if (rc) return rc;
-    
-
-    ////FAPI_INF("Inside strcmp mr3");
+	
+	////FAPI_INF("Inside strcmp mr3");
     l_sbit = 18;
     l_value = i;
     rc = fapiGetScom(i_target_mba, 0x030106c8, l_data_buffer_64);
@@ -392,6 +355,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106c8, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("mr3 Invalid");
+		
         
     }
 
@@ -426,6 +390,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106c8, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("mr2 Invalid");
+		
         
     }
 
@@ -460,8 +425,60 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba, 0x030106c8, l_data_buffer_64);
         if (rc) return rc;
         //FAPI_INF("mr1 Invalid");
+		
         
     }
+
+
+    ////FAPI_INF("Inside strcmp ba2");
+    l_sbit = 48;
+    l_value = i;
+    rc = fapiGetScom(i_target_mba, 0x030106c8, l_data_buffer_64);
+    if (rc) return rc;
+    rc_num = l_data_buffer_64.insertFromRight(l_value, l_sbit, 6);
+    if (rc_num)
+    {
+        FAPI_ERR("Error in function  parse_addr:");
+        rc.setEcmdError(rc_num);
+        return rc;
+    }
+    rc = fapiPutScom(i_target_mba, 0x030106c8, l_data_buffer_64);
+    if (rc) return rc;
+    i--;
+
+    ////FAPI_INF("Inside strcmp ba3");
+    l_sbit = 42;
+    l_value = i;
+    //------- Enable these for DDR4 --- for now constant map to zero
+    rc = fapiGetScom(i_target_mba, 0x030106c8, l_data_buffer_64);
+    if (rc) return rc;
+    //FAPI_INF("ba3 Invalid");
+	if (l_dram_gen == 2){
+    rc_num = l_data_buffer_64.insertFromRight(l_value, l_sbit, 6);
+    if (rc_num)
+    {
+        FAPI_ERR("Error in function  parse_addr:");
+        rc.setEcmdError(rc_num);
+        return rc;
+    }
+    rc = fapiPutScom(i_target_mba, 0x030106c8, l_data_buffer_64);
+    if (rc) return rc;
+	i--;
+}
+else
+{
+	rc_num = l_data_buffer_64.insertFromRight(l_value_zero, l_sbit, 6);
+    if (rc_num)
+    {
+        FAPI_ERR("Error in function  parse_addr:");
+        rc.setEcmdError(rc_num);
+        return rc;
+    }
+    rc = fapiPutScom(i_target_mba, 0x030106c8, l_data_buffer_64);
+    if (rc) return rc;
+	
+}
+
 
     ////FAPI_INF("Inside strcmp mr0");
     l_sbit = 0;
@@ -478,6 +495,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
     }
     rc = fapiPutScom(i_target_mba, 0x030106c8, l_data_buffer_64);
     if (rc) return rc;
+	
     
     ////FAPI_INF("Value of i = %d",i);
     //FAPI_INF("mr0 Invalid\n");
@@ -496,6 +514,8 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
     }
     rc = fapiPutScom(i_target_mba, 0x030106cb, l_data_buffer_64);
     if (rc) return rc;
+	
+	///////////////////////////////////////////////////////////////////
     
     //FAPI_INF("col2 Invalid");
     ////FAPI_INF("Value of i = %d",i);
@@ -528,6 +548,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         rc = fapiPutScom(i_target_mba, 0x030106cb, l_data_buffer_64);
         if (rc) return rc;
+		
         //FAPI_INF("Col 3 -- Invalid");
         
     }
@@ -562,6 +583,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         rc = fapiPutScom(i_target_mba, 0x030106cb, l_data_buffer_64);
         if (rc) return rc;
+		
         //FAPI_INF("Col 4 -- Invalid");
         
     }
@@ -595,6 +617,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         rc = fapiPutScom(i_target_mba, 0x030106cb, l_data_buffer_64);
         if (rc) return rc;
+		
         //FAPI_INF("Col 5 -- Invalid");
        
     }
@@ -629,6 +652,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         rc = fapiPutScom(i_target_mba, 0x030106cb, l_data_buffer_64);
         if (rc) return rc;
+		
         //FAPI_INF("Col 6 -- Invalid");
         
     }
@@ -663,6 +687,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         rc = fapiPutScom(i_target_mba, 0x030106cb, l_data_buffer_64);
         if (rc) return rc;
+		
         //FAPI_INF("Col 7 -- Invalid");
         
     }
@@ -697,6 +722,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         rc = fapiPutScom(i_target_mba, 0x030106cb, l_data_buffer_64);
         if (rc) return rc;
+		
         //FAPI_INF("Col 8 -- Invalid");
         
     }
@@ -731,6 +757,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         rc = fapiPutScom(i_target_mba, 0x030106cb, l_data_buffer_64);
         if (rc) return rc;
+		
         //FAPI_INF("Col 9 -- Invalid");
         
     }
@@ -767,6 +794,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
             }
             rc = fapiPutScom(i_target_mba, 0x030106ca, l_data_buffer_64);
             if (rc) return rc;
+			
             FAPI_DBG("%s:Col 11 -- Invalid", i_target_mba.toEcmdString());
             
         }
@@ -782,6 +810,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         rc = fapiPutScom(i_target_mba, 0x030106ca, l_data_buffer_64);
         if (rc) return rc;
+		
         //FAPI_INF("Col 11 -- Invalid");
         
     }
@@ -816,6 +845,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         rc = fapiPutScom(i_target_mba, 0x030106ca, l_data_buffer_64);
         if (rc) return rc;
+		
         //FAPI_INF("Col 13 Invalid");
         
     }
@@ -850,6 +880,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         rc = fapiPutScom(i_target_mba, 0x030106ca, l_data_buffer_64);
         if (rc) return rc;
+		
         //FAPI_INF("row 0 --  Invalid");
         
     }
@@ -884,6 +915,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         rc = fapiPutScom(i_target_mba, 0x030106ca, l_data_buffer_64);
         if (rc) return rc;
+		
         //FAPI_INF("row 1 --  Invalid");
         
     }
@@ -918,6 +950,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         rc = fapiPutScom(i_target_mba, 0x030106ca, l_data_buffer_64);
         if (rc) return rc;
+		
         //FAPI_INF("row 2 --  Invalid");
         
     }
@@ -952,6 +985,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         rc = fapiPutScom(i_target_mba, 0x030106ca, l_data_buffer_64);
         if (rc) return rc;
+		
         //FAPI_INF("row 3 --  Invalid");
         
     }
@@ -986,6 +1020,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         rc = fapiPutScom(i_target_mba, 0x030106ca, l_data_buffer_64);
         if (rc) return rc;
+		
         //FAPI_INF("row 4 --  Invalid");
         
     }
@@ -1020,6 +1055,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         rc = fapiPutScom(i_target_mba, 0x030106ca, l_data_buffer_64);
         if (rc) return rc;
+		
         //FAPI_INF("row 5 --  Invalid");
         
     }
@@ -1054,6 +1090,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         rc = fapiPutScom(i_target_mba, 0x030106ca, l_data_buffer_64);
         if (rc) return rc;
+		
         //FAPI_INF("row 6 --  Invalid");
         
     }
@@ -1088,6 +1125,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         rc = fapiPutScom(i_target_mba, 0x030106ca, l_data_buffer_64);
         if (rc) return rc;
+		
         //FAPI_INF("row 7 --  Invalid");
        
     }
@@ -1122,6 +1160,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         rc = fapiPutScom(i_target_mba, 0x030106c9, l_data_buffer_64);
         if (rc) return rc;
+		
         //FAPI_INF("row 8 --  Invalid");
        
     }
@@ -1156,6 +1195,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         rc = fapiPutScom(i_target_mba, 0x030106c9, l_data_buffer_64);
         if (rc) return rc;
+		
         //FAPI_INF("row 9 --  Invalid");
        
     }
@@ -1190,6 +1230,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         rc = fapiPutScom(i_target_mba, 0x030106c9, l_data_buffer_64);
         if (rc) return rc;
+		
         //FAPI_INF("row 10 --  Invalid");
         
     }
@@ -1224,6 +1265,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         rc = fapiPutScom(i_target_mba, 0x030106c9, l_data_buffer_64);
         if (rc) return rc;
+		
         //FAPI_INF("row 11 --  Invalid");
        
     }
@@ -1258,6 +1300,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         rc = fapiPutScom(i_target_mba, 0x030106c9, l_data_buffer_64);
         if (rc) return rc;
+		
         //FAPI_INF("row 12 --  Invalid");
        
     }
@@ -1292,6 +1335,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         rc = fapiPutScom(i_target_mba, 0x030106c9, l_data_buffer_64);
         if (rc) return rc;
+		
         //FAPI_INF("row 13 --  Invalid");
        
     }
@@ -1326,6 +1370,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         rc = fapiPutScom(i_target_mba, 0x030106c9, l_data_buffer_64);
         if (rc) return rc;
+		
         //FAPI_INF("row 14 --  Invalid");
        
     }
@@ -1359,6 +1404,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         }
         rc = fapiPutScom(i_target_mba, 0x030106c9, l_data_buffer_64);
         if (rc) return rc;
+		
         //FAPI_INF("row 15 --  Invalid");
        
     }
@@ -1394,6 +1440,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         //FAPI_INF("Row 16 Invalid");
         rc = fapiPutScom(i_target_mba, 0x030106c9, l_data_buffer_64);
         if (rc) return rc;
+		
        
     }
     ////FAPI_INF("Value of i = %d",i);
@@ -1406,8 +1453,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
     if (rc) return rc;
     if(sl2_valid==1)
     {
-
-      rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value,l_sbit ,6);
+	  rc_num = rc_num| l_data_buffer_64.insertFromRight(l_value,l_sbit ,6);
       if (rc_num)
       {
          FAPI_ERR( "Error in function  parse_addr:");
@@ -1415,7 +1461,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
          return rc;
       }
       rc = fapiPutScom(i_target_mba,0x030106c8,l_data_buffer_64);
-      if(rc) return rc;
+	  i--;
     }
     else
     {
@@ -1428,7 +1474,6 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba,0x030106c8,l_data_buffer_64);
         if(rc) return rc;
         FAPI_DBG("%s:sl2 Invalid",i_target_mba.toEcmdString());
-        i--;
         //FAPI_DBG("%s:Value of i = %d",i);
      }
 
@@ -1450,6 +1495,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
       }
       rc = fapiPutScom(i_target_mba,0x030106c8,l_data_buffer_64);
       if(rc) return rc;
+	  i--;
     }
     else
     {
@@ -1462,7 +1508,6 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba,0x030106c8,l_data_buffer_64);
         if(rc) return rc;
         FAPI_DBG("%s:sl1 Invalid",i_target_mba.toEcmdString());
-        i--;
         //FAPI_DBG("%s:Value of i = %d",i);
      }
     FAPI_INF("Inside strcmp sl0");
@@ -1483,6 +1528,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
       }
       rc = fapiPutScom(i_target_mba,0x030106c8,l_data_buffer_64);  
       if(rc) return rc;
+	  i--;
     }
     else
     {
@@ -1495,7 +1541,6 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
         rc = fapiPutScom(i_target_mba,0x030106c8,l_data_buffer_64);  
         if(rc) return rc;
         FAPI_DBG("%s:sl0 Invalid",i_target_mba.toEcmdString());
-        i--;
         //FAPI_DBG("%s:Value of i = %d",i);
      }
 
@@ -1513,7 +1558,7 @@ fapi::ReturnCode parse_addr(const fapi::Target & i_target_mba,
     }
     rc = fapiPutScom(i_target_mba, 0x030106d0, l_data_buffer_rd64);
     if (rc) return rc;
-    l_value = i + 1;
+    l_value = i+1;
     FAPI_INF("Setting end_addr Value of i = %d",i);
     rc_num = l_data_buffer_rd64.flushTo0();
 

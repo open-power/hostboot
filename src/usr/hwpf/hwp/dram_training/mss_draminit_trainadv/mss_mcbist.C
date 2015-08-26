@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist.C,v 1.55 2015/05/13 19:32:22 sglancy Exp $
+// $Id: mss_mcbist.C,v 1.57 2015/08/26 16:17:41 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -33,16 +33,15 @@
 // *! DESCRIPTION          : MCBIST Procedures
 // *! CONTEXT              : 
 // *!
-// *! OWNER  NAME          : Hosmane, Preetham         Email: preeragh@in.ibm.com
+// *! OWNER  NAME          : Hosmane, Preetham             Email: preeragh@in.ibm.com
 // *! BACKUP               : Sethuraman, Saravanan         Email: saravanans@in.ibm.com
 // *!***************************************************************************
 // CHANGE HISTORY:
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
-//   1.55  |sglancy |05/13/15| Fixed FW compile issue
-//   1.54  |sglancy |05/05/15| Fixed FW compile issue
-//   1.53  |sglancy |05/05/15| Added #ifdefs around non-FW compliant code
+//   1.57  |preeragh|08/25/15| FW Review Comments  MPR
+//   1.53  |preeragh|06/22/15| Added MPR
 //   1.52  |sglancy |02/16/15| Merged in FW comments with lab needs
 //   1.51  |sglancy |02/09/15| Fixed FW comments and adjusted whitespace
 //   1.50  |preeragh|01/16/15| Fixed FW comments
@@ -606,7 +605,42 @@ fapi::ReturnCode cfg_mcb_dgen(const fapi::Target & i_target_mba,
             rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFDSPQ_0x030106c7, l_spare_data_buffer_64);
             if (rc) return rc;
         }
-        else if ((i_datamode == DATA_GEN_DELTA_I) ||
+		else if(i_datamode == MPR)
+		{
+			l_var = 0x0000000000000000ull;
+			l_var1 =0xFFFFFFFFFFFFFFFFull;
+			l_spare = 0x00FF00FF00FF00FFull;
+			
+			rc_num = l_spare_data_buffer_64.setDoubleWord(0, l_spare);
+            rc_num |= l_var_data_buffer_64.setDoubleWord(0, l_var);
+            rc_num |= l_var1_data_buffer_64.setDoubleWord(0, l_var1);
+            if (rc_num)
+            {
+                FAPI_ERR("cfg_mcb_dgen:");
+                rc.setEcmdError(rc_num);
+                return rc;
+            }
+		rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD0Q_0x030106be, l_var_data_buffer_64); if(rc) return rc;
+		 
+		rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD1Q_0x030106bf, l_var1_data_buffer_64); if(rc) return rc;
+		 
+		rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD2Q_0x030106c0, l_var_data_buffer_64); if(rc) return rc;
+	  
+		rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD3Q_0x030106c1, l_var1_data_buffer_64); if(rc) return rc;
+		 
+		rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD4Q_0x030106c2, l_var_data_buffer_64); if(rc) return rc;
+		 
+		rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD5Q_0x030106c3, l_var1_data_buffer_64); if(rc) return rc;
+ 
+		rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD6Q_0x030106c4, l_var_data_buffer_64); if(rc) return rc;	
+		 
+		rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFD7Q_0x030106c5, l_var1_data_buffer_64); if(rc) return rc;
+	 
+		rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFDQ_0x030106c6 , l_spare_data_buffer_64); if(rc) return rc;
+		
+		rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCBFDSPQ_0x030106c7 , l_spare_data_buffer_64); if(rc) return rc;
+		}
+		else if ((i_datamode == DATA_GEN_DELTA_I) ||
                  (i_datamode == MCBIST_2D_CUP_PAT0))
         {
             l_var = 0xFFFFFFFFFFFFFFFFull;

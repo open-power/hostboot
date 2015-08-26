@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist.H,v 1.47 2015/02/16 19:56:22 sglancy Exp $
+// $Id: mss_mcbist.H,v 1.49 2015/08/07 11:09:15 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -40,6 +40,8 @@
 //-------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
+//   1.49  |preeragh|7/26/15  | Added RW infinite
+//   1.48  |lapietra|6/26/15  | Added RMWFIX and RMWFIX_I tests
 //   1.47  |sglancy |12/16/14| Merged FW comments with lab debugging needs
 //   1.46  |preeragh|12/15/14| Revert back, removed rwheeler changes
 //   1.43  |rwheeler|11/19/14|option to pass in rotate data seed
@@ -145,7 +147,11 @@ enum mcbist_test_mem
     MCB_2D_CUP_SEQ,
     MCB_2D_CUP_RAND,
     SHMOO_STRESS_INFINITE,
-    HYNIX_1_COL
+    HYNIX_1_COL,
+    RMWFIX,
+    RMWFIX_I,
+    W_INFINITE,
+    R_INFINITE
 };
 
 enum mcbist_data_gen

@@ -79,7 +79,7 @@ OBJS += mss_mcbist_address.o
 OBJS += mss_lrdimm_funcs.o
 OBJS += cen_stopclocks.o
 OBJS += mss_ddr4_pda.o
-
+OBJS += mss_mrs6_DDR4.o
 
 #
 OBJS += $(if $(CONFIG_PALMETTO_VDDR),palmetto_vddr.o, hbVddrMsg.o)

@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: dimm_spd_attributes.xml,v 1.46 2015/01/16 20:03:12 andrewg Exp $ -->
+<!-- $Id: dimm_spd_attributes.xml,v 1.55 2015/08/05 00:29:38 asaetow Exp $ -->
 <!-- XML file specifying DIMM SPD attributes used by HW Procedures. -->
 <attributes>
 
@@ -53,7 +53,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         Note that CDIMM designation here is obsolete.  See ATTR_SPD_CUSTOM
     </description>
     <valueType>uint8</valueType>
-    <enum>CDIMM = 0x00, RDIMM = 0x01, UDIMM = 0x02, SO_DIMM=0x03, LRDIMM = 0x0b</enum>
+    <enum>CDIMM = 0x00, RDIMM = 0x01, UDIMM = 0x02, SO_DIMM=0x03, LRDIMM = 0x0b, INVALID = 0xff</enum>
     <platInit/>
 </attribute>
 
@@ -76,6 +76,14 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <description>
         DRAM Density.
         Located in DDR3/DDR4 SPD byte 4, bits 3-0.
+        0x00 = 256MB
+        0x01 = 512MB
+        0x02 = 1GB
+        0x03 = 2GB
+        0x04 = 4GB
+        0x05 = 8GB
+        0x06 = 16GB
+        0x07 = 32GB
     </description>
     <valueType>uint8</valueType>
     <enum>
@@ -95,6 +103,8 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         The raw data has different meanings for DDR3 and DDR4.
         HWPs must use this DDR neutral enumeration to decode.
         Platform support must call an Accessor HWP.
+        For DDR4 , Values can be B4 and B8 based on bits 5-4
+        For DDR3 , Values can be B8,B16,B32,B64 based on bits 6-4
     </description>
     <valueType>uint8</valueType>
     <enum>B8 = 0x00, B16 = 0x01, B32 = 0x02, B64 = 0x03, B4 = 0x04, UNKNOWN = 0xff</enum>
@@ -137,6 +147,8 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         The raw data has different meanings for DDR3 and DDR4.
         HWPs must use this DDR neutral enumeration to decode.
         Platform support must call an Accessor HWP.
+        For DDR3, values would be NOTOP1_5,OP1_35,OP1_2X based on byte 6, bits 2-0
+        For DDR4, values would be OP1_2V,END1_2V, based on byte 6, bits 5-0
     </description>
     <valueType>uint8</valueType>
     <enum>
@@ -216,6 +228,8 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         The raw data has different meanings for DDR3 and DDR4.
         HWPs must use this DDR neutral enumeration to decode.
         Platform support must call an Accessor HWP.
+        For DDR3, the values would be from CL_4 through CL_18
+        For DDR4, the values would be from CL_7 through CL_24
     </description>
     <valueType>uint32</valueType>
     <enum>
@@ -591,6 +605,19 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <array>80</array>
     <platInit/>
     <writeable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_DIMM_RCD_CNTL_WORD_0_15</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>RCD Control Word. Supplied by VPD, used by mss_eff_config.C and mss_draminit.C . Each dimm will have a value.
+        consumer: mss_dram_init, mss_eff_config firmware notes: In order to make this readable to the OpenPower: It is necessary
+        to swap the nibbles for a given byte.  IE this is pulled from SPD bytes 69 - 76.
+        The attribute would contain byte 69 nibble 1, followed by byte 69 nibble 0, followed by byte 70 nibble 1, and so forth.
+   </description>
+    <valueType>uint64</valueType>
+    <odmVisable/>
+    <odmChangeable/>
 </attribute>
 
 <attribute>
@@ -1078,7 +1105,7 @@ Querying them from DDR3 DIMMs will result in an error
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         Minimum SDRAM Refresh Recovery Time Delay in medium timebase (MTB) units
-        Located in DDR4 SPD bytes 30(MSB) and 31(LSB).
+        Located in DDR4 SPD bytes 31(MSB) bits 15-8 and SPD byte 30(LSB) 7-0.
     </description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -1089,7 +1116,7 @@ Querying them from DDR3 DIMMs will result in an error
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         Minimum SDRAM Refresh Recovery Time Delay in medium timebase (MTB) units
-        Located in DDR4 SPD bytes 32(MSB) and 33(LSB).
+        Located in DDR4 SPD bytes 33(MSB) bits 15-8 and SPD byte 32(LSB) 7-0.
     </description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -1100,7 +1127,7 @@ Querying them from DDR3 DIMMs will result in an error
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         Minimum SDRAM Refresh Recovery Time Dealy in medium timebase (MTB) units.
-        Located in DDR4 SPD byte 34(LSB) bits 15-8 and SPD byte 35(MSB) 7-0.
+        Located in DDR4 SPD byte 35(MSB) bits 15-8 and SPD byte 34(LSB) 7-0.
     </description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -1247,6 +1274,274 @@ Querying them from DDR3 DIMMs will result in an error
         The VPD Version of this DIMM.  The version number can be an indication of when different DIMM keywords are valid and is loaded from the platform.  A version number of zero is unknown.
     </description>
     <valueType>uint32</valueType>
+    <platInit/>
+</attribute>
+
+<!--
+*******************************************************************************
+The following attributes can be queried from LRDIMM type DDR4 DIMMs only
+*******************************************************************************
+-->
+
+<attribute>
+    <id>ATTR_SPD_DIMM_MODULE_LR_ATTRIBUTES</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Indicates number of registers used and number of rows of DRAM's on LRDIMM.
+	     Byte 131, Bits 1-0 for # of registers used on LRDIMM. 
+  	     00 - Undefined , 01 - 1 Register , 10,11 -Reserved.
+        Byte 131, Bits 3-2 for # of rows of DRAM's on LRDIMM
+         00,11- Undefined, 01- 1 Row, 10 - 2 Rows.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_LR_REGISTER_MANF_ID</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Manufacturer of the memory buffer on DIMM module. 
+	     Located in DDR4 SPD bytes 133(LSB) and 134(MSB).
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_LR_ADDR_MAP_REG_TO_DRAM</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Address mapping from Register to DRAM and Drive strength.
+	     Located in DDR4 SPD bytes 136 and 137.
+        Byte 136 bit 0, 0 - Standard, 1 - Mirrored.
+        Byte 137 has drive strength for control and command/Address.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_LR_REG_OUTPUT_DRV_STRENGTH_CK</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Drive strength for clock outputs of the registering clock driver.
+	     Located in DDR4 SPD bytes 138.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_LR_DRAM_VREF_DQ_RANK0</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        VREFDQ value for the package rank 0 DRAM's.
+	     Located in DDR4 SPD bytes 140.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_LR_DRAM_VREF_DQ_RANK1</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        VREFDQ value for the package rank 1 DRAM's.
+ 	     Located in DDR4 SPD bytes 141.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_LR_DRAM_VREF_DQ_RANK2</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        VREFDQ value for the package rank 2 DRAM's.
+	     Located in DDR4 SPD bytes 142.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_LR_DRAM_VREF_DQ_RANK3</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        VREFDQ value for the package rank 3 DRAM's.
+	     Located in DDR4 SPD bytes 143.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_LR_BUF_VREF_DQ_FOR_DRAM</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        VREFDQ value for the data buffer component.
+	     Located in DDR4 SPD bytes 144.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_LR_BUF_MDQ_DRV_LESS_THAN_1866</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Data Buffer MDQ Drive strength and RTT for data rate less than 1866.
+	     Located in DDR4 SPD bytes 145.
+        Bits 2-0 for MDQ Read Termination strength.
+        Bits 6-4 for MDQ Drive strength.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_LR_BUF_MDQ_DRV_1866_2400</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Data Buffer MDQ Drive strength and RTT for data rate between 1866 and 2400.
+	     Located in DDR4 SPD bytes 146.
+        Bits 2-0 for MDQ Read Termination strength.
+        Bits 6-4 for MDQ Drive strength.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_LR_BUF_MDQ_DRV_2400_3200</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Data Buffer MDQ Drive strength and RTT for data rate between 2400 and 3200.
+	     Located in DDR4 SPD bytes 147.
+        Bits 2-0 for MDQ Read Termination strength.
+        Bits 6-4 for MDQ Drive strength.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_LR_DRAM_DRV_STRENGTH</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        DRAM Drive strength for all the data rates between 1866 and 3200.
+	     Located in DDR4 SPD bytes 148.
+        Bits 1-0 for Datarate less than 1866.
+        Bits 3-2 for Data rate between 1866 and 2400.
+        Bits 5-4 for data rate between 2400 and 3200.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_LR_DRAM_ODT_RTT_WR_LESS_THAN_1866</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        DRAM ODT (RTT_WR) for data rates less than 1866
+	     Located in DDR4 SPD bytes 149 bits 2-0.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_LR_DRAM_ODT_RTT_NOM_LESS_THAN_1866</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        DRAM ODT (RTT_NOM)for data rates less than 1866
+	     Located in DDR4 SPD bytes 149 bits 5-3.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_LR_DRAM_ODT_RTT_WR_1866_2400</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        DRAM ODT (RTT_WR) for data rates between 1866 and 2400.
+	     Located in DDR4 SPD bytes 150 bits 2-0.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_LR_DRAM_ODT_RTT_NOM_1866_2400</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        DRAM ODT (RTT_NOM)for data rates between 1866 and 2400.
+	     Located in DDR4 SPD bytes 150 bits 5-3.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_LR_DRAM_ODT_RTT_WR_2400_3200</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        DRAM ODT (RTT_WR) for data rates between 2400 and 3200.
+	     Located in DDR4 SPD bytes 151 bits 2-0.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_LR_DRAM_ODT_RTT_NOM_2400_3200</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        DRAM ODT (RTT_NOM)for data rates between 2400 and 3200.
+	     Located in DDR4 SPD bytes 151 bits 5-3.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_LR_DRAM_ODT_RTT_PARK_LESS_THAN_1866</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        DRAM ODT (RTT_PARK)for data rates less than 1866.
+	     Located in DDR4 SPD bytes 152.
+	     Bit 2-0 for package ranks 0 and 1.
+	     Bit 5-3 for package ranks 2 and 3.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_LR_DRAM_ODT_RTT_PARK_1866_2400</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        DRAM ODT (RTT_PARK)for data rates between 1866 and 2400.
+	     Located in DDR4 SPD bytes 153.
+	     Bit 2-0 for package ranks 0 and 1.
+  	     Bit 5-3 for package ranks 2 and 3.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_SPD_LR_DRAM_ODT_RTT_PARK_2400_3200</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        DRAM ODT (RTT_PARK)for data rates between 2400 and 3200.
+	     Located in DDR4 SPD bytes 154.
+	     Bit 2-0 for package ranks 0 and 1.
+	     Bit 5-3 for package ranks 2 and 3.
+    </description>
+    <valueType>uint8</valueType>
     <platInit/>
 </attribute>
 
@@ -1514,6 +1809,23 @@ firmware notes: none
 This Attribute is to be interpreted as an Integer</description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, OHM60 = 60, OHM120 = 120, OHM240 = 240, HIGHZ = 1</enum>
+    <platInit/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2 2 4</array>
+</attribute>
+
+<attribute>
+    <id>ATTR_VPD_DRAM_RTT_PARK</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>DRAM Rtt_PARK. Used in various locations and comes from the MT keyword of the VPD or is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+	RTT_Park value. This is for DDR4 MRS5.Each memory channel will have a value.
+Creator: VPD(MT), mss_eff_cnfg_termination
+consumer: various.C files (no initfiles)
+firmware notes: none
+This Attribute is to be interpreted as an Integer</description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0, 60OHM = 60, 120OHM = 120, 40OHM = 40, 240OHM = 240, 48OHM = 48, 80OHM = 80, 34OHM = 34</enum>
     <platInit/>
     <odmVisable/>
     <odmChangeable/>
@@ -2310,6 +2622,18 @@ This Attribute is to be interpreted as an Integer</description>
     <array> 2</array>
 </attribute>
 
+<attribute>
+    <id>ATTR_VPD_PERIODIC_MEMCAL_MODE_OPTIONS</id>
+    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Settings for periodic CAL - zcal 1, syscal 1, centering 0, rdclk 1, dqs align 1, rdclk_update_dis 0, dutycycle 0, and power dis (dqs) 1. Second byte has repeat as 000, mpr mode as 0, mba as 11, and the spares as 00
+</description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
 <!-- Spare attribute found in eclipz/hwpf/hwp/xml/attribute_info/dimm_attributes.xml -->
 <!-- <attribute> -->
 <!--     <id>ATTR_VPD_DIMM_SPARE</id>  -->
@@ -2494,6 +2818,70 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
 </attribute>
 
 <attribute>
+    <id>ATTR_VPD_MT_VERSION_BYTE</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Describes the Version of MT Keyword</description>
+    <valueType>uint8</valueType>
+   <platInit/>
+     <odmVisable/>
+ </attribute>
+
+<attribute>
+    <id>ATTR_VPD_MR_VERSION_BYTE</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Describes the Version of MR Keyword</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+     <odmVisable/>
+ </attribute>
+ 
+ <attribute>
+    <id>ATTR_VPD_MR_DATA_CONTROL_BYTE</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Describes the DATA control byte from MR</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+     <odmVisable/>
+ </attribute>
+ 
+ <attribute>
+    <id>ATTR_VPD_MT_DATA_CONTROL_BYTE</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Describes the DATA control byte from MT</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+     <odmVisable/>
+ </attribute>
+ 
+ <attribute>
+    <id>ATTR_VPD_VM_KEYWORD</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Fetches the VM Keyword</description>
+    <valueType>uint32</valueType>
+    <platInit/>
+     <odmVisable/>
+ </attribute>
+ 
+ <attribute>
+    <id>ATTR_VPD_VD_KEYWORD</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Fetch the VD keyword</description>
+    <valueType>uint32</valueType>
+    <platInit/>
+     <odmVisable/>
+ </attribute>
+ 
+ <attribute>
+    <id>ATTR_VPD_DW_KEYWORD</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Describes Centaur Voltage from DW keyword</description>
+    <valueType>uint32</valueType>
+    <platInit/>
+     <odmVisable/>
+ </attribute>
+ 
+
+<attribute>
     <id>ATTR_SPD_MODSPEC_COM_REF_RAW_CARD_REV</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
@@ -2545,12 +2933,68 @@ firmware notes: none</description>
     <array> 2 2</array>
 </attribute>
 
+
+ <attribute>
+     <id>ATTR_VPD_RD_CTR_WINDAGE_OFFSET</id>
+     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <description>Derived from calibration/characterization of read centering. Number of windage offset in units of pico-seconds[ps] with sign bit0 (0b0=positive, 0b1=negative) and value in bits1..31, so 0x80000023 for example would mean "-35ps". Can be overwritten by ODM vendors if done from VPD.  Each port will have a value.
+creator: VPD
+consumer: mss_draminit_training_adv
+firmware notes: none</description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array> 2</array>
+</attribute>
+
+
 <attribute>
     <id>ATTR_ISDIMM_MBVPD_INDEX</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>VPD index for associated chip's memory buffer VPD</description>
     <valueType>uint8</valueType>
     <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_CDIMM_VPD_MASTER_TOTAL_POWER_SLOPE</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Master Total Power Slope that comes from the VPD MW Keyword</description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <odmVisable/>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_CDIMM_VPD_MASTER_TOTAL_POWER_INTERCEPT</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Master Total Power Intercept that comes from the VPD MW Keyword</description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <odmVisable/>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_CDIMM_VPD_SUPPLIER_TOTAL_POWER_SLOPE</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Supplier Total Power Slope that comes from the VPD MV Keyword</description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <odmVisable/>
+    <persistRuntime/>
+</attribute>
+
+<attribute>
+    <id>ATTR_CDIMM_VPD_SUPPLIER_TOTAL_POWER_INTERCEPT</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>Supplier Total Power Intercept that comes from the VPD MV Keyword</description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <odmVisable/>
+    <persistRuntime/>
 </attribute>
 
 </attributes>

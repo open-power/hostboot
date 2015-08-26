@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_shmoo_common.H,v 1.19 2014/01/23 19:59:49 sasethur Exp $
+// $Id: mss_shmoo_common.H,v 1.21 2015/08/07 11:29:09 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM 
@@ -33,15 +33,17 @@
 // *! DESCRIPTION          : Memory Subsystem Shmoo common defines
 // *! CONTEXT              : To make all shmoos share a common defines
 // *!
-// *! OWNER  NAME          : Varkey Varghese          Email: varkey.kv@in.ibm.com
-// *! BACKUP NAME          : Gaurav Sharda            Email:     
+// *! OWNER  NAME          : Preetham Hosmane 				 Email - preeragh@in.ibm.com
+// *! BACKUP NAME          : Saravanan Sethuraman            Email:     
 // *!
 // *!***************************************************************************
 // CHANGE HISTORY:
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
+// 1.21    |preeragh| 30/07/15| Optimized for FW Linear/Composite/Bin
+// 1.20    |preeragh| 22/06/15| DDR4 - Mods
 // 1.18    |mjjones | 24/01/14| RAS Review Updates
-// 1.15    |abhijit |8/8/12  | Updated Review Comments
+// 1.15    |abhijit |8/8/12   | Updated Review Comments
 // 1.9     |aditya  |12/6/12  | Updated Review Comments
 // 1.8     | abhijit| 15/11/12| made changes fw review comments 
 // 1.7     | abhijit| 22/10/12| made changes to variables
@@ -66,7 +68,7 @@ enum shmoo_algorithm_t
 };
 
 const uint8_t NINE = 9;
-const uint8_t MAX_SHMOO=1;
+const uint8_t MAX_SHMOO=2;
 const uint8_t MAX_RANK_DIMM=4;
 const uint8_t MAX_NIBBLES=2;
 const uint8_t MAX_BITS=4;
@@ -96,6 +98,8 @@ struct shmoo_knob_data_t
     uint16_t rb_regval[MAX_DQ];// Right Bound register/Hex value
     uint16_t nom_val[MAX_DQ]; // nominal value of this instance of the knob
     uint16_t last_pass[MAX_DQ];
+	uint16_t total_margin[MAX_DQ];
+	uint16_t curr_diff[MAX_DQ];
     uint16_t last_fail[MAX_DQ];
     uint16_t curr_val[MAX_DQ];
     uint16_t right_margin_val[MAX_DQ];

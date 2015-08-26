@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_generic_shmoo.H,v 1.27 2014/01/23 19:41:31 sasethur Exp $
+// $Id: mss_generic_shmoo.H,v 1.29 2015/08/07 11:28:52 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -33,14 +33,16 @@
 // *! DESCRIPTION          : Memory Subsystem Generic Shmoo -- abstraction for HB
 // *! CONTEXT              : To make all shmoos share a common abstraction layer
 // *!
-// *! OWNER  NAME          : Abhijit Saurabh          Email:  abhijit.saurabh@in.ibm.com
-// *! BACKUP NAME          :    
+// *! OWNER  NAME          : Preetham Hosmane         Email:  preeragh@in.ibm.com
+// *! BACKUP NAME          : Saravanan Sethuraman  
 // *!
 // *!***************************************************************************
 // CHANGE HISTORY:
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
+// 	 1.29  |preeragh|30/07/15| Optimized for FW Linear/Composite/Bin
+//   1.28  |preeragh|06/22/14|DDR4 Mods
 //   1.27  |mjjones |01/24/14|RAS Review Updates
 //   1.26  |abhijit |01/17/14|enabled one more function
 //   1.24  |abhijit |12/17/13|modified as per to support firmware 
@@ -80,17 +82,17 @@ private:
                 struct RANK
                 {
                     shmoo_knob_data_t K; // Set of knobs used by this shmoo
-                }S[MAX_RANK_DIMM];
-            }P[MAX_PORT];
+                }S[MAX_RANK];       //Max Rank are 8
+            }P[MAX_PORT];			// Max Port 2
         }MBA;
         shmoo_knob_config_t static_knob; // Static info regarding the knob
-    }SHMOO[MAX_SHMOO]; // Denote max shmoo scenarios we have
+    }SHMOO[MAX_SHMOO]; // Denote max shmoo scenarios we have; Have 2; so that one for WR/RD and other Clock.
 
     //! Result Data
     uint8_t convergence_gap;
     shmoo_algorithm_t algorithm;
     shmoo_mode mcbist_mode;
-    uint8_t mcbist_error_map[MAX_PORT][MAX_RANK][MAX_BYTE][MAX_NIBBLES];
+    uint8_t mcbist_error_map[MAX_PORT][MAX_RANK][MAX_BYTE][MAX_NIBBLES];    //MAX byte is 10; Max Nibble are 2; 
     uint8_t count_bad_dq[MAX_PORT];
     uint8_t schmoo_error_map[MAX_PORT][MAX_RANK][20];
     uint8_t binary_done_map[MAX_PORT][MAX_RANK][20];
@@ -102,11 +104,13 @@ private:
     uint32_t iv_test_type;
     uint8_t iv_dmm_type;
     uint8_t iv_SHMOO_ON;
+	uint8_t iv_DQS_ON;
     uint8_t iv_shmoo_type;
     uint16_t iv_shmoo_param;
     uint16_t iv_binary_diff;
     uint16_t iv_vref_mul;
     uint8_t valid_rank[MAX_RANK];
+	uint8_t valid_rank1[MAX_PORT][MAX_RANK];
 
 public:
 
@@ -165,14 +169,19 @@ public:
     fapi::ReturnCode print_report(const fapi::Target & i_target);
 
     fapi::ReturnCode print_report_dqs(const fapi::Target & i_target);
+	fapi::ReturnCode print_report_dqs2(const fapi::Target & i_target);
 
     fapi::ReturnCode get_margin(const fapi::Target & i_target);
+	fapi::ReturnCode get_margin2(const fapi::Target & i_target);
 
     fapi::ReturnCode get_margin_dqs_by8(const fapi::Target & i_target);
 
     fapi::ReturnCode get_margin_dqs_by4(const fapi::Target & i_target);
 
     fapi::ReturnCode get_min_margin(const fapi::Target & i_target,
+                                    uint32_t *o_right_min_margin,
+                                    uint32_t *o_left_min_margin);
+	fapi::ReturnCode get_min_margin2(const fapi::Target & i_target,
                                     uint32_t *o_right_min_margin,
                                     uint32_t *o_left_min_margin);
 
@@ -185,6 +194,8 @@ public:
     fapi::ReturnCode do_mcbist_reset(const fapi::Target & i_target);
 
     fapi::ReturnCode check_error_map(const fapi::Target & i_target,
+                                     uint8_t port,uint8_t &pass);
+	fapi::ReturnCode check_error_map2(const fapi::Target & i_target,
                                      uint8_t port,uint8_t &pass);
 
     fapi::ReturnCode sanity_check(const fapi::Target & i_target);
@@ -213,6 +224,9 @@ public:
     fapi::ReturnCode shmoo_save_rest(const fapi::Target & i_target,
                                      uint64_t i_content_array[],
                                      uint8_t i_mode);
+	fapi::ReturnCode get_nibble_pda(const fapi::Target & i_target,uint32_t pda_nibble_table[2][2][16][2]);
+	fapi::ReturnCode knob_update_bin_composite(const fapi::Target & i_target,bound_t bound,uint8_t scenario,uint8_t bit,uint8_t pass,bool &flag);
+	fapi::ReturnCode print_report2(const fapi::Target & i_target);
 
 };
 #endif

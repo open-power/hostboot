@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist_common.C,v 1.73 2015/02/16 19:53:37 sglancy Exp $
+// $Id: mss_mcbist_common.C,v 1.76 2015/08/07 11:08:45 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -40,6 +40,9 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
+//   1.76  |preeragh|07/15/15|R_W Infinite Added
+//   1.75  |lapietra|06/26/15|added RMWFIX and RMWFIX_I tests
+//   1.74  |preeragh|06/15/15|o_error_map Correction
 //   1.73  |sglancy |02/16/15|Merged in lab needs
 //   1.72  |sglancy |02/09/15|Fixed FW comments and addressed bugs
 //   1.71  |preeragh|01/16/15|Fixed FW comments
@@ -1394,11 +1397,11 @@ fapi::ReturnCode mcb_error_map(const fapi::Target & i_target_mba,
 
                         if ((l_mcb_fail_160.isBitSet(l_index1)))
                         {
-                            o_error_map[l_port][l_rank][l_byte][l_nibble] = 1;
+                            o_error_map[l_port][i_rank][l_byte][l_nibble] = 1;
                         }
                         else
                         {
-                            o_error_map[l_port][l_rank][l_byte][l_nibble] = 0;
+                            o_error_map[l_port][i_rank][l_byte][l_nibble] = 0;
                         }
                     }
                     else if (l_port == 1)
@@ -1409,11 +1412,11 @@ fapi::ReturnCode mcb_error_map(const fapi::Target & i_target_mba,
                         if ((l_mcb_fail1_160.isBitSet(l_index1)))
                         {
 
-                            o_error_map[l_port][l_rank][l_byte][l_nibble] = 1;
+                            o_error_map[l_port][i_rank][l_byte][l_nibble] = 1;
                         }
                         else
                         {
-                            o_error_map[l_port][l_rank][l_byte][l_nibble] = 0;
+                            o_error_map[l_port][i_rank][l_byte][l_nibble] = 0;
                         }
                     }
                 }
@@ -1932,7 +1935,7 @@ fapi::ReturnCode mcb_error_map(const fapi::Target & i_target_mba,
                             }
                             else
                             {
-                                if (o_error_map[l_port][l_rank][i_byte1][i_nibble1] == 1)
+                                if (o_error_map[l_port][i_rank][i_byte1][i_nibble1] == 1)
                                 {
                                     strcat(l_str, "X");
                                 }
@@ -2807,6 +2810,23 @@ fapi::ReturnCode mss_conversion_testtype(const fapi::Target & i_target_mba,
         i_mcbtest = HYNIX_1_COL;
         FAPI_INF("%s:TESTTYPE :HYNIX_1_COL", i_target_mba.toEcmdString());
         break;
+    case 49:
+        i_mcbtest = RMWFIX;
+        FAPI_INF("%s:TESTTYPE :RMWFIX", i_target_mba.toEcmdString());
+        break;
+    case 50:
+        i_mcbtest = RMWFIX_I;
+        FAPI_INF("%s:TESTTYPE :RMWFIX_I", i_target_mba.toEcmdString());
+        break;
+    case 51:
+        i_mcbtest = W_INFINITE;
+        FAPI_INF("%s:TESTTYPE :W_INFINITE", i_target_mba.toEcmdString());
+        break;
+    case 52:
+        i_mcbtest = R_INFINITE;
+        FAPI_INF("%s:TESTTYPE :R_INFINITE", i_target_mba.toEcmdString());
+        break;
+
 
     default:
         FAPI_INF("%s:Wrong Test_type,so using default test_type",
