@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -296,7 +296,7 @@ void PnorRP::initDaemon()
             TRACFCOMP(g_trac_pnor, ERR_MRK"PnorRP::initDaemon: Failed to readTOC");
             break;
         }
-        l_errhdl =  PnorRP::setSideInfo ();
+        l_errhdl =  setSideInfo ();
         if(l_errhdl)
         {
             TRACFCOMP(g_trac_pnor, "PnorRP::initDaemon> setSideInfo failed");
@@ -716,6 +716,7 @@ errlHndl_t PnorRP::readTOC()
 {
     TRACUCOMP(g_trac_pnor, "PnorRP::readTOC>" );
     errlHndl_t l_errhdl = NULL;
+    errlHndl_t l_secondary_errhdl = NULL;
     uint8_t* toc0Buffer = new uint8_t[PAGESIZE];
     uint8_t* toc1Buffer = new uint8_t[PAGESIZE];
     uint64_t fatal_error = 0;
@@ -748,13 +749,55 @@ errlHndl_t PnorRP::readTOC()
             }
         }
 
-        l_errhdl = PNOR::parseTOC(toc0Buffer, toc1Buffer, iv_TOC_used, iv_TOC,
-                                  BASE_VADDR);
+        //In order to track errors we will always parse both TOCs
+        l_errhdl = PNOR::parseTOC(toc0Buffer, iv_TOC);
+        PNOR::SectionData_t l_secondary_TOC[PNOR::NUM_SECTIONS+1];
+        l_secondary_errhdl = PNOR::parseTOC(toc1Buffer, l_secondary_TOC);
+
+        //If there is no error in the primary TOC
+        if(!l_errhdl)
+        {
+            //Then we use the primary TOC
+            iv_TOC_used = TOC_0;
+            //If we found an error in the secondary TOC
+            if(l_secondary_errhdl)
+            {
+                //@TODO RTC:144079 Try to fix PNOR for detected TOC failures
+                //Set the error severity to INFORMATIONAL and commit it
+                l_secondary_errhdl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                errlCommit(l_secondary_errhdl, PNOR_COMP_ID);
+            }
+        }
+        //Otherwise if the secondary TOC has no error
+        else if(!l_secondary_errhdl)
+        {
+            //then we will use the secondary TOC instead
+            iv_TOC_used = TOC_1;
+            memcpy(iv_TOC, l_secondary_TOC, (sizeof(l_secondary_TOC)));
+            //Set the error severity to INFORMATIONAL for the primaryTOC error
+            // and commit it
+            //@TODO RTC:144079: Try to fix PNOR for detected TOC failures
+            l_errhdl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errhdl, PNOR_COMP_ID);
+        }
+        //In the case that both TOCs, have errors shut down the system
+        else
+        {
+            //commit both error logs for each corrupted TOC
+            l_errhdl->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+            errlCommit(l_errhdl, PNOR_COMP_ID);
+            l_secondary_errhdl->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+            errlCommit(l_secondary_errhdl, PNOR_COMP_ID);
+            TRACFCOMP(g_trac_pnor, "readTOC: parseTOC failed");
+            //With invalid pnor we cannot do anything, time to shut down
+            INITSERVICE::doShutdown(PNOR::RC_PARTITION_TABLE_INVALID);
+        }
+
+        l_errhdl = setVirtAddrs();
         if (l_errhdl)
         {
-            TRACFCOMP(g_trac_pnor, "readTOC: parseTOC failed");
-            errlCommit(l_errhdl, PNOR_COMP_ID);
-            INITSERVICE::doShutdown(PNOR::RC_PARTITION_TABLE_INVALID);
+            TRACFCOMP(g_trac_pnor, "readTOC: Failed to set vaddr in TOC");
+            INITSERVICE::doShutdown(PNOR::RC_PNOR_SET_VADDR_FAILED);
         }
     } while (0);
 
@@ -1475,4 +1518,101 @@ uint64_t PnorRP::getTocOffset(TOCS i_toc) const
     // Can use a ternary operator because there are only 2 TOCs per side
     return (i_toc == TOC_0) ? iv_TocOffset[WORKING].first :
                               iv_TocOffset[WORKING].second;
+}
+
+errlHndl_t PnorRP::setVirtAddrs(void)
+{
+    errlHndl_t l_errhdl = NULL;
+    //Start out with the "next v addr" being the base of pnor
+    //(this will increment in the loop below)
+    uint64_t l_next_vAddr = BASE_VADDR;
+
+    //Loop through each section in the TOC Buffer
+    for(uint32_t i=0; i<PNOR::NUM_SECTIONS; i++)
+    {
+
+        if(iv_TOC[i].flashAddr == INVALID_FLASH_OFFSET)
+        {
+            //all flashAddrs are initialized to INVALID_FLASH_OFFSET
+            //if the section's flashAddr does not get set, it doesnt exist
+            // in this TOC
+            continue;
+        }
+        //Set virtAddr for the current section
+        iv_TOC[i].virtAddr = l_next_vAddr;
+        l_next_vAddr += iv_TOC[i].size;
+
+          // Handle section permissions
+        if (iv_TOC[i].misc & FFS_MISC_READ_ONLY)
+        {
+            // Need to set permissions to allow writing to virtual
+            // addresses, but prevents the kernel from ejecting
+            // dirty pages (no WRITE_TRACKED).
+            int rc = mm_set_permission(
+                                    (void*)iv_TOC[i].virtAddr,
+                                    iv_TOC[i].size,
+                                    WRITABLE);
+            if (rc)
+            {
+                TRACFCOMP(g_trac_pnor, "E>PnorRP::readTOC: Failed to set block permissions to WRITABLE for section %s.",
+                          cv_EYECATCHER[i]);
+                /*@
+                * @errortype
+                * @moduleid PNOR::MOD_PNORRP_READTOC
+                * @reasoncode PNOR::RC_WRITABLE_PERM_FAIL
+                * @userdata1 PNOR section id
+                * @userdata2 PNOR section vaddr
+                * @devdesc Could not set permissions of the
+                * given PNOR section to WRITABLE
+                * @custdesc A problem occurred while reading
+                *           PNOR partition table
+                */
+                l_errhdl = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                PNOR::MOD_PNORRP_READTOC,
+                                PNOR::RC_WRITABLE_PERM_FAIL,
+                                i,
+                                iv_TOC[i].virtAddr,
+                                true /*Add HB SW Callout*/);
+                l_errhdl->collectTrace(PNOR_COMP_NAME);
+                break;
+            }
+        }
+        else
+        {
+            // Need to set permissions to R/W
+            int rc = mm_set_permission(
+                                (void*)iv_TOC[i].virtAddr,
+                                iv_TOC[i].size,
+                                WRITABLE | WRITE_TRACKED);
+            if (rc)
+            {
+                TRACFCOMP(g_trac_pnor, "E>PnorRP::readTOC: Failed to set block permissions to WRITABLE/WRITE_TRACKED for section %s.",
+                          cv_EYECATCHER[i]);
+                /*@
+                * @errortype
+                * @moduleid PNOR::MOD_PNORRP_READTOC
+                * @reasoncode PNOR::RC_WRITE_TRACKED_PERM_FAIL
+                * @userdata1 PNOR section id
+                * @userdata2 PNOR section vaddr
+                * @devdesc Could not set permissions of the
+                * given PNOR section to
+                * WRITABLE/WRITE_TRACKED
+                * @custdesc A problem occurred while reading
+                * PNOR partition table
+                */
+                l_errhdl = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                PNOR::MOD_PNORRP_READTOC,
+                                PNOR::RC_WRITE_TRACKED_PERM_FAIL,
+                                i,
+                                iv_TOC[i].virtAddr,
+                                true /*Add HB SW Callout*/);
+                l_errhdl->collectTrace(PNOR_COMP_NAME);
+                break;
+            }
+        }
+    }
+
+    return l_errhdl;
 }

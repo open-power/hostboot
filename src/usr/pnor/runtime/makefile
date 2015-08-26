@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2015
+# Contributors Listed Below - COPYRIGHT 2014,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -27,6 +27,7 @@ ROOTPATH = ../../../..
 MODULE = pnor_rt
 
 OBJS += rt_pnor.o
+OBJS += pnor_utils.o
 OBJS += pnor_common.o
 OBJS += ecc.o
 

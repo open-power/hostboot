@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -152,20 +152,11 @@ class LpcDD
      *
      */
     enum {
-        LPCHC_FW_SPACE  = 0xF0000000, /**< LPC Host Controller FW Space */
-        LPCHC_MEM_SPACE = 0xE0000000, /**< LPC Host Controller Mem Space */
-        LPCHC_IO_SPACE  = 0xD0010000, /**< LPC Host Controller I/O Space */
-        LPCHC_REG_SPACE = 0xC0012000, /**< LPC Host Ctlr Register Space */
 
         /** Start of LPC Addr within the memory mapped space*/
         LPC_ADDR_START = 0xC0000000,
         /** Size that LPC takes up (0xC0000000 to 0xFFFFFFFF)*/
         LPC_SPACE_SIZE = 0x40000000,
-        /** Physical addr of the start of LPC address space*/
-        LPC_PHYS_BASE = 0x6030000000000,
-
-
-
 
         /**< OPB LPCM Sync FIR Reg - used to read the FIR*/
         OPB_LPCM_FIR_REG = 0x01010C00,

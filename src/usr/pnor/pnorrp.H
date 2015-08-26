@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -212,6 +212,13 @@ class PnorRP
      * @brief  Message receiver
      */
     void waitForMessage();
+
+    /**
+     * @brief Set the virtual addresses in the iv_TOC
+     *
+     * @return Any errors found while setting Virtual Addresses
+     */
+    errlHndl_t setVirtAddrs(void);
 
     /**
      * @brief  Retrieve 1 logical page of data from the PNOR device

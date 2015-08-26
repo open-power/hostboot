@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -133,9 +133,48 @@ class PnorDdTest : public CxxTest::TestSuite
                 break;
             }
 
+           // Perform PnorDD read 1
+           uint64_t l_address =
+                      base_address + PNOR::pnorTestSec_readwrite_offset;
+            uint64_t l_readData = 0;
+            l_size = sizeof(uint64_t);
+            l_err = deviceRead(l_testTarget,
+                               &l_readData,
+                               l_size,
+                               DEVICE_PNOR_ADDRESS(0, l_address));
+            total++;
+            if (l_err)
+            {
+                TS_FAIL("PnorDdTest::test_readwrite: PNORDD read 1: deviceRead() failed! Error committed.");
+                errlCommit(l_err,PNOR_COMP_ID);
+                fails++;
+            }
+            total++;
+
+            TRACFCOMP(g_trac_pnor, "Original value in read 1: %lx", l_readData);
+
+            // Perform PnorDD read 2
+            l_address = base_address + PNOR::pnorTestSec_readwrite_offset + 0x8;
+            l_size = sizeof(uint64_t);
+            l_err = deviceRead(l_testTarget,
+                               &l_readData,
+                               l_size,
+                               DEVICE_PNOR_ADDRESS(0, l_address));
+            total++;
+            if (l_err)
+            {
+                TS_FAIL("PnorDdTest::test_readwrite: PNORDD read 2: deviceRead() failed! Error committed.");
+                errlCommit(l_err,PNOR_COMP_ID);
+                fails++;
+            }
+            total++;
+
+               TRACFCOMP(g_trac_pnor, "Original value in read 2: %lx", l_readData);
+
+
             // Perform PnorDD Write 1
 
-            uint64_t l_address = base_address +
+             l_address = base_address +
                                  PNOR::pnorTestSec_readwrite_offset;
             uint64_t l_writeData = 0x12345678FEEDB0B0;
             l_size = sizeof(uint64_t);
@@ -183,7 +222,7 @@ class PnorDdTest : public CxxTest::TestSuite
 
             // Perform PnorDD read 1
             l_address = base_address + PNOR::pnorTestSec_readwrite_offset;
-            uint64_t l_readData = 0;
+             l_readData = 0;
             l_size = sizeof(uint64_t);
             l_err = deviceRead(l_testTarget,
                                &l_readData,
