@@ -1,0 +1,64 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/ipl/hwp/p9_pm_ocb_init_errors.xml $       -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Error definitions for p9_pm_ocb_init procedure -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_OCBINIT_BAD_MODE</rc>
+    <description>Unknown mode passed to p9_pm_ocb_init.
+    </description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_OCBINIT_BAD_Q_LENGTH_PARM</rc>
+    <description>Bad Queue Length Passed to p9_pm_ocb_init.
+    </description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_OCBINIT_BAD_ITP_TYPE_PARM</rc>
+    <description>Bad Interrupt Type Passed to p9_pm_ocb_init.
+    </description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_OCBINIT_BAD_Q_OVER_UNDERFLOW_PARM</rc>
+    <description>Bad Queue Over/Underflow Enable Passed to p9_pm_ocb_init.
+    </description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_OCBINIT_BAD_CHAN_NUM_PARM</rc>
+    <description>Bad Channel Number Passed to p9_pm_ocb_init.
+    </description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_OCBINIT_BAD_CHAN_TYPE_PARM</rc>
+    <description>Bad Channel Type Passed to p9_pm_ocb_init.
+    </description>
+  </hwpError>
+   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_OCBINIT_BAD_CHAN3_TYPE_PARM</rc>
+    <description>Bad Channel Type for Channel3 Passed to p9_pm_ocb_init.
+    </description>
+  </hwpError>
+  <!-- ********************************************************************* -->
+</hwpErrors>
