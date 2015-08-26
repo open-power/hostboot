@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include <targeting/common/targetservice.H>
 #include <errl/errlmanager.H>
 #include "lpcdd.H"
+#include <lpc/lpc_const.H>
 #include <sys/time.h>
 #include <lpc/lpc_reasoncodes.H>
 #include <initservice/initserviceif.H>
@@ -379,7 +380,7 @@ LpcDD::LpcDD( TARGETING::Target* i_proc )
 {
     TRACFCOMP(g_trac_lpc, "LpcDD::LpcDD> " );
     mutex_init( &iv_mutex );
-    LPCBase_t baseAddr = LPC_PHYS_BASE + LPC_ADDR_START;
+    LPCBase_t baseAddr = LPC::LPC_PHYS_BASE + LPC_ADDR_START;
 
 
     setLPCBaseAddr( static_cast<uint64_t *>(
@@ -635,7 +636,8 @@ errlHndl_t LpcDD::checkAddr(LPC::TransType i_type,
                 invalid_address = true;
                 break;
             }
-            *o_addr = getLPCBaseAddr()+ i_addr+ LPCHC_IO_SPACE- LPC_ADDR_START;
+            *o_addr =
+            getLPCBaseAddr()+ i_addr+ LPC::LPCHC_IO_SPACE- LPC_ADDR_START;
             break;
         case LPC::TRANS_MEM:
             if( i_addr >= 0x10000000 )
@@ -643,8 +645,8 @@ errlHndl_t LpcDD::checkAddr(LPC::TransType i_type,
                 invalid_address = true;
                 break;
             }
-
-            *o_addr = getLPCBaseAddr()+ i_addr+ LPCHC_MEM_SPACE- LPC_ADDR_START;
+            *o_addr =
+            getLPCBaseAddr()+ i_addr+ LPC::LPCHC_MEM_SPACE- LPC_ADDR_START;
             break;
         case LPC::TRANS_FW:
             if( i_addr >= 0x10000000 )
@@ -652,7 +654,8 @@ errlHndl_t LpcDD::checkAddr(LPC::TransType i_type,
                 invalid_address = true;
                 break;
             }
-            *o_addr = getLPCBaseAddr()+ i_addr + LPCHC_FW_SPACE- LPC_ADDR_START;
+            *o_addr =
+            getLPCBaseAddr()+ i_addr + LPC::LPCHC_FW_SPACE- LPC_ADDR_START;
             break;
         case LPC::TRANS_REG:
           if( i_addr >= 0x100 )
@@ -660,7 +663,8 @@ errlHndl_t LpcDD::checkAddr(LPC::TransType i_type,
                 invalid_address = true;
                 break;
             }
-            *o_addr =getLPCBaseAddr()+ i_addr + LPCHC_REG_SPACE- LPC_ADDR_START;
+            *o_addr =
+            getLPCBaseAddr()+ i_addr + LPC::LPCHC_REG_SPACE- LPC_ADDR_START;
             break;
         case LPC::TRANS_ABS:
             //Just use the address as given

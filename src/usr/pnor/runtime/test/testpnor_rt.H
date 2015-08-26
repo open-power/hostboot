@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -162,7 +162,6 @@ class PnorRtTest : public CxxTest::TestSuite
                 TS_FAIL("PnorRtTest::testTOC: writeToDevice failed");
             }
         }
-
         delete tocHeader;
         delete tocEntry;
         delete corruptBuffer;

@@ -25,11 +25,11 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 
+EXTRAINCDIR += ${ROOTPATH}/src/usr/pnor/
+
 MODULE = testpnor
 
-TESTS = pnorddtest.H
-TESTS += ecctest.H
-TESTS += pnorrptest.H
+TESTS = pnorddtest.H ecctest.H pnorrptest.H pnorutilsTest.H
 
 #SFC Implementations
 TESTS += $(if $(CONFIG_SFC_IS_IBM_DPSS),sfc_ibmtest.H)

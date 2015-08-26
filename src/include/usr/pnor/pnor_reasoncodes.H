@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -153,6 +153,10 @@ namespace PNOR
         RC_INVALID_WORKING_TOC       = PNOR_COMP_ID | 0x28,
         RC_INVALID_TOC               = PNOR_COMP_ID | 0x29,
         RC_WRONG_SIZE_FROM_READ      = PNOR_COMP_ID | 0x2A,
+        RC_NULL_TOC_BUFFER           = PNOR_COMP_ID | 0x2B,
+        RC_TOC_HDR_CHECKSUM_ERR      = PNOR_COMP_ID | 0x2C,
+        RC_PNOR_PARSE_ENTRIES_ERR    = PNOR_COMP_ID | 0x2D,
+        RC_PNOR_SET_VADDR_FAILED     = PNOR_COMP_ID | 0x2E,
 
         //@fixme-RTC:131607-Temporary value to allow HWSV compile
         //termination_rc

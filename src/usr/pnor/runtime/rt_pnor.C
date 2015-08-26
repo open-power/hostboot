@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -652,11 +652,10 @@ errlHndl_t RtPnor::readTOC ()
                 break;
             }
 
-            // When we ask for TOC partition, Opal returns a valid TOC.
-            // So, we don't need to verify the second TOC in parseTOC
-            // Therefore, sending invalid value for second toc
-            PNOR::TOCS l_tocUsed;
-            l_err = PNOR::parseTOC(l_toc0Buffer, 0, l_tocUsed, iv_TOC, 0);
+            //Pass along TOC buffer to be parsed, parseTOC will parse through
+            // the buffer and store needed information in iv_TOC
+            // Note: that Opal should always return a valid TOC
+            l_err = PNOR::parseTOC(l_toc0Buffer, iv_TOC);
             if (l_err)
             {
                 TRACFCOMP(g_trac_pnor, "RtPnor::readTOC: parseTOC failed");

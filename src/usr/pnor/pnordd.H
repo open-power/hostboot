@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -141,10 +141,6 @@ class PnorDD
      * @brief Some general constants
      */
     enum {
-        LPCHC_FW_SPACE  = 0xF0000000, /**< LPC Host Controller FW Space */
-        LPCHC_MEM_SPACE = 0xE0000000, /**< LPC Host Controller Mem Space */
-        LPCHC_IO_SPACE  = 0xD0010000, /**< LPC Host Controller I/O Space */
-        LPCHC_REG_SPACE = 0xC0012000, /**< LPC Host Ctlr Register Space */
 
         LPC_SFC_CMDREG_OFFSET = 0xF0000C00, /** LPC Offest to SFC Cmd Regs */
         LPC_SFC_CMDBUF_OFFSET = 0xF0000D00, /** LPC Off to SFC Cmd Buf space */

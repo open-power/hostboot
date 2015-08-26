@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2011,2016
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -24,8 +24,10 @@
 #
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../..
-MODULE = pnor
 
+
+MODULE = pnor
+OBJS += pnor_utils.o
 OBJS += pnorrp.o
 OBJS += pnordd.o
 OBJS += pnor_common.o
