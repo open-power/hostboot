@@ -51,13 +51,13 @@ class buffer
 
         ~buffer(void) = default;
 
-        #if !defined(DOXYGEN) && defined(FAPI2_DEBUG)
+#if !defined(DOXYGEN) && defined(FAPI2_DEBUG)
         /// @brief Print the contents of the buffer to stdout
         inline void print(void) const
         {
             TT::print(iv_data);
         }
-        #endif
+#endif
 
         ///
         /// @brief Get the contents of the buffer
@@ -72,7 +72,7 @@ class buffer
         /// @brief Get the contents of the buffer
         /// @return The contents of the buffer
         ///
-        inline operator T&()
+        inline operator T& ()
         {
             return iv_data;
         }
@@ -118,7 +118,7 @@ class buffer
             static const bits_type bits_in_value = parameterTraits<OT>::bit_length();
             const bits_type bit_length = TT::bit_length(iv_data);
 
-            if (i_offset + bits_in_value >= bit_length)
+            if (i_offset + bits_in_value > bit_length)
             {
                 return FAPI2_RC_OVERFLOW;
             }
@@ -172,7 +172,7 @@ class buffer
         /// @note Example: fapi2::buffer<uint64_t>().setBit<3>();
         ///
         template< bits_type B, bits_type C = 1 >
-        inline buffer& setBit(void)
+        inline buffer & setBit(void)
         {
             static_assert((B >= 0) &&
                           ((B + C - 1) < TT::bits_per_unit()), "failed range check");
@@ -216,10 +216,10 @@ class buffer
         /// the case we can add a function parameter version.
         ///
         template< bits_type B, bits_type C = 1>
-        inline buffer& clearBit(void)
+        inline buffer & clearBit(void)
         {
             static_assert((B >= 0) &&
-                          ((B + C - 1)< TT::bits_per_unit()), "failed range check");
+                          ((B + C - 1) < TT::bits_per_unit()), "failed range check");
 
             iv_data &= buffer<T>().setBit<B, C>().invert();
             return *this;
@@ -262,10 +262,10 @@ class buffer
         /// the case we can add a function parameter version.
         ///
         template< bits_type B, bits_type C = 1 >
-        inline buffer& writeBit(const bool i_value)
+        inline buffer & writeBit(const bool i_value)
         {
             static_assert((B >= 0) &&
-                          ((B + C - 1)< TT::bits_per_unit()), "failed range check");
+                          ((B + C - 1) < TT::bits_per_unit()), "failed range check");
 
             (i_value == 0) ? clearBit<B, C>() : setBit<B, C>();
             return *this;
@@ -282,7 +282,7 @@ class buffer
         /// the case we can add a function parameter version.
         ///
         template< bits_type B, bits_type C = 1 >
-        inline buffer& flipBit(void)
+        inline buffer & flipBit(void)
         {
             static_assert((B >= 0) &&
                           ((B + C - 1) < TT::bits_per_unit()), "failed range check");
@@ -359,86 +359,86 @@ class buffer
         ///
         /// @brief operator>>()
         ///
-        #ifdef DOXYGEN
+#ifdef DOXYGEN
         inline buffer<T>& operator>>(bits_type i_shiftnum);
-        #endif
+#endif
 
         ///
         /// @brief operator<<()
         ///
-        #ifdef DOXYGEN
+#ifdef DOXYGEN
         inline buffer<T>& operator<<(bits_type i_shiftnum);
-        #endif
+#endif
 
         ///
         /// @brief operator+()
         ///
-        #ifdef DOXYGEN
+#ifdef DOXYGEN
         inline buffer<T>& operator+(const T& rhs);
-        #endif
+#endif
 
         ///
         /// @brief operator+=()
         ///
-        #ifdef DOXYGEN
+#ifdef DOXYGEN
         inline buffer<T>& operator+=(const T& rhs);
-        #endif
+#endif
 
         ///
         /// @brief operator|=()
         ///
-        #ifdef DOXYGEN
+#ifdef DOXYGEN
         inline buffer<T>& operator|=(const T& rhs);
-        #endif
+#endif
 
         ///
         /// @brief operator&=()
         ///
-        #ifdef DOXYGEN
+#ifdef DOXYGEN
         inline buffer<T>& operator&=(const T& rhs);
-        #endif
+#endif
 
         ///
         /// @brief operator|()
         ///
-        #ifdef DOXYGEN
+#ifdef DOXYGEN
         inline buffer<T>& operator|(const T& rhs);
-        #endif
+#endif
 
         ///
         /// @brief operator&()
         ///
-        #ifdef DOXYGEN
+#ifdef DOXYGEN
         inline buffer<T>& operator&(const T& rhs);
-        #endif
+#endif
 
         ///
         /// @brief operator^=()
         ///
-        #ifdef DOXYGEN
+#ifdef DOXYGEN
         inline buffer<T>& operator^=(const T& rhs);
-        #endif
+#endif
 
         ///
         /// @brief operator~()
         ///
-        #ifdef DOXYGEN
+#ifdef DOXYGEN
         inline buffer<T>& operator~(const T& rhs) const;
-        #endif
+#endif
 
         ///
         /// @brief operator==()
         ///
-        #ifdef DOXYGEN
+#ifdef DOXYGEN
         inline bool operator==(const T& rhs) const;
-        #endif
+#endif
 
         ///
         /// @brief operator!=()
         ///
-        #ifdef DOXYGEN
+#ifdef DOXYGEN
         inline bool operator!=(const T& rhs) const;
-        #endif
+#endif
 
         ///
         /// @brief Copy part of a OT into the DataBuffer
@@ -451,7 +451,7 @@ class buffer
         /// @return buffer& Useful for method chaining
         ///
         template<bits_type TS, bits_type L, bits_type SS = 0, typename OT>
-        inline buffer& insert(const OT i_datain)
+        inline buffer & insert(const OT i_datain)
         {
             const bits_type target_length = parameterTraits<T>::bit_length();
             const bits_type source_length = parameterTraits<OT>::bit_length();
@@ -592,7 +592,7 @@ class buffer
             static_assert((TS + L) <= parameterTraits<T>::bit_length(),
                           "InsertFromRight(): (Target Start + Len) is out of bounds");
 
-            this->insert<TS, L, parameterTraits<OT>::bit_length() - L>(i_datain);
+            this->insert < TS, L, parameterTraits<OT>::bit_length() - L > (i_datain);
             return *this;
         }
 
@@ -644,7 +644,7 @@ class buffer
         /// @return const buffer& Useful for method chaining
         ///
         template<bits_type SS, bits_type L, bits_type TS = 0, typename OT>
-        inline const buffer& extract(OT& o_out) const
+        inline const buffer & extract(OT& o_out) const
         {
             // Extraction is just an insert into o_out
 
@@ -664,7 +664,7 @@ class buffer
         /// @return buffer& Useful for method chaining
         ///
         template<bits_type SS, bits_type L, bits_type TS = 0, typename OT>
-        inline buffer& extract(OT& o_out)
+        inline buffer & extract(OT& o_out)
         {
             // Extraction is just an insert into o_out
 
@@ -712,7 +712,7 @@ class buffer
         template<bits_type SS, bits_type L, typename OT>
         inline const buffer& extractToRight(OT& o_out) const
         {
-            extract<SS, L, parameterTraits<OT>::bit_length() - L>(o_out);
+            extract < SS, L, parameterTraits<OT>::bit_length() - L > (o_out);
             return *this;
         }
 
@@ -727,7 +727,7 @@ class buffer
         template<bits_type SS, bits_type L, typename OT>
         inline buffer& extractToRight(OT& o_out)
         {
-            extract<SS, L, parameterTraits<OT>::bit_length() - L>(o_out);
+            extract < SS, L, parameterTraits<OT>::bit_length() - L > (o_out);
             return *this;
         }
 
