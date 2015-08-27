@@ -980,6 +980,13 @@ void ErrlEntry::setSubSystemIdBasedOnCallouts()
                     "callout to determine SSID", pData->clockType);
             iv_User.setSubSys(getSubSystem(pData->clockType));
         }
+        else if ( pData->type == HWAS::PART_CALLOUT )
+        {
+            TRACFCOMP(g_trac_errl, INFO_MRK
+                    "mapping highest priority part 0x%x "
+                    "callout to determine SSID", pData->partType);
+            iv_User.setSubSys(getSubSystem(pData->partType));
+        }
         else
         {
             TRACFCOMP(g_trac_errl, ERR_MRK
