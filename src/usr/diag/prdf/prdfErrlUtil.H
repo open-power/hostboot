@@ -204,12 +204,6 @@
   o_abort = false;
 
 /**
- * @brief  set deconfigEnum based on reconfig loop
- * @note   this is a no-op in Hostboot
- */
-#define PRDF_RECONFIG_LOOP(o_deconfigEnum)
-
-/**
  * @brief Interface to indicate errlog that hostboot need to do a
  *        soft terminate.
  */

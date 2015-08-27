@@ -126,8 +126,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     errlSeverity severityParm = ERRL_SEV_RECOVERED;
 #endif
 
-    PRDcallout thiscallout;
-    PRDpriority thispriority;
     epubProcedureID thisProcedureID;
 
     // Init Action Parm to most common usage, Service Action Required and
@@ -142,11 +140,9 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
     GardAction::ErrorType prdGardErrType;
     HWAS::GARD_ErrorType gardPolicy = HWAS::GARD_NULL;
-    HWAS::DeconfigEnum deconfigState = HWAS::NO_DECONFIG;
 
     bool ForceTerminate = false;
     bool iplDiagMode = false;
-    bool deferDeconfig = false;
 
     ++iv_serviceActionCounter;
 
@@ -349,7 +345,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     for ( SDC_MRU_LIST::const_iterator it = mruList.begin();
           it < mruList.end(); ++it )
     {
-        thiscallout = it->callout;
+        PRDcallout thiscallout = it->callout;
+
         if ( PRDcalloutData::TYPE_SYMFRU == thiscallout.getType() )
         {
             if ( (EPUB_PRC_SP_CODE   == thiscallout.flatten()) ||
@@ -435,20 +432,12 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     SrcWord7 |= io_sdc.getSecondaryAttnType();
 
     //--------------------------------------------------------------------------
-    // Check for IPL Diag Mode and set up for Deferred Deconfig
+    // Check for IPL Diag Mode
     //--------------------------------------------------------------------------
 
     #if defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
 
     iplDiagMode = PlatServices::isInMdiaMode();
-
-    // Deferred Deconfig should be used throughout all of Hostboot (both
-    // checkForIplAttns() and MDIA).
-    if ( HWAS::GARD_NULL != gardPolicy )
-    {
-        deferDeconfig = true;
-        deconfigState = HWAS::DECONFIG;
-    }
 
     #endif
 
@@ -541,12 +530,26 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // Get the global deconfig policy (must be done after setting gard policy).
     //--------------------------------------------------------------------------
 
-    // Change deconfigState only based on Gard Types.
-    // This only affects FSP code since Hostboot macro is no-op.
-    // This is needed for FSP Reconfig Loop to work.
+    HWAS::DeconfigEnum deconfigPolicy = HWAS::NO_DECONFIG;
+    bool               deferDeconfig  = false;
+
     if ( HWAS::GARD_NULL != gardPolicy )
     {
-        PRDF_RECONFIG_LOOP(deconfigState);
+        #if !defined(__HOSTBOOT_MODULE) // FSP only
+
+        // Change the deconfig state based the gard type. This is only required
+        // to control what the FSP does during the reconfig loop.
+        deconfigPolicy = HWSV::SvrError::isInHwReconfLoop() ? HWAS::DECONFIG
+                                                            : HWAS::NO_DECONFIG;
+
+        #elif !defined(__HOSTBOOT_RUNTIME) // Hostboot only
+
+        // Deferred Deconfig should be used throughout all of Hostboot (both
+        // checkForIplAttns() and MDIA).
+        deconfigPolicy = HWAS::DECONFIG;
+        deferDeconfig  = true;
+
+        #endif
     }
 
     //**************************************************************
@@ -556,27 +559,28 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     for ( SDC_MRU_LIST::const_iterator it = mruList.begin();
           it < mruList.end(); ++it )
     {
-        thispriority = it->priority;
-        thiscallout = it->callout;
-        HWAS::GARD_ErrorType tmpGard = gardPolicy;
-        HWAS::DeconfigEnum tmpDeconfig = deconfigState;
+        PRDcallout  thiscallout  = it->callout;
+        PRDpriority thispriority = it->priority;
 
-        if( HWAS::GARD_NULL != gardPolicy )
+        // Use the global gard/deconfig policies as default.
+        HWAS::GARD_ErrorType thisGard     = gardPolicy;
+        HWAS::DeconfigEnum   thisDeconfig = deconfigPolicy;
+
+        // Change the gard/deconfig actions if this MRU should not be garded.
+        if ( NO_GARD == it->gardState )
         {
-            if( NO_GARD == it->gardState )
-            {
-                tmpGard = HWAS::GARD_NULL;
-                tmpDeconfig = HWAS::NO_DECONFIG;
-            }
+            thisGard     = HWAS::GARD_NULL;
+            thisDeconfig = HWAS::NO_DECONFIG;
         }
 
+        // Add callout based on callout type.
         if( PRDcalloutData::TYPE_TARGET == thiscallout.getType() )
         {
             PRDF_HW_ADD_CALLOUT(thiscallout.getTarget(),
                                 thispriority,
-                                tmpDeconfig,
+                                thisDeconfig,
                                 iv_errl,
-                                tmpGard,
+                                thisGard,
                                 severityParm,
                                 l_diagUpdate);
         }
@@ -587,8 +591,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                                    thiscallout.getTarget(),
                                    thiscallout.getType(),
                                    thispriority,
-                                   tmpDeconfig,
-                                   tmpGard);
+                                   thisDeconfig,
+                                   thisGard);
         }
         else if ( PRDcalloutData::TYPE_MEMMRU == thiscallout.getType() )
         {
@@ -600,9 +604,9 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             {
                 PRDF_HW_ADD_CALLOUT( *it,
                                      thispriority,
-                                     tmpDeconfig,
+                                     thisDeconfig,
                                      iv_errl,
-                                     tmpGard,
+                                     thisGard,
                                      severityParm,
                                      l_diagUpdate );
             }
@@ -713,7 +717,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
                 SecondLevel = true;
             }
-
         }
     }
 
