@@ -41,6 +41,7 @@
 #include <stdint.h>
 #ifdef __HOSTBOOT_MODULE
 #include <builtins.h>
+#include <secureboot/trustedbootif.H>
 #else
 #include "trustedboot.H"
 #define PACKED __attribute__((__packed__))
@@ -77,6 +78,7 @@ namespace TRUSTEDBOOT
         MAX_TPM_LOG_MSG = 128,    ///< Maximum log message size
 
         HASH_COUNT            = 1,       ///< Maximum # of digests
+        PCR_SELECT_MAX        = ((PCR_MAX+7)/8), ///< PCR selection octet max
     };
 
     typedef enum
@@ -133,6 +135,10 @@ namespace TRUSTEDBOOT
         TPM_SUCCESS               = 0x000,
 
         TPM_RC_INITIALIZE         = 0x100,
+
+
+        // TPM Authorization types
+        TPM_RS_PW                 = 0x40000009,
 
     };
 
@@ -208,6 +214,8 @@ namespace TRUSTEDBOOT
     typedef struct _TPMT_HA TPMT_HA;
     size_t TPMT_HA_marshalSize(TPMT_HA* val);
     uint8_t* TPMT_HA_logMarshal(TPMT_HA* val, uint8_t* i_logBuf);
+    uint8_t* TPMT_HA_marshal(TPMT_HA* val, uint8_t* o_tpmBuf,
+                             size_t i_tpmBufSize, size_t * io_cmdSize);
 
 
     /// Crypto agile digests list
@@ -220,6 +228,9 @@ namespace TRUSTEDBOOT
     size_t TPML_DIGEST_VALUES_marshalSize(TPML_DIGEST_VALUES* val);
     uint8_t* TPML_DIGEST_VALUES_logMarshal(TPML_DIGEST_VALUES* val,
                                            uint8_t* i_logBuf);
+    uint8_t* TPML_DIGEST_VALUES_marshal(TPML_DIGEST_VALUES* val,
+                                        uint8_t* o_tpmBuf, size_t i_tpmBufSize,
+                                        size_t * io_cmdSize);
 
     /// Event field structure
     struct _TPM_EVENT_FIELD
@@ -276,6 +287,16 @@ namespace TRUSTEDBOOT
     uint8_t* TPM2_2ByteIn_marshal(TPM2_2ByteIn* val, uint8_t* o_tpmBuf,
                                   size_t i_tpmBufSize, size_t* io_cmdSize);
 
+    /// Generic TPM Input Command structure with a 4 byte param
+    struct _TPM2_4ByteIn
+    {
+        TPM2_BaseIn  base;
+        uint32_t     param;
+    } PACKED;
+    typedef struct _TPM2_4ByteIn TPM2_4ByteIn;
+    uint8_t* TPM2_4ByteIn_marshal(TPM2_4ByteIn* val, uint8_t* o_tpmBuf,
+                                  size_t i_tpmBufSize, size_t* io_cmdSize);
+
 
     /// Generic TPM Output Command structure with a 4 byte return data
     struct _TPM2_4ByteOut
@@ -320,6 +341,26 @@ namespace TRUSTEDBOOT
         TPML_DIGEST_VALUES digests; ///< Values to be extended
     } PACKED;
     typedef struct _TPM2_ExtendIn TPM2_ExtendIn;
+    uint8_t* TPM2_ExtendIn_marshalHandle(TPM2_ExtendIn* val,
+                                         uint8_t* o_tpmBuf, size_t i_tpmBufSize,
+                                         size_t* io_cmdSize);
+    uint8_t* TPM2_ExtendIn_marshalParms(TPM2_ExtendIn* val,
+                                        uint8_t* o_tpmBuf, size_t i_tpmBufSize,
+                                        size_t* io_cmdSize);
+
+    /// TPM Authorization structure
+    ///  This is not the full structure and only works for PW auth with NULL PW
+    struct _TPMS_AUTH_COMMAND
+    {
+        uint32_t    sessionHandle;
+        uint16_t    nonceSize;        ///< Size of nonce structure, currently 0
+        uint8_t     sessionAttributes; ///< Session attributes
+        uint16_t    hmacSize;         ///< Size of hmac structure, currently 0
+    } PACKED;
+    typedef struct _TPMS_AUTH_COMMAND TPMS_AUTH_COMMAND;
+    uint8_t* TPMS_AUTH_COMMAND_marshal(TPMS_AUTH_COMMAND* val,
+                                       uint8_t* o_tpmBuf, size_t i_tpmBufSize,
+                                       size_t* io_cmdSize);
 
 #ifdef __cplusplus
 } // end TRUSTEDBOOT namespace

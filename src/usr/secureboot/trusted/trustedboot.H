@@ -65,7 +65,7 @@ public:
 
 
 /**
- * @brief Initialize the targetted TPM
+ * @brief Initialize the targeted TPM
  * @param[in/out] io_target Current TPM target structure
  * @param[in] i_nodeTarget Node Target
  * @param[in] i_chip Chip to initialize
@@ -73,6 +73,19 @@ public:
 void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target,
                    TARGETING::Target* i_nodeTarget,
                    TPMDD::tpm_chip_types_t i_chip);
+
+/**
+ * @brief Verify a functional TPM still exists in the system
+ * @return errlHndl_t NULL if TPM available, otherwise a pointer to the
+ *       error log.
+*/
+errlHndl_t tpmVerifyFunctionalTpmExists();
+
+/**
+ * @brief Replay the entries that exist in the log into the TPM as needed
+ * @param[in/out] io_target Current TPM target structure
+ */
+void tpmReplayLog(TRUSTEDBOOT::TpmTarget & io_target);
 
 
 } // end TRUSTEDBOOT namespace

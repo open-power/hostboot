@@ -41,6 +41,8 @@
 #include "../trustedTypes.H"
 #include "../trustedboot.H"
 #include "../trustedbootCmds.H"
+#include "../base/trustedboot_base.H"
+#include "../base/tpmLogMgr.H"
 
 extern trace_desc_t* g_trac_trustedboot;
 
@@ -57,7 +59,6 @@ using namespace TRUSTEDBOOT;
 class TrustedBootTest: public CxxTest::TestSuite
 {
     public:
-
 
     /**
      * @brief Helper to run failing marshal tests
@@ -378,6 +379,8 @@ class TrustedBootTest: public CxxTest::TestSuite
 
             // Unsupported command
             {
+                TRACUCOMP( g_trac_trustedboot,
+                           "testCommandMarshal - Unsupported Command" );
                 memset(dataBufIn, 0, sizeof(dataBufIn));
                 memset(dataBufOut, 0, sizeof(dataBufOut));
                 baseCmd->commandCode = 0x12345;
@@ -393,6 +396,8 @@ class TrustedBootTest: public CxxTest::TestSuite
 
             // Test 2ByteIn with Startup command
             {
+                TRACUCOMP( g_trac_trustedboot,
+                           "testCommandMarshal - 2ByteIn" );
                 memset(dataBufIn, 0, sizeof(dataBufIn));
                 memset(dataBufOut, 0, sizeof(dataBufOut));
                 TRUSTEDBOOT::TPM2_2ByteIn* cmdPtr =
@@ -411,6 +416,8 @@ class TrustedBootTest: public CxxTest::TestSuite
 
             // Test GetCapabilityIn
             {
+                TRACUCOMP( g_trac_trustedboot,
+                           "testCommandMarshal - GetCapabilityIn" );
                 memset(dataBufIn, 0, sizeof(dataBufIn));
                 memset(dataBufOut, 0, sizeof(dataBufOut));
                 TRUSTEDBOOT::TPM2_GetCapabilityIn* cmdPtr =
@@ -428,6 +435,45 @@ class TrustedBootTest: public CxxTest::TestSuite
                                   sizeof(TPM2_GetCapabilityIn));
             }
 
+            // Test ExtendIn
+            {
+                TRACUCOMP( g_trac_trustedboot,
+                           "testCommandMarshal - ExtendIn" );
+                memset(dataBufIn, 0, sizeof(dataBufIn));
+                memset(dataBufOut, 0, sizeof(dataBufOut));
+                TRUSTEDBOOT::TPM2_ExtendIn* cmdPtr =
+                    reinterpret_cast<TRUSTEDBOOT::TPM2_ExtendIn*>
+                    (dataBufIn);
+                cmdPtr->base.tag = TPM_ST_SESSIONS;
+                cmdPtr->base.commandCode = TPM_CC_PCR_Extend;
+                cmdPtr->digests.count = 1;
+                cmdPtr->digests.digests[0].algorithmId = TPM_ALG_SHA256;
+
+                runTpmMarshalTest(baseCmd,
+                                  dataBufOut,
+                                  sizeof(dataBufOut),
+                                  cmdSize,
+                                  "ExtendIn",
+                                  num_ops,
+                                  fails,
+                                  sizeof(TPM2_ExtendIn) +
+                                  sizeof(TPMS_AUTH_COMMAND) +
+                                  4); //auth size field
+
+                // Invalid number of digests
+                memset(dataBufIn, 0, sizeof(dataBufIn));
+                memset(dataBufOut, 0, sizeof(dataBufOut));
+                cmdPtr->base.commandCode = TRUSTEDBOOT::TPM_CC_PCR_Extend;
+                cmdPtr->digests.count = HASH_COUNT+1;
+                runTpmMarshalFailTest(baseCmd,
+                                      dataBufOut,
+                                      sizeof(dataBufOut),
+                                      cmdSize,
+                                      "ExtendIn - invalid #digests",
+                                      num_ops,
+                                      fails);
+
+            }
 
 
         } while( 0 );
@@ -455,6 +501,8 @@ class TrustedBootTest: public CxxTest::TestSuite
 
             // Unsupported command
             {
+                TRACUCOMP( g_trac_trustedboot,
+                           "testCommandUnmarshal - Unsupported command" );
                 memset(dataBufIn, 0, sizeof(dataBufIn));
                 memset(dataBufOut, 0, sizeof(dataBufOut));
 
@@ -470,6 +518,8 @@ class TrustedBootTest: public CxxTest::TestSuite
 
             // Test BaseOut with Startup command
             {
+                TRACUCOMP( g_trac_trustedboot,
+                           "testCommandUnmarshal - BaseOut" );
                 memset(dataBufIn, 0, sizeof(dataBufIn));
                 memset(dataBufOut, 0, sizeof(dataBufOut));
 
@@ -485,6 +535,8 @@ class TrustedBootTest: public CxxTest::TestSuite
 
             // Test GetCapabilityOut
             {
+                TRACUCOMP( g_trac_trustedboot,
+                           "testCommandUnmarshal - GetCapabilityOut" );
                 memset(dataBufIn, 0, sizeof(dataBufIn));
                 memset(dataBufOut, 0, sizeof(dataBufOut));
 
@@ -517,11 +569,124 @@ class TrustedBootTest: public CxxTest::TestSuite
 
 
 
+
         } while( 0 );
         TRACFCOMP( g_trac_trustedboot,
                    "testCommandUnmarshal - End: %d/%d fails",
                    fails, num_ops );
 
+    }
+
+    /**
+     * @brief Retrieve a node target to test with
+     */
+    TRUSTEDBOOT::TpmTarget getTestTarget()
+    {
+        TARGETING::TargetService& tS = TARGETING::targetService();
+        TRUSTEDBOOT::TpmTarget target;
+        TPMDD::tpm_info_t tpmInfo;
+
+        target.available = true;
+        target.initAttempted = true;
+        target.failed = false;
+
+        tS.getMasterNodeTarget( target.nodeTarget );
+
+        assert(target.nodeTarget != NULL);
+
+        TRACFCOMP( g_trac_trustedboot,
+                   "getTestTarget node tgt=0x%X chip=%d",
+                   TARGETING::get_huid(target.nodeTarget));
+
+        // Let's see if the requested chip is functional
+        target.chip = TPMDD::TPM_PRIMARY;
+        tpmInfo.chip = TPMDD::TPM_PRIMARY;
+        errlHndl_t err = tpmReadAttributes (target.nodeTarget,
+                                            tpmInfo);
+
+        if (NULL != err)
+        {
+            target.failed = true;
+            delete err;
+        }
+        else if (!tpmInfo.tpmEnabled)
+        {
+            TRACFCOMP(g_trac_trustedboot, "getTestTarget - "
+                      "Chip %d not enabled",
+                      tpmInfo.chip);
+            target.failed = true;
+        }
+        else
+        {
+            TRACFCOMP(g_trac_trustedboot, "getTestTarget - "
+                      "Chip %d enabled",
+                      target.chip);
+        }
+
+        return target;
+    }
+
+
+
+    /**
+     * @brief TPM Extend PCR
+     */
+    void testExtendPCR ( void )
+    {
+        int64_t fails = 0, num_ops = 0;
+        uint8_t digest[TPM_ALG_SHA256_SIZE];
+
+        TRACFCOMP( g_trac_trustedboot,
+                   "testExtendPCR - Start" );
+        TpmTarget target = getTestTarget();
+
+        do
+        {
+
+            if (target.failed)
+            {
+                TS_FAIL( "testExtendPCR - Master TPM not functional" );
+                break;
+            }
+
+            for (size_t idx = 0; idx < sizeof(digest); idx++)
+            {
+                digest[idx] = idx+1;
+            }
+
+            for (size_t i = 0; i < 5; i ++) {
+
+                num_ops++;
+                pcrExtendSingleTpm(target,
+                                   PCR_DEBUG,
+                                   TPM_ALG_SHA256,
+                                   digest,
+                                   TPM_ALG_SHA256_SIZE,
+                                   "testExtendPCR - test 1");
+                if( target.failed )
+                {
+                    fails++;
+                    TS_FAIL( "testExtendPCR - Extend Error detected" );
+                    break;
+                }
+                else
+                {
+                    TRACUCOMP(g_trac_trustedboot, "testExtendPCR - "
+                              "Extend returned as expected.");
+                }
+            }
+
+
+
+        } while( 0 );
+        TRACFCOMP( g_trac_trustedboot,
+                   "testExtendPCR - End: %d/%d fails",
+                   fails, num_ops );
+
+        if (NULL != target.logMgr)
+        {
+            delete target.logMgr;
+        }
     }
 
 
