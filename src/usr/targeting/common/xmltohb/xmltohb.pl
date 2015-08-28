@@ -5951,8 +5951,18 @@ sub generateTargetingImage {
     {
         #Generate the MD5 checksum value for the read-only data and update the
         #content of the version section
+        my $md5hex = Digest::MD5->new;
+        $md5hex->add($numTargetsPointerBinData);
+        $md5hex->add($attributeListBinData);
+        $md5hex->add($attributePointerBinData);
+        $md5hex->add($numTargetsBinData);
+        $md5hex->add($targetsBinData);
+        $md5hex->add($roAttrBinData);
+        $md5hex->add($associationsBinData);
+        $md5hex->add($heapPnorInitBinData);
+
         my $versionHeader = "VERSION";
-        $versionHeader .= md5_hex($roAttrBinData);
+        my $versionHeader .= $md5hex->hexdigest;
 
         $outFile .= $versionHeader;
         my $versionHeaderPadSize =
