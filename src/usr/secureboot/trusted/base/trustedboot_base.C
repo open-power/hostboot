@@ -43,6 +43,7 @@
 #include <secureboot/trustedboot_reasoncodes.H>
 #include "trustedboot_base.H"
 #include "../trustedboot.H"
+#include "../trustedbootCmds.H"
 #include "../trustedbootUtils.H"
 #include "tpmLogMgr.H"
 
@@ -165,19 +166,7 @@ void pcrExtendSingleTpm(TpmTarget & io_target,
             }
         }
 
-
-
-        // If the TPM init has occurred and it is currently
-        //  functional we will do our extension
-        if (io_target.available &&
-            io_target.initAttempted &&
-            !io_target.failed)
-        {
-
-            /// @todo RTC:125288 Add call to extend the PCR
-        }
-
-        // Now we log the event, we will do this in two scenarios
+        // Log the event, we will do this in two scenarios
         //  - !initAttempted - prior to IPL of the TPM we log for replay
         //  - initAttempted && !failed - TPM is functional so we log
         if ((io_target.available &&
@@ -203,6 +192,24 @@ void pcrExtendSingleTpm(TpmTarget & io_target,
             memcpy(eventLog.event.event, i_logMsg, strlen(i_logMsg));
 
             err = TpmLogMgr_addEvent(io_target.logMgr,&eventLog);
+            if (NULL != err)
+            {
+                break;
+            }
+        }
+
+        // If the TPM init has occurred and it is currently
+        //  functional we will do our extension
+        if (io_target.available &&
+            io_target.initAttempted &&
+            !io_target.failed)
+        {
+
+            err = tpmCmdPcrExtend(&io_target,
+                                  i_pcr,
+                                  i_algId,
+                                  i_digest,
+                                  i_digestSize);
             if (NULL != err)
             {
                 break;

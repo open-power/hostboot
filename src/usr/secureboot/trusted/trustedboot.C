@@ -112,6 +112,9 @@ void* host_update_master_tpm( void *io_pArgs )
             }
         }
 
+        // Now we need to replay any existing entries in the log into the TPM
+        tpmReplayLog(systemTpms.tpm[TPM_MASTER_INDEX]);
+
         if (systemTpms.tpm[TPM_MASTER_INDEX].failed ||
             !systemTpms.tpm[TPM_MASTER_INDEX].available)
         {
@@ -150,6 +153,15 @@ void* host_update_master_tpm( void *io_pArgs )
         err = TPMDD::tpmReadAttributes(nodeTarget, tpmInfo);
         if (NULL != err)
         {
+            // We don't want to log this error we will just assume
+            //   the backup doesn't exist
+            delete err;
+            err = NULL;
+            TRACUCOMP( g_trac_trustedboot,
+                       "host_update_master_tpm() tgt=0x%X "
+                       "Marking backup TPM unavailable due to attribute fail",
+                       TARGETING::get_huid(nodeTarget));
+            systemTpms.tpm[TPM_BACKUP_INDEX].available = false;
             break;
         }
         else if (!tpmInfo.tpmEnabled)
@@ -228,7 +240,15 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target,
 
     TRACDCOMP( g_trac_trustedboot,
                EXIT_MRK"tpmInitialize()");
+}
 
+void tpmReplayLog(TRUSTEDBOOT::TpmTarget & io_target)
+{
+    ///@todo RTC:125288 Implement replay
+    // Function will walk existing entries in the TPM log and call
+    //   tpmCmdPcrExtend as required
+    // This function must commit any errors and call tpmMarkFailed if errors
+    //   are found
 }
 
 

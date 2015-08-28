@@ -136,6 +136,23 @@ namespace TRUSTEDBOOT
         return NULL;
     }
 
+    uint8_t* TPMT_HA_marshal(TPMT_HA* val,
+                             uint8_t* o_tpmBuf,
+                             size_t i_tpmBufSize,
+                             size_t * io_cmdSize)
+    {
+        o_tpmBuf = marshalChunk(o_tpmBuf, i_tpmBufSize, io_cmdSize,
+                                &(val->algorithmId), sizeof(val->algorithmId));
+        if (getDigestSize((TPM_Alg_Id)val->algorithmId) == 0)
+        {
+            return NULL;
+        }
+        o_tpmBuf = marshalChunk(o_tpmBuf, i_tpmBufSize, io_cmdSize,
+                                &(val->digest.bytes),
+                                getDigestSize((TPM_Alg_Id)val->algorithmId));
+        return o_tpmBuf;
+    }
+
     size_t TCG_PCR_EVENT_marshalSize(TCG_PCR_EVENT* val)
     {
         return (sizeof(TCG_PCR_EVENT) + val->eventSize - MAX_TPM_LOG_MSG);
@@ -150,6 +167,35 @@ namespace TRUSTEDBOOT
     size_t TPM_EVENT_FIELD_marshalSize(TPM_EVENT_FIELD* val)
     {
         return (sizeof(val->eventSize) + val->eventSize);
+    }
+
+
+    uint8_t* TPML_DIGEST_VALUES_marshal(TPML_DIGEST_VALUES* val,
+                                        uint8_t* o_tpmBuf,
+                                        size_t i_tpmBufSize,
+                                        size_t * io_cmdSize)
+    {
+        o_tpmBuf = marshalChunk(o_tpmBuf, i_tpmBufSize, io_cmdSize,
+                                &(val->count), sizeof(val->count));
+        if (NULL != o_tpmBuf && HASH_COUNT < val->count)
+        {
+            o_tpmBuf = NULL;
+        }
+        else
+        {
+            for (size_t idx = 0; idx < val->count; idx++)
+            {
+                o_tpmBuf = TPMT_HA_marshal(&(val->digests[idx]),
+                                           o_tpmBuf,
+                                           i_tpmBufSize,
+                                           io_cmdSize);
+                if (NULL == o_tpmBuf)
+                {
+                    break;
+                }
+            }
+        }
+        return o_tpmBuf;
     }
 
     uint8_t* TPM2_BaseIn_marshal(TPM2_BaseIn* val, uint8_t* o_tpmBuf,
@@ -180,6 +226,15 @@ namespace TRUSTEDBOOT
                             &(val->param), sizeof(val->param));
     }
 
+    uint8_t* TPM2_4ByteIn_marshal(TPM2_4ByteIn* val,
+                                  uint8_t* o_tpmBuf,
+                                  size_t i_tpmBufSize,
+                                  size_t* io_cmdSize)
+    {
+        // Base has already been marshaled
+        return marshalChunk(o_tpmBuf, i_tpmBufSize, io_cmdSize,
+                            &(val->param), sizeof(val->param));
+    }
 
     uint8_t* TPM2_GetCapabilityIn_marshal(TPM2_GetCapabilityIn* val,
                                           uint8_t* o_tpmBuf,
@@ -218,6 +273,36 @@ namespace TRUSTEDBOOT
 
     }
 
+    uint8_t* TPM2_ExtendIn_marshalHandle(TPM2_ExtendIn* val,
+                                         uint8_t* o_tpmBuf,
+                                         size_t i_tpmBufSize,
+                                         size_t* io_cmdSize)
+    {
+        // Base has already been marshaled
+        // only marshal the pcr handle in this stage
+        return marshalChunk(o_tpmBuf, i_tpmBufSize, io_cmdSize,
+                            &(val->pcrHandle), sizeof(val->pcrHandle));
+    }
+
+    uint8_t* TPM2_ExtendIn_marshalParms(TPM2_ExtendIn* val,
+                                        uint8_t* o_tpmBuf,
+                                        size_t i_tpmBufSize,
+                                        size_t* io_cmdSize)
+    {
+        // Base and handle has already been marshaled
+        return (TPML_DIGEST_VALUES_marshal(&(val->digests), o_tpmBuf,
+                                           i_tpmBufSize, io_cmdSize));
+    }
+
+
+    uint8_t* TPMS_AUTH_COMMAND_marshal(TPMS_AUTH_COMMAND* val,
+                                       uint8_t* o_tpmBuf,
+                                       size_t i_tpmBufSize,
+                                       size_t* io_cmdSize)
+    {
+        return marshalChunk(o_tpmBuf, i_tpmBufSize, io_cmdSize,
+                            val, sizeof(TPMS_AUTH_COMMAND));
+    }
 
 #ifdef __cplusplus
 } // end TRUSTEDBOOT

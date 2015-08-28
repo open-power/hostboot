@@ -50,6 +50,7 @@ namespace TRUSTEDBOOT
         MOD_TPM_MARSHALCMDDATA          = 0x04,
         MOD_TPM_UNMARSHALRESPDATA       = 0x05,
         MOD_TPM_VERIFYFUNCTIONAL        = 0x06,
+        MOD_TPM_CMD_PCREXTEND           = 0x07,
 
         MOD_TPMLOGMGR_INITIALIZE        = 0x10,
         MOD_TPMLOGMGR_ADDEVENT          = 0x11,
@@ -73,6 +74,8 @@ namespace TRUSTEDBOOT
         RC_TPMLOGMGR_ADDEVENTMARSH_FAIL = SECURE_COMP_ID | 0xAB,
         RC_TPMLOGMGR_INIT_FAIL          = SECURE_COMP_ID | 0xAC,
         RC_TPM_NOFUNCTIONALTPM_FAIL     = SECURE_COMP_ID | 0xAD,
+        RC_TPM_COMMAND_FAIL             = SECURE_COMP_ID | 0xAE,
+        RC_TPM_INVALID_ARGS             = SECURE_COMP_ID | 0xAF,
     };
 #ifdef __cplusplus
 }

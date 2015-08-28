@@ -112,6 +112,20 @@ errlHndl_t tpmCmdStartup(TpmTarget* io_target);
 
 errlHndl_t tpmCmdGetCapFwVersion(TpmTarget* io_target);
 
+/**
+ * @brief Send the TPM_Extend command to the targeted TPM and log
+ * @param[in/out] io_target Current TPM target structure
+ * @param[in] i_pcr PCR to write to
+ * @param[in] i_algId Algorithm to use
+ * @param[in] i_digest Digest value to write to PCR, zeros appended as needed
+ * @param[in] i_digestSize Byte size of i_digest array
+ */
+errlHndl_t tpmCmdPcrExtend(TpmTarget * io_target,
+                           TPM_Pcr i_pcr,
+                           TPM_Alg_Id i_algId,
+                           uint8_t* i_digest,
+                           size_t  i_digestSize);
+
 
 #ifdef __cplusplus
 } // end TRUSTEDBOOT namespace
