@@ -72,7 +72,7 @@ template <> inline uint32_t fapiPlatGenHash <fapi::hash::CRC32>
 #define FAPI_PLAT_HTOBE64(x) htobe64(x)
 #define FAPI_PLAT_HTOLE64(x) htole64(x)
 
-#define fapiPlatMalloc(s) malloc(s)
+void* fapiPlatMalloc(size_t);
 #define fapiPlatFree(p) free(p)
 
 #endif // FAPIPLATUTIL_H_

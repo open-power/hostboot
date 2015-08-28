@@ -51,4 +51,18 @@
 #define ALIGN_MEGABYTE(u)       (ALIGN_X(u,MEGABYTE))
 #define ALIGN_MEGABYTE_DOWN(u)  (ALIGN_DOWN_X(u,MEGABYTE))
 
+// Returns a number that is aligned to the next highest power of 2 number of
+// pages for the given buffer.
+#define ALIGN_TO_NEXT_POWER_OF_TWO_PAGES(b)   ({\
+    unsigned int v = ALIGN_PAGE(b)/PAGE_SIZE;\
+    v--;\
+    v |= v >> 1;\
+    v |= v >> 2;\
+    v |= v >> 4;\
+    v |= v >> 8;\
+    v |= v >> 16;\
+    v++;\
+    v * PAGE_SIZE;\
+    })
+
 #endif

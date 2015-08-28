@@ -40,7 +40,8 @@
 #include <initservice/initsvcbreakpoint.H>
 #include <errl/errlentry.H>
 #include <initservice/initserviceif.H>
-
+#include <util/align.H>
+#include <fapiPlatUtil.H>
 
 #ifdef __HOSTBOOT_RUNTIME
 #include <runtime/interface.h>
@@ -324,4 +325,16 @@ fapi::ReturnCode fapiSpecialWakeup(const fapi::Target & i_target,
     return fapi_rc;
 }
 
+}
+
+//******************************************************************************
+// fapiPlatMalloc
+//******************************************************************************
+void* fapiPlatMalloc(size_t s)
+{
+    if (s > PAGE_SIZE)
+    {
+        s = ALIGN_TO_NEXT_POWER_OF_TWO_PAGES(s);
+    }
+    return malloc(s);
 }
