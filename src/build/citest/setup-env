@@ -72,6 +72,7 @@ execute_in_sandbox()
     ${WORKON_CMD} -c ./sandbox_execute_cmd
 
     if [ $? -ne 0 ]; then
+        rm ${SANDBOXBASE}/src/sandbox_execute_cmd
         return -1
     fi
 

@@ -42,14 +42,16 @@ mkdir -p ${SANDBOXBASE}/src/srci || exit -1
 mkdir -p ${SANDBOXBASE}/src/errl || exit -1
 
 echo "----Building hbfw"
-execute_in_sandbox "cd ${SANDBOXBASE}/src/hbfw && mk -a -j32" "x86.nfp" \
-    || exit -1
+execute_in_sandbox "cd ${SANDBOXBASE}/src/hbfw && mk -a -j32" "x86.nfp"
+if [ $? -ne 0 ]; then exit -1; fi
+
 echo "----Building srci"
-execute_in_sandbox "cd ${SANDBOXBASE}/src/srci && mk -a -j32" "x86.nfp" \
-    || exit -1
+execute_in_sandbox "cd ${SANDBOXBASE}/src/srci && mk -a -j32" "x86.nfp"
+if [ $? -ne 0 ]; then exit -1; fi
+
 echo "----Building errl"
-execute_in_sandbox "cd ${SANDBOXBASE}/src/errl && mk -a -j32" "x86.nfp" \
-    || exit -1
+execute_in_sandbox "cd ${SANDBOXBASE}/src/errl && mk -a -j32" "x86.nfp"
+if [ $? -ne 0 ]; then exit -1; fi
 
 echo "----Extracting errl tool"
 tar -xvf ${SANDBOXBASE}/obj/x86.nfp/errl/nfp/tool/errl.tar \
