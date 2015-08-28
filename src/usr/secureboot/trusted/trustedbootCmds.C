@@ -120,9 +120,13 @@ errlHndl_t tpmMarshalCommandData(TPM2_BaseIn* i_cmd,
 {
     errlHndl_t err = TB_SUCCESS;
     uint8_t* sBuf = o_outbuf;
+    uint32_t* sSizePtr = NULL;
+    size_t curSize = 0;
     int stage = 0;
     TPM2_BaseIn* baseCmd =
         (TPM2_BaseIn*)o_outbuf;
+    TPMS_AUTH_COMMAND cmdAuth;
+
     *o_cmdSize = 0;
 
     TRACDCOMP( g_trac_trustedboot,
@@ -142,19 +146,55 @@ errlHndl_t tpmMarshalCommandData(TPM2_BaseIn* i_cmd,
             break;
         }
 
-
         // Marshal the handles
         stage = 1;
-
+        if (TPM_CC_PCR_Extend == i_cmd->commandCode)
+        {
+            TPM2_ExtendIn* cmdPtr = (TPM2_ExtendIn*)i_cmd;
+            sBuf = TPM2_ExtendIn_marshalHandle(cmdPtr,
+                                               sBuf,
+                                               i_bufsize,
+                                               o_cmdSize);
+            if (NULL == sBuf)
+            {
+                break;
+            }
+        }
 
         // Marshal the authorizations
         stage = 2;
+        if (TPM_CC_PCR_Extend == i_cmd->commandCode)
+        {
+            // Insert a password authorization with a null pw
+            // Make room for the 4 byte size field at the beginning
+            sSizePtr = (uint32_t*)sBuf;
+            sBuf += sizeof(uint32_t);
+            *o_cmdSize += sizeof(uint32_t);
+            i_bufsize -= sizeof(uint32_t);
+            curSize = *o_cmdSize;
 
-        // Marshal the parameters
+            cmdAuth.sessionHandle = TPM_RS_PW;
+            cmdAuth.nonceSize = 0;
+            cmdAuth.sessionAttributes = 0;
+            cmdAuth.hmacSize = 0;
+
+            sBuf = TPMS_AUTH_COMMAND_marshal(&cmdAuth, sBuf, i_bufsize,
+                                             o_cmdSize);
+
+            if (NULL == sBuf)
+            {
+                break;
+            }
+            // Put in the size of the auth area
+            *sSizePtr = (*o_cmdSize - curSize);
+
+        }
+
+        // Marshal the command parameters
         stage = 3;
         switch (i_cmd->commandCode)
         {
-            // Two byte parm fields
+          // Two byte parm fields
           case TPM_CC_Startup:
               {
                   TPM2_2ByteIn* cmdPtr =
@@ -170,6 +210,13 @@ errlHndl_t tpmMarshalCommandData(TPM2_BaseIn* i_cmd,
                       (TPM2_GetCapabilityIn*)i_cmd;
                   sBuf = TPM2_GetCapabilityIn_marshal(cmdPtr,sBuf,
                                                       i_bufsize, o_cmdSize);
+              }
+              break;
+          case TPM_CC_PCR_Extend:
+              {
+                  TPM2_ExtendIn* cmdPtr = (TPM2_ExtendIn*)i_cmd;
+                  sBuf = TPM2_ExtendIn_marshalParms(cmdPtr, sBuf,
+                                                    i_bufsize, o_cmdSize);
               }
               break;
 
@@ -197,11 +244,19 @@ errlHndl_t tpmMarshalCommandData(TPM2_BaseIn* i_cmd,
               break;
         };
 
-        if (TB_SUCCESS != err)
+        if (TB_SUCCESS != err || NULL == sBuf)
         {
             break;
         }
 
+        // Do a verification that the cmdSize equals what we used
+        if (((size_t)(sBuf - o_outbuf)) != *o_cmdSize)
+        {
+            TRACFCOMP( g_trac_trustedboot,
+                       "TPM MARSHAL MARSHAL SIZE MISMATCH : %d %d",
+                       (sBuf - o_outbuf), *o_cmdSize );
+            sBuf = NULL;
+        }
 
         // Lastly now that we know the size update the byte stream
         baseCmd->commandSize = *o_cmdSize;
@@ -285,8 +340,9 @@ errlHndl_t tpmUnmarshalResponseData(uint32_t i_commandCode,
         stage = 2;
         switch (i_commandCode)
         {
-            // Empty response commands
+          // Empty response commands
           case TPM_CC_Startup:
+          case TPM_CC_PCR_Extend:
             // Nothing to do
             break;
 
@@ -644,6 +700,120 @@ errlHndl_t tpmCmdGetCapFwVersion(TpmTarget* io_target)
     return err;
 }
 
+
+errlHndl_t tpmCmdPcrExtend(TpmTarget * io_target,
+                           TPM_Pcr i_pcr,
+                           TPM_Alg_Id i_algId,
+                           uint8_t* i_digest,
+                           size_t  i_digestSize)
+{
+    errlHndl_t err = NULL;
+    uint8_t dataBuf[sizeof(TPM2_ExtendIn)];
+    size_t dataSize = sizeof(dataBuf);
+    size_t fullDigestSize = 0;
+    TPM2_BaseOut* resp = (TPM2_BaseOut*)dataBuf;
+    TPM2_ExtendIn* cmd = (TPM2_ExtendIn*)dataBuf;
+
+
+    TRACDCOMP( g_trac_trustedboot,
+               ">>tpmCmdPcrExtend()" );
+    TRACUCOMP( g_trac_trustedboot,
+               ">>tpmCmdPcrExtend() Pcr(%d) Alg(%X) DS(%d)",
+               i_pcr, i_algId, (int)i_digestSize);
+
+    do
+    {
+
+        fullDigestSize = getDigestSize(i_algId);
+
+        // Build our command block
+        memset(dataBuf, 0, sizeof(dataBuf));
+
+        // Argument verification
+        if (fullDigestSize == 0 ||
+            fullDigestSize != i_digestSize ||
+            NULL == i_digest ||
+            PCR_MAX < i_pcr
+            )
+        {
+            TRACFCOMP( g_trac_trustedboot,
+                       "TPM PCR EXTEND ARG FAILURE FDS(%d) DS(%d) PCR(%d)",
+                       (int)fullDigestSize, (int)i_digestSize, i_pcr);
+            /*@
+             * @errortype
+             * @reasoncode     RC_TPM_INVALID_ARGS
+             * @severity       ERRL_SEV_UNRECOVERABLE
+             * @moduleid       MOD_TPM_CMD_PCREXTEND
+             * @userdata1      Digest Ptr
+             * @userdata2[0:31] Full Digest Size
+             * @userdata2[32:63] PCR
+             * @devdesc        Unmarshaling error detected
+             */
+            err = tpmCreateErrorLog(MOD_TPM_CMD_PCREXTEND,
+                                    RC_TPM_INVALID_ARGS,
+                                    (uint64_t)i_digest,
+                                    (fullDigestSize << 32) |
+                                    i_pcr);
+            break;
+        }
+
+        // Log the input PCR value
+        TRACUBIN(g_trac_trustedboot, "PCR In",
+                 i_digest, fullDigestSize);
+
+        cmd->base.tag = TPM_ST_SESSIONS;
+        cmd->base.commandCode = TPM_CC_PCR_Extend;
+        cmd->pcrHandle = i_pcr;
+        cmd->digests.count = 1;
+        cmd->digests.digests[0].algorithmId = i_algId;
+        memcpy(cmd->digests.digests[0].digest.bytes, i_digest, fullDigestSize);
+
+        err = tpmTransmitCommand(io_target,
+                                 dataBuf,
+                                 sizeof(dataBuf));
+
+        if (TB_SUCCESS != err)
+        {
+            TRACFCOMP( g_trac_trustedboot,
+                       "TPM PCRExtend Transmit Fail");
+            break;
+
+        }
+        else if ((sizeof(TPM2_BaseOut) > dataSize)
+                 || (TPM_SUCCESS != resp->responseCode))
+        {
+            TRACFCOMP( g_trac_trustedboot,
+                       "TPM PCRExtend OP Fail Ret(%X) ExSize(%d) Size(%d) ",
+                       resp->responseCode,
+                       (int)sizeof(TPM2_BaseOut),
+                       (int)dataSize);
+
+            /*@
+             * @errortype
+             * @reasoncode     RC_TPM_COMMAND_FAIL
+             * @severity       ERRL_SEV_UNRECOVERABLE
+             * @moduleid       MOD_TPM_CMD_PCREXTEND
+             * @userdata1      responseCode
+             * @userdata2      dataSize
+             * @devdesc        Command failure reading TPM FW version.
+             */
+            err = tpmCreateErrorLog(MOD_TPM_CMD_PCREXTEND,
+                                    RC_TPM_COMMAND_FAIL,
+                                    resp->responseCode,
+                                    dataSize);
+            break;
+
+        }
+
+    } while ( 0 );
+
+
+    TRACUCOMP( g_trac_trustedboot,
+               "<<tpmCmdPcrExtend() - %s",
+               ((TB_SUCCESS == err) ? "No Error" : "With Error") );
+    return err;
+
+}
 
 
 
