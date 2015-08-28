@@ -50,8 +50,9 @@
 
 #include <prdfCenLogParse.H>
 #include <prdfProcLogParse.H>
-#include <prdfGardType.H>
 #include <prdfParserEnums.H>
+
+#include <hwas/common/hwasCallout.H>
 
 //------------------------------------------------------------------------------
 // Data structures
@@ -494,6 +495,19 @@ const char * errlSevTypeToStr( uint32_t i_errlSev )
 
 //------------------------------------------------------------------------------
 
+const char * gardTypeToStr( uint32_t i_gardType )
+{
+    switch ( i_gardType )
+    {
+        case HWAS::GARD_NULL:       return "NoGard";
+        case HWAS::GARD_Predictive: return "Predictive";
+        case HWAS::GARD_Fatal:      return "Fatal";
+        default:                    return "";
+    }
+}
+
+//------------------------------------------------------------------------------
+
 bool parsePfaData( void * i_buffer, uint32_t i_buflen,
                    ErrlUsrParser & i_parser )
 {
@@ -555,8 +569,8 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
         i_parser.PrintString( "ERRL Severity", tmp );
 
         // GARD info
-        tmpStr = GardAction::ToString( pfa.prdGardErrType );
-        snprintf( tmp, 50, "%s (0x%X) ", tmpStr, pfa.prdGardErrType );
+        tmpStr = gardTypeToStr( pfa.globalGardPolicy );
+        snprintf( tmp, 50, "%s (0x%X) ", tmpStr, pfa.globalGardPolicy );
         i_parser.PrintString( "PRD GARD Error Type", tmp );
 
         // MRU callouts
@@ -582,7 +596,7 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
                 snprintf( header, 25, " #%d %s", i+1, tmpStr );
 
                 snprintf( data, 50, "0x%08x ", pfa.mruList[i].callout );
-                tmpStr = GardAction::ToString( pfa.mruList[i].gardState );
+                tmpStr = gardTypeToStr( pfa.mruList[i].gardState );
 
                 switch ( pfa.mruList[i].type )
                 {

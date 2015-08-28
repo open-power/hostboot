@@ -626,18 +626,6 @@ public:
   bool isGardRequested();
 
   /**
-   Query for RepeatGard ErrorType
-   <ul>
-   <br><b>Parameters    </b> None.
-   <br><b>Returns:     </b> GardAction::ErrorType
-   <br><b>Requirements:</b> setPrimaryAttnType()
-   <br><b>Promises     </b> ErrorType set by Gard or NoGard
-   <br><b>Notes:       </b>
-   </ul><br>
-   */
-  GardAction::ErrorType QueryGard(void);
-
-  /**
    Set Error type as Special Uncorrectable Error SUE
    <ul>
    <br><b>Parameters:  </b> None

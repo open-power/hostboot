@@ -138,9 +138,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
     HWSV::hwsvDiagUpdate l_diagUpdate = HWSV::HWSV_DIAG_NEEDED;
 
-    GardAction::ErrorType prdGardErrType;
-    HWAS::GARD_ErrorType gardPolicy = HWAS::GARD_NULL;
-
     bool ForceTerminate = false;
     bool iplDiagMode = false;
 
@@ -308,20 +305,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     }
 
     //**************************************************************
-    // Set Gard Error Type and state
-    //**************************************************************
-
-    prdGardErrType = io_sdc.QueryGard();
-    switch ( prdGardErrType )
-    {
-        case GardAction::NoGard:     gardPolicy = HWAS::GARD_NULL;       break;
-        case GardAction::Predictive: gardPolicy = HWAS::GARD_Predictive; break;
-        case GardAction::Fatal:      gardPolicy = HWAS::GARD_Fatal;      break;
-        default:
-            gardPolicy = HWAS::GARD_NULL;
-    }
-
-    //**************************************************************
     // Callout loop to set up Reason code and SRC word 9
     //**************************************************************
 
@@ -474,6 +457,16 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // Get the global gard policy.
     //--------------------------------------------------------------------------
 
+    HWAS::GARD_ErrorType gardPolicy = HWAS::GARD_NULL;
+
+    // Gard only if the error is a serviceable event.
+    if ( io_sdc.IsServiceCall() )
+    {
+        // We will not Resource Recover on a checkstop attention.
+        gardPolicy = ( MACHINE_CHECK == i_attnType ) ? HWAS::GARD_Fatal
+                                                     : HWAS::GARD_Predictive;
+    }
+
     // Apply special policies for OPAL.
     if ( isHyprConfigOpal() &&                          // OPAL is used
          !isMfgAvpEnabled() && !isMfgHdatAvpEnabled() ) // No AVPs running
@@ -520,10 +513,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
             #endif
         }
-
-        // Update prdGardErrType to match gardPolicy.
-        if ( HWAS::GARD_NULL == gardPolicy )
-            prdGardErrType = GardAction::NoGard;
     }
 
     //--------------------------------------------------------------------------
@@ -552,9 +541,18 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         #endif
     }
 
-    //**************************************************************
+    //--------------------------------------------------------------------------
+    // Initialize the PFA data
+    //--------------------------------------------------------------------------
+
+    PfaData pfaData;
+
+    initPfaData( io_sdc, i_attnType, deferDeconfig, actionFlag, severityParm,
+                 gardPolicy, pfaData, o_dumpTrgt );
+
+    //--------------------------------------------------------------------------
     // Add each mru/callout to the error log.
-    //**************************************************************
+    //--------------------------------------------------------------------------
 
     for ( SDC_MRU_LIST::const_iterator it = mruList.begin();
           it < mruList.end(); ++it )
@@ -572,6 +570,9 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             thisGard     = HWAS::GARD_NULL;
             thisDeconfig = HWAS::NO_DECONFIG;
         }
+
+        // Add the callout to the PFA data
+        addCalloutToPfaData( pfaData, thiscallout, thispriority, thisGard );
 
         // Add callout based on callout type.
         if( PRDcalloutData::TYPE_TARGET == thiscallout.getType() )
@@ -731,15 +732,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     }
 
     //**************************************************************
-    // Build Dump Flags and PFA5 data
-    //**************************************************************
-
-    PfaData pfaData;
-
-    initPfaData( io_sdc, i_attnType, deferDeconfig, actionFlag, severityParm,
-                 prdGardErrType, pfaData, o_dumpTrgt );
-
-    //**************************************************************
     // Check for Terminating the system for non mnfg conditions.
     //**************************************************************
 
@@ -895,7 +887,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 void ErrDataService::initPfaData( const ServiceDataCollector & i_sdc,
                                   uint32_t i_attnType, bool i_deferDeconfig,
                                   uint32_t i_errlAct, uint32_t i_errlSev,
-                                  uint32_t i_prdGardType,
+                                  uint32_t i_gardPolicy,
                                   PfaData & o_pfa, TargetHandle_t & o_dumpTrgt )
 {
     // Dump info
@@ -940,34 +932,19 @@ void ErrDataService::initPfaData( const ServiceDataCollector & i_sdc,
 
     // Misc
     o_pfa.serviceActionCounter = iv_serviceActionCounter;
-    o_pfa.prdGardErrType       = i_prdGardType;
+    o_pfa.globalGardPolicy     = i_gardPolicy;
 
     // Attention types
     o_pfa.priAttnType = i_attnType;
     o_pfa.secAttnType = i_sdc.getSecondaryAttnType();
 
-    // Build the MRU list into PFA data.
-    const SDC_MRU_LIST & mruList = i_sdc.getMruList();
-    uint32_t i; // Iterator used to set limited list count.
-    for ( i = 0; i < mruList.size() && i < MruListLIMIT; i++ )
-    {
-        o_pfa.mruList[i].callout  = mruList[i].callout.flatten();
-        o_pfa.mruList[i].type     = mruList[i].callout.getType();
-        o_pfa.mruList[i].priority = (uint8_t)mruList[i].priority;
-
-        if( NO_GARD == mruList[i].gardState )
-        {
-            o_pfa.mruList[i].gardState = GardAction::NoGard;
-        }
-        else
-        {
-            o_pfa.mruList[i].gardState = i_prdGardType;
-        }
-    }
-    o_pfa.mruListCount = i;
+    // Initialize the MRU count to 0. Callouts will be added to the PFA data
+    // when callouts are added to the error log.
+    o_pfa.mruListCount = 0;
 
     // Build the signature list into PFA data
     const PRDF_SIGNATURES & sigList = i_sdc.getSignatureList();
+    uint32_t i = 0;
     for ( i = 0; i < sigList.size() && i < SigListLIMIT; i++ )
     {
         o_pfa.sigList[i].chipId    = getHuid(sigList[i].target);
@@ -975,6 +952,26 @@ void ErrDataService::initPfaData( const ServiceDataCollector & i_sdc,
     }
     o_pfa.sigListCount = i;
 
+}
+
+//------------------------------------------------------------------------------
+
+void ErrDataService::addCalloutToPfaData( PfaData &            io_pfa,
+                                          PRDcallout           i_callout,
+                                          PRDpriority          i_priority,
+                                          HWAS::GARD_ErrorType i_gardType )
+{
+    uint32_t cnt = io_pfa.mruListCount;
+
+    if ( MruListLIMIT > cnt )
+    {
+        io_pfa.mruList[cnt].callout   = i_callout.flatten();
+        io_pfa.mruList[cnt].type      = i_callout.getType();
+        io_pfa.mruList[cnt].priority  = i_priority;
+        io_pfa.mruList[cnt].gardState = i_gardType;
+
+        io_pfa.mruListCount++;
+    }
 }
 
 //------------------------------------------------------------------------------

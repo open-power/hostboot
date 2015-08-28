@@ -50,17 +50,6 @@ namespace GardAction
     Fatal         = 2,
   };
 
-  inline const char* ToString( uint32_t i_type )
-  {
-      switch (i_type)
-      {
-          case NoGard:              return "NoGard";
-          case Predictive:          return "Predictive";
-          case Fatal:               return "Fatal";
-          default:                  return "Undefined";
-      }
-  }
-
 } // end namespace GardAction
 
 #ifdef PRDF_HOSTBOOT_ERRL_PLUGIN

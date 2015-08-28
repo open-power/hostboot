@@ -176,10 +176,10 @@ struct PfaData
              threshold  :16; // Threshold for this attention
 
     // Attention types and GARD state.
-    uint32_t priAttnType    : 8, // primary attention type
-             secAttnType    : 8, // secondary attention type
-             prdGardErrType : 8, // See enum GardResolution::ErrorType
-             unUsed         : 8;
+    uint32_t priAttnType      : 8, // primary attention type
+             secAttnType      : 8, // secondary attention type
+             globalGardPolicy : 8, // See enum HWAS::GARD_ErrorType
+             unUsed           : 8;
 
     uint32_t mruListCount;                  // Total number of MRUs.
     PfaMruListStruct mruList[MruListLIMIT]; // Full list of MRUs.
@@ -229,9 +229,9 @@ struct PfaData
         i_left << ( (i_right.errorCount << 16) |
                     (i_right.threshold       ) );
 
-        i_left << ( (i_right.priAttnType    << 24) |
-                    (i_right.secAttnType    << 16) |
-                    (i_right.prdGardErrType <<  8) |
+        i_left << ( (i_right.priAttnType      << 24) |
+                    (i_right.secAttnType      << 16) |
+                    (i_right.globalGardPolicy <<  8) |
                     (i_right.unUsed              ) );
 
         i_left << i_right.mruListCount;
@@ -281,9 +281,9 @@ struct PfaData
         i_right.errorCount = (l_tmp[3] >> 16) & 0xFFFF;
         i_right.threshold  = (l_tmp[3]      ) & 0xFFFF;
 
-        i_right.priAttnType    = (l_tmp[4] >> 24) & 0xFF;
-        i_right.secAttnType    = (l_tmp[4] >> 16) & 0xFF;
-        i_right.prdGardErrType = (l_tmp[4] >>  8) & 0xFF;
+        i_right.priAttnType      = (l_tmp[4] >> 24) & 0xFF;
+        i_right.secAttnType      = (l_tmp[4] >> 16) & 0xFF;
+        i_right.globalGardPolicy = (l_tmp[4] >>  8) & 0xFF;
 
         i_left >> i_right.mruListCount;
         for ( uint32_t i = 0; i < i_right.mruListCount; i++ )

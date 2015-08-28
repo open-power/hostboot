@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,8 @@
 #include <errlentry.H>
 #include <iipServiceDataCollector.h>
 #include <prdfPfa5Data.h>
+
+#include <hwas/common/hwasCallout.H>
 
 namespace PRDF
 {
@@ -179,6 +181,17 @@ class ErrDataService
                       uint32_t i_errlAct, uint32_t i_errlSev,
                       uint32_t i_prdGardType,
                       PfaData & o_pfa, TARGETING::TargetHandle_t & o_dumpTrgt );
+
+    /**
+     * @brief Adds a callout to the PFA data MRU list.
+     * @param io_pfa     The PFA data struct.
+     * @param i_callout  Target callout.
+     * @param i_priority Target callout priority.
+     * @param i_gardType Target callout GARD type.
+     */
+    void addCalloutToPfaData( PfaData & io_pfa,
+                              PRDcallout i_callout, PRDpriority i_priority,
+                              HWAS::GARD_ErrorType i_gardType );
 
     /**
      * @brief Deallocate DIMMS represented in mru list.

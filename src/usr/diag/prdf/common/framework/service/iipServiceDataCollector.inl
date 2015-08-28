@@ -95,26 +95,6 @@ inline void ServiceDataCollector::SetTerminate(void)
 
 // ---------------------------------------------------------------
 
-inline
-GardAction::ErrorType ServiceDataCollector::QueryGard(void)
-{
-    GardAction::ErrorType gardType = GardAction::NoGard;
-
-    if( IsServiceCall() )
-    {
-        if( attentionType == MACHINE_CHECK )
-        {
-            gardType = GardAction::Fatal;
-        }
-        else
-        {
-            gardType = GardAction::Predictive;
-        }
-    }
-
-    return gardType;
-}
-
 // dg12a -moved here from *.C --------------------------------------
 
 inline
