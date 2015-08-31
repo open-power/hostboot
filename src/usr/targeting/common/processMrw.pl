@@ -607,8 +607,8 @@ sub setupBars
         {
             for (my $i=0;$i<$num;$i++)
             {
-                my $b=sprintf("0x%016X",
-         $i_base+$i_node_offset*$node+$i_proc_offset*$proc+$i_offset*$i);
+                my $b=sprintf("0x%016s",substr((
+         $i_base+$i_node_offset*$node+$i_proc_offset*$proc+$i_offset*$i)->as_hex(),2));  #Note: Hex convert method avoids overflow on 32bit machine
                 my $sep=",";
                 if ($i==$num-1)
                 {
@@ -641,8 +641,8 @@ sub processMcs
     my $i_offset = Math::BigInt->new($offset);
 
     my $mcs = $targetObj->getAttribute($target, "MCS_NUM");
-    my $mcsStr=sprintf("0x%016X",
-         $i_base+$i_node_offset*$node+$i_proc_offset*$proc+$i_offset*$mcs);
+    my $mcsStr=sprintf("0x%016s",substr((
+         $i_base+$i_node_offset*$node+$i_proc_offset*$proc+$i_offset*$mcs)->as_hex(),2));  #Note: Hex convert method avoids overflow on 32bit machines
     $targetObj->setAttribute($target, "IBSCOM_MCS_BASE_ADDR", $mcsStr);
 }
 
@@ -779,24 +779,32 @@ sub processPcie
     $lane_swap[0][1] = 0;
     $lane_swap[1][0] = 0;
     $lane_swap[1][1] = 0;
+    $lane_swap[2][0] = 0;
+    $lane_swap[2][1] = 0;
 
     my @lane_mask;
     $lane_mask[0][0] = "0x0000";
     $lane_mask[0][1] = "0x0000";
     $lane_mask[1][0] = "0x0000";
     $lane_mask[1][1] = "0x0000";
+    $lane_mask[2][0] = "0x0000";
+    $lane_mask[2][1] = "0x0000";
 
     my @lane_rev;
     $lane_rev[0][0] = "";
     $lane_rev[0][1] = "";
     $lane_rev[1][0] = "";
     $lane_rev[1][1] = "";
+    $lane_rev[2][0] = "";
+    $lane_rev[2][1] = "";
 
     my @is_slot;
     $is_slot[0][0] = 0;
     $is_slot[0][1] = 0;
     $is_slot[1][0] = 0;
     $is_slot[1][1] = 0;
+    $is_slot[2][0] = 0;
+    $is_slot[2][1] = 0;
 
     my $phb_config = "00000000";
 
@@ -829,6 +837,16 @@ sub processPcie
     $iop_swap{1}{1}{'10'}=$t[13];
     $iop_swap{1}{1}{'01'}=$t[14];
     $iop_swap{1}{1}{'11'}=$t[15];
+    
+    
+    $iop_swap{2}{0}{'00'}=$t[16];
+    $iop_swap{2}{0}{'01'}=$t[17];
+    $iop_swap{2}{0}{'10'}=$t[18];
+    $iop_swap{2}{0}{'11'}=$t[19];
+    $iop_swap{2}{1}{'00'}=$t[20];
+    $iop_swap{2}{1}{'10'}=$t[21];
+    $iop_swap{2}{1}{'01'}=$t[22];
+    $iop_swap{2}{1}{'11'}=$t[23];
 
     my @lane_eq;
     my $NUM_PHBS=4;
@@ -901,9 +919,10 @@ sub processPcie
     my $hex = sprintf('%X', oct("0b$phb_config"));
 
     $targetObj->setAttribute($parentTarget, "PROC_PCIE_PHB_ACTIVE","0x" . $hex);
-    my $lane_mask_attr = sprintf("%s,%s,%s,%s",
+    my $lane_mask_attr = sprintf("%s,%s,%s,%s,%s,%s",
         $lane_mask[0][0], $lane_mask[0][1],
-        $lane_mask[1][0], $lane_mask[1][1]);
+        $lane_mask[1][0], $lane_mask[1][1],
+        $lane_mask[2][0], $lane_mask[2][1]);
     $targetObj->setAttribute($parentTarget, "PROC_PCIE_LANE_MASK",
         $lane_mask_attr);
     $targetObj->setAttribute($parentTarget,"PROC_PCIE_LANE_MASK_NON_BIFURCATED",
@@ -913,7 +932,7 @@ sub processPcie
 
     my @iop_swap_lu;
     my @iop_lane_swap;
-    for (my $iop=0;$iop<2;$iop++)
+    for (my $iop=0;$iop<3;$iop++)
     {
         $iop_lane_swap[$iop] = $lane_swap[$iop][0] | $lane_swap[$iop][1];
         my $lane_rev = $lane_rev[$iop][0].$lane_rev[$iop][1];
@@ -924,10 +943,10 @@ sub processPcie
         }
     }
 
-    my $lane_rev_attr0 = sprintf("%s,%s",
-                         oct($iop_swap_lu[0]),oct($iop_swap_lu[1]));
-    my $lane_rev_attr1 = sprintf("%s,0,%s,0",
-                         oct($iop_swap_lu[0]),oct($iop_swap_lu[1]));
+    my $lane_rev_attr0 = sprintf("%s,%s,%s",
+                         oct($iop_swap_lu[0]),oct($iop_swap_lu[1]),oct($iop_swap_lu[2]));
+    my $lane_rev_attr1 = sprintf("%s,0,%s,0,%s,0",
+                         oct($iop_swap_lu[0]),oct($iop_swap_lu[1]),oct($iop_swap_lu[2]));
 
     $targetObj->setAttribute($parentTarget, "PROC_PCIE_IOP_SWAP",
         $lane_rev_attr0);
@@ -942,8 +961,8 @@ sub processPcie
     $targetObj->setAttribute($parentTarget, "PROC_PCIE_IOP_REVERSAL_BIFURCATED",
         "0,0,0,0");
 
-    my $is_slot_attr = sprintf("%s,%s,%s,%s",
-        $is_slot[0][0], $is_slot[0][1], $is_slot[1][0], $is_slot[1][1]);
+    my $is_slot_attr = sprintf("%s,%s,%s,%s,%s,%s",
+        $is_slot[0][0], $is_slot[0][1], $is_slot[1][0], $is_slot[1][1], $is_slot[2][0], $is_slot[2][1]);
     $targetObj->setAttribute($parentTarget, "PROC_PCIE_IS_SLOT", $is_slot_attr);
 
     ## don't support DSMP
