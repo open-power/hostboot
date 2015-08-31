@@ -372,6 +372,8 @@ void send_esel(eselInitData * i_data,
             // copy in the SEL event record data
             memcpy(data, i_data->eSel, sizeof(IPMISEL::selRecord));
             // copy the eSEL recordID (if it was created) into the extra data area
+            // and mark the event_data1 to indicate this is OEM data
+            data[offsetof(selRecord,event_data1)] |= 0xA0;
             data[offsetof(selRecord,event_data2)] = esel_recordID[1];
             data[offsetof(selRecord,event_data3)] = esel_recordID[0];
 
