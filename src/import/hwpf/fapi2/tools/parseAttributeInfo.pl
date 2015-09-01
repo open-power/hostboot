@@ -95,16 +95,16 @@ $etFile .= "/";
 $etFile .= "attrEnumInfo.csv";
 open(ETFILE, ">", $etFile);
 
-# TODO: This for platform use only, will support later via RTC 128106
-##my $fmFile = $ARGV[0];
-#$fmFile .= "/";
-#$fmFile .= "fapi2AttrOverrideData.H";
-#open(FMFILE, ">", $fmFile);
+# TODO: This for platform use only, will support later via RTC 128106 for HB
+my $fmFile = $arg_output_dir;
+$fmFile .= "/";
+$fmFile .= "fapi2AttrOverrideData.H";
+open(FMFILE, ">", $fmFile);
 
-#my $feFile = $ARGV[0];
-#$feFile .= "/";
-#$feFile .= "fapi2AttrOverrideEnums.H";
-#open(FEFILE, ">", $feFile);
+my $feFile = $arg_output_dir;
+$feFile .= "/";
+$feFile .= "fapi2AttrOverrideEnums.H";
+open(FEFILE, ">", $feFile);
 
 
 #------------------------------------------------------------------------------
@@ -212,14 +212,14 @@ print ETFILE "# <ENUM-STR>,<ENUM-VAL>\n";
 #-------------------------------------------------------------------------------
 # Print header of getFapiAttrData.C
 # ------------------------------------------------------------------------------
-#print FMFILE "const AttributeData g_FapiAttrs[] = {\n";
-#my %attrOverrideData = ();
+print FMFILE "const AttributeData g_FapiAttrs[] = {\n";
+my %attrOverrideData = ();
 
 #-------------------------------------------------------------------------------
 # Print header of getFapiAttrEnumData.C
 # ------------------------------------------------------------------------------
-#print FEFILE "const AttributeEnum g_FapiEnums[] = {\n";
-#my @attrOverrideEnums = ();
+print FEFILE "const AttributeEnum g_FapiEnums[] = {\n";
+my @attrOverrideEnums = ();
 
 my %attrIdHash;  # Records which Attribute IDs have been used
 my %attrValHash; # Records which Attribute values have been used
@@ -319,7 +319,7 @@ foreach my $argnum (0 .. $#ARGV)
     foreach my $attr
         (@{$attributes->{attribute}})
     {
-#       my $attrOverride = "";
+        my $attrOverride = "";
         #----------------------------------------------------------------------
         # Print a comment with the attribute ID attribute_ids.H
         #----------------------------------------------------------------------
@@ -342,8 +342,8 @@ foreach my $argnum (0 .. $#ARGV)
         #----------------------------------------------------------------------
         # Print the assignment of each attribute to the local l_name
         #----------------------------------------------------------------------
-#        $attrOverride .= "\t{\n";
-#        $attrOverride .= "\t\t\"$attr->{id}\",\n";
+         $attrOverride .= "\t{\n";
+         $attrOverride .= "\t\t\"$attr->{id}\",\n";
 
         #----------------------------------------------------------------------
         # Figure out the attribute array dimensions (if array)
@@ -381,10 +381,10 @@ foreach my $argnum (0 .. $#ARGV)
             print AIFILE "typedef uint8_t $attr->{id}_Type;\n";
             print ITFILE "$attr->{id},$attr->{id},";
             print ITFILE "0x$attrIdHash{$attr->{id}},u8\n";
-#            $attrOverride .= "\t\t0x$attrIdHash{$attr->{id}},\n";
-#            $attrOverride .= "\t\tsizeof(uint8_t),\n";
-#            $attrOverride .= "\t\t{ $arrayDimString }\n";
-#            $attrOverride .= "\t},\n";
+            $attrOverride .= "\t\t0x$attrIdHash{$attr->{id}},\n";
+            $attrOverride .= "\t\tsizeof(uint8_t),\n";
+            $attrOverride .= "\t\t{ $arrayDimString }\n";
+            $attrOverride .= "\t},\n";
         }
         else
         {
@@ -410,8 +410,8 @@ foreach my $argnum (0 .. $#ARGV)
                 print AIFILE "typedef ${actualSize}_t $attr->{id}_Type$arrayDimensions;\n";
                 print ITFILE "$attr->{id},$attr->{id},0x$attrIdHash{$attr->{id}},u8" .
                              "$arrayDimensions\n";
-#                $attrOverride .= "\t\t0x$attrIdHash{$attr->{id}},\n";
-#                $attrOverride .= "\t\tsizeof(${actualSize}_t),\n";
+                $attrOverride .= "\t\t0x$attrIdHash{$attr->{id}},\n";
+                $attrOverride .= "\t\tsizeof(${actualSize}_t),\n";
             }
             else
             {
@@ -419,8 +419,8 @@ foreach my $argnum (0 .. $#ARGV)
                 print $attr->{valueType}, "\n";
                 exit(1);
             }
-#            $attrOverride .= "\t\t{ $arrayDimString }\n";
-#            $attrOverride .= "\t},\n";
+            $attrOverride .= "\t\t{ $arrayDimString }\n";
+            $attrOverride .= "\t},\n";
         }
 
         #----------------------------------------------------------------------
@@ -519,8 +519,8 @@ foreach my $argnum (0 .. $#ARGV)
                     $value =~ s/\s+$//;
                 }
 
-#                push @attrOverrideEnums,
-#                    "\t{ \"$attr->{id}_$values[0]\", $values[1] },\n";
+                push @attrOverrideEnums,
+                    "\t{ \"$attr->{id}_$values[0]\", $values[1] },\n";
 
                 # Print the attribute enum to attribute_ids.H
                 print AIFILE "    ENUM_$attr->{id}_${val}";
@@ -678,7 +678,7 @@ foreach my $argnum (0 .. $#ARGV)
         #----------------------------------------------------------------------
         # Add attribute override string to map.
         #----------------------------------------------------------------------
-#        $attrOverrideData{$attr->{id}} = $attrOverride;
+        $attrOverrideData{$attr->{id}} = $attrOverride;
     };
 }
 
@@ -731,20 +731,20 @@ print ASFILE "</html>\n";
 #------------------------------------------------------------------------------
 # Print content for getFapiAttrData.C
 #------------------------------------------------------------------------------
-#foreach my $override (sort keys %attrOverrideData)
-#{
-#    print FMFILE $attrOverrideData{$override};
-#}
-#print FMFILE "};\n";
+foreach my $override (sort keys %attrOverrideData)
+{
+    print FMFILE $attrOverrideData{$override};
+}
+print FMFILE "};\n";
 
 #------------------------------------------------------------------------------
 # Print footer for getFapiAttrEnumData.C
 #------------------------------------------------------------------------------
-#foreach my $override (sort @attrOverrideEnums)
-#{
-#    print FEFILE $override;
-#}
-#print FEFILE "};\n";
+foreach my $override (sort @attrOverrideEnums)
+{
+    print FEFILE $override;
+}
+print FEFILE "};\n";
 
 #------------------------------------------------------------------------------
 # Close output files
@@ -755,6 +755,6 @@ close(ACFILE);
 close(ASFILE);
 close(ITFILE);
 close(ETFILE);
-#close(FMFILE);
-#close(FEFILE);
+close(FMFILE);
+close(FEFILE);
 

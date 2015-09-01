@@ -363,6 +363,11 @@ template< TargetType K >
 inline ReturnCode putSpy(const Target<K>& i_target,
                          const char* const i_spyId,
                          const variable_buffer& i_data);
+
+template< TargetType K >
+inline ReturnCode putSpy(const Target<K>& i_target,
+                         const char* const i_spyId,
+                         const char* i_enum);
 #endif
 
 /// @brief Writes spy data into a buffer holding ring data image
