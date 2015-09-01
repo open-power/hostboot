@@ -58,6 +58,7 @@ use POSIX;
 use Getopt::Long;
 use File::Basename;
 use lib dirname (__FILE__);
+use Cwd;
 
 #------------------------------------------------------------------------------
 # Project-specific settings.
@@ -72,6 +73,7 @@ my $copyrightSymbol = "";
 # set by environment variable in project env.bash
 my $projectName = $ENV{'PROJECT_NAME'};
 my $copyrightStr = "Contributors Listed Below - COPYRIGHT";
+my $projectRoot = $ENV{'PROJECT_ROOT'};
 
 ## note that these use single ticks so that the escape chars are NOT evaluated yet.
 my  $OLD_DELIMITER_END      =   'IBM_PROLOG_END';
@@ -83,6 +85,7 @@ my  $SOURCE_END_TAG         =   "\$";
 
 # Desired License, set by environment variable in project env.bash
 my $LicenseFile = $ENV{'LICENSE'};
+use constant LICENSE_PROLOG => "LICENSE_PROLOG";
 
 #------------------------------------------------------------------------------
 # Contributer info
@@ -114,6 +117,7 @@ use constant    RC_PROJECT_DOES_NOT_MATCH   =>  7;
 use constant    RC_BAD_CONTRIBUTORS_BLOCK   =>  8;
 use constant    RC_NO_COPYRIGHT_STRING      =>  9;
 use constant    RC_INVALID_FILETYPE         =>  10;
+use constant    RC_DIFFERS_FROM_CUSTOM_LICENSE_PROLOG => 11;
 
 #------------------------------------------------------------------------------
 #   Global Vars
@@ -292,6 +296,26 @@ foreach ( @Files )
 
         next;
     }
+
+    ##
+    ## Check if any parent directory below $projectRoot has a LICENSE_PROLOG file
+    ## Backtrack from the directory where the file lives and find the first
+    ## custom LICENSE_PROLOG file.
+    my $path = cwd."/".$_;
+    do
+    {
+        # Remove everything after last slash
+        $path =~ s|/[^/]*$||;
+        # Check if path has LICENSE_PROLOG file
+        my $custom_license_file = $path."/".LICENSE_PROLOG;
+        if (-e $custom_license_file)
+        {
+            # Set LicenseFile to closest custom LICENSE_PROLOG to file.
+            $LicenseFile = $custom_license_file;
+            # Exit loop, 'last' breaks out of both loops.
+            $path = $projectRoot;
+        }
+    } while ($path ne $projectRoot);
 
     ##  extract the existing copyright block
     ( $DelimiterBegin, $CopyrightBlock, $DelimiterEnd ) =   extractCopyrightBlock( $_ );
@@ -589,8 +613,6 @@ sub extractCopyrightBlock( $ )
     read( FH, $data, -s FH ) or die "ERROR $? : reading $infile: $!";
     close FH;
 
-    ## print   $data;
-
     # Extract the prolog into beginning delimiter, block data, and end delimiter
     my @prolog = ( '', '', '' );
     @prolog = ($1, $2, $4) if ( $data =~ m/$g_prolog_re/ );
@@ -653,6 +675,22 @@ sub checkCopyrightBlock( $$ )
     {
         print   STDOUT  "WARNING:  Copyright block does not reference project $projectName\n";
         return  RC_PROJECT_DOES_NOT_MATCH;
+    }
+
+    ## Check if custom LICENSE_PROLOG
+    if ($LicenseFile ne $ENV{'LICENSE'})
+    {
+        ##  Get desired license
+        my $custom_prolog = genCopyrightBlock($filename, filetype($filename));
+        # Remove delimiter portions that don't exist in $block
+        # BEGIN and END plus trailing white space
+        $custom_prolog =~ s/$DELIMITER_BEGIN//;
+        $custom_prolog =~ s/$DELIMITER_END\s+//;
+        if ($block ne $custom_prolog)
+        {
+            print STDOUT  "WARNING: Copyright block does not match custom license prolog file found in $LicenseFile\n";
+            return RC_DIFFERS_FROM_CUSTOM_LICENSE_PROLOG;
+        }
     }
 
     ##  split into lines and check for specific things
@@ -1059,21 +1097,17 @@ sub addPrologComments($$$)
 }
 
 ############################################
-##  fill in the empty copyright block
-## Copyright guidelines from:
-##   FSP ClearCase Architecture
-##   Version 1.9
-##   10/12/2010
-##   Editor: Alan Hlava
+##  Generates final copyright block
 ##
-##   Section 3.14.1 has templates for different files
+##  @parma[in]  filename
 ##
+##  @return     final copyright block string
 ############################################
-sub fillinEmptyCopyrightBlock( $$ )
+sub genCopyrightBlock
 {
-    my  ( $filename, $filetype )    =   @_;
+    my ($filename, $filetype) = @_;
 
-    my  $copyrightYear  =   createYearString( $filename );
+    my  $copyrightYear = createYearString( $filename );
 
     # Get copyright contributors based on hash so no duplicates
     my  %fileContributors = getFileContributors( $filename );
@@ -1099,17 +1133,6 @@ $DELIMITER_BEGIN
 $LicenseContent
 $DELIMITER_END
 EOF
-
-    ## Modify file in place with temp file  Perl Cookbook 7.8
-    my  $savedbgfile    =   "$filename.fillin";
-    system( "cp -p $filename $TempFile" );  ## preserve file permissions
-    open( INPUT, "< $filename"  )   or die " $? can't open $filename: $!" ;
-    open( OUTPUT, "> $TempFile"  )  or die " $? can't open $TempFile: $!" ;
-    select( OUTPUT );               ## new default filehandle for print
-
-    my $newline;
-    my $lines = "";
-    while ( defined($newline = <INPUT>) ) { $lines .= $newline; }
 
     if ("Assembly" eq $filetype)
     {
@@ -1161,10 +1184,42 @@ EOF
         return RC_INVALID_FILETYPE;
     }
 
+    return $IBMCopyrightBlock;
+}
+
+############################################
+##  fill in the empty copyright block
+## Copyright guidelines from:
+##   FSP ClearCase Architecture
+##   Version 1.9
+##   10/12/2010
+##   Editor: Alan Hlava
+##
+##   Section 3.14.1 has templates for different files
+##
+############################################
+sub fillinEmptyCopyrightBlock( $$ )
+{
+    my  ( $filename, $filetype )    =   @_;
+
+    my  $copyrightYear  =   createYearString( $filename );
+
+    ##  define the final copyright block template here.
+    my $IBMCopyrightBlock = genCopyrightBlock($filename,$filetype);
+
+    ## Modify file in place with temp file  Perl Cookbook 7.8
+    my  $savedbgfile    =   "$filename.fillin";
+    system( "cp -p $filename $TempFile" );  ## preserve file permissions
+    open( INPUT, "< $filename"  )   or die " $? can't open $filename: $!" ;
+    my $newline;
+    my $lines = "";
+    while ( defined($newline = <INPUT>) ) { $lines .= $newline; }
 
     # Replace existing block with the current content.
     $lines =~ s/$DELIMITER_BEGIN[^\$]*$DELIMITER_END/$IBMCopyrightBlock/s;
 
+    open( OUTPUT, "> $TempFile"  )  or die " $? can't open $TempFile: $!" ;
+    select( OUTPUT );               ## new default filehandle for print
     print OUTPUT $lines;
 
     ##  finish up the files
