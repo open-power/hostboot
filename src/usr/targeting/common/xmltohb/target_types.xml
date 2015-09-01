@@ -1496,6 +1496,10 @@
     <attribute><id>MSS_FREQ</id></attribute>
     <attribute><id>MSS_LAB_OVERRIDE_FOR_MEM_PLL</id></attribute>
     <attribute><id>ECID</id></attribute>
+    <attribute>
+        <id>CENTAUR_ECID_FRU_ID</id>
+        <default>0xFF</default>
+    </attribute>
     <attribute><id>MRW_MEM_SENSOR_CACHE_ADDR_MAP</id></attribute>
     <attribute>
         <!-- Centaur memory buffer chips do not have SCOM accessible FSI GP regs -->
@@ -1546,9 +1550,7 @@
     </attribute>
     <attribute><id>CDM_DOMAIN</id><default>MEM</default></attribute>
     <attribute><id>FRU_ID</id></attribute>
-
     <attribute><id>MSS_VREF_CAL_CNTL</id></attribute>
-
 </targetType>
 
 <!-- Centaur L4 -->

@@ -738,6 +738,7 @@ errlHndl_t backplaneIpmiFruInv::buildBoardInfoArea(
         io_data.push_back(0);
         io_data.push_back(0);
 
+
         //Set Vendor Name - ascii formatted data
         l_errl = addVpdData(io_data, PVPD::OPFR, PVPD::VN, true);
         if (l_errl) { break; }
@@ -773,6 +774,7 @@ errlHndl_t backplaneIpmiFruInv::buildBoardInfoArea(
             TRACFCOMP(g_trac_ipmi,"backplaneIpmiFruInv::buildBoardInfoArea - "
                   "Error getting part number attribute");
         }
+
         // The attribute size is 18. The vpd is 16. Only use 16.
         addCommonAttrData(io_data,
                           (uint8_t *)&l_pn,
@@ -780,15 +782,9 @@ errlHndl_t backplaneIpmiFruInv::buildBoardInfoArea(
 
         //Push Fru File ID Byte - NULL
         io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
-
-        //Only set the ECID Data during an update scenario
-        if (iv_isUpdate == true)
-        {
-            customEcidData (iv_extraTargets, io_data);
-        }
-
         //Indicate End of Custom Fields
         io_data.push_back(IPMIFRUINV::END_OF_CUSTOM_FIELDS);
+
 
     } while (0);
 
@@ -1065,48 +1061,75 @@ errlHndl_t membufIpmiFruInv::buildBoardInfoArea(
         io_data.push_back(0);
         io_data.push_back(0);
 
-        //Set Vendor Name - ascii formatted data
-        l_errl = addVpdData(io_data, CVPD::OPFR, CVPD::VN, true);
-        if (l_errl) { break; }
+        uint8_t l_fru_id = 0xFF;
+        // if the centaur_ecid_fru_id is not valid then the centaur is on a
+        // riser card, grab its vpd and populate the record
+        l_fru_id = iv_target->getAttr<TARGETING::ATTR_CENTAUR_ECID_FRU_ID>();
 
-        //Set Product Name - ascii formatted data
-        l_errl = addVpdData(io_data, CVPD::OPFR, CVPD::DR, true);
-        if (l_errl) { break; }
-
-        //Set Product Serial number - ascii formatted data
-        TARGETING::ATTR_SERIAL_NUMBER_type l_sn = {'0'};
-        if( !( iv_target->
-                 tryGetAttr<TARGETING::ATTR_SERIAL_NUMBER>
-                     ( l_sn) ) )
+        if( l_fru_id == 0xFF )
         {
-            // Should not fail. Need to use tryGetAttr due to complex type.
-            // Use zeros if fails.
-            TRACFCOMP(g_trac_ipmi,"membufIpmiFruInv::buildBoardInfoArea - "
-                  "Error getting serial number attribute");
-        }
-        // The attribute size is 18. The vpd is 16. Only use 16.
-        addCommonAttrData(io_data,
-                          (uint8_t *)&l_sn,
-                          VPD_SN_PN_VPD_SIZE);
+            //Set Vendor Name - ascii formatted data
+            l_errl = addVpdData(io_data, CVPD::OPFR, CVPD::VN, true);
+            if (l_errl) { break; }
 
-        //Set Product Part number - ascii formatted data
-        TARGETING::ATTR_PART_NUMBER_type l_pn = {'0'};
-        if( !( iv_target->
-                 tryGetAttr<TARGETING::ATTR_PART_NUMBER>
-                     ( l_pn) ) )
+            //Set Product Name - ascii formatted data
+            l_errl = addVpdData(io_data, CVPD::OPFR, CVPD::DR, true);
+            if (l_errl) { break; }
+
+            //Set Product Serial number - ascii formatted data
+            TARGETING::ATTR_SERIAL_NUMBER_type l_sn = {'0'};
+            if( !( iv_target->
+                        tryGetAttr<TARGETING::ATTR_SERIAL_NUMBER>
+                        ( l_sn) ) )
+            {
+                // Should not fail. Need to use tryGetAttr due to complex type.
+                // Use zeros if fails.
+                TRACFCOMP(g_trac_ipmi,"membufIpmiFruInv::buildBoardInfoArea - "
+                        "Error getting serial number attribute");
+            }
+            // The attribute size is 18. The vpd is 16. Only use 16.
+            addCommonAttrData(io_data,
+                    (uint8_t *)&l_sn,
+                    VPD_SN_PN_VPD_SIZE);
+
+            //Set Product Part number - ascii formatted data
+            TARGETING::ATTR_PART_NUMBER_type l_pn = {'0'};
+            if( !( iv_target->
+                        tryGetAttr<TARGETING::ATTR_PART_NUMBER>
+                        ( l_pn) ) )
+            {
+                // Should not fail. Need to use tryGetAttr due to complex type.
+                // Use zeros if fails.
+                TRACFCOMP(g_trac_ipmi,"membufIpmiFruInv::buildBoardInfoArea - "
+                        "Error getting part number attribute");
+            }
+            // The attribute size is 18. The vpd is 16. Only use 16.
+            addCommonAttrData(io_data,
+                    (uint8_t *)&l_pn,
+                    VPD_SN_PN_VPD_SIZE);
+
+            //Push Fru File ID Byte - NULL
+            io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
+
+        }
+        else
         {
-            // Should not fail. Need to use tryGetAttr due to complex type.
-            // Use zeros if fails.
-            TRACFCOMP(g_trac_ipmi,"membufIpmiFruInv::buildBoardInfoArea - "
-                  "Error getting part number attribute");
-        }
-        // The attribute size is 18. The vpd is 16. Only use 16.
-        addCommonAttrData(io_data,
-                          (uint8_t *)&l_pn,
-                          VPD_SN_PN_VPD_SIZE);
+            //Set Vendor Name - NULL
+            io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
 
-        //Push Fru File ID Byte - NULL
-        io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
+            //Set Product Name - NULL
+            io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
+
+            //Set Product Serial number - NULL
+            io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
+
+            //Set Product Part number - NULL
+            io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
+
+            //Push Fru File ID Byte - NULL
+            io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
+
+        }
 
         //Only set the ECID Data during an update scenario
         if (iv_isUpdate == true)
@@ -1125,41 +1148,41 @@ errlHndl_t membufIpmiFruInv::buildBoardInfoArea(
     if (l_errl)
     {
         TRACFCOMP(g_trac_ipmi,"membufIpmiFruInv::buildBoardInfoArea - "
-                  "Errors collecting board info data");
+                "Errors collecting board info data");
     }
 
     return l_errl;
 }
 
 errlHndl_t membufIpmiFruInv::buildProductInfoArea(
-                                                  std::vector<uint8_t> &io_data)
+        std::vector<uint8_t> &io_data)
 {
     //This section not needed for the mem buf type
     return IpmiFruInv::buildEmptyArea(io_data);
 }
 
 errlHndl_t membufIpmiFruInv::buildMultiRecordInfoArea(
-                                                  std::vector<uint8_t> &io_data)
+        std::vector<uint8_t> &io_data)
 {
     //This section not needed for the mem buf type
     return IpmiFruInv::buildEmptyArea(io_data);
 }
 
 errlHndl_t membufIpmiFruInv::addVpdData(std::vector<uint8_t> &io_data,
-                                     uint8_t i_record,
-                                     uint8_t i_keyword,
-                                     bool i_ascii,
-                                     bool i_typeLengthByte)
+        uint8_t i_record,
+        uint8_t i_keyword,
+        bool i_ascii,
+        bool i_typeLengthByte)
 {
     errlHndl_t l_errl = NULL;
 
     l_errl = addCommonVpdData(iv_target,
-                              io_data,
-                              DeviceFW::CVPD,
-                              i_record,
-                              i_keyword,
-                              i_ascii,
-                              i_typeLengthByte);
+            io_data,
+            DeviceFW::CVPD,
+            i_record,
+            i_keyword,
+            i_ascii,
+            i_typeLengthByte);
     return l_errl;
 }
 //##############################################################################
@@ -1188,6 +1211,11 @@ void IpmiFruInv::customEcidData(TARGETING::TargetHandleList i_extraTargets,
             {
                 l_setCustomData = true;
                 addEcidData(l_extraTarget, ecidInfo, io_data);
+            }
+            else
+            {
+               TRACFCOMP(g_trac_ipmi, "No ECID info for this huid 0x%x",
+                          TARGETING::get_huid(l_extraTarget));
             }
         }
     }
@@ -1549,6 +1577,22 @@ void IPMIFRUINV::gatherSetData(const TARGETING::Target* i_pSys,
 
         TARGETING::TargetHandle_t pTarget = *pTarget_it;
         uint32_t l_fruId = pTarget->getAttr<TARGETING::ATTR_FRU_ID>();
+
+        // check if this is a membuf target, if it is and the special
+        // attribute to say we want a separate fru entry for the centaur ecids
+        // is populated, then we will push that ecid to the potential frus
+        // list
+
+        if (TARGETING::TYPE_MEMBUF == pTarget->getAttr<TARGETING::ATTR_TYPE>())
+        {
+            uint8_t l_ecidFruId =
+                pTarget->getAttr<TARGETING::ATTR_CENTAUR_ECID_FRU_ID>();
+
+            // if the ecid fru id is valid use it, else use the regular fru id
+            l_fruId = ( l_ecidFruId == 0xFF ) ? l_fruId : l_ecidFruId;
+
+            TRACFCOMP(g_trac_ipmi,"l_fruId = 0x%x, l_ecidFruId = 0x%x", l_fruId, l_ecidFruId);
+        }
 
         if (l_fruId)
         {

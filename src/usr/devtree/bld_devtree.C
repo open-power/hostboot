@@ -1864,15 +1864,6 @@ errlHndl_t bld_fdt_bmc(devTree * i_dt, bool i_smallTree)
 
     i_dt->addPropertyString(bmcNode, "name", bmcNodeName );
 
-    //Pass Opal their device string
-    // find CLASS_SYS (the top level target)
-    TARGETING::Target* pSys;
-    TARGETING::targetService().getTopLevelTarget(pSys);
-    assert(pSys != NULL,
-               "bld_fdt_bmc - Error: Could not find the top level target.");
-    i_dt->addPropertyCell32(bmcNode, "firmware-fru-id",
-                                   pSys->getAttr<TARGETING::ATTR_FRU_ID>());
-
     /* create a node to hold the sensors */
     errhdl = bld_fdt_sensors( i_dt, bmcNode, i_smallTree );
 

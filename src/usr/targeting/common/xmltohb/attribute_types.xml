@@ -11745,7 +11745,8 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>FRU_ID</id>
-    <description>FRU ID attribute for chip class</description>
+    <description>FRU ID attribute used to report FRU information to the BMC
+        for each fru in the system.</description>
     <simpleType><uint32_t><default>0</default></uint32_t></simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -11753,8 +11754,19 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>BMC_FRU_ID</id>
-    <description>BMC FRU ID attribute for node class</description>
+    <description>BMC FRU ID attribute to report the system firmware levels
+        to the BMC.</description>
     <simpleType><uint32_t><default>0</default></uint32_t></simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>CENTAUR_ECID_FRU_ID</id>
+    <description>FRU ID attribute for centaur ECID data. This fru ID is used to
+        report the ECID data to the BMC and make it available for systems which
+        have then centaur chips soldered to the backplane.</description>
+    <simpleType><uint32_t></uint32_t></simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
