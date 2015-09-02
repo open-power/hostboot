@@ -166,19 +166,12 @@ void ServiceDataCollector::SetCallout( PRDcallout mru,
 
 //------------------------------------------------------------------------------
 
-void ServiceDataCollector::Gard( GardAction::ErrorType i_et )
+void ServiceDataCollector::clearMruListGard()
 {
-    GARD_POLICY gardPolicy = GARD;
-
-    if( GardAction::NoGard == i_et )
-    {
-        gardPolicy = NO_GARD;
-    }
-
     for ( SDC_MRU_LIST::iterator i = xMruList.begin();
           i != xMruList.end(); ++i )
     {
-        i->gardState = gardPolicy;
+        i->gardState = NO_GARD;
     }
 }
 
@@ -318,7 +311,10 @@ uint32_t ServiceDataCollector::Flatten(uint8_t * i_buffer, uint32_t & io_size) c
         buffer_append(current_ptr,hitCount);
         buffer_append(current_ptr,threshold);
         buffer_append(current_ptr,startingPoint);
-        buffer_append(current_ptr,(uint32_t)errorType);
+
+        uint32_t unused = 0; // GARD type no longer used
+        buffer_append(current_ptr, unused);
+
         //@ecdf - Removed ivDumpRequestType.
         buffer_append(current_ptr,ivDumpRequestContent);
         buffer_append(current_ptr,ivpDumpRequestChipHandle);
@@ -400,7 +396,7 @@ ServiceDataCollector & ServiceDataCollector::operator=(
     hitCount = buffer_get8(i_flatdata);
     threshold = buffer_get8(i_flatdata);
     startingPoint = buffer_getTarget(i_flatdata);
-    errorType = (GardAction::ErrorType)buffer_get32(i_flatdata);
+    buffer_get32(i_flatdata); // GARD type was removed.
     ivDumpRequestContent = (hwTableContent) buffer_get32(i_flatdata); //@ecdf
     ivpDumpRequestChipHandle = buffer_getTarget(i_flatdata);
 

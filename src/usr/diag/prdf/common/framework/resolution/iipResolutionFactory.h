@@ -234,14 +234,6 @@ public:
                                     CONTENT_HW );
 
   /**
-   * @brief     Get a Gard Resolution
-   * @param[in] i_gardErrorType gard error type
-   * @return    reference to a resolution
-   * @post      only one instance of this object with this param will exist
-   */
-  Resolution & GetGardResolution( GardAction::ErrorType i_gardErrorType );
-
-  /**
    * @brief     Get a Capture Resolution
    * @param[in] i_group  The group to capture.
    * @return    reference to a resolution

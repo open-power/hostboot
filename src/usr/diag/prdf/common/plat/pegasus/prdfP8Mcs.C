@@ -301,7 +301,7 @@ PLUGIN_MCIFIR_DD1_CHECK( 49 )
 int32_t handleMirrorAction( ExtensibleChip * i_mcsChip,
                             STEP_CODE_DATA_STRUCT & i_sc )
 {
-    #define PRDF_FUNC "[ClearMbsSecondaryBits] "
+    #define PRDF_FUNC "[handleMirrorAction] "
 
     int32_t l_rc = SUCCESS;
 
@@ -341,7 +341,7 @@ int32_t handleMirrorAction( ExtensibleChip * i_mcsChip,
             {
                 // Just submit the error log as hidden.
                 i_sc.service_data->Nologging();
-                i_sc.service_data->Gard( GardAction::NoGard );
+                i_sc.service_data->clearMruListGard();
             }
         }
         else // Under threshold

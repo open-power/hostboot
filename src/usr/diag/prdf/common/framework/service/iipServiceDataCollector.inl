@@ -42,7 +42,6 @@ ServiceDataCollector::ServiceDataCollector() :
     threshold(0),
     analysisFlags(0),
     startingPoint(NULL),
-    errorType(GardAction::NoGard),
     ivpDumpRequestChipHandle(NULL),
     causeAttentionType(INVALID_ATTENTION_TYPE)
 {

@@ -44,7 +44,6 @@
 #include <prdfRegisterCache.H>
 #include <prdfScanFacility.H>
 #include <prdfMfgThresholdMgr.H>
-#include <prdfGardType.H>
 #if !defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
 #include <prdfSdcFileControl.H>
 #endif
@@ -318,7 +317,7 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
             serviceData.SetServiceCall();
             // We don't want to gard unless we have a good
             // return code
-            serviceData.Gard(GardAction::NoGard);
+            serviceData.clearMruListGard();
         }
     }
 
@@ -338,7 +337,7 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
         g_prd_errlHndl = NULL;
 
         // pw 597903 -- Don't GARD if we got a global error.
-        serviceData.Gard(GardAction::NoGard);
+        serviceData.clearMruListGard();
     }
 
     g_prd_errlHndl = serviceGenerator.GenerateSrcPfa( i_attentionType,

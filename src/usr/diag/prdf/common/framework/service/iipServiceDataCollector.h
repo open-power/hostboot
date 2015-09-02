@@ -92,7 +92,6 @@ PRDF_GARD_POLICY_MAP_END
 #endif
 #include <list>
 #include <prdfExtensibleChip.H>
-#include <prdfGardType.H>
 #include <iipstep.h>
 
 namespace PRDF
@@ -614,16 +613,17 @@ public:
      */
     void clearPrimaryPass() { analysisFlags &= ~PASS_PRIMARY; }
 
-  /**
-   * @brief set gard policy associated with target to given policy.
-   */
-  void Gard( GardAction::ErrorType i_et );
+    /**
+     * @brief Iterates the MRU list and clears gard for all callouts.
+     */
+    void clearMruListGard();
 
-  /**
-   * @brief  queries if we atleast one target is to be garded in callout list.
-   * @return true if there is a target to be garded else false.
-   */
-  bool isGardRequested();
+    /**
+     * @brief  Iterates the MRU list and returns true if at least on target in
+     *         the list is set to be garded.
+     * @return True if there is at least one target set to be garded.
+     */
+    bool isGardRequested();
 
   /**
    Set Error type as Special Uncorrectable Error SUE
@@ -815,7 +815,6 @@ private:  // Data
   uint8_t       threshold;
   uint8_t       analysisFlags;
   TARGETING::TargetHandle_t   startingPoint;
-  GardAction::ErrorType errorType;
   Timer ivCurrentEventTime;
   TARGETING::TargetHandle_t ivpDumpRequestChipHandle;
   ATTENTION_TYPE causeAttentionType;    // MCK,REC,SPCL
