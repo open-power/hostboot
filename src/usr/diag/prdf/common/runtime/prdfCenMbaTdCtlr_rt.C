@@ -621,7 +621,7 @@ int32_t CenMbaTdCtlr::analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc,
                     // The scrub completed without an error (this function
                     // currently ignores MCEs). Don't commit the error log
                     // (reduces informational error logs).
-                    io_sc.service_data->DontCommitErrorLog();
+                    io_sc.service_data->setDontCommitErrl();
                 }
 
                 o_rc = startBgScrub( io_sc );

@@ -715,7 +715,7 @@ void CenMbaTdCtlrCommon::badPathErrorHandling( STEP_CODE_DATA_STRUCT & io_sc )
 
     // Just in case it was a legitimate maintenance command complete (error
     // log not committed) but something else failed.
-    io_sc.service_data->clearFlag(ServiceDataCollector::DONT_COMMIT_ERRL);
+    io_sc.service_data->clearDontCommitErrl();
 
     #undef PRDF_FUNC
 }

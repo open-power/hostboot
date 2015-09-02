@@ -249,6 +249,30 @@ public:
      */
     bool queryServiceCall() const { return queryFlag(SERVICE_CALL); }
 
+    /**
+     * @brief Sets the DONT_COMMIT_ERRL flag indicating not to commit the error
+     *        log.
+     */
+    void setDontCommitErrl() { setFlag(DONT_COMMIT_ERRL); }
+
+    /**
+     * @brief Clears the DONT_COMMIT_ERRL flag indicating to commit the error
+     *        log.
+     */
+    void clearDontCommitErrl() { clearFlag(DONT_COMMIT_ERRL); }
+
+    /**
+     * @brief Queries the state of the DONT_COMMIT_ERRL flag.
+     */
+    bool queryDontCommitErrl() const
+    {
+        #ifndef ESW_SIM_COMPILE
+        return queryFlag(DONT_COMMIT_ERRL);
+        #else
+        return false; // Always commit error log in simulator.
+        #endif
+    }
+
   /**
    Get access to the error signature object
    <ul>
@@ -497,24 +521,6 @@ public:
    </ul><br>
    */
   bool IsLogging(void) const { return queryFlag(LOGIT); }
-
-    /**
-     * @brief Sets flag to indicate not to commit the error log.
-     */
-    void DontCommitErrorLog() { setFlag(DONT_COMMIT_ERRL); }
-
-    /**
-     * @brief  Queries if the 'Don't Commit Error Log' flag is on.
-     * @return TRUE if DONT_COMMIT_ERRL flag is set, FALSE otherwise.
-     */
-    bool IsDontCommitErrl() const
-    {
-        #ifndef ESW_SIM_COMPILE
-        return queryFlag(DONT_COMMIT_ERRL);
-        #else
-        return false;
-        #endif
-    }
 
   /**
    Indicate the chip where analysis begain

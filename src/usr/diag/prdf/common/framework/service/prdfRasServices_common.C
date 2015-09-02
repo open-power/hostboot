@@ -115,6 +115,17 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     o_dumpErrl        = NULL;
     o_dumpErrlActions = 0;
 
+    // First, check if an error log should be committed. Note that there should
+    // always be an error log if there was a system or unit checkstop.
+    if ( io_sdc.queryDontCommitErrl() &&
+         MACHINE_CHECK != i_attnType && !io_sdc.IsUnitCS() )
+    {
+        // User did not want this error log committed. No need to continue. So
+        // delete it and exit.
+        delete iv_errl; iv_errl = NULL;
+        return NULL;
+    }
+
 #ifdef __HOSTBOOT_MODULE
     using namespace ERRORLOG;
     using namespace HWAS;
@@ -807,46 +818,37 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // Do the Unit Dumps if needed.
     //**************************************************************
 
-    if ( io_sdc.IsDontCommitErrl() && !io_sdc.IsUnitCS() &&
-         (MACHINE_CHECK != pfaData.priAttnType) )
-    {
-        // User did not want this error log committed, so delete it.
-        delete iv_errl; iv_errl = NULL;
-    }
-    else
-    {
-        // Add the MNFG trace information.
-        MnfgTrace( io_sdc.GetErrorSignature(), pfaData );
+    // Add the MNFG trace information.
+    MnfgTrace( io_sdc.GetErrorSignature(), pfaData );
 
-        // If this is not a terminating condition, commit the error log. If the
-        // error log is not committed, the error log will be passed back to
-        // PRDF::main() and eventually ATTN.
-        if ( MACHINE_CHECK != pfaData.priAttnType && !ForceTerminate &&
-             !pfaData.TERMINATE )
+    // If this is not a terminating condition, commit the error log. If the
+    // error log is not committed, the error log will be passed back to
+    // PRDF::main() and eventually ATTN.
+    if ( MACHINE_CHECK != pfaData.priAttnType && !ForceTerminate &&
+         !pfaData.TERMINATE )
+    {
+        // Handle any unit checkstop conditions, if needed (i.e. runtime
+        // deconfiguration, dump/FFDC collection, etc.
+        if ( io_sdc.IsUnitCS() && !io_sdc.IsUsingSavedSdc() )
         {
-            // Handle any unit checkstop conditions, if needed (i.e. runtime
-            // deconfiguration, dump/FFDC collection, etc.
-            if ( io_sdc.IsUnitCS() && !io_sdc.IsUsingSavedSdc() )
-            {
-                handleUnitCS( io_sdc, o_dumpTrgt, o_initiateHwudump );
-            }
+            handleUnitCS( io_sdc, o_dumpTrgt, o_initiateHwudump );
+        }
 
-            if ( true == o_initiateHwudump )
-            {
-                // the dump log will be deleted later in PRDF::main
-                // after the hwudump is initiated there.
-                o_dumpErrl = iv_errl;
-                iv_errl = NULL;
-                o_dumpErrlActions = actionFlag;
-                PRDF_TRAC( PRDF_FUNC "for target: 0x%08x, i_errl: 0x%08x, "
-                           "i_errlActions: 0x%08x", getHuid(o_dumpTrgt),
-                           ERRL_GETRC_SAFE(o_dumpErrl), o_dumpErrlActions );
-            }
-            else
-            {
-                // Commit the error log.
-                commitErrLog( iv_errl, pfaData );
-            }
+        if ( true == o_initiateHwudump )
+        {
+            // the dump log will be deleted later in PRDF::main
+            // after the hwudump is initiated there.
+            o_dumpErrl = iv_errl;
+            iv_errl = NULL;
+            o_dumpErrlActions = actionFlag;
+            PRDF_TRAC( PRDF_FUNC "for target: 0x%08x, i_errl: 0x%08x, "
+                       "i_errlActions: 0x%08x", getHuid(o_dumpTrgt),
+                       ERRL_GETRC_SAFE(o_dumpErrl), o_dumpErrlActions );
+        }
+        else
+        {
+            // Commit the error log.
+            commitErrLog( iv_errl, pfaData );
         }
     }
 

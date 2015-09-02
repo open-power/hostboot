@@ -157,7 +157,7 @@ int32_t checkSpareBit( ExtensibleChip * i_mcsChip,
     if ( isSpareBitOnDMIBus(i_mcsChip, mbChip) )
     {
         // Ignore attention and do not commit the error log.
-        i_sc.service_data->DontCommitErrorLog();
+        i_sc.service_data->setDontCommitErrl();
         l_rc = SUCCESS;
     }
 

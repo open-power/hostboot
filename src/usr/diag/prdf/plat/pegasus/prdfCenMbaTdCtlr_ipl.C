@@ -430,7 +430,7 @@ int32_t CenMbaTdCtlr::analyzeCmdComplete( STEP_CODE_DATA_STRUCT & io_sc,
         else
         {
             // If maint cmd completed with no error, don't commit error log.
-            io_sc.service_data->DontCommitErrorLog();
+            io_sc.service_data->setDontCommitErrl();
         }
 
     } while (0);
