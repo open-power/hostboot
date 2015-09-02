@@ -872,7 +872,18 @@ int32_t getMemBufRawCardType( TargetHandle_t i_mba,
         switch ( l_cardType )
         {
             case ENUM_ATTR_SPD_MODSPEC_COM_REF_RAW_CARD_A:
-                o_cardType = CEN_TYPE_A;
+                if (ENUM_ATTR_EFF_DRAM_GEN_DDR3 == l_version)
+                {
+                    o_cardType = CEN_TYPE_A;
+                }
+                else if (ENUM_ATTR_EFF_DRAM_GEN_DDR4 == l_version)
+                {
+                    o_cardType = CEN_TYPE_A4;
+                }
+                else
+                {
+                    o_cardType = WIRING_INVALID;
+                }
                 break;
 
             case ENUM_ATTR_SPD_MODSPEC_COM_REF_RAW_CARD_B:
@@ -895,7 +906,18 @@ int32_t getMemBufRawCardType( TargetHandle_t i_mba,
                 break;
 
             case ENUM_ATTR_SPD_MODSPEC_COM_REF_RAW_CARD_D:
-                o_cardType = CEN_TYPE_D;
+                if (ENUM_ATTR_EFF_DRAM_GEN_DDR3 == l_version)
+                {
+                    o_cardType = CEN_TYPE_D;
+                }
+                else if (ENUM_ATTR_EFF_DRAM_GEN_DDR4 == l_version)
+                {
+                    o_cardType = CEN_TYPE_D4;
+                }
+                else
+                {
+                    o_cardType = WIRING_INVALID;
+                }
                 break;
 
             default:
