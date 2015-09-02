@@ -81,7 +81,7 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
             // the post IPL analysis. In this case, we do not have the FFDC to
             // query the IO registers so simply set service call and skip
             // everything else.
-            i_sc.service_data->SetServiceCall();
+            i_sc.service_data->setServiceCall();
             return SUCCESS;
         }
         #endif
@@ -219,7 +219,7 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
         else
         {
             // Make predictive
-            i_sc.service_data->SetServiceCall();
+            i_sc.service_data->setServiceCall();
         }
     } while (0);
 

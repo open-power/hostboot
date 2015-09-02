@@ -64,8 +64,7 @@ bool ignoreErrorForSapphire( STEP_CODE_DATA_STRUCT & i_stepcode )
             }
 
             //Prevent predictive callout of the chip.
-            i_stepcode.service_data->clearFlag(
-                                ServiceDataCollector::SERVICE_CALL );
+            i_stepcode.service_data->clearServiceCall();
 
             ignoreError = true;
         }

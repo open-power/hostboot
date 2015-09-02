@@ -563,7 +563,7 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc,
             // manufacturing, this error log will be predictive.
 
             if ( areDramRepairsDisabled() )
-                io_sc.service_data->SetServiceCall();
+                io_sc.service_data->setServiceCall();
 
             // Remove chip mark from hardware.
             iv_mark.clearCM();
@@ -1171,7 +1171,7 @@ int32_t CenMbaTdCtlr::handleUE( STEP_CODE_DATA_STRUCT & io_sc )
     iv_tdState = NO_OP; // Abort the TD procedure.
 
     setTdSignature( io_sc, PRDFSIG_MaintUE );
-    io_sc.service_data->SetServiceCall();
+    io_sc.service_data->setServiceCall();
 
     CenMbaDataBundle * mbadb = getMbaDataBundle( iv_mbaChip );
 

@@ -360,7 +360,7 @@ void PciOscSwitchDomain::addHwCalloutAndSignature( STEP_CODE_DATA_STRUCT & i_sc,
     }while(0);
 
     i_sc.service_data->SetErrorSig( signature );
-    i_sc.service_data->SetServiceCall();
+    i_sc.service_data->setServiceCall();
     #undef PRDF_FUNC
 }
 

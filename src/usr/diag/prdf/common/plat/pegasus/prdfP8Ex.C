@@ -61,7 +61,7 @@ int32_t ClearServiceCallFlag( ExtensibleChip * i_chip,
          (CHECK_STOP != i_sc.service_data->getPrimaryAttnType()) &&
          (!i_sc.service_data->queryFlag(ServiceDataCollector::UNIT_CS)) )
     {
-        i_sc.service_data->clearFlag(ServiceDataCollector::SERVICE_CALL);
+        i_sc.service_data->clearServiceCall();
     }
 
     return SUCCESS;

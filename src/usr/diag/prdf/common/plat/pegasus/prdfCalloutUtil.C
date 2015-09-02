@@ -50,7 +50,7 @@ void defaultError( STEP_CODE_DATA_STRUCT & i_sc )
 {
     i_sc.service_data->SetCallout( NextLevelSupport_ENUM, MRU_MED, NO_GARD );
     i_sc.service_data->SetCallout( SP_CODE, MRU_MED, NO_GARD );
-    i_sc.service_data->SetServiceCall();
+    i_sc.service_data->setServiceCall();
 }
 
 //------------------------------------------------------------------------------

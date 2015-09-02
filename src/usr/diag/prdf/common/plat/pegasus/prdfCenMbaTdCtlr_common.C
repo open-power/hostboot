@@ -391,7 +391,7 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
         {
             iv_tdState = NO_OP; // The TD procedure is complete.
 
-            io_sc.service_data->SetServiceCall();
+            io_sc.service_data->setServiceCall();
 
             break; // nothing else to do.
         }
@@ -462,7 +462,7 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
                  ( cmDram == ecc.getDram() ) )
             {
                 setTdSignature( io_sc, PRDFSIG_VcmBadSpare );
-                io_sc.service_data->SetServiceCall();
+                io_sc.service_data->setServiceCall();
             }
             else
             {
@@ -495,7 +495,7 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
                 {
                     // Chip mark is in place and sparing is not possible.
                     setTdSignature( io_sc, PRDFSIG_VcmCmAndSpare );
-                    io_sc.service_data->SetServiceCall();
+                    io_sc.service_data->setServiceCall();
 
                     // The mark has already been added to the callout list.
                     // Callout the used spares, if they exists.
@@ -525,7 +525,7 @@ int32_t CenMbaTdCtlrCommon::handleMCE_VCM2( STEP_CODE_DATA_STRUCT & io_sc )
             if ( iv_mark.getSM().isValid() )
             {
                 setTdSignature( io_sc, PRDFSIG_VcmCmAndSm );
-                io_sc.service_data->SetServiceCall();
+                io_sc.service_data->setServiceCall();
             }
         }
 
@@ -576,7 +576,7 @@ int32_t CenMbaTdCtlrCommon::handleMCE_DSD2( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         setTdSignature( io_sc, PRDFSIG_DsdBadSpare );
-        io_sc.service_data->SetServiceCall();
+        io_sc.service_data->setServiceCall();
 
         // Callout spare DRAM.
         MemoryMru memmru ( iv_mbaTrgt, iv_rank, iv_mark.getCM() );
@@ -698,7 +698,7 @@ void CenMbaTdCtlrCommon::badPathErrorHandling( STEP_CODE_DATA_STRUCT & io_sc )
     iv_tdState = NO_OP;
 
     setTdSignature( io_sc, PRDFSIG_MaintCmdComplete_ERROR );
-    io_sc.service_data->SetServiceCall();
+    io_sc.service_data->setServiceCall();
 
     // There may have been a code bug, callout 2nd level support.
     io_sc.service_data->SetCallout( NextLevelSupport_ENUM, MRU_HIGH );

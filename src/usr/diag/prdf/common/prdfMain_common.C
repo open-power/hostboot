@@ -314,7 +314,7 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
                                                     (uint16_t)analyzeRc );
             serviceData.SetCallout(SP_CODE);
             serviceData.SetCallout( NextLevelSupport_ENUM, MRU_LOW );
-            serviceData.SetServiceCall();
+            serviceData.setServiceCall();
             // We don't want to gard unless we have a good
             // return code
             serviceData.clearMruListGard();

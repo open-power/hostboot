@@ -269,7 +269,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             severityParm = ERRL_SEV_INFORMATIONAL;
             actionFlag = (actionFlag | ERRL_ACTION_HIDDEN);
         }
-        else if ( io_sdc.IsServiceCall() ) //At Thresold
+        else if ( io_sdc.queryServiceCall() ) //At Thresold
         {
             severityParm = ERRL_SEV_PREDICTIVE;
         }
@@ -285,18 +285,20 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     ////////////////////////////////////////////////////////////////
     else if (i_attnType == SPECIAL)
     {
-        if (io_sdc.IsServiceCall())
+        if (io_sdc.queryServiceCall())
         //Bit Steered already, or Bit Steer Not supported
         {
             severityParm = ERRL_SEV_PREDICTIVE;
         }
-        else if ( (!io_sdc.IsServiceCall()) && (!io_sdc.IsLogging()) ) // Special Attn Clean Up
+        // Special Attn Clean Up
+        else if ( (!io_sdc.queryServiceCall()) && (!io_sdc.IsLogging()) )
         {
             severityParm = ERRL_SEV_INFORMATIONAL;
             //Hidden, No Service Action for Infomational
             actionFlag = ERRL_ACTION_HIDDEN;
         }
-        else if ( (!io_sdc.IsServiceCall()) && (io_sdc.IsLogging()) ) // Special Attn Bit Steer Normal Condition
+        // Special Attn Bit Steer Normal Condition
+        else if ( (!io_sdc.queryServiceCall()) && (io_sdc.IsLogging()) )
         {
             severityParm = ERRL_SEV_RECOVERED;
             //Hidden, No Service Action for Recovered
@@ -460,7 +462,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     HWAS::GARD_ErrorType gardPolicy = HWAS::GARD_NULL;
 
     // Gard only if the error is a serviceable event.
-    if ( io_sdc.IsServiceCall() )
+    if ( io_sdc.queryServiceCall() )
     {
         // We will not Resource Recover on a checkstop attention.
         gardPolicy = ( MACHINE_CHECK == i_attnType ) ? HWAS::GARD_Fatal
@@ -911,19 +913,19 @@ void ErrDataService::initPfaData( const ServiceDataCollector & i_sdc,
     o_pfa.errlSeverity = i_errlSev;
 
     // PRD Service Data Collector Flags (1:true, 0:false)
-    o_pfa.DUMP                = i_sdc.IsDump()          ? 1 : 0;
-    o_pfa.UERE                = i_sdc.IsUERE()          ? 1 : 0;
-    o_pfa.SUE                 = i_sdc.IsSUE()           ? 1 : 0;
-    o_pfa.AT_THRESHOLD        = i_sdc.IsAtThreshold()   ? 1 : 0;
-    o_pfa.DEGRADED            = i_sdc.IsDegraded()      ? 1 : 0;
-    o_pfa.SERVICE_CALL        = i_sdc.IsServiceCall()   ? 1 : 0;
-    o_pfa.TRACKIT             = i_sdc.IsMfgTracking()   ? 1 : 0;
-    o_pfa.TERMINATE           = i_sdc.Terminate()       ? 1 : 0;
-    o_pfa.LOGIT               = i_sdc.IsLogging()       ? 1 : 0;
-    o_pfa.UNIT_CHECKSTOP      = i_sdc.IsUnitCS()        ? 1 : 0;
+    o_pfa.DUMP                = i_sdc.IsDump()              ? 1 : 0;
+    o_pfa.UERE                = i_sdc.IsUERE()              ? 1 : 0;
+    o_pfa.SUE                 = i_sdc.IsSUE()               ? 1 : 0;
+    o_pfa.AT_THRESHOLD        = i_sdc.IsAtThreshold()       ? 1 : 0;
+    o_pfa.DEGRADED            = i_sdc.IsDegraded()          ? 1 : 0;
+    o_pfa.SERVICE_CALL        = i_sdc.queryServiceCall()    ? 1 : 0;
+    o_pfa.TRACKIT             = i_sdc.IsMfgTracking()       ? 1 : 0;
+    o_pfa.TERMINATE           = i_sdc.Terminate()           ? 1 : 0;
+    o_pfa.LOGIT               = i_sdc.IsLogging()           ? 1 : 0;
+    o_pfa.UNIT_CHECKSTOP      = i_sdc.IsUnitCS()            ? 1 : 0;
     o_pfa.LAST_CORE_TERMINATE = 0; // Will be set later, if needed.
-    o_pfa.USING_SAVED_SDC     = i_sdc.IsUsingSavedSdc() ? 1 : 0;
-    o_pfa.DEFER_DECONFIG      = i_deferDeconfig         ? 1 : 0;
+    o_pfa.USING_SAVED_SDC     = i_sdc.IsUsingSavedSdc()     ? 1 : 0;
+    o_pfa.DEFER_DECONFIG      = i_deferDeconfig             ? 1 : 0;
     o_pfa.SECONDARY_ERROR     = i_sdc.isSecondaryErrFound() ? 1 : 0;
 
     // Thresholding

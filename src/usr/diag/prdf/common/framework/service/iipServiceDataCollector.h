@@ -234,6 +234,21 @@ public:
      */
     bool queryFlag( Flag i_flag ) const { return (0 != (flags & i_flag)); }
 
+    /**
+     * @brief Sets the SERVICE_CALL flag indicating service is required.
+     */
+    void setServiceCall() { setFlag(SERVICE_CALL); }
+
+    /**
+     * @brief Clears the SERVICE_CALL flag indicating service is not required.
+     */
+    void clearServiceCall() { clearFlag(SERVICE_CALL); }
+
+    /**
+     * @brief Queries the state of the SERVICE_CALL flag.
+     */
+    bool queryServiceCall() const { return queryFlag(SERVICE_CALL); }
+
   /**
    Get access to the error signature object
    <ul>
@@ -500,30 +515,6 @@ public:
         return false;
         #endif
     }
-
-  /**
-   Indicate that a service is needed
-   <ul>
-   <br><b>Parameters:  </b> None
-   <br><b>Returns:     </b> none.
-   <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> IsServiceCall() == true
-   <br><b>Exceptions:  </b> None.
-   </ul><br>
-   */
-  void SetServiceCall(void) { setFlag(SERVICE_CALL); }
-
-  /**
-   Query for need of a Service Call
-   <ul>
-   <br><b>Parameters:  </b> None.
-   <br><b>Returns:     </b> [true | false]
-   <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> None.
-   <br><b>Exceptions:  </b> None.
-   </ul><br>
-   */
-  bool IsServiceCall(void) const { return queryFlag(SERVICE_CALL); }
 
   /**
    Indicate the chip where analysis begain

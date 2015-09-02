@@ -593,21 +593,21 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
                 {
                     i_sc.service_data->AddSignatureList( mbaTrgt,
                                                          PRDFSIG_MnfgDramCte );
-                    i_sc.service_data->SetServiceCall();
+                    i_sc.service_data->setServiceCall();
                     doTps = true;
                 }
                 else if ( hrTh < hrCount )
                 {
                     i_sc.service_data->AddSignatureList( mbaTrgt,
                                                          PRDFSIG_MnfgHrCte );
-                    i_sc.service_data->SetServiceCall();
+                    i_sc.service_data->setServiceCall();
                     doTps = true;
                 }
                 else if ( dimmTh < dimmCount )
                 {
                     i_sc.service_data->AddSignatureList( mbaTrgt,
                                                          PRDFSIG_MnfgDimmCte );
-                    i_sc.service_data->SetServiceCall();
+                    i_sc.service_data->setServiceCall();
                     doTps = true;
                 }
                 else if ( 0 != (CenMbaCeTable::TABLE_FULL & ceTableRc) )
@@ -624,7 +624,7 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
                                        MemoryMruData::CALLOUT_ALL_MEM );
                     i_sc.service_data->SetCallout( all_mm,  MRU_MEDA );
                     i_sc.service_data->SetCallout( mbaTrgt, MRU_MEDA );
-                    i_sc.service_data->SetServiceCall();
+                    i_sc.service_data->setServiceCall();
                     doTps = true;
                 }
                 else if ( 0 != (CenMbaCeTable::ENTRY_TH_REACHED & ceTableRc) )
@@ -635,7 +635,7 @@ int32_t AnalyzeFetchNce( ExtensibleChip * i_membChip,
                     // There is a single entry threshold and no other threshold
                     // has been met. This is a potential flooding issue, so make
                     // the DIMM callout predictive.
-                    i_sc.service_data->SetServiceCall();
+                    i_sc.service_data->setServiceCall();
                     doTps = true;
                 }
             }
@@ -791,7 +791,7 @@ int32_t AnalyzeFetchUe( ExtensibleChip * i_membChip,
         // All memory UEs should be customer viewable. Normally, this would be
         // done by setting the threshold to 1, but we do not want to mask UEs
         // on the first occurrence.
-        i_sc.service_data->SetServiceCall();
+        i_sc.service_data->setServiceCall();
 
         CenMembufDataBundle * membdb = getMembufDataBundle( i_membChip );
         mbaChip = membdb->getMbaChip( i_mbaPos );
@@ -1262,7 +1262,7 @@ int32_t ClearServiceCallFlag( ExtensibleChip * i_chip,
          (CHECK_STOP != i_sc.service_data->getPrimaryAttnType()) &&
          (!i_sc.service_data->queryFlag(ServiceDataCollector::UNIT_CS)) )
     {
-        i_sc.service_data->clearFlag(ServiceDataCollector::SERVICE_CALL);
+        i_sc.service_data->clearServiceCall();
     }
 
     return SUCCESS;

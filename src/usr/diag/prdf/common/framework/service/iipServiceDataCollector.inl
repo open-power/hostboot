@@ -56,7 +56,7 @@ void ServiceDataCollector::setPrimaryAttnType( ATTENTION_TYPE attention )
     attentionType = attention;
     if( MACHINE_CHECK == attention )
     {
-        flags |= SERVICE_CALL;
+        setFlag( SERVICE_CALL );
     }
 }
 
@@ -73,8 +73,11 @@ void ServiceDataCollector::setSecondaryAttnType(ATTENTION_TYPE attention)
 inline
 void ServiceDataCollector::SetThresholdMaskId(uint32_t mask_id)
 {
-  flags |= AT_THRESHOLD | DEGRADED | SERVICE_CALL;
-  maskId = mask_id;        // Set MaskId
+    setFlag( AT_THRESHOLD );
+    setFlag( DEGRADED     );
+    setFlag( SERVICE_CALL );
+
+    maskId = mask_id;        // Set MaskId
 }
 
 // ---------------------------------------------------------------
@@ -86,7 +89,10 @@ uint32_t ServiceDataCollector::GetThresholdMaskId(void) const
 // ---------------------------------------------------------------
 
 inline void ServiceDataCollector::SetTerminate(void)
-{ flags |= TERMINATE | SERVICE_CALL; }
+{
+    setFlag( TERMINATE    );
+    setFlag( SERVICE_CALL );
+}
 
 // ---------------------------------------------------------------
 

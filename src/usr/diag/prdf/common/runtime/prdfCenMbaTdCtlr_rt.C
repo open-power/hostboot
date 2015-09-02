@@ -831,7 +831,7 @@ int32_t CenMbaTdCtlr::analyzeVcmPhase2( STEP_CODE_DATA_STRUCT & io_sc,
             // In manufacturing, this error log will be predictive.
             if ( areDramRepairsDisabled() )
             {
-                io_sc.service_data->SetServiceCall();
+                io_sc.service_data->setServiceCall();
                 iv_tdState = NO_OP; // Move on to the next TD procedure.
                 break;
             }
@@ -1877,7 +1877,7 @@ int32_t CenMbaTdCtlr::handleUe_Td( STEP_CODE_DATA_STRUCT & io_sc,
     io_sc.service_data->SetCallout( memmru );
 
     // Make error log predictive
-    io_sc.service_data->SetServiceCall();
+    io_sc.service_data->setServiceCall();
 
     do
     {
@@ -1936,7 +1936,7 @@ int32_t CenMbaTdCtlr::handleRceEte_Td( STEP_CODE_DATA_STRUCT & io_sc )
     io_sc.service_data->SetCallout( memmru );
 
     // Make error log predictive
-    io_sc.service_data->SetServiceCall();
+    io_sc.service_data->setServiceCall();
 
     return o_rc;
 
@@ -2039,7 +2039,7 @@ int32_t CenMbaTdCtlr::handleCeEte_Tps( STEP_CODE_DATA_STRUCT & io_sc )
         // Check if DRAM repairs are disabled.
         if ( areDramRepairsDisabled() )
         {
-            io_sc.service_data->SetServiceCall();
+            io_sc.service_data->setServiceCall();
             break; // nothing else to do
         }
 
@@ -2150,7 +2150,7 @@ int32_t CenMbaTdCtlr::handleCeEte_Tps( STEP_CODE_DATA_STRUCT & io_sc )
             {
                 // Spares have been used. Make the error log predictive.
                 setTdSignature( io_sc, PRDFSIG_TpsCmAndSpare );
-                io_sc.service_data->SetServiceCall();
+                io_sc.service_data->setServiceCall();
             }
         }
 
@@ -2181,7 +2181,7 @@ int32_t CenMbaTdCtlr::handleUe_NonTd( STEP_CODE_DATA_STRUCT & io_sc,
         // Callout the rank.
         MemoryMru memmru ( iv_mbaTrgt, iv_rank, MemoryMruData::CALLOUT_RANK );
         io_sc.service_data->SetCallout( memmru );
-        io_sc.service_data->SetServiceCall();
+        io_sc.service_data->setServiceCall();
 
         // Add a TPS request to the queue and ban any future TPS requests.
         o_rc = addTdQueueEntryTPS( iv_rank, io_sc, true );
@@ -2288,7 +2288,7 @@ int32_t CenMbaTdCtlr::handleRceEte_NonTd( STEP_CODE_DATA_STRUCT & io_sc )
             doTps = mbadb->iv_rceTable.addEntry( iv_rank, io_sc, count );
         }
         else
-            io_sc.service_data->SetServiceCall();
+            io_sc.service_data->setServiceCall();
 
         if ( doTps )
         {
@@ -2367,7 +2367,7 @@ int32_t CenMbaTdCtlr::handleHardCeEte_NonTd( STEP_CODE_DATA_STRUCT & io_sc,
 
         // Any hard CEs in MNFG should be immediately reported.
         if ( mfgMode() )
-            io_sc.service_data->SetServiceCall();
+            io_sc.service_data->setServiceCall();
 
     } while(0);
 
@@ -2460,7 +2460,7 @@ int32_t CenMbaTdCtlr::handleTpsFalseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
         // In manufacturing, this error log will be predictive.
         if ( areDramRepairsDisabled() )
         {
-            io_sc.service_data->SetServiceCall();
+            io_sc.service_data->setServiceCall();
             break; // nothing else to do
         }
 
@@ -2523,7 +2523,7 @@ int32_t CenMbaTdCtlr::handleTpsFalseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
         {
             // The spares have been used. Make the error log predictive.
             setTdSignature( io_sc, PRDFSIG_TpsMarksUnavail );
-            io_sc.service_data->SetServiceCall();
+            io_sc.service_data->setServiceCall();
         }
 
     } while(0);
