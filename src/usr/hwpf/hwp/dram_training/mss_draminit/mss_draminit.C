@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit.C,v 1.66 2014/05/09 16:40:04 jdsloat Exp $
+// $Id: mss_draminit.C,v 1.70 2015/09/04 01:10:11 kmack Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -28,6 +30,10 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.70   | kmack    |01-Sep-15| Fixed more RCs and removed extraneous comments
+//  1.69   | kmack    |28-Aug-15| Fixed an RC
+//  1.68   | kmack    |10-Aug-15| Moved the mss_lrdimm_ddr4_db_load call to the be included or not included based on def FAPI_LRDIMM
+//  1.67   | kmack    |05-Aug-15| Commented out FAPI_DDR4 code
 //  1.66   | jdsloat  |09-MAY-14| Added an explicit 500us delay before execution of MRS cmds.
 //  1.65   | jdsloat  |09-APL-14| Fixed ifdef around #include mss_lrdimm_ddr4_funcs.H
 //  1.64   | jdsloat  |01-APL-14| RAS review edits/changes
@@ -40,7 +46,7 @@
 //  1.57   | jdsloat  | 10/09/13| Added mrs_load_ddr4 with defines for ddr4 usage, added shadow regs, removed complicated flow
 //  1.56   | bellows  | 09/16/13| Hostboot compile fix
 //  1.55   | kcook    | 09/13/13| Updated define FAPI_LRDIMM token.
-//  1.54   | kcook    | 08/27/13| Removed LRDIMM support to mss_lrdimm_funcs.C. 
+//  1.54   | kcook    | 08/27/13| Removed LRDIMM support to mss_lrdimm_funcs.C.
 //         |          |         | Added check for valid rank when flagging address mirroring.
 //  1.53   | kcook    | 08/16/13| Added LRDIMM support. Use with mss_funcs.C v1.32.
 //  1.52   | jdsloat  | 08/07/13| Added a single rc_num check and edited a debug/error message to make firmware happy.
@@ -145,28 +151,6 @@ ReturnCode mss_lrdimm_mrs_load(Target& i_target, uint32_t i_port_number, uint32_
    return rc;
 
 }
-#endif
-
-#ifndef FAPI_DDR4
-using namespace fapi;
-fapi::ReturnCode mss_mrs_load_ddr4(Target& i_target, uint32_t port_number, uint32_t& ccs_inst_cnt)
-{
-   ReturnCode rc;
-
-   FAPI_ERR("Invalid exec of mrs_load_ddr4  %s!", i_target.toEcmdString());
-   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
-   return rc;
-
-}
-fapi::ReturnCode mss_rcd_load_ddr4(Target& i_target, uint32_t i_port_number, uint32_t& io_ccs_inst_cnt)
-{
-   ReturnCode rc;
-
-   FAPI_ERR("Invalid exec of rcd_load_ddr4  %s!", i_target.toEcmdString());
-   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
-   return rc;
-
-}
 fapi::ReturnCode mss_lrdimm_ddr4_db_load(Target& i_target, uint32_t i_port_number, uint32_t& io_ccs_inst_cnt)
 {
    ReturnCode rc;
@@ -176,17 +160,48 @@ fapi::ReturnCode mss_lrdimm_ddr4_db_load(Target& i_target, uint32_t i_port_numbe
    return rc;
 
 }
-fapi::ReturnCode mss_ddr4_invert_mpr_write(Target& i_target)
-{
-   ReturnCode rc;
-
-   FAPI_ERR("Invalid exec of ddr4_invert_mpr_write  %s!", i_target.toEcmdString());
-   FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR);
-   return rc;
-
-}
-
 #endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //----------------------------------------------------------------------
 //  Constants
@@ -197,7 +212,7 @@ const uint8_t MAX_NUM_RANK_PAIR = 4;
 const uint8_t MAX_NUM_LR_RANKS = 8;
 const uint8_t MRS0_BA = 0;
 const uint8_t MRS1_BA = 1;
-const uint8_t MRS2_BA = 2;  
+const uint8_t MRS2_BA = 2;
 const uint8_t MRS3_BA = 3;
 const uint8_t MRS4_BA = 4;
 const uint8_t MRS5_BA = 5;
@@ -233,13 +248,13 @@ ReturnCode mss_draminit(Target& i_target)
 
     rc = mss_draminit_cloned(i_target);
 
-	// If mss_unmask_draminit_errors gets it's own bad rc,
-	// it will commit the passed in rc (if non-zero), and return it's own bad rc.
-	// Else if mss_unmask_draminit_errors runs clean,
-	// it will just return the passed in rc.
-	rc = mss_unmask_draminit_errors(i_target, rc);
+        // If mss_unmask_draminit_errors gets it's own bad rc,
+        // it will commit the passed in rc (if non-zero), and return it's own bad rc.
+        // Else if mss_unmask_draminit_errors runs clean,
+        // it will just return the passed in rc.
+        rc = mss_unmask_draminit_errors(i_target, rc);
 
-	return rc;
+        return rc;
 }
 
 ReturnCode mss_draminit_cloned(Target& i_target)
@@ -257,7 +272,7 @@ ReturnCode mss_draminit_cloned(Target& i_target)
     uint8_t rank_pair_group = 0;
     uint8_t bit_position = 0;
     ecmdDataBufferBase data_buffer_64(64);
-    ecmdDataBufferBase mrs0(16); 
+    ecmdDataBufferBase mrs0(16);
     ecmdDataBufferBase mrs1(16);
     ecmdDataBufferBase mrs2(16);
     ecmdDataBufferBase mrs3(16);
@@ -338,172 +353,244 @@ ReturnCode mss_draminit_cloned(Target& i_target)
 
     // Check to see if any dimm needs address mirror mode.  Set the approriate flag.
     if ( ( address_mirror_map[0][0] ||
-	  address_mirror_map[0][1] ||
-	  address_mirror_map[1][0] ||
-	  address_mirror_map[1][1] )
-	&& (is_sim == 0)   )
+          address_mirror_map[0][1] ||
+          address_mirror_map[1][0] ||
+          address_mirror_map[1][1] )
+        && (is_sim == 0)   )
     {
 
-	FAPI_INF( "Setting Address Mirroring in the PHY on %s ", i_target.toEcmdString());
+        FAPI_INF( "Setting Address Mirroring in the PHY on %s ", i_target.toEcmdString());
 
-	//Set the Address and BA bits affected by mirroring
-	if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3)
-	{
-		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
-		if(rc) return rc;
-		rc_num = rc_num | data_buffer_64.setBit(58);
-		rc_num = rc_num | data_buffer_64.setBit(59);
-		rc_num = rc_num | data_buffer_64.setBit(60);
-		rc_num = rc_num | data_buffer_64.setBit(62);
-		rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
-		if(rc) return rc;
-
-		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P1_0x8001C0110301143F, data_buffer_64);
-		if(rc) return rc;
-		rc_num = rc_num | data_buffer_64.setBit(58);
-		rc_num = rc_num | data_buffer_64.setBit(59);
-		rc_num = rc_num | data_buffer_64.setBit(60);
-		rc_num = rc_num | data_buffer_64.setBit(62);
-		rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P1_0x8001C0110301143F, data_buffer_64);
-		if(rc) return rc;
-	}
-	if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
-	{
-		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
-		if(rc) return rc;
-		rc_num = rc_num | data_buffer_64.setBit(58);
-		rc_num = rc_num | data_buffer_64.setBit(59);
-		rc_num = rc_num | data_buffer_64.setBit(60);
-		rc_num = rc_num | data_buffer_64.setBit(61);
-		rc_num = rc_num | data_buffer_64.setBit(62);
-		rc_num = rc_num | data_buffer_64.setBit(63);
+        //Set the Address and BA bits affected by mirroring
+        if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3)
+        {
+                rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
+                if(rc) return rc;
+                rc_num = rc_num | data_buffer_64.setBit(58);
+                rc_num = rc_num | data_buffer_64.setBit(59);
+                rc_num = rc_num | data_buffer_64.setBit(60);
+                rc_num = rc_num | data_buffer_64.setBit(62);
+                if (rc_num)
+                {
+                    FAPI_ERR( "mss_draminit_cloned: Error setting up buffers for DPHY01_DDRPHY_PC_RANK_GROUP_P0");
+                    rc_buff.setEcmdError(rc_num);
+                    return rc_buff;
+                }
                 rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
-		if(rc) return rc;
+                if(rc) return rc;
 
-		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P1_0x8001C0110301143F, data_buffer_64);
-		if(rc) return rc;
-		rc_num = rc_num | data_buffer_64.setBit(58);
-		rc_num = rc_num | data_buffer_64.setBit(59);
-		rc_num = rc_num | data_buffer_64.setBit(60);
-		rc_num = rc_num | data_buffer_64.setBit(61);
-		rc_num = rc_num | data_buffer_64.setBit(62);
-		rc_num = rc_num | data_buffer_64.setBit(63);
-		rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P1_0x8001C0110301143F, data_buffer_64);
-		if(rc) return rc;
-	}
+                rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P1_0x8001C0110301143F, data_buffer_64);
+                if(rc) return rc;
+                rc_num = rc_num | data_buffer_64.setBit(58);
+                rc_num = rc_num | data_buffer_64.setBit(59);
+                rc_num = rc_num | data_buffer_64.setBit(60);
+                rc_num = rc_num | data_buffer_64.setBit(62);
+                if (rc_num)
+                {
+                    FAPI_ERR( "mss_draminit_cloned: Error setting up buffers for DPHY01_DDRPHY_PC_RANK_GROUP_P1");
+                    rc_buff.setEcmdError(rc_num);
+                    return rc_buff;
+                }
+                rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P1_0x8001C0110301143F, data_buffer_64);
+                if(rc) return rc;
+        }
+        if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+        {
+                rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
+                if(rc) return rc;
+                rc_num = rc_num | data_buffer_64.setBit(58);
+                rc_num = rc_num | data_buffer_64.setBit(59);
+                rc_num = rc_num | data_buffer_64.setBit(60);
+                rc_num = rc_num | data_buffer_64.setBit(61);
+                rc_num = rc_num | data_buffer_64.setBit(62);
+                rc_num = rc_num | data_buffer_64.setBit(63);
+                if (rc_num)
+                {
+                    FAPI_ERR( "mss_draminit_cloned: Error setting up buffers for DPHY01_DDRPHY_PC_RANK_GROUP_P0");
+                    rc_buff.setEcmdError(rc_num);
+                    return rc_buff;
+                }
+                rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
+                if(rc) return rc;
 
-	for ( port_number = 0; port_number < MAX_NUM_PORTS; port_number++)
-	{
-	    for ( rank_pair_group = 0; rank_pair_group < MAX_NUM_RANK_PAIR; rank_pair_group++)
-	    {
+                rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P1_0x8001C0110301143F, data_buffer_64);
+                if(rc) return rc;
+                rc_num = rc_num | data_buffer_64.setBit(58);
+                rc_num = rc_num | data_buffer_64.setBit(59);
+                rc_num = rc_num | data_buffer_64.setBit(60);
+                rc_num = rc_num | data_buffer_64.setBit(61);
+                rc_num = rc_num | data_buffer_64.setBit(62);
+                rc_num = rc_num | data_buffer_64.setBit(63);
+                if (rc_num)
+                {
+                    FAPI_ERR( "mss_draminit_cloned: Error setting up buffers for DPHY01_DDRPHY_PC_RANK_GROUP_P1");
+                    rc_buff.setEcmdError(rc_num);
+                    return rc_buff;
+                }
+                rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P1_0x8001C0110301143F, data_buffer_64);
+                if(rc) return rc;
+        }
 
-	        // dimm 0, dimm_rank 0-3 = ranks 0-3; dimm 1, dimm_rank 0-3 = ranks 4-7
-	        pri_dimm = (primary_ranks_array[rank_pair_group][port_number]) / 4;
-	        pri_dimm_rank = primary_ranks_array[rank_pair_group][port_number] - 4*pri_dimm;
-	        sec_dimm = (secondary_ranks_array[rank_pair_group][port_number]) / 4;
-	        sec_dimm_rank = secondary_ranks_array[rank_pair_group][port_number] - 4*sec_dimm;
-	        ter_dimm = (tertiary_ranks_array[rank_pair_group][port_number]) / 4;
-	        ter_dimm_rank = tertiary_ranks_array[rank_pair_group][port_number] - 4*ter_dimm;
-	        qua_dimm = (quaternary_ranks_array[rank_pair_group][port_number]) / 4;
-	        qua_dimm_rank = quaternary_ranks_array[rank_pair_group][port_number] - 4*qua_dimm;
-		// Set the rank pairs that will be affected.
-		if ( port_number == 0 )
-		{
+        for ( port_number = 0; port_number < MAX_NUM_PORTS; port_number++)
+        {
+            for ( rank_pair_group = 0; rank_pair_group < MAX_NUM_RANK_PAIR; rank_pair_group++)
+            {
+
+                // dimm 0, dimm_rank 0-3 = ranks 0-3; dimm 1, dimm_rank 0-3 = ranks 4-7
+                pri_dimm = (primary_ranks_array[rank_pair_group][port_number]) / 4;
+                pri_dimm_rank = primary_ranks_array[rank_pair_group][port_number] - 4*pri_dimm;
+                sec_dimm = (secondary_ranks_array[rank_pair_group][port_number]) / 4;
+                sec_dimm_rank = secondary_ranks_array[rank_pair_group][port_number] - 4*sec_dimm;
+                ter_dimm = (tertiary_ranks_array[rank_pair_group][port_number]) / 4;
+                ter_dimm_rank = tertiary_ranks_array[rank_pair_group][port_number] - 4*ter_dimm;
+                qua_dimm = (quaternary_ranks_array[rank_pair_group][port_number]) / 4;
+                qua_dimm_rank = quaternary_ranks_array[rank_pair_group][port_number] - 4*qua_dimm;
+                // Set the rank pairs that will be affected.
+                if ( port_number == 0 )
+                {
                     if ( ( ( address_mirror_map[port_number][pri_dimm] & (0x08 >> pri_dimm_rank) ) ) && (primary_ranks_array[rank_pair_group][port_number] != 0xff ) )
-		    {
-			FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
-			bit_position = 2 * rank_pair_group + 48;
-			FAPI_INF( "Setting bit %d", bit_position);
-			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
-			if(rc) return rc;
-			rc_num = rc_num | data_buffer_64.setBit(bit_position);
-			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
-			if(rc) return rc;
-		    }
-		    if ( ( ( address_mirror_map[port_number][sec_dimm] & (0x08 >> sec_dimm_rank) ) ) && (secondary_ranks_array[rank_pair_group][port_number] != 0xff ) )
                     {
-			FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
-			bit_position = 2 * rank_pair_group + 49;
-			FAPI_INF( "Setting bit %d", bit_position);
-			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
-			if(rc) return rc;
-			rc_num = rc_num | data_buffer_64.setBit(bit_position);
-			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
-			if(rc) return rc;
-		    }
-		    if ( ( ( address_mirror_map[port_number][ter_dimm] & (0x08 >> ter_dimm_rank) ) ) && (tertiary_ranks_array[rank_pair_group][port_number] != 0xff ) )
-		    {
-			FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
-			bit_position = 2 * rank_pair_group + 48;
-			FAPI_INF( "Setting bit %d", bit_position);
-			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P0_0x8000C0350301143F, data_buffer_64);
-			if(rc) return rc;
-			rc_num = rc_num | data_buffer_64.setBit(bit_position);
-			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P0_0x8000C0350301143F, data_buffer_64);
-			if(rc) return rc;
-		    }
-		    if ( ( ( address_mirror_map[port_number][qua_dimm] & (0x08 >> qua_dimm_rank) ) ) && (quaternary_ranks_array[rank_pair_group][port_number] != 0xff ) )
+                        FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
+                        bit_position = 2 * rank_pair_group + 48;
+                        FAPI_INF( "Setting bit %d", bit_position);
+                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
+                        if(rc) return rc;
+                        rc_num = rc_num | data_buffer_64.setBit(bit_position);
+                        if (rc_num)
+                        {
+                            FAPI_ERR( "mss_draminit_cloned: Error setting up buffers for DPHY01_DDRPHY_PC_RANK_GROUP_P0");
+                            rc_buff.setEcmdError(rc_num);
+                            return rc_buff;
+                        }
+                        rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
+                        if(rc) return rc;
+                    }
+                    if ( ( ( address_mirror_map[port_number][sec_dimm] & (0x08 >> sec_dimm_rank) ) ) && (secondary_ranks_array[rank_pair_group][port_number] != 0xff ) )
                     {
-			FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
-			bit_position = 2 * rank_pair_group + 49;
-			FAPI_INF( "Setting bit %d", bit_position);
-			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P0_0x8000C0350301143F, data_buffer_64);
-			if(rc) return rc;
-			rc_num = rc_num | data_buffer_64.setBit(bit_position);
-			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P0_0x8000C0350301143F, data_buffer_64);
-			if(rc) return rc;
-		    }
-		}
-		if ( port_number == 1 )
-		{
-		    if ( ( ( address_mirror_map[port_number][pri_dimm] & (0x08 >> pri_dimm_rank) ) ) && (primary_ranks_array[rank_pair_group][port_number] != 0xff ) )
-		    {
-			FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
-			bit_position = 2 * rank_pair_group + 48;
-			FAPI_INF( "Setting bit %d", bit_position);
-			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P1_0x8001C0110301143F, data_buffer_64);
-			if(rc) return rc;
-			rc_num = rc_num | data_buffer_64.setBit(bit_position);
-			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P1_0x8001C0110301143F, data_buffer_64);
-			if(rc) return rc;
-		    }
-		    if ( ( ( address_mirror_map[port_number][sec_dimm] & (0x08 >> sec_dimm_rank) ) ) && (secondary_ranks_array[rank_pair_group][port_number] != 0xff ) )
+                        FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
+                        bit_position = 2 * rank_pair_group + 49;
+                        FAPI_INF( "Setting bit %d", bit_position);
+                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
+                        if(rc) return rc;
+                        rc_num = rc_num | data_buffer_64.setBit(bit_position);
+                        if (rc_num)
+                        {
+                            FAPI_ERR( "mss_draminit_cloned: Error setting up buffers for DPHY01_DDRPHY_PC_RANK_GROUP_P0");
+                            rc_buff.setEcmdError(rc_num);
+                            return rc_buff;
+                        }
+                        rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P0_0x8000C0110301143F, data_buffer_64);
+                        if(rc) return rc;
+                    }
+                    if ( ( ( address_mirror_map[port_number][ter_dimm] & (0x08 >> ter_dimm_rank) ) ) && (tertiary_ranks_array[rank_pair_group][port_number] != 0xff ) )
                     {
-			FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
-			bit_position = 2 * rank_pair_group + 49;
-			FAPI_INF( "Setting bit %d", bit_position);
-			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P1_0x8001C0110301143F, data_buffer_64);
-			if(rc) return rc;
-			rc_num = rc_num | data_buffer_64.setBit(bit_position);
-			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P1_0x8001C0110301143F, data_buffer_64);
-			if(rc) return rc;
-		    }
-		    if ( ( ( address_mirror_map[port_number][ter_dimm] & (0x08 >> ter_dimm_rank) ) ) && (tertiary_ranks_array[rank_pair_group][port_number] != 0xff ) )
-		    {
-			FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
-			bit_position = 2 * rank_pair_group + 48;
-			FAPI_INF( "Setting bit %d", bit_position);
-			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P1_0x8001C0350301143F, data_buffer_64);
-			if(rc) return rc;
-			rc_num = rc_num | data_buffer_64.setBit(bit_position);
-			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P1_0x8001C0350301143F, data_buffer_64);
-			if(rc) return rc;
-		    }
-		    if ( ( ( address_mirror_map[port_number][qua_dimm] & (0x08 >> qua_dimm_rank) ) ) && (quaternary_ranks_array[rank_pair_group][port_number] != 0xff ) )
+                        FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
+                        bit_position = 2 * rank_pair_group + 48;
+                        FAPI_INF( "Setting bit %d", bit_position);
+                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P0_0x8000C0350301143F, data_buffer_64);
+                        if(rc) return rc;
+                        rc_num = rc_num | data_buffer_64.setBit(bit_position);
+                        if (rc_num)
+                        {
+                            FAPI_ERR( "mss_draminit_cloned: Error setting up buffers for DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P0");
+                            rc_buff.setEcmdError(rc_num);
+                            return rc_buff;
+                        }
+                        rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P0_0x8000C0350301143F, data_buffer_64);
+                        if(rc) return rc;
+                    }
+                    if ( ( ( address_mirror_map[port_number][qua_dimm] & (0x08 >> qua_dimm_rank) ) ) && (quaternary_ranks_array[rank_pair_group][port_number] != 0xff ) )
                     {
-			FAPI_INF( "Address Mirroring on PORT%d RANKPAIR%d RANK%d", port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
-			bit_position = 2 * rank_pair_group + 49;
-			FAPI_INF( "Setting bit %d", bit_position);
-			rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P1_0x8001C0350301143F, data_buffer_64);
-			if(rc) return rc;
-			rc_num = rc_num | data_buffer_64.setBit(bit_position);
-			rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P1_0x8001C0350301143F, data_buffer_64);
-			if(rc) return rc;
-		    }
-		}
+                        FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
+                        bit_position = 2 * rank_pair_group + 49;
+                        FAPI_INF( "Setting bit %d", bit_position);
+                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P0_0x8000C0350301143F, data_buffer_64);
+                        if(rc) return rc;
+                        rc_num = rc_num | data_buffer_64.setBit(bit_position);
+                        if (rc_num)
+                        {
+                            FAPI_ERR( "mss_draminit_cloned: Error setting up buffers for DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P0");
+                            rc_buff.setEcmdError(rc_num);
+                            return rc_buff;
+                        }
+                        rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P0_0x8000C0350301143F, data_buffer_64);
+                        if(rc) return rc;
+                    }
+                }
+                if ( port_number == 1 )
+                {
+                    if ( ( ( address_mirror_map[port_number][pri_dimm] & (0x08 >> pri_dimm_rank) ) ) && (primary_ranks_array[rank_pair_group][port_number] != 0xff ) )
+                    {
+                        FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
+                        bit_position = 2 * rank_pair_group + 48;
+                        FAPI_INF( "Setting bit %d", bit_position);
+                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P1_0x8001C0110301143F, data_buffer_64);
+                        if(rc) return rc;
+                        rc_num = rc_num | data_buffer_64.setBit(bit_position);
+                        if (rc_num)
+                        {
+                            FAPI_ERR( "mss_draminit_cloned: Error setting up buffers for DPHY01_DDRPHY_PC_RANK_GROUP_P1");
+                            rc_buff.setEcmdError(rc_num);
+                            return rc_buff;
+                        }
+                        rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P1_0x8001C0110301143F, data_buffer_64);
+                        if(rc) return rc;
+                    }
+                    if ( ( ( address_mirror_map[port_number][sec_dimm] & (0x08 >> sec_dimm_rank) ) ) && (secondary_ranks_array[rank_pair_group][port_number] != 0xff ) )
+                    {
+                        FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
+                        bit_position = 2 * rank_pair_group + 49;
+                        FAPI_INF( "Setting bit %d", bit_position);
+                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P1_0x8001C0110301143F, data_buffer_64);
+                        if(rc) return rc;
+                        rc_num = rc_num | data_buffer_64.setBit(bit_position);
+                        if (rc_num)
+                        {
+                            FAPI_ERR( "mss_draminit_cloned: Error setting up buffers for DPHY01_DDRPHY_PC_RANK_GROUP_P1");
+                            rc_buff.setEcmdError(rc_num);
+                            return rc_buff;
+                        }
+                        rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_P1_0x8001C0110301143F, data_buffer_64);
+                        if(rc) return rc;
+                    }
+                    if ( ( ( address_mirror_map[port_number][ter_dimm] & (0x08 >> ter_dimm_rank) ) ) && (tertiary_ranks_array[rank_pair_group][port_number] != 0xff ) )
+                    {
+                        FAPI_INF( "Address Mirroring on %s PORT%d RANKPAIR%d RANK%d", i_target.toEcmdString(), port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
+                        bit_position = 2 * rank_pair_group + 48;
+                        FAPI_INF( "Setting bit %d", bit_position);
+                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P1_0x8001C0350301143F, data_buffer_64);
+                        if(rc) return rc;
+                        rc_num = rc_num | data_buffer_64.setBit(bit_position);
+                        if (rc_num)
+                        {
+                            FAPI_ERR( "mss_draminit_cloned: Error setting up buffers for DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P1");
+                            rc_buff.setEcmdError(rc_num);
+                            return rc_buff;
+                        }
+                        rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P1_0x8001C0350301143F, data_buffer_64);
+                        if(rc) return rc;
+                    }
+                    if ( ( ( address_mirror_map[port_number][qua_dimm] & (0x08 >> qua_dimm_rank) ) ) && (quaternary_ranks_array[rank_pair_group][port_number] != 0xff ) )
+                    {
+                        FAPI_INF( "Address Mirroring on PORT%d RANKPAIR%d RANK%d", port_number, rank_pair_group, primary_ranks_array[rank_pair_group][port_number]);
+                        bit_position = 2 * rank_pair_group + 49;
+                        FAPI_INF( "Setting bit %d", bit_position);
+                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P1_0x8001C0350301143F, data_buffer_64);
+                        if(rc) return rc;
+                        rc_num = rc_num | data_buffer_64.setBit(bit_position);
+                        if (rc_num)
+                        {
+                            FAPI_ERR( "mss_draminit_cloned: Error setting up buffers for DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P1");
+                            rc_buff.setEcmdError(rc_num);
+                            return rc_buff;
+                        }
+                        rc = fapiPutScom(i_target, DPHY01_DDRPHY_PC_RANK_GROUP_EXT_P1_0x8001C0350301143F, data_buffer_64);
+                        if(rc) return rc;
+                    }
+                }
 
-	    }
-	}
+            }
+        }
     }
 
         //Commented because Master Attention Reg Check not written yet.
@@ -529,7 +616,7 @@ ReturnCode mss_draminit_cloned(Target& i_target)
         }
 
         rc = fapiDelay(DELAY_100US, DELAY_2000SIMCYCLES); // wait 2000 simcycles (in sim mode) OR 100 uS (in hw mode)
-	if(rc) return rc;
+        if(rc) return rc;
 
         rc = mss_assert_resetn(i_target, 1 ); // de-assert a reset
         if(rc)
@@ -544,7 +631,7 @@ ReturnCode mss_draminit_cloned(Target& i_target)
             if (!((dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_UDIMM)||(dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_CDIMM)))
             {
                 // Step three: Load RCD Control Words
-                if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4) 
+                if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
                 {
                    rc = mss_rcd_load_ddr4(i_target, port_number, ccs_inst_cnt);
                    if(rc)
@@ -564,7 +651,7 @@ ReturnCode mss_draminit_cloned(Target& i_target)
                    }
 
                 }
-                else 
+                else
                 {
                    rc = mss_rcd_load(i_target, port_number, ccs_inst_cnt);
                    if(rc)
@@ -583,11 +670,21 @@ ReturnCode mss_draminit_cloned(Target& i_target)
                           return rc;
                       }
                    }
-                } 
+                }
             }
         }
 
-       	rc = fapiDelay(DELAY_500US, DELAY_10000000SIMCYCLES); // wait 10000 simcycles (in sim mode) OR 500 uS (in hw mode)
+        rc = fapiDelay(DELAY_500US, DELAY_10000000SIMCYCLES); // wait 10000 simcycles (in sim mode) OR 500 uS (in hw mode)
+
+        if(rc)
+        {
+            FAPI_ERR(" Delay Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
+            return rc;
+        }
+
+
+
+
 
         // Cycle through Ports...
         // Ports 0-1
@@ -595,31 +692,31 @@ ReturnCode mss_draminit_cloned(Target& i_target)
         {
 
             // Step four: Load MRS Setting
-	    if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3)
-	    {
-		    rc = mss_mrs_load(i_target, port_number, ccs_inst_cnt);
-		    if(rc)
-		    {
-		        FAPI_ERR(" mrs_load Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
-		        return rc;
-		    }
-	    }
-	    else
-	    {
-		    rc = mss_mrs_load_ddr4(i_target, port_number, ccs_inst_cnt);
-		    if(rc)
-		    {
-		        FAPI_ERR(" mrs_load_ddr4 Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
-		        return rc;
-		    }
-	    }
+            if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3)
+            {
+                    rc = mss_mrs_load(i_target, port_number, ccs_inst_cnt);
+                    if(rc)
+                    {
+                        FAPI_ERR(" mrs_load Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
+                        return rc;
+                    }
+            }
+            else
+            {
+                    rc = mss_mrs_load_ddr4(i_target, port_number, ccs_inst_cnt);
+                    if(rc)
+                    {
+                        FAPI_ERR(" mrs_load_ddr4 Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
+                        return rc;
+                    }
+            }
 
         }
 
         // Execute the contents of CCS array
         if (ccs_inst_cnt  > 0)
         {
-	    // Set the End bit on the last CCS Instruction
+            // Set the End bit on the last CCS Instruction
             rc = mss_ccs_set_end_bit( i_target, ccs_inst_cnt-1);
             if(rc)
             {
@@ -646,466 +743,802 @@ ReturnCode mss_draminit_cloned(Target& i_target)
         for ( port_number = 0; port_number < MAX_NUM_PORTS; port_number++)
         {
 
-	for ( rank_pair_group = 0; rank_pair_group < MAX_NUM_RANK_PAIR; rank_pair_group++)
-	{
-	//Check if rank group exists
-	    if((primary_ranks_array[rank_pair_group][0] != INVALID) || (primary_ranks_array[rank_pair_group][1] != INVALID))
-	    {
+        for ( rank_pair_group = 0; rank_pair_group < MAX_NUM_RANK_PAIR; rank_pair_group++)
+        {
+        //Check if rank group exists
+            if((primary_ranks_array[rank_pair_group][0] != INVALID) || (primary_ranks_array[rank_pair_group][1] != INVALID))
+            {
 
-		if (port_number == 0)
-		{
-	    		// Get contents of MRS Shadow Regs and Print it to output
-			if (rank_pair_group == 0)
-			{
-		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_PRI_RP0_P0_0x8000C01C0301143F, data_buffer_64);
+                if (port_number == 0)
+                {
+                        // Get contents of MRS Shadow Regs and Print it to output
+                        if (rank_pair_group == 0)
+                        {
+                                rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_PRI_RP0_P0_0x8000C01C0301143F, data_buffer_64);
                                 if(rc) return rc;
-		    		rc_num = rc_num | data_buffer_64.reverse();
-		    		rc_num = rc_num | mrs0.insert(data_buffer_64, 0, 16);
-		    		rc_num = rc_num | mrs0.extractPreserve(&MRS0, 0, 16, 0);
-		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS0 );
+                                rc_num = rc_num | data_buffer_64.reverse();
+                                rc_num = rc_num | mrs0.insert(data_buffer_64, 0, 16);
+                                rc_num = rc_num | mrs0.extractPreserve(&MRS0, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                                FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS0 );
 
-		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_PRI_RP0_P0_0x8000C01D0301143F, data_buffer_64);
+                                rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_PRI_RP0_P0_0x8000C01D0301143F, data_buffer_64);
                                 if(rc) return rc;
-		    		rc_num = rc_num | data_buffer_64.reverse();
-		    		rc_num = rc_num | mrs1.insert(data_buffer_64, 0, 16);
-		    		rc_num = rc_num | mrs1.extractPreserve(&MRS1, 0, 16, 0);
-		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS1);
+                                rc_num = rc_num | data_buffer_64.reverse();
+                                rc_num = rc_num | mrs1.insert(data_buffer_64, 0, 16);
+                                rc_num = rc_num | mrs1.extractPreserve(&MRS1, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                                FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS1);
 
-		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_PRI_RP0_P0_0x8000C01E0301143F, data_buffer_64);
+                                rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_PRI_RP0_P0_0x8000C01E0301143F, data_buffer_64);
                                 if(rc) return rc;
-		    		rc_num = rc_num | data_buffer_64.reverse();
-		    		rc_num = rc_num | mrs2.insert(data_buffer_64, 0, 16);
-		    		rc_num = rc_num | mrs2.extractPreserve(&MRS2, 0, 16, 0);
-		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS2);
+                                rc_num = rc_num | data_buffer_64.reverse();
+                                rc_num = rc_num | mrs2.insert(data_buffer_64, 0, 16);
+                                rc_num = rc_num | mrs2.extractPreserve(&MRS2, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                                FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS2);
 
-		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR3_PRI_RP0_P0_0x8000C01F0301143F, data_buffer_64);
+                                rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR3_PRI_RP0_P0_0x8000C01F0301143F, data_buffer_64);
                                 if(rc) return rc;
-		    		rc_num = rc_num | data_buffer_64.reverse();
-		    		rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
-		    		rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
-		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
+                                rc_num = rc_num | data_buffer_64.reverse();
+                                rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
+                                rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                                FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
 
-				if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
-				{
-			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_SEC_RP0_P0_0x8000C0200301143F, data_buffer_64);
-                                	if(rc) return rc;
-			    		rc_num = rc_num | data_buffer_64.reverse();
-			    		rc_num = rc_num | mrs4.insert(data_buffer_64, 0, 16);
-			    		rc_num = rc_num | mrs4.extractPreserve(&MRS4, 0, 16, 0);
-			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 4 RP %d VALUE: 0x%04X",  i_target.toEcmdString(),  port_number, rank_pair_group, MRS4);
+                                if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+                                {
+                                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_SEC_RP0_P0_0x8000C0200301143F, data_buffer_64);
+                                        if(rc) return rc;
+                                        rc_num = rc_num | data_buffer_64.reverse();
+                                        rc_num = rc_num | mrs4.insert(data_buffer_64, 0, 16);
+                                        rc_num = rc_num | mrs4.extractPreserve(&MRS4, 0, 16, 0);
+                                        if (rc_num)
+                                        {
+                                            FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                            rc_buff.setEcmdError(rc_num);
+                                            return rc_buff;
+                                        }
+                                        FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 4 RP %d VALUE: 0x%04X",  i_target.toEcmdString(),  port_number, rank_pair_group, MRS4);
 
-			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_SEC_RP0_P0_0x8000C0210301143F, data_buffer_64);
-                                	if(rc) return rc;
-			    		rc_num = rc_num | data_buffer_64.reverse();
-			    		rc_num = rc_num | mrs5.insert(data_buffer_64, 0, 16);
-			    		rc_num = rc_num | mrs5.extractPreserve(&MRS5, 0, 16, 0);
-			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 5 RP %d VALUE: 0x%04X",  i_target.toEcmdString(),  port_number, rank_pair_group, MRS5);
+                                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_SEC_RP0_P0_0x8000C0210301143F, data_buffer_64);
+                                        if(rc) return rc;
+                                        rc_num = rc_num | data_buffer_64.reverse();
+                                        rc_num = rc_num | mrs5.insert(data_buffer_64, 0, 16);
+                                        rc_num = rc_num | mrs5.extractPreserve(&MRS5, 0, 16, 0);
+                                        if (rc_num)
+                                        {
+                                            FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                            rc_buff.setEcmdError(rc_num);
+                                            return rc_buff;
+                                        }
+                                        FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 5 RP %d VALUE: 0x%04X",  i_target.toEcmdString(),  port_number, rank_pair_group, MRS5);
 
-			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_SEC_RP0_P0_0x8000C0220301143F, data_buffer_64);
-                                	if(rc) return rc;
-			    		rc_num = rc_num | data_buffer_64.reverse();
-			    		rc_num = rc_num | mrs6.insert(data_buffer_64, 0, 16);
-			    		rc_num = rc_num | mrs6.extractPreserve(&MRS6, 0, 16, 0);
-			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 6 RP %d VALUE: 0x%04X",  i_target.toEcmdString(),  port_number, rank_pair_group, MRS6);
-				}
+                                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_SEC_RP0_P0_0x8000C0220301143F, data_buffer_64);
+                                        if(rc) return rc;
+                                        rc_num = rc_num | data_buffer_64.reverse();
+                                        rc_num = rc_num | mrs6.insert(data_buffer_64, 0, 16);
+                                        rc_num = rc_num | mrs6.extractPreserve(&MRS6, 0, 16, 0);
+                                        if (rc_num)
+                                        {
+                                            FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                            rc_buff.setEcmdError(rc_num);
+                                            return rc_buff;
+                                        }
+                                        FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 6 RP %d VALUE: 0x%04X",  i_target.toEcmdString(),  port_number, rank_pair_group, MRS6);
+                                }
 
-			}
-			else if (rank_pair_group == 1)
-			{
-		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_PRI_RP1_P0_0x8000C11C0301143F, data_buffer_64);
+                        }
+                        else if (rank_pair_group == 1)
+                        {
+                                rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_PRI_RP1_P0_0x8000C11C0301143F, data_buffer_64);
                                 if(rc) return rc;
-		    		rc_num = rc_num | data_buffer_64.reverse();
-		    		rc_num = rc_num | mrs0.insert(data_buffer_64, 0, 16);
-		    		rc_num = rc_num | mrs0.extractPreserve(&MRS0, 0, 16, 0);
-		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS0);
+                                rc_num = rc_num | data_buffer_64.reverse();
+                                rc_num = rc_num | mrs0.insert(data_buffer_64, 0, 16);
+                                rc_num = rc_num | mrs0.extractPreserve(&MRS0, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                                FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS0);
 
-		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_PRI_RP1_P0_0x8000C11D0301143F, data_buffer_64);
+                                rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_PRI_RP1_P0_0x8000C11D0301143F, data_buffer_64);
                                 if(rc) return rc;
-		    		rc_num = rc_num | data_buffer_64.reverse();
-		    		rc_num = rc_num | mrs1.insert(data_buffer_64, 0, 16);
-		    		rc_num = rc_num | mrs1.extractPreserve(&MRS1, 0, 16, 0);
-		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS1);
+                                rc_num = rc_num | data_buffer_64.reverse();
+                                rc_num = rc_num | mrs1.insert(data_buffer_64, 0, 16);
+                                rc_num = rc_num | mrs1.extractPreserve(&MRS1, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                                FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS1);
 
-		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_PRI_RP1_P0_0x8000C11E0301143F, data_buffer_64);
+                                rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_PRI_RP1_P0_0x8000C11E0301143F, data_buffer_64);
                                 if(rc) return rc;
-		    		rc_num = rc_num | data_buffer_64.reverse();
-		    		rc_num = rc_num | mrs2.insert(data_buffer_64, 0, 16);
-		    		rc_num = rc_num | mrs2.extractPreserve(&MRS2, 0, 16, 0);
-		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS2);
+                                rc_num = rc_num | data_buffer_64.reverse();
+                                rc_num = rc_num | mrs2.insert(data_buffer_64, 0, 16);
+                                rc_num = rc_num | mrs2.extractPreserve(&MRS2, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                                FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS2);
 
-		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR3_PRI_RP1_P0_0x8000C11F0301143F, data_buffer_64);
+                                rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR3_PRI_RP1_P0_0x8000C11F0301143F, data_buffer_64);
                                 if(rc) return rc;
-		    		rc_num = rc_num | data_buffer_64.reverse();
-		    		rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
-		    		rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
-		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
+                                rc_num = rc_num | data_buffer_64.reverse();
+                                rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
+                                rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                                FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
 
-				if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
-				{
-			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_SEC_RP1_P0_0x8000C1200301143F, data_buffer_64);
-                                	if(rc) return rc;
-			    		rc_num = rc_num | data_buffer_64.reverse();
-			    		rc_num = rc_num | mrs4.insert(data_buffer_64, 0, 16);
-			    		rc_num = rc_num | mrs4.extractPreserve(&MRS4, 0, 16, 0);
-			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 4 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS4);
+                                if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+                                {
+                                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_SEC_RP1_P0_0x8000C1200301143F, data_buffer_64);
+                                        if(rc) return rc;
+                                        rc_num = rc_num | data_buffer_64.reverse();
+                                        rc_num = rc_num | mrs4.insert(data_buffer_64, 0, 16);
+                                        rc_num = rc_num | mrs4.extractPreserve(&MRS4, 0, 16, 0);
+                                        if (rc_num)
+                                        {
+                                            FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                            rc_buff.setEcmdError(rc_num);
+                                            return rc_buff;
+                                        }
+                                        FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 4 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS4);
 
-			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_SEC_RP1_P0_0x8000C1210301143F, data_buffer_64);
-                                	if(rc) return rc;
-			    		rc_num = rc_num | data_buffer_64.reverse();
-			    		rc_num = rc_num | mrs5.insert(data_buffer_64, 0, 16);
-			    		rc_num = rc_num | mrs5.extractPreserve(&MRS5, 0, 16, 0);
-			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 5 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS5);
+                                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_SEC_RP1_P0_0x8000C1210301143F, data_buffer_64);
+                                        if(rc) return rc;
+                                        rc_num = rc_num | data_buffer_64.reverse();
+                                        rc_num = rc_num | mrs5.insert(data_buffer_64, 0, 16);
+                                        rc_num = rc_num | mrs5.extractPreserve(&MRS5, 0, 16, 0);
+                                        if (rc_num)
+                                        {
+                                            FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                            rc_buff.setEcmdError(rc_num);
+                                            return rc_buff;
+                                        }
+                                        FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 5 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS5);
 
-			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_SEC_RP1_P0_0x8000C1220301143F, data_buffer_64);
-                                	if(rc) return rc;
-			    		rc_num = rc_num | data_buffer_64.reverse();
-			    		rc_num = rc_num | mrs6.insert(data_buffer_64, 0, 16);
-			    		rc_num = rc_num | mrs6.extractPreserve(&MRS6, 0, 16, 0);
-			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 6 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS6);
-				}
+                                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_SEC_RP1_P0_0x8000C1220301143F, data_buffer_64);
+                                        if(rc) return rc;
+                                        rc_num = rc_num | data_buffer_64.reverse();
+                                        rc_num = rc_num | mrs6.insert(data_buffer_64, 0, 16);
+                                        rc_num = rc_num | mrs6.extractPreserve(&MRS6, 0, 16, 0);
+                                        if (rc_num)
+                                        {
+                                            FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                            rc_buff.setEcmdError(rc_num);
+                                            return rc_buff;
+                                        }
+                                        FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 6 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS6);
+                                }
 
-			}
-			else if (rank_pair_group == 2)
-			{
-		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_PRI_RP2_P0_0x8000C21C0301143F, data_buffer_64);
+                        }
+                        else if (rank_pair_group == 2)
+                        {
+                               rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_PRI_RP2_P0_0x8000C21C0301143F, data_buffer_64);
                                if(rc) return rc;
-		   	       rc_num = rc_num | data_buffer_64.reverse();
-		   	       rc_num = rc_num | mrs0.insert(data_buffer_64, 0, 16);
-		   	       rc_num = rc_num | mrs0.extractPreserve(&MRS0, 0, 16, 0);
-		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS0);
+                               rc_num = rc_num | data_buffer_64.reverse();
+                               rc_num = rc_num | mrs0.insert(data_buffer_64, 0, 16);
+                               rc_num = rc_num | mrs0.extractPreserve(&MRS0, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                               FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS0);
 
-		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_PRI_RP2_P0_0x8000C21D0301143F, data_buffer_64);
+                               rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_PRI_RP2_P0_0x8000C21D0301143F, data_buffer_64);
                                if(rc) return rc;
-		   	       rc_num = rc_num | data_buffer_64.reverse();
-		   	       rc_num = rc_num | mrs1.insert(data_buffer_64, 0, 16);
-		   	       rc_num = rc_num | mrs1.extractPreserve(&MRS1, 0, 16, 0);
-		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS1);
+                               rc_num = rc_num | data_buffer_64.reverse();
+                               rc_num = rc_num | mrs1.insert(data_buffer_64, 0, 16);
+                               rc_num = rc_num | mrs1.extractPreserve(&MRS1, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                               FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS1);
 
-		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_PRI_RP2_P0_0x8000C21E0301143F, data_buffer_64);
+                               rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_PRI_RP2_P0_0x8000C21E0301143F, data_buffer_64);
                                if(rc) return rc;
-		   	       rc_num = rc_num | data_buffer_64.reverse();
-		   	       rc_num = rc_num | mrs2.insert(data_buffer_64, 0, 16);
-		   	       rc_num = rc_num | mrs2.extractPreserve(&MRS2, 0, 16, 0);
-		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS2);
+                               rc_num = rc_num | data_buffer_64.reverse();
+                               rc_num = rc_num | mrs2.insert(data_buffer_64, 0, 16);
+                               rc_num = rc_num | mrs2.extractPreserve(&MRS2, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                               FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS2);
 
-		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR3_PRI_RP2_P0_0x8000C21F0301143F, data_buffer_64);
+                               rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR3_PRI_RP2_P0_0x8000C21F0301143F, data_buffer_64);
                                if(rc) return rc;
-		   	       rc_num = rc_num | data_buffer_64.reverse();
-		   	       rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
-		   	       rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
-		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
+                               rc_num = rc_num | data_buffer_64.reverse();
+                               rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
+                               rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                               FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
 
-				if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
-				{
-			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_SEC_RP2_P0_0x8000C2200301143F, data_buffer_64);
-                                	if(rc) return rc;
-			    		rc_num = rc_num | data_buffer_64.reverse();
-			    		rc_num = rc_num | mrs4.insert(data_buffer_64, 0, 16);
-			    		rc_num = rc_num | mrs4.extractPreserve(&MRS4, 0, 16, 0);
-			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 4 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS4);
+                                if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+                                {
+                                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_SEC_RP2_P0_0x8000C2200301143F, data_buffer_64);
+                                        if(rc) return rc;
+                                        rc_num = rc_num | data_buffer_64.reverse();
+                                        rc_num = rc_num | mrs4.insert(data_buffer_64, 0, 16);
+                                        rc_num = rc_num | mrs4.extractPreserve(&MRS4, 0, 16, 0);
+                                        if (rc_num)
+                                        {
+                                            FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                            rc_buff.setEcmdError(rc_num);
+                                            return rc_buff;
+                                        }
+                                        FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 4 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS4);
 
-			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_SEC_RP2_P0_0x8000C2210301143F, data_buffer_64);
-                                	if(rc) return rc;
-			    		rc_num = rc_num | data_buffer_64.reverse();
-			    		rc_num = rc_num | mrs5.insert(data_buffer_64, 0, 16);
-			    		rc_num = rc_num | mrs5.extractPreserve(&MRS5, 0, 16, 0);
-			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 5 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS5);
+                                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_SEC_RP2_P0_0x8000C2210301143F, data_buffer_64);
+                                        if(rc) return rc;
+                                        rc_num = rc_num | data_buffer_64.reverse();
+                                        rc_num = rc_num | mrs5.insert(data_buffer_64, 0, 16);
+                                        rc_num = rc_num | mrs5.extractPreserve(&MRS5, 0, 16, 0);
+                                        if (rc_num)
+                                        {
+                                            FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                            rc_buff.setEcmdError(rc_num);
+                                            return rc_buff;
+                                        }
+                                        FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 5 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS5);
 
-			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_SEC_RP2_P0_0x8000C2220301143F, data_buffer_64);
-                                	if(rc) return rc;
-			    		rc_num = rc_num | data_buffer_64.reverse();
-			    		rc_num = rc_num | mrs6.insert(data_buffer_64, 0, 16);
-			    		rc_num = rc_num | mrs6.extractPreserve(&MRS6, 0, 16, 0);
-			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 6 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS6);
-				}
+                                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_SEC_RP2_P0_0x8000C2220301143F, data_buffer_64);
+                                        if(rc) return rc;
+                                        rc_num = rc_num | data_buffer_64.reverse();
+                                        rc_num = rc_num | mrs6.insert(data_buffer_64, 0, 16);
+                                        rc_num = rc_num | mrs6.extractPreserve(&MRS6, 0, 16, 0);
+                                        if (rc_num)
+                                        {
+                                            FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                            rc_buff.setEcmdError(rc_num);
+                                            return rc_buff;
+                                        }
+                                        FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 6 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS6);
+                                }
 
-			}
-			else if (rank_pair_group == 3)
-			{
-		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_PRI_RP3_P0_0x8000C31C0301143F, data_buffer_64);
+                        }
+                        else if (rank_pair_group == 3)
+                        {
+                               rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_PRI_RP3_P0_0x8000C31C0301143F, data_buffer_64);
                                if(rc) return rc;
-		   	       rc_num = rc_num | data_buffer_64.reverse();
-		   	       rc_num = rc_num | mrs0.insert(data_buffer_64, 0, 16);
-		   	       rc_num = rc_num | mrs0.extractPreserve(&MRS0, 0, 16, 0);
-		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X", i_target.toEcmdString(),  port_number, rank_pair_group, MRS0);
+                               rc_num = rc_num | data_buffer_64.reverse();
+                               rc_num = rc_num | mrs0.insert(data_buffer_64, 0, 16);
+                               rc_num = rc_num | mrs0.extractPreserve(&MRS0, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                               FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X", i_target.toEcmdString(),  port_number, rank_pair_group, MRS0);
 
-		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_PRI_RP3_P0_0x8000C31D0301143F, data_buffer_64);
+                               rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_PRI_RP3_P0_0x8000C31D0301143F, data_buffer_64);
                                if(rc) return rc;
-		   	       rc_num = rc_num | data_buffer_64.reverse();
-		   	       rc_num = rc_num | mrs1.insert(data_buffer_64, 0, 16);
-		   	       rc_num = rc_num | mrs1.extractPreserve(&MRS1, 0, 16, 0);
-		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS1);
+                               rc_num = rc_num | data_buffer_64.reverse();
+                               rc_num = rc_num | mrs1.insert(data_buffer_64, 0, 16);
+                               rc_num = rc_num | mrs1.extractPreserve(&MRS1, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                               FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS1);
 
-		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_PRI_RP3_P0_0x8000C31E0301143F, data_buffer_64);
+                               rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_PRI_RP3_P0_0x8000C31E0301143F, data_buffer_64);
                                if(rc) return rc;
-		   	       rc_num = rc_num | data_buffer_64.reverse();
-		   	       rc_num = rc_num | mrs2.insert(data_buffer_64, 0, 16);
-		   	       rc_num = rc_num | mrs2.extractPreserve(&MRS2, 0, 16, 0);
-		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS2);
+                               rc_num = rc_num | data_buffer_64.reverse();
+                               rc_num = rc_num | mrs2.insert(data_buffer_64, 0, 16);
+                               rc_num = rc_num | mrs2.extractPreserve(&MRS2, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                               FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS2);
 
-		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR3_PRI_RP3_P0_0x8000C31F0301143F, data_buffer_64);
+                               rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR3_PRI_RP3_P0_0x8000C31F0301143F, data_buffer_64);
                                if(rc) return rc;
-		   	       rc_num = rc_num | data_buffer_64.reverse();
-		   	       rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
-		   	       rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
-		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
+                               rc_num = rc_num | data_buffer_64.reverse();
+                               rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
+                               rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                               FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
 
-				if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
-				{
-			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_SEC_RP3_P0_0x8000C3200301143F, data_buffer_64);
-                                	if(rc) return rc;
-			    		rc_num = rc_num | data_buffer_64.reverse();
-			    		rc_num = rc_num | mrs4.insert(data_buffer_64, 0, 16);
-			    		rc_num = rc_num | mrs4.extractPreserve(&MRS4, 0, 16, 0);
-			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 4 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS4);
+                                if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+                                {
+                                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_SEC_RP3_P0_0x8000C3200301143F, data_buffer_64);
+                                        if(rc) return rc;
+                                        rc_num = rc_num | data_buffer_64.reverse();
+                                        rc_num = rc_num | mrs4.insert(data_buffer_64, 0, 16);
+                                        rc_num = rc_num | mrs4.extractPreserve(&MRS4, 0, 16, 0);
+                                        if (rc_num)
+                                        {
+                                            FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                            rc_buff.setEcmdError(rc_num);
+                                            return rc_buff;
+                                        }
+                                        FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 4 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS4);
 
-			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_SEC_RP3_P0_0x8000C3210301143F, data_buffer_64);
-                                	if(rc) return rc;
-			    		rc_num = rc_num | data_buffer_64.reverse();
-			    		rc_num = rc_num | mrs5.insert(data_buffer_64, 0, 16);
-			    		rc_num = rc_num | mrs5.extractPreserve(&MRS5, 0, 16, 0);
-			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 5 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS5);
+                                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_SEC_RP3_P0_0x8000C3210301143F, data_buffer_64);
+                                        if(rc) return rc;
+                                        rc_num = rc_num | data_buffer_64.reverse();
+                                        rc_num = rc_num | mrs5.insert(data_buffer_64, 0, 16);
+                                        rc_num = rc_num | mrs5.extractPreserve(&MRS5, 0, 16, 0);
+                                        if (rc_num)
+                                        {
+                                            FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                            rc_buff.setEcmdError(rc_num);
+                                            return rc_buff;
+                                        }
+                                        FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 5 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS5);
 
-			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_SEC_RP3_P0_0x8000C3220301143F, data_buffer_64);
-                                	if(rc) return rc;
-			    		rc_num = rc_num | data_buffer_64.reverse();
-			    		rc_num = rc_num | mrs6.insert(data_buffer_64, 0, 16);
-			    		rc_num = rc_num | mrs6.extractPreserve(&MRS6, 0, 16, 0);
-			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 6 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS6);
-				}
+                                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_SEC_RP3_P0_0x8000C3220301143F, data_buffer_64);
+                                        if(rc) return rc;
+                                        rc_num = rc_num | data_buffer_64.reverse();
+                                        rc_num = rc_num | mrs6.insert(data_buffer_64, 0, 16);
+                                        rc_num = rc_num | mrs6.extractPreserve(&MRS6, 0, 16, 0);
+                                        if (rc_num)
+                                        {
+                                            FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                            rc_buff.setEcmdError(rc_num);
+                                            return rc_buff;
+                                        }
+                                        FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 6 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS6);
+                                }
 
-			}
-		}
-		else if (port_number == 1)
-		{
-			if (rank_pair_group == 0)
-			{
-		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_PRI_RP0_P1_0x8001C01C0301143F, data_buffer_64);
+                        }
+                }
+                else if (port_number == 1)
+                {
+                        if (rank_pair_group == 0)
+                        {
+                                rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_PRI_RP0_P1_0x8001C01C0301143F, data_buffer_64);
                                 if(rc) return rc;
-		    		rc_num = rc_num | data_buffer_64.reverse();
-		    		rc_num = rc_num | mrs0.insert(data_buffer_64, 0, 16);
-		    		rc_num = rc_num | mrs0.extractPreserve(&MRS0, 0, 16, 0);
-		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS0 );
+                                rc_num = rc_num | data_buffer_64.reverse();
+                                rc_num = rc_num | mrs0.insert(data_buffer_64, 0, 16);
+                                rc_num = rc_num | mrs0.extractPreserve(&MRS0, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                                FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS0 );
 
-		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_PRI_RP0_P1_0x8001C01D0301143F, data_buffer_64);
+                                rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_PRI_RP0_P1_0x8001C01D0301143F, data_buffer_64);
                                 if(rc) return rc;
-		    		rc_num = rc_num | data_buffer_64.reverse();
-		    		rc_num = rc_num | mrs1.insert(data_buffer_64, 0, 16);
-		    		rc_num = rc_num | mrs1.extractPreserve(&MRS1, 0, 16, 0);
-		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS1);
+                                rc_num = rc_num | data_buffer_64.reverse();
+                                rc_num = rc_num | mrs1.insert(data_buffer_64, 0, 16);
+                                rc_num = rc_num | mrs1.extractPreserve(&MRS1, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                                FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS1);
 
-		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_PRI_RP0_P1_0x8001C01E0301143F, data_buffer_64);
+                                rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_PRI_RP0_P1_0x8001C01E0301143F, data_buffer_64);
                                 if(rc) return rc;
-		    		rc_num = rc_num | data_buffer_64.reverse();
-		    		rc_num = rc_num | mrs2.insert(data_buffer_64, 0, 16);
-		    		rc_num = rc_num | mrs2.extractPreserve(&MRS2, 0, 16, 0);
-		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS2);
+                                rc_num = rc_num | data_buffer_64.reverse();
+                                rc_num = rc_num | mrs2.insert(data_buffer_64, 0, 16);
+                                rc_num = rc_num | mrs2.extractPreserve(&MRS2, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                                FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS2);
 
-		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR3_PRI_RP0_P1_0x8001C01F0301143F, data_buffer_64);
+                                rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR3_PRI_RP0_P1_0x8001C01F0301143F, data_buffer_64);
                                 if(rc) return rc;
-		    		rc_num = rc_num | data_buffer_64.reverse();
-		    		rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
-		    		rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
-		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
+                                rc_num = rc_num | data_buffer_64.reverse();
+                                rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
+                                rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                                FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
 
-				if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
-				{
-			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_SEC_RP0_P1_0x8001C0200301143F, data_buffer_64);
-                                	if(rc) return rc;
-			    		rc_num = rc_num | data_buffer_64.reverse();
-			    		rc_num = rc_num | mrs4.insert(data_buffer_64, 0, 16);
-			    		rc_num = rc_num | mrs4.extractPreserve(&MRS4, 0, 16, 0);
-			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 4 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS4);
+                                if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+                                {
+                                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_SEC_RP0_P1_0x8001C0200301143F, data_buffer_64);
+                                        if(rc) return rc;
+                                        rc_num = rc_num | data_buffer_64.reverse();
+                                        rc_num = rc_num | mrs4.insert(data_buffer_64, 0, 16);
+                                        rc_num = rc_num | mrs4.extractPreserve(&MRS4, 0, 16, 0);
+                                        if (rc_num)
+                                        {
+                                            FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                            rc_buff.setEcmdError(rc_num);
+                                            return rc_buff;
+                                        }
+                                        FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 4 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS4);
 
-			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_SEC_RP0_P1_0x8001C0210301143F, data_buffer_64);
-                                	if(rc) return rc;
-			    		rc_num = rc_num | data_buffer_64.reverse();
-			    		rc_num = rc_num | mrs5.insert(data_buffer_64, 0, 16);
-			    		rc_num = rc_num | mrs5.extractPreserve(&MRS5, 0, 16, 0);
-			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 5 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS5);
+                                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_SEC_RP0_P1_0x8001C0210301143F, data_buffer_64);
+                                        if(rc) return rc;
+                                        rc_num = rc_num | data_buffer_64.reverse();
+                                        rc_num = rc_num | mrs5.insert(data_buffer_64, 0, 16);
+                                        rc_num = rc_num | mrs5.extractPreserve(&MRS5, 0, 16, 0);
+                                        if (rc_num)
+                                        {
+                                            FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                            rc_buff.setEcmdError(rc_num);
+                                            return rc_buff;
+                                        }
+                                        FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 5 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS5);
 
-			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_SEC_RP0_P1_0x8001C0220301143F, data_buffer_64);
-                                	if(rc) return rc;
-			    		rc_num = rc_num | data_buffer_64.reverse();
-			    		rc_num = rc_num | mrs6.insert(data_buffer_64, 0, 16);
-			    		rc_num = rc_num | mrs6.extractPreserve(&MRS6, 0, 16, 0);
-			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 6 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS6);
-				}
+                                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_SEC_RP0_P1_0x8001C0220301143F, data_buffer_64);
+                                        if(rc) return rc;
+                                        rc_num = rc_num | data_buffer_64.reverse();
+                                        rc_num = rc_num | mrs6.insert(data_buffer_64, 0, 16);
+                                        rc_num = rc_num | mrs6.extractPreserve(&MRS6, 0, 16, 0);
+                                        if (rc_num)
+                                        {
+                                            FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                            rc_buff.setEcmdError(rc_num);
+                                            return rc_buff;
+                                        }
+                                        FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 6 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS6);
+                                }
 
-			}
-			else if (rank_pair_group == 1)
-			{
-		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_PRI_RP1_P1_0x8001C11C0301143F, data_buffer_64);
+                        }
+                        else if (rank_pair_group == 1)
+                        {
+                                rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_PRI_RP1_P1_0x8001C11C0301143F, data_buffer_64);
                                 if(rc) return rc;
-		    		rc_num = rc_num | data_buffer_64.reverse();
-		    		rc_num = rc_num | mrs0.insert(data_buffer_64, 0, 16);
-		    		rc_num = rc_num | mrs0.extractPreserve(&MRS0, 0, 16, 0);
-		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS0);
+                                rc_num = rc_num | data_buffer_64.reverse();
+                                rc_num = rc_num | mrs0.insert(data_buffer_64, 0, 16);
+                                rc_num = rc_num | mrs0.extractPreserve(&MRS0, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                                FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS0);
 
-		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_PRI_RP1_P1_0x8001C11D0301143F, data_buffer_64);
+                                rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_PRI_RP1_P1_0x8001C11D0301143F, data_buffer_64);
                                 if(rc) return rc;
-		    		rc_num = rc_num | data_buffer_64.reverse();
-		    		rc_num = rc_num | mrs1.insert(data_buffer_64, 0, 16);
-		    		rc_num = rc_num | mrs1.extractPreserve(&MRS1, 0, 16, 0);
-		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS1);
+                                rc_num = rc_num | data_buffer_64.reverse();
+                                rc_num = rc_num | mrs1.insert(data_buffer_64, 0, 16);
+                                rc_num = rc_num | mrs1.extractPreserve(&MRS1, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                                FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS1);
 
-		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_PRI_RP1_P1_0x8001C11E0301143F, data_buffer_64);
+                                rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_PRI_RP1_P1_0x8001C11E0301143F, data_buffer_64);
                                 if(rc) return rc;
-		    		rc_num = rc_num | data_buffer_64.reverse();
-		    		rc_num = rc_num | mrs2.insert(data_buffer_64, 0, 16);
-		    		rc_num = rc_num | mrs2.extractPreserve(&MRS2, 0, 16, 0);
-		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS2);
+                                rc_num = rc_num | data_buffer_64.reverse();
+                                rc_num = rc_num | mrs2.insert(data_buffer_64, 0, 16);
+                                rc_num = rc_num | mrs2.extractPreserve(&MRS2, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                                FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS2);
 
-		    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR3_PRI_RP1_P1_0x8001C11F0301143F, data_buffer_64);
+                                rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR3_PRI_RP1_P1_0x8001C11F0301143F, data_buffer_64);
                                 if(rc) return rc;
-		    		rc_num = rc_num | data_buffer_64.reverse();
-		    		rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
-		    		rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
-		    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
+                                rc_num = rc_num | data_buffer_64.reverse();
+                                rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
+                                rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                                FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
 
-				if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
-				{
-			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_SEC_RP1_P1_0x8001C1200301143F, data_buffer_64);
-                                	if(rc) return rc;
-			    		rc_num = rc_num | data_buffer_64.reverse();
-			    		rc_num = rc_num | mrs4.insert(data_buffer_64, 0, 16);
-			    		rc_num = rc_num | mrs4.extractPreserve(&MRS4, 0, 16, 0);
-			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 4 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS4);
+                                if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+                                {
+                                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_SEC_RP1_P1_0x8001C1200301143F, data_buffer_64);
+                                        if(rc) return rc;
+                                        rc_num = rc_num | data_buffer_64.reverse();
+                                        rc_num = rc_num | mrs4.insert(data_buffer_64, 0, 16);
+                                        rc_num = rc_num | mrs4.extractPreserve(&MRS4, 0, 16, 0);
+                                        if (rc_num)
+                                        {
+                                            FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                            rc_buff.setEcmdError(rc_num);
+                                            return rc_buff;
+                                        }
+                                        FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 4 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS4);
 
-			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_SEC_RP1_P1_0x8001C1210301143F, data_buffer_64);
-                                	if(rc) return rc;
-			    		rc_num = rc_num | data_buffer_64.reverse();
-			    		rc_num = rc_num | mrs5.insert(data_buffer_64, 0, 16);
-			    		rc_num = rc_num | mrs5.extractPreserve(&MRS5, 0, 16, 0);
-			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 5 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS5);
+                                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_SEC_RP1_P1_0x8001C1210301143F, data_buffer_64);
+                                        if(rc) return rc;
+                                        rc_num = rc_num | data_buffer_64.reverse();
+                                        rc_num = rc_num | mrs5.insert(data_buffer_64, 0, 16);
+                                        rc_num = rc_num | mrs5.extractPreserve(&MRS5, 0, 16, 0);
+                                        if (rc_num)
+                                        {
+                                            FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                            rc_buff.setEcmdError(rc_num);
+                                            return rc_buff;
+                                        }
+                                        FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 5 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS5);
 
-			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_SEC_RP1_P1_0x8001C1220301143F, data_buffer_64);
-                                	if(rc) return rc;
-			    		rc_num = rc_num | data_buffer_64.reverse();
-			    		rc_num = rc_num | mrs6.insert(data_buffer_64, 0, 16);
-			    		rc_num = rc_num | mrs6.extractPreserve(&MRS6, 0, 16, 0);
-			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 6 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS6);
+                                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_SEC_RP1_P1_0x8001C1220301143F, data_buffer_64);
+                                        if(rc) return rc;
+                                        rc_num = rc_num | data_buffer_64.reverse();
+                                        rc_num = rc_num | mrs6.insert(data_buffer_64, 0, 16);
+                                        rc_num = rc_num | mrs6.extractPreserve(&MRS6, 0, 16, 0);
+                                        if (rc_num)
+                                        {
+                                            FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                            rc_buff.setEcmdError(rc_num);
+                                            return rc_buff;
+                                        }
+                                        FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 6 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS6);
 
-				}
+                                }
 
-			}
-			else if (rank_pair_group == 2)
-		        {
-		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_PRI_RP2_P1_0x8001C21C0301143F, data_buffer_64);
+                        }
+                        else if (rank_pair_group == 2)
+                        {
+                               rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_PRI_RP2_P1_0x8001C21C0301143F, data_buffer_64);
                                 if(rc) return rc;
-		   	       rc_num = rc_num | data_buffer_64.reverse();
-		   	       rc_num = rc_num | mrs0.insert(data_buffer_64, 0, 16);
-		   	       rc_num = rc_num | mrs0.extractPreserve(&MRS0, 0, 16, 0);
-		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS0);
+                               rc_num = rc_num | data_buffer_64.reverse();
+                               rc_num = rc_num | mrs0.insert(data_buffer_64, 0, 16);
+                               rc_num = rc_num | mrs0.extractPreserve(&MRS0, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                               FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS0);
 
-		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_PRI_RP2_P1_0x8001C21D0301143F, data_buffer_64);
+                               rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_PRI_RP2_P1_0x8001C21D0301143F, data_buffer_64);
                                 if(rc) return rc;
-		   	       rc_num = rc_num | data_buffer_64.reverse();
-		   	       rc_num = rc_num | mrs1.insert(data_buffer_64, 0, 16);
-		   	       rc_num = rc_num | mrs1.extractPreserve(&MRS1, 0, 16, 0);
-		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS1);
+                               rc_num = rc_num | data_buffer_64.reverse();
+                               rc_num = rc_num | mrs1.insert(data_buffer_64, 0, 16);
+                               rc_num = rc_num | mrs1.extractPreserve(&MRS1, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                               FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS1);
 
-		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_PRI_RP2_P1_0x8001C21E0301143F, data_buffer_64);
+                               rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_PRI_RP2_P1_0x8001C21E0301143F, data_buffer_64);
                                 if(rc) return rc;
-		   	       rc_num = rc_num | data_buffer_64.reverse();
-		   	       rc_num = rc_num | mrs2.insert(data_buffer_64, 0, 16);
-		   	       rc_num = rc_num | mrs2.extractPreserve(&MRS2, 0, 16, 0);
-		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS2);
+                               rc_num = rc_num | data_buffer_64.reverse();
+                               rc_num = rc_num | mrs2.insert(data_buffer_64, 0, 16);
+                               rc_num = rc_num | mrs2.extractPreserve(&MRS2, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                               FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS2);
 
-		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR3_PRI_RP2_P1_0x8001C21F0301143F, data_buffer_64);
+                               rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR3_PRI_RP2_P1_0x8001C21F0301143F, data_buffer_64);
                                 if(rc) return rc;
-		   	       rc_num = rc_num | data_buffer_64.reverse();
-		   	       rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
-		   	       rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
-		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
+                               rc_num = rc_num | data_buffer_64.reverse();
+                               rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
+                               rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
+                                if (rc_num)
+                                {
+                                    FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                    rc_buff.setEcmdError(rc_num);
+                                    return rc_buff;
+                                }
+                               FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
 
-				if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
-				{
-			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_SEC_RP2_P1_0x8001C2200301143F, data_buffer_64);
-                                	if(rc) return rc;
-			    		rc_num = rc_num | data_buffer_64.reverse();
-			    		rc_num = rc_num | mrs4.insert(data_buffer_64, 0, 16);
-			    		rc_num = rc_num | mrs4.extractPreserve(&MRS4, 0, 16, 0);
-			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 4 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS4);
+                                if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+                                {
+                                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_SEC_RP2_P1_0x8001C2200301143F, data_buffer_64);
+                                        if(rc) return rc;
+                                        rc_num = rc_num | data_buffer_64.reverse();
+                                        rc_num = rc_num | mrs4.insert(data_buffer_64, 0, 16);
+                                        rc_num = rc_num | mrs4.extractPreserve(&MRS4, 0, 16, 0);
+                                        if (rc_num)
+                                        {
+                                            FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                            rc_buff.setEcmdError(rc_num);
+                                            return rc_buff;
+                                        }
+                                        FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 4 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS4);
 
-			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_SEC_RP2_P1_0x8001C2210301143F, data_buffer_64);
-                                	if(rc) return rc;
-			    		rc_num = rc_num | data_buffer_64.reverse();
-			    		rc_num = rc_num | mrs5.insert(data_buffer_64, 0, 16);
-			    		rc_num = rc_num | mrs5.extractPreserve(&MRS5, 0, 16, 0);
-			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 5 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS5);
+                                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_SEC_RP2_P1_0x8001C2210301143F, data_buffer_64);
+                                        if(rc) return rc;
+                                        rc_num = rc_num | data_buffer_64.reverse();
+                                        rc_num = rc_num | mrs5.insert(data_buffer_64, 0, 16);
+                                        rc_num = rc_num | mrs5.extractPreserve(&MRS5, 0, 16, 0);
+                                        if (rc_num)
+                                        {
+                                            FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                            rc_buff.setEcmdError(rc_num);
+                                            return rc_buff;
+                                        }
+                                        FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 5 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS5);
 
-			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_SEC_RP2_P1_0x8001C2220301143F, data_buffer_64);
-                                	if(rc) return rc;
-			    		rc_num = rc_num | data_buffer_64.reverse();
-			    		rc_num = rc_num | mrs6.insert(data_buffer_64, 0, 16);
-			    		rc_num = rc_num | mrs6.extractPreserve(&MRS6, 0, 16, 0);
-			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 6 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS6);
-				}
+                                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_SEC_RP2_P1_0x8001C2220301143F, data_buffer_64);
+                                        if(rc) return rc;
+                                        rc_num = rc_num | data_buffer_64.reverse();
+                                        rc_num = rc_num | mrs6.insert(data_buffer_64, 0, 16);
+                                        rc_num = rc_num | mrs6.extractPreserve(&MRS6, 0, 16, 0);
+                                        if (rc_num)
+                                        {
+                                            FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                            rc_buff.setEcmdError(rc_num);
+                                            return rc_buff;
+                                        }
+                                        FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 6 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS6);
+                                }
 
-			}
-			else if (rank_pair_group == 3)
-			{
-		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_PRI_RP3_P1_0x8001C31C0301143F, data_buffer_64);
+                        }
+                        else if (rank_pair_group == 3)
+                        {
+                               rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_PRI_RP3_P1_0x8001C31C0301143F, data_buffer_64);
                                 if(rc) return rc;
-		   	       rc_num = rc_num | data_buffer_64.reverse();
-		   	       rc_num = rc_num | mrs0.insert(data_buffer_64, 0, 16);
-		   	       rc_num = rc_num | mrs0.extractPreserve(&MRS0, 0, 16, 0);
-		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS0);
+                               rc_num = rc_num | data_buffer_64.reverse();
+                               rc_num = rc_num | mrs0.insert(data_buffer_64, 0, 16);
+                               rc_num = rc_num | mrs0.extractPreserve(&MRS0, 0, 16, 0);
+                               if (rc_num)
+                               {
+                                   FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                   rc_buff.setEcmdError(rc_num);
+                                   return rc_buff;
+                               }
+                               FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 0 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS0);
 
-		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_PRI_RP3_P1_0x8001C31D0301143F, data_buffer_64);
+                               rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_PRI_RP3_P1_0x8001C31D0301143F, data_buffer_64);
                                 if(rc) return rc;
-		   	       rc_num = rc_num | data_buffer_64.reverse();
-		   	       rc_num = rc_num | mrs1.insert(data_buffer_64, 0, 16);
-		   	       rc_num = rc_num | mrs1.extractPreserve(&MRS1, 0, 16, 0);
-		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS1);
+                               rc_num = rc_num | data_buffer_64.reverse();
+                               rc_num = rc_num | mrs1.insert(data_buffer_64, 0, 16);
+                               rc_num = rc_num | mrs1.extractPreserve(&MRS1, 0, 16, 0);
+                               if (rc_num)
+                               {
+                                   FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                   rc_buff.setEcmdError(rc_num);
+                                   return rc_buff;
+                               }
+                               FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 1 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS1);
 
-		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_PRI_RP3_P1_0x8001C31E0301143F, data_buffer_64);
+                               rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_PRI_RP3_P1_0x8001C31E0301143F, data_buffer_64);
                                 if(rc) return rc;
-		   	       rc_num = rc_num | data_buffer_64.reverse();
-		   	       rc_num = rc_num | mrs2.insert(data_buffer_64, 0, 16);
-		   	       rc_num = rc_num | mrs2.extractPreserve(&MRS2, 0, 16, 0);
-		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS2);
+                               rc_num = rc_num | data_buffer_64.reverse();
+                               rc_num = rc_num | mrs2.insert(data_buffer_64, 0, 16);
+                               rc_num = rc_num | mrs2.extractPreserve(&MRS2, 0, 16, 0);
+                               if (rc_num)
+                               {
+                                   FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                   rc_buff.setEcmdError(rc_num);
+                                   return rc_buff;
+                               }
+                               FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 2 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS2);
 
-		   	       rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR3_PRI_RP3_P1_0x8001C31F0301143F, data_buffer_64);
+                               rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR3_PRI_RP3_P1_0x8001C31F0301143F, data_buffer_64);
                                 if(rc) return rc;
-		   	       rc_num = rc_num | data_buffer_64.reverse();
-		   	       rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
-		   	       rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
-		   	       FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
+                               rc_num = rc_num | data_buffer_64.reverse();
+                               rc_num = rc_num | mrs3.insert(data_buffer_64, 0, 16);
+                               rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
+                               if (rc_num)
+                               {
+                                   FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                   rc_buff.setEcmdError(rc_num);
+                                   return rc_buff;
+                               }
+                               FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 3 RP %d VALUE: 0x%04X", i_target.toEcmdString(), port_number, rank_pair_group, MRS3);
 
-				if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
-				{
-			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_SEC_RP3_P1_0x8001C3200301143F, data_buffer_64);
-                                	if(rc) return rc;
-			    		rc_num = rc_num | data_buffer_64.reverse();
-			    		rc_num = rc_num | mrs4.insert(data_buffer_64, 0, 16);
-			    		rc_num = rc_num | mrs4.extractPreserve(&MRS4, 0, 16, 0);
-			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 4 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS4);
+                                if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+                                {
+                                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR0_SEC_RP3_P1_0x8001C3200301143F, data_buffer_64);
+                                        if(rc) return rc;
+                                        rc_num = rc_num | data_buffer_64.reverse();
+                                        rc_num = rc_num | mrs4.insert(data_buffer_64, 0, 16);
+                                        rc_num = rc_num | mrs4.extractPreserve(&MRS4, 0, 16, 0);
+                                        if (rc_num)
+                                        {
+                                            FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                            rc_buff.setEcmdError(rc_num);
+                                            return rc_buff;
+                                        }
+                                        FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 4 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS4);
 
-			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_SEC_RP3_P1_0x8001C3210301143F, data_buffer_64);
-                                	if(rc) return rc;
-			    		rc_num = rc_num | data_buffer_64.reverse();
-			    		rc_num = rc_num | mrs5.insert(data_buffer_64, 0, 16);
-			    		rc_num = rc_num | mrs5.extractPreserve(&MRS5, 0, 16, 0);
-			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 5 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS5);
+                                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR1_SEC_RP3_P1_0x8001C3210301143F, data_buffer_64);
+                                        if(rc) return rc;
+                                        rc_num = rc_num | data_buffer_64.reverse();
+                                        rc_num = rc_num | mrs5.insert(data_buffer_64, 0, 16);
+                                        rc_num = rc_num | mrs5.extractPreserve(&MRS5, 0, 16, 0);
+                                        if (rc_num)
+                                        {
+                                            FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                            rc_buff.setEcmdError(rc_num);
+                                            return rc_buff;
+                                        }
+                                        FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 5 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS5);
 
-			    		rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_SEC_RP3_P1_0x8001C3220301143F, data_buffer_64);
-                                	if(rc) return rc;
-			    		rc_num = rc_num | data_buffer_64.reverse();
-			    		rc_num = rc_num | mrs6.insert(data_buffer_64, 0, 16);
-			    		rc_num = rc_num | mrs6.extractPreserve(&MRS6, 0, 16, 0);
-			    		FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 6 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS6);
-				}
+                                        rc = fapiGetScom(i_target, DPHY01_DDRPHY_PC_MR2_SEC_RP3_P1_0x8001C3220301143F, data_buffer_64);
+                                        if(rc) return rc;
+                                        rc_num = rc_num | data_buffer_64.reverse();
+                                        rc_num = rc_num | mrs6.insert(data_buffer_64, 0, 16);
+                                        rc_num = rc_num | mrs6.extractPreserve(&MRS6, 0, 16, 0);
+                                        if (rc_num)
+                                        {
+                                            FAPI_ERR( "mss_draminit: Error setting up buffers");
+                                            rc_buff.setEcmdError(rc_num);
+                                            return rc_buff;
+                                        }
+                                        FAPI_INF( "%s PORT %d SHADOW REGISTER MRS 6 RP %d VALUE: 0x%04X",  i_target.toEcmdString(), port_number, rank_pair_group, MRS6);
+                                }
 
-			}
+                        }
 
-		}
-		}
-	    }
-	}
+                }
+                }
+            }
+        }
 
-        if ( (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4) && (dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM || dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) ) 
+        if ( (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4) && (dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM || dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) )
         {
            FAPI_INF("Performing B-side address inversion MPR write pattern");
 
@@ -1113,12 +1546,6 @@ ReturnCode mss_draminit_cloned(Target& i_target)
            if (rc) return rc;
         }
 
-	if (rc_num)
-	{
-	    FAPI_ERR( "mss_draminit: Error setting up buffers");
-	    rc_buff.setEcmdError(rc_num);
-	    return rc_buff;
-	}
 
 
         // TODO:
@@ -1230,7 +1657,7 @@ ReturnCode mss_rcd_load(
     uint8_t num_ranks_array[2][2]; //[port][dimm]
     uint64_t rcd_array[2][2]; //[port][dimm]
     uint8_t dimm_type;
-            
+
     rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target, dimm_type);
     if(rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target, num_ranks_array);
@@ -1280,7 +1707,7 @@ ReturnCode mss_rcd_load(
         else
         {
             FAPI_INF( "RCD SETTINGS FOR %s PORT%d DIMM%d ", i_target.toEcmdString(), i_port_number, dimm_number);
-	    FAPI_INF( "RCD Control Word: 0x%016llX", rcd_array[i_port_number][dimm_number]);
+            FAPI_INF( "RCD Control Word: 0x%016llX", rcd_array[i_port_number][dimm_number]);
 
             if (rc_num)
             {
@@ -1312,7 +1739,7 @@ ReturnCode mss_rcd_load(
             // Propogate through the 16, 4-bit control words
             for ( rcd_number = 0; rcd_number<= 15; rcd_number++)
             {
-		rc_num = rc_num | bank_3.clearBit(0, 3);
+                rc_num = rc_num | bank_3.clearBit(0, 3);
                 rc_num = rc_num | address_16.clearBit(0, 16);
 
                 rc_num = rc_num | rcd_cntl_wrd_64.setDoubleWord(0, rcd_array[i_port_number][dimm_number]);
@@ -1341,12 +1768,12 @@ ReturnCode mss_rcd_load(
                 }
 
 
-	        if (rc_num)
-	        {
-	           FAPI_ERR( "mss_rcd_load: Error setting up buffers");
-	           rc_buff.setEcmdError(rc_num);
-	           return rc_buff;
-	        }
+                if (rc_num)
+                {
+                   FAPI_ERR( "mss_rcd_load: Error setting up buffers");
+                   rc_buff.setEcmdError(rc_num);
+                   return rc_buff;
+                }
 
                 rc = mss_ccs_inst_arry_0( i_target,
                                           io_ccs_inst_cnt,
@@ -1374,12 +1801,6 @@ ReturnCode mss_rcd_load(
                 if(rc) return rc;
                 io_ccs_inst_cnt ++;
 
-                if (rc_num)
-                {
-                    FAPI_ERR( "mss_rcd_load: Error setting up buffers");
-                    rc_buff.setEcmdError(rc_num);
-                    return rc_buff;
-                }
             }
         }
     }
@@ -1507,7 +1928,7 @@ ReturnCode mss_mrs_load(
 
     if (dram_wr == 16)
     {
-	dram_wr = 0x00;
+        dram_wr = 0x00;
     }
     else if (dram_wr == 5)
     {
@@ -1762,7 +2183,7 @@ ReturnCode mss_mrs_load(
                               csn_8,
                               odt_4,
                               ddr_cal_type_4,
-                              i_port_number);	
+                              i_port_number);
     if(rc) return rc;
     rc = mss_ccs_inst_arry_1( i_target,
                               io_ccs_inst_cnt,
@@ -1787,13 +2208,13 @@ ReturnCode mss_mrs_load(
         }
         else
         {
-          
+
             if (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM)
             {
                 rc = FAPI_ATTR_GET(ATTR_LRDIMM_RANK_MULT_MODE, &i_target, lrdimm_rank_mult_mode);
                 if(rc) return rc;
 
-                if ( (lrdimm_rank_mult_mode == 4) && (num_ranks == 8) ) 
+                if ( (lrdimm_rank_mult_mode == 4) && (num_ranks == 8) )
                 {
                    num_ranks = 2;
                 }
@@ -1817,7 +2238,7 @@ ReturnCode mss_mrs_load(
                     rc_num = rc_num | mrs0.insert((uint8_t) dll_precharge, 12, 1);
                     rc_num = rc_num | mrs0.insert((uint8_t) 0x00, 13, 3);
 
-	            rc_num = rc_num | mrs0.extractPreserve(&MRS0, 0, 16, 0);
+                    rc_num = rc_num | mrs0.extractPreserve(&MRS0, 0, 16, 0);
 
                     if ( lrdimm_rank_mult_mode != 0 )
                     {
@@ -1849,8 +2270,8 @@ ReturnCode mss_mrs_load(
                     }
                     else
                     {
-			//DECONFIG and FFDC INFO
-			const fapi::Target & TARGET_MBA_ERROR = i_target;
+                        //DECONFIG and FFDC INFO
+                        const fapi::Target & TARGET_MBA_ERROR = i_target;
                         const uint8_t & IMP = dram_rtt_nom[i_port_number][dimm_number][rank_number];
                         const uint32_t & PORT = i_port_number;
                         const uint32_t & DIMM = dimm_number;
@@ -1884,7 +2305,7 @@ ReturnCode mss_mrs_load(
                     rc_num = rc_num | mrs1.insert((uint8_t) q_off, 12, 1, 0);
                     rc_num = rc_num | mrs1.insert((uint8_t) 0x00, 13, 3);
 
-        	    rc_num = rc_num | mrs1.extractPreserve(&MRS1, 0, 16, 0);
+                    rc_num = rc_num | mrs1.extractPreserve(&MRS1, 0, 16, 0);
 
 
                     if ( (lrdimm_rank_mult_mode != 0) && (rank_number > 1) )
@@ -1903,11 +2324,11 @@ ReturnCode mss_mrs_load(
                     {
                         dram_rtt_wr[i_port_number][dimm_number][rank_number] = 0x40;
                     }
-		    else
-		    {
+                    else
+                    {
 
-			//DECONFIG and FFDC INFO
-			const fapi::Target & TARGET_MBA_ERROR = i_target;
+                        //DECONFIG and FFDC INFO
+                        const fapi::Target & TARGET_MBA_ERROR = i_target;
                         const uint8_t & IMP = dram_rtt_nom[i_port_number][dimm_number][rank_number];
                         const uint32_t & PORT = i_port_number;
                         const uint32_t & DIMM = dimm_number;
@@ -1926,16 +2347,16 @@ ReturnCode mss_mrs_load(
                     rc_num = rc_num | mrs2.insert((uint8_t) dram_rtt_wr[i_port_number][dimm_number][rank_number], 9, 2);
                     rc_num = rc_num | mrs2.insert((uint8_t) 0x00, 11, 5);
 
-        	    rc_num = rc_num | mrs2.extractPreserve(&MRS2, 0, 16, 0);
+                    rc_num = rc_num | mrs2.extractPreserve(&MRS2, 0, 16, 0);
 
                     rc_num = rc_num | mrs3.insert((uint8_t) mpr_loc, 0, 2);
                     rc_num = rc_num | mrs3.insert((uint8_t) mpr_op, 2, 1);
                     rc_num = rc_num | mrs3.insert((uint16_t) 0x0000, 3, 13);
 
-        	    rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
-        	    FAPI_INF( "MRS 0: 0x%04X", MRS0);
-        	    FAPI_INF( "MRS 1: 0x%04X", MRS1);
-        	    FAPI_INF( "MRS 2: 0x%04X", MRS2);	
+                    rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
+                    FAPI_INF( "MRS 0: 0x%04X", MRS0);
+                    FAPI_INF( "MRS 1: 0x%04X", MRS1);
+                    FAPI_INF( "MRS 2: 0x%04X", MRS2);
                     FAPI_INF( "MRS 3: 0x%04X", MRS3);
 
                     if (rc_num)
@@ -1958,28 +2379,28 @@ ReturnCode mss_mrs_load(
                         if (mrs_number == 0)
                         {
                             rc_num = rc_num | address_16.insert(mrs2, 0, 16, 0);
-			    rc_num = rc_num | bank_3.insert((uint8_t) MRS2_BA, 0, 1, 7);
+                            rc_num = rc_num | bank_3.insert((uint8_t) MRS2_BA, 0, 1, 7);
                             rc_num = rc_num | bank_3.insert((uint8_t) MRS2_BA, 1, 1, 6);
                             rc_num = rc_num | bank_3.insert((uint8_t) MRS2_BA, 2, 1, 5);
                         }
                         else if ( mrs_number == 1)
                         {
                             rc_num = rc_num | address_16.insert(mrs3, 0, 16, 0);
-			    rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 0, 1, 7);
+                            rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 0, 1, 7);
                             rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 1, 1, 6);
                             rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 2, 1, 5);
                         }
                         else if ( mrs_number == 2)
                         {
                             rc_num = rc_num | address_16.insert(mrs1, 0, 16, 0);
-			    rc_num = rc_num | bank_3.insert((uint8_t) MRS1_BA, 0, 1, 7);
+                            rc_num = rc_num | bank_3.insert((uint8_t) MRS1_BA, 0, 1, 7);
                             rc_num = rc_num | bank_3.insert((uint8_t) MRS1_BA, 1, 1, 6);
                             rc_num = rc_num | bank_3.insert((uint8_t) MRS1_BA, 2, 1, 5);
                         }
                         else if ( mrs_number == 3)
                         {
                             rc_num = rc_num | address_16.insert(mrs0, 0, 16, 0);
-			    rc_num = rc_num | bank_3.insert((uint8_t) MRS0_BA, 0, 1, 7);
+                            rc_num = rc_num | bank_3.insert((uint8_t) MRS0_BA, 0, 1, 7);
                             rc_num = rc_num | bank_3.insert((uint8_t) MRS0_BA, 1, 1, 6);
                             rc_num = rc_num | bank_3.insert((uint8_t) MRS0_BA, 2, 1, 5);
                         }
@@ -1991,15 +2412,15 @@ ReturnCode mss_mrs_load(
                             return rc_buff;
                         }
 
-		        if (( address_mirror_map[i_port_number][dimm_number] & (0x08 >> rank_number) ) && (is_sim == 0))
-			{
-		            rc = mss_address_mirror_swizzle(i_target, i_port_number, dimm_number, rank_number, address_16, bank_3);
+                        if (( address_mirror_map[i_port_number][dimm_number] & (0x08 >> rank_number) ) && (is_sim == 0))
+                        {
+                            rc = mss_address_mirror_swizzle(i_target, i_port_number, dimm_number, rank_number, address_16, bank_3);
                             if(rc) return rc;
-			}
+                        }
 
 
-			if (dram_2n_mode  == ENUM_ATTR_VPD_DRAM_2N_MODE_ENABLED_TRUE)
-			{
+                        if (dram_2n_mode  == ENUM_ATTR_VPD_DRAM_2N_MODE_ENABLED_TRUE)
+                        {
 
                         // Send out to the CCS array a "setup" cycle
                         rc = mss_ccs_inst_arry_0( i_target,
@@ -2029,7 +2450,7 @@ ReturnCode mss_mrs_load(
 
                         io_ccs_inst_cnt ++;
 
-			}
+                        }
 
                         // Send out to the CCS array
                         rc = mss_ccs_inst_arry_0( i_target,

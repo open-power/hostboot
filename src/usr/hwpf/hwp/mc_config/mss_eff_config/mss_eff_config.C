@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config.C,v 1.51 2015/03/13 19:13:44 asaetow Exp $
+// $Id: mss_eff_config.C,v 1.54 2015/08/13 15:08:17 asaetow Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config.C,v $
 //------------------------------------------------------------------------------
@@ -32,7 +32,7 @@
 // *! TITLE       : mss_eff_config
 // *! DESCRIPTION : see additional comments below
 // *! OWNER NAME  : Anuwat Saetow     Email: asaetow@us.ibm.com
-// *! BACKUP NAME : Mark Bellows      Email: bellows@us.ibm.com
+// *! BACKUP NAME : Briana Foxworth   Email: beforwor@us.ibm.com
 // *! ADDITIONAL COMMENTS :
 //
 // The purpose of this procedure is to setup attributes used in other mss
@@ -45,6 +45,16 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.54  | asaetow  |13-AUG-15| Added ATTR_SPD_SDRAM_ROWS=R17 and ATTR_SPD_SDRAM_ROWS=R18 for DDR4.
+//   1.53  | asaetow  |31-JUL-15| Changed code based on FW code review.
+//         |          |         | Added RC_MSS_EFF_CONFIG_INVALID_DDR4_SPD_TB and RC_MSS_EFF_CONFIG_INCOMPATABLE_SPD_DRAM_GEN.
+//         |          |         | Fixed attribute naming convension from ATTR_TCCD_L to ATTR_EFF_DRAM_TCCD_L and ATTR_LRDIMM_ADDITIONAL_CNTL_WORDS to ATTR_EFF_LRDIMM_ADDITIONAL_CNTL_WORDS.
+//         |          |         | NOTE: DO NOT pickup w/o memory_attributes.xml v1.153 or newer
+//         |          |         | NOTE: DO NOT pickup w/o memory_mss_eff_config.xml v1.6 or newer
+//   1.52  | asaetow  |10-MAY-15| Added initial official DDR4 support to mainline.
+//         |          |         | NOTE: Merge of mss_eff_config_ddr4.C v1.1 from Menlo.
+//         |          |         | NOTE: LRDIMM and TSV not fully supported in this version.
+//         |          |         | Changed backup owner.
 //   1.51  | asaetow  |13-MAR-15| Changed DRAM_AL to be CL-2 in 2N/2T mode and CL-1 in 1N/1T mode.
 //   1.50  | jdsloat  |03-DEC-14| Removed string data types that are not supported.
 //   1.49  | asaetow  |01-DEC-14| Added RDIMM SPD/VPD support for ATTR_EFF_DIMM_RCD_CNTL_WORD_0_15 to take in SPD bits69:76 thru new VPD attribute ATTR_VPD_DIMM_RCD_CNTL_WORD_0_15.
@@ -197,9 +207,6 @@
 #include <mss_lrdimm_funcs.H>
 #endif
 
-#ifdef FAPI_DDR4
-#include <mss_eff_config_ddr4.H>
-#endif
 
 
 //------------------------------------------------------------------------------
@@ -245,17 +252,6 @@ fapi::ReturnCode mss_eff_config_termination( const Target& i_target_mba)
 }
 #endif
 
-#ifndef FAPI_DDR4
-fapi::ReturnCode mss_eff_config_ddr4( const Target& i_target_mba)
-{
-   ReturnCode rc;
-
-   FAPI_ERR("Invalid exec of DDR4 function on %s!", i_target_mba.toEcmdString());
-   FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_DDR4_INVALID_EXEC);
-   return rc;
-
-}
-#endif
 
 
 //------------------------------------------------------------------------------
@@ -285,6 +281,9 @@ struct mss_eff_config_data
     uint8_t dram_trtp;
     uint8_t dram_twtr;
     uint8_t dram_wr;
+    uint8_t dram_trrdl;
+    uint8_t dram_tccdl;
+    uint8_t dram_twtrl;
 };
 
 //------------------------------------------------------------------------------
@@ -315,14 +314,24 @@ struct mss_eff_config_spd_data
     //uint8_t taamin[PORT_SIZE][DIMM_SIZE];
     uint8_t twrmin[PORT_SIZE][DIMM_SIZE];
     uint8_t trcdmin[PORT_SIZE][DIMM_SIZE];
-    uint8_t trrdmin[PORT_SIZE][DIMM_SIZE];
+    uint8_t trrdmin[PORT_SIZE][DIMM_SIZE]; // DDR3 only
     uint8_t trpmin[PORT_SIZE][DIMM_SIZE];
     uint32_t trasmin[PORT_SIZE][DIMM_SIZE];
     uint32_t trcmin[PORT_SIZE][DIMM_SIZE];
-    uint32_t trfcmin[PORT_SIZE][DIMM_SIZE];
-    uint8_t twtrmin[PORT_SIZE][DIMM_SIZE];
+    uint32_t trfcmin[PORT_SIZE][DIMM_SIZE]; // DDR3 only
+    uint8_t twtrmin[PORT_SIZE][DIMM_SIZE]; // DDR3 only
     uint8_t trtpmin[PORT_SIZE][DIMM_SIZE];
     uint32_t tfawmin[PORT_SIZE][DIMM_SIZE];
+
+    // DDR4 only
+    uint8_t trrdsmin[PORT_SIZE][DIMM_SIZE];
+    uint8_t trrdlmin[PORT_SIZE][DIMM_SIZE];
+    uint8_t tccdlmin[PORT_SIZE][DIMM_SIZE];
+    uint32_t trfc1min[PORT_SIZE][DIMM_SIZE];
+    uint32_t trfc2min[PORT_SIZE][DIMM_SIZE];
+    uint32_t trfc4min[PORT_SIZE][DIMM_SIZE];
+    uint8_t twtrsmin[PORT_SIZE][DIMM_SIZE];
+    uint8_t twtrlmin[PORT_SIZE][DIMM_SIZE];
 
     // Not needed for GA1 CDIMM, will need to enable check for ISDIMM.
     //uint8_t sdram_optional_features[PORT_SIZE][DIMM_SIZE];
@@ -369,6 +378,7 @@ struct mss_eff_config_atts
     uint8_t eff_dimm_ranks_configed[PORT_SIZE][DIMM_SIZE];
     // Using SPD byte68,69:76, enabled in GA2 for full RDIMM support
     uint64_t eff_dimm_rcd_cntl_word_0_15[PORT_SIZE][DIMM_SIZE];
+    uint64_t eff_lrdimm_additional_cntl_words[PORT_SIZE][DIMM_SIZE]; // LRDIMMs only
     uint8_t eff_dimm_size[PORT_SIZE][DIMM_SIZE];
     uint8_t eff_dimm_type;
     uint8_t eff_custom_dimm;
@@ -415,14 +425,14 @@ struct mss_eff_config_atts
     uint8_t eff_mpr_loc;
     uint8_t eff_mpr_mode;
 
-    // AST HERE: Needs SPD byte33[6:4], currently hard coded to 0, removed for GA1
-    //uint8_t eff_num_dies_per_package[PORT_SIZE][DIMM_SIZE];
+    // AST HERE: Needs SPD DDR3 byte33[6:4], DDR4 byte6[6:4] currently hard coded to 0
+    uint8_t eff_num_dies_per_package[PORT_SIZE][DIMM_SIZE];
 
     uint8_t eff_num_drops_per_port;
     uint8_t eff_num_master_ranks_per_dimm[PORT_SIZE][DIMM_SIZE];
 
-    // AST HERE: Needs source data, currently hard coded to 0, removed for GA1
-    //uint8_t eff_num_packages_per_rank[PORT_SIZE][DIMM_SIZE];
+    // AST HERE: Needs source data, currently hard coded to 0
+    uint8_t eff_num_packages_per_rank[PORT_SIZE][DIMM_SIZE];
 
     uint8_t eff_num_ranks_per_dimm[PORT_SIZE][DIMM_SIZE];
     uint8_t eff_schmoo_mode;
@@ -453,7 +463,9 @@ struct mss_eff_config_atts
     uint8_t dimm_functional_vector;
     uint8_t mss_cal_step_enable; // Always run all cal steps
     uint32_t eff_vpd_version;
-
+    uint8_t eff_dram_trrdl;
+    uint8_t eff_dram_tccdl;
+    uint8_t eff_dram_twtrl;
 };
 
 //------------------------------------------------------------------------------
@@ -549,6 +561,7 @@ fapi::ReturnCode mss_eff_config_read_spd_data(fapi::Target i_target_dimm,
                                         uint8_t i_port, uint8_t i_dimm)
 {
     fapi::ReturnCode rc;
+    const fapi::Target& TARGET_DIMM = i_target_dimm;
     // Grab DIMM/SPD data.
     do
     {
@@ -591,18 +604,6 @@ fapi::ReturnCode mss_eff_config_read_spd_data(fapi::Target i_target_dimm,
         rc = FAPI_ATTR_GET(ATTR_SPD_MODULE_MEMORY_BUS_WIDTH, &i_target_dimm,
             p_o_spd_data->module_memory_bus_width[i_port][i_dimm]);
         if(rc) break;
-        rc = FAPI_ATTR_GET(ATTR_SPD_FTB_DIVIDEND, &i_target_dimm,
-            p_o_spd_data->ftb_dividend[i_port][i_dimm]);
-        if(rc) break;
-        rc = FAPI_ATTR_GET(ATTR_SPD_FTB_DIVISOR, &i_target_dimm,
-            p_o_spd_data->ftb_divisor[i_port][i_dimm]);
-        if(rc) break;
-        rc = FAPI_ATTR_GET(ATTR_SPD_MTB_DIVIDEND, &i_target_dimm,
-            p_o_spd_data->mtb_dividend[i_port][i_dimm]);
-        if(rc) break;
-        rc = FAPI_ATTR_GET(ATTR_SPD_MTB_DIVISOR, &i_target_dimm,
-            p_o_spd_data->mtb_divisor[i_port][i_dimm]);
-        if(rc) break;
 
         // See mss_freq.C
         //rc = FAPI_ATTR_GET(ATTR_SPD_TCKMIN, &i_target_dimm,
@@ -614,15 +615,149 @@ fapi::ReturnCode mss_eff_config_read_spd_data(fapi::Target i_target_dimm,
         //rc = FAPI_ATTR_GET(ATTR_SPD_TAAMIN, &i_target_dimm,
             //p_o_spd_data->taamin[i_port][i_dimm]);
         //if(rc) break;
+        
+        if (p_o_spd_data->dram_device_type[i_port][i_dimm] == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR3) {
+           // DDR3 only
+           rc = FAPI_ATTR_GET(ATTR_SPD_FTB_DIVIDEND, &i_target_dimm,
+               p_o_spd_data->ftb_dividend[i_port][i_dimm]);
+           if(rc) break;
+           rc = FAPI_ATTR_GET(ATTR_SPD_FTB_DIVISOR, &i_target_dimm,
+               p_o_spd_data->ftb_divisor[i_port][i_dimm]);
+           if(rc) break;
+           rc = FAPI_ATTR_GET(ATTR_SPD_MTB_DIVIDEND, &i_target_dimm,
+               p_o_spd_data->mtb_dividend[i_port][i_dimm]);
+           if(rc) break;
+           rc = FAPI_ATTR_GET(ATTR_SPD_MTB_DIVISOR, &i_target_dimm,
+               p_o_spd_data->mtb_divisor[i_port][i_dimm]);
+           if(rc) break;
+           rc = FAPI_ATTR_GET(ATTR_SPD_TRRDMIN, &i_target_dimm,
+               p_o_spd_data->trrdmin[i_port][i_dimm]);
+           if(rc) break;
+           rc = FAPI_ATTR_GET(ATTR_SPD_TRFCMIN, &i_target_dimm,
+               p_o_spd_data->trfcmin[i_port][i_dimm]);
+           if(rc) break;
+           rc = FAPI_ATTR_GET(ATTR_SPD_TWTRMIN, &i_target_dimm,
+               p_o_spd_data->twtrmin[i_port][i_dimm]);
+           if(rc) break;
+           
+           rc = FAPI_ATTR_GET(ATTR_SPD_TWRMIN, &i_target_dimm,
+               p_o_spd_data->twrmin[i_port][i_dimm]);
+           if(rc) break;
+           rc = FAPI_ATTR_GET(ATTR_SPD_TRTPMIN, &i_target_dimm,
+               p_o_spd_data->trtpmin[i_port][i_dimm]);
+           if(rc) break;
 
-        rc = FAPI_ATTR_GET(ATTR_SPD_TWRMIN, &i_target_dimm,
-            p_o_spd_data->twrmin[i_port][i_dimm]);
-        if(rc) break;
+        } else if (p_o_spd_data->dram_device_type[i_port][i_dimm] == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR4) {
+           // DDR4 only
+                        uint8_t l_spd_tb_mtb_ddr4, l_spd_tb_ftb_ddr4;
+                        rc = FAPI_ATTR_GET(ATTR_SPD_TIMEBASE_MTB_DDR4, &i_target_dimm,
+                                        l_spd_tb_mtb_ddr4);
+                        if (rc) break;
+
+                        rc = FAPI_ATTR_GET(ATTR_SPD_TIMEBASE_FTB_DDR4, &i_target_dimm,
+                                        l_spd_tb_ftb_ddr4);
+                        if (rc) break;
+
+                        if ( (l_spd_tb_mtb_ddr4 != 0)||(l_spd_tb_ftb_ddr4 != 0) )
+                        {
+                                FAPI_ERR("Invalid DDR4 MTB/FTB Timebase received from SPD attribute on %s!", i_target_dimm.toEcmdString());
+                                FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_INVALID_DDR4_SPD_TB);
+                                break;
+                        }
+            // AST HERE: !If DDR4 spec changes to include other values, this section needs to be updated!
+                        // for 1000fs = 1ps = 1000 * 1 / 1
+                        p_o_spd_data->ftb_dividend[i_port][i_dimm] = 1;
+                        p_o_spd_data->ftb_divisor[i_port][i_dimm] = 1;
+                        // for 125ps = 1000 * 1 / 8
+                        p_o_spd_data->mtb_dividend[i_port][i_dimm] = 1;
+                        p_o_spd_data->mtb_divisor[i_port][i_dimm] = 8;
+
+                        // not available in ddr4 spd, these are replacements.  need to double check
+                        // 15 ns for all speeds
+                        p_o_spd_data->twrmin[i_port][i_dimm] = 15000 / (
+                                (p_o_spd_data->mtb_dividend[i_port][i_dimm] * 1000) /
+                        p_o_spd_data->mtb_divisor[i_port][i_dimm]);
+
+                        // 7.5ns = 7500ps; work backwards to figure out value.  no FTB
+                        p_o_spd_data->trtpmin[i_port][i_dimm] = 7500 / (
+                                (p_o_spd_data->mtb_dividend[i_port][i_dimm] * 1000) /
+                        p_o_spd_data->mtb_divisor[i_port][i_dimm]);
+
+                        // 3 trfc values, 1x, 2x, 4x
+                        rc = FAPI_ATTR_GET(ATTR_SPD_TRFC1MIN_DDR4, &i_target_dimm,
+                                p_o_spd_data->trfc1min[i_port][i_dimm]);
+                        if(rc) break;
+
+// FW is reading out and giving the data in big endian format for some reason.
+// need to fix this...  XML is documented correctly.
+/* //                   if (p_o_spd_data->trfc1min[i_port][i_dimm] > 0xFFF) {
+                                p_o_spd_data->trfc1min[i_port][i_dimm] |= 
+                                        (p_o_spd_data->trfc1min[i_port][i_dimm] & 0xFF) << 16;
+                                p_o_spd_data->trfc1min[i_port][i_dimm] =
+                                        p_o_spd_data->trfc1min[i_port][i_dimm] >> 8;
+//                      }
+*/
+//  need to look at this more sometimes the bytes are swapped in SPD...
+                        switch(p_o_spd_data->trfc1min[i_port][i_dimm])
+                        {
+                        case 0x0005:
+                            p_o_spd_data->trfc1min[i_port][i_dimm] = 0x0500;
+                            break;
+                        case 0x2008:
+                            p_o_spd_data->trfc1min[i_port][i_dimm] = 0x0820;
+                            break;
+                        case 0xF00A:
+                            p_o_spd_data->trfc1min[i_port][i_dimm] = 0x0AF0;
+                            break;
+                        }
+
+                        rc = FAPI_ATTR_GET(ATTR_SPD_TRFC2MIN_DDR4, &i_target_dimm,
+                                p_o_spd_data->trfc2min[i_port][i_dimm]);
+                        if(rc) break;
+                        rc = FAPI_ATTR_GET(ATTR_SPD_TRFC4MIN_DDR4, &i_target_dimm,
+                                p_o_spd_data->trfc4min[i_port][i_dimm]);
+                        if(rc) break;
+
+                        // ddr4 has 's' (short; different bank group) and
+                        // 'l' (long; same bank group) values
+                        // tRRD needs to be used by Yuen's mba initfile...
+                        rc = FAPI_ATTR_GET(ATTR_SPD_TRRDSMIN_DDR4, &i_target_dimm,
+                                p_o_spd_data->trrdsmin[i_port][i_dimm]);
+                        if(rc) break;
+                        rc = FAPI_ATTR_GET(ATTR_SPD_TRRDLMIN_DDR4, &i_target_dimm,
+                                p_o_spd_data->trrdlmin[i_port][i_dimm]);
+                        if(rc) break;
+
+                        // tccdl
+                        rc = FAPI_ATTR_GET(ATTR_SPD_TCCDLMIN_DDR4, &i_target_dimm,
+                                p_o_spd_data->tccdlmin[i_port][i_dimm]);
+                        if(rc) break;
+
+                        // should be constant based on MTB and FTB after calculations
+                        // where is this used??
+/*                              SPD attributes not available yet
+                        rc = FAPI_ATTR_GET(ATTR_SPD_TWTRSMIN_DDR4, &i_target_dimm,
+                                p_o_spd_data->twtrsmin[i_port][i_dimm]);        // 2.5ns
+                        if(rc) break;
+                        rc = FAPI_ATTR_GET(ATTR_SPD_TWTRLMIN_DDR4, &i_target_dimm,
+                                p_o_spd_data->twtrlmin[i_port][i_dimm]);        // 7.5ns
+                        if(rc) break;
+*/
+                        p_o_spd_data->twtrsmin[i_port][i_dimm] = 2500 / (       // 2.5 ns
+                (p_o_spd_data->mtb_dividend[i_port][i_dimm] * 1000) /
+                                            p_o_spd_data->mtb_divisor[i_port][i_dimm]);
+                        p_o_spd_data->twtrlmin[i_port][i_dimm] = 7500 / (       // 7.5 ns
+                (p_o_spd_data->mtb_dividend[i_port][i_dimm] * 1000) /
+                                            p_o_spd_data->mtb_divisor[i_port][i_dimm]);
+        } else {
+           FAPI_ERR("Incompatable SPD DRAM generation on %s!", i_target_dimm.toEcmdString());
+           FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_INCOMPATABLE_SPD_DRAM_GEN);
+           return rc;
+        }
+
+        // Common for DDR3 and DDR4
         rc = FAPI_ATTR_GET(ATTR_SPD_TRCDMIN, &i_target_dimm,
             p_o_spd_data->trcdmin[i_port][i_dimm]);
-        if(rc) break;
-        rc = FAPI_ATTR_GET(ATTR_SPD_TRRDMIN, &i_target_dimm,
-            p_o_spd_data->trrdmin[i_port][i_dimm]);
         if(rc) break;
         rc = FAPI_ATTR_GET(ATTR_SPD_TRPMIN, &i_target_dimm,
             p_o_spd_data->trpmin[i_port][i_dimm]);
@@ -632,15 +767,6 @@ fapi::ReturnCode mss_eff_config_read_spd_data(fapi::Target i_target_dimm,
         if(rc) break;
         rc = FAPI_ATTR_GET(ATTR_SPD_TRCMIN, &i_target_dimm,
             p_o_spd_data->trcmin[i_port][i_dimm]);
-        if(rc) break;
-        rc = FAPI_ATTR_GET(ATTR_SPD_TRFCMIN, &i_target_dimm,
-            p_o_spd_data->trfcmin[i_port][i_dimm]);
-        if(rc) break;
-        rc = FAPI_ATTR_GET(ATTR_SPD_TWTRMIN, &i_target_dimm,
-            p_o_spd_data->twtrmin[i_port][i_dimm]);
-        if(rc) break;
-        rc = FAPI_ATTR_GET(ATTR_SPD_TRTPMIN, &i_target_dimm,
-            p_o_spd_data->trtpmin[i_port][i_dimm]);
         if(rc) break;
         rc = FAPI_ATTR_GET(ATTR_SPD_TFAWMIN, &i_target_dimm,
             p_o_spd_data->tfawmin[i_port][i_dimm]);
@@ -1331,6 +1457,9 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
 //------------------------------------------------------------------------------
     switch(p_i_data->sdram_banks[0][0])
     {
+        case fapi::ENUM_ATTR_SPD_SDRAM_BANKS_B4:
+            p_o_atts->eff_dram_banks = 4;                       // DDR4 only
+            break;
         case fapi::ENUM_ATTR_SPD_SDRAM_BANKS_B8:
             p_o_atts->eff_dram_banks = 8;
             break;
@@ -1366,6 +1495,12 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
             break;
         case fapi::ENUM_ATTR_SPD_SDRAM_ROWS_R16:
             p_o_atts->eff_dram_rows = 16;
+            break;
+        case fapi::ENUM_ATTR_SPD_SDRAM_ROWS_R17:
+            p_o_atts->eff_dram_rows = 17;
+            break;
+        case fapi::ENUM_ATTR_SPD_SDRAM_ROWS_R18:
+            p_o_atts->eff_dram_rows = 18;
             break;
         default:
             FAPI_ERR("Unknown DRAM rows on %s!", i_target_mba.toEcmdString());
@@ -1555,6 +1690,8 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
                     p_i_mss_eff_config_data->dram_trcd;
             }
 //------------------------------------------------------------------------------
+         if (p_i_data->dram_device_type[0][0] == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR3) {
+            // DDR3
             p_i_mss_eff_config_data->dram_trrd = calc_timing_in_clk
                 (
                     p_i_mss_eff_config_data->mtb_in_ps_u32array[l_cur_mba_port]
@@ -1572,6 +1709,165 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
                 p_o_atts->eff_dram_trrd =
                     p_i_mss_eff_config_data->dram_trrd;
             }
+         } else if (p_i_data->dram_device_type[0][0] == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR4) { 
+            // DDR4
+            FAPI_INF("DDR4 Check: spd tRRDs=0x%x, tRRDl=0x%x, mtb=%i, ftb=%i, width=%i",
+                    p_i_data->trrdsmin[l_cur_mba_port][l_cur_mba_dimm],
+                    p_i_data->trrdlmin[l_cur_mba_port][l_cur_mba_dimm],
+                    p_i_mss_eff_config_data->mtb_in_ps_u32array[l_cur_mba_port][l_cur_mba_dimm],
+                    p_i_mss_eff_config_data->ftb_in_fs_u32array[l_cur_mba_port][l_cur_mba_dimm],
+                    p_o_atts->eff_dram_width);
+                    const uint8_t min_delay_clocks = 4;
+                    uint32_t max_delay;             // in ps
+                    // bool is_2K_page = 0;    
+
+                    // get the spd min trrd in clocks
+                    p_i_mss_eff_config_data->dram_trrd = calc_timing_in_clk
+                    (
+                       p_i_mss_eff_config_data->mtb_in_ps_u32array[l_cur_mba_port][l_cur_mba_dimm],
+                       p_i_mss_eff_config_data->ftb_in_fs_u32array[l_cur_mba_port][l_cur_mba_dimm],
+                       p_i_data->trrdsmin[l_cur_mba_port][l_cur_mba_dimm],
+                       0,  // need to put in the trrdsmin_ftb here...
+                       p_i_mss_eff_config_data->mss_freq
+                    );
+
+                    // trrdsmin from SPD is absolute min of DIMM.
+                    // need to know page size, then use 6ns for (2k page) otherwise 5ns
+
+                    FAPI_INF("DDR4 Check:  p_i_tRRD_s(nCK) = %i",  p_i_mss_eff_config_data->dram_trrd);
+                    FAPI_INF("Attribute p_o_eff_dram_trrd = %i",  p_o_atts->eff_dram_trrd);
+                    // need a table here for other speeds/page sizes
+
+                    // trrd_s = 2K page @ 1600, max(4nCK,6ns)       since min nCK=1.25ns, const 6ns
+                    // 1/2 or 1K   page @ 1600, max(4nCK, 5ns)
+
+                    // 1600 1866 2133 2400 (data rate)
+                    // 6,   5.3, 5.3, 5.3 ns        for 2k page size (x16)
+                    // 5,   4.2, 3.7, 3.3 ns        for 0.5k or 1k page size (x8)
+                    // !! NOTE !!  NOT supporting 2k page size (with check for width above should cause error out).
+
+                    if (p_i_mss_eff_config_data->mss_freq < 1733)           // 1600
+                    {
+                       max_delay = 5000;       // in ps
+                    }
+                    else if (p_i_mss_eff_config_data->mss_freq < 2000)      // 1866
+                    {
+                       max_delay = 4200;       // in ps
+                    }
+                    else if (p_i_mss_eff_config_data->mss_freq < 2267)      // 2133
+                    {
+                       max_delay = 3700;       // in ps
+                    }
+                    else // if (p_i_mss_eff_config_data->mss_freq < 2533)   // 2400
+                    {
+                       max_delay = 3300;       // in ps
+                    }
+/*                  else if (p_i_mss_eff_config_data->mss_freq < 2933)      // 2666
+                    {
+                       max_delay = ??00;       // in ps
+                    }
+                    else // if (p_i_mss_eff_config_data->mss_freq < ????)   // 3200
+                    {
+                       max_delay = ??00;       // in ps
+                    }
+                                        
+*/
+                    uint8_t max_delay_clocks = calc_timing_in_clk
+                         (1, 0, max_delay, 0, p_i_mss_eff_config_data->mss_freq);
+
+                    // find max between min_delay_clocks, max_delay_clocks and dev_min
+
+                    if (min_delay_clocks > max_delay_clocks)
+                       max_delay_clocks = min_delay_clocks;
+
+                    if (p_i_mss_eff_config_data->dram_trrd > max_delay_clocks)
+                       max_delay_clocks = p_i_mss_eff_config_data->dram_trrd;
+
+                    if (max_delay_clocks > p_o_atts->eff_dram_trrd)
+                       p_o_atts->eff_dram_trrd = max_delay_clocks;
+
+//---------------------------------------------------------------------------------------
+// trrd_l = max(4nCK,7.5ns)
+        // 1600 1866 2133 2400 (data rate)
+        // 7.5  6.4, 6.4, 6.4 ns        for 2k page size (x16)
+        // 6,   5.3, 5.3, 4.9 ns        for 0.5k or 1k page size (x8)
+        // !! NOTE !!  NOT supporting 2k page size (with check for width above should cause error out).
+                p_i_mss_eff_config_data->dram_trrdl = calc_timing_in_clk
+                (
+                    p_i_mss_eff_config_data->mtb_in_ps_u32array[l_cur_mba_port][l_cur_mba_dimm],
+                    p_i_mss_eff_config_data->ftb_in_fs_u32array[l_cur_mba_port][l_cur_mba_dimm],
+                    p_i_data->trrdlmin[l_cur_mba_port][l_cur_mba_dimm],
+                    0, // need to put in the trrdlmin_ftb here...
+                    p_i_mss_eff_config_data->mss_freq
+                );
+
+                                // condense this later with the if/else above...
+                                if (p_i_mss_eff_config_data->mss_freq < 1733)           // 1600
+                                {
+                                        max_delay = 6000;       // in ps
+                                }
+                                else if (p_i_mss_eff_config_data->mss_freq < 2000)      // 1866
+                                {
+                                        max_delay = 5300;       // in ps
+                                }
+                                else if (p_i_mss_eff_config_data->mss_freq < 2267)      // 2133
+                                {
+                                        max_delay = 5300;       // in ps
+                                }
+                                else // if (p_i_mss_eff_config_data->mss_freq < 2533)   // 2400
+                                {
+                                        max_delay = 4900;       // in ps
+                                }
+/*                              else if (p_i_mss_eff_config_data->mss_freq < 2933)      // 2666
+                                {
+                                        max_delay = ??00;       // in ps
+                                }
+                                else // if (p_i_mss_eff_config_data->mss_freq < ????)   // 3200
+                                {
+                                        max_delay = ??00;       // in ps
+                                }
+                                        
+*/
+                max_delay_clocks = calc_timing_in_clk
+                                        (1, 0, max_delay, 0, p_i_mss_eff_config_data->mss_freq);
+                                if (max_delay_clocks > p_o_atts->eff_dram_trrdl)
+                                {
+                                        p_o_atts->eff_dram_trrdl = max_delay_clocks;
+                                }
+                                else if (p_i_mss_eff_config_data->dram_trrdl > p_o_atts->eff_dram_trrdl)
+                                {
+                                        p_o_atts->eff_dram_trrdl = p_i_mss_eff_config_data->dram_trrdl;
+                                }
+                FAPI_INF("DDR4 tRRDs = %i, tRRDl = %i", p_o_atts->eff_dram_trrd, p_o_atts->eff_dram_trrdl);
+         } else {
+            FAPI_ERR("Incompatable DRAM generation on %s!",i_target_mba.toEcmdString());
+            uint8_t& DRAM_DEVICE_TYPE_0_0 = p_i_data->dram_device_type[0][0];
+            uint8_t& DRAM_DEVICE_TYPE_0_1 = p_i_data->dram_device_type[0][1];
+            uint8_t& DRAM_DEVICE_TYPE_1_0 = p_i_data->dram_device_type[1][0];
+            uint8_t& DRAM_DEVICE_TYPE_1_1 = p_i_data->dram_device_type[1][1];
+            FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_INCOMPATABLE_DRAM_GEN);
+            return rc;
+         }
+//------------------------------------------------------------------------------
+         if (p_i_data->dram_device_type[0][0] == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR4) { 
+            p_i_mss_eff_config_data->dram_tccdl = calc_timing_in_clk
+                (
+                    p_i_mss_eff_config_data->mtb_in_ps_u32array[l_cur_mba_port]
+                    [l_cur_mba_dimm],
+                    p_i_mss_eff_config_data->ftb_in_fs_u32array[l_cur_mba_port]
+                    [l_cur_mba_dimm],
+                    p_i_data->tccdlmin[l_cur_mba_port]
+                    [l_cur_mba_dimm],
+                    0,
+                    p_i_mss_eff_config_data->mss_freq
+                );
+            if (p_i_mss_eff_config_data->dram_tccdl >
+                    p_o_atts->eff_dram_tccdl)
+            {
+                p_o_atts->eff_dram_tccdl =
+                    p_i_mss_eff_config_data->dram_tccdl;
+            }
+         }
 //------------------------------------------------------------------------------
             p_i_mss_eff_config_data->dram_trp = calc_timing_in_clk
                 (
@@ -1590,6 +1886,7 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
                 p_o_atts->eff_dram_trp = p_i_mss_eff_config_data->dram_trp;
             }
 //------------------------------------------------------------------------------
+         if (p_i_data->dram_device_type[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR3) {
             p_i_mss_eff_config_data->dram_twtr = calc_timing_in_clk
                 (
                     p_i_mss_eff_config_data->mtb_in_ps_u32array[l_cur_mba_port]
@@ -1601,12 +1898,55 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
                     0,
                     p_i_mss_eff_config_data->mss_freq
                 );
-            if (p_i_mss_eff_config_data->dram_twtr >
-                    p_o_atts->eff_dram_twtr)
+            if (p_i_mss_eff_config_data->dram_twtr > p_o_atts->eff_dram_twtr)
             {
-                p_o_atts->eff_dram_twtr =
-                    p_i_mss_eff_config_data->dram_twtr;
+               p_o_atts->eff_dram_twtr = p_i_mss_eff_config_data->dram_twtr;
             }
+         } else if (p_i_data->dram_device_type[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR4) {
+            p_i_mss_eff_config_data->dram_twtr = calc_timing_in_clk
+                (
+                    p_i_mss_eff_config_data->mtb_in_ps_u32array[l_cur_mba_port]
+                    [l_cur_mba_dimm],
+                    p_i_mss_eff_config_data->ftb_in_fs_u32array[l_cur_mba_port]
+                    [l_cur_mba_dimm],
+                    p_i_data->twtrsmin[l_cur_mba_port]
+                    [l_cur_mba_dimm],
+                    0,
+                    p_i_mss_eff_config_data->mss_freq
+                );
+            // twtr_s = max(2nCK,2.5ns)   since min nCK=1.25ns, const 2.5ns
+            //FAPI_INF("DDR4 Check:  tWTR in CLKS = %i (2.5ns)",  p_i_mss_eff_config_data->dram_twtr);
+            //FAPI_INF("Attribute eff_dram_twtr = %i",  p_o_atts->eff_dram_twtr);
+            p_o_atts->eff_dram_twtr = p_i_mss_eff_config_data->dram_twtr;
+
+            // twtr_l = max(4nCK,7.5ns)
+            p_i_mss_eff_config_data->dram_twtrl = calc_timing_in_clk
+                (
+                    p_i_mss_eff_config_data->mtb_in_ps_u32array[l_cur_mba_port]
+                    [l_cur_mba_dimm],
+                    p_i_mss_eff_config_data->ftb_in_fs_u32array[l_cur_mba_port]
+                    [l_cur_mba_dimm],
+                    p_i_data->twtrlmin[l_cur_mba_port]
+                    [l_cur_mba_dimm],
+                    0,
+                    p_i_mss_eff_config_data->mss_freq
+                );
+
+            if (p_i_mss_eff_config_data->dram_twtrl < 4) {
+               p_o_atts->eff_dram_twtrl = 4;
+            } else {
+               p_o_atts->eff_dram_twtrl = p_i_mss_eff_config_data->dram_twtrl;
+            }
+            FAPI_INF("DDR4 twtrs = %i, twtrl = %i", p_o_atts->eff_dram_twtr, p_o_atts->eff_dram_twtrl);
+         } else {
+            FAPI_ERR("Incompatable DRAM generation on %s!",i_target_mba.toEcmdString());
+            uint8_t& DRAM_DEVICE_TYPE_0_0 = p_i_data->dram_device_type[0][0];
+            uint8_t& DRAM_DEVICE_TYPE_0_1 = p_i_data->dram_device_type[0][1];
+            uint8_t& DRAM_DEVICE_TYPE_1_0 = p_i_data->dram_device_type[1][0];
+            uint8_t& DRAM_DEVICE_TYPE_1_1 = p_i_data->dram_device_type[1][1];
+            FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_INCOMPATABLE_DRAM_GEN);
+            return rc;
+         }
 //------------------------------------------------------------------------------
             p_i_mss_eff_config_data->dram_trtp = calc_timing_in_clk
                 (
@@ -1619,12 +1959,30 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
                     0,
                     p_i_mss_eff_config_data->mss_freq
                 );
-            if (p_i_mss_eff_config_data->dram_trtp >
-                    p_o_atts->eff_dram_trtp)
-            {
-                p_o_atts->eff_dram_trtp =
-                    p_i_mss_eff_config_data->dram_trtp;
+         if (p_i_data->dram_device_type[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR3) {
+            if (p_i_mss_eff_config_data->dram_trtp > p_o_atts->eff_dram_trtp) {
+               p_o_atts->eff_dram_trtp = p_i_mss_eff_config_data->dram_trtp;
             }
+         } else if (p_i_data->dram_device_type[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR4) {
+            // max (4nCK, 7.5ns), 7.5ns=
+            //FAPI_INF("DDR4 Check:  tRTP in CLKS = %i (should be 6)",  p_i_mss_eff_config_data->dram_trtp);
+            //FAPI_INF("Attribute eff_dram_trtp= %i",  p_o_atts->eff_dram_trtp);
+            if (p_i_mss_eff_config_data->dram_trtp < 4)
+            {
+               p_o_atts->eff_dram_trtp = 4;
+            } else {
+               p_o_atts->eff_dram_trtp = p_i_mss_eff_config_data->dram_trtp;
+            }
+         } else {
+            FAPI_ERR("Incompatable DRAM generation on %s!",i_target_mba.toEcmdString());
+            uint8_t& DRAM_DEVICE_TYPE_0_0 = p_i_data->dram_device_type[0][0];
+            uint8_t& DRAM_DEVICE_TYPE_0_1 = p_i_data->dram_device_type[0][1];
+            uint8_t& DRAM_DEVICE_TYPE_1_0 = p_i_data->dram_device_type[1][0];
+            uint8_t& DRAM_DEVICE_TYPE_1_1 = p_i_data->dram_device_type[1][1];
+            FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_INCOMPATABLE_DRAM_GEN);
+            return rc;
+         }
+
 //------------------------------------------------------------------------------
             p_i_mss_eff_config_data->dram_tras = calc_timing_in_clk
                 (
@@ -1663,6 +2021,7 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
                     p_i_mss_eff_config_data->dram_trc;
             }
 //------------------------------------------------------------------------------
+         if (p_i_data->dram_device_type[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR3) {
             p_i_mss_eff_config_data->dram_trfc = calc_timing_in_clk
                 (
                     p_i_mss_eff_config_data->mtb_in_ps_u32array[l_cur_mba_port]
@@ -1680,7 +2039,42 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
                 p_o_atts->eff_dram_trfc =
                     p_i_mss_eff_config_data->dram_trfc;
             }
+         } else if (p_i_data->dram_device_type[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR4) {
+            p_i_mss_eff_config_data->dram_trfc = calc_timing_in_clk
+                (
+                    p_i_mss_eff_config_data->mtb_in_ps_u32array[l_cur_mba_port]
+                    [l_cur_mba_dimm],
+                    p_i_mss_eff_config_data->ftb_in_fs_u32array[l_cur_mba_port]
+                    [l_cur_mba_dimm],
+                    p_i_data->trfc1min[l_cur_mba_port]
+                    [l_cur_mba_dimm],
+                    0,
+                    p_i_mss_eff_config_data->mss_freq
+                );
+            FAPI_INF("DDR4 Check: spd trfc = 0x%x (%i clks), o_attr=0x%x",
+               p_i_data->trfc1min[l_cur_mba_port][l_cur_mba_dimm],
+               p_i_mss_eff_config_data->dram_trfc,
+               p_o_atts->eff_dram_trfc
+            );
+            if (p_i_mss_eff_config_data->dram_trfc >
+                    p_o_atts->eff_dram_trfc)
+            {
+                p_o_atts->eff_dram_trfc =
+                    p_i_mss_eff_config_data->dram_trfc;
+            }
+            // AST HERE: Need DDR4 attributes for other refresh rates, 2x, 4x
+
+         } else {
+            FAPI_ERR("Incompatable DRAM generation on %s!",i_target_mba.toEcmdString());
+            uint8_t& DRAM_DEVICE_TYPE_0_0 = p_i_data->dram_device_type[0][0];
+            uint8_t& DRAM_DEVICE_TYPE_0_1 = p_i_data->dram_device_type[0][1];
+            uint8_t& DRAM_DEVICE_TYPE_1_0 = p_i_data->dram_device_type[1][0];
+            uint8_t& DRAM_DEVICE_TYPE_1_1 = p_i_data->dram_device_type[1][1];
+            FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_INCOMPATABLE_DRAM_GEN);
+            return rc;
+         }
 //------------------------------------------------------------------------------
+         if (p_i_data->dram_device_type[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR3) {
             p_i_mss_eff_config_data->dram_tfaw = calc_timing_in_clk
                 (
                     p_i_mss_eff_config_data->mtb_in_ps_u32array[l_cur_mba_port]
@@ -1698,49 +2092,181 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
                 p_o_atts->eff_dram_tfaw_u32 =
                     p_i_mss_eff_config_data->dram_tfaw;
             }
+         } else if (p_i_data->dram_device_type[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR4) {
+            p_i_mss_eff_config_data->dram_tfaw = calc_timing_in_clk
+                (
+                    p_i_mss_eff_config_data->mtb_in_ps_u32array[l_cur_mba_port][l_cur_mba_dimm],
+                    p_i_mss_eff_config_data->ftb_in_fs_u32array[l_cur_mba_port][l_cur_mba_dimm],
+                    p_i_data->tfawmin[l_cur_mba_port][l_cur_mba_dimm],
+                    0,
+                    p_i_mss_eff_config_data->mss_freq
+                );
+FAPI_DBG("DDR4 Check:  SPD=0x%x, p_i_tFAWmin (nCK) = %i",
+                p_i_data->tfawmin[l_cur_mba_port][l_cur_mba_dimm], p_i_mss_eff_config_data->dram_tfaw);
+
+                                // example x8, 1600, min= 25ns => 25/1.25 = 20 clocks
+                                const uint8_t min_clks [][6] = {        // width, data rate
+                                // NOTE: 2666 and 3200 are TBD, using guess values
+                                // 1600 1866 2133 2400 2666 3200
+                                  { 16,  16,  16,  16,  16,  16},               // x4 (page size = 1/2K)
+                                  { 20,  22,  23,  26,  29,  32}                // x8 (page size = 1K)
+                                //{ xx,  xx,  xx,  xx,  TBD, TBD},              // x16(page size = 2K)
+                                };
+
+                                uint8_t speed_idx;
+                                uint8_t width_idx;
+
+                                if (p_i_data->dram_width[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_DRAM_WIDTH_W4)
+                                {
+                                                width_idx = 0;
+                                }
+                                else //(p_i_data->dram_width[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_DRAM_WIDTH_W8)
+                                {
+                                                width_idx = 1;
+                                }
+                                //else (p_i_data->dram_width == fapi::ENUM_ATTR_SPD_DRAM_WIDTH_W16)
+
+
+                                if (p_i_mss_eff_config_data->mss_freq < 1733)           // 1600
+                                {
+                                        speed_idx  = 0;                 // 1.25ns
+                                }
+                                else if (p_i_mss_eff_config_data->mss_freq < 2000)      // 1866
+                                {
+                                        speed_idx  = 1;                 // 1.0718ns
+                                }
+                                else if (p_i_mss_eff_config_data->mss_freq < 2267)      // 2133
+                                {
+                                        speed_idx  = 2;                 // 0.9376ns
+                                }
+                                else // if (p_i_mss_eff_config_data->mss_freq < 2533)   // 2400
+                                {
+                                        speed_idx  = 3;                 // 0.8333ns
+                                }
+        //                      else if (p_i_mss_eff_config_data->mss_freq < 2933)      // 2666
+        //                      {
+        //                              speed_idx  = 4;                 // 0.7502ns
+        //                      }
+        //                      else // if (p_i_mss_eff_config_data->mss_freq < ????)   // 3200
+        //                      {
+        //                              speed_idx  = 5;                 // 0.625ns
+        //                      }
+
+                                if (p_o_atts->eff_dram_tfaw_u32 < min_clks[width_idx][speed_idx])
+                                {
+                                        p_o_atts->eff_dram_tfaw_u32 =  min_clks[width_idx][speed_idx];
+                                }
+/*                              
+    fapi::Target l_target_centaur;
+        rc = fapiGetParentChip(i_target_mba, l_target_centaur);
+    if(rc) break;
+        uint8_t ec_tfaw_16_problem;
+        // need ATTRIBUTE for this....
+    rc = FAPI_ATTR_GET(ATTR_MSS_DISABLE1_REG_FIXED, &i_target_centaur, ec_tfaw_16_problem);
+    if(rc) break;
+*/
+                                if (p_o_atts->eff_dram_tfaw_u32 == 16)  // due to logic bug above
+                                {
+                                        p_o_atts->eff_dram_tfaw_u32 = 15;
+                                        FAPI_INF("setting tFAW to 15 due to bug");
+                                }
+                        FAPI_DBG("Attribute p_o_eff_dram_tfaw = %i",  p_o_atts->eff_dram_tfaw_u32);
+         } else {
+            FAPI_ERR("Incompatable DRAM generation on %s!",i_target_mba.toEcmdString());
+            uint8_t& DRAM_DEVICE_TYPE_0_0 = p_i_data->dram_device_type[0][0];
+            uint8_t& DRAM_DEVICE_TYPE_0_1 = p_i_data->dram_device_type[0][1];
+            uint8_t& DRAM_DEVICE_TYPE_1_0 = p_i_data->dram_device_type[1][0];
+            uint8_t& DRAM_DEVICE_TYPE_1_1 = p_i_data->dram_device_type[1][1];
+            FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_INCOMPATABLE_DRAM_GEN);
+            return rc;
+         }
 //------------------------------------------------------------------------------
         } // inner for loop
     } // outter for loop
 
     // Calculate CWL
-    if ((TWO_MHZ/p_i_mss_eff_config_data->mss_freq) >= 2500)
-    {
-        p_o_atts->eff_dram_cwl = 5;
-    }
-    else if ((TWO_MHZ/p_i_mss_eff_config_data->mss_freq) >= 1875)
-    {
-        p_o_atts->eff_dram_cwl = 6;
-    }
-    else if ((TWO_MHZ/p_i_mss_eff_config_data->mss_freq) >= 1500)
-    {
-        p_o_atts->eff_dram_cwl = 7;
-    }
-    else if ((TWO_MHZ/p_i_mss_eff_config_data->mss_freq) >= 1250)
-    {
-        p_o_atts->eff_dram_cwl = 8;
-    }
-    else if ((TWO_MHZ/p_i_mss_eff_config_data->mss_freq) >= 1070)
-    {
-        p_o_atts->eff_dram_cwl = 9;
-    }
-    else if ((TWO_MHZ/p_i_mss_eff_config_data->mss_freq) >= 935)
-    {
-        p_o_atts->eff_dram_cwl = 10;
-    }
-    else if ((TWO_MHZ/p_i_mss_eff_config_data->mss_freq) >= 833)
-    {
-        p_o_atts->eff_dram_cwl = 11;
-    }
-    else if ((TWO_MHZ/p_i_mss_eff_config_data->mss_freq) >= 750)
-    {
-        p_o_atts->eff_dram_cwl = 12;
-    }
-    else
-    {
-                const uint16_t& CWL_VAL = (TWO_MHZ/p_i_mss_eff_config_data->mss_freq);
-        FAPI_ERR("Error calculating CWL");
-        FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_CWL_CALC_ERR);
-        return rc;
+    if (p_i_data->dram_device_type[0][0] == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR3) {
+       if ((TWO_MHZ/p_i_mss_eff_config_data->mss_freq) >= 2500)
+       {
+           p_o_atts->eff_dram_cwl = 5;
+       }
+       else if ((TWO_MHZ/p_i_mss_eff_config_data->mss_freq) >= 1875)
+       {
+           p_o_atts->eff_dram_cwl = 6;
+       }
+       else if ((TWO_MHZ/p_i_mss_eff_config_data->mss_freq) >= 1500)
+       {
+           p_o_atts->eff_dram_cwl = 7;
+       }
+       else if ((TWO_MHZ/p_i_mss_eff_config_data->mss_freq) >= 1250)
+       {
+           p_o_atts->eff_dram_cwl = 8;
+       }
+       else if ((TWO_MHZ/p_i_mss_eff_config_data->mss_freq) >= 1070)
+       {
+           p_o_atts->eff_dram_cwl = 9;
+       }
+       else if ((TWO_MHZ/p_i_mss_eff_config_data->mss_freq) >= 935)
+       {
+           p_o_atts->eff_dram_cwl = 10;
+       }
+       else if ((TWO_MHZ/p_i_mss_eff_config_data->mss_freq) >= 833)
+       {
+           p_o_atts->eff_dram_cwl = 11;
+       }
+       else if ((TWO_MHZ/p_i_mss_eff_config_data->mss_freq) >= 750)
+       {
+           p_o_atts->eff_dram_cwl = 12;
+       }
+       else
+       {
+           const uint16_t& CWL_VAL = (TWO_MHZ/p_i_mss_eff_config_data->mss_freq);
+           FAPI_ERR("Error calculating CWL");
+           FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_CWL_CALC_ERR);
+           return rc;
+       }
+    } else if (p_i_data->dram_device_type[0][0] == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR4) {
+                // 1st set only
+                // need to look at this again...
+                if (p_i_mss_eff_config_data->mss_freq <= (1600 * 1.05)) // 1600 
+                {
+                        p_o_atts->eff_dram_cwl = 9;
+                }
+                else if (p_i_mss_eff_config_data->mss_freq <= (1866 * 1.05))    // 1866
+                {
+                        p_o_atts->eff_dram_cwl = 10;
+                }
+                else if (p_i_mss_eff_config_data->mss_freq <= (2133 * 1.05))    // 2133
+                {
+                        p_o_atts->eff_dram_cwl = 11;
+                }
+                else if (p_i_mss_eff_config_data->mss_freq <= (2400 * 1.05))    // 2400
+                {
+                        p_o_atts->eff_dram_cwl = 12;
+                }
+                else if (p_i_mss_eff_config_data->mss_freq <= (2666 * 1.05))    // 2666
+                {
+                        p_o_atts->eff_dram_cwl = 14;
+                }
+                else if (p_i_mss_eff_config_data->mss_freq <= (3200 * 1.05))    // 2666
+                {
+                        p_o_atts->eff_dram_cwl = 16;
+                }
+                else
+                {
+                   const uint16_t& CWL_VAL = (TWO_MHZ/p_i_mss_eff_config_data->mss_freq);
+                   FAPI_ERR("Error calculating CWL");
+                   FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_CWL_CALC_ERR);
+                   return rc;
+                }
+    } else {
+         FAPI_ERR("Incompatable DRAM generation on %s!",i_target_mba.toEcmdString());
+         uint8_t& DRAM_DEVICE_TYPE_0_0 = p_i_data->dram_device_type[0][0];
+         uint8_t& DRAM_DEVICE_TYPE_0_1 = p_i_data->dram_device_type[0][1];
+         uint8_t& DRAM_DEVICE_TYPE_1_0 = p_i_data->dram_device_type[1][0];
+         uint8_t& DRAM_DEVICE_TYPE_1_1 = p_i_data->dram_device_type[1][1];
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_INCOMPATABLE_DRAM_GEN);
+         return rc;
     }
 //------------------------------------------------------------------------------
     // Calculate ZQCAL Interval based on the following equation from Ken:
@@ -1849,8 +2375,23 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
                   FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_UDIMM_UNSUPPORTED_TYPE); return rc;
                }
             } else if ( p_o_atts->eff_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM ) {
-               FAPI_INF("Will set LR atts after orig eff_config functions");
-
+               if (p_o_atts->eff_dram_gen == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR3) {
+                  FAPI_INF("Will set LR atts after orig eff_config functions");
+               } else if (p_o_atts->eff_dram_gen == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4) {   // need to update this later...
+                  if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 4) {
+                        p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_TYPE_5C;
+                  } else {
+                     FAPI_INF("Will set LR atts after orig eff_config functions");
+                  }
+               } else {
+                  FAPI_ERR("Incompatable DRAM generation on %s!",i_target_mba.toEcmdString());
+                  uint8_t& DRAM_DEVICE_TYPE_0_0 = p_i_data->dram_device_type[0][0];
+                  uint8_t& DRAM_DEVICE_TYPE_0_1 = p_i_data->dram_device_type[0][1];
+                  uint8_t& DRAM_DEVICE_TYPE_1_0 = p_i_data->dram_device_type[1][0];
+                  uint8_t& DRAM_DEVICE_TYPE_1_1 = p_i_data->dram_device_type[1][1];
+                  FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_INCOMPATABLE_DRAM_GEN);
+                  return rc;
+               }
             } else {
                p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_UNDEFINED;
                FAPI_ERR("Currently unsupported DIMM_TYPE on %s!", i_target_mba.toEcmdString());
@@ -2057,6 +2598,12 @@ fapi::ReturnCode mss_eff_config_write_eff_atts(
         rc = FAPI_ATTR_SET(ATTR_EFF_DIMM_RANKS_CONFIGED, &i_target_mba,
                 p_i_atts->eff_dimm_ranks_configed);
         if(rc) break;
+        rc = FAPI_ATTR_SET(ATTR_LRDIMM_ADDITIONAL_CNTL_WORDS, &i_target_mba,
+                p_i_atts->eff_lrdimm_additional_cntl_words);
+        if(rc) break;
+        rc = FAPI_ATTR_SET(ATTR_EFF_LRDIMM_ADDITIONAL_CNTL_WORDS, &i_target_mba,
+                p_i_atts->eff_lrdimm_additional_cntl_words);
+        if(rc) break;
         rc = FAPI_ATTR_SET(ATTR_EFF_DIMM_RCD_CNTL_WORD_0_15, &i_target_mba,
                 p_i_atts->eff_dimm_rcd_cntl_word_0_15);
         if(rc) break;
@@ -2153,12 +2700,31 @@ fapi::ReturnCode mss_eff_config_write_eff_atts(
         rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_TRRD, &i_target_mba,
                 p_i_atts->eff_dram_trrd);
         if(rc) break;
+        // DDR4 only
+        // AST HERE: Need ATTR added
+        //rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_TRRD_L, &i_target_mba,
+        //        p_i_atts->eff_dram_trrd);
+        //if(rc) break;
+        // DDR4 only
+        rc = FAPI_ATTR_SET(ATTR_TCCD_L, &i_target_mba,
+                p_i_atts->eff_dram_tccdl);
+        if(rc) break;
+
+        rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_TCCD_L, &i_target_mba,
+                p_i_atts->eff_dram_tccdl);
+        if(rc) break;
+
         rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_TRTP, &i_target_mba,
                 p_i_atts->eff_dram_trtp);
         if(rc) break;
         rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_TWTR, &i_target_mba,
                 p_i_atts->eff_dram_twtr);
         if(rc) break;
+        // DDR4 only
+        // AST HERE: Need ATTR added
+        //rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_TWTRL, &i_target_mba,
+        //p_i_atts->eff_dram_twtrl);
+        //if(rc) break;
         rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_WIDTH, &i_target_mba,
                 p_i_atts->eff_dram_width);
         if(rc) break;
@@ -2182,9 +2748,9 @@ fapi::ReturnCode mss_eff_config_write_eff_atts(
         if(rc) break;
 
         // AST HERE: Needs SPD byte33[6:4], currently hard coded to 0, removed for GA1
-        //rc = FAPI_ATTR_SET(ATTR_EFF_NUM_DIES_PER_PACKAGE, &i_target_mba,
-        //        p_i_atts->eff_num_dies_per_package);
-        //if(rc) break;
+        rc = FAPI_ATTR_SET(ATTR_EFF_NUM_DIES_PER_PACKAGE, &i_target_mba,
+                p_i_atts->eff_num_dies_per_package);
+        if(rc) break;
 
         rc = FAPI_ATTR_SET(ATTR_EFF_NUM_DROPS_PER_PORT, &i_target_mba,
                 p_i_atts->eff_num_drops_per_port);
@@ -2194,9 +2760,9 @@ fapi::ReturnCode mss_eff_config_write_eff_atts(
         if(rc) break;
 
         // AST HERE: Needs source data, currently hard coded to 0, removed for GA1
-        //rc = FAPI_ATTR_SET(ATTR_EFF_NUM_PACKAGES_PER_RANK, &i_target_mba,
-        //        p_i_atts->eff_num_packages_per_rank);
-        //if(rc) break;
+        rc = FAPI_ATTR_SET(ATTR_EFF_NUM_PACKAGES_PER_RANK, &i_target_mba,
+                p_i_atts->eff_num_packages_per_rank);
+        if(rc) break;
 
         rc = FAPI_ATTR_SET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target_mba,
                 p_i_atts->eff_num_ranks_per_dimm);
@@ -2305,16 +2871,6 @@ fapi::ReturnCode mss_eff_config_write_eff_atts(
 //------------------------------------------------------------------------------
 fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
 {
-#ifdef FAPI_DDR4
-	fapi::ReturnCode rc;
-	rc = mss_eff_config_ddr4(i_target_mba);
-	if(rc)
-    {
-        FAPI_ERR("Error from mss_eff_config_ddr4()");
-        return rc;
-    }
-#endif
-#ifndef FAPI_DDR4
     /* Initialize Variables */
     const fapi::Target& TARGET_MBA = i_target_mba;
     fapi::ReturnCode rc;
@@ -2492,7 +3048,7 @@ fapi::ReturnCode mss_eff_config(const fapi::Target i_target_mba)
     delete p_l_mss_eff_config_data;
     delete p_l_spd_data;
     delete p_l_atts;
-#endif
+
     return rc;
 } // end mss_eff_config()
 } // extern "C"

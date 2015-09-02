@@ -28,6 +28,7 @@ ROOTPATH = ../../../../..
 MODULE = dram_training
 
 CFLAGS += $(if $(CONFIG_VPD_GETMACRO_USE_EFF_ATTR), -D FAPI_MSSLABONLY -D FAPI_LRDIMM)
+CFLAGS += -DFAPI_DDR4
 
 ##      support for Targeting and fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
@@ -79,6 +80,7 @@ OBJS += mss_mcbist_address.o
 OBJS += mss_lrdimm_funcs.o
 OBJS += cen_stopclocks.o
 OBJS += mss_ddr4_pda.o
+OBJS += mss_ddr4_funcs.o
 OBJS += mss_mrs6_DDR4.o
 
 #

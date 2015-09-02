@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/dram_training/mss_draminit_trainadv//mss_mrs6_DDR4.C $ */
+/* $Source: src/usr/hwpf/hwp/dram_training/mss_draminit_trainadv/mss_mrs6_DDR4.C $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,14 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mrs6_DDR4.C,v 1.4 2015/08/05 15:06:03 sglancy Exp $
+// $Id: mss_mrs6_DDR4.C,v 1.6 2015/09/04 02:03:31 kmack Exp $
 
 
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2007
 // *! All Rights Reserved -- Property of IBM
-// *! ***  ***
-
 
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
@@ -38,6 +36,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.05   | 09/03/15 | kmack   | RC updates
 //  1.04   | 08/05/15 | sglancy | Fixed FW compile error
 //  1.03   | 08/04/15 | sglancy | Changed to address FW comments
 //  1.02   | 05/07/15 | sglancy | Fixed enable disable bug and added 3DS support
@@ -75,11 +74,11 @@ for ( port_number = 0; port_number < 2; port_number++)
             }
 
         }
-		
+
 // Execute the contents of CCS array
         if (ccs_inst_cnt  > 0)
         {
-	    // Set the End bit on the last CCS Instruction
+            // Set the End bit on the last CCS Instruction
             rc = mss_ccs_set_end_bit( i_target, ccs_inst_cnt-1);
             if(rc)
             {
@@ -95,9 +94,9 @@ for ( port_number = 0; port_number < 2; port_number++)
             }
 
             ccs_inst_cnt = 0;
-        }		
-		
-	  return rc;
+        }
+
+          return rc;
 
 }
 
@@ -133,7 +132,7 @@ fapi::ReturnCode add_nop_to_ccs(fapi::Target& i_target_mba, ecmdDataBufferBase &
    //Buffer conversions from inputs
    l_ecmd_rc |= addr_16.reverse();
    l_ecmd_rc |= bank_3.insertFromRight(bank, 0, 3);
-   l_ecmd_rc |= bank_3.reverse();  //Banks are 0:2 
+   l_ecmd_rc |= bank_3.reverse();  //Banks are 0:2
    l_ecmd_rc |= csn_8.flushTo1();
    l_ecmd_rc |= csn_8.clearBit(rank);
 
@@ -142,7 +141,7 @@ fapi::ReturnCode add_nop_to_ccs(fapi::Target& i_target_mba, ecmdDataBufferBase &
    l_ecmd_rc |= rasn_1.setBit(0);
    l_ecmd_rc |= casn_1.setBit(0);
    l_ecmd_rc |= wen_1.setBit(0);
-   
+
    l_ecmd_rc |= read_compare_1.clearBit(0);
 
    //Final setup
@@ -185,13 +184,13 @@ fapi::ReturnCode add_nop_to_ccs(fapi::Target& i_target_mba, ecmdDataBufferBase &
 ReturnCode mss_mr6_loader( fapi::Target& i_target,uint32_t i_port_number,uint32_t& io_ccs_inst_cnt)
 {
 
-    const uint8_t MRS6_BA = 6;    
+    const uint8_t MRS6_BA = 6;
     uint32_t dimm_number;
     uint32_t rank_number;
-    ReturnCode rc;  
+    ReturnCode rc;
     ReturnCode rc_buff;
     uint32_t rc_num = 0;
-	uint8_t tmod_delay = 12; 
+        uint8_t tmod_delay = 12;
     ecmdDataBufferBase data_buffer_64(64);
     ecmdDataBufferBase address_16(16);
     ecmdDataBufferBase bank_3(3);
@@ -210,7 +209,8 @@ ReturnCode mss_mr6_loader( fapi::Target& i_target,uint32_t i_port_number,uint32_
     ecmdDataBufferBase odt_4(4);
     rc_num = rc_num | odt_4.clearBit(0,4);
     ecmdDataBufferBase ddr_cal_type_4(4);
-	uint32_t instruction_number;
+
+    uint32_t instruction_number;
     ecmdDataBufferBase num_idles_16(16);
     ecmdDataBufferBase num_repeat_16(16);
     ecmdDataBufferBase data_20(20);
@@ -218,18 +218,18 @@ ReturnCode mss_mr6_loader( fapi::Target& i_target,uint32_t i_port_number,uint32_
     ecmdDataBufferBase rank_cal_4(4);
     ecmdDataBufferBase ddr_cal_enable_1(1);
     ecmdDataBufferBase ccs_end_1(1);
-    ecmdDataBufferBase mrs0(16); 
+    ecmdDataBufferBase mrs0(16);
     ecmdDataBufferBase mrs1(16);
     ecmdDataBufferBase mrs2(16);
     ecmdDataBufferBase mrs3(16);
     ecmdDataBufferBase mrs4(16);
     ecmdDataBufferBase mrs5(16);
     ecmdDataBufferBase mrs6(16);
-    
+
     uint16_t MRS6 = 0;
 
     ecmdDataBufferBase data_buffer(64);
-	instruction_number = 0;
+    instruction_number = 0;
 
     uint16_t num_ranks = 0;
 
@@ -252,30 +252,49 @@ ReturnCode mss_mr6_loader( fapi::Target& i_target,uint32_t i_port_number,uint32_
     if(rc) return rc;
 
 
-    // WORKAROUNDS 
+    // WORKAROUNDS
     rc = fapiGetScom(i_target, CCS_MODEQ_AB_REG_0x030106A7, data_buffer);
     if(rc) return rc;
     //Setting up CCS mode
     rc_num = rc_num | data_buffer.setBit(51);
+    if (rc_num)
+    {
+        FAPI_ERR( "mss_mr6_loader: Error setting up buffers");
+        rc_buff.setEcmdError(rc_num);
+        return rc_buff;
+    }
     rc = fapiPutScom(i_target, CCS_MODEQ_AB_REG_0x030106A7, data_buffer);
     if(rc) return rc;
 
-	if(i_port_number==0){
+        if(i_port_number==0){
     rc = fapiGetScom(i_target,DPHY01_DDRPHY_WC_CONFIG3_P0_0x8000CC050301143F, data_buffer);
     if(rc) return rc;
     //Setting up CCS mode
     rc_num = rc_num | data_buffer.clearBit(48);
+    if (rc_num)
+    {
+        FAPI_ERR( "mss_mr6_loader: Error setting up buffers");
+        rc_buff.setEcmdError(rc_num);
+        return rc_buff;
+    }
     rc = fapiPutScom(i_target,DPHY01_DDRPHY_WC_CONFIG3_P0_0x8000CC050301143F, data_buffer);
     if(rc) return rc;
-	}else{
-	
-	rc = fapiGetScom(i_target,DPHY01_DDRPHY_WC_CONFIG3_P1_0x8001CC050301143F, data_buffer);
+        }
+        else{
+
+        rc = fapiGetScom(i_target,DPHY01_DDRPHY_WC_CONFIG3_P1_0x8001CC050301143F, data_buffer);
     if(rc) return rc;
     //Setting up CCS mode
     rc_num = rc_num | data_buffer.clearBit(48);
+    if (rc_num)
+    {
+        FAPI_ERR( "mss_mr6_loader: Error setting up buffers");
+        rc_buff.setEcmdError(rc_num);
+        return rc_buff;
+    }
     rc = fapiPutScom(i_target,DPHY01_DDRPHY_WC_CONFIG3_P1_0x8001CC050301143F, data_buffer);
     if(rc) return rc;
-	}
+        }
 
     //Lines commented out in the following section are waiting for xml attribute adds
 
@@ -284,8 +303,8 @@ ReturnCode mss_mr6_loader( fapi::Target& i_target,uint32_t i_port_number,uint32_
     if(rc) return rc;
 
     FAPI_INF( "Stack Type: %d\n", dram_stack[0][0]);
-    
-	
+
+
     //MRS6
     uint8_t vrefdq_train_value[2][2][4]; //vrefdq_train value   -  NEW
     rc = FAPI_ATTR_GET( ATTR_VREF_DQ_TRAIN_VALUE, &i_target, vrefdq_train_value);
@@ -296,7 +315,7 @@ ReturnCode mss_mr6_loader( fapi::Target& i_target,uint32_t i_port_number,uint32_
     uint8_t vrefdq_train_enable[2][2][4]; //vrefdq_train enable  -  NEW
     rc = FAPI_ATTR_GET( ATTR_VREF_DQ_TRAIN_ENABLE, &i_target, vrefdq_train_enable);
     if(rc) return rc;
-    
+
     FAPI_INF("enable attribute %d",vrefdq_train_enable[0][0][0]);
 
 
@@ -306,23 +325,23 @@ ReturnCode mss_mr6_loader( fapi::Target& i_target,uint32_t i_port_number,uint32_
     if(rc) return rc;
     if (tccd_l == 4)
     {
-	tccd_l = 0x00;
+        tccd_l = 0x00;
     }
     else if (tccd_l == 5)
     {
-	tccd_l = 0x80;
+        tccd_l = 0x80;
     }
     else if (tccd_l == 6)
     {
-	tccd_l = 0x40;
-    }    
+        tccd_l = 0x40;
+    }
     else if (tccd_l == 7)
     {
-	tccd_l = 0xC0;
+        tccd_l = 0xC0;
     }
     else if (tccd_l == 8)
     {
-	tccd_l = 0x20;
+        tccd_l = 0x20;
     }
 
     // Raise CKE high with NOPS, waiting min Reset CKE exit time (tXPR) - 400 cycles
@@ -331,6 +350,14 @@ ReturnCode mss_mr6_loader( fapi::Target& i_target,uint32_t i_port_number,uint32_
     rc_num = rc_num | address_16.clearBit(0, 16);
     rc_num = rc_num | odt_4.clearBit(0,4);
     rc_num = rc_num | num_idles_16.insertFromRight((uint32_t) 400, 0, 16);
+
+    if (rc_num)
+    {
+        FAPI_ERR( "mss_mr6_loader: Error setting up buffers");
+        rc_buff.setEcmdError(rc_num);
+        return rc_buff;
+    }
+
     rc = mss_ccs_inst_arry_0( i_target,
                               io_ccs_inst_cnt,
                               address_16,
@@ -343,7 +370,7 @@ ReturnCode mss_mr6_loader( fapi::Target& i_target,uint32_t i_port_number,uint32_
                               csn_8,
                               odt_4,
                               ddr_cal_type_4,
-                              i_port_number);	     
+                              i_port_number);
     if(rc) return rc;
     rc = mss_ccs_inst_arry_1( i_target,
                               io_ccs_inst_cnt,
@@ -353,7 +380,7 @@ ReturnCode mss_mr6_loader( fapi::Target& i_target,uint32_t i_port_number,uint32_
                               read_compare_1,
                               rank_cal_4,
                               ddr_cal_enable_1,
-                              ccs_end_1);  
+                              ccs_end_1);
     if(rc) return rc;
     io_ccs_inst_cnt ++;
 
@@ -376,38 +403,38 @@ ReturnCode mss_mr6_loader( fapi::Target& i_target,uint32_t i_port_number,uint32_
                     rc_num = rc_num | csn_8.setBit(0,8);
                     rc_num = rc_num | address_16.clearBit(0, 16);
 
-		    //MRS6
+                    //MRS6
 
-		    vrefdq_train_value[i_port_number][dimm_number][rank_number] = mss_reverse_8bits(vrefdq_train_value[i_port_number][dimm_number][rank_number]);
+                    vrefdq_train_value[i_port_number][dimm_number][rank_number] = mss_reverse_8bits(vrefdq_train_value[i_port_number][dimm_number][rank_number]);
 
-		    if (vrefdq_train_range[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VREF_DQ_TRAIN_RANGE_RANGE1)
-		    {
-			vrefdq_train_range[i_port_number][dimm_number][rank_number] = 0x00;
-		    }
-		    else if (vrefdq_train_range[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VREF_DQ_TRAIN_RANGE_RANGE2)
-		    {
-			vrefdq_train_range[i_port_number][dimm_number][rank_number] = 0xFF;
-		    }	
+                    if (vrefdq_train_range[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VREF_DQ_TRAIN_RANGE_RANGE1)
+                    {
+                        vrefdq_train_range[i_port_number][dimm_number][rank_number] = 0x00;
+                    }
+                    else if (vrefdq_train_range[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VREF_DQ_TRAIN_RANGE_RANGE2)
+                    {
+                        vrefdq_train_range[i_port_number][dimm_number][rank_number] = 0xFF;
+                    }
 
-		    if (vrefdq_train_enable[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_ENABLE)
-		    {
-			vrefdq_train_enable[i_port_number][dimm_number][rank_number] = 0xff;FAPI_INF("ENABLE is enabled");
-		    }
-		    else if (vrefdq_train_enable[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_DISABLE)
-		    {
-			vrefdq_train_enable[i_port_number][dimm_number][rank_number] = 0x00;FAPI_INF("DISABLE is enabled");
-		    }	
+                    if (vrefdq_train_enable[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_ENABLE)
+                    {
+                        vrefdq_train_enable[i_port_number][dimm_number][rank_number] = 0xff;FAPI_INF("ENABLE is enabled");
+                    }
+                    else if (vrefdq_train_enable[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_DISABLE)
+                    {
+                        vrefdq_train_enable[i_port_number][dimm_number][rank_number] = 0x00;FAPI_INF("DISABLE is enabled");
+                    }
 
                     rc_num = rc_num | mrs6.insert((uint8_t) vrefdq_train_value[i_port_number][dimm_number][rank_number], 0, 6);
                     rc_num = rc_num | mrs6.insert((uint8_t) vrefdq_train_range[i_port_number][dimm_number][rank_number], 6, 1);
                     rc_num = rc_num | mrs6.insertFromRight((uint8_t) vrefdq_train_enable[i_port_number][dimm_number][rank_number], 7, 1);
-		    
-		    rc_num = rc_num | mrs6.insert((uint8_t) 0x00, 8, 2);
-                    rc_num = rc_num | mrs6.insert((uint8_t) tccd_l, 10, 3);
-		    rc_num = rc_num | mrs6.insert((uint8_t) 0x00, 13, 2);
 
-        	    rc_num = rc_num | mrs6.extractPreserve(&MRS6, 0, 16, 0);
-	
+                    rc_num = rc_num | mrs6.insert((uint8_t) 0x00, 8, 2);
+                    rc_num = rc_num | mrs6.insert((uint8_t) tccd_l, 10, 3);
+                    rc_num = rc_num | mrs6.insert((uint8_t) 0x00, 13, 2);
+
+                    rc_num = rc_num | mrs6.extractPreserve(&MRS6, 0, 16, 0);
+
                    FAPI_INF( "MRS 6: 0x%04X", MRS6);
 
                     if (rc_num)
@@ -418,31 +445,24 @@ ReturnCode mss_mr6_loader( fapi::Target& i_target,uint32_t i_port_number,uint32_
                     }
 
                     // Only corresponding CS to rank
-                    rc_num = rc_num | csn_8.setBit(0,8); 
+                    rc_num = rc_num | csn_8.setBit(0,8);
                     rc_num = rc_num | csn_8.clearBit(rank_number+4*dimm_number);
-		    
-		    if (dram_stack[0][0] == ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS)
-		    {
-		       FAPI_INF( "=============  Got in the 3DS stack loop CKE !!!!=====================\n");		    
+
+                    if (dram_stack[0][0] == ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS)
+                    {
+                       FAPI_INF( "=============  Got in the 3DS stack loop CKE !!!!=====================\n");
                        rc_num = rc_num | csn_8.clearBit(2+4*dimm_number,2);
                        // I'm leaving this commented out - I need to double check it with Luke Mulkey to see which CS's are wired to which CKE's
-		       // rc_num = rc_num | cke_4.clearBit(1);
-		    }
-              
+                       // rc_num = rc_num | cke_4.clearBit(1);
+                    }
+
                     // Propogate through the 4 MRS cmds
                         // Copying the current MRS into address buffer matching the MRS_array order
-                        // Setting the bank address    
+                        // Setting the bank address
                             rc_num = rc_num | address_16.insert(mrs6, 0, 16, 0);
-			    rc_num = rc_num | bank_3.insert((uint8_t) MRS6_BA, 0, 1, 7);
+                            rc_num = rc_num | bank_3.insert((uint8_t) MRS6_BA, 0, 1, 7);
                             rc_num = rc_num | bank_3.insert((uint8_t) MRS6_BA, 1, 1, 6);
                             rc_num = rc_num | bank_3.insert((uint8_t) MRS6_BA, 2, 1, 5);
-                        
-			
-			if (( address_mirror_map[i_port_number][dimm_number] & (0x08 >> rank_number) ) && (is_sim == 0))
-			{
-                            rc = mss_address_mirror_swizzle(i_target, i_port_number, dimm_number, rank_number, address_16, bank_3);
-				if(rc) return rc;
-			}
 
                         if (rc_num)
                         {
@@ -450,7 +470,14 @@ ReturnCode mss_mr6_loader( fapi::Target& i_target,uint32_t i_port_number,uint32_
                             rc_buff.setEcmdError(rc_num);
                             return rc_buff;
                         }
-                        // Send out to the CCS array 
+
+                        if (( address_mirror_map[i_port_number][dimm_number] & (0x08 >> rank_number) ) && (is_sim == 0))
+                        {
+                            rc = mss_address_mirror_swizzle(i_target, i_port_number, dimm_number, rank_number, address_16, bank_3);
+                                if(rc) return rc;
+                        }
+
+                        // Send out to the CCS array
                         rc = mss_ccs_inst_arry_0( i_target,
                                           io_ccs_inst_cnt,
                                           address_16,
@@ -476,9 +503,9 @@ ReturnCode mss_mr6_loader( fapi::Target& i_target,uint32_t i_port_number,uint32_
                                           ccs_end_1);
                         if(rc) return rc;
                         io_ccs_inst_cnt ++;
-					
-				                    // Address inversion for RCD
-                    if ( (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) || (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_RDIMM || dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) )  
+
+                                                    // Address inversion for RCD
+                    if ( (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) || (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_RDIMM || dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) )
                     {
                        FAPI_INF( "Sending out MRS with Address Inversion to B-side DRAMs\n");
 
@@ -487,35 +514,34 @@ ReturnCode mss_mr6_loader( fapi::Target& i_target,uint32_t i_port_number,uint32_
                            // Copying the current MRS into address buffer matching the MRS_array order
                            // Setting the bank address
                                rc_num = rc_num | address_16.insert(mrs6, 0, 16, 0);
-   			       rc_num = rc_num | bank_3.insert((uint8_t) MRS6_BA, 0, 1, 7);
+                               rc_num = rc_num | bank_3.insert((uint8_t) MRS6_BA, 0, 1, 7);
                                rc_num = rc_num | bank_3.insert((uint8_t) MRS6_BA, 1, 1, 6);
                                rc_num = rc_num | bank_3.insert((uint8_t) MRS6_BA, 2, 1, 5);
 
-                           // Indicate B-Side DRAMS BG1=1 
+                           // Indicate B-Side DRAMS BG1=1
                            rc_num = rc_num | address_16.setBit(15);  // Set BG1 = 1
- 
+
                            rc_num = rc_num | address_16.flipBit(3,7); // Invert A3:A9
                            rc_num = rc_num | address_16.flipBit(11);  // Invert A11
                            rc_num = rc_num | address_16.flipBit(13);  // Invert A13
                            rc_num = rc_num | address_16.flipBit(14);  // Invert A17
                            rc_num = rc_num | bank_3.flipBit(0,3);     // Invert BA0,BA1,BG0
 
-   
-                           if (( address_mirror_map[i_port_number][dimm_number] & (0x08 >> rank_number) ) && (is_sim == 0))
-                           {
-                               rc = mss_address_mirror_swizzle(i_target, i_port_number, dimm_number, rank_number, address_16, bank_3);
-                               if(rc) return rc;
-                           }
-  
-   
+
                            if (rc_num)
                            {
                                FAPI_ERR( " Error setting up buffers");
                                rc_buff.setEcmdError(rc_num);
                                return rc_buff;
                            }
-                   
-                           // Send out to the CCS array 
+
+                           if (( address_mirror_map[i_port_number][dimm_number] & (0x08 >> rank_number) ) && (is_sim == 0))
+                           {
+                               rc = mss_address_mirror_swizzle(i_target, i_port_number, dimm_number, rank_number, address_16, bank_3);
+                               if(rc) return rc;
+                           }
+
+                           // Send out to the CCS array
                            rc = mss_ccs_inst_arry_0( i_target,
                                              io_ccs_inst_cnt,
                                              address_16,
@@ -542,7 +568,7 @@ ReturnCode mss_mr6_loader( fapi::Target& i_target,uint32_t i_port_number,uint32_
                            if(rc) return rc;
                            io_ccs_inst_cnt ++;
 
-					   
+
                  }
 instruction_number = io_ccs_inst_cnt;
 
@@ -550,11 +576,11 @@ rc = add_nop_to_ccs (i_target, address_16,instruction_number,rank_number,MRS6_BA
 io_ccs_inst_cnt = instruction_number;
 io_ccs_inst_cnt++;
 if (rc) return rc;
-				 
+
             }
         }
     }
-	
+
 
 
 

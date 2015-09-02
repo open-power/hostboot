@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2013,2015                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -21,7 +23,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-<!-- $Id: memory_mss_eff_grouping.xml,v 1.3 2014/04/10 18:51:55 jdsloat Exp $ -->
+<!-- $Id: memory_mss_eff_grouping.xml,v 1.6 2015/07/15 21:41:12 asaetow Exp $ -->
 <!-- For file ../../ipl/fapi/mss_eff_grouping.C -->
 
 <hwpError>
@@ -95,8 +97,18 @@
         <procedure>MEMORY_PLUGGING_ERROR</procedure>
         <priority>HIGH</priority>
     </callout>
+    <callout>
+        <childTargets>
+        <parent>MEMBUF</parent>
+        <childType>TARGET_TYPE_DIMM</childType>
+        </childTargets> 
+        <priority>LOW</priority>
+    </callout>
     <deconfigure>
-        <target>MEMBUF</target>
+        <childTargets>
+        <parent>MEMBUF</parent>
+        <childType>TARGET_TYPE_DIMM</childType>
+        </childTargets>
     </deconfigure>
 </hwpError>
 

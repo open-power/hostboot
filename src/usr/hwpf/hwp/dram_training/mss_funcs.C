@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,13 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_funcs.C,v 1.38 2014/04/01 15:24:50 jdsloat Exp $
+// $Id: mss_funcs.C,v 1.43 2015/09/10 14:57:26 thi Exp $
 /* File mss_funcs.C created by SLOAT JACOB D. (JAKE),2D3970 on Fri Apr 22 2011. */
 
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2007
 // *! All Rights Reserved -- Property of IBM
-// *! ***  ***
 //------------------------------------------------------------------------------
 // *! TITLE : mss_funcs.C
 // *! DESCRIPTION : Tools for centaur procedures
@@ -45,6 +44,11 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.43   | thi      |10-SEP-15| Fixed more RC stuff
+//  1.42   | kmack    |03-SEP-15| Fixed up some RC stuff
+//  1.41   | sglancy  |21-AUG-15| Fixed ODT initialization bug - ODT must be held low through ZQ cal
+//  1.40   | sglancy  |09-JUL-15| Added fixes to ZQ cal bug
+//  1.39   | sglancy  |27-MAY-15| Added fixes to ZQ cal for 3DS DIMMs
 //  1.38   | jdsloat  |01-APL-14| RAS review edits/changes
 //  1.37   | jdsloat  |28-MAR-14| RAS review edits/changes
 //  1.36   | kcook    | 03/12/14| Added check for DDR3 LRDIMM during mss_execut_zq_cal.
@@ -66,12 +70,12 @@
 //  1.20   | jdsloat  | 2/16/12 | Initialize rc_num
 //  1.19   | 2/14/12  |  jdsloat| MBA translation, elminate unnecesary RC returns, got rid of some port arguments
 //  1.18   | 2/08/12  |  jdsloat| Target to Target&, Added Error reporting
-//  1.17   | 2/02/12  |  jdsloat| Initialized reg_address to 0 
+//  1.17   | 2/02/12  |  jdsloat| Initialized reg_address to 0
 //  1.16   | 1/19/12  |  jdsloat| tabs to 4 spaces - properly, cke fix in mss_ccs_inst_arry_0
 //  1.15   | 1/16/12  |  jdsloat| tabs to 4 spaces
 //  1.14   | 1/13/12  |  jdsloat| Capatilization, curley brackets, "mss_" prefix, adding rc checks, argument prefixes, includes, RC checks
 //  1.13   | 1/6/12   |  jdsloat| Got rid of Globals
-//  1.12   | 12/23/11 | bellows | Printout poll count 
+//  1.12   | 12/23/11 | bellows | Printout poll count
 //  1.11   | 12/20/11 | bellows | Fixed up ODT default value of 00 for CCS
 //  1.10   | 12/16/11 | bellows | Bit number correction for ras,cas,wen and cal_type
 //  1.9    | 12/14/11 | bellows | Fixed Bank and Address bit reversals restored others
@@ -132,12 +136,12 @@ ReturnCode mss_ccs_set_end_bit(
     i_instruction_number = i_instruction_number + 1;
 
     FAPI_INF( "Setting End Bit on instruction (NOP): %d.", i_instruction_number);
- 
+
     // Single NOP with CKE raised high and the end bit set high
     rc_num = rc_num | csn_8.setBit(0,8);
     rc_num = rc_num | address_16.clearBit(0, 16);
     rc_num = rc_num | num_idles_16.clearBit(0, 16);
-    rc_num = rc_num | odt_4.setBit(0,4);
+    rc_num = rc_num | odt_4.clearBit(0,4);
     rc_num = rc_num | csn_8.setBit(0,8);
     rc_num = rc_num | cke_4.setBit(0,4);
     rc_num = rc_num | wen_1.clearBit(0);
@@ -145,8 +149,12 @@ ReturnCode mss_ccs_set_end_bit(
     rc_num = rc_num | rasn_1.clearBit(0);
     rc_num = rc_num | ccs_end_1.setBit(0);
 
-    rc.setEcmdError(rc_num);
-    if(rc) return rc;
+    if (rc_num)
+    {
+        FAPI_ERR( "Error setting up buffers");
+        rc.setEcmdError(rc_num);
+        return rc;
+    }
 
     rc = mss_ccs_inst_arry_0( i_target,
                               i_instruction_number,
@@ -160,7 +168,7 @@ ReturnCode mss_ccs_set_end_bit(
                               csn_8,
                               odt_4,
                               ddr_cal_type_4,
-                              l_port_number);	
+                              l_port_number);
     if(rc) return rc;
     rc = mss_ccs_inst_arry_1( i_target,
                               i_instruction_number,
@@ -180,8 +188,8 @@ ReturnCode mss_ccs_set_end_bit(
 ReturnCode mss_address_mirror_swizzle(
             Target& i_target,
             uint32_t i_port,
-	    uint32_t i_dimm,
-	    uint32_t i_rank,
+            uint32_t i_dimm,
+            uint32_t i_rank,
             ecmdDataBufferBase& io_address,
             ecmdDataBufferBase& io_bank
               )
@@ -198,77 +206,97 @@ ReturnCode mss_address_mirror_swizzle(
     rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN, &i_target, dram_gen);
     if(rc) return rc;
 
-	FAPI_INF( "ADDRESS MIRRORING ON %s PORT%d DIMM%d RANK%d", i_target.toEcmdString(), i_port, i_dimm, i_rank);
+        FAPI_INF( "ADDRESS MIRRORING ON %s PORT%d DIMM%d RANK%d", i_target.toEcmdString(), i_port, i_dimm, i_rank);
 
-	rc_num = rc_num | io_address.extractPreserve(&mirror_mode_ad, 0, 16, 0);
-	FAPI_INF( "PRE - MIRROR MODE ADDRESS: 0x%04X", mirror_mode_ad);
-	rc_num = rc_num | io_bank.extractPreserve(&mirror_mode_ba, 0, 3, 0);
-	FAPI_INF( "PRE - MIRROR MODE BANK ADDRESS: 0x%04X", mirror_mode_ba);
+        rc_num = rc_num | io_address.extractPreserve(&mirror_mode_ad, 0, 16, 0);
+        FAPI_INF( "PRE - MIRROR MODE ADDRESS: 0x%04X", mirror_mode_ad);
+        rc_num = rc_num | io_bank.extractPreserve(&mirror_mode_ba, 0, 3, 0);
+        FAPI_INF( "PRE - MIRROR MODE BANK ADDRESS: 0x%04X", mirror_mode_ba);
 
-	//Initialize address and bank address as the same pre mirror mode swizzle
-	rc_num = rc_num | address_post_swizzle_16.insert(io_address, 0, 16, 0);
-	rc_num = rc_num | bank_post_swizzle_3.insert(io_bank, 0, 3, 0);
+        //Initialize address and bank address as the same pre mirror mode swizzle
+        rc_num = rc_num | address_post_swizzle_16.insert(io_address, 0, 16, 0);
+        rc_num = rc_num | bank_post_swizzle_3.insert(io_bank, 0, 3, 0);
 
-	if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3) 
-	{
-		//Swap A3 and A4
-		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 4, 1, 3);
-		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 3, 1, 4);
+        if (rc_num)
+        {
+            FAPI_ERR( "mss_address_mirror_swizzle: Error setting up buffers");
+            rc_buff.setEcmdError(rc_num);
+            return rc_buff;
+        }
+        if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3)
+        {
+                //Swap A3 and A4
+                rc_num = rc_num | address_post_swizzle_16.insert(io_address, 4, 1, 3);
+                rc_num = rc_num | address_post_swizzle_16.insert(io_address, 3, 1, 4);
 
-		//Swap A5 and A6
-		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 6, 1, 5);
-		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 5, 1, 6);
+                //Swap A5 and A6
+                rc_num = rc_num | address_post_swizzle_16.insert(io_address, 6, 1, 5);
+                rc_num = rc_num | address_post_swizzle_16.insert(io_address, 5, 1, 6);
 
-		//Swap A7 and A8
-		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 8, 1, 7);
-		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 7, 1, 8);
+                //Swap A7 and A8
+                rc_num = rc_num | address_post_swizzle_16.insert(io_address, 8, 1, 7);
+                rc_num = rc_num | address_post_swizzle_16.insert(io_address, 7, 1, 8);
 
-		//Swap BA0 and BA1
-		rc_num = rc_num | bank_post_swizzle_3.insert(io_bank, 1, 1, 0);
-		rc_num = rc_num | bank_post_swizzle_3.insert(io_bank, 0, 1, 1);
-	}
-	else if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
-	{
-		//Swap A3 and A4
-		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 4, 1, 3);
-		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 3, 1, 4);
+                //Swap BA0 and BA1
+                rc_num = rc_num | bank_post_swizzle_3.insert(io_bank, 1, 1, 0);
+                rc_num = rc_num | bank_post_swizzle_3.insert(io_bank, 0, 1, 1);
 
-		//Swap A5 and A6
-		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 6, 1, 5);
-		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 5, 1, 6);
+                if (rc_num)
+                {
+                    FAPI_ERR( "mss_address_mirror_swizzle: Error setting up buffers");
+                    rc_buff.setEcmdError(rc_num);
+                    return rc_buff;
+                }
+        }
+        else if (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+        {
+                //Swap A3 and A4
+                rc_num = rc_num | address_post_swizzle_16.insert(io_address, 4, 1, 3);
+                rc_num = rc_num | address_post_swizzle_16.insert(io_address, 3, 1, 4);
 
-		//Swap A7 and A8
-		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 8, 1, 7);
-		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 7, 1, 8);
+                //Swap A5 and A6
+                rc_num = rc_num | address_post_swizzle_16.insert(io_address, 6, 1, 5);
+                rc_num = rc_num | address_post_swizzle_16.insert(io_address, 5, 1, 6);
 
-		//Swap A11 and A13
-		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 13, 1, 11);
-		rc_num = rc_num | address_post_swizzle_16.insert(io_address, 11, 1, 13);
+                //Swap A7 and A8
+                rc_num = rc_num | address_post_swizzle_16.insert(io_address, 8, 1, 7);
+                rc_num = rc_num | address_post_swizzle_16.insert(io_address, 7, 1, 8);
 
-		//Swap BA0 and BA1
-		rc_num = rc_num | bank_post_swizzle_3.insert(io_bank, 1, 1, 0);
-		rc_num = rc_num | bank_post_swizzle_3.insert(io_bank, 0, 1, 1);
+                //Swap A11 and A13
+                rc_num = rc_num | address_post_swizzle_16.insert(io_address, 13, 1, 11);
+                rc_num = rc_num | address_post_swizzle_16.insert(io_address, 11, 1, 13);
 
-		//Swap BG0 and BG1 (BA2 and ADDR 15)
-		rc_num = rc_num | bank_post_swizzle_3.insert(io_address, 2, 1, 15);
-		rc_num = rc_num | address_post_swizzle_16.insert(io_bank, 15, 1, 2);
-	}
+                //Swap BA0 and BA1
+                rc_num = rc_num | bank_post_swizzle_3.insert(io_bank, 1, 1, 0);
+                rc_num = rc_num | bank_post_swizzle_3.insert(io_bank, 0, 1, 1);
 
-	rc_num = rc_num | address_post_swizzle_16.extractPreserve(&mirror_mode_ad, 0, 16, 0);
-	FAPI_INF( "POST - MIRROR MODE ADDRESS: 0x%04X", mirror_mode_ad);
-	rc_num = rc_num | bank_post_swizzle_3.extractPreserve(&mirror_mode_ba, 0, 3, 0);
-	FAPI_INF( "POST - MIRROR MODE BANK ADDRESS: 0x%04X", mirror_mode_ba);
+                //Swap BG0 and BG1 (BA2 and ADDR 15)
+                rc_num = rc_num | bank_post_swizzle_3.insert(io_address, 2, 1, 15);
+                rc_num = rc_num | address_post_swizzle_16.insert(io_bank, 15, 1, 2);
 
-	//copy address and bank address back to the IO variables
-	rc_num = rc_num | io_address.insert(address_post_swizzle_16, 0, 16, 0);
-	rc_num = rc_num | io_bank.insert(bank_post_swizzle_3, 0, 3, 0);
+                if (rc_num)
+                {
+                    FAPI_ERR( "mss_address_mirror_swizzle: Error setting up buffers");
+                    rc_buff.setEcmdError(rc_num);
+                    return rc_buff;
+                }
+        }
 
-    if (rc_num)
-    {
-        FAPI_ERR( "Error setting up buffers");
-        rc_buff.setEcmdError(rc_num);
-        return rc_buff;
-    }
+        rc_num = rc_num | address_post_swizzle_16.extractPreserve(&mirror_mode_ad, 0, 16, 0);
+        FAPI_INF( "POST - MIRROR MODE ADDRESS: 0x%04X", mirror_mode_ad);
+        rc_num = rc_num | bank_post_swizzle_3.extractPreserve(&mirror_mode_ba, 0, 3, 0);
+        FAPI_INF( "POST - MIRROR MODE BANK ADDRESS: 0x%04X", mirror_mode_ba);
+
+        //copy address and bank address back to the IO variables
+        rc_num = rc_num | io_address.insert(address_post_swizzle_16, 0, 16, 0);
+        rc_num = rc_num | io_bank.insert(bank_post_swizzle_3, 0, 3, 0);
+
+        if (rc_num)
+        {
+            FAPI_ERR( "mss_address_mirror_swizzle: Error setting up buffers");
+            rc_buff.setEcmdError(rc_num);
+            return rc_buff;
+        }
 
     return rc;
 }
@@ -310,11 +338,12 @@ ReturnCode mss_ccs_inst_arry_0(
 
     if (i_port == 0xFFFFFFFF)
     {
-	i_port = 0;
+        i_port = 0;
     }
 
     reg_address = io_instruction_number + CCS_INST_ARRY0_AB_REG0_0x03010615;
 
+    rc_num = rc_num | data_buffer.flushTo0();
     rc_num = rc_num | data_buffer.insert(i_cke, 24, 4, 0);
     rc_num = rc_num | data_buffer.insert(i_cke, 28, 4, 0);
 
@@ -371,7 +400,7 @@ ReturnCode mss_ccs_inst_arry_1(
     //CCS_INST_ARRY_1( i_target, io_instruction_number, i_num_idles, i_num_repeat, i_data, i_read_compare, i_rank_cal, i_ddr_cal_enable, i_ccs_end);
     ReturnCode rc;
     ReturnCode rc_buff;
-    uint32_t rc_num = 0; 
+    uint32_t rc_num = 0;
     uint32_t reg_address = 0;
     ecmdDataBufferBase goto_inst(5);
 
@@ -418,7 +447,7 @@ ReturnCode mss_ccs_inst_arry_1(
 ReturnCode mss_ccs_load_data_pattern(
             Target& i_target,
             uint32_t io_instruction_number,
-	    mss_ccs_data_pattern data_pattern)
+            mss_ccs_data_pattern data_pattern)
 {
     //Example Use:
     //
@@ -426,19 +455,19 @@ ReturnCode mss_ccs_load_data_pattern(
 
     if (data_pattern == MSS_CCS_DATA_PATTERN_00)
       {
-	rc = mss_ccs_load_data_pattern(i_target, io_instruction_number, 0x00000000);
+        rc = mss_ccs_load_data_pattern(i_target, io_instruction_number, 0x00000000);
       }
     else if (data_pattern == MSS_CCS_DATA_PATTERN_0F)
       {
-	rc = mss_ccs_load_data_pattern(i_target, io_instruction_number, 0x00055555);
+        rc = mss_ccs_load_data_pattern(i_target, io_instruction_number, 0x00055555);
       }
     else if (data_pattern == MSS_CCS_DATA_PATTERN_F0)
       {
-	rc = mss_ccs_load_data_pattern(i_target, io_instruction_number, 0x000aaaaa);
+        rc = mss_ccs_load_data_pattern(i_target, io_instruction_number, 0x000aaaaa);
       }
     else if (data_pattern == MSS_CCS_DATA_PATTERN_FF)
       {
-	rc = mss_ccs_load_data_pattern(i_target, io_instruction_number, 0x000fffff);
+        rc = mss_ccs_load_data_pattern(i_target, io_instruction_number, 0x000fffff);
       }
 
     return rc;
@@ -448,13 +477,13 @@ ReturnCode mss_ccs_load_data_pattern(
 ReturnCode mss_ccs_load_data_pattern(
             Target& i_target,
             uint32_t io_instruction_number,
-	    uint32_t data_pattern)
+            uint32_t data_pattern)
 {
     //Example Use:
     //
     ReturnCode rc;
     ReturnCode rc_buff;
-    uint32_t rc_num = 0; 
+    uint32_t rc_num = 0;
     uint32_t reg_address = 0;
 
     if (io_instruction_number > 31)
@@ -469,16 +498,16 @@ ReturnCode mss_ccs_load_data_pattern(
       //read current array1 reg
       rc = fapiGetScom(i_target, reg_address, data_buffer);
       if(rc) return rc;
-      
+
       //modify data bits for specified pattern
       rc_num = rc_num | data_buffer.insertFromRight(data_pattern, 32, 20);
       if (rc_num)
-	{
+        {
         FAPI_ERR( "mss_ccs_load_data_pattern: Error setting up buffers");
         rc_buff.setEcmdError(rc_num);
         return rc_buff;
-	}
-      
+        }
+
       //write array1 back out
       rc = fapiPutScom(i_target, reg_address, data_buffer);
       if(rc) return rc;
@@ -595,7 +624,7 @@ ReturnCode mss_ccs_status_query( Target& i_target, mss_ccs_status_query_result& 
     {
         io_status = MSS_STAT_QUERY_PASS;
     }
-    else 
+    else
     {
         FAPI_INF("CCS Status Undetermined.");
     }
@@ -614,27 +643,27 @@ ReturnCode mss_ccs_fail_type(
 
     if (data_buffer.getBit(3))
     {
-	//DECONFIG and FFDC INFO
-	const fapi::Target & TARGET_MBA_ERROR = i_target;
-	const ecmdDataBufferBase & REG_CONTENTS = data_buffer;
+        //DECONFIG and FFDC INFO
+        const fapi::Target & TARGET_MBA_ERROR = i_target;
+        const ecmdDataBufferBase & REG_CONTENTS = data_buffer;
 
         FAPI_ERR("CCS returned a FAIL condtion of \"Read Miscompare\" ");
         FAPI_SET_HWP_ERROR(rc, RC_MSS_CCS_READ_MISCOMPARE);
-    } 
+    }
     else if (data_buffer.getBit(4))
     {
-	//DECONFIG and FFDC INFO
-	const fapi::Target & TARGET_MBA_ERROR = i_target;
-	const ecmdDataBufferBase & REG_CONTENTS = data_buffer;
+        //DECONFIG and FFDC INFO
+        const fapi::Target & TARGET_MBA_ERROR = i_target;
+        const ecmdDataBufferBase & REG_CONTENTS = data_buffer;
 
         FAPI_ERR("CCS returned a FAIL condition of \"UE or SUE Error\" ");
         FAPI_SET_HWP_ERROR(rc, RC_MSS_CCS_UE_SUE);
     }
     else if (data_buffer.getBit(5))
     {
-	//DECONFIG and FFDC INFO
-	const fapi::Target & TARGET_MBA_ERROR = i_target;
-	const ecmdDataBufferBase & REG_CONTENTS = data_buffer;
+        //DECONFIG and FFDC INFO
+        const fapi::Target & TARGET_MBA_ERROR = i_target;
+        const ecmdDataBufferBase & REG_CONTENTS = data_buffer;
 
         FAPI_ERR("CCS returned a FAIL condition of \"Calibration Operation Time Out\" ");
         FAPI_SET_HWP_ERROR(rc, RC_MSS_CCS_CAL_TIMEOUT);
@@ -668,35 +697,35 @@ ReturnCode mss_execute_ccs_inst_array(
 
     if (status == MSS_STAT_QUERY_FAIL)
     {
-        FAPI_ERR("CCS FAILED");    
+        FAPI_ERR("CCS FAILED");
         rc = mss_ccs_fail_type(i_target);
         if(rc) return rc;
         FAPI_ERR("CCS has returned a fail.");
     }
     else if (status == MSS_STAT_QUERY_IN_PROGRESS)
-    {        
+    {
         FAPI_ERR("CCS Operation Hung");
         FAPI_ERR("CCS has returned a IN_PROGRESS status and considered Hung.");
         rc = mss_ccs_fail_type(i_target);
         if(rc)
-	{
-	    return rc;
-	}
-	else
-	{
-	    //DECONFIG and FFDC INFO
-	    const fapi::Target & TARGET_MBA_ERROR = i_target;
+        {
+            return rc;
+        }
+        else
+        {
+            //DECONFIG and FFDC INFO
+            const fapi::Target & TARGET_MBA_ERROR = i_target;
 
             FAPI_ERR("Returning a CCS HUNG RC Value.");
-	    FAPI_SET_HWP_ERROR(rc, RC_MSS_CCS_HUNG);
-	    return rc;
-	}
+            FAPI_SET_HWP_ERROR(rc, RC_MSS_CCS_HUNG);
+            return rc;
+        }
     }
     else if (status == MSS_STAT_QUERY_PASS)
     {
         FAPI_INF("CCS Executed Successfully.");
     }
-    else 
+    else
     {
         FAPI_INF("CCS Status Undetermined.");
     }
@@ -759,24 +788,24 @@ ReturnCode mss_rcd_parity_check(
 
     if (rcd_parity_fail)
     {
-	//DECONFIG and FFDC INFO
-	const fapi::Target & TARGET_MBA_ERROR = i_target;
+        //DECONFIG and FFDC INFO
+        const fapi::Target & TARGET_MBA_ERROR = i_target;
 
         FAPI_ERR("Ports 0 and 1 has exceeded a maximum number of RCD Parity Errors.");
         FAPI_SET_HWP_ERROR(rc, RC_MSS_RCD_PARITY_ERROR_LIMIT);
     }
     else if ((port_0_error) && (i_port == 0))
     {
-	//DECONFIG and FFDC INFO
-	const fapi::Target & TARGET_MBA_ERROR = i_target;
+        //DECONFIG and FFDC INFO
+        const fapi::Target & TARGET_MBA_ERROR = i_target;
 
         FAPI_ERR("Port 0 has recorded an RCD Parity Error. ");
         FAPI_SET_HWP_ERROR(rc, RC_MSS_RCD_PARITY_ERROR_PORT0);
     }
     else if ((port_1_error) && (i_port == 1))
     {
-	//DECONFIG and FFDC INFO
-	const fapi::Target & TARGET_MBA_ERROR = i_target;
+        //DECONFIG and FFDC INFO
+        const fapi::Target & TARGET_MBA_ERROR = i_target;
 
         FAPI_ERR("Port 1 has recorded an RCD Parity Error. ");
         FAPI_SET_HWP_ERROR(rc, RC_MSS_RCD_PARITY_ERROR_PORT1);
@@ -805,23 +834,26 @@ ReturnCode mss_execute_zq_cal(
 
     uint32_t instruction_number = 0;
     ReturnCode rc;
+    ReturnCode rc_buff;
     uint32_t rc_num = 0;
 
+    //adds a NOP before ZQ cal
     ecmdDataBufferBase address_buffer_16(16);
-    rc_num = rc_num | address_buffer_16.setHalfWord(0, 0x0020); //Set A10 bit for ZQCal Long
+    rc_num = rc_num | address_buffer_16.setHalfWord(0, 0x0000); //Set A10 bit for ZQCal Long
     ecmdDataBufferBase bank_buffer_8(8);
     rc_num = rc_num | bank_buffer_8.flushTo0();
     ecmdDataBufferBase activate_buffer_1(1);
     rc_num = rc_num | activate_buffer_1.flushTo1();
     ecmdDataBufferBase rasn_buffer_1(1);
-    rc_num = rc_num | rasn_buffer_1.flushTo1(); //For ZQCal rasn = 1; casn = 1; wen = 0;
+    rc_num = rc_num | rasn_buffer_1.flushTo1(); //For NOP rasn = 1; casn = 1; wen = 1;
     ecmdDataBufferBase casn_buffer_1(1);
     rc_num = rc_num | casn_buffer_1.flushTo1();
     ecmdDataBufferBase wen_buffer_1(1);
-    rc_num = rc_num | wen_buffer_1.flushTo0();
+    rc_num = rc_num | wen_buffer_1.flushTo1();
     ecmdDataBufferBase cke_buffer_8(8);
     rc_num = rc_num | cke_buffer_8.flushTo1();
     ecmdDataBufferBase csn_buffer_8(8);
+    rc_num = rc_num | csn_buffer_8.flushTo1();;
     ecmdDataBufferBase odt_buffer_8(8);
     rc_num = rc_num | odt_buffer_8.flushTo0();
     ecmdDataBufferBase test_buffer_4(4);
@@ -840,7 +872,7 @@ ReturnCode mss_execute_zq_cal(
     ecmdDataBufferBase ddr_cal_enable_buffer_1(1);
     rc_num = rc_num | ddr_cal_enable_buffer_1.flushTo0();
     ecmdDataBufferBase ccs_end_buffer_1(1);
-    rc_num = rc_num | ccs_end_buffer_1.flushTo1();
+    rc_num = rc_num | ccs_end_buffer_1.flushTo0();
 
     ecmdDataBufferBase stop_on_err_buffer_1(1);
     rc_num = rc_num | stop_on_err_buffer_1.flushTo0();
@@ -849,17 +881,78 @@ ReturnCode mss_execute_zq_cal(
     ecmdDataBufferBase data_buffer_64(64);
     rc_num = rc_num | data_buffer_64.flushTo0();
 
+    if (rc_num)
+    {
+        FAPI_ERR( "mss_execute_zq_cal: Error setting up buffers");
+        rc_buff.setEcmdError(rc_num);
+        return rc_buff;
+    }
+
+    rc = mss_ccs_inst_arry_0(i_target, instruction_number, address_buffer_16, bank_buffer_8, activate_buffer_1, rasn_buffer_1, casn_buffer_1, wen_buffer_1, cke_buffer_8, csn_buffer_8, odt_buffer_8, test_buffer_4, i_port);
+    if(rc) return rc; //Error handling for mss_ccs_inst built into mss_funcs
+    rc = mss_ccs_inst_arry_1(i_target, instruction_number, num_idles_buffer_16, num_repeat_buffer_16, data_buffer_20, read_compare_buffer_1, rank_cal_buffer_3, ddr_cal_enable_buffer_1, ccs_end_buffer_1);
+    if(rc) return rc; //Error handling for mss_ccs_inst built into mss_funcs
+
+    rc = mss_ccs_inst_arry_0(i_target, instruction_number, address_buffer_16, bank_buffer_8, activate_buffer_1, rasn_buffer_1, casn_buffer_1, wen_buffer_1, cke_buffer_8, csn_buffer_8, odt_buffer_8, test_buffer_4, i_port);
+    if(rc) return rc; //Error handling for mss_ccs_inst built into mss_funcs
+    rc = mss_ccs_inst_arry_1(i_target, instruction_number, num_idles_buffer_16, num_repeat_buffer_16, data_buffer_20, read_compare_buffer_1, rank_cal_buffer_3, ddr_cal_enable_buffer_1, ccs_end_buffer_1);
+    if(rc) return rc; //Error handling for mss_ccs_inst built into mss_funcs
+
+    rc = mss_ccs_inst_arry_0(i_target, instruction_number, address_buffer_16, bank_buffer_8, activate_buffer_1, rasn_buffer_1, casn_buffer_1, wen_buffer_1, cke_buffer_8, csn_buffer_8, odt_buffer_8, test_buffer_4, i_port);
+    if(rc) return rc; //Error handling for mss_ccs_inst built into mss_funcs
+    rc = mss_ccs_inst_arry_1(i_target, instruction_number, num_idles_buffer_16, num_repeat_buffer_16, data_buffer_20, read_compare_buffer_1, rank_cal_buffer_3, ddr_cal_enable_buffer_1, ccs_end_buffer_1);
+    if(rc) return rc; //Error handling for mss_ccs_inst built into mss_funcs
+
+    instruction_number = 1;
+
+    //now sets up for ZQ CAL
+    rc_num = rc_num | address_buffer_16.setHalfWord(0, 0x0020); //Set A10 bit for ZQCal Long
+    rc_num = rc_num | bank_buffer_8.flushTo0();
+    rc_num = rc_num | activate_buffer_1.flushTo1();
+    rc_num = rc_num | rasn_buffer_1.flushTo1(); //For ZQCal rasn = 1; casn = 1; wen = 0;
+    rc_num = rc_num | casn_buffer_1.flushTo1();
+    rc_num = rc_num | wen_buffer_1.flushTo0();
+    rc_num = rc_num | cke_buffer_8.flushTo1();
+    rc_num = rc_num | odt_buffer_8.flushTo0();
+    rc_num = rc_num | test_buffer_4.flushTo0(); // 01XX:External ZQ calibration
+    rc_num = rc_num | test_buffer_4.setBit(1);
+    rc_num = rc_num | num_idles_buffer_16.setHalfWord(0, 0x0400); //1024 for ZQCal
+    rc_num = rc_num | num_repeat_buffer_16.flushTo0();
+    rc_num = rc_num | data_buffer_20.flushTo0();
+    rc_num = rc_num | read_compare_buffer_1.flushTo0();
+    rc_num = rc_num | rank_cal_buffer_3.flushTo0();
+    rc_num = rc_num | ddr_cal_enable_buffer_1.flushTo0();
+    rc_num = rc_num | ccs_end_buffer_1.flushTo0();
+    rc_num = rc_num | stop_on_err_buffer_1.flushTo0();
+    rc_num = rc_num | resetn_buffer_1.setBit(0);
+    rc_num = rc_num | data_buffer_64.flushTo0();
+
+    if (rc_num)
+    {
+        FAPI_ERR( "mss_execute_zq_cal: Error setting up buffers");
+        rc_buff.setEcmdError(rc_num);
+        return rc_buff;
+    }
+
+
     uint8_t current_rank = 0;
     uint8_t start_rank = 0;
+    uint8_t num_master_ranks_array[2][2];
     uint8_t num_ranks_array[2][2]; //num_ranks_array[port][dimm]
+    uint8_t stack_type[2][2];
     uint8_t dimm_type;
     uint8_t lrdimm_rank_mult_mode;
     uint8_t dram_gen = 0;
+    uint8_t rank_end = 0;
 
     rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN, &i_target, dram_gen);
     if(rc) return rc;
 
     rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target, num_ranks_array);
+    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_STACK_TYPE, &i_target, stack_type);
+    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, &i_target, num_master_ranks_array);
     if(rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target, dimm_type);
     if(rc) return rc;
@@ -882,18 +975,24 @@ ReturnCode mss_execute_zq_cal(
     {
         start_rank=(4 * dimm);
 
-        if ( (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) && (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3) ) 
+        if ( (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) && (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3) )
         {
            rc = FAPI_ATTR_GET(ATTR_LRDIMM_RANK_MULT_MODE, &i_target, lrdimm_rank_mult_mode);
            if(rc) return rc;
-           
+
            if ( num_ranks_array[i_port][dimm] == 8 && lrdimm_rank_mult_mode == 4)
            { // For LRDIMM 8 Rank, RM=4, CS0 and CS1 to execute ZQ cal
-              num_ranks_array[i_port][dimm] = 2;
+              rank_end = 2;
            }
         }
+        else if(stack_type[i_port][dimm] == ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS) {
+           rank_end = num_master_ranks_array[i_port][dimm];
+        }
+        else {
+           rank_end = num_ranks_array[i_port][dimm];
+        }
 
-        for(current_rank = start_rank; current_rank < start_rank + num_ranks_array[i_port][dimm]; current_rank++) {
+        for(current_rank = start_rank; current_rank < start_rank + rank_end; current_rank++) {
             FAPI_INF( "+++++++++++++++ Sending zqcal to port: %d rank: %d +++++++++++++++", i_port, current_rank);
             rc_num = rc_num | csn_buffer_8.flushTo1();
             rc_num = rc_num | csn_buffer_8.clearBit(current_rank);
@@ -909,8 +1008,10 @@ ReturnCode mss_execute_zq_cal(
             if(rc) return rc; //Error handling for mss_ccs_inst built into mss_funcs
             rc = mss_ccs_inst_arry_1(i_target, instruction_number, num_idles_buffer_16, num_repeat_buffer_16, data_buffer_20, read_compare_buffer_1, rank_cal_buffer_3, ddr_cal_enable_buffer_1, ccs_end_buffer_1);
             if(rc) return rc; //Error handling for mss_ccs_inst built into mss_funcs
+            rc = mss_ccs_set_end_bit(i_target,instruction_number);
+            if(rc) return rc;
             rc = mss_execute_ccs_inst_array(i_target, NUM_POLL, 60);
-	    instruction_number = 0;
+            instruction_number = 1;
             if(rc) return rc; //Error handling for mss_ccs_inst built into mss_funcs
         }
     }

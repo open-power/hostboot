@@ -308,6 +308,7 @@
     <attribute><id>SBE_MASTER_INTR_SERVICE_DELAY_CYCLES</id></attribute>
     <attribute><id>SBE_MASTER_INTR_SERVICE_DELAY_US</id></attribute>
     <attribute><id>CLEAR_DIMM_SPD_ENABLE</id></attribute>
+    <attribute><id>MRW_MCS_PREFETCH_RETRY_THRESHOLD</id></attribute>
 </targetType>
 
 <targetType>
@@ -1181,6 +1182,10 @@
     <attribute><id>MSS_POWER_SLOPE2</id></attribute>
     <attribute><id>MSS_POWER_INT</id></attribute>
     <attribute><id>MSS_POWER_INT2</id></attribute>
+    <attribute><id>MSS_TOTAL_POWER_SLOPE</id></attribute>
+    <attribute><id>MSS_TOTAL_POWER_SLOPE2</id></attribute>
+    <attribute><id>MSS_TOTAL_POWER_INT</id></attribute>
+    <attribute><id>MSS_TOTAL_POWER_INT2</id></attribute>
     <attribute><id>MSS_DIMM_MAXBANDWIDTH_GBS</id></attribute>
     <attribute><id>MSS_DIMM_MAXBANDWIDTH_MRS</id></attribute>
     <attribute><id>MSS_CHANNEL_MAXBANDWIDTH_GBS</id></attribute>
@@ -1330,10 +1335,32 @@
     <attribute><id>MSS_EFF_VPD_VERSION</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>MEM</default></attribute>
     <attribute><id>EFF_DIMM_RCD_CNTL_WORD_X</id></attribute>
-    <attribute><id>MSS_TOTAL_POWER_SLOPE</id></attribute>
-    <attribute><id>MSS_TOTAL_POWER_SLOPE2</id></attribute>
-    <attribute><id>MSS_TOTAL_POWER_INT</id></attribute>
-    <attribute><id>MSS_TOTAL_POWER_INT2</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC00</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC01</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC02</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC03</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC04</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC05</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC06_07</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC08</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC09</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC10</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC11</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC12</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC13</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC14</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC15</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC_1x</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC_2x</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC_3x</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC_4x</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC_5x</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC_6x</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC_7x</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC_8x</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC_9x</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC_Ax</id></attribute>
+    <attribute><id>EFF_DIMM_DDR4_RC_Bx</id></attribute>
     <attribute><id>EFF_DRAM_TCCD_L</id></attribute>
     <attribute><id>EFF_LRDIMM_WORD_X</id></attribute>
     <attribute><id>EFF_LRDIMM_ADDITIONAL_CNTL_WORDS</id></attribute>
@@ -1517,7 +1544,9 @@
     </attribute>
     <attribute><id>CDM_DOMAIN</id><default>MEM</default></attribute>
     <attribute><id>FRU_ID</id></attribute>
+
     <attribute><id>MSS_VREF_CAL_CNTL</id></attribute>
+
 </targetType>
 
 <!-- Centaur L4 -->

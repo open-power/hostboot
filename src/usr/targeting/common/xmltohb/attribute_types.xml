@@ -8410,7 +8410,7 @@ firmware notes: Used as override attribute for pstate procedure
 
 <attribute>
     <id>MSS_POWER_INT2</id>
-    <description>DIMM Power intercept value. Initialized and used by HWPs.</description>
+    <description>Supplier Power intercept value for dimm</description>
     <simpleType>
         <uint32_t>
         </uint32_t>
@@ -8421,6 +8421,74 @@ firmware notes: Used as override attribute for pstate procedure
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_MSS_POWER_INT2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_TOTAL_POWER_SLOPE</id>
+    <description>Master Total Power slope value for dimm</description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_TOTAL_POWER_SLOPE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_TOTAL_POWER_SLOPE2</id>
+    <description>Supplier Total Power slope value for dimm</description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_TOTAL_POWER_SLOPE2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_TOTAL_POWER_INT</id>
+    <description>Master Total Power intercept value for dimm</description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_TOTAL_POWER_INT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MSS_TOTAL_POWER_INT2</id>
+    <description>Supplier Total Power intercept value for dimm</description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+        <array>2,2</array><!-- [drop][port] -->
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MSS_TOTAL_POWER_INT2</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -15799,16 +15867,17 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>MSS_VREF_CAL_CNTL</id>
-    <description>
-    Training Control over IPL - ENUM - 0x00=DISABLE /Skip V-ref Train;
-    0x01=DRAM - Enable V-Ref Train DRAM Level; 0x02=RANK Level Training;
-    0x03=PORT Level Training; 0x0     4=MBA Level; 0x05=CENTAUR level;
-    Default Value = 0x01;
+    <description>Training Control over IPL
+         - ENUM - 0x00=DISABLE /Skip V-ref Train; 0x01=DRAM - Enable V-Ref Train DRAM Level; 0x02=RANK Level Training;
+                  0x03=PORT Level Training; 0x04=MBA Level; 0x05=CENTAUR level;
+         Default Value = 0x01;
     </description>
     <simpleType>
-        <uint8_t></uint8_t>
+        <uint8_t>
+            <default>0x01</default>
+        </uint8_t>
     </simpleType>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>volatile</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -15819,17 +15888,15 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_DIMM_RCD_CNTL_WORD_X</id>
-    <description>
-    Additional RCD Control Word for DDR4. Used in mss_dram_init and is computed
-    in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or
-    odm_eff_cnfg. Each memory channel will have a value.
-    creator: mss_eff_cnfg
-    consumer: mss_dram_init
-    firmware notes: none
+    <description>Additional RCD Control Word for DDR4. Used in mss_dram_init and is computed in mss_eff_cnfg.
+                 Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
     </description>
     <simpleType>
         <uint64_t></uint64_t>
-        <array>2, 2</array>
+        <array>2,2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -15841,76 +15908,615 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 </attribute>
 
 <attribute>
-    <id>MSS_TOTAL_POWER_SLOPE</id>
-    <description>Master Total Power slope value for dimm</description>
+    <id>EFF_DIMM_DDR4_RC00</id>
+    <description>F0RC00: Global Features Control Word.For normal operation, output inversion is always enabled. For DIMM vendor test purpose, output
+                 inversion can be disabled. When disabled, register tPDM is not guaranteed to be met.
+                 NOTE: Default value - 0x00. Values Range from 0-8.
+                 00 - Normal Operation; 01 - Output Inversion Disabled; 02 - Weak Drive Enabled; 04 - A outputs disabled; 08 - B outputs disabled; So on.
+                 No need to calculate; User can override with desired experimental value.
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+     </description>
     <simpleType>
-        <uint32_t></uint32_t>
-        <array>2, 2</array>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_MSS_TOTAL_POWER_SLOPE</id>
+        <id>ATTR_EFF_DIMM_DDR4_RC00</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>MSS_TOTAL_POWER_SLOPE2</id>
-    <description>Supplier Total Power slope value for dimm</description>
+    <id>EFF_DIMM_DDR4_RC01</id>
+    <description>F0RC01 - Clock Driver Enable Control Word.1. Output clocks may be individually turned on or off to conserve power.
+                 The system must read the module SPD to determine which clock outputs are used by the module. The PLL remains locked
+                 on CK_t/CK_c unless the system stops the clock inputs to the DDR4RCD02 to enter the lowest power mode.
+                 Default value - 0x00. Values Range from 0-8. No need to calculate; User can override with desired experimental value.
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
     <simpleType>
-        <uint32_t></uint32_t>
-        <array>2, 2</array>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_MSS_TOTAL_POWER_SLOPE2</id>
+        <id>ATTR_EFF_DIMM_DDR4_RC01</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>MSS_TOTAL_POWER_INT</id>
-    <description>Master total power intercept value for dimm</description>
+    <id>EFF_DIMM_DDR4_RC02</id>
+    <description>F0RC02: Timing and IBT Control Word;
+                 Default value - 0x00. Values Range from 0-8. No need to calculate; User can override with desired experimental value.
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
     <simpleType>
-        <uint32_t></uint32_t>
-        <array>2, 2</array>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_MSS_TOTAL_POWER_INT</id>
+        <id>ATTR_EFF_DIMM_DDR4_RC02</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
-    <id>MSS_TOTAL_POWER_INT2</id>
-    <description>Supplier total power intercept value for dimm</description>
+    <id>EFF_DIMM_DDR4_RC03</id>
+    <description>F0RC03 - CA and CS Signals Driver Characteristics Control Word;
+                 Default value - 0x05 (Moderate Drive). Values Range from 00 to 0F. Has to be picked up from SPD byte 137, 1st Nibble for CS and CA.
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
     <simpleType>
-        <uint32_t></uint32_t>
-        <array>2, 2</array>
+        <uint8_t>
+            <default>5</default>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC03</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_RC04</id>
+    <description>F0RC04 - ODT and CKE Signals Driver Characteristics Control Word;
+                 Default value - 0x05 (Moderate Drive). Values Range from 00 to 0F. Has to be picked up from SPD byte 137, 2nd Nibble for ODT and CKE.
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>5</default>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC04</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_RC05</id>
+    <description>F0RC05 - Clock Driver Characteristics Control Word;
+                 Default value - 0x05 (Moderate Drive). Values Range from 00 to 0F. Has to be picked up from SPD byte 138, 2nd Nibble for CK.
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>5</default>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC05</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_RC06_07</id>
+    <description>F0RC06: Command Space Control Word definition;
+                 Default value - 0xF0 (NOP). Values Range from 00 to F0. F0RC07 not used. RDIMM
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0xF0</default>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC06_07</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_RC08</id>
+    <description>F0RC08: Command Space Control Word definition;
+                 Default value - 0x03. Values Range from 00 to 08 decimal. Check the stack height and calculate dynamically;
+                 00 = Stack height_8; 01 = Stack height_4; 02 = Stack height_2;
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0x03</default>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC08</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_RC09</id>
+    <description>F0RC09: Command Space Control Word definition;
+                 Default value - 0xF0 (NOP). Values Range from 00 to F0. No need to calculate; User can override with desired experimental value.
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0xF0</default>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC09</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_RC10</id>
+    <description>RDIMM Operating Speed;  Read from ATTR_MSS_FREQ;
+                 Default value - 00. Values Range from 00 to 09. No need to calculate; User can override with desired experimental value.
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_MSS_TOTAL_POWER_INT2</id>
+        <id>ATTR_EFF_DIMM_DDR4_RC10</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_RC11</id>
+    <description>Operating Voltage VDD and VrefCA Source Control Word; Read from ATTR_MSS_VOLT.
+                 Default value - 14. Values Range from 00 to 15 decimal.  No need to calculate; User can override with desired experimental value.
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>14</default>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC11</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_RC12</id>
+    <description>F0RC0C - Training Control Word;
+                 Default value - 00. Values Range from 00 to 07 decimal.No need to calculate; User can override with desired experimental value. 
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC12</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_RC13</id>
+    <description>F0RC0D - DIMM Configuration Control Word;
+                 Default value - 0x0B. Values Range from 00 to 15 decimal.
+                 Dynamically calculated using 4 bits[0:3] Bit 0 - Address Mirroring; Bit 1 - Rdimm(1)/Lrdimm (0) ; Bit 2 - N/A ; Bit 3 - CS Mode (Direct / Quad CS mode etc); 
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0x0B</default>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC13</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_RC14</id>
+    <description>F0RC0E - Parity Control Word;  Default value - 00. Check from ATTR_EFF_CA_PARITY and assign; Values Range from 00 to 0F. 
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC14</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_RC15</id>
+    <description>F0RC0F - Command Latency Adder Control Word;
+                 Default value - 04. Values Range from 00 to 04. No need to calculate; User can override with desired experimental value.
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0x04</default>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC15</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+
+<attribute>
+    <id>EFF_DIMM_DDR4_RC_1x</id>
+    <description>F0RC1x - Internal VrefCA Control Word;
+                 Default value - 00. Values Range from 00 to 3F.No need to calculate; User can override with desired experimental value. 
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC_1x</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_RC_2x</id>
+    <description>F0RC2x: I2C Bus Control Word;
+                 Default value - 00. Values Range from 00 to FF.No need to calculate; User can override with desired experimental value. 
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC_2x</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_RC_3x</id>
+    <description>F0RC3x - Fine Granularity RDIMM Operating Speed;
+                 Default value = (Operating Freq - 1250)/20. Values Range from 00 to 61 Hex. 
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC_3x</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_RC_4x</id>
+    <description>F0RC4x: CW Source Selection Control Word;
+                 Default value - 00. Values Range from 00 to FF. No need to calculate; User can override with desired experimental value.
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC_4x</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_RC_5x</id>
+    <description>F0RC5x: CW Destination Selection and Write/Read Additional QxODT[1:0] Signal High;
+                 Default value - 00. Values Range from 00 to FF. No need to calculate; User can override with desired experimental value.
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC_5x</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_RC_6x</id>
+    <description>F0RC6x: CW Data Control Word;
+                 Default value - 00. Values Range from 00 to FF.No need to calculate; User can override with desired experimental value. 
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC_6x</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_RC_7x</id>
+    <description>F0RC7x: IBT Control Word;
+                 Default value - 00. Values Range from 00 to FF.No need to calculate; User can override with desired experimental value.
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC_7x</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_RC_8x</id>
+    <description>F0RC8x: ODT Input Buffer/IBT, QxODT Output Buffer and Timing Control Word;
+                 Default value - 00. Values Range from 00 to FF. No need to calculate; User can override with desired experimental value.
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC_8x</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_RC_9x</id>
+    <description>F0RC9x1: QxODT[1:0] Write Pattern Control Word;
+                 Default value - 00. Values Range from 00 to FF.No need to calculate; User can override with desired experimental value. 
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC_9x</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_RC_Ax</id>
+    <description>F0RCAx1: QxODT[1:0] Read Pattern Control Word;
+                 Default value - 00. Values Range from 00 to FF. No need to calculate; User can override with desired experimental value. 
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC_Ax</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DIMM_DDR4_RC_Bx</id>
+    <description>F0RCBx: IBT and MRS Snoop Control Word;  Default value - 07. Values Range from 00 to FF. No need to calculate; User can override with desired experimental value. 
+                 creator: mss_eff_cnfg
+                 consumer: mss_dram_init
+                 firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DIMM_DDR4_RC_Bx</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
     <id>EFF_DRAM_TCCD_L</id>
-    <description>tccd_l. This is for DDR4 MRS6.  Computed in mss_eff_cnfg.
-    Each memory channel will have a value.
-    Creator: mss_eff_cnfg
-    Consumer:various
-    Firmware notes: none
+    <description>tccd_l. This is for DDR4 MRS6.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+                 Creator: mss_eff_cnfg
+                 Consumer:various
+                 Firmware notes: none
     </description>
     <simpleType>
         <uint8_t></uint8_t>
@@ -15926,12 +16532,10 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_LRDIMM_WORD_X</id>
-    <description>
-    Additional buffer control word for LRDIMM building of the BCW
-    </description>
+    <description>Additional buffer control word for LRDIMM building of the BCW</description>
     <simpleType>
         <uint64_t></uint64_t>
-        <array>2, 2</array>
+        <array>2,2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -15944,16 +16548,15 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_LRDIMM_ADDITIONAL_CNTL_WORDS</id>
-    <description>
-    LRDIMM additional RCD control words as set by DIMM SPD:
-    F[3,4]RC10, F[3,4]RC11, F[5,6]RC10, F[5,6]RC11, F[7,8]RC10,
-    F[7,8]RC11, F[9,10]RC10, F[9,10]RC11,F[1]RC8, F[3]RC9, F[3]RC8,
-    F[1]RC11, F[1]RC12, F[1]RC13, F[1]RC14, F[1]RC15.
-    Eff config should set this up
+    <description>LRDIMM additional RCD control words as set by DIMM SPD:
+                 F[3,4]RC10, F[3,4]RC11, F[5,6]RC10, F[5,6]RC11, F[7,8]RC10,
+                 F[7,8]RC11, F[9,10]RC10, F[9,10]RC11, F[1]RC8, F[3]RC9,
+                 F[3]RC8, F[1]RC11, F[1]RC12, F[1]RC13, F[1]RC14, F[1]RC15.
+                 Eff config should set this up.
     </description>
     <simpleType>
         <uint64_t></uint64_t>
-        <array>2, 2</array>
+        <array>2,2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -15966,10 +16569,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>MCBIST_DDR4_PDA_ENABLE</id>
-    <description>
-        Controls PDA train enable or PBA. 00 - Disable;
-        01 - PDA; 02 - PBA(Lrdimm)
-    </description>
+    <description>Controls PDA train enable or PBA. 00 - Disable; 01 - PDA; 02 - PBA(Lrdimm)</description>
     <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
@@ -15982,6 +16582,23 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>MRW_MCS_PREFETCH_RETRY_THRESHOLD</id>
+    <description>
+    Option to control MCS prefetch retry threshold, for performance
+    optimization. This attribute controls the number of retries in the
+    prefetch engine. Retry threshold available ranges from 16 to 30. Note:
+    Values outside those ranges will default to 30. In MRW.
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MRW_MCS_PREFETCH_RETRY_THRESHOLD</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>
-
-

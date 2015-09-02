@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training.C,v 1.94 2015/01/27 23:23:40 jdsloat Exp $
+// $Id: mss_draminit_training.C,v 1.101 2015/07/14 17:42:00 sglancy Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -30,6 +30,13 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|------------------------------------------------
+//  1.101  | sglancy  |14-JUL-15| Fixed compile issue
+//  1.100  | sglancy  |13-JUL-15| Fixed compile issue
+//  1.99   | sglancy  |13-JUL-15| Fixed LR DIMM order of operations and addressed FW comments
+//  1.98   | sglancy  |24-JUN-15| Added call to DQS offset function
+//  1.97   | sglancy  |10-JUN-15| Fixed BBM set code call - removed comment of code
+//  1.96   | sglancy  |27-MAY-15| Added changes for DDR4 3DS
+//  1.95   | sglancy  |12-MAY-15| Added DDR4 WR VREF set
 //  1.94   | jdsloat  |27-JAN-14| Addressed FW concerns from gerrit.
 //  1.93   | jdsloat  |22-JAN-14| Moved the initialization of rank_invalid within BYTE DISABLE WORKAROUND
 //  1.92   | jdsloat  |20-JAN-14| Added new workaround for BYTE DISABLE and for WR LVL DISABLE.  This affects  RAS/BBM work.  
@@ -176,7 +183,7 @@
 #include <mss_unmask_errors.H>
 #include <mss_lrdimm_funcs.H>
 #include "mss_access_delay_reg.H"
-
+#include <mss_mrs6_DDR4.H>
 #ifdef FAPI_LRDIMM
 #include <mss_lrdimm_ddr4_funcs.H>
 #endif
@@ -221,7 +228,6 @@ fapi::ReturnCode mss_dram_write_leveling(Target& i_target, uint32_t port)
 }
 #endif
 
-
 //------------End My Includes-------------------------------------------
 
 //----------------------------------------------------------------------
@@ -252,6 +258,10 @@ enum mss_draminit_training_result
 
 
 extern "C" {
+
+
+//Sets the DQS offset to be 16 instead of 8, recommended training settings
+fapi::ReturnCode mss_setup_dqs_offset(Target &i_target);
 
 using namespace fapi;
 
@@ -488,7 +498,6 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 
 
 
-
     if ( ( cal_steps_8.isBitSet(0) ) ||
 	 ( (cal_steps_8.isBitClear(0)) && (cal_steps_8.isBitClear(1)) &&
 	   (cal_steps_8.isBitClear(2)) && (cal_steps_8.isBitClear(3)) &&
@@ -503,15 +512,6 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 	    rc = mss_execute_zq_cal(i_target, port);
 	    if(rc) return rc;
 
-            // Should only be called for DDR4 LRDIMMs, training code is in development. Does not effect any other configs
-	    if ( (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4) &&
-                 (dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) )
-            {
-                 rc = mss_mrep_training(i_target, port);
-		 if(rc) return rc;
-		 rc = mss_mxd_training(i_target,port,0);
-		 if(rc) return rc;
-            }
 	}
 
         if ( (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR3) && 
@@ -523,7 +523,55 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
             rc = mss_execute_lrdimm_mb_dram_training(i_target);
             if (rc) return rc;
         }
+	//executes the following to ensure that DRAMS have a good intial WR VREF DQ
+	//1) enter training mode w/ old value (nominal VREF DQ)
+	//2) set value in training mode (nominal VREF DQ)
+	//3) exit training mode (nominal VREF DQ)
+	else if(dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4) {
+	   FAPI_INF("For DDR4, setting VREFDQ to have an initial value!!!!");
+	   uint8_t train_enable[2][2][4];
+	   uint8_t train_enable_override_on[2][2][4] ={{{ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_ENABLE,ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_ENABLE,ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_ENABLE,ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_ENABLE},{ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_ENABLE,ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_ENABLE,ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_ENABLE,ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_ENABLE}},{{ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_ENABLE,ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_ENABLE,ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_ENABLE,ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_ENABLE},{ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_ENABLE,ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_ENABLE,ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_ENABLE,ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_ENABLE}}};
+	   
+	   rc = FAPI_ATTR_GET( ATTR_VREF_DQ_TRAIN_ENABLE, &i_target, train_enable);
+           if(rc) return rc;
+	   
+	   rc = FAPI_ATTR_SET(ATTR_VREF_DQ_TRAIN_ENABLE, &i_target, train_enable_override_on);
+	   if(rc) return rc;
+	   
+	   //runs new values w/ train enable forces on
+	   FAPI_INF("RUN MRS6 1ST");
+	   rc = mss_mrs6_DDR4(  i_target);
+	   if(rc) return rc;
+	   FAPI_INF("RUN MRS6 2ND");
+	   rc = mss_mrs6_DDR4( i_target);
+	   if(rc) return rc;
+	   
+	   //set old train enable value
+	   rc = FAPI_ATTR_SET(ATTR_VREF_DQ_TRAIN_ENABLE, &i_target, train_enable);
+	   if(rc) return rc;
+	   
+	   FAPI_INF("RUN MRS6 3RD");
+	   rc = mss_mrs6_DDR4( i_target);
+	   if(rc) return rc;
+	   
+	   //sets up the DQS offset to be 16 instead of 8
+	   rc = mss_setup_dqs_offset(i_target);
+	   if(rc) return rc;
+	}
+	//have to do ZQ cal, then DDR4 training mode for initial VREF setup, then do LR training
+	for(port = 0; port < MAX_NUM_PORT; port++)
+	{
 
+            // Should only be called for DDR4 LRDIMMs, training code is in development. Does not effect any other configs
+	    if ( (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4) &&
+                 (dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) )
+            {
+                 rc = mss_mrep_training(i_target, port);
+		 if(rc) return rc;
+		 rc = mss_mxd_training(i_target,port,0);
+		 if(rc) return rc;
+            }
+	}
     }
 
     for(port = 0; port < MAX_NUM_PORT; port++)
@@ -7019,7 +7067,7 @@ ReturnCode getC4dq2reg(const Target & i_mba, const uint8_t i_port,
     }
 
     // get Centaur dq bitmap (C4 signal) order=[0:79], array of bytes
-    rc = dimmGetBadDqBitmap(i_mba, i_port, i_dimm, i_rank, l_bbm);
+    rc = dimmGetBadDqBitmap(i_mba, i_port, i_dimm, i_rank, l_bbm); 
     if (rc)
     {
 		FAPI_ERR("Error from dimmGetBadDqBitmap on port %i: "
@@ -7161,7 +7209,7 @@ ReturnCode setC4dq2reg(const Target &i_mba, const uint8_t i_port,
 
 
     // get Centaur dq bitmap (C4 signal) order=[0:79], array of bytes
-    rc = dimmGetBadDqBitmap(i_mba, i_port, i_dimm, i_rank, l_bbm);
+    rc = dimmGetBadDqBitmap(i_mba, i_port, i_dimm, i_rank, l_bbm); 
     if (rc)
     {
 		FAPI_ERR("Error from dimmGetBadDqBitmap on port %i: "
@@ -7262,6 +7310,42 @@ ReturnCode setC4dq2reg(const Target &i_mba, const uint8_t i_port,
 
 	return rc;
 } //end setC4dq2reg
+
+
+//Sets the DQS offset to be 16 instead of 8, recommended training settings
+fapi::ReturnCode mss_setup_dqs_offset(Target &i_target) {
+   fapi::ReturnCode rc;
+   uint32_t rc_num = 0;
+   ecmdDataBufferBase buffer(64);
+   uint64_t scom_addr_array[10] = {DPHY01_DDRPHY_DP18_DQSCLK_OFFSET_P0_0_0x800000370301143F , 
+      DPHY01_DDRPHY_DP18_DQSCLK_OFFSET_P0_1_0x800004370301143F , 
+      DPHY01_DDRPHY_DP18_DQSCLK_OFFSET_P0_2_0x800008370301143F , 
+      DPHY01_DDRPHY_DP18_DQSCLK_OFFSET_P0_3_0x80000C370301143F , 
+      DPHY01_DDRPHY_DP18_DQSCLK_OFFSET_P0_4_0x800010370301143F , 
+      DPHY01_DDRPHY_DP18_DQSCLK_OFFSET_P1_0_0x800100370301143F , 
+      DPHY01_DDRPHY_DP18_DQSCLK_OFFSET_P1_1_0x800104370301143F , 
+      DPHY01_DDRPHY_DP18_DQSCLK_OFFSET_P1_2_0x800108370301143F , 
+      DPHY01_DDRPHY_DP18_DQSCLK_OFFSET_P1_3_0x80010C370301143F , 
+      DPHY01_DDRPHY_DP18_DQSCLK_OFFSET_P1_4_0x800110370301143F};
+      
+   FAPI_INF("DDR4: setting up DQS offset to be 16");
+   for(uint8_t scom_addr = 0; scom_addr < 10; ++scom_addr) {
+      rc = fapiGetScom(i_target, scom_addr_array[scom_addr], buffer);
+      if(rc) return rc;
+      //Setting up CCS mode
+      rc_num = rc_num | buffer.insertFromRight ((uint32_t)16, 49, 7);
+      if (rc_num)
+      {
+         FAPI_ERR( "mss_setup_dqs: Error setting up buffers");
+    	 rc.setEcmdError(rc_num);
+    	 return rc;
+      }
+      rc = fapiPutScom(i_target, scom_addr_array[scom_addr], buffer);
+      if(rc) return rc;
+   }
+   
+   return rc;
+}
 
 
 } //end extern C
