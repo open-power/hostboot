@@ -216,6 +216,24 @@ public:
   // End Function Specification ****************************************
   //~ServiceDataCollector();
 
+    /**
+     * @brief Sets an SDC flag.
+     * @param i_flag The flag to set.
+     */
+    void setFlag( Flag i_flag ) { flags |= i_flag; }
+
+    /**
+     * @brief Clears an SDC flag.
+     * @param i_flag The flag to clear.
+     */
+    void clearFlag( Flag i_flag ) { flags &= ~i_flag; }
+
+    /**
+     * @param  i_flag The flag to query.
+     * @return True if the flag is set, false otherwise.
+     */
+    bool queryFlag( Flag i_flag ) const { return (0 != (flags & i_flag)); }
+
   /**
    Get access to the error signature object
    <ul>
@@ -315,7 +333,7 @@ public:
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-  bool IsAtThreshold(void) const { return (flags & AT_THRESHOLD)!=0 ? true:false; }
+  bool IsAtThreshold(void) const { return queryFlag(AT_THRESHOLD); }
 
   /**
    Query for need to terminate is machine
@@ -327,7 +345,7 @@ public:
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-  bool Terminate(void) const { return (flags & TERMINATE) != 0 ? true:false; }
+  bool Terminate(void) const { return queryFlag(TERMINATE); }
 
   /**
    Set the global attention type
@@ -403,7 +421,7 @@ public:
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-  bool IsDegraded(void) const { return (flags & DEGRADED)!=0 ? true:false; }
+  bool IsDegraded(void) const { return queryFlag(DEGRADED); }
 
   /**
    Get the mask ID to mask off the error when thresholding
@@ -427,7 +445,7 @@ public:
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-  void NoMfgTracking(void) { flags &= ~TRACKIT; }
+  void NoMfgTracking(void) { clearFlag(TRACKIT); }
 
   /**
    Query for need to track in manufacturing log
@@ -439,7 +457,7 @@ public:
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-  bool IsMfgTracking(void) const { return (flags & TRACKIT)!=0 ? true:false; }
+  bool IsMfgTracking(void) const { return queryFlag(TRACKIT); }
 
   /**
    Indicate that no system log should be generated
@@ -451,7 +469,7 @@ public:
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-  void Nologging(void) { flags &= ~LOGIT; }
+  void Nologging(void) { clearFlag(LOGIT); }
 
   /**
    Query for need to make a system error log
@@ -463,12 +481,12 @@ public:
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-  bool IsLogging(void) const { return (flags & LOGIT)!=0 ? true:false; }
+  bool IsLogging(void) const { return queryFlag(LOGIT); }
 
     /**
      * @brief Sets flag to indicate not to commit the error log.
      */
-    void DontCommitErrorLog() { flags |= DONT_COMMIT_ERRL; }
+    void DontCommitErrorLog() { setFlag(DONT_COMMIT_ERRL); }
 
     /**
      * @brief  Queries if the 'Don't Commit Error Log' flag is on.
@@ -477,7 +495,7 @@ public:
     bool IsDontCommitErrl() const
     {
         #ifndef ESW_SIM_COMPILE
-        return ( 0 != (flags & DONT_COMMIT_ERRL) );
+        return queryFlag(DONT_COMMIT_ERRL);
         #else
         return false;
         #endif
@@ -493,7 +511,7 @@ public:
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-  void SetServiceCall(void) { flags |= SERVICE_CALL; }
+  void SetServiceCall(void) { setFlag(SERVICE_CALL); }
 
   /**
    Query for need of a Service Call
@@ -505,7 +523,7 @@ public:
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-  bool IsServiceCall(void) const { return (flags & SERVICE_CALL)!=0 ? true:false; }
+  bool IsServiceCall(void) const { return queryFlag(SERVICE_CALL); }
 
   /**
    Indicate the chip where analysis begain
@@ -635,7 +653,7 @@ public:
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-  void SetSUE(void) { flags |= SUE; }
+  void SetSUE(void) { setFlag(SUE); }
 
   /**
    Query for Special Uncorrectable Error (SUE)
@@ -647,7 +665,7 @@ public:
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-  bool IsSUE(void) const { return (flags & SUE)!=0 ? true:false; }
+  bool IsSUE(void) const { return queryFlag(SUE); }
 
   /**
    Set Error type as Uncorrectable Recoverable Error
@@ -659,7 +677,7 @@ public:
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-  void SetUERE(void) { flags |= UERE; }
+  void SetUERE(void) { setFlag(UERE); }
 
   /**
    Query for Uncorrectable Recoverable Error (UERE)
@@ -671,42 +689,7 @@ public:
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-  bool IsUERE(void) const { return (flags & UERE)!=0 ? true:false;}
-
-  /**
-   Set a flag
-   <ul>
-   <br><b>Parameters:  </b> ServiceDataCollector::Flag
-   <br><b>Returns:     </b> Nothing.
-   <br><b>Requirements:</b> None
-   <br><b>Promises:    </b> ServiceDataCollector::Flag is true
-   <br><b>Exceptions:  </b> None.
-   </ul><br>
-   */
-  void SetFlag(Flag flag) { flags |= flag ;}  //mk03a
-
-  /**
-   Get a flag
-   <ul>
-   <br><b>Parameters:  </b> ServiceDataCollector::Flag
-   <br><b>Returns:     </b> boolean.
-   <br><b>Requirements:</b> None
-   <br><b>Exceptions:  </b> None.
-   </ul><br>
-   */
-  bool GetFlag(Flag flag) { return ((flags & flag)!=0);}
-
-  /**
-   Clear a flag
-   <ul>
-   <br><b>Parameters:  </b> ServiceDataCollector::Flag
-   <br><b>Returns:     </b> Nothing.
-   <br><b>Requirements:</b> None
-   <br><b>Promises:    </b> ServiceDataCollector::Flag is false
-   <br><b>Exceptions:  </b> None.
-   </ul><br>
-   */
-  void ClearFlag(Flag flag) { flags &= ~flag ;}  // rc09a
+  bool IsUERE(void) const { return queryFlag(UERE); }
 
   // dg08 - start
   /**
@@ -729,29 +712,29 @@ public:
   void SetTOE(Timer& theTime) { ivCurrentEventTime = theTime; }
 
   /** Is a Proc Core CS flag on? */
-  bool IsProcCoreCS (void) const { return (flags & PROC_CORE_CS) != 0 ? true:false; }
+  bool IsProcCoreCS (void) const { return queryFlag(PROC_CORE_CS); }
 
   /** Is a Unit CS flag on? */
-  bool IsUnitCS (void) const { return (flags & UNIT_CS) != 0 ? true:false; }
+  bool IsUnitCS (void) const { return queryFlag(UNIT_CS); }
 
   /** Is a Using Saved SDC on? */
-  bool IsUsingSavedSdc (void) const { return (flags & USING_SAVED_SDC) != 0 ? true:false; }
+  bool IsUsingSavedSdc (void) const { return queryFlag(USING_SAVED_SDC); }
 
   /**
    * @brief     sets flag indicating only secondary error  bit is set in FIR
    */
-   void setSecondaryErrFlag( ) { flags |= SECONDARY_ERRORS_FOUND; }
+   void setSecondaryErrFlag() { setFlag(SECONDARY_ERRORS_FOUND); }
 
   /**
    * @brief     clears flag indicating only secondary error  bit is set in FIR
    */
-   void clearSecondaryErrFlag() { ( flags &= ~SECONDARY_ERRORS_FOUND ); }
+   void clearSecondaryErrFlag() { clearFlag(SECONDARY_ERRORS_FOUND); }
    /**
     * @brief    returns true if there is only secondary error.
     * @return   true if secondary is found false otherwise.
     */
    bool isSecondaryErrFound() const
-   { return ( ( flags & SECONDARY_ERRORS_FOUND ) != 0 ); }
+   { return queryFlag(SECONDARY_ERRORS_FOUND); }
 
 #ifndef __HOSTBOOT_MODULE
 
@@ -886,7 +869,7 @@ public:
   void SetDump( hwTableContent iDumpRequestContent,
                 TARGETING::TargetHandle_t iDumpRequestChipHandle = NULL )
   {
-    SetFlag(DUMP);
+    setFlag(DUMP);
     ivDumpRequestContent = iDumpRequestContent;
     ivpDumpRequestChipHandle = iDumpRequestChipHandle;
   }
@@ -901,7 +884,7 @@ public:
    <br><b>Exceptions:  </b> None.
    </ul><br>
    */
-  bool IsDump(void) const { return (flags & DUMP)!=0 ? true:false; }
+  bool IsDump(void) const { return queryFlag(DUMP); }
 
   /**
    Get the dump Id

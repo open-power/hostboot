@@ -235,7 +235,7 @@ int32_t PreAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc,
     do
     {
         // Skip if we're already analyzing a unit checkstop
-        if ( i_sc.service_data->GetFlag(ServiceDataCollector::UNIT_CS) )
+        if ( i_sc.service_data->IsUnitCS() )
             break;
 
         // Skip if we're analyzing a special attention.
@@ -261,7 +261,7 @@ int32_t PreAnalysis( ExtensibleChip * i_mbChip, STEP_CODE_DATA_STRUCT & i_sc,
         if ( fir->BitStringIsZero() ) break; // No unit checkstop
 
         // Set Unit checkstop flag
-        i_sc.service_data->SetFlag(ServiceDataCollector::UNIT_CS);
+        i_sc.service_data->setFlag(ServiceDataCollector::UNIT_CS);
         i_sc.service_data->SetThresholdMaskId(0);
 
         // Set the cause attention type
@@ -1260,9 +1260,9 @@ int32_t ClearServiceCallFlag( ExtensibleChip * i_chip,
 {
     if ( i_sc.service_data->IsAtThreshold() && !mfgMode() &&
          (CHECK_STOP != i_sc.service_data->getPrimaryAttnType()) &&
-         (!i_sc.service_data->GetFlag(ServiceDataCollector::UNIT_CS)) )
+         (!i_sc.service_data->queryFlag(ServiceDataCollector::UNIT_CS)) )
     {
-        i_sc.service_data->ClearFlag(ServiceDataCollector::SERVICE_CALL);
+        i_sc.service_data->clearFlag(ServiceDataCollector::SERVICE_CALL);
     }
 
     return SUCCESS;

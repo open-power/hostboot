@@ -826,9 +826,9 @@ int32_t ClearServiceCallFlag( ExtensibleChip * i_chip,
 {
     if ( i_sc.service_data->IsAtThreshold() && !mfgMode() &&
          (CHECK_STOP != i_sc.service_data->getPrimaryAttnType()) &&
-         (!i_sc.service_data->GetFlag(ServiceDataCollector::UNIT_CS)) )
+         (!i_sc.service_data->queryFlag(ServiceDataCollector::UNIT_CS)) )
     {
-        i_sc.service_data->ClearFlag(ServiceDataCollector::SERVICE_CALL);
+        i_sc.service_data->clearFlag(ServiceDataCollector::SERVICE_CALL);
     }
 
     return SUCCESS;
@@ -848,7 +848,7 @@ int32_t ClearServiceCallFlag_mnfgInfo( ExtensibleChip * i_chip,
 {
     if ( i_sc.service_data->IsAtThreshold() )
     {
-        i_sc.service_data->ClearFlag(ServiceDataCollector::SERVICE_CALL);
+        i_sc.service_data->clearFlag(ServiceDataCollector::SERVICE_CALL);
     }
 
     return SUCCESS;

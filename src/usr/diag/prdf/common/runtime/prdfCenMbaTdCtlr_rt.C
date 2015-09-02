@@ -365,7 +365,7 @@ int32_t CenMbaTdCtlr::handleRrFo()
         ServiceDataCollector serviceData;
         STEP_CODE_DATA_STRUCT sdc;
         sdc.service_data = &serviceData;
-        sdc.service_data->SetFlag( ServiceDataCollector::DONT_SAVE_SDC );
+        sdc.service_data->setFlag( ServiceDataCollector::DONT_SAVE_SDC );
 
         o_rc = startNextTd( sdc );
         if ( SUCCESS != o_rc )

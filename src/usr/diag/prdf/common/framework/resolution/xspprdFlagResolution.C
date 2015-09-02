@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2001,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -47,7 +49,7 @@ namespace PRDF
 int32_t FlagResolution::Resolve(STEP_CODE_DATA_STRUCT & error)
 {
   uint32_t rc = SUCCESS;
-  error.service_data->SetFlag(xFlag);
+  error.service_data->setFlag(xFlag);
   return rc;
 }
 

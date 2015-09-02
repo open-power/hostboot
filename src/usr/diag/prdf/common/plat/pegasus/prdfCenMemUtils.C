@@ -349,7 +349,7 @@ int32_t checkMcsChannelFail( ExtensibleChip * i_mcsChip,
     do
     {
         // Skip if already handling unit checkstop.
-        if ( io_sc.service_data->GetFlag(ServiceDataCollector::UNIT_CS) )
+        if ( io_sc.service_data->IsUnitCS() )
             break;
 
         // Must be an MCS.
@@ -371,7 +371,7 @@ int32_t checkMcsChannelFail( ExtensibleChip * i_mcsChip,
         if ( !mcifir->IsBitSet(31) ) break; // No channel fail, so exit.
 
         // Set unit checkstop flag and cause attention type.
-        io_sc.service_data->SetFlag(ServiceDataCollector::UNIT_CS);
+        io_sc.service_data->setFlag(ServiceDataCollector::UNIT_CS);
         io_sc.service_data->setSecondaryAttnType(UNIT_CS);
         io_sc.service_data->SetThresholdMaskId(0);
 
@@ -425,7 +425,7 @@ int32_t chnlCsCleanup( ExtensibleChip *i_mbChip,
             break; // Cleanup has already been done.
 
         // Set it as SUE generation point.
-        i_sc.service_data->SetFlag( ServiceDataCollector::UERE );
+        i_sc.service_data->SetUERE();
 
         ExtensibleChip * mcsChip = mbdb->getMcsChip();
         if ( NULL == mcsChip )

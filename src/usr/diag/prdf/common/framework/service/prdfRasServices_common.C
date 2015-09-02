@@ -200,7 +200,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                     io_sdc.setPrimaryAttnType( origSdc.getPrimaryAttnType() );
 
                     if ( origSdc.Terminate() )
-                        io_sdc.SetFlag(ServiceDataCollector::TERMINATE);
+                        io_sdc.setFlag(ServiceDataCollector::TERMINATE);
                 }
             }
             else if (sdcSaveFlags & SDC_SAVE_SUE_FLAG ) //else check if SUE log
@@ -225,7 +225,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                     io_sdc.setPrimaryAttnType( origSdc.getPrimaryAttnType() );
 
                     if ( origSdc.Terminate() )
-                        io_sdc.SetFlag(ServiceDataCollector::TERMINATE);
+                        io_sdc.setFlag(ServiceDataCollector::TERMINATE);
                 }
             }
         }

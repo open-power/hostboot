@@ -59,12 +59,12 @@ bool ignoreErrorForSapphire( STEP_CODE_DATA_STRUCT & i_stepcode )
             if( !isSpConfigFsp() )
             {
                 //Mask the error on first instance for FSP less systems.
-                i_stepcode.service_data->SetFlag(
+                i_stepcode.service_data->setFlag(
                                 ServiceDataCollector::AT_THRESHOLD );
             }
 
             //Prevent predictive callout of the chip.
-            i_stepcode.service_data->ClearFlag(
+            i_stepcode.service_data->clearFlag(
                                 ServiceDataCollector::SERVICE_CALL );
 
             ignoreError = true;
