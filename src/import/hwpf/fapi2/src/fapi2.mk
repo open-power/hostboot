@@ -43,6 +43,8 @@ endef
 MODULE = fapi2
 OBJS += $(FAPI2_MODULE_OBJS)
 $(eval $(call FAPI2_MODULE_INCLUDES,$(MODULE)))
+lib$(MODULE)_EXTRALIBS += $(FAPI2_REQUIRED_LIBS)
+lib$(MODULE)_LDFLAGS += -ldl
 $(call BUILD_MODULE)
 
 # Build test FAPI2 library that uses the reference platform.
