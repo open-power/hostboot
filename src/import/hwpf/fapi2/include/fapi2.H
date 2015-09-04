@@ -35,7 +35,9 @@
 #include <error_scope.H>
 #include <set_sbe_error.H>      // Generated file
 
-#include <hwp_executor.H>
+#include <fapi2_hwp_executor.H>
+#include <fapi2_attribute_service.H>
+#include <fapi2_chip_ec_feature.H>
 
 #include <mvpd_access.H>
 
