@@ -102,8 +102,18 @@ namespace HTMGT
                         l_err = OccManager::sendOccPoll();
                         if (l_err)
                         {
-                            // Continue even if failed (poll will be retried)
-                            ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+                            if (OccManager::occNeedsReset())
+                            {
+                                // No need to continue if a reset is required
+                                TMGT_ERR("sendOccConfigData(): OCCs need to "
+                                         "be reset");
+                                break;
+                            }
+                            else
+                            {
+                                // Continue even if failed (will be retried)
+                                ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+                            }
                         }
 
                         // Send ALL config data
@@ -415,17 +425,22 @@ namespace HTMGT
         {
             // Create an elog so the user knows the cmd failed.
             TMGT_ERR("enableOccActuation(): System is in safe mode");
+            uint32_t safeInstance = 0;
+            uint32_t safeRc = OccManager::getSafeModeReason(safeInstance);
             /*@
              * @errortype
              * @reasoncode      HTMGT_RC_OCC_CRIT_FAILURE
              * @moduleid        HTMGT_MOD_ENABLE_OCC_ACTUATION
-             * @userdata1       OCC activate [1==true][0==false]
+             * @userdata1[0:31]  OCC activate [1==true][0==false]
+             * @userdata1[32:63] return code triggering safe mode
+             * @userdata2[0:31]  safeMode flag
+             * @userdata2[32:63] OCC instance
              * @devdesc         Operation not allowed, system is in safe mode
              */
             bldErrLog(l_err,
                       HTMGT_MOD_ENABLE_OCC_ACTUATION,
                       HTMGT_RC_OCC_CRIT_FAILURE,
-                      0, i_occActivation, 0, safeMode,
+                      i_occActivation, safeRc, safeMode, safeInstance,
                       ERRORLOG::ERRL_SEV_UNRECOVERABLE);
         }
 

@@ -63,6 +63,8 @@ namespace HTMGT
         iv_target(i_target),
         iv_lastPollValid(false),
         iv_occsPresent(1 << i_instance),
+        iv_resetReason(OCC_RESET_REASON_NONE),
+        iv_exceptionLogged(0),
         iv_resetCount(0),
         iv_version(0x01)
     {
@@ -235,6 +237,7 @@ namespace HTMGT
         iv_failed = false;
         iv_lastPollValid = false;
         iv_resetReason = OCC_RESET_REASON_NONE;
+        iv_exceptionLogged = 0;
     }
 
 
@@ -622,6 +625,7 @@ namespace HTMGT
                     {
                         TMGT_INF("_setOccState: All OCCs have reached state "
                                  "0x%02X", requestedState);
+                        iv_state = requestedState;
 
                         if (OCC_STATE_ACTIVE == requestedState)
                         {
@@ -769,13 +773,15 @@ namespace HTMGT
                  * @errortype
                  * @moduleid HTMGT_MOD_OCC_RESET
                  * @reasoncode HTMGT_RC_OCC_RESET_THREHOLD
+                 * @userdata1  return code triggering safe mode
+                 * @userdata2  OCC instance
                  * @devdesc OCC reset threshold reached.
                  *          Leaving OCCs in reset state
                  */
                 bldErrLog(err,
                           HTMGT_MOD_OCC_RESET,
                           HTMGT_RC_OCC_CRIT_FAILURE,
-                          0, 0, 0, 0,
+                          0, cv_safeReturnCode, 0, cv_safeOccInstance,
                           ERRORLOG::ERRL_SEV_UNRECOVERABLE);
             }
 
@@ -910,6 +916,13 @@ namespace HTMGT
     }
 
 
+    uint32_t OccManager::_getSafeModeReason(uint32_t & o_instance)
+    {
+        o_instance = cv_safeOccInstance;
+        return cv_safeReturnCode;
+    }
+
+
     bool OccManager::_occNeedsReset()
     {
         bool needsReset = false;
@@ -1039,6 +1052,40 @@ namespace HTMGT
         return err;
     }
 
+    // Consolidate all OCC states
+    void OccManager::_syncOccStates()
+    {
+        occStateId currentState = OCC_STATE_NO_CHANGE;
+
+        for(occList_t::const_iterator occ_itr = iv_occArray.begin();
+            (occ_itr != iv_occArray.end());
+            ++occ_itr)
+        {
+            Occ * occ = *occ_itr;
+            if (OCC_STATE_NO_CHANGE == currentState)
+            {
+                currentState = occ->getState();
+            }
+            else
+            {
+                if (currentState != occ->getState())
+                {
+                    // States do not match yet...
+                    currentState = OCC_STATE_NO_CHANGE;
+                    break;
+                }
+            }
+        }
+        if (OCC_STATE_NO_CHANGE != currentState)
+        {
+            if (iv_state != currentState)
+            {
+                TMGT_INF("syncOccStates: All OCCs are in 0x%02X", currentState);
+                iv_state = currentState;
+            }
+        }
+    }
+
 
     uint8_t  OccManager::getNumOccs()
     {
@@ -1084,14 +1131,20 @@ namespace HTMGT
 
     void OccManager::waitForOccCheckpoint()
     {
-        return Singleton<OccManager>::instance()._waitForOccCheckpoint();
+        Singleton<OccManager>::instance()._waitForOccCheckpoint();
     }
 
     void OccManager::updateSafeModeReason(uint32_t i_src,
                                           uint32_t i_instance)
     {
-        return Singleton<OccManager>::instance().
+        Singleton<OccManager>::instance().
             _updateSafeModeReason(i_src, i_instance);
+    }
+
+    uint32_t OccManager::getSafeModeReason(uint32_t & o_instance)
+    {
+        return Singleton<OccManager>::instance().
+            _getSafeModeReason(o_instance);
     }
 
     bool OccManager::occNeedsReset()
@@ -1124,6 +1177,10 @@ namespace HTMGT
         Singleton<OccManager>::instance()._setPstateTable(i_useNormal);
     }
 
+    void OccManager::syncOccStates()
+    {
+        Singleton<OccManager>::instance()._syncOccStates();
+    }
 
 } // end namespace
 

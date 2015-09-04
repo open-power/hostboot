@@ -84,87 +84,91 @@ namespace HTMGT
         errlHndl_t err = NULL;
         uint8_t * poll_rsp = NULL;
 
-        TMGT_INF("sendOccPoll: Polling OCC%d", iv_instance);
-        bool continuePolling = false;
-        size_t elogCount = 10;
-
-        do
+        // Only send poll if OCC has not logged an exception
+        if (0 == iv_exceptionLogged)
         {
-            // create 1 byte buffer for poll command data
-            const uint8_t l_cmdData[1] = { 0x10 /*version*/ };
+            TMGT_INF("sendOccPoll: Polling OCC%d", iv_instance);
+            bool continuePolling = false;
+            size_t elogCount = 10;
 
-            OccCmd cmd(this,
-                       OCC_CMD_POLL,
-                       sizeof(l_cmdData),
-                       l_cmdData);
-
-            err = cmd.sendOccCmd();
-            if (err != NULL)
+            do
             {
-                // Poll failed
-                TMGT_ERR("sendOccPoll: OCC%d poll failed with rc=0x%04X",
-                         iv_instance,
-                         err->reasonCode());
+                // create 1 byte buffer for poll command data
+                const uint8_t l_cmdData[1] = { 0x10 /*version*/ };
 
-                continuePolling = false;
-            }
-            else
-            {
-                // Poll succeeded, check response
-                uint32_t poll_rsp_size = cmd.getResponseData(poll_rsp);
-                if (poll_rsp_size >= OCC_POLL_DATA_MIN_SIZE)
+                OccCmd cmd(this,
+                           OCC_CMD_POLL,
+                           sizeof(l_cmdData),
+                           l_cmdData);
+
+                err = cmd.sendOccCmd();
+                if (err != NULL)
                 {
-                    if (i_flushAllErrors)
-                    {
-                        const occPollRspStruct_t *currentPollRsp =
-                            (occPollRspStruct_t *) poll_rsp;
-                        if (currentPollRsp->errorId != 0)
-                        {
-                            if (--elogCount > 0)
-                            {
-                                // An error was returned, keep polling OCC
-                                continuePolling = true;
-                            }
-                            else
-                            {
-                                // Limit number of elogs retrieved so
-                                // we do not get stuck in loop
-                                TMGT_INF("sendOccPoll: OCC%d still has"
-                                         "more errors to report.",
-                                         iv_instance);
-                                continuePolling = false;
-                            }
-                        }
-                        else
-                        {
-                            continuePolling = false;
-                        }
-                    }
-                    pollRspHandler(poll_rsp, poll_rsp_size);
+                    // Poll failed
+                    TMGT_ERR("sendOccPoll: OCC%d poll failed with rc=0x%04X",
+                             iv_instance,
+                             err->reasonCode());
+
+                    continuePolling = false;
                 }
                 else
                 {
-                    TMGT_ERR("sendOccPoll: OCC%d poll command response "
-                             "failed with invalid data length %d",
-                             iv_instance, poll_rsp_size);
-                    /*@
-                     * @errortype
-                     * @reasoncode HTMGT_RC_INVALID_LENGTH
-                     * @moduleid  HTMGT_MOD_OCC_POLL
-                     * @userdata1 OCC instance
-                     * @devdesc Invalid POLL response length
-                     */
-                    bldErrLog(err,
-                              HTMGT_MOD_OCC_POLL,
-                              HTMGT_RC_INVALID_LENGTH,
-                              iv_instance, 0, 0, 0,
-                              ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    // Poll succeeded, check response
+                    uint32_t poll_rsp_size = cmd.getResponseData(poll_rsp);
+                    if (poll_rsp_size >= OCC_POLL_DATA_MIN_SIZE)
+                    {
+                        if (i_flushAllErrors)
+                        {
+                            const occPollRspStruct_t *currentPollRsp =
+                                (occPollRspStruct_t *) poll_rsp;
+                            if (currentPollRsp->errorId != 0)
+                            {
+                                if (--elogCount > 0)
+                                {
+                                    // An error was returned, keep polling OCC
+                                    continuePolling = true;
+                                }
+                                else
+                                {
+                                    // Limit number of elogs retrieved so
+                                    // we do not get stuck in loop
+                                    TMGT_INF("sendOccPoll: OCC%d still has"
+                                             "more errors to report.",
+                                             iv_instance);
+                                    continuePolling = false;
+                                }
+                            }
+                            else
+                            {
+                                continuePolling = false;
+                            }
+                        }
+                        pollRspHandler(poll_rsp, poll_rsp_size);
+                    }
+                    else
+                    {
+                        TMGT_ERR("sendOccPoll: OCC%d poll command response "
+                                 "failed with invalid data length %d",
+                                 iv_instance, poll_rsp_size);
+                        /*@
+                         * @errortype
+                         * @reasoncode HTMGT_RC_INVALID_LENGTH
+                         * @moduleid  HTMGT_MOD_OCC_POLL
+                         * @userdata1 OCC instance
+                         * @devdesc Invalid POLL response length
+                         */
+                        bldErrLog(err,
+                                  HTMGT_MOD_OCC_POLL,
+                                  HTMGT_RC_INVALID_LENGTH,
+                                  iv_instance, 0, 0, 0,
+                                  ERRORLOG::ERRL_SEV_INFORMATIONAL);
 
-                    continuePolling = false;
-               }
+                        continuePolling = false;
+                    }
+                }
             }
+            while (continuePolling);
         }
-        while (continuePolling);
 
         return err;
     }

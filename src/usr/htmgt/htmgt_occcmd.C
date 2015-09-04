@@ -473,15 +473,46 @@ namespace HTMGT
                      ((false == l_commEstablished) &&
                       (OCC_CMD_POLL == iv_OccCmd.cmdType)) )
                 {
-                    iv_RetryCmd = false;
-                    do
+                    if (0 == iv_Occ->iv_exceptionLogged)
                     {
-                        // Send the command and receive the response
-                        l_errlHndl = writeOccCmd();
+                        iv_RetryCmd = false;
+                        do
+                        {
+                            // Send the command and receive the response
+                            l_errlHndl = writeOccCmd();
 
-                        processOccResponse(l_errlHndl, cmdTraced);
+                            // process response if OCC did not hit an exception
+                            if (0 == iv_Occ->iv_exceptionLogged)
+                            {
+                                processOccResponse(l_errlHndl, cmdTraced);
+                            }
 
-                    } while (iv_RetryCmd);
+                            // skip retry if an exception was logged
+                        } while ((iv_RetryCmd) &&
+                                 (0 == iv_Occ->iv_exceptionLogged));
+                    }
+                    else
+                    {
+                        // OCC has already logged an exception, no need to send
+                        TMGT_ERR("Skipping 0x%02X cmd since OCC has already "
+                                 "logged an exception 0x%04X",
+                                 iv_OccCmd.cmdType, iv_Occ->iv_exceptionLogged);
+                        /*@
+                         * @errortype
+                         * @reasoncode HTMGT_RC_OCC_EXCEPTION
+                         * @moduleid HTMGT_MOD_SEND_OCC_CMD
+                         * @userdata1 OCC command
+                         * @userdata2 comm established
+                         * @userdata3 OCC state
+                         * @userdata4 exception
+                         * @devdesc Unable to send cmd to OCC exception
+                         */
+                        bldErrLog(l_errlHndl, HTMGT_MOD_SEND_OCC_CMD,
+                                  HTMGT_RC_OCC_EXCEPTION,
+                                  iv_OccCmd.cmdType, l_commEstablished,
+                                  l_occState, iv_Occ->iv_exceptionLogged,
+                                  ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    }
                 }
                 else
                 {
@@ -813,29 +844,38 @@ namespace HTMGT
 
                 TMGT_BIN("OCC Exception Data (up to 64 bytes)",
                          sramRspPtr, std::min(exceptionLength,(uint32_t)64));
-                /*@
-                 * @errortype
-                 * @reasoncode HTMGT_RC_INTERNAL_ERROR
-                 * @moduleid HTMGT_MOD_HANLDE_OCC_EXCEPTION
-                 * @userdata1[0-31] rsp status
-                 * @userdata1[32-63] exception data length
-                 * @userdata2[0-31] OCC instance
-                 * @userdata2[32-63] exception data
-                 * @devdesc OCC reported exception
-                 */
-                errlHndl_t l_excErr = NULL;
-                bldErrLog(l_excErr, HTMGT_MOD_HANLDE_OCC_EXCEPTION,
-                          (htmgtReasonCode)(OCCC_COMP_ID | exceptionType),
-                          exceptionType, exceptionDataLength,
-                          iv_Occ->iv_instance, UINT32_GET(&sramRspPtr[5]),
-                          ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-                l_excErr->addFFDC(OCCC_COMP_ID,
-                                  sramRspPtr,
-                                  std::min(exceptionLength,(uint32_t)MAX_FFDC),
-                                  1,  // version
-                                  exceptionType); // subsection
-                ERRORLOG::errlCommit(l_excErr, HTMGT_COMP_ID);
+                if (iv_Occ->iv_exceptionLogged != exceptionType)
+                {
+                    /*@
+                     * @errortype
+                     * @reasoncode HTMGT_RC_INTERNAL_ERROR
+                     * @moduleid HTMGT_MOD_HANLDE_OCC_EXCEPTION
+                     * @userdata1[0-31] rsp status
+                     * @userdata1[32-63] exception data length
+                     * @userdata2[0-31] OCC instance
+                     * @userdata2[32-63] exception data
+                     * @devdesc OCC reported exception
+                     */
+                    errlHndl_t l_excErr = NULL;
+                    bldErrLog(l_excErr, HTMGT_MOD_HANLDE_OCC_EXCEPTION,
+                              (htmgtReasonCode)(OCCC_COMP_ID | exceptionType),
+                              exceptionType, exceptionDataLength,
+                              iv_Occ->iv_instance, UINT32_GET(&sramRspPtr[5]),
+                              ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                    l_excErr->addFFDC(OCCC_COMP_ID,
+                                      sramRspPtr,
+                                      std::min(exceptionLength,
+                                               (uint32_t)MAX_FFDC),
+                                      1,  // version
+                                      exceptionType); // subsection
+                    ERRORLOG::errlCommit(l_excErr, HTMGT_COMP_ID);
 
+                    // Save exception so we don't log it again
+                    iv_Occ->iv_exceptionLogged = exceptionType;
+                    // This OCC needs to be reset to recover
+                    iv_Occ->failed(true);
+                    iv_Occ->iv_needsReset = true;
+                }
             }
         }
 #endif

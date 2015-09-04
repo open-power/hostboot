@@ -196,7 +196,7 @@ namespace HTMGT
                                 break;
 
                             default:
-                                TMGT_ERR("send_occ_config_data: Unsupported"
+                                TMGT_ERR("sendOccConfigData: Unsupported"
                                          " format type 0x%02X",
                                          format);
                                 cmdDataLen = 0;
@@ -204,7 +204,7 @@ namespace HTMGT
 
                         if (cmdDataLen > 0)
                         {
-                            TMGT_INF("send_occ_config_data: Sending config"
+                            TMGT_INF("sendOccConfigData: Sending config"
                                      " 0x%02X to OCC%d",
                                      format, occInstance);
                             OccCmd cmd(occ, OCC_CMD_SETUP_CFG_DATA,
@@ -212,7 +212,7 @@ namespace HTMGT
                             errlHndl_t l_err = cmd.sendOccCmd();
                             if (l_err != NULL)
                             {
-                                TMGT_ERR("send_occ_config_data: OCC%d cfg "
+                                TMGT_ERR("sendOccConfigData: OCC%d cfg "
                                          "format 0x%02X failed with rc=0x%04X",
                                          occInstance, format,
                                          l_err->reasonCode());
@@ -222,7 +222,7 @@ namespace HTMGT
                             {
                                 if (OCC_RC_SUCCESS != cmd.getRspStatus())
                                 {
-                                    TMGT_ERR("send_occ_config_data: OCC%d cfg "
+                                    TMGT_ERR("sendOccConfigData: OCC%d cfg "
                                              "format 0x%02X had bad rsp status"
                                              " 0x%02X for sysConfig",
                                              occInstance, format,
@@ -239,12 +239,17 @@ namespace HTMGT
                         }
                     } // if (sendData)
 
+                    if (OccManager::occNeedsReset())
+                    {
+                        TMGT_ERR("sendOccConfigData(): OCCs need to be reset");
+                    }
+
                 } // for each config format
 
             } // for each OCC
         }
 
-    } // end send_occ_config_data()
+    } // end sendOccConfigData()
 
 
 /** OCC configuration data message versions */

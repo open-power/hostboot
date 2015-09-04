@@ -343,6 +343,8 @@ namespace HTMGT
 
             occResetReason  iv_resetReason;
 
+            // Value of last exception committed (to prevent duplicates)
+            uint8_t         iv_exceptionLogged;
 
             /**
              * @brief Clear flags after OCC has been reset
@@ -491,6 +493,16 @@ namespace HTMGT
 
 
             /**
+             * @brief Return the reason the system entered safe mode
+             *
+             * @param[out]  o_instance   OCC instance
+             *
+             * @return     SRC which triggered safe mode
+             */
+            static uint32_t getSafeModeReason(uint32_t & o_instance);
+
+
+            /**
              * @brief Check if any OCCs need to be reset
              *
              * @return true if any OCC needs to be reset
@@ -553,6 +565,13 @@ namespace HTMGT
              * @return true if any OCC has been marked as failed
              */
             static bool occFailed();
+
+
+            /**
+             * @brief Update OCC manager state with consolidated OCC state
+             *
+             */
+            static void syncOccStates();
 
 
         private:
@@ -641,6 +660,9 @@ namespace HTMGT
             void _updateSafeModeReason(uint32_t i_src,
                                        uint32_t i_instance);
 
+            /** See getSafeModeReason() above */
+            uint32_t _getSafeModeReason(uint32_t & o_instance);
+
             /** See occNeedsReset() above */
             bool _occNeedsReset();
 
@@ -665,6 +687,8 @@ namespace HTMGT
                 iv_normalPstateTables = i_useNormal;
             };
 
+            /** See syncOccStates() above */
+            void _syncOccStates();
     };
 
     typedef Singleton<OccManager> occMgr;
