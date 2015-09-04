@@ -250,6 +250,11 @@ void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_proc_a_x_pci_dmi_pll_setup entry" );
 
+    fapi::ReturnCode rc;
+
+    uint8_t abus_enable_attr = ENUM_ATTR_PROC_A_ENABLE_DISABLE;
+    uint8_t xbus_enable_attr = ENUM_ATTR_PROC_X_ENABLE_DISABLE;
+
     TARGETING::TargetHandleList l_procTargetList;
     getAllChips(l_procTargetList, TYPE_PROC);
 
@@ -270,19 +275,37 @@ void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
         bool l_startAbusPll = false;
         bool l_startPCIEPll = false;
         bool l_startDMIPll = false;
-        
-        TARGETING::TargetHandleList l_xbus;
-        getChildChiplets( l_xbus, l_proc_target, TYPE_XBUS );
-        if (l_xbus.size() > 0)
+
+        rc = FAPI_ATTR_GET(ATTR_PROC_X_ENABLE,
+                &l_fapi_proc_target,
+                xbus_enable_attr);
+
+        if (!rc.ok())
         {
-            l_startXbusPll = true;
+            FAPI_ERR("Error querying ATTR_PROC_X_ENABLE");
+            l_err = fapi::fapiRcToErrl(rc);
+            break;
         }
 
-        TARGETING::TargetHandleList l_abus;
-        getChildChiplets( l_abus, l_proc_target, TYPE_ABUS );
-        if (l_abus.size() > 0)
+        if( xbus_enable_attr == fapi::ENUM_ATTR_PROC_X_ENABLE_ENABLE )
         {
-            l_startAbusPll = true;
+           l_startXbusPll = true;
+        }
+
+        rc = FAPI_ATTR_GET(ATTR_PROC_A_ENABLE,
+                &l_fapi_proc_target,
+                abus_enable_attr);
+
+        if (!rc.ok())
+        {
+            FAPI_ERR("Error querying ATTR_PROC_A_ENABLE");
+            l_err = fapi::fapiRcToErrl(rc);
+            break;
+        }
+
+        if( abus_enable_attr == fapi::ENUM_ATTR_PROC_A_ENABLE_ENABLE )
+        {
+           l_startAbusPll = true;
         }
 
         TARGETING::TargetHandleList l_pci;
@@ -330,6 +353,14 @@ void*    call_proc_a_x_pci_dmi_pll_setup( void    *io_pArgs )
         }
     }
 
+    if (l_err)
+    {
+        // Create IStep error log and cross reference to error that occurred
+        l_StepError.addErrorDetails( l_err );
+
+        // Commit Error
+        errlCommit( l_err, HWPF_COMP_ID );
+    }
 
 #ifdef CONFIG_PCIE_HOTPLUG_CONTROLLER
     //  Loop through all the procs in the system
