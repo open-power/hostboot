@@ -444,7 +444,7 @@ class variable_buffer
         /// compile time so this can be templated only. If that is not
         /// the case we can add a function parameter version.
         ///
-        inline fapi2::ReturnCodes clearBit(bits_type SB, bits_type L = 0)
+        inline fapi2::ReturnCodes clearBit(bits_type SB, bits_type L = 1)
         {
             ReturnCodes rc = invert().setBit(SB, L);
 
