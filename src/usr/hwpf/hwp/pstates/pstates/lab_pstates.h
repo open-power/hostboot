@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -23,7 +25,7 @@
 #ifndef __LAB_PSTATES_H__
 #define __LAB_PSTATES_H__
 
-// $Id: lab_pstates.h,v 1.5 2013/08/13 17:12:56 jimyac Exp $
+// $Id: lab_pstates.h,v 1.7 2015/06/01 19:02:17 stillgs Exp $
 
 /// \file lab_pstates.h
 /// \brief Lab-only (as opposed to product-procedure) support for Pstates.
@@ -43,6 +45,7 @@
 ///
 /// \todo Replace with a typedef
 #define FORMAT_10UV_STRLEN 8
+#define FORMAT_IMA_STRLEN 8
 
 #define FORMAT_10UV_ERROR "<Error>"
 
@@ -50,6 +53,10 @@
 #define ROUND_VOLTAGE_DOWN -1
 
 #ifndef __ASSEMBLER__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 int
 vuv2vrm11(uint32_t v_uv, int round, uint8_t *vrm11_vid);
@@ -96,9 +103,19 @@ void
 resclk_print(FILE* stream, ResonantClockingSetup* resclk);
 
 void
+iddq_print(FILE* stream, IddqTable* iddq);
+
+void
+wof_print(FILE* stream, WOFElements* wof);
+
+void
 pss_print(FILE* stream, PstateSuperStructure* pss);
 
 #endif // FAPIECMD
+
+#ifdef __cplusplus
+} // end extern C
+#endif
 
 #endif // __ASSEMBLER__
 

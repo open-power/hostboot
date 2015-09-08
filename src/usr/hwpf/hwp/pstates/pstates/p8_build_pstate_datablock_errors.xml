@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2013,2014                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2013,2015                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: p8_build_pstate_datablock_errors.xml,v 1.13 2014/07/22 21:46:56 daviddu Exp $ -->
+<!-- $Id: p8_build_pstate_datablock_errors.xml,v 1.14 2015/05/13 02:56:56 stillgs Exp $ -->
 <!-- Error definitions for p8_build_pstate_datablock procedure -->
 <hwpErrors>
  <!-- *********************************************************************** -->
@@ -449,5 +449,109 @@
       <priority>HIGH</priority>
     </callout>
   </hwpError> 
-  <!-- *********************************************************************** -->    
+  <!-- *********************************************************************** -->  
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_IQ_BUFFER_SIZE_ERROR</rc>
+    <description>IQ Buffer returned is wrong size</description>
+    <ffdc>BUFFER_SIZE</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP_TARGET</target>
+    </deconfigure>
+  </hwpError>   
+  <!-- *********************************************************************** -->  
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_IQ_MVPD_ERROR</rc>
+    <description>LRPx access for IQ keyword failed</description>
+    <ffdc>CHIPLET_NUMBER</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP_TARGET</target>
+    </deconfigure>
+  </hwpError>   
+   <!-- *********************************************************************** -->  
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_IQ_INVALID_VDD_ERROR</rc>
+    <description>IDDQ measurement for VDD was invalid (eg zero)</description>
+    <ffdc>RAW_VALUE</ffdc>
+    <ffdc>LRP_NUMBER</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP_TARGET</target>
+    </deconfigure>
+  </hwpError> 
+   <!-- *********************************************************************** -->  
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_IQ_INVALID_VCS_ERROR</rc>
+    <description>IDDQ measurement for VCS was invalid (eg zero)</description>
+    <ffdc>RAW_VALUE</ffdc>
+    <ffdc>LRP_NUMBER</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP_TARGET</target>
+    </deconfigure>
+  </hwpError>     
+  <!-- *********************************************************************** -->  
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_IQ_INVALID_VIO_ERROR</rc>
+    <description>IDDQ measurement for VIO was invalid (eg zero)</description>
+    <ffdc>RAW_VALUE</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CHIP_TARGET</target>
+    </deconfigure>
+  </hwpError>   
+     <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PROCPM_PSTATE_DATABLOCK_PDV_ZERO_DATA_UT_ERROR</rc>
+    <description>Zero valued data found in #V for UltraTubro point.  Continuing 
+    Pstate generation</description>
+    <ffdc>OP_POINT</ffdc>
+    <ffdc>CHIPLET_NUM</ffdc>
+    <ffdc>BUCKET_ID</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>    
+  <!-- *********************************************************************** -->  
 </hwpErrors>

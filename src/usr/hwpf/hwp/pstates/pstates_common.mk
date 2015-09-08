@@ -54,6 +54,10 @@ OBJS += pstate_tables.o
 OBJS += freqVoltageSvc.o
 OBJS += proc_set_max_pstate.o
 
+## allow FAPI macros in c files
+CFLAGS += -D __FAPI
+CC_OVERRIDE = 1
+
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/???
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/pstates/pstates

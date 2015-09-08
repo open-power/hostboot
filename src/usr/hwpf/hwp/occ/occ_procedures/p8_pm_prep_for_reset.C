@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_pm_prep_for_reset.C,v 1.30 2014/04/21 14:27:53 bcbrock Exp $
+// $Id: p8_pm_prep_for_reset.C,v 1.31 2015/05/13 03:12:36 stillgs Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/p8_pm_prep_for_reset.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -33,41 +33,41 @@
 // *! OWNER NAME: Ralf Maier         Email: ralf.maier@de.ibm.com
 // *!
 /// \file p8_pm_prep_for_reset.C
-/// \brief Initialize powermanagement
-/// 
+/// \brief Reset Power Management function
+///
 //------------------------------------------------------------------------------
 ///
 /// High-level procedure flow:
 ///
 /// \verbatim
-///     - call p8_pm_firinit  *chiptarget, 
-///             - Mask the PM FIRs
 ///
-///     - call p8_occ_control.C *chiptarget, ENUM:OCC_STOP      ppc405_reset_ctrl = PPC405_RESET_SEQUENCE
-///             - OCC PPC405 put into reset safely
+///     do {
+///         - Clear the Deep Exit Masks to allow Special Wake-up to occur
+///         - Put all EX chiplets in special wakeup
+///         - Mask the PM FIRs
+///         - Disable PMC OCC HEARTBEAT before halting and reset OCC
+///         - Halt and then Reset the PPC405
 ///             - PMC moves to Vsafe value due to heartbeat loss
+///         - Force Vsafe value into voltage controller to cover the case that the
+///                 Pstate hardware didn't move correctly
+///         - Reset PCBS-PM
+///         - Reset PMC
+///             As the PMC reset kills ALL of the configuration, the idle portion
+///             must be reestablished to allow that portion to operate.
+///         - Run SLW Initialiation
+///             - This allows special wake-up removal before exit
+///         - Reset PSS
+///         - Reset GPEs
+///         - Reset PBA
+///         - Reset SRAM Controller
+///         - Reset OCB
+///         - Clear special wakeups
+///     } while(0);
 ///
-///     - call p8_cpu_special_wakeup.C  *chiptarget, ENUM:OCC_SPECIAL_WAKEUP
-///             - For each chiplet,  put into Special Wake-up via the OCC special wake-up bit
-///
-///     - call p8_pmc_force_vsafe.C  *chiptarget,
-///                    - Forces the Vsafe value into the voltage controller
-///
-///     - call p8_pcbs_init.C *chiptarget, ENUM:PCBSPM_RESET
-///
-///     - call p8_pmc_init.C *chiptarget, ENUM:PMC_RESET
-///             - Issue reset to the PMC
-///
-///     - call p8_poregpe_init.C *chiptarget, ENUM:POREGPE_RESET
-///
-///     - call p8_pba_init.C *chiptarget, ENUM:PBA_RESET
-///
-///     - call p8_occ_sram_init.C *chiptarget, ENUM:OCC_SRAM_RESET
-///
-///     - call p8_ocb_init .C *chiptarget, ENUM:OCC_OCB_RESET
+///     if error, clear special wakeups to leave this procedure clean
 ///
 ///     SLW engine reset is not done here as this will blow away all setup
-///     in istep 15.  Thus, ALL manipulation of this is via calls to 
+///     in istep 15.  Thus, ALL manipulation of this is via calls to
 ///     p8_poreslw_ioit or by p8_poreslw_recovery.
 ///
 ///  \endverbatim
@@ -101,12 +101,15 @@ using namespace fapi;
 fapi::ReturnCode
 special_wakeup_all (const fapi::Target &i_target, bool i_action);
 
-// FSM trace wrapper                 
+fapi::ReturnCode
+clear_deep_exit_mask (const fapi::Target &i_target);
+
+// FSM trace wrapper
 fapi::ReturnCode
 p4rs_pcbs_fsm_trace (const fapi::Target& i_primary_target,
-                     const fapi::Target& i_secondary_target,       
+                     const fapi::Target& i_secondary_target,
                      const char *        i_msg);
-                   
+
 // ----------------------------------------------------------------------
 // Function definitions
 // ----------------------------------------------------------------------
@@ -138,11 +141,11 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
     uint32_t                        e_rc = 0;
     std::vector<fapi::Target>       l_exChiplets;
     ecmdDataBufferBase              data(64);
-    ecmdDataBufferBase              mask(64);    
+    ecmdDataBufferBase              mask(64);
     uint64_t                        address = 0;
 
     const char *        PM_MODE_NAME_VAR; // Defines storage for PM_MODE_NAME
-    
+
     bool                            b_special_wakeup_pri = false;
     bool                            b_special_wakeup_sec = false;
 
@@ -160,7 +163,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
             FAPI_ERR("fapiGetAttribute of ATTR_IS_MPIPL rc = 0x%x", (uint32_t)rc);
             break;
         }
-        
+
         FAPI_INF("IPL mode = %s", ipl_mode ? "MPIPL" : "NORMAL");
 
 
@@ -195,58 +198,84 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
         {
             FAPI_INF("Running on DCM");
         }
+
+        // ******************************************************************
+        //  Clear the Deep Exit Masks to allow Special Wake-up to occur
+        // ******************************************************************
         
+        // Primary
+        rc = clear_deep_exit_mask(i_primary_chip_target);
+        if (rc)
+        {
+            FAPI_ERR("clear_deep_exit_mask: Failed for Primary Target %s",
+                        i_primary_chip_target.toEcmdString());
+            break;
+        }
+
+        // Secondary
+        if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
+        {
+            rc = clear_deep_exit_mask(i_secondary_chip_target);
+            if (rc)
+            {
+                FAPI_ERR("clear_deep_exit_mask: Failed for Secondary Target %s",
+                            i_secondary_chip_target.toEcmdString());
+                break;
+            }
+        }
+
+
         //  ******************************************************************
         //  FSM trace
         //  ******************************************************************
         rc = p4rs_pcbs_fsm_trace (i_primary_chip_target, i_secondary_chip_target, "start of prep for reset");
-        if (!rc.ok()) 
+        if (!rc.ok())
         {
             break;
         }
-        
+
         //  ******************************************************************
-        //  Put all EX chiplets in special wakeup       
+        //  Put all EX chiplets in special wakeup
         //  *****************************************************************
         //  This is done before FIR masking to ensure that idle functions
         //  are properly monitored
-                
+
         // Primary
         rc = special_wakeup_all (i_primary_chip_target, true);
         if (rc)
         {
-            FAPI_ERR("special_wakeup_all - Enable: Failed for Target %s", 
+            FAPI_ERR("special_wakeup_all - Enable: Failed for Target %s",
                         i_primary_chip_target.toEcmdString());
             break;
-        }        
+        }
         b_special_wakeup_pri = true;
-               
+
         rc = p8_pm_glob_fir_trace (i_primary_chip_target, "after SPWKUP");
-        if (!rc.ok()) { break; }  
-                
+        if (!rc.ok()) { break; }
+
         // Secondary
         if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
         {
             rc = special_wakeup_all (i_secondary_chip_target, true);
             if (rc)
             {
-                FAPI_ERR("special_wakeup_all - Enable: Failed for Target %s", 
+                FAPI_ERR("special_wakeup_all - Enable: Failed for Target %s",
                             i_secondary_chip_target.toEcmdString());
                 break;
             }
-            b_special_wakeup_sec = true;  
-            
+            b_special_wakeup_sec = true;
+
             rc = p8_pm_glob_fir_trace (i_secondary_chip_target, "after SPWKUP");
-            if (!rc.ok()) { break; }  
-            
-        }  
-                       
+            if (!rc.ok()) { break; }
+
+        }
+
         //  ******************************************************************
         //  FSM trace
         //  ******************************************************************
-        rc = p4rs_pcbs_fsm_trace (i_primary_chip_target, i_secondary_chip_target, 
+        rc = p4rs_pcbs_fsm_trace (i_primary_chip_target, i_secondary_chip_target,
                     "after special wake-up setting");
-        if (!rc.ok()) 
+        if (!rc.ok())
         {
             break;
         }
@@ -264,8 +293,8 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
         }
 
         rc = p8_pm_glob_fir_trace (i_primary_chip_target, "after Masking");
-        if (!rc.ok()) { break; }  
-            
+        if (!rc.ok()) { break; }
+
         if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
         {
 
@@ -275,24 +304,24 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
                 FAPI_ERR("ERROR: p8_pm_firinit detected failed  result");
                 break;
             }
-            
+
             rc = p8_pm_glob_fir_trace (i_secondary_chip_target, "after Masking");
-            if (!rc.ok()) { break; }  
+            if (!rc.ok()) { break; }
         }
-        
+
         //  ******************************************************************
         //  FSM trace
         //  ******************************************************************
-        rc = p4rs_pcbs_fsm_trace (i_primary_chip_target, i_secondary_chip_target, 
+        rc = p4rs_pcbs_fsm_trace (i_primary_chip_target, i_secondary_chip_target,
                     "after FIR masking");
-        if (!rc.ok()) 
+        if (!rc.ok())
         {
             break;
         }
 
         //  ******************************************************************
         //  Disable PMC OCC HEARTBEAT before reset OCC
-        //  ******************************************************************       
+        //  ******************************************************************
         // Primary
         rc = fapiGetScom(i_primary_chip_target, PMC_OCC_HEARTBEAT_REG_0x00062066 , data );
         if (rc)
@@ -344,7 +373,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
 
         //  ******************************************************************
         //  Put OCC PPC405 into reset safely
-        //  ******************************************************************       
+        //  ******************************************************************
         FAPI_INF("Put OCC PPC405 into reset safely");
         FAPI_DBG("Executing: p8_occ_control.C");
 
@@ -364,28 +393,28 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
               break;
             }
         }
-        
+
         //  ******************************************************************
         //  FSM trace
         //  ******************************************************************
-        rc = p4rs_pcbs_fsm_trace (i_primary_chip_target, i_secondary_chip_target, 
+        rc = p4rs_pcbs_fsm_trace (i_primary_chip_target, i_secondary_chip_target,
                     "after OCC Reset");
-        if (!rc.ok()) 
+        if (!rc.ok())
         {
             break;
         }
-                
+
         //  Check for xstops and recoverables
 
         rc = p8_pm_glob_fir_trace (i_primary_chip_target, "after OCC Reset");
-        if (!rc.ok()) { break; }  
-        
+        if (!rc.ok()) { break; }
+
         if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
-        {                      
+        {
             rc = p8_pm_glob_fir_trace (i_secondary_chip_target, "after OCC Reset");
-            if (!rc.ok()) { break; }  
+            if (!rc.ok()) { break; }
         }
-                
+
         //  ******************************************************************
         //  Force Vsafe value into voltage controller
         //  ******************************************************************
@@ -400,7 +429,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
             FAPI_ERR("Failed to force Vsafe value into voltage controller. With rc = 0x%x", (uint32_t)rc);
             break;
         }
-        
+
         // Secondary
         //   Primary passed in for FFDC reasons upon error
         if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
@@ -410,31 +439,31 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
             {
               FAPI_ERR("Failed to force Vsafe value into voltage controller. With rc = 0x%x", (uint32_t)rc);
               break;
-            }           
+            }
         }
-        
+
         //  ******************************************************************
         //  FSM trace
         //  ******************************************************************
-        rc = p4rs_pcbs_fsm_trace (i_primary_chip_target, i_secondary_chip_target, 
+        rc = p4rs_pcbs_fsm_trace (i_primary_chip_target, i_secondary_chip_target,
                     "after force Vsafe");
-        if (!rc.ok()) 
+        if (!rc.ok())
         {
             break;
         }
-        
+
         //  Check for xstops and recoverables
         rc = p8_pm_glob_fir_trace (i_primary_chip_target, "after Force Vsafe");
-        if (!rc.ok()) { break; }  
-        
+        if (!rc.ok()) { break; }
+
         if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
-        {                      
+        {
             rc = p8_pm_glob_fir_trace (i_secondary_chip_target, "after Force Vsafe");
-            if (!rc.ok()) { break; }  
-        }              
-  
+            if (!rc.ok()) { break; }
+        }
+
         //  ******************************************************************
-        //  Prepare PCBSLV_PM for RESET
+        //  Prepare PCBS_PM for RESET
         //  ******************************************************************
         //      - p8_pcbs_init internally loops over all enabled chiplets
         FAPI_INF("Prepare PCBSLV_PM for RESET");
@@ -454,7 +483,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
         {
             FAPI_INF("Recoverable attention is **ACTIVE** in prep_for_reset after PCBS reset");
         }
-        
+
         // Secondary
         if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
         {
@@ -465,32 +494,32 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
               FAPI_ERR("p8_pcbs_init: Failed to prepare PCBSLV_PM for RESET. With rc = 0x%x", (uint32_t)rc);
               break;
             }
-            
+
             GETSCOM(rc, i_secondary_chip_target, address, data);
             if (data.getNumBitsSet(0,64))
             {
                 FAPI_INF("Recoverable attention is **ACTIVE** in prep_for_reset after  PCBS reset");
             }
         }
-        
+
         //  ******************************************************************
         //  FSM trace
         //  ******************************************************************
         rc = p4rs_pcbs_fsm_trace (i_primary_chip_target, i_secondary_chip_target, "after PCBS reset");
-        if (!rc.ok()) 
+        if (!rc.ok())
         {
             break;
         }
-        
+
         //  Check for xstops and recoverables
         rc = p8_pm_glob_fir_trace (i_primary_chip_target, "after PCBS reset");
-        if (!rc.ok()) { break; }  
-        
+        if (!rc.ok()) { break; }
+
         if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
-        {                      
+        {
             rc = p8_pm_glob_fir_trace (i_secondary_chip_target, "after PCBS reset");
-            if (!rc.ok()) { break; }  
-        }              
+            if (!rc.ok()) { break; }
+        }
 
         //  ******************************************************************
         //  Reset PMC
@@ -504,21 +533,21 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
             FAPI_ERR("p8_pmc_init: Failed to issue PMC reset. With rc = 0x%x", (uint32_t)rc);
             break;
         }
-        
+
         //  ******************************************************************
         //  FSM trace
         //  ******************************************************************
-        rc = p4rs_pcbs_fsm_trace (i_primary_chip_target, i_secondary_chip_target, 
+        rc = p4rs_pcbs_fsm_trace (i_primary_chip_target, i_secondary_chip_target,
                     "after PMC reset");
-        if (!rc.ok()) 
+        if (!rc.ok())
         {
             break;
         }
-        
+
         //  ******************************************************************
         //  As the PMC reset kills ALL of the configuration, the idle portion
-        //  must be reestablished to allow that portion to operate.  This is 
-        //  what p8_poreslw_init -init does. Additionally, this lets us drop 
+        //  must be reestablished to allow that portion to operate.  This is
+        //  what p8_poreslw_init -init does. Additionally, this lets us drop
         //  special wake-up  before exiting.
         //  ******************************************************************
         //     - call p8_poreslw_init.C *chiptarget, ENUM:PM_INIT
@@ -526,7 +555,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
 
         FAPI_INF("Re-establish PMC Idle configuration");
         FAPI_DBG("Executing: p8_poreslw_init in mode %s", PM_MODE_NAME(PM_INIT_PMC));
-        
+
         // Primary
         FAPI_EXEC_HWP(rc, p8_poreslw_init, i_primary_chip_target, PM_INIT_PMC);
         if (rc)
@@ -546,17 +575,17 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
                 break;
             }
         }
-        
+
         //  Check for xstops and recoverables
         rc = p8_pm_glob_fir_trace (i_primary_chip_target,  "after PMC and SLW reinit");
-        if (!rc.ok()) { break; }  
-        
+        if (!rc.ok()) { break; }
+
         if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
-        {                      
+        {
             rc = p8_pm_glob_fir_trace (i_secondary_chip_target,  "after PMC and SLW reinit");
-            if (!rc.ok()) { break; }  
-        }              
-        
+            if (!rc.ok()) { break; }
+        }
+
         //  ******************************************************************
         //  Issue reset to PSS macro
         //  ******************************************************************
@@ -584,7 +613,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
                 break;
             }
         }
-               
+
         //  ******************************************************************
         //  Issue reset to PORE General Purpose Engine
         //  ******************************************************************
@@ -637,13 +666,13 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
         }
         //  Check for xstops and recoverables
         rc = p8_pm_glob_fir_trace (i_primary_chip_target, "after PBA reset");
-        if (!rc.ok()) { break; }  
-        
+        if (!rc.ok()) { break; }
+
         if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
-        {                      
+        {
             rc = p8_pm_glob_fir_trace (i_secondary_chip_target, "after PBA reset");
-            if (!rc.ok()) { break; }  
-        }            
+            if (!rc.ok()) { break; }
+        }
 
         //  ******************************************************************
         //  Issue reset to OCC-SRAM
@@ -695,30 +724,30 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
                 break;
             }
         }
-        
+
         //  Check for xstops and recoverables
         rc = p8_pm_glob_fir_trace (i_primary_chip_target, "after OCB reset");
-        if (!rc.ok()) { break; }  
-        
+        if (!rc.ok()) { break; }
+
         if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
-        {                      
+        {
             rc = p8_pm_glob_fir_trace (i_secondary_chip_target, "after OCB reset");
-            if (!rc.ok()) { break; }  
-        }            
+            if (!rc.ok()) { break; }
+        }
         //  ******************************************************************
         //  Remove the EX chiplet special wakeups
         //  *****************************************************************
-                
+
         // Primary
         rc = special_wakeup_all (i_primary_chip_target, false);
         if (rc)
         {
-            FAPI_ERR("special_wakeup_all - Disable: Failed for Target %s", 
+            FAPI_ERR("special_wakeup_all - Disable: Failed for Target %s",
                         i_primary_chip_target.toEcmdString());
             break;
         }
         b_special_wakeup_pri = false;
-                
+
 
         // Secondary
         if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
@@ -726,38 +755,38 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
             rc = special_wakeup_all (i_secondary_chip_target, false);
             if (rc)
             {
-                FAPI_ERR("special_wakeup_all - Disable: Failed for Target %s", 
+                FAPI_ERR("special_wakeup_all - Disable: Failed for Target %s",
                             i_secondary_chip_target.toEcmdString());
                 break;
             }
-            
+
             b_special_wakeup_sec = false;
         }
-        
-        
+
+
         //  ******************************************************************
         //  FSM trace
         //  ******************************************************************
-        rc = p4rs_pcbs_fsm_trace (i_primary_chip_target, i_secondary_chip_target, 
+        rc = p4rs_pcbs_fsm_trace (i_primary_chip_target, i_secondary_chip_target,
                     "after special wake-up clearing");
-        if (!rc.ok()) 
+        if (!rc.ok())
         {
             break;
         }
-        
+
         //  Check for xstops and recoverables
         rc = p8_pm_glob_fir_trace (i_primary_chip_target, "after special wake-up clearing");
-        if (!rc.ok()) { break; }  
-        
+        if (!rc.ok()) { break; }
+
         if ( i_secondary_chip_target.getType() != TARGET_TYPE_NONE )
-        {                      
+        {
             rc = p8_pm_glob_fir_trace (i_secondary_chip_target, "after special wake-up clearing");
-            if (!rc.ok()) { break; }  
-        }            
-        
+            if (!rc.ok()) { break; }
+        }
+
     } while(0);
-    
-    
+
+
     // Clear special wakeups that might have been set before a subsequent
     // error occured.  Only attempts them on targets that have the boolean
     // flag set that they were successfully put into special wakeup.
@@ -765,9 +794,9 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
     {
         // Save the original RC
         rc_hold = rc;
-        
+
         do
-        {        
+        {
             // Primary
             if (b_special_wakeup_pri)
             {
@@ -775,9 +804,9 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
                 rc = special_wakeup_all (i_primary_chip_target, false);
                 if (rc)
                 {
-                    FAPI_ERR("special_wakeup_all - Disable: Failed during cleanup from a previous error for Target %s", 
+                    FAPI_ERR("special_wakeup_all - Disable: Failed during cleanup from a previous error for Target %s",
                                 i_primary_chip_target.toEcmdString());
-                    FAPI_ERR("special_wakeup_all - Disable: The original error is being returned"); 
+                    FAPI_ERR("special_wakeup_all - Disable: The original error is being returned");
                     fapiLogError(rc, fapi::FAPI_ERRL_SEV_RECOVERED);
                     break;
                 }
@@ -789,7 +818,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
                 rc = special_wakeup_all (i_secondary_chip_target, false);
                 if (rc)
                 {
-                    FAPI_ERR("special_wakeup_all - Disable: Failed during cleanup from a previous error for Target %s", 
+                    FAPI_ERR("special_wakeup_all - Disable: Failed during cleanup from a previous error for Target %s",
                                 i_primary_chip_target.toEcmdString());
                     FAPI_ERR("special_wakeup_all - Disable: The original error is being returned");
                     fapiLogError(rc, fapi::FAPI_ERRL_SEV_RECOVERED);
@@ -797,7 +826,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
                 }
             }
         } while(0);
-        
+
         // Restore the original RC
         rc = rc_hold;
     }
@@ -808,7 +837,7 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
 } // Procedure
 
 /**
- * special_wakeup_all - Sets or clears special wake-up on all configured EX on a 
+ * special_wakeup_all - Sets or clears special wake-up on all configured EX on a
  *                     target
  *
  * @param[in] i_target   Chip target w
@@ -820,13 +849,13 @@ p8_pm_prep_for_reset(   const fapi::Target &i_primary_chip_target,
 fapi::ReturnCode
 special_wakeup_all (const fapi::Target &i_target, bool i_action)
 {
-    fapi::ReturnCode                rc;    
+    fapi::ReturnCode                rc;
     std::vector<fapi::Target>       l_exChiplets;
-    uint8_t                         l_ex_number = 0;    
-    
+    uint8_t                         l_ex_number = 0;
+
     do
-    {   
-             
+    {
+
         rc = fapiGetChildChiplets (  i_target,
                                      TARGET_TYPE_EX_CHIPLET,
                                      l_exChiplets,
@@ -836,15 +865,15 @@ special_wakeup_all (const fapi::Target &i_target, bool i_action)
             FAPI_ERR("Error from fapiGetChildChiplets!");
             break;
         }
-        
+
 	    // Iterate through the returned chiplets
         for (uint8_t j=0; j < l_exChiplets.size(); j++)
 	    {
-            
-            FAPI_INF("\t%s special wake-up on %s",  
-                    i_action ? "Setting" : "Clearing", 
+
+            FAPI_INF("\t%s special wake-up on %s",
+                    i_action ? "Setting" : "Clearing",
                     l_exChiplets[j].toEcmdString());
-            
+
             // Build the SCOM address
             rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &l_exChiplets[j], l_ex_number);
             FAPI_DBG("Running special wakeup on ex chiplet %d ", l_ex_number);
@@ -853,7 +882,7 @@ special_wakeup_all (const fapi::Target &i_target, bool i_action)
             rc = fapiSpecialWakeup(l_exChiplets[j], i_action);
             if (rc)
             {
-                FAPI_ERR("fapiSpecialWakeup: Failed to put CORE %d into special wakeup. With rc = 0x%x",  
+                FAPI_ERR("fapiSpecialWakeup: Failed to put CORE %d into special wakeup. With rc = 0x%x",
                             l_ex_number, (uint32_t)rc);
                 break;
             }
@@ -863,12 +892,67 @@ special_wakeup_all (const fapi::Target &i_target, bool i_action)
         // Exit if error
         if  (!rc.ok())
         {
+
             break;
         }
-        
+
     } while(0);
     return rc;
 }
+
+/**
+ * clear deep exit mask
+ *
+ * @param[in] i_target   Chip target w
+ *
+ * @retval ECMD_SUCCESS
+ * @retval ERROR defined in xml
+ */
+fapi::ReturnCode
+clear_deep_exit_mask (const fapi::Target &i_target)
+{
+    fapi::ReturnCode      rc;
+    ecmdDataBufferBase    data(64);
+
+    do
+    {
+        
+        FAPI_INF("Clearing PMC Deep Exit Mask");
+        
+        // Read the present values for debug
+        rc = fapiGetScom(i_target, PMC_DEEPEXIT_MASK_0x00062092, data);
+        if(!rc.ok())
+        {
+            FAPI_ERR("Scom error reading PMC_DEEPEXIT_MASK_0x00062092");
+            break;
+        }
+        
+        FAPI_INF("PMC Deep Exit Mask value before clearing:  0x%16llX",
+                        data.getDoubleWord(0));
+
+        // Clear the PMC Deep Exit Mask
+        data.flushTo0();
+        rc = fapiPutScom(i_target, PMC_DEEPEXIT_MASK_0x00062092, data);
+        if(!rc.ok())
+        {
+            FAPI_ERR("Scom error reading PMC_DEEPEXIT_MASK_0x00062092");
+            break;
+        }
+        
+        rc = fapiGetScom(i_target, PMC_DEEPEXIT_MASK_0x00062092, data);
+        if(!rc.ok())
+        {
+            FAPI_ERR("Scom error reading PMC_DEEPEXIT_MASK_0x00062092");
+            break;
+        }
+        
+        FAPI_INF("PMC Deep Exit Mask value after clearing:   0x%16llX",
+                        data.getDoubleWord(0));
+
+    } while(0);
+    return rc;
+}
+
 
 //------------------------------------------------------------------------------
 /**
@@ -882,32 +966,32 @@ special_wakeup_all (const fapi::Target &i_target, bool i_action)
  */
 fapi::ReturnCode
 p4rs_pcbs_fsm_trace(const fapi::Target& i_primary_target,
-                    const fapi::Target& i_secondary_target,          
+                    const fapi::Target& i_secondary_target,
                     const char *       i_msg)
 {
     fapi::ReturnCode                rc;
 
     do
     {
-    
+
         rc = p8_pm_pcbs_fsm_trace_chip (i_primary_target, i_msg);
         if (rc)
         {
-            FAPI_ERR("pcbs_fsm_trace_chip failed for Target %s", 
+            FAPI_ERR("pcbs_fsm_trace_chip failed for Target %s",
                         i_primary_target.toEcmdString());
             break;
-        }          
+        }
 
         if ( i_secondary_target.getType() != TARGET_TYPE_NONE )
         {
             rc = p8_pm_pcbs_fsm_trace_chip (i_secondary_target, i_msg);
             if (rc)
             {
-                FAPI_ERR("pcbs_fsm_trace_chip failed for Target %s", 
+                FAPI_ERR("pcbs_fsm_trace_chip failed for Target %s",
                             i_secondary_target.toEcmdString());
                 break;
-            }           
-        }                                    
+            }
+        }
     } while(0);
     return rc;
 }

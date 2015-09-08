@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_build_pstate_datablock.H,v 1.14 2014/05/27 15:33:49 daviddu Exp $
+// $Id: p8_build_pstate_datablock.H,v 1.15 2015/05/13 03:12:36 stillgs Exp $
 #ifndef _P8_BUILD_PSTATE_DATABLOCK_H_
 #define _P8_BUILD_PSTATE_DATABLOCK_H_
 
@@ -38,29 +40,40 @@ extern "C" {
 /// \param[in]     i_target            Chip Target
 /// \param[in/out] *io_pss             Reference to PstateSuperStructure
 
-fapi::ReturnCode p8_build_pstate_datablock(const fapi::Target& i_target, PstateSuperStructure *io_pss);
+fapi::ReturnCode 
+p8_build_pstate_datablock(const fapi::Target& i_target, PstateSuperStructure *io_pss);
 
 } // extern "C"
 
-#define S132A_POINTS       3
+#define S132A_POINTS       4
 #define PSTATE_STEPSIZE    1
 #define EVRM_DELAY_NS      100
-#define DEAD_ZONE_5MV      20
+#define DEAD_ZONE_5MV      20       // 100mV
 #define PDV_BUFFER_SIZE    51
-#define PDM_BUFFER_SIZE    105
+#define PDV_BUFFER_ALLOC   512
+
+//#define PDM_BUFFER_SIZE    105
+#define PDM_BUFFER_SIZE    257      // Value is for version 3 @ 256 + 1 for version number
+#define PDM_BUFFER_ALLOC   513      // Value is for version 2 @ 512 + 1 for version number
 #define BIAS_PCT_UNIT      0.005
 #define BOOST_PCT_UNIT     0.001
 #define POUNDM_POINTS      13
+#define POUNDM_MEASUREMENTS_PER_POINT   4
 
 // #V 2 dimensional array values (5x5) - 5 operating point and 5 values per operating point
 #define PV_D 5
 #define PV_W 5
 
 // order of operating points from slow to fast in #V
-// 1=pwrsave 0=nominal 2=turbo
-#define PV_OP_ORDER     {1, 0, 2}
-#define PV_OP_ORDER_STR {"nominal", "powersave", "turbo"}
+// 1=pwrsave 0=nominal 2=turbo. 3=ultraturbo
+#define PV_OP_ORDER             {1, 0, 2, 3}
+#define PV_OP_ORDER_STR         {"Nominal", "PowerSave", "Turbo", "UltraTurbo"}
+#define PV_OP_ORDER_MIN_VALID   {1, 1, 1, 0}
 
+// IQ Keyword Sizes
+#define IQ_BUFFER_SIZE      9
+#define IQ_BUFFER_ALLOC     64 
+ 
 typedef struct {
   uint32_t attr_freq_core_max;
   uint32_t attr_proc_r_loadline_vdd;
@@ -106,6 +119,9 @@ typedef struct {
   uint8_t  attr_chip_ec_feature_ivrm_winkle_bug;
   uint8_t  attr_pm_system_ivrms_enabled;
   uint8_t  attr_pm_system_ivrm_vpd_min_level;  
+  
+  uint8_t  attr_wof_enabled; 
+  uint32_t attr_tdp_rdp_current_factor; 
 
 } AttributeList;
 

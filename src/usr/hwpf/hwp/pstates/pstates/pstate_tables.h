@@ -5,9 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
-/* [+] International Business Machines Corp.                              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -26,7 +26,8 @@
 #ifndef __PSTATE_TABLES_H__
 #define __PSTATE_TABLES_H__
 
-// $Id: pstate_tables.h,v 1.10 2014/07/03 02:57:52 daviddu Exp $
+// $Id: pstate_tables.h,v 1.12 2015/06/01 19:02:17 stillgs Exp $
+
 
 /// \file pstate_tables.h 
 /// \brief Code used to generate Pstate tables from real or imagined chip
@@ -36,10 +37,11 @@
 
 // Constants associated with VRM stepping
 
-#define PSTATE_STEPSIZE_MAX        127
-#define VRM_STEPDELAY_RANGE_BITS   4
-#define LOG2_VRM_STEPDELAY_DIVIDER 3
-#define VRM_STEPDELAY_MAX          1600000
+#define PSTATE_STEPSIZE_MAX         127
+#define VRM_STEPDELAY_RANGE_BITS    4
+#define LOG2_VRM_STEPDELAY_DIVIDER  3
+#define VRM_STEPDELAY_MAX           1600000
+#define MAX_ACTIVE_CORES            12
 
 
 #ifndef __ASSEMBLER__
@@ -48,32 +50,10 @@
 extern "C" {
 #endif
 
-/// A VPD operating point
-///
-/// VPD operating points are stored without load-line correction.  Frequencies
-/// are in MHz, voltages are specified in units of 5mV, and characterization
-/// currents are specified in units of 500mA. 
-///
-/// \bug The assumption is that the 'maxreg' points for the iVRM will also be
-/// supplied in the VPD in units of 5mv.  If they are supplied in some other
-/// form then chip_characterization_create() will need to be modified.
-
-typedef struct {
-
-    uint32_t vdd_5mv;
-    uint32_t vcs_5mv;
-    uint32_t vdd_maxreg_5mv;
-    uint32_t vcs_maxreg_5mv;
-    uint32_t idd_500ma;
-    uint32_t ics_500ma;
-    uint32_t frequency_mhz;
-
-} VpdOperatingPoint;
-
-
 /// An internal operating point
 ///
-/// Internal operating points include characterization and load-line corrected
+/// Internal operating points include characterization (both the original, 
+/// unbiased values and biased by external attributes) and load-line corrected
 /// voltages for the external VRM.  For the internal VRM, effective e-voltages
 /// and maxreg voltages are stored.  All voltages are stored as
 /// uV. Characterization currents are in mA. Frequencies are in KHz. The
@@ -83,9 +63,11 @@ typedef struct {
 typedef struct {
 
     uint32_t vdd_uv;
-    uint32_t vcs_uv;
+    uint32_t vcs_uv;    
     uint32_t vdd_corrected_uv;
     uint32_t vcs_corrected_uv;
+    uint32_t vdd_corrected_wof_uv[MAX_ACTIVE_CORES];
+    uint32_t vcs_corrected_wof_uv[MAX_ACTIVE_CORES];
     uint32_t vdd_ivrm_effective_uv;
     uint32_t vcs_ivrm_effective_uv;
     uint32_t vdd_maxreg_uv;
@@ -124,9 +106,11 @@ typedef struct {
 typedef struct {
 
     VpdOperatingPoint *vpd;
+    VpdOperatingPoint *vpd_unbiased;
     OperatingPoint *ops;
     OperatingPointParameters *parameters;
-    int points;
+    uint32_t points;
+    uint32_t max_cores;                     // Needed for WOF
 
 } ChipCharacterization;
 
@@ -145,11 +129,12 @@ chip_characterization_create(ChipCharacterization *characterization,
                  VpdOperatingPoint *vpd,
                  OperatingPoint *ops,
                  OperatingPointParameters *parameters,
-                 int points);
+                 uint32_t points);
 
 int
 gpst_create(GlobalPstateTable *gpst,
-        ChipCharacterization *characterization,
+            ChipCharacterization *characterization,
+            WOFElements *wof,
             int pstate_stepsize,
             int evrm_delay_ns);
             
@@ -201,9 +186,12 @@ void fit_file(int n,
 void write_HWtab_bin(ivrm_parm_data_t* i_ivrm_parms,
                       double C[],
                       PstateSuperStructure*   pss);
+                      
+int
+vid_mod_entry_create(WOFElements *wof, uint32_t entry, uint32_t cores, OperatingPoint *op);
 
 #ifdef __cplusplus
-}  // extern "C"
+} // end extern C
 #endif
 
 #endif // __ASSEMBLER__
