@@ -163,6 +163,10 @@ if (scalar(@ARGV) < 2)
     usage();
 }
 
+if ($LicenseFile eq "" || $projectName eq "")
+{
+    die "Environment not set up properly, run './hb workon'";
+}
 
 my  @SaveArgV   =   @ARGV;
 #------------------------------------------------------------------------------
