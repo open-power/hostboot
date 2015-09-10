@@ -2426,9 +2426,20 @@ int32_t CenMbaTdCtlr::handleTpsFalseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
             o_rc = FAIL; break;
         }
 
-        // Callout all DIMMs with any non-zero counts.
+        bool isMbDimm = false;
+        o_rc = isMembufOnDimm( iv_mbaTrgt, isMbDimm );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "isMembufOnDimm() failed." );
+            break;
+        }
+
+        // Callout all DIMMs that have reached threshold.
+        //   Centaur DIMMS: Any non-zero count, threshold on 1.
+        //   IS DIMMS:      Allow 1, threshold on 2 (because of limited spares).
+        uint8_t thr = isMbDimm ? 1 : 2;
         MaintSymbols symData; CenSymbol junk;
-        o_rc = collectCeStats( iv_mbaChip, iv_rank, symData, junk );
+        o_rc = collectCeStats( iv_mbaChip, iv_rank, symData, junk, thr );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "collectCeStats() failed." );
