@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_chiplet_scominit.C,v 1.28 2015/03/17 18:54:28 jmcgill Exp $
+// $Id: proc_chiplet_scominit.C,v 1.29 2015/08/10 15:15:06 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_chiplet_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -448,6 +448,24 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
             }
             if (exist_NV)
             {
+                // mask NPU FIR bit 27
+                rc_ecmd = data.flushTo0();
+                rc_ecmd = data.setBit(NPU_FIR_NTL_DL2TL_PARITY_ERR_BIT);
+                if (rc_ecmd)
+                {
+                    FAPI_ERR("proc_chiplet_scominit: Error 0x%Xforming NPU FIR mask data buffer",
+                  	   rc_ecmd);
+                    rc.setEcmdError(rc_ecmd);
+                    break;
+                }
+                rc = fapiPutScom(i_target, NPU_FIR_MASK_OR_0x08013D85, data);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_chiplet_scominit: fapiPutScom error (NPU_FIR_MASK_OR_0x08013D85) on %s",
+                             i_target.toEcmdString());
+                    break;
+                }
+
                 FAPI_INF("proc_chiplet_scominit: Executing  %s on %s",
                          PROC_CHIPLET_SCOMINIT_NPU_IF, i_target.toEcmdString());
                 FAPI_EXEC_HWP(
@@ -464,8 +482,7 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
                 }
 
                 // cleanup FIR bit (NPU FIR bit 27) caused by NDL/NTL parity error
-                rc_ecmd = data.flushTo1();
-                rc_ecmd = data.clearBit(NPU_FIR_NTL_DL2TL_PARITY_ERR_BIT);
+                rc_ecmd = data.invert();
                 if (rc_ecmd)
                 {
                     FAPI_ERR("proc_chiplet_scominit: Error 0x%Xforming NPU FIR cleanup data buffer",
