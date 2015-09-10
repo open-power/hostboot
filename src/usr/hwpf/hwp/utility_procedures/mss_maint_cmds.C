@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_maint_cmds.C,v 1.37 2014/10/13 21:31:53 gollub Exp $
+// $Id: mss_maint_cmds.C,v 1.39 2015/08/12 17:46:32 lwmulkey Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -1369,8 +1369,8 @@ fapi::ReturnCode mss_MaintCmd::stopCmd()
     ecmdDataBufferBase l_mbspa_and(64);    
 
 
-    // 1 ms delay for HW mode
-    const uint64_t  HW_MODE_DELAY = 100000000;
+    // 1 ms delay for HW mode -- LWM changed 100,000,000 to 1,000,000 to match comment
+    const uint64_t  HW_MODE_DELAY = 1000000;
 
     // 200000 sim cycle delay for SIM mode
     const uint64_t  SIM_MODE_DELAY = 200000;
@@ -1429,7 +1429,7 @@ fapi::ReturnCode mss_MaintCmd::stopCmd()
         // Loop to check for cmd in progress bit to turn off
         do
         {                
-            // Wait 1ms
+            // Wait 1ms 
             fapiDelay(HW_MODE_DELAY, SIM_MODE_DELAY);
                     
             // Read MBMSRQ
@@ -2055,8 +2055,8 @@ fapi::ReturnCode mss_MaintCmd::stopCmd()
 
       uint32_t count = 0;
 
-// 1 ms delay for HW mode
-      const uint64_t  HW_MODE_DELAY = 100000000;
+// 1 ms delay for HW mode -- LWM changed 100,000,000 to 1,000,000 to match comment
+      const uint64_t  HW_MODE_DELAY = 1000000;
 
 // 200000 sim cycle delay for SIM mode
       const uint64_t  SIM_MODE_DELAY = 200000;
@@ -4060,9 +4060,33 @@ fapi::ReturnCode mss_MaintCmd::stopCmd()
         return l_rc;
     }
 
+//------------------------------------------------------------------------------
+// mss_get_slave_address_range
+//------------------------------------------------------------------------------
+    fapi::ReturnCode mss_get_slave_address_range( const fapi::Target & i_target,
+                                            uint8_t i_master,
+                                            uint8_t i_slave,
+                                            ecmdDataBufferBase & o_startAddr,
+                                            ecmdDataBufferBase & o_endAddr )
+    {
+        fapi::ReturnCode l_rc;
+        uint32_t l_ecmd_rc = 0;
+        FAPI_INF("ENTER mss_get_slave_address_range()");
+        mss_get_address_range(i_target,i_master,o_startAddr,o_endAddr);
+        //START SLAVE RANK = 4:6
+        l_ecmd_rc |= o_startAddr.insert( i_slave, 4, 3, 8-3 );
+        //END SLAVE RANK = 4:6
+        l_ecmd_rc |= o_endAddr.insert( i_slave, 4, 3, 8-3 );
+        if(l_ecmd_rc)
+        {
+          l_rc.setEcmdError(l_ecmd_rc);
+          return l_rc;
+        }
 
+        FAPI_INF("EXIT mss_get_slave_address_range()");
 
-
+        return l_rc;
+    }
 
 //------------------------------------------------------------------------------
 // mss_get_mark_store

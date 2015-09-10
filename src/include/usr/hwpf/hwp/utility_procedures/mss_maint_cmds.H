@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_maint_cmds.H,v 1.22 2014/03/11 19:04:46 gollub Exp $
+// $Id: mss_maint_cmds.H,v 1.23 2015/08/11 20:09:21 lwmulkey Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -906,6 +908,24 @@ static const uint8_t mss_x8_chip_mark_to_centaurDQ[18][2]={
   */
     fapi::ReturnCode mss_get_address_range( const fapi::Target & i_target,
                                             uint8_t i_rank,
+                                            ecmdDataBufferBase & o_startAddr,
+                                            ecmdDataBufferBase & o_endAddr );
+
+
+/** 
+  * @brief  Calculates start and end address for a single slave rank
+  *
+  * @param  i_target       MBA target 
+  * @param  i_master        master rank corresponding to the desired slave rank on the MBA to get start/end address
+  *                        for (0x00-0x07)
+  * @param  i_slave         Slave rank to get the address range for
+  * @param  o_startAddr    Address to start cmd at.
+  * @param  o_endAddr      Address to stop cmd at.
+  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+  */
+    fapi::ReturnCode mss_get_slave_address_range( const fapi::Target & i_target,
+                                            uint8_t i_master,
+                                            uint8_t i_slave,
                                             ecmdDataBufferBase & o_startAddr,
                                             ecmdDataBufferBase & o_endAddr );
 
