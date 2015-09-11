@@ -340,8 +340,7 @@ int32_t handleMirrorAction( ExtensibleChip * i_mcsChip,
             else // Mirror still enabled but getting a flood of attentions.
             {
                 // Just submit the error log as hidden.
-                i_sc.service_data->Nologging();
-                i_sc.service_data->clearMruListGard();
+                i_sc.service_data->clearLogging();
             }
         }
         else // Under threshold

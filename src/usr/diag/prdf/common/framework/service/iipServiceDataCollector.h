@@ -273,6 +273,17 @@ public:
         #endif
     }
 
+    /**
+     * @brief Clears the LOGIT flag and the SERVICE_CALL flag indicating that
+     *        the error log will be committed, but only as informational.
+     */
+    void clearLogging() { clearFlag(LOGIT); clearFlag(SERVICE_CALL); }
+
+    /**
+     * @brief Queries the state of the LOGIT flag.
+     */
+    bool queryLogging() const { return queryFlag(LOGIT); }
+
   /**
    Get access to the error signature object
    <ul>
@@ -497,30 +508,6 @@ public:
    </ul><br>
    */
   bool IsMfgTracking(void) const { return queryFlag(TRACKIT); }
-
-  /**
-   Indicate that no system log should be generated
-   <ul>
-   <br><b>Parameters:  </b> None
-   <br><b>Returns:     </b> none.
-   <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> IsLogging() == false
-   <br><b>Exceptions:  </b> None.
-   </ul><br>
-   */
-  void Nologging(void) { clearFlag(LOGIT); }
-
-  /**
-   Query for need to make a system error log
-   <ul>
-   <br><b>Parameters:  </b> None.
-   <br><b>Returns:     </b> [true | false]
-   <br><b>Requirements:</b> None.
-   <br><b>Promises:    </b> None.
-   <br><b>Exceptions:  </b> None.
-   </ul><br>
-   */
-  bool IsLogging(void) const { return queryFlag(LOGIT); }
 
   /**
    Indicate the chip where analysis begain

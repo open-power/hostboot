@@ -129,25 +129,13 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 #ifdef __HOSTBOOT_MODULE
     using namespace ERRORLOG;
     using namespace HWAS;
-    errlSeverity_t severityParm = ERRL_SEV_RECOVERED;
 #else
     uint8_t sdcSaveFlags = SDC_NO_SAVE_FLAGS;
     size_t  sz_uint8    = sizeof(uint8_t);
     uint8_t sdcBuffer[sdcBufferSize];  //buffer to use for SDC flatten
-    errlSeverity severityParm = ERRL_SEV_RECOVERED;
 #endif
 
     epubProcedureID thisProcedureID;
-
-    // Init Action Parm to most common usage, Service Action Required and
-    // Report Externally. Note this is like the old Signal
-    // Event: OS Viewable (Parable) or OS Hidden.
-    // Also set the Call Home Flag. This should be set when IBM Service is required.
-    // For PRD this is for UnRecoverable and Predictive errors. Setting it here will
-    // take care of this. The Hidden and Informational cases will reassign the actionFlag.
-    uint32_t actionFlag = (ERRL_ACTION_SA | ERRL_ACTION_REPORT | ERRL_ACTION_CALL_HOME);
-
-    HWSV::hwsvDiagUpdate l_diagUpdate = HWSV::HWSV_DIAG_NEEDED;
 
     bool ForceTerminate = false;
     bool iplDiagMode = false;
@@ -165,8 +153,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     ////////////////////////////////////////////////////////////////
     if (i_attnType == MACHINE_CHECK)
     {
-        severityParm = ERRL_SEV_UNRECOVERABLE;
-
         #ifdef __HOSTBOOT_MODULE
 
         // Do nothing. Saved SDCs only supported on FSP.
@@ -273,48 +259,6 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             }
         }
 #endif  // if not __HOSTBOOT_MODULE
-
-        if (!io_sdc.IsLogging() )
-        {
-            // This is a Hidden Log
-            severityParm = ERRL_SEV_INFORMATIONAL;
-            actionFlag = (actionFlag | ERRL_ACTION_HIDDEN);
-        }
-        else if ( io_sdc.queryServiceCall() ) //At Thresold
-        {
-            severityParm = ERRL_SEV_PREDICTIVE;
-        }
-        else  //Recovered
-        {
-            severityParm = ERRL_SEV_RECOVERED;
-            //  Recovered error should be Hidden, and No Service Action
-            actionFlag = ERRL_ACTION_HIDDEN;
-        }
-    }
-    ////////////////////////////////////////////////////////////////
-    // Special ATTN
-    ////////////////////////////////////////////////////////////////
-    else if (i_attnType == SPECIAL)
-    {
-        if (io_sdc.queryServiceCall())
-        //Bit Steered already, or Bit Steer Not supported
-        {
-            severityParm = ERRL_SEV_PREDICTIVE;
-        }
-        // Special Attn Clean Up
-        else if ( (!io_sdc.queryServiceCall()) && (!io_sdc.IsLogging()) )
-        {
-            severityParm = ERRL_SEV_INFORMATIONAL;
-            //Hidden, No Service Action for Infomational
-            actionFlag = ERRL_ACTION_HIDDEN;
-        }
-        // Special Attn Bit Steer Normal Condition
-        else if ( (!io_sdc.queryServiceCall()) && (io_sdc.IsLogging()) )
-        {
-            severityParm = ERRL_SEV_RECOVERED;
-            //Hidden, No Service Action for Recovered
-            actionFlag = ERRL_ACTION_HIDDEN;
-        }
     }
 
     //**************************************************************
@@ -458,13 +402,40 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         capDataAdded = true;
     }
 
-    // make sure serviceAction doesn't override errl severity
-    iv_errl->setSev(severityParm);
+    //--------------------------------------------------------------------------
+    // Set the error log severity and get the error log action flags.
+    //--------------------------------------------------------------------------
 
-    if (ERRL_ACTION_HIDDEN == actionFlag)
-    {  // Diagnostics is not needed in the next IPL cycle for non-visible logs
-        l_diagUpdate = HWSV::HWSV_DIAG_NOT_NEEDED;
+    // Let's assume the default is the action for a system checkstop.
+
+    #ifdef __HOSTBOOT_MODULE
+    errlSeverity_t errlSev = ERRL_SEV_UNRECOVERABLE;
+    #else
+    errlSeverity   errlSev = ERRL_SEV_UNRECOVERABLE;
+    #endif
+
+    uint32_t errlAct = ERRL_ACTION_SA        | // Service action required.
+                       ERRL_ACTION_REPORT    | // Report to HMC and hypervisor.
+                       ERRL_ACTION_CALL_HOME;  // Call home.
+
+    if ( MACHINE_CHECK != i_attnType ) // Anything other that a system checkstop
+    {
+        if ( io_sdc.queryServiceCall() ) // still a serviceable event
+        {
+            errlSev = ERRL_SEV_PREDICTIVE;
+        }
+        else // not a serviceable event
+        {
+            errlSev = io_sdc.queryLogging()
+                            ? ERRL_SEV_RECOVERED      // should still be logged
+                            : ERRL_SEV_INFORMATIONAL; // can be ignored
+            errlAct = ERRL_ACTION_HIDDEN;
+        }
     }
+
+    // This needs to be done after setting the SRCs otherwise it will be
+    // overridden.
+    iv_errl->setSev( errlSev );
 
     //--------------------------------------------------------------------------
     // Get the global gard policy.
@@ -555,12 +526,23 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     }
 
     //--------------------------------------------------------------------------
+    // Get the HCDB diagnostics policy.
+    //--------------------------------------------------------------------------
+
+    HWSV::hwsvDiagUpdate l_diagUpdate = HWSV::HWSV_DIAG_NEEDED;
+    if ( ERRL_ACTION_HIDDEN == errlAct )
+    {
+        // Diagnostics is not needed in the next IPL cycle for non-visible logs.
+        l_diagUpdate = HWSV::HWSV_DIAG_NOT_NEEDED;
+    }
+
+    //--------------------------------------------------------------------------
     // Initialize the PFA data
     //--------------------------------------------------------------------------
 
     PfaData pfaData;
 
-    initPfaData( io_sdc, i_attnType, deferDeconfig, actionFlag, severityParm,
+    initPfaData( io_sdc, i_attnType, deferDeconfig, errlAct, errlSev,
                  gardPolicy, pfaData, o_dumpTrgt );
 
     //--------------------------------------------------------------------------
@@ -595,7 +577,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                                 thisDeconfig,
                                 iv_errl,
                                 thisGard,
-                                severityParm,
+                                errlSev,
                                 l_diagUpdate);
         }
         else if(PRDcalloutData::TYPE_PROCCLK == thiscallout.getType() ||
@@ -621,7 +603,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                                      thisDeconfig,
                                      iv_errl,
                                      thisGard,
-                                     severityParm,
+                                     errlSev,
                                      l_diagUpdate );
             }
 
@@ -709,25 +691,25 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         {
             thisProcedureID = epubProcedureID(thiscallout.flatten());
 
-            PRDF_DTRAC( PRDF_FUNC "thisProcedureID: %x, thispriority: %x, severityParm: %x",
-                   thisProcedureID, thispriority,severityParm );
+            PRDF_DTRAC( PRDF_FUNC "thisProcedureID: %x, thispriority: %x, "
+                        "errlSev: %x", thisProcedureID, thispriority,errlSev );
 
             PRDF_HW_ADD_PROC_CALLOUT(thisProcedureID,
                                      thispriority,
                                      iv_errl,
-                                     severityParm);
+                                     errlSev);
 
             // Use the flags set earlier to determine if the callout is just Software (SP code or Phyp Code).
             // Add a Second Level Support procedure callout Low, for this case.
             if (HW == false && SW == true && SecondLevel == false)
             {
-                PRDF_DTRAC( PRDF_FUNC "thisProcedureID= %x, thispriority=%x, severityParm=%x",
-                   EPUB_PRC_LVL_SUPP, MRU_LOW, severityParm );
+                PRDF_DTRAC( PRDF_FUNC "thisProcedureID= %x, thispriority=%x, "
+                            "errlSev=%x", EPUB_PRC_LVL_SUPP, MRU_LOW, errlSev );
 
                 PRDF_HW_ADD_PROC_CALLOUT(EPUB_PRC_LVL_SUPP,
                                          MRU_LOW,
                                          iv_errl,
-                                         severityParm);
+                                         errlSev);
 
                 SecondLevel = true;
             }
@@ -757,8 +739,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     if ( PlatServices::mnfgTerminate() && !ForceTerminate )
     {
         ForceTerminate = true;
-        if ( !((severityParm == ERRL_SEV_RECOVERED) ||
-               (severityParm == ERRL_SEV_INFORMATIONAL)) &&
+        if ( !((errlSev == ERRL_SEV_RECOVERED) ||
+               (errlSev == ERRL_SEV_INFORMATIONAL)) &&
              iplDiagMode  &&
              !HW )
         {
@@ -768,18 +750,18 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         // Do not terminate if recoverable or informational.
         // Do not terminate if deferred deconfig.
         else if ( deferDeconfig                            ||
-                  (severityParm == ERRL_SEV_RECOVERED    ) ||
-                  (severityParm == ERRL_SEV_INFORMATIONAL)  )
+                  (errlSev == ERRL_SEV_RECOVERED    ) ||
+                  (errlSev == ERRL_SEV_INFORMATIONAL)  )
         {
             ForceTerminate = false;
-            actionFlag = (actionFlag | ERRL_ACTION_DONT_TERMINATE);
+            errlAct |= ERRL_ACTION_DONT_TERMINATE;
         }
         else
         {
             PRDF_SRC_WRITE_TERM_STATE_ON(iv_errl, SRCI_TERM_STATE_MNFG);
         }
 
-        pfaData.errlActions = actionFlag;
+        pfaData.errlActions = errlAct;
     }
 
     // Needed to move the errl add user data sections here because of some updates
@@ -840,7 +822,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             // after the hwudump is initiated there.
             o_dumpErrl = iv_errl;
             iv_errl = NULL;
-            o_dumpErrlActions = actionFlag;
+            o_dumpErrlActions = errlAct;
             PRDF_TRAC( PRDF_FUNC "for target: 0x%08x, i_errl: 0x%08x, "
                        "i_errlActions: 0x%08x", getHuid(o_dumpTrgt),
                        ERRL_GETRC_SAFE(o_dumpErrl), o_dumpErrlActions );
@@ -923,7 +905,7 @@ void ErrDataService::initPfaData( const ServiceDataCollector & i_sdc,
     o_pfa.SERVICE_CALL        = i_sdc.queryServiceCall()    ? 1 : 0;
     o_pfa.TRACKIT             = i_sdc.IsMfgTracking()       ? 1 : 0;
     o_pfa.TERMINATE           = i_sdc.Terminate()           ? 1 : 0;
-    o_pfa.LOGIT               = i_sdc.IsLogging()           ? 1 : 0;
+    o_pfa.LOGIT               = i_sdc.queryLogging()        ? 1 : 0;
     o_pfa.UNIT_CHECKSTOP      = i_sdc.IsUnitCS()            ? 1 : 0;
     o_pfa.LAST_CORE_TERMINATE = 0; // Will be set later, if needed.
     o_pfa.USING_SAVED_SDC     = i_sdc.IsUsingSavedSdc()     ? 1 : 0;
