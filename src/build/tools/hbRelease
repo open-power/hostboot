@@ -990,6 +990,7 @@ sub git_order_commits
     my $patches = shift;
     my $level_info = shift;
     my $forceDeps = $level_info->{forceDeps};
+    my %patch_dep = ();
 
     # Create patch -> { distance -> 0, deps -> [] } hash.
     my %patch_hash =
@@ -1001,6 +1002,12 @@ sub git_order_commits
         # Add dependencies for each patch to the hash.
         my $deps = git_commit_deps($level_info->{base}, $patch);
         push @{${$patch_hash{$patch}}->{deps}}, @{$deps};
+
+        # Add dependencies to hash for circular depends check later
+        foreach my $dep (@{$deps})
+        {
+            $patch_dep{$patch}{$dep} = 1;
+        }
 
         # Determine the distance from previous release for each patch.
         ${$patch_hash{$patch}}->{distance} =
@@ -1017,6 +1024,8 @@ sub git_order_commits
         print "Force dep: $resolve_from : $resolve_to\n" if ($debug);
 
         push @{${$patch_hash{$resolve_from}}->{deps}}, $resolve_to;
+        # Add dependencies to hash for circular depends check later
+        $patch_dep{$resolve_from}{$resolve_to} = 1;
     }
 
     # Calculate Dijkstra's on the patches.
@@ -1027,9 +1036,12 @@ sub git_order_commits
         foreach my $patch (@{$patches})
         {
             my $distance = 1 + max( map
-                    { ${$patch_hash{$_}}->{distance}}
-                    @{${$patch_hash{$patch}}->{deps}});
-
+                {
+                    # If patches have a circular dependency, ignore distance check.
+                    next if ($patch_dep{$_}{$patch} && $patch_dep{$patch}{$_});
+                    ${$patch_hash{$_}}->{distance}
+                }
+                @{${$patch_hash{$patch}}->{deps}});
             if ($distance > ${$patch_hash{$patch}}->{distance})
             {
                 $changed = 1;
