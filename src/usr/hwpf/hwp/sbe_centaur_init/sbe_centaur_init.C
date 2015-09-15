@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -55,6 +57,7 @@
 #include <errl/errludtarget.H>
 #include <sbe/sbeif.H>
 #include "cen_xip_customize.H"
+#include <util/align.H>
 
 extern fapi::ReturnCode fapiPoreVe(const fapi::Target i_target,
            std::list<uint64_t> & io_sharedObjectArgs);
@@ -66,7 +69,7 @@ const uint64_t REPAIR_LOADER_RETRY_CTR_MASK = 0x000007FC00000000ull;
 const uint64_t CENTAUR_SBE_PNOR_MRR = 0;
 
 // Max SBE image buffer size
-const uint32_t MAX_SBE_IMG_SIZE = 48 * 1024; 
+const uint32_t MAX_SBE_IMG_SIZE = 48 * 1024;
 
 namespace   SBE_CENTAUR_INIT
 {
@@ -168,9 +171,9 @@ void*    call_sbe_centaur_init( void *io_pArgs )
                      (const_cast<TARGETING::Target*>(l_membuf_target)));
 
         // Expand buffer for new image size
-        const uint32_t l_customizedMaxSize = MAX_SBE_IMG_SIZE;
-        const uint32_t l_buf1Size = MAX_SBE_IMG_SIZE;
-        const uint32_t l_buf2Size = MAX_SBE_IMG_SIZE;
+        const uint32_t l_customizedMaxSize = ALIGN_POW2(MAX_SBE_IMG_SIZE);
+        const uint32_t l_buf1Size = ALIGN_POW2(MAX_SBE_IMG_SIZE);
+        const uint32_t l_buf2Size = ALIGN_POW2(MAX_SBE_IMG_SIZE);
 
         uint32_t l_customizedSize = l_customizedMaxSize;
         char * l_pCustomizedImage = (char *)malloc(l_customizedMaxSize);
