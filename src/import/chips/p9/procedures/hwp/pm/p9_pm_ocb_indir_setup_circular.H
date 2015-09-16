@@ -35,8 +35,8 @@
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_pm_ocb_indir_setup_circular_FP_t)
 (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
- p9ocb::P9_OCB_CHAN_NUM,
- p9ocb::P9_OCB_CHAN_TYPE);
+ p9ocb::PM_OCB_CHAN_NUM,
+ p9ocb::PM_OCB_CHAN_TYPE);
 
 extern "C"
 {
@@ -52,8 +52,8 @@ extern "C"
 
     fapi2::ReturnCode p9_pm_ocb_indir_setup_circular(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        p9ocb::P9_OCB_CHAN_NUM i_ocb_chan,
-        p9ocb::P9_OCB_CHAN_TYPE i_ocb_type);
+        p9ocb::PM_OCB_CHAN_NUM i_ocb_chan,
+        p9ocb::PM_OCB_CHAN_TYPE i_ocb_type);
 
 } // extern "C"
 

@@ -45,8 +45,8 @@
 
 fapi2::ReturnCode p9_pm_ocb_indir_setup_circular(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    p9ocb::P9_OCB_CHAN_NUM i_ocb_chan,
-    p9ocb::P9_OCB_CHAN_TYPE i_ocb_type)
+    p9ocb::PM_OCB_CHAN_NUM i_ocb_chan,
+    p9ocb::PM_OCB_CHAN_TYPE i_ocb_type)
 {
     FAPI_IMP("Entering...");
     FAPI_DBG("For channel %x as type %x", i_ocb_chan, i_ocb_type);
