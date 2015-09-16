@@ -17,5 +17,4 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_pm_ocb_init
-libp9_pm_ocb_init_DEPLIBS += p9_pm_utils
 $(call BUILD_PROCEDURE)
