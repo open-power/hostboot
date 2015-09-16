@@ -45,18 +45,16 @@ extern "C"
 // Constant definitions
 //----------------------------------------------------------------------------------------------
 
-//if the flag is more than 1 bit there will be a start and end bit for the flag
-//these give the bit position that is expected for the flags
-    enum flags
+//these give the bit mask for each flag
+    enum p9_pba_flags
     {
         //fastmode flag, if this flag is set it means we will not check for errors until the very last granule for the read/write
-        FLAG_FASTMODE = 0,
+        FLAG_FASTMODE = 0x80000000ull,
         //ttype flag, this is 3 bits, will be set to 0 for dma, 1, to lco_m, 2 for atomic, 3 for cache_inj, and 4 for ci_pr_w --same as in the documentation and how they will be passed to the register
-        FLAG_TTYPE_START = 1,
-        FLAG_TTYPE_END = 3
+        FLAG_TTYPE = 0x70000000ull
     };
 
-    enum proc_pba_write_ttype
+    enum p9_pba_write_ttype
     {
         DMA = 0,
         LCO = 1,
@@ -64,6 +62,8 @@ extern "C"
         INJ = 3,
         CI = 4
     };
+
+    const uint64_t FLAG_TTYPE_SHIFT = 28;
 
 } //extern "C"
 
