@@ -23,42 +23,14 @@
     <rc>RC_PM_OCBINIT_BAD_MODE</rc>
     <description>Unknown mode passed to p9_pm_ocb_init.
     </description>
+    <ffdc>BADMODE</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_PM_OCBINIT_BAD_Q_LENGTH_PARM</rc>
     <description>Bad Queue Length Passed to p9_pm_ocb_init.
     </description>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_PM_OCBINIT_BAD_ITP_TYPE_PARM</rc>
-    <description>Bad Interrupt Type Passed to p9_pm_ocb_init.
-    </description>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_PM_OCBINIT_BAD_Q_OVER_UNDERFLOW_PARM</rc>
-    <description>Bad Queue Over/Underflow Enable Passed to p9_pm_ocb_init.
-    </description>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_PM_OCBINIT_BAD_CHAN_NUM_PARM</rc>
-    <description>Bad Channel Number Passed to p9_pm_ocb_init.
-    </description>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_PM_OCBINIT_BAD_CHAN_TYPE_PARM</rc>
-    <description>Bad Channel Type Passed to p9_pm_ocb_init.
-    </description>
-  </hwpError>
-   <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_PM_OCBINIT_BAD_CHAN3_TYPE_PARM</rc>
-    <description>Bad Channel Type for Channel3 Passed to p9_pm_ocb_init.
-    </description>
+    <ffdc>BADQLENGTH</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
 </hwpErrors>
