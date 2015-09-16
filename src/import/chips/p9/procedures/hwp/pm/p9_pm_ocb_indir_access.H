@@ -52,7 +52,7 @@ enum P9_OCB_ACCESS_OP
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_pm_ocb_indir_access_FP_t)
 (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
- p9ocb::P9_OCB_CHAN_NUM     i_ocb_chan,
+ p9ocb::PM_OCB_CHAN_NUM     i_ocb_chan,
  p9ocb::P9_OCB_ACCESS_OP    i_ocb_op,
  const uint32_t             i_ocb_req_length,
  fapi2::buffer<uint64_t>&    io_ocb_buffer,
@@ -90,7 +90,7 @@ extern "C"
 
     fapi2::ReturnCode p9_pm_ocb_indir_access(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        p9ocb::P9_OCB_CHAN_NUM      i_ocb_chan,
+        p9ocb::PM_OCB_CHAN_NUM      i_ocb_chan,
         p9ocb::P9_OCB_ACCESS_OP i_ocb_op,
         const uint32_t             i_ocb_req_length,
         fapi2::buffer<uint64_t>&    io_ocb_buffer,
