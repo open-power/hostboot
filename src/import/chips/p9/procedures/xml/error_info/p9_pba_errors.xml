@@ -22,6 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- TODO add callout, gard, deconfig info wherever applicable --> 
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -51,15 +52,22 @@
       PBA Read Status, Write Status, or Reset Register had a problem, the PBA was still busy
     </description>
     <ffdc>TARGET</ffdc>
-    <ffdc>RDBUF0</ffdc>
-    <ffdc>RDBUF1</ffdc>
     <ffdc>RDBUF2</ffdc>
     <ffdc>RDBUF3</ffdc>
-    <ffdc>RDBUF4</ffdc>
-    <ffdc>RDBUF5</ffdc>
     <ffdc>WRBUF0</ffdc>
     <ffdc>WRBUF1</ffdc>
     <ffdc>SLVRSTDATA</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_PBA_FBC_NOT_INITIALIZED_ERR</rc>
+    <description>
+      Procedure: p9_pba_coherent_utils
+      The fabric was not initialized or not running
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>INITIALIZED</ffdc>
+    <ffdc>RUNNING</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
