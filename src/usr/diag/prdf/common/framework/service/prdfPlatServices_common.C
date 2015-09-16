@@ -350,12 +350,9 @@ int32_t getMemAddrRange( TargetHandle_t i_mba, uint8_t i_mrank,
 
         if ( i_slaveOnly )
         {
-            // TODO: RTC 82157 Use new interface when available, for now use
-            //       current interface.
-//          PRD_FAPI_TO_ERRL( errl, mss_get_address_range, getFapiTarget(i_mba),
-//                            i_mrank, i_srank, o_startAddr, o_endAddr );
-            PRD_FAPI_TO_ERRL( errl, mss_get_address_range, getFapiTarget(i_mba),
-                              i_mrank, o_startAddr, o_endAddr );
+            PRD_FAPI_TO_ERRL( errl, mss_get_slave_address_range,
+                              getFapiTarget(i_mba),
+                              i_mrank, i_srank, o_startAddr, o_endAddr );
         }
         else
         {
