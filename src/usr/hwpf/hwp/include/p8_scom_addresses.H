@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_scom_addresses.H,v 1.198 2015/08/04 22:06:23 baiocchi Exp $
+// $Id: p8_scom_addresses.H,v 1.199 2015/09/16 19:33:47 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/p8_scom_addresses.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -568,8 +568,15 @@ CONST_UINT64_T( PIBMEM_REPAIR_0x00088007              , ULL(0x00088007) );
 //------------------------------------------------------------------------------
 //      I2C MASTER (MODE)
 //------------------------------------------------------------------------------
-CONST_UINT64_T( I2CM_MODE_REGISTER_0_0x000A0006       , ULL(0x000A0006) );
-
+CONST_UINT64_T( I2CM_MODE_REGISTER_0_0x000A0006          , ULL(0x000A0006) );
+CONST_UINT64_T( I2CM_WATER_MARK_0_0x000A0007             , ULL(0x000A0007) );
+CONST_UINT64_T( I2CM_INTERRUPT_MASK_0_0x000A0008         , ULL(0x000A0008) );
+CONST_UINT64_T( I2CM_INTERRUPT_COND_0_0x000A0009         , ULL(0x000A0009) );
+CONST_UINT64_T( I2CM_INTERRUPTS_0_0x000A000A             , ULL(0x000A000A) );
+CONST_UINT64_T( I2CM_STATUS_REGISTER_ENGINE_0_0x000A000B , ULL(0x000A000B) );
+CONST_UINT64_T( I2CM_EXTENDED_STATUS_0_0x000A000C        , ULL(0x000A000C) );
+CONST_UINT64_T( I2CM_RESIDUAL_FE_BE_LENGTH_0_0x000A000D  , ULL(0x000A000D) );
+CONST_UINT64_T( I2CM_BUSY_REGISTER_0_0x000A000E          , ULL(0x000A000E) );
 
 //------------------------------------------------------------------------------
 //      I2C MASTER (MEMS1)
@@ -2265,6 +2272,9 @@ This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 
 $Log: p8_scom_addresses.H,v $
+Revision 1.199  2015/09/16 19:33:47  jmcgill
+add I2CM registers for SBE FFDC collection
+
 Revision 1.198  2015/08/04 22:06:23  baiocchi
 Updating Support for starting the SBEs without a FSP
 

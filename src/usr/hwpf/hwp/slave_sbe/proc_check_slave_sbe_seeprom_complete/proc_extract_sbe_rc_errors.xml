@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_extract_sbe_rc_errors.xml,v 1.19 2015/04/15 18:40:56 dcrowell Exp $ -->
+<!-- $Id: proc_extract_sbe_rc_errors.xml,v 1.20 2015/09/16 19:34:24 jmcgill Exp $ -->
 <!-- Error definitions for proc_extract_sbe_rc procedure -->
 <hwpErrors>
   <!-- *********************************************************************** -->
@@ -98,6 +98,10 @@
     </description>
     <ffdc>I2C_BAD_STATUS_0_3</ffdc>
     <ffdc>FI2C_HANG</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_I2C_ERROR_REGS</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
     <callout>
       <target>CHIP</target>
       <priority>HIGH</priority>
@@ -479,6 +483,18 @@
     </deconfigure>
   </hwpError>
   <!-- *********************************************************************** -->
+  <registerFfdc>
+    <id>REG_FFDC_I2C_ERROR_REGS</id>
+    <scomRegister>I2CM_MODE_REGISTER_0_0x000A0006</scomRegister>
+    <scomRegister>I2CM_WATER_MARK_0_0x000A0007</scomRegister>
+    <scomRegister>I2CM_INTERRUPT_MASK_0_0x000A0008</scomRegister>
+    <scomRegister>I2CM_INTERRUPT_COND_0_0x000A0009</scomRegister>
+    <scomRegister>I2CM_INTERRUPTS_0_0x000A000A</scomRegister>
+    <scomRegister>I2CM_STATUS_REGISTER_ENGINE_0_0x000A000B</scomRegister>
+    <scomRegister>I2CM_EXTENDED_STATUS_0_0x000A000C</scomRegister>
+    <scomRegister>I2CM_RESIDUAL_FE_BE_LENGTH_0_0x000A000D</scomRegister>
+    <scomRegister>I2CM_BUSY_REGISTER_0_0x000A000E</scomRegister>
+  </registerFfdc>
 </hwpErrors>
 
 
