@@ -24,5 +24,14 @@
 #
 # IBM_PROLOG_END_TAG
 if [ -z $MIRROR ]; then
-    $TOOLSDIR/pre-commit-actions
+    if [ -f $TOOLSDIR/pre-commit-actions ]; then
+        $TOOLSDIR/pre-commit-actions
+    # Legacy support for older releases
+    elif [ -f $TOOLSDIR/pre-commit-prologs ]; then
+        export TOOLS_DIR=$GIT_DIR/../src/build/tools
+        $TOOLSDIR/pre-commit-prologs
+    else
+        echo "Missing pre-commit files"
+        exit -1
+    fi
 fi
