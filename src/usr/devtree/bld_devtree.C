@@ -102,47 +102,53 @@ void bld_swCheckstopFir (devTree * i_dt, dtOffset_t & i_parentNode)
     const uint32_t PBEASTFIR_ACT1     = 0x02010c87;
     uint64_t BIT_31_MASK        = 0xfffffffeffffffff;
     uint64_t l_data = 0;
+    size_t opsize = sizeof(uint64_t);
 
     errlHndl_t l_errl = NULL;
 
     do
     {
-        TARGETING::Target * l_proc =   NULL;
-        (void)TARGETING::targetService().masterProcChipTargetHandle(l_proc);
-        size_t opsize = sizeof(uint64_t);
+        // unmask all functional proc chip targets
+        TARGETING::TargetHandleList l_procTargetList;
+        getAllChips(l_procTargetList, TYPE_PROC);
 
-        // clear PBEASTFIR_ACT0 bit 31
-        l_errl = deviceRead( l_proc,
+        for (size_t proc = 0; proc < l_procTargetList.size(); proc++)
+        {
+            TARGETING::Target * l_proc = l_procTargetList[proc];
+
+            // clear PBEASTFIR_ACT0 bit 31
+            l_errl = deviceRead( l_proc,
                         &l_data,
                         opsize,
                         DEVICE_SCOM_ADDRESS(PBEASTFIR_ACT0) );
-        if (l_errl) break;
-        l_data &= BIT_31_MASK;
-        l_errl = deviceWrite( l_proc,
+            if (l_errl) break;
+            l_data &= BIT_31_MASK;
+            l_errl = deviceWrite( l_proc,
                         &l_data,
                         opsize,
                         DEVICE_SCOM_ADDRESS(PBEASTFIR_ACT0) );
-        if (l_errl) break;
+            if (l_errl) break;
 
-        // clear PBEASTFIR_ACT1 bit 31
-        l_errl = deviceRead( l_proc,
+            // clear PBEASTFIR_ACT1 bit 31
+            l_errl = deviceRead( l_proc,
                         &l_data,
                         opsize,
                         DEVICE_SCOM_ADDRESS(PBEASTFIR_ACT1) );
-        if (l_errl) break;
-        l_data &= BIT_31_MASK;
-        l_errl = deviceWrite( l_proc,
+            if (l_errl) break;
+            l_data &= BIT_31_MASK;
+            l_errl = deviceWrite( l_proc,
                         &l_data,
                         opsize,
                         DEVICE_SCOM_ADDRESS(PBEASTFIR_ACT1) );
-        if (l_errl) break;
+            if (l_errl) break;
 
-        // clear PBEASTFIR_MASK bit 31 using the AND register
-        l_errl = deviceWrite( l_proc,
+            // clear PBEASTFIR_MASK bit 31 using the AND register
+            l_errl = deviceWrite( l_proc,
                         &BIT_31_MASK,
                         opsize,
                         DEVICE_SCOM_ADDRESS(PBEASTFIR_MASK_AND) );
-        if (l_errl) break;
+            if (l_errl) break;
+        }
 
         // add devtree property
         uint32_t cellProperties [2] = {PBEASTFIR_OR,31};  // PBEASTFIR[31]
@@ -150,6 +156,7 @@ void bld_swCheckstopFir (devTree * i_dt, dtOffset_t & i_parentNode)
                                  "ibm,sw-checkstop-fir",
                                  cellProperties, 2);
     } while (0);
+
     if (l_errl) // commit error and keep going
     {
         errlCommit(l_errl, DEVTREE_COMP_ID);
