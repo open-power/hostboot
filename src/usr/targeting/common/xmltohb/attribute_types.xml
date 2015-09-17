@@ -16633,6 +16633,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
+
 <attribute>
     <id>DEFAULT_PROC_MODULE_NEST_FREQ_MHZ</id>
     <description>
@@ -16648,8 +16649,6 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
-
-
 
 
 </attributes>
