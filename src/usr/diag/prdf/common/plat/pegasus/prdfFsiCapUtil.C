@@ -43,6 +43,10 @@ namespace PLL
 void captureFsiStatusReg( ExtensibleChip * i_chip,
                           STEP_CODE_DATA_STRUCT & io_sc )
 {
+    // At runtime, PRD runs under the OPAL app and does not
+    // have access to drivers that read CFAM registers.
+    #ifndef __HOSTBOOT_RUNTIME
+
     #define PRDF_FUNC "[PLL::captureFsiStatusReg] "
 
     uint32_t u32Data = 0;
@@ -77,6 +81,7 @@ void captureFsiStatusReg( ExtensibleChip * i_chip,
     }
 
     #undef PRDF_FUNC
+    #endif  // not hostboot runtime
 }
 
 } // end namespace PLL
