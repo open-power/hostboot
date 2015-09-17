@@ -285,6 +285,38 @@ int32_t erepairFirIsolation(TargetHandle_t i_rxBusTgt)
 }
 
 //##############################################################################
+//##                        Processor specific functions
+//##############################################################################
+bool isXBusEnabled( TARGETING::TargetHandle_t i_proc )
+{
+    #define PRDF_FUNC "[PlatServices::isXBusEnabled] "
+
+    using namespace fapi;
+    uint8_t x_enabled = ENUM_ATTR_PROC_X_ENABLE_ENABLE;
+    if ( TYPE_PROC == getTargetType( i_proc ) )
+    {
+        fapi::Target fapiProc = getFapiTarget(i_proc);
+        ReturnCode l_rc = FAPI_ATTR_GET( ATTR_PROC_X_ENABLE, &fapiProc,
+                                         x_enabled);
+        errlHndl_t errl = fapi::fapiRcToErrl(l_rc);
+        if ( NULL != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to get ATTR_PROC_X_ENABLE for Target:"
+                      "0x%08X", getHuid( i_proc ) );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+        }
+    }
+    else
+    {
+        PRDF_ERR( PRDF_FUNC "Invalid Target Huid = 0x%08x", getHuid( i_proc ) );
+    }
+
+    return (x_enabled == ENUM_ATTR_PROC_X_ENABLE_ENABLE);
+
+    #undef PRDF_FUNC
+}
+
+//##############################################################################
 //##                        Memory specific functions
 //##############################################################################
 

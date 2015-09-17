@@ -484,6 +484,13 @@ TARGETING::TargetHandle_t getActiveRefClk(
                             TARGETING::TYPE i_connType,
                             uint32_t i_oscPos);
 
+/**
+ * @brief  Check ATTR_PROC_X_ENABLE
+ * @param  i_proc a proc target
+ * @return TRUE if ATTR_PROC_X_ENABLE is set, FALSE otherwise.
+ */
+bool isXBusEnabled(TARGETING::TargetHandle_t i_proc);
+
 } // end namespace PlatServices
 
 } // end namespace PRDF

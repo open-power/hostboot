@@ -1059,6 +1059,19 @@ int32_t isMuranoDD1( ExtensibleChip * i_chip, bool & o_isMuranoDD1 )
 PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, isMuranoDD1 );
 PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, isMuranoDD1 );
 
+/**
+ * @brief Checks if XBUS is enabled
+ * @param i_chip P8 chip
+ * @param o_xbusEnabled TRUE if xbus enabled
+ */
+int32_t isXBusEnabled( ExtensibleChip * i_chip, bool & o_xbusEnabled )
+{
+    o_xbusEnabled = PlatServices::isXBusEnabled(i_chip->GetChipHandle());
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, isXBusEnabled );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, isXBusEnabled );
+
 } // end namespace Proc
 
 } // end namespace PRDF
