@@ -81,6 +81,14 @@ chip Mba
         capture     group MemChipletRegs;
     };
 
+    register MBAFIR_MASK_OR
+    {
+        name        "MBU.MBA_MCBIST.SCOMFIR.MBAFIRMASK OR";
+        scomaddr    0x03010605;
+        capture     group never;
+        access      write_only;
+    };
+
     register MBAFIR_ACT0
     {
         name        "MBU.MBA_MCBIST.SCOMFIR.MBAFIRACT0";
@@ -693,7 +701,7 @@ group gMbaCalFir filter priority( 4, 7 ),
     /** MBACALFIR[4]
      *  MBACALFIRQ_RCD_PARITY_ERROR_0
      */
-    (MbaCalFir, bit(4)) ? CalloutMbaAndDimmOnPort0;
+    (MbaCalFir, bit(4)) ? RcdParityError0;
 
     /** MBACALFIR[5]
      *  MBACALFIRQ_DDR0_CAL_TIMEOUT_ERR
@@ -708,7 +716,7 @@ group gMbaCalFir filter priority( 4, 7 ),
     /** MBACALFIR[7]
      *  MBACALFIRQ_RCD_PARITY_ERROR_1
      */
-    (MbaCalFir, bit(7)) ? CalloutMbaAndDimmOnPort1;
+    (MbaCalFir, bit(7)) ? RcdParityError1;
 
     /** MBACALFIR[8]
      *  MBACALFIRQ_MBX_TO_MBA_PAR_ERROR
@@ -914,6 +922,20 @@ actionclass CalloutMbaAndDimmOnPort1
 {
     funccall("CalloutMbaAndDimmOnPort1");
     threshold1;
+};
+
+/** Handle RCD Parity Error 0 */
+actionclass RcdParityError0
+{
+    funccall("maskRcdParitySideEffects");
+    CalloutMbaAndDimmOnPort0;
+};
+
+/** Handle RCD Parity Error 1 */
+actionclass RcdParityError1
+{
+    funccall("maskRcdParitySideEffects");
+    CalloutMbaAndDimmOnPort1;
 };
 
 /** Callouts specific to MBASECUREFIR attentions. */

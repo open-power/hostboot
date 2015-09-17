@@ -164,6 +164,61 @@ int32_t CalloutMbaAndDimm( ExtensibleChip * i_chip,
     return o_rc;
 }
 
+/**
+ * @brief  Plugin to mask the side effects of an RCD parity error
+ * @param  i_mbaChip A Centaur MBA chip.
+ * @param  i_sc      The step code data struct.
+ * @return SUCCESS
+ */
+int32_t maskRcdParitySideEffects( ExtensibleChip * i_mbaChip,
+                                    STEP_CODE_DATA_STRUCT & i_sc )
+{
+    #define PRDF_FUNC "[maskRcdParitySideEffects] "
+
+    int32_t l_rc = SUCCESS;
+
+    do
+    {
+        //use a data bundle to get the membuf chip
+        CenMbaDataBundle * mbadb = getMbaDataBundle( i_mbaChip );
+        ExtensibleChip * membChip = mbadb->getMembChip();
+        if (NULL == membChip)
+        {
+            PRDF_ERR(PRDF_FUNC "getMembChip() failed");
+            break;
+        }
+
+        //get the masks for each FIR
+        SCAN_COMM_REGISTER_CLASS * mbsFirMaskOr =
+            membChip->getRegister("MBSFIR_MASK_OR");
+        SCAN_COMM_REGISTER_CLASS * mbaCalMaskOr =
+            i_mbaChip->getRegister("MBACALFIR_MASK_OR");
+        SCAN_COMM_REGISTER_CLASS * mbaFirMaskOr =
+            i_mbaChip->getRegister("MBAFIR_MASK_OR");
+
+        mbaFirMaskOr->SetBit(2);
+        mbaCalMaskOr->SetBit(2);
+        mbaCalMaskOr->SetBit(17);
+        mbsFirMaskOr->SetBit(4);
+
+        l_rc =  mbaFirMaskOr->Write();
+        l_rc |= mbaCalMaskOr->Write();
+        l_rc |= mbsFirMaskOr->Write();
+
+        if (SUCCESS != l_rc)
+        {
+            PRDF_ERR(PRDF_FUNC "MBAFIR_MASK_OR/MBACALFIR_MASK_OR/MBSFIR_MASK_OR"
+                    " write failed for 0x%08x", i_mbaChip->GetId());
+            break;
+        }
+    }while(0);
+
+    return SUCCESS;
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( Mba, maskRcdParitySideEffects );
+
+
 //------------------------------------------------------------------------------
 
 /**
