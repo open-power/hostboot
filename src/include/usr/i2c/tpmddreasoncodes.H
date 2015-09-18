@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,6 +81,7 @@ enum tpmReasonCode
     TPM_UNDERFLOW_ERROR                  = TPMDD_COMP_ID | 0x09,
     TPM_TIMEOUT                          = TPMDD_COMP_ID | 0x0A,
     TPM_DEVICE_NOT_AVAILABLE             = TPMDD_COMP_ID | 0x0B,
+    TPM_BUS_SPEED_LOOKUP_FAIL            = TPMDD_COMP_ID | 0x0C,
 };
 
 };  // end TPMDD

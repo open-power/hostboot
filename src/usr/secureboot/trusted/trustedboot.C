@@ -55,6 +55,89 @@ namespace TRUSTEDBOOT
 
 extern SystemTpms systemTpms;
 
+void getTPMs( std::list<TpmTarget>& o_info )
+{
+    TRACUCOMP(g_trac_trustedboot,ENTER_MRK"getTPMs()");
+
+    for (size_t idx = 0; idx < MAX_SYSTEM_TPMS; idx ++)
+    {
+        if (systemTpms.tpm[idx].available && !systemTpms.tpm[idx].failed)
+        {
+
+            o_info.push_back(systemTpms.tpm[idx]);
+        }
+    }
+
+    TRACUCOMP(g_trac_trustedboot,EXIT_MRK"getTPMs() : Size:%d", o_info.size());
+
+}
+
+errlHndl_t getTpmLogDevtreeInfo(TpmTarget & i_target,
+                                uint64_t & io_logAddr,
+                                size_t & o_allocationSize,
+                                uint64_t & o_xscomAddr,
+                                uint32_t & o_i2cMasterOffset)
+{
+    errlHndl_t err = NULL;
+    TRACUCOMP( g_trac_trustedboot,
+               ENTER_MRK"getTpmLogDevtreeInfo() Chip:%d Addr:%lX %lX",
+               i_target.chip, io_logAddr
+               ,(uint64_t)(i_target.logMgr));
+
+    o_allocationSize = 0;
+
+    if (NULL != i_target.logMgr &&
+        i_target.available)
+    {
+        err = TpmLogMgr_getDevtreeInfo(i_target.logMgr,
+                                       io_logAddr,
+                                       o_allocationSize,
+                                       o_xscomAddr,
+                                       o_i2cMasterOffset);
+    }
+    TRACUCOMP( g_trac_trustedboot,
+               EXIT_MRK"getTpmLogDevtreeInfo() Addr:%lX",io_logAddr);
+    return err;
+}
+
+void setTpmDevtreeInfo(TpmTarget & i_target,
+                       uint64_t i_xscomAddr,
+                       uint32_t i_i2cMasterOffset)
+{
+    TRACUCOMP( g_trac_trustedboot,
+               ENTER_MRK"setTpmLogDevtreeOffset() Chip:%d "
+               "Xscom:%lX Master:%X",
+               i_target.chip, i_xscomAddr, i_i2cMasterOffset);
+
+    if (NULL != i_target.logMgr)
+    {
+        TpmLogMgr_setTpmDevtreeInfo(i_target.logMgr,
+                                    i_xscomAddr, i_i2cMasterOffset);
+    }
+}
+
+bool enabled()
+{
+    bool ret = false;
+#ifdef CONFIG_TPMDD
+    bool foundFunctional = false;
+
+    for (size_t idx = 0; idx < MAX_SYSTEM_TPMS; idx ++)
+    {
+        if ((!systemTpms.tpm[idx].failed &&
+             systemTpms.tpm[idx].available) ||
+            !systemTpms.tpm[idx].initAttempted)
+        {
+            foundFunctional = true;
+            break;
+        }
+    }
+    // If we have a functional TPM we are enabled
+    ret = foundFunctional;
+#endif
+    return ret;
+}
+
 void* host_update_master_tpm( void *io_pArgs )
 {
     errlHndl_t err = NULL;
@@ -293,7 +376,7 @@ void tpmReplayLog(TRUSTEDBOOT::TpmTarget & io_target)
         }
 
         // Extend to tpm
-        if (l_eventLog.eventType == EV_ACTION)
+        if (EV_ACTION == l_eventLog.eventType)
         {
             TRACUBIN(g_trac_trustedboot, "tpmReplayLog: Extending event:",
                      &l_eventLog, sizeof(TCG_PCR_EVENT2));

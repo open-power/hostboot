@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -26,6 +28,10 @@
 #include <errl/errlentry.H>
 
 typedef uint8_t SHA512_t[64];
+/* From sha512.h:  */
+#define SHA512_DIGEST_LENGTH 64
+typedef uint8_t __attribute__((aligned(8))) sha2_hash_t[ \
+                SHA512_DIGEST_LENGTH / sizeof(uint8_t) ];
 
 namespace SECUREBOOT
 {
@@ -71,6 +77,13 @@ namespace SECUREBOOT
      */
     errlHndl_t hashBlob(void * i_blob, size_t i_size, SHA512_t o_buf);
 
+    /**
+     * @brief Retrieve the internal hardware hash key from secure ROM
+     *        object.
+     * @param[out] o_hash  Reference to the sha2_hash_t array to copy the
+     *                     hash to.
+     */
+    void getHwHashKeys(sha2_hash_t o_hash);
 }
 
 #endif

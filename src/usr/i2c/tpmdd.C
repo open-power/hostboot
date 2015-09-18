@@ -1260,6 +1260,45 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
         }
 
 
+        // Lookup bus speed
+        TARGETING::ATTR_I2C_BUS_SPEED_ARRAY_type speeds;
+        if( io_tpmInfo.i2cTarget->
+            tryGetAttr<TARGETING::ATTR_I2C_BUS_SPEED_ARRAY>(speeds) &&
+            (io_tpmInfo.engine < I2C_BUS_MAX_ENGINE(speeds)) &&
+            (io_tpmInfo.port < I2C_BUS_MAX_PORT(speeds)) )
+        {
+            io_tpmInfo.busFreq = speeds[io_tpmInfo.engine][io_tpmInfo.port];
+            io_tpmInfo.busFreq *= 1000; //convert KHz->Hz
+        }
+        else
+        {
+            TRACFCOMP( g_trac_tpmdd,
+                       ERR_MRK"tpmReadAttributes() - BUS SPEED LOOKUP FAIL");
+
+                /*@
+                 * @errortype
+                 * @reasoncode       TPM_BUS_SPEED_LOOKUP_FAIL
+                 * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid         TPMDD_READATTRIBUTES
+                 * @userdata1        HUID of target
+                 * @userdata2        Address Offset Size
+                 * @devdesc          Invalid address offset size
+                 */
+                err = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    TPMDD_READATTRIBUTES,
+                                    TPM_BUS_SPEED_LOOKUP_FAIL,
+                                    TARGETING::get_huid(i_target),
+                                    tpmData.byteAddrOffset,
+                                    true /*Add HB SW Callout*/ );
+
+                err->collectTrace( TPMDD_COMP_NAME );
+
+                break;
+
+        }
+
+
     } while( 0 );
 
     TRACUCOMP(g_trac_tpmdd,"tpmReadAttributes() tgt=0x%X, %d/%d/0x%X "

@@ -36,6 +36,7 @@
 #include <targeting/common/targetservice.H>
 #include <i2c/tpmddif.H>
 #include <errl/errlentry.H>
+#include <list>
 
 namespace TRUSTEDBOOT
 {
@@ -94,6 +95,47 @@ namespace TRUSTEDBOOT
                          uint8_t* i_digest,
                          size_t  i_digestSize,
                          const char* i_logMsg);
+
+    /**
+     * @brief Return a set of information related to every unique
+     *        functional TPM in the system
+     *
+     * @param[out] o_info - list of TPM Information
+     *
+     */
+    void getTPMs( std::list<TpmTarget>& o_info );
+
+    /**
+     * @brief Retrieve TPM log device tree information
+     * @param[in] i_target TPM target information
+     * @param[in/out] io_logAddr TPM Log Address
+     * @param[out] o_allocationSize Total memory allocated for log
+     * @param[out] o_xscomAddr Chip Xscom Address
+     * @param[out] o_i2cMasterOffset I2c Master Offset
+     * @return errlHndl_t NULL if successful, otherwise a pointer to the
+     *      error log.
+     */
+    errlHndl_t getTpmLogDevtreeInfo(TpmTarget & i_target,
+                                    uint64_t & io_logAddr,
+                                    size_t & o_allocationSize,
+                                    uint64_t & o_xscomAddr,
+                                    uint32_t & o_i2cMasterOffset);
+
+    /**
+     * @brief Store devtree node information for the TPM
+     * @param[in] i_target TPM target information
+     * @param[in] i_xscomAddr Chip Xscom Address
+     * @param[in] i_i2cMasterOffset i2c Master Offset
+     */
+    void setTpmDevtreeInfo(TpmTarget & i_target,
+                           uint64_t i_xscomAddr,
+                           uint32_t i_i2cMasterOffset);
+
+    /**
+     * @brief Is trustedboot enabled and functional
+     * @retval true if trustboot enabled and functional TPM's are available
+     */
+    bool enabled();
 
 } // end TRUSTEDBOOT namespace
 

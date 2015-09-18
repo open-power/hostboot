@@ -57,6 +57,7 @@ namespace TRUSTEDBOOT
         MOD_TPMLOGMGR_INITIALIZE        = 0x10,
         MOD_TPMLOGMGR_ADDEVENT          = 0x11,
         MOD_TPMLOGMGR_INITIALIZEEXISTLOG = 0x012,
+        MOD_TPMLOGMGR_GETDEVTREEINFO    = 0x13,
    };
 
     enum TRUSTEDReasonCode

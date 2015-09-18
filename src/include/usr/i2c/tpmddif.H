@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -70,6 +70,7 @@ struct tpm_info_t
     TARGETING::EntityPath i2cMasterPath; ///< I2C Master path
     TARGETING::Target * i2cTarget; ///< I2C Target
 
+    uint64_t busFreq;           ///< Bus speed in Hz
     uint8_t port;               ///< I2C Master port
     uint8_t engine;             ///< I2C Master engine
     uint8_t chip;               ///< Chip target, primary/backup
