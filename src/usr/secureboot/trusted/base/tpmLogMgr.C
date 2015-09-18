@@ -38,6 +38,8 @@
 #include <string.h>
 #include "tpmLogMgr.H"
 #ifdef __HOSTBOOT_MODULE
+#include <sys/mm.h>
+#include <util/align.H>
 #include <secureboot/trustedboot_reasoncodes.H>
 #include "../trustedbootUtils.H"
 #include "../trustedboot.H"
@@ -250,7 +252,6 @@ namespace TRUSTEDBOOT
 
                 break;
             }
-
 
             val->newEventPtr = TCG_PCR_EVENT2_logMarshal(logEvent,
                                                          val->newEventPtr);
@@ -489,6 +490,59 @@ namespace TRUSTEDBOOT
         return val->eventLogInMem;
 #endif
     }
+
+#ifdef __HOSTBOOT_MODULE
+    errlHndl_t TpmLogMgr_getDevtreeInfo(TpmLogMgr* val,
+                                        uint64_t & io_logAddr,
+                                        size_t & o_allocationSize,
+                                        uint64_t & o_xscomAddr,
+                                        uint32_t & o_i2cMasterOffset)
+    {
+        errlHndl_t err = NULL;
+
+        mutex_lock( &val->logMutex );
+
+        assert(io_logAddr != 0, "Invalid starting log address");
+        assert(val->eventLogInMem == NULL,
+               "getDevtreeInfo can only be called once");
+
+        io_logAddr -= ALIGN_PAGE(TPMLOG_DEVTREE_SIZE);
+        // Align to 64KB for Opal
+        io_logAddr = ALIGN_DOWN_X(io_logAddr,64*KILOBYTE);
+
+        val->inMemlogBaseAddr = io_logAddr;
+        o_allocationSize = TPMLOG_DEVTREE_SIZE;
+        o_xscomAddr = val->devtreeXscomAddr;
+        o_i2cMasterOffset = val->devtreeI2cMasterOffset;
+
+        // Copy image.
+        val->eventLogInMem = (uint8_t*)(mm_block_map(
+                                 (void*)(io_logAddr),
+                                 ALIGN_PAGE(TPMLOG_DEVTREE_SIZE)));
+        // Copy log into new location
+        memset(val->eventLogInMem, 0, TPMLOG_DEVTREE_SIZE);
+        memcpy(val->eventLogInMem, val->eventLog, val->logSize);
+        val->newEventPtr = val->eventLogInMem + val->logSize;
+
+        mutex_unlock( &val->logMutex );
+
+        TRACUCOMP( g_trac_trustedboot,
+                   "<<getDevtreeInfo() Addr:%lX - %s",
+                   io_logAddr,
+                   ((TB_SUCCESS == err) ? "No Error" : "With Error") );
+        return err;
+    }
+
+
+    void TpmLogMgr_setTpmDevtreeInfo(TpmLogMgr* val,
+                                     uint64_t i_xscomAddr,
+                                     uint32_t i_i2cMasterOffset)
+    {
+        val->devtreeXscomAddr = i_xscomAddr;
+        val->devtreeI2cMasterOffset = i_i2cMasterOffset;
+    }
+
+#endif
 
 #ifdef __cplusplus
 } // end TRUSTEDBOOT

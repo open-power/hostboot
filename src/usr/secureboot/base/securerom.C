@@ -84,6 +84,14 @@ errlHndl_t hashBlob(void * i_blob, size_t i_size, SHA512_t io_buf)
 
 }
 
+/*
+ * @brief  Externally available hardware hash key function
+ */
+void getHwHashKeys(sha2_hash_t o_hash)
+{
+    return Singleton<SecureROM>::instance().getHwHashKeys(o_hash);
+}
+
 }; //end SECUREBOOT namespace
 
 
@@ -610,14 +618,6 @@ errlHndl_t SecureROM::getHwHashKeys()
 void SecureROM::getHwHashKeys(sha2_hash_t o_hash)
 {
     memcpy(o_hash, iv_hash_key, sizeof(sha2_hash_t));
-}
-
-/*
- * @brief  Externally available hardware hash key function
- */
-void getHwHashKeys(sha2_hash_t o_hash)
-{
-    return Singleton<SecureROM>::instance().getHwHashKeys(o_hash);
 }
 
 /**

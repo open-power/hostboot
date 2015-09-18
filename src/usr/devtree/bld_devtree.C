@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -48,6 +48,9 @@
 #include <vpd/pvpdenums.H>
 #include <i2c/i2cif.H>
 #include <i2c/eepromif.H>
+#include <i2c/tpmddif.H>
+#include <secureboot/trustedbootif.H>
+#include <secureboot/service.H>
 #include <ipmi/ipmisensor.H>
 #include <fapi.H>
 #include <fapiPlatHwpInvoker.H> // for fapi::fapiRcToErrl()
@@ -216,7 +219,8 @@ homerAddr_t getHomerPhysAddr(const TARGETING::Target * i_pProc)
 
 void add_i2c_info( const TARGETING::Target* i_targ,
                    devTree* i_dt,
-                   dtOffset_t i_node )
+                   dtOffset_t i_node,
+                   uint64_t i_xscomAddr)
 {
     TRACFCOMP(g_trac_devtree,"add_i2c_info(%X)",TARGETING::get_huid(i_targ));
 
@@ -227,6 +231,14 @@ void add_i2c_info( const TARGETING::Target* i_targ,
     //find all of the EEPROMs connected via i2c
     std::list<EEPROM::EepromInfo_t> l_eepromInfo;
     EEPROM::getEEPROMs( l_eepromInfo );
+
+#ifdef CONFIG_TPMDD
+    TPMDD::tpm_info_t tpmInfo;
+    errlHndl_t err = NULL;
+    //find all TPMs
+    std::list<TRUSTEDBOOT::TpmTarget> l_tpmTarget;
+    TRUSTEDBOOT::getTPMs(l_tpmTarget);
+#endif
 
     //add any other i2c devices here as needed, e.g. TPM, etc
 
@@ -465,10 +477,122 @@ void add_i2c_info( const TARGETING::Target* i_targ,
                 // now remove the device we added so we don't add it again
                 eep2 = l_eepromInfo.erase(eep2);
             }
-        }
-    }
+        } // end eeprom iter
 
+
+#ifdef CONFIG_TPMDD
+        std::list<TRUSTEDBOOT::TpmTarget>::iterator tpm = l_tpmTarget.begin();
+        while( tpm != l_tpmTarget.end() )
+        {
+
+            // Lookup i2c info for the TPM
+            tpmInfo.chip = tpm->chip;
+            err = TPMDD::tpmReadAttributes(tpm->nodeTarget, tpmInfo);
+            if (NULL != err)
+            {
+                // Unable to get info we skip this guy
+                delete err;
+                tpm = l_tpmTarget.erase(tpm);
+                continue;
+            }
+
+            // ignore the devices that aren't on the current target
+            if( tpmInfo.i2cTarget != i_targ )
+            {
+                tpm = l_tpmTarget.erase(tpm);
+                continue;
+            }
+            // skip the devices that are on a different engine
+            else if( tpmInfo.engine != i2cm->engine )
+            {
+                ++tpm;
+                continue;
+            }
+
+            /*
+             i2c-bus@0 {
+                 reg = <0x0>;
+                 bus-frequency = <0x61a80>;
+                 compatible = "ibm,power8-i2c-port", << Opal fills in
+                              "ibm,opal-i2c"; << Opal fills in
+                 ibm,opal-id = <0x1>; << Opal fills in
+                 ibm,port-name = "p8_00000000_e1p0"; << chip_chipid_eng_port
+                 #address-cells = <0x1>;
+                 phandle = <0x10000063>; << auto-filled
+                 #size-cells = <0x0>;
+                 linux,phandle = <0x10000063>;
+             }
+             */
+            dtOffset_t l_busNode = i_dt->addNode( l_i2cNode,
+                                                  "i2c-bus", tpmInfo.port);
+            i_dt->addPropertyCell32(l_busNode, "reg", tpmInfo.port);
+            i_dt->addPropertyCell32(l_busNode, "bus-frequency",
+                                    tpmInfo.busFreq);
+            i_dt->addPropertyCell32(l_busNode, "#address-cells", 1);
+            i_dt->addPropertyCell32(l_busNode, "#size-cells", 0);
+            char portname[20];
+            sprintf( portname, "%s_%.8X_e%dp%d",
+                     l_chipname,
+                     l_chipid,
+                     tpmInfo.engine,
+                     tpmInfo.port );
+            i_dt->addPropertyString(l_busNode,
+                                    "ibm,port-name",
+                                    portname);
+
+
+            /*
+              tpm@50 {
+              reg = <0x50>; << right-justified 7-bit addr
+              label = "tpm"; << arbitrary name
+              compatible = "nuvoton,npct650"; << from i2c driver
+              status = "ok"; << Opal fills in
+              phandle = <0x10000065>; << auto-filled
+              linux,phandle = <0x10000065>; << Opal fills in
+              sml-get-allocated-size = <size of buffer allocated for event log>
+              sml-handover = <ptr to event log>
+              }
+            */
+            dtOffset_t l_tpmNode = i_dt->addNode( l_busNode,
+                                                  "tpm",
+                                                  tpmInfo.devAddr >> 1 );
+            TRACFCOMP( g_trac_devtree, "TPM NODE %X", l_tpmNode );
+
+            i_dt->addPropertyCell32(l_tpmNode, "reg",
+                                    tpmInfo.devAddr >> 1);
+            char l_label[30];
+            switch (tpm->chip)
+            {
+              case TPMDD::TPM_PRIMARY:
+                sprintf( l_label, "tpm" );
+                break;
+              case TPMDD::TPM_BACKUP:
+                sprintf( l_label, "tpm-backup" );
+                break;
+              default:
+                break;
+            }
+            i_dt->addPropertyString(l_tpmNode, "label", l_label);
+
+            // fill in nuvoton compatible
+            const char* l_compat = "nuvoton,npct650";
+            i_dt->addPropertyString(l_tpmNode, "compatible", l_compat);
+
+            // Placeholders for the tpm log which will be filled in later
+            // We store info away so we can look up this devtree node later
+            TRUSTEDBOOT::setTpmDevtreeInfo(*tpm, i_xscomAddr, i2cm->scomAddr);
+            i_dt->addPropertyCell32(l_tpmNode, "sml-get-allocated-size", 0);
+            i_dt->addPropertyCell64(l_tpmNode, "sml-handover", 0);
+
+            // now remove the device we added so we don't add it again
+            tpm = l_tpmTarget.erase(tpm);
+        } // end TPM iter
+#endif
+
+
+    } // end i2cm iter
 }
+
 
 void bld_getSideInfo(PNOR::SideId i_side,
                      uint32_t     o_TOCaddress[2],
@@ -739,7 +863,7 @@ void bld_xscom_node(devTree * i_dt, dtOffset_t & i_parentNode,
     }
 
     /*I2C Masters*/
-    add_i2c_info( i_pProc, i_dt, xscomNode );
+    add_i2c_info( i_pProc, i_dt, xscomNode, l_xscomAddr );
 
 }
 
@@ -1169,6 +1293,93 @@ void load_hbrt_image(uint64_t& io_address)
     }
 }
 
+void load_tpmlog(devTree * i_dt, uint64_t& io_address)
+{
+
+    do
+    {
+#ifdef CONFIG_TPMDD
+        errlHndl_t l_errl = NULL;
+
+        // TPM log
+        std::list<TRUSTEDBOOT::TpmTarget> l_tpmTarget;
+        TRUSTEDBOOT::getTPMs(l_tpmTarget);
+        std::list<TRUSTEDBOOT::TpmTarget>::iterator l_tpm = l_tpmTarget.begin();
+        size_t l_allocatedSize = 0;
+        uint32_t* l_propAllocSize = NULL;
+        uint64_t* l_propAddr = NULL;
+        TPMDD::tpm_info_t l_tpmInfo;
+        uint64_t l_scomAddr = 0;
+        uint32_t l_masterOffset = 0;
+        uint8_t  l_i2cBus = 0;
+        uint8_t  l_tpmAddr = 0;
+        char     l_nodePath[100];
+        dtOffset_t l_tpmNode;
+
+        while( l_tpm != l_tpmTarget.end() )
+        {
+
+            l_errl = TRUSTEDBOOT::getTpmLogDevtreeInfo(*l_tpm,
+                                                       io_address,
+                                                       l_allocatedSize,
+                                                       l_scomAddr,
+                                                       l_masterOffset);
+
+            if (l_errl)
+            {
+                errlCommit(l_errl, DEVTREE_COMP_ID);
+                ++ l_tpm;
+                continue;
+            }
+
+            // We need to build the devtree path to find this TPM node
+            // Lookup i2c info for the TPM
+            l_tpmInfo.chip = l_tpm->chip;
+            l_errl = TPMDD::tpmReadAttributes(l_tpm->nodeTarget, l_tpmInfo);
+            if (l_errl)
+            {
+                errlCommit(l_errl, DEVTREE_COMP_ID);
+                ++ l_tpm;
+                continue;
+            }
+
+            l_i2cBus = l_tpmInfo.port;
+            l_tpmAddr = l_tpmInfo.devAddr >> 1;
+
+            sprintf(l_nodePath, "/xscom@%lx/i2cm@%x/i2c-bus@%x/tpm@%x",
+                    l_scomAddr, l_masterOffset, l_i2cBus, l_tpmAddr);
+
+            TRACFCOMP(g_trac_devtree,"Searching for TPM Node %s",
+                      l_nodePath);
+            l_tpmNode = i_dt->findNode(l_nodePath);
+
+            l_propAllocSize = reinterpret_cast<uint32_t*>(
+                                          i_dt->findProperty(l_tpmNode,
+                                          "sml-get-allocated-size"));
+            l_propAddr = reinterpret_cast<uint64_t*>(
+                                     i_dt->findProperty(l_tpmNode,
+                                     "sml-handover"));
+
+            if (NULL == l_propAllocSize ||
+                NULL == l_propAddr)
+            {
+                TRACFCOMP(g_trac_devtree,ERR_MRK" Unable to find "
+                          "sml TPM properties");
+                ++ l_tpm;
+                continue;
+            }
+
+            // Store the values in the devtree nodes
+            *l_propAllocSize = l_allocatedSize;
+            *l_propAddr = io_address;
+
+            ++l_tpm;
+        }
+#endif
+
+    } while (0);
+
+}
 
 errlHndl_t bld_fdt_system(devTree * i_dt, bool i_smallTree)
 {
@@ -1478,14 +1689,34 @@ errlHndl_t bld_fdt_reserved_mem(devTree * i_dt,
     uint64_t l_hbrt_addr = l_targ_addr;
     load_hbrt_image(l_hbrt_addr);
 
-    uint64_t l_extra_addrs[] = { l_vpd_addr, l_targ_addr, l_hbrt_addr };
+#ifdef CONFIG_TPMDD
+    // TPM log
+    uint64_t l_tpmlog_addr = l_hbrt_addr;
+    uint64_t l_tpmlog_size = 0;
+    load_tpmlog(i_dt, l_tpmlog_addr);
+    l_tpmlog_size = l_hbrt_addr - l_tpmlog_addr;
+#endif
+
+    uint64_t l_extra_addrs[] = { l_vpd_addr, l_targ_addr, l_hbrt_addr
+#ifdef CONFIG_TPMDD
+                                 ,l_tpmlog_addr
+#endif
+    };
     uint64_t l_extra_sizes[] = { VMM_RT_VPD_SIZE,
                                  l_vpd_addr - l_targ_addr,
-                                 l_targ_addr - l_hbrt_addr};
+                                 l_targ_addr - l_hbrt_addr
+#ifdef CONFIG_TPMDD
+                                 ,l_tpmlog_size
+#endif
+    };
     const char* l_extra_addrs_str[] =
                     { "ibm,hbrt-vpd-image" ,
                       "ibm,hbrt-target-image",
-                      "ibm,hbrt-code-image" };
+                      "ibm,hbrt-code-image"
+#ifdef CONFIG_TPMDD
+                      ,"ibm,tpmlog"
+#endif
+                    };
     size_t l_extra_addr_cnt = sizeof(l_extra_addrs) / sizeof(uint64_t);
 
     //Add in reserved memory for HOMER images and HBRT sections.
@@ -1676,7 +1907,7 @@ errlHndl_t bld_fdt_mem(devTree * i_dt, bool i_smallTree)
                                      cmfsiCells, 2);
 
             //Add any I2C devices hanging off this chip
-            add_i2c_info( l_pMemB, i_dt, membNode );
+            add_i2c_info( l_pMemB, i_dt, membNode, l_ibscomBase);
 
             // Add membuf ECIDs
             ATTR_ECID_type ecid;
@@ -2056,6 +2287,48 @@ errlHndl_t bld_fdt_vpd(devTree * i_dt, bool i_smallTree)
     return errhdl;
 }
 
+errlHndl_t bld_fdt_secureboot(devTree * i_dt, bool i_smallTree)
+{
+    // Nothing to do for small trees currently.
+    if (i_smallTree) { return NULL; }
+
+    errlHndl_t errhdl = NULL;
+
+    do
+    {
+        /* Find the / node and add a secureboot node under it. */
+        dtOffset_t rootNode = i_dt->findNode("/");
+
+        dtOffset_t secBootNode = i_dt->addNode(rootNode, "ibm,secureboot");
+        sha2_hash_t hw_key_hash;
+        SECUREBOOT::getHwHashKeys(hw_key_hash);
+
+        i_dt->addPropertyBytes(secBootNode, "hw-key-hash",
+                               reinterpret_cast<uint8_t*>(hw_key_hash),
+                               sizeof(hw_key_hash));
+
+        i_dt->addPropertyString(secBootNode, "hash-algo", "sha512");
+
+        /* compatibility strings -- currently only one */
+        const char* compatStr[] = {"ibm,power-secureboot-v1", NULL};
+        i_dt->addPropertyStrings(secBootNode, "compatible", compatStr);
+
+        if (SECUREBOOT::enabled())
+        {
+            i_dt->addProperty(secBootNode, "secure-enabled");
+        }
+#ifdef CONFIG_TPMDD
+        if (TRUSTEDBOOT::enabled())
+        {
+            i_dt->addProperty(secBootNode, "trusted-enabled");
+        }
+#endif
+
+    } while(0);
+
+    return errhdl;
+}
+
 errlHndl_t build_flatdevtree( uint64_t i_dtAddr, size_t i_dtSize,
                               bool i_smallTree )
 {
@@ -2115,6 +2388,13 @@ errlHndl_t build_flatdevtree( uint64_t i_dtAddr, size_t i_dtSize,
 
         TRACFCOMP( g_trac_devtree, "---devtree vpd ---" );
         errhdl = bld_fdt_vpd(dt, i_smallTree);
+        if(errhdl)
+        {
+            break;
+        }
+
+        TRACFCOMP( g_trac_devtree, "---devtree secureboot ---" );
+        errhdl = bld_fdt_secureboot(dt, i_smallTree);
         if(errhdl)
         {
             break;
