@@ -84,6 +84,14 @@ errlHndl_t hashBlob(void * i_blob, size_t i_size, SHA512_t io_buf)
 
 }
 
+/*
+ * @brief  Externally available hardware hash key function
+ */
+void getHwHashKeys(sha2_hash_t o_hash)
+{
+    return Singleton<SecureROM>::instance().getHwHashKeys(o_hash);
+}
+
 }; //end SECUREBOOT namespace
 
 
@@ -543,6 +551,14 @@ errlHndl_t SecureROM::getHwHashKeys()
     // @todo RTC:34080 - Add support for getting HW Hash Keys from System
 
     return l_errl;
+}
+
+/**
+ * @brief  Retrieve the internal hardware hash key from secure ROM object.
+ */
+void SecureROM::getHwHashKeys(sha2_hash_t o_hash)
+{
+    memcpy(o_hash, iv_hash_key, sizeof(sha2_hash_t));
 }
 
 /**

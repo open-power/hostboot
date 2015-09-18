@@ -81,6 +81,7 @@ namespace TRUSTEDBOOT
 
     enum {
         TPMLOG_BUFFER_SIZE   = 1024, ///< Size of event log buffer in bytes
+        TPMLOG_DEVTREE_SIZE  = 64*1024, ///< Size to allocate for OPAL
     };
 
     struct _TpmLogMgr
@@ -90,6 +91,9 @@ namespace TRUSTEDBOOT
         uint8_t* newEventPtr;    ///< Pointer to location to add new event
         uint8_t* eventLogInMem;  ///< Event log allocated from memory
 #ifdef __HOSTBOOT_MODULE
+        uint64_t inMemlogBaseAddr; ///< Base address of log for dev tree
+        uint64_t devtreeXscomAddr; ///< Devtree Xscom Address
+        uint32_t devtreeI2cMasterOffset; ///< Devtree I2c Master Offset
         uint8_t eventLog[TPMLOG_BUFFER_SIZE]; ///< EventLog Buffer
 #endif
         mutex_t  logMutex;       ///< Log mutex
@@ -133,6 +137,37 @@ namespace TRUSTEDBOOT
      * @return uint32_t Byte size of log
      */
     uint32_t TpmLogMgr_getLogSize(TpmLogMgr* val);
+
+#ifdef __HOSTBOOT_MODULE
+    /**
+     * @brief Retrieve devtree information
+     * @param[in] val TpmLogMgr structure
+     * @param[in/out] io_logAddr TPM Log address
+     * @param[out] o_allocationSize Total memory allocated for log
+     * @param[out] o_xscomAddr Chip Xscom Address
+     * @param[out] o_i2cMasterOffset I2c Master Offset
+     * @return errlHndl_t NULL if successful, otherwise a pointer to the
+     *       error log.
+     * Function will allocate a new region in memory to store log
+     *  for passing to opal
+     */
+     errlHndl_t TpmLogMgr_getDevtreeInfo(TpmLogMgr* val,
+                                         uint64_t & io_logAddr,
+                                         size_t & o_allocationSize,
+                                         uint64_t & o_xscomAddr,
+                                         uint32_t & o_i2cMasterOffset);
+
+    /**
+     * @brief Store TPM devtree node information
+     * @param[in] val TpmLogMgr structure
+     * @param[in] i_xscomAddr Chip Xscom Address
+     * @param[in] i_i2cMasterOffset i2c Master Offset
+     */
+    void TpmLogMgr_setTpmDevtreeInfo(TpmLogMgr* val,
+                                     uint64_t i_xscomAddr,
+                                     uint32_t i_i2cMasterOffset);
+#endif
+
 
     /**
      * @brief Calculate the log size in bytes by walking the log

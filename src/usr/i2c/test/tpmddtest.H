@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,7 @@
 #include <devicefw/driverif.H>
 #include <i2c/tpmddreasoncodes.H>
 #include <targeting/common/commontargeting.H>
-#include "secureboot/trustedbootif.H"
+#include <secureboot/trustedbootif.H>
 #include "i2ctest.H"
 #include "../tpmdd.H"
 #include "../../secureboot/trusted/trustedTypes.H"
@@ -381,7 +381,8 @@ class TPMDDTest: public CxxTest::TestSuite
                                                          0) );
 
                     if( NULL == err ||
-                        err->reasonCode() != TPM_DEVICE_NOT_AVAILABLE)
+                        (err->reasonCode() != TPM_DEVICE_NOT_AVAILABLE &&
+                         err->reasonCode() != TPM_BUS_SPEED_LOOKUP_FAIL))
                     {
                         fails++;
                         TS_FAIL( "testTPMInvalidChip - TpmBackup : Error "

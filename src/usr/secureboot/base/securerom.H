@@ -157,6 +157,14 @@ class SecureROM
          */
         errlHndl_t hashBlob(void * i_blob, size_t i_size, SHA512_t io_buf);
 
+        /**
+         * @brief Retrieve the internal hardware hash key from secure ROM
+         *        object.
+         *
+         * @param[out] o_hash  Reference to the sha2_hash_t array to copy the
+         *                     hash to.
+         */
+        void getHwHashKeys(sha2_hash_t o_hash);
 
     protected:
 
