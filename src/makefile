@@ -194,7 +194,8 @@ TESTCASE_MODULES += testvpd
 TESTCASE_MODULES += testpore
 TESTCASE_MODULES += testutil
 TESTCASE_MODULES += testmbox
-TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testmdia)
+#TODO: Need to re-enable testmdia (RTC 135217)
+#TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testmdia)
 TESTCASE_MODULES += testprdf
 #TODO: Need to re-enable testattn (RTC 135217)
 #TESTCASE_MODULES += testattn
