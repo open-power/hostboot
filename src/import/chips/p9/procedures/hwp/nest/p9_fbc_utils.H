@@ -49,6 +49,9 @@ const uint64_t P9_FBC_UTILS_FBC_MAX_ADDRESS = ((1ULL << 56) - 1ULL);
 const uint64_t P9_FBC_UTILS_CACHELINE_MASK = 0x7FULL;
 const uint64_t P9_FBC_UTILS_LAST_ADDR_IN_CACHELINE = 0x78ULL;
 
+// cacheline size = 128
+const uint64_t FABRIC_CACHELINE_SIZE = 0x80;
+
 //------------------------------------------------------------------------------
 // Function prototypes
 //------------------------------------------------------------------------------
