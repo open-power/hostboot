@@ -145,6 +145,7 @@ namespace HBOCC
             }
 
             // get the full OCC LID and then copy them.
+            assert(lidSize <= 1 * MEGABYTE); // malloc() in occ.C
             l_errl = lidMgr.getLid(i_occVirtAddr, lidSize);
             if(l_errl)
             {
