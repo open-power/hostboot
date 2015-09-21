@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_image_help_base.C,v 1.14 2013-08-01 13:34:16 dcrowell Exp $
+// $Id: p8_image_help_base.C,v 1.15 2015/09/14 17:04:35 cswenson Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_image_help_base.c                                              */
 /* *! DESCRIPTION : Basic helper functions for building and extracting          */
@@ -248,7 +250,7 @@ int write_ring_block_to_image(  void             *io_image,
   // ------
   
   // Temporarily copy .dcrings section if inserting into .rings section.
-  SbeXipSection xipSectionDcrings;
+  SbeXipSection xipSectionDcrings = SbeXipSection();
   void          *hostSectionDcrings=NULL;
   
   if (i_xipSectionId==SBE_XIP_SECTION_RINGS) {

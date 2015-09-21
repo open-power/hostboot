@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: p8_slw_build_fixed.C,v 1.23 2014/09/11 22:47:00 cmolsen Exp $
+// $Id: p8_slw_build_fixed.C,v 1.24 2015/09/14 17:04:33 cswenson Exp $
 /*------------------------------------------------------------------------------*/
 /* *! TITLE : p8_slw_build_fixed                                                      */
 /* *! DESCRIPTION : Extracts and decompresses delta ring states from EPROM      */
@@ -462,7 +462,9 @@ ReturnCode p8_slw_build_fixed( const fapi::Target &i_target,
   }
   if (rcSearch==DSLWB_RING_SEARCH_MATCH || 
       rcSearch==DSLWB_RING_SEARCH_EXHAUST_MATCH)
+  {
     FAPI_DBG("\tRetrieving RS4 delta ring was successful.");
+  }
 
   //
 	// Check if we're done at this point, and save status in bSearchDone.
