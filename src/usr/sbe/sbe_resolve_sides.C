@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -539,6 +539,31 @@ errlHndl_t performSideActions(sbeResolveState_t& io_sideState)
                            io_sideState.actions, image_size);
                 break;
             }
+
+            // The host has booted from the golden side because the action
+            // COPY_READ_ONLY_TO_WORKING implies io_sideState.pnor_isGolden.
+            // We need to write to the version info that the SBE Seeprom Image
+            // originates from the golden side Seeprom.
+
+            // If the golden side version struct doesn't already have the newer
+            // nest_freq_mhz field add it.
+            if (image_version.struct_version < STRUCT_VERSION_NEST_FREQ)
+            {
+                TargetService& ts = targetService();
+                TARGETING::Target* sys = NULL;
+                ts.getTopLevelTarget(sys);
+
+                image_version.nest_freq_mhz =
+                                        sys->getAttr<ATTR_NEST_FREQ_MHZ>();
+            }
+
+            // indicate that the version struct is the latest version
+            image_version.struct_version = STRUCT_VERSION_LATEST;
+
+            // indicate that the SBE image we are copying originates from
+            // the golden side seeprom.  This value will be read and printed
+            // in the traces each time getSeepromSideVersion is called.
+            image_version.origin = GOLDEN_SIDE;
         }
 
         if ( io_sideState.actions & CHECK_WORKING_HBB )

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1619,7 +1619,6 @@ namespace SBE
         uint8_t * tmp_data_ECC = static_cast<uint8_t*>(
                                         malloc(sbeInfoSize_ECC));
 
-
         do{
 
             /***********************************************/
@@ -1668,13 +1667,12 @@ namespace SBE
                        eccStatus, o_info.struct_version, o_info.data_crc);
 
 
-            if ( ( o_info.struct_version == 1 ) ||
-                   o_info.struct_version == 2 )
+            if ( o_info.struct_version >= STRUCT_VERSION_CRC &&
+                 o_info.struct_version <= STRUCT_VERSION_ORIGIN_GOLD )
             {
                 // Supported Versions - set size variable to remove ECC
                 sbeInfoSize = SBE_SEEPROM_STRUCT_SIZES[o_info.struct_version];
                 sbeInfoSize_ECC = (sbeInfoSize*9)/8;
-
             }
             else
             {
@@ -1693,9 +1691,9 @@ namespace SBE
                                          reinterpret_cast<uint8_t*>(&o_info),
                                          sbeInfoSize);
 
-            TRACUCOMP( g_trac_sbe, "getSeepromSideVersion(): eccStatus=%d, "
-                       "sizeof o_info/sI=%d, sI_ECC=%d",
-                       eccStatus, sbeInfoSize, sbeInfoSize_ECC);
+            TRACFCOMP( g_trac_sbe, "getSeepromSideVersion(): eccStatus=%d, "
+                       "sizeof o_info/sI=%d, sI_ECC=%d, origin golden=%i",
+                       eccStatus, sbeInfoSize, sbeInfoSize_ECC, o_info.origin);
 
             // Handle Uncorrectable ECC - no error log:
             // clear data and set o_seeprom_ver_ECC_fail=true
@@ -1778,11 +1776,12 @@ namespace SBE
             /*************************************************************/
 
             // Create Invalid Version struct (which is always 8-byte aligned)
-            for ( uint8_t i = 0; i < (sbeInfoSize)/8; i++ )
+            uint8_t* sbeInfoEnd = sbeInfo_data + sbeInfoSize;
+            for (uint64_t* p = reinterpret_cast<uint64_t*>(sbeInfo_data);
+                 p < reinterpret_cast<uint64_t*>(sbeInfoEnd);
+                 p++)
             {
-                memcpy(&sbeInfo_data[i*8],
-                       &SBE_SEEPROM_STRUCT_INVALID,
-                       sizeof(uint64_t));
+                *p = SBE_SEEPROM_STRUCT_INVALID;
             }
 
             // Inject ECC to Data
@@ -2168,7 +2167,7 @@ namespace SBE
 
             // Check if in simics
             if ( ( io_sbeState.seeprom_0_ver.struct_version ==
-                   SBE_SEEPROM_STRUCT_SIMICS_VERSION )
+                   STRUCT_VERSION_SIMICS )
                  && ( Util::isSimicsRunning() )
                )
             {
@@ -2218,7 +2217,7 @@ namespace SBE
 
             // Check if in simics
             if ( ( io_sbeState.seeprom_1_ver.struct_version ==
-                   SBE_SEEPROM_STRUCT_SIMICS_VERSION )
+                   STRUCT_VERSION_SIMICS )
                  && ( Util::isSimicsRunning() )
                )
             {
@@ -2332,10 +2331,11 @@ namespace SBE
                 memset(&(io_sbeState.new_seeprom_ver),
                        0x0,
                        sizeof(sbeSeepromVersionInfo_t));
-
+                // the above memset also has the side effect of setting the
+                // origin field to WORKING_SIDE which is the default
 
                 io_sbeState.new_seeprom_ver.struct_version =
-                                            SBE_SEEPROM_STRUCT_VERSION;
+                                            STRUCT_VERSION_LATEST;
 
                 memcpy( &(io_sbeState.new_seeprom_ver.image_version),
                         &(io_sbeState.pnorVersion),
@@ -4087,7 +4087,8 @@ namespace SBE
         o_mismatch = false;
 
         // Check Seeprom
-        if ( i_struct_version == 2 )
+        if ( i_struct_version >= STRUCT_VERSION_NEST_FREQ &&
+             i_struct_version <= STRUCT_VERSION_ORIGIN_GOLD )
         {
             // Only version that tracks the nest freq when the image was
             // customized
@@ -4208,7 +4209,10 @@ namespace SBE
 
                 if (tmp_cur_side == SBE_SEEPROM0)
                 {
-                    if ( io_sbeState.seeprom_0_ver.struct_version == 2 )
+                    if ( io_sbeState.seeprom_0_ver.struct_version >=
+                            STRUCT_VERSION_NEST_FREQ &&
+                         io_sbeState.seeprom_0_ver.struct_version <=
+                            STRUCT_VERSION_ORIGIN_GOLD )
                     {
                         io_sbeState.mproc_nest_freq_mhz =
                                     io_sbeState.seeprom_0_ver.nest_freq_mhz;
@@ -4221,7 +4225,10 @@ namespace SBE
                 }
                 else if ( tmp_cur_side == SBE_SEEPROM1 )
                 {
-                    if ( io_sbeState.seeprom_1_ver.struct_version == 2 )
+                    if ( io_sbeState.seeprom_1_ver.struct_version >=
+                            STRUCT_VERSION_NEST_FREQ &&
+                         io_sbeState.seeprom_1_ver.struct_version <=
+                            STRUCT_VERSION_ORIGIN_GOLD )
                     {
                         io_sbeState.mproc_nest_freq_mhz =
                                     io_sbeState.seeprom_1_ver.nest_freq_mhz;

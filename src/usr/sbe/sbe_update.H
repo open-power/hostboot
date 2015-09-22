@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,12 +43,8 @@ namespace SBE
     // Using only first 20 bytes of 64-byte sbe_image_version
     const size_t   SBE_MVPD_SHORT_IMAGE_VERSION_SIZE = 20;
 
-    // Version of Struct stored in SEEPROM
-    const uint32_t SBE_SEEPROM_STRUCT_VERSION        = 0x00000002;
-    const uint32_t SBE_SEEPROM_STRUCT_SIMICS_VERSION = 0x5A5A5A5A;
-
     // Number of versions supported
-    const uint8_t SBE_SEEPROM_STRUCT_MAX_VERSIONS    = 0x03;
+    const uint8_t SBE_SEEPROM_STRUCT_MAX_VERSIONS    = 0x04;
 
     // Size of supported versions - must be 8-byte aligned
     const size_t  SBE_SEEPROM_STRUCT_SIZES[SBE_SEEPROM_STRUCT_MAX_VERSIONS] =
@@ -56,8 +52,18 @@ namespace SBE
                         0,   // ver0: uninitialized - no size
                         72,  // ver1: size of struct is 72 bytes
                         80,  // ver2: size of struct is 80 bytes
+                        80,  // ver3: size of struct is 80 bytes
                       };
 
+    // This enum provides the struct versions for sbeSeepromVersionInfo_t
+    // Each numberic version is named after the key feature it introduces.
+    enum sbeSeepromStructVersionInfo_t {
+        STRUCT_VERSION_CRC = 0x1,
+        STRUCT_VERSION_NEST_FREQ = 0x2,
+        STRUCT_VERSION_ORIGIN_GOLD = 0x3,
+        STRUCT_VERSION_LATEST = 0x3,
+        STRUCT_VERSION_SIMICS = 0x5A5A5A5A,
+    };
 
     // Constant written to SBE SEEPROM version struct to invalidate the
     // struct and the image - 'INVALID\0'
@@ -142,6 +148,14 @@ namespace SBE
         UNSUPPORTED_SITUATION  = 0x80000000,
     };
 
+    // Values used to indicate whether an SBE Seeprom image originates for the
+    // golden side SBE Seeprom
+    enum sbeOrigin_t
+    {
+        WORKING_SIDE = 0,
+        GOLDEN_SIDE = 1,
+    };
+
     /******************************************/
     /*  Structs                               */
     /******************************************/
@@ -161,9 +175,11 @@ namespace SBE
         uint32_t  data_crc;
         uint8_t   image_version[SBE_IMAGE_VERSION_SIZE];
 
-        // New parameters for version 2: nest_freq_mhz and uin32_t/reserved
+        // New parameters for version 2: nest_freq_mhz and uint8_t's for unused
         uint32_t  nest_freq_mhz;
-        uint32_t  reserved;      // reserved; added for alignment
+        // New parameters for version 3: origin set if SBE came from golden side
+        uint8_t   origin;
+        uint8_t   unused[3]; // unused space
     } PACKED;
 
     // This line forces a compile fail if struct is NOT 8-byte-alaigned
