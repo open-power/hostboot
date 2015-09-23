@@ -122,7 +122,14 @@ cp_hbfiles: .SPECTARG
 	dd if=${EXT_SHA_IMAGE} of=${TEMP_IMAGE} ibs=4k conv=sync
 	cat ${EXT_IMAGE} >> ${TEMP_IMAGE}
 	# HBI partition size w/o ECC = 5MB (5120K)
-	dd if=${TEMP_IMAGE} of=${EXT_HEADER_IMAGE} ibs=5120k conv=sync
+	# If "--test" flag set do not pad to ibs=5120k, as the test HBI images is
+	# possibly larger than parition size and does not need to be fully padded.
+	# Size adjustments made in buildpnor.pl
+	.if($TARGET_TEST)
+		dd if=${TEMP_IMAGE} of=${EXT_HEADER_IMAGE} ibs=4k conv=sync
+	.else
+		dd if=${TEMP_IMAGE} of=${EXT_HEADER_IMAGE} ibs=5120k conv=sync
+	.endif
 	ecc --inject ${EXT_HEADER_IMAGE} --output ${EXT_ECC_HEADER_IMAGE} --p8
 	# create data for a test partition in pnor
 	dd if=/dev/urandom of=${TESTDATA} count=1 bs=32K
@@ -314,23 +321,13 @@ BUILD_SPECIFIC_IMAGE: .SPECTARG ${IMAGE_TARGET}
 	#@echo BINARIES ${IMAGE_BINS}
 	#@echo BIN_OPTION ${IMAGE_BIN_OPTION}
 
-FFSCMD = ${DUMMY:!which ffs 2>/dev/null!i}
 
 ${IMAGE_TARGET}: ${IMAGE_LAYOUT} ${IMAGE_BINS} ${PNOR_BUILD_SCRIPT}
-	.if empty(FFSCMD)
-		.if(${PNOR} == ${IMAGE_TARGET} || ${PNOR} == "")
-			${PNOR_BUILD_SCRIPT} --pnorOutBin ${IMAGE_TARGET} \
-				${TARGET_TEST:b--test} --pnorLayout ${IMAGE_LAYOUT} \
-				${IMAGE_BIN_OPTION} --fpartCmd "fpart" --fcpCmd "fcp"
-		.endif
-	.else
-		.if(${PNOR} == ${IMAGE_TARGET})
-			${PNOR_BUILD_SCRIPT} --pnorOutBin ${IMAGE_TARGET} \
-				${TARGET_TEST:b--test} --pnorLayout ${IMAGE_LAYOUT} \
-				${IMAGE_BIN_OPTION} --ffsCmd "ffs"
-		.endif
+	.if(${PNOR} == ${IMAGE_TARGET} || ${PNOR} == "")
+		${PNOR_BUILD_SCRIPT} --pnorOutBin ${IMAGE_TARGET} \
+			${TARGET_TEST:b--test} --pnorLayout ${IMAGE_LAYOUT} \
+			${IMAGE_BIN_OPTION} --fpartCmd "fpart" --fcpCmd "fcp"
 	.endif
-
 .endif
 
 build_pnor_images:.SPECTARG ${PNOR_IMG_INFO:S/^/__IMAGE_BUILD\//g}

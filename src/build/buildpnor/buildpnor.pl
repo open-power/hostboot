@@ -67,7 +67,7 @@ my $pnorLayoutFile;
 my $pnorBinName = "";
 my $tocVersion = 0x1;
 my $g_TOCEyeCatch = "part";
-my $emitTestSections = 0;
+my $testRun = 0;
 my $g_fpartCmd = "";
 my $g_fcpCmd = "";
 my %sidelessSecFilled = ();
@@ -76,6 +76,7 @@ my %SideOptions = (
         B => "B",
         sideless => "sideless",
     );
+use constant PAGE_SIZE => 4096;
 
 if ($#ARGV < 0) {
     usage();
@@ -113,7 +114,7 @@ for (my $i=0; $i < $#ARGV + 1; $i++)
         $g_fcpCmd = $ARGV[++$i];
     }
     elsif($ARGV[$i] =~ /--test/) {
-        $emitTestSections = 1;
+        $testRun = 1;
     }
     else {
         traceErr("Unrecognized Input: $ARGV[$i]");
@@ -254,7 +255,7 @@ sub loadPnorLayout
         my $sha512perEC = (exists $sectionEl->{sha512perEC} ? "yes" : "no");
         my $preserved = (exists $sectionEl->{preserved} ? "yes" : "no");
         my $readOnly = (exists $sectionEl->{readOnly} ? "yes" : "no");
-        if (($emitTestSections == 0) && ($sectionEl->{testonly}[0] eq "yes"))
+        if (($testRun == 0) && ($sectionEl->{testonly}[0] eq "yes"))
         {
             next;
         }
@@ -784,13 +785,64 @@ sub checkSpaceConstraints
 
         if($filesize > $physicalRegionSize)
         {
-            trace(0, "$this_func: Image provided ($$i_binFiles{$eyeCatch}) has size ($filesize) which is greater than allocated space ($physicalRegionSize) for section=$eyeCatch.  Aborting!");
-            $rc = 1;
+            # If this is a test run increase HBI size by PAGE_SIZE until all test
+            # cases fit
+            if ($testRun && $eyeCatch eq "HBI")
+            {
+                print "Adjusting HBI size - ran out of space for test cases\n";
+                my $hbbKey = findLayoutKeyByEyeCatch("HBB", \%$i_pnorLayoutRef);
+                adjustHbiPhysSize(\%sectionHash, $layoutKey, $filesize, $hbbKey);
+            }
+            else
+            {
+                trace(0, "$this_func: Image provided ($$i_binFiles{$eyeCatch}) has size ($filesize) which is greater than allocated space ($physicalRegionSize) for section=$eyeCatch.  Aborting!");
+                $rc = 1;
+            }
         }
 
     }
 
     return $rc;
+}
+
+###############################################################################
+# adjustHbiPhysSize - Adjust HBI physical size when running test cases and fix
+#                     up physical offsets of partitions between HBI and HBB
+################################################################################
+sub adjustHbiPhysSize
+{
+    my ($i_sectionHashRef, $i_hbiKey, $i_filesize, $i_hbbKey) = @_;
+
+    my %sectionHash = %$i_sectionHashRef;
+
+    # Increment HBI physical size by PAGE_SIZE until the HBI file can fit
+    my $hbi_old = $sectionHash{$i_hbiKey}{physicalRegionSize};
+    while ($i_filesize > $sectionHash{$i_hbiKey}{physicalRegionSize})
+    {
+        $sectionHash{$i_hbiKey}{physicalRegionSize} += PAGE_SIZE;
+    }
+    my $hbi_move = $sectionHash{$i_hbiKey}{physicalRegionSize} - $hbi_old;
+    my $hbi_end = $sectionHash{$i_hbiKey}{physicalRegionSize} + $hbi_move;
+
+    # Fix up physical offset affected by HBI size change
+    foreach my $section (keys %sectionHash)
+    {
+        # Only fix partitions after HBI and before HBB
+        if ( ( $sectionHash{$section}{physicalOffset} >
+               $sectionHash{$i_hbiKey}{physicalOffset} ) &&
+             ( $sectionHash{$section}{physicalOffset} <
+               $sectionHash{$i_hbbKey}{physicalOffset} )
+            )
+        {
+            $sectionHash{$section}{physicalOffset} += $hbi_move;
+            # Ensure section adjustment does not cause an overlap with HBB
+            if ($sectionHash{$section}{physicalOffset} >
+                $sectionHash{$i_hbbKey}{physicalOffset})
+            {
+                die "Error detected $sectionHash{$section}{eyeCatch}'s adjusted size overlaps HBB";
+            }
+        }
+    }
 }
 
 

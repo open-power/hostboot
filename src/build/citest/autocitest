@@ -270,7 +270,7 @@ modsstarted=0
 modscompleted=0
 loopcount=0
 while [ $(($modsstarted)) -lt 1 -o $(($modsstarted)) -ne $(($modscompleted)) ]; do
-    sleep 5
+    sleep 10
     ((loopcount++))     # increment loopcount
         autosim $NOWIN --simcmd   "print ((system_cmp0.phys_mem).read 0x$mods_completed_addr 0x08)"  1> $SBXHOME/modscompleted.log  2> /dev/null
    modscompleted=`cat $SBXHOME/modscompleted.log | awk '/0x/ {print strtonum($1)}'`
@@ -279,8 +279,8 @@ while [ $(($modsstarted)) -lt 1 -o $(($modsstarted)) -ne $(($modscompleted)) ]; 
 
     echo "ModulesStarted:ModulesCompleted  => $modsstarted:$modscompleted"
 
-    if [ "$loopcount" -gt 120 ];   then
-        echo    "ERROR: timed out after 10 minutes"
+    if [ "$loopcount" -gt 90 ];   then
+        echo    "ERROR: timed out after 15 minutes"
         autosim $NOWIN --simcmd   "hb-Ps"
         timeout=$(($modsstarted - $modscompleted))
         break
