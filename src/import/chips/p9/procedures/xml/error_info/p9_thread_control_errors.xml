@@ -1,0 +1,133 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/ipl/hwp/p9_thread_control.xml $           -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2012,2015                                                    -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- @brief Error definitions for p9_thread_control procedure               -->
+<hwpErrors>
+
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P9_THREAD_CONTROL_SRESET_PRE_FAIL</rc>
+    <description>SReset command precondition not met: Not all threads are running.</description>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>THREAD</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P9_THREAD_CONTROL_SRESET_FAIL</rc>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>THREAD</ffdc>
+    <description>SReset command failed: Not all threads are running after sreset command.</description>
+    <callout>
+      <target>CORE_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CORE_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>CORE_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P9_THREAD_CONTROL_START_PRE_NOMAINT</rc>
+    <description>Start command precondition not met: RAS STAT Maintenance bit is not set.</description>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>THREAD</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P9_THREAD_CONTROL_START_FAIL</rc>
+    <description>Start command failed: RAS STAT instruction completed bit was not set after start command.</description>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>THREAD</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P9_THREAD_CONTROL_STOP_PRE_NOTRUNNING</rc>
+    <description>Stop command precondition not met: Not all threads are running.</description>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>THREAD</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P9_THREAD_CONTROL_STOP_FAIL</rc>
+    <description>Stop command issued to core PC, but RAS STAT maintenance bit is not set.</description>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>THREAD</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P9_THREAD_CONTROL_STEP_PRE_NOTSTOPPING</rc>
+    <description>Step command precondition not met: Not all threads are stopped.</description>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>THREAD</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P9_THREAD_CONTROL_STEP_FAIL</rc>
+    <description>Step command issued to core PC, but RAS STAT run bit is still set.</description>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>THREAD</ffdc>
+    <ffdc>PTC_STEP_COMP_POLL_LIMIT</ffdc>
+    <callout>
+      <target>CORE_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+
+</hwpErrors>
