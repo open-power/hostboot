@@ -1342,7 +1342,7 @@ group gCoreFir filter singlebit,
     /** COREFIR[54]
      *  AMBI_HANG_DETECT: Hang detected unknown source
      */
-    (CoreFir, bit(54)) ? SelfHighThr1;
+    (CoreFir, bit(54)) ? calloutLevel2MedExLowThr1;
 
     /** COREFIR[55]
      *  NEST_HANG_DETECT: External Hang detected
@@ -2095,4 +2095,12 @@ actionclass calloutExLowSecLvlThr1MedDumpSh
 {
     SelfLowLevel2MedThr1;
     dumpSH;
+};
+
+/** callout 2nd level med priority, core low priority */
+actionclass calloutLevel2MedExLowThr1
+{
+    callout2ndLvlMed;
+    calloutSelfLow;
+    threshold1;
 };
