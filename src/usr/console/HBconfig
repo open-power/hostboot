@@ -1,4 +1,10 @@
 config CONSOLE
-    default y if BMC_AST2400
+    default y if (BMC_AST2400 || CONSOLE_DEFAULT_UART)
     help
         Enable console support.
+
+config CONSOLE_DEFAULT_UART
+    default n
+    depends on !BMC_AST2400
+    help
+        Enable a default UART driver for the console.

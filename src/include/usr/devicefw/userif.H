@@ -63,6 +63,8 @@ namespace DeviceFW
         IPMIBT,    // As opposed to other phy's
         PVPD,
         TPM,
+        SIO,
+        AHB_SIO,
 
         LAST_ACCESS_TYPE,
     };
@@ -214,6 +216,21 @@ namespace DeviceFW
         DeviceFW::LPC, static_cast<uint64_t>(( i_trans_type )),\
             static_cast<uint64_t>(( i_address ))
 
+    /**
+     * Construct the device addressing parameters for the SIO device ops.
+     * @param[i] i_device - SIO device to operate on
+     * @param[i] i_address - SIO address to operate on
+     */
+    #define DEVICE_SIO_ADDRESS(i_device, i_address)\
+        DeviceFW::SIO, static_cast<uint64_t>((i_device)),\
+            static_cast<uint64_t>((i_address))
+
+    /**
+     * Construct the device addressing parameters for the AHB_SIO device ops.
+     * @param[i] i_address - AHB_SIO address to operate on
+     */
+    #define DEVICE_AHB_SIO_ADDRESS(i_address)\
+        DeviceFW::AHB_SIO, static_cast<uint64_t>((i_address))
 
     /**
      * Construct the device addressing parameters for the EEPROM device ops.

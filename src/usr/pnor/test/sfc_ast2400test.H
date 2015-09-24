@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -42,6 +42,7 @@
 #include <targeting/common/attributes.H>
 #include <lpc/lpcif.H>
 #include "../sfc_ast2400.H"
+#include <sio/sio.H>
 
 extern trace_desc_t* g_trac_pnor;
 
@@ -92,8 +93,8 @@ class SfcAST2400Test : public CxxTest::TestSuite
             section_found = true;
 
         }while(0);
-
         return section_found;
+
     }
 
     /**
@@ -167,139 +168,6 @@ class SfcAST2400Test : public CxxTest::TestSuite
         }
     }
 
-    /**
-     * @brief Test SIO access
-     *        Use a SIO scratch register to verify reads and writes
-     */
-    void test_SIO(void)
-    {
-        SfcAST2400* sfc = reinterpret_cast<SfcAST2400*>(
-                            Singleton<PnorDD>::instance().iv_sfc );
-        errlHndl_t l_err = NULL;
-
-        // Read SIO to BMC scratch reg 1,2 and save off values
-        uint8_t scratch1 = 0;
-        l_err = sfc->readRegSIO( 0x21, scratch1 );
-        if( l_err )
-        {
-            TS_FAIL("SfcAST2400Test::test_SIO> readRegSIO failed");
-            errlCommit(l_err,PNOR_COMP_ID);
-        }
-        uint8_t scratch2 = 0;
-        l_err = sfc->readRegSIO( 0x22, scratch2 );
-        if( l_err )
-        {
-            TS_FAIL("SfcAST2400Test::test_SIO> readRegSIO failed");
-            errlCommit(l_err,PNOR_COMP_ID);
-        }
-
-        // Write test patterns into registers
-        uint8_t testdata = 0xA5;
-        l_err = sfc->writeRegSIO( 0x21, testdata );
-        if( l_err )
-        {
-            TS_FAIL("SfcAST2400Test::test_SIO> writeRegSIO failed");
-            errlCommit(l_err,PNOR_COMP_ID);
-        }
-        testdata = 0x12;
-        l_err = sfc->writeRegSIO( 0x22, testdata );
-        if( l_err )
-        {
-            TS_FAIL("SfcAST2400Test::test_SIO> writeRegSIO failed");
-            errlCommit(l_err,PNOR_COMP_ID);
-        }
-
-        // Read the data back and compare to expected results
-        l_err = sfc->readRegSIO( 0x21, testdata );
-        if( l_err )
-        {
-            TS_FAIL("SfcAST2400Test::test_SIO> readRegSIO failed");
-            errlCommit(l_err,PNOR_COMP_ID);
-        }
-        if( testdata != 0xA5 )
-        {
-            TS_FAIL("SfcAST2400Test::test_SIO> Data mismatch on SIO 0x21 : Exp=0xA5, Act=%.2X", testdata);
-        }
-        l_err = sfc->readRegSIO( 0x22, testdata );
-        if( l_err )
-        {
-            TS_FAIL("SfcAST2400Test::test_SIO> readRegSIO failed");
-            errlCommit(l_err,PNOR_COMP_ID);
-        }
-        if( testdata != 0x12 )
-        {
-            TS_FAIL("SfcAST2400Test::test_SIO> Data mismatch on SIO 0x22 : Exp=0x12, Act=%.2X", testdata);
-        }
-
-        // Restore the original data
-        l_err = sfc->writeRegSIO( 0x21, scratch1 );
-        if( l_err )
-        {
-            TS_FAIL("SfcAST2400Test::test_SIO> writeRegSIO failed");
-            errlCommit(l_err,PNOR_COMP_ID);
-        }
-        l_err = sfc->writeRegSIO( 0x22, scratch2 );
-        if( l_err )
-        {
-            TS_FAIL("SfcAST2400Test::test_SIO> writeRegSIO failed");
-            errlCommit(l_err,PNOR_COMP_ID);
-        }
-    }
-
-    /**
-     * @brief Test SPIC access
-     *        Read and write data to the SPI Control register
-     */
-    void test_SPIC( void )
-    {
-        SfcAST2400* sfc = reinterpret_cast<SfcAST2400*>(
-                            Singleton<PnorDD>::instance().iv_sfc );
-        mutex_t* l_mutex = Singleton<PnorDD>::instance().iv_mutex_ptr;
-        errlHndl_t l_err = NULL;
-
-        mutex_lock(l_mutex);
-
-        uint32_t first = 0;
-        l_err = sfc->readRegSPIC( SfcAST2400::CTLREG_04, first );
-        if( l_err )
-        {
-            TS_FAIL("SfcAST2400Test::test_SPIC> readRegSIO failed");
-            mutex_unlock(l_mutex);//unlock before commit
-            errlCommit(l_err,PNOR_COMP_ID);
-            mutex_lock(l_mutex);//lock again for next op
-        }
-        uint32_t data1 = 0x12345678;
-        l_err = sfc->writeRegSPIC( SfcAST2400::CTLREG_04, data1 );
-        if( l_err )
-        {
-            TS_FAIL("SfcAST2400Test::test_SPIC> readRegSIO failed");
-            mutex_unlock(l_mutex);//unlock before commit
-            errlCommit(l_err,PNOR_COMP_ID);
-            mutex_lock(l_mutex);//lock again for next op
-        }
-        l_err = sfc->readRegSPIC( SfcAST2400::CTLREG_04, data1 );
-        if( l_err )
-        {
-            TS_FAIL("SfcAST2400Test::test_SPIC> readRegSIO failed");
-            mutex_unlock(l_mutex);//unlock before commit
-            errlCommit(l_err,PNOR_COMP_ID);
-            mutex_lock(l_mutex);//lock again for next op
-        }
-        if( data1 != 0x12345678 )
-        {
-            TS_FAIL("SfcAST2400Test::test_SPIC> Unexpected result of %.8X (exp 0x12345678)",data1);
-        }
-        //put back the original
-        l_err = sfc->writeRegSPIC( SfcAST2400::CTLREG_04, first );
-        if( l_err )
-        {
-            TS_FAIL("SfcAST2400Test::test_SPIC> readRegSIO failed");
-            mutex_unlock(l_mutex);//unlock before commit
-            errlCommit(l_err,PNOR_COMP_ID);
-        }
-
-        mutex_unlock(l_mutex);
-    }
 };
 
 #endif

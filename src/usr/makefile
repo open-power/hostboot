@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2014
+# Contributors Listed Below - COPYRIGHT 2010,2015
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -29,6 +29,7 @@ ROOTPATH = ../..
 HOSTBOOT_PROFILE_NO_INSTRUMENT = 1
 OBJS += module_init.o
 
+SUBDIRS += sio.d
 SUBDIRS += trace.d
 SUBDIRS += cxxtest.d
 SUBDIRS += testcore.d

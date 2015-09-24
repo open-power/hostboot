@@ -26,6 +26,7 @@
 /*****************************************************************************/
 // I n c l u d e s
 /*****************************************************************************/
+#include <sio/sio.H>
 #include <sys/mmio.h>
 #include <sys/task.h>
 #include <sys/sync.h>
@@ -50,22 +51,16 @@
 /*****************************************************************************/
 
 
-
-
 /*****************************************************************************/
 // G l o b a l s
 /*****************************************************************************/
 
 // Initialized in pnorrp.C
 extern trace_desc_t* g_trac_pnor;
-
 /*****************************************************************************/
 // M e t h o d s
 /*****************************************************************************/
-
-
 namespace PNOR {
-
 /**
  * @brief Wrapper for device driver constructor
  */
@@ -89,7 +84,6 @@ SfcAST2400::SfcAST2400( errlHndl_t& o_err,
 {
 }
 
-
 /**
  * @brief Read data from the flash
  */
@@ -99,8 +93,8 @@ errlHndl_t SfcAST2400::readFlash( uint32_t i_addr,
 {
     errlHndl_t l_err = NULL;
     TRACDCOMP( g_trac_pnor, ENTER_MRK"SfcAST2400::readFlash> i_addr=0x%.8x, i_size=0x%.8x",  i_addr, i_size );
-
-    do{
+    do
+    {
         uint32_t* word_ptr = static_cast<uint32_t*>(o_data);
         uint32_t word_size = (ALIGN_4(i_size))/4;
         for( uint32_t words_read = 0;
@@ -120,8 +114,8 @@ errlHndl_t SfcAST2400::readFlash( uint32_t i_addr,
                                                  lpc_addr) );
             if( l_err ) {  break; }
         }
-        if( l_err ) {  break; }
-    }while(0);
+        if( l_err ) { break; }
+    } while(0);
 
     TRACDCOMP( g_trac_pnor, EXIT_MRK"SfcAST2400::readFlash> err=%.8X", ERRL_GETEID_SAFE(l_err) );
     return l_err;
@@ -228,6 +222,28 @@ errlHndl_t SfcAST2400::eraseFlash( uint32_t i_addr )
     return l_err;
 }
 
+//function to call SIO dd for ahb sio read
+errlHndl_t ahbSioReadWrapper(uint32_t i_ahb_sio_data, uint32_t i_lpc_addr)
+{
+    size_t l_ahb_sio_len = sizeof(i_ahb_sio_data);
+    return deviceOp( DeviceFW::READ,
+                     TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                     &(i_ahb_sio_data),
+                     l_ahb_sio_len,
+                     DEVICE_AHB_SIO_ADDRESS(i_lpc_addr));
+}
+
+//function to call SIO dd for ahb sio write
+errlHndl_t ahbSioWriteWrapper(uint32_t i_ahb_sio_data, uint32_t i_lpc_addr)
+{
+    size_t l_ahb_sio_len = sizeof(i_ahb_sio_data);
+    return deviceOp( DeviceFW::WRITE,
+                     TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                     &(i_ahb_sio_data),
+                     l_ahb_sio_len,
+                     DEVICE_AHB_SIO_ADDRESS(i_lpc_addr));
+}
+
 /**
  * @brief Initialize and configure the SFC hardware
  */
@@ -235,55 +251,38 @@ errlHndl_t SfcAST2400::hwInit( )
 {
     TRACFCOMP( g_trac_pnor, ENTER_MRK"SfcAST2400::hwInit>" );
     errlHndl_t l_err = NULL;
-
-    do {
-        size_t reg_size = sizeof(uint8_t);
-
-        //** Initialize the LPC2AHB logic
-
-        // Send SuperIO password - send A5 twice
-        uint8_t data = 0xA5;
+    uint32_t l_lpc_addr;
+    do
+    {
+        /* Enable device 0x0D*/
+        uint8_t l_data = SIO::ENABLE_DEVICE;
+        size_t l_len = sizeof(l_data);
         l_err = deviceOp( DeviceFW::WRITE,
-                          iv_proc,
-                          &data,
-                          reg_size,
-                          DEVICE_LPC_ADDRESS(LPC::TRANS_IO,SIO_ADDR_2E) );
-        if( l_err ) { break; }
-
-        l_err = deviceOp( DeviceFW::WRITE,
-                          iv_proc,
-                          &data,
-                          reg_size,
-                          DEVICE_LPC_ADDRESS(LPC::TRANS_IO,SIO_ADDR_2E) );
-        if( l_err ) { break; }
-
-
-        // Select logical device D (iLPC2AHB)
-        l_err = writeRegSIO( 0x07, 0x0D );
-        if( l_err ) { break; }
-
-
-        // Enable iLPC->AHB
-        l_err = writeRegSIO( 0x30, 0x01 );
-        if( l_err ) { break; }
-
-
+                          TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                          (&l_data),
+                          l_len,
+                          DEVICE_SIO_ADDRESS(SIO::iLPC2AHB,0x30));
+        if(l_err) { break; }
         //** Setup the SPI Controller
 
         /* Enable writing to the controller */
         SpiControlReg04_t ctlreg;
-        l_err = readRegSPIC( CTLREG_04, ctlreg.data32 );
+        l_lpc_addr = CTLREG_04 | SPIC_BASE_ADDR_AHB;
+        l_err = ahbSioReadWrapper(ctlreg.data32, l_lpc_addr);
         if( l_err ) { break; }
+
         ctlreg.cmdMode = 0b10; //10:Normal Write (CMD + Address + Write data)
-        l_err = writeRegSPIC( CTLREG_04, ctlreg.data32 );
+        l_err = ahbSioWriteWrapper(ctlreg.data32, l_lpc_addr);
         if( l_err ) { break; }
 
         SpiConfigReg00_t confreg;
-        l_err = readRegSPIC( CONFREG_00, confreg.data32 );
+        l_lpc_addr = CONFREG_00 | SPIC_BASE_ADDR_AHB;
+        l_err = ahbSioReadWrapper(confreg.data32, l_lpc_addr);
         if( l_err ) { break; }
+
         confreg.inactiveX2mode = 1; //Enable CE# Inactive pulse width X2 mode
         confreg.enableWrite = 1; //Enable flash memory write
-        l_err = writeRegSPIC( CONFREG_00, confreg.data32 );
+        l_err = ahbSioWriteWrapper(confreg.data32, l_lpc_addr);
         if( l_err ) { break; }
 
 
@@ -305,7 +304,8 @@ errlHndl_t SfcAST2400::hwInit( )
         iv_ctlRegDefault = ctlreg;  // Default setup is regular read mode
 
         // Configure for read
-        l_err = writeRegSPIC( CTLREG_04, ctlreg.data32 );
+        l_lpc_addr = CTLREG_04 | SPIC_BASE_ADDR_AHB;
+        l_err = ahbSioWriteWrapper(ctlreg.data32, l_lpc_addr);
         if( l_err ) { break; }
 
         // Figure out what flash chip we have
@@ -482,6 +482,7 @@ errlHndl_t SfcAST2400::sendSpiCmd( uint8_t i_opCode,
 errlHndl_t SfcAST2400::commandMode( bool i_enter )
 {
     errlHndl_t l_err = NULL;
+    uint32_t l_lpc_addr;
     TRACDCOMP( g_trac_pnor, ENTER_MRK"SfcAST2400::commandMode(%d)", i_enter );
 
     /*
@@ -503,20 +504,21 @@ errlHndl_t SfcAST2400::commandMode( bool i_enter )
         // Switch to user mode, CE# dropped
         ctlreg.stopActiveCtl = 1;
         ctlreg.cmdMode = 0b11; //User Mode (Read/Write Data)
-        l_err = writeRegSPIC( CTLREG_04, ctlreg.data32 );
+        l_lpc_addr = CTLREG_04 | SPIC_BASE_ADDR_AHB;
+        l_err = ahbSioWriteWrapper(ctlreg.data32, l_lpc_addr);
         if( l_err ) { break; }
 
         if( i_enter ) //ast_sf_start_cmd
         {
             // user mode, CE# active
             ctlreg.stopActiveCtl = 0;
-            l_err = writeRegSPIC( CTLREG_04, ctlreg.data32 );
+            l_err = ahbSioWriteWrapper(ctlreg.data32, l_lpc_addr);
             if( l_err ) { break; }
         }
         else //ast_sf_end_cmd
         {
             // Switch back to read mode
-            l_err = writeRegSPIC( CTLREG_04, iv_ctlRegDefault.data32 );
+            l_err = ahbSioWriteWrapper(iv_ctlRegDefault.data32, l_lpc_addr);
             if( l_err ) { break; }
         }
     } while(0);
@@ -583,187 +585,6 @@ errlHndl_t SfcAST2400::enableWriteMode( void )
     }
 
     TRACDCOMP( g_trac_pnor, EXIT_MRK"SfcAST2400::enableWriteMode> err=%.8X", ERRL_GETEID_SAFE(l_err) );
-    return l_err;
-}
-
-/**
- * @brief Write a single byte into the SIO
- */
-errlHndl_t SfcAST2400::writeRegSIO( uint8_t i_regAddr,
-                                    uint8_t i_data )
-{ //lpc_sio_outb
-    errlHndl_t l_err = NULL;
-    TRACDCOMP( g_trac_pnor, ENTER_MRK"SfcAST2400::writeRegSIO> i_regAddr=0x%.2X, i_data=0x%.2X", i_regAddr, i_data );
-
-    do {
-        size_t reg_size = sizeof(uint8_t);
-
-        // AST2400 integrates a Super I/O module with
-        //  LPC protocol (I/O cycle 0x2E/0x2F)
-
-        // Write out the register address
-        l_err = deviceOp( DeviceFW::WRITE,
-                          iv_proc,
-                          &i_regAddr,
-                          reg_size,
-                          DEVICE_LPC_ADDRESS(LPC::TRANS_IO,SIO_ADDR_2E) );
-        if( l_err ) { break; }
-
-        // Write out the register data
-        l_err = deviceOp( DeviceFW::WRITE,
-                          iv_proc,
-                          &i_data,
-                          reg_size,
-                          DEVICE_LPC_ADDRESS(LPC::TRANS_IO,SIO_DATA_2F) );
-        if( l_err ) { break; }
-
-    } while(0);
-
-    TRACDCOMP( g_trac_pnor, EXIT_MRK"SfcAST2400::writeRegSIO> err=%.8X", ERRL_GETEID_SAFE(l_err) );
-    return l_err;
-}
-
-/**
- * @brief Read a single byte from the SIO
- */
-errlHndl_t SfcAST2400::readRegSIO( uint8_t i_regAddr,
-                                   uint8_t& o_data )
-{ //lpc_sio_inb
-    errlHndl_t l_err = NULL;
-    TRACDCOMP( g_trac_pnor, ENTER_MRK"SfcAST2400::readRegSIO> i_regAddr=0x%.2X", i_regAddr );
-
-    do {
-        size_t reg_size = sizeof(uint8_t);
-
-        // AST2400 integrates a Super I/O module with
-        //  LPC protocol (I/O cycle 0x2E/0x2F)
-
-        // Write out the register address
-        l_err = deviceOp( DeviceFW::WRITE,
-                          iv_proc,
-                          &i_regAddr,
-                          reg_size,
-                          DEVICE_LPC_ADDRESS(LPC::TRANS_IO,SIO_ADDR_2E) );
-        if( l_err ) { break; }
-
-        // Read in the register data
-        l_err = deviceOp( DeviceFW::READ,
-                          iv_proc,
-                          &o_data,
-                          reg_size,
-                          DEVICE_LPC_ADDRESS(LPC::TRANS_IO,SIO_DATA_2F) );
-        if( l_err ) { break; }
-
-    } while(0);
-
-    TRACDCOMP( g_trac_pnor, EXIT_MRK"SfcAST2400::readRegSIO> o_data=0x%.2X, err-%.8X", o_data, ERRL_GETEID_SAFE(l_err) );
-    return l_err;
-}
-
-/**
- * @brief Prepare the iLPC2AHB address regs
- */
-errlHndl_t SfcAST2400::setupAddrLPC2AHB( uint32_t i_addr )
-{ //lpc_ahb_prep
-    errlHndl_t l_err = NULL;
-    TRACDCOMP( g_trac_pnor, ENTER_MRK"SfcAST2400::setupAddrLPC2AHB> i_addr=0x%X", i_addr );
-
-    do {
-        // Select logical device D (iLPC2AHB)
-        l_err = writeRegSIO( 0x07, 0x0D );
-        if( l_err ) { break; }
-
-        // Push 4 address bytes into SIO regs 0xF0-0xF3
-        for( size_t i=sizeof(i_addr); i>0; i-- )
-        {
-            l_err = writeRegSIO( 0xF3-(i-1), //F0,F1,F2,F3
-                                 static_cast<uint8_t>(i_addr >> ((i-1)*8)) );
-            if( l_err ) { break; }
-        }
-        if( l_err ) { break; }
-
-        // Configure 4 byte length
-        l_err = writeRegSIO( 0xF8, 0x02 );
-        if( l_err ) { break; }
-
-    } while(0);
-
-    TRACDCOMP( g_trac_pnor, EXIT_MRK"SfcAST2400::setupAddrLPC2AHB> err=%.8X", ERRL_GETEID_SAFE(l_err) );
-    return l_err;
-}
-
-/**
- * @brief Write SPI Controller Register
- */
-errlHndl_t SfcAST2400::writeRegSPIC( SpicReg_t i_reg,
-                                     uint32_t i_data )
-{
-    errlHndl_t l_err = NULL;
-    TRACDCOMP( g_trac_pnor, ENTER_MRK"SfcAST2400::writeRegSPIC> i_reg=0x%.2X, i_data=0x%.8X", i_reg, i_data );
-
-    do {
-        // Compute the full LPC address
-        uint32_t lpc_addr = i_reg | SPIC_BASE_ADDR_AHB;
-
-        // Setup the logic for the write
-        l_err = setupAddrLPC2AHB( lpc_addr );
-        if( l_err ) { break; }
-
-        // Push 4 data bytes into SIO regs 0xF4-0xF7
-        uint8_t* ptr8 = reinterpret_cast<uint8_t*>(&i_data);
-        for( size_t i=0; i<sizeof(i_data); i++ )
-        {
-            l_err = writeRegSIO( 0xF4+i, //F4,F5,F6,F7
-                                 ptr8[i] );
-            if( l_err ) { break; }
-        }
-        if( l_err ) { break; }
-
-        // Trigger the write operation by writing the magic 0xCF value
-        l_err = writeRegSIO( 0xFE, 0xCF );
-        if( l_err ) { break; }
-
-    } while(0);
-
-    TRACDCOMP( g_trac_pnor, EXIT_MRK"SfcAST2400::writeRegSPIC> err=%.8X", ERRL_GETEID_SAFE(l_err) );
-    return l_err;
-}
-
-/**
- * @brief Read SPI Controller Register
- */
-errlHndl_t SfcAST2400::readRegSPIC( SpicReg_t i_reg,
-                                    uint32_t& o_data )
-{
-    TRACDCOMP( g_trac_pnor, ENTER_MRK"SfcAST2400::readRegSPIC> i_reg=0x%.2X", i_reg );
-    errlHndl_t l_err = NULL;
-
-    do {
-        // Compute the full LPC address
-        uint32_t lpc_addr = i_reg | SPIC_BASE_ADDR_AHB;
-
-        // Setup the logic for the write
-        l_err = setupAddrLPC2AHB( lpc_addr );
-        if( l_err ) { break; }
-
-        // Trigger the write operation by reading the magic register
-        uint8_t ignored = 0;
-        l_err = readRegSIO( 0xFE, ignored );
-        if( l_err ) { break; }
-
-        // Read 4 data bytes into SIO regs 0xF4-0xF7
-        uint8_t* ptr8 = reinterpret_cast<uint8_t*>(&o_data);
-        for( size_t i=0; i<sizeof(o_data); i++ )
-        {
-            l_err = readRegSIO( 0xF4+i, //F4,F5,F6,F7
-                                ptr8[i] );
-            if( l_err ) { break; }
-        }
-        if( l_err ) { break; }
-
-    } while(0);
-
-    TRACDCOMP( g_trac_pnor, EXIT_MRK"SfcAST2400::readRegSPIC> o_data=0x%.8X, l_err=%.8X", o_data, ERRL_GETEID_SAFE(l_err) );
     return l_err;
 }
 

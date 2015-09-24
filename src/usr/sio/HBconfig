@@ -1,0 +1,4 @@
+config AST2400
+    default y if (BMC_AST2400 || SFC_IS_AST2400)
+    help
+        Enables superIO driver.

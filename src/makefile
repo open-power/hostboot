@@ -115,6 +115,7 @@ BASE_MODULES += secureboot_base
 BASE_MODULES += lpc
 BASE_MODULES += pnor
 BASE_MODULES += vfs
+BASE_MODULES += $(if $(CONFIG_AST2400), sio)
 
 EXTENDED_MODULES += targeting
 EXTENDED_MODULES += ecmddatabuffer
@@ -208,6 +209,7 @@ TESTCASE_MODULES += testrtloader
 TESTCASE_MODULES += testsbe
 TESTCASE_MODULES += testlpc
 TESTCASE_MODULES += $(if $(CONFIG_HTMGT),testhtmgt)
+TESTCASE_MODULES += $(if $(CONFIG_AST2400), testsio)
 
 RUNTIME_OBJECTS += rt_start.o
 RUNTIME_OBJECTS += rt_main.o

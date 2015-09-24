@@ -138,50 +138,6 @@ class SfcAST2400 : public SfcDD
     };
 
     /**
-     * @brief Write a SPI Controller register
-     *
-     * @param[in] i_reg: Register to write
-     * @param[in] i_data: Data to write
-     *
-     * @return Error from operation
-     */
-    errlHndl_t writeRegSPIC( SpicReg_t i_reg,
-                             uint32_t i_data );
-
-    /**
-     * @brief Write a SPI Controller register
-     *
-     * @param[in] i_reg: Register to write
-     * @param[in] o_data: Data that was read
-     *
-     * @return Error from operation
-     */
-    errlHndl_t readRegSPIC( SpicReg_t i_reg,
-                            uint32_t& o_data );
-
-    /**
-     * @brief Write a single byte into a SIO register
-     *
-     * @param[in] i_reg: Register to write
-     * @param[in] i_data: Data to write
-     *
-     * @return Error from operation
-     */
-    errlHndl_t writeRegSIO( uint8_t i_regAddr,
-                            uint8_t i_data );
-
-    /**
-     * @brief Read a single byte from a SIO register
-     *
-     * @param[in] i_reg: Register to read
-     * @param[in] o_data: Data that was read
-     *
-     * @return Error from operation
-     */
-    errlHndl_t readRegSIO( uint8_t i_regAddr,
-                           uint8_t& o_data );
-
-    /**
      * @brief Enable write mode
      *
      * @return Error from operation

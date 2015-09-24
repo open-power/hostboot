@@ -383,6 +383,14 @@ const compId_t FIPS_ERRL_COMP_ID = 0x3100;
 const char FIPS_ERRL_COMP_NAME[] = "hb-trace";
 //@}
 
+/** @name SIO
+ *  SIO driver
+ */
+//@{
+const compId_t SIO_COMP_ID = 0x3200;
+const char SIO_COMP_NAME[] = "sio";
+//@}
+
 /** @name PRDF
  *  PRDF component
  *  @Note PRDF_COMP_ID=0xE500 matches with what

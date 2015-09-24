@@ -26,6 +26,7 @@
 // Includes
 /******************************************************************************/
 #include "bootconfig_ast2400.H"
+
 #include <lpc/lpcif.H>
 #include <devicefw/userif.H>
 #include <errl/errlentry.H>
@@ -33,6 +34,8 @@
 #include <hwas/common/deconfigGard.H>
 #include <console/consoleif.H>
 #include <config.h>
+#include <sio/sio.H>
+#include <devicefw/driverif.H>
 
 namespace INITSERVICE
 {
@@ -181,22 +184,21 @@ errlHndl_t AST2400BootConfig::readAndProcessBootConfig()
     errlHndl_t l_err = NULL;
 
     uint8_t register_data = 0;
-
-    do{
-
-        l_err = unlockSIORegisters();
-
-        if(l_err)
-        {
-            TRACFCOMP(g_bc_trace, "readAndProcessBootConfig()"
-                    " call to unlock SIO registers failed");
-            break;
-        }
-
+    size_t l_len = sizeof(uint8_t);
+    do
+    {
         // read the register holding the agreed upon magic
         // number to indicate registers have been configured
-        l_err = readSIORegister( BOOT_FLAGS_VERSION_REG, register_data );
 
+        // Registers below 0x30 do not belong to any particular SIO device.
+        // Device field advised to be set to SUART1 or iLPC2AHB as these are the
+        // only two devices currently in use and will thereby save additional
+        // SIO before and after this call.
+        l_err = deviceOp( DeviceFW::READ,
+                          TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                          &(register_data),
+                          l_len,
+                          DEVICE_SIO_ADDRESS(SIO::DONT_CARE, BOOT_FLAGS_VERSION_REG));
         if( l_err )
         {
             TRACFCOMP(g_bc_trace,"Failed reading the boot flags version, skip processing");
@@ -219,8 +221,11 @@ errlHndl_t AST2400BootConfig::readAndProcessBootConfig()
         }
 
         // read the SIO register holding the boot flags
-        l_err = readSIORegister( BOOT_FLAGS_REG, register_data );
-
+        l_err = deviceOp( DeviceFW::READ,
+                          TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                          &(register_data),
+                          l_len,
+                          DEVICE_SIO_ADDRESS(SIO::DONT_CARE, BOOT_FLAGS_REG));
         if( l_err )
         {
             TRACFCOMP(g_bc_trace,"Failed reading the boot flags, leave"
@@ -232,9 +237,6 @@ errlHndl_t AST2400BootConfig::readAndProcessBootConfig()
         processBootFlagsV1( register_data );
 
     }while(0);
-
-   // leave SIO registers unlocked, pnor code is dependant on
-   // having access to them
 
     TRACDCOMP(g_bc_trace, EXIT_MRK"readAndProcessBootConfig()");
 
@@ -259,136 +261,37 @@ void AST2400BootConfig::processBootFlagsV1( uint8_t i_flags )
 errlHndl_t AST2400BootConfig::readIstepControl( istepControl_t &o_stepInfo )
 {
     errlHndl_t l_err = NULL;
-
+    size_t l_len = sizeof(uint8_t);
     do
     {
         // read istep control from 0x2a
-        l_err = readSIORegister( ISTEP_CONTROL_REG, o_stepInfo.istepControl );
-
-        if(l_err) break;
+        l_err = deviceOp( DeviceFW::READ,
+                          TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                          &(o_stepInfo.istepControl),
+                          l_len,
+                          DEVICE_SIO_ADDRESS(SIO::DONT_CARE, ISTEP_CONTROL_REG));
+        if(l_err) { break; }
 
         // read major number from 0x2b
-        l_err = readSIORegister( ISTEP_MAJOR_REG, o_stepInfo.istepMajorNumber );
-        if(l_err) break;
+        l_err = deviceOp( DeviceFW::READ,
+                          TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                          &(o_stepInfo.istepMajorNumber),
+                          l_len,
+                          DEVICE_SIO_ADDRESS(SIO::DONT_CARE, ISTEP_MAJOR_REG));
+        if(l_err) { break; }
 
         // read minor number from 0x2c
-        l_err = readSIORegister( ISTEP_MINOR_REG, o_stepInfo.istepMinorNumber );
+        l_err = deviceOp( DeviceFW::READ,
+                          TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                          &(o_stepInfo.istepMinorNumber),
+                          l_len,
+                          DEVICE_SIO_ADDRESS(SIO::DONT_CARE, ISTEP_MINOR_REG));
     }
     while(0);
 
     return l_err;
 }
 
-
-// $TODO RTC:115576 remove these functions
-errlHndl_t  AST2400BootConfig::readSIORegister( uint8_t i_addr,
-        uint8_t &o_data  )
-{
-
-    errlHndl_t l_err = NULL;
-
-    o_data = 0;
-
-    size_t length = sizeof(o_data);
-
-    // write the value of the read register
-    l_err = deviceWrite( TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-            &i_addr,
-            length,
-            DEVICE_LPC_ADDRESS(LPC::TRANS_IO, SIO_ADDR_REG));
-
-    if( l_err == NULL )
-    {
-
-        // get the register contents.
-        l_err = deviceRead(
-                TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                (void *)&o_data,
-                length,
-                DEVICE_LPC_ADDRESS(LPC::TRANS_IO, SIO_DATA_REG));
-    }
-
-    return l_err;
-
-}
-
-// $TODO RTC:115576 remove these function
-errlHndl_t  AST2400BootConfig::writeSIORegister( uint8_t i_addr,
-        uint8_t i_data  )
-{
-
-    size_t length = sizeof(i_data);
-
-    errlHndl_t l_err = NULL;
-
-    l_err = deviceWrite(
-            TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-            &i_addr,
-            length,
-            DEVICE_LPC_ADDRESS(LPC::TRANS_IO, SIO_ADDR_REG ));
-
-    if( l_err == NULL )
-    {
-        l_err = deviceWrite(
-                TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                &i_data,
-                length,
-                DEVICE_LPC_ADDRESS(LPC::TRANS_IO, SIO_DATA_REG ));
-    }
-
-    return l_err;
-}
-
-// $TODO RTC:115576 remove these function
-errlHndl_t AST2400BootConfig::unlockSIORegisters()
-{
-    errlHndl_t l_err = NULL;
-    uint8_t key = SIO_REG_UNLOCK_KEY;
-    size_t length = sizeof(key);
-
-    do {
-
-        // Write out the register address
-        l_err = deviceWrite(
-                TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                &key,
-                length,
-                DEVICE_LPC_ADDRESS(LPC::TRANS_IO,SIO_ADDR_REG) );
-
-        if(l_err) break;
-
-        // Write out the register address
-        l_err = deviceWrite(
-                TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                &key,
-                length,
-                DEVICE_LPC_ADDRESS(LPC::TRANS_IO,SIO_ADDR_REG) );
-
-    }while(0);
-
-    return l_err;
-}
-
-// $TODO RTC:115576 remove these function
-void AST2400BootConfig::lockSIORegisters()
-{
-    // write the data to lock it back up..
-    uint8_t key = SIO_REG_LOCK_KEY;
-    size_t length = sizeof(uint8_t);
-
-    // Write out the register address
-    errlHndl_t l_err = deviceWrite(
-            TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-            &key,
-            length,
-            DEVICE_LPC_ADDRESS(LPC::TRANS_IO,SIO_ADDR_REG) );
-
-    if(l_err)
-    {
-        TRACFCOMP(g_bc_trace, "FAILED locking SIO registers");
-        errlCommit(l_err, ISTEP_COMP_ID);
-    }
-}
 
 };
 };

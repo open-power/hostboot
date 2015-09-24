@@ -191,39 +191,6 @@ public:
      */
     void processBootFlagsV1( uint8_t i_flags );
 
-    // $TODO RTC:115576 remove these temporary SIO related functions
-    /**
-     * @brief read a byte from an SIO register
-     *
-     * @param[i] i_addr - address of SIO register to read
-     * @param[o] o_data - SIO register contents
-     *
-     * @return  errlHndl_t
-     */
-    errlHndl_t readSIORegister( uint8_t i_addr, uint8_t &register_value  );
-
-    /**
-     * @brief Write a byte to an SIO register
-     *
-     * @param[i] i_addr - address of SIO register to write
-     * @param[i] i_data - SIO register contents
-     *
-     * @return  errlHndl_t
-     */
-    errlHndl_t writeSIORegister( uint8_t i_addr, uint8_t i_data  );
-
-    /**
-     * @brief Allow read/write access to the SIO registers
-     *
-     * @return  errlHndl_t
-     */
-    errlHndl_t unlockSIORegisters();
-
-    /**
-     * @brief Lock the SIO registers
-     */
-    void lockSIORegisters();
-
 };
 
 };
