@@ -1,0 +1,357 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/attribute_info/pervasive_attributes.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- This is an automatically generated file. -->
+<!-- File: pervasive_attributes.xml. -->
+<!-- XML file specifying attributes used by HW Procedures. Attributes are taken from model pervasive -->
+<!--pervasive_attributes.xml-->
+<attributes>
+<attribute>
+  <id>ATTR_BACKUP_SEEPROM_SELECT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Set with Primary SEEPROM</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_BOOT_FLAGS</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Switch to using a flag to indicate SEEPROM side SBE</description>
+  <valueType>uint32</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_BOOT_FREQ</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>EQ boot frequency</description>
+  <valueType>uint32</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_BRANCH_PIBMEM_ADDR</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description></description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_CHIP_POS</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Indicate the chip position</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_CHIP_REGIONS_TO_ENABLE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description></description>
+  <valueType>uint32</valueType>
+</attribute>
+
+<attribute>
+  <id>ATTR_CHIP_UNIT_POS</id>
+  <targetType>TARGET_TYPE_PERV</targetType>
+  <description>//TODO : Need Description</description>
+  <valueType>uint8</valueType>
+</attribute>
+
+<attribute>
+  <id>ATTR_DEVICE_ID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description></description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_ECID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description></description>
+  <valueType>uint64</valueType>
+</attribute>
+
+<attribute>
+  <id>ATTR_EC_GARD</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Capturing EC Gard Value</description>
+  <valueType>uint32</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_EQ_GARD</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Capturing EQ Gard value</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_FABRIC_CHIP_ID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Logical fabric chip ID associated with this chip.</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_FABRIC_GROUP_ID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Logical fabric group ID associated with this chip. Provided by the MRW.</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_I2C_BUS_DIV_NEST</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>I2C Bus speed based on nest freq, ref clock</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_I2C_BUS_DIV_REF</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Ref clock I2C bus divider consumed by code running out of OTPROM</description>
+  <valueType>uint32</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_LEN_OF_SEEPROM_DATA</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description></description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_MB_BIT_RATE_DIVISOR_PLL</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description></description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_MB_BIT_RATE_DIVISOR_REFCLK</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description></description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_MC_SYNC_MODE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>MC mesh to use Nest mesh or not</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_NEST_PLL_BUCKET</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Select Nest I2C and pll setting from one of the supported frequencies</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_NODE_POS</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Indicate the node position in FSP based systems (unused in Spless systems)</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_PG</id>
+  <targetType>TARGET_TYPE_PERV</targetType>
+  <description>Chiplet Partial good info attribute. Provided by Ring scans</description>
+  <valueType>uint32</valueType>
+</attribute>
+
+<attribute>
+  <id>ATTR_PROC_FABRIC_ADDR_BAR_MODE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Processor memory map configuration.0 = default = large system address map1 = small system address map Provided by the MRW.</description>
+  <valueType>uint8</valueType>
+  <enum>LARGE_SYSTEM = 0x0,SMALL_SYSTEM = 0x1</enum>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_PROC_PB_BNDY_DMIPLL_DATA</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Ring image for pb_bndy_dmipll ring creator: platform firmware notes:</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Ring image for pb_bndy_dmipll ring for DC cal creator: platform firmware notes:</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_PROC_PERV_BNDY_PLL_DATA</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Ring image for perv_bndy_pll ring containing filter plls and xb_pll,nest_pll creator: platform firmware notes:</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_PROC_SBE_MASTER_CHIP</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Indicates if SBE on this chip is serving as hosboot drawer master</description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x0,TRUE = 0x1</enum>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_SBE_SEEPROM_I2C_DEVICE_ADDRESS</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description></description>
+  <valueType>uint64</valueType>
+</attribute>
+
+<attribute>
+  <id>ATTR_SBE_SEEPROM_I2C_PORT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description></description>
+  <valueType>uint64</valueType>
+</attribute>
+
+<attribute>
+  <id>ATTR_START_PIBMEM_ADDR</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description></description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_START_SEEPROM_ADDR</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description></description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_VCS_BOOT_VOLTAGE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Boot Voltages - VCS</description>
+  <valueType>uint32</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_VDD_BOOT_VOLTAGE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Boot Voltages - VDD</description>
+  <valueType>uint32</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_WAIT_N0</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description></description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_WAIT_N1</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description></description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_WAIT_N2</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description></description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_WAIT_N3</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description></description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+</attributes>
