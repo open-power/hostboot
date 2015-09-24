@@ -1,0 +1,42 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/error_info/p9_start_cbs_errors.xml $  -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- This is an automatically generated file. -->
+<!-- File: p9_start_cbs_errors.xml. -->
+<!-- Halt codes for p9_start_cbs -->
+
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_OSC_BIT_ERR</rc>
+    <description>OSC is not in valid state</description>
+    <ffdc>READ_SNS1LTH</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_VDD_NEST_OBSERVE</rc>
+    <description>VDD is in OFF state</description>
+    <ffdc>READ_FSI2PIB_STATUS</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_CBS_CS_INTERNAL_STATE</rc>
+    <description>CBS is not in IDLE state</description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>
