@@ -23,5 +23,6 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-
-$TOOLSDIR/verify-commit
+if [ -z $MIRROR ]; then
+    $TOOLSDIR/verify-commit
+fi

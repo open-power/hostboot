@@ -23,5 +23,6 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-
-$TOOLSDIR/pre-commit-actions
+if [ -z $MIRROR ]; then
+    $TOOLSDIR/pre-commit-actions
+fi
