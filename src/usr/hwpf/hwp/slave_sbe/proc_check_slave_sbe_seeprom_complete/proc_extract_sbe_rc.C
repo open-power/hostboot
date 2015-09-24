@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_extract_sbe_rc.C,v 1.24 2015/05/14 22:27:29 jmcgill Exp $
+// $Id: proc_extract_sbe_rc.C,v 1.25 2015/09/22 13:47:24 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_extract_sbe_rc.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -109,6 +109,8 @@ fapi::ReturnCode proc_extract_sbe_rc(const fapi::Target & i_target,
     por_base_state pore_state;
     // SBE specific state for analysis/FFDC
     por_sbe_base_state pore_sbe_state;
+    // multicast error regs
+    ecmdDataBufferBase mc_err_reg0(64);
 
     // process arguments
     bool is_processor = (i_target.getType() == fapi::TARGET_TYPE_PROC_CHIP);
@@ -117,6 +119,16 @@ fapi::ReturnCode proc_extract_sbe_rc(const fapi::Target & i_target,
 
     do
     {
+        // 
+        // SBE - capture multicast error reg
+        // 
+        rc = fapiGetScom(i_target, PCBMS_REC_ERR_REG0_0x000F0011, mc_err_reg0);
+        if (!rc.ok())
+        {
+            FAPI_INF("proc_extract_sbe_rc: Error from fapiGetScom (PCBMS_REC_ERR_REG0_0x000F0011)");
+            rc = fapi::FAPI_RC_SUCCESS;
+        }
+
         //
         // all engine types -- extract engine state
         //
@@ -335,6 +347,16 @@ fapi::ReturnCode proc_extract_sbe_rc(const fapi::Target & i_target,
                          (pore_state.vital_state.getHalfWord(1) == 0x2100))
                 {
                     FAPI_INF("proc_extract_sbe_rc: PCI OPCG SCOM failure encountered");
+                    FAPI_SET_HWP_ERROR(rc, RC_PROC_EXTRACT_SBE_RC_PCI_CLOCK_ERROR);
+                }
+                // SW310202
+                else if (is_sbe &&
+                         (scom_address == (uint32_t) WRITE_ALL_GP0_OR_0x68000005) &&
+                         (pore_state.vital_state.getHalfWord(1) == 0x2120) &&
+                         (mc_err_reg0.isBitSet(36) &&                                 // slave9 response
+                          mc_err_reg0.isBitClear(37) && mc_err_reg0.isBitSet(38,2)))  // slave9 error code = 0b011
+                {
+                    FAPI_INF("proc_extract_sbe_rc: PCI multicast SCOM failure encountered");
                     FAPI_SET_HWP_ERROR(rc, RC_PROC_EXTRACT_SBE_RC_PCI_CLOCK_ERROR);
                 }
                 else
