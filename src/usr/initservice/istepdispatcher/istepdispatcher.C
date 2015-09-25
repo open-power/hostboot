@@ -559,6 +559,19 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                                            IPMIWATCHDOG::BIOS_FRB2), // default
                                            IPMIWATCHDOG::TIMEOUT_HARD_RESET);
                             #endif
+                            #ifdef CONFIG_CONSOLE
+                            #ifdef CONFIG_BMC_IPMI
+                            CONSOLE::displayf(NULL,
+                               "System Shutting Down In %d Seconds "
+                               "To Perform Reconfiguration\n",
+                               SET_WD_TIMER_IN_SECS);
+                            #else
+                            CONSOLE::displayf(NULL,
+                               "System Shutting Down "
+                               "To Perform Reconfiguration\n");
+                            #endif
+                            CONSOLE::flush();
+                            #endif
                             shutdownDuringIpl();
                         }
                     }

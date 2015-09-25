@@ -46,7 +46,8 @@
 #include    <vmmconst.h>
 #include    <sys/time.h>
 #include    <hwas/common/hwas_reasoncodes.H>
-
+#include    <console/consoleif.H>
+#include    <sbe/sbereasoncodes.H>
 
 #include    <errl/errludstring.H>
 #include    <errl/errludprintk.H>
@@ -750,6 +751,17 @@ void InitService::doShutdown(uint64_t i_status,
     static volatile uint64_t worst_status = 0;
 
     TRACFCOMP(g_trac_initsvc, "doShutdown(i_status=%.16X)",i_status);
+#ifdef CONFIG_CONSOLE
+    // check if console msg not needed or already displayed by caller
+    if ((SHUTDOWN_STATUS_GOOD != i_status) &&
+        (SBE::SBE_UPDATE_REQUEST_REIPL != i_status) &&
+        (SHUTDOWN_NOT_RECONFIG_LOOP != i_status)  )
+    {
+        CONSOLE::displayf(NULL, "System shutting down with error status 0x%X",
+                         i_status);
+        CONSOLE::flush();
+    }
+#endif
 
     // Hostboot PLIDs always start with 0x9 (32-bit)
     static const uint64_t PLID_MASK = 0x0000000090000000;
