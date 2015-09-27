@@ -16625,7 +16625,9 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     Values outside those ranges will default to 30. In MRW.
     </description>
     <simpleType>
-        <uint8_t></uint8_t>
+        <uint8_t>
+           <default>0xF</default>
+        </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
