@@ -25,28 +25,50 @@
 //------------------------------------------------------------------------------
 /// @file  p9_sbe_lpc_init.C
 ///
-/// @brief Requirement from the bootloader is that it only uses MMIOs to LPC master, not Xscom
-// *!
-// *! OWNER NAME  : Abhishek Agarwal  Email: abagarw8@in.ibm.com
-// *! BACKUP NAME :                   Email:
+/// @brief procedure to initialize LPC to enable communictation to PNOR
 //------------------------------------------------------------------------------
-// *HWP HWP Owner   : Abhishek Agarwal <abagarw8@in.ibm.com>
-// *HWP FW Owner    : Brian Silver <bsilver@us.ibm.com>
-// *HWP Team        : Perv
-// *HWP Level       : 1
-// *HWP Consumed by : SBE
+// *HWP HW Owner        : Abhishek Agarwal <abagarw8@in.ibm.com>
+// *HWP HW Backup Owner : Srinivas V Naga <srinivan@in.ibm.com>
+// *HWP FW Owner        : sunil kumar <skumar8j@in.ibm.com>
+// *HWP Team            : Perv
+// *HWP Level           : 2
+// *HWP Consumed by     : SBE
 //------------------------------------------------------------------------------
 
 
 //## auto_generated
 #include "p9_sbe_lpc_init.H"
+
+#include "p9_perv_scom_addresses.H"
+
+
 fapi2::ReturnCode p9_sbe_lpc_init(const
                                   fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
 {
-    FAPI_DBG("p9_sbe_lpc_init: Entering ...");
+    fapi2::buffer<uint64_t> l_data64;
+    FAPI_DBG("Entering ...");
 
-    FAPI_DBG("p9_sbe_lpc_init: Exiting ...");
+    //activate LPCM reset input
+    //TODO: ADU register address TBD
 
-    return fapi2::FAPI2_RC_SUCCESS;
+    // set LPC clock mux select to internal clock
+    //Setting CPLT_CTRL0 register value
+    l_data64.flush<0>();
+    l_data64.setBit<1>();  //PERV.CPLT_CTRL0.TC_UNIT_SYNCCLK_MUXSEL_DC = 1
+    FAPI_TRY(fapi2::putScom(i_target_chip, PERV_TP_CPLT_CTRL0_OR, l_data64));
+
+    // set LPC clock mux select to external clock
+    //Setting CPLT_CTRL0 register value
+    l_data64.flush<0>();
+    l_data64.setBit<1>();  //PERV.CPLT_CTRL0.TC_UNIT_SYNCCLK_MUXSEL_DC = 0
+    FAPI_TRY(fapi2::putScom(i_target_chip, PERV_TP_CPLT_CTRL0_CLEAR, l_data64));
+
+    //de-activate LPCM reset input
+    //TODO: ADU register address TBD
+
+    FAPI_DBG("Exiting ...");
+
+fapi_try_exit:
+    return fapi2::current_err;
 
 }
