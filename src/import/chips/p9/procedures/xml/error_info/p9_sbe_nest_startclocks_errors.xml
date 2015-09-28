@@ -1,0 +1,49 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/error_info/p9_sbe_nest_startclocks_errors.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- This is an automatically generated file. -->
+<!-- File: p9_sbe_nest_startclocks_errors.xml. -->
+<!-- Halt codes for p9_sbe_nest_startclocks -->
+
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_READ_ALL_CHECKSTOP_ERR</rc>
+    <description>Read and or all Checkstop error</description>
+    <ffdc>READ_ALL_CHECKSTOP</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_NEST_ARY_ERR</rc>
+    <description>ary_thold status not matching the expected value in clock start stop sequence</description>
+    <ffdc>READ_CLK_ARY</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_NEST_NSL_ERR</rc>
+    <description>nsl_thold status not matching the expected value in clock start stop sequence</description>
+    <ffdc>READ_CLK_NSL</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_NEST_SL_ERR</rc>
+    <description>sl_thold status not matching the expected value in clock start stop sequence</description>
+    <ffdc>READ_CLK_SL</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>
