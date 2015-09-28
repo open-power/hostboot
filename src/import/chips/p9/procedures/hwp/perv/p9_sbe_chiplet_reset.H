@@ -25,19 +25,20 @@
 //------------------------------------------------------------------------------
 /// @file  p9_sbe_chiplet_reset.H
 ///
-/// @brief Identify all good chiplets excluding EQ/EC
-/// Setup multicast groups for all chiplets
-/// For all good chiplets excluding EQ/EC
-/// For all enabled chiplets
-// *!
-// *! OWNER NAME  : Abhishek Agarwal  Email: abagarw8@in.ibm.com
-// *! BACKUP NAME :                   Email:
+/// @brief Steps:-
+///     1) Identify Partical good chiplet and configure Multicasting register
+///     2) Similar way, Configure hang pulse counter for Nest/MC/OBus/XBus/PCIe
+///     3) Similar way,  set fence for Nest and MC chiplet
+///     4) Similar way,  Reset sys.config and OPCG setting for Nest and MC chiplet in sync mode
+///
+/// Done
 //------------------------------------------------------------------------------
-// *HWP HWP Owner   : Abhishek Agarwal <abagarw8@in.ibm.com>
-// *HWP FW Owner    : Brian Silver <bsilver@us.ibm.com>
-// *HWP Team        : Perv
-// *HWP Level       : 1
-// *HWP Consumed by : SBE
+// *HWP HW Owner        : Abhishek Agarwal <abagarw8@in.ibm.com>
+// *HWP HW Backup Owner : Srinivas V. Naga <srinivan@in.ibm.com>
+// *HWP FW Owner        : Brian Silver <bsilver@us.ibm.com>
+// *HWP Team            : Perv
+// *HWP Level           : 2
+// *HWP Consumed by     : SBE
 //------------------------------------------------------------------------------
 
 
@@ -48,23 +49,54 @@
 #include <fapi2.H>
 
 
+namespace p9SbeChipletReset
+{
+enum P9_SBE_CHIPLET_RESET_Public_Constants
+{
+    MCGR0_CNFG_SETTINGS = 0xE0001C0000000000ull,
+    MCGR1_CNFG_SETTINGS = 0xE4001C0000000000ull,
+    MCGR2_CNFG_SETTINGS = 0xE8001C0000000000ull,
+    MCGR3_CNFG_SETTINGS = 0xEC001C0000000000ull,
+    NET_CNTL0_HW_INIT_VALUE = 0x7C16222000000000ull,
+    HANG_PULSE_0X10 = 0x10,
+    HANG_PULSE_0X0F = 0x0F,
+    HANG_PULSE_0X06 = 0x06,
+    HANG_PULSE_0X17 = 0x18,
+    HANG_PULSE_0X18 = 0x18,
+    HANG_PULSE_0X22 = 0x22,
+    HANG_PULSE_0X13 = 0x13,
+    HANG_PULSE_0X03 = 0x03,
+    OPCG_ALIGN_SETTING = 0x5000000000003020ull,
+    INOP_ALIGN_SETTING_0X9 = 0x9,
+    OPCG_WAIT_CYCLE_0X020 = 0x020,
+    SCAN_RATIO_0X3 = 0x3,
+    SYNC_PULSE_DELAY_0X0 = 0X00,
+    SYNC_CONFIG_DEFAULT = 0X0000000000000000,
+    HANG_PULSE_0X00 = 0x00,
+    HANG_PULSE_0X01 = 0x01,
+    HANG_PULSE_0X04 = 0x04,
+    HANG_PULSE_0X1A = 0x1A,
+    NET_CNTL1_HW_INIT_VALUE = 0x6000000000000000ull
+};
+}
+
 typedef fapi2::ReturnCode (*p9_sbe_chiplet_reset_FP_t)(const
         fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
 /// @brief Identify all good chiplets excluding EQ/EC
-///      -- All chiplets will be reset and PLLs started
-///      -- Partial bad - All nest Chiplets must be good, MC, IO can be partial bad
+///  -- All chiplets will be reset and PLLs started
+///  -- Partial bad - All nest Chiplets must be good, MC, IO can be partial bad
 /// Setup multicast groups for all chiplets
-///      -- Can't use the multicast for all non-nest chiplets
-///      -- This is intended to be the eventual product setting
-///      -- This includes the core/cache chiplets
+///  -- Can't use the multicast for all non-nest chiplets
+///  -- This is intended to be the eventual product setting
+///  -- This includes the core/cache chiplets
 /// For all good chiplets excluding EQ/EC
-///      -- Setup Chiplet GP3 regs
-///          -- Reset to default state
-///          -- Set chiplet enable on all all good chiplets excluding EQ/EC
-/// For all enabled chiplets
-///      -- Start vital clocks and release endpoint reset
-///      -- PCB Slave error register Reset
+/// -- Setup Chiplet GP3 regs
+///  -- Reset to default state
+///  -- Set chiplet enable on all all good chiplets excluding EQ/EC
+/// For all enabled chiplets excluding EQ/EC/Buses
+///  -- Start vital clocks and release endpoint reset
+///  -- PCB Slave error register Reset
 ///
 ///
 /// @param[in]     i_target_chip   Reference to TARGET_TYPE_PROC_CHIP target
