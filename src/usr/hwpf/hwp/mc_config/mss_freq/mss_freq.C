@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_freq.C,v 1.30 2015/01/29 20:28:38 jdsloat Exp $
+// $Id: mss_freq.C,v 1.31 2015/09/16 15:27:04 sglancy Exp $
 /* File mss_freq.C created by JEFF SABROWSKI on Fri 21 Oct 2011. */
 
 //------------------------------------------------------------------------------
@@ -32,8 +32,8 @@
 //------------------------------------------------------------------------------
 // *! TITLE : mss_freq.C
 // *! DESCRIPTION : Tools for centaur procedures
-// *! OWNER NAME :   Jacob Sloat (jdsloat@us.ibm.com)
-// *! BACKUP NAME :  
+// *! OWNER NAME :   Andre Marin (aamarin@us.ibm.com)
+// *! BACKUP NAME :  Stephen Glancy (sglancy@us.ibm.com)
 // #! ADDITIONAL COMMENTS :
 //
 // General purpose funcs
@@ -72,6 +72,7 @@
 //  1.28   | jdsloat  | 04/30/14 | Fixed a divide by 0 error opened up by RAS review Edits -- Error HW callouts v1.25
 //  1.29   | jdsloat  | 12/10/14 | Fixed 1333 speed limitation for config/ Habenero
 //  1.30   | jdsloat  | 01/29/14 | Fixed 1600 speed limitation for DDR4
+//  1.31   | sglancy  | 09/16/15 | Changed DMI capable values to allow for 8.0GBits/s or 9.6GBits/s if not specifically needing 8.0GBits/s
 
 // Add continues to logerrors to lines 650, 560.  IN order to avoid possible future problems.
 //
@@ -671,6 +672,8 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
             FAPI_INF( "Dual Drop RDIMM with more than 8 Rank Cnfg limitation.  New Freq: %d", l_dimm_freq_min); 
         }
 
+
+
         if ( l_spd_min_tck_max == 0)
         {
 	        // Loop through the 2 MBA's                                                                                                  
@@ -990,7 +993,7 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
             }
             else
             {
-                l_nest_capable_frequencies = 0x02;
+                l_nest_capable_frequencies = 0x03;
                 l_rc = FAPI_ATTR_SET(ATTR_MSS_NEST_CAPABLE_FREQUENCIES, &i_target_memb, l_nest_capable_frequencies);
             }
 
