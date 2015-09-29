@@ -85,7 +85,7 @@
 #include    <diag/prdf/prdfMain.H>
 #include <util/misc.H>
 
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
     #include    <occ/occ_common.H>
 #endif
 
@@ -641,7 +641,7 @@ void*    call_host_activate_slave_cores( void    *io_pArgs )
 
     // @@@@@    END CUSTOM BLOCK:   @@@@@
 
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
     if( l_stepError.isNull() )
     {
         // update firdata inputs for OCC

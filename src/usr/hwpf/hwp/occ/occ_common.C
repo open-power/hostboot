@@ -122,7 +122,7 @@ namespace HBOCC
         return l_errl;
     }
 
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
     errlHndl_t loadOCCImageDuringIpl( TARGETING::Target* i_target,
                                         void* i_occVirtAddr)
     {
@@ -289,7 +289,7 @@ namespace HBOCC
         return l_errl;
     } // loadHostDataToHomer
 
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
 #ifndef __HOSTBOOT_RUNTIME
     /**
      * @brief Sets up OCC Host data in SRAM
@@ -485,7 +485,7 @@ namespace HBOCC
                 break;
             }
 
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
           if (i_useSRAM)
           {
             void* occVirt = reinterpret_cast<void *>(i_occImgVaddr);
@@ -504,7 +504,7 @@ namespace HBOCC
             //Load the OCC HOMER image
             //==============================
 
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
             // clear (up to and including) the IPL Flag
             const uint32_t l_SramAddrApp = OCC_SRAM_ADDRESS;
             ecmdDataBufferBase l_occAppData((OCC_OFFSET_IPL_FLAG + 6) * 8 /* bits */);

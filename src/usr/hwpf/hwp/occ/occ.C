@@ -160,7 +160,7 @@ namespace HBOCC
                 break;
             }
 
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
 #ifndef __HOSTBOOT_RUNTIME
             if (i_useSRAM)
             {

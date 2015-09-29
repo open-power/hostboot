@@ -82,7 +82,7 @@
 #include <dump/dumpif.H>
 #include <vfs/vfs.H>
 
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
     #include    <occ/occ_common.H>
 #endif
 
@@ -137,7 +137,7 @@ void*    call_host_startprd_dram( void    *io_pArgs )
     // @@@@@    END CUSTOM BLOCK:   @@@@@
 #endif
 
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
     // update firdata inputs for OCC
     TARGETING::Target* masterproc = NULL;
     TARGETING::targetService().masterProcChipTargetHandle(masterproc);

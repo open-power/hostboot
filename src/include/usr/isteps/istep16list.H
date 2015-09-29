@@ -91,7 +91,7 @@ const DepModInfo g_istep16Dependancies = {
         DEP_LIB(libcore_activate.so),
         DEP_LIB(libbuild_winkle_images.so),
         DEP_LIB(libnest_chiplets.so),
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
         DEP_LIB(libocc.so),
 #endif
         NULL

@@ -129,7 +129,7 @@ const DepModInfo g_istep14Dependancies = {
         DEP_LIB(libdram_training.so),
         DEP_LIB(libdump.so),
         DEP_LIB(libnest_chiplets.so),
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
         DEP_LIB(libocc.so),
 #endif
 #endif

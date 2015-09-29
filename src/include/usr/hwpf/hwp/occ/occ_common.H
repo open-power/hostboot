@@ -103,7 +103,7 @@ namespace HBOCC
     errlHndl_t loadHostDataToHomer(TARGETING::Target* i_proc,
                                    void* i_occHostDataVirtAddr);
 
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
     /**
      * @brief Sets up OCC Host data in SRAM
      *

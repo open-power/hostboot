@@ -162,7 +162,7 @@ const DepModInfo  g_istep06Dependancies = {
       DEP_LIB(libpstates.so),
       DEP_LIB(libcore_activate.so),
       DEP_LIB(libsecure_boot.so),
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
       DEP_LIB(libocc.so),
 #endif
       NULL

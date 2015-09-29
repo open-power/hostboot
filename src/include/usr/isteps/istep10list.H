@@ -170,7 +170,7 @@ const DepModInfo g_istep10Dependancies = {
         DEP_LIB(libsbe.so),
         DEP_LIB(libproc_hwreconfig.so),
         DEP_LIB(libslave_sbe.so),
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
         DEP_LIB(libocc.so),
 #endif
 #endif

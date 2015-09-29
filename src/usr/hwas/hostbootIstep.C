@@ -360,7 +360,7 @@ void* host_cancontinue_clear( void *io_pArgs )
                 "host_cancontinue_clear entry" );
     errlHndl_t errl = NULL;
 
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
     // TODO RTC 115587: current place; could change
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "host_cancontinue_clear: calling activateOCCs" );
@@ -465,7 +465,7 @@ void* host_prd_hwreconfig( void *io_pArgs )
                     "MCS target HUID %.8X", l_currMcsHuid);
         } // for
 
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
         // update firdata inputs for OCC
         TARGETING::Target* masterproc = NULL;
         TARGETING::targetService().masterProcChipTargetHandle(masterproc);
