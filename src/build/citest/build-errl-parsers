@@ -54,5 +54,6 @@ execute_in_sandbox "cd ${SANDBOXBASE}/src/errl && mk -a -j32" "x86.nfp"
 if [ $? -ne 0 ]; then exit -1; fi
 
 echo "----Extracting errl tool"
+mkdir -p ${SANDBOXBASE}/simics || exit -1
 tar -xvf ${SANDBOXBASE}/obj/x86.nfp/errl/nfp/tool/errl.tar \
          -C ${SANDBOXBASE}/simics errl  || exit -1
