@@ -422,7 +422,6 @@ sub processProcessor
     my $target    = shift;
 
     #########################
-    ## Copy PCIE attributes from socket
     ## In serverwiz, processor instances are not unique
     ## because plugged into socket
     ## so processor instance unique attributes are socket level.
@@ -431,6 +430,12 @@ sub processProcessor
        $targetObj->getTargetParent($targetObj->getTargetParent($target));
     $targetObj->copyAttribute($socket_target,$target,"LOCATION_CODE");
 
+    ## Module attibutes are inherited into the proc target
+    my $module_target =
+       $targetObj->getTargetParent($target);
+    $targetObj->copyAttribute($module_target,$target,"LOCATION_CODE");
+
+    ## Copy PCIE attributes from socket
     foreach my $attr (sort (keys
            %{ $targetObj->getTarget($socket_target)->{TARGET}->{attribute} }))
     {
@@ -439,6 +444,14 @@ sub processProcessor
             $targetObj->copyAttribute($socket_target,$target,$attr);
         }
     }
+
+    ## Copy all attributes from module
+    foreach my $attr (sort (keys
+           %{ $targetObj->getTarget($module_target)->{TARGET}->{attribute} }))
+    {
+        $targetObj->copyAttribute($module_target,$target,$attr);
+    }
+
     $targetObj->log($target, "Processing PROC");
     foreach my $child (@{ $targetObj->getTargetChildren($target) })
     {
