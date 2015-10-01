@@ -131,6 +131,15 @@
 </attribute>
 
 <attribute>
+  <id>ATTR_FABRIC_SYSTEM_ID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+   <description>Logical fabric system ID associated with this chip. Provided by the MRW.</description>
+   <valueType>uint8</valueType>
+   <persistRuntime/>
+   <platInit/>
+</attribute>
+
+<attribute>
   <id>ATTR_I2C_BUS_DIV_NEST</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>I2C Bus speed based on nest freq, ref clock</description>
