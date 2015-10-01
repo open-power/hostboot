@@ -31,6 +31,9 @@ TARGETS += attribute_plat_check.H
 TARGETS += attributesSupported.html
 TARGETS += attrInfo.csv
 TARGETS += attrEnumInfo.csv
+TARGETS += fapi2AttrOverrideData.H
+TARGETS += fapi2AttrOverrideEnums.H
+
 
 define parseAttributeInfo_RUN
 		$(C1) $$< --output-dir=$$($(GENERATED)_PATH) $$(filter-out $$<,$$^)
