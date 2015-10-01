@@ -1,0 +1,252 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/attribute_info/nest_attributes.xml $  -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- This is an automatically generated file. -->
+<!-- File: nest_attributes.xml. -->
+<!-- XML file specifying attributes used by HW Procedures. -->
+<!-- Attributes are taken from model nest -->
+<!--nest_attributes.xml-->
+<attributes>
+<!-- ******************************************************************************** -->
+<attribute>
+  <id>ATTR_DMI_REFCLOCK_SWIZZLE</id>
+  <targetType>TARGET_TYPE_MCS</targetType>
+  <description>Define DMI Ref clock/Swizzle for Centaur.
+   Provided by the MRW</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+<!-- ******************************************************************************** -->
+<attribute>
+  <id>ATTR_SYSTEM_IPL_PHASE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Define context for current phase of system IPL.
+  Provided by the platform. </description>
+  <valueType>uint8</valueType>
+  <enum>HB_IPL = 0x1,HB_RUNTIME = 0x2,CACHE_CONTAINED = 0x4</enum>
+  <persistRuntime/>
+  <writeable/>
+</attribute>
+<!-- ******************************************************************************** -->
+<attribute>
+  <id>ATTR_IS_MPIPL</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Indicates if current IPL is memory-preserving
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    FALSE = 0x0,
+    TRUE = 0x1
+  </enum>
+  <platInit/>
+  <writeable/>
+</attribute>
+<!-- ******************************************************************************** -->
+<attribute>
+  <id>ATTR_ADU_XSCOM_BAR_BASE_ADDR</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Defines XSCOM base address on each processor level.
+        address provided by the MRW </description>
+  <valueType>uint64</valueType>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+<!-- ******************************************************************************** -->
+<attribute>
+  <id>ATTR_MEM_MIRROR_PLACEMENT_POLICY</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Define placement policy/scheme for non-mirrored/mirrored memory
+               layout
+    creator: platform
+    consumer: mss_eff_grouping
+    firmware notes:
+      NORMAL  = non-mirrored start: 0, mirrored start: 1024TB
+      FLIPPED = mirrored start: 0, non-mirrored start: 512TB
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    NORMAL    = 0x0,
+    FLIPPED   = 0x1
+  </enum>
+  <platInit/>
+  <persistRuntime/>
+</attribute>
+<!-- ******************************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_MEM_BASES</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Non-mirrored memory base addresses
+    creator: mss_setup_bars
+    consumer: proc_setup_bars, platform
+    firmware notes:
+      64-bit RA
+      eight independent non-mirrored segments are supported
+      (max number based on P9 design)
+  </description>
+  <valueType>uint64</valueType>
+  <array>8</array>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+<!-- ******************************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_MIRROR_BASE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Base address for mirrored memory regions
+    creator: platform (proc_config_base_addr)
+    consumer: mss_setup_bars
+    firmware notes:
+      64-bit RA
+  </description>
+  <valueType>uint64</valueType>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+<!-- ******************************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_MIRROR_BASES</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Mirrored memory base addresses
+    creator: mss_eff_grouping
+    consumer: proc_setup_bars, platform
+    firmware notes:
+      64-bit RA
+      four independent mirrored segments are supported
+      (max number based on P9 design)
+  </description>
+  <valueType>uint64</valueType>
+  <array>4</array>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+<!-- ******************************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_MIRROR_SIZES</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Size of mirrored memory region
+    creator: mss_eff_grouping
+    consumer: proc_setup_bars, platform
+    firmware notes:
+      for given index value, address space assumed to be contiguous
+      from ATTR_PROC_MIRROR_BASES value at matching index
+      four independent mirrored segments are supported
+      (max number based on P9 design)
+  </description>
+  <valueType>uint64</valueType>
+  <array>4</array>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+<!-- ******************************************************************************** -->
+<attribute>
+    <id>ATTR_MSS_INTERLEAVE_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Used in the setting of groups.  It is a bit vector.  If the value
+      BITWISE_AND  0x01 = 0x01 then groups of 1 are enabled,
+      if the value BITWISE_AND  0x02 = 0x02, then groups of 2 are possible,
+      if the value BITWISE_AND  0x04 = 0x04, then group of 3 are possible,
+      if the value BITWISE_AND  0x08 = 0x08, then groups of 4 are possible,
+      if the value BITWISE_AND 0x20 = 0x20, then groups of 6 are possible,
+      if the value BITWISE_AND 0x80 = 0x80, then groups of 8 are possible.
+      If no groups can formed according to this input, then an error will
+      be thrown. Provided by the MRW
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <odmVisable/>
+    <odmChangeable/>
+</attribute>
+<!-- ******************************************************************************** -->
+<attribute>
+    <id>ATTR_MSS_MEM_MC_IN_GROUP</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Creator :- mss_setup_bars
+      consumer :- platform
+      A 8 bit vector that would be a designation of which MC are involved in
+      the group. So the bits would represent MC0,MC1,MC2,MC3,MC4,MC5,MC6,MC7
+      -what is grouped into the first would go into [0], the 2nd group into
+       entry [1] and so on.
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array>8</array>
+    <persistRuntime/>
+</attribute>
+<!-- ******************************************************************************** -->
+<attribute>
+    <id>ATTR_MSS_MCS_GROUP_32</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+       creator:- mss_eff_grouping
+       consumer:- mss_setup_bars
+       Data Structure from eff grouping to setup bars to help determine
+       different groups
+       Non- Mirroring array[0-7]
+       [0.7][0] -- MCS size // 1-- No of MCS/group //2-- Total group size of
+       non-mirroring  //3 -- Base address // 4-11 - MCS ID number// 12 --
+       Alter.Bar //13 - Alternate Group Size // 14 - Alternate Base address
+       Mirroring      array[8-15]
+       [8:15][0] -- MCS size // 1-- No of MCS/group // 2-- Total group size
+       of mirroring // 3 -- Base address // 4-11 - MCS ID number// 12 --
+       Alter.Bar //13 - Alternate Group Size // 14 - Alternate Base address
+       Measured in GB
+     </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <array>16 16</array>
+</attribute>
+<!-- ******************************************************************************** -->
+<attribute>
+    <id>ATTR_MSS_MEM_IPL_COMPLETE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+       Creator:- mss_setup_bars
+       A numerical number indicating if the memory procedures are complete.
+       written by mss_setup_bars when the bars are now functional in the
+       processor.
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <persistRuntime/>
+</attribute>
+<!-- ******************************************************************************** -->
+<attribute>
+    <id>ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+       If this attribute sets to TRUE, supports MCS grouping  with out mirroring.
+       If this attribute to FALSE, IBM Power system Mirroring support enabled.
+       This instructs the grouping code to group contiguous memory controllers
+       of the same size together. Provided by the MRW.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <enum>FALSE = 0, TRUE = 1</enum>
+</attribute>
+<!-- ******************************************************************************** -->
+</attributes>
