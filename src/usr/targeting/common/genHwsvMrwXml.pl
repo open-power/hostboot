@@ -70,11 +70,22 @@ use constant CHIP_ATTR_START_INDEX => 2; # Position in array of start of attrs
 use constant
 {
     MAX_PROC_PER_NODE => 8,
-    MAX_EX_PER_PROC => 16,
+    MAX_CORE_PER_PROC => 24,
+    MAX_EX_PER_PROC => 12,
+    MAX_EQ_PER_PROC => 6,
     MAX_ABUS_PER_PROC => 3,
-    MAX_XBUS_PER_PROC => 4,
-    MAX_MCS_PER_PROC => 8,
+    MAX_XBUS_PER_PROC => 3,
+    MAX_MCS_PER_PROC => 4,
+    MAX_MCA_PER_PROC => 8,
+    MAX_MCBIST_PER_PROC => 2,
+    MAX_PEC_PER_PROC => 3,
+    MAX_PHB_PER_PROC => 18,
     MAX_MBA_PER_MEMBUF => 2,
+    MAX_OBUS_PER_PROC => 4,
+    MAX_PPE_PER_PROC => 21,
+    MAX_PERV_PER_PROC => 42,
+    MAX_CAPP_PER_PROC => 2,
+    MAX_SBE_PER_PROC => 1,
 };
 
 # for SPI connections in the @SPIs array
@@ -716,30 +727,30 @@ foreach my $i (@{$powerbus->{'power-bus'}})
     my $present = index $endp1, 'not connected';
     if ($present eq -1)
     {
-       $endp2 = $endp1;
-       $endp1 =~ s/^(.*) to.*/$1/;
-       $endp2 =~ s/.* to (.*)\s*$/$1/;
+        $endp2 = $endp1;
+        $endp1 =~ s/^(.*) to.*/$1/;
+        $endp2 =~ s/.* to (.*)\s*$/$1/;
 
-       # Grab the lane swap information
-       $dwnstrm_swap = $i->{'downstream-n-p-lane-swap-mask'};
-       $upstrm_swap =  $i->{'upstream-n-p-lane-swap-mask'};
+        # Grab the lane swap information
+        $dwnstrm_swap = $i->{'downstream-n-p-lane-swap-mask'};
+        $upstrm_swap =  $i->{'upstream-n-p-lane-swap-mask'};
 
-       # Abort if node config information is not found
-       if(!(exists $i->{'include-for-node-config'}))
-       {
-           die "include-for-node-config element not found ";
-       }
-       $nodeconfig = $i->{'include-for-node-config'};
+        # Abort if node config information is not found
+        if(!(exists $i->{'include-for-node-config'}))
+        {
+            die "include-for-node-config element not found ";
+        }
+        $nodeconfig = $i->{'include-for-node-config'};
     }
     else
     {
-       $endp1 =~ s/^(.*) unit.*/$1/;
-       $endp2 = "invalid";
+        $endp1 =~ s/^(.*) unit.*/$1/;
+        $endp2 = "invalid";
 
 
-       # Set the lane swap information to 0 to avoid junk
-       $dwnstrm_swap = 0;
-       $upstrm_swap =  0;
+        # Set the lane swap information to 0 to avoid junk
+        $dwnstrm_swap = 0;
+        $upstrm_swap =  0;
     }
 
     my $bustype = $endp1;
@@ -764,7 +775,7 @@ foreach my $i (@{$powerbus->{'power-bus'}})
     # Other targets(tuleta, alphine..etc) : nodeconfig will be "all".
 
     if ( (lc($bustype) ne "a") || ($nodeconfig eq $NODECONF) ||
-         ($nodeconfig eq "all") )
+            ($nodeconfig eq "all") )
     {
         push @pbus, [ lc($endp1), lc($endp2), $dwnstrm_swap,
                       $upstrm_swap, $tx_swap, $rx_swap, $endpoint1_ipath,
@@ -1450,8 +1461,19 @@ foreach my $i (@{$i2cHost->{'host-i2c-connection'}})
 #
 #   pu
 #   ex  (one or more EX of pu before it)
-#   core
+#   eq  (one or more EQ of pu before it)
+#   core (one or more CORE of pu before it)
 #   mcs (one or more MCS of pu before it)
+#   mca (one or more MCA of pu before it)
+#   mcbist (one or more MCBIST of pu before it)
+#   pec (one or more PEC of pu before it)
+#   phb (one or more PHB of pu before it)
+#   obus (one or more OBUS of pu before it)
+#   xbus (one or more XBUS of pu before it)
+#   ppe (one or more PPE of pu before it)
+#   perv (one or more PERV of pu before it)
+#   capp (one or more CAPP of pu before it)
+#   sbe (one or more SBE of pu before it)
 #   (Repeat for remaining pu)
 #   memb
 #   mba (to for membuf before it)
@@ -1507,6 +1529,20 @@ for my $i ( 0 .. $#SortedTargets )
 
         for my $j ( 0 .. $#SortedTargets )
         {
+            if (($SortedTargets[$j][NAME_FIELD] eq "eq") &&
+                ($SortedTargets[$j][NODE_FIELD] eq $node) &&
+                ($SortedTargets[$j][POS_FIELD] eq $position))
+            {
+                for my $k ( 0 .. PLUG_POS )
+                {
+                    $fields[$k] = $SortedTargets[$j][$k];
+                }
+                push @STargets, [ @fields ];
+            }
+        }
+
+        for my $j ( 0 .. $#SortedTargets )
+        {
             if (($SortedTargets[$j][NAME_FIELD] eq "core") &&
                 ($SortedTargets[$j][NODE_FIELD] eq $node) &&
                 ($SortedTargets[$j][POS_FIELD] eq $position))
@@ -1530,6 +1566,136 @@ for my $i ( 0 .. $#SortedTargets )
                     $fields[$k] = $SortedTargets[$j][$k];
                 }
                 push @STargets, [ @fields ];
+            }
+        }
+        for my $j ( 0 .. $#SortedTargets )
+        {
+            if (($SortedTargets[$j][NAME_FIELD] eq "mca") &&
+                ($SortedTargets[$j][NODE_FIELD] eq $node) &&
+                ($SortedTargets[$j][POS_FIELD] eq $position))
+            {
+                for my $k ( 0 .. PLUG_POS )
+                {
+                    $fields[$k] = $SortedTargets[$j][$k];
+                }
+                push @STargets, [ @fields ];
+            }
+        }
+        for my $j ( 0 .. $#SortedTargets )
+        {
+            if (($SortedTargets[$j][NAME_FIELD] eq "mcbist") &&
+                ($SortedTargets[$j][NODE_FIELD] eq $node) &&
+                ($SortedTargets[$j][POS_FIELD] eq $position))
+            {
+                for my $k ( 0 .. PLUG_POS )
+                {
+                    $fields[$k] = $SortedTargets[$j][$k];
+                }
+                push @STargets, [ @fields ];
+            }
+        }
+        for my $j ( 0 .. $#SortedTargets )
+        {
+            if (($SortedTargets[$j][NAME_FIELD] eq "pec") &&
+                ($SortedTargets[$j][NODE_FIELD] eq $node) &&
+                ($SortedTargets[$j][POS_FIELD] eq $position))
+            {
+                for my $k ( 0 .. PLUG_POS )
+                {
+                    $fields[$k] = $SortedTargets[$j][$k];
+                }
+                push @STargets, [@fields];
+            }
+        }
+        for my $j ( 0 .. $#SortedTargets )
+        {
+            if (($SortedTargets[$j][NAME_FIELD] eq "phb") &&
+                ($SortedTargets[$j][NODE_FIELD] eq $node) &&
+                ($SortedTargets[$j][POS_FIELD] eq $position))
+            {
+                for my $k ( 0 .. PLUG_POS )
+                {
+                    $fields[$k] = $SortedTargets[$j][$k];
+                }
+                push @STargets, [@fields];
+            }
+        }
+        for my $j ( 0 .. $#SortedTargets )
+        {
+            if (($SortedTargets[$j][NAME_FIELD] eq "obus") &&
+                ($SortedTargets[$j][NODE_FIELD] eq $node) &&
+                ($SortedTargets[$j][POS_FIELD] eq $position))
+            {
+                for my $k ( 0 .. PLUG_POS )
+                {
+                    $fields[$k] = $SortedTargets[$j][$k];
+                }
+                push @STargets, [@fields];
+            }
+        }
+        for my $j ( 0 .. $#SortedTargets )
+        {
+            if (($SortedTargets[$j][NAME_FIELD] eq "xbus") &&
+                ($SortedTargets[$j][NODE_FIELD] eq $node) &&
+                ($SortedTargets[$j][POS_FIELD] eq $position))
+            {
+                for my $k ( 0 .. PLUG_POS )
+                {
+                   $fields[$k] = $SortedTargets[$j][$k];
+                }
+                push @STargets, [@fields];
+            }
+        }
+        for my $j ( 0 .. $#SortedTargets )
+        {
+            if (($SortedTargets[$j][NAME_FIELD] eq "ppe") &&
+                ($SortedTargets[$j][NODE_FIELD] eq $node) &&
+                ($SortedTargets[$j][POS_FIELD] eq $position))
+            {
+                for my $k ( 0 .. PLUG_POS )
+                {
+                    $fields[$k] = $SortedTargets[$j][$k];
+                }
+                push @STargets, [@fields];
+            }
+        }
+        for my $j ( 0 .. $#SortedTargets )
+        {
+            if (($SortedTargets[$j][NAME_FIELD] eq "perv") &&
+                ($SortedTargets[$j][NODE_FIELD] eq $node) &&
+                ($SortedTargets[$j][POS_FIELD] eq $position))
+            {
+                for my $k ( 0 .. PLUG_POS )
+                {
+                    $fields[$k] = $SortedTargets[$j][$k];
+                }
+                push @STargets, [@fields];
+            }
+        }
+        for my $j ( 0 .. $#SortedTargets )
+        {
+            if (($SortedTargets[$j][NAME_FIELD] eq "capp") &&
+                ($SortedTargets[$j][NODE_FIELD] eq $node) &&
+                ($SortedTargets[$j][POS_FIELD] eq $position))
+            {
+                for my $k ( 0 .. PLUG_POS )
+                {
+                    $fields[$k] = $SortedTargets[$j][$k];
+                }
+                push @STargets, [@fields];
+            }
+        }
+        for my $j ( 0 .. $#SortedTargets )
+        {
+            if (($SortedTargets[$j][NAME_FIELD] eq "sbe") &&
+                ($SortedTargets[$j][NODE_FIELD] eq $node) &&
+                ($SortedTargets[$j][POS_FIELD] eq $position))
+            {
+                for my $k ( 0 .. PLUG_POS )
+                {
+                    $fields[$k] = $SortedTargets[$j][$k];
+                }
+                push @STargets, [@fields];
             }
         }
     }
@@ -1680,7 +1846,6 @@ if($axBusesHuidInit == 0)
                         ($STargets[$i+1][NAME_FIELD] eq "memb"))
                 {
                     preCalculateAxBusesHUIDs($my_curnode, $proc, "A");
-                    preCalculateAxBusesHUIDs($my_curnode, $proc, "X");
                 }
             }
         }
@@ -1691,7 +1856,18 @@ if($axBusesHuidInit == 0)
 # unit-tp (if on fsp), pcie bus and A/X-bus.
 my $ex_count = 0;
 my $ex_core_count = 0;
+my $eq_count = 0;
 my $mcs_count = 0;
+my $mca_count = 0;
+my $mcbist_count = 0;
+my $pec_count = 0;
+my $phb_count = 0;
+my $obus_count = 0;
+my $xbus_count = 0;
+my $ppe_count = 0;
+my $perv_count = 0;
+my $capp_count = 0;
+my $sbe_count = 0;
 my $proc_ordinal_id =0;
 #my $fru_id = 0;
 #my @fru_paths;
@@ -1819,18 +1995,36 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
     elsif ($STargets[$i][NAME_FIELD] eq "core")
     {
         my $proc = $STargets[$i][POS_FIELD];
-        my $ex = $STargets[$i][UNIT_FIELD];
+        my $core = $STargets[$i][UNIT_FIELD];
 
         if ($ex_core_count == 0)
         {
             print "\n<!-- $SYSNAME n${node}p$proc core units -->\n";
         }
-        generate_ex_core($proc,$ex,$STargets[$i][ORDINAL_FIELD], $STargets[$i][PATH_FIELD]);
+        generate_core($proc,$core,$STargets[$i][ORDINAL_FIELD],
+                      $STargets[$i][PATH_FIELD]);
         $ex_core_count++;
         if ($STargets[$i+1][NAME_FIELD] eq "mcs")
         {
             $ex_core_count = 0;
         }
+    }
+    elsif ($STargets[$i][NAME_FIELD] eq "eq")
+    {
+        my $proc = $STargets[$i][POS_FIELD];
+        my $eq = $STargets[$i][UNIT_FIELD];
+
+        if ($eq_count == 0)
+        {
+            print "\n<!-- $SYSNAME n${node}p$proc EQ units -->\n";
+        }
+        generate_eq($proc, $eq, $STargets[$i][ORDINAL_FIELD], $ipath);
+        $eq_count++;
+        if ($STargets[$i+1][NAME_FIELD] eq "core")
+        {
+            $eq_count = 0;
+        }
+
     }
     elsif ($STargets[$i][NAME_FIELD] eq "mcs")
     {
@@ -1847,11 +2041,158 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         {
             $mcs_count = 0;
             generate_pcies($proc,$proc_ordinal_id);
-            generate_ax_buses($proc, "A",$proc_ordinal_id);
-            generate_ax_buses($proc, "X",$proc_ordinal_id);
             generate_nx($proc,$proc_ordinal_id,$node);
             generate_pore($proc,$proc_ordinal_id,$node);
-            generate_capp($proc,$proc_ordinal_id,$node);
+        }
+    }
+    elsif ( $STargets[$i][NAME_FIELD] eq "mca")
+    {
+        my $proc = $STargets[$i][POS_FIELD];
+        my $mca = $STargets[$i][UNIT_FIELD];
+        if ($mca_count == 0)
+        {
+            print "\n<!-- $SYSNAME n${node}p$proc MCA units -->\n";
+        }
+        generate_mca($proc,$mca, $STargets[$i][ORDINAL_FIELD], $ipath);
+        $mca_count++;
+        if ($STargets[$i+1][NAME_FIELD] eq "pu")
+        {
+            $mca_count = 0;
+        }
+    }
+    elsif ( $STargets[$i][NAME_FIELD] eq "mcbist")
+    {
+        my $proc = $STargets[$i][POS_FIELD];
+        my $mcbist = $STargets[$i][UNIT_FIELD];
+        if ($mcbist_count == 0)
+        {
+            print "\n<!-- $SYSNAME n${node}p$proc MCBIST units -->\n";
+        }
+        generate_mcbist($proc,$mcbist,$STargets[$i][ORDINAL_FIELD],$ipath);
+        $mcbist_count++;
+        if ($STargets[$i+1][NAME_FIELD] eq "pu")
+        {
+            $mcbist_count = 0;
+        }
+    }
+    elsif ( $STargets[$i][NAME_FIELD] eq "pec")
+    {
+        my $proc = $STargets[$i][POS_FIELD];
+        my $pec = $STargets[$i][UNIT_FIELD];
+        if ($pec_count == 0)
+        {
+            print "\n<!-- $SYSNAME n${node}p$proc PEC units -->\n";
+        }
+        generate_pec($proc,$pec,$STargets[$i][ORDINAL_FIELD],$ipath);
+        $pec_count++;
+        if ($STargets[$i+1][NAME_FIELD] eq "pu")
+        {
+            $pec_count = 0;
+        }
+    }
+    elsif ( $STargets[$i][NAME_FIELD] eq "phb")
+    {
+        my $proc = $STargets[$i][POS_FIELD];
+        my $phb = $STargets[$i][UNIT_FIELD];
+        if ($phb_count == 0)
+        {
+            print "\n<!-- $SYSNAME n${node}p$proc PHB units -->\n";
+        }
+        generate_phb_chiplet($proc,$phb,$STargets[$i][ORDINAL_FIELD],$ipath);
+        $phb_count++;
+        if ($STargets[$i+1][NAME_FIELD] eq "pu")
+        {
+            $phb_count = 0;
+        }
+    }
+    elsif ( $STargets[$i][NAME_FIELD] eq "obus")
+    {
+        my $proc = $STargets[$i][POS_FIELD];
+        my $obus = $STargets[$i][UNIT_FIELD];
+        if ($obus_count == 0)
+        {
+            print "\n<!-- $SYSNAME n${node}p$proc OBUS units -->\n";
+        }
+        generate_obus($proc,$obus,$STargets[$i][ORDINAL_FIELD],$ipath);
+        $obus_count++;
+        if ($STargets[$i+1][NAME_FIELD] eq "pu")
+        {
+            $obus_count = 0;
+        }
+    }
+    elsif ( $STargets[$i][NAME_FIELD] eq "xbus")
+    {
+        my $proc = $STargets[$i][POS_FIELD];
+        my $xbus = $STargets[$i][UNIT_FIELD];
+        if ($xbus_count == 0)
+        {
+           print "\n<!-- $SYSNAME n${node}p$proc XBUS units -->\n";
+        }
+        generate_xbus($proc,$xbus,$STargets[$i][ORDINAL_FIELD],$ipath);
+        $xbus_count++;
+        if ($STargets[$i+1][NAME_FIELD] eq "pu")
+        {
+           $xbus_count = 0;
+        }
+    }
+    elsif ( $STargets[$i][NAME_FIELD] eq "ppe")
+    {
+        my $proc = $STargets[$i][POS_FIELD];
+        my $ppe = $STargets[$i][UNIT_FIELD];
+        if ($ppe_count == 0)
+        {
+            print "\n<!-- $SYSNAME n${node}p$proc PPE units -->\n";
+        }
+        generate_ppe($proc,$ppe,$STargets[$i][ORDINAL_FIELD],$ipath);
+        $ppe_count++;
+        if ($STargets[$i+1][NAME_FIELD] eq "pu" )
+        {
+            $ppe_count = 0;
+        }
+    }
+    elsif ( $STargets[$i][NAME_FIELD] eq "perv")
+    {
+        my $proc = $STargets[$i][POS_FIELD];
+        my $perv = $STargets[$i][UNIT_FIELD];
+        if ($perv_count == 0)
+        {
+            print "\n<!-- $SYSNAME n${node}p$proc PERV units -->\n";
+        }
+        generate_perv($proc,$perv,$STargets[$i][ORDINAL_FIELD],$ipath);
+        $perv_count++;
+        if ($STargets[$i+1][NAME_FIELD] eq "pu")
+        {
+            $perv_count = 0;
+        }
+    }
+    elsif ( $STargets[$i][NAME_FIELD] eq "capp")
+    {
+        my $proc = $STargets[$i][POS_FIELD];
+        my $capp = $STargets[$i][UNIT_FIELD];
+        if ($capp_count == 0)
+        {
+            print "\n<!-- $SYSNAME n${node}p$proc CAPP units -->\n";
+        }
+        generate_capp($proc,$capp,$STargets[$i][ORDINAL_FIELD],$ipath);
+        $capp_count++;
+        if ($STargets[$i+1][NAME_FIELD] eq "pu")
+        {
+            $capp_count = 0;
+        }
+    }
+    elsif ( $STargets[$i][NAME_FIELD] eq "sbe")
+    {
+        my $proc = $STargets[$i][POS_FIELD];
+        my $sbe = $STargets[$i][UNIT_FIELD];
+        if ($sbe_count == 0)
+        {
+            print "\n<!-- $SYSNAME n${node}p$proc SBE units -->\n";
+        }
+        generate_sbe($proc,$sbe,$STargets[$i][ORDINAL_FIELD],$ipath);
+        $sbe_count++;
+        if ($STargets[$i+1][NAME_FIELD] eq "pu")
+        {
+            $sbe_count = 0;
         }
     }
 }
@@ -2211,6 +2552,7 @@ sub byNodePos($$)
 sub generate_sys
 {
     my $plat = 0;
+
     if ($build eq "fsp")
     {
         $plat = 2;
@@ -2225,7 +2567,7 @@ sub generate_sys
 
 <targetInstance>
     <id>sys$sys</id>
-    <type>sys-sys-power8</type>
+    <type>sys-sys-power9</type>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys</default>
@@ -2246,36 +2588,6 @@ sub generate_sys
     print "    <!-- System Attributes from MRW -->\n";
     addSysAttrs();
 
-    # $TODO RTC:110399
-    # hardcode for now both palmetto and habenaro are
-    # currently the same - this will change though
-    #
-    if( $haveFSPs == 0 )
-    {
-       print "\n<!-- IPMI sensor numbers -->
-    <attribute>
-        <id>IPMI_SENSORS</id>
-        <default>
-            0x0700,90,    <!-- OS_Boot -->
-            0x0800,0x04,  <!-- Host_Status -->
-            0x0900,0x05,  <!-- FW_Boot_Progress -->
-            0x0b00, 88,   <!-- Power_Cap  -->
-            0x0c00, 85,   <!-- PCI -->
-            0x0d00,0x00,  <!-- Boot_watchdog -->
-            0x0e00, 80,   <!-- Boot_Count -->
-            0x1000, 82,   <!-- System_Event -->
-            0x1010, 87,   <!-- APSS Fault -->
-            0xC615, 83,   <!-- Activate Power Limit -->
-            0xFFFF,0xFF,
-            0xFFFF,0xFF,
-            0xFFFF,0xFF,
-            0xFFFF,0xFF,
-            0xFFFF,0xFF,
-            0xFFFF,0xFF
-       </default>
-    </attribute>\n";
-
-    }
     print "    <!-- End System Attributes from MRW -->";
 
     # If we don't have any FSPs (open-power) then we don't need any SP_FUNCTIONS
@@ -2452,18 +2764,6 @@ sub generate_max_config
     <attribute>
         <id>MAX_EXS_PER_PROC_CHIP</id>
         <default>$maxEx_Per_Proc</default>
-    </attribute>
-    <attribute>
-        <id>MAX_MBAS_PER_MEMBUF_CHIP</id>
-        <default>$maxMba_Per_MemBuf</default>
-    </attribute>
-    <attribute>
-        <id>MAX_MBA_PORTS_PER_MBA</id>
-        <default>$maxMbaPort_Per_Mba</default>
-    </attribute>
-    <attribute>
-        <id>MAX_DIMMS_PER_MBA_PORT</id>
-        <default>$maxDimm_Per_MbaPort</default>
     </attribute>
     <attribute>
         <id>MAX_CHIPLETS_PER_PROC</id>
@@ -2697,7 +2997,7 @@ sub generate_system_node
 
 <targetInstance>
     <id>sys${sys}node${node}</id>
-    <type>enc-node-power8</type>
+    <type>enc-node-power9</type>
     <attribute><id>HUID</id><default>0x0${node}020000</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -2714,36 +3014,6 @@ sub generate_system_node
 
     print "    <!-- Node Attributes from MRW -->\n";
     addNodeAttrs();
-
-        # $TODO RTC:110399
-        # hardcode for now both palmetto and habenaro are
-        # currently the same - this will change though
-        #
-        if( $haveFSPs == 0 )
-        {
-            print "\n<!-- IPMI sensor numbers -->
-    <attribute>
-        <id>IPMI_SENSORS</id>
-        <default>
-            0x1000, 81, <!-- Backplane fault sensor -->
-            0x1017, 86, <!-- TOD clock fault sensor -->
-            0x101A, 84, <!-- REF clock fault sensor -->
-            0x101B, 85, <!-- PCI clock fault sensor -->
-            0xFFFF,0xFF,
-            0xFFFF,0xFF,
-            0xFFFF,0xFF,
-            0xFFFF,0xFF,
-            0xFFFF,0xFF,
-            0xFFFF,0xFF,
-            0xFFFF,0xFF,
-            0xFFFF,0xFF,
-            0xFFFF,0xFF,
-            0xFFFF,0xFF,
-            0xFFFF,0xFF,
-            0xFFFF,0xFF
-       </default>
-    </attribute>\n";
-        }
 
         # add fsp extensions
         do_plugin('fsp_node_add_extensions', $node);
@@ -3027,6 +3297,7 @@ sub generate_proc
             $node, $proc, $fruid, $ipath, $hwTopology, $mboxFspApath,
             $mboxFspAsize, $mboxFspBpath, $mboxFspBsize, $ordinalId );
 
+    #TODO: RTC 139073 Need to fix all of these calculations.
     # Data from PHYP Memory Map
     print "\n";
     print "    <!-- Data from PHYP Memory Map -->\n";
@@ -3114,104 +3385,8 @@ sub generate_proc
 
     print "    <!-- PROC_PCIE_ attributes -->\n";
     addProcPcieAttrs( $proc, $node );
-    print "    <attribute>
-        <id>PROC_PCIE_IOP_SWAP</id>
-        <default>$pcie_list{$ipath}{0}{0}{'lane-swap'},
-                 $pcie_list{$ipath}{1}{0}{'lane-swap'}
-        </default>
-    </attribute>
-    <attribute>
-        <id>PROC_PCIE_IOP_REVERSAL</id>
-        <default>
-            $pcie_list{$ipath}{0}{0}{'lane-reversal'},
-            $pcie_list{$ipath}{0}{1}{'lane-reversal'},
-            $pcie_list{$ipath}{1}{0}{'lane-reversal'},
-            $pcie_list{$ipath}{1}{1}{'lane-reversal'}
-        </default>
-    </attribute>
-    <attribute>
-        <id>PROC_PCIE_LANE_MASK</id>
-        <default>
-            $pcie_list{$ipath}{0}{0}{'lane-mask'},
-            $pcie_list{$ipath}{0}{1}{'lane-mask'},
-            $pcie_list{$ipath}{1}{0}{'lane-mask'},
-            $pcie_list{$ipath}{1}{1}{'lane-mask'}
-        </default>
-    </attribute>
-    <attribute>
-        <id>PROC_PCIE_IOP_SWAP_NON_BIFURCATED</id>
-        <default>
-            $pcie_list{$ipath}{0}{0}{'lane-swap'},
-            $pcie_list{$ipath}{0}{1}{'lane-swap'},
-            $pcie_list{$ipath}{1}{0}{'lane-swap'},
-            $pcie_list{$ipath}{1}{1}{'lane-swap'}
-        </default>
-    </attribute>
-    <attribute>
-        <id>PROC_PCIE_IOP_REVERSAL_NON_BIFURCATED</id>
-        <default>
-            $pcie_list{$ipath}{0}{0}{'lane-reversal'},
-            $pcie_list{$ipath}{0}{1}{'lane-reversal'},
-            $pcie_list{$ipath}{1}{0}{'lane-reversal'},
-            $pcie_list{$ipath}{1}{1}{'lane-reversal'}
-        </default>
-    </attribute>
-    <attribute>
-        <id>PROC_PCIE_LANE_MASK_NON_BIFURCATED</id>
-        <default>
-            $pcie_list{$ipath}{0}{0}{'lane-mask'},
-            $pcie_list{$ipath}{0}{1}{'lane-mask'},
-            $pcie_list{$ipath}{1}{0}{'lane-mask'},
-            $pcie_list{$ipath}{1}{1}{'lane-mask'}
-        </default>
-    </attribute>
-    <attribute>
-        <id>PROC_PCIE_IOP_SWAP_BIFURCATED</id>
-        <default>
-            $bifurcation_list{$ipath}{0}{0}{'lane-swap'},
-            $bifurcation_list{$ipath}{0}{1}{'lane-swap'},
-            $bifurcation_list{$ipath}{1}{0}{'lane-swap'},
-            $bifurcation_list{$ipath}{1}{1}{'lane-swap'}
-        </default>
-    </attribute>
-    <attribute>
-        <id>PROC_PCIE_LANE_MASK_BIFURCATED</id>
-        <default>
-            $bifurcation_list{$ipath}{0}{0}{'lane-mask'},
-            $bifurcation_list{$ipath}{0}{1}{'lane-mask'},
-            $bifurcation_list{$ipath}{1}{0}{'lane-mask'},
-            $bifurcation_list{$ipath}{1}{1}{'lane-mask'}
-        </default>
-    </attribute>
-    <attribute>
-        <id>PROC_PCIE_IOP_REVERSAL_BIFURCATED</id>
-        <default>
-            $bifurcation_list{$ipath}{0}{0}{'lane-reversal'},
-            $bifurcation_list{$ipath}{0}{1}{'lane-reversal'},
-            $bifurcation_list{$ipath}{1}{0}{'lane-reversal'},
-            $bifurcation_list{$ipath}{1}{1}{'lane-reversal'}
-        </default>
-    </attribute>
-    <attribute>
-        <id>PROC_PCIE_DSMP_CAPABLE</id>
-        <default>
-            $pcie_list{$ipath}{0}{0}{'dsmp-capable'},
-            $pcie_list{$ipath}{0}{1}{'dsmp-capable'},
-            $pcie_list{$ipath}{1}{0}{'dsmp-capable'},
-            $pcie_list{$ipath}{1}{1}{'dsmp-capable'}
-        </default>
-    </attribute>
-    <attribute>
-        <id>PROC_PCIE_IS_SLOT</id>
-        <default>
-            $pcie_list{$ipath}{0}{0}{'is-slot'},
-            $pcie_list{$ipath}{0}{1}{'is-slot'},
-            $pcie_list{$ipath}{1}{0}{'is-slot'},
-            $pcie_list{$ipath}{1}{1}{'is-slot'}
-        </default>
-    </attribute>
 
-    <!-- End PROC_PCIE_ attributes -->\n";
+    print "    <!-- End PROC_PCIE_ attributes -->\n";
 
     if ((scalar @SortedPmChipAttr) == 0)
     {
@@ -3292,32 +3467,6 @@ sub generate_proc
         print "    <!-- End PM_ attributes -->\n";
     }
 
-    # $TODO RTC:110399
-    if( $haveFSPs == 0 )
-    {
-        print "<!-- IPMI Sensor numbers for processor status -->
-    <attribute>
-        <id>IPMI_SENSORS</id>
-        <default>
-            0x0100, 100, <!-- Temperature sensor -->
-            0x0500, 78, <!-- State sensor -->
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF,
-            0xFFFF, 0xFF
-        </default>
-    </attribute>\n";
-    }
 
     my $nXpY = "n" . $node . "p" . $proc;
     foreach my $attr (keys %procLoadline)
@@ -3345,15 +3494,18 @@ sub generate_ex
 {
     my ($proc, $ex, $ordinalId, $ipath) = @_;
     my $uidstr = sprintf("0x%02X06%04X",${node},$proc*MAX_EX_PER_PROC + $ex);
+    my $eq = ($ex - ($ex%2))/2;
+    my $ex_orig = $ex;
+    $ex = $ex % 2;
     my $mruData = get_mruid($ipath);
     print "
 <targetInstance>
-    <id>sys${sys}node${node}proc${proc}ex$ex</id>
-    <type>unit-ex-$CHIPNAME</type>
+    <id>sys${sys}node${node}proc${proc}eq${eq}ex$ex</id>
+    <type>unit-ex-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-$sys/node-$node/proc-$proc/ex-$ex</default>
+        <default>physical:sys-$sys/node-$node/proc-$proc/eq-$eq/ex-$ex</default>
     </attribute>
     <attribute>
         <id>MRU_ID</id>
@@ -3361,7 +3513,7 @@ sub generate_ex
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/ex-$ex</default>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/eq-$eq/ex-$ex</default>
     </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
@@ -3369,7 +3521,7 @@ sub generate_ex
     </compileAttribute>
     <attribute>
         <id>CHIP_UNIT</id>
-        <default>$ex</default>
+        <default>$ex_orig</default>
     </attribute>";
 
     # call to do any fsp per-ex attributes
@@ -3380,19 +3532,24 @@ sub generate_ex
 ";
 }
 
-sub generate_ex_core
+sub generate_core
 {
-    my ($proc, $ex, $ordinalId, $ipath) = @_;
-    my $uidstr = sprintf("0x%02X07%04X",${node},$proc*MAX_EX_PER_PROC + $ex);
+    my ($proc, $core, $ordinalId, $ipath) = @_;
+    my $uidstr = sprintf("0x%02X07%04X",${node},
+                         $proc*MAX_CORE_PER_PROC + $core);
     my $mruData = get_mruid($ipath);
+    my $core_orig = $core;
+    my $ex = (($core - ($core % 2))/2) % 2;
+    my $eq = ($core - ($core % 4))/4;
+    $core = $core % 2;
     print "
 <targetInstance>
-    <id>sys${sys}node${node}proc${proc}ex${ex}core0</id>
-    <type>unit-core-$CHIPNAME</type>
+    <id>sys${sys}node${node}proc${proc}eq${eq}ex${ex}core$core</id>
+    <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-$sys/node-$node/proc-$proc/ex-$ex/core-0</default>
+        <default>physical:sys-$sys/node-$node/proc-$proc/eq-$eq/ex-$ex/core-$core</default>
     </attribute>
     <attribute>
         <id>MRU_ID</id>
@@ -3400,7 +3557,7 @@ sub generate_ex_core
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/ex-$ex/core-0</default>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/eq-$eq/ex-$ex/core-$core</default>
     </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
@@ -3408,11 +3565,11 @@ sub generate_ex_core
     </compileAttribute>
     <attribute>
         <id>CHIP_UNIT</id>
-        <default>$ex</default>
+        <default>$core_orig</default>
     </attribute>";
 
     # call to do any fsp per-ex_core attributes
-    do_plugin('fsp_ex_core', $proc, $ex, $ordinalId );
+    do_plugin('fsp_ex_core', $proc, $core, $ordinalId );
 
     my $snbase=62;
 
@@ -3457,6 +3614,46 @@ sub generate_ex_core
 ";
 }
 
+sub generate_eq
+{
+    my ($proc, $eq, $ordinalId, $ipath) = @_;
+    my $uidstr = sprintf("0x%02X23%04X",${node},$proc*MAX_EQ_PER_PROC + $eq);
+    my $mruData = get_mruid($ipath);
+    print "
+<targetInstance>
+    <id>sys${sys}node${node}proc${proc}eq$eq</id>
+    <type>unit-eq-power9</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-$sys/node-$node/proc-$proc/eq-$eq</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>$mruData</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/eq-$eq</default>
+    </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>
+        <default>instance:$ipath</default>
+    </compileAttribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>$eq</default>
+    </attribute>";
+
+    # call to do any fsp per-eq attributes
+    do_plugin('fsp_eq', $proc, $eq, $ordinalId );
+
+    print "
+</targetInstance>
+";
+}
+
+
 sub generate_mcs
 {
     my ($proc, $mcs, $ordinalId, $ipath) = @_;
@@ -3475,6 +3672,7 @@ sub generate_mcs
         }
     }
 
+    #TODO:RTC 139073
     #IBSCOM address range starts at 0x0003E00000000000 (992 TB)
     #128GB per MCS/Centaur
     #Addresses assigned by logical node, not physical node
@@ -3501,7 +3699,7 @@ sub generate_mcs
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}mcs$mcs</id>
-    <type>unit-mcs-$CHIPNAME</type>
+    <type>unit-mcs-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -3527,20 +3725,548 @@ sub generate_mcs
         <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
         <default>$mscStr</default>
     </attribute>
-    <attribute><id>DMI_REFCLOCK_SWIZZLE</id>
-        <default>$swizzle</default>
-    </attribute>
     <attribute>
         <id>EI_BUS_TX_MSBSWAP</id>
         <default>$msb_swap</default>
-    </attribute>
-    <attribute>
-        <id>EI_BUS_TX_LANE_INVERT</id>
-        <default>$lane_swap</default>
     </attribute>";
 
     # call to do any fsp per-mcs attributes
     do_plugin('fsp_mcs', $proc, $mcs, $ordinalId );
+
+    print "
+</targetInstance>
+";
+}
+
+sub generate_mca
+{
+    my ($proc, $mca, $ordinalId, $ipath) = @_;
+    my $uidstr = sprintf("0x%02X24%04X",${node},$proc*MAX_MCA_PER_PROC + $mca);
+    my $mruData = get_mruid($ipath);
+    my $mcs = ($mca - ($mca%2))/2;
+    my $mca_orig = $mca;
+    $mca = $mca % 2;
+
+    my $lognode;
+    my $logid;
+    for (my $j = 0; $j <= $#chipIDs; $j++)
+    {
+        if ($chipIDs[$j][CHIP_ID_NXPX] eq "n${node}:p${proc}")
+        {
+            $lognode = $chipIDs[$j][CHIP_ID_NODE];
+            $logid = $chipIDs[$j][CHIP_ID_POS];
+            last;
+        }
+    }
+
+    print "
+<targetInstance>
+    <id>sys${sys}node${node}proc${proc}mcs${mcs}mca$mca</id>
+    <type>unit-mca-power9</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-$sys/node-$node/proc-$proc/mcs-$mcs/mca-$mca</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>$mruData</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/mca-$mca</default>
+    </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>
+        <default>instance:$ipath</default>
+    </compileAttribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>$mca_orig</default>
+    </attribute>";
+
+    # call to do any fsp per-mca attributes
+    do_plugin('fsp_mca', $proc, $mca, $ordinalId );
+
+    print "
+</targetInstance>
+";
+}
+
+sub generate_mcbist
+{
+    my ($proc, $mcbist, $ordinalId, $ipath) = @_;
+    my $uidstr = sprintf("0x%02X25%04X",${node},$proc*MAX_MCBIST_PER_PROC + $mcbist);
+    my $mruData = get_mruid($ipath);
+
+    my $lognode;
+    my $logid;
+    for (my $j = 0; $j <= $#chipIDs; $j++)
+    {
+        if ($chipIDs[$j][CHIP_ID_NXPX] eq "n${node}:p${proc}")
+        {
+            $lognode = $chipIDs[$j][CHIP_ID_NODE];
+            $logid = $chipIDs[$j][CHIP_ID_POS];
+            last;
+        }
+    }
+
+    print "
+<targetInstance>
+    <id>sys${sys}node${node}proc${proc}mcbist$mcbist</id>
+    <type>unit-mcbist-power9</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-$sys/node-$node/proc-$proc/mcbist-$mcbist</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>$mruData</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/mcbist-$mcbist</default>
+    </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>
+        <default>instance:$ipath</default>
+    </compileAttribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>$mcbist</default>
+    </attribute>";
+
+    # call to do any fsp per-mcbist attributes
+    do_plugin('fsp_mcbist', $proc, $mcbist, $ordinalId );
+
+    print "
+</targetInstance>
+";
+}
+
+sub generate_pec
+{
+    my ($proc, $pec, $ordinalId, $ipath) = @_;
+    my $uidstr = sprintf("0x%02X0B%04X",${node},$proc*MAX_PEC_PER_PROC + $pec);
+    my $mruData = get_mruid($ipath);
+
+    my $lognode;
+    my $logid;
+    for (my $j = 0; $j <= $#chipIDs; $j++)
+    {
+        if ($chipIDs[$j][CHIP_ID_NXPX] eq "n${node}:p${proc}")
+        {
+            $lognode = $chipIDs[$j][CHIP_ID_NODE];
+            $logid = $chipIDs[$j][CHIP_ID_POS];
+            last;
+        }
+    }
+
+    print "
+<targetInstance>
+    <id>sys${sys}node${node}proc${proc}pec$pec</id>
+    <type>unit-pec-power9</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-$sys/node-$node/proc-$proc/pec-$pec</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>$mruData</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/pec-$pec</default>
+    </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>
+        <default>instance:$ipath</default>
+    </compileAttribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>$pec</default>
+    </attribute>";
+
+    # call to do any fsp per-pec attributes
+    do_plugin('fsp_pec', $proc, $pec, $ordinalId );
+
+    print "
+</targetInstance>
+";
+}
+
+sub generate_phb_chiplet
+{
+    my ($proc, $phb, $ordinalId, $ipath) = @_;
+    my $uidstr = sprintf("0x%02X0B%04X",${node},$proc*MAX_PHB_PER_PROC + $phb);
+    my $mruData = get_mruid($ipath);
+
+    my $pec = 0;
+    if($phb > 0 && $phb < 3)
+    {
+        $pec = 1;
+        $phb = $phb - 1;
+    }
+    elsif($phb >= 3)
+    {
+        $pec = 2;
+        $phb = $phb - 3;
+    }
+
+    my $lognode;
+    my $logid;
+    for (my $j = 0; $j <= $#chipIDs; $j++)
+    {
+        if ($chipIDs[$j][CHIP_ID_NXPX] eq "n${node}:p${proc}")
+        {
+           $lognode = $chipIDs[$j][CHIP_ID_NODE];
+           $logid = $chipIDs[$j][CHIP_ID_POS];
+           last;
+        }
+    }
+
+    print "
+<targetInstance>
+    <id>sys${sys}node${node}proc${proc}pec${pec}phb$phb</id>
+    <type>unit-phb-power9</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-$sys/node-$node/proc-$proc/pec-$pec}phb-$phb</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>$mruData</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/pec-$pec/phb-$phb</default>
+    </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>
+        <default>instance:$ipath</default>
+    </compileAttribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>$phb</default>
+    </attribute>";
+
+    # call to do any fsp per-phb attributes
+    do_plugin('fsp_phb', $proc, $phb, $ordinalId );
+
+    print "
+</targetInstance>
+";
+}
+
+sub generate_ppe
+{
+    my ($proc, $ppe, $ordinalId, $ipath) = @_;
+    my $uidstr = sprintf("0x%02X0B%04X",${node},$proc*MAX_PPE_PER_PROC + $ppe);
+    my $mruData = get_mruid($ipath);
+
+    my $lognode;
+    my $logid;
+    for (my $j = 0; $j <= $#chipIDs; $j++)
+    {
+        if ($chipIDs[$j][CHIP_ID_NXPX] eq "n${node}:p${proc}")
+        {
+            $lognode = $chipIDs[$j][CHIP_ID_NODE];
+            $logid = $chipIDs[$j][CHIP_ID_POS];
+            last;
+        }
+    }
+
+    print "
+<targetInstance>
+    <id>sys${sys}node${node}proc${proc}ppe$ppe</id>
+    <type>unit-ppe-power9</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-$sys/node-$node/proc-$proc/ppe-$ppe</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>$mruData</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/ppe-$ppe</default>
+    </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>
+        <default>instance:$ipath</default>
+    </compileAttribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>$ppe</default>
+    </attribute>";
+
+    # call to do any fsp per-ppe attributes
+    do_plugin('fsp_ppe', $proc, $ppe, $ordinalId );
+
+    print "
+</targetInstance>
+";
+}
+
+sub generate_obus
+{
+    my ($proc, $obus, $ordinalId, $ipath) = @_;
+    my $uidstr = sprintf("0x%02X28%04X",${node},
+                         $proc*MAX_OBUS_PER_PROC + $obus);
+    my $mruData = get_mruid($ipath);
+
+    my $lognode;
+    my $logid;
+    for (my $j = 0; $j <= $#chipIDs; $j++)
+    {
+        if ($chipIDs[$j][CHIP_ID_NXPX] eq "n${node}:p${proc}")
+        {
+            $lognode = $chipIDs[$j][CHIP_ID_NODE];
+            $logid = $chipIDs[$j][CHIP_ID_POS];
+            last;
+        }
+    }
+
+    print "
+<targetInstance>
+    <id>sys${sys}node${node}proc${proc}obus$obus</id>
+    <type>unit-obus-power9</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-$sys/node-$node/proc-$proc/obus-$obus</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>$mruData</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/obus-$obus</default>
+    </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>
+        <default>instance:$ipath</default>
+    </compileAttribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>$obus</default>
+    </attribute>";
+
+    # call to do any fsp per-obus attributes
+    do_plugin('fsp_obus', $proc, $obus, $ordinalId );
+
+    print "
+</targetInstance>
+";
+}
+
+sub generate_xbus
+{
+    my ($proc, $xbus, $ordinalId, $ipath) = @_;
+    my $mruData = get_mruid($ipath);
+    my $uidstr = sprintf("0x%02X0E%04X",${node},$proc*MAX_XBUS_PER_PROC + $xbus);
+
+    my $lognode;
+    my $logid;
+    for (my $j = 0; $j <= $#chipIDs; $j++)
+    {
+        if ($chipIDs[$j][CHIP_ID_NXPX] eq "n${node}:p${proc}")
+        {
+            $lognode = $chipIDs[$j][CHIP_ID_NODE];
+            $logid = $chipIDs[$j][CHIP_ID_POS];
+            last;
+        }
+    }
+
+    print "
+<targetInstance>
+    <id>sys${sys}node${node}proc${proc}xbus$xbus</id>
+    <type>unit-xbus-power9</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-$sys/node-$node/proc-$proc/xbus-$xbus</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>$mruData</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/xbus-$xbus</default>
+    </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>
+        <default>instance:$ipath</default>
+    </compileAttribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>$xbus</default>
+    </attribute>";
+
+    # call to do any fsp per-obus attributes
+    do_plugin('fsp_xbus', $proc, $xbus, $ordinalId );
+
+    print "
+</targetInstance>
+";
+}
+
+sub generate_perv
+{
+    my ($proc, $perv, $ordinalId, $ipath) = @_;
+    my $uidstr = sprintf("0x%02X2C%04X",${node},$proc*MAX_PERV_PER_PROC + $perv);
+    my $mruData = get_mruid($ipath);
+
+    my $lognode;
+    my $logid;
+    for (my $j = 0; $j <= $#chipIDs; $j++)
+    {
+        if ($chipIDs[$j][CHIP_ID_NXPX] eq "n${node}:p${proc}")
+        {
+            $lognode = $chipIDs[$j][CHIP_ID_NODE];
+            $logid = $chipIDs[$j][CHIP_ID_POS];
+            last;
+        }
+    }
+
+    print "
+<targetInstance>
+    <id>sys${sys}node${node}proc${proc}perv$perv</id>
+    <type>unit-perv-power9</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-$sys/node-$node/proc-$proc/perv-$perv</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>$mruData</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/perv-$perv</default>
+    </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>
+        <default>instance:$ipath</default>
+    </compileAttribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>$perv</default>
+    </attribute>";
+
+    # call to do any fsp per-perv attributes
+    do_plugin('fsp_perv', $proc, $perv, $ordinalId );
+
+    print "
+</targetInstance>
+";
+}
+
+sub generate_capp
+{
+    my ($proc, $capp, $ordinalId, $ipath) = @_;
+    my $uidstr = sprintf("0x%02X21%04X",${node},$proc*MAX_CAPP_PER_PROC + $capp);
+    my $mruData = get_mruid($ipath);
+
+    my $lognode;
+    my $logid;
+    for (my $j = 0; $j <= $#chipIDs; $j++)
+    {
+        if ($chipIDs[$j][CHIP_ID_NXPX] eq "n${node}:p${proc}")
+        {
+            $lognode = $chipIDs[$j][CHIP_ID_NODE];
+            $logid = $chipIDs[$j][CHIP_ID_POS];
+            last;
+        }
+    }
+
+    print "
+<targetInstance>
+    <id>sys${sys}node${node}proc${proc}capp$capp</id>
+    <type>unit-capp-power9</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-$sys/node-$node/proc-$proc/capp-$capp</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>$mruData</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/capp-$capp</default>
+    </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>
+        <default>instance:$ipath</default>
+    </compileAttribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>$capp</default>
+    </attribute>";
+
+    # call to do any fsp per-capp attributes
+    do_plugin('fsp_capp', $proc, $capp, $ordinalId );
+
+    print "
+</targetInstance>
+";
+}
+
+sub generate_sbe
+{
+    my ($proc, $sbe, $ordinalId, $ipath) = @_;
+    my $uidstr = sprintf("0x%02X2A%04X",${node},$proc*MAX_SBE_PER_PROC + $sbe);
+    my $mruData = get_mruid($ipath);
+
+    my $lognode;
+    my $logid;
+    for (my $j = 0; $j <= $#chipIDs; $j++)
+    {
+        if ($chipIDs[$j][CHIP_ID_NXPX] eq "n${node}:p${proc}")
+        {
+            $lognode = $chipIDs[$j][CHIP_ID_NODE];
+            $logid = $chipIDs[$j][CHIP_ID_POS];
+            last;
+        }
+    }
+    print "
+<targetInstance>
+    <id>sys${sys}node${node}proc${proc}sbe$sbe</id>
+    <type>unit-sbe-power9</type>
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-$sys/node-$node/proc-$proc/sbe-$sbe</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>$mruData</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-$sys/node-$node/proc-$proc/sbe-$sbe</default>
+    </attribute>
+    <compileAttribute>
+        <id>INSTANCE_PATH</id>
+        <default>instance:$ipath</default>
+    </compileAttribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>$sbe</default>
+    </attribute>";
+
+    # call to do any fsp per-sbe attributes
+    do_plugin('fsp_sbe', $proc, $sbe, $ordinalId );
 
     print "
 </targetInstance>
@@ -3623,7 +4349,7 @@ sub generate_a_pcie
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}pci${phb}</id>
-    <type>unit-pci-$CHIPNAME</type>
+    <type>unit-pci-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -3648,200 +4374,6 @@ sub generate_a_pcie
     print "
 </targetInstance>
 ";
-}
-
-sub getBusInfo
-{
-    my($type, $chipName) = @_;
-
-    my $minbus = ($type eq "A") ? 0 : ($chipName eq "murano") ? 1 : 0;
-    my $maxbus = ($type eq "A") ? 2 : ($chipName eq "murano") ? 1 : 3;
-    my $numperchip = ($type eq "A") ? MAX_ABUS_PER_PROC : MAX_XBUS_PER_PROC;
-    my $typenum = ($type eq "A") ? 0x0F : 0x0E;
-    $type = lc( $type );
-
-    return ($minbus, $maxbus, $numperchip, $typenum, $type);
-}
-
-sub generate_ax_buses
-{
-    my ($proc, $type, $ordinalId) = @_;
-
-    my $proc_name = "n${node}p${proc}";
-    print "\n<!-- $SYSNAME $proc_name ${type}BUS units -->\n";
-
-    my ($minbus, $maxbus, $numperchip, $typenum, $type) =
-            getBusInfo($type, $CHIPNAME);
-
-    for my $i ( $minbus .. $maxbus )
-    {
-        my $c_ordinalId = $i+($ordinalId*($numperchip));
-
-        my $peer = 0;
-        my $p_node = 0;
-        my $p_proc = 0;
-        my $p_port = 0;
-        my $lane_swap = 0;
-        my $msb_swap = 0;
-        my $ipath = "abus_or_xbus:TO_BE_ADDED";
-        my $node_config = "null";
-        foreach my $pbus ( @pbus )
-        {
-            if ($pbus->[PBUS_FIRST_END_POINT_INDEX] eq
-                "n${node}:p${proc}:${type}${i}" )
-            {
-                $ipath = $pbus->[PBUS_ENDPOINT_INSTANCE_PATH];
-                if ($pbus->[PBUS_SECOND_END_POINT_INDEX] ne "invalid")
-                {
-                    $peer = 1;
-                    $p_proc = $pbus->[PBUS_SECOND_END_POINT_INDEX];
-                    $p_port = $p_proc;
-                    $p_node = $pbus->[PBUS_SECOND_END_POINT_INDEX];
-                    $p_node =~ s/^n(.*):p.*:.*$/$1/;
-                    $p_proc =~ s/^.*:p(.*):.*$/$1/;
-                    $p_port =~ s/.*:p.*:.(.*)$/$1/;
-                    $node_config = $pbus->[PBUS_NODE_CONFIG_FLAG];
-
-                    # Calculation from Pete Thomsen for 'master' chip
-                    if(((${node}*100) + $proc) < (($p_node*100) + $p_proc))
-                    {
-                        # This chip is lower so it's master so it gets
-                        # the downstream data.
-                        $lane_swap = $pbus->[PBUS_DOWNSTREAM_INDEX];
-                        $msb_swap = $pbus->[PBUS_TX_MSB_LSB_SWAP];
-                    }
-                    else
-                    {
-                        # This chip is higher so it's the slave chip
-                        # and gets the upstream
-                        $lane_swap = $pbus->[PBUS_UPSTREAM_INDEX];
-                        $msb_swap = $pbus->[PBUS_RX_MSB_LSB_SWAP];
-                    }
-                    last;
-                }
-            }
-        }
-        my $mruData = get_mruid($ipath);
-        my $phys_path =
-            "physical:sys-${sys}/node-${node}/proc-${proc}/${type}bus-${i}";
-        print "
-<targetInstance>
-    <id>sys${sys}node${node}proc${proc}${type}bus$i</id>
-    <type>unit-${type}bus-$CHIPNAME</type>
-    <attribute>
-        <id>HUID</id>
-        <default>$hash_ax_buses->{$phys_path}</default>
-    </attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>$phys_path</default>
-    </attribute>
-    <attribute>
-        <id>MRU_ID</id>
-        <default>$mruData</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/${type}bus-$i</default>
-    </attribute>
-    <compileAttribute>
-        <id>INSTANCE_PATH</id>
-        <default>instance:$ipath</default>
-    </compileAttribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>$i</default>
-    </attribute>";
-        if ($peer)
-        {
-            my $peerPhysPath = "physical:sys-${sys}/node-${p_node}/"
-                ."proc-${p_proc}/${type}bus-${p_port}";
-
-            if ( $type eq "a" )
-            {
-                # Brazos : Generate ABUS peer info only for "2-node",
-                # "3-and-4-node" and "all" configuration.
-                # All other targets(tuleta,alphine..etc) will have "all"
-                # configuration.
-
-                if( ($node_config eq $NODECONF) || ($node_config eq "all") )
-                {
-                    print "
-    <attribute>
-        <id>PEER_TARGET</id>
-        <default>$peerPhysPath</default>
-    </attribute>
-    <compileAttribute>
-        <id>PEER_HUID</id>
-        <default>$hash_ax_buses->{$peerPhysPath}</default>
-    </compileAttribute>
-    <attribute>
-        <id>PEER_PATH</id>
-        <default>physical:sys-$sys/node-$p_node/proc-$p_proc/"
-            . "${type}bus-$p_port</default>
-    </attribute>";
-
-                }
-                else
-                {
-                    print "
-    <attribute>
-        <id>PEER_PATH</id>
-        <default>physical:na</default>
-    </attribute>";
-                }
-            }
-            else
-            {
-            print "
-    <attribute>
-        <id>PEER_TARGET</id>
-        <default>$peerPhysPath</default>
-    </attribute>
-    <compileAttribute>
-        <id>PEER_HUID</id>
-        <default>$hash_ax_buses->{$peerPhysPath}</default>
-    </compileAttribute>";
-            }
-            if (($node != $p_node) && ($type eq "a"))
-            {
-               print "
-    <attribute>
-        <id>IS_INTER_ENCLOSURE_BUS</id>
-        <default>1</default>
-    </attribute>";
-            }
-        }
-        else
-        {
-            if ($type eq "a")
-            {
-                print "
-    <attribute>
-        <id>PEER_PATH</id>
-        <default>physical:na</default>
-    </attribute>";
-            }
-        }
-
-        # call to do any fsp per-axbus attributes
-        do_plugin('fsp_axbus', $proc, $type, $i, $c_ordinalId );
-
-        if($type eq "a")
-        {
-            print "
-    <attribute>
-        <id>EI_BUS_TX_LANE_INVERT</id>
-        <default>$lane_swap</default>
-    </attribute>
-    <attribute>
-        <id>EI_BUS_TX_MSBSWAP</id>
-        <default>$msb_swap</default>
-    </attribute>";
-        }
-
-        print "\n</targetInstance>\n";
-    }
 }
 
 my $poreNxInit = 0;
@@ -3899,7 +4431,7 @@ sub generate_nx
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}nx0</id>
-    <type>unit-nx-$CHIPNAME</type>
+    <type>unit-nx-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -3949,7 +4481,7 @@ sub generate_pore
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}pore0</id>
-    <type>unit-pore-$CHIPNAME</type>
+    <type>unit-pore-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -3974,54 +4506,6 @@ sub generate_pore
 
     # call to do any fsp per-pore attributes
     do_plugin('fsp_pore', $proc, $ordinalId );
-
-    print "
-</targetInstance>
-";
-}
-
-sub generate_capp
-{
-    my ($proc, $ordinalId, $node) = @_;
-    my $uidstr = sprintf("0x%02X21%04X",${node},$proc);
-
-    # TODO RTC: 97477
-    my $ipath = "";
-    my $mruData = "";
-
-    print "\n<!-- $SYSNAME n${node}p$proc capp units -->\n";
-    print "
-<targetInstance>
-    <id>sys${sys}node${node}proc${proc}capp0</id>
-    <type>unit-capp-$CHIPNAME</type>
-    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-$sys/node-$node/proc-$proc/capp-0</default>
-    </attribute>
-    <attribute>
-        <id>MRU_ID</id>";
-        # TODO RTC: 97477
-        print "
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/capp-0</default>
-    </attribute>
-    <compileAttribute>
-        <id>INSTANCE_PATH</id>";
-        # TODO RTC: 97477
-        print "
-        <default>instance:TO_BE_ADDED</default>
-    </compileAttribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>0</default>
-    </attribute>";
-
-    # call to do any fsp per-capp attributes
-    do_plugin('fsp_capp', $proc, $ordinalId );
 
     print "
 </targetInstance>
@@ -5061,31 +5545,6 @@ sub addProcPcieAttrs
 {
     my ($position,$nodeId) = @_;
 
-    for my $i (0 .. $#SortedPcie)
-    {
-        if (($SortedPcie[$i][CHIP_POS_INDEX] == $position) &&
-            ($SortedPcie[$i][CHIP_NODE_INDEX] == $nodeId) )
-        {
-            #found the corresponding proc and node
-            my $j =0;
-            my $arraySize=$#{$SortedPcie[$i]} - CHIP_ATTR_START_INDEX;
-            while ($j<$arraySize)
-            {
-                print "    <attribute>\n";
-                print "        <id>$SortedPcie[$i][CHIP_ATTR_START_INDEX+$j]</id>\n";
-                $j++;
-                print "        <default>\n";
-                print "            $SortedPcie[$i][CHIP_ATTR_START_INDEX+$j]";
-                print ",";
-                $j++;
-                print "$SortedPcie[$i][CHIP_ATTR_START_INDEX+$j]\n";
-                print "        </default>\n";
-                print "    </attribute>\n";
-                $j++;
-            }
-        }
-    }
-
     foreach my $pcie ( keys %procPcieTargetList )
     {
         if( $procPcieTargetList{$pcie}{nodePosition} eq $nodeId &&
@@ -5096,16 +5555,6 @@ sub addProcPcieAttrs
             print "        <id>PROC_PCIE_LANE_EQUALIZATION</id>\n";
             print "        <default>$procPcieRef->{phbValue}\n";
             print "        </default>\n";
-            print "    </attribute>\n";
-            print "    <!-- The default value of the following three attributes are written by -->\n";
-            print "    <!-- the FSP. They are included here because VBU/VPO uses faked PNOR.   -->\n";
-            print "    <attribute>\n";
-            print "        <id>PROC_PCIE_IOP_CONFIG</id>\n";
-            print "        <default>$procPcieRef->{iopConfig}</default>\n";
-            print "    </attribute>\n";
-            print "    <attribute>\n";
-            print "        <id>PROC_PCIE_PHB_ACTIVE</id>\n";
-            print "        <default>$procPcieRef->{phbActive}</default>\n";
             print "    </attribute>\n";
             last;
         }
