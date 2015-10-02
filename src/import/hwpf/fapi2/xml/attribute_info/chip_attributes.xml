@@ -1,0 +1,53 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: hwpf/fapi2/xml/attribute_info/chip_attributes.xml $           -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<attributes>
+  <!-- ******************************************************************************** -->
+  <attribute>
+    <id>ATTR_NAME</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>
+      Product name of a chip target.
+      Provided by the MRW.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+      NONE = 0x0,
+      CENTAUR = 0x3,
+      NIMBUS = 0x5,
+      CUMULUS = 0x6
+    </enum>
+    <platInit/>
+    <privledged/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_EC</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>
+        EC level of a chip target.
+        Read from the chip by the platform
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <!-- To make HWPs data driven, this is a privileged attribute that cannot
+         be accessed by normal HWPs. -->
+    <privileged/>
+  </attribute>
+  <!-- ********************************************************************* -->
+</attributes>

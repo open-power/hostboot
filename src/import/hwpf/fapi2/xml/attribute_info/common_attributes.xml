@@ -1,0 +1,57 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: hwpf/fapi2/xml/attribute_info/common_attributes.xml $         -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<attributes>
+  <!-- ******************************************************************************** -->
+  <attribute>
+    <id>ATTR_FUNCTIONAL</id>
+    <targetType>
+      TARGET_TYPE_PROC_CHIP,
+      TARGET_TYPE_CORE, TARGET_TYPE_EX, TARGET_TYPE_EQ, 
+      TARGET_TYPE_MCS, TARGET_TYPE_MCA, TARGET_TYPE_MCBIST, TARGET_TYPE_MI, TARGET_TYPE_DMI,
+      TARGET_TYPE_XBUS, TARGET_TYPE_OBUS,
+      TARGET_TYPE_NV,
+      TARGET_TYPE_SBE, TARGET_TYPE_PPE, TARGET_TYPE_PERV,
+      TARGET_TYPE_PEC, TARGET_TYPE_PHB, TARGET_TYPE_CAPP,
+      TARGET_TYPE_MEMBUF_CHIP,
+      TARGET_TYPE_MBA,
+      TARGET_TYPE_DIMM
+    </targetType>
+    <description>
+      1 if the target is functional, else 0.  Set by the platform.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+      NON_FUNCTIONAL = 0x0,
+      FUNCTIONAL = 0x1
+    </enum>
+    <platInit/>
+  </attribute>
+  <!-- ******************************************************************************** -->
+  <attribute>
+    <id>ATTR_POS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_MEMBUF_CHIP, TARGET_TYPE_DIMM</targetType>
+    <description>
+      Position of chip/dimm within drawer
+      This data is from the MRW.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ******************************************************************************** -->
+</attributes>

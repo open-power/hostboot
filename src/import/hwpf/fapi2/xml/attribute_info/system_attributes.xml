@@ -1,0 +1,43 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: hwpf/fapi2/xml/attribute_info/system_attributes.xml $         -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<attributes>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_IS_SIMULATION</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>env: 1 = Awan/HWSimulator. 0 = Simics/RealHW.</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_EXECUTION_PLATFORM</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Which execution platform the HW Procedure is running on
+        Some HWPs (e.g. special wakeup) use different registers for different
+          platforms to avoid arbitration problems when multiple platforms do
+          the same thing concurrently
+    </description>
+    <valueType>uint8</valueType>
+    <enum>HOST = 0x01, FSP = 0x02, OCC = 0x03</enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+</attributes>
