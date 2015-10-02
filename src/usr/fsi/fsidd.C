@@ -3031,6 +3031,14 @@ void FsiDD::getFsiLinkInfo( TARGETING::Target* i_slave,
     {
         o_info.mPort = 1;
     }
+
+    // if this chip is not off the master, need to include
+    //   its master's offset too
     o_info.baseAddr = addr_info.absAddr;
+    if( addr_info.opbTarg != iv_master )
+    {
+        FsiChipInfo_t mfsi_info = getFsiInfo(addr_info.accessInfo.master);
+        o_info.baseAddr |= getPortOffset(mfsi_info.type,mfsi_info.port);
+    }
 }
 

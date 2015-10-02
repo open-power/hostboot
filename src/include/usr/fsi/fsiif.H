@@ -111,7 +111,7 @@ struct FsiLinkInfo_t
     uint8_t link; ///< Which link is this chip hanging off of
     uint8_t cascade; ///< Slave cascade position
     uint8_t mPort; ///< FSI Master port (0=A,1=B)
-    uint32_t baseAddr; ///< Base FSI Address for this chip
+    uint32_t baseAddr; ///< Base FSI Address for this chip, from master proc
 
     FsiLinkInfo_t() :
       master(NULL), type(TARGETING::FSI_MASTER_TYPE_NO_MASTER),
