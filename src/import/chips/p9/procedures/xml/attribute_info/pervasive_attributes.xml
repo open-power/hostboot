@@ -77,13 +77,6 @@
 </attribute>
 
 <attribute>
-  <id>ATTR_CHIP_UNIT_POS</id>
-  <targetType>TARGET_TYPE_PERV</targetType>
-  <description>//TODO : Need Description</description>
-  <valueType>uint8</valueType>
-</attribute>
-
-<attribute>
   <id>ATTR_DEVICE_ID</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description></description>
