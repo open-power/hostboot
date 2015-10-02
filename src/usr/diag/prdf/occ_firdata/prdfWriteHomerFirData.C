@@ -134,7 +134,7 @@ static uint32_t proc_reg[] =
     0x09012800, // PCICLOCKFIR_2
 
     // PLL registers
-    0x00050019, // PCIE_OSC_SWITCH
+    //0x00050019, // PCIE_OSC_SWITCH - disabled due to SW324506
     0x01020019, // OSCERR
 
     // TOD registers

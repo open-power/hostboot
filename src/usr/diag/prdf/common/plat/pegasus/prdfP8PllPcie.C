@@ -486,6 +486,23 @@ uint32_t getIoOscPos( ExtensibleChip * i_chip,
     {
         int32_t rc = SUCCESS;
 
+        // START WORKAROUND
+        // TODO: RTC 137711 - This redundant clock code only applies to Brazos
+        //       systems. Unfortunately, this code made it into the common
+        //       source and we ran into SW324506 where we are unable to SCOM
+        //       PCIE_OSC_SWITCH during OP checkstop analysis. We should have
+        //       a system attribute that tells us if redundant clock are enabled
+        //       but for now just assume anything that is OPAL based will not
+        //       have redundant clocks. Note that we still need this code in
+        //       Hostboot (not HBRT) because Hostboot is still run on a Brazos
+        //       system.
+        if ( isHyprConfigOpal() )
+        {
+            o_oscPos = 0;
+            break;
+        }
+        // END WORKAROUND
+
         SCAN_COMM_REGISTER_CLASS * pcieOscSwitchReg =
                 i_chip->getRegister("PCIE_OSC_SWITCH");
 
