@@ -43,6 +43,16 @@ CREATESANDBOX_PID=$!
 # Build Hostboot.
 make -j32 || exit -1
 
+# Check copyright completion.
+wait $COPYRIGHT_PID
+if [ $? -eq 0 ]; then
+    cat copyright.log
+else
+    echo "----Copyright check failed."
+    cat copyright.log
+    exit -1
+fi
+
 # Check sandbox create completion.
 wait $CREATESANDBOX_PID
 if [ $? -eq 0 ]; then
@@ -62,16 +72,6 @@ ERRLPARSERS_PID=$!
 
 # Start CxxTest Simics execution.
 cxxtest-start.sh || exit -1
-
-# Check copyright completion.
-wait $COPYRIGHT_PID
-if [ $? -eq 0 ]; then
-    cat copyright.log
-else
-    echo "----Copyright check failed."
-    cat copyright.log
-    exit -1
-fi
 
 # Check errl parser completion.
 wait $ERRLPARSERS_PID
