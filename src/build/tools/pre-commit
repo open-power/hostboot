@@ -28,7 +28,6 @@ if [ -z $MIRROR ]; then
         $TOOLSDIR/pre-commit-actions
     # Legacy support for older releases
     elif [ -f $TOOLSDIR/pre-commit-prologs ]; then
-        export TOOLS_DIR=$GIT_DIR/../src/build/tools
         $TOOLSDIR/pre-commit-prologs
     else
         echo "Missing pre-commit files"
