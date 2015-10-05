@@ -104,7 +104,7 @@ my $attribute = 'attribute';
 #------------------------------------------------------------------------------
 # For each argument
 #------------------------------------------------------------------------------
-foreach my $argnum (1 .. $#ARGV)
+foreach my $argnum (0 .. $#ARGV)
 {
     my $infile = $ARGV[$argnum];
 

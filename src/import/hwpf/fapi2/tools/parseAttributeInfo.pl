@@ -394,7 +394,7 @@ foreach my $argnum (0 .. $#ARGV)
                 exit(1);
             }
 
-            my @sizes = ( 'uint8', 'uint32', 'uint64', 'int8', 'int32', 'int64' );
+            my @sizes = ( 'uint8', 'uint16', 'uint32', 'uint64', 'int8', 'int16', 'int32', 'int64' );
             my $actualSize = '';
             foreach my $size (@sizes)
             {

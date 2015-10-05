@@ -48,6 +48,28 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_SCRATCH_UINT16_1</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Scratch uint16_t attribute.
+        Can be used by HWPs for testing.
+    </description>
+    <valueType>uint16</valueType>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SCRATCH_UINT16_2</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Scratch uint16_t attribute.
+        Can be used by HWPs for testing.
+    </description>
+    <valueType>uint16</valueType>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_SCRATCH_UINT32_1</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
@@ -113,6 +135,30 @@
     </description>
     <valueType>uint8</valueType>
     <array>2 3 4</array>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SCRATCH_UINT16_ARRAY_1</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Scratch uint16_t[16] attribute.
+        Can be used by HWPs for testing.
+    </description>
+    <valueType>uint16</valueType>
+    <array>16</array>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SCRATCH_UINT16_ARRAY_2</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Scratch uint16_t[2][3][2] attribute.
+        Can be used by HWPs for testing.
+    </description>
+    <valueType>uint16</valueType>
+    <array>2,3,2</array>
     <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
@@ -188,6 +234,28 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_SCRATCH_INT16_1</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Scratch int16_t attribute.
+        Can be used by HWPs for testing.
+    </description>
+    <valueType>int16</valueType>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SCRATCH_INT16_2</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Scratch int16_t attribute.
+        Can be used by HWPs for testing.
+    </description>
+    <valueType>int16</valueType>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_SCRATCH_INT32_1</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
@@ -253,6 +321,30 @@
     </description>
     <valueType>int8</valueType>
     <array>2 3 4</array>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SCRATCH_INT16_ARRAY_1</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Scratch int16_t[16] attribute.
+        Can be used by HWPs for testing.
+    </description>
+    <valueType>int16</valueType>
+    <array>16</array>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SCRATCH_INT16_ARRAY_2</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Scratch int16_t[2][3][2] attribute.
+        Can be used by HWPs for testing.
+    </description>
+    <valueType>int16</valueType>
+    <array>2,3,2</array>
     <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
