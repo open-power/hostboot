@@ -51,7 +51,7 @@ enum MFG_THRES_SYNC_MSG_TYPE
                                   // fail.
     #include <hwas/common/hwasCallout.H>
 
-    // FIXME: remove these mapping once the enums are made common
+    // FIXME RTC 137911: remove these mapping once the enums are made common
     #define EPUB_PRC_ALL_PROCS      HWAS::EPUB_PRC_ALL_PROCS
     #define EPUB_PRC_SP_CODE        HWAS::EPUB_PRC_SP_CODE
     #define EPUB_PRC_PHYP_CODE      HWAS::EPUB_PRC_PHYP_CODE
@@ -61,6 +61,7 @@ enum MFG_THRES_SYNC_MSG_TYPE
     #define EPUB_PRC_PROC_AB_BUS    HWAS::EPUB_PRC_PROC_AB_BUS
     #define EPUB_PRC_MEMORY_UE      HWAS::EPUB_PRC_MEMORY_UE
     #define EPUB_PRC_TOD_CLOCK_ERR  HWAS::EPUB_PRC_TOD_CLOCK_ERR
+    #define EPUB_PRC_COOLING_SYSTEM_ERR  HWAS::EPUB_PRC_COOLING_SYSTEM_ERR
 
     // FIXME: remove these mapping once the enums are made common
     #define SRCI_PRIORITY_HIGH  HWAS::SRCI_PRIORITY_HIGH
@@ -80,7 +81,7 @@ enum MFG_THRES_SYNC_MSG_TYPE
     enum
     {
         #ifdef __PRD_RULE_COMPILE
-        //FIXME: these enum values have to match with
+        //FIXME RTC 137911: these enum values have to match with
         //what are defined in include/usr/hwas/common/hwasCallout.H
         EPUB_PRC_SP_CODE        = 0x04,
         EPUB_PRC_PHYP_CODE      = 0x05,
@@ -91,6 +92,7 @@ enum MFG_THRES_SYNC_MSG_TYPE
         EPUB_PRC_MEMBUS_ERROR   = 0x34,
         EPUB_PRC_MEMORY_UE      = 0x4F,
         EPUB_PRC_TOD_CLOCK_ERR  = 0x56,
+        EPUB_PRC_COOLING_SYSTEM_ERR  = 0x5C,
 
         SRCI_PRIORITY_LOW   = 1,
         SRCI_PRIORITY_MEDC  = 2,

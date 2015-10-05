@@ -364,9 +364,9 @@ group gOccFir filter singlebit,
                      secondarybits( 10, 39 )
 {
     /** OCCFIR[0]
-     *  OCC_SCOM_OCCFIR_OCC_FW0
+     *  Cooling system error
      */
-    (OccFir, bit(0)) ? defaultMaskedError;
+    (OccFir, bit(0)) ? coolingSystemError;
 
     /** OCCFIR[1]
      *  OCC_SCOM_OCCFIR_OCC_FW1
@@ -1310,3 +1310,11 @@ actionclass analyzePibError
     capture(TODReg);
     try( funccall("isTodDisabled"), SelfHighThr1 );
 };
+
+/** Callout the cooling system error procedure */
+actionclass coolingSystemError
+{
+    callout(procedure(CoolingSystemError_ENUM), MRU_MED);
+    threshold1;
+};
+
