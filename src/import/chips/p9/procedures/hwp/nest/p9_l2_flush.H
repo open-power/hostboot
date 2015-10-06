@@ -1,0 +1,123 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/import/chips/p9/procedures/hwp/nest/p9_l2_flush.H $       */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+///
+/// @file p9_l2_flush.H
+/// @brief Flush the P9 L2 cache (FAPI)
+///
+/// *HWP HWP Owner   : Benjamin Gass <bgass@us.ibm.com>
+/// *HWP FW Owner    : Bilicon Patil <bilpatil@in.ibm.com>
+/// *HWP Team        : Quad
+/// *HWP Consumed by : FSP
+/// *HWP Level       : 2
+///
+///  Procedure Additional Comments:
+///
+///  High-level procedure flow:
+///    o Poll Purge Engine Command Register to confirm that purge engine
+///      is idle before starting (fail if self-imposed timeout occurs)
+///    o Write Purge Engine Command Register to kick off complete/requested
+///      cache flush operation
+///    o Poll Purge Engine Command Register to wait for completion of
+///      flush (fail if self-imposed timeout occurs) & check for errors
+///
+///  Successful operations assumes that:
+///    o System clocks are running
+///    o While not strictly required, to guarantee a completely empty cache
+///      at the end of the procedure execution, instructions should be
+///      stopped on the core underneath the L2 being flushed before the flush
+///      is executed
+///
+
+#ifndef _P9_L2_FLUSH_H_
+#define _P9_L2_FLUSH_H_
+
+//------------------------------------------------------------------------------
+// Includes
+//------------------------------------------------------------------------------
+
+#include <fapi2.H>
+
+//------------------------------------------------------------------------------
+// Constants
+//------------------------------------------------------------------------------
+
+namespace p9core
+{
+
+// This structure specifies the data needed in case when there
+// is request for specific L2 purges
+struct purgeData_t
+{
+    uint8_t iv_cmdType: 4;
+    uint8_t iv_cmdMem: 3;
+    uint8_t iv_cmdBank: 1;
+    uint8_t iv_cmdCGC: 8;
+
+    purgeData_t(): iv_cmdType(0),
+        iv_cmdMem(0),
+        iv_cmdBank(0),
+        iv_cmdCGC(0) {}
+};
+
+} // end of p9core namespace
+
+//------------------------------------------------------------------------------
+// Structure definitions
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// Function prototypes
+//------------------------------------------------------------------------------
+
+typedef fapi2::ReturnCode (*p9_l2_flush_FP_t)
+(const fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_EX > &i_target,
+ const p9core::purgeData_t& i_purgeData);
+
+extern "C"
+{
+
+///
+/// @brief p9_l2_flush HWP to flush entire content of L2 cache via purge engine
+/// @param[in] i_target Core target or Ex target
+/// @param[in] i_purgeData Specifies a particular purge type
+/// @return: FAPI2_RC_SUCCESS if purge operation completes successfully,
+///          RC_P9_L2_FLUSH_UNKNOWN_PLATFORM
+///              if executed on unsupported platform,
+///          RC_P9_L2_FLUSH_PURGE_REQ_OUTSTANDING
+///              if called when existing L2 purge is in progress,
+///          RC_P9_L2_FLUSH_CMD_TIMEOUT
+///              if purge operation does not complete in expected time,
+///          RC_P9_L2_FLUSH_CMD_ERROR
+///              if purge operation reports error,
+///          else FAPI getscom/putscom return code for failing operation
+///
+    fapi2::ReturnCode p9_l2_flush(const fapi2::Target < fapi2::TARGET_TYPE_CORE
+                                  | fapi2::TARGET_TYPE_EX >
+                                  &i_target,
+                                  const p9core::purgeData_t& i_purgeData);
+
+} // end of extern C
+
+#endif // _P9_L2_FLUSH_H_
