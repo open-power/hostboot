@@ -107,17 +107,12 @@ my %fileContributorsCompany = (
 #------------------------------------------------------------------------------
 #   Constants
 #------------------------------------------------------------------------------
-use constant    RC_INVALID_PARAMETERS       =>  1;
-use constant    RC_OLD_COPYRIGHT_BLOCK      =>  2;
-use constant    RC_NO_COPYRIGHT_BLOCK       =>  3;
-use constant    RC_INVALID_SOURCE_LINE      =>  4;
-use constant    RC_INVALID_YEAR             =>  5;
-use constant    RC_OLD_DELIMITER_END        =>  6;
-use constant    RC_PROJECT_DOES_NOT_MATCH   =>  7;
-use constant    RC_BAD_CONTRIBUTORS_BLOCK   =>  8;
-use constant    RC_NO_COPYRIGHT_STRING      =>  9;
-use constant    RC_INVALID_FILETYPE         =>  10;
-use constant    RC_DIFFERS_FROM_CUSTOM_LICENSE_PROLOG => 11;
+use constant    RC_INVALID_PARAMETERS           => 1;
+use constant    RC_NO_COPYRIGHT_BLOCK           => 2;
+use constant    RC_BAD_CONTRIBUTORS_BLOCK       => 3;
+use constant    RC_INVALID_FILETYPE             => 4;
+use constant    RC_DIFFERS_FROM_LICENSE_PROLOG  => 5;
+use constant    RC_NO_LICENSE_PROLOG_FILE       => 6;
 
 #------------------------------------------------------------------------------
 #   Global Vars
@@ -163,10 +158,6 @@ if (scalar(@ARGV) < 2)
     usage();
 }
 
-if ($LicenseFile eq "" || $projectName eq "")
-{
-    die "Environment not set up properly, run './hb workon'";
-}
 
 my  @SaveArgV   =   @ARGV;
 #------------------------------------------------------------------------------
@@ -322,7 +313,7 @@ foreach ( @Files )
     } while ($path ne $projectRoot);
 
     ##  extract the existing copyright block
-    ( $DelimiterBegin, $CopyrightBlock, $DelimiterEnd ) =   extractCopyrightBlock( $_ );
+    $CopyrightBlock = extractCopyrightBlock( $_ );
 
     ##
     ##  validate the file.
@@ -333,12 +324,7 @@ foreach ( @Files )
     if ( $operation =~  m/validate/i )
     {
         $rc = validate( $_ );
-        if ( $rc == RC_OLD_DELIMITER_END )
-        {
-            ##  special case, let it go for now
-            print STDOUT  "$_ has old prolog end '$OLD_DELIMITER_END', please fix\n";
-        }
-        elsif ( $rc )
+        if ( $rc )
         {
             print   STDOUT  "$_ FAILED copyright validation: $rc \n";
             if ( $opt_logfile   ne  "" )
@@ -611,29 +597,16 @@ sub extractCopyrightBlock( $ )
 {
     my  ( $infile )    =   shift;
 
-    my  $data               =   "";
-
-    open( FH, "< $infile")   or die "ERROR $? : can't open $infile : $!";
-    read( FH, $data, -s FH ) or die "ERROR $? : reading $infile: $!";
-    close FH;
-
-    # Extract the prolog into beginning delimiter, block data, and end delimiter
-    my @prolog = ( '', '', '' );
-    @prolog = ($1, $2, $4) if ( $data =~ m/$g_prolog_re/ );
+    # Extract the prolog
+    my $prolog = `sed -n \"/$DELIMITER_BEGIN/,/$DELIMITER_END/p\" $infile`;
+    # Critical to remove newline for validate step
+    chomp($prolog);
 
     ##  As long as we're here extract the copyright string within the block
     ##  and save it to a global var
-    $CopyRightString = $1 if ( $prolog[1] =~ /(^.*$copyrightStr.*$)/m );
+    $CopyRightString = $1 if ( $prolog =~ /(^.*$copyrightStr.*$)/m );
 
-    if ( $opt_debug )
-    {
-        print STDERR __LINE__, ": DELIMITER_BEGIN: >${prolog[0]}<\n";
-        print STDERR __LINE__, ": DELIMITER_END:   >${prolog[2]}<\n";
-        print STDERR __LINE__, ": Extracted Block: \n>>>>>${prolog[1]}<<<<<\n";
-        print STDERR __LINE__, ": CopyRightString: >$CopyRightString<\n";
-    }
-
-    return @prolog;
+    return $prolog;
 }
 
 
@@ -645,147 +618,43 @@ sub extractCopyrightBlock( $ )
 ##
 ##  @return     0 if success, nonzero otherwise
 #######################################
+use File::Temp;
 sub checkCopyrightBlock( $$ )
 {
     my ( $block, $filename )    =   @_;
-    my  $goodsourcelineflag     =   1;          ## init to TRUE
-    my  $yearstring             =   createYearString( $filename );
-    my  $goodyearflag           =   1;          ## init to TRUE
-
-    ##  Check for old "$IBMCopyrightBlock" signature
-    if ( $block =~ m/\$IBMCopyrightBlock:.*\$/s )
-    {
-        print   STDOUT  "WARNING:  Old copyright block\n";
-        return  RC_OLD_COPYRIGHT_BLOCK;
-    }
-
-    if ( $DelimiterEnd eq $OLD_DELIMITER_END )
-    {
-        print   STDOUT  "WARNING:  Old Prolog Tag End\n";
-        return  RC_OLD_DELIMITER_END;
-    }
-
-    ##  If no $CopyRightString was extracted above, fail with that
-    if (    ( !defined( $CopyRightString ) )
-         || ( $CopyRightString eq "" )
-       )
-    {
-        print   STDOUT  "WARNING: can't find copyright string\n";
-        return  RC_NO_COPYRIGHT_STRING;
-    }
-
-    ##  Check to see if this matches the project it lives in
-    if  ( !( $block =~ m/$projectName Project/ )  )
-    {
-        print   STDOUT  "WARNING:  Copyright block does not reference project $projectName\n";
-        return  RC_PROJECT_DOES_NOT_MATCH;
-    }
 
     ## Check if custom LICENSE_PROLOG
-    if ($LicenseFile ne $ENV{'LICENSE'})
+    if ($LicenseFile ne "")
     {
         ##  Get desired license
-        my $custom_prolog = genCopyrightBlock($filename, filetype($filename));
-        # Remove delimiter portions that don't exist in $block
-        # BEGIN and END plus trailing white space
-        $custom_prolog =~ s/$DELIMITER_BEGIN//;
-        $custom_prolog =~ s/$DELIMITER_END\s+//;
-        if ($block ne $custom_prolog)
+        my $license_prolog = genCopyrightBlock($filename, filetype($filename));
+
+        if ($block ne $license_prolog)
         {
-            print STDOUT  "WARNING: Copyright block does not match custom license prolog file found in $LicenseFile\n";
-            return RC_DIFFERS_FROM_CUSTOM_LICENSE_PROLOG;
+            # Print strings to files to use unix diff, do not need to add the
+            # File::Diff module this way.
+            my ($blockHndl, $blockFile) = File::Temp::tempfile();
+            my ($licenseHndl, $licenseFile)= File::Temp::tempfile();
+            print $blockHndl $block;
+            print $licenseHndl $license_prolog;
+            close($blockHndl);
+            close($licenseHndl);
+
+            print STDOUT "\nERROR> Prolog not correct for $filename, run...\n";
+            print STDOUT "git show --pretty=\"format:\" --name-only | xargs addCopyright.pl update\n";
+            print STDOUT "\nDiff:\n";
+            print STDOUT `diff $blockFile $licenseFile`;
+            my $relLicensePath = $LicenseFile ;
+            $relLicensePath =~ s/$projectRoot//;
+            print STDOUT "\nWARNING: Copyright block does not match LICNESE_PROLOG file found at $relLicensePath\n";
+            system("rm -f $blockFile $licenseFile");
+            return RC_DIFFERS_FROM_LICENSE_PROLOG;
         }
     }
-
-    ##  split into lines and check for specific things
-    ##      $Source: src/usr/initservice/istepdispatcher/istepdispatcher.H $
-    my %blockFileContributorsHash = ();
-    my $numBlockEntries = 0;
-    for ( split /^/, $block )
+    else
     {
-        chomp( $_ );
-
-        ##  verify that the $Source: tag has the correct filename
-        if  ( m/.*$SOURCE_BEGIN_TAG.*\$/ )
-        {
-            if ( $opt_debug )   { print STDERR __LINE__,  ": $SOURCE_BEGIN_TAG : >$_<\n";  }
-            $goodsourcelineflag =   grep /$filename/, $_ ;
-            if  ( !$goodsourcelineflag )
-            {
-                print   STDOUT  "WARNING: invalid filename in tag: $_\n";
-                print   STDOUT  "         Expected: $filename\n";
-                ##  FAIL, bad sourceline
-            }
-        }
-
-        ##  check for the correct year string
-        if  ( m/$copyrightStr/ )
-        {
-            $goodyearflag = grep /$copyrightStr.* $yearstring/, $_;
-            if  ( !$goodyearflag )
-            {
-                print   STDOUT  "WARNING: outdated copyright year: $_\n";
-                print   STDOUT  "         Expected: $yearstring\n";
-                ##  FAIL, bad yearstring
-            }
-        }
-
-        # Grab file contributors in block
-        if ( m/\[\+\]/ )
-        {
-            # remove everything through [+]
-            $_ =~ s/[^\]]*\]//;
-            # remove closing comment string depening on language
-            if (( filetype($filename) eq "C") ||
-                ( filetype($filename) eq "LinkerScript"))
-            {
-                # remove */
-                $_ =~ s/\*\///;
-            }
-            elsif ( filetype($filename)  eq "xml" )
-            {
-                # remove -->
-                $_ =~ s/\-\-\>//;
-            }
-            # remove trailing and leading whitespace
-            $_ =~ s/^\s+|\s+$//g;
-            # add contributor to hash
-            $blockFileContributorsHash{$_} = 1;
-            $numBlockEntries++;
-        }
-    }   ## endfor
-
-    # Get file contributors from git log
-    my %fileContributors = getFileContributors( $filename );
-
-    # Make sure no extra or missing contributors by checking if the current
-    # contributor block matches the git log history
-    if ( (scalar keys %fileContributors) !=
-         ($numBlockEntries) )
-    {
-        print STDOUT  "WARNING:  Extra or missing file contributors\n";
-        return RC_BAD_CONTRIBUTORS_BLOCK;
-    }
-    # Check if block's contibutors matches every contributor in git log
-    # file history
-    while ( my ($key, $value) = each(%fileContributors) )
-    {
-        # Block does not match file contributors
-        if ( !exists($blockFileContributorsHash{$key}) )
-        {
-            print STDOUT  "WARNING:  File contributors section not correct\n";
-            return RC_BAD_CONTRIBUTORS_BLOCK;
-        }
-    }
-
-    if ( !$goodsourcelineflag )
-    {
-        return  RC_INVALID_SOURCE_LINE;
-    }
-
-    if  ( !$goodyearflag )
-    {
-        return  RC_INVALID_YEAR;
+        print STDOUT  "WARNING: Missing LICNESE_PROLOG file in directory structure\n";
+        return RC_NO_LICENSE_PROLOG_FILE;
     }
 
     return  0;
@@ -961,16 +830,8 @@ sub addEmptyCopyrightBlock( $$$ )
     open( INPUT, "< $filename"  )   or die " $? can't open $filename: $!" ;
     open( OUTPUT, "> $TempFile"  )  or die " $? can't open $TempFile: $!" ;
     select( OUTPUT );               ## new default filehandle for print
-    if ("Assembly" eq $filetype)
-    {
-        print OUTPUT "# $DELIMITER_BEGIN $DELIMITER_END\n";
-    }
-    elsif ( ("Makefile"    eq $filetype) or
-            ("PrdRuleFile" eq $filetype) )
-    {
-        print OUTPUT "# $DELIMITER_BEGIN $DELIMITER_END\n";
-    }
-    elsif (("Autoconf" eq $filetype) or
+
+    if (("Autoconf" eq $filetype) or
            ("Automake" eq $filetype) or
            ("CVS" eq $filetype) or
            ("Perl" eq $filetype) or
@@ -989,38 +850,15 @@ sub addEmptyCopyrightBlock( $$$ )
         {
             print OUTPUT $line;
         }
-        print OUTPUT "# $DELIMITER_BEGIN $DELIMITER_END\n";
+        print OUTPUT "$DELIMITER_BEGIN $DELIMITER_END\n";
         unless ($line =~ m/^#!/)
         {
             print OUTPUT $line;
         }
     }
-    elsif ( "C" eq $filetype )
-    {
-        print OUTPUT "/* $DELIMITER_BEGIN $DELIMITER_END */\n";
-    }
-    elsif ( ("RPC" eq $filetype) or
-            ("LinkerScript" eq $filetype)
-          )
-    {
-        # ld stubbornly refuses to use modern comment lines.
-        print OUTPUT "/* $DELIMITER_BEGIN $DELIMITER_END */\n";
-    }
-    elsif ("MofFile" eq $filetype)
-    {
-        print OUTPUT "// $DELIMITER_BEGIN $DELIMITER_END\n";
-    }
-    elsif ("xml" eq $filetype )
-    {
-        print   OUTPUT "<!-- $DELIMITER_BEGIN $DELIMITER_END -->\n";
-    }
     else
     {
-        print   STDOUT  "ERROR: Can\'t handle filetype:  $filetype\n";
-        close( INPUT )      or die " $? can't close $filename: $!" ;
-        close( OUTPUT )     or die " $? can't close $TempFile: $!" ;
-        ## leave $Tempfile around for debug
-        return RC_INVALID_FILETYPE;
+        print OUTPUT "$DELIMITER_BEGIN $DELIMITER_END\n";
     }
 
     # Copy rest of file
@@ -1069,14 +907,14 @@ sub addPrologComments($$$)
         # NOTE: CMVC prologs with inline comments will have a single trailing
         #       space at the end of the line. This is undesirable for most
         #       developers so it will not be added.
-
-        if ( $line =~ m/$DELIMITER_BEGIN/ )
+        if ( $line =~ m/$DELIMITER_BEGIN/)
         {
             $line = "$line $end" if ( $end );
-            $line = "$line\n";
+            $line = "$begin $line\n";
         }
         elsif ( $line =~ m/$DELIMITER_END/ )
         {
+            $line = "$line $end" if ( $end );
             $line = "$begin $line";
         }
         else
