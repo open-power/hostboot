@@ -190,7 +190,7 @@ enum CalloutPriority
 }
 
 ///
-/// @enum Collect Trace
+/// @enum CollectTrace
 ///
 /// This enumeration defines the possible firmware traces to collect
 ///
