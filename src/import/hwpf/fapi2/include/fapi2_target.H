@@ -297,8 +297,8 @@ class Target
 ///
 /// @brief Given a normal core thread id, translate this to
 /// a fused core thread id. (normal to fused)
-/// @param[in] the ordinal number of the normal core this thread belongs to
-/// @param[in] a normal core thread id - 0, ..., 3
+/// @param[in] i_ordinal   the ordinal number of the normal core this thread belongs to
+/// @param[in] i_thread_id a normal core thread id - 0, ..., 3
 /// @return the fused core thread id
 ///
 inline uint8_t thread_id_n2f(const uint8_t i_ordinal, const uint8_t i_thread_id)
@@ -309,7 +309,7 @@ inline uint8_t thread_id_n2f(const uint8_t i_ordinal, const uint8_t i_thread_id)
 ///
 /// @brief Given a fused core thread id, translate this to
 /// a normal core thread id. (fused to normal)
-/// @param[in] a fused core thread id - 0, ..., 7
+/// @param[in] i_thread_id a fused core thread id - 0, ..., 7
 /// @return the normal core thread id
 ///
 inline uint8_t thread_id_f2n(const uint8_t i_thread_id)
@@ -320,7 +320,7 @@ inline uint8_t thread_id_f2n(const uint8_t i_thread_id)
 ///
 /// @brief Given a normal core thread id, translate this to a
 /// normal core bitset.
-/// @param[in] a normal core thread id - 0, ..., 3
+/// @param[in] i_thread_id a normal core thread id - 0, ..., 3
 /// @return the normal core bitset
 /// @note to got from a fused core id to a normal core bitset,
 /// translate from a fused core thread id first.
@@ -343,8 +343,8 @@ inline uint8_t thread_id2bitset(const uint8_t i_thread_id)
 ///
 /// @brief Given a bitset of normal core thread ids, translate this to
 /// a bit mask of fused core thread id. (normal to fused)
-/// @param[in] the ordinal number of the normal core this thread belongs to
-/// @param[in] a normal core thread bitset - b0000, ..., b1111
+/// @param[in] i_ordinal the ordinal number of the normal core this thread belongs to
+/// @param[in] i_threads a normal core thread bitset - b0000, ..., b1111
 /// @return the corresponding fused core bitset
 ///
 inline uint8_t thread_bitset_n2f(const uint8_t i_ordinal, const uint8_t i_threads)
@@ -377,8 +377,8 @@ inline uint8_t thread_bitset_n2f(const uint8_t i_ordinal, const uint8_t i_thread
 ///
 /// @brief Given a fused core thread bitset, translate this to
 /// a normal core thread bitset. (fused to normal)
-/// @param[in] the ordinal number of the normal core this thread belongs to
-/// @param[in] a fused core thread bitset - b00000000, ..., b11111111
+/// @param[in] i_ordinal the ordinal number of the normal core this thread belongs to
+/// @param[in] i_threads a fused core thread bitset - b00000000, ..., b11111111
 /// @return the corresponding normal core bitset
 ///
 inline uint8_t thread_bitset_f2n(const uint8_t i_ordinal, const uint8_t i_threads)
@@ -421,9 +421,9 @@ inline void toString(const Target<T>& i_target, char* i_buffer, size_t i_bsize);
 /// @brief Return the string interpretation of this target
 /// @tparam T The type of the target
 /// @tparam B The type of the buffer
-/// @param[in] A pointer to the Target<T>
+/// @param[in] i_target A pointer to the Target<T>
 /// @param[in] i_buffer buffer to write in to
-/// @param[in] i_bsize size of the buffer
+/// @param[in] i_bsize  size of the buffer
 /// @return void
 /// @post The contents of the buffer is replaced with the string
 /// representation of the target

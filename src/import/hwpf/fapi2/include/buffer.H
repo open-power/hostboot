@@ -500,11 +500,11 @@ class buffer
         ///
         /// @brief Copy part of a OT into the DataBuffer
         /// @tparam OT the type of the incoming (origin) data
-        /// @param[in] i_datain OT value to copy into DataBuffer
-        ///    - data is taken left aligned
-        /// @param[in] Start bit to insert into (target start)
-        /// @param[in] Length of bits to insert
-        /// @param[in] Start bit in source - defaults to bit 0
+        /// @param[in] i_datain      OT value to copy into DataBuffer
+        ///                          - data is taken left aligned
+        /// @param[in] i_targetStart bit to insert into (target start)
+        /// @param[in] i_len         Length of bits to insert
+        /// @param[in] i_sourceStart Start bit in source - defaults to bit 0
 
         /// @return FAPI2_RC_SUCCESS if successful
         ///
@@ -599,10 +599,10 @@ class buffer
         ///
         /// @brief Copy in a right aligned value
         /// @tparam OT the type of the incoming (origin) data
-        /// @param[in] i_datain OT value to copy into DataBuffer
-        ///    - data is taken right aligned
-        /// @param[in] Start bit to insert into
-        /// @param[in] Length of bits to insert
+        /// @param[in] i_datain      OT value to copy into DataBuffer
+        ///                          - data is taken right aligned
+        /// @param[in] i_targetStart Start bit to insert into
+        /// @param[in] i_len         Length of bits to insert
         /// @return FAPi2_RC_SUCCESS if no error
         /// @note Data is assumed to be aligned on the word boundary of L
         ///
@@ -677,10 +677,10 @@ class buffer
         ///
         /// @brief Copy data from this buffer into an OT
         /// @tparam OT the type of the outgoing (target)
-        /// @param[out] o_out OT to copy into - data is placed left aligned
-        /// @param[in] Start bit in source
-        /// @param[in] Length of bits to extract
-        /// @param[in] Start bit to insert into (target start)
+        /// @param[out] o_out        OT to copy into - data is placed left aligned
+        /// @param[in] i_sourceStart Start bit in source
+        /// @param[in] i_len         Length of bits to extract
+        /// @param[in] i_targetStart Start bit to insert into (target start)
         /// @return FAPI2_RC_SUCCESS if ok
         ///
         template<typename OT>
@@ -734,9 +734,9 @@ class buffer
         ///
         /// @brief Copy data from this buffer into an OT and right justify
         /// @tparam OT the type of the outgoing (target)
-        /// @param[out] o_out OT to copy into - data is placed right aligned
-        /// @param[in] Start bit to insert into (source start)
-        /// @param[in] Length of bits to insert
+        /// @param[out] o_out        OT to copy into - data is placed right aligned
+        /// @param[in] i_sourceStart Start bit to insert into (source start)
+        /// @param[in] i_len         Length of bits to insert
         /// @return FAPI2_RC_SUCCESS if ok
         ///
         template<typename OT>

@@ -45,7 +45,7 @@ namespace fapi2
 /// @note Implemented by platform code
 ///
 void logError(
-    fapi2::ReturnCode & io_rc,
+    fapi2::ReturnCode& io_rc,
     fapi2::errlSeverity_t i_sev = fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE,
     bool i_unitTestError = false );
 
@@ -83,7 +83,7 @@ ReturnCode delay(uint64_t i_nanoSeconds, uint64_t i_simCycles,
 ///
 /// @brief Assert a condition, and halt
 ///
-/// @param[in] a boolean representing the assertion
+/// @param[in] i_expression a boolean representing the assertion
 ///
 void Assert(bool i_expression);
 };

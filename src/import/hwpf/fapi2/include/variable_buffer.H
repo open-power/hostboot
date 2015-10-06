@@ -607,8 +607,8 @@ class variable_buffer
 
         ///
         /// @brief Shift a buffer left a defined number of bits, from a start bit
-        /// @param[in] number of bits to shift
-        /// @param[in] offset from 0 to start shift, defaults to ~0 (see operator<<())
+        /// @param[in] i_shiftNum number of bits to shift
+        /// @param[in] i_offset   offset from 0 to start shift, defaults to ~0 (see operator<<())
         /// @note an offset of ~(0) implies "end of the buffer"
         /// @warning there is no shiftLeftandResize - resizing the buffer is left to
         /// the caller to alight the operations with integral buffers.
@@ -618,8 +618,8 @@ class variable_buffer
 
         ///
         /// @brief Shift a buffer right a defined number of bits, from a start bit
-        /// @param[in] number of bits to shift
-        /// @param[in] offset from 0 to start shift, defaults to 0 (see operator>>())
+        /// @param[in] i_shiftNum number of bits to shift
+        /// @param[in] i_offset   offset from 0 to start shift, defaults to 0 (see operator>>())
         /// @warning there is no shiftRightandResize - resizing the buffer is left to
         /// the caller to alight the operations with integral buffers.
         /// @return FAPI2_RC_SUCCESS on success
@@ -682,7 +682,7 @@ class variable_buffer
 
         ///
         /// @brief operator+()
-        /// @param[in] A variable_buffer to append to this
+        /// @param[in] rhs A variable_buffer to append to this
         ///
         inline variable_buffer& operator+(const variable_buffer& rhs)
         {
@@ -693,7 +693,7 @@ class variable_buffer
 
         ///
         /// @brief operator+()
-        /// @param[in] A number of bits to add to this buffer
+        /// @param[in] rhs A number of bits to add to this buffer
         ///
         inline variable_buffer& operator+(const bits_type& rhs)
         {
@@ -708,7 +708,7 @@ class variable_buffer
 
         ///
         /// @brief resize()
-        /// @param[in] Desired resulting size of the buffer, in bits
+        /// @param[in] rhs Desired resulting size of the buffer, in bits
         ///
         inline variable_buffer& resize(const bits_type& rhs)
         {

@@ -1,25 +1,19 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: $                                                             */
+/* $Source: hwpf/fapi2/include/array.H $                                  */
 /*                                                                        */
-/* OpenPOWER HostBoot Project                                             */
+/* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* EKB Project                                                            */
+/*                                                                        */
+/* COPYRIGHT 2012,2015                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
-/* Licensed under the Apache License, Version 2.0 (the "License");        */
-/* you may not use this file except in compliance with the License.       */
-/* You may obtain a copy of the License at                                */
-/*                                                                        */
-/*     http://www.apache.org/licenses/LICENSE-2.0                         */
-/*                                                                        */
-/* Unless required by applicable law or agreed to in writing, software    */
-/* distributed under the License is distributed on an "AS IS" BASIS,      */
-/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
-/* implied. See the License for the specific language governing           */
-/* permissions and limitations under the License.                         */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
@@ -37,28 +31,28 @@
 
 namespace fapi2
 {
-    ///
-    /// @brief Class representing a FAPI2 array
-    /// FAPI2 arrays are defined to be very lightweight but support
-    /// c++ container operations (iterators, bounds checking, assignment, etc.)
-    /// To avoid the code-bloat associated with std::vector templates,
-    /// fapi2::array is presently limited to 64-bit elements.
-    ///
-    /// To construct an array, you can either pass in an existing chunk
-    /// of memory, or let the container allocate memory for you:
-    ///    fapi2::array foo(3, &PIB_MEM_BLOCK);
-    /// creates an array 3 x uit64_t in size, located at &PIB_MEM_BLOCK.
-    /// The memory pointed to by the address passed in is untouched
-    /// during creation. This allows for a light-weight overlay on top
-    /// of existing memory. It also means you need to initialize the space
-    /// yourself.
-    ///    fapi2_array foo(3);
-    /// creates an array 3 x uint64_t in size, and that memory will be
-    /// allocated by the constructor and initiaized to 0's.
-    ///
-    ///
-    class array
-    {
+///
+/// @brief Class representing a FAPI2 array
+/// FAPI2 arrays are defined to be very lightweight but support
+/// c++ container operations (iterators, bounds checking, assignment, etc.)
+/// To avoid the code-bloat associated with std::vector templates,
+/// fapi2::array is presently limited to 64-bit elements.
+///
+/// To construct an array, you can either pass in an existing chunk
+/// of memory, or let the container allocate memory for you:
+///    fapi2::array foo(3, &PIB_MEM_BLOCK);
+/// creates an array 3 x uit64_t in size, located at &PIB_MEM_BLOCK.
+/// The memory pointed to by the address passed in is untouched
+/// during creation. This allows for a light-weight overlay on top
+/// of existing memory. It also means you need to initialize the space
+/// yourself.
+///    fapi2_array foo(3);
+/// creates an array 3 x uint64_t in size, and that memory will be
+/// allocated by the constructor and initiaized to 0's.
+///
+///
+class array
+{
     public:
 
         typedef uint64_t element_type;
@@ -67,8 +61,8 @@ namespace fapi2
 
         ///
         /// @brief Create an array
-        /// @param[in] the size of the array
-        /// @param[in] a pointer to memory of appropriate size
+        /// @param[in] i_size the size of the array
+        /// @param[in] i_data a pointer to memory of appropriate size
         ///   defaults to nullptr which causes the platform to
         ///   allocate memory of size * element_type
         /// @warning fapi2::arrays, like arrays, can not be re-sized after
@@ -83,7 +77,7 @@ namespace fapi2
 
         ///
         /// @brief operator[]
-        /// @param[in] the index of the element
+        /// @param[in] i_index the index of the element
         /// @return a reference to the element in question.
         /// @note array[0] = 0 works as well as foo = array[0]
         ///
@@ -91,7 +85,7 @@ namespace fapi2
 
         ///
         /// @brief operator=()
-        /// @param[in] the other array
+        /// @param[in] i_other the other array
         /// @return a reference to this, after the assignement
         ///
         array& operator=(const array& i_other);
@@ -113,7 +107,9 @@ namespace fapi2
         ///
         __attribute__ ((always_inline))
         bool operator!=(const array& i_other)
-            { return ! operator==(i_other); }
+        {
+            return ! operator==(i_other);
+        }
 
         ///
         /// @brief Return an iterator the to beginning of the array
@@ -121,7 +117,9 @@ namespace fapi2
         ///
         __attribute__ ((always_inline))
         iterator begin(void)
-            { return iv_data; }
+        {
+            return iv_data;
+        }
 
         ///
         /// @brief Return an iterator the to end of the array
@@ -129,7 +127,9 @@ namespace fapi2
         ///
         __attribute__ ((always_inline))
         iterator end(void)
-            { return iv_data + size(); }
+        {
+            return iv_data + size();
+        }
 
         ///
         /// @brief Return a const_iterator the to beginning of the array
@@ -137,7 +137,9 @@ namespace fapi2
         ///
         __attribute__ ((always_inline))
         const_iterator begin(void) const
-            { return iv_data; }
+        {
+            return iv_data;
+        }
 
         ///
         /// @brief Return a const_iterator the to end of the array
@@ -145,7 +147,9 @@ namespace fapi2
         ///
         __attribute__ ((always_inline))
         const_iterator end(void) const
-            { return iv_data + size(); }
+        {
+            return iv_data + size();
+        }
 
     private:
 
@@ -160,15 +164,19 @@ namespace fapi2
 
         __attribute__ ((always_inline))
         uint32_t size(void)
-        { return (iv_size & ~delete_bit); }
+        {
+            return (iv_size & ~delete_bit);
+        }
 
         __attribute__ ((always_inline))
         uint32_t size(void) const
-        { return (iv_size & ~delete_bit); }
+        {
+            return (iv_size & ~delete_bit);
+        }
 
         uint32_t      iv_size;
         element_type* iv_data;
-    };
+};
 }
 
 #endif

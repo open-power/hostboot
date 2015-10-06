@@ -17,7 +17,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
-/// @file src/include/usr/hwpf/fapi2/fapi2_chip_ec_feature.H
+/// @file fapi2_chip_ec_feature.H
 ///
 /// @brief Defines the queryChipEcFeature function that allows HWPs to
 ///        query if a particular chip has a feature determined by its EC level.

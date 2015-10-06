@@ -47,8 +47,8 @@
 
 ///
 /// @brief Wrapper to check an operation for an error state
-/// and jump to the label cleam_up if there is an error.
-/// @param[in] __operation__ an operation which returns a fapi::ReturnCode
+/// and jump to the label clean_up if there is an error.
+/// @param[in] \__operation__ an operation which returns a fapi::ReturnCode
 /// @param[in] ... vararg format/agruments for trace output (optional)
 /// @note This implementation does not support PIB error masks or
 /// FSP operational states.
@@ -63,8 +63,8 @@
 /// @brief Assert a conditional is true.
 /// If it is not, the FFDC gathering function is called and the
 /// trace is output as a FAPI error trace.
-/// @param[in] __conditional__ the condition to assert
-/// @param[in] __ffdc__ the FFDC gathering function
+/// @param[in] \__conditional__ the condition to assert
+/// @param[in] \__ffdc__ the FFDC gathering function
 /// @param[in] ... varargs, as input to FAPI_ERR
 ///
 #define FAPI_ASSERT( __conditional__, __ffdc__, ... ) PLAT_FAPI_ASSERT( __conditional__, __ffdc__, __VA_ARGS__ )

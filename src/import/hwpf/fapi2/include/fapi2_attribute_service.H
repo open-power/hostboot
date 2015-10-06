@@ -17,7 +17,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
-/// @file src/include/usr/hwpf/fapi2/fapi2_attribute_service.H
+/// @file fapi2_attribute_service.H
 ///
 /// @brief Defines the FAPI_ATTR_GET and FAPI_ATTR_SET macros that a user
 /// calls to get/set attributes and a check function that the macros use to
@@ -100,7 +100,7 @@ namespace fapi2
 /// If there are ever attributes with more than 4 dimensions then this function
 /// will need to be updated.
 ///
-/// @Tparam K template parameter, passed in target.
+/// @tparam K template parameter, passed in target.
 /// @param[in]  i_id          AttributeID
 /// @param[in]  i_target      Reference to fapi2::Target (can be NULL for system)
 /// @param[out] o_val         Reference to uint64_t where attribute value is set
