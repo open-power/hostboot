@@ -1,0 +1,31 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/error_info/p9_io_gcr_errors.xml $     -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Error definitions for P9_IO_GCR  -->
+<hwpErrors>
+    <hwpError>
+        <rc>RC_IO_GCR_TARGET_TYPE_NOT_FOUND</rc>
+        <description>P9_IO_GCR Invoked with Incorrect Target Type</description>
+        <ffdc>TARGET</ffdc>
+        <callout>
+            <procedure>CODE</procedure>
+            <priority>HIGH</priority>
+        </callout>
+    </hwpError>
+    <!-- *********************************************************************** -->
+</hwpErrors>
