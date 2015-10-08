@@ -1,0 +1,62 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/error_info/p9_adu_errors.xml $        -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_ADU_COHERENT_UTILS_INVALID_ARGS</rc>
+    <description>
+      Procedure: p9_adu_coherent_utils
+      ADU access or setup not attempted, ADU access or setup is stopped
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>ADDRESS</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_ADU_COHERENT_UTILS_RESET_ERR</rc>
+    <description>
+      Procedure: p9_adu_coherent_utils
+      ADU Reset had a problem, the ADU was not actually reset
+    </description>
+    <ffdc>TARGET</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_ADU_FBC_NOT_INITIALIZED_ERR</rc>
+    <description>
+      Procedure: p9_adu_coherent_utils
+      The fabric was not initialized or not running
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>INITIALIZED</ffdc>
+    <ffdc>RUNNING</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc> RC_P9_ADU_STATUS_REG_ERR</rc>
+    <description>
+      Procedure: p9_adu_coherent_utils
+      The ALTD_STATUS_REGISTER has something high or low that was not expected 
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>STATUSREG</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>
+
