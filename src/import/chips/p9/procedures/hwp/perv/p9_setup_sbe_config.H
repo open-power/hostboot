@@ -16,22 +16,6 @@
 /* deposited with the U.S. Copyright Office.                              */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-//------------------------------------------------------------------------------
-/// @file  p9_setup_sbe_config.H
-///
-/// @brief proc setup sbe config
-// *!
-// *! OWNER NAME  : Abhishek Agarwal  Email: abagarw8@in.ibm.com
-// *! BACKUP NAME :                   Email:
-//------------------------------------------------------------------------------
-// *HWP HWP Owner   : Abhishek Agarwal <abagarw8@in.ibm.com>
-// *HWP FW Owner    : Brian Silver <bsilver@us.ibm.com>
-// *HWP Team        : Perv
-// *HWP Level       : 1
-// *HWP Consumed by : SBE
-//------------------------------------------------------------------------------
-
-
 #ifndef _P9_SETUP_SBE_CONFIG_H_
 #define _P9_SETUP_SBE_CONFIG_H_
 
