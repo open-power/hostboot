@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_bulk_pwr_throttles.C,v 1.30 2015/03/06 15:54:35 pardeik Exp $
+// $Id: mss_bulk_pwr_throttles.C,v 1.32 2015/10/05 19:49:06 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_bulk_pwr_throttles.C,v $
 //------------------------------------------------------------------------------
@@ -73,6 +73,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.32  | pardeik  | 07/31/15| Support new CDIMM total power curves (SW316162)
+//   1.31  | pardeik  |15-MAY-15| split FAPI_INF statement up to limit variables
 //   1.30  | pardeik  |12-FEB-15| Review change to check for l_throttle_n_per_chip
 //         |          |         |   being zero (shouldn't have any impact to hwp)
 //   1.29  | pardeik  |12-FEB-15| CDIMM DDR4 throttle updates (set Nmba to Nchip)
@@ -207,8 +209,8 @@ extern "C" {
 	const uint32_t ISDIMM_MIN_DIMM_POWER = 800;   // cW, min ISDIMM power for throttling
 	const uint8_t ISDIMM_MEMORY_THROTTLE_PERCENT = 65;  // percent, throttle impact when limit is between min and max power.  A value of 0 would be for no throttle impact.
 
-	uint32_t l_power_slope_array[MAX_NUM_PORTS][MAX_NUM_DIMMS];
-	uint32_t l_power_int_array[MAX_NUM_PORTS][MAX_NUM_DIMMS];
+	uint32_t l_total_power_slope_array[MAX_NUM_PORTS][MAX_NUM_DIMMS];
+	uint32_t l_total_power_int_array[MAX_NUM_PORTS][MAX_NUM_DIMMS];
 	uint8_t l_dimm_ranks_array[MAX_NUM_PORTS][MAX_NUM_DIMMS];
 	uint8_t l_port;
 	uint8_t l_dimm;
@@ -297,16 +299,16 @@ extern "C" {
 		FAPI_ERR("Error getting attribute ATTR_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT_IDLE");
 		return rc;
 	    }
-	    rc = FAPI_ATTR_GET(ATTR_MSS_POWER_SLOPE,
-			       &i_target_mba, l_power_slope_array);
+	    rc = FAPI_ATTR_GET(ATTR_MSS_TOTAL_POWER_SLOPE,
+			       &i_target_mba, l_total_power_slope_array);
 	    if (rc) {
-		FAPI_ERR("Error getting attribute ATTR_MSS_POWER_SLOPE");
+		FAPI_ERR("Error getting attribute ATTR_MSS_TOTAL_POWER_SLOPE");
 		return rc;
 	    }
-	    rc = FAPI_ATTR_GET(ATTR_MSS_POWER_INT,
-			       &i_target_mba, l_power_int_array);
+	    rc = FAPI_ATTR_GET(ATTR_MSS_TOTAL_POWER_INT,
+			       &i_target_mba, l_total_power_int_array);
 	    if (rc) {
-		FAPI_ERR("Error getting attribute ATTR_MSS_POWER_INT");
+		FAPI_ERR("Error getting attribute ATTR_MSS_TOTAL_POWER_INT");
 		return rc;
 	    }
 	    rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM,
@@ -373,8 +375,8 @@ extern "C" {
 // See if there are any ranks present on the dimm (configured or deconfigured)
 		    if (l_dimm_ranks_array[l_port][l_dimm] > 0)
 		    {
-			l_dimm_power_array_idle[l_port][l_dimm] = l_dimm_power_array_idle[l_port][l_dimm] + (idle_util / 100 * l_power_slope_array[l_port][l_dimm]) + l_power_int_array[l_port][l_dimm];
-			l_dimm_power_array_max[l_port][l_dimm] = l_dimm_power_array_max[l_port][l_dimm] + (max_util / 100 * l_power_slope_array[l_port][l_dimm]) + l_power_int_array[l_port][l_dimm];
+			l_dimm_power_array_idle[l_port][l_dimm] = l_dimm_power_array_idle[l_port][l_dimm] + (idle_util / 100 * l_total_power_slope_array[l_port][l_dimm]) + l_total_power_int_array[l_port][l_dimm];
+			l_dimm_power_array_max[l_port][l_dimm] = l_dimm_power_array_max[l_port][l_dimm] + (max_util / 100 * l_total_power_slope_array[l_port][l_dimm]) + l_total_power_int_array[l_port][l_dimm];
 		    }
 // Include any system uplift here too
 		    if (l_dimm_power_array_idle[l_port][l_dimm] > 0)
@@ -392,7 +394,7 @@ extern "C" {
 // calculate channel power by adding up the power of each dimm
 		    l_channel_power_array_idle[l_port] = l_channel_power_array_idle[l_port] + l_dimm_power_array_idle[l_port][l_dimm];
 		    l_channel_power_array_max[l_port] = l_channel_power_array_max[l_port] + l_dimm_power_array_max[l_port][l_dimm];
-		    FAPI_DBG("[P%d:D%d][CH Util %4.2f/%4.2f][Slope:Int %d:%d][UpliftPercent idle/max %d/%d)][Power min/max %4.2f/%4.2f cW]", l_port, l_dimm, idle_util, max_util, l_power_slope_array[l_port][l_dimm], l_power_int_array[l_port][l_dimm], l_power_curve_percent_uplift_idle, l_power_curve_percent_uplift, l_dimm_power_array_idle[l_port][l_dimm], l_dimm_power_array_max[l_port][l_dimm]);
+		    FAPI_DBG("[P%d:D%d][CH Util %4.2f/%4.2f][Slope:Int %d:%d][UpliftPercent idle/max %d/%d)][Power min/max %4.2f/%4.2f cW]", l_port, l_dimm, idle_util, max_util, l_total_power_slope_array[l_port][l_dimm], l_total_power_int_array[l_port][l_dimm], l_power_curve_percent_uplift_idle, l_power_curve_percent_uplift, l_dimm_power_array_idle[l_port][l_dimm], l_dimm_power_array_max[l_port][l_dimm]);
 		}
 		FAPI_DBG("[P%d][CH Util %4.2f/%4.2f][Power %4.2f/%4.2f cW]", l_port, min_util, max_util, l_channel_power_array_idle[l_port], l_channel_power_array_max[l_port]);
 		l_channel_pair_power_idle = l_channel_pair_power_idle + l_channel_power_array_idle[l_port];
@@ -527,7 +529,8 @@ extern "C" {
 	    channel_pair_power = int(l_utilization / 100 * l_channel_power_slope + l_channel_power_intercept);
 	}
 
-	FAPI_INF("[Available Channel Pair Power %d cW][UTIL %4.2f][Channel Pair Power %d cW][Throttles %d/%d/%d]", l_channel_pair_watt_target, l_utilization, channel_pair_power, l_throttle_n_per_mba, l_throttle_n_per_chip, l_throttle_d);
+	FAPI_INF("[Available Channel Pair Power %d cW][UTIL %4.2f][Channel Pair Power %d cW]", l_channel_pair_watt_target, l_utilization, channel_pair_power);
+	FAPI_INF("[Throttles %d/%d/%d]", l_throttle_n_per_mba, l_throttle_n_per_chip, l_throttle_d);
 
 // Update output attributes
 	rc = FAPI_ATTR_SET(ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA,

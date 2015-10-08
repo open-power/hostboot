@@ -22,13 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_thermal.C,v 1.32 2015/06/16 21:57:30 pardeik Exp $
+// $Id: mss_eff_config_thermal.C,v 1.34 2015/10/20 13:44:46 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config_thermal.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
-// *! ***  ***
 //------------------------------------------------------------------------------
 // *! TITLE       : mss_eff_config_thermal
 // *! DESCRIPTION : see additional comments below
@@ -55,6 +54,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.34  | pardeik  | 10/20/15| change fapilogerror (not recoverable)
+//   1.33  | pardeik  | 07/31/15| Support new CDIMM total power curves (SW316162)
+//         |          |         | Only log one error per MBA intead of per DIMM 
 //   1.32  | pardeik  | 06/16/15| fix for ISDIMM systems to prevent a zero
 //         |          |         |   ATTR_MSS_MEM_WATT_TARGET value
 //         |          |         | Removed unneeded TODO commented section
@@ -153,7 +155,7 @@ const uint8_t NUM_PORTS = 2;
 const uint8_t NUM_DIMMS = 2;
 const uint8_t NUM_RANKS = 4;
 // Only use values here (not any valid bits or flag bits)
-const uint32_t CDIMM_POWER_SLOPE_DEFAULT = 0x0240;
+const uint32_t CDIMM_POWER_SLOPE_DEFAULT = 0x0358;
 const uint32_t CDIMM_POWER_INT_DEFAULT = 0x00CE;
 
 extern "C" {
@@ -237,12 +239,21 @@ extern "C" {
 	uint32_t power_int_array[NUM_PORTS][NUM_DIMMS];
 	uint32_t power_slope2_array[NUM_PORTS][NUM_DIMMS];
 	uint32_t power_int2_array[NUM_PORTS][NUM_DIMMS];
+	uint32_t total_power_slope_array[NUM_PORTS][NUM_DIMMS];
+	uint32_t total_power_int_array[NUM_PORTS][NUM_DIMMS];
+	uint32_t total_power_slope2_array[NUM_PORTS][NUM_DIMMS];
+	uint32_t total_power_int2_array[NUM_PORTS][NUM_DIMMS];
 	uint32_t cdimm_master_power_slope;
 	uint32_t cdimm_master_power_intercept;
 	uint32_t cdimm_supplier_power_slope;
 	uint32_t cdimm_supplier_power_intercept;
-
-
+	uint32_t cdimm_master_total_power_slope = 0;
+	uint32_t cdimm_master_total_power_intercept = 0;
+	uint32_t cdimm_supplier_total_power_slope = 0;
+	uint32_t cdimm_supplier_total_power_intercept = 0;
+	uint8_t l_dram_gen;
+	uint8_t l_logged_error_power_curve = 0;
+	uint8_t l_logged_error_total_power_curve = 0;
 //------------------------------------------------------------------------------
 // Get input attributes
 //------------------------------------------------------------------------------
@@ -265,9 +276,16 @@ extern "C" {
 	    FAPI_ERR("Error getting attribute ATTR_EFF_NUM_RANKS_PER_DIMM");
 	    return rc;
 	}
+	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN,
+			   &i_target_mba, l_dram_gen);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_EFF_DRAM_GEN");
+	    return rc;
+	}
 	// Only get power curve values for custom dimms to prevent errors
 	if (custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
 	{
+	    // These are the CDIMM power curve values for only VMEM (DDR3 and DDR4)
 	    rc = FAPI_ATTR_GET(ATTR_CDIMM_VPD_MASTER_POWER_SLOPE,
 			       &target_chip, cdimm_master_power_slope);
 	    if (rc) {
@@ -293,6 +311,45 @@ extern "C" {
 		FAPI_ERR("Error getting attribute ATTR_CDIMM_VPD_SUPPLIER_POWER_INTERCEPT");
 		return rc;
 	    }
+
+	    // These are for the total CDIMM power (VMEM+VPP for DDR4)
+	    if (l_dram_gen == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+	    {
+
+		rc = FAPI_ATTR_GET(ATTR_CDIMM_VPD_MASTER_TOTAL_POWER_SLOPE,
+				   &target_chip, cdimm_master_total_power_slope);
+		if (rc) {
+		    FAPI_ERR("Error getting attribute ATTR_CDIMM_VPD_MASTER_TOTAL_POWER_SLOPE");
+		    return rc;
+		}
+		rc = FAPI_ATTR_GET(ATTR_CDIMM_VPD_MASTER_TOTAL_POWER_INTERCEPT,
+				   &target_chip, cdimm_master_total_power_intercept);
+		if (rc) {
+		    FAPI_ERR("Error getting attribute ATTR_CDIMM_VPD_MASTER_TOTAL_POWER_INTERCEPT");
+		    return rc;
+		}
+
+		rc = FAPI_ATTR_GET(ATTR_CDIMM_VPD_SUPPLIER_TOTAL_POWER_SLOPE,
+				   &target_chip, cdimm_supplier_total_power_slope);
+		if (rc) {
+		    FAPI_ERR("Error getting attribute ATTR_CDIMM_VPD_SUPPLIER_TOTAL_POWER_SLOPE");
+		    return rc;
+		}
+		rc = FAPI_ATTR_GET(ATTR_CDIMM_VPD_SUPPLIER_TOTAL_POWER_INTERCEPT,
+				   &target_chip, cdimm_supplier_total_power_intercept);
+		if (rc) {
+		    FAPI_ERR("Error getting attribute ATTR_CDIMM_VPD_SUPPLIER_TOTAL_POWER_INTERCEPT");
+		    return rc;
+		}
+	    }
+	    else
+	    {
+// Set total power curve variables to the VMEM power curve variables for DDR3
+		cdimm_master_total_power_slope = cdimm_master_power_slope;
+		cdimm_master_total_power_intercept = cdimm_master_power_intercept;
+		cdimm_supplier_total_power_slope = cdimm_supplier_power_slope;
+		cdimm_supplier_total_power_intercept = cdimm_supplier_power_intercept;
+	    }
 	}
 
 //------------------------------------------------------------------------------
@@ -310,6 +367,10 @@ extern "C" {
 		power_int_array[port][dimm] = 0;
 		power_slope2_array[port][dimm] = 0;
 		power_int2_array[port][dimm] = 0;
+		total_power_slope_array[port][dimm] = 0;
+		total_power_int_array[port][dimm] = 0;
+		total_power_slope2_array[port][dimm] = 0;
+		total_power_int2_array[port][dimm] = 0;
 // only update values for dimms that are physically present
 		if (dimm_ranks_array[port][dimm] > 0)
 		{
@@ -326,8 +387,16 @@ extern "C" {
 			  cdimm_supplier_power_slope;
 			power_int2_array[port][dimm] =
 			  cdimm_supplier_power_intercept;
+			total_power_slope_array[port][dimm] =
+			  cdimm_master_total_power_slope;
+			total_power_int_array[port][dimm] =
+			  cdimm_master_total_power_intercept;
+			total_power_slope2_array[port][dimm] =
+			  cdimm_supplier_total_power_slope;
+			total_power_int2_array[port][dimm] =
+			  cdimm_supplier_total_power_intercept;
 
-// check to see if data is valid
+// check to see if VMEM power curve data is valid
 			if (
 			    (((cdimm_master_power_slope & 0x8000) != 0) &&
 			     ((cdimm_master_power_intercept & 0x8000) != 0))
@@ -354,11 +423,89 @@ extern "C" {
 				   0x4000) == 0))
 				)
 			    {
-				FAPI_INF("WARNING:  power curve data is lab data, not ship level data. Using data anyways.");
+				FAPI_INF("WARNING:  VMEM power curve data is lab data, not ship level data. Using data anyways.");
+			    }
+// check total power curve (VMEM+VPP) values for DDR4
+			    if (l_dram_gen == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+			    {
+				if (
+				    (((cdimm_master_total_power_slope & 0x8000) != 0) &&
+				     ((cdimm_master_total_power_intercept & 0x8000) != 0))
+				    &&
+				    (((cdimm_supplier_total_power_slope & 0x8000) != 0) &&
+				     ((cdimm_supplier_total_power_intercept & 0x8000) != 0))
+				    )
+				{
+				    total_power_slope_array[port][dimm] =
+				      cdimm_master_total_power_slope & 0x1FFF;
+				    total_power_int_array[port][dimm] =
+				      cdimm_master_total_power_intercept & 0x1FFF;
+				    total_power_slope2_array[port][dimm] =
+				      cdimm_supplier_total_power_slope & 0x1FFF;
+				    total_power_int2_array[port][dimm] =
+				      cdimm_supplier_total_power_intercept & 0x1FFF;
+// check to see if data is lab data
+				    if (
+					(((cdimm_master_total_power_slope & 0x4000) == 0) ||
+					 ((cdimm_master_total_power_intercept & 0x4000) == 0))
+					||
+					(((cdimm_supplier_total_power_slope & 0x4000) == 0) ||
+					 ((cdimm_supplier_total_power_intercept &
+					   0x4000) == 0))
+					)
+				    {
+					FAPI_INF("WARNING:  Total power curve data is lab data, not ship level data. Using data anyways.");
+				    }
+				}
+				else
+				{
+// Set to VMEM power curve values if total values are not valid and log an error
+// early DDR4 CDIMMs will have the total power curve entries all zero (not valid)
+				    total_power_slope_array[port][dimm] =
+				      power_slope_array[port][dimm];
+				    total_power_int_array[port][dimm] =
+				      power_int_array[port][dimm];
+				    total_power_slope2_array[port][dimm] =
+				      power_slope2_array[port][dimm];
+				    total_power_int2_array[port][dimm] =
+				      power_int2_array[port][dimm];
+// only log the error once per MBA, since all dimms will have the same power curve values
+				    if (l_logged_error_total_power_curve == 0)
+				    {
+					l_logged_error_total_power_curve = 1;
+					FAPI_ERR("Total power curve data not valid, use default values");
+					const fapi::Target & MEM_CHIP =
+					  target_chip;
+					uint32_t FFDC_DATA_1 =
+					  cdimm_master_total_power_slope;
+					uint32_t FFDC_DATA_2 =
+					  cdimm_master_total_power_intercept;
+					uint32_t FFDC_DATA_3 =
+					  cdimm_supplier_total_power_slope;
+					uint32_t FFDC_DATA_4 =
+					  cdimm_supplier_total_power_intercept;
+					FAPI_SET_HWP_ERROR
+					  (rc, RC_MSS_DIMM_POWER_CURVE_DATA_INVALID);
+					if (rc) fapiLogError(rc);
+				    }
+				}
+			    }
+			    else
+			    {
+// Set total power curve values to VMEM power curve values for anything other than DDR4 (ie.  DDR3)
+				total_power_slope_array[port][dimm] =
+				  power_slope_array[port][dimm];
+				total_power_int_array[port][dimm] =
+				  power_int_array[port][dimm];
+				total_power_slope2_array[port][dimm] =
+				  power_slope2_array[port][dimm];
+				total_power_int2_array[port][dimm] =
+				  power_int2_array[port][dimm];
 			    }
 			}
 			else
 			{
+// Set to default values and log an error if VMEM power curve values are not valid
 			    power_slope_array[port][dimm] =
 			      CDIMM_POWER_SLOPE_DEFAULT;
 			    power_int_array[port][dimm] =
@@ -367,18 +514,36 @@ extern "C" {
 			      CDIMM_POWER_SLOPE_DEFAULT;
 			    power_int2_array[port][dimm] =
 			      CDIMM_POWER_INT_DEFAULT;
-			    FAPI_ERR("power curve data not valid, use default values");
-			    const fapi::Target & MEM_CHIP = target_chip;
-			    uint32_t FFDC_DATA_1 = cdimm_master_power_slope;
-			    uint32_t FFDC_DATA_2 = cdimm_master_power_intercept;
-			    uint32_t FFDC_DATA_3 = cdimm_supplier_power_slope;
-			    uint32_t FFDC_DATA_4 =
-			      cdimm_supplier_power_intercept;
-			    FAPI_SET_HWP_ERROR
-			      (rc, RC_MSS_DIMM_POWER_CURVE_DATA_INVALID);
-			    if (rc) fapiLogError(rc);
+			    total_power_slope_array[port][dimm] =
+			      CDIMM_POWER_SLOPE_DEFAULT;
+			    total_power_int_array[port][dimm] =
+			      CDIMM_POWER_INT_DEFAULT;
+			    total_power_slope2_array[port][dimm] =
+			      CDIMM_POWER_SLOPE_DEFAULT;
+			    total_power_int2_array[port][dimm] =
+			      CDIMM_POWER_INT_DEFAULT;
+// only log the error once per MBA, since all dimms will have the same power curve values
+			    if (l_logged_error_power_curve == 0)
+			    {
+				l_logged_error_power_curve = 1;
+				FAPI_ERR("VMEM power curve data not valid, use default values");
+				const fapi::Target & MEM_CHIP =
+				  target_chip;
+				uint32_t FFDC_DATA_1 =
+				  cdimm_master_power_slope;
+				uint32_t FFDC_DATA_2 =
+				  cdimm_master_power_intercept;
+				uint32_t FFDC_DATA_3 =
+				  cdimm_supplier_power_slope;
+				uint32_t FFDC_DATA_4 =
+				  cdimm_supplier_power_intercept;
+				FAPI_SET_HWP_ERROR
+				  (rc, RC_MSS_DIMM_POWER_CURVE_DATA_INVALID);
+				if (rc) fapiLogError(rc);
+			    }
 			}
-			FAPI_DBG("CDIMM Power [P%d:D%d][SLOPE=%d:INT=%d cW][SLOPE2=%d:INT2=%d cW]", port, dimm, power_slope_array[port][dimm], power_int_array[port][dimm], power_slope2_array[port][dimm], power_int2_array[port][dimm]);
+			FAPI_DBG("CDIMM VMEM Power [P%d:D%d][SLOPE=%d:INT=%d cW][SLOPE2=%d:INT2=%d cW]", port, dimm, power_slope_array[port][dimm], power_int_array[port][dimm], power_slope2_array[port][dimm], power_int2_array[port][dimm]);
+			FAPI_DBG("CDIMM Total Power [P%d:D%d][VMEM SLOPE=%d:INT=%d cW][VMEM SLOPE2=%d:INT2=%d cW]", port, dimm, total_power_slope_array[port][dimm], total_power_int_array[port][dimm], total_power_slope2_array[port][dimm], total_power_int2_array[port][dimm]);
 		    }
 // non custom dimms will no longer use power curves
 // These will use a simplified approach of using throttle values for certain ranges of power
@@ -410,6 +575,30 @@ extern "C" {
 			   &i_target_mba, power_int2_array);
 	if (rc) {
 	    FAPI_ERR("Error writing attribute ATTR_MSS_POWER_INT2");
+	    return rc;
+	}
+	rc = FAPI_ATTR_SET(ATTR_MSS_TOTAL_POWER_SLOPE,
+			   &i_target_mba, total_power_slope_array);
+	if (rc) {
+	    FAPI_ERR("Error writing attribute ATTR_MSS_TOTAL_POWER_SLOPE");
+	    return rc;
+	}
+	rc = FAPI_ATTR_SET(ATTR_MSS_TOTAL_POWER_INT, &i_target_mba, total_power_int_array);
+	if (rc) {
+	    FAPI_ERR("Error writing attribute ATTR_MSS_TOTAL_POWER_INT");
+	    return rc;
+	}
+
+	rc = FAPI_ATTR_SET(ATTR_MSS_TOTAL_POWER_SLOPE2,
+			   &i_target_mba, total_power_slope2_array);
+	if (rc) {
+	    FAPI_ERR("Error writing attribute ATTR_MSS_TOTAL_POWER_SLOPE2");
+	    return rc;
+	}
+	rc = FAPI_ATTR_SET(ATTR_MSS_TOTAL_POWER_INT2,
+			   &i_target_mba, total_power_int2_array);
+	if (rc) {
+	    FAPI_ERR("Error writing attribute ATTR_MSS_TOTAL_POWER_INT2");
 	    return rc;
 	}
 
@@ -456,6 +645,11 @@ extern "C" {
 	uint8_t l_dimm_reg_power_limit_adj_enable;
 	uint8_t l_reg_max_dimm_count;
 	uint8_t l_dram_gen;
+	uint32_t l_power_slope_array[NUM_PORTS][NUM_DIMMS];
+	uint32_t l_power_int_array[NUM_PORTS][NUM_DIMMS];
+	uint32_t l_total_power_slope_array[NUM_PORTS][NUM_DIMMS];
+	uint32_t l_total_power_int_array[NUM_PORTS][NUM_DIMMS];
+
 //------------------------------------------------------------------------------
 // Get input attributes
 //------------------------------------------------------------------------------
@@ -524,6 +718,30 @@ extern "C" {
 			   &i_target_mba, l_dram_gen);
 	if (rc) {
 	    FAPI_ERR("Error getting attribute ATTR_EFF_DRAM_GEN");
+	    return rc;
+	}
+	rc = FAPI_ATTR_GET(ATTR_MSS_POWER_SLOPE,
+			   &i_target_mba, l_power_slope_array);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_MSS_POWER_SLOPE");
+	    return rc;
+	}
+	rc = FAPI_ATTR_GET(ATTR_MSS_POWER_INT,
+			   &i_target_mba, l_power_int_array);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_MSS_POWER_INT");
+	    return rc;
+	}
+	rc = FAPI_ATTR_GET(ATTR_MSS_TOTAL_POWER_SLOPE,
+			   &i_target_mba, l_total_power_slope_array);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_MSS_TOTAL_POWER_SLOPE");
+	    return rc;
+	}
+	rc = FAPI_ATTR_GET(ATTR_MSS_TOTAL_POWER_INT,
+			   &i_target_mba, l_total_power_int_array);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_MSS_TOTAL_POWER_INT");
 	    return rc;
 	}
 
@@ -667,14 +885,49 @@ extern "C" {
 
 	FAPI_INF("Min Power/Thermal Limit per MBA %d cW.  Unthrottled values [%d/%d/%d].", channel_pair_thermal_power_limit, runtime_throttle_n_per_mba, runtime_throttle_n_per_chip, runtime_throttle_d);
 
+
+// For DDR4, use the VMEM power to determine the runtime throttle settings that are based
+//  on a VMEM power limit (not a VMEM+VPP power limit which is to be used at runtime for tmgt)
+// Need to temporarily override attributes for mss_bulk_pwr_throttles to use
+// Needed to determines runtime memory throttle settings based on any VMEM power limits
+	if (l_dram_gen == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+	{
+	    rc = FAPI_ATTR_SET(ATTR_MSS_TOTAL_POWER_SLOPE,
+			       &i_target_mba, l_power_slope_array);
+	    if (rc) {
+		FAPI_ERR("Error writing attribute ATTR_MSS_TOTAL_POWER_SLOPE");
+		return rc;
+	    }
+	    rc = FAPI_ATTR_SET(ATTR_MSS_TOTAL_POWER_INT, &i_target_mba, l_power_int_array);
+	    if (rc) {
+		FAPI_ERR("Error writing attribute ATTR_MSS_TOTAL_POWER_INT");
+		return rc;
+	    }
+	}
+
 // Call the procedure function that takes a channel pair power limit and
 // converts it to throttle values
-
 	FAPI_EXEC_HWP(rc, mss_bulk_pwr_throttles, i_target_mba);
 	if (rc)
 	{
 	    FAPI_ERR("Error (0x%x) calling mss_bulk_pwr_throttles", static_cast<uint32_t>(rc));
 	    return rc;
+	}
+
+// Reset the total power curve attributes back to the original values
+	if (l_dram_gen == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+	{
+	    rc = FAPI_ATTR_SET(ATTR_MSS_TOTAL_POWER_SLOPE,
+			       &i_target_mba, l_total_power_slope_array);
+	    if (rc) {
+		FAPI_ERR("Error writing attribute ATTR_MSS_TOTAL_POWER_SLOPE");
+		return rc;
+	    }
+	    rc = FAPI_ATTR_SET(ATTR_MSS_TOTAL_POWER_INT, &i_target_mba, l_total_power_int_array);
+	    if (rc) {
+		FAPI_ERR("Error writing attribute ATTR_MSS_TOTAL_POWER_INT");
+		return rc;
+	    }
 	}
 
 // Read back in the updated throttle attribute values (these are now set to
