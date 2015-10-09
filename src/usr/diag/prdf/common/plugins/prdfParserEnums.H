@@ -161,9 +161,11 @@ namespace CEN_SYMBOL
         BOTH_SYMBOL_DQS = EVEN_SYMBOL_DQ | ODD_SYMBOL_DQ,
     };
 
-    /** A three bit field in memory MRU. It describes the raw card type for
-     *  buffered DIMMs or the DIMM plug card type for IS DIMMs. These types are
-     *  used for error log parsing which must be supported independent of the
+    /** This enum describes the raw card type for buffered DIMMs or the
+     *  DIMM plug card type for IS DIMMs. PRD will store the 80 byte translation
+     *  map in a separate section of the error log which can be used by the
+     *  parser to do the Centaur DQ to DIMM DQ translation. These types are used
+     *  for error log parsing which must be supported independent of the
      *  drivers (i.e. eblis tool) so enums can be added, but the values of the
      *  enums cannot be changed */
     enum WiringType
@@ -176,6 +178,7 @@ namespace CEN_SYMBOL
         CEN_TYPE_A4         = 5,
         CEN_TYPE_D4         = 6,
         WIRING_INVALID      = 7, // An invalid card type
+        CEN_TYPE_C4         = 8,
     };
 
 }//namespace CEN_SYMBOL ends

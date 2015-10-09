@@ -2110,6 +2110,183 @@ static const char ** dqSiteMap_rcB4
 };
 
 //##############################################################################
+// DRAM site tables for RAW CARD C4
+//##############################################################################
+
+static const char * dramSiteCardC4PortARank04[] =
+{
+    "DA12.d0", "DA12.d1", "DA12.d2", "DA12.d3",
+    "DA02.d1", "DA02.d0", "DA02.d3", "DA02.d2",
+
+    "DA05.d1", "DA05.d0", "DA05.d2", "DA05.d3",
+    "DA15.d1", "DA15.d2", "DA15.d3", "DA15.d0",
+
+    "DA17.d3", "DA17.d1", "DA17.d2", "DA17.d0",
+    "DA07.d0", "DA07.d2", "DA07.d1", "DA07.d3",
+
+    "DA18.d2", "DA18.d1", "DA18.d3", "DA18.d0",
+    "DA06.d1", "DA06.d2", "DA06.d3", "DA06.d0",
+
+    "DA03.d1", "DA03.d3", "DA03.d2", "DA03.d0",
+    "DA13.d3", "DA13.d2", "DA13.d1", "DA13.d0",
+
+    "DA16.d0", "DA16.d2", "DA16.d1", "DA16.d3",
+    "DA08.d2", "DA08.d3", "DA08.d0", "DA08.d1",
+
+    "DA14.d3", "DA14.d0", "DA14.d2", "DA14.d1",
+    "DA04.d0", "DA04.d3", "DA04.d2", "DA04.d1",
+
+    "DA09.d1", "DA09.d2", "DA09.d3", "DA09.d0",
+    "DA19.d0", "DA19.d3", "DA19.d2", "DA19.d1",
+
+    "DA01.d2", "DA01.d1", "DA01.d3", "DA01.d0",
+    "DA11.d1", "DA11.d3", "DA11.d0", "DA11.d2",
+
+    "DA1SP.d2", "DA1SP.d3", "DA1SP.d0", "DA1SP.d1",
+    "",         "",         "",         "",
+};
+
+//------------------------------------------------------------------------------
+
+static const char * dramSiteCardC4PortBRank04[] =
+{
+    "DB08.d1", "DB08.d0", "DB08.d2", "DB08.d3",
+    "DB18.d3", "DB18.d2", "DB18.d0", "DB18.d1",
+
+    "DB12.d3", "DB12.d0", "DB12.d2", "DB12.d1",
+    "DB02.d0", "DB02.d3", "DB02.d2", "DB02.d1",
+
+    "DB04.d1", "DB04.d3", "DB04.d2", "DB04.d0",
+    "DB14.d0", "DB14.d2", "DB14.d1", "DB14.d3",
+
+    "DB13.d2", "DB13.d0", "DB13.d3", "DB13.d1",
+    "DB03.d0", "DB03.d1", "DB03.d2", "DB03.d3",
+
+    "DB17.d0", "DB17.d2", "DB17.d1", "DB17.d3",
+    "DB07.d1", "DB07.d0", "DB07.d3", "DB07.d2",
+
+    "DB05.d1", "DB05.d0", "DB05.d3", "DB05.d2",
+    "DB15.d0", "DB15.d2", "DB15.d1", "DB15.d3",
+
+    "DB09.d2", "DB09.d1", "DB09.d3", "DB09.d0",
+    "DB19.d2", "DB19.d0", "DB19.d1", "DB19.d3",
+
+    "DB01.d1", "DB01.d3", "DB01.d0", "DB01.d2",
+    "DB11.d0", "DB11.d3", "DB11.d2", "DB11.d1",
+
+    "DB06.d2", "DB06.d0", "DB06.d1", "DB06.d3",
+    "DB16.d3", "DB16.d1", "DB16.d2", "DB16.d0",
+
+    "DB1SP.d2", "DB1SP.d3", "DB1SP.d1", "DB1SP.d0",
+    "",         "",         "",         "",
+};
+
+//------------------------------------------------------------------------------
+
+static const char * dramSiteCardC4PortCRank04[] =
+{
+    "DC13.d1", "DC13.d3", "DC13.d0", "DC13.d2",
+    "DC03.d0", "DC03.d2", "DC03.d3", "DC03.d1",
+
+    "DC04.d1", "DC04.d2", "DC04.d3", "DC04.d0",
+    "DC14.d1", "DC14.d3", "DC14.d0", "DC14.d2",
+
+    "DC06.d0", "DC06.d3", "DC06.d1", "DC06.d2",
+    "DC16.d2", "DC16.d0", "DC16.d3", "DC16.d1",
+
+    "DC09.d3", "DC09.d2", "DC09.d1", "DC09.d0",
+    "DC19.d1", "DC19.d0", "DC19.d3", "DC19.d2",
+
+    "DC12.d2", "DC12.d0", "DC12.d3", "DC12.d1",
+    "DC02.d3", "DC02.d1", "DC02.d2", "DC02.d0",
+
+    "DC17.d2", "DC17.d0", "DC17.d1", "DC17.d3",
+    "DC07.d3", "DC07.d1", "DC07.d0", "DC07.d2",
+
+    "DC05.d1", "DC05.d3", "DC05.d2", "DC05.d0",
+    "DC15.d2", "DC15.d0", "DC15.d3", "DC15.d1",
+
+    "DC01.d0", "DC01.d3", "DC01.d2", "DC01.d1",
+    "DC11.d3", "DC11.d0", "DC11.d1", "DC11.d2",
+
+    "DC08.d1", "DC08.d3", "DC08.d2", "DC08.d0",
+    "DC18.d0", "DC18.d2", "DC18.d1", "DC18.d3",
+
+    "DC1SP.d3", "DC1SP.d0", "DC1SP.d1", "DC1SP.d2",
+    "",         "",         "",         "",
+};
+
+//------------------------------------------------------------------------------
+
+static const char * dramSiteCardC4PortDRank04[] =
+{
+    "DD06.d2", "DD06.d1", "DD06.d0", "DD06.d3",
+    "DD16.d3", "DD16.d2", "DD16.d0", "DD16.d1",
+
+    "DD05.d1", "DD05.d3", "DD05.d2", "DD05.d0",
+    "DD15.d2", "DD15.d0", "DD15.d3", "DD15.d1",
+
+    "DD13.d3", "DD13.d0", "DD13.d1", "DD13.d2",
+    "DD03.d1", "DD03.d3", "DD03.d2", "DD03.d0",
+
+    "DD09.d3", "DD09.d1", "DD09.d2", "DD09.d0",
+    "DD19.d0", "DD19.d2", "DD19.d1", "DD19.d3",
+
+    "DD12.d2", "DD12.d1", "DD12.d3", "DD12.d0",
+    "DD02.d0", "DD02.d2", "DD02.d3", "DD02.d1",
+
+    "DD18.d1", "DD18.d3", "DD18.d0", "DD18.d2",
+    "DD08.d0", "DD08.d2", "DD08.d3", "DD08.d1",
+
+    "DD04.d0", "DD04.d1", "DD04.d3", "DD04.d2",
+    "DD14.d2", "DD14.d0", "DD14.d3", "DD14.d1",
+
+    "DD11.d0", "DD11.d2", "DD11.d1", "DD11.d3",
+    "DD01.d1", "DD01.d3", "DD01.d0", "DD01.d2",
+
+    "DD17.d3", "DD17.d0", "DD17.d1", "DD17.d2",
+    "DD07.d2", "DD07.d1", "DD07.d3", "DD07.d0",
+
+    "DD1SP.d1", "DD1SP.d3", "DD1SP.d2", "DD1SP.d0",
+    "",         "",         "",         "",
+};
+
+//------------------------------------------------------------------------------
+
+static const char ** dqSiteMap_rcC4
+                [MAX_MBA_PER_MEMBUF][PORT_SLCT_PER_MBA][MASTER_RANKS_PER_MBA] =
+{
+    { // MBA 0
+        { // Port 0
+            dramSiteCardC4PortARank04, NULL, // Ranks 0-1
+            NULL,                      NULL, // Ranks 2-3
+            dramSiteCardC4PortARank04, NULL, // Ranks 4-5
+            NULL,                      NULL, // Ranks 6-7
+        },
+        { // Port 1
+            dramSiteCardC4PortBRank04, NULL, // Ranks 0-1
+            NULL,                      NULL, // Ranks 2-3
+            dramSiteCardC4PortBRank04, NULL, // Ranks 4-5
+            NULL,                      NULL, // Ranks 6-7
+        },
+    },
+    { // MBA 1
+        { // Port 0
+            dramSiteCardC4PortCRank04, NULL, // Ranks 0-1
+            NULL,                      NULL, // Ranks 2-3
+            dramSiteCardC4PortCRank04, NULL, // Ranks 4-5
+            NULL,                      NULL, // Ranks 6-7
+        },
+        { // Port 1
+            dramSiteCardC4PortDRank04, NULL, // Ranks 0-1
+            NULL,                      NULL, // Ranks 2-3
+            dramSiteCardC4PortDRank04, NULL, // Ranks 4-5
+            NULL,                      NULL, // Ranks 6-7
+        },
+    },
+};
+
+//##############################################################################
 // DRAM site tables for RAW CARD D4
 //##############################################################################
 
@@ -2497,6 +2674,14 @@ int32_t getDramSiteInfo( uint8_t i_cardType, uint8_t i_mbaPos,
                 o_dqMap    = dqSiteMap_rcB4[i_mbaPos][i_ps][i_mrank];
                 // We can use the same dram Mapping as a similar card
                 o_dramMap  = dramSiteMap_rcB[i_mbaPos][i_ps][i_mrank];
+                break;
+
+            case CEN_TYPE_C4:
+                o_x4Dram   = true;
+                o_cardName = "RAW_CARD_C4  ";
+                o_dqMap    = dqSiteMap_rcC4[i_mbaPos][i_ps][i_mrank];
+                // We can use the same dram Mapping as a similar card
+                o_dramMap  = dramSiteMap_rcC[i_mbaPos][i_ps][i_mrank];
                 break;
 
             case CEN_TYPE_D4:
