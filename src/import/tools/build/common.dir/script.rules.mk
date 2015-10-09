@@ -33,7 +33,10 @@
 #       * $(GENERATED)_PATH - Optional path to put output into.
 #       * $(GENERATED)_COMMAND_PATH - Path to tool, assumed to be the current
 #                                     directory of the .mk file if not given.
-BUILD_GENERATED = $(eval $(call __BUILD_GENERATED))
+#    Input:
+#       * Optional input to delay the running of BUILD_GENERATED macro to a
+#       later phase  EXE or MODULE.
+BUILD_GENERATED = $(eval $(call __BUILD_GENERATED,$1))
 
 # Order of operations:
 #   * Define _PATH and _COMMAND_PATH if they do not exist.
@@ -64,7 +67,7 @@ $(call __CLEAN_TARGET,$$($(GENERATED)_PATH)/.$(GENERATED).built)
 $(foreach target,$(TARGETS),\
 	$(call __CLEAN_TARGET,$$($(GENERATED)_PATH)/$(target)))
 
-GEN_TARGETS += $$($(GENERATED)_PATH)/.$(GENERATED).built
+$(or $1,GEN)_TARGETS += $$($(GENERATED)_PATH)/.$(GENERATED).built
 
 GENERATED:=
 COMMAND:=
