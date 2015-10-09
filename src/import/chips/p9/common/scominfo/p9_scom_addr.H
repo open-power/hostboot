@@ -433,11 +433,6 @@ extern "C"
             /// @retval bool True if SCOM address is valid, false otherwise
             inline bool is_valid() const
             {
-                if (iv_addr & 0x0000000000F0C000ULL)
-                {
-                    return false;
-                }
-
                 return true;
             }
 
