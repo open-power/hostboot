@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config.C,v 1.54 2015/08/13 15:08:17 asaetow Exp $
+// $Id: mss_eff_config.C,v 1.55 2015/10/02 19:49:34 sglancy Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config.C,v $
 //------------------------------------------------------------------------------
@@ -45,6 +45,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.55  | sglancy  |02-OCT-15| Fixed RCD support for DDR4 ISRDIMMs
 //   1.54  | asaetow  |13-AUG-15| Added ATTR_SPD_SDRAM_ROWS=R17 and ATTR_SPD_SDRAM_ROWS=R18 for DDR4.
 //   1.53  | asaetow  |31-JUL-15| Changed code based on FW code review.
 //         |          |         | Added RC_MSS_EFF_CONFIG_INVALID_DDR4_SPD_TB and RC_MSS_EFF_CONFIG_INCOMPATABLE_SPD_DRAM_GEN.
@@ -2501,12 +2502,13 @@ FAPI_DBG("DDR4 Check:  SPD=0x%x, p_i_tFAWmin (nCK) = %i",
                   uint32_t& INVALID_RDIMM_FREQ = p_i_mss_eff_config_data->mss_freq;
                   FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_INVALID_RDIMM_FREQ); return rc;
                }
-
-               if ( p_i_mss_eff_config_data->mss_volt >= 1420 ) {        // 1.5V
+               
+	       //1.5V DDR3 or 1.2V DDR4
+               if ( p_i_mss_eff_config_data->mss_volt >= 1420 || (p_o_atts->eff_dram_gen == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4 && p_i_mss_eff_config_data->mss_volt >= 1130 && p_i_mss_eff_config_data->mss_volt <= 1270)) {        // 1.5V
                   l_mss_volt_mask = 0x0000000000000000LL;
-               } else if ( p_i_mss_eff_config_data->mss_volt >= 1270 ) { // 1.35V
+               } else if ( p_i_mss_eff_config_data->mss_volt >= 1270 && p_o_atts->eff_dram_gen == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR3) { // 1.35V and DDR3
                   l_mss_volt_mask = 0x0000000000010000LL;
-               } else {                           // 1.2V 
+               } else {                           // not valid DDR3 or DDR4 setting
                   FAPI_ERR("Invalid RDIMM ATTR_MSS_VOLT = %d on %s!", p_i_mss_eff_config_data->mss_volt, i_target_mba.toEcmdString());
                   uint32_t& INVALID_RDIMM_VOLT = p_i_mss_eff_config_data->mss_volt;
                   FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_INVALID_RDIMM_VOLT); return rc;
