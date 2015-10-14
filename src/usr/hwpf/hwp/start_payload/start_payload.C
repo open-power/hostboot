@@ -61,7 +61,7 @@
 #include    <util/misc.H>
 
 #include    <initservice/isteps_trace.H>
-#include    <hwpisteperror.H>
+#include    <isteps/hwpisteperror.H>
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>

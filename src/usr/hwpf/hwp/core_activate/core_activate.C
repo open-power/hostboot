@@ -46,7 +46,7 @@
 #include    <initservice/isteps_trace.H>
 #include    <initservice/istepdispatcherif.H>
 
-#include    <hwpisteperror.H>
+#include    <isteps/hwpisteperror.H>
 #include    <errl/errludtarget.H>
 
 #include    <intr/interrupt.H>

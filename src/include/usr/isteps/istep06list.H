@@ -26,31 +26,12 @@
 #define __ISTEPS_ISTEP6LIST_H
 
 /**
- * @file    istep6list.H
- *
- *  list of functions called by HWAS (ISTEP 6) - "named isteps"
- *
- *  Please see the note in initsvcstructs.H for description of
- *      the ISTEPNAME macro.
- *
- */
-
-#include    <initservice/initsvcstructs.H>
-#include    <initservice/initsvcreasoncodes.H>
-#include    <hwas/common/hwas.H>
-#include    <hwas/hostbootIstep.H>
-#include    "../../../usr/hwpf/hwp/slave_sbe/slave_sbe.H"
-
-namespace   INITSERVICE
-{
-
-/**
  * @file    istep06list.H
  *
  * @note    IStep definition for Hostboot - Slave SBE
  *
  *  IStep 06    Slave SBE
- *  IPL FLow Doc        v0.60 (06/02/15)
+ *  IPL FLow Doc        v0.67 (11/02/15)
  *
  *  06.1    host_bootloader
  *        : Host Bootloader (non-executable istep)
@@ -64,12 +45,109 @@ namespace   INITSERVICE
  *        : Build ipl parameters
  *  06.6    host_discover_targets
  *      :   Builds targeting
- *  06.7    host_gard
+ *  06.7    host_update_master_tpm
+ *      :   Update master TPM
+ *  06.8    host_gard
  *      :   Do Gard
- *  06.8    host_revert_sbe_mcs_setup
+ *  06.9    host_revert_sbe_mcs_setup
  *      :   Clean up MCS extent regs
+ *  06.10   host_start_occ_xstop_handler
+ *      :
  *
  */
+
+#include    <initservice/initsvcstructs.H>
+#include    <initservice/initsvcreasoncodes.H>
+
+namespace ISTEP_06
+{
+/**
+ * @brief   host_init_fsi   Setup the FSI links to slave chips (istep 6.4)
+ *
+ *  Call into the hwas platform-specific initHardware() function
+ *  to init the FSI hardware.
+ *
+ *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
+ *                              or NULL.
+ *  return  any error logs to istep
+ */
+void* host_init_fsi( void *io_pArgs );
+
+/**
+ * @brief   host_set_ipl_parms  Build ipl parameters (istep 6.5)
+ *
+ *  TBD
+ *
+ *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
+ *                              or NULL.
+ *  return  any error logs to istep
+ */
+void* host_set_ipl_parms( void *io_pArgs );
+
+/**
+ * @brief   host_discover_targets   Builds targeting (istep 6.6)
+ *
+ *  This routine will walk through all the targets and initialize HWAS STATE
+ *  to a known default value.
+ *
+ *  Currently everything is initialized to powered off, etc.
+ *
+ *  Call into the hwas platform-specific presenceDetect() function to
+ *  read the hardware information, and apply it to the target states.
+ *
+ *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
+ *                              or NULL.
+ *  return  any error logs to istep
+ */
+void* host_discover_targets( void *io_pArgs );
+
+/**
+ * @brief   host_update_master_tpm (istep 6.7)
+ *
+ *
+ *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
+ *                              or NULL.
+ *  return  any error logs to istep
+ */
+void* host_update_master_tpm( void *io_pArgs );
+
+/**
+ * @brief   host_gard   Do Gard (istep 6.8)
+ *
+ * Collect GARD information and apply it to the target states.
+ *
+ *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
+ *                              or NULL.
+ *  return  any error logs to istep
+ */
+void* host_gard( void *io_pArgs );
+
+/**
+ * @brief   host_revert_sbe_mcs_setup (istep 6.9)
+ *
+ *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
+ *                              or NULL.
+ *  return  any error logs to istep
+ */
+void* host_revert_sbe_mcs_setup (void * io_pArgs);
+
+/**
+ * @brief   host_start_occ_xstop_handler (istep 6.10)
+ *
+ *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
+ *                              or NULL.
+ *  return  any error logs to istep
+ */
+void* host_start_occ_xstop_handler (void * io_pArgs);
+
+
+
+};
+
+
+namespace   INITSERVICE
+{
+
 const   TaskInfo    g_istep06[]  =   {
         {
                 "",         // dummy, index 0
@@ -93,41 +171,46 @@ const   TaskInfo    g_istep06[]  =   {
         },
         {
                 ISTEPNAME(06,04,"host_init_fsi"),
-                HWAS::host_init_fsi,
+                ISTEP_06::host_init_fsi,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false,
                         BASE_INITIALIZATION }
         },
         {
                 ISTEPNAME(06,05,"host_set_ipl_parms"),
-                HWAS::host_set_ipl_parms,
+                ISTEP_06::host_set_ipl_parms,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
         {
                 ISTEPNAME(06,06,"host_discover_targets"),
-                HWAS::host_discover_targets,
+                ISTEP_06::host_discover_targets,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
         {
-                ISTEPNAME(06,07, "host_gard"),
-                HWAS::host_gard,
+                ISTEPNAME(06,07,"host_update_master_tpm"),
+                ISTEP_06::host_update_master_tpm,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
         {
-                ISTEPNAME(06,08,"host_revert_sbe_mcs_setup"),
-                HWAS::call_p9_revert_sbe_mcs_setup,
+                ISTEPNAME(06,08, "host_gard"),
+                ISTEP_06::host_gard,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
+        },
+        {
+                ISTEPNAME(06,09,"host_revert_sbe_mcs_setup"),
+                ISTEP_06::host_revert_sbe_mcs_setup,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
+        {
+                ISTEPNAME(06,10,"host_start_occ_xstop_handler"),
+                ISTEP_06::host_start_occ_xstop_handler,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+
 };
 
 const DepModInfo  g_istep06Dependancies = {
     {
-      DEP_LIB(libbuild_winkle_images.so), //proc_mailbox_utils
-      DEP_LIB(libslave_sbe.so),
-      DEP_LIB(libsbe.so),
-      DEP_LIB(libporeve.so),
-      DEP_LIB(libpstates.so),
-      DEP_LIB(libcore_activate.so),
-      DEP_LIB(libsecure_boot.so),
+      DEP_LIB(libistep06.so),
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
       DEP_LIB(libocc.so),
 #endif

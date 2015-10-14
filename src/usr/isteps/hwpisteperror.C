@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/hwpisteperror.C $                            */
+/* $Source: src/usr/isteps/hwpisteperror.C $                              */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,8 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include <hwpisteperror.H>
-#include <hwpistepud.H>
+#include <isteps/hwpisteperror.H>
+#include <isteps/hwpistepud.H>
 #include <istepdispatcher.H>
 
 using namespace ISTEP;
@@ -31,7 +31,7 @@ using namespace ISTEP_ERROR;
 
 // setup the internal elog pointer and capture error data for the first or
 // add error data to top level elog
-void IStepError::addErrorDetails( const errlHndl_t i_err )
+void ISTEP_ERROR::IStepError::addErrorDetails( const errlHndl_t i_err )
 {
     mutex_lock( &iv_mutex );
 

@@ -33,12 +33,14 @@ include hwp.mk
 OBJS += fapiTestHwp.o
 OBJS += fapiTestHwpDq.o
 OBJS += fapiHwpExecInitFile.o
-OBJS += hwpisteperror.o
-OBJS += hwpistepud.o
+
+#Temporarily compiling these here to avoid linker errors
+#This file will eventually be deleted when we delete hwpf/
+OBJS += ../isteps/hwpisteperror.o
+OBJS += ../isteps/hwpistepud.o
 
 SUBDIRS	+= dmi_training.d
 SUBDIRS	+= sbe_centaur_init.d
-SUBDIRS	+= mc_config.d
 SUBDIRS	+= dram_training.d
 SUBDIRS	+= activate_powerbus.d
 SUBDIRS	+= build_winkle_images.d

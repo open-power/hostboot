@@ -51,7 +51,7 @@
 
 #include    <initservice/isteps_trace.H>
 
-#include    <hwpisteperror.H>
+#include    <isteps/hwpisteperror.H>
 #include    <errl/errludtarget.H>
 #include    <hwas/common/deconfigGard.H>
 

@@ -51,10 +51,6 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_eff_pre_config
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_attr_cleanup
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_eff_mb_interleave
 
-OBJS +=  mc_config.o
-OBJS += mss_volt.o
-OBJS += mss_volt_dimm_count.o
-OBJS += mss_freq.o
 OBJS += mss_eff_config.o
 OBJS += mss_eff_grouping.o
 OBJS += opt_memmap.o
@@ -68,22 +64,12 @@ OBJS += mss_throttle_to_power.o
 OBJS += mss_eff_config_shmoo.o
 OBJS += mss_error_support.o
 OBJS += mss_eff_pre_config.o
-OBJS += mss_attr_cleanup.o
-OBJS += mss_eff_mb_interleave.o
-OBJS += mss_volt_vdd_offset.o
-OBJS += mss_volt_avdd_offset.o
-OBJS += mss_volt_vcs_offset.o
-OBJS += mss_volt_vpp_offset.o
-OBJS += mss_volt_vddr_offset.o
 OBJS += mss_count_active_centaurs.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/???
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_eff_config
-VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_volt
-VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_freq
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_eff_pre_config
-VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_attr_cleanup
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/mc_config/mss_eff_mb_interleave
 
 include ${ROOTPATH}/config.mk

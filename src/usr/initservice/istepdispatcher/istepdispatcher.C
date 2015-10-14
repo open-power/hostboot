@@ -63,7 +63,7 @@
 #include <hwas/hwasPlat.H>
 #include <targeting/attrPlatOverride.H>
 #include <console/consoleif.H>
-#include <hwpisteperror.H>
+#include <isteps/hwpisteperror.H>
 #include <pnor/pnorif.H>
 #include <ipmi/ipmiwatchdog.H>      //IPMI watchdog timer
 #include <ipmi/ipmipowerstate.H>    //IPMI System ACPI Power State
