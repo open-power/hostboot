@@ -30,6 +30,7 @@ HOSTBOOT_PROFILE_NO_INSTRUMENT = 1
 OBJS += module_init.o
 
 SUBDIRS += sio.d
+SUBDIRS += isteps.d
 SUBDIRS += trace.d
 SUBDIRS += cxxtest.d
 SUBDIRS += testcore.d

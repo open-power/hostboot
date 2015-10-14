@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/mc_config/mss_volt/mss_volt_dimm_count.H $   */
+/* $Source: src/usr/isteps/hwpistepud.C $                                 */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,49 +22,38 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_volt_dimm_count.H,v 1.1 2015/02/17 19:33:58 pardeik Exp $
-//------------------------------------------------------------------------------
-// *! (C) Copyright International Business Machines Corp. 2011
-// *! All Rights Reserved -- Property of IBM
-// *! ***  ***
-//------------------------------------------------------------------------------
-// *! TITLE       : mss_volt_dimm_count.H
-// *! DESCRIPTION : see additional comments below
-// *! OWNER NAME  : Michael Pardeik    Email: pardeik@us.ibm.com
-// *! BACKUP NAME : Jacob Sloat        Email: jdsloat@us.ibm.com
-// *! ADDITIONAL COMMENTS :
-//
-// Header file for mss_volt_dimm_count.
-//
-//------------------------------------------------------------------------------
-// Don't forget to create CVS comments when you check in your changes!
-//------------------------------------------------------------------------------
-// CHANGE HISTORY:
-//------------------------------------------------------------------------------
-// Version:|  Author: |  Date:   | Comment:
-//---------|----------|----------|-----------------------------------------------
-//  1.1    | pardeik  | 02/17/15 | initial drop
+/**
+ *  @file hwpudistep.C
+ *
+ *  @brief Implementation of HwpSvcUserDetailsIstep
+ */
+#include <hbotcompid.H>
+#include <isteps/hwpistepud.H>
+#include <hwpf/hwpf_reasoncodes.H>
 
-#ifndef MSS_VOLT_DIMM_COUNT_H_
-#define MSS_VOLT_DIMM_COUNT_H_
+using namespace ISTEP_ERROR;
 
-#include <fapi.H>
+//------------------------------------------------------------------------------
+HwpUserDetailsIstep::HwpUserDetailsIstep( errlHndl_t i_err )
+{
+    HwpUserDetailsIstepErrorData * l_pBuf =
+        reinterpret_cast<HwpUserDetailsIstepErrorData *>(
+                reallocUsrBuf(sizeof(HwpUserDetailsIstepErrorData)));
 
-typedef fapi::ReturnCode (*mss_volt_dimm_count_FP_t)(std::vector<fapi::Target> &);
+    l_pBuf->eid = i_err->eid();
 
-extern "C"
+    l_pBuf->reasoncode = i_err->reasonCode();
+
+    // Set up ErrlUserDetails instance variables
+    iv_CompId = HWPF_COMP_ID;
+    iv_Version = 1;
+    iv_SubSection = fapi::HWPF_UDT_STEP_ERROR_DETAILS;
+}
+
+//------------------------------------------------------------------------------
+HwpUserDetailsIstep::~HwpUserDetailsIstep()
 {
 
-/**
- * @brief mss_volt_dimm_count procedure. Determines number of dimms present behind a voltage domain
- *
- * @param[in]  std::vector<fapi::Target> l_targets  Reference to vector of present Centaur Targets in a particular power domain
- *
- * @return ReturnCode
- */
+}
 
-  fapi::ReturnCode mss_volt_dimm_count(std::vector<fapi::Target> & i_targets_memb);
 
-} // extern "C"
-
-#endif // MSS_VOLT_DIMM_COUNT_H_

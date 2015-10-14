@@ -1,12 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/isteps/istep12list.H $                        */
+/* $Source: src/usr/isteps/istep07/call_mss_attr_update.C $               */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
-/* [+] Google Inc.                                                        */
+/* Contributors Listed Below - COPYRIGHT 2015                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,51 +22,62 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __ISTEPS_ISTEP12LIST_H
-#define __ISTEPS_ISTEP12LIST_H
-
 /**
- * @file    istep12list.H
- *
- *  IStep 12    Step 12 DMI Training
- *  IPL FLow Doc        v0.60 (06/02/15)
- *
- *  Please see the note in initsvcstructs.H for description of
- *      the ISTEPNAME macro.
- *
+ *  @file call_mss_attr_update.C
+ *  Contains the wrapper for istep 7.5
  */
 
-#include    <initservice/initsvcstructs.H>
-#include    <initservice/initsvcreasoncodes.H>
+/******************************************************************************/
+// Includes
+/******************************************************************************/
+#include    <stdint.h>
 
-//  include prototypes file
+#include    <trace/interface.H>
+#include    <initservice/taskargs.H>
+#include    <errl/errlentry.H>
 
-#include <config.h>
+#include    <isteps/hwpisteperror.H>
 
-namespace   INITSERVICE
+#include    <errl/errludtarget.H>
+#include    <initservice/isteps_trace.H>
+
+//  targeting support
+#include    <targeting/common/commontargeting.H>
+#include    <targeting/common/utilFilter.H>
+
+
+#include    <config.h>
+
+namespace   ISTEP_07
 {
 
-const   TaskInfo    g_istep12[]  =   {
-        {
-                "",                   // dummy, index 0
-                NULL,
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
-        },
+using   namespace   ISTEP;
+using   namespace   ISTEP_ERROR;
+using   namespace   ERRORLOG;
+using   namespace   TARGETING;
 
-};
+//
+//  Wrapper function to call mss_attr_update
+//
+void*    call_mss_attr_update( void *io_pArgs )
+{
 
-const DepModInfo g_istep12Dependancies = {
+    IStepError l_StepError;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_attr_update entry");
+    errlHndl_t l_err = NULL;
+
+    //@TODO RTC:133830 add the procedure back in when ready
+    //FAPI_INVOKE_HWP(l_err, p9_mss_attr_update);
+    if(l_err)
     {
-        NULL
+        l_StepError.addErrorDetails(l_err);
+        errlCommit( l_err, HWPF_COMP_ID );
     }
-};
 
-const ExtTaskInfo g_istep12TaskList = {
-    &(g_istep12[0]),
-    ( sizeof(g_istep12)/sizeof(TaskInfo) ),
-    &g_istep12Dependancies
-};
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_attr_update exit" );
 
-};  // end namespace
+    return l_StepError.getErrorHandle();
+}
 
-#endif
+};   // end namespace

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,7 @@
 #include    <initservice/taskargs.H>
 #include    <errl/errlentry.H>
 
-#include    <hwpisteperror.H>
+#include    <isteps/hwpisteperror.H>
 #include    <errl/errludtarget.H>
 
 #include    <initservice/isteps_trace.H>

@@ -51,7 +51,7 @@
 #include <targeting/namedtarget.H>
 #include <targeting/attrsync.H>
 
-#include <hwpisteperror.H>
+#include <isteps/hwpisteperror.H>
 #include <errl/errludtarget.H>
 
 //  fapi support

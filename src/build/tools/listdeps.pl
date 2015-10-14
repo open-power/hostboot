@@ -166,10 +166,10 @@ elsif ( $list_all )
 else
 {
     @istep_modules = (
-        "libslave_sbe.so",
+        "libistep06.so",
+        "libistep07.so",
         "libnest_chiplets.so" ,
         "libedi_ei_initialization.so" ,
-        "libmc_config.so" ,
         "libbuild_winkle_images.so" ,
         "libcore_activate.so" ,
         "libstart_payload.so" ,
@@ -216,16 +216,16 @@ my $resident_modules = {
 
 # A list of the dependent libraries in each istep.
 # These must be included in the istep file as a dependency.
-my $istepFiles = {
-    "libslave_sbe.so"               => "istep06list.H" ,
-    "libmc_config.so"               => "istep07list.H" ,
+my %istepFiles = (
+    "libistep06.so"               => "istep06list.H" ,
+    "libistep07.so"               => "istep07list.H" ,
     "libnest_chiplets.so"           => "istep08list.H" ,
     "libedi_ei_initialization.so"   => "istep09list.H" ,
     "libocc.so"                     => "istep15list.H" ,
     "libbuild_winkle_images.so"     => "istep15list.H" ,
     "libcore_activate.so"           => "istep16list.H" ,
     "libstart_payload.so"           => "istep21list.H" ,
-};
+);
 
 # array to hold list of dependent libraries
 my @Dependencies;
@@ -272,7 +272,7 @@ foreach my $module_name  (@istep_modules )
     # should we validate?
     if( $validate_deps )
     {
-        validate( $module_name, $istepFiles->{$module_name} );
+        validate( $module_name, $istepFiles{$module_name} );
     }
 
     # does user want us to print the dependencies to the screen?

@@ -29,7 +29,7 @@
  * @file    istep07list.H
  *
  *  IStep 07    Nest Chiplets
- *  IPL FLow Doc        v0.60 (06/02/15)
+ *  IPL FLow Doc        v0.67 (11/02/15)
  *
  *    07.1    host_collect_dimm_spd
  *          : Collect Master dimm SPD
@@ -50,8 +50,77 @@
 #include    <initservice/initsvcstructs.H>
 #include    <initservice/initsvcreasoncodes.H>
 
-//  include prototypes file
-#include    "../../../usr/hwpf/hwp/mc_config/mc_config.H"
+
+namespace   ISTEP_07
+{
+/**
+ *  @brief   host_collect_dimm_spd
+ *
+ *           Collect Master dimm SPD
+ *
+ *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
+ *                              or NULL.
+ *  return  any error logs to istep
+ *
+ */
+void*    call_host_collect_dimm_spd( void * io_pArgs );
+
+/**
+ *  @brief   mss_volt
+ *
+ *            Calc dimm voltage
+ *
+ *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
+ *                              or NULL.
+ *  return  any error logs to istep
+ *
+ */
+void*   call_mss_volt( void * io_pArgs );
+
+
+
+/**
+ *  @brief   mss_freq
+ *
+ *           Calc dimm frequency
+ *
+ *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
+ *                              or NULL.
+ *  return  any error logs to istep
+ *
+ */
+void*    call_mss_freq( void * io_pArgs );
+
+
+
+/**
+ *  @brief   mss_eff_config
+ *
+ *           Determine effective config
+ *
+ *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
+ *                              or NULL.
+ *  return  any error logs to istep
+ *
+ */
+void*    call_mss_eff_config( void * io_pArgs );
+
+/**
+ *  @brief   mss_attr_update
+ *
+ *  Stub HWP to allow FW to override attributes programmatically
+ *
+ *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
+ *                              or NULL.
+ *  return  any error logs to istep
+ *
+ */
+void*    call_mss_attr_update( void *io_pArgs );
+
+};   // end namespace
+
+
+
 
 namespace   INITSERVICE
 {
@@ -63,27 +132,27 @@ namespace   INITSERVICE
         },
         {
                 ISTEPNAME(07,01,"host_collect_dimm_spd"),
-                MC_CONFIG::call_host_collect_dimm_spd,
+                ISTEP_07::call_host_collect_dimm_spd,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(07,02,"mss_volt"),
-                MC_CONFIG::call_mss_volt,
+                ISTEP_07::call_mss_volt,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(07,03,"mss_freq"),
-                MC_CONFIG::call_mss_freq,
+                ISTEP_07::call_mss_freq,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(07,04,"mss_eff_config"),
-                MC_CONFIG::call_mss_eff_config,
+                ISTEP_07::call_mss_eff_config,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(07,05,"mss_attr_update"),
-                MC_CONFIG::call_mss_attr_update,
+                ISTEP_07::call_mss_attr_update,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
 };
@@ -91,8 +160,7 @@ namespace   INITSERVICE
 
 const DepModInfo g_istep07Dependancies = {
     {
-        DEP_LIB(libmc_config.so),
-        DEP_LIB(libsbe.so),
+        DEP_LIB(libistep07.so),
         NULL
     }
 };

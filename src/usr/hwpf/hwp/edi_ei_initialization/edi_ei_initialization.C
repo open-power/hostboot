@@ -43,7 +43,7 @@
 #include    <initservice/taskargs.H>
 #include    <errl/errlentry.H>
 
-#include    <hwpisteperror.H>
+#include    <isteps/hwpisteperror.H>
 #include    <errl/errludtarget.H>
 
 #include    <initservice/isteps_trace.H>

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -25,7 +27,7 @@
 
 #include <cxxtest/TestSuite.H>
 #include <errl/errlentry.H>
-#include <hwpisteperror.H>
+#include <isteps/hwpisteperror.H>
 #include <istepdispatcher.H>
 
 using namespace ISTEP;

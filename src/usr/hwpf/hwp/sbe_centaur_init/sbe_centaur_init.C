@@ -53,7 +53,7 @@
 #include <fapiPlatHwpInvoker.H>
 #include <vfs/vfs.H>
 #include "sbe_centaur_init.H"
-#include <hwpisteperror.H>
+#include <isteps/hwpisteperror.H>
 #include <errl/errludtarget.H>
 #include <sbe/sbeif.H>
 #include "cen_xip_customize.H"

@@ -51,7 +51,6 @@ OBJS += deconfigGard.o
 
 # files in this directory
 OBJS += hwasPlat.o
-OBJS += hostbootIstep.o
 OBJS += hwasPlatError.o
 OBJS += hwasPlatCallout.o
 OBJS += hwasPlatDeconfigGard.o

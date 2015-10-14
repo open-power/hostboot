@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwas/hostbootIstep.C $                                */
+/* $Source: src/usr/isteps/istep06/istep06.C $                            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2015                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,25 +22,18 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/**
- *  @file hostbootIstep.C
- *
- *  @brief hostboot istep-called functions
- */
-
 #include <hwas/common/hwas.H>
 #include <hwas/common/hwasCommon.H>
 #include <hwas/common/hwas_reasoncodes.H>
 #include <hwas/hwasPlat.H>
 
-#include <hwas/hostbootIstep.H>
 #include <hwas/common/deconfigGard.H>
 
 #include <fsi/fsiif.H>
 #include <initservice/taskargs.H>
 #include <initservice/isteps_trace.H>
 #include <initservice/initserviceif.H>
-#include <hwpisteperror.H>
+#include <isteps/hwpisteperror.H>
 
 #include <targeting/attrsync.H>
 #include <targeting/namedtarget.H>
@@ -53,18 +46,12 @@
 #include <sbe/sbeif.H>
 #include <sbe_update.H>
 
-//  fapi support
-#include  <fapi.H>
-#include  <fapiPlatHwpInvoker.H>
-
 //  targeting support.
 #include  <targeting/common/utilFilter.H>
 #include  <targeting/common/commontargeting.H>
 #include  <targeting/common/entitypath.H>
 
 #include  <errl/errludtarget.H>
-
-#include <proc_enable_reconfig.H>
 
 #include <console/consoleif.H>
 
@@ -85,18 +72,15 @@
   #include <secureboot/trustedbootif.H>
 #endif
 
-namespace HWAS
-{
-
+using namespace HWAS;
 using namespace TARGETING;
-using namespace fapi;
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
 
-// functions called from the istep dispatcher -- hostboot only
-
+namespace ISTEP_06
+{
 //******************************************************************************
-// host_init_fsi function
+// host_init_fsi function -- istep 06.4
 //******************************************************************************
 void* host_init_fsi( void *io_pArgs )
 {
@@ -130,7 +114,7 @@ void* host_init_fsi( void *io_pArgs )
 }
 
 //******************************************************************************
-// host_set_ipl_parms function
+// host_set_ipl_parms function -- istep 6.5
 //******************************************************************************
 void* host_set_ipl_parms( void *io_pArgs )
 {
@@ -143,7 +127,7 @@ void* host_set_ipl_parms( void *io_pArgs )
 }
 
 //******************************************************************************
-// host_discover_targets function
+// host_discover_targets function -- istep 6.6
 //******************************************************************************
 void* host_discover_targets( void *io_pArgs )
 {
@@ -226,7 +210,17 @@ void* host_discover_targets( void *io_pArgs )
 }
 
 //******************************************************************************
-// host_gard function
+// host_update_master_tpm -- istep 6.7
+//******************************************************************************
+void* host_update_master_tpm( void *io_pArgs )
+{
+    errlHndl_t l_err = NULL;
+
+    return l_err;
+}
+
+//******************************************************************************
+// host_gard function --istep 6.8
 //******************************************************************************
 void* host_gard( void *io_pArgs )
 {
@@ -315,8 +309,8 @@ void* host_gard( void *io_pArgs )
 
          /*@    errorlog tag
           *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
-          *  @moduleid       MOD_HOST_GARD
-          *  @reasoncode     RC_MASTER_CORE_NULL
+          *  @moduleid       HWAS::MOD_HOST_GARD
+          *  @reasoncode     HWAS::RC_MASTER_CORE_NULL
           *  @userdata1      0
           *  @userdata2      0
           *  @devdesc        HWAS host_gard: no masterCore found
@@ -364,58 +358,32 @@ void* host_gard( void *io_pArgs )
 }
 
 //******************************************************************************
-// call_p9_revert_sbe_mcs_setup function
+// host_revert_sbe_mcs_setup --istep 6.9
 //******************************************************************************
-void* call_p9_revert_sbe_mcs_setup(void *io_pArgs)
+void* host_revert_sbe_mcs_setup ( void *io_pArgs )
 {
-    errlHndl_t  l_errl = NULL;
-    IStepError  l_stepError;
+    errlHndl_t l_err = NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_p9_revert_sbe_mcs_setup entry" );
+            "call p9_revert_sbe_mcs_setup entry" );
 
-    TARGETING::Target* l_pProcTarget = NULL;
-    TARGETING::targetService().masterProcChipTargetHandle(l_pProcTarget);
+    //@TODO: RTC:133836 call p9_revert_sbe_mcs_setup HWP
 
-    fapi::Target l_fapiProcTarget(fapi::TARGET_TYPE_PROC_CHIP, l_pProcTarget);
-
-    // Invoke the HWP
-    // FAPI_INVOKE_HWP(l_errl, p9_revert_sbe_mcs_setup, l_fapiProcTarget);
-
-    if (l_errl)
-    {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "ERROR : failed executing p9_revert_sbe_mcs_setup "
-                  "returning error");
-
-        // capture the target data in the elog
-        ERRORLOG::ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_errl );
-
-        // Create IStep error log and cross reference error that occurred
-        l_stepError.addErrorDetails( l_errl );
-
-        errlCommit( l_errl, HWPF_COMP_ID );
-    }
-    else
-    {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "SUCCESS : p9_revert_sbe_mcs_setup completed ok");
-    }
-
-    TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-              "call_p9_revert_sbe_mcs_setup exit");
-
-    // end task, returning any errorlogs to IStepDisp
-    return l_stepError.getErrorHandle();
+    return l_err;
 }
 
-
 //******************************************************************************
-// host_cancontinue_clear function
+// host_start_occ_xstop_handler
 //******************************************************************************
-void* host_cancontinue_clear( void *io_pArgs )
+void* host_start_occ_xstop_handler ( void *io_pArgs )
 {
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    errlHndl_t l_err = NULL;
+
+#if 0
+/// This is a bunch of stuff that was put into P8 and git didn't handle
+/// merging correctly.  Some of this may be a useful starting point for
+/// enabling OCC checkstop handling.  -- Patrick
+
                 "host_cancontinue_clear entry" );
     errlHndl_t errl = NULL;
 
@@ -430,83 +398,6 @@ void* host_cancontinue_clear( void *io_pArgs )
                "activateOCCs failed");
     }
 #endif
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "host_cancontinue_clear exit" );
-
-    return errl;
-}
-
-//******************************************************************************
-// host_prd_hwreconfig function
-//******************************************************************************
-void* host_prd_hwreconfig( void *io_pArgs )
-{
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "host_prd_hwreconfig entry" );
-
-    errlHndl_t errl = NULL;
-    IStepError l_stepError;
-    do
-    {
-        // Flip the scom path back to FSI in case we enabled IBSCOM previously
-        IBSCOM::enableInbandScoms(IBSCOM_DISABLE);
-
-        // Call PRDF to remove non-function chips from its system model
-        errl = PRDF::refresh();
-
-        if (errl)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "host_prd_hwreconfig ERROR 0x%.8X returned from"
-                      "  call to PRDF::refresh", errl->reasonCode());
-
-            // Create IStep error log and cross reference error that occurred
-            l_stepError.addErrorDetails(errl);
-
-            // Commit Error
-            errlCommit(errl, HWPF_COMP_ID);
-
-            break;
-        }
-
-        // Lists for present MCS
-        TARGETING::TargetHandleList l_presMcsList;
-
-        // find all present MCS chiplets of all procs
-        getChipletResources(l_presMcsList, TYPE_MCS, UTIL_FILTER_PRESENT);
-
-        for (TargetHandleList::const_iterator
-             l_mcs_iter = l_presMcsList.begin();
-             l_mcs_iter != l_presMcsList.end();
-             ++l_mcs_iter)
-        {
-            // make a local copy of the MCS target
-            const TARGETING::Target * l_pMcs = *l_mcs_iter;
-            // Retrieve HUID of current MCS
-            TARGETING::ATTR_HUID_type l_currMcsHuid =
-                TARGETING::get_huid(l_pMcs);
-
-            // Dump current run on target
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Running proc_enable_reconfig HWP on "
-                    "MCS target HUID %.8X", l_currMcsHuid);
-
-            // Create FAPI Targets.
-            fapi::Target l_fapiMcsTarget(TARGET_TYPE_MCS_CHIPLET,
-                    (const_cast<TARGETING::Target*>(l_pMcs)));
-
-            // Call the HWP with each fapi::Target
-            FAPI_INVOKE_HWP(errl, proc_enable_reconfig, l_fapiMcsTarget);
-
-            if (errl)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                         "ERROR 0x%.8X: proc_enable_reconfig HWP returns error",
-                          errl->reasonCode());
-
-                // Capture the target data in the elog
-                ERRORLOG::ErrlUserDetailsTarget(l_pMcs).addToLog( errl );
 
                 //Create IStep error log and cross reference error that occurred
                 l_stepError.addErrorDetails(errl);
@@ -551,16 +442,8 @@ void* host_prd_hwreconfig( void *io_pArgs )
                 "host_prd_hwreconfig exit" );
     // end task, returning any errorlogs to IStepDisp
     return l_stepError.getErrorHandle();
+#endif
+    return l_err;
 }
 
-//******************************************************************************
-// host_stub function
-//******************************************************************************
-void* host_stub( void *io_pArgs )
-{
-    errlHndl_t errl = NULL;
-    // no function required
-    return errl;
-}
-
-} // namespace HWAS
+};

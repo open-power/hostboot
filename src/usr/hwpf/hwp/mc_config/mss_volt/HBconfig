@@ -1,4 +1,0 @@
-config ALLOW_NON_COMPLIANT_DIMM
-    default n
-    help
-        Set ATTR_MSS_VOLT_COMPLIANT_DIMMS to allow dimms that are not 1.35V

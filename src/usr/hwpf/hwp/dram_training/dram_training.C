@@ -49,7 +49,7 @@
 #include    <targeting/common/util.H>
 #include    <targeting/common/utilFilter.H>
 
-#include    <hwpisteperror.H>
+#include    <isteps/hwpisteperror.H>
 #include    <errl/errludtarget.H>
 
 //  fapi support
@@ -79,7 +79,6 @@ const uint8_t VPO_NUM_OF_MEMBUF_TO_RUN = UNLIMITED_RUN;
 #include    "mss_draminit_trainadv/mss_draminit_training_advanced.H"
 #include    "mss_draminit_mc/mss_draminit_mc.H"
 #include    "proc_throttle_sync.H"
-#include    "../mc_config/mc_config.H"
 
 
 namespace   DRAM_TRAINING
@@ -544,7 +543,10 @@ void   mss_post_draminit( IStepError & l_stepError )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "mss_post_draminit entry" );
 
-    set_eff_config_attrs_helper(MC_CONFIG::POST_DRAM_INIT, rerun_vddr);
+    //@TODO RTC: 133831. The helper function is currently commented out because
+    //some of the attributes don't exist. uncomment it once attribute support is
+    //in place
+//    set_eff_config_attrs_helper(ISTEP_07::POST_DRAM_INIT, rerun_vddr);
 
     if ( rerun_vddr == false )
     {
@@ -554,11 +556,13 @@ void   mss_post_draminit( IStepError & l_stepError )
     }
 
     // Call mss_volt_vddr_offset to recalculate VDDR voltage
-
-    l_err = MC_CONFIG::setMemoryVoltageDomainOffsetVoltage<
+    // @TODO RTC: 133831 Uncomment once attribute support is in place
+    /*
+    l_err = ISTEP_07::setMemoryVoltageDomainOffsetVoltage<
         TARGETING::ATTR_MSS_VOLT_VDDR_OFFSET_DISABLE,
         TARGETING::ATTR_MEM_VDDR_OFFSET_MILLIVOLTS,
         TARGETING::ATTR_VMEM_ID>();
+        */
     if(l_err)
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "mss_post_draminit: "
@@ -596,7 +600,6 @@ void   mss_post_draminit( IStepError & l_stepError )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "mss_post_draminit exit" );
-
     return;
 }
 

@@ -43,7 +43,7 @@
 #include    <diag/mdia/mdia.H>
 #include    <diag/attn/attn.H>
 #include    <initservice/isteps_trace.H>
-#include    <hwpisteperror.H>
+#include    <isteps/hwpisteperror.H>
 #include    <errl/errludtarget.H>
 #include    <intr/interrupt.H>    // for PIR_t structure
 
