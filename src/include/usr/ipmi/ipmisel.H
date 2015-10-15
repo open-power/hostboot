@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/ipmi/ipmisel.H $                                      */
+/* $Source: src/include/usr/ipmi/ipmisel.H $                              */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -34,6 +34,8 @@
 #include <stdint.h>
 #include <builtins.h>
 #include <ipmi/ipmiif.H>
+#include <sys/sync.h>
+
 
 /**
  *
@@ -248,9 +250,9 @@ class IpmiSEL
 
       /**
        * Thread start routine for the resource provider
-       * @param[in] void*, unused
+       * @param[in] void* instance - 'this' instance to start.
        */
-      static void* start(void* unused);
+      static void* start(void* instance);
 
       /**
        * Default constructor
@@ -277,6 +279,7 @@ class IpmiSEL
       void execute(void);
 
       msg_q_t           iv_msgQ;      //!< ipmi message queue
+      barrier_t         iv_sync_start;
 
       //Disallow copying of this class.
       IpmiSEL& operator=(const IpmiSEL&);

@@ -420,7 +420,9 @@ IpmiSEL::IpmiSEL(void)
     :iv_msgQ(msg_q_create())
 {
     IPMI_TRAC(ENTER_MRK "IpmiSEL ctor");
-    task_create(&IpmiSEL::start,NULL);
+    barrier_init(&iv_sync_start, 2);
+    task_create(&IpmiSEL::start, this);
+    barrier_wait(&iv_sync_start);
 }
 
 /**
@@ -431,9 +433,9 @@ IpmiSEL::~IpmiSEL(void)
     msg_q_destroy(iv_msgQ);
 }
 
-void* IpmiSEL::start(void* unused)
+void* IpmiSEL::start(void* instance)
 {
-    Singleton<IpmiSEL>::instance().execute();
+    static_cast<IpmiSEL*>(instance)->execute();
     return NULL;
 }
 
@@ -455,6 +457,8 @@ void IpmiSEL::execute(void)
     //      finish flushing the pipe.
     INITSERVICE::registerShutdownEvent(iv_msgQ, IPMISEL::MSG_STATE_SHUTDOWN,
                                        INITSERVICE::MBOX_PRIORITY);
+
+    barrier_wait(&iv_sync_start);
 
     while(true)
     {
