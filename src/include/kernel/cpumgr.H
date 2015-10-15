@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -170,8 +170,9 @@ class CpuManager
          *  bit 51 - Wake-up from machine check.
          *  bit 60 - LPES(0) = 1 (see ISA).
          *  bit 61 - LPES(1) = 0 (P8 RFC02204 forces to 0)
+         *  bit 62 - HVICE - Hypervisor Virt Interrupt Conditionally Enable
          */
-        static const uint64_t WAKEUP_LPCR_VALUE =   0x0000000000007008;
+        static const uint64_t WAKEUP_LPCR_VALUE =   0x000000000000700A;
 
         /** Desired value for RPR after wakeup.
          *

@@ -46,6 +46,7 @@ class InterruptMsgHdlr : public MessageHandler
     public:
 
         /**
+         * TODO RTC 150260
          * Field values for P8
          * @note This is used to calculate the mmio address offset
          * from the PIR for the interrupt presenter memory mapped registers.
@@ -56,19 +57,20 @@ class InterruptMsgHdlr : public MessageHandler
          */
         enum
         {
-            P8_PIR_THREADID_MSK = PIR_t::THREAD_MASK,
-            P8_PIR_COREID_MSK   = PIR_t::CORE_MASK,
-            P8_PIR_CHIPID_MSK   = PIR_t::CHIP_MASK,
-            P8_PIR_NODEID_MSK   = PIR_t::GROUP_MASK,
+            P9_PIR_THREADID_MSK = PIR_t::THREAD_MASK,
+            P9_PIR_COREID_MSK   = PIR_t::CORE_MASK,
+            P9_PIR_CHIPID_MSK   = PIR_t::CHIP_MASK,
+            P9_PIR_NODEID_MSK   = PIR_t::GROUP_MASK,
 
             // Logical Shift Left fields for mmio Base address from PIR.
             // (IP addr bit pos - PIR bit pos)
-            P8_IP_THREADID_LSL = (12-PIR_t::BITS_AFTER_CORE),
-            P8_IP_COREID_LSL   = (15-PIR_t::BITS_AFTER_CORE),
-            P8_IP_CHIPID_LSL   = (20-PIR_t::BITS_AFTER_CHIP),
-            P8_IP_NODEID_LSL   = (22-PIR_t::BITS_AFTER_GROUP),
+            P9_IP_THREADID_LSL = (12-PIR_t::BITS_AFTER_CORE),
+            P9_IP_COREID_LSL   = (15-PIR_t::BITS_AFTER_CORE),
+            P9_IP_CHIPID_LSL   = (20-PIR_t::BITS_AFTER_CHIP),
+            P9_IP_NODEID_LSL   = (22-PIR_t::BITS_AFTER_GROUP),
             XIRR_ADDR_OFFSET   = 4,
             MFRR_ADDR_OFFSET   = 12,
+            ACK_HYPERVISOR_INT_REG_OFFSET = 0x830,
 
             INTP_BAR_VALUE     = 0xFFFFE000,    // upper 32 bits of IPCBAR
 
@@ -109,16 +111,16 @@ class InterruptMsgHdlr : public MessageHandler
             // The PIR chip id field has 1 extra bit (8 chips), so we need
             // to shift the node and chip separately
             offset  |=
-                (i_pir & P8_PIR_NODEID_MSK) << P8_IP_NODEID_LSL;
+                (i_pir & P9_PIR_NODEID_MSK) << P9_IP_NODEID_LSL;
 
             offset  |=
-                (i_pir & P8_PIR_CHIPID_MSK) << P8_IP_CHIPID_LSL;
+                (i_pir & P9_PIR_CHIPID_MSK) << P9_IP_CHIPID_LSL;
 
             // The core and thread id field are adjacent in both the PIR and
             // the mmio offset, so they can be done in one shift operation.
             offset  |=
-                (i_pir & (P8_PIR_COREID_MSK | P8_PIR_THREADID_MSK))
-                << P8_IP_THREADID_LSL;
+                (i_pir & (P9_PIR_COREID_MSK | P9_PIR_THREADID_MSK))
+                << P9_IP_THREADID_LSL;
 
             return offset;
         }

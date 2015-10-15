@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -76,26 +78,22 @@ void InterruptMsgHdlr::handleInterrupt()
 
     if( cv_ipc_base_address != 0 )
     {
-        uint64_t xirrAddress = cv_ipc_base_address;
-
-        xirrAddress += mmio_offset(pir); // Add offset for this cpu
-        xirrAddress += XIRR_ADDR_OFFSET; // Add offset for XIRR register
+        uint64_t ackHypeInt2RegAddress = cv_ipc_base_address;
+        ackHypeInt2RegAddress += ACK_HYPERVISOR_INT_REG_OFFSET;
 
         // Ignore HRMOR setting
-        xirrAddress |= 0x8000000000000000ul;
-
-        uint32_t xirr = 0;
-        printkd ("XirrAddr %lx\n",xirrAddress);
+        ackHypeInt2RegAddress |= 0x8000000000000000ul;
+        uint16_t ackHypeInt2Reg = 0;
 
         // Reading this register acknowledges the interrupt and deactivates the
         // external interrupt signal to the processor. The XIRR is now locked
         // and can't be pre-empted by a "more favored" interrupt.
         // This is a cache-inhibited load from hypervisor state.
-        // lwzcix      BOP1,Ref_G0,BOP2
-        asm volatile("lwzcix %0, 0, %1"
-                     : "=r" (xirr)           // output, %0
-                     : "r" (xirrAddress)     // input,  %1
-                     : );                    // no impacts
+        // lhzcix      BOP1,Ref_G0,BOP2
+        asm volatile("lhzcix %0, 0, %1"
+                     : "=r" (ackHypeInt2Reg)           // output, %0
+                     : "r" (ackHypeInt2RegAddress)     // input,  %1
+                     : );                              // no impacts
 
         if(cv_instance)
         {
@@ -103,8 +101,9 @@ void InterruptMsgHdlr::handleInterrupt()
 
             //sendMessage needs a unique key, otherwise it
             //drops messages.  PIR is not unique enough, make
-            //it (xirr<<32) | PIR
-            uint64_t l_data0 = pir | (static_cast<uint64_t>(xirr) <<32);
+            //it (ackHypInt2Reg<<32) | PIR
+            uint64_t l_data0 =
+                             pir | (static_cast<uint64_t>(ackHypeInt2Reg) <<32);
             cv_instance->sendMessage(MSG_INTR_EXTERN,
                                      reinterpret_cast<void*>(l_data0),
                                      NULL,
@@ -115,7 +114,6 @@ void InterruptMsgHdlr::handleInterrupt()
     else
     {
         printk("InterrurptMsgHdlr got called before IPC was setup\n");
-
         // The INTR mmio base address is not yet available via the attributes.
         // If we get here during an MPIPL then the BAR value could be read
         // from the ICP BAR SCOM register, however, since this value will
@@ -142,9 +140,8 @@ void InterruptMsgHdlr::handleInterrupt()
         // There should not be any more interrupts until an eoi is sent
         // by writing the xirr back with the value read.
 
-        printk("XIRR @ %lx = %x\n",xirrAddress,xirr);
-
         //If this is an IPI -- clean it up
+        //TODO RTC 137564
         if((xirr & 0x00FFFFFF) == INTERPROC_XISR)
         {
             uint64_t mfrrAddress =

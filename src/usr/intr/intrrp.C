@@ -58,26 +58,6 @@
 using namespace INTR;
 using namespace TARGETING;
 
-const uint32_t IntrRp::cv_PE_IRSN_COMP_SCOM_LIST[] =
-{
-    PE0_IRSN_COMP_SCOM_ADDR,
-    PE1_IRSN_COMP_SCOM_ADDR,
-    PE2_IRSN_COMP_SCOM_ADDR
-};
-
-const uint32_t IntrRp::cv_PE_IRSN_MASK_SCOM_LIST[] =
-{
-    PE0_IRSN_MASK_SCOM_ADDR,
-    PE1_IRSN_MASK_SCOM_ADDR,
-    PE2_IRSN_MASK_SCOM_ADDR
-};
-
-const uint32_t IntrRp::cv_PE_BAR_SCOM_LIST[] =
-{
-    PE0_BAREN_SCOM_ADDR,
-    PE1_BAREN_SCOM_ADDR,
-    PE2_BAREN_SCOM_ADDR
-};
 
 trace_desc_t * g_trac_intr = NULL;
 TRAC_INIT(&g_trac_intr, INTR_TRACE_NAME, 16*KILOBYTE, TRACE::BUFFER_SLOW);
@@ -87,69 +67,6 @@ TRAC_INIT(&g_trac_intr, INTR_TRACE_NAME, 16*KILOBYTE, TRACE::BUFFER_SLOW);
  */
 TASK_ENTRY_MACRO( IntrRp::init );
 
-
-/**
- * @brief Utility function to get the list of enabled threads
- * @return Bitstring of enabled threads
- */
-uint64_t get_enabled_threads( void )
-{
-    TARGETING::Target* sys = NULL;
-    TARGETING::targetService().getTopLevelTarget(sys);
-    assert( sys != NULL );
-    uint64_t en_threads = sys->getAttr<TARGETING::ATTR_ENABLED_THREADS>();
-    if( en_threads == 0 )
-    {
-
-// Set max thread for VPO, nanosleep() here takes too long in VPO environment
-#ifdef CONFIG_VPO_COMPILE
-       en_threads = 0xFF00000000000000;
-       sys->setAttr<TARGETING::ATTR_ENABLED_THREADS>(en_threads);
-       TRACFCOMP( g_trac_intr, "Enabled Threads for VPO = %.16X", en_threads );
-       return en_threads; 
-#endif
-
-        // Read the scratch reg that the SBE setup
-        //  Enabled threads are listed as a bitstring in bits 16:23
-        //  A value of zero means the SBE hasn't set them up yet
-
-        // Loop for 1 sec (1000 x 1 msec) for this value to be set
-        uint64_t loop_count = 0;
-        const uint64_t LOOP_MAX = 1000;
-
-        while( (en_threads == 0) && (loop_count < LOOP_MAX) )
-        {
-            en_threads = mmio_scratch_read(MMIO_SCRATCH_AVP_THREADS);
-
-            if( en_threads == 0 )
-            {
-                // Sleep if value has not been set
-                nanosleep(0,NS_PER_MSEC);   // 1 msec
-            }
-
-            // Update the counter
-            loop_count++;
-        }
-
-        // If LOOP_MAX reached, CRIT_ASSERT
-        if ( unlikely(loop_count == LOOP_MAX) )
-        {
-            TRACFCOMP( g_trac_intr,"SBE Didn't Set Active Threads");
-            crit_assert(0);
-        }
-        else
-        {
-            en_threads = en_threads << 16; //left-justify the threads
-            TRACFCOMP( g_trac_intr,
-                       "Enabled Threads = %.16X",
-                       en_threads );
-            sys->setAttr<TARGETING::ATTR_ENABLED_THREADS>(en_threads);
-        }
-
-    }
-    TRACDCOMP( g_trac_intr, "en_threads=%.16X", en_threads );
-    return en_threads;
-}
 
 void IntrRp::init( errlHndl_t   &io_errlHndl_t )
 {
@@ -161,23 +78,9 @@ void IntrRp::init( errlHndl_t   &io_errlHndl_t )
     io_errlHndl_t = err ;
 }
 
-//  ICPBAR = INTP.ICP_BAR[0:25] in P8 = 0x3FFFF800 + (8*node) + procPos
-//  P8 Scom address = 0x020109c9
-//
-//  BaseAddress P8:
-//  BA[14:43] = ICPBAR (30 bits)
-//  BA[45:48] = coreID (1-6,9-14) (12 cores)
-//  BA[49:51] = thread (0-7)
-//
-//  BA+0  = XIRR (poll - Read/Write has no side effects))
-//  BA+4  = XIRR (Read locks HW, Write -> EOI to HW))
-//  BA+12 = MFRR  (1 byte)
-//  BA+16 = LINKA (4 bytes)
-//  BA+20 = LINKB (4 bytes)
-//  BA+24 = LINKC (4 bytes)
 errlHndl_t IntrRp::_init()
 {
-    errlHndl_t err = NULL;
+    errlHndl_t l_err = NULL;
 
     // get the PIR
     // Which ever cpu core this is running on is the MASTER cpu
@@ -186,31 +89,15 @@ errlHndl_t IntrRp::_init()
     iv_masterCpu = cpuid;
     iv_masterCpu.threadId = 0;
 
-    TRACFCOMP(g_trac_intr,"Master cpu group[%d], chip[%d], core[%d], thread[%d]",
+    TRACFCOMP(g_trac_intr,"IntrRp::_init() Master cpu group[%d], "
+                          "chip[%d], core[%d], thread[%d]",
               iv_masterCpu.groupId, iv_masterCpu.chipId, iv_masterCpu.coreId,
               iv_masterCpu.threadId);
 
-    // The base realAddr is the base address for the whole system.
-    // Therefore the realAddr must be based on the processor
-    // that would have the lowest BAR value in the system,
-    // whether it exists or not. In this case n0p0
-
+    // Do the initialization steps on the master proc chip
+    // The other proc chips will be setup at a later point
     TARGETING::Target* procTarget = NULL;
     TARGETING::targetService().masterProcChipTargetHandle( procTarget );
-
-    uint64_t barValue = 0;
-    barValue = procTarget->getAttr<TARGETING::ATTR_INTP_BASE_ADDR>();
-
-    // Mask off group & chip id to get base address
-    uint64_t realAddr = barValue & ICPBAR_BASE_ADDRESS_MASK;
-
-    TRACFCOMP(g_trac_intr,"INTR: realAddr = %lx",realAddr);
-
-    // VADDR_SIZE is 1MB per chip - max 32 -> 32MB
-    iv_baseAddr = reinterpret_cast<uint64_t>
-        (mmio_dev_map(reinterpret_cast<void*>(realAddr),THIRTYTWO_MB));
-
-    TRACFCOMP(g_trac_intr,"INTR: vAddr = %lx",iv_baseAddr);
 
     // Set up the IPC message Data area
     TARGETING::Target * sys = NULL;
@@ -223,16 +110,22 @@ errlHndl_t IntrRp::_init()
     KernelIpc::ipc_data_area.hrmor_base = hrmor_base;
     KernelIpc::ipc_data_area.msg_queue_id = IPC_DATA_AREA_CLEAR;
 
-    // Set the BAR scom reg
-    err = setBAR(procTarget,iv_masterCpu);
-
-    if(!err)
+    do
     {
-        err = checkAddress(iv_baseAddr);
-    }
+        //TODO RTC 150562 - updates for multi-chip. My understanding is
+        // the setting of the BARs + Enables can be done at the point in the IPL
+        // where Xscoms are enabled.
+        // Set the Interrupt BAR Scom Registers
+        l_err = setInterruptBARs(procTarget);
 
-    if(!err)
-    {
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_intr, "IntrRp::_init() Error setting Interrupt BARs.");
+            break;
+        }
+
+      //TODO RTC 134431
+      #ifdef CONFIG_MPIPL_ENABLED
         uint8_t is_mpipl = 0;
         TARGETING::Target * sys = NULL;
         TARGETING::targetService().getTopLevelTarget(sys);
@@ -241,76 +134,218 @@ errlHndl_t IntrRp::_init()
            is_mpipl)
         {
             TRACFCOMP(g_trac_intr,"Disable interupts for MPIPL");
-            err = hw_disableIntrMpIpl();
+            l_err = hw_disableIntrMpIpl();
 
-            if(err)
+            if(l_err)
             {
-                errlCommit(err,INTR_COMP_ID);
-                err = NULL;
+                errlCommit(l_err,INTR_COMP_ID);
+                l_err = NULL;
             }
         }
+      #endif
 
-
-        // Set up the interrupt provider registers
-        // NOTE: It's only possible to set up the master core at this point.
-        //
-        // Set up link registers to forward all intrpts to master cpu.
-        //
-        // There is one register set per cpu thread.
-        uint64_t max_threads = cpu_thread_count();
-        uint64_t en_threads = get_enabled_threads();
-
-        PIR_t pir = iv_masterCpu;
-        for(size_t thread = 0; thread < max_threads; ++thread)
+        TRACFCOMP(g_trac_intr, "IntrRp::_init() Masking Interrupts");
+        //Mask off all interrupt sources - these will be enabled as SW entities
+        // register for specific interrupts via the appropriate message queue
+        l_err = maskAllInterruptSources();
+        if (l_err)
         {
-            // Skip threads that we shouldn't be starting
-            if( !(en_threads & (0x8000000000000000>>thread)) )
-            {
-                TRACDCOMP(g_trac_intr,
-                          "IntrRp::_init: Skipping thread %d : en_threads=%X",
-                          thread,en_threads);
-                continue;
-            }
-            pir.threadId = thread;
-            initInterruptPresenter(pir);
+            TRACFCOMP(g_trac_intr, "IntrRp::_init() Error masking all interrupt sources.");
+            break;
         }
 
-        // Get the kernel msg queue for ext intr
-        // Create a task to handle the messages
-        iv_msgQ = msg_q_create();
-        msg_intr_q_register(iv_msgQ, realAddr);
+        TRACFCOMP(g_trac_intr, "IntrRp::_init() Enabling PSIHB Interrupts");
+        //Enable PSIHB Interrupts
+        l_err = enableInterrupts();
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_intr, "IntrRp::_init() Error enabling Interrupts");
+            break;
+        }
 
+        // Create the kernel msg queue for external interrupts
+        iv_msgQ = msg_q_create();
+        msg_intr_q_register(iv_msgQ,
+             procTarget->getAttr<TARGETING::ATTR_XIVE_THREAD_MGMT1_BAR_ADDR>());
+
+        // Create a task to handle the messages
         task_create(IntrRp::msg_handler, NULL);
 
         // Register event to be called on shutdown
         INITSERVICE::registerShutdownEvent(iv_msgQ,
                                            MSG_INTR_SHUTDOWN,
                                            INITSERVICE::INTR_PRIORITY);
-    }
 
-    if(!err)
+        //The INTRP itself will monitor/handle PSU Interrupts
+        //  so unmask those interrupts
+        l_err = unmaskInterruptSource(LSI_PSU);
+
+    } while(0);
+
+    return l_err;
+}
+
+void IntrRp::acknowledgeInterrupt()
+{
+    //A uint16 store from the Acknowledge Hypervisor Interrupt
+    // offset in the Thread Management BAR space signals
+    // the interrupt is acknowledged
+    uint16_t * l_ack_int_ptr = (uint16_t *)iv_xiveTmBar1Address;
+    l_ack_int_ptr += ACK_HYPERVISOR_INT_REG_OFFSET;
+
+    uint16_t l_ackRead = *l_ack_int_ptr;
+    TRACDCOMP(g_trac_intr, "IntrRp::acknowledgeInterrupt(), read result: %16x", l_ackRead);
+}
+
+errlHndl_t IntrRp::resetIntUnit()
+{
+    errlHndl_t l_err = NULL;
+    uint64_t l_barValue = XIVE_RESET_POWERBUS_QUIESCE_ENABLE;
+    uint64_t size = sizeof(l_barValue);
+    uint32_t l_addr = XIVE_RESET_INT_CQ_RST_CTL_SCOM_ADDR;
+
+    TARGETING::Target* procTarget = NULL;
+    TARGETING::targetService().masterProcChipTargetHandle( procTarget );
+
+    do {
+        //First quiesce the power bus
+        TRACDCOMP(g_trac_intr, "IntrRp::resetIntUnit() - "
+                           "Quiesce the PowerBus Interface");
+        l_err = deviceWrite(procTarget,
+                            &l_barValue,
+                            size,
+                            DEVICE_SCOM_ADDRESS(l_addr));
+
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_intr, "IntrRp::resetIntUnit() - "
+                                    "Error Quiescing the PowerBus");
+            break;
+        }
+
+        //A short amount of time is needed to let the powerbus quiesce before
+        // the next step in the reset can occur, so do a short polling loop
+        // for the indicator the power bus has been quiesced
+        uint64_t l_quiesceTimeout = XIVE_RESET_POWERBUS_QUIESCE_TIMEOUT;
+        uint64_t l_timeWaited = 0;
+        uint64_t reg = 0x0;
+
+        do
+        {
+            if (l_timeWaited >= l_quiesceTimeout)
+            {
+                TRACFCOMP(g_trac_intr, "IntrRp::resetIntUnit() - Timeout "
+                          "waiting for PowerBus to quiesce");
+                /*@ errorlog tag
+                 * @errortype       ERRL_SEV_UNRECOVERABLE
+                 * @moduleid        INTR::MOD_INTRRP_RESETINTUNIT
+        `        * @reasoncode      INTR::RC_XIVE_PBUS_QUIESCE_TIMEOUT
+                 * @userdata1       XIVE Powerbus Scom Register Address
+                 * @userdata2       XIVE Powerbus Scom Register Data
+                 *
+                 * @devdesc         Timeout waiting for Powerbus to Quiesce
+                 */
+                l_err = new ERRORLOG::ErrlEntry
+                        (
+                         ERRORLOG::ERRL_SEV_UNRECOVERABLE,    // severity
+                         INTR::MOD_INTRRP_RESETINTUNIT,       // moduleid
+                         INTR::RC_XIVE_PBUS_QUIESCE_TIMEOUT,  // reason code
+                         l_addr,
+                         reg
+                        );
+
+                break;
+            }
+
+            uint64_t scom_len = sizeof(reg);
+
+            //Read the powerbus state
+            l_err = deviceRead( procTarget,
+                                &reg,
+                                scom_len,
+                                DEVICE_SCOM_ADDRESS(l_addr));
+
+
+            if (l_err)
+            {
+                //Logging below this loop
+                break;
+            }
+
+
+            if (reg & POWERBUS_STATE_QUIESCE)
+            {
+                //Powerbus Quiesced
+                break;
+            }
+            else
+            {
+                nanosleep(0,XIVE_RESET_POWERBUS_QUIESCE_TIMEOUT / 10);
+                l_timeWaited += XIVE_RESET_POWERBUS_QUIESCE_TIMEOUT / 10;
+            }
+        } while(1);
+
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_intr, "Error getting Powerbus state");
+            break;
+        }
+
+        TRACDCOMP(g_trac_intr, "Reset XIVE INT unit");
+        l_barValue = XIVE_RESET_UNIT_ENABLE;
+        l_err = deviceWrite(procTarget,
+                            &l_barValue,
+                            size,
+                            DEVICE_SCOM_ADDRESS(l_addr));
+
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_intr, "Error resetting XIVE INT unit");
+            break;
+        }
+
+    } while (0);
+
+    if (l_err)
     {
-        // Enable PSI to present interrupts
-        err = initIRSCReg(procTarget);
+        TRACFCOMP(g_trac_intr, "Error: Interrupt Engine not reset successfully");
     }
 
-    return err;
+    return l_err;
 }
 
 errlHndl_t IntrRp::enableInterrupts()
 {
     errlHndl_t err = NULL;
+    PSIHB_SW_INTERFACES_t * l_psihb_ptr = iv_psiHbBaseAddr;
 
-    // Enable the interrupt on master processor core, thread 0
-    uint64_t baseAddr = iv_baseAddr + cpuOffsetAddr(iv_masterCpu);
-
-    err = checkAddress(baseAddr);
-    if(!err)
+   do
     {
-        uint8_t * cppr = reinterpret_cast<uint8_t*>(baseAddr+CPPR_OFFSET);
-        *cppr = 0xff;
-    }
+        //Set bit to route interrupts to CEC instead of FSP
+        l_psihb_ptr->psihbcr =
+                    (l_psihb_ptr->psihbcr | PSI_BRIDGE_ENABLE_CEC_INTERRUPT);
 
+        //Set bit to enable PSIHB Interrupts
+        l_psihb_ptr->icr =
+                      (l_psihb_ptr->icr | PSI_BRIDGE_INTP_STATUS_CTL_ENABLE);
+
+        //Set Physical Thread Enable register in the PC space
+        uint64_t * l_ic_ptr = iv_xiveIcBarAddress;
+        l_ic_ptr += XIVE_IC_BAR_INT_PC_MMIO_REG_OFFSET;
+
+        XIVE_IC_THREAD_CONTEXT_t * l_xive_ic_ptr =
+                reinterpret_cast<XIVE_IC_THREAD_CONTEXT_t *>(l_ic_ptr);
+        l_xive_ic_ptr->phys_thread_enable0_set = XIVE_IC_THREAD0_ENABLE;
+
+        //Set bit to configure LSI mode for HB cec interrupts
+        XIVE_IVPE_THREAD_CONTEXT_t * this_ivpe_ptr =
+          reinterpret_cast<XIVE_IVPE_THREAD_CONTEXT_t *> (iv_xiveTmBar1Address);
+        this_ivpe_ptr->cams = XIVE_IVPE_QW3_LSI_ENABLE;
+
+   } while (0);
+
+    //TODO RTC 150260 - Determine if any error checking can be done above, if so
+    //  create/return errorlogs. If not, change the funciton return type.
     return err;
 }
 
@@ -343,15 +378,39 @@ void* IntrRp::msg_handler(void * unused)
 
 void IntrRp::msgHandler()
 {
+    TRACDCOMP(g_trac_intr, ENTER_MRK"IntrRp::msgHandler()");
+
     while(1)
     {
         msg_t* msg = msg_wait(iv_msgQ); // wait for interrupt msg
 
         switch(msg->type)
         {
+            //Both cases require the same functinality, EXTERN comes from
+            //  the kernel. COALESCE comes from userspace as the final step of
+            //  the EOI path involves a read, if that returns 1 it signifies a
+            //  new interrupt is already pending. So the EOI path will send a
+            //  new COALESCE message to trigger the handling.
+            case MSG_INTR_COALESCE:
             case MSG_INTR_EXTERN:
                 {
                     ext_intr_t type = NO_INTERRUPT;
+                    uint32_t ackResponse =
+                                        static_cast<uint32_t>(msg->data[0]>>32);
+                    //Check if LSI-Based Interrupt
+                    if ((ackResponse & LSI_INTERRUPT) == LSI_INTERRUPT)
+                    {
+                        TRACDCOMP(g_trac_intr, "IntrRp::msgHandler() "
+                                                 "- LSI Interrupt Detected");
+                        //Read LSI Interrupt Status register
+                        PSIHB_SW_INTERFACES_t * l_psihb_ptr = iv_psiHbBaseAddr;
+                        uint64_t lsiIntStatus = l_psihb_ptr->lsiintstatus;
+                        TRACDCOMP(g_trac_intr, "IntrRp::msgHandler() "
+                                         "lsiIntStatus 0x%016lx", lsiIntStatus);
+                        LSIvalue_t l_intrType = static_cast<LSIvalue_t>
+                             (__builtin_clzl(lsiIntStatus));
+                        type = static_cast<ext_intr_t>(l_intrType);
+                    }
 
                     // xirr was read by interrupt message handler.
                     // Passed in as upper word of data[0]
@@ -365,22 +424,29 @@ void IntrRp::msgHandler()
                     uint32_t * xirrAddress =
                         reinterpret_cast<uint32_t*>(baseAddr + XIRR_OFFSET);
 
-                    // type = XISR = XIRR[8:31]
-                    // priority = XIRR[0:7]
-                    // Use the XISR as the type (for now)
-                    type = static_cast<ext_intr_t>(xirr & XISR_MASK);
-
                     TRACFCOMP(g_trac_intr,
                               "External Interrupt received. XIRR=%x, PIR=%x",
                               xirr,pir.word);
+                    //An external interrupt comes from two paths
+                    //  1) kernel space - synchronous - response needed
+                    //  2) User space (coalesce interrupt) - asynchronous
+                    //     - no response needed, just free message
+                    if (msg_is_async(msg))
+                    {
+                        msg_free(msg);
+                    }
+                    else
+                    {
+                        // Acknowlege msg
+                        msg->data[1] = 0;
+                        msg_respond(iv_msgQ, msg);
+                    }
 
-                    // Acknowlege msg
-                    msg->data[1] = 0;
-                    msg_respond(iv_msgQ, msg);
-
+                    //Search if anyone is subscribed to the given
+                    // interrupt source
                     Registry_t::iterator r = iv_registry.find(type);
-                    if(r != iv_registry.end() &&
-                       type != INTERPROC_XISR) //handle IPI after EOI, not here
+
+                    if(r != iv_registry.end() && type != INTERPROC_XISR)
                     {
                         msg_q_t msgQ = r->second.msgQ;
 
@@ -399,11 +465,6 @@ void IntrRp::msgHandler()
                                       " handler. Ignoring it. rc = %d",
                                       (uint32_t) type, rc);
                         }
-
-                        //Since non IPI EOIs are blocking fashion need to open
-                        //up the interrupt priority to max (CPRR)
-                        uint8_t *cppr = reinterpret_cast<uint8_t*>(xirrAddress);
-                        *cppr = CPPR_ENABLE_ALL; //allow any INTR
                     }
                     else if (type == INTERPROC_XISR)
                     {
@@ -413,6 +474,11 @@ void IntrRp::msgHandler()
                         // and handle it through the above registration list
                         // as well.  This is to catch the case where no one
                         // has registered for an IPI.
+                    }
+                    else if (type == LSI_PSU)
+                    {
+                        TRACDCOMP(g_trac_intr, "PSU Interrupt Detected");
+                        handlePsuInterrupt(type);
                     }
                     else  // no queue registered for this interrupt type
                     {
@@ -508,82 +574,54 @@ void IntrRp::msgHandler()
 
             case MSG_INTR_EOI:
                 {
-                    // Write the XIRR with the same value read earlier
-                    // to signal EOI. XIRR value was stored in data[1]
-                    // Only do this for non IPI types (type is in data[0])
+                    // Use standrard EOI (End of Interrupt) sequence
                     if(msg->data[0] != INTERPROC_XISR)
                     {
-                        // Passed in as upper word of data[1]
-                        uint32_t xirr = static_cast<uint32_t>(msg->data[1]>>32);
-                        // data[1] (lower word) has the PIR
-                        uint64_t l_data0 = (msg->data[1] & 0xFFFFFFFF);
-                        PIR_t pir = static_cast<PIR_t>(l_data0);
-
-                        uint64_t baseAddr = iv_baseAddr + cpuOffsetAddr(pir);
-                        uint32_t * xirrAddress =
-                          reinterpret_cast<uint32_t*>(baseAddr + XIRR_OFFSET);
-
-                        xirr |= CPPR_MASK;  //set all CPPR bits - allow any INTR
-                        *xirrAddress = xirr;
-
-                        TRACDCOMP(g_trac_intr,
-                                  "EOI issued. XIRR=%x, PIR=%x",
-                                  xirr,pir);
+                        uint64_t intSource = msg->data[0];
+                        sendEOI(intSource);
                     }
                     msg_free(msg);
                 }
                 break;
 
-
-
             case MSG_INTR_REGISTER_MSGQ:
                 {
+
                     msg_q_t l_msgQ = reinterpret_cast<msg_q_t>(msg->data[0]);
                     uint64_t l_type = msg->data[1];
-                    ISNvalue_t l_intr_type = static_cast<ISNvalue_t>
+                    LSIvalue_t l_intr_type = static_cast<LSIvalue_t>
                       (l_type & 0xFFFF);
 
-                    errlHndl_t err = registerInterruptISN(l_msgQ,l_type >> 32,
-                                                       l_intr_type);
-                    if(!err)
+                    errlHndl_t err = registerInterruptXISR(l_msgQ, l_type >> 32,
+                                                                   l_intr_type);
+                    if (err)
                     {
-                        err = initXIVR(l_intr_type, true);
+                        TRACFCOMP(g_trac_intr,
+                            "IntrRp::msgHandler MSG_INTR_REGISTER_MSGQ error "
+                            "registering handler for interrupt type: %lx",
+                            l_intr_type);
+                    }
+                    else
+                    {
+                        //Enable (aka unmask) Interrupts for the source being
+                        // registered for
+                        err = unmaskInterruptSource(l_intr_type);
+                        if (err)
+                        {
+                            TRACFCOMP(g_trac_intr,
+                              "IntrRp::msgHandler MSG_INTR_REGISTER_MSGQ error"
+                                " unmasking interrupt type: %lx",
+                                l_intr_type);
+                        }
                     }
 
                     msg->data[1] = reinterpret_cast<uint64_t>(err);
                     msg_respond(iv_msgQ,msg);
                 }
                 break;
-
             case MSG_INTR_UNREGISTER_MSGQ:
-                {
-                    TRACFCOMP(g_trac_intr,
-                              "INTR remove registration of interrupt type = 0x%lx",
-                              msg->data[0]);
-                    ISNvalue_t l_type = static_cast<ISNvalue_t>(msg->data[0]);
-                    msg_q_t msgQ = unregisterInterruptISN(l_type);
-
-                    if(msgQ)
-                    {
-                        //shouldn't get an error since we found a queue
-                        //Just commit it
-                        errlHndl_t err = initXIVR(l_type, false);
-                        if(err)
-                        {
-                            errlCommit(err,INTR_COMP_ID);
-                        }
-                    }
-
-                    msg->data[1] = reinterpret_cast<uint64_t>(msgQ);
-
-                    TRACDCOMP(g_trac_intr,
-                              "UNREG: msgQ = 0x%lx",
-                              msg->data[1]);
-
-                    msg_respond(iv_msgQ,msg);
-                }
+                //TODO RTC 150260 add functionality
                 break;
-
             case MSG_INTR_ENABLE:
                 {
                     errlHndl_t err = enableInterrupts();
@@ -594,12 +632,13 @@ void IntrRp::msgHandler()
 
             case MSG_INTR_DISABLE:
                 {
-                    errlHndl_t err =disableInterrupts();
+                    errlHndl_t err = disableInterrupts();
                     msg->data[1] = reinterpret_cast<uint64_t>(err);
                     msg_respond(iv_msgQ,msg);
                 }
                 break;
 
+#ifdef CONFIG_ENABLE_P9_IPI
             //  Called when a new cpu becomes active other than the master
             //  Expect a call for each new core
             case MSG_INTR_ADD_CPU:
@@ -627,7 +666,7 @@ void IntrRp::msgHandler()
                             continue;
                         }
                         pir.threadId = thread;
-                        initInterruptPresenter(pir);
+                        //wh_p9 initInterruptPresenter(pir);
                         sendIPI(pir);
                     }
 
@@ -636,7 +675,7 @@ void IntrRp::msgHandler()
                                 reinterpret_cast<void*>(pir.word));
                 }
                 break;
-
+#endif
             case MSG_INTR_ADD_CPU_TIMEOUT:
                 {
                     PIR_t pir = msg->data[0];
@@ -684,46 +723,6 @@ void IntrRp::msgHandler()
                     msg_respond(iv_msgQ, msg);
                 }
                 break;
-
-            case MSG_INTR_ENABLE_PSI_INTR:
-                {
-                    TARGETING::Target * target =
-                        reinterpret_cast<TARGETING::Target *>(msg->data[0]);
-                    errlHndl_t err = initIRSCReg(target);
-                    msg->data[1] = reinterpret_cast<uint64_t>(err);
-                    msg_respond(iv_msgQ,msg);
-                }
-                break;
-
-            case MSG_INTR_ISSUE_SBE_MBOX_WA:
-                {
-                    //The SBE IPI injection on master winkle wakeup
-                    //can clobber a pending mailbox interrupt in the ICP
-                    //To workaround need to issue EOI on mailbox.  If
-                    //mbx intr is not hot this does nothing, if it is
-                    //then the EOI will cause intr to be represented
-
-                    //This is safe on FSPless since the PSI intr are
-                    //always setup on master chip
-                    uint64_t baseAddr = iv_baseAddr +
-                                        cpuOffsetAddr(iv_masterCpu);
-                    uint32_t * xirrAddress =
-                      reinterpret_cast<uint32_t*>(baseAddr + XIRR_OFFSET);
-
-                    //Generate the mailbox IRSN for this group
-                    uint32_t l_irsn = makeXISR(iv_masterCpu, ISN_FSI);
-                    l_irsn |= CPPR_MASK;  //set all CPPR bits - allow any INTR
-
-                    TRACFCOMP(g_trac_intr,
-                              "MBX SBE WA Issue EOI to %x",l_irsn);
-                    *xirrAddress = l_irsn;  //Issue EOI
-
-                    // Acknowlege msg
-                    msg->data[1] = 0;
-                    msg_respond(iv_msgQ, msg);
-                }
-                break;
-
             case MSG_INTR_SHUTDOWN:
                 {
                     TRACFCOMP(g_trac_intr,"Shutdown event received");
@@ -733,7 +732,7 @@ void IntrRp::msgHandler()
 
                 }
                 break;
-
+#ifdef CONFIG_MPIPL_ENABLED //TODO RTC 134431
             case MSG_INTR_ADD_HBNODE:  // node info for mpipl
                 {
                     errlHndl_t err = addHbNodeToMpiplSyncArea(msg->data[0]);
@@ -744,7 +743,7 @@ void IntrRp::msgHandler()
                     msg_free(msg); // async message
                 }
                 break;
-
+#endif
             case MSG_INTR_DRAIN_QUEUE:
                 {
                     //The purpose of this message is allow the
@@ -761,72 +760,318 @@ void IntrRp::msgHandler()
     }
 }
 
-
-
-errlHndl_t IntrRp::setBAR(TARGETING::Target * i_target,
-                          const PIR_t i_pir)
+errlHndl_t IntrRp::sendEOI(uint64_t& i_intSource)
 {
-    errlHndl_t err = NULL;
+    //Send an EOI to the Power bus using the PSIHB ESB Space
+    //This is done with a read to the page specific to the interrupt source.
+    //Each interrupt source gets one page
+    uint64_t * l_psiHbPowerBusEoiAddr =
+               iv_psiHbEsbBaseAddr + ((i_intSource)*PAGE_SIZE)/sizeof(uint64_t);
+    errlHndl_t l_err = NULL;
 
-    uint64_t barValue = 0;
-    barValue = i_target->getAttr<TARGETING::ATTR_INTP_BASE_ADDR>();
+    do {
 
-    barValue <<= 14;
-    barValue |= 1ULL << (63 - ICPBAR_EN);
+        uint64_t eoiRead = *l_psiHbPowerBusEoiAddr;
+        if (eoiRead != 0)
+        {
+            TRACFCOMP(g_trac_intr, ERR_MRK"IntrRp::sendEOI error sending EOI"
+                               " to PSIHB ESB. EOI load returned: %x", eoiRead);
+            /*@ errorlog tag
+             * @errortype       ERRL_SEV_UNRECOVERABLE
+             * @moduleid        INTR::MOD_INTRRP_SENDEOI
+             * @reasoncode      INTR::RC_PSIHB_ESB_EOI_FAIL
+             * @userdata1       Value read from EOI load
+             * @userdata2       Interrupt Source to issue EOI to
+             * @devdesc         Unexpected RC from issuing PSIHB EOI store
+             */
+            l_err = new ERRORLOG::ErrlEntry
+              (
+               ERRORLOG::ERRL_SEV_UNRECOVERABLE,    // severity
+               INTR::MOD_INTRRP_SENDEOI,            // moduleid
+               INTR::RC_PSIHB_ESB_EOI_FAIL,         // reason code
+               eoiRead,                             // read value
+               i_intSource                          // interrupt source number
+               );
+            break;
+        }
 
-    TRACFCOMP(g_trac_intr,"INTR: Target %p. ICPBAR value: 0x%016lx",
-              i_target,barValue);
+        TRACDCOMP(g_trac_intr, "IntrRp::sendEOI read response: %lx", eoiRead);
 
-    uint64_t size = sizeof(barValue);
+        //EOI Part 2 - LSI ESB Internal to the IVPE
+        uint64_t * l_lsiEoi = iv_xiveIcBarAddress;
+        l_lsiEoi += XIVE_IC_LSI_EOI_OFFSET;
+        uint64_t l_intPending = *l_lsiEoi;
 
-    err = deviceWrite(i_target,
-                      &barValue,
-                      size,
-                      DEVICE_SCOM_ADDRESS(ICPBAR_SCOM_ADDR));
+        //If an interrupt is pending, HB userspace will send a message to
+        // trigger the handling of a 'new' interrupt. In this situation the
+        // interrupt will not be triggered via the kernel.
+        if (l_intPending == 1)
+        {
+            //First acknowledge the interrupt so it won't be re-presented
+            acknowledgeInterrupt();
 
-    if(err)
-    {
-        TRACFCOMP(g_trac_intr,ERR_MRK"Unable to set IPCBAR");
-    }
+            uint64_t l_data0 = LSI_INTERRUPT << 32;
+            if (iv_msgQ)
+            {
+                msg_t * int_msg = msg_allocate();
+                int_msg->type = MSG_INTR_COALESCE;
+                int_msg->data[0] = reinterpret_cast<uint64_t>(l_data0);
+                int send_rc = msg_send(iv_msgQ, int_msg);
+                if (send_rc != 0)
+                {
+                    TRACFCOMP(g_trac_intr, ERR_MRK"IntrRp::sendEOI error "
+                            "sending coalesce message");
+                    /*@ errorlog tag
+                     * @errortype       ERRL_SEV_UNRECOVERABLE
+                     * @moduleid        INTR::MOD_INTRRP_SENDEOI
+                     * @reasoncode      INTR::RC_MESSAGE_SEND_ERROR
+                     * @userdata1       RC from msg_send command
+                     * @devdesc         Error encountered sending coalesce
+                     *                  message to INTRP
+                     */
+                    l_err = new ERRORLOG::ErrlEntry
+                        (
+                         ERRORLOG::ERRL_SEV_UNRECOVERABLE,  // severity
+                         INTR::MOD_INTRRP_SENDEOI,          // moduleid
+                         INTR::RC_MESSAGE_SEND_ERROR,       // reason code
+                         send_rc,
+                         0
+                        );
+                    break;
+                }
+            }
+        }
+    } while(0);
 
-    return err;
+    return l_err;
 }
 
-errlHndl_t IntrRp::getPsiIRSN(TARGETING::Target * i_target,
-                              uint32_t& o_irsn, uint32_t& o_num)
+errlHndl_t IntrRp::maskAllInterruptSources(void)
 {
-    errlHndl_t err = NULL;
+    errlHndl_t l_err = NULL;
+    for (uint8_t i = 0; i < LSI_LAST_SOURCE; i++)
+    {
+        TRACDCOMP(g_trac_intr, "MaskInterruptSource: %d", i);
+        l_err = maskInterruptSource(i);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_intr, "Error Masking Interrupt source: %x", i);
+            break;
+        }
+    }
 
-    // Setup PHBISR
-    // EN.TPC.PSIHB.PSIHB_ISRN_REG set to 0x00030003FFFF0000
-    PSIHB_ISRN_REG_t reg;
+    TRACDCOMP(g_trac_intr, EXIT_MRK"MaskAllInterruptSources");
+    return l_err;
+}
+
+errlHndl_t IntrRp::maskInterruptSource(uint8_t l_intr_source)
+{
+    errlHndl_t l_err = NULL;
+    uint64_t * l_psiHbEsbptr = iv_psiHbEsbBaseAddr;
+    l_psiHbEsbptr +=
+       (((l_intr_source*PAGE_SIZE)+PSI_BRIDGE_ESB_OFF_OFFSET)/sizeof(uint64_t));
+
+    uint64_t l_maskRead = *l_psiHbEsbptr;
+    TRACDCOMP(g_trac_intr, "Mask read result: %lx", l_maskRead);
+
+/*
+    TODO RTC 150260
+
+    //Perform 2nd read to verify in OFF state
+    l_maskRead = *l_psiHbEsbptr;
+    TRACDCOMP(g_trac_intr, "Mask read result: %lx", l_maskRead);
+
+    if (l_maskRead != ESB_STATE_OFF)
+    {
+        TRACFCOMP(g_trac_intr, "Error masking interrupt source: %x."
+                              " ESB state is: %lx.",
+                              l_intr_source, l_maskRead);
+
+        l_err = new ERRORLOG::ErrlEntry
+              (
+               ERRORLOG::ERRL_SEV_INFORMATIONAL,  // severity
+               INTR::MOD_INTRRP_MASKINTERRUPT,    // moduleid
+               INTR::RC_XIVE_ESB_WRONG_STATE,     // reason code
+               l_intr_source,
+               l_maskRead
+               );
+
+    }
+**/
+
+    return l_err;
+}
+
+errlHndl_t IntrRp::unmaskInterruptSource(uint8_t l_intr_source)
+{
+    errlHndl_t l_err = NULL;
+    uint64_t * l_psiHbEsbptr = iv_psiHbEsbBaseAddr;
+    l_psiHbEsbptr +=
+     (((l_intr_source*PAGE_SIZE)+PSI_BRIDGE_ESB_RESET_OFFSET)/sizeof(uint64_t));
+
+    uint64_t l_unmaskRead = *l_psiHbEsbptr;
+    TRACDCOMP(g_trac_intr, "Unmask read result: %lx", l_unmaskRead);
+
+/* TODO RTC 150260
+
+    //Read 2nd time to verify proper ESB state
+    l_unmaskRead = *l_psiHbEsbptr;
+
+    if (l_unmaskRead != ESB_STATE_RESET)
+    {
+        TRACFCOMP(g_trac_intr, "Error unmasking interrupt source: %x."
+                              " ESB state is: %lx.",
+                              l_intr_source, l_unmaskRead);
+
+        l_err = new ERRORLOG::ErrlEntry
+              (
+               ERRORLOG::ERRL_SEV_INFORMATIONAL,  // severity
+               INTR::MOD_INTRRP_UNMASKINTERRUPT,  // moduleid
+               INTR::RC_XIVE_ESB_WRONG_STATE,     // reason code
+               l_intr_source,
+               l_unmaskRead
+               );
+
+    }
+**/
+    return l_err;
+}
+
+errlHndl_t IntrRp::setInterruptBARs(TARGETING::Target * i_target)
+{
+    errlHndl_t l_err = NULL;
+
+    do {
+
+        l_err = setPsiHbBAR(i_target);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_intr, "Error setting PSIHB BAR");
+            break;
+        }
+
+        l_err = setPsiHbEsbBAR(i_target, true);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_intr, "Error setting PSIHB ESB BAR");
+            break;
+        }
+
+        l_err = setXiveIcBAR(i_target);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_intr, "Error setting XIVE IC BAR");
+            break;
+        }
+
+        l_err = setXiveIvpeTmBAR1(i_target);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_intr, "Error setting XIVE TM BAR1");
+            break;
+        }
+
+    } while (0);
+
+    return l_err;
+}
+
+errlHndl_t IntrRp::handlePsuInterrupt(ext_intr_t i_type)
+{
+    //TODO FIXME RTC 149698
+    // Long term will leverage mask register to avoid
+    // polling loop below
+    errlHndl_t l_err = NULL;
+    uint32_t l_addr = PSI_BRIDGE_PSU_DOORBELL_REG;
     size_t scom_len = sizeof(uint64_t);
-    o_num = ISN_HOST; //Hardcoded based on HB knowledge of HW
+    uint64_t reg = 0x0;
+    uint64_t l_elapsed_time_ns = 0;
+    TARGETING::Target* procTarget = NULL;
+    TARGETING::targetService().masterProcChipTargetHandle( procTarget );
 
-    do{
-        err = deviceRead
-          ( i_target,
-            &reg,
-            scom_len,
-            DEVICE_SCOM_ADDRESS(PSIHB_ISRN_REG_t::PSIHB_ISRN_REG));
+    do
+    {
+        l_err = deviceRead(procTarget,
+                           &reg,
+                           scom_len,
+                           DEVICE_SCOM_ADDRESS(l_addr));
 
-        if(err)
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_intr, "Error Reading PSU SCOM address: %lx",
+                                   l_addr);
+            break;
+        }
+
+        //If the PSU Host Doorbell bit is on, wait for the
+        // PSU DD to handle
+        if (reg & PSI_BRIDGE_PSU_HOST_DOORBELL)
+        {
+            TRACDCOMP(g_trac_intr, "Host/SBE Mailbox "
+                                   "response. Wait for Polling to handle"
+                                   " response");
+            nanosleep(0,10000);
+            l_elapsed_time_ns += 10000;
+        }
+        else
+        {
+            //Polling Complete
+            break;
+        }
+        if (l_elapsed_time_ns > MAX_PSU_LONG_TIMEOUT_NS)
+        {
+            TRACFCOMP(g_trac_intr, "PSU Timeout hit");
+            /*@ errorlog tag
+             * @errortype       ERRL_SEV_UNRECOVERABLE
+             * @moduleid        INTR::MOD_INTRRP_HNDLPSUINTERRUPT
+             * @reasoncode      INTR::RC_PSU_DOORBELL_TIMEOUT
+             * @userdata1       Scom Address with interrupt condition
+             * @userdata2       Register Value
+             * @devdesc         PSU Doorbell Timeout hit waiting for doorbell
+             *                  interrupt condition to be cleared
+             */
+            l_err = new ERRORLOG::ErrlEntry
+              (
+               ERRORLOG::ERRL_SEV_UNRECOVERABLE,    // severity
+               INTR::MOD_INTRRP_HNDLPSUINTERRUPT,   // moduleid
+               INTR::RC_PSU_DOORBELL_TIMEOUT,       // reason code
+               l_addr,
+               reg
+               );
+            break;
+        }
+
+    } while(1);
+
+    do {
+
+        if (l_err)
         {
             break;
         }
 
-        //only calc IRSN if downstream interrupts are enabled
-        o_irsn = 0;
-        if(reg.die == 1)  //downstream interrupt enable = 1
+        //Clear the PSU Scom Reg Interrupt Status register
+        uint64_t l_barValue = 0;
+        uint64_t size = sizeof(l_barValue);
+        l_err = deviceWrite(procTarget,
+                            &l_barValue,
+                            size,
+                            DEVICE_SCOM_ADDRESS(l_addr));
+
+        if (l_err)
         {
-            o_irsn = reg.irsn & reg.mask;
+            TRACFCOMP(g_trac_intr, "Error clearing scom - %x", l_addr);
+            break;
         }
-    }while(0);
 
+        //Issue standard EOI for the PSU Interupt
+        uint64_t intSource = i_type;
+        TRACDCOMP(g_trac_intr, "Sending PSU EOI");
+        sendEOI(intSource);
 
-    TRACFCOMP(g_trac_intr,"PSIHB_ISRN: 0x%x",o_irsn);
+    } while(0);
 
-    return err;
+    return l_err;
 }
 
 errlHndl_t IntrRp::getNxIRSN(TARGETING::Target * i_target,
@@ -871,269 +1116,14 @@ errlHndl_t IntrRp::getNxIRSN(TARGETING::Target * i_target,
     return err;
 }
 
-errlHndl_t IntrRp::initIRSCReg(TARGETING::Target * i_target)
-{
-    errlHndl_t err = NULL;
-
-    // Only do once for each proc chip
-    if(std::find(iv_chipList.begin(),iv_chipList.end(),i_target) ==
-       iv_chipList.end())
-    {
-        uint8_t chip = 0;
-        uint8_t group = 0;
-
-        group = i_target->getAttr<ATTR_FABRIC_NODE_ID>();
-        chip = i_target->getAttr<ATTR_FABRIC_CHIP_ID>();
-
-        size_t scom_len = sizeof(uint64_t);
-
-        // Mask off interrupts from isn's on this target
-        // This also sets the source isn and PIR destination
-        // such that if an interrupt is pending when when the ISRN
-        // is written, simics get the right destination for the
-        // interrupt.  err is from deviceWrite(...)
-        err = maskXIVR(i_target);
-
-        if(!err)
-        {
-            // Setup PHBISR
-            // EN.TPC.PSIHB.PSIHB_ISRN_REG set to 0x00030003FFFF0000
-            PSIHB_ISRN_REG_t reg;
-
-            PIR_t pir(0);
-            pir.groupId = group;
-            pir.chipId = chip;
-            // IRSN must be unique for each processor chip
-            reg.irsn = makeXISR(pir,0);
-            reg.die  = PSIHB_ISRN_REG_t::ENABLE;
-            reg.uie  = PSIHB_ISRN_REG_t::ENABLE;
-            reg.mask = PSIHB_ISRN_REG_t::IRSN_MASK;
-
-            TRACFCOMP(g_trac_intr,"PSIHB_ISRN_REG: 0x%016lx",reg.d64);
-
-            err = deviceWrite
-                ( i_target,
-                  &reg,
-                  scom_len,
-                  DEVICE_SCOM_ADDRESS(PSIHB_ISRN_REG_t::PSIHB_ISRN_REG));
-        }
-
-        if(!err)
-        {
-            iv_chipList.push_back(i_target);
-        }
-    }
-
-    return err;
-}
-
-errlHndl_t IntrRp::initXIVR(enum ISNvalue_t i_isn, bool i_enable)
-{
-    errlHndl_t err = NULL;
-    size_t scom_len = sizeof(uint64_t);
-    uint64_t scom_addr = 0;
-
-    //Don't do any of this for ISN_INTERPROC
-    if(ISN_INTERPROC != i_isn)
-    {
-        //Setup the XIVR register
-        PsiHbXivr xivr;
-        PIR_t pir = intrDestCpuId();
-        xivr.pir = pir.word;
-        xivr.source = i_isn;
-
-        switch(i_isn)
-        {
-        case ISN_PSI:
-            xivr.priority   = PsiHbXivr::PSI_PRIO;
-            scom_addr       = PsiHbXivr::PSI_XIVR_ADRR;
-            break;
-
-        case ISN_OCC:
-            xivr.priority   = PsiHbXivr::OCC_PRIO;
-            scom_addr       = PsiHbXivr::OCC_XIVR_ADRR;
-            break;
-
-        case ISN_FSI: //FSP_MAILBOX
-            xivr.priority   = PsiHbXivr::FSI_PRIO;
-            scom_addr       = PsiHbXivr::FSI_XIVR_ADRR;
-            break;
-
-        case ISN_LPC:
-            xivr.priority   = PsiHbXivr::LPC_PRIO;
-            scom_addr       = PsiHbXivr::LPC_XIVR_ADRR;
-            break;
-
-        case ISN_LCL_ERR:
-            xivr.priority   = PsiHbXivr::LCL_ERR_PRIO;
-            scom_addr       = PsiHbXivr::LCL_ERR_XIVR_ADDR;
-            break;
-
-        case ISN_HOST:
-            xivr.priority   = PsiHbXivr::HOST_PRIO;
-            scom_addr       = PsiHbXivr::HOST_XIVR_ADRR;
-            break;
-
-        default: //Unsupported ISN
-            TRACFCOMP(g_trac_intr,"Unsupported ISN: 0x%02x",i_isn);
-            /*@ errorlog tag
-             * @errortype  ERRL_SEV_INFORMATIONAL
-             * @moduleid   INTR::MOD_INTR_INIT_XIVR
-             * @reasoncode INTR::RC_BAD_ISN
-             * @userdata1  Interrupt type to register
-             * @userdata2  0
-             *
-             * @devdesc    Unsupported ISN Requested
-             *
-             */
-            err = new ERRORLOG::ErrlEntry
-              (
-               ERRORLOG::ERRL_SEV_INFORMATIONAL,    // severity
-               INTR::MOD_INTR_INIT_XIVR,            // moduleid
-               INTR::RC_BAD_ISN,                    // reason code
-               static_cast<uint64_t>(i_isn),
-               0
-               );
-        }
-
-        // Init the XIVR on all chips we have setup
-        // Note that this doesn't handle chips getting added midstream,
-        // But the current use case only has FSIMbox (1 chip) and
-        // ATTN (all chips) at stable points in the IPL
-        if(!err)
-        {
-            if(i_enable)
-            {
-                iv_isnList.push_back(i_isn);
-            }
-            else
-            {
-                xivr.priority = PsiHbXivr::PRIO_DISABLED;
-
-                //Remove from isn list
-                ISNList_t::iterator itr = std::find(iv_isnList.begin(),
-                                                    iv_isnList.end(),
-                                                    i_isn);
-                if(itr != iv_isnList.end())
-                {
-                    iv_isnList.erase(itr);
-                }
-            }
-
-            for(ChipList_t::iterator target_itr = iv_chipList.begin();
-                target_itr != iv_chipList.end(); ++target_itr)
-            {
-                err = deviceWrite
-                  (*target_itr,
-                   &xivr,
-                   scom_len,
-                   DEVICE_SCOM_ADDRESS(scom_addr));
-
-                if(err)
-                {
-                    break;
-                }
-            }
-        }
-    }
-
-    return err;
-}
-
 //----------------------------------------------------------------------------
-
-// Set priority highest (disabled) ,but with valid PIR
-errlHndl_t IntrRp::maskXIVR(TARGETING::Target *i_target)
-{
-    struct XIVR_INFO
-    {
-        ISNvalue_t  isn:8;
-        uint32_t addr;
-    };
-
-    static  const XIVR_INFO xivr_info[] =
-    {
-        {ISN_PSI,       PsiHbXivr::PSI_XIVR_ADRR},
-        {ISN_OCC,       PsiHbXivr::OCC_XIVR_ADRR},
-        {ISN_FSI,       PsiHbXivr::FSI_XIVR_ADRR},
-        {ISN_LPC,       PsiHbXivr::LPC_XIVR_ADRR},
-        {ISN_LCL_ERR,   PsiHbXivr::LCL_ERR_XIVR_ADDR},
-        {ISN_HOST,      PsiHbXivr::HOST_XIVR_ADRR}
-    };
-
-    errlHndl_t err = NULL;
-    size_t scom_len = sizeof(uint64_t);
-    PIR_t pir = intrDestCpuId();
-    PsiHbXivr xivr;
-
-    xivr.pir = pir.word;
-    xivr.priority = PsiHbXivr::PRIO_DISABLED;
-
-    for(size_t i = 0; i < sizeof(xivr_info)/sizeof(xivr_info[0]); ++i)
-    {
-        xivr.source = xivr_info[i].isn;
-
-        err = deviceWrite
-            (i_target,
-             &xivr,
-             scom_len,
-             DEVICE_SCOM_ADDRESS(xivr_info[i].addr));
-
-        if(err)
-        {
-            break;
-        }
-    }
-    return err;
-}
-
-//----------------------------------------------------------------------------
-
-errlHndl_t IntrRp::registerInterruptISN(msg_q_t i_msgQ,
-                                     uint32_t i_msg_type,
-                                     ext_intr_t i_intr_type)
-{
-    errlHndl_t err = NULL;
-
-    //INTERPROC is special -- same for all procs
-    if(i_intr_type == ISN_INTERPROC)
-    {
-        err = registerInterruptXISR(i_msgQ, i_msg_type,
-                                    INTERPROC_XISR);
-    }
-    else
-    {
-        //Register interrupt type on all present procs
-        for(ChipList_t::iterator target_itr = iv_chipList.begin();
-            target_itr != iv_chipList.end(); ++target_itr)
-        {
-            uint8_t chip = 0;
-            uint8_t node = 0;
-            node = (*target_itr)->getAttr<ATTR_FABRIC_NODE_ID>();
-            chip = (*target_itr)->getAttr<ATTR_FABRIC_CHIP_ID>();
-
-            PIR_t pir(0);
-            pir.groupId = node;
-            pir.chipId = chip;
-            uint32_t l_irsn = makeXISR(pir, i_intr_type);
-
-            err = registerInterruptXISR(i_msgQ, i_msg_type, l_irsn);
-            if(err)
-            {
-                break;
-            }
-        }
-    }
-    return err;
-}
-
 errlHndl_t IntrRp::registerInterruptXISR(msg_q_t i_msgQ,
                                      uint32_t i_msg_type,
                                      ext_intr_t i_xisr)
 {
     errlHndl_t err = NULL;
-
     Registry_t::iterator r = iv_registry.find(i_xisr);
+
     if(r == iv_registry.end())
     {
         TRACFCOMP(g_trac_intr,"INTR::register intr type 0x%x", i_xisr);
@@ -1166,38 +1156,6 @@ errlHndl_t IntrRp::registerInterruptXISR(msg_q_t i_msgQ,
     return err;
 }
 
-msg_q_t IntrRp::unregisterInterruptISN(ISNvalue_t i_intr_type)
-{
-    msg_q_t msgQ = NULL;
-
-    //INTERPROC is special -- same for all procs
-    if(i_intr_type == ISN_INTERPROC)
-    {
-        msgQ = unregisterInterruptXISR(INTERPROC_XISR);
-    }
-    else
-    {
-        //Unregister interrupt type on all present procs
-        for(ChipList_t::iterator target_itr = iv_chipList.begin();
-            target_itr != iv_chipList.end(); ++target_itr)
-        {
-            uint8_t chip = 0;
-            uint8_t node = 0;
-            node = (*target_itr)->getAttr<ATTR_FABRIC_NODE_ID>();
-            chip = (*target_itr)->getAttr<ATTR_FABRIC_CHIP_ID>();
-
-            PIR_t pir(0);
-            pir.groupId = node;
-            pir.chipId = chip;
-            uint32_t l_irsn = makeXISR(pir, i_intr_type);
-
-            msgQ = unregisterInterruptXISR(l_irsn);
-        }
-    }
-
-    return msgQ;
-}
-
 msg_q_t IntrRp::unregisterInterruptXISR(ext_intr_t i_xisr)
 {
     msg_q_t msgQ = NULL;
@@ -1211,91 +1169,6 @@ msg_q_t IntrRp::unregisterInterruptXISR(ext_intr_t i_xisr)
 
     return msgQ;
 }
-
-void IntrRp::initInterruptPresenter(const PIR_t i_pir) const
-{
-    uint64_t baseAddr = iv_baseAddr + cpuOffsetAddr(i_pir);
-    uint8_t * cppr =
-        reinterpret_cast<uint8_t*>(baseAddr + CPPR_OFFSET);
-    uint32_t * plinkReg =
-        reinterpret_cast<uint32_t *>(baseAddr + LINKA_OFFSET);
-
-    TRACDCOMP(g_trac_intr,"PIR 0x%x offset: 0x%lx",
-              i_pir.word,
-              cpuOffsetAddr(i_pir));
-
-    if(i_pir.word == iv_masterCpu.word)
-    {
-        *cppr = 0xff;          // Allow all interrupts
-    }
-    else
-    {
-        // Allow Wake-up IPIs only
-        // link regs route non-IPIs to iv_masterCPU) anyway
-        // IPC IPIs are only directed at iv_masterCpu
-        *cppr = IPI_USR_PRIO + 1;
-    }
-
-    // Links are intended to be set up in rings.  If an interrupt ends up
-    // where it started, it gets rejected by hardware.
-    //
-    // According to BOOK IV, The links regs are setup by firmware.
-    //
-    // Should be possible to link all interrupt forwarding directly to
-    // the master core and either make them direct (lspec = 0) or by setting
-    // the LOOPTRIP bit to stop the forwarding at the masterProc.
-    //
-    LinkReg_t linkReg;
-    linkReg.word = 0;
-    linkReg.loopTrip = 1;   // needed?
-    linkReg.node = iv_masterCpu.groupId;
-    linkReg.pchip= iv_masterCpu.chipId;
-    linkReg.pcore= iv_masterCpu.coreId;
-    linkReg.tspec= iv_masterCpu.threadId;
-
-    *(plinkReg) = linkReg.word;
-    *(plinkReg + 1) = linkReg.word;
-    linkReg.last = 1;
-    *(plinkReg + 2) = linkReg.word;
-}
-
-
-
-void IntrRp::disableInterruptPresenter(const PIR_t i_pir) const
-{
-    uint64_t baseAddr = iv_baseAddr + cpuOffsetAddr(i_pir);
-    uint8_t * cppr =
-        reinterpret_cast<uint8_t*>(baseAddr + CPPR_OFFSET);
-    uint32_t * plinkReg =
-        reinterpret_cast<uint32_t *>(baseAddr + LINKA_OFFSET);
-
-    // non- side effect xirr register
-    uint32_t * xirrAddr =
-        reinterpret_cast<uint32_t *>(baseAddr + XIRR_RO_OFFSET);
-
-    uint32_t xirr = *xirrAddr & 0x00FFFFFF;
-
-    TRACDCOMP(g_trac_intr,"PIR 0x%x offset: 0x%lx",
-              i_pir.word,
-              cpuOffsetAddr(i_pir));
-
-    // Not sure if this will ever happen, but squawk alittle if it does
-    if(xirr)
-    {
-        TRACFCOMP(g_trac_intr,
-                  ERR_MRK
-                  "Pending interrupt found on shutdown. CpuId:0x%x XIRR:0x%x",
-                  i_pir.word,
-                  xirr);
-    }
-
-    *cppr = 0;          // Set priority to most favored (off)
-
-    *plinkReg = 0;      // Reset link registers - clear all forwarding
-    *(plinkReg + 1) = 0;
-    *(plinkReg + 2) = 0;
-}
-
 
 void IntrRp::sendIPI(const PIR_t i_pir) const
 {
@@ -1340,7 +1213,6 @@ errlHndl_t IntrRp::checkAddress(uint64_t i_addr)
 
 void IntrRp::shutDown(uint64_t i_status)
 {
-    errlHndl_t err = NULL;
     msg_t * rmsg = msg_allocate();
 
     // Call everyone and say shutting down!
@@ -1367,51 +1239,25 @@ void IntrRp::shutDown(uint64_t i_status)
 
     msg_free(rmsg);
 
-    // Reset the PSI regs
-    // NOTE: there is nothing in the  IRSN Proposal.odt document that
-    // specifies a procedure or order for disabling interrupts.
-    // @see RTC story 47105 discussion for Firmware & Hardware requirements
-    //
+    //TODO FIXME RTC 149694 - Workaround to set proper PSIHB ESB BAR for PHYP
+    TARGETING::Target* procTarget = NULL;
+    TARGETING::targetService().masterProcChipTargetHandle( procTarget );
+    TRACDCOMP(g_trac_intr, "Disable PSIHB ESB BAR");
+    setPsiHbEsbBAR(procTarget, false);
 
-    //Going to clear the XIVRs first
-    ISNList_t l_isnList = iv_isnList;
-    for(ISNList_t::iterator isnItr = l_isnList.begin();
-        isnItr != l_isnList.end();++isnItr)
-    {
-        //shouldn't get an error since we found a queue
-        //so just commit it
-        err = initXIVR((*isnItr), false);
-        if(err)
-        {
-            errlCommit(err,INTR_COMP_ID);
-            err = NULL;
-        }
-    }
+    //Reset PSIHB Interrupt Space
+    TRACDCOMP(g_trac_intr, "Reset PSIHB Interrupt Space");
+    PSIHB_SW_INTERFACES_t * this_psihb_ptr = iv_psiHbBaseAddr;
+    this_psihb_ptr->icr = PSI_BRIDGE_INTP_STATUS_CTL_RESET;
+    TRACDCOMP(g_trac_intr, "Reset PSIHB INTR Complete");
 
-    PSIHB_ISRN_REG_t reg;               //zeros self
-    size_t scom_len = sizeof(reg);
+    //Reset XIVE Interrupt unit
+    resetIntUnit();
 
-    for(ChipList_t::iterator target_itr = iv_chipList.begin();
-        target_itr != iv_chipList.end(); ++target_itr)
-    {
-        err = deviceWrite
-            (*target_itr,
-             &reg,
-             scom_len,
-             DEVICE_SCOM_ADDRESS(PSIHB_ISRN_REG_t::PSIHB_ISRN_REG));
-
-        if(err)
-        {
-            errlCommit(err,INTR_COMP_ID);
-            err = NULL;
-        }
-    }
-
-
-    // Reset the IP hardware regiseters
-
+    // Reset the IP hardware registers
     iv_cpuList.push_back(iv_masterCpu);
 
+#ifdef CONFIG_ENABLE_P9_IPI
     size_t threads = cpu_thread_count();
     uint64_t en_threads = get_enabled_threads();
 
@@ -1429,13 +1275,16 @@ void IntrRp::shutDown(uint64_t i_status)
                 continue;
             }
             pir.threadId = thread;
-            disableInterruptPresenter(pir);
+            //wh_p9 disableInterruptPresenter(pir);
         }
     }
+#endif
     TRACFCOMP(g_trac_intr,INFO_MRK"INTR is shutdown");
 }
 
 //----------------------------------------------------------------------------
+
+#ifdef CONFIG_MPIPL_ENABLED
 
 errlHndl_t IntrRp::hw_disableRouting(TARGETING::Target * i_proc,
                                      INTR_ROUTING_t i_rx_tx)
@@ -1453,7 +1302,8 @@ errlHndl_t IntrRp::hw_disableRouting(TARGETING::Target * i_proc,
            i_proc,
            &reg,
            scom_len,
-           DEVICE_SCOM_ADDRESS(PSIHB_ISRN_REG_t::PSIHB_ISRN_REG)
+           DEVICE_SCOM_ADDRESS(PSIHB_ISRN_REG_t::PSIHB_STATUS_CTL_REG)
+
            );
 
         if(err)
@@ -1478,7 +1328,7 @@ errlHndl_t IntrRp::hw_disableRouting(TARGETING::Target * i_proc,
            i_proc,
            &reg,
            scom_len,
-           DEVICE_SCOM_ADDRESS(PSIHB_ISRN_REG_t::PSIHB_ISRN_REG)
+           DEVICE_SCOM_ADDRESS(PSIHB_ISRN_REG_t::PSIHB_STATUS_CTL_REG)
            );
 
         if(err)
@@ -1578,9 +1428,11 @@ errlHndl_t IntrRp::hw_disableRouting(TARGETING::Target * i_proc,
     } while(0);
     return err;
 }
+#endif
 
 //----------------------------------------------------------------------------
 
+#ifdef CONFIG_MPIPL_ENABLED
 errlHndl_t IntrRp::hw_resetIRSNregs(TARGETING::Target * i_proc)
 {
     errlHndl_t err = NULL;
@@ -1661,9 +1513,10 @@ errlHndl_t IntrRp::hw_resetIRSNregs(TARGETING::Target * i_proc)
     } while(0);
     return err;
 }
+#endif
 
 //----------------------------------------------------------------------------
-
+#ifdef CONFIG_MPIPL_ENABLED
 errlHndl_t IntrRp::blindIssueEOIs(TARGETING::Target * i_proc)
 {
     errlHndl_t err = NULL;
@@ -1767,7 +1620,7 @@ errlHndl_t IntrRp::blindIssueEOIs(TARGETING::Target * i_proc)
     } while(0);
     return err;
 }
-
+#endif
 
 //----------------------------------------------------------------------------
 
@@ -1933,7 +1786,7 @@ void IntrRp::disableAllInterrupts(TARGETING::Target* i_core)
     for(size_t thread = 0; thread < threads; ++thread)
     {
         pir.threadId = thread;
-        disableInterruptPresenter(pir);
+        //wh_p9 disableInterruptPresenter(pir);
     }
 }
 
@@ -2014,7 +1867,7 @@ void IntrRp::drainMpIplInterrupts(TARGETING::TargetHandleList & i_cores)
 }
 
 
-
+#ifdef CONFIG_MPIPL_ENABLED
 errlHndl_t IntrRp::hw_disableIntrMpIpl()
 {
     errlHndl_t err = NULL;
@@ -2162,7 +2015,7 @@ errlHndl_t IntrRp::hw_disableIntrMpIpl()
     } while(0);
     return err;
 }
-
+#endif
 
 errlHndl_t syncNodesError(void * i_p, uint64_t i_len)
 {
@@ -2311,7 +2164,7 @@ errlHndl_t IntrRp::syncNodes(intr_mpipl_sync_t i_sync_type)
     return err;
 }
 
-
+#ifdef CONFIG_MPIPL_ENABLED
 errlHndl_t  IntrRp::initializeMpiplSyncArea()
 {
     errlHndl_t err = NULL;
@@ -2371,7 +2224,9 @@ errlHndl_t  IntrRp::initializeMpiplSyncArea()
     }
     return err;
 }
+#endif
 
+#ifdef CONFIG_MPIPL_ENABLED
 errlHndl_t  IntrRp::addHbNodeToMpiplSyncArea(uint64_t i_hbNode)
 {
     errlHndl_t err = NULL;
@@ -2420,7 +2275,9 @@ errlHndl_t  IntrRp::addHbNodeToMpiplSyncArea(uint64_t i_hbNode)
     }
     return err;
 }
+#endif
 
+#ifdef CONFIG_MPIPL_ENABLED
 errlHndl_t  IntrRp::extractHbNodeInfo(void)
 {
     errlHndl_t err = NULL;
@@ -2488,7 +2345,7 @@ errlHndl_t  IntrRp::extractHbNodeInfo(void)
 
     return err;
 }
-
+#endif
 
 //----------------------------------------------------------------------------
 // External interfaces
@@ -2503,6 +2360,7 @@ errlHndl_t INTR::registerMsgQ(msg_q_t i_msgQ,
     // Can't add while handling an interrupt, so
     // send msg instead of direct call
     msg_q_t intr_msgQ = msg_q_resolve(VFS_ROOT_MSG_INTR);
+
     if(intr_msgQ)
     {
         msg_t * msg = msg_allocate();
@@ -2524,7 +2382,6 @@ errlHndl_t INTR::registerMsgQ(msg_q_t i_msgQ,
         }
 
         msg_free(msg);
-
     }
     else
     {
@@ -2547,6 +2404,7 @@ errlHndl_t INTR::registerMsgQ(msg_q_t i_msgQ,
              0
             );
     }
+
     return err;
 }
 
@@ -2671,59 +2529,208 @@ errlHndl_t INTR::disableExternalInterrupts()
     return err;
 }
 
-errlHndl_t INTR::enablePsiIntr(TARGETING::Target * i_target)
+errlHndl_t IntrRp::setPsiHbBAR(TARGETING::Target * i_target)
 {
-    errlHndl_t err = NULL;
-    msg_q_t intr_msgQ = msg_q_resolve(VFS_ROOT_MSG_INTR);
-    if(intr_msgQ)
-    {
-        msg_t * msg = msg_allocate();
-        msg->type = MSG_INTR_ENABLE_PSI_INTR;
-        msg->data[0] = reinterpret_cast<uint64_t>(i_target);
+    errlHndl_t l_err = NULL;
+    uint64_t l_baseBarValue =
+                      i_target->getAttr<TARGETING::ATTR_PSI_BRIDGE_BASE_ADDR>();
 
-        msg_sendrecv(intr_msgQ, msg);
+    do {
+        //Get base BAR Value from attribute
+        uint64_t l_barValue = l_baseBarValue;
 
-        err = reinterpret_cast<errlHndl_t>(msg->data[1]);
-        msg_free(msg);
-    }
-    else
-    {
-        /*@ errorlog tag
-         * @errortype       ERRL_SEV_INFORMATIONAL
-         * @moduleid        INTR::MOD_INTR_ENABLE_PSI_INTR
-         * @reasoncode      INTR::RC_RP_NOT_INITIALIZED
-         * @userdata1       MSG_INTR_ENABLE_PSI_INTR
-         * @userdata2       0
-         *
-         * @devdesc         Interrupt resource provider not initialized yet.
-         *
-         */
-        err = new ERRORLOG::ErrlEntry
-            (
-             ERRORLOG::ERRL_SEV_INFORMATIONAL,      // severity
-             INTR::MOD_INTR_ENABLE_PSI_INTR,        // moduleid
-             INTR::RC_RP_NOT_INITIALIZED,           // reason code
-             static_cast<uint64_t>(MSG_INTR_ENABLE_PSI_INTR),
-             0
-            );
-    }
-    return err;
+        TRACFCOMP(g_trac_intr,"INTR: Setting PSI BRIDGE Bar Address value for -"
+                              " Target %p. PSI BRIDGE BAR value: 0x%016lx",
+                  i_target,l_barValue);
+
+        //Set base BAR Value
+        uint64_t size = sizeof(l_barValue);
+        l_err = deviceWrite(i_target,
+                          &l_barValue,
+                          size,
+                          DEVICE_SCOM_ADDRESS(PSI_BRIDGE_BAR_SCOM_ADDR));
+
+        if(l_err)
+        {
+            TRACFCOMP(g_trac_intr,ERR_MRK"Unable to set PSI BRIDGE BAR Address");
+            break;
+        }
+
+        //Now set the enable bit
+        l_barValue += PSI_BRIDGE_BAR_ENABLE;
+        size = sizeof(l_barValue);
+
+        TRACDCOMP(g_trac_intr,"INTR: Setting PSI BRIDGE Bar enable value for Target - %p. PSI BRIDGE BAR value: 0x%016lx",
+                  i_target,l_barValue);
+
+        l_err = deviceWrite(i_target,
+                          &l_barValue,
+                          size,
+                          DEVICE_SCOM_ADDRESS(PSI_BRIDGE_BAR_SCOM_ADDR));
+
+        if(l_err)
+        {
+            TRACFCOMP(g_trac_intr,ERR_MRK"Error enabling PSIHB BAR");
+            break;
+        }
+
+        //Map Memory Internally for HB and store in member variable
+        void *l_psiHbAddress =
+               reinterpret_cast<void *>(l_baseBarValue);
+        iv_psiHbBaseAddr =
+               reinterpret_cast<PSIHB_SW_INTERFACES_t *>
+               (mmio_dev_map(l_psiHbAddress, PAGE_SIZE));
+    } while(0);
+
+    return l_err;
 }
 
-uint64_t INTR::getIntpAddr(const TARGETING::Target * i_ex, uint8_t i_thread)
+errlHndl_t IntrRp::setPsiHbEsbBAR(TARGETING::Target * i_target,
+                                    bool i_enable)
 {
-    const TARGETING::Target * l_proc = getParentChip(i_ex);
+    errlHndl_t l_err = NULL;
+    uint64_t l_baseBarValue
+            = i_target->getAttr<TARGETING::ATTR_PSI_HB_ESB_ADDR>();
+
+    do {
+
+        uint64_t l_barValue = l_baseBarValue;
+        TRACDCOMP(g_trac_intr,"INTR: Target %p. "
+                              "PSI BRIDGE ESB BAR value: 0x%016lx",
+                  i_target,l_barValue);
+
+        uint64_t size = sizeof(l_barValue);
+        l_err = deviceWrite(i_target,
+                          &l_barValue,
+                          size,
+                          DEVICE_SCOM_ADDRESS(PSI_BRIDGE_ESB_BAR_SCOM_ADDR));
+
+        if(l_err)
+        {
+            TRACFCOMP(g_trac_intr,ERR_MRK"Unable to set PSIHB ESB BAR ");
+            break;
+        }
+
+        //If we are trying to enable this BAR register
+        if (i_enable)
+        {
+            l_barValue += PSI_BRIDGE_ESB_BAR_VALID;
+            TRACDCOMP(g_trac_intr,"INTR: Target %p. PSI BRIDGE ESB BAR value: 0x%016lx",
+                  i_target,l_barValue);
+
+            size = sizeof(l_barValue);
+            l_err = deviceWrite(i_target,
+                             &l_barValue,
+                             size,
+                             DEVICE_SCOM_ADDRESS(PSI_BRIDGE_ESB_BAR_SCOM_ADDR));
+
+            if(l_err)
+            {
+                TRACFCOMP(g_trac_intr,ERR_MRK"Error setting PSIHB ESB BAR");
+                break;
+            }
+
+            //Map Memory Internally for HB and store in member variable
+            void *l_psiHbEoiAddress =
+                    reinterpret_cast<void *>(l_baseBarValue);
+            iv_psiHbEsbBaseAddr =
+               reinterpret_cast<uint64_t *>
+               (mmio_dev_map(l_psiHbEoiAddress, (LSI_LAST_SOURCE)*PAGE_SIZE));
+        }
+
+    } while (0);
+
+    return l_err;
+}
+
+errlHndl_t IntrRp::setXiveIvpeTmBAR1(TARGETING::Target * i_target)
+{
+    errlHndl_t l_err = NULL;
+    uint64_t l_baseBarValue =
+                i_target->getAttr<TARGETING::ATTR_XIVE_THREAD_MGMT1_BAR_ADDR>();
+
+    do
+    {
+        uint64_t l_barValue = l_baseBarValue + XIVE_IVPE_TM_BAR1_VALIDATE;
+
+        TRACDCOMP(g_trac_intr,"INTR: Target %p. XIVE IVPE TM BAR1 value: 0x%016lx",
+                  i_target,l_barValue);
+
+        uint64_t size = sizeof(l_barValue);
+        l_err = deviceWrite(i_target,
+                          &l_barValue,
+                          size,
+                          DEVICE_SCOM_ADDRESS(XIVE_IVPE_TM_BAR1_SCOM_ADDR));
+
+        if(l_err)
+        {
+            TRACFCOMP(g_trac_intr,ERR_MRK"Unable to set XIVE IVPE TM BAR1");
+            break;
+        }
+
+        //Map Memory Internally for HB and store in member variable
+        void *l_xiveTmBar1Address =
+                reinterpret_cast<void *>(l_baseBarValue);
+        iv_xiveTmBar1Address =
+               reinterpret_cast<uint64_t *>
+               (mmio_dev_map(l_xiveTmBar1Address, PAGE_SIZE));
+
+    } while(0);
+
+    return l_err;
+}
+
+
+errlHndl_t IntrRp::setXiveIcBAR(TARGETING::Target * i_target)
+{
+    errlHndl_t l_err = NULL;
+    uint64_t l_baseBarValue
+            = i_target->getAttr<TARGETING::ATTR_XIVE_CONTROLLER_BAR_ADDR>();
+
+    do {
+        uint64_t l_barValue = l_baseBarValue + XIVE_IC_BAR_VALID;
+
+        TRACDCOMP(g_trac_intr,"INTR: Target %p. XIVE IC BAR value: 0x%016lx",
+                  i_target,l_barValue);
+
+        uint64_t size = sizeof(l_barValue);
+        l_err = deviceWrite(i_target,
+                          &l_barValue,
+                          size,
+                          DEVICE_SCOM_ADDRESS(XIVE_IC_BAR_SCOM_ADDR));
+
+        if(l_err)
+        {
+            TRACFCOMP(g_trac_intr,ERR_MRK"Unable to set XIVE IC BAR");
+            break;
+        }
+
+        //Map Memory Internally for HB and store in member variable
+        void *l_xiveIcBarAddress =
+                reinterpret_cast<void *>(l_baseBarValue);
+        iv_xiveIcBarAddress =
+               reinterpret_cast<uint64_t *>
+               (mmio_dev_map(l_xiveIcBarAddress, 40*PAGE_SIZE));
+
+    } while(0);
+
+    return l_err;
+}
+
+uint64_t INTR::getIntpAddr(const TARGETING::Target * i_ec, uint8_t i_thread)
+{
+    const TARGETING::Target * l_proc = getParentChip(i_ec);
     uint64_t l_intB =l_proc->getAttr<TARGETING::ATTR_INTP_BASE_ADDR>();
 
     PIR_t pir(0);
-    pir.groupId = l_proc->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
+    pir.groupId = l_proc->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
     pir.chipId = l_proc->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
-    pir.coreId = i_ex->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+    pir.coreId = i_ec->getAttr<TARGETING::ATTR_CHIP_UNIT>();
     pir.threadId = i_thread;
 
     return (l_intB+ InterruptMsgHdlr::mmio_offset(
-              pir.word & (InterruptMsgHdlr::P8_PIR_THREADID_MSK |
-                          InterruptMsgHdlr::P8_PIR_COREID_MSK)));
+              pir.word & (InterruptMsgHdlr::P9_PIR_THREADID_MSK |
+                          InterruptMsgHdlr::P9_PIR_COREID_MSK)));
 }
 
 void* INTR::IntrRp::handleCpuTimeout(void* _pir)
@@ -2797,9 +2804,6 @@ errlHndl_t INTR::addHbNode(uint64_t i_hbNode)
     return err;
 }
 
-/*
- * Drain interrupt message queue (if present)
- */
 void INTR::drainQueue()
 {
     // send a sync message if queue is found
@@ -2808,9 +2812,7 @@ void INTR::drainQueue()
     {
         msg_t * msg = msg_allocate();
         msg->type = MSG_INTR_DRAIN_QUEUE;
-
         msg_sendrecv(intr_msgQ, msg);
-
         msg_free(msg);
     }
     //else no queue, no need to do anything

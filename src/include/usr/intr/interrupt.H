@@ -51,7 +51,8 @@ namespace INTR
     enum XISRvalue_t
     {
         NO_INTERRUPT = 0,       //!< no interrupt present
-        INTERPROC_XISR = 2,     //!< XISR value for IPIs
+        //TODO RTC 137564
+        INTERPROC_XISR = 0xFF,  //!< XISR value for IPIs
         MAX_XISR  = 0x00FFFFFF, //!< Max value of the XISR
         SHUT_DOWN = 0x01000000, //!< INTR presenter sends this when shutting down
     };
@@ -70,6 +71,33 @@ namespace INTR
         ISN_INTERPROC   = 0xF0, //"special" as it isn't part of PSIHB
                                 //Converts to INTERPROC_XISR when registered
     };
+
+    //These values are HW defined values from the LSI Interrupts status register
+    // on the PSIHB. These should only be changed if the spec changes.
+    enum LSIvalue_t
+    {
+        LSI_PSI         = 0,
+        LSI_OCC         = 1,
+        LSI_FSIMBOX     = 2,
+        LSI_LPC         = 3,
+        LSI_LCL_FIR     = 4,
+        LSI_GLOBAL      = 5,
+        LSI_TPM         = 6,
+        LSI_LPC_SERIAL0 = 7,
+        LSI_LPC_SERIAL1 = 8,
+        LSI_LPC_SERIAL2 = 9,
+        LSI_LPC_SERIAL3 = 10,
+        LSI_SBE_OR_I2C  = 11,
+        LSI_DIO         = 12,
+        LSI_PSU         = 13,
+        LSI_LAST_SOURCE,
+
+//TODO RTC 137564
+//        ISN_INTERPROC   = 0xF0, //"special" as it isn't part of PSIHB
+//                                //Converts to INTERPROC_XISR when registered
+//                                //
+    };
+
 
     /**
      * The XISR value is the logical OR of the Interrup Requestor Source
@@ -107,12 +135,12 @@ namespace INTR
         MSG_INTR_ENABLE,            //!< Enable external Interrupts
         MSG_INTR_DISABLE,           //!< Disable external interrupts
         MSG_INTR_SHUTDOWN,          //!< Call to shutdown interrupt presenter
-        MSG_INTR_ENABLE_PSI_INTR,   //!< Enable PSI interrupts
         MSG_INTR_MPIPL_CLEANUP,     //!< Clean up interrupts on MPIPL
         MSG_INTR_ADD_CPU_TIMEOUT,   //!< Check for a timeout waiting for a core.
         MSG_INTR_ADD_HBNODE,        //!< Add node info for MPIPL
         MSG_INTR_EOI,               //!< Issue EOI when received
         MSG_INTR_DRAIN_QUEUE,       //!< Allow intrp to drain Q of EOI
+        MSG_INTR_COALESCE,          //!< Pending interrupt to be handled
     };
 
     /**
@@ -181,12 +209,13 @@ namespace INTR
      */
     errlHndl_t disableExternalInterrupts();
 
+    //TODO RTC 150260
     /**
      * Initialize the IRSCReg to enable PSI to present interrupts
      * @param[in] i_target  The target processor
      * @return error log handle on error
      */
-    errlHndl_t enablePsiIntr(TARGETING::Target * i_target);
+    //errlHndl_t enablePsiIntr(TARGETING::Target * i_target);
 
     /**
      * Return the interrupt presenter for requested target/thread

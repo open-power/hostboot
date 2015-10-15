@@ -217,6 +217,15 @@
     <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
         <default>0x0006030203000000</default>
     </attribute>
+    <attribute><id>PSI_HB_ESB_ADDR</id>
+        <default>0x00060302031C0000</default>
+    </attribute>
+    <attribute><id>XIVE_CONTROLLER_BAR_ADDR</id>
+        <default>0x0006030203100000</default>
+    </attribute>
+    <attribute><id>XIVE_THREAD_MGMT1_BAR_ADDR</id>
+        <default>0x0006020000000000</default>
+    </attribute>
     <attribute><id>INTP_BASE_ADDR</id>
         <default>0x0003FFFF80300000</default>
     </attribute>

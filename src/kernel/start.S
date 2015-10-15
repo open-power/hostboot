@@ -208,6 +208,7 @@ UNIMPL_INTERRUPT_STUB(hype_data_storage, 0xE00)
 UNIMPL_INTERRUPT_STUB(hype_inst_storage, 0xE20)
 STD_INTERRUPT_STUB(hype_emu_assist, 0xE40)
 UNIMPL_INTERRUPT_STUB(hype_maint, 0xE60)
+STD_INTERRUPT_STUB(hypervisor_external, 0xEA0)
 UNIMPL_INTERRUPT_STUB(perf_monitor, 0xF00)
 UNIMPL_INTERRUPT_STUB(vector_unavail, 0xF20)
 UNIMPL_INTERRUPT_STUB(vsx_unavail, 0xF40)
@@ -696,6 +697,20 @@ intvect_system_reset_external:
     mfsprg0 r1
     mfsprg1 r2
 
+    b intvect_external
+
+    ;// @fn intvect_hypervisor_external
+    ;// Handle hypervisor external interrupt
+    ;//    This function moves the hypervisor external interrupt regs
+    ;//    into the external interrupt regs and then branches to the
+    ;//    external interrupt handler
+intvect_hypervisor_external:
+    mtsprg1 r1          ;// Save off R1 temporarily.
+    mfspr r1, HSRR0     ;// Move HSRR0 -> SRR0.
+    mtsrr0 r1
+    mfspr r1, HSRR1     ;// Move HSRR1 -> SRR1.
+    mtsrr1 r1
+    mfsprg1 r1          ;// Restore R1 and use external interrupt handler
     b intvect_external
 
     ;// @fn system_call_fast_path

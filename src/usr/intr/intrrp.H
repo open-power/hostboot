@@ -92,7 +92,9 @@ namespace INTR
             IntrRp() :
                 iv_msgQ(NULL),
                 iv_baseAddr(0),
-                iv_masterCpu(0) {}
+                iv_masterCpu(0),
+                iv_psiHbBaseAddr(NULL),
+                iv_psiHbEsbBaseAddr(NULL) {}
 
             /**
              * Destructor
@@ -142,6 +144,7 @@ namespace INTR
                 PE0_IRSN_MASK_SCOM_ADDR = 0x0201201B, //INTR IRSN mask
                 PE0_BAREN_SCOM_ADDR     = 0x02012045, //INTR enable/disable
 
+
                 PE1_IRSN_COMP_SCOM_ADDR = 0x0201241A, //INTR IRSN compare
                 PE1_IRSN_MASK_SCOM_ADDR = 0x0201241B, //INTR IRSN mask
                 PE1_BAREN_SCOM_ADDR     = 0x02012445, //INTR enable/disable
@@ -161,6 +164,56 @@ namespace INTR
                 PSI_HBCR_AND_SCOM_ADDR  = 0x02010913,
 
                 IPI_USR_PRIO        = 0x2,   //<! IPI priority from USR space
+
+                LSI_INTERRUPT = 0xC000,
+
+                //PSI Host Bridge Constants
+                PSI_BRIDGE_BAR_SCOM_ADDR = 0x0501290A,
+                PSI_BRIDGE_BAR_ENABLE = 0x0000000000000001ULL,
+                PSI_BRIDGE_ENABLE_CEC_INTERRUPT = 0x1000000000000000ULL,
+                PSI_BRIDGE_ESB_BAR_SCOM_ADDR = 0x05012916,
+
+                //PSI Host Bridge ESB Constants
+                PSI_BRIDGE_ESB_BAR_VALID = 0x0000000000000001ULL,
+                PSI_BRIDGE_ESB_OFF_OFFSET = 0xD00,
+                PSI_BRIDGE_ESB_RESET_OFFSET = 0XC00,
+                PSI_BRIDGE_PSU_DOORBELL_REG = 0x000D0063,
+                PSI_BRIDGE_PSU_HOST_DOORBELL = 0x8000000000000000,
+
+                //XIVE Interrupt Controller Constants
+                XIVE_IC_BAR_SCOM_ADDR = 0x05013010,
+                XIVE_IC_BAR_VALID = 0x8000000000000000ULL,
+                XIVE_IC_PHYSICAL_THREAD_ENABLE_OFFSET = 0x400,
+                XIVE_IC_BAR_INT_PC_MMIO_REG_OFFSET =
+                         XIVE_IC_PHYSICAL_THREAD_ENABLE_OFFSET/sizeof(uint64_t),
+                XIVE_IC_THREAD0_ENABLE = 0x8000000000000000ULL,
+                XIVE_IC_ESB_EOI_OFFSET = 0x3000,
+                XIVE_IC_LSI_EOI_OFFSET =
+                                        XIVE_IC_ESB_EOI_OFFSET/sizeof(uint64_t),
+
+                //XIVE IVPE (Presentation Engine) Constants
+                XIVE_IVPE_TM_BAR1_SCOM_ADDR = 0x05013012,
+                XIVE_IVPE_TM_BAR1_MMIO_OFFSET = 0x0006020000000000ULL,
+                XIVE_IVPE_TM_BAR1_VALIDATE = 0x8000000000000000ULL,
+                XIVE_IVPE_QW3_OFFSET = 0x38,
+                XIVE_IVPE_QW3_LSI_ENABLE = 0x81000000,
+
+                PSI_BRIDGE_INTP_STATUS_CTL_SCOM_ADDR = 0x0501290E,
+                PSI_BRIDGE_INTP_STATUS_CTL_ENABLE = 0x8000000000000000ULL,
+                PSI_BRIDGE_INTP_STATUS_CTL_RESET = 0x4000000000000000ULL,
+
+                XIVE_RESET_INT_CQ_RST_CTL_SCOM_ADDR = 0x05013023,
+                XIVE_RESET_POWERBUS_QUIESCE_ENABLE = 0x4000000000000000,
+                XIVE_RESET_POWERBUS_QUIESCE_TIMEOUT = 1000000, //1 millisecond
+                XIVE_RESET_UNIT_ENABLE = 0x8000000000000000,
+                ACK_HYPERVISOR_INT_REG_OFFSET = 0x830/sizeof(uint16_t),
+                POWERBUS_STATE_QUIESCE = 0xC000000000000000,
+                MAX_PSU_LONG_TIMEOUT_NS  = 100000*NS_PER_MSEC,
+
+                ESB_STATE_RESET   = 0,
+                ESB_STATE_OFF     = 1,
+                ESB_STATE_PENDING = 2,
+                ESB_STATE_QUEUED  = 3,
             };
 
             enum INTR_ROUTING_t
@@ -199,88 +252,76 @@ namespace INTR
                 };
             };
 
+            //Derived from 15.8 PSIHB Software Interfaces of the
+            //  P9 Pervasive Workbook
+            struct PSIHB_SW_INTERFACES_t
+            {
+                uint64_t psihbbar; //Host Bridge Base Address Register    - 0x0
+                uint64_t fspbar;   //FSP Base Address Register            - 0x8
+                uint64_t fspmmr;   //FSP Memory Mask Register             - 0x10
+                uint64_t reserved1; //Unused / Reserved
+                uint64_t psihbcr;  //PSI Host Bridge Ctrl/Status Register - 0x20
+                uint64_t psisemr;  //PSIHB Status / Error Mask Register   - 0x28
+                uint64_t reserved2; //Unused / Reserved
+                uint64_t phbdsr;   //PSIHB Debug Setting register         - 0x38
+                uint64_t phbscr;   //PSI Host Bridge Ctrl/Status Register - 0x40
+                uint64_t phbccr;   //PSI Host Bridge clear ctl/status reg - 0x48
+                uint64_t dmaupaddr; //DMA Upper Address Register          - 0x50
+                uint64_t icr;      //Interrupt Control Register           - 0x58
+                uint64_t esbciaddr; //ESB CI Base Address                 - 0x60
+                uint64_t esbnotifaddr; //ESB Notification Address         - 0x68
+                uint64_t ivtofforig; //IVT Offset Origin Register         - 0x70
+                uint64_t lsiintlevel; //LSI Int Level Register (lab use)  - 0x78
+                uint64_t lsiintstatus; //LSI Interrupt Status register    - 0x80
+            };
+
+            //Found in the PC Register Specification Document
+            struct XIVE_IC_THREAD_CONTEXT_t
+            {
+                uint64_t tctxt_cfg;   // 0x00
+                uint64_t tctxt_track; // 0x08
+                uint64_t unused0;     // 0x10
+                uint64_t unused1;     // 0x18
+                uint64_t ind_thread_context_access0; //0x20
+                uint64_t ind_thread_context_access1; //0x28
+                uint64_t ind_thread_context_access2; //0x30
+                uint64_t ind_thread_context_access3; //0x38
+                uint64_t phys_thread_enable0; //0x40
+                uint64_t phys_thread_enable0_set; //0x48
+                uint64_t phys_thread_enable0_reset; //0x50
+                uint64_t unused3;    //0x58
+                uint64_t phys_thread_enable1; //0x60
+                uint64_t phys_thread_enable1_set; //0x68
+                uint64_t phys_thread_enable1_reset; //0x70
+            };
+
+            //Found in External Interrupt Virtualization Engine (XIVE) Document
+            // in Chapter 4.4 - Per Thread Interrupt Management Area
+            struct XIVE_IVPE_THREAD_CONTEXT_t
+            {
+                uint64_t qw0_0;
+                uint64_t qw0_1;
+                uint64_t qw1_0;
+                uint64_t qw1_1;
+                uint64_t qw2_0;
+                uint64_t qw2_1;
+                uint8_t nsr; //Notification Source Register    - 0x0
+                uint8_t cppr; //Current processor priority register - 0x1
+                uint8_t ipb; //Interrupt pending buffer - 0x2
+                uint8_t lsmfb; //logical server most favored backlog - 0x3
+                uint8_t ack; //O/S Interrupt Acknowledge Counter - 0x4
+                uint8_t inc; //Age increment - 0x5
+                uint8_t age; //Thread age since last selected - 0x6
+                uint8_t pipr; //Pending Interrupt Priority Register - 0x7
+                uint32_t cams; //qw0/1/2/3 - 0x8
+            };
+
+            #define PSIHB_SW_INTERFACES_SIZE (sizeof(PSIHB_SW_INTERFACES_t))
+            #define XIVE_IVPE_THREAD_CONTEXT_SIZE (sizeof(XIVE_IVPE_THREAD_CONTEXT_t))
             /**
-             * This is the Interrupt Requestoer Source Compare Register.
+             * This is the Interrupt Requester Source Compare Register.
              * See Book IV, PSI chapter.
              */
-            struct PSIHB_ISRN_REG_t
-            {
-                enum
-                {
-                    //PSIHB_ISRN_REG_t values. See book IV & P8 scom reg defn.
-                    DISABLE                 = 0,
-                    ENABLE                  = 1,
-                    IRSN_MASK               = 0x7FFF8,    //!< IRSN bits
-                    PSIHB_ISRN_REG          = 0x0201091b, //!< ISRN SCOM Address
-                };
-
-                union
-                {
-                    uint64_t    d64;
-
-                    struct
-                    {
-                        uint64_t irsn:19;       //!< IRSN compare reg
-                        uint64_t res1:10;       //!< zeros
-                        uint64_t reset:1;       //!< ICS Reset
-                        uint64_t die:1;         //!< Downstream Interrupt Enable
-                        uint64_t uie:1;         //!< Upstream Interrupt Enable
-                        uint64_t mask:19;       //!< IRSN Compare Mask
-                        uint64_t res2:13;       //!< zeros
-                    } PACKED;
-                };
-
-                /**
-                 * Default Contructor
-                 */
-                PSIHB_ISRN_REG_t() : d64(0) {}
-            };
-
-            /**
-             * @brief PsiHbXivr Layout for XIVR registers.
-             */
-            struct PsiHbXivr
-            {
-                enum
-                {
-                    PRIO_DISABLED           = 0xff,
-
-                    OCC_PRIO            = 0x30,
-                    FSI_PRIO            = 0x20,
-                    LPC_PRIO            = 0x40,
-                    LCL_ERR_PRIO        = 0x10,
-                    HOST_PRIO           = 0x50,
-                    PSI_PRIO            = 0x60,
-
-                    PSI_XIVR_ADRR           = 0x02010910,
-                    OCC_XIVR_ADRR           = 0x02010916,
-                    FSI_XIVR_ADRR           = 0x02010917,
-                    LPC_XIVR_ADRR           = 0x02010918,
-                    LCL_ERR_XIVR_ADDR       = 0x02010919,
-                    HOST_XIVR_ADRR          = 0x0201091A,
-                };
-
-
-                union
-                {
-                    uint64_t u64;
-
-                    struct
-                    {
-                        uint64_t res1:8;       // zeros
-                        uint64_t pir:14;       // interrupt destination (server)
-                        uint64_t linkptr:2;    // which link reg in intr presenter
-                        uint64_t priority:8;   // intr priority level
-                        uint64_t source:3;     // source number
-                        uint64_t res2:4;       // zeros
-                        uint64_t intr_pend:25; // interrupt is pending
-                    } PACKED;
-                };
-
-                PsiHbXivr() : u64(0) {}
-            };
-
-
             struct intr_response_t
             {
                 msg_q_t msgQ;
@@ -318,6 +359,11 @@ namespace INTR
             Registry_t  iv_registry;    //!< registered interrupt type
             uint64_t    iv_baseAddr;    //!< Base address of hw INTR regs
             PIR_t       iv_masterCpu;   //!< Master cpu PIR
+
+            PSIHB_SW_INTERFACES_t *iv_psiHbBaseAddr; //INTR PSIHB regs base addr
+            uint64_t    *iv_psiHbEsbBaseAddr; //INTR PSIHB ESB regs base addr
+            uint64_t    *iv_xiveIcBarAddress; //XIVE Controller regs base addr
+            uint64_t    *iv_xiveTmBar1Address; //Xive Thread mgmt bar reg 1 addr
             CpuList_t   iv_cpuList;     //!< Other CPU chips
             ChipList_t  iv_chipList;    //!< Proc chips with PSI intr enabled
             ISNList_t   iv_isnList;     //!< List of ISN's to clear on shutdown
@@ -410,12 +456,91 @@ namespace INTR
             void sendIPI(const PIR_t i_pir) const;
 
             /**
-             * Set the IPCBAR scom register
-             * @param[in] i_target, the Target.
-             * @param[in] i_pir, The pir for this processor
+             * Mask all PSIHB Interrupt Sources which will block any
+             * interrupts from the PSIHB to be sent to the HB kernel.
+             * @return Errorlog from masking the sources
              */
-            errlHndl_t setBAR(TARGETING::Target * i_target,
-                              const PIR_t i_pir);
+            errlHndl_t maskAllInterruptSources(void);
+
+            /**
+             * Mask specific PSIHB Interrupt source
+             * @param[in] i_intr_source, The interrupt source to be masked
+             * @return Errorlog from masking the source
+             */
+            errlHndl_t maskInterruptSource(uint8_t i_intr_source);
+
+            /**
+             * Unmask (enable) specific PSIHB Interrupt source
+             * @param[in] i_intr_source, The interrupt source to be unmasked
+             * @return Errorlog from unmasking the source
+             */
+            errlHndl_t unmaskInterruptSource(uint8_t i_intr_source);
+
+            /**
+             * Set all of the Interrupt BAR scom registers
+             * @param[in] i_target, the Target.
+             * @return Errorlog from DeviceWrite
+             */
+            errlHndl_t setInterruptBARs(TARGETING::Target * i_target);
+
+            /**
+             * Perform HW Functions to acknowledge Interrupt which will
+             * stop the interrupt from being re-presented by HW
+             */
+            void acknowledgeInterrupt(void);
+
+            /**
+             * Send EOI (End of Interrupt) sequence
+             * @param[in] i_intSource, interrupt source to perform EOI for
+             * @return Errorlog from DeviceWrite
+             */
+            errlHndl_t sendEOI(uint64_t& i_intSource);
+
+            /**
+             * Handle Interrupt from PSU Source
+             *   - Acknowledge Interrupt
+             *   - Clear Interrupt Condition
+             *   - Issue EOI
+             * @param[in] i_type, interrupt type encountered
+             * @return Errorlog from DeviceWrite
+             */
+            errlHndl_t handlePsuInterrupt(ext_intr_t i_type);
+
+            /**
+             * Set the PSI Host Bridge BAR scom register
+             * @param[in] i_target, the Target.
+             * @return Errorlog from DeviceWrite
+             */
+            errlHndl_t setPsiHbBAR(TARGETING::Target * i_target);
+
+            /**
+             * Set the PSI Host Bridge ESB BAR scom register
+             * @param[in] i_target, the Target.
+             * @param[in] i_enable, indicator to enable/disable the BAR
+             * @return Errorlog from DeviceWrite
+             */
+            errlHndl_t setPsiHbEsbBAR(TARGETING::Target * i_target,
+                                                bool i_enable);
+
+            /**
+             * Set the XIVE Thread Management (TM) BAR1 scom register
+             * @param[in] i_target, the Target.
+             * @return Errorlog from DeviceWrite
+             */
+            errlHndl_t setXiveIvpeTmBAR1(TARGETING::Target * i_target);
+
+            /**
+             * Set the XIVE Interrupt Controller (IC) BAR scom register
+             * @param[in] i_target, the Target.
+             * @return Errorlog from DeviceWrite
+             */
+            errlHndl_t setXiveIcBAR(TARGETING::Target * i_target);
+
+            /**
+             * Reset Interrupt Unit (both the XIVE and PSIHB Interrupt Units)
+             * @return Errorlog from DeviceWrite
+             */
+            errlHndl_t resetIntUnit();
 
             /**
              * Initialize the IRSCReg to enable PSI to present interrupts

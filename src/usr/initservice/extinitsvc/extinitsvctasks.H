@@ -96,8 +96,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
             }
         },
 
-        // @todo RTC:126643 P9 interrupt support
-#if (0)
         /**
          * @brief External interrupt resource provider
          */
@@ -109,8 +107,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 EXT_IMAGE,                              // Extended Module
             }
         },
-#endif
-
         /**
          * @brief Mailbox service provider
          */
