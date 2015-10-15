@@ -188,6 +188,25 @@ int32_t maskRcdParitySideEffects( ExtensibleChip * i_mbaChip,
             break;
         }
 
+        //get the FIRs
+        SCAN_COMM_REGISTER_CLASS * mbsFir =
+            membChip->getRegister("MBSFIR");
+        SCAN_COMM_REGISTER_CLASS * mbaCalFir =
+            i_mbaChip->getRegister("MBACALFIR");
+        SCAN_COMM_REGISTER_CLASS * mbaFir =
+            i_mbaChip->getRegister("MBAFIR");
+
+        l_rc  = mbsFir->Read();
+        l_rc |= mbaCalFir->Read();
+        l_rc |= mbaFir->Read();
+
+        if (SUCCESS != l_rc)
+        {
+            PRDF_ERR(PRDF_FUNC "MBSFIR/MBACALFIR/MBAFIR read failed for"
+                     " 0x%08x", i_mbaChip->GetId());
+            break;
+        }
+
         //get the masks for each FIR
         SCAN_COMM_REGISTER_CLASS * mbsFirMaskOr =
             membChip->getRegister("MBSFIR_MASK_OR");
@@ -196,20 +215,55 @@ int32_t maskRcdParitySideEffects( ExtensibleChip * i_mbaChip,
         SCAN_COMM_REGISTER_CLASS * mbaFirMaskOr =
             i_mbaChip->getRegister("MBAFIR_MASK_OR");
 
-        mbaFirMaskOr->SetBit(2);
-        mbaCalMaskOr->SetBit(2);
-        mbaCalMaskOr->SetBit(17);
-        mbsFirMaskOr->SetBit(4);
-
-        l_rc =  mbaFirMaskOr->Write();
-        l_rc |= mbaCalMaskOr->Write();
-        l_rc |= mbsFirMaskOr->Write();
-
-        if (SUCCESS != l_rc)
+        //set the masks only if the side effect bit is set
+        if (mbaFir->IsBitSet(2))
         {
-            PRDF_ERR(PRDF_FUNC "MBAFIR_MASK_OR/MBACALFIR_MASK_OR/MBSFIR_MASK_OR"
-                    " write failed for 0x%08x", i_mbaChip->GetId());
-            break;
+            mbaFirMaskOr->SetBit(2);
+            l_rc = mbaFirMaskOr->Write();
+            if (SUCCESS != l_rc)
+            {
+                PRDF_ERR(PRDF_FUNC "MBAFIR_MASK_OR write failed for "
+                         "0x%08x", i_mbaChip->GetId());
+                break;
+            }
+        }
+
+        if (mbaCalFir->IsBitSet(2))
+        {
+            mbaCalMaskOr->SetBit(2);
+            l_rc = mbaCalMaskOr->Write();
+            if (SUCCESS != l_rc)
+            {
+                PRDF_ERR(PRDF_FUNC "MBACALFIR_MASK_OR write failed for "
+                         "0x%08x", i_mbaChip->GetId());
+                break;
+            }
+
+        }
+
+        if (mbaCalFir->IsBitSet(17))
+        {
+            mbaCalMaskOr->SetBit(17);
+            l_rc = mbaCalMaskOr->Write();
+            if (SUCCESS != l_rc)
+            {
+                PRDF_ERR(PRDF_FUNC "MBACALFIR_MASK_OR write failed for "
+                         "0x%08x", i_mbaChip->GetId());
+                break;
+            }
+        }
+
+        if (mbsFir->IsBitSet(4))
+        {
+            mbsFirMaskOr->SetBit(4);
+            l_rc = mbsFirMaskOr->Write();
+            if (SUCCESS != l_rc)
+            {
+                PRDF_ERR(PRDF_FUNC "MBSFIR_MASK_OR write failed for "
+                         "0x%08x", membChip->GetId());
+                break;
+            }
+
         }
     }while(0);
 
