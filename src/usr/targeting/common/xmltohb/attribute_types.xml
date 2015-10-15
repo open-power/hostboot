@@ -17360,7 +17360,20 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 </attribute>
 
 <attribute>
-    <id>PSI_HB_ESP_ADDR</id>
+    <id>XIVE_THREAD_MGMT1_BAR_ADDR</id>
+    <description>XIVE - Thread Management Bar address register 1
+         MMIO consumed by HB/PHYP
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+
+<attribute>
+    <id>PSI_HB_ESB_ADDR</id>
     <description>PSIHB - ESB space address - MMIO consumed by PHYP
     </description>
     <simpleType>

@@ -2125,7 +2125,8 @@
     <attribute><id>NVIDIA_PHY1_REG_ADDR</id></attribute>
     <attribute><id>XIVE_CONTROLLER_BAR_ADDR</id></attribute>
     <attribute><id>XIVE_PRESENTATION_BAR_ADDR</id></attribute>
-    <attribute><id>PSI_HB_ESP_ADDR</id></attribute>
+    <attribute><id>PSI_HB_ESB_ADDR</id></attribute>
+    <attribute><id>XIVE_THREAD_MGMT1_BAR_ADDR</id></attribute>
     <attribute><id>NX_RNG_ADDR</id></attribute>
     <!-- end Memory Map -->
 

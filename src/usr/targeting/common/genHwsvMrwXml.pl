@@ -3347,8 +3347,14 @@ sub generate_proc
        0x0006030203180000 + $nodeSize*$lognode + $chipSize*$logid );
     printf( "    </attribute>\n" );
 
+    #XIVE - Thread Management Bar Address register 1
+    printf( "    <attribute><id>XIVE_THREAD_MGMT1_BAR_ADDR</id>\n" );
+    printf( "        <default>0x%016X</default>\n",
+       0x0006020000000000 + $nodeSize*$lognode + $chipSize*$logid );
+    printf( "    </attribute>\n" );
+
     #PSI HB - ESP space address
-    printf( "    <attribute><id>PSI_HB_ESP_ADDR</id>\n" );
+    printf( "    <attribute><id>PSI_HB_ESB_ADDR</id>\n" );
     printf( "        <default>0x%016X</default>\n",
        0x00060302031C0000 + $nodeSize*$lognode + $chipSize*$logid );
     printf( "    </attribute>\n" );

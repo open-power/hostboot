@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -49,7 +51,7 @@ class IntrTest: public CxxTest::TestSuite
          */
         void test_verifyState( void )
         {
-
+/* TODO RTC 150260
             uint32_t * addr = reinterpret_cast<uint32_t *>(iv_masterAddr);
 
             if(*addr != 0xFF000000) // XIRR ro reg
@@ -95,6 +97,7 @@ class IntrTest: public CxxTest::TestSuite
             }
 
             // Potentially could check all link registers on other chips
+**/
         }
 
         /**
@@ -103,6 +106,7 @@ class IntrTest: public CxxTest::TestSuite
         void test_enableDisable( void )
         {
 
+/* TODO RTC 150260
             uint32_t * addr = reinterpret_cast<uint32_t *>(iv_masterAddr);
 
             errlHndl_t err = INTR::disableExternalInterrupts();
@@ -133,6 +137,7 @@ class IntrTest: public CxxTest::TestSuite
             {
                 TS_FAIL("INTR not enabled. Addr %p", addr);
             }
+**/
         }
 
         // This checks the enablePsiIntr. Even though the master proc
@@ -141,6 +146,7 @@ class IntrTest: public CxxTest::TestSuite
         // to test with.
         void test_enablePsi( void )
         {
+/* TODO RTC 150260
             errlHndl_t err = NULL;
             if( TARGETING::is_vpo() )
             {
@@ -156,10 +162,12 @@ class IntrTest: public CxxTest::TestSuite
                 TS_FAIL("Errl from INTER::enablePsiIntr");
                 errlCommit(err,INTR_COMP_ID);
             }
+**/
         }
 
         void test_mpipl_node_data( void )
         {
+/* TODO RTC 150260
             errlHndl_t err = NULL;
             for(uint64_t hb_node = 0; hb_node < MAX_NODES_PER_SYS; ++hb_node)
             {
@@ -221,16 +229,24 @@ class IntrTest: public CxxTest::TestSuite
             {
                 TS_FAIL("INTR Could not map memory of NODE_DATA_AREA");
             }
-
+**/
         }
 
 
         IntrTest() : CxxTest::TestSuite()
         {
+/* TODO RTC 150260
+            TARGETING::Target* procTarget = NULL;
+            TARGETING::targetService().masterProcChipTargetHandle( procTarget );
+            // Set the Interrupt BAR Scom Registers
+            l_err = setInterruptBARs(procTarget);
+
             iv_baseAddr = reinterpret_cast<uint64_t>
                 (mmio_dev_map(reinterpret_cast<void*>(cv_realAddr),THIRTYTWO_MB));
 
-            TRACDCOMP(g_trac_intr,"IntrTest()> iv_baseAddr=0x%.X",iv_baseAddr);
+            TRACFCOMP(g_trac_intr,"IntrTest()> iv_baseAddr=0x%.X",iv_baseAddr);
+
+
 
             task_affinity_pin();                // pin this task to current cpu
             task_affinity_migrate_to_master();  // Move  to the master cpu
@@ -238,7 +254,7 @@ class IntrTest: public CxxTest::TestSuite
             // Get the master cpu id, thread 0
             iv_masterPIR = task_getcpuid();
 
-            TRACDCOMP(g_trac_intr,"IntrTest()> iv_masterPIR=0x%.X",iv_masterPIR);
+            TRACFCOMP(g_trac_intr,"IntrTest()> iv_masterPIR=0x%.X",iv_masterPIR);
 
             iv_masterPIR &= 0xFFFFFFF8;
 
@@ -246,24 +262,31 @@ class IntrTest: public CxxTest::TestSuite
 
             iv_masterAddr = InterruptMsgHdlr::mmio_offset(iv_masterPIR) + iv_baseAddr;
 
+**/
         };
 
 
       ~IntrTest()
       {
+/* TODO RTC 150260
           mmio_dev_unmap(reinterpret_cast<void*>(iv_baseAddr));
+**/
       };
 
     private:
 
+/* TODO RTC 150260
       uint64_t iv_baseAddr;
       uint64_t iv_masterAddr;
       cpuid_t  iv_masterPIR;
       static const uint64_t cv_realAddr;
+**/
 };
 
+/* TODO RTC 150260
 //note: this must be changed if the BAR changes
 const uint64_t IntrTest::cv_realAddr = 0x3ffff80000000ul;
+**/
 
 
 

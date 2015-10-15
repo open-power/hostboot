@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -42,6 +44,11 @@ namespace INTR
         MOD_INTR_SYNC_ADDNODE        = 0x0A, /**< intrrp.C : IntrRp::addHbNodeToMpiplSyncArea */
         MOD_INTR_ADDHBNODE           = 0x0B, /**< intrrp.C : INTR::addHbNode */
         MOD_INTR_EXTRACTNODEINFO     = 0x0C, /**< intrrp.C : INTR::extractHbNodeInfo */
+        MOD_INTRRP_SENDEOI           = 0x0D, /**< intrrp.C : INTR::sendEOI */
+        MOD_INTRRP_MASKINTERRUPT     = 0x0E, /**< intrrp.C : INTR::maskInterruptSource */
+        MOD_INTRRP_UNMASKINTERRUPT   = 0x0F, /**< intrrp.C : INTR::unmaskInterruptSource */
+        MOD_INTRRP_HNDLPSUINTERRUPT  = 0x10, /**< intrrp.C : INTR::handlePsuInterrupt */
+        MOD_INTRRP_RESETINTUNIT      = 0x11, /**< intrrp.C : IntrRp::resetIntUnit */
     };
 
     enum IntrReasonCode
@@ -54,6 +61,11 @@ namespace INTR
         //termination_rc
         RC_PERSISTENT_INTERRUPTS      = INTR_COMP_ID | 0x06,
         RC_CANNOT_MAP_MEMORY          = INTR_COMP_ID | 0x07,
+        RC_PSIHB_ESB_EOI_FAIL         = INTR_COMP_ID | 0x08,
+        RC_XIVE_ESB_WRONG_STATE       = INTR_COMP_ID | 0x09,
+        RC_PSU_DOORBELL_TIMEOUT       = INTR_COMP_ID | 0x0A,
+        RC_XIVE_PBUS_QUIESCE_TIMEOUT  = INTR_COMP_ID | 0x0B,
+        RC_MESSAGE_SEND_ERROR         = INTR_COMP_ID | 0x0C,
     };
 };
 

@@ -289,14 +289,15 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
             // End of Add P9 - Fake trigger for memory expansion
 
             //Set PSI and FSP BARs, activate the PSI link BAR
-            uint64_t psi = l_masterProc->getAttr<ATTR_PSI_BRIDGE_BASE_ADDR>();
+            //TODO RTC 150260 Re-evaluate if this should be deleted or enabled
+//            uint64_t psi = l_masterProc->getAttr<ATTR_PSI_BRIDGE_BASE_ADDR>();
             uint64_t fsp = l_masterProc->getAttr<ATTR_FSP_BASE_ADDR>();
-            psi |= 0x1; //turn on enable bit for PSI, FSP is in PSI Init HWP
+//            psi |= 0x1; //turn on enable bit for PSI, FSP is in PSI Init HWP
 
-            l_errl = deviceWrite( l_masterProc,
-                                  &psi,
-                                  scom_size,
-                                  DEVICE_SCOM_ADDRESS(0x0501290a) );
+//            l_errl = deviceWrite( l_masterProc,
+//                                  &psi,
+//                                  scom_size,
+//                                  DEVICE_SCOM_ADDRESS(0x0501290a) );
             if ( l_errl )
             {
                 // Create IStep error log and cross reference to error that
