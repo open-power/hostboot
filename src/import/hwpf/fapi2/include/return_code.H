@@ -74,10 +74,10 @@ class ReturnCode : public FirstFailureData<ReturnCode>
         ///
         /// @brief Assignement operator
         ///
-        #ifdef DOXYGEN
+#ifdef DOXYGEN
         inline ReturnCode& operator=(const uint64_t& rhs)
         inline ReturnCode& operator=(const ReturnCodes& rhs)
-        #endif
+#endif
 
         inline bool operator==(const uint64_t& rhs) const
         {
@@ -97,6 +97,36 @@ class ReturnCode : public FirstFailureData<ReturnCode>
         inline bool operator!=(const ReturnCodes& rhs) const
         {
             return rhs != iv_rc;
+        }
+
+        ///
+        /// @brief Enumeration of return code creators
+        ///
+        enum returnCodeCreator
+        {
+            CREATOR_FAPI = 1,
+            CREATOR_PLAT = 2,
+            CREATOR_HWP = 3,
+        };
+
+        ///
+        /// @brief Gets the creator of the return code
+        /// @return ReturnCodeCreator
+        ///
+        inline returnCodeCreator getCreator(void) const
+        {
+            returnCodeCreator l_creator = CREATOR_HWP;
+
+            if (iv_rc & FAPI2_RC_FAPI2_MASK)
+            {
+                l_creator = CREATOR_FAPI;
+            }
+            else if (iv_rc & FAPI2_RC_PLAT_MASK)
+            {
+                l_creator = CREATOR_PLAT;
+            }
+
+            return l_creator;
         }
 
     private:
