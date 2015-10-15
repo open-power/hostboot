@@ -40,31 +40,31 @@ using fapi2::TARGET_TYPE_ALL;
 
 namespace fapi2
 {
-    ///
-    /// @brief Check the type of a variable
-    ///
-    /// This function can be called to check that a variable type is as expected
-    /// @note This mechanism will allow for cast ctor's which other static type
-    /// checking might not.
-    ///
-    template<typename T>
-    inline
-    void checkType(const T &) {}
+///
+/// @brief Check the type of a variable
+///
+/// This function can be called to check that a variable type is as expected
+/// @note This mechanism will allow for cast ctor's which other static type
+/// checking might not.
+///
+template<typename T>
+inline
+void checkType(const T&) {}
 
-    class ReturnCode;
+class ReturnCode;
 
-    ///
-    /// @class FirstFailureData
-    ///
-    /// This class provides storage and methods for creating and manipulating
-    /// FFDC.
-    /// It is not needed on all platforms - platforms which need this class have
-    /// specified this by forcing their fapi2::ReturnCode to be a subclass of
-    /// this class.
-    ///
-    template< class R = fapi2::ReturnCode >
-    class FirstFailureData
-    {
+///
+/// @class FirstFailureData
+///
+/// This class provides storage and methods for creating and manipulating
+/// FFDC.
+/// It is not needed on all platforms - platforms which need this class have
+/// specified this by forcing their fapi2::ReturnCode to be a subclass of
+/// this class.
+///
+template< class R = fapi2::ReturnCode >
+class FirstFailureData
+{
     public:
 
         ///
@@ -75,7 +75,7 @@ namespace fapi2
         ///
         FirstFailureData(void):
             iv_info( nullptr )
-            {}
+        {}
 
         ///
         /// @brief Copy Constructor
@@ -84,7 +84,7 @@ namespace fapi2
         /// @note Generates default copy constructor - no deep pointer
         /// copies necessary.
         ///
-        FirstFailureData(const FirstFailureData & i_right) = default;
+        FirstFailureData(const FirstFailureData& i_right) = default;
 
         ///
         /// @brief Destructor
@@ -97,7 +97,7 @@ namespace fapi2
         /// @param[in] i_right Reference to FirstFailureData to assign from.
         /// @return Reference to 'this' FirstFailureData
         ///
-        FirstFailureData & operator=(const FirstFailureData & i_right) = default;
+        FirstFailureData& operator=(const FirstFailureData& i_right) = default;
 
         ///
         /// @brief Sets a HWP error. Sets the rcValue to the supplied value (from
@@ -112,13 +112,13 @@ namespace fapi2
         /// @param[in] i_rcValue Error value to set
         ///
         inline void _setHwpError(const fapi2::HwpReturnCode i_rcValue)
-            {
-                FAPI_ERR("_setHwpError: Creating HWP error 0x%x", i_rcValue);
-                static_cast<R*>(this)->operator=(i_rcValue);
+        {
+            FAPI_ERR("_setHwpError: Creating HWP error 0x%x", i_rcValue);
+            static_cast<R*>(this)->operator=(i_rcValue);
 
-                // Forget about any associated data (this is a new error)
-                iv_info.reset(new ErrorInfo());
-            }
+            // Forget about any associated data (this is a new error)
+            iv_info.reset(new ErrorInfo());
+        }
 
         ///
         /// @brief Get a pointer to any PlatData. FirstFailureData is still
@@ -142,7 +142,12 @@ namespace fapi2
         ///
         /// @return void*. Pointer to any PlatData. If NULL then no data
         ///
-        void* releaseData(void);
+        inline void* releaseData(void)
+        {
+            void* l_pData = iv_info;
+            iv_info = NULL;
+            return l_pData;
+        }
 
         ///
         /// @brief Add ErrorInfo
@@ -159,7 +164,7 @@ namespace fapi2
         ///     defining the ErrorInfo that needs to be added
         /// @param[in] i_count    Number of ErrorInfoEntry entries
         ///
-        void addErrorInfo(const void* const * i_pObjects,
+        void addErrorInfo(const void* const* i_pObjects,
                           const ErrorInfoEntry* i_pEntries,
                           const uint8_t i_count);
 
@@ -171,7 +176,9 @@ namespace fapi2
         /// @return ErrorInfo *. Pointer to any ErrorInfo. If NULL then no info
         ///
         inline const fapi2::ErrorInfo* getErrorInfo(void) const
-            { return iv_info.get(); }
+        {
+            return iv_info.get();
+        }
 
         ///
         /// @brief Forgets about any associated data (PlatData and ErrorInfo)
@@ -180,13 +187,15 @@ namespace fapi2
         /// data is deleted
         ///
         inline void forgetData(void)
-            { iv_info = nullptr; }
+        {
+            iv_info = nullptr;
+        }
 
     private:
 
         // Pointer to the data
         std::shared_ptr<ErrorInfo> iv_info;
-    };
+};
 
 }
 #endif // FAPI2_FFDC_H_
