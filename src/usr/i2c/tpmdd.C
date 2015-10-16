@@ -275,17 +275,6 @@ errlHndl_t tpmPerformOp( DeviceFW::OperationType i_opType,
 
     } while( 0 );
 
-#if 0
-    // If there is an error, add parameter info to log
-    if ( err != NULL )
-    {
-        TPMDD::UdEepromParms( i_opType,
-                              i_target,
-                              io_buflen,
-                              tpmInfo )
-            .addToLog(err);
-    }
-#endif
     if( unlock )
     {
         mutex_unlock( & g_tpmMutex );

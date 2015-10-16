@@ -33,9 +33,33 @@
 // -----------------------------------------------
 // Includes
 // -----------------------------------------------
+#include <i2c/tpmddif.H>
+#include <errl/errlentry.H>
 
 namespace TRUSTEDBOOT
 {
+
+    /// Track system TPM status
+    struct TpmTarget
+    {
+        TARGETING::Target*      nodeTarget;     ///< Node target ptr
+        TPMDD::tpm_chip_types_t chip;           ///< Chip Pri vs Backup
+        uint8_t                 initAttempted:1;///< Has TPM init been run
+        uint8_t                 failed:1;       ///< Is TPM currently failed
+        mutex_t                 tpmMutex;       ///< TPM Mutex
+
+        TpmTarget();
+    };
+
+   /// TPM PCR designations
+    enum TPM_Pcr
+    {
+        PCR_0     = 0,
+        PCR_1     = 1,
+        PCR_4     = 4,
+        PCR_DEBUG = 16,
+        PCR_MAX   = 16,
+    };
 
 
     /**
@@ -48,6 +72,21 @@ namespace TRUSTEDBOOT
      */
     void* host_update_master_tpm( void *io_pArgs );
 
+    /**
+     * @brief Extend a measurement into the TPMs and log
+     * @param[in] i_pcr PCR to write to
+     * @param[in] i_digest Digest value to write to PCR
+     * @param[in] i_digestSize Byte size of i_digest data
+     * @param[in] i_logMsg Null terminated log message, truncated at 128 chars
+     * @return errlHndl_t NULL if successful, otherwise a pointer to the
+     *      error log.
+     * Digest will be right padded with zeros or truncated to match TPM digest
+     *  size being used
+     */
+    errlHndl_t pcrExtend(TPM_Pcr i_pcr,
+                         uint8_t* i_digest,
+                         size_t  i_digestSize,
+                         const char* i_logMsg);
 
 } // end TRUSTEDBOOT namespace
 

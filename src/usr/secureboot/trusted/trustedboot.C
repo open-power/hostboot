@@ -49,8 +49,7 @@
 // ----------------------------------------------
 // Trace definitions
 // ----------------------------------------------
-trace_desc_t* g_trac_trustedboot = NULL;
-TRAC_INIT( & g_trac_trustedboot, "TRBOOT", KILOBYTE );
+extern trace_desc_t* g_trac_trustedboot;
 
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
@@ -59,9 +58,13 @@ TRAC_INIT( & g_trac_trustedboot, "TRBOOT", KILOBYTE );
 namespace TRUSTEDBOOT
 {
 
+extern SystemTpms systemTpms;
+
 void* host_update_master_tpm( void *io_pArgs )
 {
     errlHndl_t err = NULL;
+    bool unlock = false;
+
     TRACDCOMP( g_trac_trustedboot,
                ENTER_MRK"host_update_master_tpm()" );
     TRACUCOMP( g_trac_trustedboot,
@@ -69,11 +72,6 @@ void* host_update_master_tpm( void *io_pArgs )
 
     do
     {
-
-        // First time here so we need to clean out our data structure
-        memset(&tpmTargets, 0,
-               sizeof(TpmTarget) * TRUSTEDBOOT::MAX_SYSTEM_TPMS);
-
 
         // Get a node Target
         TARGETING::TargetService& tS = TARGETING::targetService();
@@ -90,21 +88,23 @@ void* host_update_master_tpm( void *io_pArgs )
             continue;
         }
 
-        if (TPMDD::tpmPresence(nodeTarget, TPMDD::TPM_PRIMARY))
-        {
-            tpmTargets[TPM_MASTER_INDEX].nodeTarget = nodeTarget;
-            tpmTargets[TPM_MASTER_INDEX].chip = TPMDD::TPM_PRIMARY;
-            tpmTargets[TPM_MASTER_INDEX].functional = true;
+        mutex_lock( &(systemTpms.tpm[TPM_MASTER_INDEX].tpmMutex) );
+        unlock = true;
 
+        if (!systemTpms.tpm[TPM_MASTER_INDEX].failed &&
+            TPMDD::tpmPresence(nodeTarget, TPMDD::TPM_PRIMARY))
+        {
             // Initialize the TPM, this will mark it as non-functional on fail
-            tpmInitialize(tpmTargets[TPM_MASTER_INDEX]);
+            tpmInitialize(systemTpms.tpm[TPM_MASTER_INDEX],
+                          nodeTarget,
+                          TPMDD::TPM_PRIMARY);
 
         }
 
-        if (!tpmTargets[TPM_MASTER_INDEX].functional)
+        if (systemTpms.tpm[TPM_MASTER_INDEX].failed)
         {
 
-            /// @todo RTC:134913 Switch to redundant chip if redundant TPM avail
+            /// @todo RTC:134913 Switch to backup chip if backup TPM avail
 
             // Master TPM not available
             TRACFCOMP( g_trac_trustedboot,
@@ -133,6 +133,12 @@ void* host_update_master_tpm( void *io_pArgs )
 
     } while ( 0 );
 
+    if( unlock )
+    {
+        mutex_unlock(&(systemTpms.tpm[TPM_MASTER_INDEX].tpmMutex));
+    }
+
+
     TRACDCOMP( g_trac_trustedboot,
                EXIT_MRK"host_update_master_tpm() - %s",
                ((NULL == err) ? "No Error" : "With Error") );
@@ -140,7 +146,9 @@ void* host_update_master_tpm( void *io_pArgs )
 }
 
 
-void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target)
+void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target,
+                   TARGETING::Target* i_nodeTarget,
+                   TPMDD::tpm_chip_types_t i_chip)
 {
     errlHndl_t err = NULL;
     uint8_t dataBuf[BUFSIZE];
@@ -157,6 +165,11 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target)
     do
     {
         // TPM Initialization sequence
+
+        io_target.nodeTarget = i_nodeTarget;
+        io_target.chip = i_chip;
+        io_target.initAttempted = true;
+        io_target.failed = false;
 
         // Send the TPM startup command
         // Build our command block for a startup
@@ -233,11 +246,10 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target)
     // If the TPM failed we will mark it not functional
     if (NULL != err)
     {
-        io_target.functional = false;
+        io_target.failed = true;
         // Log this failure
         errlCommit(err, SECURE_COMP_ID);
     }
-
 
     TRACDCOMP( g_trac_trustedboot,
                EXIT_MRK"tpmInitialize() - %s",

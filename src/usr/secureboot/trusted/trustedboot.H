@@ -33,6 +33,7 @@
 // -----------------------------------------------
 // Includes
 // -----------------------------------------------
+#include <secureboot/trustedbootif.H>
 
 namespace TRUSTEDBOOT
 {
@@ -42,23 +43,28 @@ enum
     MAX_SYSTEM_TPMS = 2,
     BUFSIZE         = 256,
     TPM_MASTER_INDEX = 0,     ///< Index into tpmTargets array for master chip
-    TPM_REDUNDANT_INDEX = 1,  ///< Index for redundant chip TPM
+    TPM_BACKUP_INDEX = 1,     ///< Index for backup chip TPM
 };
 
-/// Track system TPM status
-struct TpmTarget
-{
-    TARGETING::Target*        nodeTarget;
-    TPMDD::tpm_chip_types_t   chip;         ///< Chip Pri vs Backup
-    uint8_t                   functional:1; ///< Is TPM currently functional
-} tpmTargets[MAX_SYSTEM_TPMS];
 
 /**
  * @brief Initialize the targetted TPM
- * @param[in/out] target Current TPM target structure
+ * @param[in/out] io_target Current TPM target structure
+ * @param[in] i_nodeTarget Node Target
+ * @param[in] i_chip Chip to initialize
 */
-void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target);
+    void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target,
+                       TARGETING::Target* i_nodeTarget,
+                       TPMDD::tpm_chip_types_t i_chip);
 
+/// Class object to store system TPM information
+class SystemTpms
+{
+public:
+    SystemTpms();
+
+    TpmTarget tpm[MAX_SYSTEM_TPMS];
+};
 
 // Command structures taken from TPM Main - Part3 commands v 1.2 rev116
 
