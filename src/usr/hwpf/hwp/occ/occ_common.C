@@ -35,6 +35,7 @@
 #include    <sys/misc.h>
 #include    <sys/mm.h>
 #include    <sys/mmio.h>
+#include    <limits.h>
 #include    <vmmconst.h>
 
 //  targeting support
@@ -60,6 +61,7 @@
 #include <p8_pm_init.H>
 #include <p8_pm_firinit.H>
 #include <p8_pm_prep_for_reset.H>
+#include <arch/ppc.H>
 
 #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
   #include <diag/prdf/prdfWriteHomerFirData.H>
@@ -132,9 +134,14 @@ namespace HBOCC
 
         errlHndl_t l_errl = NULL;
         size_t lidSize = 0;
+        void* l_occImage = NULL;
         do {
+            // allocate memory big enough for all OCC
+            l_occImage = (void*)malloc(1*MEGABYTE);
+
             UtilLidMgr lidMgr(HBOCC::OCC_LIDID);
 
+            // Get the size of the OCC lid
             l_errl = lidMgr.getLidSize(lidSize);
             if(l_errl)
             {
@@ -144,9 +151,11 @@ namespace HBOCC
                 break;
             }
 
-            // get the full OCC LID and then copy them.
-            assert(lidSize <= 1 * MEGABYTE); // malloc() in occ.C
-            l_errl = lidMgr.getLid(i_occVirtAddr, lidSize);
+            // Ensure occ lid size is less than memory allocated for it
+            assert(lidSize <= 1*MEGABYTE);
+
+            // Get the entire OCC lid and write it into temporary memory
+            l_errl = lidMgr.getLid(l_occImage, lidSize);
             if(l_errl)
             {
                 TRACFCOMP( g_fapiImpTd,
@@ -154,42 +163,66 @@ namespace HBOCC
                            OCC_LIDID);
                 break;
             }
+            // Pointer to OCC LID
+            char *l_occLid = reinterpret_cast<char*>(l_occImage);
 
-            // OCC Boot Image is now at the start of that L3 region.
-            size_t l_length = 0; // length of this section
-            size_t l_startOffset = 0; // offset to start of the section
-            size_t l_offsetToLength = 0x48; // offset to length of the section
 
-            char *l_tmpStart = reinterpret_cast<char *>(i_occVirtAddr) +
-                                l_startOffset;
-            uint32_t *ptrToLength = (uint32_t *)(l_tmpStart + l_offsetToLength);
-            l_length = *ptrToLength;
-
-            // OCC Main Application
-            l_startOffset = l_length; // after the Boot image
-            l_tmpStart = reinterpret_cast<char *>(i_occVirtAddr) +
-                            l_startOffset;
-            ptrToLength = (uint32_t *)(l_tmpStart + l_offsetToLength);
-            l_length = *ptrToLength;
-
-            // write the IPL flag and the nest FREQ for OCC.
-            // IPL_FLAG is a two byte field.  OR a 1 into these two bytes.
-            // FREQ is the 4 byte nest frequency value that goes into
-            //  the same field in the HOMER.
+            // Get system target in order to access ATTR_NEST_FREQ_MHZ
             TARGETING::TargetService & tS = TARGETING::targetService();
             TARGETING::Target * sysTarget = NULL;
             tS.getTopLevelTarget( sysTarget );
             assert( sysTarget != NULL );
 
-            uint16_t *ptrToIplFlag =
-                    (uint16_t *)((char *)l_tmpStart + OCC_OFFSET_IPL_FLAG);
-            uint32_t *ptrToFreq =
-                    (uint32_t *)((char *)l_tmpStart + OCC_OFFSET_FREQ);
-            *ptrToIplFlag |= 0x0001;
-            *ptrToFreq = sysTarget->getAttr<ATTR_FREQ_PB>();
+            // Save Nest Frequency;
+            ATTR_NEST_FREQ_MHZ_type l_nestFreq =
+                                     sysTarget->getAttr<ATTR_FREQ_PB>();
 
+
+            size_t l_length = 0; // length of this section
+            size_t l_startOffset = 0; // offset to start of the section
+
+            // offset to length of the section
+            size_t l_offsetToLength = OCC_OFFSET_LENGTH; 
+
+            // Get length of OCC bootloader
+            uint32_t *ptrToLength = (uint32_t *)(l_occLid + l_offsetToLength);
+            l_length = *ptrToLength;
+
+            // We only have PAGESIZE to work with so make sure we do not exceed
+            // limit.
+            assert(l_length <= PAGESIZE);
+            // Write the OCC Bootloader into memory
+            memcpy(i_occVirtAddr, l_occImage, l_length);
+
+
+            // OCC Main Application
+            l_startOffset = l_length; // after the Boot image
+            char * l_occMainAppPtr = reinterpret_cast<char *>(l_occLid) +
+                            l_startOffset;
+
+            // Get the length of the OCC Main application
+            ptrToLength = (uint32_t *)(l_occMainAppPtr + l_offsetToLength);
+            l_length = *ptrToLength;
+
+
+            // write the IPL flag and the nest freq into OCC main app.
+            // IPL_FLAG is a two byte field.  OR a 1 into these two bytes.
+            // FREQ is the 4 byte nest frequency value that goes into
+            //  the same field in the HOMER.
+
+            uint16_t *ptrToIplFlag =
+                    (uint16_t *)((char *)l_occMainAppPtr + OCC_OFFSET_IPL_FLAG);
+
+            uint32_t *ptrToFreq =
+                    (uint32_t *)((char *)l_occMainAppPtr + OCC_OFFSET_FREQ);
+
+            *ptrToIplFlag |= 0x0001;
+            *ptrToFreq = l_nestFreq;
+
+            // Store the OCC Main applicatoin into ecmdDataBuffer
+            // so we may write it to SRAM
             ecmdDataBufferBase l_occAppData(l_length * 8 /* bits */);
-            uint32_t rc = l_occAppData.insert((uint32_t *)l_tmpStart, 0,
+            uint32_t rc = l_occAppData.insert((uint32_t *)l_occMainAppPtr, 0,
                                 l_length * 8 /* bits */);
             if (rc)
             {
@@ -199,6 +232,7 @@ namespace HBOCC
                 // create l_errl
                 break;
             }
+            // Write the OCC Main app into SRAM
             const uint32_t l_SramAddrApp = OCC_SRAM_ADDRESS;
             l_errl = HBOCC::writeSRAM(i_target, l_SramAddrApp, l_occAppData);
             if(l_errl)
@@ -208,7 +242,11 @@ namespace HBOCC
                 break;
             }
 
+
         }while(0);
+
+        //free memory used for OCC lid
+        free(l_occImage);
 
         TRACUCOMP( g_fapiTd,
                    EXIT_MRK"loadOCCImageDuringIpl");
@@ -315,6 +353,8 @@ namespace HBOCC
 
         uint32_t nestFreq =  sysTarget->getAttr<ATTR_FREQ_PB>();
 
+
+
         config_data->version = HBOCC::OccHostDataVersion;
         config_data->nestFrequency = nestFreq;
 
@@ -342,8 +382,10 @@ namespace HBOCC
             const uint32_t l_SramAddrFir = OCC_SRAM_FIR_DATA;
             ecmdDataBufferBase l_occFirData(OCC_SRAM_FIR_LENGTH * 8 /* bits */);
             /// copy config_data in here
-            uint32_t rc = l_occFirData.insert((uint32_t *)config_data, 0,
-                                    sizeof(*config_data) * 8 /* bits */);
+            uint32_t rc = l_occFirData.insert(
+                    (uint32_t *)config_data->firdataConfig,
+                     0,
+                     sizeof(config_data->firdataConfig) * 8 /* bits */);
             if (rc)
             {
                 TRACFCOMP( g_fapiImpTd,

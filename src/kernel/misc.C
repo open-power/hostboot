@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -498,6 +500,11 @@ namespace KernelMisc
         if (startAddr != NULL)
         {
             populate_cache_lines(startAddr, endAddr);
+            // Increment the start address by a page size to make a gap
+            // in memory that Hostboot will later populate with
+            // the OCC Bootloader image.
+            // see src/usr/hwpf/hwp/occ/occ.C::loadnStartAllOccs()
+            startAddr += PAGESIZE;
             size_t pages = (reinterpret_cast<uint64_t>(endAddr) -
                             reinterpret_cast<uint64_t>(startAddr)) / PAGESIZE;
 

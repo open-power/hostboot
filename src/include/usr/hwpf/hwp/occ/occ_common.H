@@ -80,6 +80,7 @@ namespace HBOCC
         OCC_SRAM_FIR_LENGTH = 0x1000,
 
         // offsets for OCC loading during IPL
+        OCC_OFFSET_LENGTH   = 0x48,
         OCC_OFFSET_IPL_FLAG = 0x82,
         OCC_OFFSET_FREQ     = 0x84,
 

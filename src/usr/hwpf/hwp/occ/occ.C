@@ -37,6 +37,7 @@
 #include    <sys/mm.h>
 #include    <sys/mmio.h>
 #include    <vmmconst.h>
+#include    <kernel/vmmmgr.H> // INITIAL_MEM_SIZE
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
@@ -258,9 +259,16 @@ namespace HBOCC
             }
             else
             {
-                // malloc space big enough for all of OCC
-                homerVirtAddrBase = (void *)malloc(1 * MEGABYTE);
+                // Use page of memory previously set aside for OCC Bootloader
+                // see src/kernel/misc.C::expand_full_cache()
+                homerVirtAddrBase = reinterpret_cast<void*>
+                                            (VmmManager::INITIAL_MEM_SIZE);
                 homerPhysAddrBase = mm_virt_to_phys(homerVirtAddrBase);
+
+                TRACUCOMP(g_fapiTd, "Virtual Address = 0x%16lx",
+                                homerVirtAddrBase);
+                TRACUCOMP(g_fapiTd, "Physical Address= 0x%16lx",
+                                homerPhysAddrBase);
             }
 #endif
 
@@ -285,15 +293,12 @@ namespace HBOCC
                     o_failedOccTarget = masterproc;
                     TRACFCOMP( g_fapiImpTd, ERR_MRK
                      "loadnStartAllOccs:primeAndLoadOcc failed");
-                    free(homerVirtAddrBase);
                     break;
                 }
 
                 /********* START OCC *************/
                 l_errl = HBOCC::startOCC (masterproc, NULL, o_failedOccTarget);
 
-                // it either started or errored; either way, free the memory
-                free(homerVirtAddrBase);
 
                 if (l_errl)
                 {
