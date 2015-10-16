@@ -226,7 +226,9 @@ int32_t ClearMbsSecondaryBits( ExtensibleChip * i_chip,
 int32_t ClearServiceCallFlag( ExtensibleChip * i_chip,
                               STEP_CODE_DATA_STRUCT & i_sc )
 {
-    if ( i_sc.service_data->IsAtThreshold() && !mfgMode() )
+    if ( i_sc.service_data->IsAtThreshold() && !mfgMode() &&
+         (CHECK_STOP != i_sc.service_data->getPrimaryAttnType()) &&
+         (!i_sc.service_data->GetFlag(ServiceDataCollector::UNIT_CS)) )
     {
         i_sc.service_data->ClearFlag(ServiceDataCollector::SERVICE_CALL);
     }
