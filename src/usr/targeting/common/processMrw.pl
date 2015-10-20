@@ -77,12 +77,18 @@ my $xmldir = dirname($serverwiz_file);
 $targetObj->loadXML($serverwiz_file);
 
 
-my $str=sprintf(" %30s | %10s | %6s | %4s | %4s | %4s | %4s | %10s | %s\n",
-           "Sensor Name","FRU Name","Ent ID","Type","ID","Inst","FRU","HUID","Target");
+my $str=sprintf(
+    " %30s | %10s | %6s | %4s | %9s | %4s | %4s | %4s | %10s | %s\n",
+    "Sensor Name","FRU Name","Ent ID","Type","Evt Type","ID","Inst","FRU",
+    "HUID","Target");
+
 $targetObj->writeReport($str);
-$str=sprintf(" %30s | %10s | %6s | %4s | %4s | %4s | %4s | %10s | %s\n",
-                   "------------------------------","----------",
-                   "------","----","----","----","----","----------","----------");
+my $str=sprintf(
+    " %30s | %10s | %6s | %4s | %9s | %4s | %4s | %4s | %10s | %s\n",
+    "------------------------------","----------",
+    "------","----","---------","----","----","----","----------",
+    "----------");
+
 $targetObj->writeReport($str);
 #--------------------------------------------------
 ## loop through all targets and do stuff
@@ -220,6 +226,9 @@ sub processIpmiSensors {
                  getAttribute($child,"IPMI_SENSOR_NAME_SUFFIX");
             my $sensor_id=$targetObj->
                  getAttribute($child,"IPMI_SENSOR_ID");
+            my $sensor_evt=$targetObj->
+                 getAttribute($child,"IPMI_SENSOR_READING_TYPE");
+
 
             $name_suffix=~s/\n//g;
             $name_suffix=~s/\s+//g;
@@ -239,9 +248,11 @@ sub processIpmiSensors {
                 $sensor_id_str = sprintf("0x%02X",oct($sensor_id));
             }
             my $str=sprintf(
-                    " %30s | %10s |  0x%02X  | 0x%02X | %4s | %4d | %4d | %10s | %s\n",
-                    $sensor_name,$name,oct($entity_id),oct($sensor_type),
-                    $sensor_id_str,$instance,$fru_id,$huid,$target);
+                " %30s | %10s |  0x%02X  | 0x%02X |    0x%02x   |" .
+                " %4s | %4d | %4d | %10s | %s\n",
+                $sensor_name,$name,oct($entity_id),oct($sensor_type),
+                oct($sensor_evt), $sensor_id_str,$instance,$fru_id,
+                $huid,$target);
             $targetObj->writeReport($str);
         }
     }
@@ -277,6 +288,8 @@ sub processApss {
                  getAttribute($child,"IPMI_SENSOR_NAME_SUFFIX");
             my $sensor_id=$targetObj->
                  getAttribute($child,"IPMI_SENSOR_ID");
+            my $sensor_evt=$targetObj->
+                 getAttribute($child,"IPMI_SENSOR_READING_TYPE");
             my $channel = $targetObj->
                  getAttribute($child,"ADC_CHANNEL_ASSIGNMENT");
             my $channel_id = $targetObj->
@@ -306,9 +319,12 @@ sub processApss {
                 $channel_gains[$channel] = $channel_gain;
             }
             my $str=sprintf(
-                    " %30s | %10s |  0x%02X  | 0x%02X | %4s | %4d | %4d | %10s | %s\n",
+                    " %30s | %10s |  0x%02X  | 0x%02X |    0x%02x   |" .
+                    " %4s | %4d | %4d | %10s | %s\n",
                     $name,"",oct($entity_id),oct($sensor_type),
-                    $sensor_id_str,$channel,"","",$systemTarget);
+                    oct($sensor_evt),$sensor_id_str,$channel,"","",
+                    $systemTarget);
+
             $targetObj->writeReport($str);
         }
     }
