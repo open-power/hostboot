@@ -51,7 +51,7 @@ namespace HWAS
 using namespace HWAS::COMMON;
 using namespace TARGETING;
 
-const uint32_t EMPTY_GARD_RECORDID = 0xFFFFFFFF;
+const uint32_t CLEARED_GARD_RECORDID = 0xFFFFFFFF;
 /**
  * @brief Guard PNOR section info, obtained once for efficiency
  */
@@ -114,7 +114,7 @@ errlHndl_t DeconfigGard::platClearGardRecords(
         const uint32_t l_maxGardRecords = l_hbDeconfigGard->iv_maxGardRecords;
         for (uint32_t i = 0; i < l_maxGardRecords; i++)
         {
-            if (l_pGardRecords[i].iv_recordId != EMPTY_GARD_RECORDID)
+            if (l_pGardRecords[i].iv_recordId != CLEARED_GARD_RECORDID)
             {
                 // specific or all
                 if (i_pTarget)
@@ -124,7 +124,7 @@ errlHndl_t DeconfigGard::platClearGardRecords(
                     {
                         HWAS_INF("Clearing GARD Record for %.8X",
                                 get_huid(i_pTarget));
-                        l_pGardRecords[i].iv_recordId = EMPTY_GARD_RECORDID;
+                        l_pGardRecords[i].iv_recordId = CLEARED_GARD_RECORDID;
                         _flush(&l_pGardRecords[i]);
                         l_gardRecordsCleared++;
                         break; // done - can only be 1 GARD record per target
@@ -132,7 +132,7 @@ errlHndl_t DeconfigGard::platClearGardRecords(
                 }
                 else // Clear all records
                 {
-                    l_pGardRecords[i].iv_recordId = EMPTY_GARD_RECORDID;
+                    l_pGardRecords[i].iv_recordId = CLEARED_GARD_RECORDID;
                     _flush(&l_pGardRecords[i]);
                     l_gardRecordsCleared++;
                 }
@@ -176,7 +176,7 @@ errlHndl_t DeconfigGard::platGetGardRecords(
         const uint32_t l_maxGardRecords = l_hbDeconfigGard->iv_maxGardRecords;
         for (uint32_t i = 0; i < l_maxGardRecords; i++)
         {
-            if (l_pGardRecords[i].iv_recordId != EMPTY_GARD_RECORDID)
+            if (l_pGardRecords[i].iv_recordId != CLEARED_GARD_RECORDID)
             {
                 // specific or all
                 if (i_pTarget)
@@ -296,7 +296,7 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
         const uint32_t l_maxGardRecords = l_hbDeconfigGard->iv_maxGardRecords;
         for (uint32_t i = 0; i < l_maxGardRecords; i++)
         {
-            if (l_pGardRecords[i].iv_recordId == EMPTY_GARD_RECORDID)
+            if (l_pGardRecords[i].iv_recordId == CLEARED_GARD_RECORDID)
             {
                 if (!l_pRecord)
                 {
@@ -442,7 +442,7 @@ errlHndl_t _GardRecordIdSetup( void *&io_platDeconfigGard)
         {
             // if this gard record is already filled out
             if (l_pGardRecords[i].iv_recordId
-                    != EMPTY_GARD_RECORDID)
+                    != CLEARED_GARD_RECORDID)
             {
                 // count how many gard records are already defined
                 l_numGardRecords++;
