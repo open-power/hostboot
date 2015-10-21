@@ -581,10 +581,25 @@
 <attribute>
     <id>OPEN_POWER_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS</id>
     <description>
-        N+1 bulk power limit in Watts
+        N+1 bulk power limit in Watts for systems running
+        with redundant power supplies (default)
     </description>
     <simpleType>
         <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+<attribute>
+    <id>OPEN_POWER_N_PLUS_ONE_HPC_BULK_POWER_LIMIT_WATTS</id>
+    <description>
+        N+1 bulk power limit in Watts for High Performance Computing
+        systems running with a non-redundant power supply policy
+    </description>
+    <simpleType>
+        <uint64_t>
+            <default>0</default>
+        </uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
