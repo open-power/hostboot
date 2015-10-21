@@ -2339,56 +2339,56 @@ sub writeAttrErrlHFile {
             {
                 print $outFile "              l_traceEntry.resize(10+offset + $total_count * 5);\n";
                 print $outFile "              for (uint32_t i = 0;i<$total_count;i++) {\n";
-                print $outFile "                  sprintf(&(l_traceEntry[offset+i*5]), \"0x%.2X \", *((uint8_t *)l_ptr)+i);\n";
+                print $outFile "                  sprintf(&(l_traceEntry[offset+i*5]), \"0x%.2X \", *(((uint8_t *)l_ptr)+i));\n";
                 print $outFile "              }\n";
                 print $outFile "              l_ptr += $total_count * sizeof(uint8_t);\n";
             }
             elsif (exists $attribute->{simpleType}->{uint16_t}) {
                 print $outFile "              l_traceEntry.resize(10+offset + $total_count * 7);\n";
                 print $outFile "              for (uint32_t i = 0;i<$total_count;i++) {\n";
-                print $outFile "                  sprintf(&(l_traceEntry[offset+i*7]), \"0x%.4X \", ntohs(*((uint16_t *)l_ptr)+i));\n";
+                print $outFile "                  sprintf(&(l_traceEntry[offset+i*7]), \"0x%.4X \", ntohs(*(((uint16_t *)l_ptr)+i)));\n";
                 print $outFile "              }\n";
                 print $outFile "              l_ptr += $total_count * sizeof(uint16_t);\n";
             }
             elsif (exists $attribute->{simpleType}->{uint32_t}) {
                 print $outFile "              l_traceEntry.resize(10+offset + $total_count * 11);\n";
                 print $outFile "              for (uint32_t i = 0;i<$total_count;i++) {\n";
-                print $outFile "                  sprintf(&(l_traceEntry[offset+i*11]), \"0x%.8X \", ntohl(*((uint32_t *)l_ptr)+i));\n";
+                print $outFile "                  sprintf(&(l_traceEntry[offset+i*11]), \"0x%.8X \", ntohl(*(((uint32_t *)l_ptr)+i)));\n";
                 print $outFile "              }\n";
                 print $outFile "              l_ptr += $total_count * sizeof(uint32_t);\n";
             }
             elsif (exists $attribute->{simpleType}->{uint64_t}) {
                 print $outFile "              l_traceEntry.resize(10+offset + $total_count * 19);\n";
                 print $outFile "              for (uint32_t i = 0;i<$total_count;i++) {\n";
-                print $outFile "                  sprintf(&(l_traceEntry[offset+i*19]), \"0x%.16llX \", ntohll(*((uint64_t *)l_ptr)+i));\n";
+                print $outFile "                  sprintf(&(l_traceEntry[offset+i*19]), \"0x%.16llX \", ntohll(*(((uint64_t *)l_ptr)+i)));\n";
                 print $outFile "              }\n";
                 print $outFile "              l_ptr += $total_count * sizeof(uint64_t);\n";
             }
             elsif (exists $attribute->{simpleType}->{int8_t}) {
                 print $outFile "              l_traceEntry.resize(10+offset + $total_count * 5);\n";
                 print $outFile "              for (uint32_t i = 0;i<$total_count;i++) {\n";
-                print $outFile "                  sprintf(&(l_traceEntry[offset+i*5]), \"0x%.2X \", *((uint8_t *)l_ptr)+i);\n";
+                print $outFile "                  sprintf(&(l_traceEntry[offset+i*5]), \"0x%.2X \", *(((uint8_t *)l_ptr)+i));\n";
                 print $outFile "              }\n";
                 print $outFile "              l_ptr += $total_count * sizeof(uint8_t);\n";
             }
             elsif (exists $attribute->{simpleType}->{int16_t}) {
                 print $outFile "              l_traceEntry.resize(10+offset + $total_count * 7);\n";
                 print $outFile "              for (uint32_t i = 0;i<$total_count;i++) {\n";
-                print $outFile "                  sprintf(&(l_traceEntry[offset+i*7]), \"0x%.4X \", ntohs(*((int16_t *)l_ptr)+i));\n";
+                print $outFile "                  sprintf(&(l_traceEntry[offset+i*7]), \"0x%.4X \", ntohs(*(((int16_t *)l_ptr)+i)));\n";
                 print $outFile "              }\n";
                 print $outFile "              l_ptr += $total_count * sizeof(int16_t);\n";
             }
             elsif (exists $attribute->{simpleType}->{int32_t}) {
                 print $outFile "              l_traceEntry.resize(10+offset + $total_count * 11);\n";
                 print $outFile "              for (uint32_t i = 0;i<$total_count;i++) {\n";
-                print $outFile "                  sprintf(&(l_traceEntry[offset+i*11]), \"0x%.8X \", ntohl(*((int32_t *)l_ptr)+i));\n";
+                print $outFile "                  sprintf(&(l_traceEntry[offset+i*11]), \"0x%.8X \", ntohl(*(((int32_t *)l_ptr)+i)));\n";
                 print $outFile "              }\n";
                 print $outFile "              l_ptr += $total_count * sizeof(int32_t);\n";
             }
             elsif (exists $attribute->{simpleType}->{int64_t}) {
                 print $outFile "              l_traceEntry.resize(10+offset + $total_count * 19);\n";
                 print $outFile "              for (uint32_t i = 0;i<$total_count;i++) {\n";
-                print $outFile "                  sprintf(&(l_traceEntry[offset+i*19]), \"0x%.16llX \", ntohll(*((int64_t *)l_ptr)+i));\n";
+                print $outFile "                  sprintf(&(l_traceEntry[offset+i*19]), \"0x%.16llX \", ntohll(*(((int64_t *)l_ptr)+i)));\n";
                 print $outFile "              }\n";
                 print $outFile "              l_ptr += $total_count * sizeof(int64_t);\n";
             }
