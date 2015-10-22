@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -158,7 +158,8 @@ class CVPDTest: public CxxTest::TestSuite
                 TARGETING::Target * theTarget = getFunctionalMembufTarget();
                 if(theTarget == NULL)
                 {
-                    TS_FAIL("testCvpdRead() - No Functional Targets found!");
+                    TRACFCOMP(g_trac_vpd,
+                              "testCvpdRead() - No Functional Targets found!");
                     break;
                 }
 
@@ -266,7 +267,8 @@ class CVPDTest: public CxxTest::TestSuite
                 TARGETING::Target * theTarget = getFunctionalMembufTarget();
                 if(theTarget == NULL)
                 {
-                    TS_FAIL("testCvpdWrite() - No Functional Targets found!");
+                    TRACFCOMP(g_trac_vpd,
+                            "testCvpdWrite() - No Functional Targets found!");
                     break;
                 }
 
@@ -407,7 +409,7 @@ class CVPDTest: public CxxTest::TestSuite
 
             if( cmds == 0 )
             {
-                TS_FAIL("testCvpdWrite - No tests ran, something is wrong...");
+                TRACFCOMP(g_trac_vpd, "testCvpdWrite - No tests ran, something is wrong...");
             }
 
             TRACFCOMP( g_trac_vpd,
@@ -435,7 +437,7 @@ class CVPDTest: public CxxTest::TestSuite
                 TARGETING::Target * theTarget = getFunctionalMembufTarget();
                 if(theTarget == NULL)
                 {
-                    TS_FAIL("testCvpdInvalidRecord() - No Functional Targets found!");
+                    TRACFCOMP(g_trac_vpd, "testCvpdInvalidRecord() No Functional Targets found!");
                     break;
                 }
 
@@ -494,7 +496,7 @@ class CVPDTest: public CxxTest::TestSuite
                 TARGETING::Target * theTarget = getFunctionalMembufTarget();
                 if(theTarget == NULL)
                 {
-                    TS_FAIL("testCvpdMissingRecord() - No Functional Targets found!");
+                    TRACFCOMP(g_trac_vpd, "testCvpdMissingRecord() - No Functional Targets found!");
                     break;
                 }
 
@@ -549,7 +551,7 @@ class CVPDTest: public CxxTest::TestSuite
                 TARGETING::Target * theTarget = getFunctionalMembufTarget();
                 if(theTarget == NULL)
                 {
-                    TS_FAIL("testCvpdMissingKeyword() - No Functional Targets found!");
+                    TRACFCOMP(g_trac_vpd, "testCvpdMissingKeyword() - No Functional Targets found!");
                     break;
                 }
 
@@ -606,7 +608,7 @@ class CVPDTest: public CxxTest::TestSuite
                 TARGETING::Target * theTarget = getFunctionalMembufTarget();
                 if(theTarget == NULL)
                 {
-                    TS_FAIL("testCvpdInvalidKeyword() - No Functional Targets found!");
+                    TRACFCOMP(g_trac_vpd, "testCvpdInvalidKeyword() - No Functional Targets found!");
                     break;
                 }
 
@@ -665,7 +667,7 @@ class CVPDTest: public CxxTest::TestSuite
                 TARGETING::Target * theTarget = getFunctionalMembufTarget();
                 if(theTarget == NULL)
                 {
-                    TS_FAIL("testCvpdInvalidBufferSize() - No Functional Targets found!");
+                    TRACFCOMP(g_trac_vpd, "testCvpdInvalidBufferSize() - No Functional Targets found!");
                     break;
                 }
 

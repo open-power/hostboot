@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -244,7 +244,8 @@ class SPDTest: public CxxTest::TestSuite
 
             if( cmds == 0 )
             {
-                TS_FAIL( "testSpdRead - No tests ran, something is wrong..." );
+                TRACFCOMP(g_trac_spd,
+                          "testSpdRead - No tests ran, something is wrong..." );
             }
 
             TRACFCOMP( g_trac_spd,
@@ -442,7 +443,9 @@ class SPDTest: public CxxTest::TestSuite
 
             if( cmds == 0 )
             {
-                TS_FAIL( "testSpdWriteDQ - No tests ran, something is wrong..." );
+                TRACFCOMP( g_trac_spd,
+                           "testSpdWriteDQ - No tests ran,\
+                           something is wrong..." );
             }
 
             TRACFCOMP( g_trac_spd,

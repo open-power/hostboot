@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -83,7 +85,7 @@ class IBscomTest: public CxxTest::TestSuite
 
         if( centaur_list.size() < 1 )
         {
-            TS_FAIL( "test_IBscom> ERROR : Unable to find a Centaur chip" );
+            TRACFCOMP(g_trac_ibscom, "test_IBscom> ERROR : Unable to find a Centaur chip" );
             return;
         }
         l_testTarget = *(centaur_list.begin());
@@ -345,7 +347,7 @@ class IBscomTest: public CxxTest::TestSuite
 
         if( centaur_list.size() < 1 )
         {
-            TS_FAIL( "test_IBscom_error> ERROR : Unable to find a Centaur chip" );
+            TRACFCOMP(g_trac_ibscom, "test_IBscom_error> ERROR : Unable to find a Centaur chip" );
             return;
         }
         l_testTarget = *(centaur_list.begin());

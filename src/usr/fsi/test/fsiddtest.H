@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -417,34 +417,35 @@ class FsiDDTest : public CxxTest::TestSuite
         if( l_memTargetList.empty() )
         {
             TRACFCOMP( g_trac_fsi, "FsiDDTest::test_FFDC> No Centaurs found..." );
-            TS_FAIL( "FsiDDTest::test_FFDC> No Centaurs found..." );
         }
-        TARGETING::Target* fsi_target = *(l_memTargetList.begin());
+        else
+        {
+            TARGETING::Target* fsi_target = *(l_memTargetList.begin());
 
-        l_err =  new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                         FSI::MOD_FSIDD_INVALID,
-                                         FSI::RC_BAD_REASONCODE,
-                                         TARGETING::get_huid(fsi_target),
-                                         FSI::FFDC_PRESENCE_FAIL);
-        FSI::getFsiFFDC( FSI::FFDC_PRESENCE_FAIL, l_err, fsi_target );
-        errlCommit(l_err,CXXTEST_COMP_ID);
+            l_err =  new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            FSI::MOD_FSIDD_INVALID,
+                                            FSI::RC_BAD_REASONCODE,
+                                            TARGETING::get_huid(fsi_target),
+                                            FSI::FFDC_PRESENCE_FAIL);
+            FSI::getFsiFFDC( FSI::FFDC_PRESENCE_FAIL, l_err, fsi_target );
+            errlCommit(l_err,CXXTEST_COMP_ID);
 
-        l_err =  new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                         FSI::MOD_FSIDD_INVALID,
-                                         FSI::RC_BAD_REASONCODE,
-                                         TARGETING::get_huid(fsi_target),
-                                         FSI::FFDC_READWRITE_FAIL);
-        FSI::getFsiFFDC( FSI::FFDC_READWRITE_FAIL, l_err, fsi_target );
-        errlCommit(l_err,CXXTEST_COMP_ID);
+            l_err =  new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            FSI::MOD_FSIDD_INVALID,
+                                            FSI::RC_BAD_REASONCODE,
+                                            TARGETING::get_huid(fsi_target),
+                                            FSI::FFDC_READWRITE_FAIL);
+            FSI::getFsiFFDC( FSI::FFDC_READWRITE_FAIL, l_err, fsi_target );
+            errlCommit(l_err,CXXTEST_COMP_ID);
 
-        l_err =  new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                         FSI::MOD_FSIDD_INVALID,
-                                         FSI::RC_BAD_REASONCODE,
-                                         TARGETING::get_huid(fsi_target),
-                                         FSI::FFDC_PIB_FAIL);
-        FSI::getFsiFFDC( FSI::FFDC_PIB_FAIL, l_err, fsi_target );
-        errlCommit(l_err,CXXTEST_COMP_ID);
-
+            l_err =  new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            FSI::MOD_FSIDD_INVALID,
+                                            FSI::RC_BAD_REASONCODE,
+                                            TARGETING::get_huid(fsi_target),
+                                            FSI::FFDC_PIB_FAIL);
+            FSI::getFsiFFDC( FSI::FFDC_PIB_FAIL, l_err, fsi_target );
+            errlCommit(l_err,CXXTEST_COMP_ID);
+        }
         TRACFCOMP( g_trac_fsi, "FsiDDTest::test_FFDC> Finish" );
     };
 
