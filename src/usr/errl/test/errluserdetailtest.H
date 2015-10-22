@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -212,58 +212,64 @@ public:
         // done - write it out
         pProcEUDA.addToLog(errl);
 
-        c_target = *pMembuf;
-        TS_TRACE( "testAttribute pMembuf %p", c_target);
-        ErrlUserDetailsTarget(c_target).addToLog(errl);
 
-        // all attributes
-        ErrlUserDetailsAttribute(c_target).addToLog(errl);
+        if(*pMembuf != NULL)
+        {
+            c_target = *pMembuf;
+            TS_TRACE( "testAttribute pMembuf %p", c_target);
+            ErrlUserDetailsTarget(c_target).addToLog(errl);
 
-        // one HUID then each attribute
-        ErrlUserDetailsAttribute pMembufEUDA(c_target,ATTR_CHIP_ID);
-        pMembufEUDA.addData(ATTR_EC);
-        pMembufEUDA.addData(ATTR_CHIP_ID);
-        pMembufEUDA.addData(ATTR_MSS_VOLT);
-        pMembufEUDA.addData(ATTR_MSS_FREQ);
+            // all attributes
+            ErrlUserDetailsAttribute(c_target).addToLog(errl);
 
-        // skipped - not there
-        pMembufEUDA.addData(ATTR_SCRATCH_UINT8_1);
+            // one HUID then each attribute
+            ErrlUserDetailsAttribute pMembufEUDA(c_target,ATTR_CHIP_ID);
+            pMembufEUDA.addData(ATTR_EC);
+            pMembufEUDA.addData(ATTR_CHIP_ID);
+            pMembufEUDA.addData(ATTR_MSS_VOLT);
+            pMembufEUDA.addData(ATTR_MSS_FREQ);
 
-        // skipped - write only
-        pMembufEUDA.addData(ATTR_DUMMY_WO);
+            // skipped - not there
+            pMembufEUDA.addData(ATTR_SCRATCH_UINT8_1);
 
-        // skipped - read only
-        pMembufEUDA.addData(ATTR_CLASS);
+            // skipped - write only
+            pMembufEUDA.addData(ATTR_DUMMY_WO);
 
-        // done - write it out
-        pMembufEUDA.addToLog(errl);
+            // skipped - read only
+            pMembufEUDA.addData(ATTR_CLASS);
 
-        c_target = *pDimm;
-        TS_TRACE( "testAttribute pDimm %p", c_target);
-        ErrlUserDetailsTarget(c_target).addToLog(errl);
+            // done - write it out
+            pMembufEUDA.addToLog(errl);
+        }
 
-        // all attributes
-        ErrlUserDetailsAttribute(c_target).addToLog(errl);
+        if(*pDimm != NULL)
+        {
+            c_target = *pDimm;
+            TS_TRACE( "testAttribute pDimm %p", c_target);
+            ErrlUserDetailsTarget(c_target).addToLog(errl);
 
-        // one HUID then each attribute
-        ErrlUserDetailsAttribute pDimmEUDA(c_target,ATTR_CHIP_ID);
-        pDimmEUDA.addData(ATTR_EC);
-        pDimmEUDA.addData(ATTR_CHIP_ID);
-        pDimmEUDA.addData(ATTR_MSS_VOLT);
-        pDimmEUDA.addData(ATTR_MSS_FREQ);
+            // all attributes
+            ErrlUserDetailsAttribute(c_target).addToLog(errl);
 
-        // skipped - not there
-        pDimmEUDA.addData(ATTR_SCRATCH_UINT8_1);
+            // one HUID then each attribute
+            ErrlUserDetailsAttribute pDimmEUDA(c_target,ATTR_CHIP_ID);
+            pDimmEUDA.addData(ATTR_EC);
+            pDimmEUDA.addData(ATTR_CHIP_ID);
+            pDimmEUDA.addData(ATTR_MSS_VOLT);
+            pDimmEUDA.addData(ATTR_MSS_FREQ);
 
-        // skipped - write only
-        pDimmEUDA.addData(ATTR_DUMMY_WO);
+            // skipped - not there
+            pDimmEUDA.addData(ATTR_SCRATCH_UINT8_1);
 
-        // skipped - read only
-        pDimmEUDA.addData(ATTR_CLASS);
+            // skipped - write only
+            pDimmEUDA.addData(ATTR_DUMMY_WO);
 
-        // done - write it out
-        pDimmEUDA.addToLog(errl);
+            // skipped - read only
+            pDimmEUDA.addData(ATTR_CLASS);
 
+            // done - write it out
+            pDimmEUDA.addToLog(errl);
+        }
 #if 0
         // extended test
         uint32_t i = 0;
@@ -282,6 +288,7 @@ public:
         errlCommit(errl, CXXTEST_COMP_ID);
         TS_TRACE( "testAttribute done");
     } // testAttribute
+
 
     /**
      * @test testLogRegister - Capture a register in an error log
@@ -361,11 +368,14 @@ public:
         {
             ErrlUserDetailsLogRegister eudlr(c_target);
             eudlr.addData(DEVICE_SCOM_ADDRESS(0x000F000Full));
-            eudlr.addData(DEVICE_MVPD_ADDRESS(3,0));
+         // Turn on MVPD Testing @TODO RTC 131121,
+         //   eudlr.addData(DEVICE_MVPD_ADDRESS(3,0));
             // error:
             eudlr.addData(DEVICE_FSI_ADDRESS(0x01028));
-            eudlr.addData(DEVICE_I2C_ADDRESS(0,0,0xAC));
-            eudlr.addData(DEVICE_EEPROM_ADDRESS(0x0,0x0));
+            //TODO RTC: 123019 I2CM changes for P9
+            //Need to uncomment this when this work is complete
+//          eudlr.addData(DEVICE_I2C_ADDRESS(0,0,0xAC));
+//          eudlr.addData(DEVICE_EEPROM_ADDRESS(0x0,0x0));
             eudlr.addToLog(errl);
         }
 
@@ -389,21 +399,21 @@ public:
         }
         ErrlUserDetailsLogRegister(c_target, &reg1_data, reg1_size,
                 DEVICE_SCOM_ADDRESS(0x000F000Full)).addToLog(errl);
-
-        uint64_t reg2_data = 0;
-        size_t reg2_size = sizeof(reg2_data);
-        errl_deviceRead = DeviceFW::deviceRead(c_target,
-                        &reg2_data, reg2_size,
-                        DEVICE_MVPD_ADDRESS(3,0));
-
-        if (errl_deviceRead != NULL)
-        {
-            TS_TRACE( "testLogRegister deviceRead return errl; deleting;");
-            delete errl_deviceRead;
-            reg2_size = 0;
-        }
-        ErrlUserDetailsLogRegister(c_target, &reg2_data, reg2_size,
-                DEVICE_MVPD_ADDRESS(3,0)).addToLog(errl);
+// Turn on MVPD Testing @TODO RTC 131121,
+//         uint64_t reg2_data = 0;
+//         size_t reg2_size = sizeof(reg2_data);
+//         errl_deviceRead = DeviceFW::deviceRead(c_target,
+//                         &reg2_data, reg2_size,
+//                         DEVICE_MVPD_ADDRESS(3,0));
+//
+//         if (errl_deviceRead != NULL)
+//         {
+//             TS_TRACE( "testLogRegister deviceRead return errl; deleting;");
+//             delete errl_deviceRead;
+//             reg2_size = 0;
+//         }
+//         ErrlUserDetailsLogRegister(c_target, &reg2_data, reg2_size,
+//                 DEVICE_MVPD_ADDRESS(3,0)).addToLog(errl);
 
         uint32_t reg3_data = 0;
         size_t reg3_size = sizeof(reg3_data);
@@ -429,54 +439,63 @@ public:
             ErrlUserDetailsLogRegister eudlr(c_target);
             eudlr.addDataBuffer(&reg1_data, reg1_size,
                     DEVICE_SCOM_ADDRESS(0x000F000Full));
-            eudlr.addDataBuffer(&reg2_data, reg2_size,
-                    DEVICE_MVPD_ADDRESS(3,0));
-            eudlr.addDataBuffer(&reg3_data, reg3_size,
-                    DEVICE_FSI_ADDRESS(0x01028));
+              // Turn on MVPD Testing @TODO RTC 131121,
+ /*           eudlr.addDataBuffer(&reg2_data, reg2_size,
+                    DEVICE_MVPD_ADDRESS(3,0));*/
+             eudlr.addDataBuffer(&reg3_data, reg3_size,
+                     DEVICE_FSI_ADDRESS(0x01028));
             eudlr.addToLog(errl);
         }
 
         // send some that aren't logged:
-        ErrlUserDetailsLogRegister(c_target,
-                DEVICE_PRESENT_ADDRESS()).addToLog(errl);
+      //TODO RTC: 123019 I2CM changes for P9
+      //Need to uncomment this when this work is complete
+//         ErrlUserDetailsLogRegister(c_target,
+//                 DEVICE_PRESENT_ADDRESS()).addToLog(errl);
         ErrlUserDetailsLogRegister(c_target,
                 DEVICE_PNOR_ADDRESS(0, 0)).addToLog(errl);
         ErrlUserDetailsLogRegister(c_target,
                 DEVICE_MBOX_ADDRESS(0)).addToLog(errl);
 
-        c_target = *pMembuf;
-        ErrlUserDetailsTarget(c_target, "Target: pMembuf").addToLog(errl);
 
-        // HUID then each register
+        if(*pMembuf != NULL)
         {
-            ErrlUserDetailsLogRegister eudlr(c_target);
-            eudlr.addData(DEVICE_FSI_ADDRESS(0x01028));
-            eudlr.addData(DEVICE_SCOM_ADDRESS(0x000F000Full));
-            eudlr.addToLog(errl);
+            c_target = *pMembuf;
+            ErrlUserDetailsTarget(c_target, "Target: pMembuf").addToLog(errl);
+
+            // HUID then each register
+            {
+                ErrlUserDetailsLogRegister eudlr(c_target);
+                eudlr.addData(DEVICE_FSI_ADDRESS(0x01028));
+                eudlr.addData(DEVICE_SCOM_ADDRESS(0x000F000Full));
+                eudlr.addToLog(errl);
+            }
         }
-
-        c_target = *pDimm;
-        ErrlUserDetailsTarget(c_target, "Target: pDimm").addToLog(errl);
-
-        // HUID then each register
+        if(*pDimm != NULL)
         {
-            ErrlUserDetailsLogRegister eudlr(c_target);
-            eudlr.addData(DEVICE_SPD_ADDRESS(0));
-            eudlr.addData(DEVICE_FSI_ADDRESS(0x01028));
-            eudlr.addData(DEVICE_SCOM_ADDRESS(0x000F000Full));
-            eudlr.addToLog(errl);
-        }
+            c_target = *pDimm;
+            ErrlUserDetailsTarget(c_target, "Target: pDimm").addToLog(errl);
 
-        {
-            ErrlUserDetailsLogRegister eudlr(c_target);
-            eudlr.addData(DEVICE_FSISCOM_ADDRESS(0x01028));
-            eudlr.addData(DEVICE_XSCOM_ADDRESS(0x000F000Full));
-            eudlr.addToLog(errl);
-        }
+            // HUID then each register
+            {
+                ErrlUserDetailsLogRegister eudlr(c_target);
+                eudlr.addData(DEVICE_SPD_ADDRESS(0));
+                eudlr.addData(DEVICE_FSI_ADDRESS(0x01028));
+                eudlr.addData(DEVICE_SCOM_ADDRESS(0x000F000Full));
+                eudlr.addToLog(errl);
+            }
 
-        // commit the errorlog
-        errlCommit(errl, CXXTEST_COMP_ID);
-        TS_TRACE( "testLogRegister errorlog user detail data - complete");
+            {
+                ErrlUserDetailsLogRegister eudlr(c_target);
+                eudlr.addData(DEVICE_FSISCOM_ADDRESS(0x01028));
+                eudlr.addData(DEVICE_XSCOM_ADDRESS(0x000F000Full));
+                eudlr.addToLog(errl);
+            }
+
+            // commit the errorlog
+            errlCommit(errl, CXXTEST_COMP_ID);
+            TS_TRACE( "testLogRegister errorlog user detail data - complete");
+        }
     } // testLogRegister
 
 };

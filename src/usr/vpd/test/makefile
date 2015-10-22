@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2013,2016
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,6 +25,9 @@
 ROOTPATH = ../../../..
 
 MODULE = testvpd
-TESTS = *.H
+#TESTS = *.H
 
+TESTS += spdtest.H dimmPrestest.H cvpdtest.H
+#@TODO: RTC 131121 Reenable mvpd test cases after mvpd available
+#TEST += mvpdtest.H
 include ${ROOTPATH}/config.mk

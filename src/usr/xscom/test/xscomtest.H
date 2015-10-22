@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -50,10 +52,11 @@ struct testXscomAddrData
 const testXscomAddrData g_xscomAddrTable[] =
 {
         // Write data to be ORed with read value
-        // Use PORE_GPE0_SCRATCH1_0x0006000B and PORE_GPE0_SCRATCH2_0x0006000C
+        // Use EXP0.EC.PCC1.COMMON.SPR_COMMON.SCR0 and
+        //EXP0.EC.PCC1.COMMON.SPR_COMMON.SCR1
         // Scom registers for testing
-        {0x0006000B, 0x0000040000000000},
-        {0x0006000C, 0xC000000000000000},
+        {0x21010A86, 0x0000040000000000},
+        {0x21010A87, 0xC000000000000000},
 };
 const uint32_t g_xscomAddrTableSz =
                     sizeof(g_xscomAddrTable)/sizeof(testXscomAddrData);

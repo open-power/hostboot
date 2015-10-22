@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2016
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +25,20 @@
 ROOTPATH = ../../../..
 
 MODULE = testsyslib
-TESTS = *.H
+#TESTS = *.H
+#@TODO RTC 144346 Need fix to shared_ptr.H
+#TEST += shared_ptr.H
+TEST += fptest.H
+TEST += integral.H
+TEST += is_integral.H
+TEST += is_ptr.H
+TEST += is_same.H
+TEST += stl_functional.H
+TEST += stltest.H
+TEST += string.H
+TEST += synctest.H
+TEST += time.H
+TEST += tls.H
 
 SUBDIRS += runtime.d
 

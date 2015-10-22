@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2015
+# Contributors Listed Below - COPYRIGHT 2010,2016
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -158,45 +158,77 @@ EXTENDED_MODULES += $(if $(CONFIG_CONSOLE),console)
 EXTENDED_MODULES += $(if $(CONFIG_CONSOLE_OUTPUT_ERRORDISPLAY),errldisplay)
 EXTENDED_MODULES += $(if $(CONFIG_BMC_IPMI),ipmi)
 
+
+
+#***************************************
+# Working test modules
+#***************************************
 TESTCASE_MODULES += cxxtest
 TESTCASE_MODULES += testtrace
-TESTCASE_MODULES += testerrl
 TESTCASE_MODULES += testdevicefw
-TESTCASE_MODULES += testsyslib
-TESTCASE_MODULES += testscom
-TESTCASE_MODULES += testxscom
-TESTCASE_MODULES += testtargeting
-TESTCASE_MODULES += testinitservice
-TESTCASE_MODULES += testkernel
 TESTCASE_MODULES += initsvctesttask
 TESTCASE_MODULES += testcxxtest
 TESTCASE_MODULES += testpnor
-TESTCASE_MODULES += testi2c
-TESTCASE_MODULES += testfsi
 TESTCASE_MODULES += testvfs
-TESTCASE_MODULES += testhwas
-TESTCASE_MODULES += testintr
-TESTCASE_MODULES += testvpd
 TESTCASE_MODULES += testutil
-TESTCASE_MODULES += testmbox
+TESTCASE_MODULES += testscan
+TESTCASE_MODULES += testfsiscom
+TESTCASE_MODULES += testlpc
+TESTCASE_MODULES += $(if $(CONFIG_HTMGT),testhtmgt)
+TESTCASE_MODULES += testinitservice
+TESTCASE_MODULES += testfsi
+TESTCASE_MODULES += testibscom
+TESTCASE_MODULES += testxscom
+TESTCASE_MODULES += testkernel
+TESTCASE_MODULES += testtargeting
+
+#******************************************************************
+#KNOWN ISSUES (I might let these run but there is something wrong)
+#All of these are tracked by a RTC story
+#******************************************************************
+
+TESTCASE_MODULES += testerrl
+#@TODO RTC: 142612 Fix up hwas1test.H
+#TESTCASE_MODULES += testhwas
+TESTCASE_MODULES += testvpd
+TESTCASE_MODULES += testsyslib
+
+#Requires main store memory @TODO RTC: 132577
+#TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testdump)
+
+#Need to remove HostServices related code @TODO RTC:132750
+#TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testruntime)
+
+#@TODO RTC: 137561 Enable this test case when interupt story is complete
+#TESTCASE_MODULES += testintr
+
 #TODO: Need to re-enable testmdia (RTC 135217)
 #TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testmdia)
-#TESTCASE_MODULES += testprdf
-#TODO: Need to re-enable testattn (RTC 135217)
+
+#@TODO RTC: 139904 need to reenable testattn and testprdf
 #TESTCASE_MODULES += testattn
-TESTCASE_MODULES += testscan
-TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testruntime)
-TESTCASE_MODULES += testibscom
-TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testdump)
-TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testsecureboot)
-TESTCASE_MODULES += $(if $(CONFIG_TPMDD),testtrusted)
-TESTCASE_MODULES += testfsiscom
-#FIXME: RTC 129630
-#TESTCASE_MODULES += testrtloader
+#Need PRD team to look at this
+#TESTCASE_MODULES += testprdf
+
+#@TODO RTC: 123019 (p9 work in progress)
+#TESTCASE_MODULES += testi2c
+
+#@TODO RTC: 138226 (p9 work in progress)
 #TESTCASE_MODULES += testsbe
-#TESTCASE_MODULES += testlpc
-TESTCASE_MODULES += $(if $(CONFIG_HTMGT),testhtmgt)
-TESTCASE_MODULES += $(if $(CONFIG_AST2400), testsio)
+
+#@TODO RTC: 118804
+#TESTCASE_MODULES += testscom
+
+#*******************************************************
+#These modules do not work and are not tracked by any stories
+#*******************************************************
+#might need to enable isteps that turn mailboxes on
+#TESTCASE_MODULES += testmbox
+
+#TESTCASE_MODULES += testhwpf
+
+#@TODO RTC:138280 Need to enable Istep 21.1
+#TESTCASE_MODULES += testrtloader
 
 RUNTIME_OBJECTS += rt_start.o
 RUNTIME_OBJECTS += rt_main.o
