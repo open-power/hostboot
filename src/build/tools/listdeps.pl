@@ -168,8 +168,8 @@ else
     @istep_modules = (
         "libistep06.so",
         "libistep07.so",
-        "libistep08.so" ,
-        "libedi_ei_initialization.so" ,
+        "libistep08.so",
+        "libistep09.so",
         "libbuild_winkle_images.so" ,
         "libcore_activate.so" ,
         "libstart_payload.so" ,
@@ -217,10 +217,10 @@ my $resident_modules = {
 # A list of the dependent libraries in each istep.
 # These must be included in the istep file as a dependency.
 my %istepFiles = (
-    "libistep06.so"               => "istep06list.H" ,
-    "libistep07.so"               => "istep07list.H" ,
-    "libistep08.so"               => "istep08list.H" ,
-    "libedi_ei_initialization.so"   => "istep09list.H" ,
+    "libistep06.so"                 => "istep06list.H" ,
+    "libistep07.so"                 => "istep07list.H" ,
+    "libistep08.so"                 => "istep08list.H" ,
+    "libistep09.so"                 => "istep09list.H" ,
     "libocc.so"                     => "istep15list.H" ,
     "libbuild_winkle_images.so"     => "istep15list.H" ,
     "libcore_activate.so"           => "istep16list.H" ,

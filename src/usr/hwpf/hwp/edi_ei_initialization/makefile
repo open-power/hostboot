@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -49,7 +51,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training/io_pre_trainadv
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training/io_post_trainadv
 
 ##  NOTE: add new object files when you add a new HWP
-OBJS += edi_ei_initialization.o
+OBJS += smp_unfencing_inter_enclosure_abus_links.o
 OBJS += proc_fab_iovalid.o
 OBJS += fabric_io_run_training.o
 OBJS += fabric_io_dccal.o
