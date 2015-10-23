@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/activate_powerbus/activate_powerbus.C $      */
+/* $Source: src/usr/isteps/istep10/call_proc_build_smp.C $                */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2015                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,69 +22,31 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
-/**
- *  @file activate_powerbus.C
- *
- *  Support file for IStep: activate_powerbus
- *   Activate PowerBus
- *
- *  HWP_IGNORE_VERSION_CHECK
- *
- */
-
-/******************************************************************************/
-// Includes
-/******************************************************************************/
-#include    <stdint.h>
-#include    <config.h>
-
-#include    <trace/interface.H>
-#include    <initservice/taskargs.H>
 #include    <errl/errlentry.H>
 #include    <errl/errludtarget.H>
-
-#include    <initservice/isteps_trace.H>
+#include    <errl/errlmanager.H>
 #include    <isteps/hwpisteperror.H>
-
-#include    <sbe/sbeif.H>
-#include    <pnor/pnorif.H>
-#include    <i2c/i2cif.H>
+#include    <initservice/isteps_trace.H>
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/common/target.H>
 
-//  fapi support
-#include    <fapi.H>
-#include    <fapiPlatHwpInvoker.H>
-
-#include    "activate_powerbus.H"
-#include    <pbusLinkSvc.H>
-
-#include    "proc_build_smp/proc_build_smp.H"
-#include    <intr/interrupt.H>
-#include    <fsi/fsiif.H>
-
-namespace   ACTIVATE_POWERBUS
-{
-
 using   namespace   ISTEP_ERROR;
 using   namespace   ISTEP;
 using   namespace   TARGETING;
-using   namespace   EDI_EI_INITIALIZATION;
-using   namespace   fapi;
 using   namespace   ERRORLOG;
 
-//******************************************************************************
-// wrapper function to call proc_build_smp
-//******************************************************************************
-void*    call_proc_build_smp( void    *io_pArgs )
+
+namespace ISTEP_10
+{
+void* call_proc_build_smp (void *io_pArgs)
 {
 
-    errlHndl_t  l_errl  =   NULL;
     IStepError l_StepError;
+    //@TODO RTC:133830
+/*    errlHndl_t  l_errl  =   NULL;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_build_smp entry" );
@@ -329,80 +291,9 @@ void*    call_proc_build_smp( void    *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_proc_build_smp exit" );
-
+*/
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();
 }
 
-//******************************************************************************
-// wrapper function to call host_slave_sbe_update
-//******************************************************************************
-void * call_host_slave_sbe_update( void * io_pArgs )
-{
-    errlHndl_t  l_errl  =   NULL;
-    IStepError l_StepError;
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_slave_sbe_update entry" );
-    do
-    {
-
-        // Slave processors should now use Host I2C Access Method
-        I2C::i2cSetAccessMode( I2C::I2C_SET_ACCESS_MODE_PROC_HOST );
-
-        // Reset I2C devices before trying to access the SBE SEEPROMs
-        // Any error returned should not fail istep
-        l_errl = I2C::i2cResetActiveMasters( I2C::I2C_PROC_ALL );
-        if (l_errl)
-        {
-            // Commit error and keep going
-            errlCommit( l_errl, HWPF_COMP_ID );
-        }
-
-        // Call to check state of Processor SBE SEEPROMs and
-        // make any necessary updates
-        l_errl = SBE::updateProcessorSbeSeeproms();
-
-        if (l_errl)
-        {
-            // Create IStep error log and cross reference error that occurred
-            l_StepError.addErrorDetails( l_errl);
-            // Commit error
-            errlCommit( l_errl, HWPF_COMP_ID );
-            break;
-        }
-
-        // Call to Validate any Alternative Master's connection to PNOR
-        // Only call this in MNFG mode
-        // Any error returned should not fail istep
-
-        // Get target service and the system target
-        TargetService& tS = targetService();
-        TARGETING::Target* sys = NULL;
-        (void) tS.getTopLevelTarget( sys );
-        assert(sys, "call_host_slave_sbe_update() system target is NULL");
-
-        TARGETING::ATTR_MNFG_FLAGS_type mnfg_flags;
-        mnfg_flags = sys->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
-        if ( mnfg_flags & MNFG_FLAG_THRESHOLDS )
-        {
-            l_errl = PNOR::validateAltMaster();
-            if (l_errl)
-            {
-                // Commit error
-                errlCommit( l_errl, HWPF_COMP_ID );
-                break;
-            }
-        }
-
-   } while (0);
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_slave_sbe_update exit" );
-
-    // end task, returning any errorlogs to IStepDisp
-    return l_StepError.getErrorHandle();
-
-}
-
-};   // end namespace
+};

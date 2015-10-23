@@ -30,7 +30,7 @@
  * @file    istep10list.H
  *
  *  Step 10 Hostboot SBE Centaur Init
- *  IPL FLow Doc        v0.60 (06/02/15)
+ *  IPL FLow Doc        v0.67 (11/12/15)
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -40,8 +40,47 @@
 #include    <initservice/initsvcreasoncodes.H>
 
 //  include prototypes file
-#include    "../../../usr/hwpf/hwp/sbe_centaur_init/sbe_centaur_init.H"
 #include <config.h>
+
+namespace   ISTEP_10
+{
+
+/**
+ *  @brief   proc_build_smp
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return any errlogs to istep
+ *
+ */
+void*    call_proc_build_smp( void    *io_pArgs );
+
+
+
+/**
+ *  @brief   host_slave_sbe_update
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep
+ *
+ */
+void*    call_host_slave_sbe_update( void    *io_pArgs );
+
+
+
+/**
+ *  @brief   host update redundant tpm
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep
+ *
+ */
+void*    call_host_update_redundant_tpm( void    *io_pArgs );
+
+};
+
 
 namespace   INITSERVICE
 {
@@ -52,10 +91,27 @@ const   TaskInfo    g_istep10[]  =   {
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
+        {
+                ISTEPNAME(10,01,"proc_build_smp"),
+                ISTEP_10::call_proc_build_smp,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
+        {
+                ISTEPNAME(10,02,"host_slave_sbe_update"),
+                ISTEP_10::call_host_slave_sbe_update,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
+        {
+                ISTEPNAME(10,03,"host_update_redundant_tpm"),
+                ISTEP_10::call_host_update_redundant_tpm,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
 };
 
 const DepModInfo g_istep10Dependancies = {
     {
+        DEP_LIB(libistep10.so),
+        DEP_LIB(libsbe.so),
         NULL
     }
 };
