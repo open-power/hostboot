@@ -1,0 +1,120 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/error_info/p9_mss_eff_grouping_errors.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- File: p9_mss_eff_grouping_errors.xml. -->
+<!-- Error definitions for p9_mss_eff_grouping HWP. -->
+
+<hwpErrors>
+
+<hwpError>
+    <rc>RC_MSS_EFF_CONFIG_MIRROR_DISABLED</rc>
+    <description>
+        Mirroring is disabled but Mirror placement policy is flipped.
+        Firmware error.
+        - ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING is true
+        - ATTR_MEM_MIRROR_PLACEMENT_POLICY is FLIPPED
+    </description>
+    <ffdc>MRW_ENHANCED_GROUPING_NO_MIRRORING</ffdc>
+    <ffdc>MIRROR_PLACEMENT_POLICY</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_NO_GROUP_ALLOWED</rc>
+    <description>
+        ATTR_MSS_INTERLEAVE_ENABLE doesn't have any grouping type allowed.
+        Firmware error.
+    </description>
+    <ffdc>MSS_INTERLEAVE_ENABLE_VALUE</ffdc>
+    <ffdc>CHIP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_UNABLE_TO_GROUP_MC</rc>
+    <description>
+        p9_mss_eff_grouping is unable to group this MC.
+        This is a memory plugging error. Refer to memory plugging rules.
+        The attached target MC or MEMBUF chip is deconfigured as a result.
+    </description>
+    <ffdc>MC_PORT_NUMBER</ffdc>
+    <callout>
+        <procedure>MEMORY_PLUGGING_ERROR</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+        <target>TARGET</target>
+    </deconfigure>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_NO_SPACE_FOR_HTM_OCC_BAR</rc>
+    <description>
+        There is not enough memory availble for the requested HTM and OCC
+        Sandbox bar sizes.
+    </description>
+    <ffdc>TOTAL_SIZE</ffdc>
+    <ffdc>HTM_BAR_SIZE_1</ffdc>
+    <ffdc>HTM_BAR_SIZE_2</ffdc>
+    <ffdc>OCC_SANDBOX_BAR_SIZE</ffdc>
+    <ffdc>MIRROR_PLACEMENT_POLICY</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_HTM_OCC_BAR_NOT_POSSIBLE</rc>
+    <description>
+        HTM and OCC Sandbox bars are not possible.
+    </description>
+    <ffdc>TOTAL_SIZE</ffdc>
+    <ffdc>HTM_BAR_SIZE_1</ffdc>
+    <ffdc>HTM_BAR_SIZE_2</ffdc>
+    <ffdc>OCC_SANDBOX_BAR_SIZE</ffdc>
+    <ffdc>MIRROR_PLACEMENT_POLICY</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_BASE_ADDRESS_OVERLAPS_MIRROR_ADDRESS</rc>
+    <description>
+        p9_mss_eff_grouping found that the base address overlaps with the
+        mirror base address.
+    </description>
+    <ffdc>PROC_CHIP</ffdc>
+    <ffdc>MEM_BASE_ADDR</ffdc>
+    <ffdc>MIRROR_BASE_ADDR</ffdc>
+    <ffdc>SIZE_NON_MIRROR</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+</hwpErrors>
