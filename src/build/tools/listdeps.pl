@@ -168,7 +168,7 @@ else
     @istep_modules = (
         "libistep06.so",
         "libistep07.so",
-        "libnest_chiplets.so" ,
+        "libistep08.so" ,
         "libedi_ei_initialization.so" ,
         "libbuild_winkle_images.so" ,
         "libcore_activate.so" ,
@@ -219,7 +219,7 @@ my $resident_modules = {
 my %istepFiles = (
     "libistep06.so"               => "istep06list.H" ,
     "libistep07.so"               => "istep07list.H" ,
-    "libnest_chiplets.so"           => "istep08list.H" ,
+    "libistep08.so"               => "istep08list.H" ,
     "libedi_ei_initialization.so"   => "istep09list.H" ,
     "libocc.so"                     => "istep15list.H" ,
     "libbuild_winkle_images.so"     => "istep15list.H" ,

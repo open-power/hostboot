@@ -45,14 +45,13 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_pcie_slot_power
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/secure_boot
 
 ##  NOTE: add new object files when you add a new HWP
-OBJS += nest_chiplets.o
 OBJS += proc_start_clocks_chiplets.o
 OBJS += proc_a_x_pci_dmi_pll_initf.o
 OBJS += proc_a_x_pci_dmi_pll_setup.o
 OBJS += proc_a_x_pci_dmi_pll_utils.o
 OBJS += proc_pcie_slot_power.o
 
-        
+
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_start_clocks_chiplets
 VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/nest_chiplets/proc_a_x_pci_dmi_pll_setup
