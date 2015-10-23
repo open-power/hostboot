@@ -30,7 +30,7 @@
  * @file    istep12list.H
  *
  *  IStep 12    Step 12 DMI Training
- *  IPL FLow Doc        v0.60 (06/02/15)
+ *  IPL FLow Doc        v0.67 (11/11/15)
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -44,6 +44,78 @@
 
 #include <config.h>
 
+namespace   ISTEP_12
+{
+
+/**
+ *  @brief   mss getecid
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return any errlogs to istep 
+ *
+ */
+void*  call_mss_getecid( void    *io_pArgs );
+
+
+
+/**
+ *  @brief   dmi attr update
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep 
+ *
+ */
+void*    call_dmi_attr_update( void    *io_pArgs );
+
+
+
+/**
+ *  @brief   proc dmi scominit
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep 
+ *
+ */
+void*    call_proc_dmi_scominit( void    *io_pArgs );
+
+/**
+ *  @brief   dmi scominit
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep 
+ *
+ */
+void*    call_dmi_scominit( void    *io_pArgs );
+
+
+/**
+ *  @brief   dmi erepair
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep 
+ *
+ */
+void*    call_dmi_erepair( void    *io_pArgs );
+
+/**
+ *  @brief   dmi io dccal
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep 
+ *
+ */
+void*    call_dmi_io_dccal( void    *io_pArgs );
+
+
+};
+
+
 namespace   INITSERVICE
 {
 
@@ -53,11 +125,42 @@ const   TaskInfo    g_istep12[]  =   {
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
+        {
+                ISTEPNAME(12,01,"mss_getecid"),
+                ISTEP_12::call_mss_getecid,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
+        {
+                ISTEPNAME(12,02,"dmi_attr_update"),
+                ISTEP_12::call_dmi_attr_update,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
+        {
+                ISTEPNAME(12,03,"proc_dmi_scominit"),
+                ISTEP_12::call_proc_dmi_scominit,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
+        {
+                ISTEPNAME(12,04,"dmi_scominit"),
+                ISTEP_12::call_dmi_scominit,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
+        {
+                ISTEPNAME(12,05,"dmi_erepair"),
+                ISTEP_12::call_dmi_erepair,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
+        {
+                ISTEPNAME(12,06,"dmi_io_dccal"),
+                ISTEP_12::call_dmi_io_dccal,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
 
 };
 
 const DepModInfo g_istep12Dependancies = {
     {
+        DEP_LIB(libistep12.so),
         NULL
     }
 };
