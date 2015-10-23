@@ -60,7 +60,6 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_training/cen_stopclocks
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/dram_initialization/proc_throttle_sync
 
 ##  NOTE: add new object files when you add a new HWP
-OBJS += dram_training.o
 OBJS += mss_draminit.o
 OBJS += mss_funcs.o
 OBJS += mss_draminit_mc.o
@@ -82,9 +81,6 @@ OBJS += cen_stopclocks.o
 OBJS += mss_ddr4_pda.o
 OBJS += mss_ddr4_funcs.o
 OBJS += mss_mrs6_DDR4.o
-
-#
-OBJS += $(if $(CONFIG_PALMETTO_VDDR),palmetto_vddr.o, hbVddrMsg.o)
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##@ VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/???
