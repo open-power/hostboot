@@ -51,7 +51,6 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/secure_boot
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/core_activate/proc_stop_deadman_timer
 
 ##  NOTE: add new object files when you add a new HWP
-OBJS += slave_sbe.o
 OBJS += proc_extract_sbe_rc.o
 OBJS += proc_read_seeprom.o
 OBJS += proc_getecid.o

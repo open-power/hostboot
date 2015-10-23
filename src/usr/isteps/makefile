@@ -27,6 +27,7 @@ MODULE = isteps
 
 SUBDIRS+=istep06.d
 SUBDIRS+=istep07.d
+SUBDIRS+=istep08.d
 
 OBJS += hwpisteperror.o
 OBJS += hwpistepud.o
