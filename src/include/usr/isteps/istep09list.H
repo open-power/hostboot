@@ -30,7 +30,7 @@
  * @file    istep09list.H
  *
  *  IStep 09    Activate PowerBus
- *  IPL FLow Doc        v0.60 (06/02/15)
+ *  IPL FLow Doc        v0.67 (11/11/15)
  *
  *    09.1    fabric_erepair
  *          : Restore Fabric Bus eRepair data
@@ -58,8 +58,137 @@
 #include    <initservice/initsvcreasoncodes.H>
 
 //  include prototypes file
-#include "../../../usr/hwpf/hwp/edi_ei_initialization/edi_ei_initialization.H"
 #include <config.h>
+
+namespace   ISTEP_09
+{
+
+/**
+ *  @brief   fabric_erepair
+ *
+ *           Restore Fabric/EDI Bus eRepair data
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return any errlogs to istep 
+ *
+ */
+void*    call_fabric_erepair( void    *io_pArgs );
+
+
+
+/**
+ *  @brief   fabric_io_dccal
+ *
+ *           Calibrate Fabric/EDI interfaces
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep 
+ *
+ */
+void*    call_fabric_io_dccal( void    *io_pArgs );
+
+
+
+/**
+ *  @brief   fabric_pre_trainadv
+ *
+ *  08.3 : : Advanced pre EI/EDI training
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep 
+ *
+ */
+void*    call_fabric_pre_trainadv( void    *io_pArgs );
+
+
+
+/**
+ *  @brief   fabric_io_run_training
+ *
+ *           Run training on internal buses
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep 
+ *
+ */
+void*    call_fabric_io_run_training( void    *io_pArgs );
+
+
+
+/**
+ *  @brief   fabric_post_trainadv
+ *
+ *           Advanced post EI/EDI training
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep 
+ *
+ */
+void*    call_fabric_post_trainadv( void    *io_pArgs );
+
+
+
+/**
+ *  @brief   proc_smp_link_layer
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep
+ *
+ */
+void*   call_proc_smp_link_layer( void    *io_pArgs );
+
+
+
+/**
+ *  @brief   host_startprd_pbus
+ *
+ *           Load PRD for powerbus domain
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep 
+ *
+ */
+void*    call_host_startprd_pbus( void    *io_pArgs );
+
+
+
+/**
+ *  @brief   host_attnlisten_proc
+ *
+ *           Start listening for attentions
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep 
+ *
+ */
+void*    call_host_attnlisten_proc( void    *io_pArgs );
+
+
+
+/**
+ *  @brief   proc_fab_iovalid
+ *
+ *           Lower functional fences on local SMP
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep 
+ *
+ */
+void*    call_proc_fab_iovalid( void    *io_pArgs );
+
+
+};   // end namespace
+
+
 
 namespace   INITSERVICE
 {
@@ -71,53 +200,54 @@ namespace   INITSERVICE
         },
         {
                 ISTEPNAME(09,01,"fabric_erepair"),
-                EDI_EI_INITIALIZATION::call_fabric_erepair,
+                ISTEP_09::call_fabric_erepair,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
                 ISTEPNAME(09,02,"fabric_io_dccal"),
-                EDI_EI_INITIALIZATION::call_fabric_io_dccal,
+                ISTEP_09::call_fabric_io_dccal,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
                 ISTEPNAME(09,03,"fabric_pre_trainadv"),
-                EDI_EI_INITIALIZATION::call_fabric_pre_trainadv,
+                ISTEP_09::call_fabric_pre_trainadv,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
                 ISTEPNAME(09,04,"fabric_io_run_training"),
-                EDI_EI_INITIALIZATION::call_fabric_io_run_training,
+                ISTEP_09::call_fabric_io_run_training,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
                 ISTEPNAME(09,05,"fabric_post_trainadv"),
-                EDI_EI_INITIALIZATION::call_fabric_post_trainadv,
+                ISTEP_09::call_fabric_post_trainadv,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
                 ISTEPNAME(09,06,"proc_smp_link_layer"),
-                EDI_EI_INITIALIZATION::call_proc_smp_link_layer,
+                ISTEP_09::call_proc_smp_link_layer,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
                 ISTEPNAME(09,07,"host_startprd_pbus"),
-                EDI_EI_INITIALIZATION::call_host_startprd_pbus,
+                ISTEP_09::call_host_startprd_pbus,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
                 ISTEPNAME(09,08,"host_attnlisten_proc"),
-                EDI_EI_INITIALIZATION::call_host_attnlisten_proc,
+                ISTEP_09::call_host_attnlisten_proc,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
                 ISTEPNAME(09,09,"proc_fab_iovalid"),
-                EDI_EI_INITIALIZATION::call_proc_fab_iovalid,
+                ISTEP_09::call_proc_fab_iovalid,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
 };
 
 const DepModInfo  g_istep09Dependancies = {
     {
+        DEP_LIB(libistep09.so),
         DEP_LIB(libedi_ei_initialization.so),
         DEP_LIB(libsbe.so),
         NULL
