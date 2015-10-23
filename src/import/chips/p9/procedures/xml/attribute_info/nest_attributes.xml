@@ -22,7 +22,7 @@
 <!-- Attributes are taken from model nest -->
 <!--nest_attributes.xml-->
 <attributes>
-<!-- ******************************************************************************** -->
+<!-- ********************************************************************** -->
 <attribute>
   <id>ATTR_DMI_REFCLOCK_SWIZZLE</id>
   <targetType>TARGET_TYPE_MCS</targetType>
@@ -32,7 +32,7 @@
   <persistRuntime/>
   <platInit/>
 </attribute>
-<!-- ******************************************************************************** -->
+<!-- ********************************************************************** -->
 <attribute>
   <id>ATTR_SYSTEM_IPL_PHASE</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -43,7 +43,7 @@
   <persistRuntime/>
   <writeable/>
 </attribute>
-<!-- ******************************************************************************** -->
+<!-- ********************************************************************** -->
 <attribute>
   <id>ATTR_IS_MPIPL</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -58,7 +58,7 @@
   <platInit/>
   <writeable/>
 </attribute>
-<!-- ******************************************************************************** -->
+<!-- ********************************************************************** -->
 <attribute>
   <id>ATTR_ADU_XSCOM_BAR_BASE_ADDR</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -68,17 +68,16 @@
   <persistRuntime/>
   <platInit/>
 </attribute>
-<!-- ******************************************************************************** -->
+<!-- ********************************************************************** -->
 <attribute>
   <id>ATTR_MEM_MIRROR_PLACEMENT_POLICY</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>Define placement policy/scheme for non-mirrored/mirrored memory
                layout
-    creator: platform
-    consumer: mss_eff_grouping
-    firmware notes:
-      NORMAL  = non-mirrored start: 0, mirrored start: 1024TB
-      FLIPPED = mirrored start: 0, non-mirrored start: 512TB
+               NORMAL = non-mirrored start: 0, mirrored start: 1024TB
+               FLIPPED = mirrored start: 0, non-mirrored start: 512TB
+               Set by platform.
+               Used by mss_eff_grouping
   </description>
   <valueType>uint8</valueType>
   <enum>
@@ -88,73 +87,97 @@
   <platInit/>
   <persistRuntime/>
 </attribute>
-<!-- ******************************************************************************** -->
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_MEM_BASE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> The location where the stacking of non-mirrored memory groups
+                of the chip starts.  This address is determined in a fixed
+                manner from the chip's position in the fabric topology (i.e.
+                each chip will consume a fixed portion of the system address
+                map).
+                Set by p9_mss_eff_grouping TODO: is this correct?
+                Used by p9_mss_eff_grouping.
+  </description>
+  <valueType>uint64</valueType>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+<!-- ********************************************************************** -->
 <attribute>
   <id>ATTR_PROC_MEM_BASES</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Non-mirrored memory base addresses
-    creator: mss_setup_bars
-    consumer: proc_setup_bars, platform
-    firmware notes:
-      64-bit RA
-      eight independent non-mirrored segments are supported
-      (max number based on P9 design)
+  <description> The non-mirrored memory base addresses of the groups formed
+                by the memory grouping process.
+                Set by p9_mss_eff_grouping.
+                Used by p9_setup_bars and platforms (dev tree).
   </description>
   <valueType>uint64</valueType>
   <array>8</array>
   <writeable/>
   <persistRuntime/>
 </attribute>
-<!-- ******************************************************************************** -->
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_MEM_SIZES</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> The non-mirrored memory sizes of the groups formed by the memory
+                grouping process.  These values reflect the usable amount of
+                memory covered by the group.
+                Set by p9_mss_eff_grouping.
+                Used by p9_setup_bars and platforms (dev tree, build winkle img)
+  </description>
+  <valueType>uint64</valueType>
+  <array>8</array>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+<!-- ********************************************************************* -->
 <attribute>
   <id>ATTR_PROC_MIRROR_BASE</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Base address for mirrored memory regions
-    creator: platform (proc_config_base_addr)
-    consumer: mss_setup_bars
-    firmware notes:
-      64-bit RA
+  <description> The location where the stacking of mirrored memory groups
+                of the chip starts.  This address is determined in a fixed
+                manner from the chip's position in the fabric topology (i.e.
+                each chip will consume a fixed portion of the system address
+                map).
+                Set by p9_mss_eff_grouping TODO: is this correct?
+                Used by p9_mss_eff_grouping.
   </description>
   <valueType>uint64</valueType>
   <writeable/>
   <persistRuntime/>
 </attribute>
-<!-- ******************************************************************************** -->
+<!-- ********************************************************************** -->
 <attribute>
   <id>ATTR_PROC_MIRROR_BASES</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Mirrored memory base addresses
-    creator: mss_eff_grouping
-    consumer: proc_setup_bars, platform
-    firmware notes:
-      64-bit RA
-      four independent mirrored segments are supported
-      (max number based on P9 design)
+  <description> The mirrored memory base addresses of the groups formed
+                by the memory grouping process.
+                Set by p9_mss_eff_grouping.
+                Used by p9_setup_bars.
   </description>
   <valueType>uint64</valueType>
   <array>4</array>
   <writeable/>
   <persistRuntime/>
 </attribute>
-<!-- ******************************************************************************** -->
+<!-- ********************************************************************** -->
 <attribute>
   <id>ATTR_PROC_MIRROR_SIZES</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Size of mirrored memory region
-    creator: mss_eff_grouping
-    consumer: proc_setup_bars, platform
-    firmware notes:
-      for given index value, address space assumed to be contiguous
-      from ATTR_PROC_MIRROR_BASES value at matching index
-      four independent mirrored segments are supported
-      (max number based on P9 design)
+  <description> The mirrored memory sizes of the groups formed by the memory
+                grouping process.  These values reflect the usable amount of
+                mirrored memory covered by the group.
+                Set by p9_mss_eff_grouping.
+                Used by p9_setup_bars and platforms (dev tree, build winkle img)
   </description>
   <valueType>uint64</valueType>
   <array>4</array>
   <writeable/>
   <persistRuntime/>
 </attribute>
-<!-- ******************************************************************************** -->
+<!-- ********************************************************************** -->
 <attribute>
     <id>ATTR_MSS_INTERLEAVE_ENABLE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -174,7 +197,7 @@
     <odmVisable/>
     <odmChangeable/>
 </attribute>
-<!-- ******************************************************************************** -->
+<!-- ********************************************************************** -->
 <attribute>
     <id>ATTR_MSS_MEM_MC_IN_GROUP</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -193,7 +216,7 @@
     <array>8</array>
     <persistRuntime/>
 </attribute>
-<!-- ******************************************************************************** -->
+<!-- ********************************************************************** -->
 <attribute>
     <id>ATTR_MSS_MCS_GROUP_32</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -213,12 +236,12 @@
        Measured in GB
      </description>
     <valueType>uint32</valueType>
+    <array>16,16</array>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
-    <array>16 16</array>
 </attribute>
-<!-- ******************************************************************************** -->
+<!-- ********************************************************************** -->
 <attribute>
     <id>ATTR_MSS_MEM_IPL_COMPLETE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -234,7 +257,7 @@
     <odmChangeable/>
     <persistRuntime/>
 </attribute>
-<!-- ******************************************************************************** -->
+<!-- ********************************************************************** -->
 <attribute>
     <id>ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -248,5 +271,167 @@
     <platInit/>
     <enum>FALSE = 0, TRUE = 1</enum>
 </attribute>
-<!-- ******************************************************************************** -->
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_HTM_BAR_BASE_ADDR</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> The base addresses where the HTM traces start.  They are
+                calculated based on the HTM trace sizes requested by users.
+                There are two different HTM trace areas, thus two different
+                base addresses.
+                Platform is to initialize this attribute to 0 (default).
+                Set by p9_mss_eff_grouping.
+                Used by p9_setup_bars.
+  </description>
+  <valueType>uint64</valueType>
+  <array>2</array>
+  <writeable/>
+  <platInit/>
+  <persistRuntime/>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_PROC_HTM_BAR_SIZES</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> The amount of memory a user can reserve to store HTM traces.
+                There are two different HTM trace areas, thus two different
+                sizes (For example, one to store NHTM0 and one forNHTM1).
+                Platform is to initialize this attribute to 0 (default).
+                Set by user via attribute override.
+                Used by p9_mss_eff_grouping.
+  </description>
+  <valueType>uint64</valueType>
+  <enum>
+    256_GB = 0x0000004000000000,
+    128_GB = 0x0000002000000000,
+     64_GB = 0x0000001000000000,
+     32_GB = 0x0000000800000000,
+     16_GB = 0x0000000400000000,
+      8_GB = 0x0000000200000000,
+      4_GB = 0x0000000100000000,
+      2_GB = 0x0000000080000000,
+      1_GB = 0x0000000040000000,
+    512_MB = 0x0000000020000000,
+    256_MB = 0x0000000010000000,
+    128_MB = 0x0000000008000000,
+     64_MB = 0x0000000004000000,
+     32_MB = 0x0000000002000000,
+     16_MB = 0x0000000001000000,
+      ZERO = 0x0000000000000000
+  </enum>
+  <array>2</array>
+  <writeable/>
+  <platInit/>
+  <persistRuntime/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_OCC_SANDBOX_BASE_ADDR</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> The base address where the OCC sandbox starts.  It is
+                calculated based on the OCC sandbox size requested by users.
+                Platform is to initialize this attribute to 0 (default).
+                Set by p9_mss_eff_grouping.
+                Used by p9_setup_bars.
+  </description>
+  <valueType>uint64</valueType>
+  <writeable/>
+  <platInit/>
+  <persistRuntime/>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_PROC_OCC_SANDBOX_SIZE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> The amount of memory a user can reserve to store OCC sandbox
+                functions.
+                Platform is to initialize this attribute to 0 (default).
+                Set by user via attribute override.
+                Used by p9_mss_eff_grouping.
+  </description>
+  <valueType>uint64</valueType>
+  <enum>
+    256_GB = 0x0000004000000000,
+    128_GB = 0x0000002000000000,
+     64_GB = 0x0000001000000000,
+     32_GB = 0x0000000800000000,
+     16_GB = 0x0000000400000000,
+      8_GB = 0x0000000200000000,
+      4_GB = 0x0000000100000000,
+      2_GB = 0x0000000080000000,
+      1_GB = 0x0000000040000000,
+    512_MB = 0x0000000020000000,
+    256_MB = 0x0000000010000000,
+    128_MB = 0x0000000008000000,
+     64_MB = 0x0000000004000000,
+     32_MB = 0x0000000002000000,
+     16_MB = 0x0000000001000000,
+      ZERO = 0x0000000000000000
+  </enum>
+  <writeable/>
+  <platInit/>
+  <persistRuntime/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_MEM_BASES_ACK</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> The actual non-mirrored base addresses of the groups formed
+                by the memory grouping process.  These values correspond to
+                the BAR programming and would be acknowleged on the fabric.
+                Set by p9_mss_eff_grouping.
+                Used by p9_setup_bars.
+  </description>
+  <valueType>uint64</valueType>
+  <array>8</array>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_MEM_SIZES_ACK</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> The actual non-mirrored memory sizes of the groups formed
+                by the memory grouping process.  These values correspond to
+                the BAR programming.
+                Set by p9_mss_eff_grouping.
+                Used by p9_setup_bars.
+  </description>
+  <valueType>uint64</valueType>
+  <array>8</array>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_PROC_MIRROR_BASES_ACK</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> The actual mirrored base addresses of the groups formed
+                by the memory grouping process.  These values correspond to
+                the BAR programming and would be acknowleged on the fabric.
+                Set by p9_mss_eff_grouping.
+                Used by p9_setup_bars.
+  </description>
+  <valueType>uint64</valueType>
+  <array>4</array>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+<!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_PROC_MIRROR_SIZES_ACK</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> The actual mirrored memory sizes of the groups formed
+                by the memory grouping process.  These values correspond to
+                the BAR programming.
+                Set by p9_mss_eff_grouping.
+                Used by p9_setup_bars.
+  </description>
+  <valueType>uint64</valueType>
+  <array>4</array>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+<!-- ********************************************************************* -->
+
 </attributes>
