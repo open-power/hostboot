@@ -26,6 +26,7 @@
 
 #include <buffer_parameters.H>
 #include <buffer_traits.H>
+#include <plat_trace.H>
 #include <return_code_defs.H>
 
 namespace fapi2
