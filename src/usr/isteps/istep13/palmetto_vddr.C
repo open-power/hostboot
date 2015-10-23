@@ -1,12 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/dram_training/palmetto_vddr.C $              */
+/* $Source: src/usr/isteps/istep13/palmetto_vddr.C $                      */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2014,2015                        */
-/* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */

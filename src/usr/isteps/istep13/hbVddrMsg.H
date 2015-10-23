@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/dram_training/hbVddrMsg.H $                  */
+/* $Source: src/usr/isteps/istep13/hbVddrMsg.H $                          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */

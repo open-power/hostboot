@@ -1,12 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/dram_training/platform_vddr.H $              */
+/* $Source: src/usr/isteps/istep13/istep13consts.H $                      */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
-/* [+] Google Inc.                                                        */
+/* Contributors Listed Below - COPYRIGHT 2015                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,35 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// platform specific VDDR support.
+#ifndef _ISTEP13CONSTS_H_
+#define _ISTEP13CONSTS_H_
+// Run on all Centaurs/MBAs, but needs to keep this one handy in case we
+// want to limit them in VPO
+const uint8_t UNLIMITED_RUN = 0xFF;
+const uint8_t VPO_NUM_OF_MBAS_TO_RUN = UNLIMITED_RUN;
+const uint8_t VPO_NUM_OF_MEMBUF_TO_RUN = UNLIMITED_RUN;
 
-#ifndef PLATFORM_VDDR_H__
-#define PLATFORM_VDDR_H__
-
-#include <usr/errl/errlentry.H>
-
-/**
- * @brief Enable vspd on DIMMS
- * @return NULL | error handle on error
- */
-errlHndl_t platform_enable_vspd();
-
-/**
- * @brief Enable vddr on DIMMS
- * @return NULL | error handle on error
- */
-errlHndl_t platform_enable_vddr();
-
-/**
- * @brief Adjust vddr on DIMMS with POST DRAM INITs
- * @return NULL | error handle on error
- */
-errlHndl_t platform_adjust_vddr_post_dram_init();
-
-/**
- * @brief Disable vddr on DIMMS
- * @return NULL | error handle on error
- */
-errlHndl_t platform_disable_vddr();
-
-#endif  // PLATFORM_VDDR_H__
+#endif

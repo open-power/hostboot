@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/isteps/makefile $
+# $Source: src/usr/isteps/istep13/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2015
 # [+] International Business Machines Corp.
 #
 #
@@ -22,22 +22,22 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH=../../..
-MODULE = isteps
+ROOTPATH = ../../../..
+MODULE = istep13
 
-SUBDIRS+=istep06.d
-SUBDIRS+=istep07.d
-SUBDIRS+=istep08.d
-SUBDIRS+=istep09.d
-SUBDIRS+=istep10.d
-SUBDIRS+=istep11.d
-SUBDIRS+=istep12.d
-SUBDIRS+=istep13.d
+OBJS += call_host_disable_vddr.o
+OBJS += call_mem_pll_initf.o
+OBJS += call_mem_pll_setup.o
+OBJS += call_proc_mcs_skewadjust.o
+OBJS += call_mem_startclocks.o
+OBJS += call_host_enable_vddr.o
+OBJS += call_mss_scominit.o
+OBJS += call_mss_ddr_phy_reset.o
+OBJS += call_mss_draminit.o
+OBJS += call_mss_draminit_training.o
+OBJS += call_mss_draminit_trainadv.o
+OBJS += call_mss_draminit_mc.o
 
-OBJS += hwpisteperror.o
-OBJS += hwpistepud.o
-OBJS += istepHelperFuncs.o
-
-EXTRAINCDIR += ${ROOTPATH}/src/usr/initservice/istepdispatcher
+OBJS += $(if $(CONFIG_PALMETTO_VDDR),palmetto_vddr.o,hbVddrMsg.o)
 
 include ${ROOTPATH}/config.mk

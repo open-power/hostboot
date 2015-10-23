@@ -1,12 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/dram_training/hbVddrMsg.C $                  */
+/* $Source: src/usr/isteps/istep13/hbVddrMsg.C $                          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2012,2015                        */
-/* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,15 +34,13 @@
 #include <mbox/mbox_queues.H>
 #include <mbox/mboxif.H>
 
-#include <hbVddrMsg.H>
+#include "hbVddrMsg.H"
 #include <initservice/initserviceif.H>
 #include <pnor/pnorif.H>
-#include <fapi.H>
 #include "platform_vddr.H"
 
 
 using namespace ERRORLOG;
-
 using namespace TARGETING;
 
 // Trace definition
@@ -356,7 +353,7 @@ errlHndl_t HBVddrMsg::sendMsg(VDDR_MSG_TYPE i_msgType) const
              *   @errortype
              *   @moduleid      fapi::MOD_VDDR_SEND_MSG
              *   @reasoncode    fapi::RC_INCORRECT_MSG_TYPE
-             *   @userdata1     i_msgType 
+             *   @userdata1     i_msgType
              *   @userdata2     0
              *
              *   @devdesc       HB got an incorrect type message.  HB did not
@@ -454,7 +451,7 @@ errlHndl_t  HBVddrMsg::processVDDRmsg(msg_t* i_recvMsg) const
     do{
         if (l_extraData==NULL)
         {
-            //an error occred in obtaining the extra data from the response msg 
+            //an error occred in obtaining the extra data from the response msg
             TRACFCOMP( g_trac_volt, ERR_MRK
                        "HBVddrMsg::processVDDRmsg: l_extraData = NULL");
             //create an errorlog
@@ -465,8 +462,8 @@ errlHndl_t  HBVddrMsg::processVDDRmsg(msg_t* i_recvMsg) const
             *   @userdata1     0
             *   @userdata2     0
             *
-            *   @devdesc       The hwsv returned a message where the extra data 
-            *                  was null.  This should not happen so need to 
+            *   @devdesc       The hwsv returned a message where the extra data
+            *                  was null.  This should not happen so need to
             *                  tell HostBoot to stop the ipl
             */
             createErrLog(l_errLog, fapi::MOD_VDDR_PROC_VDDR_MSG,
@@ -479,7 +476,7 @@ errlHndl_t  HBVddrMsg::processVDDRmsg(msg_t* i_recvMsg) const
         uint32_t l_errPlid =0x0;
 
         TRACFCOMP( g_trac_volt, INFO_MRK "HBVddrMsg::processVDDRmsg: "
-                    "l_elementCount=%d, l_msgSize =%d", 
+                    "l_elementCount=%d, l_msgSize =%d",
                     l_elementCount, l_msgSize);
         const hwsvPowrMemVoltDomainReply_t* l_ptr=
             reinterpret_cast<const hwsvPowrMemVoltDomainReply_t*>(l_extraData);
@@ -511,7 +508,7 @@ errlHndl_t  HBVddrMsg::processVDDRmsg(msg_t* i_recvMsg) const
                 *   @errortype
                 *   @moduleid      fapi::MOD_VDDR_PROC_VDDR_MSG
                 *   @reasoncode    fapi::RC_VDDR_POWR_ERR
-                *   @userdata1     l_errPlid 
+                *   @userdata1     l_errPlid
                 *   @userdata2     0
                 *
                 *   @devdesc       The hwsv returned a message where there was
@@ -526,10 +523,10 @@ errlHndl_t  HBVddrMsg::processVDDRmsg(msg_t* i_recvMsg) const
             }
 
             l_ptr++;
-        }   
+        }
     }while(0);
     TRACFCOMP(g_trac_volt, EXIT_MRK "HBVddrMsg::processVDDRmsg");
-    return l_errLog;    
+    return l_errLog;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -550,7 +547,7 @@ errlHndl_t HBVddrMsg::processMsg(msg_t* i_Msg) const
         if (l_value1 ==0)
         {
             //process a response to a request
-        
+
             uint32_t l_msgType =i_Msg->type;
             TRACFCOMP( g_trac_volt, INFO_MRK
                        "HBVddrMsg::processMsg l_msgType=x%08X",l_msgType );
@@ -558,19 +555,19 @@ errlHndl_t HBVddrMsg::processMsg(msg_t* i_Msg) const
                  (l_msgType == HB_VDDR_DISABLE)||
                  (l_msgType == HB_VDDR_POST_DRAM_INIT_ENABLE) )
             {
-                //process a VDDR message    
+                //process a VDDR message
                 l_errLog=processVDDRmsg(i_Msg);
                 if (l_errLog)
                 {
                     break;
-                }   
+                }
 
             }
             else
             {
                 TRACFCOMP( g_trac_volt, ERR_MRK
                            "HBVddrMsg::processMsg recv'd a non valid type");
-                //generate errorLog;    
+                //generate errorLog;
                 /*@
                  *   @errortype
                  *   @moduleid      fapi::MOD_VDDR_PROC_MSG
@@ -596,12 +593,12 @@ errlHndl_t HBVddrMsg::processMsg(msg_t* i_Msg) const
              *   @errortype
              *   @moduleid      fapi::MOD_VDDR_PROC_MSG
              *   @reasoncode    fapi::RC_VDDR_ERROR_MSG
-             *   @userdata1     error PLID from hwsv 
+             *   @userdata1     error PLID from hwsv
              *   @userdata2     0
              *
-             *   @devdesc       The hwsv found an error while processing the 
+             *   @devdesc       The hwsv found an error while processing the
              *                  message so it sent an error message back to
-             *                  indicate to HostBoot to stop the IPL. 
+             *                  indicate to HostBoot to stop the IPL.
              *                  Userdata1 will have the error PLID from hwsv's
              *                  errorlog
              */
@@ -613,7 +610,7 @@ errlHndl_t HBVddrMsg::processMsg(msg_t* i_Msg) const
     }while(0);
 
     TRACFCOMP(g_trac_volt, EXIT_MRK "HBVddrMsg::processMsg");
-    return l_errLog;    
+    return l_errLog;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -632,7 +629,7 @@ void HBVddrMsg::createErrLog(errlHndl_t& io_err,
                                 i_userData1,
                                 0);
 
-    }   
+    }
     return;
 }
 
