@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -50,7 +50,6 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/activate_powerbus
 EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/activate_powerbus/proc_build_smp
 
 ##  NOTE: add new object files when you add a new HWP
-OBJS += activate_powerbus.o
 OBJS += proc_build_smp.o
 OBJS += proc_build_smp_adu.o
 OBJS += proc_build_smp_epsilon.o
