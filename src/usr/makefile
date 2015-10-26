@@ -59,6 +59,7 @@ SUBDIRS += secureboot.d
 SUBDIRS += devtree.d
 #@TODO RTC:142091
 #SUBDIRS += sbe.d
+SUBDIRS += sbeio.d
 SUBDIRS += gpio.d
 SUBDIRS += lpc.d
 SUBDIRS += console.d

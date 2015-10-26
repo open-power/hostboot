@@ -364,6 +364,14 @@ const compId_t TPMDD_COMP_ID = 0x2700;
 const char TPMDD_COMP_NAME[] = "tpmdd";
 //@}
 
+/** @name SBEIO
+ * SBE PSU and FIFO
+ */
+//@{
+const compId_t SBEIO_COMP_ID = 0x2800;
+const char SBEIO_COMP_NAME[] = "sbeio";
+//@}
+
 // OCCC id 2A00 matches OCCC id on FSP
 /** @name OCCC
  * OCC Thermal Management Device

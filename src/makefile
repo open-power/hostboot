@@ -162,6 +162,7 @@ EXTENDED_MODULES += $(if $(CONFIG_VPO_COMPILE),,runtime)
 EXTENDED_MODULES += secureboot_ext
 EXTENDED_MODULES += $(if $(CONFIG_TPMDD),secureboot_trusted,)
 EXTENDED_MODULES += devtree
+EXTENDED_MODULES += sbeio
 EXTENDED_MODULES += $(if $(CONFIG_HTMGT),htmgt)
 EXTENDED_MODULES += $(if $(CONFIG_GPIODD),gpio,)
 EXTENDED_MODULES += $(if $(CONFIG_CONSOLE),console)
