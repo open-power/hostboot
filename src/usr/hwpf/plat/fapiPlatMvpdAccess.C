@@ -36,7 +36,7 @@
 #include <fapiAttributeService.H>
 #include <fapiMvpdAccess.H>
 #include <fapiSystemConfig.H>
-#include <hwpf/hwpf_reasoncodes.H>
+#include <isteps/hwpf_reasoncodes.H>
 
 //  MVPD
 #include <devicefw/userif.H>

@@ -30,7 +30,7 @@
 
 #include <string.h>
 
-#include <hwpf/hwpf_reasoncodes.H>
+#include <isteps/hwpf_reasoncodes.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 

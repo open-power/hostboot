@@ -1,12 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/hwpf/hwpf_reasoncodes.H $                     */
+/* $Source: src/include/usr/isteps/hwpf_reasoncodes.H $                   */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2013,2015                        */
-/* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,7 +32,7 @@
 
 #include <fapiPlatTrace.H>
 #include <fapiSystemConfig.H>
-#include <hwpf/hwpf_reasoncodes.H>
+#include <isteps/hwpf_reasoncodes.H>
 #include <errl/errlentry.H>
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>

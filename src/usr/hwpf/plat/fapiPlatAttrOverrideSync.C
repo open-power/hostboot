@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -40,7 +42,7 @@
 #include <mbox/mboxif.H>
 #include <hwpf/plat/fapiPlatAttrOverrideSync.H>
 #include <hwpf/plat/fapiPlatTrace.H>
-#include <hwpf/hwpf_reasoncodes.H>
+#include <isteps/hwpf_reasoncodes.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/attributeTank.H>
 

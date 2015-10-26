@@ -63,7 +63,7 @@
 //  fapi support
 #include    <fapi.H>
 #include    <fapiPlatHwpInvoker.H>
-#include    <hwpf/hwpf_reasoncodes.H>
+#include    <isteps/hwpf_reasoncodes.H>
 
 #include    "establish_system_smp.H"
 #include    <mbox/ipc_msg_types.H>

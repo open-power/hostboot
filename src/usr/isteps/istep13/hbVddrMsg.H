@@ -46,7 +46,7 @@
 #include <mbox/mboxif.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
-#include <hwpf/hwpf_reasoncodes.H>
+#include <isteps/hwpf_reasoncodes.H>
 #include <attributeenums.H>
 
 /*****************************************************************************/
