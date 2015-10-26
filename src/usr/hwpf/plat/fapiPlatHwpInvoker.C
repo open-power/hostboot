@@ -33,7 +33,7 @@
 #include <fapiSystemConfig.H>
 #include <fapiPlatTrace.H>
 #include <fapiErrorInfo.H>
-#include <hwpf/hwpf_reasoncodes.H>
+#include <isteps/hwpf_reasoncodes.H>
 #include <errl/errlentry.H>
 #include <targeting/common/utilFilter.H>
 

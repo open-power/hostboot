@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,7 +31,7 @@
 #include    <occ/occAccess.H>
 #include    <errl/errlentry.H>
 #include    <vfs/vfs.H>
-#include    <hwpf/hwpf_reasoncodes.H>
+#include    <isteps/hwpf_reasoncodes.H>
 
 //  fapi support
 #include    <fapi.H>

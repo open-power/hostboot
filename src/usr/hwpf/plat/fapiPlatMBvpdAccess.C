@@ -32,7 +32,7 @@
 #include    <errl/errlentry.H>
 
 //  fapi support
-#include <hwpf/hwpf_reasoncodes.H>
+#include <isteps/hwpf_reasoncodes.H>
 #include <fapiMBvpdAccess.H>
 
 //  MBVPD

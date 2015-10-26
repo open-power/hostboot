@@ -47,7 +47,7 @@
 #include <runtime/interface.h>
 #include <targeting/common/targetservice.H>
 #include <runtime/rt_targeting.H>
-#include <hwpf/hwpf_reasoncodes.H>
+#include <isteps/hwpf_reasoncodes.H>
 #include "handleSpecialWakeup.H"
 #endif
 

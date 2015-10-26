@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/hwpistepud.C $                                 */
+/* $Source: src/include/usr/isteps/istep_reasoncodes.H $                  */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,38 +22,29 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/**
- *  @file hwpudistep.C
- *
- *  @brief Implementation of HwpSvcUserDetailsIstep
- */
+#ifndef _ISTEP_REASONCODES_H_
+#define _ISTEP_REASONCODES_H_
+
 #include <hbotcompid.H>
-#include <isteps/hwpistepud.H>
-#include <isteps/hwpf_reasoncodes.H>
-
-using namespace ISTEP_ERROR;
-
-//------------------------------------------------------------------------------
-HwpUserDetailsIstep::HwpUserDetailsIstep( errlHndl_t i_err )
+namespace ISTEP
 {
-    HwpUserDetailsIstepErrorData * l_pBuf =
-        reinterpret_cast<HwpUserDetailsIstepErrorData *>(
-                reallocUsrBuf(sizeof(HwpUserDetailsIstepErrorData)));
+    /**
+     * @brief Defines the ISTEP error log module IDs
+     */
+    enum istepModuleId
+    {
+        MOD_EXIT_CACHE_CONTAINED                   = 0x01,
+    };
 
-    l_pBuf->eid = i_err->eid();
+    /**
+     * @brief Defines the ISTEP error log reason codes
+     */
+    enum istepReasonCode
+    {
+        RC_NO_MIRRORED_MEMORY         = HWPF_COMP_ID | 0x01,
+        RC_MM_EXTEND_FAILED           = HWPF_COMP_ID | 0x02,
+    };
 
-    l_pBuf->reasoncode = i_err->reasonCode();
+};
 
-    // Set up ErrlUserDetails instance variables
-    iv_CompId = HWPF_COMP_ID;
-    iv_Version = 1;
-    iv_SubSection = fapi::HWPF_UDT_STEP_ERROR_DETAILS;
-}
-
-//------------------------------------------------------------------------------
-HwpUserDetailsIstep::~HwpUserDetailsIstep()
-{
-
-}
-
-
+#endif

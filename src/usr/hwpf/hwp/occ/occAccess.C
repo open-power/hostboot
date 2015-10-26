@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,7 +32,7 @@
 // Fapi
 #include    <fapi.H>
 #include    <fapiPlatHwpInvoker.H>
-#include    <hwpf/hwpf_reasoncodes.H>
+#include    <isteps/hwpf_reasoncodes.H>
 
 // Procedures
 #include <p8_ocb_init.H>

@@ -40,7 +40,7 @@
 #include <targeting/common/utilFilter.H>
 #include <errl/errlentry.H>
 #include <hwpf/plat/fapiPlatAttributeService.H>
-#include <hwpf/hwpf_reasoncodes.H>
+#include <isteps/hwpf_reasoncodes.H>
 #include <vpd/spdenums.H>
 #include <devicefw/driverif.H>
 #include <hwpf/hwp/mvpd_accessors/getMvpdExL2SingleMemberEnable.H>

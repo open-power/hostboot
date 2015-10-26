@@ -42,7 +42,7 @@
 #include <errl/errlmanager.H>
 #include <fapiPlatHwpInvoker.H>
 #include <hwpf/fapi/fapiMvpdAccess.H>
-#include <hwpf/hwpf_reasoncodes.H>
+#include <isteps/hwpf_reasoncodes.H>
 #include <p8_build_pstate_datablock.H>
 #include <proc_get_voltage.H>
 #include <pstates.h>

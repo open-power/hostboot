@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/hwpistepud.C $                                 */
+/* $Source: src/usr/isteps/istep14/call_proc_htm_setup.C $                */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,38 +22,19 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/**
- *  @file hwpudistep.C
- *
- *  @brief Implementation of HwpSvcUserDetailsIstep
- */
-#include <hbotcompid.H>
-#include <isteps/hwpistepud.H>
-#include <isteps/hwpf_reasoncodes.H>
+#include <errl/errlentry.H>
 
-using namespace ISTEP_ERROR;
+using namespace ERRORLOG;
 
-//------------------------------------------------------------------------------
-HwpUserDetailsIstep::HwpUserDetailsIstep( errlHndl_t i_err )
+namespace ISTEP_14
 {
-    HwpUserDetailsIstepErrorData * l_pBuf =
-        reinterpret_cast<HwpUserDetailsIstepErrorData *>(
-                reallocUsrBuf(sizeof(HwpUserDetailsIstepErrorData)));
+void* call_proc_htm_setup (void *io_pArgs)
+{
+    errlHndl_t l_err = NULL;
 
-    l_pBuf->eid = i_err->eid();
+    //@TODO RTC:33831 call p9_htm_setup.C HWP
 
-    l_pBuf->reasoncode = i_err->reasonCode();
-
-    // Set up ErrlUserDetails instance variables
-    iv_CompId = HWPF_COMP_ID;
-    iv_Version = 1;
-    iv_SubSection = fapi::HWPF_UDT_STEP_ERROR_DETAILS;
+    return l_err;
 }
 
-//------------------------------------------------------------------------------
-HwpUserDetailsIstep::~HwpUserDetailsIstep()
-{
-
-}
-
-
+};
