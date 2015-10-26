@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,7 +33,7 @@
 #include <intr/interrupt.H>
 #include <initservice/initserviceif.H>
 
-namespace START_PAYLOAD
+namespace ISTEP_21
 {
     extern errlHndl_t callShutdown ( uint64_t i_hbInstance,
                                      bool i_masterInstance );
@@ -190,7 +190,7 @@ void IpcSp::msgHandler()
                 if(!err)
                 {
                     //  Function will not return unless error
-                    err = START_PAYLOAD::callShutdown(msg->data[0],false);
+                    err = ISTEP_21::callShutdown(msg->data[0],false);
                 }
 
                 if(err)

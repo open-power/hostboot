@@ -50,8 +50,46 @@
 #include    <initservice/initsvcreasoncodes.H>
 #include    <config.h>
 
-//  include prototypes file
-#include    "../../../usr/hwpf/hwp/start_payload/start_payload.H"
+namespace   ISTEP_21
+{
+
+/**
+ *  @brief   host_runtime_setup
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return any errlogs to istep
+ *
+ */
+void*  call_host_runtime_setup( void    *io_pArgs );
+
+
+
+/**
+ *  @brief   host_verify_hdat
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep
+ *
+ */
+void*    call_host_verify_hdat( void    *io_pArgs );
+
+
+
+/**
+ *  @brief   host_start_payload
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep
+ *
+ */
+void*    call_host_start_payload( void    *io_pArgs );
+
+
+};
+
 
 namespace   INITSERVICE
 {
@@ -64,18 +102,18 @@ namespace   INITSERVICE
 #if (0)
         {
                 ISTEPNAME(21,01,"host_runtime_setup"),
-                START_PAYLOAD::call_host_runtime_setup,
+                ISTEP_21::call_host_runtime_setup,
                 { START_FN, EXT_IMAGE, MPIPL_OP | NORMAL_IPL_OP, false }
         },
         {
                 ISTEPNAME(21,02,"host_verify_hdat"),
-                START_PAYLOAD::call_host_verify_hdat,
+                ISTEP_21::call_host_verify_hdat,
                 { START_FN, EXT_IMAGE, MPIPL_OP | NORMAL_IPL_OP, false }
         },
 #endif
         {
                 ISTEPNAME(21,03,"host_start_payload"),
-                START_PAYLOAD::call_host_start_payload,
+                ISTEP_21::call_host_start_payload,
                 { START_FN, EXT_IMAGE, MPIPL_OP | NORMAL_IPL_OP, false }
         },
 
@@ -83,6 +121,7 @@ namespace   INITSERVICE
 
 const DepModInfo  g_istep21Dependancies = {
     {
+        DEP_LIB(libistep21.so),
 #ifndef CONFIG_VPO_COMPILE
         DEP_LIB(libbuild_winkle_images.so),
         DEP_LIB(libstart_payload.so),
@@ -94,7 +133,6 @@ const DepModInfo  g_istep21Dependancies = {
         DEP_LIB(libocc.so),
 #if defined(CONFIG_HTMGT)
         DEP_LIB(libhtmgt.so),
-        DEP_LIB(libmc_config.so),
 #endif
 #endif
         NULL
