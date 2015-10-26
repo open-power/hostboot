@@ -372,6 +372,11 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                              i_accessType,
                              i_addr);
 
+            if (l_err != NULL)
+            {
+                break;
+            }
+
             // Need to check loop on read until we see done, error,
             //  or we timeout
             IndirectScom_t scomout;
