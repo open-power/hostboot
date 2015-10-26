@@ -51,6 +51,16 @@
 </attribute>
 
 <attribute>
+  <id>ATTR_BOOT_FMULT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>EQ boot frequency multiplier</description>
+  <valueType>uint16</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+
+<attribute>
   <id>ATTR_BRANCH_PIBMEM_ADDR</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description></description>
