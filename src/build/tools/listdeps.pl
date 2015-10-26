@@ -175,10 +175,8 @@ else
         "libistep12.so",
         "libistep13.so",
         "libistep14.so",
-        "libbuild_winkle_images.so" ,
-        "libcore_activate.so" ,
-        "libstart_payload.so" ,
-        "libocc.so" ,
+        "libistep15.so",
+        "libistep16.so",
     );
 }
 
@@ -231,9 +229,8 @@ my %istepFiles = (
     "libistep12.so"                 => "istep12list.H" ,
     "libistep13.so"                 => "istep13list.H" ,
     "libistep14.so"                 => "istep14list.H" ,
-    "libocc.so"                     => "istep15list.H" ,
-    "libbuild_winkle_images.so"     => "istep15list.H" ,
-    "libcore_activate.so"           => "istep16list.H" ,
+    "libistep15.so"                 => "istep15list.H" ,
+    "libistep16.so"                 => "istep16list.H" ,
     "libstart_payload.so"           => "istep21list.H" ,
 );
 
