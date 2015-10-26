@@ -177,6 +177,7 @@ else
         "libistep14.so",
         "libistep15.so",
         "libistep16.so",
+        "libistep21.so",
     );
 }
 
@@ -231,7 +232,7 @@ my %istepFiles = (
     "libistep14.so"                 => "istep14list.H" ,
     "libistep15.so"                 => "istep15list.H" ,
     "libistep16.so"                 => "istep16list.H" ,
-    "libstart_payload.so"           => "istep21list.H" ,
+    "libistep21.so"                 => "istep21list.H" ,
 );
 
 # array to hold list of dependent libraries
