@@ -168,6 +168,20 @@ const TaskInfo g_exttaskinfolist[]   =   {
             }
         },
 #endif
+
+        /**
+         * @brief SBE IO Device Driver
+         */
+        {
+            "libsbeio.so",                               // taskname
+            NULL,                                       // no ptr to fnct
+            {
+
+                INIT_TASK,                          // init only
+                EXT_IMAGE,                          // Extended Module
+            }
+        },
+
         /**
          * @brief   FSI SCOM Device Driver
          */
