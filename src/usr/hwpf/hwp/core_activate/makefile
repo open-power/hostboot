@@ -58,7 +58,6 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp/utility_procedures
 
 
 ##  NOTE: add new object files when you add a new HWP
-OBJS += core_activate.o
 OBJS += proc_prep_master_winkle.o
 OBJS += proc_stop_deadman_timer.o
 OBJS += proc_sbe_utils.o

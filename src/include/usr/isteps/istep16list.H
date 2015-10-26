@@ -43,8 +43,65 @@
 #include    <initservice/initsvcstructs.H>
 #include    <initservice/initsvcreasoncodes.H>
 
-//  include prototypes file
-#include    "../../../usr/hwpf/hwp/core_activate/core_activate.H"
+namespace   ISTEP_16
+{
+
+/**
+ *  @brief   host_activate_master
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return any errlogs to istep
+ *
+ */
+void*  call_host_activate_master( void    *io_pArgs );
+
+
+
+/**
+ *  @brief   host_activate_slave_cores
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep
+ *
+ */
+void*    call_host_activate_slave_cores( void    *io_pArgs );
+
+
+
+/**
+ *  @brief   host_secure_rng
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep
+ *
+ */
+void*    call_host_secure_rng( void    *io_pArgs );
+
+/**
+ *  @brief   mss_scrub
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep
+ *
+ */
+void*    call_mss_scrub( void    *io_pArgs );
+
+/**
+ *  @brief    host_ipl_complete
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep
+ *
+ */
+void*    call_host_ipl_complete( void    *io_pArgs );
+};
+
+
 
 namespace   INITSERVICE
 {
@@ -58,7 +115,27 @@ namespace   INITSERVICE
 #if (0)
         {
                 ISTEPNAME(16,01,"host_activate_master"),
-                CORE_ACTIVATE::call_host_activate_master,
+                ISTEP_16::call_host_activate_master,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
+        },
+        {
+                ISTEPNAME(16,02,"host_activate_slave_cores"),
+                ISTEP_16::call_host_activate_slave_cores,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
+        },
+        {
+                ISTEPNAME(16,03,"host_secure_rng"),
+                ISTEP_16::call_host_activate_master,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
+        },
+        {
+                ISTEPNAME(16,04,"mss_scrub"),
+                ISTEP_16::call_mss_scrub,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
+        },
+        {
+                ISTEPNAME(16,05,"host_ipl_complete"),
+                ISTEP_16::call_host_ipl_complete,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
         },
 #endif
@@ -66,9 +143,8 @@ namespace   INITSERVICE
 
 const DepModInfo g_istep16Dependancies = {
     {
-        DEP_LIB(libcore_activate.so),
+        DEP_LIB(libistep16.so),
         DEP_LIB(libbuild_winkle_images.so),
-        DEP_LIB(libnest_chiplets.so),
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
         DEP_LIB(libocc.so),
 #endif

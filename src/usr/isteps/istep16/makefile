@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/isteps/makefile $
+# $Source: src/usr/isteps/istep16/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2015
 # [+] International Business Machines Corp.
 #
 #
@@ -22,25 +22,15 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH=../../..
-MODULE = isteps
+ROOTPATH = ../../../..
+MODULE = istep16
 
-SUBDIRS+=istep06.d
-SUBDIRS+=istep07.d
-SUBDIRS+=istep08.d
-SUBDIRS+=istep09.d
-SUBDIRS+=istep10.d
-SUBDIRS+=istep11.d
-SUBDIRS+=istep12.d
-SUBDIRS+=istep13.d
-SUBDIRS+=istep14.d
-SUBDIRS+=istep15.d
-SUBDIRS+=istep16.d
+OBJS += call_host_activate_master.o
+OBJS += call_host_activate_slave_cores.o
+OBJS += call_host_secure_rng.o
+OBJS += call_mss_scrub.o
+OBJS += call_host_ipl_complete.o
 
-OBJS += hwpisteperror.o
-OBJS += hwpistepud.o
-OBJS += istepHelperFuncs.o
-
-EXTRAINCDIR += ${ROOTPATH}/src/usr/initservice/istepdispatcher
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer/
 
 include ${ROOTPATH}/config.mk

@@ -435,7 +435,8 @@ const Target * getExChiplet( const Target * i_pCoreChiplet )
 
     // Create a Class/Type/Model predicate to look for EX chiplet of the input
     // core (i.e. the core's parent)
-    TARGETING::PredicateCTM l_predicate(TARGETING::CLASS_UNIT);
+    TARGETING::PredicateCTM l_predicate(TARGETING::CLASS_UNIT,
+            TARGETING::TYPE_EX);
 
     // Create a vector of TARGETING::Target pointers
     TARGETING::TargetHandleList l_exList;

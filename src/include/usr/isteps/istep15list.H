@@ -29,7 +29,7 @@
  * @file    istep15list.H
  *
  *  IStep 15    Build Winkle Images
- *  IPL FLow Doc        v0.60 (06/02/15)
+ *  IPL FLow Doc        v0.67 (11/11/15)
  *
  *    15.1    host_build_winkle
  *          : Build runtime winkle images
@@ -39,12 +39,58 @@
  *
  */
 
-#include    <initservice/initsvcstructs.H>
-#include    <initservice/initsvcreasoncodes.H>
-
-//  include prototypes file
-#include    "../../../usr/hwpf/hwp/build_winkle_images/build_winkle_images.H"
+#include <initservice/initsvcstructs.H>
+#include <initservice/initsvcreasoncodes.H>
 #include <config.h>
+
+namespace   ISTEP_15
+{
+
+/**
+ *  @brief   host_build_stop_image
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return any errlogs to istep
+ *
+ */
+void*  call_host_build_stop_image( void    *io_pArgs );
+
+
+
+/**
+ *  @brief   proc_set_pba_homer_bar
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep
+ *
+ */
+void*    call_proc_set_pba_homer_bar( void    *io_pArgs );
+
+
+
+/**
+ *  @brief   host_establish_ex_chiplet
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep
+ *
+ */
+void*    call_host_establish_ex_chiplet( void    *io_pArgs );
+
+/**
+ *  @brief   host_start_stop_engine
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep
+ *
+ */
+void*    call_host_start_stop_engine( void    *io_pArgs );
+};
+
 
 namespace   INITSERVICE
 {
@@ -54,21 +100,32 @@ namespace   INITSERVICE
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
-
         {
-                ISTEPNAME(15,01,"host_build_winkle"),
-                BUILD_WINKLE_IMAGES::call_host_build_winkle,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true,
-                        SEC_PROCESSOR_INIT }
+                ISTEPNAME(15,01,"host_build_stop_image"),
+                ISTEP_15::call_host_build_stop_image,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-
+        {
+                ISTEPNAME(15,02,"proc_set_pba_homer_bar"),
+                ISTEP_15::call_proc_set_pba_homer_bar,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
+        {
+                ISTEPNAME(15,03,"host_establish_ex_chiplet"),
+                ISTEP_15::call_host_establish_ex_chiplet,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
+        {
+                ISTEPNAME(15,04,"host_start_stop_engine"),
+                ISTEP_15::call_host_start_stop_engine,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
 };
 
 
 const DepModInfo g_istep15Dependancies = {
     {
-        DEP_LIB(libocc.so),
-        DEP_LIB(libbuild_winkle_images.so),
+        DEP_LIB(libistep15.so),
         NULL
     }
 };
