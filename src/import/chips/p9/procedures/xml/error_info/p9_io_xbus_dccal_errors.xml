@@ -1,0 +1,69 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/error_info/p9_io_xbus_dccal_errors.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+    <!-- *********************************************************************** -->
+    <hwpError>
+        <rc>RC_IO_XBUS_RX_DCCAL_TIMEOUT</rc>
+        <ffdc>GROUP</ffdc>
+        <ffdc>TARGET</ffdc>
+        <description>I/O EDI+ Xbus Rx Dccal(Offset calibration) Timeout</description>
+        <callout>
+            <target>TARGET</target>
+            <priority>MEDIUM</priority>
+        </callout>
+        <deconfigure>
+            <target>TARGET</target>
+        </deconfigure>
+        <gard>
+            <target>TARGET</target>
+        </gard>
+    </hwpError>
+    <!-- *********************************************************************** -->
+    <hwpError>
+        <rc>RC_IO_XBUS_TX_ZCAL_ERROR</rc>
+        <description>I/O EDI+ Xbus Zcal Error. Using Nominal Values</description>
+	   <callout>
+            <target>TARGET</target>
+            <priority>MEDIUM</priority>
+        </callout>
+    </hwpError>
+    <!-- *********************************************************************** -->
+    <hwpError>
+        <rc>RC_IO_XBUS_TX_ZCAL_TIMEOUT</rc>
+        <description>I/O EDI+ Xbus Zcal Timeout. Using Nominal Values</description>
+        <callout>
+            <target>TARGET</target>
+            <priority>MEDIUM</priority>
+        </callout>
+    </hwpError>
+    <!-- *********************************************************************** -->
+    <hwpError>
+        <rc>RC_IO_XBUS_TX_ZCAL_OUT_OF_RANGE</rc>
+        <ffdc>ZCAL_P</ffdc>
+        <ffdc>ZCAL_N</ffdc>
+        <description>I/O EDI+ Xbus Zcal Out of Range. Using Max/Min Values Depending on failure.</description>
+        <callout>
+            <target>TARGET</target>
+            <priority>MEDIUM</priority>
+        </callout>
+    </hwpError>
+    <!-- *********************************************************************** -->
+</hwpErrors>
+
+
