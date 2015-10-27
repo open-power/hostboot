@@ -1,0 +1,75 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/error_info/p9_htm_setup_errors.xml $  -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- File: p9_htm_setup_errors.xml. -->
+<!-- Error definitions for p9_htm_setup HWP. -->
+
+<hwpErrors>
+
+<hwpError>
+    <rc>RC_HTM_SETUP_PROC_BAR_SIZE</rc>
+    <description>
+        ATTR_PROC_HTM_BAR_SIZE contains an invalid size value.
+        Firmware error.
+    </description>
+    <ffdc>PROC_BAR_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_PROC_HTM_CTRL_BAD_STATE</rc>
+    <description>
+        HTM is not at the expected state for current operation.
+    </description>
+    <ffdc>HTM_STATUS_REG</ffdc>
+    <ffdc>TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <!-- TODO: Add deconfigure/HW callout -->
+</hwpError>
+
+<hwpError>
+    <rc>RC_NHTM_TRACE_TYPE_NOT_SUPPORTED</rc>
+    <description>
+        The selected Nest HTM trace type is not yet supported.
+    </description>
+    <ffdc>NHTM_TRACE_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_CHTM_TRACE_TYPE_NOT_SUPPORTED</rc>
+    <description>
+        The selected Core HTM trace type is not yet supported.
+    </description>
+    <ffdc>CHTM_TRACE_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+</hwpErrors>

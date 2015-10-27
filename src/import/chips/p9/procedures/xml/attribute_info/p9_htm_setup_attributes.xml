@@ -1,0 +1,588 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/attribute_info/p9_htm_setup_attributes.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- File: p9_htm_setup_attributes.xml. -->
+<!-- XML file specifying attributes used by p9_htm_setup HW Procedures. -->
+
+<attributes>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_NHTM_TRACE_TYPE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> The Nest HTM trace type desired to be collected.
+                - Platform is to default to DISABLE (0x0).
+                - User can change NHTM trace type (i.e. enable NHTM trace
+                  collection) using Attribute Override.
+                </description>
+  <valueType>uint8</valueType>
+  <enum> DISABLE = 0x0, FABRIC = 0x1, EVENT = 0x2, OCC = 0x3 </enum>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_CHTM_TRACE_TYPE</id>
+<!-- TODO: Need to handle CHTM trace targets.
+           See review comments in: http://gfw160.aus.stglabs.ibm.com:8080/gerrit/#/c/21527/ -->
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> The Core HTM trace type desired to be collected.
+                - Platform is to default to DISABLE (0x0)
+                - User can change CHTM trace type (i.e. enable CHTM trace
+                  collection) using Attribute Override.
+                </description>
+  <valueType>uint8</valueType>
+  <enum> DISABLE = 0x0, CORE = 0x1, LLAT = 0x2, PPE = 0x3, DMW = 0x4 </enum>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<!-- **************************************************
+     Attributes for HTM TTYPE Filter Control Register
+     ************************************************** -->
+<attribute>
+  <id>ATTR_HTMSC_TTYPEFILT_PAT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: defines the TTYPE pattern to match in Fabric trace
+                mode.
+                HTM Ttype Filter Control Register (1:7).
+                - Platform is to default to 0x0
+                - User can change the value using Attribute Override.
+  </description>
+  <valueType>uint8</valueType>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_TSIZEFILT_PAT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: defines the TSIZE pattern to match in Fabric trace
+                mode.
+                HTM Ttype Filter Control Register (8:15).
+                - Platform is to default to 0x0
+                - User can change the value using Attribute Override.
+  </description>
+  <valueType>uint8</valueType>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+<attribute>
+  <id>ATTR_HTMSC_TTYPEFILT_MASK</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: TTYPE pattern mask.
+                HTM Ttype Filter Control Register (17:23).
+                If set to 1, do not need to match w/ the pattern.
+                If all mask bits are set, no TTYPE pattern/masking is done
+                - Platform is to default to 0x7F
+                - User can change the value using Attribute Override.
+  </description>
+  <valueType>uint8</valueType>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_TSIZEFILT_MASK</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: TSIZE pattern mask.
+                HTM Ttype Filter Control Register (24:31).
+                If set to 1, do not need to match w/ the Pattern.
+                If all mask bits are set, no TSIZE pattern/masking is done
+                - Platform is to default to 0xFF
+                - User can change the value using Attribute Override.
+  </description>
+  <valueType>uint8</valueType>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+<attribute>
+  <id>ATTR_HTMSC_TTYPEFILT_INVERT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: TTYPE/TSIZE Capture Invert.
+                HTM Ttype Filter Control Register (32).
+                0 : Capture record based on ttype/tsize pattern matching
+                1 : Capture record based on ttype/tsize pattern NOT matching
+                - Platform is to default to 0x0
+                - User can change the value using Attribute Override.
+  </description>
+  <valueType>uint8</valueType>
+  <enum> MATCH = 0x0, NOT_MATCH = 0x1 </enum>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_CRESPFILT_INVERT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: CRESP Filter Capture Invert.
+                HTM Ttype Filter Control Register (33).
+                0 : Capture record based on cresp filter pattern matching
+                1 : Capture record based on cresp filter pattern NOT matching
+                - Platform is to default to 0x0
+                - User can change the value using Attribute Override.
+  </description>
+  <valueType>uint8</valueType>
+  <enum> MATCH = 0x0, NOT_MATCH = 0x1 </enum>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<!-- **************************************************
+        Attributes for HTM Filter Control Register
+     ************************************************** -->
+<attribute>
+  <id>ATTR_HTMSC_FILT_PAT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: Filter Pattern.
+                HTM Filter Control Register (0:22).
+                In Fabric trace mode, defines the TTAG/Scope/Source pattern to
+                match in the RCMD and CRESP:
+                    0:3   rcmd_ttag(0:2) Group ID Pattern for rcmd and cresp
+                          filtering.
+                    4:6   rcmd_ttag(3:5) Chip ID Pattern for rcmd and cresp
+                          filtering.
+                    7:16  rcmd_ttag(6:13) Unit ID Pattern for rcmd and cresp
+                          (if from this chip) filtering.
+                    17:19 rcmd_scope(0:2) Scope Pattern for rcmd and cresp
+                          filtering.
+                    20:21 rcmd_source(0:1) Source Pattern for rcmd filtering.
+                    22    Powerbus PORT pattern for rcmd and cresp filtering.
+                 In OCC trace mode, defines the occ_trace_data(0:22) pattern
+                 to match:
+                    0:22  occ_trace_data(0:22) pattern.
+                - Platform is to default to 0x0
+                - User can change the value using Attribute Override.
+  </description>
+  <valueType>uint32</valueType>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_FILT_CRESP_PAT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: defines the CRESP Filter pattern in FABRIC trace mode.
+                HTM Filter Control Register (27:31).
+                - Platform is to default to 0x0
+                - User can change the value using Attribute Override.
+  </description>
+  <valueType>uint8</valueType>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_FILT_MASK</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM FABRIC: Pattern mask.
+                HTM Filter Control Register (32:54).
+                Bits set to 1 in this mask do not need to match w/ the Filter
+                pattern.
+                If all mask bits are set, No pattern matching is done.
+                - Platform is to default to 0x3FFFFF
+                - User can change the value using Attribute Override.
+  </description>
+  <valueType>uint32</valueType>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_FILT_CRESP_MASK</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM FABRIC: CRESP Filter Mask.
+                HTM Filter Control Register (59:63).
+                Bits set to 1 in this mask do not need to match w/ the CRESP
+                Filter pattern.
+                If all mask bits are set, no pattern matching is done
+                - Platform is to default to 0x0
+                - User can change the value using Attribute Override.
+  </description>
+  <valueType>uint8</valueType>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<!-- **************************************************
+        Attributes for HTM Collection Mode Register
+     ************************************************** -->
+<attribute>
+  <id>ATTR_HTMSC_MODE_CONTENT_SEL</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: defines the NHTM trace mode.
+                HTM Collection Mode Register (1:2).
+                - Platform is to default to 0x0 (FABRIC)
+                - User can change the value using Attribute Override.
+  </description>
+  <valueType>uint8</valueType>
+  <enum> FABRIC = 0x0, EVENT = 0x1, OCC = 0x2 </enum>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_MODE_CAPTURE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: defines capture mode according to trace mode.
+                HTM Collection Mode Register (4:12).
+                When htm_mode_q(1 TO 2) == 00, i.e. FABRIC
+                  456789012
+                  0xxxx0000 : Ignore HTM generated data writes
+                  1xxxx0000 : Capture htm generated data writes
+                  x0xxx0000 : Filtering ignored on PMISC (always trace PMISC and Report Hang)
+                  x1xxx0000 : Filtering applied on ttype = PMISC and ttype = report hang
+                  xx00x0000 : CRESP Mode: Flush CRESP Queue to avoid overrun (default)
+                  xx01x0000 : CRESP Mode: Reserved
+                  xx10x0000 : CRESP Mode: Enable Precise CRESP Mode
+                  xx11x0000 : CRESP Mode: Ignore CRESP
+                  xxxx00000 : Pre-Allocate maximum memory buffers (8)
+                  xxxx10000 : Pre-Allocate fewer memory buffers (4)
+                When htm_mode_q(1 TO 2) == 01, i.e. OTHER
+                  00000xxxx : Pre-Allocate maximum memory buffers (8)
+                  00001xxxx : Pre-Allocate fewer memory buffers (4)
+                  0000xmmmx : mmm for optional external mux control
+                  0000xxxx0 : Both -other- trace buses to NHTM0
+                  0000xxxx1 : Other trace bus0 to nhtm0, trace bus1 to nhtm1. High BW
+                When htm_mode_q(1 TO 2) == 10, i.e. OCC
+                  00000xxx0 : Pre-Allocate maximum memory buffers (8)
+                  00001xxx0 : Pre-Allocate fewer memory buffers (4)
+                  0000xmmm0 : mmm for optional external mux control
+                - Platform is to default to 0x040 (Precise CRESP, 0b001000000)
+                - User can change the value using Attribute Override.
+  </description>
+  <valueType>uint32</valueType>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_MODE_WRAP</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: Trace Wrap mode.
+                HTM Collection Mode Register (13).
+                0 = Stop trace when top of Trace Memory is reached
+                1 = Wrap trace to beginning of Trace Memory
+                - Platform is to default to 0x1
+                - User can change the value using Attribute Override.
+  </description>
+  <valueType>uint8</valueType>
+  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_MODE_DIS_TSTAMP</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: TimeStamp Writes option.
+                HTM Collection Mode Register (14).
+                0 = Write of timestamps enabled to indicate elapsed time
+                    between records.
+                1 = Timestamps written only to indicate record loss
+                - Platform is to default to 0x0
+                - User can change the value using Attribute Override.
+  </description>
+  <valueType>uint8</valueType>
+  <enum> ENABLE = 0x0, DISABLE = 0x1 </enum>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_MODE_SINGLE_TSTAMP</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: Overflow Timestamps option.
+                HTM Collection Mode Register (15).
+                0 = Timestamp written to indicate elapsed time overflow.
+                1 = Only one timestamp is written between entries, overflow
+                    indication is lost
+                - Platform is to default to 0x0
+                - User can change the value using Attribute Override.
+  </description>
+  <valueType>uint8</valueType>
+  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_MODE_MARKERS_ONLY</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: Stamp/Marker only mode.
+                HTM Collection Mode Register (17).
+                0 = Normal trace
+                1 = Ignore incoming trace data and save only markers caused
+                    by HTM_TRIG writes,
+                - Platform is to default to 0x0
+                - User can change the value using Attribute Override.
+  </description>
+  <valueType>uint8</valueType>
+  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_MODE_DIS_FORCE_GROUP_SCOPE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: Group scope option.
+                HTM Collection Mode Register (18).
+                This is a powerbus debug bit
+                0 = htm write ops sent with group scope
+                1 = htm write ops sent with Vg scope using programmed
+                    target bits.
+                - Platform is to default to 0x0
+                - User can change the value using Attribute Override.
+  </description>
+  <valueType>uint8</valueType>
+  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_MODE_SYNC_STAMP_FORCE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: Control the number of cycles to wait to force a
+                synchronization stamp or reset the timer.
+                HTM Collection Mode Register (19:21).
+                - Platform is to default to 0x0
+                - User can change the value using Attribute Override.
+  </description>
+  <valueType>uint8</valueType>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_MODE_WRITETOIO</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: Use space option.
+                HTM Collection Mode Register (22).
+                0 = Use HTM_CL_Write op to target system memory.
+                    Do pre-allocation sequence. (default)
+                1 = Use ci_pr_st op to target anywhere else.
+                    Dont do pre-allocate sequence.
+                - Platform is to default to 0x0
+                - User can change the value using Attribute Override.
+  </description>
+  <valueType>uint8</valueType>
+  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_MODE_VGTARGET</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Nest HTM: VG target mode.
+                HTM Collection Mode Register (24:39).
+                Vg Target bits should be configured if HTM_MEM[scope] is Vg
+                or if Disable Group Scope=1
+                - Platform is to default to 0x0
+                - User can change the value using Attribute Override.
+  </description>
+  <valueType>uint32</valueType>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<!-- ********************************************************
+        Attributes for HTM Memory Configuration Register
+     ******************************************************** -->
+<attribute>
+  <id>ATTR_HTMSC_MEM_SCOPE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Setting of memory scope for HTM collection.
+                HTM Memory Configuration Register (1:3)
+                - Platform is to default to 0x0 (LOCAL).
+                - User can change HTM scope using Attribute Override.
+  </description>
+  <valueType>uint8</valueType>
+  <enum> LOCAL = 0b000, NEARNODE = 0b001, GROUP = 0b011, REMOTE = 0b100,
+         VECTORED = 0b101 </enum>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_MEM_PRIORITY</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Setting of memory priority for HTM collection.
+                HTM Memory Configuration Register (4)
+                - Platform is to default to LOW.
+                - User can change MEM_PRIORITY using Attribute Override.
+  </description>
+  <valueType>uint8</valueType>
+  <enum> LOW = 0x0, HIGH = 0x1</enum>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<!-- ********************************************************
+        Attributes for HTM Trigger Control Register
+     ******************************************************** -->
+<attribute>
+  <id>ATTR_HTMSC_CTRL_TRIG</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Setting of Trigger control.
+                HTM Trigger Control Register (0:1)
+                  00 local triggers are not forwarded to the PowerBus, it is
+                     inserted into the trace when tracing.  Both local and
+                     global triggers control the HTM
+                  01 local triggers are not forwarded to the PowerBus, it is
+                     inserted into the traCe when tracing.  Only local triggers
+                     control the HTM
+                  1x local triggers are forwarded to the PowerBus, it is not
+                     inserted into the trace when tracing.  Only global
+                     triggers control the HTM
+                - Platform is to default to 0x1.
+                - User can change MEM_PRIORITY using Attribute Override.
+  </description>
+  <valueType>uint8</valueType>
+  <enum> LOCAL_GLOBAL = 0x0, LOCAL = 0x1, GLOBAL = 0x2 </enum>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_CTRL_MARK</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Setting of Mark control.
+                HTM Trigger Control Register (4:5)
+                00 local markers are not forwarded to the PowerBus.  Both
+                   local and global markers are inserted into the trace
+                01 local markers are not forwarded to the PowerBus.  Only
+                   local markers are inserted into the trace
+                10 local markers are forwarded to the PowerBus.  Only global
+                   markers are inserted into the trace
+                11 local markers are forwarded to the PowerBus.  Markers
+                   are not inserted into the trace (Fabric Trace Mode)
+
+                - Platform is to default to 1.
+                - User can change MEM_PRIORITY using Attribute Override.
+  </description>
+  <valueType>uint8</valueType>
+  <enum> LOCAL_GLOBAL = 0x0, LOCAL_MARK = 0x1, GLOBAL_MARK = 0x2,
+         NO_MARK = 0x3 </enum>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_CTRL_DBG0_STOP</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Enable Stop on PB Chiplet Debug Trigger 0.
+                HTM Trigger Control Register (6)
+                - Platform is to default to 0x0
+                - User can change the value using Attribute Override.
+  </description>
+  <valueType>uint8</valueType>
+  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_CTRL_DBG1_STOP</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Enable Stop on PB Chiplet Debug Trigger 1.
+                HTM Trigger Control Register (7)
+                - Platform is to default to 0x0
+                - User can change the value using Attribute Override.
+  </description>
+  <valueType>uint8</valueType>
+  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_CTRL_RUN_STOP</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Enable trace stop on falling edge of PB chiplet trace run.
+                HTM Trigger Control Register (8)
+                - Platform is to default to 0x0
+                - User can change the value using Attribute Override.
+  </description>
+  <valueType>uint8</valueType>
+  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_CTRL_OTHER_DBG0_STOP</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Enable Stop using OCC Control.
+                HTM Trigger Control Register (9)
+                - Platform is to default to 0x0
+                - User can change the value using Attribute Override.
+  </description>
+  <valueType>uint8</valueType>
+  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HTMSC_CTRL_XSTOP_STOP</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> Enable Stop on chiplet XSTOP.
+                HTM Trigger Control Register (13)
+                - Platform is to default to 0x1
+                - User can change the value using Attribute Override.
+  </description>
+  <valueType>uint8</valueType>
+  <enum> DISABLE = 0x0, ENABLE = 0x1 </enum>
+  <writeable/>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+</attributes>
