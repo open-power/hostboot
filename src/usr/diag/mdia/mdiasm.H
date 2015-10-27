@@ -43,8 +43,8 @@ namespace MDIA
 //MBA timeout value - 30 secs
 static const uint64_t MBA_TIMEOUT = 30000000000;
 
-//Longer MBA timeout to be used when continuous tracing is enabled - 10 min
-static const uint64_t MBA_TIMEOUT_LONG = 600000000000;
+//Longer MBA timeout to be used when continuous tracing is enabled - 30 min
+static const uint64_t MBA_TIMEOUT_LONG = 1800000000000;
 
 //Commit an info log for SW timeout every 10 mins
 static const uint64_t MBA_TIMEOUT_LOG =
