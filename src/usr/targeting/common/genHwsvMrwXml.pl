@@ -3078,6 +3078,22 @@ sub generate_proc
         $mboxFspBsize = length($mboxFspBpath) + 1;
     }
 
+    #sbeFifo paths
+    my $sbefifoFspApath = "";
+    my $sbefifoFspAsize = 0;
+    my $sbefifoFspBpath = "";
+    my $sbefifoFspBsize = 0;
+    if (exists $devpath->{chip}->{$ipath}->{'sbefifo-path-a'})
+    {
+        $sbefifoFspApath = $devpath->{chip}->{$ipath}->{'sbefifo-path-a'};
+        $sbefifoFspAsize = length($sbefifoFspApath) + 1;
+    }
+    if (exists $devpath->{chip}->{$ipath}->{'sbefifo-path-b'})
+    {
+        $sbefifoFspBpath = $devpath->{chip}->{$ipath}->{'sbefifo-path-b'};
+        $sbefifoFspBsize = length($sbefifoFspBpath) + 1;
+    }
+
     my $psichip = 0;
     my $psilink = 0;
     for my $psi ( 0 .. $#hbPSIs )
@@ -3301,7 +3317,9 @@ sub generate_proc
             $scomFspApath, $scomFspAsize, $scanFspApath, $scanFspAsize,
             $scomFspBpath, $scomFspBsize, $scanFspBpath, $scanFspBsize,
             $node, $proc, $fruid, $ipath, $hwTopology, $mboxFspApath,
-            $mboxFspAsize, $mboxFspBpath, $mboxFspBsize, $ordinalId );
+            $mboxFspAsize, $mboxFspBpath, $mboxFspBsize, $ordinalId,
+            $sbefifoFspApath, $sbefifoFspAsize, $sbefifoFspBpath,
+            $sbefifoFspBsize);
 
     # Data from PHYP Memory Map
     print "\n";
