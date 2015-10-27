@@ -1,0 +1,81 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p9/procedures/xml/error_info/p9_htm_setup_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- File: p9_htm_setup_errors.xml. -->
+<!-- Error definitions for p9_htm_setup HWP. -->
+
+<hwpErrors>
+
+<hwpError>
+    <rc>RC_HTM_SETUP_PROC_BAR_SIZE</rc>
+    <description>
+        ATTR_PROC_HTM_BAR_SIZE contains an invalid size value.
+        Firmware error.
+    </description>
+    <ffdc>PROC_BAR_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_PROC_HTM_CTRL_BAD_STATE</rc>
+    <description>
+        HTM is not at the expected state for current operation.
+    </description>
+    <ffdc>HTM_STATUS_REG</ffdc>
+    <ffdc>TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <!-- TODO: Add deconfigure/HW callout -->
+</hwpError>
+
+<hwpError>
+    <rc>RC_NHTM_TRACE_TYPE_NOT_SUPPORTED</rc>
+    <description>
+        The selected Nest HTM trace type is not yet supported.
+    </description>
+    <ffdc>NHTM_TRACE_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_CHTM_TRACE_TYPE_NOT_SUPPORTED</rc>
+    <description>
+        The selected Core HTM trace type is not yet supported.
+    </description>
+    <ffdc>CHTM_TRACE_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+</hwpErrors>
