@@ -1,0 +1,113 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/import/chips/p9/procedures/hwp/pm/p9_block_wakeup_intr.C $ */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+///
+/// @file p8_block_wakeup_intr.C
+/// @brief Set/reset the BLOCK_REG_WKUP_SOURCES bit in the PCBS-PM associated
+///          with an EX chiplet
+///
+//  *HWP HWP Owner: Amit Kumar <akumar3@us.ibm.com>
+//  *HWP FW Owner: Bilicon Patil <bilpatil@in.ibm.com>
+//  *HWP Team: PM
+//  *HWP Level: 1
+//  *HWP Consumed by: FSP:HS
+///
+/// @verbatim
+/// High-level procedure flow:
+///
+///   With set/reset enum parameter, either set or clear PMGP0(53)
+///
+/// Procedure Prereq:
+///    - System clocks are running
+/// @endverbatim
+///
+//------------------------------------------------------------------------------
+
+
+// ----------------------------------------------------------------------
+// Includes
+// ----------------------------------------------------------------------
+
+#include "p9_block_wakeup_intr.H"
+
+// ----------------------------------------------------------------------
+// Procedure Function
+// ----------------------------------------------------------------------
+
+/// @brief @brief Set/reset the BLOCK_INTR_INPUTS bit in the Core PPM
+///         associated with an EX chiplet
+fapi2::ReturnCode p9_block_wakeup_intr(
+    const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_core_target,
+    const p9pmblockwkup::OP_TYPE i_operation )
+
+{
+    FAPI_IMP("p9_block_wakeup_intr start");
+
+#if 0
+    ecmdDataBufferBase  data(64);
+
+    uint8_t             attr_chip_unit_pos = 0;
+
+    // CPMMR Bit definitions
+    const uint32_t      BLOCK_INTR_INPUTS = 11;
+
+    FAPI_DBG("Executing with operation %s to Core %s...",
+             p9pmblockwkup::P9_BLKWKUP_OP_STRING[i_operation],
+             i_core_target.toEcmdString());
+
+
+    // Get the core number
+    FAPI_TRY(FAPI_ATTR_GET( ATTR_CHIP_UNIT_POS,
+                            &i_core_target,
+                            attr_chip_unit_pos),
+             "fapiGetAttribute of ATTR_CHIP_UNIT_POS failed");
+
+    FAPI_DBG("Core number = %d", attr_chip_unit_pos);
+
+    if (i_operation == p9pmblockwkup::SET)
+    {
+        FAPI_INF("Setting Block Interrupt Sources...");
+
+
+    }
+    else if (i_operation == p9pmblockwkup::CLEAR)
+    {
+
+        FAPI_INF("Clearing Block Interrupt Sources...");
+
+
+    }
+    else
+    {
+        FAPI_ASSERT(false,
+                    BLOCK_WAKEUP_INTR_OP()
+                    .set_OPERATION(i_operation),
+                    "Invalid operation specified.");
+    }
+
+
+#endif
+    FAPI_INF("p9_block_wakeup_intr end");
+    return fapi2::current_err;
+}
