@@ -222,16 +222,6 @@
 </attribute>
 
 <attribute>
-  <id>ATTR_PROC_FABRIC_ADDR_BAR_MODE</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Processor memory map configuration.0 = default = large system address map1 = small system address map Provided by the MRW.</description>
-  <valueType>uint8</valueType>
-  <enum>LARGE_SYSTEM = 0x0,SMALL_SYSTEM = 0x1</enum>
-  <persistRuntime/>
-  <platInit/>
-</attribute>
-
-<attribute>
   <id>ATTR_PROC_PB_BNDY_DMIPLL_DATA</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Ring image for pb_bndy_dmipll ring creator: platform firmware notes:</description>
