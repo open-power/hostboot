@@ -2037,11 +2037,27 @@
     <attribute><id>PCI_BASE_ADDRS_32</id></attribute>
     <attribute><id>MEM_BASE</id></attribute>
     <attribute><id>MIRROR_BASE</id></attribute>
-    <attribute><id>RNG_BASE_ADDR</id></attribute>
     <attribute><id>RNG_BAR_SIZE</id></attribute>
     <attribute><id>IMT_BASE_ADDR</id></attribute>
     <attribute><id>IMT_BAR_SIZE</id></attribute>
-    <attribute><id>IBSCOM_PROC_BASE_ADDR</id></attribute>
+    <attribute><id>PHB_MMIO_ADDRS_64</id></attribute>
+    <attribute><id>PHB_MMIO_ADDRS_32</id></attribute>
+    <attribute><id>PHB_XIVE_ESB_ADDRS</id></attribute>
+    <attribute><id>PHB_REG_ADDRS</id></attribute>
+    <attribute><id>XIVE_ROUTING_ESB_ADDR</id></attribute>
+    <attribute><id>XIVE_ROUTING_END_ADDR</id></attribute>
+    <attribute><id>XIVE_PRESENTATION_NVT_ADDR</id></attribute>
+    <attribute><id>VAS_HYPERVISOR_WINDOW_CONTEXT_ADDR</id></attribute>
+    <attribute><id>VAS_USER_WINDOW_CONTEXT_ADDR</id></attribute>
+    <attribute><id>LPC_BUS_ADDR</id></attribute>
+    <attribute><id>NVIDIA_NPU_PRIVILEGED_ADDR</id></attribute>
+    <attribute><id>NVIDIA_NPU_USER_REG_ADDR</id></attribute>
+    <attribute><id>NVIDIA_PHY0_REG_ADDR</id></attribute>
+    <attribute><id>NVIDIA_PHY1_REG_ADDR</id></attribute>
+    <attribute><id>XIVE_CONTROLLER_BAR_ADDR</id></attribute>
+    <attribute><id>XIVE_PRESENTATION_BAR_ADDR</id></attribute>
+    <attribute><id>PSI_HB_ESP_ADDR</id></attribute>
+    <attribute><id>NX_RNG_ADDR</id></attribute>
     <!-- end Memory Map -->
 
     <attribute><id>ECID</id></attribute>

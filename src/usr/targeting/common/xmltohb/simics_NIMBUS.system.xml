@@ -186,30 +186,6 @@
     <attribute><id>INTP_BASE_ADDR</id>
         <default>0x0003FFFF80300000</default>
     </attribute>
-    <attribute><id>PHB_BASE_ADDRS</id>
-        <default>
-            0x0003FFFE40C00000,0x0003FFFE40D00000,
-            0x0003FFFE40E00000,0x0003FFFE40F00000
-        </default>
-    </attribute>
-    <attribute><id>PCI_BASE_ADDRS_64</id>
-        <default>
-            0x0003D0C000000000,0x0003D0D000000000,
-            0x0003D0E000000000,0x0003D0F000000000
-        </default>
-    </attribute>
-    <attribute><id>PCI_BASE_ADDRS_32</id>
-        <default>
-            0x0003FF8600000000,0x0003FF8680000000,
-            0x0003FF8700000000,0x0003FF8780000000
-        </default>
-    </attribute>
-    <attribute><id>RNG_BASE_ADDR</id>
-        <default>0x0003FFFF40003000</default>
-    </attribute>
-    <attribute><id>IBSCOM_PROC_BASE_ADDR</id>
-        <default>0x0003E50000000000</default>
-    </attribute>
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>0</default>
     </attribute>

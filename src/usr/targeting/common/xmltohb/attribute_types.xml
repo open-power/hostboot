@@ -2782,8 +2782,6 @@
     <description>System XSCOM base address</description>
     <simpleType>
         <uint64_t>
-            <!-- 1020TB, 32GB per proc -->
-            <default>0x0003FC0000000000</default>
         </uint64_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -16747,6 +16745,221 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
         <id>ATTR_EFF_DRAM_TCCD_S</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PHB_MMIO_ADDRS_64</id>
+    <description>PHB0-PHB5 64 bits addresses
+        MMIO consumed by PHYP
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+        <array>6</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>PHB_MMIO_ADDRS_32</id>
+    <description>PHB0-PHB5 32 bit addresses
+        MMIO consumed by PHYP
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+        <array>6</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>`
+
+<attribute>
+    <id>PHB_XIVE_ESB_ADDRS</id>
+    <description>PHB0-PHB5 XIVE ESB addresses
+        MMIO consumed by PHYP
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+        <array>6</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>PHB_REG_ADDRS</id>
+    <description>PHB0-PHB5 Register Space addresses
+        MMIO consumed by PHYP
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+        <array>6</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>XIVE_ROUTING_ESB_ADDR</id>
+    <description>XIVE Routing ESB address
+        MMIO consumed by PHYP
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>XIVE_ROUTING_END_ADDR</id>
+    <description>XIVE Routing END address
+        MMIO consumed by PHYP
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>XIVE_PRESENTATION_NVT_ADDR</id>
+    <description>XIVE Presentation NVT address
+        MMIO consumed by PHYP
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>VAS_HYPERVISOR_WINDOW_CONTEXT_ADDR</id>
+    <description>VAS - Hypervisor Window Contexts address
+        MMIO consumed by PHYP
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>VAS_USER_WINDOW_CONTEXT_ADDR</id>
+    <description>VAS - User Window Context address
+        MMIO consumed by PHYP
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>LPC_BUS_ADDR</id>
+    <description>LPC Bus address - MMIO consumed by PHYP</description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>NVIDIA_NPU_PRIVILEGED_ADDR</id>
+    <description>Nvidia Link - NPU Privileged Regs address
+        MMIO consumed by PHYP
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>NVIDIA_NPU_USER_REG_ADDR</id>
+    <description>Nvidia Link - NPU User Regs address
+        MMIO consumed by PHYP
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>NVIDIA_PHY0_REG_ADDR</id>
+    <description>Nvidia Link - Phy 0 Regs address
+        MMIO consumed by PHYP
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>NVIDIA_PHY1_REG_ADDR</id>
+    <description>Nvidia Link - Phy 1 Regs address
+        MMIO consumed by PHYP
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>XIVE_CONTROLLER_BAR_ADDR</id>
+    <description>XIVE - Controller Bar address
+        MMIO consumed by PHYP
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>XIVE_PRESENTATION_BAR_ADDR</id>
+    <description>XIVE - Presentation Bar address
+        MMIO consumed by PHYP
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+   </simpleType>
+   <persistency>non-volatile</persistency>
+   <readable/>
+</attribute>
+
+<attribute>
+    <id>PSI_HB_ESP_ADDR</id>
+    <description>PSIHB - ESB space address - MMIO consumed by PHYP
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>NX_RNG_ADDR</id>
+    <description>NX - RNG space - MMIO consumed by PHYP</description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
 </attribute>
 
 </attributes>

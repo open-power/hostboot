@@ -614,8 +614,15 @@ sub setupBars
     $targetObj->{TOPOLOGY}->{$node}->{$proc}++;
 
     my @bars=("FSP_BASE_ADDR","PSI_BRIDGE_BASE_ADDR",
-              "INTP_BASE_ADDR","PHB_BASE_ADDRS","PCI_BASE_ADDRS_32",
-              "PCI_BASE_ADDRS_64","RNG_BASE_ADDR","IBSCOM_PROC_BASE_ADDR");
+              "INTP_BASE_ADDR","PHB_MMIO_ADDRS_64","PHB_MMIO_ADDRS_32",
+              "PHB_XIVE_ESB_ADDRS","PHB_REG_ADDRS","XIVE_ROUTING_ESB_ADDR",
+              "XIVE_ROUTING_END_ADDR","XIVE_PRESENTATION_NVT_ADDR",
+              "VAS_HYPERVISOR_WINDOW_CONTEXT_ADDR",
+              "VAS_USER_WINDOW_CONTEXT_ADDR","LPC_BUS_ADDR",
+              "NVIDIA_NPU_PRIVILEGED_ADDR","NVIDIA_NPU_USER_REG_ADDR",
+              "NVIDIA_PHY0_REG_ADDR","NVIDIA_PHY1_REG_ADDR",
+              "XIVE_CONTROLLER_BAR_ADDR","XIVE_PRESENTATION_BAR_ADDR",
+              "PSI_HB_ESP_ADDR","NX_RNG_ADDR");
 
     # Attribute only valid in naples-based systems
     if (!$targetObj->isBadAttribute($target,"NPU_MMIO_BAR_BASE_ADDR") ) {

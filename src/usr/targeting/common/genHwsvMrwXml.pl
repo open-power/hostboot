@@ -2682,6 +2682,12 @@ sub generate_sys
 ";
     }
 
+    #adding XSCOM_BASE_ADDRESS to the system target for HDAT
+    print "
+    <attribute><id>XSCOM_BASE_ADDRESS</id>
+        <default>0x000603FC00000000</default>
+    </attribute>
+";
 
     if( $haveFSPs == 0 )
     {
@@ -3297,10 +3303,12 @@ sub generate_proc
             $node, $proc, $fruid, $ipath, $hwTopology, $mboxFspApath,
             $mboxFspAsize, $mboxFspBpath, $mboxFspBsize, $ordinalId );
 
-    #TODO: RTC 139073 Need to fix all of these calculations.
     # Data from PHYP Memory Map
     print "\n";
     print "    <!-- Data from PHYP Memory Map -->\n";
+
+    my $nodeSize = 0x200000000000; # 32 TB
+    my $chipSize = 0x40000000000;  #  4 TB
 
     # Calculate the FSP and PSI BRIGDE BASE ADDR
     my $fspBase = 0;
@@ -3310,74 +3318,180 @@ sub generate_proc
         if (($i->{'processor'}->{target}->{position} eq $proc) &&
             ($i->{'processor'}->{target}->{node} eq $node ))
         {
-            $fspBase = 0x0003FFE000000000 + 0x400000000*$lognode + 0x100000000*$logid;
-            $psiBase = 0x0003FFFE80000000 + 0x400000*$psichip + 0x100000*$psilink;
+            #FSP MMIO address
+            $fspBase = 0x0006030100000000 + $nodeSize*$lognode +
+                         $chipSize*$logid;
+            #PSI Link address
+            $psiBase = 0x0006030203000000 + $nodeSize*$psichip +
+                         $chipSize*$logid;
             last;
         }
     }
 
-    # Starts at 1024TB - 128GB, 4GB per proc
+    # FSP MMIO address
     printf( "    <attribute><id>FSP_BASE_ADDR</id>\n" );
     printf( "        <default>0x%016X</default>\n", $fspBase );
     printf( "    </attribute>\n" );
 
-    # Starts at 1024TB - 6GB, 1MB per link/proc
+    # PSI Link address
     printf( "    <attribute><id>PSI_BRIDGE_BASE_ADDR</id>\n" );
     printf( "        <default>0x%016X</default>\n", $psiBase );
     printf( "    </attribute>\n" );
 
-    # Starts at 1024TB - 2GB, 1MB per proc
+    #HDAT consumes INTP_BASE_ADDR. leaving for now. TODO RTC:140452
     printf( "    <attribute><id>INTP_BASE_ADDR</id>\n" );
     printf( "        <default>0x%016X</default>\n",
        0x0003FFFF80000000 + 0x400000*$lognode + 0x100000*$logid );
     printf( "    </attribute>\n" );
 
-    # Starts at 1024TB - 7GB, 1MB per PHB (=4MB per proc)
-    printf( "    <attribute><id>PHB_BASE_ADDRS</id>\n" );
+    #PHB 64 bit MMIO address (PHB0-PHB5)
+    printf( "    <attribute><id>PHB_MMIO_ADDRS_64</id>\n" );
     printf( "        <default>\n" );
     printf( "            0x%016X,0x%016X,\n",
-       0x0003FFFE40000000 + 0x1000000*$lognode + 0x400000*$logid + 0x100000*0,
-         0x0003FFFE40000000 + 0x1000000*$lognode + 0x400000*$logid + 0x100000*1 );
-    printf( "            0x%016X,0x%016X\n",
-       0x0003FFFE40000000 + 0x1000000*$lognode + 0x400000*$logid + 0x100000*2,
-         0x0003FFFE40000000 + 0x1000000*$lognode + 0x400000*$logid + 0x100000*3 );
+       0x0006000000000000 + $nodeSize*$lognode + $chipSize*$logid,
+       0x0006002000000000 + $nodeSize*$lognode + $chipSize*$logid);
+    printf( "            0x%016X,0x%016X,\n",
+       0x0006004000000000 + $nodeSize*$lognode + $chipSize*$logid,
+       0x0006006000000000 + $nodeSize*$lognode + $chipSize*$logid);
+    printf( "            0x%016X,0x%016X,\n",
+       0x0006008000000000 + $nodeSize*$lognode + $chipSize*$logid,
+       0x000600A000000000 + $nodeSize*$lognode + $chipSize*$logid);
     printf( "        </default>\n" );
     printf( "    </attribute>\n" );
 
-    # Starts at 1024TB -0.5TB, 2GB per PHB (=8GB per proc)
-    printf( "    <attribute><id>PCI_BASE_ADDRS_32</id>\n" );
+    #PHB 32 Bit MMIO address (PHB0-PHB5)
+    printf( "    <attribute><id>PHB_MMIO_ADDRS_32</id>\n" );
     printf( "        <default>\n" );
     printf( "            0x%016X,0x%016X,\n",
-       0x0003FF8000000000 + 0x800000000*$lognode + 0x200000000*$logid + 0x80000000*0,
-         0x0003FF8000000000 + 0x800000000*$lognode + 0x200000000*$logid + 0x80000000*1 );
-    printf( "            0x%016X,0x%016X\n",
-       0x0003FF8000000000 + 0x800000000*$lognode + 0x200000000*$logid + 0x80000000*2,
-         0x0003FF8000000000 + 0x800000000*$lognode + 0x200000000*$logid + 0x80000000*3 );
+       0x000600C000000000 + $nodeSize*$lognode + $chipSize*$logid,
+       0x000600C080000000 + $nodeSize*$lognode + $chipSize*$logid);
+    printf( "            0x%016X,0x%016X,\n",
+       0x000600C100000000 + $nodeSize*$lognode + $chipSize*$logid,
+       0x000600C180000000 + $nodeSize*$lognode + $chipSize*$logid);
+    printf( "            0x%016X,0x%016X,\n",
+       0x000600C200000000 + $nodeSize*$lognode + $chipSize*$logid,
+       0x000600C280000000 + $nodeSize*$lognode + $chipSize*$logid);
     printf( "        </default>\n" );
     printf( "    </attribute>\n" );
 
-    # Starts at 976TB, 64GB per PHB (=256GB per proc)
-    printf( "    <attribute><id>PCI_BASE_ADDRS_64</id>\n" );
+    #PHB XIVE ESB address (PHB0-PHB5)
+    printf( "    <attribute><id>PHB_XIVE_ESB_ADDRS</id>\n" );
     printf( "        <default>\n" );
     printf( "            0x%016X,0x%016X,\n",
-       0x0003D00000000000 + 0x10000000000*$lognode + 0x4000000000*$logid + 0x1000000000*0,
-         0x0003D00000000000 + 0x10000000000*$lognode + 0x4000000000*$logid + 0x1000000000*1 );
-    printf( "            0x%016X,0x%016X\n",
-       0x0003D00000000000 + 0x10000000000*$lognode + 0x4000000000*$logid + 0x1000000000*2,
-         0x0003D00000000000 + 0x10000000000*$lognode + 0x4000000000*$logid + 0x1000000000*3 );
+       0x000600C300000000 + $nodeSize*$lognode + $chipSize*$logid,
+       0x000600C320000000 + $nodeSize*$lognode + $chipSize*$logid);
+    printf( "            0x%016X,0x%016X,\n",
+       0x000600C340000000 + $nodeSize*$lognode + $chipSize*$logid,
+       0x000600C360000000 + $nodeSize*$lognode + $chipSize*$logid);
+    printf( "            0x%016X,0x%016X,\n",
+       0x000600C380000000 + $nodeSize*$lognode + $chipSize*$logid,
+       0x000600C3A0000000 + $nodeSize*$lognode + $chipSize*$logid);
     printf( "        </default>\n" );
     printf( "    </attribute>\n" );
 
-    # Starts at 1024TB - 3GB
-    printf( "    <attribute><id>RNG_BASE_ADDR</id>\n" );
+    #PHB Register Space address (PHB0-PHB5)
+    printf( "    <attribute><id>PHB_REG_ADDRS</id>\n" );
+    printf( "        <default>\n" );
+    printf( "            0x%016X,0x%016X,\n",
+       0x000600C3C0000000 + $nodeSize*$lognode + $chipSize*$logid,
+       0x000600C3C0100000 + $nodeSize*$lognode + $chipSize*$logid);
+    printf( "            0x%016X,0x%016X,\n",
+       0x000600C3C0200000 + $nodeSize*$lognode + $chipSize*$logid,
+       0x000600C3C0300000 + $nodeSize*$lognode + $chipSize*$logid);
+    printf( "            0x%016X,0x%016X,\n",
+       0x000600C3C0400000 + $nodeSize*$lognode + $chipSize*$logid,
+       0x000600C3C0500000 + $nodeSize*$lognode + $chipSize*$logid);
+    printf( "        </default>\n" );
+    printf( "    </attribute>\n" );
+
+    #XIVE Routing ESB address
+    printf( "    <attribute><id>XIVE_ROUTING_ESB_ADDR</id>\n" );
     printf( "        <default>0x%016X</default>\n",
-       0x0003FFFF40000000 + 0x4000*$lognode + 0x1000*$logid );
+       0x0006010000000000 + $nodeSize*$lognode + $chipSize*$logid );
     printf( "    </attribute>\n" );
 
-    # Starts at 992TB - 128GB per MCS/Centaur
-    printf( "    <attribute><id>IBSCOM_PROC_BASE_ADDR</id>\n" );
+    #XIVE Routing END address
+    printf( "    <attribute><id>XIVE_ROUTING_END_ADDR</id>\n" );
     printf( "        <default>0x%016X</default>\n",
-       0x0003E00000000000 + 0x40000000000*$lognode + 0x10000000000*$logid );
+       0x0006011000000000 + $nodeSize*$lognode + $chipSize*$logid );
+    printf( "    </attribute>\n" );
+
+    #XIVE Presentation NVT address
+    printf( "    <attribute><id>XIVE_PRESENTATION_NVT_ADDR</id>\n" );
+    printf( "        <default>0x%016X</default>\n",
+       0x0006012000000000 + $nodeSize*$lognode + $chipSize*$logid );
+    printf( "    </attribute>\n" );
+
+    #VAS Hypervisor Window Contexts address
+    printf( "    <attribute><id>VAS_HYPERVISOR_WINDOW_CONTEXT_ADDR</id>\n" );
+    printf( "        <default>0x%016X</default>\n",
+       0x0006013000000000 + $nodeSize*$lognode + $chipSize*$logid );
+    printf( "    </attribute>\n" );
+
+    #VAS User Window Contexts address
+    printf( "    <attribute><id>VAS_USER_WINDOW_CONTEXT_ADDR</id>\n" );
+    printf( "        <default>0x%016X</default>\n",
+       0x0006013100000000 + $nodeSize*$lognode + $chipSize*$logid );
+    printf( "    </attribute>\n" );
+
+    #LPC Bus address
+    printf( "    <attribute><id>LPC_BUS_ADDR</id>\n" );
+    printf( "        <default>0x%016X</default>\n",
+       0x0006030000000000 + $nodeSize*$lognode + $chipSize*$logid );
+    printf( "    </attribute>\n" );
+
+    #Nvidia Link - NPU Priviledged address
+    printf( "    <attribute><id>NVIDIA_NPU_PRIVILEGED_ADDR</id>\n" );
+    printf( "        <default>0x%016X</default>\n",
+       0x0006030200000000 + $nodeSize*$lognode + $chipSize*$logid );
+    printf( "    </attribute>\n" );
+
+    #Nvidia Link - NPU User Regs address
+    printf( "    <attribute><id>NVIDIA_NPU_USER_REG_ADDR</id>\n" );
+    printf( "        <default>0x%016X</default>\n",
+       0x0006030201000000 + $nodeSize*$lognode + $chipSize*$logid );
+    printf( "    </attribute>\n" );
+
+    #Nvidia Link - Phy 0 Regs address
+    printf( "    <attribute><id>NVIDIA_PHY0_REG_ADDR</id>\n" );
+    printf( "        <default>0x%016X</default>\n",
+       0x0006030201200000 + $nodeSize*$lognode + $chipSize*$logid );
+    printf( "    </attribute>\n" );
+
+    #Nvidia Link - Phy 1 Regs address
+    printf( "    <attribute><id>NVIDIA_PHY1_REG_ADDR</id>\n" );
+    printf( "        <default>0x%016X</default>\n",
+       0x0006030201400000 + $nodeSize*$lognode + $chipSize*$logid );
+    printf( "    </attribute>\n" );
+
+    #XIVE - Controller Bar address
+    printf( "    <attribute><id>XIVE_CONTROLLER_BAR_ADDR</id>\n" );
+    printf( "        <default>0x%016X</default>\n",
+       0x0006030203100000 + $nodeSize*$lognode + $chipSize*$logid );
+    printf( "    </attribute>\n" );
+
+    #XIVE - Presentation Bar address
+    printf( "    <attribute><id>XIVE_PRESENTATION_BAR_ADDR</id>\n" );
+    printf( "        <default>0x%016X</default>\n",
+       0x0006030203180000 + $nodeSize*$lognode + $chipSize*$logid );
+    printf( "    </attribute>\n" );
+
+    #PSI HB - ESP space address
+    printf( "    <attribute><id>PSI_HB_ESP_ADDR</id>\n" );
+    printf( "        <default>0x%016X</default>\n",
+       0x00060302031C0000 + $nodeSize*$lognode + $chipSize*$logid );
+    printf( "    </attribute>\n" );
+
+    #NX - RNG space address
+    printf( "    <attribute><id>NX_RNG_ADDR</id>\n" );
+    printf( "        <default>0x%016X</default>\n",
+       0x00060302031D0000 + $nodeSize*$lognode + $chipSize*$logid );
+    printf( "    </attribute>\n" );
+
+    #XSCOM address
+    printf( "    <attribute><id>XSCOM_BASE_ADDRESS</id>\n" );
+    printf( "        <default>0x%016X</default>\n",
+       0x000603FC00000000 + $nodeSize*$lognode + $chipSize*$logid );
     printf( "    </attribute>\n" );
 
     print "    <!-- End PHYP Memory Map -->\n\n";
