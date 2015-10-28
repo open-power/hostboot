@@ -16,12 +16,443 @@
 <!-- deposited with the U.S. Copyright Office.                              -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- This is an automatically generated file. -->
-<!-- File: nest_attributes.xml. -->
-<!-- XML file specifying attributes used by HW Procedures. -->
-<!-- Attributes are taken from model nest -->
 <!--nest_attributes.xml-->
 <attributes>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_FREQ_PB</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    The frequency of a processor's nest mesh clock, in MHz.
+    This is the same for all chips in the system.
+    Provided by the MRW.
+  </description>
+  <valueType>uint32</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_FREQ_A</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    The frequency of a processor's A link clocks, in MHz.
+    This is the same for all chips in the system.
+    Provided by the MRW.
+  </description>
+  <valueType>uint32</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_FREQ_X</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    The frequency of a processor's X link clocks, in MHz.
+    This is the same for all chips in the system.
+    Provided by the MRW.
+  </description>
+  <valueType>uint32</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_FREQ_CORE_FLOOR</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    The lowest frequency that a core can be set to in MHz.
+    This is the same for all cores in the system.
+    Provided by the MRW.
+  </description>
+  <valueType>uint32</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_FREQ_CORE_NOMINAL</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    The nominal core frequency in MHz.
+    This is the same for all cores in the system.
+    Provided by the MRW.
+  </description>
+  <valueType>uint32</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_FREQ_CORE_CEILING</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    The maximum core frequency in MHz.
+    This is the same for all cores in the system.
+    Provided by the MRW.
+  </description>
+  <valueType>uint32</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_FREQ_PCIE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    The frequency of a processor's PCI-e bus in MHz.
+    This is the same for all PCI-e busses in the system.
+    Provided by the MRW.
+  </description>
+  <valueType>uint32</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_ASYNC_SAFE_MODE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Set to force all fabric asynchronous boundary crossings into safe mode.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    PERFORMANCE_MODE = 0x0,
+    SAFE_MODE = 0x1
+  </enum>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_A_BUS_WIDTH</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Processor SMP A bus width.
+    Provided by the MRW.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    2_BYTE = 0x01,
+    4_BYTE = 0x02
+  </enum>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_X_BUS_WIDTH</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Processor SMP X bus width.
+    Provided by the MRW.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    2_BYTE = 0x01,
+    4_BYTE = 0x02
+  </enum>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_PUMP_MODE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Processor SMP Fabric broadcast scope configuration.
+    MODE1 = default = chip_is_node
+    MODE2 = chip_is_group
+    Provided by the MRW.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    MODE1 = 0x01,
+    MODE2 = 0x02
+  </enum>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_CCSM_MODE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Processor SMP topology configuration.
+    0 = default = 1 or 2 hop topology (PHYP image spans system)
+    1 = 3 hop topology (PHYP image spans group).
+    Provided by the MRW.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    OFF = 0x0,
+    ON = 0x1
+  </enum>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_OPTICS_CONFIG_MODE</id>
+  <targetType>TARGET_TYPE_OBUS</targetType>
+  <description>
+    Per-link optics configuration
+    0 = default = SMP
+    1 = CAPI 2.0
+    2 = NV 2.0
+    Provided by the MRW.
+  </description>
+  <valueType>uint8</valueType>
+  <array>4</array>
+  <enum>
+    SMP = 0x0,
+    CAPI = 0x1,
+    NV = 0x2
+  </enum>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_SMP_OPTICS_MODE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Processor SMP optics mode.
+    0 = default = Optics_is_X_bus
+    1 = Optics_is_A_bus
+    Provided by the MRW.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    OPTICS_IS_X_BUS = 0x0,
+    OPTICS_IS_A_BUS = 0x1
+  </enum>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_CAPI_MODE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Processor CAPI attachement protocol mode.
+    0 = default = no: SMPA CAPI attachement
+    1 = yes: SMPA CAPI attachement
+    Provided by the MRW.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    OFF = 0x0,
+    ON = 0x1
+  </enum>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_ADDR_BAR_MODE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Processor memory map configuration.
+    0 = default = large system address map
+    1 = small system address map
+    Provided by the MRW.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    LARGE_SYSTEM = 0x0,
+    SMALL_SYSTEM = 0x1
+  </enum>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_SYSTEM_ID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Logical fabric system ID associated with this chip.Provided by the MRW.
+  </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_GROUP_ID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Logical fabric group ID associated with this chip.Provided by the MRW.
+  </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_CHIP_ID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Logical fabric chip ID associated with this chip.Provided by the MRW.
+  </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_SYSTEM_MASTER_CHIP</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Indicates if the given chip should serve as the fabric system master.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    FALSE = 0x0,
+    TRUE = 0x1
+  </enum>
+  <platInit/>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_GROUP_MASTER_CHIP</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Indicates if the given chip should serve as the fabric group master.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    FALSE = 0x0,
+    TRUE = 0x1
+  </enum>
+  <platInit/>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    For each fabric X link on this chip, specifies whether or not the chip at the
+    receiving end of the link is present and configured
+  </description>
+  <valueType>uint8</valueType>
+  <array>7</array>
+  <enum>
+    FALSE = 0x0,
+    TRUE = 0x1
+  </enum>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    For each fabric A link on this chip, specifies whether or not the chip at the
+    receiving end of the link is present and configured
+  </description>
+  <valueType>uint8</valueType>
+  <array>4</array>
+  <enum>
+    FALSE = 0x0,
+    TRUE = 0x1
+  </enum>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_X_ATTACHED_CHIP_ID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    For each fabric X link on this chip, specifies the fabric ID of the chip at the
+    receiving end of the link.  Should be considered valid only if corresponding
+    ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG index is true.
+  </description>
+  <valueType>uint8</valueType>
+  <array>7</array>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    For each fabric A link on this chip, specifies the fabric ID of the chip at the
+    receiving end of the link.  Should be considered valid only if corresponding
+    ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG index is true.
+  </description>
+  <valueType>uint8</valueType>
+  <array>4</array>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_X_ADDR_DIS</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Indicates if link should be used to carry data only (in aggregate configurations).
+    Should be considered valid only if corresponding ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG
+    index is true.
+  </description>
+  <valueType>uint8</valueType>
+  <array>7</array>
+  <enum>
+    OFF = 0x0,
+    ON = 0x1
+  </enum>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_A_ADDR_DIS</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Indicates if link should be used to carry data only (in aggregate configurations).
+    Should be considered valid only if corresponding ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG
+    index is true.
+  </description>
+  <valueType>uint8</valueType>
+  <array>4</array>
+  <enum>
+    OFF = 0x0,
+    ON = 0x1
+  </enum>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_EPS_GB_PERCENTAGE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Guardband percentage to apply to baseline epsilon calculations
+  </description>
+  <valueType>int8</valueType>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_EPS_TABLE_TYPE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Processor epsilon table type.
+    Used to calculate the processor nest epsilon register values.
+    Provided by the MRW.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    EPS_TYPE_LE = 0x01,
+    EPS_TYPE_HE = 0x02
+  </enum>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_EPS_READ_CYCLES</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Calculated read epsilon protection count.
+    Counter tier is index.
+  </description>
+  <valueType>uint32</valueType>
+  <array>3</array>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_EPS_WRITE_CYCLES</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Calculated write epsilon protection count.
+    Counter tier is index.
+  </description>
+  <valueType>uint32</valueType>
+  <array>3</array>
+  <writeable/>
+</attribute>
 <!-- ********************************************************************** -->
 <attribute>
   <id>ATTR_DMI_REFCLOCK_SWIZZLE</id>
@@ -433,5 +864,4 @@
   <persistRuntime/>
 </attribute>
 <!-- ********************************************************************* -->
-
 </attributes>
