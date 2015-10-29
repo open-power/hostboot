@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1079,6 +1079,7 @@ fapi::ReturnCode fapiPlatGetProcPcieBarBaseAddr (
             // Pull the data out of the Hostboot attribute
             uint64_t l_pciMem32[4];
             uint64_t l_pciMem64[4];
+            uint16_t l_pos;
             l_pProcTarget->tryGetAttr<TARGETING::ATTR_PCI_BASE_ADDRS_32>(
                 l_pciMem32);
             l_pProcTarget->tryGetAttr<TARGETING::ATTR_PCI_BASE_ADDRS_64>(
@@ -1086,6 +1087,7 @@ fapi::ReturnCode fapiPlatGetProcPcieBarBaseAddr (
             uint64_t l_phbRegs[4];
             l_pProcTarget->tryGetAttr<TARGETING::ATTR_PHB_BASE_ADDRS>(
                 l_phbRegs);
+            l_pProcTarget->tryGetAttr<TARGETING::ATTR_POSITION>(l_pos);
 
             //  BAR # 0 are the PCIE mem 64, 64GB window
             //  BAR # 1 are the PCIE mem 32, 2GB window
@@ -1096,6 +1098,15 @@ fapi::ReturnCode fapiPlatGetProcPcieBarBaseAddr (
             //adapter.  This is a workaround for GA1 so the adapter
             //can be supported.  Largest (theoretically dimm) is 1TB,
             //so max mem is ~32TB for non brazos system.
+
+            //For systems that have multiple K80 adapters in it need
+            //to reserve 1TB per PHB.  Given this we will place
+            //mem64 @ 32TB - 64TB range, 1TB per PHB.  Note that
+            //the last TB is also where the mem32 BARs are placed,
+            //but this isn't a problem since Murano/Venice only have
+            // 3 actual BARs (4th is unused), Naples has 4.  Physical
+            //chip wiring on naples prevents more that 2 sockets so
+            //the PHB range on chip 8, bar 4 is never used.
 
             //Place mem64 @ 59TB-63TB (0x00003B0000000000)
             //Place mem32 @ 63.875TB-64TB (0x00030FE000000000)
@@ -1110,7 +1121,9 @@ fapi::ReturnCode fapiPlatGetProcPcieBarBaseAddr (
                if(TARGETING::is_sapphire_load())
                {
                    o_pcieBarBase[u][0] = SAPPHIRE_PCIE_BAR0_BASE +
-                                     (l_pciMem64[u] & PCIE_BAR0_OFFSET_MASK);
+                                     (l_pos * PCIE_SAPH_BAR0_SIZE*
+                                      PROC_SETUP_BARS_PCIE_NUM_UNITS) +
+                                     (u * PCIE_SAPH_BAR0_SIZE) ;
                    o_pcieBarBase[u][1] = SAPPHIRE_PCIE_BAR1_BASE +
                                      (l_pciMem32[u] & PCIE_BAR1_OFFSET_MASK);
                }
@@ -1154,7 +1167,14 @@ fapi::ReturnCode fapiPlatGetProcPcieBarSize (
         //  NOTE: only supported BAR2 size is 4KB
         for ( uint8_t u=0; u < PROC_SETUP_BARS_PCIE_NUM_UNITS; u++ )
         {
-           o_pcieBarSize[u][0]  =   PCIE_BAR0_SIZE ;
+           if(TARGETING::is_sapphire_load())
+           {
+               o_pcieBarSize[u][0]  =   PCIE_SAPH_BAR0_SIZE ;
+           }
+           else
+           {
+               o_pcieBarSize[u][0]  =   PCIE_BAR0_SIZE ;
+           }
            o_pcieBarSize[u][1]  =   PCIE_BAR1_SIZE ;
            o_pcieBarSize[u][2]  =   PCIE_BAR2_SIZE;
 

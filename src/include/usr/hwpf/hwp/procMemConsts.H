@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -55,13 +57,14 @@ const uint64_t  PCI_MEM_SIZE	    =   0x0000001000000000ULL;
 //      Bar1 = 2_GB   ( from spreadsheet)
 //      Bar2 = 4_KB see NOTE above
 const uint64_t  PCIE_BAR0_SIZE      =   0x0000001000000000ULL;
+const uint64_t  PCIE_SAPH_BAR0_SIZE =   0x0000010000000000ULL;  //1TB for K80
 const uint64_t  PCIE_BAR1_SIZE      =   0x0000000080000000ULL;
 const uint64_t  PCIE_BAR2_SIZE      =   0x0000000000001000ULL;
 
 // 4 PHB per chip, 4chips per node, max 4 nodes
 const uint64_t  PCIE_BAR0_OFFSET_MASK =  ((PCIE_BAR0_SIZE*4*4*4)-1);
 const uint64_t  PCIE_BAR1_OFFSET_MASK =  ((PCIE_BAR1_SIZE*4*4*4)-1);
-const uint64_t  SAPPHIRE_PCIE_BAR0_BASE = 0x00003B0000000000;
+const uint64_t  SAPPHIRE_PCIE_BAR0_BASE = 0x0000200000000000; // 32TB for K80
 const uint64_t  SAPPHIRE_PCIE_BAR1_BASE = 0x00003FE000000000;
 
 
