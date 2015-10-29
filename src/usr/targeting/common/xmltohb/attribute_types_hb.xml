@@ -1109,6 +1109,10 @@
         <name>DERATING_FACTOR</name>
         <value>0xC815</value>
     </enumerator>
+    <enumerator>
+        <name>REDUNDANT_PS_POLICY</name>
+        <value>0xCA22</value>
+    </enumerator>
 </enumerationType>
 
 <enumerationType>
