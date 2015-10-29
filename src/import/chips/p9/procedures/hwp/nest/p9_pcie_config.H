@@ -17,19 +17,16 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 //-----------------------------------------------------------------------------------
-//
-/// @file p9_pcie_config.H
-/// @brief Configure the PHBs
 ///
+/// @file p9_pcie_config.H
+/// @brief Perform PCIE Phase2 init sequence (FAPI2)
+///
+
 // *HWP HWP Owner: Christina Graves clgraves@us.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
 // *HWP Team: Nest
 // *HWP Level: 1
-// *HWP Consumed by:
-//-----------------------------------------------------------------------------------
-//
-// *! ADDITIONAL COMMENTS :
-//-----------------------------------------------------------------------------------
+// *HWP Consumed by: HB
 
 #ifndef _P9_PCIE_CONFIG_H_
 #define _P9_PCIE_CONFIG_H_
@@ -37,7 +34,6 @@
 //-----------------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------------
-
 #include <fapi2.H>
 
 //-----------------------------------------------------------------------------------
@@ -45,8 +41,7 @@
 //-----------------------------------------------------------------------------------
 
 //function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode
-(*p9_pcie_config_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
+typedef fapi2::ReturnCode (*p9_pcie_config_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
 //-----------------------------------------------------------------------------------
 // Constant definitions
@@ -58,12 +53,11 @@ extern "C" {
 // Function prototype
 //-----------------------------------------------------------------------------------
 
-/// @brief Configure the PHBs
+/// @brief Perform PCIE Phase2 init sequence
 /// @param[in] i_target => P9 chip target
 /// @return FAPI_RC_SUCCESS if the setup completes successfully,
 //
-    fapi2::ReturnCode p9_pcie_config(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+    fapi2::ReturnCode p9_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 } //extern"C"
 
 #endif //_P9_PCIE_CONFIG_H_

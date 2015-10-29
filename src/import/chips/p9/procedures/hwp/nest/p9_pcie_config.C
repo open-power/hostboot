@@ -17,43 +17,29 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 //-----------------------------------------------------------------------------------
-//
-/// @file p9_pcie_config.C
-/// @brief Configure the PHBs
 ///
+/// @file p9_pcie_config.C
+/// @brief Perform PCIE Phase2 init sequence (FAPI2)
+///
+
 // *HWP HWP Owner: Christina Graves clgraves@us.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
 // *HWP Team: Nest
 // *HWP Level: 1
-// *HWP Consumed by:
-//-----------------------------------------------------------------------------------
+// *HWP Consumed by: HB
 
 //-----------------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------------
 #include <p9_pcie_config.H>
 
-extern "C" {
 
 //-----------------------------------------------------------------------------------
-// HWP entry point
+// Function definitions
 //-----------------------------------------------------------------------------------
-    fapi2::ReturnCode p9_pcie_config(const
-                                     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
-    {
-        //return code
-        fapi2::ReturnCode rc;
-
-        //mark HWP entry
-        FAPI_INF("p9_pcie_config: Entering...\n");
-
-        do
-        {
-
-        }
-        while(0);
-
-        return rc;
-    }
-
-} //extern "C"
+fapi2::ReturnCode p9_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_INF("Start");
+    FAPI_INF("End");
+    return fapi2::current_err;
+}

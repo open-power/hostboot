@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: chips/p9/procedures/ipl/hwp/p9_pcie_scominit.C $              */
+/* $Source: chips/p9/procedures/hwp/nest/p9_pcie_hotplug_control.H $      */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -16,10 +16,9 @@
 /* deposited with the U.S. Copyright Office.                              */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-//-----------------------------------------------------------------------------------
 ///
-/// @file p9_pcie_scominit.C
-/// @brief Perform PCIE Phase1 init sequence (FAPI2)
+/// @file p9_pcie_hotplug_control.H
+/// @brief Manage slot power on hot-plug controlled slots (FAPI2)
 ///
 // *HWP HWP Owner: Christina Graves clgraves@us.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
@@ -27,18 +26,39 @@
 // *HWP Level: 1
 // *HWP Consumed by: HB
 
+#ifndef _P9_PCIE_HOTPLUG_CONTROL_H_
+#define _P9_PCIE_HOTPLUG_CONTROL_H_
+
 //-----------------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------------
-#include <p9_pcie_scominit.H>
-
+#include <fapi2.H>
 
 //-----------------------------------------------------------------------------------
-// Function definitions
+// Structure definitions
 //-----------------------------------------------------------------------------------
-fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
-{
-    FAPI_INF("Start");
-    FAPI_INF("End");
-    return fapi2::current_err;
-}
+
+//function pointer typedef definition for HWP call support
+typedef fapi2::ReturnCode (*p9_pcie_hotplug_control_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
+        const bool);
+
+//-----------------------------------------------------------------------------------
+// Constant definitions
+//-----------------------------------------------------------------------------------
+
+extern "C" {
+
+//-----------------------------------------------------------------------------------
+// Function prototype
+//-----------------------------------------------------------------------------------
+
+/// @brief Enable/disable PCIE slot power
+/// @param[in] i_target => P9 chip target
+/// @param[in] i_enable_slot_power => boolean to control power state (true=enable, false=disable)
+/// @return FAPI_RC_SUCCESS if the setup completes successfully,
+//
+    fapi2::ReturnCode p9_pcie_hotplug_control(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+            const bool i_enable_slot_power);
+} //extern"C"
+
+#endif //_P9_PCIE_HOTPLUG_CONTROL_H_

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: chips/p9/procedures/ipl/hwp/p9_pcie_scominit.C $              */
+/* $Source: chips/p9/procedures/hwp/nest/p9_pcie_hotplug_control.C $      */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -16,10 +16,9 @@
 /* deposited with the U.S. Copyright Office.                              */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-//-----------------------------------------------------------------------------------
 ///
-/// @file p9_pcie_scominit.C
-/// @brief Perform PCIE Phase1 init sequence (FAPI2)
+/// @file p9_pcie_hotplug_control.C
+/// @brief Manage slot power on hot-plug controlled slots (FAPI2)
 ///
 // *HWP HWP Owner: Christina Graves clgraves@us.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
@@ -30,13 +29,14 @@
 //-----------------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------------
-#include <p9_pcie_scominit.H>
+#include <p9_pcie_hotplug_control.H>
 
 
 //-----------------------------------------------------------------------------------
 // Function definitions
 //-----------------------------------------------------------------------------------
-fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+fapi2::ReturnCode p9_pcie_hotplug_control(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+        const bool i_enable_slot_power)
 {
     FAPI_INF("Start");
     FAPI_INF("End");
