@@ -1,0 +1,500 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/attribute_info/p9_pcie_attributes.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- p9_pcie_attributes.xml -->
+<attributes>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_CONFIG</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      PCIE IOP lane configuration
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        Encoded PCIE IOP lane configuration
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_SWAP</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      PCIE IOP swap configuration
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        Encoded PCIE IOP swap configuration
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOVALID_ENABLE</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      PCIE iovalid enable valid mask
+      creator: platform
+      consumer: p9_pcie_scominit
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_REFCLOCK_ENABLE</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      PCIE refclock enable valid mask
+      creator: platform
+      consumer: p9_pcie_scominit
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_G3_PLL_CONTROL0</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        PCIe Gen3 PLL Control Register 0.
+        ATUNE/CPISEL.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_G2_PLL_CONTROL0</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        PCIe Gen2/Gen1 PLL Control Register 0.
+        ATUNE/CPISEL.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        PCIe PLL Global Control Register 0.
+        REFISRC/REFISINK.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmare notes:
+        PCIe PLL Global Control Register 1.
+	ENBGDOCPSRC/ENBGDOCAMP/REFVREG.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_PCS_CONTROL0</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        PCIe PCS Control Register 0.
+        BITLOCKTIME/ADDDREMDELTA_810_B/STARTUPDELTA_810_B/ADDDREMDELTA_810_A/
+        STARTUPDELTA_A/RXREJECTHANDLING/EQCOMLETERESPONSE.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_PCS_CONTROL1</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        PCIe PCS Control Register 1.
+	RXSIGDETSETTING/ADDDREMDELTA_128130_B/STARTUPDELTA_128130_B/
+        ADDDREMDELTA_128130_A/STARTUPDELTA_128130_A.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        PCIe TX FIFO Offset Register.
+	G3OFFSET/G2OFFSET/G1OFFSET.
+        Array index: Lane number (0:15)
+    </description>
+    <valueType>uint32</valueType>
+    <array>16</array>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        PCIe TX Receiver Detect Control Register.
+        VREFSEL/RCVRDETCNT/DETDRVC/PH1WAIT.
+        Array index: Lane number (0:15)
+    </description>
+    <valueType>uint32</valueType>
+    <array>16</array>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_TX_BWLOSS1</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        PCIe TX Bandwidth Loss Coefficient Register.
+        GEN3BWCOEFF/GEN2BWCOEFF/GEN1BWCOEFF.
+        Array index: Lane number (0:15)
+    </description>
+    <valueType>uint32</valueType>
+    <array>16</array>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        PCIe RX VGA Control Register 2.
+        GAIN2/GAIN1.
+        Array index: Lane number (0:15)
+    </description>
+    <valueType>uint32</valueType>
+    <array>16</array>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_RX_PEAK</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        PCIe RX Receiver Peaking Value Register.
+	PEAK1/PEAK2/PEAK3.
+        Array index: Lane number (0:15)
+    </description>
+    <valueType>uint32</valueType>
+    <array>16</array>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_RX_SDL</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        PCIe RX Signal Detect Level Register.
+        SDLVL3/SDLVL2/SDLVL1.
+        Array index: Lane number (0:15)
+    </description>
+    <valueType>uint32</valueType>
+    <array>16</array>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_TX_FFE_GEN1</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        PCIe TX FFE (Gen1)
+        Array index: Lane number (0:15)
+    </description>
+    <valueType>uint32</valueType>
+    <array>16</array>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_TX_FFE_GEN2</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        PCIe TX FFE (Gen2)
+        Array index: Lane number (0:15)
+    </description>
+    <valueType>uint32</valueType>
+    <array>16</array>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_IOP_ZCAL_CONTROL</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        PCIe ZCAL Control Register.
+        CMPEVALDLY.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_BAR_ENABLE</id>
+    <targetType>TARGET_TYPE_PHB</targetType>
+    <description>
+      PCIE MMIO BAR enable
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes:
+        Array index: BAR number (0:2)
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+    <array>3</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_BAR_BASE_ADDR</id>
+    <targetType>TARGET_TYPE_PHB</targetType>
+    <description>
+      PCIE MMIO BAR base address value
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes:
+        64-bit address representing BAR RA
+        Array index: BAR number (0:2)
+        NOTE: BAR0/1 registers cover RA 8:47
+        NOTE: BAR2 registers covers RA 8:49
+    </description>
+    <valueType>uint64</valueType>
+    <array>3</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_BAR_SIZE</id>
+    <targetType>TARGET_TYPE_PHB</targetType>
+    <description>
+      PCIE MMIO BAR size value
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes:
+        Array index: BAR number (0:2)
+        NOTE: supported BAR0/1 sizes are from 64KB-32PB
+        NOTE: only supported BAR2 size is 4KB
+    </description>
+    <valueType>uint64</valueType>
+    <enum>
+       32_PB = 0x0000008000000000,
+       16_PB = 0x000000C000000000,
+        8_PB = 0x000000E000000000,
+        4_PB = 0x000000F000000000,
+        2_PB = 0x000000F800000000,
+        1_PB = 0x000000FC00000000,
+      512_TB = 0x000000FE00000000,
+      256_TB = 0x000000FF00000000,
+      128_TB = 0x000000FF80000000,
+       64_TB = 0x000000FFC0000000,
+       32_TB = 0x000000FFE0000000,
+       16_TB = 0x000000FFF0000000,
+        8_TB = 0x000000FFF8000000,
+        4_TB = 0x000000FFFC000000,
+        2_TB = 0x000000FFFE000000,
+        1_TB = 0x000000FFFF000000,
+      512_GB = 0x000000FFFF800000,
+      256_GB = 0x000000FFFFC00000,
+      128_GB = 0x000000FFFFE00000,
+       64_GB = 0x000000FFFFF00000,
+       32_GB = 0x000000FFFFF80000,
+       16_GB = 0x000000FFFFFC0000,
+        8_GB = 0x000000FFFFFE0000,
+        4_GB = 0x000000FFFFFF0000,
+        2_GB = 0x000000FFFFFF8000,
+        1_GB = 0x000000FFFFFFC000,
+      512_MB = 0x000000FFFFFFE000,
+      256_MB = 0x000000FFFFFFF000,
+      128_MB = 0x000000FFFFFFF800,
+       64_MB = 0x000000FFFFFFFC00,
+       32_MB = 0x000000FFFFFFFE00,
+       16_MB = 0x000000FFFFFFFF00,
+        8_MB = 0x000000FFFFFFFF80,
+        4_MB = 0x000000FFFFFFFFC0,
+        2_MB = 0x000000FFFFFFFFE0,
+        1_MB = 0x000000FFFFFFFFF0,
+      512_KB = 0x000000FFFFFFFFF8,
+      256_KB = 0x000000FFFFFFFFFC,
+      128_KB = 0x000000FFFFFFFFFE,
+       64_KB = 0x000000FFFFFFFFFF,
+        4_KB = 0xFFFFFFFFFFFFFFFF
+    </enum>
+    <array>3</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_HOTPLUG_I2C_DEVICE_ADDRESS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      I2C device address for PCIE hotplug controller
+      creator: platform
+      consumer: p9_pcie_hotplug
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_HOTPLUG_ENABLE_ACTIONS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Sequence of PCIE hotplug controller register writes required to enable
+      slot power
+      creator: platform
+      consumer: p9_pcie_hotplug
+      firmware notes:
+        Primary array index: Sequence number
+        Secondary array index: Address (0) / Data (1)
+    </description>
+    <valueType>uint8</valueType>
+    <array>8 2</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_HOTPLUG_NUM_ENABLE_ACTIONS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Number of valid entries in primary index of
+      ATTR_PROC_PCIE_HOTPLUG_ENABLE_ACTIONS
+      creator: platform
+      consumer: p9_pcie_hotplug
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <enum>
+        ZERO = 0x0,
+        ONE = 0x1, 
+        TWO = 0x2,
+        THREE = 0x3,
+        FOUR = 0x4,
+        FIVE = 0x5,
+        SIX = 0x6,
+        SEVEN = 0x7,
+        EIGHT = 0x8
+    </enum>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_HOTPLUG_DISABLE_ACTIONS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Sequence of PCIE hotplug controller register writes required to disable
+      slot power
+      creator: platform
+      consumer: p9_pcie_hotplug
+      firmware notes:
+        Primary array index: Sequence number
+        Secondary array index: Address (0) / Data (1)
+    </description>
+    <valueType>uint8</valueType>
+    <array>8 2</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_HOTPLUG_NUM_DISABLE_ACTIONS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Number of valid entries in primary index of
+      ATTR_PROC_PCIE_HOTPLUG_DISABLE_ACTIONS
+      creator: platform
+      consumer: p9_pcie_hotplug
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <enum>
+        ZERO = 0x0,
+        ONE = 0x1, 
+        TWO = 0x2,
+        THREE = 0x3,
+        FOUR = 0x4,
+        FIVE = 0x5,
+        SIX = 0x6,
+        SEVEN = 0x7,
+        EIGHT = 0x8
+    </enum>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+</attributes>
