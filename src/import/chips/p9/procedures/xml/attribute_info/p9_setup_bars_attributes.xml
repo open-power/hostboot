@@ -1,0 +1,139 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p9/procedures/xml/attribute_info/p9_setup_bars_attributes.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- p9_setup_bars_attributes.xml -->
+<attributes>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PSI_BRIDGE_BAR_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>PSI Bridge BAR enable
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes: none
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PSI_BRIDGE_BAR_BASE_ADDR</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>PSI Bridge BAR base address value
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes:
+        64-bit address representing BAR RA
+        NOTE: BAR register covers RA 8:43
+        NOTE: Implied size of 1MB
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_FSP_BAR_ENABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>FSP BAR enable
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes: none
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_FSP_BAR_BASE_ADDR</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>FSP BAR base address value
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes:
+        64-bit address representing BAR RA
+        NOTE: BAR register covers RA 8:43
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_FSP_BAR_SIZE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>FSP BAR size value
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes: none
+    </description>
+    <valueType>uint64</valueType>
+    <enum>
+        4_GB = 0x0000000100000000,
+        2_GB = 0x0000000080000000,
+        1_GB = 0x0000000040000000,
+      512_MB = 0x0000000020000000,
+      256_MB = 0x0000000010000000,
+      128_MB = 0x0000000008000000,
+       64_MB = 0x0000000004000000,
+       32_MB = 0x0000000002000000,
+       16_MB = 0x0000000001000000,
+        8_MB = 0x0000000000800000,
+        4_MB = 0x0000000000400000,
+        2_MB = 0x0000000000200000,
+        1_MB = 0x0000000000100000
+    </enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_FSP_MMIO_MASK_SIZE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>FSP MMIO mask size value
+      creator: platform
+      consumer: p9_setup_bars
+      firmware notes:
+        AND mask applied to RA 32:35 when transmitting address to FSP
+        NOTE: RA 8:31 are always replaced with zero
+    </description>
+    <valueType>uint64</valueType>
+    <enum>
+        4_GB = 0x0000000100000000,
+        2_GB = 0x0000000080000000,
+        1_GB = 0x0000000040000000,
+      512_MB = 0x0000000020000000,
+      256_MB = 0x0000000010000000
+    </enum>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <!-- TODO: add remaining nest MMIO BAR attributes required for IPL         -->
+  <!-- ********************************************************************* -->
+</attributes>
