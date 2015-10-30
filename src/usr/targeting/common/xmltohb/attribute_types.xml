@@ -30156,4 +30156,41 @@ DEPRECATED!!!!
   </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+  <id>PROC_FSP_BAR_ENABLE</id>
+  <description>
+      FSP BAR enable
+      DISABLE = 0x0, ENABLE = 0x1
+  </description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_FSP_BAR_ENABLE</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PSI_BRIDGE_BAR_ENABLE</id>
+  <description>
+      PSI Bridge BAR enable
+      DISABLE = 0x0, ENABLE = 0x1
+  </description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PSI_BRIDGE_BAR_ENABLE</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+
 </attributes>
