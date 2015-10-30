@@ -497,6 +497,8 @@ inline bool SensorModifier::modifySensor(uint8_t i_sensorType,
 ///////////////////////////////////////////////////////////////////////////////
 void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
 {
+    bool l_selSent = false;
+
     TRACFCOMP(g_trac_errl, ENTER_MRK
                 "sendErrLogToBmc errlogId 0x%.8x, i_sendSels %d",
                 io_err->eid(), i_sendSels);
@@ -642,9 +644,14 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
                                                l_eventOffset );
                 }
 
-                // if we are sending the first sel then we will include the
-                // pel data, otherwise we send no data
-                uint32_t selSize = ( i == 0 ) ? l_pelSize:0;
+                uint32_t selSize = l_pelSize;
+
+                // if we sent an eSEL then set the PEL size to zero such
+                // that we don't send another eSEL for the same error log
+                if (l_selSent)
+                {
+                    selSize = 0;
+                }
 
                 // only send highest priority SELs or
                 // SELs of lesser priority that were modified
@@ -660,7 +667,10 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
                                     l_eventDirType, l_eventOffset,
                                     l_sensorType,
                                     l_sensorNumber);
+
+                    l_selSent = true;
                 }
+
             } // for l_callouts
         }
         else
