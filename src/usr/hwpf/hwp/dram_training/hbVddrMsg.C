@@ -41,7 +41,6 @@
 #include <fapi.H>
 #include "platform_vddr.H"
 
-
 using namespace ERRORLOG;
 
 using namespace TARGETING;
@@ -435,6 +434,49 @@ errlHndl_t HBVddrMsg::sendMsg(VDDR_MSG_TYPE i_msgType) const
     return l_err;
 }
 
+//
+// calloutCentaurChildDimms : HW callout for the failing DIMMs
+//
+void calloutCentaurChildDimms(
+                              errlHndl_t & io_errl,
+                              const TARGETING::Target * i_membuf)
+{
+    TRACFCOMP(g_trac_volt, ENTER_MRK "calloutCentaurChildDimms");
+
+    TARGETING::TargetHandleList l_dimmList;
+
+    // Get child dimms
+    getChildAffinityTargets( l_dimmList,
+                             i_membuf,
+                             CLASS_NA,
+                             TYPE_DIMM );
+
+    if( !l_dimmList.empty())
+    {
+        // iterate over the DIMMs and call them out
+        TargetHandleList::iterator l_iter = l_dimmList.begin();
+
+        for(;l_iter != l_dimmList.end(); ++l_iter)
+        {
+            TRACFCOMP( g_trac_volt, INFO_MRK
+                    "HBVddrMsg::calloutCentaurChildDimms Target HUID = 0x%08X" ,
+                    TARGETING::get_huid(*l_iter) );
+
+            io_errl->addHwCallout( *l_iter,
+                    HWAS::SRCI_PRIORITY_LOW,
+                    HWAS::NO_DECONFIG,
+                    HWAS::GARD_NULL );
+        }
+    }
+    else
+    {
+        TRACFCOMP(g_trac_volt, "Centuar [ 0x%08X ] No child DIMMs found!",
+                               TARGETING::get_huid(i_membuf));
+    }
+
+    TRACFCOMP(g_trac_volt, EXIT_MRK "calloutCentaurChildDimms");
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // HBVddrMsg::processVDDRmsg
@@ -521,6 +563,68 @@ errlHndl_t  HBVddrMsg::processVDDRmsg(msg_t* i_recvMsg) const
                 */
                 createErrLog(l_errLog, fapi::MOD_VDDR_PROC_VDDR_MSG,
                              fapi::RC_VDDR_POWR_ERR, l_errPlid);
+
+                l_errLog->addProcedureCallout(
+                             HWAS::EPUB_PRC_MEMORY_PLUGGING_ERROR,
+                             HWAS::SRCI_PRIORITY_MED );
+
+                // Find the centaur buffers associated with this Domain id
+                TARGETING::TargetHandleList membufTargetList;
+                TARGETING::ATTR_VMEM_ID_type  l_attr_domainId = 0x0;
+                TARGETING::Target* pMembuf =NULL;
+                getAllChips(membufTargetList, TYPE_MEMBUF);
+
+                for (TARGETING::TargetHandleList::const_iterator
+                        ppMembuf = membufTargetList.begin();
+                        ppMembuf != membufTargetList.end();
+                        ++ppMembuf)
+                {
+                    pMembuf = *ppMembuf;
+                    // Get the domain id and check if this Id is matching
+                    // centaur chip reported for failing domain Id
+                    switch(domain)
+                    {
+                        // Add hw callouts for the failing Centaur and it's
+                        // child DIMMs
+                        case MEM_VOLTAGE_DOMAIN_VDDR:
+                            l_attr_domainId =
+                                pMembuf->getAttr< TARGETING::ATTR_VMEM_ID >();
+                            break;
+                        case MEM_VOLTAGE_DOMAIN_VCS:
+                            l_attr_domainId =
+                                   pMembuf->getAttr< TARGETING::ATTR_VCS_ID>();
+                            break;
+                        case MEM_VOLTAGE_DOMAIN_VPP:
+                            l_attr_domainId =
+                                    pMembuf->getAttr< TARGETING::ATTR_VPP_ID>();
+                            break;
+                        case MEM_VOLTAGE_DOMAIN_AVDD:
+                            l_attr_domainId =
+                                   pMembuf->getAttr< TARGETING::ATTR_AVDD_ID>();
+                            break;
+                        case MEM_VOLTAGE_DOMAIN_VDD:
+                            l_attr_domainId =
+                                    pMembuf->getAttr< TARGETING::ATTR_VDD_ID>();
+                            break;
+                        default:
+                            // Mark this Centaur as Not found
+                            pMembuf = NULL;
+                            TRACFCOMP( g_trac_volt, ERR_MRK
+                                    "[ ERROR ]  unsupported Domain" );
+                            break;
+                    }
+
+                    // Call out DIMMs associated for this Centaur
+                    if(( pMembuf != NULL ) && ( l_attr_domainId == l_domainId ))
+                    {
+                        TRACFCOMP( g_trac_volt, INFO_MRK
+                                " Target Centaur HUID = 0x%08X",
+                                TARGETING::get_huid(pMembuf));
+
+                        calloutCentaurChildDimms( l_errLog, pMembuf );
+                    }
+                }
+
                 l_errLog->plid(l_errPlid);
                 break;
             }
