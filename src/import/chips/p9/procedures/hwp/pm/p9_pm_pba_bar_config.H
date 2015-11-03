@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 // -----------------------------------------------------------------------------
 #include <fapi2.H>
 #include <p9_pm_pba_init.H>
+#include <p9_misc_scom_addresses.H>
 
 // function pointer typedef definition for HWP call support
 
@@ -44,7 +45,8 @@ typedef fapi2::ReturnCode (*p9_pm_pba_bar_config_FP_t)
  const uint32_t,
  const uint64_t,
  const uint64_t,
- const p9pba::CMD_SCOPE);
+ const p9pba::CMD_SCOPE,
+ const uint16_t);
 
 extern "C"
 {
@@ -63,6 +65,16 @@ extern "C"
 ///                             the value will be rounded up to the next power
 ///                             of 2 for setting hardware mask
 /// @param [in] i_pba_cmd_scope Command scope according to pba spec
+/// @param [in] i_vectorTarget  Indicates which target should be searched for
+///                             the information when the command scope specified
+///                             is "Vectored".
+///                             Possible Values      : Significance
+///                             ------------------------------------------------
+///                             FF                   : PBA will always drive
+///                                                    Target value to FF
+///                             Values other than FF : PBA will update Target
+///                                                    value based on the CRESP
+///                                                    of the request
 ///
 /// @return FAPI_RC_SUCCESS on success or error return code
 ///
@@ -71,7 +83,8 @@ extern "C"
         const uint32_t i_index,
         const uint64_t i_pba_bar_addr,
         const uint64_t i_pba_bar_size,
-        const p9pba::CMD_SCOPE i_pba_cmd_scope);
+        const p9pba::CMD_SCOPE i_pba_cmd_scope,
+        const uint16_t i_vectorTarget);
 }
 
 #endif // _P9_PM_PBA_CONFIG_H_

@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,7 +23,7 @@
 // *HWP Backup HWP Owner: Greg Still <stillgs@us.ibm.com>
 // *HWP FW Owner        : Bilicon Patil <bilpatil@in.ibm.com>
 // *HWP Team            : PM
-// *HWP Level           : 1
+// *HWP Level           : 2
 // *HWP Consumed by     : HS
 ///
 ///
@@ -137,41 +137,15 @@ p9_pm_set_homer_bar(  const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
                 fapi2::P9_PM_SET_HOMER_BAR_NOT_1MB_ALIGNED().set_MEM_BAR(i_mem_bar),
                 "ERROR: i_mem_bar:0x%16llx is not 1MB aligned ", i_mem_bar);
 
-    // Check that the image address passed is within the memory region that
-    // is also passed.
-    //
-    // The PBA Mask indicates which bits from 23:43 (1MB grandularity) are
-    // enabled to be passed from the OCI addresses.  Inverting this mask
-    // indicates which address bits are going to come from the PBA BAR value.
-    // The image address (the starting address) must match these post mask bits
-    // to be resident in the range.
-    //
-    // Starting bit number: 64 bit Big Endian
-    //                                          12223344
-    //                                          60482604
-    //region_inverted_mask = i_mem_size ^ BAR_MASK_LIMIT;  // XOR
-
-    // Set bits 14:22 as these are unconditional address bits
-    //region_inverted_mask = region_inverted_mask | BAR_ADDR_UNMASKED;
-    //computed_image_address = region_inverted_mask && image_address;
-
-    // Need to AND the address
-    //if (computed_image_address != i_mem_bar )
-    //{
-    //    FAPI2_ERR("SLW image address check failure. ");
-    //    FAPI2_SET_HWP_ERROR(l_rc, RC_PROCPM_POREBAR_IMAGE_ADDR_ERROR);
-    //    break;
-    //}
-
     FAPI_DBG("Calling pba_bar_config with BAR %x Addr: 0x%16llX  Size: 0x%16llX",
              PBA_BAR0, i_mem_bar, i_mem_size);
 
-    // Set the PBA BAR for the SLW region
+    // Set the PBA BAR for the HOMER base
     FAPI_EXEC_HWP(l_rc, p9_pm_pba_bar_config, i_target,
                   PBA_BAR0,
                   i_mem_bar,
                   i_mem_size,
-                  p9pba::GROUP);
+                  p9pba::GROUP, 0);
 
     fapi2::current_err = l_rc;
 
