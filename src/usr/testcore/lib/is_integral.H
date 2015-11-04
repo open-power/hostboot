@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/type_traits $                                     */
+/* $Source: src/usr/testcore/lib/is_integral.H $                          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,9 +22,49 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include <util/impl/integral.H>
-#include <util/impl/type_remove.H>
-#include <util/impl/is_same.H>
-#include <util/impl/is_integral.H>
+#ifndef __LIB_IS_INTEGRAL_H
+#define __LIB_IS_INTEGRAL_H
 
-/* vim: set filetype=cpp : */
+#include <cxxtest/TestSuite.H>
+#include <type_traits>
+
+class STLIsIntegralTest : public CxxTest::TestSuite
+{
+    public:
+        void testIsIntegral()
+        {
+            using namespace std;
+
+            if(!is_integral<bool>::value)
+            {
+                TS_FAIL("is_integral<bool> is false.");
+            }
+            if(!is_integral<const bool>::value)
+            {
+                TS_FAIL("is_integral<const bool> is false.");
+            }
+            if(!is_integral<bool&>::value)
+            {
+                TS_FAIL("is_integral<bool&> is false.");
+            }
+            if(!is_integral<int>::value)
+            {
+                TS_FAIL("is_integral<int> is false.");
+            }
+            if(!is_integral<unsigned int>::value)
+            {
+                TS_FAIL("is_integral<unsigned int> is false.");
+            }
+            if(is_integral<float>::value)
+            {
+                TS_FAIL("is_integral<float> is true.");
+            }
+            if(is_integral<char*>::value)
+            {
+                TS_FAIL("is_integral<char*> is true.");
+            }
+        }
+
+};
+
+#endif

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/type_traits $                                     */
+/* $Source: src/include/util/impl/type_remove.H $                         */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,9 +22,36 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include <util/impl/integral.H>
-#include <util/impl/type_remove.H>
-#include <util/impl/is_same.H>
-#include <util/impl/is_integral.H>
+#ifndef __UTIL_IMPL_TYPE_REMOVE_H
+#define __UTIL_IMPL_TYPE_REMOVE_H
 
-/* vim: set filetype=cpp : */
+namespace std
+{
+    template <typename T> struct remove_const { typedef T type; };
+    template <typename T> struct remove_const<const T> { typedef T type; };
+
+    template <typename T> struct remove_volatile { typedef T type; };
+    template <typename T> struct remove_volatile<volatile T>
+        { typedef T type; };
+
+    template <typename T> struct remove_cv
+    {
+        typedef typename remove_const<typename remove_volatile<T>::type>::type
+                type;
+    };
+
+    template <typename T> struct remove_reference { typedef T type; };
+    template <typename T> struct remove_reference<T&> { typedef T type; };
+    template <typename T> struct remove_reference<T&&> { typedef T type; };
+
+    template <typename T> struct remove_pointer { typedef T type; };
+    template <typename T> struct remove_pointer<T*> { typedef T type; };
+    template <typename T> struct remove_pointer<T* const> { typedef T type; };
+    template <typename T> struct remove_pointer<T* volatile>
+        { typedef T type; };
+    template <typename T> struct remove_pointer<T* const volatile>
+        { typedef T type; };
+
+}
+
+#endif
