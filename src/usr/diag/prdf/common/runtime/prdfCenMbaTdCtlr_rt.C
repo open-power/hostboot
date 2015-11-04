@@ -2148,7 +2148,9 @@ int32_t CenMbaTdCtlr::handleCeEte_Tps( STEP_CODE_DATA_STRUCT & io_sc )
 
             if ( !available )
             {
-                // Spares have been used. Make the error log predictive.
+                // Spares have been used. Callout the mark. Make the error log
+                // predictive.
+                CalloutUtil::calloutMark( iv_mbaTrgt, iv_rank, iv_mark, io_sc );
                 setTdSignature( io_sc, PRDFSIG_TpsCmAndSpare );
                 io_sc.service_data->setServiceCall();
             }
