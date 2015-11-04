@@ -1867,6 +1867,7 @@
          <default>43</default>
     </attribute>
     <attribute><id>MAX_MCS_PER_SYSTEM</id></attribute>
+    <attribute><id>TEST_NEGATIVE_FCN</id></attribute>
     <!-- End max/min config attributes -->
     <attribute><id>RECONFIGURE_LOOP</id></attribute>
     <attribute><id>MULTI_SCOM_BUFFER_MAX_SIZE</id></attribute>

@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2015
+# Contributors Listed Below - COPYRIGHT 2012,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -2367,7 +2367,7 @@ sub writeAttrErrlHFile {
             elsif (exists $attribute->{simpleType}->{int8_t}) {
                 print $outFile "              l_traceEntry.resize(10+offset + $total_count * 5);\n";
                 print $outFile "              for (uint32_t i = 0;i<$total_count;i++) {\n";
-                print $outFile "                  sprintf(&(l_traceEntry[offset+i*5]), \"0x%.2X \", *(((uint8_t *)l_ptr)+i));\n";
+                print $outFile "                  sprintf(&(l_traceEntry[offset+i*5]), \"0x%.2X \", *(((int8_t *)l_ptr)+i));\n";
                 print $outFile "              }\n";
                 print $outFile "              l_ptr += $total_count * sizeof(uint8_t);\n";
             }
@@ -4283,6 +4283,13 @@ sub enumNameToValue {
             . "enumerator value in \"$enumerationName\".");
     }
 
+    if($enumeratorValue < 0)
+    {
+        # In C++ enumerations are unsigned, we do not support negative values.
+        fatal("Negative enumeration value found $enumeration->{id},"
+               ." $enumeratorValue");
+    }
+
     return $enumeratorValue;
 }
 
@@ -4644,6 +4651,7 @@ sub packSingleSimpleTypeAttribute {
         $simpleTypeProperties->{$typeName}{specialPolicies}->($$attributeRef,
             $value);
 
+        my $valueIsNegative = 'false';
         if (ref($value) eq "HASH")
         {
             # value is a hash ref, XML::Simple represents an empty element with
@@ -4661,9 +4669,22 @@ sub packSingleSimpleTypeAttribute {
         {
             $value = 0;
         }
+        elsif ($value =~ m/[^0-9]/)
+        {
+            # This section is looking for integer values that are incorrectly
+            # being interpreted as strings because of their negative sign (-).
+            # We ensure that the first thing in the String is a negative sign
+            # and that the rest of the String only contains numbers.
+            my $negSign = substr($value,0,1);
+            my $posVal = substr($value,1);
+            if(($negSign eq '-') && ($posVal =~ m/[0-9]/))
+            {
+                $valueIsNegative = 'true';
+            }
+        }
 
         if( ($simpleTypeProperties->{$typeName}{complexTypeSupport}) &&
-            ($value =~ m/[^0-9]/) )
+            ($value =~ m/[^0-9]/) && ($valueIsNegative eq 'false'))
         {
             # This is a type that supports complex types - i.e. an integer and
             # the value is a string. Look for an enumeration named after the
