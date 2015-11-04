@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2016                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -10499,6 +10499,20 @@ Measured in GB</description>
         </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>TEST_NEGATIVE_FCN</id>
+    <description>Attribute to test signed attribute
+        functionality in the system</description>
+    <simpleType>
+        <int8_t>
+            <default>-6</default>
+        </int8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <writeable/>
     <readable/>
 </attribute>
 

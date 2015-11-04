@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -273,6 +273,45 @@ class TargetingTestSuite : public CxxTest::TestSuite
 #endif
         TS_TRACE(EXIT_MRK "testL4Target" );
     }
+
+    /**
+     *  @brief Testing Hostboot support for negative attributes
+     */
+    void testSignedAttribute()
+    {
+        TS_TRACE(ENTER_MRK "testSignedAttribute");
+
+        // TODO RTC 144142
+
+        TARGETING::Target* l_sys = NULL;
+        TARGETING::targetService().getTopLevelTarget(l_sys);
+        int8_t signedAttr = -5;
+
+        // Attempt to set the attribute to a negative number
+        if(l_sys->trySetAttr<TARGETING::ATTR_TEST_NEGATIVE_FCN>(signedAttr))
+        {
+            TS_TRACE("testSignedAttribute: Attribute is %d",signedAttr);
+        }
+        else
+        {
+            TS_FAIL("testSignedAttribute: Attribute failed during set");
+        }
+
+        signedAttr = 0;
+
+        l_sys->tryGetAttr<TARGETING::ATTR_TEST_NEGATIVE_FCN>(signedAttr);
+        if(signedAttr < 0)
+        {
+            TS_TRACE("testSignedAttribute: Attribute is %d",signedAttr);
+        }
+        else
+        {
+            TS_FAIL("testSignedAttribute: Attribute is incorrectly positive");
+        }
+
+        TS_TRACE(EXIT_MRK "testSignedAttribute");
+    }
+
 };
 
 #endif // End __TARGETING_TESTTARGETING_H
