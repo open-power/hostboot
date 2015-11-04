@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/type_traits $                                     */
+/* $Source: src/include/util/impl/is_ptr.H $                              */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,10 +22,27 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include <util/impl/integral.H>
-#include <util/impl/type_remove.H>
-#include <util/impl/is_same.H>
-#include <util/impl/is_integral.H>
-#include <util/impl/is_ptr.H>
+#ifndef __UTIL_IMPL_IS_PTR_H
+#define __UTIL_IMPL_IS_PTR_H
 
-/* vim: set filetype=cpp : */
+#include <util/impl/integral.H>
+
+namespace std
+{
+    template <typename T> struct _is_pointer : std::false_type {};
+    template <typename T> struct _is_pointer<T*> : std::true_type {};
+    template <typename T> struct is_pointer :
+        _is_pointer<typename remove_cv<T>::type> {};
+
+    template <typename T> struct is_lvalue_reference : std::false_type {};
+    template <typename T> struct is_lvalue_reference<T&> : std::true_type {};
+
+    template <typename T> struct is_rvalue_reference : std::false_type {};
+    template <typename T> struct is_rvalue_reference<T&&> : std::true_type {};
+
+    template <typename T> struct is_reference : std::false_type {};
+    template <typename T> struct is_reference<T&> : std::true_type {};
+    template <typename T> struct is_reference<T&&> : std::true_type {};
+}
+
+#endif
