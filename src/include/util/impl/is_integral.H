@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/type_traits $                                     */
+/* $Source: src/include/util/impl/_is_integral.H $                         */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,9 +22,31 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#ifndef __UTIL_IMPL_IS_INTEGRAL_H
+#define __UTIL_IMPL_IS_INTEGRAL_H
+
 #include <util/impl/integral.H>
 #include <util/impl/type_remove.H>
-#include <util/impl/is_same.H>
-#include <util/impl/is_integral.H>
 
-/* vim: set filetype=cpp : */
+namespace std
+{
+    template <typename T> struct _is_integral : std::false_type {};
+    template <> struct _is_integral<bool> : std::true_type {};
+    template <> struct _is_integral<char> : std::true_type {};
+    template <> struct _is_integral<short> : std::true_type {};
+    template <> struct _is_integral<int> : std::true_type {};
+    template <> struct _is_integral<long> : std::true_type {};
+    template <> struct _is_integral<long long> : std::true_type {};
+    template <> struct _is_integral<unsigned char> : std::true_type {};
+    template <> struct _is_integral<unsigned short> : std::true_type {};
+    template <> struct _is_integral<unsigned int> : std::true_type {};
+    template <> struct _is_integral<unsigned long> : std::true_type {};
+    template <> struct _is_integral<unsigned long long> : std::true_type {};
+
+    template <typename T> struct is_integral :
+        _is_integral<
+            typename std::remove_cv<
+                typename std::remove_reference<T>::type>::type> {};
+
+}
+#endif
