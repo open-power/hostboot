@@ -32,7 +32,7 @@
 // *HWP FW Owner        : sunil kumar <skumar8j@in.ibm.com>
 // *HWP Team            : Perv
 // *HWP Level           : 2
-// *HWP Consumed by     : SE
+// *HWP Consumed by     : SE:HB
 //------------------------------------------------------------------------------
 
 
