@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -683,6 +685,22 @@ namespace std
                 //           (uint64_t)iv_start, (uint64_t)iv_finish, (uint64_t)iv_end_of_storage);
                 //}
         };
+
+    template <class T, class U>
+    bool operator==(const vector<T>& l, const vector<U>& r)
+    {
+        if (l.size() != r.size()) return false;
+        auto p = l.begin();
+        auto q = r.begin();
+
+        while(p != l.end())
+        {
+            if (*p != *q) return false;
+            ++p; ++q;
+        }
+
+        return true;
+    }
 
 }; // end namespace std
 
