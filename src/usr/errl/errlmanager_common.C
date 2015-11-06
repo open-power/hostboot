@@ -28,10 +28,10 @@
 #include <errl/errlreasoncodes.H>
 #include <ipmi/ipmisel.H>
 #include <ipmi/ipmisensor.H>
-
+#include <errl/errlentry.H>
 #include <sys/mm.h>
 #include <pnor/pnorif.H>
-
+#include <errl/errludstring.H>
 namespace ERRORLOG
 {
 
@@ -556,6 +556,20 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
                 } // if callout
             } // for each SectionVector
         } // if i_sendSels
+
+        //Add additional user detail section to pel data after hw and procedure
+        //callouts to indicate esels from a previous boot.
+        if(!i_sendSels)
+        {
+            const char* l_prev_boot = "Error from a previous boot";
+            ERRORLOG::ErrlUserDetailsString(l_prev_boot).addToLog(io_err);
+            io_err->iv_SectionVector.insert(io_err->iv_SectionVector.begin(),
+                    1,io_err->iv_SectionVector.back());
+            if(io_err->iv_SectionVector.size()!=0)
+            {
+                io_err->iv_SectionVector.pop_back();
+            }
+        }
 
         // flatten into buffer, truncate to max eSEL size
         uint32_t l_pelSize = io_err->flattenedSize();
