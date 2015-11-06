@@ -212,9 +212,7 @@ namespace HTMGT
             {
                 //Make sure this value is between the min & max allowed
                 min = sys->getAttr<ATTR_OPEN_POWER_MIN_POWER_CAP_WATTS>();
-                max = sys->
-                  getAttr<ATTR_OPEN_POWER_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS>();
-
+                max = getMaxPowerCap(sys);
                 if ((limit != 0) && (limit < min))
                 {
                     TMGT_INF("sendOccUserPowerCap:  User power cap %d is below"

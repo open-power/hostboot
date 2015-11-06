@@ -531,6 +531,69 @@ void getOCCRoleMessageData(bool i_master, bool i_firMaster,
 }
 
 
+uint16_t getMaxPowerCap(Target *i_sys)
+{
+    uint16_t o_maxPcap = 0;
+    bool useDefaultLimit = true;
+
+#ifdef CONFIG_BMC_IPMI
+    // Check if HPC limit was found
+    ATTR_OPEN_POWER_N_PLUS_ONE_HPC_BULK_POWER_LIMIT_WATTS_type hpc_pcap;
+    if (i_sys->tryGetAttr
+        <ATTR_OPEN_POWER_N_PLUS_ONE_HPC_BULK_POWER_LIMIT_WATTS>(hpc_pcap))
+    {
+        if (0 != hpc_pcap)
+        {
+            // Check if redundant power supply policy is enabled (on BMC)
+            SENSOR::getSensorReadingData redPolicyData;
+            SENSOR::SensorBase
+                redPolicySensor(TARGETING::SENSOR_NAME_REDUNDANT_PS_POLICY,
+                                i_sys);
+            errlHndl_t err = redPolicySensor.readSensorData(redPolicyData);
+            if (NULL == err)
+            {
+                // 0x02 == Asserted bit (redundant policy is enabled)
+                if ((redPolicyData.event_status & 0x02) == 0x00)
+                {
+                    // non-redundant policy allows higher bulk power limit
+                    // with the potential impact of OCC not being able to
+                    // lower power fast enough
+                    useDefaultLimit = false;
+                    TMGT_INF("getMaxPowerCap: maximum power cap = %dW"
+                             " (HPC/non-redundant PS bulk power limit)",
+                             hpc_pcap);
+                    o_maxPcap = hpc_pcap;
+                }
+                // else redundant policy enabled, use default
+            }
+            else
+            {
+                // error reading policy, commit and use default
+                TMGT_ERR("getMaxPowerCap: unable to read power supply"
+                         " redundancy policy sensor, rc=0x%04X",
+                         err->reasonCode());
+                ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+            }
+        }
+        // else no valid HPC limit, use default
+    }
+    // else HPC limit not found, use default
+#endif
+
+    if (useDefaultLimit)
+    {
+        // Read the default N+1 bulk power limit (redundant PS policy)
+        o_maxPcap = i_sys->
+            getAttr<ATTR_OPEN_POWER_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS>();
+        TMGT_INF("getMaxPowerCap: maximum power cap = %dW "
+                 "(redundant PS bulk power limit)", o_maxPcap);
+    }
+
+    return o_maxPcap;
+
+} // end getMaxPowerCap()
+
+
 void getPowerCapMessageData(uint8_t* o_data, uint64_t & o_size)
 {
     uint64_t index = 0;
@@ -552,59 +615,7 @@ void getPowerCapMessageData(uint8_t* o_data, uint64_t & o_size)
     index += 2;
 
     //System Maximum Power Cap
-    bool useDefaultLimit = true;
-#ifdef CONFIG_BMC_IPMI
-    // Check if HPC limit was found
-    ATTR_OPEN_POWER_N_PLUS_ONE_HPC_BULK_POWER_LIMIT_WATTS_type hpc_pcap;
-    if (sys->tryGetAttr
-        <ATTR_OPEN_POWER_N_PLUS_ONE_HPC_BULK_POWER_LIMIT_WATTS>(hpc_pcap))
-    {
-        if (0 != hpc_pcap)
-        {
-            // Check if redundant power supply policy is enabled (on BMC)
-            SENSOR::getSensorReadingData redPolicyData;
-            SENSOR::SensorBase
-                redPolicySensor(TARGETING::SENSOR_NAME_REDUNDANT_PS_POLICY,
-                                sys);
-            errlHndl_t err = redPolicySensor.readSensorData(redPolicyData);
-            if (NULL == err)
-            {
-                // 0x02 == Asserted bit (redundant policy is enabled)
-                if ((redPolicyData.event_status & 0x02) == 0x00)
-                {
-                    // non-redundant policy allows higher bulk power limit
-                    // with the potential impact of OCC not being able to
-                    // lower power fast enough
-                    useDefaultLimit = false;
-                    TMGT_INF("getPowerCapMessageData: maximum power cap = %dW"
-                             " (HPC/non-redundant PS bulk power limit)",
-                             hpc_pcap);
-                    pcap = hpc_pcap;
-                }
-                // else redundant policy enabled, use default
-            }
-            else
-            {
-                // error reading policy, commit and use default
-                TMGT_ERR("getPowerCapMessageData: unable to read power supply"
-                         " redundancy policy sensor, rc=0x%04X",
-                         err->reasonCode());
-                ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
-            }
-        }
-        // else no valid HPC limit, use default
-    }
-    // else HPC limit not found, use default
-#endif
-
-    if (useDefaultLimit)
-    {
-        // Read the default N+1 bulk power limit (redundant PS policy)
-        pcap =
-            sys->getAttr<ATTR_OPEN_POWER_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS>();
-        TMGT_INF("getPowerCapMessageData: maximum power cap = %dW "
-                 "(redundant PS bulk power limit)", pcap);
-    }
+    pcap = getMaxPowerCap(sys);
     memcpy(&o_data[index], &pcap, 2);
     index += 2;
 

@@ -165,6 +165,18 @@ namespace HTMGT
 
 
     /**
+     * Return the maximum power cap for the system.
+     *
+     * Value is read from the MRW based on the Current Power Supply
+     * Redundancy Policy sensor in the BMC
+     *
+     * @param[in] i_sys - pointer to system target
+     * @returns  maximum power cap in watts
+     */
+    uint16_t getMaxPowerCap(TARGETING::Target * i_sys);
+
+
+    /**
      * Fills in the Power Cap Configuration Data message buffer.
      *
      * @param[out] o_data - preallocated buffer to fill in
