@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/type_traits $                                     */
+/* $Source: src/include/util/impl/type_add.H $                            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,11 +22,25 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include <util/impl/integral.H>
-#include <util/impl/type_remove.H>
-#include <util/impl/type_add.H>
-#include <util/impl/is_same.H>
-#include <util/impl/is_integral.H>
-#include <util/impl/is_ptr.H>
+#ifndef __UTIL_IMPL_TYPE_ADD_H
+#define __UTIL_IMPL_TYPE_ADD_H
 
-/* vim: set filetype=cpp : */
+#include <util/impl/type_remove.H>
+
+namespace std
+{
+    template <typename T> struct add_const { typedef const T type; };
+    template <typename T> struct add_volatile { typedef volatile T type; };
+    template <typename T> struct add_cv { typedef const volatile T type; };
+
+    template <typename T> struct add_pointer
+        { typedef typename std::remove_reference<T>::type* type; };
+
+    template <typename T> struct add_lvalue_reference
+        { typedef typename std::remove_reference<T>::type& type; };
+
+    template <typename T> struct add_rvalue_reference
+        { typedef typename std::remove_reference<T>::type&& type; };
+}
+
+#endif
