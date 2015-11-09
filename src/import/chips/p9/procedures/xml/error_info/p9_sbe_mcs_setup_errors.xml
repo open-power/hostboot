@@ -22,15 +22,11 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- This is an automatically generated file. -->
-<!-- File: p9_sbe_mcs_setup_errors.xml. -->
-<!-- Halt codes for p9_sbe_mcs_setup -->
-
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_P9_SBE_MCS_SETUP_NO_MCS_FOUND_ERR</rc>
-    <description>There is no functional MCS chiplet found in chip</description>
+    <rc>RC_P9_SBE_MCS_SETUP_NO_MC_FOUND_ERR</rc>
+    <description>There is no functional MC chiplet (MCS/MI) present on the master chip</description>
     <ffdc>CHIP</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
