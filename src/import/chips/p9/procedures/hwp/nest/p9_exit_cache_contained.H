@@ -17,13 +17,18 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
-/// @file p9_exit_cache_contained.C
-/// @brief  Placeholder for overrides needed to step the core from cache-contained execution to expand to memory
+
+///----------------------------------------------------------------------------
+/// @file p9_exit_cache_contained.H
 ///
-// *HWP HWP Owner: Michael Dye <dyem@us.ibm.com>
+/// @brief  Contains inits to be performed before Hostboot expanded from
+///         running inside the confines of the L3 cache out to main memory.
+///----------------------------------------------------------------------------
+
+// *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
 // *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 // *HWP Team: Nest
-// *HWP Level: 1
+// *HWP Level: 2
 // *HWP Consumed by: HB
 
 #ifndef _PROC_EXIT_CACHE_CONTAINED_H_
@@ -34,20 +39,24 @@
 
 #include <fapi2.H>
 
-// function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode
-(*p9_exit_cache_contained_FP_t)();
+// Function pointer typedef definition for HWP call support
+typedef fapi2::ReturnCode (*p9_exit_cache_contained_FP_t)();
+
 //------------------------------------------------------------------------------
 // Function prototypes
 //------------------------------------------------------------------------------
 extern "C"
 {
+
 //------------------------------------------------------------------------------
 // Hardware Procedure
 //------------------------------------------------------------------------------
 ///
-/// @brief Placeholder for overrides needed to step the core from cache-contained execution to expand to memory
+/// @brief Placeholder for overrides needed to step the core from
+///        cache-contained execution to expand to memory
+///
 /// @param[in] i_target Reference to processor chip target
+///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
     fapi2::ReturnCode p9_exit_cache_contained(const

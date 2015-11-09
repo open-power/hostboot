@@ -16,14 +16,18 @@
 /* deposited with the U.S. Copyright Office.                              */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-///
+
+///----------------------------------------------------------------------------
 /// @file p9_exit_cache_contained.C
-/// @brief  Placeholder for overrides needed to step the core from cache-contained execution to expand to memory
 ///
-// *HWP HWP Owner: Michael Dye <dyem@us.ibm.com>
+/// @brief  Contains inits to be performed before Hostboot expanded from
+///         running inside the confines of the L3 cache out to main memory.
+///----------------------------------------------------------------------------
+
+// *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
 // *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 // *HWP Team: Nest
-// *HWP Level: 1
+// *HWP Level: 2
 // *HWP Consumed by: HB
 
 
@@ -43,10 +47,16 @@ extern "C"
     {
         fapi2::ReturnCode rc;
 
-        //Mark Entry
+        // Mark Entry
         FAPI_INF("Entering ...");
 
-        //Mark Exit
+        // This procedure is a placeholder to add inits that might need to be
+        // performed before Hostboot expanded from running inside the confines
+        // of the L3 cache out to main memory.
+        // There is nothing specific to be added for P9 at this point.
+
+
+        // Mark Exit
         FAPI_INF("Exiting ...");
 
         return rc;
