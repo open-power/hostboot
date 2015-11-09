@@ -258,7 +258,7 @@
   <description>
     Logical fabric system ID associated with this chip.Provided by the MRW.
   </description>
-  <valueType>uint8</valueType>
+  <valueType>uint32</valueType>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
