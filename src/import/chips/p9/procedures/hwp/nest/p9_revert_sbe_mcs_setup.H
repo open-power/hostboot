@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: chips/p9/procedures/ipl/sbe/p9_fbc_utils.H $                  */
+/* $Source: chips/p9/procedures/hwp/nest/p9_revert_sbe_mcs_setup.H $      */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -17,11 +17,15 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
-/// @file p9_fbc_utils.H
-/// @brief Fabric library functions/constants (FAPI2)
+/// @file p9_revert_sbe_mcs_setup.H
+/// @brief Revert MC configuration applied by SBE (FAPI2)
+///
+/// Reset memory controller configuration written by SBE in order to
+/// enable initial phase of hostboot execution (providing lpc_ack for dcbz
+/// prior to initialization of memory).  Registers touched by SBE will
+/// be reset to flush state by this procedure.
 ///
 /// @author Joe McGill <jmcgill@us.ibm.com>
-/// @author Christy Graves <clgraves@us.ibm.com>
 ///
 
 //
@@ -29,11 +33,12 @@
 // *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 // *HWP Team: Nest
 // *HWP Level: 2
-// *HWP Consumed by: SBE,HB
+// *HWP Consumed by: HB
 //
 
-#ifndef _P9_FBC_UTILS_H_
-#define _P9_FBC_UTILS_H_
+#ifndef _P9_REVERT_SBE_MCS_SETUP_H_
+#define _P9_REVERT_SBE_MCS_SETUP_H_
+
 
 //------------------------------------------------------------------------------
 // Includes
@@ -41,60 +46,29 @@
 #include <fapi2.H>
 
 //------------------------------------------------------------------------------
-// Constant definitions
+// Structure definitions
 //------------------------------------------------------------------------------
 
-// address range definitions
-const uint64_t P9_FBC_UTILS_FBC_MAX_ADDRESS = ((1ULL << 56) - 1ULL);
-const uint64_t P9_FBC_UTILS_CACHELINE_MASK = 0x7FULL;
-const uint64_t P9_FBC_UTILS_LAST_ADDR_IN_CACHELINE = 0x78ULL;
+/// function pointer typedef definition for HWP call support
+typedef fapi2::ReturnCode (*p9_revert_sbe_mcs_setup_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
-// cacheline size = 128
-const uint64_t FABRIC_CACHELINE_SIZE = 0x80;
 
 //------------------------------------------------------------------------------
 // Function prototypes
 //------------------------------------------------------------------------------
 
-extern "C" {
+extern "C"
+{
 
 ///
-/// @brief Read FBC/ADU registers to determine state of fabric init and stop
-/// control signals
+/// @brief Disable MC configuration written by SBE to enable initial phase
+/// of hostboot execution
 ///
 /// @param[in] i_target Reference to processor chip target
-/// @param[out] o_is_initialized State of fabric init signal
-/// @param[out] o_is_running State of fabric pervasive stop control
-/// @return fapi::ReturnCode, FAPI2_RC_SUCCESS if success, else error code.
+/// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-    fapi2::ReturnCode p9_fbc_utils_get_fbc_state(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        bool& o_is_initialized,
-        bool& o_is_running);
-
-///
-/// @brief Use ADU pMisc Mode register to clear fabric stop signal, overriding
-/// a stop condition caused by a checkstop
-///
-/// @param[in] i_target Reference to processor chip target
-/// @return fapi::ReturnCode, FAPI2_RC_SUCCESS if success, else error code.
-///
-    fapi2::ReturnCode p9_fbc_utils_override_fbc_stop(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
-
-///
-/// @brief Return base address origin (non-mirrored/mirrored) for this chip
-///
-/// @param[in] i_target Reference to processor chip target
-/// @param[out] o_base_address_nm Non-mirrored base address for this chip
-/// @param[out] o_base_address_m Mirrored base address for this chip
-/// @return fapi::ReturnCode, FAPI2_RC_SUCCESS if success, else error code.
-///
-    fapi2::ReturnCode p9_fbc_utils_get_chip_base_address(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        uint64_t& o_base_address_nm,
-        uint64_t& o_base_address_m);
+    fapi2::ReturnCode p9_revert_sbe_mcs_setup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 } // extern "C"
 
-#endif // _P9_FBC_UTILS_H_
+#endif // _P9_REVERT_SBE_MCS_SETUP_H_
