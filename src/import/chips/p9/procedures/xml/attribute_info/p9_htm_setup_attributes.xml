@@ -436,8 +436,7 @@
                 - User can change HTM scope using Attribute Override.
   </description>
   <valueType>uint8</valueType>
-  <enum> LOCAL = 0b000, NEARNODE = 0b001, GROUP = 0b011, REMOTE = 0b100,
-         VECTORED = 0b101 </enum>
+  <enum> LOCAL = 0x0, NEARNODE = 0x1, GROUP = 0x3, REMOTE = 0x4, VECTORED = 0x5 </enum>
   <writeable/>
   <persistRuntime/>
   <platInit/>
