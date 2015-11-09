@@ -35,8 +35,6 @@
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>EX_TARGET</ffdc>
     <ffdc>TARGET_BASE_ADDRESS</ffdc>
-    <ffdc>FABRIC_GROUP_ID</ffdc>
-    <ffdc>FABRIC_ADDR_BAR_MODE</ffdc>
     <ffdc>HRMOR_OFFSET</ffdc>
     <ffdc>BOOTLOADER_OFFSET</ffdc>
   </hwpError>
