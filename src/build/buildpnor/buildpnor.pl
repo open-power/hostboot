@@ -133,35 +133,15 @@ if (-e $pnorBinName)
 }
 
 #Load PNOR Layout XML file
-my $rc = loadPnorLayout($pnorLayoutFile, \%pnorLayout, \%PhysicalOffsets);
-if($rc != 0)
-{
-    trace(0, "Error detected from call to loadPnorLayout().  Exiting");
-    exit 1;
-}
+loadPnorLayout($pnorLayoutFile, \%pnorLayout, \%PhysicalOffsets);
 
 #Verify all the section files exist
-my $rc = verifyFilesExist(\%pnorLayout, \%binFiles);
-if($rc != 0)
-{
-    trace(0, "Error detected from call to verifyFilesExist().  Exiting");
-    exit 1;
-}
+verifyFilesExist(\%pnorLayout, \%binFiles);
 
 #Perform any data integrity manipulation (ECC, shaw-hash, etc)
-$rc = robustifyImgs(\%pnorLayout, \%binFiles);
-if($rc != 0)
-{
-    trace(0, "Error detected from call to robustifyImgs().  Exiting");
-    exit 1;
-}
+robustifyImgs(\%pnorLayout, \%binFiles);
 
-$rc = checkSpaceConstraints(\%pnorLayout, \%binFiles);
-if($rc != 0)
-{
-    trace(0, "Error detected from call to checkSpaceConstraints().  Exiting");
-    exit 1;
-}
+checkSpaceConstraints(\%pnorLayout, \%binFiles);
 trace(1, "Done checkSpaceConstraints");
 
 # Create all Partition Tables at each TOC offset
@@ -173,13 +153,8 @@ foreach my $sideId ( keys %{$pnorLayout{metadata}{sides}} )
     foreach my $toc ( keys %{$pnorLayout{metadata}{sides}{$sideId}{toc}})
     {
         my $tocOffset = $pnorLayout{metadata}{sides}{$sideId}{toc}{$toc};
-        $rc = createPnorPartition($tocVersion, $pnorBinName, \%pnorLayout,
+        createPnorPartition($tocVersion, $pnorBinName, \%pnorLayout,
                                   $sideId, $tocOffset);
-        if($rc != 0)
-        {
-            trace(0, "Error detected from createPnorPartition() $tocOffset Exiting");
-            exit 1;
-        }
 
         #Add the golden side tag to the "part" partition of PNOR`
         my $userflags1 = ($pnorLayout{metadata}{sides}{$sideId}{golden} eq "yes") ?
@@ -188,35 +163,21 @@ foreach my $sideId ( keys %{$pnorLayout{metadata}{sides}} )
         #add a golden bit to the misc flags in userflag1
         $userflags1 = $userflags1 << 16;
         trace(2, "$g_fpartCmd --target $pnorBinName --partition-offset $tocOffset --user 1 --name part --value $userflags1 --force");
-        $rc =    `$g_fpartCmd --target $pnorBinName --partition-offset $tocOffset --user 1 --name part --value $userflags1 --force`;
-        if($rc != 0)
-        {
-            trace(0, "Call to add golden flag to PART failed.  rc=$rc.  Aborting!");
-            exit;
-        }
+        system("$g_fpartCmd --target $pnorBinName --partition-offset $tocOffset --user 1 --name part --value $userflags1 --force");
+        die "ERROR: Call to add golden flag to PART failed. Aborting!" if($?);
     }
 }
 
 #add backup TOC and other side's toc information to each TOC
-$rc = addTOCInfo(\%pnorLayout, $pnorBinName);
-if($rc)
-{
-    trace(0, "Error detected from call to addTOCInfo().  Exiting");
-    exit 1;
-}
+addTOCInfo(\%pnorLayout, $pnorBinName);
 
 # Fill all sides
 foreach my $sideId ( keys %{$pnorLayout{metadata}{sides}} )
 {
     my $tocOffset = $pnorLayout{metadata}{sides}{$sideId}{toc}{primary};
 
-    $rc = fillPnorImage($pnorBinName, \%pnorLayout, \%binFiles, $sideId,
+    fillPnorImage($pnorBinName, \%pnorLayout, \%binFiles, $sideId,
                         $tocOffset);
-    if($rc != 0)
-    {
-        trace(0, "Error detected from call to fillPnorImage() sideATocOffset. Exiting");
-        exit 1;
-    }
 }
 
 exit 0;
@@ -370,7 +331,6 @@ sub createPnorImg
 {
     my ($i_tocVersion, $i_pnorBinName, $i_pnorLayoutRef, $i_offset) = @_;
     my $this_func = (caller(0))[3];
-    my $rc = 0;
     trace(4, "$this_func: >>Enter");
 
     trace(1, "createPnorImg:: $i_offset");
@@ -381,24 +341,15 @@ sub createPnorImg
     #Get size of image in blocks
     my $imageSize = $$i_pnorLayoutRef{metadata}{imageSize};
     my $blockCount = $imageSize/$blockSize;
-    do{
-        if ($blockCount != int($blockCount))
-        {
-            trace(0, "$this_func: Image size ($imageSize) is not an even multiple of erase blocks ($blockSize).  This is not supported.  Aborting!");
-            $rc = 1;
-            last;
-        }
-        #f{fs,part} --create tuleta.pnor --partition-offset 0 --size 8MiB --block 4KiB --force
-        trace(2, "$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --create --size $imageSize --block $blockSize --force");
-        $rc = `$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --create --size $imageSize --block $blockSize --force`;
-        if($rc)
-        {
-            trace(0, "$this_func: Call to creating image failed.  rc=$rc.  Aborting!");
-            last;
-        }
-    }while(0);
+    if ($blockCount != int($blockCount))
+    {
+        die "ERROR: $this_func: Image size ($imageSize) is not an even multiple of erase blocks ($blockSize).  This is not supported.  Aborting!";
 
-    return $rc;
+    }
+    #f{fs,part} --create tuleta.pnor --partition-offset 0 --size 8MiB --block 4KiB --force
+    trace(2, "$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --create --size $imageSize --block $blockSize --force");
+    system("$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --create --size $imageSize --block $blockSize --force");
+    die "ERROR: $this_func: Call to creating image failed. Aborting!" if($?);
 }
 
 ################################################################################
@@ -412,7 +363,6 @@ sub addUserData
     my %i_sectionHash = @_;
 
     my $this_func = (caller(0))[3];
-    my $rc = 0;
     trace(4, "$this_func: >>Enter");
 
     my $eyeCatch = $i_sectionHash{$i_key}{eyeCatch};
@@ -461,24 +411,13 @@ sub addUserData
     my $userflags1 = ($verCheck << 24)
         | ($miscFlags << 16);
 
-    do{
-        trace(2, "$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --user 0 --name $eyeCatch --value userflags0=$userflags0");
-        $rc = `$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --user 0 --name $eyeCatch --value $userflags0`;
-        if($rc)
-        {
-            trace(0, "$this_func: Call to add userdata to $eyeCatch failed.  rc=$rc.  Aborting!");
-            last;
-        }
-        trace(2, "$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --user 1 --name $eyeCatch --value userflags1=$userflags1");
-        $rc = `$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --user 1 --name $eyeCatch --value $userflags1`;
-        if($rc)
-        {
-            trace(0, "$this_func: Call to add userdata to $eyeCatch failed.  rc=$rc.  Aborting!");
-            last;
-        }
-    }while(0);
+    trace(2, "$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --user 0 --name $eyeCatch --value userflags0=$userflags0");
+    system("$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --user 0 --name $eyeCatch --value $userflags0");
+    die "ERROR: $this_func: Call to add userdata to $eyeCatch failed. Aborting!" if($?);
 
-    return $rc;
+    trace(2, "$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --user 1 --name $eyeCatch --value userflags1=$userflags1");
+    system("$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --user 1 --name $eyeCatch --value $userflags1");
+    die "ERROR: $this_func: Call to add userdata to $eyeCatch failed. Aborting!" if($?);
 }
 
 ################################################################################
@@ -488,7 +427,6 @@ sub createPnorPartition
 {
     my ($i_tocVersion, $i_pnorBinName, $i_pnorLayoutRef, $side, $offset) = @_;
     my $this_func = (caller(0))[3];
-    my $rc = 0;
     my $key;
     my $other_side = getOtherSide($side);
 
@@ -496,96 +434,67 @@ sub createPnorPartition
 
     trace(1, "createPnorPartition:: $offset");
 
-    do{
-        # Create pnor image at partition offset
-        $rc = createPnorImg($i_tocVersion, $i_pnorBinName, $i_pnorLayoutRef,
-                            $offset);
-        if($rc)
+    # Create pnor image at partition offset
+    createPnorImg($i_tocVersion, $i_pnorBinName, $i_pnorLayoutRef, $offset);
+
+    #get Block size
+    my $blockSize = $$i_pnorLayoutRef{metadata}{blockSize};
+
+    # key into hash data is the physical offset of section.  Need to sort the
+    # keys so we put things in the correct order in toc. Generally speaking,
+    # this loop is populating the FFS Header with records based on the section
+    # data specified in the XML + actual sizes of the input binary files.
+    my %sectionHash = %{$$i_pnorLayoutRef{sections}};
+
+    for $key ( sort {$a<=> $b} keys %sectionHash)
+    {
+        my $eyeCatch = "UNDEF";
+        my $physicalOffset = 0xFFFFFFFF;
+        my $physicalRegionSize = 0xFFFFFFFF;
+
+        # eyecatcher
+        my $eyeCatch = $sectionHash{$key}{eyeCatch};
+
+        my $sideInfo = getSideInfo($key, %sectionHash);
+
+        #don't try to add the TOC, but need to update all other paritions
+        #Add if side matches (or not set) -- so if it isn't equal to other side
+        #Also add if sideless
+        if( ($eyeCatch ne $g_TOCEyeCatch ) &&
+            ($sideInfo ne $other_side ))
         {
-            last;
-        }
-        #get Block size
-        my $blockSize = $$i_pnorLayoutRef{metadata}{blockSize};
-
-        # key into hash data is the physical offset of section.  Need to sort the
-        # keys so we put things in the correct order in toc. Generally speaking,
-        # this loop is populating the FFS Header with records based on the section
-        # data specified in the XML + actual sizes of the input binary files.
-        my %sectionHash = %{$$i_pnorLayoutRef{sections}};
-
-        for $key ( sort {$a<=> $b} keys %sectionHash)
-        {
-            my $eyeCatch = "UNDEF";
-            my $physicalOffset = 0xFFFFFFFF;
-            my $physicalRegionSize = 0xFFFFFFFF;
-
-            # eyecatcher
-            my $eyeCatch = $sectionHash{$key}{eyeCatch};
-
-            my $sideInfo = getSideInfo($key, %sectionHash);
-
-            #don't try to add the TOC, but need to update all other paritions
-            #Add if side matches (or not set) -- so if it isn't equal to other side
-            #Also add if sideless
-            if( ($eyeCatch ne $g_TOCEyeCatch ) &&
-                ($sideInfo ne $other_side ))
+            # base/physical offset
+            my $physicalOffset = $sectionHash{$key}{physicalOffset};
+            #make sure offset is on a block boundary
+            my $val = $physicalOffset/$blockSize;
+            if ($val != int($val))
             {
-                # base/physical offset
-                my $physicalOffset = $sectionHash{$key}{physicalOffset};
-                #make sure offset is on a block boundary
-                my $val = $physicalOffset/$blockSize;
-                if ($val != int($val))
-                {
-                    trace(0, "$this_func: Partition offset ($val) does not fall on an erase block ($blockSize) boundary.  This is not supported.  Aborting!");
-                    $rc = -1;
-                    last;
-                }
-
-                #physical size
-                my $physicalRegionSize = $sectionHash{$key}{physicalRegionSize};
-                $val = $physicalRegionSize/$blockSize;
-                if($val != int($val))
-                {
-                    trace(0, "$this_func: Partition size ($val) is not an even multiple of erase blocks ($blockSize).  This is not supported.  Aborting!");
-                    exit 1;
-                }
-
-                #Add Partition
-                #f{fs,part} --add --target tuleta.pnor --partition-offset 0 --offset 0x1000   --size 0x280000 --name HBI --flags 0x0
-                trace(2, "$this_func: $g_fpartCmd --target $i_pnorBinName --partition-offset $offset --add --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --flags 0x0");
-                $rc = `$g_fpartCmd --target $i_pnorBinName --partition-offset $offset --add --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --flags 0x0`;
-                if($rc)
-                {
-                    trace(0, "$this_func: Call to add partition $eyeCatch failed.  rc=$rc.  Aborting!");
-                    last;
-                }
-
-                # Add User Partition data
-                $rc = addUserData($i_pnorBinName, $offset, $key, %sectionHash);
-                if($rc)
-                {
-                    trace(0, "$this_func: Call to add user data to partition $eyeCatch failed.  rc=$rc.  Aborting!");
-                    last;
-                }
-
-                #Trunc Partition
-                #f{fs,part} --target tuleta.pnor --partition-offset 0 --name HBI --trunc
-                $rc = `$g_fpartCmd --target $i_pnorBinName --partition-offset $offset --trunc --name $eyeCatch`;
-                if($rc)
-                {
-                    trace(0, "$this_func: Call to trunc partition $eyeCatch failed.  rc=$rc.  Aborting!");
-                    last;
-                }
+                die "ERROR: this_func: Partition offset ($val) does not fall on an erase block ($blockSize) boundary.  This is not supported.  Aborting!";
             }
-        }
-        # Added in case more functionality added before while ends
-        if ($rc)
-        {
-            last;
-        }
-    }while(0);
 
-    return $rc;
+            #physical size
+            my $physicalRegionSize = $sectionHash{$key}{physicalRegionSize};
+            $val = $physicalRegionSize/$blockSize;
+            if($val != int($val))
+            {
+                die "ERROR: $this_func: Partition size ($val) is not an even multiple of erase blocks ($blockSize).  This is not supported.  Aborting!";
+            }
+
+            #Add Partition
+            #f{fs,part} --add --target tuleta.pnor --partition-offset 0 --offset 0x1000   --size 0x280000 --name HBI --flags 0x0
+            trace(2, "$this_func: $g_fpartCmd --target $i_pnorBinName --partition-offset $offset --add --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --flags 0x0");
+            system("$g_fpartCmd --target $i_pnorBinName --partition-offset $offset --add --offset $physicalOffset --size $physicalRegionSize --name $eyeCatch --flags 0x0");
+            die "ERROR: $this_func: Call to add partition $eyeCatch failed. Aborting!" if($?);
+
+            # Add User Partition data
+            addUserData($i_pnorBinName, $offset, $key, %sectionHash);
+
+            #Trunc Partition
+            #f{fs,part} --target tuleta.pnor --partition-offset 0 --name HBI --trunc
+            system("$g_fpartCmd --target $i_pnorBinName --partition-offset $offset --trunc --name $eyeCatch");
+            die "ERROR: $this_func: Call to trunc partition $eyeCatch failed. Aborting!" if ($?);
+        }
+    }
 }
 
 ################################################################################
@@ -594,7 +503,6 @@ sub createPnorPartition
 sub addTOCInfo
 {
     my ($i_pnorLayout, $i_pnorBinName) = @_;
-    my $rc        = 0;
     my $other_idx = 0;
     my $sideShift = 0;
     my @all_tocs;
@@ -622,22 +530,15 @@ sub addTOCInfo
             my $toc_offset    = $$i_pnorLayout{metadata}{sides}{$sideId}{toc}{$toc};
             my $backup_offset = $all_tocs[(($backup_idx + 1)% $numOfTOCs) + $sideShift ];
             trace(1, "$g_fpartCmd --target $i_pnorBinName --partition-offset $toc_offset --add --offset $backup_offset --size $physicalRegionSize --name $backup_part --flags 0x0");
-            $rc = `$g_fpartCmd --target $i_pnorBinName --partition-offset $toc_offset --add --offset $backup_offset --size $physicalRegionSize --name $backup_part --flags 0x0`;
-            if($rc)
-            {
-                trace(0, "Call to add partition $backup_part failed.  rc=$rc.  Aborting!");
-                exit;
-            }
+            system("$g_fpartCmd --target $i_pnorBinName --partition-offset $toc_offset --add --offset $backup_offset --size $physicalRegionSize --name $backup_part --flags 0x0");
+            die "ERROR: Call to add partition $backup_part failed. Aborting!" if ($?);
+
             #indicate that this is a puesdo-partition and should be skipped on code update
             my $userflags1 = 0x20;
             $userflags1 = $userflags1 << 16;
             trace(1, "$g_fpartCmd --target $i_pnorBinName --partition-offset $toc_offset --user 1 --name $backup_part --value $userflags1 --force");
-            $rc =    `$g_fpartCmd --target $i_pnorBinName --partition-offset $toc_offset --user 1 --name $backup_part --value $userflags1 --force`;
-            if($rc != 0)
-            {
-                trace(0, "Call to set BACKUP_PART as pseudo failed.  rc=$rc.  Aborting!");
-                exit;
-            }
+            system("$g_fpartCmd --target $i_pnorBinName --partition-offset $toc_offset --user 1 --name $backup_part --value $userflags1 --force");
+            die "ERROR: Call to set BACKUP_PART as pseudo failed. Aborting!" if ($?);
 
             #Don't add OTHER_SIDE section if there is only one side in PNOR
             if ((scalar keys % {$$i_pnorLayout{metadata}{sides}}) > 1)
@@ -645,27 +546,19 @@ sub addTOCInfo
                 #adding other_side
                 my $otherSide_offset = $all_tocs[(($other_idx + 2)% scalar @all_tocs)];
                 trace(1, "$g_fpartCmd --target $i_pnorBinName --partition-offset $toc_offset --add --offset $otherSide_offset --size $physicalRegionSize --name $other_side --flags 0x0");
-                $rc = `$g_fpartCmd --target $i_pnorBinName --partition-offset $toc_offset --add --offset $otherSide_offset --size $physicalRegionSize --name $other_side --flags 0x0`;
-                if($rc)
-                {
-                    trace(0, "Call to add partition $other_side failed.  rc=$rc.  Aborting!");
-                    exit;
-                }
+                system("$g_fpartCmd --target $i_pnorBinName --partition-offset $toc_offset --add --offset $otherSide_offset --size $physicalRegionSize --name $other_side --flags 0x0");
+                die "ERROR: Call to add partition $other_side failed. Aborting!" if($?);
+
                 #indicate that this is a puesdo-partition and should be skipped on code update
                 trace(1, "$g_fpartCmd --target $i_pnorBinName --partition-offset $toc_offset --user 1 --name $other_side --value $userflags1 --force");
-                $rc =    `$g_fpartCmd --target $i_pnorBinName --partition-offset $toc_offset --user 1 --name $other_side --value $userflags1 --force`;
-                if($rc != 0)
-                {
-                    trace(0, "Call to set OTHER_SIDE as pseudo failed.  rc=$rc.  Aborting!");
-                    exit;
-                }
+                system("$g_fpartCmd --target $i_pnorBinName --partition-offset $toc_offset --user 1 --name $other_side --value $userflags1 --force");
+                die "ERROR: Call to set OTHER_SIDE as pseudo failed. Aborting!" if($?);
             }
             $backup_idx++;
             $other_idx++;
         }
         $sideShift = $sideShift + $numOfTOCs;
     }
-    return $rc;
 }
 ################################################################################
 # robustifyImgs - Perform any ECC or ShawHash manipulations
@@ -729,16 +622,13 @@ sub verifyFilesExist
     my ($i_pnorLayoutRef, $i_binFiles) = @_;
     my $this_func = (caller(0))[3];
     my $key;
-    my $rc = 0;
 
     for $key ( keys %$i_binFiles)
     {
         unless(-e $$i_binFiles{$key})
         {
             my $inputFile = $$i_binFiles{$key};
-            trace(0, "Specified input file ($inputFile) for key ($key) does not exist.  Aborting!");
-            $rc = 1;
-            last;
+            die "ERROR: Specified input file ($inputFile) for key ($key) does not exist.  Aborting!";
         }
         else
         {
@@ -746,14 +636,7 @@ sub verifyFilesExist
         }
     }
 
-    if($rc != 0)
-    {
-        return $rc;
-    }
-
     my %sectionHash = %{$$i_pnorLayoutRef{sections}};
-
-    return $rc;
 }
 
 ################################################################################
@@ -762,7 +645,6 @@ sub verifyFilesExist
 sub checkSpaceConstraints
 {
     my ($i_pnorLayoutRef, $i_binFiles) = @_;
-    my $rc = 0;
     my $this_func = (caller(0))[3];
     my $key;
 
@@ -775,9 +657,7 @@ sub checkSpaceConstraints
         my $layoutKey = findLayoutKeyByEyeCatch($key, \%$i_pnorLayoutRef);
         if( $layoutKey == -1)
         {
-            trace(0, "$this_func: entry not found in PNOR layout for file $$i_binFiles{$key}, under eyecatcher $key");
-            $rc = 1;
-            last;
+            die "ERROR: $this_func: entry not found in PNOR layout for file $$i_binFiles{$key}, under eyecatcher $key" if($?);
         }
 
         my $eyeCatch = $sectionHash{$layoutKey}{eyeCatch};
@@ -795,14 +675,10 @@ sub checkSpaceConstraints
             }
             else
             {
-                trace(0, "$this_func: Image provided ($$i_binFiles{$eyeCatch}) has size ($filesize) which is greater than allocated space ($physicalRegionSize) for section=$eyeCatch.  Aborting!");
-                $rc = 1;
+                die "ERROR: $this_func: Image provided ($$i_binFiles{$eyeCatch}) has size ($filesize) which is greater than allocated space ($physicalRegionSize) for section=$eyeCatch.  Aborting!";
             }
         }
-
     }
-
-    return $rc;
 }
 
 ###############################################################################
@@ -853,7 +729,6 @@ sub fillPnorImage
 {
     my ($i_pnorBinName, $i_pnorLayoutRef, $i_binFiles, $side, $offset) = @_;
     my $this_func = (caller(0))[3];
-    my $rc = 0;
     my $key;
     my $other_side = getOtherSide($side);
 
@@ -891,16 +766,10 @@ sub fillPnorImage
             }
             trace(5, "$this_func: populating section $sideInfo:$eyeCatch, filename=$inputFile");
             #fcp --target tuleta.pnor --partition-offset 0 --name HBI --write hostboot_extended.bin
-            $rc = `$g_fcpCmd $inputFile $i_pnorBinName:$eyeCatch --offset $offset --write --buffer 0x40000000`;
-            if($rc)
-            {
-                trace(0, "$this_func: Call to fcp adding data to partition $eyeCatch failed.  rc=$rc.  Aborting!");
-                last;
-            }
+            system("$g_fcpCmd $inputFile $i_pnorBinName:$eyeCatch --offset $offset --write --buffer 0x40000000");
+            die "ERROR: $this_func: Call to fcp adding data to partition $eyeCatch failed. Aborting!" if($?);
          }
      }
-
-    return $rc;
 }
 
 ################################################################################
