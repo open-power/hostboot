@@ -50,43 +50,11 @@ grep -v "GFW_P8_HB_UNSECURE_OFFSET" \
 echo "SETENV GFW_P8_HB_UNSECURE_OFFSET 58720256" >> \
     $sb/simu/configs/P8_VENICE.config
 
-echo "+++ Patching P9_NIMBUS.config with L3_MB_SIZE."
-egrep -v "GFW_P9_NIMBUS_L3_MB_SIZE|GFW_P9_NIMBUS_HB_BASE_IMG_USE_PNOR|GFW_P9_NIMBUS_HB_BASE_IMG_WITH_ECC" \
-    $BACKING_BUILD/src/simu/configs/P9_NIMBUS.config > \
+echo "+++ Patching P9_NIMBUS.config with extra PARMS"
+cp $bbsrc/simu/configs/P9_NIMBUS.config $sb/simu/configs/
+echo "
+SETENV GFW_P9_NIMBUS_DIMM_CCIN              HABJ
+SETENV GFW_P9_NIMBUS_DIMMS_PER_PROC         16
+SETENV GFW_P9_NIMBUS_DIMM_EC                20
+SETENV GFW_P9_NIMBUS_DIMM_MODEL_EC          0" >> \
     $sb/simu/configs/P9_NIMBUS.config
-echo "SETENV GFW_P9_NIMBUS_L3_MB_SIZE             10
-SETENV GFW_P9_NIMBUS_HB_BASE_IMG_USE_PNOR   no
-SETENV GFW_P9_NIMBUS_HB_BASE_IMG_WITH_ECC   no
-SETENV XSCOM_BASE_ADDR      0x0006010000000000" >> \
-    $sb/simu/configs/P9_NIMBUS.config
-
-echo "+++ Patching simicsInfo with new POWER9 FIPSLEVEL."
-mkdir -p $sb/simu/data
-grep -v "WSALIAS POWER9 FIPSLEVEL" \
-    $BACKING_BUILD/src/simu/data/simicsInfo > \
-    $sb/simu/data/simicsInfo
-echo "WSALIAS POWER9 FIPSLEVEL env/sima/simics-4.8.0/simics-4.8.87/fips/fld36/fi150615g900.48" >> \
-    $sb/simu/data/simicsInfo
-
-echo "+++ Creating p9.act with SBE start action."
-mkdir -p $sb/simu/data/cec-chip
-echo \
-"CAUSE_EFFECT {
-  LABEL=[Master SBE Start Part One - c4t0]
-  WATCH=[STARTSBEREGS(0x0)]
-  CAUSE: TARGET=[STARTSBEREGS(0x0)] OP=[BIT,ON] BIT=[0]
-  EFFECT: TARGET=[MODULE(enterMaintenanceMode, 0, 0)] OP=[MODULECALL] # jlo_181
-  EFFECT: TARGET=[MODULE(enterMaintenanceMode, 0, 1)] OP=[MODULECALL] # jlo_181
-  EFFECT: TARGET=[MODULE(enterMaintenanceMode, 0, 2)] OP=[MODULECALL] # jlo_181
-  EFFECT: TARGET=[MODULE(enterMaintenanceMode, 0, 3)] OP=[MODULECALL] # jlo_181
-  EFFECT: TARGET=[MODULE(sbeStart, FSIMBOX(0x3A), LOGIC(0xFF0CC004), 0)] OP=[MODULECALL] #dds129
-  EFFECT: TARGET=[STARTSBEREGS(0x1)]  OP=[BIT,ON]  BIT=[0] #Signal Centaur 0 to flush regs
-  EFFECT: TARGET=[STARTSBEREGS(0x1)]  OP=[BIT,ON]  BIT=[1] #Signal Centaur 1 to flush regs
-  EFFECT: TARGET=[STARTSBEREGS(0x1)]  OP=[BIT,ON]  BIT=[2] #Signal Centaur 2 to flush regs
-  EFFECT: TARGET=[STARTSBEREGS(0x1)]  OP=[BIT,ON]  BIT=[3] #Signal Centaur 3 to flush regs
-  EFFECT: TARGET=[STARTSBEREGS(0x1)]  OP=[BIT,ON]  BIT=[4] #Signal Centaur 4 to flush regs
-  EFFECT: TARGET=[STARTSBEREGS(0x1)]  OP=[BIT,ON]  BIT=[5] #Signal Centaur 5 to flush regs
-  EFFECT: TARGET=[STARTSBEREGS(0x1)]  OP=[BIT,ON]  BIT=[6] #Signal Centaur 6 to flush regs
-  EFFECT: TARGET=[STARTSBEREGS(0x1)]  OP=[BIT,ON]  BIT=[7] #Signal Centaur 7 to flush regs
-  EFFECT: TARGET=[STARTSBEREGS(0x0)]  OP=[BIT,OFF] BIT=[0] #reset to 0 so subsequent SBE starts will trigger this action again
-}" > $sb/simu/data/cec-chip/p9.act

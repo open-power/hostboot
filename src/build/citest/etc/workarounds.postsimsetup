@@ -34,3 +34,17 @@
 #cp $BACKING_BUILD/src/simu/data/cec-chip/base_cec_chip_file $sb/simu/data/cec-chip
 #patch -p0 $sb/simu/data/cec-chip/base_cec_chip_file $PROJECT_ROOT/src/build/citest/etc/patches/my_patch_File
 
+
+echo "+++ Fixing pnor file in p9_nimbus.simics"
+cp -f $sb/../simics/targets/p9_nimbus/p9_nimbus.simics /tmp/
+cp -f /tmp/p9_nimbus.simics $sb/../simics/targets/p9_nimbus/p9_nimbus.simics
+sed -i '/$image_name =/c\$image_name = "nimbus.pnor"' $sb/../simics/targets/p9_nimbus/p9_nimbus.simics
+
+echo "+++ Patching simicsInfo NIMBUS flash definitions"
+mkdir -p $sb/simu/data
+cp $bbsrc/simu/data/simicsInfo $sb/simu/data/
+sed -i '/^MACHINE:NIMBUS/ s/$/ | IMGS:HOSTBOOT_IMG | IMGS:NIMBUS_IMG/' $sb/simu/data/simicsInfo
+echo "
+IMGS:NIMBUS_IMG | FLASH:nimbus.pnor | LOC:SB_CHAIN/images/ppc/lab/flash" >> \
+    $sb/simu/data/simicsInfo
+

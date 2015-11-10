@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -46,6 +48,9 @@ void addFruCallouts(TARGETING::Target* i_target,
                     uint64_t i_scomAddr,
                     errlHndl_t& io_errl)
 {
+    // @todo RTC:137627 - Remove for p9 bringup
+    return;
+
    switch (i_pibErrStatus)
    {
      case  PIB::PIB_CHIPLET_OFFLINE: //b010

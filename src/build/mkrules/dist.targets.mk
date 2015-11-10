@@ -36,7 +36,7 @@ ROOTPATH = ../../..
 # The release is created by generating all targets into their subdirectory:
 #    ...release/fsp/...
 #    ...release/vpo/...
-#    ...reelase/tools/...
+#    ...release/tools/...
 #
 
 # Content targets.
@@ -205,6 +205,7 @@ fsp.tar_CONTENTS = \
     img/simics_MURANO_targeting.bin \
     img/simics_VENICE_targeting.bin \
     img/simics_NAPLES_targeting.bin \
+    img/simics_NIMBUS_targeting.bin \
     obj/genfiles/fapiAttrInfo.csv \
     obj/genfiles/fapiAttrEnumInfo.csv \
     obj/genfiles/targAttrInfo.csv \

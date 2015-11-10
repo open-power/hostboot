@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -54,6 +54,7 @@ XMLTOHB_SYSTEM_BINARIES += vbu_NAPLES_targeting.bin
 XMLTOHB_SYSTEM_BINARIES += simics_VENICE_targeting.bin
 XMLTOHB_SYSTEM_BINARIES += simics_MURANO_targeting.bin
 XMLTOHB_SYSTEM_BINARIES += simics_NAPLES_targeting.bin
+XMLTOHB_SYSTEM_BINARIES += simics_NIMBUS_targeting.bin
 
 XMLTOHB_TARGETS += ${XMLTOHB_HEADER_TARGETS}
 XMLTOHB_TARGETS += ${XMLTOHB_SOURCE_TARGETS}

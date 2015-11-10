@@ -370,8 +370,9 @@ errlHndl_t discoverTargets()
                             if (l_procEntry.maxEXs == 0)
                             {
                                 // this is PROBABLY bad PR, so YELL...
-                                HWAS_ERR("pTarget %.8X - PR VPD says 0 CORES",
-                                    pTarget->getAttr<ATTR_HUID>());
+                                // @todo RTC:137627 - remove for P9 bringup
+                                //HWAS_ERR("pTarget %.8X - PR VPD says 0 CORES",
+                                //    pTarget->getAttr<ATTR_HUID>());
                             }
                         }
                       }
@@ -927,6 +928,9 @@ errlHndl_t restrictEXunits(
     HWAS_INF("restrictEXunits entry, %d elements", i_procList.size());
     errlHndl_t errl = NULL;
 
+    // @todo RTC:137627 - return from restrictEXunits for P9 bringup
+    return errl;
+
     // sort by group so PROC# are in the right groupings.
     std::sort(i_procList.begin(), i_procList.end(),
                 compareProcGroup);
@@ -1414,6 +1418,8 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
         HWAS_DBG( "checkMinimumHardware: %d functional dimms",
                   l_dimms.size());
 
+// @todo RTC:137627 - remov dimm stuff for P9 bringup
+#if (0)
         if (l_dimms.empty())
         {
             HWAS_ERR( "Insufficient hardware to continue IPL (func DIMM)");
@@ -1526,7 +1532,7 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
              errlCommit(l_errl, HWAS_COMP_ID);
              // errl is now NULL
         }
-
+#endif
         //  ------------------------------------------------------------
         //  Check for Mirrored memory -
         //  If the user requests mirrored memory and we do not have it,

@@ -189,7 +189,7 @@ enum BlockPriority
  *  allows us to have a payload image up to that size and up to 'Cache Size'
  *  worth of unsecure content.
  */
-#define VMM_UNSECURE_RESERVED_MEMORY_BASEADDR (56 * MEGABYTE)
+#define VMM_UNSECURE_RESERVED_MEMORY_BASEADDR (54 * MEGABYTE)
 
 /**
  * Test Constants

@@ -32,6 +32,8 @@
 #include <errl/errlentry.H>
 #include <lpc/lpcif.H>
 
+typedef uint64_t LPCBase_t;
+
 /** @file lpcdd.H
  *  @brief Provides the interfaces to the LPC Device Driver
  */
@@ -40,6 +42,7 @@
  *  @brief  LPC Device Driver Class
  *     Provides access to the LPC bus for a specific Processor
  */
+
 class LpcDD
 {
   public:
@@ -109,6 +112,26 @@ class LpcDD
     };
 
     /**
+    * @brief Get the base address of the LPC space
+    *
+    * @return Pointer to base address
+    */
+    uint64_t getLPCBaseAddr(void)
+    {
+        return iv_lpcBaseAddr;
+    };
+
+    /**
+    * @brief Set the base address of the LPC space
+    *
+    * @return Void
+    */
+    void setLPCBaseAddr(uint64_t * i_baseLPCAddr)
+    {
+        iv_lpcBaseAddr = reinterpret_cast<uint64_t>(i_baseLPCAddr);
+    };
+
+    /**
      * @brief Constructor
      * @param[in]  Processor target associated with the ECCB logic
      */
@@ -122,17 +145,6 @@ class LpcDD
     ~LpcDD();
 
   protected:
-    /**
-     * @brief LPC HC Registers
-     *    These are offsets within the LPC Host Controller Register Space
-     */
-    enum LpcRegAddr {
-        LPC_REG_BAR0 = 0x00, /**< BAR0 : OPB register */
-        LPC_REG_BAR1 = 0x04, /**< BAR1 : LPC I/O space */
-        LPC_REG_BAR2 = 0x08, /**< BAR2 : LPC Memory space */
-        LPC_REG_BAR3 = 0x0C, /**< BAR3 : LPC Firmware space */
-        LPC_REG_ABRTCNT = 0x2C, /**< ABORT COUNT */
-    };
 
 
     /**
@@ -145,19 +157,15 @@ class LpcDD
         LPCHC_IO_SPACE  = 0xD0010000, /**< LPC Host Controller I/O Space */
         LPCHC_REG_SPACE = 0xC0012000, /**< LPC Host Ctlr Register Space */
 
-        ECCB_NON_FW_RESET_REG = 0x000B0001, /**< ECCB Reset Reg (non-FW) */
+        /** Start of LPC Addr within the memory mapped space*/
+        LPC_ADDR_START = 0xC0000000,
+        /** Size that LPC takes up (0xC0000000 to 0xFFFFFFFF)*/
+        LPC_SPACE_SIZE = 0x40000000,
+        /** Physical addr of the start of LPC address space*/
+        LPC_PHYS_BASE = 0x6030000000000,
 
-        ECCB_CTL_REG  = 0x000B0020, /**< ECCB Control Reg (FW) */
-        ECCB_RESET_REG  = 0x000B0021, /**< ECCB Reset Reg (FW) */
-        ECCB_STAT_REG = 0x000B0022, /**< ECCB Status Reg (FW) */
-        ECCB_DATA_REG = 0x000B0023, /**< ECCB Data Reg (FW) */
 
-        // Default Values to set for all operations
-        // 1101.0100.0000.000x.0000.0001.0000.0000.<address>
-        ECCB_CTL_REG_DEFAULT = 0xD400010000000000,
 
-        // Error bits: 41-43, 56  (52=cmd complete) (not 57: only non-fw use)
-        ECCB_STAT_REG_ERROR_MASK = 0x0000000000700080, /**< Error Bits */
 
         /**< OPB LPCM Sync FIR Reg - used to read the FIR*/
         OPB_LPCM_FIR_REG = 0x01010C00,
@@ -174,68 +182,10 @@ class LpcDD
         OPB_MASTER_LS_CONTROL_REG = 0x008, /**<OPBM LS Control Reg */
         LPCHC_RESET_REG           = 0x0FC, /**<LPC HC Reset Register */
 
-        ECCB_RESET_LPC_FAST_RESET = 1ULL << 62, /**< bit 1 = Fast reset */
-
-        #ifndef CONFIG_SFC_IS_IBM_DPSS
-        // Intel spec requires no LPC timeout during boot, however that guidance
-        // presumes the system can still boot without the LPC, which is not true
-        // for systems that require PNOR access.  Therefore we'll allow plenty
-        // of time for delays to work themselves out, but still flag an error
-        // ahead of the watchdog timer expiring, so that it's easier to debug
-        // any problems.
-        ECCB_POLL_TIME_NS = 90000000, /**< max time should be 90s */
-        #else
-        ECCB_POLL_TIME_NS = 400000, /**< max time should be 400ms */
-        #endif
-        ECCB_POLL_INCR_NS = 10, /**< minimum increment during poll */
 
         LPCHC_SYNC_CYCLE_COUNTER_INFINITE = 0xFF000000
     };
 
-    /**
-     * @brief  ECCB Control Register Layout
-     */
-    union ControlReg_t
-    {
-        uint64_t data64;
-        struct
-        {
-            // unused sections should be set to zero
-            uint64_t magic1      : 4;  /**< 0:3 = b1101 per spec */
-            uint64_t data_len    : 4;  /**< 4:7 = b0100 means 4 byte */
-            uint64_t unused1     : 7;  /**< 8:14 */
-            uint64_t read_op     : 1;  /**< 15 = set for read operation */
-            uint64_t unused2     : 7;  /**< 16:22 */
-            uint64_t addr_len    : 3;  /**< 23:25 = b100 means 4 byte */
-            uint64_t unused3     : 6;  /**< 26:31 */
-            uint64_t address     : 32; /**< 32:63 = LPC Address */
-        };
-
-        ControlReg_t() : data64(ECCB_CTL_REG_DEFAULT) {};
-    };
-
-    /**
-     * @brief  ECCB Status Register Layout
-     */
-    union StatusReg_t
-    {
-        uint64_t data64;
-        struct
-        {
-            uint64_t unused      : 6;  /**< 0:5  */
-            uint64_t read_data   : 32; /**< 6:37 */
-            uint64_t unused1     : 3;  /**< 38:40 */
-            uint64_t eccb_err    : 3;  /**< 41:43 = ECCB_Error_Info */
-            uint64_t busy        : 1;  /**< 44 = Operation Busy */
-            uint64_t unused2     : 7;  /**< 45:51 */
-            uint64_t op_done     : 1;  /**< 52 = Command Complete */
-            uint64_t unused3     : 3;  /**< 53:55 */
-            uint64_t addr_parity_err : 1; /**< 56 = ECC Address Register
-                                                    Parity Error */
-            uint64_t unused4     : 7;  /**< 57:63 */
-        };
-        StatusReg_t() : data64(0) {};
-    };
 
     /**
      * @brief  OPB-LPCM FIR Register Layout
@@ -279,18 +229,7 @@ class LpcDD
      */
     errlHndl_t checkAddr( LPC::TransType i_type,
                           uint32_t i_addr,
-                          uint32_t* o_addr );
-
-    /**
-     * @brief Poll for completion of LPC operation
-     *
-     * @param[in] i_ctrl  Control register describing operation
-     * @param[out] o_stat  Status register for failures
-     *
-     * @return errlHndl_t  NULL on success, else error log
-     */
-    errlHndl_t pollComplete( const ControlReg_t& i_ctrl,
-                             StatusReg_t& o_stat );
+                          uint64_t* o_addr );
 
     /**
      * @brief Add Error Registers to an existing Error Log
@@ -372,6 +311,11 @@ class LpcDD
      * @brief Indicates if class is currently doing a RESET procedure
      */
     bool iv_resetActive;
+
+    /**
+    * @brief Virtual Address of the begining of LPC address space
+    */
+    uint64_t iv_lpcBaseAddr;
 
 };
 

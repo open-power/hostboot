@@ -2898,10 +2898,13 @@ errlHndl_t i2cResetActiveMasters ( i2cProcessType i_resetType,
                "i_functional=%d",
                i_resetType, i_functional );
 
+    // @todo RTC:137627 - remove for P9 bringup
+#if (0)
     err = i2cProcessActiveMasters (i_resetType,  // select engines
                                    I2C_OP_RESET, // reset engines
                                    I2C_BUS_SPEED_FROM_MRW,
                                    i_functional);
+#endif
 
     TRACFCOMP( g_trac_i2c,
                EXIT_MRK"i2cResetActiveMasters(): err rc=0x%X, plid=0x%X",

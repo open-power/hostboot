@@ -61,7 +61,7 @@ namespace TARGETING
     void* AttrRP::startMsgServiceTask(void* i_pInstance)
     {
         // Call msgServiceTask loop on instance.
-        TARG_ASSERT(i_pInstance);
+        TARG_ASSERT(i_pInstance, "No instance passed to startMsgServiceTask");
         static_cast<AttrRP*>(i_pInstance)->msgServiceTask();
         return NULL;
     }

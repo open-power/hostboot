@@ -96,6 +96,8 @@ const TaskInfo g_exttaskinfolist[]   =   {
             }
         },
 
+        // @todo RTC:126643 P9 interrupt support
+#if (0)
         /**
          * @brief External interrupt resource provider
          */
@@ -107,6 +109,7 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 EXT_IMAGE,                              // Extended Module
             }
         },
+#endif
 
         /**
          * @brief Mailbox service provider
@@ -285,6 +288,8 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 }
         },
 
+        // @todo RTC:137627 - remove for p9 bringup
+#if (0)
         /**
          * @brief   Start slave threads
          */
@@ -304,6 +309,7 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 EXT_IMAGE,                          // Extended Module
             }
         },
+#endif
 
         /**
          * @brief  bus_training library.
