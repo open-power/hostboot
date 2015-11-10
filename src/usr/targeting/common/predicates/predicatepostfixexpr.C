@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -181,7 +183,7 @@ bool PredicatePostfixExpr::operator()(
 
                 TARG_ASSERT(l_stack.size() >= 2,
                        TARG_LOC "Stack for AND must be >=2 but is %d",
-                       l_stack.size());
+                       (uint32_t)(l_stack.size()));
 
                 // The stack now has two trailing items, LHS + RHS (back).  If
                 // LHS is still in predicate form, evaluate it first, otherwise
@@ -210,7 +212,7 @@ bool PredicatePostfixExpr::operator()(
 
                TARG_ASSERT(l_stack.size() >= 2,
                        TARG_LOC "Stack for OR must be >= 2 but is %d",
-                       l_stack.size());
+                       (uint32_t)(l_stack.size()));
 
                 // The stack now has two trailing items, LHS + RHS (back).  If
                 // LHS is still in predicate form, evaluate it first, otherwise
@@ -238,7 +240,7 @@ bool PredicatePostfixExpr::operator()(
              case NOT:
                 TARG_ASSERT(l_stack.size() >= 1,
                        TARG_LOC "Stack for NOT must be >= 1 but is %d",
-                       l_stack.size());
+                       (uint32_t)(l_stack.size()));
 
                 // The stack now has a trailing item, LHS (back). If LHS is
                 // still in predicate form, evaluate it first, otherwise
@@ -270,7 +272,7 @@ bool PredicatePostfixExpr::operator()(
         TARG_ASSERT(l_stack.size() == 1,
                TARG_LOC "Postfix expression created incorrectly. Stack "
                "size should be 1 but is %d",
-               l_stack.size());
+               (uint32_t)(l_stack.size()));
 
         // The stack now has a trailing item, LHS (back). If LHS is still in
         // predicate form, evaluate it first, otherwise use it directly.  This

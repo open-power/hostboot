@@ -5111,6 +5111,12 @@ sub generateTargetingImage {
             $targetNodeInstance = $targetInstance;
             next;
         }
+        elsif(($targetInstance->{type} eq "enc-node-power9") && ($targetNodeCnt == 0))
+        {
+            $targetNodeCnt = 1;
+            $targetNodeInstance = $targetInstance;
+            next;
+        }
         push(@targetsAoH, $targetInstance);
     }
     unshift(@targetsAoH, $targetSystemInstance);

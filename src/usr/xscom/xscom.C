@@ -592,6 +592,9 @@ uint64_t* getCpuIdVirtualAddress()
 void resetScomEngine(TARGETING::Target* i_target,
                            uint64_t* i_virtAddr)
 {
+    // @todo-RTC:128077 XSCOM support for P9
+    return;
+
     errlHndl_t l_err = NULL;
     HMER l_hmer;
     uint64_t io_buffer = 0;

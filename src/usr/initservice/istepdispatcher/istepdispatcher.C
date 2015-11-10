@@ -737,6 +737,9 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
             TRACFCOMP(g_trac_initsvc, ERR_MRK"doIstep: Istep failed, plid 0x%x",
                       err->plid());
         }
+
+// @todo RTC:137627 - Removed for P9 bringup
+#if (0)
         // Check for any attentions and invoke PRD for analysis
         // if not in MPIPL mode
         else if ((true == theStep->taskflags.check_attn) &&
@@ -753,6 +756,7 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
                           "checkForIplAttentions");
             }
         }
+#endif
 
 #ifdef CONFIG_RECONFIG_LOOP_TESTS_ENABLE
         // Read ATTR_RECONFIG_LOOP_TESTS_ENABLE attribute

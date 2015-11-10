@@ -241,6 +241,7 @@ static void initializeAttributes(TargetService& i_targetService)
             l_pMasterProcChip->setAttr<ATTR_I2C_SWITCHES>(l_i2c_switches);
 
 
+#if 0 //@fixme RTC 127337
             errlHndl_t l_errl = NULL;
             size_t l_size = sizeof(uint64_t);
             uint64_t l_data;
@@ -266,6 +267,7 @@ static void initializeAttributes(TargetService& i_targetService)
                     l_isMpipl = true;
                 }
             }
+#endif //@fixme RTC 127337
         }
 
 

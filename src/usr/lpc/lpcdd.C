@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -378,8 +378,13 @@ LpcDD::LpcDD( TARGETING::Target* i_proc )
 ,iv_resetActive(false)
 {
     TRACFCOMP(g_trac_lpc, "LpcDD::LpcDD> " );
-
     mutex_init( &iv_mutex );
+    LPCBase_t baseAddr = LPC_PHYS_BASE + LPC_ADDR_START;
+
+
+    setLPCBaseAddr( static_cast<uint64_t *>(
+                  mmio_dev_map(reinterpret_cast<void *>(baseAddr),
+                               LPC_SPACE_SIZE )));
 
     if( i_proc == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL )
     {
@@ -397,13 +402,14 @@ LpcDD::LpcDD( TARGETING::Target* i_proc )
         ivp_mutex = &iv_mutex;
     }
 
+    //@todo RTC:126644
     // Initialize the hardware
-    errlHndl_t l_errl = hwReset(LpcDD::RESET_INIT);
-    if( l_errl )
-    {
-        TRACFCOMP( g_trac_lpc, "Errors initializing LPC logic... Beware! PLID=%.8X", l_errl->plid() );
-        errlCommit(l_errl, LPC_COMP_ID);
-    }
+//     errlHndl_t l_errl = hwReset(LpcDD::RESET_INIT);
+//     if( l_errl )
+//     {
+//         TRACFCOMP( g_trac_lpc, "Errors initializing LPC logic... Beware! PLID=%.8X", l_errl->plid() );
+//         errlCommit(l_errl, LPC_COMP_ID);
+//     }
 }
 
 LpcDD::~LpcDD()
@@ -411,13 +417,17 @@ LpcDD::~LpcDD()
     mutex_destroy( &iv_mutex );
 }
 
+
 /**
  * @brief Reset hardware to get into clean state
  */
 errlHndl_t LpcDD::hwReset( ResetLevels i_resetLevel )
 {
+  errlHndl_t l_err = NULL;
+// @todo RTC:133649 Support P9 LPC controller - error detection
+#if 0
     TRACFCOMP( g_trac_lpc, ENTER_MRK"LpcDD::hwReset(i_resetLevel=%d)>", i_resetLevel );
-    errlHndl_t l_err = NULL;
+
 
     // check iv_resetActive to avoid infinite loops
     // and don't reset if in the middle of FFDC collection
@@ -442,7 +452,6 @@ errlHndl_t LpcDD::hwReset( ResetLevels i_resetLevel )
                     {// Nothing to do here, so just break
                         break;
                     }
-
                 case RESET_INIT:
                     {
                         // Set OPB LPCM FIR Mask
@@ -509,7 +518,6 @@ errlHndl_t LpcDD::hwReset( ResetLevels i_resetLevel )
                                            opsize );
 
                         if (l_err) { break; }
-
                         // Clear FIR register
                         scom_data_64 = ~(OPB_LPCM_FIR_ERROR_MASK);
                         l_err = deviceOp(
@@ -606,6 +614,7 @@ errlHndl_t LpcDD::hwReset( ResetLevels i_resetLevel )
     }
 
     TRACFCOMP( g_trac_lpc, EXIT_MRK"LpcDD::hwReset()=%.8X:%.4X", ERRL_GETEID_SAFE(l_err), ERRL_GETRC_SAFE(l_err) );
+#endif
     return l_err;
 }
 
@@ -615,7 +624,7 @@ errlHndl_t LpcDD::hwReset( ResetLevels i_resetLevel )
  */
 errlHndl_t LpcDD::checkAddr(LPC::TransType i_type,
                             uint32_t i_addr,
-                            uint32_t *o_addr)
+                            uint64_t *o_addr)
 {
     bool invalid_address = false;
     switch ( i_type )
@@ -626,7 +635,7 @@ errlHndl_t LpcDD::checkAddr(LPC::TransType i_type,
                 invalid_address = true;
                 break;
             }
-            *o_addr = i_addr + LPCHC_IO_SPACE;
+            *o_addr = getLPCBaseAddr()+ i_addr+ LPCHC_IO_SPACE- LPC_ADDR_START;
             break;
         case LPC::TRANS_MEM:
             if( i_addr >= 0x10000000 )
@@ -634,17 +643,28 @@ errlHndl_t LpcDD::checkAddr(LPC::TransType i_type,
                 invalid_address = true;
                 break;
             }
-            *o_addr = i_addr + LPCHC_MEM_SPACE;
+
+            *o_addr = getLPCBaseAddr()+ i_addr+ LPCHC_MEM_SPACE- LPC_ADDR_START;
             break;
         case LPC::TRANS_FW:
-            *o_addr = i_addr + LPCHC_FW_SPACE;
+            if( i_addr >= 0x10000000 )
+            {
+                invalid_address = true;
+                break;
+            }
+            *o_addr = getLPCBaseAddr()+ i_addr + LPCHC_FW_SPACE- LPC_ADDR_START;
             break;
         case LPC::TRANS_REG:
-            *o_addr = i_addr + LPCHC_REG_SPACE;
+          if( i_addr >= 0x100 )
+            {
+                invalid_address = true;
+                break;
+            }
+            *o_addr =getLPCBaseAddr()+ i_addr + LPCHC_REG_SPACE- LPC_ADDR_START;
             break;
         case LPC::TRANS_ABS:
             //Just use the address as given
-            *o_addr = i_addr;
+            *o_addr = getLPCBaseAddr() + i_addr;
             break;
         default:
             invalid_address = true;
@@ -683,37 +703,18 @@ errlHndl_t LpcDD::_readLPC(LPC::TransType i_type,
                            size_t& io_buflen)
 {
     errlHndl_t l_err = NULL;
-    uint32_t l_addr = 0;
+    uint64_t l_addr = 0;
 
     do {
         // Generate the full absolute LPC address
         l_err = checkAddr( i_type, i_addr, &l_addr );
         if( l_err ) { break; }
 
-        // Execute command.
-        ControlReg_t eccb_cmd;
-        eccb_cmd.data_len = io_buflen;
-        eccb_cmd.read_op = 1;
-        eccb_cmd.addr_len = sizeof(l_addr);
-        eccb_cmd.address = l_addr;
-        size_t scom_size = sizeof(uint64_t);
-        l_err = deviceOp( DeviceFW::WRITE,
-                          iv_proc,
-                          &(eccb_cmd.data64),
-                          scom_size,
-                          DEVICE_SCOM_ADDRESS(ECCB_CTL_REG) );
-        if( l_err ) { break; }
-
-        // Poll for completion
-        StatusReg_t eccb_stat;
-        l_err = pollComplete( eccb_cmd, eccb_stat );
-        if( l_err ) { break; }
 
         // Copy data out to caller's buffer.
         if( io_buflen <= sizeof(uint32_t) )
         {
-            uint32_t tmpbuf = eccb_stat.read_data;
-            memcpy( o_buffer, &tmpbuf, io_buflen );
+            memcpy( o_buffer, reinterpret_cast<void*>(l_addr), io_buflen );
         }
         else
         {
@@ -755,210 +756,21 @@ errlHndl_t LpcDD::_writeLPC(LPC::TransType i_type,
                             size_t& io_buflen)
 {
     errlHndl_t l_err = NULL;
-    uint32_t l_addr = 0;
+    uint64_t l_addr = 0;
 
     do {
         // Generate the full absolute LPC address
         l_err = checkAddr( i_type, i_addr, &l_addr );
         if( l_err ) { break; }
 
-        uint64_t eccb_data = 0;
-        // Left-justify user data into data register.
-        switch ( io_buflen )
-        {
-            case 1:
-                eccb_data = static_cast<uint64_t>(
-                   *reinterpret_cast<const uint8_t*>( i_buffer ) ) << 56;
-                break;
-            case 2:
-                eccb_data = static_cast<uint64_t>(
-                   *reinterpret_cast<const uint16_t*>( i_buffer ) ) << 48;
-                break;
-            case 4:
-                eccb_data = static_cast<uint64_t>(
-                   *reinterpret_cast<const uint32_t*>( i_buffer ) ) << 32;
-                break;
-            default:
-                TRACFCOMP( g_trac_lpc, "writeLPC> Unsupported buffer size : %d", io_buflen );
-                assert( false );
-                break;
-        }
-
-        // Write data out
-        size_t scom_size = sizeof(uint64_t);
-        l_err = deviceOp( DeviceFW::WRITE,
-                          iv_proc,
-                          &eccb_data,
-                          scom_size,
-                          DEVICE_SCOM_ADDRESS(ECCB_DATA_REG) );
-        if( l_err ) { break; }
-
-        // Execute command.
-        ControlReg_t eccb_cmd;
-        eccb_cmd.data_len = io_buflen;
-        eccb_cmd.read_op = 0;
-        eccb_cmd.addr_len = sizeof(l_addr);
-        eccb_cmd.address = l_addr;
-        l_err = deviceOp( DeviceFW::WRITE,
-                          iv_proc,
-                          &(eccb_cmd.data64),
-                          scom_size,
-                          DEVICE_SCOM_ADDRESS(ECCB_CTL_REG) );
-        if( l_err ) { break; }
-
-        // Poll for completion
-        StatusReg_t eccb_stat;
-        l_err = pollComplete( eccb_cmd, eccb_stat );
-        if( l_err ) { break; }
+        memcpy(reinterpret_cast<void*>(l_addr), i_buffer, io_buflen);
 
     } while(0);
 
     return l_err;
 }
 
-/**
- * @brief Poll for completion of LPC operation
- */
-errlHndl_t LpcDD::pollComplete(const ControlReg_t &i_ctrl,
-                               StatusReg_t& o_stat)
-{
-    // Note: Caller must lock mutex before calling this function
-    errlHndl_t l_err = NULL;
-    ResetLevels l_resetLevel = RESET_CLEAR;
 
-    do {
-        uint64_t poll_time = 0;
-        uint64_t loop = 0;
-        do
-        {
-            size_t scom_size = sizeof(uint64_t);
-            l_err = deviceOp( DeviceFW::READ,
-                              iv_proc,
-                              &(o_stat.data64),
-                              scom_size,
-                              DEVICE_SCOM_ADDRESS(ECCB_STAT_REG) );
-            LPC_TRACFCOMP( g_trac_lpc, "writeLPC> Poll on ECCB Status, "
-                           "poll_time=0x%.16x, stat=0x%.16x",
-                           poll_time,
-                           o_stat.data64 );
-            if( l_err )
-            {
-                break;
-            }
-
-            if( o_stat.op_done )
-            {
-                break;
-            }
-
-            // want to start out incrementing by small numbers then get bigger
-            //  to avoid a really tight loop in an error case so we'll increase
-            //  the wait each time through
-            nanosleep( 0, ECCB_POLL_INCR_NS*(++loop) );
-            poll_time += ECCB_POLL_INCR_NS * loop;
-        } while ( poll_time < ECCB_POLL_TIME_NS );
-
-        // Check for hw errors or timeout if no previous logs
-        if( (l_err == NULL) &&
-            ((o_stat.data64 & ECCB_STAT_REG_ERROR_MASK)
-             || (!o_stat.op_done)) )
-        {
-            TRACFCOMP( g_trac_lpc, "LpcDD::pollComplete> LPC error or timeout: "
-                       "addr=0x%.8X, status=0x%.16X",
-                       i_ctrl.address, o_stat.data64 );
-
-            if( i_ctrl.read_op )
-            {
-                /*@
-                 * @errortype
-                 * @moduleid     LPC::MOD_LPCDD_READLPC
-                 * @reasoncode   LPC::RC_ECCB_ERROR
-                 * @userdata1[0:31]   LPC Address
-                 * @userdata1[32:63]  Total poll time (ns)
-                 * @userdata2    ECCB Status Register
-                 * @devdesc      LpcDD::pollComplete> LPC error or timeout
-                 * @custdesc     Hardware error accessing internal
-                 *               bus during IPL
-                 */
-                l_err = new ERRORLOG::ErrlEntry(
-                                          ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          LPC::MOD_LPCDD_READLPC,
-                                          LPC::RC_ECCB_ERROR,
-                                          TWO_UINT32_TO_UINT64(
-                                                 i_ctrl.address, poll_time),
-                                          o_stat.data64 );
-            }
-            else
-            {
-                /*@
-                 * @errortype
-                 * @moduleid     LPC::MOD_LPCDD_WRITELPC
-                 * @reasoncode   LPC::RC_ECCB_ERROR
-                 * @userdata1[0:31]   LPC Address
-                 * @userdata1[32:63]  Total poll time (ns)
-                 * @userdata2    ECCB Status Register
-                 * @devdesc      LpcDD::pollComplete> LPC error or timeout
-                 * @custdesc     Hardware error accessing internal
-                 *               bus during IPL
-                 */
-                l_err = new ERRORLOG::ErrlEntry(
-                                          ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          LPC::MOD_LPCDD_WRITELPC,
-                                          LPC::RC_ECCB_ERROR,
-                                          TWO_UINT32_TO_UINT64(
-                                                 i_ctrl.address, poll_time),
-                                          o_stat.data64 );
-            }
-            // Limited in callout: no LPC sub-target, so calling out processor
-            l_err->addHwCallout( iv_proc,
-                                 HWAS::SRCI_PRIORITY_HIGH,
-                                 HWAS::NO_DECONFIG,
-                                 HWAS::GARD_NULL );
-
-            addFFDC(l_err);
-            l_err->collectTrace(LPC_COMP_NAME);
-            l_err->collectTrace(XSCOM_COMP_NAME);
-
-            // Reset ECCB - handled below
-            l_resetLevel = RESET_ECCB;
-
-            break;
-        }
-
-        // check for errors at OPB level
-        l_err = checkForOpbErrors( l_resetLevel );
-        if( l_err ) { break; }
-
-    } while(0);
-
-    // If we have an error that requires a reset, do that here
-    if ( l_err && ( l_resetLevel != RESET_CLEAR ) )
-    {
-        errlHndl_t tmp_err = hwReset(l_resetLevel);
-        if ( tmp_err )
-        {
-            // Commit reset error since we have original error l_err
-            TRACFCOMP(g_trac_lpc, "LpcDD::pollComplete> Error from reset() after previous error eid=0x%X. Committing reset() error log eid=0x%X.", l_err->eid(), tmp_err->eid());
-
-            tmp_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-            tmp_err->collectTrace(LPC_COMP_NAME);
-            tmp_err->plid(l_err->plid());
-            errlCommit(tmp_err, LPC_COMP_ID);
-        }
-
-        // Limited in callout: no LPC sub-target, so calling out processor
-        l_err->addHwCallout( iv_proc,
-                             HWAS::SRCI_PRIORITY_HIGH,
-                             HWAS::NO_DECONFIG,
-                             HWAS::GARD_NULL );
-
-        addFFDC(l_err);
-        l_err->collectTrace(LPC_COMP_NAME);
-        l_err->collectTrace(XSCOM_COMP_NAME);
-    }
-
-    return l_err;
-}
 
 /**
  * @brief Add Error Registers to an existing Error Log
@@ -975,11 +787,12 @@ void LpcDD::addFFDC(errlHndl_t & io_errl)
 
         ERRORLOG::ErrlUserDetailsLogRegister l_eud(iv_proc);
 
+        // @todo RTC:133649 Support P9 LPC controller - error detection
         // Add ECCB Status Register
-        l_eud.addData(DEVICE_SCOM_ADDRESS(ECCB_STAT_REG));
+        //l_eud.addData(DEVICE_SCOM_ADDRESS(ECCB_STAT_REG));
 
         // Add OPB LPC Master FIR
-        l_eud.addData(DEVICE_SCOM_ADDRESS(OPB_LPCM_FIR_REG));
+        //l_eud.addData(DEVICE_SCOM_ADDRESS(OPB_LPCM_FIR_REG));
 
         //@todo - add more LPC regs RTC:37744
         //LPCIRQ_STATUS = 0x38

@@ -42,7 +42,7 @@
      * Each Nimbus has 2 OBUS (OB0 and OB3)
      * Each Nimbus has 2 NVBUS
      * Each Nimbus has 21 PPE units (including the SBE):
-     *    1 SBE, 1 Powerbus/Fabric PPE, 4 GPEs, 12 CMEs, and 3 IO PPEs.     * 
+     *    1 SBE, 1 Powerbus/Fabric PPE, 4 GPEs, 12 CMEs, and 3 IO PPEs.     *
      * Each chiplet existing in a Nimbus has 1 equivalent PERV unit
      * Each Nimbus has 2 CAPP units
      * Each Nimbus has 1 SBE unit
@@ -69,6 +69,22 @@
     <attribute>
         <id>EXECUTION_PLATFORM</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>SP_FUNCTIONS</id>
+        <default>
+            <field><id>fsiSlaveInit</id><value>0</value></field>
+            <field><id>mailboxEnabled</id><value>0</value></field>
+            <field><id>fsiMasterInit</id><value>0</value></field>
+            <field><id>hardwareChangeDetection</id><value>0</value></field>
+            <field><id>powerLineDisturbance</id><value>0</value></field>
+            <field><id>baseServices</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>NEST_FREQ_MHZ</id>
+        <default>0x960</default>
     </attribute>
 </targetInstance>
 
@@ -99,8 +115,8 @@
     <attribute><id>POSITION</id><default>4</default></attribute>
     <attribute><id>SCOM_SWITCHES</id>
         <default>
-            <field><id>useFsiScom</id><value>1</value></field>
-            <field><id>useXscom</id><value>0</value></field>
+            <field><id>useFsiScom</id><value>0</value></field>
+            <field><id>useXscom</id><value>1</value></field>
             <field><id>useInbandScom</id><value>0</value></field>
             <field><id>reserved</id><value>0</value></field>
         </default>
@@ -196,6 +212,10 @@
     </attribute>
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PROC_MASTER_TYPE</id>
+        <default>ACTING_MASTER</default>
     </attribute>
 </targetInstance>
 
@@ -1805,10 +1825,10 @@
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
-    <attribute>
+<!--    <attribute> // @FIXME RTC 127337
         <id>PEER_TARGET</id>
         <default>physical:sys-0/node-0/proc-1/xbus-1</default>
-    </attribute>
+    </attribute>    // @FIXME RTC 127337  -->
 </targetInstance>
 
 <targetInstance>
@@ -1827,10 +1847,10 @@
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
-    <attribute>
+<!--    <attribute> // @FIXME RTC 127337
         <id>PEER_TARGET</id>
         <default>physical:sys-0/node-0/proc-2/xbus-1</default>
-    </attribute>
+    </attribute>    // @FIXME RTC 127337  -->
 </targetInstance>
 
 <!-- nimbus n0p0 CAPP units -->

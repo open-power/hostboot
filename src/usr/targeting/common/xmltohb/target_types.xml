@@ -1854,6 +1854,7 @@
         <id>IS_SIMULATION</id>
         <default>0</default>
     </attribute>
+    <attribute><id>HB_HRMOR_NODAL_BASE</id></attribute>
     <!-- Max/min config attributes -->
     <attribute><id>MAX_PROC_CHIPS_PER_NODE</id></attribute>
     <attribute><id>MAX_EXS_PER_PROC_CHIP</id></attribute>
@@ -1948,9 +1949,6 @@
     <attribute><id>OPT_MEMMAP_GROUP_POLICY</id></attribute>
     <attribute><id>BRAZOS_RX_FIFO_OVERRIDE</id></attribute>
     <attribute><id>MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL</id></attribute>
-    <attribute><id>SP_FUNCTIONS</id></attribute>
-    <attribute><id>HB_SETTINGS</id></attribute>
-    <attribute><id>PAYLOAD_KIND</id></attribute>
     <attribute><id>MAX_PROC_CHIPS_PER_NODE</id></attribute>
     <attribute><id>MAX_EXS_PER_PROC_CHIP</id></attribute>
     <attribute><id>MAX_MBAS_PER_MEMBUF_CHIP</id></attribute>
@@ -1960,6 +1958,26 @@
     <attribute><id>MAX_MCS_PER_SYSTEM</id></attribute>
     <attribute><id>FABRIC_TO_PHYSICAL_NODE_MAP</id></attribute>
     <attribute><id>RUN_MAX_MEM_PATTERNS</id></attribute>
+    <attribute><id>HIDDEN_ERRLOGS_ENABLE</id></attribute>
+    <attribute><id>SP_FUNCTIONS</id></attribute>
+    <attribute><id>HB_SETTINGS</id></attribute>
+    <attribute><id>CEC_IPL_TYPE</id></attribute>
+    <attribute><id>PAYLOAD_KIND</id></attribute>
+    <attribute><id>PAYLOAD_BASE</id></attribute>
+    <attribute><id>PAYLOAD_ENTRY</id></attribute>
+    <attribute><id>NEST_FREQ_MHZ</id></attribute>
+    <attribute><id>MFG_TRACE_ENABLE</id></attribute>
+    <attribute><id>ENABLED_THREADS</id></attribute>
+    <attribute><id>ISTEP_MODE</id></attribute>
+    <attribute><id>RECONFIG_LOOP_TESTS_ENABLE</id></attribute>
+    <attribute><id>ISTEP_PAUSE_ENABLE</id></attribute>
+    <attribute><id>ISTEP_PAUSE_CONFIG</id></attribute>
+    <attribute><id>CDM_POLICIES</id></attribute>
+    <attribute><id>NOMINAL_FREQ_MHZ</id></attribute>
+    <attribute><id>MNFG_FLAGS</id></attribute>
+    <attribute><id>FABRIC_TO_PHYSICAL_NODE_MAP</id></attribute>
+    <attribute><id>MFG_TRACE_ENABLE</id></attribute>
+
 </targetType>
 
 <!-- enc-node-power9 -->

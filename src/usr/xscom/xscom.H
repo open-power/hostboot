@@ -41,7 +41,7 @@
  *  @brief  The (fixed) base address value for master proc
  */
 // @todo-RTC:128077 XSCOM support for P9
-#define MASTER_PROC_XSCOM_BASE_ADDR     0x0006010000000000
+#define MASTER_PROC_XSCOM_BASE_ADDR     0x000603FC00000000
 
 /**
  *  @brief  Type definition for XSCom address and Chip ID
@@ -196,13 +196,12 @@ class XSComP8Address
         uint64_t mMmioAddress;          // mMmio address
         struct
         {
-            uint64_t mReserved1:18;     // Not currently used (0:17)
-            uint64_t mBaseAddress:5;    // Base address (18:22)
-            uint64_t mNodeId:3;         // Node where target resides (23:25)
-            uint64_t mChipId:3;         // Targeted chip ID (26:28)
-            uint64_t mSComAddrHi:27;    // PCB Address High (29:55)
-            uint64_t mCacheLine:1;      // Cached line (56)
-            uint64_t mSComAddrLo:4;     // PCB Address low (57:60)
+            uint64_t mReserved1:8;      // Not currently used (0:7)
+            uint64_t mBaseAddrHi:7;     // Base address [8:14] (8:14)
+            uint64_t mNodeId:4;         // Node where target resides (15:18)
+            uint64_t mChipId:3;         // Targeted chip ID (19:21)
+            uint64_t mBaseAddrLo:8;     // Base address [22:29] (22:29)
+            uint64_t mSComAddr:31;      // PIB Address (30:60)
             uint64_t mAlign:3;          // Align (61:63)
         } mAddressParts;
     };
@@ -221,8 +220,7 @@ XSComP8Address::XSComP8Address(const XSComAddress_t i_addr)
     // Relative address of Node 0, chip 0
     // The chip's nodeId and chip id will be taken into account
     // when calculating its XSCOM base address
-    mAddressParts.mSComAddrHi = i_addr >> 4; // Get 27-bits
-    mAddressParts.mSComAddrLo = i_addr;      // Get 4 bits
+    mAddressParts.mSComAddr = i_addr;
 }
 
 ////////////////////////////////////////////////////////////////////////////

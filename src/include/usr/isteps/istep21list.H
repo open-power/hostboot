@@ -61,6 +61,7 @@ namespace   INITSERVICE
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
+#if (0)
         {
                 ISTEPNAME(21,01,"host_runtime_setup"),
                 START_PAYLOAD::call_host_runtime_setup,
@@ -71,6 +72,7 @@ namespace   INITSERVICE
                 START_PAYLOAD::call_host_verify_hdat,
                 { START_FN, EXT_IMAGE, MPIPL_OP | NORMAL_IPL_OP, false }
         },
+#endif
         {
                 ISTEPNAME(21,03,"host_start_payload"),
                 START_PAYLOAD::call_host_start_payload,

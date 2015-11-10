@@ -290,6 +290,10 @@ sub createMVPDData
             {
                 $sourceFile = "$dataPath/$mvpdFile_p9n";
             }
+            elsif( $machine eq "ZZTOP")
+            {
+                $sourceFile = "$dataPath/$mvpdFile_p9n";
+            }
             else
             {
                 $sourceFile = "$dataPath/$mvpdFile";
@@ -521,7 +525,12 @@ sub getCentaurConfig
             elsif( $machine eq "NIMBUS")
             {
             #as there are no centaurs within a NIMBUS machine NO configuration
-            #for centaur chips is required 
+            #for centaur chips is required
+            }
+            elsif( $machine eq "ZZTOP")
+            {
+            #as there are no centaurs within a NIMBUS machine NO configuration
+            #for centaur chips is required
             }
             else
             {

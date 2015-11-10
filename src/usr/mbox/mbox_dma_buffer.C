@@ -45,7 +45,8 @@ DmaBuffer::DmaBuffer() :
     iv_dma_req_sent(false)
 {
     iv_head = reinterpret_cast<void*>(VmmManager::MBOX_DMA_ADDR);
-    initPhysicalArea(iv_head, iv_phys_head);
+    // RTC:137627 - remove for P9 bringup
+    //initPhysicalArea(iv_head, iv_phys_head);
 }
 
 

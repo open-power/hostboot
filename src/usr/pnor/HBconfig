@@ -1,11 +1,11 @@
 config SFC_IS_IBM_DPSS
-    default y
+    default n
     depends on !SFC_IS_AST2400 && !SFC_IS_FAKE
     help
         The Serial Flash Controller is the IBM DPSS FPGA.
 
 config SFC_IS_AST2400
-    default n
+    default y
     depends on !SFC_IS_IBM_DPSS && !SFC_IS_FAKE
     help
         The Serial Flash Controller is the AST2400 BMC.
@@ -17,7 +17,7 @@ config SFC_IS_FAKE
         The Serial Flash Controller is emulated using memory.
 
 config BMC_DOES_SFC_INIT
-    default y
+    default n
     help
         The BMC is completely responsible for initializing and configuring the
         SFC before Hostboot is started.  The BMC is also responsible for doing

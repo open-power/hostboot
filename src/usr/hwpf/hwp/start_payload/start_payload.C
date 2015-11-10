@@ -567,7 +567,10 @@ void*    call_host_start_payload( void    *io_pArgs )
 
     if( l_errl == NULL )
     {
+// todo RTC:137627 - remove for P9 bringup
+#if (0)
         l_errl = disableSpecialWakeup();
+#endif
     }
 
     if( l_errl == NULL )
@@ -721,6 +724,8 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
 
         }
 
+// @todo RTC:137627 - remove i2cSetupActiveMasters for P9 bringup
+#if (0)
         // Phyp needs us to program all of the I2C masters with the bus
         // divisor
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -733,7 +738,7 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
             // just commit the error and keep going
             errlCommit(err, ISTEP_COMP_ID);
         }
-
+#endif
         // Get Target Service, and the system target.
         TargetService& tS = targetService();
         TARGETING::Target* sys = NULL;

@@ -170,11 +170,13 @@ errlHndl_t MailboxSp::_init()
         }
     }
 
+    // @todo RTC:126643
+#if (0)
     // Register for IPC messages
     err = INTR::registerMsgQ(iv_msgQ,
                              MSG_IPC,
                              INTR::ISN_INTERPROC);
-
+#endif
 
     if(mbxComm)
     {
@@ -2222,7 +2224,7 @@ void * MBOX::allocate(size_t i_size)
     {
         response = malloc(i_size);
     }
-    
+
     return response;
 }
 
