@@ -28,11 +28,12 @@
 // *HWP Level: 1
 // *HWP Consumed by: FSP:HB
 
+#ifndef __P9_MSS_SCOMINIT__
+#define __P9_MSS_SCOMINIT__
+
 #include <fapi2.H>
 
-using fapi2::TARGET_TYPE_MBIST;
-
-typedef fapi2::ReturnCode (*p9_mss_scominit_FP_t) (const fapi2::Target<TARGET_TYPE_MCBIST>&);
+typedef fapi2::ReturnCode (*p9_mss_scominit_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>&);
 
 extern "C"
 {
@@ -42,7 +43,9 @@ extern "C"
 /// @param[in] i_target, the MCBIST
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-    fapi2::ReturnCode p9_mss_scominit( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target );
+    fapi2::ReturnCode p9_mss_scominit( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
 
 }
+
+#endif
 

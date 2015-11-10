@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: chips/centaur/procedures/ipl/hwp/p9_mss_attr_update.H $       */
+/* $Source: chips/p9/procedures/hwp/memory/p9_mss_thermal_init.H $        */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -17,34 +17,31 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+/// @file p9_mss_thermal_init.H
+/// @brief Initialize thermal sensors
 ///
-/// @file p9_mss_attr_update.H
-/// @brief Programatic over-rides related to effective config
-///
-// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Luke Mulkey <lwmulkey@us.ibm.com>
+// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP FW Owner: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 1
 // *HWP Consumed by: FSP:HB
 
-#ifndef __P9_MSS_ATTR_UPDATE__
-#define __P9_MSS_ATTR_UPDATE__
+#ifndef __P9_MSS_THERMAL_INIT__
+#define __P9_MSS_THERMAL_INIT__
 
 #include <fapi2.H>
 
-typedef fapi2::ReturnCode (*p9_mss_attr_update_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_MCS>&);
+typedef fapi2::ReturnCode (*p9_mss_thermal_init_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>&);
 
 extern "C"
 {
-
 ///
-/// @brief Programatic over-rides related to effective config
-/// @param[in] i_target, the controller (e.g., MCS)
+/// @brief Initialize thermal sensors
+/// @param[in] i_target, the McBIST of the ports of the dram you're training
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-    fapi2::ReturnCode p9_mss_attr_update( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target );
-
+    fapi2::ReturnCode p9_mss_thermal_init( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
 }
 
 #endif

@@ -28,11 +28,12 @@
 // *HWP Level: 1
 // *HWP Consumed by: FSP:HB
 
+#ifndef __P9_MSS_EFF_CONFIG__
+#define __P9_MSS_EFF_CONFIG__
+
 #include <fapi2.H>
 
-using fapi2::TARGET_TYPE_MCS;
-
-typedef fapi2::ReturnCode (*p9_mss_eff_config_FP_t) (const fapi2::Target<TARGET_TYPE_MCS>&);
+typedef fapi2::ReturnCode (*p9_mss_eff_config_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_MCS>&);
 
 extern "C"
 {
@@ -42,7 +43,8 @@ extern "C"
 /// @param[in] i_target, the controller (e.g., MCS)
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-    fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<TARGET_TYPE_MCS>& i_target );
+    fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target );
 
 }
 
+#endif
