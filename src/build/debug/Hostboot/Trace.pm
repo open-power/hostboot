@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -109,6 +111,7 @@ sub main
     {
         my $buffer = ::read64($serviceAddr + 8*$i);
         my $page = ::read64($buffer + BUFFER_FIRST_PAGE_OFFSET);
+        $page = extractABAptr($page);
 
         readPage($page, BUFFER_PAGE_PREV_OFFSET, \@bufferPages);
     }
@@ -230,6 +233,16 @@ sub round8
 
     return $val;
 }
+
+sub extractABAptr
+{
+    my ($val) = @_;
+
+    $val = ($val & 0xFFFFFFFF);
+
+    return $val;
+}
+
 
 sub lookupComponent
 {
