@@ -301,26 +301,6 @@
 </attribute>
 
 <attribute>
-  <id>ATTR_VCS_BOOT_VOLTAGE</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Boot Voltages - VCS</description>
-  <valueType>uint32</valueType>
-  <persistRuntime/>
-  <platInit/>
-  <writeable/>
-</attribute>
-
-<attribute>
-  <id>ATTR_VDD_BOOT_VOLTAGE</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Boot Voltages - VDD</description>
-  <valueType>uint32</valueType>
-  <persistRuntime/>
-  <platInit/>
-  <writeable/>
-</attribute>
-
-<attribute>
   <id>ATTR_WAIT_N0</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description></description>
