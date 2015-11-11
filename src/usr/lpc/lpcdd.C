@@ -710,12 +710,32 @@ errlHndl_t LpcDD::_readLPC(LPC::TransType i_type,
         l_err = checkAddr( i_type, i_addr, &l_addr );
         if( l_err ) { break; }
 
-
-        // Copy data out to caller's buffer.
+#if CONFIG_SFC_IS_AST2400  //TODO CQ:SW328950 to work around Simics AST2400 bug
         if( io_buflen <= sizeof(uint32_t) )
         {
             memcpy( o_buffer, reinterpret_cast<void*>(l_addr), io_buflen );
         }
+#else
+        // Copy data out to caller's buffer.
+        if( io_buflen == sizeof(uint8_t) )
+        {
+            uint8_t * l_ptr = reinterpret_cast<uint8_t*>(l_addr);
+            uint8_t * o_ptr = reinterpret_cast<uint8_t*>(o_buffer);
+            *o_ptr = *l_ptr;
+        }
+        else if( io_buflen == sizeof(uint16_t) )
+        {
+            uint16_t * l_ptr = reinterpret_cast<uint16_t*>(l_addr);
+            uint16_t * o_ptr = reinterpret_cast<uint16_t*>(o_buffer);
+            *o_ptr = *l_ptr;
+        }
+        else if ( io_buflen == sizeof(uint32_t) )
+        {
+            uint32_t * l_ptr = reinterpret_cast<uint32_t*>(l_addr);
+            uint32_t * o_ptr = reinterpret_cast<uint32_t*>(o_buffer);
+            *o_ptr = *l_ptr;
+        }
+#endif
         else
         {
             TRACFCOMP( g_trac_lpc, "readLPC> Unsupported buffer size : %d", io_buflen );
@@ -740,6 +760,9 @@ errlHndl_t LpcDD::_readLPC(LPC::TransType i_type,
             break;
         }
 
+        //Sync the IO op
+        eieio();
+
     } while(0);
 
     LPC_TRACFCOMP( g_trac_lpc, "readLPC> %08X[%d] = %08X", l_addr, io_buflen, *reinterpret_cast<uint32_t*>( o_buffer )  >> (8 * (4 - io_buflen)) );
@@ -763,8 +786,29 @@ errlHndl_t LpcDD::_writeLPC(LPC::TransType i_type,
         l_err = checkAddr( i_type, i_addr, &l_addr );
         if( l_err ) { break; }
 
+#if CONFIG_SFC_IS_AST2400  //TODO CQ:SW328950 to work around Simics AST2400 bug
         memcpy(reinterpret_cast<void*>(l_addr), i_buffer, io_buflen);
-
+#else
+        if( io_buflen == sizeof(uint8_t) )
+        {
+            uint8_t * l_ptr = reinterpret_cast<uint8_t*>(l_addr);
+            const uint8_t * i_ptr =reinterpret_cast<const uint8_t*>(i_buffer);
+            *l_ptr = *i_ptr;
+        }
+        else if( io_buflen == sizeof(uint16_t) )
+        {
+            uint16_t * l_ptr = reinterpret_cast<uint16_t*>(l_addr);
+            const uint16_t * i_ptr =reinterpret_cast<const uint16_t*>(i_buffer);
+            *l_ptr = *i_ptr;
+        }
+        else if ( io_buflen == sizeof(uint32_t) )
+        {
+            uint32_t * l_ptr = reinterpret_cast<uint32_t*>(l_addr);
+            const uint32_t * i_ptr =reinterpret_cast<const uint32_t*>(i_buffer);
+            *l_ptr = *i_ptr;
+        }
+        eieio();
+#endif
     } while(0);
 
     return l_err;
