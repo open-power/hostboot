@@ -1,0 +1,812 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/attribute_info/pm_plat_attributes.xml $  -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- pm_plat_attributes.xml -->
+<!--                                                                        -->
+<!-- XML file specifying Power Management HWPF attributes.                  -->
+<!-- These attributes are initialized by the platform.                      -->
+<attributes>
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_PROC_DPLL_DIVIDER</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <description>The product of the DPLL internal prescalar divide (CD_DIV124_DC)
+      and the output divider(CD_DPLLOUT124_DC).  This estalishes the step size of
+      the DPLL in terms of this number divided into the processor reference clock.
+
+      Platform default:  8
+      </description>
+      <valueType>uint32</valueType>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_EXTERNAL_VRM_STEPSIZE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <!-- <<<<<<< PROC_CHIP POSSIBLE -->
+    <description>
+      Step size (binary in microvolts) to take upon external VRM voltage
+      transitions. The value set here must take into account where internal
+      VRMs are enabled or not as, when they are enabled, the step size must
+      account for the tracking (eg PFET strength recalculation) for the step.
+
+      Consumer: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE
+
+      Provided by the Machine Readable Workbook after system characterization.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_EXTERNAL_VRM_STEPDELAY</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <!-- <<<<<<< PROC_CHIP POSSIBLE -->
+    <description>
+      Step delay (binary in microseconds) after a voltage change
+
+      Consumer: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE
+
+      Provided by the Machine Readable Workbook after system characterization.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_AVSBUS_FREQUENCY</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <!-- <<<<<<< PROC_CHIP POSSIBLE -->
+    <description>
+      AVSBus Clock Frequency (binary in KHz)
+
+      Consumer: p9_ocb_init.C
+
+      Overridden by the Machine Readable Workbook.
+
+      If default of 0 is read, HWP will set AVSBus frequency to 1MHz.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VDD_AVSBUS_BUSNUM</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Defines the AVSBus (0 or 1) which has the core VDD rail VRM
+
+      Producer:  Machine Readable Workbook
+      Consumers: p9_set_evid;
+                 p9_set_voltage (tool);
+                 p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VDN_AVSBUS_BUSNUM</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Defines the AVSBus (0 or 1) which has the chip VDN rail VRM
+
+      Producer:  Machine Readable Workbook
+      Consumers: p9_set_evid;
+                 p9_set_voltage (tool);
+                 p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VDD_AVSBUS_RAIL</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     Defines the AVSBus rail selector number (0 - 15) for the VDD VRM on the bus
+     defined by ATTR_AVSBUS_VDD_BUSNUM.
+
+      Producer:  Machine Readable Workbook
+      Consumers: p9_set_evid;
+                 p9_set_voltage (tool);
+                 p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VDN_AVSBUS_RAIL</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     Defines the AVSBus rail selector number (0 - 15) for the VDN VRM on the bus
+     defined by ATTR_AVSBUS_VDN_BUSNUM.
+
+      Producer:  Machine Readable Workbook
+      Consumers:
+      p9_set_avsbus_voltage (tool);
+                 p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VCS_I2C_BUSNUM</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Defines the I2C bus number (0 - 15) that has the VCS VRM.
+
+      Producer:  Machine Readable Workbook
+      Consumers: p9_set_evid;
+                 p9_set_voltage (tool)
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VCS_I2C_RAIL</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Defines the I2C rail selector number (0 - 15) for the VCS VRM on the
+      bus defined by ATTR_VCS_I2C_BUSNUM.
+
+      Producer:  Machine Readable Workbook
+      Consumers: p9_set_evid;
+                 p9_set_voltage (tool)
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VDD_BOOT_VOLTAGE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Voltage (binary in 1mV units) to apply to the VDD VRM for booting.  Value
+      chosen is system dependent and is a combination of the part's Vital Product
+      Data (VPD) (typically the PowerSave value) and the minimum allowed for
+      correct operation of the fabric bus.
+
+      Producer: Machine Readable Workbook
+
+      Consumer: p9_setup_evid
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <writeable/>
+  </attribute>
+    <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VDN_BOOT_VOLTAGE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Voltage (binary in 1mV units) to apply to the VCS VRM for booting.  Value
+      chosen is system dependent and is a combination of the part's Vital Product
+      Data (VPD) (typically the PowerSave value) and the minimum allowed for
+      correct operation of the fabric bus.
+
+      Producer: Machine Readable Workbook
+
+      Consumer: p9_setup_evid
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VCS_BOOT_VOLTAGE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Voltage (binary in 1mV units) to apply to the VCS VRM for booting.  Value
+      chosen is system dependent and is a combination of the part's Vital Product
+      Data (VPD) (typically the PowerSave value) and the minimum allowed for
+      correct operation of the fabric bus.
+
+      Producer: Machine Readable Workbook
+
+      Consumer: p9_setup_evid
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SPIPSS_FREQUENCY</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      SPIPSS Clock Frequency (binary in KHz)
+
+      Valid range: 500KHz to 2500KHz
+
+      Consumer: p8_pss_init
+
+      Overridden by the Machine Readable Workbook.
+
+      If default of 0 is read, HWP will set SPIPSS frequency to 10MHz.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_APSS_CHIP_SELECT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Defines which of the PSS chip selects (0 or 1) that the APSS is connected
+
+      Provided by the Machine Readable Workbook.
+      Consumer: p8_pss_init
+    </description>
+    <valueType>uint8</valueType>
+    <enum>NONE = 0xFF, CS0 = 0x00, CS1 = 0x01</enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_R_LOADLINE_VDD</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Impedance (binary microOhms) of the load line from a processor VDD VRM to the
+      Processor Module pins.  This value is applied to each processor instance.
+
+      Consumer: p9_hcd_image_build_pstate ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+
+      Producer: Machine Readable Workbook (per the power subsystem design)
+      per system)
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_R_DISTLOSS_VDD</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Impedance (binary in microOhms) of the VDD distribution loss sense point
+      to the circuit. This value is applied to each processor instance.
+
+      Producer: Machine Readable Workbook (via the power subsystem design per system)
+
+      Consumer: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_VRM_VOFFSET_VDD</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Offset voltage (binary in microvolts) to apply to the VDD VRM distribution to
+      the processor module.  This value is applied to each processor instance.
+      Note:  no loadline may be present in the system; thus, a value of 0 is legal.
+
+      Producer: Machine Readable Workbook (via the power subsystem design per system)
+
+      Consumer: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_R_LOADLINE_VDN</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Impedance (binary microOhms) of the load line from a processor VDN VRM to the
+      Processor Module pins.  This value is applied to each processor instance.
+      Note:  no loadline may be present in the system; thus, a value of 0 is legal.
+
+      Producer: Machine Readable Workbook (via the power subsystem design per system)
+
+      Consumer: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_R_DISTLOSS_VDN</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Impedance (binary in microOhms) of the VDN distribution loss sense point
+      to the circuit. This value is applied to each processor instance.
+
+      Producer:  Machine Readable Workbook (via the power subsystem design per system)
+
+      Consumer: p9_build_gpstate_table.C
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_VRM_VOFFSET_VDN</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Offset voltage (binary in microvolts) to apply to the VDN VRM distribution to
+      the processor module.  This value is applied to each processor instance.
+
+      Producer:  Machine Readable Workbook (via the power subsystem design per system)
+
+      Consumer: p8_build_gpstate_table.C
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+    <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_R_LOADLINE_VCS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Impedance (binary microOhms) of the load line from a processor VCS VRM to the
+      Processor Module pins.  This value is applied to each processor instance.
+      Note:  no loadline may be present in the system; thus, a value of 0 is legal.
+
+      Producer: Machine Readable Workbook (via the power subsystem design per system)
+
+      Consumer: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_R_DISTLOSS_VCS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Impedance (binary in microOhms) of the VCS distribution loss sense point
+      to the circuit. This value is applied to each processor instance.
+
+      Producer:  Machine Readable Workbook (via the power subsystem design per system)
+
+      Consumer: p9_build_gpstate_table.C
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_VRM_VOFFSET_VCS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Offset voltage (binary in microvolts) to apply to the VCS VRM distribution to
+      the processor module.  This value is applied to each processor instance.
+
+      Producer:  Machine Readable Workbook (via the power subsystem design per system)
+
+      Consumer: p8_build_gpstate_table.C
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_FREQ_EXT_BIAS_ULTRATURBO</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     UltraTurbo Frequency Bias - % of bias (signed twos complement in 0.5 percent
+     steps) used in calculating the frequency associated with a Pstate.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+                        CME Quad Pstate Region (CQPR) for CM Quad Manager
+
+     Platform default:  0
+    </description>
+    <valueType>int32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_FREQ_EXT_BIAS_TURBO</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     Turbo Frequency Bias - % of bias (signed twos complement in 0.5 percent
+     steps) used in calculating the frequency associated with a Pstate.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+                        CME Quad Pstate Region (CQPR) for CM Quad Manager
+
+     Platform default:  0
+    </description>
+    <valueType>int32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_FREQ_EXT_BIAS_NOMINAL</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     Nominal Frequency Bias - % of bias (signed twos complement in 0.5 percent
+     steps) used in calculating the frequency associated with a Pstate.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+                        CME Quad Pstate Region (CQPR) for CM Quad Manager
+
+     Platform default:  0
+    </description>
+    <valueType>int32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_FREQ_EXT_BIAS_POWERSAVE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     PowerSave Frequency Bias - % of bias (signed twos complement in 0.5 percent
+     steps) used in calculating the frequency associated with a Pstate.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+                        CME Quad Pstate Region (CQPR) for CM Quad Manager
+
+     Platform default:  0
+    </description>
+    <valueType>int32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VOLTAGE_VDD_BIAS_ULTRATURBO</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     UltraTurbo VDD Voltage Bias - % of bias (signed twos complement in 0.5 percent
+     steps) that is applied to the UltraTurbo VPD point used in calculating the
+     the Global Pstate values.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+
+     Platform default:  0
+    </description>
+    <valueType>int32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VOLTAGE_VDD_BIAS_TURBO</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     Turbo VDD Voltage Bias - % of bias (signed twos complement in 0.5 percent
+     steps) that is applied to the UltraTurbo VPD point used in calculating the
+     the Global Pstate values.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+
+     Platform default:  0
+    </description>
+    <valueType>int32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VOLTAGE_VDD_BIAS_NOMINAL</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     Nominal VDD Voltage Bias - % of bias (signed twos complement in 0.5 percent
+     steps) that is applied to the UltraTurbo VPD point used in calculating the
+     the Global Pstate values.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+
+     Platform default:  0
+    </description>
+    <valueType>int32</valueType>
+    <platInit/>
+  </attribute>
+    <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VOLTAGE_VDD_BIAS_POWERSAVE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     PowerSave VDD Voltage Bias - % of bias (signed twos complement in 0.5 percent
+     steps) that is applied to the UltraTurbo VPD point used in calculating the
+     the Global Pstate values.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+
+     Platform default:  0
+    </description>
+    <valueType>int32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VOLTAGE_VCS_BIAS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     VCS Voltage Bias - % of bias (signed twos complement in 0.5 percent
+     steps) that is applied to the VCS value stored in the UltraTurbo VPD
+     point for setting the VCS rail.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+
+     Platform default:  0
+    </description>
+    <valueType>int32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VOLTAGE_VDN_BIAS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     VDN Voltage Bias - % of bias (signed twos complement in 0.5 percent
+     steps) that is applied to the VDN value stored in the VPD for setting the
+     VDN rail.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+
+     Platform default:  0
+    </description>
+    <valueType>int32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_VOLTAGE_INT_VDD_BIAS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+     TODO (RTC 136996) NEED TO LOOK AT PERCENTAGE IMPLEMENTATION IN CME CODE AS WELL
+     AS THE IVRM VOLTAGE CALCULATION PROCESS
+     Internal VDD Voltage Bias - % of bias (signed twos complement in 0.5 percent
+     steps) that is applied to the Local Pstate voltage *after* the
+     ATTR_VOLTAGE_VDD_BIAS bias have been applied.
+
+     Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+     Consumers: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+                        CME Quad Pstate Region (CQPR) for CM Quad Manager
+
+     Platform default:  0
+    </description>
+    <valueType>int32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_STOP4_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Control CME response to execution of PowerPC STOP instruction
+
+    if OFF, treat STOP4 as STOP4
+    if ON, treat STOP4 as STOP2
+
+    Producer: ???
+
+    Consumer:  p8_hcd_image_build.C
+
+    Platform default:  OFF
+    </description>
+    <valueType>uint8</valueType>
+    <enum>OFF=0, ON=1</enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_STOP8_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Control CME response to execution of PowerPC STOP instruction
+
+    if OFF, treat STOP8 as STOP8
+    if ON, treat STOP8 as STOP4
+
+    Producer: ???
+
+    Consumer:  p8_hcd_image_build.C
+
+    Platform default:  OFF
+    </description>
+    <valueType>uint8</valueType>
+    <enum>OFF=0, ON=1</enum>
+    <platInit/>
+  </attribute>
+    <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_STOP11_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Control CME response to execution of PowerPC STOP instruction
+
+    if OFF, treat STOP11 as STOP11
+    if ON, treat STOP11 as STOP8
+
+    Producer: ???
+
+    Consumer:  p8_hcd_image_build.C
+
+    Platform default:  OFF
+    </description>
+    <valueType>uint8</valueType>
+    <enum>OFF=0, ON=1</enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_IVRMS_ENABLED</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>System control to allow (if all other attribute tests yield
+    true values) or categorically disallow IVRM enablement
+
+    Producer: MRWB
+
+    Consumers: p9_build_pstate_datablock ->
+                      Pstate Parameter Block (PSPB) for PGPE/OCC
+                      CME Quad Pstate Region (CQPR) for CM Quad Manager
+
+    Platform default: FALSE
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE=0, TRUE=1</enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_WOF_ENABLED</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>System control to allow Work Load Optimized Frequency (WOF)
+    algorithms to modify frequency based on active core count and other inputs.
+
+    Producer: MRWB
+
+    Consumers: p9_build_pstate_datablock ->
+                      Pstate Parameter Block (PSPB) for PGPE/OCC
+
+    Platform default:   FALSE
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE=0, TRUE=1</enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_RESCLK_STEP_DELAY</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Minimum delay (in nanoseconds) between resonant clock transition steps
+
+    Producer: MRWB
+
+    Consumers: p9_build_pstate_datablock ->
+                      CME Quad Pstate Region (CQPR) for CM Quad Manager
+
+    Platform default:   0
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PFET_POWERUP_DELAY_NS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Time (in nanoseconds) between PFET controller steps (7 of them) when turning
+    the PFES ON
+
+    Producer: MRWB
+
+    Consumers: p9_pfet_init
+
+    Platform default:
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PFET_POWERDOWN_DELAY_NS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Time (in nanoseconds) between PFET controller steps (7 of them) when turning
+    the PFES OFF
+
+    Producer: MRWB
+
+    Consumers: p9_pfet_init
+
+    Platform default:
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PBAX_NODEID</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Receive PBAX Nodeid. Value that indicates this PBA's PBAX Node affinity.
+      This is matched to pbax_nodeid of the PMISC Address phase.
+
+      Provided by the Machine Readable Workbook.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PBAX_CHIPID</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Receive PBAX Chipid. Value that indicates this PBA's PBAX Chipid within
+      the PBAX node.  Is matched to pbax_chipid of the Address phase if
+      pbax_type=unicast.
+
+      Provided by the Machine Readable Workbook.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PBAX_BRDCST_ID_VECTOR</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Receive PBAX Broadcast Group. Vector that is indexed when decoded PMISC
+      pbax_type=broadcast with the decoded PMISC pbax_chipid value.  If the
+      bit in this vector at the decoded bit location is a 1, then this receive
+      engine will participate in the broadcast operation.
+
+      Provided by the Machine Readable Workbook.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+</attributes>
