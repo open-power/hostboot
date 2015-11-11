@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -545,14 +545,6 @@ errlHndl_t SfcIBM::hwInit( )
                   "SfcIBM::hwInit: iv_norChipId=0x%.8x> ",
                   iv_norChipId );
 
-        //Query the configured size of the erase block
-        l_err = readReg(SFC_CMD_SPACE,
-                        SFC_REG_ERASMS,
-                        iv_eraseSizeBytes);
-        if(l_err) { break; }
-        TRACFCOMP(g_trac_pnor,"iv_eraseSizeBytes=0x%X",iv_eraseSizeBytes);
-
-
 #ifndef CONFIG_BMC_DOES_SFC_INIT
         TRACFCOMP( g_trac_pnor, INFO_MRK "Initializing SFC registers" );
 
@@ -650,6 +642,13 @@ errlHndl_t SfcIBM::hwInit( )
 #endif
 
 #endif //!CONFIG_BMC_DOES_SFC_INIT
+
+        //Query the configured size of the erase block
+        l_err = readReg(SFC_CMD_SPACE,
+                        SFC_REG_ERASMS,
+                        iv_eraseSizeBytes);
+        if(l_err) { break; }
+        TRACFCOMP(g_trac_pnor,"iv_eraseSizeBytes=0x%X",iv_eraseSizeBytes);
 
 
 #ifdef CONFIG_ALLOW_MICRON_PNOR
