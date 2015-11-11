@@ -1142,12 +1142,14 @@
     <attribute><id>EFF_DRAM_DENSITY</id></attribute>
     <attribute><id>EFF_DRAM_TRCD</id></attribute>
     <attribute><id>EFF_DRAM_TRRD</id></attribute>
+    <attribute><id>EFF_DRAM_TRRD_L</id></attribute>
     <attribute><id>EFF_DRAM_TRP</id></attribute>
     <attribute><id>EFF_DRAM_TRAS</id></attribute>
     <attribute><id>EFF_DRAM_TRC</id></attribute>
     <attribute><id>EFF_DRAM_TRFI</id></attribute>
     <attribute><id>EFF_DRAM_TRFC</id></attribute>
     <attribute><id>EFF_DRAM_TWTR</id></attribute>
+    <attribute><id>EFF_DRAM_TWTR_L</id></attribute>
     <attribute><id>EFF_DRAM_TRTP</id></attribute>
     <attribute><id>EFF_DRAM_TFAW</id></attribute>
     <attribute><id>EFF_DRAM_BL</id></attribute>
@@ -1319,9 +1321,9 @@
     <attribute><id>EFF_DATA_MASK</id></attribute>
     <attribute><id>EFF_WRITE_DBI</id></attribute>
     <attribute><id>EFF_READ_DBI</id></attribute>
-    <attribute><id>VREF_DQ_TRAIN_VALUE</id></attribute>
-    <attribute><id>VREF_DQ_TRAIN_RANGE</id></attribute>
-    <attribute><id>VREF_DQ_TRAIN_ENABLE</id></attribute>
+    <attribute><id>EFF_VREF_DQ_TRAIN_VALUE</id></attribute>
+    <attribute><id>EFF_VREF_DQ_TRAIN_RANGE</id></attribute>
+    <attribute><id>EFF_VREF_DQ_TRAIN_ENABLE</id></attribute>
     <attribute><id>TCCD_L</id></attribute>
     <attribute><id>EFF_WRITE_CRC</id></attribute>
     <attribute><id>EFF_DRAM_2N_MODE_ENABLED</id></attribute>
@@ -1376,6 +1378,7 @@
     <attribute><id>EFF_DIMM_DDR4_RC_Ax</id></attribute>
     <attribute><id>EFF_DIMM_DDR4_RC_Bx</id></attribute>
     <attribute><id>EFF_DRAM_TCCD_L</id></attribute>
+    <attribute><id>EFF_DRAM_TCCD_S</id></attribute>
     <attribute><id>EFF_LRDIMM_WORD_X</id></attribute>
     <attribute><id>EFF_LRDIMM_ADDITIONAL_CNTL_WORDS</id></attribute>
     <attribute><id>MCBIST_DDR4_PDA_ENABLE</id></attribute>

@@ -11623,7 +11623,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 </attribute>
 
 <attribute>
-    <id>VREF_DQ_TRAIN_VALUE</id>
+    <id>EFF_VREF_DQ_TRAIN_VALUE</id>
     <description>vrefdq_train value. This is for DDR4 MRS6.  Computed in mss_eff_cnfg. Each memory channel will have a value.
       creator: mss_eff_cnfg
       consumer: various
@@ -11642,7 +11642,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 </attribute>
 
 <attribute>
-    <id>VREF_DQ_TRAIN_RANGE</id>
+    <id>EFF_VREF_DQ_TRAIN_RANGE</id>
     <description>vrefdq_train range. This is for DDR4 MRS6.  Computed in mss_eff_cnfg. Each memory channel will have a value.
       creator: mss_eff_cnfg
       consumer: various
@@ -11661,7 +11661,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 </attribute>
 
 <attribute>
-    <id>VREF_DQ_TRAIN_ENABLE</id>
+    <id>EFF_VREF_DQ_TRAIN_ENABLE</id>
     <description>vrefdq_train enable. This is for DDR4 MRS6.  Computed in mss_eff_cnfg. Each memory channel will have a value.
       creator: mss_eff_cnfg
       consumer: various
@@ -15953,7 +15953,6 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
      </description>
     <simpleType>
         <uint8_t>
-            <default>0</default>
         </uint8_t>
         <array>2,2</array>
     </simpleType>
@@ -15978,7 +15977,6 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
         <uint8_t>
-            <default>0</default>
         </uint8_t>
         <array>2,2</array>
     </simpleType>
@@ -16001,7 +15999,6 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
         <uint8_t>
-            <default>0</default>
         </uint8_t>
         <array>2,2</array>
     </simpleType>
@@ -16024,11 +16021,10 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
         <uint8_t>
-            <default>5</default>
         </uint8_t>
         <array>2,2</array>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -16047,11 +16043,10 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
         <uint8_t>
-            <default>5</default>
         </uint8_t>
         <array>2,2</array>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -16070,11 +16065,10 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
         <uint8_t>
-            <default>5</default>
         </uint8_t>
         <array>2,2</array>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -16093,11 +16087,10 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
         <uint8_t>
-            <default>0xF0</default>
         </uint8_t>
         <array>2,2</array>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -16117,11 +16110,10 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
         <uint8_t>
-            <default>0x03</default>
         </uint8_t>
         <array>2,2</array>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -16140,11 +16132,10 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
         <uint8_t>
-            <default>0xF0</default>
         </uint8_t>
         <array>2,2</array>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -16163,7 +16154,6 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
         <uint8_t>
-            <default>0</default>
         </uint8_t>
         <array>2,2</array>
     </simpleType>
@@ -16186,11 +16176,10 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
         <uint8_t>
-            <default>14</default>
         </uint8_t>
         <array>2,2</array>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -16209,7 +16198,6 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
         <uint8_t>
-            <default>0</default>
         </uint8_t>
         <array>2,2</array>
     </simpleType>
@@ -16233,11 +16221,10 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
         <uint8_t>
-            <default>0x0B</default>
         </uint8_t>
         <array>2,2</array>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -16255,7 +16242,6 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
         <uint8_t>
-            <default>0</default>
         </uint8_t>
         <array>2,2</array>
     </simpleType>
@@ -16278,11 +16264,10 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
         <uint8_t>
-            <default>0x04</default>
         </uint8_t>
         <array>2,2</array>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -16650,5 +16635,55 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <readable/>
 </attribute>
 
+<attribute>
+    <id>EFF_DRAM_TRRD_L</id>
+    <description>DRAM Row to Row Delay. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_TRRD_L</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TWTR_L</id>
+    <description>DRAM Internal Write to Read Delay. Initialized and used by HWPs.</description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_TWTR_L</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_DRAM_TCCD_S</id>
+    <description>tccd_l. This is for DDR4 MRS6.  Computed in mss_eff_cnfg. Each memory channel will have a value.
+                 Creator: mss_eff_cnfg
+                 Consumer:various
+                 Firmware notes: none
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EFF_DRAM_TCCD_S</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
 
 </attributes>

@@ -159,7 +159,7 @@ const KeywordData ddr4Data[] =
     { UMM_CRC,                          0xff,   0x02,   0x00,   0x00, true,  false, UMM },
     { RMM_ADDR_MAPPING,                 0x88,   0x01,   0x01,   0x00, false, false, RMM },
     { MODSPEC_MM_ATTRIBS,               0x83,   0x01,   0x00,   0x00, false, false, ALL },
-    { MODSPEC_MM_ADDR_MAPPING,          0x88,   0x02,   0x00,   0x00, false, false, ALL },
+    { MODSPEC_MM_ADDR_MAPPING,          0x88,   0x01,   0x01,   0x00, false, false, ALL },
     { MODSPEC_MM_DRV_STRENGTH_CNTL,     0x89,   0x01,   0x00,   0x00, false, false, ALL },
     { MODSPEC_MM_DRV_STRENGTH_CK,       0x8a,   0x01,   0x00,   0x00, false, false, ALL },
     { LRMM_VREF_DQ_RANK0,               0x8c,   0x01,   0x00,   0x00, false, false, LRMM },
