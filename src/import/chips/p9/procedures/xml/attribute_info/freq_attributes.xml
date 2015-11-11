@@ -1,0 +1,47 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/attribute_info/freq_attributes.xml $  -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- freq_attributes.xml -->
+<attributes>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_FREQ_PROC_REFCLOCK_KHZ</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      The frequency of the processor refclock in kHz.
+      Provided by the Machine Readable Workbook.
+      This can be overridden to adjust the refclock frequency.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_FREQ_MEM_REFCLOCK</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      The frequency of the memory refclock in MHz.
+      Provided by the Machine Readable Workbook.
+      This is read by the set_ref_clock HWP to find out the desired frequency.
+      This can be overridden to adjust the refclock frequency.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+</attributes>
