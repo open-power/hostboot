@@ -168,11 +168,6 @@ namespace MBOX
              */
             static uint64_t makeMask(uint64_t i_size);
 
-            /**
-             * Perform VMM operations to allocate physical area in unsecure
-             * region of memory.
-             */
-            void initPhysicalArea(void*& io_addr, uint64_t& o_phys);
 
             enum
             {
