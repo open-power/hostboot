@@ -301,25 +301,33 @@ REG64( MCS_3_PORT02_AAER                                       , RULL(0x030108AE
 REG64( MCS_PORT02_AAER                                         , RULL(0x0501082E), SH_UNT_MCS_PORT02,
        SH_ACS_SCOM_RO   );
 
-REG64( MCA_ACTION0                                             , RULL(0x07010A06), SH_UNT_MCA      , SH_ACS_SCOM_RO   );
-REG64( MCA_0_ACTION0                                           , RULL(0x07010A06), SH_UNT_MCA_0    , SH_ACS_SCOM_RO   );
-REG64( MCA_1_ACTION0                                           , RULL(0x07010A46), SH_UNT_MCA_1    , SH_ACS_SCOM_RO   );
-REG64( MCA_2_ACTION0                                           , RULL(0x07010A86), SH_UNT_MCA_2    , SH_ACS_SCOM_RO   );
-REG64( MCA_3_ACTION0                                           , RULL(0x07010AC6), SH_UNT_MCA_3    , SH_ACS_SCOM_RO   );
-REG64( MCA_4_ACTION0                                           , RULL(0x08010A06), SH_UNT_MCA_4    , SH_ACS_SCOM_RO   );
-REG64( MCA_5_ACTION0                                           , RULL(0x08010A46), SH_UNT_MCA_5    , SH_ACS_SCOM_RO   );
-REG64( MCA_6_ACTION0                                           , RULL(0x08010A86), SH_UNT_MCA_6    , SH_ACS_SCOM_RO   );
-REG64( MCA_7_ACTION0                                           , RULL(0x08010AC6), SH_UNT_MCA_7    , SH_ACS_SCOM_RO   );
+REG64( MCA_ACTION0                                             , RULL(0x07010A06), SH_UNT_MCA      , SH_ACS_SCOM_RW   );
+REG64( MCA_0_ACTION0                                           , RULL(0x07010A06), SH_UNT_MCA_0    , SH_ACS_SCOM_RW   );
+REG64( MCA_1_ACTION0                                           , RULL(0x07010A46), SH_UNT_MCA_1    , SH_ACS_SCOM_RW   );
+REG64( MCA_2_ACTION0                                           , RULL(0x07010A86), SH_UNT_MCA_2    , SH_ACS_SCOM_RW   );
+REG64( MCA_3_ACTION0                                           , RULL(0x07010AC6), SH_UNT_MCA_3    , SH_ACS_SCOM_RW   );
+REG64( MCA_4_ACTION0                                           , RULL(0x08010A06), SH_UNT_MCA_4    , SH_ACS_SCOM_RW   );
+REG64( MCA_5_ACTION0                                           , RULL(0x08010A46), SH_UNT_MCA_5    , SH_ACS_SCOM_RW   );
+REG64( MCA_6_ACTION0                                           , RULL(0x08010A86), SH_UNT_MCA_6    , SH_ACS_SCOM_RW   );
+REG64( MCA_7_ACTION0                                           , RULL(0x08010AC6), SH_UNT_MCA_7    , SH_ACS_SCOM_RW   );
 
-REG64( MCA_ACTION1                                             , RULL(0x07010A07), SH_UNT_MCA      , SH_ACS_SCOM_RO   );
-REG64( MCA_0_ACTION1                                           , RULL(0x07010A07), SH_UNT_MCA_0    , SH_ACS_SCOM_RO   );
-REG64( MCA_1_ACTION1                                           , RULL(0x07010A47), SH_UNT_MCA_1    , SH_ACS_SCOM_RO   );
-REG64( MCA_2_ACTION1                                           , RULL(0x07010A87), SH_UNT_MCA_2    , SH_ACS_SCOM_RO   );
-REG64( MCA_3_ACTION1                                           , RULL(0x07010AC7), SH_UNT_MCA_3    , SH_ACS_SCOM_RO   );
-REG64( MCA_4_ACTION1                                           , RULL(0x08010A07), SH_UNT_MCA_4    , SH_ACS_SCOM_RO   );
-REG64( MCA_5_ACTION1                                           , RULL(0x08010A47), SH_UNT_MCA_5    , SH_ACS_SCOM_RO   );
-REG64( MCA_6_ACTION1                                           , RULL(0x08010A87), SH_UNT_MCA_6    , SH_ACS_SCOM_RO   );
-REG64( MCA_7_ACTION1                                           , RULL(0x08010AC7), SH_UNT_MCA_7    , SH_ACS_SCOM_RO   );
+REG64( MCA_ACTION1                                             , RULL(0x07010A07), SH_UNT_MCA      , SH_ACS_SCOM_RW   );
+REG64( MCA_0_ACTION1                                           , RULL(0x07010A07), SH_UNT_MCA_0    , SH_ACS_SCOM_RW   );
+REG64( MCA_1_ACTION1                                           , RULL(0x07010A47), SH_UNT_MCA_1    , SH_ACS_SCOM_RW   );
+REG64( MCA_2_ACTION1                                           , RULL(0x07010A87), SH_UNT_MCA_2    , SH_ACS_SCOM_RW   );
+REG64( MCA_3_ACTION1                                           , RULL(0x07010AC7), SH_UNT_MCA_3    , SH_ACS_SCOM_RW   );
+REG64( MCA_4_ACTION1                                           , RULL(0x08010A07), SH_UNT_MCA_4    , SH_ACS_SCOM_RW   );
+REG64( MCA_5_ACTION1                                           , RULL(0x08010A47), SH_UNT_MCA_5    , SH_ACS_SCOM_RW   );
+REG64( MCA_6_ACTION1                                           , RULL(0x08010A87), SH_UNT_MCA_6    , SH_ACS_SCOM_RW   );
+REG64( MCA_7_ACTION1                                           , RULL(0x08010AC7), SH_UNT_MCA_7    , SH_ACS_SCOM_RW   );
+
+REG64( MCA_ADDR_TRAP_REG                                       , RULL(0x07010003), SH_UNT_MCA      , SH_ACS_SCOM      );
+REG64( MCA_0_ADDR_TRAP_REG                                     , RULL(0x07010003), SH_UNT_MCA_0    , SH_ACS_SCOM      );
+REG64( MCA_4_ADDR_TRAP_REG                                     , RULL(0x08010003), SH_UNT_MCA_4    , SH_ACS_SCOM      );
+
+REG64( MCA_ATOMIC_LOCK_MASK_LATCH_REG                          , RULL(0x07010007), SH_UNT_MCA      , SH_ACS_SCOM      );
+REG64( MCA_0_ATOMIC_LOCK_MASK_LATCH_REG                        , RULL(0x07010007), SH_UNT_MCA_0    , SH_ACS_SCOM      );
+REG64( MCA_4_ATOMIC_LOCK_MASK_LATCH_REG                        , RULL(0x08010007), SH_UNT_MCA_4    , SH_ACS_SCOM      );
 
 REG64( MCBIST_CCSARRERRINJQ                                    , RULL(0x07010FDE), SH_UNT_MCBIST   , SH_ACS_SCOM_RW   );
 REG64( MCBIST_0_CCSARRERRINJQ                                  , RULL(0x07010FDE), SH_UNT_MCBIST_0 , SH_ACS_SCOM_RW   );
@@ -601,6 +609,76 @@ REG64( MCBIST_CCS_STATQ                                        , RULL(0x07010FA6
 REG64( MCBIST_0_CCS_STATQ                                      , RULL(0x07010FA6), SH_UNT_MCBIST_0 , SH_ACS_SCOM_RW   );
 REG64( MCBIST_1_CCS_STATQ                                      , RULL(0x08010FA6), SH_UNT_MCBIST_1 , SH_ACS_SCOM_RW   );
 
+REG64( MCA_CERR0                                               , RULL(0x07010A0E), SH_UNT_MCA      , SH_ACS_SCOM_RO   );
+REG64( MCA_0_CERR0                                             , RULL(0x07010A0E), SH_UNT_MCA_0    , SH_ACS_SCOM_RO   );
+REG64( MCA_1_CERR0                                             , RULL(0x07010A4E), SH_UNT_MCA_1    , SH_ACS_SCOM_RO   );
+REG64( MCA_2_CERR0                                             , RULL(0x07010A8E), SH_UNT_MCA_2    , SH_ACS_SCOM_RO   );
+REG64( MCA_3_CERR0                                             , RULL(0x07010ACE), SH_UNT_MCA_3    , SH_ACS_SCOM_RO   );
+REG64( MCA_4_CERR0                                             , RULL(0x08010A0E), SH_UNT_MCA_4    , SH_ACS_SCOM_RO   );
+REG64( MCA_5_CERR0                                             , RULL(0x08010A4E), SH_UNT_MCA_5    , SH_ACS_SCOM_RO   );
+REG64( MCA_6_CERR0                                             , RULL(0x08010A8E), SH_UNT_MCA_6    , SH_ACS_SCOM_RO   );
+REG64( MCA_7_CERR0                                             , RULL(0x08010ACE), SH_UNT_MCA_7    , SH_ACS_SCOM_RO   );
+
+REG64( MCA_CERR1                                               , RULL(0x07010A0F), SH_UNT_MCA      , SH_ACS_SCOM_RO   );
+REG64( MCA_0_CERR1                                             , RULL(0x07010A0F), SH_UNT_MCA_0    , SH_ACS_SCOM_RO   );
+REG64( MCA_1_CERR1                                             , RULL(0x07010A4F), SH_UNT_MCA_1    , SH_ACS_SCOM_RO   );
+REG64( MCA_2_CERR1                                             , RULL(0x07010A8F), SH_UNT_MCA_2    , SH_ACS_SCOM_RO   );
+REG64( MCA_3_CERR1                                             , RULL(0x07010ACF), SH_UNT_MCA_3    , SH_ACS_SCOM_RO   );
+REG64( MCA_4_CERR1                                             , RULL(0x08010A0F), SH_UNT_MCA_4    , SH_ACS_SCOM_RO   );
+REG64( MCA_5_CERR1                                             , RULL(0x08010A4F), SH_UNT_MCA_5    , SH_ACS_SCOM_RO   );
+REG64( MCA_6_CERR1                                             , RULL(0x08010A8F), SH_UNT_MCA_6    , SH_ACS_SCOM_RO   );
+REG64( MCA_7_CERR1                                             , RULL(0x08010ACF), SH_UNT_MCA_7    , SH_ACS_SCOM_RO   );
+
+REG64( MCBIST_DBGCFG0Q                                         , RULL(0x07010FE8), SH_UNT_MCBIST   , SH_ACS_SCOM_RW   );
+REG64( MCBIST_0_DBGCFG0Q                                       , RULL(0x07010FE8), SH_UNT_MCBIST_0 , SH_ACS_SCOM_RW   );
+REG64( MCBIST_1_DBGCFG0Q                                       , RULL(0x08010FE8), SH_UNT_MCBIST_1 , SH_ACS_SCOM_RW   );
+
+REG64( MCBIST_DBGCFG1Q                                         , RULL(0x07010FE9), SH_UNT_MCBIST   , SH_ACS_SCOM_RW   );
+REG64( MCBIST_0_DBGCFG1Q                                       , RULL(0x07010FE9), SH_UNT_MCBIST_0 , SH_ACS_SCOM_RW   );
+REG64( MCBIST_1_DBGCFG1Q                                       , RULL(0x08010FE9), SH_UNT_MCBIST_1 , SH_ACS_SCOM_RW   );
+
+REG64( MCBIST_DBGCFG2Q                                         , RULL(0x07010FEA), SH_UNT_MCBIST   , SH_ACS_SCOM_RW   );
+REG64( MCBIST_0_DBGCFG2Q                                       , RULL(0x07010FEA), SH_UNT_MCBIST_0 , SH_ACS_SCOM_RW   );
+REG64( MCBIST_1_DBGCFG2Q                                       , RULL(0x08010FEA), SH_UNT_MCBIST_1 , SH_ACS_SCOM_RW   );
+
+REG64( MCBIST_DBGCFG3Q                                         , RULL(0x07010FEB), SH_UNT_MCBIST   , SH_ACS_SCOM_RW   );
+REG64( MCBIST_0_DBGCFG3Q                                       , RULL(0x07010FEB), SH_UNT_MCBIST_0 , SH_ACS_SCOM_RW   );
+REG64( MCBIST_1_DBGCFG3Q                                       , RULL(0x08010FEB), SH_UNT_MCBIST_1 , SH_ACS_SCOM_RW   );
+
+REG64( MCA_DBGR                                                , RULL(0x07010A0B), SH_UNT_MCA      , SH_ACS_SCOM_RW   );
+REG64( MCA_0_DBGR                                              , RULL(0x07010A0B), SH_UNT_MCA_0    , SH_ACS_SCOM_RW   );
+REG64( MCA_1_DBGR                                              , RULL(0x07010A4B), SH_UNT_MCA_1    , SH_ACS_SCOM_RW   );
+REG64( MCA_2_DBGR                                              , RULL(0x07010A8B), SH_UNT_MCA_2    , SH_ACS_SCOM_RW   );
+REG64( MCA_3_DBGR                                              , RULL(0x07010ACB), SH_UNT_MCA_3    , SH_ACS_SCOM_RW   );
+REG64( MCA_4_DBGR                                              , RULL(0x08010A0B), SH_UNT_MCA_4    , SH_ACS_SCOM_RW   );
+REG64( MCA_5_DBGR                                              , RULL(0x08010A4B), SH_UNT_MCA_5    , SH_ACS_SCOM_RW   );
+REG64( MCA_6_DBGR                                              , RULL(0x08010A8B), SH_UNT_MCA_6    , SH_ACS_SCOM_RW   );
+REG64( MCA_7_DBGR                                              , RULL(0x08010ACB), SH_UNT_MCA_7    , SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DBG_INST1_COND_REG_1                              , RULL(0x070107C1), SH_UNT_MCA_3    , SH_ACS_SCOM      );
+REG64( MCA_7_DBG_INST1_COND_REG_1                              , RULL(0x080107C1), SH_UNT_MCA_7    , SH_ACS_SCOM      );
+
+REG64( MCA_3_DBG_INST1_COND_REG_2                              , RULL(0x070107C2), SH_UNT_MCA_3    , SH_ACS_SCOM      );
+REG64( MCA_7_DBG_INST1_COND_REG_2                              , RULL(0x080107C2), SH_UNT_MCA_7    , SH_ACS_SCOM      );
+
+REG64( MCA_3_DBG_INST2_COND_REG_1                              , RULL(0x070107C3), SH_UNT_MCA_3    , SH_ACS_SCOM      );
+REG64( MCA_7_DBG_INST2_COND_REG_1                              , RULL(0x080107C3), SH_UNT_MCA_7    , SH_ACS_SCOM      );
+
+REG64( MCA_3_DBG_INST2_COND_REG_2                              , RULL(0x070107C4), SH_UNT_MCA_3    , SH_ACS_SCOM      );
+REG64( MCA_7_DBG_INST2_COND_REG_2                              , RULL(0x080107C4), SH_UNT_MCA_7    , SH_ACS_SCOM      );
+
+REG64( MCA_3_DBG_MODE_REG                                      , RULL(0x070107C0), SH_UNT_MCA_3    , SH_ACS_SCOM      );
+REG64( MCA_7_DBG_MODE_REG                                      , RULL(0x080107C0), SH_UNT_MCA_7    , SH_ACS_SCOM      );
+
+REG64( MCA_3_DBG_TRACE_MODE_REG_2                              , RULL(0x070107CB), SH_UNT_MCA_3    , SH_ACS_SCOM      );
+REG64( MCA_7_DBG_TRACE_MODE_REG_2                              , RULL(0x080107CB), SH_UNT_MCA_7    , SH_ACS_SCOM      );
+
+REG64( MCA_3_DBG_TRACE_REG_0                                   , RULL(0x070107C9), SH_UNT_MCA_3    , SH_ACS_SCOM      );
+REG64( MCA_7_DBG_TRACE_REG_0                                   , RULL(0x080107C9), SH_UNT_MCA_7    , SH_ACS_SCOM      );
+
+REG64( MCA_3_DBG_TRACE_REG_1                                   , RULL(0x070107CA), SH_UNT_MCA_3    , SH_ACS_SCOM      );
+REG64( MCA_7_DBG_TRACE_REG_1                                   , RULL(0x080107CA), SH_UNT_MCA_7    , SH_ACS_SCOM      );
+
 REG64( MCA_DDRPHY_ADR_BIT_ENABLE_P0_ADR0                       , RULL(0x800040000701103F), SH_UNT_MCA      ,
        SH_ACS_SCOM_RW   );
 REG64( MCA_0_DDRPHY_ADR_BIT_ENABLE_P0_ADR0                     , RULL(0x800040000701103F), SH_UNT_MCA_0    ,
@@ -688,6 +766,50 @@ REG64( MCA_3_DDRPHY_ADR_BIT_ENABLE_P3_ADR3                     , RULL(0x80004C00
        SH_ACS_SCOM_RW   );
 REG64( MCA_7_DDRPHY_ADR_BIT_ENABLE_P3_ADR3                     , RULL(0x80004C0008011C3F), SH_UNT_MCA_7    ,
        SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_ADR_DCD_CONTROL_P0_ADR32S0                   , RULL(0x800080380701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM      );
+REG64( MCA_0_DDRPHY_ADR_DCD_CONTROL_P0_ADR32S0                 , RULL(0x800080380701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM      );
+REG64( MCA_4_DDRPHY_ADR_DCD_CONTROL_P0_ADR32S0                 , RULL(0x800080380801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM      );
+
+REG64( MCA_DDRPHY_ADR_DCD_CONTROL_P0_ADR32S1                   , RULL(0x800084380701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM      );
+REG64( MCA_0_DDRPHY_ADR_DCD_CONTROL_P0_ADR32S1                 , RULL(0x800084380701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM      );
+REG64( MCA_4_DDRPHY_ADR_DCD_CONTROL_P0_ADR32S1                 , RULL(0x800084380801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM      );
+
+REG64( MCA_1_DDRPHY_ADR_DCD_CONTROL_P1_ADR32S0                 , RULL(0x800080380701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM      );
+REG64( MCA_5_DDRPHY_ADR_DCD_CONTROL_P1_ADR32S0                 , RULL(0x800080380801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM      );
+
+REG64( MCA_1_DDRPHY_ADR_DCD_CONTROL_P1_ADR32S1                 , RULL(0x800084380701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM      );
+REG64( MCA_5_DDRPHY_ADR_DCD_CONTROL_P1_ADR32S1                 , RULL(0x800084380801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM      );
+
+REG64( MCA_2_DDRPHY_ADR_DCD_CONTROL_P2_ADR32S0                 , RULL(0x800080380701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM      );
+REG64( MCA_6_DDRPHY_ADR_DCD_CONTROL_P2_ADR32S0                 , RULL(0x800080380801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM      );
+
+REG64( MCA_2_DDRPHY_ADR_DCD_CONTROL_P2_ADR32S1                 , RULL(0x800084380701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM      );
+REG64( MCA_6_DDRPHY_ADR_DCD_CONTROL_P2_ADR32S1                 , RULL(0x800084380801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM      );
+
+REG64( MCA_3_DDRPHY_ADR_DCD_CONTROL_P3_ADR32S0                 , RULL(0x8000803807011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM      );
+REG64( MCA_7_DDRPHY_ADR_DCD_CONTROL_P3_ADR32S0                 , RULL(0x8000803808011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM      );
+
+REG64( MCA_3_DDRPHY_ADR_DCD_CONTROL_P3_ADR32S1                 , RULL(0x8000843807011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM      );
+REG64( MCA_7_DDRPHY_ADR_DCD_CONTROL_P3_ADR32S1                 , RULL(0x8000843808011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM      );
 
 REG64( MCA_DDRPHY_ADR_DELAY0_P0_ADR0                           , RULL(0x800040040701103F), SH_UNT_MCA      ,
        SH_ACS_SCOM_RW   );
@@ -1570,48 +1692,48 @@ REG64( MCA_7_DDRPHY_ADR_DIFFPAIR_ENABLE_P3_ADR3                , RULL(0x80004C01
        SH_ACS_SCOM_RW   );
 
 REG64( MCA_DDRPHY_ADR_DLL_CNTL_P0_ADR32S0                      , RULL(0x8000803A0701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_0_DDRPHY_ADR_DLL_CNTL_P0_ADR32S0                    , RULL(0x8000803A0701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_4_DDRPHY_ADR_DLL_CNTL_P0_ADR32S0                    , RULL(0x8000803A0801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_DDRPHY_ADR_DLL_CNTL_P0_ADR32S1                      , RULL(0x8000843A0701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_0_DDRPHY_ADR_DLL_CNTL_P0_ADR32S1                    , RULL(0x8000843A0701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_4_DDRPHY_ADR_DLL_CNTL_P0_ADR32S1                    , RULL(0x8000843A0801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_1_DDRPHY_ADR_DLL_CNTL_P1_ADR32S0                    , RULL(0x8000803A0701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_5_DDRPHY_ADR_DLL_CNTL_P1_ADR32S0                    , RULL(0x8000803A0801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_1_DDRPHY_ADR_DLL_CNTL_P1_ADR32S1                    , RULL(0x8000843A0701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_5_DDRPHY_ADR_DLL_CNTL_P1_ADR32S1                    , RULL(0x8000843A0801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_2_DDRPHY_ADR_DLL_CNTL_P2_ADR32S0                    , RULL(0x8000803A0701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_6_DDRPHY_ADR_DLL_CNTL_P2_ADR32S0                    , RULL(0x8000803A0801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_2_DDRPHY_ADR_DLL_CNTL_P2_ADR32S1                    , RULL(0x8000843A0701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_6_DDRPHY_ADR_DLL_CNTL_P2_ADR32S1                    , RULL(0x8000843A0801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_3_DDRPHY_ADR_DLL_CNTL_P3_ADR32S0                    , RULL(0x8000803A07011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_7_DDRPHY_ADR_DLL_CNTL_P3_ADR32S0                    , RULL(0x8000803A08011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_3_DDRPHY_ADR_DLL_CNTL_P3_ADR32S1                    , RULL(0x8000843A07011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_7_DDRPHY_ADR_DLL_CNTL_P3_ADR32S1                    , RULL(0x8000843A08011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_DDRPHY_ADR_DLL_DAC_LOWER_P0_ADR32S0                 , RULL(0x8000803B0701103F), SH_UNT_MCA      ,
        SH_ACS_SCOM_RW   );
@@ -2713,445 +2835,489 @@ REG64( MCA_3_DDRPHY_APB_FIR_ERR1_P3                            , RULL(0x8000D007
 REG64( MCA_7_DDRPHY_APB_FIR_ERR1_P3                            , RULL(0x8000D00708011C3F), SH_UNT_MCA_7    ,
        SH_ACS_SCOM_RO   );
 
+REG64( MCA_DDRPHY_APB_FIR_ERR2_P0                              , RULL(0x8000D0030701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_0_DDRPHY_APB_FIR_ERR2_P0                            , RULL(0x8000D0030701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_4_DDRPHY_APB_FIR_ERR2_P0                            , RULL(0x8000D0030801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RO   );
+
+REG64( MCA_1_DDRPHY_APB_FIR_ERR2_P1                            , RULL(0x8000D0030701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_5_DDRPHY_APB_FIR_ERR2_P1                            , RULL(0x8000D0030801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RO   );
+
+REG64( MCA_2_DDRPHY_APB_FIR_ERR2_P2                            , RULL(0x8000D0030701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_6_DDRPHY_APB_FIR_ERR2_P2                            , RULL(0x8000D0030801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RO   );
+
+REG64( MCA_3_DDRPHY_APB_FIR_ERR2_P3                            , RULL(0x8000D00307011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_7_DDRPHY_APB_FIR_ERR2_P3                            , RULL(0x8000D00308011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RO   );
+
+REG64( MCA_DDRPHY_APB_LO_PROBE_SEL_P0                          , RULL(0x8000D0080701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_APB_LO_PROBE_SEL_P0                        , RULL(0x8000D0080701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_APB_LO_PROBE_SEL_P0                        , RULL(0x8000D0080801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_APB_LO_PROBE_SEL_P1                        , RULL(0x8000D0080701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_APB_LO_PROBE_SEL_P1                        , RULL(0x8000D0080801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_APB_LO_PROBE_SEL_P2                        , RULL(0x8000D0080701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_APB_LO_PROBE_SEL_P2                        , RULL(0x8000D0080801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_APB_LO_PROBE_SEL_P3                        , RULL(0x8000D00807011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_APB_LO_PROBE_SEL_P3                        , RULL(0x8000D00808011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
 REG64( MCA_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P0_0                  , RULL(0x800000220701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_0_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P0_0                , RULL(0x800000220701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_4_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P0_0                , RULL(0x800000220801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P0_1                  , RULL(0x800004220701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_0_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P0_1                , RULL(0x800004220701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_4_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P0_1                , RULL(0x800004220801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P0_2                  , RULL(0x800008220701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_0_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P0_2                , RULL(0x800008220701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_4_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P0_2                , RULL(0x800008220801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P0_3                  , RULL(0x80000C220701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_0_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P0_3                , RULL(0x80000C220701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_4_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P0_3                , RULL(0x80000C220801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P0_4                  , RULL(0x800010220701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_0_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P0_4                , RULL(0x800010220701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_4_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P0_4                , RULL(0x800010220801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_1_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P1_0                , RULL(0x800000220701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_5_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P1_0                , RULL(0x800000220801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_1_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P1_1                , RULL(0x800004220701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_5_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P1_1                , RULL(0x800004220801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_1_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P1_2                , RULL(0x800008220701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_5_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P1_2                , RULL(0x800008220801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_1_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P1_3                , RULL(0x80000C220701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_5_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P1_3                , RULL(0x80000C220801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_1_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P1_4                , RULL(0x800010220701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_5_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P1_4                , RULL(0x800010220801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_2_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P2_0                , RULL(0x800000220701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_6_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P2_0                , RULL(0x800000220801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_2_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P2_1                , RULL(0x800004220701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_6_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P2_1                , RULL(0x800004220801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_2_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P2_2                , RULL(0x800008220701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_6_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P2_2                , RULL(0x800008220801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_2_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P2_3                , RULL(0x80000C220701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_6_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P2_3                , RULL(0x80000C220801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_2_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P2_4                , RULL(0x800010220701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_6_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P2_4                , RULL(0x800010220801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_3_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P3_0                , RULL(0x8000002207011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_7_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P3_0                , RULL(0x8000002208011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_3_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P3_1                , RULL(0x8000042207011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_7_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P3_1                , RULL(0x8000042208011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_3_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P3_2                , RULL(0x8000082207011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_7_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P3_2                , RULL(0x8000082208011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_3_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P3_3                , RULL(0x80000C2207011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_7_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P3_3                , RULL(0x80000C2208011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_3_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P3_4                , RULL(0x8000102207011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_7_DDRPHY_DP16_ACBOOST_CTL_BYTE0_P3_4                , RULL(0x8000102208011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P0_0                  , RULL(0x800000230701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_0_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P0_0                , RULL(0x800000230701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_4_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P0_0                , RULL(0x800000230801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P0_1                  , RULL(0x800004230701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_0_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P0_1                , RULL(0x800004230701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_4_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P0_1                , RULL(0x800004230801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P0_2                  , RULL(0x800008230701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_0_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P0_2                , RULL(0x800008230701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_4_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P0_2                , RULL(0x800008230801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P0_3                  , RULL(0x80000C230701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_0_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P0_3                , RULL(0x80000C230701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_4_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P0_3                , RULL(0x80000C230801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P0_4                  , RULL(0x800010230701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_0_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P0_4                , RULL(0x800010230701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_4_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P0_4                , RULL(0x800010230801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_1_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P1_0                , RULL(0x800000230701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_5_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P1_0                , RULL(0x800000230801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_1_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P1_1                , RULL(0x800004230701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_5_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P1_1                , RULL(0x800004230801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_1_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P1_2                , RULL(0x800008230701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_5_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P1_2                , RULL(0x800008230801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_1_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P1_3                , RULL(0x80000C230701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_5_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P1_3                , RULL(0x80000C230801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_1_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P1_4                , RULL(0x800010230701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_5_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P1_4                , RULL(0x800010230801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_2_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P2_0                , RULL(0x800000230701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_6_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P2_0                , RULL(0x800000230801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_2_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P2_1                , RULL(0x800004230701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_6_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P2_1                , RULL(0x800004230801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_2_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P2_2                , RULL(0x800008230701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_6_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P2_2                , RULL(0x800008230801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_2_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P2_3                , RULL(0x80000C230701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_6_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P2_3                , RULL(0x80000C230801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_2_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P2_4                , RULL(0x800010230701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_6_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P2_4                , RULL(0x800010230801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_3_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P3_0                , RULL(0x8000002307011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_7_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P3_0                , RULL(0x8000002308011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_3_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P3_1                , RULL(0x8000042307011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_7_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P3_1                , RULL(0x8000042308011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_3_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P3_2                , RULL(0x8000082307011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_7_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P3_2                , RULL(0x8000082308011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_3_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P3_3                , RULL(0x80000C2307011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_7_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P3_3                , RULL(0x80000C2308011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_3_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P3_4                , RULL(0x8000102307011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_7_DDRPHY_DP16_ACBOOST_CTL_BYTE1_P3_4                , RULL(0x8000102308011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_0                     , RULL(0x800000200701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_0_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_0                   , RULL(0x800000200701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_4_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_0                   , RULL(0x800000200801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_1                     , RULL(0x800004200701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_0_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_1                   , RULL(0x800004200701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_4_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_1                   , RULL(0x800004200801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_2                     , RULL(0x800008200701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_0_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_2                   , RULL(0x800008200701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_4_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_2                   , RULL(0x800008200801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_3                     , RULL(0x80000C200701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_0_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_3                   , RULL(0x80000C200701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_4_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_3                   , RULL(0x80000C200801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_4                     , RULL(0x800010200701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_0_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_4                   , RULL(0x800010200701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_4_DDRPHY_DP16_CTLE_CTL_BYTE0_P0_4                   , RULL(0x800010200801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_1_DDRPHY_DP16_CTLE_CTL_BYTE0_P1_0                   , RULL(0x800000200701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_5_DDRPHY_DP16_CTLE_CTL_BYTE0_P1_0                   , RULL(0x800000200801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_1_DDRPHY_DP16_CTLE_CTL_BYTE0_P1_1                   , RULL(0x800004200701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_5_DDRPHY_DP16_CTLE_CTL_BYTE0_P1_1                   , RULL(0x800004200801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_1_DDRPHY_DP16_CTLE_CTL_BYTE0_P1_2                   , RULL(0x800008200701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_5_DDRPHY_DP16_CTLE_CTL_BYTE0_P1_2                   , RULL(0x800008200801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_1_DDRPHY_DP16_CTLE_CTL_BYTE0_P1_3                   , RULL(0x80000C200701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_5_DDRPHY_DP16_CTLE_CTL_BYTE0_P1_3                   , RULL(0x80000C200801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_1_DDRPHY_DP16_CTLE_CTL_BYTE0_P1_4                   , RULL(0x800010200701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_5_DDRPHY_DP16_CTLE_CTL_BYTE0_P1_4                   , RULL(0x800010200801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_2_DDRPHY_DP16_CTLE_CTL_BYTE0_P2_0                   , RULL(0x800000200701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_6_DDRPHY_DP16_CTLE_CTL_BYTE0_P2_0                   , RULL(0x800000200801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_2_DDRPHY_DP16_CTLE_CTL_BYTE0_P2_1                   , RULL(0x800004200701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_6_DDRPHY_DP16_CTLE_CTL_BYTE0_P2_1                   , RULL(0x800004200801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_2_DDRPHY_DP16_CTLE_CTL_BYTE0_P2_2                   , RULL(0x800008200701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_6_DDRPHY_DP16_CTLE_CTL_BYTE0_P2_2                   , RULL(0x800008200801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_2_DDRPHY_DP16_CTLE_CTL_BYTE0_P2_3                   , RULL(0x80000C200701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_6_DDRPHY_DP16_CTLE_CTL_BYTE0_P2_3                   , RULL(0x80000C200801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_2_DDRPHY_DP16_CTLE_CTL_BYTE0_P2_4                   , RULL(0x800010200701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_6_DDRPHY_DP16_CTLE_CTL_BYTE0_P2_4                   , RULL(0x800010200801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_3_DDRPHY_DP16_CTLE_CTL_BYTE0_P3_0                   , RULL(0x8000002007011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_7_DDRPHY_DP16_CTLE_CTL_BYTE0_P3_0                   , RULL(0x8000002008011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_3_DDRPHY_DP16_CTLE_CTL_BYTE0_P3_1                   , RULL(0x8000042007011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_7_DDRPHY_DP16_CTLE_CTL_BYTE0_P3_1                   , RULL(0x8000042008011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_3_DDRPHY_DP16_CTLE_CTL_BYTE0_P3_2                   , RULL(0x8000082007011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_7_DDRPHY_DP16_CTLE_CTL_BYTE0_P3_2                   , RULL(0x8000082008011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_3_DDRPHY_DP16_CTLE_CTL_BYTE0_P3_3                   , RULL(0x80000C2007011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_7_DDRPHY_DP16_CTLE_CTL_BYTE0_P3_3                   , RULL(0x80000C2008011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_3_DDRPHY_DP16_CTLE_CTL_BYTE0_P3_4                   , RULL(0x8000102007011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_7_DDRPHY_DP16_CTLE_CTL_BYTE0_P3_4                   , RULL(0x8000102008011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_DDRPHY_DP16_CTLE_CTL_BYTE1_P0_0                     , RULL(0x800000210701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_0_DDRPHY_DP16_CTLE_CTL_BYTE1_P0_0                   , RULL(0x800000210701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_4_DDRPHY_DP16_CTLE_CTL_BYTE1_P0_0                   , RULL(0x800000210801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_DDRPHY_DP16_CTLE_CTL_BYTE1_P0_1                     , RULL(0x800004210701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_0_DDRPHY_DP16_CTLE_CTL_BYTE1_P0_1                   , RULL(0x800004210701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_4_DDRPHY_DP16_CTLE_CTL_BYTE1_P0_1                   , RULL(0x800004210801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_DDRPHY_DP16_CTLE_CTL_BYTE1_P0_2                     , RULL(0x800008210701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_0_DDRPHY_DP16_CTLE_CTL_BYTE1_P0_2                   , RULL(0x800008210701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_4_DDRPHY_DP16_CTLE_CTL_BYTE1_P0_2                   , RULL(0x800008210801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_DDRPHY_DP16_CTLE_CTL_BYTE1_P0_3                     , RULL(0x80000C210701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_0_DDRPHY_DP16_CTLE_CTL_BYTE1_P0_3                   , RULL(0x80000C210701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_4_DDRPHY_DP16_CTLE_CTL_BYTE1_P0_3                   , RULL(0x80000C210801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_DDRPHY_DP16_CTLE_CTL_BYTE1_P0_4                     , RULL(0x800010210701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_0_DDRPHY_DP16_CTLE_CTL_BYTE1_P0_4                   , RULL(0x800010210701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_4_DDRPHY_DP16_CTLE_CTL_BYTE1_P0_4                   , RULL(0x800010210801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_1_DDRPHY_DP16_CTLE_CTL_BYTE1_P1_0                   , RULL(0x800000210701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_5_DDRPHY_DP16_CTLE_CTL_BYTE1_P1_0                   , RULL(0x800000210801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_1_DDRPHY_DP16_CTLE_CTL_BYTE1_P1_1                   , RULL(0x800004210701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_5_DDRPHY_DP16_CTLE_CTL_BYTE1_P1_1                   , RULL(0x800004210801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_1_DDRPHY_DP16_CTLE_CTL_BYTE1_P1_2                   , RULL(0x800008210701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_5_DDRPHY_DP16_CTLE_CTL_BYTE1_P1_2                   , RULL(0x800008210801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_1_DDRPHY_DP16_CTLE_CTL_BYTE1_P1_3                   , RULL(0x80000C210701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_5_DDRPHY_DP16_CTLE_CTL_BYTE1_P1_3                   , RULL(0x80000C210801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_1_DDRPHY_DP16_CTLE_CTL_BYTE1_P1_4                   , RULL(0x800010210701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_5_DDRPHY_DP16_CTLE_CTL_BYTE1_P1_4                   , RULL(0x800010210801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_2_DDRPHY_DP16_CTLE_CTL_BYTE1_P2_0                   , RULL(0x800000210701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_6_DDRPHY_DP16_CTLE_CTL_BYTE1_P2_0                   , RULL(0x800000210801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_2_DDRPHY_DP16_CTLE_CTL_BYTE1_P2_1                   , RULL(0x800004210701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_6_DDRPHY_DP16_CTLE_CTL_BYTE1_P2_1                   , RULL(0x800004210801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_2_DDRPHY_DP16_CTLE_CTL_BYTE1_P2_2                   , RULL(0x800008210701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_6_DDRPHY_DP16_CTLE_CTL_BYTE1_P2_2                   , RULL(0x800008210801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_2_DDRPHY_DP16_CTLE_CTL_BYTE1_P2_3                   , RULL(0x80000C210701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_6_DDRPHY_DP16_CTLE_CTL_BYTE1_P2_3                   , RULL(0x80000C210801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_2_DDRPHY_DP16_CTLE_CTL_BYTE1_P2_4                   , RULL(0x800010210701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_6_DDRPHY_DP16_CTLE_CTL_BYTE1_P2_4                   , RULL(0x800010210801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_3_DDRPHY_DP16_CTLE_CTL_BYTE1_P3_0                   , RULL(0x8000002107011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_7_DDRPHY_DP16_CTLE_CTL_BYTE1_P3_0                   , RULL(0x8000002108011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_3_DDRPHY_DP16_CTLE_CTL_BYTE1_P3_1                   , RULL(0x8000042107011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_7_DDRPHY_DP16_CTLE_CTL_BYTE1_P3_1                   , RULL(0x8000042108011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_3_DDRPHY_DP16_CTLE_CTL_BYTE1_P3_2                   , RULL(0x8000082107011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_7_DDRPHY_DP16_CTLE_CTL_BYTE1_P3_2                   , RULL(0x8000082108011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_3_DDRPHY_DP16_CTLE_CTL_BYTE1_P3_3                   , RULL(0x80000C2107011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_7_DDRPHY_DP16_CTLE_CTL_BYTE1_P3_3                   , RULL(0x80000C2108011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_3_DDRPHY_DP16_CTLE_CTL_BYTE1_P3_4                   , RULL(0x8000102107011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 REG64( MCA_7_DDRPHY_DP16_CTLE_CTL_BYTE1_P3_4                   , RULL(0x8000102108011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_RO   );
 
 REG64( MCA_DDRPHY_DP16_DATA_BIT_DIR0_P0_0                      , RULL(0x800000020701103F), SH_UNT_MCA      ,
        SH_ACS_SCOM_RW   );
@@ -4473,6 +4639,226 @@ REG64( MCA_3_DDRPHY_DP16_DATA_BIT_ENABLE1_P3_4                 , RULL(0x80001001
 REG64( MCA_7_DDRPHY_DP16_DATA_BIT_ENABLE1_P3_4                 , RULL(0x8000100108011C3F), SH_UNT_MCA_7    ,
        SH_ACS_SCOM_RW   );
 
+REG64( MCA_DDRPHY_DP16_DCD_CONTROL0_P0_0                       , RULL(0x800000A40701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_DCD_CONTROL0_P0_0                     , RULL(0x800000A40701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_DCD_CONTROL0_P0_0                     , RULL(0x800000A40801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_DCD_CONTROL0_P0_1                       , RULL(0x800004A40701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_DCD_CONTROL0_P0_1                     , RULL(0x800004A40701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_DCD_CONTROL0_P0_1                     , RULL(0x800004A40801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_DCD_CONTROL0_P0_2                       , RULL(0x800008A40701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_DCD_CONTROL0_P0_2                     , RULL(0x800008A40701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_DCD_CONTROL0_P0_2                     , RULL(0x800008A40801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_DCD_CONTROL0_P0_3                       , RULL(0x80000CA40701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_DCD_CONTROL0_P0_3                     , RULL(0x80000CA40701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_DCD_CONTROL0_P0_3                     , RULL(0x80000CA40801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_DCD_CONTROL0_P0_4                       , RULL(0x800010A40701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_DCD_CONTROL0_P0_4                     , RULL(0x800010A40701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_DCD_CONTROL0_P0_4                     , RULL(0x800010A40801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_DCD_CONTROL0_P1_0                     , RULL(0x800000A40701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_DCD_CONTROL0_P1_0                     , RULL(0x800000A40801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_DCD_CONTROL0_P1_1                     , RULL(0x800004A40701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_DCD_CONTROL0_P1_1                     , RULL(0x800004A40801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_DCD_CONTROL0_P1_2                     , RULL(0x800008A40701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_DCD_CONTROL0_P1_2                     , RULL(0x800008A40801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_DCD_CONTROL0_P1_3                     , RULL(0x80000CA40701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_DCD_CONTROL0_P1_3                     , RULL(0x80000CA40801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_DCD_CONTROL0_P1_4                     , RULL(0x800010A40701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_DCD_CONTROL0_P1_4                     , RULL(0x800010A40801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_DCD_CONTROL0_P2_0                     , RULL(0x800000A40701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_DCD_CONTROL0_P2_0                     , RULL(0x800000A40801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_DCD_CONTROL0_P2_1                     , RULL(0x800004A40701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_DCD_CONTROL0_P2_1                     , RULL(0x800004A40801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_DCD_CONTROL0_P2_2                     , RULL(0x800008A40701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_DCD_CONTROL0_P2_2                     , RULL(0x800008A40801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_DCD_CONTROL0_P2_3                     , RULL(0x80000CA40701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_DCD_CONTROL0_P2_3                     , RULL(0x80000CA40801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_DCD_CONTROL0_P2_4                     , RULL(0x800010A40701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_DCD_CONTROL0_P2_4                     , RULL(0x800010A40801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_DCD_CONTROL0_P3_0                     , RULL(0x800000A407011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_DCD_CONTROL0_P3_0                     , RULL(0x800000A408011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_DCD_CONTROL0_P3_1                     , RULL(0x800004A407011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_DCD_CONTROL0_P3_1                     , RULL(0x800004A408011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_DCD_CONTROL0_P3_2                     , RULL(0x800008A407011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_DCD_CONTROL0_P3_2                     , RULL(0x800008A408011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_DCD_CONTROL0_P3_3                     , RULL(0x80000CA407011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_DCD_CONTROL0_P3_3                     , RULL(0x80000CA408011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_DCD_CONTROL0_P3_4                     , RULL(0x800010A407011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_DCD_CONTROL0_P3_4                     , RULL(0x800010A408011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_DCD_CONTROL1_P0_0                       , RULL(0x800000A50701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_DCD_CONTROL1_P0_0                     , RULL(0x800000A50701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_DCD_CONTROL1_P0_0                     , RULL(0x800000A50801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_DCD_CONTROL1_P0_1                       , RULL(0x800004A50701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_DCD_CONTROL1_P0_1                     , RULL(0x800004A50701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_DCD_CONTROL1_P0_1                     , RULL(0x800004A50801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_DCD_CONTROL1_P0_2                       , RULL(0x800008A50701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_DCD_CONTROL1_P0_2                     , RULL(0x800008A50701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_DCD_CONTROL1_P0_2                     , RULL(0x800008A50801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_DCD_CONTROL1_P0_3                       , RULL(0x80000CA50701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_DCD_CONTROL1_P0_3                     , RULL(0x80000CA50701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_DCD_CONTROL1_P0_3                     , RULL(0x80000CA50801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_DCD_CONTROL1_P0_4                       , RULL(0x800010A50701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_DCD_CONTROL1_P0_4                     , RULL(0x800010A50701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_DCD_CONTROL1_P0_4                     , RULL(0x800010A50801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_DCD_CONTROL1_P1_0                     , RULL(0x800000A50701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_DCD_CONTROL1_P1_0                     , RULL(0x800000A50801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_DCD_CONTROL1_P1_1                     , RULL(0x800004A50701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_DCD_CONTROL1_P1_1                     , RULL(0x800004A50801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_DCD_CONTROL1_P1_2                     , RULL(0x800008A50701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_DCD_CONTROL1_P1_2                     , RULL(0x800008A50801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_DCD_CONTROL1_P1_3                     , RULL(0x80000CA50701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_DCD_CONTROL1_P1_3                     , RULL(0x80000CA50801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_DCD_CONTROL1_P1_4                     , RULL(0x800010A50701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_DCD_CONTROL1_P1_4                     , RULL(0x800010A50801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_DCD_CONTROL1_P2_0                     , RULL(0x800000A50701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_DCD_CONTROL1_P2_0                     , RULL(0x800000A50801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_DCD_CONTROL1_P2_1                     , RULL(0x800004A50701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_DCD_CONTROL1_P2_1                     , RULL(0x800004A50801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_DCD_CONTROL1_P2_2                     , RULL(0x800008A50701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_DCD_CONTROL1_P2_2                     , RULL(0x800008A50801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_DCD_CONTROL1_P2_3                     , RULL(0x80000CA50701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_DCD_CONTROL1_P2_3                     , RULL(0x80000CA50801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_DCD_CONTROL1_P2_4                     , RULL(0x800010A50701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_DCD_CONTROL1_P2_4                     , RULL(0x800010A50801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_DCD_CONTROL1_P3_0                     , RULL(0x800000A507011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_DCD_CONTROL1_P3_0                     , RULL(0x800000A508011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_DCD_CONTROL1_P3_1                     , RULL(0x800004A507011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_DCD_CONTROL1_P3_1                     , RULL(0x800004A508011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_DCD_CONTROL1_P3_2                     , RULL(0x800008A507011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_DCD_CONTROL1_P3_2                     , RULL(0x800008A508011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_DCD_CONTROL1_P3_3                     , RULL(0x80000CA507011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_DCD_CONTROL1_P3_3                     , RULL(0x80000CA508011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_DCD_CONTROL1_P3_4                     , RULL(0x800010A507011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_DCD_CONTROL1_P3_4                     , RULL(0x800010A508011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
 REG64( MCA_DDRPHY_DP16_DEBUG_SEL_P0_0                          , RULL(0x8000000B0701103F), SH_UNT_MCA      ,
        SH_ACS_SCOM_RW   );
 REG64( MCA_0_DDRPHY_DP16_DEBUG_SEL_P0_0                        , RULL(0x8000000B0701103F), SH_UNT_MCA_0    ,
@@ -4694,114 +5080,114 @@ REG64( MCA_7_DDRPHY_DP16_DELAY_LINE_PWR_CTL_P3_4               , RULL(0x8000106F
        SH_ACS_SCOM_RW   );
 
 REG64( MCA_DDRPHY_DP16_DFT_DIG_EYE_P0_0                        , RULL(0x800000080701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 REG64( MCA_0_DDRPHY_DP16_DFT_DIG_EYE_P0_0                      , RULL(0x800000080701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 REG64( MCA_4_DDRPHY_DP16_DFT_DIG_EYE_P0_0                      , RULL(0x800000080801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 
 REG64( MCA_DDRPHY_DP16_DFT_DIG_EYE_P0_1                        , RULL(0x800004080701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 REG64( MCA_0_DDRPHY_DP16_DFT_DIG_EYE_P0_1                      , RULL(0x800004080701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 REG64( MCA_4_DDRPHY_DP16_DFT_DIG_EYE_P0_1                      , RULL(0x800004080801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 
 REG64( MCA_DDRPHY_DP16_DFT_DIG_EYE_P0_2                        , RULL(0x800008080701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 REG64( MCA_0_DDRPHY_DP16_DFT_DIG_EYE_P0_2                      , RULL(0x800008080701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 REG64( MCA_4_DDRPHY_DP16_DFT_DIG_EYE_P0_2                      , RULL(0x800008080801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 
 REG64( MCA_DDRPHY_DP16_DFT_DIG_EYE_P0_3                        , RULL(0x80000C080701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 REG64( MCA_0_DDRPHY_DP16_DFT_DIG_EYE_P0_3                      , RULL(0x80000C080701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 REG64( MCA_4_DDRPHY_DP16_DFT_DIG_EYE_P0_3                      , RULL(0x80000C080801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 
 REG64( MCA_DDRPHY_DP16_DFT_DIG_EYE_P0_4                        , RULL(0x800010080701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 REG64( MCA_0_DDRPHY_DP16_DFT_DIG_EYE_P0_4                      , RULL(0x800010080701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 REG64( MCA_4_DDRPHY_DP16_DFT_DIG_EYE_P0_4                      , RULL(0x800010080801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 
 REG64( MCA_1_DDRPHY_DP16_DFT_DIG_EYE_P1_0                      , RULL(0x800000080701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 REG64( MCA_5_DDRPHY_DP16_DFT_DIG_EYE_P1_0                      , RULL(0x800000080801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 
 REG64( MCA_1_DDRPHY_DP16_DFT_DIG_EYE_P1_1                      , RULL(0x800004080701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 REG64( MCA_5_DDRPHY_DP16_DFT_DIG_EYE_P1_1                      , RULL(0x800004080801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 
 REG64( MCA_1_DDRPHY_DP16_DFT_DIG_EYE_P1_2                      , RULL(0x800008080701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 REG64( MCA_5_DDRPHY_DP16_DFT_DIG_EYE_P1_2                      , RULL(0x800008080801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 
 REG64( MCA_1_DDRPHY_DP16_DFT_DIG_EYE_P1_3                      , RULL(0x80000C080701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 REG64( MCA_5_DDRPHY_DP16_DFT_DIG_EYE_P1_3                      , RULL(0x80000C080801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 
 REG64( MCA_1_DDRPHY_DP16_DFT_DIG_EYE_P1_4                      , RULL(0x800010080701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 REG64( MCA_5_DDRPHY_DP16_DFT_DIG_EYE_P1_4                      , RULL(0x800010080801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 
 REG64( MCA_2_DDRPHY_DP16_DFT_DIG_EYE_P2_0                      , RULL(0x800000080701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 REG64( MCA_6_DDRPHY_DP16_DFT_DIG_EYE_P2_0                      , RULL(0x800000080801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 
 REG64( MCA_2_DDRPHY_DP16_DFT_DIG_EYE_P2_1                      , RULL(0x800004080701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 REG64( MCA_6_DDRPHY_DP16_DFT_DIG_EYE_P2_1                      , RULL(0x800004080801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 
 REG64( MCA_2_DDRPHY_DP16_DFT_DIG_EYE_P2_2                      , RULL(0x800008080701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 REG64( MCA_6_DDRPHY_DP16_DFT_DIG_EYE_P2_2                      , RULL(0x800008080801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 
 REG64( MCA_2_DDRPHY_DP16_DFT_DIG_EYE_P2_3                      , RULL(0x80000C080701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 REG64( MCA_6_DDRPHY_DP16_DFT_DIG_EYE_P2_3                      , RULL(0x80000C080801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 
 REG64( MCA_2_DDRPHY_DP16_DFT_DIG_EYE_P2_4                      , RULL(0x800010080701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 REG64( MCA_6_DDRPHY_DP16_DFT_DIG_EYE_P2_4                      , RULL(0x800010080801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 
 REG64( MCA_3_DDRPHY_DP16_DFT_DIG_EYE_P3_0                      , RULL(0x8000000807011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 REG64( MCA_7_DDRPHY_DP16_DFT_DIG_EYE_P3_0                      , RULL(0x8000000808011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 
 REG64( MCA_3_DDRPHY_DP16_DFT_DIG_EYE_P3_1                      , RULL(0x8000040807011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 REG64( MCA_7_DDRPHY_DP16_DFT_DIG_EYE_P3_1                      , RULL(0x8000040808011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 
 REG64( MCA_3_DDRPHY_DP16_DFT_DIG_EYE_P3_2                      , RULL(0x8000080807011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 REG64( MCA_7_DDRPHY_DP16_DFT_DIG_EYE_P3_2                      , RULL(0x8000080808011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 
 REG64( MCA_3_DDRPHY_DP16_DFT_DIG_EYE_P3_3                      , RULL(0x80000C0807011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 REG64( MCA_7_DDRPHY_DP16_DFT_DIG_EYE_P3_3                      , RULL(0x80000C0808011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 
 REG64( MCA_3_DDRPHY_DP16_DFT_DIG_EYE_P3_4                      , RULL(0x8000100807011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 REG64( MCA_7_DDRPHY_DP16_DFT_DIG_EYE_P3_4                      , RULL(0x8000100808011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM      );
+       SH_ACS_SCOM_RW   );
 
 REG64( MCA_DDRPHY_DP16_DFT_WRAP_STATUS_P0_0                    , RULL(0x8000001D0701103F), SH_UNT_MCA      ,
        SH_ACS_SCOM      );
@@ -4914,224 +5300,224 @@ REG64( MCA_7_DDRPHY_DP16_DFT_WRAP_STATUS_P3_4                  , RULL(0x8000101D
        SH_ACS_SCOM      );
 
 REG64( MCA_DDRPHY_DP16_DLL_CNTL0_P0_0                          , RULL(0x800000240701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_0_DDRPHY_DP16_DLL_CNTL0_P0_0                        , RULL(0x800000240701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_4_DDRPHY_DP16_DLL_CNTL0_P0_0                        , RULL(0x800000240801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_DDRPHY_DP16_DLL_CNTL0_P0_1                          , RULL(0x800004240701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_0_DDRPHY_DP16_DLL_CNTL0_P0_1                        , RULL(0x800004240701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_4_DDRPHY_DP16_DLL_CNTL0_P0_1                        , RULL(0x800004240801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_DDRPHY_DP16_DLL_CNTL0_P0_2                          , RULL(0x800008240701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_0_DDRPHY_DP16_DLL_CNTL0_P0_2                        , RULL(0x800008240701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_4_DDRPHY_DP16_DLL_CNTL0_P0_2                        , RULL(0x800008240801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_DDRPHY_DP16_DLL_CNTL0_P0_3                          , RULL(0x80000C240701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_0_DDRPHY_DP16_DLL_CNTL0_P0_3                        , RULL(0x80000C240701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_4_DDRPHY_DP16_DLL_CNTL0_P0_3                        , RULL(0x80000C240801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_DDRPHY_DP16_DLL_CNTL0_P0_4                          , RULL(0x800010240701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_0_DDRPHY_DP16_DLL_CNTL0_P0_4                        , RULL(0x800010240701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_4_DDRPHY_DP16_DLL_CNTL0_P0_4                        , RULL(0x800010240801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_1_DDRPHY_DP16_DLL_CNTL0_P1_0                        , RULL(0x800000240701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_5_DDRPHY_DP16_DLL_CNTL0_P1_0                        , RULL(0x800000240801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_1_DDRPHY_DP16_DLL_CNTL0_P1_1                        , RULL(0x800004240701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_5_DDRPHY_DP16_DLL_CNTL0_P1_1                        , RULL(0x800004240801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_1_DDRPHY_DP16_DLL_CNTL0_P1_2                        , RULL(0x800008240701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_5_DDRPHY_DP16_DLL_CNTL0_P1_2                        , RULL(0x800008240801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_1_DDRPHY_DP16_DLL_CNTL0_P1_3                        , RULL(0x80000C240701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_5_DDRPHY_DP16_DLL_CNTL0_P1_3                        , RULL(0x80000C240801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_1_DDRPHY_DP16_DLL_CNTL0_P1_4                        , RULL(0x800010240701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_5_DDRPHY_DP16_DLL_CNTL0_P1_4                        , RULL(0x800010240801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_2_DDRPHY_DP16_DLL_CNTL0_P2_0                        , RULL(0x800000240701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_6_DDRPHY_DP16_DLL_CNTL0_P2_0                        , RULL(0x800000240801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_2_DDRPHY_DP16_DLL_CNTL0_P2_1                        , RULL(0x800004240701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_6_DDRPHY_DP16_DLL_CNTL0_P2_1                        , RULL(0x800004240801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_2_DDRPHY_DP16_DLL_CNTL0_P2_2                        , RULL(0x800008240701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_6_DDRPHY_DP16_DLL_CNTL0_P2_2                        , RULL(0x800008240801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_2_DDRPHY_DP16_DLL_CNTL0_P2_3                        , RULL(0x80000C240701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_6_DDRPHY_DP16_DLL_CNTL0_P2_3                        , RULL(0x80000C240801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_2_DDRPHY_DP16_DLL_CNTL0_P2_4                        , RULL(0x800010240701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_6_DDRPHY_DP16_DLL_CNTL0_P2_4                        , RULL(0x800010240801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_3_DDRPHY_DP16_DLL_CNTL0_P3_0                        , RULL(0x8000002407011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_7_DDRPHY_DP16_DLL_CNTL0_P3_0                        , RULL(0x8000002408011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_3_DDRPHY_DP16_DLL_CNTL0_P3_1                        , RULL(0x8000042407011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_7_DDRPHY_DP16_DLL_CNTL0_P3_1                        , RULL(0x8000042408011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_3_DDRPHY_DP16_DLL_CNTL0_P3_2                        , RULL(0x8000082407011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_7_DDRPHY_DP16_DLL_CNTL0_P3_2                        , RULL(0x8000082408011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_3_DDRPHY_DP16_DLL_CNTL0_P3_3                        , RULL(0x80000C2407011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_7_DDRPHY_DP16_DLL_CNTL0_P3_3                        , RULL(0x80000C2408011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_3_DDRPHY_DP16_DLL_CNTL0_P3_4                        , RULL(0x8000102407011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_7_DDRPHY_DP16_DLL_CNTL0_P3_4                        , RULL(0x8000102408011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_DDRPHY_DP16_DLL_CNTL1_P0_0                          , RULL(0x800000250701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_0_DDRPHY_DP16_DLL_CNTL1_P0_0                        , RULL(0x800000250701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_4_DDRPHY_DP16_DLL_CNTL1_P0_0                        , RULL(0x800000250801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_DDRPHY_DP16_DLL_CNTL1_P0_1                          , RULL(0x800004250701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_0_DDRPHY_DP16_DLL_CNTL1_P0_1                        , RULL(0x800004250701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_4_DDRPHY_DP16_DLL_CNTL1_P0_1                        , RULL(0x800004250801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_DDRPHY_DP16_DLL_CNTL1_P0_2                          , RULL(0x800008250701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_0_DDRPHY_DP16_DLL_CNTL1_P0_2                        , RULL(0x800008250701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_4_DDRPHY_DP16_DLL_CNTL1_P0_2                        , RULL(0x800008250801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_DDRPHY_DP16_DLL_CNTL1_P0_3                          , RULL(0x80000C250701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_0_DDRPHY_DP16_DLL_CNTL1_P0_3                        , RULL(0x80000C250701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_4_DDRPHY_DP16_DLL_CNTL1_P0_3                        , RULL(0x80000C250801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_DDRPHY_DP16_DLL_CNTL1_P0_4                          , RULL(0x800010250701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_0_DDRPHY_DP16_DLL_CNTL1_P0_4                        , RULL(0x800010250701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_4_DDRPHY_DP16_DLL_CNTL1_P0_4                        , RULL(0x800010250801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_1_DDRPHY_DP16_DLL_CNTL1_P1_0                        , RULL(0x800000250701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_5_DDRPHY_DP16_DLL_CNTL1_P1_0                        , RULL(0x800000250801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_1_DDRPHY_DP16_DLL_CNTL1_P1_1                        , RULL(0x800004250701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_5_DDRPHY_DP16_DLL_CNTL1_P1_1                        , RULL(0x800004250801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_1_DDRPHY_DP16_DLL_CNTL1_P1_2                        , RULL(0x800008250701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_5_DDRPHY_DP16_DLL_CNTL1_P1_2                        , RULL(0x800008250801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_1_DDRPHY_DP16_DLL_CNTL1_P1_3                        , RULL(0x80000C250701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_5_DDRPHY_DP16_DLL_CNTL1_P1_3                        , RULL(0x80000C250801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_1_DDRPHY_DP16_DLL_CNTL1_P1_4                        , RULL(0x800010250701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_5_DDRPHY_DP16_DLL_CNTL1_P1_4                        , RULL(0x800010250801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_2_DDRPHY_DP16_DLL_CNTL1_P2_0                        , RULL(0x800000250701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_6_DDRPHY_DP16_DLL_CNTL1_P2_0                        , RULL(0x800000250801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_2_DDRPHY_DP16_DLL_CNTL1_P2_1                        , RULL(0x800004250701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_6_DDRPHY_DP16_DLL_CNTL1_P2_1                        , RULL(0x800004250801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_2_DDRPHY_DP16_DLL_CNTL1_P2_2                        , RULL(0x800008250701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_6_DDRPHY_DP16_DLL_CNTL1_P2_2                        , RULL(0x800008250801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_2_DDRPHY_DP16_DLL_CNTL1_P2_3                        , RULL(0x80000C250701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_6_DDRPHY_DP16_DLL_CNTL1_P2_3                        , RULL(0x80000C250801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_2_DDRPHY_DP16_DLL_CNTL1_P2_4                        , RULL(0x800010250701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_6_DDRPHY_DP16_DLL_CNTL1_P2_4                        , RULL(0x800010250801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_3_DDRPHY_DP16_DLL_CNTL1_P3_0                        , RULL(0x8000002507011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_7_DDRPHY_DP16_DLL_CNTL1_P3_0                        , RULL(0x8000002508011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_3_DDRPHY_DP16_DLL_CNTL1_P3_1                        , RULL(0x8000042507011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_7_DDRPHY_DP16_DLL_CNTL1_P3_1                        , RULL(0x8000042508011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_3_DDRPHY_DP16_DLL_CNTL1_P3_2                        , RULL(0x8000082507011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_7_DDRPHY_DP16_DLL_CNTL1_P3_2                        , RULL(0x8000082508011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_3_DDRPHY_DP16_DLL_CNTL1_P3_3                        , RULL(0x80000C2507011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_7_DDRPHY_DP16_DLL_CNTL1_P3_3                        , RULL(0x80000C2508011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_3_DDRPHY_DP16_DLL_CNTL1_P3_4                        , RULL(0x8000102507011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 REG64( MCA_7_DDRPHY_DP16_DLL_CNTL1_P3_4                        , RULL(0x8000102508011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM      );
 
 REG64( MCA_DDRPHY_DP16_DLL_CONFIG1_P0_0                        , RULL(0x800000770701103F), SH_UNT_MCA      ,
        SH_ACS_SCOM_RW   );
@@ -9533,224 +9919,114 @@ REG64( MCA_3_DDRPHY_DP16_IO_TX_CONFIG0_P3_4                    , RULL(0x80001075
 REG64( MCA_7_DDRPHY_DP16_IO_TX_CONFIG0_P3_4                    , RULL(0x8000107508011C3F), SH_UNT_MCA_7    ,
        SH_ACS_SCOM_RW   );
 
-REG64( MCA_DDRPHY_DP16_IO_TX_NFET_SLICE_P0_0                   , RULL(0x800000780701103F), SH_UNT_MCA      ,
+REG64( MCA_DDRPHY_DP16_IO_TX_FET_SLICE_P0_0                    , RULL(0x800000780701103F), SH_UNT_MCA      ,
        SH_ACS_SCOM_RW   );
-REG64( MCA_0_DDRPHY_DP16_IO_TX_NFET_SLICE_P0_0                 , RULL(0x800000780701103F), SH_UNT_MCA_0    ,
+REG64( MCA_0_DDRPHY_DP16_IO_TX_FET_SLICE_P0_0                  , RULL(0x800000780701103F), SH_UNT_MCA_0    ,
        SH_ACS_SCOM_RW   );
-REG64( MCA_4_DDRPHY_DP16_IO_TX_NFET_SLICE_P0_0                 , RULL(0x800000780801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_DDRPHY_DP16_IO_TX_NFET_SLICE_P0_1                   , RULL(0x800004780701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_0_DDRPHY_DP16_IO_TX_NFET_SLICE_P0_1                 , RULL(0x800004780701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_4_DDRPHY_DP16_IO_TX_NFET_SLICE_P0_1                 , RULL(0x800004780801103F), SH_UNT_MCA_4    ,
+REG64( MCA_4_DDRPHY_DP16_IO_TX_FET_SLICE_P0_0                  , RULL(0x800000780801103F), SH_UNT_MCA_4    ,
        SH_ACS_SCOM_RW   );
 
-REG64( MCA_DDRPHY_DP16_IO_TX_NFET_SLICE_P0_2                   , RULL(0x800008780701103F), SH_UNT_MCA      ,
+REG64( MCA_DDRPHY_DP16_IO_TX_FET_SLICE_P0_1                    , RULL(0x800004780701103F), SH_UNT_MCA      ,
        SH_ACS_SCOM_RW   );
-REG64( MCA_0_DDRPHY_DP16_IO_TX_NFET_SLICE_P0_2                 , RULL(0x800008780701103F), SH_UNT_MCA_0    ,
+REG64( MCA_0_DDRPHY_DP16_IO_TX_FET_SLICE_P0_1                  , RULL(0x800004780701103F), SH_UNT_MCA_0    ,
        SH_ACS_SCOM_RW   );
-REG64( MCA_4_DDRPHY_DP16_IO_TX_NFET_SLICE_P0_2                 , RULL(0x800008780801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_DDRPHY_DP16_IO_TX_NFET_SLICE_P0_3                   , RULL(0x80000C780701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_0_DDRPHY_DP16_IO_TX_NFET_SLICE_P0_3                 , RULL(0x80000C780701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_4_DDRPHY_DP16_IO_TX_NFET_SLICE_P0_3                 , RULL(0x80000C780801103F), SH_UNT_MCA_4    ,
+REG64( MCA_4_DDRPHY_DP16_IO_TX_FET_SLICE_P0_1                  , RULL(0x800004780801103F), SH_UNT_MCA_4    ,
        SH_ACS_SCOM_RW   );
 
-REG64( MCA_DDRPHY_DP16_IO_TX_NFET_SLICE_P0_4                   , RULL(0x800010780701103F), SH_UNT_MCA      ,
+REG64( MCA_DDRPHY_DP16_IO_TX_FET_SLICE_P0_2                    , RULL(0x800008780701103F), SH_UNT_MCA      ,
        SH_ACS_SCOM_RW   );
-REG64( MCA_0_DDRPHY_DP16_IO_TX_NFET_SLICE_P0_4                 , RULL(0x800010780701103F), SH_UNT_MCA_0    ,
+REG64( MCA_0_DDRPHY_DP16_IO_TX_FET_SLICE_P0_2                  , RULL(0x800008780701103F), SH_UNT_MCA_0    ,
        SH_ACS_SCOM_RW   );
-REG64( MCA_4_DDRPHY_DP16_IO_TX_NFET_SLICE_P0_4                 , RULL(0x800010780801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_1_DDRPHY_DP16_IO_TX_NFET_SLICE_P1_0                 , RULL(0x800000780701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_5_DDRPHY_DP16_IO_TX_NFET_SLICE_P1_0                 , RULL(0x800000780801143F), SH_UNT_MCA_5    ,
+REG64( MCA_4_DDRPHY_DP16_IO_TX_FET_SLICE_P0_2                  , RULL(0x800008780801103F), SH_UNT_MCA_4    ,
        SH_ACS_SCOM_RW   );
 
-REG64( MCA_1_DDRPHY_DP16_IO_TX_NFET_SLICE_P1_1                 , RULL(0x800004780701143F), SH_UNT_MCA_1    ,
+REG64( MCA_DDRPHY_DP16_IO_TX_FET_SLICE_P0_3                    , RULL(0x80000C780701103F), SH_UNT_MCA      ,
        SH_ACS_SCOM_RW   );
-REG64( MCA_5_DDRPHY_DP16_IO_TX_NFET_SLICE_P1_1                 , RULL(0x800004780801143F), SH_UNT_MCA_5    ,
+REG64( MCA_0_DDRPHY_DP16_IO_TX_FET_SLICE_P0_3                  , RULL(0x80000C780701103F), SH_UNT_MCA_0    ,
        SH_ACS_SCOM_RW   );
-
-REG64( MCA_1_DDRPHY_DP16_IO_TX_NFET_SLICE_P1_2                 , RULL(0x800008780701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_5_DDRPHY_DP16_IO_TX_NFET_SLICE_P1_2                 , RULL(0x800008780801143F), SH_UNT_MCA_5    ,
+REG64( MCA_4_DDRPHY_DP16_IO_TX_FET_SLICE_P0_3                  , RULL(0x80000C780801103F), SH_UNT_MCA_4    ,
        SH_ACS_SCOM_RW   );
 
-REG64( MCA_1_DDRPHY_DP16_IO_TX_NFET_SLICE_P1_3                 , RULL(0x80000C780701143F), SH_UNT_MCA_1    ,
+REG64( MCA_DDRPHY_DP16_IO_TX_FET_SLICE_P0_4                    , RULL(0x800010780701103F), SH_UNT_MCA      ,
        SH_ACS_SCOM_RW   );
-REG64( MCA_5_DDRPHY_DP16_IO_TX_NFET_SLICE_P1_3                 , RULL(0x80000C780801143F), SH_UNT_MCA_5    ,
+REG64( MCA_0_DDRPHY_DP16_IO_TX_FET_SLICE_P0_4                  , RULL(0x800010780701103F), SH_UNT_MCA_0    ,
        SH_ACS_SCOM_RW   );
-
-REG64( MCA_1_DDRPHY_DP16_IO_TX_NFET_SLICE_P1_4                 , RULL(0x800010780701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_5_DDRPHY_DP16_IO_TX_NFET_SLICE_P1_4                 , RULL(0x800010780801143F), SH_UNT_MCA_5    ,
+REG64( MCA_4_DDRPHY_DP16_IO_TX_FET_SLICE_P0_4                  , RULL(0x800010780801103F), SH_UNT_MCA_4    ,
        SH_ACS_SCOM_RW   );
 
-REG64( MCA_2_DDRPHY_DP16_IO_TX_NFET_SLICE_P2_0                 , RULL(0x800000780701183F), SH_UNT_MCA_2    ,
+REG64( MCA_1_DDRPHY_DP16_IO_TX_FET_SLICE_P1_0                  , RULL(0x800000780701143F), SH_UNT_MCA_1    ,
        SH_ACS_SCOM_RW   );
-REG64( MCA_6_DDRPHY_DP16_IO_TX_NFET_SLICE_P2_0                 , RULL(0x800000780801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_2_DDRPHY_DP16_IO_TX_NFET_SLICE_P2_1                 , RULL(0x800004780701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_6_DDRPHY_DP16_IO_TX_NFET_SLICE_P2_1                 , RULL(0x800004780801183F), SH_UNT_MCA_6    ,
+REG64( MCA_5_DDRPHY_DP16_IO_TX_FET_SLICE_P1_0                  , RULL(0x800000780801143F), SH_UNT_MCA_5    ,
        SH_ACS_SCOM_RW   );
 
-REG64( MCA_2_DDRPHY_DP16_IO_TX_NFET_SLICE_P2_2                 , RULL(0x800008780701183F), SH_UNT_MCA_2    ,
+REG64( MCA_1_DDRPHY_DP16_IO_TX_FET_SLICE_P1_1                  , RULL(0x800004780701143F), SH_UNT_MCA_1    ,
        SH_ACS_SCOM_RW   );
-REG64( MCA_6_DDRPHY_DP16_IO_TX_NFET_SLICE_P2_2                 , RULL(0x800008780801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_2_DDRPHY_DP16_IO_TX_NFET_SLICE_P2_3                 , RULL(0x80000C780701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_6_DDRPHY_DP16_IO_TX_NFET_SLICE_P2_3                 , RULL(0x80000C780801183F), SH_UNT_MCA_6    ,
+REG64( MCA_5_DDRPHY_DP16_IO_TX_FET_SLICE_P1_1                  , RULL(0x800004780801143F), SH_UNT_MCA_5    ,
        SH_ACS_SCOM_RW   );
 
-REG64( MCA_2_DDRPHY_DP16_IO_TX_NFET_SLICE_P2_4                 , RULL(0x800010780701183F), SH_UNT_MCA_2    ,
+REG64( MCA_1_DDRPHY_DP16_IO_TX_FET_SLICE_P1_2                  , RULL(0x800008780701143F), SH_UNT_MCA_1    ,
        SH_ACS_SCOM_RW   );
-REG64( MCA_6_DDRPHY_DP16_IO_TX_NFET_SLICE_P2_4                 , RULL(0x800010780801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_3_DDRPHY_DP16_IO_TX_NFET_SLICE_P3_0                 , RULL(0x8000007807011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_7_DDRPHY_DP16_IO_TX_NFET_SLICE_P3_0                 , RULL(0x8000007808011C3F), SH_UNT_MCA_7    ,
+REG64( MCA_5_DDRPHY_DP16_IO_TX_FET_SLICE_P1_2                  , RULL(0x800008780801143F), SH_UNT_MCA_5    ,
        SH_ACS_SCOM_RW   );
 
-REG64( MCA_3_DDRPHY_DP16_IO_TX_NFET_SLICE_P3_1                 , RULL(0x8000047807011C3F), SH_UNT_MCA_3    ,
+REG64( MCA_1_DDRPHY_DP16_IO_TX_FET_SLICE_P1_3                  , RULL(0x80000C780701143F), SH_UNT_MCA_1    ,
        SH_ACS_SCOM_RW   );
-REG64( MCA_7_DDRPHY_DP16_IO_TX_NFET_SLICE_P3_1                 , RULL(0x8000047808011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_3_DDRPHY_DP16_IO_TX_NFET_SLICE_P3_2                 , RULL(0x8000087807011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_7_DDRPHY_DP16_IO_TX_NFET_SLICE_P3_2                 , RULL(0x8000087808011C3F), SH_UNT_MCA_7    ,
+REG64( MCA_5_DDRPHY_DP16_IO_TX_FET_SLICE_P1_3                  , RULL(0x80000C780801143F), SH_UNT_MCA_5    ,
        SH_ACS_SCOM_RW   );
 
-REG64( MCA_3_DDRPHY_DP16_IO_TX_NFET_SLICE_P3_3                 , RULL(0x80000C7807011C3F), SH_UNT_MCA_3    ,
+REG64( MCA_1_DDRPHY_DP16_IO_TX_FET_SLICE_P1_4                  , RULL(0x800010780701143F), SH_UNT_MCA_1    ,
        SH_ACS_SCOM_RW   );
-REG64( MCA_7_DDRPHY_DP16_IO_TX_NFET_SLICE_P3_3                 , RULL(0x80000C7808011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_3_DDRPHY_DP16_IO_TX_NFET_SLICE_P3_4                 , RULL(0x8000107807011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_7_DDRPHY_DP16_IO_TX_NFET_SLICE_P3_4                 , RULL(0x8000107808011C3F), SH_UNT_MCA_7    ,
+REG64( MCA_5_DDRPHY_DP16_IO_TX_FET_SLICE_P1_4                  , RULL(0x800010780801143F), SH_UNT_MCA_5    ,
        SH_ACS_SCOM_RW   );
 
-REG64( MCA_DDRPHY_DP16_IO_TX_PFET_SLICE_P0_0                   , RULL(0x800000790701103F), SH_UNT_MCA      ,
+REG64( MCA_2_DDRPHY_DP16_IO_TX_FET_SLICE_P2_0                  , RULL(0x800000780701183F), SH_UNT_MCA_2    ,
        SH_ACS_SCOM_RW   );
-REG64( MCA_0_DDRPHY_DP16_IO_TX_PFET_SLICE_P0_0                 , RULL(0x800000790701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_4_DDRPHY_DP16_IO_TX_PFET_SLICE_P0_0                 , RULL(0x800000790801103F), SH_UNT_MCA_4    ,
+REG64( MCA_6_DDRPHY_DP16_IO_TX_FET_SLICE_P2_0                  , RULL(0x800000780801183F), SH_UNT_MCA_6    ,
        SH_ACS_SCOM_RW   );
 
-REG64( MCA_DDRPHY_DP16_IO_TX_PFET_SLICE_P0_1                   , RULL(0x800004790701103F), SH_UNT_MCA      ,
+REG64( MCA_2_DDRPHY_DP16_IO_TX_FET_SLICE_P2_1                  , RULL(0x800004780701183F), SH_UNT_MCA_2    ,
        SH_ACS_SCOM_RW   );
-REG64( MCA_0_DDRPHY_DP16_IO_TX_PFET_SLICE_P0_1                 , RULL(0x800004790701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_4_DDRPHY_DP16_IO_TX_PFET_SLICE_P0_1                 , RULL(0x800004790801103F), SH_UNT_MCA_4    ,
+REG64( MCA_6_DDRPHY_DP16_IO_TX_FET_SLICE_P2_1                  , RULL(0x800004780801183F), SH_UNT_MCA_6    ,
        SH_ACS_SCOM_RW   );
 
-REG64( MCA_DDRPHY_DP16_IO_TX_PFET_SLICE_P0_2                   , RULL(0x800008790701103F), SH_UNT_MCA      ,
+REG64( MCA_2_DDRPHY_DP16_IO_TX_FET_SLICE_P2_2                  , RULL(0x800008780701183F), SH_UNT_MCA_2    ,
        SH_ACS_SCOM_RW   );
-REG64( MCA_0_DDRPHY_DP16_IO_TX_PFET_SLICE_P0_2                 , RULL(0x800008790701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_4_DDRPHY_DP16_IO_TX_PFET_SLICE_P0_2                 , RULL(0x800008790801103F), SH_UNT_MCA_4    ,
+REG64( MCA_6_DDRPHY_DP16_IO_TX_FET_SLICE_P2_2                  , RULL(0x800008780801183F), SH_UNT_MCA_6    ,
        SH_ACS_SCOM_RW   );
 
-REG64( MCA_DDRPHY_DP16_IO_TX_PFET_SLICE_P0_3                   , RULL(0x80000C790701103F), SH_UNT_MCA      ,
+REG64( MCA_2_DDRPHY_DP16_IO_TX_FET_SLICE_P2_3                  , RULL(0x80000C780701183F), SH_UNT_MCA_2    ,
        SH_ACS_SCOM_RW   );
-REG64( MCA_0_DDRPHY_DP16_IO_TX_PFET_SLICE_P0_3                 , RULL(0x80000C790701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_4_DDRPHY_DP16_IO_TX_PFET_SLICE_P0_3                 , RULL(0x80000C790801103F), SH_UNT_MCA_4    ,
+REG64( MCA_6_DDRPHY_DP16_IO_TX_FET_SLICE_P2_3                  , RULL(0x80000C780801183F), SH_UNT_MCA_6    ,
        SH_ACS_SCOM_RW   );
 
-REG64( MCA_DDRPHY_DP16_IO_TX_PFET_SLICE_P0_4                   , RULL(0x800010790701103F), SH_UNT_MCA      ,
+REG64( MCA_2_DDRPHY_DP16_IO_TX_FET_SLICE_P2_4                  , RULL(0x800010780701183F), SH_UNT_MCA_2    ,
        SH_ACS_SCOM_RW   );
-REG64( MCA_0_DDRPHY_DP16_IO_TX_PFET_SLICE_P0_4                 , RULL(0x800010790701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_4_DDRPHY_DP16_IO_TX_PFET_SLICE_P0_4                 , RULL(0x800010790801103F), SH_UNT_MCA_4    ,
+REG64( MCA_6_DDRPHY_DP16_IO_TX_FET_SLICE_P2_4                  , RULL(0x800010780801183F), SH_UNT_MCA_6    ,
        SH_ACS_SCOM_RW   );
 
-REG64( MCA_1_DDRPHY_DP16_IO_TX_PFET_SLICE_P1_0                 , RULL(0x800000790701143F), SH_UNT_MCA_1    ,
+REG64( MCA_3_DDRPHY_DP16_IO_TX_FET_SLICE_P3_0                  , RULL(0x8000007807011C3F), SH_UNT_MCA_3    ,
        SH_ACS_SCOM_RW   );
-REG64( MCA_5_DDRPHY_DP16_IO_TX_PFET_SLICE_P1_0                 , RULL(0x800000790801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_1_DDRPHY_DP16_IO_TX_PFET_SLICE_P1_1                 , RULL(0x800004790701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_5_DDRPHY_DP16_IO_TX_PFET_SLICE_P1_1                 , RULL(0x800004790801143F), SH_UNT_MCA_5    ,
+REG64( MCA_7_DDRPHY_DP16_IO_TX_FET_SLICE_P3_0                  , RULL(0x8000007808011C3F), SH_UNT_MCA_7    ,
        SH_ACS_SCOM_RW   );
 
-REG64( MCA_1_DDRPHY_DP16_IO_TX_PFET_SLICE_P1_2                 , RULL(0x800008790701143F), SH_UNT_MCA_1    ,
+REG64( MCA_3_DDRPHY_DP16_IO_TX_FET_SLICE_P3_1                  , RULL(0x8000047807011C3F), SH_UNT_MCA_3    ,
        SH_ACS_SCOM_RW   );
-REG64( MCA_5_DDRPHY_DP16_IO_TX_PFET_SLICE_P1_2                 , RULL(0x800008790801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_1_DDRPHY_DP16_IO_TX_PFET_SLICE_P1_3                 , RULL(0x80000C790701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_5_DDRPHY_DP16_IO_TX_PFET_SLICE_P1_3                 , RULL(0x80000C790801143F), SH_UNT_MCA_5    ,
+REG64( MCA_7_DDRPHY_DP16_IO_TX_FET_SLICE_P3_1                  , RULL(0x8000047808011C3F), SH_UNT_MCA_7    ,
        SH_ACS_SCOM_RW   );
 
-REG64( MCA_1_DDRPHY_DP16_IO_TX_PFET_SLICE_P1_4                 , RULL(0x800010790701143F), SH_UNT_MCA_1    ,
+REG64( MCA_3_DDRPHY_DP16_IO_TX_FET_SLICE_P3_2                  , RULL(0x8000087807011C3F), SH_UNT_MCA_3    ,
        SH_ACS_SCOM_RW   );
-REG64( MCA_5_DDRPHY_DP16_IO_TX_PFET_SLICE_P1_4                 , RULL(0x800010790801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_2_DDRPHY_DP16_IO_TX_PFET_SLICE_P2_0                 , RULL(0x800000790701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_6_DDRPHY_DP16_IO_TX_PFET_SLICE_P2_0                 , RULL(0x800000790801183F), SH_UNT_MCA_6    ,
+REG64( MCA_7_DDRPHY_DP16_IO_TX_FET_SLICE_P3_2                  , RULL(0x8000087808011C3F), SH_UNT_MCA_7    ,
        SH_ACS_SCOM_RW   );
 
-REG64( MCA_2_DDRPHY_DP16_IO_TX_PFET_SLICE_P2_1                 , RULL(0x800004790701183F), SH_UNT_MCA_2    ,
+REG64( MCA_3_DDRPHY_DP16_IO_TX_FET_SLICE_P3_3                  , RULL(0x80000C7807011C3F), SH_UNT_MCA_3    ,
        SH_ACS_SCOM_RW   );
-REG64( MCA_6_DDRPHY_DP16_IO_TX_PFET_SLICE_P2_1                 , RULL(0x800004790801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_2_DDRPHY_DP16_IO_TX_PFET_SLICE_P2_2                 , RULL(0x800008790701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_6_DDRPHY_DP16_IO_TX_PFET_SLICE_P2_2                 , RULL(0x800008790801183F), SH_UNT_MCA_6    ,
+REG64( MCA_7_DDRPHY_DP16_IO_TX_FET_SLICE_P3_3                  , RULL(0x80000C7808011C3F), SH_UNT_MCA_7    ,
        SH_ACS_SCOM_RW   );
 
-REG64( MCA_2_DDRPHY_DP16_IO_TX_PFET_SLICE_P2_3                 , RULL(0x80000C790701183F), SH_UNT_MCA_2    ,
+REG64( MCA_3_DDRPHY_DP16_IO_TX_FET_SLICE_P3_4                  , RULL(0x8000107807011C3F), SH_UNT_MCA_3    ,
        SH_ACS_SCOM_RW   );
-REG64( MCA_6_DDRPHY_DP16_IO_TX_PFET_SLICE_P2_3                 , RULL(0x80000C790801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_2_DDRPHY_DP16_IO_TX_PFET_SLICE_P2_4                 , RULL(0x800010790701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_6_DDRPHY_DP16_IO_TX_PFET_SLICE_P2_4                 , RULL(0x800010790801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_3_DDRPHY_DP16_IO_TX_PFET_SLICE_P3_0                 , RULL(0x8000007907011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_7_DDRPHY_DP16_IO_TX_PFET_SLICE_P3_0                 , RULL(0x8000007908011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_3_DDRPHY_DP16_IO_TX_PFET_SLICE_P3_1                 , RULL(0x8000047907011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_7_DDRPHY_DP16_IO_TX_PFET_SLICE_P3_1                 , RULL(0x8000047908011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_3_DDRPHY_DP16_IO_TX_PFET_SLICE_P3_2                 , RULL(0x8000087907011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_7_DDRPHY_DP16_IO_TX_PFET_SLICE_P3_2                 , RULL(0x8000087908011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_3_DDRPHY_DP16_IO_TX_PFET_SLICE_P3_3                 , RULL(0x80000C7907011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_7_DDRPHY_DP16_IO_TX_PFET_SLICE_P3_3                 , RULL(0x80000C7908011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_3_DDRPHY_DP16_IO_TX_PFET_SLICE_P3_4                 , RULL(0x8000107907011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_7_DDRPHY_DP16_IO_TX_PFET_SLICE_P3_4                 , RULL(0x8000107908011C3F), SH_UNT_MCA_7    ,
+REG64( MCA_7_DDRPHY_DP16_IO_TX_FET_SLICE_P3_4                  , RULL(0x8000107808011C3F), SH_UNT_MCA_7    ,
        SH_ACS_SCOM_RW   );
 
 REG64( MCA_DDRPHY_DP16_IO_TX_PFET_TERM_P0_0                    , RULL(0x8000007B0701103F), SH_UNT_MCA      ,
@@ -9861,6 +10137,116 @@ REG64( MCA_7_DDRPHY_DP16_IO_TX_PFET_TERM_P3_3                  , RULL(0x80000C7B
 REG64( MCA_3_DDRPHY_DP16_IO_TX_PFET_TERM_P3_4                  , RULL(0x8000107B07011C3F), SH_UNT_MCA_3    ,
        SH_ACS_SCOM_RW   );
 REG64( MCA_7_DDRPHY_DP16_IO_TX_PFET_TERM_P3_4                  , RULL(0x8000107B08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_LO_PROBE_SELECT_P0_0                    , RULL(0x800000790701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_LO_PROBE_SELECT_P0_0                  , RULL(0x800000790701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_LO_PROBE_SELECT_P0_0                  , RULL(0x800000790801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_LO_PROBE_SELECT_P0_1                    , RULL(0x800004790701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_LO_PROBE_SELECT_P0_1                  , RULL(0x800004790701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_LO_PROBE_SELECT_P0_1                  , RULL(0x800004790801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_LO_PROBE_SELECT_P0_2                    , RULL(0x800008790701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_LO_PROBE_SELECT_P0_2                  , RULL(0x800008790701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_LO_PROBE_SELECT_P0_2                  , RULL(0x800008790801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_LO_PROBE_SELECT_P0_3                    , RULL(0x80000C790701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_LO_PROBE_SELECT_P0_3                  , RULL(0x80000C790701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_LO_PROBE_SELECT_P0_3                  , RULL(0x80000C790801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_LO_PROBE_SELECT_P0_4                    , RULL(0x800010790701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_LO_PROBE_SELECT_P0_4                  , RULL(0x800010790701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_LO_PROBE_SELECT_P0_4                  , RULL(0x800010790801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_LO_PROBE_SELECT_P1_0                  , RULL(0x800000790701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_LO_PROBE_SELECT_P1_0                  , RULL(0x800000790801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_LO_PROBE_SELECT_P1_1                  , RULL(0x800004790701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_LO_PROBE_SELECT_P1_1                  , RULL(0x800004790801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_LO_PROBE_SELECT_P1_2                  , RULL(0x800008790701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_LO_PROBE_SELECT_P1_2                  , RULL(0x800008790801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_LO_PROBE_SELECT_P1_3                  , RULL(0x80000C790701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_LO_PROBE_SELECT_P1_3                  , RULL(0x80000C790801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_LO_PROBE_SELECT_P1_4                  , RULL(0x800010790701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_LO_PROBE_SELECT_P1_4                  , RULL(0x800010790801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_LO_PROBE_SELECT_P2_0                  , RULL(0x800000790701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_LO_PROBE_SELECT_P2_0                  , RULL(0x800000790801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_LO_PROBE_SELECT_P2_1                  , RULL(0x800004790701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_LO_PROBE_SELECT_P2_1                  , RULL(0x800004790801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_LO_PROBE_SELECT_P2_2                  , RULL(0x800008790701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_LO_PROBE_SELECT_P2_2                  , RULL(0x800008790801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_LO_PROBE_SELECT_P2_3                  , RULL(0x80000C790701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_LO_PROBE_SELECT_P2_3                  , RULL(0x80000C790801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_LO_PROBE_SELECT_P2_4                  , RULL(0x800010790701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_LO_PROBE_SELECT_P2_4                  , RULL(0x800010790801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_LO_PROBE_SELECT_P3_0                  , RULL(0x8000007907011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_LO_PROBE_SELECT_P3_0                  , RULL(0x8000007908011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_LO_PROBE_SELECT_P3_1                  , RULL(0x8000047907011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_LO_PROBE_SELECT_P3_1                  , RULL(0x8000047908011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_LO_PROBE_SELECT_P3_2                  , RULL(0x8000087907011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_LO_PROBE_SELECT_P3_2                  , RULL(0x8000087908011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_LO_PROBE_SELECT_P3_3                  , RULL(0x80000C7907011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_LO_PROBE_SELECT_P3_3                  , RULL(0x80000C7908011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_LO_PROBE_SELECT_P3_4                  , RULL(0x8000107907011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_LO_PROBE_SELECT_P3_4                  , RULL(0x8000107908011C3F), SH_UNT_MCA_7    ,
        SH_ACS_SCOM_RW   );
 
 REG64( MCA_DDRPHY_DP16_PATTERN_POS_0_P0_0                      , RULL(0x800000320701103F), SH_UNT_MCA      ,
@@ -11511,6 +11897,446 @@ REG64( MCA_7_DDRPHY_DP16_RD_STATUS0_P3_3                       , RULL(0x80000C14
 REG64( MCA_3_DDRPHY_DP16_RD_STATUS0_P3_4                       , RULL(0x8000101407011C3F), SH_UNT_MCA_3    ,
        SH_ACS_SCOM_RW   );
 REG64( MCA_7_DDRPHY_DP16_RD_STATUS0_P3_4                       , RULL(0x8000101408011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_0                  , RULL(0x800000160701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_0                , RULL(0x800000160701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_0                , RULL(0x800000160801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_1                  , RULL(0x800004160701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_1                , RULL(0x800004160701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_1                , RULL(0x800004160801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_2                  , RULL(0x800008160701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_2                , RULL(0x800008160701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_2                , RULL(0x800008160801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_3                  , RULL(0x80000C160701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_3                , RULL(0x80000C160701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_3                , RULL(0x80000C160801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_4                  , RULL(0x800010160701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_4                , RULL(0x800010160701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_4                , RULL(0x800010160801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P1_0                , RULL(0x800000160701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P1_0                , RULL(0x800000160801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P1_1                , RULL(0x800004160701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P1_1                , RULL(0x800004160801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P1_2                , RULL(0x800008160701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P1_2                , RULL(0x800008160801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P1_3                , RULL(0x80000C160701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P1_3                , RULL(0x80000C160801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P1_4                , RULL(0x800010160701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P1_4                , RULL(0x800010160801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P2_0                , RULL(0x800000160701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P2_0                , RULL(0x800000160801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P2_1                , RULL(0x800004160701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P2_1                , RULL(0x800004160801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P2_2                , RULL(0x800008160701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P2_2                , RULL(0x800008160801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P2_3                , RULL(0x80000C160701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P2_3                , RULL(0x80000C160801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P2_4                , RULL(0x800010160701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P2_4                , RULL(0x800010160801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P3_0                , RULL(0x8000001607011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P3_0                , RULL(0x8000001608011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P3_1                , RULL(0x8000041607011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P3_1                , RULL(0x8000041608011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P3_2                , RULL(0x8000081607011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P3_2                , RULL(0x8000081608011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P3_3                , RULL(0x80000C1607011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P3_3                , RULL(0x80000C1608011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P3_4                , RULL(0x8000101607011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P3_4                , RULL(0x8000101608011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_0                  , RULL(0x8000001F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_0                , RULL(0x8000001F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_0                , RULL(0x8000001F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_1                  , RULL(0x8000041F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_1                , RULL(0x8000041F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_1                , RULL(0x8000041F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_2                  , RULL(0x8000081F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_2                , RULL(0x8000081F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_2                , RULL(0x8000081F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_3                  , RULL(0x80000C1F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_3                , RULL(0x80000C1F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_3                , RULL(0x80000C1F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_4                  , RULL(0x8000101F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_4                , RULL(0x8000101F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_4                , RULL(0x8000101F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P1_0                , RULL(0x8000001F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P1_0                , RULL(0x8000001F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P1_1                , RULL(0x8000041F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P1_1                , RULL(0x8000041F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P1_2                , RULL(0x8000081F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P1_2                , RULL(0x8000081F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P1_3                , RULL(0x80000C1F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P1_3                , RULL(0x80000C1F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P1_4                , RULL(0x8000101F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P1_4                , RULL(0x8000101F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P2_0                , RULL(0x8000001F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P2_0                , RULL(0x8000001F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P2_1                , RULL(0x8000041F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P2_1                , RULL(0x8000041F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P2_2                , RULL(0x8000081F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P2_2                , RULL(0x8000081F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P2_3                , RULL(0x80000C1F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P2_3                , RULL(0x80000C1F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P2_4                , RULL(0x8000101F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P2_4                , RULL(0x8000101F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P3_0                , RULL(0x8000001F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P3_0                , RULL(0x8000001F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P3_1                , RULL(0x8000041F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P3_1                , RULL(0x8000041F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P3_2                , RULL(0x8000081F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P3_2                , RULL(0x8000081F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P3_3                , RULL(0x80000C1F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P3_3                , RULL(0x80000C1F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P3_4                , RULL(0x8000101F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P3_4                , RULL(0x8000101F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_RD_VREF_CAL_DONE_P0_0                   , RULL(0x8000007A0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_0_DDRPHY_DP16_RD_VREF_CAL_DONE_P0_0                 , RULL(0x8000007A0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_4_DDRPHY_DP16_RD_VREF_CAL_DONE_P0_0                 , RULL(0x8000007A0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RO   );
+
+REG64( MCA_DDRPHY_DP16_RD_VREF_CAL_DONE_P0_1                   , RULL(0x8000047A0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_0_DDRPHY_DP16_RD_VREF_CAL_DONE_P0_1                 , RULL(0x8000047A0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_4_DDRPHY_DP16_RD_VREF_CAL_DONE_P0_1                 , RULL(0x8000047A0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RO   );
+
+REG64( MCA_DDRPHY_DP16_RD_VREF_CAL_DONE_P0_2                   , RULL(0x8000087A0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_0_DDRPHY_DP16_RD_VREF_CAL_DONE_P0_2                 , RULL(0x8000087A0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_4_DDRPHY_DP16_RD_VREF_CAL_DONE_P0_2                 , RULL(0x8000087A0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RO   );
+
+REG64( MCA_DDRPHY_DP16_RD_VREF_CAL_DONE_P0_3                   , RULL(0x80000C7A0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_0_DDRPHY_DP16_RD_VREF_CAL_DONE_P0_3                 , RULL(0x80000C7A0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_4_DDRPHY_DP16_RD_VREF_CAL_DONE_P0_3                 , RULL(0x80000C7A0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RO   );
+
+REG64( MCA_DDRPHY_DP16_RD_VREF_CAL_DONE_P0_4                   , RULL(0x8000107A0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_0_DDRPHY_DP16_RD_VREF_CAL_DONE_P0_4                 , RULL(0x8000107A0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_4_DDRPHY_DP16_RD_VREF_CAL_DONE_P0_4                 , RULL(0x8000107A0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RO   );
+
+REG64( MCA_1_DDRPHY_DP16_RD_VREF_CAL_DONE_P1_0                 , RULL(0x8000007A0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_5_DDRPHY_DP16_RD_VREF_CAL_DONE_P1_0                 , RULL(0x8000007A0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RO   );
+
+REG64( MCA_1_DDRPHY_DP16_RD_VREF_CAL_DONE_P1_1                 , RULL(0x8000047A0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_5_DDRPHY_DP16_RD_VREF_CAL_DONE_P1_1                 , RULL(0x8000047A0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RO   );
+
+REG64( MCA_1_DDRPHY_DP16_RD_VREF_CAL_DONE_P1_2                 , RULL(0x8000087A0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_5_DDRPHY_DP16_RD_VREF_CAL_DONE_P1_2                 , RULL(0x8000087A0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RO   );
+
+REG64( MCA_1_DDRPHY_DP16_RD_VREF_CAL_DONE_P1_3                 , RULL(0x80000C7A0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_5_DDRPHY_DP16_RD_VREF_CAL_DONE_P1_3                 , RULL(0x80000C7A0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RO   );
+
+REG64( MCA_1_DDRPHY_DP16_RD_VREF_CAL_DONE_P1_4                 , RULL(0x8000107A0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_5_DDRPHY_DP16_RD_VREF_CAL_DONE_P1_4                 , RULL(0x8000107A0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RO   );
+
+REG64( MCA_2_DDRPHY_DP16_RD_VREF_CAL_DONE_P2_0                 , RULL(0x8000007A0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_6_DDRPHY_DP16_RD_VREF_CAL_DONE_P2_0                 , RULL(0x8000007A0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RO   );
+
+REG64( MCA_2_DDRPHY_DP16_RD_VREF_CAL_DONE_P2_1                 , RULL(0x8000047A0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_6_DDRPHY_DP16_RD_VREF_CAL_DONE_P2_1                 , RULL(0x8000047A0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RO   );
+
+REG64( MCA_2_DDRPHY_DP16_RD_VREF_CAL_DONE_P2_2                 , RULL(0x8000087A0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_6_DDRPHY_DP16_RD_VREF_CAL_DONE_P2_2                 , RULL(0x8000087A0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RO   );
+
+REG64( MCA_2_DDRPHY_DP16_RD_VREF_CAL_DONE_P2_3                 , RULL(0x80000C7A0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_6_DDRPHY_DP16_RD_VREF_CAL_DONE_P2_3                 , RULL(0x80000C7A0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RO   );
+
+REG64( MCA_2_DDRPHY_DP16_RD_VREF_CAL_DONE_P2_4                 , RULL(0x8000107A0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_6_DDRPHY_DP16_RD_VREF_CAL_DONE_P2_4                 , RULL(0x8000107A0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RO   );
+
+REG64( MCA_3_DDRPHY_DP16_RD_VREF_CAL_DONE_P3_0                 , RULL(0x8000007A07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_7_DDRPHY_DP16_RD_VREF_CAL_DONE_P3_0                 , RULL(0x8000007A08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RO   );
+
+REG64( MCA_3_DDRPHY_DP16_RD_VREF_CAL_DONE_P3_1                 , RULL(0x8000047A07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_7_DDRPHY_DP16_RD_VREF_CAL_DONE_P3_1                 , RULL(0x8000047A08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RO   );
+
+REG64( MCA_3_DDRPHY_DP16_RD_VREF_CAL_DONE_P3_2                 , RULL(0x8000087A07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_7_DDRPHY_DP16_RD_VREF_CAL_DONE_P3_2                 , RULL(0x8000087A08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RO   );
+
+REG64( MCA_3_DDRPHY_DP16_RD_VREF_CAL_DONE_P3_3                 , RULL(0x80000C7A07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_7_DDRPHY_DP16_RD_VREF_CAL_DONE_P3_3                 , RULL(0x80000C7A08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RO   );
+
+REG64( MCA_3_DDRPHY_DP16_RD_VREF_CAL_DONE_P3_4                 , RULL(0x8000107A07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_7_DDRPHY_DP16_RD_VREF_CAL_DONE_P3_4                 , RULL(0x8000107A08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RO   );
+
+REG64( MCA_DDRPHY_DP16_RD_VREF_CAL_EN_P0_0                     , RULL(0x800000760701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_RD_VREF_CAL_EN_P0_0                   , RULL(0x800000760701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_RD_VREF_CAL_EN_P0_0                   , RULL(0x800000760801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_RD_VREF_CAL_EN_P0_1                     , RULL(0x800004760701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_RD_VREF_CAL_EN_P0_1                   , RULL(0x800004760701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_RD_VREF_CAL_EN_P0_1                   , RULL(0x800004760801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_RD_VREF_CAL_EN_P0_2                     , RULL(0x800008760701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_RD_VREF_CAL_EN_P0_2                   , RULL(0x800008760701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_RD_VREF_CAL_EN_P0_2                   , RULL(0x800008760801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_RD_VREF_CAL_EN_P0_3                     , RULL(0x80000C760701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_RD_VREF_CAL_EN_P0_3                   , RULL(0x80000C760701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_RD_VREF_CAL_EN_P0_3                   , RULL(0x80000C760801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_RD_VREF_CAL_EN_P0_4                     , RULL(0x800010760701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_RD_VREF_CAL_EN_P0_4                   , RULL(0x800010760701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_RD_VREF_CAL_EN_P0_4                   , RULL(0x800010760801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_RD_VREF_CAL_EN_P1_0                   , RULL(0x800000760701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_RD_VREF_CAL_EN_P1_0                   , RULL(0x800000760801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_RD_VREF_CAL_EN_P1_1                   , RULL(0x800004760701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_RD_VREF_CAL_EN_P1_1                   , RULL(0x800004760801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_RD_VREF_CAL_EN_P1_2                   , RULL(0x800008760701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_RD_VREF_CAL_EN_P1_2                   , RULL(0x800008760801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_RD_VREF_CAL_EN_P1_3                   , RULL(0x80000C760701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_RD_VREF_CAL_EN_P1_3                   , RULL(0x80000C760801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_RD_VREF_CAL_EN_P1_4                   , RULL(0x800010760701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_RD_VREF_CAL_EN_P1_4                   , RULL(0x800010760801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_RD_VREF_CAL_EN_P2_0                   , RULL(0x800000760701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_RD_VREF_CAL_EN_P2_0                   , RULL(0x800000760801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_RD_VREF_CAL_EN_P2_1                   , RULL(0x800004760701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_RD_VREF_CAL_EN_P2_1                   , RULL(0x800004760801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_RD_VREF_CAL_EN_P2_2                   , RULL(0x800008760701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_RD_VREF_CAL_EN_P2_2                   , RULL(0x800008760801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_RD_VREF_CAL_EN_P2_3                   , RULL(0x80000C760701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_RD_VREF_CAL_EN_P2_3                   , RULL(0x80000C760801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_RD_VREF_CAL_EN_P2_4                   , RULL(0x800010760701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_RD_VREF_CAL_EN_P2_4                   , RULL(0x800010760801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_RD_VREF_CAL_EN_P3_0                   , RULL(0x8000007607011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_RD_VREF_CAL_EN_P3_0                   , RULL(0x8000007608011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_RD_VREF_CAL_EN_P3_1                   , RULL(0x8000047607011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_RD_VREF_CAL_EN_P3_1                   , RULL(0x8000047608011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_RD_VREF_CAL_EN_P3_2                   , RULL(0x8000087607011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_RD_VREF_CAL_EN_P3_2                   , RULL(0x8000087608011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_RD_VREF_CAL_EN_P3_3                   , RULL(0x80000C7607011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_RD_VREF_CAL_EN_P3_3                   , RULL(0x80000C7608011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_RD_VREF_CAL_EN_P3_4                   , RULL(0x8000107607011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_RD_VREF_CAL_EN_P3_4                   , RULL(0x8000107608011C3F), SH_UNT_MCA_7    ,
        SH_ACS_SCOM_RW   );
 
 REG64( MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_0              , RULL(0x800000040701103F), SH_UNT_MCA      ,
@@ -16351,6 +17177,116 @@ REG64( MCA_7_DDRPHY_DP16_READ_DELAY_OFFSET1_RANK_PAIR3_P3_3    , RULL(0x80000F0D
 REG64( MCA_3_DDRPHY_DP16_READ_DELAY_OFFSET1_RANK_PAIR3_P3_4    , RULL(0x8000130D07011C3F), SH_UNT_MCA_3    ,
        SH_ACS_SCOM_RW   );
 REG64( MCA_7_DDRPHY_DP16_READ_DELAY_OFFSET1_RANK_PAIR3_P3_4    , RULL(0x8000130D08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P0_0          , RULL(0x800000720701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P0_0        , RULL(0x800000720701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P0_0        , RULL(0x800000720801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P0_1          , RULL(0x800004720701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P0_1        , RULL(0x800004720701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P0_1        , RULL(0x800004720801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P0_2          , RULL(0x800008720701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P0_2        , RULL(0x800008720701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P0_2        , RULL(0x800008720801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P0_3          , RULL(0x80000C720701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P0_3        , RULL(0x80000C720701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P0_3        , RULL(0x80000C720801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P0_4          , RULL(0x800010720701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P0_4        , RULL(0x800010720701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P0_4        , RULL(0x800010720801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P1_0        , RULL(0x800000720701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P1_0        , RULL(0x800000720801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P1_1        , RULL(0x800004720701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P1_1        , RULL(0x800004720801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P1_2        , RULL(0x800008720701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P1_2        , RULL(0x800008720801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P1_3        , RULL(0x80000C720701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P1_3        , RULL(0x80000C720801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P1_4        , RULL(0x800010720701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P1_4        , RULL(0x800010720801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P2_0        , RULL(0x800000720701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P2_0        , RULL(0x800000720801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P2_1        , RULL(0x800004720701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P2_1        , RULL(0x800004720801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P2_2        , RULL(0x800008720701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P2_2        , RULL(0x800008720801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P2_3        , RULL(0x80000C720701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P2_3        , RULL(0x80000C720801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P2_4        , RULL(0x800010720701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P2_4        , RULL(0x800010720801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P3_0        , RULL(0x8000007207011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P3_0        , RULL(0x8000007208011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P3_1        , RULL(0x8000047207011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P3_1        , RULL(0x8000047208011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P3_2        , RULL(0x8000087207011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P3_2        , RULL(0x8000087208011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P3_3        , RULL(0x80000C7207011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P3_3        , RULL(0x80000C7208011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P3_4        , RULL(0x8000107207011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_READ_DQS_TIMING_REFERENCE_P3_4        , RULL(0x8000107208011C3F), SH_UNT_MCA_7    ,
        SH_ACS_SCOM_RW   );
 
 REG64( MCA_DDRPHY_DP16_READ_EYE_SIZE0_RANK_PAIR0_P0_0          , RULL(0x800000600701103F), SH_UNT_MCA      ,
@@ -22293,446 +23229,6 @@ REG64( MCA_3_DDRPHY_DP16_SYSCLK_PR_VALUE_P3_4                  , RULL(0x80001073
 REG64( MCA_7_DDRPHY_DP16_SYSCLK_PR_VALUE_P3_4                  , RULL(0x8000107308011C3F), SH_UNT_MCA_7    ,
        SH_ACS_SCOM_RO   );
 
-REG64( MCA_DDRPHY_DP16_VREF_BYTE0_DAC_P0_0                     , RULL(0x800000160701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_0_DDRPHY_DP16_VREF_BYTE0_DAC_P0_0                   , RULL(0x800000160701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_4_DDRPHY_DP16_VREF_BYTE0_DAC_P0_0                   , RULL(0x800000160801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_DDRPHY_DP16_VREF_BYTE0_DAC_P0_1                     , RULL(0x800004160701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_0_DDRPHY_DP16_VREF_BYTE0_DAC_P0_1                   , RULL(0x800004160701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_4_DDRPHY_DP16_VREF_BYTE0_DAC_P0_1                   , RULL(0x800004160801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_DDRPHY_DP16_VREF_BYTE0_DAC_P0_2                     , RULL(0x800008160701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_0_DDRPHY_DP16_VREF_BYTE0_DAC_P0_2                   , RULL(0x800008160701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_4_DDRPHY_DP16_VREF_BYTE0_DAC_P0_2                   , RULL(0x800008160801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_DDRPHY_DP16_VREF_BYTE0_DAC_P0_3                     , RULL(0x80000C160701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_0_DDRPHY_DP16_VREF_BYTE0_DAC_P0_3                   , RULL(0x80000C160701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_4_DDRPHY_DP16_VREF_BYTE0_DAC_P0_3                   , RULL(0x80000C160801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_DDRPHY_DP16_VREF_BYTE0_DAC_P0_4                     , RULL(0x800010160701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_0_DDRPHY_DP16_VREF_BYTE0_DAC_P0_4                   , RULL(0x800010160701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_4_DDRPHY_DP16_VREF_BYTE0_DAC_P0_4                   , RULL(0x800010160801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_1_DDRPHY_DP16_VREF_BYTE0_DAC_P1_0                   , RULL(0x800000160701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_5_DDRPHY_DP16_VREF_BYTE0_DAC_P1_0                   , RULL(0x800000160801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_1_DDRPHY_DP16_VREF_BYTE0_DAC_P1_1                   , RULL(0x800004160701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_5_DDRPHY_DP16_VREF_BYTE0_DAC_P1_1                   , RULL(0x800004160801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_1_DDRPHY_DP16_VREF_BYTE0_DAC_P1_2                   , RULL(0x800008160701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_5_DDRPHY_DP16_VREF_BYTE0_DAC_P1_2                   , RULL(0x800008160801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_1_DDRPHY_DP16_VREF_BYTE0_DAC_P1_3                   , RULL(0x80000C160701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_5_DDRPHY_DP16_VREF_BYTE0_DAC_P1_3                   , RULL(0x80000C160801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_1_DDRPHY_DP16_VREF_BYTE0_DAC_P1_4                   , RULL(0x800010160701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_5_DDRPHY_DP16_VREF_BYTE0_DAC_P1_4                   , RULL(0x800010160801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_2_DDRPHY_DP16_VREF_BYTE0_DAC_P2_0                   , RULL(0x800000160701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_6_DDRPHY_DP16_VREF_BYTE0_DAC_P2_0                   , RULL(0x800000160801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_2_DDRPHY_DP16_VREF_BYTE0_DAC_P2_1                   , RULL(0x800004160701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_6_DDRPHY_DP16_VREF_BYTE0_DAC_P2_1                   , RULL(0x800004160801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_2_DDRPHY_DP16_VREF_BYTE0_DAC_P2_2                   , RULL(0x800008160701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_6_DDRPHY_DP16_VREF_BYTE0_DAC_P2_2                   , RULL(0x800008160801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_2_DDRPHY_DP16_VREF_BYTE0_DAC_P2_3                   , RULL(0x80000C160701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_6_DDRPHY_DP16_VREF_BYTE0_DAC_P2_3                   , RULL(0x80000C160801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_2_DDRPHY_DP16_VREF_BYTE0_DAC_P2_4                   , RULL(0x800010160701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_6_DDRPHY_DP16_VREF_BYTE0_DAC_P2_4                   , RULL(0x800010160801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_3_DDRPHY_DP16_VREF_BYTE0_DAC_P3_0                   , RULL(0x8000001607011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_7_DDRPHY_DP16_VREF_BYTE0_DAC_P3_0                   , RULL(0x8000001608011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_3_DDRPHY_DP16_VREF_BYTE0_DAC_P3_1                   , RULL(0x8000041607011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_7_DDRPHY_DP16_VREF_BYTE0_DAC_P3_1                   , RULL(0x8000041608011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_3_DDRPHY_DP16_VREF_BYTE0_DAC_P3_2                   , RULL(0x8000081607011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_7_DDRPHY_DP16_VREF_BYTE0_DAC_P3_2                   , RULL(0x8000081608011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_3_DDRPHY_DP16_VREF_BYTE0_DAC_P3_3                   , RULL(0x80000C1607011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_7_DDRPHY_DP16_VREF_BYTE0_DAC_P3_3                   , RULL(0x80000C1608011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_3_DDRPHY_DP16_VREF_BYTE0_DAC_P3_4                   , RULL(0x8000101607011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_7_DDRPHY_DP16_VREF_BYTE0_DAC_P3_4                   , RULL(0x8000101608011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_DDRPHY_DP16_VREF_BYTE1_DAC_P0_0                     , RULL(0x800000720701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_0_DDRPHY_DP16_VREF_BYTE1_DAC_P0_0                   , RULL(0x800000720701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_4_DDRPHY_DP16_VREF_BYTE1_DAC_P0_0                   , RULL(0x800000720801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_DDRPHY_DP16_VREF_BYTE1_DAC_P0_1                     , RULL(0x800004720701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_0_DDRPHY_DP16_VREF_BYTE1_DAC_P0_1                   , RULL(0x800004720701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_4_DDRPHY_DP16_VREF_BYTE1_DAC_P0_1                   , RULL(0x800004720801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_DDRPHY_DP16_VREF_BYTE1_DAC_P0_2                     , RULL(0x800008720701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_0_DDRPHY_DP16_VREF_BYTE1_DAC_P0_2                   , RULL(0x800008720701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_4_DDRPHY_DP16_VREF_BYTE1_DAC_P0_2                   , RULL(0x800008720801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_DDRPHY_DP16_VREF_BYTE1_DAC_P0_3                     , RULL(0x80000C720701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_0_DDRPHY_DP16_VREF_BYTE1_DAC_P0_3                   , RULL(0x80000C720701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_4_DDRPHY_DP16_VREF_BYTE1_DAC_P0_3                   , RULL(0x80000C720801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_DDRPHY_DP16_VREF_BYTE1_DAC_P0_4                     , RULL(0x800010720701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_0_DDRPHY_DP16_VREF_BYTE1_DAC_P0_4                   , RULL(0x800010720701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_4_DDRPHY_DP16_VREF_BYTE1_DAC_P0_4                   , RULL(0x800010720801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_1_DDRPHY_DP16_VREF_BYTE1_DAC_P1_0                   , RULL(0x800000720701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_5_DDRPHY_DP16_VREF_BYTE1_DAC_P1_0                   , RULL(0x800000720801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_1_DDRPHY_DP16_VREF_BYTE1_DAC_P1_1                   , RULL(0x800004720701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_5_DDRPHY_DP16_VREF_BYTE1_DAC_P1_1                   , RULL(0x800004720801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_1_DDRPHY_DP16_VREF_BYTE1_DAC_P1_2                   , RULL(0x800008720701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_5_DDRPHY_DP16_VREF_BYTE1_DAC_P1_2                   , RULL(0x800008720801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_1_DDRPHY_DP16_VREF_BYTE1_DAC_P1_3                   , RULL(0x80000C720701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_5_DDRPHY_DP16_VREF_BYTE1_DAC_P1_3                   , RULL(0x80000C720801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_1_DDRPHY_DP16_VREF_BYTE1_DAC_P1_4                   , RULL(0x800010720701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_5_DDRPHY_DP16_VREF_BYTE1_DAC_P1_4                   , RULL(0x800010720801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_2_DDRPHY_DP16_VREF_BYTE1_DAC_P2_0                   , RULL(0x800000720701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_6_DDRPHY_DP16_VREF_BYTE1_DAC_P2_0                   , RULL(0x800000720801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_2_DDRPHY_DP16_VREF_BYTE1_DAC_P2_1                   , RULL(0x800004720701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_6_DDRPHY_DP16_VREF_BYTE1_DAC_P2_1                   , RULL(0x800004720801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_2_DDRPHY_DP16_VREF_BYTE1_DAC_P2_2                   , RULL(0x800008720701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_6_DDRPHY_DP16_VREF_BYTE1_DAC_P2_2                   , RULL(0x800008720801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_2_DDRPHY_DP16_VREF_BYTE1_DAC_P2_3                   , RULL(0x80000C720701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_6_DDRPHY_DP16_VREF_BYTE1_DAC_P2_3                   , RULL(0x80000C720801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_2_DDRPHY_DP16_VREF_BYTE1_DAC_P2_4                   , RULL(0x800010720701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_6_DDRPHY_DP16_VREF_BYTE1_DAC_P2_4                   , RULL(0x800010720801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_3_DDRPHY_DP16_VREF_BYTE1_DAC_P3_0                   , RULL(0x8000007207011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_7_DDRPHY_DP16_VREF_BYTE1_DAC_P3_0                   , RULL(0x8000007208011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_3_DDRPHY_DP16_VREF_BYTE1_DAC_P3_1                   , RULL(0x8000047207011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_7_DDRPHY_DP16_VREF_BYTE1_DAC_P3_1                   , RULL(0x8000047208011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_3_DDRPHY_DP16_VREF_BYTE1_DAC_P3_2                   , RULL(0x8000087207011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_7_DDRPHY_DP16_VREF_BYTE1_DAC_P3_2                   , RULL(0x8000087208011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_3_DDRPHY_DP16_VREF_BYTE1_DAC_P3_3                   , RULL(0x80000C7207011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_7_DDRPHY_DP16_VREF_BYTE1_DAC_P3_3                   , RULL(0x80000C7208011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_3_DDRPHY_DP16_VREF_BYTE1_DAC_P3_4                   , RULL(0x8000107207011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_7_DDRPHY_DP16_VREF_BYTE1_DAC_P3_4                   , RULL(0x8000107208011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_DDRPHY_DP16_VREF_CAL_DONE_P0_0                      , RULL(0x8000007A0701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_0_DDRPHY_DP16_VREF_CAL_DONE_P0_0                    , RULL(0x8000007A0701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_4_DDRPHY_DP16_VREF_CAL_DONE_P0_0                    , RULL(0x8000007A0801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RO   );
-
-REG64( MCA_DDRPHY_DP16_VREF_CAL_DONE_P0_1                      , RULL(0x8000047A0701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_0_DDRPHY_DP16_VREF_CAL_DONE_P0_1                    , RULL(0x8000047A0701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_4_DDRPHY_DP16_VREF_CAL_DONE_P0_1                    , RULL(0x8000047A0801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RO   );
-
-REG64( MCA_DDRPHY_DP16_VREF_CAL_DONE_P0_2                      , RULL(0x8000087A0701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_0_DDRPHY_DP16_VREF_CAL_DONE_P0_2                    , RULL(0x8000087A0701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_4_DDRPHY_DP16_VREF_CAL_DONE_P0_2                    , RULL(0x8000087A0801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RO   );
-
-REG64( MCA_DDRPHY_DP16_VREF_CAL_DONE_P0_3                      , RULL(0x80000C7A0701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_0_DDRPHY_DP16_VREF_CAL_DONE_P0_3                    , RULL(0x80000C7A0701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_4_DDRPHY_DP16_VREF_CAL_DONE_P0_3                    , RULL(0x80000C7A0801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RO   );
-
-REG64( MCA_DDRPHY_DP16_VREF_CAL_DONE_P0_4                      , RULL(0x8000107A0701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_0_DDRPHY_DP16_VREF_CAL_DONE_P0_4                    , RULL(0x8000107A0701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_4_DDRPHY_DP16_VREF_CAL_DONE_P0_4                    , RULL(0x8000107A0801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RO   );
-
-REG64( MCA_1_DDRPHY_DP16_VREF_CAL_DONE_P1_0                    , RULL(0x8000007A0701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_5_DDRPHY_DP16_VREF_CAL_DONE_P1_0                    , RULL(0x8000007A0801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RO   );
-
-REG64( MCA_1_DDRPHY_DP16_VREF_CAL_DONE_P1_1                    , RULL(0x8000047A0701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_5_DDRPHY_DP16_VREF_CAL_DONE_P1_1                    , RULL(0x8000047A0801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RO   );
-
-REG64( MCA_1_DDRPHY_DP16_VREF_CAL_DONE_P1_2                    , RULL(0x8000087A0701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_5_DDRPHY_DP16_VREF_CAL_DONE_P1_2                    , RULL(0x8000087A0801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RO   );
-
-REG64( MCA_1_DDRPHY_DP16_VREF_CAL_DONE_P1_3                    , RULL(0x80000C7A0701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_5_DDRPHY_DP16_VREF_CAL_DONE_P1_3                    , RULL(0x80000C7A0801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RO   );
-
-REG64( MCA_1_DDRPHY_DP16_VREF_CAL_DONE_P1_4                    , RULL(0x8000107A0701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_5_DDRPHY_DP16_VREF_CAL_DONE_P1_4                    , RULL(0x8000107A0801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RO   );
-
-REG64( MCA_2_DDRPHY_DP16_VREF_CAL_DONE_P2_0                    , RULL(0x8000007A0701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_6_DDRPHY_DP16_VREF_CAL_DONE_P2_0                    , RULL(0x8000007A0801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RO   );
-
-REG64( MCA_2_DDRPHY_DP16_VREF_CAL_DONE_P2_1                    , RULL(0x8000047A0701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_6_DDRPHY_DP16_VREF_CAL_DONE_P2_1                    , RULL(0x8000047A0801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RO   );
-
-REG64( MCA_2_DDRPHY_DP16_VREF_CAL_DONE_P2_2                    , RULL(0x8000087A0701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_6_DDRPHY_DP16_VREF_CAL_DONE_P2_2                    , RULL(0x8000087A0801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RO   );
-
-REG64( MCA_2_DDRPHY_DP16_VREF_CAL_DONE_P2_3                    , RULL(0x80000C7A0701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_6_DDRPHY_DP16_VREF_CAL_DONE_P2_3                    , RULL(0x80000C7A0801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RO   );
-
-REG64( MCA_2_DDRPHY_DP16_VREF_CAL_DONE_P2_4                    , RULL(0x8000107A0701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_6_DDRPHY_DP16_VREF_CAL_DONE_P2_4                    , RULL(0x8000107A0801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RO   );
-
-REG64( MCA_3_DDRPHY_DP16_VREF_CAL_DONE_P3_0                    , RULL(0x8000007A07011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_7_DDRPHY_DP16_VREF_CAL_DONE_P3_0                    , RULL(0x8000007A08011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RO   );
-
-REG64( MCA_3_DDRPHY_DP16_VREF_CAL_DONE_P3_1                    , RULL(0x8000047A07011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_7_DDRPHY_DP16_VREF_CAL_DONE_P3_1                    , RULL(0x8000047A08011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RO   );
-
-REG64( MCA_3_DDRPHY_DP16_VREF_CAL_DONE_P3_2                    , RULL(0x8000087A07011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_7_DDRPHY_DP16_VREF_CAL_DONE_P3_2                    , RULL(0x8000087A08011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RO   );
-
-REG64( MCA_3_DDRPHY_DP16_VREF_CAL_DONE_P3_3                    , RULL(0x80000C7A07011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_7_DDRPHY_DP16_VREF_CAL_DONE_P3_3                    , RULL(0x80000C7A08011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RO   );
-
-REG64( MCA_3_DDRPHY_DP16_VREF_CAL_DONE_P3_4                    , RULL(0x8000107A07011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_7_DDRPHY_DP16_VREF_CAL_DONE_P3_4                    , RULL(0x8000107A08011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RO   );
-
-REG64( MCA_DDRPHY_DP16_VREF_CAL_EN_P0_0                        , RULL(0x800000760701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_0_DDRPHY_DP16_VREF_CAL_EN_P0_0                      , RULL(0x800000760701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_4_DDRPHY_DP16_VREF_CAL_EN_P0_0                      , RULL(0x800000760801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_DDRPHY_DP16_VREF_CAL_EN_P0_1                        , RULL(0x800004760701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_0_DDRPHY_DP16_VREF_CAL_EN_P0_1                      , RULL(0x800004760701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_4_DDRPHY_DP16_VREF_CAL_EN_P0_1                      , RULL(0x800004760801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_DDRPHY_DP16_VREF_CAL_EN_P0_2                        , RULL(0x800008760701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_0_DDRPHY_DP16_VREF_CAL_EN_P0_2                      , RULL(0x800008760701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_4_DDRPHY_DP16_VREF_CAL_EN_P0_2                      , RULL(0x800008760801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_DDRPHY_DP16_VREF_CAL_EN_P0_3                        , RULL(0x80000C760701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_0_DDRPHY_DP16_VREF_CAL_EN_P0_3                      , RULL(0x80000C760701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_4_DDRPHY_DP16_VREF_CAL_EN_P0_3                      , RULL(0x80000C760801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_DDRPHY_DP16_VREF_CAL_EN_P0_4                        , RULL(0x800010760701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_0_DDRPHY_DP16_VREF_CAL_EN_P0_4                      , RULL(0x800010760701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_4_DDRPHY_DP16_VREF_CAL_EN_P0_4                      , RULL(0x800010760801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_1_DDRPHY_DP16_VREF_CAL_EN_P1_0                      , RULL(0x800000760701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_5_DDRPHY_DP16_VREF_CAL_EN_P1_0                      , RULL(0x800000760801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_1_DDRPHY_DP16_VREF_CAL_EN_P1_1                      , RULL(0x800004760701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_5_DDRPHY_DP16_VREF_CAL_EN_P1_1                      , RULL(0x800004760801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_1_DDRPHY_DP16_VREF_CAL_EN_P1_2                      , RULL(0x800008760701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_5_DDRPHY_DP16_VREF_CAL_EN_P1_2                      , RULL(0x800008760801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_1_DDRPHY_DP16_VREF_CAL_EN_P1_3                      , RULL(0x80000C760701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_5_DDRPHY_DP16_VREF_CAL_EN_P1_3                      , RULL(0x80000C760801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_1_DDRPHY_DP16_VREF_CAL_EN_P1_4                      , RULL(0x800010760701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_5_DDRPHY_DP16_VREF_CAL_EN_P1_4                      , RULL(0x800010760801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_2_DDRPHY_DP16_VREF_CAL_EN_P2_0                      , RULL(0x800000760701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_6_DDRPHY_DP16_VREF_CAL_EN_P2_0                      , RULL(0x800000760801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_2_DDRPHY_DP16_VREF_CAL_EN_P2_1                      , RULL(0x800004760701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_6_DDRPHY_DP16_VREF_CAL_EN_P2_1                      , RULL(0x800004760801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_2_DDRPHY_DP16_VREF_CAL_EN_P2_2                      , RULL(0x800008760701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_6_DDRPHY_DP16_VREF_CAL_EN_P2_2                      , RULL(0x800008760801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_2_DDRPHY_DP16_VREF_CAL_EN_P2_3                      , RULL(0x80000C760701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_6_DDRPHY_DP16_VREF_CAL_EN_P2_3                      , RULL(0x80000C760801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_2_DDRPHY_DP16_VREF_CAL_EN_P2_4                      , RULL(0x800010760701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_6_DDRPHY_DP16_VREF_CAL_EN_P2_4                      , RULL(0x800010760801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_3_DDRPHY_DP16_VREF_CAL_EN_P3_0                      , RULL(0x8000007607011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_7_DDRPHY_DP16_VREF_CAL_EN_P3_0                      , RULL(0x8000007608011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_3_DDRPHY_DP16_VREF_CAL_EN_P3_1                      , RULL(0x8000047607011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_7_DDRPHY_DP16_VREF_CAL_EN_P3_1                      , RULL(0x8000047608011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_3_DDRPHY_DP16_VREF_CAL_EN_P3_2                      , RULL(0x8000087607011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_7_DDRPHY_DP16_VREF_CAL_EN_P3_2                      , RULL(0x8000087608011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_3_DDRPHY_DP16_VREF_CAL_EN_P3_3                      , RULL(0x80000C7607011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_7_DDRPHY_DP16_VREF_CAL_EN_P3_3                      , RULL(0x80000C7608011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_3_DDRPHY_DP16_VREF_CAL_EN_P3_4                      , RULL(0x8000107607011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_7_DDRPHY_DP16_VREF_CAL_EN_P3_4                      , RULL(0x8000107608011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RW   );
-
 REG64( MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_0                       , RULL(0x800000050701103F), SH_UNT_MCA      ,
        SH_ACS_SCOM_RW   );
 REG64( MCA_0_DDRPHY_DP16_WRCLK_EN_RP0_P0_0                     , RULL(0x800000050701103F), SH_UNT_MCA_0    ,
@@ -23943,27 +24439,1325 @@ REG64( MCA_3_DDRPHY_DP16_WR_LVL_STATUS0_P3_4                   , RULL(0x80001017
 REG64( MCA_7_DDRPHY_DP16_WR_LVL_STATUS0_P3_4                   , RULL(0x8000101708011C3F), SH_UNT_MCA_7    ,
        SH_ACS_SCOM_RW   );
 
-REG64( MCA_DDRPHY_PC_ADR_DLL_CAL_STATUS_P0                     , RULL(0x8000C0010701103F), SH_UNT_MCA      ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_0_DDRPHY_PC_ADR_DLL_CAL_STATUS_P0                   , RULL(0x8000C0010701103F), SH_UNT_MCA_0    ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_4_DDRPHY_PC_ADR_DLL_CAL_STATUS_P0                   , RULL(0x8000C0010801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RO   );
+REG64( MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0                    , RULL(0x8000006C0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0                  , RULL(0x8000006C0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0                  , RULL(0x8000006C0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
 
-REG64( MCA_1_DDRPHY_PC_ADR_DLL_CAL_STATUS_P1                   , RULL(0x8000C0010701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_5_DDRPHY_PC_ADR_DLL_CAL_STATUS_P1                   , RULL(0x8000C0010801143F), SH_UNT_MCA_5    ,
-       SH_ACS_SCOM_RO   );
+REG64( MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_1                    , RULL(0x8000046C0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_CONFIG0_P0_1                  , RULL(0x8000046C0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_CONFIG0_P0_1                  , RULL(0x8000046C0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
 
-REG64( MCA_2_DDRPHY_PC_ADR_DLL_CAL_STATUS_P2                   , RULL(0x8000C0010701183F), SH_UNT_MCA_2    ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_6_DDRPHY_PC_ADR_DLL_CAL_STATUS_P2                   , RULL(0x8000C0010801183F), SH_UNT_MCA_6    ,
-       SH_ACS_SCOM_RO   );
+REG64( MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_2                    , RULL(0x8000086C0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_CONFIG0_P0_2                  , RULL(0x8000086C0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_CONFIG0_P0_2                  , RULL(0x8000086C0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
 
-REG64( MCA_3_DDRPHY_PC_ADR_DLL_CAL_STATUS_P3                   , RULL(0x8000C00107011C3F), SH_UNT_MCA_3    ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_7_DDRPHY_PC_ADR_DLL_CAL_STATUS_P3                   , RULL(0x8000C00108011C3F), SH_UNT_MCA_7    ,
-       SH_ACS_SCOM_RO   );
+REG64( MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_3                    , RULL(0x80000C6C0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_CONFIG0_P0_3                  , RULL(0x80000C6C0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_CONFIG0_P0_3                  , RULL(0x80000C6C0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_4                    , RULL(0x8000106C0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_CONFIG0_P0_4                  , RULL(0x8000106C0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_CONFIG0_P0_4                  , RULL(0x8000106C0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_CONFIG0_P1_0                  , RULL(0x8000006C0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_CONFIG0_P1_0                  , RULL(0x8000006C0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_CONFIG0_P1_1                  , RULL(0x8000046C0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_CONFIG0_P1_1                  , RULL(0x8000046C0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_CONFIG0_P1_2                  , RULL(0x8000086C0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_CONFIG0_P1_2                  , RULL(0x8000086C0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_CONFIG0_P1_3                  , RULL(0x80000C6C0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_CONFIG0_P1_3                  , RULL(0x80000C6C0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_CONFIG0_P1_4                  , RULL(0x8000106C0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_CONFIG0_P1_4                  , RULL(0x8000106C0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_CONFIG0_P2_0                  , RULL(0x8000006C0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_CONFIG0_P2_0                  , RULL(0x8000006C0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_CONFIG0_P2_1                  , RULL(0x8000046C0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_CONFIG0_P2_1                  , RULL(0x8000046C0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_CONFIG0_P2_2                  , RULL(0x8000086C0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_CONFIG0_P2_2                  , RULL(0x8000086C0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_CONFIG0_P2_3                  , RULL(0x80000C6C0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_CONFIG0_P2_3                  , RULL(0x80000C6C0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_CONFIG0_P2_4                  , RULL(0x8000106C0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_CONFIG0_P2_4                  , RULL(0x8000106C0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_CONFIG0_P3_0                  , RULL(0x8000006C07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_CONFIG0_P3_0                  , RULL(0x8000006C08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_CONFIG0_P3_1                  , RULL(0x8000046C07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_CONFIG0_P3_1                  , RULL(0x8000046C08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_CONFIG0_P3_2                  , RULL(0x8000086C07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_CONFIG0_P3_2                  , RULL(0x8000086C08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_CONFIG0_P3_3                  , RULL(0x80000C6C07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_CONFIG0_P3_3                  , RULL(0x80000C6C08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_CONFIG0_P3_4                  , RULL(0x8000106C07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_CONFIG0_P3_4                  , RULL(0x8000106C08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_CONFIG1_P0_0                    , RULL(0x800000EC0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_CONFIG1_P0_0                  , RULL(0x800000EC0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_CONFIG1_P0_0                  , RULL(0x800000EC0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_CONFIG1_P0_1                    , RULL(0x800004EC0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_CONFIG1_P0_1                  , RULL(0x800004EC0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_CONFIG1_P0_1                  , RULL(0x800004EC0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_CONFIG1_P0_2                    , RULL(0x800008EC0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_CONFIG1_P0_2                  , RULL(0x800008EC0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_CONFIG1_P0_2                  , RULL(0x800008EC0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_CONFIG1_P0_3                    , RULL(0x80000CEC0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_CONFIG1_P0_3                  , RULL(0x80000CEC0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_CONFIG1_P0_3                  , RULL(0x80000CEC0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_CONFIG1_P0_4                    , RULL(0x800010EC0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_CONFIG1_P0_4                  , RULL(0x800010EC0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_CONFIG1_P0_4                  , RULL(0x800010EC0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_CONFIG1_P1_0                  , RULL(0x800000EC0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_CONFIG1_P1_0                  , RULL(0x800000EC0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_CONFIG1_P1_1                  , RULL(0x800004EC0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_CONFIG1_P1_1                  , RULL(0x800004EC0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_CONFIG1_P1_2                  , RULL(0x800008EC0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_CONFIG1_P1_2                  , RULL(0x800008EC0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_CONFIG1_P1_3                  , RULL(0x80000CEC0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_CONFIG1_P1_3                  , RULL(0x80000CEC0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_CONFIG1_P1_4                  , RULL(0x800010EC0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_CONFIG1_P1_4                  , RULL(0x800010EC0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_CONFIG1_P2_0                  , RULL(0x800000EC0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_CONFIG1_P2_0                  , RULL(0x800000EC0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_CONFIG1_P2_1                  , RULL(0x800004EC0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_CONFIG1_P2_1                  , RULL(0x800004EC0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_CONFIG1_P2_2                  , RULL(0x800008EC0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_CONFIG1_P2_2                  , RULL(0x800008EC0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_CONFIG1_P2_3                  , RULL(0x80000CEC0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_CONFIG1_P2_3                  , RULL(0x80000CEC0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_CONFIG1_P2_4                  , RULL(0x800010EC0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_CONFIG1_P2_4                  , RULL(0x800010EC0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_CONFIG1_P3_0                  , RULL(0x800000EC07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_CONFIG1_P3_0                  , RULL(0x800000EC08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_CONFIG1_P3_1                  , RULL(0x800004EC07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_CONFIG1_P3_1                  , RULL(0x800004EC08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_CONFIG1_P3_2                  , RULL(0x800008EC07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_CONFIG1_P3_2                  , RULL(0x800008EC08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_CONFIG1_P3_3                  , RULL(0x80000CEC07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_CONFIG1_P3_3                  , RULL(0x80000CEC08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_CONFIG1_P3_4                  , RULL(0x800010EC07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_CONFIG1_P3_4                  , RULL(0x800010EC08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_STATUS0_P0_0                    , RULL(0x8000002E0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_STATUS0_P0_0                  , RULL(0x8000002E0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_STATUS0_P0_0                  , RULL(0x8000002E0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_STATUS0_P0_1                    , RULL(0x8000042E0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_STATUS0_P0_1                  , RULL(0x8000042E0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_STATUS0_P0_1                  , RULL(0x8000042E0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_STATUS0_P0_2                    , RULL(0x8000082E0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_STATUS0_P0_2                  , RULL(0x8000082E0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_STATUS0_P0_2                  , RULL(0x8000082E0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_STATUS0_P0_3                    , RULL(0x80000C2E0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_STATUS0_P0_3                  , RULL(0x80000C2E0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_STATUS0_P0_3                  , RULL(0x80000C2E0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_STATUS0_P0_4                    , RULL(0x8000102E0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_STATUS0_P0_4                  , RULL(0x8000102E0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_STATUS0_P0_4                  , RULL(0x8000102E0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_STATUS0_P1_0                  , RULL(0x8000002E0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_STATUS0_P1_0                  , RULL(0x8000002E0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_STATUS0_P1_1                  , RULL(0x8000042E0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_STATUS0_P1_1                  , RULL(0x8000042E0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_STATUS0_P1_2                  , RULL(0x8000082E0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_STATUS0_P1_2                  , RULL(0x8000082E0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_STATUS0_P1_3                  , RULL(0x80000C2E0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_STATUS0_P1_3                  , RULL(0x80000C2E0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_STATUS0_P1_4                  , RULL(0x8000102E0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_STATUS0_P1_4                  , RULL(0x8000102E0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_STATUS0_P2_0                  , RULL(0x8000002E0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_STATUS0_P2_0                  , RULL(0x8000002E0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_STATUS0_P2_1                  , RULL(0x8000042E0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_STATUS0_P2_1                  , RULL(0x8000042E0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_STATUS0_P2_2                  , RULL(0x8000082E0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_STATUS0_P2_2                  , RULL(0x8000082E0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_STATUS0_P2_3                  , RULL(0x80000C2E0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_STATUS0_P2_3                  , RULL(0x80000C2E0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_STATUS0_P2_4                  , RULL(0x8000102E0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_STATUS0_P2_4                  , RULL(0x8000102E0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_STATUS0_P3_0                  , RULL(0x8000002E07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_STATUS0_P3_0                  , RULL(0x8000002E08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_STATUS0_P3_1                  , RULL(0x8000042E07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_STATUS0_P3_1                  , RULL(0x8000042E08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_STATUS0_P3_2                  , RULL(0x8000082E07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_STATUS0_P3_2                  , RULL(0x8000082E08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_STATUS0_P3_3                  , RULL(0x80000C2E07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_STATUS0_P3_3                  , RULL(0x80000C2E08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_STATUS0_P3_4                  , RULL(0x8000102E07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_STATUS0_P3_4                  , RULL(0x8000102E08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_STATUS1_P0_0                    , RULL(0x8000002F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_STATUS1_P0_0                  , RULL(0x8000002F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_STATUS1_P0_0                  , RULL(0x8000002F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_STATUS1_P0_1                    , RULL(0x8000042F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_STATUS1_P0_1                  , RULL(0x8000042F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_STATUS1_P0_1                  , RULL(0x8000042F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_STATUS1_P0_2                    , RULL(0x8000082F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_STATUS1_P0_2                  , RULL(0x8000082F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_STATUS1_P0_2                  , RULL(0x8000082F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_STATUS1_P0_3                    , RULL(0x80000C2F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_STATUS1_P0_3                  , RULL(0x80000C2F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_STATUS1_P0_3                  , RULL(0x80000C2F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_STATUS1_P0_4                    , RULL(0x8000102F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_STATUS1_P0_4                  , RULL(0x8000102F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_STATUS1_P0_4                  , RULL(0x8000102F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_STATUS1_P1_0                  , RULL(0x8000002F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_STATUS1_P1_0                  , RULL(0x8000002F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_STATUS1_P1_1                  , RULL(0x8000042F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_STATUS1_P1_1                  , RULL(0x8000042F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_STATUS1_P1_2                  , RULL(0x8000082F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_STATUS1_P1_2                  , RULL(0x8000082F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_STATUS1_P1_3                  , RULL(0x80000C2F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_STATUS1_P1_3                  , RULL(0x80000C2F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_STATUS1_P1_4                  , RULL(0x8000102F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_STATUS1_P1_4                  , RULL(0x8000102F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_STATUS1_P2_0                  , RULL(0x8000002F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_STATUS1_P2_0                  , RULL(0x8000002F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_STATUS1_P2_1                  , RULL(0x8000042F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_STATUS1_P2_1                  , RULL(0x8000042F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_STATUS1_P2_2                  , RULL(0x8000082F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_STATUS1_P2_2                  , RULL(0x8000082F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_STATUS1_P2_3                  , RULL(0x80000C2F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_STATUS1_P2_3                  , RULL(0x80000C2F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_STATUS1_P2_4                  , RULL(0x8000102F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_STATUS1_P2_4                  , RULL(0x8000102F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_STATUS1_P3_0                  , RULL(0x8000002F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_STATUS1_P3_0                  , RULL(0x8000002F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_STATUS1_P3_1                  , RULL(0x8000042F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_STATUS1_P3_1                  , RULL(0x8000042F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_STATUS1_P3_2                  , RULL(0x8000082F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_STATUS1_P3_2                  , RULL(0x8000082F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_STATUS1_P3_3                  , RULL(0x80000C2F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_STATUS1_P3_3                  , RULL(0x80000C2F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_STATUS1_P3_4                  , RULL(0x8000102F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_STATUS1_P3_4                  , RULL(0x8000102F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_0          , RULL(0x8000005E0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_0        , RULL(0x8000005E0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_0        , RULL(0x8000005E0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_1          , RULL(0x8000045E0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_1        , RULL(0x8000045E0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_1        , RULL(0x8000045E0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_2          , RULL(0x8000085E0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_2        , RULL(0x8000085E0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_2        , RULL(0x8000085E0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_3          , RULL(0x80000C5E0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_3        , RULL(0x80000C5E0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_3        , RULL(0x80000C5E0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_4          , RULL(0x8000105E0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_4        , RULL(0x8000105E0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_4        , RULL(0x8000105E0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P1_0        , RULL(0x8000005E0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P1_0        , RULL(0x8000005E0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P1_1        , RULL(0x8000045E0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P1_1        , RULL(0x8000045E0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P1_2        , RULL(0x8000085E0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P1_2        , RULL(0x8000085E0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P1_3        , RULL(0x80000C5E0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P1_3        , RULL(0x80000C5E0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P1_4        , RULL(0x8000105E0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P1_4        , RULL(0x8000105E0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P2_0        , RULL(0x8000005E0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P2_0        , RULL(0x8000005E0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P2_1        , RULL(0x8000045E0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P2_1        , RULL(0x8000045E0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P2_2        , RULL(0x8000085E0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P2_2        , RULL(0x8000085E0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P2_3        , RULL(0x80000C5E0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P2_3        , RULL(0x80000C5E0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P2_4        , RULL(0x8000105E0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P2_4        , RULL(0x8000105E0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P3_0        , RULL(0x8000005E07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P3_0        , RULL(0x8000005E08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P3_1        , RULL(0x8000045E07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P3_1        , RULL(0x8000045E08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P3_2        , RULL(0x8000085E07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P3_2        , RULL(0x8000085E08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P3_3        , RULL(0x80000C5E07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P3_3        , RULL(0x80000C5E08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P3_4        , RULL(0x8000105E07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P3_4        , RULL(0x8000105E08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P0_0          , RULL(0x8000015E0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P0_0        , RULL(0x8000015E0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P0_0        , RULL(0x8000015E0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P0_1          , RULL(0x8000055E0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P0_1        , RULL(0x8000055E0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P0_1        , RULL(0x8000055E0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P0_2          , RULL(0x8000095E0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P0_2        , RULL(0x8000095E0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P0_2        , RULL(0x8000095E0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P0_3          , RULL(0x80000D5E0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P0_3        , RULL(0x80000D5E0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P0_3        , RULL(0x80000D5E0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P0_4          , RULL(0x8000115E0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P0_4        , RULL(0x8000115E0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P0_4        , RULL(0x8000115E0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P1_0        , RULL(0x8000015E0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P1_0        , RULL(0x8000015E0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P1_1        , RULL(0x8000055E0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P1_1        , RULL(0x8000055E0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P1_2        , RULL(0x8000095E0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P1_2        , RULL(0x8000095E0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P1_3        , RULL(0x80000D5E0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P1_3        , RULL(0x80000D5E0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P1_4        , RULL(0x8000115E0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P1_4        , RULL(0x8000115E0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P2_0        , RULL(0x8000015E0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P2_0        , RULL(0x8000015E0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P2_1        , RULL(0x8000055E0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P2_1        , RULL(0x8000055E0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P2_2        , RULL(0x8000095E0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P2_2        , RULL(0x8000095E0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P2_3        , RULL(0x80000D5E0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P2_3        , RULL(0x80000D5E0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P2_4        , RULL(0x8000115E0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P2_4        , RULL(0x8000115E0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P3_0        , RULL(0x8000015E07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P3_0        , RULL(0x8000015E08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P3_1        , RULL(0x8000055E07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P3_1        , RULL(0x8000055E08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P3_2        , RULL(0x8000095E07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P3_2        , RULL(0x8000095E08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P3_3        , RULL(0x80000D5E07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P3_3        , RULL(0x80000D5E08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P3_4        , RULL(0x8000115E07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR1_P3_4        , RULL(0x8000115E08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P0_0          , RULL(0x8000025E0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P0_0        , RULL(0x8000025E0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P0_0        , RULL(0x8000025E0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P0_1          , RULL(0x8000065E0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P0_1        , RULL(0x8000065E0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P0_1        , RULL(0x8000065E0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P0_2          , RULL(0x80000A5E0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P0_2        , RULL(0x80000A5E0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P0_2        , RULL(0x80000A5E0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P0_3          , RULL(0x80000E5E0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P0_3        , RULL(0x80000E5E0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P0_3        , RULL(0x80000E5E0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P0_4          , RULL(0x8000125E0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P0_4        , RULL(0x8000125E0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P0_4        , RULL(0x8000125E0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P1_0        , RULL(0x8000025E0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P1_0        , RULL(0x8000025E0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P1_1        , RULL(0x8000065E0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P1_1        , RULL(0x8000065E0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P1_2        , RULL(0x80000A5E0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P1_2        , RULL(0x80000A5E0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P1_3        , RULL(0x80000E5E0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P1_3        , RULL(0x80000E5E0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P1_4        , RULL(0x8000125E0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P1_4        , RULL(0x8000125E0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P2_0        , RULL(0x8000025E0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P2_0        , RULL(0x8000025E0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P2_1        , RULL(0x8000065E0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P2_1        , RULL(0x8000065E0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P2_2        , RULL(0x80000A5E0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P2_2        , RULL(0x80000A5E0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P2_3        , RULL(0x80000E5E0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P2_3        , RULL(0x80000E5E0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P2_4        , RULL(0x8000125E0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P2_4        , RULL(0x8000125E0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P3_0        , RULL(0x8000025E07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P3_0        , RULL(0x8000025E08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P3_1        , RULL(0x8000065E07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P3_1        , RULL(0x8000065E08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P3_2        , RULL(0x80000A5E07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P3_2        , RULL(0x80000A5E08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P3_3        , RULL(0x80000E5E07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P3_3        , RULL(0x80000E5E08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P3_4        , RULL(0x8000125E07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR2_P3_4        , RULL(0x8000125E08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P0_0          , RULL(0x8000035E0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P0_0        , RULL(0x8000035E0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P0_0        , RULL(0x8000035E0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P0_1          , RULL(0x8000075E0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P0_1        , RULL(0x8000075E0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P0_1        , RULL(0x8000075E0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P0_2          , RULL(0x80000B5E0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P0_2        , RULL(0x80000B5E0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P0_2        , RULL(0x80000B5E0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P0_3          , RULL(0x80000F5E0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P0_3        , RULL(0x80000F5E0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P0_3        , RULL(0x80000F5E0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P0_4          , RULL(0x8000135E0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P0_4        , RULL(0x8000135E0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P0_4        , RULL(0x8000135E0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P1_0        , RULL(0x8000035E0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P1_0        , RULL(0x8000035E0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P1_1        , RULL(0x8000075E0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P1_1        , RULL(0x8000075E0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P1_2        , RULL(0x80000B5E0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P1_2        , RULL(0x80000B5E0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P1_3        , RULL(0x80000F5E0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P1_3        , RULL(0x80000F5E0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P1_4        , RULL(0x8000135E0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P1_4        , RULL(0x8000135E0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P2_0        , RULL(0x8000035E0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P2_0        , RULL(0x8000035E0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P2_1        , RULL(0x8000075E0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P2_1        , RULL(0x8000075E0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P2_2        , RULL(0x80000B5E0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P2_2        , RULL(0x80000B5E0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P2_3        , RULL(0x80000F5E0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P2_3        , RULL(0x80000F5E0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P2_4        , RULL(0x8000135E0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P2_4        , RULL(0x8000135E0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P3_0        , RULL(0x8000035E07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P3_0        , RULL(0x8000035E08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P3_1        , RULL(0x8000075E07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P3_1        , RULL(0x8000075E08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P3_2        , RULL(0x80000B5E07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P3_2        , RULL(0x80000B5E08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P3_3        , RULL(0x80000F5E07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P3_3        , RULL(0x80000F5E08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P3_4        , RULL(0x8000135E07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR3_P3_4        , RULL(0x8000135E08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P0_0          , RULL(0x8000005F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P0_0        , RULL(0x8000005F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P0_0        , RULL(0x8000005F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P0_1          , RULL(0x8000045F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P0_1        , RULL(0x8000045F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P0_1        , RULL(0x8000045F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P0_2          , RULL(0x8000085F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P0_2        , RULL(0x8000085F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P0_2        , RULL(0x8000085F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P0_3          , RULL(0x80000C5F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P0_3        , RULL(0x80000C5F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P0_3        , RULL(0x80000C5F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P0_4          , RULL(0x8000105F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P0_4        , RULL(0x8000105F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P0_4        , RULL(0x8000105F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P1_0        , RULL(0x8000005F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P1_0        , RULL(0x8000005F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P1_1        , RULL(0x8000045F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P1_1        , RULL(0x8000045F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P1_2        , RULL(0x8000085F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P1_2        , RULL(0x8000085F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P1_3        , RULL(0x80000C5F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P1_3        , RULL(0x80000C5F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P1_4        , RULL(0x8000105F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P1_4        , RULL(0x8000105F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P2_0        , RULL(0x8000005F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P2_0        , RULL(0x8000005F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P2_1        , RULL(0x8000045F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P2_1        , RULL(0x8000045F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P2_2        , RULL(0x8000085F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P2_2        , RULL(0x8000085F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P2_3        , RULL(0x80000C5F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P2_3        , RULL(0x80000C5F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P2_4        , RULL(0x8000105F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P2_4        , RULL(0x8000105F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P3_0        , RULL(0x8000005F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P3_0        , RULL(0x8000005F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P3_1        , RULL(0x8000045F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P3_1        , RULL(0x8000045F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P3_2        , RULL(0x8000085F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P3_2        , RULL(0x8000085F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P3_3        , RULL(0x80000C5F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P3_3        , RULL(0x80000C5F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P3_4        , RULL(0x8000105F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR0_P3_4        , RULL(0x8000105F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P0_0          , RULL(0x8000015F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P0_0        , RULL(0x8000015F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P0_0        , RULL(0x8000015F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P0_1          , RULL(0x8000055F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P0_1        , RULL(0x8000055F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P0_1        , RULL(0x8000055F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P0_2          , RULL(0x8000095F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P0_2        , RULL(0x8000095F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P0_2        , RULL(0x8000095F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P0_3          , RULL(0x80000D5F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P0_3        , RULL(0x80000D5F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P0_3        , RULL(0x80000D5F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P0_4          , RULL(0x8000115F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P0_4        , RULL(0x8000115F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P0_4        , RULL(0x8000115F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P1_0        , RULL(0x8000015F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P1_0        , RULL(0x8000015F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P1_1        , RULL(0x8000055F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P1_1        , RULL(0x8000055F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P1_2        , RULL(0x8000095F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P1_2        , RULL(0x8000095F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P1_3        , RULL(0x80000D5F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P1_3        , RULL(0x80000D5F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P1_4        , RULL(0x8000115F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P1_4        , RULL(0x8000115F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P2_0        , RULL(0x8000015F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P2_0        , RULL(0x8000015F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P2_1        , RULL(0x8000055F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P2_1        , RULL(0x8000055F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P2_2        , RULL(0x8000095F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P2_2        , RULL(0x8000095F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P2_3        , RULL(0x80000D5F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P2_3        , RULL(0x80000D5F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P2_4        , RULL(0x8000115F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P2_4        , RULL(0x8000115F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P3_0        , RULL(0x8000015F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P3_0        , RULL(0x8000015F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P3_1        , RULL(0x8000055F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P3_1        , RULL(0x8000055F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P3_2        , RULL(0x8000095F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P3_2        , RULL(0x8000095F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P3_3        , RULL(0x80000D5F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P3_3        , RULL(0x80000D5F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P3_4        , RULL(0x8000115F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR1_P3_4        , RULL(0x8000115F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P0_0          , RULL(0x8000025F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P0_0        , RULL(0x8000025F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P0_0        , RULL(0x8000025F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P0_1          , RULL(0x8000065F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P0_1        , RULL(0x8000065F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P0_1        , RULL(0x8000065F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P0_2          , RULL(0x80000A5F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P0_2        , RULL(0x80000A5F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P0_2        , RULL(0x80000A5F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P0_3          , RULL(0x80000E5F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P0_3        , RULL(0x80000E5F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P0_3        , RULL(0x80000E5F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P0_4          , RULL(0x8000125F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P0_4        , RULL(0x8000125F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P0_4        , RULL(0x8000125F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P1_0        , RULL(0x8000025F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P1_0        , RULL(0x8000025F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P1_1        , RULL(0x8000065F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P1_1        , RULL(0x8000065F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P1_2        , RULL(0x80000A5F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P1_2        , RULL(0x80000A5F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P1_3        , RULL(0x80000E5F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P1_3        , RULL(0x80000E5F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P1_4        , RULL(0x8000125F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P1_4        , RULL(0x8000125F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P2_0        , RULL(0x8000025F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P2_0        , RULL(0x8000025F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P2_1        , RULL(0x8000065F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P2_1        , RULL(0x8000065F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P2_2        , RULL(0x80000A5F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P2_2        , RULL(0x80000A5F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P2_3        , RULL(0x80000E5F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P2_3        , RULL(0x80000E5F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P2_4        , RULL(0x8000125F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P2_4        , RULL(0x8000125F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P3_0        , RULL(0x8000025F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P3_0        , RULL(0x8000025F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P3_1        , RULL(0x8000065F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P3_1        , RULL(0x8000065F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P3_2        , RULL(0x80000A5F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P3_2        , RULL(0x80000A5F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P3_3        , RULL(0x80000E5F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P3_3        , RULL(0x80000E5F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P3_4        , RULL(0x8000125F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR2_P3_4        , RULL(0x8000125F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P0_0          , RULL(0x8000035F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P0_0        , RULL(0x8000035F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P0_0        , RULL(0x8000035F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P0_1          , RULL(0x8000075F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P0_1        , RULL(0x8000075F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P0_1        , RULL(0x8000075F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P0_2          , RULL(0x80000B5F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P0_2        , RULL(0x80000B5F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P0_2        , RULL(0x80000B5F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P0_3          , RULL(0x80000F5F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P0_3        , RULL(0x80000F5F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P0_3        , RULL(0x80000F5F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P0_4          , RULL(0x8000135F0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P0_4        , RULL(0x8000135F0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P0_4        , RULL(0x8000135F0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P1_0        , RULL(0x8000035F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P1_0        , RULL(0x8000035F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P1_1        , RULL(0x8000075F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P1_1        , RULL(0x8000075F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P1_2        , RULL(0x80000B5F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P1_2        , RULL(0x80000B5F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P1_3        , RULL(0x80000F5F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P1_3        , RULL(0x80000F5F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P1_4        , RULL(0x8000135F0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P1_4        , RULL(0x8000135F0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P2_0        , RULL(0x8000035F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P2_0        , RULL(0x8000035F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P2_1        , RULL(0x8000075F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P2_1        , RULL(0x8000075F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P2_2        , RULL(0x80000B5F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P2_2        , RULL(0x80000B5F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P2_3        , RULL(0x80000F5F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P2_3        , RULL(0x80000F5F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P2_4        , RULL(0x8000135F0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P2_4        , RULL(0x8000135F0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P3_0        , RULL(0x8000035F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P3_0        , RULL(0x8000035F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P3_1        , RULL(0x8000075F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P3_1        , RULL(0x8000075F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P3_2        , RULL(0x80000B5F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P3_2        , RULL(0x80000B5F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P3_3        , RULL(0x80000F5F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P3_3        , RULL(0x80000F5F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P3_4        , RULL(0x8000135F07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_DP16_WR_VREF_VALUE1_RANK_PAIR3_P3_4        , RULL(0x8000135F08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
 
 REG64( MCA_DDRPHY_PC_BASE_CNTR0_P0                             , RULL(0x8000C0040701103F), SH_UNT_MCA      ,
        SH_ACS_SCOM_RO   );
@@ -24119,26 +25913,26 @@ REG64( MCA_3_DDRPHY_PC_CSID_CFG_P3                             , RULL(0x8000C033
 REG64( MCA_7_DDRPHY_PC_CSID_CFG_P3                             , RULL(0x8000C03308011C3F), SH_UNT_MCA_7    ,
        SH_ACS_SCOM_RW   );
 
-REG64( MCA_DDRPHY_PC_DP16_DLL_CAL_STATUS_P0                    , RULL(0x8000C0000701103F), SH_UNT_MCA      ,
+REG64( MCA_DDRPHY_PC_DLL_CAL_STATUS_P0                         , RULL(0x8000C0000701103F), SH_UNT_MCA      ,
        SH_ACS_SCOM_RO   );
-REG64( MCA_0_DDRPHY_PC_DP16_DLL_CAL_STATUS_P0                  , RULL(0x8000C0000701103F), SH_UNT_MCA_0    ,
+REG64( MCA_0_DDRPHY_PC_DLL_CAL_STATUS_P0                       , RULL(0x8000C0000701103F), SH_UNT_MCA_0    ,
        SH_ACS_SCOM_RO   );
-REG64( MCA_4_DDRPHY_PC_DP16_DLL_CAL_STATUS_P0                  , RULL(0x8000C0000801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RO   );
-
-REG64( MCA_1_DDRPHY_PC_DP16_DLL_CAL_STATUS_P1                  , RULL(0x8000C0000701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RO   );
-REG64( MCA_5_DDRPHY_PC_DP16_DLL_CAL_STATUS_P1                  , RULL(0x8000C0000801143F), SH_UNT_MCA_5    ,
+REG64( MCA_4_DDRPHY_PC_DLL_CAL_STATUS_P0                       , RULL(0x8000C0000801103F), SH_UNT_MCA_4    ,
        SH_ACS_SCOM_RO   );
 
-REG64( MCA_2_DDRPHY_PC_DP16_DLL_CAL_STATUS_P2                  , RULL(0x8000C0000701183F), SH_UNT_MCA_2    ,
+REG64( MCA_1_DDRPHY_PC_DLL_CAL_STATUS_P1                       , RULL(0x8000C0000701143F), SH_UNT_MCA_1    ,
        SH_ACS_SCOM_RO   );
-REG64( MCA_6_DDRPHY_PC_DP16_DLL_CAL_STATUS_P2                  , RULL(0x8000C0000801183F), SH_UNT_MCA_6    ,
+REG64( MCA_5_DDRPHY_PC_DLL_CAL_STATUS_P1                       , RULL(0x8000C0000801143F), SH_UNT_MCA_5    ,
        SH_ACS_SCOM_RO   );
 
-REG64( MCA_3_DDRPHY_PC_DP16_DLL_CAL_STATUS_P3                  , RULL(0x8000C00007011C3F), SH_UNT_MCA_3    ,
+REG64( MCA_2_DDRPHY_PC_DLL_CAL_STATUS_P2                       , RULL(0x8000C0000701183F), SH_UNT_MCA_2    ,
        SH_ACS_SCOM_RO   );
-REG64( MCA_7_DDRPHY_PC_DP16_DLL_CAL_STATUS_P3                  , RULL(0x8000C00008011C3F), SH_UNT_MCA_7    ,
+REG64( MCA_6_DDRPHY_PC_DLL_CAL_STATUS_P2                       , RULL(0x8000C0000801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RO   );
+
+REG64( MCA_3_DDRPHY_PC_DLL_CAL_STATUS_P3                       , RULL(0x8000C00007011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RO   );
+REG64( MCA_7_DDRPHY_PC_DLL_CAL_STATUS_P3                       , RULL(0x8000C00008011C3F), SH_UNT_MCA_7    ,
        SH_ACS_SCOM_RO   );
 
 REG64( MCA_DDRPHY_PC_ERROR_MASK0_P0                            , RULL(0x8000C0130701103F), SH_UNT_MCA      ,
@@ -25483,6 +27277,50 @@ REG64( MCA_3_DDRPHY_RC_ERROR_STATUS0_P3                        , RULL(0x8000C805
 REG64( MCA_7_DDRPHY_RC_ERROR_STATUS0_P3                        , RULL(0x8000C80508011C3F), SH_UNT_MCA_7    ,
        SH_ACS_SCOM_RO   );
 
+REG64( MCA_DDRPHY_RC_RDVREF_CONFIG0_P0                         , RULL(0x8000C8090701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_RC_RDVREF_CONFIG0_P0                       , RULL(0x8000C8090701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_RC_RDVREF_CONFIG0_P0                       , RULL(0x8000C8090801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_RC_RDVREF_CONFIG0_P1                       , RULL(0x8000C8090701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_RC_RDVREF_CONFIG0_P1                       , RULL(0x8000C8090801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_RC_RDVREF_CONFIG0_P2                       , RULL(0x8000C8090701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_RC_RDVREF_CONFIG0_P2                       , RULL(0x8000C8090801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_RC_RDVREF_CONFIG0_P3                       , RULL(0x8000C80907011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_RC_RDVREF_CONFIG0_P3                       , RULL(0x8000C80908011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_DDRPHY_RC_RDVREF_CONFIG1_P0                         , RULL(0x8000C80A0701103F), SH_UNT_MCA      ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_0_DDRPHY_RC_RDVREF_CONFIG1_P0                       , RULL(0x8000C80A0701103F), SH_UNT_MCA_0    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_4_DDRPHY_RC_RDVREF_CONFIG1_P0                       , RULL(0x8000C80A0801103F), SH_UNT_MCA_4    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_1_DDRPHY_RC_RDVREF_CONFIG1_P1                       , RULL(0x8000C80A0701143F), SH_UNT_MCA_1    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_5_DDRPHY_RC_RDVREF_CONFIG1_P1                       , RULL(0x8000C80A0801143F), SH_UNT_MCA_5    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_2_DDRPHY_RC_RDVREF_CONFIG1_P2                       , RULL(0x8000C80A0701183F), SH_UNT_MCA_2    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_6_DDRPHY_RC_RDVREF_CONFIG1_P2                       , RULL(0x8000C80A0801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_RC_RDVREF_CONFIG1_P3                       , RULL(0x8000C80A07011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_RC_RDVREF_CONFIG1_P3                       , RULL(0x8000C80A08011C3F), SH_UNT_MCA_7    ,
+       SH_ACS_SCOM_RW   );
+
 REG64( MCA_DDRPHY_SEQ_CONFIG0_P0                               , RULL(0x8000C4020701103F), SH_UNT_MCA      ,
        SH_ACS_SCOM_RW   );
 REG64( MCA_0_DDRPHY_SEQ_CONFIG0_P0                             , RULL(0x8000C4020701103F), SH_UNT_MCA_0    ,
@@ -25681,26 +27519,26 @@ REG64( MCA_3_DDRPHY_SEQ_MEM_TIMING_PARAM2_P3                   , RULL(0x8000C414
 REG64( MCA_7_DDRPHY_SEQ_MEM_TIMING_PARAM2_P3                   , RULL(0x8000C41408011C3F), SH_UNT_MCA_7    ,
        SH_ACS_SCOM_RW   );
 
-REG64( MCA_DDRPHY_SEQ_ODT_DEFAULT_CFG_P0                       , RULL(0x8000C4240701103F), SH_UNT_MCA      ,
+REG64( MCA_DDRPHY_SEQ_ODT_DEFAULT_CONFIG_P0                    , RULL(0x8000C4240701103F), SH_UNT_MCA      ,
        SH_ACS_SCOM_RW   );
-REG64( MCA_0_DDRPHY_SEQ_ODT_DEFAULT_CFG_P0                     , RULL(0x8000C4240701103F), SH_UNT_MCA_0    ,
+REG64( MCA_0_DDRPHY_SEQ_ODT_DEFAULT_CONFIG_P0                  , RULL(0x8000C4240701103F), SH_UNT_MCA_0    ,
        SH_ACS_SCOM_RW   );
-REG64( MCA_4_DDRPHY_SEQ_ODT_DEFAULT_CFG_P0                     , RULL(0x8000C4240801103F), SH_UNT_MCA_4    ,
-       SH_ACS_SCOM_RW   );
-
-REG64( MCA_1_DDRPHY_SEQ_ODT_DEFAULT_CFG_P1                     , RULL(0x8000C4240701143F), SH_UNT_MCA_1    ,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_5_DDRPHY_SEQ_ODT_DEFAULT_CFG_P1                     , RULL(0x8000C4240801143F), SH_UNT_MCA_5    ,
+REG64( MCA_4_DDRPHY_SEQ_ODT_DEFAULT_CONFIG_P0                  , RULL(0x8000C4240801103F), SH_UNT_MCA_4    ,
        SH_ACS_SCOM_RW   );
 
-REG64( MCA_2_DDRPHY_SEQ_ODT_DEFAULT_CFG_P2                     , RULL(0x8000C4240701183F), SH_UNT_MCA_2    ,
+REG64( MCA_1_DDRPHY_SEQ_ODT_DEFAULT_CONFIG_P1                  , RULL(0x8000C4240701143F), SH_UNT_MCA_1    ,
        SH_ACS_SCOM_RW   );
-REG64( MCA_6_DDRPHY_SEQ_ODT_DEFAULT_CFG_P2                     , RULL(0x8000C4240801183F), SH_UNT_MCA_6    ,
+REG64( MCA_5_DDRPHY_SEQ_ODT_DEFAULT_CONFIG_P1                  , RULL(0x8000C4240801143F), SH_UNT_MCA_5    ,
        SH_ACS_SCOM_RW   );
 
-REG64( MCA_3_DDRPHY_SEQ_ODT_DEFAULT_CFG_P3                     , RULL(0x8000C42407011C3F), SH_UNT_MCA_3    ,
+REG64( MCA_2_DDRPHY_SEQ_ODT_DEFAULT_CONFIG_P2                  , RULL(0x8000C4240701183F), SH_UNT_MCA_2    ,
        SH_ACS_SCOM_RW   );
-REG64( MCA_7_DDRPHY_SEQ_ODT_DEFAULT_CFG_P3                     , RULL(0x8000C42408011C3F), SH_UNT_MCA_7    ,
+REG64( MCA_6_DDRPHY_SEQ_ODT_DEFAULT_CONFIG_P2                  , RULL(0x8000C4240801183F), SH_UNT_MCA_6    ,
+       SH_ACS_SCOM_RW   );
+
+REG64( MCA_3_DDRPHY_SEQ_ODT_DEFAULT_CONFIG_P3                  , RULL(0x8000C42407011C3F), SH_UNT_MCA_3    ,
+       SH_ACS_SCOM_RW   );
+REG64( MCA_7_DDRPHY_SEQ_ODT_DEFAULT_CONFIG_P3                  , RULL(0x8000C42408011C3F), SH_UNT_MCA_7    ,
        SH_ACS_SCOM_RW   );
 
 REG64( MCA_DDRPHY_SEQ_ODT_RD_CONFIG0_P0                        , RULL(0x8000C40E0701103F), SH_UNT_MCA      ,
@@ -26208,6 +28046,10 @@ REG64( MCA_3_DDRPHY_WC_ERROR_STATUS0_P3                        , RULL(0x8000CC03
        SH_ACS_SCOM_RO   );
 REG64( MCA_7_DDRPHY_WC_ERROR_STATUS0_P3                        , RULL(0x8000CC0308011C3F), SH_UNT_MCA_7    ,
        SH_ACS_SCOM_RO   );
+
+REG64( MCA_DEBUG_STATUS_REG                                    , RULL(0x07010004), SH_UNT_MCA      , SH_ACS_SCOM      );
+REG64( MCA_0_DEBUG_STATUS_REG                                  , RULL(0x07010004), SH_UNT_MCA_0    , SH_ACS_SCOM      );
+REG64( MCA_4_DEBUG_STATUS_REG                                  , RULL(0x08010004), SH_UNT_MCA_4    , SH_ACS_SCOM      );
 
 REG64( MCA_DP16_WR_DELAY_VALUE_0_RP0_REG_P0_0                  , RULL(0x800000380701103F), SH_UNT_MCA      ,
        SH_ACS_SCOM_RW   );
@@ -35019,6 +36861,16 @@ REG64( MCA_5_EICR                                              , RULL(0x08010A4D
 REG64( MCA_6_EICR                                              , RULL(0x08010A8D), SH_UNT_MCA_6    , SH_ACS_SCOM_RW   );
 REG64( MCA_7_EICR                                              , RULL(0x08010ACD), SH_UNT_MCA_7    , SH_ACS_SCOM_RW   );
 
+REG64( MCA_ELPR                                                , RULL(0x07010A2F), SH_UNT_MCA      , SH_ACS_SCOM_RO   );
+REG64( MCA_0_ELPR                                              , RULL(0x07010A2F), SH_UNT_MCA_0    , SH_ACS_SCOM_RO   );
+REG64( MCA_1_ELPR                                              , RULL(0x07010A6F), SH_UNT_MCA_1    , SH_ACS_SCOM_RO   );
+REG64( MCA_2_ELPR                                              , RULL(0x07010AAF), SH_UNT_MCA_2    , SH_ACS_SCOM_RO   );
+REG64( MCA_3_ELPR                                              , RULL(0x07010AEF), SH_UNT_MCA_3    , SH_ACS_SCOM_RO   );
+REG64( MCA_4_ELPR                                              , RULL(0x08010A2F), SH_UNT_MCA_4    , SH_ACS_SCOM_RO   );
+REG64( MCA_5_ELPR                                              , RULL(0x08010A6F), SH_UNT_MCA_5    , SH_ACS_SCOM_RO   );
+REG64( MCA_6_ELPR                                              , RULL(0x08010AAF), SH_UNT_MCA_6    , SH_ACS_SCOM_RO   );
+REG64( MCA_7_ELPR                                              , RULL(0x08010AEF), SH_UNT_MCA_7    , SH_ACS_SCOM_RO   );
+
 REG64( MCA_FIR                                                 , RULL(0x07010A00), SH_UNT_MCA      , SH_ACS_SCOM_RW   );
 REG64( MCA_FIR_OR                                              , RULL(0x07010A02), SH_UNT_MCA      , SH_ACS_SCOM2_OR  );
 REG64( MCA_0_FIR                                               , RULL(0x07010A00), SH_UNT_MCA_0    , SH_ACS_SCOM_RW   );
@@ -35426,6 +37278,26 @@ REG64( MCA_5_MBA_CAL3Q                                         , RULL(0x08010952
 REG64( MCA_6_MBA_CAL3Q                                         , RULL(0x08010992), SH_UNT_MCA_6    , SH_ACS_SCOM_RW   );
 REG64( MCA_7_MBA_CAL3Q                                         , RULL(0x080109D2), SH_UNT_MCA_7    , SH_ACS_SCOM_RW   );
 
+REG64( MCA_MBA_DBG0Q                                           , RULL(0x07010926), SH_UNT_MCA      , SH_ACS_SCOM_RW   );
+REG64( MCA_0_MBA_DBG0Q                                         , RULL(0x07010926), SH_UNT_MCA_0    , SH_ACS_SCOM_RW   );
+REG64( MCA_1_MBA_DBG0Q                                         , RULL(0x07010966), SH_UNT_MCA_1    , SH_ACS_SCOM_RW   );
+REG64( MCA_2_MBA_DBG0Q                                         , RULL(0x070109A6), SH_UNT_MCA_2    , SH_ACS_SCOM_RW   );
+REG64( MCA_3_MBA_DBG0Q                                         , RULL(0x070109E6), SH_UNT_MCA_3    , SH_ACS_SCOM_RW   );
+REG64( MCA_4_MBA_DBG0Q                                         , RULL(0x08010926), SH_UNT_MCA_4    , SH_ACS_SCOM_RW   );
+REG64( MCA_5_MBA_DBG0Q                                         , RULL(0x08010966), SH_UNT_MCA_5    , SH_ACS_SCOM_RW   );
+REG64( MCA_6_MBA_DBG0Q                                         , RULL(0x080109A6), SH_UNT_MCA_6    , SH_ACS_SCOM_RW   );
+REG64( MCA_7_MBA_DBG0Q                                         , RULL(0x080109E6), SH_UNT_MCA_7    , SH_ACS_SCOM_RW   );
+
+REG64( MCA_MBA_DBG1Q                                           , RULL(0x07010927), SH_UNT_MCA      , SH_ACS_SCOM_RW   );
+REG64( MCA_0_MBA_DBG1Q                                         , RULL(0x07010927), SH_UNT_MCA_0    , SH_ACS_SCOM_RW   );
+REG64( MCA_1_MBA_DBG1Q                                         , RULL(0x07010967), SH_UNT_MCA_1    , SH_ACS_SCOM_RW   );
+REG64( MCA_2_MBA_DBG1Q                                         , RULL(0x070109A7), SH_UNT_MCA_2    , SH_ACS_SCOM_RW   );
+REG64( MCA_3_MBA_DBG1Q                                         , RULL(0x070109E7), SH_UNT_MCA_3    , SH_ACS_SCOM_RW   );
+REG64( MCA_4_MBA_DBG1Q                                         , RULL(0x08010927), SH_UNT_MCA_4    , SH_ACS_SCOM_RW   );
+REG64( MCA_5_MBA_DBG1Q                                         , RULL(0x08010967), SH_UNT_MCA_5    , SH_ACS_SCOM_RW   );
+REG64( MCA_6_MBA_DBG1Q                                         , RULL(0x080109A7), SH_UNT_MCA_6    , SH_ACS_SCOM_RW   );
+REG64( MCA_7_MBA_DBG1Q                                         , RULL(0x080109E7), SH_UNT_MCA_7    , SH_ACS_SCOM_RW   );
+
 REG64( MCA_MBA_DSM0Q                                           , RULL(0x0701090A), SH_UNT_MCA      , SH_ACS_SCOM_RW   );
 REG64( MCA_0_MBA_DSM0Q                                         , RULL(0x0701090A), SH_UNT_MCA_0    , SH_ACS_SCOM_RW   );
 REG64( MCA_1_MBA_DSM0Q                                         , RULL(0x0701094A), SH_UNT_MCA_1    , SH_ACS_SCOM_RW   );
@@ -35506,25 +37378,25 @@ REG64( MCA_5_MBA_FARB5Q                                        , RULL(0x08010958
 REG64( MCA_6_MBA_FARB5Q                                        , RULL(0x08010998), SH_UNT_MCA_6    , SH_ACS_SCOM_RW   );
 REG64( MCA_7_MBA_FARB5Q                                        , RULL(0x080109D8), SH_UNT_MCA_7    , SH_ACS_SCOM_RW   );
 
-REG64( MCA_MBA_FARB6Q                                          , RULL(0x07010919), SH_UNT_MCA      , SH_ACS_SCOM_RW   );
-REG64( MCA_0_MBA_FARB6Q                                        , RULL(0x07010919), SH_UNT_MCA_0    , SH_ACS_SCOM_RW   );
-REG64( MCA_1_MBA_FARB6Q                                        , RULL(0x07010959), SH_UNT_MCA_1    , SH_ACS_SCOM_RW   );
-REG64( MCA_2_MBA_FARB6Q                                        , RULL(0x07010999), SH_UNT_MCA_2    , SH_ACS_SCOM_RW   );
-REG64( MCA_3_MBA_FARB6Q                                        , RULL(0x070109D9), SH_UNT_MCA_3    , SH_ACS_SCOM_RW   );
-REG64( MCA_4_MBA_FARB6Q                                        , RULL(0x08010919), SH_UNT_MCA_4    , SH_ACS_SCOM_RW   );
-REG64( MCA_5_MBA_FARB6Q                                        , RULL(0x08010959), SH_UNT_MCA_5    , SH_ACS_SCOM_RW   );
-REG64( MCA_6_MBA_FARB6Q                                        , RULL(0x08010999), SH_UNT_MCA_6    , SH_ACS_SCOM_RW   );
-REG64( MCA_7_MBA_FARB6Q                                        , RULL(0x080109D9), SH_UNT_MCA_7    , SH_ACS_SCOM_RW   );
+REG64( MCA_MBA_FARB6Q                                          , RULL(0x07010919), SH_UNT_MCA      , SH_ACS_SCOM_RO   );
+REG64( MCA_0_MBA_FARB6Q                                        , RULL(0x07010919), SH_UNT_MCA_0    , SH_ACS_SCOM_RO   );
+REG64( MCA_1_MBA_FARB6Q                                        , RULL(0x07010959), SH_UNT_MCA_1    , SH_ACS_SCOM_RO   );
+REG64( MCA_2_MBA_FARB6Q                                        , RULL(0x07010999), SH_UNT_MCA_2    , SH_ACS_SCOM_RO   );
+REG64( MCA_3_MBA_FARB6Q                                        , RULL(0x070109D9), SH_UNT_MCA_3    , SH_ACS_SCOM_RO   );
+REG64( MCA_4_MBA_FARB6Q                                        , RULL(0x08010919), SH_UNT_MCA_4    , SH_ACS_SCOM_RO   );
+REG64( MCA_5_MBA_FARB6Q                                        , RULL(0x08010959), SH_UNT_MCA_5    , SH_ACS_SCOM_RO   );
+REG64( MCA_6_MBA_FARB6Q                                        , RULL(0x08010999), SH_UNT_MCA_6    , SH_ACS_SCOM_RO   );
+REG64( MCA_7_MBA_FARB6Q                                        , RULL(0x080109D9), SH_UNT_MCA_7    , SH_ACS_SCOM_RO   );
 
-REG64( MCA_MBA_FARB7Q                                          , RULL(0x07010920), SH_UNT_MCA      , SH_ACS_SCOM_RW   );
-REG64( MCA_0_MBA_FARB7Q                                        , RULL(0x07010920), SH_UNT_MCA_0    , SH_ACS_SCOM_RW   );
-REG64( MCA_1_MBA_FARB7Q                                        , RULL(0x07010960), SH_UNT_MCA_1    , SH_ACS_SCOM_RW   );
-REG64( MCA_2_MBA_FARB7Q                                        , RULL(0x070109A0), SH_UNT_MCA_2    , SH_ACS_SCOM_RW   );
-REG64( MCA_3_MBA_FARB7Q                                        , RULL(0x070109E0), SH_UNT_MCA_3    , SH_ACS_SCOM_RW   );
-REG64( MCA_4_MBA_FARB7Q                                        , RULL(0x08010920), SH_UNT_MCA_4    , SH_ACS_SCOM_RW   );
-REG64( MCA_5_MBA_FARB7Q                                        , RULL(0x08010960), SH_UNT_MCA_5    , SH_ACS_SCOM_RW   );
-REG64( MCA_6_MBA_FARB7Q                                        , RULL(0x080109A0), SH_UNT_MCA_6    , SH_ACS_SCOM_RW   );
-REG64( MCA_7_MBA_FARB7Q                                        , RULL(0x080109E0), SH_UNT_MCA_7    , SH_ACS_SCOM_RW   );
+REG64( MCA_MBA_FARB7Q                                          , RULL(0x07010925), SH_UNT_MCA      , SH_ACS_SCOM      );
+REG64( MCA_0_MBA_FARB7Q                                        , RULL(0x07010925), SH_UNT_MCA_0    , SH_ACS_SCOM      );
+REG64( MCA_1_MBA_FARB7Q                                        , RULL(0x07010965), SH_UNT_MCA_1    , SH_ACS_SCOM      );
+REG64( MCA_2_MBA_FARB7Q                                        , RULL(0x070109A5), SH_UNT_MCA_2    , SH_ACS_SCOM      );
+REG64( MCA_3_MBA_FARB7Q                                        , RULL(0x070109E5), SH_UNT_MCA_3    , SH_ACS_SCOM      );
+REG64( MCA_4_MBA_FARB7Q                                        , RULL(0x08010925), SH_UNT_MCA_4    , SH_ACS_SCOM      );
+REG64( MCA_5_MBA_FARB7Q                                        , RULL(0x08010965), SH_UNT_MCA_5    , SH_ACS_SCOM      );
+REG64( MCA_6_MBA_FARB7Q                                        , RULL(0x080109A5), SH_UNT_MCA_6    , SH_ACS_SCOM      );
+REG64( MCA_7_MBA_FARB7Q                                        , RULL(0x080109E5), SH_UNT_MCA_7    , SH_ACS_SCOM      );
 
 REG64( MCBIST_MBA_MCBERRPTQ                                    , RULL(0x07010FE7), SH_UNT_MCBIST   , SH_ACS_SCOM_RO   );
 REG64( MCBIST_0_MBA_MCBERRPTQ                                  , RULL(0x07010FE7), SH_UNT_MCBIST_0 , SH_ACS_SCOM_RO   );
@@ -35590,15 +37462,35 @@ REG64( MCA_5_MBA_PMU5Q                                         , RULL(0x0801097C
 REG64( MCA_6_MBA_PMU5Q                                         , RULL(0x080109BC), SH_UNT_MCA_6    , SH_ACS_SCOM_RO   );
 REG64( MCA_7_MBA_PMU5Q                                         , RULL(0x080109FC), SH_UNT_MCA_7    , SH_ACS_SCOM_RO   );
 
-REG64( MCA_MBA_PMU6Q                                           , RULL(0x0701093D), SH_UNT_MCA      , SH_ACS_SCOM      );
-REG64( MCA_0_MBA_PMU6Q                                         , RULL(0x0701093D), SH_UNT_MCA_0    , SH_ACS_SCOM      );
-REG64( MCA_1_MBA_PMU6Q                                         , RULL(0x0701097D), SH_UNT_MCA_1    , SH_ACS_SCOM      );
-REG64( MCA_2_MBA_PMU6Q                                         , RULL(0x070109BD), SH_UNT_MCA_2    , SH_ACS_SCOM      );
-REG64( MCA_3_MBA_PMU6Q                                         , RULL(0x070109FD), SH_UNT_MCA_3    , SH_ACS_SCOM      );
-REG64( MCA_4_MBA_PMU6Q                                         , RULL(0x0801093D), SH_UNT_MCA_4    , SH_ACS_SCOM      );
-REG64( MCA_5_MBA_PMU6Q                                         , RULL(0x0801097D), SH_UNT_MCA_5    , SH_ACS_SCOM      );
-REG64( MCA_6_MBA_PMU6Q                                         , RULL(0x080109BD), SH_UNT_MCA_6    , SH_ACS_SCOM      );
-REG64( MCA_7_MBA_PMU6Q                                         , RULL(0x080109FD), SH_UNT_MCA_7    , SH_ACS_SCOM      );
+REG64( MCA_MBA_PMU6Q                                           , RULL(0x0701093D), SH_UNT_MCA      , SH_ACS_SCOM_RO   );
+REG64( MCA_0_MBA_PMU6Q                                         , RULL(0x0701093D), SH_UNT_MCA_0    , SH_ACS_SCOM_RO   );
+REG64( MCA_1_MBA_PMU6Q                                         , RULL(0x0701097D), SH_UNT_MCA_1    , SH_ACS_SCOM_RO   );
+REG64( MCA_2_MBA_PMU6Q                                         , RULL(0x070109BD), SH_UNT_MCA_2    , SH_ACS_SCOM_RO   );
+REG64( MCA_3_MBA_PMU6Q                                         , RULL(0x070109FD), SH_UNT_MCA_3    , SH_ACS_SCOM_RO   );
+REG64( MCA_4_MBA_PMU6Q                                         , RULL(0x0801093D), SH_UNT_MCA_4    , SH_ACS_SCOM_RO   );
+REG64( MCA_5_MBA_PMU6Q                                         , RULL(0x0801097D), SH_UNT_MCA_5    , SH_ACS_SCOM_RO   );
+REG64( MCA_6_MBA_PMU6Q                                         , RULL(0x080109BD), SH_UNT_MCA_6    , SH_ACS_SCOM_RO   );
+REG64( MCA_7_MBA_PMU6Q                                         , RULL(0x080109FD), SH_UNT_MCA_7    , SH_ACS_SCOM_RO   );
+
+REG64( MCA_MBA_PMU7Q                                           , RULL(0x0701093E), SH_UNT_MCA      , SH_ACS_SCOM_RW   );
+REG64( MCA_0_MBA_PMU7Q                                         , RULL(0x0701093E), SH_UNT_MCA_0    , SH_ACS_SCOM_RW   );
+REG64( MCA_1_MBA_PMU7Q                                         , RULL(0x0701097E), SH_UNT_MCA_1    , SH_ACS_SCOM_RW   );
+REG64( MCA_2_MBA_PMU7Q                                         , RULL(0x070109BE), SH_UNT_MCA_2    , SH_ACS_SCOM_RW   );
+REG64( MCA_3_MBA_PMU7Q                                         , RULL(0x070109FE), SH_UNT_MCA_3    , SH_ACS_SCOM_RW   );
+REG64( MCA_4_MBA_PMU7Q                                         , RULL(0x0801093E), SH_UNT_MCA_4    , SH_ACS_SCOM_RW   );
+REG64( MCA_5_MBA_PMU7Q                                         , RULL(0x0801097E), SH_UNT_MCA_5    , SH_ACS_SCOM_RW   );
+REG64( MCA_6_MBA_PMU7Q                                         , RULL(0x080109BE), SH_UNT_MCA_6    , SH_ACS_SCOM_RW   );
+REG64( MCA_7_MBA_PMU7Q                                         , RULL(0x080109FE), SH_UNT_MCA_7    , SH_ACS_SCOM_RW   );
+
+REG64( MCA_MBA_PMU8Q                                           , RULL(0x0701093F), SH_UNT_MCA      , SH_ACS_SCOM_RW   );
+REG64( MCA_0_MBA_PMU8Q                                         , RULL(0x0701093F), SH_UNT_MCA_0    , SH_ACS_SCOM_RW   );
+REG64( MCA_1_MBA_PMU8Q                                         , RULL(0x0701097F), SH_UNT_MCA_1    , SH_ACS_SCOM_RW   );
+REG64( MCA_2_MBA_PMU8Q                                         , RULL(0x070109BF), SH_UNT_MCA_2    , SH_ACS_SCOM_RW   );
+REG64( MCA_3_MBA_PMU8Q                                         , RULL(0x070109FF), SH_UNT_MCA_3    , SH_ACS_SCOM_RW   );
+REG64( MCA_4_MBA_PMU8Q                                         , RULL(0x0801093F), SH_UNT_MCA_4    , SH_ACS_SCOM_RW   );
+REG64( MCA_5_MBA_PMU8Q                                         , RULL(0x0801097F), SH_UNT_MCA_5    , SH_ACS_SCOM_RW   );
+REG64( MCA_6_MBA_PMU8Q                                         , RULL(0x080109BF), SH_UNT_MCA_6    , SH_ACS_SCOM_RW   );
+REG64( MCA_7_MBA_PMU8Q                                         , RULL(0x080109FF), SH_UNT_MCA_7    , SH_ACS_SCOM_RW   );
 
 REG64( MCA_MBA_RRQ0Q                                           , RULL(0x0701090E), SH_UNT_MCA      , SH_ACS_SCOM_RW   );
 REG64( MCA_0_MBA_RRQ0Q                                         , RULL(0x0701090E), SH_UNT_MCA_0    , SH_ACS_SCOM_RW   );
@@ -35939,9 +37831,12 @@ REG64( MCBIST_1_MCBISTFIRQ                                     , RULL(0x08010F00
 REG64( MCBIST_1_MCBISTFIRQ_AND                                 , RULL(0x08010F01), SH_UNT_MCBIST_1 , SH_ACS_SCOM1_AND );
 REG64( MCBIST_1_MCBISTFIRQ_OR                                  , RULL(0x08010F02), SH_UNT_MCBIST_1 , SH_ACS_SCOM2_OR  );
 
-REG64( MCBIST_MCBISTFIRWOF                                     , RULL(0x07010F08), SH_UNT_MCBIST   , SH_ACS_SCOM_RO   );
-REG64( MCBIST_0_MCBISTFIRWOF                                   , RULL(0x07010F08), SH_UNT_MCBIST_0 , SH_ACS_SCOM_RO   );
-REG64( MCBIST_1_MCBISTFIRWOF                                   , RULL(0x08010F08), SH_UNT_MCBIST_1 , SH_ACS_SCOM_RO   );
+REG64( MCBIST_MCBISTFIRWOF                                     , RULL(0x07010F08), SH_UNT_MCBIST   ,
+       SH_ACS_SCOM_WCLRREG );
+REG64( MCBIST_0_MCBISTFIRWOF                                   , RULL(0x07010F08), SH_UNT_MCBIST_0 ,
+       SH_ACS_SCOM_WCLRREG );
+REG64( MCBIST_1_MCBISTFIRWOF                                   , RULL(0x08010F08), SH_UNT_MCBIST_1 ,
+       SH_ACS_SCOM_WCLRREG );
 
 REG64( MCBIST_MCBLFSRA0Q                                       , RULL(0x07010FD4), SH_UNT_MCBIST   , SH_ACS_SCOM_RW   );
 REG64( MCBIST_0_MCBLFSRA0Q                                     , RULL(0x07010FD4), SH_UNT_MCBIST_0 , SH_ACS_SCOM_RW   );
@@ -36364,6 +38259,12 @@ REG64( MCS_1_MCSYNC                                            , RULL(0x05010895
 REG64( MCS_2_MCSYNC                                            , RULL(0x03010815), SH_UNT_MCS_2    , SH_ACS_SCOM_RW   );
 REG64( MCS_3_MCSYNC                                            , RULL(0x03010895), SH_UNT_MCS_3    , SH_ACS_SCOM_RW   );
 
+REG64( MCS_MCTO                                                , RULL(0x0501081B), SH_UNT_MCS      , SH_ACS_SCOM_RW   );
+REG64( MCS_0_MCTO                                              , RULL(0x0501081B), SH_UNT_MCS_0    , SH_ACS_SCOM_RW   );
+REG64( MCS_1_MCTO                                              , RULL(0x0501089B), SH_UNT_MCS_1    , SH_ACS_SCOM_RW   );
+REG64( MCS_2_MCTO                                              , RULL(0x0301081B), SH_UNT_MCS_2    , SH_ACS_SCOM_RW   );
+REG64( MCS_3_MCTO                                              , RULL(0x0301089B), SH_UNT_MCS_3    , SH_ACS_SCOM_RW   );
+
 REG64( MCA_MSR                                                 , RULL(0x07010A0C), SH_UNT_MCA      , SH_ACS_SCOM_RO   );
 REG64( MCA_0_MSR                                               , RULL(0x07010A0C), SH_UNT_MCA_0    , SH_ACS_SCOM_RO   );
 REG64( MCA_1_MSR                                               , RULL(0x07010A4C), SH_UNT_MCA_1    , SH_ACS_SCOM_RO   );
@@ -36373,6 +38274,18 @@ REG64( MCA_4_MSR                                               , RULL(0x08010A0C
 REG64( MCA_5_MSR                                               , RULL(0x08010A4C), SH_UNT_MCA_5    , SH_ACS_SCOM_RO   );
 REG64( MCA_6_MSR                                               , RULL(0x08010A8C), SH_UNT_MCA_6    , SH_ACS_SCOM_RO   );
 REG64( MCA_7_MSR                                               , RULL(0x08010ACC), SH_UNT_MCA_7    , SH_ACS_SCOM_RO   );
+
+REG64( MCA_PSCOM_ERROR_MASK                                    , RULL(0x07010002), SH_UNT_MCA      , SH_ACS_SCOM      );
+REG64( MCA_0_PSCOM_ERROR_MASK                                  , RULL(0x07010002), SH_UNT_MCA_0    , SH_ACS_SCOM      );
+REG64( MCA_4_PSCOM_ERROR_MASK                                  , RULL(0x08010002), SH_UNT_MCA_4    , SH_ACS_SCOM      );
+
+REG64( MCA_PSCOM_MODE_REG                                      , RULL(0x07010000), SH_UNT_MCA      , SH_ACS_SCOM      );
+REG64( MCA_0_PSCOM_MODE_REG                                    , RULL(0x07010000), SH_UNT_MCA_0    , SH_ACS_SCOM      );
+REG64( MCA_4_PSCOM_MODE_REG                                    , RULL(0x08010000), SH_UNT_MCA_4    , SH_ACS_SCOM      );
+
+REG64( MCA_PSCOM_STATUS_ERROR_REG                              , RULL(0x07010001), SH_UNT_MCA      , SH_ACS_SCOM      );
+REG64( MCA_0_PSCOM_STATUS_ERROR_REG                            , RULL(0x07010001), SH_UNT_MCA_0    , SH_ACS_SCOM      );
+REG64( MCA_4_PSCOM_STATUS_ERROR_REG                            , RULL(0x08010001), SH_UNT_MCA_4    , SH_ACS_SCOM      );
 
 REG64( MCBIST_RCD_LRDIM_CNTL_WORD0_15Q                         , RULL(0x07010FDD), SH_UNT_MCBIST   , SH_ACS_SCOM_RW   );
 REG64( MCBIST_0_RCD_LRDIM_CNTL_WORD0_15Q                       , RULL(0x07010FDD), SH_UNT_MCBIST_0 , SH_ACS_SCOM_RW   );
@@ -36388,9 +38301,157 @@ REG64( MCA_5_RECR                                              , RULL(0x08010A4A
 REG64( MCA_6_RECR                                              , RULL(0x08010A8A), SH_UNT_MCA_6    , SH_ACS_SCOM_RW   );
 REG64( MCA_7_RECR                                              , RULL(0x08010ACA), SH_UNT_MCA_7    , SH_ACS_SCOM_RW   );
 
+REG64( MCA_RING_FENCE_MASK_LATCH_REG                           , RULL(0x07010008), SH_UNT_MCA      , SH_ACS_SCOM      );
+REG64( MCA_0_RING_FENCE_MASK_LATCH_REG                         , RULL(0x07010008), SH_UNT_MCA_0    , SH_ACS_SCOM      );
+REG64( MCA_4_RING_FENCE_MASK_LATCH_REG                         , RULL(0x08010008), SH_UNT_MCA_4    , SH_ACS_SCOM      );
+
 REG64( MCBIST_RUNTIMECTRQ                                      , RULL(0x07010FB0), SH_UNT_MCBIST   , SH_ACS_SCOM_RW   );
 REG64( MCBIST_0_RUNTIMECTRQ                                    , RULL(0x07010FB0), SH_UNT_MCBIST_0 , SH_ACS_SCOM_RW   );
 REG64( MCBIST_1_RUNTIMECTRQ                                    , RULL(0x08010FB0), SH_UNT_MCBIST_1 , SH_ACS_SCOM_RW   );
+
+REG64( MCA_SECURE_PIB_MASTER_ID_REG                            , RULL(0x07010009), SH_UNT_MCA      , SH_ACS_SCOM      );
+REG64( MCA_0_SECURE_PIB_MASTER_ID_REG                          , RULL(0x07010009), SH_UNT_MCA_0    , SH_ACS_SCOM      );
+REG64( MCA_4_SECURE_PIB_MASTER_ID_REG                          , RULL(0x08010009), SH_UNT_MCA_4    , SH_ACS_SCOM      );
+
+REG64( MCA_TCMC01_FAST_TRA0_TRACE_HI_DATA_REG                  , RULL(0x07010C00), SH_UNT_MCA      , SH_ACS_SCOM_RO   );
+REG64( MCA_0_TCMC01_FAST_TRA0_TRACE_HI_DATA_REG                , RULL(0x07010C00), SH_UNT_MCA_0    , SH_ACS_SCOM_RO   );
+
+REG64( MCA_TCMC01_FAST_TRA0_TRACE_LO_DATA_REG                  , RULL(0x07010C01), SH_UNT_MCA      , SH_ACS_SCOM_RO   );
+REG64( MCA_0_TCMC01_FAST_TRA0_TRACE_LO_DATA_REG                , RULL(0x07010C01), SH_UNT_MCA_0    , SH_ACS_SCOM_RO   );
+
+REG64( MCA_TCMC01_FAST_TRA0_TRACE_TRCTRL_CONFIG                , RULL(0x07010C02), SH_UNT_MCA      , SH_ACS_SCOM      );
+REG64( MCA_0_TCMC01_FAST_TRA0_TRACE_TRCTRL_CONFIG              , RULL(0x07010C02), SH_UNT_MCA_0    , SH_ACS_SCOM      );
+
+REG64( MCA_TCMC01_FAST_TRA0_TRACE_TRDATA_CONFIG_0              , RULL(0x07010C03), SH_UNT_MCA      , SH_ACS_SCOM      );
+REG64( MCA_0_TCMC01_FAST_TRA0_TRACE_TRDATA_CONFIG_0            , RULL(0x07010C03), SH_UNT_MCA_0    , SH_ACS_SCOM      );
+
+REG64( MCA_TCMC01_FAST_TRA0_TRACE_TRDATA_CONFIG_1              , RULL(0x07010C04), SH_UNT_MCA      , SH_ACS_SCOM      );
+REG64( MCA_0_TCMC01_FAST_TRA0_TRACE_TRDATA_CONFIG_1            , RULL(0x07010C04), SH_UNT_MCA_0    , SH_ACS_SCOM      );
+
+REG64( MCA_TCMC01_FAST_TRA0_TRACE_TRDATA_CONFIG_2              , RULL(0x07010C05), SH_UNT_MCA      , SH_ACS_SCOM      );
+REG64( MCA_0_TCMC01_FAST_TRA0_TRACE_TRDATA_CONFIG_2            , RULL(0x07010C05), SH_UNT_MCA_0    , SH_ACS_SCOM      );
+
+REG64( MCA_TCMC01_FAST_TRA0_TRACE_TRDATA_CONFIG_3              , RULL(0x07010C06), SH_UNT_MCA      , SH_ACS_SCOM      );
+REG64( MCA_0_TCMC01_FAST_TRA0_TRACE_TRDATA_CONFIG_3            , RULL(0x07010C06), SH_UNT_MCA_0    , SH_ACS_SCOM      );
+
+REG64( MCA_TCMC01_FAST_TRA0_TRACE_TRDATA_CONFIG_4              , RULL(0x07010C07), SH_UNT_MCA      , SH_ACS_SCOM      );
+REG64( MCA_0_TCMC01_FAST_TRA0_TRACE_TRDATA_CONFIG_4            , RULL(0x07010C07), SH_UNT_MCA_0    , SH_ACS_SCOM      );
+
+REG64( MCA_TCMC01_FAST_TRA0_TRACE_TRDATA_CONFIG_5              , RULL(0x07010C08), SH_UNT_MCA      , SH_ACS_SCOM      );
+REG64( MCA_0_TCMC01_FAST_TRA0_TRACE_TRDATA_CONFIG_5            , RULL(0x07010C08), SH_UNT_MCA_0    , SH_ACS_SCOM      );
+
+REG64( MCA_TCMC01_FAST_TRA0_TRACE_TRDATA_CONFIG_9              , RULL(0x07010C09), SH_UNT_MCA      , SH_ACS_SCOM      );
+REG64( MCA_0_TCMC01_FAST_TRA0_TRACE_TRDATA_CONFIG_9            , RULL(0x07010C09), SH_UNT_MCA_0    , SH_ACS_SCOM      );
+
+REG64( MCA_1_TCMC01_FAST_TRA1_TRACE_HI_DATA_REG                , RULL(0x07010C40), SH_UNT_MCA_1    , SH_ACS_SCOM_RO   );
+
+REG64( MCA_1_TCMC01_FAST_TRA1_TRACE_LO_DATA_REG                , RULL(0x07010C41), SH_UNT_MCA_1    , SH_ACS_SCOM_RO   );
+
+REG64( MCA_1_TCMC01_FAST_TRA1_TRACE_TRCTRL_CONFIG              , RULL(0x07010C42), SH_UNT_MCA_1    , SH_ACS_SCOM      );
+
+REG64( MCA_1_TCMC01_FAST_TRA1_TRACE_TRDATA_CONFIG_0            , RULL(0x07010C43), SH_UNT_MCA_1    , SH_ACS_SCOM      );
+
+REG64( MCA_1_TCMC01_FAST_TRA1_TRACE_TRDATA_CONFIG_1            , RULL(0x07010C44), SH_UNT_MCA_1    , SH_ACS_SCOM      );
+
+REG64( MCA_1_TCMC01_FAST_TRA1_TRACE_TRDATA_CONFIG_2            , RULL(0x07010C45), SH_UNT_MCA_1    , SH_ACS_SCOM      );
+
+REG64( MCA_1_TCMC01_FAST_TRA1_TRACE_TRDATA_CONFIG_3            , RULL(0x07010C46), SH_UNT_MCA_1    , SH_ACS_SCOM      );
+
+REG64( MCA_1_TCMC01_FAST_TRA1_TRACE_TRDATA_CONFIG_4            , RULL(0x07010C47), SH_UNT_MCA_1    , SH_ACS_SCOM      );
+
+REG64( MCA_1_TCMC01_FAST_TRA1_TRACE_TRDATA_CONFIG_5            , RULL(0x07010C48), SH_UNT_MCA_1    , SH_ACS_SCOM      );
+
+REG64( MCA_1_TCMC01_FAST_TRA1_TRACE_TRDATA_CONFIG_9            , RULL(0x07010C49), SH_UNT_MCA_1    , SH_ACS_SCOM      );
+
+REG64( MCA_TCMC01_SLOW_TRA0_TRACE_HI_DATA_REG                  , RULL(0x07010400), SH_UNT_MCA      , SH_ACS_SCOM_RO   );
+REG64( MCA_0_TCMC01_SLOW_TRA0_TRACE_HI_DATA_REG                , RULL(0x07010400), SH_UNT_MCA_0    , SH_ACS_SCOM_RO   );
+
+REG64( MCA_TCMC01_SLOW_TRA0_TRACE_LO_DATA_REG                  , RULL(0x07010401), SH_UNT_MCA      , SH_ACS_SCOM_RO   );
+REG64( MCA_0_TCMC01_SLOW_TRA0_TRACE_LO_DATA_REG                , RULL(0x07010401), SH_UNT_MCA_0    , SH_ACS_SCOM_RO   );
+
+REG64( MCA_TCMC01_SLOW_TRA0_TRACE_TRCTRL_CONFIG                , RULL(0x07010402), SH_UNT_MCA      , SH_ACS_SCOM      );
+REG64( MCA_0_TCMC01_SLOW_TRA0_TRACE_TRCTRL_CONFIG              , RULL(0x07010402), SH_UNT_MCA_0    , SH_ACS_SCOM      );
+
+REG64( MCA_TCMC01_SLOW_TRA0_TRACE_TRDATA_CONFIG_0              , RULL(0x07010403), SH_UNT_MCA      , SH_ACS_SCOM      );
+REG64( MCA_0_TCMC01_SLOW_TRA0_TRACE_TRDATA_CONFIG_0            , RULL(0x07010403), SH_UNT_MCA_0    , SH_ACS_SCOM      );
+
+REG64( MCA_TCMC01_SLOW_TRA0_TRACE_TRDATA_CONFIG_1              , RULL(0x07010404), SH_UNT_MCA      , SH_ACS_SCOM      );
+REG64( MCA_0_TCMC01_SLOW_TRA0_TRACE_TRDATA_CONFIG_1            , RULL(0x07010404), SH_UNT_MCA_0    , SH_ACS_SCOM      );
+
+REG64( MCA_TCMC01_SLOW_TRA0_TRACE_TRDATA_CONFIG_2              , RULL(0x07010405), SH_UNT_MCA      , SH_ACS_SCOM      );
+REG64( MCA_0_TCMC01_SLOW_TRA0_TRACE_TRDATA_CONFIG_2            , RULL(0x07010405), SH_UNT_MCA_0    , SH_ACS_SCOM      );
+
+REG64( MCA_TCMC01_SLOW_TRA0_TRACE_TRDATA_CONFIG_3              , RULL(0x07010406), SH_UNT_MCA      , SH_ACS_SCOM      );
+REG64( MCA_0_TCMC01_SLOW_TRA0_TRACE_TRDATA_CONFIG_3            , RULL(0x07010406), SH_UNT_MCA_0    , SH_ACS_SCOM      );
+
+REG64( MCA_TCMC01_SLOW_TRA0_TRACE_TRDATA_CONFIG_4              , RULL(0x07010407), SH_UNT_MCA      , SH_ACS_SCOM      );
+REG64( MCA_0_TCMC01_SLOW_TRA0_TRACE_TRDATA_CONFIG_4            , RULL(0x07010407), SH_UNT_MCA_0    , SH_ACS_SCOM      );
+
+REG64( MCA_TCMC01_SLOW_TRA0_TRACE_TRDATA_CONFIG_5              , RULL(0x07010408), SH_UNT_MCA      , SH_ACS_SCOM      );
+REG64( MCA_0_TCMC01_SLOW_TRA0_TRACE_TRDATA_CONFIG_5            , RULL(0x07010408), SH_UNT_MCA_0    , SH_ACS_SCOM      );
+
+REG64( MCA_TCMC01_SLOW_TRA0_TRACE_TRDATA_CONFIG_9              , RULL(0x07010409), SH_UNT_MCA      , SH_ACS_SCOM      );
+REG64( MCA_0_TCMC01_SLOW_TRA0_TRACE_TRDATA_CONFIG_9            , RULL(0x07010409), SH_UNT_MCA_0    , SH_ACS_SCOM      );
+
+REG64( MCA_4_TCMC23_FAST_TRA0_TRACE_HI_DATA_REG                , RULL(0x08010C00), SH_UNT_MCA_4    , SH_ACS_SCOM_RO   );
+
+REG64( MCA_4_TCMC23_FAST_TRA0_TRACE_LO_DATA_REG                , RULL(0x08010C01), SH_UNT_MCA_4    , SH_ACS_SCOM_RO   );
+
+REG64( MCA_4_TCMC23_FAST_TRA0_TRACE_TRCTRL_CONFIG              , RULL(0x08010C02), SH_UNT_MCA_4    , SH_ACS_SCOM      );
+
+REG64( MCA_4_TCMC23_FAST_TRA0_TRACE_TRDATA_CONFIG_0            , RULL(0x08010C03), SH_UNT_MCA_4    , SH_ACS_SCOM      );
+
+REG64( MCA_4_TCMC23_FAST_TRA0_TRACE_TRDATA_CONFIG_1            , RULL(0x08010C04), SH_UNT_MCA_4    , SH_ACS_SCOM      );
+
+REG64( MCA_4_TCMC23_FAST_TRA0_TRACE_TRDATA_CONFIG_2            , RULL(0x08010C05), SH_UNT_MCA_4    , SH_ACS_SCOM      );
+
+REG64( MCA_4_TCMC23_FAST_TRA0_TRACE_TRDATA_CONFIG_3            , RULL(0x08010C06), SH_UNT_MCA_4    , SH_ACS_SCOM      );
+
+REG64( MCA_4_TCMC23_FAST_TRA0_TRACE_TRDATA_CONFIG_4            , RULL(0x08010C07), SH_UNT_MCA_4    , SH_ACS_SCOM      );
+
+REG64( MCA_4_TCMC23_FAST_TRA0_TRACE_TRDATA_CONFIG_5            , RULL(0x08010C08), SH_UNT_MCA_4    , SH_ACS_SCOM      );
+
+REG64( MCA_4_TCMC23_FAST_TRA0_TRACE_TRDATA_CONFIG_9            , RULL(0x08010C09), SH_UNT_MCA_4    , SH_ACS_SCOM      );
+
+REG64( MCA_5_TCMC23_FAST_TRA1_TRACE_HI_DATA_REG                , RULL(0x08010C40), SH_UNT_MCA_5    , SH_ACS_SCOM_RO   );
+
+REG64( MCA_5_TCMC23_FAST_TRA1_TRACE_LO_DATA_REG                , RULL(0x08010C41), SH_UNT_MCA_5    , SH_ACS_SCOM_RO   );
+
+REG64( MCA_5_TCMC23_FAST_TRA1_TRACE_TRCTRL_CONFIG              , RULL(0x08010C42), SH_UNT_MCA_5    , SH_ACS_SCOM      );
+
+REG64( MCA_5_TCMC23_FAST_TRA1_TRACE_TRDATA_CONFIG_0            , RULL(0x08010C43), SH_UNT_MCA_5    , SH_ACS_SCOM      );
+
+REG64( MCA_5_TCMC23_FAST_TRA1_TRACE_TRDATA_CONFIG_1            , RULL(0x08010C44), SH_UNT_MCA_5    , SH_ACS_SCOM      );
+
+REG64( MCA_5_TCMC23_FAST_TRA1_TRACE_TRDATA_CONFIG_2            , RULL(0x08010C45), SH_UNT_MCA_5    , SH_ACS_SCOM      );
+
+REG64( MCA_5_TCMC23_FAST_TRA1_TRACE_TRDATA_CONFIG_3            , RULL(0x08010C46), SH_UNT_MCA_5    , SH_ACS_SCOM      );
+
+REG64( MCA_5_TCMC23_FAST_TRA1_TRACE_TRDATA_CONFIG_4            , RULL(0x08010C47), SH_UNT_MCA_5    , SH_ACS_SCOM      );
+
+REG64( MCA_5_TCMC23_FAST_TRA1_TRACE_TRDATA_CONFIG_5            , RULL(0x08010C48), SH_UNT_MCA_5    , SH_ACS_SCOM      );
+
+REG64( MCA_5_TCMC23_FAST_TRA1_TRACE_TRDATA_CONFIG_9            , RULL(0x08010C49), SH_UNT_MCA_5    , SH_ACS_SCOM      );
+
+REG64( MCA_4_TCMC23_SLOW_TRA0_TRACE_HI_DATA_REG                , RULL(0x08010400), SH_UNT_MCA_4    , SH_ACS_SCOM_RO   );
+
+REG64( MCA_4_TCMC23_SLOW_TRA0_TRACE_LO_DATA_REG                , RULL(0x08010401), SH_UNT_MCA_4    , SH_ACS_SCOM_RO   );
+
+REG64( MCA_4_TCMC23_SLOW_TRA0_TRACE_TRCTRL_CONFIG              , RULL(0x08010402), SH_UNT_MCA_4    , SH_ACS_SCOM      );
+
+REG64( MCA_4_TCMC23_SLOW_TRA0_TRACE_TRDATA_CONFIG_0            , RULL(0x08010403), SH_UNT_MCA_4    , SH_ACS_SCOM      );
+
+REG64( MCA_4_TCMC23_SLOW_TRA0_TRACE_TRDATA_CONFIG_1            , RULL(0x08010404), SH_UNT_MCA_4    , SH_ACS_SCOM      );
+
+REG64( MCA_4_TCMC23_SLOW_TRA0_TRACE_TRDATA_CONFIG_2            , RULL(0x08010405), SH_UNT_MCA_4    , SH_ACS_SCOM      );
+
+REG64( MCA_4_TCMC23_SLOW_TRA0_TRACE_TRDATA_CONFIG_3            , RULL(0x08010406), SH_UNT_MCA_4    , SH_ACS_SCOM      );
+
+REG64( MCA_4_TCMC23_SLOW_TRA0_TRACE_TRDATA_CONFIG_4            , RULL(0x08010407), SH_UNT_MCA_4    , SH_ACS_SCOM      );
+
+REG64( MCA_4_TCMC23_SLOW_TRA0_TRACE_TRDATA_CONFIG_5            , RULL(0x08010408), SH_UNT_MCA_4    , SH_ACS_SCOM      );
+
+REG64( MCA_4_TCMC23_SLOW_TRA0_TRACE_TRDATA_CONFIG_9            , RULL(0x08010409), SH_UNT_MCA_4    , SH_ACS_SCOM      );
 
 REG64( MCA_WBMGR_TAG_INFO                                      , RULL(0x07010A33), SH_UNT_MCA      , SH_ACS_SCOM_RW   );
 REG64( MCA_0_WBMGR_TAG_INFO                                    , RULL(0x07010A33), SH_UNT_MCA_0    , SH_ACS_SCOM_RW   );
@@ -36432,6 +38493,16 @@ REG64( MCA_5_WECR                                              , RULL(0x08010A68
 REG64( MCA_6_WECR                                              , RULL(0x08010AA8), SH_UNT_MCA_6    , SH_ACS_SCOM_RW   );
 REG64( MCA_7_WECR                                              , RULL(0x08010AE8), SH_UNT_MCA_7    , SH_ACS_SCOM_RW   );
 
+REG64( MCA_WESR                                                , RULL(0x07010A2E), SH_UNT_MCA      , SH_ACS_SCOM_RO   );
+REG64( MCA_0_WESR                                              , RULL(0x07010A2E), SH_UNT_MCA_0    , SH_ACS_SCOM_RO   );
+REG64( MCA_1_WESR                                              , RULL(0x07010A6E), SH_UNT_MCA_1    , SH_ACS_SCOM_RO   );
+REG64( MCA_2_WESR                                              , RULL(0x07010AAE), SH_UNT_MCA_2    , SH_ACS_SCOM_RO   );
+REG64( MCA_3_WESR                                              , RULL(0x07010AEE), SH_UNT_MCA_3    , SH_ACS_SCOM_RO   );
+REG64( MCA_4_WESR                                              , RULL(0x08010A2E), SH_UNT_MCA_4    , SH_ACS_SCOM_RO   );
+REG64( MCA_5_WESR                                              , RULL(0x08010A6E), SH_UNT_MCA_5    , SH_ACS_SCOM_RO   );
+REG64( MCA_6_WESR                                              , RULL(0x08010AAE), SH_UNT_MCA_6    , SH_ACS_SCOM_RO   );
+REG64( MCA_7_WESR                                              , RULL(0x08010AEE), SH_UNT_MCA_7    , SH_ACS_SCOM_RO   );
+
 REG64( MCA_WOF                                                 , RULL(0x07010A08), SH_UNT_MCA      ,
        SH_ACS_SCOM_WCLRREG );
 REG64( MCA_0_WOF                                               , RULL(0x07010A08), SH_UNT_MCA_0    ,
@@ -36450,6 +38521,14 @@ REG64( MCA_6_WOF                                               , RULL(0x08010A88
        SH_ACS_SCOM_WCLRREG );
 REG64( MCA_7_WOF                                               , RULL(0x08010AC8), SH_UNT_MCA_7    ,
        SH_ACS_SCOM_WCLRREG );
+
+REG64( MCA_WRITE_PROTECT_ENABLE_REG                            , RULL(0x07010005), SH_UNT_MCA      , SH_ACS_SCOM      );
+REG64( MCA_0_WRITE_PROTECT_ENABLE_REG                          , RULL(0x07010005), SH_UNT_MCA_0    , SH_ACS_SCOM      );
+REG64( MCA_4_WRITE_PROTECT_ENABLE_REG                          , RULL(0x08010005), SH_UNT_MCA_4    , SH_ACS_SCOM      );
+
+REG64( MCA_WRITE_PROTECT_RINGS_REG                             , RULL(0x07010006), SH_UNT_MCA      , SH_ACS_SCOM      );
+REG64( MCA_0_WRITE_PROTECT_RINGS_REG                           , RULL(0x07010006), SH_UNT_MCA_0    , SH_ACS_SCOM      );
+REG64( MCA_4_WRITE_PROTECT_RINGS_REG                           , RULL(0x08010006), SH_UNT_MCA_4    , SH_ACS_SCOM      );
 
 REG64( MCA_WRTCFG                                              , RULL(0x07010A38), SH_UNT_MCA      , SH_ACS_SCOM_RW   );
 REG64( MCA_0_WRTCFG                                            , RULL(0x07010A38), SH_UNT_MCA_0    , SH_ACS_SCOM_RW   );
@@ -36482,31 +38561,40 @@ REG64( MCA_6_WRTDBGNEST                                        , RULL(0x08010ABB
 REG64( MCA_7_WRTDBGNEST                                        , RULL(0x08010AFB), SH_UNT_MCA_7    , SH_ACS_SCOM_RW   );
 
 REG64( MCA_0_WREITE_WRT_ECC                                    , RULL(0x07010A39), SH_UNT_MCA_0_WREITE,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_0_WDF_WRT_ECC                                       , RULL(0x07010A31), SH_UNT_MCA_0_WDF, SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_WCLRPART );
+REG64( MCA_0_WDF_WRT_ECC                                       , RULL(0x07010A31), SH_UNT_MCA_0_WDF,
+       SH_ACS_SCOM_WCLRPART );
 REG64( MCA_1_WREITE_WRT_ECC                                    , RULL(0x07010A79), SH_UNT_MCA_1_WREITE,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_1_WDF_WRT_ECC                                       , RULL(0x07010A71), SH_UNT_MCA_1_WDF, SH_ACS_SCOM_RW   );
-REG64( MCA_2_WDF_WRT_ECC                                       , RULL(0x07010AB1), SH_UNT_MCA_2_WDF, SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_WCLRPART );
+REG64( MCA_1_WDF_WRT_ECC                                       , RULL(0x07010A71), SH_UNT_MCA_1_WDF,
+       SH_ACS_SCOM_WCLRPART );
+REG64( MCA_2_WDF_WRT_ECC                                       , RULL(0x07010AB1), SH_UNT_MCA_2_WDF,
+       SH_ACS_SCOM_WCLRPART );
 REG64( MCA_2_WREITE_WRT_ECC                                    , RULL(0x07010AB9), SH_UNT_MCA_2_WREITE,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_WCLRPART );
 REG64( MCA_3_WREITE_WRT_ECC                                    , RULL(0x07010AF9), SH_UNT_MCA_3_WREITE,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_3_WDF_WRT_ECC                                       , RULL(0x07010AF1), SH_UNT_MCA_3_WDF, SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_WCLRPART );
+REG64( MCA_3_WDF_WRT_ECC                                       , RULL(0x07010AF1), SH_UNT_MCA_3_WDF,
+       SH_ACS_SCOM_WCLRPART );
 REG64( MCA_4_WREITE_WRT_ECC                                    , RULL(0x08010A39), SH_UNT_MCA_4_WREITE,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_4_WDF_WRT_ECC                                       , RULL(0x08010A31), SH_UNT_MCA_4_WDF, SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_WCLRPART );
+REG64( MCA_4_WDF_WRT_ECC                                       , RULL(0x08010A31), SH_UNT_MCA_4_WDF,
+       SH_ACS_SCOM_WCLRPART );
 REG64( MCA_5_WREITE_WRT_ECC                                    , RULL(0x08010A79), SH_UNT_MCA_5_WREITE,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_5_WDF_WRT_ECC                                       , RULL(0x08010A71), SH_UNT_MCA_5_WDF, SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_WCLRPART );
+REG64( MCA_5_WDF_WRT_ECC                                       , RULL(0x08010A71), SH_UNT_MCA_5_WDF,
+       SH_ACS_SCOM_WCLRPART );
 REG64( MCA_6_WREITE_WRT_ECC                                    , RULL(0x08010AB9), SH_UNT_MCA_6_WREITE,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_6_WDF_WRT_ECC                                       , RULL(0x08010AB1), SH_UNT_MCA_6_WDF, SH_ACS_SCOM_RW   );
-REG64( MCA_7_WDF_WRT_ECC                                       , RULL(0x08010AF1), SH_UNT_MCA_7_WDF, SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_WCLRPART );
+REG64( MCA_6_WDF_WRT_ECC                                       , RULL(0x08010AB1), SH_UNT_MCA_6_WDF,
+       SH_ACS_SCOM_WCLRPART );
+REG64( MCA_7_WDF_WRT_ECC                                       , RULL(0x08010AF1), SH_UNT_MCA_7_WDF,
+       SH_ACS_SCOM_WCLRPART );
 REG64( MCA_7_WREITE_WRT_ECC                                    , RULL(0x08010AF9), SH_UNT_MCA_7_WREITE,
-       SH_ACS_SCOM_RW   );
-REG64( MCA_WDF_WRT_ECC                                         , RULL(0x07010A31), SH_UNT_MCA_WDF  , SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_WCLRPART );
+REG64( MCA_WDF_WRT_ECC                                         , RULL(0x07010A31), SH_UNT_MCA_WDF  ,
+       SH_ACS_SCOM_WCLRPART );
 REG64( MCA_WREITE_WRT_ECC                                      , RULL(0x07010A39), SH_UNT_MCA_WREITE,
-       SH_ACS_SCOM_RW   );
+       SH_ACS_SCOM_WCLRPART );
 #endif
 
