@@ -41,4 +41,16 @@
 //          RULL(0x00090000)
 //        );
 
+//L2 laoder
+REG64( EQ_QPPM_QACCR_SCOM2                                     , RULL(0x100F0162), SH_UNT_EQ       , SH_ACS_SCOM2     );
+REG64( EQ_PPM_CGCR_OR                                          , RULL(0x100F0167), SH_UNT_EQ       , SH_ACS_SCOM2_OR  );
+
+REG64( EQ_PPM_CGCR_CLEAR                                       , RULL(0x100F0166), SH_UNT_EQ       ,
+       SH_ACS_SCOM1_CLEAR );
+
+REG64( C_PPM_CGCR_CLEAR                                        , RULL(0x200F0166), SH_UNT_C        ,
+       SH_ACS_SCOM1_CLEAR );
+
+REG64( C_PPM_CGCR_OR                                           , RULL(0x200F0167), SH_UNT_C        , SH_ACS_SCOM2_OR  );
+
 #endif
