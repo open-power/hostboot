@@ -31,6 +31,7 @@
 #include <kernel/misc.H>
 #include <targeting/common/targetservice.H>
 
+
 #define ALIGN_DMAPAGE(u) (((u) + (VmmManager::MBOX_DMA_PAGESIZE-1)) & \
                           ~(VmmManager::MBOX_DMA_PAGESIZE-1))
 
@@ -44,9 +45,10 @@ DmaBuffer::DmaBuffer() :
     iv_dir(makeMask(VmmManager::MBOX_DMA_PAGES)),
     iv_dma_req_sent(false)
 {
-    iv_head = reinterpret_cast<void*>(VmmManager::MBOX_DMA_ADDR);
-    // RTC:137627 - remove for P9 bringup
-    //initPhysicalArea(iv_head, iv_phys_head);
+    iv_head = malloc(VmmManager::MBOX_DMA_SIZE);
+
+    iv_phys_head = mm_virt_to_phys(iv_head);
+    memset(iv_head, '\0', VmmManager::MBOX_DMA_SIZE);
 }
 
 
@@ -162,44 +164,5 @@ uint64_t DmaBuffer::makeMask(uint64_t i_size)
     mask <<= MAX_MASK_SIZE - i_size;
 
     return mask;
-}
-
-void DmaBuffer::initPhysicalArea(void*& io_addr, uint64_t& o_phys)
-{
-    // Get the original physical address (includes HRMOR).
-    o_phys = mm_virt_to_phys(io_addr);
-
-    // Remove original address from VMM maps.
-    mm_set_permission(io_addr, VmmManager::MBOX_DMA_SIZE, NO_ACCESS);
-
-    // Find the amount of the node offset.
-    TARGETING::Target * sys = NULL;
-    TARGETING::targetService().getTopLevelTarget( sys );
-    assert(sys != NULL);
-    uint64_t hrmor_base =
-        sys->getAttr<TARGETING::ATTR_HB_HRMOR_NODAL_BASE>();
-
-    // Move the physical address to the start of the node (unsecure) and
-    // add on the DMA buffer offset inside the node.
-    o_phys &= ~(hrmor_base-1);
-    o_phys += reinterpret_cast<uint64_t>(io_addr) +
-              VMM_UNSECURE_RESERVED_MEMORY_BASEADDR;
-
-    // Allocate a new VMM block for the buffer.
-    io_addr = mm_guarded_block_map(reinterpret_cast<void*>(o_phys),
-                           VmmManager::MBOX_DMA_SIZE);
-        // Note: We do not plan on deleting this block, even when the buffer
-        //       is destructed, because we have fundamentally changed the
-        //       underlying memory by populating the addresses in a different
-        //       physical location (see populate_cache_lines call below).
-
-    // Populate cache lines in unsecure memory.
-    KernelMisc::populate_cache_lines(
-        reinterpret_cast<uint64_t*>(io_addr),
-        reinterpret_cast<uint64_t*>(VmmManager::MBOX_DMA_SIZE +
-            reinterpret_cast<uint64_t>(io_addr)));
-
-    memset(io_addr, '\0', VmmManager::MBOX_DMA_SIZE);
-
 }
 
