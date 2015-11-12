@@ -39,4 +39,18 @@
 //FIXREG64_FLD( PU_ALTD_CMD_REG_FBC_WITH_TM_QUIESCE, 24, SH_UNT, SH_ACS_SCOM, SH_FLD_FBC_WITH_TM_QUIESCE,
 //              12);
 
+
+//L2 loader fixes
+REG64_FLD( EQ_QPPM_QACCR_L2_EX0_CLK_SYNC_ENABLE                    , 13  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_L2_EX0_CLK_SYNC_ENABLE );
+
+REG64_FLD( EQ_QPPM_QACCR_L2_EX1_CLK_SYNC_ENABLE                    , 33  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_L2_EX1_CLK_SYNC_ENABLE );
+
+REG64_FLD( EQ_QPPM_QACCR_L2_EX0_CLKGLM_SEL                         , 19  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_L2_EX0_CLKGLM_SEL );
+
+REG64_FLD( EQ_QPPM_QACCR_L2_EX1_CLKGLM_SEL                         , 39  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
+           SH_FLD_L2_EX1_CLKGLM_SEL );
+
 #endif
