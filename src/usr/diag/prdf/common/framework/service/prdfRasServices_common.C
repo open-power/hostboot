@@ -659,6 +659,9 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                             // Get the 32 bit representation of MemMru
                             l_memData.memMru32bits = memMru.toUint32();
 
+                            // Get the DRAM width.
+                            l_memData.isX4 = isDramWidthX4( l_mba ) ? 1 : 0;
+
                             // Add mapping to ELOG and parser will print it
                             PRDF_ADD_FFDC( iv_errl, (const char*)(&l_memData),
                                            sizeof(memMruDqInfo),

@@ -2799,8 +2799,8 @@ void getBadDqBitmapEntry( uint8_t * i_buffer, char * o_str )
 int32_t getMemMruDramSite( memMruDqInfo &i_memDqStruct,
                            char * o_data )
 {
-    char  l_dqMapBuffer[4];
-    memset (l_dqMapBuffer, 0, 4);
+    char  l_dqMapBuffer[10];
+    memset (l_dqMapBuffer, 0, 10);
     int32_t o_rc = SUCCESS;
 
     MemoryMruData::MemMruMeld mm; mm.u = i_memDqStruct.memMru32bits;
@@ -2817,7 +2817,6 @@ int32_t getMemMruDramSite( memMruDqInfo &i_memDqStruct,
         uint8_t mrank  = mm.s.mrank;
 
         // Get the DRAM site location information.
-        bool x4Dram;
         const char * cardName;
         const char ** dramMap;
         const char ** dqMap;
@@ -2825,6 +2824,7 @@ int32_t getMemMruDramSite( memMruDqInfo &i_memDqStruct,
         // This routine will only succeed on CDIMMs
         if (i_memDqStruct.bufferedDimm)
         {
+            bool x4Dram = false; // Not used in this function.
             o_rc = getDramSiteInfo( type, mbaPos, ps, mrank, x4Dram,
                                     cardName, dqMap, dramMap );
         }
@@ -2835,7 +2835,7 @@ int32_t getMemMruDramSite( memMruDqInfo &i_memDqStruct,
         uint8_t dqIdx = transDramSpare( symbol2CenDq(symbol),
                                         mm.s.dramSpared );
 
-        uint8_t dramIdx = dqSiteIdx2DramSiteIdx( dqIdx, x4Dram );
+        uint8_t dramIdx = dqSiteIdx2DramSiteIdx( dqIdx, i_memDqStruct.isX4 );
 
         // Add the DRAM site data based on the pin info.
         strcpy( o_data, "" );
