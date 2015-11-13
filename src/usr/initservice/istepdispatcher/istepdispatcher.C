@@ -48,7 +48,8 @@
 #include <targeting/common/targetservice.H>
 #include <targeting/attrsync.H>
 #include <establish_system_smp.H>
-#include <hwpf/plat/fapiPlatAttributeService.H>
+//@TODO RTC:128106 port to fapi2 plat attribute service
+//#include <hwpf/plat/fapiPlatAttributeService.H>
 #include <mbox/mbox_queues.H>            // HB_ISTEP_MSGQ
 #include <mbox/mboxif.H>                 // register mailbox
 #include <intr/interrupt.H>
@@ -275,7 +276,8 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
 
                 if (l_attrOverridesExist)
                 {
-                    fapi::theAttrOverrideSync().getAttrOverridesFromFsp();
+                    //@TODO RTC:128106 port to fapi2 plat attribute service
+                    //fapi::theAttrOverrideSync().getAttrOverridesFromFsp();
                 }
 
                 // Start a new thread to handle non-IStep messages from the FSP
@@ -342,7 +344,8 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
             // Attributes to sync to the FSP
             if(iv_spBaseServicesEnabled)
             {
-                fapi::theAttrOverrideSync().sendAttrOverridesAndSyncsToFsp();
+                //@TODO RTC:128106 port to fapi2 plat attribute service
+                //fapi::theAttrOverrideSync().sendAttrOverridesAndSyncsToFsp();
             }
         }
     } while(0);
@@ -1574,7 +1577,8 @@ void IStepDispatcher::handleIStepRequestMsg(msg_t * & io_pMsg)
 
     // Send the potentially modified set of Attribute overrides and any
     // Attributes to sync (to Cronus) to the FSP
-    fapi::theAttrOverrideSync().sendAttrOverridesAndSyncsToFsp();
+    //@TODO RTC:128106 port to fapi2 plat attribute service
+    //fapi::theAttrOverrideSync().sendAttrOverridesAndSyncsToFsp();
 
     // Transfer ownership of the message pointer back from iv_pIstepMsg
     mutex_lock(&iv_mutex);
@@ -1676,8 +1680,10 @@ void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
 
         // Create child thread so that if there are problems, the istep
         //  dispatcher code continues
-        tid_t l_progTid = task_create(
-                ESTABLISH_SYSTEM_SMP::host_sys_fab_iovalid_processing,io_pMsg);
+        //  @TODO RTC:133831
+        //tid_t l_progTid = task_create(
+        //        ESTABLISH_SYSTEM_SMP::host_sys_fab_iovalid_processing,io_pMsg);
+        tid_t l_progTid = 1;
         assert( l_progTid > 0 );
         //  wait here for the task to end.
         //  status of the task ( OK or Crashed ) is returned in l_childsts
@@ -1733,7 +1739,8 @@ void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
             }
 
             // Re-enable p8_cpu_special_wakeup
-            err = ESTABLISH_SYSTEM_SMP::enableSpecialWakeup();
+            // @TODO RTC:133831
+            //err = ESTABLISH_SYSTEM_SMP::enableSpecialWakeup();
             if (err)
             {
                 TRACFCOMP( g_trac_initsvc,
@@ -2011,7 +2018,8 @@ errlHndl_t  IStepDispatcher::handleCoalesceHostMsg()
     }
     else
     {
-        err = ESTABLISH_SYSTEM_SMP::call_host_coalesce_host();
+        //@TODO RTC:133831
+        //err = ESTABLISH_SYSTEM_SMP::call_host_coalesce_host();
         if (err)
         {
             TRACFCOMP(g_trac_initsvc, "handleCoalesceHostMsg: Error with "

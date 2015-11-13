@@ -187,6 +187,8 @@ void* call_host_slave_sbe_config(void *io_pArgs)
     }
 
     // Resolve the side characteristics of the Processor SBE Seeproms
+#if 0
+    //@TODO RTC:142091
     errlHndl_t err = SBE::resolveProcessorSbeSeeproms();
     if ( err )
     {
@@ -196,8 +198,7 @@ void* call_host_slave_sbe_config(void *io_pArgs)
         // Commit Error
         errlCommit( err, HWPF_COMP_ID );
     }
-
-
+#endif
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_slave_sbe_config exit" );
 

@@ -1,11 +1,12 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/scom/disableSW.C $                                    */
+/* $Source: src/usr/scom/runtime/handleSpecialWakeup.C $                  */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2015                             */
+/* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,9 +34,6 @@
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/util.H>
 
-#include <fapi.H>
-#include <fapiPlatHwpInvoker.H>
-#include "p8_cpu_special_wakeup.H"
 
 extern "C"
 {
@@ -51,6 +49,8 @@ errlHndl_t handleSpecialWakeup(TARGETING::Target* i_exTarget,
 {
     errlHndl_t l_errl = NULL;
 
+    //@TODO RTC:132413 Add it back once we have fapi2 support
+#if 0
     fapi::Target l_fapi_ex_target(TARGET_TYPE_EX_CHIPLET,
                             (const_cast<TARGETING::Target*>(i_exTarget)) );
 
@@ -84,6 +84,7 @@ errlHndl_t handleSpecialWakeup(TARGETING::Target* i_exTarget,
         // capture the target data in the elog
         ERRORLOG::ErrlUserDetailsTarget(i_exTarget).addToLog( l_errl );
     }
+#endif
 
     return l_errl;
 }

@@ -240,89 +240,8 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 EXT_IMAGE,                                  // Extended Module
             }
         },
-        /**
-         * @brief   ecmddatabuffer task,
-         */
-        {
-                "libecmddatabuffer.so" ,                    // taskname
-                NULL,                                       // no pointer to fn
-                {
-                        INIT_TASK,                          // task type
-                        EXT_IMAGE,                          // Extended Module
-                }
-        },
-
-        /**
-         * @brief   fapi task,
-         */
-        {
-                "libfapi.so" ,                              // taskname
-                NULL,                                       // no pointer to fn
-                {
-                        INIT_TASK,                          // task type
-                        EXT_IMAGE,                          // Extended Module
-                }
-        },
-
-        /**
-         * @brief   hwp task,
-         */
-        {
-                "libhwp.so" ,                               // taskname
-                NULL,                                       // no pointer to fn
-                {
-                        INIT_TASK,                          // task type
-                        EXT_IMAGE,                          // Extended Module
-                }
-        },
-
-        /**
-         * @brief   plat task,
-         */
-        {
-                "libplat.so" ,                              // taskname
-                NULL,                                       // no pointer to fn
-                {
-                        START_TASK,                         // task type
-                        EXT_IMAGE,                          // Extended Module
-                }
-        },
-
         // @todo RTC:137627 - remove for p9 bringup
 #if (0)
-        /**
-         * @brief   Start slave threads
-         */
-        {
-            "libthread_activate.so" ,               // taskname
-            NULL,                                   // no pointer to fn
-            {
-                START_TASK,                         // task type
-                EXT_IMAGE,                          // Extended Module
-            }
-        },
-        {
-            "libthread_activate.so" ,               // taskname
-            NULL,                                   // no pointer to fn
-            {
-                UNINIT_TASK,                        // task type
-                EXT_IMAGE,                          // Extended Module
-            }
-        },
-#endif
-
-        /**
-         * @brief  bus_training library.
-         */
-        {
-            "libbus_training.so",                  // library name
-            NULL,                                  // no function to run
-            {
-                INIT_TASK,                         // init only
-                EXT_IMAGE,                         // extended image module
-            }
-        },
-
 // No mdia in VPO
 #ifndef CONFIG_VPO_COMPILE
         /**
@@ -362,6 +281,7 @@ const TaskInfo g_exttaskinfolist[]   =   {
             }
         },
 
+#endif
 #ifdef CONFIG_GPIODD
         /**
          * @brief GPIO code library
@@ -390,7 +310,19 @@ const TaskInfo g_exttaskinfolist[]   =   {
         },
 #endif
 
-
+        /**
+         * @brief   Common istep functions
+         *
+         *
+         */
+        {
+            "libisteps.so" ,                                // taskname
+            NULL,                                           // no pointer to fn
+            {
+                INIT_TASK,                                 // task type
+                EXT_IMAGE,                                  // Extended Module
+            }
+        },
 
         //  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         // NOTE: libistepdisp.so needs to always be last in this list!!

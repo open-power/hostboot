@@ -23,7 +23,8 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 #include <targeting/attrPlatOverride.H>
-#include <hwpf/plat/fapiPlatAttrOverrideSync.H>
+//@TODO RTC:128106
+//#include <hwpf/plat/fapiPlatAttrOverrideSync.H>
 #include <targeting/common/trace.H>
 #include <targeting/common/targreasoncodes.H>
 #include <errl/errlmanager.H>
@@ -37,9 +38,9 @@ errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
     TRACFCOMP(g_trac_targeting,"attrPlatOverride::getAttrOverrides ENTER");
 
     // Create local permanent override tank and array of tanks
+    errlHndl_t l_err = NULL;
     AttributeTank l_PermTank;
     AttributeTank* l_overTanks[AttributeTank::TANK_LAYER_LAST];
-    errlHndl_t l_err = NULL;
 
     // Local pointer to array containing each tank layer or io_tanks
     AttributeTank* *l_pOverTanks;
@@ -49,8 +50,9 @@ errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
     if (io_tanks == NULL)
     {
         // All indexes are -1 due to the first enum being TANK_LAYER_NONE,
-        l_overTanks[AttributeTank::TANK_LAYER_FAPI-1] =
-                    &fapi::theAttrOverrideSync().iv_overrideTank;
+        //@TODO RTC:128106
+        //l_overTanks[AttributeTank::TANK_LAYER_FAPI-1] =
+        //            &fapi::theAttrOverrideSync().iv_overrideTank;
         l_overTanks[AttributeTank::TANK_LAYER_TARG-1] =
                     &Target::theTargOverrideAttrTank();
         l_overTanks[AttributeTank::TANK_LAYER_PERM-1] = &l_PermTank;

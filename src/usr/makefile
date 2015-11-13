@@ -40,8 +40,6 @@ SUBDIRS += scom.d
 SUBDIRS += xscom.d
 SUBDIRS += targeting.d
 SUBDIRS += initservice.d
-SUBDIRS += hwpf.d
-SUBDIRS += ecmddatabuffer.d
 SUBDIRS += pnor.d
 SUBDIRS += i2c.d
 SUBDIRS += vfs.d
@@ -49,10 +47,8 @@ SUBDIRS += fsi.d
 SUBDIRS += hwas.d
 SUBDIRS += fsiscom.d
 SUBDIRS += intr.d
-SUBDIRS += pore.d
 SUBDIRS += util.d
 SUBDIRS += mbox.d
-SUBDIRS += diag.d
 SUBDIRS += vpd.d
 SUBDIRS += scan.d
 SUBDIRS += runtime.d
@@ -60,12 +56,13 @@ SUBDIRS += ibscom.d
 SUBDIRS += dump.d
 SUBDIRS += secureboot.d
 SUBDIRS += devtree.d
-SUBDIRS += sbe.d
+#@TODO RTC:142091
+#SUBDIRS += sbe.d
 SUBDIRS += gpio.d
 SUBDIRS += lpc.d
 SUBDIRS += console.d
 SUBDIRS += errldisplay.d
 SUBDIRS += ipmi.d
-SUBDIRS += htmgt.d
+#SUBDIRS += htmgt.d
 
 include ${ROOTPATH}/config.mk

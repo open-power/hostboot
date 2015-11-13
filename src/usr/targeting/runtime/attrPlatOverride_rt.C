@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/targeting/attrPlatOverride.C $                        */
+/* $Source: src/usr/targeting/runtime/attrPlatOverride_rt.C $             */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -27,7 +27,8 @@
 #include <runtime/rt_targeting.H>
 #include <targeting/common/commontargeting.H>
 #include <targeting/attrPlatOverride.H>
-#include <hwpf/plat/fapiPlatAttrOverrideSync.H>
+//@TODO RTC:132750
+//#include <hwpf/plat/fapiPlatAttrOverrideSync.H>
 #include <targeting/common/trace.H>
 #include <errl/errlmanager.H>
 
@@ -40,6 +41,8 @@ int apply_attr_override(uint8_t* i_data,
                         size_t i_size )
 {
     int rc = 0;
+//@TODO RTC:132750
+#if 0
     errlHndl_t l_errl = NULL;
 
     TRACFCOMP(g_trac_targeting, "enter apply_attr_override");
@@ -83,6 +86,7 @@ int apply_attr_override(uint8_t* i_data,
     {
         TRACFCOMP(g_trac_targeting, "apply_attr_override succeed");
     }
+#endif
     return rc;
 }
 

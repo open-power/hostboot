@@ -6,6 +6,7 @@
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,7 +88,8 @@ void*    call_host_startprd_pbus( void    *io_pArgs )
 
     do
     {
-        l_errl = PRDF::initialize();
+        //@TODO RTC:134079
+        //l_errl = PRDF::initialize();
         if (l_errl)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,

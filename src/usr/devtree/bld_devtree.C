@@ -49,8 +49,10 @@
 #include <i2c/i2cif.H>
 #include <i2c/eepromif.H>
 #include <ipmi/ipmisensor.H>
-#include <fapi.H>
-#include <fapiPlatHwpInvoker.H> // for fapi::fapiRcToErrl()
+
+//@TODO RTC:143092
+//#include <fapi.H>
+//#include <fapiPlatHwpInvoker.H> // for fapi::fapiRcToErrl()
 #include <vpd/mvpdenums.H>
 
 trace_desc_t *g_trac_devtree = NULL;
@@ -1944,6 +1946,9 @@ errlHndl_t bld_fdt_vpd(devTree * i_dt, bool i_smallTree)
             /***************************************************************/
             /* Add the #V bucket for each functional core                  */
             /***************************************************************/
+
+            //@TODO RTC:143092
+#if 0
             TARGETING::TargetHandleList l_exlist;
             fapi::Target l_pFapiProc(fapi::TARGET_TYPE_PROC_CHIP,
                             (const_cast<TARGETING::Target*>(l_pProc) ));
@@ -1988,6 +1993,7 @@ errlHndl_t bld_fdt_vpd(devTree * i_dt, bool i_smallTree)
             {
                 break;
             }
+#endif
         }
         if(errhdl)
         {

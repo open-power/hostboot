@@ -41,7 +41,8 @@
 
 //#define REAL_HDAT_TEST
 
-extern trace_desc_t* g_trac_runtime;
+trace_desc_t *g_trac_runtime = NULL;
+TRAC_INIT(&g_trac_runtime, RUNTIME_COMP_NAME, KILOBYTE);
 
 #define TRACUCOMP TRACDCOMP
 

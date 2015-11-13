@@ -41,10 +41,6 @@
 #include <sys/time.h>
 
 // CXXTEST
-#include <hwpf/plat/fapiPlatAttributeService.H>
-#include <fapiReturnCode.H>
-#include <fapiAttributeIds.H>
-#include <fapiAttributeService.H>
 #include <targeting/common/error.H>
 
 // This component
@@ -1298,7 +1294,6 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         TARG_TS_TRACE(INFO_MRK "Now using direct access macros");
 
         using namespace TARGETING;
-        using namespace fapi;
 
         TargetService& l_targetService = targetService();
 
@@ -1345,6 +1340,9 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         TARG_TS_TRACE(INFO_MRK "Now using FAPI get macros");
 
         memset(l_dummyRw,0x00,sizeof(l_dummyRw));
+
+#if 0
+        //@TODO RTC:142602
         fapi::ReturnCode l_rc = FAPI_ATTR_GET(
                                               ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8, NULL, l_dummyRw);
         if(l_rc != 0)
@@ -1361,6 +1359,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         TARG_TS_TRACE(INFO_MRK "Now using FAPI set macros");
 
         l_dummyRw[0][2][3] = 6;
+
         l_rc = FAPI_ATTR_SET(ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8, NULL,
                              l_dummyRw);
         if(l_rc != 0)
@@ -1392,7 +1391,7 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         {
             TARG_TS_FAIL("Node 0 target handle should not be NULL");
         }
-
+        //@TODO RTC:142602
         fapi::Target* l_pFapiTarget = new fapi::Target(
                                                        fapi::TARGET_TYPE_PROC_CHIP, l_pTarget);
         l_rc = FAPI_ATTR_GET(ATTR_DUMMY_SCRATCH_PLAT_INIT_UINT8,
@@ -1406,13 +1405,13 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         {
             TARG_TS_FAIL("Should have been a platform handled error");
         }
-
         // The error log will get deleted when the ReturnCode is destructed. The
         // error log is not committed here to avoid it getting interpreted as a
         // real problem
 
         delete l_pFapiTarget;
         l_pFapiTarget = NULL;
+#endif
 
         TARG_TS_TRACE(EXIT_MRK "testFapiToHbMacros" );
     }
@@ -1422,7 +1421,6 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         TARG_TS_TRACE(ENTER_MRK "testPodNumericalTypes" );
 
         using namespace TARGETING;
-        using namespace fapi;
 
         TargetService& l_targetService = targetService();
 

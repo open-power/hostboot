@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -40,10 +42,7 @@
 
 // CXXTEST
 #include <cxxtest/TestSuite.H>
-#include <hwpf/plat/fapiPlatAttributeService.H>
-#include <fapiReturnCode.H>
-#include <fapiAttributeIds.H>
-#include <fapiAttributeService.H>
+
 #include <errl/errlmanager.H>
 #include <sys/sync.h>
 #include <sys/task.h>
@@ -103,7 +102,6 @@ class TargetingTestSuite : public CxxTest::TestSuite
         TS_TRACE(ENTER_MRK "testHbMutexAttr" );
 
         using namespace TARGETING;
-        using namespace fapi;
 
         do {
 
@@ -207,7 +205,6 @@ class TargetingTestSuite : public CxxTest::TestSuite
 
         using namespace ERRORLOG;
         using namespace TARGETING;
-        using namespace fapi;
 
         // Get a reference to the target service
         TargetService& l_service = targetService();
@@ -253,7 +250,6 @@ class TargetingTestSuite : public CxxTest::TestSuite
         // is resolved
         using namespace ERRORLOG;
         using namespace TARGETING;
-        using namespace fapi;
 
         TargetHandleList l_targs;
 

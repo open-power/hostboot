@@ -144,7 +144,6 @@ namespace   INITSERVICE
 const DepModInfo g_istep16Dependancies = {
     {
         DEP_LIB(libistep16.so),
-        DEP_LIB(libbuild_winkle_images.so),
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
         DEP_LIB(libocc.so),
 #endif
