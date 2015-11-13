@@ -188,7 +188,8 @@ simics.tar_CONTENTS = \
     img/procmvpd_ven.dat \
     img/procmvpd_p9n.dat \
     img/cvpd.dat \
-    obj/genfiles/fapiAttrInfo.csv \
+#@TODO RTC:142088
+#   obj/genfiles/fapiAttrInfo.csv \
     obj/genfiles/fapiAttrEnumInfo.csv \
     obj/genfiles/targAttrInfo.csv
 
@@ -208,9 +209,6 @@ fsp.tar_CONTENTS = \
     img/simics_VENICE_targeting.bin \
     img/simics_NAPLES_targeting.bin \
     img/simics_NIMBUS_targeting.bin \
-    obj/genfiles/fapiAttrInfo.csv \
-    obj/genfiles/fapiAttrEnumInfo.csv \
-    obj/genfiles/targAttrInfo.csv \
     $(addsuffix :targeting/,\
 	$(call ROOTPATH_WILDCARD_RECURSIVE,src/usr/targeting/common))\
     $(addsuffix :targeting/,\
@@ -230,7 +228,6 @@ fsp.tar_CONTENTS = \
     src/include/usr/hwas/common/hwasCallout.H:hwas/ \
     src/include/usr/devicefw/driverif.H:devicefw/ \
     src/include/usr/devicefw/userif.H:devicefw/ \
-    obj/genfiles/plugins/fapiPlatHwpErrParser.H:plugins/ \
     obj/genfiles/plugins/errludattribute.H:plugins/ \
     obj/genfiles/plugins/errludtarget.H:plugins/ \
     $(addsuffix :plugins/,\
@@ -241,7 +238,12 @@ fsp.tar_CONTENTS = \
         $(call ROOTPATH_WILDCARD,src/usr/*/plugins/*)) \
     src/build/debug/fsp-memdump.sh:src/build/debug/ \
     obj/genfiles/hbfw_term_rc.H \
-    obj/genfiles/srcListing
+    obj/genfiles/srcListing \
+#@TODO RTC:142088
+#   obj/genfiles/fapiAttrInfo.csv \
+    obj/genfiles/fapiAttrEnumInfo.csv \
+    obj/genfiles/targAttrInfo.csv\
+    obj/genfiles/plugins/fapiPlatHwpErrParser.H:plugins/
 
 #
 # Portions of the FSP sandbox which must be rebuilt based on file changes.

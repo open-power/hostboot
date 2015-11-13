@@ -65,7 +65,8 @@ OBJS += ${HOSTBOOT_SPECIFIC_OBJS}
 SUBDIRS += test.d
 SUBDIRS += xmltohb.d
 SUBDIRS += runtime.d
-SUBDIRS += attroverride.d
+#@TODO RTC:128106
+#SUBDIRS += attroverride.d
 
 include ${ROOTPATH}/config.mk
 

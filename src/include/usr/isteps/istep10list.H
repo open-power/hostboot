@@ -111,7 +111,6 @@ const   TaskInfo    g_istep10[]  =   {
 const DepModInfo g_istep10Dependancies = {
     {
         DEP_LIB(libistep10.so),
-        DEP_LIB(libsbe.so),
         NULL
     }
 };

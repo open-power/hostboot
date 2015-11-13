@@ -122,19 +122,7 @@ namespace   INITSERVICE
 const DepModInfo  g_istep21Dependancies = {
     {
         DEP_LIB(libistep21.so),
-#ifndef CONFIG_VPO_COMPILE
-        DEP_LIB(libbuild_winkle_images.so),
-        DEP_LIB(libstart_payload.so),
-        DEP_LIB(libruntime.so),
         DEP_LIB(libdevtree.so),
-#if defined(CONFIG_SET_NOMINAL_PSTATE) || defined(CONFIG_HTMGT)
-        DEP_LIB(libpstates.so),
-#endif
-        DEP_LIB(libocc.so),
-#if defined(CONFIG_HTMGT)
-        DEP_LIB(libhtmgt.so),
-#endif
-#endif
         NULL
     }
 };

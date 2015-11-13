@@ -41,10 +41,6 @@
 
 // CXXTEST
 #include <cxxtest/TestSuite.H>
-#include <hwpf/plat/fapiPlatAttributeService.H>
-#include <fapiReturnCode.H>
-#include <fapiAttributeIds.H>
-#include <fapiAttributeService.H>
 #include <errl/errlmanager.H>
 
 #include <hwas/common/hwas.H>

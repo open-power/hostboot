@@ -248,8 +248,6 @@ namespace   INITSERVICE
 const DepModInfo  g_istep09Dependancies = {
     {
         DEP_LIB(libistep09.so),
-        DEP_LIB(libedi_ei_initialization.so),
-        DEP_LIB(libsbe.so),
         NULL
     }
 };

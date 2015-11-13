@@ -194,6 +194,7 @@ my $resident_modules = {
     "libpnor.so"                => '1',
     "libmbox.so"                => '1',
     "libinitservice.so"         => '1',
+    "libisteps.so"              => '1',
     "libistepdisp.so"           => '1',
     "libextinitsvc.so"          => '1',
     "libplat.so"                => '1',

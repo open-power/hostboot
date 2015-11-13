@@ -26,7 +26,8 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = targeting_rt
 
-SUBDIRS += test.d
+#@TODO RTC:132750
+#SUBDIRS += test.d
 
 TARGETING_REL_PATH = ..
 include ${TARGETING_REL_PATH}/hostboot_common.mk

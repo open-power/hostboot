@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,13 +25,12 @@
 ROOTPATH = ../../../..
 
 MODULE = testruntime
-TESTS = *.H
+TESTS += hdatservicetest.H
+TESTS += tcetest.H
 
-# support for fapi
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
+#@TODO RTC:132750
+#TESTS += runtimeattrtest.H
+
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/runtime/
 
 include ${ROOTPATH}/config.mk
