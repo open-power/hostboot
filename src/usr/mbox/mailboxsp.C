@@ -46,6 +46,7 @@
 #include <sys/misc.h>
 #include <errl/errludprintk.H>
 #include <errno.h>
+#include <sys/time.h>
 
 // Local functions
 namespace MBOX
@@ -110,6 +111,47 @@ void* MailboxSp::msg_handler(void * unused)
     return NULL;
 }
 
+// helper function to start mailbox message handler
+// @todo RTC:126643 Remove poller when interrupts avail
+void* MailboxSp::poller(void * unused)
+{
+    TRACFCOMP(g_trac_mbox, "start MBOX::pollTask");
+    Singleton<MailboxSp>::instance().pollTask();
+    return NULL;
+}
+
+// @todo RTC:126643 Remove pollTask when interrupts avail
+void MailboxSp::pollTask()
+{
+    int rc = 0;
+
+    msg_q_t mboxQ = msg_q_resolve(VFS_ROOT_MSG_MBOX);
+    if(mboxQ)
+    {
+        while(!iv_disabled)
+        {
+            msg_t * msg = msg_allocate();
+            msg->type = MSG_INTR;
+            msg->data[0] = 0;
+            msg->data[1] = 0;
+
+            rc = msg_sendrecv(mboxQ, msg);
+
+            msg_free(msg);
+
+            if (rc)
+            {
+                TRACFCOMP(g_trac_mbox, ERR_MRK
+                          "MBOX::pollTask msg_sendrecv() failed. errno = %d",
+                          rc);
+                break;
+            }
+
+            nanosleep(0, NS_PER_MSEC*100);
+        }
+    }
+}
+
 
 errlHndl_t MailboxSp::_init()
 {
@@ -160,10 +202,12 @@ errlHndl_t MailboxSp::_init()
             return err;
         }
 
+#if (0) // @todo RTC:126643
         // Register to get interrupts for mailbox
         err = INTR::registerMsgQ(iv_msgQ,
                                  MSG_INTR,
                                  INTR::FSP_MAILBOX);
+#endif
         if(err)
         {
             return err;
@@ -195,6 +239,10 @@ errlHndl_t MailboxSp::_init()
         INITSERVICE::registerShutdownEvent(iv_msgQ,
                                            MSG_MBOX_SHUTDOWN,
                                            INITSERVICE::MBOX_PRIORITY);
+
+        //@todo RTC:126643 --  poll mbox until interrupts are working
+        task_create(MailboxSp::poller, NULL);
+
     }
     // else leave iv_disabled as true;
 
@@ -245,8 +293,12 @@ void MailboxSp::msgHandler()
                 {
                     err = handleInterrupt();
 
+#if 0 // @todo RTC:126643 Remove poller and turn on when interrupts are working
                     // Respond to the interrupt handler regardless of err
                     INTR::sendEOI(iv_msgQ,msg);
+#else
+                    msg_respond(iv_msgQ,msg);
+#endif
 
                     // err will be set if scom failed in mbox DD
                     // or MBOX_DATA_WRITE_ERR  - serious - assert

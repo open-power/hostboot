@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -108,6 +108,12 @@ namespace MBOX
              */
             static void* msg_handler(void * unused);
 
+            /**
+             * Start poll Task
+             */
+            // @todo RTC:126643 Remove poller when interrupts avail
+            static void* poller(void * unused);
+
         private:
 
             /**
@@ -151,6 +157,12 @@ namespace MBOX
              * The mailbox service provider task
              */
             void msgHandler();
+
+            /**
+             * The mailbox service poll task
+             */
+            // @todo RTC:126643 Remove pollTask when interrupts avail
+            void pollTask();
 
             /**
              * Send or queue up the next message to the device driver
