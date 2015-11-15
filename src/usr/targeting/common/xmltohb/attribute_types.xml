@@ -16962,4 +16962,36 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <readable/>
 </attribute>
 
+<enumerationType>
+    <id>FUSED_CORE_OPTION</id>
+    <description>Enum for FUSED_CORE_OPTION</description>
+    <enumerator>
+        <name>USING_DEFAULT_CORES</name>
+        <value>0</value>
+    </enumerator>
+    <enumerator>
+        <name>USING_NORMAL_CORES</name>
+        <value>1</value>
+    </enumerator>
+    <enumerator>
+        <name>USING_FUSED_CORES</name>
+        <value>2</value>
+    </enumerator>
+</enumerationType>
+
+<attribute>
+    <id>FUSED_CORE_OPTION</id>
+    <description>
+        If not loading PHYP or OPAL, then use this to
+        decide whether to use FUSED cores or NOT.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
 </attributes>

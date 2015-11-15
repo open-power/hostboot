@@ -111,13 +111,13 @@ namespace   INITSERVICE
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
-// @todo RTC:137389 - removed for P9 bringup
-#if (0)
         {
                 ISTEPNAME(16,01,"host_activate_master"),
                 ISTEP_16::call_host_activate_master,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
         },
+// @todo RTC:137389 - removed for P9 bringup
+#if 0
         {
                 ISTEPNAME(16,02,"host_activate_slave_cores"),
                 ISTEP_16::call_host_activate_slave_cores,

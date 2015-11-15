@@ -867,15 +867,15 @@ UNIMPL_INTERRUPT_NOADDR(vector_unavail, 0xF20)
 UNIMPL_INTERRUPT_NOADDR(vsx_unavail, 0xF40)
 UNIMPL_INTERRUPT_NOADDR(fac_unavail, 0xF60)
 
-    ;// @fn kernel_execute_winkle
+    ;// @fn kernel_execute_stop
     ;//
     ;// Saves kernel state into a specified task structure and then executes
-    ;// the winkle instruction.
+    ;// the stop instruction.
     ;//
     ;// @param r3 - task_t* to save kernel state into.
     ;//
-.global kernel_execute_winkle
-kernel_execute_winkle:
+.global kernel_execute_stop
+kernel_execute_stop:
     ;// Move save area to SPRG3 for kernel_save_task.
     mtsprg3 r3
 
@@ -883,7 +883,7 @@ kernel_execute_winkle:
     mflr r3
     mtsrr0 r3
 
-    ;// Load winkle instruction address into the "return to" address (SPRG0).
+    ;// Load stop instruction address into the "return to" address (SPRG0).
     lis r3, 1f@h
     ori r3, r3, 1f@l
     mtsprg0 r3
@@ -891,9 +891,12 @@ kernel_execute_winkle:
     ;// Save kernel state.
     b kernel_save_task
 
-    ;// Execute winkle.
+    ;// Execute stop.
 1:
-    rvwinkle
+    ;// Magic instruction(7015) to allow simics to trigger thread wakeup
+    rlwimi  r27,r27,0,6,23
+    ;// When GCC supports 'stop', you can  use it
+    .long 0x4C0002E4
 
 .section .data
     .balign 1024
