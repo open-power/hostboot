@@ -191,13 +191,15 @@ uint64_t cpu_spr_value(CpuSprNames spr);
  *  Will execute the winkle instruction on all running threads and return when
  *  an IPI is receieved on the master thread of the core.
  *
+ *  @param[in] i_fusedCores - Fused cores if true,  Regular cores if false
+ *
  *  @retval 0 - Success
  *  @retval -EDEADLK - Cores other than the master are already running.
  *
  *  @note This function will migrate the task to the master thread and in the
  *        process will unset any task affinity.  See task_affinity_unpin().
  */
-int cpu_master_winkle();
+int cpu_master_winkle(bool  i_fusedCores);
 
 /** @fn cpu_all_winkle
  *  @brief Winkle all the threads.

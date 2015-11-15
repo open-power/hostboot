@@ -310,4 +310,38 @@ bool orderByNodeAndPosition(  Target* i_firstProc,
     return nodeId0 < nodeId1;
 }
 
+uint8_t  is_fused_mode( )
+{
+    uint8_t  l_fused;
+    TARGETING::Target * sys = NULL;
+    TARGETING::targetService().getTopLevelTarget( sys );
+    assert(sys != NULL);
+    TARGETING::PAYLOAD_KIND l_payload = sys->getAttr<ATTR_PAYLOAD_KIND>();
+    uint8_t  l_attrValue = sys->getAttr<ATTR_FUSED_CORE_OPTION>();
+
+
+    if (FUSED_CORE_OPTION_USING_DEFAULT_CORES == l_attrValue)
+    {
+        // if payload is PHYP, use FUSED mode
+        // Anything else, use NORMAL mode
+        if (PAYLOAD_KIND_PHYP == l_payload)
+        {
+            l_fused = true;
+        }
+        else
+        {
+            l_fused = false;
+        }
+    }
+    else
+    {
+        l_fused = (l_attrValue == FUSED_CORE_OPTION_USING_NORMAL_CORES) ?
+                   false : true;
+    }
+
+
+    return(l_fused);
+
+} // end is_fused_mode
+
 }

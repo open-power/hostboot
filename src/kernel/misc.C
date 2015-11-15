@@ -40,6 +40,7 @@
 #include <kernel/hbdescriptor.H>
 #include <kernel/ipc.H>
 #include <kernel/timemgr.H>
+#include <util/singleton.H>
 
 
 extern "C"
@@ -249,14 +250,35 @@ namespace KernelMisc
         // Save away the current timebase.  All threads are in this object
         // now so they're not going to be using the time for anything else.
         iv_timebase = getTB() + TimeManager::convertSecToTicks(1,0);
+
+        if (true == iv_fusedCores)
+        {
+            uint64_t  l_numThreads = CpuManager::getThreadCount();
+            cpu_t *   l_cput = CpuManager::getCurrentCPU();
+
+            // creates cpu_t structure in advance for new threads
+            // (should be next set of cpuIds past master core)
+            for ( uint64_t  l_threadNum = l_numThreads;
+                  (l_threadNum < (l_numThreads *2));
+                   l_threadNum++ )
+            {
+                Singleton<CpuManager>::instance().startCPU(l_cput->cpu +
+                                                           l_threadNum);
+            }
+
+            // Tell SIMICS we expect more threads (one more core)
+            // to appear after doing the 'stop' instruction.
+            MAGIC_INSTRUCTION(MAGIC_SIMICS_FUSEDCOREWAKE);
+        } // end if fused core mode
     }
 
-    extern "C" void kernel_execute_winkle(task_t* t);
+    extern "C" void kernel_execute_stop(task_t* t);
 
     void WinkleCore::activeMainWork()
     {
         cpu_t* cpu = CpuManager::getCurrentCPU();
-        printk("%d", static_cast<int>(cpu->cpu & 0x7));
+        ssize_t  l_numThreads = CpuManager::getThreadCount();
+        printk("%d", static_cast<int>(cpu->cpu & (l_numThreads-1)));
 
         // Return current task to run-queue so it isn't lost.
         cpu->scheduler->returnRunnable();
@@ -276,10 +298,14 @@ namespace KernelMisc
         saveArea->context.msr_mask = 0xD030; // EE, ME, PR, IR, DR.
         *(reinterpret_cast<task_t**>(cpu->kernel_stack_bottom)) = saveArea;
 
+        // Set register to indicate we want a 'stop 15' to occur (state loss)
+        uint64_t l_psscr_saved = getPSSCR();
+        setPSSCR( 0x00000000003F00FF );
         // Execute winkle.
-        kernel_execute_winkle(saveArea);
+        kernel_execute_stop(saveArea);
 
         // Re-activate CPU in kernel and re-init VMM SPRs.
+        setPSSCR(l_psscr_saved);
         delete saveArea;
         cpu->winkled = false;
         CpuManager::activateCPU(cpu);
@@ -314,6 +340,39 @@ namespace KernelMisc
 
         //Issue sbe master workaround
         InterruptMsgHdlr::issueSbeMboxWA();
+        // NOTE: The cpu_t structures for theads 1:3 were created
+        //       during init (CpuManager::init).
+
+        #ifdef HOSTBOOT_REAL_WINKLE
+        // @todo- RTC 141924 Start the other threads 1:3 in a new manner
+        //  SBE won't start them and we can't use normal instruction start.
+        //  Maybe something like:   sendIPI(..) or  addCpuCore(..)
+        //  Need interrupt code in place for this.
+
+        #else
+        // get other 3 threads going in SIMICs for now
+        MAGIC_INSTRUCTION(MAGIC_WAKE_OTHER_THREADS);
+        #endif
+
+        if (true == iv_fusedCores)
+        {
+            // If using FUSED cores, we need to essentially
+            // treat this as a new core appearing.
+
+            #ifdef HOSTBOOT_REAL_WINKLE
+            ssize_t  l_numThreads = CpuManager::getThreadCount();
+            cpu_t*   l_cpuPtr = CpuManager::getCurrentCPU();
+            cpuid_t  l_startPir = l_cpuPtr->cpu  & (~(l_numThreads - 1));
+
+            // New core should have threads just past current ones
+            CpuManager::startCore(l_startPir + l_numThreads,
+                                  0xF000000000000000);  // all 4 threads
+            #else
+            // get new core going in SIMICS
+            MAGIC_INSTRUCTION(MAGIC_WAKE_FUSED_THREADS);
+            #endif
+        } // end if fused core mode
+
     }
 
     void WinkleCore::nonactiveMainWork()
@@ -356,10 +415,14 @@ namespace KernelMisc
         saveArea->context.msr_mask = 0xD030; // EE, ME, PR, IR, DR.
         *(reinterpret_cast<task_t**>(cpu->kernel_stack_bottom)) = saveArea;
 
+        // Set register to indicate we want a 'stop 15' to ocur (state loss)
+        uint64_t l_psscr_saved = getPSSCR();
+        setPSSCR( 0x00000000003F00FF );
         // Execute winkle.
-        kernel_execute_winkle(saveArea);
+        kernel_execute_stop(saveArea);
 
         // Re-activate CPU in kernel and re-init VMM SPRs.
+        setPSSCR(l_psscr_saved);
         delete saveArea;
         cpu->winkled = false;
         CpuManager::activateCPU(cpu);

@@ -91,14 +91,16 @@ uint64_t cpu_spr_value(CpuSprNames spr)
         _syscall1(MISC_CPUSPRVALUE, reinterpret_cast<void*>(spr)));
 }
 
-int cpu_master_winkle()
+int cpu_master_winkle(bool  i_fusedCores)
 {
     task_affinity_pin();
     task_affinity_migrate_to_master();
 
     int rc = reinterpret_cast<int64_t>(
-                _syscall1(MISC_CPUWINKLE,
-                          reinterpret_cast<void*>(WINKLE_SCOPE_MASTER)));
+                _syscall2(MISC_CPUWINKLE,
+                          reinterpret_cast<void*>(WINKLE_SCOPE_MASTER),
+                          reinterpret_cast<void*>(i_fusedCores) ));
+
 
     task_affinity_unpin();
 
@@ -111,8 +113,9 @@ int cpu_all_winkle()
     task_affinity_migrate_to_master();
 
     int rc = reinterpret_cast<int64_t>(
-                _syscall1(MISC_CPUWINKLE,
-                          reinterpret_cast<void*>(WINKLE_SCOPE_ALL)));
+                _syscall2(MISC_CPUWINKLE,
+                          reinterpret_cast<void*>(WINKLE_SCOPE_ALL),
+                          reinterpret_cast<void*>(false) ));
 
     task_affinity_unpin();
 

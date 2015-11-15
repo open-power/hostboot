@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -93,9 +95,11 @@ namespace KernelMisc
              *
              *  @param i_caller - Task calling cpu_master_winkle to be
              *                    restored after winkle is complete.
+             *  @param i_fusedCores - true if using 8 threaded cores 
              */
-            WinkleCore(task_t* i_caller) :
-                iv_caller(i_caller), iv_timebase(0) {};
+            WinkleCore(task_t* i_caller, bool i_fusedCores) :
+                iv_caller(i_caller), iv_timebase(0),
+                iv_fusedCores(i_fusedCores) {};
 
             void masterPreWork();
             void activeMainWork();
@@ -107,6 +111,9 @@ namespace KernelMisc
             task_t* iv_caller;
                 /** Current time-base value for restore after winkle. */
             uint64_t iv_timebase;
+                /** Fused core has 8 threads per core (normal is 4).   */
+                /** So when winkling core, we need a 2nd core started. */
+            bool  iv_fusedCores;
     };
 
     /** @class WinkleAll

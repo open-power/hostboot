@@ -311,6 +311,8 @@
     <attribute><id>SBE_MASTER_INTR_SERVICE_DELAY_US</id></attribute>
     <attribute><id>CLEAR_DIMM_SPD_ENABLE</id></attribute>
     <attribute><id>MRW_MCS_PREFETCH_RETRY_THRESHOLD</id></attribute>
+    <!-- AVP override for fused cores or normal cores -->
+    <attribute><id>FUSED_CORE_OPTION</id></attribute>
 </targetType>
 
 <targetType>
@@ -1987,6 +1989,8 @@
     <attribute><id>DO_ABUS_DECONFIG</id></attribute>
     <attribute><id>PLCK_IPL_ATTR_OVERRIDES_EXIST</id></attribute>
     <attribute><id>PAYLOAD_IN_MIRROR_MEM</id></attribute>
+    <!-- AVP override for fused cores or normal cores -->
+    <attribute><id>FUSED_CORE_OPTION</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->

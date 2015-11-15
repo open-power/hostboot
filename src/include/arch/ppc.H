@@ -339,6 +339,29 @@ inline void nap()
 {
     // @todo-RTC:130186 Add new stop command support
     //asm volatile("nap");
+
+    // Nap should be equivalent to 'stop 1' (no state loss)
+    // 855 reg for HYPV,  823 reg otherwise
+    // using EC(bit43) as 1 here  (system reset or LPCR event)
+    // PHYP uses bit 42 as 1 also
+//  register uint64_t psscr = 0x0000000000310001;
+//  asm volatile("mtspr 823, %0; isync" :: "r" (psscr));
+//  asm volatile(".long 0x4C0002E4"); // When GCC supports 'stop', use it
+}
+
+ALWAYS_INLINE
+inline void setPSSCR(uint64_t _psscr)
+{
+    register uint64_t psscr = _psscr;
+    asm volatile("mtspr 855, %0; isync" :: "r" (psscr));
+}
+
+ALWAYS_INLINE
+inline uint64_t getPSSCR()
+{
+    register uint64_t psscr = 0;
+    asm volatile("mfspr %0, 855" : "=r" (psscr));
+    return psscr;
 }
 
 ALWAYS_INLINE
@@ -426,6 +449,10 @@ enum
                                      // some state from the core doing the
                                      // wakeup to apply into the woken one.
 
+    MAGIC_SIMICS_FUSEDCOREWAKE = 11, // Indicate to the PHYP model of simics
+                                     // that we are waking up and expecting
+                                     // CORES to become fused.
+
     MAGIC_SHUTDOWN            =  7006, // KernelMisc::shutdown() called.
     MAGIC_BREAK               =  7007, // hard-code a breakpoint
     MAGIC_RANDOM              =  7008, // generate random number
@@ -433,6 +460,13 @@ enum
     MAGIC_FAKEPAYLOAD_ENTER   =  7010, // Entered the fake payload.
     MAGIC_SIMICS_CHECK        =  7011, // Check if system is running on simics
     MAGIC_LOAD_PAYLOAD        =  7012, // load payload from flash
+
+                                       // These are used for getting threads
+                                       // going after doing 'stop/winkle'
+    MAGIC_WAKE_MASTER_THREAD  =  7015, // Wake master thread
+    MAGIC_WAKE_OTHER_THREADS  =  7016, // Wake other threads on initial CORE
+    MAGIC_WAKE_FUSED_THREADS  =  7017, // Wake up fused core threads
+
     MAGIC_CONTINUOUS_TRACE    =  7055, // extract mixed trace buffer
 };
 

@@ -66,7 +66,6 @@ namespace ISTEP_16
 void* call_host_activate_master (void *io_pArgs)
 {
     IStepError  l_stepError;
-#if 0
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_activate_master entry" );
@@ -77,6 +76,7 @@ void* call_host_activate_master (void *io_pArgs)
 
     do  {
 
+#if 0
         // find the master core, i.e. the one we are running on
         TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "call_host_activate_master: Find master core: " );
@@ -205,6 +205,7 @@ void* call_host_activate_master (void *io_pArgs)
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "Disable special wakeup on master core SUCCESS");
         }
+#endif
 
 
         //  put the master into winkle.
@@ -213,8 +214,9 @@ void* call_host_activate_master (void *io_pArgs)
 
         // Flush any lingering console traces first
         CONSOLE::flush();
+        bool l_fusedCores = is_fused_mode();
 
-        int l_rc    =   cpu_master_winkle( );
+        int l_rc    =   cpu_master_winkle(l_fusedCores);
         if ( l_rc )
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -226,15 +228,15 @@ void* call_host_activate_master (void *io_pArgs)
              * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @moduleid    ISTEP_HOST_ACTIVATE_MASTER
              * @userdata1   return code from cpu_master_winkle
+             * @userdata2   Fused core indicator
              *
-             * @devdesc p8_pore_gen_cpureg returned an error when
-             *          attempting to change a reg value in the PORE image.
+             * @devdesc cpu_master_winkle returned an error 
              */
             l_errl =
             new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                     ISTEP_HOST_ACTIVATE_MASTER,
                                     ISTEP_FAIL_MASTER_WINKLE_RC,
-                                    l_rc  );
+                                    l_rc, l_fusedCores );
             break;
         }
 
@@ -245,6 +247,7 @@ void* call_host_activate_master (void *io_pArgs)
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "Returned from Winkle." );
 
+#if (0)
         //Re-enable the mailbox
         l_errl = MBOX::resume();
         if (l_errl)
@@ -315,6 +318,7 @@ void* call_host_activate_master (void *io_pArgs)
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "Enable special wakeup on master core SUCCESS");
         }
+#endif
 
     }   while ( 0 );
 
@@ -330,7 +334,6 @@ void* call_host_activate_master (void *io_pArgs)
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_activate_master exit" );
-#endif
     // end task, returning any errorlogs to IStepDisp
     return l_stepError.getErrorHandle();
 

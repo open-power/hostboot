@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -161,6 +163,13 @@ uint64_t get_bottom_mem_addr(void);
 bool orderByNodeAndPosition(  Target* i_firstProc,
                               Target* i_secondProc);
 
+/**
+ * @brief   Checks if we want to be in FUSED mode or not.
+ * @description  Fused mode is when 2 cores merge to produce
+ *               a core with 8 threads versus 4 threaded cores.
+ * @return  Non-zero if FUSED mode, 0 if non-FUSED mode
+ */
+uint8_t  is_fused_mode( );
 
 }
 

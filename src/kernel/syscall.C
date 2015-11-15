@@ -751,7 +751,8 @@ namespace Systemcalls
             DeferredWork* deferred = NULL;
             if (WINKLE_SCOPE_MASTER == TASK_GETARG0(t))
             {
-                deferred = new KernelMisc::WinkleCore(t);
+                bool  l_fusedCores = (bool)TASK_GETARG1(t);
+                deferred = new KernelMisc::WinkleCore(t, l_fusedCores);
             }
             else
             {

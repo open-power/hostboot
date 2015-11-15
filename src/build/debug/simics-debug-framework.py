@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2015
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -513,6 +513,61 @@ def magic_instruction_callback(user_arg, cpu, arg):
         cmd = 'shell "fcp --force -o0 -R %s:PAYLOAD simicsPayload.ecc; ecc --remove --p8 simicsPayload.ecc simicsPayload"; load-file simicsPayload 0x%x' % (flash_file, load_addr)
         SIM_run_alone( run_command, cmd )
 
+    if arg == 7015:
+        print "Wake up master Thread CORE0 - 7015 start \n";
+
+        # If more than 1 thread, we only want to do
+        # this on 4th hit -- won't worry about it for now.
+        setIar0 = "system_cmp0.cpu0_0_00_0->iar=0x100"
+        SIM_run_alone(run_command, setIar0 )
+
+        # need to disable and then re-enable thread0 to
+        # make it appear to wake back up
+        disable0 = "system_cmp0.cpu0_0_00_0.disable"
+        SIM_run_alone(run_command, disable0 )
+        enable0 =  "system_cmp0.cpu0_0_00_0.enable"
+        SIM_run_alone(run_command, enable0 )
+        print "Master Thread should be awake now \n";
+
+    if arg == 7016:
+        print "Wake up rest of CORE0 - 7017 start \n";
+
+        # Set other threads on CORE0 to proper address
+        setIar1 = "system_cmp0.cpu0_0_00_1->iar=0x100"
+        setIar2 = "system_cmp0.cpu0_0_00_2->iar=0x100"
+        setIar3 = "system_cmp0.cpu0_0_00_3->iar=0x100"
+
+        setIarAll = "%s; %s; %s"%(setIar1,setIar2,setIar3)
+        SIM_run_alone(run_command, setIarAll )
+
+        # Enable rest of threads on CORE0
+        enable1 =  "system_cmp0.cpu0_0_00_1.enable"
+        enable2 =  "system_cmp0.cpu0_0_00_2.enable"
+        enable3 =  "system_cmp0.cpu0_0_00_3.enable"
+        enableCore0 = "%s; %s; %s"%(enable1,enable2,enable3)
+        SIM_run_alone(run_command, enableCore0 )
+
+    if arg == 7017:
+        print "Wake up FUSED threads - 7017 start \n";
+
+        # Set CORE1 threads to proper address
+        setIar4  = "system_cmp0.cpu0_0_01_0->iar=0x100"
+        setIar5  = "system_cmp0.cpu0_0_01_1->iar=0x100"
+        setIar6  = "system_cmp0.cpu0_0_01_2->iar=0x100"
+        setIar7  = "system_cmp0.cpu0_0_01_3->iar=0x100"
+        setHrmor = "system_cmp0.cpu0_0_01_0->hrmor=0x08000000"
+
+        setIarAll = "%s; %s; %s; %s; %s"%(setIar4,setIar5,setIar6,setIar7,setHrmor)
+        SIM_run_alone(run_command, setIarAll )
+
+        # Enable all threads on CORE1
+        enable4 =  "system_cmp0.cpu0_0_01_0.enable"
+        enable5 =  "system_cmp0.cpu0_0_01_1.enable"
+        enable6 =  "system_cmp0.cpu0_0_01_2.enable"
+        enable7 =  "system_cmp0.cpu0_0_01_3.enable"
+        enableCore1 = "%s; %s; %s; %s"%(enable4,enable5,enable6,enable7)
+        SIM_run_alone(run_command, enableCore1 )
+
     if arg == 7055:   # MAGIC_CONTINUOUS_TRACE
         hb_tracBinaryBuffer = cpu.r4
         hb_tracBinaryBufferSz = cpu.r5
@@ -605,4 +660,3 @@ SIM_hap_add_callback_range( "Core_Magic_Instruction", magic_instruction_callback
 
 # Run the registration automatically whenever this script is loaded.
 register_hb_debug_framework_tools()
-
