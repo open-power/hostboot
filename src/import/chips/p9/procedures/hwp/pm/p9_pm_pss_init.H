@@ -1,0 +1,61 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: chips/p9/procedures/ipl/hwp/p9_pm_pss_init.H $                */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* EKB Project                                                            */
+/*                                                                        */
+/* COPYRIGHT 2015                                                         */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+/// @file p9_pm_pss_init.H
+/// @brief Initializes P2S and HWC logic
+///
+// *HWP HWP Owner: Amit Kumar <akumar3@us.ibm.com>
+// *HWP Backup HWP Owner: Greg Still <stillgs@us.ibm.com>
+// *HWP FW Owner: Sangeetha T S <sangeet2@in.ibm.com>
+// *HWP Team: PM
+// *HWP Level: 1
+// *HWP Consumed by: FSP:HS
+
+#ifndef _P9_PM_PSS_INIT_H_
+#define _P9_PM_PSS_INIT_H_
+
+//------------------------------------------------------------------------------
+// Includes
+//------------------------------------------------------------------------------
+#include <fapi2.H>
+#include <p9_pm.H>
+
+typedef fapi2::ReturnCode (*p9_pm_pss_init_FP_t)
+(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
+ const p9pm::PM_FLOW_MODE);
+
+extern "C"
+{
+//------------------------------------------------------------------------------
+// Function prototype
+//------------------------------------------------------------------------------
+///
+/// @brief Calls the underlying routine based on mode parameter to initialize
+///        the PSS macro or reset it or configure the required attributes
+///
+/// @param[in] i_target Chip target
+/// @param[in] i_mode   Control mode for the procedure:
+///                     PM_INIT, PM_RESET
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code
+///
+    fapi2::ReturnCode p9_pm_pss_init(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+        const p9pm::PM_FLOW_MODE i_mode);
+}
+#endif // _P9_PM_PSS_INIT_H_
