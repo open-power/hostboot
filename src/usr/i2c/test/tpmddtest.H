@@ -521,9 +521,6 @@ class TPMDDTest: public CxxTest::TestSuite
             int64_t fails = 0, num_ops = 0;
             uint8_t data[256];
             size_t dataSize = sizeof(data);
-#ifdef CONFIG_TPMDD_1_2
-            uint32_t subCap = 0;
-#endif
             size_t cmdSize = 0;
 
             TRACFCOMP( g_trac_tpmdd,
@@ -543,20 +540,6 @@ class TPMDDTest: public CxxTest::TestSuite
                 dataSize = sizeof(data);
                 memset(data, 0xFE, sizeof(data));
 
-#ifdef CONFIG_TPMDD_1_2
-                TRUSTEDBOOT::TPM_GetCapabilityIn* capCmd =
-                    reinterpret_cast<TRUSTEDBOOT::TPM_GetCapabilityIn*>(data);
-                subCap = TRUSTEDBOOT::TPM_CAP_PROP_MANUFACTURER;
-
-                capCmd->base.tag = TRUSTEDBOOT::TPM_TAG_RQU_COMMAND;
-                capCmd->base.paramSize =
-                    sizeof (TRUSTEDBOOT::TPM_GetCapabilityIn) + sizeof (subCap);
-                capCmd->base.ordinal = TRUSTEDBOOT::TPM_ORD_GetCapability;
-                capCmd->capArea = TRUSTEDBOOT::TPM_CAP_PROPERTY;
-                capCmd->subCapSize = sizeof (subCap);
-                memcpy(capCmd->subCap, &subCap, sizeof (subCap));
-                cmdSize = capCmd->base.paramSize;
-#elif defined (CONFIG_TPMDD_2_0)
                 TRUSTEDBOOT::TPM2_GetCapabilityIn* cmd =
                     (TRUSTEDBOOT::TPM2_GetCapabilityIn*)data;
 
@@ -570,8 +553,6 @@ class TPMDDTest: public CxxTest::TestSuite
 
                 cmdSize = cmd->base.commandSize;
 
-#endif
-
                 num_ops++;
                 err = deviceRead(testTarget,
                                  &data,
@@ -580,8 +561,8 @@ class TPMDDTest: public CxxTest::TestSuite
                                                      TPM_OP_TRANSMIT,
                                                      cmdSize) );
 
-                TRUSTEDBOOT::TPM_BaseOut* resp =
-                    reinterpret_cast<TRUSTEDBOOT::TPM_BaseOut*>(data);
+                TRUSTEDBOOT::TPM2_BaseOut* resp =
+                    reinterpret_cast<TRUSTEDBOOT::TPM2_BaseOut*>(data);
 
 
                 if( NULL != err )
@@ -594,22 +575,13 @@ class TPMDDTest: public CxxTest::TestSuite
                     err = NULL;
                     continue;
                 }
-                else if (resp->paramSize != dataSize)
-                {
-                    fails++;
-                    TS_FAIL( "testTPMTransmit - GetCap : TPM didn't return "
-                             "correct response size E:%d A:%d",
-                             resp->paramSize,
-                             dataSize);
-                    continue;
-                }
                 else if (TRUSTEDBOOT::TPM_SUCCESS !=
-                         resp->returnCode)
+                         resp->responseCode)
                 {
                     fails++;
                     TS_FAIL( "testTPMTransmit - GetCap : "
                              "TPM return non-success : %d",
-                             resp->returnCode);
+                             resp->responseCode);
                     continue;
                 }
                 else
@@ -632,16 +604,10 @@ class TPMDDTest: public CxxTest::TestSuite
         void testTPMTransmitOverUnder ( void )
         {
 
-    // Unfortunately the simics 1.2 model doesn't handle the following
-    // over/under flow tests properly
-#ifndef CONFIG_TPMDD_1_2
             errlHndl_t err = NULL;
             int64_t fails = 0, num_ops = 0;
             uint8_t data[256];
             size_t dataSize = sizeof(data);
-#ifdef CONFIG_TPMDD_1_2
-            uint32_t subCap = 0;
-#endif
             size_t cmdSize = 0;
 
             TRACFCOMP( g_trac_tpmdd,
@@ -661,20 +627,6 @@ class TPMDDTest: public CxxTest::TestSuite
                 memset(data, 0xFE, sizeof(data));
 
                 // Test a TPM command underflow
-#ifdef CONFIG_TPMDD_1_2
-                TRUSTEDBOOT::TPM_GetCapabilityIn* capCmd =
-                    reinterpret_cast<TRUSTEDBOOT::TPM_GetCapabilityIn*>(data);
-                subCap = TRUSTEDBOOT::TPM_CAP_PROP_MANUFACTURER;
-
-                capCmd->base.tag = TRUSTEDBOOT::TPM_TAG_RQU_COMMAND;
-                capCmd->base.paramSize =
-                    sizeof (TRUSTEDBOOT::TPM_GetCapabilityIn) + sizeof (subCap);
-                capCmd->base.ordinal = TRUSTEDBOOT::TPM_ORD_GetCapability;
-                capCmd->capArea = TRUSTEDBOOT::TPM_CAP_PROPERTY;
-                capCmd->subCapSize = sizeof (subCap);
-                memcpy(capCmd->subCap, &subCap, sizeof (subCap));
-                cmdSize = capCmd->base.paramSize;
-#elif defined (CONFIG_TPMDD_2_0)
                 TRUSTEDBOOT::TPM2_GetCapabilityIn* cmd =
                     (TRUSTEDBOOT::TPM2_GetCapabilityIn*)data;
 
@@ -687,7 +639,6 @@ class TPMDDTest: public CxxTest::TestSuite
                 cmd->propertyCount = 1;
 
                 cmdSize = cmd->base.commandSize;
-#endif
 
                 num_ops++;
                 err = deviceRead(testTarget,
@@ -721,18 +672,6 @@ class TPMDDTest: public CxxTest::TestSuite
                 memset(data, 0xFE, sizeof(data));
 
                 // Test a TPM command overflow
-#ifdef CONFIG_TPMDD_1_2
-                subCap = TRUSTEDBOOT::TPM_CAP_PROP_MANUFACTURER;
-
-                capCmd->base.tag = TRUSTEDBOOT::TPM_TAG_RQU_COMMAND;
-                capCmd->base.paramSize =
-                    sizeof (TRUSTEDBOOT::TPM_GetCapabilityIn) + sizeof (subCap);
-                capCmd->base.ordinal = TRUSTEDBOOT::TPM_ORD_GetCapability;
-                capCmd->capArea = TRUSTEDBOOT::TPM_CAP_PROPERTY;
-                capCmd->subCapSize = sizeof (subCap);
-                memcpy(capCmd->subCap, &subCap, sizeof (subCap));
-                cmdSize = capCmd->base.paramSize;
-#elif defined (CONFIG_TPMDD_2_0)
 
                 cmd->base.tag = TRUSTEDBOOT::TPM_ST_NO_SESSIONS;
                 cmd->base.commandSize =
@@ -743,7 +682,6 @@ class TPMDDTest: public CxxTest::TestSuite
                 cmd->propertyCount = 1;
 
                 cmdSize = cmd->base.commandSize;
-#endif
 
                 num_ops++;
                 err = deviceRead(testTarget,
@@ -776,18 +714,6 @@ class TPMDDTest: public CxxTest::TestSuite
                 memset(data, 0xFE, sizeof(data));
 
                 // Test a TPM data overflow
-#ifdef CONFIG_TPMDD_1_2
-                subCap = TRUSTEDBOOT::TPM_CAP_PROP_MANUFACTURER;
-
-                capCmd->base.tag = TRUSTEDBOOT::TPM_TAG_RQU_COMMAND;
-                capCmd->base.paramSize =
-                    sizeof (TRUSTEDBOOT::TPM_GetCapabilityIn) + sizeof (subCap);
-                capCmd->base.ordinal = TRUSTEDBOOT::TPM_ORD_GetCapability;
-                capCmd->capArea = TRUSTEDBOOT::TPM_CAP_PROPERTY;
-                capCmd->subCapSize = sizeof (subCap);
-                memcpy(capCmd->subCap, &subCap, sizeof (subCap));
-                cmdSize = capCmd->base.paramSize;
-#elif defined (CONFIG_TPMDD_2_0)
 
                 cmd->base.tag = TRUSTEDBOOT::TPM_ST_NO_SESSIONS;
                 cmd->base.commandSize =
@@ -798,11 +724,10 @@ class TPMDDTest: public CxxTest::TestSuite
                 cmd->propertyCount = 1;
 
                 cmdSize = cmd->base.commandSize;
-#endif
 
                 num_ops++;
                 // Force datasize to be too small
-                dataSize = sizeof(TRUSTEDBOOT::TPM_BaseOut);
+                dataSize = sizeof(TRUSTEDBOOT::TPM2_BaseOut);
                 err = deviceRead(testTarget,
                                  &data,
                                  dataSize,
@@ -832,7 +757,6 @@ class TPMDDTest: public CxxTest::TestSuite
             TRACFCOMP( g_trac_tpmdd,
                        "testTPMTransmitOverUnder - End: %d/%d fails",
                        fails, num_ops );
-#endif // !defined CONFIG_TPMDD_1_2
         }
 
 };

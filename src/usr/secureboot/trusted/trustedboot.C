@@ -175,18 +175,8 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target,
         // Build our command block for a startup
         memset(dataBuf, 0, sizeof(dataBuf));
 
-        TRUSTEDBOOT::TPM_BaseOut* resp =
-            (TRUSTEDBOOT::TPM_BaseOut*)dataBuf;
-#ifdef CONFIG_TPMDD_1_2
-        TRUSTEDBOOT::TPM_2ByteIn* cmd =
-            (TRUSTEDBOOT::TPM_2ByteIn*)dataBuf;
-
-        cmd->base.tag = TRUSTEDBOOT::TPM_TAG_RQU_COMMAND;
-        cmd->base.paramSize = sizeof (TRUSTEDBOOT::TPM_2ByteIn);
-        cmd->base.ordinal = TRUSTEDBOOT::TPM_ORD_Startup;
-        cmd->param = TRUSTEDBOOT::TPM_ST_CLEAR;
-        cmdSize = cmd->base.paramSize;
-#elif defined(CONFIG_TPMDD_2_0)
+        TRUSTEDBOOT::TPM2_BaseOut* resp =
+            (TRUSTEDBOOT::TPM2_BaseOut*)dataBuf;
         TRUSTEDBOOT::TPM2_2ByteIn* cmd =
             (TRUSTEDBOOT::TPM2_2ByteIn*)dataBuf;
 
@@ -195,7 +185,6 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target,
         cmd->base.commandCode = TRUSTEDBOOT::TPM_CC_Startup;
         cmd->param = TRUSTEDBOOT::TPM_SU_CLEAR;
         cmdSize = cmd->base.commandSize;
-#endif
 
         err = deviceRead(io_target.nodeTarget,
                          &dataBuf,
@@ -212,11 +201,11 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target,
             break;
 
         }
-        else if (TRUSTEDBOOT::TPM_SUCCESS != resp->returnCode)
+        else if (TRUSTEDBOOT::TPM_SUCCESS != resp->responseCode)
         {
             TRACFCOMP( g_trac_trustedboot,
                        "TPM STARTUP OP Fail %X : ",
-                       resp->returnCode);
+                       resp->responseCode);
 
             /*@
              * @errortype
@@ -232,7 +221,7 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target,
                                            RC_TPM_START_FAIL,
                                            TARGETING::get_huid(
                                               io_target.nodeTarget),
-                                           resp->returnCode,
+                                           resp->responseCode,
                                            true /*Add HB SW Callout*/ );
 
             err->collectTrace( SECURE_COMP_NAME );

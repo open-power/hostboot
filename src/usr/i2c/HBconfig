@@ -1,20 +1,8 @@
 config TPMDD
     default n
-    depends on TPM_NUVOTON && (TPMDD_1_2 || TPMDD_2_0)
+    depends on TPM_NUVOTON
     help
         Enable TPM support
-
-config TPMDD_1_2
-    default n
-    depends on !TPMDD_2_0
-    help
-        Enable TPM 1.2 Support
-
-config TPMDD_2_0
-    default n
-    depends on !TPMDD_1_2
-    help
-        Enable TPM 2.0 Support
 
 config TPM_NUVOTON
     default n

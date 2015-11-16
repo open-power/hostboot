@@ -1710,25 +1710,6 @@ errlHndl_t tpmReadBurstCount( tpm_info_t i_tpmInfo,
     errlHndl_t err = NULL;
     o_burstCount = 0;
 
-#ifdef CONFIG_TPMDD_1_2
-    // Nuvoton 1.2 used a one byte burst count
-    uint8_t burstLow = 0;
-
-    err = tpmReadReg(i_tpmInfo,
-                     TPMDD::I2C_REG_BURSTCOUNT,
-                     1,
-                     reinterpret_cast<void*>(&burstLow));
-
-    o_burstCount = burstLow;
-
-    if (NULL == err &&
-        o_burstCount > TPMDD::TPM_MAXBURSTSIZE)
-    {
-        o_burstCount = TPMDD::TPM_MAXBURSTSIZE;
-    }
-
-#else
-    // Nuvoton 2.0 uses a two byte burst count
     // Read the burst count
     uint16_t burstCount = 0;
     if (NULL == err)
@@ -1744,7 +1725,6 @@ errlHndl_t tpmReadBurstCount( tpm_info_t i_tpmInfo,
         o_burstCount = (burstCount & 0x00FF) << 8;
         o_burstCount |= (burstCount & 0xFF00) >> 8;
     }
-#endif
     TRACUCOMP( g_trac_tpmdd,
                "tpmReadBurstCount() - BurstCount %d",
                o_burstCount);
