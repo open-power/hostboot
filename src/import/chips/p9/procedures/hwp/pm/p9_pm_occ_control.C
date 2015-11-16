@@ -51,16 +51,6 @@ enum DELAY_VALUE
     SIM_CYCLE_DELAY = 10000
 };
 
-//TODO: Should be removed when the scom addresses are added to a
-//      scom address header.
-enum FIR_SCOM_ADDRESS
-{
-    OCCLFIR_REG = 0x0000000001010800,
-    OCCLFIR_REG_AND = 0x0000000001010801,
-    OCCLFIR_MASK_REG = 0x0000000001010803,
-    OCCLFIR_MASK_REG_OR = 0x0000000001010805
-};
-
 // -----------------------------------------------------------------------------
 //   Procedure Defintion
 // -----------------------------------------------------------------------------
@@ -161,16 +151,16 @@ fapi2::ReturnCode p9_pm_occ_control
             /// Save the FIR mask, and mask the halted FIR
 
             FAPI_DBG("Performing the RESET SEQUENCE");
-            FAPI_TRY(fapi2::getScom(i_target, OCCLFIR_MASK_REG, l_firMask));
-            FAPI_TRY(fapi2::putScom(i_target, OCCLFIR_MASK_REG_OR, BIT(25)));
+            FAPI_TRY(fapi2::getScom(i_target, PERV_TP_OCC_SCOM_OCCLFIRMASK, l_firMask));
+            FAPI_TRY(fapi2::putScom(i_target, PERV_TP_OCC_SCOM_OCCLFIRMASK_OR, BIT(25)));
             // Halt the 405 and verify that it is halted
             FAPI_TRY(fapi2::putScom(i_target, PU_JTG_PIB_OJCFG_OR, BIT(6)));
 
             FAPI_TRY(fapi2::delay(NS_DELAY, SIM_CYCLE_DELAY));
 
-            FAPI_TRY(fapi2::putScom(i_target, OCCLFIR_REG_AND, ~BIT(25)));
+            FAPI_TRY(fapi2::putScom(i_target, PERV_TP_OCC_SCOM_OCCLFIR_AND, ~BIT(25)));
 
-            FAPI_TRY(fapi2::getScom(i_target, OCCLFIR_REG, l_occfir));
+            FAPI_TRY(fapi2::getScom(i_target, PERV_TP_OCC_SCOM_OCCLFIR, l_occfir));
 
             if (!(l_occfir & BIT(25)))
             {
@@ -180,9 +170,9 @@ fapi2::ReturnCode p9_pm_occ_control
             // Put 405 into reset, unhalt 405 and clear the halted FIR bit.
             FAPI_TRY(fapi2::putScom(i_target, PU_OCB_PIB_OCR_OR, BIT(0)));
             FAPI_TRY(fapi2::putScom(i_target, PU_JTG_PIB_OJCFG_AND, ~BIT(6)));
-            FAPI_TRY(fapi2::putScom(i_target, OCCLFIR_REG_AND, ~BIT(25)));
+            FAPI_TRY(fapi2::putScom(i_target, PERV_TP_OCC_SCOM_OCCLFIR_AND, ~BIT(25)));
             // Restore the original FIR mask
-            FAPI_TRY(fapi2::putScom(i_target, OCCLFIR_MASK_REG, l_firMask));
+            FAPI_TRY(fapi2::putScom(i_target, PERV_TP_OCC_SCOM_OCCLFIRMASK, l_firMask));
             break;
 
         default:

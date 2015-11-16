@@ -61,6 +61,7 @@
 #include <fapi2.H>
 #include <p9_pm.H>
 #include <p9_misc_scom_addresses.H>
+#include <p9_perv_scom_addresses.H>
 
 // -----------------------------------------------------------------------------
 //  ENUMS
