@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014
+# Contributors Listed Below - COPYRIGHT 2014,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -24,9 +24,9 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../../../..
 
-OUT_FILE += $(ROOTPATH)/obj/modules/compression/compression
+OUT_FILE += $(GENDIR)/compression
 
-GEN_PASS_BODY += compression
+GEN_PASS_BODY += $(OUT_FILE)
 CLEAN_TARGETS += $(OUT_FILE) compression.o
 
 INC_DIRS += $(ROOTPATH)/src/include/usr/ecmddatabuffer
@@ -41,7 +41,7 @@ HCFLAGS += -Di386=1
 
 include $(ROOTPATH)/config.mk
 
-compression: ecmdDataBufferBase.C DQCompressionLib.C EncodeDQMapping.C
+$(OUT_FILE): ecmdDataBufferBase.C DQCompressionLib.C EncodeDQMapping.C
 	$(C2) "    CC         $(notdir $@)"
 	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 -g $^ -o $(OUT_FILE)\
 			$(foreach dir,$(INC_DIRS), -I $(dir)) $(HCFLAGS)

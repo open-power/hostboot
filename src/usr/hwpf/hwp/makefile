@@ -57,6 +57,7 @@ SUBDIRS	+= pstates.d
 SUBDIRS	+= proc_hwreconfig.d
 SUBDIRS	+= runtime.d
 SUBDIRS	+= secure_boot.d
+SUBDIRS	+= mvpd_accessors.d
 
 
 include ${ROOTPATH}/config.mk
