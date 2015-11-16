@@ -22,14 +22,32 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- This is an automatically generated file. -->
+<!-- File: p9_sbe_tp_arrayinit_errors.xml. -->
+<!-- Halt codes for p9_sbe_tp_arrayinit -->
+
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_SELECT_EX_NONE_FOUND</rc>
-    <description>
-      Procedure: p9_sbe_select_ex.C
-      Indicates the no EX element (single core) was found.
-    </description>
+    <rc>RC_SBE_SELECT_EX_NO_CORES</rc>
+    <description>No good cores were found in the Partial Good attribures</description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_SELECT_EX_NO_EQS</rc>
+    <description>No good cache chiplets were found in the Partial Good attribures</description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_SELECT_EX_CORE_EQ_CONFIG_ERROR</rc>
+    <description>Did not find the matching EQ for the first core</description>
+    <ffdc>CORE_NUM</ffdc>
+    <ffdc>EQ_NUM</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_SBE_SELECT_EX_NO_CORE_AVAIL_ERROR</rc>
+    <description>No cores are configurable with current partial good and gard settings</description>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
