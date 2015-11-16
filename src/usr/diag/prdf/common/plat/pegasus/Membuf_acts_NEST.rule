@@ -909,12 +909,12 @@ group gMbsEccFir filter priority ( 19, 41 ),
     /** MBA0_MBSECCFIR[19]
      *  Memory UE
      */
-    (Mba0_MbsEccFir, bit(19)) ? analyzeFetchUe0;
+    (Mba0_MbsEccFir, bit(19)) ? mba0MemoryUe;
 
     /** MBA1_MBSECCFIR[19]
      *  Memory UE
      */
-    (Mba1_MbsEccFir, bit(19)) ? analyzeFetchUe1;
+    (Mba1_MbsEccFir, bit(19)) ? mba1MemoryUe;
 
     /** MBA0_MBSECCFIR[20:27]
      *  Maintenance chip mark
@@ -1273,7 +1273,19 @@ actionclass replayTimeOutError
 /** Handles MBACAL parity err if present, else handles MBS Internal Timeout */
 actionclass internalTimeout
 {
-    try( funccall("handleMbaCalParityErr"),  SelfMedThr1);
+    try( funccall("handleMbaCalParityErr"),  SelfMedThr1 );
+};
+
+/** Handles MBACAL parity err if present, else handles MBA0 MBSECC Memory UE */
+actionclass mba0MemoryUe
+{
+    try ( funccall("handleSingleMbaCalParityErr0"), analyzeFetchUe0 );
+};
+
+/** Handles MBACAL parity err if present, else handles MBA1 MBSECC Memory UE */
+actionclass mba1MemoryUe
+{
+    try ( funccall("handleSingleMbaCalParityErr1"), analyzeFetchUe1 );
 };
 
 /** Clear MBS SecondaryBits and calloutDmiBusTh1UE */

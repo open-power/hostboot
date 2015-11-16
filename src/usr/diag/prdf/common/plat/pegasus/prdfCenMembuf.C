@@ -1172,6 +1172,77 @@ int32_t handleMcsChnlCs( ExtensibleChip * i_membChip,
 //------------------------------------------------------------------------------
 
 /**
+ * @brief Handles MBACALFIR RCD Parity error bits, if they exist on a single mba
+ *
+ * @param  i_membChip   The Centaur chip.
+ * @param  i_sc         ServiceDataCollector.
+ * @param  i_mbaPos     The MBA position.
+ *
+ * @return SUCCESS if MBACALFIR Parity error is present and properly
+ *         handled, FAIL otherwise.
+ */
+int32_t handleSingleMbaCalParityErr( ExtensibleChip * i_membChip,
+                                     STEP_CODE_DATA_STRUCT & i_sc,
+                                     uint32_t i_mbaPos)
+{
+    #define PRDF_FUNC "[handleSingleMbaCalParityErr] "
+
+    int32_t l_rc = SUCCESS;
+
+    CenMembufDataBundle * mbdb = getMembufDataBundle( i_membChip );
+
+    do
+    {
+        ExtensibleChip * mbaChip = mbdb->getMbaChip(i_mbaPos);
+        if ( NULL == mbaChip )
+        {
+            l_rc = FAIL;
+            break;
+        }
+
+        SCAN_COMM_REGISTER_CLASS * mbaCalFir =
+            mbaChip->getRegister("MBACALFIR");
+        SCAN_COMM_REGISTER_CLASS * mbaCalMask =
+            mbaChip->getRegister("MBACALFIR_MASK");
+
+        l_rc  = mbaCalFir->Read();
+        l_rc |= mbaCalMask->Read();
+
+        if ( SUCCESS != l_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "MBACALFIR/MBACALFIR_MASK read failed for"
+                    "0x%08x", mbaChip->GetId());
+            break;
+        }
+
+        // If any of the MBACALFIR parity error bits are set, we will
+        // analyze the MBA.
+        // bits 4 and 7 are parity error bits
+        bool bit4  = mbaCalFir->IsBitSet(4);
+        bool mask4 = mbaCalMask->IsBitSet(4);
+
+        bool bit7  = mbaCalFir->IsBitSet(7);
+        bool mask7 = mbaCalMask->IsBitSet(7);
+
+        if ( ( bit4 && !mask4 ) || ( bit7 && !mask7 ) )
+        {
+            l_rc = mbaChip->Analyze( i_sc,
+                    i_sc.service_data->getSecondaryAttnType() );
+            if ( SUCCESS == l_rc ) break;
+        }
+
+        l_rc = FAIL;
+
+    }while(0);
+
+    return l_rc;
+    #undef PRDF_FUNC
+
+} PRDF_PLUGIN_DEFINE( Membuf, handleSingleMbaCalParityErr );
+
+//------------------------------------------------------------------------------
+
+/**
  * @brief Handles MBACALFIR RCD Parity error bits, if they exist.
  *
  * @param  i_membChip   The Centaur chip.
@@ -1192,53 +1263,15 @@ int32_t handleMbaCalParityErr( ExtensibleChip * i_membChip,
 
     int32_t l_rc;
 
-    CenMembufDataBundle * mbdb = getMembufDataBundle( i_membChip );
-
     // We will loop through to check all MBA if necessary until one is found
     // with parity error bits set
     for ( uint32_t i = 0; i < MAX_MBA_PER_MEMBUF; i++)
     {
         l_rc = SUCCESS;
 
-        ExtensibleChip * mbaChip = mbdb->getMbaChip(i);
-        if ( NULL == mbaChip )
-        {
-            l_rc = FAIL;
-            continue;
-        }
+        l_rc = handleSingleMbaCalParityErr( i_membChip, i_sc, i );
 
-        SCAN_COMM_REGISTER_CLASS * mbaCalFir =
-                                    mbaChip->getRegister("MBACALFIR");
-        SCAN_COMM_REGISTER_CLASS * mbaCalMask =
-                                    mbaChip->getRegister("MBACALFIR_MASK");
-
-        l_rc  = mbaCalFir->Read();
-        l_rc |= mbaCalMask->Read();
-
-        if ( SUCCESS != l_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "MBACALFIR/MBACALFIR_MASK read failed for"
-                      "0x%08x", mbaChip->GetId());
-            continue;
-        }
-
-        // If any of the MBACALFIR parity error bits are set, we will
-        // analyze the MBA.
-        // bits 4 and 7 are parity error bits
-        bool bit4  = mbaCalFir->IsBitSet(4);
-        bool mask4 = mbaCalMask->IsBitSet(4);
-
-        bool bit7  = mbaCalFir->IsBitSet(7);
-        bool mask7 = mbaCalMask->IsBitSet(7);
-
-        if ( ( bit4 && !mask4 ) || ( bit7 && !mask7 ) )
-        {
-            l_rc = mbaChip->Analyze( i_sc,
-                        i_sc.service_data->getSecondaryAttnType() );
-            if ( SUCCESS == l_rc ) break;
-        }
-
-        l_rc = FAIL;
+        if ( SUCCESS == l_rc ) break;
     }
 
     return l_rc;
@@ -1417,6 +1450,18 @@ PLUGIN_MEMORY_MPE_ERROR( 1, 6 )
 PLUGIN_MEMORY_MPE_ERROR( 1, 7 )
 
 #undef PLUGIN_MEMORY_MPE_ERROR
+
+// Define the plugins for RCD parity error memory UE side-effects
+#define PLUGIN_RCD_PARITY_UE_SIDEEFFECTS( MBA ) \
+int32_t handleSingleMbaCalParityErr##MBA( ExtensibleChip * i_membChip, \
+                                          STEP_CODE_DATA_STRUCT & i_sc) \
+{ \
+    return handleSingleMbaCalParityErr( i_membChip, i_sc, MBA ); \
+} \
+PRDF_PLUGIN_DEFINE( Membuf, handleSingleMbaCalParityErr##MBA );
+
+PLUGIN_RCD_PARITY_UE_SIDEEFFECTS ( 0 )
+PLUGIN_RCD_PARITY_UE_SIDEEFFECTS ( 1 )
 
 //------------------------------------------------------------------------------
 
