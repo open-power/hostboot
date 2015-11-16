@@ -181,7 +181,9 @@
 <attribute>
   <id>ATTR_SYS_FORCE_ALL_CORES</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Indicates that SBE should init all cores</description>
+  <description>Indicate that p9_sbe_select_ex should force selection to ALL good
+  EX chiplets having good cores even if only a single EX chiplet mode is executed.
+  </description>
   <valueType>uint8</valueType>
   <enum>FALSE = 0x0,TRUE = 0x1</enum>
   <persistRuntime/>
@@ -499,6 +501,29 @@
   <valueType>uint8</valueType>
   <persistRuntime/>
   <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_MASTER_CORE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Indicates the master boot core chiplet selected by p9_sbe_select_ex.
+  </description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_MASTER_EX</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Indicates the EX targert associated with the master boot core selected
+  by p9_sbe_select_ex.
+  </description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
 </attribute>
 
 </attributes>
