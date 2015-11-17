@@ -1983,6 +1983,10 @@
     <attribute><id>TEST_MIN_STRING</id><default>Z</default></attribute>
     <attribute><id>TEST_MAX_STRING</id></attribute>
     <attribute><id>TEST_NO_DEFAULT_STRING</id></attribute>
+    <attribute><id>SYNC_BETWEEN_STEPS</id></attribute>
+    <attribute><id>DO_ABUS_DECONFIG</id></attribute>
+    <attribute><id>PLCK_IPL_ATTR_OVERRIDES_EXIST</id></attribute>
+    <attribute><id>PAYLOAD_IN_MIRROR_MEM</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->
@@ -2088,6 +2092,7 @@
     <attribute><id>PROC_PCIE_IOP_TX_FFE_GEN2</id></attribute>
     <attribute><id>PROC_PCIE_IOP_CONFIG</id></attribute>
     <attribute><id>PROC_PCIE_PHB_ACTIVE</id></attribute>
+    <attribute><id>XSCOM_BASE_ADDRESS</id></attribute>
 </targetType>
 
 <!-- chip-processor-nimbus -->
