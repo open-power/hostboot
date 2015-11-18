@@ -80,20 +80,6 @@ enum
 
 //------------------------------------------------------------------------------
 ///
-/// @brief l2_flush: Utility subroutine to start flush and check the status
-/// @param[in]  i_target Ex target
-/// @param[in]  i_purgeData Structure having values for MEM, CGC, BANK
-///                         passed by the user
-/// @return  FAPI2_RC_SUCCESS if purge operation was started,
-///          RC_P9_L2_FLUSH_PURGE_REQ_OUTSTANDING if a prior purge
-///          operation has not yet completed
-///          else FAPI getscom/putscom return code for failing operation
-//------------------------------------------------------------------------------
-fapi2::ReturnCode l2_flush(const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
-                           const p9core::purgeData_t& i_purgeData);
-
-//------------------------------------------------------------------------------
-///
 /// @brief l2_flush_start: Utility subroutine to initiate L2 cache flush
 ///                        via purge engine
 /// @param[in]  i_target Ex target
@@ -235,8 +221,9 @@ fapi_try_exit:
 //------------------------------------------------------------------------------
 // Hardware Procedure
 //------------------------------------------------------------------------------
-fapi2::ReturnCode l2_flush(const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
-                           const p9core::purgeData_t& i_purgeData)
+fapi2::ReturnCode p9_l2_flush(const fapi2::Target < fapi2::TARGET_TYPE_EX >
+                              & i_target,
+                              const p9core::purgeData_t& i_purgeData)
 {
     FAPI_DBG("i_purgeData.iv_cmdType: 0x%x", i_purgeData.iv_cmdType);
     FAPI_DBG("i_purgeData.iv_cmdMem : 0x%x", i_purgeData.iv_cmdMem);
@@ -278,28 +265,3 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-fapi2::ReturnCode p9_l2_flush(const fapi2::Target < fapi2::TARGET_TYPE_CORE
-                              | fapi2::TARGET_TYPE_EX >
-                              &i_target,
-                              const p9core::purgeData_t& i_purgeData)
-{
-    FAPI_IMP("p9_l2_flush, Core|Ex 0x%lx: Enter", i_target.get());
-
-    fapi2::Target<fapi2::TARGET_TYPE_EX> l_exTarget;
-
-    if(i_target.getType() & fapi2::TARGET_TYPE_CORE)
-    {
-        l_exTarget = i_target.getParent<fapi2::TARGET_TYPE_EX>();
-    }
-    else
-    {
-        // We got an Ex target.
-        l_exTarget = i_target.get();
-    }
-
-    FAPI_TRY(l2_flush(l_exTarget, i_purgeData));
-
-fapi_try_exit:
-    FAPI_IMP("p9_l2_flush, Core: Exit");
-    return fapi2::current_err;
-}
