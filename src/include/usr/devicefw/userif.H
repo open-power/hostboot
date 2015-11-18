@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -54,8 +54,8 @@ namespace DeviceFW
         PRESENT,
         FSI,
         SPD,
-        MVPD,
-        CVPD,
+        MVPD,      // Module (processor) VPD
+        CVPD,      // Centaur (memory buffer) VPD
         SCAN,
         EEPROM,
         GPIO,
@@ -65,6 +65,7 @@ namespace DeviceFW
         TPM,
         SIO,
         AHB_SIO,
+        DVPD,      // Direct access memory VPD
 
         LAST_ACCESS_TYPE,
     };
@@ -191,6 +192,28 @@ namespace DeviceFW
             static_cast<uint64_t>(( i_keyword )),\
             static_cast<uint64_t>(( i_location ))
 
+    /**
+     * Construct the device addressing parameters for the DVPD (Direct access
+     * memory VPD) device ops.
+     * @param[in] i_record - The enumeration of the DVPD record to access.
+     * @param[in] i_keyword - The enumeration of the DVPD keyword, located
+     *      within the i_record Record to access.
+     */
+    #define DEVICE_DVPD_ADDRESS( i_record, i_keyword )\
+        DEVICE_DVPD_FORCE_ADDRESS( i_record, i_keyword, VPD::AUTOSELECT )
+
+    /**
+     * Construct the device addressing parameters for the DVPD device ops.
+     * @param[in] i_record - The enumeration of the DVPD record to access.
+     * @param[in] i_keyword - The enumeration of the DVPD keyword, located
+     *      within the i_record Record to access.
+     * @param[in] i_location - The location of the data (PNOR/SEEPROM)
+            see vpd_if.H
+     */
+    #define DEVICE_DVPD_FORCE_ADDRESS( i_record, i_keyword, i_location )\
+        DeviceFW::DVPD, static_cast<uint64_t>(( i_record )),\
+            static_cast<uint64_t>(( i_keyword )),\
+            static_cast<uint64_t>(( i_location ))
     /**
      * Construct the device addressing parameters for the SCAN device ops.
      * @param[in] i_ring - The ring address to scan

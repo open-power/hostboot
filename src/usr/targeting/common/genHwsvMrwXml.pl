@@ -3758,7 +3758,7 @@ sub generate_mcs
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}mcs$mcs</id>
-    <type>unit-mcs-power9</type>
+    <type>unit-mcs-$CHIPNAME</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -3787,7 +3787,8 @@ sub generate_mcs
     <attribute>
         <id>EI_BUS_TX_MSBSWAP</id>
         <default>$msb_swap</default>
-    </attribute>";
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>";
 
     addPervasiveParentLink($sys,$node,$proc,$mcs,"mcs");
 

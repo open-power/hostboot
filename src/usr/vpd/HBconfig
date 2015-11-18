@@ -1,37 +1,37 @@
-config CVPD_READ_FROM_PNOR
+config MEMVPD_READ_FROM_PNOR
     default y
     help
-        Read Centaur VPD data from PNOR cache
+        Read memory VPD data from PNOR cache
 
-config CVPD_READ_FROM_HW
+config MEMVPD_READ_FROM_HW
     default n
     depends on !PALMETTO_PASS1
     help
-        Read Centaur VPD data from HW resources
+        Read memory VPD data from HW resources
 
-config CVPD_READ
+config MEMVPD_READ
     default y
-    depends on CVPD_READ_FROM_PNOR || CVPD_READ_FROM_HW
+    depends on MEMVPD_READ_FROM_PNOR || MEMVPD_READ_FROM_HW
     help
-        Ensure at least one of the CVPD READs are enabled
+        Ensure at least one of the MEMVPD READs are enabled
 
-config CVPD_WRITE_TO_PNOR
-    default y if CVPD_READ_FROM_PNOR
-    depends on CVPD_READ_FROM_PNOR
+config MEMVPD_WRITE_TO_PNOR
+    default y if MEMVPD_READ_FROM_PNOR
+    depends on MEMVPD_READ_FROM_PNOR
     help
-        Write Centaur VPD data to PNOR cache
+        Write memory VPD data to PNOR cache
 
-config CVPD_WRITE_TO_HW
-    default y if CVPD_READ_FROM_HW
-    depends on !PALMETTO_PASS1 && CVPD_READ_FROM_HW
+config MEMVPD_WRITE_TO_HW
+    default y if MEMVPD_READ_FROM_HW
+    depends on !PALMETTO_PASS1 && MEMVPD_READ_FROM_HW
     help
-        Write Centaur VPD data to HW resources
+        Write memory VPD data to HW resources
 
-config CVPD_WRITE
+config MEMVPD_WRITE
     default y
-    depends on CVPD_WRITE_TO_PNOR || CVPD_WRITE_TO_HW
+    depends on MEMVPD_WRITE_TO_PNOR || MEMVPD_WRITE_TO_HW
     help
-        Ensure at least one of the CVPD WRITEs are enabled
+        Ensure at least one of the MEMVPD WRITEs are enabled
 
 config PVPD_READ_FROM_PNOR
     default n
@@ -45,7 +45,7 @@ config PVPD_READ_FROM_HW
 
 config PVPD_WRITE_TO_PNOR
     default y if PVPD_READ_FROM_PNOR
-    depends on PVPD_READ_FROM_PNOR && CVPD_WRITE_TO_PNOR
+    depends on PVPD_READ_FROM_PNOR && MEMVPD_WRITE_TO_PNOR
     help
         Write Planar VPD data to PNOR cache
 
@@ -122,8 +122,8 @@ config DJVPD_WRITE
         Ensure at least one of the DJVPD WRITEs are enabled
 
 config HAVE_MBVPD
-    default y if CVPD_READ_FROM_PNOR || CVPD_READ_FROM_HW
-    depends on (CVPD_READ_FROM_PNOR || CVPD_READ_FROM_HW) && !PALMETTO_PASS1
+    default y if MEMVPD_READ_FROM_PNOR || MEMVPD_READ_FROM_HW
+    depends on (MEMVPD_READ_FROM_PNOR || MEMVPD_READ_FROM_HW) && !PALMETTO_PASS1
     help
         Have MemBuff/Centaur VPD, PNOR or HW
 

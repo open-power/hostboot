@@ -215,7 +215,7 @@ errlHndl_t discoverTargets()
 
     // Assumptions and actions:
     // CLASS_SYS (exactly 1) - mark as present
-    // CLASS_ENC, TYPE_PROC, TYPE_MEMBUF, TYPE_DIMM
+    // CLASS_ENC, TYPE_PROC, TYPE_MCS, TYPE_MEMBUF, TYPE_DIMM
     //     (ALL require hardware query) - call platPresenceDetect
     //  \->children: CLASS_* (NONE require hardware query) - mark as present
     do
@@ -236,8 +236,10 @@ errlHndl_t discoverTargets()
         PredicateCTM predEnc(CLASS_ENC);
         PredicateCTM predChip(CLASS_CHIP);
         PredicateCTM predDimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
+        PredicateCTM predMcs(CLASS_UNIT, TYPE_MCS);
         PredicatePostfixExpr checkExpr;
-        checkExpr.push(&predChip).push(&predDimm).Or().push(&predEnc).Or();
+        checkExpr.push(&predChip).push(&predDimm).Or().push(&predEnc).Or().
+                  push(&predMcs).Or();
 
         TargetHandleList pCheckPres;
         targetService().getAssociated( pCheckPres, pSys,
@@ -456,8 +458,9 @@ errlHndl_t discoverTargets()
         }
 #endif
 
-        // call invokePresentByAssoc() to obtain functional MCS's, MEMBUFs, and
-        // DIMM's, call algorithm function presentByAssoc() to determine
+        // call invokePresentByAssoc() to obtain functional MCSs, MEMBUFs, and
+        // DIMMs for non-direct memory or MCSs, MCAs, and DIMMs for direct
+        // memory. Call algorithm function presentByAssoc() to determine
         // targets that need to be deconfigured
         invokePresentByAssoc();
 
@@ -1416,7 +1419,8 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
         HWAS_DBG( "checkMinimumHardware: %d functional dimms",
                   l_dimms.size());
 
-// @todo RTC:142535 Add DIMM targets to MRW targeting script
+// @todo RTC:149770 Once ZZ supports DIMMs, add DIMMs back in min hdw check.
+// It works for stand alone.
 #if (0)
         if (l_dimms.empty())
         {
@@ -1468,69 +1472,140 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
             errlCommit(l_errl, HWAS_COMP_ID);
             // errl is now NULL
         } // if no dimms
+#endif
+        // There needs to be either functional MCS/MCAs (NIMBUS) or MCS/MBAs
+        // (CUMULUS). Check for MCAs first.
+        PredicateCTM l_mca(CLASS_UNIT, TYPE_MCA);
 
-        // check for functional membufs
-        PredicateCTM l_membuf(CLASS_CHIP, TYPE_MEMBUF);
+        TargetHandleList l_presMcaTargetList;
+        PredicatePostfixExpr l_checkExprPresMca;
+        l_checkExprPresMca.push(&l_mca).push(&l_present).And();
+        targetService().getAssociated( l_presMcaTargetList, pTop,
+                TargetService::CHILD, TargetService::ALL,
+                &l_checkExprPresMca);
+        // If any MCAs are present, then some must be functional
+        if (!l_presMcaTargetList.empty())
+        {
+            TargetHandleList l_funcMcaTargetList;
+            PredicatePostfixExpr l_checkExprPresMca;
+            l_checkExprPresMca.push(&l_mca).push(&l_functional).And();
+            targetService().getAssociated( l_funcMcaTargetList, pTop,
+                TargetService::CHILD, TargetService::ALL,
+                &l_checkExprPresMca);
 
-        TargetHandleList l_funcMembufTargetList;
-        PredicatePostfixExpr l_checkExprFunctionalMembufs;
-        l_checkExprFunctionalMembufs.push(&l_membuf).push(&l_functional).And();
-        targetService().getAssociated( l_funcMembufTargetList, pTop,
+            HWAS_DBG( "checkMinimumHardware: %d functional MCAs",
+                l_funcMcaTargetList.size());
+
+            if (l_funcMcaTargetList.empty())
+            {
+                 HWAS_ERR( "Insufficient hardware to continue IPL"
+                           " (func membufs)");
+                if(o_bootable)
+                {
+                    *o_bootable = false;
+                    break;
+                }
+                uint32_t mca_present = l_presMcaTargetList.size();
+
+                /*@
+                 * @errortype
+                 * @severity           ERRL_SEV_UNRECOVERABLE
+                 * @moduleid           MOD_CHECK_MIN_HW
+                 * @reasoncode         RC_SYSAVAIL_NO_MCAS_FUNC
+                 * @devdesc            checkMinimumHardware found no
+                 *                     functional membufs
+                 * @custdesc           A problem occurred during the IPL of the
+                 *                     system: Found no functional dimm cards.
+                 * @userdata1[00:31]   HUID of node
+                 * @userdata2[00:31]   number of present nonfunctional membufs
+                 */
+                const uint64_t userdata1 =
+                    (static_cast<uint64_t>(get_huid(pTop)) << 32);
+                const uint64_t userdata2 =
+                    (static_cast<uint64_t>(mca_present) << 32);
+                l_errl = hwasError(ERRL_SEV_UNRECOVERABLE,
+                             MOD_CHECK_MIN_HW,
+                             RC_SYSAVAIL_NO_MCAS_FUNC,
+                             userdata1, userdata2);
+
+                //  call out the procedure to find the deconfigured part.
+                hwasErrorAddProcedureCallout( l_errl,
+                             EPUB_PRC_FIND_DECONFIGURED_PART,
+                             SRCI_PRIORITY_HIGH );
+
+                //  if we already have an error, link this one to the earlier;
+                //  if not, set the common plid
+                hwasErrorUpdatePlid( l_errl, l_commonPlid );
+                errlCommit(l_errl, HWAS_COMP_ID);
+                // errl is now NULL
+            }
+        }
+        else  // there were no MCAa. There must be functional membufs
+        {
+            PredicateCTM l_membuf(CLASS_CHIP, TYPE_MEMBUF);
+
+            TargetHandleList l_funcMembufTargetList;
+            PredicatePostfixExpr l_checkExprFunctionalMembufs;
+            l_checkExprFunctionalMembufs.push(&l_membuf).
+                                                      push(&l_functional).And();
+            targetService().getAssociated( l_funcMembufTargetList, pTop,
                 TargetService::CHILD, TargetService::ALL,
                 &l_checkExprFunctionalMembufs);
 
-        HWAS_DBG( "checkMinimumHardware: %d functional membufs",
-            l_funcMembufTargetList.size());
+            HWAS_DBG( "checkMinimumHardware: %d functional membufs",
+                l_funcMembufTargetList.size());
 
-        if (l_funcMembufTargetList.empty())
-        {
-             HWAS_ERR( "Insufficient hardware to continue IPL (func membufs)");
-             if(o_bootable)
-             {
-                *o_bootable = false;
-                break;
-             }
-             TargetHandleList l_presentMembufTargetList;
-             PredicatePostfixExpr l_checkExprPresentMembufs;
-             l_checkExprPresentMembufs.push(&l_membuf).push(&l_present).And();
-             targetService().getAssociated( l_presentMembufTargetList, pTop,
+            if (l_funcMembufTargetList.empty())
+            {
+                 HWAS_ERR( "Insufficient hardware to continue IPL"
+                           " (func membufs)");
+                if(o_bootable)
+                {
+                    *o_bootable = false;
+                    break;
+                }
+                TargetHandleList l_presentMembufTargetList;
+                PredicatePostfixExpr l_checkExprPresentMembufs;
+                l_checkExprPresentMembufs.push(&l_membuf).
+                                                      push(&l_present).And();
+                targetService().getAssociated( l_presentMembufTargetList, pTop,
                 TargetService::CHILD, TargetService::ALL,
                 &l_checkExprPresentMembufs);
-             uint32_t membufs_present = l_presentMembufTargetList.size();
+                uint32_t membufs_present = l_presentMembufTargetList.size();
 
-             /*@
-              * @errortype
-              * @severity           ERRL_SEV_UNRECOVERABLE
-              * @moduleid           MOD_CHECK_MIN_HW
-              * @reasoncode         RC_SYSAVAIL_NO_MEMBUFS_FUNC
-              * @devdesc            checkMinimumHardware found no
-              *                     functional membufs
-              * @custdesc           A problem occurred during the IPL of the
-              *                     system: Found no functional dimm cards.
-              * @userdata1[00:31]   HUID of node
-              * @userdata2[00:31]   number of present nonfunctional membufs
-              */
-             const uint64_t userdata1 =
-                 (static_cast<uint64_t>(get_huid(pTop)) << 32);
-             const uint64_t userdata2 =
-                 (static_cast<uint64_t>(membufs_present) << 32);
-             l_errl = hwasError(ERRL_SEV_UNRECOVERABLE,
+                /*@
+                 * @errortype
+                 * @severity           ERRL_SEV_UNRECOVERABLE
+                 * @moduleid           MOD_CHECK_MIN_HW
+                 * @reasoncode         RC_SYSAVAIL_NO_MEMBUFS_FUNC
+                 * @devdesc            checkMinimumHardware found no
+                 *                     functional membufs
+                 * @custdesc           A problem occurred during the IPL of the
+                 *                     system: Found no functional dimm cards.
+                 * @userdata1[00:31]   HUID of node
+                 * @userdata2[00:31]   number of present nonfunctional membufs
+                 */
+                const uint64_t userdata1 =
+                    (static_cast<uint64_t>(get_huid(pTop)) << 32);
+                const uint64_t userdata2 =
+                    (static_cast<uint64_t>(membufs_present) << 32);
+                l_errl = hwasError(ERRL_SEV_UNRECOVERABLE,
                              MOD_CHECK_MIN_HW,
                              RC_SYSAVAIL_NO_MEMBUFS_FUNC,
                              userdata1, userdata2);
 
-             //  call out the procedure to find the deconfigured part.
-             hwasErrorAddProcedureCallout( l_errl,
+                //  call out the procedure to find the deconfigured part.
+                hwasErrorAddProcedureCallout( l_errl,
                              EPUB_PRC_FIND_DECONFIGURED_PART,
                              SRCI_PRIORITY_HIGH );
 
-             //  if we already have an error, link this one to the earlier;
-             //  if not, set the common plid
-             hwasErrorUpdatePlid( l_errl, l_commonPlid );
-             errlCommit(l_errl, HWAS_COMP_ID);
-             // errl is now NULL
+                //  if we already have an error, link this one to the earlier;
+                //  if not, set the common plid
+                hwasErrorUpdatePlid( l_errl, l_commonPlid );
+                errlCommit(l_errl, HWAS_COMP_ID);
+                // errl is now NULL
+            }
         }
-#endif
         //  ------------------------------------------------------------
         //  Check for Mirrored memory -
         //  If the user requests mirrored memory and we do not have it,
@@ -1651,7 +1726,7 @@ void invokePresentByAssoc()
     // make one list
     TargetHandleList l_funcTargetList;
 
-    // get the functional mcss
+    // get the functional MCSs
     TargetHandleList l_funcMCSTargetList;
     getAllChiplets(l_funcMCSTargetList, TYPE_MCS, true );
     l_funcTargetList.insert(l_funcTargetList.begin(),
@@ -1671,6 +1746,7 @@ void invokePresentByAssoc()
 #endif
 
     // get the functional membufs
+    // note: do not expect membufs for NIMBUS direct memory attach
     TargetHandleList l_funcMembufTargetList;
     getAllChips(l_funcMembufTargetList, TYPE_MEMBUF, true );
     l_funcTargetList.insert(l_funcTargetList.begin(),
@@ -1690,6 +1766,7 @@ void invokePresentByAssoc()
 #endif
 
     // get the functional mbas
+    // note: do not expect mbas for NIMBUS direct memory attach
     TargetHandleList l_funcMBATargetList;
     getAllChiplets(l_funcMBATargetList, TYPE_MBA, true );
     l_funcTargetList.insert(l_funcTargetList.begin(),
@@ -1708,6 +1785,25 @@ void invokePresentByAssoc()
     }
 #endif
 
+    // get the functional MCAs
+    // note: MCAs are expected for NIMBUS direct memory attach
+    TargetHandleList l_funcMcaTargetList;
+    getAllChiplets(l_funcMcaTargetList, TYPE_MCA, true );
+    l_funcTargetList.insert(l_funcTargetList.begin(),
+                               l_funcMcaTargetList.begin(),
+                               l_funcMcaTargetList.end());
+
+// If VPO, dump targets (MCA) for verification & debug purposes
+#ifdef CONFIG_VPO_COMPILE
+    HWAS_INF("invokePresentByAssocDA(): MCA targets:");
+    for (TargetHandleList::const_iterator
+            l_MCA_Itr = l_funcMcaTargetList.begin();
+            l_MCA_Itr != l_funcMcaTargetList.end();
+            l_MCA_Itr++)
+    {
+        HWAS_INF("   MCA: HUID %.8x", TARGETING::get_huid(*l_MCA_Itr));
+    }
+#endif
     // get the functional dimms
     TargetHandleList l_funcDIMMTargetList;
     getAllLogicalCards(l_funcDIMMTargetList, TYPE_DIMM, true );
@@ -1767,6 +1863,11 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
 
     // Sort entire vector by affinity path. This provides the algorithm with
     // an ordered vector of targets, making it easy to check if:
+    // for direct attach memory -
+    //   MCS has child MCA
+    //   MCA has child DIMM and parent MCS
+    //   DIMM has parent MCA.
+    // for non direct attach memory -
     //   MCS has child MEMBUF
     //   MEMBUF has parent MCS and child MBA
     //   MBA has child DIMM and parnent MEMBUF
@@ -1780,6 +1881,7 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
     size_t l_MCSIndex = __INT_MAX__;
     size_t l_MEMBUFIndex = __INT_MAX__;
     size_t l_MBAIndex = __INT_MAX__;
+    size_t l_MCAIndex = __INT_MAX__;
     size_t i = 0;
 
     // Perform presentByAssoc algorithm
@@ -1807,16 +1909,16 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
         {
         case TYPE_MCS:
         {
-            // No Child MEMBUFs
-            // If next is not a MEMBUF sharing the same MCS, deconfig MCS
+            // No Child MEMBUFs or MCAs
+            // If next is not a MEMBUF or MCA sharing the same MCS, deconfig MCS
             if ( (l_nextTargetInfo == NULL) ||
-                 (l_nextTargetInfo->type != TYPE_MEMBUF) ||
+                 ( (l_nextTargetInfo->type != TYPE_MEMBUF) &&
+                   (l_nextTargetInfo->type != TYPE_MCA) ) ||
                  !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo) )
             {
-                // Disable MCS - NO_CHILD_MEMBUF
+                // Disable MCS - NO_CHILD_MEMBUF_OR_MCA
                 l_curTargetInfo.reason =
-                        DeconfigGard::DECONFIGURED_BY_NO_CHILD_MEMBUF;
-
+                        DeconfigGard::DECONFIGURED_BY_NO_CHILD_MEMBUF_OR_MCA;
                 // Add target to Deconfig vector to be deconfigured later
                 o_targToDeconfig.push_back(l_curTargetInfo);
                 // Remove target from funcTargets
@@ -1930,17 +2032,72 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
             break;
         } // MBA
 
+        case TYPE_MCA:
+        {
+// @todo RTC:149770 Once ZZ supports DIMMs, add DIMMs back in min hdw check.
+// It works for stand alone.
+#if (0)
+            // No Child DIMMs
+            // If next is not a DIMM sharing the same MCA, deconfig MCS
+            if ( (l_nextTargetInfo == NULL) ||
+                 (l_nextTargetInfo->type != TYPE_DIMM) ||
+                 !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo) )
+            {
+                // Disable MCS - NO_CHILD_DIMM
+                l_curTargetInfo.reason =
+                        DeconfigGard::DECONFIGURED_BY_NO_CHILD_DIMM;
+            }
+            // No Parent MCS
+            // If MCA doesn't share the same MCS as MCSIndex, deconfig MCA
+            else
+#endif // the new line can be removed
+            if ( (l_MCSIndex == __INT_MAX__) ||
+                    !isSameSubPath(l_curTargetInfo, io_funcTargets[l_MCSIndex]))
+            {
+                // Disable MCA - NO_PARENT_MCS
+                l_curTargetInfo.reason =
+                        DeconfigGard::DECONFIGURED_BY_NO_PARENT_MCS;
+            }
+            // Update MCA Index
+            else
+            {
+                l_MCAIndex = i;
+                i++;
+                continue;
+            }
+
+            // Add target to deconfig vector to be deconfigured later
+            o_targToDeconfig.push_back(l_curTargetInfo);
+            // Remove target from funcTargets
+            io_funcTargets.erase(it);
+
+            // Backtrack to last MCS
+            if ( l_MCSIndex != __INT_MAX__ )
+            {
+                i = l_MCSIndex;
+            }
+            // Backtrack to beginning if no MCS has been seen yet
+            else
+            {
+                i = 0;
+            }
+            break;
+        } // MCS
+
         case TYPE_DIMM:
         {
-            // No Parent MBA
+            // No Parent MBA or MCA
             // If DIMM does not share the same MBA as MBAIndex,
+            // or if DIMM does not share the same MCA as MCAIndex,
             // deconfig DIMM
-            if ( (l_MBAIndex == __INT_MAX__) ||
-                 !isSameSubPath(l_curTargetInfo, io_funcTargets[l_MBAIndex]))
+            if ( ((l_MBAIndex == __INT_MAX__) ||
+                 !isSameSubPath(l_curTargetInfo, io_funcTargets[l_MBAIndex])) &&
+                 ((l_MCAIndex == __INT_MAX__) ||
+                 !isSameSubPath(l_curTargetInfo, io_funcTargets[l_MCAIndex])) )
             {
                 // Disable DIMM
                 l_curTargetInfo.reason =
-                        DeconfigGard::DECONFIGURED_BY_NO_PARENT_MBA;
+                        DeconfigGard::DECONFIGURED_BY_NO_PARENT_MBA_OR_MCA;
 
                 // Add target to deconfig vector to be deconfigured later
                 o_targToDeconfig.push_back(l_curTargetInfo);
@@ -1951,6 +2108,11 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
                 if ( l_MBAIndex != __INT_MAX__ )
                 {
                     i = l_MBAIndex;
+                }
+                // Backtrack to last MCA
+                else if ( l_MCAIndex != __INT_MAX__)
+                {
+                    i = l_MCSIndex;
                 }
                 // Backtrack to last MEMBUF if no MBA has been seen yet
                 else if ( l_MEMBUFIndex != __INT_MAX__)

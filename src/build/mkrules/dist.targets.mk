@@ -65,6 +65,7 @@ COPY_FILES = \
     img/dimmspd.dat:vpo \
     img/procmvpd.dat:vpo \
     img/cvpd.dat:vpo \
+    img/dvpd.dat:vpo \
     obj/genfiles/fapiAttrInfo.csv:vpo \
     obj/genfiles/fapiAttrEnumInfo.csv:vpo \
     obj/genfiles/targAttrInfo.csv:vpo \
@@ -193,6 +194,7 @@ simics.tar_CONTENTS = \
     img/procmvpd_ven.dat \
     img/procmvpd_p9n.dat \
     img/cvpd.dat \
+    img/dvpd.dat \
 #@TODO RTC:142088
 #   obj/genfiles/fapiAttrInfo.csv \
     obj/genfiles/fapiAttrEnumInfo.csv \

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2015
+# Contributors Listed Below - COPYRIGHT 2012,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -32,9 +32,18 @@ import shlex
 toolLoc = os.environ.get("HB_TOOLPATH");
 thisSys = os.environ.get("HB_MACHINE").upper();
 numProcs = os.environ.get( "NUM_PROCS");
-#@TODO RTC 128112
-numCentaurPerProc = "0"; # os.environ.get( "GFW_P9_%s_CENTAURS_PER_PROC" % thisSys );
-cmd = toolLoc + "/hb-pnor-vpd-preload.pl --numProcs " + numProcs + " --numCentPerProc " + numCentaurPerProc + " --machine " + thisSys + " --dataPath " + toolLoc
+numCentaurPerProcParm = "";
+numCentaurPerProc = "0";
+if os.environ.has_key( "GFW_P9_%s_CENTAURS_PER_PROC" % thisSys ):
+    numCentaurPerProc=os.environ.get( "GFW_P9_%s_CENTAURS_PER_PROC" % thisSys );
+    numCentaurPerProcParm=" --numCentPerProc " + numCentaurPerProc;
+pass
+procChipTypeParm = "";
+if os.environ.has_key('HB_PROC_CHIP_TYPE'):
+    procChipType = os.environ.get('HB_PROC_CHIP_TYPE');
+    procChipTypeParm=" --procChipType " + procChipType;
+pass
+cmd = toolLoc + "/hb-pnor-vpd-preload.pl --numProcs " + numProcs + numCentaurPerProcParm + procChipTypeParm + " --machine " + thisSys + " --dataPath " + toolLoc
 print "Generate PNOR VPD for " + numProcs + " processor(s), and " + numCentaurPerProc + " Centaur(s) per Processor.";
 args = shlex.split( cmd );
 subprocess.call( args );

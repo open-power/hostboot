@@ -5,11 +5,16 @@
 ($hb_masterproc).proc_fsi2host_mbox->responder_enable=1
 
 # Preload VPD in PNOR
+# Pass processor chip type. All proc chip types should be the same.
+    if (get-object-list p9_proc) {
+        $procChipType=(get-object-list p9_proc)[0]->chip_type
+        python "os.environ['HB_PROC_CHIP_TYPE'] = \""+$procChipType+"\""
+    }
     try {
         run-python-file (lookup-file hbfw/hb-pnor-vpd-preload.py)
             ($hb_pnor).sfc_master_mem.load-file ./sysmvpd.dat.ecc 0x1C5000
             ($hb_pnor).sfc_master_mem.load-file ./sysspd.dat.ecc 0x17D000
-            ($hb_pnor).sfc_master_mem.load-file ./syscvpd.dat.ecc 0x255000
+            ($hb_pnor).sfc_master_mem.load-file ./sysmemvpd.dat.ecc 0x255000
     } except { echo "ERROR: Failed to preload VPD into PNOR." }
 
 #Write the PNOR MMIO addr into Scratch 2, 0x283A

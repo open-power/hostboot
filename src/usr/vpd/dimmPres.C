@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -43,6 +43,7 @@
 #include <vpd/spdenums.H>
 #include <config.h>
 #include <initservice/initserviceif.H>
+#include <fsi/fsiif.H>
 
 #include "spd.H"
 
@@ -90,16 +91,15 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
     bool present = false;
     size_t presentSz = sizeof(present);
 
-    TRACSSCOMP( g_trac_spd,
-                ENTER_MRK"dimmPresenceDetect()" );
-
+    TRACSSCOMP( g_trac_spd, ENTER_MRK"dimmPresenceDetect() "
+                "DIMM HUID 0x%X", TARGETING::get_huid(i_target));
     do
     {
         // Check to be sure that the buffer is big enough.
         if( !(io_buflen >= sizeof(bool)) )
         {
-            TRACFCOMP( g_trac_spd,
-                       ERR_MRK"dimmPresenceDetect() - Invalid Data Length: %d",
+            TRACFCOMP( g_trac_spd, ERR_MRK"dimmPresenceDetect() "
+                       "Invalid Data Length: %d",
                        io_buflen );
 
             /*@
@@ -124,45 +124,81 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
             break;
         }
 
-        // Is the target present
+        // Is the target present?
 #ifdef CONFIG_DJVPD_READ_FROM_HW
-        // Check if the parent MBA/MEMBUF is present.  If it is not then
-        // no reason to check the DIMM which would otherwise generate
-        // tons of FSI errors.  We can't just check if parent MBA
+        // Check if the i2c master is present.
+        // If it is not then no reason to check the DIMM which would
+        // otherwise generate tons of FSI errors.
+        // We can't just check if parent MCA or MBA
         // is functional because DIMM presence detect is called before
-        // the parent MBA/MEMBUF is set as present/functional.
-        TARGETING::TargetHandleList membufList;
-        TARGETING::PredicateCTM membufPred( TARGETING::CLASS_CHIP,
-                                            TARGETING::TYPE_MEMBUF );
-        TARGETING::targetService().getAssociated(
-            membufList,
-            i_target,
-            TARGETING::TargetService::PARENT_BY_AFFINITY,
-            TARGETING::TargetService::ALL,
-            &membufPred);
+        // the parent MCS/MCA or MBA/MEMBUF is set as present/functional.
+        bool l_i2cMasterPresent = false;
 
-        bool parentPresent = false;
-        const TARGETING::TargetHandle_t membufTarget = *(membufList.begin());
-
-        err = deviceRead(membufTarget, &parentPresent, presentSz,
-                                DEVICE_PRESENT_ADDRESS());
-        if (err)
+        do
         {
-            TRACFCOMP(
-                g_trac_spd,
-                "Error reading parent MEMBUF present: huid 0x%X DIMM huid 0x%X",
-                TARGETING::get_huid(membufTarget),
-                TARGETING::get_huid(i_target) );
-            break;
+            // get eeprom vpd primary info
+            TARGETING::EepromVpdPrimaryInfo eepromData;
+            if( !(i_target->
+                     tryGetAttr<TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO>
+                         ( eepromData ) ) )
+            {
+                TRACFCOMP( g_trac_spd, ERR_MRK"dimmPresenceDetect() "
+                           "Error: no eeprom vpd primary info" );
+                break;
+            }
+
+            // find i2c master target
+            TARGETING::TargetService& tS = TARGETING::targetService();
+            bool exists = false;
+            tS.exists( eepromData.i2cMasterPath, exists );
+            if( !exists )
+            {
+                TRACFCOMP( g_trac_spd, ERR_MRK"dimmPresenceDetect() "
+                           "i2cMasterPath attribute path doesn't exist");
+                break;
+            }
+
+            // Since it exists, convert to a target
+            TARGETING::Target * l_i2cMasterTarget =
+                                   tS.toTarget( eepromData.i2cMasterPath );
+
+            if( NULL == l_i2cMasterTarget )
+            {
+                TRACFCOMP( g_trac_spd, ERR_MRK"dimmPresenceDetect() "
+                           "i2cMasterPath target is NULL");
+                break;
+            }
+            TRACSSCOMP( g_trac_spd, "dimmPresenceDetect() "
+                "i2c master HUID 0x%X", TARGETING::get_huid(l_i2cMasterTarget));
+
+            // Check if present
+            TARGETING::Target* masterProcTarget = NULL;
+            TARGETING::targetService().masterProcChipTargetHandle(
+                                                        masterProcTarget );
+            // Master proc is taken as always present. Validate other targets.
+            if (l_i2cMasterTarget != masterProcTarget)
+            {
+                l_i2cMasterPresent = FSI::isSlavePresent(l_i2cMasterTarget);
+                if( !l_i2cMasterPresent )
+                {
+                    TRACFCOMP( g_trac_spd, ERR_MRK"dimmPresenceDetect() "
+                               "isSlavePresent failed");
+                    break;
+                }
+            }
+            l_i2cMasterPresent = true;
         }
-        if (!parentPresent)
+        while (0);
+
+        if (!l_i2cMasterPresent)
         {
             present = false;
             // Invalidate the SPD in PNOR
             err = VPD::invalidatePnorCache(i_target);
             if (err)
             {
-                TRACFCOMP( g_trac_spd, "Error invalidating SPD in PNOR" );
+                TRACFCOMP( g_trac_spd, ERR_MRK"dimmPresenceDetect() "
+                           "Error invalidating SPD in PNOR" );
             }
             break;
         }
@@ -172,13 +208,13 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
 
         if( present == false )
         {
-            TRACUCOMP( g_trac_spd,
-                       INFO_MRK"Dimm was found to be NOT present." );
+            TRACUCOMP( g_trac_spd, INFO_MRK"dimmPresenceDetect() "
+                       "Dimm was found to be NOT present." );
         }
         else
         {
-            TRACUCOMP( g_trac_spd,
-                       INFO_MRK"Dimm was found to be present." );
+            TRACUCOMP( g_trac_spd, INFO_MRK"dimmPresenceDetect() "
+                       "Dimm was found to be present." );
         }
 
 #if defined(CONFIG_DJVPD_READ_FROM_HW) && defined(CONFIG_DJVPD_READ_FROM_PNOR)
@@ -189,8 +225,8 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
             if( err )
             {
                 present = false;
-
-                TRACFCOMP(g_trac_spd,ERR_MRK "dimmPresenceDetectt> Error during ensureCacheIsInSync (SPD)" );
+                TRACFCOMP( g_trac_spd, ERR_MRK"dimmPresenceDetect() "
+                           "Error during ensureCacheIsInSync (SPD)" );
                 break;
             }
         }
@@ -200,7 +236,8 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
             err = VPD::invalidatePnorCache(i_target);
             if (err)
             {
-                TRACFCOMP( g_trac_spd, "Error invalidating SPD in PNOR" );
+                TRACFCOMP( g_trac_spd, ERR_MRK"dimmPresenceDetect() "
+                           "Error invalidating SPD in PNOR" );
             }
         }
 #endif
@@ -221,7 +258,7 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
             TARGETING::ATTR_CLEAR_DIMM_SPD_ENABLE_type l_clearSPD =
                 l_sys->getAttr<TARGETING::ATTR_CLEAR_DIMM_SPD_ENABLE>();
 
-            // If SPD clear is enabled then write 0's into magic word for 
+            // If SPD clear is enabled then write 0's into magic word for
             // DIMM_BAD_DQ_DATA keyword
             // Note: If there's an error from performing the clearing,
             // just log the error and continue.
@@ -234,7 +271,7 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
                                  DEVICE_SPD_ADDRESS( DIMM_BAD_DQ_DATA ));
                 if (err)
                 {
-                    TRACFCOMP(g_trac_spd, "dimmPresenceDetect - "
+                    TRACFCOMP( g_trac_spd, ERR_MRK"dimmPresenceDetect() "
                         "Error reading DIMM_BAD_DQ_DATA keyword size");
                     errlCommit( err, VPD_COMP_ID );
                 }
@@ -252,9 +289,9 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
                                      DEVICE_SPD_ADDRESS( DIMM_BAD_DQ_DATA ));
                     if (err)
                     {
-                        TRACFCOMP( g_trac_spd, "Error trying to clear SPD on "
-                                   "DIMM HUID 0x%X",
-                                   TARGETING::get_huid(i_target));
+                        TRACFCOMP(g_trac_spd, ERR_MRK"dimmPresenceDetect() "
+                                  "Error trying to clear SPD on DIMM HUID 0x%X",
+                                  TARGETING::get_huid(i_target));
                         errlCommit( err, VPD_COMP_ID );
                     }
 
@@ -273,8 +310,7 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
 
     } while( 0 );
 
-    TRACSSCOMP( g_trac_spd,
-                EXIT_MRK"dimmPresenceDetect()" );
+    TRACSSCOMP( g_trac_spd, EXIT_MRK"dimmPresenceDetect()" );
 
     return err;
 } // end dimmPresenceDetect

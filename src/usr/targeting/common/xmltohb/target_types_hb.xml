@@ -75,6 +75,7 @@
     <attribute><id>HTMGT_SAFEMODE</id></attribute>
     <attribute><id>IPMI_SENSORS</id></attribute>
     <attribute><id>IPMI_MAX_BUFFER_SIZE</id></attribute>
+    <attribute><id>CLEAR_DIMM_SPD_ENABLE</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>

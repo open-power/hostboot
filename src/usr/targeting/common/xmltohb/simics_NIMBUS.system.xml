@@ -218,7 +218,7 @@
 <targetInstance>
     <id>sys0node0proc0eq0</id>
     <type>unit-eq-power9</type>
-    <attribute><id>HUID</id><default>0x00200000</default></attribute>
+    <attribute><id>HUID</id><default>0x00230000</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-0</default>
@@ -240,7 +240,7 @@
 <targetInstance>
     <id>sys0node0proc0eq1</id>
     <type>unit-eq-power9</type>
-    <attribute><id>HUID</id><default>0x00200001</default></attribute>
+    <attribute><id>HUID</id><default>0x00230001</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-1</default>
@@ -262,7 +262,7 @@
 <targetInstance>
     <id>sys0node0proc0eq2</id>
     <type>unit-eq-power9</type>
-    <attribute><id>HUID</id><default>0x00200002</default></attribute>
+    <attribute><id>HUID</id><default>0x00230002</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-2</default>
@@ -284,7 +284,7 @@
 <targetInstance>
     <id>sys0node0proc0eq3</id>
     <type>unit-eq-power9</type>
-    <attribute><id>HUID</id><default>0x00200003</default></attribute>
+    <attribute><id>HUID</id><default>0x00230003</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-3</default>
@@ -306,7 +306,7 @@
 <targetInstance>
     <id>sys0node0proc0eq4</id>
     <type>unit-eq-power9</type>
-    <attribute><id>HUID</id><default>0x00200004</default></attribute>
+    <attribute><id>HUID</id><default>0x00230004</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-4</default>
@@ -328,7 +328,7 @@
 <targetInstance>
     <id>sys0node0proc0eq5</id>
     <type>unit-eq-power9</type>
-    <attribute><id>HUID</id><default>0x00200005</default></attribute>
+    <attribute><id>HUID</id><default>0x00230005</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-5</default>
@@ -1136,6 +1136,7 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-7</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1164,6 +1165,7 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-7</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1192,6 +1194,7 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-8</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1220,13 +1223,14 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-8</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
 </targetInstance>
 
 <!-- Nimbus n0p0mcs0 MCA units -->
 <targetInstance>
     <id>sys0node0proc0mcs0mca0</id>
     <type>unit-mca-nimbus</type>
-    <attribute><id>HUID</id><default>0x000D0100</default></attribute>
+    <attribute><id>HUID</id><default>0x00240100</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcs-0/mca-0</default>
@@ -1248,7 +1252,7 @@
 <targetInstance>
     <id>sys0node0proc0mcs0mca1</id>
     <type>unit-mca-nimbus</type>
-    <attribute><id>HUID</id><default>0x000D0101</default></attribute>
+    <attribute><id>HUID</id><default>0x00240101</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcs-0/mca-1</default>
@@ -1271,7 +1275,7 @@
 <targetInstance>
     <id>sys0node0proc0mcs1mca0</id>
     <type>unit-mca-nimbus</type>
-    <attribute><id>HUID</id><default>0x000D0102</default></attribute>
+    <attribute><id>HUID</id><default>0x00240102</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcs-1/mca-0</default>
@@ -1293,7 +1297,7 @@
 <targetInstance>
     <id>sys0node0proc0mcs1mca1</id>
     <type>unit-mca-nimbus</type>
-    <attribute><id>HUID</id><default>0x000D0103</default></attribute>
+    <attribute><id>HUID</id><default>0x00240103</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcs-1/mca-1</default>
@@ -1316,7 +1320,7 @@
 <targetInstance>
     <id>sys0node0proc0mcs2mca0</id>
     <type>unit-mca-nimbus</type>
-    <attribute><id>HUID</id><default>0x000D0104</default></attribute>
+    <attribute><id>HUID</id><default>0x00240104</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcs-2/mca-0</default>
@@ -1338,7 +1342,7 @@
 <targetInstance>
     <id>sys0node0proc0mcs2mca1</id>
     <type>unit-mca-nimbus</type>
-    <attribute><id>HUID</id><default>0x000D0105</default></attribute>
+    <attribute><id>HUID</id><default>0x00240105</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcs-2/mca-1</default>
@@ -1361,7 +1365,7 @@
 <targetInstance>
     <id>sys0node0proc0mcs3mca0</id>
     <type>unit-mca-nimbus</type>
-    <attribute><id>HUID</id><default>0x000D0106</default></attribute>
+    <attribute><id>HUID</id><default>0x00240106</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcs-3/mca-0</default>
@@ -1383,7 +1387,7 @@
 <targetInstance>
     <id>sys0node0proc0mcs3mca1</id>
     <type>unit-mca-nimbus</type>
-    <attribute><id>HUID</id><default>0x000D0107</default></attribute>
+    <attribute><id>HUID</id><default>0x00240107</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcs-3/mca-1</default>
@@ -1406,7 +1410,7 @@
 <targetInstance>
     <id>sys0node0proc0mcbist0</id>
     <type>unit-mcbist-nimbus</type>
-    <attribute><id>HUID</id><default>0x000D0000</default></attribute>
+    <attribute><id>HUID</id><default>0x00250000</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcbist-0</default>
@@ -1428,7 +1432,7 @@
 <targetInstance>
     <id>sys0node0proc0mcbist1</id>
     <type>unit-mcbist-nimbus</type>
-    <attribute><id>HUID</id><default>0x000D0001</default></attribute>
+    <attribute><id>HUID</id><default>0x00250001</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcbist-1</default>
@@ -1451,7 +1455,7 @@
 <targetInstance>
     <id>sys0node0proc0pec0</id>
     <type>unit-pec-power9</type>
-    <attribute><id>HUID</id><default>0x000E0000</default></attribute>
+    <attribute><id>HUID</id><default>0x002D0000</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pec-0</default>
@@ -1473,7 +1477,7 @@
 <targetInstance>
     <id>sys0node0proc0pec1</id>
     <type>unit-pec-power9</type>
-    <attribute><id>HUID</id><default>0x000E0001</default></attribute>
+    <attribute><id>HUID</id><default>0x002D0001</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pec-1</default>
@@ -1495,7 +1499,7 @@
 <targetInstance>
     <id>sys0node0proc0pec2</id>
     <type>unit-pec-power9</type>
-    <attribute><id>HUID</id><default>0x000E0002</default></attribute>
+    <attribute><id>HUID</id><default>0x002D0002</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pec-2</default>
@@ -1518,7 +1522,7 @@
 <targetInstance>
     <id>sys0node0proc0pec0phb0</id>
     <type>unit-phb-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0100</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0100</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pec-0/phb-0</default>
@@ -1541,7 +1545,7 @@
 <targetInstance>
     <id>sys0node0proc0pec1phb0</id>
     <type>unit-phb-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0101</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0101</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pec-1/phb-0</default>
@@ -1563,7 +1567,7 @@
 <targetInstance>
     <id>sys0node0proc0pec1phb1</id>
     <type>unit-phb-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0102</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0102</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pec-1/phb-1</default>
@@ -1586,7 +1590,7 @@
 <targetInstance>
     <id>sys0node0proc0pec2phb0</id>
     <type>unit-phb-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0103</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0103</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pec-2/phb-0</default>
@@ -1608,7 +1612,7 @@
 <targetInstance>
     <id>sys0node0proc0pec2phb1</id>
     <type>unit-phb-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0104</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0104</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pec-2/phb-1</default>
@@ -1630,7 +1634,7 @@
 <targetInstance>
     <id>sys0node0proc0pec2phb2</id>
     <type>unit-phb-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0105</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0105</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pec-2/phb-2</default>
@@ -1653,7 +1657,7 @@
 <targetInstance>
     <id>sys0node0proc0obus0</id>
     <type>unit-obus-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0200</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0200</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/obus-0</default>
@@ -1675,7 +1679,7 @@
 <targetInstance>
     <id>sys0node0proc0obus3</id>
     <type>unit-obus-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0201</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0201</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/obus-3</default>
@@ -1698,7 +1702,7 @@
 <targetInstance>
     <id>sys0node0proc0nv0</id>
     <type>unit-nv-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0300</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0300</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/nv-0</default>
@@ -1720,7 +1724,7 @@
 <targetInstance>
     <id>sys0node0proc0nv1</id>
     <type>unit-nv-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0301</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0301</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/nv-1</default>
@@ -1744,7 +1748,7 @@
 <targetInstance>
     <id>sys0node0proc0ppe0</id>
     <type>unit-ppe-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0400</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0400</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ppe-0</default>
@@ -1762,7 +1766,7 @@
 <targetInstance>
     <id>sys0node0proc0ppe1</id>
     <type>unit-ppe-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0401</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0401</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ppe-1</default>
@@ -2828,7 +2832,7 @@
 <targetInstance>
     <id>sys0node0proc0sbe0</id>
     <type>unit-sbe-nimbus</type>
-    <attribute><id>HUID</id><default>0x00220000</default></attribute>
+    <attribute><id>HUID</id><default>0x002A0000</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/sbe-0</default>
@@ -2848,7 +2852,7 @@
 <targetInstance>
     <id>sys0node0proc0occ0</id>
     <type>occ</type>
-        <attribute><id>HUID</id><default>0x00230000</default></attribute>
+        <attribute><id>HUID</id><default>0x00130000</default></attribute>
         <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/occ-0</default>
@@ -2881,4 +2885,492 @@
     </attribute>
 </targetInstance>
 
+<!-- DIMMS
+     id/physical is sys-0/node-0/dimm-[d]
+            where d=[0-31]
+     affinity    is sys-0/node-0/proc-0/mcs-[j]/mca-[k]/dimm-[m]
+            where j=[0-3] k=[0-1] m=[0-3]
+-->
+
+<targetInstance>
+    <id>sys0node0dimm0</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030000</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-0/mca-0/dimm-0</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm1</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030001</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-0/mca-0/dimm-1</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>1</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm2</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030002</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-2</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-0/mca-0/dimm-2</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>2</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm3</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030003</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-3</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-0/mca-0/dimm-3</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>3</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm4</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030004</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-4</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-0/mca-1/dimm-0</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>4</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm5</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030005</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-5</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-0/mca-1/dimm-1</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>5</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm6</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030006</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-6</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-0/mca-1/dimm-2</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>7</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm7</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030007</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-7</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-0/mca-1/dimm-3</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>7</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm8</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030008</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-8</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-1/mca-0/dimm-0</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>8</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm9</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030009</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-9</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-1/mca-0/dimm-1</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>9</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm10</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x0003000A</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-10</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-1/mca-0/dimm-2</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>10</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm11</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x0003000B</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-11</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-1/mca-0/dimm-3</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>11</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm12</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x0003000C</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-12</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-1/mca-1/dimm-0</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>12</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm13</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x0003000D</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-13</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-1/mca-1/dimm-1</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>14</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm14</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x0003000E</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-14</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-1/mca-1/dimm-2</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>14</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm15</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x0003000F</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-15</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-1/mca-1/dimm-3</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>15</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm16</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030010</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-16</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-2/mca-0/dimm-0</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>16</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm17</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030017</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-17</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-2/mca-0/dimm-1</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>17</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm18</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030012</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-18</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-2/mca-0/dimm-2</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>18</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm19</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030013</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-19</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-2/mca-0/dimm-3</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>19</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm20</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030014</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-20</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-2/mca-1/dimm-0</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>20</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm21</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030015</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-21</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-2/mca-1/dimm-1</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>21</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm22</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030016</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-22</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-2/mca-1/dimm-2</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>22</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm23</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030017</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-23</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-2/mca-1/dimm-3</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>23</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm24</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030018</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-24</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-3/mca-0/dimm-0</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>24</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm25</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030019</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-25</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-3/mca-0/dimm-1</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>25</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm26</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x0003001A</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-26</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-3/mca-0/dimm-2</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>26</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm27</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x0003001B</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-27</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-3/mca-0/dimm-3</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>27</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm28</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x0003001C</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-28</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-3/mca-1/dimm-0</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>28</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm29</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x0003001D</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-29</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-3/mca-1/dimm-1</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>29</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm30</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x0003001E</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-30</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-3/mca-1/dimm-2</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>30</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm31</id>
+    <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x0003001F</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-31</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcs-3/mca-1/dimm-3</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>31</default></attribute>
+</targetInstance>
+
 </attributes>
+
