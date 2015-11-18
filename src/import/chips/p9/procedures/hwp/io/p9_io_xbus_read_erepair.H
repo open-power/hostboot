@@ -27,7 +27,7 @@
 /// *HWP HWP Backup Owner : Gary Peterson <garyp@us.ibm.com>
 /// *HWP FW Owner         : Jamie Knight <rjknight@us.ibm.com>
 /// *HWP Team             : IO
-/// *HWP Level            : 1
+/// *HWP Level            : 2
 /// *HWP Consumed by      : FSP:HB
 ///----------------------------------------------------------------------------
 
@@ -41,7 +41,7 @@
 
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_io_xbus_read_erepair_FP_t)
-(const fapi2::Target < fapi2::TARGET_TYPE_XBUS >&, std::vector< uint8_t >&);
+(const fapi2::Target < fapi2::TARGET_TYPE_XBUS >&, const uint8_t&, std::vector< uint8_t >&);
 
 
 extern "C"
@@ -49,12 +49,14 @@ extern "C"
     /**
      * @brief A HWP that runs Read eRepair. This procedure reads the current bad
      * lanes and passes by reference the lane numbers in a vector
-     * @param[in] i_target Reference to Target
-     * @param[out] o_bad_lanes Vector of bad lanes
+     * @param[in] i_target        Reference to Target
+     * @param[in] i_clock_group   Clock Group of Target
+     * @param[out] o_bad_lanes    Vector of bad lanes
      * @retval ReturnCode
      */
     fapi2::ReturnCode
     p9_io_xbus_read_erepair(const fapi2::Target< fapi2::TARGET_TYPE_XBUS >& i_target,
+                            const uint8_t& i_clock_group,
                             std::vector< uint8_t >& o_bad_lanes);
 
 } // extern "C"
