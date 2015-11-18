@@ -35,7 +35,7 @@
 ///
 ///     The Base Address and a size mask for the region is passed.  This is
 ///     used to establish the PBA BAR and mask hardware to set the legal
-///     bounds for OCc complex accesses.
+///     bounds for OCC complex accesses.
 ///
 ///     The BAR defines address bits 14:43 in natural bit alignment (eg no
 ///     shifting)
@@ -58,7 +58,7 @@
 ///
 ///        Call p9_pba_bar_config to set up PBA BAR 0 with the address and
 ///            size of the HOMER region as passed via calling parameters
-///         i_mem_bar and i_mem_mask.
+///         i_mem_bar and i_mem_size.
 ///
 ///  Procedure Prereq:
 ///     - HOMER memory region has been allocated.
@@ -80,36 +80,21 @@
 #include "p9_pm_pba_bar_config.H"
 
 
-#if 0
+
 // ------------------------------------------------------------------------------
 // Constant definitions
 // ------------------------------------------------------------------------------
-
-enum STOPGPE_IMG_LOC
-  {
-    STOPGPE_MEMORY  = 0x0,
-    STOPGPE_L3      = 0x1,
-    STOPGPE_SRAM    = 0x2
-  };
+static const uint64_t BAR_MASK_MB_ALIGN = 0x00000000000FFFFFull;
 
 // The value here will yield the appropriate nibble for accessing the PowerBus
 
 enum PBA_BARS
-  {
+{
     PBA_BAR0    = 0x0,
     PBA_BAR1    = 0x1,
     PBA_BAR2    = 0x2,
     PBA_BAR3    = 0x3
-  };
-
-enum PBA_SLAVES
-  {
-    PBA_SLAVE0    = 0x0,
-    PBA_SLAVE1    = 0x1,
-    PBA_SLAVE2    = 0x2,
-    PBA_SLAVE3    = 0x3
-  };
-#endif
+};
 
 
 // ------------------------------------------------------------------------------
@@ -127,115 +112,71 @@ enum PBA_SLAVES
 ///
 fapi2::ReturnCode
 p9_pm_set_homer_bar(  const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-		      const uint64_t i_mem_bar,
-		      const uint64_t i_mem_size)
+                      const uint64_t i_mem_bar,
+                      const uint64_t i_mem_size)
 {
 
-  fapi2::ReturnCode    l_rc;
-#if 0
-  uint32_t            l_ecmdRc = 0;
-  ecmdDataBufferBase  data(64);
+    fapi2::ReturnCode    l_rc;
+    uint64_t region_masked_address;
 
-  uint64_t            image_address;
-  uint64_t            image_size;
-  uint64_t            region_masked_address;
+    // Hardcoded use of PBA BAR and SCOPE
+    //const uint32_t      pba_bar = PBA_BAR0;
+    //p9pba::CMD_SCOPE    slw_pba_cmd_scope = p9pba::GROUP;
 
-  pba_slvctln_t       ps;                         // PBA Slave
+    FAPI_INF("Entering p9_pm_set_homer_bar ...");
 
-  // Hardcoded use of PBA BAR and Slave
-  const uint32_t      pba_bar = PBA_BAR2;
-  const uint32_t      pba_bar_slw = PBA_SLW_BAR2;
-  const uint32_t      pba_slave = PBA_SLAVE2;
+    // Check to make sure mem_bar is also 0 when mem_size is 0.
+    FAPI_ASSERT(!((i_mem_size == 0) && (i_mem_bar != 0)),
+                fapi2::P9_PM_SET_HOMER_BAR_SIZE_INVALID().set_MEM_BAR(i_mem_bar)
+                .set_MEM_SIZE(i_mem_size),
+                "ERROR:HOMER Size is 0 but BAR is non-zero:0x%16llx", i_mem_bar);
+    // check that bar address passed in 1MB aligned(eg bits 44:63 are zero)
 
-  const uint64_t      slw_pba_cmd_scope = 0x2;    // Set to SYSTEM
+    region_masked_address = i_mem_bar & BAR_MASK_MB_ALIGN;
+    FAPI_ASSERT(!(region_masked_address != 0),
+                fapi2::P9_PM_SET_HOMER_BAR_NOT_1MB_ALIGNED().set_MEM_BAR(i_mem_bar),
+                "ERROR: i_mem_bar:0x%16llx is not 1MB aligned ", i_mem_bar);
 
-  const uint32_t      occ_pba_bar = PBA_BAR0;
-  uint64_t            occ_mem_bar =  0x0;
-  const uint64_t      occ_mem_size = 0x4;         // in MB
-  const uint64_t      occ_pba_cmd_scope = 0x0;    // Set to NODAL
+    // Check that the image address passed is within the memory region that
+    // is also passed.
+    //
+    // The PBA Mask indicates which bits from 23:43 (1MB grandularity) are
+    // enabled to be passed from the OCI addresses.  Inverting this mask
+    // indicates which address bits are going to come from the PBA BAR value.
+    // The image address (the starting address) must match these post mask bits
+    // to be resident in the range.
+    //
+    // Starting bit number: 64 bit Big Endian
+    //                                          12223344
+    //                                          60482604
+    //region_inverted_mask = i_mem_size ^ BAR_MASK_LIMIT;  // XOR
 
+    // Set bits 14:22 as these are unconditional address bits
+    //region_inverted_mask = region_inverted_mask | BAR_ADDR_UNMASKED;
+    //computed_image_address = region_inverted_mask && image_address;
 
-  // -----------------------------------------------------------------
-  do
-    {
-      FAPI2_INF("Entering p9_pm_set_homer_bar ...");
+    // Need to AND the address
+    //if (computed_image_address != i_mem_bar )
+    //{
+    //    FAPI2_ERR("SLW image address check failure. ");
+    //    FAPI2_SET_HWP_ERROR(l_rc, RC_PROCPM_POREBAR_IMAGE_ADDR_ERROR);
+    //    break;
+    //}
 
-      // Check if this is a BAR reset case.
-      if (i_mem_size == 0)
-	{
-	  if(i_mem_bar != 0)
-	    {
-	      FAPI2_ERR("HOMER Size is 0 but BAR is non-zero:  0x%16llx", i_mem_bar );
-	      const fapi2::Target& CHIP = i_target;
-	      const uint32_t&      MEMSIZE = i_mem_size;
-	      const uint64_t&      MEMBAR = i_mem_bar;
-	      FAPI2_SET_HWP_ERROR(rc, RC_PROCPM_HOMER_BAR_SIZE0_ERROR);
-	      break;
-	    }
-	  else
-	    {
-	      FAPI2_DBG("Calling pba_bar_config to BAR %x Addr: 0x%16llX  Size: 0x%16llX",
-			pba_bar, i_mem_bar, i_mem_size);
+    FAPI_DBG("Calling pba_bar_config with BAR %x Addr: 0x%16llX  Size: 0x%16llX",
+             PBA_BAR0, i_mem_bar, i_mem_size);
 
-	      // Set the PBA BAR for HOMER
-	      FAPI2_EXEC_HWP(rc, p8_pba_bar_config, i_target,
-			     pba_bar,
-			     i_mem_bar,
-			     i_mem_size,
-			     slw_pba_cmd_scope);
+    // Set the PBA BAR for the SLW region
+    FAPI_EXEC_HWP(l_rc, p9_pm_pba_bar_config, i_target,
+                  PBA_BAR0,
+                  i_mem_bar,
+                  i_mem_size,
+                  p9pba::GROUP);
 
-	      // No rc check is made as we're exiting anyway.
-
-	      break;
-	    }
-	}
-
-
-      // Check that the image address passed is within the memory region that
-      // is also passed.
-      //
-      // The PBA Mask indicates which bits from 23:43 (1MB grandularity) are
-      // enabled to be passed from the OCI addresses.  Inverting this mask
-      // indicates which address bits are going to come from the PBA BAR value.
-      // The image address (the starting address) must match these post mask bits
-      // to be resident in the range.
-      //
-      // Starting bit number: 64 bit Big Endian
-      //                                          12223344
-      //                                          60482604
-      // region_inverted_mask = i_mem_mask ^ BAR_MASK_LIMIT;  // XOR
-
-      // Set bits 14:22 as these are unconditional address bits
-      //region_inverted_mask = region_inverted_mask | BAR_ADDR_UNMASKED;
-      //computed_image_address = region_inverted_mask && image_address;
-      // Need to AND the address
-      //if (computed_image_address != i_mem_bar )
-      //{
-      //    FAPI2_ERR("SLW image address check failure. ");
-      //    FAPI2_SET_HWP_ERROR(rc, RC_PROCPM_POREBAR_IMAGE_ADDR_ERROR);
-      //    break;
-      //}
-
-      FAPI2_DBG("Calling pba_bar_config to BAR %x Addr: 0x%16llX  Size: 0x%16llX",
-		pba_bar, i_mem_bar, i_mem_size);
-
-      // Set the PBA BAR for the SLW region
-      FAPI2_EXEC_HWP(rc, p9_pba_bar_config, i_target,
-		     pba_bar,
-		     i_mem_bar,
-		     i_mem_size,
-		     slw_pba_cmd_scope);
-
-      if(rc)
-	{
-	  break;
-	}
+    fapi2::current_err = l_rc;
 
 
-    }
-  while (0);
+fapi_try_exit:
+    return fapi2::current_err;
 
-#endif
-  l_rc = fapi2::FAPI2_RC_SUCCESS;
-  return l_rc;
 }

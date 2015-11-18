@@ -40,12 +40,13 @@
 
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_pm_set_homer_bar_FP_t) (
-						       const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
-						       const uint64_t,
-						       const uint64_t);
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
+    const uint64_t,
+    const uint64_t);
 
 
-
+extern "C"
+{
 //------------------------------------------------------------------------------
 // Function prototype
 //------------------------------------------------------------------------------
@@ -56,9 +57,10 @@ typedef fapi2::ReturnCode (*p9_pm_set_homer_bar_FP_t) (
 ///                         rounded up to the next power of 2 for setting the
 ///                         hardware mask
 
-fapi2::ReturnCode p9_pm_set_homer_bar(
-				      const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-				      const uint64_t i_mem_bar,
-				      const uint64_t i_mem_size);
+    fapi2::ReturnCode p9_pm_set_homer_bar(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+        const uint64_t i_mem_bar,
+        const uint64_t i_mem_size);
 
+}//extern
 #endif // _P9_SET_HOMER_BAR_H_
