@@ -418,76 +418,63 @@ int32_t getSystemAddr( ExtensibleChip * i_mbaChip, CenAddr i_addr,
 {
     #define PRDF_FUNC "[DEALLOC::getSystemAddr] "
 
-    uint64_t cenAddr = 0;
-    o_addr = 0;
     int32_t o_rc = SUCCESS;
+
+    o_addr = 0;
+
     do
     {
-        uint8_t dramGen = 0;
-        TargetHandle_t mba = i_mbaChip->GetChipHandle();
-
-        o_rc = getDramGen( mba, dramGen );
-        if( SUCCESS != o_rc )
+        // Get the MEMBUF chip.
+        CenMbaDataBundle * mbadb  = getMbaDataBundle( i_mbaChip );
+        ExtensibleChip   * mbChip = mbadb->getMembChip();
+        if ( NULL == mbChip )
         {
-            PRDF_ERR( PRDF_FUNC "getDramGen() failed. HUID:0x%08X",
-                      i_mbaChip->GetId());
-            break;
-        }
-        if( fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR3 != dramGen )
-        {
-            PRDF_ERR( PRDF_FUNC "page Gard is only supported for DDR3."
-                      "HUID:0x%08X  DRAM Generation : %u",
-                      i_mbaChip->GetId(), dramGen );
-            o_rc = FAIL; break;
-        }
-
-        CenMbaDataBundle * mbadb = getMbaDataBundle( i_mbaChip );
-        ExtensibleChip *mbChip = mbadb->getMembChip();
-        if( NULL == mbChip )
-        {
-            PRDF_ERR( PRDF_FUNC " Null Membuf chip for mba. HUID:0x%08X",
+            PRDF_ERR( PRDF_FUNC "getMembChip() returned NULL. MBA:0x%08X",
                                  i_mbaChip->GetId() );
             o_rc = FAIL; break;
         }
-        CenMembufDataBundle * mbdb = getMembufDataBundle( mbChip );
-        ExtensibleChip * mcsChip = mbdb->getMcsChip();
 
-        if( NULL == mbChip )
+        // Get the MCS chip.
+        CenMembufDataBundle * mbdb    = getMembufDataBundle( mbChip );
+        ExtensibleChip      * mcsChip = mbdb->getMcsChip();
+        if ( NULL == mbChip )
         {
-            PRDF_ERR( PRDF_FUNC " Null Mcs chip for Membuf. HUID:0x%08X",
+            PRDF_ERR( PRDF_FUNC "getMcsChip() returned NULL. MEMBUF:0x%08X",
                       mbChip->GetId() );
             o_rc = FAIL; break;
         }
 
-        o_rc = getCenPhyAddr( i_mbaChip, mbChip, i_addr, cenAddr);
-        if( SUCCESS != o_rc )
+        // Get the physical Centaur address.
+        uint64_t cenAddr = 0;
+        o_rc = getCenPhyAddr( i_mbaChip, mbChip, i_addr, cenAddr );
+        if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getCenPhyAddr() failed. MBA:0x%08X "
-                      "Membuf:0x%08X", i_mbaChip->GetId(), mbChip->GetId());
+                      "MEMBUF:0x%08X", i_mbaChip->GetId(), mbChip->GetId());
             break;
         }
 
+        // Get the MCS group information.
         SCAN_COMM_REGISTER_CLASS * mcgfp = mcsChip->getRegister( "MCFGP" );
-
         o_rc = mcgfp->Read();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "Read() failed on MCFGP. HUID:0x%08X",
+            PRDF_ERR( PRDF_FUNC "Read() failed on MCFGP. MCS:0x%08X",
                       mcsChip->GetId() ) ;
             break;
         }
 
         // Get the MCS per group
         // 000 - 1, 001 - 2, 010 - 4, 100 - 8
-        uint8_t mcsPerGrp =  mcgfp->GetBitFieldJustified( 1,3 );
+        uint8_t mcsPerGrp = mcgfp->GetBitFieldJustified( 1,3 );
         uint8_t grpShift = 0;
 
         // Get the number of  bits required to accomondate mcsPos
-        while( 0 != ( mcsPerGrp >> grpShift ) ) {  grpShift++;    }
+        while ( 0 != ( mcsPerGrp >> grpShift ) ) { grpShift++; }
 
         // Get the MCS position within group. Though it is 5 bit field,
         // two bits are not used.
-        uint64_t grpSlct    = mcgfp->GetBitFieldJustified( 4, 5 ) << 7;
+        uint64_t grpSlct  = mcgfp->GetBitFieldJustified(  4, 5 )  << 7;
         // Get the base address for MCS
         uint64_t baseAddr = mcgfp->GetBitFieldJustified( 26, 18 ) << 32;
 
@@ -495,13 +482,13 @@ int32_t getSystemAddr( ExtensibleChip * i_mbaChip, CenAddr i_addr,
         uint64_t cenUpper33 = (cenAddr & 0xFFFFFFFF80ull) << grpShift;
         uint64_t cenLower7  =  cenAddr & 0x000000007full;
 
-
         // Put the whole address together
         o_addr = baseAddr | cenUpper33 | grpSlct | cenLower7;
 
     } while( 0 );
 
     return o_rc;
+
     #undef PRDF_FUNC
 }
 
