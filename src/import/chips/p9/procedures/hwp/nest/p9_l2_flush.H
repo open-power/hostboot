@@ -92,7 +92,7 @@ struct purgeData_t
 //------------------------------------------------------------------------------
 
 typedef fapi2::ReturnCode (*p9_l2_flush_FP_t)
-(const fapi2::Target < fapi2::TARGET_TYPE_CORE | fapi2::TARGET_TYPE_EX > &i_target,
+(const fapi2::Target < fapi2::TARGET_TYPE_EX >& i_target,
  const p9core::purgeData_t& i_purgeData);
 
 extern "C"
@@ -100,7 +100,7 @@ extern "C"
 
 ///
 /// @brief p9_l2_flush HWP to flush entire content of L2 cache via purge engine
-/// @param[in] i_target Core target or Ex target
+/// @param[in] i_target Ex target
 /// @param[in] i_purgeData Specifies a particular purge type
 /// @return: FAPI2_RC_SUCCESS if purge operation completes successfully,
 ///          RC_P9_L2_FLUSH_UNKNOWN_PLATFORM
@@ -113,9 +113,8 @@ extern "C"
 ///              if purge operation reports error,
 ///          else FAPI getscom/putscom return code for failing operation
 ///
-    fapi2::ReturnCode p9_l2_flush(const fapi2::Target < fapi2::TARGET_TYPE_CORE
-                                  | fapi2::TARGET_TYPE_EX >
-                                  &i_target,
+    fapi2::ReturnCode p9_l2_flush(const fapi2::Target < fapi2::TARGET_TYPE_EX >
+                                  & i_target,
                                   const p9core::purgeData_t& i_purgeData);
 
 } // end of extern C
