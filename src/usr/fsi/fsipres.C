@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -272,7 +272,7 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
     bool cvpd_present = false;
     bool check_for_cvpd = true;
 
-#ifdef CONFIG_CVPD_READ_FROM_HW
+#ifdef CONFIG_MEMVPD_READ_FROM_HW
     check_for_cvpd = fsi_present;
 #endif
 
@@ -282,7 +282,7 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
     }
 
 
-#if defined(CONFIG_CVPD_READ_FROM_HW) && defined(CONFIG_CVPD_READ_FROM_PNOR)
+#if defined(CONFIG_MEMVPD_READ_FROM_HW) && defined(CONFIG_MEMVPD_READ_FROM_PNOR)
     if( cvpd_present )
     {
         // Check if the VPD data in the PNOR matches the SEEPROM

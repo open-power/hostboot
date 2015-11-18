@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2015
+# Contributors Listed Below - COPYRIGHT 2012,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -30,9 +30,11 @@ my $DEBUG = 0;
 
 my $numProcs;
 my $numCentPerProc;
+my $numMcsPerProc = 8;
+my $procChipType;
 my $dataPath = ".";
 my $outputPath = ".";
-my $machine = "NIMBUS";
+my $machine;
 my $procConfig = "uninit";
 my $centConfig = "uninit";
 my $maxProcs = 8;
@@ -48,17 +50,19 @@ my $emptySPD;
 ($emptySPDfh, $emptySPD) = tempfile();
 
 # Create temp file for CVPD
-my $emptyCVPDfh;
-my $emptyCVPD;
-($emptyCVPDfh, $emptyCVPD) = tempfile();
+my $emptyMemVPDfh;
+my $emptyMemVPD;
+($emptyMemVPDfh, $emptyMemVPD) = tempfile();
 
 my $mvpdFile = "procmvpd.dat";
 my $mvpdFile_ven = "procmvpd_ven.dat";
 my $mvpdFile_p9n = "procmvpd_p9n.dat";
 my $cvpdFile = "cvpd.dat";
+my $dvpdFile = "dvpd.dat";
+my $memVpdFile = $cvpdFile;
 my $spdFile = "dimmspd.dat";
 my $sysMVPD = "sysmvpd.dat";
-my $sysCVPD = "syscvpd.dat";
+my $sysMemVPD = "sysmemvpd.dat";
 my $sysSPD = "sysspd.dat";
 
 
@@ -87,6 +91,12 @@ while( $ARGV = shift )
     {
         $numCentPerProc = shift;
         debugMsg( "Num Centaurs Per Proc: $numCentPerProc" );
+    }
+    elsif( $ARGV =~ m/--procChipType/ ||
+           $ARGV =~ m/-pct/ )
+    {
+        $procChipType = shift;
+        debugMsg( "Proc Chip Type: $procChipType" );
     }
     elsif( $ARGV =~ m/--dataPath/ ||
         $ARGV =~ m/-dp/ )
@@ -161,7 +171,7 @@ if($machine eq "HABANERO")
     exit 0;
 }
 
-getCentaurConfig();
+getMemoryConfig();
 createMVPDData();
 createCVPDData();
 createSPDData();
@@ -180,6 +190,7 @@ exit 0;
 sub usage
 {
     print "Usage: $0 --numProcs <value> [--numCentPerProc <value>]\n";
+    print "         [--procChipType <value>]\n";
     print "         [--dataPath <path> ] [-m | --machine <value>]\n";
     print "         [-mp | --maxProcs <value>]\n";
     print "         [-fp | --forceProc <value ] [-fc | -forceCent <value>]\n";
@@ -194,6 +205,7 @@ sub usage
     print "                           behind each processor. Must always\n";
     print "                           contain info for 8 Centaurs\n";
     print "                           --numCentPerProc\n";
+    print "  -pct   --procChipType    Processor Chip Type, ie p9n\n";
     print "  -m     --machine         Text machine to build data for.\n";
     print "                              Default: MURANO\n";
     print "  -dp    --dataPath        Path to VPD data files.\n";
@@ -286,11 +298,7 @@ sub createMVPDData
             {
                 $sourceFile = "$dataPath/$mvpdFile_ven";
             }
-            elsif( $machine eq "NIMBUS")
-            {
-                $sourceFile = "$dataPath/$mvpdFile_p9n";
-            }
-            elsif( $machine eq "ZZTOP")
+            elsif( $procChipType eq "p9n")
             {
                 $sourceFile = "$dataPath/$mvpdFile_p9n";
             }
@@ -327,63 +335,64 @@ sub createMVPDData
 #====================================================================
 sub createCVPDData
 {
-    print "Creating CVPD Data...\n";
+    print "Creating Mem VPD Data...\n";
 
     my $cmd;
     my $result;
     my $sourceFile;
-    my $sysCVPDFile = "$outputPath/$sysCVPD";
-    my $sysCVPDFileECC = $sysCVPDFile . ".ecc";
+    my $sysMemVPDFile = "$outputPath/$sysMemVPD";
+    my $sysMemVPDFileECC = $sysMemVPDFile . ".ecc";
 
-    if( -e $sysCVPDFile )
+    if( -e $sysMemVPDFile )
     {
         # Cleanup any existing files
-        system( "rm -rf $sysCVPDFile" );
+        system( "rm -rf $sysMemVPDFile" );
     }
 
     #Centaurs are populated based on populated Processors and special
     #MCS plugging rules.  We can look at $procConfig and $maxProcs
     #to determine processor config.  Centaur plugging is contained
-    #in $mcsArray, populated by getCentaurConfig()
+    #in $mcsArray, populated by getMemoryConfig()
+    #For direct access memory, $mcsArray has which MCSs are present
 
-    # Create empty CVPD data chunk
-    $cmd = " echo \"000FFF: 00\" \| xxd -r \> $emptyCVPD";
-    system( $cmd ) == 0 or die "Creating $emptyCVPD failed!";
+    # Create empty Mem VPD data chunk
+    $cmd = " echo \"000FFF: 00\" \| xxd -r \> $emptyMemVPD";
+    system( $cmd ) == 0 or die "Creating $emptyMemVPD failed!";
 
     for( my $proc = 0; $proc < $maxProcs; $proc++ )
     {
-        for( my $cent = 0; $cent < $MAX_CENT_PER_PROC; $cent++ )
+        for( my $mcs = 0; $mcs < $MAX_MCS; $mcs++ )
         {
-            if( ($mcsArray[$cent] == 1) &&
+            if( ($mcsArray[$mcs] == 1) &&
                 substr($procConfig,$proc,1) =~ /1/ )
             {
-                debugMsg( "$machine( $proc, $cent): Real File" );
+                debugMsg( "$machine( $proc, $mcs): Real File" );
                 # Use the real data to the full image
-                $sourceFile = "$dataPath/$cvpdFile";
+                $sourceFile = "$dataPath/$memVpdFile";
             }
             else
             {
-                debugMsg( "$machine( $proc, $cent): Empty file" );
-                # No Centaur, use empty data chunk
-                $sourceFile = $emptyCVPD;
+                debugMsg( "$machine( $proc, $mcs): Empty file" );
+                # No Centaur/MCS, use empty data chunk
+                $sourceFile = $emptyMemVPD;
             }
 
-            $result = `dd if=$sourceFile of=$sysCVPDFile conv=notrunc oflag=append 2>&1 1>/dev/null`;
+            $result = `dd if=$sourceFile of=$sysMemVPDFile conv=notrunc oflag=append 2>&1 1>/dev/null`;
             if( $? )
             {
-                die "Error building CVPD file! proc=$proc cent=$cent\n";
+                die "Error building Mem VPD file! proc=$proc cent=$mcs\n";
             }
 
         }
     }
 
-    if( -e $sysCVPDFile )
+    if( -e $sysMemVPDFile )
     {
-        system( "chmod 775 $sysCVPDFile" );
-        system( "ecc --inject $sysCVPDFile --output $sysCVPDFileECC --p8" );
-        system( "chmod 775 $sysCVPDFileECC" );
+        system( "chmod 775 $sysMemVPDFile" );
+        system( "ecc --inject $sysMemVPDFile --output $sysMemVPDFileECC --p8" );
+        system( "chmod 775 $sysMemVPDFileECC" );
     }
-    debugMsg( "CVPD Done." );
+    debugMsg( "Mem VPD Done." );
 }
 
 
@@ -412,20 +421,20 @@ sub createSPDData
 
     for( my $proc = 0; $proc < $maxProcs; $proc++ )
     {
-        for( my $cent = 0; $cent < $MAX_CENT_PER_PROC; $cent++ )
+        for( my $mcs = 0; $mcs < $MAX_MCS; $mcs++ )
         {
             for( my $dimm = 0; $dimm < $MAX_DIMMS_PER_CENT; $dimm++ )
             {
-                if( ($mcsArray[$cent] == 1) &&
-                    substr($procConfig,$proc,1) =~ /1/ )
+                 if( ($mcsArray[$mcs] == 1) &&
+                     substr($procConfig,$proc,1) =~ /1/ )
                 {
-                    debugMsg( "$machine( $proc, $cent, $dimm ): Real File" );
+                    debugMsg( "$machine( $proc, $mcs, $dimm ): Real File" );
                     # Use the real data to the full image
                     $sourceFile = "$dataPath/$spdFile";
                 }
                 else
                 {
-                    debugMsg( "$machine( $proc, $cent, $dimm ): Empty file" );
+                    debugMsg( "$machine( $proc, $mcs, $dimm ): Empty file" );
                     # No dimm, use empty data chunk
                     $sourceFile = $emptySPD;
                 }
@@ -433,7 +442,7 @@ sub createSPDData
                 $result = `dd if=$sourceFile of=$sysSPDFile conv=notrunc oflag=append 2>&1 1>/dev/null`;
                 if( $? )
                 {
-                    die "Error building SPD file! $proc  $cent  $dimm\n";
+                    die "Error building SPD file! $proc  $mcs  $dimm\n";
                 }
             }
         }
@@ -450,9 +459,16 @@ sub createSPDData
 }
 
 
-sub getCentaurConfig
+sub getMemoryConfig
 {
-    debugMsg( "getCentaurConfig $machine" );
+    debugMsg( "getMemoryConfig $machine" );
+
+    #Select direct memory vpd file or Centaur vpd file
+    if( $procChipType eq "p9n")
+    {
+        $memVpdFile = $dvpdFile;
+        $numMcsPerProc = 4;
+    }
 
     #First check if explicit Centaur Plugging rules were provided
     if( $centConfig !~ m/uninit/ )
@@ -522,15 +538,14 @@ sub getCentaurConfig
                     }
                 }
             }
-            elsif( $machine eq "NIMBUS")
+            elsif( $procChipType eq "p9n")
             {
-            #as there are no centaurs within a NIMBUS machine NO configuration
-            #for centaur chips is required
-            }
-            elsif( $machine eq "ZZTOP")
-            {
-            #as there are no centaurs within a NIMBUS machine NO configuration
-            #for centaur chips is required
+            #There are no centaurs within a NIMBUS machine, but need to set
+            #up the mcs array.
+                if( $mcs < $numMcsPerProc)
+                {
+                    $mcsArray[$mcs] = 1;
+                }
             }
             else
             {
@@ -539,7 +554,7 @@ sub getCentaurConfig
         }
     }
 
-    debugMsg( "@mcsArray" );
+    debugMsg( "mcsArray=@mcsArray" );
 
 
 }

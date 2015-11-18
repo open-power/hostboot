@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -412,7 +412,8 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
             errlCommit(errl, HWAS_COMP_ID);
         }
 #endif
-#ifdef CONFIG_CVPD_WRITE_TO_PNOR
+#if    defined(CONFIG_MEMVPD_WRITE_TO_PNOR) || \
+       defined(CONFIG_PVPD_WRITE_TO_PNOR)
         errl = PNOR::clearSection( PNOR::CENTAUR_VPD );
         if( errl )
         {

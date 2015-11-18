@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -485,7 +485,7 @@ errlHndl_t getPnAndSnRecordAndKeywords( TARGETING::Target * i_target,
         }
         else if( i_type == TARGETING::TYPE_MEMBUF )
         {
-#if defined(CONFIG_CVPD_READ_FROM_HW) && defined(CONFIG_CVPD_READ_FROM_PNOR)
+#if defined(CONFIG_MEMVPD_READ_FROM_HW) && defined(CONFIG_MEMVPD_READ_FROM_PNOR)
             IpVpdFacade* l_ipvpd     = &(Singleton<CvpdFacade>::instance());
             io_record    = CVPD::OPFR;
             io_keywordPN = CVPD::VP;

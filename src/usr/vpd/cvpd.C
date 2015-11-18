@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -197,7 +197,7 @@ namespace CVPD
 bool VPD::cvpdPresent( TARGETING::Target * i_target )
 {
     TRACSSCOMP( g_trac_vpd, ENTER_MRK"cvpdPresent()");
-#if(defined( CONFIG_CVPD_READ_FROM_HW ) && !defined( __HOSTBOOT_RUNTIME) )
+#if(defined( CONFIG_MEMVPD_READ_FROM_HW ) && !defined( __HOSTBOOT_RUNTIME) )
 
     return EEPROM::eepromPresence( i_target );
 
@@ -228,22 +228,22 @@ IpVpdFacade(CVPD::SECTION_SIZE,
 {
     TRACUCOMP(g_trac_vpd, "CvpdFacade::CvpdFacade> " );
 
-#ifdef CONFIG_CVPD_READ_FROM_PNOR
+#ifdef CONFIG_MEMVPD_READ_FROM_PNOR
     iv_configInfo.vpdReadPNOR = true;
 #else
     iv_configInfo.vpdReadPNOR = false;
 #endif
-#ifdef CONFIG_CVPD_READ_FROM_HW
+#ifdef CONFIG_MEMVPD_READ_FROM_HW
     iv_configInfo.vpdReadHW = true;
 #else
     iv_configInfo.vpdReadHW = false;
 #endif
-#ifdef CONFIG_CVPD_WRITE_TO_PNOR
+#ifdef CONFIG_MEMVPD_WRITE_TO_PNOR
     iv_configInfo.vpdWritePNOR = true;
 #else
     iv_configInfo.vpdWritePNOR = false;
 #endif
-#ifdef CONFIG_CVPD_WRITE_TO_HW
+#ifdef CONFIG_MEMVPD_WRITE_TO_HW
     iv_configInfo.vpdWriteHW = true;
 #else
     iv_configInfo.vpdWriteHW = false;

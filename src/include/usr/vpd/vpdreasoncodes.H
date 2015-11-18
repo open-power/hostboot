@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -64,6 +64,9 @@ enum vpdModuleId
 
     // PVPD
     VPD_PVPD_PRESENCEDETECT                 = 0x50,
+
+    // DVPD
+    VPD_DVPD_PRESENCEDETECT                 = 0x58,
 
     // DIMM SPD
     VPD_SPD_GET_KEYWORD_VALUE               = 0x61,

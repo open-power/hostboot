@@ -118,8 +118,11 @@ public:
         // set by call_mss_getecid() in dmi_training.c
         DECONFIGURED_BY_MEMORY_CONFIG,          // BASE | 0x03
 
-        // set by presentByAssoc() when a MCS has no MEMBUFs
-        DECONFIGURED_BY_NO_CHILD_MEMBUF,        // BASE | 0x04
+        // set by presentByAssoc() when a MCS has no MEMBUFs or MCAs
+        DECONFIGURED_BY_NO_CHILD_MEMBUF_OR_MCA, // BASE | 0x04
+        // TODO RTC 149367 Remove deprecated enumeration once hwsv is not using
+        DECONFIGURED_BY_NO_CHILD_MEMBUF =      //Deprecated
+           DECONFIGURED_BY_NO_CHILD_MEMBUF_OR_MCA,
 
         // set by deconfigureAssocProc() in hwas/common/deconfigGard.C
         DECONFIGURED_BY_BUS_DECONFIG,           // BASE | 0x05
@@ -145,8 +148,11 @@ public:
         // set by presentByAssoc() when a MEMBUF has no MBAs
         DECONFIGURED_BY_NO_CHILD_MBA,           // BASE | 0x0C
 
-        // set by presentByAssoc() when a DIMM has no MBA
-        DECONFIGURED_BY_NO_PARENT_MBA,          // BASE | 0x0D
+        // set by presentByAssoc() when a DIMM has no MBA or MCA
+        DECONFIGURED_BY_NO_PARENT_MBA_OR_MCA,   // BASE | 0x0D
+        // TODO RTC 149367 Remove deprecated enumeration once hwsv is not using
+        DECONFIGURED_BY_NO_PARENT_MBA =         //Deprecated
+            DECONFIGURED_BY_NO_PARENT_MBA_OR_MCA,
 
         CONFIGURED_BY_RESOURCE_RECOVERY,        // BASE | 0x0E
 

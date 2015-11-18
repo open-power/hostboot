@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2015
+# Contributors Listed Below - COPYRIGHT 2013,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -46,5 +46,8 @@ BINARY_FILES += $(IMGDIR)/procmvpd_p9n.dat:c459021cad3335d42274fbf151ecd3647d0df
 
 #Update to Centaur DD2.0 for CCIN 31E8
 BINARY_FILES += $(IMGDIR)/cvpd.dat:2e33352ca95279b992927336567adf960dca7d46
+
+#Direct memory vpd
+BINARY_FILES += $(IMGDIR)/dvpd.dat:2e33352ca95279b992927336567adf960dca7d46
 
 include ${ROOTPATH}/config.mk

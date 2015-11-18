@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -152,7 +152,7 @@ typedef std::vector<TargetInfo> TargetInfoVector;
  * @brief Invokes presentByAssoc
  *
  * Called by discoverTargets(). This function queries the system and populates
- * a vector of structs representing functional MCS, MEMBUFS, DIMMS.
+ * a vector of structs representing functional MCS, MEMBUFS, MBAs, MCAs,DIMMS.
  * This vector is then passed to presentByAssoc() which systematically adds
  * targets to another vector to be deconfigured based on their related targets
  * Upon completion of presentByAssoc(), this function iterates
@@ -162,15 +162,19 @@ typedef std::vector<TargetInfo> TargetInfoVector;
 void invokePresentByAssoc();
 
 /**
- * @brief Algorithm to check if a MCS has a MEMBUF, a MEMBUF has a MCS and DIMM,
- *        and a DIMM has a MEMBUF.
+ * @brief Algorithm to validate the memory target structure.
+ *
+ * For non direct memory, check if a MCS has a MEMBUF, a MEMBUF has a MBA,
+ * and the MBA has a DIMM.
+ *
+ * For direct memory, check if a MCS has a MCA, and a MCA has a DIMM.
  *
  * The vector o_funcTargets is sorted by affinity path to allow a single pass
  * with some backtracking to check every scenario more efficiently.
  * These checks are needed because of scenarios where targets are non-present
  * and their related targets are not marked as deconfigured
  *
- * @param[in/out] io_funcTargets    A vector of functional MCS, MEMBUFS, DIMMS
+ * @param[in/out] io_funcTargets    A vector of functional memory targets
  * @param[out]    o_targToDeconfig  A vector of targets to deconfigure, done
  *                                  this way to allow unit tests
  */

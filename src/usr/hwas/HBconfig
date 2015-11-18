@@ -10,7 +10,7 @@ config NO_GARD_SUPPORT
 
 config HOST_HCDB_SUPPORT
    default n
-   depends on CVPD_READ_FROM_HW || MVPD_READ_FROM_HW || DJVPD_READ_FROM_HW
+   depends on MEMVPD_READ_FROM_HW || MVPD_READ_FROM_HW || DJVPD_READ_FROM_HW
    help
        Hostboot will detect hardware changes
 
