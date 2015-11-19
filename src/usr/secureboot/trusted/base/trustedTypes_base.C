@@ -130,7 +130,7 @@ namespace TRUSTEDBOOT
             field32 = (uint32_t*)(i_tpmBuf);
             val->pcrIndex = le32toh(*field32);
             // Ensure a valid pcr index
-            if (val->pcrIndex >= PCR_MAX)
+            if (val->pcrIndex >= IMPLEMENTATION_PCR)
             {
                 *o_err = true;
                 i_tpmBuf = NULL;

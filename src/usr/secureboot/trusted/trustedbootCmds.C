@@ -212,6 +212,15 @@ errlHndl_t tpmMarshalCommandData(TPM2_BaseIn* i_cmd,
                                                       i_bufsize, o_cmdSize);
               }
               break;
+          case TPM_CC_PCR_Read:
+              {
+                  TPM2_PcrReadIn* cmdPtr = (TPM2_PcrReadIn*)i_cmd;
+                  sBuf = TPM2_PcrReadIn_marshal(cmdPtr, sBuf,
+                                                i_bufsize - (sBuf - o_outbuf),
+                                                o_cmdSize);
+              }
+              break;
+
           case TPM_CC_PCR_Extend:
               {
                   TPM2_ExtendIn* cmdPtr = (TPM2_ExtendIn*)i_cmd;
@@ -254,7 +263,7 @@ errlHndl_t tpmMarshalCommandData(TPM2_BaseIn* i_cmd,
         {
             TRACFCOMP( g_trac_trustedboot,
                        "TPM MARSHAL MARSHAL SIZE MISMATCH : %d %d",
-                       (sBuf - o_outbuf), *o_cmdSize );
+                       (int)(sBuf - o_outbuf), (int)(*o_cmdSize) );
             sBuf = NULL;
         }
 
@@ -354,6 +363,15 @@ errlHndl_t tpmUnmarshalResponseData(uint32_t i_commandCode,
                                                          &i_respBufSize,
                                                          i_outBufSize);
 
+              }
+              break;
+
+          case TPM_CC_PCR_Read:
+              {
+                  TPM2_PcrReadOut* respPtr = (TPM2_PcrReadOut*)o_outBuf;
+                  sBuf = TPM2_PcrReadOut_unmarshal(respPtr, sBuf,
+                                                   &i_respBufSize,
+                                                   i_outBufSize);
               }
               break;
 
@@ -733,7 +751,7 @@ errlHndl_t tpmCmdPcrExtend(TpmTarget * io_target,
         if (fullDigestSize == 0 ||
             fullDigestSize != i_digestSize ||
             NULL == i_digest ||
-            PCR_MAX < i_pcr
+            IMPLEMENTATION_PCR < i_pcr
             )
         {
             TRACFCOMP( g_trac_trustedboot,
@@ -815,6 +833,132 @@ errlHndl_t tpmCmdPcrExtend(TpmTarget * io_target,
 
 }
 
+errlHndl_t tpmCmdPcrRead(TpmTarget* io_target,
+                         TPM_Pcr i_pcr,
+                         TPM_Alg_Id i_algId,
+                         uint8_t* o_digest,
+                         size_t  i_digestSize)
+{
+    errlHndl_t err = NULL;
+    uint8_t dataBuf[sizeof(TPM2_PcrReadOut)];
+    size_t dataSize = sizeof(dataBuf);
+    size_t fullDigestSize = 0;
+    TPM2_PcrReadOut* resp = (TPM2_PcrReadOut*)dataBuf;
+    TPM2_PcrReadIn* cmd = (TPM2_PcrReadIn*)dataBuf;
+
+
+    TRACDCOMP( g_trac_trustedboot,
+               ">>tpmCmdPcrRead()" );
+    TRACUCOMP( g_trac_trustedboot,
+               ">>tpmCmdPcrRead() Pcr(%d) DS(%d)",
+               i_pcr, (int)i_digestSize);
+
+    do
+    {
+
+        fullDigestSize = getDigestSize(i_algId);
+
+        // Build our command block
+        memset(dataBuf, 0, sizeof(dataBuf));
+
+        // Argument verification
+        if (fullDigestSize > i_digestSize ||
+            NULL == o_digest ||
+            IMPLEMENTATION_PCR < i_pcr
+            )
+        {
+            TRACFCOMP( g_trac_trustedboot,
+                       "TPM PCR READ ARG FAILURE FDS(%d) DS(%d) PCR(%d)",
+                       (int)fullDigestSize, (int)i_digestSize, i_pcr);
+            /*@
+             * @errortype
+             * @reasoncode     RC_TPM_INVALID_ARGS
+             * @severity       ERRL_SEV_UNRECOVERABLE
+             * @moduleid       MOD_TPM_CMD_PCRREAD
+             * @userdata1      Digest Ptr
+             * @userdata2[0:31] Full Digest Size
+             * @userdata2[32:63] PCR
+             * @devdesc        Unmarshaling error detected
+             */
+            err = tpmCreateErrorLog(MOD_TPM_CMD_PCRREAD,
+                                    RC_TPM_INVALID_ARGS,
+                                    (uint64_t)o_digest,
+                                    (fullDigestSize << 32) |
+                                    i_pcr);
+
+            break;
+        }
+
+        cmd->base.tag = TPM_ST_NO_SESSIONS;
+        cmd->base.commandCode = TPM_CC_PCR_Read;
+        cmd->pcrSelectionIn.count = 1; // One algorithm
+        cmd->pcrSelectionIn.pcrSelections[0].algorithmId = i_algId;
+        cmd->pcrSelectionIn.pcrSelections[0].sizeOfSelect = PCR_SELECT_MAX;
+        memset(cmd->pcrSelectionIn.pcrSelections[0].pcrSelect, 0,
+               sizeof(cmd->pcrSelectionIn.pcrSelections[0].pcrSelect));
+        cmd->pcrSelectionIn.pcrSelections[0].pcrSelect[i_pcr / 8] =
+            0x01 << (i_pcr % 8);
+
+        err = tpmTransmitCommand(io_target,
+                                 dataBuf,
+                                 sizeof(dataBuf));
+
+        if (TB_SUCCESS != err)
+        {
+            TRACFCOMP( g_trac_trustedboot,
+                       "TPM PCRRead Transmit Fail ");
+            break;
+
+        }
+        else if ((sizeof(TPM2_BaseOut) > dataSize) ||
+                 (TPM_SUCCESS != resp->base.responseCode) ||
+                 (resp->pcrValues.count != 1) ||
+                 (resp->pcrValues.digests[0].size != fullDigestSize))
+        {
+            TRACFCOMP( g_trac_trustedboot,
+                       "TPM PCRRead OP Fail Ret(%X) ExSize(%d) "
+                       "Size(%d) Cnt(%d) DSize(%d)",
+                       resp->base.responseCode,
+                       (int)sizeof(TPM2_BaseOut),
+                       (int)dataSize,
+                       resp->pcrValues.count,
+                       resp->pcrValues.digests[0].size);
+
+            /*@
+             * @errortype
+             * @reasoncode     RC_TPM_COMMAND_FAIL
+             * @severity       ERRL_SEV_UNRECOVERABLE
+             * @moduleid       MOD_TPM_CMD_PCRREAD
+             * @userdata1      responseCode
+             * @userdata2      dataSize
+             * @devdesc        Command failure reading TPM FW version.
+             */
+            err = tpmCreateErrorLog(MOD_TPM_CMD_PCRREAD,
+                                    RC_TPM_COMMAND_FAIL,
+                                    resp->base.responseCode,
+                                    dataSize);
+            break;
+        }
+        else
+        {
+
+            memcpy(o_digest, resp->pcrValues.digests[0].buffer, fullDigestSize);
+
+            // Log the PCR value
+            TRACUBIN(g_trac_trustedboot, "PCR Out",
+                     o_digest, fullDigestSize);
+
+        }
+
+    } while ( 0 );
+
+
+    TRACUCOMP( g_trac_trustedboot,
+               "<<tpmCmdPcrRead() - %s",
+               ((TB_SUCCESS == err) ? "No Error" : "With Error") );
+    return err;
+
+}
 
 
 #ifdef __cplusplus

@@ -475,6 +475,67 @@ class TrustedBootTest: public CxxTest::TestSuite
 
             }
 
+            // Test PcrReadIn
+            {
+                TRACUCOMP( g_trac_trustedboot,
+                           "testCommandMarshal - PcrReadIn" );
+                memset(dataBufIn, 0, sizeof(dataBufIn));
+                memset(dataBufOut, 0, sizeof(dataBufOut));
+                TRUSTEDBOOT::TPM2_PcrReadIn* cmdPtr =
+                    reinterpret_cast<TRUSTEDBOOT::TPM2_PcrReadIn*>
+                    (dataBufIn);
+                cmdPtr->base.commandCode = TRUSTEDBOOT::TPM_CC_PCR_Read;
+                cmdPtr->pcrSelectionIn.count = 1;
+                cmdPtr->pcrSelectionIn.pcrSelections[0].algorithmId =
+                    TPM_ALG_SHA256;
+                cmdPtr->pcrSelectionIn.pcrSelections[0].sizeOfSelect =
+                    PCR_SELECT_MAX;
+
+                runTpmMarshalTest(baseCmd,
+                                  dataBufOut,
+                                  sizeof(dataBufOut),
+                                  cmdSize,
+                                  "PcrReadIn",
+                                  num_ops,
+                                  fails,
+                                  sizeof(TPM2_PcrReadIn));
+
+                // Invalid number of algorithms
+                memset(dataBufIn, 0, sizeof(dataBufIn));
+                memset(dataBufOut, 0, sizeof(dataBufOut));
+                cmdPtr->base.commandCode = TRUSTEDBOOT::TPM_CC_PCR_Read;
+                cmdPtr->pcrSelectionIn.count = HASH_COUNT+1;
+                cmdPtr->pcrSelectionIn.pcrSelections[0].algorithmId =
+                    TPM_ALG_SHA256;
+                cmdPtr->pcrSelectionIn.pcrSelections[0].sizeOfSelect = 1;
+                runTpmMarshalFailTest(baseCmd,
+                                      dataBufOut,
+                                      sizeof(dataBufOut),
+                                      cmdSize,
+                                      "PcrReadIn - invalid #algorithms",
+                                      num_ops,
+                                      fails);
+
+                // Invalid select size
+                memset(dataBufIn, 0, sizeof(dataBufIn));
+                memset(dataBufOut, 0, sizeof(dataBufOut));
+                cmdPtr->base.commandCode = TRUSTEDBOOT::TPM_CC_PCR_Read;
+                cmdPtr->pcrSelectionIn.count = HASH_COUNT+1;
+                cmdPtr->pcrSelectionIn.pcrSelections[0].algorithmId =
+                    TPM_ALG_SHA256;
+                cmdPtr->pcrSelectionIn.pcrSelections[0].sizeOfSelect =
+                    PCR_SELECT_MAX+1;
+                runTpmMarshalFailTest(baseCmd,
+                                      dataBufOut,
+                                      sizeof(dataBufOut),
+                                      cmdSize,
+                                      "PcrReadIn - invalid select size",
+                                      num_ops,
+                                      fails);
+
+            }
+
+
 
         } while( 0 );
         TRACFCOMP( g_trac_trustedboot,
@@ -567,6 +628,44 @@ class TrustedBootTest: public CxxTest::TestSuite
                                     fails);
             }
 
+            // Test PcrReadOut
+            {
+                TRACUCOMP( g_trac_trustedboot,
+                           "testCommandUnmarshal - PcrReadOut" );
+                memset(dataBufIn, 0, sizeof(dataBufIn));
+                memset(dataBufOut, 0, sizeof(dataBufOut));
+
+                TRUSTEDBOOT::TPM2_PcrReadOut* respPtr =
+                    reinterpret_cast<TRUSTEDBOOT::TPM2_PcrReadOut*>
+                    (dataBufIn);
+                respPtr->pcrUpdateCounter = 0xAABBCCDD;
+                respPtr->pcrSelectionOut.count = 1;
+                respPtr->pcrSelectionOut.pcrSelections[0].sizeOfSelect =
+                    PCR_SELECT_MAX;
+                respPtr->pcrValues.count = 1;
+                respPtr->pcrValues.digests[0].size = TPM_ALG_SHA256_SIZE;
+
+                runTpmUnmarshalTest(TRUSTEDBOOT::TPM_CC_PCR_Read,
+                                    dataBufIn,
+                                    sizeof(dataBufIn),
+                                    baseCmd,
+                                    sizeof(TPM2_PcrReadOut),
+                                    "PcrReadOut",
+                                    num_ops,
+                                    fails);
+
+                memset(dataBufIn, 0xFF, sizeof(dataBufIn));
+                respPtr->base.responseCode = TPM_SUCCESS;
+                runTpmUnmarshalFailTest(TRUSTEDBOOT::TPM_CC_PCR_Read,
+                                        dataBufIn,
+                                        sizeof(dataBufIn),
+                                        baseCmd,
+                                        sizeof(TPM2_PcrReadOut),
+                                        "PcrReadOut - xFF buffer",
+                                        num_ops,
+                                        fails);
+
+            }
 
 
 
@@ -681,6 +780,67 @@ class TrustedBootTest: public CxxTest::TestSuite
         } while( 0 );
         TRACFCOMP( g_trac_trustedboot,
                    "testExtendPCR - End: %d/%d fails",
+                   fails, num_ops );
+
+        if (NULL != target.logMgr)
+        {
+            delete target.logMgr;
+        }
+    }
+
+    /**
+     * @brief TPM Read PCR
+     */
+    void testReadPCR ( void )
+    {
+        int64_t fails = 0, num_ops = 0;
+        uint8_t digest[TPM_ALG_SHA256_SIZE];
+        errlHndl_t err = NULL;
+
+        TRACFCOMP( g_trac_trustedboot,
+                   "testReadPCR - Start" );
+        TpmTarget target = getTestTarget();
+
+        do
+        {
+
+            if (target.failed)
+            {
+                TS_FAIL( "testReadPCR - Master TPM not functional" );
+                break;
+            }
+
+            memset(digest, 0, sizeof(digest));
+
+            num_ops++;
+            err = tpmCmdPcrRead(&target,
+                                PCR_DEBUG,
+                                TPM_ALG_SHA256,
+                                digest,
+                                sizeof(digest));
+            if( NULL != err )
+            {
+                fails++;
+                TS_FAIL( "testReadPCR - Error detected" );
+                errlCommit( err,
+                            SECURE_COMP_ID );
+                delete err;
+                err = NULL;
+                break;
+            }
+            else
+            {
+                TRACUCOMP(g_trac_trustedboot, "testReadPCR - "
+                          "Read returned as expected.");
+                TRACUBIN(g_trac_trustedboot, "PCR Contents",
+                         digest, sizeof(digest));
+            }
+
+
+
+        } while( 0 );
+        TRACFCOMP( g_trac_trustedboot,
+                   "testReadPCR - End: %d/%d fails",
                    fails, num_ops );
 
         if (NULL != target.logMgr)
