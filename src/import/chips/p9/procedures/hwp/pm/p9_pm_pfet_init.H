@@ -35,6 +35,8 @@
 #include <fapi2.H>
 #include <p9_pm.H>
 
+#include "p9_quad_scom_addresses.H"
+
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_pm_pfet_init_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
@@ -51,7 +53,7 @@ extern "C"
 /// \retval FAPI_RC_SUCCESS if something good happens,
 /// \retval RC per p9_pfet_init_errors.xml otherwise
     fapi2::ReturnCode p9_pm_pfet_init(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         const p9pm::PM_FLOW_MODE i_mode);
 
 } // extern "C"
