@@ -140,17 +140,6 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
             if ( iv_memMruMeld.s.dramSpared ) iv_symbol.setDramSpared();
             if ( iv_memMruMeld.s.eccSpared  ) iv_symbol.setEccSpared();
 
-            // Validation checks
-            CEN_SYMBOL::WiringType type = iv_symbol.getWiringType();
-
-            if ( type != CEN_SYMBOL::WiringType (iv_memMruMeld.s.wiringType))
-            {
-                PRDF_ERR( PRDF_FUNC "Wiring Type does not match type:%u "
-                                    "iv_memMruMeld.s.wiringType :%u",
-                                    type, iv_memMruMeld.s.wiringType);
-                break;
-            }
-
         }
 
         // If the code gets to this point the MemoryMru is valid.
@@ -210,7 +199,12 @@ MemoryMru::MemoryMru( TARGETING::TargetHandle_t i_mbaTarget,
         iv_memMruMeld.s.pins       = iv_symbol.getPins();
         iv_memMruMeld.s.dramSpared = iv_symbol.isDramSpared() ? 1 : 0;
         iv_memMruMeld.s.eccSpared  = iv_symbol.isEccSpared()  ? 1 : 0;
-        iv_memMruMeld.s.wiringType = iv_symbol.getWiringType();
+
+        // The wiring type field has been depricated. This must be initialized
+        // to invalid so that out-of-date error log parsers can handle the new
+        // code appropriately.
+        iv_memMruMeld.s.wiringType = CEN_SYMBOL::WIRING_INVALID;
+
         // If the code gets to this point the MemoryMru is valid.
         iv_memMruMeld.s.valid = 1;
 

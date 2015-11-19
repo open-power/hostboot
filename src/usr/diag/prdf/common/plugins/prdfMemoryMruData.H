@@ -48,8 +48,6 @@ struct memMruDqInfo
     uint8_t   dqMapping[80];               // CenDQ to DimmDQ mapping
 };
 
-#define  MEMRU_WIRING_UNKNOWN 0xFF
-
 #ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
 namespace HOSTBOOT
 {
@@ -116,8 +114,10 @@ union MemMruMeld
         uint32_t symbol     : 7; ///< Symbol or SpecialCallout
 
         uint32_t eccSpared  : 1; ///< True if symbol is on ECC DRAM
-        // TODO: RTC 67376 Check if width for wiring type is enough
-        uint32_t wiringType : 3; ///< Wiring type
+        // The wiring type is no longer used in the MemoryMru. However, this
+        // field must remain and be initilized to CEN_SYMBOL::WIRING_INVALID so
+        // that out-of-date error log parsers can handle it appropriately.
+        uint32_t wiringType : 3; ///< Wiring type (deprecated)
         uint32_t srankValid : 1; ///< TRUE if slave rank is valid
         uint32_t srank      : 3; ///< Slave rank (0-7)
 #else

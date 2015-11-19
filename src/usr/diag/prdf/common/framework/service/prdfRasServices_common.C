@@ -653,7 +653,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                             }
                             else
                             {   // unable to determine anything
-                                l_memData.cardType = MEMRU_WIRING_UNKNOWN;
+                                l_memData.cardType = CEN_SYMBOL::WIRING_INVALID;
                             }
 
                             // Get the 32 bit representation of MemMru
