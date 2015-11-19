@@ -742,7 +742,7 @@
 
     Producer: MRWB
 
-    Consumers: p9_pfet_init
+    Consumers: p9_pm_pfet_init
 
     Platform default:
     </description>
@@ -759,11 +759,65 @@
 
     Producer: MRWB
 
-    Consumers: p9_pfet_init
+    Consumers: p9_pm_pfet_init
 
     Platform default:
     </description>
     <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PFET_VDD_VOFF_SEL</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Selection of the OFF setting for the core and cache chiplet VDD PFET controllers
+
+    Producer: MRWB
+
+    Consumers: p9_pm_pfet_init
+
+    Platform default:
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+    NOOFF = 0x00,
+    ALLBUT1TO7OFF = 0x01,
+    ALLBUT2TO7OFF = 0x02,
+    ALLBUT3TO7OFF = 0x03,
+    ALLBUT4TO7OFF = 0x04,
+    ALLBUT5TO7OFF = 0x05,
+    ALLBUT6TO7OFF = 0x06,
+    ALLBUT7OFF = 0x7,
+    ALLOFF = 0x08
+    </enum>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PFET_VCS_VOFF_SEL</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Selection of the OFF setting for the core and cache chiplet VCS PFET controllers
+
+    Producer: MRWB
+
+    Consumers: p9_pm_pfet_init
+
+    Platform default:
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+    NOOFF = 0x00,
+    ALLBUT1TO7OFF = 0x01,
+    ALLBUT2TO7OFF = 0x02,
+    ALLBUT3TO7OFF = 0x03,
+    ALLBUT4TO7OFF = 0x04,
+    ALLBUT5TO7OFF = 0x05,
+    ALLBUT6TO7OFF = 0x06,
+    ALLBUT7OFF = 0x7,
+    ALLOFF = 0x08
+    </enum>
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
