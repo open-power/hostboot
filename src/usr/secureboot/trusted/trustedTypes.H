@@ -78,7 +78,9 @@ namespace TRUSTEDBOOT
         MAX_TPM_LOG_MSG = 128,    ///< Maximum log message size
 
         HASH_COUNT            = 1,       ///< Maximum # of digests
-        PCR_SELECT_MAX        = ((PCR_MAX+7)/8), ///< PCR selection octet max
+
+        PCR_SELECT_MAX = (IMPLEMENTATION_PCR+7)/8, ///< PCR selection octet max
+
     };
 
     typedef enum
@@ -347,6 +349,77 @@ namespace TRUSTEDBOOT
     uint8_t* TPM2_ExtendIn_marshalParms(TPM2_ExtendIn* val,
                                         uint8_t* o_tpmBuf, size_t i_tpmBufSize,
                                         size_t* io_cmdSize);
+
+    struct _TPMS_PCR_SELECTION
+    {
+        uint16_t   algorithmId; ///< ID of hashing algorithm
+        uint8_t    sizeOfSelect; ///< Byte size of pcrSelect array
+        uint8_t    pcrSelect[PCR_SELECT_MAX];
+    } PACKED;
+    typedef struct _TPMS_PCR_SELECTION TPMS_PCR_SELECTION;
+    uint8_t* TPMS_PCR_SELECTION_marshal(TPMS_PCR_SELECTION* val,
+                                        uint8_t* o_tpmBuf, size_t i_tpmBufSize,
+                                        size_t* io_cmdSize);
+    uint8_t* TPMS_PCR_SELECTION_unmarshal(TPMS_PCR_SELECTION* val,
+                                          uint8_t* i_tpmBuf,
+                                          size_t* io_tpmBufSize);
+
+
+    struct _TPM2B_DIGEST
+    {
+        uint16_t size;
+        uint8_t  buffer[sizeof(TPMU_HA)];
+    } PACKED;
+    typedef struct _TPM2B_DIGEST TPM2B_DIGEST;
+    uint8_t* TPM2B_DIGEST_unmarshal(TPM2B_DIGEST* val,
+                                    uint8_t* i_tpmBuf, size_t* io_tpmBufSize);
+
+    struct _TPML_DIGEST
+    {
+        uint32_t  count;
+        TPM2B_DIGEST digests[HASH_COUNT];
+    } PACKED;
+    typedef struct _TPML_DIGEST TPML_DIGEST;
+    uint8_t* TPML_DIGEST_unmarshal(TPML_DIGEST* val,
+                                   uint8_t* i_tpmBuf, size_t* io_tpmBufSize);
+
+    struct _TPML_PCR_SELECTION
+    {
+        uint32_t     count;
+        TPMS_PCR_SELECTION pcrSelections[HASH_COUNT];
+    } PACKED;
+    typedef struct _TPML_PCR_SELECTION TPML_PCR_SELECTION;
+    uint8_t* TPML_PCR_SELECTION_marshal(TPML_PCR_SELECTION* val,
+                                        uint8_t* o_tpmBuf, size_t i_tpmBufSize,
+                                        size_t* io_cmdSize);
+    uint8_t* TPML_PCR_SELECTION_unmarshal(TPML_PCR_SELECTION* val,
+                                          uint8_t* i_tpmBuf,
+                                          size_t* io_tpmBufSize);
+
+    /// Incoming PCR_Read structure
+    struct _TPM2_PcrReadIn
+    {
+        TPM2_BaseIn  base;
+        TPML_PCR_SELECTION pcrSelectionIn;
+    } PACKED;
+    typedef struct _TPM2_PcrReadIn TPM2_PcrReadIn;
+    uint8_t* TPM2_PcrReadIn_marshal(TPM2_PcrReadIn* val,
+                                    uint8_t* o_tpmBuf, size_t i_tpmBufSize,
+                                    size_t* io_cmdSize);
+
+    /// Outgoing Pcr_Read structure
+    struct _TPM2_PcrReadOut
+    {
+        TPM2_BaseOut base;
+        uint32_t     pcrUpdateCounter;
+        TPML_PCR_SELECTION pcrSelectionOut;
+        TPML_DIGEST  pcrValues;
+    } PACKED;
+    typedef struct _TPM2_PcrReadOut TPM2_PcrReadOut;
+    uint8_t* TPM2_PcrReadOut_unmarshal(TPM2_PcrReadOut* val,
+                                       uint8_t* i_tpmBuf,
+                                       size_t* io_tpmBufSize,
+                                       size_t i_outBufSize);
 
     /// TPM Authorization structure
     ///  This is not the full structure and only works for PW auth with NULL PW
