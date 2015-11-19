@@ -294,6 +294,185 @@ namespace TRUSTEDBOOT
                                            i_tpmBufSize, io_cmdSize));
     }
 
+    uint8_t* TPMS_PCR_SELECTION_marshal(TPMS_PCR_SELECTION* val,
+                                        uint8_t* o_tpmBuf,
+                                        size_t i_tpmBufSize,
+                                        size_t* io_cmdSize)
+    {
+        o_tpmBuf = marshalChunk(o_tpmBuf, i_tpmBufSize, io_cmdSize,
+                                &(val->algorithmId), sizeof(val->algorithmId));
+        o_tpmBuf = marshalChunk(o_tpmBuf, i_tpmBufSize, io_cmdSize,
+                               &(val->sizeOfSelect), sizeof(val->sizeOfSelect));
+
+        if (NULL != o_tpmBuf &&
+            PCR_SELECT_MAX < val->sizeOfSelect)
+        {
+            return NULL;
+        }
+
+        o_tpmBuf = marshalChunk(o_tpmBuf, i_tpmBufSize, io_cmdSize,
+                                val->pcrSelect, val->sizeOfSelect);
+        return o_tpmBuf;
+    }
+
+    uint8_t* TPMS_PCR_SELECTION_unmarshal(TPMS_PCR_SELECTION* val,
+                                          uint8_t* i_tpmBuf,
+                                          size_t* io_tpmBufSize)
+    {
+        i_tpmBuf = unmarshalChunk(i_tpmBuf, io_tpmBufSize,
+                                  &(val->algorithmId),
+                                  sizeof(val->algorithmId));
+        i_tpmBuf = unmarshalChunk(i_tpmBuf, io_tpmBufSize,
+                                  &(val->sizeOfSelect),
+                                  sizeof(val->sizeOfSelect));
+        if (NULL != i_tpmBuf &&
+            PCR_SELECT_MAX < val->sizeOfSelect)
+        {
+            return NULL;
+        }
+        i_tpmBuf = unmarshalChunk(i_tpmBuf, io_tpmBufSize,
+                                  val->pcrSelect, val->sizeOfSelect);
+
+        return i_tpmBuf;
+    }
+
+    uint8_t* TPM2B_DIGEST_unmarshal(TPM2B_DIGEST* val,
+                                    uint8_t* i_tpmBuf,
+                                    size_t* io_tpmBufSize)
+    {
+        i_tpmBuf = unmarshalChunk(i_tpmBuf, io_tpmBufSize,
+                                  &val->size, sizeof(val->size));
+        if (NULL != i_tpmBuf &&
+            sizeof(TPMU_HA) < val->size)
+        {
+            TRACUCOMP( g_trac_trustedboot,
+                       "TPM2B_DIGEST::unmarshal invalid size");
+            return NULL;
+        }
+        i_tpmBuf = unmarshalChunk(i_tpmBuf, io_tpmBufSize,
+                                  val->buffer, val->size);
+        return i_tpmBuf;
+
+    }
+
+    uint8_t* TPML_DIGEST_unmarshal(TPML_DIGEST* val,
+                                   uint8_t* i_tpmBuf,
+                                   size_t* io_tpmBufSize)
+    {
+        i_tpmBuf = unmarshalChunk(i_tpmBuf, io_tpmBufSize,
+                                  &(val->count), sizeof(val->count));
+        if (NULL != i_tpmBuf && HASH_COUNT < val->count)
+        {
+            TRACUCOMP( g_trac_trustedboot,
+                       "TPML_DIGEST::unmarshal invalid count %d", val->count);
+            i_tpmBuf = NULL;
+        }
+        else if (NULL != i_tpmBuf)
+        {
+            for (size_t idx = 0; idx < val->count; idx++)
+            {
+                i_tpmBuf = TPM2B_DIGEST_unmarshal(&(val->digests[idx]),
+                                                  i_tpmBuf,
+                                                  io_tpmBufSize);
+                if (NULL == i_tpmBuf)
+                {
+                    break;
+                }
+            }
+        }
+        return i_tpmBuf;
+
+    }
+
+    uint8_t* TPML_PCR_SELECTION_marshal(TPML_PCR_SELECTION* val,
+                                        uint8_t* o_tpmBuf,
+                                        size_t i_tpmBufSize,
+                                        size_t* io_cmdSize)
+    {
+        o_tpmBuf = marshalChunk(o_tpmBuf, i_tpmBufSize, io_cmdSize,
+                                &(val->count), sizeof(val->count));
+        if (NULL != o_tpmBuf && HASH_COUNT < val->count)
+        {
+            TRACUCOMP( g_trac_trustedboot,
+                       "TPML_PCR_SELECTION::marshal invalid count");
+            o_tpmBuf = NULL;
+        }
+        else if (NULL != o_tpmBuf)
+        {
+            for (size_t idx = 0; idx < val->count; idx++)
+            {
+                o_tpmBuf = TPMS_PCR_SELECTION_marshal(
+                                          &(val->pcrSelections[idx]),
+                                          o_tpmBuf,
+                                          i_tpmBufSize,
+                                          io_cmdSize);
+                if (NULL == o_tpmBuf)
+                {
+                    break;
+                }
+            }
+        }
+        return o_tpmBuf;
+    }
+
+    uint8_t* TPML_PCR_SELECTION_unmarshal(TPML_PCR_SELECTION* val,
+                                          uint8_t* i_tpmBuf,
+                                          size_t* io_tpmBufSize)
+    {
+        i_tpmBuf = unmarshalChunk(i_tpmBuf, io_tpmBufSize,
+                                  &(val->count), sizeof(val->count));
+        if (NULL != i_tpmBuf && HASH_COUNT < val->count)
+        {
+            TRACUCOMP( g_trac_trustedboot,
+                       "TPML_PCR_SELECTION::unmarshal invalid count");
+            i_tpmBuf = NULL;
+        }
+        else if (NULL != i_tpmBuf)
+        {
+            for (size_t idx = 0; idx < val->count; idx++)
+            {
+                i_tpmBuf = TPMS_PCR_SELECTION_unmarshal(
+                                 &(val->pcrSelections[idx]),
+                                 i_tpmBuf,
+                                 io_tpmBufSize);
+                if (NULL == i_tpmBuf)
+                {
+                    break;
+                }
+            }
+        }
+        return i_tpmBuf;
+
+    }
+
+    uint8_t* TPM2_PcrReadIn_marshal(TPM2_PcrReadIn* val,
+                                    uint8_t* o_tpmBuf,
+                                    size_t i_tpmBufSize,
+                                    size_t* io_cmdSize)
+    {
+        // Base and handle has already been marshaled
+        return (TPML_PCR_SELECTION_marshal(&(val->pcrSelectionIn), o_tpmBuf,
+                                           i_tpmBufSize, io_cmdSize));
+    }
+
+    uint8_t* TPM2_PcrReadOut_unmarshal(TPM2_PcrReadOut* val,
+                                       uint8_t* i_tpmBuf,
+                                       size_t* io_tpmBufSize,
+                                       size_t i_outBufSize)
+    {
+        // Base and handle has already been marshaled
+        if (sizeof(TPM2_PcrReadOut) > i_outBufSize) return NULL;
+        i_tpmBuf = unmarshalChunk(i_tpmBuf, io_tpmBufSize,
+                                  &(val->pcrUpdateCounter),
+                                  sizeof(val->pcrUpdateCounter));
+
+        i_tpmBuf = TPML_PCR_SELECTION_unmarshal(&(val->pcrSelectionOut),
+                                                i_tpmBuf, io_tpmBufSize);
+        i_tpmBuf = TPML_DIGEST_unmarshal(&(val->pcrValues), i_tpmBuf,
+                                         io_tpmBufSize);
+        return i_tpmBuf;
+
+    }
 
     uint8_t* TPMS_AUTH_COMMAND_marshal(TPMS_AUTH_COMMAND* val,
                                        uint8_t* o_tpmBuf,

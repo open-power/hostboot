@@ -62,7 +62,8 @@ namespace TRUSTEDBOOT
         PCR_1     = 1,
         PCR_4     = 4,
         PCR_DEBUG = 16,
-        PCR_MAX   = 16,
+        PLATFORM_PCR = 24, ///< The number of PCR required by the platform spec
+        IMPLEMENTATION_PCR = 24, ///< The number of PCRs implemented by TPM
     } TPM_Pcr;
 
 

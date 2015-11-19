@@ -119,6 +119,8 @@ errlHndl_t tpmCmdGetCapFwVersion(TpmTarget* io_target);
  * @param[in] i_algId Algorithm to use
  * @param[in] i_digest Digest value to write to PCR, zeros appended as needed
  * @param[in] i_digestSize Byte size of i_digest array
+ * @return errlHndl_t NULL if successful, otherwise a pointer to the
+ *       error log.
  */
 errlHndl_t tpmCmdPcrExtend(TpmTarget * io_target,
                            TPM_Pcr i_pcr,
@@ -126,6 +128,21 @@ errlHndl_t tpmCmdPcrExtend(TpmTarget * io_target,
                            uint8_t* i_digest,
                            size_t  i_digestSize);
 
+/**
+ * @brief Send the TPM_Read command to the targeted TPM and log
+ * @param[in/out] io_target Current TPM target structure
+ * @param[in] i_pcr PCR to read from
+ * @param[in] i_algId Algorithm back to read from
+ * @param[out] o_digest Array to store PCR contents
+ * @param[in] i_digestSize Byte size of i_digest array
+ * @return errlHndl_t NULL if successful, otherwise a pointer to the
+ *       error log.
+ */
+errlHndl_t tpmCmdPcrRead(TpmTarget* io_target,
+                         TPM_Pcr i_pcr,
+                         TPM_Alg_Id i_algId,
+                         uint8_t* o_digest,
+                         size_t  i_digestSize);
 
 #ifdef __cplusplus
 } // end TRUSTEDBOOT namespace
