@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,7 @@
 ///     - if PPC405_HALT_OFF   , write halt bit to 0  (PPC405 not halted)
 ///     - if PPC405_HALT_ON    , write halt bit to 1  (PPC405 halted)
 ///     - if PPC405_RESET_SEQUENCE , Perform the safe halt->reset sequence
+///     - if PPC405_START      , Start the PPC405
 ///
 /// Procedure Prereq:
 ///   - System clocks are running
@@ -75,7 +76,8 @@ enum PPC_CONTROL
     PPC405_RESET_ON,         ///< Assert the PPC405 reset
     PPC405_HALT_OFF,         ///< Deassert the PPC405 halt
     PPC405_HALT_ON,          ///< Assert the PPC405 halt
-    PPC405_RESET_SEQUENCE    ///< Perform the safe halt->reset sequence
+    PPC405_RESET_SEQUENCE,   ///< Perform the safe halt->reset sequence
+    PPC405_START             ///< Perform start sequence
 };
 
 enum PPC_BOOT_CONTROL

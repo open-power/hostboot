@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,8 +37,8 @@
 
 enum PPC_BRANCH_INSTR
 {
-    // Branch Absolute 0xFFF80040  (boot from sram)
-    PPC405_BRANCH_SRAM_INSTR = 0x4BF80042,
+    // Branch Absolute 0xFFF40002  (boot from sram)
+    PPC405_BRANCH_SRAM_INSTR = 0x4BF40002,
     // Branch Absolute 0x00000040  (boot from memory)
     PPC405_BRANCH_MEM_INSTR  = 0x48000042,
     // Branch Relative -16         (boot from sram)
@@ -50,6 +50,17 @@ enum DELAY_VALUE
     NS_DELAY = 1000000,// 1,000,000 ns = 1ms
     SIM_CYCLE_DELAY = 10000
 };
+
+// OCR Register Bits
+static const uint32_t OCB_PIB_OCR_CORE_RESET_BIT = 0;
+static const uint32_t OCB_PIB_OCR_OCR_DBG_HALT_BIT = 10;
+
+// OCC JTAG Register Bits
+static const uint32_t JTG_PIB_OJCFG_DBG_HALT_BIT = 6;
+
+// OCC LFIR Bits
+static const uint32_t OCCLFIR_PPC405_DBGSTOPACK_BIT = 31;
+
 
 // -----------------------------------------------------------------------------
 //   Procedure Defintion
@@ -64,6 +75,7 @@ fapi2::ReturnCode p9_pm_occ_control
     fapi2::buffer<uint64_t> l_data64;
     fapi2::buffer<uint64_t> l_firMask;
     fapi2::buffer<uint64_t> l_occfir;
+    fapi2::buffer<uint64_t> l_jtagcfg;
 
     // Set up Boot Vector Registers in SRAM
     //    - set bv0-2 to all 0's (illegal instructions)
@@ -93,10 +105,6 @@ fapi2::ReturnCode p9_pm_occ_control
 
         FAPI_TRY(fapi2::putScom(i_target, PU_SRAM_SRBV3_SCOM, l_data64));
     }
-    else
-    {
-        FAPI_INF("Boot instruction location not specified");
-    }
 
     // Handle the i_ppc405_reset_ctrl parameter
     switch (i_ppc405_reset_ctrl)
@@ -106,19 +114,27 @@ fapi2::ReturnCode p9_pm_occ_control
             break;
 
         case p9occ_ctrl::PPC405_RESET_OFF:
-            FAPI_TRY(fapi2::putScom(i_target, PU_OCB_PIB_OCR_CLEAR, ~BIT(0)));
+            FAPI_TRY(fapi2::putScom(i_target,
+                                    PU_OCB_PIB_OCR_CLEAR,
+                                    ~BIT(OCB_PIB_OCR_CORE_RESET_BIT)));
             break;
 
         case p9occ_ctrl::PPC405_RESET_ON:
-            FAPI_TRY(fapi2::putScom(i_target, PU_OCB_PIB_OCR_OR, BIT(0)));
+            FAPI_TRY(fapi2::putScom(i_target,
+                                    PU_OCB_PIB_OCR_OR,
+                                    BIT(OCB_PIB_OCR_CORE_RESET_BIT)));
             break;
 
         case p9occ_ctrl::PPC405_HALT_OFF:
-            FAPI_TRY(fapi2::putScom(i_target, PU_JTG_PIB_OJCFG_AND, ~BIT(6)));
+            FAPI_TRY(fapi2::putScom(i_target,
+                                    PU_JTG_PIB_OJCFG_AND,
+                                    ~BIT(OCB_PIB_OCR_OCR_DBG_HALT_BIT)));
             break;
 
         case p9occ_ctrl::PPC405_HALT_ON:
-            FAPI_TRY(fapi2::putScom(i_target, PU_JTG_PIB_OJCFG_OR, BIT(6)));
+            FAPI_TRY(fapi2::putScom(i_target,
+                                    PU_JTG_PIB_OJCFG_OR,
+                                    BIT(OCB_PIB_OCR_OCR_DBG_HALT_BIT)));
             break;
 
         case p9occ_ctrl::PPC405_RESET_SEQUENCE:
@@ -151,28 +167,70 @@ fapi2::ReturnCode p9_pm_occ_control
             /// Save the FIR mask, and mask the halted FIR
 
             FAPI_DBG("Performing the RESET SEQUENCE");
-            FAPI_TRY(fapi2::getScom(i_target, PERV_TP_OCC_SCOM_OCCLFIRMASK, l_firMask));
-            FAPI_TRY(fapi2::putScom(i_target, PERV_TP_OCC_SCOM_OCCLFIRMASK_OR, BIT(25)));
+            FAPI_TRY(fapi2::getScom(i_target,
+                                    PERV_TP_OCC_SCOM_OCCLFIRMASK,
+                                    l_firMask));
+            FAPI_TRY(fapi2::putScom(i_target,
+                                    PERV_TP_OCC_SCOM_OCCLFIRMASK_OR,
+                                    BIT(OCCLFIR_PPC405_DBGSTOPACK_BIT)));
+
             // Halt the 405 and verify that it is halted
-            FAPI_TRY(fapi2::putScom(i_target, PU_JTG_PIB_OJCFG_OR, BIT(6)));
+            FAPI_TRY(fapi2::putScom(i_target,
+                                    PU_OCB_PIB_OCR_OR,
+                                    BIT(OCB_PIB_OCR_OCR_DBG_HALT_BIT)));
 
             FAPI_TRY(fapi2::delay(NS_DELAY, SIM_CYCLE_DELAY));
 
-            FAPI_TRY(fapi2::putScom(i_target, PERV_TP_OCC_SCOM_OCCLFIR_AND, ~BIT(25)));
+            FAPI_TRY(fapi2::putScom(i_target,
+                                    PERV_TP_OCC_SCOM_OCCLFIR_AND,
+                                    ~BIT(OCCLFIR_PPC405_DBGSTOPACK_BIT)));
 
-            FAPI_TRY(fapi2::getScom(i_target, PERV_TP_OCC_SCOM_OCCLFIR, l_occfir));
+            FAPI_TRY(fapi2::getScom(i_target,
+                                    PERV_TP_OCC_SCOM_OCCLFIR,
+                                    l_occfir));
 
-            if (!(l_occfir & BIT(25)))
+            if (!(l_occfir & BIT(OCCLFIR_PPC405_DBGSTOPACK_BIT)))
             {
                 FAPI_ERR("OCC will not halt. Pressing on, hoping for the best.");
             }
 
             // Put 405 into reset, unhalt 405 and clear the halted FIR bit.
-            FAPI_TRY(fapi2::putScom(i_target, PU_OCB_PIB_OCR_OR, BIT(0)));
-            FAPI_TRY(fapi2::putScom(i_target, PU_JTG_PIB_OJCFG_AND, ~BIT(6)));
-            FAPI_TRY(fapi2::putScom(i_target, PERV_TP_OCC_SCOM_OCCLFIR_AND, ~BIT(25)));
+            FAPI_TRY(fapi2::putScom(i_target,
+                                    PU_OCB_PIB_OCR_OR,
+                                    BIT(OCB_PIB_OCR_CORE_RESET_BIT)));
+            FAPI_TRY(fapi2::putScom(i_target,
+                                    PU_OCB_PIB_OCR_CLEAR,
+                                    BIT(OCB_PIB_OCR_OCR_DBG_HALT_BIT)));
+            FAPI_TRY(fapi2::putScom(i_target,
+                                    PERV_TP_OCC_SCOM_OCCLFIR_AND,
+                                    ~BIT(OCCLFIR_PPC405_DBGSTOPACK_BIT)));
             // Restore the original FIR mask
-            FAPI_TRY(fapi2::putScom(i_target, PERV_TP_OCC_SCOM_OCCLFIRMASK, l_firMask));
+            FAPI_TRY(fapi2::putScom(i_target,
+                                    PERV_TP_OCC_SCOM_OCCLFIRMASK,
+                                    l_firMask));
+            break;
+
+        case p9occ_ctrl::PPC405_START:
+
+            // Check the JTAG Halt bit is off as the the PPC405 won't actually start
+            // if this bit is on (controlled by RiscWatch)
+            FAPI_TRY(fapi2::getScom(i_target, PU_JTG_PIB_OJCFG, l_jtagcfg));
+
+            FAPI_ASSERT (!(l_jtagcfg.getBit<JTG_PIB_OJCFG_DBG_HALT_BIT>()),
+                         fapi2::OCC_CONTROL_NONSTART_DUE_TO_RISCWATCH()
+                         .set_JTAGCFG(l_jtagcfg),
+                         "OCC will not start as the JTAG halt from RiscWatch is currently set");
+
+            FAPI_INF("Starting the PPC405");
+            // Clear the halt bit
+            FAPI_TRY(fapi2::putScom(i_target,
+                                    PU_OCB_PIB_OCR_CLEAR,
+                                    BIT(OCB_PIB_OCR_OCR_DBG_HALT_BIT)));
+            // Clear the reset bit
+            FAPI_TRY(fapi2::putScom(i_target,
+                                    PU_OCB_PIB_OCR_CLEAR,
+                                    BIT(OCB_PIB_OCR_CORE_RESET_BIT)));
+
             break;
 
         default:
