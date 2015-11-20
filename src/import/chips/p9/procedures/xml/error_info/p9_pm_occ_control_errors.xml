@@ -7,7 +7,7 @@
 <!--                                                                        -->
 <!-- EKB Project                                                            -->
 <!--                                                                        -->
-<!-- COPYRIGHT 2015                                                         -->
+<!-- COPYRIGHT 2015,2016                                                    -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -25,4 +25,13 @@
 
 <!-- Error definitions for p9_pm_occ_control procedure -->
 <hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_OCC_CONTROL_NONSTART_DUE_TO_RISCWATCH</rc>
+    <description>
+    The OCC PPC405 cannot be started due to a conflicting RISCWatch operation
+    that keeps it in the halt state.
+    </description>
+    <ffdc>JTAGCFG</ffdc>
+  </hwpError>
 </hwpErrors>
