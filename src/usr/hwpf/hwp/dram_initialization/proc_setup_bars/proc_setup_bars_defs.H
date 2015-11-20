@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_setup_bars_defs.H,v 1.4 2015/02/02 18:58:18 jmcgill Exp $
+// $Id: proc_setup_bars_defs.H,v 1.6 2015/11/10 19:39:58 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_setup_bars_defs.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -247,6 +247,7 @@ struct proc_setup_bars_smp_chip
     bool nx_enabled;
     bool pcie_enabled;
     bool nv_present;
+    bool init_group_as_chip;
     bool dual_capp_present;
     // number of valid PCIe PHBs
     uint8_t num_phb;
@@ -440,15 +441,16 @@ struct proc_setup_bars_hca_nm_bar_size
     static std::map<uint64_t, uint64_t> create_map()
     {
         std::map<uint64_t, uint64_t> m;
-        m[PROC_SETUP_BARS_SIZE_1_TB]   = 0xFFULL;
-        m[PROC_SETUP_BARS_SIZE_512_GB] = 0x7FULL;
-        m[PROC_SETUP_BARS_SIZE_256_GB] = 0x3FULL;
-        m[PROC_SETUP_BARS_SIZE_128_GB] = 0x1FULL;
-        m[PROC_SETUP_BARS_SIZE_64_GB]  = 0x0FULL;
-        m[PROC_SETUP_BARS_SIZE_32_GB]  = 0x07ULL;
-        m[PROC_SETUP_BARS_SIZE_16_GB]  = 0x03ULL;
-        m[PROC_SETUP_BARS_SIZE_8_GB]   = 0x01ULL;
-        m[PROC_SETUP_BARS_SIZE_4_GB]   = 0x00ULL;
+        m[PROC_SETUP_BARS_SIZE_2_TB]   = 0x1FFULL;
+        m[PROC_SETUP_BARS_SIZE_1_TB]   = 0x0FFULL;
+        m[PROC_SETUP_BARS_SIZE_512_GB] = 0x07FULL;
+        m[PROC_SETUP_BARS_SIZE_256_GB] = 0x03FULL;
+        m[PROC_SETUP_BARS_SIZE_128_GB] = 0x01FULL;
+        m[PROC_SETUP_BARS_SIZE_64_GB]  = 0x00FULL;
+        m[PROC_SETUP_BARS_SIZE_32_GB]  = 0x007ULL;
+        m[PROC_SETUP_BARS_SIZE_16_GB]  = 0x003ULL;
+        m[PROC_SETUP_BARS_SIZE_8_GB]   = 0x001ULL;
+        m[PROC_SETUP_BARS_SIZE_4_GB]   = 0x000ULL;
         return m;
     }
     static const std::map<uint64_t, uint64_t> xlate_map;
@@ -1000,8 +1002,8 @@ const proc_setup_bars_bar_reg_def hca_nm_bar_reg_def =
     31,
     false,                         // enable: bit 63 (off for SW258328)
     63,
-    true,                          // size: bits 33:40
-    33,
+    true,                          // size: bits 32:40
+    32,
     40,
     &proc_setup_bars_hca_nm_bar_size::xlate_map,
     0x0ULL,

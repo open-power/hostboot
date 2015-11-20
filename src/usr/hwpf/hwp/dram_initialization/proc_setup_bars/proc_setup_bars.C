@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_setup_bars.C,v 1.28 2015/04/14 22:19:55 jmcgill Exp $
+// $Id: proc_setup_bars.C,v 1.29 2015/11/10 19:39:58 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_setup_bars.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -992,6 +992,7 @@ fapi::ReturnCode proc_setup_bars_process_chip(
     uint8_t pcie_enabled;
     uint8_t nx_enabled;
     uint8_t nv_present;
+    uint8_t init_group_as_chip;
     uint8_t dual_capp_present;
 
     // mark function entry
@@ -1072,6 +1073,17 @@ fapi::ReturnCode proc_setup_bars_process_chip(
 
         io_smp_chip.pcie_enabled =
             (pcie_enabled == fapi::ENUM_ATTR_PROC_PCIE_ENABLE_ENABLE);
+
+        // configure group BARs to cover chip ranges?
+        rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_INIT_GROUP_BARS_AS_CHIP_BARS,
+                           &(io_smp_chip.chip->this_chip),
+                           init_group_as_chip);
+        if (!rc.ok())
+        {
+            FAPI_ERR("proc_setup_bars_process_chip: Error querying ATTR_CHIP_EC_FEATURE_INIT_GROUP_BARS_AS_CHIP_BARS");
+            break;
+        }
+        io_smp_chip.init_group_as_chip = (init_group_as_chip != 0);
 
         // get NV link presence attribute
         rc = FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_NV_PRESENT,
@@ -2668,17 +2680,23 @@ proc_setup_bars_write_local_node_region_bars(
 
     FAPI_DBG("proc_setup_bars_write_local_node_region_bars: Start");
 
+    // set non-mirrored/mirrored ranges based on group=chip EC feature attribute
+    proc_setup_bars_addr_range non_mirrored_range =
+        ((i_smp_chip.init_group_as_chip)?(i_smp_chip.non_mirrored_range):(i_smp_node.non_mirrored_range));
+    proc_setup_bars_addr_range mirrored_range =
+        ((i_smp_chip.init_group_as_chip)?(i_smp_chip.mirrored_range):(i_smp_node.mirrored_range));
+
     do
     {
         // NX (non-mirrored)
-        if (i_smp_node.non_mirrored_range.enabled && i_smp_chip.nx_enabled)
+        if (non_mirrored_range.enabled && i_smp_chip.nx_enabled)
         {
             FAPI_DBG("proc_setup_bars_write_local_node_region_bars: Writing NX CXA0 APC Group Non-Mirrored BAR register");
             rc = proc_setup_bars_common_write_bar_reg(
                 i_smp_chip.chip->this_chip,
                 NX_APC_GROUP_BAR0_0x0201302F,
                 common_nf_scope_bar_reg_def,
-                i_smp_node.non_mirrored_range);
+                non_mirrored_range);
             if (!rc.ok())
             {
                 FAPI_ERR("proc_setup_bars_write_local_node_region_bars: Error from proc_setup_bars_common_write_bar_reg");
@@ -2692,7 +2710,7 @@ proc_setup_bars_write_local_node_region_bars(
                     i_smp_chip.chip->this_chip,
                     NX_CXA1_APC_GROUP_BAR0_0x020131AF,
                     common_nf_scope_bar_reg_def,
-                    i_smp_node.non_mirrored_range);
+                    non_mirrored_range);
                 if (!rc.ok())
                 {
                     FAPI_ERR("proc_setup_bars_write_local_node_region_bars: Error from proc_setup_bars_common_write_bar_reg");
@@ -2705,7 +2723,7 @@ proc_setup_bars_write_local_node_region_bars(
                 i_smp_chip.chip->this_chip,
                 NX_GROUP_BAR0_0x02013097,
                 common_nf_scope_bar_reg_def,
-                i_smp_node.non_mirrored_range);
+                non_mirrored_range);
             if (!rc.ok())
             {
                 FAPI_ERR("proc_setup_bars_write_local_node_region_bars: Error from proc_setup_bars_common_write_bar_reg");
@@ -2714,14 +2732,14 @@ proc_setup_bars_write_local_node_region_bars(
         }
 
         // NX (mirrored)
-        if (i_smp_node.mirrored_range.enabled && i_smp_chip.nx_enabled)
+        if (mirrored_range.enabled && i_smp_chip.nx_enabled)
         {
             FAPI_DBG("proc_setup_bars_write_local_node_region_bars: Writing NX CXA0 APC Group Mirrored BAR register");
             rc = proc_setup_bars_common_write_bar_reg(
                 i_smp_chip.chip->this_chip,
                 NX_APC_GROUP_BAR1_0x02013030,
                 common_nf_scope_bar_reg_def,
-                i_smp_node.mirrored_range);
+                mirrored_range);
             if (!rc.ok())
             {
                 FAPI_ERR("proc_setup_bars_write_local_node_region_bars: Error from proc_setup_bars_common_write_bar_reg");
@@ -2735,7 +2753,7 @@ proc_setup_bars_write_local_node_region_bars(
                     i_smp_chip.chip->this_chip,
                     NX_CXA1_APC_GROUP_BAR1_0x020131B0,
                     common_nf_scope_bar_reg_def,
-                    i_smp_node.mirrored_range);
+                    mirrored_range);
                 if (!rc.ok())
                 {
                     FAPI_ERR("proc_setup_bars_write_local_node_region_bars: Error from proc_setup_bars_common_write_bar_reg");
@@ -2748,7 +2766,7 @@ proc_setup_bars_write_local_node_region_bars(
                 i_smp_chip.chip->this_chip,
                 NX_GROUP_BAR1_0x02013098,
                 common_nf_scope_bar_reg_def,
-                i_smp_node.mirrored_range);
+                mirrored_range);
             if (!rc.ok())
             {
                 FAPI_ERR("proc_setup_bars_write_local_node_region_bars: Error from proc_setup_bars_common_write_bar_reg");
@@ -2756,7 +2774,7 @@ proc_setup_bars_write_local_node_region_bars(
             }
         }
         // NPU (non-mirrored)
-        if (i_smp_chip.non_mirrored_range.enabled && i_smp_chip.nv_present)
+        if (non_mirrored_range.enabled && i_smp_chip.nv_present)
         {
             for (uint8_t u = 0; u < PROC_SETUP_BARS_NPU_NUM_UNITS; u++)
             {
@@ -2765,7 +2783,7 @@ proc_setup_bars_write_local_node_region_bars(
                     i_smp_chip.chip->this_chip,
                     PROC_SETUP_BARS_NPU_NODE_NON_MIRRORED_BAR[u],
                     common_nf_scope_bar_reg_def,
-                    i_smp_node.non_mirrored_range);
+                    non_mirrored_range);
                 if (!rc.ok())
                 {
                     FAPI_ERR("proc_setup_bars_write_local_node_region_bars: Error from proc_setup_bars_common_write_bar_reg");
@@ -2780,7 +2798,7 @@ proc_setup_bars_write_local_node_region_bars(
         }
 
         // NPU (mirrored)
-        if (i_smp_chip.mirrored_range.enabled && i_smp_chip.nv_present)
+        if (mirrored_range.enabled && i_smp_chip.nv_present)
         {
             for (uint8_t u = 0; u < PROC_SETUP_BARS_NPU_NUM_UNITS; u++)
             {
@@ -2789,7 +2807,7 @@ proc_setup_bars_write_local_node_region_bars(
                     i_smp_chip.chip->this_chip,
                     PROC_SETUP_BARS_NPU_NODE_MIRRORED_BAR[u],
                     common_nf_scope_bar_reg_def,
-                    i_smp_node.mirrored_range);
+                    mirrored_range);
                 if (!rc.ok())
                 {
                     FAPI_ERR("proc_setup_bars_write_local_node_region_bars: Error from proc_setup_bars_common_write_bar_reg");
@@ -2803,12 +2821,12 @@ proc_setup_bars_write_local_node_region_bars(
         }
 
         // L3 (non-mirrored)
-        if (i_smp_node.non_mirrored_range.enabled)
+        if (non_mirrored_range.enabled)
         {
             rc = proc_setup_bars_l3_write_local_node_memory_bar_attr(
                 &(i_smp_chip.chip->this_chip),
                 true,
-                i_smp_node.non_mirrored_range,
+                non_mirrored_range,
                 i_smp_chip.non_mirrored_range);
 
             if (!rc.ok())
@@ -2819,12 +2837,12 @@ proc_setup_bars_write_local_node_region_bars(
         }
 
         // L3 (mirrored)
-        if (i_smp_node.mirrored_range.enabled)
+        if (mirrored_range.enabled)
         {
             rc = proc_setup_bars_l3_write_local_node_memory_bar_attr(
                 &(i_smp_chip.chip->this_chip),
                 false,
-                i_smp_node.mirrored_range,
+                mirrored_range,
                 i_smp_chip.mirrored_range);
 
             if (!rc.ok())
@@ -2840,8 +2858,8 @@ proc_setup_bars_write_local_node_region_bars(
             rc = proc_setup_bars_pcie_write_local_node_memory_bars(
                 i_smp_chip.chip->this_chip,
                 i_smp_chip.num_phb,
-                i_smp_node.non_mirrored_range,
-                i_smp_node.mirrored_range);
+                non_mirrored_range,
+                mirrored_range);
             if (!rc.ok())
             {
                 FAPI_ERR("proc_setup_bars_write_local_node_region_bars: Error from proc_setup_bars_pcie_write_local_node_memory_bars");

@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: proc_chip_ec_feature.xml,v 1.62 2015/06/29 01:45:13 jmcgill Exp $ -->
+<!-- $Id: proc_chip_ec_feature.xml,v 1.63 2015/11/10 19:38:14 jmcgill Exp $ -->
 <!-- Defines the attributes that are based on EC level -->
 <attributes>
   <!-- ********************************************************************* -->
@@ -110,6 +110,26 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Returns if a chip contains NV chiplet/link logic.  True if:
+      Naples EC 0x10 or greater
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NAPLES</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_INIT_GROUP_BARS_AS_CHIP_BARS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Returns true if the fabric unit BARs which track group memory ranges
+      should be initialized to track the chip memory range instead of the
+      group memory range.  True if:
       Naples EC 0x10 or greater
     </description>
     <chipEcFeature>
