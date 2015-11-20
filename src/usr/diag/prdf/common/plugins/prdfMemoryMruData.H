@@ -34,19 +34,12 @@
 
 #include <stdint.h>
 #include <endian.h>
+#include <string.h>
+
+#include <prdfParserEnums.H>
 
 namespace PRDF
 {
-// Structure to contain memory DQ mapping and related info
-struct memMruDqInfo
-{
-    uint32_t  memMru32bits;                // 32 bit MemoryMru format
-    uint32_t  cardType              :8;    // cardType for Centaur DIMMs
-    uint32_t  bufferedDimm          :1;    // 1=Centaur DIMM, 0=IS DIMM
-    uint32_t  isX4                  :1;    // 1=x4 DRAM DIMM, 0=x8 DRAM DIMM
-    uint32_t  reserved              :22;   // Future use / nice boundary
-    uint8_t   dqMapping[80];               // CenDQ to DimmDQ mapping
-};
 
 #ifdef PRDF_HOSTBOOT_ERRL_PLUGIN
 namespace HOSTBOOT
@@ -139,6 +132,40 @@ union MemMruMeld
 #endif
 
     } s; ///< A struct defining the 32-bit version of the MemoryMru
+};
+
+/** Contains a MemoryMru and extended data for extra FFDC. */
+struct ExtendedData
+{
+    MemMruMeld mmMeld;             ///< See MemMruMeld union
+    uint32_t   cardType       : 8; ///< Raw card type (Centaur DIMMs only)
+    uint32_t   isBufDimm      : 1; ///< 1=Centaur DIMM, 0=IS DIMM
+    uint32_t   isX4Dram       : 1; ///< 1=x4 DRAM DIMM, 0=x8 DRAM DIMM
+    uint32_t   isValid        : 1; ///< 1=struct contains valid data,
+                                   ///< 0=otherwise. Needed just in case there
+                                   ///< was a failure to gather extended data.
+    uint32_t   reserved       :21; ///< Future use / nice boundary
+    uint8_t    dqMapping[80];      ///< Centaur DQ to DIMM DQ mapping (only used
+                                   ///< when the MemoryMru contains a single
+                                   ///< IS DIMM callout).
+
+    /** Default contructor */
+    ExtendedData() :
+        cardType(CEN_SYMBOL::WIRING_INVALID), isBufDimm(0), isX4Dram(0),
+        isValid(0), reserved(0)
+    {
+        mmMeld.u = 0;
+        memset( &dqMapping[0], 0x00, sizeof(dqMapping) );
+    }
+
+    /** Contructor from flattened MemoryMru */
+    explicit ExtendedData( uint32_t i_memMru ) :
+        cardType(CEN_SYMBOL::WIRING_INVALID), isBufDimm(0), isX4Dram(0),
+        isValid(0), reserved(0)
+    {
+        mmMeld.u = i_memMru;
+        memset( &dqMapping[0], 0x00, sizeof(dqMapping) );
+    }
 };
 
 } // end namespace MemoryMruData

@@ -50,10 +50,11 @@ namespace FSP
  *        simply parses the data. It does not print header information (i.e.
  *        "MemoryMru") or print out the uint32_t value of the MemoryMru. It is
  *        up to the caller to add that data.
- * @param i_parser The error log parser.
- * @param i_memMru The MemoryMru data.
+ * @param i_parser    The error log parser.
+ * @param i_extMemMru A MemoryMru with extended data for extra FFDC.
  */
-bool parseMemMruData( ErrlUsrParser & i_parser, memMruDqInfo &i_memDqStruct );
+bool parseMemMruData( ErrlUsrParser & i_parser,
+                      MemoryMruData::ExtendedData & i_extMemMru );
 
 /**
  * @brief Parses Memory UE table.

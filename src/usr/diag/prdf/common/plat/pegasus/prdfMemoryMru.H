@@ -82,11 +82,14 @@ class MemoryMru
     /** @return A list of targets that are represented by this MemoryMru. */
     TARGETING::TargetHandleList getCalloutList() const;
 
-    /**
-     * @brief Allows reading the symbol information
-     * @return 'centaur symbol object'
-     */
-    CenSymbol  getSymbol() { return iv_symbol; }
+    /** @return The MBA target associated with this MemoryMru. */
+    TARGETING::TargetHandle_t getMbaTrgt() const { return iv_mbaTarget; }
+
+    /** @return The rank associated with this MemoryMru. */
+    CenRank getRank() const { return iv_rank; }
+
+    /** @return The symbol associated with this MemoryMru. */
+    CenSymbol getSymbol() const { return iv_symbol; }
 
   private: // instance variables
 

@@ -707,7 +707,7 @@ bool parseMemMru( void * i_buffer, uint32_t i_buflen, ErrlUsrParser & i_parser )
 bool parseDqMap( void * i_buffer, uint32_t i_buflen, ErrlUsrParser & i_parser )
 {
     bool    o_rc = true;
-    size_t  l_size = sizeof(memMruDqInfo);
+    size_t  l_size = sizeof(MemoryMruData::ExtendedData);
 
     i_parser.PrintBlank();
 
@@ -720,15 +720,15 @@ bool parseDqMap( void * i_buffer, uint32_t i_buflen, ErrlUsrParser & i_parser )
     else
     {
         // Data on input::has DQ mapping and a few other fields in a structure
-        memMruDqInfo  l_memData;
+        MemoryMruData::ExtendedData extMemMru;
         UtilMem membuf( i_buffer, i_buflen );
-        membuf >> l_memData;
+        membuf >> extMemMru;
 
         char header[72];
-        snprintf( header, 72, "MemoryMru (0x%08x)", l_memData.memMru32bits);
+        snprintf( header, 72, "MemoryMru (0x%08x)", extMemMru.mmMeld.u);
         i_parser.PrintHeading( header );
 
-        o_rc = parseMemMruData( i_parser, l_memData );
+        o_rc = parseMemMruData( i_parser, extMemMru );
 
     }
 

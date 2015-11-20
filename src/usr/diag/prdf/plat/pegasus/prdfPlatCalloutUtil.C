@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -32,6 +34,7 @@
 
 // Pegasus includes
 #include <prdfMemoryMru.H>
+#include <prdfCenMbaCaptureData.H>
 
 using namespace TARGETING;
 
@@ -57,8 +60,7 @@ void calloutMemoryMru( errlHndl_t io_errl, const MemoryMru & i_memmru,
     }
 
     // Add the MemoryMru to the capture data.
-    uint32_t tmpMru = i_memmru.toUint32();
-    PRDF_ADD_FFDC( io_errl, &tmpMru, sizeof(tmpMru), ErrlVer1, ErrlMruData_1 );
+    CenMbaCaptureData::addExtMemMruData( i_memmru, io_errl );
 }
 
 } // end namespace CalloutUtil

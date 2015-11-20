@@ -34,6 +34,7 @@
 #include <targeting/common/targetservice.H>
 #include <iipCaptureData.h>
 #include <errlentry.H>
+#include <prdfMemoryMru.H>
 
 namespace PRDF
 {
@@ -99,6 +100,14 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_mbaTrgt,
  */
 void captureDramRepairsVpd( TARGETING::TargetHandle_t i_mbaTrgt,
                             CaptureData & io_cd );
+
+/**
+ * @brief Adds a new user data section to the error log containing a MemoryMru
+ *        plus extended data for extra FFDC.
+ * @param i_mbaTrgt An MBA target
+ * @param io_errl   Target error log.
+ */
+void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl );
 
 } // end namespace MbaCaptureData
 
