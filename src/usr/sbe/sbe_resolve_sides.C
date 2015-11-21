@@ -543,7 +543,6 @@ errlHndl_t performSideActions(sbeResolveState_t& io_sideState)
 
         if ( io_sideState.actions & CHECK_WORKING_HBB )
         {
-
             // Copy current SBE Seeprom Image to Memory
             // NOTE: Seprate section from above because of possible future
             // improvement to use MBPD SB Keyword bit to keep track of HBB
@@ -607,6 +606,7 @@ errlHndl_t performSideActions(sbeResolveState_t& io_sideState)
                  ( io_sideState.cur_side != READ_ONLY_SEEPROM ) )
             {
                 io_sideState.actions |= REIPL;
+
                 TRACUCOMP( g_trac_sbe, ERR_MRK
                            "performSideActions: resolveImageHBBaddr returned "
                            "updateForHBB=%d, and not on READ_ONLY_SEEPROM so "
@@ -1191,13 +1191,9 @@ errlHndl_t resolveImageHBBaddr(TARGETING::Target* i_target,
             break;
         }
 
-
         // Only Need to Check/Update if PNOR has Other Side
-        // and Seeprom isn't pointing at PNOR's GOLDEN side
-        if ( (  pnor_side_info.hasOtherSide == true ) &&
-             (  pnor_side_info.isGolden == false ) )
+        if ( pnor_side_info.hasOtherSide == true )
         {
-
             // Read the MMIO offset associated with the HBB address
             // from the image
             rc = sbe_xip_get_scalar( io_imgPtr,

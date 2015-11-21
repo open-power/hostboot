@@ -165,17 +165,37 @@ namespace SBE
                 g_istep_mode = true;
             }
 
-
             if (mnfg_flags & MNFG_FLAG_UPDATE_BOTH_SIDES_OF_SBE)
             {
                 TRACFCOMP(g_trac_sbe,
-                        INFO_MRK"Update Both Sides of SBE Flag Indicated");
-                g_update_both_sides = true;
+                            INFO_MRK"Update Both Sides of SBE Flag Indicated.");
+                bool l_isGoldenSide=true;
+                errlHndl_t l_err = isGoldenSide(l_isGoldenSide);
+
+                if(l_err)
+                {
+                    TRACFCOMP(g_trac_sbe,
+                              ERR_MRK"updateProcessorSbeSeeproms::isGoldenSide "
+                                     "returned an error");
+                    errlCommit( l_err, SBE_COMP_ID );
+                    l_isGoldenSide = true;
+                }
+
+                if (l_isGoldenSide)
+                {
+                    g_update_both_sides = false;
+                    TRACFCOMP(g_trac_sbe,
+                                INFO_MRK"Boot on Golden Side - Ignoring Update "
+                                        "both sides of SBE Flag");
+                }
+                else
+                {
+                    g_update_both_sides = true;
+                }
             }
 
             // Collect ATTR_NEST_FREQ_MHZ for reference later
             g_current_nest_freq = sys->getAttr<ATTR_NEST_FREQ_MHZ>();
-
 
             //Make sure procedure constants keep within expected range.
             assert((FIXED_SEEPROM_WORK_SPACE <= VMM_SBE_UPDATE_SIZE/2),
@@ -1899,13 +1919,21 @@ namespace SBE
             // Ensure HBB address value in the customized image is correct
             // for this side
             bool imageWasUpdated=false;
+
             err = resolveImageHBBaddr ( io_sbeState.target,
                                         reinterpret_cast<void*>(SBE_IMG_VADDR),
                                         ((io_sbeState.seeprom_side_to_update ==
                                          EEPROM::SBE_PRIMARY ) ?
                                                  SBE_SEEPROM0 :
                                                  SBE_SEEPROM1  ),
+#ifdef CONFIG_PNOR_TWO_SIDE_SUPPORT
+                                        ((io_sbeState.seeprom_side_to_update ==
+                                         EEPROM::SBE_PRIMARY ) ?
+                                                 PNOR::WORKING :
+                                                 PNOR::ALTERNATE  ),
+#else
                                         PNOR::WORKING,
+#endif
                                         imageWasUpdated );
 
             if (imageWasUpdated == true )
@@ -4191,7 +4219,7 @@ namespace SBE
                         io_sbeState.mproc_nest_freq_mhz = default_nest_freq;
                     }
                 }
-                else if ( io_sbeState.cur_seeprom_side == SBE_SEEPROM1)
+                else if ( tmp_cur_side == SBE_SEEPROM1 )
                 {
                     if ( io_sbeState.seeprom_1_ver.struct_version == 2 )
                     {
