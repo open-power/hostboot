@@ -39,6 +39,12 @@
 #include <intr/interrupt.H>
 #include <isteps/hwpf_reasoncodes.H>
 
+// @TODO RTC:134082 remove below block
+// Add P9 - Fake trigger for memory expansion
+#include <kernel/console.H>                  // printk status
+#include <devicefw/userif.H>
+// @TODO RTC:134082 remove above block
+
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
@@ -69,7 +75,6 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
     assert( l_sys != NULL );
 
     //@TODO RTC:133831 Commenting out due to missing attributes
-#if 0
     errlHndl_t  l_errl  =   NULL;
     uint8_t l_mpipl = l_sys->getAttr<ATTR_IS_MPIPL_HB>();
     ATTR_PAYLOAD_BASE_type payloadBase = 0;
@@ -223,7 +228,67 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "SUCCESS : call_proc_exit_cache_contained" );
 
+            // @TODO RTC:134082 remove below block
+#if 1
+            // Add P9 - Fake trigger for memory expansion
+            TARGETING::Target* l_masterProc = NULL;
+            TARGETING::targetService()
+              .masterProcChipTargetHandle( l_masterProc );
 
+            uint64_t l_top_addr = get_top_mem_addr();
+            uint64_t l_bottom_addr = get_bottom_mem_addr();
+            uint64_t l_mem_size = l_top_addr - l_bottom_addr;
+
+            // aggregate scom data to write
+            uint64_t l_data[] = {l_bottom_addr,  // Memory Base Address
+                                 l_mem_size,     // Memory Size in bytes
+                                 1};             // Memory Valid
+            uint64_t l_addr = 0x05000000;
+            size_t scom_size = sizeof(uint64_t);
+
+            for(uint8_t i = 0;
+                i < sizeof(l_data) / sizeof(uint64_t);
+                i++)
+            {
+                l_errl = deviceWrite( l_masterProc,
+                                      &(l_data[i]),
+                                      scom_size,
+                                      DEVICE_SCOM_ADDRESS(l_addr+i) );
+                if( l_errl ) { break; }
+            }
+
+            if ( l_errl )
+            {
+                // Create IStep error log and cross reference to error that
+                // occurred
+                l_stepError.addErrorDetails( l_errl );
+
+                // Commit Error
+                errlCommit( l_errl, HWPF_COMP_ID );
+            }
+
+            printk("Fake Memory now set up.\n");
+
+            // exit cache contained mode
+            l_errl = deviceWrite( l_masterProc,
+                                  &(l_data[2]),
+                                  scom_size,
+                                  DEVICE_SCOM_ADDRESS(l_addr+3) );
+
+            if ( l_errl )
+            {
+                // Create IStep error log and cross reference to error that
+                // occurred
+                l_stepError.addErrorDetails( l_errl );
+
+                // Commit Error
+                errlCommit( l_errl, HWPF_COMP_ID );
+            }
+
+            printk("Cache contained mode has been exited.\n");
+            // End of Add P9 - Fake trigger for memory expansion
+#endif
+            // @TODO RTC:134082 remove above block
 
             // Call the function to extend VMM to 32MEG
             int rc = mm_extend();
@@ -272,7 +337,6 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_exit_cache_contained exit" );
-#endif
     // @@@@@    END CUSTOM BLOCK:   @@@@@
 
     // end task, returning any errorlogs to IStepDisp
