@@ -31,7 +31,6 @@
  *
  */
 
-
 /******************************************************************************/
 // Includes
 /******************************************************************************/
@@ -68,8 +67,10 @@
 #include <pnor/pnorif.H>
 #include <ipmi/ipmiwatchdog.H>      //IPMI watchdog timer
 #include <ipmi/ipmipowerstate.H>    //IPMI System ACPI Power State
+#include <ipmi/ipmichassiscontrol.H> 
 #include <config.h>
 #include <ipmi/ipmisensor.H>
+#include <ipmi/ipmiif.H>
 
 #include <initservice/bootconfigif.H>
 #include <trace/trace.H>
@@ -532,11 +533,6 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                             err = failedDueToDeconfig(istep, substep,
                                                       newIstep, newSubstep);
                         }
-                        // Otherwise shut down. The BMC watchdog reset will
-                        // cause the system to reboot.  The BMC allows 2
-                        // boot attempts from the primary side of PNOR and 1
-                        // from the golden side. After that the system would
-                        // shut down and halt.
                         else
                         {
                             #ifdef CONFIG_BMC_IPMI
@@ -573,34 +569,26 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                                     "not increment reboot count.");
                             }
 
-                            // @TODO RTC:124679 - Remove Once BMC Monitors
-                            // Shutdown Attention
-                            // Set Watchdog Timer before calling doShutdown()
-                            TRACFCOMP( g_trac_initsvc,"executeAllISteps: "
-                                       "Set Watch Dog Timer To %d Seconds",
-                                       SET_WD_TIMER_IN_SECS);
-
-                            err = IPMIWATCHDOG::setWatchDogTimer(
-                               SET_WD_TIMER_IN_SECS,  // new time
-                               static_cast<uint8_t>
-                                          (IPMIWATCHDOG::DO_NOT_STOP |
-                                           IPMIWATCHDOG::BIOS_FRB2), // default
-                                           IPMIWATCHDOG::TIMEOUT_HARD_RESET);
+                            // Request BMC to do power cycle that sends shutdown
+                            // and reset the host
+                            err = IPMI::chassisControl
+                                    (IPMI::CHASSIS_POWER_CYCLE);
+                            if (err)
+                            {
+                                TRACFCOMP(g_trac_initsvc, ERR_MRK
+                                "FAIL executing chassisControl command");
+                                break;
+                            }
                             #endif
                             #ifdef CONFIG_CONSOLE
-                            #ifdef CONFIG_BMC_IPMI
-                            CONSOLE::displayf(NULL,
-                               "System Shutting Down In %d Seconds "
-                               "To Perform Reconfiguration\n",
-                               SET_WD_TIMER_IN_SECS);
-                            #else
                             CONSOLE::displayf(NULL,
                                "System Shutting Down "
                                "To Perform Reconfiguration\n");
-                            #endif
                             CONSOLE::flush();
                             #endif
+                            #ifndef CONFIG_BMC_IPMI
                             shutdownDuringIpl();
+                            #endif
                         }
                     }
                     // else return the error from doIstep
