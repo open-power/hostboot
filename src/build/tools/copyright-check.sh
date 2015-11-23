@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +26,7 @@
 
 #
 #   Front end to addCopyright.pl - script to check for copyright block during
-#   Gerrit checkin.  
+#   Gerrit checkin.
 #
 
 export WORKSPACE_DIR=`pwd`
@@ -44,12 +46,12 @@ echo "========================================================================"
 echo "  Checking Copyright blocks for checked-in files:"
 echo "  $CHECKINFILES"
 echo
-$ADDCOPYRIGHT validate  $CHECKINFILES
+$ADDCOPYRIGHT validate  $CHECKINFILES --copyright-check
 
 if [ $? -eq 0 ]; then
     echo "Copyright Check passed OK, $?"
     exit 0
-else       
-    echo "ERROR: $?" 
+else
+    echo "ERROR: $?"
     exit 1
 fi

@@ -126,6 +126,7 @@ my  $DelimiterBegin         =   "";
 my  $CopyrightBlock         =   "";
 my  $DelimiterEnd           =   "";
 my  $CopyRightString        =   "";
+my  $copyright_check        =   0;
 
 my  $TempFile               =   "";
 my  @Files                  =   ();
@@ -137,18 +138,6 @@ my  $rc                     =   0;
 my $g_end_del_re = "($DELIMITER_END|$OLD_DELIMITER_END)";
 my $g_prolog_re  = "($DELIMITER_BEGIN)((.|\n)+?)$g_end_del_re";
 
-#------------------------------------------------------------------------------
-#   Forward Declaration
-#------------------------------------------------------------------------------
-sub validate( $ );
-sub update( $$ );
-sub extractCopyrightBlock( $ );
-sub checkCopyrightblock( $$ );
-sub createYearString( $ );
-sub removeCopyrightBlock( $$ );
-sub addEmptyCopyrightBlock( $$$ );
-sub fillinEmptyCopyrightBlock( $$ );
-sub getFileContributors( $ );
 #######################################################################
 # Main
 #######################################################################
@@ -166,7 +155,7 @@ my  @SaveArgV   =   @ARGV;
 GetOptions( "help|?"                    =>  \$opt_help,
             "validate"                  =>  sub { $operation="validate";    },
             "update"                    =>  sub { $operation="update";      },
-
+            "copyright-check"           => \$copyright_check,
             "log-failed-files=s"        =>  \$opt_logfile,
             "debug"                     =>  \$opt_debug,
           );
@@ -386,7 +375,7 @@ sub usage
 ##  returns     0 success, nonzero failure
 ##  See constants above for values of failure
 #######################################
-sub validate( $ )
+sub validate
 {
     my  ( $filename )    =   @_;
     my  $rc =   0;
@@ -397,7 +386,7 @@ sub validate( $ )
         return  RC_NO_COPYRIGHT_BLOCK;
     }
 
-    $rc =   checkCopyrightBlock( $CopyrightBlock, $filename );
+    $rc =   checkCopyrightBlock( $CopyrightBlock, $filename);
 
     #   good file
     return  $rc;
@@ -411,7 +400,7 @@ sub validate( $ )
 ##
 ##  @return success or failure  (currently only return success)
 ##
-sub update( $$ )
+sub update
 {
     my  ( $filename, $filetype )    =   @_;
     my  $olddelimiter               =   0;
@@ -432,7 +421,7 @@ sub update( $$ )
         addEmptyCopyrightBlock( $filename, $filetype, $localrc );
 
         if ( $opt_debug )   { print STDERR __LINE__, ": fill in new copyright block...\n"; }
-        fillinEmptyCopyrightBlock( $filename, $filetype );
+        fillinEmptyCopyrightBlock( $filename, $filetype);
     }
 
     ##  return OK by default.
@@ -593,7 +582,7 @@ sub filetype
 ##
 ##  param[out]  returns block or ""
 ########################################################################
-sub extractCopyrightBlock( $ )
+sub extractCopyrightBlock
 {
     my  ( $infile )    =   shift;
 
@@ -619,7 +608,7 @@ sub extractCopyrightBlock( $ )
 ##  @return     0 if success, nonzero otherwise
 #######################################
 use File::Temp;
-sub checkCopyrightBlock( $$ )
+sub checkCopyrightBlock
 {
     my ( $block, $filename )    =   @_;
 
@@ -640,13 +629,13 @@ sub checkCopyrightBlock( $$ )
             close($blockHndl);
             close($licenseHndl);
 
-            print STDOUT "\nERROR> Prolog not correct for $filename, run...\n";
-            print STDOUT "git show --pretty=\"format:\" --name-only | xargs addCopyright.pl update\n";
+            print STDOUT "\nERROR> Prolog not correct for $filename.\n";
+            print STDOUT "To fix run: git show --pretty=\"format:\" --name-only | xargs addCopyright.pl update\n";
             print STDOUT "\nDiff:\n";
             print STDOUT `diff $blockFile $licenseFile`;
-            my $relLicensePath = $LicenseFile ;
+            my $relLicensePath = $LicenseFile;
             $relLicensePath =~ s/$projectRoot//;
-            print STDOUT "\nWARNING: Copyright block does not match LICNESE_PROLOG file found at $relLicensePath\n";
+            print STDOUT "\nWARNING: Copyright block does not match LICENSE_PROLOG file found at $relLicensePath\n";
             system("rm -f $blockFile $licenseFile");
             return RC_DIFFERS_FROM_LICENSE_PROLOG;
         }
@@ -660,7 +649,7 @@ sub checkCopyrightBlock( $$ )
     return  0;
 }
 
-sub createYearString( $ )
+sub createYearString
 {
     my  ( $filename )   =   @_;
     my  $yearstr        =   "";
@@ -716,7 +705,7 @@ sub createYearString( $ )
 ###################################
 ##  Helper function for removeCopyrightBlock()
 ###################################
-sub removeProlog($$$)
+sub removeProlog
 {
     my ( $data, $begin_re, $end_re ) = @_;
 
@@ -729,7 +718,7 @@ sub removeProlog($$$)
 ##  remove old Copyright Block in preparation for making a new one.
 ##  makes up a debug file named "<filename>.remove"
 ###################################
-sub removeCopyrightBlock( $$ )
+sub removeCopyrightBlock
 {
     my  ( $filename, $filetype )    =   @_ ;
     my  $data                       =   "" ;
@@ -819,7 +808,7 @@ sub removeCopyrightBlock( $$ )
 ##
 ##  - Makes up a debug file called "<filename>.empty"
 ##################################
-sub addEmptyCopyrightBlock( $$$ )
+sub addEmptyCopyrightBlock
 {
     my ( $filename, $filetype, $validaterc )  =   @_;
     my $line;
@@ -882,7 +871,7 @@ sub addEmptyCopyrightBlock( $$$ )
 ############################################
 ## Helper functions for fillinEmptyCopyrightBlock()
 ############################################
-sub addPrologComments($$$)
+sub addPrologComments
 {
     my ( $data, $begin, $end ) = @_;
 
@@ -952,7 +941,7 @@ sub genCopyrightBlock
     my  $copyrightYear = createYearString( $filename );
 
     # Get copyright contributors based on hash so no duplicates
-    my  %fileContributors = getFileContributors( $filename );
+    my %fileContributors = getFileContributors( $filename );
     my $copyright_Contributors = "";
     foreach my $key (sort keys %fileContributors)
     {
@@ -1040,7 +1029,7 @@ EOF
 ##   Section 3.14.1 has templates for different files
 ##
 ############################################
-sub fillinEmptyCopyrightBlock( $$ )
+sub fillinEmptyCopyrightBlock
 {
     my  ( $filename, $filetype )    =   @_;
 
@@ -1083,7 +1072,7 @@ sub fillinEmptyCopyrightBlock( $$ )
 ##
 ##  @return     hash of contributors (key,value) => (name/company, 1)
 #######################################
-sub getFileContributors( $ )
+sub getFileContributors
 {
     my  ( $filename )    =   @_;
     # Create a "set like" hash for file contributors to handle duplicates
@@ -1091,7 +1080,8 @@ sub getFileContributors( $ )
     my %fileContributors = ();
 
     # Check file for company Origin
-    my @gitDomain = `git log -- $filename | grep Origin: | sort | uniq`;
+    my $gitDomain = `git log -- $filename | grep Origin: | sort | uniq`;
+    my @gitDomain = split('\n', $gitDomain);
     foreach my $origin (@gitDomain)
     {
         chomp($origin);
@@ -1107,13 +1097,26 @@ sub getFileContributors( $ )
     }
 
     # Check file for all contributors
-    my @gitAuthors = `git log --pretty="%aN <%aE>" -- $filename | sort | uniq`;
-    # Add current commiter, add < > around the email to follow the same format
-    # as the above array
-    my $curAuthorEmail = `git config user.email`;
-    chomp($curAuthorEmail);
-    my $curGitAuthor = "<".$curAuthorEmail.">";
-    push(@gitAuthors, $curGitAuthor);
+    my $gitAuthors = `git log --pretty="%aN <%aE>" -- $filename | sort | uniq`;
+    my @gitAuthors = split('\n', $gitAuthors);
+
+    # Add current commiter.
+    # If running copyright_check run 'git log' as a commit is not taking place
+    # Otherwise check using 'git config' as this is a pre-commit hook
+    my $curAuthorEmail = "";
+    if ($copyright_check)
+    {
+        $curAuthorEmail = `git log -n1 --pretty=format:"%aN <%aE>"`;
+        chomp($curAuthorEmail);
+    }
+    else
+    {
+        my $curAuthorName = `git config user.name`;
+        $curAuthorEmail = `git config user.email`;
+        chomp($curAuthorEmail);
+        $curAuthorEmail = "$curAuthorName <".$curAuthorEmail.">";
+    }
+    push(@gitAuthors, $curAuthorEmail);
     foreach my $contributor (@gitAuthors)
     {
         my $companyExists = 0;
