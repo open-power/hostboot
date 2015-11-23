@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,8 +42,9 @@
 #include <initservice/initserviceif.H>
 #include <console/consoleif.H>
 #include <config.h>
-#include <ipmi/ipmiwatchdog.H>
+#include <ipmi/ipmiif.H>
 #include <ipmi/ipmisensor.H>
+#include <ipmi/ipmichassiscontrol.H>
 #include <sbe/sbeif.H>
 #include <sbe/sbereasoncodes.H>
 #include "sbe_resolve_sides.H"
@@ -295,28 +296,29 @@ errlHndl_t resolveProcessorSbeSeeproms()
                        l_restartNeeded);
 
 #ifdef CONFIG_BMC_IPMI
-            sbePreShutdownIpmiCalls();
+            err = sbePreRebootIpmiCalls();
+            if (err)
+            {
+                TRACFCOMP( g_trac_sbe,ERR_MRK"sbePreRebootIpmiCalls failed");
+                break;
+            }
 #endif
 
 #ifdef CONFIG_CONSOLE
-  #ifdef CONFIG_BMC_IPMI
-            CONSOLE::displayf(SBE_COMP_NAME, "System Shutting Down In %d "
-                              "Seconds To Perform SBE Update\n",
-                              SET_WD_TIMER_IN_SECS);
-  #else
-            CONSOLE::displayf(SBE_COMP_NAME, "System Shutting Down To "
+            CONSOLE::displayf(SBE_COMP_NAME, "System Rebooting  To "
                               "Perform SBE Update\n");
-  #endif
 
             CONSOLE::flush();
 #endif
 
+#ifndef CONFIG_BMC_IPMI
             TRACFCOMP( g_trac_sbe,
                        INFO_MRK"resolveProcessorSbeSeeproms: Calling "
                        "INITSERVICE::doShutdown() with "
                        "SBE_UPDATE_REQUEST_REIPL = 0x%X",
                        SBE_UPDATE_REQUEST_REIPL );
             INITSERVICE::doShutdown(SBE_UPDATE_REQUEST_REIPL);
+#endif
         }
 
     }while(0);
@@ -1293,10 +1295,10 @@ errlHndl_t resolveImageHBBaddr(TARGETING::Target* i_target,
 
 #ifdef CONFIG_BMC_IPMI
 /////////////////////////////////////////////////////////////////////
-void sbePreShutdownIpmiCalls( void )
+errlHndl_t sbePreRebootIpmiCalls( void )
 {
     errlHndl_t err = NULL;
-    TRACFCOMP( g_trac_sbe, ENTER_MRK"sbePreShutdownIpmiCalls");
+    TRACFCOMP( g_trac_sbe, ENTER_MRK"sbePreRebootIpmiCalls");
 
     do{
         uint16_t count = 0;
@@ -1307,7 +1309,7 @@ void sbePreShutdownIpmiCalls( void )
         if ( err )
         {
             TRACFCOMP( g_trac_sbe,
-                       ERR_MRK"sbePreShutdownIpmiCalls: "
+                       ERR_MRK"sbePreRebootIpmiCalls: "
                        "FAIL Reading Reboot Sensor Count. "
                        "Committing Error Log rc=0x%.4X eid=0x%.8X "
                        "plid=0x%.8X, but continuing shutdown",
@@ -1317,21 +1319,21 @@ void sbePreShutdownIpmiCalls( void )
             err->collectTrace(SBE_COMP_NAME);
             errlCommit( err, SBE_COMP_ID );
 
-            // No Break - Still Do Watchdog Timer Call
+            // No Break - Still do reboot
         }
         else
         {
             // Increment Reboot Count Sensor
             count++;
             TRACFCOMP( g_trac_sbe,
-                       INFO_MRK"sbePreShutdownIpmiCalls: "
+                       INFO_MRK"sbePreRebootIpmiCalls: "
                        "Writing Reboot Sensor Count=%d", count);
 
             err = l_sensor.setRebootCount( count );
             if ( err )
             {
                 TRACFCOMP( g_trac_sbe,
-                           ERR_MRK"sbePreShutdownIpmiCalls: "
+                           ERR_MRK"sbePreRebootIpmiCalls: "
                            "FAIL Writing Reboot Sensor Count to %d. "
                            "Committing Error Log rc=0x%.4X eid=0x%.8X "
                            "plid=0x%.8X, but continuing shutdown",
@@ -1342,43 +1344,37 @@ void sbePreShutdownIpmiCalls( void )
                 err->collectTrace(SBE_COMP_NAME);
                 errlCommit( err, SBE_COMP_ID );
 
-                // No Break - Still Do Watchdog Timer Call
+                // No Break - Still send chassis power cycle
             }
         }
 
-        // @todo RTC 124679 - Remove Once BMC Monitors Shutdown Attention
-        // Set Watchdog Timer before calling doShutdown()
-        TRACFCOMP( g_trac_sbe,"sbePreShutdownIpmiCalls: "
-                   "Set Watch Dog Timer To %d Seconds",
-                   SET_WD_TIMER_IN_SECS);
+        TRACFCOMP( g_trac_sbe,"sbePreRebootIpmiCalls: "
+                   "requesting chassis power cycle");
 
-        err = IPMIWATCHDOG::setWatchDogTimer(
-                               SET_WD_TIMER_IN_SECS,  // new time
-                               static_cast<uint8_t>
-                                          (IPMIWATCHDOG::DO_NOT_STOP |
-                                           IPMIWATCHDOG::BIOS_FRB2), // default
-                               IPMIWATCHDOG::TIMEOUT_HARD_RESET);
+        // Request BMC to do power cycle that sends shutdown
+        // and reset the host
+        err = IPMI::chassisControl(IPMI::CHASSIS_POWER_CYCLE);
         if(err)
         {
-               TRACFCOMP( g_trac_sbe,
-                          ERR_MRK"sbePreShutdownIpmiCalls: "
-                          "FAIL Setting Watch Dog Timer to %d seconds. "
-                          "Committing Error Log rc=0x%.4X eid=0x%.8X "
-                          "plid=0x%.8X, but continuing shutdown",
-                          SET_WD_TIMER_IN_SECS,
-                          err->reasonCode(),
-                          err->eid(),
-                          err->plid());
+            TRACFCOMP( g_trac_sbe,
+                ERR_MRK"sbePreRebootIpmiCalls: "
+                "FAIL executing chassisiControl"
+                "Error Log rc=0x%.4X eid=0x%.8X "
+                "plid=0x%.8X ",
+                err->reasonCode(),
+                err->eid(),
+                err->plid());
 
                 err->collectTrace(SBE_COMP_NAME);
-                errlCommit(err, SBE_COMP_ID );
          }
 
+
+        
     }while(0);
 
-    TRACFCOMP( g_trac_sbe, EXIT_MRK"sbePreShutdownIpmiCalls");
+    TRACFCOMP( g_trac_sbe, EXIT_MRK"sbePreRebootIpmiCalls");
 
-    return;
+    return err;
 }
 #endif // CONFIG_BMC_IPMI
 
