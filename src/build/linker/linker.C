@@ -95,6 +95,9 @@ struct Symbol
         VARIABLE = 0x10,
 
         RELATIVE = 0x20,
+
+        TLS_MODULE = 0x40,
+        TLS_OFFSET = 0x80,
     };
 };
 
@@ -126,7 +129,8 @@ struct Object
         unsigned long offset;           //!< output file offset of image start
         unsigned long base_addr;        //!< output file base address
         FILE * iv_output;               //!< output file handle
-
+        ssize_t tls_module;             //!< module id of this module's
+                                        //   thread local storage.
         /**
          * Read the object from it's file and extract bfd, text, & data image
          * @param[in] i_file : file path
@@ -187,10 +191,15 @@ struct Object
         uint64_t find_fini_symbol();
 
         /**
+         * Get the TLS ID of this module.
+         */
+        size_t get_tls_module();
+
+        /**
          * CTOR default
          */
         Object() : image(NULL), offset(0), base_addr(0), iv_output(NULL),
-                   text(), rodata(), data() {}
+                   text(), rodata(), data(), tls_module(-1) {}
 
         /**
          * CTOR
@@ -199,7 +208,7 @@ struct Object
          */
         Object(unsigned long i_baseAddr, FILE* i_out)
             : image(NULL), offset(0), base_addr(i_baseAddr), iv_output(i_out),
-              text(), rodata(), data() {}
+              text(), rodata(), data(), tls_module(-1) {}
 };
 
 inline bool Object::isELF()
@@ -279,6 +288,8 @@ map<string,size_t> weak_symbols;
 set<string> all_symbols;
 set<string> weak_symbols_to_check;
 bool includes_extended_image = false;
+
+size_t next_tls_id = 0;
 
 //-----------------------------------------------------------------------------
 // MAIN
@@ -757,6 +768,14 @@ bool Object::read_relocation()
         {
             s.type |= Symbol::FUNCTION;
         }
+        else if (loc[i]->howto->name == string("R_PPC64_DTPMOD64"))
+        {
+            s.type |= Symbol::TLS_MODULE;
+        }
+        else if (loc[i]->howto->name == string("R_PPC64_DTPREL64"))
+        {
+            s.type |= Symbol::TLS_OFFSET;
+        }
         this->relocs.push_back(s);
 
         cout << "\tSymbol: " << loc[i]->sym_ptr_ptr[0]->name;
@@ -792,6 +811,8 @@ bool Object::perform_local_relocations()
         uint64_t address = 0;
         char data[sizeof(uint64_t)];
 
+        bool needs_relocation = true;
+
         fseek(iv_output, offset + i->address, SEEK_SET);
         fread(data, sizeof(uint64_t), 1, iv_output);
 
@@ -814,9 +835,29 @@ bool Object::perform_local_relocations()
             relocation += symbol_addr;
         }
 
-        address = relocation + base_addr; //dgxxa
+        if (i->type & Symbol::TLS_MODULE)
+        {
+            // Set value to TLS module.
+            address = get_tls_module();
+            needs_relocation = false;
+            relocation = address;
+        }
+        else if (i->type & Symbol::TLS_OFFSET)
+        {
+            // Set value to TLS offset.
+            address = i->addend;
+            needs_relocation = false;
+            relocation = address;
+        }
+        else // Perform relocation.
+        {
+            address = relocation + base_addr; //dgxxa
+        }
         bfd_putb64(address, data);
-        if(!base_addr) all_relocations.push_back(offset + i->address);
+        if((!base_addr) && (needs_relocation))
+        {
+            all_relocations.push_back(offset + i->address);
+        }
 
         fseek(iv_output, offset + i->address, SEEK_SET);
         fwrite(data, sizeof(uint64_t), 1, iv_output);
@@ -967,6 +1008,16 @@ uint64_t Object::find_fini_symbol()
 
     return symbols[VFS_TOSTRING(VFS_SYMBOL_FINI)].address +
         offset + base_addr + rodata.vma_offset;
+}
+
+//-----------------------------------------------------------------------------
+
+size_t Object::get_tls_module()
+{
+    if (tls_module < 0)
+        tls_module = next_tls_id++;
+
+    return tls_module;
 }
 
 
