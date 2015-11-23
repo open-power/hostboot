@@ -48,25 +48,26 @@ fi
 mksb -rc $SANDBOXRC -dir $SANDBOXROOT -back $BACKING_BUILD -sb $SANDBOXNAME \
       -m ppc -auto || exit -1
 
+# TODO: RTC:137477-Turn this pre/post workaround scripts and start simics
 # workaround scripts expect $sb variable to be populated.
-export sb=$SANDBOXBASE/src
+#export sb=$SANDBOXBASE/src
 
 # Run presimsetup workarounds.
-echo "----Running presimsetup workarounds."
-if [ -f ${CITESTPATH}/etc/workarounds.presimsetup ];
-then
-    ${CITESTPATH}/etc/workarounds.presimsetup || exit -1
-fi
+#echo "----Running presimsetup workarounds."
+#if [ -f ${CITESTPATH}/etc/workarounds.presimsetup ];
+#then
+#    ${CITESTPATH}/etc/workarounds.presimsetup || exit -1
+#fi
 
 # Run start_simics to populate simics directories.
-echo "----Setting up simics."
-execute_in_sandbox "start_simics -no_start -machine $MACHINE -batch_mode" \
-                   "ppc" || exit -1
+#echo "----Setting up simics."
+#execute_in_sandbox "start_simics -no_start -machine $MACHINE -batch_mode" \
+#                   "ppc" || exit -1
 
 # Run postsimsetup workarounds.
-echo "----Running postsimsetup workarounds."
-if [ -f ${CITESTPATH}/etc/workarounds.postsimsetup ];
-then
-    ${CITESTPATH}/etc/workarounds.postsimsetup || exit -1
-fi
+#echo "----Running postsimsetup workarounds."
+#if [ -f ${CITESTPATH}/etc/workarounds.postsimsetup ];
+#then
+#    ${CITESTPATH}/etc/workarounds.postsimsetup || exit -1
+#fi
 
