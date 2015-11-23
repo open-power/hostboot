@@ -5,9 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2014                        */
-/* [+] International Business Machines Corp.                              */
+/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
 /* [+] Google Inc.                                                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -34,6 +34,13 @@ SECTIONS
 
     .rodata ALIGN(0x8): {
         __minimum_data_start_addr = ALIGN(0x1000);
+        tls_start_address = .;
+        *(.tdata)
+        *(.tdata.*)
+        *(.tbss)
+        *(.tbss.*)
+        tls_end_address = .;
+        . = ALIGN(0x8);
         ctor_start_address = .;
         *(.ctors)
         *(.ctors.*)
