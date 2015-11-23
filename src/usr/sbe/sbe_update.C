@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -420,28 +420,30 @@ namespace SBE
                 }
 
 #ifdef CONFIG_BMC_IPMI
-                sbePreShutdownIpmiCalls();
+                err = sbePreRebootIpmiCalls();
+                if (err)
+                {
+                    TRACFCOMP( g_trac_sbe,ERR_MRK"sbePreRebootIpmiCalls "
+                               "failed");
+                    break;
+                }
 #endif
 
 #ifdef CONFIG_CONSOLE
-  #ifdef CONFIG_BMC_IPMI
-            CONSOLE::displayf(SBE_COMP_NAME, "System Shutting Down In %d "
-                              "Seconds To Perform SBE Update\n",
-                              SET_WD_TIMER_IN_SECS);
-  #else
-            CONSOLE::displayf(SBE_COMP_NAME, "System Shutting Down To "
+            CONSOLE::displayf(SBE_COMP_NAME, "System Rebooting To "
                               "Perform SBE Update\n");
-  #endif
 
             CONSOLE::flush();
 #endif
 
+#ifndef CONFIG_BMC_IPMI
                 TRACFCOMP( g_trac_sbe,
                            INFO_MRK"updateProcessorSbeSeeproms(): Calling "
                            "INITSERVICE::doShutdown() with "
                            "SBE_UPDATE_REQUEST_REIPL = 0x%X",
                            SBE_UPDATE_REQUEST_REIPL );
                 INITSERVICE::doShutdown(SBE_UPDATE_REQUEST_REIPL);
+#endif
             }
 
             /************************************************************/

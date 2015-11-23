@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -252,12 +252,11 @@ namespace SBE
 
 #ifdef CONFIG_BMC_IPMI
     /**
-     * @brief Performs any necessary IPMI calls before shutting down the system
+     * @brief Performs any necessary IPMI calls before reboot the system
      *
-     * @return void       Any generated Error Logs will be commited before the
-     *                    function returns
+     * @return errlHndl_t    Error log handle on failure.
      */
-    void sbePreShutdownIpmiCalls( void );
+    errlHndl_t sbePreRebootIpmiCalls( void );
 #endif
 
 } //end namespace SBE
