@@ -408,10 +408,11 @@ void ErrlManager::errlogMsgHndlr ()
 #ifdef CONFIG_CONSOLE_OUTPUT_ERRORDISPLAY
                     // Errldisplay now ready
                     iv_isErrlDisplayEnabled = true;
-
-                    CONSOLE::displayf("ERRL",
+                    if(!iv_errlList.empty())
+                    {
+                        CONSOLE::displayf("ERRL",
                         "Dumping errors reported prior to registration");
-
+                    }
                     // Display errlogs to errldisplay
                     ErrlListItr_t it = iv_errlList.begin();
                     while(it != iv_errlList.end())
