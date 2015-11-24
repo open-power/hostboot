@@ -116,7 +116,7 @@ chdir "$image_directory";
 
 my $module_name;
 my $depends;
-my %FunctionMap;
+my $FunctionMap;
 
 #slurp in all the modules names from the img directory
 my @module_names = < *[!_][!r][!t].so >;
@@ -142,9 +142,9 @@ foreach $module_name  (@module_names )
 
         my $function = $values[2];
 
-        if (not defined %FunctionMap->{ $function })
+        if (not defined $FunctionMap->{ $function })
         {
-            %FunctionMap->{ $function } =  $library;
+            $FunctionMap->{ $function } =  $library;
         }
     }
 }
@@ -220,7 +220,7 @@ my %resident_modules = (
 );
 
 # has with library to istep list file were the DepMod array is kept
-my %istepFiles = (
+my $istepFiles = {
     "libslave_sbe.so"               => "istep06list.H" ,
     "libnest_chiplets.so"           => "istep07list.H" ,
     "libedi_ei_initialization.so"   => "istep08list.H" ,
@@ -235,7 +235,7 @@ my %istepFiles = (
     "libcore_activate.so"           => "istep16list.H" ,
     "libtod_init.so"                => "istep18list.H" ,
     "libstart_payload.so"           => "istep21list.H" ,
-);
+};
 
 # array to hold list of dependent libraries
 my @Dependencies;
@@ -270,7 +270,7 @@ foreach my $module_name  (@istep_modules )
 
         my $elem = $values[1];
 
-        my $lib = %FunctionMap->{ $elem};
+        my $lib = $FunctionMap->{ $elem};
 
         # if we have this module in our "seen it" array, just skip it
         # otherwise we will add it as a new dependency
@@ -282,7 +282,7 @@ foreach my $module_name  (@istep_modules )
     # should we validate?
     if( $validate_deps )
     {
-        validate( $module_name, %istepFiles->{$module_name} );
+        validate( $module_name, $istepFiles->{$module_name} );
     }
 
     # does user want us to print the dependencies to the screen?
