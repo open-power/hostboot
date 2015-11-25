@@ -5073,7 +5073,7 @@ Supported values: 0x000 to spi_frame_size.  The actual number of bits captured i
       PROC_CHIP Attribute
     </description>
     <simpleType>
-        <uint8_t></uint8_t>
+        <uint16_t></uint16_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -31442,5 +31442,6 @@ Measured in GB</description>
       <macro>DIRECT</macro>
   </hwpfToHbAttrMap>
 </attribute>
+
 
 </attributes>
