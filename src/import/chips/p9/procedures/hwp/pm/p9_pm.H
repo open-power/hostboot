@@ -78,6 +78,18 @@ extern const char* p9_PM_FLOW_MODE_NAME[];
 
 
 
+// Incase the attribute does not a have a value previously assigned,
+// assign the user given default value
+#define GETATTR_DEFAULT(_i_attr, _i_attr_name, _i_target, _i_value, _i_defVal){\
+        FAPI_ATTR_GET(_i_attr, _i_target, _i_value); \
+        if (!_i_value) \
+        { \
+            FAPI_DBG("Attribute %s set to default = 0x%x",_i_attr_name,_i_defVal); \
+            _i_value = _i_defVal;\
+        } \
+        FAPI_INF("Value read from attribute %s = 0x%x", _i_attr_name,_i_value);\
+    }
+
 //------------------------------------------------------------------------------
 // Constant definitions
 //------------------------------------------------------------------------------
