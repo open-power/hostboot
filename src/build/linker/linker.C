@@ -845,7 +845,7 @@ bool Object::perform_local_relocations()
         else if (i->type & Symbol::TLS_OFFSET)
         {
             // Set value to TLS offset.
-            address = i->addend;
+            address = i->addend - VFS_PPC64_DTPREL_OFFSET;
             needs_relocation = false;
             relocation = address;
         }

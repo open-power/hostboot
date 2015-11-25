@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -116,12 +116,15 @@ task_t* TaskManager::_createTask(TaskManager::task_fn_t t,
     }
     else
     {
-	task->context.stack_ptr = NULL;
+        task->context.stack_ptr = NULL;
         task->context.gprs[1] = NULL;
     }
 
     // Clear FP context (start with FP disabled on all tasks).
     task->fp_context = NULL;
+
+    // Clear out the TLS context.
+    task->tls_context = NULL;
 
     // Clear task state info.
     task->state = TASK_STATE_READY;
