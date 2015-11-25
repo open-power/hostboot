@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/module_init.C $                                       */
+/* $Source: src/usr/testcore/lib/tls.H $                                  */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2015                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,41 +22,54 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-void call_dtors(void * i_dso_handle);
-void __tls_register(void * tls_start, void * tls_end);
-void __tls_unregister(void * tls_start, void * tls_end);
+#ifndef __LIB_TLS_H
+#define __LIB_TLS_H
 
-// This identifies the module
-void*   __dso_handle = (void*) &__dso_handle;
+#include <cxxtest/TestSuite.H>
+#include <sys/task.h>
 
-extern "C"
-void _init(void*)
+namespace __tls_test
 {
-    // Register thread-local storage.
-    extern void* tls_start_address;
-    extern void* tls_end_address;
-    __tls_register(&tls_start_address, &tls_end_address);
+    thread_local size_t foobar = 0xabcd1234;
 
-    // Call default constructors for any static objects.
-    extern void (*ctor_start_address)();
-    extern void (*ctor_end_address)();
-    void(**ctors)() = &ctor_start_address;
-    while(ctors != &ctor_end_address)
+    void* test_tls(void* unused)
     {
-	(*ctors)();
-	ctors++;
+        decltype(foobar) rc;
+
+        rc = foobar;
+        if(rc != 0xabcd1234)
+        {
+            TS_FAIL("TLS not initialized correctly: %ld", rc);
+        }
+
+        task_yield();
+
+        foobar++;
+
+        task_yield();
+
+        rc = foobar;
+        if(rc != 0xabcd1235)
+        {
+            TS_FAIL("TLS increment not operating correctly: %ld", rc);
+        }
+
+        return nullptr;
     }
-}
+};
 
-extern "C"
-void _fini(void)
+class LibcTlsTest : public CxxTest::TestSuite
 {
-    call_dtors(__dso_handle);
+    public:
+        void testTls()
+        {
+            auto t1 = task_create(__tls_test::test_tls, nullptr);
+            auto t2 = task_create(__tls_test::test_tls, nullptr);
+            auto t3 = task_create(__tls_test::test_tls, nullptr);
+            task_wait_tid(t1, nullptr, nullptr);
+            task_wait_tid(t2, nullptr, nullptr);
+            task_wait_tid(t3, nullptr, nullptr);
+        }
 
-    extern void* tls_start_address;
-    extern void* tls_end_address;
-    __tls_unregister(&tls_start_address, &tls_end_address);
-}
-
-
-
+};
+#endif

@@ -52,6 +52,7 @@ BASE_OBJECTS += cxxtest_data.o
 BASE_OBJECTS += sprintf.o
 BASE_OBJECTS += crc32.o
 BASE_OBJECTS += utilmisc.o
+BASE_OBJECTS += tls.o
 
 ifdef HOSTBOOT_PROFILE
 BASE_OBJECTS += gcov.o

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2014
+# Contributors Listed Below - COPYRIGHT 2010,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -817,6 +817,26 @@ userspace_task_entry:
     ;// inserts garbage code into the task_end C function.
 .global task_end_stub
 task_end_stub:
+        // Check for a NULL stack pointer and skip TLS cleanup.
+    cmpi cr0, r1, 0
+    beq 1f
+        // Check for a NULL TLS-context and skip TLS cleanup.
+    ld r0, TASK_TLS_CONTEXT(r13)
+    cmpi cr0, r0, 0
+    beq 1f
+        // Save off r3.
+    mr r31, r3
+        // Set up TOC for __tls_cleanup
+    lis r2, __tls_cleanup@h
+    ori r2, r2, __tls_cleanup@l
+    ld r2, 8(r2)
+        // Call __tls_cleanup
+    mr r3, r0
+    bl __tls_cleanup
+        // Restore r3.
+    mr r3, r31
+1:
+        // Call task-end syscall.
     mr r4, r3 ;// Move current rc (r3) to status value (r4)
     li r3, 2  ;// TASK_END -> r3 (syscall number)
     sc

@@ -97,6 +97,10 @@ extern VfsSystemModule VFS_MODULES[VFS_MODULE_MAX];
 
 extern uint64_t VFS_LAST_ADDRESS;
 
+// Offset for TLS "dtv-relative displacement".
+// See http://www.uclibc.org/docs/tls-ppc64.txt
+#define VFS_PPC64_DTPREL_OFFSET 0x8000
+
 #ifdef __cplusplus
 }
 #endif

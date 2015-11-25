@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2010,2014
+# Contributors Listed Below - COPYRIGHT 2010,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -244,6 +246,8 @@
 .set TASK_FPR_30, TASK_FPR_29+8
 .set TASK_FPR_31, TASK_FPR_30+8
 .set TASK_FPSCR, TASK_FPR_31+8
+
+.set TASK_TLS_CONTEXT, TASK_FP_CONTEXT+8
 
 .set CPU_KERNEL_STACK, 0
 .set CPU_KERNEL_STACK_BOTTOM, CPU_KERNEL_STACK+8

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -93,6 +95,8 @@ struct task_t
     context_t context;
         /** Pointer to optional floating point context. */
     context_fp_t* fp_context;
+        /** Thread-local-storage area for userspace. */
+    void* tls_context;
 
         /** Task ID */
     tid_t tid;

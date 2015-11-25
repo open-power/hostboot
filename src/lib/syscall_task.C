@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -47,14 +49,16 @@ tid_t task_create(void*(*fn)(void*), void* ptr)
     return (tid_t)(uint64_t) _syscall2(TASK_START, (void*)fn, ptr);
 }
 
+extern "C" void task_end_stub(void*) NO_RETURN;
+
 void task_end()
 {
-    _syscall1_nr(TASK_END, NULL); // no return.
+    task_end_stub(NULL);
 }
 
 void task_end2(void* retval)
 {
-    _syscall1_nr(TASK_END, retval); // no return.
+    task_end_stub(retval);
 }
 
 tid_t task_gettid()
