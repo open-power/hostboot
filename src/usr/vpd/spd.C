@@ -2085,8 +2085,8 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
             break;
         }
         // Set the attributes
-        TARGETING::ATTR_PART_NUMBER_type l_PN;
-        TARGETING::ATTR_SERIAL_NUMBER_type l_SN;
+        TARGETING::ATTR_PART_NUMBER_type l_PN = {0};
+        TARGETING::ATTR_SERIAL_NUMBER_type l_SN = {0};
         size_t expectedPNSize = sizeof(l_PN);
         size_t expectedSNSize = sizeof(l_SN);
         if(expectedPNSize < l_partDataSize)

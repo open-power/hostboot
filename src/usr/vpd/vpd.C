@@ -399,7 +399,7 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
             }
 
             // Set the part number attribute
-            TARGETING::ATTR_PART_NUMBER_type l_partNumber;
+            TARGETING::ATTR_PART_NUMBER_type l_partNumber = {0};
             size_t expectedPNSize = sizeof(l_partNumber);
             if(expectedPNSize < l_dataSize)
             {
@@ -443,7 +443,7 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
             }
 
             // set the serial number attribute
-            TARGETING::ATTR_SERIAL_NUMBER_type l_serialNumber;
+            TARGETING::ATTR_SERIAL_NUMBER_type l_serialNumber = {0};
             size_t expectedSNSize = sizeof(l_serialNumber);
             if(expectedSNSize < l_dataSize)
             {

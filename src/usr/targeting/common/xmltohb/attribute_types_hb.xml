@@ -1230,7 +1230,6 @@ ID for the sensor number returned with the elog. -->
     <description>The serial number for a particular FRU target</description>
     <simpleType>
         <uint8_t>
-            <default>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0</default>
         </uint8_t>
         <array>18</array>
     </simpleType>
@@ -1249,9 +1248,8 @@ ID for the sensor number returned with the elog. -->
     <description>The part number for a particular FRU target</description>
     <simpleType>
         <uint8_t>
-            <default>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0</default>
         </uint8_t>
-        <array>18</array>
+        <array>20</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
