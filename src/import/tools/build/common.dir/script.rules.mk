@@ -65,7 +65,7 @@ $$(addprefix $$($(GENERATED)_PATH)/,$(TARGETS)): \
 
 $(call __CLEAN_TARGET,$$($(GENERATED)_PATH)/.$(GENERATED).built)
 $(foreach target,$(TARGETS),\
-	$(call __CLEAN_TARGET,$$($(GENERATED)_PATH)/$(target)))
+	$(call CLEAN_TARGET,$$($(GENERATED)_PATH)/$(target)))
 
 $(or $1,GEN)_TARGETS += $$($(GENERATED)_PATH)/.$(GENERATED).built
 
