@@ -289,7 +289,7 @@ uint64_t get_bottom_mem_addr(void)
     // 64 bit value
     TARG_ASSERT(
         bottom_addr < UINT64_MAX,
-        "Lowest address is maximum 64-bit value");
+        "Lowest address is maximum 64-bit value, probably have no memory");
 
     return bottom_addr;
 }
