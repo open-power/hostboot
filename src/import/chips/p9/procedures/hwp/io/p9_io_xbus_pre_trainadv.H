@@ -31,7 +31,7 @@
 /// *HWP HWP Backup Owner : Gary Peterson <garyp@us.ibm.com>
 /// *HWP FW Owner         : Jamie Knight <rjknight@us.ibm.com>
 /// *HWP Team             : IO
-/// *HWP Level            : 1
+/// *HWP Level            : 2
 /// *HWP Consumed by      : FSP:HB
 ///----------------------------------------------------------------------------
 
@@ -49,7 +49,10 @@
 
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_io_xbus_pre_trainadv_FP_t)
-(const fapi2::Target < fapi2::TARGET_TYPE_XBUS >&);
+(const fapi2::Target < fapi2::TARGET_TYPE_XBUS >&,
+ const uint8_t&,
+ const fapi2::Target < fapi2::TARGET_TYPE_XBUS >&,
+ const uint8_t&);
 
 // ----------------------------------------------------------------------------
 // Constant Definitions
@@ -63,11 +66,17 @@ extern "C" {
     /**
      * @brief A simple HWP that runs prior to io_run_trainig.
      *  This function is called on every Xbus.
-     * @param[in] i_target Reference to FAPI2 Target
+     * @param[in] i_target   Fapi2 Target
+     * @param[in] i_group    Clock Group
+     * @param[in] i_ctarget  Fapi2 Connected Target
+     * @param[in] i_cgroup   Connected Clock Group
      * @retval ReturnCode
      */
-    fapi2::ReturnCode
-    p9_io_xbus_pre_trainadv(const fapi2::Target< fapi2::TARGET_TYPE_XBUS >& i_target);
+    fapi2::ReturnCode p9_io_xbus_pre_trainadv(
+        const fapi2::Target< fapi2::TARGET_TYPE_XBUS >& i_target,
+        const uint8_t& i_group,
+        const fapi2::Target< fapi2::TARGET_TYPE_XBUS >& i_ctarget,
+        const uint8_t& i_cgroup);
 
 } // extern "C"
 
