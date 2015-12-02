@@ -604,6 +604,7 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
                         strcat( data, "(MemoryMru) " );
                         strcat( data, tmpStr );
                         i_parser.PrintString( header, data );
+                        parseMemMruData( i_parser, pfa.mruList[i].callout );
                         break;
 
                     case PRDcalloutData::TYPE_SYMFRU:
@@ -694,6 +695,10 @@ bool parseMemMru( void * i_buffer, uint32_t i_buflen, ErrlUsrParser & i_parser )
         char heading[72];
         snprintf( heading, 72, "MemoryMru (0x%08x)", memMru );
         i_parser.PrintHeading( heading );
+        i_parser.PrintBlank();
+
+        parseMemMruData( i_parser, memMru );
+
         i_parser.PrintBlank();
     }
 

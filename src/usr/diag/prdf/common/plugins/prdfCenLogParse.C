@@ -2607,16 +2607,40 @@ static const char ** dqSiteMap_rcD4
 // Support functions for looking up DRAM site locations
 //##############################################################################
 
+int32_t isX4Dram( uint8_t i_cardType, bool & o_x4Dram )
+{
+    int32_t o_rc = SUCCESS;
+
+    o_x4Dram = false;
+
+    switch ( i_cardType )
+    {
+        case CEN_TYPE_A:  o_x4Dram = false; break;
+        case CEN_TYPE_B:  o_x4Dram = true;  break;
+        case CEN_TYPE_C:  o_x4Dram = true;  break;
+        case CEN_TYPE_D:  o_x4Dram = true;  break;
+        case CEN_TYPE_A4: o_x4Dram = false; break;
+        case CEN_TYPE_B4: o_x4Dram = true;  break;
+        case CEN_TYPE_C4: o_x4Dram = true;  break;
+        case CEN_TYPE_D4: o_x4Dram = true;  break;
+
+        default: o_rc = FAIL;
+    }
+
+    return o_rc;
+}
+
+//------------------------------------------------------------------------------
+
 // NOTE: o_cardName will always return a non-NULL string of exactly 2
 //       characters, regardless if this function gave a bad return code.
 int32_t getDramSiteInfo( uint8_t i_cardType, uint8_t i_mbaPos,
                          uint8_t i_ps, uint8_t i_mrank,
-                         bool & o_x4Dram, const char * & o_cardName,
+                         const char * & o_cardName,
                          const char ** & o_dqMap, const char ** & o_dramMap )
 {
     int32_t o_rc = SUCCESS;
 
-    o_x4Dram   = false;
     o_cardName = "  ";
     o_dqMap    = NULL;
     o_dramMap  = NULL;
@@ -2633,35 +2657,30 @@ int32_t getDramSiteInfo( uint8_t i_cardType, uint8_t i_mbaPos,
         switch ( i_cardType )
         {
             case CEN_TYPE_A:
-                o_x4Dram   = false;
                 o_cardName = "A ";
                 o_dqMap    = dqSiteMap_rcA[i_mbaPos][i_ps][i_mrank];
                 o_dramMap  = dramSiteMap_rcA[i_mbaPos][i_ps][i_mrank];
                 break;
 
             case CEN_TYPE_B:
-                o_x4Dram   = true;
                 o_cardName = "B ";
                 o_dqMap    = dqSiteMap_rcB[i_mbaPos][i_ps][i_mrank];
                 o_dramMap  = dramSiteMap_rcB[i_mbaPos][i_ps][i_mrank];
                 break;
 
             case CEN_TYPE_C:
-                o_x4Dram   = true;
                 o_cardName = "C ";
                 o_dqMap    = dqSiteMap_rcC[i_mbaPos][i_ps][i_mrank];
                 o_dramMap  = dramSiteMap_rcC[i_mbaPos][i_ps][i_mrank];
                 break;
 
             case CEN_TYPE_D:
-                o_x4Dram   = true;
                 o_cardName = "D ";
                 o_dqMap    = dqSiteMap_rcD[i_mbaPos][i_ps][i_mrank];
                 o_dramMap  = dramSiteMap_rcD[i_mbaPos][i_ps][i_mrank];
                 break;
 
             case CEN_TYPE_A4:
-                o_x4Dram   = false;
                 o_cardName = "A4";
                 o_dqMap    = dqSiteMap_rcA4[i_mbaPos][i_ps][i_mrank];
                 // We can use the same dram Mapping as a similar card
@@ -2669,7 +2688,6 @@ int32_t getDramSiteInfo( uint8_t i_cardType, uint8_t i_mbaPos,
                 break;
 
             case CEN_TYPE_B4:
-                o_x4Dram   = true;
                 o_cardName = "B4";
                 o_dqMap    = dqSiteMap_rcB4[i_mbaPos][i_ps][i_mrank];
                 // We can use the same dram Mapping as a similar card
@@ -2677,7 +2695,6 @@ int32_t getDramSiteInfo( uint8_t i_cardType, uint8_t i_mbaPos,
                 break;
 
             case CEN_TYPE_C4:
-                o_x4Dram   = true;
                 o_cardName = "C4";
                 o_dqMap    = dqSiteMap_rcC4[i_mbaPos][i_ps][i_mrank];
                 // We can use the same dram Mapping as a similar card
@@ -2685,7 +2702,6 @@ int32_t getDramSiteInfo( uint8_t i_cardType, uint8_t i_mbaPos,
                 break;
 
             case CEN_TYPE_D4:
-                o_x4Dram   = true;
                 o_cardName = "D4";
                 o_dqMap    = dqSiteMap_rcD4[i_mbaPos][i_ps][i_mrank];
                 // We can use the same dram Mapping as a similar card
@@ -2877,10 +2893,8 @@ void addDramSiteString( const MemoryMruData::ExtendedData & i_extMemMru,
 
         uint8_t ps = symbol2PortSlct( symbol );
 
-        bool x4Dram = false; // Not used in this function.
         if ( SUCCESS == getDramSiteInfo(i_extMemMru.cardType, mm.s.mbaPos, ps,
-                                        mm.s.mrank, x4Dram, cardName, dqMap,
-                                        dramMap) )
+                                        mm.s.mrank, cardName, dqMap, dramMap) )
         {
             // Add raw card name.
             strcat( io_data, "RC:" );
@@ -2936,6 +2950,38 @@ void addDramSiteString( const MemoryMruData::ExtendedData & i_extMemMru,
                 break;
         }
     }
+}
+
+//------------------------------------------------------------------------------
+
+void parseMemMruData( ErrlUsrParser & i_parser, uint32_t i_memMru )
+{
+    MemoryMruData::MemMruMeld mm; mm.u = i_memMru;
+
+    bool addDramSite;
+    char header[HEADER_SIZE]; char data[DATA_SIZE];
+    initMemMruStrings( mm, addDramSite, header, data );
+
+    if ( addDramSite && CEN_SYMBOL::WIRING_INVALID > mm.s.wiringType )
+    {
+        // This is a legacy MemoryMru so try to get the DRAM site location from
+        // the provided wiring type. Note that any new MemoryMru with extended
+        // data will not have a valid wiring type. The user will need to look at
+        // the extended section for the DRAM site location info.
+        bool x4Dram;
+        if ( SUCCESS == isX4Dram(mm.s.wiringType, x4Dram) )
+        {
+            MemoryMruData::ExtendedData extMemMru ( i_memMru );
+            extMemMru.cardType  = mm.s.wiringType;
+            extMemMru.isBufDimm = 1;
+            extMemMru.isX4Dram  = x4Dram ? 1 : 0;
+            extMemMru.isValid   = 1;
+
+            addDramSiteString( extMemMru, data );
+        }
+    }
+
+    i_parser.PrintString( header, data );
 }
 
 //------------------------------------------------------------------------------
@@ -3096,12 +3142,15 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
         char isEcc_char  = ( 1 == isEcc  ) ? 'Y':'N';
 
         // Get the DRAM site location information.
-        bool x4Dram;
         const char * cardName;
         const char ** dqMap;
         const char ** dramMap;
-        int32_t l_rc = getDramSiteInfo( type, mbaPos, ps, mrnk, x4Dram,
+        int32_t l_rc = getDramSiteInfo( type, mbaPos, ps, mrnk,
                                         cardName, dqMap, dramMap );
+
+        // Check if DIMM has x4 DRAMs.
+        bool x4Dram;
+        l_rc |= isX4Dram( type, x4Dram );
 
         // Get the DRAM site string.
         const char * dramSite_str = "";
