@@ -1,0 +1,53 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/attribute_info/p9_io_xbus_dccal_attributes.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<attributes>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IO_XBUS_DCCAL_FLAGS</id>
+  <targetType>TARGET_TYPE_XBUS</targetType>
+  <description>
+    Flags to indicate if rx / tx dccal has been run.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    NONE = 0x0,
+    TX = 0x1,
+    RX = 0x2
+  </enum>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IO_X_DEBUG</id>
+  <targetType>TARGET_TYPE_XBUS</targetType>
+  <description>
+    Indicate if debug data should be taken pre / post linktraining.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    FALSE = 0x0,
+    TRUE = 0x1
+  </enum>
+  <platInit/>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+</attributes>
