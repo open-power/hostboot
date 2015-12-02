@@ -144,7 +144,7 @@ static const char * dramCardAPortARank4[] =
 static const char * dramSiteCardAPortBRank0[] =
 {
     "DB07.d4", "DB07.d6", "DB07.d0", "DB07.d1",
-    "DB07.d5", "DB07.d3", "DB07.d2",  "DB07.d7",
+    "DB07.d5", "DB07.d3", "DB07.d2", "DB07.d7",
 
     "DB01.d6", "DB01.d2", "DB01.d1", "DB01.d0",
     "DB01.d4", "DB01.d3", "DB01.d7", "DB01.d5",
@@ -225,7 +225,7 @@ static const char * dramCardAPortBRank4[] =
 static const char * dramSiteCardAPortCRank0[] =
 {
     "DC02.d2", "DC02.d0", "DC02.d7", "DC02.d5",
-    "DC02.d4", "DC02.d6", "DC02.d1",  "DC02.d3",
+    "DC02.d4", "DC02.d6", "DC02.d1", "DC02.d3",
 
     "DC03.d3", "DC03.d6", "DC03.d7", "DC03.d1",
     "DC03.d2", "DC03.d0", "DC03.d5", "DC03.d4",
@@ -1348,7 +1348,7 @@ static const char * dramSiteCardDPortDRank01[] =
     "DD02.d0", "DD02.d1", "DD02.d2", "DD02.d3",
 
     "DD06.d2", "DD06.d0", "DD06.d1", "DD06.d3",
-    "DD07.d2", "DD07.d0","DD07.d1", "DD07.d3",
+    "DD07.d2", "DD07.d0", "DD07.d1", "DD07.d3",
 
     "DD09.d2", "DD09.d0", "DD09.d3", "DD09.d1",
     "DD17.d0", "DD17.d3", "DD17.d1", "DD17.d2",
@@ -1368,8 +1368,8 @@ static const char * dramCardDPortDRank01[] =
 
 static const char * dramSiteCardDPortDRank45[] =
 {
-    "DD33.d1", "DD33.d3", "DD33.d0",  "DD33.d2",
-    "DD36.d3", "DD36.d1", "DD36.d0",  "DD36.d2",
+    "DD33.d1", "DD33.d3", "DD33.d0", "DD33.d2",
+    "DD36.d3", "DD36.d1", "DD36.d0", "DD36.d2",
 
     "DD39.d0", "DD39.d2", "DD39.d1", "DD39.d3",
     "DD35.d0", "DD35.d2", "DD35.d3", "DD35.d1",
@@ -2607,7 +2607,7 @@ static const char ** dqSiteMap_rcD4
 // Support functions for looking up DRAM site locations
 //##############################################################################
 
-// NOTE: o_cardName will always return a non-NULL string of exactly 12
+// NOTE: o_cardName will always return a non-NULL string of exactly 2
 //       characters, regardless if this function gave a bad return code.
 int32_t getDramSiteInfo( uint8_t i_cardType, uint8_t i_mbaPos,
                          uint8_t i_ps, uint8_t i_mrank,
@@ -2617,7 +2617,7 @@ int32_t getDramSiteInfo( uint8_t i_cardType, uint8_t i_mbaPos,
     int32_t o_rc = SUCCESS;
 
     o_x4Dram   = false;
-    o_cardName = "            ";
+    o_cardName = "  ";
     o_dqMap    = NULL;
     o_dramMap  = NULL;
 
@@ -2634,35 +2634,35 @@ int32_t getDramSiteInfo( uint8_t i_cardType, uint8_t i_mbaPos,
         {
             case CEN_TYPE_A:
                 o_x4Dram   = false;
-                o_cardName = "RAW_CARD_A  ";
+                o_cardName = "A ";
                 o_dqMap    = dqSiteMap_rcA[i_mbaPos][i_ps][i_mrank];
                 o_dramMap  = dramSiteMap_rcA[i_mbaPos][i_ps][i_mrank];
                 break;
 
             case CEN_TYPE_B:
                 o_x4Dram   = true;
-                o_cardName = "RAW_CARD_B  ";
+                o_cardName = "B ";
                 o_dqMap    = dqSiteMap_rcB[i_mbaPos][i_ps][i_mrank];
                 o_dramMap  = dramSiteMap_rcB[i_mbaPos][i_ps][i_mrank];
                 break;
 
             case CEN_TYPE_C:
                 o_x4Dram   = true;
-                o_cardName = "RAW_CARD_C  ";
+                o_cardName = "C ";
                 o_dqMap    = dqSiteMap_rcC[i_mbaPos][i_ps][i_mrank];
                 o_dramMap  = dramSiteMap_rcC[i_mbaPos][i_ps][i_mrank];
                 break;
 
             case CEN_TYPE_D:
                 o_x4Dram   = true;
-                o_cardName = "RAW_CARD_D  ";
+                o_cardName = "D ";
                 o_dqMap    = dqSiteMap_rcD[i_mbaPos][i_ps][i_mrank];
                 o_dramMap  = dramSiteMap_rcD[i_mbaPos][i_ps][i_mrank];
                 break;
 
             case CEN_TYPE_A4:
                 o_x4Dram   = false;
-                o_cardName = "RAW_CARD_A4 ";
+                o_cardName = "A4";
                 o_dqMap    = dqSiteMap_rcA4[i_mbaPos][i_ps][i_mrank];
                 // We can use the same dram Mapping as a similar card
                 o_dramMap  = dramSiteMap_rcA[i_mbaPos][i_ps][i_mrank];
@@ -2670,7 +2670,7 @@ int32_t getDramSiteInfo( uint8_t i_cardType, uint8_t i_mbaPos,
 
             case CEN_TYPE_B4:
                 o_x4Dram   = true;
-                o_cardName = "RAW_CARD_B4 ";
+                o_cardName = "B4";
                 o_dqMap    = dqSiteMap_rcB4[i_mbaPos][i_ps][i_mrank];
                 // We can use the same dram Mapping as a similar card
                 o_dramMap  = dramSiteMap_rcB[i_mbaPos][i_ps][i_mrank];
@@ -2678,7 +2678,7 @@ int32_t getDramSiteInfo( uint8_t i_cardType, uint8_t i_mbaPos,
 
             case CEN_TYPE_C4:
                 o_x4Dram   = true;
-                o_cardName = "RAW_CARD_C4  ";
+                o_cardName = "C4";
                 o_dqMap    = dqSiteMap_rcC4[i_mbaPos][i_ps][i_mrank];
                 // We can use the same dram Mapping as a similar card
                 o_dramMap  = dramSiteMap_rcC[i_mbaPos][i_ps][i_mrank];
@@ -2686,7 +2686,7 @@ int32_t getDramSiteInfo( uint8_t i_cardType, uint8_t i_mbaPos,
 
             case CEN_TYPE_D4:
                 o_x4Dram   = true;
-                o_cardName = "RAW_CARD_D4 ";
+                o_cardName = "D4";
                 o_dqMap    = dqSiteMap_rcD4[i_mbaPos][i_ps][i_mrank];
                 // We can use the same dram Mapping as a similar card
                 o_dramMap  = dramSiteMap_rcD[i_mbaPos][i_ps][i_mrank];
@@ -3075,10 +3075,10 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
 
     i_parser.PrintNumber( " MEM_CE_TABLE", "%d", entries );
 
-    const char * hh = "  A H Count Type";
+    const char * hh = "  A H Count RC";
     const char * hd = "Rank P Bank Row     Column DRAM Pins S E Site";
     i_parser.PrintString( hh, hd );
-    hh = "  - - ----- ------------";
+    hh = "  - - ----- ----";
     hd = "---- - ---- ------- ------ ---- ---- - - ------";
     i_parser.PrintString( hh, hd );
 
@@ -3088,11 +3088,14 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
 
         uint32_t count = i_buffer[idx];                             //  8-bit
 
-        uint32_t type   = (i_buffer[idx+1] >> 5) & 0x7;             //  3-bit
+        uint32_t type13 = (i_buffer[idx+1] >> 5) & 0x7;             //  3-bit
         uint32_t mbaPos = (i_buffer[idx+1] >> 4) & 0x1;             //  1-bit
         uint32_t ps     = (i_buffer[idx+1] >> 3) & 0x1;             //  1-bit
         uint32_t isSp   = (i_buffer[idx+1] >> 2) & 0x1;             //  1-bit
         uint32_t isEcc  = (i_buffer[idx+1] >> 1) & 0x1;             //  1-bit
+        uint32_t type0  =  i_buffer[idx+1]       & 0x1;             //  1-bit
+
+        uint32_t type = type0 << 3 | type13;
 
         uint8_t  isHard = (i_buffer[idx+2] >> 7) & 0x1;             //  1-bit
         uint8_t  active = (i_buffer[idx+2] >> 6) & 0x1;             //  1-bit
@@ -3156,7 +3159,7 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
 
         // Build the header string.
         char header[HEADER_SIZE] = { '\0' };
-        snprintf( header, HEADER_SIZE, "  %c %c  0x%02x %s", active_char,
+        snprintf( header, HEADER_SIZE, "  %c %c  0x%02x %s ", active_char,
                   isHard_char, count, cardName );
 
         // Build the data string.

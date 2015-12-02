@@ -227,9 +227,10 @@ void CenMbaCeTable::addCapData( CaptureData & io_cd )
         uint8_t isEcc  = it->isEccSpared  ? 1 : 0;
 
         data[sz_actData  ] = it->count;
-        data[sz_actData+1] = (it->type << 5) |
+        data[sz_actData+1] = ((it->type & 0x7) << 5) |
                              (mbaPos << 4) | (it->portSlct << 3) |
-                             (isSp << 2) | (isEcc << 1);  // 1 spare bit
+                             (isSp << 2) | (isEcc << 1) |
+                             ((it->type & 0x8) >> 3);
         data[sz_actData+2] = (isHard << 7) | (active << 6) | (it->dram & 0x3f);
         data[sz_actData+3] = it->dramPins;
         data[sz_actData+4] = (mrnk << 5) | (srnk << 2) | (svld << 1) | row0;
