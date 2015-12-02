@@ -676,69 +676,78 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
 
 bool parseMemMru( void * i_buffer, uint32_t i_buflen, ErrlUsrParser & i_parser )
 {
-    bool o_rc = true;
-
-    uint32_t memMru;
-    size_t sz_memMru = sizeof( memMru );
+    bool o_rc = true; // Don't dump the hex buffer at the end.
 
     i_parser.PrintBlank();
 
-    if ( i_buflen != sz_memMru )
+    if ( i_buflen != sizeof(uint32_t) )
     {
         i_parser.PrintString( "                   ERROR",
                               "Unable to parse MRU data" );
-        i_parser.PrintBlank();
-        i_parser.PrintHexDump( i_buffer, i_buflen );
+        o_rc = false; // Dump the hex buffer at the end.
     }
     else
     {
-        UtilMem membuf( i_buffer, i_buflen );
-        membuf >> memMru;
+        uint8_t * buf = (uint8_t *)i_buffer;
+        uint32_t memMru = buf[0] << 24 | buf[1] << 16 | buf[2] << 8 | buf[3];
 
-        char header[72];
-        snprintf( header, 72, "MemoryMru (0x%08x)", memMru );
-        i_parser.PrintHeading( header );
+        char heading[72];
+        snprintf( heading, 72, "MemoryMru (0x%08x)", memMru );
+        i_parser.PrintHeading( heading );
+        i_parser.PrintBlank();
     }
 
     return o_rc;
 }
 
 //------------------------------------------------------------------------------
-bool parseDqMap( void * i_buffer, uint32_t i_buflen, ErrlUsrParser & i_parser )
+
+bool parseExtMemMru( void * i_buffer, uint32_t i_buflen,
+                     ErrlUsrParser & i_parser )
 {
-    bool    o_rc = true;
-    size_t  l_size = sizeof(MemoryMruData::ExtendedData);
+    bool o_rc = true; // Don't dump the hex buffer at the end.
 
     i_parser.PrintBlank();
 
-    if ( i_buflen != l_size )
+    if ( i_buflen != sizeof(MemoryMruData::ExtendedData) )
     {
         i_parser.PrintString( "                   ERROR",
-                              "Unable to parse Mem DQ  " );
-        i_parser.PrintBlank();
+                              "Unable to parse MRU data" );
+        o_rc = false; // Dump the hex buffer at the end.
     }
     else
     {
-        // Data on input::has DQ mapping and a few other fields in a structure
-        MemoryMruData::ExtendedData extMemMru;
-        UtilMem membuf( i_buffer, i_buflen );
-        membuf >> extMemMru;
+        uint8_t * buf = (uint8_t *)i_buffer;
 
-        char header[72];
-        snprintf( header, 72, "MemoryMru (0x%08x)", extMemMru.mmMeld.u);
-        i_parser.PrintHeading( header );
+        MemoryMruData::ExtendedData extMemMru;
+
+        extMemMru.mmMeld.u = buf[0] << 24 | buf[1] << 16 | buf[2] << 8 | buf[3];
+
+        extMemMru.cardType  =  buf[4];
+
+        extMemMru.isBufDimm = (buf[5] >> 7) & 0x1;
+        extMemMru.isX4Dram  = (buf[5] >> 6) & 0x1;
+        extMemMru.isValid   = (buf[5] >> 5) & 0x1;
+
+        memcpy( &extMemMru.dqMapping[0], &buf[8],
+                sizeof(extMemMru.dqMapping) );
+
+        char heading[72];
+        snprintf( heading, 72, "Extended MemoryMru (0x%08x)",
+                  extMemMru.mmMeld.u );
+        i_parser.PrintHeading( heading );
+        i_parser.PrintBlank();
 
         o_rc = parseMemMruData( i_parser, extMemMru );
 
+        i_parser.PrintBlank();
+
+        o_rc = false; // Dump the hex buffer at the end. This is temporary. Just
+                      // until we are confident the parser works.
     }
 
-    // want to see the bitmap/data in any case
-    i_parser.PrintHexDump( i_buffer, i_buflen );
-
     return o_rc;
-
-} // end parseDqMap
-
+}
 
 //------------------------------------------------------------------------------
 
@@ -821,7 +830,7 @@ bool logDataParse( ErrlUsrParser & i_parser, void * i_buffer,
             break;
 
         case ErrlMruData_2:
-            rc = parseDqMap( i_buffer, i_buflen, i_parser );
+            rc = parseExtMemMru( i_buffer, i_buflen, i_parser );
             break;
 
         default:

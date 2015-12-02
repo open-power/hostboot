@@ -433,9 +433,24 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
 
     } while (0);
 
+    size_t sz_buf = sizeof(extMemMru);
+    uint8_t buf[sz_buf]; memset( buf, 0x00, sz_buf );
+
+    buf[0] = (extMemMru.mmMeld.u >> 24) & 0xff;
+    buf[1] = (extMemMru.mmMeld.u >> 16) & 0xff;
+    buf[2] = (extMemMru.mmMeld.u >>  8) & 0xff;
+    buf[3] =  extMemMru.mmMeld.u        & 0xff;
+
+    buf[4] = extMemMru.cardType;
+
+    buf[5] = extMemMru.isBufDimm << 7 |
+             extMemMru.isX4Dram  << 6 |
+             extMemMru.isValid   << 5;
+
+    memcpy( &buf[8], &extMemMru.dqMapping[0], sizeof(extMemMru.dqMapping) );
+
     // Add the extended MemoryMru to the error log.
-    PRDF_ADD_FFDC( io_errl, (const char*)(&extMemMru), sizeof(extMemMru),
-                   ErrlVer1, ErrlMruData_2 );
+    PRDF_ADD_FFDC( io_errl, buf, sz_buf, ErrlVer1, ErrlMruData_2 );
 
     #undef PRDF_FUNC
 }
