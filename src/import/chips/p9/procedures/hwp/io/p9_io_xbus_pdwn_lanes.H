@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: chips/p9/procedures/hwp/io/p9_io_xbus_restore_erepair.H $     */
+/* $Source: chips/p9/procedures/hwp/io/p9_io_xbus_pdwn_lanes.H $          */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
@@ -21,12 +21,12 @@
 /// *HWP HWP Backup Owner : Gary Peterson <garyp@us.ibm.com>
 /// *HWP FW Owner         : Jamie Knight <rjknight@us.ibm.com>
 /// *HWP Team             : IO
-/// *HWP Level            : 1
+/// *HWP Level            : 2
 /// *HWP Consumed by      : FSP:HB
 ///----------------------------------------------------------------------------
 
-#ifndef _P9_IO_XBUS_RESTORE_EREPAIR_H_
-#define _P9_IO_XBUS_RESTORE_EREPAIR_H_
+#ifndef _P9_IO_XBUS_PDWN_LANES_H_
+#define _P9_IO_XBUS_PDWN_LANES_H_
 
 // ----------------------------------------------------------------------------
 // Includes
@@ -34,7 +34,7 @@
 #include <fapi2.H>
 
 // function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*p9_io_xbus_restore_erepair_FP_t) (
+typedef fapi2::ReturnCode (*p9_io_xbus_pdwn_lanes_FP_t) (
     const fapi2::Target < fapi2::TARGET_TYPE_XBUS >&,
     const uint8_t&,
     const std::vector< uint8_t >&,
@@ -46,18 +46,17 @@ extern "C"
 {
 
     /**
-     * @brief A HWP that runs Restore eRepair.  This procedure should update the
-     * bad lane vector and power down the bad lanes.
+     * @brief A HWP that powers down the specified lanes.
      * @param[in] i_rx_target        FAPI2 Rx Target
-     * @param[in] i_rx_clock_group   Rx Clock Group of Rx Target
+     * @param[in] i_rx_clock_group   Clock Group of Rx Target
      * @param[in] i_rx_bad_lanes     Vector of Rx Bad Lanes
-     * @param[in] i_tx_target FAPI2  Tx Target
-     * @param[in] i_tx_clock_group   Tx Clock Group of Tx Target
+     * @param[in] i_tx_target        FAPI2 Tx Target
+     * @param[in] i_tx_clock_group   Clock Group of Tx Target
      * @param[in] i_tx_bad_lanes     Vector of Tx Bad Lanes
      * @retval ReturnCode
      */
     fapi2::ReturnCode
-    p9_io_xbus_restore_erepair(
+    p9_io_xbus_pdwn_lanes(
         const fapi2::Target< fapi2::TARGET_TYPE_XBUS >& i_rx_target,
         const uint8_t& i_rx_clock_group,
         const std::vector< uint8_t >& i_rx_bad_lanes,
@@ -67,4 +66,4 @@ extern "C"
 
 } // extern "C"
 
-#endif // _P9_IO_XBUS_RESTORE_EREPAIR_H_
+#endif // _P9_IO_XBUS_PDWN_LANES_H_

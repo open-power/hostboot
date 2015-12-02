@@ -16,6 +16,5 @@
 # deposited with the U.S. Copyright Office.
 #
 # IBM_PROLOG_END_TAG
-PROCEDURE=p9_io_xbus_restore_erepair
-p9_io_xbus_restore_erepair_USELIBS += p9_io_xbus_pdwn_lanes
+PROCEDURE=p9_io_xbus_pdwn_lanes
 $(call BUILD_PROCEDURE)
