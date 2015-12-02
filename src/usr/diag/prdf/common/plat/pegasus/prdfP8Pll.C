@@ -77,11 +77,24 @@ void GetProcPllErrRegList(ExtensibleChip * i_chip,
         entry.configReg = i_chip->getRegister("PB_CONFIG_REG");
         o_pllErrRegList.push_back( entry );
 
-        // ABUS
         entry.chip      = i_chip;
-        entry.type      = P8DataBundle::ABUS;
-        entry.errReg    = i_chip->getRegister("ABUS_ERROR_REG");
-        entry.configReg = i_chip->getRegister("ABUS_CONFIG_REG");
+
+        // Get NV PLL Registers if Naples chip, else get ABUS PLL Registers
+        if ( MODEL_NAPLES == getProcModel(i_chip->GetChipHandle()) )
+        {
+            // NV
+            entry.type      = P8DataBundle::NV;
+            entry.errReg    = i_chip->getRegister("NV_ERROR_REG");
+            entry.configReg = i_chip->getRegister("NV_CONFIG_REG");
+        }
+        else
+        {
+            // ABUS
+            entry.type      = P8DataBundle::ABUS;
+            entry.errReg    = i_chip->getRegister("ABUS_ERROR_REG");
+            entry.configReg = i_chip->getRegister("ABUS_CONFIG_REG");
+        }
+
         o_pllErrRegList.push_back( entry );
 
         // EX

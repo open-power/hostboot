@@ -208,3 +208,20 @@
         capture     req nonzero("NPUFIR");
     };
 
+    ############################################################################
+    # NV Chiplet PLL Registers
+    ############################################################################
+
+    register NV_ERROR_REG
+    {
+        name        "EH.TPCHIP.NET.PCBSLNV.ERROR_REG";
+        scomaddr    0x080F001F;
+        capture     group PllFIRs;
+    };
+
+    register NV_CONFIG_REG
+    {
+        name        "EH.TPCHIP.NET.PCBSLNV.SLAVE_CONFIG_REG";
+        scomaddr    0x080F001E;
+        capture     group PllFIRs;
+    };

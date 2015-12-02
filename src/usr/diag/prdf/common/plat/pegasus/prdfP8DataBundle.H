@@ -54,6 +54,7 @@ class P8DataBundle : public DataBundle
           ABUS,
           EX,
           PB,
+          NV,
       };
 
       /*
