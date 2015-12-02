@@ -57,7 +57,9 @@
 //-----------------------------------------------------------------------------
 //  Definitions
 //-----------------------------------------------------------------------------
-fapi2::ReturnCode checkMaster(const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target);
+fapi2::ReturnCode check_master(
+    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target,
+    const uint8_t& i_clock_group);
 
 /**
  * @brief A HWP that runs on every instance of the XBUS(EDI+)
@@ -70,38 +72,46 @@ fapi2::ReturnCode p9_io_xbus_linktrain(
     const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_slave)
 {
     FAPI_IMP("I/O Start Xbus Training");
-    const uint8_t EDIP_GROUPS     = 2;
-    const uint8_t GROUP_BROADCAST = 0x0F; // broadcast to all groups
-    uint8_t l_group               = 0;
+    const uint8_t EDIP_GROUPS = 2;
+    uint8_t l_group           = 0;
+    char master_string[fapi2::MAX_ECMD_STRING_LEN];
+    char slave_string[fapi2::MAX_ECMD_STRING_LEN];
+
+    fapi2::toString(i_master, master_string, fapi2::MAX_ECMD_STRING_LEN);
+    fapi2::toString(i_slave,  slave_string, fapi2::MAX_ECMD_STRING_LEN);
+
+    FAPI_DBG("I/O Xbus Targets: Master(%s) Slave(%s)",
+             master_string,
+             slave_string);
 
     EdipTrain l_master;
     EdipTrain l_slave;
 
-    // Check if Master Target is an actual master
-    checkMaster(i_master);
-
-#if 0 // While we are doing broadside scoms, group broadcasts will not work.
-    FAPI_TRY( slave.start(i_slave, IO_EDIP_STATE_WDERF, GROUP_BROADCAST ),
-              "Start Slave EDI+ Xbus Training Failed.");
-
-    FAPI_TRY( master.start(i_master, IO_EDIP_STATE_WDERF, GROUP_BROADCAST ),
-              "Start Master EDI+ Xbus Training Failed.");
-#else
-    static_cast<void>(GROUP_BROADCAST);
-    FAPI_TRY( l_slave.start(i_slave, IO_EDIP_STATE_WDERF, 0 ),
-              "Start EDI+ Xbus Training On Slave Group 0 Failed.");
-    FAPI_TRY( l_slave.start(i_slave, IO_EDIP_STATE_WDERF, 1 ),
-              "Start EDI+ Xbus Training On Slave Group 1 Failed.");
-    FAPI_TRY( l_master.start(i_master, IO_EDIP_STATE_WDERF, 0 ),
-              "Start EDI+ Xbus Training On Master Group 0 Failed.");
-    FAPI_TRY( l_master.start(i_master, IO_EDIP_STATE_WDERF, 1 ),
-              "Start EDI+ Xbus Training On Master Group 1 Failed.");
-#endif
-
+    // Start Training on all groups
     for(l_group = 0; l_group < EDIP_GROUPS; ++l_group)
     {
-        FAPI_TRY(l_master.poll(i_master, i_slave, l_group ),
-                 "Polling EDI+ Xbus Training Failed");
+
+        // Check if master target is actually master.
+        FAPI_TRY( check_master( i_master, l_group ),
+                  "Target(%s:g%d) is not master.",
+                  master_string, l_group);
+
+        // Start Slave Target First
+        FAPI_TRY( l_slave.start( i_slave, IO_EDIP_STATE_WDERF, l_group ),
+                  "Start EDI+ Xbus Training On Slave Group(%d) Failed.",
+                  l_group);
+
+        FAPI_TRY( l_master.start( i_master, IO_EDIP_STATE_WDERF, l_group ),
+                  "Start EDI+ Xbus Training On Master Group(%d) Failed.",
+                  l_group);
+    }
+
+    // Poll for Training to complete on all Groups
+    for(l_group = 0; l_group < EDIP_GROUPS; ++l_group)
+    {
+        FAPI_TRY(l_master.poll( i_master, i_slave, l_group ),
+                 "Polling EDI+ Xbus Training Group(%d) Failed",
+                 l_group);
     }
 
 fapi_try_exit:
@@ -118,22 +128,24 @@ fapi_try_exit:
 
 /**
  * @brief Checks if the Xbus target is set to Master Mode
- * @param[in] i_target Fapi2 Target
+ * @param[in] i_target        Fapi2 Target
+ * @param[in] i_clock_group   Clock Group
  * @retval ReturnCode
  */
-fapi2::ReturnCode checkMaster(const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target)
+fapi2::ReturnCode check_master(
+    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target,
+    const uint8_t& i_clock_group)
 {
     FAPI_IMP("Entering...");
-    const uint8_t EDIP_GROUPS = 2;
     Register<EDIP_RX_CTL_MODE1_E_PG> master_reg;
 
-    for(uint8_t l_group = 0; l_group < EDIP_GROUPS; ++l_group)
-    {
-        FAPI_TRY(master_reg.read(i_target, l_group), "Reading Master Mode Failed");
-        FAPI_ASSERT( (master_reg.get<EDIP_RX_MASTER_MODE>() == 1),
-                     fapi2::IO_XBUS_NOT_MASTER().set_TARGET(i_target).set_GROUP(l_group),
-                     "I/O Xbus Target is not Master")
-    }
+    FAPI_TRY(master_reg.read(i_target, i_clock_group),
+             "Reading Master Mode Failed");
+
+    FAPI_ASSERT( (master_reg.get<EDIP_RX_MASTER_MODE>() == 1),
+                 fapi2::IO_XBUS_NOT_MASTER().set_TARGET(i_target).set_GROUP(i_clock_group),
+                 "I/O Xbus Target is not Master. Group(%d)",
+                 i_clock_group);
 
 fapi_try_exit:
     FAPI_IMP("Exiting...");
