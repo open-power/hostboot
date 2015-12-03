@@ -46,4 +46,9 @@
     <ffdc>READ_CLK_SL</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_CPLT_NOT_ALIGNED_ERR</rc>
+    <description>Chiplet not aligned</description>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>
