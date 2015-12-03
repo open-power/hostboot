@@ -540,6 +540,7 @@
     <attribute><id>PROC_R_LOADLINE_VCS</id></attribute>
     <attribute><id>PROC_R_DISTLOSS_VCS</id></attribute>
     <attribute><id>PROC_VRM_VOFFSET_VCS</id></attribute>
+    <attribute><id>PROC_HTM_BAR_BASE_ADDR</id></attribute>
 </targetType>
 
 <targetType>
@@ -1991,6 +1992,9 @@
     <attribute><id>PAYLOAD_IN_MIRROR_MEM</id></attribute>
     <!-- AVP override for fused cores or normal cores -->
     <attribute><id>FUSED_CORE_OPTION</id></attribute>
+    <attribute><id>MIRROR_BASE_ADDRESS</id></attribute>
+    <attribute><id>EFFECTIVE_EC</id></attribute>
+    <attribute><id>HB_RSV_MEM_SIZE_MB</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->
@@ -2096,6 +2100,7 @@
     <attribute><id>PROC_PCIE_IOP_TX_FFE_GEN2</id></attribute>
     <attribute><id>PROC_PCIE_IOP_CONFIG</id></attribute>
     <attribute><id>PROC_PCIE_PHB_ACTIVE</id></attribute>
+    <attribute><id>PROC_HTM_BAR_SIZE</id></attribute>
     <attribute><id>XSCOM_BASE_ADDRESS</id></attribute>
 </targetType>
 
@@ -2228,6 +2233,7 @@
         <default>MCA</default>
     </attribute>
     <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
+    <attribute><id>EFF_DIMM_SIZE</id></attribute>
 </targetType>
 
 <targetType>
@@ -2250,6 +2256,7 @@
         <default>MCBIST</default>
     </attribute>
     <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
+    <attribute><id>MSS_FREQ</id></attribute>
 </targetType>
 
 <targetType>

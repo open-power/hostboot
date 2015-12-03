@@ -46,6 +46,7 @@
 #include    <targeting/common/utilFilter.H>
 
 #include    <config.h>
+#include    <targeting/attrsync.H>
 
 namespace   ISTEP_07
 {
@@ -218,6 +219,7 @@ void*    call_mss_eff_config( void *io_pArgs )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_eff_config entry" );
 
+    TARGETING::hdatAttrHack();
     //@TODO RTC:133830 Add the wrapper back in when ready
 /*
     errlHndl_t l_err = NULL;
