@@ -32,8 +32,10 @@
 
 //## auto_generated
 #include "p9_sbe_common.H"
-
+#include "p9_const_common.H"
+#include "p9_misc_scom_addresses_fld.H"
 #include "p9_perv_scom_addresses.H"
+
 
 
 enum P9_SBE_COMMON_Private_Constants
@@ -41,7 +43,8 @@ enum P9_SBE_COMMON_Private_Constants
     CLK_REGION_VALUE = 0x498000000000E000,
     EXPECTED_CLOCK_STATUS = 0xF07FDFFFFFFFFFFF,
     NS_DELAY = 100000, // unit in nano seconds
-    SIM_CYCLE_DELAY = 1000 // unit in cycles
+    SIM_CYCLE_DELAY = 1000, // unit in cycles
+    CPLT_ALIGN_CHECK_POLL_COUNT = 10 // count to wait for chiplet aligned
 };
 
 /// @brief --For all chiplets exit flush
@@ -54,26 +57,56 @@ fapi2::ReturnCode p9_sbe_common_align_chiplets(const
         fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chiplets)
 {
     fapi2::buffer<uint64_t> l_data64;
+    int l_timeout = 0;
     FAPI_DBG("Entering ...");
 
     FAPI_INF("For all chiplets: exit flush");
     //Setting CPLT_CTRL0 register value
     l_data64.flush<0>();
-    l_data64.setBit<2>();  //CPLT_CTRL0.CTRL_CC_FLUSHMODE_INH_DC = 1
+    //CPLT_CTRL0.CTRL_CC_FLUSHMODE_INH_DC = 1
+    l_data64.setBit<PEC_CPLT_CTRL0_CTRL_CC_FLUSHMODE_INH_DC>();
     FAPI_TRY(fapi2::putScom(i_target_chiplets, PERV_CPLT_CTRL0_OR, l_data64));
 
     FAPI_INF("For all chiplets: enable alignement");
     //Setting CPLT_CTRL0 register value
     l_data64.flush<0>();
-    l_data64.setBit<3>();  //CPLT_CTRL0.CTRL_CC_FORCE_ALIGN_DC = 1
+    //CPLT_CTRL0.CTRL_CC_FORCE_ALIGN_DC = 1
+    l_data64.setBit<PEC_CPLT_CTRL0_CTRL_CC_FORCE_ALIGN_DC>();
     FAPI_TRY(fapi2::putScom(i_target_chiplets, PERV_CPLT_CTRL0_OR, l_data64));
 
     fapi2::delay(NS_DELAY, SIM_CYCLE_DELAY);
 
+    FAPI_INF("Poll OPCG done bit to check for run-N completeness");
+    l_timeout = CPLT_ALIGN_CHECK_POLL_COUNT;
+
+    //UNTIL CPLT_STAT0.CC_CTRL_CHIPLET_IS_ALIGNED_DC == 1
+    while (l_timeout != 0)
+    {
+        //Getting CPLT_STAT0 register value
+        FAPI_TRY(fapi2::getScom(i_target_chiplets, PERV_CPLT_STAT0, l_data64));
+        bool l_poll_data =
+            l_data64.getBit<PEC_CPLT_STAT0_CC_CTRL_CHIPLET_IS_ALIGNED_DC>();  //bool l_poll_data = CPLT_STAT0.CC_CTRL_CHIPLET_IS_ALIGNED_DC
+
+        if (l_poll_data == 1)
+        {
+            break;
+        }
+
+        fapi2::delay(NS_DELAY, SIM_CYCLE_DELAY);
+        --l_timeout;
+    }
+
+    FAPI_INF("Loop Count :%d", l_timeout);
+
+    FAPI_ASSERT(l_timeout > 0,
+                fapi2::CPLT_NOT_ALIGNED_ERR(),
+                "ERROR:CHIPLET NOT ALIGNED");
+
     FAPI_INF("For all chiplets: disable alignement");
     //Setting CPLT_CTRL0 register value
     l_data64.flush<0>();
-    l_data64.setBit<3>();  //CPLT_CTRL0.CTRL_CC_FORCE_ALIGN_DC = 0
+    //CPLT_CTRL0.CTRL_CC_FORCE_ALIGN_DC = 0
+    l_data64.setBit<PEC_CPLT_CTRL0_CTRL_CC_FORCE_ALIGN_DC>();
     FAPI_TRY(fapi2::putScom(i_target_chiplets, PERV_CPLT_CTRL0_CLEAR, l_data64));
 
     FAPI_DBG("Exiting ...");
@@ -173,7 +206,8 @@ fapi2::ReturnCode p9_sbe_common_clock_start_stop(const
     FAPI_INF("Chiplet exit flush");
     //Setting CPLT_CTRL0 register value
     l_data64.flush<0>();
-    l_data64.setBit<2>();  //CPLT_CTRL0.CTRL_CC_FLUSHMODE_INH_DC = 1
+    //CPLT_CTRL0.CTRL_CC_FLUSHMODE_INH_DC = 1
+    l_data64.setBit<PEC_CPLT_CTRL0_CTRL_CC_FLUSHMODE_INH_DC>();
     FAPI_TRY(fapi2::putScom(i_target, PERV_CPLT_CTRL0_OR, l_data64));
 
     FAPI_INF("Clear Scan region type register");
@@ -199,9 +233,12 @@ fapi2::ReturnCode p9_sbe_common_clock_start_stop(const
     FAPI_INF("Setup all Clock Domains and Clock Types");
     //Setting CLK_REGION register value
     FAPI_TRY(fapi2::getScom(i_target, PERV_CLK_REGION, l_data64));
-    l_data64.insertFromRight<0, 2>(l_clk_cmd);  //CLK_REGION.CLOCK_CMD = l_clk_cmd
-    l_data64.writeBit<2>(i_startslave);  //CLK_REGION.SLAVE_MODE = i_startslave
-    l_data64.writeBit<3>(i_startmaster);  //CLK_REGION.MASTER_MODE = i_startmaster
+    l_data64.insertFromRight<PEC_CLK_REGION_CLOCK_CMD, PEC_CLK_REGION_CLOCK_CMD_LEN>
+    (l_clk_cmd);  //CLK_REGION.CLOCK_CMD = l_clk_cmd
+    //CLK_REGION.SLAVE_MODE = i_startslave
+    l_data64.writeBit<PEC_CLK_REGION_SLAVE_MODE>(i_startslave);
+    //CLK_REGION.MASTER_MODE = i_startmaster
+    l_data64.writeBit<PEC_CLK_REGION_MASTER_MODE>(i_startmaster);
     //CLK_REGION.CLOCK_REGION_PERV = i_regions.getBit<53>()
     l_data64.writeBit<4>(i_regions.getBit<53>());
     //CLK_REGION.CLOCK_REGION_UNIT1 = i_regions.getBit<54>()
@@ -224,9 +261,12 @@ fapi2::ReturnCode p9_sbe_common_clock_start_stop(const
     l_data64.writeBit<13>(i_regions.getBit<62>());
     //CLK_REGION.CLOCK_REGION_UNIT10 = i_regions.getBit<63>()
     l_data64.writeBit<14>(i_regions.getBit<63>());
-    l_data64.writeBit<48>(l_reg_sl);  //CLK_REGION.SEL_THOLD_SL = l_reg_sl
-    l_data64.writeBit<49>(l_reg_nsl);  //CLK_REGION.SEL_THOLD_NSL = l_reg_nsl
-    l_data64.writeBit<50>(l_reg_ary);  //CLK_REGION.SEL_THOLD_ARY = l_reg_ary
+    //CLK_REGION.SEL_THOLD_SL = l_reg_sl
+    l_data64.writeBit<PEC_CLK_REGION_SEL_THOLD_SL>(l_reg_sl);
+    //CLK_REGION.SEL_THOLD_NSL = l_reg_nsl
+    l_data64.writeBit<PEC_CLK_REGION_SEL_THOLD_NSL>(l_reg_nsl);
+    //CLK_REGION.SEL_THOLD_ARY = l_reg_ary
+    l_data64.writeBit<PEC_CLK_REGION_SEL_THOLD_ARY>(l_reg_ary);
     FAPI_TRY(fapi2::putScom(i_target, PERV_CLK_REGION, l_data64));
 
     //To do do checking only for chiplets that dont have Master-slave mode enabled
@@ -339,7 +379,8 @@ fapi2::ReturnCode p9_sbe_common_set_scan_ratio(const
 
     //Setting OPCG_ALIGN register value
     FAPI_TRY(fapi2::getScom(i_target_chiplets, PERV_OPCG_ALIGN, l_data64));
-    l_data64.insertFromRight<47, 5>(0xE0);  //OPCG_ALIGN.SCAN_RATIO = 0xE0
+    l_data64.insertFromRight<PEC_OPCG_ALIGN_SCAN_RATIO, PEC_OPCG_ALIGN_SCAN_RATIO_LEN>
+    (0xE0);  //OPCG_ALIGN.SCAN_RATIO = 0xE0
     FAPI_TRY(fapi2::putScom(i_target_chiplets, PERV_OPCG_ALIGN, l_data64));
 
     FAPI_DBG("Exiting ...");
