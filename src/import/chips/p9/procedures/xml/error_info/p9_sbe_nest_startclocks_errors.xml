@@ -29,9 +29,9 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_NEST_ARY_ERR</rc>
-    <description>ary_thold status not matching the expected value in clock start stop sequence</description>
-    <ffdc>READ_CLK_ARY</ffdc>
+    <rc>RC_NEST_SL_ERR</rc>
+    <description>sl_thold status not matching the expected value in clock start stop sequence</description>
+    <ffdc>READ_CLK_SL</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -41,9 +41,9 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_NEST_SL_ERR</rc>
-    <description>sl_thold status not matching the expected value in clock start stop sequence</description>
-    <ffdc>READ_CLK_SL</ffdc>
+    <rc>RC_NEST_ARY_ERR</rc>
+    <description>ary_thold status not matching the expected value in clock start stop sequence</description>
+    <ffdc>READ_CLK_ARY</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
