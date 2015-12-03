@@ -2796,7 +2796,65 @@ void getBadDqBitmapEntry( uint8_t * i_buffer, char * o_str )
 //------------------------------------------------------------------------------
 
 // Helper function for parseMemMruData()
-int32_t getMemMruDramSite( MemoryMruData::ExtendedData & i_extMemMru,
+void initMemMruStrings( MemoryMruData::MemMruMeld i_mm, bool & o_addDramSite,
+                        char * o_header, char * o_data )
+{
+    o_addDramSite = false;
+    memset( o_header, '\0', HEADER_SIZE );
+    memset( o_data,   '\0', DATA_SIZE   );
+
+    // Get the position info.
+    uint8_t nodePos  =  i_mm.s.nodePos;
+    uint8_t cenPos   = (i_mm.s.procPos << 3) | i_mm.s.cenPos;
+    uint8_t mbaPos   =  i_mm.s.mbaPos;
+
+    // Get the slave rank info.
+    char tmp[HEADER_SIZE] = { '\0' };
+    if ( 1 == i_mm.s.srankValid )
+        snprintf( tmp, HEADER_SIZE, "S%d", i_mm.s.srank );
+
+    // Build the header string.
+    snprintf( o_header, HEADER_SIZE, "  mba(n%dp%dc%d)%s Rank:M%d%s",
+              nodePos, cenPos, mbaPos, (cenPos < 10) ? " " : "",
+              i_mm.s.mrank, tmp );
+
+    // Build the generic data string (no DRAM site info).
+    switch ( i_mm.s.symbol )
+    {
+        case MemoryMruData::CALLOUT_RANK:
+            snprintf( o_data, DATA_SIZE, "Special: CALLOUT_RANK" );
+            break;
+        case MemoryMruData::CALLOUT_RANK_AND_MBA:
+            snprintf( o_data, DATA_SIZE, "Special: CALLOUT_RANK_AND_MBA" );
+            break;
+        case MemoryMruData::CALLOUT_ALL_MEM:
+            snprintf( o_data, DATA_SIZE, "Special: CALLOUT_ALL_MEM" );
+            break;
+        default:
+
+            if ( SYMBOLS_PER_RANK > i_mm.s.symbol )
+            {
+                o_addDramSite = true; // Only condition where a DRAM site
+                                      // location is relevant.
+
+                snprintf( o_data, DATA_SIZE,
+                          "Sym:%d Pins:%d S:%c E:%c ",
+                          i_mm.s.symbol, i_mm.s.pins,
+                          (1 == i_mm.s.dramSpared) ? 'Y' : 'N',
+                          (1 == i_mm.s.eccSpared)  ? 'Y' : 'N' );
+            }
+    }
+
+    // Ouptut should look like:
+    //  |   mba(n0p0c0)  Rank:M7   : Special: CALLOUT_RANK                    |
+    //  |   mba(n7p63c1) Rank:M0S7 : Symbol:71 Pins:3 S:Y E:N                 |
+    // DRAM site info will be added later.
+}
+
+//------------------------------------------------------------------------------
+
+// Helper function for parseMemMruData()
+int32_t getMemMruDramSite( const MemoryMruData::ExtendedData & i_extMemMru,
                            char * o_data )
 {
     char  l_dqMapBuffer[10];
@@ -2911,77 +2969,35 @@ int32_t getMemMruDramSite( MemoryMruData::ExtendedData & i_extMemMru,
 
 //------------------------------------------------------------------------------
 
-bool parseMemMruData( ErrlUsrParser & i_parser,
-                      MemoryMruData::ExtendedData & i_extMemMru )
+void parseMemMruData( ErrlUsrParser & i_parser,
+                      const MemoryMruData::ExtendedData & i_extMemMru )
 {
-    bool o_rc = true;
+    bool addDramSite;
+    char header[HEADER_SIZE]; char data[DATA_SIZE];
+    initMemMruStrings( i_extMemMru.mmMeld, addDramSite, header, data );
 
-    MemoryMruData::MemMruMeld mm = i_extMemMru.mmMeld;
-
-    uint8_t nodePos  =  mm.s.nodePos;
-    uint8_t cenPos   = (mm.s.procPos << 3) | mm.s.cenPos;
-    uint8_t mbaPos   = mm.s.mbaPos;
-
-    char tmp[HEADER_SIZE] = { '\0' };
-    if ( 1 == mm.s.srankValid )
-        snprintf( tmp, HEADER_SIZE, "S%d", mm.s.srank );
-
-    char header[HEADER_SIZE];
-    snprintf( header, HEADER_SIZE, "  mba(n%dp%dc%d)%s Rank:M%d%s",
-              nodePos, cenPos, mbaPos, (cenPos < 10) ? " " : "",
-              mm.s.mrank, tmp );
-
-    char data[DATA_SIZE] = { '\0' };
-
-    switch ( mm.s.symbol )
+    if ( addDramSite )
     {
-        case MemoryMruData::CALLOUT_RANK:
-            snprintf( data, DATA_SIZE, "Special: CALLOUT_RANK" );
-            break;
-        case MemoryMruData::CALLOUT_RANK_AND_MBA:
-            snprintf( data, DATA_SIZE, "Special: CALLOUT_RANK_AND_MBA" );
-            break;
-        case MemoryMruData::CALLOUT_ALL_MEM:
-            snprintf( data, DATA_SIZE, "Special: CALLOUT_ALL_MEM" );
-            break;
-        default:
+        char dramSite_str[DATA_SIZE] = { '\0' };
 
-            if ( SYMBOLS_PER_RANK > mm.s.symbol )
-            {
-                char dramSite_str[DATA_SIZE] = { '\0' };
+        getMemMruDramSite( i_extMemMru, dramSite_str );
 
-                getMemMruDramSite( i_extMemMru, dramSite_str );
+        char l_sitePinString[5];
+        if  ( i_extMemMru.isBufDimm )
+        {
+            strcpy(l_sitePinString, "Site");
+        }
+        else
+        {
+            strcpy(l_sitePinString, "DQ");
+        }
 
-                char l_sitePinString[5];
-                if  ( i_extMemMru.isBufDimm )
-                {
-                    strcpy(l_sitePinString, "Site");
-                }
-                else
-                {
-                    strcpy(l_sitePinString, "DQ");
-                }
-
-                snprintf( data, DATA_SIZE,
-                          "Symbol:%d Pins:%d S:%c E:%c %s:%s",
-                          mm.s.symbol, mm.s.pins,
-                          (1 == mm.s.dramSpared) ? 'Y' : 'N',
-                          (1 == mm.s.eccSpared)  ? 'Y' : 'N',
-                          l_sitePinString,
-                          dramSite_str );
-            }
+        strcat( data, l_sitePinString );
+        strcat( data, ":" );
+        strcat( data, dramSite_str );
     }
 
-    // Ouptut should look like:
-    // |   mba(n0p0c0)  Rank:M7   : Special: CALLOUT_RANK                    |
-    // |   mba(n7p63c1) Rank:M0S7 : Symbol: 71 Pins: 3 Spared: false         |
-    // |   mba(n0p4c0)  Rank:M0S0 : Site/Pin: DA03.d1                        |
-    //            or for IS DIMM we would see the last line be:
-    // |   mba(n0p4c0)  Rank:M0S0 : Site/Pin: 25                             |
-
     i_parser.PrintString( header, data );
-
-    return o_rc;
 }
 
 //------------------------------------------------------------------------------

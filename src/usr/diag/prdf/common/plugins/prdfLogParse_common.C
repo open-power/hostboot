@@ -738,7 +738,7 @@ bool parseExtMemMru( void * i_buffer, uint32_t i_buflen,
         i_parser.PrintHeading( heading );
         i_parser.PrintBlank();
 
-        o_rc = parseMemMruData( i_parser, extMemMru );
+        parseMemMruData( i_parser, extMemMru );
 
         i_parser.PrintBlank();
 

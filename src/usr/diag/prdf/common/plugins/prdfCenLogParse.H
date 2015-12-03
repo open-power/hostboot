@@ -53,8 +53,8 @@ namespace FSP
  * @param i_parser    The error log parser.
  * @param i_extMemMru A MemoryMru with extended data for extra FFDC.
  */
-bool parseMemMruData( ErrlUsrParser & i_parser,
-                      MemoryMruData::ExtendedData & i_extMemMru );
+void parseMemMruData( ErrlUsrParser & i_parser,
+                      const MemoryMruData::ExtendedData & i_extMemMru );
 
 /**
  * @brief Parses Memory UE table.
