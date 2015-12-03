@@ -279,5 +279,14 @@ namespace   TARGETING
      */
     errlHndl_t syncAllAttributesFromFsp();
 
+    /**
+     *  @brief  A temporary hack to set attributes that HDAT needs.
+     *          To be removed by RTC: 143191
+     *  @return     errlHndl_t
+     *                  return errl ==  NULL  -> success
+     *                  return errl !=  NULL  -> failure
+     */
+    errlHndl_t hdatAttrHack();
+
 } // namespace
 #endif

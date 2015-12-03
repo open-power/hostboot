@@ -1991,7 +1991,9 @@
         Provided by the Machine Readable Workbook.
         Can vary across drawers.
     </description>
-    <simpleType><uint8_t></uint8_t></simpleType>
+    <simpleType><uint8_t>
+        <default>0</default>
+    </uint8_t></simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
@@ -2008,7 +2010,9 @@
         Provided by the Machine Readable Workbook.
         Can vary across drawers.
     </description>
-    <simpleType><uint8_t></uint8_t></simpleType>
+    <simpleType><uint8_t>
+        <default>0</default>
+    </uint8_t></simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
@@ -2125,7 +2129,9 @@
         This is the same for all A-bus chiplets in the system.
         Provided by the MRW.
     </description>
-    <simpleType><uint32_t></uint32_t></simpleType>
+    <simpleType><uint32_t>
+        <default>0x1900</default>
+    </uint32_t></simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
@@ -10489,6 +10495,7 @@ Measured in GB</description>
     </description>
     <simpleType>
         <uint8_t>
+            <default>4</default>
         </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -13364,7 +13371,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
         <uint8_t>
-            <default>0x00</default>
+            <default>0x10</default>
         </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -15148,7 +15155,16 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
                 Bit 12:15 - dn_tx_preset
     </description>
     <simpleType>
-        <uint8_t>
+        <uint8_t><default>0x77,0x77,0x77,0x77,0x77,0x77,0x77,0x77,0x77,0x77,
+            0x77,0x77,0x77,0x77,0x77,0x77,0x77,0x77,0x77,0x77,0x77,0x77,0x77,
+            0x77,0x77,0x77,0x77,0x77,0x77,0x77,0x77,0x77,0x77,0x77,0x77,0x77,
+            0x77,0x77,0x77,0x77,0x77,0x77,0x77,0x77,0x77,0x77,0x77,0x77,0x0,
+            0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x77,
+            0x77,0x77,0x77,0x77,0x77,0x77,0x77,0x77,0x77,0x77,0x77,0x77,0x77,
+            0x77,0x77,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+            0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+            0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+            0x0,0x0</default>
         </uint8_t>
         <array>4,32</array>
     </simpleType>

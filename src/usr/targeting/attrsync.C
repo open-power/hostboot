@@ -27,6 +27,7 @@
 #include <targeting/common/trace.H>
 #include <initservice/initserviceif.H>
 #include <errl/hberrltypes.H>
+#include <hwas/common/hwasCommon.H>
 
 using namespace ERRORLOG;
 
@@ -600,6 +601,106 @@ namespace TARGETING
 
         TARG_INF( EXIT_MRK "syncAllAttributesFromFsp" );
         return  l_errl;
+    }
+
+    //TODO RTC 143191
+    errlHndl_t hdatAttrHack()
+    {
+        TARG_INF(ENTER_MRK "hdatAttrHack" );
+
+        errlHndl_t l_errl = NULL;
+        do{
+
+            //sys-sys-power9 - base
+            TARGETING::Target* l_pTopLevel = NULL;
+            TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
+            //l_pTopLevel->getAttr<ATTR_FREQ_A>(); //defaulted in attribute_types.xml
+            l_pTopLevel->setAttr<ATTR_FREQ_X>(0xfa0);
+            //l_pTopLevel->setAttr<ATTR_MAX_MCS_PER_SYSTEM>(4); //defaulted in attribute_types.xml
+            l_pTopLevel->setAttr<ATTR_NOMINAL_FREQ_MHZ>(0xf75);
+
+            //chip-base
+            PredicateCTM predEnc(CLASS_ENC);
+            PredicateCTM predChip(CLASS_CHIP);
+            PredicateCTM predDimm(CLASS_LOGICAL_CARD, TYPE_DIMM);
+            PredicatePostfixExpr checkExpr;
+            checkExpr.push(&predChip).push(&predDimm).Or().push(&predEnc).Or();
+
+            TargetHandleList pCheckPres;
+            targetService().getAssociated( pCheckPres, l_pTopLevel,
+               TargetService::CHILD, TargetService::ALL, &checkExpr );
+
+            TARG_INF("pCheckPres size: %d", pCheckPres.size());
+            l_errl = HWAS::platPresenceDetect(pCheckPres);
+            TARG_INF("pCheckPres size: %d", pCheckPres.size());
+
+            std::sort(pCheckPres.begin(),pCheckPres.end(),
+                   compareTargetHuid);
+
+            for(TargetHandleList::const_iterator pTarget_it =
+                   pCheckPres.begin();
+                   pTarget_it != pCheckPres.end();
+                   ++pTarget_it
+               )
+            {
+                TargetHandle_t pTarget = *pTarget_it;
+                if(pTarget->getAttr<ATTR_CLASS>() == CLASS_CHIP)
+                {
+                    pTarget->setAttr<ATTR_CHIP_ID>(0x20D1);
+                    pTarget->setAttr<ATTR_EC>(0x10);
+                }
+            }
+
+            //chip-processor - chip
+            TARGETING::TargetHandleList l_procList;
+            getAllChips(l_procList, TYPE_PROC);
+
+            for(TargetHandleList::const_iterator proc = l_procList.begin();
+                proc != l_procList.end(); ++proc)
+            {
+                uint64_t mirrorBase[] = {0x800000000000,0x0,0x0,0x0};
+                (*proc)->setAttr<ATTR_PROC_MIRROR_BASES>(mirrorBase);
+                uint64_t mirrorSize[] = {0x400000000,0x0,0x0,0x0};
+                (*proc)->setAttr<ATTR_PROC_MIRROR_SIZES>(mirrorSize);
+                //(*proc)->setAttr<ATTR_FABRIC_CHIP_ID>(0); //defaulted in attribute_types.xml
+                //(*proc)->setAttr<ATTR_FABRIC_NODE_ID>(0); //defualted in attribute_types.xml
+                uint64_t memBases[] = {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
+                (*proc)->setAttr<ATTR_PROC_MEM_BASES>(memBases);
+                uint64_t memSizes[] = {0x800000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
+                (*proc)->setAttr<ATTR_PROC_MEM_SIZES>(memSizes);
+                (*proc)->setAttr<ATTR_PROC_HTM_BAR_BASE_ADDR>(0);
+                //(*proc)->setAttr<ATTR_PROC_PCIE_LANE_EQUALIZATION>(pcieLane); //defaulted in attribute_types.xml
+                uint8_t mssMem[] = {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0};
+                (*proc)->setAttr<ATTR_MSS_MEM_MC_IN_GROUP>(mssMem);
+                uint8_t procActive = 0xc0;
+                (*proc)->setAttr<ATTR_PROC_PCIE_PHB_ACTIVE>(procActive);
+
+                //mcbist
+                TARGETING::TargetHandleList l_mcbistList;
+                getChildChiplets(l_mcbistList,(*proc), TARGETING::TYPE_MCBIST);
+                for(TargetHandleList::const_iterator mcbist = l_mcbistList.begin();
+                    mcbist != l_mcbistList.end(); ++mcbist)
+                {
+                    (*mcbist)->setAttr<ATTR_MSS_FREQ>(1600);
+                }
+
+                //mca
+                TARGETING::TargetHandleList l_mcaList;
+                getChildChiplets(l_mcaList,(*proc),TARGETING::TYPE_MCA);
+                for(TargetHandleList::const_iterator mca = l_mcaList.begin();
+                    mca != l_mcaList.end(); ++mca)
+                {
+                    uint8_t effDimmSize[][2] = {{0x4,0x0},{0x4,0x0}};
+                    (*mca)->setAttr<ATTR_EFF_DIMM_SIZE>(effDimmSize);
+                }
+
+                //EFFECTIVE_EC was hardcoded as well.
+            }
+
+        } while (0);
+
+        TARG_INF( EXIT_MRK "hdatAttrHack" );
+        return l_errl;
     }
 
 };   // end namespace
