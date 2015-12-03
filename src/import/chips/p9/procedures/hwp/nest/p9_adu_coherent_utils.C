@@ -245,35 +245,33 @@ extern "C"
         {
             if (i_rnw)
             {
-                altd_cmd_reg_data.insertFromRight(ALTD_CMD_TTYPE_CI_PR_RD,
-                                                  ALTD_CMD_TTYPE_START_BIT, ALTD_CMD_TTYPE_NUM_BITS);
+                altd_cmd_reg_data.insertFromRight<ALTD_CMD_TTYPE_START_BIT, ALTD_CMD_TTYPE_NUM_BITS>(ALTD_CMD_TTYPE_CI_PR_RD);
             }
             else
             {
-                altd_cmd_reg_data.insertFromRight(ALTD_CMD_TTYPE_CI_PR_WR,
-                                                  ALTD_CMD_TTYPE_START_BIT, ALTD_CMD_TTYPE_NUM_BITS);
+                altd_cmd_reg_data.insertFromRight<ALTD_CMD_TTYPE_START_BIT, ALTD_CMD_TTYPE_NUM_BITS>(ALTD_CMD_TTYPE_CI_PR_WR);
             }
 
             //if tsize = 1
             if (((i_flags & FLAG_SIZE) >> FLAG_SIZE_SHIFT) == 1)
             {
-                altd_cmd_reg_data.insertFromRight(ALTD_CMD_CI_TSIZE_1, ALTD_CMD_TSIZE_START_BIT,
-                                                  ALTD_CMD_TSIZE_NUM_BITS);
+                altd_cmd_reg_data.insertFromRight<ALTD_CMD_TSIZE_START_BIT,
+                                                  ALTD_CMD_TSIZE_NUM_BITS>(ALTD_CMD_CI_TSIZE_1);
             }
             else if (((i_flags & FLAG_SIZE) >> FLAG_SIZE_SHIFT) == 2)
             {
-                altd_cmd_reg_data.insertFromRight(ALTD_CMD_CI_TSIZE_2, ALTD_CMD_TSIZE_START_BIT,
-                                                  ALTD_CMD_TSIZE_NUM_BITS);
+                altd_cmd_reg_data.insertFromRight<ALTD_CMD_TSIZE_START_BIT,
+                                                  ALTD_CMD_TSIZE_NUM_BITS>(ALTD_CMD_CI_TSIZE_2);
             }
             else if (((i_flags & FLAG_SIZE) >> FLAG_SIZE_SHIFT) == 4)
             {
-                altd_cmd_reg_data.insertFromRight(ALTD_CMD_CI_TSIZE_4, ALTD_CMD_TSIZE_START_BIT,
-                                                  ALTD_CMD_TSIZE_NUM_BITS);
+                altd_cmd_reg_data.insertFromRight<ALTD_CMD_TSIZE_START_BIT,
+                                                  ALTD_CMD_TSIZE_NUM_BITS>(ALTD_CMD_CI_TSIZE_4);
             }
             else
             {
-                altd_cmd_reg_data.insertFromRight(ALTD_CMD_CI_TSIZE_8, ALTD_CMD_TSIZE_START_BIT,
-                                                  ALTD_CMD_TSIZE_NUM_BITS);
+                altd_cmd_reg_data.insertFromRight<ALTD_CMD_TSIZE_START_BIT,
+                                                  ALTD_CMD_TSIZE_NUM_BITS>(ALTD_CMD_CI_TSIZE_8);
             }
         }
         //if it's not a CI write/read
@@ -283,37 +281,31 @@ extern "C"
             //set the tsize to 8
             if (i_rnw)
             {
-                altd_cmd_reg_data.insertFromRight(ALTD_CMD_TTYPE_CL_DMA_RD,
-                                                  ALTD_CMD_TTYPE_START_BIT, ALTD_CMD_TTYPE_NUM_BITS);
-                altd_cmd_reg_data.insertFromRight(ALTD_CMD_DMAR_TSIZE, ALTD_CMD_TSIZE_START_BIT,
-                                                  ALTD_CMD_TSIZE_NUM_BITS);
+                altd_cmd_reg_data.insertFromRight<ALTD_CMD_TTYPE_START_BIT, ALTD_CMD_TTYPE_NUM_BITS>(ALTD_CMD_TTYPE_CL_DMA_RD);
+                altd_cmd_reg_data.insertFromRight<ALTD_CMD_TSIZE_START_BIT,
+                                                  ALTD_CMD_TSIZE_NUM_BITS>(ALTD_CMD_DMAR_TSIZE);
             }
             //if a write set pr_dma_wr
             //set the tsize to 8
             else
             {
-                altd_cmd_reg_data.insertFromRight(ALTD_CMD_TTYPE_DMA_PR_WR,
-                                                  ALTD_CMD_TTYPE_START_BIT, ALTD_CMD_TTYPE_NUM_BITS);
+                altd_cmd_reg_data.insertFromRight<ALTD_CMD_TTYPE_START_BIT, ALTD_CMD_TTYPE_NUM_BITS>(ALTD_CMD_TTYPE_DMA_PR_WR);
 
                 if (((i_flags & FLAG_SIZE) >> FLAG_SIZE_SHIFT) == 1)
                 {
-                    altd_cmd_reg_data.insertFromRight(ALTD_CMD_DMAW_TSIZE_1,
-                                                      ALTD_CMD_TSIZE_START_BIT, ALTD_CMD_TSIZE_NUM_BITS);
+                    altd_cmd_reg_data.insertFromRight<ALTD_CMD_TSIZE_START_BIT, ALTD_CMD_TSIZE_NUM_BITS>(ALTD_CMD_DMAW_TSIZE_1);
                 }
                 else if (((i_flags & FLAG_SIZE) >> FLAG_SIZE_SHIFT) == 2)
                 {
-                    altd_cmd_reg_data.insertFromRight(ALTD_CMD_DMAW_TSIZE_2,
-                                                      ALTD_CMD_TSIZE_START_BIT, ALTD_CMD_TSIZE_NUM_BITS);
+                    altd_cmd_reg_data.insertFromRight<ALTD_CMD_TSIZE_START_BIT, ALTD_CMD_TSIZE_NUM_BITS>(ALTD_CMD_DMAW_TSIZE_2);
                 }
                 else if (((i_flags & FLAG_SIZE) >> FLAG_SIZE_SHIFT) == 4)
                 {
-                    altd_cmd_reg_data.insertFromRight(ALTD_CMD_DMAW_TSIZE_4,
-                                                      ALTD_CMD_TSIZE_START_BIT, ALTD_CMD_TSIZE_NUM_BITS);
+                    altd_cmd_reg_data.insertFromRight<ALTD_CMD_TSIZE_START_BIT, ALTD_CMD_TSIZE_NUM_BITS>(ALTD_CMD_DMAW_TSIZE_4);
                 }
                 else
                 {
-                    altd_cmd_reg_data.insertFromRight(ALTD_CMD_DMAW_TSIZE_8,
-                                                      ALTD_CMD_TSIZE_START_BIT, ALTD_CMD_TSIZE_NUM_BITS);
+                    altd_cmd_reg_data.insertFromRight<ALTD_CMD_TSIZE_START_BIT, ALTD_CMD_TSIZE_NUM_BITS>(ALTD_CMD_DMAW_TSIZE_8);
                 }
             }
         }
@@ -373,8 +365,9 @@ extern "C"
         //if we want to write the ecc data get the data
         if (i_flags & FLAG_ECC)
         {
-            force_ecc_reg_data.insertFromRight<ALTD_DATA_TX_ECC_START_BIT, ALTD_DATA_TX_ECC_END_BIT>
-            ((uint64_t)i_write_data[eccIndex]);
+            force_ecc_reg_data.insertFromRight < ALTD_DATA_TX_ECC_START_BIT,
+                                               (ALTD_DATA_TX_ECC_END_BIT - ALTD_DATA_TX_ECC_START_BIT) + 1 >
+                                               ((uint64_t)i_write_data[eccIndex]);
         }
 
         //if we want to overwrite the ecc data
