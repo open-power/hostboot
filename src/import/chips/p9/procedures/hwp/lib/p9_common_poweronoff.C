@@ -26,25 +26,47 @@
 /// @file  p9_common_poweronoff.C
 /// @brief common procedure for power on/off
 ///
+/// Procedure Summary:
+///
+
 // *HWP HWP Owner          : David Du       <daviddu@us.ibm.com>
 // *HWP Backup HWP Owner   : Greg Still     <stillgs@us.ibm.com>
 // *HWP FW Owner           : Sangeetha T S  <sangeet2@in.ibm.com>
 // *HWP Team               : PM
 // *HWP Consumed by        : SBE:SGPE:CME
 // *HWP Level              : 2
-//
-// Procedure Summary:
-//
 
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include <fapi2.H>
 #include "p9_common_poweronoff.H"
+#include "p9_quad_scom_addresses.H"
 
 //------------------------------------------------------------------------------
 // Constant Definitions:
 //------------------------------------------------------------------------------
+// Define only address offset to be compatible with both core and cache domain
+
+const uint64_t PPM_PFCS[2]     = { C_PPM_PFCS_SCOM,
+                                   EQ_PPM_PFCS_SCOM
+                                 };
+
+const uint64_t PPM_PFCS_CLR[2] = { C_PPM_PFCS_SCOM1,
+                                   EQ_PPM_PFCS_SCOM1
+                                 };
+
+const uint64_t PPM_PFCS_OR[2] = { C_PPM_PFCS_SCOM2,
+                                  EQ_PPM_PFCS_SCOM2
+                                };
+
+const uint64_t PPM_PFDLY[2] =   { C_PPM_PFDLY,
+                                  EQ_PPM_PFDLY
+                                };
+
+const uint64_t PPM_PFSNS[2] =   { C_PPM_PFSNS,
+                                  EQ_PPM_PFSNS
+                                };
+
 enum { CYCLES_PER_MS = 500000,
        INST_PER_LOOP = 8,
        PFET_STATE_LENGTH = 2,
@@ -110,16 +132,21 @@ enum { POWDN_DLY_LENGTH = 4,
 //------------------------------------------------------------------------------
 // Procedure:
 //------------------------------------------------------------------------------
-
+template <fapi2::TargetType K>
 fapi2::ReturnCode
 p9_common_poweronoff(
-    const fapi2::Target < fapi2::TARGET_TYPE_EQ |
-    fapi2::TARGET_TYPE_CORE > & i_target,
+    const fapi2::Target<K>& i_target,
     const p9power::powerOperation_t i_operation)
 {
     uint32_t l_loopsPerMs;
 
     FAPI_INF(">>p9_common_poweronoff: %d",  i_operation);
+    uint32_t l_type = 0;  // Assumes core
+
+    if((i_target.getType() & fapi2::TARGET_TYPE_EQ))
+    {
+        l_type = 1;
+    }
 
     fapi2::buffer<uint64_t> l_data;
     fapi2::buffer<uint64_t> l_temp;  // extractToRight seems the require space to write into.
@@ -136,7 +163,7 @@ p9_common_poweronoff(
         // Note that the Lamda assumes that l_data already contains the
         do
         {
-            FAPI_TRY(fapi2::getScom(i_target, PPM_PFCS, l_data),
+            FAPI_TRY(fapi2::getScom(i_target, PPM_PFCS[l_type], l_data),
                      "getScom failed for address PPM_PFCS"); // poll
         }
         while ((l_data.getBit < VDD_PG_STATE_BIT + PG_STATE_IDLE_OFFSET > ()
@@ -144,7 +171,7 @@ p9_common_poweronoff(
 
         FAPI_ASSERT((l_loopsPerMs != 0),
                     fapi2::PMPROC_PFETLIB_TIMEOUT()
-                    .set_ADDRESS(PPM_PFCS),
+                    .set_ADDRESS(PPM_PFCS[l_type]),
                     "VDD FSM idle timeout");
 
         ///  (Optional) Check PFETCNTLSTAT_REG[VDD_PG_SEL]being 0x8
@@ -169,7 +196,7 @@ p9_common_poweronoff(
 
         do
         {
-            FAPI_TRY(fapi2::getScom(i_target, PPM_PFCS, l_data),
+            FAPI_TRY(fapi2::getScom(i_target, PPM_PFCS[l_type], l_data),
                      "getScom failed for address PPM_PFCS");  // poll
             FAPI_DBG("timeout l_loopsPerMs. %x", l_loopsPerMs);
         }
@@ -178,7 +205,7 @@ p9_common_poweronoff(
 
         FAPI_ASSERT((l_loopsPerMs != 0),
                     fapi2::PMPROC_PFETLIB_TIMEOUT()
-                    .set_ADDRESS(PPM_PFCS),
+                    .set_ADDRESS(PPM_PFCS[l_type]),
                     "VCS FSM idle timeout");
 
         //   (Optional) Check PFETCNTLSTAT_REG[VDD_PG_SEL]
@@ -212,13 +239,13 @@ p9_common_poweronoff(
         setBit<VDD_PFET_VAL_OVERRIDE_BIT>().
         setBit<VDD_PFET_SEL_OVERRIDE_BIT>().
         setBit<VDD_PFET_REGULATION_FINGER_EN_BIT>();
-        FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_CLR, l_data),
+        FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_CLR[l_type], l_data),
                  "putScom failed for address PPM_PFCS");
 
         FAPI_DBG("Force VDD on");
         l_data.flush<0>().insertFromRight
         <VDD_PFET_FORCE_STATE_BIT, PFET_STATE_LENGTH>(PFET_FORCE_VON);
-        FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_OR, l_data),
+        FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_OR[l_type], l_data),
                  "putScom failed for address PPM_PFCS_OR");
 
         // Check for valid power on completion
@@ -233,7 +260,7 @@ p9_common_poweronoff(
         FAPI_DBG("vdd_pfet_force_state = 00, or Idle");
         l_data.flush<0>().insertFromRight
         <VDD_PFET_FORCE_STATE_BIT, PFET_STATE_LENGTH>(~PFET_NOP);
-        FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_CLR, l_data),
+        FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_CLR[l_type], l_data),
                  "putScom failed for address PPM_PFCS_CLR");
 
     fapi_try_exit:
@@ -254,13 +281,13 @@ p9_common_poweronoff(
         l_data.flush<0>().
         setBit<VCS_PFET_VAL_OVERRIDE_BIT>().
         setBit<VCS_PFET_SEL_OVERRIDE_BIT>();
-        FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_CLR, l_data),
+        FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_CLR[l_type], l_data),
                  "putScom failed for address PPM_PFCS_CLR");
 
         FAPI_DBG("Force VSS on");
         l_data.flush<0>().insertFromRight
         <VCS_PFET_FORCE_STATE_BIT, PFET_STATE_LENGTH>(PFET_FORCE_VON);
-        FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_OR, l_data),
+        FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_OR[l_type], l_data),
                  "putScom failed for address PPM_PFCS_OR");
 
         // Check for valid power on completion
@@ -274,7 +301,7 @@ p9_common_poweronoff(
         FAPI_DBG("vss_pfet_force_state = 00, or Idle");
         l_data.flush<0>().insertFromRight
         <VCS_PFET_FORCE_STATE_BIT, PFET_STATE_LENGTH>(~PFET_NOP);
-        FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_CLR, l_data),
+        FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_CLR[l_type], l_data),
                  "putScom failed for address PPM_PFCS_CLR");
 
     fapi_try_exit:
@@ -295,13 +322,13 @@ p9_common_poweronoff(
         setBit<VDD_PFET_VAL_OVERRIDE_BIT>().
         setBit<VDD_PFET_SEL_OVERRIDE_BIT>().
         setBit<VDD_PFET_REGULATION_FINGER_EN_BIT>();
-        FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_CLR, l_data),
+        FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_CLR[l_type], l_data),
                  "putScom failed for address PPM_PFCS");
 
         FAPI_DBG("Force VDD off");
         l_data.flush<0>().insertFromRight
         <VDD_PFET_FORCE_STATE_BIT, PFET_STATE_LENGTH>(PFET_FORCE_VOFF);
-        FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_OR, l_data),
+        FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_OR[l_type], l_data),
                  "putScom failed for address PPM_PFCS");
 
         // Check for valid power off completion
@@ -315,7 +342,7 @@ p9_common_poweronoff(
         FAPI_DBG("vdd_pfet_force_state = 00, or Idle");
         l_data.flush<0>().insertFromRight
         <VDD_PFET_FORCE_STATE_BIT, PFET_STATE_LENGTH>(~PFET_NOP);
-        FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_CLR, l_data),
+        FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_CLR[l_type], l_data),
                  "putScom failed for address PPM_PFCS_CLR");
 
     fapi_try_exit:
@@ -335,14 +362,14 @@ p9_common_poweronoff(
         l_data.flush<0>().
         setBit<VCS_PFET_VAL_OVERRIDE_BIT>().
         setBit<VCS_PFET_SEL_OVERRIDE_BIT>();
-        FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_CLR, l_data),
+        FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_CLR[l_type], l_data),
                  "putScom failed for address PPM_PFCS_CLR");
 
         FAPI_DBG("Force VSS off");
         l_data.flush<0>().
         insertFromRight
         <VCS_PFET_FORCE_STATE_BIT, PFET_STATE_LENGTH>(PFET_FORCE_VOFF);
-        FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_OR, l_data),
+        FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_OR[l_type], l_data),
                  "putScom failed for address PPM_PFCS_OR");
 
         // Check for valid power off completion
@@ -356,7 +383,7 @@ p9_common_poweronoff(
         FAPI_DBG("vcs_pfet_force_state = 00, or Idle");
         l_data.flush<0>().insertFromRight
         <VCS_PFET_FORCE_STATE_BIT, PFET_STATE_LENGTH>(~PFET_NOP);
-        FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_CLR, l_data),
+        FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_CLR[l_type], l_data),
                  "putScom failed for address PPM_PFCS_CLR");
 
     fapi_try_exit:
@@ -390,18 +417,18 @@ p9_common_poweronoff(
                 l_data.flush<0>().
                 setBit<VCS_PFET_VAL_OVERRIDE_BIT>().
                 setBit<VCS_PFET_SEL_OVERRIDE_BIT>();
-                FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_CLR, l_data),
+                FAPI_TRY(fapi2::putScom(i_target, PPM_PFCS_CLR[l_type], l_data),
                          "putScom failed for address PPM_PFCS_CLR");
 
                 FAPI_DBG("Make sure that we are not forcing PFET for VCS or VDD off");
-                FAPI_TRY(fapi2::getScom(i_target, PPM_PFCS, l_data),
+                FAPI_TRY(fapi2::getScom(i_target, PPM_PFCS[l_type], l_data),
                          "getScom failed for address PPM_PFCS");
                 l_data.extractToRight
                 <VDD_PFET_FORCE_STATE_BIT, 2 * PFET_STATE_LENGTH>
                 (l_temp);
                 FAPI_ASSERT((l_temp == 0),
                             fapi2::PMPROC_PFETLIB_BAD_SCOM()
-                            .set_ADDRESS(PPM_PFCS),
+                            .set_ADDRESS(PPM_PFCS[l_type]),
                             "PFET_FORCE_STATE not 0");
 
                 // 2) Set bits to program HW to enable VDD PFET, and
@@ -427,7 +454,7 @@ p9_common_poweronoff(
                 // 4.3.8.2 Power-off via Hardware FSM
                 // 1)  Read  PFETCNTLSTAT_REG:  check for bits 0:3 being 0b0000
                 FAPI_DBG("Make sure that we are not forcing PFET for VCS or VDD off");
-                FAPI_TRY(fapi2::getScom(i_target, PPM_PFCS, l_data),
+                FAPI_TRY(fapi2::getScom(i_target, PPM_PFCS[l_type], l_data),
                          "getScom failed for address PPM_PFCS");
 
                 l_data.extractToRight
@@ -435,7 +462,7 @@ p9_common_poweronoff(
                 (l_temp);
                 FAPI_ASSERT((l_temp == 0),
                             fapi2::PMPROC_PFETLIB_BAD_SCOM()
-                            .set_ADDRESS(PPM_PFCS),
+                            .set_ADDRESS(PPM_PFCS[l_type]),
                             "PFET_FORCE_STATE not 0");
 
                 // 2) Set bits to program HW to turn off VDD PFET, and
