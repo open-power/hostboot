@@ -1170,14 +1170,14 @@ void*   call_host_mpipl_service( void *io_pArgs )
             }
 
 
-            // Need to unload the dump module regardless of whether we have
+            // Need to unload the runtime module regardless of whether we have
             // an error or not.
-            errlHndl_t l_errUnLoad = VFS::module_unload( "libdump.so" );
+            errlHndl_t l_errUnLoad = VFS::module_unload( "libruntime.so" );
 
             if (l_errUnLoad)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                     "ERROR : returned from VFS::module_unload (libdump.so)" );
+                     "ERROR : returned from VFS::module_unload (libruntime.so)" );
 
                 errlCommit( l_errUnLoad, HWPF_COMP_ID );
             }
@@ -1186,7 +1186,7 @@ void*   call_host_mpipl_service( void *io_pArgs )
         else
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR : returned from VFS::module_load (libdump.so)" );
+                      "ERROR : returned from VFS::module_load (libruntime.so)" );
         }
     }
 
