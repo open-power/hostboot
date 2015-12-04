@@ -25,6 +25,9 @@
 // *HWP Team: SOA
 // *HWP Level: 1
 // *HWP Consumed by: FSP:HB:HS:OCC:SBE:CME:SGPE:PGPE:FPPE:IPPE
+
+#include <p9_const_common.H>
+
 #ifndef __P9_MC_SCOM_ADDRESSES_FLD_H
 #define __P9_MC_SCOM_ADDRESSES_FLD_H
 
