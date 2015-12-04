@@ -425,7 +425,7 @@ fapi::ReturnCode getVersion  (const fapi::Target    & i_mbaTarget,
 
         if((l_fapirc == 0) && (!l_sizeMismatch))
         {
-            FAPI_INF("getVersion:"
+            FAPI_DBG("getVersion:"
                      " returned vm data : 0x%x ",
                      l_vmVersionBuf.iv_version);
 
