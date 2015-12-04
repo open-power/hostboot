@@ -55,4 +55,64 @@
     </gard>
   </hwpError>
   <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_PMPROC_DPLLCLKSTART_TIMEOUT</rc>
+    <description>
+        dpll clock start timed out.
+    </description>
+    <ffdc>EQCLKSTAT</ffdc>
+    <callout>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EX_CHIPLET</childType>
+        <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EX_CHIPLET</childType>
+        <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </deconfigure>
+    <gard>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EX_CHIPLET</childType>
+        <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </gard>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_PMPROC_ANEPCLKSTART_TIMEOUT</rc>
+    <description>
+        anep clock start timed out.
+    </description>
+    <ffdc>EQCLKSTAT</ffdc>
+    <callout>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EX_CHIPLET</childType>
+        <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EX_CHIPLET</childType>
+        <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </deconfigure>
+    <gard>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EX_CHIPLET</childType>
+        <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </gard>
+  </hwpError>
+  <!-- ********************************************************************* -->
 </hwpErrors>

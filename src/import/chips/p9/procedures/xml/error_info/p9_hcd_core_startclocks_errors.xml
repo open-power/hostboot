@@ -26,11 +26,27 @@
 <hwpErrors>
   <!-- ********************************************************************* -->
   <hwpError>
+    <rc>RC_PMPROC_CORECPLTALIGN_TIMEOUT</rc>
+    <description>
+        core chiplets alignment timed out.
+    </description>
+    <ffdc>CORECPLTSTAT0</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_PMPROC_CORE_XSTOP</rc>
+    <description>
+        core checkstops.
+    </description>
+    <ffdc>COREXFIR</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
     <rc>RC_PMPROC_CORECLKSYNC_TIMEOUT</rc>
     <description>
         core clock sync done timed out.
     </description>
-    <ffdc>CORECLKSYNCDONE</ffdc>
+    <ffdc>COREPPMCACSR</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -38,7 +54,7 @@
     <description>
         core clock start timed out.
     </description>
-    <ffdc>CORECLKSTATREGIONS</ffdc>
+    <ffdc>CORECLKSTAT</ffdc>
     <callout>
       <childTargets>
         <parent>PROC_CHIP_IN_ERROR</parent>
