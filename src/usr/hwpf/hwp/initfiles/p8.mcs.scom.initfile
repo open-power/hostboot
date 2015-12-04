@@ -1,8 +1,10 @@
-#-- $Id: p8.mcs.scom.initfile,v 1.21 2014/11/17 21:13:37 baysah Exp $
+#-- $Id: p8.mcs.scom.initfile,v 1.22 2015/09/23 21:23:38 baysah Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--         |        |        |
+#--     1.22|baysah  |09/18/15|- SW322180 : MCMODE0Q_L3_PREFETCH_RETRY_THRESHOLD from 0xF to 0x7 for all 4 DMI systems with SYS.ATTR_MRW_MCS_PREFETCH_RETRY_THRESHOLD.
 #--         |        |        |
 #--     1.21|baysah  |11/17/14|- FW630892 : Disable MCS Read Data OctoWord Gathering to prevent dcbz starvation
 #--         |        |        |- Don't attempt to enable this workaround for MurDD1.x, because it doesn't exist.
@@ -61,6 +63,8 @@ SyntaxVersion = 1
 # running risk level 0
 define ecc_bypass_disable = ((TGT1.ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE != 0x0) && (SYS.ATTR_RISK_LEVEL == ENUM_ATTR_RISK_LEVEL_RL0));
 
+# Set MCS PrefetchA retry threshold
+define def_mcs_prefA_rtry_thrd = ((SYS.ATTR_MRW_MCS_PREFETCH_RETRY_THRESHOLD == 0x00) || (SYS.ATTR_MRW_MCS_PREFETCH_RETRY_THRESHOLD >= 0x0F));
 
 
 #--******************************************************************************
@@ -72,7 +76,22 @@ define ecc_bypass_disable = ((TGT1.ATTR_CHIP_EC_FEATURE_MCS_ECC_BYPASS_DISABLE !
      1    ,                    0b0           ,     any                 ;              # MCMODE0Q_RESERVED Reserved
      2    ,                    0b1           ,     any                 ;              # MCMODE0Q_ENABLE_NS_RD_AO_SFU_FOR_DCBZ
      3    ,                    0b1           ,     any                 ;              # MCMODE0Q_ENABLE_CENTAUR_LOCAL_CHECKSTOP_COMMAND
-     4:7  ,                    0xF           ,     any                 ;              # MCMODE0Q_L3_PREFETCH_RETRY_THRESHOLD
+#    4:7  ,                    0xF           ,     any                 ;              # MCMODE0Q_L3_PREFETCH_RETRY_THRESHOLD  (actual value is 2x register value => 15 x 2 = 30)
+     4:7  ,                    0xF           ,    (def_mcs_prefA_rtry_thrd);          # MCMODE0Q_L3_PREFETCH_RETRY_THRESHOLD
+     4:7  ,                    0x1           ,    (SYS.ATTR_MRW_MCS_PREFETCH_RETRY_THRESHOLD == 0x01);  # MCMODE0Q_L3_PREFETCH_RETRY_THRESHOLD
+     4:7  ,                    0x2           ,    (SYS.ATTR_MRW_MCS_PREFETCH_RETRY_THRESHOLD == 0x02);  # MCMODE0Q_L3_PREFETCH_RETRY_THRESHOLD
+     4:7  ,                    0x3           ,    (SYS.ATTR_MRW_MCS_PREFETCH_RETRY_THRESHOLD == 0x03);  # MCMODE0Q_L3_PREFETCH_RETRY_THRESHOLD
+     4:7  ,                    0x4           ,    (SYS.ATTR_MRW_MCS_PREFETCH_RETRY_THRESHOLD == 0x04);  # MCMODE0Q_L3_PREFETCH_RETRY_THRESHOLD
+     4:7  ,                    0x5           ,    (SYS.ATTR_MRW_MCS_PREFETCH_RETRY_THRESHOLD == 0x05);  # MCMODE0Q_L3_PREFETCH_RETRY_THRESHOLD
+     4:7  ,                    0x6           ,    (SYS.ATTR_MRW_MCS_PREFETCH_RETRY_THRESHOLD == 0x06);  # MCMODE0Q_L3_PREFETCH_RETRY_THRESHOLD
+     4:7  ,                    0x7           ,    (SYS.ATTR_MRW_MCS_PREFETCH_RETRY_THRESHOLD == 0x07);  # MCMODE0Q_L3_PREFETCH_RETRY_THRESHOLD
+     4:7  ,                    0x8           ,    (SYS.ATTR_MRW_MCS_PREFETCH_RETRY_THRESHOLD == 0x08);  # MCMODE0Q_L3_PREFETCH_RETRY_THRESHOLD
+     4:7  ,                    0x9           ,    (SYS.ATTR_MRW_MCS_PREFETCH_RETRY_THRESHOLD == 0x09);  # MCMODE0Q_L3_PREFETCH_RETRY_THRESHOLD
+     4:7  ,                    0xA           ,    (SYS.ATTR_MRW_MCS_PREFETCH_RETRY_THRESHOLD == 0x0A);  # MCMODE0Q_L3_PREFETCH_RETRY_THRESHOLD
+     4:7  ,                    0xB           ,    (SYS.ATTR_MRW_MCS_PREFETCH_RETRY_THRESHOLD == 0x0B);  # MCMODE0Q_L3_PREFETCH_RETRY_THRESHOLD
+     4:7  ,                    0xC           ,    (SYS.ATTR_MRW_MCS_PREFETCH_RETRY_THRESHOLD == 0x0C);  # MCMODE0Q_L3_PREFETCH_RETRY_THRESHOLD
+     4:7  ,                    0xD           ,    (SYS.ATTR_MRW_MCS_PREFETCH_RETRY_THRESHOLD == 0x0D);  # MCMODE0Q_L3_PREFETCH_RETRY_THRESHOLD
+     4:7  ,                    0xE           ,    (SYS.ATTR_MRW_MCS_PREFETCH_RETRY_THRESHOLD == 0x0E);  # MCMODE0Q_L3_PREFETCH_RETRY_THRESHOLD
  #   8:11 ,                    0x0           ,     any                 ;              # MCMODE0Q_Number_of_CL_Entries_Reserved_for_Read
  #   8:11 ,                    0x1           , (SYS.ATTR_PM_SLEEP_ENABLE == 1) ;      # CAPI Deadlock workaround
      8:11 ,                    0x1           ,     any                 ;              # CAPI Deadlock workaround
