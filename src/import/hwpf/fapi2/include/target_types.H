@@ -98,6 +98,65 @@ enum TargetType
     TARGET_TYPE_ABUS_ENDPOINT = TARGET_TYPE_ABUS,
 };
 
+///
+/// @brief Enumeration of chiplet filters
+///
+enum TargetFilter
+{
+    TARGET_FILTER_TP          = 0x80000000,  // Pervasive 1
+    TARGET_FILTER_NEST_NORTH  = 0x40000000,  // Pervasive 2
+    TARGET_FILTER_NEST_SOUTH  = 0x20000000,  // Pervasive 3
+    TARGET_FILTER_NEST_EAST   = 0x10000000,  // Pervasive 4
+    TARGET_FILTER_NEST_WEST   = 0x08000000,  // Pervasive 5
+    TARGET_FILTER_XBUS        = 0x04000000,  // Pervasive 6
+    TARGET_FILTER_MC_WEST     = 0x02000000,  // Pervasive 7
+    TARGET_FILTER_MC_EAST     = 0x01000000,  // Pervasive 8
+    TARGET_FILTER_OBUS0       = 0x00800000,  // Pervasive 9
+    TARGET_FILTER_OBUS1       = 0x00400000,  // Pervasive 10
+    TARGET_FILTER_OBUS2       = 0x00200000,  // Pervasive 11
+    TARGET_FILTER_OBUS3       = 0x00100000,  // Pervasive 12
+    TARGET_FILTER_PCI0        = 0x00080000,  // Pervasive 13
+    TARGET_FILTER_PCI1        = 0x00040000,  // Pervasive 14
+    TARGET_FILTER_PCI2        = 0x00020000,  // Pervasive 15
+
+    // Composite filters follow
+
+    // Pervasive 2-5 (eg N0-N3) < req'd
+    TARGET_FILTER_ALL_NEST    = (TARGET_FILTER_NEST_NORTH |
+                                 TARGET_FILTER_NEST_SOUTH | TARGET_FILTER_NEST_EAST |
+                                 TARGET_FILTER_NEST_WEST),
+
+    // Pervasive 2-4 (eg N0-N2) < req'd
+    TARGET_FILTER_NEST_SLAVES =
+        (TARGET_FILTER_NEST_NORTH | TARGET_FILTER_NEST_SOUTH |
+         TARGET_FILTER_NEST_EAST),
+
+    // Pervasive 5 (eg N32) < req'd
+    TARGET_FILTER_NEST_MASTER = TARGET_FILTER_NEST_WEST,
+
+    // Pervasive 7-8 (eg MC0-MC1)
+    TARGET_FILTER_ALL_MC      =
+        (TARGET_FILTER_MC_WEST | TARGET_FILTER_MC_EAST),
+
+    // Pervasive 9-12 (OB0-OB3)
+    TARGET_FILTER_ALL_OBUS    =
+        (TARGET_FILTER_OBUS0 | TARGET_FILTER_OBUS1 | TARGET_FILTER_OBUS2 |
+         TARGET_FILTER_OBUS3),
+
+    // Pervasive 13-15 (PCI0-PCI2)
+    TARGET_FILTER_ALL_PCI =
+        (TARGET_FILTER_PCI0 | TARGET_FILTER_PCI1 | TARGET_FILTER_PCI2),
+
+    // Sync mode filter = All NEST + All MCS
+    TARGET_FILTER_SYNC_MODE_NEST =
+        (TARGET_FILTER_ALL_NEST | TARGET_FILTER_ALL_MC),
+
+    // All IO Targets except NEST
+    TARGET_FILTER_ALL_IO_EXCEPT_NEST =
+        (TARGET_FILTER_XBUS | TARGET_FILTER_ALL_PCI | TARGET_FILTER_ALL_OBUS),
+};
+
+
 /// @cond
 constexpr TargetType operator|(TargetType x, TargetType y)
 {
