@@ -8,7 +8,7 @@
 #
 # EKB Project
 #
-# COPYRIGHT 2015
+# COPYRIGHT 2015,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -1183,16 +1183,40 @@ foreach my $argnum (0 .. $#ARGV)
             print ECFILE $methods{$key}{method};
         }
 
+        # add a method to adjust the severity if desired
+         print ECFILE "    inline void setSev(const fapi2::errlSeverity_t i_sev)\n" .
+                      "                      { iv_sev = i_sev; };\n\n";
+
+        # add a method to read the severity if desired
+         print ECFILE "    inline fapi2::errlSeverity_t getSev() const\n" .
+                      "                      { return iv_sev; };\n\n";
+
+
+        #
         # Stick the execute method at the end of the other methods. We allow
         # passing in of the severity so that macros which call execute() can over-ride
         # the default severity.
-        print ECFILE "    void execute(fapi2::errlSeverity_t i_sev = fapi2::FAPI2_ERRL_SEV_UNDEFINED)\n";
+        print ECFILE "    void execute(fapi2::errlSeverity_t" .
+                          " i_sev = fapi2::FAPI2_ERRL_SEV_UNDEFINED," .
+                          "bool commit = true )\n";
         if ($arg_empty_ffdc eq undef)
         {
             print ECFILE "    {\n";
-            print ECFILE "        FAPI_SET_HWP_ERROR(iv_rc, $err->{rc});\n";
-            print ECFILE "        fapi2::logError(iv_rc, (i_sev == fapi2::FAPI2_ERRL_SEV_UNDEFINED) ? iv_sev : i_sev);\n";
-            print ECFILE "    }\n\n";
+            print ECFILE "      FAPI_SET_HWP_ERROR(iv_rc, $err->{rc});\n";
+            print ECFILE "      if( commit )\n";
+            print ECFILE "      {\n";
+            print ECFILE "        fapi2::logError(iv_rc, " .
+                                  "(i_sev == fapi2::FAPI2_ERRL_SEV_UNDEFINED)" .
+                                  " ? iv_sev : i_sev);\n";
+            print ECFILE "      }\n";
+            print ECFILE "      else\n";
+            print ECFILE "      {\n";
+            print ECFILE "        fapi2::createPlatLog(iv_rc, " .
+                                  "(i_sev == fapi2::FAPI2_ERRL_SEV_UNDEFINED)".
+                                  " ? iv_sev : i_sev);\n";
+            print ECFILE "      }\n\n";
+            print ECFILE "    }\n";
+
         }
         else
         {
