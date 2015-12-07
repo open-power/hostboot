@@ -73,6 +73,17 @@
 /// @param[in] \__ffdc__ the FFDC gathering function
 /// @param[in] ... varargs, as input to FAPI_ERR
 ///
-#define FAPI_ASSERT( __conditional__, __ffdc__, ... ) PLAT_FAPI_ASSERT( __conditional__, __ffdc__, __VA_ARGS__ )
+#define FAPI_ASSERT( __conditional__, __ffdc__, ... ) \
+    PLAT_FAPI_ASSERT( __conditional__, __ffdc__, __VA_ARGS__ )
+
+///
+/// @brief Create an eror log, commit it, but do not exit the hwp because of
+///        the error condition.
+/// @param[in] \__conditional__ the condition to assert
+/// @param[in] \__ffdc__ the FFDC gathering function
+/// @param[in] ... varargs, as input to FAPI_ERR
+///
+#define FAPI_ASSERT_NOEXIT( __conditional__, __ffdc__, ... ) \
+    PLAT_FAPI_ASSERT_NOEXIT( __conditional__, __ffdc__, __VA_ARGS__ )
 
 #endif
