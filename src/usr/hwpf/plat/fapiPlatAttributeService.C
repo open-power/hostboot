@@ -303,6 +303,12 @@ fapi::ReturnCode fapiPlatGetSpdAttr(const fapi::Target * i_pFapiTarget,
                 // Shift the data to be right aligned
                 *(static_cast<uint32_t *>(o_data)) >>= 16;
             }
+            else if ((i_len == sizeof(uint32_t)) && (l_len == sizeof(uint8_t)))
+            {
+                // This is a uint8_t attribute written to a uint32_t type.
+                // Shift the data to the lower byte
+                *(static_cast<uint32_t *>(o_data)) >>= 24;
+            }
         }
     }
 
