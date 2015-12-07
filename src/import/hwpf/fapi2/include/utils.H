@@ -56,6 +56,25 @@ void logError(
     bool i_unitTestError = false );
 
 ///
+/// @brief Create a platform error log
+///
+///  This function will create a platform error log from the passed in
+///  return code value and will populate the iv_platDataPtr of the return code
+///  with a pointer to the newly created log.
+///
+/// @param[in,out] io_rc - Reference to ReturnCode
+///
+/// @param[in] i_sev Fapi error log severity defaulted to unrecoverable
+//
+//
+/// @note Implemented by platform code
+///
+void createPlatLog(
+    fapi2::ReturnCode& io_rc,
+    fapi2::errlSeverity_t i_sev = fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE
+);
+
+///
 /// @brief Delay this thread. Hostboot will use the nanoseconds parameter
 /// and make a syscall to nanosleep. While in the syscall, the hostboot
 /// kernel will continue to consume CPU cycles as it looks for a runnable
