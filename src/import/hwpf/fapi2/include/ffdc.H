@@ -69,12 +69,13 @@ class FirstFailureData
 
         ///
         /// @brief Default constructor.
-        /// @note We don't create our error info be default. It will be created
+        /// @note We don't create our error info by default. It will be created
         /// when its needed in the setHwpError() method. Note that dereferencing
-        /// the error info without will create a problem.
+        /// the error info without first calling setHwpError() will create a
+        //  problem.
         ///
         FirstFailureData(void):
-            iv_info( nullptr )
+            iv_info( nullptr ), iv_platDataPtr(nullptr)
         {}
 
         ///
@@ -121,26 +122,18 @@ class FirstFailureData
         }
 
         ///
-        /// @brief Get a pointer to any PlatData. FirstFailureData is still
-        ///        responsible for deletion of the data. The caller must not
-        ///        delete
-        ///
-        /// This is called by PLAT. The expected use-case is to get a pointer to
-        /// a platform error log. The data pointer should be used immediately in
-        /// the same thread.
-        ///
-        /// @return void *. Pointer to any PlatData. If NULL then no data
+        /// @return void *. Pointer to error info data. If NULL then no data
         ///
         void* getData(void) const;
 
         ///
-        /// @brief Get a pointer to any PlatData and release ownership from
+        /// @brief Get a pointer to any error info and release ownership from
         ///      FirstFailureData. The caller is responsible for deletion.
         ///
         /// This is called by PLAT. The expected use-case is to retrieve a
         /// platform error log.
         ///
-        /// @return void*. Pointer to any PlatData. If NULL then no data
+        /// @return void*. Pointer to any Error data. If NULL then no data
         ///
         inline void* releaseData(void)
         {
@@ -191,10 +184,30 @@ class FirstFailureData
             iv_info = nullptr;
         }
 
+        ///
+        /// @brief Returns the platform data pointer value to the caller.
+        ///
+        inline void* getPlatDataPtr()
+        {
+            return iv_platDataPtr;
+        };
+
+        ///
+        /// @brief Sets objects platform data pointer to the passed in value.
+        ///
+        ///
+        inline void  setPlatDataPtr( void* i_ptr )
+        {
+            iv_platDataPtr = i_ptr;
+        };
+
     private:
 
-        // Pointer to the data
+        // Pointer to the error info
         std::shared_ptr<ErrorInfo> iv_info;
+
+        // free format data, to be used by the platform
+        void*    iv_platDataPtr;
 };
 
 }
