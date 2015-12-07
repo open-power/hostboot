@@ -93,14 +93,14 @@ namespace std
                 return *this;
             }
 
-            shared_ptr& operator=(const shared_ptr&& r)
+            shared_ptr& operator=(shared_ptr&& r)
             {
                 _cleanup();
                 _swap(std::move(r));
 
                 return *this;
             }
-            template<typename U> shared_ptr& operator=(const shared_ptr<U>&& r)
+            template<typename U> shared_ptr& operator=(shared_ptr<U>&& r)
             {
                 _cleanup();
                 _swap(std::move(r));
