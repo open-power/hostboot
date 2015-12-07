@@ -41,6 +41,7 @@
 #include <errl/hberrltypes.H>
 #include <lpc/lpcif.H>
 #include "sfc_ast2400.H"
+#include "sfc_memboot_ast2400.H"
 #include "norflash.H"
 #include <util/align.H>
 #include "pnor_common.H"
@@ -49,8 +50,8 @@
 // C o n s t a n t s
 /*****************************************************************************/
 
-
-
+#define BOOT_FLAG_MEMBOOT 0x10
+#define BOOT_FLAGS_VERSION 0x42
 
 /*****************************************************************************/
 // G l o b a l s
@@ -74,7 +75,67 @@ errlHndl_t create_SfcDD( SfcDD*& o_sfc,
 {
     errlHndl_t l_err = NULL;
     TRACFCOMP( g_trac_pnor, "Creating SfcAST2400 object" );
-    o_sfc = new SfcAST2400( l_err, i_proc );
+
+    do {
+	size_t reg_size = sizeof(uint8_t);
+	uint8_t boot_flags, boot_flag_version;
+
+	// Send SuperIO password - send A5 twice
+	uint8_t data = 0xA5;
+	l_err = deviceOp( DeviceFW::WRITE,
+			  i_proc,
+			  &data,
+			  reg_size,
+			  DEVICE_LPC_ADDRESS(LPC::TRANS_IO,0x2E) );
+	if( l_err ) { break; }
+
+	l_err = deviceOp( DeviceFW::WRITE,
+			  i_proc,
+			  &data,
+			  reg_size,
+			  DEVICE_LPC_ADDRESS(LPC::TRANS_IO,0x2E) );
+	if( l_err ) { break; }
+
+        // Read scratch register 0x28 to get the boot flag version
+	data = 0x28;
+	l_err = deviceOp( DeviceFW::WRITE,
+			  i_proc,
+			  &data,
+			  reg_size,
+			  DEVICE_LPC_ADDRESS(LPC::TRANS_IO,0x2E) );
+	if( l_err ) { break; }
+
+	l_err = deviceOp( DeviceFW::READ,
+			  i_proc,
+			  &boot_flag_version,
+			  reg_size,
+			  DEVICE_LPC_ADDRESS(LPC::TRANS_IO,0x2F) );
+	if( l_err ) { break; }
+
+        // Read scratch register 0x29 to get the boot mode
+	data = 0x29;
+	l_err = deviceOp( DeviceFW::WRITE,
+			  i_proc,
+			  &data,
+			  reg_size,
+			  DEVICE_LPC_ADDRESS(LPC::TRANS_IO,0x2E) );
+	if( l_err ) { break; }
+
+	l_err = deviceOp( DeviceFW::READ,
+			  i_proc,
+			  &boot_flags,
+			  reg_size,
+			  DEVICE_LPC_ADDRESS(LPC::TRANS_IO,0x2F) );
+	if( l_err ) { break; }
+
+	if( boot_flag_version == BOOT_FLAGS_VERSION && (boot_flags & BOOT_FLAG_MEMBOOT) ) {
+	    TRACFCOMP( g_trac_pnor, "SfcAST2400 Memboot mode detected" );
+	    o_sfc = new SfcMembootAST2400( l_err, i_proc );
+	} else {
+	    o_sfc = new SfcAST2400( l_err, i_proc );
+	}
+    } while(0);
+
     return l_err;
 }
 
