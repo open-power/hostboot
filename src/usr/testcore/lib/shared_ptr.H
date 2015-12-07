@@ -40,6 +40,16 @@ struct __STLSharedPtrTester2 : __STLSharedPtrTester
     using __STLSharedPtrTester::__STLSharedPtrTester;
 };
 
+struct __STLSharedPtrTester3
+{
+    std::shared_ptr<uint8_t> foo;
+
+    explicit __STLSharedPtrTester3(size_t i)
+    {
+        foo = std::shared_ptr<uint8_t>(new uint8_t[i]());
+    }
+};
+
 class STLSharedPtrTest : public CxxTest::TestSuite
 {
     public:
@@ -83,6 +93,12 @@ class STLSharedPtrTest : public CxxTest::TestSuite
             {
                 TS_FAIL("p4 is not unique after p3.reset.");
             }
+        }
+
+        void testSharedPtr_Compile1()
+        {
+            // This was a compile issue for the FAPI2 code.
+            __STLSharedPtrTester3 foo(10);
         }
 };
 
