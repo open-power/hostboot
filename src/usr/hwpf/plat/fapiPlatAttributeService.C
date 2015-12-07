@@ -1800,6 +1800,26 @@ fapi::ReturnCode fapiPlatGetRCDCntlWord015(const fapi::Target * i_pFapiTarget,
 
         if (l_dimmType == ENUM_ATTR_SPD_MODULE_TYPE_RDIMM)
         {
+            ATTR_SPD_DRAM_DEVICE_TYPE_Type l_spd_dramtype =
+                                         ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR3;
+
+            l_rc = FAPI_ATTR_GET(ATTR_SPD_DRAM_DEVICE_TYPE,
+                                 i_pFapiTarget,
+                                 l_spd_dramtype);
+            if (l_rc)
+            {
+                FAPI_ERR("fapiPlatGetRCDCntlWord015: Error from get"
+                         " ATTR_SPD_DRAM_DEVICE_TYPE");
+                break;
+            }
+
+            // Not defined for DDR4
+            if (ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR4 == l_spd_dramtype)
+            {
+                o_val = 0;
+                break;
+            }
+
             TARGETING::Target* l_pTarget = NULL;
             l_rc = getTargetingTarget(i_pFapiTarget, l_pTarget, TARGETING::TYPE_DIMM);
             if (l_rc)
