@@ -109,7 +109,7 @@ int main(int argc, char** argv)
     g_crossPrefix = getenv("CROSS_PREFIX");
     if (NULL == g_crossPrefix)
     {
-        printf("Environment variable CROSS_PREFIX not set.\n");
+	fprintf(stderr, "Environment variable CROSS_PREFIX not set.\n");
         exit(-1);
     }
     g_crossPrefix = strdup(g_crossPrefix);
@@ -155,7 +155,7 @@ int main(int argc, char** argv)
 
 void print_usage()
 {
-    printf("genlist <image>\n");
+    fprintf(stderr, "genlist <image>\n");
     exit(-1);
 }
 
@@ -176,7 +176,7 @@ void parse_modinfo_file(const string& i_image)
     FILE* modinfo_file = fopen(modinfo_name.c_str(), "r");
     if (NULL == modinfo_file)
     {
-        printf("Unable to open modinfo file.\n");
+        fprintf(stderr, "Unable to open modinfo file.\n");
         exit(-1);
     }
 
@@ -217,7 +217,7 @@ void parse_syms_file(const string& i_image)
     FILE* syms_file = fopen(syms_name.c_str(), "r");
     if (NULL == syms_file)
     {
-        printf("Unable to open syms file.\n");
+        fprintf(stderr, "Unable to open syms file.\n");
         exit(-1);
     }
 
