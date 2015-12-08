@@ -136,13 +136,13 @@ int main(int argc, char** argv)
     int base_fd = open(g_imageName.c_str(), O_RDONLY);
     if (-1 == base_fd)
     {
-        printf("Failed to open image file: %s.\n", g_imageName.c_str());
+        fprintf(stderr, "Failed to open image file: %s.\n", g_imageName.c_str());
         exit(-1);
     }
     struct stat base_stat;
     if (0 != fstat(base_fd, &base_stat))
     {
-        printf("Failed to stat image file: %s.\n", g_imageName.c_str());
+        fprintf(stderr, "Failed to stat image file: %s.\n", g_imageName.c_str());
         exit(-1);
     }
     g_imageFileSize = base_stat.st_size;
@@ -156,13 +156,13 @@ int main(int argc, char** argv)
         int ext_fd = open(g_extImageName.c_str(), O_RDONLY);
         if (-1 == ext_fd)
         {
-            printf("Failed to open image file: %s.\n", g_extImageName.c_str());
+            fprintf(stderr, "Failed to open image file: %s.\n", g_extImageName.c_str());
             exit(-1);
         }
         struct stat ext_stat;
         if (0 != fstat(ext_fd, &ext_stat))
         {
-            printf("Failed to stat image file: %s.\n", g_extImageName.c_str());
+            fprintf(stderr, "Failed to stat image file: %s.\n", g_extImageName.c_str());
             exit(-1);
         }
         g_extImageFileSize = ext_stat.st_size;
@@ -175,7 +175,7 @@ int main(int argc, char** argv)
     g_crossPrefix = getenv("CROSS_PREFIX");
     if (NULL == g_crossPrefix)
     {
-        printf("Environment variable CROSS_PREFIX not set.\n");
+        fprintf(stderr, "Environment variable CROSS_PREFIX not set.\n");
         exit(-1);
     }
     g_crossPrefix = strdup(g_crossPrefix);
@@ -220,7 +220,7 @@ int main(int argc, char** argv)
 
 void print_usage()
 {
-    printf("gensyms <image> [<extimage> <extoffset>]\n");
+    fprintf(stderr, "gensyms <image> [<extimage> <extoffset>]\n");
     exit(-1);
 }
 
@@ -241,7 +241,7 @@ void parse_modinfo_file(const string& i_image)
     FILE* modinfo_file = fopen(modinfo_name.c_str(), "r");
     if (NULL == modinfo_file)
     {
-        printf("Unable to open modinfo file.\n");
+        fprintf(stderr, "Unable to open modinfo file.\n");
         exit(-1);
     }
 
