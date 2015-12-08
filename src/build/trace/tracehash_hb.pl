@@ -166,7 +166,7 @@ if (!$file && !$dir && !$in_sand) {
 #          M A I N              #
 #################################
 
-my $clock = gmtime;
+my $clock = gmtime();
 
 $build = $HEAD_EYE_CATCHER . "$HEAD_VER_FLAG" . $HEAD_SEP . $clock . $HEAD_SEP  . $HEAD_BUILD_FLAG;
 
@@ -232,7 +232,7 @@ else
 write_string_file();
 
 print "Hashing Started at $clock\n";
-$clock = `date`;
+$clock = gmtime();
 print "Hashing Finished at $clock\n";
 
 exit 0;
