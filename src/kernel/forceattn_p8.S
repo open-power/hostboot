@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
 # [+] International Business Machines Corp.
 #
 #
@@ -29,7 +29,7 @@
 p8_force_attn:
     li r0, 1
     mfspr r9, HID0
-    insrdi r9,r0,1,31 	/* Turn on bit 31. */
+    insrdi r9,r0,1,3 	/* Turn on bit 3 */
     sync
     mtspr HID0,r9	/* Enable attentions */
     mfspr r9, HID0
