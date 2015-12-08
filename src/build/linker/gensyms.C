@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -302,10 +302,12 @@ void* read_module_symbols(void* input)
     {
         if (NULL == fgets(line, 1024, pipe)) break;
 
+        size_t linelen = strlen(line);
+
         // Skip absolute values (ex. constants) and undefined symbols.
         if (strstr(line, "*ABS*") || strstr(line, "*UND*")) continue;
         // Skip section symbols (marked by 'd' in the 22nd column).
-        if ('d' == line[22]) continue;
+        if (linelen > 22 && 'd' == line[22]) continue;
 
         // First part of an objdump line is the symbol address, parse that.
         uint64_t line_address;
@@ -315,14 +317,16 @@ void* read_module_symbols(void* input)
         // Determine if the symbol is a function and if it is in the .rodata
         // section.  Symbols in the .rodata section have a slightly longer
         // line than those in the .text/.data sections (by 2 characters).
-        bool is_function = ('F' == line[23]);
+        bool is_function = (linelen > 23 && 'F' == line[23]);
         size_t rodata = (NULL != strstr(line, ".rodata")) ? 2 : 0;
 
         // Parse the symbol size.
         uint64_t symbol_size;
-        if (1 != sscanf(&line[32+rodata], "%lx", &symbol_size)) continue;
+        if (linelen > 32+rodata &&
+            1 != sscanf(&line[32+rodata], "%lx", &symbol_size)) continue;
 
         // Parse the function name.
+        assert(linelen > 48+rodata);
         string function = &line[48+rodata];
         function.resize(function.length() - 1); // remove the newline.
 
