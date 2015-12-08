@@ -48,13 +48,11 @@ linker: linker.C
 gensyms: gensyms.C
 	$(C2) "    CXX        $(notdir $<)"
 	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 -g gensyms.C -o gensyms.o -c
-	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 -g gensyms.o -o gensyms \
-					 -lpthread
+	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 -g gensyms.o -o gensyms
 	$(C1)rm gensyms.o
 
 genlist: genlist.C
 	$(C2) "    CXX        $(notdir $<)"
 	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 -g genlist.C -o genlist.o -c
-	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 -g genlist.o -o genlist \
-					 -lpthread
+	$(C1)$(CCACHE) $(HOST_PREFIX)g++ -O3 -g genlist.o -o genlist
 	$(C1)rm genlist.o

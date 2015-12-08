@@ -105,7 +105,6 @@ char* g_crossPrefix = NULL;
      */
 multimap<uint64_t, string> g_symbols;
     /** Mutex to protect symbol map. */
-pthread_mutex_t g_symbolMutex = PTHREAD_MUTEX_INITIALIZER;
 
 int main(int argc, char** argv)
 {
@@ -185,7 +184,6 @@ int main(int argc, char** argv)
 
     // Create threads for each ELF object in the image(s) to get their symbol
     // information.
-    vector<pthread_t*> threads;
     for(vector<pair<string, uint64_t> >::const_iterator i = g_modules.begin();
         i != g_modules.end(); ++i)
     {
@@ -194,18 +192,8 @@ int main(int argc, char** argv)
         if (strstr(m.c_str(), ".o") || strstr(m.c_str(), ".elf") ||
             strstr(m.c_str(), ".so"))
         {
-            pthread_t* thread = new pthread_t;
-            pthread_create(thread, NULL, read_module_symbols,
-                           new pair<string,uint64_t>(*i));
-            threads.push_back(thread);
+	    read_module_symbols(new pair<string,uint64_t>(*i));
         }
-    }
-
-    // Wait for all threads to finish.
-    for(vector<pthread_t*>::const_iterator i = threads.begin();
-        i != threads.end(); ++i)
-    {
-        pthread_join(*(*i), NULL);
     }
 
     // Output (in order) each symbol information.
@@ -368,9 +356,7 @@ void* read_module_symbols(void* input)
     pclose(pipe);
 
     // Copy our local symbol list all at once into the global symbol list.
-    pthread_mutex_lock(&g_symbolMutex);
     g_symbols.insert(l_symbols.begin(), l_symbols.end());
-    pthread_mutex_unlock(&g_symbolMutex);
 
     return NULL;
 }
