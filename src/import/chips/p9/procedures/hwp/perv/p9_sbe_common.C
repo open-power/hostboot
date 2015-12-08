@@ -74,6 +74,20 @@ fapi2::ReturnCode p9_sbe_common_align_chiplets(const
     l_data64.setBit<PEC_CPLT_CTRL0_CTRL_CC_FORCE_ALIGN_DC>();
     FAPI_TRY(fapi2::putScom(i_target_chiplets, PERV_CPLT_CTRL0_OR, l_data64));
 
+    FAPI_INF("Clear chiplet is aligned");
+    //Setting SYNC_CONFIG register value
+    FAPI_TRY(fapi2::getScom(i_target_chiplets, PERV_SYNC_CONFIG, l_data64));
+    //SYNC_CONFIG.CLEAR_CHIPLET_IS_ALIGNED = 0b1
+    l_data64.setBit<PEC_SYNC_CONFIG_CLEAR_CHIPLET_IS_ALIGNED>();
+    FAPI_TRY(fapi2::putScom(i_target_chiplets, PERV_SYNC_CONFIG, l_data64));
+
+    FAPI_INF("unset clear chiplet is aligned" );
+    //Setting SYNC_CONFIG register value
+    FAPI_TRY(fapi2::getScom(i_target_chiplets, PERV_SYNC_CONFIG, l_data64));
+    //SYNC_CONFIG.CLEAR_CHIPLET_IS_ALIGNED = 0b0
+    l_data64.clearBit<PEC_SYNC_CONFIG_CLEAR_CHIPLET_IS_ALIGNED>();
+    FAPI_TRY(fapi2::putScom(i_target_chiplets, PERV_SYNC_CONFIG, l_data64));
+
     fapi2::delay(NS_DELAY, SIM_CYCLE_DELAY);
 
     FAPI_INF("Poll OPCG done bit to check for run-N completeness");
