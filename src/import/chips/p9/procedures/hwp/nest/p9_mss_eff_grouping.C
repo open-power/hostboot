@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -273,7 +273,7 @@ extern "C" {
         uint64_t iv_mirrorBaseAddr = 0; // ATTR_PROC_MIRROR_BASE >> 30
         uint64_t iv_htmBarSizes[NUM_OF_HTM_REGIONS] = {0}; // ATTR_PROC_HTM_BAR_SIZES
         uint64_t iv_occSandboxSize = 0; // ATTR_PROC_OCC_SANDBOX_SIZE
-        uint8_t  iv_fabricSystemId = 0; // ATTR_FABRIC_SYSTEM_ID
+        uint32_t iv_fabricSystemId = 0; // ATTR_FABRIC_SYSTEM_ID
         uint8_t  iv_fabricGroupId = 0;  // ATTR_FABRIC_GROUP_ID
         uint8_t  iv_fabricChipId = 0;   // ATTR_FABRIC_CHIP_ID
     };
@@ -354,21 +354,21 @@ extern "C" {
                  (uint64_t)fapi2::current_err);
 
         // Get Fabric system ID
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FABRIC_SYSTEM_ID, i_target,
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_SYSTEM_ID, i_target,
                                iv_fabricSystemId),
                  "EffGroupingProcAttrs::getAttrs: Error getting "
                  "ATTR_FABRIC_SYSTEM_ID, l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
 
         // Get Fabric group ID
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FABRIC_GROUP_ID, i_target,
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_GROUP_ID, i_target,
                                iv_fabricGroupId),
                  "EffGroupingProcAttrs::getAttrs: Error getting "
                  "ATTR_FABRIC_GROUP_ID, l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
 
         // Get Fabric chip ID
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FABRIC_CHIP_ID, i_target,
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_CHIP_ID, i_target,
                                iv_fabricChipId),
                  "EffGroupingProcAttrs::getAttrs: Error getting "
                  "ATTR_FABRIC_CHIP_ID, l_rc 0x%.8X",
