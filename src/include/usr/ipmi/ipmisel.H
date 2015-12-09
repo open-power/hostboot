@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,6 +50,14 @@ namespace IPMISEL
         MSG_LAST_TYPE = MSG_STATE_SHUTDOWN,
     };
 
+    typedef struct sel_info
+    {
+        uint8_t eventDirType;
+        uint8_t sensorNumber;
+        uint8_t eventOffset;
+        uint8_t sensorType;
+    }sel_info_t;
+
     enum sel_size_constants
     {
         // size of the partial_add_esel request (command) data
@@ -66,20 +74,16 @@ namespace IPMISEL
      * @param[in] pointer to eSEL data
      * @param[in] size of eSEL data
      * @param[in] eid of errorlog for this eSEL (for ack)
-     * @param[in] event_dir_type for this eSEL
-     * @param[in] event_offset for this eSEL
-     * @param[in] sensorType that caused the error/eSEL
-     * @param[in] sensorNumber that caused the error/eSEL
+     * @param[in] callout list,which has sel event details
      */
     void sendESEL(uint8_t* i_eselData, uint32_t i_dataSize,
-                  uint32_t i_eid,
-                  uint8_t i_eventDirType, uint8_t i_eventOffset,
-                  uint8_t i_sensorType, uint8_t i_sensorNumber);
+                  uint32_t i_eid,std::vector<sel_info_t*>&i_calloutList);
 
     // per IPMI Spec, section 32.1 SEL Event Records
     enum sel_record_type
     {
         record_type_system_event    = 0x02,
+        record_type_oem_sel_for_procedure_callout = 0xDE,
         record_type_ami_esel        = 0xDF,
     };
 
@@ -126,6 +130,52 @@ namespace IPMISEL
     {
         generator_id_ami        = 0x2000,
     };
+
+    struct oemSelRecord
+    {
+        // ID used for SEL Record access. The Record ID values 0000h and FFFFh
+        // have special meaning in the Event Access commands and must not be
+        // used as Record ID values for stored SEL Event Records.
+        uint16_t recordID;
+
+        // [7:0] - Record Type
+        //  C0h-DFh = OEM system event record
+        uint8_t record_type;
+
+        // Time when event was logged. LS byte first.
+        uint32_t timestamp;
+
+        // Manufacturer ID 
+        uint8_t manufactureId_data1;
+        uint8_t manufactureId_data2;
+        uint8_t manufactureId_data3;
+    
+        // OEM defined
+        uint8_t event_data1;
+        uint8_t event_data2;
+        uint8_t event_data3;
+        uint8_t event_data4;
+        uint8_t event_data5;
+        uint8_t event_data6;
+
+
+        // ctor
+        oemSelRecord():
+            recordID(0),
+            record_type(0),
+            timestamp(0),
+            manufactureId_data1(0),
+            manufactureId_data2(0),
+            manufactureId_data3(0),
+            event_data1(0),
+            event_data2(0),
+            event_data3(0),
+            event_data4(0),
+            event_data5(0),
+            event_data6(0)
+            { };
+
+    } PACKED; //oemSelRecord
 
     struct selRecord
     {
@@ -205,22 +255,38 @@ namespace IPMISEL
     struct eselInitData
     {
         size_t dataSize;
+        std::vector <sel_info_t*> selInfoList;
         uint8_t eSel[sizeof(selRecord)];
+        uint8_t oemSel[sizeof(oemSelRecord)];
         uint8_t *eSelExtra;
+        bool selEvent;
+        uint8_t eselRecord[2];
 
         // ctor
-        eselInitData(selRecord* i_eSEL,
+        eselInitData(std::vector <sel_info_t*> &i_eventList,
                   uint8_t* i_extraData, uint32_t i_dataSize)
         {
             dataSize = i_dataSize;
-            memcpy(eSel,i_eSEL,sizeof(selRecord));
+            selInfoList = i_eventList;
             eSelExtra = new uint8_t[i_dataSize];
             memcpy(eSelExtra, i_extraData, i_dataSize);
+            selEvent = false;
+            memset (eselRecord,0,sizeof(eselRecord));
         }
 
         // dtor
         ~eselInitData()
         {
+            std::vector<sel_info_t*>::iterator it;
+            for (it = selInfoList.begin(); it != selInfoList.end();
+                ++it)
+            {
+                sel_info_t* l_sel = *it;
+                if (l_sel)
+                {
+                    delete l_sel;
+                }
+            }
             delete eSelExtra;
         }
     };

@@ -37,8 +37,12 @@
 #include <sys/task.h>
 #include <initservice/taskargs.H>
 #include <initservice/initserviceif.H>
+#include <targeting/common/commontargeting.H>
+#include <targeting/common/util.H>
+#include <targeting/common/utilFilter.H>
 
 #include <errl/errlmanager.H>
+using   namespace   TARGETING;
 
 //Defined in ipmidd.C
 extern trace_desc_t * g_trac_ipmi;
@@ -83,11 +87,9 @@ enum esel_retry
 namespace IPMISEL
 {
 void sendESEL(uint8_t* i_eselData, uint32_t i_dataSize,
-              uint32_t i_eid,
-              uint8_t i_eventDirType, uint8_t i_eventOffset,
-              uint8_t i_sensorType, uint8_t i_sensorNumber )
+              uint32_t i_eid, std::vector<sel_info_t*>&i_selEventList)
 {
-    IPMI_TRAC(ENTER_MRK "sendESEL()");
+    IPMI_TRAC(ENTER_MRK "sendESEL() %d",i_selEventList.size());
 
 #ifdef __HOSTBOOT_RUNTIME
     // HBRT doesn't send a msg, but use the msg structure to pass the data
@@ -99,19 +101,8 @@ void sendESEL(uint8_t* i_eselData, uint32_t i_dataSize,
 #endif
     msg->type = MSG_SEND_ESEL;
     msg->data[0] = i_eid;
-
-    // create the sel record of information
-    selRecord l_sel;
-    l_sel.record_type = record_type_system_event;
-    l_sel.generator_id = generator_id_ami;
-    l_sel.evm_format_version = format_ipmi_version_2_0;
-    l_sel.sensor_type = i_sensorType;
-    l_sel.sensor_number = i_sensorNumber;
-    l_sel.event_dir_type = i_eventDirType;
-    l_sel.event_data1 = i_eventOffset;
-
-    eselInitData *eselData =
-        new eselInitData(&l_sel, i_eselData, i_dataSize);
+    eselInitData *eselData = 
+    new eselInitData(i_selEventList, i_eselData, i_dataSize);
 
     msg->extra_data = eselData;
 
@@ -131,7 +122,7 @@ void sendESEL(uint8_t* i_eselData, uint32_t i_dataSize,
 #endif
     IPMI_TRAC(EXIT_MRK "sendESEL");
     return;
-} // sendESEL
+}
 
 /*
  * @brief process esel msg
@@ -144,36 +135,81 @@ void process_esel(msg_t *i_msg)
     eselInitData * l_data =
             (eselInitData*)(i_msg->extra_data);
     IPMI_TRAC(ENTER_MRK "process_esel");
+    selRecord l_eSel;
+    oemSelRecord l_oemSel;
 
-    uint32_t l_send_count = MAX_SEND_COUNT;
-    while (l_send_count > 0)
+    do
     {
-        // try to send the eles to the bmc
-        send_esel(l_data, l_err, l_cc);
-
-        // if no error but last completion code was:
-        if ((l_err == NULL) &&
-            ((l_cc == IPMI::CC_BADRESV) ||  // lost reservation
-             (l_cc == IPMI::CC_TIMEOUT)))   // timeout
+        IPMI_TRAC(ENTER_MRK"sel list size %d", l_data->selInfoList.size());
+        std::vector<sel_info_t*>::iterator it;
+        for (it = l_data->selInfoList.begin(); it != l_data->selInfoList.end(); 
+        ++it)
         {
-            // update our count and pause
-            l_send_count--;
-            if (l_send_count)
+            sel_info_t *l_sel = *it;
+            memset(l_data->oemSel,0,sizeof(oemSelRecord));
+            memset(l_data->eSel,0,sizeof(selRecord));
+            l_data->selEvent = true;
+
+            //If sensor type is sys event then need to send the oem sel
+            //to handle procedure callout        
+            if (l_sel->sensorType == TARGETING::SENSOR_TYPE_SYS_EVENT)
             {
-                IPMI_TRAC("process_esel: sleeping; retry_count %d",
-                    l_send_count);
-                // sleep 3 times - 2ms, 32ms, 512ms. if we can't get this
-                //  through by then, the system must really be busy...
-                nanosleep(0,
-                    SLEEP_BASE << (4 * (MAX_SEND_COUNT - l_send_count - 1)));
-                continue;
+                //oem sel data
+                l_data->selEvent = false;
+                l_oemSel.record_type = 
+                record_type_oem_sel_for_procedure_callout;
+                l_oemSel.event_data1 = l_sel->eventOffset;
+                l_sel->eventOffset = SENSOR::UNDETERMINED_SYSTEM_HW_FAILURE;
+                memcpy(l_data->oemSel,&l_oemSel,sizeof(oemSelRecord));
             }
-        }
 
-        // else it did get sent down OR it didn't because of a bad error
-        break;
+            //sel data
+            l_eSel.record_type = record_type_system_event;
+            l_eSel.generator_id = generator_id_ami;
+            l_eSel.evm_format_version = format_ipmi_version_2_0;
+            l_eSel.sensor_type = l_sel->sensorType;
+            l_eSel.sensor_number = l_sel->sensorNumber;
+            l_eSel.event_dir_type = l_sel->eventDirType;
+            l_eSel.event_data1 = l_sel->eventOffset;
+            memcpy(l_data->eSel,&l_eSel,sizeof(selRecord));
+                
 
-    } // while
+            uint32_t l_send_count = MAX_SEND_COUNT;
+            while (l_send_count > 0)
+            {
+                // try to send the eles to the bmc
+                send_esel(l_data, l_err, l_cc);
+
+                // if no error but last completion code was:
+                if ((l_err == NULL) &&
+                    ((l_cc == IPMI::CC_BADRESV) ||  // lost reservation
+                    (l_cc == IPMI::CC_TIMEOUT)))   // timeout
+                {
+                    // update our count and pause
+                    l_send_count--;
+                    if (l_send_count)
+                    {
+                        IPMI_TRAC("process_esel: sleeping; retry_count %d",
+                        l_send_count);
+                        // sleep 3 times - 2ms, 32ms, 512ms. if we can't get this
+                        //  through by then, the system must really be busy...
+                        nanosleep(0,
+                        SLEEP_BASE << (4 * (MAX_SEND_COUNT - l_send_count - 1)));
+                        continue;
+                    }
+                }
+                else
+                {
+                    //if we enter this, then pel data has logged successfully,
+                    //so we don't need to log again, make the size to zero.
+                    l_data->dataSize = 0;
+                }
+                // else it did get sent down OR it didn't because of a bad error
+                break;
+            } // while
+        } // for
+
+    }while(0);
 
     if(l_err)
     {
@@ -212,10 +248,12 @@ void send_esel(eselInitData * i_data,
     uint8_t* data = NULL;
 
     size_t len = 0;
-    uint8_t esel_recordID[2] = {0,0};
-    uint8_t sel_recordID[2] = {0,0};
 
-    do{
+    uint8_t sel_recordID[2] = {0,0};
+    uint8_t esel_recordID[2] = {0,0};
+
+    do
+    {
         const size_t l_eSELlen = i_data->dataSize;
 
         if (l_eSELlen == 0)
@@ -348,6 +386,10 @@ void send_esel(eselInitData * i_data,
             // there's a major BMC bug...)
             storeReserveRecord(esel_recordID,data);
         } // while eSELindex
+        if (o_cc == IPMI::CC_OK)
+        {
+            memcpy(i_data->eselRecord,esel_recordID,sizeof(esel_recordID));
+        }
     }while(0);
 
     // if eSEL wasn't created due to an error, we don't want to continue
@@ -356,7 +398,7 @@ void send_esel(eselInitData * i_data,
         // caller wants us to NOT create sensor SEL
         if ((i_data->eSel[offsetof(selRecord,sensor_type)] == SENSOR::INVALID_TYPE) &&
             (i_data->eSel[offsetof(selRecord,sensor_number)] == TARGETING::UTIL::INVALID_IPMI_SENSOR)
-           )
+            )
         {
             IPMI_TRAC(INFO_MRK "Invalid sensor type/number - NOT sending sensor SELs");
         }
@@ -372,13 +414,25 @@ void send_esel(eselInitData * i_data,
             len = sizeof(IPMISEL::selRecord);
             data = new uint8_t[len];
 
-            // copy in the SEL event record data
-            memcpy(data, i_data->eSel, sizeof(IPMISEL::selRecord));
-            // copy the eSEL recordID (if it was created) into the extra data area
-            // and mark the event_data1 to indicate this is OEM data
-            data[offsetof(selRecord,event_data1)] |= 0xA0;
-            data[offsetof(selRecord,event_data2)] = esel_recordID[1];
-            data[offsetof(selRecord,event_data3)] = esel_recordID[0];
+
+            // send standard SEL event
+            if (i_data->selEvent)
+            {
+                // copy in the SEL event record data
+                memcpy(data, i_data->eSel, len);
+                // copy the eSEL recordID (if it was created) into the extra data area
+                // and mark the event_data1 to indicate this is OEM data
+                data[offsetof(selRecord,event_data1)] |= 0xA0;
+                data[offsetof(selRecord,event_data2)] = i_data->eselRecord[1];
+                data[offsetof(selRecord,event_data3)] = i_data->eselRecord[0];
+            }
+            else //send OEM SEL event
+            {
+                // copy in the SEL event record data
+                memcpy(data, i_data->oemSel, len);
+                data[offsetof(oemSelRecord,event_data5)] = i_data->eselRecord[1];
+                data[offsetof(oemSelRecord,event_data6)] =i_data->eselRecord[0];
+            }
 
             // use local cc so that we don't corrupt the esel from above
             IPMI::completion_code l_cc = IPMI::CC_UNKBAD;
