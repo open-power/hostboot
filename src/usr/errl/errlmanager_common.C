@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -497,8 +497,6 @@ inline bool SensorModifier::modifySensor(uint8_t i_sensorType,
 ///////////////////////////////////////////////////////////////////////////////
 void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
 {
-    bool l_selSent = false;
-
     TRACFCOMP(g_trac_errl, ENTER_MRK
                 "sendErrLogToBmc errlogId 0x%.8x, i_sendSels %d",
                 io_err->eid(), i_sendSels);
@@ -594,8 +592,10 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
             break;
         }
 
+        std::vector<IPMISEL::sel_info_t*> l_selEventList;
         if (i_sendSels)
         {
+            l_selEventList.clear();
             for(size_t i = 0; i < l_callouts.size(); i++)
             {
                 uint8_t l_eventDirType = IPMISEL::sensor_specific;
@@ -628,7 +628,6 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
                 // grab the sensor type so the bmc knows how to use the offset
                 uint8_t unused = 0;
                 uint8_t l_sensorType = 0;
-
                 errlHndl_t e =
                     SENSOR::SensorBase::getSensorType(
                             l_sensorNumber,
@@ -637,8 +636,8 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
                 if( e )
                 {
                     TRACFCOMP(g_trac_errl,
-                            ERR_MRK"Failed to get sensor type for sensor %d",
-                            l_sensorNumber);
+                        ERR_MRK"Failed to get sensor type for sensor %d",
+                        l_sensorNumber);
 
                     l_sensorType = 0;
                     // since we are in the commit path, lets just delete this
@@ -658,15 +657,6 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
                                                l_eventOffset );
                 }
 
-                uint32_t selSize = l_pelSize;
-
-                // if we sent an eSEL then set the PEL size to zero such
-                // that we don't send another eSEL for the same error log
-                if (l_selSent)
-                {
-                    selSize = 0;
-                }
-
                 // only send highest priority SELs or
                 // SELs of lesser priority that were modified
                 if (l_ud->priority == l_priority || l_wasModified)
@@ -674,18 +664,29 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
                     TRACFCOMP(g_trac_errl, INFO_MRK "sendErrLogToBmc:"
                             " sensor %.2x/%.2x event %x/%x, size %d",
                             l_sensorType, l_sensorNumber,
-                            l_eventDirType, l_eventOffset, selSize );
+                            l_eventDirType, l_eventOffset, l_pelSize);
 
-                    IPMISEL::sendESEL(l_pelData, selSize,
-                                    io_err->eid(),
-                                    l_eventDirType, l_eventOffset,
-                                    l_sensorType,
-                                    l_sensorNumber);
+                    IPMISEL::sel_info_t *l_selEvent = new (IPMISEL::sel_info_t);
+                    l_selEvent->eventDirType = l_eventDirType;
+                    l_selEvent->sensorNumber = l_sensorNumber;
+                    l_selEvent->eventOffset  = l_eventOffset;
+                    l_selEvent->sensorType   = l_sensorType;
 
-                    l_selSent = true;
+                    l_selEventList.push_back(l_selEvent);
                 }
 
             } // for l_callouts
+
+            if (l_selEventList.size())
+            {
+                IPMISEL::sendESEL(l_pelData, l_pelSize,
+                                    io_err->eid(),
+                                    l_selEventList);
+                TRACFCOMP(g_trac_errl, INFO_MRK
+                "sendErrLogToBmc callout size %d",
+                l_selEventList.size());
+            }
+
         }
         else
         {
@@ -693,13 +694,20 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
             TRACFCOMP(g_trac_errl, INFO_MRK
                     "sendErrLogToBmc: no sensor SELs, size %d",
                     l_pelSize );
-
+            l_selEventList.clear();
+            IPMISEL::sel_info_t *l_selEvent = new (IPMISEL::sel_info_t);
             uint8_t l_eventDirType = IPMISEL::sensor_specific;
             uint8_t l_eventOffset = IPMISEL::event_data1_invalid_offset;
+
+            l_selEvent->eventDirType = l_eventDirType;
+            l_selEvent->sensorNumber = TARGETING::UTIL::INVALID_IPMI_SENSOR;
+            l_selEvent->eventOffset  = l_eventOffset;
+            l_selEvent->sensorType   = SENSOR::INVALID_TYPE;
+
+            l_selEventList.push_back(l_selEvent);
+
             IPMISEL::sendESEL(l_pelData, l_pelSize,
-                            io_err->eid(),
-                            l_eventDirType, l_eventOffset,
-                            SENSOR::INVALID_TYPE, TARGETING::UTIL::INVALID_IPMI_SENSOR);
+                            io_err->eid(), l_selEventList);
         }
 
         // free the buffer
@@ -720,15 +728,17 @@ void getSensorInfo(HWAS::callout_ud_t *i_ud, uint8_t
 
     if( i_ud->type == HWAS::PROCEDURE_CALLOUT )
     {
-        // for procedure callouts generate sel using the system event
-        // sensor
+        // for procedure callouts
         o_sensorNumber = TARGETING::UTIL::getSensorNumber(NULL,
-                TARGETING::SENSOR_NAME_SYSTEM_EVENT);
+                    TARGETING::SENSOR_NAME_SYSTEM_EVENT);
 
-        // use the generic offset to indicate there is more work
-        // required to figure out what went wrong, ie. follow
-        // the procedure in the elog
-        o_eventOffset = SENSOR::UNDETERMINED_SYSTEM_HW_FAILURE;
+        // For procedure callout, will have EPUB ID's.This data will be part of
+        // OEM SEL.
+        o_eventOffset = i_ud->procedure;
+
+        TRACFCOMP(g_trac_errl, ENTER_MRK
+                "getSensorInfo o_eventOffset %d o_sensorNumber %d",
+                o_eventOffset,o_sensorNumber); 
 
     }
     // if its a clock callout or a its a part callout and its not
