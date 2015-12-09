@@ -23,7 +23,6 @@
 
 
 # Add common and generated parts to object list.
-FAPI2_MODULE_OBJS += array.o
 FAPI2_MODULE_OBJS += error_info.o
 FAPI2_MODULE_OBJS += ffdc.o
 FAPI2_MODULE_OBJS += fapi2_attribute_service.o
