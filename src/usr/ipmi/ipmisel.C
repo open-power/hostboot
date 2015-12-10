@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -221,7 +221,10 @@ void send_esel(eselInitData * i_data,
         if (l_eSELlen == 0)
         {
             IPMI_TRAC(INFO_MRK "no eSEL data present, skipping to SEL");
+
             // sending sensor SELs only, not the eSEL
+            o_cc = IPMI::CC_OK;
+
             break;
         }
 
@@ -348,7 +351,7 @@ void send_esel(eselInitData * i_data,
     }while(0);
 
     // if eSEL wasn't created due to an error, we don't want to continue
-    if (o_err == NULL)
+    if ((o_err == NULL) && (o_cc == IPMI::CC_OK))
     {
         // caller wants us to NOT create sensor SEL
         if ((i_data->eSel[offsetof(selRecord,sensor_type)] == SENSOR::INVALID_TYPE) &&
