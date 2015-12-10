@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: tools/build/common.d/script.rules.mk $
+# $Source: tools/build/common.dir/script.rules.mk $
 #
 # IBM CONFIDENTIAL
 #
