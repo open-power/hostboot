@@ -45,6 +45,8 @@ export TOOLSDIR=$PROJECT_ROOT/src/build/tools
 export HOOKSDIR=$PROJECT_ROOT/.git/hooks
 # Copyright license file for project
 export LICENSE=$PROJECT_ROOT/LICENSE_PROLOG
+export IMPORT_REL_PATH=src/import
+export IMPORT_DIR=$PROJECT_ROOT/$IMPORT_REL_PATH
 
 # Update PATH
 export PATH=${PATH}:$PWD/src/build/trace

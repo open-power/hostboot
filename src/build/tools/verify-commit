@@ -30,6 +30,8 @@ my $issueFound = 0;
 my $errorFound = 0;
 
 my $projectName = $ENV{'PROJECT_NAME'};
+# Relative path of import tree from project root
+my $importPrefix = $ENV{'IMPORT_REL_PATH'}."/";
 
 verifyPatchSet();       # Verify the patch contents.
 verifyCommitMsg();      # Verify the commit message.
@@ -124,6 +126,13 @@ sub verifyFileLine
 {
     my ($file,$line,$count) = @_;
 
+    # Check if file was mirrored
+    my $mirror = 0;
+    if ($file =~ m/^$importPrefix/)
+    {
+        $mirror = 1;
+    }
+
     # Check line length.
     if (length($line) > 80)
     {
@@ -180,8 +189,8 @@ sub verifyFileLine
                 "NOMERGE tag found.");
     }
 
-    # Check for "Confidential".
-    if ($line =~ m/Confidential/i && $projectName =~ m/HostBoot/i)
+    # Check for "Confidential", unless it's a mirrored commit
+    if ($line =~ m/Confidential/i && $projectName =~ m/HostBoot/i && !$mirror)
     {
         unless (($file =~ m/verify-commit/) ||
                 ($file =~ m/addCopyright.pl/))
