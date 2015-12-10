@@ -120,25 +120,33 @@ namespace   INITSERVICE
 #if 0
         {
                 ISTEPNAME(16,02,"host_activate_slave_cores"),
-                ISTEP_16::call_host_activate_slave_cores,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
+                // @todo RTC:137389 - removed for P9 bringup
+                //ISTEP_16::call_host_activate_slave_cores,
+                //{ START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
                 ISTEPNAME(16,03,"host_secure_rng"),
-                ISTEP_16::call_host_activate_master,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
+                // @todo RTC:137389 - removed for P9 bringup
+                //ISTEP_16::call_host_activate_master,
+                //{ START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
                 ISTEPNAME(16,04,"mss_scrub"),
-                ISTEP_16::call_mss_scrub,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
+                // @todo RTC:137389 - removed for P9 bringup
+                //ISTEP_16::call_mss_scrub,
+                //{ START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
                 ISTEPNAME(16,05,"host_ipl_complete"),
                 ISTEP_16::call_host_ipl_complete,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
         },
-#endif
 };
 
 const DepModInfo g_istep16Dependancies = {
