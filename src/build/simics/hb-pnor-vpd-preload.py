@@ -31,7 +31,7 @@ import shlex
 #------------------------------------------------------------------------------
 toolLoc = os.environ.get("HB_TOOLPATH");
 thisSys = os.environ.get("HB_MACHINE").upper();
-numProcs = os.environ.get( "GFW_P9_%s_NUM_PROCS" % thisSys );
+numProcs = os.environ.get( "NUM_PROCS");
 #@TODO RTC 128112
 numCentaurPerProc = "0"; # os.environ.get( "GFW_P9_%s_CENTAURS_PER_PROC" % thisSys );
 cmd = toolLoc + "/hb-pnor-vpd-preload.pl --numProcs " + numProcs + " --numCentPerProc " + numCentaurPerProc + " --machine " + thisSys + " --dataPath " + toolLoc
