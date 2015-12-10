@@ -31,7 +31,6 @@
 #endif
 
 #include <stdint.h>
-#include <thread>
 #include <buffer.H>
 
 // variable_buffer isn't supported on PPE
