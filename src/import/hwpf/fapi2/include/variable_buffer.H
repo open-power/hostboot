@@ -187,7 +187,7 @@ class variable_buffer
             static_assert(std::is_same<unit_type, uint32_t>::value,
                           "code currently needs unit_type to be a unit32_t");
         }
-
+#ifndef NO_INITIALIZER_LIST
         ///
         /// @brief Variable buffer list constructor
         /// @param[in] i_value an initializer list to initialize the container.
@@ -200,7 +200,7 @@ class variable_buffer
             static_assert(std::is_same<unit_type, uint32_t>::value,
                           "code currently needs unit_type to be a unit32_t");
         }
-
+#endif
         ///
         /// @brief Variable buffer copy constructor
         /// @param[in] i_buffer the buffer to copy from
