@@ -36,13 +36,16 @@
 
 
 echo "+++ Fixing pnor file in p9_nimbus.simics"
-cp -f $sb/../simics/targets/p9_nimbus/p9_nimbus.simics /tmp/
-cp -f /tmp/p9_nimbus.simics $sb/../simics/targets/p9_nimbus/p9_nimbus.simics
+cp -f $sb/../simics/targets/p9_nimbus/p9_nimbus.simics $sb/../simics/targets/p9_nimbus/p9_nimbus_nolink.simics
+cp -f $sb/../simics/targets/p9_nimbus/p9_nimbus_nolink.simics $sb/../simics/targets/p9_nimbus/p9_nimbus.simics
+chmod 666 $sb/../simics/targets/p9_nimbus/p9_nimbus.simics
 sed -i '/$image_name =/c\$image_name = "nimbus.pnor"' $sb/../simics/targets/p9_nimbus/p9_nimbus.simics
+echo '$proc[0].setup-hostboot-script hb_script = "hbfw/standalone.simics"' >> $sb/../simics/targets/p9_nimbus/p9_nimbus.simics
 
 echo "+++ Patching simicsInfo NIMBUS flash definitions"
 mkdir -p $sb/simu/data
-cp $bbsrc/simu/data/simicsInfo $sb/simu/data/
+#cp $bbsrc/simu/data/simicsInfo $sb/simu/data/
+chmod 666 $sb/simu/data/simicsInfo
 sed -i '/^MACHINE:NIMBUS/ s/$/ | IMGS:HOSTBOOT_IMG | IMGS:NIMBUS_IMG/' $sb/simu/data/simicsInfo
 echo "
 IMGS:NIMBUS_IMG | FLASH:nimbus.pnor | LOC:SB_CHAIN/images/ppc/lab/flash" >> \

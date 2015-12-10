@@ -50,11 +50,5 @@ grep -v "GFW_P8_HB_UNSECURE_OFFSET" \
 echo "SETENV GFW_P8_HB_UNSECURE_OFFSET 58720256" >> \
     $sb/simu/configs/P8_VENICE.config
 
-echo "+++ Patching P9_NIMBUS.config with extra PARMS"
-cp $bbsrc/simu/configs/P9_NIMBUS.config $sb/simu/configs/
-echo "
-SETENV GFW_P9_NIMBUS_DIMM_CCIN              HABJ
-SETENV GFW_P9_NIMBUS_DIMMS_PER_PROC         16
-SETENV GFW_P9_NIMBUS_DIMM_EC                20
-SETENV GFW_P9_NIMBUS_DIMM_MODEL_EC          0" >> \
-    $sb/simu/configs/P9_NIMBUS.config
+echo "+++ Extracting latest Simics, CacheExit/PBA actions"
+sbex -t 981222 981040 981512 980939
