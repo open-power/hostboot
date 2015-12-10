@@ -1,0 +1,62 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p9/procedures/xml/error_info/p9_l3_flush_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_L3_FLUSH_INVALID_ARGS_ERR</rc>
+    <description>
+      Procedure: p9_l3_flush
+      L3 flush not attempted, L3 flush is stopped
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>PURGETYPE</ffdc>
+    <ffdc>PURGEADDR</ffdc>
+    <ffdc>PURGEMEMBER</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_L3_FLUSH_PREVIOUS_PURGE_ACTIVE_ERR</rc>
+    <description>
+      Procedure: p9_l3_flush
+      There is another purge that has not finished yet
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>PURGEREG</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_L3_FLUSH_PURGE_REQ_TIMEOUT_ERR</rc>
+    <description>
+      Procedure: p9_l3_flush
+      The L3 flush did not finish and has timed out 
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>PURGETYPE</ffdc>
+    <ffdc>PURGEADDR</ffdc>
+    <ffdc>PURGEMEMBER</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>
+
