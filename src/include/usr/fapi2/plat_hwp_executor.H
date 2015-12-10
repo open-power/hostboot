@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/scom/runtime/handleSpecialWakeup.C $                  */
+/* $Source: src/include/usr/fapi2/plat_hwp_executor.H $                   */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,68 +22,37 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include <stdint.h>
-#include <errl/errlentry.H>
-#include <errl/errludtarget.H>
+///
+/// @file plat_hwp_executor.H
+///
+/// @brief Defines the specialized platform HWP Executor Macro.
+///
+/// The PLAT HWP Executor macro is called by the FAPI HWP Executor macro when a
+/// PLAT invoker function or a HWP wants to execute a HWP. Each platform can
+/// modify the macro to do any platform specific work to execute the HWP (e.g.
+/// dlopening a shared library)
+///
 
-#include <trace/interface.H>
+// plat_hwp_executor.H     (platform owned file) - Platform specialization
+//                                                 of functions.
+//
+// fapi2_hwp_executor.H    (common file)         - contains the templates
+//                                                 and calls a required macro
+//                                                 for non-specialized methods.
+//
+// hw_executor.H           (platform owned file) - Platform implementation of
+//                                                 functions defined in
+//                                                 fapi2_hwp_executor.H above.
+// -- Include order --
+//     procedure.C
+//        #include <hwp_executor.H>
+//     target.H
+//        #include plat_hwp_executor.H
+//        #include fapi2_hwp_executor.H
 
-#include <targeting/common/commontargeting.H>
-#include <targeting/common/targetservice.H>
-#include <targeting/common/utilFilter.H>
-#include <targeting/common/util.H>
+#ifndef PLATHWPEXECUTOR_H_
+#define PLATHWPEXECUTOR_H_
 
+// Currently empty because no specialzation for Hostboot
 
-extern "C"
-{
-
-// Trace definition
-extern trace_desc_t* g_trac_scom;
-
-using namespace TARGETING;
-
-errlHndl_t handleSpecialWakeup(TARGETING::Target* i_exTarget,
-                               bool i_enableDisable)
-{
-    errlHndl_t l_errl = NULL;
-
-    //@TODO RTC:132413 Add it back once we have fapi2 support
-#if 0
-    fapi::Target l_fapi_ex_target(TARGET_TYPE_EX_CHIPLET,
-                            (const_cast<TARGETING::Target*>(i_exTarget)) );
-
-    PROC_SPCWKUP_OPS l_spcwkupType;
-    if(i_enableDisable)
-    {
-        l_spcwkupType = SPCWKUP_ENABLE;
-    }
-    else
-    {
-        l_spcwkupType = SPCWKUP_DISABLE;
-    }
-
-    //Using the FSP bit so it doesn't collide with Sapphire.
-    //There are 3 independent registers used to trigger a special wakeup
-    //(FSP,HOST,OCC). Since this is in HBRT, Opal already owns the HOST
-    //register, so we're using the FSP bit here.
-    FAPI_INVOKE_HWP(l_errl,
-                    p8_cpu_special_wakeup,
-                    l_fapi_ex_target,
-                    l_spcwkupType,
-                    FSP);
-
-    if(l_errl)
-    {
-        TRACFCOMP( g_trac_scom,
-                  "Disable p8_cpu_special_wakeup ERROR :"
-                  " Returning errorlog, reason=0x%x",
-                   l_errl->reasonCode() );
-
-        // capture the target data in the elog
-        ERRORLOG::ErrlUserDetailsTarget(i_exTarget).addToLog( l_errl );
-    }
-#endif
-
-    return l_errl;
-}
-}
+#endif // PLATHWPEXECUTOR_H_

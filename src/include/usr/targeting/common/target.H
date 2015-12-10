@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,17 +54,20 @@
 //******************************************************************************
 // Forward declarations to allow friend functions to work
 //******************************************************************************
-namespace fapi
-{
-    class ReturnCode;
-    class Target;
 
-    namespace platAttrSvc
+
+namespace fapi2
+{
+
+   namespace platAttrSvc
     {
-        fapi::ReturnCode getTargetingAttr(const fapi::Target *,
-            const TARGETING::ATTRIBUTE_ID, const uint32_t, void *);
-        fapi::ReturnCode setTargetingAttr(const fapi::Target *,
-            const TARGETING::ATTRIBUTE_ID, const uint32_t, void *);
+
+      bool setTargetingAttrHelper(TARGETING::Target * ,
+                                  const TARGETING::ATTRIBUTE_ID ,
+                                  const uint32_t , void * );
+      bool getTargetingAttrHelper(TARGETING::Target * ,
+                                  const TARGETING::ATTRIBUTE_ID ,
+                                  const uint32_t , void * );
     }
 }
 
@@ -351,8 +354,7 @@ class Target
         void getAttrTankTargetPosData(uint16_t & o_pos,
                                       uint8_t & o_unitPos,
                                       uint8_t & o_node) const;
-
-    private: // Private helper interfaces
+   private: // Private helper interfaces
 
         /**
          *  @brief Tries to get the target's specified attribute value
@@ -403,6 +405,7 @@ class Target
             ATTRIBUTE_ID i_attr,
             uint32_t     i_size,
             const void*  i_pAttrData) const;
+
 
         /**
          *  @brief Gets a pointer to the target's associated attribute
@@ -573,15 +576,19 @@ class Target
         friend class AssociationManager;
         friend class AttributeTank;
 
-        // Friend functions to allow FAPI Attribute code to directly call
-        // _tryGetAttr and _trySetAttr for code size optimization
-        friend fapi::ReturnCode fapi::platAttrSvc::getTargetingAttr(
-            const fapi::Target *, TARGETING::ATTRIBUTE_ID, const uint32_t,
-            void *);
-        friend fapi::ReturnCode fapi::platAttrSvc::setTargetingAttr(
-            const fapi::Target *, TARGETING::ATTRIBUTE_ID, const uint32_t,
-            void *);
 
+
+
+         friend bool fapi2::
+                     platAttrSvc::
+                     setTargetingAttrHelper(TARGETING::Target*,
+                                            const TARGETING::ATTRIBUTE_ID ,
+                                            const uint32_t , void * );
+         friend bool fapi2::
+                     platAttrSvc::
+                     getTargetingAttrHelper(TARGETING::Target * ,
+                                            const TARGETING::ATTRIBUTE_ID ,
+                                            const uint32_t , void * );
       /*
        * @brief allow targetattrbulksync access to the target class store.
        */

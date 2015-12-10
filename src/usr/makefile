@@ -40,6 +40,7 @@ SUBDIRS += scom.d
 SUBDIRS += xscom.d
 SUBDIRS += targeting.d
 SUBDIRS += initservice.d
+SUBDIRS += fapi2.d
 SUBDIRS += pnor.d
 SUBDIRS += i2c.d
 SUBDIRS += vfs.d

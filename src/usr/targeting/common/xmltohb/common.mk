@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2015
+# Contributors Listed Below - COPYRIGHT 2012,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -36,7 +36,7 @@ XMLTOHB_HEADER_TARGETS += attributestrings.H
 XMLTOHB_HEADER_TARGETS += attributetraits.H
 XMLTOHB_HEADER_TARGETS += attributestructs.H
 XMLTOHB_HEADER_TARGETS += pnortargeting.H
-XMLTOHB_HEADER_TARGETS += fapiplatattrmacros.H
+XMLTOHB_HEADER_TARGETS += fapi2platattrmacros.H
 XMLTOHB_HEADER_TARGETS += test_ep.H
 XMLTOHB_HEADER_TARGETS += mapattrmetadata.H
 XMLTOHB_HEADER_TARGETS += mapsystemattrsize.H
@@ -73,8 +73,8 @@ FAPI_ATTR_SOURCES += dram_initialization/proc_setup_bars/proc_setup_bars_memory_
 FAPI_ATTR_SOURCES += dram_initialization/proc_setup_bars/proc_setup_bars_l3_attributes.xml
 FAPI_ATTR_SOURCES += dram_initialization/proc_setup_bars/proc_setup_bars_mmio_attributes.xml
 FAPI_ATTR_SOURCES += activate_powerbus/proc_build_smp/proc_fab_smp_fabric_attributes.xml
-FAPI_ATTR_SOURCES += runtime_attributes/pm_hwp_attributes.xml
-FAPI_ATTR_SOURCES += runtime_attributes/pm_plat_attributes.xml
+#FAPI_ATTR_SOURCES += runtime_attributes/pm_hwp_attributes.xml
+#FAPI_ATTR_SOURCES += runtime_attributes/pm_plat_attributes.xml
 FAPI_ATTR_SOURCES += nest_chiplets/proc_pcie_scominit/proc_pcie_scominit_attributes.xml
 FAPI_ATTR_SOURCES += dmi_training/proc_cen_set_inband_addr/proc_cen_set_inband_addr_attributes.xml
 FAPI_ATTR_SOURCES += common_attributes.xml

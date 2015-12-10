@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/scom/runtime/handleSpecialWakeup.C $                  */
+/* $Source: src/usr/fapi2/test/fapi2Test.H $                              */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,68 +22,47 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include <stdint.h>
+#ifndef __FAPI2TEST_H__
+#define __FAPI2TEST_H__
+
+/**
+ *  @file fapi2Test.H
+ *
+ *  @brief Test case for SCOM code
+*/
+
+#include <cxxtest/TestSuite.H>
+#include <errl/errlmanager.H>
 #include <errl/errlentry.H>
-#include <errl/errludtarget.H>
-
-#include <trace/interface.H>
-
-#include <targeting/common/commontargeting.H>
 #include <targeting/common/targetservice.H>
+#include <fapi2.H>
+#include <p9_sample_procedure.H>
+#include <hwp_executor.H>
+#include <plat_hwp_invoker.H>
+#include <pnor/pnorif.H>
 #include <targeting/common/utilFilter.H>
-#include <targeting/common/util.H>
+#include <fapi2TestUtils.H>
+#include <hwpf_fapi2_reasoncodes.H>
 
+#include "fapi2HwpTest.C"
 
-extern "C"
+using namespace fapi2;
+
+class fapi2Test: public CxxTest::TestSuite
 {
+public:
 
-// Trace definition
-extern trace_desc_t* g_trac_scom;
-
-using namespace TARGETING;
-
-errlHndl_t handleSpecialWakeup(TARGETING::Target* i_exTarget,
-                               bool i_enableDisable)
+/**
+* @brief Test some basic HWPs that hit all targets
+*        that runs through the FAPI2 macros
+*
+*/
+void test_fapi2HwpTest(void)
 {
-    errlHndl_t l_errl = NULL;
+    FAPI_INF(">>test_fapi2HwpTest starting...");
+    fapi2HwpTest();
+    FAPI_INF(">>test_fapi2HwpTest exiting...");
+}
+};
 
-    //@TODO RTC:132413 Add it back once we have fapi2 support
-#if 0
-    fapi::Target l_fapi_ex_target(TARGET_TYPE_EX_CHIPLET,
-                            (const_cast<TARGETING::Target*>(i_exTarget)) );
-
-    PROC_SPCWKUP_OPS l_spcwkupType;
-    if(i_enableDisable)
-    {
-        l_spcwkupType = SPCWKUP_ENABLE;
-    }
-    else
-    {
-        l_spcwkupType = SPCWKUP_DISABLE;
-    }
-
-    //Using the FSP bit so it doesn't collide with Sapphire.
-    //There are 3 independent registers used to trigger a special wakeup
-    //(FSP,HOST,OCC). Since this is in HBRT, Opal already owns the HOST
-    //register, so we're using the FSP bit here.
-    FAPI_INVOKE_HWP(l_errl,
-                    p8_cpu_special_wakeup,
-                    l_fapi_ex_target,
-                    l_spcwkupType,
-                    FSP);
-
-    if(l_errl)
-    {
-        TRACFCOMP( g_trac_scom,
-                  "Disable p8_cpu_special_wakeup ERROR :"
-                  " Returning errorlog, reason=0x%x",
-                   l_errl->reasonCode() );
-
-        // capture the target data in the elog
-        ERRORLOG::ErrlUserDetailsTarget(i_exTarget).addToLog( l_errl );
-    }
 #endif
-
-    return l_errl;
-}
-}

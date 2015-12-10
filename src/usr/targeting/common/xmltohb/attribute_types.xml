@@ -454,6 +454,100 @@
 </attribute>
 
 <attribute>
+    <id>SCRATCH_INT8_1</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <int8_t>
+        </int8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_INT8_1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SCRATCH_INT8_2</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <int8_t>
+        </int8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_INT8_2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SCRATCH_UINT16_1</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <uint16_t>
+        </uint16_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_UINT16_1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+<attribute>
+    <id>SCRATCH_UINT16_2</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <uint16_t>
+        </uint16_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_UINT16_2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SCRATCH_INT16_1</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <int16_t>
+        </int16_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_INT16_1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+<attribute>
+    <id>SCRATCH_INT16_2</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <int16_t>
+        </int16_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_INT16_2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>SCRATCH_UINT32_1</id>
     <description>Scratch attribute that can be used for dev/test</description>
     <simpleType>
@@ -486,6 +580,38 @@
 </attribute>
 
 <attribute>
+    <id>SCRATCH_INT32_1</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <int32_t>
+        </int32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_INT32_1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SCRATCH_INT32_2</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <int32_t>
+        </int32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_INT32_2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>SCRATCH_UINT64_1</id>
     <description>Scratch attribute that can be used for dev/test</description>
     <simpleType>
@@ -513,6 +639,38 @@
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_SCRATCH_UINT64_2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SCRATCH_INT64_1</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <int64_t>
+        </int64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_INT64_1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SCRATCH_INT64_2</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <int64_t>
+        </int64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_INT64_2</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -552,6 +710,108 @@
 </attribute>
 
 <attribute>
+    <id>SCRATCH_INT8_ARRAY_1</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <int8_t>
+        </int8_t>
+        <array>32</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_INT8_ARRAY_1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SCRATCH_INT8_ARRAY_2</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <int8_t>
+        </int8_t>
+        <array>2, 3, 4</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_INT8_ARRAY_2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SCRATCH_UINT16_ARRAY_1</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <uint16_t>
+        </uint16_t>
+        <array>16</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_UINT16_ARRAY_1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SCRATCH_UINT16_ARRAY_2</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <uint16_t>
+        </uint16_t>
+        <array>2, 3, 4</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_UINT16_ARRAY_2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SCRATCH_INT16_ARRAY_1</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <int16_t>
+        </int16_t>
+        <array>16</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_INT16_ARRAY_1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SCRATCH_INT16_ARRAY_2</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <int16_t>
+        </int16_t>
+        <array>2, 3, 4</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_INT16_ARRAY_2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>SCRATCH_UINT32_ARRAY_1</id>
     <description>Scratch attribute that can be used for dev/test</description>
     <simpleType>
@@ -586,6 +846,41 @@
 </attribute>
 
 <attribute>
+    <id>SCRATCH_INT32_ARRAY_1</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <int32_t>
+        </int32_t>
+        <array>8</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_INT32_ARRAY_1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SCRATCH_INT32_ARRAY_2</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <int32_t>
+        </int32_t>
+        <array>2,3</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_INT32_ARRAY_2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+
+<attribute>
     <id>SCRATCH_UINT64_ARRAY_1</id>
     <description>Scratch attribute that can be used for dev/test</description>
     <simpleType>
@@ -615,6 +910,40 @@
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_SCRATCH_UINT64_ARRAY_2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SCRATCH_INT64_ARRAY_1</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <int64_t>
+        </int64_t>
+        <array>4</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_INT64_ARRAY_1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SCRATCH_INT64_ARRAY_2</id>
+    <description>Scratch attribute that can be used for dev/test</description>
+    <simpleType>
+        <int64_t>
+        </int64_t>
+        <array>2,2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SCRATCH_INT64_ARRAY_2</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -15887,9 +16216,9 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <id>WOF_ENABLED</id>
     <description>
         Defines if the Workload Optimization Frequency (WOF) system feature
-        where OCC algorithms will change (typically boost) the operational 
-        frequency based on measured power available and any currently idling 
-        cores.        
+        where OCC algorithms will change (typically boost) the operational
+        frequency based on measured power available and any currently idling
+        cores.
     </description>
     <simpleType>
         <uint8_t>
@@ -16290,7 +16619,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 <attribute>
     <id>EFF_DIMM_DDR4_RC12</id>
     <description>F0RC0C - Training Control Word;
-                 Default value - 00. Values Range from 00 to 07 decimal.No need to calculate; User can override with desired experimental value. 
+                 Default value - 00. Values Range from 00 to 07 decimal.No need to calculate; User can override with desired experimental value.
                  creator: mss_eff_cnfg
                  consumer: mss_dram_init
                  firmware notes: none
@@ -16313,7 +16642,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <id>EFF_DIMM_DDR4_RC13</id>
     <description>F0RC0D - DIMM Configuration Control Word;
                  Default value - 0x0B. Values Range from 00 to 15 decimal.
-                 Dynamically calculated using 4 bits[0:3] Bit 0 - Address Mirroring; Bit 1 - Rdimm(1)/Lrdimm (0) ; Bit 2 - N/A ; Bit 3 - CS Mode (Direct / Quad CS mode etc); 
+                 Dynamically calculated using 4 bits[0:3] Bit 0 - Address Mirroring; Bit 1 - Rdimm(1)/Lrdimm (0) ; Bit 2 - N/A ; Bit 3 - CS Mode (Direct / Quad CS mode etc);
                  creator: mss_eff_cnfg
                  consumer: mss_dram_init
                  firmware notes: none
@@ -16334,7 +16663,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_DIMM_DDR4_RC14</id>
-    <description>F0RC0E - Parity Control Word;  Default value - 00. Check from ATTR_EFF_CA_PARITY and assign; Values Range from 00 to 0F. 
+    <description>F0RC0E - Parity Control Word;  Default value - 00. Check from ATTR_EFF_CA_PARITY and assign; Values Range from 00 to 0F.
                  creator: mss_eff_cnfg
                  consumer: mss_dram_init
                  firmware notes: none
@@ -16379,7 +16708,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 <attribute>
     <id>EFF_DIMM_DDR4_RC_1x</id>
     <description>F0RC1x - Internal VrefCA Control Word;
-                 Default value - 00. Values Range from 00 to 3F.No need to calculate; User can override with desired experimental value. 
+                 Default value - 00. Values Range from 00 to 3F.No need to calculate; User can override with desired experimental value.
                  creator: mss_eff_cnfg
                  consumer: mss_dram_init
                  firmware notes: none
@@ -16402,7 +16731,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 <attribute>
     <id>EFF_DIMM_DDR4_RC_2x</id>
     <description>F0RC2x: I2C Bus Control Word;
-                 Default value - 00. Values Range from 00 to FF.No need to calculate; User can override with desired experimental value. 
+                 Default value - 00. Values Range from 00 to FF.No need to calculate; User can override with desired experimental value.
                  creator: mss_eff_cnfg
                  consumer: mss_dram_init
                  firmware notes: none
@@ -16425,7 +16754,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 <attribute>
     <id>EFF_DIMM_DDR4_RC_3x</id>
     <description>F0RC3x - Fine Granularity RDIMM Operating Speed;
-                 Default value = (Operating Freq - 1250)/20. Values Range from 00 to 61 Hex. 
+                 Default value = (Operating Freq - 1250)/20. Values Range from 00 to 61 Hex.
                  creator: mss_eff_cnfg
                  consumer: mss_dram_init
                  firmware notes: none
@@ -16494,7 +16823,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 <attribute>
     <id>EFF_DIMM_DDR4_RC_6x</id>
     <description>F0RC6x: CW Data Control Word;
-                 Default value - 00. Values Range from 00 to FF.No need to calculate; User can override with desired experimental value. 
+                 Default value - 00. Values Range from 00 to FF.No need to calculate; User can override with desired experimental value.
                  creator: mss_eff_cnfg
                  consumer: mss_dram_init
                  firmware notes: none
@@ -16563,7 +16892,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 <attribute>
     <id>EFF_DIMM_DDR4_RC_9x</id>
     <description>F0RC9x1: QxODT[1:0] Write Pattern Control Word;
-                 Default value - 00. Values Range from 00 to FF.No need to calculate; User can override with desired experimental value. 
+                 Default value - 00. Values Range from 00 to FF.No need to calculate; User can override with desired experimental value.
                  creator: mss_eff_cnfg
                  consumer: mss_dram_init
                  firmware notes: none
@@ -16586,7 +16915,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 <attribute>
     <id>EFF_DIMM_DDR4_RC_Ax</id>
     <description>F0RCAx1: QxODT[1:0] Read Pattern Control Word;
-                 Default value - 00. Values Range from 00 to FF. No need to calculate; User can override with desired experimental value. 
+                 Default value - 00. Values Range from 00 to FF. No need to calculate; User can override with desired experimental value.
                  creator: mss_eff_cnfg
                  consumer: mss_dram_init
                  firmware notes: none
@@ -16608,7 +16937,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 
 <attribute>
     <id>EFF_DIMM_DDR4_RC_Bx</id>
-    <description>F0RCBx: IBT and MRS Snoop Control Word;  Default value - 07. Values Range from 00 to FF. No need to calculate; User can override with desired experimental value. 
+    <description>F0RCBx: IBT and MRS Snoop Control Word;  Default value - 07. Values Range from 00 to FF. No need to calculate; User can override with desired experimental value.
                  creator: mss_eff_cnfg
                  consumer: mss_dram_init
                  firmware notes: none
@@ -17295,5 +17624,1460 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
+
+<attribute>
+    <id>PFET_POWERUP_DELAY_NS</id>
+    <description>
+        Time (in nanoseconds) between PFET controller steps (7 of them) when turning
+        the PFES ON
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <readable/>
+    <persistency>non-volatile</persistency>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PFET_POWERUP_DELAY_NS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>STOP_IMAGE_ADDR</id>
+    <description>
+        Addres of Stop Image
+    </description>
+    <simpleType>
+        <uint64_t>
+        </uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>STOP_IMAGE_SIZE</id>
+    <description>
+      Address of Stop Image
+    </description>
+    <simpleType>
+        <uint64_t>
+        </uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<!--<attribute>
+    <id>FREQ_PROC_REFCLOCK_KHZ</id>
+    <description>
+      The frequency of the processor refclock in kHz.
+      Provided by the Machine Readable Workbook.
+      This can be overridden to adjust the refclock frequency.
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FREQ_PROC_REFCLOCK_KHZ</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>-->
+
+<!--<attribute>
+    <id>FREQ_MEM_REFCLOCK</id>
+    <description>
+      The frequency of the memory refclock in MHz.
+      Provided by the Machine Readable Workbook.
+      This is read by the set_ref_clock HWP to find out the desired frequency.
+      This can be overridden to adjust the refclock frequency.
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FREQ_MEM_REFCLOCK</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>-->
+
+<attribute>
+    <id>MEM_IN_SYNCH_MODE</id>
+    <description>
+      Run the memory clocks in synchronous mode with the nest clocks.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MEM_IN_SYNCH_MODE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>MAX_ALLOWED_DIMM_FREQ</id>
+    <description>
+      Maximum frequency (in MHz) that this system can run the DIMMs at.
+      There are 4 possible values determined by the dimm configuration.
+      [0]=One rank, single drop
+      [1]=Two rank, single drop
+      [2]=One rank, dual drop
+      [3]=Two rank, dual drop
+      A value of zero would indicate an unsupported configuration.
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+        <array>0,1, 2, 3</array>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MAX_ALLOWED_DIMM_FREQ</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<!--<attribute>
+    <id>PROC_DPLL_DIVIDER</id>
+    <description>
+      The product of the DPLL internal prescalar divide (CD_DIV124_DC)
+      and the output divider(CD_DPLLOUT124_DC).  This estalishes the step size of
+      the DPLL in terms of this number divided into the processor reference clock.
+
+      Platform default:  8
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_DPLL_DIVIDER</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>-->
+
+<attribute>
+    <id>EXTERNAL_VRM_STEPSIZE</id>
+    <description>
+      Step delay (binary in microseconds) after a voltage change
+
+      Consumer: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE
+
+      Provided by the Machine Readable Workbook after system characterization.
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EXTERNAL_VRM_STEPSIZE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>AVSBUS_FREQUENCY</id>
+    <description>
+      AVSBus Clock Frequency (binary in KHz)
+
+      Consumer: p9_ocb_init.C
+
+      Overridden by the Machine Readable Workbook.
+
+      If default of 0 is read, HWP will set AVSBus frequency to 1MHz.
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_AVSBUS_FREQUENCY</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>VDD_AVSBUS_BUSNUM</id>
+    <description>
+      Defines the AVSBus (0 or 1) which has the core VDD rail VRM
+
+      Producer:  Machine Readable Workbook
+      Consumers: p9_set_evid;
+                p9_set_voltage (tool);
+                p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VDD_AVSBUS_BUSNUM</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>VDN_AVSBUS_BUSNUM</id>
+    <description>
+      Defines the AVSBus (0 or 1) which has the chip VDN rail VRM
+
+      Producer:  Machine Readable Workbook
+      Consumers: p9_set_evid;
+                p9_set_voltage (tool);
+                p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VDN_AVSBUS_BUSNUM</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>VDD_AVSBUS_RAIL</id>
+    <description>
+      Defines the AVSBus rail selector number (0 - 15) for the VDD VRM on the bus
+      defined by ATTR_AVSBUS_VDD_BUSNUM.
+
+      Producer:  Machine Readable Workbook
+      Consumers: p9_set_evid;
+                p9_set_voltage (tool);
+                p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VDD_AVSBUS_RAIL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>VDN_AVSBUS_RAIL</id>
+    <description>
+      Defines the AVSBus rail selector number (0 - 15) for the VDN VRM on the bus
+      defined by ATTR_AVSBUS_VDN_BUSNUM.
+
+      Producer:  Machine Readable Workbook
+      Consumers:
+      p9_set_avsbus_voltage (tool);
+                  p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VDN_AVSBUS_RAIL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>VCS_I2C_BUSNUM</id>
+    <description>
+      Defines the I2C bus number (0 - 15) that has the VCS VRM.
+
+      Producer:  Machine Readable Workbook
+      Consumers: p9_set_evid;
+                  sp9_set_voltage (tool)
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VCS_I2C_BUSNUM</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>VDD_BOOT_VOLTAGE</id>
+    <description>
+      Voltage (binary in 1mV units) to apply to the VDD VRM for booting.  Value
+      chosen is system dependent and is a combination of the part's Vital Product
+      Data (VPD) (typically the PowerSave value) and the minimum allowed for
+      correct operation of the fabric bus.
+
+      Producer: Machine Readable Workbook
+
+      Consumer: p9_setup_evid
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VDD_BOOT_VOLTAGE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>VCS_BOOT_VOLTAGE</id>
+    <description>
+      Voltage (binary in 1mV units) to apply to the VCS VRM for booting.  Value
+      chosen is system dependent and is a combination of the part's Vital Product
+      Data (VPD) (typically the PowerSave value) and the minimum allowed for
+      correct operation of the fabric bus.
+
+      Producer: Machine Readable Workbook
+
+      Consumer: p9_setup_evid
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VCS_BOOT_VOLTAGE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>SPIPSS_FREQUENCY</id>
+    <description>
+      SPIPSS Clock Frequency (binary in KHz)
+
+      Valid range: 500KHz to 2500KHz
+
+      Consumer: p8_pss_init
+
+      Overridden by the Machine Readable Workbook.
+
+      If default of 0 is read, HWP will set SPIPSS frequency to 10MHz.
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SPIPSS_FREQUENCY</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>APSS_CHIP_SELECT</id>
+    <description>
+      Defines which of the PSS chip selects (0 or 1) that the APSS is connected
+
+      Provided by the Machine Readable Workbook.
+      Consumer: p8_pss_init
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_APSS_CHIP_SELECT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<enumerationType>
+    <id>APSS_CHIP_SELECT</id>
+    <description>Enumeration indicating the ATTR_APSS_CHIP_SELECT</description>
+    <enumerator>
+        <name>NONE</name>
+        <value>0xFF</value>
+    </enumerator>
+    <enumerator>
+        <name>CS0</name>
+        <value>0x00</value>
+    </enumerator>
+        <enumerator>
+        <name>CS1</name>
+        <value>0x01</value>
+    </enumerator>
+</enumerationType>
+
+<!--<attribute>
+    <id>PROC_R_LOADLINE_VDD</id>
+    <description>
+      Impedance (binary microOhms) of the load line from a processor VDD VRM to the
+      Processor Module pins.  This value is applied to each processor instance.
+
+      Consumer: p9_hcd_image_build_pstate ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+
+      Producer: Machine Readable Workbook (per the power subsystem design)
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_R_LOADLINE_VDD</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>-->
+
+<!--<attribute>
+    <id>PROC_R_DISTLOSS_VDD</id>
+    <description>
+      Impedance (binary in microOhms) of the VDD distribution loss sense point
+      to the circuit. This value is applied to each processor instance.
+
+      Producer: Machine Readable Workbook (via the power subsystem design per system)
+
+      Consumer: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_R_DISTLOSS_VDD</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>-->
+
+<!--<attribute>
+    <id>PROC_VRM_VOFFSET_VDD</id>
+    <description>
+      Offset voltage (binary in microvolts) to apply to the VDD VRM distribution to
+      the processor module.  This value is applied to each processor instance.
+      Note:  no loadline may be present in the system; thus, a value of 0 is legal.
+
+      Producer: Machine Readable Workbook (via the power subsystem design per system)
+
+      Consumer: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_VRM_VOFFSET_VDD</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>-->
+
+<attribute>
+    <id>PROC_R_LOADLINE_VDN</id>
+    <description>
+      Impedance (binary microOhms) of the load line from a processor VDN VRM to the
+      Processor Module pins.  This value is applied to each processor instance.
+      Note:  no loadline may be present in the system; thus, a value of 0 is legal.
+
+      Producer: Machine Readable Workbook (via the power subsystem design per system)
+
+      Consumer: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_R_LOADLINE_VDN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>PROC_R_DISTLOSS_VDN</id>
+    <description>
+      Impedance (binary in microOhms) of the VDN distribution loss sense point
+      to the circuit. This value is applied to each processor instance.
+
+      Producer:  Machine Readable Workbook (via the power subsystem design per system)
+
+      Consumer: p9_build_gpstate_table.C
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_R_DISTLOSS_VDN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>PROC_VRM_VOFFSET_VDN</id>
+    <description>
+      Offset voltage (binary in microvolts) to apply to the VDN VRM distribution to
+      the processor module.  This value is applied to each processor instance.
+
+      Producer:  Machine Readable Workbook (via the power subsystem design per system)
+
+      Consumer: p8_build_gpstate_table.C
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_VRM_VOFFSET_VDN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<!--<attribute>
+    <id>PROC_R_LOADLINE_VCS</id>
+    <description>
+      Impedance (binary microOhms) of the load line from a processor VCS VRM to the
+      Processor Module pins.  This value is applied to each processor instance.
+      Note:  no loadline may be present in the system; thus, a value of 0 is legal.
+
+      Producer: Machine Readable Workbook (via the power subsystem design per system)
+
+      Consumer: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_R_LOADLINE_VCS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>-->
+
+<!--<attribute>
+    <id>PROC_R_DISTLOSS_VCS</id>
+    <description>
+      Impedance (binary in microOhms) of the VCS distribution loss sense point
+      to the circuit. This value is applied to each processor instance.
+
+      Producer:  Machine Readable Workbook (via the power subsystem design per system)
+
+      Consumer: p9_build_gpstate_table.C
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_R_DISTLOSS_VCS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>-->
+
+<!--<attribute>
+    <id>PROC_VRM_VOFFSET_VCS</id>
+    <description>
+      Offset voltage (binary in microvolts) to apply to the VCS VRM distribution to
+      the processor module.  This value is applied to each processor instance.
+
+      Producer:  Machine Readable Workbook (via the power subsystem design per system)
+
+      Consumer: p8_build_gpstate_table.C
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_VRM_VOFFSET_VCS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>-->
+
+<attribute>
+    <id>FREQ_EXT_BIAS_ULTRATURBO</id>
+    <description>
+      UltraTurbo Frequency Bias - % of bias (signed twos complement in 0.5 percent
+      steps) used in calculating the frequency associated with a Pstate.
+
+      Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+      Consumers: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+                        CME Quad Pstate Region (CQPR) for CM Quad Manager
+
+      Platform default:  0
+    </description>
+    <simpleType>
+        <int32_t>
+        </int32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FREQ_EXT_BIAS_ULTRATURBO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>FREQ_EXT_BIAS_TURBO</id>
+    <description>
+      Turbo Frequency Bias - % of bias (signed twos complement in 0.5 percent
+      steps) used in calculating the frequency associated with a Pstate.
+
+      Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+      Consumers: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+                        CME Quad Pstate Region (CQPR) for CM Quad Manager
+
+      Platform default:  0
+    </description>
+    <simpleType>
+        <int32_t>
+        </int32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FREQ_EXT_BIAS_TURBO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>FREQ_EXT_BIAS_NOMINAL</id>
+    <description>
+      Nominal Frequency Bias - % of bias (signed twos complement in 0.5 percent
+      steps) used in calculating the frequency associated with a Pstate.
+
+      Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+      Consumers: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+                        CME Quad Pstate Region (CQPR) for CM Quad Manager
+
+      Platform default:  0
+    </description>
+    <simpleType>
+        <int32_t>
+        </int32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FREQ_EXT_BIAS_NOMINAL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>FREQ_EXT_BIAS_POWERSAVE</id>
+    <description>
+      PowerSave Frequency Bias - % of bias (signed twos complement in 0.5 percent
+      steps) used in calculating the frequency associated with a Pstate.
+
+      Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+      Consumers: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+                        CME Quad Pstate Region (CQPR) for CM Quad Manager
+
+      Platform default:  0
+    </description>
+    <simpleType>
+        <int32_t>
+        </int32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FREQ_EXT_BIAS_POWERSAVE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>VOLTAGE_VDD_BIAS_ULTRATURBO</id>
+    <description>
+      UltraTurbo VDD Voltage Bias - % of bias (signed twos complement in 0.5 percent
+      steps) that is applied to the UltraTurbo VPD point used in calculating the
+      the Global Pstate values.
+
+      Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+      Consumers: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+
+      Platform default:  0
+    </description>
+    <simpleType>
+        <int32_t>
+        </int32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VOLTAGE_VDD_BIAS_ULTRATURBO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>VOLTAGE_VDD_BIAS_TURBO</id>
+    <description>
+      Turbo VDD Voltage Bias - % of bias (signed twos complement in 0.5 percent
+      steps) that is applied to the UltraTurbo VPD point used in calculating the
+      the Global Pstate values.
+
+      Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+      Consumers: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+
+      Platform default:  0
+    </description>
+    <simpleType>
+        <int32_t>
+        </int32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VOLTAGE_VDD_BIAS_TURBO</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>VOLTAGE_VDD_BIAS_NOMINAL</id>
+    <description>
+      Nominal VDD Voltage Bias - % of bias (signed twos complement in 0.5 percent
+      steps) that is applied to the UltraTurbo VPD point used in calculating the
+      the Global Pstate values.
+
+      Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+      Consumers: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+
+      Platform default:  0
+    </description>
+    <simpleType>
+        <int32_t>
+        </int32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VOLTAGE_VDD_BIAS_NOMINAL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>VOLTAGE_VDD_BIAS_POWERSAVE</id>
+    <description>
+      PowerSave VDD Voltage Bias - % of bias (signed twos complement in 0.5 percent
+      steps) that is applied to the UltraTurbo VPD point used in calculating the
+      the Global Pstate values.
+
+      Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+      Consumers: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+
+      Platform default:  0
+    </description>
+    <simpleType>
+        <int32_t>
+        </int32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VOLTAGE_VDD_BIAS_POWERSAVE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>VOLTAGE_VCS_BIAS</id>
+    <description>
+      VCS Voltage Bias - % of bias (signed twos complement in 0.5 percent
+      steps) that is applied to the VCS value stored in the UltraTurbo VPD
+      point for setting the VCS rail.
+
+      Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+      Consumers: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+
+      Platform default:  0
+    </description>
+    <simpleType>
+        <int32_t>
+        </int32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VOLTAGE_VCS_BIAS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>VOLTAGE_VDN_BIAS</id>
+    <description>
+      VDN Voltage Bias - % of bias (signed twos complement in 0.5 percent
+      steps) that is applied to the VDN value stored in the VPD for setting the
+      VDN rail.
+
+      Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+      Consumers: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+
+      Platform default:  0
+    </description>
+    <simpleType>
+        <int32_t>
+        </int32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VOLTAGE_VDN_BIAS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>VOLTAGE_INT_VDD_BIAS</id>
+    <description>
+      TODO (RTC 136996) NEED TO LOOK AT PERCENTAGE IMPLEMENTATION IN CME CODE AS WELL
+      AS THE IVRM VOLTAGE CALCULATION PROCESS
+      Internal VDD Voltage Bias - % of bias (signed twos complement in 0.5 percent
+      steps) that is applied to the Local Pstate voltage *after* the
+      ATTR_VOLTAGE_VDD_BIAS bias have been applied.
+
+      Producer:  Attribute Overrides by Lab/Mfg Characterization Team
+
+      Consumers: p9_build_pstate_datablock ->
+                          Pstate Parameter Block (PSPB) for PGPE/OCC
+                          CME Quad Pstate Region (CQPR) for CM Quad Manager
+
+      Platform default:  0
+    </description>
+    <simpleType>
+        <int32_t>
+        </int32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VOLTAGE_INT_VDD_BIAS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>STOP4_DISABLE</id>
+    <description>
+      Control CME response to execution of PowerPC STOP instruction
+
+      if OFF, treat STOP4 as STOP4
+      if ON, treat STOP4 as STOP2
+
+      Producer: ???
+
+      Consumer:  p8_hcd_image_build.C
+
+      Platform default:  OFF
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_STOP4_DISABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>STOP8_DISABLE</id>
+    <description>
+      Control CME response to execution of PowerPC STOP instruction
+
+      if OFF, treat STOP8 as STOP8
+      if ON, treat STOP8 as STOP4
+
+      Producer: ???
+
+      Consumer:  p8_hcd_image_build.C
+
+      Platform default:  OFF
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+        <hwpfToHbAttrMap>
+        <id>ATTR_STOP8_DISABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>STOP11_DISABLE</id>
+    <description>
+      Control CME response to execution of PowerPC STOP instruction
+
+      if OFF, treat STOP8 as STOP11
+      if ON, treat STOP8 as STOP8
+
+      Producer: ???
+
+      Consumer:  p8_hcd_image_build.C
+
+      Platform default:  OFF
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_STOP11_DISABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>SYSTEM_IVRMS_ENABLED</id>
+    <description>
+      System control to allow (if all other attribute tests yield
+      true values) or categorically disallow IVRM enablement
+
+      Producer: MRWB
+
+      Consumers: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+                        CME Quad Pstate Region (CQPR) for CM Quad Manager
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SYSTEM_IVRMS_ENABLED</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>SYSTEM_WOF_ENABLED</id>
+    <description>
+      System control to allow Work Load Optimized Frequency (WOF)
+      algorithms to modify frequency based on active core count and other inputs.
+
+      Producer: MRWB
+
+      Consumers: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE/OCC
+
+      Platform default:   FALSE
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SYSTEM_WOF_ENABLED</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>SYSTEM_RESCLK_STEP_DELAY</id>
+    <description>
+      Minimum delay (in nanoseconds) between resonant clock transition steps
+
+      Producer: MRWB
+
+      Consumers: p9_build_pstate_datablock ->
+                        CME Quad Pstate Region (CQPR) for CM Quad Manager
+
+      Platform default:   0
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SYSTEM_RESCLK_STEP_DELAY</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<!--<attribute>
+    <id>PFET_POWERUP_DELAY_NS</id>
+    <description>
+      Time (in nanoseconds) between PFET controller steps (7 of them) when turning
+      the PFES ON
+
+      Producer: MRWB
+
+      Consumers: p9_pm_pfet_init
+
+      Platform default:
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PFET_POWERUP_DELAY_NS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>-->
+
+<attribute>
+    <id>PFET_POWERDOWN_DELAY_NS</id>
+    <description>
+      Time (in nanoseconds) between PFET controller steps (7 of them) when turning
+      the PFES OFF
+
+      Producer: MRWB
+
+      Consumers: p9_pm_pfet_init
+
+      Platform default:
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PFET_POWERDOWN_DELAY_NS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>PFET_VDD_VOFF_SEL</id>
+    <description>
+      Selection of the OFF setting for the core and cache chiplet VDD PFET controllers
+
+      Producer: MRWB
+
+      Consumers: p9_pm_pfet_init
+
+      Platform default:
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PFET_VDD_VOFF_SEL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<enumerationType>
+    <id>PFET_VDD_VOFF_SEL</id>
+    <description>
+        Enumeration indicating the OFF setting for the core and cache chiplet
+        DD PFET controllers
+    </description>
+    <enumerator>
+        <name>NOOFF</name>
+        <value>0</value>
+    </enumerator>
+    <enumerator>
+        <name>ALLBUT1TO7OFF</name>
+        <value>1</value>
+    </enumerator>
+    <enumerator>
+        <name>ALLBUT2TO7OFF</name>
+        <value>2</value>
+    </enumerator>
+    <enumerator>
+        <name>ALLBUT3TO7OFF</name>
+        <value>3</value>
+    </enumerator>
+        <enumerator>
+        <name>ALLBUT4TO7OFF</name>
+        <value>4</value>
+    </enumerator>
+        <enumerator>
+        <name>ALLBUT5TO7OFF</name>
+        <value>5</value>
+    </enumerator>
+        <enumerator>
+        <name>ALLBUT6TO7OFF</name>
+        <value>6</value>
+    </enumerator>
+        <enumerator>
+        <name>ALLBUT7TO7OFF</name>
+        <value>7</value>
+    </enumerator>
+        <enumerator>
+        <name>ALLOFF</name>
+        <value>8</value>
+    </enumerator>
+</enumerationType>
+
+<attribute>
+    <id>PFET_VCS_VOFF_SEL</id>
+    <description>
+      Selection of the OFF setting for the core and cache chiplet VCS PFET controllers
+
+      Producer: MRWB
+
+      Consumers: p9_pm_pfet_init
+
+      Platform default:
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PFET_VCS_VOFF_SEL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<enumerationType>
+    <id>PFET_VCS_VOFF_SEL</id>
+    <description>
+        Enumeration indicating the OFF setting for the core and cache chiplet
+        VCS PFET controllers
+    </description>
+    <enumerator>
+        <name>NOOFF</name>
+        <value>0</value>
+    </enumerator>
+    <enumerator>
+        <name>ALLBUT1TO7OFF</name>
+        <value>1</value>
+    </enumerator>
+    <enumerator>
+        <name>ALLBUT2TO7OFF</name>
+        <value>2</value>
+    </enumerator>
+    <enumerator>
+        <name>ALLBUT3TO7OFF</name>
+        <value>3</value>
+    </enumerator>
+        <enumerator>
+        <name>ALLBUT4TO7OFF</name>
+        <value>4</value>
+    </enumerator>
+        <enumerator>
+        <name>ALLBUT5TO7OFF</name>
+        <value>5</value>
+    </enumerator>
+        <enumerator>
+        <name>ALLBUT6TO7OFF</name>
+        <value>6</value>
+    </enumerator>
+        <enumerator>
+        <name>ALLBUT7TO7OFF</name>
+        <value>7</value>
+    </enumerator>
+        <enumerator>
+        <name>ALLOFF</name>
+        <value>8</value>
+    </enumerator>
+</enumerationType>
+
+<attribute>
+    <id>PBAX_NODEID</id>
+    <description>
+      Receive PBAX Nodeid. Value that indicates this PBA's PBAX Node affinity.
+      This is matched to pbax_nodeid of the PMISC Address phase.
+
+      Provided by the Machine Readable Workbook.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PBAX_NODEID</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>PBAX_CHIPID</id>
+    <description>
+      Receive PBAX Chipid. Value that indicates this PBA's PBAX Chipid within
+      the PBAX node.  Is matched to pbax_chipid of the Address phase if
+      pbax_type=unicast.
+
+      Provided by the Machine Readable Workbook.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PBAX_CHIPID</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>PBAX_BRDCST_ID_VECTOR</id>
+    <description>
+      Receive PBAX Broadcast Group. Vector that is indexed when decoded PMISC
+      pbax_type=broadcast with the decoded PMISC pbax_chipid value.  If the
+      bit in this vector at the decoded bit location is a 1, then this receive
+      engine will participate in the broadcast operation.
+
+      Provided by the Machine Readable Workbook.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PBAX_BRDCST_ID_VECTOR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>EXTERNAL_VRM_STEPDELAY</id>
+    <description>
+      Step delay (binary in microseconds) after a voltage change
+
+      Consumer: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE
+
+      Provided by the Machine Readable Workbook after system characterization.
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_EXTERNAL_VRM_STEPDELAY</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>VCS_I2C_RAIL</id>
+    <description>
+      Step delay (binary in microseconds) after a voltage change
+
+      Consumer: p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE
+
+      Provided by the Machine Readable Workbook after system characterization.
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VCS_I2C_RAIL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>VDN_BOOT_VOLTAGE</id>
+    <description>
+      Voltage (binary in 1mV units) to apply to the VCS VRM for booting.  Value
+      chosen is system dependent and is a combination of the part's Vital Product
+      Data (VPD) (typically the PowerSave value) and the minimum allowed for
+      correct operation of the fabric bus.
+
+      Producer: Machine Readable Workbook
+
+      Consumer: p9_setup_evid
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VDN_BOOT_VOLTAGE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>FAPI_POS</id>
+    <description>
+      Logical position of target within a system. This is derived from the SMP location
+      of each processor and each target's relationship to a proc.
+      - PROC = based on SMP groupid+chipid
+      - MEMBUF = PROC:FAPI_POS * [max membuf per proc]
+      - 1st level child unit = [parent chip]:FAPI_POS * [max children of this type per chip]
+      - 2nd+ level child unit = [immediate parent unit]:FAPI_POS * [max units below parent]
+      Note: This should not be used algorithmically by HWPs directly.
+      Note: Value ignores physical drawer boundaries, the value is unique across the entire
+            system.
+      This data is derived from the MRW.
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FAPI_POS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+</attribute>
+
 
 </attributes>

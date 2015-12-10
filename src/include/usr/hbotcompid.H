@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -390,6 +390,13 @@ const char FIPS_ERRL_COMP_NAME[] = "hb-trace";
 const compId_t SIO_COMP_ID = 0x3200;
 const char SIO_COMP_NAME[] = "sio";
 //@}
+
+/** @name FAPI2
+ *  FAPI2 Interface
+ */
+const compId_t FAPI2_COMP_ID = 0x3300;
+const char FAPI2_COMP_NAME[] = "fapi2";
+
 
 /** @name PRDF
  *  PRDF component

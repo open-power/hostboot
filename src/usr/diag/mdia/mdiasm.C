@@ -49,7 +49,6 @@
 using namespace TARGETING;
 using namespace ERRORLOG;
 using namespace std;
-using namespace fapi;
 using namespace DeviceFW;
 
 namespace MDIA
