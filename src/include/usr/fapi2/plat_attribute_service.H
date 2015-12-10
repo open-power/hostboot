@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/scom/runtime/handleSpecialWakeup.C $                  */
+/* $Source: src/include/usr/fapi2/plat_attribute_service.H $              */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,68 +22,28 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include <stdint.h>
-#include <errl/errlentry.H>
-#include <errl/errludtarget.H>
+///
+/// @file src/include/usr/hwpf/plat/plat_attribute_service.H
+///
+/// @brief Defines the specialized platform attribute access functions
+///
+/// Note that platform code must provide the code.
+///
 
-#include <trace/interface.H>
+#ifndef PLATATTRIBUTESERVICE_H_
+#define PLATATTRIBUTESERVICE_H_
 
-#include <targeting/common/commontargeting.H>
-#include <targeting/common/targetservice.H>
-#include <targeting/common/utilFilter.H>
-#include <targeting/common/util.H>
-
-
-extern "C"
+#include <attribute_service.H>
+namespace fapi2
 {
 
-// Trace definition
-extern trace_desc_t* g_trac_scom;
-
-using namespace TARGETING;
-
-errlHndl_t handleSpecialWakeup(TARGETING::Target* i_exTarget,
-                               bool i_enableDisable)
+namespace platAttrSvc
 {
-    errlHndl_t l_errl = NULL;
 
-    //@TODO RTC:132413 Add it back once we have fapi2 support
-#if 0
-    fapi::Target l_fapi_ex_target(TARGET_TYPE_EX_CHIPLET,
-                            (const_cast<TARGETING::Target*>(i_exTarget)) );
+   // Currently empty because no specialized functions for Hostboot.
 
-    PROC_SPCWKUP_OPS l_spcwkupType;
-    if(i_enableDisable)
-    {
-        l_spcwkupType = SPCWKUP_ENABLE;
-    }
-    else
-    {
-        l_spcwkupType = SPCWKUP_DISABLE;
-    }
+} // namespace platAttrSvc
 
-    //Using the FSP bit so it doesn't collide with Sapphire.
-    //There are 3 independent registers used to trigger a special wakeup
-    //(FSP,HOST,OCC). Since this is in HBRT, Opal already owns the HOST
-    //register, so we're using the FSP bit here.
-    FAPI_INVOKE_HWP(l_errl,
-                    p8_cpu_special_wakeup,
-                    l_fapi_ex_target,
-                    l_spcwkupType,
-                    FSP);
+} // namespace fapi2
 
-    if(l_errl)
-    {
-        TRACFCOMP( g_trac_scom,
-                  "Disable p8_cpu_special_wakeup ERROR :"
-                  " Returning errorlog, reason=0x%x",
-                   l_errl->reasonCode() );
-
-        // capture the target data in the elog
-        ERRORLOG::ErrlUserDetailsTarget(i_exTarget).addToLog( l_errl );
-    }
-#endif
-
-    return l_errl;
-}
-}
+#endif // PLATATTRIBUTESERVICE_H_

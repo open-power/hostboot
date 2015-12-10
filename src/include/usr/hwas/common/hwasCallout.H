@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -134,7 +134,14 @@ enum partTypeEnum
     LPC_SLAVE_PART_TYPE             = 5,
     GPIO_EXPANDER_PART_TYPE         = 6,
     SPIVID_SLAVE_PART_TYPE          = 7,
+    TOD_CLOCK                       = 8,
+    MEM_REF_CLOCK                   = 9,
+    PROC_REF_CLOCK                  = 10,
+    PCI_REF_CLOCK                   = 11,
 };
+
+
+
 
 //
 const uint8_t HW_CALLOUT        = 0x01;

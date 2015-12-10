@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2015
+# Contributors Listed Below - COPYRIGHT 2013,2016
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -189,7 +189,7 @@ my $resident_modules = {
     "liberrl.so"                => '1',
     "libtrace.so"               => '1',
     "libvfs.so"                 => '1',
-    "libfapi.so"                => '1',
+    "libfapi2.so"               => '1',
     "libecmddatabuffer.so"      => '1',
     "libpnor.so"                => '1',
     "libmbox.so"                => '1',

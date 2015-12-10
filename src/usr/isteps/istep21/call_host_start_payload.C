@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,7 +56,6 @@ using namespace ERRORLOG;
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
 using namespace TARGETING;
-using namespace fapi;
 
 namespace ISTEP_21
 {

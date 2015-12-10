@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2015
+# Contributors Listed Below - COPYRIGHT 2013,2016
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -33,6 +33,8 @@ OPT_LEVEL ?= -O3
 ifdef MODULE
 COMMONFLAGS += -fPIC -Bsymbolic -Bsymbolic-functions
 CFLAGS += -D__HOSTBOOT_MODULE=$(MODULE)
+CFLAGS += -DNO_INITIALIZER_LIST
+CFLAGS += -DPLAT_NO_THREAD_LOCAL_STORAGE
 endif
 
 COMMONFLAGS += $(OPT_LEVEL) -nostdlib

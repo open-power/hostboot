@@ -141,6 +141,7 @@ EXTENDED_MODULES += istep16
 EXTENDED_MODULES += istep21
 EXTENDED_MODULES += isteps
 EXTENDED_MODULES += targeting
+EXTENDED_MODULES += fapi2
 EXTENDED_MODULES += extinitsvc
 EXTENDED_MODULES += istepdisp
 EXTENDED_MODULES += hwas
@@ -166,7 +167,6 @@ EXTENDED_MODULES += $(if $(CONFIG_GPIODD),gpio,)
 EXTENDED_MODULES += $(if $(CONFIG_CONSOLE),console)
 EXTENDED_MODULES += $(if $(CONFIG_CONSOLE_OUTPUT_ERRORDISPLAY),errldisplay)
 EXTENDED_MODULES += $(if $(CONFIG_BMC_IPMI),ipmi)
-
 
 
 #***************************************
@@ -211,6 +211,7 @@ TESTCASE_MODULES += testscom
 #@TODO RTC: 137561 Enable this test case when interupt story is complete
 #TESTCASE_MODULES += testintr
 
+TESTCASE_MODULES += testfapi2
 #TODO: Need to re-enable testmdia (RTC 135217)
 #TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testmdia)
 

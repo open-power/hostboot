@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -240,6 +240,19 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 EXT_IMAGE,                                  // Extended Module
             }
         },
+        /**
+         * @brief   fapi2 task,
+         */
+        {
+                "libfapi2.so" ,                              // taskname
+                NULL,                                       // no pointer to fn
+                {
+                        INIT_TASK,                          // task type
+                        EXT_IMAGE,                          // Extended Module
+                }
+        },
+
+
         // @todo RTC:137627 - remove for p9 bringup
 #if (0)
 // No mdia in VPO
