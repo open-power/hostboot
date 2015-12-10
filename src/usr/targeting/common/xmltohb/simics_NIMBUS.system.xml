@@ -86,6 +86,20 @@
         <id>NEST_FREQ_MHZ</id>
         <default>0x960</default>
     </attribute>
+     <attribute>
+        <id>PAYLOAD_BASE</id>
+        <!-- Value of 0x0 for standalone systems, no payload to start -->
+        <default>0x0</default>
+    </attribute>
+    <attribute>
+        <id>PAYLOAD_ENTRY</id>
+        <!-- Value of 0x0 for standalone systems, no payload to start -->
+        <default>0x0</default>
+    </attribute>
+    <attribute>
+        <id>PAYLOAD_KIND</id>
+        <default>NONE</default>
+    </attribute>
 </targetInstance>
 
 <!-- System node 0 -->
