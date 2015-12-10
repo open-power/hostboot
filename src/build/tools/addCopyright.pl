@@ -72,8 +72,11 @@ my $copyrightSymbol = "";
 
 # set by environment variable in project env.bash
 my $projectName = $ENV{'PROJECT_NAME'};
-my $copyrightStr = "Contributors Listed Below - COPYRIGHT";
+my $copyrightPrefix = "Contributors Listed Below - ";
+my $copyrightStr = $copyrightPrefix."COPYRIGHT";
 my $projectRoot = $ENV{'PROJECT_ROOT'};
+# Relative path of import tree from project root
+my $importPrefix = $ENV{'IMPORT_REL_PATH'}."/";
 
 ## note that these use single ticks so that the escape chars are NOT evaluated yet.
 my  $OLD_DELIMITER_END      =   'IBM_PROLOG_END';
@@ -302,6 +305,12 @@ foreach ( @Files )
     } while ($path ne $projectRoot);
 
     ##  extract the existing copyright block
+    # Check if file from EKB in import tree
+    if (mirrored_file($_))
+    {
+        # Remove copyright prefix as EKB does not have it
+        $copyrightStr =~ s/$copyrightPrefix//;
+    }
     $CopyrightBlock = extractCopyrightBlock( $_ );
 
     ##
@@ -370,6 +379,43 @@ sub usage
 }
 
 #######################################
+##  checks if file was mirrored from EKB
+##  param[in]   $filename to check
+##  returns     1 mirrored from EKB
+#######################################
+sub mirrored_file
+{
+    my $filename = shift;
+
+    if ($filename =~ m/^$importPrefix/)
+    {
+        # Import tree expects to have EKB in the prolog
+        $projectName = "EKB";
+        return 1;
+    }
+    return 0;
+}
+
+#######################################
+##  Converts mirrored filename to match its original in EKB
+##  Mirroring prefixes the name with the import tree.
+##  param[in]   $filename to check
+##  returns     new $filename with prefix removed
+#######################################
+sub convert_mirror_file
+{
+    my $filename = shift;
+
+    if (mirrored_file($filename))
+    {
+        # Remove $importPrefix as EKB does not have it
+        $filename =~ s/^$importPrefix//;
+    }
+
+    return $filename
+}
+
+#######################################
 ##  validate the file
 ##  param[in]   $filename to validate
 ##  returns     0 success, nonzero failure
@@ -386,7 +432,8 @@ sub validate
         return  RC_NO_COPYRIGHT_BLOCK;
     }
 
-    $rc =   checkCopyrightBlock( $CopyrightBlock, $filename);
+    my $converted_file = convert_mirror_file($filename);
+    $rc =   checkCopyrightBlock( $CopyrightBlock, $converted_file);
 
     #   good file
     return  $rc;
@@ -943,6 +990,7 @@ sub genCopyrightBlock
     # Get copyright contributors based on hash so no duplicates
     my %fileContributors = getFileContributors( $filename );
     my $copyright_Contributors = "";
+
     foreach my $key (sort keys %fileContributors)
     {
         $copyright_Contributors .= "[+] ".$key."\n";
@@ -1036,7 +1084,8 @@ sub fillinEmptyCopyrightBlock
     my  $copyrightYear  =   createYearString( $filename );
 
     ##  define the final copyright block template here.
-    my $IBMCopyrightBlock = genCopyrightBlock($filename,$filetype);
+    my $converted_file = convert_mirror_file($filename);
+    my $IBMCopyrightBlock = genCopyrightBlock($converted_file,$filetype);
 
     ## Modify file in place with temp file  Perl Cookbook 7.8
     my  $savedbgfile    =   "$filename.fillin";
