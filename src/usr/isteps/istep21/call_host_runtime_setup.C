@@ -30,6 +30,11 @@
 #include <hwpf/istepreasoncodes.H>
 #include <initservice/initserviceif.H>
 #include <initservice/istepdispatcherif.H>
+#include <vfs/vfs.H>
+#include <runtime/runtime.H>
+#include <devtree/devtreeif.H>
+
+
 
 #include <hbotcompid.H>
 
@@ -53,8 +58,6 @@ void* call_host_runtime_setup (void *io_pArgs)
 
     do
     {
-        //@TODO RTC:133848
-/*
         // Need to load up the runtime module if it isn't already loaded
         if (  !VFS::module_is_loaded( "libruntime.so" ) )
         {
@@ -77,6 +80,8 @@ void* call_host_runtime_setup (void *io_pArgs)
             break;
         }
 
+        //@TODO RTC:133848
+/*
         bool l_activateOCC = is_avp_load();
 
 #ifdef CONFIG_START_OCC_DURING_BOOT
