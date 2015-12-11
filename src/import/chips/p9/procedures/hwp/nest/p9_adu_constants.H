@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,39 +35,90 @@
 extern "C"
 {
 
-    //----------------------------------------------------------------------------------------------
-    // Constant definitions
-    //----------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------
+// Constant definitions
+//----------------------------------------------------------------------------------------------
 
-    //if the flag is more than 1 bit there will be a start and end bit for the flag
-    //these give the bit position that is expected for the flags
+//if the flag is more than 1 bit there will be a start and end bit for the flag
+//these give the bit position that is expected for the flags
     enum adu_flags
     {
-        //cache-inhibited (true = ci, false = dma partial)
-        FLAG_CI = 0x80000000ull,
-        //utilize ADU HW auto-increment function (true = use autoinc, false = don't use autoinc)
-        FLAG_AUTOINC = 0x40000000ull,
-        //pick ADU lock (if required) (true = use lock pick, false = don't pick lock)
-        FLAG_LOCK_PICK = 0x20000000ull,
-        //in the case of a fail with lock held, reset ADU and release lock (true = , false = )
-        FLAG_LEAVE_DIRTY = 0x10000000ull,
-        //check status only at the end of read/write stream (true = don't do status check, false = do status check after every read/write)
-        FLAG_FASTMODE_ADU = 0x8000000ull,
-        //collect/set itag with each 8B read/write (true = collect itag, false = don't collect itag) for a write only set if itag data should be 1
-        FLAG_ITAG = 0x4000000ull,
-        //collect/set ecc with each 8B read/write (true = collect ecc, false = don't collect ecc)
-        FLAG_ECC = 0x2000000ull,
-        //overwrite the ecc/itag data
-        FLAG_OVERWRITE_ECC = 0x1000000ull,
-        //transaction size (choice is 1, 2, 4, or 8)
-        FLAG_SIZE = 0xFF0000ull,
-        //number of ADU lock acquisitions to attempt before giving up or attempting lock pick
-        FLAG_LOCK_TRIES = 0xFFFFull
+        // Operation type
+        // 0b000: DMA partial
+        // 0b001: Cache-inhibited
+        // 0b010: PB op
+        // 0b011: PMISC op
+        FLAG_ADU_TTYPE = 0xE0000000ull,                        // Bits 0:2
+
+        // Utilize ADU HW auto-increment function
+        // 0: Don't use autoinc
+        // 1: Use autoinc
+        FLAG_AUTOINC = 0x10000000ull,                          // Bit 3
+
+        // Pick ADU lock (if required)
+        // 0: Don't use lock pick
+        // 1: Use lock pick
+        FLAG_LOCK_PICK = 0x08000000ull,                        // Bit 4
+
+        // In case of a fail with lock held, reset
+        // ADU and release lock
+        // 0: Reset & release
+        // 1: Leave dirty
+        FLAG_LEAVE_DIRTY = 0x04000000ull,                      // Bit 5
+
+        // Check status only at the end of read/write stream
+        // 0:  Do status check after every read/write
+        // 1:  Don't do status check
+        FLAG_ADU_FASTMODE = 0x02000000ull,                     // Bit 6
+
+        // Collect/set itag with each 8B read/write
+        // For a write only set if itag data should be 1
+        // 0: Don't collect itag
+        // 1: Collect itag
+        FLAG_ITAG = 0x01000000ull,                             // Bit 7
+
+        // Collect/set ecc with each 8B read/write
+        // 0: Don't collect ecc
+        // 1: Collect ecc
+        FLAG_ECC = 0x00800000ull,                              // Bit 8
+
+        // Overwrite the ecc/itag data
+        // 0: Don't overwrite ECC
+        // 1: Overwrite ECC
+        FLAG_OVERWRITE_ECC = 0x00400000ull,                    // Bit 9
+
+        // Transaction size (choice is 1, 2, 4, or 8)
+        // 0b00: TSIZE_1
+        // 0b01: TSIZE_2
+        // 0b10: TSIZE_4
+        // 0b11: TSIZE_8
+        FLAG_SIZE = 0x00300000ull,                             // Bits 10:11
+
+        // Number of ADU lock acquisitions to attempt
+        // before giving up or attempting lock pick
+        FLAG_LOCK_TRIES       = 0x000F0000,                    // Bit 12:15
+
+        // Reserved bits
+        FLAG_NOT_USED_BITS    = 0x0000FFFF,                    // Bit 16:31
     };
 
-    const uint64_t FLAG_SIZE_SHIFT = 17;
+// Operation type values
+    const uint32_t FLAG_ADU_TTYPE_DMA   = 0x00000000ull;   // DMA partial
+    const uint32_t FLAG_ADU_TTYPE_CI    = 0x20000000ull;   // Cache inhibit
+    const uint32_t FLAG_ADU_TTYPE_PB    = 0x40000000ull;   // PB operation
+    const uint32_t FLAG_ADU_TTYPE_PMISC = 0x60000000ull;   // Switch operation
+
+// Flag size values
+    const uint32_t FLAG_SIZE_TSIZE_1   = 0x00000000ull;
+    const uint32_t FLAG_SIZE_TSIZE_2   = 0x00100000ull;
+    const uint32_t FLAG_SIZE_TSIZE_4   = 0x00200000ull;
+    const uint32_t FLAG_SIZE_TSIZE_8   = 0x00300000ull;
+
+// Shift positions
+    const uint64_t FLAG_ADU_TTYPE_SHIFT  = 29;
+    const uint64_t FLAG_LOCK_TRIES_SHIFT = 16;
+    const uint64_t FLAG_ADU_SIZE_SHIFT  = 20;
 
 } //extern "C"
 
 #endif //_P9_ADU_CONSTANTS_H_
-
