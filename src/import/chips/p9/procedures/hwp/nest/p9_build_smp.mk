@@ -7,7 +7,7 @@
 #
 # EKB Project
 #
-# COPYRIGHT 2015
+# COPYRIGHT 2015,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -17,4 +17,11 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_build_smp
+OBJS+=p9_fab_smp_utils.o
+OBJS+=p9_build_smp_fbc_ab.o
+OBJS+=p9_build_smp_epsilon.o
+OBJS+=p9_build_smp_fbc_nohp.o
+OBJS+=p9_build_smp_fbc_cd.o
+OBJS+=p9_build_smp_adu.o
+OBJS+=p9_adu_coherent_utils.o
 $(call BUILD_PROCEDURE)
