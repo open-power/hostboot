@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2015
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -983,15 +983,17 @@ print OFILE "\#\n";
 print OFILE "CFLAGS += -DPARSER\n\n";
 print OFILE "EXPLIBS =\n\n";
 
-print OFILE "\#-------------------------------------------------------------\n";
-print OFILE "\# Call PRD makefile for prdf plugins\n";
-print OFILE "\#-------------------------------------------------------------\n";
-print OFILE ".if ( \$(CONTEXT) != \"x86.nfp\" )\n";
-print OFILE "EXPLIB_SUBDIRS += prdf\n";
-print OFILE "EXPSHLIB_SUBDIRS += prdf\n";
-print OFILE ".else\n";
-print OFILE "EXPLIB_SUBDIRS += prdf\n";
-print OFILE ".endif\n";
+# TODO: RTC 135217
+# Disable PRD error log plugins until we enable compile of PRD.
+#print OFILE "\#-------------------------------------------------------------\n";
+#print OFILE "\# Call PRD makefile for prdf plugins\n";
+#print OFILE "\#-------------------------------------------------------------\n";
+#print OFILE ".if ( \$(CONTEXT) != \"x86.nfp\" )\n";
+#print OFILE "EXPLIB_SUBDIRS += prdf\n";
+#print OFILE "EXPSHLIB_SUBDIRS += prdf\n";
+#print OFILE ".else\n";
+#print OFILE "EXPLIB_SUBDIRS += prdf\n";
+#print OFILE ".endif\n";
 
 print OFILE "\#-------------------------------------------------------------\n";
 print OFILE "\# SRC Parsers\n";
@@ -1228,7 +1230,9 @@ sub getPluginDirsToParse
             if ($dirEntryPath =~ /plugins/)
             {
                 # Found plugins directory
-                push(@pluginDirsToParse, $dirEntryPath);
+                push(@pluginDirsToParse, $dirEntryPath)
+                    if (!($dirEntryPath =~ /hwpf/));
+                    # TODO RTC 124673 disable fapi1
             }
             else
             {
