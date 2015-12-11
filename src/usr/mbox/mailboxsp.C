@@ -128,7 +128,8 @@ void MailboxSp::pollTask()
     msg_q_t mboxQ = msg_q_resolve(VFS_ROOT_MSG_MBOX);
     if(mboxQ)
     {
-        while(!iv_disabled)
+        //Loop until there is a shutdown request AND quiesced
+        while(!(iv_shutdown_msg && quiesced()))
         {
             msg_t * msg = msg_allocate();
             msg->type = MSG_INTR;
@@ -1549,7 +1550,7 @@ bool MailboxSp::quiesced()
 {
     bool result = iv_rts && !iv_dma_pend && iv_sendq.empty();
 
-    TRACFCOMP(g_trac_mbox,INFO_MRK"Checking quiesced.. rts[%d] dma_pend[%d] sendq[%d]",
+    TRACDCOMP(g_trac_mbox,INFO_MRK"Checking quiesced.. rts[%d] dma_pend[%d] sendq[%d]",
               iv_rts, iv_dma_pend, iv_sendq.empty());
 
 
@@ -1775,8 +1776,10 @@ void MailboxSp::handleShutdown()
     // Shutdown the hardware
     errlHndl_t err = mboxddShutDown(iv_trgt);
 
+#if (0) // @todo RTC:126643
     INTR::unRegisterMsgQ(INTR::FSP_MAILBOX);
     INTR::unRegisterMsgQ(INTR::ISN_INTERPROC);
+#endif
 
     if(err)  // SCOM failed.
     {
