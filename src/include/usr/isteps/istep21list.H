@@ -99,7 +99,6 @@ namespace   INITSERVICE
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
-#if (0)
         {
                 ISTEPNAME(21,01,"host_runtime_setup"),
                 ISTEP_21::call_host_runtime_setup,
@@ -110,7 +109,6 @@ namespace   INITSERVICE
                 ISTEP_21::call_host_verify_hdat,
                 { START_FN, EXT_IMAGE, MPIPL_OP | NORMAL_IPL_OP, false }
         },
-#endif
         {
                 ISTEPNAME(21,03,"host_start_payload"),
                 ISTEP_21::call_host_start_payload,
@@ -123,6 +121,7 @@ const DepModInfo  g_istep21Dependancies = {
     {
         DEP_LIB(libistep21.so),
         DEP_LIB(libdevtree.so),
+        DEP_LIB(libruntime.so),
         NULL
     }
 };
