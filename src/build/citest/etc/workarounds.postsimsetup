@@ -51,3 +51,8 @@ echo "
 IMGS:NIMBUS_IMG | FLASH:nimbus.pnor | LOC:SB_CHAIN/images/ppc/lab/flash" >> \
     $sb/simu/data/simicsInfo
 
+#@fixme-SW330727
+echo "+++ Patching memory expansion segfault"
+mv $sb/../simics/linux64/lib/cec-chip.so $sb/../simics/linux64/lib/cec-chip.so.orig
+cp /gsa/ausgsa/home/h/c/hcnguyen/public/memexp/cec-chip.so $sb/../simics/linux64/lib/
+
