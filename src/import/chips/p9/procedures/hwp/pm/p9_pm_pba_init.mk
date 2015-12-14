@@ -8,7 +8,7 @@
 # EKB Project
 #
 # COPYRIGHT 2015
-# [+] <
+# [+] International Business Machines Corp.
 #
 #
 # The source code for this program is not published or otherwise
