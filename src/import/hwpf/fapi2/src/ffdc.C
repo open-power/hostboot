@@ -1,23 +1,19 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: $                                                             */
+/* $Source: hwpf/fapi2/src/ffdc.C $                                       */
 /*                                                                        */
-/* OpenPOWER HostBoot Project                                             */
+/* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* EKB Project                                                            */
 /*                                                                        */
-/* Licensed under the Apache License, Version 2.0 (the "License");        */
-/* you may not use this file except in compliance with the License.       */
-/* You may obtain a copy of the License at                                */
+/* COPYRIGHT 2011,2015                                                    */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
-/*     http://www.apache.org/licenses/LICENSE-2.0                         */
 /*                                                                        */
-/* Unless required by applicable law or agreed to in writing, software    */
-/* distributed under the License is distributed on an "AS IS" BASIS,      */
-/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
-/* implied. See the License for the specific language governing           */
-/* permissions and limitations under the License.                         */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
@@ -32,25 +28,26 @@
 namespace fapi2
 {
 
-    ///
-    /// @brief Add error information to this ffdc object
-    /// @param[in] A pointer to a list of objects
-    /// @param[in] A pointer to the list of entries
-    /// @param[in] The count of how many entries there are
-    /// @return void
-    ///
-    template<>
-    void FirstFailureData<ReturnCode>::addErrorInfo(
-        const void* const* i_pObjects,
-        const ErrorInfoEntry* i_pEntries,
-        const uint8_t i_count)
+///
+/// @brief Add error information to this ffdc object
+/// @param[in] A pointer to a list of objects
+/// @param[in] A pointer to the list of entries
+/// @param[in] The count of how many entries there are
+/// @return void
+///
+template<>
+void FirstFailureData<ReturnCode>::addErrorInfo(
+    const void* const* i_pObjects,
+    const ErrorInfoEntry* i_pEntries,
+    const uint8_t i_count)
+{
+    FAPI_DBG("%d entries", i_count);
+
+    for (uint32_t i = 0; i < i_count; i++)
     {
-        FAPI_DBG("%d entries", i_count);
-        for (uint32_t i = 0; i < i_count; i++)
-        {
-            i_pEntries[i].addErrorInfo(iv_info, i_pObjects);
-        }
+        i_pEntries[i].addErrorInfo(iv_info, i_pObjects);
     }
+}
 
 
 
