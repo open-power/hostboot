@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: chips/centaur/procedures/ipl/hwp/p9_mss_volt.H $       */
+/* $Source: chips/p9/procedures/hwp/memory/p9_mss_volt.H $                */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */

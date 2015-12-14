@@ -15,7 +15,7 @@
 /* divested of its trade secrets, irrespective of what has been           */
 /* deposited with the U.S. Copyright Office.                              */
 /*                                                                        */
-/* IBM_PROLOG_END_TAG                                                                                                         */
+/* IBM_PROLOG_END_TAG                                                     */
 ///
 /// @file p9_pfet_init.C
 /// @brief  Initialization and reset the EC/EQ chiplet PFET controller

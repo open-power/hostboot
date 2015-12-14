@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: chips/p9/procedures/ipl/hwp/p9_update_ec_eq_state.H $         */
+/* $Source: chips/p9/procedures/hwp/pm/p9_update_ec_eq_state.H $          */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
