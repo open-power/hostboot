@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: chips/p9/common/include/misc_scom_addresses_fld_fixes.H $           */
+/* $Source: chips/p9/common/include/p9_misc_scom_addresses_fld_fixes.H $  */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
