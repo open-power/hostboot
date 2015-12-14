@@ -58,56 +58,56 @@
 
 namespace fapi2
 {
-    ///
-    /// @brief Enumeration of return codes
-    ///
-    enum ReturnCodes
-    {
-        ///< Success
-        FAPI2_RC_SUCCESS = 0,
+///
+/// @brief Enumeration of return codes
+///
+enum ReturnCodes
+{
+    ///< Success
+    FAPI2_RC_SUCCESS = 0,
 
-        // Flag bits indicating which code generated the error.
-        FAPI2_RC_FAPI2_MASK = 0x04000000, ///< FAPI2 mask
-        FAPI2_RC_PLAT_MASK =  0x02000000, ///< Platform mask
-        FAPI2_RC_HWP_MASK =   0x00000000, ///< HWP mask
+    // Flag bits indicating which code generated the error.
+    FAPI2_RC_FAPI2_MASK = 0x04000000, ///< FAPI2 mask
+    FAPI2_RC_PLAT_MASK =  0x02000000, ///< Platform mask
+    FAPI2_RC_HWP_MASK =   0x00000000, ///< HWP mask
 
-        //
-        // FAPI generated return codes
-        //
+    //
+    // FAPI generated return codes
+    //
 
-        FAPI2_RC_INVALID_ATTR_GET            = FAPI2_RC_FAPI2_MASK | 0x01,
-        ///< Initfile requested an attribute with an invalid attribute ID
+    FAPI2_RC_INVALID_ATTR_GET            = FAPI2_RC_FAPI2_MASK | 0x01,
+    ///< Initfile requested an attribute with an invalid attribute ID
 
-        FAPI2_RC_INVALID_CHIP_EC_FEATURE_GET = FAPI2_RC_FAPI2_MASK | 0x02,
-        ///< HWP requested a chip EC feature with an invalid attribute ID
+    FAPI2_RC_INVALID_CHIP_EC_FEATURE_GET = FAPI2_RC_FAPI2_MASK | 0x02,
+    ///< HWP requested a chip EC feature with an invalid attribute ID
 
-        FAPI2_RC_INVALID_MULTISCOM_LENGTH    = FAPI2_RC_FAPI2_MASK | 0x03,
-        ///< Invalid multiscom parameters
+    FAPI2_RC_INVALID_MULTISCOM_LENGTH    = FAPI2_RC_FAPI2_MASK | 0x03,
+    ///< Invalid multiscom parameters
 
-        FAPI2_RC_INVALID_PARAMETER           = FAPI2_RC_FAPI2_MASK | 0x04,
-        ///< Invalid parameters to a FAPI2 function
+    FAPI2_RC_INVALID_PARAMETER           = FAPI2_RC_FAPI2_MASK | 0x04,
+    ///< Invalid parameters to a FAPI2 function
 
-        FAPI2_RC_OVERFLOW                    = FAPI2_RC_FAPI2_MASK | 0x05,
-        ///< Overflow condition, typically a buffer operation
+    FAPI2_RC_OVERFLOW                    = FAPI2_RC_FAPI2_MASK | 0x05,
+    ///< Overflow condition, typically a buffer operation
 
-        FAPI2_RC_FALSE                       = FAPI2_RC_FAPI2_MASK | 0x06,
-        ///< The logical opposite of SUCCESS. Needed where procedures want
-        ///< a multi-bool type of operation (e.g., true, false, scom error)
+    FAPI2_RC_FALSE                       = FAPI2_RC_FAPI2_MASK | 0x06,
+    ///< The logical opposite of SUCCESS. Needed where procedures want
+    ///< a multi-bool type of operation (e.g., true, false, scom error)
 
-        //
-        // PLAT generated return codes. Additional details may be contained in
-        // ReturnCode platData (this can only be looked at by PLAT code)
-        //
+    //
+    // PLAT generated return codes. Additional details may be contained in
+    // ReturnCode platData (this can only be looked at by PLAT code)
+    //
 
-        FAPI2_RC_PLAT_ERR_SEE_DATA   = FAPI2_RC_PLAT_MASK | 0x01,
-        ///< Generic platform error
+    FAPI2_RC_PLAT_ERR_SEE_DATA   = FAPI2_RC_PLAT_MASK | 0x01,
+    ///< Generic platform error
 
-        FAPI2_RC_PLAT_ERR_ADU_LOCKED = FAPI2_RC_PLAT_MASK | 0x02,
-        ///< Operation to AlterDisplay unit failed because it is locked
+    FAPI2_RC_PLAT_ERR_ADU_LOCKED = FAPI2_RC_PLAT_MASK | 0x02,
+    ///< Operation to AlterDisplay unit failed because it is locked
 
-        FAPI2_RC_PLAT_NOT_SUPPORTED_AT_RUNTIME = FAPI2_RC_PLAT_MASK | 0x03,
-        ///< Operation not supported by HB runtime
-    };
+    FAPI2_RC_PLAT_NOT_SUPPORTED_AT_RUNTIME = FAPI2_RC_PLAT_MASK | 0x03,
+    ///< Operation not supported by HB runtime
+};
 
 }
 
