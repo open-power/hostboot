@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,7 @@
 #include    <isteps/hwpisteperror.H>
 #include    <errl/errludtarget.H>
 
-#include    <intr/interrupt.H>
+#include    <arch/pirformat.H>
 #include    <console/consoleif.H>
 
 //  targeting support
@@ -88,8 +88,8 @@ void* call_host_activate_slave_cores (void *io_pArgs)
 
         CHIP_UNIT_ATTR l_coreId =
                 (*l_core)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-        FABRIC_NODE_ID_ATTR l_logicalNodeId =
-          l_processor->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
+        FABRIC_GROUP_ID_ATTR l_logicalNodeId =
+          l_processor->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
         FABRIC_CHIP_ID_ATTR l_chipId =
           l_processor->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
         TARGETING::Target* sys = NULL;
@@ -97,7 +97,7 @@ void* call_host_activate_slave_cores (void *io_pArgs)
         assert( sys != NULL );
         uint64_t en_threads = sys->getAttr<ATTR_ENABLED_THREADS>();
 
-        uint64_t pir = INTR::PIR_t(l_logicalNodeId, l_chipId, l_coreId).word;
+        uint64_t pir = PIR_t(l_logicalNodeId, l_chipId, l_coreId).word;
 
         if (pir != l_masterCoreID)
         {

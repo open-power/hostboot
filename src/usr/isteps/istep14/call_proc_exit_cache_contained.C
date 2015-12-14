@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,7 +36,7 @@
 #include <targeting/common/utilFilter.H>
 
 #include <sys/mm.h>
-#include <intr/interrupt.H>
+#include <arch/pirformat.H>
 #include <isteps/hwpf_reasoncodes.H>
 
 // @TODO RTC:134082 remove below block
@@ -103,11 +103,11 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
                     l_sys->getAttr<TARGETING::ATTR_MIRROR_BASE_ADDRESS>();
 
                 // For single-node systems, the non-master processors can be
-                // in a different logical (powerbus) node.
+                // in a different logical (powerbus) group.
                 // Need to migrate task to master.
                 task_affinity_pin();
                 task_affinity_migrate_to_master();
-                uint64_t this_node = INTR::PIR_t(task_getcpuid()).nodeId;
+                uint64_t this_node = PIR_t(task_getcpuid()).groupId;
                 task_affinity_unpin();
 
                 l_mirrorBaseAddr += (this_node * hrmor_base)/2;

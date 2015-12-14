@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,6 +50,7 @@
 #include <hwas/common/hwasCallout.H>
 #include <fsi/fsiif.H>
 #include <arch/ppc.H>
+#include <arch/pirformat.H>
 #include <config.h>
 
 #define INTR_TRACE_NAME INTR_COMP_NAME
@@ -185,8 +186,8 @@ errlHndl_t IntrRp::_init()
     iv_masterCpu = cpuid;
     iv_masterCpu.threadId = 0;
 
-    TRACFCOMP(g_trac_intr,"Master cpu node[%d], chip[%d], core[%d], thread[%d]",
-              iv_masterCpu.nodeId, iv_masterCpu.chipId, iv_masterCpu.coreId,
+    TRACFCOMP(g_trac_intr,"Master cpu group[%d], chip[%d], core[%d], thread[%d]",
+              iv_masterCpu.groupId, iv_masterCpu.chipId, iv_masterCpu.coreId,
               iv_masterCpu.threadId);
 
     // The base realAddr is the base address for the whole system.
@@ -200,7 +201,7 @@ errlHndl_t IntrRp::_init()
     uint64_t barValue = 0;
     barValue = procTarget->getAttr<TARGETING::ATTR_INTP_BASE_ADDR>();
 
-    // Mask off node & chip id to get base address
+    // Mask off group & chip id to get base address
     uint64_t realAddr = barValue & ICPBAR_BASE_ADDRESS_MASK;
 
     TRACFCOMP(g_trac_intr,"INTR: realAddr = %lx",realAddr);
@@ -607,9 +608,9 @@ void IntrRp::msgHandler()
                     pir.threadId = 0;
                     iv_cpuList.push_back(pir);
 
-                    TRACFCOMP(g_trac_intr,"Add CPU node[%d], chip[%d],"
+                    TRACFCOMP(g_trac_intr,"Add CPU group[%d], chip[%d],"
                               "core[%d], thread[%d]",
-                              pir.nodeId, pir.chipId, pir.coreId,
+                              pir.groupId, pir.chipId, pir.coreId,
                               pir.threadId);
 
                     size_t threads = cpu_thread_count();
@@ -709,7 +710,7 @@ void IntrRp::msgHandler()
                     uint32_t * xirrAddress =
                       reinterpret_cast<uint32_t*>(baseAddr + XIRR_OFFSET);
 
-                    //Generate the mailbox IRSN for this node
+                    //Generate the mailbox IRSN for this group
                     uint32_t l_irsn = makeXISR(iv_masterCpu, ISN_FSI);
                     l_irsn |= CPPR_MASK;  //set all CPPR bits - allow any INTR
 
@@ -879,9 +880,9 @@ errlHndl_t IntrRp::initIRSCReg(TARGETING::Target * i_target)
        iv_chipList.end())
     {
         uint8_t chip = 0;
-        uint8_t node = 0;
+        uint8_t group = 0;
 
-        node = i_target->getAttr<ATTR_FABRIC_NODE_ID>();
+        group = i_target->getAttr<ATTR_FABRIC_NODE_ID>();
         chip = i_target->getAttr<ATTR_FABRIC_CHIP_ID>();
 
         size_t scom_len = sizeof(uint64_t);
@@ -900,7 +901,7 @@ errlHndl_t IntrRp::initIRSCReg(TARGETING::Target * i_target)
             PSIHB_ISRN_REG_t reg;
 
             PIR_t pir(0);
-            pir.nodeId = node;
+            pir.groupId = group;
             pir.chipId = chip;
             // IRSN must be unique for each processor chip
             reg.irsn = makeXISR(pir,0);
@@ -1112,7 +1113,7 @@ errlHndl_t IntrRp::registerInterruptISN(msg_q_t i_msgQ,
             chip = (*target_itr)->getAttr<ATTR_FABRIC_CHIP_ID>();
 
             PIR_t pir(0);
-            pir.nodeId = node;
+            pir.groupId = node;
             pir.chipId = chip;
             uint32_t l_irsn = makeXISR(pir, i_intr_type);
 
@@ -1186,7 +1187,7 @@ msg_q_t IntrRp::unregisterInterruptISN(ISNvalue_t i_intr_type)
             chip = (*target_itr)->getAttr<ATTR_FABRIC_CHIP_ID>();
 
             PIR_t pir(0);
-            pir.nodeId = node;
+            pir.groupId = node;
             pir.chipId = chip;
             uint32_t l_irsn = makeXISR(pir, i_intr_type);
 
@@ -1247,7 +1248,7 @@ void IntrRp::initInterruptPresenter(const PIR_t i_pir) const
     LinkReg_t linkReg;
     linkReg.word = 0;
     linkReg.loopTrip = 1;   // needed?
-    linkReg.node = iv_masterCpu.nodeId;
+    linkReg.node = iv_masterCpu.groupId;
     linkReg.pchip= iv_masterCpu.chipId;
     linkReg.pcore= iv_masterCpu.coreId;
     linkReg.tspec= iv_masterCpu.threadId;
@@ -1684,7 +1685,7 @@ errlHndl_t IntrRp::blindIssueEOIs(TARGETING::Target * i_proc)
                                 (*core)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
             PIR_t pir(0);
-            pir.nodeId = node;
+            pir.groupId = node;
             pir.chipId = chip;
             pir.coreId = coreId;
 
@@ -1900,7 +1901,7 @@ void IntrRp::allowAllInterrupts(TARGETING::Target* i_core)
     CHIP_UNIT_ATTR coreId = i_core->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
     PIR_t pir(0);
-    pir.nodeId = node;
+    pir.groupId = node;
     pir.chipId = chip;
     pir.coreId = coreId;
 
@@ -1924,7 +1925,7 @@ void IntrRp::disableAllInterrupts(TARGETING::Target* i_core)
     CHIP_UNIT_ATTR coreId = i_core->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
     PIR_t pir(0);
-    pir.nodeId = node;
+    pir.groupId = node;
     pir.chipId = chip;
     pir.coreId = coreId;
 
@@ -1960,7 +1961,7 @@ void IntrRp::drainMpIplInterrupts(TARGETING::TargetHandleList & i_cores)
                               (*core)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
             PIR_t pir(0);
-            pir.nodeId = node;
+            pir.groupId = node;
             pir.chipId = chip;
             pir.coreId = coreId;
 
@@ -2193,7 +2194,7 @@ errlHndl_t IntrRp::syncNodes(intr_mpipl_sync_t i_sync_type)
     uint64_t hrmorBase = KernelIpc::ipc_data_area.hrmor_base;
 
     void * node_info_ptr =
-        reinterpret_cast<void *>((iv_masterCpu.nodeId * hrmorBase) +
+        reinterpret_cast<void *>((iv_masterCpu.groupId * hrmorBase) +
                                  VMM_INTERNODE_PRESERVED_MEMORY_ADDR);
 
     internode_info_t * this_node_info =
@@ -2224,7 +2225,7 @@ errlHndl_t IntrRp::syncNodes(intr_mpipl_sync_t i_sync_type)
 
         for(uint64_t node = 0; node < MAX_NODES_PER_SYS; ++node)
         {
-            if (node == iv_masterCpu.nodeId)
+            if (node == iv_masterCpu.groupId)
             {
                 vaddr[node] = this_node_info;
             }
@@ -2296,7 +2297,7 @@ errlHndl_t IntrRp::syncNodes(intr_mpipl_sync_t i_sync_type)
             {
                 // We are still using this_node_info area
                 // so unmap it later.
-                if(node != iv_masterCpu.nodeId)
+                if(node != iv_masterCpu.groupId)
                 {
                     mm_block_unmap(vaddr[node]);
                 }
@@ -2316,7 +2317,7 @@ errlHndl_t  IntrRp::initializeMpiplSyncArea()
     errlHndl_t err = NULL;
     uint64_t hrmorBase = KernelIpc::ipc_data_area.hrmor_base;
     void * node_info_ptr =
-        reinterpret_cast<void *>((iv_masterCpu.nodeId * hrmorBase) +
+        reinterpret_cast<void *>((iv_masterCpu.groupId * hrmorBase) +
                                  VMM_INTERNODE_PRESERVED_MEMORY_ADDR);
 
     internode_info_t * this_node_info =
@@ -2335,7 +2336,7 @@ errlHndl_t  IntrRp::initializeMpiplSyncArea()
         this_node_info->mpipl_intr_sync = INTR_MPIPL_SYNC_CLEAR;
         for(uint64_t node = 0; node < MAX_NODES_PER_SYS; ++node)
         {
-            if(iv_masterCpu.nodeId == node)
+            if(iv_masterCpu.groupId == node)
             {
                 this_node_info->exist[node] = true;
             }
@@ -2376,7 +2377,7 @@ errlHndl_t  IntrRp::addHbNodeToMpiplSyncArea(uint64_t i_hbNode)
     errlHndl_t err = NULL;
     uint64_t hrmorBase = KernelIpc::ipc_data_area.hrmor_base;
     void * node_info_ptr =
-        reinterpret_cast<void *>((iv_masterCpu.nodeId * hrmorBase) +
+        reinterpret_cast<void *>((iv_masterCpu.groupId * hrmorBase) +
                                  VMM_INTERNODE_PRESERVED_MEMORY_ADDR);
 
     internode_info_t * this_node_info =
@@ -2426,7 +2427,7 @@ errlHndl_t  IntrRp::extractHbNodeInfo(void)
     uint64_t hrmorBase = KernelIpc::ipc_data_area.hrmor_base;
     TARGETING::ATTR_HB_EXISTING_IMAGE_type hb_existing_image = 0;
     void * node_info_ptr =
-        reinterpret_cast<void *>((iv_masterCpu.nodeId * hrmorBase) +
+        reinterpret_cast<void *>((iv_masterCpu.groupId * hrmorBase) +
                                  VMM_INTERNODE_PRESERVED_MEMORY_ADDR);
 
     internode_info_t * this_node_info =
@@ -2715,7 +2716,7 @@ uint64_t INTR::getIntpAddr(const TARGETING::Target * i_ex, uint8_t i_thread)
     uint64_t l_intB =l_proc->getAttr<TARGETING::ATTR_INTP_BASE_ADDR>();
 
     PIR_t pir(0);
-    pir.nodeId = l_proc->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
+    pir.groupId = l_proc->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
     pir.chipId = l_proc->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
     pir.coreId = i_ex->getAttr<TARGETING::ATTR_CHIP_UNIT>();
     pir.threadId = i_thread;

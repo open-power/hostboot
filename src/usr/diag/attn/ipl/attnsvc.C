@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -177,7 +177,7 @@ void Service::processIntrQMsgPreAck(const msg_t & i_msg)
     {
         uint64_t node = 0, chip = 0;
 
-        getTargetService().getAttribute(ATTR_FABRIC_NODE_ID, *it, node);
+        getTargetService().getAttribute(ATTR_FABRIC_GROUP_ID, *it, node);
         getTargetService().getAttribute(ATTR_FABRIC_CHIP_ID, *it, chip);
 
         if(node == xisr.node

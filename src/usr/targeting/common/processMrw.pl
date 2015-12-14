@@ -125,7 +125,7 @@ foreach my $n (keys %{$targetObj->{TOPOLOGY}}) {
     foreach my $p (keys %{$targetObj->{TOPOLOGY}->{$n}}) {
         if ($targetObj->{TOPOLOGY}->{$n}->{$p} > 1) {
             print "ERROR: Fabric topology invalid.  2 targets have same ".
-                  "FABRIC_NODE_ID,FABRIC_CHIP_ID ($n,$p)\n";
+                  "FABRIC_GROUP_ID,FABRIC_CHIP_ID ($n,$p)\n";
             $targetObj->myExit(3);
         }
     }
@@ -614,9 +614,9 @@ sub setupBars
     #--------------------------------------------------
     ## Setup BARs
 
-    my $node = $targetObj->getAttribute($target, "FABRIC_NODE_ID");
+    my $group = $targetObj->getAttribute($target, "FABRIC_GROUP_ID");
     my $proc   = $targetObj->getAttribute($target, "FABRIC_CHIP_ID");
-    $targetObj->{TOPOLOGY}->{$node}->{$proc}++;
+    $targetObj->{TOPOLOGY}->{$group}->{$proc}++;
 
     my @bars=("FSP_BASE_ADDR","PSI_BRIDGE_BASE_ADDR",
               "INTP_BASE_ADDR","PHB_MMIO_ADDRS_64","PHB_MMIO_ADDRS_32",
@@ -636,10 +636,10 @@ sub setupBars
 
     foreach my $bar (@bars)
     {
-        my ($num,$base,$node_offset,$proc_offset,$offset) = split(/,/,
+        my ($num,$base,$group_offset,$proc_offset,$offset) = split(/,/,
                $targetObj->getAttribute($target,$bar));
         my $i_base = Math::BigInt->new($base);
-        my $i_node_offset = Math::BigInt->new($node_offset);
+        my $i_node_offset = Math::BigInt->new($group_offset);
         my $i_proc_offset = Math::BigInt->new($proc_offset);
         my $i_offset = Math::BigInt->new($offset);
 
@@ -654,7 +654,7 @@ sub setupBars
             {
                 #Note: Hex convert method avoids overflow on 32bit machine
                 my $b=sprintf("0x%016s",substr((
-                        $i_base+$i_node_offset*$node+
+                        $i_base+$i_node_offset*$group+
                         $i_proc_offset*$proc+$i_offset*$i)->as_hex(),2));
                 my $sep=",";
                 if ($i==$num-1)
@@ -677,20 +677,20 @@ sub processMcs
     my $target       = shift;
     my $parentTarget = shift;
 
-    my $node = $targetObj->getAttribute($parentTarget, "FABRIC_NODE_ID");
+    my $group = $targetObj->getAttribute($parentTarget, "FABRIC_GROUP_ID");
     my $proc   = $targetObj->getAttribute($parentTarget, "FABRIC_CHIP_ID");
 
-    my ($base,$node_offset,$proc_offset,$offset) = split(/,/,
+    my ($base,$group_offset,$proc_offset,$offset) = split(/,/,
                $targetObj->getAttribute($target,"IBSCOM_MCS_BASE_ADDR"));
     my $i_base = Math::BigInt->new($base);
-    my $i_node_offset = Math::BigInt->new($node_offset);
+    my $i_node_offset = Math::BigInt->new($group_offset);
     my $i_proc_offset = Math::BigInt->new($proc_offset);
     my $i_offset = Math::BigInt->new($offset);
 
     my $mcs = $targetObj->getAttribute($target, "MCS_NUM");
     #Note: Hex convert method avoids overflow on 32bit machines
     my $mcsStr=sprintf("0x%016s",substr((
-         $i_base+$i_node_offset*$node+
+         $i_base+$i_node_offset*$group+
          $i_proc_offset*$proc+$i_offset*$mcs)->as_hex(),2));
     $targetObj->setAttribute($target, "IBSCOM_MCS_BASE_ADDR", $mcsStr);
 }
@@ -1071,16 +1071,16 @@ sub processMembufVpdAssociation
                             "VPD_REC_NUM",$targetObj->{vpd_num});
             }
         }
-        my $node_assocs=$targetObj->findConnections($vpd->{DEST_PARENT},
+        my $group_assocs=$targetObj->findConnections($vpd->{DEST_PARENT},
                           "LOGICAL_ASSOCIATION","CARD");
 
-        if ($node_assocs ne "") {
-            foreach my $node_assoc (@{$node_assocs->{CONN}}) {
-                my $mb_target = $node_assoc->{DEST_PARENT};
-                my $node_target = $targetObj->getTargetParent($mb_target);
+        if ($group_assocs ne "") {
+            foreach my $group_assoc (@{$group_assocs->{CONN}}) {
+                my $mb_target = $group_assoc->{DEST_PARENT};
+                my $group_target = $targetObj->getTargetParent($mb_target);
                 setEepromAttributes($targetObj,
-                       "EEPROM_VPD_PRIMARY_INFO",$node_target,$vpd);
-                $targetObj->setAttribute($node_target,
+                       "EEPROM_VPD_PRIMARY_INFO",$group_target,$vpd);
+                $targetObj->setAttribute($group_target,
                             "VPD_REC_NUM",$targetObj->{vpd_num});
             }
         }

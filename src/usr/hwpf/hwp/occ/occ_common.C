@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -850,17 +850,17 @@ namespace HBOCC
                     Target* targ1 = NULL;
 
                     TRACFCOMP( g_fapiImpTd, INFO_MRK"stopAllOCCs: Cur target nodeID=%d",
-                               targ0->getAttr<ATTR_FABRIC_NODE_ID>());
+                               targ0->getAttr<ATTR_FABRIC_GROUP_ID>());
 
                     //if the next target in the list is in the same node
                     // they are on the same DCM, so bump itr forward
                     // and update targ0 pointer
                     if((itr+1) != procChips.end())
                     {
-                        TRACFCOMP( g_fapiImpTd, INFO_MRK"stopAllOCCs: n+1 target nodeID=%d", ((*(itr+1))->getAttr<ATTR_FABRIC_NODE_ID>()));
+                        TRACFCOMP( g_fapiImpTd, INFO_MRK"stopAllOCCs: n+1 target nodeID=%d", ((*(itr+1))->getAttr<ATTR_FABRIC_GROUP_ID>()));
 
-                        if((targ0->getAttr<ATTR_FABRIC_NODE_ID>()) ==
-                           ((*(itr+1))->getAttr<ATTR_FABRIC_NODE_ID>()))
+                        if((targ0->getAttr<ATTR_FABRIC_GROUP_ID>()) ==
+                           ((*(itr+1))->getAttr<ATTR_FABRIC_GROUP_ID>()))
                         {
                             //need to flip the numbers because we were reversed
                             targ1 = targ0;

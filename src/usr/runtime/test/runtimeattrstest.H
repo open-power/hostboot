@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -473,11 +473,11 @@ class RuntimeAttrsTest: public CxxTest::TestSuite
         TARGETING::Target* proc_target = NULL;
         for( size_t p = 0; p < all_procs.size(); p++ )
         {
-            uint64_t node_id =
-              all_procs[p]->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
-            uint64_t CHIP_UNIT_POS =
+            uint64_t group_id =
+              all_procs[p]->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
+            uint64_t chip_pos =
               all_procs[p]->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
-            uint32_t procid = (node_id << 3) | (CHIP_UNIT_POS); //NNNCCC
+            uint32_t procid = createChipId( node_id, chip_pos );
             if( procid == i_procid )
             {
                 proc_target = all_procs[p];

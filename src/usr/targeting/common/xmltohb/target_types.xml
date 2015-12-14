@@ -390,7 +390,8 @@
         <id>FSI_GP_REG_SCOM_ACCESS</id>
         <default>1</default>
     </attribute>
-    <attribute><id>FABRIC_NODE_ID</id></attribute>
+    <attribute><id>FABRIC_NODE_ID</id></attribute><!-- DEPRECATED -->
+    <attribute><id>FABRIC_GROUP_ID</id></attribute>
     <attribute><id>FABRIC_CHIP_ID</id></attribute>
     <attribute>
         <!-- Processor chips have an SBE -->

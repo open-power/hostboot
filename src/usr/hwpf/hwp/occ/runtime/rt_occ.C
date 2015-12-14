@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -351,8 +351,8 @@ namespace RT_OCC
                 TARGETING::Target* t1 = NULL;
                 if((itarg+1) != targets.end())
                 {
-                    if((t0->getAttr<ATTR_FABRIC_NODE_ID>()) ==
-                       ((*(itarg+1))->getAttr<ATTR_FABRIC_NODE_ID>()))
+                    if((t0->getAttr<ATTR_FABRIC_GROUP_ID>()) ==
+                       ((*(itarg+1))->getAttr<ATTR_FABRIC_GROUP_ID>()))
                     {
                         ++itarg;
                         t1 = *itarg;

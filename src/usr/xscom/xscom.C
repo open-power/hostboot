@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,7 @@
 #include <assert.h>
 #include <errl/errludlogregister.H>
 #include <xscom/piberror.H>
+#include <arch/pirformat.H>
 
 // Trace definition
 trace_desc_t* g_trac_xscom = NULL;
@@ -347,7 +348,7 @@ errlHndl_t getTargetVirtualAddress(TARGETING::Target* i_target,
 
                 // Get the target Node Id
                 xscomNodeId =
-                  i_target->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
+                  i_target->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
 
                 // Get the target Chip Id
                 xscomChipId =
@@ -548,12 +549,7 @@ uint64_t* getCpuIdVirtualAddress()
     uint64_t* o_virtAddr = 0;
 
     // Get the CPU core this thread is running on
-    uint32_t cpuid = task_getcpuid();
-
-    //NNNCCCPPPPTTT format fot the cpuid..
-    //  N = node, C = chip, P = proc, T = thread
-    uint32_t chipId = (cpuid & 0x0380)>>7;
-    uint32_t nodeId = (cpuid & 0x1C00)>>10;
+    PIR_t cpuid = task_getcpuid();
 
     // Can change the above hardcoded values to either a macro or use
     // the info below to do the masking and shifting.
@@ -566,8 +562,8 @@ uint64_t* getCpuIdVirtualAddress()
 
     // Target's XSCOM Base address
     XSComBase_t l_XSComBaseAddr = l_systemBaseAddr +
-      ( ( (g_xscomMaxChipsPerNode * nodeId) +
-          chipId ) * THIRTYTWO_GB);
+      ( ( (g_xscomMaxChipsPerNode * cpuid.groupId) +
+          cpuid.chipId ) * THIRTYTWO_GB);
 
     // Target's virtual address
     o_virtAddr = static_cast<uint64_t*>

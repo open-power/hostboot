@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -28,6 +30,7 @@
 #include <kernel/msghandler.H>
 #include <kernel/msg.H>
 #include <builtins.h>
+#include <arch/pirformat.H>
 
 /**
  * @class InterruptMsgHdlr
@@ -53,17 +56,17 @@ class InterruptMsgHdlr : public MessageHandler
          */
         enum
         {
-            P8_PIR_THREADID_MSK = 0x00000007,
-            P8_PIR_COREID_MSK   = 0x00000078,
-            P8_PIR_CHIPID_MSK   = 0x00000380,
-            P8_PIR_NODEID_MSK   = 0x00001C00,
+            P8_PIR_THREADID_MSK = PIR_t::THREAD_MASK,
+            P8_PIR_COREID_MSK   = PIR_t::CORE_MASK,
+            P8_PIR_CHIPID_MSK   = PIR_t::CHIP_MASK,
+            P8_PIR_NODEID_MSK   = PIR_t::GROUP_MASK,
 
             // Logical Shift Left fields for mmio Base address from PIR.
             // (IP addr bit pos - PIR bit pos)
-            P8_IP_THREADID_LSL = (12-0),
-            P8_IP_COREID_LSL   = (15-3),
-            P8_IP_CHIPID_LSL   = (20-7),
-            P8_IP_NODEID_LSL   = (22-10),
+            P8_IP_THREADID_LSL = (12-PIR_t::BITS_AFTER_CORE),
+            P8_IP_COREID_LSL   = (15-PIR_t::BITS_AFTER_CORE),
+            P8_IP_CHIPID_LSL   = (20-PIR_t::BITS_AFTER_CHIP),
+            P8_IP_NODEID_LSL   = (22-PIR_t::BITS_AFTER_GROUP),
             XIRR_ADDR_OFFSET   = 4,
             MFRR_ADDR_OFFSET   = 12,
 

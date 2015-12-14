@@ -188,7 +188,7 @@
     </attribute>
     <!-- End FSI connections -->
     <attribute>
-        <id>FABRIC_NODE_ID</id>
+        <id>FABRIC_GROUP_ID</id>
         <default>0</default>
     </attribute>
     <attribute>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -34,7 +34,6 @@
 #include <devtree/devtreeif.H>
 #include "devtree.H"
 #include <sys/mmio.h> //THIRTYTWO_GB
-#include <intr/interrupt.H>
 #include <vpd/vpd_if.H>
 #include <stdio.h>
 #include <pnor/pnorif.H>
@@ -48,12 +47,15 @@
 #include <vpd/pvpdenums.H>
 #include <i2c/i2cif.H>
 #include <i2c/eepromif.H>
+#include <intr/interrupt.H>
+
 #include <ipmi/ipmisensor.H>
 
 //@TODO RTC:143092
 //#include <fapi.H>
 //#include <fapiPlatHwpInvoker.H> // for fapi::fapiRcToErrl()
 #include <vpd/mvpdenums.H>
+#include <arch/pirformat.H>
 
 trace_desc_t *g_trac_devtree = NULL;
 TRAC_INIT(&g_trac_devtree, "DEVTREE", 4096);
@@ -64,20 +66,17 @@ using   namespace   TARGETING;
 
 typedef std::pair<uint64_t,uint64_t> homerAddr_t;
 
-#define CHIPID_EXTRACT_NODE(i_chipid) (i_chipid >> CHIPID_NODE_SHIFT)
-#define CHIPID_EXTRACT_PROC(i_chipid) (i_chipid & CHIPID_PROC_MASK)
-
 enum BuildConstants
 {
-    DEVTREE_DATA_ADDR   =0xFF00000,    /* 256MB - 1MB*/
+    DEVTREE_DATA_ADDR   =0xFF00000,    /*256MB - 1MB*/
     DEVTREE_SPACE_SIZE  =0x40000,      /*256KB*/
     XSCOM_NODE_SHIFT    =38,           /*Node pos is 25, so 63-25=38*/
     XSCOM_CHIP_SHIFT    =35,           /*Chip pos is 28, so 63-28=35*/
-    CHIPID_NODE_SHIFT   =3,            /*CHIPID is NNNCCC, shift 3*/
-    CHIPID_PROC_MASK    =0x7,            /*CHIPID is NNNCCC, shift 3*/
+    CHIPID_NODE_SHIFT   =3,            /*CHIPID is NNNNCCC, shift 3*/
+    CHIPID_PROC_MASK    =0x7,          /*CHIPID is NNNNCCC, shift 3*/
     PHB0_MASK           =0x80,
-    MAX_PHBs            =4,             /*Max PHBs per chip is 4*/
-    THREADPERCORE       =8,             /*8 threads per core*/
+    MAX_PHBs            =4,            /*Max PHBs per chip is 4*/
+    THREADPERCORE       =8,            /*8 threads per core*/
     MHZ                 =1000000,
 
     /* The Cache unit address (and reg property) is mostly free-for-all
@@ -168,7 +167,7 @@ void bld_swCheckstopFir (devTree * i_dt, dtOffset_t & i_parentNode)
 //@todo-RTC:123043 -- Should use the functions in RT_TARG
 uint32_t getProcChipId(const TARGETING::Target * i_pProc)
 {
-    uint32_t l_fabId = i_pProc->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
+    uint32_t l_fabId = i_pProc->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
     uint32_t l_procPos = i_pProc->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
     return ( (l_fabId << CHIPID_NODE_SHIFT) + l_procPos);
 }
@@ -600,6 +599,7 @@ void bld_xscom_node(devTree * i_dt, dtOffset_t & i_parentNode,
     /**********************************************************/
     /*                   Xscom node                           */
     /**********************************************************/
+    //@todo-Fix for P9-RTC:128077
     uint64_t l_xscomAddr = l_xscomBaseAddr +
       (static_cast<uint64_t>(i_chipid) << XSCOM_CHIP_SHIFT);
 
@@ -787,7 +787,7 @@ uint32_t bld_l2_node(devTree * i_dt, dtOffset_t & i_parentNode,
 
 uint32_t bld_cpu_node(devTree * i_dt, dtOffset_t & i_parentNode,
                       const TARGETING::Target * i_ex,
-                      INTR::PIR_t i_pir, uint32_t i_chipId,
+                      PIR_t i_pir, uint32_t i_chipId,
                       uint32_t i_nextCacheHandle)
 {
     /*
@@ -929,7 +929,7 @@ uint32_t bld_cpu_node(devTree * i_dt, dtOffset_t & i_parentNode,
 
 uint32_t bld_intr_node(devTree * i_dt, dtOffset_t & i_parentNode,
                       const TARGETING::Target * i_ex,
-                      INTR::PIR_t i_pir)
+                      PIR_t i_pir)
 
 {
     /*
@@ -1421,26 +1421,26 @@ errlHndl_t bld_fdt_cpu(devTree * i_dt,
         //to be reserved -- save it away
         o_homerRegions.push_back(getHomerPhysAddr(l_pProc));
 
-        TARGETING::TargetHandleList l_exlist;
-        getChildChiplets( l_exlist, l_pProc, TYPE_CORE );
-        for (size_t core = 0; core < l_exlist.size(); core++)
+        TARGETING::TargetHandleList l_corelist;
+        getChildChiplets( l_corelist, l_pProc, TYPE_CORE );
+        for (size_t core = 0; core < l_corelist.size(); core++)
         {
-            const TARGETING::Target * l_ex = l_exlist[core];
-            if(l_ex->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
+            const TARGETING::Target * l_core = l_corelist[core];
+            if(l_core->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
             {
                 continue; //Not functional
             }
 
-            /* Proc ID Reg is N NNCC CPPP PTTT Where
-                               NNN           is node number
+            /* Proc ID Reg is GG GGCC CPPP PPTT Where
+                              GGGG           is Group number
                                   CCC        is Chip
-                                     PPPP    is the core number
-                                         TTT is Thread num
+                                     PPPPP   is the core number
+                                          TT is Thread num
              */
-            uint32_t l_coreNum = l_ex->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-            INTR::PIR_t pir(0);
-            pir.nodeId = CHIPID_EXTRACT_NODE(l_chipid);
-            pir.chipId = CHIPID_EXTRACT_PROC(l_chipid);
+            uint32_t l_coreNum = l_core->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+            PIR_t pir(0);
+            pir.groupId = PIR_t::groupFromChipId(l_chipid);
+            pir.chipId = PIR_t::chipFromChipId(l_chipid);
             pir.coreId = l_coreNum;
 
             TRACFCOMP( g_trac_devtree, "Added pir[%x] chipid 0x%x core %d",
@@ -1451,10 +1451,10 @@ errlHndl_t bld_fdt_cpu(devTree * i_dt,
             uint32_t l3pHandle = bld_l3_node(i_dt, cpusNode, pir.word);
             uint32_t l2pHandle = bld_l2_node(i_dt, cpusNode, pir.word,
                                              l3pHandle);
-            bld_cpu_node(i_dt, cpusNode, l_ex, pir, l_chipid, l2pHandle);
+            bld_cpu_node(i_dt, cpusNode, l_core, pir, l_chipid, l2pHandle);
 
             rootNode = i_dt->findNode("/");
-            bld_intr_node(i_dt, rootNode, l_ex, pir);
+            bld_intr_node(i_dt, rootNode, l_core, pir);
         }
     }
 
@@ -1949,19 +1949,20 @@ errlHndl_t bld_fdt_vpd(devTree * i_dt, bool i_smallTree)
 
             //@TODO RTC:143092
 #if 0
-            TARGETING::TargetHandleList l_exlist;
+            TARGETING::TargetHandleList l_corelist;
             fapi::Target l_pFapiProc(fapi::TARGET_TYPE_PROC_CHIP,
                             (const_cast<TARGETING::Target*>(l_pProc) ));
 
-            getChildChiplets( l_exlist, l_pProc, TYPE_CORE );
-            for (size_t core = 0; core < l_exlist.size(); core++)
+            getChildChiplets( l_corelist, l_pProc, TYPE_CORE );
+            for (size_t core = 0; core < l_corelist.size(); core++)
             {
-                const TARGETING::Target * l_ex = l_exlist[core];
+                const TARGETING::Target * l_core = l_corelist[core];
 
-                uint32_t l_coreNum = l_ex->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-                INTR::PIR_t pir(0);
-                pir.nodeId = CHIPID_EXTRACT_NODE(l_procId);
-                pir.chipId = CHIPID_EXTRACT_PROC(l_procId);
+                uint32_t l_coreNum =
+                  l_core->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+                PIR_t pir(0);
+                pir.groupId = PIR_t::groupFromChipId(l_procId);
+                pir.chipId = PIR_t::chipFromChipId(l_procId);
                 pir.coreId = l_coreNum;
 
                 // Get #V bucket data
@@ -1982,10 +1983,10 @@ errlHndl_t bld_fdt_vpd(devTree * i_dt, bool i_smallTree)
                 }
 
                 //Add the attached core
-                dtOffset_t exNode = i_dt->addNode(procNode, "cpu",
+                dtOffset_t coreNode = i_dt->addNode(procNode, "cpu",
                                                     pir.word);
 
-                i_dt->addPropertyBytes(exNode, "frequency,voltage",
+                i_dt->addPropertyBytes(coreNode, "frequency,voltage",
                                      reinterpret_cast<uint8_t*>( &l_poundVdata),
                                      sizeof(fapi::voltageBucketData_t));
             }
