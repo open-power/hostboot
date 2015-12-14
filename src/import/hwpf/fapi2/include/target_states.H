@@ -32,14 +32,14 @@
 
 namespace fapi2
 {
-    ///
-    /// @brief Enumeration of target state values (bitmask values)
-    ///
-    enum TargetState
-    {
-        TARGET_STATE_PRESENT    = 0x00000001,
-        TARGET_STATE_FUNCTIONAL = 0x00000002,
-    };
+///
+/// @brief Enumeration of target state values (bitmask values)
+///
+enum TargetState
+{
+    TARGET_STATE_PRESENT    = 0x00000001,
+    TARGET_STATE_FUNCTIONAL = 0x00000002,
+};
 }
 
 #endif
