@@ -34,24 +34,30 @@
 
 namespace fapi2
 {
-    /// @cond
-    /// @brief Traits of buffer parameters - things passed in
-    /// @tparam T is the type of i_value (typically an integral type)
-    template<typename T>
-    class parameterTraits
-    {
+/// @cond
+/// @brief Traits of buffer parameters - things passed in
+/// @tparam T is the type of i_value (typically an integral type)
+template<typename T>
+class parameterTraits
+{
     public:
         // Why constexpr functions? Enums are hard to do math on, and
         // static const doesn't work without -O1 (or greater.) That might
         // be a bug in g++ but this works just the same.
         constexpr static T mask(void)
-            { return T(~0); }
+        {
+            return T(~0);
+        }
 
         constexpr static uint32_t byte_length(void)
-            { return sizeof(T); }
+        {
+            return sizeof(T);
+        }
 
         constexpr static uint32_t bit_length(void)
-            { return sizeof(T) * 8; }
+        {
+            return sizeof(T) * 8;
+        }
 
         template<typename U>
         inline static void write_element(void* i_data, T i_value, uint32_t i_offset)
@@ -63,8 +69,8 @@ namespace fapi2
 #endif
             *ptr = i_value;
         }
-    };
-    /// @endcond
+};
+/// @endcond
 }
 
 #endif
