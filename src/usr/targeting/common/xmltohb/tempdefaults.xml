@@ -1,0 +1,86 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/targeting/common/xmltohb/tempdefaults.xml $           -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+
+<attributes>
+
+<!-- =====================================================================
+     ATTRIBUTE TYPES
+     Contains the definition of temporary defaults for existing attributes
+     without a default.
+     <tempDefault>
+         <attribute>
+             <id>...</id>
+             <default>...</default>
+             <force/> # optional to force use of specified default value
+                      # even when existing attribute definition has a
+                      # default value defined
+         </attribute>
+     </tempDefault>
+
+     Contains initial temporary definitions of new attributes.
+
+     These definitions should be removed and replaced with permanent
+     definitions elsewhere prior to shipping code that uses them.
+
+     Examples:
+     <tempDefault>
+         <attribute>
+             <id>FRU_ID</id>
+             <default>0x56789</default>
+             <force/>
+         </attribute>
+     </tempDefault>
+
+     <tempDefault>
+         <attribute>
+             <id>OPT_MEMMAP_GROUP_POLICY</id>
+             <default>0x12</default>
+         </attribute>
+     </tempDefault>
+
+     <tempDefault>
+         <attribute>
+             <id>PHB_BASE_ADDRS</id>
+             <default>
+                     0x0FFFFFFFFFFFFFFF,
+                     0x1FFFFFFFFFFFFFFF,
+                     0x2FFFFFFFFFFFFFFF,
+                     0x3FFFFFFFFFFFFFFF
+             </default>
+             <force/>
+         </attribute>
+     </tempDefault>
+     ================================================================= -->
+
+<!-- =====================================================================
+     Start of temporary definitions
+     ================================================================= -->
+
+
+<!-- =====================================================================
+     End of temporary definitions
+     ================================================================= -->
+
+</attributes>

@@ -85,6 +85,7 @@ COPY_FILES = \
     src/usr/targeting/common/xmltohb/attribute_types_hb.xml:openpower \
     src/usr/targeting/common/xmltohb/target_types_hb.xml:openpower \
     src/usr/targeting/common/xmltohb/xmltohb.pl:openpower \
+    src/usr/targeting/xmltohb/updatetempsxml.pl:openpower \
     src/include/usr/vmmconst.h:openpower \
     src/usr/targeting/common/xmltohb/bios.xsd:openpower \
     src/usr/targeting/common/xmltohb/bios_metadata_petitboot.xslt:openpower \
@@ -213,10 +214,15 @@ fsp.tar_CONTENTS = \
     src/build/buildpnor/defaultPnorLayout.xml \
     $(if $(FAKEPNOR), src/build/buildpnor/pnorLayoutFake.xml, ) \
     img/simics_NIMBUS_targeting.bin \
+    obj/genfiles/fapiattrs.xml \
+    obj/genfiles/hb_plat_attr_srvc.H \
+    src/import/hwpf/fapi2/xml/attribute_info/hb_temp_defaults.xml \
     $(addsuffix :targeting/,\
 	$(call ROOTPATH_WILDCARD_RECURSIVE,src/usr/targeting/common))\
     $(addsuffix :targeting/,\
 	$(call ROOTPATH_WILDCARD_RECURSIVE,src/include/usr/targeting/common)) \
+    $(addsuffix :targeting/,\
+	$(call ROOTPATH_WILDCARD,src/usr/targeting/xmltohb/updatetempsxml.pl))\
     $(addsuffix :hwas/,\
 	$(call ROOTPATH_WILDCARD_RECURSIVE,src/usr/hwas/common))\
     $(addsuffix :hwas/,\

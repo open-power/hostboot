@@ -67,6 +67,14 @@ FAPI2_ATTR_XML += $(wildcard \
 FAPI2_ATTR_XML += $(wildcard \
   $(ROOTPATH)/src/import/chips/p9/procedures/xml/attribute_info/*.xml)
 
+# Filter out Temp defaults XML file from Attribute XML files.
+# NOTE: The hb_temp_defaults.xml file is not a normal attribute file with the
+#       normal structures that define the attribute itself.  It temporarily
+#       provides default values for new attributes defined in other files.
+HB_TEMP_DFLT_XML = $(wildcard \
+    ${ROOTPATH}/src/import/hwpf/fapi2/xml/attribute_info/hb_temp_defaults.xml)
+FAPI2_ATTR_XML := $(filter-out ${HB_TEMP_DFLT_XML},$(FAPI2_ATTR_XML))
+
 # Chip SCOM address header files.
 FAPI2_PLAT_INCLUDE += $(addsuffix /common/include, \
   $(addprefix $(ROOTPATH)/src/import/chips/$CHIPS))

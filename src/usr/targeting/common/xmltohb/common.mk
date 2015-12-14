@@ -81,9 +81,18 @@ FAPI_ATTR_SOURCES += runtime_attributes/memory_occ_attributes.xml
 FAPI_ATTR_SOURCES += proc_abus_dmi_xbus_scominit_attributes.xml
 FAPI_ATTR_SOURCES += pstate_attributes.xml
 
+# Temp defaults XML sources used by updatetempsxml.pl script
+TEMP_DEFAULTS_XML       += tempdefaults.xml
+HB_TEMP_DEFAULTS_XML    += hb_temp_defaults.xml
+
+ATTRIBUTE_SERVICE_H     += plat_attribute_service.H
+HB_PLAT_ATTR_SRVC_H     += hb_plat_attr_srvc.H
+
+TEMP_GENERIC_XML        += temp_generic.xml
 XMLTOHB_GENERIC_XML     += generic.xml
 XMLTOHB_FAPI_XML        += fapiattrs.xml
 XMLTOHB_MERGE_SCRIPT    += mergexml.sh
+XMLTOHB_TEMPS_MERGE_SCRIPT += updatetempsxml.pl
 XMLTOHB_COMPILER_SCRIPT += xmltohb.pl
 VMM_CONSTS_FILE         += vmmconst.h
 
