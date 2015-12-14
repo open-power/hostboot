@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_rank_group.C,v 1.12 2014/04/01 17:10:21 asaetow Exp $
+// $Id: mss_eff_config_rank_group.C,v 1.13 2015/10/21 10:42:37 sasethur Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_eff_config_rank_group.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -119,12 +119,16 @@ fapi::ReturnCode mss_eff_config_rank_group(const fapi::Target i_target_mba) {
    // ATTR_EFF_DRAM_GEN: EMPTY = 0, DDR3 = 1, DDR4 = 2,
    // ATTR_EFF_DIMM_TYPE: CDIMM = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3,
    uint8_t num_ranks_per_dimm_u8array[PORT_SIZE][DIMM_SIZE];
+   uint8_t l_num_master_ranks[PORT_SIZE][DIMM_SIZE];
    uint8_t dram_gen_u8;
    uint8_t dimm_type_u8;
+   uint8_t l_stack_type[PORT_SIZE][DIMM_SIZE];
 
    rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target_mba, num_ranks_per_dimm_u8array); if(rc) return rc;
    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN, &i_target_mba, dram_gen_u8); if(rc) return rc;
    rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target_mba, dimm_type_u8); if(rc) return rc;
+   rc = FAPI_ATTR_GET(ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, &i_target_mba, l_num_master_ranks); if(rc) return rc;
+   rc = FAPI_ATTR_GET(ATTR_EFF_STACK_TYPE, &i_target_mba, l_stack_type); if(rc) return rc;
 
    uint8_t primary_rank_group0_u8array[PORT_SIZE];
    uint8_t primary_rank_group1_u8array[PORT_SIZE];
@@ -238,7 +242,8 @@ fapi::ReturnCode mss_eff_config_rank_group(const fapi::Target i_target_mba) {
          }
 
       } else { // RDIMM or CDIMM
-         if ((num_ranks_per_dimm_u8array[cur_port][0] > 0) && (num_ranks_per_dimm_u8array[cur_port][1] == 0)) {
+         if ((num_ranks_per_dimm_u8array[cur_port][0] > 0) && (num_ranks_per_dimm_u8array[cur_port][1] == 0))    //Single Drop
+		 {
             primary_rank_group0_u8array[cur_port] = 0;
             if (num_ranks_per_dimm_u8array[cur_port][0] > 1) {
                primary_rank_group1_u8array[cur_port] = 1;
@@ -256,7 +261,54 @@ fapi::ReturnCode mss_eff_config_rank_group(const fapi::Target i_target_mba) {
             secondary_rank_group1_u8array[cur_port] = INVALID;
             secondary_rank_group2_u8array[cur_port] = INVALID;
             secondary_rank_group3_u8array[cur_port] = INVALID;
-         } else if ((num_ranks_per_dimm_u8array[cur_port][0] > 0) && (num_ranks_per_dimm_u8array[cur_port][1] > 0)) {
+			
+			//Preet Add 3TSV /2H  Type - Single Drop Case   
+			//ATTR_EFF_STACK_TYPE <enum>NONE = 0, DDP_QDP = 1, STACK_3DS = 2</enum>
+			
+			if((l_num_master_ranks[cur_port][0] != 0) && (dram_gen_u8 == 2) && (l_stack_type[cur_port][0] == 2))
+			{
+				//if((num_ranks_per_dimm_u8array[cur_port][0] / l_num_master_ranks[cur_port][0]) != 1)      //Check Stack 
+			//if 2H
+			if(num_ranks_per_dimm_u8array[cur_port][0] == 2)
+			{
+				primary_rank_group0_u8array[cur_port] = 0;
+				primary_rank_group1_u8array[cur_port] = INVALID;
+				primary_rank_group2_u8array[cur_port] = INVALID;
+				primary_rank_group3_u8array[cur_port] = INVALID;
+				secondary_rank_group0_u8array[cur_port] = 1;
+				secondary_rank_group1_u8array[cur_port] = INVALID;
+				secondary_rank_group2_u8array[cur_port] = INVALID;
+				secondary_rank_group3_u8array[cur_port] = INVALID;
+			}
+			
+			//if 4H
+			
+			else if(num_ranks_per_dimm_u8array[cur_port][0] == 4)
+			{
+				primary_rank_group0_u8array[cur_port] = 0;
+				primary_rank_group1_u8array[cur_port] = INVALID;
+				primary_rank_group2_u8array[cur_port] = INVALID;
+				primary_rank_group3_u8array[cur_port] = INVALID;
+				secondary_rank_group0_u8array[cur_port] = 1;
+				secondary_rank_group1_u8array[cur_port] = INVALID;
+				secondary_rank_group2_u8array[cur_port] = INVALID;
+				secondary_rank_group3_u8array[cur_port] = INVALID;
+				tertiary_rank_group0_u8array[cur_port] = 2;
+				tertiary_rank_group1_u8array[cur_port] = INVALID;
+			    tertiary_rank_group2_u8array[cur_port] = INVALID;
+				tertiary_rank_group3_u8array[cur_port] = INVALID;
+				quanternary_rank_group0_u8array[cur_port] = 3;
+				quanternary_rank_group1_u8array[cur_port] = INVALID;
+				quanternary_rank_group2_u8array[cur_port] = INVALID;
+				quanternary_rank_group3_u8array[cur_port] = INVALID;
+			}
+			
+			//if 8H   <Add Later if Required>
+			
+			} //end of if 3DS Stack
+         } 
+		 else if ((num_ranks_per_dimm_u8array[cur_port][0] > 0) && (num_ranks_per_dimm_u8array[cur_port][1] > 0)) //Dual Drop
+		 {
             if (num_ranks_per_dimm_u8array[cur_port][0] != num_ranks_per_dimm_u8array[cur_port][1]) {
                FAPI_ERR("%s: FAILED!", PROCEDURE_NAME);
                FAPI_ERR("Plug rule violation, num_ranks_per_dimm=%d[0],%d[1] on %s PORT%d!", num_ranks_per_dimm_u8array[cur_port][0], num_ranks_per_dimm_u8array[cur_port][1], i_target_mba.toEcmdString(), cur_port);
@@ -281,12 +333,59 @@ fapi::ReturnCode mss_eff_config_rank_group(const fapi::Target i_target_mba) {
                secondary_rank_group1_u8array[cur_port] = 5;
                secondary_rank_group2_u8array[cur_port] = 3;
                secondary_rank_group3_u8array[cur_port] = 7;
-            } else if (num_ranks_per_dimm_u8array[cur_port][0] != 1) {
+            } 
+			else if (num_ranks_per_dimm_u8array[cur_port][0] != 1) {
                FAPI_ERR("%s: FAILED!", PROCEDURE_NAME);
                FAPI_ERR("Plug rule violation, num_ranks_per_dimm=%d[0],%d[1] on %s PORT%d!", num_ranks_per_dimm_u8array[cur_port][0], num_ranks_per_dimm_u8array[cur_port][1], i_target_mba.toEcmdString(), cur_port);
                FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_RANK_GROUP_NUM_RANKS_NEQ1);
                return rc;
             }
+			
+			//Preet Add 3TSV  /2H Type - Dual Drop Case
+			if((l_num_master_ranks[cur_port][0] != 0) && (dram_gen_u8 == 2) && (l_stack_type[cur_port][0] == 2))
+			{
+				//if((num_ranks_per_dimm_u8array[cur_port][0] / l_num_master_ranks[cur_port][0]) != 1)      //Check Stack 
+			//if 2H
+			if(num_ranks_per_dimm_u8array[cur_port][0] == 2)
+			{
+				primary_rank_group0_u8array[cur_port] = 0;
+				primary_rank_group1_u8array[cur_port] = 4;
+				primary_rank_group2_u8array[cur_port] = INVALID;
+				primary_rank_group3_u8array[cur_port] = INVALID;
+				secondary_rank_group0_u8array[cur_port] = 1;
+				secondary_rank_group1_u8array[cur_port] = 5;
+				secondary_rank_group2_u8array[cur_port] = INVALID;
+				secondary_rank_group3_u8array[cur_port] = INVALID;
+			}
+			
+			//if 4H
+			
+			else if(num_ranks_per_dimm_u8array[cur_port][0] == 4)
+			{
+				primary_rank_group0_u8array[cur_port] = 0;
+				primary_rank_group1_u8array[cur_port] = 4;
+				primary_rank_group2_u8array[cur_port] = INVALID;
+				primary_rank_group3_u8array[cur_port] = INVALID;
+				secondary_rank_group0_u8array[cur_port] = 1;
+				secondary_rank_group1_u8array[cur_port] = 5;
+				secondary_rank_group2_u8array[cur_port] = INVALID;
+				secondary_rank_group3_u8array[cur_port] = INVALID;
+				tertiary_rank_group0_u8array[cur_port] = 2;
+				tertiary_rank_group1_u8array[cur_port] = 6;
+			    tertiary_rank_group2_u8array[cur_port] = INVALID;
+				tertiary_rank_group3_u8array[cur_port] = INVALID;
+				quanternary_rank_group0_u8array[cur_port] = 3;
+				quanternary_rank_group1_u8array[cur_port] = 7;
+				quanternary_rank_group2_u8array[cur_port] = INVALID;
+				quanternary_rank_group3_u8array[cur_port] = INVALID;
+			}
+			
+			//if 8H   <Add Later if Required>
+			
+			} //end of if 3DS Stack
+			
+			
+			
          } else if ((num_ranks_per_dimm_u8array[cur_port][0] == 0) && (num_ranks_per_dimm_u8array[cur_port][1] == 0)) {
             primary_rank_group0_u8array[cur_port] = INVALID;
             primary_rank_group1_u8array[cur_port] = INVALID;

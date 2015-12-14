@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,12 +22,14 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mrs6_DDR4.C,v 1.6 2015/09/04 02:03:31 kmack Exp $
+// $Id: mss_mrs6_DDR4.C,v 1.7 2015/10/23 15:12:05 sglancy Exp $
 
 
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2007
 // *! All Rights Reserved -- Property of IBM
+// *! ***  ***
+
 
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
@@ -36,6 +38,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.06   |10-23-15  |sglancy | Fixed attribute names
 //  1.05   | 09/03/15 | kmack   | RC updates
 //  1.04   | 08/05/15 | sglancy | Fixed FW compile error
 //  1.03   | 08/04/15 | sglancy | Changed to address FW comments
@@ -307,13 +310,13 @@ ReturnCode mss_mr6_loader( fapi::Target& i_target,uint32_t i_port_number,uint32_
 
     //MRS6
     uint8_t vrefdq_train_value[2][2][4]; //vrefdq_train value   -  NEW
-    rc = FAPI_ATTR_GET( ATTR_VREF_DQ_TRAIN_VALUE, &i_target, vrefdq_train_value);
+    rc = FAPI_ATTR_GET( ATTR_EFF_VREF_DQ_TRAIN_VALUE, &i_target, vrefdq_train_value);
     if(rc) return rc;
     uint8_t vrefdq_train_range[2][2][4]; //vrefdq_train range   -  NEW
-    rc = FAPI_ATTR_GET( ATTR_VREF_DQ_TRAIN_RANGE, &i_target, vrefdq_train_range);
+    rc = FAPI_ATTR_GET( ATTR_EFF_VREF_DQ_TRAIN_RANGE, &i_target, vrefdq_train_range);
     if(rc) return rc;
     uint8_t vrefdq_train_enable[2][2][4]; //vrefdq_train enable  -  NEW
-    rc = FAPI_ATTR_GET( ATTR_VREF_DQ_TRAIN_ENABLE, &i_target, vrefdq_train_enable);
+    rc = FAPI_ATTR_GET( ATTR_EFF_VREF_DQ_TRAIN_ENABLE, &i_target, vrefdq_train_enable);
     if(rc) return rc;
 
     FAPI_INF("enable attribute %d",vrefdq_train_enable[0][0][0]);
@@ -407,20 +410,20 @@ ReturnCode mss_mr6_loader( fapi::Target& i_target,uint32_t i_port_number,uint32_
 
                     vrefdq_train_value[i_port_number][dimm_number][rank_number] = mss_reverse_8bits(vrefdq_train_value[i_port_number][dimm_number][rank_number]);
 
-                    if (vrefdq_train_range[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VREF_DQ_TRAIN_RANGE_RANGE1)
+                    if (vrefdq_train_range[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_VREF_DQ_TRAIN_RANGE_RANGE1)
                     {
                         vrefdq_train_range[i_port_number][dimm_number][rank_number] = 0x00;
                     }
-                    else if (vrefdq_train_range[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VREF_DQ_TRAIN_RANGE_RANGE2)
+                    else if (vrefdq_train_range[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_VREF_DQ_TRAIN_RANGE_RANGE2)
                     {
                         vrefdq_train_range[i_port_number][dimm_number][rank_number] = 0xFF;
                     }
 
-                    if (vrefdq_train_enable[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_ENABLE)
+                    if (vrefdq_train_enable[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE)
                     {
                         vrefdq_train_enable[i_port_number][dimm_number][rank_number] = 0xff;FAPI_INF("ENABLE is enabled");
                     }
-                    else if (vrefdq_train_enable[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_DISABLE)
+                    else if (vrefdq_train_enable[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_VREF_DQ_TRAIN_ENABLE_DISABLE)
                     {
                         vrefdq_train_enable[i_port_number][dimm_number][rank_number] = 0x00;FAPI_INF("DISABLE is enabled");
                     }

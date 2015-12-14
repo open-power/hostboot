@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_ddr4_funcs.C,v 1.15 2015/08/28 18:15:08 sglancy Exp $
+// $Id: mss_ddr4_funcs.C,v 1.17 2015/10/23 15:11:23 sglancy Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2013
 // *! All Rights Reserved -- Property of IBM
@@ -43,6 +43,8 @@
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
 //         |          |         |
+//  1.17   | 10/23/15 | sglancy | Changed attribute names
+//  1.16   | 10/21/15 | sglancy | Changed attribute names
 //  1.15   | 08/28/15 | sglancy | Added RCs - addressed FW comments
 //  1.14   | 08/21/15 | sglancy | Fixed ODT initialization bug - ODT must be held low through ZQ cal 
 //  1.13   | 08/05/15 | kmack   | Commented out FAPI_DDR4 code
@@ -704,6 +706,20 @@ ReturnCode mss_create_rcd_ddr4(const Target& i_target_mba) {
          else {
             l_rcd_cntl_word_15 = 0; // 1nCk latency adder with DB control bus
          }
+	 
+	 FAPI_INF("RCD_CNTL_WORDS %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x ",l_rcd_cntl_word_0_1,
+l_rcd_cntl_word_2,  
+l_rcd_cntl_word_3,  
+l_rcd_cntl_word_4,  
+l_rcd_cntl_word_5,  
+l_rcd_cntl_word_6_7,
+l_rcd_cntl_word_8_9,
+l_rcd_cntl_word_10, 
+l_rcd_cntl_word_11, 
+l_rcd_cntl_word_12, 
+l_rcd_cntl_word_13, 
+l_rcd_cntl_word_14, 
+l_rcd_cntl_word_15 );
 
          rc_num |= data_buffer_64.insertFromRight(&l_rcd_cntl_word_0_1, 0 , 8);
          rc_num |= data_buffer_64.insertFromRight(&l_rcd_cntl_word_2,   8 , 4);
@@ -800,6 +816,10 @@ ReturnCode mss_rcd_load_ddr4(
             )    {
 
     ReturnCode rc;
+    //generates the RCD words
+    rc = mss_create_rcd_ddr4(i_target);
+    if(rc) return rc;
+    
     ReturnCode rc_buff;
     uint32_t rc_num = 0;
     uint32_t dimm_number;
@@ -1730,7 +1750,7 @@ ReturnCode mss_mrs_load_ddr4(
     rc = FAPI_ATTR_GET(ATTR_EFF_ODT_INPUT_BUFF , &i_target, odt_input_buffer);
     if(rc) return rc;
     uint8_t rtt_park[2][2][4]; //RTT_Park value  -  NEW
-    rc = FAPI_ATTR_GET(ATTR_EFF_RTT_PARK , &i_target, rtt_park);
+    rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_RTT_PARK , &i_target, rtt_park);
     if(rc) return rc;
     uint8_t ca_parity; //CA Parity Persistance Error  -  NEW
     rc = FAPI_ATTR_GET(ATTR_EFF_CA_PARITY , &i_target, ca_parity);
@@ -1833,13 +1853,13 @@ ReturnCode mss_mrs_load_ddr4(
 
     //MRS6
     uint8_t vrefdq_train_value[2][2][4]; //vrefdq_train value   -  NEW
-    rc = FAPI_ATTR_GET( ATTR_VREF_DQ_TRAIN_VALUE, &i_target, vrefdq_train_value);
+    rc = FAPI_ATTR_GET( ATTR_EFF_VREF_DQ_TRAIN_VALUE, &i_target, vrefdq_train_value);
     if(rc) return rc;
     uint8_t vrefdq_train_range[2][2][4]; //vrefdq_train range   -  NEW
-    rc = FAPI_ATTR_GET( ATTR_VREF_DQ_TRAIN_RANGE, &i_target, vrefdq_train_range);
+    rc = FAPI_ATTR_GET( ATTR_EFF_VREF_DQ_TRAIN_RANGE, &i_target, vrefdq_train_range);
     if(rc) return rc;
     uint8_t vrefdq_train_enable[2][2][4]; //vrefdq_train enable  -  NEW
-    rc = FAPI_ATTR_GET( ATTR_VREF_DQ_TRAIN_ENABLE, &i_target, vrefdq_train_enable);
+    rc = FAPI_ATTR_GET( ATTR_EFF_VREF_DQ_TRAIN_ENABLE, &i_target, vrefdq_train_enable);
     if(rc) return rc;
     uint8_t tccd_l; //tccd_l  -  NEW
     rc = FAPI_ATTR_GET( ATTR_TCCD_L, &i_target, tccd_l);
@@ -2080,35 +2100,35 @@ ReturnCode mss_mrs_load_ddr4(
 
 
                     //MRS5
-                    if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_RTT_PARK_DISABLE)
+                    if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_PARK_DISABLE)
                     {
                         rtt_park[i_port_number][dimm_number][rank_number] = 0x00;
                     }
-                    else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_RTT_PARK_60OHM)
+                    else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_PARK_60OHM)
                     {
                         rtt_park[i_port_number][dimm_number][rank_number] = 0x80;
                     }
-                    else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_RTT_PARK_40OHM)
+                    else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_PARK_40OHM)
                     {
                         rtt_park[i_port_number][dimm_number][rank_number] = 0xC0;
                     }
-                    else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_RTT_PARK_120OHM)
+                    else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_PARK_120OHM)
                     {
                         rtt_park[i_port_number][dimm_number][rank_number] = 0x40;
                     }
-                    else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_RTT_PARK_240OHM)
+                    else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_PARK_240OHM)
                     {
                         rtt_park[i_port_number][dimm_number][rank_number] = 0x20;
                     }
-                    else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_RTT_PARK_48OHM)
+                    else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_PARK_48OHM)
                     {
                         rtt_park[i_port_number][dimm_number][rank_number] = 0xA0;
                     }
-                    else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_RTT_PARK_80OHM)
+                    else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_PARK_80OHM)
                     {
                         rtt_park[i_port_number][dimm_number][rank_number] = 0x60;
                     }
-                    else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_RTT_PARK_34OHM)
+                    else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_PARK_34OHM)
                     {
                         rtt_park[i_port_number][dimm_number][rank_number] = 0xE0;
                     }
@@ -2135,20 +2155,20 @@ ReturnCode mss_mrs_load_ddr4(
 
                     vrefdq_train_value[i_port_number][dimm_number][rank_number] = mss_reverse_8bits(vrefdq_train_value[i_port_number][dimm_number][rank_number]);
 
-                    if (vrefdq_train_range[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VREF_DQ_TRAIN_RANGE_RANGE1)
+                    if (vrefdq_train_range[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_VREF_DQ_TRAIN_RANGE_RANGE1)
                     {
                         vrefdq_train_range[i_port_number][dimm_number][rank_number] = 0x00;
                     }
-                    else if (vrefdq_train_range[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VREF_DQ_TRAIN_RANGE_RANGE2)
+                    else if (vrefdq_train_range[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_VREF_DQ_TRAIN_RANGE_RANGE2)
                     {
                         vrefdq_train_range[i_port_number][dimm_number][rank_number] = 0xFF;
                     }
 
-                    if (vrefdq_train_enable[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_ENABLE)
+                    if (vrefdq_train_enable[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE)
                     {
                         vrefdq_train_enable[i_port_number][dimm_number][rank_number] = 0xFF;
                     }
-                    else if (vrefdq_train_enable[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_DISABLE)
+                    else if (vrefdq_train_enable[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_VREF_DQ_TRAIN_ENABLE_DISABLE)
                     {
                         vrefdq_train_enable[i_port_number][dimm_number][rank_number] = 0x00;
                     }

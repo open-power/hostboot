@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_generic_shmoo.H,v 1.29 2015/08/07 11:28:52 sasethur Exp $
+// $Id: mss_generic_shmoo.H,v 1.31 2015/10/20 12:14:43 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -41,6 +41,8 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
+// 	 1.31  |preeragh|20/10/15| Header Fix
+// 	 1.30  |preeragh|07/10/15| PDA Table Size
 // 	 1.29  |preeragh|30/07/15| Optimized for FW Linear/Composite/Bin
 //   1.28  |preeragh|06/22/14|DDR4 Mods
 //   1.27  |mjjones |01/24/14|RAS Review Updates
@@ -224,7 +226,7 @@ public:
     fapi::ReturnCode shmoo_save_rest(const fapi::Target & i_target,
                                      uint64_t i_content_array[],
                                      uint8_t i_mode);
-	fapi::ReturnCode get_nibble_pda(const fapi::Target & i_target,uint32_t pda_nibble_table[2][2][16][2]);
+	fapi::ReturnCode get_nibble_pda(const fapi::Target & i_target,uint32_t pda_nibble_table[2][2][4][16][2]);
 	fapi::ReturnCode knob_update_bin_composite(const fapi::Target & i_target,bound_t bound,uint8_t scenario,uint8_t bit,uint8_t pass,bool &flag);
 	fapi::ReturnCode print_report2(const fapi::Target & i_target);
 

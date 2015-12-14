@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_ddr4_pda.C,v 1.42 2015/07/23 14:18:55 sglancy Exp $
+// $Id: mss_ddr4_pda.C,v 1.44 2015/10/23 15:11:24 sglancy Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2013
 // *! All Rights Reserved -- Property of IBM
@@ -42,6 +42,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.13   | 10/23/15 | sglancy | Changed attribute names
+//  1.12   | 10/21/15 | sglancy | Changed attribute names
 //  1.11   | 07/23/15 | sglancy | Changed code to address FW comments
 //  1.10   | 06/09/15 | sglancy | Fixed bug
 //  1.9    | 05/27/15 | sglancy | Fixed bug
@@ -265,16 +267,16 @@ ReturnCode PDA_MRS_Storage::setMRSbyAttr(Target& i_target) {
       case ATTR_EFF_CRC_ERROR_CLEAR : MRS = MRS5_BA; break;
       case ATTR_EFF_CA_PARITY_ERROR_STATUS : MRS = MRS5_BA; break;
       case ATTR_EFF_ODT_INPUT_BUFF : MRS = MRS5_BA; break;
-      case ATTR_EFF_RTT_PARK : MRS = MRS5_BA; break;
+      case ATTR_VPD_DRAM_RTT_PARK : MRS = MRS5_BA; break;
       case ATTR_EFF_CA_PARITY : MRS = MRS5_BA; break;
       case ATTR_EFF_DATA_MASK : MRS = MRS5_BA; break;
       case ATTR_EFF_WRITE_DBI : MRS = MRS5_BA; break;
       case ATTR_EFF_READ_DBI : MRS = MRS5_BA; break;
 
    //MRS6
-      case ATTR_VREF_DQ_TRAIN_VALUE: MRS = MRS6_BA; break;
-      case ATTR_VREF_DQ_TRAIN_RANGE: MRS = MRS6_BA; break;
-      case ATTR_VREF_DQ_TRAIN_ENABLE: MRS = MRS6_BA; break;
+      case ATTR_EFF_VREF_DQ_TRAIN_VALUE: MRS = MRS6_BA; break;
+      case ATTR_EFF_VREF_DQ_TRAIN_RANGE: MRS = MRS6_BA; break;
+      case ATTR_EFF_VREF_DQ_TRAIN_ENABLE: MRS = MRS6_BA; break;
       case ATTR_TCCD_L: MRS = MRS6_BA; break;
       
       //MRS attribute not found, error out
@@ -844,7 +846,7 @@ ReturnCode mss_ddr4_pda(
     
     //gets the WR VREF information
     uint8_t wr_vref[2][2][4]; //[port][dimm]
-    rc = FAPI_ATTR_GET(ATTR_VREF_DQ_TRAIN_VALUE, &i_target, wr_vref);
+    rc = FAPI_ATTR_GET(ATTR_EFF_VREF_DQ_TRAIN_VALUE, &i_target, wr_vref);
     if(rc) return rc;
     
     
@@ -883,7 +885,7 @@ ReturnCode mss_ddr4_pda(
     		    if(port == 0) wr_vref[port][dimm][rank] = dram*3;
     		    else wr_vref[port][dimm][rank] = 57-dram*3;
     		    if(wr_vref[port][dimm][rank]  > 50) wr_vref[port][dimm][rank] = 50;
-    		    pda.push_back(PDA_MRS_Storage(array[port][dimm][dram],ATTR_VREF_DQ_TRAIN_VALUE,dram,dimm,rank,port));
+    		    pda.push_back(PDA_MRS_Storage(array[port][dimm][dram],ATTR_EFF_VREF_DQ_TRAIN_VALUE,dram,dimm,rank,port));
     		    FAPI_INF("PDA STRING: %d %s",pda.size()-1,pda[pda.size()-1].c_str());
     		 }
     	      }
@@ -2457,36 +2459,36 @@ ReturnCode mss_ddr4_modify_mrs_pda(Target& i_target,ecmdDataBufferBase& address_
            }
            rc_num = rc_num | address_16.insert((uint8_t) odt_input_buffer, 5, 1);
 	   break;
-       case ATTR_EFF_RTT_PARK:
-	   if (rtt_park == ENUM_ATTR_EFF_RTT_PARK_DISABLE)
+       case ATTR_VPD_DRAM_RTT_PARK:
+	   if (rtt_park == ENUM_ATTR_VPD_DRAM_RTT_PARK_DISABLE)
            {
                rtt_park = 0x00;
            }
-           else if (rtt_park == ENUM_ATTR_EFF_RTT_PARK_60OHM)
+           else if (rtt_park == ENUM_ATTR_VPD_DRAM_RTT_PARK_60OHM)
            {
                rtt_park = 0x80;
            }
-           else if (rtt_park == ENUM_ATTR_EFF_RTT_PARK_40OHM)
+           else if (rtt_park == ENUM_ATTR_VPD_DRAM_RTT_PARK_40OHM)
            {
                rtt_park = 0xC0;
            }
-           else if (rtt_park == ENUM_ATTR_EFF_RTT_PARK_120OHM)
+           else if (rtt_park == ENUM_ATTR_VPD_DRAM_RTT_PARK_120OHM)
            {
                rtt_park = 0x40;
            }
-           else if (rtt_park == ENUM_ATTR_EFF_RTT_PARK_240OHM)
+           else if (rtt_park == ENUM_ATTR_VPD_DRAM_RTT_PARK_240OHM)
            {
                rtt_park = 0x20;
            }
-           else if (rtt_park == ENUM_ATTR_EFF_RTT_PARK_48OHM)
+           else if (rtt_park == ENUM_ATTR_VPD_DRAM_RTT_PARK_48OHM)
            {
                rtt_park = 0xA0;
            }
-           else if (rtt_park == ENUM_ATTR_EFF_RTT_PARK_80OHM)
+           else if (rtt_park == ENUM_ATTR_VPD_DRAM_RTT_PARK_80OHM)
            {
                rtt_park = 0x60;
            }
-           else if (rtt_park == ENUM_ATTR_EFF_RTT_PARK_34OHM)
+           else if (rtt_park == ENUM_ATTR_VPD_DRAM_RTT_PARK_34OHM)
            {
                rtt_park = 0xE0;
            }
@@ -2536,27 +2538,27 @@ ReturnCode mss_ddr4_modify_mrs_pda(Target& i_target,ecmdDataBufferBase& address_
            }
            rc_num = rc_num | address_16.insert((uint8_t) read_dbi, 12, 1);
 	   break;
-       case ATTR_VREF_DQ_TRAIN_VALUE:
+       case ATTR_EFF_VREF_DQ_TRAIN_VALUE:
 	   vrefdq_train_value = mss_reverse_8bits(vrefdq_train_value);
            rc_num = rc_num | address_16.insert((uint8_t) vrefdq_train_value, 0, 6);
 	   break;
-       case ATTR_VREF_DQ_TRAIN_RANGE:
-	   if (vrefdq_train_range == ENUM_ATTR_VREF_DQ_TRAIN_RANGE_RANGE1)
+       case ATTR_EFF_VREF_DQ_TRAIN_RANGE:
+	   if (vrefdq_train_range == ENUM_ATTR_EFF_VREF_DQ_TRAIN_RANGE_RANGE1)
            {
                vrefdq_train_range = 0x00;
            }
-           else if (vrefdq_train_range == ENUM_ATTR_VREF_DQ_TRAIN_RANGE_RANGE2)
+           else if (vrefdq_train_range == ENUM_ATTR_EFF_VREF_DQ_TRAIN_RANGE_RANGE2)
            {
                vrefdq_train_range = 0xFF;
            } 
            rc_num = rc_num | address_16.insert((uint8_t) vrefdq_train_range, 6, 1);
 	   break;
-       case ATTR_VREF_DQ_TRAIN_ENABLE:
-	   if (vrefdq_train_enable == ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_ENABLE)
+       case ATTR_EFF_VREF_DQ_TRAIN_ENABLE:
+	   if (vrefdq_train_enable == ENUM_ATTR_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE)
            {
                vrefdq_train_enable = 0xFF;
            }
-           else if (vrefdq_train_enable == ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_DISABLE)
+           else if (vrefdq_train_enable == ENUM_ATTR_EFF_VREF_DQ_TRAIN_ENABLE_DISABLE)
            {
                vrefdq_train_enable = 0x00;
            }   
@@ -3264,7 +3266,7 @@ ReturnCode mss_ddr4_load_nominal_mrs_pda(Target& i_target,ecmdDataBufferBase& ba
     	rc = FAPI_ATTR_GET(ATTR_EFF_ODT_INPUT_BUFF , &i_target, odt_input_buffer);
     	if(rc) return rc;
     	uint8_t rtt_park[2][2][4]; //RTT_Park value  -  NEW
-    	rc = FAPI_ATTR_GET(ATTR_EFF_RTT_PARK , &i_target, rtt_park);
+    	rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_RTT_PARK , &i_target, rtt_park);
     	if(rc) return rc;
     	uint8_t ca_parity; //CA Parity Persistance Error  -  NEW
     	rc = FAPI_ATTR_GET(ATTR_EFF_CA_PARITY , &i_target, ca_parity);
@@ -3364,35 +3366,35 @@ ReturnCode mss_ddr4_load_nominal_mrs_pda(Target& i_target,ecmdDataBufferBase& ba
     	{
     	    read_dbi = 0xFF;
     	}
-    	if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_RTT_PARK_DISABLE)
+    	if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_PARK_DISABLE)
     	{
     	    rtt_park[i_port_number][dimm_number][rank_number] = 0x00;
     	}
-    	else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_RTT_PARK_60OHM)
+    	else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_PARK_60OHM)
     	{
     	    rtt_park[i_port_number][dimm_number][rank_number] = 0x80;
     	}
-    	else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_RTT_PARK_40OHM)
+    	else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_PARK_40OHM)
     	{
     	    rtt_park[i_port_number][dimm_number][rank_number] = 0xC0;
     	}
-    	else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_RTT_PARK_120OHM)
+    	else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_PARK_120OHM)
     	{
     	    rtt_park[i_port_number][dimm_number][rank_number] = 0x40;
     	}
-    	else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_RTT_PARK_240OHM)
+    	else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_PARK_240OHM)
     	{
     	    rtt_park[i_port_number][dimm_number][rank_number] = 0x20;
     	}
-    	else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_RTT_PARK_48OHM)
+    	else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_PARK_48OHM)
     	{
     	    rtt_park[i_port_number][dimm_number][rank_number] = 0xA0;
     	}
-    	else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_RTT_PARK_80OHM)
+    	else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_PARK_80OHM)
     	{
     	    rtt_park[i_port_number][dimm_number][rank_number] = 0x60;
     	}
-    	else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_RTT_PARK_34OHM)
+    	else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_PARK_34OHM)
     	{
     	    rtt_park[i_port_number][dimm_number][rank_number] = 0xE0;
     	}
@@ -3421,13 +3423,13 @@ ReturnCode mss_ddr4_load_nominal_mrs_pda(Target& i_target,ecmdDataBufferBase& ba
     //MRS6
     else if(MRS == MRS6_BA) {
     	uint8_t vrefdq_train_value[2][2][4]; //vrefdq_train value   -  NEW
-    	rc = FAPI_ATTR_GET( ATTR_VREF_DQ_TRAIN_VALUE, &i_target, vrefdq_train_value);
+    	rc = FAPI_ATTR_GET( ATTR_EFF_VREF_DQ_TRAIN_VALUE, &i_target, vrefdq_train_value);
     	if(rc) return rc;
     	uint8_t vrefdq_train_range[2][2][4]; //vrefdq_train range   -  NEW
-    	rc = FAPI_ATTR_GET( ATTR_VREF_DQ_TRAIN_RANGE, &i_target, vrefdq_train_range);
+    	rc = FAPI_ATTR_GET( ATTR_EFF_VREF_DQ_TRAIN_RANGE, &i_target, vrefdq_train_range);
     	if(rc) return rc;
     	uint8_t vrefdq_train_enable[2][2][4]; //vrefdq_train enable  -  NEW
-    	rc = FAPI_ATTR_GET( ATTR_VREF_DQ_TRAIN_ENABLE, &i_target, vrefdq_train_enable);
+    	rc = FAPI_ATTR_GET( ATTR_EFF_VREF_DQ_TRAIN_ENABLE, &i_target, vrefdq_train_enable);
     	if(rc) return rc;
     	uint8_t tccd_l; //tccd_l  -  NEW
     	rc = FAPI_ATTR_GET( ATTR_TCCD_L, &i_target, tccd_l);
@@ -3455,20 +3457,20 @@ ReturnCode mss_ddr4_load_nominal_mrs_pda(Target& i_target,ecmdDataBufferBase& ba
 
     	vrefdq_train_value[i_port_number][dimm_number][rank_number] = mss_reverse_8bits(vrefdq_train_value[i_port_number][dimm_number][rank_number]);
 
-    	if (vrefdq_train_range[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VREF_DQ_TRAIN_RANGE_RANGE1)
+    	if (vrefdq_train_range[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_VREF_DQ_TRAIN_RANGE_RANGE1)
     	{
     	    vrefdq_train_range[i_port_number][dimm_number][rank_number] = 0x00;
     	}
-    	else if (vrefdq_train_range[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VREF_DQ_TRAIN_RANGE_RANGE2)
+    	else if (vrefdq_train_range[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_VREF_DQ_TRAIN_RANGE_RANGE2)
     	{
     	    vrefdq_train_range[i_port_number][dimm_number][rank_number] = 0xFF;
     	}   
 
-    	if (vrefdq_train_enable[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_ENABLE)
+    	if (vrefdq_train_enable[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE)
     	{
     	    vrefdq_train_enable[i_port_number][dimm_number][rank_number] = 0xFF;
     	}
-    	else if (vrefdq_train_enable[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_DISABLE)
+    	else if (vrefdq_train_enable[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_VREF_DQ_TRAIN_ENABLE_DISABLE)
     	{
     	    vrefdq_train_enable[i_port_number][dimm_number][rank_number] = 0x00;
     	}   

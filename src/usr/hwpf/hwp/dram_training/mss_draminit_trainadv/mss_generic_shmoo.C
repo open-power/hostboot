@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_generic_shmoo.C,v 1.101 2015/09/25 20:19:34 sglancy Exp $
+// $Id: mss_generic_shmoo.C,v 1.107 2015/11/13 10:01:29 sasethur Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_generic_shmoo.C,v $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
@@ -42,6 +42,12 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
+//   1.107 |preeragh|13-Nov-15| Run Shmoos Only on Master Ranks 256GB 3DTSV
+//   1.106 |preeragh|02-Sep-15| Run Shmoos Only on Master Ranks!
+//   1.105 |sglancy| 10-Oct-15| Changed attribute names
+//   1.104 |preeragh|20-Oct-15| Fix Report Prints and Range for WR_DDR4_Vref Range 0-50
+//   1.103 |preeragh|20-Oct-15| Remove Floating Point for V-ref Prints
+//   1.102 |preeragh|07-Oct-15| PDA - Write Back Fix - DDR4
 //   1.101 |sglancy |25-Sep-15| Fixed bug where shmoos only had a granularity of 2 ticks instead of 1
 //   1.100 |preeragh|25-Aug-15| More FW Review Comments
 //   1.99  |preeragh|25-Aug-15| More FW Review Comments
@@ -199,7 +205,7 @@ extern "C"
         uint8_t l_shmoo_param = 0;
         uint8_t rank_table_port0[8] = {0};
         uint8_t rank_table_port1[8] = {0};
-
+		uint8_t l_dram_gen = 0;
         rc = FAPI_ATTR_GET(ATTR_EFF_SCHMOO_MODE, &i_target, l_shmoo_param);
         if (rc) return rc;
         iv_shmoo_param = l_shmoo_param;
@@ -208,12 +214,13 @@ extern "C"
 
         ecmdDataBufferBase l_data_buffer1_64(64);
         uint8_t l_dram_width = 0;
+		uint8_t eff_stack_type[2][2];
 
         rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target, l_dram_width);
         if(rc) return rc;
         rc = FAPI_ATTR_SET(ATTR_MCBIST_PRINTING_DISABLE, &i_target, l_mcbist_prnt_off);
         if(rc) return rc;
-        rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target, num_ranks_per_dimm);
+        rc = FAPI_ATTR_GET(ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, &i_target, num_ranks_per_dimm);
         if(rc) return rc;
         rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &i_target, l_attr_eff_dimm_type_u8);
         if(rc) return rc;
@@ -229,7 +236,10 @@ extern "C"
         if(rc) return rc;
         rc = FAPI_ATTR_GET(ATTR_EFF_PRIMARY_RANK_GROUP3, &i_target, l_rankpgrp3);
         if(rc) return rc;
-
+		rc = FAPI_ATTR_GET(ATTR_EFF_STACK_TYPE, &i_target,eff_stack_type);
+		if(rc) return rc;
+		rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN, &i_target, l_dram_gen); 
+		if(rc) return rc;
         iv_MAX_RANKS[0]=num_ranks_per_dimm[0][0]+num_ranks_per_dimm[0][1];
         iv_MAX_RANKS[1]=num_ranks_per_dimm[1][0]+num_ranks_per_dimm[1][1];
         iv_pattern=0;
@@ -266,8 +276,19 @@ extern "C"
                     valid_rank1[l_p][l_rnk] = rank_table_port0[l_rnk];
                 else
                     valid_rank1[l_p][l_rnk] = rank_table_port1[l_rnk];
-
-                FAPI_INF("PORT - %d - RANK %d\n",l_p,valid_rank1[l_p][l_rnk]);
+			if((l_attr_eff_dimm_type_u8 == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES) && (eff_stack_type[l_p][0] == fapi::ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS) && (l_dram_gen == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4))
+			{ //3ds 256 GB Dimm
+				//FAPI_INF("3DS - 2H 256GB");
+				rank_table_port0[0] = 0;
+				rank_table_port0[1] = 4;
+				rank_table_port0[2] = 255;
+				rank_table_port0[3] = 255;
+				rank_table_port1[0] = 0;
+				rank_table_port1[1] = 4;
+				rank_table_port1[2] = 255;
+				rank_table_port1[3] = 255;
+			}
+                //FAPI_INF("PORT - %d - RANK %d\n",l_p,valid_rank1[l_p][l_rnk]);
             }
         }
         FAPI_DBG("mss_generic_shmoo : run() for shmoo type %d", shmoo_mask);
@@ -422,7 +443,7 @@ extern "C"
 
                 rc=get_min_margin2(i_target,o_right_min_margin,o_left_min_margin);
                 if(rc) return rc;
-                rc=print_report(i_target);
+                rc=print_report2(i_target);
                 if(rc) return rc;
                 FAPI_INF("%s:Minimum hold margin=%d ps and setup margin=%d ps",i_target.toEcmdString(), *o_left_min_margin,*o_right_min_margin);
             }
@@ -430,7 +451,7 @@ extern "C"
             {
                 rc=get_min_margin2(i_target,o_right_min_margin,o_left_min_margin);
                 if(rc) return rc;
-                rc=print_report(i_target);
+                rc=print_report2(i_target);
                 if(rc) return rc;
                 FAPI_INF("%s:Minimum hold margin=%d ps and setup margin=%d ps",i_target.toEcmdString(), *o_left_min_margin,*o_right_min_margin);
             }
@@ -3622,185 +3643,160 @@ extern "C"
         return rc;
     }
 
-    /*
-    	fapi::ReturnCode generic_shmoo::print_report2(const fapi::Target & i_target)
-    	{
-    		fapi::ReturnCode rc;
-    		FAPI_INF("\nIn print report!!!\n");
-    		uint8_t l_rnk, l_nibble;
-    		uint8_t l_p = 0;
-    		uint8_t i_rank = 0;
-    		uint8_t l_mbapos = 0;
-    		uint16_t l_total_margin = 0;
-    		//uint8_t l_SCHMOO_NIBBLES = 20;
-    		char * l_pMike = new char[128];
-    		char * l_str = new char[128];
-    		uint8_t l_i = 0;
-    		uint8_t l_dq = 0;
-    		uint8_t l_byte = 0;
-    		uint8_t l_bit = 0;
-    		uint8_t l_flag = 0;
-    		uint8_t l_CDarray0[80] = { 0 };
-    		uint8_t l_CDarray1[80] = { 0 };
-    		uint8_t vrefdq_train_range[2][2][4];
-    		uint32_t l_attr_mss_freq_u32 = 0;
-    		uint32_t l_attr_mss_volt_u32 = 0;
-    		uint8_t l_attr_eff_dimm_type_u8 = 0;
-    		uint8_t l_attr_eff_num_drops_per_port_u8 = 0;
-    		uint8_t l_attr_eff_dram_width_u8 = 0;
-    		fapi::Target l_target_centaur;
-    		uint8_t l_dram_gen = 1;
-    		uint8_t base_percent = 60;
-    		float index_mul_print = 0.65;
-    		float vref_val_print = 0;
+fapi::ReturnCode generic_shmoo::print_report2(const fapi::Target & i_target)
+{
+    fapi::ReturnCode rc;
 
+    uint8_t l_rnk, l_byte, l_nibble, l_bit;
+    uint8_t l_p = 0;
+    uint8_t i_rank = 0;
+    uint8_t l_mbapos = 0;
+    uint32_t l_attr_mss_freq_u32 = 0;
+    uint32_t l_attr_mss_volt_u32 = 0;
+    uint8_t l_attr_eff_dimm_type_u8 = 0;
+    uint8_t l_attr_eff_num_drops_per_port_u8 = 0;
+    uint8_t l_attr_eff_dram_width_u8 = 0;
+    uint16_t l_total_margin = 0;
+	uint8_t l_dq = 0;
+	char * l_pMike = new char[128];
+    char * l_str = new char[128];
+	
+	fapi::Target l_target_centaur;
 
-    		rc = fapiGetParentChip(i_target, l_target_centaur); if(rc) return rc;
-    		rc = FAPI_ATTR_GET( ATTR_VREF_DQ_TRAIN_RANGE, &i_target, vrefdq_train_range);if(rc) return rc;
-    		rc = FAPI_ATTR_GET(ATTR_MSS_FREQ, &l_target_centaur, l_attr_mss_freq_u32); if(rc) return rc;
-    		rc = FAPI_ATTR_GET(ATTR_MSS_VOLT, &l_target_centaur, l_attr_mss_volt_u32); if(rc) return rc;
-    		rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &i_target, l_attr_eff_dimm_type_u8); if(rc) return rc;
-    		rc = FAPI_ATTR_GET(ATTR_EFF_NUM_DROPS_PER_PORT, &i_target, l_attr_eff_num_drops_per_port_u8); if(rc) return rc;
-    		rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target, l_attr_eff_dram_width_u8); if(rc) return rc;
-    		rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target, l_mbapos);if(rc) return rc;
-    		rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN, &i_target, l_dram_gen); if(rc) return rc;
+    rc = fapiGetParentChip(i_target, l_target_centaur);
+    if (rc) return rc;
+	
+	uint8_t l_dram_gen = 1;
+	uint32_t base_percent = 60000;
+	uint32_t index_mul_print = 650;
+	uint32_t vref_val_print = 0;
+    uint8_t vrefdq_train_range[2][2][4];
+	
+	rc = FAPI_ATTR_GET( ATTR_EFF_VREF_DQ_TRAIN_RANGE, &i_target, vrefdq_train_range);if(rc) return rc;
+	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN, &i_target, l_dram_gen); if(rc) return rc;
+	
+	if(vrefdq_train_range[0][0][0] == 1)
+	{
+	base_percent = 45000;
+	}
+	
+	vref_val_print = base_percent + (iv_vref_mul * index_mul_print);
+	
+    rc = FAPI_ATTR_GET(ATTR_MSS_FREQ, &l_target_centaur, l_attr_mss_freq_u32);
+    if (rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_MSS_VOLT, &l_target_centaur, l_attr_mss_volt_u32);
+    if (rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &i_target, l_attr_eff_dimm_type_u8);
+    if (rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_NUM_DROPS_PER_PORT, &i_target,
+                       l_attr_eff_num_drops_per_port_u8);
+    if (rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target,
+                       l_attr_eff_dram_width_u8);
+    if (rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target, l_mbapos);
+    if (rc) return rc;
 
+    FAPI_INF("%s: freq = %d on %s.", i_target.toEcmdString(),
+             l_attr_mss_freq_u32, l_target_centaur.toEcmdString());
+    FAPI_INF("%s: volt = %d on %s.", i_target.toEcmdString(),
+             l_attr_mss_volt_u32, l_target_centaur.toEcmdString());
+    FAPI_INF("%s: dimm_type = %d on %s.", i_target.toEcmdString(),
+             l_attr_eff_dimm_type_u8, i_target.toEcmdString());
+	//FAPI_INF("%s: +++ Preet1 %d +++ ", i_target.toEcmdString(),vref_val_print);
+			 
+    if (l_attr_eff_dimm_type_u8 == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
+    {
+        FAPI_INF("%s: It is a CDIMM", i_target.toEcmdString());
+    }
+    else
+    {
+        FAPI_INF("%s: It is an ISDIMM", i_target.toEcmdString());
+    }
+    FAPI_INF("%s: \n Number of ranks on port = 0 is %d ",
+             i_target.toEcmdString(), iv_MAX_RANKS[0]);
+    FAPI_INF("%s: \n Number of ranks on port = 1 is %d \n \n",
+             i_target.toEcmdString(), iv_MAX_RANKS[1]);
 
+    //FAPI_INF("%s:num_drops_per_port = %d on %s.", l_attr_eff_num_drops_per_port_u8, i_target.toEcmdString());
+    //FAPI_INF("%s:num_ranks  = %d on %s.", iv_MAX_RANKS,i_target.toEcmdString());
+    FAPI_INF("dram_width = %d  \n\n", l_attr_eff_dram_width_u8);
+    FAPI_INF("%s:+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++",
+             i_target.toEcmdString());
+    //// Based on schmoo param the print will change eventually
 
-    		if(vrefdq_train_range[0][0][0] == 1)
-    		{
-    			base_percent = 45;
-    		}
+    if (iv_shmoo_type == 0)
+    {
+        sprintf(l_pMike, "Schmoo  POS\tPort\tRank\tByte\tnibble\t\tSetup_Limit\tHold_Limit\tWrD_Setup(ps)\tWrD_Hold(ps)\tEye_Width(ps)\tBitRate\tVref_Multiplier  ");
+    }
+    else
+    {
+        sprintf(l_pMike, "Schmoo  POS\tPort\tRank\tByte\tnibble\t\tSetup_Limit\tHold_Limit\tRdD_Setup(ps)\tRdD_Hold(ps)\tEye_Width(ps)\tBitRate\tVref_Multiplier  ");
+    }
+    //FAPI_INF("Schmoo  POS\tPort\tRank\tByte\tnibble\tbit\tNominal\t\tSetup_Limit\tHold_Limit \n");
+    FAPI_INF("%s", l_pMike);
+    delete[] l_pMike;
 
-    		vref_val_print = base_percent + (iv_vref_mul * index_mul_print);
-    		FAPI_INF("%s: freq = %d on %s.",i_target.toEcmdString(),l_attr_mss_freq_u32, l_target_centaur.toEcmdString());
-    		FAPI_INF("%s: volt = %d on %s.",i_target.toEcmdString(), l_attr_mss_volt_u32, l_target_centaur.toEcmdString());
-    		FAPI_INF("%s: dimm_type = %d on %s.",i_target.toEcmdString(), l_attr_eff_dimm_type_u8, i_target.toEcmdString());
-    		if ( l_attr_eff_dimm_type_u8 == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES )
-    		{
-    			FAPI_INF("%s: It is a CDIMM",i_target.toEcmdString());
-    		}
-    		else
-    		{
-    			FAPI_INF("%s: It is an ISDIMM",i_target.toEcmdString());
-    		}
-    		FAPI_INF("%s: \n Number of ranks on port = 0 is %d ",i_target.toEcmdString(),iv_MAX_RANKS[0]);
-    		FAPI_INF("%s: \n Number of ranks on port = 1 is %d \n \n",i_target.toEcmdString(),iv_MAX_RANKS[1]);
-    		if (iv_shmoo_type == 2)
-    		{
-    			FAPI_INF("\n\n********************* WR_EYE Margins ********************** \n\n");
-    			sprintf(l_pMike, "\nSchmoo\tP\tP\tR\tB\tN\tBi\tNom\t\tRb\t\tLb\t\tSetup\t\tHold\t\tTotal\tfreq\tiv_ref_mul  ");
+    for (l_p = 0; l_p < MAX_PORT; l_p++)
+    {
+        for (l_rnk = 0; l_rnk < iv_MAX_RANKS[l_p]; l_rnk++)
+        {
+            
+            i_rank = valid_rank1[l_p][l_rnk];
+            
+            for (l_byte = 0; l_byte < iv_MAX_BYTES; l_byte++)
+            {
+                //Nibble loop
+                for (l_nibble = 0; l_nibble < MAX_NIBBLES; l_nibble++)
+                {	
+				
+                    for (l_bit = 0; l_bit < MAX_BITS; l_bit++) 
+                    {
+                        l_dq = 8 * l_byte + 4 * l_nibble + l_bit;
+                        l_total_margin
+                            = SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_dq]
+                                + SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_dq];
+								if(l_dram_gen==2)
+								{
+								sprintf(l_str, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d",
+                                l_mbapos, l_p, i_rank, l_byte, l_nibble, l_bit,
+                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.nom_val[l_dq],
+                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_dq],
+                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq],
+                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_dq],
+                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_dq],
+                                l_total_margin, l_attr_mss_freq_u32, vref_val_print);
+								}
+								else 
+								{
+								sprintf(l_str, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d",
+                                l_mbapos, l_p, i_rank, l_byte, l_nibble, l_bit,
+                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.nom_val[l_dq],
+                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_dq],
+                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq],
+                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_dq],
+                                SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_dq],
+                                l_total_margin, l_attr_mss_freq_u32, iv_vref_mul);
+								}
+                        if (iv_shmoo_type == 2)
+                        {
+                            FAPI_ERR("WR_EYE %s ", l_str);
+                            
+                        }
+                        if (iv_shmoo_type == 8)
+                        {
+                            FAPI_ERR("RD_EYE %s ", l_str);
+                            
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-    		}
-    		else
-    		{
-    			FAPI_INF("\n\n********************* RD_EYE Margins ********************** \n\n");
-    			sprintf(l_pMike, "\nSchmoo\tP\tP\tR\tB\tN\tBi\tNom\t\tRb\t\tLb\t\tSetup\t\tHold\t\tTotal\t\tfreq\t\tiv_ref_mul  ");
-    		}
-    		//printf("Schmoo  POS\tPort\tRank\tByte\tnibble\tbit\tNominal\t\tSetup_Limit\tHold_Limit \n");
-    		FAPI_INF("%s", l_pMike);
-    		delete[] l_pMike;
-
-
-
-    		rc=mcb_error_map(i_target,mcbist_error_map,l_CDarray0,l_CDarray1,count_bad_dq);if(rc)return rc;
-
-
-    		for (l_p = 0; l_p < MAX_PORT; l_p++)
-    		{
-    			for (l_rnk = 0; l_rnk < iv_MAX_RANKS[l_p]; l_rnk++)
-    			{
-    				//////
-
-    				i_rank = valid_rank1[l_p][l_rnk];
-    				////
-
-    				for (l_byte = 0; l_byte < iv_MAX_BYTES; l_byte++)
-    				{
-    					//Nibble loop
-    					for (l_nibble = 0; l_nibble < MAX_NIBBLES; l_nibble++)
-    					{
-
-    						l_dq=8 * l_byte + 4 * l_nibble;
-    						l_flag=0;
-    						if (l_p == 0)
-    						{
-    							for (l_i = 0; l_i < count_bad_dq[0]; l_i++)
-    							{
-    								if (l_CDarray0[l_i] == l_dq)
-    								{
-    									l_flag=1;
-
-    								}
-    							}
-    						}
-    						else
-    						{
-    							for (l_i = 0; l_i < count_bad_dq[1]; l_i++)
-    							{
-    								if (l_CDarray1[l_i] == l_dq)
-    								{
-    									l_flag=1;
-
-    								}
-    							}
-    						}
-
-    						if(l_flag==1)
-    						{
-    							//printf("Would normally skip prints...\n");
-    							//continue;
-    						}
-    						for (l_bit = 0; l_bit < MAX_BITS; l_bit++)
-    						{
-    							l_dq = 8 * l_byte + 4 * l_nibble + l_bit;
-    							l_total_margin
-    							= SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_dq]
-    							+ SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_dq];
-    							if(l_dram_gen ==2)
-    							{
-    								sprintf(l_str, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%f",
-    								l_mbapos, l_p, i_rank, l_byte, l_nibble, l_bit,
-    								SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.nom_val[l_dq],
-    								SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_dq],
-    								SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq],
-    								SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_dq],
-    								SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_dq],
-    								l_total_margin, l_attr_mss_freq_u32, vref_val_print);
-
-    							}
-    							else
-    							{
-    								sprintf(l_str, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d",
-    								l_mbapos, l_p, i_rank, l_byte, l_nibble, l_bit,
-    								SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.nom_val[l_dq],
-    								SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.rb_regval[l_dq],
-    								SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.lb_regval[l_dq],
-    								SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.right_margin_val[l_dq],
-    								SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[i_rank].K.left_margin_val[l_dq],
-    								l_total_margin, l_attr_mss_freq_u32, iv_vref_mul);
-    							}
-    							if (iv_shmoo_type == 2)
-    							{
-    								FAPI_INF("\nWR_EYE %s ", l_str);
-
-    							}
-    							else if (iv_shmoo_type == 8)
-    							{
-    								FAPI_INF("\nRD_EYE %s ", l_str);
-
-    							}
-    						}
-    					}
-    				}
-    			}
-    		}
-
-    		delete[] l_str;
-
-    		return rc;
-    	}
-    */  //end of print report test code
+    delete[] l_str;
+    return rc;
+}
 
     fapi::ReturnCode generic_shmoo::get_margin_dqs_by4(const fapi::Target & i_target)
     {
@@ -4280,38 +4276,47 @@ extern "C"
 
     }
 
-    fapi::ReturnCode generic_shmoo::get_nibble_pda(const fapi::Target & i_target,uint32_t pda_nibble_table[2][2][16][2])
-    {
-        fapi::ReturnCode rc;
-        uint8_t i_rank = 0;
-
-        for (int l_p=0; l_p < MAX_PORT; l_p++) {
-            for (int l_rnk=0; l_rnk<iv_MAX_RANKS[l_p]; l_rnk++)
-            {
-                ////
-                i_rank=valid_rank1[l_p][l_rnk];
-                for(int l_dq = 0; l_dq < 4; l_dq++) {
-                    for (int l_n=0; l_n < 16; l_n++) {
-                        // do necessary
-                        //if(pda_nibble_table[l_p][i_rank][l_n][1] < FAPI_INF.MBA.P[l_p].S[i_rank].K.total_margin[l_dq+l_n*4])
-                        {
-                            pda_nibble_table[l_p][i_rank][l_n][0] = iv_vref_mul;
-                            pda_nibble_table[l_p][i_rank][l_n][1] = SHMOO[iv_DQS_ON].MBA.P[l_p].S[i_rank].K.total_margin[l_dq+l_n*4];
-                        }
-                        //FAPI_INF("\n Port %d Rank:%d Pda_Nibble: %d  V-ref:%d  Margin:%d",l_p,i_rank,l_n,pda_nibble_table[l_p][i_rank][l_n][0],pda_nibble_table[l_p][i_rank][l_n][1]);
-                    }
-                }
-
-            }
-        }
-        return rc;
-    }
-    /*------------------------------------------------------------------------------
-    * Function: get_min_margin
-    * Description  : This function is used to get the minimum margin of all the schmoo margins
-    *
-    * Parameters: Target:MBA,right minimum margin , left minimum margin, pass fail
-    * ---------------------------------------------------------------------------*/
+	fapi::ReturnCode generic_shmoo::get_nibble_pda(const fapi::Target & i_target,uint32_t pda_nibble_table[2][2][4][16][2])
+	{
+		fapi::ReturnCode rc;
+		//uint8_t i_rank = 0;
+		uint8_t l_dimm = 0;
+		uint8_t num_ranks_per_dimm[2][2];
+		
+		rc = FAPI_ATTR_GET(ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, &i_target, num_ranks_per_dimm); if(rc) return rc;
+		
+		for (int l_p=0;l_p < MAX_PORT;l_p++){
+		 for (l_dimm=0;l_dimm < 2;l_dimm++){
+			for (int l_rnk=0;l_rnk < num_ranks_per_dimm[l_p][l_dimm];l_rnk++)
+			{
+				////
+				for(int l_dq = 0; l_dq < 4;l_dq++){
+					for (int l_n=0; l_n < 16;l_n++){
+						// do necessary
+						//if(pda_nibble_table[l_p][i_rank][l_n][1] < FAPI_INF.MBA.P[l_p].S[i_rank].K.total_margin[l_dq+l_n*4])
+						{
+							pda_nibble_table[l_p][l_dimm][l_rnk][l_n][0] = iv_vref_mul;
+							
+							if(l_dimm == 0)
+							{pda_nibble_table[l_p][l_dimm][l_rnk][l_n][1] = SHMOO[iv_DQS_ON].MBA.P[l_p].S[l_rnk].K.total_margin[l_dq+l_n*4];}
+							else
+							{pda_nibble_table[l_p][l_dimm][l_rnk][l_n][1] = SHMOO[iv_DQS_ON].MBA.P[l_p].S[l_rnk+4].K.total_margin[l_dq+l_n*4];}
+						}
+						//FAPI_INF("\n Port %d Rank:%d Pda_Nibble: %d  V-ref:%d  Margin:%d",l_p,i_rank,l_n,pda_nibble_table[l_p][i_rank][l_n][0],pda_nibble_table[l_p][i_rank][l_n][1]);
+					}
+				}
+				
+			}
+		}
+		}						
+		return rc;
+	}
+	/*------------------------------------------------------------------------------
+* Function: get_min_margin
+* Description  : This function is used to get the minimum margin of all the schmoo margins
+*
+* Parameters: Target:MBA,right minimum margin , left minimum margin, pass fail
+* ---------------------------------------------------------------------------*/
 
     fapi::ReturnCode generic_shmoo::get_min_margin2(const fapi::Target & i_target,uint32_t *o_right_min_margin,uint32_t *o_left_min_margin)
     {

@@ -1,8 +1,10 @@
-/#-- $Id: mba_def.initfile,v 1.76 2015/07/16 22:50:59 asaetow Exp $
+/#-- $Id: mba_def.initfile,v 1.78 2015/11/13 16:10:48 sglancy Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.78|sglancy |11/13/15| Added masking of MCBIST done special attention bit
+#--     1.77|yctschan|11/02/15| Added DDR4 1600 12_11_11 and 13_12_11 part defines
 #--     1.76|asaetow |07/16/15| Fixed define of def_RDODT_start_udimm and def_RDODT_start_rdimm which currently effects Habanero dual-drop and 128G CDIMM termination.
 #--     1.75|yctschan| 6/09/15| Updated Fast/Slow exit power down settings for MBAPC1Q and MBAREF1Q register
 #--     1.74|yctschan| 4/10/15| SW302059 - turn off row hammer when ATTR_CENTAUR_EC_ENABLE_ROW_HAMMER_FEATURE is 1
@@ -342,7 +344,17 @@ define  def_2400_8gb_fast_exit_pd_ddr4 = ((CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( 
 #gdial std_timming               ( mba_tmr0q_RRDM_dly, mba_tmr0q_RWSMSR_dly, mba_tmr0q_RWSMDR_dly, mba_tmr0q_RWDM_dly, mba_tmr0q_WRSMSR_dly, mba_tmr0q_WRSMDR_dly,   mba_tmr0q_WRDM_dly,    mba_tmr0q_WWDM_dly,  mba_tmr0q_RROP_dly,  mba_tmr0q_WWOP_dly, mba_tmr1q_RRSBG_dly,  MBA_TMR1Q_WRSBG_dly,  mba_tmr1q_cfg_trap,  mba_tmr1q_cfg_twap,  mba_dsm0q_cfg_rdtag_dly,  mba_dsm0q_cfg_wrdata_dly,  mba_dsm0q_cfg_wrdone_dly,  mba_dsm0q_CFG_RODT_start_dly,  mba_dsm0q_CFG_RODT_end_dly, mba_dsm0q_CFG_RODT_BC4_END_DLY,   mba_dsm0q_CFG_WODT_start_dly,  mba_dsm0q_CFG_WODT_end_dly, mba_dsm0q_CFG_WODT_BC4_END_DLY,  srqdbg.cfg_std_timing_id)=
 
 
+define  def_ddr3_1600_12_11_11    = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr3_1600_12_11_11R   = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
+define  def_ddr3_1600_12_11_11_2N = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr3_1600_12_11_11_L2 = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr3_1600_12_11_11_LR = ((ATTR_EFF_DRAM_GEN == 1 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
 
+define  def_ddr4_1600_13_12_11    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ((( ATTR_VPD_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 2)) || (( ATTR_VPD_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 1 ))));
+define  def_ddr4_1600_13_12_11R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
+define  def_ddr4_1600_13_12_11_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 2));
+define  def_ddr4_1600_13_12_11_L2 = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
+define  def_ddr4_1600_13_12_11_LR = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
 
 
 
@@ -442,16 +454,6 @@ define  def_ddr4_1866_13_13_13_L2 = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR
 define  def_ddr4_1866_13_13_13_LR = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
 
 # DDR4 2133 12 -13  - not supported
-#define  def_ddr4_2133_12_12_12    = 0;
-#define  def_ddr4_2133_12_12_12R   = 0;
-#define  def_ddr4_2133_12_12_12_2N = 0;
-#define  def_ddr4_2133_12_12_12_L2 = 0;
-#define  def_ddr4_2133_12_12_12_LR = 0;
-#define  def_ddr4_2133_13_13_13    = 0;
-#define  def_ddr4_2133_13_13_13R   = 0;
-#define  def_ddr4_2133_13_13_13_2N = 0;
-#define  def_ddr4_2133_13_13_13_L2 = 0;
-#define  def_ddr4_2133_13_13_13_LR = 0;
 define  def_ddr4_2133_12_12_12    = (CENTAUR.ATTR_MSS_FREQ == 1400);
 define  def_ddr4_2133_12_12_12R   = (CENTAUR.ATTR_MSS_FREQ == 1400);
 define  def_ddr4_2133_12_12_12_2N = (CENTAUR.ATTR_MSS_FREQ == 1400);
@@ -463,28 +465,8 @@ define  def_ddr4_2133_13_13_13_2N = (CENTAUR.ATTR_MSS_FREQ == 1400);
 define  def_ddr4_2133_13_13_13_L2 = (CENTAUR.ATTR_MSS_FREQ == 1400);
 define  def_ddr4_2133_13_13_13_LR = (CENTAUR.ATTR_MSS_FREQ == 1400);
 
-#define  def_ddr4_2133_12_12_12    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ((( ATTR_VPD_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 2)) || (( ATTR_VPD_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 1 ))));
-#define  def_ddr4_2133_12_12_12R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
-#define  def_ddr4_2133_12_12_12_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr4_2133_12_12_12_L2 = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
-#define  def_ddr4_2133_12_12_12_LR = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
-#define  def_ddr4_2133_13_13_13    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ((( ATTR_VPD_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 2)) || (( ATTR_VPD_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 1 ))));
-#define  def_ddr4_2133_13_13_13R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
-#define  def_ddr4_2133_13_13_13_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr4_2133_13_13_13_L2 = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
-#define  def_ddr4_2133_13_13_13_LR = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2133 ) && ( ATTR_EFF_DRAM_CL == 13 ) && ( ATTR_EFF_DRAM_TRCD == 13 ) && ( ATTR_EFF_DRAM_TRP == 13 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
 
 # DDR4 2400 13-14 not supported
-#define  def_ddr4_2400_13_13_13    = 0;
-#define  def_ddr4_2400_13_13_13R   = 0;
-#define  def_ddr4_2400_13_13_13_2N = 0;
-#define  def_ddr4_2400_13_13_13_L2 = 0;
-#define  def_ddr4_2400_13_13_13_LR = 0;
-#define  def_ddr4_2400_14_14_14    = 0;
-#define  def_ddr4_2400_14_14_14R   = 0;
-#define  def_ddr4_2400_14_14_14_2N = 0;
-#define  def_ddr4_2400_14_14_14_L2 = 0;
-#define  def_ddr4_2400_14_14_14_LR = 0;
 define  def_ddr4_2400_13_13_13    = (CENTAUR.ATTR_MSS_FREQ == 1400);
 define  def_ddr4_2400_13_13_13R   = (CENTAUR.ATTR_MSS_FREQ == 1400);
 define  def_ddr4_2400_13_13_13_2N = (CENTAUR.ATTR_MSS_FREQ == 1400);
@@ -507,13 +489,6 @@ define  def_ddr4_2400_14_14_14_LR = (CENTAUR.ATTR_MSS_FREQ == 1400);
 #define  def_ddr4_2400_14_14_14_L2 = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 14 ) && ( ATTR_EFF_DRAM_TRCD == 14 ) && ( ATTR_EFF_DRAM_TRP == 14 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 3));
 #define  def_ddr4_2400_14_14_14_LR = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 2400 ) && ( ATTR_EFF_DRAM_CL == 14 ) && ( ATTR_EFF_DRAM_TRCD == 14 ) && ( ATTR_EFF_DRAM_TRP == 14 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 3));
 
-#define  def_ddr4_1600_10_10_10    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr3_1600_10_10_10R   = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 1 ));
-#define  def_ddr4_1600_10_10_10_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 10 ) && ( ATTR_EFF_DRAM_TRCD == 10 ) && ( ATTR_EFF_DRAM_TRP == 10 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr4_1600_11_11_11    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr4_1600_11_11_11_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr4_1600_9_9_9       = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 2));
-#define  def_ddr4_1600_9_9_9_2N    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1600 ) && ( ATTR_EFF_DRAM_CL == 9  ) && ( ATTR_EFF_DRAM_TRCD == 9  ) && ( ATTR_EFF_DRAM_TRP == 9  ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 2));
 #define  def_ddr4_1866_11_11_11    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 2));
 #define  def_ddr4_1866_11_11_11_2N = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 11 ) && ( ATTR_EFF_DRAM_TRCD == 11 ) && ( ATTR_EFF_DRAM_TRP == 11 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 1 ) && (ATTR_EFF_DIMM_TYPE == 2));
 #define  def_ddr4_1866_12_12_12    = ((ATTR_EFF_DRAM_GEN == 2 ) && ( CENTAUR.ATTR_MSS_FREQ == 1866 ) && ( ATTR_EFF_DRAM_CL == 12 ) && ( ATTR_EFF_DRAM_TRCD == 12 ) && ( ATTR_EFF_DRAM_TRP == 12 ) && ( ATTR_VPD_DRAM_2N_MODE_ENABLED == 0 ) && (ATTR_EFF_DIMM_TYPE == 2));
@@ -531,11 +506,12 @@ define  def_mba_tmr0q_RW_dlys8  = ((def_ddr3_1066_7_7_7      )||( def_ddr3_1066_
 define  def_mba_tmr0q_RW_dlys9  = ((def_ddr3_1066_8_8_8      )||( def_ddr3_1066_8_8_8_2N    )||( def_ddr3_1066_8_8_8R      )||( def_ddr3_1333_9_9_9       )||(def_ddr3_1600_10_10_10    )||(def_ddr3_1333_9_9_9_2N    )||(def_ddr3_1600_10_10_10_2N )||(def_ddr3_1333_9_9_9R      )||(def_ddr3_1600_10_10_10R   )||(def_ddr4_1600_11_11_11    )||(def_ddr4_1866_11_11_11    )||(def_ddr4_2133_12_12_12    )||(def_ddr4_1600_11_11_11_2N )||(def_ddr4_1866_11_11_11_2N )||(def_ddr4_2133_12_12_12_2N )||(def_ddr4_1600_11_11_11R   )||(def_ddr4_1866_11_11_11R   )||(def_ddr4_2133_12_12_12R   ));
 define  def_mba_tmr0q_RW_dlys10 = ((def_ddr4_1600_12_12_12)||(def_ddr4_1600_12_12_12_2N)||(def_ddr4_1600_12_12_12R)||(def_ddr4_2133_13_13_13R)||(def_ddr4_2133_13_13_13_2N )||(def_ddr4_2133_13_13_13    )||(def_ddr3_1600_11_11_11    )||(def_ddr3_1866_11_11_11    )||(def_ddr3_1600_11_11_11_2N )||(def_ddr3_1866_11_11_11_2N )||(def_ddr3_1600_11_11_11R   )||(def_ddr3_1866_11_11_11R   )||(def_ddr4_1866_12_12_12    )||(def_ddr4_2400_13_13_13    )||(def_ddr4_1866_12_12_12_2N )||(def_ddr4_2400_13_13_13_2N )||(def_ddr4_1866_12_12_12R   )||(def_ddr4_2400_13_13_13R));
 define  def_mba_tmr0q_RW_dlys11 = ((def_ddr4_1866_13_13_13)||(def_ddr4_1866_13_13_13_2N)||(def_ddr4_1866_13_13_13R)||(def_ddr3_1066_6_6_6_L2)||( def_ddr3_1066_6_6_6_LR    )||(def_ddr3_1866_12_12_12    )||(def_ddr3_1866_12_12_12_2N )||(def_ddr3_1866_12_12_12R   )||(def_ddr4_2400_14_14_14    )||(def_ddr4_2400_14_14_14_2N )||(def_ddr4_2400_14_14_14R   )||(def_ddr4_1600_9_9_9_LR    )||(def_ddr4_1600_9_9_9_L2));
-define  def_mba_tmr0q_RW_dlys12 = (( def_ddr3_1066_7_7_7_L2)||( def_ddr3_1066_7_7_7_LR    )||(def_ddr3_1333_8_8_8_LR    )||(def_ddr3_1600_9_9_9_LR    )||(def_ddr3_1333_8_8_8_L2    )||(def_ddr3_1600_9_9_9_L2    )||(def_ddr4_1600_10_10_10_LR )||(def_ddr4_1600_10_10_10_L2));
+define  def_mba_tmr0q_RW_dlys12 = ((def_ddr4_1600_13_12_11)||(def_ddr4_1600_13_12_11_2N)||(def_ddr4_1600_13_12_11R)||( def_ddr3_1066_7_7_7_L2)||( def_ddr3_1066_7_7_7_LR    )||(def_ddr3_1333_8_8_8_LR    )||(def_ddr3_1600_9_9_9_LR    )||(def_ddr3_1333_8_8_8_L2    )||(def_ddr3_1600_9_9_9_L2    )||(def_ddr4_1600_10_10_10_LR )||(def_ddr4_1600_10_10_10_L2));
 # change RW_dly for LRDIMMs
 define  def_mba_tmr0q_RW_dlys13 = (( def_ddr3_1066_8_8_8_L2)||( def_ddr3_1066_8_8_8_LR    )||(def_ddr3_1333_9_9_9_L2    )||(def_ddr3_1600_10_10_10_L2 )||(def_ddr3_1866_11_11_11_L2 )||(def_ddr4_1600_11_11_11_LR )||(def_ddr4_1866_11_11_11_LR )||(def_ddr4_2133_12_12_12_LR )||(def_ddr4_1600_11_11_11_L2 )||(def_ddr4_1866_11_11_11_L2 )||(def_ddr4_2133_12_12_12_L2 ));
 define  def_mba_tmr0q_RW_dlys14 = ((def_ddr4_1600_12_12_12_LR)||(def_ddr4_1600_12_12_12_L2)||(def_ddr4_2133_13_13_13_L2)||(def_ddr4_2133_13_13_13_LR )||(def_ddr3_1600_11_11_11_LR )||(def_ddr3_1866_12_12_12_LR )||(def_ddr3_1600_11_11_11_L2 )||(def_ddr3_1866_12_12_12_L2 )||(def_ddr4_1866_12_12_12_LR )||(def_ddr4_2400_13_13_13_LR )||(def_ddr4_1866_12_12_12_L2 )||(def_ddr4_2400_13_13_13_L2)||(def_ddr3_1333_9_9_9_LR    )||(def_ddr3_1600_10_10_10_LR )||(def_ddr3_1866_11_11_11_LR ));
-define  def_mba_tmr0q_RW_dlys15 = ((def_ddr4_1866_13_13_13_LR)||(def_ddr4_1866_13_13_13_L2)||(def_ddr4_2400_14_14_14_LR )||(def_ddr4_2400_14_14_14_L2));
+define  def_mba_tmr0q_RW_dlys15 = ((def_ddr4_1600_13_12_11_LR)||(def_ddr4_1600_13_12_11_L2)||(def_ddr4_1866_13_13_13_LR)||(def_ddr4_1866_13_13_13_L2)||(def_ddr4_2400_14_14_14_LR )||(def_ddr4_2400_14_14_14_L2));
+define  def_mba_tmr0q_RW_dlys16 = ((def_ddr4_1600_13_12_11_LR)||(def_ddr4_1600_13_12_11_L2));
 
 #new  19,20,21
 
@@ -546,7 +522,7 @@ define  def_mba_tmr0q_WRSM_dlys21 = (def_ddr3_1066_8_8_8_group);
 define  def_mba_tmr0q_WRSM_dlys23 = ((def_ddr3_1333_8_8_8       )||(def_ddr3_1333_8_8_8_2N    )||(def_ddr3_1333_8_8_8R      )||(def_ddr3_1333_8_8_8_LR    )||(def_ddr3_1333_8_8_8_L2));
 define  def_mba_tmr0q_WRSM_dlys24 = ((def_ddr3_1333_9_9_9       )||(def_ddr3_1333_9_9_9_2N    )||(def_ddr3_1333_9_9_9R      )||(def_ddr3_1333_9_9_9_LR    )||(def_ddr3_1333_9_9_9_L2    ));
 define  def_mba_tmr0q_WRSM_dlys25 = ((def_ddr4_1600_9_9_9       )||(def_ddr4_1600_9_9_9_2N    )||(def_ddr4_1600_9_9_9R      )||(def_ddr4_1600_9_9_9_LR    )||(def_ddr4_1600_9_9_9_L2    ));
-define  def_mba_tmr0q_WRSM_dlys26 = ((def_ddr3_1600_9_9_9       )||(def_ddr3_1600_9_9_9_2N    )||(def_ddr3_1600_9_9_9R      )||(def_ddr3_1600_9_9_9_LR    )||(def_ddr3_1600_9_9_9_L2    )||(def_ddr4_1600_10_10_10    )||(def_ddr4_1600_10_10_10_2N )||(def_ddr4_1600_10_10_10R   )||(def_ddr4_1600_10_10_10_LR )||(def_ddr4_1600_10_10_10_L2 ));
+define  def_mba_tmr0q_WRSM_dlys26 = ((def_ddr3_1600_9_9_9       )||(def_ddr3_1600_9_9_9_2N    )||(def_ddr3_1600_9_9_9R      )||(def_ddr3_1600_9_9_9_LR    )||(def_ddr3_1600_9_9_9_L2    )||(def_ddr4_1600_10_10_10    )||(def_ddr4_1600_10_10_10_2N )||(def_ddr4_1600_10_10_10R   )||(def_ddr4_1600_10_10_10_LR )||(def_ddr4_1600_10_10_10_L2 )||(def_ddr4_1600_13_12_11));
 define  def_mba_tmr0q_WRSM_dlys27 = ((def_ddr3_1600_10_10_10    )||(def_ddr3_1600_10_10_10_2N )||(def_ddr3_1600_10_10_10R   )||(def_ddr3_1600_10_10_10_LR )||(def_ddr3_1600_10_10_10_L2 )||(def_ddr4_1600_11_11_11    )||(def_ddr4_1600_11_11_11_2N )||(def_ddr4_1600_11_11_11R   )||(def_ddr4_1600_11_11_11_LR )||(def_ddr4_1600_11_11_11_L2 ));
 define  def_mba_tmr0q_WRSM_dlys28 = (def_ddr4_1600_12_12_12    ||def_ddr4_1600_12_12_12_2N ||def_ddr4_1600_12_12_12R   ||def_ddr4_1600_12_12_12_LR ||def_ddr4_1600_12_12_12_L2 || (def_ddr3_1600_11_11_11    )||(def_ddr3_1600_11_11_11_2N )||(def_ddr3_1600_11_11_11R   )||(def_ddr3_1600_11_11_11_LR )||(def_ddr3_1600_11_11_11_L2 )||(def_ddr4_1866_11_11_11    )||(def_ddr4_1866_11_11_11_2N )||(def_ddr4_1866_11_11_11R   )||(def_ddr4_1866_11_11_11_LR )||(def_ddr4_1866_11_11_11_L2 ));
 define  def_mba_tmr0q_WRSM_dlys29 = ((def_ddr4_1866_12_12_12    )||(def_ddr4_1866_12_12_12_2N )||(def_ddr4_1866_12_12_12R   )||(def_ddr4_1866_12_12_12_LR )||(def_ddr4_1866_12_12_12_L2 ));
@@ -556,7 +532,7 @@ define  def_mba_tmr0q_WRSM_dlys32 = (def_ddr4_1866_13_13_13    ||def_ddr4_1866_1
 define  def_mba_tmr0q_WRSM_dlys33 = ((def_ddr4_2400_14_14_14    )||(def_ddr4_2400_14_14_14_2N )||(def_ddr4_2400_14_14_14R   )||(def_ddr4_2400_14_14_14_LR )||(def_ddr4_2400_14_14_14_L2 ));
 
 #new 7,6,5
-define  def_mba_tmr0q_WRDM_dlys4 = (def_ddr4_1600_12_12_12    ||def_ddr4_1600_12_12_12_2N ||def_ddr4_1600_12_12_12R   ||def_ddr4_1600_12_12_12_LR ||def_ddr4_1600_12_12_12_L2 || (def_ddr3_1600_11_11_11    )||(def_ddr3_1600_11_11_11_2N )||(def_ddr3_1600_11_11_11R   )||(def_ddr3_1600_11_11_11_LR )||(def_ddr3_1600_11_11_11_L2));
+define  def_mba_tmr0q_WRDM_dlys4 = (def_ddr4_1600_13_12_11 || def_ddr4_1600_13_12_11R ||  def_ddr4_1600_13_12_11_2N || def_ddr4_1600_13_12_11_L2 || def_ddr4_1600_13_12_11_LR || def_ddr4_1600_12_12_12    ||def_ddr4_1600_12_12_12_2N ||def_ddr4_1600_12_12_12R   ||def_ddr4_1600_12_12_12_LR ||def_ddr4_1600_12_12_12_L2 || (def_ddr3_1600_11_11_11    )||(def_ddr3_1600_11_11_11_2N )||(def_ddr3_1600_11_11_11R   )||(def_ddr3_1600_11_11_11_LR )||(def_ddr3_1600_11_11_11_L2));
 define  def_mba_tmr0q_WRDM_dlys5 = (def_ddr4_1866_13_13_13    ||def_ddr4_1866_13_13_13_2N ||def_ddr4_1866_13_13_13R   ||def_ddr4_1866_13_13_13_LR ||def_ddr4_1866_13_13_13_L2 || (def_ddr3_1066_8_8_8_group )||(def_ddr3_1333_9_9_9       )||(def_ddr3_1600_10_10_10    )||(def_ddr3_1866_12_12_12    )||(def_ddr3_1333_9_9_9_2N    )||(def_ddr3_1600_10_10_10_2N )||(def_ddr3_1866_12_12_12_2N )||(def_ddr3_1333_9_9_9R      )||(def_ddr3_1600_10_10_10R   )||(def_ddr3_1866_12_12_12R   )||(def_ddr3_1333_9_9_9_LR    )||(def_ddr3_1600_10_10_10_LR )||(def_ddr3_1866_12_12_12_LR )||(def_ddr3_1333_9_9_9_L2    )||(def_ddr3_1600_10_10_10_L2 )||(def_ddr3_1866_12_12_12_L2 )||(def_ddr4_1600_11_11_11    )||(def_ddr4_1600_11_11_11_2N )||(def_ddr4_1600_11_11_11R   )||(def_ddr4_1600_11_11_11_LR )||(def_ddr4_1600_11_11_11_L2));
 define  def_mba_tmr0q_WRDM_dlys6 = ((def_ddr3_1066_7_7_7_group )||(def_ddr3_1333_8_8_8       )||(def_ddr3_1600_9_9_9       )||(def_ddr3_1866_11_11_11    )||(def_ddr3_1333_8_8_8_2N    )||(def_ddr3_1600_9_9_9_2N    )||(def_ddr3_1866_11_11_11_2N )||(def_ddr3_1333_8_8_8R      )||(def_ddr3_1600_9_9_9R      )||(def_ddr3_1866_11_11_11R   )||(def_ddr3_1333_8_8_8_LR    )||(def_ddr3_1600_9_9_9_LR    )||(def_ddr3_1866_11_11_11_LR )||(def_ddr3_1333_8_8_8_L2    )||(def_ddr3_1600_9_9_9_L2    )||(def_ddr3_1866_11_11_11_L2 )||(def_ddr4_1600_10_10_10    )||(def_ddr4_1866_12_12_12    )||(def_ddr4_2133_13_13_13    )||(def_ddr4_1600_10_10_10_2N )||(def_ddr4_1866_12_12_12_2N )||(def_ddr4_2133_13_13_13_2N )||(def_ddr4_1600_10_10_10R   )||(def_ddr4_1866_12_12_12R   )||(def_ddr4_2133_13_13_13R   )||(def_ddr4_1600_10_10_10_LR )||(def_ddr4_1866_12_12_12_LR )||(def_ddr4_2133_13_13_13_LR )||(def_ddr4_1600_10_10_10_L2 )||(def_ddr4_1866_12_12_12_L2 )||(def_ddr4_2133_13_13_13_L2));
 define  def_mba_tmr0q_WRDM_dlys7 = ((def_ddr3_1066_6_6_6_group )||(def_ddr4_1600_9_9_9       )||(def_ddr4_1866_11_11_11    )||(def_ddr4_2133_12_12_12    )||(def_ddr4_2400_14_14_14    )||(def_ddr4_1600_9_9_9_2N    )||(def_ddr4_1866_11_11_11_2N )||(def_ddr4_2133_12_12_12_2N )||(def_ddr4_2400_14_14_14_2N )||(def_ddr4_1600_9_9_9R      )||(def_ddr4_1866_11_11_11R   )||(def_ddr4_2133_12_12_12R   )||(def_ddr4_2400_14_14_14R   )||(def_ddr4_1600_9_9_9_LR    )||(def_ddr4_1866_11_11_11_LR )||(def_ddr4_2133_12_12_12_LR )||(def_ddr4_2400_14_14_14_LR )||(def_ddr4_1600_9_9_9_L2    )||(def_ddr4_1866_11_11_11_L2 )||(def_ddr4_2133_12_12_12_L2 )||(def_ddr4_2400_14_14_14_L2));
@@ -573,7 +549,7 @@ define  def_mba_tmr1q_WRSBG_dlys26  = ((def_ddr4_1600_9_9_9       )||( def_ddr4_
 define  def_mba_tmr1q_WRSBG_dlys27  = ((def_ddr4_1600_10_10_10    )||( def_ddr4_1600_10_10_10_2N )||( def_ddr4_1600_10_10_10R   )||( def_ddr4_1600_10_10_10_LR )||( def_ddr4_1600_10_10_10_L2));
 define  def_mba_tmr1q_WRSBG_dlys28  = ((def_ddr4_1600_11_11_11    )||( def_ddr4_1600_11_11_11_2N )||( def_ddr4_1600_11_11_11R   )||( def_ddr4_1600_11_11_11_LR )||( def_ddr4_1600_11_11_11_L2));
 define  def_mba_tmr1q_WRSBG_dlys29  = (def_ddr4_1600_12_12_12    ||def_ddr4_1600_12_12_12_2N ||def_ddr4_1600_12_12_12R   ||def_ddr4_1600_12_12_12_LR ||def_ddr4_1600_12_12_12_L2  );
-define  def_mba_tmr1q_WRSBG_dlys30  = ((def_ddr4_1866_11_11_11    )||( def_ddr4_1866_11_11_11_2N )||( def_ddr4_1866_11_11_11R   )||( def_ddr4_1866_11_11_11_LR )||( def_ddr4_1866_11_11_11_L2));
+define  def_mba_tmr1q_WRSBG_dlys30  = ((def_ddr4_1866_11_11_11    )||( def_ddr4_1866_11_11_11_2N )||( def_ddr4_1866_11_11_11R   )||( def_ddr4_1866_11_11_11_LR )||( def_ddr4_1866_11_11_11_L2)||(def_ddr4_1600_13_12_11));
 define  def_mba_tmr1q_WRSBG_dlys31  = ((def_ddr4_1866_12_12_12    )||( def_ddr4_1866_12_12_12_2N )||( def_ddr4_1866_12_12_12R   )||( def_ddr4_1866_12_12_12_LR )||( def_ddr4_1866_12_12_12_L2));
 #define  def_mba_tmr1q_WRSBG_dlys32  = (def_ddr4_1866_13_13_13    ||def_ddr4_1866_13_13_13_2N ||def_ddr4_1866_13_13_13R   ||def_ddr4_1866_13_13_13_LR ||def_ddr4_1866_13_13_13_L2  );
 #define  def_mba_tmr1q_WRSBG_dlys33 = ((def_ddr4_2133_12_12_12    )||( def_ddr4_2133_12_12_12_2N )||( def_ddr4_2133_12_12_12R   )||( def_ddr4_2133_12_12_12_LR )||( def_ddr4_2133_12_12_12_L2));
@@ -627,18 +603,19 @@ define  def_mba_dsm0q_cfg_rdtag_dly13  = (def_ddr3_1066_6_6_6);
 define  def_mba_dsm0q_cfg_rdtag_dly14  = (def_ddr3_1066_7_7_7_2N     || def_ddr3_1066_6_6_6R     ||def_ddr3_1333_8_8_8_2N);
 define  def_mba_dsm0q_cfg_rdtag_dly15  = (def_ddr3_1066_7_7_7       ||def_ddr3_1066_8_8_8_2N    ||def_ddr3_1333_8_8_8       ||def_ddr3_1600_9_9_9_2N    ||def_ddr4_1600_9_9_9_2N);
 define  def_mba_dsm0q_cfg_rdtag_dly16  = (def_ddr3_1066_8_8_8       ||def_ddr3_1066_7_7_7R      ||def_ddr3_1066_6_6_6_L2    ||def_ddr3_1600_9_9_9       ||def_ddr3_1333_9_9_9_2N    ||def_ddr3_1600_10_10_10_2N ||def_ddr3_1333_8_8_8R      ||def_ddr4_1600_9_9_9);
+
 define  def_mba_dsm0q_cfg_rdtag_dly17  = (def_ddr3_1066_8_8_8R      ||def_ddr3_1066_6_6_6_LR    ||def_ddr3_1333_9_9_9       ||def_ddr3_1600_9_9_9R      ||def_ddr4_1600_10_10_10_2N ||def_ddr4_1600_9_9_9R);
 define  def_mba_dsm0q_cfg_rdtag_dly18  = (def_ddr3_1066_7_7_7_L2    ||def_ddr3_1600_10_10_10    ||def_ddr3_1600_11_11_11_2N ||def_ddr3_1866_11_11_11_2N ||def_ddr3_1333_9_9_9R      ||def_ddr3_1333_8_8_8_L2    ||def_ddr4_1600_10_10_10);
 define  def_mba_dsm0q_cfg_rdtag_dly19  = (def_ddr3_1066_7_7_7_LR    ||def_ddr3_1066_8_8_8_L2    ||def_ddr3_1600_10_10_10R   ||def_ddr3_1333_8_8_8_LR    ||def_ddr3_1600_9_9_9_L2    ||def_ddr4_1600_11_11_11_2N ||def_ddr4_1866_11_11_11_2N ||def_ddr4_1600_10_10_10R   ||def_ddr4_1600_9_9_9_L2);
 define  def_mba_dsm0q_cfg_rdtag_dly20  = (def_ddr3_1066_8_8_8_LR    ||def_ddr3_1600_11_11_11    ||def_ddr3_1866_11_11_11    ||def_ddr3_1866_12_12_12_2N ||def_ddr3_1600_9_9_9_LR    ||def_ddr3_1333_9_9_9_L2    ||def_ddr4_1600_11_11_11    ||def_ddr4_1866_11_11_11    ||def_ddr4_1600_9_9_9_LR);
 define  def_mba_dsm0q_cfg_rdtag_dly21  = (def_ddr4_1600_12_12_12_2N ||def_ddr3_1600_11_11_11R   ||def_ddr3_1866_11_11_11R   ||def_ddr3_1333_9_9_9_LR    ||def_ddr3_1600_10_10_10_L2 ||def_ddr4_1866_12_12_12_2N ||def_ddr4_2133_12_12_12_2N ||def_ddr4_1600_11_11_11R   ||def_ddr4_1866_11_11_11R   ||def_ddr4_1600_10_10_10_L2);
 define  def_mba_dsm0q_cfg_rdtag_dly22  = (def_ddr4_1600_12_12_12    ||def_ddr3_1866_12_12_12    ||def_ddr3_1600_10_10_10_LR ||def_ddr4_1866_12_12_12    ||def_ddr4_2133_12_12_12    ||def_ddr4_2400_13_13_13_2N ||def_ddr4_1600_10_10_10_LR);
-define  def_mba_dsm0q_cfg_rdtag_dly23  = (def_ddr4_1866_13_13_13_2N ||def_ddr4_1600_12_12_12R   ||def_ddr3_1866_12_12_12R   ||def_ddr3_1600_11_11_11_L2 ||def_ddr3_1866_11_11_11_L2 ||def_ddr4_2400_13_13_13    ||def_ddr4_2133_13_13_13_2N ||def_ddr4_1866_12_12_12R   ||def_ddr4_2133_12_12_12R   ||def_ddr4_1600_11_11_11_L2 ||def_ddr4_1866_11_11_11_L2);
-define  def_mba_dsm0q_cfg_rdtag_dly24  = (def_ddr4_1866_13_13_13    ||def_ddr3_1600_11_11_11_LR ||def_ddr3_1866_11_11_11_LR ||def_ddr4_2133_13_13_13    ||def_ddr4_2400_14_14_14_2N ||def_ddr4_2400_13_13_13R   ||def_ddr4_1600_11_11_11_LR ||def_ddr4_1866_11_11_11_LR);
-define  def_mba_dsm0q_cfg_rdtag_dly25  = (def_ddr4_1866_13_13_13R   ||def_ddr4_1600_12_12_12_L2 ||def_ddr3_1866_12_12_12_L2 ||def_ddr4_2400_14_14_14    ||def_ddr4_2133_13_13_13R   ||def_ddr4_1866_12_12_12_L2 ||def_ddr4_2133_12_12_12_L2);
+define  def_mba_dsm0q_cfg_rdtag_dly23  = (def_ddr4_1600_13_12_11_2N ||def_ddr4_1866_13_13_13_2N ||def_ddr4_1600_12_12_12R   ||def_ddr3_1866_12_12_12R   ||def_ddr3_1600_11_11_11_L2 ||def_ddr3_1866_11_11_11_L2 ||def_ddr4_2400_13_13_13    ||def_ddr4_2133_13_13_13_2N ||def_ddr4_1866_12_12_12R   ||def_ddr4_2133_12_12_12R   ||def_ddr4_1600_11_11_11_L2 ||def_ddr4_1866_11_11_11_L2);
+define  def_mba_dsm0q_cfg_rdtag_dly24  = (def_ddr4_1600_13_12_11    ||def_ddr4_1866_13_13_13    ||def_ddr3_1600_11_11_11_LR ||def_ddr3_1866_11_11_11_LR ||def_ddr4_2133_13_13_13    ||def_ddr4_2400_14_14_14_2N ||def_ddr4_2400_13_13_13R   ||def_ddr4_1600_11_11_11_LR ||def_ddr4_1866_11_11_11_LR);
+define  def_mba_dsm0q_cfg_rdtag_dly25  = (def_ddr4_1600_13_12_11R   ||def_ddr4_1866_13_13_13R   ||def_ddr4_1600_12_12_12_L2 ||def_ddr3_1866_12_12_12_L2 ||def_ddr4_2400_14_14_14    ||def_ddr4_2133_13_13_13R   ||def_ddr4_1866_12_12_12_L2 ||def_ddr4_2133_12_12_12_L2);
 define  def_mba_dsm0q_cfg_rdtag_dly26  = (def_ddr4_1600_12_12_12_LR ||def_ddr3_1866_12_12_12_LR ||def_ddr4_2400_14_14_14R   ||def_ddr4_1866_12_12_12_LR ||def_ddr4_2133_12_12_12_LR ||def_ddr4_2400_13_13_13_L2);
-define  def_mba_dsm0q_cfg_rdtag_dly27  = (def_ddr4_1866_13_13_13_L2 ||def_ddr4_2400_13_13_13_LR ||def_ddr4_2133_13_13_13_L2);
-define  def_mba_dsm0q_cfg_rdtag_dly28  = (def_ddr4_1866_13_13_13_LR ||def_ddr4_2133_13_13_13_LR ||def_ddr4_2400_14_14_14_L2);
+define  def_mba_dsm0q_cfg_rdtag_dly27  = (def_ddr4_1600_13_12_11_L2 ||def_ddr4_1866_13_13_13_L2 ||def_ddr4_2400_13_13_13_LR ||def_ddr4_2133_13_13_13_L2);
+define  def_mba_dsm0q_cfg_rdtag_dly28  = (def_ddr4_1600_13_12_11_LR ||def_ddr4_1866_13_13_13_LR ||def_ddr4_2133_13_13_13_LR ||def_ddr4_2400_14_14_14_L2);
 define  def_mba_dsm0q_cfg_rdtag_dly29  = (def_ddr4_2400_14_14_14_LR);
 
 #mixed
@@ -1580,6 +1557,7 @@ scom 0x03010414     {
     0:5     ,   0b010000,             1            ,      (def_IS5D                               == 1);          # cfg_M0S0_cs
     0:5     ,   0b010000,             1            ,      (def_IS7C                               == 1);          # cfg_M0S0_cs
     0:5     ,   0b011100,             1            ,      (def_IS7a_C4a_C3a                       == 1);          # cfg_M0S0_cs
+    6:11    ,   0b010100,             1            ,      (def_ddr4_1600_13_12_11                 == 1);          # cfg_M0S1_cs
     6:11    ,   0b101100,             1            ,      (def_C3b                                == 1);          # cfg_M0S1_cs
     6:11    ,   0b101100,             1            ,      (def_C3c                                == 1);          # cfg_M0S1_cs
     6:11    ,   0b011000,             1            ,      (def_C3c_C4C_ddr4                       == 1);          # cfg_M0S1_cs
@@ -1757,7 +1735,9 @@ scom 0x03010415     {
 #
 scom 0x0301040B     {
     bits    ,   scom_data   ,       ATTR_FUNCTIONAL,    expr;
+    0:3     ,   0b0101   + def_margin2 ,             1            ,   (((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_STACK_TYPE[1][0] == 2 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_STACK_TYPE[0][0] == 2 ))); # RRSMSR_dly is 4 for all cfgs     1                                                      D
     0:3     ,   0b0100   + def_margin2 ,             1            ,   any; # RRSMSR_dly is 4 for all cfgs     1                                                      D
+    4:7     ,   0b0101   + def_margin2 ,             1            ,   (((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_STACK_TYPE[1][0] == 2 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_STACK_TYPE[0][0] == 2 ))); # RRSMDR_dly is 4 for all cfgs     2                                                      D
     4:7     ,   0b0100   + def_margin2 ,             1            ,   any; # RRSMDR_dly is 4 for all cfgs     2                                                      D
     8:11    ,   0b0111   + def_margin2 ,             1            ,   (CENTAUR.ATTR_MSS_FREQ == 1066) || (CENTAUR.ATTR_MSS_FREQ == 1333) || (CENTAUR.ATTR_MSS_FREQ == 1600); # RRDM_dly     3    D
     8:11    ,   0b1000   + def_margin2 ,             1            ,   (CENTAUR.ATTR_MSS_FREQ == 1866) || (CENTAUR.ATTR_MSS_FREQ == 2133); # RRDM_dly     3                             D
@@ -1772,6 +1752,7 @@ scom 0x0301040B     {
     12:15   ,   0b1101   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys13 == 1); # RWSMSR_dly   4
     12:15   ,   0b1110   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys14 == 1); # RWSMSR_dly   4
     12:15   ,   0b1111   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys15 == 1); # RWSMSR_dly   4
+    12:15   ,   0b0000   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys16 == 1); # RWSMSR_dly   4
     16:19   ,   0b0111   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys7  == 1); # RWSMDR_dly   5
     16:19   ,   0b1000   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys8  == 1); # RWSMDR_dly   5
     16:19   ,   0b1001   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys9  == 1); # RWSMDR_dly   5
@@ -1781,6 +1762,7 @@ scom 0x0301040B     {
     16:19   ,   0b1101   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys13 == 1); # RWSMDR_dly   5
     16:19   ,   0b1110   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys14 == 1); # RWSMDR_dly   5
     16:19   ,   0b1111   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys15 == 1); # RWSMDR_dly   5
+    16:19   ,   0b0000   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys16 == 1); # RWSMDR_dly   5
     20:23   ,   0b0111   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys7  == 1); # RWDM_dly	 6
     20:23   ,   0b1000   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys8  == 1); # RWDM_dly	 6
     20:23   ,   0b1001   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys9  == 1); # RWDM_dly	 6
@@ -1790,6 +1772,7 @@ scom 0x0301040B     {
     20:23   ,   0b1101   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys13 == 1); # RWDM_dly	 6
     20:23   ,   0b1110   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys14 == 1); # RWDM_dly	 6
     20:23   ,   0b1111   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys15 == 1); # RWDM_dly	 6
+    20:23   ,   0b0000   + def_margin1 ,             1            ,   (def_mba_tmr0q_RW_dlys16 == 1); # RWDM_dly	 6
     24:29   ,   0b010011 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys19 == 1); # WRSMSR_dly   7
     24:29   ,   0b010100 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys20 == 1); # WRSMSR_dly   7
     24:29   ,   0b010101 + def_margin2 ,             1            ,   (def_mba_tmr0q_WRSM_dlys21 == 1); # WRSMSR_dly   7
@@ -1820,7 +1803,9 @@ scom 0x0301040B     {
     36:39   ,   0b0110   + def_margin2 ,             1            ,   (def_mba_tmr0q_WRDM_dlys6 == 1); # WRDM_dly     9
     36:39   ,   0b0111   + def_margin2 ,             1            ,   (def_mba_tmr0q_WRDM_dlys7 == 1); # WRDM_dly     9
     36:39   ,   0b1000   + def_margin2 ,             1            ,   (def_mba_tmr0q_WRDM_dlys8 == 1); # WRDM_dly     9
+    40:43   ,   0b0101   + def_margin2 ,             1            ,   (((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_STACK_TYPE[1][0] == 2 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_STACK_TYPE[0][0] == 2 ))); # WWSMSR_dly is 4 for all cfgs     10
     40:43   ,   0b0100   + def_margin2 ,             1            ,   any; # WWSMSR_dly is 4 for all cfgs     10                                      D
+    44:47   ,   0b0101   + def_margin2 ,             1            ,   (((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_STACK_TYPE[1][0] == 2 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_STACK_TYPE[0][0] == 2 ))); #  WWSMDR_dly is 4 for all cfgs     11
     44:47   ,   0b0100   + def_margin2 ,             1            ,   any; # WWSMDR_dly is 4 for all cfgs     11                                      D
     48:51   ,   0b0111   + def_margin2 ,             1            ,   (CENTAUR.ATTR_MSS_FREQ == 1066) || (CENTAUR.ATTR_MSS_FREQ == 1333) || (CENTAUR.ATTR_MSS_FREQ == 1600);  # WWDM_dly     12     D
     48:51   ,   0b1000   + def_margin2 ,             1            ,   (CENTAUR.ATTR_MSS_FREQ == 1866) || (CENTAUR.ATTR_MSS_FREQ == 2133);  # WWDM_dly     12                              D
@@ -1862,7 +1847,7 @@ scom 0x0301040C     {
     14:19   ,   0b0001111         ,          1             ,   (ATTR_EFF_DRAM_TFAW == 16); # cfg_tfaw    #  HW278587 if tfaw is 16 set it to 15
     14:19   ,   ATTR_EFF_DRAM_TFAW,          1             ,   (ATTR_EFF_DRAM_TFAW != 16); # cfg_tfaw    #  otherwise use the attribute value
     20:23   ,   0b0000      ,          1             ,   (def_mba_tmr1q_RRSBG_dlys0 == 1); # RRSBG_dly    19
-    20:23   ,   0b0101      ,          1             ,   (def_mba_tmr1q_RRSBG_dlys5 == 1); # RRSBG_dly    19
+    20:23   ,   0b0101      ,          1             ,   (def_mba_tmr1q_RRSBG_dlys5 == 1) || (((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_STACK_TYPE[1][0] == 2 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_STACK_TYPE[0][0] == 2 ))); # RRSBG_dly    19
     20:23   ,   0b0110      ,          1             ,   (def_mba_tmr1q_RRSBG_dlys6 == 1); # RRSBG_dly    19
     24:28   ,   0b00000     ,          1             ,   (def_mba_tmr1q_WRSBG_dlys0  == 1); # WRSBG_dly    20
     24:28   ,   0b11010     ,          1             ,   (def_mba_tmr1q_WRSBG_dlys26 == 1); # WRSBG_dly    20
@@ -1871,10 +1856,14 @@ scom 0x0301040C     {
     24:28   ,   0b11101     ,          1             ,   (def_mba_tmr1q_WRSBG_dlys29 == 1); # WRSBG_dly    20
     24:28   ,   0b11110     ,          1             ,   (def_mba_tmr1q_WRSBG_dlys30 == 1); # WRSBG_dly    20
     24:28   ,   0b11111     ,          1             ,   (def_mba_tmr1q_WRSBG_dlys31 == 1); # WRSBG_dly    20
+    24:28   ,   0b10011     ,          1             ,   (((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_STACK_TYPE[1][0] == 2 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_STACK_TYPE[0][0] == 2 ))); # WRSBG_dly    20
 #    24:28   ,   0b00000     ,          1             ,   (def_mba_tmr1q_WRSBG_dlys33 == 1); # WRSBG_dly  ## 2133 and 2400 DRM not supported  20
 #    24:28   ,   0b00000     ,          1             ,   (def_mba_tmr1q_WRSBG_dlys34 == 1); # WRSBG_dly  ## 2133 and 2400 DRM not supported  20
 #    24:28   ,   0b00000     ,          1             ,   (def_mba_tmr1q_WRSBG_dlys36 == 1); # WRSBG_dly  ## 2133 and 2400 DRM not supported  20
 #    24:28   ,   0b00000     ,          1             ,   (def_mba_tmr1q_WRSBG_dlys37 == 1); # WRSBG_dly  ## 2133 and 2400 DRM not supported  20
+    48      ,   0b0          ,             1            ,   (def_mba_tmr0q_RW_dlys16 == 1); # RWSMSR_dly   4
+    49      ,   0b0          ,             1            ,   (def_mba_tmr0q_RW_dlys16 == 1); # RWSMDR_dly   5
+    50      ,   0b0          ,             1            ,   (def_mba_tmr0q_RW_dlys16 == 1); # RWDM_dly	 6
 }
 
 # 1333Mbps RDIMM WL = Setting + 7 = CWL + AL[CL-1] + 1= 16
@@ -2523,3 +2512,18 @@ scom 0x030106CB     {
 }
 
 
+scom 0x03010614     {
+    bits    ,   scom_data   ,       ATTR_FUNCTIONAL,     expr;
+    0     ,   0b0    ,            1           ,      any;         #command_complete_wo_ena_err_attn
+    1     ,   0b0    ,            1           ,      any;         #hard_ce_ete_attn
+    2     ,   0b0    ,            1           ,      any;         #soft_ce_ete_attn
+    3     ,   0b0    ,            1           ,      any;         #intermittent_ete_attn
+    4     ,   0b0    ,            1           ,      any;         #rce_ete_attn
+    5     ,   0b0    ,            1           ,      any;         #emergency_throttle_attn
+    6     ,   0b0    ,            1           ,      any;         #firmware_attn0
+    7     ,   0b0    ,            1           ,      any;         #fimware_attn1
+    8     ,   0b0    ,            1           ,      any;         #wat_debug_attn
+    9     ,   0b0    ,            1           ,      any;         #spare_attn1
+    10    ,   0b1    ,            1           ,      any;         #mcbist_done
+    11:63 ,   0b00000000000000000000000000000000000000000000000000000 ,            1           ,      any;         #reserved
+}

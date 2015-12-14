@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training_advanced.C,v 1.50 2015/08/27 21:59:32 eliner Exp $
+// $Id: mss_draminit_training_advanced.C,v 1.58 2015/11/13 16:53:22 dcrowell Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur 29 Sept 2011. */
 
 //------------------------------------------------------------------------------
@@ -92,6 +92,13 @@
 //  1.48   |preeragh  |19-Aug-14| Fix FW Review Comments
 //  1.49   |eliner    |27-Aug-15| Fixing Index Overflow Bug
 //  1.50   |eliner    |27-Aug-15| Fixing Index Overflow Bug
+//  1.51   |eliner    |07-Oct-15| PDA Write Back
+//  1.51   |preeragh  |21-Oct-15| Fix V-Ref Range 0-50
+//  1.53   |janssens  |21-Oct-15| 64 Bit compile Fix
+//  1.54   |sglancy   |10-Oct-15| Changed attribute names
+//  1.56   |preeragh  |12-Nov-15| V-ref CAL_CONTROL options
+//  1.57   |preeragh  |13-Nov-15| Mask MCBIT_DONE bit FIR before Schmoos
+//  1.58   |dcrowell  |13-Nov-15| Change allocation of generic_shmoo object
 // This procedure Schmoo's DRV_IMP, SLEW, VREF (DDR, CEN), RCV_IMP based on attribute from effective config procedure
 // DQ & DQS Driver impedance, Slew rate, WR_Vref shmoo would call only write_eye shmoo for margin calculation
 // DQ & DQS VREF (rd_vref), RCV_IMP shmoo would call rd_eye for margin calculation
@@ -166,12 +173,12 @@ extern "C"
 	fapi::ReturnCode delay_shmoo_ddr4(const fapi::Target & i_target_mba, uint8_t i_port,
 	shmoo_type_t i_shmoo_type_valid, 
 	uint32_t *o_left_margin, uint32_t *o_right_margin,
-	uint32_t i_shmoo_param,uint32_t pda_nibble_table[2][2][16][2]);
+	uint32_t i_shmoo_param,uint32_t pda_nibble_table[2][2][4][16][2]);
 	
 	fapi::ReturnCode delay_shmoo_ddr4_pda(const fapi::Target & i_target_mba, uint8_t i_port,
 	shmoo_type_t i_shmoo_type_valid, 
 	uint32_t *o_left_margin, uint32_t *o_right_margin,
-	uint32_t i_shmoo_param,uint32_t pda_nibble_table[2][2][16][2]);
+	uint32_t i_shmoo_param,uint32_t pda_nibble_table[2][2][4][16][2]);
 
 	void find_best_margin(shmoo_param i_shmoo_param_valid,uint32_t i_left[], 
 	uint32_t i_right[], const uint8_t l_max, 
@@ -245,6 +252,12 @@ fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_ta
 	uint32_t l_shmoo_param=0; 
 	uint8_t l_dram_type=0;
 	uint8_t bin_pda=0;
+	uint8_t vref_cal_control = 0;
+	uint8_t temp_cal_control = 0;
+	uint32_t int32_cal_control[2] = {0};
+	uint64_t int64_cal_control = 0;
+	
+	
 	// Define local variables
 	uint8_t l_shmoo_type_valid_t=0;
 	uint8_t l_shmoo_param_valid_t=0;
@@ -257,6 +270,11 @@ fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_ta
 	if(rc) return rc;
 	rc = FAPI_ATTR_GET(ATTR_MSS_VOLT, &l_target_centaur, l_attr_mss_volt_u32); 
 	if(rc) return rc;
+	//Preet Add MSS_CAL control here
+	rc = FAPI_ATTR_GET(ATTR_MSS_VREF_CAL_CNTL, &l_target_centaur, vref_cal_control); 
+	if(rc) return rc;
+	FAPI_INF("+++++++++++++++++++++++++++++ - DDR4 - CAL Control - %d +++++++++++++++++++++++++++++++++++++++++++++",vref_cal_control);
+	
 	
 	//const fapi::Target is centaur.mba   
 	rc = FAPI_ATTR_GET(ATTR_EFF_NUM_DROPS_PER_PORT, &i_target_mba, l_num_drops_per_port_u8); 
@@ -265,6 +283,63 @@ fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_ta
 	if(rc) return rc;
 	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN, &i_target_mba, l_dram_type); 
 	if(rc) return rc;
+	rc = FAPI_ATTR_GET(ATTR_MCBIST_USER_BANK, &i_target_mba, bin_pda); 
+	if(rc) return rc;
+	
+	if ((vref_cal_control == 0) && (l_dram_type == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4)&& (bin_pda != 3))
+	{
+		FAPI_INF("+++++++++++++++++++++++++++++ - DDR4 - Skipping - V-Ref CAL Control +++++++++++++++++++++++++++++++++++++++++++++");
+		int32_cal_control[0] = 37;
+		rc = FAPI_ATTR_SET(ATTR_MCBIST_TEST_TYPE, &i_target_mba, int32_cal_control[0]); 
+		if(rc) return rc;
+		
+		rc = wr_vref_shmoo_ddr4_bin(i_target_mba);
+						if (rc)
+						{
+							FAPI_ERR("Write Vref Schmoo Function is Failed rc = 0x%08X (creator = %d)",
+							uint32_t(rc), rc.getCreator());
+							return rc;
+						}
+	return rc;
+	}
+		
+	else if ((vref_cal_control != 0) && (l_dram_type == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4) && (bin_pda != 3))
+	{
+		FAPI_INF("+++++++++++++++++++++++++++++ - DDR4 - CAL Control +++++++++++++++++++++++++++++++++++++++++++++");
+		
+		temp_cal_control = 8;
+		rc = FAPI_ATTR_SET(ATTR_EFF_SCHMOO_PARAM_VALID, &i_target_mba, temp_cal_control); 
+		if(rc) return rc;
+		temp_cal_control = 6;
+		rc = FAPI_ATTR_SET(ATTR_EFF_SCHMOO_MODE, &i_target_mba, temp_cal_control); 
+		if(rc) return rc;
+		temp_cal_control = 1;
+		rc = FAPI_ATTR_SET(ATTR_MCBIST_USER_BANK, &i_target_mba, temp_cal_control); 
+		if(rc) return rc;
+		temp_cal_control = 2;
+		rc = FAPI_ATTR_SET(ATTR_EFF_SCHMOO_TEST_VALID, &i_target_mba, temp_cal_control); 
+		if(rc) return rc;
+		l_shmoo_param_valid_t = 1;
+		rc = FAPI_ATTR_SET(ATTR_MCBIST_RANK, &i_target_mba, l_shmoo_param_valid_t); 
+		if(rc) return rc;
+		l_shmoo_param_valid_t = 1;
+		rc = FAPI_ATTR_SET(ATTR_EFF_SCHMOO_ADDR_MODE, &i_target_mba, l_shmoo_param_valid_t); 
+		if(rc) return rc;
+		int32_cal_control[0] = 0xFFFFFFFF;
+		int32_cal_control[1] = 0xFFFFFFFF;
+		rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_WR_VREF_SCHMOO, &i_target_mba, int32_cal_control); 
+		if(rc) return rc;
+		int32_cal_control[0] = 37;
+		rc = FAPI_ATTR_SET(ATTR_MCBIST_TEST_TYPE, &i_target_mba, int32_cal_control[0]); 
+		if(rc) return rc;
+		int64_cal_control = 0x0000000000000000ull;
+		rc = FAPI_ATTR_SET(ATTR_MCBIST_START_ADDR, &i_target_mba, int64_cal_control); 
+		if(rc) return rc;
+		int64_cal_control = 0x0000001fc0000000ull;
+		rc = FAPI_ATTR_SET(ATTR_MCBIST_END_ADDR, &i_target_mba, int64_cal_control); 
+		if(rc) return rc;
+	}
+	
 	rc = FAPI_ATTR_GET(ATTR_MCBIST_USER_BANK, &i_target_mba, bin_pda); 
 	if(rc) return rc;
 	
@@ -278,6 +353,8 @@ fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_ta
 	l_num_ranks_per_dimm_u8array[0][1],
 	l_num_ranks_per_dimm_u8array[1][0],
 	l_num_ranks_per_dimm_u8array[1][1]);
+	
+	
 	FAPI_INF("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 
 	rc = FAPI_ATTR_GET(ATTR_EFF_SCHMOO_TEST_VALID, &i_target_mba, l_shmoo_type_valid_t);  
@@ -829,7 +906,7 @@ fapi::ReturnCode wr_vref_shmoo_ddr4(const fapi::Target & i_target_mba)
 {
 	fapi::ReturnCode rc;
 	uint8_t max_port = 2;
-	uint8_t max_ddr4_vrefs1 = 52;
+	uint8_t max_ddr4_vrefs1 = 51;
 	shmoo_type_t i_shmoo_type_valid = MCBIST; // Hard coded - Temporary
 	ecmdDataBufferBase l_data_buffer_64(64);
 	uint32_t l_left_margin = 0;
@@ -840,23 +917,23 @@ fapi::ReturnCode wr_vref_shmoo_ddr4(const fapi::Target & i_target_mba)
 	uint8_t l_MAX_RANKS[2];
 	uint32_t rc_num = 0;
 	uint8_t l_SCHMOO_NIBBLES=20;
-	uint8_t base_percent = 60;
+	uint32_t base_percent = 60000;
 	
-	float index_mul_print = 0.65;
+	uint32_t index_mul_print = 650;
 	uint8_t l_attr_schmoo_test_type_u8 = 1;
-	float vref_val_print = 0;
+	uint32_t vref_val_print = 0;
 	rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &i_target_mba, l_attr_eff_dimm_type_u8); if(rc) return rc;
 	rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target_mba, num_ranks_per_dimm); if(rc) return rc;
-	rc = FAPI_ATTR_GET( ATTR_VREF_DQ_TRAIN_RANGE, &i_target_mba, vrefdq_train_range);if(rc) return rc;
+	rc = FAPI_ATTR_GET( ATTR_EFF_VREF_DQ_TRAIN_RANGE, &i_target_mba, vrefdq_train_range);if(rc) return rc;
 	rc = FAPI_ATTR_SET(ATTR_EFF_SCHMOO_TEST_VALID, &i_target_mba, l_attr_schmoo_test_type_u8); if(rc) return rc;
 	if(vrefdq_train_range[0][0][0] == 1)
 	{
-		base_percent = 45;
+		base_percent = 45000;
 	}
 	
 	l_MAX_RANKS[0]=num_ranks_per_dimm[0][0]+num_ranks_per_dimm[0][1];
 	l_MAX_RANKS[1]=num_ranks_per_dimm[1][0]+num_ranks_per_dimm[1][1];
-	FAPI_INF("\n ** l_max_rank 0 = %d",l_MAX_RANKS[0]);
+	//FAPI_INF("\n ** l_max_rank 0 = %d",l_MAX_RANKS[0]);
 	if ( l_attr_eff_dimm_type_u8 == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES )
 		{
 			l_SCHMOO_NIBBLES=20;
@@ -875,7 +952,7 @@ fapi::ReturnCode wr_vref_shmoo_ddr4(const fapi::Target & i_target_mba)
 	//uint32_t best_vref[50][2][8][20];
 	//uint32_t best_vref_nibble[2][8][20];
 	uint32_t vref_val=0;
-	uint32_t pda_nibble_table[2][2][16][2];
+	uint32_t pda_nibble_table[2][2][4][16][2];
 	uint8_t i=0;
 	uint8_t j=0;
 	uint8_t k=0;
@@ -921,8 +998,8 @@ for(l_vref_num=0; l_vref_num < max_ddr4_vrefs1; l_vref_num++){
 			}
 		}	
 		
-		rc = FAPI_ATTR_SET( ATTR_VREF_DQ_TRAIN_RANGE, &i_target_mba, vrefdq_train_range);if(rc) return rc;
-		rc = FAPI_ATTR_SET( ATTR_VREF_DQ_TRAIN_ENABLE, &i_target_mba, vrefdq_train_enable);if(rc) return rc;
+		rc = FAPI_ATTR_SET( ATTR_EFF_VREF_DQ_TRAIN_RANGE, &i_target_mba, vrefdq_train_range);if(rc) return rc;
+		rc = FAPI_ATTR_SET( ATTR_EFF_VREF_DQ_TRAIN_ENABLE, &i_target_mba, vrefdq_train_enable);if(rc) return rc;
 		rc = mss_mrs6_DDR4(l_target_centaur);
 		if(rc)
 		{
@@ -942,7 +1019,7 @@ for(l_vref_num=0; l_vref_num < max_ddr4_vrefs1; l_vref_num++){
 			}
 		}
 		
-		rc = FAPI_ATTR_SET( ATTR_VREF_DQ_TRAIN_VALUE, &i_target_mba, vrefdq_train_value);
+		rc = FAPI_ATTR_SET( ATTR_EFF_VREF_DQ_TRAIN_VALUE, &i_target_mba, vrefdq_train_value);
 		
 		
 		rc = mss_mrs6_DDR4(l_target_centaur);
@@ -952,7 +1029,7 @@ for(l_vref_num=0; l_vref_num < max_ddr4_vrefs1; l_vref_num++){
 			return rc;
 		}
 		
-		FAPI_INF("The Vref value is %d .... The percent voltage bump = %f ",vref_val,vref_val_print);
+		FAPI_INF("The Vref value is %d .... The percent voltage bump = %d ",vref_val,vref_val_print);
 		
 		for(i=0;i< max_port;i++){
 			for(j=0;j<l_MAX_RANKS[0];j++){
@@ -963,7 +1040,7 @@ for(l_vref_num=0; l_vref_num < max_ddr4_vrefs1; l_vref_num++){
 				}
 			}
 		}	
-		rc = FAPI_ATTR_SET( ATTR_VREF_DQ_TRAIN_ENABLE, &i_target_mba, vrefdq_train_enable);if(rc) return rc;
+		rc = FAPI_ATTR_SET( ATTR_EFF_VREF_DQ_TRAIN_ENABLE, &i_target_mba, vrefdq_train_enable);if(rc) return rc;
 		rc = mss_mrs6_DDR4(l_target_centaur);
 		if(rc)
 		{
@@ -982,7 +1059,7 @@ for(l_vref_num=0; l_vref_num < max_ddr4_vrefs1; l_vref_num++){
 		vref_val,pda_nibble_table);
 		if (rc) return rc;
 		
-		FAPI_INF("Wr Vref = %f ; Min Setup time = %d; Min Hold time = %d",
+		FAPI_INF("Wr Vref = %d ; Min Setup time = %d; Min Hold time = %d",
 		vref_val_print,
 		l_left_margin,
 		l_right_margin);
@@ -1005,7 +1082,8 @@ fapi::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi::Target & i_target_mba)
 {
 	fapi::ReturnCode rc;
 	uint8_t MAX_PORT = 2;
-	uint8_t max_ddr4_vrefs1 = 50;
+	uint8_t MAX_DIMM = 2;
+	//uint8_t max_ddr4_vrefs1 = 52;
 	shmoo_type_t i_shmoo_type_valid = MCBIST;
 	ecmdDataBufferBase l_data_buffer_64(64);
 	ecmdDataBufferBase refresh_reg(64); 
@@ -1014,52 +1092,68 @@ fapi::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi::Target & i_target_mba)
 	uint8_t l_attr_eff_dimm_type_u8 = 0;
 	uint8_t vrefdq_train_range[2][2][4];
 	uint8_t num_ranks_per_dimm[2][2];
-	uint8_t l_MAX_RANKS[2];
-	uint32_t rc_num = 0;
-	uint8_t l_SCHMOO_NIBBLES=20;
-	uint8_t base_percent = 60;
-	uint32_t pda_nibble_table[2][2][16][2];
-	uint32_t best_pda_nibble_table[2][2][16][2];
-	float index_mul_print = 0.65;
-	uint8_t l_attr_schmoo_test_type_u8 = 1;
-	float vref_val_print = 0;
-	rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &i_target_mba, l_attr_eff_dimm_type_u8); if(rc) return rc;
-	rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target_mba, num_ranks_per_dimm); if(rc) return rc;
-	rc = FAPI_ATTR_GET( ATTR_VREF_DQ_TRAIN_RANGE, &i_target_mba, vrefdq_train_range);if(rc) return rc;
-	rc = FAPI_ATTR_SET(ATTR_EFF_SCHMOO_TEST_VALID, &i_target_mba, l_attr_schmoo_test_type_u8); if(rc) return rc;
-	if(vrefdq_train_range[0][0][0] == 1)
-	{
-		base_percent = 45;
-	}
-	
-	l_MAX_RANKS[0]=num_ranks_per_dimm[0][0]+num_ranks_per_dimm[0][1];
-	l_MAX_RANKS[1]=num_ranks_per_dimm[1][0]+num_ranks_per_dimm[1][1];
-	FAPI_INF("\n ** l_max_rank 0 = %d Base Percent = %d",l_MAX_RANKS[0],base_percent);
-	if ( l_attr_eff_dimm_type_u8 == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES )
-	{
-		l_SCHMOO_NIBBLES=20;
-	}else{
-		l_SCHMOO_NIBBLES=18;
-	}
+	//uint8_t l_MAX_RANKS[2];
+	uint32_t total_val = 0;
+	uint32_t last_total = 0;
+	uint32_t base_percent = 60000;
+	uint32_t pda_nibble_table[2][2][4][16][2];  // Port,Dimm,Rank,Nibble,[2]
+	uint32_t best_pda_nibble_table[2][2][4][16][2];
+	uint8_t cal_control = 0;
 	///// ddr4 vref //////
-	fapi::Target l_target_centaur=i_target_mba;
 	uint8_t vrefdq_train_value[2][2][4]; 
 	uint8_t vrefdq_train_enable[2][2][4]; 
-	uint32_t best_vref[50][1];
 	uint32_t vref_val=0;
-	uint8_t index = 0;	
 	uint8_t i=0;
 	uint8_t j=0;
 	uint8_t k=0;
 	uint8_t a=0;
 	uint8_t c=0;
-	uint8_t l_ranks = 0;
+	uint32_t rc_num = 0;
+	uint8_t l_dimm = 0;
 	uint8_t i_port=0;
 	uint8_t l_vref_mid = 0;
+	uint8_t imax = 	39;
+	uint8_t imin = 13;
+	uint8_t last_known_vref = 0;
+	uint8_t l_loop_count = 0;
 	vector<PDA_MRS_Storage> pda;
 	pda.clear();
-
-	FAPI_INF("+++++++++++++++++++++++++++++++++++++++++++++ Patch - Preet - WR_VREF - Check Sanity only at 500 ddr4 +++++++++++++++++++++++++++");
+	uint32_t index_mul_print = 650;
+	uint8_t l_attr_schmoo_test_type_u8 = 1;
+	uint32_t vref_val_print = 0;
+	uint8_t vpd_wr_vref_value[2] = {0};
+	fapi::Target l_target_centaur=i_target_mba;
+	fapi::Target l_target_centaur1;
+	rc = fapiGetParentChip(i_target_mba, l_target_centaur1); 
+	if(rc) return rc;
+	
+	rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &i_target_mba, l_attr_eff_dimm_type_u8); if(rc) return rc;
+	rc = FAPI_ATTR_GET(ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, &i_target_mba, num_ranks_per_dimm); if(rc) return rc;
+	rc = FAPI_ATTR_GET( ATTR_EFF_VREF_DQ_TRAIN_RANGE, &i_target_mba, vrefdq_train_range);if(rc) return rc;
+	rc = FAPI_ATTR_SET(ATTR_EFF_SCHMOO_TEST_VALID, &i_target_mba, l_attr_schmoo_test_type_u8); if(rc) return rc;
+	rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_WRDDR4_VREF, &i_target_mba, vpd_wr_vref_value); if(rc) return rc;
+	rc = FAPI_ATTR_GET( ATTR_MSS_VREF_CAL_CNTL, &l_target_centaur1, cal_control);if(rc) return rc;
+	//FAPI_INF("++++++++++++++ATTR_MSS_VREF_CAL_CNTL = %d +++++++++++++++++++++++++++",cal_control);
+	
+	if(vrefdq_train_range[0][0][0] == 1)
+	{
+		base_percent = 45;
+	}
+	
+	FAPI_INF("Setting MCBIST DONE bit MASK as FW reports FIR bits!...");
+	//Workaround MCBIST MASK Bit as FW reports FIR bits --- > SET
+	rc = fapiGetScom(i_target_mba, 0x03010614, l_data_buffer_64);
+        if (rc) return rc;
+        rc_num = l_data_buffer_64.setBit(10);
+        if (rc_num)
+        {
+            FAPI_ERR("Buffer error in function wr_vref_shmoo_ddr4_bin Workaround MCBIST MASK Bit");
+            rc.setEcmdError(rc_num);
+            return rc;
+        }
+		
+	
+	FAPI_INF("+++++++++++++++++++++++++++++++++++++++++++++ WR_VREF - Check Sanity only MCBIST +++++++++++++++++++++++++++");
 	rc = delay_shmoo_ddr4_pda(i_target_mba, i_port, i_shmoo_type_valid,
 	&l_left_margin, &l_right_margin,
 	vref_val,pda_nibble_table);
@@ -1068,35 +1162,38 @@ fapi::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi::Target & i_target_mba)
 	FAPI_INF(" Setup and Sanity - Check disabled from now on..... Continuing .....");
 	rc = set_attribute(i_target_mba);
 	if (rc) return rc;
+	
+	if (cal_control !=0)
+	{
 	i_shmoo_type_valid = WR_EYE;
 	l_attr_schmoo_test_type_u8 = 2;
 	rc = FAPI_ATTR_SET(ATTR_EFF_SCHMOO_TEST_VALID, &i_target_mba, l_attr_schmoo_test_type_u8); if(rc) return rc;
 	//Initialize all to zero
-	for(index = 0; index < max_ddr4_vrefs1;index++)
+	/*for(index = 0; index < 50;index++)
 	{
-		best_vref[index][0] = 0;
+		best_vref[index] = 0;
+		
 	}
+	*/
+	//Initialise All to Zero [2][2][4]
 	
-	//Initialise All to Zero 
-	for(int k=0;k< MAX_PORT;k++)  // port
+	for(k=0;k < MAX_PORT;k++)  // port
 	{
-		for(int j=0;j < l_MAX_RANKS[0];j++)   //Rank
+		for(l_dimm=0;l_dimm < 2;l_dimm++)   //Dimm
 		{
-			for(int i=0;i<16;i++)  //Nibble
+			for(j=0;j < 4;j++)   //Rank
 			{
-				pda_nibble_table[k][j][i][0] = 0;  //  Index 0 Are V-refs
-				pda_nibble_table[k][j][i][1] = 0;   // Index 1 are Total Margin Values
-				best_pda_nibble_table[k][j][i][0] = 0;   //  Index 0 Are V-refs
-				best_pda_nibble_table[k][j][i][1] = 0;    // Index 1 are Total Margin Values
+				for(i=0;i<16;i++)  //Nibble
+				{
+				pda_nibble_table[k][l_dimm][j][i][0] = 0;  //  Index 0 Are V-refs
+				pda_nibble_table[k][l_dimm][j][i][1] = 0;   // Index 1 are Total Margin Values
+				best_pda_nibble_table[k][l_dimm][j][i][0] = 0;   //  Index 0 Are V-refs
+				best_pda_nibble_table[k][l_dimm][j][i][1] = 0;    // Index 1 are Total Margin Values
+				}
 			}
 		}
 	}               
-	uint8_t imax = 	39;
-	uint8_t imin = 13;
-	uint8_t last_known_vref = 0;
-	uint8_t l_loop_count = 0;		
-	//for(l_vref_num=0; l_vref_num < max_ddr4_vrefs1; l_vref_num++){
-	//Sweep Right
+			
 	while(imax >= imin){	
 
 		if(l_loop_count==0)
@@ -1106,58 +1203,15 @@ fapi::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi::Target & i_target_mba)
 
 		vref_val = l_vref_mid;
 		vref_val_print = base_percent + (l_vref_mid * index_mul_print);
-		
+		FAPI_INF("The Vref value is = %d; The percent voltage bump = %d ",vref_val,vref_val_print);
+		//FAPI_INF("\n Before Clearing Refresh");
 		rc = fapiGetScom(i_target_mba,0x03010432,l_data_buffer_64); if(rc) return rc;
-		rc_num = rc_num | l_data_buffer_64.clearBit(0); if(rc_num) return rc;
+		l_data_buffer_64.clearBit(0);
 		rc = fapiPutScom(i_target_mba,0x03010432,l_data_buffer_64); if(rc) return rc;
-		
-		//system("putscom cen.mba 03010432 0 1 0 -ib -all");
-		FAPI_INF("\n After Clearing Refresh");
+		//FAPI_INF("\n After Clearing Refresh");
 		
 		for(i=0;i<MAX_PORT;i++){
-			for(j=0;j<l_MAX_RANKS[0];j++){
-				for(k=0;k<4;k++){
-					
-					vrefdq_train_enable[i][j][k]=0x00;
-					
-				}
-			}
-		}	
-		
-		rc = FAPI_ATTR_SET( ATTR_VREF_DQ_TRAIN_RANGE, &i_target_mba, vrefdq_train_range);if(rc) return rc;
-		rc = FAPI_ATTR_SET( ATTR_VREF_DQ_TRAIN_ENABLE, &i_target_mba, vrefdq_train_enable);if(rc) return rc;
-		rc = mss_mrs6_DDR4(l_target_centaur);
-		if(rc)
-		{
-			//FAPI_ERR(" mrs_load Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
-			return rc;
-		}
-		
-		for(a=0;a < MAX_PORT;a++) //Port
-		{
-			for(l_ranks=0;l_ranks < l_MAX_RANKS[0];l_ranks++){
-				for(c=0;c < 4;c++){
-					
-					vrefdq_train_value[a][l_ranks][c]=vref_val;
-					
-				}
-			}
-		}
-		
-		rc = FAPI_ATTR_SET( ATTR_VREF_DQ_TRAIN_VALUE, &i_target_mba, vrefdq_train_value); if(rc) return rc;
-		
-		
-		rc = mss_mrs6_DDR4(l_target_centaur);
-		if(rc)
-		{
-			//FAPI_ERR(" mrs_load Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
-			return rc;
-		}
-		
-		FAPI_INF("The Vref value is %d .... The percent voltage bump = %f ",vref_val,vref_val_print);
-		
-		for(i=0;i < MAX_PORT;i++){
-			for(j=0;j<l_MAX_RANKS[0];j++){
+			for(j=0;j<MAX_DIMM;j++){
 				for(k=0;k<4;k++){
 					
 					vrefdq_train_enable[i][j][k]=0x01;
@@ -1165,187 +1219,209 @@ fapi::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi::Target & i_target_mba)
 				}
 			}
 		}	
-		rc = FAPI_ATTR_SET( ATTR_VREF_DQ_TRAIN_ENABLE, &i_target_mba, vrefdq_train_enable);if(rc) return rc;
+		
+		rc = FAPI_ATTR_SET( ATTR_EFF_VREF_DQ_TRAIN_RANGE, &i_target_mba, vrefdq_train_range);if(rc) return rc;
+		rc = FAPI_ATTR_SET( ATTR_EFF_VREF_DQ_TRAIN_ENABLE, &i_target_mba, vrefdq_train_enable);if(rc) return rc;
+		for(a=0;a < MAX_PORT;a++) //Port
+		{
+			for(l_dimm=0;l_dimm < MAX_DIMM;l_dimm++)  //Max dimms
+			{
+				for(c=0;c < 4;c++)   //Ranks
+				{
+					
+					vrefdq_train_value[a][l_dimm][c]=vref_val;
+					
+				}
+			}
+		}
+		
+		rc = FAPI_ATTR_SET( ATTR_EFF_VREF_DQ_TRAIN_VALUE, &i_target_mba, vrefdq_train_value); if(rc) return rc;
 		rc = mss_mrs6_DDR4(l_target_centaur);
 		if(rc)
 		{
-			//FAPI_ERR(" mrs_load Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
+			FAPI_ERR(" mrs_load Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
+			return rc;
+		}
+		
+		for(i=0;i < MAX_PORT;i++){
+			for(j=0;j<2;j++){
+				for(k=0;k<4;k++){
+					
+					vrefdq_train_enable[i][j][k]=0x00;
+					
+				}
+			}
+		}	
+		rc = FAPI_ATTR_SET( ATTR_EFF_VREF_DQ_TRAIN_ENABLE, &i_target_mba, vrefdq_train_enable);if(rc) return rc;
+		rc = mss_mrs6_DDR4(l_target_centaur);
+		if(rc)
+		{
+			FAPI_ERR(" mrs_load Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
 			return rc;
 		}
 		
 		rc = fapiGetScom(i_target_mba,0x03010432,l_data_buffer_64); if(rc) return rc;
-		rc_num = rc_num | l_data_buffer_64.setBit(0); if(rc_num) return rc;
+		l_data_buffer_64.setBit(0);
 		rc = fapiPutScom(i_target_mba,0x03010432,l_data_buffer_64); if(rc) return rc;
-		//system("putscom cen.mba 03010432 0 1 1 -ib -all");
 		
-		rc = delay_shmoo_ddr4_pda(i_target_mba, i_port, i_shmoo_type_valid,
-		&l_left_margin, &l_right_margin,
-		vref_val,pda_nibble_table);
+		
+		rc = delay_shmoo_ddr4_pda(i_target_mba, i_port, i_shmoo_type_valid,&l_left_margin,&l_right_margin,vref_val,pda_nibble_table);
 		if (rc) return rc;
 		
-		FAPI_INF("Wr Vref = %f ; Min Setup time = %d; Min Hold time = %d",
-		vref_val_print,
-		l_left_margin,
-		l_right_margin);
-		best_vref[vref_val][0] = l_right_margin+l_left_margin;
+		total_val = l_right_margin+l_left_margin;
+		FAPI_INF("Preet2 - %d ; Wr Vref = %d ; Min Setup time = %d; Min Hold time = %d and Total = %d",vref_val,vref_val_print,l_left_margin,l_right_margin,total_val);
 		
-		//Get proper Criteria HERE
-		if(best_vref[vref_val][0] > best_vref[last_known_vref][0])
+		if(total_val > last_total)
 		{
 			last_known_vref = vref_val;
-			//if(l_loop_count !=0)
+			last_total = total_val;
+			if(l_loop_count != 0)
 			imin = l_vref_mid+1;
 		}
-		//imax = l_vref_mid + (imax - l_vref_mid)/2;
 		else
 		{
-			if(l_loop_count ==0)
-			{	FAPI_INF("Safety Fuse-1 !! "); 
-				imin = l_vref_mid+1;
-			}
-			else
-			imax = ((l_vref_mid + imax )/2)-2;
+			imax = l_vref_mid - 1;
 		}
 		l_loop_count ++;
 		for(int i_port=0;i_port < MAX_PORT;i_port++){
-			for(int i_rank=0;i_rank < l_MAX_RANKS[0];i_rank++){
-				for(int i_nibble=0;i_nibble < l_SCHMOO_NIBBLES;i_nibble++){
-					if (best_pda_nibble_table[i_port][i_rank][i_nibble][1] < pda_nibble_table[i_port][i_rank][i_nibble][1])
+			for(l_dimm=0;l_dimm < 2;l_dimm++){
+			for(int i_rank=0;i_rank < num_ranks_per_dimm[i_port][l_dimm];i_rank++){
+				for(int i_nibble=0;i_nibble < 16;i_nibble++){
+					if (best_pda_nibble_table[i_port][l_dimm][i_rank][i_nibble][1] < pda_nibble_table[i_port][l_dimm][i_rank][i_nibble][1])
 					{
-						best_pda_nibble_table[i_port][i_rank][i_nibble][1] = pda_nibble_table[i_port][i_rank][i_nibble][1];
-						best_pda_nibble_table[i_port][i_rank][i_nibble][0] = vref_val;
+						best_pda_nibble_table[i_port][l_dimm][i_rank][i_nibble][1] = pda_nibble_table[i_port][l_dimm][i_rank][i_nibble][1];
+						best_pda_nibble_table[i_port][l_dimm][i_rank][i_nibble][0] = vref_val;
 					}
-				}}}
-		
-	}
-
-	//imax = 	max_ddr4_vrefs1/2;
-	//imin = 0;
-	//Sweep Left
-	/*while(imax >= imin){	
-
-l_vref_mid = (imax+imin)/2;
-vref_val = l_vref_mid;
-vref_val_print = base_percent + (l_vref_mid * index_mul_print);	
-system("putscom cen.mba 03010432 0 1 0 -ib -all");
-FAPI_INF("\n After Clearing Refresh");
-		
-		for(i=0;i<2;i++){
-			for(j=0;j<l_MAX_RANKS[0];j++){
-				for(k=0;k<4;k++){
-					
-					vrefdq_train_enable[i][j][k]=0x00;
-					
 				}
-			}
-		}	
+			} //Rank Loop
+		} //dimm loop
+		} //Port loop
 		
-		rc = FAPI_ATTR_SET( ATTR_VREF_DQ_TRAIN_RANGE, &i_target_mba, vrefdq_train_range);if(rc) return rc;
-		rc = FAPI_ATTR_SET( ATTR_VREF_DQ_TRAIN_ENABLE, &i_target_mba, vrefdq_train_enable);if(rc) return rc;
-				rc = mss_mrs6_DDR4(l_target_centaur);
-			if(rc)
-			{
-				//FAPI_ERR(" mrs_load Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
-				return rc;
-			}
-			
-			for(a=0;a<2;a++){
-				for(l_ranks=0;l_ranks < l_MAX_RANKS[0];l_ranks++){
-					for(c=0;c<4;c++){
+	} //end of While
+
 	
-					vrefdq_train_value[a][l_ranks][c]=vref_val;
-					
-					}
-				}
-			}
-		
-				rc = FAPI_ATTR_SET( ATTR_VREF_DQ_TRAIN_VALUE, &i_target_mba, vrefdq_train_value);
-		
-		
-			rc = mss_mrs6_DDR4(l_target_centaur);
-			if(rc)
-			{
-				//FAPI_ERR(" mrs_load Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
-				return rc;
-			}
-			
-			FAPI_INF("The Vref value is %d .... The percent voltage bump = %f ",vref_val,vref_val_print);
-			
-			for(i=0;i<2;i++){
-			for(j=0;j<l_MAX_RANKS[0];j++){
-				for(k=0;k<4;k++){
-					
-					vrefdq_train_enable[i][j][k]=0x01;
-					
-				}
-			}
-		}	
-		rc = FAPI_ATTR_SET( ATTR_VREF_DQ_TRAIN_ENABLE, &i_target_mba, vrefdq_train_enable);if(rc) return rc;
-		rc = mss_mrs6_DDR4(l_target_centaur);
-			if(rc)
-			{
-				//FAPI_ERR(" mrs_load Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
-				return rc;
-			}
-		
-		system("putscom cen.mba 03010432 0 1 1 -ib -all");
-		
-		rc = delay_shmoo_ddr4(i_target_mba, i_port, i_shmoo_type_valid,
-								&l_left_margin, &l_right_margin,
-								vref_val);
-				if (rc) return rc;
-			
-	FAPI_INF("Wr Vref = %f ; Min Setup time = %d; Min Hold time = %d",
-						vref_val_print,
-						l_left_margin,
-						l_right_margin);
-		best_vref[vref_val][0] = l_right_margin+l_left_margin;
-		
-		//Get proper Criteria HERE
-		if(best_vref[vref_val][0] > best_vref[last_known_vref][0])
-		{
-			last_known_vref = vref_val;
-			imin = l_vref_mid+1;
-		}
-		//last_known_vref = vref_val;
-		//imax = l_vref_mid + (imax - l_vref_mid)/2;
-		else
-		imax = (l_vref_mid + imax )/2;
-		}
-
-		*/
 	vref_val_print = base_percent + (last_known_vref * index_mul_print);		
-	FAPI_INF("Best V-Ref - %f  ; Total Window = %d",
-	vref_val_print,best_vref[last_known_vref][0]);
+	FAPI_INF("Best V-Ref - %d - %d  ; Total Window = %d",last_known_vref,vref_val_print,last_total);
 	// What do we do Once we know best V-Ref
-	for(a=0;a<50;a++)
-	{
-		vref_val_print = base_percent + (a * index_mul_print);
-		FAPI_INF("\n V-Ref - %f  ; Total Window = %d",vref_val_print,best_vref[a][0]);
-	}
+	
 	rc = fapiGetScom( i_target_mba,  0x03010432,  refresh_reg); if(rc) return rc;
 	refresh_reg.clearBit(0);
 	fapiPutScom( i_target_mba,  0x03010432,  refresh_reg);if(rc) return rc;
 	
-	/*for(int i_port=0;i_port < 2;i_port++){
-		for(int i_rank=0;i_rank < 2;i_rank++){
-		for(int i_nibble=0;i_nibble < 16;i_nibble++){
-		FAPI_INF("\n Port %d Rank:%d Pda_Nibble: %d  V-ref:%d  Margin:%d",i_port,i_rank,i_nibble,best_pda_nibble_table[i_port][i_rank][i_nibble][0],best_pda_nibble_table[i_port][i_rank][i_nibble][1]);
-		pda.push_back(PDA_MRS_Storage(best_pda_nibble_table[i_port][i_rank][i_nibble][0],ATTR_VREF_DQ_TRAIN_VALUE,i_nibble,i_rank,0,i_port));
-}
-FAPI_INF("FINAL %s PDA STRING: %d %s",i_target_mba.toEcmdString(),pda.size()-1,pda[pda.size()-1].c_str());
-}}
+	for(int i_port=0;i_port < 2;i_port++){
+		for(int i_dimm=0;i_dimm < 2;i_dimm++){
+		for(int i_rank=0;i_rank < num_ranks_per_dimm[i_port][i_dimm];i_rank++){
+			for(int i_nibble=0;i_nibble < 16;i_nibble++){
+				FAPI_INF("\n Port %d Dimm %d Rank:%d Pda_Nibble: %d  V-ref:%d  Margin:%d",i_port,i_dimm,i_rank,i_nibble,best_pda_nibble_table[i_port][i_dimm][i_rank][i_nibble][0],best_pda_nibble_table[i_port][i_dimm][i_rank][i_nibble][1]);
+				pda.push_back(PDA_MRS_Storage(best_pda_nibble_table[i_port][i_dimm][i_rank][i_nibble][0],ATTR_EFF_VREF_DQ_TRAIN_VALUE,0,i_dimm,i_rank,i_port));
+				}
+				FAPI_INF("FINAL %s PDA STRING: %d %s",i_target_mba.toEcmdString(),pda.size()-1,pda[pda.size()-1].c_str());
+				rc = mss_ddr4_run_pda((fapi::Target &)i_target_mba,pda); if(rc) return rc; 
+		} //End of Rank Loop
+		} //end of dimm loop
+} //End of Port Loop
 
-rc = fapiGetScom( i_target_mba,  0x03010432,  refresh_reg);
+for(i=0;i<MAX_PORT;i++){
+			for(j=0;j<2;j++){
+				for(k=0;k<4;k++){
+					
+					vrefdq_train_enable[i][j][k]=0x00;
+					
+				}
+			}
+		}	
+rc = FAPI_ATTR_SET( ATTR_EFF_VREF_DQ_TRAIN_ENABLE, &i_target_mba, vrefdq_train_enable);if(rc) return rc;
+		rc = mss_mrs6_DDR4(l_target_centaur);
+		if(rc)
+		{
+			FAPI_ERR(" mrs_load Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
+			return rc;
+		}
+	rc = fapiGetScom( i_target_mba,0x03010432,refresh_reg);
 	refresh_reg.setBit(0);
-	fapiPutScom( i_target_mba,  0x03010432,  refresh_reg);
+	fapiPutScom( i_target_mba,0x03010432,refresh_reg);
 			
+} // end of if
+
+else     //Skipping Shmoos ... Writing VPD data directly
+
+{
+	vref_val_print = base_percent + (vpd_wr_vref_value[0] * index_mul_print);
+	FAPI_INF("The Vref value is from VPD = %d; The  Voltage bump = %d ",vpd_wr_vref_value[0],vref_val_print);
 		
-	//Read the write vref attributes
+	rc = fapiGetScom(i_target_mba,0x03010432,l_data_buffer_64); if(rc) return rc;
+		l_data_buffer_64.clearBit(0);
+		rc = fapiPutScom(i_target_mba,0x03010432,l_data_buffer_64); if(rc) return rc;
+		//FAPI_INF("\n After Clearing Refresh");
+		
+		for(i=0;i<MAX_PORT;i++){
+			for(j=0;j<MAX_DIMM;j++){
+				for(k=0;k<4;k++){
+					
+					vrefdq_train_enable[i][j][k]=0x01;
+					
+				}
+			}
+		}	
+		
+		rc = FAPI_ATTR_SET( ATTR_EFF_VREF_DQ_TRAIN_RANGE, &i_target_mba, vrefdq_train_range);if(rc) return rc;
+		rc = FAPI_ATTR_SET( ATTR_EFF_VREF_DQ_TRAIN_ENABLE, &i_target_mba, vrefdq_train_enable);if(rc) return rc;
+		for(a=0;a < MAX_PORT;a++) //Port
+		{
+			for(l_dimm=0;l_dimm < MAX_DIMM;l_dimm++)  //Max dimms
+			{
+				for(c=0;c < 4;c++)   //Ranks
+				{
+					
+					vrefdq_train_value[a][l_dimm][c]=vpd_wr_vref_value[0];
+					
+				}
+			}
+		}
+		
+		rc = FAPI_ATTR_SET( ATTR_EFF_VREF_DQ_TRAIN_VALUE, &i_target_mba, vrefdq_train_value); if(rc) return rc;
+		rc = mss_mrs6_DDR4(l_target_centaur);
+		if(rc)
+		{
+			FAPI_ERR(" mrs_load Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
+			return rc;
+		}
+		
+		for(i=0;i < MAX_PORT;i++){
+			for(j=0;j<2;j++){
+				for(k=0;k<4;k++){
+					
+					vrefdq_train_enable[i][j][k]=0x00;
+					
+				}
+			}
+		}	
+		rc = FAPI_ATTR_SET( ATTR_EFF_VREF_DQ_TRAIN_ENABLE, &i_target_mba, vrefdq_train_enable);if(rc) return rc;
+		rc = mss_mrs6_DDR4(l_target_centaur);
+		if(rc)
+		{
+			FAPI_ERR(" mrs_load Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
+			return rc;
+		}
+		
+		rc = fapiGetScom(i_target_mba,0x03010432,l_data_buffer_64); if(rc) return rc;
+		l_data_buffer_64.setBit(0);
+		rc = fapiPutScom(i_target_mba,0x03010432,l_data_buffer_64); if(rc) return rc;
+		
+}	
 	
-				
-	rc = mss_ddr4_run_pda((fapi::Target &)i_target_mba,pda); 
-*/	
+//Workaround MCBIST MASK Bit as FW reports FIR bits --- > CLEAR
+	rc = fapiGetScom(i_target_mba, 0x03010614, l_data_buffer_64);
+        if (rc) return rc;
+        rc_num = l_data_buffer_64.clearBit(10);
+        if (rc_num)
+        {
+            FAPI_ERR("Buffer error in function wr_vref_shmoo_ddr4_bin Workaround MCBIST MASK Bit");
+            rc.setEcmdError(rc_num);
+            return rc;
+        }
+		
+//Read the write vref attributes
 	return rc;
 }
 
@@ -1616,14 +1692,17 @@ uint32_t i_shmoo_param)
 	//FAPI_INF(" Inside before the delay shmoo " );
 	//Constructor CALL: generic_shmoo::generic_shmoo(uint8_t i_port, uint32_t shmoo_mask,shmoo_algorithm_t shmoo_algorithm)
 	//generic_shmoo mss_shmoo=generic_shmoo(i_port,2,SEQ_LIN);
-	generic_shmoo * l_pShmoo = new generic_shmoo(i_port,i_shmoo_type_valid,SEQ_LIN);
-	//generic_shmoo mss_shmoo=generic_shmoo(i_port,i_shmoo_type_valid,SEQ_LIN);
+
+        //need to use fapi allocator to avoid memory fragmentation issues in Hostboot
+        //  then use an in-place new to put the object in the pre-allocated memory
+        void* l_mallocptr = fapiMalloc(sizeof(generic_shmoo));
+	generic_shmoo * l_pShmoo = new (l_mallocptr) generic_shmoo(i_port,i_shmoo_type_valid,SEQ_LIN);
 	rc = l_pShmoo->run(i_target_mba, o_left_margin, o_right_margin,i_shmoo_param);
 	if(rc)
 	{
 		FAPI_ERR("Delay Schmoo Function is Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
 	}
-	delete l_pShmoo;
+        fapiFree(l_mallocptr);
 	return rc;
 }
 
@@ -1642,17 +1721,20 @@ fapi::ReturnCode delay_shmoo_ddr4(const fapi::Target & i_target_mba, uint8_t i_p
 shmoo_type_t i_shmoo_type_valid,
 uint32_t *o_left_margin,
 uint32_t *o_right_margin,
-uint32_t i_shmoo_param,uint32_t pda_nibble_table[2][2][16][2])
+uint32_t i_shmoo_param,uint32_t pda_nibble_table[2][2][4][16][2])
 {
 	fapi::ReturnCode rc;
 
-	generic_shmoo * l_pShmoo = new generic_shmoo(i_port,i_shmoo_type_valid,SEQ_LIN);
+        //need to use fapi allocator to avoid memory fragmentation issues in Hostboot
+        //  then use an in-place new to put the object in the pre-allocated memory
+        void* l_mallocptr = fapiMalloc(sizeof(generic_shmoo));
+	generic_shmoo * l_pShmoo = new (l_mallocptr) generic_shmoo(i_port,i_shmoo_type_valid,SEQ_LIN);
 
 	rc = l_pShmoo->run(i_target_mba, o_left_margin, o_right_margin,i_shmoo_param); if (rc) return rc;
 	
 	
 	
-	delete l_pShmoo;
+        fapiFree(l_mallocptr);
 	return rc;
 }
 
@@ -1660,17 +1742,20 @@ fapi::ReturnCode delay_shmoo_ddr4_pda(const fapi::Target & i_target_mba, uint8_t
 shmoo_type_t i_shmoo_type_valid,
 uint32_t *o_left_margin,
 uint32_t *o_right_margin,
-uint32_t i_shmoo_param,uint32_t pda_nibble_table[2][2][16][2])
+uint32_t i_shmoo_param,uint32_t pda_nibble_table[2][2][4][16][2])
 {
 	fapi::ReturnCode rc;
 
-	generic_shmoo * l_pShmoo = new generic_shmoo(i_port,i_shmoo_type_valid,SEQ_LIN);
+        //need to use fapi allocator to avoid memory fragmentation issues in Hostboot
+        //  then use an in-place new to put the object in the pre-allocated memory
+        void* l_mallocptr = fapiMalloc(sizeof(generic_shmoo));
+	generic_shmoo * l_pShmoo = new (l_mallocptr) generic_shmoo(i_port,i_shmoo_type_valid,SEQ_LIN);
 
 	rc = l_pShmoo->run(i_target_mba, o_left_margin, o_right_margin,i_shmoo_param); if (rc) return rc;
 	
 	rc = l_pShmoo->get_nibble_pda(i_target_mba,pda_nibble_table); if (rc) return rc;
 	
-	delete l_pShmoo;
+        fapiFree(l_mallocptr);
 	return rc;
 }
 
@@ -2034,3 +2119,5 @@ uint8_t& o_index)
 		}
 	}
 }
+
+

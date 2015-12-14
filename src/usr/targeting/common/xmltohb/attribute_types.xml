@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2016                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -11636,7 +11636,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_VREF_DQ_TRAIN_VALUE</id>
+        <id>ATTR_EFF_VREF_DQ_TRAIN_VALUE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -11655,7 +11655,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_VREF_DQ_TRAIN_RANGE</id>
+        <id>ATTR_EFF_VREF_DQ_TRAIN_RANGE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -11674,7 +11674,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_VREF_DQ_TRAIN_ENABLE</id>
+        <id>ATTR_EFF_VREF_DQ_TRAIN_ENABLE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
