@@ -337,16 +337,7 @@ inline void icbi(void* _ptr)
 ALWAYS_INLINE
 inline void nap()
 {
-    // @todo-RTC:130186 Add new stop command support
-    //asm volatile("nap");
-
-    // Nap should be equivalent to 'stop 1' (no state loss)
-    // 855 reg for HYPV,  823 reg otherwise
-    // using EC(bit43) as 1 here  (system reset or LPCR event)
-    // PHYP uses bit 42 as 1 also
-//  register uint64_t psscr = 0x0000000000310001;
-//  asm volatile("mtspr 823, %0; isync" :: "r" (psscr));
-//  asm volatile(".long 0x4C0002E4"); // When GCC supports 'stop', use it
+    asm volatile(".long 0x4C0002E4"); // When GCC supports 'stop', use it
 }
 
 ALWAYS_INLINE

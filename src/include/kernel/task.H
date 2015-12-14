@@ -30,6 +30,13 @@
 
 #include <kernel/types.h>
 
+
+// Stop/Nap instruction
+#define STOP_INSTRUCTION   0x4C0002E4
+// Default PSSCR value for NAP'ing
+#define PSSCR_NAP_VALUE    0x0000000000310001ull
+
+
 /** @struct context_t
  *  @brief Defines the save-restore context for the task.
  *
