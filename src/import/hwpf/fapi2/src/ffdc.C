@@ -34,25 +34,26 @@
 namespace fapi2
 {
 
-    ///
-    /// @brief Add error information to this ffdc object
-    /// @param[in] A pointer to a list of objects
-    /// @param[in] A pointer to the list of entries
-    /// @param[in] The count of how many entries there are
-    /// @return void
-    ///
-    template<>
-    void FirstFailureData<ReturnCode>::addErrorInfo(
-        const void* const* i_pObjects,
-        const ErrorInfoEntry* i_pEntries,
-        const uint8_t i_count)
+///
+/// @brief Add error information to this ffdc object
+/// @param[in] A pointer to a list of objects
+/// @param[in] A pointer to the list of entries
+/// @param[in] The count of how many entries there are
+/// @return void
+///
+template<>
+void FirstFailureData<ReturnCode>::addErrorInfo(
+    const void* const* i_pObjects,
+    const ErrorInfoEntry* i_pEntries,
+    const uint8_t i_count)
+{
+    FAPI_DBG("%d entries", i_count);
+
+    for (uint32_t i = 0; i < i_count; i++)
     {
-        FAPI_DBG("%d entries", i_count);
-        for (uint32_t i = 0; i < i_count; i++)
-        {
-            i_pEntries[i].addErrorInfo(iv_info, i_pObjects);
-        }
+        i_pEntries[i].addErrorInfo(iv_info, i_pObjects);
     }
+}
 
 
 
