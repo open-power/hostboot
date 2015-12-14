@@ -534,6 +534,7 @@ sub validateAttributes {
                              = { required => 0, isscalar => 0};
     $elements{"display-name"} = { required => 0, isscalar => 1};
     $elements{"virtual"}     = { required => 0, isscalar => 0};
+    $elements{"tempAttribute"} = { required => 0, isscalar => 0};
 
     foreach my $attribute (@{$attributes->{attribute}})
     {
@@ -885,7 +886,8 @@ sub writeFapiPlatAttrMacrosHeaderFileContent {
                 {
                     if(exists $attribute->{readable})
                     {
-                        $macroSection .= '    #define ' .  $hwpfToHbAttrMap->{id} .
+                        $macroSection .= '    #define ' .
+                            $hwpfToHbAttrMap->{id} .
                             "_GETMACRO(ID,PTARGET,VAL) \\\n" .
                             "        FAPI_PLAT_ATTR_SVC_GETMACRO_" .
                             $hwpfToHbAttrMap->{macro} . "(ID,PTARGET,VAL)\n";
@@ -893,8 +895,8 @@ sub writeFapiPlatAttrMacrosHeaderFileContent {
                     }
                     else
                     {
-                        fatal("FAPI attribute $hwpfToHbAttrMap->{id} requires " .
-                            "platform supply readable attribute.");
+                        fatal("FAPI attribute $hwpfToHbAttrMap->{id} " .
+                            "requires platform supply readable attribute.");
                     }
                 }
 
@@ -902,7 +904,8 @@ sub writeFapiPlatAttrMacrosHeaderFileContent {
                 {
                     if(exists $attribute->{writeable})
                     {
-                        $macroSection .= '    #define ' .  $hwpfToHbAttrMap->{id} .
+                        $macroSection .= '    #define ' .
+                            $hwpfToHbAttrMap->{id} .
                             "_SETMACRO(ID,PTARGET,VAL) \\\n" .
                             "        FAPI_PLAT_ATTR_SVC_SETMACRO_" .
                             $hwpfToHbAttrMap->{macro} . "(ID,PTARGET,VAL)\n";
@@ -910,8 +913,8 @@ sub writeFapiPlatAttrMacrosHeaderFileContent {
                     }
                     else
                     {
-                        fatal("FAPI attribute $hwpfToHbAttrMap->{id} requires "
-                            . "platform supply writeable attribute.");
+                        fatal("FAPI attribute $hwpfToHbAttrMap->{id} "
+                            . "requires platform supply writeable attribute.");
                     }
                 }
             }
