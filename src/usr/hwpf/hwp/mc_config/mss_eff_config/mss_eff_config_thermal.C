@@ -22,12 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_thermal.C,v 1.34 2015/10/20 13:44:46 pardeik Exp $
+// $Id: mss_eff_config_thermal.C,v 1.36 2015/11/16 23:11:02 pardeik Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config_thermal.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
-// *! All Rights Reserved -- Property of IBM
+// *! ***  ***
 //------------------------------------------------------------------------------
 // *! TITLE       : mss_eff_config_thermal
 // *! DESCRIPTION : see additional comments below
@@ -54,6 +54,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.36  | pardeik  | 11/16/15| support for ATTR_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4
+//   1.35  | pardeik  | 11/09/15| Update for DDR4 reg power limit
 //   1.34  | pardeik  | 10/20/15| change fapilogerror (not recoverable)
 //   1.33  | pardeik  | 07/31/15| Support new CDIMM total power curves (SW316162)
 //         |          |         | Only log one error per MBA intead of per DIMM 
@@ -641,6 +643,7 @@ extern "C" {
 	uint32_t l_max_dram_databus_util;
 	uint32_t l_dimm_reg_power_limit_per_dimm_adj;
 	uint32_t l_dimm_reg_power_limit_per_dimm;
+	uint32_t l_dimm_reg_power_limit_per_dimm_ddr4;
 	uint8_t l_max_number_dimms_per_reg;
 	uint8_t l_dimm_reg_power_limit_adj_enable;
 	uint8_t l_reg_max_dimm_count;
@@ -694,6 +697,12 @@ extern "C" {
 			   NULL, l_dimm_reg_power_limit_per_dimm);
 	if (rc) {
 	    FAPI_ERR("Error getting attribute ATTR_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM");
+	    return rc;
+	}
+	rc = FAPI_ATTR_GET(ATTR_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4,
+			   NULL, l_dimm_reg_power_limit_per_dimm_ddr4);
+	if (rc) {
+	    FAPI_ERR("Error getting attribute ATTR_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4");
 	    return rc;
 	}
 	rc = FAPI_ATTR_GET(ATTR_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR,
@@ -800,6 +809,12 @@ extern "C" {
 //------------------------------------------------------------------------------
 
 // adjust the regulator power limit per dimm if enabled and use this if less than the thermal limit
+
+// If DDR4, use DDR4 regulator power limit
+	if (l_dram_gen == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+	{
+	    l_dimm_reg_power_limit_per_dimm = l_dimm_reg_power_limit_per_dimm_ddr4;
+	}
 // If reg power limit is zero, then set to thermal limit - needed for ISDIMM systems since some of these MRW attributes are not defined
 	if (l_dimm_reg_power_limit_per_dimm == 0)
 	{

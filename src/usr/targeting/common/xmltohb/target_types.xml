@@ -135,6 +135,7 @@
     <attribute><id>MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE</id></attribute>
     <attribute><id>MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR</id></attribute>
     <attribute><id>MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM</id></attribute>
+    <attribute><id>MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4</id></attribute>
     <!-- Start pm_plat_attributes.xml -->
     <attribute><id>PM_EXTERNAL_VRM_STEPSIZE</id></attribute>
     <attribute><id>PM_EXTERNAL_VRM_STEPDELAY</id></attribute>
