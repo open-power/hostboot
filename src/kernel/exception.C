@@ -191,7 +191,7 @@ namespace ExceptionHandles
             // Check for 'nap' and skip over.  This avoids a task-crash
             // if for some reason we entered back into the task without
             // privilege raised.
-            if (*instruction == 0x4c000364)
+            if (*instruction == STOP_INSTRUCTION)
             {
                 printk("Error: Nap executed with lowered permissions on %d\n",
                        t->tid);

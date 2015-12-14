@@ -759,8 +759,8 @@ namespace Systemcalls
     {
 
         uint32_t* instruction = static_cast<uint32_t*>(t->context.nip);
-        if (0x4c000364 == (*instruction)) // Verify 'nap' instruction,
-                                          // otherwise just return.
+        if (STOP_INSTRUCTION == (*instruction)) // Verify 'nap' instruction,
+                                                // otherwise just return.
         {
             // Disable EE, PR, IR, DR so 'nap' can be executed.
             //     (which means to stay in HV state)

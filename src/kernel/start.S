@@ -41,6 +41,9 @@ _start:
     mtsrr1 r2
     li r2, _start_postmsr@l
     mtsrr0 r2
+    lis     r9,49      ;// Want to default the NAP value
+    ori     r9,r9,1    ;// Value is 0x0000000000310001
+    mtspr   855,r9     ;// set actual PSSCR
     rfid
 
 _start_postmsr:
