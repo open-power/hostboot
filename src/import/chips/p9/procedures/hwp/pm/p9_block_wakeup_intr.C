@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: chips/p9/procedures/ipl/hwp/p9_block_wakeup_intr.C $          */
+/* $Source: chips/p9/procedures/hwp/pm/p9_block_wakeup_intr.C $           */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */

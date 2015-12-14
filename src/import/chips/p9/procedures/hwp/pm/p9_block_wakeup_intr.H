@@ -8,7 +8,6 @@
 /* EKB Project                                                            */
 /*                                                                        */
 /* COPYRIGHT 2015                                                         */
-/* [+] <                                                                  */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
