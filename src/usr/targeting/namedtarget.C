@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -62,8 +64,8 @@ const TARGETING::Target *   getMasterCore( )
 
     TARGETING::Target * l_processor =   NULL;
     (void)TARGETING::targetService().masterProcChipTargetHandle( l_processor );
-    FABRIC_NODE_ID_ATTR l_logicalNodeId =
-                l_processor->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
+    FABRIC_GROUP_ID_ATTR l_logicalGroupId =
+                l_processor->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
     FABRIC_CHIP_ID_ATTR l_chipId =
                 l_processor->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
 
@@ -89,7 +91,7 @@ const TARGETING::Target *   getMasterCore( )
 
         uint64_t pir = l_coreId << 3;
         pir |= l_chipId << 7;
-        pir |= l_logicalNodeId << 10;
+        pir |= l_logicalGroupId << 10;
 
         if (pir == l_masterCoreID){
             TRACFCOMP( g_trac_targeting,

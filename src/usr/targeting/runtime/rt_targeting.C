@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2014                   */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -32,6 +34,7 @@
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/trace.H>
 #include <targeting/common/targreasoncodes.H>
+#include <arch/pirformat.H>
 
 #include <runtime/rt_targeting.H>
 
@@ -89,20 +92,19 @@ errlHndl_t getRtTarget(const TARGETING::Target* i_target,
 
         if(target_type == TARGETING::TYPE_PROC)
         {
-            // use 0b0000.0000.0000.0000.0000.0000.00NN.NCCC:
             uint32_t fabId =
-                i_target->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>();
+                i_target->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
 
             uint32_t procPos =
                 i_target->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
 
-            o_chipId = (fabId << CHIPID_NODE_SHIFT) + procPos;
+            o_chipId = PIR_t::createChipId( fabId, procPos );
         }
         else if( target_type == TARGETING::TYPE_MEMBUF)
         {
             //MEMBUF
-            // 0b1000.0000.0000.0000.0000.00NN.NCCC.MMMM
-            // where NNN id node, CCC is chip, MMMM is memory channel
+            // 0b1000.0000.0000.0000.0000.0GGG.GCCC.MMMM
+            // where GGGG is group, CCC is chip, MMMM is memory channel
             //
             TARGETING::TargetHandleList targetList;
 
@@ -163,16 +165,15 @@ errlHndl_t getRtTarget(const TARGETING::Target* i_target,
                 break;
             }
 
-            o_chipId = (o_chipId << UNIT_ID_SHIFT);
+            o_chipId = (o_chipId << MEMBUF_ID_SHIFT);
             o_chipId += pos;
-            o_chipId |= MEMBUF_ID_TYPE;
+            o_chipId |= MEMBUF_TYPE;
         }
-        else if(target_type == TARGETING::TYPE_EX ||
-                target_type == TARGETING::TYPE_CORE)
+        else if(target_type == TARGETING::TYPE_CORE)
         {
-            // EX/CORE
-            // 0b0100.0000.0000.0000.0000.00NN.NCCC.PPPP
-            // NNN is node, CCC is chip, PPPP is core
+            // CORE
+            // 0b0100.0000.0000.0000.0000.GGGG.CCCP.PPPP
+            // GGGG is group, CCC is chip, PPPPP is core
             uint32_t pos = i_target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
             const TARGETING::Target * proc_target = getParentChip(i_target);
@@ -188,9 +189,8 @@ errlHndl_t getRtTarget(const TARGETING::Target* i_target,
                 break;
             }
 
-            o_chipId = (o_chipId << UNIT_ID_SHIFT);
-            o_chipId += pos;
-            o_chipId |= CORE_ID_TYPE;
+            o_chipId = PIR_t::createCoreId(o_chipId,pos);
+            o_chipId |= CORE_TYPE;
         }
         else
         {
@@ -234,18 +234,18 @@ errlHndl_t getHbTarget(rtChipId_t i_rt_chip_id,
 
     do
     {
-        uint64_t idType = i_rt_chip_id & CHIPID_ID_MASK;
+        uint64_t idType = i_rt_chip_id & CHIPID_TYPE_MASK;
 
-        if(0 != (idType ==  MEMBUF_ID_TYPE))
+        if(0 != (idType ==  MEMBUF_TYPE))
         {
             //membuf
-            uint64_t chip_id = i_rt_chip_id & UNIT_ID_MASK;
-            uint32_t unitPos = chip_id & 0x0000000f;
-            chip_id >>= UNIT_ID_SHIFT;
+            uint64_t proc_chip_id = i_rt_chip_id & ~CHIPID_TYPE_MASK;
+            uint32_t unitPos = proc_chip_id & MEMBUF_ID_MASK;
+            proc_chip_id >>= MEMBUF_ID_SHIFT;
             TARGETING::Target * proc = NULL;
             TARGETING::Target * msc = NULL;
 
-            err = getHbTarget(chip_id, proc);
+            err = getHbTarget(proc_chip_id, proc);
             if(err)
             {
                 break;
@@ -308,13 +308,11 @@ errlHndl_t getHbTarget(rtChipId_t i_rt_chip_id,
             }
 
         }
-        else if(0 != (idType == CORE_ID_TYPE))
+        else if(0 != (idType == CORE_TYPE))
         {
-            // core/ex  will alway return EX chiplet as there is no concept
-            //  (yet) of a core in fapi
-            uint64_t chip_id = i_rt_chip_id & UNIT_ID_MASK;
-            uint32_t unitPos = chip_id & 0x0000000f;
-            chip_id >>= UNIT_ID_SHIFT;
+            uint64_t core_id = i_rt_chip_id & ~CHIPID_TYPE_MASK;
+            uint32_t unitPos = PIR_t::coreFromCoreId(core_id);
+            uint64_t chip_id = PIR_t::chipFromCoreId(core_id);
             TARGETING::Target * proc = NULL;
 
             err = getHbTarget(chip_id, proc);
@@ -323,7 +321,7 @@ errlHndl_t getHbTarget(rtChipId_t i_rt_chip_id,
                 break;
             }
 
-            PredicateCTM exFilter(CLASS_UNIT, TYPE_EX);
+            PredicateCTM exFilter(CLASS_UNIT, TYPE_CORE);
             PredicateAttrVal<ATTR_CHIP_UNIT> unitAttr(unitPos);
             PredicatePostfixExpr exUnitFilter;
             exUnitFilter.push(&exFilter).push(&unitAttr).And();
@@ -343,15 +341,14 @@ errlHndl_t getHbTarget(rtChipId_t i_rt_chip_id,
             }
             // o_target not found caught below..
         }
-        else if( idType == PROC_ID_TYPE)
+        else if( idType == PROC_TYPE)
         {
             // assume processor chip
-            // chip_id  = 'NNNCCC'b
-            uint32_t fabId = i_rt_chip_id >> CHIPID_NODE_SHIFT;
-            uint32_t procPos = i_rt_chip_id & 0x7;
+            uint32_t fabId = PIR_t::groupFromChipId(i_rt_chip_id);
+            uint32_t procPos = PIR_t::chipFromChipId(i_rt_chip_id);
 
             PredicateCTM procFilter(CLASS_CHIP, TYPE_PROC);
-            PredicateAttrVal<ATTR_FABRIC_NODE_ID> nodeFilter(fabId);
+            PredicateAttrVal<ATTR_FABRIC_GROUP_ID> nodeFilter(fabId);
             PredicateAttrVal<ATTR_FABRIC_CHIP_ID> chipFilter(procPos);
 
             PredicatePostfixExpr theProc, theAttrs;

@@ -31,7 +31,6 @@
 #include <initservice/initserviceif.H>
 #include <initservice/istepdispatcherif.H>
 #include <sys/task.h>
-#include <intr/interrupt.H>
 #include <initservice/extinitserviceif.H>
 #include <hbotcompid.H>
 #include <sys/misc.h>
@@ -43,9 +42,8 @@
 #include <devtree/devtreeif.H>
 #include <kernel/ipc.H> // for internode data areas
 #include <mbox/ipc_msg_types.H>
-
 #include <devicefw/userif.H>
-
+#include <arch/pirformat.H>
 
 
 
@@ -195,11 +193,11 @@ void* call_host_start_payload (void *io_pArgs)
             "call_host_start_payload entry" );
 
     // For single-node systems, the non-master processors can be in a
-    // different logical (powerbus) node.  Need to migrate task to master.
+    // different logical (powerbus) group.  Need to migrate task to master.
     task_affinity_pin();
     task_affinity_migrate_to_master();
 
-    uint64_t this_node = INTR::PIR_t(task_getcpuid()).nodeId;
+    uint64_t this_node = PIR_t(task_getcpuid()).groupId;
 
     task_affinity_unpin();
 

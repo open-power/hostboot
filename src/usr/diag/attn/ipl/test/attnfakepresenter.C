@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/attn/hostboot/test/attnfakepresenter.C $         */
+/* $Source: src/usr/diag/attn/ipl/test/attnfakepresenter.C $              */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -134,7 +134,7 @@ void FakePresenter::interrupt(
 
         uint64_t node = 0, chip = 0;
 
-        getTargetService().getAttribute(ATTR_FABRIC_NODE_ID, i_source, node);
+        getTargetService().getAttribute(ATTR_FABRIC_GROUP_ID, i_source, node);
         getTargetService().getAttribute(ATTR_FABRIC_CHIP_ID, i_source, chip);
 
         xisr.node = node;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -683,16 +683,16 @@ errlHndl_t TargetService::queryMasterProcChipTargetHandle(
                 targetService().end(),
                 &actingMasterProcFilter);
 
-            TARGETING::ATTR_FABRIC_NODE_ID_type minFabricNodeId =
-                TARGETING::FABRIC_NODE_ID_NOT_FOUND;
+            TARGETING::ATTR_FABRIC_GROUP_ID_type minFabricGroupId =
+                TARGETING::FABRIC_GROUP_ID_NOT_FOUND;
             for(; blueprintProcs; ++blueprintProcs)
             {
-                TARGETING::ATTR_FABRIC_NODE_ID_type fabricNodeId =
+                TARGETING::ATTR_FABRIC_GROUP_ID_type fabricGroupId =
                     blueprintProcs->getAttr<
-                        TARGETING::ATTR_FABRIC_NODE_ID>();
-                if(fabricNodeId < minFabricNodeId)
+                        TARGETING::ATTR_FABRIC_GROUP_ID>();
+                if(fabricGroupId < minFabricGroupId)
                 {
-                    minFabricNodeId = fabricNodeId;
+                    minFabricGroupId = fabricGroupId;
                     pMasterProc = *blueprintProcs;
                 }
             }
@@ -1018,11 +1018,11 @@ void TargetService::dump() const
             TARG_INF("XSCOM Base Address = 0x%016llX",l_xscomBaseAddr);
         }
 
-        uint8_t l_Node_Id = 0;
+        uint8_t l_Group_Id = 0;
         if ( l_allTargets->tryGetAttr<
-                ATTR_FABRIC_NODE_ID>(l_Node_Id))
+                ATTR_FABRIC_GROUP_ID>(l_Group_Id))
         {
-            TARG_INF("XSCOM Node ID = 0x%X",l_Node_Id);
+            TARG_INF("XSCOM Node ID = 0x%X",l_Group_Id);
         }
 
         uint8_t l_Chip_Id = 0;

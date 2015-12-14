@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -392,7 +392,7 @@ namespace HBOCC
 
                     TRACUCOMP( g_fapiImpTd, INFO_MRK
                                "loadnStartAllOccs: Cur target nodeID=%d",
-                               targ0->getAttr<ATTR_FABRIC_NODE_ID>());
+                               targ0->getAttr<ATTR_FABRIC_GROUP_ID>());
 
 
                     //if the next target in the list is in the same node
@@ -402,11 +402,11 @@ namespace HBOCC
                     {
                         TRACUCOMP( g_fapiImpTd, INFO_MRK
                                    "loadnStartAllOccs: n+1 target nodeID=%d",
-                                   ((*(itr+1))->getAttr<ATTR_FABRIC_NODE_ID>())
+                                   ((*(itr+1))->getAttr<ATTR_FABRIC_GROUP_ID>())
                                    );
 
-                        if((targ0->getAttr<ATTR_FABRIC_NODE_ID>()) ==
-                           ((*(itr+1))->getAttr<ATTR_FABRIC_NODE_ID>()))
+                        if((targ0->getAttr<ATTR_FABRIC_GROUP_ID>()) ==
+                           ((*(itr+1))->getAttr<ATTR_FABRIC_GROUP_ID>()))
                         {
                             itr++;
                             targ1 = *itr;

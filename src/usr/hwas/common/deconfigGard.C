@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1137,9 +1137,9 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(
             // HUID
             l_ProcInfo.procHUID =
                 (*l_procsIter)->getAttr<ATTR_HUID>();
-            // FABRIC_NODE_ID
-            l_ProcInfo.procFabricNode =
-                (*l_procsIter)->getAttr<ATTR_FABRIC_NODE_ID>();
+            // FABRIC_GROUP_ID
+            l_ProcInfo.procFabricGroup =
+                (*l_procsIter)->getAttr<ATTR_FABRIC_GROUP_ID>();
             // FABRIC_CHIP_ID
             l_ProcInfo.procFabricChip =
                 (*l_procsIter)->getAttr<ATTR_FABRIC_CHIP_ID>();
@@ -2024,7 +2024,7 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
 
         // STEP 3:
         // If a deconfigured bus connects two non-master procs,
-        // both of which are in the master-containing logical node,
+        // both of which are in the master-containing logical group,
         // mark proc with higher HUID to be deconfigured.
 
         // Iterate through procs and check xbus chiplets
@@ -2043,9 +2043,9 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
             {
                 continue;
             }
-            // If current proc is on master logical node
-            if (l_pMasterProcInfo->procFabricNode ==
-                (*l_procInfoIter).procFabricNode)
+            // If current proc is on master logical group
+            if (l_pMasterProcInfo->procFabricGroup ==
+                (*l_procInfoIter).procFabricGroup)
             {
                 // Check xbus endpoints
                 for (uint8_t i = 0; i < NUM_X_BUSES; i++)
@@ -2063,7 +2063,7 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
                                  " %.8X for deconfiguration "
                                  "due to higher HUID than peer "
                                  "proc on same master-containing logical "
-                                 "node.",
+                                 "group.",
                                  (*l_procInfoIter).iv_pXProcs[i]->procHUID);
                             (*l_procInfoIter).iv_pXProcs[i]->
                                                iv_deconfigured = true;
@@ -2074,7 +2074,7 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
                                  "%.8X for deconfiguration "
                                  "due to higher HUID than peer "
                                  "proc on same master-containing logical "
-                                 "node.",
+                                 "group.",
                                  (*l_procInfoIter).procHUID);
                             (*l_procInfoIter).iv_deconfigured = true;
                         }
@@ -2086,14 +2086,14 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
 
         // STEP 4:
         // If a deconfigured bus connects two procs, both in the same
-        // non-master-containing logical node, mark current proc
+        // non-master-containing logical group, mark current proc
         // deconfigured if there is a same position proc marked deconfigured
-        // in the master logical node, else mark remote proc if there is
+        // in the master logical group, else mark remote proc if there is
         // a same position proc marked deconfigured in the master logical
-        // node otherwise, mark the proc with the higher HUID.
+        // group otherwise, mark the proc with the higher HUID.
 
         // Iterate through procs and, if in non-master
-        // logical node, check xbus chiplets
+        // logical group, check xbus chiplets
         for (ProcInfoVector::iterator
                  l_procInfoIter = io_procInfo.begin();
                  l_procInfoIter != io_procInfo.end();
@@ -2104,14 +2104,14 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
             {
                 continue;
             }
-            // Don't examine procs on master logical node
-            if (l_pMasterProcInfo->procFabricNode ==
-                (*l_procInfoIter).procFabricNode)
+            // Don't examine procs on master logical group
+            if (l_pMasterProcInfo->procFabricGroup ==
+                (*l_procInfoIter).procFabricGroup)
             {
                 continue;
             }
             // Check xbuses because they connect procs which
-            // are in the same logical node
+            // are in the same logical group
             for (uint8_t i = 0; i < NUM_X_BUSES; i++)
             {
                 // If endpoint deconfigured and endpoint peer proc
@@ -2123,19 +2123,19 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
                     // finding a proc to mark deconfigured
                     bool l_chipIDmatch = false;
                     // Iterate through procs and examine ones found to
-                    // be on the master-containing logical node
+                    // be on the master-containing logical group
                     for (ProcInfoVector::const_iterator
-                         l_mNodeProcInfoIter = io_procInfo.begin();
-                         l_mNodeProcInfoIter != io_procInfo.end();
-                         ++l_mNodeProcInfoIter)
+                         l_mGroupProcInfoIter = io_procInfo.begin();
+                         l_mGroupProcInfoIter != io_procInfo.end();
+                         ++l_mGroupProcInfoIter)
                     {
-                        if (l_pMasterProcInfo->procFabricNode ==
-                            (*l_mNodeProcInfoIter).procFabricNode)
+                        if (l_pMasterProcInfo->procFabricGroup ==
+                            (*l_mGroupProcInfoIter).procFabricGroup)
                         {
-                            // If master logical node proc deconfigured with
+                            // If master logical group proc deconfigured with
                             // same FABRIC_CHIP_ID as current proc
-                            if (((*l_mNodeProcInfoIter).iv_deconfigured) &&
-                                ((*l_mNodeProcInfoIter).procFabricChip ==
+                            if (((*l_mGroupProcInfoIter).iv_deconfigured) &&
+                                ((*l_mGroupProcInfoIter).procFabricChip ==
                                  (*l_procInfoIter).procFabricChip))
                             {
                                 // Mark current proc to be deconfigured
@@ -2144,19 +2144,19 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
                                  "%.8X for deconfiguration "
                                  "due to same position deconfigured "
                                  "proc on master-containing logical "
-                                 "node.",
+                                 "group.",
                                  (*l_procInfoIter).procHUID);
                                 (*l_procInfoIter).iv_deconfigured =\
                                                                   true;
                                 l_chipIDmatch = true;
                                 break;
                             }
-                            // If master logical node proc deconfigured with
+                            // If master logical group proc deconfigured with
                             // same FABRIC_CHIP_ID as current proc's xbus peer
                             // proc
-                            else if (((*l_mNodeProcInfoIter).
+                            else if (((*l_mGroupProcInfoIter).
                                         iv_deconfigured) &&
-                                    ((*l_mNodeProcInfoIter).
+                                    ((*l_mGroupProcInfoIter).
                                         procFabricChip ==
                                     (*l_procInfoIter).iv_pXProcs[i]->
                                         procFabricChip))
@@ -2167,7 +2167,7 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
                                  "proc: %.8X for deconfiguration "
                                  "due to same position deconfigured "
                                  "proc on master-containing logical "
-                                 "node.",
+                                 "group.",
                                  (*l_procInfoIter).iv_pXProcs[i]->procHUID);
                                 (*l_procInfoIter).iv_pXProcs[i]->
                                  iv_deconfigured = true;
@@ -2187,7 +2187,7 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
                              " %.8X for deconfiguration "
                              "due to higher HUID than peer "
                              "proc on same non master-containing logical "
-                             "node.",
+                             "group.",
                              (*l_procInfoIter).procHUID);
                             (*l_procInfoIter).iv_deconfigured =
                                                           true;
@@ -2198,7 +2198,7 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
                              " %.8X for deconfiguration "
                              "due to higher HUID than peer "
                              "proc on same non master-containing logical "
-                             "node.",
+                             "group.",
                              (*l_procInfoIter).iv_pXProcs[i]->procHUID);
                             (*l_procInfoIter).iv_pXProcs[i]->
                             iv_deconfigured = true;
@@ -2209,7 +2209,7 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
         }// STEP 4
 
         // STEP 5:
-        // If a deconfigured bus conects two procs on different logical nodes,
+        // If a deconfigured bus conects two procs on different logical groups,
         // and neither proc is the master proc: If current proc's xbus peer
         // proc is marked as deconfigured, mark current proc. Else, mark
         // abus peer proc.
@@ -2231,7 +2231,7 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
                 continue;
             }
             // Check abuses because they connect procs which are in
-            // different logical nodes
+            // different logical groups
             for (uint8_t i = 0; i < NUM_A_BUSES; i++)
             {
                 // If endpoint deconfigured and endpoint peer proc
@@ -2279,7 +2279,7 @@ errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
     }while(0);
     if (!l_errlHdl)
     {
-        // Perform SMP node balancing
+        // Perform SMP group balancing
         l_errlHdl = _symmetryValidation(io_procInfo);
     }
     return l_errlHdl;
@@ -2293,13 +2293,13 @@ errlHndl_t DeconfigGard::_symmetryValidation(ProcInfoVector &io_procInfo)
     // Defined for possible use in future applications
     errlHndl_t l_errlHdl = NULL;
 
-    // Perform SMP node balancing
+    // Perform SMP group balancing
     do
     {
         // STEP 1:
-        // If a proc is deconfigured in a logical node
+        // If a proc is deconfigured in a logical group
         // containing the master proc, iterate through all procs
-        // and mark as deconfigured those in other logical nodes
+        // and mark as deconfigured those in other logical groups
         // with the same FABRIC_CHIP_ID (procFabricChip)
 
         // Find master proc
@@ -2320,7 +2320,7 @@ errlHndl_t DeconfigGard::_symmetryValidation(ProcInfoVector &io_procInfo)
         // If no master proc found, abort
         HWAS_ASSERT(l_pMasterProcInfo, "HWAS _symmetryValidation:"
                                        "Master proc not found");
-        // Iterate through procs and check if in master logical node
+        // Iterate through procs and check if in master logical group
         for (ProcInfoVector::const_iterator
                  l_procInfoIter = io_procInfo.begin();
                  l_procInfoIter != io_procInfo.end();
@@ -2331,10 +2331,10 @@ errlHndl_t DeconfigGard::_symmetryValidation(ProcInfoVector &io_procInfo)
             {
                 continue;
             }
-            // If current proc is on master logical node
+            // If current proc is on master logical group
             // and marked as deconfigured
-            if ((l_pMasterProcInfo->procFabricNode ==
-                (*l_procInfoIter).procFabricNode) &&
+            if ((l_pMasterProcInfo->procFabricGroup ==
+                (*l_procInfoIter).procFabricGroup) &&
                 ((*l_procInfoIter).iv_deconfigured))
             {
                 // Iterate through procs and mark any same-
@@ -2357,13 +2357,13 @@ errlHndl_t DeconfigGard::_symmetryValidation(ProcInfoVector &io_procInfo)
         }// STEP 1
 
         // STEP 2:
-        // If a deconfigured proc is found on a non-master-containing node
+        // If a deconfigured proc is found on a non-master-containing group
         // and has the same position (FABRIC_CHIP_ID) as a functional
-        // non-master chip on the master logical node,
+        // non-master chip on the master logical group,
         // mark its xbus peer proc(s) for deconfiguration
 
         // Iterate through procs, if marked deconfigured, compare chip
-        // position to functional chip on master node.
+        // position to functional chip on master group.
         for (ProcInfoVector::const_iterator
                  l_procInfoIter = io_procInfo.begin();
                  l_procInfoIter != io_procInfo.end();
@@ -2373,19 +2373,19 @@ errlHndl_t DeconfigGard::_symmetryValidation(ProcInfoVector &io_procInfo)
             if ((*l_procInfoIter).iv_deconfigured)
             {
                 // Iterate through procs, examining those on
-                // the master logical node
+                // the master logical group
                 for (ProcInfoVector::const_iterator
-                     l_mNodeProcInfoIter = io_procInfo.begin();
-                     l_mNodeProcInfoIter != io_procInfo.end();
-                     ++l_mNodeProcInfoIter)
+                     l_mGroupProcInfoIter = io_procInfo.begin();
+                     l_mGroupProcInfoIter != io_procInfo.end();
+                     ++l_mGroupProcInfoIter)
                 {
-                    // If proc found is on the master-containing logical node
+                    // If proc found is on the master-containing logical group
                     // functional, and matches the position of the deconfigured
                     // proc from the outer loop
-                    if ((l_pMasterProcInfo->procFabricNode ==
-                        (*l_mNodeProcInfoIter).procFabricNode) &&
-                        (!((*l_mNodeProcInfoIter).iv_deconfigured)) &&
-                        ((*l_mNodeProcInfoIter).procFabricChip ==
+                    if ((l_pMasterProcInfo->procFabricGroup ==
+                        (*l_mGroupProcInfoIter).procFabricGroup) &&
+                        (!((*l_mGroupProcInfoIter).iv_deconfigured)) &&
+                        ((*l_mGroupProcInfoIter).procFabricChip ==
                                 (*l_procInfoIter).procFabricChip))
                     {
                         // Find xbus peer proc to mark deconfigured

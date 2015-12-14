@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -47,6 +47,7 @@
 #include <errl/errludprintk.H>
 #include <errno.h>
 #include <sys/time.h>
+#include <arch/pirformat.H>
 
 // Local functions
 namespace MBOX
@@ -1951,8 +1952,8 @@ errlHndl_t MBOX::send(queue_id_t i_q_id, msg_t * i_msg,int i_node)
                       i_msg->extra_data);
 
             // node means Hb instance number in this context
-            INTR::PIR_t my_pir (KernelIpc::ipc_data_area.pir);
-            if( (my_pir.nodeId == i_node)
+            PIR_t my_pir (KernelIpc::ipc_data_area.pir);
+            if( (my_pir.groupId == i_node)
                 && (MBOX::HB_TEST_MSGQ != i_q_id) ) //use IPC for tests
             {
                 // Message is to this node - don't use IPC path

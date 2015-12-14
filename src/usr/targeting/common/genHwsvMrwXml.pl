@@ -3155,7 +3155,7 @@ sub generate_proc
         <default>instance:$ipath</default>
     </compileAttribute>
     <attribute>
-        <id>FABRIC_NODE_ID</id>
+        <id>FABRIC_GROUP_ID</id>
         <default>$lognode</default>
     </attribute>
     <attribute>

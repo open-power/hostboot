@@ -2323,6 +2323,7 @@
 <attribute>
     <id>FABRIC_NODE_ID</id>
     <description>
+        DEPRECATED!!!!
         Chip attribute.
         Logical fabric node the chip belongs to.
         Provided by the Machine Readable Workbook.
@@ -2335,6 +2336,25 @@
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_FABRIC_NODE_ID</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>FABRIC_GROUP_ID</id>
+    <description>
+        Chip attribute.
+        Logical fabric group the chip belongs to.
+        Provided by the Machine Readable Workbook.
+        Can vary across drawers.
+    </description>
+    <simpleType><uint8_t>
+        <default>0</default>
+    </uint8_t></simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_FABRIC_GROUP_ID</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>

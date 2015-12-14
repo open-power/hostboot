@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -159,9 +159,9 @@ void* call_proc_build_smp (void *io_pArgs)
                              (const_cast<TARGETING::Target*>(l_itr->second)));
 
                 l_procEntry.f0_node_id = static_cast<proc_fab_smp_node_id>(
-                        l_pTarget->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>());
+                        l_pTarget->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>());
                 l_procEntry.f1_node_id = static_cast<proc_fab_smp_node_id>(
-                        l_pParent->getAttr<TARGETING::ATTR_FABRIC_NODE_ID>());
+                        l_pParent->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>());
             }
 
             // Get X-BUS

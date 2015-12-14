@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -46,7 +46,7 @@
 #include <initservice/initserviceif.H>
 #include <pnor/pnorif.H>
 #include <sys/mm.h>
-#include <intr/interrupt.H>
+#include <arch/pirformat.H>
 #include <errldisplay/errldisplay.H>
 #include <console/consoleif.H>
 #include <config.h>
@@ -155,10 +155,10 @@ ErrlManager::ErrlManager() :
     //   [0..3] for hostboot on master proc (chip==0) on node [0..3]
     //   [4..7] for hostboot on alternate proc on node [0..3]
 
-    const INTR::PIR_t masterCpu = task_getcpuid();
+    const PIR_t masterCpu = task_getcpuid();
     const uint32_t l_eid_id = (masterCpu.chipId == 0) ?
-                                    masterCpu.nodeId :
-                                    masterCpu.nodeId + 4;
+                                    masterCpu.groupId :
+                                    masterCpu.groupId + 4;
 
     iv_currLogId = ERRLOG_PLID_BASE + ERRLOG_PLID_INITIAL +
                         (l_eid_id << ERRLOG_PLID_NODE_SHIFT);
@@ -170,7 +170,7 @@ ErrlManager::ErrlManager() :
     // whatever it is.
 
     TRACFCOMP( g_trac_errl, INFO_MRK"ErrlManager on node %d (%smaster proc), LogId 0x%X",
-        masterCpu.nodeId, (masterCpu.chipId == 0) ? "" : "alternate ",
+        masterCpu.groupId, (masterCpu.chipId == 0) ? "" : "alternate ",
         iv_currLogId);
 
     // Create and register error log message queue.

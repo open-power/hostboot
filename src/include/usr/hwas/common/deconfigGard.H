@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -431,7 +431,7 @@ private:
         // target for this chip
         TARGETING::Target * iv_pThisProc;
         TARGETING::ATTR_HUID_type procHUID;
-        TARGETING::ATTR_FABRIC_NODE_ID_type procFabricNode;
+        TARGETING::ATTR_FABRIC_GROUP_ID_type procFabricGroup;
         TARGETING::ATTR_FABRIC_CHIP_ID_type procFabricChip;
         bool iv_masterCapable;
         bool iv_deconfigured;

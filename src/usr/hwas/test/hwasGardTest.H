@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1812,7 +1812,7 @@ public:
         // Proc0:
         l_tuletaProcs[0].iv_pThisProc = NULL;          // Target *
         l_tuletaProcs[0].procHUID = 0;                 // HUID
-        l_tuletaProcs[0].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_tuletaProcs[0].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_tuletaProcs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
         l_tuletaProcs[0].iv_masterCapable = true;      // Master proc
         l_tuletaProcs[0].iv_deconfigured = false;      // HWAS state
@@ -1828,7 +1828,7 @@ public:
         // Proc1:
         l_tuletaProcs[1].iv_pThisProc = NULL;          // Target *
         l_tuletaProcs[1].procHUID = 1;                 // HUID
-        l_tuletaProcs[1].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_tuletaProcs[1].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_tuletaProcs[1].procFabricChip = 1;           // FABRIC_CHIP_ID
         l_tuletaProcs[1].iv_masterCapable = false;     // Not master proc
         l_tuletaProcs[1].iv_deconfigured = false;      // HWAS state
@@ -1841,7 +1841,7 @@ public:
         // Proc2:
         l_tuletaProcs[2].iv_pThisProc = NULL;          // Target *
         l_tuletaProcs[2].procHUID = 2;                 // HUID
-        l_tuletaProcs[2].procFabricNode = 1;           // FABRIC_NODE_ID
+        l_tuletaProcs[2].procFabricGroup = 1;          // FABRIC_GROUP_ID
         l_tuletaProcs[2].procFabricChip = 0;           // FABRIC_CHIP_ID
         l_tuletaProcs[2].iv_masterCapable = false;     // Not master proc
         l_tuletaProcs[2].iv_deconfigured = false;      // HWAS state
@@ -1855,7 +1855,7 @@ public:
         // Proc3:
         l_tuletaProcs[3].iv_pThisProc = NULL;          // Target *
         l_tuletaProcs[3].procHUID = 3;                 // HUID
-        l_tuletaProcs[3].procFabricNode = 1;           // FABRIC_NODE_ID
+        l_tuletaProcs[3].procFabricGroup = 1;          // FABRIC_GROUP_ID
         l_tuletaProcs[3].procFabricChip = 1;           // FABRIC_CHIP_ID
         l_tuletaProcs[3].iv_masterCapable = false;     // Not master proc
         l_tuletaProcs[3].iv_deconfigured = false;      // HWAS state
@@ -1920,7 +1920,7 @@ public:
         // Proc0:
         l_tuletaProcs[0].iv_pThisProc = NULL;          // Target *
         l_tuletaProcs[0].procHUID = 0;                 // HUID
-        l_tuletaProcs[0].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_tuletaProcs[0].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_tuletaProcs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
         l_tuletaProcs[0].iv_masterCapable = false;     // Note master proc
         l_tuletaProcs[0].iv_deconfigured = false;      // HWAS state
@@ -1933,7 +1933,7 @@ public:
         // Proc1:
         l_tuletaProcs[1].iv_pThisProc = NULL;          // Target *
         l_tuletaProcs[1].procHUID = 1;                 // HUID
-        l_tuletaProcs[1].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_tuletaProcs[1].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_tuletaProcs[1].procFabricChip = 1;           // FABRIC_CHIP_ID
         l_tuletaProcs[1].iv_masterCapable = false;     // Not master proc
         l_tuletaProcs[1].iv_deconfigured = false;      // HWAS state
@@ -1946,7 +1946,7 @@ public:
         // Proc2:
         l_tuletaProcs[2].iv_pThisProc = NULL;          // Target *
         l_tuletaProcs[2].procHUID = 2;                 // HUID
-        l_tuletaProcs[2].procFabricNode = 1;           // FABRIC_NODE_ID
+        l_tuletaProcs[2].procFabricGroup = 1;          // FABRIC_GROUP_ID
         l_tuletaProcs[2].procFabricChip = 0;           // FABRIC_CHIP_ID
         l_tuletaProcs[2].iv_masterCapable = true;      // Master proc
         l_tuletaProcs[2].iv_deconfigured = false;      // HWAS state
@@ -1960,7 +1960,7 @@ public:
         // Proc3:
         l_tuletaProcs[3].iv_pThisProc = NULL;          // Target *
         l_tuletaProcs[3].procHUID = 3;                 // HUID
-        l_tuletaProcs[3].procFabricNode = 1;           // FABRIC_NODE_ID
+        l_tuletaProcs[3].procFabricGroup = 1;          // FABRIC_GROUP_ID
         l_tuletaProcs[3].procFabricChip = 1;           // FABRIC_CHIP_ID
         l_tuletaProcs[3].iv_masterCapable = false;     // Not master proc
         l_tuletaProcs[3].iv_deconfigured = false;      // HWAS state
@@ -2024,7 +2024,7 @@ public:
         // Proc0:
         l_orlenaProcs[0].iv_pThisProc = NULL;          // Target *
         l_orlenaProcs[0].procHUID = 0;                 // HUID
-        l_orlenaProcs[0].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_orlenaProcs[0].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_orlenaProcs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
         l_orlenaProcs[0].iv_masterCapable = true;      // Master proc
         l_orlenaProcs[0].iv_deconfigured = false;      // HWAS state
@@ -2039,7 +2039,7 @@ public:
         // Proc1:
         l_orlenaProcs[1].iv_pThisProc = NULL;          // Target *
         l_orlenaProcs[1].procHUID = 1;                 // HUID
-        l_orlenaProcs[1].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_orlenaProcs[1].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_orlenaProcs[1].procFabricChip = 1;           // FABRIC_CHIP_ID
         l_orlenaProcs[1].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[1].iv_deconfigured = false;      // HWAS state
@@ -2054,7 +2054,7 @@ public:
         // Proc2:
         l_orlenaProcs[2].iv_pThisProc = NULL;          // Target *
         l_orlenaProcs[2].procHUID = 2;                 // HUID
-        l_orlenaProcs[2].procFabricNode = 1;           // FABRIC_NODE_ID
+        l_orlenaProcs[2].procFabricGroup = 1;          // FABRIC_GROUP_ID
         l_orlenaProcs[2].procFabricChip = 0;           // FABRIC_CHIP_ID
         l_orlenaProcs[2].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[2].iv_deconfigured = false;      // HWAS state
@@ -2068,7 +2068,7 @@ public:
         // Proc3:
         l_orlenaProcs[3].iv_pThisProc = NULL;          // Target *
         l_orlenaProcs[3].procHUID = 3;                 // HUID
-        l_orlenaProcs[3].procFabricNode = 1;           // FABRIC_NODE_ID
+        l_orlenaProcs[3].procFabricGroup = 1;          // FABRIC_GROUP_ID
         l_orlenaProcs[3].procFabricChip = 1;           // FABRIC_CHIP_ID
         l_orlenaProcs[3].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[3].iv_deconfigured = false;      // HWAS state
@@ -2082,7 +2082,7 @@ public:
         // Proc4:
         l_orlenaProcs[4].iv_pThisProc = NULL;          // Target *
         l_orlenaProcs[4].procHUID = 4;                 // HUID
-        l_orlenaProcs[4].procFabricNode = 2;           // FABRIC_NODE_ID
+        l_orlenaProcs[4].procFabricGroup = 2;          // FABRIC_GROUP_ID
         l_orlenaProcs[4].procFabricChip = 0;           // FABRIC_CHIP_ID
         l_orlenaProcs[4].iv_masterCapable = false;      // Master proc
         l_orlenaProcs[4].iv_deconfigured = false;      // HWAS state
@@ -2096,7 +2096,7 @@ public:
         // Proc5:
         l_orlenaProcs[5].iv_pThisProc = NULL;          // Target *
         l_orlenaProcs[5].procHUID = 5;                 // HUID
-        l_orlenaProcs[5].procFabricNode = 2;           // FABRIC_NODE_ID
+        l_orlenaProcs[5].procFabricGroup = 2;          // FABRIC_GROUP_ID
         l_orlenaProcs[5].procFabricChip = 1;           // FABRIC_CHIP_ID
         l_orlenaProcs[5].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[5].iv_deconfigured = false;      // HWAS state
@@ -2110,7 +2110,7 @@ public:
         // Proc6:
         l_orlenaProcs[6].iv_pThisProc = NULL;          // Target *
         l_orlenaProcs[6].procHUID = 6;                 // HUID
-        l_orlenaProcs[6].procFabricNode = 3;           // FABRIC_NODE_ID
+        l_orlenaProcs[6].procFabricGroup = 3;          // FABRIC_GROUP_ID
         l_orlenaProcs[6].procFabricChip = 0;           // FABRIC_CHIP_ID
         l_orlenaProcs[6].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[6].iv_deconfigured = false;      // HWAS state
@@ -2124,7 +2124,7 @@ public:
         // Proc7:
         l_orlenaProcs[7].iv_pThisProc = NULL;          // Target *
         l_orlenaProcs[7].procHUID = 7;                 // HUID
-        l_orlenaProcs[7].procFabricNode = 3;           // FABRIC_NODE_ID
+        l_orlenaProcs[7].procFabricGroup = 3;          // FABRIC_GROUP_ID
         l_orlenaProcs[7].procFabricChip = 1;           // FABRIC_CHIP_ID
         l_orlenaProcs[7].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[7].iv_deconfigured = false;      // HWAS state
@@ -2193,7 +2193,7 @@ public:
         // Proc0:
         l_orlenaProcs[0].iv_pThisProc = NULL;          // Target *
         l_orlenaProcs[0].procHUID = 0;                 // HUID
-        l_orlenaProcs[0].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_orlenaProcs[0].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_orlenaProcs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
         l_orlenaProcs[0].iv_masterCapable = true;      // Master proc
         l_orlenaProcs[0].iv_deconfigured = false;      // HWAS state
@@ -2207,7 +2207,7 @@ public:
         // Proc1:
         l_orlenaProcs[1].iv_pThisProc = NULL;          // Target *
         l_orlenaProcs[1].procHUID = 1;                 // HUID
-        l_orlenaProcs[1].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_orlenaProcs[1].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_orlenaProcs[1].procFabricChip = 1;           // FABRIC_CHIP_ID
         l_orlenaProcs[1].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[1].iv_deconfigured = false;      // HWAS state
@@ -2221,7 +2221,7 @@ public:
         // Proc2:
         l_orlenaProcs[2].iv_pThisProc = NULL;          // Target *
         l_orlenaProcs[2].procHUID = 2;                 // HUID
-        l_orlenaProcs[2].procFabricNode = 1;           // FABRIC_NODE_ID
+        l_orlenaProcs[2].procFabricGroup = 1;          // FABRIC_GROUP_ID
         l_orlenaProcs[2].procFabricChip = 0;           // FABRIC_CHIP_ID
         l_orlenaProcs[2].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[2].iv_deconfigured = false;      // HWAS state
@@ -2236,7 +2236,7 @@ public:
         // Proc3:
         l_orlenaProcs[3].iv_pThisProc = NULL;          // Target *
         l_orlenaProcs[3].procHUID = 3;                 // HUID
-        l_orlenaProcs[3].procFabricNode = 1;           // FABRIC_NODE_ID
+        l_orlenaProcs[3].procFabricGroup = 1;          // FABRIC_GROUP_ID
         l_orlenaProcs[3].procFabricChip = 1;           // FABRIC_CHIP_ID
         l_orlenaProcs[3].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[3].iv_deconfigured = false;      // HWAS state
@@ -2250,7 +2250,7 @@ public:
         // Proc4:
         l_orlenaProcs[4].iv_pThisProc = NULL;          // Target *
         l_orlenaProcs[4].procHUID = 4;                 // HUID
-        l_orlenaProcs[4].procFabricNode = 2;           // FABRIC_NODE_ID
+        l_orlenaProcs[4].procFabricGroup = 2;          // FABRIC_GROUP_ID
         l_orlenaProcs[4].procFabricChip = 0;           // FABRIC_CHIP_ID
         l_orlenaProcs[4].iv_masterCapable = false;      // Master proc
         l_orlenaProcs[4].iv_deconfigured = false;      // HWAS state
@@ -2265,7 +2265,7 @@ public:
         // Proc5:
         l_orlenaProcs[5].iv_pThisProc = NULL;          // Target *
         l_orlenaProcs[5].procHUID = 5;                 // HUID
-        l_orlenaProcs[5].procFabricNode = 2;           // FABRIC_NODE_ID
+        l_orlenaProcs[5].procFabricGroup = 2;          // FABRIC_GROUP_ID
         l_orlenaProcs[5].procFabricChip = 1;           // FABRIC_CHIP_ID
         l_orlenaProcs[5].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[5].iv_deconfigured = false;      // HWAS state
@@ -2279,7 +2279,7 @@ public:
         // Proc6:
         l_orlenaProcs[6].iv_pThisProc = NULL;          // Target *
         l_orlenaProcs[6].procHUID = 6;                 // HUID
-        l_orlenaProcs[6].procFabricNode = 3;           // FABRIC_NODE_ID
+        l_orlenaProcs[6].procFabricGroup = 3;          // FABRIC_GROUP_ID
         l_orlenaProcs[6].procFabricChip = 0;           // FABRIC_CHIP_ID
         l_orlenaProcs[6].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[6].iv_deconfigured = false;      // HWAS state
@@ -2294,7 +2294,7 @@ public:
         // Proc7:
         l_orlenaProcs[7].iv_pThisProc = NULL;          // Target *
         l_orlenaProcs[7].procHUID = 7;                 // HUID
-        l_orlenaProcs[7].procFabricNode = 3;           // FABRIC_NODE_ID
+        l_orlenaProcs[7].procFabricGroup = 3;          // FABRIC_GROUP_ID
         l_orlenaProcs[7].procFabricChip = 1;           // FABRIC_CHIP_ID
         l_orlenaProcs[7].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[7].iv_deconfigured = false;      // HWAS state
@@ -2365,7 +2365,7 @@ public:
         // Proc0:
         l_orlenaProcs[0].iv_pThisProc = NULL;          // Target *
         l_orlenaProcs[0].procHUID = 0;                 // HUID
-        l_orlenaProcs[0].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_orlenaProcs[0].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_orlenaProcs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
         l_orlenaProcs[0].iv_masterCapable = true;      // Master proc
         l_orlenaProcs[0].iv_deconfigured = false;      // HWAS state
@@ -2380,7 +2380,7 @@ public:
         // Proc1:
         l_orlenaProcs[1].iv_pThisProc = NULL;          // Target *
         l_orlenaProcs[1].procHUID = 1;                 // HUID
-        l_orlenaProcs[1].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_orlenaProcs[1].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_orlenaProcs[1].procFabricChip = 1;           // FABRIC_CHIP_ID
         l_orlenaProcs[1].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[1].iv_deconfigured = false;      // HWAS state
@@ -2394,7 +2394,7 @@ public:
         // Proc2:
         l_orlenaProcs[2].iv_pThisProc = NULL;          // Target *
         l_orlenaProcs[2].procHUID = 2;                 // HUID
-        l_orlenaProcs[2].procFabricNode = 1;           // FABRIC_NODE_ID
+        l_orlenaProcs[2].procFabricGroup = 1;          // FABRIC_GROUP_ID
         l_orlenaProcs[2].procFabricChip = 0;           // FABRIC_CHIP_ID
         l_orlenaProcs[2].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[2].iv_deconfigured = false;      // HWAS state
@@ -2409,7 +2409,7 @@ public:
         // Proc3:
         l_orlenaProcs[3].iv_pThisProc = NULL;          // Target *
         l_orlenaProcs[3].procHUID = 3;                 // HUID
-        l_orlenaProcs[3].procFabricNode = 1;           // FABRIC_NODE_ID
+        l_orlenaProcs[3].procFabricGroup = 1;          // FABRIC_GROUP_ID
         l_orlenaProcs[3].procFabricChip = 1;           // FABRIC_CHIP_ID
         l_orlenaProcs[3].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[3].iv_deconfigured = false;      // HWAS state
@@ -2423,7 +2423,7 @@ public:
         // Proc4:
         l_orlenaProcs[4].iv_pThisProc = NULL;          // Target *
         l_orlenaProcs[4].procHUID = 4;                 // HUID
-        l_orlenaProcs[4].procFabricNode = 2;           // FABRIC_NODE_ID
+        l_orlenaProcs[4].procFabricGroup = 2;          // FABRIC_GROUP_ID
         l_orlenaProcs[4].procFabricChip = 0;           // FABRIC_CHIP_ID
         l_orlenaProcs[4].iv_masterCapable = false;      // Master proc
         l_orlenaProcs[4].iv_deconfigured = true;      // HWAS state
@@ -2441,7 +2441,7 @@ public:
         // Proc5:
         l_orlenaProcs[5].iv_pThisProc = NULL;          // Target *
         l_orlenaProcs[5].procHUID = 5;                 // HUID
-        l_orlenaProcs[5].procFabricNode = 2;           // FABRIC_NODE_ID
+        l_orlenaProcs[5].procFabricGroup = 2;          // FABRIC_GROUP_ID
         l_orlenaProcs[5].procFabricChip = 1;           // FABRIC_CHIP_ID
         l_orlenaProcs[5].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[5].iv_deconfigured = false;      // HWAS state
@@ -2457,7 +2457,7 @@ public:
         // Proc6:
         l_orlenaProcs[6].iv_pThisProc = NULL;          // Target *
         l_orlenaProcs[6].procHUID = 6;                 // HUID
-        l_orlenaProcs[6].procFabricNode = 3;           // FABRIC_NODE_ID
+        l_orlenaProcs[6].procFabricGroup = 3;          // FABRIC_GROUP_ID
         l_orlenaProcs[6].procFabricChip = 0;           // FABRIC_CHIP_ID
         l_orlenaProcs[6].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[6].iv_deconfigured = false;      // HWAS state
@@ -2472,7 +2472,7 @@ public:
         // Proc7:
         l_orlenaProcs[7].iv_pThisProc = NULL;          // Target *
         l_orlenaProcs[7].procHUID = 7;                 // HUID
-        l_orlenaProcs[7].procFabricNode = 3;           // FABRIC_NODE_ID
+        l_orlenaProcs[7].procFabricGroup = 3;          // FABRIC_GROUP_ID
         l_orlenaProcs[7].procFabricChip = 1;           // FABRIC_CHIP_ID
         l_orlenaProcs[7].iv_masterCapable = false;     // Not master proc
         l_orlenaProcs[7].iv_deconfigured = false;      // HWAS state
@@ -2545,7 +2545,7 @@ public:
         // Proc0:
         l_brazosProcs[0].iv_pThisProc = NULL;          // Target *
         l_brazosProcs[0].procHUID = 0;                 // HUID
-        l_brazosProcs[0].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[0].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_brazosProcs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
         l_brazosProcs[0].iv_masterCapable = true;      // Master proc
         l_brazosProcs[0].iv_deconfigured = false;      // HWAS state
@@ -2558,7 +2558,7 @@ public:
         // Proc1:
         l_brazosProcs[1].iv_pThisProc = NULL;          // Target *
         l_brazosProcs[1].procHUID = 1;                 // HUID
-        l_brazosProcs[1].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[1].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_brazosProcs[1].procFabricChip = 1;           // FABRIC_CHIP_ID
         l_brazosProcs[1].iv_masterCapable = false;     // Not master proc
         l_brazosProcs[1].iv_deconfigured = false;      // HWAS state
@@ -2572,7 +2572,7 @@ public:
         // Proc2:
         l_brazosProcs[2].iv_pThisProc = NULL;          // Target *
         l_brazosProcs[2].procHUID = 2;                 // HUID
-        l_brazosProcs[2].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[2].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_brazosProcs[2].procFabricChip = 2;           // FABRIC_CHIP_ID
         l_brazosProcs[2].iv_masterCapable = false;     // Not master proc
         l_brazosProcs[2].iv_deconfigured = false;      // HWAS state
@@ -2584,7 +2584,7 @@ public:
         // Proc3:
         l_brazosProcs[3].iv_pThisProc = NULL;          // Target *
         l_brazosProcs[3].procHUID = 3;                 // HUID
-        l_brazosProcs[3].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[3].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_brazosProcs[3].procFabricChip = 3;           // FABRIC_CHIP_ID
         l_brazosProcs[3].iv_masterCapable = false;     // Not master proc
         l_brazosProcs[3].iv_deconfigured = false;      // HWAS state
@@ -2795,7 +2795,7 @@ public:
         // Proc0:
         l_tuletaProcs[0].iv_pThisProc = NULL;          // Target *
         l_tuletaProcs[0].procHUID = 0;                 // HUID
-        l_tuletaProcs[0].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_tuletaProcs[0].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_tuletaProcs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
         l_tuletaProcs[0].iv_masterCapable = true;      // Master proc
         l_tuletaProcs[0].iv_deconfigured = false;      // HWAS state
@@ -2808,7 +2808,7 @@ public:
         // Proc1:
         l_tuletaProcs[1].iv_pThisProc = NULL;          // Target *
         l_tuletaProcs[1].procHUID = 1;                 // HUID
-        l_tuletaProcs[1].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_tuletaProcs[1].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_tuletaProcs[1].procFabricChip = 1;           // FABRIC_CHIP_ID
         l_tuletaProcs[1].iv_masterCapable = false;     // Not master proc
         l_tuletaProcs[1].iv_deconfigured = false;      // HWAS state
@@ -2821,7 +2821,7 @@ public:
         // Proc2:
         l_tuletaProcs[2].iv_pThisProc = NULL;          // Target *
         l_tuletaProcs[2].procHUID = 2;                 // HUID
-        l_tuletaProcs[2].procFabricNode = 1;           // FABRIC_NODE_ID
+        l_tuletaProcs[2].procFabricGroup = 1;          // FABRIC_GROUP_ID
         l_tuletaProcs[2].procFabricChip = 0;           // FABRIC_CHIP_ID
         l_tuletaProcs[2].iv_masterCapable = false;     // Not master proc
         l_tuletaProcs[2].iv_deconfigured = true;      // HWAS state
@@ -2836,7 +2836,7 @@ public:
         // Proc3:
         l_tuletaProcs[3].iv_pThisProc = NULL;          // Target *
         l_tuletaProcs[3].procHUID = 3;                 // HUID
-        l_tuletaProcs[3].procFabricNode = 1;           // FABRIC_NODE_ID
+        l_tuletaProcs[3].procFabricGroup = 1;          // FABRIC_GROUP_ID
         l_tuletaProcs[3].procFabricChip = 1;           // FABRIC_CHIP_ID
         l_tuletaProcs[3].iv_masterCapable = false;     // Not master proc
         l_tuletaProcs[3].iv_deconfigured = true;      // HWAS state
@@ -2902,7 +2902,7 @@ public:
         // Proc0:
         l_tuletaProcs[0].iv_pThisProc = NULL;          // Target *
         l_tuletaProcs[0].procHUID = 0;                 // HUID
-        l_tuletaProcs[0].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_tuletaProcs[0].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_tuletaProcs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
         l_tuletaProcs[0].iv_masterCapable = true;      // Master proc
         l_tuletaProcs[0].iv_deconfigured = false;      // HWAS state
@@ -2915,7 +2915,7 @@ public:
         // Proc1:
         l_tuletaProcs[1].iv_pThisProc = NULL;          // Target *
         l_tuletaProcs[1].procHUID = 1;                 // HUID
-        l_tuletaProcs[1].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_tuletaProcs[1].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_tuletaProcs[1].procFabricChip = 1;           // FABRIC_CHIP_ID
         l_tuletaProcs[1].iv_masterCapable = false;     // Not master proc
         l_tuletaProcs[1].iv_deconfigured = false;      // HWAS state
@@ -2925,7 +2925,7 @@ public:
         // Proc2:
         l_tuletaProcs[2].iv_pThisProc = NULL;          // Target *
         l_tuletaProcs[2].procHUID = 2;                 // HUID
-        l_tuletaProcs[2].procFabricNode = 1;           // FABRIC_NODE_ID
+        l_tuletaProcs[2].procFabricGroup = 1;          // FABRIC_GROUP_ID
         l_tuletaProcs[2].procFabricChip = 0;           // FABRIC_CHIP_ID
         l_tuletaProcs[2].iv_masterCapable = false;     // Not master proc
         l_tuletaProcs[2].iv_deconfigured = false;      // HWAS state
@@ -2937,7 +2937,7 @@ public:
         // Proc3:
         l_tuletaProcs[3].iv_pThisProc = NULL;          // Target *
         l_tuletaProcs[3].procHUID = 3;                 // HUID
-        l_tuletaProcs[3].procFabricNode = 1;           // FABRIC_NODE_ID
+        l_tuletaProcs[3].procFabricGroup = 1;          // FABRIC_GROUP_ID
         l_tuletaProcs[3].procFabricChip = 1;           // FABRIC_CHIP_ID
         l_tuletaProcs[3].iv_masterCapable = false;     // Not master proc
         l_tuletaProcs[3].iv_deconfigured = true;      // HWAS state
@@ -2998,7 +2998,7 @@ public:
         // Proc0:
         l_brazosProcs[0].iv_pThisProc = NULL;          // Target *
         l_brazosProcs[0].procHUID = 0;                 // HUID
-        l_brazosProcs[0].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[0].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_brazosProcs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
         l_brazosProcs[0].iv_masterCapable = true;      // Master proc
         l_brazosProcs[0].iv_deconfigured = false;      // HWAS state
@@ -3011,7 +3011,7 @@ public:
         // Proc1:
         l_brazosProcs[1].iv_pThisProc = NULL;          // Target *
         l_brazosProcs[1].procHUID = 1;                 // HUID
-        l_brazosProcs[1].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[1].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_brazosProcs[1].procFabricChip = 1;           // FABRIC_CHIP_ID
         l_brazosProcs[1].iv_masterCapable = true;     // Not master proc
         l_brazosProcs[1].iv_deconfigured = false;      // HWAS state
@@ -3025,7 +3025,7 @@ public:
         // Proc2:
         l_brazosProcs[2].iv_pThisProc = NULL;          // Target *
         l_brazosProcs[2].procHUID = 2;                 // HUID
-        l_brazosProcs[2].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[2].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_brazosProcs[2].procFabricChip = 2;           // FABRIC_CHIP_ID
         l_brazosProcs[2].iv_masterCapable = false;     // Not master proc
         l_brazosProcs[2].iv_deconfigured = false;      // HWAS state
@@ -3037,7 +3037,7 @@ public:
         // Proc3:
         l_brazosProcs[3].iv_pThisProc = NULL;          // Target *
         l_brazosProcs[3].procHUID = 3;                 // HUID
-        l_brazosProcs[3].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[3].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_brazosProcs[3].procFabricChip = 3;           // FABRIC_CHIP_ID
         l_brazosProcs[3].iv_masterCapable = false;     // Not master proc
         l_brazosProcs[3].iv_deconfigured = false;      // HWAS state
@@ -3100,7 +3100,7 @@ public:
         // Proc0:
         l_brazosProcs[0].iv_pThisProc = NULL;          // Target *
         l_brazosProcs[0].procHUID = 0;                 // HUID
-        l_brazosProcs[0].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[0].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_brazosProcs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
         l_brazosProcs[0].iv_masterCapable = true;      // Master proc
         l_brazosProcs[0].iv_deconfigured = true;      // HWAS state
@@ -3113,7 +3113,7 @@ public:
         // Proc1:
         l_brazosProcs[1].iv_pThisProc = NULL;          // Target *
         l_brazosProcs[1].procHUID = 1;                 // HUID
-        l_brazosProcs[1].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[1].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_brazosProcs[1].procFabricChip = 1;           // FABRIC_CHIP_ID
         l_brazosProcs[1].iv_masterCapable = true;     // Not master proc
         l_brazosProcs[1].iv_deconfigured = false;      // HWAS state
@@ -3127,7 +3127,7 @@ public:
         // Proc2:
         l_brazosProcs[2].iv_pThisProc = NULL;          // Target *
         l_brazosProcs[2].procHUID = 2;                 // HUID
-        l_brazosProcs[2].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[2].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_brazosProcs[2].procFabricChip = 2;           // FABRIC_CHIP_ID
         l_brazosProcs[2].iv_masterCapable = false;     // Not master proc
         l_brazosProcs[2].iv_deconfigured = false;      // HWAS state
@@ -3139,7 +3139,7 @@ public:
         // Proc3:
         l_brazosProcs[3].iv_pThisProc = NULL;          // Target *
         l_brazosProcs[3].procHUID = 3;                 // HUID
-        l_brazosProcs[3].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[3].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_brazosProcs[3].procFabricChip = 3;           // FABRIC_CHIP_ID
         l_brazosProcs[3].iv_masterCapable = false;     // Not master proc
         l_brazosProcs[3].iv_deconfigured = false;      // HWAS state
@@ -3202,7 +3202,7 @@ public:
         // Proc0:
         l_brazosProcs[0].iv_pThisProc = NULL;          // Target *
         l_brazosProcs[0].procHUID = 0;                 // HUID
-        l_brazosProcs[0].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[0].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_brazosProcs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
         l_brazosProcs[0].iv_masterCapable = true;      // Master proc
         l_brazosProcs[0].iv_deconfigured = false;      // HWAS state
@@ -3215,7 +3215,7 @@ public:
         // Proc1:
         l_brazosProcs[1].iv_pThisProc = NULL;          // Target *
         l_brazosProcs[1].procHUID = 1;                 // HUID
-        l_brazosProcs[1].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[1].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_brazosProcs[1].procFabricChip = 1;           // FABRIC_CHIP_ID
         l_brazosProcs[1].iv_masterCapable = true;     // Not master proc
         l_brazosProcs[1].iv_deconfigured = true;      // HWAS state
@@ -3229,7 +3229,7 @@ public:
         // Proc2:
         l_brazosProcs[2].iv_pThisProc = NULL;          // Target *
         l_brazosProcs[2].procHUID = 2;                 // HUID
-        l_brazosProcs[2].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[2].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_brazosProcs[2].procFabricChip = 2;           // FABRIC_CHIP_ID
         l_brazosProcs[2].iv_masterCapable = false;     // Not master proc
         l_brazosProcs[2].iv_deconfigured = false;      // HWAS state
@@ -3241,7 +3241,7 @@ public:
         // Proc3:
         l_brazosProcs[3].iv_pThisProc = NULL;          // Target *
         l_brazosProcs[3].procHUID = 3;                 // HUID
-        l_brazosProcs[3].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[3].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_brazosProcs[3].procFabricChip = 3;           // FABRIC_CHIP_ID
         l_brazosProcs[3].iv_masterCapable = false;     // Not master proc
         l_brazosProcs[3].iv_deconfigured = false;      // HWAS state
@@ -3305,7 +3305,7 @@ public:
         // Proc0:
         l_brazosProcs[0].iv_pThisProc = NULL;          // Target *
         l_brazosProcs[0].procHUID = 0;                 // HUID
-        l_brazosProcs[0].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[0].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_brazosProcs[0].procFabricChip = 0;           // FABRIC_CHIP_ID
         l_brazosProcs[0].iv_masterCapable = true;      // Master proc
         l_brazosProcs[0].iv_deconfigured = true;      // HWAS state
@@ -3318,7 +3318,7 @@ public:
         // Proc1:
         l_brazosProcs[1].iv_pThisProc = NULL;          // Target *
         l_brazosProcs[1].procHUID = 1;                 // HUID
-        l_brazosProcs[1].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[1].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_brazosProcs[1].procFabricChip = 1;           // FABRIC_CHIP_ID
         l_brazosProcs[1].iv_masterCapable = true;      // Not master proc
         l_brazosProcs[1].iv_deconfigured = false;      // HWAS state
@@ -3333,7 +3333,7 @@ public:
         // Proc2:
         l_brazosProcs[2].iv_pThisProc = NULL;          // Target *
         l_brazosProcs[2].procHUID = 2;                 // HUID
-        l_brazosProcs[2].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[2].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_brazosProcs[2].procFabricChip = 2;           // FABRIC_CHIP_ID
         l_brazosProcs[2].iv_masterCapable = false;     // Not master proc
         l_brazosProcs[2].iv_deconfigured = false;      // HWAS state
@@ -3346,7 +3346,7 @@ public:
         // Proc3:
         l_brazosProcs[3].iv_pThisProc = NULL;          // Target *
         l_brazosProcs[3].procHUID = 3;                 // HUID
-        l_brazosProcs[3].procFabricNode = 0;           // FABRIC_NODE_ID
+        l_brazosProcs[3].procFabricGroup = 0;          // FABRIC_GROUP_ID
         l_brazosProcs[3].procFabricChip = 3;           // FABRIC_CHIP_ID
         l_brazosProcs[3].iv_masterCapable = false;     // Not master proc
         l_brazosProcs[3].iv_deconfigured = false;      // HWAS state

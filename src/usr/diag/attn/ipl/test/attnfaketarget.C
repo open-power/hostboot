@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/attn/hostboot/test/attnfaketarget.C $            */
+/* $Source: src/usr/diag/attn/ipl/test/attnfaketarget.C $                 */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,7 +87,7 @@ bool FakeProcTargetService::getAttribute(
 
         switch (i_attribute)
         {
-            case ATTR_FABRIC_NODE_ID:
+            case ATTR_FABRIC_GROUP_ID:
 
                 o_val = 0;
                 break;

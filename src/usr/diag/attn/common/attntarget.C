@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -189,9 +189,9 @@ bool TargetServiceImpl::getAttribute(
 
     switch (i_attribute)
     {
-        case ATTR_FABRIC_NODE_ID:
+        case ATTR_FABRIC_GROUP_ID:
 
-            found = i_target->tryGetAttr<ATTR_FABRIC_NODE_ID>(u8);
+            found = i_target->tryGetAttr<ATTR_FABRIC_GROUP_ID>(u8);
             o_val = u8;
 
             break;

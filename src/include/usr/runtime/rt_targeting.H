@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,20 +38,19 @@ namespace RT_TARG
 
     enum
     {
-        CHIPID_NODE_SHIFT = 3,  //!< CHIPID NODE is 'NNNCCC'b
-        MEMBUF_ID_SHIFT = 4,    //!< CHIPID for MEMBUF is 'NNNCCCMMMM'b
-        UNIT_ID_SHIFT   = 4,    //!< CHIPID for CORE is 'NNNCCCPPPP'b
-        UNIT_ID_MASK    = 0x000003ff, //!< Valid id bits w/o ID_FLAG
-        PROC_ID_TYPE    = 0x00000000, //!< PROC chip id type
-        MEMBUF_ID_TYPE  = 0x80000000, //!< MEMBUF chip id type
-        CORE_ID_TYPE    = 0x40000000, //!< CORE/EX chip id type
-        CHIPID_ID_MASK  = 0xFF000000, //!< TYPE field
+        MEMBUF_ID_SHIFT = 4,    //!< CHIPID for MEMBUF is '<procid>MMMM'b
+        MEMBUF_ID_MASK  = 0x0000000F, //!< valid position bits for MEMBUF
+
+        PROC_TYPE        = 0x00000000, //!< PROC chip id type
+        MEMBUF_TYPE      = 0x80000000, //!< MEMBUF chip id type
+        CORE_TYPE        = 0x40000000, //!< CORE chip id type
+        CHIPID_TYPE_MASK = 0xFF000000, //!< TYPE field
     };
 
 
     /**
      * @brief Convert a TARGETING::Target to an unit ID that can be used
-     * in calls to Sapphire
+     * in calls to the runtime host
      * @param[in] The HB TARGETING::Target
      * @param[out] Sapphire target id
      * @return an error handle on error

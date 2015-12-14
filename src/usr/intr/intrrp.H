@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 #include <intr/interrupt.H>
 #include <map>
 #include <algorithm>
+#include <arch/pirformat.H>
 
 struct msg_t;
 
@@ -61,7 +62,7 @@ namespace INTR
         r.u32 = 0;
         r.isn = i_isn;
         r.chip = i_pir.chipId;
-        r.node = i_pir.nodeId;
+        r.node = i_pir.groupId;
         r.intrproc = 1;  // not interproc intr
         return r.u32;
     }
@@ -176,7 +177,7 @@ namespace INTR
             // [0] last
             // [1] LoopTrip
             // [2:18] Reserved
-            // [19:21] NodeId
+            // [19:21] GroupId
             // [22:24] ChipId
             // [25:28] PCore
             // [29:31] TSpec
