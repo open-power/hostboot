@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: chips/p9/procedures/ipl/hwp/io/p9_io_xbus_dccal.mk $
+# $Source: chips/p9/procedures/hwp/io/p9_io_xbus_dccal.mk $
 #
 # IBM CONFIDENTIAL
 #
