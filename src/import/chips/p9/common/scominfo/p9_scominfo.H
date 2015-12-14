@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: systems/power9/procedures/p9_scominfo.H $                     */
+/* $Source: chips/p9/common/scominfo/p9_scominfo.H $                      */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
