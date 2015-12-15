@@ -235,11 +235,11 @@ foreach my $argnum (0 .. $#ARGV)
 
             if (exists $attr->{privileged})
             {
-                print ASFILE "        l_rc = FAPI2_ATTR_GET_PRIVILEGED($attr->{id}, i_pTarget, l_attr);\n";
+                print ASFILE "        l_rc = FAPI2_ATTR_GET_PRIVILEGED(fapi2::$attr->{id}, i_pTarget, l_attr);\n";
             }
             else
             {
-                print ASFILE "        l_rc = FAPI_ATTR_GET($attr->{id}, i_pTarget, l_attr);\n";
+                print ASFILE "        l_rc = FAPI_ATTR_GET(fapi2::$attr->{id}, i_pTarget, l_attr);\n";
             }
             print ASFILE "        o_val = l_attr";
 
