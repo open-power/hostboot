@@ -22,12 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_chiplet_scominit.C,v 1.29 2015/08/10 15:15:06 jmcgill Exp $
+// $Id: proc_chiplet_scominit.C,v 1.30 2015/10/19 14:33:56 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_chiplet_scominit.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
-// *! ***  ***
+// *! *** ***
 //------------------------------------------------------------------------------
 // *! TITLE       : proc_chiplet_scominit.C
 // *! DESCRIPTION : Invoke initfiles for proc_chiplet_scominit istep (FAPI)
@@ -501,6 +501,21 @@ fapi::ReturnCode proc_chiplet_scominit(const fapi::Target & i_target)
                 if (!rc.ok())
                 {
                     FAPI_ERR("proc_chiplet_scominit: fapiPutScom error (NPU_FIR_MASK_AND_0x08013D84) on %s",
+                             i_target.toEcmdString());
+                    break;
+                }
+
+                FAPI_INF("proc_chiplet_scominit: Executing  %s on %s",
+                         PROC_CHIPLET_SCOMINIT_NVBUS_IF, i_target.toEcmdString());
+                FAPI_EXEC_HWP(
+                        rc,
+                        fapiHwpExecInitFile,
+                        initfile_targets,
+                        PROC_CHIPLET_SCOMINIT_NVBUS_IF);
+                if (!rc.ok())
+                {
+                    FAPI_ERR("proc_chiplet_scominit: Error from fapiHwpExecInitfile executing %s on %s",
+                             PROC_CHIPLET_SCOMINIT_NVBUS_IF,
                              i_target.toEcmdString());
                     break;
                 }

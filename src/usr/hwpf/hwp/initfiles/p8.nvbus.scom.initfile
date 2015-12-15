@@ -1,0 +1,978 @@
+#-- $Id: p8.nvbus.scom.initfile,v 1.5 2015/10/13 17:28:01 jgrell Exp $ 
+
+
+####################################################################
+##  
+##  Auto-genrated by fig2scominit.pl
+##      Based on SET_MODE HW_TR
+##      from ../../logic/old_mesa_sim/fusion/run/IOOSH_NVBUS_CPLT.IOOSH_NVBUS_CPLT.figdb
+##
+##   Created on Wed Jul 22 13:59:18 CDT 2015, by jgrell
+####################################################################
+
+
+
+SyntaxVersion = 1
+
+
+
+####################################################################
+#  Define File
+####################################################################
+include opt.io.define
+
+                    define def_IS_HW  = SYS.ATTR_IS_SIMULATION == 0;
+                    define def_IS_VBU = SYS.ATTR_IS_SIMULATION == 1;
+                
+
+######################################
+##     NV0 
+######################################
+
+#BUSCTL.BUS_REG_IF.BUS_CTL_REGS.TX_IMPCAL_P_4X_PB
+scom 0x800F1C0008010C3F { 
+	bits, scom_data, expr;
+	tx_zcal_p_4x, 0b00100, any;
+}
+
+#BUSCTL.BUS_REG_IF.BUS_CTL_REGS.TX_IMPCAL_SWO2_PB
+scom 0x800F2C0008010C3F { 
+	bits, scom_data, expr;
+	tx_zcal_sm_max_val, 0b1000110, any;
+     tx_zcal_sm_min_val,  0b0010101   , def_IS_HW;
+     tx_zcal_sm_min_val,  0b0010110  , def_IS_VBU;
+}
+
+#RX0.RXCTL.CTL_REGS.RX_CTL_REGS.RX_DFE_CONFIG1_PG
+scom 0x8008680008010C3F { 
+	bits, scom_data, expr;
+     rx_amp_cfg,  0b0010   , def_IS_HW;
+     rx_amp_cfg,  0b0001  , def_IS_VBU;
+     rx_amp_init_cfg,  0b010   , def_IS_HW;
+     rx_amp_init_cfg,  0b001  , def_IS_VBU;
+     rx_amp_recal_cfg,  0b010   , def_IS_HW;
+     rx_amp_recal_cfg,  0b001  , def_IS_VBU;
+	rx_peak_init_cfg, 0b101, any;
+	rx_peak_recal_cfg, 0b101, any;
+}
+
+#RX0.RXCTL.CTL_REGS.RX_CTL_REGS.RX_DFE_CONFIG2_PG
+scom 0x8008700008010C3F { 
+	bits, scom_data, expr;
+	rx_cm_cfg, 0b010, any;
+	rx_off_init_cfg, 0b010, any;
+	rx_off_recal_cfg, 0b010, any;
+}
+
+#RX0.RXCTL.CTL_REGS.RX_CTL_REGS.RX_DFE_CONFIG3_PG
+scom 0x8008780008010C3F { 
+	bits, scom_data, expr;
+     rx_voff_cfg,  0b100   , def_IS_HW;
+     rx_voff_cfg,  0b010  , def_IS_VBU;
+}
+
+#RX0.RXCTL.CTL_REGS.RX_CTL_REGS.RX_ID1_PG
+scom 0x8008000008010C3F { 
+	bits, scom_data, expr;
+	rx_bus_id, 0b000000, any;
+	rx_group_id, 0b000000, any;
+}
+
+#RX0.RXCTL.CTL_REGS.RX_CTL_REGS.RX_LANE_DISABLED_VEC_0_15_PG
+scom 0x8008080008010C3F { 
+	bits, scom_data, expr;
+	rx_lane_disabled_vec_0_15, 0b0000000000000000, any;
+}
+
+#RX0.RXCTL.CTL_REGS.RX_CTL_REGS.RX_LANE_DISABLED_VEC_16_23_PG
+scom 0x8008100008010C3F { 
+	bits, scom_data, expr;
+	rx_lane_disabled_vec_16_23, 0b11111111, any;
+}
+
+#RX0.RXCTL.CTL_REGS.RX_CTL_REGS.RX_MISC_ANALOG_PG
+scom 0x8008D80008010C3F { 
+	bits, scom_data, expr;
+	rx_iref_pdwn_b, 0b1, any;
+     rx_iref_res_dac,  0b110   , def_IS_HW;
+     rx_iref_res_dac,  0b000  , def_IS_VBU;
+     rx_iref_sc_dac,  0b1010   , def_IS_HW;
+     rx_iref_sc_dac,  0b0000  , def_IS_VBU;
+}
+
+#RX0.RXCTL.CTL_REGS.RX_CTL_REGS.RX_MODE1_PG
+scom 0x8008180008010C3F { 
+	bits, scom_data, expr;
+	rx_disable_bank_pdwn, 0b1, any;
+	rx_grp_pdwn, 0b100, any;
+}
+
+#RX0.RXCTL.CTL_REGS.RX_CTL_REGS.RX_SERVO_TO1_PG
+scom 0x8008500008010C3F { 
+	bits, scom_data, expr;
+     rx_amp_init_timeout,  0b0101   , def_IS_HW;
+     rx_amp_init_timeout,  0b0100  , def_IS_VBU;
+     rx_amp_recal_timeout,  0b0101   , def_IS_HW;
+     rx_amp_recal_timeout,  0b0100  , def_IS_VBU;
+	rx_peak_init_timeout, 0b0101, any;
+	rx_peak_recal_timeout, 0b0010, any;
+}
+
+#RX0.RXCTL.CTL_REGS.RX_CTL_REGS.RX_SERVO_TO2_PG
+scom 0x8008580008010C3F { 
+	bits, scom_data, expr;
+     rx_cm_timeout,  0b0100   , def_IS_HW;
+     rx_cm_timeout,  0b0010  , def_IS_VBU;
+     rx_off_init_timeout,  0b0100   , def_IS_HW;
+     rx_off_init_timeout,  0b0011  , def_IS_VBU;
+     rx_off_recal_timeout,  0b0100   , def_IS_HW;
+     rx_off_recal_timeout,  0b0011  , def_IS_VBU;
+}
+
+#RX0.RXCTL.CTL_REGS.RX_CTL_REGS.RX_SERVO_TO3_PG
+scom 0x8008600008010C3F { 
+	bits, scom_data, expr;
+     rx_amp_timeout,  0b0101   , def_IS_HW;
+     rx_amp_timeout,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXCTL.CTL_REGS.RX_CTL_REGS.RX_SPARE_MODE_PG
+scom 0x8008280008010C3F { 
+	bits, scom_data, expr;
+	rx_pg_spare_mode_4, 0b0, any;
+}
+
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100008010C3F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#0.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080008010C3F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100108010C3F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#1.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080108010C3F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100208010C3F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#2.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080208010C3F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100308010C3F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#3.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080308010C3F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100408010C3F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#0.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080408010C3F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100508010C3F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#1.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080508010C3F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100608010C3F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#2.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080608010C3F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100708010C3F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#3.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080708010C3F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100808010C3F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#0.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080808010C3F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100908010C3F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#1.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080908010C3F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100A08010C3F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#2.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080A08010C3F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100B08010C3F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#3.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080B08010C3F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100C08010C3F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#0.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080C08010C3F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100D08010C3F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#1.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080D08010C3F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100E08010C3F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#2.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080E08010C3F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100F08010C3F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#3.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080F08010C3F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#4.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002101008010C3F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#4.RXPACK.RD.SLICE#0.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000081008010C3F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#4.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002101108010C3F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#4.RXPACK.RD.SLICE#1.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000081108010C3F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#4.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002101208010C3F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#4.RXPACK.RD.SLICE#2.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000081208010C3F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#4.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002101308010C3F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#4.RXPACK.RD.SLICE#3.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000081308010C3F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#5.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002101408010C3F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#5.RXPACK.RD.SLICE#0.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000081408010C3F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#5.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002101508010C3F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#5.RXPACK.RD.SLICE#1.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000081508010C3F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#5.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002101608010C3F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#5.RXPACK.RD.SLICE#2.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000081608010C3F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#5.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002101708010C3F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#5.RXPACK.RD.SLICE#3.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000081708010C3F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#TX0.TXCTL.CTL_REGS.TX_CTL_REGS.TX_FFE_MODE_PG
+scom 0x800C1C0008010C3F { 
+	bits, scom_data, expr;
+     tx_ffe_boost_en,  0b0   , def_IS_HW;
+     tx_ffe_boost_en,  0b1  , def_IS_VBU;
+}
+
+#TX0.TXCTL.CTL_REGS.TX_CTL_REGS.TX_ID1_PG
+scom 0x800C140008010C3F { 
+	bits, scom_data, expr;
+	tx_bus_id, 0b000000, any;
+	tx_group_id, 0b100000, any;
+}
+
+#TX0.TXCTL.CTL_REGS.TX_CTL_REGS.TX_MODE_PG
+scom 0x800C040008010C3F { 
+	bits, scom_data, expr;
+	tx_grp_pdwn, 0b100, any;
+}
+
+######################################
+##     NV1 
+######################################
+
+#BUSCTL.BUS_REG_IF.BUS_CTL_REGS.TX_IMPCAL_P_4X_PB
+scom 0x800F1C0008010C7F { 
+	bits, scom_data, expr;
+	tx_zcal_p_4x, 0b00100, any;
+}
+
+#BUSCTL.BUS_REG_IF.BUS_CTL_REGS.TX_IMPCAL_SWO2_PB
+scom 0x800F2C0008010C7F { 
+	bits, scom_data, expr;
+	tx_zcal_sm_max_val, 0b1000110, any;
+     tx_zcal_sm_min_val,  0b0010101   , def_IS_HW;
+     tx_zcal_sm_min_val,  0b0010110  , def_IS_VBU;
+}
+
+#RX0.RXCTL.CTL_REGS.RX_CTL_REGS.RX_DFE_CONFIG1_PG
+scom 0x8008680008010C7F { 
+	bits, scom_data, expr;
+     rx_amp_cfg,  0b0010   , def_IS_HW;
+     rx_amp_cfg,  0b0001  , def_IS_VBU;
+     rx_amp_init_cfg,  0b010   , def_IS_HW;
+     rx_amp_init_cfg,  0b001  , def_IS_VBU;
+     rx_amp_recal_cfg,  0b010   , def_IS_HW;
+     rx_amp_recal_cfg,  0b001  , def_IS_VBU;
+	rx_peak_init_cfg, 0b101, any;
+	rx_peak_recal_cfg, 0b101, any;
+}
+
+#RX0.RXCTL.CTL_REGS.RX_CTL_REGS.RX_DFE_CONFIG2_PG
+scom 0x8008700008010C7F { 
+	bits, scom_data, expr;
+	rx_cm_cfg, 0b010, any;
+	rx_off_init_cfg, 0b010, any;
+	rx_off_recal_cfg, 0b010, any;
+}
+
+#RX0.RXCTL.CTL_REGS.RX_CTL_REGS.RX_DFE_CONFIG3_PG
+scom 0x8008780008010C7F { 
+	bits, scom_data, expr;
+     rx_voff_cfg,  0b100   , def_IS_HW;
+     rx_voff_cfg,  0b010  , def_IS_VBU;
+}
+
+#RX0.RXCTL.CTL_REGS.RX_CTL_REGS.RX_ID1_PG
+scom 0x8008000008010C7F { 
+	bits, scom_data, expr;
+	rx_bus_id, 0b000000, any;
+	rx_group_id, 0b000000, any;
+}
+
+#RX0.RXCTL.CTL_REGS.RX_CTL_REGS.RX_LANE_DISABLED_VEC_0_15_PG
+scom 0x8008080008010C7F { 
+	bits, scom_data, expr;
+	rx_lane_disabled_vec_0_15, 0b0000000000000000, any;
+}
+
+#RX0.RXCTL.CTL_REGS.RX_CTL_REGS.RX_LANE_DISABLED_VEC_16_23_PG
+scom 0x8008100008010C7F { 
+	bits, scom_data, expr;
+	rx_lane_disabled_vec_16_23, 0b11111111, any;
+}
+
+#RX0.RXCTL.CTL_REGS.RX_CTL_REGS.RX_MISC_ANALOG_PG
+scom 0x8008D80008010C7F { 
+	bits, scom_data, expr;
+	rx_iref_pdwn_b, 0b1, any;
+     rx_iref_res_dac,  0b110   , def_IS_HW;
+     rx_iref_res_dac,  0b000  , def_IS_VBU;
+     rx_iref_sc_dac,  0b1010   , def_IS_HW;
+     rx_iref_sc_dac,  0b0000  , def_IS_VBU;
+}
+
+#RX0.RXCTL.CTL_REGS.RX_CTL_REGS.RX_MODE1_PG
+scom 0x8008180008010C7F { 
+	bits, scom_data, expr;
+	rx_disable_bank_pdwn, 0b1, any;
+	rx_grp_pdwn, 0b100, any;
+}
+
+#RX0.RXCTL.CTL_REGS.RX_CTL_REGS.RX_SERVO_TO1_PG
+scom 0x8008500008010C7F { 
+	bits, scom_data, expr;
+     rx_amp_init_timeout,  0b0101   , def_IS_HW;
+     rx_amp_init_timeout,  0b0100  , def_IS_VBU;
+     rx_amp_recal_timeout,  0b0101   , def_IS_HW;
+     rx_amp_recal_timeout,  0b0100  , def_IS_VBU;
+	rx_peak_init_timeout, 0b0101, any;
+	rx_peak_recal_timeout, 0b0010, any;
+}
+
+#RX0.RXCTL.CTL_REGS.RX_CTL_REGS.RX_SERVO_TO2_PG
+scom 0x8008580008010C7F { 
+	bits, scom_data, expr;
+     rx_cm_timeout,  0b0100   , def_IS_HW;
+     rx_cm_timeout,  0b0010  , def_IS_VBU;
+     rx_off_init_timeout,  0b0100   , def_IS_HW;
+     rx_off_init_timeout,  0b0011  , def_IS_VBU;
+     rx_off_recal_timeout,  0b0100   , def_IS_HW;
+     rx_off_recal_timeout,  0b0011  , def_IS_VBU;
+}
+
+#RX0.RXCTL.CTL_REGS.RX_CTL_REGS.RX_SERVO_TO3_PG
+scom 0x8008600008010C7F { 
+	bits, scom_data, expr;
+     rx_amp_timeout,  0b0101   , def_IS_HW;
+     rx_amp_timeout,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXCTL.CTL_REGS.RX_CTL_REGS.RX_SPARE_MODE_PG
+scom 0x8008280008010C7F { 
+	bits, scom_data, expr;
+	rx_pg_spare_mode_4, 0b0, any;
+}
+
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100008010C7F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#0.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080008010C7F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100108010C7F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#1.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080108010C7F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100208010C7F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#2.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080208010C7F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100308010C7F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#0.RXPACK.RD.SLICE#3.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080308010C7F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100408010C7F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#0.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080408010C7F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100508010C7F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#1.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080508010C7F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100608010C7F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#2.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080608010C7F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100708010C7F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#1.RXPACK.RD.SLICE#3.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080708010C7F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100808010C7F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#0.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080808010C7F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100908010C7F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#1.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080908010C7F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100A08010C7F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#2.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080A08010C7F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100B08010C7F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#2.RXPACK.RD.SLICE#3.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080B08010C7F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100C08010C7F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#0.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080C08010C7F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100D08010C7F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#1.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080D08010C7F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100E08010C7F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#2.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080E08010C7F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002100F08010C7F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#3.RXPACK.RD.SLICE#3.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000080F08010C7F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#4.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002101008010C7F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#4.RXPACK.RD.SLICE#0.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000081008010C7F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#4.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002101108010C7F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#4.RXPACK.RD.SLICE#1.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000081108010C7F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#4.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002101208010C7F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#4.RXPACK.RD.SLICE#2.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000081208010C7F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#4.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002101308010C7F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#4.RXPACK.RD.SLICE#3.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000081308010C7F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#5.RXPACK.RD.SLICE#0.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002101408010C7F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#5.RXPACK.RD.SLICE#0.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000081408010C7F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#5.RXPACK.RD.SLICE#1.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002101508010C7F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#5.RXPACK.RD.SLICE#1.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000081508010C7F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#5.RXPACK.RD.SLICE#2.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002101608010C7F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#5.RXPACK.RD.SLICE#2.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000081608010C7F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#5.RXPACK.RD.SLICE#3.RD.RX_BIT_REGS.RX_PR_MODE_PL
+scom 0x8002101708010C7F { 
+	bits, scom_data, expr;
+     rx_pr_phase_step,  0b1000   , def_IS_HW;
+     rx_pr_phase_step,  0b0100  , def_IS_VBU;
+}
+
+#RX0.RXPACKS#5.RXPACK.RD.SLICE#3.RX_DAC_REGS.RX_DAC_REGS.RX_A_DAC_CNTL_PL
+scom 0x8000081708010C7F { 
+	bits, scom_data, expr;
+     rx_pr_iq_res_sel,  0b111   , def_IS_HW;
+     rx_pr_iq_res_sel,  0b000  , def_IS_VBU;
+}
+
+#TX0.TXCTL.CTL_REGS.TX_CTL_REGS.TX_FFE_MODE_PG
+scom 0x800C1C0008010C7F { 
+	bits, scom_data, expr;
+     tx_ffe_boost_en,  0b0   , def_IS_HW;
+     tx_ffe_boost_en,  0b1  , def_IS_VBU;
+}
+
+#TX0.TXCTL.CTL_REGS.TX_CTL_REGS.TX_ID1_PG
+scom 0x800C140008010C7F { 
+	bits, scom_data, expr;
+	tx_bus_id, 0b000000, any;
+	tx_group_id, 0b100000, any;
+}
+
+#TX0.TXCTL.CTL_REGS.TX_CTL_REGS.TX_MODE_PG
+scom 0x800C040008010C7F { 
+	bits, scom_data, expr;
+	tx_grp_pdwn, 0b100, any;
+}
+
+
+
+######################################
+##      END OF FILE
+#######################################

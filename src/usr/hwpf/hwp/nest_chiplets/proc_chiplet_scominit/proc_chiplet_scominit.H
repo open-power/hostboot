@@ -22,12 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_chiplet_scominit.H,v 1.17 2015/03/17 18:54:30 jmcgill Exp $
+// $Id: proc_chiplet_scominit.H,v 1.18 2015/10/19 14:33:56 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_chiplet_scominit.H,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
 // *! All Rights Reserved -- Property of IBM
-// *! ***  ***
+// *! *** ***
 //------------------------------------------------------------------------------
 // *! TITLE       : proc_chiplet_scominit.H
 // *! DESCRIPTION : Invoke initfiles for proc_chiplet_scominit istep (FAPI)
@@ -60,7 +60,7 @@ const char * const PROC_CHIPLET_SCOMINIT_CXA_IF         = "p8.cxa.scom.if";
 const char * const PROC_CHIPLET_SCOMINIT_A_X_PCI_DMI_IF = "p8.a_x_pci_dmi_fir.scom.if";
 const char * const PROC_CHIPLET_SCOMINIT_NPU_IF = "p8.npu.scom.if";
 const char * const PROC_CHIPLET_SCOMINIT_MCS_IF         = "p8.mcs.scom.if";
-
+const char * const PROC_CHIPLET_SCOMINIT_NVBUS_IF       = "p8.nvbus.scom.if";
 
 // FSI GP6 Register field/bit definitions
 const uint32_t MBOX_FSIGP6_XBUS_RESONANT_CLOCK_CONFIG_START_BIT = 0;

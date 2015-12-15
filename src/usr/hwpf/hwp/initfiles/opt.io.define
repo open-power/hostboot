@@ -1,0 +1,803 @@
+define tx_mode1_pl_full_reg=48:63; 	 #start_bit=48, number_of_bit=16
+define tx_lane_pdwn=48:48; 	 #start_bit=48, number_of_bit=1
+define tx_lane_invert=49:49; 	 #start_bit=49, number_of_bit=1
+define tx_lane_quiesce_p=50:51; 	 #start_bit=50, number_of_bit=2
+define tx_lane_quiesce_n=52:53; 	 #start_bit=52, number_of_bit=2
+define tx_err_inj_a_enable=55:55; 	 #start_bit=55, number_of_bit=1
+define tx_err_inj_b_enable=56:56; 	 #start_bit=56, number_of_bit=1
+define tx_pl_spare_mode_0=60:60; 	 #start_bit=60, number_of_bit=1
+define tx_pl_spare_mode_1=61:61; 	 #start_bit=61, number_of_bit=1
+define tx_pl_spare_mode_2=62:62; 	 #start_bit=62, number_of_bit=1
+define tx_pl_spare_mode_3=63:63; 	 #start_bit=63, number_of_bit=1
+define tx_fifo_l2u_dly=48:50; 	 #start_bit=48, number_of_bit=3
+define tx_unload_clk_disable=56:56; 	 #start_bit=56, number_of_bit=1
+define tx_rxcal =57:57; 	 #start_bit=57, number_of_bit=1
+define tx_unload_sel=58:60; 	 #start_bit=58, number_of_bit=3
+define tx_sst_ctl_enable=61:61; 	 #start_bit=61, number_of_bit=1
+define tx_lane_bist_err=51:51; 	 #start_bit=51, number_of_bit=1
+define tx_lane_bist_actvity_det=52:52; 	 #start_bit=52, number_of_bit=1
+define tx_pl_fir_errs_full_reg=48:63; 	 #start_bit=48, number_of_bit=16
+define tx_pl_fir_errs=48:48; 	 #start_bit=48, number_of_bit=1
+define tx_pl_fir_err_pl_regs=48:48; 	 #start_bit=48, number_of_bit=1
+define tx_pl_fir_errs_mask_full_reg=48:63; 	 #start_bit=48, number_of_bit=16
+define tx_pl_fir_errs_mask=48:48; 	 #start_bit=48, number_of_bit=1
+define tx_pl_fir_err_mask_pl_regs=48:48; 	 #start_bit=48, number_of_bit=1
+define tx_pl_fir_err_inj_full_reg=48:63; 	 #start_bit=48, number_of_bit=16
+define tx_pl_fir_err_inj=48:48; 	 #start_bit=48, number_of_bit=1
+define tx_pl_fir_err_inj_pl_regs=48:48; 	 #start_bit=48, number_of_bit=1
+define tx_ioreset_vec_0_15=48:63; 	 #start_bit=48, number_of_bit=16
+define tx_ioreset_vec_16_23=48:55; 	 #start_bit=48, number_of_bit=8
+define tx_pg_spare_mode_0=48:48; 	 #start_bit=48, number_of_bit=1
+define tx_pg_spare_mode_1=49:49; 	 #start_bit=49, number_of_bit=1
+define tx_pg_spare_mode_2=50:50; 	 #start_bit=50, number_of_bit=1
+define tx_pg_spare_mode_3=51:51; 	 #start_bit=51, number_of_bit=1
+define tx_pg_spare_mode_4=52:52; 	 #start_bit=52, number_of_bit=1
+define tx_pg_spare_mode_5=53:53; 	 #start_bit=53, number_of_bit=1
+define tx_pg_spare_mode_6=54:54; 	 #start_bit=54, number_of_bit=1
+define tx_pg_spare_mode_7=55:55; 	 #start_bit=55, number_of_bit=1
+define tx_bist_done=49:49; 	 #start_bit=49, number_of_bit=1
+define tx_grp_pdwn=48:50; 	 #start_bit=48, number_of_bit=3
+define tx_bist_en=51:51; 	 #start_bit=51, number_of_bit=1
+define tx_exbist_mode=52:52; 	 #start_bit=52, number_of_bit=1
+define tx_bus_id=48:53; 	 #start_bit=48, number_of_bit=6
+define tx_group_id=55:60; 	 #start_bit=55, number_of_bit=6
+define tx_drv_data_pattern_gcrmsg=50:53; 	 #start_bit=50, number_of_bit=4
+define tx_ffe_test_mode=50:51; 	 #start_bit=50, number_of_bit=2
+define tx_ffe_test_override1r=54:54; 	 #start_bit=54, number_of_bit=1
+define tx_ffe_test_override2r=55:55; 	 #start_bit=55, number_of_bit=1
+define tx_ffe_boost_en=56:56; 	 #start_bit=56, number_of_bit=1
+define tx_ffe_total_enable_p_enc=49:55; 	 #start_bit=49, number_of_bit=7
+define tx_ffe_total_enable_n_enc=57:63; 	 #start_bit=57, number_of_bit=7
+define tx_ffe_pre_p_sel_enc=51:54; 	 #start_bit=51, number_of_bit=4
+define tx_ffe_pre_n_sel_enc=59:62; 	 #start_bit=59, number_of_bit=4
+define tx_ffe_margin_pu_p_sel_enc=51:55; 	 #start_bit=51, number_of_bit=5
+define tx_ffe_margin_pd_n_sel_enc=59:63; 	 #start_bit=59, number_of_bit=5
+define tx_err_inj_a_fine_sel=49:51; 	 #start_bit=49, number_of_bit=3
+define tx_err_inj_a_coarse_sel=52:55; 	 #start_bit=52, number_of_bit=4
+define tx_err_inj_a_ber_sel=58:63; 	 #start_bit=58, number_of_bit=6
+define tx_err_inj_b_fine_sel=49:51; 	 #start_bit=49, number_of_bit=3
+define tx_err_inj_b_coarse_sel=52:55; 	 #start_bit=52, number_of_bit=4
+define tx_err_inj_b_ber_sel=58:63; 	 #start_bit=58, number_of_bit=6
+define tx_err_inj_enable=48:48; 	 #start_bit=48, number_of_bit=1
+define tx_err_inj_clock_enable=49:49; 	 #start_bit=49, number_of_bit=1
+define tx_clr_par_errs=62:62; 	 #start_bit=62, number_of_bit=1
+define tx_fir_reset=63:63; 	 #start_bit=63, number_of_bit=1
+define tx_pg_fir_errs_full_reg=48:63; 	 #start_bit=48, number_of_bit=16
+define tx_pg_fir_err_tx_sm_regs=48:48; 	 #start_bit=48, number_of_bit=1
+define tx_pg_fir_err_gcr_buff=49:49; 	 #start_bit=49, number_of_bit=1
+define tx_pg_fir_err_gcrs_ld_sm=50:50; 	 #start_bit=50, number_of_bit=1
+define tx_pg_fir_err_gcrs_unld_sm=51:51; 	 #start_bit=51, number_of_bit=1
+define tx_pg_fir_err_ctl_regs=52:52; 	 #start_bit=52, number_of_bit=1
+#define #tx_pg_fir_err_bist=53:53; 	 #start_bit=53, number_of_bit=1
+define tx_pl_fir_err=63:63; 	 #start_bit=63, number_of_bit=1
+#define #tx_pg_fir_err_stat_rpr_snd_msg_sm=51:51; 	 #start_bit=51, number_of_bit=1
+#define #tx_pg_fir_errs=48:55; 	 #start_bit=48, number_of_bit=8
+#define #tx_pg_fir_err_pg_regs=48:48; 	 #start_bit=48, number_of_bit=1
+define tx_pg_fir_err_mask_full_reg=48:63; 	 #start_bit=48, number_of_bit=16
+define tx_pg_fir_errs_mask=48:52; 	 #start_bit=48, number_of_bit=5
+define tx_pg_fir_err_mask_tx_sm_regs=48:48; 	 #start_bit=48, number_of_bit=1
+define tx_pg_fir_err_mask_gcr_buff=49:49; 	 #start_bit=49, number_of_bit=1
+define tx_pg_fir_err_mask_gcrs_ld_sm=50:50; 	 #start_bit=50, number_of_bit=1
+define tx_pg_fir_err_mask_gcrs_unld_sm=51:51; 	 #start_bit=51, number_of_bit=1
+define tx_pg_fir_err_mask_ctl_regs=52:52; 	 #start_bit=52, number_of_bit=1
+define tx_pg_fir_err_mask_bist=53:53; 	 #start_bit=53, number_of_bit=1
+define tx_pl_fir_err_mask=63:63; 	 #start_bit=63, number_of_bit=1
+define tx_pg_fir_err_inj_full_reg=48:63; 	 #start_bit=48, number_of_bit=16
+define tx_pg_fir_err_inj=48:52; 	 #start_bit=48, number_of_bit=5
+define tx_pg_fir_err_inj_tx_sm_regs=48:48; 	 #start_bit=48, number_of_bit=1
+define tx_pg_fir_err_inj_gcr_buff=49:49; 	 #start_bit=49, number_of_bit=1
+define tx_pg_fir_err_inj_gcrs_ld_sm=50:50; 	 #start_bit=50, number_of_bit=1
+define tx_pg_fir_err_inj_gcrs_unld_sm=51:51; 	 #start_bit=51, number_of_bit=1
+define tx_pg_fir_err_inj_ctl_regs=52:52; 	 #start_bit=52, number_of_bit=1
+define tx_pg_fir_err_inj_bist=53:53; 	 #start_bit=53, number_of_bit=1
+define tx_pg_ctl_sm_spare_mode_0=48:48; 	 #start_bit=48, number_of_bit=1
+define tx_pg_ctl_sm_spare_mode_1=49:49; 	 #start_bit=49, number_of_bit=1
+define tx_pg_ctl_sm_spare_mode_2=50:50; 	 #start_bit=50, number_of_bit=1
+define tx_pg_ctl_sm_spare_mode_3=51:51; 	 #start_bit=51, number_of_bit=1
+define tx_pg_ctl_sm_spare_mode_4=52:52; 	 #start_bit=52, number_of_bit=1
+define tx_pg_ctl_sm_spare_mode_5=53:53; 	 #start_bit=53, number_of_bit=1
+define tx_pg_ctl_sm_spare_mode_6=54:54; 	 #start_bit=54, number_of_bit=1
+define tx_pg_ctl_sm_spare_mode_7=55:55; 	 #start_bit=55, number_of_bit=1
+define tx_zcal_done=50:50; 	 #start_bit=50, number_of_bit=1
+define tx_zcal_error=51:51; 	 #start_bit=51, number_of_bit=1
+define tx_zcal_busy=52:52; 	 #start_bit=52, number_of_bit=1
+define tx_zcal_cmp_out=54:54; 	 #start_bit=54, number_of_bit=1
+define tx_zcal_sample_cnt=55:63; 	 #start_bit=55, number_of_bit=9
+define tx_zcal_n=48:56; 	 #start_bit=48, number_of_bit=9
+define tx_zcal_p=48:56; 	 #start_bit=48, number_of_bit=9
+define tx_zcal_p_4x=48:52; 	 #start_bit=48, number_of_bit=5
+define tx_zcal_swo_en=48:48; 	 #start_bit=48, number_of_bit=1
+define tx_zcal_swo_cal_segs=49:49; 	 #start_bit=49, number_of_bit=1
+define tx_zcal_swo_cmp_inv=50:50; 	 #start_bit=50, number_of_bit=1
+define tx_zcal_swo_cmp_offset=51:51; 	 #start_bit=51, number_of_bit=1
+define tx_zcal_swo_cmp_reset=52:52; 	 #start_bit=52, number_of_bit=1
+define tx_zcal_swo_powerdown=53:53; 	 #start_bit=53, number_of_bit=1
+define tx_zcal_cya_data_inv=54:54; 	 #start_bit=54, number_of_bit=1
+define tx_zcal_test_ovr_2r=55:55; 	 #start_bit=55, number_of_bit=1
+define tx_zcal_debug_mode=62:63; 	 #start_bit=62, number_of_bit=2
+define tx_zcal_sm_min_val=48:54; 	 #start_bit=48, number_of_bit=7
+define tx_zcal_sm_max_val=55:61; 	 #start_bit=55, number_of_bit=7
+define tx_iref_bc=48:50; 	 #start_bit=48, number_of_bit=3
+define tx_minikerf=48:63; 	 #start_bit=48, number_of_bit=16
+define pb_spare_mode_0=48:48; 	 #start_bit=48, number_of_bit=1
+define pb_spare_mode_1=49:49; 	 #start_bit=49, number_of_bit=1
+define pb_spare_mode_2=50:50; 	 #start_bit=50, number_of_bit=1
+define pb_spare_mode_3=51:51; 	 #start_bit=51, number_of_bit=1
+define pb_spare_mode_4=52:52; 	 #start_bit=52, number_of_bit=1
+define pb_spare_mode_5=53:53; 	 #start_bit=53, number_of_bit=1
+define pb_spare_mode_6=54:54; 	 #start_bit=54, number_of_bit=1
+define pb_spare_mode_7=55:55; 	 #start_bit=55, number_of_bit=1
+define rx_mode_pl_full_reg=48:63; 	 #start_bit=48, number_of_bit=16
+define rx_lane_dig_pdwn=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_ber_dpipe_mux_sel=49:49; 	 #start_bit=49, number_of_bit=1
+define rx_decouple_edge_a=50:50; 	 #start_bit=50, number_of_bit=1
+define rx_decouple_edge_b=51:51; 	 #start_bit=51, number_of_bit=1
+define rx_cal_lane_sel=50:50; 	 #start_bit=50, number_of_bit=1
+define rx_pipe_sel=51:52; 	 #start_bit=51, number_of_bit=2
+define rx_bank_sel_a=53:53; 	 #start_bit=53, number_of_bit=1
+define rx_pipe_margin=54:54; 	 #start_bit=54, number_of_bit=1
+define rx_scope_mode=55:56; 	 #start_bit=55, number_of_bit=2
+define rx_bank_pdwn=61:62; 	 #start_bit=61, number_of_bit=2
+define rx_pl_spare_mode_0=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_pl_spare_mode_1=49:49; 	 #start_bit=49, number_of_bit=1
+define rx_pl_spare_mode_2=50:50; 	 #start_bit=50, number_of_bit=1
+define rx_pl_spare_mode_3=51:51; 	 #start_bit=51, number_of_bit=1
+define rx_pl_spare_mode_4=52:52; 	 #start_bit=52, number_of_bit=1
+define rx_pl_spare_mode_5=53:53; 	 #start_bit=53, number_of_bit=1
+define rx_pl_spare_mode_6=54:54; 	 #start_bit=54, number_of_bit=1
+define rx_pl_spare_mode_7=55:55; 	 #start_bit=55, number_of_bit=1
+define rx_pl_data_work_spare_mode_0=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_pl_data_work_spare_mode_1=49:49; 	 #start_bit=49, number_of_bit=1
+define rx_pl_data_work_spare_mode_2=50:50; 	 #start_bit=50, number_of_bit=1
+define rx_pl_data_work_spare_mode_3=51:51; 	 #start_bit=51, number_of_bit=1
+define rx_pl_data_work_spare_mode_4=52:52; 	 #start_bit=52, number_of_bit=1
+define rx_pl_data_work_spare_mode_5=53:53; 	 #start_bit=53, number_of_bit=1
+define rx_pl_data_work_spare_mode_6=54:54; 	 #start_bit=54, number_of_bit=1
+define rx_pl_data_work_spare_mode_7=55:55; 	 #start_bit=55, number_of_bit=1
+define rx_pl_data_dac_spare_mode_0=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_pl_data_dac_spare_mode_1=49:49; 	 #start_bit=49, number_of_bit=1
+define rx_pl_data_dac_spare_mode_2=50:50; 	 #start_bit=50, number_of_bit=1
+define rx_pl_data_dac_spare_mode_3=51:51; 	 #start_bit=51, number_of_bit=1
+define rx_pl_data_dac_spare_mode_4=52:52; 	 #start_bit=52, number_of_bit=1
+define rx_pl_data_dac_spare_mode_5=53:53; 	 #start_bit=53, number_of_bit=1
+define rx_pl_data_dac_spare_mode_6=54:54; 	 #start_bit=54, number_of_bit=1
+define rx_pl_data_dac_spare_mode_7=55:55; 	 #start_bit=55, number_of_bit=1
+define rx_bist_err_a=61:61; 	 #start_bit=61, number_of_bit=1
+define rx_bist_err_b=62:62; 	 #start_bit=62, number_of_bit=1
+define rx_bist_err_e=63:63; 	 #start_bit=63, number_of_bit=1
+define rx_a_bad_dfe_conv=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_b_bad_dfe_conv=49:49; 	 #start_bit=49, number_of_bit=1
+define rx_a_h1ap_at_limit=50:50; 	 #start_bit=50, number_of_bit=1
+define rx_b_h1ap_at_limit=51:51; 	 #start_bit=51, number_of_bit=1
+define rx_a_bank_controls=48:53; 	 #start_bit=48, number_of_bit=6
+define rx_lane_ana_pdwn=54:54; 	 #start_bit=54, number_of_bit=1
+define rx_prbs_test_data=55:57; 	 #start_bit=55, number_of_bit=3
+define rx_b_bank_controls=58:63; 	 #start_bit=58, number_of_bit=6
+define rx_a_controls=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_cm_cntl=52:53; 	 #start_bit=52, number_of_bit=2
+#define #rx_a_bist_en=54:54; 	 #start_bit=54, number_of_bit=1
+#define #rx_bistclk_en=55:56; 	 #start_bit=55, number_of_bit=2
+define rx_pr_halfrate_mode=57:57; 	 #start_bit=57, number_of_bit=1
+define rx_pr_iq_res_sel=58:60; 	 #start_bit=58, number_of_bit=3
+define rx_a_offset_e0=48:54; 	 #start_bit=48, number_of_bit=7
+define rx_a_offset_e1=56:62; 	 #start_bit=56, number_of_bit=7
+define rx_a_offset_o0=48:54; 	 #start_bit=48, number_of_bit=7
+define rx_a_offset_o1=56:62; 	 #start_bit=56, number_of_bit=7
+define rx_a_even_integ_gain=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_a_odd_integ_gain=52:55; 	 #start_bit=52, number_of_bit=4
+define rx_a_ctle_coarse=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_a_ctle_gain=52:55; 	 #start_bit=52, number_of_bit=4
+define rx_a_h1e_val=48:55; 	 #start_bit=48, number_of_bit=8
+define rx_a_h1o_val=56:63; 	 #start_bit=56, number_of_bit=8
+define rx_amp_val=48:55; 	 #start_bit=48, number_of_bit=8
+define rx_b_controls=48:51; 	 #start_bit=48, number_of_bit=4
+#define #rx_b_bist_en=54:54; 	 #start_bit=54, number_of_bit=1
+define rx_b_offset_e0=48:54; 	 #start_bit=48, number_of_bit=7
+define rx_b_offset_e1=56:62; 	 #start_bit=56, number_of_bit=7
+define rx_b_offset_o0=48:54; 	 #start_bit=48, number_of_bit=7
+define rx_b_offset_o1=56:62; 	 #start_bit=56, number_of_bit=7
+define rx_b_even_integ_gain=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_b_odd_integ_gain=52:55; 	 #start_bit=52, number_of_bit=4
+define rx_b_ctle_coarse=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_b_ctle_gain=52:55; 	 #start_bit=52, number_of_bit=4
+define rx_b_h1e_val=48:55; 	 #start_bit=48, number_of_bit=8
+define rx_b_h1o_val=56:63; 	 #start_bit=56, number_of_bit=8
+define rx_e_controls=48:49; 	 #start_bit=48, number_of_bit=2
+#define #rx_e_bist_en=54:54; 	 #start_bit=54, number_of_bit=1
+define rx_e_offset_e=48:54; 	 #start_bit=48, number_of_bit=7
+define rx_e_offset_o=56:62; 	 #start_bit=56, number_of_bit=7
+define rx_e_even_integ_gain=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_e_odd_integ_gain=52:55; 	 #start_bit=52, number_of_bit=4
+define rx_e_ctle_coarse=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_e_ctle_gain=52:55; 	 #start_bit=52, number_of_bit=4
+define rx_pl_fir_errs_full_reg=48:63; 	 #start_bit=48, number_of_bit=16
+define rx_pl_fir_errs=48:50; 	 #start_bit=48, number_of_bit=3
+define rx_pl_fir_err_pl_regs=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_pl_fir_err_ddc_sm=49:49; 	 #start_bit=49, number_of_bit=1
+define rx_pl_fir_err_dac_regs=50:50; 	 #start_bit=50, number_of_bit=1
+define rx_pl_fir_errs_mask_full_reg=48:63; 	 #start_bit=48, number_of_bit=16
+define rx_pl_fir_errs_mask=48:50; 	 #start_bit=48, number_of_bit=3
+define rx_pl_fir_err_mask_pl_regs=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_pl_fir_err_mask_ddc_sm=49:49; 	 #start_bit=49, number_of_bit=1
+define rx_pl_fir_err_mask_dac_regs=50:50; 	 #start_bit=50, number_of_bit=1
+define rx_pl_fir_err_inj_full_reg=48:63; 	 #start_bit=48, number_of_bit=16
+define rx_pl_fir_err_inj=48:50; 	 #start_bit=48, number_of_bit=3
+define rx_pl_fir_err_inj_pl_regs=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_pl_fir_err_inj_ddc_sm=49:49; 	 #start_bit=49, number_of_bit=1
+define rx_pl_fir_err_inj_dac_regs=50:50; 	 #start_bit=50, number_of_bit=1
+define rx_pr_fw_off=56:56; 	 #start_bit=56, number_of_bit=1
+define rx_pr_fw_inertia_amt=57:59; 	 #start_bit=57, number_of_bit=3
+define rx_pr_phase_step=60:63; 	 #start_bit=60, number_of_bit=4
+define rx_ber_cfg=48:50; 	 #start_bit=48, number_of_bit=3
+define rx_fifo_dly_cfg=51:52; 	 #start_bit=51, number_of_bit=2
+define rx_ddc_cfg=53:54; 	 #start_bit=53, number_of_bit=2
+define rx_pr_edge_track_cntl=48:49; 	 #start_bit=48, number_of_bit=2
+define rx_pr_wobble_a=50:50; 	 #start_bit=50, number_of_bit=1
+define rx_pr_wobble_b=51:51; 	 #start_bit=51, number_of_bit=1
+define rx_pr_wobble_edge=52:52; 	 #start_bit=52, number_of_bit=1
+define rx_pr_ddc_a=53:53; 	 #start_bit=53, number_of_bit=1
+define rx_pr_ddc_b=54:54; 	 #start_bit=54, number_of_bit=1
+define rx_pr_bump_to_edge_a=55:55; 	 #start_bit=55, number_of_bit=1
+define rx_pr_bump_to_edge_b=56:56; 	 #start_bit=56, number_of_bit=1
+define rx_pr_bump_plus_1ui=57:57; 	 #start_bit=57, number_of_bit=1
+define rx_pr_bump_minus_1ui=58:58; 	 #start_bit=58, number_of_bit=1
+define rx_pr_use_dfe_clock_a=61:61; 	 #start_bit=61, number_of_bit=1
+define rx_pr_use_dfe_clock_b=62:62; 	 #start_bit=62, number_of_bit=1
+define rx_pr_reset=63:63; 	 #start_bit=63, number_of_bit=1
+define rx_pr_data_a_offset=48:53; 	 #start_bit=48, number_of_bit=6
+define rx_pr_data_b_offset=54:59; 	 #start_bit=54, number_of_bit=6
+define rx_pr_bit_lock_done=60:60; 	 #start_bit=60, number_of_bit=1
+define rx_pr_invalid_lock_filter_en=61:61; 	 #start_bit=61, number_of_bit=1
+define rx_pr_invalid_lock_bump_size=62:63; 	 #start_bit=62, number_of_bit=2
+define rx_pr_trace_ddc_stop=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_pr_trace_ddc_sm=51:55; 	 #start_bit=51, number_of_bit=5
+define rx_pr_trace_wobble_stop=56:56; 	 #start_bit=56, number_of_bit=1
+define rx_pr_trace_wobble_sm=61:63; 	 #start_bit=61, number_of_bit=3
+define rx_pr_wobble_a_ip=50:50; 	 #start_bit=50, number_of_bit=1
+define rx_pr_wobble_b_ip=51:51; 	 #start_bit=51, number_of_bit=1
+define rx_pr_wobble_edge_ip=52:52; 	 #start_bit=52, number_of_bit=1
+define rx_pr_ddc_done=53:53; 	 #start_bit=53, number_of_bit=1
+define rx_pr_ddc_failed=54:54; 	 #start_bit=54, number_of_bit=1
+define rx_pr_bump_plus_1ui_done=56:56; 	 #start_bit=56, number_of_bit=1
+define rx_pr_bump_minus_1ui_done=57:57; 	 #start_bit=57, number_of_bit=1
+define rx_pr_trace_stopped=58:58; 	 #start_bit=58, number_of_bit=1
+define rx_pr_l_r_edge_a_alias=48:59; 	 #start_bit=48, number_of_bit=12
+define rx_pr_left_edge_a=48:53; 	 #start_bit=48, number_of_bit=6
+define rx_pr_right_edge_a=54:59; 	 #start_bit=54, number_of_bit=6
+define rx_pr_l_r_edge_b_alias=48:59; 	 #start_bit=48, number_of_bit=12
+define rx_pr_left_edge_b=48:53; 	 #start_bit=48, number_of_bit=6
+define rx_pr_right_edge_b=54:59; 	 #start_bit=54, number_of_bit=6
+define rx_a_pr_dfe_clkadj=60:63; 	 #start_bit=60, number_of_bit=4
+define rx_b_pr_dfe_clkadj=60:63; 	 #start_bit=60, number_of_bit=4
+define rx_pg_spare_mode_0=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_pg_spare_mode_1=49:49; 	 #start_bit=49, number_of_bit=1
+define rx_pg_spare_mode_2=50:50; 	 #start_bit=50, number_of_bit=1
+define rx_pg_spare_mode_3=51:51; 	 #start_bit=51, number_of_bit=1
+define rx_pg_spare_mode_4=52:52; 	 #start_bit=52, number_of_bit=1
+#define #rx_pg_spare_mode_5=53:53; 	 #start_bit=53, number_of_bit=1
+#define #rx_pg_spare_mode_6=54:54; 	 #start_bit=54, number_of_bit=1
+#define #rx_pg_spare_mode_7=55:55; 	 #start_bit=55, number_of_bit=1
+define rx_grp_pdwn=48:50; 	 #start_bit=48, number_of_bit=3
+define rx_bist_min_eye_width=51:56; 	 #start_bit=51, number_of_bit=6
+define rx_a_bist_en=57:57; 	 #start_bit=57, number_of_bit=1
+define rx_b_bist_en=58:58; 	 #start_bit=58, number_of_bit=1
+define rx_e_bist_en=59:59; 	 #start_bit=59, number_of_bit=1
+define rx_bistclk_en=60:61; 	 #start_bit=60, number_of_bit=2
+define rx_disable_bank_pdwn=62:62; 	 #start_bit=62, number_of_bit=1
+define rx_dfe_ca_cfg=48:49; 	 #start_bit=48, number_of_bit=2
+define rx_scope_control=53:56; 	 #start_bit=53, number_of_bit=4
+define rx_run_lane_dl_mask=57:57; 	 #start_bit=57, number_of_bit=1
+define rx_recal_abort_dl_mask=58:58; 	 #start_bit=58, number_of_bit=1
+define rx_init_done_dl_mask=59:59; 	 #start_bit=59, number_of_bit=1
+define rx_data_pipe_clr_on_read_mode=60:60; 	 #start_bit=60, number_of_bit=1
+define rx_clr_par_errs=62:62; 	 #start_bit=62, number_of_bit=1
+define rx_fir_reset=63:63; 	 #start_bit=63, number_of_bit=1
+define rx_bus_id=48:53; 	 #start_bit=48, number_of_bit=6
+define rx_group_id=55:60; 	 #start_bit=55, number_of_bit=6
+define rx_minikerf=48:63; 	 #start_bit=48, number_of_bit=16
+define rx_run_lane_vec_0_15=48:63; 	 #start_bit=48, number_of_bit=16
+define rx_run_lane_vec_16_23=48:55; 	 #start_bit=48, number_of_bit=8
+define rx_ioreset_vec_0_15=48:63; 	 #start_bit=48, number_of_bit=16
+define rx_ioreset_vec_16_23=48:55; 	 #start_bit=48, number_of_bit=8
+define rx_init_done_vec_0_15=48:63; 	 #start_bit=48, number_of_bit=16
+define rx_init_done_vec_16_23=48:55; 	 #start_bit=48, number_of_bit=8
+define rx_lane_busy_vec_0_15=48:63; 	 #start_bit=48, number_of_bit=16
+define rx_lane_busy_vec_16_23=48:55; 	 #start_bit=48, number_of_bit=8
+define rx_recal_abort_vec_0_15=48:63; 	 #start_bit=48, number_of_bit=16
+define rx_recal_abort_vec_16_23=48:55; 	 #start_bit=48, number_of_bit=8
+define rx_tracking_timeout_sel=56:59; 	 #start_bit=56, number_of_bit=4
+define rx_abort_check_timeout_sel=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_polling_timeout_sel=52:55; 	 #start_bit=52, number_of_bit=4
+define rx_dfe_converged_cnt_max=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_ap110_ap010_delta_max=52:55; 	 #start_bit=52, number_of_bit=4
+define rx_eo_converged_end_count=48:51; 	 #start_bit=48, number_of_bit=4
+#define #rx_amp_offset_cnt_max=52:55; 	 #start_bit=52, number_of_bit=4
+define rx_amp_gain_cnt_max=56:59; 	 #start_bit=56, number_of_bit=4
+define rx_rc_slowdown_timeout_sel=60:63; 	 #start_bit=60, number_of_bit=4
+define rx_recal_cnt=48:63; 	 #start_bit=48, number_of_bit=16
+define rx_dactest_isgt=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_dactest_islt=49:49; 	 #start_bit=49, number_of_bit=1
+define rx_dactest_iseq=50:50; 	 #start_bit=50, number_of_bit=1
+define rx_dactest_diff=51:59; 	 #start_bit=51, number_of_bit=9
+define rx_pg_glbsm_spare_mode_0=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_pg_glbsm_spare_mode_1=49:49; 	 #start_bit=49, number_of_bit=1
+define rx_pg_glbsm_spare_mode_2=50:50; 	 #start_bit=50, number_of_bit=1
+define rx_pg_glbsm_spare_mode_3=51:51; 	 #start_bit=51, number_of_bit=1
+define rx_pg_glbsm_spare_mode_4=52:52; 	 #start_bit=52, number_of_bit=1
+define rx_pg_glbsm_spare_mode_5=53:53; 	 #start_bit=53, number_of_bit=1
+define rx_pg_glbsm_spare_mode_6=54:54; 	 #start_bit=54, number_of_bit=1
+define rx_pg_glbsm_spare_mode_7=55:55; 	 #start_bit=55, number_of_bit=1
+#define ##dmb##rx_pg_fir1_errs_full_reg=48:63; 	 #start_bit=48, number_of_bit=16
+#define ##dmb###rx_pg_fir1_errs=48:60; 	 #start_bit=48, number_of_bit=13
+#define ##dmb##rx_pg_fir_err_pg_regs=48:48; 	 #start_bit=48, number_of_bit=1
+#define ##dmb##rx_pg_fir_err_gcr_buff=49:49; 	 #start_bit=49, number_of_bit=1
+#define ##dmb##rx_pg_fir_err_gcrs_ld_sm=51:51; 	 #start_bit=51, number_of_bit=1
+#define ##dmb##rx_pg_fir_err_gcrs_unld_sm=52:52; 	 #start_bit=52, number_of_bit=1
+#define ##dmb##rx_pg_fir_err_glb_init_snd_msg_sm=53:53; 	 #start_bit=53, number_of_bit=1
+#define ##dmb#rx_pg_fir_err_eyeopt_sm=59:59; 	 #start_bit=59, number_of_bit=1
+#define ##dmb#rx_pl_fir_err=63:63; 	 #start_bit=63, number_of_bit=1
+define rx_pg_fir1_errs_full_reg=48:63; 	 #start_bit=48, number_of_bit=16
+#define #rx_pg_fir1_errs=48:60; 	 #start_bit=48, number_of_bit=13
+define rx_pg_fir_err_pg_regs=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_pg_fir_err_gcr_buff=49:49; 	 #start_bit=49, number_of_bit=1
+define rx_pg_fir_err_gcrs_ld_sm=50:50; 	 #start_bit=50, number_of_bit=1
+define rx_pg_fir_err_gcrs_unld_sm=51:51; 	 #start_bit=51, number_of_bit=1
+define rx_pg_fir_err_glbsm_regs=52:52; 	 #start_bit=52, number_of_bit=1
+define rx_pg_fir_err_glbsm_regrw=53:53; 	 #start_bit=53, number_of_bit=1
+define rx_pg_fir_err_datasm_regs=54:54; 	 #start_bit=54, number_of_bit=1
+define rx_pg_fir_err_datasm_regrw=55:55; 	 #start_bit=55, number_of_bit=1
+define rx_pg_fir_err_eyeopt_sm=56:56; 	 #start_bit=56, number_of_bit=1
+define rx_pg_fir_err_bist_main_state=57:57; 	 #start_bit=57, number_of_bit=1
+define rx_pg_fir_err_bist_init_state=58:58; 	 #start_bit=58, number_of_bit=1
+define rx_pg_fir_err_rx_servo_sm=59:59; 	 #start_bit=59, number_of_bit=1
+define rx_pg_fir_err_work_regs=60:60; 	 #start_bit=60, number_of_bit=1
+define rx_pl_fir_err=61:61; 	 #start_bit=61, number_of_bit=1
+define fir1_errs_mask_full_reg=48:63; 	 #start_bit=48, number_of_bit=16
+define rx_pg_fir1_errs_mask=48:60; 	 #start_bit=48, number_of_bit=13
+define fir_err_mask_pg_regs=48:48; 	 #start_bit=48, number_of_bit=1
+define fir_err_mask_gcr_buff=49:49; 	 #start_bit=49, number_of_bit=1
+define rx_pg_fir_err_mask_gcrs_ld_sm=50:50; 	 #start_bit=50, number_of_bit=1
+define rx_pg_fir_err_mask_gcrs_unld_sm=51:51; 	 #start_bit=51, number_of_bit=1
+define rx_pg_fir_err_mask_glbsm_regs=52:52; 	 #start_bit=52, number_of_bit=1
+define rx_pg_fir_err_mask_glbsm_regrw=53:53; 	 #start_bit=53, number_of_bit=1
+define rx_pg_fir_err_mask_datasm_regs=54:54; 	 #start_bit=54, number_of_bit=1
+define rx_pg_fir_err_mask_datasm_regrw=55:55; 	 #start_bit=55, number_of_bit=1
+define rx_pg_fir_err_mask_eyeopt_sm=56:56; 	 #start_bit=56, number_of_bit=1
+define rx_pg_fir_err_mask_bist_main_state=57:57; 	 #start_bit=57, number_of_bit=1
+define rx_pg_fir_err_mask_bist_init_state=58:58; 	 #start_bit=58, number_of_bit=1
+define rx_pg_fir_err_mask_rx_servo_sm=59:59; 	 #start_bit=59, number_of_bit=1
+define rx_pg_fir_err_mask_work_regs=60:60; 	 #start_bit=60, number_of_bit=1
+define rx_pl_fir_err_mask=61:61; 	 #start_bit=61, number_of_bit=1
+define rx_pg_fir1_err_inj_full_reg=48:63; 	 #start_bit=48, number_of_bit=16
+define rx_pg_fir1_err_inj=48:60; 	 #start_bit=48, number_of_bit=13
+define rx_pg_fir_err_inj_pg_regs=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_pg_fir_err_inj_gcr_buff=49:49; 	 #start_bit=49, number_of_bit=1
+define rx_pg_fir_err_inj_gcrs_ld_sm=50:50; 	 #start_bit=50, number_of_bit=1
+define rx_pg_fir_err_inj_gcrs_unld_sm=51:51; 	 #start_bit=51, number_of_bit=1
+define rx_pg_fir_err_inj_glbsm_regs=52:52; 	 #start_bit=52, number_of_bit=1
+define rx_pg_fir_err_inj_glbsm_regrw=53:53; 	 #start_bit=53, number_of_bit=1
+define rx_pg_fir_err_inj_datasm_regs=54:54; 	 #start_bit=54, number_of_bit=1
+define rx_pg_fir_err_inj_datasm_regrw=55:55; 	 #start_bit=55, number_of_bit=1
+define rx_pg_fir_err_inj_eyeopt_sm=56:56; 	 #start_bit=56, number_of_bit=1
+define rx_pg_fir_err_inj_bist_main_state=57:57; 	 #start_bit=57, number_of_bit=1
+define rx_pg_fir_err_inj_bist_init_state=58:58; 	 #start_bit=58, number_of_bit=1
+define rx_pg_fir_err_inj_rx_servo_sm=59:59; 	 #start_bit=59, number_of_bit=1
+define rx_pg_fir_err_inj_work_regs=60:60; 	 #start_bit=60, number_of_bit=1
+#define ##dmb#fir1_errs_mask_full_reg=48:63; 	 #start_bit=48, number_of_bit=16
+#define ##dmb#fir1_errs_mask=48:61; 	 #start_bit=48, number_of_bit=14
+#define ##dmb#fir_err_mask_pg_regs=48:48; 	 #start_bit=48, number_of_bit=1
+#define ##dmb#fir_err_mask_gcr_buff=49:49; 	 #start_bit=49, number_of_bit=1
+#define ##dmb#rx_pg_fir_err_mask_gcrs_ld_sm=51:51; 	 #start_bit=51, number_of_bit=1
+#define ##dmb#rx_pg_fir_err_mask_gcrs_unld_sm=52:52; 	 #start_bit=52, number_of_bit=1
+#define ##dmb#rx_pg_fir_err_mask_glb_init_snd_msg_sm=53:53; 	 #start_bit=53, number_of_bit=1
+#define ##dmb#rx_pg_fir_err_mask_main_init_sm=54:54; 	 #start_bit=54, number_of_bit=1
+#define ##dmbrx_pg_fir_err_mask_eyeopt_sm=59:59; 	 #start_bit=59, number_of_bit=1
+#define ##dmbrx_pl_fir_err_mask=63:63; 	 #start_bit=63, number_of_bit=1
+#define ##dmbrx_pg_fir1_err_inj_full_reg=48:63; 	 #start_bit=48, number_of_bit=16
+#define ##dmbrx_pg_fir1_err_inj=48:61; 	 #start_bit=48, number_of_bit=14
+#define ##dmbrx_pg_fir_err_inj_pg_regs=48:48; 	 #start_bit=48, number_of_bit=1
+#define ##dmbrx_pg_fir_err_inj_gcr_buff=49:49; 	 #start_bit=49, number_of_bit=1
+#define ##dmbrx_pg_fir_err_inj_gcrs_ld_sm=51:51; 	 #start_bit=51, number_of_bit=1
+#define ##dmbrx_pg_fir_err_inj_gcrs_unld_sm=52:52; 	 #start_bit=52, number_of_bit=1
+#define ##dmbrx_pg_fir_err_inj_glb_init_snd_msg_sm=53:53; 	 #start_bit=53, number_of_bit=1
+#define ##dmbrx_pg_fir_err_inj_main_init_sm=54:54; 	 #start_bit=54, number_of_bit=1
+#define ##dmbrx_pg_fir_err_inj_eyeopt_sm=59:59; 	 #start_bit=59, number_of_bit=1
+define rx_lane_disabled_vec_0_15=48:63; 	 #start_bit=48, number_of_bit=16
+define rx_lane_disabled_vec_16_23=48:55; 	 #start_bit=48, number_of_bit=8
+define rx_cal_lane_pg_phy_gcrmsg=56:60; 	 #start_bit=56, number_of_bit=5
+define rx_quad_sel=48:49; 	 #start_bit=48, number_of_bit=2
+define rx_iref_res_dac=50:52; 	 #start_bit=50, number_of_bit=3
+define rx_iref_sc_dac=53:56; 	 #start_bit=53, number_of_bit=4
+define rx_iref_bypass=57:57; 	 #start_bit=57, number_of_bit=1
+define rx_iref_pdwn_b=58:58; 	 #start_bit=58, number_of_bit=1
+define rx_dactest_llmt=48:56; 	 #start_bit=48, number_of_bit=9
+define rx_dactest_reset=57:57; 	 #start_bit=57, number_of_bit=1
+define rx_dactest_start=58:58; 	 #start_bit=58, number_of_bit=1
+define rx_dactest_hlmt=48:56; 	 #start_bit=48, number_of_bit=9
+define rx_eye_opt_state=48:59; 	 #start_bit=48, number_of_bit=12
+define rx_eo_enable_latch_offset_cal=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_eo_enable_ctle_coarse_cal=49:49; 	 #start_bit=49, number_of_bit=1
+define rx_eo_enable_vga_cal=51:51; 	 #start_bit=51, number_of_bit=1
+define rx_eo_enable_dfe_h1_cal=52:52; 	 #start_bit=52, number_of_bit=1
+define rx_eo_enable_h1ap_tweak=53:53; 	 #start_bit=53, number_of_bit=1
+define rx_eo_enable_ddc=54:54; 	 #start_bit=54, number_of_bit=1
+define rx_eo_enable_ber_test=55:55; 	 #start_bit=55, number_of_bit=1
+define rx_eo_enable_result_check=56:56; 	 #start_bit=56, number_of_bit=1
+define rx_eo_enable_cm_coarse_cal=57:57; 	 #start_bit=57, number_of_bit=1
+define rx_eo_enable_vga_edge_offset_cal=61:61; 	 #start_bit=61, number_of_bit=1
+define rx_eo_enable_ctle_edge_offset_cal=62:62; 	 #start_bit=62, number_of_bit=1
+define rx_rc_enable_latch_offset_cal=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_rc_enable_ctle_coarse_cal=49:49; 	 #start_bit=49, number_of_bit=1
+define rx_rc_enable_vga_cal=51:51; 	 #start_bit=51, number_of_bit=1
+define rx_rc_enable_dfe_h1_cal=52:52; 	 #start_bit=52, number_of_bit=1
+define rx_rc_enable_h1ap_tweak=53:53; 	 #start_bit=53, number_of_bit=1
+define rx_rc_enable_ddc=54:54; 	 #start_bit=54, number_of_bit=1
+define rx_rc_enable_ber_test=55:55; 	 #start_bit=55, number_of_bit=1
+define rx_rc_enable_result_check=56:56; 	 #start_bit=56, number_of_bit=1
+define rx_rc_enable_cm_coarse_cal=57:57; 	 #start_bit=57, number_of_bit=1
+define rx_rc_enable_vga_edge_offset_cal=61:61; 	 #start_bit=61, number_of_bit=1
+define rx_rc_enable_ctle_edge_offset_cal=62:62; 	 #start_bit=62, number_of_bit=1
+define rx_amax_high=48:55; 	 #start_bit=48, number_of_bit=8
+define rx_amax_low=56:63; 	 #start_bit=56, number_of_bit=8
+define rx_amp_start_val=48:55; 	 #start_bit=48, number_of_bit=8
+#define #rx_amp_offset_max=48:55; 	 #start_bit=48, number_of_bit=8
+#define #rx_amp_offset_min=56:63; 	 #start_bit=56, number_of_bit=8
+define rx_ctle_gain_max=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_trc_mode=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_trc_grp=54:59; 	 #start_bit=54, number_of_bit=6
+define rx_min_eye_width=50:55; 	 #start_bit=50, number_of_bit=6
+define rx_min_eye_height=56:63; 	 #start_bit=56, number_of_bit=8
+define rx_stop_state_enable=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_state_stopped=49:49; 	 #start_bit=49, number_of_bit=1
+define rx_stop_addr_msb=56:59; 	 #start_bit=56, number_of_bit=4
+define rx_stop_mask_msb=60:63; 	 #start_bit=60, number_of_bit=4
+define rx_stop_addr_lsb=48:63; 	 #start_bit=48, number_of_bit=16
+define rx_stop_mask_lsb=48:63; 	 #start_bit=48, number_of_bit=16
+define rx_amp_init_timeout=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_amp_recal_timeout=52:55; 	 #start_bit=52, number_of_bit=4
+define rx_peak_init_timeout=56:59; 	 #start_bit=56, number_of_bit=4
+define rx_peak_recal_timeout=60:63; 	 #start_bit=60, number_of_bit=4
+define rx_off_init_timeout=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_off_recal_timeout=52:55; 	 #start_bit=52, number_of_bit=4
+define rx_cm_timeout=56:59; 	 #start_bit=56, number_of_bit=4
+define rx_amin_timeout=60:63; 	 #start_bit=60, number_of_bit=4
+define rx_amp_timeout=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_userdef_timeout=52:55; 	 #start_bit=52, number_of_bit=4
+define rx_ber_timeout=56:59; 	 #start_bit=56, number_of_bit=4
+define rx_spare4_timeout=60:63; 	 #start_bit=60, number_of_bit=4
+define rx_amp_init_cfg=48:50; 	 #start_bit=48, number_of_bit=3
+define rx_amp_recal_cfg=51:53; 	 #start_bit=51, number_of_bit=3
+define rx_peak_init_cfg=54:56; 	 #start_bit=54, number_of_bit=3
+define rx_peak_recal_cfg=57:59; 	 #start_bit=57, number_of_bit=3
+define rx_amp_cfg=60:63; 	 #start_bit=60, number_of_bit=4
+define rx_off_init_cfg=48:50; 	 #start_bit=48, number_of_bit=3
+define rx_off_recal_cfg=51:53; 	 #start_bit=51, number_of_bit=3
+define rx_cm_cfg=54:56; 	 #start_bit=54, number_of_bit=3
+define rx_amin_cfg=57:59; 	 #start_bit=57, number_of_bit=3
+define rx_userdef_cfg=60:63; 	 #start_bit=60, number_of_bit=4
+define rx_user_filter_mask=48:55; 	 #start_bit=48, number_of_bit=8
+define rx_amp0_filter_mask=48:55; 	 #start_bit=48, number_of_bit=8
+define rx_amp1_filter_mask=56:63; 	 #start_bit=56, number_of_bit=8
+define rx_servo_chg_cfg=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_dac_bo_cfg=52:54; 	 #start_bit=52, number_of_bit=3
+define rx_filter_mode=55:56; 	 #start_bit=55, number_of_bit=2
+define rx_misc_cfg=57:58; 	 #start_bit=57, number_of_bit=2
+define rx_disable_h1_clear=59:59; 	 #start_bit=59, number_of_bit=1
+define rx_voff_cfg=60:62; 	 #start_bit=60, number_of_bit=3
+define rx_loff_amp_en=63:63; 	 #start_bit=63, number_of_bit=1
+define rx_cm_offset_val=49:55; 	 #start_bit=49, number_of_bit=7
+define rx_servo_thresh1=56:59; 	 #start_bit=56, number_of_bit=4
+define rx_servo_thresh2=60:63; 	 #start_bit=60, number_of_bit=4
+define rx_h1ap_cfg=48:49; 	 #start_bit=48, number_of_bit=2
+define rx_ctle_update_mode=50:50; 	 #start_bit=50, number_of_bit=1
+define rx_bist_en=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_bist_ext_start_mode=49:49; 	 #start_bit=49, number_of_bit=1
+define rx_bist_init_disable=50:52; 	 #start_bit=50, number_of_bit=3
+define rx_bist_cupll_lock_check_en=53:53; 	 #start_bit=53, number_of_bit=1
+define rx_bist_store_eyes_lane_sel=54:59; 	 #start_bit=54, number_of_bit=6
+define rx_bist_store_eyes_bank_sel=60:61; 	 #start_bit=60, number_of_bit=2
+define rx_bist_ll_test_en=62:62; 	 #start_bit=62, number_of_bit=1
+define rx_pervasive_capt=63:63; 	 #start_bit=63, number_of_bit=1
+define rx_bist_prbs_test_time=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_bist_bus_data_mode=52:52; 	 #start_bit=52, number_of_bit=1
+define rx_bist_prbs_prop_time=53:56; 	 #start_bit=53, number_of_bit=4
+define rx_bist_init_done=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_bist_done=49:49; 	 #start_bit=49, number_of_bit=1
+define rx_bist_ll_err=50:50; 	 #start_bit=50, number_of_bit=1
+define rx_bist_no_edge_det=51:51; 	 #start_bit=51, number_of_bit=1
+define rx_bist_eye_a_width=52:57; 	 #start_bit=52, number_of_bit=6
+define rx_bist_eye_b_width=58:63; 	 #start_bit=58, number_of_bit=6
+define rx_iref_parity_chk=59:62; 	 #start_bit=59, number_of_bit=4
+define rx_prvcpt_change_det=63:63; 	 #start_bit=63, number_of_bit=1
+define rx_ber_en=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_ber_timer_freeze_en=49:49; 	 #start_bit=49, number_of_bit=1
+define rx_ber_count_freeze_en=50:50; 	 #start_bit=50, number_of_bit=1
+define rx_ber_count_sel=51:54; 	 #start_bit=51, number_of_bit=4
+define rx_ber_timer_sel=56:58; 	 #start_bit=56, number_of_bit=3
+define rx_ber_clr_count_on_read_en=59:59; 	 #start_bit=59, number_of_bit=1
+define rx_ber_clr_timer_on_read_en=60:60; 	 #start_bit=60, number_of_bit=1
+define rx_data_pipe_0_15=48:63; 	 #start_bit=48, number_of_bit=16
+define rx_data_pipe_16_31=48:63; 	 #start_bit=48, number_of_bit=16
+define rx_servo_op=48:57; 	 #start_bit=48, number_of_bit=10
+define rx_servo_done=63:63; 	 #start_bit=63, number_of_bit=1
+define rx_servo_result=48:55; 	 #start_bit=48, number_of_bit=8
+define rx_hist_min_eye_width_valid=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_hist_min_eye_width_mode=49:50; 	 #start_bit=49, number_of_bit=2
+define rx_hist_min_eye_width_lane=51:55; 	 #start_bit=51, number_of_bit=5
+define rx_hist_min_eye_width=56:63; 	 #start_bit=56, number_of_bit=8
+define rx_hist_min_eye_height_valid=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_hist_min_eye_height_mode=49:50; 	 #start_bit=49, number_of_bit=2
+define rx_hist_min_eye_height_lane=51:55; 	 #start_bit=51, number_of_bit=5
+define rx_hist_min_eye_height=56:63; 	 #start_bit=56, number_of_bit=8
+define rx_servo_status=48:63; 	 #start_bit=48, number_of_bit=16
+define rx_servo_chg_cnt=48:51; 	 #start_bit=48, number_of_bit=4
+define rx_scan_p_0_15=48:63; 	 #start_bit=48, number_of_bit=16
+define rx_scan_p_16_23=48:55; 	 #start_bit=48, number_of_bit=8
+define rx_scan_n_0_15=48:63; 	 #start_bit=48, number_of_bit=16
+define rx_scan_n_16_23=48:55; 	 #start_bit=48, number_of_bit=8
+define rx_ber_count=48:58; 	 #start_bit=48, number_of_bit=11
+define rx_ber_count_saturated=59:59; 	 #start_bit=59, number_of_bit=1
+define rx_ber_count_frozen_by_err_cnt=60:60; 	 #start_bit=60, number_of_bit=1
+define rx_ber_count_frozen_by_timer=61:61; 	 #start_bit=61, number_of_bit=1
+define rx_ber_timer_saturated=62:62; 	 #start_bit=62, number_of_bit=1
+define rx_ber_timer_value_0_15=48:63; 	 #start_bit=48, number_of_bit=16
+define rx_ber_timer_value_16_31=48:63; 	 #start_bit=48, number_of_bit=16
+#define #rx_ber_timer_value_32_39=48:55; 	 #start_bit=48, number_of_bit=8
+define rx_pg_datasm_spare_mode_0=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_pg_datasm_spare_mode_1=49:49; 	 #start_bit=49, number_of_bit=1
+define rx_pg_datasm_spare_mode_2=50:50; 	 #start_bit=50, number_of_bit=1
+define rx_pg_datasm_spare_mode_3=51:51; 	 #start_bit=51, number_of_bit=1
+define rx_pg_datasm_spare_mode_4=52:52; 	 #start_bit=52, number_of_bit=1
+define rx_pg_datasm_spare_mode_5=53:53; 	 #start_bit=53, number_of_bit=1
+define rx_pg_datasm_spare_mode_6=54:54; 	 #start_bit=54, number_of_bit=1
+define rx_pg_datasm_spare_mode_7=55:55; 	 #start_bit=55, number_of_bit=1
+define rx_pb_clr_par_errs=62:62; 	 #start_bit=62, number_of_bit=1
+define rx_pb_fir_reset=63:63; 	 #start_bit=63, number_of_bit=1
+define rx_pb_fir_errs_full_reg=48:57; 	 #start_bit=48, number_of_bit=10
+define rx_pb_fir_errs=48:57; 	 #start_bit=48, number_of_bit=10
+define rx_pb_fir_err_pb_regs=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_pb_fir_err_gcr_buff0=49:49; 	 #start_bit=49, number_of_bit=1
+define rx_pb_fir_err_gcr_buff1=50:50; 	 #start_bit=50, number_of_bit=1
+define rx_pb_fir_err_gcr_buff2=51:51; 	 #start_bit=51, number_of_bit=1
+define rx_pb_fir_err_gcrs_ld_sm0=52:52; 	 #start_bit=52, number_of_bit=1
+define rx_pb_fir_err_gcrs_ld_sm1=53:53; 	 #start_bit=53, number_of_bit=1
+define rx_pb_fir_err_gcrs_ld_sm2=54:54; 	 #start_bit=54, number_of_bit=1
+define rx_pb_fir_err_gcrs_unld_sm0=55:55; 	 #start_bit=55, number_of_bit=1
+define rx_pb_fir_err_gcrs_unld_sm1=56:56; 	 #start_bit=56, number_of_bit=1
+define rx_pb_fir_err_gcrs_unld_sm2=57:57; 	 #start_bit=57, number_of_bit=1
+define rx_pb_fir_errs_mask_full_reg=48:57; 	 #start_bit=48, number_of_bit=10
+define rx_pb_fir_errs_mask=48:57; 	 #start_bit=48, number_of_bit=10
+define rx_pb_fir_err_mask_pb_regs=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_pb_fir_err_mask_gcr_buff0=49:49; 	 #start_bit=49, number_of_bit=1
+define rx_pb_fir_err_mask_gcr_buff1=50:50; 	 #start_bit=50, number_of_bit=1
+define rx_pb_fir_err_mask_gcr_buff2=51:51; 	 #start_bit=51, number_of_bit=1
+define rx_pb_fir_err_mask_gcrs_ld_sm0=52:52; 	 #start_bit=52, number_of_bit=1
+define rx_pb_fir_err_mask_gcrs_ld_sm1=53:53; 	 #start_bit=53, number_of_bit=1
+define rx_pb_fir_err_mask_gcrs_ld_sm2=54:54; 	 #start_bit=54, number_of_bit=1
+define rx_pb_fir_err_mask_gcrs_unld_sm0=55:55; 	 #start_bit=55, number_of_bit=1
+define rx_pb_fir_err_mask_gcrs_unld_sm1=56:56; 	 #start_bit=56, number_of_bit=1
+define rx_pb_fir_err_mask_gcrs_unld_sm2=57:57; 	 #start_bit=57, number_of_bit=1
+define rx_pb_fir_errs_inj_full_reg=48:57; 	 #start_bit=48, number_of_bit=10
+define rx_pb_fir_errs_inj=48:57; 	 #start_bit=48, number_of_bit=10
+define rx_pb_fir_err_inj_pb_regs=48:48; 	 #start_bit=48, number_of_bit=1
+define rx_pb_fir_err_inj_gcr_buff0=49:49; 	 #start_bit=49, number_of_bit=1
+define rx_pb_fir_err_inj_gcr_buff1=50:50; 	 #start_bit=50, number_of_bit=1
+define rx_pb_fir_err_inj_gcr_buff2=51:51; 	 #start_bit=51, number_of_bit=1
+define rx_pb_fir_err_inj_gcrs_ld_sm0=52:52; 	 #start_bit=52, number_of_bit=1
+define rx_pb_fir_err_inj_gcrs_ld_sm1=53:53; 	 #start_bit=53, number_of_bit=1
+define rx_pb_fir_err_inj_gcrs_ld_sm2=54:54; 	 #start_bit=54, number_of_bit=1
+define rx_pb_fir_err_inj_gcrs_unld_sm0=55:55; 	 #start_bit=55, number_of_bit=1
+define rx_pb_fir_err_inj_gcrs_unld_sm1=56:56; 	 #start_bit=56, number_of_bit=1
+define rx_pb_fir_err_inj_gcrs_unld_sm2=57:57; 	 #start_bit=57, number_of_bit=1
+define tx_mode1_pl=010000000; 	       #080
+define tx_mode2_pl=010000001; 	       #081
+define tx_cntl_stat1_pl=010000010; 	       #082
+define tx_cntl_stat2_pl=010000011; 	       #083
+define tx_fir_pl=010000100; 	       #084
+define tx_fir_mask_pl=010000101; 	       #085
+define tx_fir_error_inject_pl=010000110; 	       #086
+define tx_spare_mode_pl=010000111; 	       #087
+define tx_mode_pg=110000000; 	       #180
+define tx_spare_mode_pg=110000001; 	       #181
+define tx_id1_pg=110000010; 	       #182
+define tx_ffe_mode_pg=110000011; 	       #183
+define tx_ffe_total_2Rstep_en_pg=110000100; 	       #184
+define tx_ffe_pre_2Rstep_sel_pg=110000101; 	       #185
+define tx_ffe_margin_2Rstep_sel_pg=110000110; 	       #186
+define tx_ber_cntl_a_pg=110000111; 	       #187
+define tx_ber_cntl_b_pg=110001000; 	       #188
+define tx_ber_cntl_pg=110001001; 	       #189
+define tx_cntl_pg=110001100; 	       #18C
+define tx_stat_pg=110100000; 	       #1A0
+define tx_fir_reset_pg=110100001; 	       #1A1
+define tx_fir_pg=110100010; 	       #1A2
+define tx_fir_mask_pg=110100011; 	       #1A3
+define tx_fir_error_inject_pg=110100100; 	       #1A4
+define tx_ctl_sm_spare_mode_pg=110100111; 	       #1A7
+define tx_ioreset_vec_0_15_pg=110100101; 	       #1A5
+define tx_ioreset_vec_16_23_pg=110100110; 	       #1A6
+define tx_impcal_pb=111100000; 	       #1E0
+define tx_impcal_nval_pb=111100001; 	       #1E1
+define tx_impcal_pval_pb=111100010; 	       #1E2
+define tx_impcal_p_4x_pb=111100011; 	       #1E3
+define tx_impcal_swo1_pb=111100100; 	       #1E4
+define tx_impcal_swo2_pb=111100101; 	       #1E5
+define tx_analog_iref_pb=111100110; 	       #1E6
+define tx_minikerf_pb=111100111; 	       #1E7
+define spare_mode_pb=111101000; 	       #1E8
+define rx_data_dac_spare_mode_pl=000011110; 	       #01E
+define rx_bank_controls_pl=000011111; 	       #01F
+define rx_a_dac_cntl_pl=000000001; 	       #001
+define rx_a_offset_even_pl=000000010; 	       #002
+define rx_a_offset_odd_pl=000000011; 	       #003
+define rx_a_integ_dac_pl=000000100; 	       #004
+define rx_a_ctle_pl=000000101; 	       #005
+define rx_a_h1_pl=000000110; 	       #006
+define rx_amp_val_pl=000000111; 	       #007
+define rx_b_dac_cntl_pl=000100001; 	       #021
+define rx_b_offset_even_pl=000100010; 	       #022
+define rx_b_offset_odd_pl=000100011; 	       #023
+define rx_b_integ_dac_pl=000100100; 	       #024
+define rx_b_ctle_pl=000100101; 	       #025
+define rx_b_h1_pl=000100110; 	       #026
+define rx_e_dac_cntl_pl=000110001; 	       #031
+define rx_e_offset_pl=000110010; 	       #032
+define rx_e_integ_dac_pl=000110100; 	       #034
+define rx_e_ctle_pl=000110101; 	       #035
+define rx_mode_pl=001000000; 	       #040
+define rx_cntl_pl=001000001; 	       #041
+define rx_pr_mode_pl=001000010; 	       #042
+define rx_pr_cntl_pl=001000011; 	       #043
+define rx_pr_cntl2_pl=001000100; 	       #044
+define rx_pr_status1_pl=001000101; 	       #045
+define rx_pr_status2_pl=001000110; 	       #046
+define rx_spare_mode_pl=001000111; 	       #047
+define rx_fir_pl=001001000; 	       #048
+define rx_fir_mask_pl=001001001; 	       #049
+define rx_fir_error_inject_pl=001001010; 	       #04A
+define rx_pr_timers_pl=001001110; 	       #04E
+define rx_pr_status3_pl=001001111; 	       #04F
+define rx_pr_status4_pl=001010000; 	       #050
+define rx_pr_trace_pl=001010001; 	       #051
+define rx_training_stat_pl=001110000; 	       #070
+define rx_training_stat2_pl=001110001; 	       #071
+define rx_data_work_spare_mode_pl=001110010; 	       #072
+define rx_id1_pg=100000000; 	       #100
+define rx_lane_disabled_vec_0_15_pg=100000001; 	       #101
+define rx_lane_disabled_vec_16_23_pg=100000010; 	       #102
+define rx_mode1_pg=100000011; 	       #103
+define rx_mode2_pg=100000100; 	       #104
+define rx_spare_mode_pg=100000101; 	       #105
+define rx_eo_step_cntl_pg=100000110; 	       #106
+define rx_rc_step_cntl_pg=100000111; 	       #107
+define rx_timeout_sel1_pg=100001000; 	       #108
+define rx_timeout_sel2_pg=100001001; 	       #109
+define rx_servo_to1_pg=100001010; 	       #10A
+define rx_servo_to2_pg=100001011; 	       #10B
+define rx_servo_to3_pg=100001100; 	       #10C
+define rx_dfe_config1_pg=100001101; 	       #10D
+define rx_dfe_config2_pg=100001110; 	       #10E
+define rx_dfe_config3_pg=100001111; 	       #10F
+define rx_dfe_config4_pg=100010000; 	       #110
+define rx_amax_pg=100010001; 	       #111
+#define #rx_amp_offset_pg=100010001; 	       #111
+define rx_amp_filter_mask_pg=100101100; 	       #12C
+define rx_user_filter_mask_pg=100101111; 	       #12F
+define rx_amp_start_val_pg=100010010; 	       #112
+define rx_eo_config_pg=100010011; 	       #113
+define rx_result_chk_pg=100010100; 	       #114
+define rx_ber_chk_pg=100010101; 	       #115
+define rx_trace_1_pg=100010110; 	       #116
+define rx_trace_2_pg=100010111; 	       #117
+define rx_trace_3_pg=100011000; 	       #118
+define rx_trace_4_pg=100011001; 	       #119
+define rx_minikerf_pg=100011010; 	       #11A
+define rx_misc_analog_pg=100011011; 	       #11B
+define rx_ber_mode_pg=100011100; 	       #11C
+define rx_timeout_sel4_pg=100101101; 	       #12D
+define rx_dfe_converge_pg=100101110; 	       #12E
+define rx_cal_lane_enc_gcrmsg_pg=100110000; 	       #130
+define rx_stop_cntl_stat_pg=100110001; 	       #131
+define rx_servo_hndshk_pg=100110010; 	       #132
+define rx_servo_result_pg=100110011; 	       #133
+define rx_bist_cntl_pg=100110100; 	       #134
+define rx_bist_cntl2_pg=100110101; 	       #135
+define rx_bist_stat_pg=100110110; 	       #136
+define rx_dactest_cntl1_pg=101001100; 	       #14C
+define rx_dactest_cntl2_pg=101001101; 	       #14D
+define rx_hist_eye_width_pg=101001110; 	       #14E
+define rx_hist_eye_height_pg=101001111; 	       #14F
+define rx_run_lane_vec_0_15_pg=100110111; 	       #137
+define rx_run_lane_vec_16_23_pg=100111000; 	       #138
+define rx_recal_abort_vec_0_15_pg=100111001; 	       #139
+define rx_recal_abort_vec_16_23_pg=100111010; 	       #13A
+define rx_ioreset_vec_0_15_pg=100111011; 	       #13B
+define rx_ioreset_vec_16_23_pg=100111100; 	       #13C
+define rx_eo_recal_pg=101010000; 	       #150
+define rx_func_state_pg=101010001; 	       #151
+define rx_fir_reset_pg=101010010; 	       #152
+define rx_fir1_pg=101010011; 	       #153
+define rx_fir1_mask_pg=101010100; 	       #154
+define rx_fir1_error_inject_pg=101010101; 	       #155
+define rx_fir_training_pg=101010110; 	       #156
+define rx_fir_training_mask_pg=101010111; 	       #157
+define rx_recal_cnt_pg=101100100; 	       #164
+#define #rx_last_ctle_gain_pg=101100101; 	       #165
+define rx_dactest_status_pg=101100101; 	       #165
+define rx_glbsm_spare_mode_pg=101100110; 	       #166
+define rx_misc_config_pg=101100111; 	       #167
+define rx_init_done_vec_0_15_pg=101011000; 	       #158
+define rx_init_done_vec_16_23_pg=101011001; 	       #159
+define rx_lane_busy_vec_0_15_pg=101100000; 	       #160
+define rx_lane_busy_vec_16_23_pg=101100001; 	       #161
+define rx_datasm_cntl_pg=101110000; 	       #170
+define rx_ber_status_pg=101110001; 	       #171
+define rx_ber_timer_0_15_pg=101110010; 	       #172
+define rx_ber_timer_16_31_pg=101110011; 	       #173
+define rx_ber_timer_32_39_pg=101110100; 	       #174
+define rx_data_pipe_0_15_pg=101110101; 	       #175
+define rx_data_pipe_16_31_pg=101110110; 	       #176
+define rx_datasm_spare_mode_pg=101110111; 	       #177
+define rx_servo_status_pg=101111000; 	       #178
+define rx_servo_chg_cnt_pg=101111001; 	       #179
+define rx_scan_p_0_15_pg=101111010; 	       #17A
+define rx_scan_p_16_23_pg=101111011; 	       #17B
+define rx_scan_n_0_15_pg=101111100; 	       #17C
+define rx_scan_n_16_23_pg=101111101; 	       #17D
+define rx_fir_reset_pb=111110000; 	       #1F0
+define rx_fir_pb=111110001; 	       #1F1
+define rx_fir_mask_pb=111110010; 	       #1F2
+define rx_fir_error_inject_pb=111110011; 	       #1F3
+define rx_fir_msg_pb=111111111; 	       #1FF
+define xbus0_gcr_addr=0401103F;
+define xbus1_gcr_addr=0401143F;
+define xbus2_gcr_addr=04011C3F;
+define xbus3_gcr_addr=0401183F;
+define nvbus_gcr_addr=08010C3F;
+define rx_grp0=000000;        # 0x00
+define rx_grp1=000001;        # 0x01
+define rx_grp2=000010;        # 0x02
+define rx_grp3=000011;        # 0x03
+define tx_grp0=100000;        # 0x20
+define tx_grp1=100001;        # 0x21
+define tx_grp2=100010;        # 0x22
+define tx_grp3=100011;        # 0x23
+define lane_na=00000;         # 0x00
+define lane_0=00000;
+define lane_1=00001;
+define lane_2=00010;
+define lane_3=00011;
+define lane_4=00100;
+define lane_5=00101;
+define lane_6=00110;
+define lane_7=00111;
+define lane_8=01000;
+define lane_9=01001;
+define lane_10=01010;
+define lane_11=01011;
+define lane_12=01100;
+define lane_13=01101;
+define lane_14=01110;
+define lane_15=01111;
+define lane_16=10000;
+define lane_17=10001;
+define lane_18=10010;
+define lane_19=10011;
+define lane_20=10100;
+define lane_21=10101;
+define lane_22=10110;
+define lane_23=10111;
+define rx_prbs_tap_id_pattern_a=0b0000000000000000;
+define rx_prbs_tap_id_pattern_b=0b0010000000000000;
+define rx_prbs_tap_id_pattern_c=0b0100000000000000;
+define rx_prbs_tap_id_pattern_d=0b0110000000000000;
+define rx_prbs_tap_id_pattern_e=0b1000000000000000;
+define rx_prbs_tap_id_pattern_f=0b1010000000000000;
+define rx_prbs_tap_id_pattern_g=0b1100000000000000;
+define rx_prbs_tap_id_pattern_h=0b1110000000000000;
+define tx_prbs_tap_id_pattern_a=0b0000000000000000;
+define tx_prbs_tap_id_pattern_b=0b0010000000000000;
+define tx_prbs_tap_id_pattern_c=0b0100000000000000;
+define tx_prbs_tap_id_pattern_d=0b0110000000000000;
+define tx_prbs_tap_id_pattern_e=0b1000000000000000;
+define tx_prbs_tap_id_pattern_f=0b1010000000000000;
