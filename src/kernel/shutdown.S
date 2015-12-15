@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2015
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -107,10 +109,9 @@ kernel_shutdown_ea0_1_mode:
         ;// Perform barrier - 2
     KERNEL_BARRIER(r8, r3, r11)
 
-        ;// Update HRMOR on master.
-    mfspr r10, PIR
-    andi. r10, r10, 7
-    bne+ 1f
+    ;// Update HRMOR -- since in EA[0] =1, going to just have all
+    ;// threads update HRMOR so we don't have to know about
+    ;// fused/normal core differences
     mtspr HRMOR, r4
 1:
         ;// Perform barrier - 3
