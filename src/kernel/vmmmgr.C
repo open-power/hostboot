@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -132,7 +132,7 @@ void VmmManager::initPartitionTable()
 
     // Init the PTCR reg
     // PATB, PATS = 0 (4k table)
-    setPTCR( reinterpret_cast<uint64_t>(g_patb) );
+    setPTCR( reinterpret_cast<uint64_t>(g_patb) + getHRMOR() );
 }
 
 void VmmManager::initSDR1()
