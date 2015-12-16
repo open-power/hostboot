@@ -506,12 +506,13 @@ sub addTOCInfo
     my $other_idx = 0;
     my $sideShift = 0;
     my @all_tocs;
-    foreach my $sideId (keys %{$$i_pnorLayout{metadata}{sides}})
+    foreach my $sideId (sort keys %{$$i_pnorLayout{metadata}{sides}})
     {
         push @all_tocs, $$i_pnorLayout{metadata}{sides}{$sideId}{toc}{primary};
         push @all_tocs, $$i_pnorLayout{metadata}{sides}{$sideId}{toc}{backup};
     }
-    foreach my $sideId ( keys %{$$i_pnorLayout{metadata}{sides}} )
+    # sort sides so we write A,B not B,A
+    foreach my $sideId (sort keys %{$$i_pnorLayout{metadata}{sides}} )
     {
         my $physicalRegionSize = $$i_pnorLayout{metadata}{tocSize};
         my $backup_part = "BACKUP_PART";
@@ -524,7 +525,9 @@ sub addTOCInfo
         #This is used to search for all the TOCs in PnorRP code. The idea is to create a link between the tocs such that
         #if we can find one valid TOC, then we can look at its  BACKUP_PART entry or OTHER_SIDE entry in the TOC to
         #determine the location of backup TOC.Each TOC has only one BACKUP_PART entry and one OTHER_SIDE entry.
-        foreach my $toc (keys %{$$i_pnorLayout{metadata}{sides}{$sideId}{toc}})
+        #
+        # reverse sort is used to sort "primary,backup" rather than "backup,primary"
+        foreach my $toc (reverse sort keys %{$$i_pnorLayout{metadata}{sides}{$sideId}{toc}})
         {
             #adding backup_part
             my $toc_offset    = $$i_pnorLayout{metadata}{sides}{$sideId}{toc}{$toc};
