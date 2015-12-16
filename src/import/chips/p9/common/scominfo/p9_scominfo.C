@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -150,6 +150,7 @@ extern "C"
                 break;
 
             default:
+                l_scom.set_addr(FAILED_TRANSLATION);
                 break;
         }
 
