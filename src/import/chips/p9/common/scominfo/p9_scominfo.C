@@ -156,6 +156,7 @@ extern "C"
                 break;
 
             default:
+                l_scom.set_addr(FAILED_TRANSLATION);
                 break;
         }
 
