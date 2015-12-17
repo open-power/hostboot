@@ -1,12 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/bootloader.ld $                                           */
+/* $Source: src/bootloader/bl_pnor_utils.C $                              */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2015,2016                        */
-/* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,72 +22,38 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-base_load_address = 0x00000000;
-/* @TODO-RTC:138273-Support multiple nodes using relative HRMOR */
-/* Text section offset = 12KB (space reserved for exception vectors)      */
-text_load_address = 0x00003000;
 
-SECTIONS
+#include <bootloader/bootloader.H>
+
+#define bl_pnor_utils_C
+
+#include <stdio.h>
+#include <endian.h>
+
+int strcmp(const char *str1, const char *str2)
 {
-    . = base_load_address;
-
-    . = text_load_address;
-    .text ALIGN(0x0020): {
-        *(.text.intvects)
-        *(.text.bootloaderasm)
-        *(.text)
-        *(.text._*)
-        *(.text.*)
+    for(uint32_t strcmp_index = 0;
+        strcmp_index < 12;
+        strcmp_index++)
+    {
+        if((str1[strcmp_index] == '\0') && (str2[strcmp_index] == '\0'))
+        {
+            return 0;
+        }
+        else if(str1[strcmp_index] ==  str2[strcmp_index])
+        {
+            continue;
+        }
+        else
+        {
+            return 1;
+        }
     }
-
-    .rodata ALIGN(0x8): {
-        __minimum_data_start_addr = ALIGN(0x1000);
-        ctor_start_address = .;
-        *(.ctors)
-        *(.ctors.*)
-        ctor_end_address = .;
-        *(.rodata)
-        *(.rodata.*)
-        . = ALIGN(8);
-        toc_load_address = .;
-        *(.toc)
-        *(.opd)
-        *(.got)
-        *(.plt)
-        *(.data.rel.ro.*)
-        *(.data.*traceData_codeInfo*)
-
-        . = __minimum_data_start_addr > . ? __minimum_data_start_addr : .;
-    }
-
-    .data ALIGN(0x8): {
-        data_load_address = .;
-        *(.data)
-        *(.data.*)
-
-        *(.bss)
-        *(.bss.*)
-
-    }
-
-    end_load_address = .;
-
-    .rela : {
-        *(.rela.*)
-    }
-
-    .dynsym : { *(.dynsym) }
-    .dynstr : { *(.dynstr) }
-    .hash : { *(.hash) }
-    .gnu.hash : { *(.gnu.hash) }
-    .eh_frame : { *(.eh_frame) }
-
-    /DISCARD/ : {
-        *(.comment)
-        *(.gnu.attributes)
-        *(.dtors)
-        *(.interp)
-    }
+    return 0;
 }
+
+#include <pnor_utils.C>
+
+#undef bl_pnor_utils_C
 
 

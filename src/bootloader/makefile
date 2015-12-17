@@ -24,8 +24,16 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../..
 
+EXTRAINCDIR += ${ROOTPATH}/src/usr/pnor/
+EXTRAINCDIR += ${ROOTPATH}/src/usr/lpc/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/pnor/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/lpc/
+
 OBJS += bl_start.o
 OBJS += bootloader.o
+OBJS += bl_pnorAccess.o
+OBJS += bl_pnor_utils.o
 OBJS += bl_pnor_ecc.o
 OBJS += bl_builtins.o
 

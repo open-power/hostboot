@@ -29,9 +29,9 @@
 #include <stdio.h>
 #include <endian.h>
 
-#include <usr/pnor/ecc.H>
+#include <ecc.H>
 
-#include <../usr/pnor/ecc.C>
+#include <ecc.C>
 
 #undef bl_pnor_ecc_C
 
