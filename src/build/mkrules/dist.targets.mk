@@ -98,7 +98,7 @@ COPY_RENAME_FILES = \
     makefile:src/build/mkrules/hbfw/makefile:fsp\
     img/makefile:src/build/mkrules/hbfw/img/makefile:fsp \
     hbicore.bin:img/hbicore$(UNDERSCORE_TEST).bin:vpo \
-    img/bootloader.bin:img/bootloader.bin:fsp,openpower \
+    img/hostboot_bootloader.bin:img/hbibl.bin:fsp,openpower \
     img/hostboot.bin:img/hbicore$(UNDERSCORE_TEST).bin:fsp,openpower \
     img/hostboot_extended.bin:img/hbicore$(UNDERSCORE_TEST)_extended.bin:fsp,openpower \
     img/hostboot_runtime.bin:img/hbirt$(UNDERSCORE_TEST).bin:fsp,openpower \
@@ -109,6 +109,9 @@ COPY_RENAME_FILES = \
     hbirt.syms:img/hbicore$(UNDERSCORE_TEST).syms:tools,vpo,openpower \
     hbirt.list.bz2:img/hbirt$(UNDERSCORE_TEST).list.bz2:tools,vpo,openpower \
     hbirt.bin.modinfo:img/hbirt$(UNDERSCORE_TEST).bin.modinfo:tools,vpo,openpower \
+    hbibl.syms:img/hbibl.syms:tools,vpo,openpower \
+    hbibl.list.bz2:img/hbibl.list.bz2:tools,vpo,openpower \
+    hbibl.bin.modinfo:img/hbibl.bin.modinfo:tools,vpo,openpower \
     $(foreach file, $(call ROOTPATH_WILDCARD,src/build/debug/Hostboot/*.pm), \
 	Hostboot/$(notdir $(file)):$(file):tools,vpo,openpower)
 
@@ -177,6 +180,9 @@ simics.tar_CONTENTS = \
     img/hbirt$(UNDERSCORE_TEST).syms \
     img/hbirt$(UNDERSCORE_TEST).list.bz2 \
     img/hbirt$(UNDERSCORE_TEST).bin.modinfo \
+    img/hbibl.syms \
+    img/hbibl.list.bz2 \
+    img/hbibl.bin.modinfo \
     img/errlparser \
     img/isteplist.csv \
     img/hbotStringFile \

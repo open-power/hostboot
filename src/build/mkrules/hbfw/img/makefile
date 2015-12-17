@@ -51,7 +51,9 @@ ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
 # Having external users acquire from OBJ dir as there are packaging
 # changes expected in the future which will require using OBJ version.
 #################################################
-BOOTLDR_IMAGE = bootloader.bin
+BOOTLDR_IMAGE = hostboot_bootloader.bin
+HBBL_IMAGE = hbbl.bin
+HBBL_ECC_IMAGE = hbbl.bin.ecc
 BASE_IMAGE = hostboot.bin
 EXT_IMAGE =  hostboot_extended.bin
 EXT_FAKE_IMAGE = hostboot_extended.bin.fake
@@ -59,7 +61,7 @@ HBRT_IMAGE = hostboot_runtime.bin
 HBRT_SHA_IMAGE = hostboot_runtime.sha.bin
 HBRT_HEADER_IMAGE = hostboot_runtime.header.bin
 HBRT_ECC_HEADER_IMAGE = hostboot_runtime.header.bin.ecc
-BASE_IMAGES = ${BASE_IMAGE} ${EXT_IMAGE} ${HBRT_IMAGE}
+BASE_IMAGES = ${BASE_IMAGE} ${EXT_IMAGE} ${HBRT_IMAGE} ${BOOTLDR_IMAGE}
 BASE_W_HEADER_IMAGE = hostboot.header.bin
 BASE_W_HEADER_ECC_IMAGE = hostboot.header.bin.ecc
 BASE_ECC_IMAGE = hostboot.bin.ecc
@@ -92,6 +94,7 @@ ALL_HB_IMAGES = ${BASE_IMAGES} \
                 ${EXT_PAD_IMAGE} \
                 ${EXT_SHA_IMAGE} ${EXT_HEADER_IMAGE} \
                 ${EXT_ECC_HEADER_IMAGE} \
+                ${BOOTLDR_IMAGE} ${HBBL_IMAGE} ${HBBL_ECC_IMAGE} \
                 ${TESTDATA} ${TESTDATA_ECC} \
                 ${HBEL_ECC_IMAGE} ${GUARD_ECC_IMAGE} ${GLOBAL_ECC_IMAGE} \
                 ${DJVPD_ECC_IMAGE} ${MVPD_ECC_IMAGE} ${CVPD_ECC_IMAGE} \
@@ -174,6 +177,11 @@ cp_hbfiles: .SPECTARG
 	dd if=/dev/zero bs=20480K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
 	ecc --inject ${TEMP_IMAGE} --output ${PAYLOAD_ECC_IMAGE} --p8
 	rm ${TEMP_IMAGE}
+        # Remove offset from start of Bootloader image for HBBL partition
+        # Actual code is offset from HRMOR by 12k = 12 1k-blocks (space
+        # reserved for exception vectors)
+	dd if=${BOOTLDR_IMAGE} of=${HBBL_IMAGE} ibs=1k skip=12 conv=sync
+	ecc --inject ${HBBL_IMAGE} --output ${HBBL_ECC_IMAGE} --p8
 
 clobber_cp_hbfiles:
 	rm -f ${ALL_HB_IMAGES} \
@@ -250,7 +258,7 @@ PNOR_BUILD_SCRIPT = ${buildpnor.pl:P}
 #so need to use tryinclude for now.
 .tryinclude <${.PATH:Ffips_pnor.mk}>
 
-HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_W_HEADER_ECC_IMAGE},HBI=${EXT_ECC_HEADER_IMAGE},HBRT=${HBRT_ECC_HEADER_IMAGE},TEST=${TESTDATA_ECC},TESTRO=${TESTDATA_ECC},HBEL=${HBEL_ECC_IMAGE},GUARD=${GUARD_ECC_IMAGE},GLOBAL=${GLOBAL_ECC_IMAGE},PAYLOAD=${PAYLOAD_ECC_IMAGE},CVPD=${CVPD_ECC_IMAGE},MVPD=${MVPD_ECC_IMAGE},DJVPD=${DJVPD_ECC_IMAGE}
+HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_W_HEADER_ECC_IMAGE},HBI=${EXT_ECC_HEADER_IMAGE},HBRT=${HBRT_ECC_HEADER_IMAGE},HBBL=${HBBL_ECC_IMAGE},TEST=${TESTDATA_ECC},TESTRO=${TESTDATA_ECC},HBEL=${HBEL_ECC_IMAGE},GUARD=${GUARD_ECC_IMAGE},GLOBAL=${GLOBAL_ECC_IMAGE},PAYLOAD=${PAYLOAD_ECC_IMAGE},CVPD=${CVPD_ECC_IMAGE},MVPD=${MVPD_ECC_IMAGE},DJVPD=${DJVPD_ECC_IMAGE}
 HOSTBOOT_FAKEPNOR_SECTIONS = HBI=${EXT_FAKE_IMAGE},HBEL=${HBEL_IMAGE},MVPD=${MVPD_IMAGE},DJVPD=${DJVPD_IMAGE}
 
 
@@ -351,7 +359,7 @@ clobber_build_pnor_images:
 #Special target to copy images to flash dir for simics
 #################################################
 FLASH_DEST = $(MAKETOP)$(OBJECTDIRTOP)../images/$(CONTEXT)/lab/flash
-FLASH_IMG = ${BASE_IMAGE} ${BASE_ECC_IMAGE} ${BOOTLDR_IMAGE}
+FLASH_IMG = ${BASE_IMAGE} ${BASE_ECC_IMAGE} ${HBBL_IMAGE}
 FAKE_PNOR = fake6m.pnor
 
 update_images_for_sandbox: inject_ecc build_sbe_partitions build_pnor_images

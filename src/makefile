@@ -37,7 +37,7 @@ SUBDIRS += runtime.d
 
 # Reducing HB extended img size for VPO by disabling certain libs using
 # CONFIG_VPO_COMPILE option
-IMGS += bootloader
+IMGS += hbibl
 IMGS += hbicore
 IMGS += hbicore_test
 IMGS += hbirt
@@ -64,6 +64,8 @@ BL_BASE_OBJECTS += bl_builtins.o
 
 BOOTLDR_OBJECTS += bl_start.o
 BOOTLDR_OBJECTS += bootloader.o
+BOOTLDR_OBJECTS += bl_pnorAccess.o
+BOOTLDR_OBJECTS += bl_pnor_utils.o
 BOOTLDR_OBJECTS += bl_pnor_ecc.o
 
 DIRECT_BOOT_OBJECTS += start.o
@@ -281,9 +283,9 @@ RUNTIME_TESTCASE_MODULES += testpnor_rt
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 
-bootloader_OBJECTS += ${BL_BASE_OBJECTS}
-bootloader_OBJECTS += ${BOOTLDR_OBJECTS}
-bootloader_LDFILE = bootloader.ld
+hbibl_OBJECTS += ${BL_BASE_OBJECTS}
+hbibl_OBJECTS += ${BOOTLDR_OBJECTS}
+hbibl_LDFILE = bootloader.ld
 
 hbicore_OBJECTS += ${BASE_OBJECTS}
 hbicore_OBJECTS += ${DIRECT_BOOT_OBJECTS}
@@ -337,6 +339,12 @@ $(IMGDIR)/hbotStringFile : $(IMAGES)
 #make sure base image isn't over 508k  (512K - 4K for secure header)
 #PROCESS: get size of hbicore.bin, sort with respect to 508k (520192), then see if
 #last word is 508k.  If not, the base image is too big.
+#make sure bootloader image isn't over 32k (32K = 12K for exception vectors +
+#20K for bootloader code and data)
+#PROCESS: get size of hbibl.bin, sort with respect to 32k (32768),
+#then see if last word is 32k.  If not, the bootloader image is too big.
 MAX_BASE_SIZE = 520192
-imgsizecheck: ${IMGDIR}/hbicore.bin
+MAX_BTLDR_SIZE = 32768
+imgsizecheck: ${IMGDIR}/hbicore.bin ${IMGDIR}/hbibl.bin
 	$(if $(findstring $(shell (stat -c%s ${IMGDIR}/hbicore.bin; echo $(MAX_BASE_SIZE)) | sort -n | tail -n1), $(MAX_BASE_SIZE)),true, @echo ERROR: ${IMGDIR}/hbicore.bin too large.  Max allowed size is $(MAX_BASE_SIZE); false)
+	$(if $(findstring $(shell (stat -c%s ${IMGDIR}/hbibl.bin; echo $(MAX_BTLDR_SIZE)) | sort -n | tail -n1), $(MAX_BTLDR_SIZE)),true, @echo ERROR: ${IMGDIR}/hbibl.bin too large.  Max allowed size is $(MAX_BTLDR_SIZE); false)

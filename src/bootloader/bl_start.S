@@ -41,7 +41,6 @@ _start:
     mtsrr1 r2
     li r2, _start_postmsr@l
     mtsrr0 r2
-    b _start_postmsr
 
 _start_postmsr:
 
@@ -59,63 +58,6 @@ _start_postmsr:
     bne 1b ;// Loop until sucessful at stwcx.
     isync
 
-    b _main
-
-
-/* @TODO RTC:133821 might not be needed
-    ;// Relocate code
-    bl pre_relocate     ;// fill LR with address
-pre_relocate:
-    mflr r2
-    lis r1,0x0010
-    cmpl cr0,r2,r1              ;// Check LR is less than 1MB
-    blt finished_relocate       ;// No need to relocate if less than 1MB
-
-    ;// Get addresses for relocation.
-    ;// Write address in r5
-    ;// Read address in r1
-    li r5,0
-    lis r1, -1  ;// fill r1 with ffff..ff0000
-
-    and r1,r1,r2 ;// and with pre_relocate's address from r2 to get start of
-                 ;// rom section.
-
-    ;// Update LR to low address.
-    clrldi r2,r2,48  ;// Equiv to ~(0x0FFFF)
-    mtlr 2
-
-    ;// Moving 1MB , so load r2 with (1MB / 8 bytes per word)
-    lis r2, 0x2
-    mtctr r2
-relocate_loop:
-    ;// The dcbst/sync/icbi/isync sequence comes from PowerISA
-    ld r4, 0(r1)
-    std r4, 0(r5)
-    dcbst 0,r5
-    sync
-    icbi 0,r5
-    isync
-    addi r1,r1,8
-    addi r5,r5,8
-    bdnz+ relocate_loop
-
-    ;// Now that we've relocated, erase exception prefix.
-    mfmsr r11
-
-    rldicl r11,r11,57,1  ;// Erase bit 6 ( equiv to r11 & ~(0x40))
-    rotldi r11,r11,7
-
-    mtmsr r11
-
-    ;// Jump to low address.
-    blr
-
-finished_relocate:
-    ;// Jump to main.
-    b _main
-@TODO RTC:133821 might not be needed */
-
-
 ;// _main:
 ;//     Set up stack and TOC and call kernel's main.
 _main:
@@ -124,10 +66,22 @@ _main:
     ori r2, r2, main@l
     ld r2,8(r2)
 
-    ;// Set up initial stack, space for 8 double-words
-    lis r1, kernel_stack@h
-    ori r1, r1, kernel_stack@l
-    addi r1, r1, 16320
+    ;// Set up initial stack just before scratch space at 64k offset into HBBL
+    lis r1, _start@h
+    addis r1, r1, 1 ;// 64k (1 * 0x10000)
+
+    ;// Zero space from end of load to bottom of stack
+    lis r3, end_load_address@h
+    ori r3, r3, end_load_address@l
+    li r4, 7
+    add r3, r3, r4
+    andc r3, r3, r4
+    li r4, 0
+_zero_space_loop:
+    std r4, 0(r3)
+    addi r3, r3, 8
+    cmpld cr7, r3, r1
+    blt cr7, _zero_space_loop
 
     ;// Call main.
     bl main
@@ -161,22 +115,76 @@ task_end_stub:
     sc
 
 
+    ;// @fn enterHBB
+    ;// Leave the Bootloader and switch to the Hostboot Base (HBB).
+    ;//
+    ;// Steps:
+    ;//     Retrieve existing HRMOR.
+    ;//     Determine physical address of EA[0]=1 mode instruction.
+    ;//     Jump to enter EA[0]=1 mode.
+    ;//     Update HRMOR.
+    ;//     Execute isync.
+    ;//     Enter Hostboot Base (HBB).
+    ;//
+    ;// @param[in] r3 - Hostboot HRMOR
+    ;// @param[in] r4 - Hostboot Entry
+    ;//
+.global enterHBB
+enterHBB:
+        ;// Set R10 to 0x8000000000000000 so we can set "EA[0]=1" for addrs.
+    li r10, 1
+    rotldi r10, r10, 63
+
+        ;// Retrieve existing HRMOR.
+    mfspr r0, HRMOR
+
+        ;// Determine physical address of EA[0]=1 mode instruction.
+    lis r9, switchToHBB@h
+    ori r9, r9, switchToHBB@l
+    or r9, r9, r0       ;// Apply HRMOR.
+    or r9, r9, r10      ;// Apply EA[0]=1.
+
+        ;// Jump to enter EA[0]=1
+    mtlr r9
+    blr
+
+switchToHBB:
+        ;// Update HRMOR
+    mtspr HRMOR, r3
+
+        ;// Execute isync
+    isync
+
+        ;// Enter Hostboot Base (HBB).
+    mtsrr0 r4
+    rfid
+
+
 .section .data
 
-    .balign 1024
-kernel_stack:
-    .space 4*1024
-
     .balign 8
-.global data_sandbox
-data_sandbox:
-    .space 64
-
 .global kernel_other_thread_spinlock
 kernel_other_thread_spinlock:
     .space 8
 
-.global g_blScratchSpace
-g_blScratchSpace:
-    .space 8
+    ;// @name bootloader_trace_index
+    ;// @brief Index for Bootloader Trace entries
+    ;// One-byte index for next entry to use in bootloader_trace.
+.global bootloader_trace_index
+bootloader_trace_index:
+    .space 1
 
+    .balign 16
+    ;// @name bootloader_trace
+    ;// @brief Buffer for Bootloader Trace data
+    ;// Buffer with bootloader trace entries.  There are 64 one-byte entries
+    ;// in the buffer.  They are used to track events that have occurred in
+    ;// the bootloader code.  After all entries have been used, the buffer
+    ;// wraps and the oldest entry is overwritten by the newest trace data.
+.global bootloader_trace
+bootloader_trace:
+    .space 64
+
+.global bootloader_hbbSection
+bootloader_hbbSection:
+    .space 32
