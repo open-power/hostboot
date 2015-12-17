@@ -35,6 +35,7 @@
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
+#include "p9_mss_draminit_training.H"
 
 using fapi2::TARGET_TYPE_MCBIST;
 
