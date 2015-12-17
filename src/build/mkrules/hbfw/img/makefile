@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2015
+# Contributors Listed Below - COPYRIGHT 2012,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -51,6 +51,7 @@ ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
 # Having external users acquire from OBJ dir as there are packaging
 # changes expected in the future which will require using OBJ version.
 #################################################
+BOOTLDR_IMAGE = bootloader.bin
 BASE_IMAGE = hostboot.bin
 EXT_IMAGE =  hostboot_extended.bin
 EXT_FAKE_IMAGE = hostboot_extended.bin.fake
@@ -58,7 +59,7 @@ HBRT_IMAGE = hostboot_runtime.bin
 HBRT_SHA_IMAGE = hostboot_runtime.sha.bin
 HBRT_HEADER_IMAGE = hostboot_runtime.header.bin
 HBRT_ECC_HEADER_IMAGE = hostboot_runtime.header.bin.ecc
-BASE_IMAGES = ${BASE_IMAGE} ${EXT_IMAGE} ${HBRT_IMAGE}
+BASE_IMAGES = ${BASE_IMAGE} ${EXT_IMAGE} ${HBRT_IMAGE} ${BOOTLDR_IMAGE}
 BASE_W_HEADER_IMAGE = hostboot.header.bin
 BASE_W_HEADER_ECC_IMAGE = hostboot.header.bin.ecc
 BASE_ECC_IMAGE = hostboot.bin.ecc
@@ -397,12 +398,12 @@ clobber_build_pnor_images:
 #Special target to copy images to flash dir for simics
 #################################################
 FLASH_DEST = $(MAKETOP)$(OBJECTDIRTOP)../images/$(CONTEXT)/lab/flash
-FLASH_IMG = ${BASE_IMAGE} ${BASE_ECC_IMAGE}
+FLASH_IMG = ${BASE_IMAGE} ${BASE_ECC_IMAGE} ${BOOTLDR_IMAGE}
 FAKE_PNOR = fake6m.pnor
 
 update_images_for_sandbox: inject_ecc build_sbe_partitions build_pnor_images
 	mkdir -p ${FLASH_DEST}
-	#Copy hostboot base image to flash dir
+	#Copy hostboot base image and bootloader image to flash dir
 	${FLASH_IMG:@image@${baseimg:!cd ${FLASH_DEST}; cp -f ${.PATH:F${image}} ${image};!e}@}
 	#Truncate fake pnor image down to 6MB and copy to flash dir
 	${FAKE_PNOR_IMG_INFO:@image@${pnorimg:!dd if=${image:s/:/ /g:xs/ .*//} of=${FAKE_PNOR} bs=6M count=1; \

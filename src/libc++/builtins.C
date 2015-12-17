@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,6 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#ifndef bl_builtins_C
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -58,6 +59,7 @@ void operator delete[](void* p)
 {
     return free(p);
 };
+#endif // bl_builtins_C
 
 extern "C" int __cxa_guard_acquire(volatile uint64_t* gv)
 {
@@ -91,6 +93,7 @@ extern "C" void __cxa_guard_release(volatile uint64_t* gv)
     return;
 }
 
+#ifndef bl_builtins_C
 extern "C" void __cxa_pure_virtual()
 {
     // TODO: Add better code for invalid pure virtual call.
@@ -162,6 +165,6 @@ extern "C" int __cxa_atexit(void (*i_dtor)(void*),
     }
     return 0;
 }
-
+#endif // bl_builtins_C
 
 

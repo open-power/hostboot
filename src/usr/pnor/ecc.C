@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,11 +22,13 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#ifndef bl_pnor_ecc_C
 #include <stdio.h>
 #include <endian.h>
 #include <assert.h>
 
 #include <pnor/ecc.H>
+#endif
 
 namespace PNOR
 {
@@ -168,6 +172,7 @@ namespace ECC
         return badBit;
     }
 
+#ifndef bl_pnor_ecc_C
     void injectECC(const uint8_t* i_src, size_t i_srcSz,
                    uint8_t* o_dst)
     {
@@ -187,6 +192,7 @@ namespace ECC
             o_dst[o + sizeof(uint64_t)] = ecc;
         }
     }
+#endif
 
     eccStatus removeECC(uint8_t* io_src,
                         uint8_t* o_dst, size_t i_dstSz)

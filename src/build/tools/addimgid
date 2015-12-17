@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2011,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -30,6 +30,12 @@ my $imageIdSym = "hbi_ImageId";
 
 my $img = shift;
 my $src = shift;
+
+if(($img =~ /.*bootloader.*/) || ($src =~ /.*bootloader.*/))
+{
+    # @TODO RTC:135747 Add version/id tag to binary
+    exit $?
+}
 
 my $imgBase = $img;
 $imgBase =~ s/.*\///;
