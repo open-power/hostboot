@@ -29,6 +29,7 @@
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
+#include "p9_mss_attr_update.H"
 
 using fapi2::TARGET_TYPE_MCS;
 using fapi2::FAPI2_RC_SUCCESS;
