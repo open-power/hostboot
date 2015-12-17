@@ -26,6 +26,7 @@
 
 ROOTPATH = ..
 
+SUBDIRS += bootloader.d
 SUBDIRS += kernel.d
 SUBDIRS += lib.d
 SUBDIRS += libc++.d
@@ -36,6 +37,7 @@ SUBDIRS += runtime.d
 
 # Reducing HB extended img size for VPO by disabling certain libs using
 # CONFIG_VPO_COMPILE option
+IMGS += bootloader
 IMGS += hbicore
 IMGS += hbicore_test
 IMGS += hbirt
@@ -57,6 +59,13 @@ BASE_OBJECTS += tls.o
 ifdef HOSTBOOT_PROFILE
 BASE_OBJECTS += gcov.o
 endif
+
+BL_BASE_OBJECTS += bl_builtins.o
+
+BOOTLDR_OBJECTS += bl_start.o
+BOOTLDR_OBJECTS += bootloader.o
+BOOTLDR_OBJECTS += bl_pnor_ecc.o
+
 DIRECT_BOOT_OBJECTS += start.o
 DIRECT_BOOT_OBJECTS += kernel.o
 DIRECT_BOOT_OBJECTS += taskmgr.o
@@ -270,10 +279,15 @@ RUNTIME_TESTCASE_MODULES += testpnor_rt
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 
+bootloader_OBJECTS += ${BL_BASE_OBJECTS}
+bootloader_OBJECTS += ${BOOTLDR_OBJECTS}
+bootloader_LDFILE = bootloader.ld
+
 hbicore_OBJECTS += ${BASE_OBJECTS}
 hbicore_OBJECTS += ${DIRECT_BOOT_OBJECTS}
 hbicore_MODULES += ${BASE_MODULES}
 hbicore_EXTENDED_MODULES += ${EXTENDED_MODULES}
+hbicore_LDFILE = kernel.ld
 
 # for PRDR_RULE_TABLE_TARGETS
 include ${ROOTPATH}/src/usr/diag/prdf/common/framework/rule/prdf_rule.mk
@@ -286,6 +300,7 @@ hbicore_test_DATA_MODULES += testdata
 ifndef SKIP_BINARY_FILES
 hbicore_test_DATA_MODULES += test_signed_container
 endif
+hbicore_test_LDFILE = kernel.ld
 
 hbirt_OBJECTS += ${RUNTIME_OBJECTS}
 hbirt_OBJECTS += ${BASE_OBJECTS}
@@ -293,12 +308,14 @@ hbirt_MODULES += ${RUNTIME_MODULES}
 hbirt_DATA_MODULES += ${RUNTIME_DATA_MODULES}
 hbirt_DATA_MODULES += $(if $(CONFIG_HBRT_PRD),$(prd_rule_prf_targets))
 hbirt_LDFLAGS = ${RELOCATABLE_IMAGE_LDFLAGS}
+hbirt_LDFILE = kernel.ld
 
 hbirt_test_OBJECTS += ${hbirt_OBJECTS}
 hbirt_test_MODULES += ${hbirt_MODULES}
 hbirt_test_MODULES += ${RUNTIME_TESTCASE_MODULES}
 hbirt_test_DATA_MODULES += ${hbirt_DATA_MODULES}
 hbirt_test_LDFLAGS = ${RELOCATABLE_IMAGE_LDFLAGS}
+hbirt_test_LDFILE = kernel.ld
 
 IMAGE_PASS_POST += buildpnor
 IMAGE_PASS_POST += imgsizecheck

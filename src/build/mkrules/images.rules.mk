@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -37,11 +37,12 @@ CLEAN_TARGETS += $(addsuffix .lnkout.bz2, $(addprefix $(IMGDIR)/., $(IMGS)))
 
 define ELF_template
 $$(IMGDIR)/$(1).elf: $$(addprefix $$(OBJDIR)/, $$($(1)_OBJECTS)) \
-                     $$(ROOTPATH)/src/kernel.ld
+                     $$(ROOTPATH)/src/$$($(1)_LDFILE)
 	$$(C2) "    LD         $$(notdir $$@)"
 	$$(C1)$$(LD) -static $$(LDFLAGS) $$($$*_LDFLAGS) \
                      $$(addprefix $$(OBJDIR)/, $$($(1)_OBJECTS)) \
-                     $$($(1)_LDFLAGS) -T $$(ROOTPATH)/src/kernel.ld -o $$@
+                     $$($(1)_LDFLAGS) -T $$(ROOTPATH)/src/$$($(1)_LDFILE) \
+                     -o $$@
 endef
 $(foreach img,$(IMGS),$(eval $(call ELF_template,$(img))))
 
