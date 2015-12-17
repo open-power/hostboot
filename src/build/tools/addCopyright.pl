@@ -1129,7 +1129,7 @@ sub getFileContributors
     my %fileContributors = ();
 
     # Check file for company Origin
-    my $gitDomain = `git log --follow -- $filename | grep Origin: | sort | uniq`;
+    my $gitDomain = `git log --follow --find-copies-harder -C85% -M85% -- $filename | grep Origin: | sort | uniq`;
     my @gitDomain = split('\n', $gitDomain);
     foreach my $origin (@gitDomain)
     {
@@ -1146,7 +1146,7 @@ sub getFileContributors
     }
 
     # Check file for all contributors
-    my $gitAuthors = `git log --follow --pretty="%aN <%aE>" -- $filename | sort | uniq`;
+    my $gitAuthors = `git log --follow --find-copies-harder -C85% -M85% --pretty="%aN <%aE>" -- $filename | sort | uniq`;
     my @gitAuthors = split('\n', $gitAuthors);
 
     # Add current commiter.
