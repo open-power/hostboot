@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdSpareDramData.C,v 1.7 2014/10/23 21:00:12 eliner Exp $
+// $Id: getMBvpdSpareDramData.C,v 1.8 2015/12/16 16:23:45 janssens Exp $
 #include  <stdint.h>
 
 //  fapi support
@@ -33,6 +33,18 @@
 extern "C"
 {
 using namespace fapi;
+
+/**
+ * @brief Function to check if the system has Custom DIMM type (CDIMM).
+ * @param[in] i_tgtHandle   Reference to MBA target
+ * @param[o]  o_customDimm  Return value - ENUM_ATTR_SPD_CUSTOM_NO
+ *                                      or ENUM_ATTR_SPD_CUSTOM_YES
+ * @return ReturnCode
+ */
+fapi::ReturnCode getDimmType(const fapi::Target &i_tgtHandle,
+                             uint8_t &o_customDimm);
+
+
 
 fapi::ReturnCode getMBvpdSpareDramData(const fapi::Target &i_mba,
                                        uint8_t (&o_data)[DIMM_DQ_MAX_MBA_PORTS]
@@ -82,7 +94,7 @@ fapi::ReturnCode getMBvpdSpareDramData(const fapi::Target &i_mba,
     {
         uint8_t l_customDimm = 0;
 
-        l_rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM,&i_mba,l_customDimm);
+        l_rc = getDimmType(i_mba,l_customDimm);
         if(l_rc)
         {
             FAPI_ERR("getMBvpdSpareDramData: Read of Custom Dimm failed");
@@ -90,7 +102,7 @@ fapi::ReturnCode getMBvpdSpareDramData(const fapi::Target &i_mba,
         }
 
         //if custom_dimm = 0, use isdimm
-        if(fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_NO == l_customDimm)
+        if(fapi::ENUM_ATTR_SPD_CUSTOM_NO == l_customDimm)
         {
             //ISDIMMs do not have any spare drams,
             //return 0 for all ports and ranks.
@@ -185,5 +197,49 @@ fapi::ReturnCode getMBvpdSpareDramData(const fapi::Target &i_mba,
     l_pAmBuffer = NULL;
     return l_rc;
 }
+
+
+
+fapi::ReturnCode getDimmType(const fapi::Target &i_tgtHandle,
+                             uint8_t &o_customDimm)
+{
+    fapi::ReturnCode          l_rc;
+
+    do
+    {
+        o_customDimm = fapi::ENUM_ATTR_SPD_CUSTOM_NO;
+
+        std::vector<fapi::Target> l_target_dimm_array;
+
+        l_rc =  fapiGetAssociatedDimms(i_tgtHandle, l_target_dimm_array);
+
+        if(l_rc)
+        {
+            FAPI_ERR("Error (0x%x), from fapiGetAssociatedDimms",
+                    static_cast<uint32_t>(l_rc));
+            break;
+        }
+
+        if(0 != l_target_dimm_array.size())
+        {
+            l_rc = FAPI_ATTR_GET(ATTR_SPD_CUSTOM,
+                    &l_target_dimm_array[0],
+                    o_customDimm);
+            if(l_rc)
+            {
+                FAPI_ERR("Error (0x%x), from FAPI_ATTR_GET",
+                        static_cast<uint32_t>(l_rc));
+                break;
+            }
+        }
+        else
+        {
+            o_customDimm = fapi::ENUM_ATTR_SPD_CUSTOM_NO;
+        }
+    }while(0);
+
+    return l_rc;
+}
+
 
 }  // extern "C"
