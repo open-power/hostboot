@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +41,7 @@
 #include <initservice/initsvcstructs.H>
 
 // This constant has a corresponding entry in src/build/tools/listdeps.pl.
-#define MAX_DEPENDENT_MODULES   9
+#define MAX_DEPENDENT_MODULES   10
 
 
 namespace   INITSERVICE

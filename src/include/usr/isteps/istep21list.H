@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -122,6 +122,7 @@ const DepModInfo  g_istep21Dependancies = {
         DEP_LIB(libistep21.so),
         DEP_LIB(libdevtree.so),
         DEP_LIB(libruntime.so),
+        DEP_LIB(libxz.so),
         NULL
     }
 };

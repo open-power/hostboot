@@ -67,5 +67,6 @@ SUBDIRS += errldisplay.d
 SUBDIRS += ipmi.d
 #SUBDIRS += htmgt.d
 SUBDIRS += diag.d
+SUBDIRS += xz.d
 
 include ${ROOTPATH}/config.mk

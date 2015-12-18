@@ -170,6 +170,7 @@ EXTENDED_MODULES += $(if $(CONFIG_GPIODD),gpio,)
 EXTENDED_MODULES += $(if $(CONFIG_CONSOLE),console)
 EXTENDED_MODULES += $(if $(CONFIG_CONSOLE_OUTPUT_ERRORDISPLAY),errldisplay)
 EXTENDED_MODULES += $(if $(CONFIG_BMC_IPMI),ipmi)
+EXTENDED_MODULES += xz
 
 
 #***************************************
