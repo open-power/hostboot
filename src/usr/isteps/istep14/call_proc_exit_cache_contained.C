@@ -287,6 +287,77 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
 
             printk("Cache contained mode has been exited.\n");
             // End of Add P9 - Fake trigger for memory expansion
+
+            //Set PSI and FSP BARs, activate the PSI link BAR
+            uint64_t psi = l_masterProc->getAttr<ATTR_PSI_BRIDGE_BASE_ADDR>();
+            uint64_t fsp = l_masterProc->getAttr<ATTR_FSP_BASE_ADDR>();
+            psi |= 0x1; //turn on enable bit for PSI, FSP is in PSI Init HWP
+
+            l_errl = deviceWrite( l_masterProc,
+                                  &psi,
+                                  scom_size,
+                                  DEVICE_SCOM_ADDRESS(0x0501290a) );
+            if ( l_errl )
+            {
+                // Create IStep error log and cross reference to error that
+                // occurred
+                l_stepError.addErrorDetails( l_errl );
+
+                // Commit Error
+                errlCommit( l_errl, HWPF_COMP_ID );
+            }
+
+            l_errl = deviceWrite( l_masterProc,
+                                  &fsp,
+                                  scom_size,
+                                  DEVICE_SCOM_ADDRESS(0x0501290b) );
+            if ( l_errl )
+            {
+                // Create IStep error log and cross reference to error that
+                // occurred
+                l_stepError.addErrorDetails( l_errl );
+
+                // Commit Error
+                errlCommit( l_errl, HWPF_COMP_ID );
+            }
+
+            //Need to default TOD registers to reasonable value
+            // aggregate scom data to write
+            uint64_t l_tod_data[] = {
+                0x40001, 0x0008008007000000,
+                0x40002, 0x8000000000000000,
+                0x40003, 0x0008008000000000,
+                0x40004, 0x8000000000000000,
+                0x40005, 0x0800c30000000000,
+                0x40008, 0x03e6600000000000,
+                0x40010, 0x003f000000000000,
+                0x40013, 0x8000000000000000,
+                0x40000, 0x4083000000000000,
+                0x40007, 0x6920000000000000,
+            };
+
+            for(uint8_t i = 0;
+                i < (sizeof(l_tod_data) / sizeof(uint64_t));
+                i+=2)
+            {
+                l_errl = deviceWrite( l_masterProc,
+                                      &(l_tod_data[i+1]),
+                                      scom_size,
+                                      DEVICE_SCOM_ADDRESS(l_tod_data[i]) );
+                if( l_errl ) { break; }
+            }
+
+            if ( l_errl )
+            {
+                // Create IStep error log and cross reference to error that
+                // occurred
+                l_stepError.addErrorDetails( l_errl );
+
+                // Commit Error
+                errlCommit( l_errl, HWPF_COMP_ID );
+            }
+
+            printk("Fake TOD Initialized\n");
 #endif
             // @TODO RTC:134082 remove above block
 
