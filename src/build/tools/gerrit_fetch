@@ -1,0 +1,81 @@
+#!/usr/bin/perl
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/build/tools/gerrit_fetch $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2015
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+use strict;
+use Getopt::Long qw(:config pass_through);
+use Data::Dumper;
+# Include custom modules
+use lib "$ENV{'PERLMODULES'}";
+use ToolInit;
+use GitUtil;
+
+# Grab initial globals from ToolInit module
+my %globals = init_globals;
+my $commit = "";
+
+GetOptions("commit:s" => \$commit,
+           "branch:s" => \$globals{branch});
+
+if ($module_script eq "")
+{
+    die "Don't call modelTool directly, run through module script";
+}
+if ($help)
+{
+    execute_help();
+}
+elsif($commit ne "")
+{
+    my $git_root = GitUtil::root();
+    GitUtil::fetch($git_root,
+                   GitUtil::remote($git_root,$globals{gerrit_project}),
+                   $commit, $globals{gerrit_project}, $globals{branch}, 1);
+}
+else
+{
+    die "Missing commit" if ($commit eq "");
+}
+
+############################## Begin Actions ##################################
+
+sub execute_help
+{
+    print "  Usage:\n";
+    print "      $module_script gerrit_fetch [options]\n";
+    print "\n  Tool to allow developers to fetch commits from gerrit via\n";
+    print "  Change-id or commit number\n";
+    print "\n";
+    print "  Options:\n";
+    print "      --commit=<commit>  Commit or change-id to fetch [required].\n";
+    print "      --branch=<name>    Branch in $globals{gerrit_project} [optional].\n";
+    print "  Global options:\n";
+    print "      --debug     Enable debug mode.\n";
+    print "      --help      Display help on a specific tool.\n";
+    print "  Note: Generally a <commit> can be any git or gerrit reference\n";
+    print "        A git commit number, tag, branch, or a gerrit change-id\n";
+    print "        are all valid, but they must exist in the gerrit server\n";
+
+}
