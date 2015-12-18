@@ -5,9 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
-# [+] International Business Machines Corp.
+# Contributors Listed Below - COPYRIGHT 2012,2015
 # [+] Google Inc.
+# [+] International Business Machines Corp.
 #
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -52,7 +52,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/pstates/pstates
 ##  NOTE: add new object files when you add a new HWP
 OBJS += start_payload.o
 
-        
+
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 ##  EXAMPLE:
 #   VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/start_payload/<HWP_dir>

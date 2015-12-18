@@ -102,6 +102,7 @@ const DepModInfo  g_istep21Dependancies = {
         DEP_LIB(libmc_config.so),
 #endif
 #endif
+        DEP_LIB(libxz.so),
         NULL
     }
 };

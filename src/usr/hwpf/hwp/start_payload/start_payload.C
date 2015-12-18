@@ -89,6 +89,7 @@
 #include    <ipmi/ipmiwatchdog.H>
 #include    <vpd/vpd_if.H>
 
+#include    <xz/xz.h>
 
 //  Uncomment these files as they become available:
 // #include    "host_start_payload/host_start_payload.H"
