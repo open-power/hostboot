@@ -38,7 +38,8 @@ use File::Find ();
 use File::Path;
 use Cwd;
 
-use constant MAX_DEPENDENT_MODULES => 9;
+# This constant has a corresponding entry in src/include/usr/initservice/initsvcstructs.H.
+use constant MAX_DEPENDENT_MODULES => 10;
 
 # validate the number of input args
 if( $#ARGV == -1 || $#ARGV > 4 )

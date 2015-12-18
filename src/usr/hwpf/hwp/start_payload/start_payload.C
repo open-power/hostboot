@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -89,6 +89,7 @@
 #include    <ipmi/ipmiwatchdog.H>
 #include    <vpd/vpd_if.H>
 
+#include    <xz/xz.h>
 
 //  Uncomment these files as they become available:
 // #include    "host_start_payload/host_start_payload.H"
