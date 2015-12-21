@@ -21,6 +21,5 @@ try {
     }
 } except { echo "ERROR: Failed to load tools in combined.simics." }
 
-system_cmp0.cpu0_0_00_0.disable
 
 
