@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/thread_activate/thread_activate.C $          */
+/* $Source: src/usr/isteps/istep06/thread_activate/thread_activate.C $    */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,23 +37,25 @@
 #include    <stdint.h>
 
 #include    <initservice/taskargs.H>
+#include    <initservice/initserviceif.H> // @TODO RTC:149103 @TODO RTC:134077
 #include    <errl/errlentry.H>
 
 #include    <devicefw/userif.H>
 #include    <sys/misc.h>
 #include    <sys/mm.h>
-#include    <proc_thread_control.H>
+#include    <p9_thread_control.H>
+#include    <arch/pirformat.H>
 
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 
 //  fapi support
-#include    <fapi.H>
-#include    <fapiPlatHwpInvoker.H>
-#include    <hwpf/plat/fapiPlatTrace.H>
-#include    <isteps/hwpf_reasoncodes.H>
-#include    "p8_cpu_special_wakeup.H"
+#include    <fapi2.H>
+#include    <fapi2_target.H>
+#include    <plat_hwp_invoker.H>
+#include    <istep_reasoncodes.H>
+#include    <p9_cpu_special_wakeup.H>
 
 #include    <pnor/pnorif.H>
 #include    <vpd/mvpdenums.H>
@@ -116,41 +118,14 @@ bool getCacheDeconfig(uint64_t i_masterCoreId)
         case 0x5:
             theRecord = MVPD::LRP5;
             break;
-        case 0x6:
-            theRecord = MVPD::LRP6;
-            break;
-        case 0x7:
-            theRecord = MVPD::LRP7;
-            break;
-        case 0x8:
-            theRecord = MVPD::LRP8;
-            break;
-        case 0x9:
-            theRecord = MVPD::LRP9;
-            break;
-        case 0xA:
-            theRecord = MVPD::LRPA;
-            break;
-        case 0xB:
-            theRecord = MVPD::LRPB;
-            break;
-        case 0xC:
-            theRecord = MVPD::LRPC;
-            break;
-        case 0xD:
-            theRecord = MVPD::LRPD;
-            break;
-        case 0xE:
-            theRecord = MVPD::LRPE;
-            break;
         default:
             TRACFCOMP( g_fapiImpTd,
                        "getCacheDeconfig: No MVPD Record for core 0x%.8X",
                        i_masterCoreId);
             /*@
              * @errortype
-             * @moduleid     fapi::MOD_GET_CACHE_DECONFIG
-             * @reasoncode   fapi::RC_INVALID_RECORD
+             * @moduleid     ISTEP::MOD_GET_CACHE_DECONFIG
+             * @reasoncode   ISTEP::RC_INVALID_RECORD
              * @userdata1    Master Core Number
              * @userdata2    Master processor chip huid
              * @devdesc      getCacheDeconfig> Master core is not mapped
@@ -159,8 +134,8 @@ bool getCacheDeconfig(uint64_t i_masterCoreId)
              *               of the system.
              */
             l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                             fapi::MOD_GET_CACHE_DECONFIG,
-                                             fapi::RC_INVALID_RECORD,
+                                             ISTEP::MOD_GET_CACHE_DECONFIG,
+                                             ISTEP::RC_INVALID_RECORD,
                                              i_masterCoreId,
                                              TARGETING::get_huid(l_procTarget));
             break;
@@ -172,14 +147,34 @@ bool getCacheDeconfig(uint64_t i_masterCoreId)
                           theSize,
                           DEVICE_MVPD_ADDRESS( theRecord,
                                                theKeyword ) );
+
+        // @TODO RTC:149103 Special case to work around MVPD with LPR1 to LPR6
+        uint64_t workAroundRecord = theRecord;
+        while( l_errl && (0x0 == i_masterCoreId) &&
+               (++workAroundRecord <= MVPD::LRP5) )
+        {
+            TRACFCOMP( g_fapiImpTd,
+                       "getCacheDeconfig: Use LPR work around for core 0x%.8X, "
+                       "substitute LRP%ld for LRP%ld",
+                       i_masterCoreId, workAroundRecord - MVPD::LRP0,
+                       theRecord - MVPD::LRP0);
+            delete l_errl;
+            l_errl = deviceRead(l_procTarget,
+                                NULL,
+                                theSize,
+                                DEVICE_MVPD_ADDRESS( workAroundRecord,
+                                                     theKeyword ) );
+            if( l_errl == NULL ) { theRecord = workAroundRecord; }
+        }
+
         if( l_errl ) { break; }
 
         if(theSize != 1)
         {
             /*@
              * @errortype
-             * @moduleid     fapi::MOD_GET_CACHE_DECONFIG
-             * @reasoncode   fapi::RC_INCORRECT_KEWORD_SIZE
+             * @moduleid     ISTEP::MOD_GET_CACHE_DECONFIG
+             * @reasoncode   ISTEP::RC_INCORRECT_KEWORD_SIZE
              * @userdata1    Master Core Number
              * @userdata2    CH Keyword Size
              * @devdesc      getCacheDeconfig> LRPx Record, CH keyword
@@ -188,8 +183,8 @@ bool getCacheDeconfig(uint64_t i_masterCoreId)
              *               of the system.
              */
             l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                             fapi::MOD_GET_CACHE_DECONFIG,
-                                             fapi::RC_INCORRECT_KEWORD_SIZE,
+                                             ISTEP::MOD_GET_CACHE_DECONFIG,
+                                             ISTEP::RC_INCORRECT_KEWORD_SIZE,
                                              i_masterCoreId,
                                              theSize);
             break;
@@ -220,10 +215,10 @@ bool getCacheDeconfig(uint64_t i_masterCoreId)
 
     if(NULL != l_errl)
     {
-        //TODO: We may not be able to run with only 4MB
+        // We may not be able to run with only 4MB
         // in the long run so need to revist this after
         // we no longer have to deal with parital good
-        // bringup chips.  RTC: 60620
+        // bringup chips.  TODO: RTC: 60620
 
         //Not worth taking the system down, just assume
         //we only have half the cache available.
@@ -231,6 +226,9 @@ bool getCacheDeconfig(uint64_t i_masterCoreId)
         cacheDeconfig = true;
     }
 
+    TRACFCOMP( g_fapiImpTd,
+               "Exiting getCacheDeconfig, cacheDeconfig=%d",
+               cacheDeconfig);
     return cacheDeconfig;
 }
 
@@ -256,7 +254,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
     TARGETING::TargetHandleList l_coreTargetList;
     TARGETING::getChildChiplets( l_coreTargetList,
                                  l_masterProc,
-                                 TARGETING::TYPE_EX,
+                                 TARGETING::TYPE_CORE,
                                  false);
 
     // find the core/thread we're running on
@@ -265,9 +263,8 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
     uint64_t cpuid = task_getcpuid();
     task_affinity_unpin();
 
-    //NNNCCCPPPPTTT
-    uint64_t l_masterCoreID = (cpuid & 0x0078)>>3;
-    uint64_t l_masterThreadID = (cpuid & 0x0007);
+    uint64_t l_masterCoreID = PIR_t::coreFromPir(cpuid);
+    uint64_t l_masterThreadID = PIR_t::threadFromPir(cpuid);
 
     const TARGETING::Target* l_masterCore = NULL;
     for( TARGETING::TargetHandleList::const_iterator
@@ -293,9 +290,9 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
                        l_masterCoreID );
             /*@
              * @errortype
-             * @moduleid     fapi::MOD_THREAD_ACTIVATE
-             * @reasoncode   fapi::RC_NO_MASTER_CORE_TARGET
-             * @userdata1    Master cpu id (NNNCCCPPPPTTT)
+             * @moduleid     ISTEP::MOD_THREAD_ACTIVATE
+             * @reasoncode   ISTEP::RC_NO_MASTER_CORE_TARGET
+             * @userdata1    Master cpu id
              * @userdata2    Master processor chip huid
              * @devdesc      activate_threads> Could not find a target
              *               for the master core
@@ -303,8 +300,8 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
              *               of the system.
              */
             l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                             fapi::MOD_THREAD_ACTIVATE,
-                                             fapi::RC_NO_MASTER_CORE_TARGET,
+                                             ISTEP::MOD_THREAD_ACTIVATE,
+                                             ISTEP::RC_NO_MASTER_CORE_TARGET,
                                              cpuid,
                                              TARGETING::get_huid(l_masterProc));
             l_errl->collectTrace("TARG",256);
@@ -320,9 +317,8 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
                    TARGETING::get_huid(l_masterCore) );
 
         // cast OUR type of target to a FAPI type of target.
-        const fapi::Target l_fapiCore
-            ( fapi::TARGET_TYPE_EX_CHIPLET,
-              (const_cast<TARGETING::Target*>(l_masterCore)));
+        const fapi2::Target<fapi2::TARGET_TYPE_CORE>& l_fapiCore =
+              (const_cast<TARGETING::Target*>(l_masterCore));
 
         //  AVPs might enable a subset of the available threads
         uint64_t max_threads = cpu_thread_count();
@@ -333,18 +329,18 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
 
 
         // --------------------------------------------------------------------
-        //Enbale the special wake-up on master core(EX)
+        //Enable the special wake-up on master core
         FAPI_INF("\tEnable special wake-up on master core");
 
-        FAPI_INVOKE_HWP(l_errl, p8_cpu_special_wakeup,
+        FAPI_INVOKE_HWP(l_errl, p9_cpu_special_wakeup,
                         l_fapiCore,
-                        SPCWKUP_ENABLE,
-                        HOST);
+                        p9specialWakeup::SPCWKUP_ENABLE,
+                        p9specialWakeup::HOST);
 
         if(l_errl)
         {
             TRACFCOMP( g_fapiImpTd,
-                       "ERROR: 0x%.8X : p8_cpu_special_wakeup set HWP(cpu %d)",
+                       "ERROR: 0x%.8X : p9_cpu_special_wakeup set HWP(cpu %d)",
                        l_errl->reasonCode(),
                        l_masterCoreID);
 
@@ -353,86 +349,91 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
             break;
         }
 
+        TRACDCOMP( g_fapiTd,
+                   "activate_threads max_threads=%d, en_threads=0x%016X",
+                   max_threads, en_threads );
+
+        uint8_t thread_bitset = 0;
+        // @TODO RTC:134077 Should not need to handle zero case when
+        //                  attribute is set by intrrp
+        if( en_threads )
+        {
+            TRACFCOMP( g_fapiTd,
+                       "Handling special enable threads attribute case" );
+        }
         for( uint64_t thread = 0; thread < max_threads; thread++ )
         {
             // Skip the thread that we're running on
             if( thread == l_masterThreadID )
             {
+                TRACDCOMP( g_fapiTd,
+                           "activate_threads skip master thread=%d", thread );
+
                 continue;
             }
 
             // Skip threads that we shouldn't be starting
-            if( !(en_threads & (0x8000000000000000>>thread)) )
+            // @TODO RTC:134077 Should not need to handle zero case when
+            //                  attribute is set by intrrp
+            if( en_threads && !(en_threads & (0x8000000000000000>>thread)) )
             {
+                TRACDCOMP( g_fapiTd,
+                           "activate_threads skipping thread=%d", thread );
+
                 continue;
-            }
-
-            // send a magic instruction for PHYP Simics to work...
-            MAGIC_INSTRUCTION(MAGIC_SIMICS_CORESTATESAVE);
-
-            // parameters: i_target   => core target
-            //             i_thread   => thread (0..7)
-            //             i_command  =>
-            //               PTC_CMD_SRESET => initiate sreset thread command
-            //               PTC_CMD_START  => initiate start thread command
-            //               PTC_CMD_STOP   => initiate stop thread command
-            //               PTC_CMD_STEP   => initiate step thread command
-            //               PTC_CMD_QUERY  => query and return thread state
-            //                                 return data in o_ras_status
-            //             i_warncheck => convert pre/post checks errors to
-            //                            warnings
-            //             o_ras_status  => output: complete RAS status
-            //                                      register
-            //             o_state       => output: thread state info
-            //                               see proc_thread_control.H
-            //                               for bit enumerations:
-            //                               THREAD_STATE_*
-            ecmdDataBufferBase l_ras_status;
-            uint64_t l_thread_state;
-            FAPI_INVOKE_HWP( l_errl, proc_thread_control,
-                             l_fapiCore,      //i_target
-                             thread,          //i_thread
-                             PTC_CMD_SRESET,  //i_command
-                             false,           //i_warncheck
-                             l_ras_status,    //o_ras_status
-                             l_thread_state); //o_state
-
-            if ( l_errl != NULL )
-            {
-                TRACFCOMP( g_fapiImpTd,
-                           "ERROR: 0x%.8X :  proc_thread_control HWP"
-                           "( cpu %d, thread %d, "
-                           "ras status 0x%.16X, thread state 0x%.16X )",
-                           l_errl->reasonCode(),
-                           l_masterCoreID,
-                           thread,
-                           l_ras_status.getDoubleWord(0),
-                           l_thread_state );
-
-                l_errl->collectTrace(FAPI_TRACE_NAME,256);
-                l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
-
-                // if 1 thread fails it is unlikely that other threads will work
-                //   so we'll just jump out now
-                break;
             }
             else
             {
-                TRACFCOMP
-                    (g_fapiTd,
-                     "SUCCESS: proc_thread_control HWP( cpu %d, thread %d, "
-                     "ras status 0x%.16X,thread state 0x%.16X )",
-                     l_masterCoreID,
-                     thread,
-                     l_ras_status.getDoubleWord(0),
-                     l_thread_state );
-            }
+                TRACDCOMP( g_fapiTd,
+                           "activate_threads enabling thread=%d", thread );
 
-            TRACFCOMP( g_fapiTd,
-                       "SUCCESS: Thread c%d t%d started",
-                       l_masterCoreID,
-                       thread );
+                thread_bitset |= fapi2::thread_id2bitset(thread);
+
+            }
         }
+
+        // send a magic instruction for PHYP Simics to work...
+        MAGIC_INSTRUCTION(MAGIC_SIMICS_CORESTATESAVE);
+
+        // parameters: i_target   => core target
+        //             i_threads  => thread bitset (0b0000..0b1111)
+        //             i_command  =>
+        //               PTC_CMD_SRESET => initiate sreset thread command
+        //               PTC_CMD_START  => initiate start thread command
+        //               PTC_CMD_STOP   => initiate stop thread command
+        //               PTC_CMD_STEP   => initiate step thread command
+        //               PTC_CMD_QUERY  => query and return thread state
+        //                                 return data in o_ras_status
+        //             i_warncheck => convert pre/post checks errors to
+        //                            warnings
+//        // @TODO RTC:134077
+//        FAPI_INVOKE_HWP( l_errl, p9_thread_control,
+//                         l_fapiCore,      //i_target
+//                         thread_bitset,   //i_threads
+//                         PTC_CMD_SRESET,  //i_command
+//                         false);          //i_warncheck
+
+        if ( l_errl != NULL )
+        {
+            TRACFCOMP( g_fapiImpTd,
+                       "ERROR: 0x%.8X :  proc_thread_control HWP"
+                       "( cpu %d, thread_bitset 0x%02X )",
+                       l_errl->reasonCode(),
+                       l_masterCoreID,
+                       thread_bitset );
+
+            l_errl->collectTrace(FAPI_TRACE_NAME,256);
+            l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
+        }
+        else
+        {
+            TRACFCOMP(g_fapiTd,
+                      "SUCCESS: p9_thread_control HWP"
+                      "( cpu %d, thread_bitset 0x%02X )",
+                      l_masterCoreID,
+                      thread_bitset );
+        }
+
         if(l_errl)
         {
             break;
@@ -440,7 +441,9 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
 
         // Reclaim remainder of L3 cache if available.
         if ((!PNOR::usingL3Cache()) &&
-            (!getCacheDeconfig(l_masterCoreID)))
+             // Special case as hwsv doesn't load needed MVPD on FSP
+            ((INITSERVICE::spBaseServicesEnabled()) // @TODO RTC:149103
+             || (!getCacheDeconfig(l_masterCoreID))))
         {
             TRACFCOMP( g_fapiTd,
                        "activate_threads: Extending cache to 8MB" );

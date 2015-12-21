@@ -48,6 +48,8 @@ namespace ISTEP
         MOD_HOST_GARD                                     = 0x0C,
         MOD_EDI_EI_IO_RUN_TRAINING                        = 0x0D,
         MOD_LOAD_PAYLOAD                                  = 0x0E,
+        MOD_GET_CACHE_DECONFIG                            = 0x0F,
+        MOD_THREAD_ACTIVATE                               = 0x10,
     };
 
     /**
@@ -75,6 +77,9 @@ namespace ISTEP
         RC_MIXED_PBUS_CONNECTION                 = ISTEP_COMP_ID | 0x0F,
         RC_SAME_CHIP_PBUS_CONNECTION             = ISTEP_COMP_ID | 0x10,
         RC_CONFLICT_PBUS_CONNECTION              = ISTEP_COMP_ID | 0x11,
+        RC_INVALID_RECORD                        = ISTEP_COMP_ID | 0x12,
+        RC_INCORRECT_KEWORD_SIZE                 = ISTEP_COMP_ID | 0x13,
+        RC_NO_MASTER_CORE_TARGET                 = ISTEP_COMP_ID | 0x14,
     };
 
 };

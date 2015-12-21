@@ -34,6 +34,8 @@ OBJS += host_gard.o
 OBJS += call_proc_revert_sbe_mcs_setup.o
 OBJS += host_start_occ_xstop_handler.o
 
+SUBDIRS	+= thread_activate.d
+
 HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest
 VPATH    += ${HWP_PATH}
 
