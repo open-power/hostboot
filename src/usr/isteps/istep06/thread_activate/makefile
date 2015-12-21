@@ -1,11 +1,13 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/hwpf/hwp/thread_activate/makefile $
+# $Source: src/usr/isteps/istep06/thread_activate/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2015,2016
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,35 +26,33 @@ ROOTPATH = ../../../../..
 
 MODULE = thread_activate
 
-##      support for Targeting and fapi
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/fapi
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/plat
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
+##      support for fapi2
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 
 ## pointer to common HWP files
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/include
-
-##  NOTE: add the base istep dir here.
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/thread_activate
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/isteps/
 
 ##  Include sub dirs
 ##  NOTE: add a new EXTRAINCDIR when you add a new HWP
-##  EXAMPLE:
-##  EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/thread_activate/<HWP_dir>
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp/thread_activate/proc_thread_control
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp/utility_procedures
+HWP_PATH_1 += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/core
+HWP_PATH_2 += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm
+HWP_PATH += ${HWP_PATH_1}/ ${HWP_PATH_2}/
+EXTRAINCDIR += ${HWP_PATH}
 
 ##  NOTE: add new object files when you add a new HWP
 OBJS += thread_activate.o
-OBJS += proc_thread_control.o
 
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
-##  EXAMPLE:
-#   VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/thread_activate/<HWP_dir>
-VPATH += ${ROOTPATH}/src/usr/hwpf/hwp/thread_activate/proc_thread_control
+VPATH += ${HWP_PATH}
 
-
+include ${ROOTPATH}/procedure.rules.mk
+# p9_thread_control.o brought in by p9_thread_control.mk
+include $(HWP_PATH_1)/p9_thread_control.mk
+# p9_cpu_special_wakeup.o brought in by p9_cpu_special_wakeup.mk
+include $(HWP_PATH_2)/p9_cpu_special_wakeup.mk
 include ${ROOTPATH}/config.mk
 

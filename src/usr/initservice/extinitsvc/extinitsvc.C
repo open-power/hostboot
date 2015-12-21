@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -91,7 +93,7 @@ void ExtInitSvc::init( errlHndl_t   &io_rtaskRetErrl )
         if ( l_errl )
         {
             TRACFCOMP( g_trac_initsvc,
-                    "ERROR: task %s returned errlog=0x%p",
+                    "ERROR: task %s returned errlog=%p",
                     l_ptask->taskname,
                     l_errl );
             //  break out of loop with error.

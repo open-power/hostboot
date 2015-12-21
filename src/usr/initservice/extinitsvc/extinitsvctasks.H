@@ -262,6 +262,29 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 }
         },
 
+
+        // @todo RTC:145354 Restore testprdf and testattn in p9 branch
+        /**
+         * @brief   Start slave threads
+         */
+        {
+            "libthread_activate.so" ,               // taskname
+            NULL,                                   // no pointer to fn
+            {
+                START_TASK,                         // task type
+                EXT_IMAGE,                          // Extended Module
+            }
+        },
+        {
+            "libthread_activate.so" ,               // taskname
+            NULL,                                   // no pointer to fn
+            {
+                UNINIT_TASK,                        // task type
+                EXT_IMAGE,                          // Extended Module
+            }
+        },
+
+        // @todo RTC:137627 - remove for p9 bringup
 // No mdia in VPO
 #ifndef CONFIG_VPO_COMPILE
         /**
@@ -300,7 +323,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
                EXT_IMAGE,                         // Extended Module
             }
         },
-
 
 #ifdef CONFIG_GPIODD
         /**
