@@ -305,7 +305,7 @@ void* read_module_symbols(void* input)
         // Skip absolute values (ex. constants) and undefined symbols.
         if (strstr(line, "*ABS*") || strstr(line, "*UND*")) continue;
         // Skip section symbols (marked by 'd' in the 22nd column).
-        if ('d' == line[22]) continue;
+        if (strlen(line) > 22 && 'd' == line[22]) continue;
 
         // First part of an objdump line is the symbol address, parse that.
         uint64_t line_address;
@@ -315,14 +315,15 @@ void* read_module_symbols(void* input)
         // Determine if the symbol is a function and if it is in the .rodata
         // section.  Symbols in the .rodata section have a slightly longer
         // line than those in the .text/.data sections (by 2 characters).
-        bool is_function = ('F' == line[23]);
+        bool is_function = (strlen(line) > 23 && 'F' == line[23]);
         size_t rodata = (NULL != strstr(line, ".rodata")) ? 2 : 0;
 
         // Parse the symbol size.
         uint64_t symbol_size;
-        if (1 != sscanf(&line[32+rodata], "%lx", &symbol_size)) continue;
+        if (strlen(line) > 32+rodata && 1 != sscanf(&line[32+rodata], "%lx", &symbol_size)) continue;
 
         // Parse the function name.
+	assert(strlen(line) > 48+rodata);
         string function = &line[48+rodata];
         function.resize(function.length() - 1); // remove the newline.
 
