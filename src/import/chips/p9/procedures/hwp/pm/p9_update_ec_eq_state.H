@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,11 +37,30 @@
 
 #include <fapi2.H>
 #include <p9_misc_scom_addresses.H>
+#include <p9_perv_scom_addresses.H>
+#include <p9_quad_scom_addresses.H>
+
 
 
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_update_ec_eq_state_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
+
+
+
+namespace p9UpdateECEQ
+{
+enum P9_Update_EQ_EC_Constants
+{
+    MCGR0_CNFG_SETTINGS = 0xE000000000000000ull,        // Group 0
+    MCGR1_CNFG_SETTINGS = 0xE400000000000000ull,        // Group 1
+    MCGR2_CNFG_SETTINGS = 0xE800000000000000ull,        // Group 2
+    MCGR3_CNFG_SETTINGS = 0xEC00000000000000ull,        // Group 3
+    MCGR_CLEAR_CNFG_SETTINGS = 0xFC00000000000000ull,   // Group 7
+};
+}
+
+
 
 extern "C" {
 
