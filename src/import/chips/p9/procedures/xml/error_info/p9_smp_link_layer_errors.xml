@@ -1,0 +1,34 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/error_info/p9_smp_link_layer_errors.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015,2016                                                    -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Halt codes for p9_smp_link_layer -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_SMP_LINK_LAYER_TABLE_ERR</rc>
+    <description>
+      Procedure: p9_smp_link_layer
+      Internal procedure error.
+      No match found for X/A link in procedure data structures.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>LINK</ffdc>
+    <ffdc>LINK_ID</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>
