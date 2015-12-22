@@ -7,7 +7,7 @@
 #
 # EKB Project
 #
-# COPYRIGHT 2015
+# COPYRIGHT 2015,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -17,4 +17,5 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_chiplet_scominit
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/initfiles)
 $(call BUILD_PROCEDURE)

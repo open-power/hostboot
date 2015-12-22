@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,14 +32,13 @@
 /// the fabric quiesced)
 ///
 /// @author Joe McGill <jmcgill@us.ibm.com>
-/// @author Christy Graves <clgraves@us.ibm.com>
 ///
 
 //
 // *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
 // *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 // *HWP Team: Nest
-// *HWP Level: 1
+// *HWP Level: 2
 // *HWP Consumed by: HB,FSP
 //
 
@@ -71,7 +70,7 @@ extern "C"
 /// @brief Raise/lower iovalids for all logically enabled links on a single chip
 ///
 /// @param[in] i_target Reference to processor chip target
-/// @param[op] i_set_not_clear Define iovalid operation (true=set, false=clear)
+/// @param[in] i_set_not_clear Define iovalid operation (true=set, false=clear)
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
     fapi2::ReturnCode p9_fab_iovalid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,

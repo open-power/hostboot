@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -18,21 +18,25 @@
 /* IBM_PROLOG_END_TAG                                                     */
 ///
 /// @file p9_smp_link_layer.H
-/// @brief Enable fabric link/transaction layers (FAPI2)
+/// @brief Start SMP link layer (FAPI2)
 ///
-/// Enable fabric X/A data link (DL) and transaction (TL) layers
+/// Train fabric Data Link Layer (DLL) and Transaction Layer (TL).
 ///
-/// Procedure should enable use of link TL mailbox
+/// High level sequence:
+/// - HWP engages DLL training via SCOM
+/// - HW fires DLL link up FIR bit when finished
+/// - Link up FIR bit launches TL training, in HW
+/// - HW fires TL training done FIR bit when finished.
+///   mailbox registers should be accessible for HWP/FW use
 ///
 /// @author Joe McGill <jmcgill@us.ibm.com>
-/// @author Christy Graves <clgraves@us.ibm.com>
 ///
 
 //
 // *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
 // *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 // *HWP Team: Nest
-// *HWP Level: 1
+// *HWP Level: 2
 // *HWP Consumed by: HB,FSP
 //
 
@@ -60,7 +64,7 @@ extern "C"
 {
 
 ///
-/// @brief Enable fabric data link/transaction layers, for all logically enabled links on a single chip
+/// @brief Train fabric DLL/TL layers
 ///
 /// @param[in] i_target Reference to processor chip target
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.

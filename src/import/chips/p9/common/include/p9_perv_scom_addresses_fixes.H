@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,5 +40,23 @@
 //          RULL(0x05022800), SH_UNT, SH_ACS_SCOM,
 //          RULL(0x00090000)
 //        );
+
+static const uint64_t SH_UNT_PERV_10 = 512;
+static const uint64_t SH_UNT_PERV_11 = 513;
+
+REG64( PERV_OB1_CPLT_CONF1,
+       RULL(0x0A000009), SH_UNT_PERV_10, SH_ACS_SCOM_RW);
+REG64( PERV_OB1_CPLT_CONF1_OR,
+       RULL(0x0A000019), SH_UNT_PERV_10, SH_ACS_SCOM1_OR);
+REG64( PERV_OB1_CPLT_CONF1_CLEAR,
+       RULL(0x0A000029), SH_UNT_PERV_10, SH_ACS_SCOM2_CLEAR);
+
+REG64( PERV_OB2_CPLT_CONF1,
+       RULL(0x0B000009), SH_UNT_PERV_11, SH_ACS_SCOM_RW);
+REG64( PERV_OB2_CPLT_CONF1_OR,
+       RULL(0x0B000019), SH_UNT_PERV_11, SH_ACS_SCOM1_OR);
+REG64( PERV_OB2_CPLT_CONF1_CLEAR,
+       RULL(0x0B000029), SH_UNT_PERV_11, SH_ACS_SCOM2_CLEAR);
+
 
 #endif
