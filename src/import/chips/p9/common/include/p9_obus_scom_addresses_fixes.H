@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,5 +41,13 @@
 //          RULL(0x05022800), SH_UNT, SH_ACS_SCOM,
 //          RULL(0x00090000)
 //        );
+
+static const uint64_t SH_UNT_OBUS_1 = 514;
+static const uint64_t SH_UNT_OBUS_2 = 515;
+
+REG64( OBUS_1_LL3_IOOL_CONTROL,
+       RULL(0x0A01080B), SH_UNT_OBUS_1, SH_ACS_SCOM );
+REG64( OBUS_2_LL3_IOOL_CONTROL,
+       RULL(0x0B01080B), SH_UNT_OBUS_2, SH_ACS_SCOM );
 
 #endif
