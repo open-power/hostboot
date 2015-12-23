@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2015
+# Contributors Listed Below - COPYRIGHT 2012,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -156,18 +156,16 @@
         scomaddr    0x04011000;
         reset       (&, 0x04011001);
         mask        (|, 0x04011005);
-        capture     req funccall("isNotMuranoProc");
+        capture     req funccall("notMuranoAndXbEnabled");
         capture     group default;
-        capture     req funccall("isXBusEnabled");
     };
 
     register IOXFIR_0_MASK
     {
         name        "XBUS01.X0.BUSCTL.SCOM.FIR_MASK_REG";
         scomaddr    0x04011003;
-        capture     req funccall("isNotMuranoProc");
+        capture     req funccall("notMuranoAndXbEnabled");
         capture     group default;
-        capture     req funccall("isXBusEnabled");
     };
 
     register IOXFIR_0_ACT0
@@ -175,10 +173,9 @@
         name        "XBUS01.X0.BUSCTL.SCOM.FIR_ACTION0_REG";
         scomaddr    0x04011006;
         capture     type secondary;
-        capture     req funccall("isNotMuranoProc");
+        capture     req funccall("notMuranoAndXbEnabled");
         capture     req nonzero("IOXFIR_0");
         capture     group default;
-        capture     req funccall("isXBusEnabled");
     };
 
     register IOXFIR_0_ACT1
@@ -186,10 +183,9 @@
         name        "XBUS01.X0.BUSCTL.SCOM.FIR_ACTION1_REG";
         scomaddr    0x04011007;
         capture     type secondary;
-        capture     req funccall("isNotMuranoProc");
+        capture     req funccall("notMuranoAndXbEnabled");
         capture     req nonzero("IOXFIR_0");
         capture     group default;
-        capture     req funccall("isXBusEnabled");
     };
 
     ############################################################################
@@ -247,18 +243,16 @@
         scomaddr    0x04011C00;
         reset       (&, 0x04011C01);
         mask        (|, 0x04011C05);
-        capture     req funccall("isNotMuranoProc");
+        capture     req funccall("notMuranoAndXbEnabled");
         capture     group default;
-        capture     req funccall("isXBusEnabled");
     };
 
     register IOXFIR_2_MASK
     {
         name        "XBUS23.X1.BUSCTL.SCOM.FIR_MASK_REG";
         scomaddr    0x04011C03;
-        capture     req funccall("isNotMuranoProc");
+        capture     req funccall("notMuranoAndXbEnabled");
         capture     group default;
-        capture     req funccall("isXBusEnabled");
     };
 
     register IOXFIR_2_ACT0
@@ -266,10 +260,9 @@
         name        "XBUS23.X1.BUSCTL.SCOM.FIR_ACTION0_REG";
         scomaddr    0x04011C06;
         capture     type secondary;
-        capture     req funccall("isNotMuranoProc");
+        capture     req funccall("notMuranoAndXbEnabled");
         capture     req nonzero("IOXFIR_2");
         capture     group default;
-        capture     req funccall("isXBusEnabled");
     };
 
     register IOXFIR_2_ACT1
@@ -277,10 +270,9 @@
         name        "XBUS23.X1.BUSCTL.SCOM.FIR_ACTION1_REG";
         scomaddr    0x04011C07;
         capture     type secondary;
-        capture     req funccall("isNotMuranoProc");
+        capture     req funccall("notMuranoAndXbEnabled");
         capture     req nonzero("IOXFIR_2");
         capture     group default;
-        capture     req funccall("isXBusEnabled");
     };
 
     ############################################################################
@@ -296,18 +288,16 @@
         scomaddr    0x04011800;
         reset       (&, 0x04011801);
         mask        (|, 0x04011805);
-        capture     req funccall("isNotMuranoProc");
+        capture     req funccall("notMuranoAndXbEnabled");
         capture     group default;
-        capture     req funccall("isXBusEnabled");
     };
 
     register IOXFIR_3_MASK
     {
         name        "XBUS23.X0.XBUS1.BUSCTL.SCOM.FIR_MASK_REG";
         scomaddr    0x04011803;
-        capture     req funccall("isNotMuranoProc");
+        capture     req funccall("notMuranoAndXbEnabled");
         capture     group default;
-        capture     req funccall("isXBusEnabled");
     };
 
     register IOXFIR_3_ACT0
@@ -315,10 +305,9 @@
         name        "XBUS23.X0.XBUS1.BUSCTL.SCOM.FIR_ACTION0_REG";
         scomaddr    0x04011806;
         capture     type secondary;
-        capture     req funccall("isNotMuranoProc");
+        capture     req funccall("notMuranoAndXbEnabled");
         capture     req nonzero("IOXFIR_3");
         capture     group default;
-        capture     req funccall("isXBusEnabled");
     };
 
     register IOXFIR_3_ACT1
@@ -326,10 +315,9 @@
         name        "XBUS23.X0.XBUS1.BUSCTL.SCOM.FIR_ACTION1_REG";
         scomaddr    0x04011807;
         capture     type secondary;
-        capture     req funccall("isNotMuranoProc");
+        capture     req funccall("notMuranoAndXbEnabled");
         capture     req nonzero("IOXFIR_3");
         capture     group default;
-        capture     req funccall("isXBusEnabled");
     };
 
     ############################################################################
