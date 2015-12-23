@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1073,6 +1073,23 @@ int32_t isXBusEnabled( ExtensibleChip * i_chip, bool & o_xbusEnabled )
 }
 PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, isXBusEnabled );
 PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, isXBusEnabled );
+
+/**
+ * @brief Checks if not murano chip and XBUS is enabled
+ * @param i_chip P8 chip
+ * @param o_captureAllowed TRUE if not murano and xbus enabled
+ */
+int32_t notMuranoAndXbEnabled( ExtensibleChip * i_chip,
+                               bool & o_captureAllowed )
+{
+    o_captureAllowed =
+        ( ( MODEL_MURANO != getProcModel( i_chip->GetChipHandle() ) ) &&
+          PlatServices::isXBusEnabled(i_chip->GetChipHandle()) );
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE_NS( NaplesProc, Proc, notMuranoAndXbEnabled );
+PRDF_PLUGIN_DEFINE_NS( MuranoVeniceProc, Proc, notMuranoAndXbEnabled );
 
 } // end namespace Proc
 
