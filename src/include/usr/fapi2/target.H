@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,7 @@
 #include <fapi2_target.H>
 #include <target_types.H>
 
+
 // HB platform support
 #include <fapiPlatTrace.H>
 #include <targeting/common/target.H>
@@ -53,6 +54,8 @@ namespace fapi2
 
 ///
 /// @brief Assignment Operator.
+/// @tparam K The type of target of which this is called
+/// @tparam V the type of the target's Value
 /// @param[in] i_right Reference to Target to assign from.
 /// @return Reference to 'this' Target
 ///
@@ -62,6 +65,8 @@ Target<K, V>& Target<K, V>::operator=(const Target& i_right)
 
 ///
 /// @brief Equality Comparison Operator
+/// @tparam K The type of target of which this is called
+/// @tparam V the type of the target's Value
 /// @param[in] i_right Reference to Target to compare.
 /// @return bool. True if equal.
 /// @note Platforms need to define this so that the physical
@@ -73,6 +78,8 @@ bool Target<K, V>::operator==(const Target& i_right) const
 
 ///
 /// @brief Inquality Comparison Operator
+/// @tparam K The type of target of which this is called
+/// @tparam V the type of the target's Value
 /// @param[in] i_right Reference to Target to compare.
 /// @return bool. True if not equal.
 /// @note Platforms need to define this so that the physical
@@ -81,6 +88,7 @@ bool Target<K, V>::operator==(const Target& i_right) const
 template<TargetType K, typename V>
 bool Target<K, V>::operator!=(const Target& i_right) const
 { return i_right.iv_handle != iv_handle; }
+
 
 ///
 /// @brief This function takes in a FAPI2 Type and returns the corresponding
@@ -183,20 +191,269 @@ inline TARGETING::TYPE convertFapi2TypeToTargeting(fapi2::TargetType i_T)
 ///
 /// @brief Get this target's immediate parent
 /// @tparam T The desired type of the parent target
+/// @tparam K The type of target of which this is called
+/// @tparam V the type of the target's Value
 /// @return Target<T> a target representing the parent
 ///
 template<TargetType K, typename V>
 template<TargetType T>
 inline Target<T> Target<K, V>::getParent(void) const
 {
-  //@TODO RTC:129517 fapi2 getParent
-    // For testing
-    return Target<T>(iv_handle);
+
+    FAPI_DBG(ENTER_MRK "getParent. Type of parent 0x%08x", T);
+
+    // General compound chiplet check for proc parent
+
+    const fapi2::TargetType TARGET_TYPE_PROC_CHIPLETS = fapi2::TARGET_TYPE_EX |
+            fapi2::TARGET_TYPE_MCS |
+            fapi2::TARGET_TYPE_XBUS |
+            fapi2::TARGET_TYPE_CORE |
+            fapi2::TARGET_TYPE_EQ |
+            fapi2::TARGET_TYPE_MCA |
+            fapi2::TARGET_TYPE_MCBIST |
+            fapi2::TARGET_TYPE_MI |
+            fapi2::TARGET_TYPE_CAPP |
+            fapi2::TARGET_TYPE_DMI |
+            fapi2::TARGET_TYPE_OBUS |
+            fapi2::TARGET_TYPE_NV |
+            fapi2::TARGET_TYPE_SBE |
+            fapi2::TARGET_TYPE_PPE |
+            fapi2::TARGET_TYPE_PERV |
+            fapi2::TARGET_TYPE_PEC |
+            fapi2::TARGET_TYPE_PHB;
+
+    static_assert( !((T == fapi2::TARGET_TYPE_PROC_CHIP) &&
+                     ((K & TARGET_TYPE_PROC_CHIPLETS) == fapi2::TARGET_TYPE_NONE)),
+                   "fapi2::TARGET_TYPE_PROC_CHIP is not a valid parent" );
+
+    const fapi2::TargetType TARGET_TYPE_PERV_CHIPLETS = fapi2::TARGET_TYPE_EQ |
+            fapi2::TARGET_TYPE_CORE |
+            fapi2::TARGET_TYPE_XBUS |
+            fapi2::TARGET_TYPE_OBUS |
+            fapi2::TARGET_TYPE_CAPP |
+            fapi2::TARGET_TYPE_NV |
+            fapi2::TARGET_TYPE_MCBIST |
+            fapi2::TARGET_TYPE_MCS |
+            fapi2::TARGET_TYPE_MCA |
+            fapi2::TARGET_TYPE_MI |
+            fapi2::TARGET_TYPE_DMI |
+            fapi2::TARGET_TYPE_PEC |
+            fapi2::TARGET_TYPE_PHB;
+
+    static_assert( !((T == fapi2::TARGET_TYPE_PERV) &&
+                     ((K & TARGET_TYPE_PERV_CHIPLETS) == fapi2::TARGET_TYPE_NONE)),
+                   "fapi2::TARGET_TYPE_PERV is not a valid parent" );
+
+    // Specific parent checks for each TargetType
+
+    // valid parents for DIMM
+    // DIMM -> MCA
+    // DIMM -> MBA
+    static_assert(!((K == fapi2::TARGET_TYPE_DIMM) &&
+                    (T != fapi2::TARGET_TYPE_MCA) &&
+                    (T != fapi2::TARGET_TYPE_MBA)),
+                  "improper parent of fapi2::TARGET_TYPE_DIMM");
+
+    // valid parents for PROC
+    // PROC -> SYSTEM
+    static_assert(!((K == fapi2::TARGET_TYPE_PROC_CHIP) &&
+                    (T != fapi2::TARGET_TYPE_SYSTEM)),
+                  "improper parent of fapi2::TARGET_TYPE_PROC_CHIP");
+
+    // valid parents for MEMBUF
+    // MEMBUF -> SYSTEM
+    // MEMBUF -> DMI
+    static_assert(!((K == fapi2::TARGET_TYPE_MEMBUF_CHIP) &&
+                    (T != fapi2::TARGET_TYPE_SYSTEM) &&
+                    (T != fapi2::TARGET_TYPE_DMI)),
+                  "improper parent of fapi2::TARGET_TYPE_MEMBUF_CHIP");
+
+    // valid parents for EX
+    // EX -> EQ
+    // EX -> PROC
+    static_assert(!((K == fapi2::TARGET_TYPE_EX) &&
+                    (T != fapi2::TARGET_TYPE_EQ) &&
+                    (T != fapi2::TARGET_TYPE_PROC_CHIP)),
+                  "improper parent of fapi2::TARGET_TYPE_EX");
+
+    // valid parents for MBA
+    // MBA -> MEMBUF
+    static_assert(!((K == fapi2::TARGET_TYPE_MBA) &&
+                    (T != fapi2::TARGET_TYPE_MEMBUF_CHIP)),
+                  "improper parent of fapi2::TARGET_TYPE_MBA");
+
+    // valid parents for MCS
+    // MCS -> MCBIST
+    // MCS -> PERV
+    // MCS -> PROC
+    static_assert(!((K == fapi2::TARGET_TYPE_MCS) &&
+                    (T != fapi2::TARGET_TYPE_MCBIST) &&
+                    (T != fapi2::TARGET_TYPE_PERV) &&
+                    (T != fapi2::TARGET_TYPE_PROC_CHIP)),
+                  "improper parent of fapi2::TARGET_TYPE_MCS");
+
+    // valid parents for L4
+    // L4 -> MEMBUF
+    static_assert(!((K == fapi2::TARGET_TYPE_L4) &&
+                    (T != fapi2::TARGET_TYPE_MEMBUF_CHIP)),
+                  "improper parent of fapi2::TARGET_TYPE_L4");
+
+    // valid parents for CORE
+    // CORE -> EX
+    // CORE -> EQ
+    // CORE -> PERV
+    // CORE -> PROC
+    static_assert(!((K == fapi2::TARGET_TYPE_CORE) &&
+                    (T != fapi2::TARGET_TYPE_EX) &&
+                    (T != fapi2::TARGET_TYPE_EQ) &&
+                    (T != fapi2::TARGET_TYPE_PERV) &&
+                    (T != fapi2::TARGET_TYPE_PROC_CHIP)),
+                  "improper parent of fapi2::TARGET_TYPE_CORE");
+
+    // valid parents for EQ
+    // EQ -> PROC
+    // EQ -> PERV
+    static_assert(!((K == fapi2::TARGET_TYPE_EQ) &&
+                    (T != fapi2::TARGET_TYPE_PERV) &&
+                    (T != fapi2::TARGET_TYPE_PROC_CHIP)),
+                  "improper parent of fapi2::TARGET_TYPE_EQ");
+
+    // valid parents for MCA
+    // MCA -> MCS
+    // MCA -> MCBIST
+    // MCA -> PERV
+    // MCA -> PROC
+    static_assert(!((K == fapi2::TARGET_TYPE_MCA) &&
+                    (T != fapi2::TARGET_TYPE_MCS) &&
+                    (T != fapi2::TARGET_TYPE_MCBIST) &&
+                    (T != fapi2::TARGET_TYPE_PERV) &&
+                    (T != fapi2::TARGET_TYPE_PROC_CHIP)),
+                  "improper parent of fapi2::TARGET_TYPE_MCA");
+
+    // valid parents for MCBIST
+    // MCBIST -> PERV
+    // MCBIST -> PROC
+    static_assert(!((K == fapi2::TARGET_TYPE_MCBIST) &&
+                    (T != fapi2::TARGET_TYPE_PERV) &&
+                    (T != fapi2::TARGET_TYPE_PROC_CHIP)),
+                  "improper parent of fapi2::TARGET_TYPE_MCBIST");
+
+    // valid parents for MI
+    // MI -> PERV
+    // MI -> PROC
+    static_assert(!((K == fapi2::TARGET_TYPE_MI) &&
+                    (T != fapi2::TARGET_TYPE_PERV) &&
+                    (T != fapi2::TARGET_TYPE_PROC_CHIP)),
+                  "improper parent of fapi2::TARGET_TYPE_MI");
+
+    // valid parents for DMI
+    // DMI -> MI
+    // DMI -> PERV
+    // DMI -> PROC
+    static_assert(!((K == fapi2::TARGET_TYPE_DMI) &&
+                    (T != fapi2::TARGET_TYPE_MI) &&
+                    (T != fapi2::TARGET_TYPE_PERV) &&
+                    (T != fapi2::TARGET_TYPE_PROC_CHIP)),
+                  "improper parent of fapi2::TARGET_TYPE_DMI");
+
+    // valid parents for SBE
+    // SBE -> PROC
+    static_assert(!((K == fapi2::TARGET_TYPE_SBE) &&
+                    (T != fapi2::TARGET_TYPE_PROC_CHIP)),
+                  "improper parent of fapi2::TARGET_TYPE_SBE");
+
+    // valid parents for PPE
+    // PPE -> PROC
+    static_assert(!((K == fapi2::TARGET_TYPE_PPE) &&
+                    (T != fapi2::TARGET_TYPE_PROC_CHIP)),
+                  "improper parent of fapi2::TARGET_TYPE_PPE");
+
+    // valid parents for PERV
+    // PERV -> PROC
+    static_assert(!((K == fapi2::TARGET_TYPE_PERV) &&
+                    (T != fapi2::TARGET_TYPE_PROC_CHIP)),
+                  "improper parent of fapi2::TARGET_TYPE_PERV");
+
+    // valid parents for PEC
+    // PEC -> PERV
+    // PEC -> PROC
+    static_assert(!((K == fapi2::TARGET_TYPE_PEC) &&
+                    (T != fapi2::TARGET_TYPE_PERV) &&
+                    (T != fapi2::TARGET_TYPE_PROC_CHIP)),
+                  "improper parent of fapi2::TARGET_TYPE_PEC");
+
+    // valid parents for PHB
+    // PHB -> PERV
+    // PHB -> PROC
+    static_assert(!((K == fapi2::TARGET_TYPE_PHB) &&
+                    (T != fapi2::TARGET_TYPE_PERV) &&
+                    (T != fapi2::TARGET_TYPE_PROC_CHIP)),
+                  "improper parent of fapi2::TARGET_TYPE_PHB");
+
+    // valid parents for XBUS
+    // XBUS -> PERV
+    // XBUS -> PROC
+    static_assert(!((K == fapi2::TARGET_TYPE_XBUS) &&
+                    (T != fapi2::TARGET_TYPE_PERV) &&
+                    (T != fapi2::TARGET_TYPE_PROC_CHIP)),
+                  "improper parent of fapi2::TARGET_TYPE_XBUS");
+
+    // valid parents for OBUS
+    // OBUS -> PERV
+    // OBUS -> PROC
+    static_assert(!((K == fapi2::TARGET_TYPE_OBUS) &&
+                    (T != fapi2::TARGET_TYPE_PERV) &&
+                    (T != fapi2::TARGET_TYPE_PROC_CHIP)),
+                  "improper parent of fapi2::TARGET_TYPE_OBUS");
+
+    // valid parents for NV
+    // NV -> PERV
+    // NV -> PROC
+    static_assert(!((K == fapi2::TARGET_TYPE_NV) &&
+                    (T != fapi2::TARGET_TYPE_PERV) &&
+                    (T != fapi2::TARGET_TYPE_PROC_CHIP)),
+                  "improper parent of fapi2::TARGET_TYPE_NV");
+
+    // valid parents for CAPP
+    // CAPP -> PERV
+    // CAPP -> PROC
+    static_assert(!((K == fapi2::TARGET_TYPE_CAPP) &&
+                    (T != fapi2::TARGET_TYPE_PERV) &&
+                    (T != fapi2::TARGET_TYPE_PROC_CHIP)),
+                  "improper parent of fapi2::TARGET_TYPE_CAPP");
+
+
+
+    TARGETING::TargetHandleList l_parentList;
+
+    TARGETING::TYPE requiredPType = fapi2::convertFapi2TypeToTargeting(T);
+
+    TARGETING::getParentAffinityTargetsByState(l_parentList,
+                                    static_cast<TARGETING::Target*>(this->get()),
+                                    TARGETING::CLASS_NA,
+                                    requiredPType,
+                                    TARGETING::UTIL_FILTER_ALL);
+
+    assert(l_parentList.size() == 1, "Found %d parents of the same type. Target HUID %x , \
+          looking for parents of type %x", l_parentList.size(), TARGETING::get_huid(this->get()) , requiredPType);
+
+    TARGETING::Target * l_parentTarget = l_parentList[0];
+
+    assert(l_parentTarget != NULL,
+                "No parent of type %x was found for the target of type %x \
+                Found required parent plat type to be %x", T, K, requiredPType)
+
+
+    Target<T> outTarget(l_parentTarget);
+    FAPI_DBG(EXIT_MRK "getParent");
+    return outTarget;
 }
 
 ///
 /// @brief Get this target's children
 /// @tparam T The desired type of child target
+/// @tparam K The type of target of which this is called
+/// @tparam V the type of the target's Value
 /// @param[in] i_state The desired TargetState of the children
 /// @return std::vector<Target<T> > a vector of present/functional
 /// children
@@ -210,7 +467,6 @@ inline std::vector<Target<T> >
 {
 
 FAPI_DBG(ENTER_MRK "getChildren. Type 0x%08x State:0x%08x", T, i_state);
-        // FIXME check for MULTICAST
 #define INVALID_CHILD(PARENT, CHILD) \
     static_assert(!((K == PARENT) && (T == CHILD)), \
                   #CHILD " is not a child of " #PARENT );
@@ -386,17 +642,6 @@ FAPI_DBG(ENTER_MRK "getChildren. Type 0x%08x State:0x%08x", T, i_state);
             chipletIter != l_childList.end();
             ++chipletIter)
     {
-        TARGETING::HwasState l_state =
-            (*chipletIter)->getAttr<TARGETING::ATTR_HWAS_STATE>();
-
-        // HWPs/FAPI considers partial good chiplets as present, but
-        // firmware considers them not-present. Return all chiplets
-        // in the model when caller requests PRESENT
-        if ((fapi2::TARGET_STATE_FUNCTIONAL == i_state) &&
-            !l_state.functional)
-        {
-            continue;
-        }
         fapi2::Target<T> l_target(*chipletIter);
         l_children.push_back(l_target);
     }
@@ -405,9 +650,13 @@ FAPI_DBG(ENTER_MRK "getChildren. Type 0x%08x State:0x%08x", T, i_state);
     return l_children;
 }
 
+
+
 ///
 /// @brief Get the target at the other end of a bus - dimm included
 /// @tparam T The type of the parent
+/// @tparam K The type of target of which this is called
+/// @tparam V the type of the target's Value
 /// @param[in] i_state The desired TargetState of the children
 /// @return Target<T> a target representing the thing on the other end
 /// @note Can be easily changed to a vector if needed

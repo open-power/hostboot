@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -428,6 +428,34 @@ const Target * getParentChip( const Target * i_pChiplet )
 
     return l_pChip;
 }
+
+const Target * getParent( const Target * i_unit , TARGETING::TYPE &i_pType)
+{
+    const Target * l_parent = NULL;
+    TARGETING::PredicateCTM l_predicate;
+
+    l_predicate.setType(i_pType);
+
+    // Create a vector of TARGETING::Target pointers
+    TARGETING::TargetHandleList l_chipList;
+
+    // Get parent
+    TARGETING::targetService().getAssociated(l_chipList, i_unit,
+                          TARGETING::TargetService::PARENT,
+                          TARGETING::TargetService::ALL, &l_predicate);
+
+    if (l_chipList.size() == 1)
+    {
+        l_parent = l_chipList[0];
+    }
+    else
+    {
+        TARG_ERR("Number of Parent chip is not 1, but %d",l_chipList.size());
+    }
+
+    return l_parent;
+}
+
 
 const Target * getExChiplet( const Target * i_pCoreChiplet )
 {

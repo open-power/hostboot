@@ -44,6 +44,7 @@
 #include <fapi2TestUtils.H>
 #include <hwpf_fapi2_reasoncodes.H>
 
+#include "fapi2GetParentTest.C"
 #include "fapi2HwpTest.C"
 #include "fapi2GetChildrenTest.C"
 
@@ -60,6 +61,8 @@ public:
 */
 void test_fapi2Test(void)
 {
+    FAPI_INF(">>>>>>test_fapi2Test starting...");
+
     FAPI_INF(">>test_fapi2HwpTest starting...");
     fapi2HwpTest();
     FAPI_INF("<<test_fapi2HwpTest exiting...");
@@ -67,6 +70,12 @@ void test_fapi2Test(void)
     FAPI_INF(">>test_fapi2GetChildrenTest starting...");
     fapi2GetChildrenTest();
     FAPI_INF("<<test_fapi2ChildTest exiting...");
+
+    FAPI_INF(">>fapi2TargetTest::testFapi2GetParent starting...");
+    fapi2GetParentTest();
+    FAPI_INF("<<FAPI2: testFapi2GetParent exiting...");
+
+    FAPI_INF("<<<<<<test_fapi2Test exiting...");
 }
 
 };
