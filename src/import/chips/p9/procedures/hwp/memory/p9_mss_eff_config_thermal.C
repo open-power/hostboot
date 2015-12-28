@@ -21,9 +21,8 @@
 /// @file p9_mss_eff_config_thermal.C
 /// @brief Perform thermal calculations as part of the effective configuration
 ///
-// *HWP HWP Owner: Luke Mulkey <lwmulkey@us.ibm.com>
-// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
-// *HWP FW Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 1
 // *HWP Consumed by: FSP:HB
@@ -31,17 +30,14 @@
 #include <fapi2.H>
 #include "p9_mss_eff_config_thermal.H"
 
-using fapi2::TARGET_TYPE_MCS;
-using fapi2::FAPI2_RC_SUCCESS;
-
 ///
 /// @brief Perform thermal calculations as part of the effective configuration
 /// @param[in] i_target, the controller (e.g., MCS)
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode p9_mss_eff_config_thermal( const fapi2::Target<TARGET_TYPE_MCS>& i_target )
+fapi2::ReturnCode p9_mss_eff_config_thermal( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target )
 {
     FAPI_INF("Start effective config thermal");
     FAPI_INF("End effective config thermal");
-    return FAPI2_RC_SUCCESS;
+    return fapi2::FAPI2_RC_SUCCESS;
 }

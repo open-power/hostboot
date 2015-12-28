@@ -22,14 +22,13 @@
 /// @brief Calculate and save off rail voltages
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Luke Mulkey <lwmulkey@us.ibm.com>
-// *HWP FW Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
-#ifndef __P9_MSS_VOLT__
-#define __P9_MSS_VOLT__
+#ifndef MSS_VOLT_H_
+#define MSS_VOLT_H_
 
 #include <fapi2.H>
 

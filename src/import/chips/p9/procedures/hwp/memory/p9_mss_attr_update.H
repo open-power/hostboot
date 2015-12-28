@@ -22,7 +22,6 @@
 /// @brief Programatic over-rides related to effective config
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Luke Mulkey <lwmulkey@us.ibm.com>
 // *HWP FW Owner: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 1
@@ -32,7 +31,6 @@
 #define __P9_MSS_ATTR_UPDATE__
 
 #include <fapi2.H>
-
 typedef fapi2::ReturnCode (*p9_mss_attr_update_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_MCS>&);
 
 extern "C"

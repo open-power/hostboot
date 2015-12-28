@@ -22,8 +22,7 @@
 /// @brief Begin background scrub
 ///
 // *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
-// *HWP HWP Backup: Luke Mulkey <lwmulkey@us.ibm.com>
-// *HWP FW Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 1
 // *HWP Consumed by: FSP:HB

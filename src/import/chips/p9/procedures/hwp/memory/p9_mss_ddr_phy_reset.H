@@ -19,21 +19,20 @@
 
 ///
 /// @file p9_mss_ddr_phy_reset.H
-/// @brief Perform reset of the DDR PHY
+/// @brief  Reset and initialize the DDR PHY
 ///
-// *HWP HWP Owner: Luke Mulkey <lwmulkey@us.ibm.com>
+// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
-// *HWP FW Owner: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
-#ifndef __P9_MSS_DDR_PHY_RESET__
-#define __P9_MSS_DDR_PHY_RESET__
+#ifndef P9_MSS_DDR_PHY_RESET_H_
+#define P9_MSS_DDR_PHY_RESET_H_
 
 #include <fapi2.H>
 
-typedef fapi2::ReturnCode (*p9_mss_ddr_phy_reset_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>&);
+typedef fapi2::ReturnCode (*p9_mss_ddr_phy_reset_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target);
 
 extern "C"
 {
@@ -47,4 +46,3 @@ extern "C"
 }
 
 #endif
-

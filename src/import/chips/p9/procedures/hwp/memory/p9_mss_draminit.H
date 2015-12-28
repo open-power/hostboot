@@ -21,11 +21,10 @@
 /// @file p9_mss_draminit.H
 /// @brief Reset and initialze DRAM
 ///
-// *HWP HWP Owner: Luke Mulkey <lwmulkey@us.ibm.com>
+// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
-// *HWP FW Owner: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
 #ifndef __P9_MSS_DRAMINIT__
@@ -39,8 +38,8 @@ extern "C"
 {
 
 ///
-/// @brief Initialize dram
-/// @param[in] i_target, the McBIST of the ports of the dram you're training
+/// @brief Initialize dram, assumes effective config has run
+/// @param[in] i_target, the McBIST of the ports of the dram you're initializing
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
     fapi2::ReturnCode p9_mss_draminit( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );

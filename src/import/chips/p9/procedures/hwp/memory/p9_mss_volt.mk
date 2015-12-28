@@ -17,5 +17,10 @@
 #
 # IBM_PROLOG_END_TAG
 
+# Include the macros and things for MSS procedures
+-include 00common.mk
+
 PROCEDURE=p9_mss_volt
+$(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
+lib$(PROCEDURE)_DEPLIBS+=mss
 $(call BUILD_PROCEDURE)

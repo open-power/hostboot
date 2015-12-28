@@ -21,9 +21,8 @@
 /// @file p9_mss_eff_config.H
 /// @brief Command and Control for the memory subsystem - populate attributes
 ///
-// *HWP HWP Owner: Luke Mulkey <lwmulkey@us.ibm.com>
-// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
-// *HWP FW Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 1
 // *HWP Consumed by: FSP:HB
