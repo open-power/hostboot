@@ -25,7 +25,9 @@
     #include <endian.h>
 #endif
 
-#include "p9_stop_api.H"
+#ifndef __PPE_PLAT
+    #include "p9_stop_api.H"
+#endif
 
 #ifdef FAPI_2
     #include <fapi2.H>
