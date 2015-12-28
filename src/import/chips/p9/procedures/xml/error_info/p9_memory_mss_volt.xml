@@ -1,0 +1,101 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/error_info/p9_memory_mss_volt.xml $   -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+
+<!-- $Id: memory_mss_volt.xml,v 1.3 2014/06/19 18:41:16 jdsloat Exp $ -->
+<!-- For file ../../ipl/fapi/mss_volt.C -->
+<!-- // *! OWNER NAME :   Jacob Sloat (jdsloat@us.ibm.com) -->
+<!-- // *! BACKUP NAME : -->
+
+<!-- Original Source for RC_MSS_VOLT_UNRECOGNIZED_DRAM_DEVICE_TYPE memory_errors.xml -->
+  <hwpError>
+    <rc>RC_MSS_VOLT_UNRECOGNIZED_DRAM_DEVICE_TYPE</rc>
+    <description>Unsupported DIMM type found.  All dimms must be DDR3 or DDR4</description>
+    <ffdc>DEVICE_TYPE</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+<!-- Original Source for RC_MSS_VOLT_DDR_TYPE_MIXING_UNSUPPORTED memory_errors.xml -->
+  <hwpError>
+    <rc>RC_MSS_VOLT_DDR_TYPE_MIXING_UNSUPPORTED</rc>
+    <description>Mixing of DDR3 and DDR4 not supported.</description>
+    <ffdc>DEVICE_TYPE</ffdc>
+    <callout>
+      <target>DIMM_DDR4_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_DDR4_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+<!-- Original Source for RC_MSS_VOLT_DDR_TYPE_REQUIRED_VOLTAGE memory_errors.xml -->
+  <hwpError>
+    <rc>RC_MSS_VOLT_DDR_TYPE_REQUIRED_VOLTAGE</rc>
+    <description>One or more DIMMs do not support required voltage for DDR type.</description>
+    <ffdc>DIMM_VOLTAGE</ffdc>
+    <callout>
+      <target>DIMM_UV_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_UV_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+<!-- Original Source for RC_MSS_VOLT_TOLERATED_VOLTAGE_VIOLATION memory_errors.xml -->
+  <hwpError>
+    <rc>RC_MSS_VOLT_TOLERATED_VOLTAGE_VIOLATION</rc>
+    <description>One or more DIMMs classified non-functional has a tolerated voltage below selected voltage.</description>
+    <ffdc>DIMM_VOLTAGE</ffdc>
+ <!-- Deconfigure DIMM or Centaur -->
+    <deconfigure>
+      <target>CHIP_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_VOLT_OVERIDE_MIXING</rc>
+    <description>An override is trying to be applied to only a part of the voltage domain.  It needs to be applied to the entire domain.</description>
+    <ffdc>OVERRIDE_TYPE</ffdc>
+    <ffdc>OVERRIDE_DOMAIN_TYPE</ffdc>
+    <callout>
+      <target>MEMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_VOLT_OVERIDE_UKNOWN</rc>
+    <description>An uknown override is trying to be applied to the voltage domain.  It needs to be none, 1.2 or 1.35V. </description>
+    <ffdc>OVERRIDE_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+</hwpErrors>
+
