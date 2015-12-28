@@ -1,0 +1,111 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/error_info/p9_memory_mss_lib.xml $    -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+
+<!-- -->
+<!-- @file memory_mss_lib.xml -->
+<!-- @brief Error xml for MSS library routines -->
+<!-- -->
+<!-- *HWP HWP Owner:  Andre Marin <aamarin@us.ibm.com> -->
+<!-- *HWP FW Owner: Brian Silver <bsilver@us.ibm.com> -->
+<!-- *HWP Team: Memory -->
+<!-- *HWP Level: 1 -->
+<!-- *HWP Consumed by: HB:FSP -->
+<!-- -->
+
+
+
+<hwpErrors>
+
+  <registerFfdc>
+    <id>REG_FFDC_MSS_CCS_FAILURE</id>
+    <scomRegister>MCBIST_CCS_MODEQ</scomRegister>
+    <scomRegister>MCBIST_CCS_STATQ</scomRegister>
+    <scomRegister>MCBIST_CCS_CNTLQ</scomRegister>
+  </registerFfdc>
+
+  <hwpError>
+    <rc>RC_MSS_CCS_READ_MISCOMPARE</rc>
+    <description>CCS reports a read miscompare.</description>
+    <ffdc>REG_CONTENTS</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_MSS_CCS_FAILURE</id>
+      <target>TARGET_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>TARGET_IN_ERROR</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_CCS_UE_SUE</rc>
+    <description>CCS reports a UE or SUE</description>
+    <ffdc>REG_CONTENTS</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_MSS_CCS_FAILURE</id>
+      <target>TARGET_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>TARGET_IN_ERROR</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_CCS_CAL_TIMEOUT</rc>
+    <description>CCS reports a calibration operation timeout</description>
+    <ffdc>REG_CONTENTS</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_MSS_CCS_FAILURE</id>
+      <target>TARGET_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>TARGET_IN_ERROR</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_CCS_HUNG</rc>
+    <description>CCS failed to return from in_progress status and failed to describe an error further.</description>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_MSS_CCS_FAILURE</id>
+      <target>TARGET_IN_ERROR</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>TARGET_IN_ERROR</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET_IN_ERROR</target>
+    </deconfigure>
+  </hwpError>
+  
+</hwpErrors>
+
+

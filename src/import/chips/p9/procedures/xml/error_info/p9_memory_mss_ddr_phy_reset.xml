@@ -1,0 +1,111 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/error_info/p9_memory_mss_ddr_phy_reset.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+
+<!-- -->
+<!-- @file memory_mss_ddr_phy_reset.xml -->
+<!-- @brief Error xml for ddr_phy_reset -->
+<!-- -->
+<!-- *HWP HWP Owner: Name <email address> -->
+<!-- *HWP FW Owner: Name <email address> -->
+<!-- *HWP Team: Team Name -->
+<!-- *HWP Level: 1 -->
+<!-- *HWP Consumed by: XX:XX -->
+<!-- -->
+
+<hwpErrors>
+
+<hwpError>
+  <rc>RC_MSS_DP16_PLL_FAILED_TO_LOCK</rc>
+  <description>
+    p9_mss_ddr_phy_reset: DP16 PLL failed to lock! Value in MCA_DDRPHY_PC_DP18_PLL_LOCK_STATUS not as expected
+  </description>
+  <ffdc>EXPECTED_STATUS</ffdc>
+  <ffdc>ACTUAL_STATUS</ffdc>
+  <ffdc>REGISTER</ffdc>
+  <callout>
+    <target>MCBIST_IN_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
+  <callout>
+    <hw>
+      <hwid>MEM_REF_CLOCK</hwid>
+      <refTarget>MCBIST_IN_ERROR</refTarget>
+    </hw>
+    <priority>MEDIUM</priority>
+  </callout>
+  <deconfigure>
+    <target>MCBIST_IN_ERROR</target>
+  </deconfigure>
+  <gard>
+    <target>MCBIST_IN_ERROR</target>
+  </gard>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_AD32S_PLL_FAILED_TO_LOCK</rc>
+  <description>
+    p9_mss_ddr_phy_reset: AD32S PLL failed to lock! Value in MCA_DDRPHY_PC_AD32S_PLL_LOCK_STATUS not as expected
+  </description>
+  <ffdc>EXPECTED_STATUS</ffdc>
+  <ffdc>ACTUAL_STATUS</ffdc>
+  <ffdc>REGISTER</ffdc>
+  <callout>
+    <target>MCBIST_IN_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
+  <callout>
+    <hw>
+      <hwid>MEM_REF_CLOCK</hwid>
+      <refTarget>MCBIST_IN_ERROR</refTarget>
+    </hw>
+    <priority>MEDIUM</priority>
+  </callout>
+  <deconfigure>
+    <target>MCBIST_IN_ERROR</target>
+  </deconfigure>
+  <gard>
+    <target>MCBIST_IN_ERROR</target>
+  </gard>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_BANG_BANG_FAILED_TO_LOCK</rc>
+  <description>
+    p9_mss_ddr_phy_reset: phy clock and sysclk failed to align.
+  </description>
+  <callout>
+    <target>MCA_IN_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
+  <callout>
+    <hw>
+      <hwid>MEM_REF_CLOCK</hwid>
+      <refTarget>MCA_IN_ERROR</refTarget>
+    </hw>
+    <priority>MEDIUM</priority>
+  </callout>
+  <deconfigure>
+    <target>MCA_IN_ERROR</target>
+  </deconfigure>
+  <gard>
+    <target>MCA_IN_ERROR</target>
+  </gard>
+</hwpError>
+
+</hwpErrors>

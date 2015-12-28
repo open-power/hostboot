@@ -1,0 +1,39 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/error_info/p9_memory_mss_spd_decode.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+<!-- $Id: memory_spd_decode.xml,v 1.2 2014/03/06 00:11:49 jdsloat Exp $ -->
+<!-- For file ../../ipl/fapi/mss_freq.C -->
+<!-- // *! OWNER NAME :   Jacob Sloat (jdsloat@us.ibm.com) -->
+<!-- // *! BACKUP NAME :   -->
+
+   <hwpError>
+    <rc>RC_MSS_VALID_VALUE</rc>
+    <description>Invalid data returned.</description>
+    <ffdc>VALUE</ffdc>
+    <ffdc>BYTE</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+    </hwpError>
+
+</hwpErrors>

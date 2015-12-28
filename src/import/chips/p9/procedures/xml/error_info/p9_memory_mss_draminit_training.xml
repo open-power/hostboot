@@ -1,0 +1,307 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/error_info/p9_memory_mss_draminit_training.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+
+<!-- -->
+<!-- @file memory_mss_draminit_training.xml -->
+<!-- @brief Error xml for draminit_training -->
+<!-- -->
+<!-- *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com> -->
+<!-- *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com> -->
+<!-- *HWP FW Owner: Bill Hoffa <wghoffa@us.ibm.com> -->
+<!-- *HWP Team: Memory -->
+<!-- *HWP Level: 1 -->
+<!-- *HWP Consumed by: HB:FSP -->
+<!-- -->
+
+<hwpErrors>
+
+<registerFfdc>
+  <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP0_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP0_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP0_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP0_P0_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP0_P0_4</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP1_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP1_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP1_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP1_P0_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP1_P0_4</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP2_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP2_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP2_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP2_P0_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP2_P0_4</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP3_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP3_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP3_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP3_P0_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP3_P0_4</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP0_P1_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP0_P1_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP0_P1_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP0_P1_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP0_P1_4</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP1_P1_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP1_P1_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP1_P1_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP1_P1_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP1_P1_4</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP2_P1_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP2_P1_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP2_P1_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP2_P1_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP2_P1_4</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP3_P1_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP3_P1_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP3_P1_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP3_P1_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP3_P1_4</scomRegister>
+</registerFfdc>
+
+<hwpError>
+  <rc>RC_MSS_DRAMINIT_TRAINING_MULTIPLE_ERRORS</rc>
+  <description>Multiple training stesp failed for a given position within this calibration.</description>
+  <ffdc>FAILED_STEPS</ffdc>
+  <ffdc>PORT_POSITION</ffdc>
+  <ffdc>RANKGROUP_POSITION</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
+    <target>TARGET_IN_ERROR</target>
+  </collectRegisterFfdc>
+  <callout>
+    <target>TARGET_IN_ERROR</target>
+    <priority>LOW</priority>
+  </callout>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_DRAMINIT_TRAINING_WR_LVL_ERROR</rc>
+  <description>Write Leveling has returned a fail for a given position within this calibration.</description>
+  <ffdc>PORT_POSITION</ffdc>
+  <ffdc>RANKGROUP_POSITION</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
+    <target>TARGET_IN_ERROR</target>
+  </collectRegisterFfdc>
+  <callout>
+    <target>TARGET_IN_ERROR</target>
+    <priority>LOW</priority>
+  </callout>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_DRAMINIT_TRAINING_INITIAL_PAT_WRITE_ERROR</rc>
+  <description>Initial pattern write has returned a fail for a given position within this calibration.</description>
+  <ffdc>PORT_POSITION</ffdc>
+  <ffdc>RANKGROUP_POSITION</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
+    <target>TARGET_IN_ERROR</target>
+  </collectRegisterFfdc>
+  <callout>
+    <target>TARGET_IN_ERROR</target>
+    <priority>LOW</priority>
+  </callout>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_DRAMINIT_TRAINING_DQS_ALIGNMENT_ERROR</rc>
+  <description>DQS Alignment has returned a fail for a given position within this calibration.</description>
+  <ffdc>PORT_POSITION</ffdc>
+  <ffdc>RANKGROUP_POSITION</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
+    <target>TARGET_IN_ERROR</target>
+  </collectRegisterFfdc>
+  <callout>
+    <target>TARGET_IN_ERROR</target>
+    <priority>LOW</priority>
+  </callout>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_DRAMINIT_TRAINING_RD_CLK_SYS_CLK_ALIGNMENT_ERROR</rc>
+  <description>Read CLK to SYS CLK Alignment has returned a fail for a given position within this calibration.</description>
+  <ffdc>PORT_POSITION</ffdc>
+  <ffdc>RANKGROUP_POSITION</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
+    <target>TARGET_IN_ERROR</target>
+  </collectRegisterFfdc>
+  <callout>
+    <target>TARGET_IN_ERROR</target>
+    <priority>LOW</priority>
+  </callout>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_DRAMINIT_TRAINING_RD_CENTERING_ERROR</rc>
+  <description>Read Centering has returned a fail for a given position within this calibration.</description>
+  <ffdc>PORT_POSITION</ffdc>
+  <ffdc>RANKGROUP_POSITION</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
+    <target>TARGET_IN_ERROR</target>
+  </collectRegisterFfdc>
+  <callout>
+    <target>TARGET_IN_ERROR</target>
+    <priority>LOW</priority>
+  </callout>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_DRAMINIT_TRAINING_WR_CENTERING_ERROR</rc>
+  <description>Write centering has returned a fail for a given position within this calibration.</description>
+  <ffdc>PORT_POSITION</ffdc>
+  <ffdc>RANKGROUP_POSITION</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
+    <target>TARGET_IN_ERROR</target>
+  </collectRegisterFfdc>
+  <callout>
+    <target>TARGET_IN_ERROR</target>
+    <priority>LOW</priority>
+  </callout>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_DRAMINIT_TRAINING_INITIAL_COARSE_WR_ERROR</rc>
+  <description>Initial coarse write has returned a fail for a given position within this calibration.</description>
+  <ffdc>PORT_POSITION</ffdc>
+  <ffdc>RANKGROUP_POSITION</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
+    <target>TARGET_IN_ERROR</target>
+  </collectRegisterFfdc>
+  <callout>
+    <target>TARGET_IN_ERROR</target>
+    <priority>LOW</priority>
+  </callout>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_DRAMINIT_TRAINING_COARSE_RD_ERROR</rc>
+  <description>Coarse read has returned a fail for a given position within this calibration.</description>
+  <ffdc>PORT_POSITION</ffdc>
+  <ffdc>RANKGROUP_POSITION</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
+    <target>TARGET_IN_ERROR</target>
+  </collectRegisterFfdc>
+  <callout>
+    <target>TARGET_IN_ERROR</target>
+    <priority>LOW</priority>
+  </callout>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_DRAMINIT_TRAINING_CUSTOM_PATTERN_RD_ERROR</rc>
+  <description>Custom Pattern Read has returned a fail for a given position within this calibration.</description>
+  <ffdc>PORT_POSITION</ffdc>
+  <ffdc>RANKGROUP_POSITION</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
+    <target>TARGET_IN_ERROR</target>
+  </collectRegisterFfdc>
+  <callout>
+    <target>TARGET_IN_ERROR</target>
+    <priority>LOW</priority>
+  </callout>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_DRAMINIT_TRAINING_CUSTOM_PATTERN_WR_ERROR</rc>
+  <description>Custom Pattern Write has returned a fail for a given position within this calibration.</description>
+  <ffdc>PORT_POSITION</ffdc>
+  <ffdc>RANKGROUP_POSITION</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
+    <target>TARGET_IN_ERROR</target>
+  </collectRegisterFfdc>
+  <callout>
+    <target>TARGET_IN_ERROR</target>
+    <priority>LOW</priority>
+  </callout>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_DRAMINIT_TRAINING_DIGITAL_EYE_ERROR</rc>
+  <description>Digital Eye has returned a fail for a given position within this calibration.</description>
+  <ffdc>PORT_POSITION</ffdc>
+  <ffdc>RANKGROUP_POSITION</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
+    <target>TARGET_IN_ERROR</target>
+  </collectRegisterFfdc>
+  <callout>
+    <target>TARGET_IN_ERROR</target>
+    <priority>LOW</priority>
+  </callout>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+</hwpErrors>

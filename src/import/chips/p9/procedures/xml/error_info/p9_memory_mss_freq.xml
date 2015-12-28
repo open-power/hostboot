@@ -1,0 +1,137 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/error_info/p9_memory_mss_freq.xml $   -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+
+<!-- $Id: memory_mss_freq.xml,v 1.2 2014/03/06 00:11:49 jdsloat Exp $ -->
+<!-- For file ../../ipl/fapi/mss_freq.C -->
+<!-- // *! OWNER NAME :   Jacob Sloat (jdsloat@us.ibm.com) -->
+<!-- // *! BACKUP NAME :   -->
+
+<!-- Original Source for RC_MSS_UNSUPPORTED_SPD_DATA_DDR4 memory_errors.xml -->
+  <hwpError>
+    <rc>RC_MSS_UNSUPPORTED_SPD_DATA_DDR4</rc>
+    <description>Invalid SPD data returned.</description>
+    <ffdc>MTB_DDR4</ffdc>
+    <ffdc>FTB_DDR4</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+</hwpError>
+
+<!-- Original Source for RC_MSS_UNSUPPORTED_SPD_DATA_DDR3 memory_errors.xml -->
+  <hwpError>
+    <rc>RC_MSS_UNSUPPORTED_SPD_DATA_DDR3</rc>
+    <description>Invalid SPD data returned.</description>
+    <ffdc>MTB_DIVIDEND</ffdc>
+    <ffdc>MTB_DIVISOR</ffdc>
+    <ffdc>FTB_DIVIDEND</ffdc>
+    <ffdc>FTB_DIVISOR</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+</hwpError>
+
+<!-- Original Source for RC_MSS_UNSUPPORTED_SPD_DATA_COMMON memory_errors.xml -->
+  <hwpError>
+    <rc>RC_MSS_UNSUPPORTED_SPD_DATA_COMMON</rc>
+    <description>Invalid SPD data returned.</description>
+    <ffdc>MIN_TCK</ffdc>
+    <ffdc>MIN_TAA</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+</hwpError>
+
+<!-- Original Source for RC_MSS_MODULE_TYPE_MIX memory_errors.xml -->
+  <hwpError>
+    <rc>RC_MSS_MODULE_TYPE_MIX</rc>
+    <description>Differing DIMM types in the same configuration.</description>
+    <ffdc>MODULE_TYPE</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+</hwpError>
+
+<!-- Original Source for RC_MSS_NO_COMMON_SUPPORTED_CL memory_errors.xml -->
+  <hwpError>
+    <rc>RC_MSS_NO_COMMON_SUPPORTED_CL</rc>
+    <description>Current Configuration has no common supported CL Values.</description>
+    <ffdc>CL_SUPPORTED</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+</hwpError>
+
+<!-- Original Source for RC_MSS_EXCEED_TAA_MAX_NO_CL memory_errors.xml -->
+  <hwpError>
+    <rc>RC_MSS_EXCEED_TAA_MAX_NO_CL</rc>
+    <description>Exceeded TAA MAX with Lowest frequency.  No compatable CL.</description>
+    <ffdc>CL_SUPPORTED</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+</hwpError>
+
+<!-- Original Source for RC_MSS_UNSUPPORTED_FREQ_CALCULATED memory_errors.xml -->
+  <hwpError>
+    <rc>RC_MSS_UNSUPPORTED_FREQ_CALCULATED</rc>
+    <description>The frequency calculated with spd data is not supported by the jedec standards.</description>
+    <ffdc>DIMM_MIN_FREQ</ffdc>
+</hwpError>
+
+<!-- Original Source for RC_MSS_UNSUPPORTED_DEV_TYPE  memory_errors.xml -->
+  <hwpError>
+      <rc>RC_MSS_UNSUPPORTED_DEV_TYPE</rc>
+      <description>Device type is not DDR4.</description>
+      <ffdc>DEV_TYPE</ffdc>
+      <callout>
+        <target>DIMM_TARGET</target>
+        <priority>HIGH</priority>
+      </callout>
+      <deconfigure>
+        <target>DIMM_TARGET</target>
+      </deconfigure>
+
+ </hwpError>
+
+</hwpErrors>
