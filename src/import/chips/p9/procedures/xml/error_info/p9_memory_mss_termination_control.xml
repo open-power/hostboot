@@ -1,0 +1,198 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/error_info/p9_memory_mss_termination_control.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+
+<!-- -->
+<!-- @file memory_mss_termination_control.xml -->
+<!-- @brief Error xml for termination control -->
+<!-- -->
+<!-- *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com> -->
+<!-- *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com> -->
+<!-- *HWP FW Owner: Bill Hoffa <wghoffa@us.ibm.com> -->
+<!-- *HWP Team: Memory -->
+<!-- *HWP Level: 1 -->
+<!-- *HWP Consumed by: FSP:HB -->
+<!-- -->
+
+<hwpErrors>
+
+<hwpError>
+  <rc>RC_CONFIG_DRV_IMP_INVALID_INPUT</rc>
+  <description>
+    The config_drv_imp utility function received a bad parameter
+  </description>
+  <ffdc>PORT_PARAM</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_CONFIG_RCV_IMP_INVALID_INPUT</rc>
+  <description>
+    The config_rcv_imp utility function received a bad parameter
+  </description>
+  <ffdc>PORT_PARAM</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_CONFIG_SLEW_RATE_INVALID_INPUT</rc>
+  <description>
+    The config_slew_rate utility function received a bad parameter
+  </description>
+  <ffdc>PORT_PARAM</ffdc>
+  <ffdc>SLEW_TYPE_PARAM</ffdc>
+  <ffdc>SLEW_IMP_PARAM</ffdc>
+  <ffdc>SLEW_RATE_PARAM</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_CONFIG_WR_DRAM_VREF_INVALID_INPUT</rc>
+  <description>
+    The config_wr_dram_vref utility function received a bad parameter
+  </description>
+  <ffdc>PORT_PARAM</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_CONFIG_RD_CEN_VREF_INVALID_INPUT</rc>
+  <description>
+    The config_rd_cen_vref utility function received a bad parameter
+  </description>
+  <ffdc>PORT_PARAM</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_SLEW_CAL_INVALID_DRAM_GEN</rc>
+  <description>
+    mss_slew_cal found an invalid DRAM type in ATTR_EFF_DRAM_GEN (not DDR3/4)
+  </description>
+  <ffdc>DRAM_GEN</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_SLEW_CAL_INVALID_FREQ</rc>
+  <description>
+    mss_slew_cal found a zero frequency in ATTR_MSS_FREQ
+  </description>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<!-- Hm, fairly p9n specific ... BRS -->
+<registerFfdc>
+  <id>REG_FFDC_MSS_SLEW_CAL_FAILURE</id>
+  <scomRegister>MCA_DDRPHY_ADR_IO_SLEW_CTL_VALUE_MAP0_P0_ADR0</scomRegister>
+  <scomRegister>MCA_DDRPHY_ADR_IO_SLEW_CTL_VALUE_MAP0_P0_ADR1</scomRegister>
+  <scomRegister>MCA_DDRPHY_ADR_IO_SLEW_CTL_VALUE_MAP0_P0_ADR2</scomRegister>
+  <scomRegister>MCA_DDRPHY_ADR_IO_SLEW_CTL_VALUE_MAP0_P0_ADR3</scomRegister>
+
+  <scomRegister>MCA_DDRPHY_DP16_IO_TX_CONFIG0_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_IO_TX_CONFIG0_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_IO_TX_CONFIG0_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_IO_TX_CONFIG0_P0_3</scomRegister>
+</registerFfdc>
+
+<!-- Should be good for MCA and MBA, not clear how to deal with the register ffdc, tho BRS -->
+<hwpError>
+  <rc>RC_MSS_SLEW_CAL_TIMEOUT</rc>
+  <description>
+      mss_slew_cal found slew calibration timeout
+  </description>
+  <ffdc>PORT</ffdc>
+  <ffdc>DATA_ADR</ffdc>
+  <ffdc>IMP</ffdc>
+  <ffdc>SLEW</ffdc>
+  <ffdc>STAT_REG</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_SLEW_CAL_FAILURE</id>
+    <target>TARGET_IN_ERROR</target>
+  </collectRegisterFfdc>
+  <callout>
+    <target>TARGET_IN_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>TARGETIN_ERROR</target>
+  </deconfigure>
+  <gard>
+    <target>TARGET_IN_ERROR</target>
+  </gard>
+</hwpError>
+
+
+<hwpError>
+  <rc>RC_MSS_SLEW_CAL_ERROR</rc>
+  <description>
+      mss_slew_cal found slew calibration error
+  </description>
+  <ffdc>PORT</ffdc>
+  <ffdc>DATA_ADR</ffdc>
+  <ffdc>IMP</ffdc>
+  <ffdc>SLEW</ffdc>
+  <ffdc>STAT_REG</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_SLEW_CAL_FAILURE</id>
+    <target>TARGET_IN_ERROR</target>
+  </collectRegisterFfdc>
+  <callout>
+    <target>TARGET_IN_ERROR</target>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <target>TARGET_IN_ERROR</target>
+  </deconfigure>
+  <gard>
+    <target>TARGET_IN_ERROR</target>
+  </gard>
+</hwpError>
+
+<hwpError>
+  <rc>RC_MSS_IMP_INPUT_ERROR</rc>
+  <!-- TODO Remove when all HWPs using it are using their own Error XML file -->
+  <description>Impedance is invalid for driver/receiver type.</description>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+</hwpErrors>
