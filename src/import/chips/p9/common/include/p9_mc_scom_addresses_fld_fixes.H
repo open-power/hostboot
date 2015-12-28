@@ -44,4 +44,7 @@ const static uint64_t SH_FLD_COMMAND_LIST_TIMEOUT_SPEC = 99990000;
 REG64_FLD( MCS_MCFIR_COMMAND_LIST_TIMEOUT_SPEC                     , 9   , SH_UNT_MCS      , SH_ACS_SCOM2_OR ,
            SH_FLD_COMMAND_LIST_TIMEOUT_SPEC );
 
+REG64_FLD( MCA_DDRPHY_DP16_SYSCLK_PR0_P0_0_01_ENABLE               , 48  , SH_UNT_MCA      , SH_ACS_SCOM_RW  ,
+           0 );
+
 #endif
