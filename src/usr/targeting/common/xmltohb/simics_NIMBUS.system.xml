@@ -2554,7 +2554,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/capp-0</default>
+        <default>affinity:sys-0/node-0/proc-0/capp-0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2572,7 +2572,7 @@
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/capp-1</default>
+        <default>affinity:sys-0/node-0/proc-0/capp-1</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>

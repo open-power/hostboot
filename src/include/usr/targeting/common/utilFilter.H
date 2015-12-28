@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -252,6 +252,16 @@ void getParentAffinityTargets ( TARGETING::TargetHandleList& o_vector,
  * @return Parent chip target pointer or NULL if error
  */
 const Target * getParentChip( const Target * i_pChiplet );
+
+/**
+ * @brief return the parent target of the specified input unit
+ *
+ * @parm[in]  i_unit, unit target used for finding the parent target
+ * @parm[in]  i_pType, type of the parent
+ *
+ * @return Parent target pointer or NULL if error
+ */
+const Target * getParent( const Target * i_unit , TARGETING::TYPE &i_pType);
 
 /**
  * @brief return the EX target of the specified input core chiplet
