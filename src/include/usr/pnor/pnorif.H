@@ -89,6 +89,8 @@ struct SectionInfo_t
     bool sha512perEC;   /**< Version Checking perEC */
     bool readOnly;      /**< Section is read only */
     bool reprovision;   /**< Erase this section during a reprovision */
+    bool xzCompressed;  /**< Section is XZ compressed */
+    uint32_t xzSize;    /**< Size of uncompressed partition in bytes */
 };
 
 /**

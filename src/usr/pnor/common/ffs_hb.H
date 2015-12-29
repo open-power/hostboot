@@ -52,7 +52,8 @@ enum
     FFS_CHIPSEL_UNUSED     = 0xFF,    /**< Chip select not used */
 
     /* Compression : 1 byte */
-    FFS_COMPRESS_UNUSED    = 0xFF,    /**< Compression not used  */
+    FFS_COMPRESS_XZ        = 0x80,    /**< Section is XZ compressed */
+    FFS_COMPRESS_UNUSED    = 0x7F,    /**< Compression not used  */
 
     /* Data Integrity : 2 bytes */
     FFS_INTEG_ECC_PROTECT  = 0x8000,  /**< Data Integrity: ECC protected */
@@ -77,13 +78,14 @@ enum
  *   This matches the PNOR binary layout of the data[] in an ffs_entry.
  */
 struct ffs_hb_user_t{
-    uint8_t  chip;         /**< Chip Select (0,1) */
+    uint8_t  chip;           /**< Chip Select (0,1) */
     uint8_t  compressType; /**< Compression Indication/alg (0=not compressed) */
-    uint16_t dataInteg;    /**< Indicates Data Integrity mechanism */
-    uint8_t  verCheck;     /**< Indicates Version check type */
-    uint8_t  miscFlags;    /**< Misc Partition related Flags */
-    uint8_t  freeMisc[2];  /**< Unused Miscellaneious Info */
-    uint32_t freeUser[13]; /**< Unused User Data */
+    uint16_t dataInteg;      /**< Indicates Data Integrity mechanism */
+    uint8_t  verCheck;       /**< Indicates Version check type */
+    uint8_t  miscFlags;      /**< Misc Partition related Flags */
+    uint8_t  freeMisc[2];    /**< Unused Miscellaneous Info */
+    uint32_t decompressSize; /**< Size after data is uncompressed in bytes */
+    uint32_t freeUser[12];   /**< Unused User Data */
 } PACKED;
 
 

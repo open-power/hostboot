@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -430,6 +430,9 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
                     o_TOC[secId].integrity = ffsUserData->dataInteg;
                     o_TOC[secId].version = ffsUserData->verCheck;
                     o_TOC[secId].misc = ffsUserData->miscFlags;
+                    o_TOC[secId].compress = ffsUserData->compressType;
+                    o_TOC[secId].xzDecompressSize =
+                            (ffsUserData->decompressSize);
 
                     TRACFCOMP(g_trac_pnor,"PNOR::parseTOC: User Data %s",
                             cur_entry->name);
