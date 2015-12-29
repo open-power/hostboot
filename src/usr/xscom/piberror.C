@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,8 +48,6 @@ void addFruCallouts(TARGETING::Target* i_target,
                     uint64_t i_scomAddr,
                     errlHndl_t& io_errl)
 {
-    // @todo RTC:137627 - Remove for p9 bringup
-    return;
 
    switch (i_pibErrStatus)
    {

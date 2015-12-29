@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -370,9 +370,8 @@ errlHndl_t discoverTargets()
                             if (l_procEntry.maxEXs == 0)
                             {
                                 // this is PROBABLY bad PR, so YELL...
-                                // @todo RTC:137627 - remove for P9 bringup
-                                //HWAS_ERR("pTarget %.8X - PR VPD says 0 CORES",
-                                //    pTarget->getAttr<ATTR_HUID>());
+                                HWAS_ERR("pTarget %.8X - PR VPD says 0 CORES",
+                                   pTarget->getAttr<ATTR_HUID>());
                             }
                         }
                       }
@@ -928,9 +927,8 @@ errlHndl_t restrictEXunits(
     HWAS_INF("restrictEXunits entry, %d elements", i_procList.size());
     errlHndl_t errl = NULL;
 
-    // @todo RTC:137627 - return from restrictEXunits for P9 bringup
+    // @todo RTC:145459 - P9 changes for PR core restriction
     return errl;
-
     // sort by group so PROC# are in the right groupings.
     std::sort(i_procList.begin(), i_procList.end(),
                 compareProcGroup);
@@ -1418,7 +1416,7 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
         HWAS_DBG( "checkMinimumHardware: %d functional dimms",
                   l_dimms.size());
 
-// @todo RTC:137627 - remov dimm stuff for P9 bringup
+// @todo RTC:142535 Add DIMM targets to MRW targeting script
 #if (0)
         if (l_dimms.empty())
         {

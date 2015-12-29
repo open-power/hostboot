@@ -254,7 +254,7 @@ void* call_host_start_payload (void *io_pArgs)
 
     if( l_errl == NULL )
     {
-// todo RTC:137627 - remove for P9 bringup
+// todo RTC:132413 Special Wakeup updates for P9
 #if (0)
         l_errl = disableSpecialWakeup();
 #endif
@@ -339,7 +339,7 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
 
         }
 
-// @todo RTC:137627 - remove i2cSetupActiveMasters for P9 bringup
+// @todo RTC:123019 I2CM changes for P9bringup
 #if (0)
         // Phyp needs us to program all of the I2C masters with the bus
         // divisor

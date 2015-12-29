@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2898,7 +2898,7 @@ errlHndl_t i2cResetActiveMasters ( i2cProcessType i_resetType,
                "i_functional=%d",
                i_resetType, i_functional );
 
-    // @todo RTC:137627 - remove for P9 bringup
+    // @todo RTC:123019- I2CM Changes for P9
 #if (0)
     err = i2cProcessActiveMasters (i_resetType,  // select engines
                                    I2C_OP_RESET, // reset engines
