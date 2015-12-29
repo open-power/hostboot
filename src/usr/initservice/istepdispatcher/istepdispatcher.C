@@ -726,7 +726,7 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
                       err->plid());
         }
 
-// @todo RTC:137627 - Removed for P9 bringup
+// @todo RTC:145353 - Restore testprdf and testattn in p9 branch
 #if (0)
         // Check for any attentions and invoke PRD for analysis
         // if not in MPIPL mode

@@ -267,7 +267,7 @@ const TaskInfo g_exttaskinfolist[]   =   {
         },
 
 
-        // @todo RTC:137627 - remove for p9 bringup
+        // @todo RTC:145354 Restore testprdf and testattn in p9 branch
 #if (0)
 // No mdia in VPO
 #ifndef CONFIG_VPO_COMPILE
