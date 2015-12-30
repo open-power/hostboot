@@ -97,10 +97,10 @@ extern "C"
 #ifdef CAL_STATUS_DOESNT_REPORT_COMPLETE
             // This isn't correct - shouldn't be setting
             static const uint64_t CLEAR_CAL_COMPLETE = 0x000000000000F000;
-            FAPI_TRY( fapi2::putScom(p, MCA_DDRPHY_PC_INIT_CAL_STATUS_P0, CLEAR_CAL_COMPLETE) );
+            FAPI_TRY( mss::putScom(p, MCA_DDRPHY_PC_INIT_CAL_STATUS_P0, CLEAR_CAL_COMPLETE) );
 #endif
-            FAPI_TRY( fapi2::putScom(p, MCA_DDRPHY_PC_INIT_CAL_ERROR_P0, 0) );
-            FAPI_TRY( fapi2::putScom(p, MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0, 0) );
+            FAPI_TRY( mss::putScom(p, MCA_DDRPHY_PC_INIT_CAL_ERROR_P0, 0) );
+            FAPI_TRY( mss::putScom(p, MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0, 0) );
 
             // Hit the reset button for wr_lvl values. These won't reset until the next run of wr_lvl
             FAPI_TRY( mss::reset_wc_config0(p) );
