@@ -195,7 +195,7 @@ fapi2::ReturnCode perform_slew_cal<slew_rate_t>(
                            MCA_DDRPHY_ADR_SLEW_CAL_CNTL_P0_ADR32S0_ADR0_TARGET_PR_OFFSET_LEN>(l_slew_rate.second);
     l_data.setBit<MCA_DDRPHY_ADR_SLEW_CAL_CNTL_P0_ADR32S0_ADR0_START>();
 
-    FAPI_TRY( fapi2::putScom(i_target, MCA_DDRPHY_ADR_SLEW_CAL_CNTL_P0_ADR32S0, l_data) );
+    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_ADR_SLEW_CAL_CNTL_P0_ADR32S0, l_data) );
 
     mss::poll( i_target, MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0, mss::poll_parameters(DELAY_100NS),
                [&](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
@@ -212,7 +212,7 @@ fapi2::ReturnCode perform_slew_cal<slew_rate_t>(
     FAPI_TRY( slew_cal_status(i_target, i_where_am_i, l_slew_rate.second, cal_status, status_register) );
 
     // Get our calculated slew rate and process.
-    FAPI_TRY( fapi2::getScom(i_target, MCA_DDRPHY_ADR_SLEW_CAL_CNTL_P0_ADR32S0, l_data) );
+    FAPI_TRY( mss::getScom(i_target, MCA_DDRPHY_ADR_SLEW_CAL_CNTL_P0_ADR32S0, l_data) );
     l_data.extractToRight<MCA_DDRPHY_ADR_SLEW_CAL_CNTL_P0_ADR32S0_ADR0_TARGET_PR_OFFSET,
                           MCA_DDRPHY_ADR_SLEW_CAL_CNTL_P0_ADR32S0_ADR0_TARGET_PR_OFFSET_LEN>(calculated_slew);
 
@@ -444,8 +444,8 @@ fapi2::ReturnCode slew_cal(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target)
                      mss::pos(p), (ddr_type + 2), ddr_idx, ddr_freq, freq_idx, l_name);
 
             // Note: This is wrong. Cant' find the SLEW_CAL enable bit in n10_e9024, so leaving this here for now BRS
-            FAPI_TRY( fapi2::putScom(p, MCA_DDRPHY_ADR_SLEW_CAL_CNTL_P0_ADR32S0,
-                                     fapi2::buffer<uint64_t>().setBit<ENABLE_BIT>()),
+            FAPI_TRY( mss::putScom(p, MCA_DDRPHY_ADR_SLEW_CAL_CNTL_P0_ADR32S0,
+                                   fapi2::buffer<uint64_t>().setBit<ENABLE_BIT>()),
                       "Error enabling slew calibration engine in DDRPHY_ADR_SLEW_CAL_CNTL register.");
         }
     }
@@ -483,8 +483,8 @@ fapi2::ReturnCode slew_cal(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target)
         for (auto p : l_mcs_ports)
         {
             // Note: This is wrong. Cant' find the SLEW_CAL enable bit in n10_e9024, so leaving this here for now BRS
-            FAPI_TRY( fapi2::putScom(p, MCA_DDRPHY_ADR_SLEW_CAL_CNTL_P0_ADR32S0,
-                                     fapi2::buffer<uint64_t>().clearBit<ENABLE_BIT>()),
+            FAPI_TRY( mss::putScom(p, MCA_DDRPHY_ADR_SLEW_CAL_CNTL_P0_ADR32S0,
+                                   fapi2::buffer<uint64_t>().clearBit<ENABLE_BIT>()),
                       "Error disabling slew calibration engine in DDRPHY_ADR_SLEW_CAL_CNTL register.");
         }
 

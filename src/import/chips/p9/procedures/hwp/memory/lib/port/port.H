@@ -102,9 +102,9 @@ fapi2::ReturnCode change_addr_mux_sel( const fapi2::Target<T>& i_target, states 
     fapi2::buffer<uint64_t> l_data;
 
     FAPI_DBG("Change addr_mux_sel to %s %s", (i_state == HIGH ? "high" : "low"), mss::c_str(i_target));
-    FAPI_TRY( fapi2::getScom(i_target, TT::FARB5Q_REG, l_data) );
+    FAPI_TRY( mss::getScom(i_target, TT::FARB5Q_REG, l_data) );
     l_data.writeBit<TT::CFG_CCS_ADDR_MUX_SEL>(i_state);
-    FAPI_TRY( fapi2::putScom(i_target, TT::FARB5Q_REG, l_data) );
+    FAPI_TRY( mss::putScom(i_target, TT::FARB5Q_REG, l_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -122,9 +122,9 @@ fapi2::ReturnCode change_refresh_enable( const fapi2::Target<T>& i_target, state
     fapi2::buffer<uint64_t> l_data;
 
     FAPI_DBG("Change refresh enable to %s %s", (i_state == HIGH ? "high" : "low"), mss::c_str(i_target));
-    FAPI_TRY( fapi2::getScom(i_target, TT::REFRESH_REG, l_data) );
+    FAPI_TRY( mss::getScom(i_target, TT::REFRESH_REG, l_data) );
     l_data.writeBit<TT::REFRESH_ENABLE>(i_state);
-    FAPI_TRY( fapi2::putScom(i_target, TT::REFRESH_REG, l_data) );
+    FAPI_TRY( mss::putScom(i_target, TT::REFRESH_REG, l_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -154,7 +154,7 @@ fapi2::ReturnCode enable_read_ecc( const fapi2::Target<T>& i_target )
 
     FAPI_DBG("Enable Read ECC %s", mss::c_str(i_target));
 
-    FAPI_TRY( fapi2::getScom(i_target, TT::ECC_REG, l_data) );
+    FAPI_TRY( mss::getScom(i_target, TT::ECC_REG, l_data) );
     l_data.clearBit<TT::ECC_CHECK_DISABLE>();
     l_data.clearBit<TT::ECC_CORRECT_DISABLE>();
 
@@ -166,7 +166,7 @@ fapi2::ReturnCode enable_read_ecc( const fapi2::Target<T>& i_target )
     // bits: 60 MBSTRQ_CFG_MAINT_RCE_WITH_CE
     // cfg_maint_rce_with_ce - not implemented. Need to investigate if needed for nimbus.
 
-    FAPI_TRY( fapi2::putScom(i_target, TT::ECC_REG, l_data) );
+    FAPI_TRY( mss::putScom(i_target, TT::ECC_REG, l_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -191,7 +191,7 @@ template< fapi2::TargetType T, typename TT = portTraits<T> >
 inline fapi2::ReturnCode draminit_entry_invariant( const fapi2::Target<T>& i_target )
 {
     fapi2::buffer<uint64_t> l_data;
-    FAPI_TRY( fapi2::getScom(i_target, TT::FARB5Q_REG, l_data) );
+    FAPI_TRY( mss::getScom(i_target, TT::FARB5Q_REG, l_data) );
 
     if ((l_data.getBit<TT::CFG_CCS_ADDR_MUX_SEL>() != HIGH) || (l_data.getBit<TT::CFG_CCS_INST_RESET_ENABLE>() != LOW))
     {
@@ -199,7 +199,7 @@ inline fapi2::ReturnCode draminit_entry_invariant( const fapi2::Target<T>& i_tar
         FAPI_INF("FARB5Q: 0x%llx, setting MUX_SEL, clearing RESET_ENABLE", uint64_t(l_data));
         l_data.setBit<TT::CFG_CCS_ADDR_MUX_SEL>();
         l_data.clearBit<TT::CFG_CCS_INST_RESET_ENABLE>();
-        FAPI_TRY( fapi2::putScom(i_target, TT::FARB5Q_REG, l_data) );
+        FAPI_TRY( mss::putScom(i_target, TT::FARB5Q_REG, l_data) );
     }
 
 fapi_try_exit:
@@ -220,12 +220,12 @@ fapi2::ReturnCode drive_mem_clks( const fapi2::Target<T>& i_target, uint64_t i_p
     fapi2::buffer<uint64_t> l_data;
 
     FAPI_DBG("Drive mem clocks");
-    FAPI_TRY( fapi2::getScom(i_target, TT::FARB5Q_REG, l_data) );
+    FAPI_TRY( mss::getScom(i_target, TT::FARB5Q_REG, l_data) );
 
     l_data.insertFromRight<TT::CFG_DDR_DPHY_NCLK, TT::CFG_DDR_DPHY_NCLK_LEN>(i_nclk);
     l_data.insertFromRight<TT::CFG_DDR_DPHY_PCLK, TT::CFG_DDR_DPHY_PCLK_LEN>(i_pclk);
 
-    FAPI_TRY( fapi2::putScom(i_target, TT::FARB5Q_REG, l_data) );
+    FAPI_TRY( mss::putScom(i_target, TT::FARB5Q_REG, l_data) );
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -245,13 +245,13 @@ template< fapi2::TargetType T, typename TT = portTraits<T> >
 fapi2::ReturnCode ddr_resetn( const fapi2::Target<T>& i_target, bool i_state )
 {
     fapi2::buffer<uint64_t> l_data;
-    FAPI_TRY( fapi2::getScom(i_target, TT::FARB5Q_REG, l_data) );
+    FAPI_TRY( mss::getScom(i_target, TT::FARB5Q_REG, l_data) );
 
     if (l_data.getBit<TT::CFG_DDR_RESETN>() != i_state)
     {
         l_data.writeBit<TT::CFG_DDR_RESETN>(i_state);
         FAPI_DBG("ddr_resetn transitioning to %d (0x%llx)", i_state, l_data);
-        FAPI_TRY( fapi2::putScom(i_target, TT::FARB5Q_REG, l_data) );
+        FAPI_TRY( mss::putScom(i_target, TT::FARB5Q_REG, l_data) );
     }
 
     return fapi2::FAPI2_RC_SUCCESS;

@@ -461,9 +461,9 @@ inline fapi2::ReturnCode select_ports( const fapi2::Target<T>& i_target, uint64_
     // Not handling multiple ports here, can't do that for CCS. BRS
     FAPI_TRY( l_ports.setBit(i_ports) );
 
-    FAPI_TRY( fapi2::getScom(i_target, TT::MCB_CNTL_REG, l_data) );
+    FAPI_TRY( mss::getScom(i_target, TT::MCB_CNTL_REG, l_data) );
     l_data.insert<TT::MCB_CNTL_PORT_SEL, TT::MCB_CNTL_PORT_SEL_LEN>(l_ports);
-    FAPI_TRY( fapi2::putScom(i_target, TT::MCB_CNTL_REG, l_data) );
+    FAPI_TRY( mss::putScom(i_target, TT::MCB_CNTL_REG, l_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -563,7 +563,7 @@ template< fapi2::TargetType T, typename TT = ccsTraits<T> >
 inline fapi2::ReturnCode read_mode( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& i_buffer)
 {
     FAPI_DBG("read mode 0x%llx", TT::MODEQ_REG);
-    return fapi2::getScom(i_target, TT::MODEQ_REG, i_buffer);
+    return mss::getScom(i_target, TT::MODEQ_REG, i_buffer);
 }
 
 ///
@@ -577,7 +577,7 @@ inline fapi2::ReturnCode read_mode( const fapi2::Target<T>& i_target, fapi2::buf
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
 inline fapi2::ReturnCode write_mode( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_buffer)
 {
-    return fapi2::putScom(i_target, TT::MODEQ_REG, i_buffer);
+    return mss::putScom(i_target, TT::MODEQ_REG, i_buffer);
 }
 
 ///

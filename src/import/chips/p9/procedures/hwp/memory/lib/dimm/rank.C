@@ -265,9 +265,9 @@ fapi2::ReturnCode set_rank_pairs(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
     FAPI_DBG("setting rank pairs for %s. [%d,%d] (0x%08llx, 0x%08llx) csid: 0x%016llx",
              mss::c_str(i_target), l_rank_count[1], l_rank_count[0], l_rp0_register, l_rp1_register, l_csid_data);
 
-    FAPI_TRY( fapi2::putScom(i_target, MCA_DDRPHY_PC_RANK_PAIR0_P0, l_rp0_register) );
-    FAPI_TRY( fapi2::putScom(i_target, MCA_DDRPHY_PC_RANK_PAIR1_P0, l_rp1_register) );
-    FAPI_TRY( fapi2::putScom(i_target, MCA_DDRPHY_PC_CSID_CFG_P0, l_csid_data) );
+    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_RANK_PAIR0_P0, l_rp0_register) );
+    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_RANK_PAIR1_P0, l_rp1_register) );
+    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_CSID_CFG_P0, l_csid_data) );
 
     // HACK HACK HACK: put this in the code properly!! BRS
     {
@@ -281,7 +281,7 @@ fapi2::ReturnCode set_rank_pairs(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
         l_fix_me.setBit<MCA_DDRPHY_PC_RANK_GROUP_P0_ADDR_MIRROR_BA0_BA1>();
         l_fix_me.setBit<MCA_DDRPHY_PC_RANK_GROUP_P0_ADDR_MIRROR_BG0_BG1>();
         FAPI_DBG("pc_rank_group: 0x%016llx", uint64_t(l_fix_me));
-        FAPI_TRY( fapi2::putScom(i_target, MCA_DDRPHY_PC_RANK_GROUP_P0, l_fix_me) );
+        FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_RANK_GROUP_P0, l_fix_me) );
     }
 
 fapi_try_exit:

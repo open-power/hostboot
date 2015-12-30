@@ -67,7 +67,7 @@ fapi2::ReturnCode scom_blastah( const fapi2::Target<T>& i_target, const std::vec
 
     for (auto a : i_addrs)
     {
-        FAPI_TRY( fapi2::putScom(i_target, a, i_data) );
+        FAPI_TRY( mss::putScom(i_target, a, i_data) );
         ++count;
     }
 
@@ -93,7 +93,7 @@ fapi2::ReturnCode scom_blastah( const std::vector<fapi2::Target<T> >& i_targets,
 
     for (auto t : i_targets)
     {
-        FAPI_TRY( fapi2::putScom(t, i_addr, i_data) );
+        FAPI_TRY( mss::putScom(t, i_addr, i_data) );
         ++count;
     }
 
@@ -145,9 +145,9 @@ fapi2::ReturnCode change_resetn( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targ
     {
         FAPI_DBG("Change reset to %s PHY: %s", (i_state == HIGH ? "high" : "low"), mss::c_str(p));
 
-        FAPI_TRY( fapi2::getScom(p, MCA_MBA_CAL0Q, l_data) );
+        FAPI_TRY( mss::getScom(p, MCA_MBA_CAL0Q, l_data) );
         i_state == HIGH ? l_data.setBit<MCA_MBA_CAL0Q_RESET_RECOVER>() : l_data.clearBit<MCA_MBA_CAL0Q_RESET_RECOVER>();
-        FAPI_TRY( fapi2::putScom(p, MCA_MBA_CAL0Q, l_data) );
+        FAPI_TRY( mss::putScom(p, MCA_MBA_CAL0Q, l_data) );
     }
 
 fapi_try_exit:
@@ -221,7 +221,7 @@ fapi2::ReturnCode change_force_mclk_low (const fapi2::Target<fapi2::TARGET_TYPE_
     // Might as well do this for all the ports while we're here.
     for (auto p : i_target.getChildren<TARGET_TYPE_MCA>())
     {
-        FAPI_TRY(fapi2::getScom( p, MCA_MBA_FARB5Q, l_data));
+        FAPI_TRY(mss::getScom( p, MCA_MBA_FARB5Q, l_data));
 
         if (i_state == mss::HIGH)
         {
@@ -232,7 +232,7 @@ fapi2::ReturnCode change_force_mclk_low (const fapi2::Target<fapi2::TARGET_TYPE_
             l_data.clearBit<MCA_MBA_FARB5Q_CFG_FORCE_MCLK_LOW_N>();
         }
 
-        FAPI_TRY(fapi2::putScom( p, MCA_MBA_FARB5Q, l_data));
+        FAPI_TRY(mss::putScom( p, MCA_MBA_FARB5Q, l_data));
     }
 
 fapi_try_exit:
@@ -399,7 +399,7 @@ fapi2::ReturnCode ddr_phy_flush( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targ
 
     for (auto p : l_ports)
     {
-        FAPI_TRY(fapi2::putScomUnderMask(p, MCA_DDRPHY_PC_POWERDOWN_1_P0, l_data, l_mask) );
+        FAPI_TRY(mss::putScomUnderMask(p, MCA_DDRPHY_PC_POWERDOWN_1_P0, l_data, l_mask) );
     }
 
     fapi2::delay(DELAY_100NS, cycles_to_simcycles(ns_to_cycles(i_target, 100)));
@@ -408,7 +408,7 @@ fapi2::ReturnCode ddr_phy_flush( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targ
 
     for (auto p : l_ports)
     {
-        FAPI_TRY(fapi2::putScomUnderMask(p, MCA_DDRPHY_PC_POWERDOWN_1_P0, 0, l_mask) );
+        FAPI_TRY(mss::putScomUnderMask(p, MCA_DDRPHY_PC_POWERDOWN_1_P0, 0, l_mask) );
     }
 
 fapi_try_exit:
@@ -435,7 +435,7 @@ static inline fapi2::ReturnCode phy_block_broadcast( const fapi2::Target<TARGET_
     // the PHY) we can use the broadcast bits and iterate over the DIMM ranks.
     for (size_t i = 0; i < PHY_INSTANCE_COUNT; ++i)
     {
-        FAPI_TRY( fapi2::putScom(i_target, l_addr | fapi2::buffer<uint64_t>().insertFromRight<18, 4>(i), i_data) );
+        FAPI_TRY( mss::putScom(i_target, l_addr | fapi2::buffer<uint64_t>().insertFromRight<18, 4>(i), i_data) );
     }
 
 fapi_try_exit:
@@ -540,25 +540,25 @@ fapi2::ReturnCode rank_pair_primary_to_dimm(
     switch(i_rp)
     {
         case 0:
-            FAPI_TRY( fapi2::getScom(i_target, MCA_DDRPHY_PC_RANK_PAIR0_P0, l_data) );
+            FAPI_TRY( mss::getScom(i_target, MCA_DDRPHY_PC_RANK_PAIR0_P0, l_data) );
             l_data.extractToRight<MCA_DDRPHY_PC_RANK_PAIR0_P0_PRI,
                                   MCA_DDRPHY_PC_RANK_PAIR0_P0_PRI_LEN>(l_rank);
             break;
 
         case 1:
-            FAPI_TRY( fapi2::getScom(i_target, MCA_DDRPHY_PC_RANK_PAIR0_P0, l_data) );
+            FAPI_TRY( mss::getScom(i_target, MCA_DDRPHY_PC_RANK_PAIR0_P0, l_data) );
             l_data.extractToRight<MCA_DDRPHY_PC_RANK_PAIR0_P0_PAIR1_PRI,
                                   MCA_DDRPHY_PC_RANK_PAIR0_P0_PAIR1_PRI_LEN>(l_rank);
             break;
 
         case 2:
-            FAPI_TRY( fapi2::getScom(i_target, MCA_DDRPHY_PC_RANK_PAIR1_P0, l_data) );
+            FAPI_TRY( mss::getScom(i_target, MCA_DDRPHY_PC_RANK_PAIR1_P0, l_data) );
             l_data.extractToRight<MCA_DDRPHY_PC_RANK_PAIR1_P0_PAIR2_PRI,
                                   MCA_DDRPHY_PC_RANK_PAIR1_P0_PAIR2_PRI_LEN>(l_rank);
             break;
 
         case 3:
-            FAPI_TRY( fapi2::getScom(i_target, MCA_DDRPHY_PC_RANK_PAIR1_P0, l_data) );
+            FAPI_TRY( mss::getScom(i_target, MCA_DDRPHY_PC_RANK_PAIR1_P0, l_data) );
             l_data.extractToRight<MCA_DDRPHY_PC_RANK_PAIR1_P0_PAIR3_PRI,
                                   MCA_DDRPHY_PC_RANK_PAIR1_P0_PAIR3_PRI_LEN>(l_rank);
             break;
@@ -599,7 +599,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
 
     fapi2::Target<TARGET_TYPE_DIMM> l_failed_dimm;
 
-    FAPI_TRY( fapi2::getScom(i_target, MCA_DDRPHY_APB_FIR_ERR1_P0, l_fir_data) );
+    FAPI_TRY( mss::getScom(i_target, MCA_DDRPHY_APB_FIR_ERR1_P0, l_fir_data) );
 
     FAPI_DBG("initial cal FIR: 0x%016llx", uint64_t(l_fir_data));
 
@@ -609,7 +609,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
     }
 
     // We have bits to check ...
-    FAPI_TRY( fapi2::getScom(i_target, MCA_DDRPHY_PC_INIT_CAL_ERROR_P0, l_err_data) );
+    FAPI_TRY( mss::getScom(i_target, MCA_DDRPHY_PC_INIT_CAL_ERROR_P0, l_err_data) );
 
     l_err_data.extractToRight<MCA_DDRPHY_PC_INIT_CAL_ERROR_P0_WR_LEVEL, 11>(l_errors);
     l_err_data.extractToRight<MCA_DDRPHY_PC_INIT_CAL_ERROR_P0_RANK_PAIR,
@@ -761,7 +761,7 @@ template<>
 fapi2::ReturnCode set_pc_config0(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
 {
     fapi2::buffer<uint64_t> l_data;
-    FAPI_TRY( fapi2::getScom(i_target, MCA_DDRPHY_PC_CONFIG0_P0, l_data) );
+    FAPI_TRY( mss::getScom(i_target, MCA_DDRPHY_PC_CONFIG0_P0, l_data) );
 
     // Note: This needs to get the DRAM gen from an attribute. - 0x1 is DDR4 Note for Nimbus PHY
     // this is ignored and hard-wired to DDR4, per John Bialas 10/15 BRS
@@ -771,7 +771,7 @@ fapi2::ReturnCode set_pc_config0(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
     l_data.setBit<MCA_DDRPHY_PC_CONFIG0_P0_DDR4_VLEVEL_BANK_GROUP>();
 
     FAPI_DBG("phy pc_config0 0x%0llx", l_data);
-    FAPI_TRY( fapi2::putScom(i_target, MCA_DDRPHY_PC_CONFIG0_P0, l_data) );
+    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_CONFIG0_P0, l_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -820,7 +820,7 @@ fapi2::ReturnCode set_pc_config1(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
     l_gen_index = l_dram_gen[0] | l_dram_gen[1];
 
     // FOR NIMBUS PHY (as the protocol choice above is) BRS
-    FAPI_TRY( fapi2::getScom(i_target, MCA_DDRPHY_PC_CONFIG1_P0, l_data) );
+    FAPI_TRY( mss::getScom(i_target, MCA_DDRPHY_PC_CONFIG1_P0, l_data) );
 
     l_data.insertFromRight<MCA_DDRPHY_PC_CONFIG1_P0_MEMORY_TYPE,
                            MCA_DDRPHY_PC_CONFIG1_P0_MEMORY_TYPE_LEN>(memory_type[l_type_index][l_gen_index]);
@@ -832,7 +832,7 @@ fapi2::ReturnCode set_pc_config1(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
     l_data.setBit<MCA_DDRPHY_PC_CONFIG1_P0_DDR4_LATENCY_SW>();
 
     FAPI_DBG("phy pc_config1 0x%0llx", l_data);
-    FAPI_TRY( fapi2::putScom(i_target, MCA_DDRPHY_PC_CONFIG1_P0, l_data) );
+    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_CONFIG1_P0, l_data) );
 
 fapi_try_exit:
     return fapi2::current_err;

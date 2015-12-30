@@ -31,6 +31,7 @@
 #define _MSS_POLL_H_
 
 #include <fapi2.H>
+#include "../utils/scom.H"
 #include "../shared/mss_const.H"
 #include "conversions.H"
 
@@ -110,7 +111,7 @@ inline bool poll(const fapi2::Target<T>& i_target, const uint64_t i_addr,
 
     for ( size_t l_poll_limit = i_params.iv_poll_count; l_poll_limit > 0; --l_poll_limit )
     {
-        FAPI_TRY( fapi2::getScom(i_target, i_addr, l_reg) );
+        FAPI_TRY( mss::getScom(i_target, i_addr, l_reg) );
 
         if (i_fn(l_poll_limit, l_reg) == true)
         {
@@ -126,7 +127,7 @@ inline bool poll(const fapi2::Target<T>& i_target, const uint64_t i_addr,
     return false;
 
 fapi_try_exit:
-    FAPI_ERR("mss::poll() hit an error in fapi2::delay or fapi2::getScom");
+    FAPI_ERR("mss::poll() hit an error in fapi2::delay or mss::getScom");
     return false;
 }
 

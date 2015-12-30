@@ -31,6 +31,7 @@
 #include <utility>
 #include <vector>
 
+#include "../utils/scom.H"
 #include "dp16.H"
 
 #include <p9_mc_scom_addresses.H>
@@ -163,7 +164,7 @@ fapi2::ReturnCode write_data_bit_enable( const fapi2::Target<TARGET_TYPE_MCA>& i
     {
         // This is probably important enough to be seen all the time, not just debug
         FAPI_INF( "Setting up DATA_BIT_ENABLE 0x%llx (0x%llx) %s", rdp.first, rdp.second, mss::c_str(i_target) );
-        FAPI_TRY( fapi2::putScom(i_target, rdp.first, rdp.second) );
+        FAPI_TRY( mss::putScom(i_target, rdp.first, rdp.second) );
     }
 
 fapi_try_exit:
@@ -196,7 +197,7 @@ fapi2::ReturnCode read_clock_enable( const fapi2::Target<TARGET_TYPE_MCA>& i_tar
             l_data.insertFromRight<MCA_DDRPHY_DP16_READ_CLOCK_RANK_PAIR0_P0_0_01_QUAD0_CLK16, 16>(rdp.second);
 
             FAPI_INF( "Setting up RDCLK RP%d 0x%llx (0x%llx) %s", rp, l_address, l_data, mss::c_str(i_target) );
-            FAPI_TRY( fapi2::putScom(i_target, l_address, l_data) );
+            FAPI_TRY( mss::putScom(i_target, l_address, l_data) );
         }
     }
 
@@ -230,7 +231,7 @@ fapi2::ReturnCode write_clock_enable( const fapi2::Target<TARGET_TYPE_MCA>& i_ta
             l_data.insertFromRight<MCA_DDRPHY_DP16_WRCLK_EN_RP0_P0_0_01_QUAD0_CLK16, 16>(rdp.second);
 
             FAPI_INF( "Setting up WRCLK RP%d 0x%llx (0x%llx) %s", rp, l_address, l_data, mss::c_str(i_target) );
-            FAPI_TRY( fapi2::putScom(i_target, l_address, l_data) );
+            FAPI_TRY( mss::putScom(i_target, l_address, l_data) );
         }
     }
 
@@ -261,9 +262,9 @@ fapi2::ReturnCode reset_delay_values( const fapi2::Target<TARGET_TYPE_MCA>& i_ta
 
     // Reset the write level values
     FAPI_INF( "Resetting write level values %s", mss::c_str(i_target) );
-    FAPI_TRY( fapi2::getScom(i_target, MCA_DDRPHY_WC_CONFIG2_P0, l_data) );
+    FAPI_TRY( mss::getScom(i_target, MCA_DDRPHY_WC_CONFIG2_P0, l_data) );
     l_data.setBit<MCA_DDRPHY_WC_CONFIG2_P0_EN_RESET_WR_DELAY_WL>();
-    FAPI_TRY( fapi2::putScom(i_target, MCA_DDRPHY_WC_CONFIG2_P0, l_data) );
+    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_WC_CONFIG2_P0, l_data) );
 
     for (auto rp : l_rank_pairs)
     {
@@ -274,7 +275,7 @@ fapi2::ReturnCode reset_delay_values( const fapi2::Target<TARGET_TYPE_MCA>& i_ta
             l_address.insertFromRight<22, 2>(rp);
 
             FAPI_DBG( "Resetting DP16 gate delay 0x%llx %s", l_address, mss::c_str(i_target) );
-            FAPI_TRY( fapi2::putScom(i_target, l_address, 0) );
+            FAPI_TRY( mss::putScom(i_target, l_address, 0) );
         }
     }
 
@@ -316,8 +317,8 @@ fapi2::ReturnCode setup_sysclk( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
 
         for (auto a : l_addrs)
         {
-            FAPI_TRY( fapi2::putScom(p, a.first, l_data) );
-            FAPI_TRY( fapi2::putScom(p, a.second, l_data) );
+            FAPI_TRY( mss::putScom(p, a.first, l_data) );
+            FAPI_TRY( mss::putScom(p, a.second, l_data) );
         }
     }
 

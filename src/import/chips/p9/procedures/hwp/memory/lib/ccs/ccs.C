@@ -56,10 +56,10 @@ fapi2::ReturnCode start_stop( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
     fapi2::buffer<uint64_t> l_buf;
 
     // Do we need to read this? We are setting the only bit defined in the scomdef? BRS
-    FAPI_TRY(fapi2::getScom(i_target, TT::CNTLQ_REG, l_buf));
+    FAPI_TRY(mss::getScom(i_target, TT::CNTLQ_REG, l_buf));
 
-    FAPI_TRY( fapi2::putScom(i_target, TT::CNTLQ_REG,
-                             i_start_stop ? l_buf.setBit<TT::CCS_START>() : l_buf.setBit<TT::CCS_STOP>()) );
+    FAPI_TRY( mss::putScom(i_target, TT::CNTLQ_REG,
+                           i_start_stop ? l_buf.setBit<TT::CCS_START>() : l_buf.setBit<TT::CCS_STOP>()) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -175,8 +175,8 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
             // simple (straight line) CCS programs. Anything with a loop or such will need another mechanism.
             l_inst_iter->arr1.insertFromRight<MCBIST_CCS_INST_ARR1_00_GOTO_CMD,
                         MCBIST_CCS_INST_ARR1_00_GOTO_CMD_LEN>(l_inst_count + 1);
-            FAPI_TRY( fapi2::putScom(i_target, CCS_ARR0_ZERO + l_inst_count, l_inst_iter->arr0) );
-            FAPI_TRY( fapi2::putScom(i_target, CCS_ARR1_ZERO + l_inst_count, l_inst_iter->arr1) );
+            FAPI_TRY( mss::putScom(i_target, CCS_ARR0_ZERO + l_inst_count, l_inst_iter->arr0) );
+            FAPI_TRY( mss::putScom(i_target, CCS_ARR1_ZERO + l_inst_count, l_inst_iter->arr1) );
 
             // arr1 contains a specification of the delay and repeat after this instruction, as well
             // as a repeat. Total up the delays as we go so we know how long to wait before polling
@@ -212,8 +212,8 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
         // here as an instruction forces the CCS engine to wait the delay specified in
         // the last instruction in this array (which it otherwise doesn't do.)
         l_des.arr1.setBit<MCBIST_CCS_INST_ARR1_00_END>();
-        FAPI_TRY( fapi2::putScom(i_target, CCS_ARR0_ZERO + l_inst_count, l_des.arr0) );
-        FAPI_TRY( fapi2::putScom(i_target, CCS_ARR1_ZERO + l_inst_count, l_des.arr1) );
+        FAPI_TRY( mss::putScom(i_target, CCS_ARR0_ZERO + l_inst_count, l_des.arr0) );
+        FAPI_TRY( mss::putScom(i_target, CCS_ARR1_ZERO + l_inst_count, l_des.arr1) );
 
         FAPI_DBG("css inst %d fixup: 0x%016lX 0x%016lX (0x%lx, 0x%lx) %s",
                  l_inst_count, l_des.arr0, l_des.arr1,
