@@ -188,8 +188,7 @@ TESTCASE_MODULES += testtargeting
 #******************************************************************
 
 TESTCASE_MODULES += testerrl
-#@TODO RTC: 142612 Fix up hwas1test.H
-#TESTCASE_MODULES += testhwas
+TESTCASE_MODULES += testhwas
 TESTCASE_MODULES += testvpd
 TESTCASE_MODULES += testsyslib
 

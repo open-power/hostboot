@@ -354,8 +354,11 @@ public:
                 if (isChipFunctional(pTarget, pgData))
                 {
                     TS_FAIL("testHWASisChipFunctional>"
-                            "functional = 0x%x, should be false.",
-                            isChipFunctional(pTarget, pgData));
+                            "functional = 0x%x, should be false, "
+                            "FSI = 0x%04x, mask = 0x%04x.",
+                            isChipFunctional(pTarget, pgData),
+                            pgData[VPD_CP00_PG_FSI_INDEX],
+                            l_mask);
                 }
 
                 // Restore the "all good" data
@@ -382,8 +385,11 @@ public:
                 if (isChipFunctional(pTarget, pgData))
                 {
                     TS_FAIL("testHWASisChipFunctional>"
-                            "functional = 0x%x, should be false.",
-                            isChipFunctional(pTarget, pgData));
+                            "functional = 0x%x, should be false, "
+                            "PRV = 0x%04x, mask = 0x%04x.",
+                            isChipFunctional(pTarget, pgData),
+                            pgData[VPD_CP00_PG_PERVASIVE_INDEX],
+                            l_mask);
                 }
 
                 // Restore the "all good" data
@@ -410,8 +416,11 @@ public:
                 if (isChipFunctional(pTarget, pgData))
                 {
                     TS_FAIL("testHWASisChipFunctional>"
-                            "functional = 0x%x, should be false.",
-                            isChipFunctional(pTarget, pgData));
+                            "functional = 0x%x, should be false, "
+                            "N0 = 0x%04x, mask = 0x%04x.",
+                            isChipFunctional(pTarget, pgData),
+                            pgData[VPD_CP00_PG_N0_INDEX],
+                            l_mask);
                 }
 
                 // Restore the "all good" data
@@ -444,8 +453,11 @@ public:
                 if (isChipFunctional(pTarget, pgData))
                 {
                     TS_FAIL("testHWASisChipFunctional>"
-                            "functional = 0x%x, should be false.",
-                            isChipFunctional(pTarget, pgData));
+                            "functional = 0x%x, should be false, "
+                            "N1 = 0x%04x, mask = 0x%04x.",
+                            isChipFunctional(pTarget, pgData),
+                            pgData[VPD_CP00_PG_N1_INDEX],
+                            l_mask);
                 }
 
                 // Restore the "all good" data
@@ -472,8 +484,11 @@ public:
                 if (isChipFunctional(pTarget, pgData))
                 {
                     TS_FAIL("testHWASisChipFunctional>"
-                            "functional = 0x%x, should be false.",
-                            isChipFunctional(pTarget, pgData));
+                            "functional = 0x%x, should be false, "
+                            "N2 = 0x%04x, mask = 0x%04x.",
+                            isChipFunctional(pTarget, pgData),
+                            pgData[VPD_CP00_PG_N2_INDEX],
+                            l_mask);
                 }
 
                 // Restore the "all good" data
@@ -506,8 +521,11 @@ public:
                 if (isChipFunctional(pTarget, pgData))
                 {
                     TS_FAIL("testHWASisChipFunctional>"
-                            "functional = 0x%x, should be false.",
-                            isChipFunctional(pTarget, pgData));
+                            "functional = 0x%x, should be false, "
+                            "N3 = 0x%04x, mask = 0x%04x.",
+                            isChipFunctional(pTarget, pgData),
+                            pgData[VPD_CP00_PG_N3_INDEX],
+                            l_mask);
                 }
 
                 // Restore the "all good" data
@@ -537,8 +555,11 @@ public:
                 if (isChipFunctional(pTarget, pgData))
                 {
                     TS_FAIL("testHWASisChipFunctional>"
-                            "functional = 0x%x, should be false.",
-                            isChipFunctional(pTarget, pgData));
+                            "functional = 0x%x, should be false, "
+                            "XBUS = 0x%04x, mask = 0x%04x.",
+                            isChipFunctional(pTarget, pgData),
+                            pgData[VPD_CP00_PG_XBUS_INDEX],
+                            l_mask);
                 }
 
                 // Restore the "all good" data
@@ -579,6 +600,9 @@ public:
             memcpy(pgData,
                    pgDataAllGood,
                    VPD_CP00_PG_DATA_LENGTH);
+            pgData[VPD_CP00_PG_XBUS_INDEX] = l_xbus;
+            pgData[VPD_CP00_PG_OB0_INDEX + 1] =  l_obus12;
+            pgData[VPD_CP00_PG_OB0_INDEX + 2] =  l_obus12;
             uint16_t l_mask = 0x8000;
             uint32_t l_index = VPD_CP00_PG_PERVASIVE_INDEX;
 
@@ -593,24 +617,133 @@ public:
                 ATTR_TYPE_type l_type = pDesc->getAttr<ATTR_TYPE>();
                 ATTR_CHIP_UNIT_type l_chipUnit =
                     pDesc->getAttr<ATTR_CHIP_UNIT>();
+                char l_type_str[9];
+                char l_pgData[] = "";
 
                 TS_TRACE( "testHWASisDescFunctional: descendant functional");
                 if (!isDescFunctional(pDesc, pgData))
                 {
+                    switch(l_type)
+                    {
+                        case TYPE_CORE:
+                            sprintf(l_type_str, "CORE");
+                            sprintf(l_pgData, ", pgData = 0x%04x",
+                                pgData[VPD_CP00_PG_EC00_INDEX + l_chipUnit]);
+                            break;
+
+                        case TYPE_MCS:
+                            sprintf(l_type_str, "MCS");
+                            sprintf(l_pgData, ", pgData = 0x%04x",
+                                pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]]);
+                            break;
+
+                        case TYPE_XBUS:
+                            if(MODEL_NIMBUS == l_model)
+                            {
+                                // XBUS is not fully functional on Nimbus
+                                continue;
+                            }
+
+                            sprintf(l_type_str, "XBUS");
+                            sprintf(l_pgData, ", pgData = 0x%04x",
+                                pgData[VPD_CP00_PG_XBUS_INDEX]);
+                            break;
+
+                        case TYPE_NX:
+                            sprintf(l_type_str, "NX");
+                            sprintf(l_pgData, ", pgData = 0x%04x",
+                                pgData[VPD_CP00_PG_N0_INDEX + l_chipUnit]);
+                            break;
+
+                        case TYPE_FSI:
+                            sprintf(l_type_str, "FSI");
+                            sprintf(l_pgData, ", pgData = 0x%04x",
+                                pgData[VPD_CP00_PG_FSI_INDEX]);
+                            break;
+
+                        case TYPE_EQ:
+                            sprintf(l_type_str, "EQ");
+                            sprintf(l_pgData, ", pgData = 0x%04x",
+                                pgData[VPD_CP00_PG_EP0_INDEX + l_chipUnit]);
+                            break;
+
+                        case TYPE_OBUS:
+                            if((MODEL_NIMBUS == l_model) &&
+                               ((1 == l_chipUnit) || (2 == l_chipUnit)))
+                            {
+                                // OBUS1 & OBUS2 are not functional on Nimbus
+                                continue;
+                            }
+
+                            sprintf(l_type_str, "OBUS");
+                            sprintf(l_pgData, ", pgData = 0x%04x",
+                                pgData[VPD_CP00_PG_OB0_INDEX + l_chipUnit]);
+                            break;
+
+                        case TYPE_PERV:
+                            sprintf(l_type_str, "PERV");
+                            sprintf(l_pgData, ", pgData = 0x%04x",
+                                pgData[VPD_CP00_PG_PERVASIVE_INDEX]);
+                            break;
+
+                        case TYPE_PEC:
+                            sprintf(l_type_str, "PEC");
+                            sprintf(l_pgData, ", pgData = 0x%04x",
+                                pgData[VPD_CP00_PG_PCI0_INDEX + l_chipUnit]);
+                            break;
+
+                        default:
+                            sprintf(l_type_str, "%08x", l_type);
+                            break;
+                    }
+
                     TS_FAIL("testHWASisDescFunctional>"
-                            "functional = 0x%x, should be true.",
-                            isDescFunctional(pTarget, pgData));
+                            "functional = 0x%x, should be true, "
+                            "type = %s, chip unit = %d%s.",
+                            isDescFunctional(pDesc, pgData),
+                            l_type_str,
+                            l_chipUnit,
+                            l_pgData);
                 }
-
-                if ((TYPE_XBUS == l_type) && (0 == l_chipUnit))
+                else
+                if(MODEL_NIMBUS == l_model)
                 {
-                    pgData[VPD_CP00_PG_XBUS_INDEX] = l_xbus;
-                }
+                    // Nimbus has special cases for XBUS, OBUS1, and OBUS2.
+                    // These should show up as not functional, so fail if they
+                    // come back as functional.
+                    switch(l_type)
+                    {
+                        case TYPE_XBUS:
+                            sprintf(l_type_str, "XBUS");
+                            sprintf(l_pgData, ", pgData = 0x%04x",
+                                pgData[VPD_CP00_PG_XBUS_INDEX]);
+                            break;
 
-                if ((TYPE_OBUS == l_type) &&
-                    ((1 == l_chipUnit) || (2 == l_chipUnit)))
-                {
-                    pgData[VPD_CP00_PG_OB0_INDEX + l_chipUnit] = l_obus12;
+                        case TYPE_OBUS:
+                            if((0 == l_chipUnit) || (3 == l_chipUnit))
+                            {
+                                // OBUS0 & OBUS3 should be functional on Nimbus
+                                continue;
+                            }
+
+                            sprintf(l_type_str, "OBUS");
+                            sprintf(l_pgData, ", pgData = 0x%04x",
+                                pgData[VPD_CP00_PG_OB0_INDEX + l_chipUnit]);
+                            break;
+
+                        default:
+                            // Most types should be functional on Nimbus
+                            continue;
+                            break;
+                    }
+
+                    TS_FAIL("testHWASisDescFunctional>"
+                            "functional = 0x%x, should be false, "
+                            "type = %s, chip unit = %d%s.",
+                            isDescFunctional(pDesc, pgData),
+                            l_type_str,
+                            l_chipUnit,
+                            l_pgData);
                 }
 
                 switch(l_type)
@@ -621,11 +754,14 @@ public:
                         pgData[VPD_CP00_PG_XBUS_INDEX] |=
                             (uint16_t)VPD_CP00_PG_XBUS_IOX_PAIR[l_chipUnit];
 
-                        if (isDescFunctional(pTarget, pgData))
+                        if (isDescFunctional(pDesc, pgData))
                         {
                             TS_FAIL("testHWASisDescFunctional>"
-                                    "functional = 0x%x, should be false.",
-                                    isDescFunctional(pTarget, pgData));
+                                    "functional = 0x%x, should be false, "
+                                    "XBUS%d = 0x%04x.",
+                                    isDescFunctional(pDesc, pgData),
+                                    l_chipUnit,
+                                    pgData[VPD_CP00_PG_XBUS_INDEX]);
                         }
 
                         pgData[VPD_CP00_PG_XBUS_INDEX] = l_xbus;
@@ -634,22 +770,34 @@ public:
                     case TYPE_OBUS:
                         TS_TRACE( "testHWASisDescFunctional: "
                                   "OBUS%d is not functional", l_chipUnit);
-                       if ((1 == l_chipUnit) || (2 == l_chipUnit))
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N1_PBIOO0;
-                        }
-                        else
-                        {
-                            pgData[VPD_CP00_PG_N1_INDEX] |=
-                                (uint16_t)VPD_CP00_PG_N1_PBIOO1;
-                        }
+                        pgData[VPD_CP00_PG_N1_INDEX] |=
+                            (uint16_t)VPD_CP00_PG_N1_PBIOO0;
 
-                        if (isDescFunctional(pTarget, pgData))
+                        if (isDescFunctional(pDesc, pgData))
                         {
                             TS_FAIL("testHWASisDescFunctional>"
-                                    "functional = 0x%x, should be false.",
-                                    isDescFunctional(pTarget, pgData));
+                                    "functional = 0x%x, should be false, "
+                                    "N1 for OBUS%d = 0x%04x.",
+                                    isDescFunctional(pDesc, pgData),
+                                    l_chipUnit,
+                                    pgData[VPD_CP00_PG_N1_INDEX]);
+                        }
+
+                        if ((1 == l_chipUnit) || (2 == l_chipUnit))
+                        {
+                            pgData[VPD_CP00_PG_N1_INDEX] =
+                                (uint16_t)VPD_CP00_PG_N1_GOOD |
+                                (uint16_t)VPD_CP00_PG_N1_PBIOO1;
+
+                            if (isDescFunctional(pDesc, pgData))
+                            {
+                                TS_FAIL("testHWASisDescFunctional>"
+                                        "functional = 0x%x, should be false, "
+                                        "N1 for OBUS%d = 0x%04x.",
+                                        isDescFunctional(pDesc, pgData),
+                                        l_chipUnit,
+                                        pgData[VPD_CP00_PG_N1_INDEX]);
+                            }
                         }
 
                         pgData[VPD_CP00_PG_N1_INDEX] =
@@ -673,11 +821,16 @@ public:
                                     l_mask;
                             }
 
-                            if (isDescFunctional(pTarget, pgData))
+                            if (isDescFunctional(pDesc, pgData))
                             {
                                 TS_FAIL("testHWASisDescFunctional>"
-                                        "functional = 0x%x, should be false.",
-                                        isDescFunctional(pTarget, pgData));
+                                        "functional = 0x%x, should be false, "
+                                        "OBUS%d = 0x%04x, mask = 0x%04x.",
+                                        isDescFunctional(pDesc, pgData),
+                                        l_chipUnit,
+                                        pgData[VPD_CP00_PG_OB0_INDEX
+                                               + l_chipUnit],
+                                        l_mask);
                             }
 
                             // Restore the "all good" data
@@ -709,11 +862,16 @@ public:
                                     l_mask;
                             }
 
-                            if (isDescFunctional(pTarget, pgData))
+                            if (isDescFunctional(pDesc, pgData))
                             {
                                 TS_FAIL("testHWASisDescFunctional>"
-                                        "functional = 0x%x, should be false.",
-                                        isDescFunctional(pTarget, pgData));
+                                        "functional = 0x%x, should be false, "
+                                        "PCI%d = 0x%04x, mask = 0x%04x.",
+                                        isDescFunctional(pDesc, pgData),
+                                        l_chipUnit,
+                                        pgData[VPD_CP00_PG_PCI0_INDEX
+                                               + l_chipUnit],
+                                        l_mask);
                             }
 
                             // Restore the "all good" data
@@ -747,11 +905,16 @@ public:
                                     l_mask;
                             }
 
-                            if (isDescFunctional(pTarget, pgData))
+                            if (isDescFunctional(pDesc, pgData))
                             {
                                 TS_FAIL("testHWASisDescFunctional>"
-                                        "functional = 0x%x, should be false.",
-                                        isDescFunctional(pTarget, pgData));
+                                        "functional = 0x%x, should be false, "
+                                        "EQ/EP%d = 0x%04x, mask = 0x%04x.",
+                                        isDescFunctional(pDesc, pgData),
+                                        l_chipUnit,
+                                        pgData[VPD_CP00_PG_EP0_INDEX
+                                               + l_chipUnit],
+                                        l_mask);
                             }
 
                             // Restore the "all good" data
@@ -766,11 +929,15 @@ public:
                         pgData[VPD_CP00_PG_EP0_INDEX + (l_chipUnit / 2)] |=
                             (uint16_t)VPD_CP00_PG_EPx_L3L2REFR[l_chipUnit % 2];
 
-                        if (isDescFunctional(pTarget, pgData))
+                        if (isDescFunctional(pDesc, pgData))
                         {
                             TS_FAIL("testHWASisDescFunctional>"
-                                    "functional = 0x%x, should be false.",
-                                    isDescFunctional(pTarget, pgData));
+                                    "functional = 0x%x, should be false, "
+                                    "EX%d / EP%d = 0x%04x.",
+                                    isDescFunctional(pDesc, pgData),
+                                    l_chipUnit, (l_chipUnit / 2),
+                                    pgData[VPD_CP00_PG_EP0_INDEX
+                                           + (l_chipUnit / 2)]);
                         }
 
                         pgData[VPD_CP00_PG_EP0_INDEX + (l_chipUnit / 2)] =
@@ -798,11 +965,16 @@ public:
                                     l_mask;
                             }
 
-                            if (isDescFunctional(pTarget, pgData))
+                            if (isDescFunctional(pDesc, pgData))
                             {
                                 TS_FAIL("testHWASisDescFunctional>"
-                                        "functional = 0x%x, should be false.",
-                                        isDescFunctional(pTarget, pgData));
+                                        "functional = 0x%x, should be false, "
+                                        "CORE%d = 0x%04x, mask = 0x%04x.",
+                                        isDescFunctional(pDesc, pgData),
+                                        l_chipUnit,
+                                        pgData[VPD_CP00_PG_EC00_INDEX
+                                               + l_chipUnit],
+                                        l_mask);
                             }
 
                             // Restore the "all good" data
@@ -825,11 +997,15 @@ public:
                                 (uint16_t)VPD_CP00_PG_N3_MCS01;
                         }
 
-                        if (isDescFunctional(pTarget, pgData))
+                        if (isDescFunctional(pDesc, pgData))
                         {
                             TS_FAIL("testHWASisDescFunctional>"
-                                    "functional = 0x%x, should be false.",
-                                    isDescFunctional(pTarget, pgData));
+                                    "functional = 0x%x, should be false, "
+                                    "N1/N3 for MCBIST%d = 0x%04x.",
+                                    isDescFunctional(pDesc, pgData),
+                                    l_chipUnit,
+                                    l_chipUnit ? pgData[VPD_CP00_PG_N1_INDEX]
+                                               : pgData[VPD_CP00_PG_N3_INDEX]);
                         }
 
                         if (l_chipUnit)
@@ -867,11 +1043,18 @@ public:
                                     |= l_mask;
                             }
 
-                            if (isDescFunctional(pTarget, pgData))
+                            if (isDescFunctional(pDesc, pgData))
                             {
                                 TS_FAIL("testHWASisDescFunctional>"
-                                        "functional = 0x%x, should be false.",
-                                        isDescFunctional(pTarget, pgData));
+                                        "functional = 0x%x, should be false, "
+                                        "MC%s for MCBIST%d = 0x%04x, "
+                                        "mask = 0x%04x.",
+                                        isDescFunctional(pDesc, pgData),
+                                        l_chipUnit ? "01" : "23",
+                                        l_chipUnit,
+                                        pgData[VPD_CP00_PG_MCxx_INDEX
+                                                   [l_chipUnit * 2]],
+                                        l_mask);
                             }
 
                             // Restore the "all good" data
@@ -894,11 +1077,16 @@ public:
                                 (uint16_t)VPD_CP00_PG_N3_MCS01;
                         }
 
-                        if (isDescFunctional(pTarget, pgData))
+                        if (isDescFunctional(pDesc, pgData))
                         {
                             TS_FAIL("testHWASisDescFunctional>"
-                                    "functional = 0x%x, should be false.",
-                                    isDescFunctional(pTarget, pgData));
+                                    "functional = 0x%x, should be false, "
+                                    "N1/N3 for MCS%d = 0x%04x.",
+                                    isDescFunctional(pDesc, pgData),
+                                    l_chipUnit,
+                                    (l_chipUnit >= 2)
+                                        ? pgData[VPD_CP00_PG_N1_INDEX]
+                                        : pgData[VPD_CP00_PG_N3_INDEX]);
                         }
 
                         if (l_chipUnit >= 2)
@@ -937,11 +1125,18 @@ public:
                                     l_mask;
                             }
 
-                            if (isDescFunctional(pTarget, pgData))
+                            if (isDescFunctional(pDesc, pgData))
                             {
                                 TS_FAIL("testHWASisDescFunctional>"
-                                        "functional = 0x%x, should be false.",
-                                        isDescFunctional(pTarget, pgData));
+                                        "functional = 0x%x, should be false, "
+                                        "MC%s for MCS%d = 0x%04x, "
+                                        "mask = 0x%04x.",
+                                        isDescFunctional(pDesc, pgData),
+                                        (l_chipUnit < 2) ? "01" : "23",
+                                        l_chipUnit,
+                                        pgData[VPD_CP00_PG_MCxx_INDEX
+                                                   [l_chipUnit]],
+                                        l_mask);
                             }
 
                             // Restore the "all good" data
@@ -956,11 +1151,16 @@ public:
                         pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit / 2]] |=
                             (uint16_t)VPD_CP00_PG_MCxx_IOMyy[l_chipUnit / 2];
 
-                        if (isDescFunctional(pTarget, pgData))
+                        if (isDescFunctional(pDesc, pgData))
                         {
                             TS_FAIL("testHWASisDescFunctional>"
-                                    "functional = 0x%x, should be false.",
-                                    isDescFunctional(pTarget, pgData));
+                                    "functional = 0x%x, should be false, "
+                                    "MC%s for MCA%d = 0x%04x.",
+                                    isDescFunctional(pDesc, pgData),
+                                    (l_chipUnit < 4) ? "01" : "23",
+                                    l_chipUnit,
+                                    pgData[VPD_CP00_PG_MCxx_INDEX
+                                               [l_chipUnit / 2]]);
                         }
 
                         pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit / 2]] =
@@ -973,11 +1173,13 @@ public:
                         pgData[VPD_CP00_PG_N3_INDEX] |=
                             (uint16_t)VPD_CP00_PG_N3_NPU;
 
-                        if (isDescFunctional(pTarget, pgData))
+                        if (isDescFunctional(pDesc, pgData))
                         {
                             TS_FAIL("testHWASisDescFunctional>"
-                                    "functional = 0x%x, should be false.",
-                                    isDescFunctional(pTarget, pgData));
+                                    "functional = 0x%x, should be false, "
+                                    "NVBUS = 0x%04x.",
+                                    isDescFunctional(pDesc, pgData),
+                                    pgData[VPD_CP00_PG_N3_INDEX]);
                         }
 
                         pgData[VPD_CP00_PG_N3_INDEX] =
@@ -1004,11 +1206,14 @@ public:
                                     (uint16_t)VPD_CP00_PG_xxx_PERV;
                             }
 
-                            if (isDescFunctional(pTarget, pgData))
+                            if (isDescFunctional(pDesc, pgData))
                             {
                                 TS_FAIL("testHWASisDescFunctional>"
-                                        "functional = 0x%x, should be false.",
-                                        isDescFunctional(pTarget, pgData));
+                                        "functional = 0x%x, should be false, "
+                                        "PERV(%d) = 0x%04x.",
+                                        isDescFunctional(pDesc, pgData),
+                                        l_index,
+                                        pgData[l_index]);
                             }
 
                             // Restore the "all good" data
