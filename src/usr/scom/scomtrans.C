@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -130,28 +130,33 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
 
                     //capture the target data in the elog
                     ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(l_err);
+                    
                 }
                 l_target_SW = i_target;
                 g_wakeupInProgress = false;
             }
+
+            // skip the rest of this if the wakeup failed
+            if( !l_err )
+            {
 #endif
  
-        // Below are the assumptions used for the EX translate
-        // EX
-        // Mask		:  0x1F00_0000
-        // Range 1	:  0x1000_0000 -  0x10FF_FFFF
-        //
-        //  bits 3:7 correspond to what EX chiplet is targeted.
-        //  where 0x10XXXXXX is for EX0
-        // 
-        // where 0x13XXXXXX is for EX3
-        // where 0x14XXXXXX is for EX4
-        //  ...
-        // where 0x1CXXXXXX is for EX12
+            // Below are the assumptions used for the EX translate
+            // EX
+            // Mask		:  0x1F00_0000
+            // Range 1	:  0x1000_0000 -  0x10FF_FFFF
+            //
+            //  bits 3:7 correspond to what EX chiplet is targeted.
+            //  where 0x10XXXXXX is for EX0
+            // 
+            // where 0x13XXXXXX is for EX3
+            // where 0x14XXXXXX is for EX4
+            //  ...
+            // where 0x1CXXXXXX is for EX12
 
-        // EX Mask = 0x7F000000 to catch other chiplets.
+            // EX Mask = 0x7F000000 to catch other chiplets.
 
-        // no indirect addresses to worry about*/
+            // no indirect addresses to worry about*/
 
             // check to see that the Address is in the correct range
             if ((i_addr & SCOM_TRANS_EX_MASK) ==  SCOM_TRANS_EX_BASEADDR)
@@ -170,6 +175,11 @@ errlHndl_t scomTranslate(DeviceFW::OperationType i_opType,
 	        // set invalid addr to true.. and create errorlog below.
                 l_invalidAddr = true;
             }
+
+#if __HOSTBOOT_RUNTIME
+            } //from error check above
+#endif
+
         }
         else if (l_type == TARGETING::TYPE_MCS)
         {

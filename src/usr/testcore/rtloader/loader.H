@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -206,6 +206,11 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             if(it != cv_scomMap.end())
             {
                 *data64 = it->second;
+            }
+            else if( (addr & 0x00FFFFFF) == 0x0F0100)
+            {
+                // force special wakeup done bit
+                *data64 = 0x0000000100000000;
             }
             else
             {
