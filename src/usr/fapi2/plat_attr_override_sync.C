@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
- *  @file fapiPlatAttrOverrideSync.C
+ *  @file plat_attr_override_sync.C
  *
  *  @brief Implements the functions for Attribute Override and Sync
  *
@@ -32,8 +32,8 @@
 //******************************************************************************
 // Includes
 //******************************************************************************
-#include <limits.h>
 #include <sys/msg.h>
+#include <limits.h>
 #include <string.h>
 #include <vector>
 #include <sys/msg.h>
@@ -67,6 +67,7 @@ uint8_t g_attrOverrideFapiTank = 0;
 void directOverride()
 {
 #ifndef __HOSTBOOT_RUNTIME
+    uint32_t l_targetType = TARGETING::TYPE_NA;
     // Apply the attribute override
     if (g_attrOverrideFapiTank)
     {
@@ -92,10 +93,12 @@ void directOverride()
     else
     {
         // Convert the FAPI targeting type to TARGETING
-        TARGETING::TYPE l_targetType = TARGETING::TYPE_SYS;
 
         switch (g_attrOverrideHeader.iv_targetType)
         {
+            case fapi2::TARGET_TYPE_SYSTEM:
+                l_targetType = TARGETING::TYPE_SYS;
+                break;
             case fapi2::TARGET_TYPE_DIMM:
                 l_targetType = TARGETING::TYPE_DIMM;
                 break;
@@ -123,6 +126,47 @@ void directOverride()
             case fapi2::TARGET_TYPE_L4:
                 l_targetType = TARGETING::TYPE_L4;
                 break;
+            case fapi2::TARGET_TYPE_CORE:
+                l_targetType = TARGETING::TYPE_CORE;
+                break;
+            case fapi2::TARGET_TYPE_EQ:
+                l_targetType = TARGETING::TYPE_EQ;
+                break;
+            case fapi2::TARGET_TYPE_MCA:
+                l_targetType = TARGETING::TYPE_MCA;
+                break;
+            case fapi2::TARGET_TYPE_MCBIST:
+                l_targetType = TARGETING::TYPE_MCBIST;
+                break;
+            case fapi2::TARGET_TYPE_CAPP:
+                l_targetType = TARGETING::TYPE_CAPP;
+                break;
+            case fapi2::TARGET_TYPE_DMI:
+                l_targetType = TARGETING::TYPE_DMI;
+                break;
+            case fapi2::TARGET_TYPE_OBUS:
+                l_targetType = TARGETING::TYPE_OBUS;
+                break;
+            case fapi2::TARGET_TYPE_NV:
+                l_targetType = TARGETING::TYPE_NVBUS;
+                break;
+            case fapi2::TARGET_TYPE_SBE:
+                l_targetType = TARGETING::TYPE_SBE;
+                break;
+            case fapi2::TARGET_TYPE_PPE:
+                l_targetType = TARGETING::TYPE_PPE;
+                break;
+            case fapi2::TARGET_TYPE_PERV:
+                l_targetType = TARGETING::TYPE_PERV;
+                break;
+            case fapi2::TARGET_TYPE_PEC:
+                l_targetType = TARGETING::TYPE_PEC;
+                break;
+            case fapi2::TARGET_TYPE_PHB:
+                l_targetType = TARGETING::TYPE_PHB;
+                break;
+            default:
+                l_targetType = TARGETING::TYPE_NA;
         }
 
         FAPI_IMP("directOverride: Applying override to TARG tank "

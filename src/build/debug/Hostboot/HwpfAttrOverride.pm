@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2016
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -41,7 +43,7 @@ our @EXPORT_OK = ('main');
 # Constants
 #------------------------------------------------------------------------------
 
-# From fapiTarget.H
+# From src/import/hwpf/fapi2/include/target_types.H
 use constant TARGET_TYPE_SYSTEM => 0x00000001;
 use constant TARGET_TYPE_DIMM => 0x00000002;
 use constant TARGET_TYPE_PROC_CHIP => 0x00000004;
@@ -51,6 +53,21 @@ use constant TARGET_TYPE_MBA_CHIPLET => 0x00000020;
 use constant TARGET_TYPE_MCS_CHIPLET => 0x00000040;
 use constant TARGET_TYPE_XBUS_ENDPOINT => 0x00000080;
 use constant TARGET_TYPE_ABUS_ENDPOINT => 0x00000100;
+use constant TARGET_TYPE_CORE => 0x00000400;
+use constant TARGET_TYPE_EQ => 0x00000800;
+use constant TARGET_TYPE_MCA => 0x00001000;
+use constant TARGET_TYPE_MCBIST => 0x00002000;
+use constant TARGET_TYPE_MI => 0x00004000;
+use constant TARGET_TYPE_CAPP => 0x00008000;
+use constant TARGET_TYPE_DMI => 0x00010000;
+use constant TARGET_TYPE_OBUS => 0x00020000;
+use constant TARGET_TYPE_NV => 0x00040000;
+use constant TARGET_TYPE_SBE => 0x00080000;
+use constant TARGET_TYPE_PPE => 0x00100000;
+use constant TARGET_TYPE_PERV => 0x00200000;
+use constant TARGET_TYPE_PEC => 0x00400000;
+use constant TARGET_TYPE_PHB => 0x00800000;
+use constant TARGET_TYPE_L4 =>  0x00000200;
 
 # From attributeTank.H
 use constant ATTR_POS_NA => 0xffff;
@@ -58,11 +75,11 @@ use constant ATTR_UNIT_POS_NA => 0xff;
 use constant ATTR_NODE_NA => 0xf;
 use constant ATTR_FLAG_CONST => 1;
 
-# From fapiPlatAttrOverrideSync.C
+# From plat_attr_override_sync.C
 use constant MAX_DIRECT_OVERRIDE_ATTR_SIZE_BYTES => 64;
-my $overrideHeaderSymbol = 'fapi::g_attrOverrideHeader';
-my $overrideSymbol = 'fapi::g_attrOverride';
-my $overrideFapiTankSymbol = 'fapi::g_attrOverrideFapiTank';
+my $overrideHeaderSymbol = 'fapi2::g_attrOverrideHeader';
+my $overrideSymbol = 'fapi2::g_attrOverride';
+my $overrideFapiTankSymbol = 'fapi2::g_attrOverrideFapiTank';
 
 # Expected filenames
 my $fapiAttrInfoFileName = 'fapiAttrInfo.csv';
@@ -557,30 +574,45 @@ sub main
             }
 
             # Figure out the target type
-            if ($targ =~ /p8.ex/)
+            if ($targ =~ /pu.ex/)
             {
                 $targType = TARGET_TYPE_EX_CHIPLET;
-                $targ =~ s/^.*p8.ex//;
+                $targ =~ s/^.*pu.ex//;
+            }
+            elsif ($targ =~ /pu.core/)
+            {
+                $targType = TARGET_TYPE_CORE;
+                $targ =~ s/^.*pu.core//;
+            }
+            elsif ($targ =~ /pu.mci/)
+            {
+                $targType = TARGET_TYPE_MCI;
+                $targ =~ s/^.*pu.mci//;
+            }
+            elsif ($targ =~ /pu.dmi/)
+            {
+                $targType = TARGET_TYPE_DMI;
+                $targ =~ s/^.*pu.dmi//;
             }
             elsif ($targ =~ /centaur.mba/)
             {
                 $targType = TARGET_TYPE_MBA_CHIPLET;
                 $targ =~ s/^.*centaur.mba//;
             }
-            elsif ($targ =~ /p8.mcs/)
+            elsif ($targ =~ /pu.mcs/)
             {
                 $targType = TARGET_TYPE_MCS_CHIPLET;
-                $targ =~ s/^.*p8.mcs//;
+                $targ =~ s/^.*pu.mcs//;
             }
-            elsif ($targ =~ /p8.xbus/)
+            elsif ($targ =~ /pu.xbus/)
             {
                 $targType = TARGET_TYPE_XBUS_ENDPOINT;
-                $targ =~ s/^.*p8.xbus//;
+                $targ =~ s/^.*pu.xbus//;
             }
-            elsif ($targ =~ /p8.abus/)
+            elsif ($targ =~ /pu.abus/)
             {
                 $targType = TARGET_TYPE_ABUS_ENDPOINT;
-                $targ =~ s/^.*p8.abus//;
+                $targ =~ s/^.*pu.abus//;
             }
             elsif ($targ =~ /centaur/)
             {
@@ -592,10 +624,65 @@ sub main
                 $targType = TARGET_TYPE_DIMM;
                 $targ =~ s/^.*dimm//;
             }
-            elsif ($targ =~ /p8/)
+            elsif ($targ =~ /pu/)
             {
                 $targType = TARGET_TYPE_PROC_CHIP;
-                $targ =~ s/^.*p8//;
+                $targ =~ s/^.*pu//;
+            }
+            elsif ($targ =~ /pu.obus/)
+            {
+                $targType = TARGET_TYPE_OBUS;
+                $targ =~ s/^.*pu.obus//;
+            }
+            elsif ($targ =~ /pu.mcbist/)
+            {
+                $targType = TARGET_TYPE_MCBIST;
+                $targ =~ s/^.*pu.mcbist//;
+            }
+            elsif ($targ =~ /pu.mca/)
+            {
+                $targType = TARGET_TYPE_MCA;
+                $targ =~ s/^.*pu.mca//;
+            }
+            elsif ($targ =~ /pu.pec/)
+            {
+                $targType = TARGET_TYPE_PEC;
+                $targ =~ s/^.*pu.pec//;
+            }
+            elsif ($targ =~ /pu.phb/)
+            {
+                $targType = TARGET_TYPE_PHB;
+                $targ =~ s/^.*pu.phb//;
+            }
+            elsif ($targ =~ /pu.nvbus/)
+            {
+                $targType = TARGET_TYPE_NV;
+                $targ =~ s/^.*pu.nvbus//;
+            }
+            elsif ($targ =~ /pu.ppe/)
+            {
+                $targType = TARGET_TYPE_PPE;
+                $targ =~ s/^.*pu.ppe//;
+            }
+            elsif ($targ =~ /pu.perv/)
+            {
+                $targType = TARGET_TYPE_PERV;
+                $targ =~ s/^.*pu.perv//;
+            }
+            elsif ($targ =~ /pu.capp/)
+            {
+                $targType = TARGET_TYPE_CAPP;
+                $targ =~ s/^.*pu.capp//;
+            }
+            elsif ($targ =~ /pu.eq/)
+            {
+                $targType = TARGET_TYPE_EQ;
+                $targ =~ s/^.*pu.eq//;
+            }
+            elsif ($targ =~ /memb.l4/)
+            {
+                $targType = TARGET_TYPE_L4;
+                $targ =~ s/^.*memb.l4//;
             }
 
             # Figure out the position
@@ -670,7 +757,7 @@ sub main
             #------------------------------------------------------------------
             my $callFuncForce = 0;
             my @callFuncParms;
-            Hostboot::CallFunc::execFunc("fapi::directOverride()",
+            Hostboot::CallFunc::execFunc("fapi2::directOverride()",
                 $debug, $callFuncForce, \@callFuncParms);
 
             if ($debug)
