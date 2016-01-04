@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -171,11 +171,12 @@ namespace std
                 if (count->decrement())
                 {
                     delete count;
-                    count = nullptr;
                     delete owner;
-                    owner = nullptr;
-                    pointer = nullptr;
                 }
+
+                count = nullptr;
+                owner = nullptr;
+                pointer = nullptr;
             }
 
             template<typename U> void _copy(const shared_ptr<U>& r)
