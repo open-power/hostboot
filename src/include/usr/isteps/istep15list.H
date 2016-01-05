@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,11 +28,17 @@
 /**
  * @file    istep15list.H
  *
- *  IStep 15    Build Winkle Images
- *  IPL FLow Doc        v0.67 (11/11/15)
+ *  IStep 15    Build Hcode Images
+ *  IPL FLow Doc        v0.84 (11/11/15)
  *
- *    15.1    host_build_winkle
- *          : Build runtime winkle images
+ *    15.1    host_build_stop_image
+ *          : Build runtime stop images
+ *    15.2    proc_set_pba_homer_bar
+ *          : Set HOMER location in OCC
+ *    15.3    host_establish_ex_chiplet
+ *          : Select Hostboot Core
+ *    15.4    host_start_stop_engine
+ *          : Initialize STOPGPE engine
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -54,7 +60,7 @@ namespace   ISTEP_15
  *  return any errlogs to istep
  *
  */
-void*  call_host_build_stop_image( void    *io_pArgs );
+void*  host_build_stop_image( void    *io_pArgs );
 
 
 
@@ -66,7 +72,7 @@ void*  call_host_build_stop_image( void    *io_pArgs );
  *  return  any errlogs to istep
  *
  */
-void*    call_proc_set_pba_homer_bar( void    *io_pArgs );
+void*    proc_set_pba_homer_bar( void    *io_pArgs );
 
 
 
@@ -78,7 +84,7 @@ void*    call_proc_set_pba_homer_bar( void    *io_pArgs );
  *  return  any errlogs to istep
  *
  */
-void*    call_host_establish_ex_chiplet( void    *io_pArgs );
+void*    host_establish_ex_chiplet( void    *io_pArgs );
 
 /**
  *  @brief   host_start_stop_engine
@@ -88,7 +94,7 @@ void*    call_host_establish_ex_chiplet( void    *io_pArgs );
  *  return  any errlogs to istep
  *
  */
-void*    call_host_start_stop_engine( void    *io_pArgs );
+void*    host_start_stop_engine( void    *io_pArgs );
 };
 
 
@@ -102,22 +108,22 @@ namespace   INITSERVICE
         },
         {
                 ISTEPNAME(15,01,"host_build_stop_image"),
-                ISTEP_15::call_host_build_stop_image,
+                ISTEP_15::host_build_stop_image,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(15,02,"proc_set_pba_homer_bar"),
-                ISTEP_15::call_proc_set_pba_homer_bar,
+                ISTEP_15::proc_set_pba_homer_bar,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(15,03,"host_establish_ex_chiplet"),
-                ISTEP_15::call_host_establish_ex_chiplet,
+                ISTEP_15::host_establish_ex_chiplet,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(15,04,"host_start_stop_engine"),
-                ISTEP_15::call_host_start_stop_engine,
+                ISTEP_15::host_start_stop_engine,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
 };

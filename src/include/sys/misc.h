@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,6 +44,14 @@ enum    p8SystemConsts
 
 };
 
+enum    p9SystemConsts
+{
+    /// max possible processors in a P9 system
+    P9_MAX_PROCS        =   8,
+    /// max EC (cores available in a processor )
+    P9_MAX_EC_PER_PROC  =   16,
+
+};
 
 /**
  * @enum ShutdownStatus
@@ -71,18 +79,22 @@ enum WinkleScope
     WINKLE_SCOPE_ALL = 0x1,
 };
 
+
+
+//TODO RTC:147693
+//Need to determine what HOMER layout offsets should be
 /**
  * HOMER layout offsets
  * see: HOMER_Image_Layout.odt
  */
 /** OCC image is at the start of the HOMER layout */
-#define HOMER_OFFSET_TO_OCC_IMG 0
+#define HOMER_OFFSET_TO_OCC_IMG (1*MEGABYTE)
 /** Offset from HOMER to OCC Host Data Area */
 #define HOMER_OFFSET_TO_OCC_HOST_DATA (MEGABYTE)
 /** SLW image is 2MB into the HOMER layout */
-#define HOMER_SLW_IMG_OFFSET (2*MEGABYTE)
-/** SLW Image Max ouput size */
-#define HOMER_MAX_SLW_IMG_SIZE_IN_MB 1
+#define HOMER_HCODE_IMG_OFFSET (2*MEGABYTE)
+/** STOP Image Max ouput size */
+#define HOMER_MAX_HCODE_IMG_SIZE_IN_MB 1
 
 
 #ifdef __cplusplus

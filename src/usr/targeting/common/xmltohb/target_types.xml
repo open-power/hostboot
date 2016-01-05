@@ -2021,6 +2021,10 @@
     <attribute><id>HB_RSV_MEM_SIZE_MB</id></attribute>
     <attribute><id>FREQ_CORE_MAX</id></attribute>
     <attribute><id>THREAD_COUNT</id></attribute>
+    <attribute><id>PFET_POWERUP_DELAY_NS</id></attribute>
+    <attribute><id>PFET_POWERDOWN_DELAY_NS</id></attribute>
+    <attribute><id>PFET_VDD_VOFF_SEL</id></attribute>
+    <attribute><id>PFET_VCS_VOFF_SEL</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->

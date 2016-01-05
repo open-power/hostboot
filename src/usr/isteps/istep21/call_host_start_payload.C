@@ -578,7 +578,7 @@ errlHndl_t enableCoreCheckstops()
         uint64_t l_physAddr =
           l_pChipTarget->getAttr<TARGETING::ATTR_SLW_IMAGE_ADDR>();
         l_slwPtr = mm_block_map(reinterpret_cast<void*>(l_physAddr),
-                                HOMER_MAX_SLW_IMG_SIZE_IN_MB*MEGABYTE);
+                                HOMER_MAX_STOP_IMG_SIZE_IN_MB*MEGABYTE);
         if( l_slwPtr == NULL )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Error from mm_block_map : phys=%.16X", l_physAddr );
@@ -587,7 +587,7 @@ errlHndl_t enableCoreCheckstops()
              * @reasoncode   RC_MM_MAP_ERR
              * @moduleid     MOD_ENABLE_CORE_CHECKSTOPS
              * @severity     ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @userdata1    <unused>
+             * @userdata1    Size of STOP IMG
              * @userdata2    Physical address
              * @devdesc      mm_block_map() returns error
              * @custdesc     A problem occurred during the IPL
@@ -596,9 +596,9 @@ errlHndl_t enableCoreCheckstops()
             l_errl =
               new ERRORLOG::ErrlEntry(
                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                      MOD_ENABLE_CORE_CHECKSTOPS,
-                                      RC_MM_MAP_ERR,
-                                      0,
+                                      ISTEP::MOD_ENABLE_CORE_CHECKSTOPS,
+                                      ISTEP::RC_MM_MAP_ERR,
+                                      HOMER_MAX_STOP_IMG_SIZE_IN_MB*MEGABYTE,
                                       l_physAddr);
         }
 
@@ -680,8 +680,8 @@ errlHndl_t enableCoreCheckstops()
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Error from mm_block_unmap : rc=%d, ptr=%p", mm_rc, l_slwPtr );
             /*@
              * @errortype
-             * @reasoncode   RC_MM_UNMAP_ERR
-             * @moduleid     MOD_ENABLE_CORE_CHECKSTOPS
+             * @reasoncode   ISTEP::RC_MM_UNMAP_ERR
+             * @moduleid     ISTEP::MOD_ENABLE_CORE_CHECKSTOPS
              * @severity     ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @userdata1    Return Code
              * @userdata2    Unmap address
@@ -692,8 +692,8 @@ errlHndl_t enableCoreCheckstops()
             l_errl =
                 new ERRORLOG::ErrlEntry(
                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                      MOD_ENABLE_CORE_CHECKSTOPS,
-                                      RC_MM_UNMAP_ERR,
+                                      ISTEP::MOD_ENABLE_CORE_CHECKSTOPS,
+                                      ISTEP::RC_MM_UNMAP_ERR,
                                       mm_rc,
                                       reinterpret_cast<uint64_t>
                                       (l_slwPtr));
