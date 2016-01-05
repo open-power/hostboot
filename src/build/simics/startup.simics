@@ -3,7 +3,12 @@ $hb_startup_path = (lookup-file hbfw/startup.simics)
 $hb_script_location = (python "''.join(map('/'.__add__,\""+$hb_startup_path+"\"[1:].split('/')[0:-1]))")
 python "os.environ['HB_TOOLPATH'] = \""+$hb_script_location+"\""
 
-python "os.environ['HB_MACHINE'] = os.environ['MACHINE']"
+$model = (shell "printenv CEC_MODEL")
+$hb_machine = "unknown"
+if ($model == "p9_nimbus") {$hb_machine = "nimbus"}
+if ($model == "p9zz_1s2u") {$hb_machine = "zztop"}
+python "os.environ['HB_MACHINE'] = \""+$hb_machine+"\""
+echo "HB_MACHINE is: "+$hb_machine
 
 
 # Setup some common vars to use across machine types

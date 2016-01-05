@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2015
+# Contributors Listed Below - COPYRIGHT 2014,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -30,7 +30,7 @@ export PATH=${CITESTPATH}:${PATH}
 # Determine backing build.
 export BACKING_BUILD=`cat ${CITESTPATH}/etc/bbuild`
 # Limit pnor image to be built to murano for standalone simics
-export PNOR=murano.pnor
+export PNOR=nimbus.pnor
 
 # If we are running under Jenkins we need to pick a random-ish sandbox name
 # so that the autoipl tools do not have a /tmp name collision.

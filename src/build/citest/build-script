@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2015
+# Contributors Listed Below - COPYRIGHT 2014,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -71,8 +71,7 @@ build-errl-parsers > errl-parsers.log 2>&1 &
 ERRLPARSERS_PID=$!
 
 # Start CxxTest Simics execution.
-#@todo-RTC:137477-Turn this back on
-#cxxtest-start.sh || exit -1
+cxxtest-start.sh || exit -1
 
 # Check errl parser completion.
 wait $ERRLPARSERS_PID

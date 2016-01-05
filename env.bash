@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2015
+# Contributors Listed Below - COPYRIGHT 2010,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -58,7 +58,7 @@ if [ -n "${SANDBOXROOT}" ]; then
     fi
 fi
 
-export DEFAULT_MACHINE=MURANO
+export DEFAULT_MACHINE=NIMBUS
 
 ## Search and set gerrit host
 # Gerrit host name should be in .ssh/config file
