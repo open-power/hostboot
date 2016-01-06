@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2015
+# Contributors Listed Below - COPYRIGHT 2012,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -291,16 +291,19 @@ sub execute_publish_cq
 
     my $commits = git_commit_history($level, $released);
 
+    bq_add_releaseList($level,$track,$commits);
+
     foreach my $commit (@{$commits})
     {
         my $changeid = gerrit_changeid_num($commit);
         my $cq = cq_workitem_num($commit);
+        my $commitMessage = git_commit_msg($commit);
         if ($cq ne "")
         {
             print "Change-Id: $changeid\n" if ($debug);
             print "CQ: $cq\n" if ($debug);
 
-            bq_add_releasenote($cq, $changeid, $level, $track);
+            bq_add_releasenote($cq, $changeid, $level, $track, $commitMessage);
         }
     }
 }
@@ -2166,13 +2169,15 @@ sub bq_login
 
 # sub bq_add_releasenote
 #
-# Adds a string "Change X added to Hostboot level Y and released under Z." to
-# a CQ defect / feature.
+# Adds a string "Change W added to Hostboot level X and released under Y.
+#               "Commit Message: Z"
+# to a CQ defect / feature.
 #
 # @param[in] - CQ defect / feature.
 # @param[in] - Corresponding Gerrit Change-Id.
 # @param[in] - Hostboot release level.
 # @param[in] - Hostboot release track.
+# @param[in] - Hostboot commit message
 #
 sub bq_add_releasenote
 {
@@ -2180,9 +2185,11 @@ sub bq_add_releasenote
     my $change_id = shift;
     my $level = shift;
     my $release = shift;
+    my $commitMessage = shift;
 
     my $note = "Change%20$change_id%20added%20to%20Hostboot%20level%20".
-               "$level%20and%20released%20under%20$release";
+               "$level%20and%20released%20under%20$release%0A".
+               "Commit%20Message%3A%0A$commitMessage";
 
     # Login to BQ.
     bq_login();
@@ -2206,3 +2213,81 @@ sub bq_add_releasenote
            "note_string=$note' > /dev/null";
 
 }
+
+# sub bq_add_releaseList
+#
+# This function is adding the releaseNotes to the release's BestQuest
+# The build team wanted to know exactly what was included in each release
+# and this is just an easy way to quickly view it.
+#
+# @param[in] - Hostboot release level.
+# @param[in] - Hostboot release track.
+# @param[in] - Array of commits in the hostboot level
+
+sub bq_add_releaseList
+{
+    my $level = shift;
+    my $track = shift;
+    my $commits = shift;
+
+    # Note: when adding notes to BestQuest, everything has to be in ASCII
+    # for it to display correctly
+    # %20:' ', %0A:newline, %3D:'=', %3A:':', %2D:'-'
+    my $note = "Hostboot%20Official%20Release%20Notes%0A";
+
+    # Adding a seperator ('='x100) between the title and the actual data.
+    # This posting method doesn't allow for bolding and it needs an eyecatch
+    for (my $i=0; $i <100; $i++)
+    {
+        $note .= "%3D";
+    }
+    $note .= "%0A%0ALevel%3A%20$level%0AIncluded%20commits%3A%0A%0A";
+
+    foreach my $commit (@{$commits})
+    {
+        my $cq = cq_workitem_num($commit);
+        my $rtc = rtc_workitem_num($commit);
+        my $changenum = "";
+        my $subject = git_get_subject($commit);
+
+        # Find if the commit has a ClearQuest # or an RTC #, if not blank -'s
+        if ($cq ne "")
+        {
+            $changenum = "$cq%20%20"; #additionally, spacing for readability
+        }
+        elsif ($rtc ne "")
+        {
+            $changenum = "$rtc%20%20%20%20";
+        }
+        else
+        {
+            $changenum = "%2D%2D%2D%2D%2D%2D%2D%2D%2D%20"; #---------
+        }
+        $note .= "$changenum$subject%20%20%0A";
+    }
+
+    # Login to BQ.
+    bq_login();
+
+    print "Updating release note for hbRelease $level\n";
+
+    # Find CQ ID for defect/feature.
+    my $cqid_cmd = "wget -q -O - --load-cookies $cookie_name ".
+                   BQ_SERVER."?defect=$track | grep 'CQ ID:' -A1 | tail -n1 | ".
+                   "sed 's/<\\/a.*//' | sed 's/.*recordType=//' | ".
+                   "sed 's/\">/ /'";
+
+    my $cqid_result = `$cqid_cmd`;
+    chomp $cqid_result;
+
+    # Splitting on whitespace to seperate the ClearQuest type and ID
+    my ($cqtype,$cqid) = split / /, $cqid_result;
+
+    # Add the release notes to the defect for our hbRelease.
+    # For all commits in this release: CQ/RTC number - Subject of commit
+    system "wget -q -O - --load-cookies $cookie_name '".BQ_SERVER.
+           "?verb=editnote_form_response&table=$cqtype&id=$cqid&uid=$track&".
+           "note_string=$note' > /dev/null";
+
+}
+
