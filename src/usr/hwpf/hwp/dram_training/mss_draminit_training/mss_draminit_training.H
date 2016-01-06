@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training.H,v 1.3 2012/07/17 13:22:42 bellows Exp $
+// $Id: mss_draminit_training.H,v 1.4 2016/01/06 16:09:54 thi Exp $
+
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -36,7 +39,7 @@
 #define mss_draminit_training_H_
 #include <fapi.H>
 
-typedef fapi::ReturnCode (*mss_draminit_training_FP_t)(const fapi::Target target);
+typedef fapi::ReturnCode (*mss_draminit_training_FP_t)(const fapi::Target & target );
 
 extern "C"
 {
@@ -49,7 +52,7 @@ extern "C"
  * @return ReturnCode
  */
 
-fapi::ReturnCode mss_draminit_training(const fapi::Target target);
+fapi::ReturnCode mss_draminit_training(const fapi::Target & target);
 
 } // extern "C"
 
