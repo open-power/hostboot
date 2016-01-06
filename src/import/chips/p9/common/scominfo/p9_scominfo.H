@@ -43,6 +43,11 @@
 
 extern "C"
 {
+    typedef enum
+    {
+        STANDARD_MODE = 0
+    } p9TranslationMode_t;
+
     /// @brief Creates the actual SCOM address based on the chip unit type, instance, and the input SCOM address (relative to chip unit instance 0)
     /// @param[in] i_p9CU Enumeration of the chip unit type
     /// @param[in] i_chipUnitNum Instance number of the chip unit
