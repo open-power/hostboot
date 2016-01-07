@@ -3175,17 +3175,16 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA</id>
+        <id>ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_PORT</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>This is the throttle numerator setting for cfg_nm_n_per_mba creator: mss_eff_cnfg consumer: mc_config firmware notes: none</description>
+        <description>This is the throttle numerator setting for cfg_nm_n_per_port</description>
         <valueType>uint32</valueType>
         <writeable/>
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
         <persistRuntime/>
-        <mssAccessor>PORT</mssAccessor>
-        <mssAccessorName>mem_throttle_numerator_per_mba</mssAccessorName>
+        <mssAccessorName>mem_throttle_numerator_per_port</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -3204,18 +3203,17 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
+        <id>ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_SLOT</id>
         <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>This is the throttle numerator setting for cfg_nm_n_per_chip creator: mss_eff_cnfg consumer: mc_config firmware notes: none</description>
+        <description>This is the throttle numerator setting for cfg_nm_n_per_slot</description>
         <valueType>uint32</valueType>
         <writeable/>
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
         <persistRuntime/>
-        <mssAccessor>PORT</mssAccessor>
-        <mssAccessorName>mem_throttle_numerator_per_chip</mssAccessorName>
+        <mssAccessorName>mem_throttle_numerator_per_slot</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -3384,10 +3382,10 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA</id>
+        <id>ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_PORT</id>
         <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Runtime throttle numerator setting for cfg_nm_n_per_mba</description>
+        <description>Runtime throttle numerator setting for cfg_nm_n_per_port</description>
         <valueType>uint32</valueType>
         <writeable/>
         <odmVisable/>
@@ -3395,7 +3393,7 @@
         <array>2</array>
         <persistRuntime/>
         <mssAccessor>PORT</mssAccessor>
-        <mssAccessorName>runtime_mem_throttle_numerator_per_mba</mssAccessorName>
+        <mssAccessorName>runtime_mem_throttle_numerator_per_port</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -3414,10 +3412,10 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
+        <id>ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_SLOT</id>
         <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Runtime throttle numerator setting for cfg_nm_n_per_chip</description>
+        <description>Runtime throttle numerator setting for cfg_nm_n_per_slot</description>
         <valueType>uint32</valueType>
         <writeable/>
         <odmVisable/>
@@ -3425,29 +3423,29 @@
         <array>2</array>
         <persistRuntime/>
         <mssAccessor>PORT</mssAccessor>
-        <mssAccessorName>runtime_mem_throttle_numerator_per_chip</mssAccessorName>
+        <mssAccessorName>runtime_mem_throttle_numerator_per_slot</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA</id>
+        <id>ATTR_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_PORT</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_mba</description>
+        <description>Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_port</description>
         <valueType>uint32</valueType>
         <platInit/>
         <odmVisable/>
         <persistRuntime/>
-        <mssAccessorName>mrw_safemode_mem_throttle_numerator_per_mba</mssAccessorName>
+        <mssAccessorName>mrw_safemode_mem_throttle_numerator_per_port</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
+        <id>ATTR_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_SLOT</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_chip</description>
+        <description>Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_slot</description>
         <valueType>uint32</valueType>
         <platInit/>
         <odmVisable/>
         <persistRuntime/>
-        <mssAccessorName>mrw_safemode_mem_throttle_numerator_per_chip</mssAccessorName>
+        <mssAccessorName>mrw_safemode_mem_throttle_numerator_per_slot</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -4469,6 +4467,17 @@
         <array>2</array>
         <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>mcbist_pattern</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MCBIST_WRITE_DATA</id>
+        <targetType>TARGET_TYPE_MCBIST</targetType>
+        <description>Define mcbist data for writing</description>
+        <valueType>uint64</valueType>
+        <writeable/>
+        <odmVisable/>
+        <odmChangeable/>
+        <mssAccessorName>mcbist_write_data</mssAccessorName>
     </attribute>
 
     <attribute>
