@@ -111,5 +111,11 @@
       <target>TARGET_IN_ERROR</target>
     </deconfigure>
   </hwpError>
-  
+
+  <hwpError>
+    <rc>RC_MSS_MCBIST_PROGRAM_TOO_BIG</rc>
+    <description>MCBIST program larger than currently supported size</description>
+    <ffdc>PROGRAM_LENGTH</ffdc>
+  </hwpError>
+
 </hwpErrors>
