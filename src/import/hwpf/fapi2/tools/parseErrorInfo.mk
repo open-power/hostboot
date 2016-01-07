@@ -7,7 +7,7 @@
 #
 # EKB Project
 #
-# COPYRIGHT 2015
+# COPYRIGHT 2015,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -32,7 +32,7 @@ TARGETS += collect_reg_ffdc.H
 TARGETS += set_sbe_error.H
 
 define parseErrorInfo_RUN
-		$(C1) $$< --output-dir=$$($(GENERATED)_PATH) $$(filter-out $$<,$$^)
+		$(C1) $$< --empty-ffdc-classes --output-dir=$$($(GENERATED)_PATH) $$(filter-out $$<,$$^)
 endef
 
 $(call BUILD_GENERATED)

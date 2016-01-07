@@ -1225,7 +1225,7 @@ foreach my $argnum (0 .. $#ARGV)
             print ECFILE "      }\n";
             print ECFILE "      else\n";
             print ECFILE "      {\n";
-            print ECFILE "        fapi2::createPlatLog(iv_rc, " .
+            print ECFILE "     //   fapi2::createPlatLog(iv_rc, " .
                                   "(i_sev == fapi2::FAPI2_ERRL_SEV_UNDEFINED)".
                                   " ? iv_sev : i_sev);\n";
             print ECFILE "      }\n\n";
