@@ -66,7 +66,7 @@ inline uint64_t mhz_to_ps(const uint64_t i_mhz)
             return FREQ_TO_PS[FREQ_2400];
 
         default:
-            FAPI_ERR("unsupported frequency %d", i_mhz);
+            FAPI_ERR("unsupported frequency %llu", i_mhz);
             fapi2::Assert(false);
 
             // Keeps compiler happy

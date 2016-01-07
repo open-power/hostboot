@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,6 +98,10 @@ enum states
     OFF = 0,
     ON_N = 0,
     OFF_N = 1,
+    YES = 1,
+    NO = 0,
+    YES_N = 0,
+    NO_N = 1,
     INVALID = 0xFF,
 
     // This needs to be an attribute I think - BRS. Used as a boolean.
@@ -134,6 +138,86 @@ enum data_mode
     ROTATE_LEFT_MODE  = 0b110,
     ROTATE_RIGHT_MODE = 0b111,
 };
+
+// 0:3  Operation Type
+enum op_type
+{
+    WRITE            = 0b0000, // fast, with no concurrent traffic
+    READ             = 0b0001, // fast, with no concurrent traffic
+    READ_WRITE       = 0b0010,
+    WRITE_READ       = 0b0011,
+    READ_WRITE_READ  = 0b0100,
+    READ_WRITE_WRITE = 0b0101,
+    RAND_SEQ         = 0b0110,
+    READ_READ_WRITE  = 0b1000,
+    SCRUB_RRWR       = 0b1001,
+    STEER_RW         = 0b1010,
+    ALTER            = 0b1011, // (W)
+    DISPLAY          = 0b1100, // (R, slow)
+    CCS_EXECUTE      = 0b1111,
+
+    // if bits 9:11 (Data Mode bits)  = 000  (bits 4:8 used to specify which subtest to go to)
+    // Refresh only cmd if bits 9:11 (Data Mode bits) /= 000
+    GOTO_SUBTEST_N = 0b0111,
+};
+
+enum test_type
+{
+    USER_MODE = 0,
+    CENSHMOO = 1,
+    SUREFAIL = 2,
+    MEMWRITE = 3,
+    MEMREAD = 4,
+    CBR_REFRESH = 5,
+    MCBIST_SHORT = 6,
+    SHORT_SEQ = 7,
+    DELTA_I = 8,
+    DELTA_I_LOOP = 9,
+    SHORT_RAND = 10,
+    LONG1 = 11,
+    BUS_TAT = 12,
+    SIMPLE_FIX = 13,
+    SIMPLE_RAND = 14,
+    SIMPLE_RAND_2W = 15,
+    SIMPLE_RAND_FIXD = 16,
+    SIMPLE_RA_RD_WR = 17,
+    SIMPLE_RA_RD_R = 18,
+    SIMPLE_RA_FD_R = 19,
+    SIMPLE_RA_FD_R_INF = 20,
+    SIMPLE_SA_FD_R = 21,
+    SIMPLE_RA_FD_W = 22,
+    INFINITE = 23,
+    WR_ONLY = 24,
+    W_ONLY = 25,
+    R_ONLY = 26,
+    W_ONLY_RAND = 27,
+    R_ONLY_RAND = 28,
+    R_ONLY_MULTI = 29,
+    SHORT = 30,
+    SIMPLE_RAND_BARI = 31,
+    W_R_INFINITE = 32,
+    W_R_RAND_INFINITE = 33,
+    R_INFINITE1 = 34,
+    R_INFINITE_RF = 35,
+    MARCH = 36,
+    SIMPLE_FIX_RF = 37,
+    SHMOO_STRESS = 38,
+    SIMPLE_RAND_RA = 39,
+    SIMPLE_FIX_RA = 40,
+    SIMPLE_FIX_RF_RA = 41,
+    TEST_RR = 42,
+    TEST_RF = 43,
+    W_ONLY_INFINITE_RAND = 44,
+    MCB_2D_CUP_SEQ = 45,
+    MCB_2D_CUP_RAND = 46,
+    SHMOO_STRESS_INFINITE = 47,
+    HYNIX_1_COL = 48,
+    RMWFIX = 49,
+    RMWFIX_I = 50,
+    W_INFINITE = 51,
+    R_INFINITE = 52,
+};
+
 } // namespace mcbist
 
 

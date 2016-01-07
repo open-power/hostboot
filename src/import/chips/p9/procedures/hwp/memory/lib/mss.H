@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,6 +51,7 @@
 #include "utils/dump_regs.H"
 
 #include "ccs/ccs.H"
+#include "mcbist/mcbist.H"
 
 #include "port/port.H"
 
@@ -58,9 +59,14 @@
 #include "dimm/rcd_load.H"
 #include "dimm/mrs_load.H"
 #include "dimm/rank.H"
+#include "dimm/kind.H"
 
 #include "phy/ddr_phy.H"
 #include "phy/dp16.H"
 #include "phy/cal_timers.H"
+
+#include "utils/dump_regs.H"
+
+#include "mc/mc.H"
 
 #endif

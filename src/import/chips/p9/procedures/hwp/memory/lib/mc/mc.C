@@ -28,17 +28,21 @@
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
-
 #include <p9_mc_scom_addresses.H>
 
 #include "../utils/dump_regs.H"
 #include "../utils/scom.H"
+#include "mc.H"
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCS;
 
 namespace mss
 {
+
+const uint64_t mcTraits<TARGET_TYPE_MCS>::xlate0_reg[] = {MCS_PORT02_MCP0XLT0, MCS_PORT13_MCP0XLT0};
+const uint64_t mcTraits<TARGET_TYPE_MCS>::xlate1_reg[] = {MCS_PORT02_MCP0XLT1, MCS_PORT13_MCP0XLT1};
+const uint64_t mcTraits<TARGET_TYPE_MCS>::xlate2_reg[] = {MCS_PORT02_MCP0XLT2, MCS_PORT13_MCP0XLT2};
 
 ///
 /// @brief Dump the registers of the MC (MCA_MBA, MCS)
@@ -172,6 +176,133 @@ fapi2::ReturnCode dump_regs( const fapi2::Target<TARGET_TYPE_MCS>& i_target )
             FAPI_TRY( mss::getScom(p, r.second, l_data) );
             FAPI_DBG("dump %s: 0x%016lx 0x%016lx", r.first, r.second, l_data);
         }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform initializations for the MC (MCA)
+/// @param[in] i_target, the MCA to initialize
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode mc<TARGET_TYPE_MCA>::scominit(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
+{
+    uint32_t l_throttle_denominator = 0;
+    FAPI_TRY( mss::runtime_mem_throttle_denominator(i_target, l_throttle_denominator) );
+
+    // #Register Name  Final Arb Parms
+    // #Mnemonic       MBA_FARB0Q
+    // #Attributes     PAR:EVEN        Bit     Field Mnemonic  Attribute or Setting to use
+    // #Description    FARB command control
+    // #1. FARB0 bit 38: cfg_parity_after_cmd
+    // #       - set this bit if DDR3 and (RDIMM or LDRIMM)
+    //
+    // #       - clear this bit if DDR4 and (RDIMM or LDRIMM)
+    // #2. FARB0 bit 60: cfg_ignore_rcd_parity_err
+    // #       - clear this bit if (RDIMM or LDRIMM)
+    // #3. FARB0 bit 61: cfg_enable_rcd_rw_retry
+    // #       - set this bit if  (RDIMM or LDRIMM)
+
+    // Nimbus is always LR/RDIMM, DDR4.
+    // Not sure what happened to cfg_ignore_rcd_parity_err, cfg_enable_rcd_rw_retry - perhaps they're always ok since we don't
+    // support anything else?
+    {
+        fapi2::buffer<uint64_t> l_data;
+
+        l_data.setBit<MCA_MBA_FARB0Q_CFG_PARITY_AFTER_CMD>();
+        FAPI_TRY( mss::putScom(i_target, MCA_MBA_FARB0Q, l_data) );
+    }
+
+    {
+        // FABR1Q - Chip ID bits
+    }
+    {
+        // FARB2Q - ODT bits
+    }
+
+    // #Register Name  N/M Throttling Control
+    // #Mnemonic       MBA_FARB3Q
+    // #Attributes     PAR:EVEN        Bit     Field Mnemonic  Attribute or Setting to use
+    // #Description    N/M throttling control (Centaur only)
+    // #               0:14    cfg_nm_n_per_mba        MSS_MEM_THROTTLE_NUMERATOR_PER_MBA (Centaur)
+    // #               15:30   cfg_nm_n_per_chip       MSS_MEM_THROTTLE_NUMERATOR_PER_CHIP (Centaur)
+    // #               0:14    cfg_nm_n_per_slot       MSS_MEM_THROTTLE_NUMERATOR_PER_SLOT (Nimbus)
+    // #               15:30   cfg_nm_n_per_port       MSS_MEM_THROTTLE_NUMERATOR_PER_PORT (Nimbus)
+    // #               31:44   cfg_nm_m        MSS_MEM_THROTTLE_DENOMINATOR
+    // #               51      cfg_nm_per_slot_enabled 1 (not on Nimbus?)
+    // #               52      cfg_nm_count_other_mba_dis      Set to 0 for CDIMM, Set to 1 for everything else (not on Nimbus?)
+    // #cfg_nm_ras_weight, bits 45:47 = ATTR_MSS_THROTTLE_CONTROL_RAS_WEIGHT
+    // #cfg_nm_cas_weight, bits 48:50 = ATTR_MSS_THROTTLE_CONTROL_CAS_WEIGHT
+    {
+        fapi2::buffer<uint64_t> l_data;
+        uint32_t l_throttle_per_slot = 0;
+        uint32_t l_throttle_per_port = 0;
+        uint8_t l_ras_weight = 0;
+        uint8_t l_cas_weight = 0;
+
+        FAPI_TRY( mss::runtime_mem_throttle_numerator_per_slot(i_target, l_throttle_per_slot) );
+        FAPI_TRY( mss::runtime_mem_throttle_numerator_per_port(i_target, l_throttle_per_port) );
+        FAPI_TRY( mss::throttle_control_ras_weight(i_target, l_ras_weight) );
+        FAPI_TRY( mss::throttle_control_cas_weight(i_target, l_cas_weight) );
+
+        l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_N_PER_SLOT, MCA_MBA_FARB3Q_CFG_NM_N_PER_SLOT_LEN>(l_throttle_per_slot);
+        l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_N_PER_PORT, MCA_MBA_FARB3Q_CFG_NM_N_PER_PORT_LEN>(l_throttle_per_port);
+        l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_M, MCA_MBA_FARB3Q_CFG_NM_M_LEN>(l_throttle_denominator);
+        l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_RAS_WEIGHT, MCA_MBA_FARB3Q_CFG_NM_RAS_WEIGHT_LEN>(l_ras_weight);
+        l_data.insertFromRight<MCA_MBA_FARB3Q_CFG_NM_CAS_WEIGHT, MCA_MBA_FARB3Q_CFG_NM_CAS_WEIGHT_LEN>(l_ras_weight);
+
+        FAPI_TRY( mss::putScom(i_target, MCA_MBA_FARB3Q, l_data) );
+    }
+
+    // Doesn't appear to be a row-hammer-mode in Nimbus
+    // #   -- bits 27:41 (cfg_emer_n) = ATTR_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_SLOT
+    // #   -- bits 42:55 (cfg_emer_m) = ATTR_MRW_MEM_THROTTLE_DENOMINATOR
+    {
+        fapi2::buffer<uint64_t> l_data;
+        uint32_t l_throttle_per_slot = 0;
+
+        FAPI_TRY( mss::mrw_safemode_mem_throttle_numerator_per_slot(l_throttle_per_slot) );
+
+        l_data.insertFromRight<MCA_MBA_FARB4Q_EMERGENCY_M, MCA_MBA_FARB4Q_EMERGENCY_M_LEN>(l_throttle_denominator);
+        l_data.insertFromRight<MCA_MBA_FARB4Q_EMERGENCY_N, MCA_MBA_FARB4Q_EMERGENCY_N_LEN>(l_throttle_per_slot);
+
+        FAPI_TRY( mss::putScom(i_target, MCA_MBA_FARB4Q, l_data) );
+    }
+
+    {
+        // TMR0Q - DDR data bus timing parameters
+    }
+
+    {
+        // TMR1Q - DDR bank busy parameters
+    }
+
+    {
+        // DSM0Q - Data State Machine Configurations
+    }
+
+    {
+        // MBAREF0Q   mba01 refresh settings
+    }
+
+    {
+        // MBAPC0Q    power control settings reg 0
+        // MBAPC1Q    power control settings reg 1
+    }
+
+    {
+        // MBAREF1Q   MBA01 Rank-to-primary-CKE mapping table
+        // Doesn't exist in Nimbus. Leaving this as a comment to note that we didn't forget it.
+        // CKEs are fixed to chip selects for all P9 configs
+    }
+
+    {
+        // CAL0Q (this timer to be used for zq cal)
+        // CAL1Q (this timer to be used for mem cal)
+        // CAL3Q (this timer to be used for mem cal)
     }
 
 fapi_try_exit:

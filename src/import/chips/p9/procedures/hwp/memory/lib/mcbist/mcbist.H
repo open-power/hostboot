@@ -37,6 +37,7 @@
 
 #include "../utils/poll.H"
 #include "../shared/mss_const.H"
+#include "../utils/bit_count.H"
 
 namespace mss
 {
@@ -72,6 +73,26 @@ class mcbistTraits<fapi2::TARGET_TYPE_MCBIST>
     public:
         /// MCBIST "memory registers" - config for subtests.
         static const uint64_t MCBMR0_REG = MCBIST_MCBMR0Q;
+        static const uint64_t CFGQ_REG = MCBIST_MCBCFGQ;
+        static const uint64_t CNTLQ_REG = MCBIST_MCB_CNTLQ;
+        static const uint64_t STATQ_REG = MCBIST_MCB_CNTLSTATQ;
+        static const uint64_t MCBPARMQ_REG = MCBIST_MCBPARMQ;
+        static const uint64_t MCBAGRAQ_REG = MCBIST_MCBAGRAQ;
+
+        static const uint64_t MCBAMR0A0Q_REG = MCBIST_MCBAMR0A0Q;
+        static const uint64_t MCBAMR1A0Q_REG = MCBIST_MCBAMR1A0Q;
+        static const uint64_t MCBAMR2A0Q_REG = MCBIST_MCBAMR2A0Q;
+        static const uint64_t MCBAMR3A0Q_REG = MCBIST_MCBAMR3A0Q;
+
+        static const uint64_t START_ADDRESS_0 = MCBIST_MCBSA0Q;
+        static const uint64_t START_ADDRESS_1 = MCBIST_MCBSA1Q;
+        static const uint64_t START_ADDRESS_2 = MCBIST_MCBSA2Q;
+        static const uint64_t START_ADDRESS_3 = MCBIST_MCBSA3Q;
+
+        static const uint64_t END_ADDRESS_0 = MCBIST_MCBEA0Q;
+        static const uint64_t END_ADDRESS_1 = MCBIST_MCBEA1Q;
+        static const uint64_t END_ADDRESS_2 = MCBIST_MCBEA2Q;
+        static const uint64_t END_ADDRESS_3 = MCBIST_MCBEA3Q;
 
         enum
         {
@@ -86,6 +107,74 @@ class mcbistTraits<fapi2::TARGET_TYPE_MCBIST>
             DATA_MODE_LEN = MCBIST_MCBMR0Q_MCBIST_CFG_TEST00_DATA_MODE_LEN,
             ADDR_SEL = MCBIST_MCBMR0Q_MCBIST_CFG_TEST00_ADDR_SEL,
             ADDR_SEL_LEN = MCBIST_MCBMR0Q_MCBIST_CFG_TEST00_ADDR_SEL_LEN,
+            OP_TYPE = MCBIST_MCBMR0Q_MCBIST_CFG_TEST00_OP_TYPE,
+            OP_TYPE_LEN = MCBIST_MCBMR0Q_MCBIST_CFG_TEST00_OP_TYPE_LEN,
+            DONE = MCBIST_MCBMR0Q_MCBIST_CFG_TEST00_DONE,
+
+            SYNC_EN = MCBIST_MCBCFGQ_BROADCAST_SYNC_EN,
+            SYNC_WAIT = MCBIST_MCBCFGQ_BROADCAST_SYNC_WAIT,
+            SYNC_WAIT_LEN = MCBIST_MCBCFGQ_BROADCAST_SYNC_WAIT_LEN,
+
+            PORT_SEL = MCBIST_MCB_CNTLQ_MCBCNTL_PORT_SEL,
+            PORT_SEL_LEN = MCBIST_MCB_CNTLQ_MCBCNTL_PORT_SEL_LEN,
+
+            MCBIST_START = MCBIST_MCB_CNTLQ_START,
+            MCBIST_STOP = MCBIST_MCB_CNTLQ_STOP,
+
+            MCBIST_IN_PROGRESS = MCBIST_MCB_CNTLSTATQ_IP,
+            MCBIST_DONE = MCBIST_MCB_CNTLSTATQ_DONE,
+            MCBIST_FAIL = MCBIST_MCB_CNTLSTATQ_FAIL,
+
+            MIN_CMD_GAP = MCBIST_MCBPARMQ_CFG_MIN_CMD_GAP,
+            MIN_CMD_GAP_LEN = MCBIST_MCBPARMQ_CFG_MIN_CMD_GAP_LEN,
+            MIN_GAP_TIMEBASE = MCBIST_MCBPARMQ_CFG_MIN_GAP_TIMEBASE,
+            MIN_CMD_GAP_BLIND_STEER = MCBIST_MCBPARMQ_CFG_MIN_CMD_GAP_BLIND_STEER,
+            MIN_CMD_GAP_BLIND_STEER_LEN = MCBIST_MCBPARMQ_CFG_MIN_CMD_GAP_BLIND_STEER_LEN,
+            MIN_GAP_TIMEBASE_BLIND_STEER = MCBIST_MCBPARMQ_CFG_MIN_GAP_TIMEBASE_BLIND_STEER,
+            RANDCMD_WGT = MCBIST_MCBPARMQ_CFG_RANDCMD_WGT,
+            RANDCMD_WGT_LEN = MCBIST_MCBPARMQ_CFG_RANDCMD_WGT_LEN,
+            CLOCK_MONITOR_EN = MCBIST_MCBPARMQ_CFG_CLOCK_MONITOR_EN,
+            EN_RANDCMD_GAP = MCBIST_MCBPARMQ_CFG_EN_RANDCMD_GAP,
+            RANDGAP_WGT = MCBIST_MCBPARMQ_CFG_RANDGAP_WGT,
+            RANDGAP_WGT_LEN = MCBIST_MCBPARMQ_CFG_RANDGAP_WGT_LEN,
+            BC4_EN = MCBIST_MCBPARMQ_CFG_BC4_EN,
+
+            FIXED_WIDTH = MCBIST_MCBAGRAQ_CFG_FIXED_WIDTH,
+            FIXED_WIDTH_LEN = MCBIST_MCBAGRAQ_CFG_FIXED_WIDTH_LEN,
+            ADDR_COUNTER_MODE = MCBIST_MCBAGRAQ_CFG_ADDR_COUNTER_MODE,
+            ADDR_COUNTER_MODE_LEN = MCBIST_MCBAGRAQ_CFG_ADDR_COUNTER_MODE_LEN,
+            MAINT_ADDR_MODE_EN = MCBIST_MCBAGRAQ_CFG_MAINT_ADDR_MODE_EN,
+            MAINT_BROADCAST_MODE_EN = MCBIST_MCBAGRAQ_CFG_MAINT_BROADCAST_MODE_EN,
+            MAINT_DETECT_SRANK_BOUNDARIES = MCBIST_MCBAGRAQ_CFG_MAINT_DETECT_SRANK_BOUNDARIES,
+
+            BROADCAST_SYNC_EN = MCBIST_MCBCFGQ_BROADCAST_SYNC_EN,
+            BROADCAST_SYNC_WAIT = MCBIST_MCBCFGQ_BROADCAST_SYNC_WAIT,
+            BROADCAST_SYNC_WAIT_LEN = MCBIST_MCBCFGQ_BROADCAST_SYNC_WAIT_LEN,
+            CFG_CMD_TIMEOUT_MODE = MCBIST_MCBCFGQ_CFG_CMD_TIMEOUT_MODE,
+            CFG_CMD_TIMEOUT_MODE_LEN = MCBIST_MCBCFGQ_CFG_CMD_TIMEOUT_MODE_LEN,
+            RESET_KEEPER = MCBIST_MCBCFGQ_RESET_KEEPER,
+            CFG_CURRENT_ADDR_TRAP_UPDATE_DIS = MCBIST_MCBCFGQ_CFG_CURRENT_ADDR_TRAP_UPDATE_DIS,
+            CFG_CCS_RETRY_DIS = MCBIST_MCBCFGQ_CFG_CCS_RETRY_DIS,
+            RESERVED_13_34 = MCBIST_MCBCFGQ_RESERVED_13_34,
+            RESERVED_13_34_LEN = MCBIST_MCBCFGQ_RESERVED_13_34_LEN,
+            CFG_RESET_CNTS_START_OF_RANK = MCBIST_MCBCFGQ_CFG_RESET_CNTS_START_OF_RANK,
+            CFG_LOG_COUNTS_IN_TRACE = MCBIST_MCBCFGQ_CFG_LOG_COUNTS_IN_TRACE,
+            SKIP_INVALID_ADDR_DIMM_DIS = MCBIST_MCBCFGQ_SKIP_INVALID_ADDR_DIMM_DIS,
+            REFRESH_ONLY_SUBTEST_EN = MCBIST_MCBCFGQ_REFRESH_ONLY_SUBTEST_EN,
+            REFRESH_ONLY_SUBTEST_TIMEBASE_SEL = MCBIST_MCBCFGQ_REFRESH_ONLY_SUBTEST_TIMEBASE_SEL,
+            REFRESH_ONLY_SUBTEST_TIMEBASE_SEL_LEN = MCBIST_MCBCFGQ_REFRESH_ONLY_SUBTEST_TIMEBASE_SEL_LEN,
+            RAND_ADDR_ALL_ADDR_MODE_EN = MCBIST_MCBCFGQ_RAND_ADDR_ALL_ADDR_MODE_EN,
+            MCBIST_CFG_REF_WAIT_TIME = MCBIST_MCBCFGQ_MCBIST_CFG_REF_WAIT_TIME,
+            MCBIST_CFG_REF_WAIT_TIME_LEN = MCBIST_MCBCFGQ_MCBIST_CFG_REF_WAIT_TIME_LEN,
+            CFG_MCB_LEN64 = MCBIST_MCBCFGQ_CFG_MCB_LEN64,
+            CFG_PAUSE_ON_ERROR_MODE = MCBIST_MCBCFGQ_CFG_PAUSE_ON_ERROR_MODE,
+            CFG_PAUSE_ON_ERROR_MODE_LEN = MCBIST_MCBCFGQ_CFG_PAUSE_ON_ERROR_MODE_LEN,
+            MCBIST_CFG_PAUSE_AFTER_CCS_SUBTEST = MCBIST_MCBCFGQ_MCBIST_CFG_PAUSE_AFTER_CCS_SUBTEST,
+            MCBIST_CFG_FORCE_PAUSE_AFTER_ADDR = MCBIST_MCBCFGQ_MCBIST_CFG_FORCE_PAUSE_AFTER_ADDR,
+            MCBIST_CFG_FORCE_PAUSE_AFTER_SUBTEST = MCBIST_MCBCFGQ_MCBIST_CFG_FORCE_PAUSE_AFTER_SUBTEST,
+            CFG_ENABLE_SPEC_ATTN = MCBIST_MCBCFGQ_CFG_ENABLE_SPEC_ATTN,
+            CFG_ENABLE_HOST_ATTN = MCBIST_MCBCFGQ_CFG_ENABLE_HOST_ATTN,
+
         };
 
 };
@@ -98,6 +187,156 @@ template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
 class subtest_t
 {
     public:
+        subtest_t( const uint16_t i_data = 0 ):
+            iv_mcbmr(i_data)
+        {}
+
+        ///
+        /// @brief Complement the data for the first subcommand
+        /// @param[in] i_state, the desired state, mss::ON, mss::OFF
+        /// @return void
+        ///
+        inline void change_compliment_1st_cmd( const mss::states i_state )
+        {
+            iv_mcbmr.template writeBit<TT::COMPL_1ST_CMD>(i_state);
+            return;
+        }
+
+        ///
+        /// @brief Complement the data for the second subcommand
+        /// @param[in] i_state, the desired state, mss::ON, mss::OFF
+        /// @return void
+        ///
+        inline void change_compliment_2nd_cmd( const mss::states i_state )
+        {
+            iv_mcbmr.template writeBit<TT::COMPL_2ND_CMD>(i_state);
+            return;
+        }
+
+        ///
+        /// @brief Complement the data for the third subcommand
+        /// @param[in] i_state, the desired state, mss::ON, mss::OFF
+        /// @return void
+        ///
+        inline void change_compliment_3rd_cmd( const mss::states i_state )
+        {
+            iv_mcbmr.template writeBit<TT::COMPL_3RD_CMD>(i_state);
+            return;
+        }
+
+        ///
+        /// @brief Enable a specific port for this test - maint address mode
+        /// @param[in] i_port, the port desired to be enabled - int 0, 1, 2, 3
+        /// @return void
+        ///
+        inline void enable_port( const uint64_t i_port )
+        {
+            constexpr uint64_t l_len = (TT::COMPL_2ND_CMD - TT::COMPL_1ST_CMD) + 1;
+            iv_mcbmr.template insertFromRight<TT::COMPL_1ST_CMD, l_len>(i_port);
+            return;
+        }
+
+        ///
+        /// @brief Enable a specific dimm for this test - maint address mode
+        /// @param[in] i_dimm, the dimm desired to be enabled - int 0, 1
+        /// @return void
+        ///
+        inline void enable_dimm( const uint64_t i_dimm )
+        {
+            iv_mcbmr.template writeBit<TT::COMPL_3RD_CMD>(i_dimm);
+            return;
+        }
+
+
+        ///
+        /// @brief Generate addresses in reverse order
+        /// @param[in] i_state, the desired state of the function; mss:ON, mss::OFF
+        /// @return void
+        ///
+        inline void change_addr_rev_mode( const mss::states i_state )
+        {
+            iv_mcbmr.template writeBit<TT::ADDR_REV_MODE>(i_state);
+            return;
+        }
+
+        ///
+        /// @brief Generate addresses in random order
+        /// @param[in] i_state, the desired state of the function; mss:ON, mss::OFF
+        /// @return void
+        ///
+        inline void change_addr_rand_mode( const mss::states i_state )
+        {
+            iv_mcbmr.template writeBit<TT::ADDR_RAND_MODE>(i_state);
+            return;
+        }
+
+        ///
+        /// @brief Generate and check data with ECC
+        /// @param[in] i_state, the desired state of the function; mss:ON, mss::OFF
+        /// @return void
+        ///
+        inline void change_ecc_mode( const mss::states i_state )
+        {
+            iv_mcbmr.template writeBit<TT::ECC_MODE>(i_state);
+            return;
+        }
+
+        ///
+        /// @brief Set the 'done after this test' bit
+        /// @param[in] i_state, the desired state of the function; mss:ON, mss::OFF
+        /// @return void
+        ///
+        inline void change_done( const mss::states i_state )
+        {
+            iv_mcbmr.template writeBit<TT::DONE>(i_state);
+            return;
+        }
+
+        ///
+        /// @brief Set the data mode for this subtest
+        /// @param[in] i_mode, the desired mcbist::data_mode
+        /// @return void
+        ///
+        inline void change_data_mode( const data_mode i_mode )
+        {
+            iv_mcbmr.template insertFromRight<TT::DATA_MODE, TT::DATA_MODE_LEN>(i_mode);
+            return;
+        }
+
+        ///
+        /// @brief Set the operation type for this subtest
+        /// @param[in] i_mode, the desired mcbist::op_type
+        /// @return void
+        ///
+        inline void change_op_type( const op_type i_type )
+        {
+            iv_mcbmr.template insertFromRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(i_type);
+            return;
+        }
+
+        ///
+        /// @brief Configure which address registers to use for this subtest
+        /// @param[in] i_index, 0 = MCBSA0Q, 1 = MCBSA1Q, ...
+        /// @note wraps to 0-3 no matter what value you pass in.
+        /// @return void
+        ///
+        inline void change_addr_sel( const uint16_t i_index )
+        {
+            // Roll the index around - tidy support for an index which is out of range.
+            static const uint16_t MAX_ADDRESS_START_END_REGISTERS = 3 + 1;
+            iv_mcbmr.template insertFromRight<TT::ADDR_SEL, TT::ADDR_SEL_LEN>(i_index % MAX_ADDRESS_START_END_REGISTERS);
+            return;
+        }
+
+        //
+        // @brief operator== for mcbist subtests
+        // @param[in] i_rhs, the right hand side of the compare
+        // @return bool, true iff i_rhs == this
+        inline bool operator==(const subtest_t<T>& i_rhs) const
+        {
+            return i_rhs.iv_mcbmr == iv_mcbmr;
+        }
+
         /// The mcbist 'memory register' for this subtest.
         // Note that it is only 16 bits.
         // Each 64b memory register contains multiple 16 bit subtest definitions.
@@ -107,149 +346,694 @@ class subtest_t
 };
 
 ///
+/// @brief Return a write subtest - configured simply
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T - derived
+/// @return mss::mcbist::subtest_t
+/// @note Turns on ECC mode for the returned subtest - caller can turn it off
+/// @note Configures for start/end address select bit as address config register 0
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline subtest_t<T> write_subtest()
+{
+    // Starts life full of 0's
+    subtest_t<T> l_subtest;
+
+    // 0:3   = 0000 - we want subtest type to be a Write (W)
+    l_subtest.iv_mcbmr.template insertFromRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(op_type::WRITE);
+
+    // - Not a special subtest, so no other configs associated
+    // 4     = 0    - we don't want to complement data for our Writes
+    // 5:6   = 00   - don't know whether we complement 2nd and 3rd subcommand, caller to fix
+    // 7     = 0    - forward address generation
+    // 8     = 0    - non random address generation
+    // - Don't need to set up anything for LFSRs
+    // 9:11  = 000  - Fixed data mode
+
+    // 14:15 = 0 address select config registers 0
+
+    // By default we want to turn on ECC. Caller can turn it off.
+    l_subtest.change_ecc_mode(mss::ON);
+
+    return l_subtest;
+}
+
+///
+/// @brief Return a read subtest - configured simply
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T - derived
+/// @return mss::mcbist::subtest_t
+/// @note Turns on ECC mode for the returned subtest - caller can turn it off
+/// @note Configures for start/end address select bit as address config register 0
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline subtest_t<T> read_subtest()
+{
+    // Starts life full of 0's
+    subtest_t<T> l_subtest;
+
+    // 0:3   = 0001 - we want subtest type to be a Read (R)
+    l_subtest.iv_mcbmr.template insertFromRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(op_type::READ);
+
+    // - Not a special subtest, so no other configs associated
+    // 4     = 0    - we don't want to complement data for our Writes
+    // 5:6   = 00   - don't know whether we complement 2nd and 3rd subcommand, caller to fix
+    // 7     = 0    - forward address generation
+    // 8     = 0    - non random address generation
+    // - Don't need to set up anything for LFSRs
+    // 9:11  = 000  - Fixed data mode
+
+    // 14:15 = 0 address select config registers 0
+
+    // By default we want to turn on ECC. Caller can turn it off.
+    l_subtest.change_ecc_mode(mss::ON);
+
+    return l_subtest;
+}
+
+///
 /// @brief A class representing a series of MCBIST subtests, and the
 /// MCBIST engine parameters associated with running the subtests
 /// @tparam T fapi2::TargetType representing the fapi2 target which
 /// contains the MCBIST engine (e.g., fapi2::TARGET_TYPE_MCBIST)
+/// @tparam TT, the mssTraits associtated with T
+/// @note MCBIST Memory Parameter Register defaults to
+/// - issue commands as fast as possible
+/// - even weighting of read/write if random addressing
+/// - disable clock monitoring
+/// - random command gap is disabled
+/// - BC4 disabled
+/// - no selected ports
+/// @note Address Generation Config Register defaults to
+/// - 0 fixed slots
+/// - All address counter modes on (so addr configs are start + len)
+/// - maint address mode enabled
+/// - maint broadcast mode disabled
+/// - maint slave rank boundary detect disabled
+/// @note Config register defaults to
+/// - BROADCAST_SYNC_EN disabled
+/// - BROADCAST_SYNC_WAIT 0
+/// - TIMEOUT_MODE - wait 524288 cycles until timeout is called
+/// - RESET_KEEPER - 0
+/// - CURRENT_ADDR_TRAP_UPDATE_DIS - 0
+/// - CCS_RETRY_DIS - 0
+/// - RESET_CNTS_START_OF_RANK - 0
+/// - LOG_COUNTS_IN_TRACE - 0
+/// - SKIP_INVALID_ADDR_DIMM_DIS - 0
+/// - REFRESH_ONLY_SUBTEST_EN - 0
+/// - REFRESH_ONLY_SUBTEST_TIMEBASE_SEL(0:1) - 0
+/// - RAND_ADDR_ALL_ADDR_MODE_EN - 0
+/// - REF_WAIT_TIME(0:13) - 0
+/// - MCB_LEN64 - 1
+/// - PAUSE_ON_ERROR_MODE(0:1) - don't pause on error
+/// - PAUSE_AFTER_CCS_SUBTEST - don't puase after CCS subtest
+/// - FORCE_PAUSE_AFTER_ADDR - don't pause after current address
+/// - FORCE_PAUSE_AFTER_SUBTEST - no pause after subtest
+/// - ENABLE_SPEC_ATTN - disabled
+/// - ENABLE_HOST_ATTN - disabled
 ///
-template< fapi2::TargetType T >
+
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
 class program
 {
     public:
-        // Setup our poll parameters so the CCS executer can see
+        // Setup our poll parameters so the MCBIST executer can see
         // whether to use the delays in the instruction stream or not
-        program(): iv_poll(0, 0)
-        {}
+        program():
+            iv_parameters(0),
+            iv_addr_gen(0),
+            iv_test_type(CENSHMOO), // Used as default in Centaur
+            iv_addr_map0(0),
+            iv_addr_map1(0),
+            iv_addr_map2(0),
+            iv_addr_map3(0),
+            iv_config(0),
+            iv_control(0)
+        {
+            // Enable the maintenance mode addressing
+            change_maint_address_mode(mss::ON);
 
-        // Vector of subtests
+            // Enable 64b lengths, required in maint mode.
+            change_len64(mss::ON);
+
+            // Turn on counting mode for all address configs
+            iv_addr_gen.insertFromRight<TT::ADDR_COUNTER_MODE, TT::ADDR_COUNTER_MODE_LEN>(0b1111);
+        }
+
+        ///
+        /// @brief Change the mcbist 64/128 bit control
+        /// @param[in] i_state, mss::ON if you want 64b,mss::OFF if you want 128b
+        /// @return void
+        ///
+        inline void change_len64( const mss::states i_state )
+        {
+            iv_config.writeBit<TT::CFG_MCB_LEN64>(i_state);
+            return;
+        }
+
+        ///
+        /// @brief Change the mcbist min command gap
+        /// @param[in] i_gap minimum number of cycles between commands when cfg_en_randcmd_gap is a 0 (disabled)
+        /// @note Assumes data is right-aligned
+        /// @return void
+        ///
+        inline void change_min_cmd_gap( const uint64_t i_gap )
+        {
+            iv_parameters.insertFromRight<TT::MIN_CMD_GAP, TT::MIN_CMD_GAP_LEN>(i_gap);
+            return;
+        }
+
+        ///
+        /// @brief Change the mcbist gap timebase
+        /// @param[in] i_tb When set to mss::ON and cfg_en_randcmd_gap is a 0, then the number of minimum
+        /// cycles between commands will be cfg_min_cmd_gap multiplied by 2^13.
+        /// @note Assumes data is right-aligned
+        /// @return void
+        ///
+        inline void change_min_gap_timebase( const bool i_tb )
+        {
+            iv_parameters.writeBit<TT::MIN_GAP_TIMEBASE>(i_tb);
+            return;
+        }
+
+        ///
+        /// @brief Change the mcbist min command gap blind steer
+        /// @param[in] i_gap min gap between commands when doing steering
+        /// @note Assumes data is right-aligned
+        /// @return void
+        ///
+        inline void change_min_cmd_gap_blind_steer( const uint64_t i_gap )
+        {
+            iv_parameters.insertFromRight<TT::MIN_CMD_GAP_BLIND_STEER, TT::MIN_CMD_GAP_BLIND_STEER_LEN>(i_gap);
+            return;
+        }
+
+        ///
+        /// @brief Change the mcbist gap timebase for blind steer
+        /// @param[in] i_program, the program in question
+        /// @param[in] i_tb When set to mss::ON and cfg_en_randcmd_gap is a 0, then the number of minimum
+        /// cycles between commands will be cfg_min_cmd_gap multiplied by 2^13.
+        /// @note Assumes data is right-aligned
+        /// @return void
+        ///
+        inline void change_min_gap_timebase_blind_steer( const bool i_tb )
+        {
+            iv_parameters.writeBit<TT::MIN_GAP_TIMEBASE_BLIND_STEER>(i_tb);
+            return;
+        }
+
+        ///
+        /// @brief Change the weights for random mcbist reads, writes
+        /// @param[in] i_weight
+        /// @note Assumes data is right-aligned
+        /// @return void
+        ///
+        inline void change_randcmd_wgt( const uint64_t i_weight )
+        {
+            iv_parameters.insertFromRight<TT::RANDCMD_WGT, TT::RANDCMD_WGT_LEN>(i_weight);
+            return;
+        }
+
+        ///
+        /// @brief Change the weights for random mcbist command gaps
+        /// @param[in] i_program, the program in question
+        /// @param[in] i_weight
+        /// @note Assumes data is right-aligned
+        /// @return void
+        ///
+        inline void change_randgap_wgt( const uint64_t i_weight )
+        {
+            iv_parameters.insertFromRight<TT::RANDGAP_WGT, TT::RANDGAP_WGT_LEN>(i_weight);
+            return;
+        }
+
+        ///
+        /// @brief Enable or disable mcbist clock monitoring
+        /// @param[in] i_monitor mss::ON to monitor
+        /// @note Assumes data is right-aligned
+        /// @return void
+        ///
+        inline void change_clock_monitor_en( const bool i_monitor )
+        {
+            iv_parameters.writeBit<TT::CLOCK_MONITOR_EN>(i_monitor);
+            return;
+        }
+
+        ///
+        /// @brief Enable or disable mcbist random command gaps
+        /// @param[in] i_rndgap mss::ON to enable
+        /// @note Assumes data is right-aligned
+        /// @return void
+        ///
+        inline void change_en_randcmd_gap( const bool i_rndgap )
+        {
+            iv_parameters.writeBit<TT::EN_RANDCMD_GAP>(i_rndgap);
+            return;
+        }
+
+        ///
+        /// @brief Enable or disable mcbist BC4 support
+        /// @param[in] i_bc4 mss::ON to enable
+        /// @note Assumes data is right-aligned
+        /// @return void
+        ///
+        inline void change_bc4_en( const bool i_bc4 )
+        {
+            iv_parameters.writeBit<TT::BC4_EN>(i_bc4);
+            return;
+        }
+
+        ///
+        /// @brief Change fixed width address generator config
+        /// @param[in] i_width
+        /// @note Assumes data is right-aligned
+        /// @return void
+        ///
+        inline void change_fixed_width( const uint64_t i_width )
+        {
+            iv_addr_gen.insertFromRight<TT::FIXED_WIDTH, TT::FIXED_WIDTH_LEN>(i_width);
+            return;
+        }
+
+        ///
+        /// @brief Enable or disable address counting mode for address config 0
+        /// @param[in] i_mode mss::ON to enable
+        /// @note Assumes data is right-aligned
+        /// @return void
+        ///
+        inline void change_address_counter_mode0( const bool i_mode )
+        {
+            fapi2::buffer<uint64_t> l_value;
+            iv_addr_gen.extract<TT::ADDR_COUNTER_MODE, TT::ADDR_COUNTER_MODE_LEN>(l_value);
+            l_value.writeBit<0>(i_mode);
+            iv_addr_gen.insert<TT::ADDR_COUNTER_MODE, TT::ADDR_COUNTER_MODE_LEN>(l_value);
+            return;
+        }
+
+        ///
+        /// @brief Enable or disable address counting mode for address config 1
+        /// @param[in] i_mode mss::ON to enable
+        /// @note Assumes data is right-aligned
+        /// @return void
+        ///
+        inline void change_address_counter_mode1( const bool i_mode )
+        {
+            fapi2::buffer<uint64_t> l_value;
+            iv_addr_gen.extract<TT::ADDR_COUNTER_MODE, TT::ADDR_COUNTER_MODE_LEN>(l_value);
+            l_value.writeBit<1>(i_mode);
+            iv_addr_gen.insert<TT::ADDR_COUNTER_MODE, TT::ADDR_COUNTER_MODE_LEN>(l_value);
+            return;
+        }
+
+        ///
+        /// @brief Enable or disable address counting mode for address config 2
+        /// @param[in] i_mode mss::ON to enable
+        /// @note Assumes data is right-aligned
+        /// @return void
+        ///
+        inline void change_address_counter_mode2( const bool i_mode )
+        {
+            fapi2::buffer<uint64_t> l_value;
+            iv_addr_gen.extract<TT::ADDR_COUNTER_MODE, TT::ADDR_COUNTER_MODE_LEN>(l_value);
+            l_value.writeBit<2>(i_mode);
+            iv_addr_gen.insert<TT::ADDR_COUNTER_MODE, TT::ADDR_COUNTER_MODE_LEN>(l_value);
+            return;
+        }
+
+        ///
+        /// @brief Enable or disable address counting mode for address config 3
+        /// @param[in] i_program, the program in question
+        /// @param[in] i_mode mss::ON to enable
+        /// @note Assumes data is right-aligned
+        /// @return void
+        ///
+        inline void change_address_counter_mode3( const bool i_mode )
+        {
+            fapi2::buffer<uint64_t> l_value;
+            iv_addr_gen.extract<TT::ADDR_COUNTER_MODE, TT::ADDR_COUNTER_MODE_LEN>(l_value);
+            l_value.writeBit<3>(i_mode);
+            iv_addr_gen.insert<TT::ADDR_COUNTER_MODE, TT::ADDR_COUNTER_MODE_LEN>(l_value);
+            return;
+        }
+
+
+        ///
+        /// @brief Enable or disable maint address mode
+        /// @param[in] i_program, the program in question
+        /// @param[in] i_mode mss::ON to enable
+        /// @warn Address counter modes must be 0 for this to work.
+        /// @note When enabled subtest complement bits become 3-bit port-dimm selector field
+        /// (Note: when turning this off, make sure you clear or reprogram complement bits)
+        /// @return void
+        ///
+        inline void change_maint_address_mode( const bool i_mode )
+        {
+            iv_addr_gen.writeBit<TT::MAINT_ADDR_MODE_EN>(i_mode);
+            return;
+        }
+
+
+        ///
+        /// @brief Enable or disable broadcast mode
+        /// @param[in] i_program, the program in question
+        /// @param[in] i_mode mss::ON to enable
+        /// @warn Maint address mode must be enabled for this to work
+        /// @return void
+        ///
+        inline void change_maint_broadcast_mode( const bool i_mode )
+        {
+            iv_addr_gen.writeBit<TT::MAINT_BROADCAST_MODE_EN>(i_mode);
+            return;
+        }
+
+
+        ///
+        /// @brief Enable or disable slave rank boundary detect
+        /// @param[in] i_program, the program in question
+        /// @param[in] i_mode mss::ON to enable
+        /// @return void
+        ///
+        inline void change_srank_boundaries( const bool i_mode )
+        {
+            iv_addr_gen.writeBit<TT::MAINT_DETECT_SRANK_BOUNDARIES>(i_mode);
+            return;
+        }
+
+        ///
+        /// @brief Select the port(s) to be used by the MCBIST
+        /// @param[in] i_ports uint64_t representing the ports. Multiple bits set imply broadcast
+        /// i_ports is a right-aligned uint64_t, of which only the right-most 4 bits are used. The register
+        /// field is defined such that the left-most bit in the field represents port 0, the right most
+        /// bit in the field represents port 3. So, to run on port 0, i_ports should be 0b1000. 0b0001
+        /// (or 0x1) is port 3 - not port 0
+        /// @param[in] i_wait_time representing the sync wait time for broadcast operations (optional)
+        /// @return void
+        /// @note If multiple bits are set, the MCBIST will be configured for broadcast mode.
+        /// This implies all subtests are individual reads/writes. Uses i_wait parameter.
+        /// @note i_wait is the number of 1024 2:1 cycle timebases to wait starting up MCBIST for SRQ's to get
+        /// synchornized for broadcast mode (ranges 0-127).
+        ///
+        inline void select_ports( const uint64_t i_ports, const uint64_t i_wait = 0)
+        {
+            fapi2::buffer<uint64_t> l_data;
+            fapi2::buffer<uint64_t> l_ports;
+
+            if (0 == i_ports)
+            {
+                FAPI_DBG("no ports selected for mcbist");
+                return;
+            }
+
+            if (1 != mss::bit_count(i_ports))
+            {
+                // We're in broadcast mode, so setup the broadcast inforamtion registers
+                FAPI_INF("mcbist select ports seeing broadcast requested: ports 0x%x", i_ports);
+                iv_config.setBit<TT::SYNC_EN>();
+                iv_config.insertFromRight<TT::SYNC_WAIT, TT::SYNC_WAIT_LEN>(i_wait);
+
+                // Should we check for maint mode and set the MCBAGRAQ_CFG_MAINT_BROADCAST_MODE_EN? BRS
+            }
+
+            iv_control.insertFromRight<TT::PORT_SEL, TT::PORT_SEL_LEN>(i_ports);
+            FAPI_DBG("mcbist select ports: 0x%016lx (0x%x)", iv_control, i_ports);
+
+            return;
+        }
+
+        // Vector of subtests. Note the MCBIST subtests are spread across
+        // 8 registers - 4 subtests fit in one 64b register
+        // (16 bits/test, 4 x 16 == 64, 4x8 = 32 subtests)
+        // We keep a vector of 16 bit subtests here, and we program the
+        // MCBIST engine (i.e., spread the subtests over the 8 registers)
+        // when we're told to execute the program.
         std::vector< subtest_t<T> > iv_subtests;
+
+        // Place to hold the value of the MCBIST Memory Parameter Register. We'll scom
+        // it when we execute the program.
+        fapi2::buffer<uint64_t>     iv_parameters;
+
+        // Place to hold the value of the MCBIST Address Generation Config. We'll scom
+        // it when we execute the program.
+        fapi2::buffer<uint64_t>     iv_addr_gen;
+
+        test_type                   iv_test_type;
+
         poll_parameters             iv_poll;
+
+        // Address Map Registers
+        // We might want to refactor to a vector ... BRS
+        uint64_t                    iv_addr_map0;
+        uint64_t                    iv_addr_map1;
+        uint64_t                    iv_addr_map2;
+        uint64_t                    iv_addr_map3;
+
+        // Config register
+        fapi2::buffer<uint64_t>     iv_config;
+
+        // Control register
+        fapi2::buffer<uint64_t>     iv_control;
 };
 
 ///
-/// @brief Complement the data for the first subcommand
+/// @brief Load the mcbist config register
 /// @tparam T fapi2::TargetType of the MCBIST engine
 /// @tparam TT the mssTraits associtated with T
-/// @param[in,out] io_subtest a subtest
-/// @param[in] i_state the desired state of the function
-/// @return void
+/// @param[in] i_target the target to effect
+/// @param[in] i_program the mcbist::program
+/// @return FAPI2_RC_SUCCSS iff ok
 ///
 template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
-void change_compliment_1st_cmd( subtest_t<T>& io_subtest, const mss::states i_state )
+inline fapi2::ReturnCode load_config( const fapi2::Target<T>& i_target, const mcbist::program<T>& i_program )
 {
-    io_subtest.iv_mcbmr.template writeBit<TT::COMPL_1ST_CMD>(i_state);
-    return;
+    FAPI_DBG("loading MCBIST Config 0x%016lx", i_program.iv_config);
+    return mss::putScom(i_target, TT::CFGQ_REG, i_program.iv_config);
+}
+
+
+///
+/// @brief Load the mcbist control register
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_program the mcbist::program
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline fapi2::ReturnCode load_control( const fapi2::Target<T>& i_target, const mcbist::program<T>& i_program )
+{
+    FAPI_DBG("loading MCBIST Control 0x%016lx", i_program.iv_control);
+    return mss::putScom(i_target, TT::CFGQ_REG, i_program.iv_control);
+}
+
+
+///
+/// @brief Load the address generator config
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_program the mcbist::program
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline fapi2::ReturnCode load_addr_gen( const fapi2::Target<T>& i_target, const mcbist::program<T>& i_program )
+{
+    FAPI_DBG("loading MCBIST Address Generation 0x%016lx", i_program.iv_addr_gen);
+    return mss::putScom(i_target, TT::MCBAGRAQ_REG, i_program.iv_addr_gen);
 }
 
 ///
-/// @brief Complement the data for the second subcommand
-/// @tparam T fapi2::TargetType of the MCBIST engine
-/// @tparam TT the mssTraits associtated with T
-/// @param[in,out] io_subtest a subtest
-/// @param[in] i_state the desired state of the function
-/// @return void
+/// @brief Configure address range 0
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_program the mcbist::program
+/// @param[in] i_start 64b right-aligned address
+/// @param[in] i_end 64b right-aligned address
+/// @return FAPI2_RC_SUCCSS iff ok
+/// @note Only the right-most 37 bits of the start/end are used.
+/// @warn if address counting mode is enabled in the MCBIST program, these bits are start, len
 ///
 template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
-void change_compliment_2nd_cmd( subtest_t<T>& io_subtest, const mss::states i_state )
+inline fapi2::ReturnCode config_address_range0( const fapi2::Target<T>& i_target, const uint64_t i_start,
+        const uint64_t i_end )
 {
-    io_subtest.iv_mcbmr.template writeBit<TT::COMPL_2ND_CMD>(i_state);
-    return;
+    FAPI_DBG("config MCBIST address range 0 start: 0x%016lx (0x%016lx), end/len 0x%016lx (0x%016lx)",
+             i_start, (i_start << 26), i_end, (i_end << 26));
+    FAPI_TRY( mss::putScom(i_target, TT::START_ADDRESS_0, i_start << 26) );
+    FAPI_TRY( mss::putScom(i_target, TT::END_ADDRESS_0, i_end << 26) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+///
+/// @brief Configure address range 1
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_program the mcbist::program
+/// @param[in] i_start 64b right-aligned address
+/// @param[in] i_end 64b right-aligned address
+/// @return FAPI2_RC_SUCCSS iff ok
+/// @note Only the right-most 37 bits of the start/end are used.
+/// @warn if address counting mode is enabled in the MCBIST program, these bits are start, len
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline fapi2::ReturnCode config_address_range1( const fapi2::Target<T>& i_target, const uint64_t i_start,
+        const uint64_t i_end )
+{
+    FAPI_DBG("config MCBIST address range 1 start: 0x%016lx (0x%016lx), end/len 0x%016lx (0x%016lx)",
+             i_start, (i_start << 26), i_end, (i_end << 26));
+    FAPI_TRY( mss::putScom(i_target, TT::START_ADDRESS_1, i_start << 26) );
+    FAPI_TRY( mss::putScom(i_target, TT::END_ADDRESS_1, i_end << 26) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+///
+/// @brief Configure address range 2
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_program the mcbist::program
+/// @param[in] i_start 64b right-aligned address
+/// @param[in] i_end 64b right-aligned address
+/// @return FAPI2_RC_SUCCSS iff ok
+/// @note Only the right-most 37 bits of the start/end are used.
+/// @warn if address counting mode is enabled in the MCBIST program, these bits are start, len
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline fapi2::ReturnCode config_address_range2( const fapi2::Target<T>& i_target, const uint64_t i_start,
+        const uint64_t i_end )
+{
+    FAPI_DBG("config MCBIST address range 2 start: 0x%016lx (0x%016lx), end/len 0x%016lx (0x%016lx)",
+             i_start, (i_start << 26), i_end, (i_end << 26));
+    FAPI_TRY( mss::putScom(i_target, TT::START_ADDRESS_2, i_start << 26) );
+    FAPI_TRY( mss::putScom(i_target, TT::END_ADDRESS_2, i_end << 26) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+///
+/// @brief Configure address range 3
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_program the mcbist::program
+/// @param[in] i_start 64b right-aligned address
+/// @param[in] i_end 64b right-aligned address
+/// @return FAPI2_RC_SUCCSS iff ok
+/// @note Only the right-most 37 bits of the start/end are used.
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline fapi2::ReturnCode config_address_range3( const fapi2::Target<T>& i_target, const uint64_t i_start,
+        const uint64_t i_end )
+{
+    FAPI_DBG("config MCBIST address range 3 start: 0x%016lx (0x%016lx), end/len 0x%016lx (0x%016lx)",
+             i_start, (i_start << 26), i_end, (i_end << 26));
+    FAPI_TRY( mss::putScom(i_target, TT::START_ADDRESS_3, i_start << 26) );
+    FAPI_TRY( mss::putScom(i_target, TT::END_ADDRESS_3, i_end << 26) );
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
-/// @brief Complement the data for the third subcommand
-/// @tparam T fapi2::TargetType of the MCBIST engine
-/// @tparam TT the mssTraits associtated with T
-/// @param[in,out] io_subtest a subtest
-/// @param[in] i_state the desired state of the function
-/// @return void
+/// @brief Start or stop the MCBIST engine
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_start_stop bool START for starting, STOP otherwise
+/// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff OK
 ///
 template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
-void change_compliment_3rd_cmd( subtest_t<T>& io_subtest, const mss::states i_state )
+inline fapi2::ReturnCode start_stop( const fapi2::Target<T>& i_target, bool i_start_stop )
 {
-    io_subtest.iv_mcbmr.template writeBit<TT::COMPL_3RD_CMD>(i_state);
-    return;
+    // This is the same as the CCS start_stop ... perhaps we need one template for all
+    // 'engine' control functions? BRS
+    fapi2::buffer<uint64_t> l_buf;
+    FAPI_TRY(mss::getScom(i_target, TT::CNTLQ_REG, l_buf));
+
+    FAPI_TRY( mss::putScom(i_target, TT::CNTLQ_REG,
+                           i_start_stop ? l_buf.setBit<TT::MCBIST_START>() : l_buf.setBit<TT::MCBIST_STOP>()) );
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
-/// @brief Generate addresses in reverse order
-/// @tparam T fapi2::TargetType of the MCBIST engine
-/// @tparam TT the mssTraits associtated with T
-/// @param[in,out] io_subtest a subtest
-/// @param[in] i_state the desired state of the function
-/// @return void
+/// @brief Execute the mcbist program
+/// @tparam T the fapi2::TargetType - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_program the mcbist program to execute
+/// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff OK
 ///
-template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
-void change_addr_rev_mode( subtest_t<T>& io_subtest, const mss::states i_state )
-{
-    io_subtest.iv_mcbmr.template writeBit<TT::ADDR_REV_MODE>(i_state);
-    return;
-}
+template< fapi2::TargetType T >
+fapi2::ReturnCode execute( const fapi2::Target<T>& i_target, const program<T>& i_program );
 
 ///
-/// @brief Generate addresses in random order
-/// @tparam T fapi2::TargetType of the MCBIST engine
-/// @tparam TT the mssTraits associtated with T
-/// @param[in,out] io_subtest a subtest
-/// @param[in] i_state the desired state of the function
-/// @return void
+/// @brief Load a set of MCBIST subtests in to the MCBIST registers
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_program the mcbist::program
+/// @return FAPI2_RC_SUCCSS iff ok
 ///
 template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
-void change_addr_rand_mode( subtest_t<T>& io_subtest, const mss::states i_state )
-{
-    io_subtest.iv_mcbmr.template writeBit<TT::ADDR_RAND_MODE>(i_state);
-    return;
-}
+fapi2::ReturnCode load_mcbmr( const fapi2::Target<T>& i_target, const mcbist::program<T>& i_program );
+
 
 ///
-/// @brief Generate and check data with ECC
-/// @tparam T fapi2::TargetType of the MCBIST engine
-/// @tparam TT the mssTraits associtated with T
-/// @param[in,out] io_subtest a subtest
-/// @param[in] i_state the desired state of the function
-/// @return void
+/// @brief Load a set of MCBIST address map registers
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T - derived
+/// @param[in] the target to effect
+/// @param[in] the mcbist::program
+/// @return FAPI2_RC_SUCCSS iff ok
 ///
 template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
-void change_ecc_mode( subtest_t<T>& io_subtest, const mss::states i_state )
+fapi2::ReturnCode load_mcbamr( const fapi2::Target<T>& i_target, const mcbist::program<T>& i_program )
 {
-    io_subtest.iv_mcbmr.template writeBit<TT::ECC_MODE>(i_state);
-    return;
+    // Vector? Can decide when we fully understand the methods to twiddle the maps themselves. BRS
+    FAPI_DBG("load MCBIST address map register 0: 0x%016lx", i_program.iv_addr_map0);
+    FAPI_TRY( mss::putScom(i_target, TT::MCBAMR0A0Q_REG, i_program.iv_addr_map0) );
+
+    FAPI_DBG("load MCBIST address map register 1: 0x%016lx", i_program.iv_addr_map1);
+    FAPI_TRY( mss::putScom(i_target, TT::MCBAMR1A0Q_REG, i_program.iv_addr_map1) );
+
+    FAPI_DBG("load MCBIST address map register 2: 0x%016lx", i_program.iv_addr_map2);
+    FAPI_TRY( mss::putScom(i_target, TT::MCBAMR1A0Q_REG, i_program.iv_addr_map2) );
+
+    FAPI_DBG("load MCBIST address map register 3: 0x%016lx", i_program.iv_addr_map3);
+    FAPI_TRY( mss::putScom(i_target, TT::MCBAMR1A0Q_REG, i_program.iv_addr_map3) );
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
-///
-/// @brief Set the data mode for this subtest
-/// @tparam T fapi2::TargetType of the MCBIST engine
-/// @tparam TT the mssTraits associtated with T
-/// @param[in,out] io_subtest a subtest
-/// @param[in] i_mode the desired mcbist::data_mode
-/// @return void
-///
-template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
-void change_data_mode( subtest_t<T>& io_subtest, const data_mode i_mode )
-{
-    io_subtest.iv_mcbmr.template insertFromRight<TT::DATA_MODE, TT::DATA_MODE_LEN>(i_mode);
-    return;
-}
 
 ///
-/// @brief Configure which address registers to use for this subtest
-/// @tparam T fapi2::TargetType of the MCBIST engine
-/// @tparam TT the mssTraits associtated with T
-/// @param[in,out] io_subtest a subtest
-/// @param[in] i_index 0 = MCBSA0Q, 1 = MCBSA1Q, ...
-/// @note wraps to 0-3 no matter what value you pass in.
-/// @return void
+/// @brief Load MCBIST Memory Parameter Register
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T - derived
+/// @param[in] the target to effect
+/// @param[in] the mcbist::program
+/// @return FAPI2_RC_SUCCSS iff ok
 ///
 template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
-void change_addr_sel( subtest_t<T>& io_subtest, const uint16_t i_index )
+inline fapi2::ReturnCode load_mcbparm( const fapi2::Target<T>& i_target, const mcbist::program<T>& i_program )
 {
-    // Roll the index around - tidy support for an index which is out of range.
-    static const uint16_t MAX_ADDRESS_START_END_REGISTERS = 3 + 1;
-    io_subtest.iv_mcbmr.template insertFromRight<TT::ADDR_SEL, TT::ADDR_SEL_LEN>(i_index % MAX_ADDRESS_START_END_REGISTERS);
-    return;
+    FAPI_DBG("load MCBIST parameter register: 0x%016lx", i_program.iv_parameters);
+    return mss::putScom(i_target, TT::MCBPARMQ_REG, i_program.iv_parameters);
 }
 
 } // namespace
+
 } // namespace
 
 #endif
