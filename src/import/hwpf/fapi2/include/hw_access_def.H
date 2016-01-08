@@ -57,6 +57,7 @@ enum ChipOpModifyMode
 ///
 enum RingMode
 {
+    RING_MODE_HEADER_CHECK    = 0x00000000, ///< Check header
     RING_MODE_SET_PULSE       = 0x00000001, ///< Set pulse
     RING_MODE_NO_HEADER_CHECK = 0x00000002, ///< Dont' check header
     // FUTURE_MODE            = 0x00000004,
