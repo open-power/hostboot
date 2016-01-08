@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2012,2015                                                    */
+/* COPYRIGHT 2012,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,7 @@
 #include <target.H>
 #include <hw_access_def.H>
 #include <plat_hw_access.H>
+#include <p9_ringId.H>
 
 #ifdef FAPI_SUPPORT_MULTI_SCOM
     #include <multi_scom.H>
@@ -148,6 +149,17 @@ inline ReturnCode modifyCfamRegister(const Target<K>& i_target,
                                      const buffer<uint32_t> i_data,
                                      const ChipOpModifyMode i_modifyMode);
 
+/// @brief Writes a ring to a chip.
+/// @tparam K template parameter, passed in target.
+/// @param[in] i_target   Target to operate on.
+/// @param[in] i_ringID   Ring ID that will identify the Ring in the image.
+/// @param[in] i_ringMode Ring operation mode.
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+template< TargetType K >
+inline ReturnCode putRing(const Target<K>& i_target,
+                          const RingID i_ringID,
+                          const RingMode i_ringMode = RING_MODE_HEADER_CHECK);
+
 // variable_buffer isn't supported on PPE
 #ifndef __PPE__
 /// @brief Reads a ring from a chip.
@@ -162,21 +174,6 @@ inline ReturnCode getRing(const Target<K>& i_target,
                           const scanRingId_t i_address,
                           variable_buffer& o_data,
                           const RingMode i_ringMode = 0);
-
-/// @brief Writes a ring to a chip.
-/// @tparam K template parameter, passed in target.
-/// @param[in] i_target   Target to operate on.
-/// @param[in] i_address  Ring address to write to.
-/// @param[in] i_data     Buffer that contains RS4 compressed ring data
-///                       to write into address
-/// @param[in] i_ringMode Ring operation mode.
-/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-template< TargetType K >
-inline ReturnCode putRing(const Target<K>& i_target,
-                          const scanRingId_t i_address,
-                          const variable_buffer& i_data,
-                          const RingMode i_ringMode = 0);
-
 
 /// @brief Read-modify-write a ring on a chip.
 /// @tparam K template parameter, passed in target.
