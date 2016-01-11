@@ -50,6 +50,7 @@ namespace fapi2
         MOD_FAPI2_VERIFYCFAMACCESSTARGET            = 0x07,
         MOD_FAPI2_PLAT_GET_OTHER_END_TEST           = 0x08,
         MOD_FAPI2_PLAT_GET_OTHER_END                = 0x09,
+        MOD_FAPI2_MVPD_ACCESS                       = 0x0A,
     };
 
     /**
@@ -66,6 +67,9 @@ namespace fapi2
         RC_NULL_FAPI_TARGET            = HWPF_COMP_ID | 0x0A,
         RC_LOOKING_FOR_TYPE_NA         = HWPF_COMP_ID | 0x0B,
 
+        // MVPD generated errors
+        RC_INVALID_RECORD              = HWPF_COMP_ID | 0x0C,
+        RC_INVALID_KEYWORD             = HWPF_COMP_ID | 0x0D,
 
         //Platform generated errors
         RC_NO_PROCS_FOUND              = FAPI2_COMP_ID | 0x0B,
@@ -95,6 +99,7 @@ namespace fapi2
         RC_INCORRECT_OTHER_END         = FAPI2_COMP_ID | 0x24,
         RC_FOUND_TOO_MANY_PEERS        = FAPI2_COMP_ID | 0x25,
         RC_FOUND_NO_PEERS              = FAPI2_COMP_ID | 0x26,
+
         // HWP generated errors
         RC_HWP_GENERATED_ERROR         = HWPF_COMP_ID | 0x0f,
 
