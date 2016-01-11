@@ -41,6 +41,7 @@ OBJS += plat_hwp_invoker.o
 OBJS += target.o
 OBJS += plat_hw_access.o
 OBJS += plat_spd_access.o
+OBJS += plat_mvpd_access.o
 
 #EKB Objects (mirrored in src/import)
 OBJS += error_info.o
