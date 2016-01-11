@@ -425,7 +425,6 @@ errlHndl_t getSideState(sbeResolveState_t& io_sideState)
     return err;
 }
 
-
 /////////////////////////////////////////////////////////////////////
 errlHndl_t getSideActions(sbeResolveState_t& io_sideState)
 {
@@ -435,7 +434,16 @@ errlHndl_t getSideActions(sbeResolveState_t& io_sideState)
                ENTER_MRK"getSideActions()" );
 
     do{
-
+#ifdef CONFIG_PNOR_TWO_SIDE_SUPPORT
+        if (sbeGoldenHBBFixNeeded(io_sideState.tgt))
+        {
+            l_actions |= FIXUP_GOLDEN_HBB;
+            l_actions |= REIPL;
+            io_sideState.actions = l_actions;
+            // do not perform any other side actions
+            break;
+        }
+#endif
         // Check if PNOR is running from its GOLDEN side
         if ( io_sideState.pnor_isGolden == true )
         {
@@ -545,18 +553,6 @@ errlHndl_t performSideActions(sbeResolveState_t& io_sideState)
             // We need to write to the version info that the SBE Seeprom Image
             // originates from the golden side Seeprom.
 
-            // If the golden side version struct doesn't already have the newer
-            // nest_freq_mhz field add it.
-            if (image_version.struct_version < STRUCT_VERSION_NEST_FREQ)
-            {
-                TargetService& ts = targetService();
-                TARGETING::Target* sys = NULL;
-                ts.getTopLevelTarget(sys);
-
-                image_version.nest_freq_mhz =
-                                        sys->getAttr<ATTR_NEST_FREQ_MHZ>();
-            }
-
             // indicate that the version struct is the latest version
             image_version.struct_version = STRUCT_VERSION_LATEST;
 
@@ -565,6 +561,49 @@ errlHndl_t performSideActions(sbeResolveState_t& io_sideState)
             // in the traces each time getSeepromSideVersion is called.
             image_version.origin = GOLDEN_SIDE;
         }
+
+#ifdef CONFIG_PNOR_TWO_SIDE_SUPPORT
+        if ( io_sideState.actions & FIXUP_GOLDEN_HBB )
+        {
+            // SBE golden side images in the field may have an incorrect
+            // HBB pointer address that makes booting from the golden side pnor
+            // image impossible.
+
+            // Determine which PNOR is golden and fixup the SBE HBB pointer
+            // with it.
+            PNOR::SideId l_pnor_side = PNOR::WORKING;
+
+            if (!io_sideState.pnor_isGolden)
+            {
+                l_pnor_side = PNOR::ALTERNATE;
+            }
+
+            err = fixupSbeGoldenHBB(io_sideState.tgt,
+                                 reinterpret_cast<void*>(SBE_IMG_VADDR),
+                                 READ_ONLY_SEEPROM,
+                                 l_pnor_side,
+                                 image_size);
+            if ( err )
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK
+                           "performSideActions: Error returned from "
+                           "fixupSbeGoldenHBB() rc=0x%.4X, "
+                           "actions = 0x%X, image_size=0x%X"
+                           "Committing Error Log eid=0x%.8X "
+                           "plid=0x%.8X for Target UID=0x%X, but "
+                           "continuing procedure",
+                           err->reasonCode(),
+                           io_sideState.actions, image_size,
+                           err->eid(),
+                           err->plid(),
+                           TARGETING::get_huid(io_sideState.tgt));
+                errlCommit( err, SBE_COMP_ID );
+                // continuing on
+                err = NULL;
+                break;
+            }
+        }
+#endif
 
         if ( io_sideState.actions & CHECK_WORKING_HBB )
         {
@@ -588,7 +627,6 @@ errlHndl_t performSideActions(sbeResolveState_t& io_sideState)
                            io_sideState.actions, image_size);
                 break;
             }
-
         }
 
 
@@ -631,7 +669,6 @@ errlHndl_t performSideActions(sbeResolveState_t& io_sideState)
                  ( io_sideState.cur_side != READ_ONLY_SEEPROM ) )
             {
                 io_sideState.actions |= REIPL;
-
                 TRACUCOMP( g_trac_sbe, ERR_MRK
                            "performSideActions: resolveImageHBBaddr returned "
                            "updateForHBB=%d, and not on READ_ONLY_SEEPROM so "
@@ -670,6 +707,157 @@ errlHndl_t performSideActions(sbeResolveState_t& io_sideState)
     return err;
 }
 
+bool sbeGoldenHBBFixNeeded(TARGETING::Target* i_target)
+{
+    // First read the image version struct only to check if it needs fixup
+    sbeSeepromSide_t i_side = READ_ONLY_SEEPROM;
+    EEPROM::eeprom_chip_types_t l_seeprom = sbe_side_sync[i_side];
+    sbeSeepromVersionInfo_t l_image_version;
+    errlHndl_t err = NULL;
+    bool l_rc = true;
+
+    do {
+        // Read out SBE Version Info to help determing whether SBE HBB fix
+        // was performed previously
+        bool seeprom_ver_ECC_fail = false;
+
+        err = getSeepromSideVersion(i_target,
+                                    l_seeprom,
+                                    l_image_version,
+                                    seeprom_ver_ECC_fail);
+
+        if(err)
+        {
+            TRACFCOMP( g_trac_sbe, ERR_MRK"sbeGoldenHBBFixNeeded: - Error "
+                       "from getSeepromSideVersion: rc=0x%.4X, seeprom=%d "
+                       "(side=%d). HUID=0x%.8X",
+                       err->reasonCode(), l_seeprom, i_side,
+                       TARGETING::get_huid(i_target));
+            break;
+        }
+        else if (seeprom_ver_ECC_fail == true)
+        {
+            // For now, any issues will be addressed in SBE Update
+            // later in the IPL
+            TRACFCOMP( g_trac_sbe, ERR_MRK"readSbeGoldenHBB: ECC fail=%d "
+                       "Reading Seeprom Version seeprom=%d "
+                       "(side=%d). HUID=0x%.8X",
+                       seeprom_ver_ECC_fail, l_seeprom, i_side,
+                       TARGETING::get_huid(i_target));
+            break;
+        }
+
+        // if fixup already occured
+        if(l_image_version.fixed || l_image_version.struct_version ==
+                                                STRUCT_VERSION_LATEST)
+        {
+            TRACFCOMP(g_trac_sbe,
+                              "SBE HBB fixup occured previously.  Skipping.");
+            l_rc = false;
+            break;
+        }
+
+        TRACFCOMP(g_trac_sbe,
+                          "SBE HBB fixup has not yet occurred.  Fixing now.");
+    } while(0);
+
+    return l_rc;
+}
+
+errlHndl_t fixupSbeGoldenHBB(TARGETING::Target* i_target,
+                        void* o_imgPtr,
+                        sbeSeepromSide_t i_side,
+                        PNOR::SideId i_pnor_side,
+                        size_t& o_image_size)
+{
+    errlHndl_t err = NULL;
+    sbeSeepromVersionInfo_t l_image_version;
+    uint8_t l_fixed_flag = 1;
+
+    do {
+        // load the entire sbe image, fixup the HBB, and update the version
+        // info struct to indicate that a fixup was done thus avoiding a repeat.
+        err = readSbeImage(i_target, o_imgPtr, i_side, o_image_size,
+                        l_image_version);
+        if (err)
+        {
+            TRACFCOMP( g_trac_sbe, ERR_MRK
+                           "fixupSbeGoldenHBB: Error returned from "
+                           "readSbeImage() rc=0x%.4X, Target HUID=0x%X, ",
+                           err->reasonCode(),
+                           TARGETING::get_huid(i_target));
+            break;
+        }
+
+        // get the MMIO offset value from the side info
+        PNOR::SideInfo_t pnor_side_info;
+        err = PNOR::getSideInfo (i_pnor_side, pnor_side_info);
+        if ( err )
+        {
+            TRACFCOMP( g_trac_sbe, ERR_MRK
+                       "fixupSbeGoldenHBB() - Error returned "
+                       "from PNOR::getSideInfo() rc=0x%.4X, Target HUID=0x%X "
+                       "i_pnorSideId",
+                       err->reasonCode(),
+                       TARGETING::get_huid(i_target), i_pnor_side);
+            break;
+        }
+
+        // Setting MMIO offset
+        int rc = sbe_xip_set_scalar( o_imgPtr, "standalone_mbox2_value",
+                                         pnor_side_info.hbbMmioOffset);
+        if (rc)
+        {
+            TRACFCOMP( g_trac_sbe, ERR_MRK"fixupSbeGoldenHBB() - "
+                                 "sbe_xip_set_scalar() failed rc = 0x%X", rc);
+            /*@
+             * @errortype
+             * @moduleid     SBE_FIXUP_GOLDEN_HBB
+             * @reasoncode   SBE_IMAGE_GET_SET_SCALAR_FAIL
+             * @userdata1    Return Code of failed operation
+             * @devdesc      sbe_xip_get/set_scalar() failed when accessing the
+             * HBB Address MMIO offset in 'standalone_mbox2_value'
+             * @custdesc     A problem occurred while updating processor
+             * boot code.
+             */
+            err = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                            SBE_FIXUP_GOLDEN_HBB,
+                            SBE_IMAGE_GET_SET_SCALAR_FAIL,
+                            TO_UINT64(rc),
+                            true /*Add HB SW Callout*/ );
+
+            err->collectTrace(SBE_COMP_NAME);
+            errlCommit( err, SBE_COMP_ID );
+            l_fixed_flag = 2;  // error in TOC bread crumb
+
+            // We do not break here.  We want to write the image version struct
+            // even if the call to sbe_xip_set_scalar failed.  In such a case
+            // we will increment the "fixed" flag from 1 to 2.  See below.
+        }
+
+        // indicate that the version struct is the latest version
+        l_image_version.struct_version = STRUCT_VERSION_LATEST;
+
+        // Set the fixed flag
+        l_image_version.fixed = l_fixed_flag;  // 1: success  2: error in TOC
+
+        // Finally, write the entire SBE image to the golden side SBE seeprom.
+        err = writeSbeImage(i_target, o_imgPtr, i_side, o_image_size,
+                                l_image_version);
+        if ( err )
+        {
+            TRACFCOMP( g_trac_sbe, ERR_MRK
+                           "fixupSbeGoldenHBB: Error returned from "
+                           "writeSbeImage() rc=0x%.4X, Target UID=0x%X, ",
+                           err->reasonCode(),
+                           TARGETING::get_huid(i_target));
+            break;
+        }
+
+    } while (0);
+
+    return err;
+}
 
 /////////////////////////////////////////////////////////////////////
 errlHndl_t readSbeImage(TARGETING::Target* i_target,
@@ -1178,8 +1366,6 @@ errlHndl_t getSbeImageSize(TARGETING::Target* i_target,
 
     return err;
 }
-
-
 
 /////////////////////////////////////////////////////////////////////
 errlHndl_t resolveImageHBBaddr(TARGETING::Target* i_target,

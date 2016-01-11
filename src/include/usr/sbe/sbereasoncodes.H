@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,6 +60,7 @@ enum sbeModuleId
     SBE_READ_SBE_IMAGE                  = 0x0F,
     SBE_WRITE_SBE_IMAGE                 = 0x10,
     SBE_GET_SBE_IMAGE_SIZE              = 0x11,
+    SBE_FIXUP_GOLDEN_HBB                = 0x12,
 };
 
 /**

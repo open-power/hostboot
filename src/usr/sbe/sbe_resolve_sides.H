@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -70,6 +70,10 @@ namespace SBE
         // NOTE: These next 2 values are mutually exclusive
         CHECK_WORKING_HBB         = 0x00000010,
         COPY_READ_ONLY_TO_WORKING = 0x00000020,
+
+        // NOTE: This must be performed on its own IPL and
+        // only makes sense on machines with a two-sided PNOR
+        FIXUP_GOLDEN_HBB          = 0x00000040,
     };
 
     /******************************************/
@@ -138,6 +142,16 @@ namespace SBE
      */
     errlHndl_t performSideActions(sbeResolveState_t& io_sideState);
 
+    /**
+     * @brief Determines whether the Golden HBB Pointer Fix has happened
+     * previously on this sytem and returns true if it has.
+     *
+     * @param[in] i_target The SBE target that this fix applies to.
+     *
+     * @return bool  Returns true if the fix is needed and false it it was
+     * already applied.
+     */
+    bool sbeGoldenHBBFixNeeded(TARGETING::Target* i_target);
 
 
     /******************************************/
@@ -204,7 +218,7 @@ namespace SBE
      *
      * @param[in] i_target   Target processor
      *
-     * @param[out] i_imgPtr    Pointer to pre-allocated memory to be used
+     * @param[in] i_imgPtr    Pointer to pre-allocated memory to be used
      *                         for different operations
      *
      * @param[in] i_side          Seeprom Side to access
@@ -218,8 +232,28 @@ namespace SBE
                                sbeSeepromSide_t i_side,
                                size_t& o_image_size);
 
-
-
+    /**
+     * @brief Check if a given SBE side has the correct HBB pointer and
+     *        perform fixup if it is invalid
+     *
+     * @param[in] i_target   Target processor
+     *
+     * @param[in] i_imgPtr    Pointer to pre-allocated memory to be used
+     *                         for different operations
+     *
+     * @param[in] i_side          Seeprom Side to access
+     *
+     * @param[in] i_pnor_side     PNOR Side to access
+     *
+     * @param[out] o_image_size    The size of the image (non-ECC)
+     *
+     * @return errlHndl_t    Error log handle on failure.
+     */
+     errlHndl_t fixupSbeGoldenHBB(TARGETING::Target* i_target,
+                               void* i_imgPtr,
+                               sbeSeepromSide_t i_side,
+                               PNOR::SideId i_pnor_side,
+                               size_t& o_image_size);
 
     /******************************************/
     /*  Functions -- Helper Functions         */

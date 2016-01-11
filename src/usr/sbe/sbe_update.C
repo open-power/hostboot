@@ -1668,7 +1668,7 @@ namespace SBE
 
 
             if ( o_info.struct_version >= STRUCT_VERSION_CRC &&
-                 o_info.struct_version <= STRUCT_VERSION_ORIGIN_GOLD )
+                 o_info.struct_version <= STRUCT_VERSION_LATEST )
             {
                 // Supported Versions - set size variable to remove ECC
                 sbeInfoSize = SBE_SEEPROM_STRUCT_SIZES[o_info.struct_version];
@@ -1699,8 +1699,7 @@ namespace SBE
             // clear data and set o_seeprom_ver_ECC_fail=true
             if ( eccStatus == PNOR::ECC::UNCORRECTABLE )
             {
-
-                TRACFCOMP( g_trac_sbe,ERR_MRK"getSeepromSideVersion() - ECC "
+                TRACFCOMP( g_trac_sbe, ERR_MRK"getSeepromSideVersion() - ECC "
                            "ERROR: Handled. eccStatus=%d, side=%d, sizeof "
                            "o_info/sI=%d, sI_ECC=%d",
                            eccStatus, i_seepromSide, sbeInfoSize,
@@ -4088,7 +4087,8 @@ namespace SBE
 
         // Check Seeprom
         if ( i_struct_version >= STRUCT_VERSION_NEST_FREQ &&
-             i_struct_version <= STRUCT_VERSION_ORIGIN_GOLD )
+             i_struct_version <= STRUCT_VERSION_LATEST &&
+             i_seeprom_nest_freq != 0 )
         {
             // Only version that tracks the nest freq when the image was
             // customized
@@ -4212,7 +4212,8 @@ namespace SBE
                     if ( io_sbeState.seeprom_0_ver.struct_version >=
                             STRUCT_VERSION_NEST_FREQ &&
                          io_sbeState.seeprom_0_ver.struct_version <=
-                            STRUCT_VERSION_ORIGIN_GOLD )
+                            STRUCT_VERSION_LATEST &&
+                         io_sbeState.seeprom_0_ver.nest_freq_mhz != 0 )
                     {
                         io_sbeState.mproc_nest_freq_mhz =
                                     io_sbeState.seeprom_0_ver.nest_freq_mhz;
@@ -4228,7 +4229,8 @@ namespace SBE
                     if ( io_sbeState.seeprom_1_ver.struct_version >=
                             STRUCT_VERSION_NEST_FREQ &&
                          io_sbeState.seeprom_1_ver.struct_version <=
-                            STRUCT_VERSION_ORIGIN_GOLD )
+                            STRUCT_VERSION_LATEST &&
+                         io_sbeState.seeprom_1_ver.nest_freq_mhz != 0 )
                     {
                         io_sbeState.mproc_nest_freq_mhz =
                                     io_sbeState.seeprom_1_ver.nest_freq_mhz;
