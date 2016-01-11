@@ -1,6 +1,5 @@
 config HTMGT
     default n
-    depends on BMC_IPMI #TODO RTC: 124370
     help
         Enable Host TMGT in hostboot/HBRT
 
