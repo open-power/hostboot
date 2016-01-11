@@ -23,7 +23,7 @@
 // *HWP HWP Owner   : Greg Still <stillgsg@us.ibm.com>
 // *HWP FW Owner    : Bilicon Patil <bilpatil@in.ibm.com>
 // *HWP Team        : PM
-// *HWP Level       : 1
+// *HWP Level       : 2
 // *HWP Consumed by : SBE
 //------------------------------------------------------------------------------
 
@@ -35,6 +35,7 @@
 
 typedef fapi2::ReturnCode (*p9_sbe_check_master_stop15_FP_t)(const
         fapi2::Target<fapi2::TARGET_TYPE_CORE>&);
+
 
 /// @brief Check if the targeted core (master) is fully in STOP15
 ///
