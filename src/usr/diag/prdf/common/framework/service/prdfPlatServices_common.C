@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -619,10 +619,6 @@ int32_t mssGetSteerMux( TargetHandle_t i_mba, const CenRank & i_rank,
         o_port0Spare = CenSymbol::fromSymbol( i_mba, i_rank, port0Spare );
         o_port1Spare = CenSymbol::fromSymbol( i_mba, i_rank, port1Spare );
         o_eccSpare   = CenSymbol::fromSymbol( i_mba, i_rank, eccSpare   );
-
-        if ( o_port0Spare.isValid() ) o_port0Spare.setDramSpared();
-        if ( o_port1Spare.isValid() ) o_port1Spare.setDramSpared();
-        if ( o_eccSpare.isValid()   ) o_eccSpare.setEccSpared();
     }
 
     return o_rc;
