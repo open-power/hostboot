@@ -28,21 +28,40 @@
     <rc>RC_CHECK_MASTER_STOP15_PENDING</rc>
     <description>
       Procedure: p9_sbe_check_master_stop15
-      Indicates that STOP15 on the Master Hostboot processor is in a valid
-       transition state (eg pending).  This return code would be used by the
-       caller (SBE control loop) to determine whether to continue polling for
-       a completed transition.
+      Indicates the targeted core is in a valid pending entering either a STOP
+      11 or STOP1.  This return code would be used by the caller (SBE control
+      loop) to determine whether to continue polling for a completed transition.
+
+       Note: STOP 11 and STOP 15 are equivalent for POWER9.
     </description>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_CHECK_MASTER_STOP15_COMPLETE_WRONG_ACTUAL</rc>
+    <rc>RC_CHECK_MASTER_STOP15_INVALID_REQUEST_LEVEL</rc>
     <description>
       Procedure: p9_sbe_check_master_stop15
-      Indicates that STOP15 on the Master Hostboot processor has completed but
-      does not indicate the correct actual level.
+      Indicates the requested stop level was invalid..
     </description>
-    <ffdc>HISTORY_REG</ffdc>
+    <ffdc>REQUESTED_LEVEL</ffdc>
+  </hwpError>
+ <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_CHECK_MASTER_STOP15_INVALID_ACTUAL_LEVEL</rc>
+    <description>
+      Procedure: p9_sbe_check_master_stop15
+      Indicates the actual stop level was invalid..
+    </description>
+    <ffdc>ACTUAL_LEVEL</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_CHECK_MASTER_STOP15_INVALID_STATE</rc>
+    <description>
+      Procedure: p9_sbe_check_master_stop15
+      Indicates the targeted core is no longer pending entering a STOP state
+      but the achieved level is not appropriate.
+    </description>
+    <ffdc>STOP_HISTORY</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
