@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -257,10 +257,7 @@ extern "C"
 
     typedef enum
     {
-        MC_DIR_SAT_ID_MCBIST_0 = 0x3,
-        MC_DIR_SAT_ID_MCBIST_1 = 0x4,
-        MC_DIR_SAT_ID_MCBIST_2 = 0x5,
-        MC_DIR_SAT_ID_MCBIST_3 = 0x6
+        MC_DIR_SAT_ID_MCBIST = 0xC
     } p9_mc_dir1_sat_id_t;
 
     typedef enum

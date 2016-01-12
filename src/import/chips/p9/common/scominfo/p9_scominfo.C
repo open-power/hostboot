@@ -269,7 +269,7 @@ extern "C"
             if (((l_chiplet_id == MC01_CHIPLET_ID) || (l_chiplet_id == MC23_CHIPLET_ID)) &&
                 (l_port == UNIT_PORT_ID) &&
                 (l_ring == MC_MC01_1_RING_ID) &&
-                ((l_sat_id >= MC_DIR_SAT_ID_MCBIST_0) && (l_sat_id <= MC_DIR_SAT_ID_MCBIST_3)))
+                ((l_sat_id & 0xC) == MC_DIR_SAT_ID_MCBIST)) //MCBIST has 2 bit sat_id
             {
                 o_chipUnitRelated = true;
                 o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_MCBIST_CHIPUNIT,
