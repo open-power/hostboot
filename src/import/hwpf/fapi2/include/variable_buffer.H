@@ -1229,7 +1229,7 @@ template< typename OT>
 inline OT variable_buffer::get(const bits_type i_offset)
 {
     // Get is just an extract.
-    OT l_tmp;
+    OT l_tmp = OT(0);
     extract(l_tmp, parameterTraits<OT>::bit_length() * i_offset, parameterTraits<OT>::bit_length());
     return l_tmp;
 }
