@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2012,2015                                                    */
+/* COPYRIGHT 2012,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -90,6 +90,10 @@ struct has_fixfld
 #define REG64_FLD(name, expr, unit, meth, fld) static const uint8_t name = has_fixfld<uint64_t,unit,meth,expr,fld>::value != 255 ? has_fixfld<uint64_t,unit,meth,expr,fld>::value : expr;
 
 #define RULL(x) x##ull
+
+//Remove the chiplet id from any register so that it can
+//be used with pu.perv target type
+#define FORCE_PERV(val) (RULL(0xFFFFFFFF00FFFFFF) & val)
 
 #else // C code
 
