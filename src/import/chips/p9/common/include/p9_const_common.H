@@ -97,6 +97,10 @@ struct has_fixfld
 
 #define RULL(x) x##ull
 
+//Remove the chiplet id from any register so that it can
+//be used with pu.perv target type
+#define FORCE_PERV(val) (RULL(0xFFFFFFFF00FFFFFF) & val)
+
 #else // C code
 
 // CONST_UINT[8,3,64]_T() can't be used in C code/headers; Use
