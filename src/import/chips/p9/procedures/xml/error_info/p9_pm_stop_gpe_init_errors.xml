@@ -1,0 +1,66 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p9/procedures/xml/error_info/p9_pm_stop_gpe_init_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Error definitions for p9_pm_ocb_init procedure -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_STOP_GPE_BAD_MODE</rc>
+    <description>Unknown mode passed to p9_pm_stop_gpe_init.
+    </description>
+    <ffdc>BADMODE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_STOP_GPE_INIT_TIMEOUT</rc>
+    <description> Stop GPE init timedout while waiting for SGPE ACtive in OCCFLG register.
+    </description>
+    <ffdc>OCCFLGSTAT</ffdc>
+    <ffdc>XSR</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_STOP_GPE_RESET_TIMEOUT</rc>
+    <description> Stop GPE init timedout while waiting for HALT status in XSR register.
+    </description>
+    <ffdc>SGPEXSRNOTHALT</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_STOP_GPE_PFETS_FAILED</rc>
+    <description> Stop GPE called to p9_pm_pfet_init failed.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>MODE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_STOP_GPE_PBA_INIT_FAILED</rc>
+    <description> Stop GPE called to p9_pm_pba_init failed.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>MODE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>
