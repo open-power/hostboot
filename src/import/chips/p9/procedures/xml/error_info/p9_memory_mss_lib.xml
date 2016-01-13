@@ -159,7 +159,7 @@
     <scomRegister>MCBIST_CCS_INST_ARR1_31</scomRegister>
 
     <!-- to get the CCS state machine hung state -->
-    <scomRegister>MCBIST_MCBERRPTQ</scomRegister>
+    <scomRegister>MCBIST_MBA_MCBERRPTQ</scomRegister>
   </registerFfdc>
 
   <hwpError>
@@ -169,10 +169,12 @@
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_CCS_FAILURE</id>
       <target>TARGET_IN_ERROR</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_PHY_MR_SHADOW_REGS</id>
       <target>TARGET_IN_ERROR</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
     <callout>
       <target>TARGET_IN_ERROR</target>
@@ -190,10 +192,12 @@
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_CCS_FAILURE</id>
       <target>TARGET_IN_ERROR</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_PHY_MR_SHADOW_REGS</id>
       <target>TARGET_IN_ERROR</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
     <callout>
       <target>TARGET_IN_ERROR</target>
@@ -211,10 +215,12 @@
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_CCS_FAILURE</id>
       <target>TARGET_IN_ERROR</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_PHY_MR_SHADOW_REGS</id>
       <target>TARGET_IN_ERROR</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
     <callout>
       <target>TARGET_IN_ERROR</target>
@@ -231,10 +237,12 @@
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_CCS_FAILURE</id>
       <target>TARGET_IN_ERROR</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_PHY_MR_SHADOW_REGS</id>
       <target>TARGET_IN_ERROR</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
     <callout>
       <target>TARGET_IN_ERROR</target>
