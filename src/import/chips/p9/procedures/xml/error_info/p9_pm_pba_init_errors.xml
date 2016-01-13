@@ -75,6 +75,7 @@
     <collectRegisterFfdc>
       <id>REG_FFDC_PROC_PBA_REGISTERS</id>
       <target>CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
     <callout>
       <target>CHIP</target>
@@ -92,6 +93,7 @@
     <collectRegisterFfdc>
       <id>REG_FFDC_PROC_PBA_REGISTERS</id>
       <target>CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
     <callout>
       <target>CHIP</target>
@@ -109,6 +111,7 @@
     <collectRegisterFfdc>
       <id>REG_FFDC_PROC_PBA_REGISTERS</id>
       <target>CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
     <callout>
       <target>CHIP</target>
@@ -126,6 +129,7 @@
     <collectRegisterFfdc>
       <id>REG_FFDC_PROC_PBA_REGISTERS</id>
       <target>CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
     <callout>
       <target>CHIP</target>
