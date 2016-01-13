@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,6 +76,7 @@
 //-------------------------
 // Constants
 //-------------------------
+
 
 namespace p9hcd
 {
@@ -152,6 +153,32 @@ enum P9_HCD_COMMON_SCAN0_CONSTANTS
     SCAN0_TYPE_GPTR                          = 0x200,
     SCAN0_TYPE_FUNC_BNDY                     = 0x808
 };
+//OCC FLag defines
+enum PM_GPE_OCCFLG_DEFS
+{
+    SGPE_ACTIVE    = 8
+};
+
+// XSR defines
+enum XSR_DEFS
+{
+    HALTED_STATE    = 0
+};
+
+
+// XCR defines
+enum XCR_DEFS
+{
+    CLEAR_DEBUG_STATUS = 0,
+    HALT               = 1,
+    RESUME             = 2,
+    SINGLE_STEP        = 3,
+    TOGGLE_XSR_TRH     = 4,
+    SOFT_RESET         = 5,
+    HARD_RESET         = 6,
+    FORCE_HALT         = 7
+};
+
 
 } // END OF NAMESPACE p9hcd
 
@@ -170,7 +197,5 @@ enum P9_HCD_COMMON_SCAN0_CONSTANTS
 /// Scom addresses missing from p9_quad_scom_addresses.H
 #define EQ_QPPM_QCCR_WCLEAR              0x100F01BE
 #define EQ_QPPM_QCCR_WOR                 0x100F01BF
-#define EQ_QPPM_QACCR_CLEAR              0x100F0161
-#define EQ_QPPM_QACCR_OR                 0x100F0162
 
 #endif  // __P9_HCD_COMMON_H__
