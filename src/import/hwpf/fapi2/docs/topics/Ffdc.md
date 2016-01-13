@@ -8,12 +8,17 @@ easily be used by the FAPI_ASSERT macro.
 
 ## Using the Tools
 
-parseErrorInfo.pl [--empty-ffdc-classes] [--use-variable-buffers] --output-dir=<output dir> <filename1> <filename2> ...
+parseErrorInfo.pl [--local-ffdc ][--empty-ffdc-classes] [--use-variable-buffers]
+                   --output-dir=<output dir> <filename1> <filename2> ...
 - This perl script will parse HWP Error XML files and creates the following files:
 - hwp_return_codes.H. HwpReturnCode enumeration (HWP generated errors)
 - hwp_error_info.H.   Error information (used by FAPI_SET_HWP_ERROR when a HWP generates an error)
-- collect_reg_ffdc.H. Function to collect register FFDC
+- collect_reg_ffdc.regs.C  Function to grab registers required for collectRegFfdc functionality.
 - set_sbe_error.H.    Macro to create an SBE error
+
+The --local-ffdc option is for platforms (SBE) which desire to collect only local ffdc info and return it to
+the platform via a preformatted buffer.  Local ffdc logging and out of band ffdc collection for the SBE will
+be driven by the SET_SBE_ERROR macro.
 
 The --empty-ffdc-classes option is for platforms which don't collect FFDC. It will generate stub classes which
 will allow the source to have the same code, but compile to no-ops on certain platforms.
@@ -142,10 +147,84 @@ type without changing the XML
     fapi2::buffer<uint64_t> data;
     set_RAS_STATUS(unt64_t(data)) ...
 
+
+### Collecting Register Data as Part of FFDC
+
+For fapi2 the addtional of tags to indicate the target
+type are required. XML parsing will fail if the targetType
+tag is missing for any of the collectRegisterFfdc tags.
+
+
+Specifying registers to collect:
+
+   <registerFfdc>
+     <id>REG_FFDC_TEST_X_PROC_REGISTERS</id>
+     <scomRegister>EX_PRD_PURGE_CMD_REG</scomRegister>
+     <scomRegister>EX_L2_FIR_REG</scomRegister>
+     <cfamRegister>PERV_FSI2PIB_CHIPID_FSI</cfamRegister>
+  </registerFfdc>
+
+
+The register FFDC id tag contents will be used in the specification
+of the collectRegisterFfdx xml below.
+
+To collect the contents of registers as part FFDC you
+can add it to the XML:
+
+    <!-- Collect chip/chiplet register FFDC -->
+    <collectRegisterFfdc>
+       <id>REG_FFDC_TEST_X_PROC_REGISTERS</id>
+       <target>UNIT_TEST_CHIP_TARGET</target>
+       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+
+    <!-- Collect register FFDC based for child targets (implies functional) -->
+    <collectRegisterFfdc>
+       <id>REG_FFDC_TEST_X_EX_REGISTERS</id>
+       <childTargets>
+           <parent>UNIT_TEST_CHIP_TARGET</parent>
+           <parentType>TARGET_TYPE_PROC_CHIP</parentType>
+         <childType>TARGET_TYPE_EX_CHIPLET</childType>
+       </childTargets>
+    </collectRegisterFfdc>
+
+    <!-- Collect register FFDC based on present children (does not imply functional) -->
+    <collectRegisterFfdc>
+        <id>REG_FFDC_TEST_X_PROC_REGISTERS_PRES_CHILDREN</id>
+        <basedOnPresentChildren>
+        <target>UNIT_TEST_CHIP_TARGET</target>
+        <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+        <childType>TARGET_TYPE_EX_CHIPLET</childType>
+        <childPosOffsetMultiplier>0x01000000</childPosOffsetMultiplier>
+        </basedOnPresentChildren>
+    </collectRegisterFfdc>
+
+## Collect FFDC using an addtional HWP
+
+To collect addtional FFDC info using a hwp to do the work requires
+the writing of a procedure, the signature must include the ability
+to pass a vector of shared_pointers to ErrorInfoFfdc types as the
+first parameter, as follows:
+
+fapi2::ReturnCode p9_collect_some_ffdc(std::vector<std::shared_ptr<fapi2::ErrorInfoFfdc>>& o_ffdc_data, args...);
+
+the first argument must be the containter for the returned ffdc, addtional parameters can be added as needed.
+
+Addtional parameters are included in the xml tag as comma separated values.
+
+    <collectFfdc>p9_collect_some_ffdc,parm1,parm2</collectFfdc>
+
+    the generated C code in hwp_error_info.H will look like this once
+    expanded.
+
+    std::vector<std::shared_ptr<ErrorInfoFfdc>>ffdc;
+    RC = p9_collect_some_ffdc(ffdc,parm1,parm2);
+    RC.addErrorInfo(ffdc);
+
 ## Error Log Generation
 
-FAPI had a function called fapiLogError() which would generate platform
-errors. The pattern was to call fapiLogError() at the end of the block
+        FAPI had a function called fapiLogError() which would generate platform
+        errors. The pattern was to call fapiLogError() at the end of the block
 which generated the FFDC. With the addition of the FFDC classes, this
 is no longer needed - the class knows to create these logs for you.
 
@@ -153,15 +232,9 @@ However, the severity information is needed by this logging mechanism.
 It was an argument to fapiLogError(), and so it's been added to the
 constructor of the FFDC class:
 
-rc_repair_ring_invalid_ringbuf_ptr(fapi2::errlSeverity_t i_sev, ...)
+    rc_repair_ring_invalid_ringbuf_ptr(fapi2::errlSeverity_t i_sev, ...)
 
-It defaults to "unrecoverable" and so only need be set for errors
-which have a different severity. That is, doing nothing will get you
+    It defaults to "unrecoverable" and so only need be set for errors
+    which have a different severity. That is, doing nothing will get you
 and error log with unrecoverable severity - which was the default
 for FAPI.
-
-## Known Limitations
-
-- Collecting register FFDC is not presently implemented.
-- Calling out to hwp to collect FFDC is not presently implemented.
-- The FirstFailureData class does not have a platform pointer

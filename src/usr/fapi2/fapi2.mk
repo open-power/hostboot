@@ -37,7 +37,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/
-EXTRAINCDIR += $(ROOTPATH)/src/import/chips/p9/procedures/hwp/ffdc/
+EXTRAINCDIR += $(ROOTPATH)/src/import/chips/p9/procedures/hwp/sbe/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/accessors/
 
 include ${ROOTPATH}/src/build/mkrules/verbose.rules.mk
@@ -71,6 +71,7 @@ OBJS += p9_collect_some_ffdc.o
 
 #Generated Objects
 OBJS += fapi2_attribute_service.o
+OBJS += collect_reg_ffdc_regs.o
 
 #------------------------------------------------------------------------------
 # Set fapi2 build environment

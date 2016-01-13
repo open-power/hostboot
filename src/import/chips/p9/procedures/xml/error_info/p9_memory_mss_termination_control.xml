@@ -151,6 +151,7 @@
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_SLEW_CAL_FAILURE</id>
     <target>TARGET_IN_ERROR</target>
+      <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
     <target>TARGET_IN_ERROR</target>
@@ -178,6 +179,7 @@
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_SLEW_CAL_FAILURE</id>
     <target>TARGET_IN_ERROR</target>
+      <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
     <target>TARGET_IN_ERROR</target>

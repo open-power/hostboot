@@ -69,6 +69,7 @@
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
       <target>TARGET</target>
+      <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
       <target>TARGET</target>
@@ -84,6 +85,7 @@
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
       <target>TARGET</target>
+      <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
       <target>TARGET</target>
@@ -104,6 +106,7 @@
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
       <target>TARGET</target>
+      <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
       <target>TARGET</target>
@@ -118,6 +121,7 @@
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
       <target>TARGET</target>
+      <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
       <target>TARGET</target>
@@ -132,6 +136,7 @@
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
       <target>TARGET</target>
+      <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
       <target>TARGET</target>
@@ -147,6 +152,7 @@
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
       <target>TARGET</target>
+      <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
       <target>TARGET</target>
@@ -161,6 +167,7 @@
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
       <target>TARGET</target>
+      <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
       <target>TARGET</target>
@@ -175,6 +182,7 @@
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
       <target>TARGET</target>
+      <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
       <target>TARGET</target>
@@ -189,6 +197,7 @@
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
       <target>TARGET</target>
+      <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
       <target>TARGET</target>
@@ -203,6 +212,7 @@
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
       <target>TARGET</target>
+      <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
       <target>TARGET</target>
@@ -218,6 +228,7 @@
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
       <target>TARGET</target>
+      <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
       <target>TARGET</target>
