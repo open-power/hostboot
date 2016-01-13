@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,122 +43,6 @@
 //        );
 
 // ADU registers
-FIXREG64( PU_ALTD_ADDR_REG,
-          RULL(0x05022800), SH_UNT, SH_ACS_SCOM,
-          RULL(0x00090000)
-        );
-FIXREG64( PU_ALTD_CMD_REG,
-          RULL(0x05022801), SH_UNT, SH_ACS_SCOM,
-          RULL(0x00090001)
-        );
-FIXREG64( PU_ALTD_OPTION_REG,
-          RULL(0x05022802), SH_UNT, SH_ACS_SCOM,
-          RULL(0x00090002)
-        );
-FIXREG64( PU_ALTD_STATUS_REG,
-          RULL(0x05022803), SH_UNT, SH_ACS_SCOM,
-          RULL(0x00090003)
-        );
-FIXREG64( PU_ALTD_DATA_REG,
-          RULL(0x05022804), SH_UNT, SH_ACS_SCOM_RW,
-          RULL(0x00090004)
-        );
-FIXREG64( PU_FORCE_ECC_REG,
-          RULL(0x0502280D), SH_UNT, SH_ACS_SCOM_RW,
-          RULL(0x0009000D)
-        );
-FIXREG64( PU_XSCOM_BASE_REG,
-          RULL(0x05022810), SH_UNT, SH_ACS_SCOM,
-          RULL(0x00090010)
-        );
-FIXREG64( PU_XSCOM_MODE_REG,
-          RULL(0x05022811), SH_UNT, SH_ACS_SCOM,
-          RULL(0x00090011)
-        );
-FIXREG64( PU_XSCOM_LOG_REG,
-          RULL(0x05022812), SH_UNT, SH_ACS_SCOM,
-          RULL(0x00090012)
-        );
-FIXREG64( PU_XSCOM_ERR_REG,
-          RULL(0x05022813), SH_UNT, SH_ACS_SCOM_WCLRREG,
-          RULL(0x00090013)
-        );
-FIXREG64( PU_XSCOM_RCVED_STAT_REG,
-          RULL(0x05022818), SH_UNT, SH_ACS_SCOM_WCLRREG,
-          RULL(0x00090018)
-        );
-FIXREG64( PU_ADS_XSCOM_CMD_REG,
-          RULL(0x0502281C), SH_UNT, SH_ACS_SCOM,
-          RULL(0x0009001C)
-        );
-FIXREG64( PU_XSCOM_DAT0_REG,
-          RULL(0x0502281E), SH_UNT, SH_ACS_SCOM_RW,
-          RULL(0x0009001E)
-        );
-FIXREG64( PU_XSCOM_DAT1_REG,
-          RULL(0x0502281F), SH_UNT, SH_ACS_SCOM_RW,
-          RULL(0x0009001F)
-        );
-FIXREG64( PU_SND_STAT_REG,
-          RULL(0x05022820), SH_UNT, SH_ACS_SCOM,
-          RULL(0x00090020)
-        );
-FIXREG64( PU_SND_MODE_REG,
-          RULL(0x05022821), SH_UNT, SH_ACS_SCOM,
-          RULL(0x00090021)
-        );
-FIXREG64( PU_RCV_ERRLOG0_REG,
-          RULL(0x05022822), SH_UNT, SH_ACS_SCOM_WAND,
-          RULL(0x00090022)
-        );
-FIXREG64( PU_RCV_ERRLOG1_REG,
-          RULL(0x05022823), SH_UNT, SH_ACS_SCOM_WAND,
-          RULL(0x00090023)
-        );
-FIXREG64( PU_TOD_DATA_SND_REG,
-          RULL(0x05022828), SH_UNT, SH_ACS_SCOM_RW,
-          RULL(0x00090028)
-        );
-FIXREG64( PU_TOD_DATA_RCV_REG,
-          RULL(0x05022829), SH_UNT, SH_ACS_SCOM_RO,
-          RULL(0x00090029)
-        );
-FIXREG64( PU_TOD_CMD_REG,
-          RULL(0x0502282A), SH_UNT, SH_ACS_SCOM,
-          RULL(0x0009002A)
-        );
-FIXREG64( PU_IO_DATA_REG,
-          RULL(0x05022830), SH_UNT, SH_ACS_SCOM_RO,
-          RULL(0x00090030)
-        );
-FIXREG64( PU_PIB_CMD_REG,
-          RULL(0x05022831), SH_UNT, SH_ACS_SCOM,
-          RULL(0x00090031)
-        );
-FIXREG64( PU_PIB_DATA_REG,
-          RULL(0x05022832), SH_UNT, SH_ACS_SCOM_RO,
-          RULL(0x00090032)
-        );
-FIXREG64( PU_PIB_RESET_REG,
-          RULL(0x05022833), SH_UNT, SH_ACS_SCOM,
-          RULL(0x00090033)
-        );
-FIXREG64( PU_LPC_BASE_REG,
-          RULL(0x05022840), SH_UNT, SH_ACS_SCOM,
-          RULL(0x00090040)
-        );
-FIXREG64( PU_LPC_CMD_REG,
-          RULL(0x05022841), SH_UNT, SH_ACS_SCOM,
-          RULL(0x00090041)
-        );
-FIXREG64( PU_LPC_DATA_REG,
-          RULL(0x05022842), SH_UNT, SH_ACS_SCOM_RO,
-          RULL(0x00090042)
-        );
-FIXREG64( PU_ADU_HANG_DIV_REG,
-          RULL(0x05022850), SH_UNT, SH_ACS_SCOM_RW,
-          RULL(0x00090050)
-        );
 //WARNING AUTO CORRECT: val mismatch: RULL(0x40020000) != RULL(0xC0040000)  name: PU_PBAMODE_OCI
 
 // PBA registers
