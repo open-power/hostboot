@@ -23,5 +23,4 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_proc_gettracearray
-lib$(PROCEDURE)_DEPLIBS=fapi2_utils
 $(call BUILD_PROCEDURE)
