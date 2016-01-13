@@ -1329,15 +1329,13 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
                     "attribute access",l_type,TARGETING::TYPE_SYS);
         }
 
-//@TODO RTC:143749 System target returning invalid XSCOM BASE ADDRESS with
-//                 direct attribute access
-//         uint64_t l_xscom =
-//           l_pTarget->getAttr<TARGETING::ATTR_XSCOM_BASE_ADDRESS>();
-//         if(l_xscom != 0x0003FC0000000000ULL)
-//         {
-//             TARG_TS_FAIL("l_xscom value is 0x%016llX, not 0x%016llX as expected in direct "
-//                     "attribute access",l_xscom,0x0003FC00000000ULL);
-//         }
+        uint64_t l_xscom =
+          l_pTarget->getAttr<TARGETING::ATTR_XSCOM_BASE_ADDRESS>();
+        if(l_xscom != 0x000603FC00000000ULL)
+        {
+            TARG_TS_FAIL("l_xscom value is 0x%016llX, not 0x%016llX as expected in direct "
+                    "attribute access",l_xscom,0x000603FC00000000ULL);
+        }
 
         TARG_TS_TRACE(INFO_MRK "Now using FAPI get macros");
 
