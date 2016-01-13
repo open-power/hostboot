@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -61,6 +63,8 @@ enum msg_sys_types_t
 
     MSG_INTR_EXTERN,    //!< Msg sent from kernel to user space on ext intr
     MSG_INTR_ADD_CPU,   //!< Add cpu core, data[0] = cpuid (PIR)
+    MSG_INTR_CPU_WAKEUP, //!< Msg sent from kernel to user space on cpu wakeup
+                         // data[0] = cpuid (PIR)
     MSG_INTR_ISSUE_SBE_MBOX_WA,   //!< Issue EOI to mailbox
 
 };
@@ -117,6 +121,7 @@ enum msg_root_queue_types_t
  *
  *  TODO.
  */
+
 
 
 // Message queue interfaces.

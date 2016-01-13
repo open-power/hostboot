@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -29,9 +31,11 @@
 #define __KERNEL_CPU_H
 
 #include <kernel/types.h>
+#include <kernel/workitem.H>
 #include <arch/ppc.H>
 #include <builtins.h>
 #include <sys/sync.h>
+#include <util/lockfree/stack.H>
 
 // See BookIV PIR definition.
 #define KERNEL_MAX_SUPPORTED_NODES 8
@@ -97,6 +101,8 @@ struct cpu_t
     /** Sequence ID of CPU initialization. */
     uint64_t cpu_start_seqid;
 
+    /** Stack of WorkItems to be executed during doorbell wakeup */
+    Util::Lockfree::Stack<KernelWorkItem> doorbell_actions;
 };
 
 /** @fn getCpuId

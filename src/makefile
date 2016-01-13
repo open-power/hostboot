@@ -117,6 +117,7 @@ DIRECT_BOOT_OBJECTS += vfs_init.o
 DIRECT_BOOT_OBJECTS += cpuid.o
 DIRECT_BOOT_OBJECTS += stdlib.o
 DIRECT_BOOT_OBJECTS += assert.o
+DIRECT_BOOT_OBJECTS += workitem.o
 
 BASE_MODULES += trace
 BASE_MODULES += errl

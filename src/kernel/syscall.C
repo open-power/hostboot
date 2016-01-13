@@ -55,6 +55,17 @@ extern "C"
 void kernel_execute_hype_doorbell()
 {
     task_t* t = TaskManager::getCurrentTask();
+    doorbell_clear();
+
+    //Execute all work items on doorbell_actions stack
+    KernelWorkItem *l_work = t->cpu->doorbell_actions.pop();
+    while(l_work != NULL)
+    {
+        //Execute Work Item and then delete it
+        (*l_work)();
+        delete l_work;
+        l_work = t->cpu->doorbell_actions.pop();
+    }
 
     if (t->cpu->idle_task == t)
     {
@@ -63,8 +74,6 @@ void kernel_execute_hype_doorbell()
     }
 
     DeferredQueue::execute();
-
-    doorbell_clear();
 }
 
 extern "C"
@@ -401,7 +410,7 @@ namespace Systemcalls
 
         if (m->type >= MSG_FIRST_SYS_TYPE)
         {
-            printkd("Invalid message type for msg_sendrecv, type=%d.\n",
+            printk("Invalid message type for msg_sendrecv, type=%d.\n",
                     m->type);
             TASK_SETRTN(t, -EINVAL);
             return;

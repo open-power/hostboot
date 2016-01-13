@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -118,11 +118,8 @@ namespace   INITSERVICE
         },
         {
                 ISTEPNAME(16,02,"host_activate_slave_cores"),
-                // @todo RTC:137389 - removed for P9 bringup
-                //ISTEP_16::call_host_activate_slave_cores,
-                //{ START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
-                NULL,
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
+                ISTEP_16::call_host_activate_slave_cores,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
         },
         {
                 ISTEPNAME(16,03,"host_secure_rng"),

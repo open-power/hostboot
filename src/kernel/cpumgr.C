@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,7 @@
 #include <kernel/hbterminatetypes.H>
 #include <kernel/kernel_reasoncodes.H>
 #include <kernel/cpuid.H>
+#include <kernel/doorbell.H>
 
 cpu_t** CpuManager::cv_cpus[KERNEL_MAX_SUPPORTED_NODES];
 bool CpuManager::cv_shutdown_requested = false;
@@ -193,7 +194,7 @@ void CpuManager::startCPU(ssize_t i)
     // Initialize CPU structure.
     if (NULL == cv_cpus[nodeId][cpuId])
     {
-        printk("Starting CPU %ld...", i);
+        printk("Starting CPU with pir %ld...", i);
         cpu_t* cpu = cv_cpus[nodeId][cpuId] = new cpu_t();
 
         // Initialize CPU.
@@ -434,7 +435,20 @@ void CpuManager::startCore(uint64_t pir,uint64_t i_threads)
     }
     __sync_synchronize();
 
+    //Send a message to userspace that a core with this base pir is being added
+    // userspace will know which threads on the core to expect already
     InterruptMsgHdlr::addCpuCore(pir);
+
+    for(size_t i = 0; i < threads; i++)
+    {
+        // Only wakeup the threads we were told to wakeup
+        if( i_threads & (0x8000000000000000 >> i) )
+        {
+            printk("Dbell wkup pir %ld\n", pir + i);
+            //Initiate the Doorbell for this core/pir
+            send_doorbell_wakeup(pir + i);
+        }
+    }
 
     return;
 };

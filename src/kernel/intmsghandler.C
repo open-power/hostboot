@@ -113,7 +113,7 @@ void InterruptMsgHdlr::handleInterrupt()
     }
     else
     {
-        printk("InterrurptMsgHdlr got called before IPC was setup\n");
+        printk("InterruptMsgHdlr got called before IPC was setup\n");
         // The INTR mmio base address is not yet available via the attributes.
         // If we get here during an MPIPL then the BAR value could be read
         // from the ICP BAR SCOM register, however, since this value will
@@ -165,28 +165,30 @@ void InterruptMsgHdlr::addCpuCore(uint64_t i_pir)
     {
         // To avoid conflict with interrupts on thread i_pir, change the key
         // for the message to be an invalid PIR.
-        uint64_t pir_key = i_pir | 0x8000000000000000ul;
+        uint64_t pir_key = i_pir | 0x4000000000000000ul;
 
         cv_instance->iv_lock.lock();
         cv_instance->sendMessage(MSG_INTR_ADD_CPU,
                                  (void*)pir_key,(void *)i_pir,t);
         cv_instance->iv_lock.unlock();
+        printkd("InterruptMsgHdlr::addCpuCore MSG_INTR_ADD_CPU message "
+               "sent for pir: %lx\n", i_pir);
     }
 }
 
-void InterruptMsgHdlr::sendIPI(uint64_t i_pir, uint8_t i_favor)
+void InterruptMsgHdlr::sendThreadWakeupMsg(uint64_t i_pir)
 {
-    uint64_t mfrrAddress = cv_ipc_base_address;
-    mfrrAddress += mmio_offset(i_pir);
-    mfrrAddress += MFRR_ADDR_OFFSET;
+    if(cv_instance)
+    {
+        // To avoid conflict with interrupts on thread i_pir, change the key
+        // for the message to be an invalid PIR.
+        uint64_t pir_key = i_pir | 0x8000000000000000ul;
 
-    mfrrAddress |= 0x8000000000000000ul;
-
-    register uint8_t data = i_favor;
-
-    eieio(); sync();
-    MAGIC_INSTRUCTION(MAGIC_SIMICS_CORESTATESAVE);
-    asm volatile("stbcix %0,0,%1" :: "r" (data) , "r" (mfrrAddress));
+        cv_instance->iv_lock.lock();
+        cv_instance->sendMessage(MSG_INTR_CPU_WAKEUP,
+                                 (void*)pir_key,(void *)i_pir,NULL);
+        cv_instance->iv_lock.unlock();
+    }
 }
 
 MessageHandler::HandleResult InterruptMsgHdlr::handleResponse
