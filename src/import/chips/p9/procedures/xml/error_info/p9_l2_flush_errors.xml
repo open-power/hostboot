@@ -34,6 +34,7 @@
     <collectRegisterFfdc>
       <id>REG_FFDC_PROC_L2_REGISTERS</id>
       <target>TARGET</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
     <callout>
       <procedure>CODE</procedure>
@@ -57,6 +58,7 @@
     <collectRegisterFfdc>
       <id>REG_FFDC_PROC_L2_REGISTERS</id>
       <target>TARGET</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
     <callout>
       <target>TARGET</target>
@@ -85,6 +87,7 @@
     <collectRegisterFfdc>
       <id>REG_FFDC_PROC_L2_REGISTERS</id>
       <target>TARGET</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
     <callout>
       <target>TARGET</target>
