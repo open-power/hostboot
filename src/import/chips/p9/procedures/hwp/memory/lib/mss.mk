@@ -42,9 +42,9 @@ $(foreach dir, $(MSS_SOURCE_DIRS), $(call ADD_MODULE_SRCDIR,$(1),$(dir)))
 $(call ADD_MODULE_INCDIR,$(1),$(ROOTPATH)/chips/p9/procedures/hwp/memory)
 $(call ADD_MODULE_INCDIR,$(1),$(FAPI2_PATH)/include)
 $(call ADD_MODULE_INCDIR,$(1),$(GENPATH))
+$(call ADD_MODULE_INCDIR,$(1),$(FAPI2_PATH)/include)
 $(call ADD_MODULE_INCDIR,$(1),$(FAPI2_PLAT_INCLUDE))
 endef
-
 MODULE = mss
 OBJS += $(MSS_MODULE_OBJS)
 $(eval $(call MSS_MODULE_INCLUDES,$(MODULE)))
