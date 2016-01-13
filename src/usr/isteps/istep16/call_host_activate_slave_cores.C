@@ -65,16 +65,22 @@ void* call_host_activate_slave_cores (void *io_pArgs)
 
     // @@@@@    CUSTOM BLOCK:   @@@@@
 
-    uint64_t l_masterCoreID = task_getcpuid() & ~7;
+    uint64_t l_masterCoreID = PIR_t::coreFromPir(task_getcpuid());
 
     TargetHandleList l_cores;
     getAllChiplets(l_cores, TYPE_CORE);
+    uint32_t l_numCores = 0;
 
     for(TargetHandleList::const_iterator
         l_core = l_cores.begin();
         l_core != l_cores.end();
         ++l_core)
     {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Iterating all cores in system - "
+                   "This is core: %d", l_numCores);
+        l_numCores += 1;
+
         ConstTargetHandle_t l_processor = getParentChip(*l_core);
 
         CHIP_UNIT_ATTR l_coreId =
@@ -86,20 +92,23 @@ void* call_host_activate_slave_cores (void *io_pArgs)
         TARGETING::Target* sys = NULL;
         TARGETING::targetService().getTopLevelTarget(sys);
         assert( sys != NULL );
-        uint64_t en_threads = sys->getAttr<ATTR_ENABLED_THREADS>();
 
         const fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_coreTarget(
               const_cast<TARGETING::Target*> (*l_core));
 
+        //Determine PIR and threads to enable for this core
         uint64_t pir = PIR_t(l_logicalGroupId, l_chipId, l_coreId).word;
+        uint64_t en_threads = sys->getAttr<ATTR_ENABLED_THREADS>();
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "pir for this core is: %lx", pir);
 
         if (pir != l_masterCoreID)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "call_host_activate_slave_cores: Waking %x",
+                       "call_host_activate_slave_cores: Waking %x.",
                        pir );
 
-            int rc = cpu_start_core(pir,en_threads);
+            int rc = cpu_start_core(pir, en_threads);
 
             // Handle time out error
             if (-ETIME == rc)

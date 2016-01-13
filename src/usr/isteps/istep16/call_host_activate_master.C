@@ -107,6 +107,9 @@ void* call_host_activate_master (void *io_pArgs)
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "startDeadManLoop SUCCESS"  );
         }
+        //Need to indicate to PHYP to save HRMOR and other SPR Data to be
+        // applied during wakeup
+        MAGIC_INSTRUCTION(MAGIC_SIMICS_CORESTATESAVE);
 
         //Because of a bug in how the SBE injects the IPI used to wake
         //up the master core, need to ensure no mailbox traffic

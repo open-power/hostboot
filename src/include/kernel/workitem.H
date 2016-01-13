@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/kernel/doorbell.H $                               */
+/* $Source: src/include/kernel/workitem.H $                               */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,43 +22,47 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __KERNEL_DOORBELL_H
-#define __KERNEL_DOORBELL_H
 
-/** doorbell_broadcast
- *
- *  Broadcast a doorbell exception to all threads on the same core.
- */
-void doorbell_broadcast();
+#ifndef __KERNEL_WORKITEM_H
+#define __KERNEL_WORKITEM_H
 
-/** doorbell_clear
- *
- *  Clears a pending doorbell from the executing thread, so that the
- *  exception is no longer asserted.
- */
-void doorbell_clear();
-
-/** Send a doorbell exception to the given pir
- *
- *  @param i_pir - PIR to send doorbell exception to
- */
-void doorbell_send(uint64_t i_pir);
-
-/** Initiate a thread/core wakeup using a doorbell
- *
- *  @param i_pir - PIR to send doorbell to wakeup
- */
-void send_doorbell_wakeup(uint64_t i_pir);
-
-/* TODO RTC 150861
- * send_doorbell_ipc
- *
- * void send_doorbell_ipc(cpu_t *i_cpu, uint64_t pir);
-**/
-
-enum
+//The WorkItem class is a generic base class for a work item.
+class KernelWorkItem
 {
-    _DOORBELL_MSG_TYPE = 0x0000000028000000, /// Comes from the ISA.
+    public:
+        //Virtual operator to be defined by child classes to define proper
+        // behavior in that situation
+        virtual void operator() (void);
+
+        /** Default destructor */
+        virtual ~KernelWorkItem() = default;
+
+        //Next Pointer is needed to be used with the lockfree::Stack container
+        KernelWorkItem* next;
 };
 
+//A work item to be created/executed during a CPU core/thread
+// wakeup scenario
+class CpuWakeupDoorbellWorkItem : public KernelWorkItem
+{
+    public:
+        //Implement operator() function
+        void operator() (void);
+
+        //No data to clean up, use default destructor
+        ~CpuWakeupDoorbellWorkItem() = default;
+};
+
+
+/* TODO RTC 150861
+
+//A work item to be created/executed during an IPC scenario
+class IPCDoorbellWorkItem : public KernelWorkItem
+{
+    public:
+        //Implement operator() function
+        void operator() (void);
+};
+**/
 #endif
+

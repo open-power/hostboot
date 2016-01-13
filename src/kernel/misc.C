@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +41,7 @@
 #include <kernel/ipc.H>
 #include <kernel/timemgr.H>
 #include <util/singleton.H>
-
+#include <kernel/doorbell.H>
 
 extern "C"
     void kernel_shutdown(size_t, uint64_t, uint64_t, uint64_t,
@@ -340,14 +340,17 @@ namespace KernelMisc
 
         //Issue sbe master workaround
         InterruptMsgHdlr::issueSbeMboxWA();
+
         // NOTE: The cpu_t structures for theads 1:3 were created
         //       during init (CpuManager::init).
+        //
 
         #ifdef HOSTBOOT_REAL_WINKLE
         // @todo- RTC 141924 Start the other threads 1:3 in a new manner
         //  SBE won't start them and we can't use normal instruction start.
         //  Maybe something like:   sendIPI(..) or  addCpuCore(..)
         //  Need interrupt code in place for this.
+
 
         #else
         // get other 3 threads going in SIMICs for now
@@ -371,6 +374,7 @@ namespace KernelMisc
             // get new core going in SIMICS
             MAGIC_INSTRUCTION(MAGIC_WAKE_FUSED_THREADS);
             #endif
+
         } // end if fused core mode
 
     }
@@ -440,7 +444,7 @@ namespace KernelMisc
                 {
                     if (slave->winkled)
                     {
-                        InterruptMsgHdlr::sendIPI(i);
+                        InterruptMsgHdlr::sendThreadWakeupMsg(i);
                     }
                 }
             }

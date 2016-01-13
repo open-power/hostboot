@@ -145,14 +145,15 @@ class InterruptMsgHdlr : public MessageHandler
         static void addCpuCore(uint64_t i_pir);
 
         /**
-         * Issue an IPI to the core.
+         * Send message to interrupt resource provider (intrrp) in userspace to
+         * indicate a wakeup occurred for core/thread indicated by given pir.
+         * The intrrp monitors the expected cores/threads wakeup and will issue
+         * a timeout/error in the event that not all expected cores/threads
+         * send this message
          *
-         * @param[in] i_pir - The PIR of the CPU to send IPI at.
-         * @param[in] i_favor - How favored the interrupt is; 0 = most favored
-         *                      254 = least favored, 255 = no interrupt
-         *                      Default 0x1 - IPI from kernel side (wakeup)
+         * @param[in] i_pir - The PIR of the CPU to send doorbell to.
          */
-        static void sendIPI(uint64_t i_pir, uint8_t i_favor = 0x1);
+        static void sendThreadWakeupMsg(uint64_t i_pir);
 
         /**
          * Issue the sbe/mailbox workaround (issue a mbox EOI to mailbox)

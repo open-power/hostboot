@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,8 +87,11 @@ int KernelIpc::send(uint64_t i_q, msg_t * i_msg)
 
     printkd("IPC send from PIR %lx to PIR %x\n",getPIR(),p_dest->pir);
 
+    /* TODO RTC 150861
     // send IPI - use this_node + 10 as favor level of interrupt
-    InterruptMsgHdlr::sendIPI(p_dest->pir,this_node + 0x10);
+    //P8 Call: InterruptMsgHdlr::sendIPI(p_dest->pir,this_node + 0x10);
+    //P9 Call (likely): send_doorbell_ipc(p_dest->pir);
+    **/
 
     // The message allocation is freed here to make msg_send for IPC
     // messages behave the same as non-IPC msg_send; that is, the message

@@ -180,7 +180,10 @@ errlHndl_t IntrRp::_init()
         //  so unmask those interrupts
         l_err = unmaskInterruptSource(LSI_PSU);
 
-
+        //Set value for enabled threads
+        uint64_t l_en_threads = get_enabled_threads();
+        TRACDCOMP(g_trac_intr, "IntrRp::_init() Threads enabled:"
+                                " %lx", l_en_threads);
     } while(0);
 
     return l_err;
@@ -421,11 +424,7 @@ void IntrRp::msgHandler()
                     uint64_t l_data0 = (l_xirr_pir & 0xFFFFFFFF);
                     PIR_t pir = static_cast<PIR_t>(l_data0);
 
-                    uint64_t baseAddr = iv_baseAddr + cpuOffsetAddr(pir);
-                    uint32_t * xirrAddress =
-                        reinterpret_cast<uint32_t*>(baseAddr + XIRR_OFFSET);
-
-                    TRACFCOMP(g_trac_intr,
+                    TRACDCOMP(g_trac_intr,
                               "External Interrupt received. XIRR=%x, PIR=%x",
                               xirr,pir.word);
                     //An external interrupt comes from two paths
@@ -467,15 +466,6 @@ void IntrRp::msgHandler()
                                       (uint32_t) type, rc);
                         }
                     }
-                    else if (type == INTERPROC_XISR)
-                    {
-                        // Ignore "spurious" IPIs (handled below).
-
-                        // Note that we could get an INTERPROC interrupt
-                        // and handle it through the above registration list
-                        // as well.  This is to catch the case where no one
-                        // has registered for an IPI.
-                    }
                     else if (type == LSI_PSU)
                     {
                         TRACDCOMP(g_trac_intr, "PSU Interrupt Detected");
@@ -490,89 +480,78 @@ void IntrRp::msgHandler()
                                   "Ignoring it.",
                                   (uint32_t)type);
                     }
-
-                    // Handle IPIs special since they're used for waking up
-                    // cores and have special clearing requirements.
-                    if (type == INTERPROC_XISR)
-                    {
-                        // Clear IPI request.
-                        volatile uint8_t * mfrr =
-                            reinterpret_cast<uint8_t*>(baseAddr + MFRR_OFFSET);
-
-                        TRACFCOMP( g_trac_intr,"mfrr = %x",*mfrr);
-
-                        (*mfrr) = 0xff;
-                        eieio();  // Force mfrr clear before xirr EIO.
-
-                        // Deal with pending IPIs.
-                        PIR_t core_pir = pir; core_pir.threadId = 0;
-                        if (iv_ipisPending.count(core_pir))
-                        {
-                            TRACFCOMP(g_trac_intr,INFO_MRK
-                                      "IPI wakeup received for %d", pir.word);
-
-                            IPI_Info_t& ipiInfo = iv_ipisPending[core_pir];
-
-                            ipiInfo.first &=
-                                ~(0x8000000000000000 >> pir.threadId);
-
-                            if (0 == ipiInfo.first)
-                            {
-                                msg_t* ipiMsg = ipiInfo.second;
-                                iv_ipisPending.erase(core_pir);
-
-                                ipiMsg->data[1] = 0;
-                                msg_respond(iv_msgQ, ipiMsg);
-                            }
-                            else
-                            {
-                                TRACDCOMP(g_trac_intr,INFO_MRK
-                                          "IPI still pending for %x",
-                                          ipiInfo.first);
-                            }
-
-                        }
-
-                        // Writing the XIRR with the same value read earlier
-                        // to signal an EOI.
-                        xirr |= CPPR_MASK;  //set all CPPR bits - allow any INTR
-                        *xirrAddress = xirr;
-
-                        TRACDCOMP(g_trac_intr,
-                                  "EOI issued. XIRR=%x, PIR=%x",
-                                  xirr,pir);
-
-                        // Now handle any IPC messages
-                        // If something is registered for IPIs
-                        // and msg is ready, then handle
-                        if(r != iv_registry.end() &&
-                           (KernelIpc::ipc_data_area.msg_queue_id !=
-                           IPC_DATA_AREA_CLEAR) &&
-                            (KernelIpc::ipc_data_area.msg_queue_id !=
-                             IPC_DATA_AREA_LOCKED))
-                        {
-                            msg_q_t msgQ = r->second.msgQ;
-
-                            msg_t * rmsg = msg_allocate();
-                            rmsg->type = r->second.msgType;
-                            rmsg->data[0] = type;  // interrupt type
-                            rmsg->data[1] = l_xirr_pir;
-                            rmsg->extra_data = NULL;
-
-                            int rc = msg_sendrecv_noblk(msgQ, rmsg, iv_msgQ);
-                            if(rc)
-                            {
-                                TRACFCOMP(g_trac_intr,ERR_MRK
-                                          "IPI Interrupt received, but could "
-                                          "not send message to the registered "
-                                          "handler. Ignoring it. rc = %d",
-                                          rc);
-                            }
-                        }
-                    }
                 }
                 break;
 
+            case MSG_INTR_CPU_WAKEUP:
+                {
+                    uint64_t l_xirr_pir = msg->data[0];
+                    uint64_t l_data0 = (l_xirr_pir & 0xFFFFFFFF);
+                    PIR_t l_pir = static_cast<PIR_t>(l_data0);
+                    PIR_t l_core_pir = l_pir;
+                    l_core_pir.threadId = 0;
+
+                    if (iv_ipisPending.count(l_core_pir))
+                    {
+                        TRACFCOMP(g_trac_intr,INFO_MRK
+                                  "IntrRp::msgHandler Doorbell wakeup received"
+                                  " for %d", l_pir.word);
+
+                        IPI_Info_t& ipiInfo = iv_ipisPending[l_core_pir];
+                        ipiInfo.first &=
+                           ~(0x8000000000000000 >> l_pir.threadId);
+
+                        if (0 == ipiInfo.first)
+                        {
+                            msg_t* ipiMsg = ipiInfo.second;
+                            iv_ipisPending.erase(l_core_pir);
+
+                            ipiMsg->data[1] = 0;
+                            msg_respond(iv_msgQ, ipiMsg);
+                        }
+                        else
+                        {
+                            TRACFCOMP(g_trac_intr,INFO_MRK
+                                      "IPI still pending for %x",
+                                      ipiInfo.first);
+                        }
+
+                    }
+                }
+                break;
+/*TODO RTC 150861 -- I think a new IPC message type needs to be defined.
+ *                   And the code below should be executed when this new message
+ *                   type is received. The Kernel will send this message to
+ *                   here (this intrrp code) during doorbell wakeup.
+
+                    // Now handle any IPC messages
+                    // If something is registered for IPIs
+                    // and msg is ready, then handle
+                    if(r != iv_registry.end() &&
+                       (KernelIpc::ipc_data_area.msg_queue_id !=
+                       IPC_DATA_AREA_CLEAR) &&
+                        (KernelIpc::ipc_data_area.msg_queue_id !=
+                         IPC_DATA_AREA_LOCKED))
+                    {
+                        msg_q_t msgQ = r->second.msgQ;
+
+                        msg_t * rmsg = msg_allocate();
+                        rmsg->type = r->second.msgType;
+                        rmsg->data[0] = type;  // interrupt type
+                        rmsg->data[1] = l_xirr_pir;
+                        rmsg->extra_data = NULL;
+
+                        int rc = msg_sendrecv_noblk(msgQ, rmsg, iv_msgQ);
+                        if(rc)
+                        {
+                            TRACFCOMP(g_trac_intr,ERR_MRK
+                                      "IPI Interrupt received, but could "
+                                      "not send message to the registered "
+                                      "handler. Ignoring it. rc = %d",
+                                      rc);
+                        }
+                    }
+**/
             case MSG_INTR_EOI:
                 {
                     // Use standrard EOI (End of Interrupt) sequence
@@ -662,13 +641,16 @@ void IntrRp::msgHandler()
                 }
                 break;
 
-#ifdef CONFIG_ENABLE_P9_IPI
             //  Called when a new cpu becomes active other than the master
             //  Expect a call for each new core
             case MSG_INTR_ADD_CPU:
                 {
+                    //Get the base PIR sent from the kernel
                     PIR_t pir = msg->data[1];
+                    //No need to care about thread ID as that will be gathered
+                    //  below
                     pir.threadId = 0;
+                    //Push back base core PIR for later use
                     iv_cpuList.push_back(pir);
 
                     TRACFCOMP(g_trac_intr,"Add CPU group[%d], chip[%d],"
@@ -676,40 +658,31 @@ void IntrRp::msgHandler()
                               pir.groupId, pir.chipId, pir.coreId,
                               pir.threadId);
 
-                    size_t threads = cpu_thread_count();
+                    //Get threads to be enabled so they will be monitored
                     uint64_t en_threads = get_enabled_threads();
-
                     iv_ipisPending[pir] = IPI_Info_t(en_threads, msg);
 
-                    for(size_t thread = 0; thread < threads; ++thread)
-                    {
-                        // Skip threads that we shouldn't be starting
-                        if( !(en_threads & (0x8000000000000000>>thread)) )
-                        {
-                            TRACDCOMP(g_trac_intr,"MSG_INTR_ADD_CPU: Skipping thread %d",thread);
-                            continue;
-                        }
-                        pir.threadId = thread;
-                        //wh_p9 initInterruptPresenter(pir);
-                        sendIPI(pir);
-                    }
-
-                    pir.threadId = 0;
+                    //Create handleCpuTimeout task - this task will monitor
+                    // for wakeup messages from each individual expected
+                    // thread to be sent.
                     task_create(handleCpuTimeout,
                                 reinterpret_cast<void*>(pir.word));
+                    TRACFCOMP(g_trac_intr, "handleCpuTimeout task started"
+                              " responding to kernel message");
                 }
                 break;
-#endif
             case MSG_INTR_ADD_CPU_TIMEOUT:
                 {
                     PIR_t pir = msg->data[0];
+                    TRACDCOMP("IntrRp::msgHandler() CPU Timeout Message "
+                              "received for: %x", pir.word);
                     size_t count = msg->data[1];
 
                     if(iv_ipisPending.count(pir))
                     {
                         if (count < CPU_WAKEUP_INTERVAL_COUNT)
                         {
-                            TRACDCOMP(g_trac_intr,
+                            TRACFCOMP(g_trac_intr,
                                       INFO_MRK "Cpu wakeup pending on %x",
                                       pir.word);
 
@@ -2768,6 +2741,8 @@ void* INTR::IntrRp::handleCpuTimeout(void* _pir)
     msg->data[0] = pir;
     msg_q_t intr_msgQ = msg_q_resolve(VFS_ROOT_MSG_INTR);
 
+    TRACFCOMP( g_trac_intr,"handleCpuTimeout for pir: %lx", pir);
+
     do
     {
         // Sleep for the right amount.
@@ -2837,4 +2812,21 @@ void INTR::drainQueue()
         msg_free(msg);
     }
     //else no queue, no need to do anything
+}
+
+uint64_t INTR::get_enabled_threads( void )
+{
+    TARGETING::Target* sys = NULL;
+    TARGETING::targetService().getTopLevelTarget(sys);
+    assert( sys != NULL );
+    uint64_t en_threads = sys->getAttr<TARGETING::ATTR_ENABLED_THREADS>();
+    if( en_threads == 0 )
+    {
+        //TODO RTC 151022
+        //Read <SBE memory area> for enabled threads value
+        //  and set attribute appropriately
+        en_threads = 0xF000000000000000; //Enable all the threads
+        sys->setAttr<TARGETING::ATTR_ENABLED_THREADS>(en_threads);
+    }
+    return en_threads;
 }

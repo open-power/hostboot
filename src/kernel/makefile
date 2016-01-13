@@ -65,6 +65,7 @@ OBJS += ipc.o
 OBJS += machchk.o
 
 OBJS += doorbell.o
+OBJS += workitem.o
 
 include ${ROOTPATH}/config.mk
 

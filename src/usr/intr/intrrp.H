@@ -67,6 +67,12 @@ namespace INTR
         return r.u32;
     }
 
+    /**
+     * @brief Utility function to get the list of enabled threads
+     * @return Bitstring of enabled threads
+     */
+    uint64_t get_enabled_threads( void );
+
     class IntrRp
     {
         public:
