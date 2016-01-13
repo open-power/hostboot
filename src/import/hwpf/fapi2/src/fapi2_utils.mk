@@ -24,7 +24,10 @@
 # IBM_PROLOG_END_TAG
 MODULE=fapi2_utils
 $(call ADD_MODULE_SRCDIR,$(MODULE),$(GENPATH))
+$(call ADD_MODULE_INCDIR,$(MODULE),$(GENPATH))
 $(call ADD_MODULE_INCDIR,$(MODULE),$(FAPI2_PLAT_INCLUDE))
+$(call ADD_MODULE_INCDIR,$(MODULE),$(ROOTPATH)/chips/p9/common/include)
 OBJS+=fapi2_utils.o
 OBJS+=fapi2_attribute_service.o
+OBJS+=collect_reg_ffdc_regs.o
 $(call BUILD_MODULE)
