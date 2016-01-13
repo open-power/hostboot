@@ -265,6 +265,7 @@
   <collectRegisterFfdc>
     <id>REG_FFDC_BANG_BANG_REGS</id>
     <target>MCA_IN_ERROR</target>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
     <target>MCA_IN_ERROR</target>
@@ -294,6 +295,7 @@
   <collectRegisterFfdc>
     <id>REG_FFDC_BANG_BANG_REGS</id>
     <target>MCA_IN_ERROR</target>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
     <target>MCA_IN_ERROR</target>
@@ -322,6 +324,7 @@
   <collectRegisterFfdc>
     <id>REG_FFDC_DLL_REGS</id>
     <target>MCA_IN_ERROR</target>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
     <target>MCA_IN_ERROR</target>
@@ -343,6 +346,7 @@
   <collectRegisterFfdc>
     <id>REG_FFDC_ZCNTL_REGS</id>
     <target>MCA_IN_ERROR</target>
+    <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
     <target>MCA_IN_ERROR</target>
