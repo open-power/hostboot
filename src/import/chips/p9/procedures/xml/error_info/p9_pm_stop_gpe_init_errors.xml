@@ -1,0 +1,60 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/error_info/p9_pm_stop_gpe_init_errors.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015,2016                                                    -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Error definitions for p9_pm_ocb_init procedure -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_STOP_GPE_BAD_MODE</rc>
+    <description>Unknown mode passed to p9_pm_stop_gpe_init.
+    </description>
+    <ffdc>BADMODE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_STOP_GPE_INIT_TIMEOUT</rc>
+    <description> Stop GPE init timedout while waiting for SGPE ACtive in OCCFLG register.
+    </description>
+    <ffdc>OCCFLGSTAT</ffdc>
+    <ffdc>XSR</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_STOP_GPE_RESET_TIMEOUT</rc>
+    <description> Stop GPE init timedout while waiting for HALT status in XSR register.
+    </description>
+    <ffdc>SGPEXSRNOTHALT</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_STOP_GPE_PFETS_FAILED</rc>
+    <description> Stop GPE called to p9_pm_pfet_init failed.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>MODE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_STOP_GPE_PBA_INIT_FAILED</rc>
+    <description> Stop GPE called to p9_pm_pba_init failed.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>MODE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>
