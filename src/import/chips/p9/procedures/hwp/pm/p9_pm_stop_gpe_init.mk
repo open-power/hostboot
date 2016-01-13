@@ -1,13 +1,13 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: chips/p9/procedures/ipl/hwp/p9_pm_stop_gpe_init.mk $
+# $Source: chips/p9/procedures/hwp/pm/p9_pm_stop_gpe_init.mk $
 #
 # IBM CONFIDENTIAL
 #
 # EKB Project
 #
-# COPYRIGHT 2015
+# COPYRIGHT 2015,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -17,4 +17,5 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_pm_stop_gpe_init
+$(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/lib)
 $(call BUILD_PROCEDURE)

@@ -49,6 +49,29 @@
     #define BIT(b) BITS((b), 1)
 #endif
 
+extern const char* p9_PM_FLOW_MODE_NAME[];
+
+#define PM_FLOW_MODE_NAME   \
+    {                           \
+        "PM_RESET",             \
+        "PM_INIT",              \
+        "PM_SETUP",             \
+        "PM_SETUP_PIB",         \
+        "PM_SETUP_ALL",         \
+        "PM_RESET_SOFT",        \
+        "PM_INIT_SOFT",         \
+        "PM_INIT_SPECIAL"       \
+    }
+
+#define PM_MODE_NAME_VAR p9_PM_FLOW_MODE_NAME[] = PM_FLOW_MODE_NAME
+
+#define PM_MODE_NAME(_mi_mode)(         \
+                                        p9_PM_FLOW_MODE_NAME[_mi_mode-1]    \
+                              )
+
+
+
+
 //------------------------------------------------------------------------------
 // Constant definitions
 //------------------------------------------------------------------------------
