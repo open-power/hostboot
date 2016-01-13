@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,7 +39,7 @@
 //FIXREG64_FLD( PU_ALTD_CMD_REG_FBC_WITH_TM_QUIESCE, 24, SH_UNT, SH_ACS_SCOM, SH_FLD_FBC_WITH_TM_QUIESCE,
 //              12);
 
-const static uint64_t SH_FLD_COMMAND_LIST_TIMEOUT_SPEC = 99990000;
+static const uint64_t SH_FLD_COMMAND_LIST_TIMEOUT_SPEC = 99990000;
 
 REG64_FLD( MCS_MCFIR_COMMAND_LIST_TIMEOUT_SPEC                     , 9   , SH_UNT_MCS      , SH_ACS_SCOM2_OR ,
            SH_FLD_COMMAND_LIST_TIMEOUT_SPEC );
