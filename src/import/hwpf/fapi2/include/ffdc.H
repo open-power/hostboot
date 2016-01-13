@@ -119,7 +119,8 @@ class FirstFailureData
             static_cast<R*>(this)->operator=(i_rcValue);
 
             // Forget about any associated data (this is a new error)
-            iv_info.reset(new ErrorInfo());
+            iv_info.reset( new ErrorInfo());
+
         }
 
         ///
@@ -183,8 +184,6 @@ class FirstFailureData
         };
 
         ///
-
-        ///
         /// @brief Get a pointer to any ErrorInfo
         ///
         /// This is called by PLAT to find information about an error
@@ -225,11 +224,12 @@ class FirstFailureData
             iv_platDataPtr = i_ptr;
         };
 
-    private:
 
+    protected:
         // Pointer to the error info
         std::shared_ptr<ErrorInfo> iv_info;
 
+    private:
         // free format data, to be used by the platform
         void*    iv_platDataPtr;
 };
