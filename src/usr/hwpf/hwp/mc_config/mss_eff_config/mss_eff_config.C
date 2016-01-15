@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config.C,v 1.62 2015/11/05 16:10:08 jrneaton Exp $
+// $Id: mss_eff_config.C,v 1.67 2016/01/13 15:55:46 sglancy Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config.C,v $
 //------------------------------------------------------------------------------
@@ -45,11 +45,18 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.67  | sglancy  |13-JAN-16| Added RC checks and fixed white space issues
+//   1.66  | preeragh |18-DEC-15| Change ATTR_EFF_TEMP_REF_MODE to Disable by default. SW331045
+//   1.65  | preeragh |16-DEC-15| Updated DIE Count Enums
+//   1.64  | sglancy  |16-NOV-15| Updated comments
+//   1.63  | asaetow  |03-NOV-15| Added support for new attribute ATTR_EFF_DRAM_ADDRESS_MIRRORING (from Steve Glancy)
+//         |          |         | Added support of ATTR_EFF_DRAM_AL for DDR4 3DS (from Jeremy Neaton)
+//         |          |         | Note: DO NOT pickup w/o memory_attributes.xml v1.166 or newer
 //   1.62  | jneaton  |05-NOV-15| Added 3DS AL support
 //   1.61  | preeragh |29-OCT-15| Updated ATTR_EFF_FINE_REFRESH_MODE based upon CUSTOM_dimm ATTR
 //   1.60  | preeragh |29-OCT-15| Updated IBM_TYPE 2A Case and ATTR_EFF_DIMM_RANKS_CONFIGED for 3D TSV Case
 //   1.59  | sglancy  |26-OCT-15| Updated ATTR_VPD_DRAM_WRDDR4_VREF to have a new definition
-//   1.58  | asaetow/sglancy  |23-OCT-15| Added ATTR_EFF_VREF_DQ_TRAIN_VALUE, ATTR_EFF_VREF_DQ_TRAIN_RANGE, and ATTR_EFF_VREF_DQ_TRAIN_ENABLE for DDR4, eq from Steve Glancy below. Glancy made equation adjustments
+//   1.58  | asaetow/sglancy |23-OCT-15| Added ATTR_EFF_VREF_DQ_TRAIN_VALUE, ATTR_EFF_VREF_DQ_TRAIN_RANGE, and ATTR_EFF_VREF_DQ_TRAIN_ENABLE for DDR4, eq from Steve Glancy below. Glancy made equation adjustments
 //         |          |         | Note: ATTR_EFF_VREF_DQ_TRAIN_ENABLE = DISABLE, ATTR_EFF_VREF_DQ_TRAIN_RANGE = RANGE1 if ATTR_VPD_DRAM_WRDDR4_VREF > 24 else RANGE2, ATTR_EFF_VREF_DQ_TRAIN_VALUE = ATTR_VPD_DRAM_WRDDR4_VREF - ATTR_EFF_VREF_DQ_TRAIN_RANGE * 24
 //   1.57  | asaetow  |22-OCT-15| Added ENUM_ATTR_EFF_CS_CMD_LATENCY_DISABLE default for DDR4.
 //   1.56  | preeragh |21-OCT-15| Added 3D TSV support and DDR4 ATTR
@@ -346,12 +353,12 @@ struct mss_eff_config_spd_data
     uint32_t trfc4min[PORT_SIZE][DIMM_SIZE];
     uint8_t twtrsmin[PORT_SIZE][DIMM_SIZE];
     uint8_t twtrlmin[PORT_SIZE][DIMM_SIZE];
+    uint32_t addr_map_reg_to_dram[PORT_SIZE][DIMM_SIZE]; // Assuming right align based on dimm_spd_attributes.xml
 
 
     // DDR4 LR only
     uint8_t dimm_module_lr_attributes[PORT_SIZE][DIMM_SIZE];
     uint32_t lr_register_manf_id[PORT_SIZE][DIMM_SIZE]; // Assuming right align based on dimm_spd_attributes.xml
-    uint32_t lr_addr_map_reg_to_dram[PORT_SIZE][DIMM_SIZE]; // Assuming right align based on dimm_spd_attributes.xml
     uint8_t lr_reg_output_drv_strength_ck[PORT_SIZE][DIMM_SIZE];
     uint8_t lr_dram_vref_dq_rank0[PORT_SIZE][DIMM_SIZE];
     uint8_t lr_dram_vref_dq_rank1[PORT_SIZE][DIMM_SIZE];
@@ -423,6 +430,7 @@ struct mss_eff_config_spd_data
 struct mss_eff_config_atts
 {
     uint8_t eff_dimm_ranks_configed[PORT_SIZE][DIMM_SIZE];
+    uint8_t eff_dram_address_mirroring[PORT_SIZE][DIMM_SIZE];
     // Using SPD byte68,69:76, enabled in GA2 for full RDIMM support
     uint64_t eff_dimm_rcd_cntl_word_0_15[PORT_SIZE][DIMM_SIZE];
     uint8_t eff_dimm_size[PORT_SIZE][DIMM_SIZE];
@@ -867,13 +875,14 @@ fapi::ReturnCode mss_eff_config_read_spd_data(fapi::Target i_target_dimm,
               (p_o_spd_data->mtb_dividend[i_port][i_dimm] * 1000) /
               p_o_spd_data->mtb_divisor[i_port][i_dimm]);
 
+           // DDR4 RDIMM/LRDIMM Support
+              rc = FAPI_ATTR_GET(ATTR_SPD_ADDR_MAP_REG_TO_DRAM, &i_target_dimm, p_o_spd_data->addr_map_reg_to_dram[i_port][i_dimm]);
+              if(rc) break;
            // DDR4 LRDIMM Support  AST HERE
            if (p_o_spd_data->module_type[i_port][i_dimm] == fapi::ENUM_ATTR_SPD_MODULE_TYPE_LRDIMM) {
               rc = FAPI_ATTR_GET(ATTR_SPD_DIMM_MODULE_ATTRIBUTES, &i_target_dimm, p_o_spd_data->dimm_module_lr_attributes[i_port][i_dimm]);
               if(rc) break;
               rc = FAPI_ATTR_GET(ATTR_SPD_REGISTER_MANF_ID, &i_target_dimm, p_o_spd_data->lr_register_manf_id[i_port][i_dimm]);
-              if(rc) break;
-              rc = FAPI_ATTR_GET(ATTR_SPD_ADDR_MAP_REG_TO_DRAM, &i_target_dimm, p_o_spd_data->lr_addr_map_reg_to_dram[i_port][i_dimm]);
               if(rc) break;
               rc = FAPI_ATTR_GET(ATTR_SPD_REG_OUTPUT_DRV_STRENGTH_CK, &i_target_dimm, p_o_spd_data->lr_reg_output_drv_strength_ck[i_port][i_dimm]);
               if(rc) break;
@@ -1517,6 +1526,11 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
     fapi::ReturnCode rc;
     const fapi::Target& TARGET_MBA = i_target_mba;
 
+
+    uint8_t vpd_dram_address_mirroring[PORT_SIZE][DIMM_SIZE];
+    rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_ADDRESS_MIRRORING, &i_target_mba, vpd_dram_address_mirroring);
+    if(rc) return rc;
+
     uint8_t mss_dram_2n_mode_enable;
     rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_2N_MODE_ENABLED, &i_target_mba, mss_dram_2n_mode_enable);
     if(rc) return rc;
@@ -1524,6 +1538,7 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
     // DDR4 Vref
     uint8_t l_attr_vpd_dram_wrddr4_vref[PORT_SIZE];
     rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_WRDDR4_VREF, &i_target_mba, l_attr_vpd_dram_wrddr4_vref);
+    if(rc) return rc;
 
     // Transfer powerdown request from system attr to DRAM attr
     uint8_t mss_power_control_requested;
@@ -2028,12 +2043,12 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
 			if((p_o_atts->eff_custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES) && (p_o_atts->eff_dram_gen == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4))			
 				{ p_o_atts->eff_fine_refresh_mode = ENUM_ATTR_EFF_FINE_REFRESH_MODE_NORMAL;}
 			else
-				{p_o_atts->eff_fine_refresh_mode = ENUM_ATTR_EFF_FINE_REFRESH_MODE_FIXED_4X;}
+				{p_o_atts->eff_fine_refresh_mode = ENUM_ATTR_EFF_FINE_REFRESH_MODE_NORMAL;}
 			
             p_o_atts->eff_mpr_rd_format = ENUM_ATTR_EFF_MPR_RD_FORMAT_SERIAL;
             p_o_atts->eff_max_powerdown_mode = ENUM_ATTR_EFF_MAX_POWERDOWN_MODE_DISABLE; 
             p_o_atts->eff_temp_ref_range = ENUM_ATTR_EFF_TEMP_REF_RANGE_NORMAL; 
-            p_o_atts->eff_temp_ref_mode = ENUM_ATTR_EFF_TEMP_REF_MODE_ENABLE; 
+            p_o_atts->eff_temp_ref_mode = ENUM_ATTR_EFF_TEMP_REF_MODE_DISABLE; 
             p_o_atts->eff_int_vref_mon = ENUM_ATTR_EFF_INT_VREF_MON_DISABLE;  
             p_o_atts->eff_self_ref_abort = ENUM_ATTR_EFF_SELF_REF_ABORT_DISABLE; 
             p_o_atts->eff_rd_preamble_train = ENUM_ATTR_EFF_RD_PREAMBLE_TRAIN_DISABLE;       
@@ -2544,8 +2559,16 @@ FAPI_DBG("DDR4 Check:  SPD=0x%x, p_i_tFAWmin (nCK) = %i",
 			{
 				if (p_i_data->sdram_die_count[l_cur_mba_port][l_cur_mba_dimm]== fapi::ENUM_ATTR_SPD_SDRAM_DIE_COUNT_DIE2)
 					{die_count = 2;}
+				else if(p_i_data->sdram_die_count[l_cur_mba_port][l_cur_mba_dimm]== fapi::ENUM_ATTR_SPD_SDRAM_DIE_COUNT_DIE3)
+					{die_count = 3;}
 				else if(p_i_data->sdram_die_count[l_cur_mba_port][l_cur_mba_dimm]== fapi::ENUM_ATTR_SPD_SDRAM_DIE_COUNT_DIE4)
 					{die_count = 4;}
+				else if(p_i_data->sdram_die_count[l_cur_mba_port][l_cur_mba_dimm]== fapi::ENUM_ATTR_SPD_SDRAM_DIE_COUNT_DIE5)
+					{die_count = 5;}
+				else if(p_i_data->sdram_die_count[l_cur_mba_port][l_cur_mba_dimm]== fapi::ENUM_ATTR_SPD_SDRAM_DIE_COUNT_DIE6)
+					{die_count = 6;}
+				else if(p_i_data->sdram_die_count[l_cur_mba_port][l_cur_mba_dimm]== fapi::ENUM_ATTR_SPD_SDRAM_DIE_COUNT_DIE7)
+					{die_count = 7;}
 				else if(p_i_data->sdram_die_count[l_cur_mba_port][l_cur_mba_dimm]== fapi::ENUM_ATTR_SPD_SDRAM_DIE_COUNT_DIE8)
 					{die_count = 8;}
 				
@@ -2560,7 +2583,7 @@ FAPI_DBG("DDR4 Check:  SPD=0x%x, p_i_tFAWmin (nCK) = %i",
 			
 			}  //end of 3d TSV
 	else      //if Non-3D TSV
-		{
+        {
 			 if (p_i_data->num_ranks[l_cur_mba_port]
                     [l_cur_mba_dimm] == 0x04)                 // for 8R LRDIMM  since no ENUM defined yet for SPD of 8R
 //                    [l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_NUM_RANKS_R8)
@@ -2600,7 +2623,7 @@ FAPI_DBG("DDR4 Check:  SPD=0x%x, p_i_tFAWmin (nCK) = %i",
                 p_o_atts->eff_dimm_ranks_configed[l_cur_mba_port]
                     [l_cur_mba_dimm] = 0x00;
             }
-		  }
+         }
 			//Preet
 			
 			uint8_t& UNSUPPORTED_VAL = p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm];
@@ -2664,6 +2687,53 @@ FAPI_DBG("DDR4 Check:  SPD=0x%x, p_i_tFAWmin (nCK) = %i",
                FAPI_ERR("Currently unsupported DIMM_TYPE on %s!", i_target_mba.toEcmdString());
                FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_DIMM_UNSUPPORTED_TYPE); return rc;
             }
+
+            // Support for new attribute ATTR_EFF_DRAM_ADDRESS_MIRRORING 
+            if ( p_o_atts->eff_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM ) {
+               if (p_o_atts->eff_dram_gen == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4) {
+                  // Assuming Byte136[7:0] right align based on dimm_spd_attributes.xml
+                  // Mask for bit0 of Byte136 = 0x00000001
+                  if ((p_i_data->addr_map_reg_to_dram[l_cur_mba_port][l_cur_mba_dimm] & 0x00000001) != 0) {
+                     if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 4) {
+                        p_o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x05;
+                     } else if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 2) {
+                        p_o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x04;
+                     } else {
+                        p_o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x00;
+                     }
+                  } else {
+                     p_o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x00;
+                  }
+               } else {
+                  p_o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x00;
+               }
+            } else if (( p_o_atts->eff_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM ) && ( p_o_atts->eff_custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES )) {
+               p_o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = vpd_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm];
+            } else if ( p_o_atts->eff_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM ) {
+               if (p_o_atts->eff_dram_gen == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4) {
+                  // Assuming Byte136[7:0]:Byte137[7:0] right align based on dimm_spd_attributes.xml
+                  // Mask for bit0 of Byte136 = 0x00000100
+                  if ((p_i_data->addr_map_reg_to_dram[l_cur_mba_port][l_cur_mba_dimm] & 0x00000001) != 0) {
+                     if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 4) {
+                        p_o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x05;
+                     } else if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 2) {
+                        p_o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x04;
+                     } else {
+                        p_o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x00;
+                     }
+                  } else {
+                     p_o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x00;
+                  }
+               } else {
+                  // DDR3 LRDIMM not supported
+                  p_o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x00;
+               }
+            } else {
+               p_o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x00;
+               FAPI_ERR("Currently unsupported DIMM_TYPE on %s!", i_target_mba.toEcmdString());
+               FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_DIMM_UNSUPPORTED_TYPE); return rc;
+            }
+
           } else {
              p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port]
                  [l_cur_mba_dimm] = 0;
@@ -2671,6 +2741,7 @@ FAPI_DBG("DDR4 Check:  SPD=0x%x, p_i_tFAWmin (nCK) = %i",
                  [l_cur_mba_dimm] = 0x00;
             p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_NONE;
             p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_UNDEFINED;
+            p_o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x00;
           }
 //------------------------------------------------------------------------------
           
@@ -2857,8 +2928,9 @@ FAPI_DBG("DDR4 Check:  SPD=0x%x, p_i_tFAWmin (nCK) = %i",
 
         } // inner for loop
     } // outer for loop
-    
-        // Select EFF_DRAM_AL
+
+
+    // Select EFF_DRAM_AL
     if (p_i_data->dram_device_type[0][0] == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR3) {
        if ( mss_dram_2n_mode_enable == fapi::ENUM_ATTR_VPD_DRAM_2N_MODE_ENABLED_TRUE ) {
           p_o_atts->eff_dram_al = fapi::ENUM_ATTR_EFF_DRAM_AL_CL_MINUS_2; // Always use AL = CL - 2 for 2N/2T mode
@@ -2888,7 +2960,8 @@ FAPI_DBG("DDR4 Check:  SPD=0x%x, p_i_tFAWmin (nCK) = %i",
        FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_INCOMPATABLE_DRAM_GEN);
        return rc;
     }
-    
+
+
     return rc;
 } // end mss_eff_config_setup_eff_atts()
 
@@ -2916,6 +2989,9 @@ fapi::ReturnCode mss_eff_config_write_eff_atts(
 
     do
     {
+
+        rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_ADDRESS_MIRRORING, &i_target_mba, p_i_atts->eff_dram_address_mirroring);if(rc) break;
+
         // Set attributes
         rc = FAPI_ATTR_SET(ATTR_EFF_DIMM_RANKS_CONFIGED, &i_target_mba,
                 p_i_atts->eff_dimm_ranks_configed);

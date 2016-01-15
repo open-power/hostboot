@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: dimm_spd_attributes.xml,v 1.57 2015/09/23 13:50:07 dcrowell Exp $ -->
+<!-- $Id: dimm_spd_attributes.xml,v 1.60 2015/12/16 13:18:06 sasethur Exp $ -->
 <!-- XML file specifying DIMM SPD attributes used by HW Procedures. -->
 <attributes>
 
@@ -400,11 +400,10 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         SDRAM Device Type Die Count.
-        Located in DDR3 SPD byte 33, bits 6-4.
         Located in DDR4 SPD byte 6, bit 6-4.
     </description>
     <valueType>uint8</valueType>
-    <enum>DIE1 = 0x00, DIE2 = 0x01, DIE4 = 0x02, DIE8 = 0x03</enum>
+    <enum>DIE1 = 0x00, DIE2 = 0x01, DIE3 = 0x02, DIE4 = 0x03,DIE5 = 0x04,DIE6 = 0x05,DIE7 = 0x06,DIE8 = 0x07</enum>
     <platInit/>
 </attribute>
 
@@ -1860,7 +1859,11 @@ consumer: various
 firmware notes: none
 This is the nominal value
 This is for DDR4
-The value is from 0 to 50</description>
+The value is a decode that is passed into ATTR_EFF_VREF_DQ_TRAIN_RANGE and ATTR_EFF_VREF_DQ_TRAIN_VALUE:
+Decode: (R for Range V for Value, blank for unused)
+ WRDDR4_VREF Bits 01234567  
+        Attr Name  RVVVVVV
+        Attr Bits  0543210</description>
     <valueType>uint8</valueType>
     <platInit/>
     <odmVisable/>

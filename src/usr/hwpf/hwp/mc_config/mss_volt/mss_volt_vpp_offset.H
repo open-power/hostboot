@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_volt_vpp_offset.H,v 1.6 2014/09/10 15:48:07 sglancy Exp $
+// $Id: mss_volt_vpp_offset.H,v 1.7 2015/12/22 15:33:09 sglancy Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -43,6 +43,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:   | Comment:
 //---------|----------|----------|-----------------------------------------------
+//  1.7    | pardeik  | 12/16/15 | Added defaults for die and package
 //  1.6    | sglancy  | 09/10/14 | Updated default attribute values
 //  1.5    | sglancy  | 07/09/14 | Added Default attribute values
 //  1.4    | sglancy  | 06/16/14 | Updated to fix formatting
@@ -58,6 +59,8 @@
 #define DRAM_WIDTH_DEFAULT fapi::ENUM_ATTR_SPD_DRAM_WIDTH_W4
 #define NUM_RANKS_PER_DIMM_DEFAULT fapi::ENUM_ATTR_SPD_NUM_RANKS_R4
 #define DIMM_SPARE_DEFAULT fapi::ENUM_ATTR_VPD_DIMM_SPARE_FULL_BYTE
+#define DIE_COUNT_DEFAULT fapi::ENUM_ATTR_SPD_SDRAM_DIE_COUNT_DIE2
+#define SIGNAL_LOADING_DEFAULT fapi::ENUM_ATTR_SPD_SDRAM_DEVICE_TYPE_SIGNAL_LOADING_SINGLE_LOAD_STACK
 
 typedef fapi::ReturnCode (*mss_volt_vpp_offset_FP_t)(std::vector<fapi::Target> &);
 
