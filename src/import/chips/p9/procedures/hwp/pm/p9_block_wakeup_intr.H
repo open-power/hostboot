@@ -37,10 +37,9 @@
 // Includes
 //------------------------------------------------------------------------------
 
-#include <p9_pm.H>
 #include <fapi2.H>
-#include <p9_misc_scom_addresses.H>
-
+#include <p9_quad_scom_addresses.H>
+#include <p9_quad_scom_addresses_fld.H>
 
 //------------------------------------------------------------------------------
 // Constant definitions
@@ -49,22 +48,35 @@
 namespace p9pmblockwkup
 {
 
-static const uint8_t NUM_OPS = 2;
-
 enum OP_TYPE
 {
-    SET,
-    CLEAR
+    SET = 0,
+    SET_NOSPWUP = 1,
+    CLEAR = 2
 };
 
+// Used by checking infrasture checking code
+static const uint32_t END_OP = CLEAR;
+
 } // namespace p9pmblockwkup
+
+
+//
+// CPMMR Bit definitions
+const uint32_t      BLOCK_REG_WKUP_EVENTS = 6;
+
+// GPMMR Address mappings (for clarity)
+static const uint64_t C_PPM_GPMMR       = C_PPM_GPMMR_SCOM;
+static const uint64_t C_PPM_GPMMR_CLEAR = C_PPM_GPMMR_SCOM1;
+static const uint64_t C_PPM_GPMMR_OR    = C_PPM_GPMMR_SCOM2;
 
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_block_wakeup_intr_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_CORE>&,
     const p9pmblockwkup::OP_TYPE);
 
-extern "C" {
+extern "C"
+{
 
 //------------------------------------------------------------------------------
 // Function prototype
@@ -76,13 +88,12 @@ extern "C" {
 /// @param[in] i_core_target    Core target
 /// @param[in] i_operation      SET, CLEAR
 ///
-/// @retval ECMD_SUCCESS
-/// @retval ERROR only those from called functions or MACROs
+/// @return FAPI2_RC_SUCCESS if success, else error code.
 
     fapi2::ReturnCode
-    p9_block_wakeup_intr(  const fapi2::Target<fapi2::TARGET_TYPE_CORE>&
-                           i_core_target,
-                           p9pmblockwkup::OP_TYPE i_operation);
+    p9_block_wakeup_intr(
+        const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_core_target,
+        const p9pmblockwkup::OP_TYPE i_operation);
 
 } // extern "C"
 
