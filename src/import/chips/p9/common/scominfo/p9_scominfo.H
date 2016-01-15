@@ -44,7 +44,7 @@ extern "C"
 
     typedef enum
     {
-        FAILED_TRANSLATION = 0xFFFFFFFFFFFFFFF1
+        FAILED_TRANSLATION = 0xFFFFFFFFFFFFFFF1ull
     } p9TranslationResult_t;
 
     /// @brief Creates the actual SCOM address based on the chip unit type, instance, and the input SCOM address (relative to chip unit instance 0)
