@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,6 +74,12 @@ namespace FREQVOLTSVC
         ATTR_WOF_ENABLED_type l_wofEnabled = l_pTopLevel->getAttr
                                            < TARGETING::ATTR_WOF_ENABLED > ();
 
+        const size_t l_NumRowsProcSort = sizeof(ATTR_WOF_PROC_SORT_type)/
+                                         sizeof(l_procSortTable[0]);
+        const size_t l_NumRowsFreqUplift =
+                                        sizeof(ATTR_WOF_FREQUENCY_UPLIFT_type)/
+                                        sizeof(l_upliftTable[0]);
+
         // tryGetAttr used due to complex data type. Expected to always work.
         if (!l_pTopLevel->tryGetAttr<ATTR_WOF_FREQUENCY_UPLIFT>(l_upliftTable))
         {
@@ -108,10 +114,10 @@ namespace FREQVOLTSVC
                       TARGETING::TYPE_CORE,
                       TARGETING::UTIL_FILTER_PRESENT);
             uint8_t l_activeCores = l_presCoreList.size();
-            TRACDCOMP(g_fapiTd, "setWofFrequencyUpliftSelected:"
-                            " number of active cores  is %d ",
-                            l_activeCores);
 
+            TRACDCOMP(g_fapiTd, "setWofFrequencyUpliftSelected:"
+                            " nomimal freq is %d,number of active cores  is %d",
+                            l_sysNomFreqMhz,l_activeCores);
             // find WOF index. For example:
             // ATTR_WOF_PROC_SORT =
             // Cores/Nom Freq/Index
@@ -119,9 +125,10 @@ namespace FREQVOLTSVC
             //   10   2926     2
             //   12   2561     3
             //   12   3093     4
+            //   etc...
             // Use WOF index=3 for active cores=12 && nom freq=2561
             uint8_t l_wofIndex = 0;
-            for (uint8_t i=0;i<4;i++)
+            for (uint8_t i=0;i<l_NumRowsProcSort;i++)
             {
                 if ( (l_activeCores   == l_procSortTable[i][0]) &&
                      (l_sysNomFreqMhz == l_procSortTable[i][1]) )
@@ -135,7 +142,7 @@ namespace FREQVOLTSVC
                             l_wofIndex);
             // validate WOF index
             ATTR_WOF_FREQUENCY_UPLIFT_SELECTED_type l_selectedTable = {{0}};
-            if ( (!l_wofIndex) || (l_wofIndex > 4))
+            if ( (!l_wofIndex) || (l_wofIndex > l_NumRowsFreqUplift))
             {
                 if (l_wofEnabled) // log error if WOF enabled
                 {
@@ -157,7 +164,10 @@ namespace FREQVOLTSVC
                      * @userdata2[0:31]  Number of active cores
                      * @userdata2[32:63] Nomimal Frequency
                      * @devdesc          When WOF is enabled, the WOF Freq
-                     *                   Uplift index should be 1,2,3, or 4
+                     *                   Uplift index must be within range of
+                     *                   the number of rows in the frequency
+                     *                   uplift table.
+                     *                   0=not found.
                      */
                     l_err =
                         new  ERRORLOG::ErrlEntry(
