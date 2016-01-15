@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2015
+# Contributors Listed Below - COPYRIGHT 2013,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -1278,16 +1278,17 @@ my $memory_busses_file = open_mrw_file($mrwdir, "${sysname}-memory-busses.xml");
 my $memBus = parse_xml_file($memory_busses_file);
 
 # Capture all memory buses info into the @Membuses array
-use constant MCS_TARGET_FIELD     => 0;
-use constant CENTAUR_TARGET_FIELD => 1;
-use constant DIMM_TARGET_FIELD    => 2;
-use constant DIMM_PATH_FIELD      => 3;
-use constant BUS_NODE_FIELD       => 4;
-use constant BUS_POS_FIELD        => 5;
-use constant BUS_ORDINAL_FIELD    => 6;
-use constant DIMM_POS_FIELD       => 7;
-use constant MBA_SLOT_FIELD       => 8;
-use constant MBA_PORT_FIELD       => 9;
+use constant MCS_TARGET_FIELD     =>  0;
+use constant MCA_TARGET_FIELD     =>  1;
+use constant CENTAUR_TARGET_FIELD =>  2;
+use constant DIMM_TARGET_FIELD    =>  3;
+use constant DIMM_PATH_FIELD      =>  4;
+use constant BUS_NODE_FIELD       =>  5;
+use constant BUS_POS_FIELD        =>  6;
+use constant BUS_ORDINAL_FIELD    =>  7;
+use constant DIMM_POS_FIELD       =>  8;
+use constant MBA_SLOT_FIELD       =>  9;
+use constant MBA_PORT_FIELD       => 10;
 
 use constant CDIMM_RID_NODE_MULTIPLIER => 32;
 
@@ -1297,6 +1298,8 @@ foreach my $i (@{$memBus->{'memory-bus'}})
     push @Membuses, [
          "n$i->{mcs}->{target}->{node}:p$i->{mcs}->{target}->{position}:mcs" .
          $i->{mcs}->{target}->{chipUnit},
+         "n$i->{mca}->{target}->{node}:p$i->{mca}->{target}->{position}:mca" .
+         $i->{mca}->{target}->{chipUnit},
          "n$i->{mba}->{target}->{node}:p$i->{mba}->{target}->{position}:mba" .
          $i->{mba}->{target}->{chipUnit},
          "n$i->{dimm}->{target}->{node}:p$i->{dimm}->{target}->{position}",
@@ -5044,9 +5047,6 @@ sub generate_l4
 
 sub generate_is_dimm
 {
-    # keyed by $mba, keeps track of which dimm on each mba we're working on
-    my $dimmCounter = {};
-
     # From the i2c busses, grab the information for the DIMMs, if any.
     my @dimmI2C;
     my $i2c_file = open_mrw_file($mrwdir, "${sysname}-i2c-busses.xml");
@@ -5082,13 +5082,10 @@ sub generate_is_dimm
         my $ipath = $SMembuses[$i][DIMM_PATH_FIELD];
         my $proc = $SMembuses[$i][MCS_TARGET_FIELD];
         my $mcs = $proc;
+        my $mca = $SMembuses[$i][MCA_TARGET_FIELD];
         $proc =~ s/.*:p(.*):.*/$1/;
         $mcs =~ s/.*mcs(.*)/$1/;
-        my $ctaur = $SMembuses[$i][CENTAUR_TARGET_FIELD];
-        my $mba = $ctaur;
-        $ctaur =~ s/.*:p(.*):mba.*$/$1/;
-        $mba =~ s/.*:mba(.*)$/$1/;
-        $dimmCounter->{$mba} = 0 if ($dimmCounter->{$mba} eq undef);
+        $mca =~ s/.*mca(.*)/$1/;
         my $pos = $SMembuses[$i][DIMM_TARGET_FIELD];
         $pos =~ s/.*:p(.*)/$1/;
         my $dimm = $SMembuses[$i][DIMM_PATH_FIELD];
@@ -5113,50 +5110,12 @@ sub generate_is_dimm
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
-            . "membuf-$ctaur/mba-$mba/dimm-$dimmCounter->{$mba}</default>
+            . "mca-$mca/dimm-$dimm</default>
     </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
         <default>$ipath</default>
     </compileAttribute>
-    <attribute>
-        <id>MBA_DIMM</id>
-        <default>$SMembuses[$i][MBA_SLOT_FIELD]</default>
-    </attribute>
-    <attribute>
-        <id>MBA_PORT</id>
-        <default>$SMembuses[$i][MBA_PORT_FIELD]</default>
-    </attribute>";
-
-        # Map MemBus DIMM instance path to I2C Busses DIMM instace path
-        #  and then add the correct VPD data
-        for my $j ( 0 .. $#dimmI2C )
-        {
-            if ( $ipath eq $dimmI2C[$j]{ipath} )
-            {
-            # @todo RTC 119382 - eventually read the last 4 values from MRW
-            print "
-    <attribute>
-        <id>EEPROM_VPD_PRIMARY_INFO</id>
-         <default>
-             <field><id>i2cMasterPath</id><value>physical:sys-$sys/"
-                . "node-$node/membuf-$ctaur</value></field>
-             <field><id>port</id><value>$dimmI2C[$j]{port}</value></field>
-             <field><id>devAddr</id><value>0x$dimmI2C[$j]{devAddr}"
-                . "</value></field>
-             <field><id>engine</id><value>$dimmI2C[$j]{engine}</value></field>
-             <field><id>byteAddrOffset</id><value>0x01</value></field>
-             <field><id>maxMemorySizeKB</id><value>0x01</value></field>
-             <field><id>writePageSize</id><value>0x50</value></field>
-             <field><id>writeCycleTime</id><value>0x05</value></field>
-         </default>
-    </attribute>";
-
-               last;
-            }
-        }
-
-       print "
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>$pos</default>
@@ -5165,7 +5124,7 @@ sub generate_is_dimm
 
         # call to do any fsp per-dimm attributes
         my $dimmHex = sprintf("0xD0%02X",$dimmPos);
-        do_plugin('fsp_dimm', $proc, $ctaur, $dimm, $dimm, $dimmHex );
+        do_plugin('fsp_dimm', $proc, $dimm, $dimm, $dimmHex );
 
         # $TODO RTC:110399
         if( $haveFSPs == 0 )
@@ -5201,7 +5160,6 @@ sub generate_is_dimm
 
         print "\n</targetInstance>\n";
 
-        $dimmCounter->{$mba} += 1;
     }
 }
 
