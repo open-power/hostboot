@@ -32,4 +32,11 @@
     <ffdc>OPERATION</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
+   <hwpError>
+    <rc>RC_BLOCK_WAKEUP_INTR_CHECK_FAIL</rc>
+    <description>Test of p9_block_wakeup_intr failed.  Note: this is NOT
+    a production error definition; used by test infrastructure.
+    </description>
+  </hwpError>
+  <!-- ********************************************************************* -->
 </hwpErrors>
