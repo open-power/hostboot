@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,13 +33,13 @@
 #define prdfHomRegisterAccess_C
 
 #ifdef __HOSTBOOT_MODULE
-  #include <ecmdDataBufferBase.H>
+//  #include <ecmdDataBufferBase.H> TODO RTC 144696
   #include <ibscomreasoncodes.H>
 #else
   #include <ecmdDataBuffer.H>
   #include <hwsvExecutionService.H>
   #include <hwco_service_codes.H>
-  #include <p8_pore_table_gen_api.H>
+//  #include <p8_pore_table_gen_api.H> TODO RTC 136050
 #endif
 
 #include <prdfHomRegisterAccess.H>
@@ -195,10 +195,12 @@ errlHndl_t ScomAccessor::Access(TargetHandle_t i_target,
     PRDF_DENTER("ScomAccessor::Access()");
 
     errlHndl_t errH = NULL;
-    uint32_t bsize = bs.GetLength();
 
     if(i_target != NULL)
     {
+/* TODO RTC 144696
+        uint32_t bsize = bs.GetLength();
+
         #ifdef __HOSTBOOT_MODULE
 
         ecmdDataBufferBase buffer(bsize);
@@ -225,7 +227,9 @@ errlHndl_t ScomAccessor::Access(TargetHandle_t i_target,
                                  buffer);
 
                 #ifndef __HOSTBOOT_MODULE
+*/
 
+/* TODO RTC 136050
                 if( NULL != errH ) break;
 
                 // If register is in a EX chiplet, need to update PORE image.
@@ -270,6 +274,9 @@ errlHndl_t ScomAccessor::Access(TargetHandle_t i_target,
                         }
                     }
                 }
+*/
+
+/* TODO RTC 144696
                 #endif // End of, not __HOSTBOOT_MODULE
 
                 break;
@@ -297,6 +304,7 @@ errlHndl_t ScomAccessor::Access(TargetHandle_t i_target,
                 break;
 
         } // end switch operation
+*/
 
     }
     else // Invalid target

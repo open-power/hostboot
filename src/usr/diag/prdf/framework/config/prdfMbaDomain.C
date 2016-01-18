@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,7 +31,7 @@
 #include <prdfTrace.H>
 
 // Pegasus includes
-#include <prdfCenMbaDataBundle.H>
+//#include <prdfCenMbaDataBundle.H> TODO RTC 136126
 
 using namespace TARGETING;
 
@@ -48,6 +48,7 @@ int32_t MbaDomain::startScrub()
 
     do
     {
+/* TODO RTC 136126
         // Iterate all MBAs in the domain.
         for ( uint32_t i = 0; i < GetSize(); ++i )
         {
@@ -63,6 +64,7 @@ int32_t MbaDomain::startScrub()
                 o_rc = FAIL; continue; // Keep going.
             }
         }
+*/
 
     } while (0);
 

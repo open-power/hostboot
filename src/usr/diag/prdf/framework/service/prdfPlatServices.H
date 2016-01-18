@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,7 +34,7 @@
  * is common between FSP and Hostboot should be in the respective common file.
  */
 
-#include <utility_procedures/mss_maint_cmds.H>
+//#include <utility_procedures/mss_maint_cmds.H> TODO: RTC 136126
 
 // This must be included after all Hostboot specific includes. This will take
 // care of cases where a file must be included in the common code, but the

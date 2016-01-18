@@ -40,17 +40,17 @@
 #include <prdfErrlUtil.H>
 
 #include <prdfCenAddress.H>
-#include <prdfCenDqBitmap.H>
+//#include <prdfCenDqBitmap.H>
 #include <prdfCenMarkstore.H>
 
-#include <dimmBadDqBitmapFuncs.H> // for dimm[S|G]etBadDqBitmap()
+//#include <dimmBadDqBitmapFuncs.H> // for dimm[S|G]etBadDqBitmap() TODO RTC
 
-#include <io_read_erepair.H>
-#include <io_power_down_lanes.H>
-#include <io_clear_firs.H>
-#include <erepairAccessorHwpFuncs.H>
-#include <io_fir_isolation.H>
-#include <fapiAttributeIds.H>
+//#include <io_read_erepair.H> TODO RTC 136120
+//#include <io_power_down_lanes.H> TODO RTC 136120
+//#include <io_clear_firs.H> TODO RTC 136120
+//#include <erepairAccessorHwpFuncs.H> TODO RTC 136120
+//#include <io_fir_isolation.H> TODO RTC 136120
+//#include <fapiAttributeIds.H> TODO RTC 136120
 #ifdef __HOSTBOOT_MODULE
 #include <config.h>
 #endif
@@ -69,6 +69,7 @@ namespace PlatServices
 //##                     Utility Functions (for this file only)
 //##############################################################################
 
+/* TODO RTC 144700
 fapi::TargetType getFapiType( TARGETING::TargetHandle_t i_target )
 {
     fapi::TargetType o_type = fapi::TARGET_TYPE_NONE;
@@ -88,6 +89,7 @@ fapi::TargetType getFapiType( TARGETING::TargetHandle_t i_target )
 
     return o_type;
 }
+*/
 
 //##############################################################################
 //##                     System Level Utility Functions
@@ -101,16 +103,18 @@ void getECIDString( TargetHandle_t i_target, char * o_ecidStr )
 
 //------------------------------------------------------------------------------
 
+/* TODO RTC 144700
 fapi::Target getFapiTarget( TARGETING::TargetHandle_t i_target )
 {
     return fapi::Target( getFapiType(i_target), i_target );
 }
-
+*/
 
 //##############################################################################
 //##                       Lane Repair functions
 //##############################################################################
 
+/* TODO RTC 136120
 int32_t readErepair(TargetHandle_t i_rxBusTgt,
                     std::vector<uint8_t> &o_rxFailLanes)
 {
@@ -283,10 +287,13 @@ int32_t erepairFirIsolation(TargetHandle_t i_rxBusTgt)
 
     #undef PRDF_FUNC
 }
+*/
 
 //##############################################################################
 //##                        Processor specific functions
 //##############################################################################
+
+/* TODO RTC 144703
 bool isXBusEnabled( TARGETING::TargetHandle_t i_proc )
 {
     #define PRDF_FUNC "[PlatServices::isXBusEnabled] "
@@ -315,11 +322,13 @@ bool isXBusEnabled( TARGETING::TargetHandle_t i_proc )
 
     #undef PRDF_FUNC
 }
+*/
 
 //##############################################################################
 //##                        Memory specific functions
 //##############################################################################
 
+/* TODO RTC 136126
 // Helper function for the for several other memory functions.
 int32_t getMemAddrRange( TargetHandle_t i_mba, uint8_t i_mrank,
                          ecmdDataBufferBase & o_startAddr,
@@ -389,9 +398,11 @@ int32_t getMemAddrRange( TargetHandle_t i_mba, uint8_t i_mrank,
 
     #undef PRDF_FUNC
 }
+*/
 
 //------------------------------------------------------------------------------
 
+/* TODO RTC 136126
 int32_t getBadDqBitmap( TargetHandle_t i_mba, const CenRank & i_rank,
                         CenDqBitmap & o_bitmap, bool i_allowNoDimm )
 {
@@ -435,9 +446,11 @@ int32_t getBadDqBitmap( TargetHandle_t i_mba, const CenRank & i_rank,
 
     #undef PRDF_FUNC
 }
+*/
 
 //------------------------------------------------------------------------------
 
+/* TODO RTC 136126
 int32_t setBadDqBitmap( TargetHandle_t i_mba, const CenRank & i_rank,
                         const CenDqBitmap & i_bitmap )
 {
@@ -471,9 +484,11 @@ int32_t setBadDqBitmap( TargetHandle_t i_mba, const CenRank & i_rank,
 
     #undef PRDF_FUNC
 }
+*/
 
 //------------------------------------------------------------------------------
 
+/* TODO RTC 136126
 int32_t mssGetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
                          CenMark & o_mark )
 {
@@ -535,9 +550,11 @@ int32_t mssGetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
 
     #undef PRDF_FUNC
 }
+*/
 
 //------------------------------------------------------------------------------
 
+/* TODO RTC 136126
 int32_t mssSetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
                          CenMark & io_mark, bool & o_writeBlocked,
                          bool i_allowWriteBlocked )
@@ -545,6 +562,7 @@ int32_t mssSetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
     #define PRDF_FUNC "[PlatServices::mssSetMarkStore] "
 
     int32_t o_rc = SUCCESS;
+
     errlHndl_t errl = NULL;
     o_writeBlocked = false;
 
@@ -591,9 +609,11 @@ int32_t mssSetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
 
     #undef PRDF_FUNC
 }
+*/
 
 //------------------------------------------------------------------------------
 
+/* TODO RTC 136126
 int32_t mssGetSteerMux( TargetHandle_t i_mba, const CenRank & i_rank,
                         CenSymbol & o_port0Spare, CenSymbol & o_port1Spare,
                         CenSymbol & o_eccSpare )
@@ -623,9 +643,11 @@ int32_t mssGetSteerMux( TargetHandle_t i_mba, const CenRank & i_rank,
 
     return o_rc;
 }
+*/
 
 //------------------------------------------------------------------------------
 
+/* TODO RTC 136126
 int32_t mssSetSteerMux( TargetHandle_t i_mba, const CenRank & i_rank,
                         const CenSymbol & i_symbol, bool i_x4EccSpare )
 {
@@ -649,9 +671,11 @@ int32_t mssSetSteerMux( TargetHandle_t i_mba, const CenRank & i_rank,
 
     return o_rc;
 }
+*/
 
 //------------------------------------------------------------------------------
 
+/* TODO RTC 136126
 int32_t getMemAddrRange( TargetHandle_t i_mba, CenAddr & o_startAddr,
                          CenAddr & o_endAddr )
 {
@@ -673,9 +697,11 @@ int32_t getMemAddrRange( TargetHandle_t i_mba, CenAddr & o_startAddr,
 
     #undef PRDF_FUNC
 }
+*/
 
 //------------------------------------------------------------------------------
 
+/* TODO RTC 136126
 int32_t getMemAddrRange( TargetHandle_t i_mba, const CenRank & i_rank,
                          CenAddr & o_startAddr, CenAddr & o_endAddr,
                          bool i_slaveOnly )
@@ -702,9 +728,11 @@ int32_t getMemAddrRange( TargetHandle_t i_mba, const CenRank & i_rank,
 
     #undef PRDF_FUNC
 }
+*/
 
 //------------------------------------------------------------------------------
 
+/* TODO RTC
 int32_t getDimmSpareConfig( TargetHandle_t i_mba, CenRank i_rank,
                             uint8_t i_ps, uint8_t & o_spareConfig )
 {
@@ -763,8 +791,11 @@ int32_t getDimmSpareConfig( TargetHandle_t i_mba, CenRank i_rank,
     return o_rc;
     #undef PRDF_FUNC
 }
+*/
 
 //------------------------------------------------------------------------------
+
+/* TODO RTC
 errlHndl_t  getFapiDimmDqAttr( TargetHandle_t i_target,
                                uint8_t *io_dqMapPtr )
 {
@@ -785,9 +816,11 @@ errlHndl_t  getFapiDimmDqAttr( TargetHandle_t i_target,
 
     return(l_fapiElog);
 } // end function getFapiDimmDqAttr
+*/
 
 //------------------------------------------------------------------------------
 
+/* TODO RTC
 int32_t getMemBufRawCardType( TargetHandle_t i_mba,
                               WiringType & o_cardType )
 {
@@ -937,11 +970,13 @@ int32_t getMemBufRawCardType( TargetHandle_t i_mba,
 
     #undef PRDF_FUNC
 }
+*/
 
 //##############################################################################
 //##                    Maintenance Command class wrapper
 //##############################################################################
 
+/* TODO RTC 136126
 mss_MaintCmdWrapper::mss_MaintCmdWrapper( mss_MaintCmd * i_maintCmd ) :
     iv_cmd(i_maintCmd)
 {}
@@ -1021,8 +1056,6 @@ int32_t mss_MaintCmdWrapper::cleanupCmd()
 
     #undef PRDF_FUNC
 }
-
-//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 
@@ -1127,6 +1160,7 @@ mss_MaintCmdWrapper * createIncAddrMssCmd( TargetHandle_t i_mba )
 
     return o_cmd;
 }
+*/
 
 //------------------------------------------------------------------------------
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,7 @@
 #include <prdfErrlUtil.H>
 #include <prdfTrace.H>
 #include <algorithm>
-#include <fapi.H>
+//#include <fapi.H> TODO RTC 136126
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
 
@@ -1344,11 +1344,13 @@ int32_t getDimmRowCol( TARGETING::TargetHandle_t i_mba, uint8_t & o_rowNum,
 
 //------------------------------------------------------------------------------
 
+/* TODO RTC 136126
 bool isDramWidthX4( TargetHandle_t i_mba )
 {
     return ( fapi::ENUM_ATTR_EFF_DRAM_WIDTH_X4 ==
              i_mba->getAttr<ATTR_EFF_DRAM_WIDTH>() );
 }
+*/
 
 //------------------------------------------------------------------------------
 

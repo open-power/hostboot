@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2015
+# Contributors Listed Below - COPYRIGHT 2014,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -123,34 +123,34 @@ prd_obj += prdfMfgThresholdMgr.o
 prd_obj += prdfLineDelete.o
 
 # common/plat/pegasus/ (non-rule plugin related)
-prd_obj += prdfCalloutUtil.o
-prd_obj += prdfCenAddress.o
-prd_obj += prdfCenDqBitmap.o
-prd_obj += prdfCenMbaCaptureData.o
-prd_obj += prdfCenMbaCeTable.o
-prd_obj += prdfCenMbaRceTable.o
-prd_obj += prdfCenMbaTdCtlr_common.o
-prd_obj += prdfCenMbaThresholds_common.o
-prd_obj += prdfCenMbaUeTable.o
-prd_obj += prdfCenMemUtils.o
-prd_obj += prdfCenSymbol.o
-prd_obj += prdfFsiCapUtil.o
-prd_obj += prdfLaneRepair.o
-prd_obj += prdfMemoryMru.o
-prd_obj += prdfPegasusConfigurator.o
-prd_obj += prdfPhbUtils.o
-prd_obj += prdfPlatUtil.o
+#prd_obj += prdfCalloutUtil.o
+#prd_obj += prdfCenAddress.o
+#prd_obj += prdfCenDqBitmap.o
+#prd_obj += prdfCenMbaCaptureData.o
+#prd_obj += prdfCenMbaCeTable.o
+#prd_obj += prdfCenMbaRceTable.o
+#prd_obj += prdfCenMbaTdCtlr_common.o
+#prd_obj += prdfCenMbaThresholds_common.o
+#prd_obj += prdfCenMbaUeTable.o
+#prd_obj += prdfCenMemUtils.o
+#prd_obj += prdfCenSymbol.o
+#prd_obj += prdfFsiCapUtil.o
+#prd_obj += prdfLaneRepair.o
+#prd_obj += prdfMemoryMru.o
+#prd_obj += prdfPegasusConfigurator.o
+#prd_obj += prdfPhbUtils.o
+#prd_obj += prdfPlatUtil.o
 
 # common/plat/pegasus/ (rule plugin related)
-prd_rule_plugin += prdfCenMba.o
-prd_rule_plugin += prdfCenMembuf.o
-prd_rule_plugin += prdfCenPll.o
-prd_rule_plugin += prdfP8Ex.o
-prd_rule_plugin += prdfP8Mcs.o
-prd_rule_plugin += prdfP8Pll.o
-prd_rule_plugin += prdfP8PllPcie.o
-prd_rule_plugin += prdfP8Proc.o
-prd_rule_plugin += prdfPllUtils.o
+#prd_rule_plugin += prdfCenMba.o
+#prd_rule_plugin += prdfCenMembuf.o
+#prd_rule_plugin += prdfCenPll.o
+#prd_rule_plugin += prdfP8Ex.o
+#prd_rule_plugin += prdfP8Mcs.o
+#prd_rule_plugin += prdfP8Pll.o
+#prd_rule_plugin += prdfP8PllPcie.o
+#prd_rule_plugin += prdfP8Proc.o
+#prd_rule_plugin += prdfPllUtils.o
 
 # common/plugins/ (errl plugin related)
 prd_obj += prdfParserUtils.o

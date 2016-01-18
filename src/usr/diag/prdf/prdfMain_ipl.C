@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,7 +33,7 @@
 
 #include <prdfMain.H>
 
-#include <prdfCenMbaDataBundle.H>
+//#include <prdfCenMbaDataBundle.H> TODO RTC 136128
 #include <prdfExtensibleChip.H>
 #include <prdfErrlUtil.H>
 #include <prdfPlatServices.H>
@@ -68,12 +68,14 @@ int32_t analyzeIplCEStats( TargetHandle_t i_mba, bool &o_calloutMade )
 {
     #define PRDF_FUNC "PRDF::analyzeIplCEStats"
 
+    int32_t o_rc = SUCCESS;
+
     PRDF_ENTER( PRDF_FUNC "(0x%08x)", getHuid(i_mba) );
 
+/* TODO RTC 136128
     // will unlock when going out of scope
     PRDF_SYSTEM_SCOPELOCK;
 
-    int32_t o_rc = SUCCESS;
     o_calloutMade = false;
 
     ExtensibleChip * mbaChip = (ExtensibleChip *)systemPtr->GetChip( i_mba );
@@ -105,6 +107,7 @@ int32_t analyzeIplCEStats( TargetHandle_t i_mba, bool &o_calloutMade )
         // Commit the error log
         ERRORLOG::errlCommit( errl, PRDF_COMP_ID );
     }
+*/
 
     PRDF_EXIT( PRDF_FUNC "(0x%08x), o_calloutMade:%u",
                getHuid(i_mba), o_calloutMade );
@@ -126,6 +129,7 @@ errlHndl_t startScrub()
     int32_t l_rc = SUCCESS;
     HUID nodeId = INVALID_HUID;
 
+/* TODO RTC 136126
     // will unlock when going out of scope
     PRDF_SYSTEM_SCOPELOCK;
 
@@ -165,6 +169,7 @@ errlHndl_t startScrub()
         PRDF_EXIT( PRDF_FUNC "HUID=0x%08x", nodeId );
 
     } while (0);
+*/
 
     if (( SUCCESS != l_rc ) && (NULL == o_errl))
     {
