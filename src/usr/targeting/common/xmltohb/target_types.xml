@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2016                        -->
 <!-- [+] Google Inc.                                                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
@@ -1995,6 +1995,7 @@
     <attribute><id>MIRROR_BASE_ADDRESS</id></attribute>
     <attribute><id>EFFECTIVE_EC</id></attribute>
     <attribute><id>HB_RSV_MEM_SIZE_MB</id></attribute>
+    <attribute><id>FREQ_CORE_MAX</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->
