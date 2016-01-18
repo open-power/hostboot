@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -359,24 +359,16 @@ namespace SENSOR
             /**
              * @brief Send set sensor reading and event status command
              *    Helper function to send the sensor reading to the BMC, this
-             *    command executes synchronously.
+             *    command executes asynchronously.
              *
-             * @param[inout] io_data - Initially contains the command and data
-             *                         to send to the BMC, will hold the BMC
-             *                         response when the command returns.
-             *
-             * @param[out] o_completion_code - Return value defined by the IPMI
-             *                                 spec and returned in the message
-             *                                 from the BMC to indicate if the
-             *                                 command processing completed
-             *                                 successfully.
+             * @param[in] i_data - Contains the command and data
+             *                      to send to the BMC.
              *
              * @return Errorlog handle
              *
              */
             errlHndl_t sendSetSensorReading(
-                    setSensorReadingRequest *& io_data,
-                    IPMI::completion_code& o_completion_code );
+                    setSensorReadingRequest * i_data);
 
             /**
              * @brief helper function to get the sensor nubmer
