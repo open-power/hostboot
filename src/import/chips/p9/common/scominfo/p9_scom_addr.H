@@ -317,6 +317,17 @@ extern "C"
         PCI_IOPCI_0_RING_ID = 0x3    ///< IOPCI_0
     } p9_pci_ring_id_t;
 
+//        8             7             6             5             4             3          2         1
+//
+//  |0 1 2 3| |4 5 6 7| |8 9 10 11| |12 13 14 15| |16 17 18 19| |20 21 22 23| |24 25 26 27| |28 29 30 31|
+//    {A}{     B      }             {   C    }          {      D      }{     E      }{        F          }
+//
+// A - Is multiCast if bit 1 = 0x1
+// B - Contains Chiplet ID (6 bits) [2:7]
+// C - Contains Port Number (4 bits) [12:15]
+// D - Ring (4 bits) [18:21]
+// E - Sat ID (4 bits) [22:25]
+// F - Sat Offset (6 bits) [26:31]
 
     /// P9 SCOM address class
     class p9_scom_addr
