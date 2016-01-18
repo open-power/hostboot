@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,8 +61,6 @@ errlHndl_t setWatchDogTimer(  const uint16_t i_countdown_secs,
                         const TIMER_ACTIONS i_timer_action,
                         const TIMER_USE_CLR_FLAGS i_timer_clr_flag)
 {
-    errlHndl_t err_ipmi = NULL;
-
     // Convert secs into lsb and msb values
     // the ipmi spec uses the count which is 100ms/count
     static const uint16_t ms_per_count               = 100;
@@ -85,8 +83,6 @@ errlHndl_t setWatchDogTimer(  const uint16_t i_countdown_secs,
     //create request data buffer
     uint8_t* data = new uint8_t[len];
 
-    IPMI::completion_code cc = IPMI::CC_UNKBAD;
-
     data[0] = i_timer_use;          // byte 1 timer use
     data[1] = i_timer_action;      // byte 2 timer actions
     data[2] = 0x00;                 // byte 3 pre-interval timeout in secs
@@ -94,20 +90,8 @@ errlHndl_t setWatchDogTimer(  const uint16_t i_countdown_secs,
     data[4] = init_countdown_lsb; // byte 5 initial countdown timer LSByte
     data[5] = init_countdown_msb; // byte 6 initial countdown timer MSByte
 
-    err_ipmi = IPMI::sendrecv(IPMI::set_watchdog(), cc, len, data);
+    return IPMI::send(IPMI::set_watchdog(), len, data);
 
-    //cleanup buffer
-    delete[] data; data = NULL;
-
-    if(cc != IPMI::CC_OK)
-    {
-        IPMI_TRAC("Watchdog: BMC returned not ok CC[%x]",cc);
-        // should we log error and then retry?
-        // what happens if the communication is broken
-        // reset will try and set it again.
-    }
-
-    return err_ipmi;
 }
 
 
