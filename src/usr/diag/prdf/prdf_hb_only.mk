@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2015
+# Contributors Listed Below - COPYRIGHT 2013,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -58,14 +58,14 @@ prd_incpath += ${PRD_SRC_PATH}/plat/pegasus
 # External header paths
 prd_incpath += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 prd_incpath += ${ROOTPATH}/src/include/usr/errl
-prd_incpath += ${ROOTPATH}/src/include/usr/hwpf/fapi
-prd_incpath += ${ROOTPATH}/src/include/usr/hwpf/hwp
-prd_incpath += ${ROOTPATH}/src/include/usr/hwpf/plat
+#prd_incpath += ${ROOTPATH}/src/include/usr/hwpf/fapi
+#prd_incpath += ${ROOTPATH}/src/include/usr/hwpf/hwp
+#prd_incpath += ${ROOTPATH}/src/include/usr/hwpf/plat
 prd_incpath += ${ROOTPATH}/src/include/usr/ibscom
 prd_incpath += ${ROOTPATH}/src/include/usr/util
-prd_incpath += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training
-prd_incpath += ${ROOTPATH}/src/usr/hwpf/hwp/include
-prd_incpath += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete
+#prd_incpath += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training
+#prd_incpath += ${ROOTPATH}/src/usr/hwpf/hwp/include
+#prd_incpath += ${ROOTPATH}/src/usr/hwpf/hwp/slave_sbe/proc_check_slave_sbe_seeprom_complete
 
 ################################################################################
 # Hostboot only object files common to both IPL and runtime
@@ -82,11 +82,11 @@ prd_obj += prdfPlatServices.o
 prd_obj += prdfRasServices.o
 
 # plat/pegasus/ (rule plugin related)
-prd_rule_plugin += prdfP8TodPlugins.o
-prd_rule_plugin += prdfPlatCenMemUtils.o
-prd_rule_plugin += prdfPlatCenPll.o
-prd_rule_plugin += prdfPlatP8Ex.o
-prd_rule_plugin += prdfPlatP8Proc.o
+#prd_rule_plugin += prdfP8TodPlugins.o
+#prd_rule_plugin += prdfPlatCenMemUtils.o
+#prd_rule_plugin += prdfPlatCenPll.o
+#prd_rule_plugin += prdfPlatP8Ex.o
+#prd_rule_plugin += prdfPlatP8Proc.o
 
 ################################################################################
 # Hostboot only object files (IPL only)
@@ -115,13 +115,13 @@ prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfReadPnorFirData.o)
 prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfWriteHomerFirData.o)
 
 # plat/pegasus/ (non-rule plugin related)
-prd_obj += prdfCenMbaIplCeStats.o
-prd_obj += prdfCenMbaTdCtlr_ipl.o
-prd_obj += prdfDramRepairs.o
-prd_obj += prdfPlatCalloutUtil.o
+#prd_obj += prdfCenMbaIplCeStats.o
+#prd_obj += prdfCenMbaTdCtlr_ipl.o
+#prd_obj += prdfDramRepairs.o
+#prd_obj += prdfPlatCalloutUtil.o
 
 # plat/pegasus/ (rule plugin related)
-prd_rule_plugin += prdfPlatCenMba_ipl.o
+#prd_rule_plugin += prdfPlatCenMba_ipl.o
 
 endif
 
@@ -135,9 +135,9 @@ ifeq (${HOSTBOOT_RUNTIME},1)
 prd_obj += prdfPlatServices_rt.o
 
 # common/runtime/
-prd_obj += prdfCenMbaDynMemDealloc_rt.o
-prd_obj += prdfCenMbaTdCtlr_rt.o
-prd_obj += prdfCenMbaTdRankData.o
+#prd_obj += prdfCenMbaDynMemDealloc_rt.o
+#prd_obj += prdfCenMbaTdCtlr_rt.o
+#prd_obj += prdfCenMbaTdRankData.o
 
 endif
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,13 +38,9 @@
 #include <prdfTrace.H>
 #include <prdfAssert.h>
 
-#include <prdfCenAddress.H>
-#include <prdfCenDqBitmap.H>
 #include <iipServiceDataCollector.h>
 #include <UtilHash.H>
 
-#include <diag/mdia/mdia.H>
-#include <diag/mdia/mdiamevent.H>
 #include <errno.h>
 #include <sys/time.h>
 #include <time.h>
@@ -115,10 +111,12 @@ bool isSpConfigFsp()
 //##                       Processor specific functions
 //##############################################################################
 
+/* TODO RTC 136050
 void collectSBE_FFDC(TARGETING::TargetHandle_t i_procTarget)
 {
     // Do nothing for Hostboot
 }
+*/
 
 //------------------------------------------------------------------------------
 
@@ -137,6 +135,7 @@ TARGETING::TargetHandle_t getMasterCore( TARGETING::TargetHandle_t i_procTgt )
 //##                        util functions
 //##############################################################################
 
+/* TODO RTC 136052
 int32_t getCfam( ExtensibleChip * i_chip,
                  const uint32_t i_addr,
                  uint32_t & o_data)
@@ -194,6 +193,7 @@ int32_t getCfam( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
+*/
 
 //------------------------------------------------------------------------------
 

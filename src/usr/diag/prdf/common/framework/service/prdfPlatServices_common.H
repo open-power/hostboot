@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,7 +43,9 @@
 #include <prdfTimer.H>
 #include <prdfParserEnums.H>
 
-#include <dimmConsts.H>         // for DIMM_DQ_RANK_BITMAP_SIZE
+//#include <dimmConsts.H>         // for DIMM_DQ_RANK_BITMAP_SIZE TODO RTC 136126
+
+/* TODO RTC 144699
 #include <fapiPlatHwpInvoker.H> // for fapi::fapiRcToErrl()
 
 #define PRD_FAPI_TO_ERRL(ERRHNDL, FUNC, _args_...) \
@@ -51,6 +53,9 @@
         fapi::ReturnCode l_rc = FUNC(_args_); \
         ERRHNDL = fapi::fapiRcToErrl(l_rc);   \
     }
+*/
+
+#include <errlentry.H>
 
 //------------------------------------------------------------------------------
 
@@ -90,7 +95,9 @@ void milliSleep( uint32_t i_seconds, uint32_t i_milliseconds );
  * @param   i_target  Any target
  * @return  Returns the corresponding FAPI target for a given target
  */
+/* TODO RTC 144700
 fapi::Target getFapiTarget( TARGETING::TargetHandle_t i_target );
+*/
 
 /**
  * @brief Check SMGR runtime state
@@ -128,8 +135,9 @@ bool isSpConfigFsp();
  * @brief capture SBE image failure Registers for FFDC
  * @param i_procTarget Processor target
  */
+/* TODO RTC 136050
 void collectSBE_FFDC(TARGETING::TargetHandle_t i_procTarget);
-
+*/
 
 //##############################################################################
 //##                       Lane Repair functions
@@ -141,15 +149,19 @@ void collectSBE_FFDC(TARGETING::TargetHandle_t i_procTarget);
  * @param   o_rxFailLanes Vector of failed lanes
  * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
+/* TODO RTC 136120
 int32_t readErepair(TARGETING::TargetHandle_t i_rxBusTgt,
                     std::vector<uint8_t> &o_rxFailLanes);
+*/
 
 /**
  * @brief   Calls HWP to clear FIRs after a lane repair event
  * @param   i_rxBusTgt    Target of the receiving end of the bus
  * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
+/* TODO RTC 136120
 int32_t clearIOFirs(TARGETING::TargetHandle_t i_rxBusTgt);
+*/
 
 /**
  * @brief   Calls HWP to power down failed lanes
@@ -158,9 +170,11 @@ int32_t clearIOFirs(TARGETING::TargetHandle_t i_rxBusTgt);
  * @param   i_txFailLanes Vector of  tx failed lanes
  * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
+/* TODO RTC 136120
 int32_t powerDownLanes(TARGETING::TargetHandle_t i_rxBusTgt,
                        const std::vector<uint8_t> &i_rxFailLanes,
                        const std::vector<uint8_t> &i_txFailLanes);
+*/
 
 /**
  * @brief   Calls erepair accessor procedure get failed lanes from VPD
@@ -169,9 +183,11 @@ int32_t powerDownLanes(TARGETING::TargetHandle_t i_rxBusTgt,
  * @param   o_txFailLanes Vector of  tx failed lanes
  * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
+/* TODO RTC 136120
 int32_t getVpdFailedLanes(TARGETING::TargetHandle_t i_rxBusTgt,
                           std::vector<uint8_t> &o_rxFailLanes,
                           std::vector<uint8_t> &o_txFailLanes);
+*/
 
 /**
  * @brief   Calls erepair prcd to set failed lanes in vpd and check threshold
@@ -181,10 +197,12 @@ int32_t getVpdFailedLanes(TARGETING::TargetHandle_t i_rxBusTgt,
  * @param   o_thrExceeded True if these failed lanes exceeded erepair threshold
  * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
+/* TODO RTC 136120
 int32_t setVpdFailedLanes(TARGETING::TargetHandle_t i_rxBusTgt,
                           TARGETING::TargetHandle_t i_txBusTgt,
                           std::vector<uint8_t> &i_rxFailLanes,
                           bool & o_thrExceeded);
+*/
 
 /**
  * @brief   Calls io_fir_isolation HWP and commits FAPI errorlog containing
@@ -192,7 +210,9 @@ int32_t setVpdFailedLanes(TARGETING::TargetHandle_t i_rxBusTgt,
  * @param   i_rxBusTgt    Target of the receiving end of the bus
  * @return  SUCCESS
  */
+/* TODO RTC 136120
 int32_t erepairFirIsolation(TARGETING::TargetHandle_t i_rxBusTgt);
+*/
 
 //##############################################################################
 //##                        Memory specific functions
@@ -208,8 +228,10 @@ int32_t erepairFirIsolation(TARGETING::TargetHandle_t i_rxBusTgt);
  *                       possible ranks. Default is FALSE.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
+/* TODO RTC 136126
 int32_t getBadDqBitmap( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
                         CenDqBitmap & o_bitmap, bool i_allowNoDimm = false );
+*/
 
 /**
  * @brief  Writes the bad DQ bitmap attribute for both ports of the target rank.
@@ -219,8 +241,10 @@ int32_t getBadDqBitmap( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
  * @note   This is a no-op if DRAM Repairs are disabled in manufacturing.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
+/* TODO RTC 136126
 int32_t setBadDqBitmap( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
                         const CenDqBitmap & i_bitmap );
+*/
 
 /**
  * @brief  Invokes the get mark store hardware procedure.
@@ -229,8 +253,10 @@ int32_t setBadDqBitmap( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
  * @param  o_mark The returned mark.
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
+/* TODO RTC 136126
 int32_t mssGetMarkStore( TARGETING::TargetHandle_t i_mba,
                          const CenRank & i_rank, CenMark & o_mark );
+*/
 
 /**
  * @brief  Invokes the set mark store hardware procedure.
@@ -252,10 +278,12 @@ int32_t mssGetMarkStore( TARGETING::TargetHandle_t i_mba,
  *         time, so do a RMW operation to avoid overwritting a previous mark.
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
+/* TODO RTC 136126
 int32_t mssSetMarkStore( TARGETING::TargetHandle_t i_mba,
                          const CenRank & i_rank, CenMark & io_mark,
                          bool & o_writeBlocked,
                          bool i_allowWriteBlocked = false );
+*/
 
 /**
  * @brief  Invokes the get steer mux hardware procedure.
@@ -266,9 +294,11 @@ int32_t mssSetMarkStore( TARGETING::TargetHandle_t i_mba,
  * @param  o_eccSpare   A symbol associated with the ECC spare (x4 mode only).
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
+/* TODO RTC 136126
 int32_t mssGetSteerMux( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
                         CenSymbol & o_port0Spare, CenSymbol & o_port1Spare,
                         CenSymbol & o_eccSpare );
+*/
 
 /**
  * @brief  Invokes the set steer mux hardware procedure.
@@ -279,8 +309,10 @@ int32_t mssGetSteerMux( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
  * @note   The procedure will be able to derive the port from the given symbol.
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
+/* TODO RTC 136126
 int32_t mssSetSteerMux( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
                         const CenSymbol & i_symbol, bool i_x4EccSpare );
+*/
 
 /**
  * @brief  Returns the start and end maintenance address of the given MBA.
@@ -289,8 +321,10 @@ int32_t mssSetSteerMux( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
  * @param  o_endAddr   The return end address.
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
+/* TODO RTC 136126
 int32_t getMemAddrRange( TARGETING::TargetHandle_t i_mba, CenAddr & o_startAddr,
                          CenAddr & o_endAddr );
+*/
 
 /**
  * @brief  Returns the start and end maintenance address of the given rank. By
@@ -302,9 +336,11 @@ int32_t getMemAddrRange( TARGETING::TargetHandle_t i_mba, CenAddr & o_startAddr,
  * @param  i_slaveOnly true = slave rank only, false = master rank (default).
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
+/* TODO RTC 136126
 int32_t getMemAddrRange( TARGETING::TargetHandle_t i_mba,
                          const CenRank & i_rank, CenAddr & o_startAddr,
                          CenAddr & o_endAddr, bool i_slaveOnly = false );
+*/
 
 /**
  * @brief   Returns master core for the master proc
@@ -326,8 +362,10 @@ TARGETING::TargetHandle_t getMasterCore( TARGETING::TargetHandle_t i_procTgt );
  *          spare can be on High nibble or low nibble. This function will
  *          populate spare config information in o_spareConfig.
  */
+/* TODO RTC 136126
 int32_t getDimmSpareConfig( TARGETING::TargetHandle_t i_mba, CenRank i_rank,
                             uint8_t i_ps, uint8_t & o_spareConfig );
+*/
 
 /**
  * @brief  Returns the raw card type of a buffered DIMM.
@@ -336,8 +374,10 @@ int32_t getDimmSpareConfig( TARGETING::TargetHandle_t i_mba, CenRank i_rank,
  *                      the raw card type currently is not supported.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
+/* TODO RTC 136126
 int32_t getMemBufRawCardType( TARGETING::TargetHandle_t i_mbaTarget,
                               CEN_SYMBOL::WiringType & o_wiringType );
+*/
 
 /**
  * @brief   get DIMM DQ map from FAPI routines
@@ -345,90 +385,92 @@ int32_t getMemBufRawCardType( TARGETING::TargetHandle_t i_mbaTarget,
  * @param   io_dqMapPtr   Pointer to area to receive DIMM DQ map (80 bytes)
  * @return  Non-Null if error log occurs
  */
+/* TODO RTC 136126
 errlHndl_t  getFapiDimmDqAttr( TARGETING::TargetHandle_t i_target,
                                uint8_t *io_dqMapPtr );
+*/
 
 //##############################################################################
 //##                    Maintenance Command class wrapper
 //##############################################################################
 
-/**
- * @brief This is a wrapper class for underlying maintenance class object
- *
- * By this class, we will hide underlying maintenance class dependency
- * from rest of code. All public function mss_MaintCmd used by prd should
- * be defined here also.
- */
-
-class mss_MaintCmdWrapper
-{
-  public: // data types
-
-    /** Represents underlying maintenance command object type **/
-    enum CmdType
-    {
-        TIMEBASE_SCRUB,
-        TIMEBASE_STEER_CLEANUP,
-        SUPERFAST_READ,
-    };
-
-    /** Input flags to control how, and on what, the command runs. **/
-    enum CtrlFlags
-    {
-        /** Run all defaults. See each individual flag of default behavior */
-        NO_FLAGS        = 0x00,
-
-        /** When set, the command will run from the beginning of the given rank
-         *  to the end of memory. Default is to run to the end of the rank. */
-        END_OF_MEMORY   = 0x01,
-
-        /** When set, the command will run on the slave rank only. Default is to
-         *  run on the entire master rank. */
-        SLAVE_RANK_ONLY = 0x04,
-    };
-
-  public: // functions
-
-    /**
-     * @brief Constructor
-     *
-     * @param i_maintCmd Underlying maintenance command object
-     */
-    mss_MaintCmdWrapper( mss_MaintCmd * i_maintCmd );
-
-    /**
-     * @brief Destructor
-     */
-    virtual ~mss_MaintCmdWrapper();
-
-    /**
-     * @brief  Stops running maint cmd, and saves the address it stopped at.
-     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
-     */
-    int32_t stopCmd();
-
-    /**
-     * @brief  Saves any settings that need to be restored when command is done.
-     *         Loads the setup parameters into the hardware. Starts the command,
-     *         then either polls for complete or exits with command running.
-     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
-     */
-     int32_t setupAndExecuteCmd();
-
-    /**
-     * @brief  Called once a command is done if we need to restore settings that
-     *         had to be modified to run a specific command type, or clear error
-     *         data in the hw that is no longer relevant.
-     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
-     */
-     int32_t cleanupCmd();
-
-  private: // instance variables
-
-    // Underlying maintenance command object pointer
-    mss_MaintCmd * iv_cmd;
-
-}; // class mss_MaintCmdWrapper
+// TODO: RTC 136126
+///**
+// * @brief This is a wrapper class for underlying maintenance class object
+// *
+// * By this class, we will hide underlying maintenance class dependency
+// * from rest of code. All public function mss_MaintCmd used by prd should
+// * be defined here also.
+// */
+//class mss_MaintCmdWrapper
+//{
+//  public: // data types
+//
+//    /** Represents underlying maintenance command object type **/
+//    enum CmdType
+//    {
+//        TIMEBASE_SCRUB,
+//        TIMEBASE_STEER_CLEANUP,
+//        SUPERFAST_READ,
+//    };
+//
+//    /** Input flags to control how, and on what, the command runs. **/
+//    enum CtrlFlags
+//    {
+//        /** Run all defaults. See each individual flag of default behavior */
+//        NO_FLAGS        = 0x00,
+//
+//        /** When set, the command will run from the beginning of the given rank
+//         *  to the end of memory. Default is to run to the end of the rank. */
+//        END_OF_MEMORY   = 0x01,
+//
+//        /** When set, the command will run on the slave rank only. Default is to
+//         *  run on the entire master rank. */
+//        SLAVE_RANK_ONLY = 0x04,
+//    };
+//
+//  public: // functions
+//
+//    /**
+//     * @brief Constructor
+//     *
+//     * @param i_maintCmd Underlying maintenance command object
+//     */
+//    mss_MaintCmdWrapper( mss_MaintCmd * i_maintCmd );
+//
+//    /**
+//     * @brief Destructor
+//     */
+//    virtual ~mss_MaintCmdWrapper();
+//
+//    /**
+//     * @brief  Stops running maint cmd, and saves the address it stopped at.
+//     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+//     */
+//    int32_t stopCmd();
+//
+//    /**
+//     * @brief  Saves any settings that need to be restored when command is done.
+//     *         Loads the setup parameters into the hardware. Starts the command,
+//     *         then either polls for complete or exits with command running.
+//     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+//     */
+//     int32_t setupAndExecuteCmd();
+//
+//    /**
+//     * @brief  Called once a command is done if we need to restore settings that
+//     *         had to be modified to run a specific command type, or clear error
+//     *         data in the hw that is no longer relevant.
+//     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+//     */
+//     int32_t cleanupCmd();
+//
+//  private: // instance variables
+//
+//    // Underlying maintenance command object pointer
+//    mss_MaintCmd * iv_cmd;
+//
+//}; // class mss_MaintCmdWrapper
 
 /**
  * @brief  Create a maintenance command object.
@@ -448,6 +490,7 @@ class mss_MaintCmdWrapper
  *         that contains i_rank, but the target address range can be modified
  *         with i_flags and/or i_sAddrOverride.
  */
+/* TODO RTC 136126
 mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
                             TARGETING::TargetHandle_t i_mba,
                             const CenRank & i_rank, uint32_t i_stopCond,
@@ -455,6 +498,7 @@ mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
                                             = mss_MaintCmd::FAST_MAX_BW_IMPACT,
                             uint32_t i_flags = mss_MaintCmdWrapper::NO_FLAGS,
                             const CenAddr * i_sAddrOverride = NULL );
+*/
 
 /**
  * @brief  Create an IncrementAddress maintenance command object.
@@ -463,7 +507,9 @@ mss_MaintCmdWrapper * createMssCmd( mss_MaintCmdWrapper::CmdType i_cmdType,
  * @note   This function allocates memory on heap for mss_MaintCmdWrapper
  *         object. It is the caller's responsibilty to delete this object.
  */
+/* TODO RTC 136126
 mss_MaintCmdWrapper * createIncAddrMssCmd( TARGETING::TargetHandle_t i_mba );
+*/
 
 //##############################################################################
 //##                        util functions
@@ -477,9 +523,11 @@ mss_MaintCmdWrapper * createIncAddrMssCmd( TARGETING::TargetHandle_t i_mba );
  * @param   o_data   returned data
  * @return  Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
+/* TODO RTC 136052
 int32_t getCfam( ExtensibleChip * i_chip,
                  const uint32_t i_addr,
                  uint32_t & o_data);
+*/
 
 /**
  * @brief   get sysref clk target for the given proc target.
@@ -498,7 +546,9 @@ TARGETING::TargetHandle_t getActiveRefClk(
  * @param  i_proc a proc target
  * @return TRUE if ATTR_PROC_X_ENABLE is set, FALSE otherwise.
  */
+/* TODO RTC 144703
 bool isXBusEnabled(TARGETING::TargetHandle_t i_proc);
+*/
 
 } // end namespace PlatServices
 

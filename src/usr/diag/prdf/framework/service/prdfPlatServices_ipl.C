@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,7 @@
 #include <prdfErrlUtil.H>
 #include <prdfTrace.H>
 
-#include <prdfCenDqBitmap.H>
+//#include <prdfCenDqBitmap.H> TODO RTC 136126
 
 #include <diag/mdia/mdia.H>
 #include <diag/mdia/mdiamevent.H>
@@ -120,6 +120,7 @@ int32_t mdiaSendEventMsg( TargetHandle_t i_mbaTarget,
 
 //------------------------------------------------------------------------------
 
+/* TODO RTC 136126
 int32_t mssRestoreDramRepairs( TargetHandle_t i_mbaTarget,
                                uint8_t & o_repairedRankMask,
                                uint8_t & o_badDimmMask )
@@ -143,9 +144,11 @@ int32_t mssRestoreDramRepairs( TargetHandle_t i_mbaTarget,
 
     return o_rc;
 }
+*/
 
 //------------------------------------------------------------------------------
 
+/* TODO RTC 136126
 int32_t mssIplUeIsolation( TargetHandle_t i_mba, const CenRank & i_rank,
                            CenDqBitmap & o_bitmap )
 {
@@ -174,6 +177,7 @@ int32_t mssIplUeIsolation( TargetHandle_t i_mba, const CenRank & i_rank,
 
     #undef PRDF_FUNC
 }
+*/
 
 //------------------------------------------------------------------------------
 
