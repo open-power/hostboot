@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,13 +58,9 @@ namespace SENSOR
     SensorBase::~SensorBase()
     {
         // The memory allocated for the set sensor reading command is deleted
-        // by the IPMI transport layer, this delete will get delete the memory
-        // allocated by the IPMI transport layer which contains the response
-        // to the set sensor reading command.
-        if( iv_msg )
-        {
-            delete[] iv_msg;
-        }
+        // by the IPMI transport layer.  Since we are sending messages
+        // asynchronously, the IPMI resource provider deletes the message
+        // and there is nothing to delete here.
     };
 
     //
@@ -208,24 +204,14 @@ namespace SENSOR
         if( iv_msg->iv_sensor_number != TARGETING::UTIL::INVALID_IPMI_SENSOR )
         {
 
-            IPMI::completion_code l_rc = IPMI::CC_UNKBAD;
-
-            // iv_msg is deleted by the destructor
-            l_err = sendSetSensorReading( iv_msg, l_rc);
+            // iv_msg is deleted by the IPMI resource provider.
+            l_err = sendSetSensorReading( iv_msg);
 
             if( l_err )
             {
                 TRACFCOMP(g_trac_ipmi,"error returned from "
                         "sendSetSensorReading() for sensor number 0x%x",
                         getSensorNumber());
-
-                // return error log to caller
-            }
-            else
-            {
-                // check the completion code to see if we need to generate a
-                // PEL.
-                l_err = processCompletionCode( l_rc );
             }
         }
         else
@@ -369,21 +355,17 @@ namespace SENSOR
     };
 
     //
-    //  Synchronously send a set sensor reading command to the BMC,
-    //  the response is returned with the io_data pointer
+    //  Asynchronously send a set sensor reading command to the BMC.
     //
     errlHndl_t SensorBase::sendSetSensorReading(
-                            setSensorReadingRequest *& io_data,
-                            IPMI::completion_code& o_completion_code )
+                            setSensorReadingRequest * i_data)
     {
 
         size_t l_len = sizeof( setSensorReadingRequest );
 
-        o_completion_code = IPMI::CC_UNKBAD;
-
         // i_data will hold the response when this returns
-        errlHndl_t l_err = sendrecv(IPMI::set_sensor_reading(),
-                            o_completion_code, l_len, (uint8_t *&)io_data);
+        errlHndl_t l_err = send(IPMI::set_sensor_reading(),
+                            l_len, (uint8_t *)i_data);
 
         return l_err;
     }

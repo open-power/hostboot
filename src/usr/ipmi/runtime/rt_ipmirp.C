@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -157,4 +157,35 @@ namespace IPMI
 
         return err;
     } // sendrecv
+
+    /*
+     * @brief       Asynchronus message send
+     *
+     * @param[in]   i_cmd,  the command we're sending
+     * @param[in]   i_len,  the length of the data
+     * @param[in]   i_data, the data we're sending
+     * @param[in]   i_type, the type of message we're sending
+     *
+     */
+    errlHndl_t send(const IPMI::command_t& i_cmd,
+                    size_t i_len, uint8_t* i_data,
+                    IPMI::message_type i_type)
+    {
+        IPMI::completion_code l_cc = IPMI::CC_UNKBAD;
+
+        // We are calling a synchronous send in an asynchronous function
+        // This is needed to enable asynchronous message sending before
+        // runtime. A message should be synchronous during runtime, but
+        // by ignoring the cc returned and clearing the data, we're making
+        // a synchronous function "asynchronous".
+        errlHndl_t l_err = sendrecv(i_cmd,l_cc,i_len,i_data);
+
+        if(i_data != NULL)
+        {
+            delete i_data;
+        }
+
+        return l_err;
+    }
+
 };
