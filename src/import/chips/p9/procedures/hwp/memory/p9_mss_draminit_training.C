@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -106,6 +106,8 @@ extern "C"
             FAPI_TRY( mss::reset_wc_config0(p) );
             FAPI_TRY( mss::reset_wc_config1(p) );
             FAPI_TRY( mss::reset_wc_config2(p) );
+
+            FAPI_TRY( mss::reset_wc_rtt_wr_swap_enable(p) );
 
             // The following registers must be configured to the correct operating environment:
 
