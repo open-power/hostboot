@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -576,6 +576,41 @@ fapi_try_exit:
 }
 
 
+///
+/// @brief Setup WC RTT Write Swap Enable Register
+/// @tparam T, the target type of the MCA/MBA
+/// @param[in] the target
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template< fapi2::TargetType T >
+inline fapi2::ReturnCode reset_wc_rtt_wr_swap_enable( const fapi2::Target<T>& i_target );
+
+///
+/// @brief Setup WC RTT Write Swap Enable Register
+/// @param[in] the MCA target
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<>
+inline fapi2::ReturnCode reset_wc_rtt_wr_swap_enable( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_TRY( mss::getScom(i_target, MCA_DDRPHY_WC_RTT_WR_SWAP_ENABLE_P0, l_data) );
+
+    // Per John Bialas 1/16: The enable RTT_SWAP bit is causing problems in sim.
+    l_data.clearBit<MCA_DDRPHY_WC_RTT_WL_SWAP_ENABLE_P0>();
+    l_data.setBit<MCA_DDRPHY_WC_RTT_WR_CTL_SWAP_ENABLE_P0>();
+
+    FAPI_DBG("wc_swap_enable 0x%llx", l_data);
+    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_WC_RTT_WR_SWAP_ENABLE_P0, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+
+
 
 
 ///
@@ -630,7 +665,7 @@ inline fapi2::ReturnCode reset_odt_config( const fapi2::Target<fapi2::TARGET_TYP
     uint8_t l_odt_wr[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
 
     FAPI_TRY( mss::eff_odt_rd(i_target, &(l_odt_rd[0][0])) );
-    FAPI_TRY( mss::eff_odt_wr(i_target, &(l_odt_rd[0][0])) );
+    FAPI_TRY( mss::eff_odt_wr(i_target, &(l_odt_wr[0][0])) );
 
     // Nimbus PHY is more or less hard-wired for 2 DIMM/port 4R/DIMM
     // So there's not much point in looping over DIMM or ranks.

@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -161,6 +161,9 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode toggle_zctl( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
 {
+// With model 31 (Drop X) this became unecessary. Not removing it as it's unclear what
+// the final algorithm(s) will be. BRS
+#if 0
     fapi2::buffer<uint64_t> l_data;
 
     auto l_ports = i_target.getChildren<TARGET_TYPE_MCA>();
@@ -187,6 +190,7 @@ fapi2::ReturnCode toggle_zctl( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
     FAPI_TRY( mss::scom_blastah(l_ports, MCA_DDRPHY_PC_IO_PVT_FET_CONTROL_P0, l_data) );
 
 fapi_try_exit:
+#endif
     return fapi2::current_err;
 }
 
@@ -829,7 +833,9 @@ fapi2::ReturnCode set_pc_config1(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
     l_data.insertFromRight<MCA_DDRPHY_PC_CONFIG1_P0_WRITE_LATENCY_OFFSET,
                            MCA_DDRPHY_PC_CONFIG1_P0_WRITE_LATENCY_OFFSET_LEN>(l_wlo);
 
-    l_data.setBit<MCA_DDRPHY_PC_CONFIG1_P0_DDR4_LATENCY_SW>();
+    // Model 31 changed the MCA_DDRPHY_PC_CONFIG1_P0_DDR4_LATENCY_SW bit to '0' for DDR4
+    // and '1' for 'extended 3ds.' We need to check an attribute here when we get to 3ds BRS
+    l_data.clearBit<MCA_DDRPHY_PC_CONFIG1_P0_DDR4_LATENCY_SW>();
 
     FAPI_DBG("phy pc_config1 0x%0llx", l_data);
     FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_CONFIG1_P0, l_data) );
