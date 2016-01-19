@@ -459,8 +459,8 @@ xipTranslateSection(P9XipSection* o_dest, const P9XipSection* i_src)
 {
 #ifndef _BIG_ENDIAN
 
-#if P9_XIP_HEADER_VERSION != 8
-#error This code assumes the P9-XIP header version 8 layout
+#if P9_XIP_HEADER_VERSION != 9
+#error This code assumes the P9-XIP header version 9 layout
 #endif
 
     o_dest->iv_offset = xipRevLe32(i_src->iv_offset);
@@ -487,8 +487,8 @@ xipTranslateToc(P9XipToc* o_dest, P9XipToc* i_src)
 {
 #ifndef _BIG_ENDIAN
 
-#if P9_XIP_HEADER_VERSION != 8
-#error This code assumes the P9-XIP header version 8 layout
+#if P9_XIP_HEADER_VERSION != 9
+#error This code assumes the P9-XIP header version 9 layout
 #endif
 
     o_dest->iv_id = xipRevLe32(i_src->iv_id);
@@ -1124,7 +1124,7 @@ XIP_STATIC int
 xipHashCollision(P9XipHashedToc* i_fixedToc, size_t i_entries)
 {
     int rc;
-    size_t i, j;
+    int i, j;
 
     rc = 0;
 
@@ -1551,7 +1551,7 @@ p9_xip_validate(void* i_image, const uint32_t i_size)
         if (sizeof(P9XipSection) != SIZE_OF_P9_XIP_SECTION)
         {
             rc = TRACE_ERRORX(P9_XIP_BUG,
-                              "C/Assembler size mismatch(%d/%d) "
+                              "C/Assembler size mismatch(%ld/%d) "
                               "for P9XipSection\n",
                               sizeof(P9XipSection), SIZE_OF_P9_XIP_SECTION);
             break;
@@ -1560,7 +1560,7 @@ p9_xip_validate(void* i_image, const uint32_t i_size)
         if (sizeof(P9XipToc) != SIZE_OF_P9_XIP_TOC)
         {
             rc = TRACE_ERRORX(P9_XIP_BUG,
-                              "C/Assembler size mismatch(%d/%d) "
+                              "C/Assembler size mismatch(%ld/%d) "
                               "for P9XipToc\n",
                               sizeof(P9XipToc), SIZE_OF_P9_XIP_TOC);
             break;
@@ -1569,7 +1569,7 @@ p9_xip_validate(void* i_image, const uint32_t i_size)
         if (sizeof(P9XipHashedToc) != SIZE_OF_P9_XIP_HASHED_TOC)
         {
             rc = TRACE_ERRORX(P9_XIP_BUG,
-                              "C/Assembler size mismatch(%d/%d) "
+                              "C/Assembler size mismatch(%ld/%d) "
                               "for P9XipHashedToc\n",
                               sizeof(P9XipHashedToc),
                               SIZE_OF_P9_XIP_HASHED_TOC);
@@ -1710,7 +1710,7 @@ p9_xip_validate2(void* i_image, const uint32_t i_size, const uint32_t i_maskIgno
         if (sizeof(P9XipSection) != SIZE_OF_P9_XIP_SECTION)
         {
             rc = TRACE_ERRORX(P9_XIP_BUG,
-                              "C/Assembler size mismatch(%d/%d) "
+                              "C/Assembler size mismatch(%ld/%d) "
                               "for P9XipSection\n",
                               sizeof(P9XipSection), SIZE_OF_P9_XIP_SECTION);
             break;
@@ -1719,7 +1719,7 @@ p9_xip_validate2(void* i_image, const uint32_t i_size, const uint32_t i_maskIgno
         if (sizeof(P9XipToc) != SIZE_OF_P9_XIP_TOC)
         {
             rc = TRACE_ERRORX(P9_XIP_BUG,
-                              "C/Assembler size mismatch(%d/%d) "
+                              "C/Assembler size mismatch(%ld/%d) "
                               "for P9XipToc\n",
                               sizeof(P9XipToc), SIZE_OF_P9_XIP_TOC);
             break;
@@ -1728,7 +1728,7 @@ p9_xip_validate2(void* i_image, const uint32_t i_size, const uint32_t i_maskIgno
         if (sizeof(P9XipHashedToc) != SIZE_OF_P9_XIP_HASHED_TOC)
         {
             rc = TRACE_ERRORX(P9_XIP_BUG,
-                              "C/Assembler size mismatch(%d/%d) "
+                              "C/Assembler size mismatch(%ld/%d) "
                               "for P9XipHashedToc\n",
                               sizeof(P9XipHashedToc),
                               SIZE_OF_P9_XIP_HASHED_TOC);
@@ -2970,8 +2970,8 @@ p9_xip_translate_header(P9XipHeader* o_dest, const P9XipHeader* i_src)
     P9XipSection* destSection;
     const P9XipSection* srcSection;
 
-#if P9_XIP_HEADER_VERSION != 8
-#error This code assumes the P9-XIP header version 8 layout
+#if P9_XIP_HEADER_VERSION != 9
+#error This code assumes the P9-XIP header version 9 layout
 #endif
 
     o_dest->iv_magic = xipRevLe64(i_src->iv_magic);

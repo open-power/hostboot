@@ -24,6 +24,8 @@
 /// attributes whose pointers are stored in the fixed and fixed_toc section
 /// Everything related to creating and manipulating P9-XIP binary images
 
+// *INDENT-OFF*
+
 #ifndef __P9_XIP_IMAGE_H
 #define __P9_XIP_IMAGE_H
 
@@ -34,7 +36,7 @@
 /// If any changes are made to this file or to p9_xip_header.H, please update
 /// the header version and follow-up on all of the error messages.
 
-#define P9_XIP_HEADER_VERSION 8
+#define P9_XIP_HEADER_VERSION 9
 
 /// \defgroup p9_xip_magic_numbers P9-XIP magic numbers
 ///
@@ -44,10 +46,17 @@
 ///
 /// @{
 
-#define P9_XIP_MAGIC     0x58495020               // "XIP "
-#define P9_BASE_MAGIC    ULL(0x5849502042415345)  // "XIP BASE"
-#define P9_SEEPROM_MAGIC ULL(0x584950205345504d)  // "XIP SEPM"
-#define P9_CENTAUR_MAGIC ULL(0x58495020434e5452)  // "XIP CNTR"
+#define P9_XIP_MAGIC             0x58495020           // "XIP "
+#define P9_XIP_MAGIC_BASE    ULL(0x5849502042415345)  // "XIP BASE"
+#define P9_XIP_MAGIC_SEEPROM ULL(0x584950205345504d)  // "XIP SEPM"
+#define P9_XIP_MAGIC_CENTAUR ULL(0x58495020434e5452)  // "XIP CNTR"
+#define P9_XIP_MAGIC_HW      ULL(0x5849502020204857)  // "XIP   HW"
+#define P9_XIP_MAGIC_SGPE    ULL(0x5849502053475045)  // "XIP SGPE"
+#define P9_XIP_MAGIC_RESTORE ULL(0x5849502052455354)  // "XIP REST"
+#define P9_XIP_MAGIC_CME     ULL(0x5849502020434d45)  // "XIP  CME"
+#define P9_XIP_MAGIC_PGPE    ULL(0x5849502050475045)  // "XIP PGPE"
+#define P9_XIP_MAGIC_IOPPE   ULL(0x5849502049505045)  // "XIP IPPE"
+#define P9_XIP_MAGIC_FPPE    ULL(0x5849502046505045)  // "XIP FPPE"
 
 /// @}
 
@@ -63,25 +72,47 @@
 ///
 /// @{
 
-// -*- DO NOT REORDER OR EDIT THIS SET OF CONSTANTS WITHOUT ALSO EDITING -*-
-// -*- THE ASSEMBLER LAYOUT IN p9_xip_header.H.                         -*-
+// fixed number of entries in section table including common and
+// image-specific sections
+#define P9_XIP_SECTIONS 15
 
-#define P9_XIP_SECTION_HEADER      0
-#define P9_XIP_SECTION_FIXED       1
-#define P9_XIP_SECTION_FIXED_TOC   2
-#define P9_XIP_SECTION_LOADER_TEXT 3
-#define P9_XIP_SECTION_LOADER_DATA 4
-#define P9_XIP_SECTION_TEXT        5
-#define P9_XIP_SECTION_DATA        6
-#define P9_XIP_SECTION_TOC         7
-#define P9_XIP_SECTION_STRINGS     8
-#define P9_XIP_SECTION_BASE        9
-#define P9_XIP_SECTION_BASELOADER 10
-#define P9_XIP_SECTION_OVERLAYS   11
-#define P9_XIP_SECTION_RINGS      12
-#define P9_XIP_SECTION_HBBL       13
+// this ensures that common sections go first followed by image-specific
+// sections, to be used to define image-specific sections
+#define P9_XIP_SECTIONS_PLUS(num) (P9_XIP_SECTIONS_COMMON + num)
 
-#define P9_XIP_SECTIONS 14
+#ifndef __ASSEMBLER__
+
+// these are common P9-XIP sections defined for a images
+typedef enum {
+    P9_XIP_SECTION_HEADER    = 0,
+    P9_XIP_SECTION_FIXED     = 1,
+    P9_XIP_SECTION_FIXED_TOC = 2,
+    P9_XIP_SECTION_TOC       = 3,
+    P9_XIP_SECTION_STRINGS   = 4,
+    P9_XIP_SECTIONS_COMMON   = 5   // total number of common sections
+} p9_xip_section_common_t;
+
+/// Applications can expand this macro to create an array of section names.
+#define P9_XIP_SECTION_NAMES_COMMON \
+    ".header",                      \
+    ".fixed",                       \
+    ".fixedtoc",                    \
+    ".toc",                         \
+    ".strings"
+
+#define P9_XIP_SECTION_NAMES(var, ...) \
+    const char* var[] =  {             \
+        P9_XIP_SECTION_NAMES_COMMON,   \
+        __VA_ARGS__                    \
+                         }
+
+/// Applications can use this macro to safely index the array of section
+/// names.
+#define P9_XIP_SECTION_NAME(var, n)                              \
+    ((((n) < 0) || ((n) > (int)(sizeof(var) / sizeof(char*)))) ? \
+     "" : var[n])
+
+#endif  /* __ASSEMBLER__ */
 
 /// @}
 
@@ -100,38 +131,6 @@
 #define P9_XIP_IGNORE_ALL       (uint32_t)0x80000000
 
 /// @}
-
-
-#ifndef __ASSEMBLER__
-
-/// Applications can expand this macro to create an array of section names.
-#define P9_XIP_SECTION_NAMES(var)              \
-    const char* var[] = {                       \
-                                                ".header",                              \
-                                                ".fixed",                               \
-                                                ".fixed_toc",                           \
-                                                ".loader_text",                         \
-                                                ".loader_data",                         \
-                                                ".text",                                \
-                                                ".data",                                \
-                                                ".toc",                                 \
-                                                ".strings",                             \
-                                                ".base",                                \
-                                                ".baseloader",                          \
-                                                ".overlays",                             \
-                                                ".rings",                               \
-                                                ".hbbl",                                \
-                        }
-
-/// Applications can use this macro to safely index the array of section
-/// names.
-#define P9_XIP_SECTION_NAME(var, n)                                   \
-    ((((n) < 0) || ((n) > (int)(sizeof(var) / sizeof(char*)))) ?        \
-     "Bug : Invalid P9-XIP section name" : var[n])
-
-
-#endif  /* __ASSEMBLER__ */
-
 
 /// Maximum section alignment for P9-XIP sections
 #define P9_XIP_MAX_SECTION_ALIGNMENT 128
@@ -182,42 +181,42 @@
 
 /// Applications can expand this macro to get access to string forms of the
 /// P9-XIP data types if desired.
-#define P9_XIP_TYPE_STRINGS(var)               \
-    const char* var[] = {                       \
-                                                "Illegal 0 Code",                       \
-                                                "P9_XIP_UINT8",                        \
-                                                "P9_XIP_UINT16",                       \
-                                                "P9_XIP_UINT32",                       \
-                                                "P9_XIP_UINT64",                       \
-                                                "P9_XIP_INT8",                         \
-                                                "P9_XIP_INT16",                        \
-                                                "P9_XIP_INT32",                        \
-                                                "P9_XIP_INT64",                        \
-                                                "P9_XIP_STRING",                       \
-                                                "P9_XIP_ADDRESS",                      \
-                        }
+#define P9_XIP_TYPE_STRINGS(var) \
+    const char* var[] = {        \
+        "Illegal 0 Code",        \
+        "P9_XIP_UINT8",          \
+        "P9_XIP_UINT16",         \
+        "P9_XIP_UINT32",         \
+        "P9_XIP_UINT64",         \
+        "P9_XIP_INT8",           \
+        "P9_XIP_INT16",          \
+        "P9_XIP_INT32",          \
+        "P9_XIP_INT64",          \
+        "P9_XIP_STRING",         \
+        "P9_XIP_ADDRESS",        \
+    }
 
 /// Applications can expand this macro to get access to abbreviated string
 /// forms of the P9-XIP data types if desired.
-#define P9_XIP_TYPE_ABBREVS(var)               \
-    const char* var[] = {                       \
-                                                "Illegal 0 Code",                       \
-                                                "u8 ",                                  \
-                                                "u16",                                  \
-                                                "u32",                                  \
-                                                "u64",                                  \
-                                                "i8 ",                                  \
-                                                "i16",                                  \
-                                                "i32",                                  \
-                                                "i64",                                  \
-                                                "str",                                  \
-                                                "adr",                                  \
-                        }
+#define P9_XIP_TYPE_ABBREVS(var) \
+    const char* var[] = {        \
+        "Illegal 0 Code",        \
+        "u8 ",                   \
+        "u16",                   \
+        "u32",                   \
+        "u64",                   \
+        "i8 ",                   \
+        "i16",                   \
+        "i32",                   \
+        "i64",                   \
+        "str",                   \
+        "adr",                   \
+    }
 
 /// Applications can use this macro to safely index either array of P9-XIP
 /// type strings.
-#define P9_XIP_TYPE_STRING(var, n)                     \
-    (((n) > (sizeof(var) / sizeof(char*))) ?            \
+#define P9_XIP_TYPE_STRING(var, n)                 \
+    (((n) > (sizeof(var) / sizeof(char*))) ?       \
      "Invalid P9-XIP type specification" : var[n])
 
 /// @}
@@ -620,7 +619,8 @@ int
 p9_xip_validate(void* i_image, const uint32_t i_size);
 
 int
-p9_xip_validate2(void* i_image, const uint32_t i_size, const uint32_t i_maskIgnores);
+p9_xip_validate2(void* i_image, const uint32_t i_size,
+                 const uint32_t i_maskIgnores);
 
 
 /// Normalize the P9-XIP image
@@ -1284,7 +1284,6 @@ p9_xip_host2image(const void* i_image,
 #ifdef PPC_HYP
 
     #ifdef PLIC_MODULE
-
         #define strcpy(dest, src) hvstrcpy(dest, src)
         #define strlen(s) hvstrlen(s)
         #define strcmp(s1, s2) hvstrcmp(s1, s2)
@@ -1385,31 +1384,31 @@ xipRevLe64(const uint64_t i_x);
 
 /// Applications can expand this macro to declare an array of string forms of
 /// the error codes if desired.
-#define P9_XIP_ERROR_STRINGS(var)              \
-    const char* var[] = {                       \
-                                                "Success",                              \
-                                                "P9_XIP_IMAGE_ERROR",                  \
-                                                "P9_XIP_TOC_ERROR",                    \
-                                                "P9_XIP_ITEM_NOT_FOUND",               \
-                                                "P9_XIP_DATA_NOT_PRESENT",             \
-                                                "P9_XIP_CANT_MODIFY",                  \
-                                                "P9_XIP_INVALID_ARGUMENT",             \
-                                                "P9_XIP_TYPE_ERROR",                   \
-                                                "P9_XIP_BUG",                          \
-                                                "P9_XIP_NOT_NORMALIZED",               \
-                                                "P9_XIP_SECTION_ERROR",                \
-                                                "P9_XIP_ALIGNMENT_ERROR",              \
-                                                "P9_XIP_NO_MEMORY",                    \
-                                                "P9_XIP_BOUNDS_ERROR",                 \
-                                                "P9_XIP_WOULD_OVERFLOW",               \
-                                                "P9_XIP_DISASSEMBLER_ERROR",           \
-                                                "P9_XIP_HASH_COLLISION",               \
-                        }
+#define P9_XIP_ERROR_STRINGS(var)    \
+    const char* var[] = {            \
+        "Success",                   \
+        "P9_XIP_IMAGE_ERROR",        \
+        "P9_XIP_TOC_ERROR",          \
+        "P9_XIP_ITEM_NOT_FOUND",     \
+        "P9_XIP_DATA_NOT_PRESENT",   \
+        "P9_XIP_CANT_MODIFY",        \
+        "P9_XIP_INVALID_ARGUMENT",   \
+        "P9_XIP_TYPE_ERROR",         \
+        "P9_XIP_BUG",                \
+        "P9_XIP_NOT_NORMALIZED",     \
+        "P9_XIP_SECTION_ERROR",      \
+        "P9_XIP_ALIGNMENT_ERROR",    \
+        "P9_XIP_NO_MEMORY",          \
+        "P9_XIP_BOUNDS_ERROR",       \
+        "P9_XIP_WOULD_OVERFLOW",     \
+        "P9_XIP_DISASSEMBLER_ERROR", \
+        "P9_XIP_HASH_COLLISION",     \
+    }
 
 /// Applications can use this macro to safely index the array of error
 /// strings.
-#define P9_XIP_ERROR_STRING(var, n)                                   \
-    ((((n) < 0) || ((n) > (int)(sizeof(var) / sizeof(char*)))) ?        \
+#define P9_XIP_ERROR_STRING(var, n)                              \
+    ((((n) < 0) || ((n) > (int)(sizeof(var) / sizeof(char*)))) ? \
      "Bug : Invalid P9-XIP error code" : var[n])
 
 /// @}
@@ -1425,18 +1424,18 @@ xipRevLe64(const uint64_t i_x);
 
 #define DIS_ERROR_STRINGS(var)              \
     const char* var[] = {                   \
-                                            "Success",                          \
-                                            "DIS_IMAGE_ERROR",                  \
-                                            "DIS_MEMORY_ERROR",                 \
-                                            "DIS_DISASM_ERROR",                 \
-                                            "DIS_RING_NAME_ADDR_MATCH_SUCCESS", \
-                                            "DIS_RING_NAME_ADDR_MATCH_FAILURE", \
-                                            "DIS_TOO_MANY_DISASM_WARNINGS",     \
-                                            "DIS_DISASM_TROUBLES",              \
-                        }
+        "Success",                          \
+        "DIS_IMAGE_ERROR",                  \
+        "DIS_MEMORY_ERROR",                 \
+        "DIS_DISASM_ERROR",                 \
+        "DIS_RING_NAME_ADDR_MATCH_SUCCESS", \
+        "DIS_RING_NAME_ADDR_MATCH_FAILURE", \
+        "DIS_TOO_MANY_DISASM_WARNINGS",     \
+        "DIS_DISASM_TROUBLES",              \
+    }
 
-#define DIS_ERROR_STRING(var, n)                                   \
-    ((((n) < 0) || ((n) > (int)(sizeof(var) / sizeof(char*)))) ?        \
+#define DIS_ERROR_STRING(var, n)                                 \
+    ((((n) < 0) || ((n) > (int)(sizeof(var) / sizeof(char*)))) ? \
      "Bug : Invalid DIS error code" : var[n])
 
 #if 0
@@ -1455,7 +1454,6 @@ xipRevLe64(const uint64_t i_x);
 ////////////////////////////////////////////////////////////////////////////
 
 #ifdef __ASSEMBLER__
-// *INDENT-OFF*
 
 /// Create an XIP TOC entry
 ///
@@ -1466,7 +1464,7 @@ xipRevLe64(const uint64_t i_x);
 /// \param[in] type One of the P9_XIP_* type constants; See \ref
 /// p9_xip_toc_types.
 ///
-/// \param[in] address The address of the idexed code or data; This wlll
+/// \param[in] address The address of the idexed code or data; This will
 /// typically be a symbol.
 ///
 /// \param[in] elements <Optional> For vector types, number of elements in the
@@ -1482,35 +1480,35 @@ xipRevLe64(const uint64_t i_x);
 /// use .xip_quad, .xip_quada, .xip_quadia, .xip_address, .xip_string or
 /// .xip_cvs_revision.
 
-        .macro  .xip_toc, index:req, type:req, address:req, elements=1
+    .macro .xip_toc, index:req, type:req, address:req, elements=1
 
-	.if	(((\type) < 1) || ((\type) > P9_XIP_MAX_TYPE_INDEX))
-	.error	".xip_toc : Illegal type index"
-	.endif
+        .if (((\type) < 1) || ((\type) > P9_XIP_MAX_TYPE_INDEX))
+            .error ".xip_toc : Illegal type index"
+        .endif
 
         // First push into the .strings section to lay down the
         // string form of the index name under a local label.
 
         .pushsection .strings
 7667862:
-        .asciz  "\index"
+        .asciz "\index"
         .popsection
 
         // Now the 12-byte TOC entry is created.  Push into the .toc section
-	// and lay down the first 4 bytes which are always a pointer to the
-	// string just declared.  The next 4 bytes are the address of the data
-	// (or the address itself in the case of address types). The final 4
-	// bytes are the type, section (always 0 prior to normalization),
-	// number of elements, and a padding byte.
+        // and lay down the first 4 bytes which are always a pointer to the
+        // string just declared.  The next 4 bytes are the address of the data
+        // (or the address itself in the case of address types). The final 4
+        // bytes are the type, section (always 0 prior to normalization),
+        // number of elements, and a padding byte.
 
-	.pushsection .toc
+        .pushsection .toc
 
-	.long	7667862b, (\address)
-	.byte	(\type), 0, (\elements), 0
+        .long 7667862b, (\address)
+        .byte (\type), 0, (\elements), 0
 
-	.popsection
+        .popsection
 
-	.endm
+    .endm
 
 
 /// Allocate and initialize 64-bit global scalar or vector data and create the
@@ -1528,11 +1526,11 @@ xipRevLe64(const uint64_t i_x);
 /// \param[in] section The section where the data will be allocated,
 /// default depends on the memory space
 
-	.macro	.xip_quad, symbol:req, init:req, elements=1, section
+    .macro .xip_quad, symbol:req, init:req, elements=1, section
 
         ..xip_quad_helper .quad, \symbol, (\init), (\elements), \section
 
-	.endm
+    .endm
 
 
 /// Allocate and initialize 64-bit global scalar or vector data containing a
@@ -1552,35 +1550,35 @@ xipRevLe64(const uint64_t i_x);
 /// \param[in] section The section where the data will be allocated,
 /// default depends on the memory space
 
-	.macro	.xip_quada, symbol:req, offset:req, elements=1, section
+    .macro .xip_quada, symbol:req, offset:req, elements=1, section
 
-	..xip_quad_helper .quada, \symbol, (\offset), (\elements), \section
+        ..xip_quad_helper .quada, \symbol, (\offset), (\elements), \section
 
-	.endm
+    .endm
 
 
 /// Helper for .xip_quad and .xip_quada
 
-        .macro	..xip_quad_helper, directive, symbol, init, elements, section
+    .macro ..xip_quad_helper, directive, symbol, init, elements, section
 
-	.if	(((\elements) < 1) || ((\elements) > 255))
-	.error	"The number of vector elements must be in the range 1..255"
-	.endif
+        .if (((\elements) < 1) || ((\elements) > 255))
+            .error "The number of vector elements must be in the range 1..255"
+        .endif
 
-	..xip_pushsection \section
-	.balign 8
+        ..xip_pushsection \section
+        .balign 8
 
-	.global	\symbol
+        .global \symbol
 \symbol\():
-	.rept	(\elements)
-        \directive (\init)
-	.endr
+        .rept (\elements)
+            \directive (\init)
+        .endr
 
-	.popsection
+        .popsection
 
-	.xip_toc \symbol, P9_XIP_UINT64, \symbol, (\elements)
+        .xip_toc \symbol, P9_XIP_UINT64, \symbol, (\elements)
 
-	.endm
+    .endm
 
 
 /// Allocate and initialize 64-bit global scalar or vector data containing
@@ -1599,45 +1597,44 @@ xipRevLe64(const uint64_t i_x);
 /// \param[in] section The section where the data will be allocated,
 /// default depends on the memory space
 
-         .macro	.xip_quadia, symbol:req, space:req, offset:req, \
-		 elements=1, section
+    .macro .xip_quadia, symbol:req, space:req, offset:req, elements=1, section
 
-	.if	(((\elements) < 1) || ((\elements) > 255))
-	.error	"The number of vector elements must be in the range 1..255"
-	.endif
+        .if (((\elements) < 1) || ((\elements) > 255))
+            .error "The number of vector elements must be in the range 1..255"
+        .endif
 
-	..xip_pushsection \section
-	.balign	8
+        ..xip_pushsection \section
+        .balign 8
 
-	.global	\symbol
+        .global \symbol
 \symbol\():
-	.rept	(\elements)
-	.quadia	(\space), (\offset)
-	.endr
+        .rept (\elements)
+            .quadia (\space), (\offset)
+        .endr
 
-	.popsection
+        .popsection
 
-	.xip_toc \symbol, P9_XIP_UINT64, \symbol, (\elements)
+        .xip_toc \symbol, P9_XIP_UINT64, \symbol, (\elements)
 
-	.endm
+    .endm
 
 /// Default push into .ipl_data unless in an OCI space, then .data
 
-	.macro	..xip_pushsection, section
+    .macro ..xip_pushsection, section
 
-	.ifnb	\section
-	.pushsection \section
-	.else
-	.if	(_PGAS_DEFAULT_SPACE == PORE_SPACE_OCI)
-	.pushsection .data
-	.else
-	.pushsection .ipl_data
-	.endif
-	.endif
+        .ifnb \section
+            .pushsection \section
+        .else
+            .if (_PGAS_DEFAULT_SPACE == PORE_SPACE_OCI)
+                .pushsection .data
+            .else
+                .pushsection .ipl_data
+            .endif
+        .endif
 
-	.balign	8
+        .balign 8
 
-	.endm
+    .endm
 
 /// Allocate and initialize a string in .strings
 ///
@@ -1649,16 +1646,16 @@ xipRevLe64(const uint64_t i_x);
 /// should be allocated to be as long as eventually needed (e.g., by a string
 /// of blanks.)
 
-	.macro	.xip_string, index:req, string:req
+    .macro .xip_string, index:req, string:req
 
-	.pushsection .strings
+        .pushsection .strings
 7874647:
-	.asciz	"\string"
-	.popsection
+        .asciz "\string"
+        .popsection
 
-	.xip_toc \index, P9_XIP_STRING, 7874647b
+        .xip_toc \index, P9_XIP_STRING, 7874647b
 
-	.endm
+    .endm
 
 
 /// Allocate and initialize a CVS Revison string in .strings
@@ -1675,16 +1672,16 @@ xipRevLe64(const uint64_t i_x);
 /// \endcode
 
 
-	.macro	.xip_cvs_revision, index:req, string:req
+    .macro .xip_cvs_revision, index:req, string:req
 
-	.pushsection .strings
+        .pushsection .strings
 7874647:
-	..cvs_revision_string "\string"
-	.popsection
+        ..cvs_revision_string "\string"
+        .popsection
 
-	.xip_toc \index, P9_XIP_STRING, 7874647b
+        .xip_toc \index, P9_XIP_STRING, 7874647b
 
-	.endm
+    .endm
 
 
 /// Shorthand to create a TOC entry for an address
@@ -1694,15 +1691,15 @@ xipRevLe64(const uint64_t i_x);
 /// \param[in] symbol <Optional> The symbol to index; by default the same as
 /// the index.
 
-	.macro	.xip_address, index:req, symbol
+    .macro .xip_address, index:req, symbol
 
-	.ifb	\symbol
-	.xip_toc \index, P9_XIP_ADDRESS, \index
-	.else
-	.xip_toc \index, P9_XIP_ADDRESS, \symbol
-	.endif
+        .ifb \symbol
+            .xip_toc \index, P9_XIP_ADDRESS, \index
+        .else
+            .xip_toc \index, P9_XIP_ADDRESS, \symbol
+        .endif
 
-	.endm
+    .endm
 
 
 /// Edit and allocate a CVS revision string
@@ -1713,36 +1710,232 @@ xipRevLe64(const uint64_t i_x);
 ///     "$Revision <n>.<m> $" -> "<n>.<m>"
 /// \endcode
 
-	.macro	..cvs_revision_string, rev:req
-	.irpc	c, \rev
-	.ifnc	"\c", "$"
-	.ifnc	"\c", "R"
-	.ifnc	"\c", "e"
-	.ifnc	"\c", "v"
-	.ifnc	"\c", "i"
-	.ifnc	"\c", "s"
-	.ifnc	"\c", "i"
-	.ifnc	"\c", "o"
-	.ifnc	"\c", "n"
-	.ifnc	"\c", ":"
-	.ifnc	"\c", " "
-	.ascii	"\c"
-	.endif
-	.endif
-	.endif
-	.endif
-	.endif
-	.endif
-	.endif
-	.endif
-	.endif
-	.endif
-	.endif
-	.endr
-	.byte	0
-	.endm
+    .macro ..cvs_revision_string, rev:req
+        .irpc c, \rev
+            .ifnc "\c", "$"
+                .ifnc "\c", "R"
+                    .ifnc "\c", "e"
+                        .ifnc "\c", "v"
+                            .ifnc "\c", "i"
+                                .ifnc "\c", "s"
+                                    .ifnc "\c", "i"
+                                        .ifnc "\c", "o"
+                                            .ifnc "\c", "n"
+                                                .ifnc "\c", ":"
+                                                    .ifnc "\c", " "
+                                                        .ascii "\c"
+                                                    .endif
+                                                .endif
+                                            .endif
+                                        .endif
+                                    .endif
+                                .endif
+                            .endif
+                        .endif
+                    .endif
+                .endif
+            .endif
+        .endr
+        .byte 0
+    .endm
+
+    .macro  .xip_section, s, alignment=1, empty=0
+        .ifnb \s
+_\s\()_section:
+            .if \empty
+                .long   0
+                .long   0
+            .else
+                .long   _\s\()_offset
+                .long   _\s\()_size
+            .endif
+        .else
+            .long   0
+            .long   0
+        .endif
+        .byte   (\alignment)
+        .byte   0, 0, 0
+    .endm
+
+#endif  // __ASSEMBLER__
+
+#ifndef __ASSEMBLER__
+
+/**************************************************************************/
+/* SBE Image                                                              */
+/**************************************************************************/
+
+typedef enum
+{
+    P9_XIP_SECTION_SBE_LOADERTEXT = P9_XIP_SECTIONS_PLUS(0),
+    P9_XIP_SECTION_SBE_LOADERDATA = P9_XIP_SECTIONS_PLUS(1),
+    P9_XIP_SECTION_SBE_TEXT       = P9_XIP_SECTIONS_PLUS(2),
+    P9_XIP_SECTION_SBE_DATA       = P9_XIP_SECTIONS_PLUS(3),
+    P9_XIP_SECTION_SBE_BASE       = P9_XIP_SECTIONS_PLUS(4),
+    P9_XIP_SECTION_SBE_BASELOADER = P9_XIP_SECTIONS_PLUS(5),
+    P9_XIP_SECTION_SBE_OVERRIDES  = P9_XIP_SECTIONS_PLUS(6),
+    P9_XIP_SECTION_SBE_RINGS      = P9_XIP_SECTIONS_PLUS(7),
+    P9_XIP_SECTION_SBE_OVERLAYS   = P9_XIP_SECTIONS_PLUS(8),
+    P9_XIP_SECTION_SBE_HBBL       = P9_XIP_SECTIONS_PLUS(9),
+    P9_XIP_SECTIONS_SBE           = P9_XIP_SECTIONS_PLUS(10) // # sections
+} p9_xip_section_sbe_t;
+
+#define P9_XIP_SECTION_NAMES_SBE(var)    \
+    P9_XIP_SECTION_NAMES(var,            \
+                         ".loader_text", \
+                         ".loader_data", \
+                         ".text",        \
+                         ".data",        \
+                         ".base",        \
+                         ".baseloader",  \
+                         ".overrides",   \
+                         ".rings",       \
+                         ".overlays",    \
+                         ".hbbl")
+
+/**************************************************************************/
+/* Hardware Image                                                         */
+/**************************************************************************/
+
+typedef enum
+{
+    P9_XIP_SECTION_HW_SGPE      = P9_XIP_SECTIONS_PLUS(0),
+    P9_XIP_SECTION_HW_RESTORE   = P9_XIP_SECTIONS_PLUS(1),
+    P9_XIP_SECTION_HW_CME       = P9_XIP_SECTIONS_PLUS(2),
+    P9_XIP_SECTION_HW_PGPE      = P9_XIP_SECTIONS_PLUS(3),
+    P9_XIP_SECTION_HW_IOPPE     = P9_XIP_SECTIONS_PLUS(4),
+    P9_XIP_SECTION_HW_FPPE      = P9_XIP_SECTIONS_PLUS(5),
+    P9_XIP_SECTION_HW_OVERRIDES = P9_XIP_SECTIONS_PLUS(6),
+    P9_XIP_SECTION_HW_RINGS     = P9_XIP_SECTIONS_PLUS(7),
+    P9_XIP_SECTIONS_HW          = P9_XIP_SECTIONS_PLUS(8) // # sections
+} p9_xip_section_hw_t;
+
+#define P9_XIP_SECTION_NAMES_HW(var)      \
+    P9_XIP_SECTION_NAMES(var,             \
+                         ".sgpe",         \
+                         ".core_restore", \
+                         ".cme",          \
+                         ".pgpe",         \
+                         ".ioppe",        \
+                         ".fppe",         \
+                         ".overrides",    \
+                         ".rings")
+
+/**************************************************************************/
+/* SGPE Image                                                             */
+/**************************************************************************/
+
+typedef enum
+{
+    P9_XIP_SECTION_SGPE_QPMR     = P9_XIP_SECTIONS_PLUS(0),
+    P9_XIP_SECTION_SGPE_LVL1_BL  = P9_XIP_SECTIONS_PLUS(1),
+    P9_XIP_SECTION_SGPE_LVL2_BL  = P9_XIP_SECTIONS_PLUS(2),
+    P9_XIP_SECTION_SGPE_INT_VECT = P9_XIP_SECTIONS_PLUS(3),
+    P9_XIP_SECTION_SGPE_IMG_HDR  = P9_XIP_SECTIONS_PLUS(4),
+    P9_XIP_SECTION_SGPE_HCODE    = P9_XIP_SECTIONS_PLUS(5),
+    P9_XIP_SECTIONS_SGPE         = P9_XIP_SECTIONS_PLUS(6) // # sections
+} p9_xip_section_sgpe_t;
+
+#define P9_XIP_SECTION_NAMES_SGPE(var)         \
+    P9_XIP_SECTION_NAMES(var,                  \
+                         ".qpmr",              \
+                         ".lvl1_bl",           \
+                         ".lvl2_bl",           \
+                         ".vect",              \
+                         ".sgpe_image_header", \
+                         ".hcode")
+
+/**************************************************************************/
+/* Core Restore Image                                                     */
+/**************************************************************************/
+
+typedef enum
+{
+    P9_XIP_SECTION_RESTORE_CPMR = P9_XIP_SECTIONS_PLUS(0),
+    P9_XIP_SECTION_RESTORE_SELF = P9_XIP_SECTIONS_PLUS(1),
+    P9_XIP_SECTION_RESTORE_SPR  = P9_XIP_SECTIONS_PLUS(2),
+    P9_XIP_SECTION_RESTORE_SCOM = P9_XIP_SECTIONS_PLUS(3),
+    P9_XIP_SECTIONS_RESTORE     = P9_XIP_SECTIONS_PLUS(4) // # sections
+} p9_xip_section_restore_t;
+
+#define P9_XIP_SECTION_NAMES_RESTORE(var)    \
+    P9_XIP_SECTION_NAMES(var,                \
+                         ".cpmr",            \
+                         ".self_restore",    \
+                         ".spr_restore",     \
+                         ".scom_restore")
+
+/**************************************************************************/
+/* CME Image                                                             */
+/**************************************************************************/
+
+typedef enum
+{
+    P9_XIP_SECTION_CME_INT_VECT  = P9_XIP_SECTIONS_PLUS(0),
+    P9_XIP_SECTION_CME_IMG_HDR   = P9_XIP_SECTIONS_PLUS(1),
+    P9_XIP_SECTION_CME_HCODE     = P9_XIP_SECTIONS_PLUS(2),
+    P9_XIP_SECTION_CME_CMN_RING  = P9_XIP_SECTIONS_PLUS(3),
+    P9_XIP_SECTION_CME_SPEC_RING = P9_XIP_SECTIONS_PLUS(4),
+    P9_XIP_SECTIONS_CME          = P9_XIP_SECTIONS_PLUS(5) // # sections
+} p9_xip_section_cme_t;
+
+#define P9_XIP_SECTION_NAMES_CME(var)          \
+    P9_XIP_SECTION_NAMES(var,                  \
+                         ".vect",              \
+                         ".cme_image_header",  \
+                         ".hcode",             \
+                         ".cmn_ring",          \
+                         ".spec_ring")
+
+/**************************************************************************/
+/* PGPE Image                                                             */
+/**************************************************************************/
+
+typedef enum
+{
+    P9_XIP_SECTION_PGPE_LVL1_BL  = P9_XIP_SECTIONS_PLUS(0),
+    P9_XIP_SECTION_PGPE_LVL2_BL  = P9_XIP_SECTIONS_PLUS(1),
+    P9_XIP_SECTION_PGPE_INT_VECT = P9_XIP_SECTIONS_PLUS(2),
+    P9_XIP_SECTION_PGPE_IMG_HDR  = P9_XIP_SECTIONS_PLUS(3),
+    P9_XIP_SECTION_PGPE_HCODE    = P9_XIP_SECTIONS_PLUS(4),
+    P9_XIP_SECTIONS_PGPE         = P9_XIP_SECTIONS_PLUS(5) // # sections
+} p9_xip_section_pgpe_t;
+
+#define P9_XIP_SECTION_NAMES_PGPE(var)         \
+    P9_XIP_SECTION_NAMES(var,                  \
+                         ".lvl1_bl",           \
+                         ".lvl2_bl",           \
+                         ".vect",              \
+                         ".pgpe_image_header", \
+                         ".hcode")
+
+/**************************************************************************/
+/* IOPPE Image                                                            */
+/**************************************************************************/
+
+typedef enum
+{
+    P9_XIP_SECTIONS_IOPPE = P9_XIP_SECTIONS_PLUS(0) // # sections
+} p9_xip_section_ioppe_t;
+
+#define P9_XIP_SECTION_NAMES_IOPPE(var) \
+    P9_XIP_SECTION_NAMES(var)
+
+/**************************************************************************/
+/* FPPE Image                                                             */
+/**************************************************************************/
+
+typedef enum
+{
+    P9_XIP_SECTIONS_FPPE = P9_XIP_SECTIONS_PLUS(0) // # sections
+} p9_xip_section_fppe_t;
+
+#define P9_XIP_SECTION_NAMES_FPPE(var) \
+    P9_XIP_SECTION_NAMES(var)
+
+
+#endif  /* !__ASSEMBLER__ */
+
+#endif  // __P9_XIP_IMAGE_H
 
 // *INDENT-ON*
-#endif // __ASSEMBLER__
-
-#endif  // __P9_XIP_TOC_H

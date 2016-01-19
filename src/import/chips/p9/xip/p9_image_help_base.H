@@ -45,13 +45,6 @@ const uint32_t  WF_WORST_CASE_SIZE_FAC  =   4; // WC WF size = 3x ring length.
 const uint32_t  LISTING_STRING_SIZE     = 256;
 const uint64_t  MAX_UINT64_T            = (uint64_t)0xFFFFFFFF << 32 | (uint64_t)0xFFFFFFFF;
 
-const uint8_t RING_SECTION_ID[] =
-{
-    P9_XIP_SECTION_RINGS,
-    P9_XIP_SECTION_OVERLAYS,
-};
-const uint8_t RING_SECTION_ID_SIZE = sizeof(RING_SECTION_ID) / sizeof(RING_SECTION_ID[0]);
-
 #ifdef __cplusplus
 extern "C" {
 #endif
