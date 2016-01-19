@@ -47,4 +47,9 @@ REG64_FLD( MCS_MCFIR_COMMAND_LIST_TIMEOUT_SPEC                     , 9   , SH_UN
 REG64_FLD( MCA_DDRPHY_DP16_SYSCLK_PR0_P0_0_01_ENABLE               , 48  , SH_UNT_MCA      , SH_ACS_SCOM_RW  ,
            0 );
 
+REG64_FLD( MCA_DDRPHY_WC_RTT_WL_SWAP_ENABLE_P0                     , 48  , SH_UNT_MCA      , SH_ACS_SCOM_RW  ,
+           0 );
+REG64_FLD( MCA_DDRPHY_WC_RTT_WR_CTL_SWAP_ENABLE_P0                 , 49  , SH_UNT_MCA      , SH_ACS_SCOM_RW  ,
+           0 );
+
 #endif
