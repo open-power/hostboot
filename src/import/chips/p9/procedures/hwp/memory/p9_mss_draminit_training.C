@@ -113,6 +113,8 @@ extern "C"
             FAPI_TRY( mss::reset_wc_config1(p) );
             FAPI_TRY( mss::reset_wc_config2(p) );
 
+            FAPI_TRY( mss::reset_wc_rtt_wr_swap_enable(p) );
+
             // The following registers must be configured to the correct operating environment:
 
             // Unclear, can probably be 0's for sim BRS
