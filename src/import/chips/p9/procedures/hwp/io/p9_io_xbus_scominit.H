@@ -28,7 +28,7 @@
 ///
 //----------------------------------------------------------------------------
 // *HWP HWP Owner       : Chris Steffen <cwsteffen@us.ibm.com>
-// *HWP HWP Backup Owner:
+// *HWP HWP Backup Owner: Gary Peterson <garyp@us.ibm.com>
 // *HWP FW Owner        : Sumit Kumar <sumit_kumar@in.ibm.com>
 // *HWP Team            : IO
 // *HWP Level           : 2
@@ -51,7 +51,8 @@
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_io_xbus_scominit_FP_t)
 (const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& i_target,
- const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& i_connected_target);
+ const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& i_connected_target,
+ const uint8_t i_group);
 
 extern "C" {
 
@@ -66,14 +67,16 @@ extern "C" {
      *
      * @param[in] i_target           Reference to XBUS chiplet target
      *            i_connected_target Reference to connected XBUS chiplet target
-     *                                    - p9.xbus.scom.initfile
-     *                                    - p9.xbus.custom.scom.initfile
+     *                                    - p9.xbus.g0.scom.initfile
+     *                                    - p9.xbus.g1.scom.initfile
+     *            i_group            Reference to XBUS group-0/1
      *
      * @return FAPI2_RC_SUCCESS on success, error otherwise
      */
     fapi2::ReturnCode p9_io_xbus_scominit(
         const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& i_target,
-        const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& i_connected_target);
+        const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& i_connected_target,
+        const uint8_t i_group);
 
 
 } // extern "C"
