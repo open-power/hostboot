@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 ///
 //----------------------------------------------------------------------------
 // *HWP HWP Owner       : Chris Steffen <cwsteffen@us.ibm.com>
-// *HWP HWP Backup Owner:
+// *HWP HWP Backup Owner: Gary Peterson <garyp@us.ibm.com>
 // *HWP FW Owner        : Sumit Kumar <sumit_kumar@in.ibm.com>
 // *HWP Team            : IO
 // *HWP Level           : 2
@@ -46,10 +46,13 @@
 #include <p9_io_gcr.H>
 #include <p9_io_regs.H>
 #include <p9_io_xbus_scominit.H>
+#include <p9_xbus_g0_scom.H>
+#include <p9_xbus_g1_scom.H>
 
 enum
 {
-    ENUM_ATTR_PROC_X_ENABLE = 1
+    ENUM_ATTR_XBUS_GROUP_0,
+    ENUM_ATTR_XBUS_GROUP_1
 };
 
 //------------------------------------------------------------------------------
@@ -63,39 +66,16 @@ enum
 // HWP entry point, comments in header
 fapi2::ReturnCode p9_io_xbus_scominit(
     const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& i_target,
-    const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& i_connected_target)
+    const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& i_connected_target,
+    const uint8_t i_group)
 {
-    std::vector < fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_PERV >> l_targets;
-    fapi2::Target<fapi2::TARGET_TYPE_PERV>               l_this_pu_target;
-    fapi2::Target<fapi2::TARGET_TYPE_PERV>               l_connected_pu_target;
-
-    fapi2::buffer<uint32_t> l_xbus_enable_attr;
-    fapi2::buffer<uint64_t> l_data64;
-
     // mark HWP entry
     FAPI_INF("p9_io_xbus_scominit: Entering ...");
+    fapi2::ReturnCode rc = fapi2::FAPI2_RC_SUCCESS;
 
-    // get parent chip targets
-    l_this_pu_target = i_target.getParent<fapi2::TARGET_TYPE_PERV>();
-    l_connected_pu_target =
-        i_connected_target.getParent<fapi2::TARGET_TYPE_PERV>();
+    // get system target
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> l_system_target;
 
-    // populate targets vector
-    l_targets.push_back(i_target);             // chiplet target
-    l_targets.push_back(l_this_pu_target);     // chip target
-    l_targets.push_back(i_connected_target);   // connected chiplet target
-    l_targets.push_back(l_connected_pu_target);// connected chip target
-
-    // query XBUS partial good attribute
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG,
-                           l_this_pu_target,
-                           l_xbus_enable_attr));
-
-    FAPI_ASSERT(l_xbus_enable_attr.getBit<8>() != ENUM_ATTR_PROC_X_ENABLE,
-                fapi2::P9_XBUS_SCOMINIT_PARTIAL_GOOD_ERR()
-                .set_TARGET(l_this_pu_target),
-                "ERROR: Partial good attribute error");
 
     // assert IO reset to power-up bus endpoint logic
     // read-modify-write, set single reset bit (HW auto-clears)
@@ -109,12 +89,24 @@ fapi2::ReturnCode p9_io_xbus_scominit(
                  "Scom Write failed: scom_mode_pb.");
     }
 
-    //TODO:Initfile work in progress. yet to be available
-    FAPI_INF("Invoke FAPI procedure core");
-#if 0
-    fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapi_target(&l_targets);
-    FAPI_EXEC_HWP(rc_fapi, p9_xbus_scom, fapi_target);
-#endif
+    switch(i_group)
+    {
+        case ENUM_ATTR_XBUS_GROUP_0:
+            FAPI_INF("Group 0:Invoke FAPI procedure core: input_target");
+            FAPI_EXEC_HWP(rc, p9_xbus_g0_scom, i_target, l_system_target);
+
+            FAPI_INF("Group 0:Invoke FAPI procedure core: connected_target");
+            FAPI_EXEC_HWP(rc, p9_xbus_g0_scom, i_connected_target, l_system_target);
+            break;
+
+        case ENUM_ATTR_XBUS_GROUP_1:
+            FAPI_INF("Group 1:Invoke FAPI procedure core: input_target");
+            FAPI_EXEC_HWP(rc, p9_xbus_g1_scom, i_target, l_system_target);
+
+            FAPI_INF("Group 1:Invoke FAPI procedure core: connected_target");
+            FAPI_EXEC_HWP(rc, p9_xbus_g1_scom, i_connected_target, l_system_target);
+            break;
+    }
 
     // mark HWP exit
     FAPI_INF("p9_io_xbus_scominit: ...Exiting");
