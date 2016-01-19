@@ -32,7 +32,6 @@
 ///     4) Similar way,  Reset sys.config and OPCG setting for Nest and MC chiplet in sync mode
 ///
 /// Done
-///
 //------------------------------------------------------------------------------
 // *HWP HW Owner        : Abhishek Agarwal <abagarw8@in.ibm.com>
 // *HWP HW Backup Owner : Srinivas V. Naga <srinivan@in.ibm.com>
@@ -68,7 +67,7 @@ enum P9_SBE_CHIPLET_RESET_Public_Constants
     HANG_PULSE_0X13 = 0x13,
     HANG_PULSE_0X03 = 0x03,
     OPCG_ALIGN_SETTING = 0x5000000000003020ull,
-    INOP_ALIGN_SETTING_0X9 = 0x9,
+    INOP_ALIGN_SETTING_0X5 = 0x5,
     OPCG_WAIT_CYCLE_0X020 = 0x020,
     SCAN_RATIO_0X3 = 0x3,
     SYNC_PULSE_DELAY_0X0 = 0X00,
