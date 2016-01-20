@@ -7,7 +7,7 @@
 <!--                                                                        -->
 <!-- EKB Project                                                            -->
 <!--                                                                        -->
-<!-- COPYRIGHT 2015                                                         -->
+<!-- COPYRIGHT 2015,2016                                                    -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -41,6 +41,33 @@
       This can be overridden to adjust the refclock frequency.
     </description>
     <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_MEM_IN_SYNCH_MODE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Run the memory clocks in synchronous mode with the nest clocks.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_MAX_ALLOWED_DIMM_FREQ</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Maximum frequency (in MHz) that this system can run the DIMMs at.
+      There are 4 possible values determined by the dimm configuration.
+        [0]=One rank, single drop
+        [1]=Two rank, single drop
+        [2]=One rank, dual drop
+        [3]=Two rank, dual drop
+      A value of zero would indicate an unsupported configuration.
+    </description>
+    <valueType>uint32</valueType>
+    <array>4</array>
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
