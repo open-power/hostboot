@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -17,29 +17,35 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/**
- * @file            :     p9_cpu_special_wakeup.C
- * @brief           :     HWP to perform special wakeup of core, EQ or EX.
- * @HWP HW Owner    :     Greg Still <stillgs@us.ibm.com>
- * @HWP FW Owner    :     Prem S Jha <premjha2@in.ibm.com>
- * @HWP Team        :     PM
- * @HWP Level       :     L1
- * @HWP Consumed by :     OCC, FSP, HOST
- */
+///
+///  @file          :     p9_cpu_special_wakeup.C
+///  @brief         :     HWP to perform special wakeup of core, EQ or EX.
+
+// *HWP HW Owner    :    Greg Still <stillgs@us.ibm.com>
+// *HWP FW Owner    :    Prem S Jha <premjha2@in.ibm.com>
+// *HWP Team        :    PM
+// *HWP Level       :    1
+// *HWP Consumed by :    OCC:FSP:HOST
 
 // ---------------------------------------------------------------------
 // Includes
 // ---------------------------------------------------------------------
 #include <p9_cpu_special_wakeup.H>
 
-fapi2::ReturnCode
-p9_cpu_special_wakeup(  CONST_FAPI2_WAKEUP_CHIPLET& i_chipletTarget,
-                        PROC_SPCWKUP_OPS i_operation,
-                        PROC_SPCWKUP_ENTITY i_entity )
+using namespace p9specialWakeup;
+enum
 {
-    FAPI_IMP("Entering... ");
+    NUM_SPCWKUP_ENTITIES = 4,
+    NUM_SPCWKUP_OPS = 3,
+};
 
-    FAPI_IMP("Exit..." );
+fapi2::ReturnCode
+p9_cpu_special_wakeup(  const FAPI2_WAKEUP_CHIPLET& i_chipletTarget,
+                        const PROC_SPCWKUP_OPS i_operation,
+                        const PROC_SPCWKUP_ENTITY i_entity )
+{
+    FAPI_DBG("Entering p9_cpu_special_wakeup");
+
+    FAPI_DBG("Exit p9_cpu_special_wakeup" );
     return fapi2::FAPI2_RC_SUCCESS;
 }
-
