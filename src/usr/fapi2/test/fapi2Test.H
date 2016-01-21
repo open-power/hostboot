@@ -48,6 +48,7 @@
 #include "fapi2HwpTest.C"
 #include "fapi2GetChildrenTest.C"
 #include "fapi2GetOtherEnd.C"
+#include "p9_basicTry.C"
 
 using namespace fapi2;
 
@@ -81,7 +82,15 @@ void test_fapi2Test(void)
     //FAPI_INF(">>fapi2GetOtherEnd starting...");
     //fapi2GetOtherEnd();
     //FAPI_INF(">>fapi2GetOtherEnd exiting...");
+
+    FAPI_INF(">>test fapi2basicTry starting...");
+    fapi2basicTry();
+    FAPI_INF(">>test fapi2basicTry exiting...");
+
+    FAPI_INF("<<<<<<test_fapi2Test exiting...");
 }
+
+
 };
 
 #endif
