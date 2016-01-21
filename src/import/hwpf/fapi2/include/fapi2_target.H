@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -257,7 +257,7 @@ class Target
         ///
         /// @brief Get this target's children, filtered
         /// @tparam T The type of the parent
-        /// @param[in], i_filter The desired chiplet filter
+        /// @param[in] i_filter The desired chiplet filter
         /// @param[in] i_state The desired TargetState of the children
         /// @return std::vector<Target<T> > a vector of present/functional
         /// children
