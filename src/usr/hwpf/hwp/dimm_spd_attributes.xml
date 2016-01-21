@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2016                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: dimm_spd_attributes.xml,v 1.56 2015/08/27 12:04:06 sasethur Exp $ -->
+<!-- $Id: dimm_spd_attributes.xml,v 1.57 2015/09/23 13:50:07 dcrowell Exp $ -->
 <!-- XML file specifying DIMM SPD attributes used by HW Procedures. -->
 <attributes>
 
@@ -624,7 +624,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <id>ATTR_VPD_DIMM_RCD_CNTL_WORD_0_15</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>This will be replaced by ATTR_SPD_DIMM_RCD_CNTL_WORD_0_15. Until migration is complete USE as is. (Will be deleted soon)
-    IE this is pulled from SPD bytes 69 - 76. (DDR3)
+	IE this is pulled from SPD bytes 69 - 76. (DDR3)
     The attribute would contain byte 69 nibble 1, followed by byte 69 nibble 0, followed by byte 70 nibble 1, and so forth.
    </description>
     <valueType>uint64</valueType>
@@ -1270,9 +1270,11 @@ Querying them from DDR3 DIMMs will result in an error
     <id>ATTR_VPD_VERSION</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
-        The VPD Version of this DIMM.  The version number can be an indication of when different DIMM keywords are valid and is loaded from the platform.  A version number of zero is unknown.
+        The VPD Version of this DIMM.  The version number can be an indication of when different DIMM keywords are valid and is loaded from the platform. The version represented here represents one of three distinct vintages of parts : unknown/error, early build CDIMMs with VZ less than 10, everything else.  In other words, this attribute does NOT equate to the VZ keyword.
     </description>
     <valueType>uint32</valueType>
+    <!-- Values are ASCII numbers to match previous VZ usage -->
+    <enum>UNKNOWN = 0x3030, OLD_CDIMM = 0x3031, CURRENT = 0x3230</enum>
     <platInit/>
 </attribute>
 
@@ -1287,8 +1289,8 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         Indicates number of registers used and number of rows of DRAM's on LRDIMM.
-         Byte 131, Bits 1-0 for # of registers used on LRDIMM. 
-         00 - Undefined , 01 - 1 Register , 10,11 -Reserved.
+	     Byte 131, Bits 1-0 for # of registers used on LRDIMM. 
+  	     00 - Undefined , 01 - 1 Register , 10,11 -Reserved.
         Byte 131, Bits 3-2 for # of rows of DRAM's on LRDIMM
          00,11- Undefined, 01- 1 Row, 10 - 2 Rows.
     </description>
@@ -1301,7 +1303,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         Manufacturer of the memory buffer on DIMM module. 
-         Located in DDR4 SPD bytes 133(LSB) and 134(MSB).
+	     Located in DDR4 SPD bytes 133(LSB) and 134(MSB).
     </description>
     <valueType>uint32</valueType>
     <platInit/>
@@ -1312,7 +1314,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         Address mapping from Register to DRAM and Drive strength.
-         Located in DDR4 SPD bytes 136 and 137.
+	     Located in DDR4 SPD bytes 136 and 137.
         Byte 136 bit 0, 0 - Standard, 1 - Mirrored.
         Byte 137 has drive strength for control and command/Address.
     </description>
@@ -1325,7 +1327,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         Drive strength for clock outputs of the registering clock driver.
-         Located in DDR4 SPD bytes 138.
+	     Located in DDR4 SPD bytes 138.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -1336,7 +1338,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         VREFDQ value for the package rank 0 DRAM's.
-         Located in DDR4 SPD bytes 140.
+	     Located in DDR4 SPD bytes 140.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -1347,7 +1349,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         VREFDQ value for the package rank 1 DRAM's.
-         Located in DDR4 SPD bytes 141.
+ 	     Located in DDR4 SPD bytes 141.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -1358,7 +1360,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         VREFDQ value for the package rank 2 DRAM's.
-         Located in DDR4 SPD bytes 142.
+	     Located in DDR4 SPD bytes 142.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -1369,7 +1371,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         VREFDQ value for the package rank 3 DRAM's.
-         Located in DDR4 SPD bytes 143.
+	     Located in DDR4 SPD bytes 143.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -1380,7 +1382,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         VREFDQ value for the data buffer component.
-         Located in DDR4 SPD bytes 144.
+	     Located in DDR4 SPD bytes 144.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -1391,7 +1393,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         Data Buffer MDQ Drive strength and RTT for data rate less than 1866.
-         Located in DDR4 SPD bytes 145.
+	     Located in DDR4 SPD bytes 145.
         Bits 2-0 for MDQ Read Termination strength.
         Bits 6-4 for MDQ Drive strength.
     </description>
@@ -1404,7 +1406,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         Data Buffer MDQ Drive strength and RTT for data rate between 1866 and 2400.
-         Located in DDR4 SPD bytes 146.
+	     Located in DDR4 SPD bytes 146.
         Bits 2-0 for MDQ Read Termination strength.
         Bits 6-4 for MDQ Drive strength.
     </description>
@@ -1417,7 +1419,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         Data Buffer MDQ Drive strength and RTT for data rate between 2400 and 3200.
-         Located in DDR4 SPD bytes 147.
+	     Located in DDR4 SPD bytes 147.
         Bits 2-0 for MDQ Read Termination strength.
         Bits 6-4 for MDQ Drive strength.
     </description>
@@ -1430,7 +1432,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         DRAM Drive strength for all the data rates between 1866 and 3200.
-         Located in DDR4 SPD bytes 148.
+	     Located in DDR4 SPD bytes 148.
         Bits 1-0 for Datarate less than 1866.
         Bits 3-2 for Data rate between 1866 and 2400.
         Bits 5-4 for data rate between 2400 and 3200.
@@ -1444,7 +1446,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         DRAM ODT (RTT_WR) for data rates less than 1866
-         Located in DDR4 SPD bytes 149 bits 2-0.
+	     Located in DDR4 SPD bytes 149 bits 2-0.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -1455,7 +1457,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         DRAM ODT (RTT_NOM)for data rates less than 1866
-         Located in DDR4 SPD bytes 149 bits 5-3.
+	     Located in DDR4 SPD bytes 149 bits 5-3.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -1466,7 +1468,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         DRAM ODT (RTT_WR) for data rates between 1866 and 2400.
-         Located in DDR4 SPD bytes 150 bits 2-0.
+	     Located in DDR4 SPD bytes 150 bits 2-0.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -1477,7 +1479,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         DRAM ODT (RTT_NOM)for data rates between 1866 and 2400.
-         Located in DDR4 SPD bytes 150 bits 5-3.
+	     Located in DDR4 SPD bytes 150 bits 5-3.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -1488,7 +1490,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         DRAM ODT (RTT_WR) for data rates between 2400 and 3200.
-         Located in DDR4 SPD bytes 151 bits 2-0.
+	     Located in DDR4 SPD bytes 151 bits 2-0.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -1499,7 +1501,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         DRAM ODT (RTT_NOM)for data rates between 2400 and 3200.
-         Located in DDR4 SPD bytes 151 bits 5-3.
+	     Located in DDR4 SPD bytes 151 bits 5-3.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -1510,9 +1512,9 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         DRAM ODT (RTT_PARK)for data rates less than 1866.
-         Located in DDR4 SPD bytes 152.
-         Bit 2-0 for package ranks 0 and 1.
-         Bit 5-3 for package ranks 2 and 3.
+	     Located in DDR4 SPD bytes 152.
+	     Bit 2-0 for package ranks 0 and 1.
+	     Bit 5-3 for package ranks 2 and 3.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -1523,9 +1525,9 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         DRAM ODT (RTT_PARK)for data rates between 1866 and 2400.
-         Located in DDR4 SPD bytes 153.
-         Bit 2-0 for package ranks 0 and 1.
-         Bit 5-3 for package ranks 2 and 3.
+	     Located in DDR4 SPD bytes 153.
+	     Bit 2-0 for package ranks 0 and 1.
+  	     Bit 5-3 for package ranks 2 and 3.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -1536,9 +1538,9 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         DRAM ODT (RTT_PARK)for data rates between 2400 and 3200.
-         Located in DDR4 SPD bytes 154.
-         Bit 2-0 for package ranks 0 and 1.
-         Bit 5-3 for package ranks 2 and 3.
+	     Located in DDR4 SPD bytes 154.
+	     Bit 2-0 for package ranks 0 and 1.
+	     Bit 5-3 for package ranks 2 and 3.
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -1818,7 +1820,7 @@ This Attribute is to be interpreted as an Integer</description>
     <id>ATTR_VPD_DRAM_RTT_PARK</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
     <description>DRAM Rtt_PARK. Used in various locations and comes from the MT keyword of the VPD or is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
-    RTT_Park value. This is for DDR4 MRS5.Each memory channel will have a value.
+	RTT_Park value. This is for DDR4 MRS5.Each memory channel will have a value.
 Creator: VPD(MT), mss_eff_cnfg_termination
 consumer: various.C files (no initfiles)
 firmware notes: none
