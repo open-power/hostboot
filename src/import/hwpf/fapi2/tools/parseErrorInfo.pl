@@ -1184,12 +1184,26 @@ foreach my $argnum (0 .. $#ARGV)
         }
 
         # add a method to adjust the severity if desired
-         print ECFILE "    inline void setSev(const fapi2::errlSeverity_t i_sev)\n" .
-                      "                      { iv_sev = i_sev; };\n\n";
+        print ECFILE "    inline void setSev(const fapi2::errlSeverity_t i_sev)\n";
+        if ($arg_empty_ffdc eq undef)
+        {
+            print ECFILE "                      { iv_sev = i_sev; };\n\n";
+        }
+        else
+        {
+            print ECFILE "                      { static_cast<void>(i_sev); };\n\n";
+        }
 
         # add a method to read the severity if desired
-         print ECFILE "    inline fapi2::errlSeverity_t getSev() const\n" .
-                      "                      { return iv_sev; };\n\n";
+        print ECFILE "    inline fapi2::errlSeverity_t getSev() const\n";
+        if ($arg_empty_ffdc eq undef)
+        {
+            print ECFILE "                      { return iv_sev; };\n\n";
+        }
+        else
+        {
+            print ECFILE "                      { return fapi2::FAPI2_ERRL_SEV_UNDEFINED; };\n\n";
+        }
 
 
         #
