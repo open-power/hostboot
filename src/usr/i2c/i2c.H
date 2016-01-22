@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,18 @@ enum i2c_reset_level
 {
     BASIC_RESET,
     FORCE_UNLOCK_RESET,
+};
+
+/**
+ * @brief Miscellaneous enums for I2C
+ */
+enum
+{
+    PAGE_ZERO = 0x0,
+    PAGE_ONE = 0x1,
+    PAGE_UNKNOWN = 0x2,
+    PAGE_ZERO_ADDR = 0x6C,
+    PAGE_ONE_ADDR  = 0x6E,
 };
 
 
@@ -520,8 +532,61 @@ errlHndl_t fsi_i2cPerformOp( DeviceFW::OperationType i_opType,
                          int64_t i_accessType,
                          va_list i_args );
 
+
 /**
- * @brief This function sets the Host vs FSI switches if the user has not
+ * @brief Analyzes an error handle object and
+ *        performs an i2c reset if necessary
+ *
+ * @param[in] i_target - The target
+ * @param[in] i_err - There error to analyze
+ * @param[in] i_args - miscellaneous arguments
+ *
+ * @return void
+ */
+void i2cHandleError( TARGETING::Target * i_target,
+                     errlHndl_t & i_err,
+                     misc_args_t & i_args );
+
+
+
+/**
+ * @brief Performs the necessary operations and comparisons
+ *        needed to decide what EEPROM page we are on and locks the appropriate
+ *        page control mutexes
+ * @param[in] i_opType - Operation Type - See DeviceFW::OperationType in
+ *                        driverif.H
+ * @param[in] i_target - The target to lock the page for.
+ * @param[in] i_accessType - Access Type - See DeviceFW::AccessType in
+ *                            userif.H
+ * @param[in] i_desiredPage - The EEPROM page that will be switched to.
+ * @param[in] i_lockMutex - True if we want to actually lock the mutex,
+ *            False if we do not want to lock it.
+ * @param[in] i_args - miscellaneous arguments
+ *
+ * @return errlHndl_t - NULL if successful, otherwise a pointer to an error log
+ *
+ */
+errlHndl_t i2cPageSwitchOp( DeviceFW::OperationType i_opType,
+                             TARGETING::Target * i_target,
+                             int64_t i_accessType,
+                             uint8_t i_desiredPage,
+                             bool i_lockMutex,
+                             misc_args_t & i_args );
+/**
+ * @brief Unlocks the page mutex for targets given page attribute
+ *
+ * @param[in] i_target - target to unlock the page for.
+ * @param[in] i_args - miscellaneous arguments
+ *
+ * @return - True on success, False on failure.
+ */
+bool i2cPageUnlockOp( TARGETING::Target * i_target,
+                            misc_args_t & i_args );
+
+
+
+/**
+ * @brief Sets the Host vs FSI switches if the user has not
  *  already.
  *
  * param[in] i_target - The target device
@@ -536,7 +601,7 @@ void i2cSetSwitches( TARGETING::Target * i_target,
 /**
 *
 * @brief Performs the actual I2C operation.
-*        NOTE:  This function handles the MUTEX used to avoid deadlocks.
+*        NOTE: Handles the MUTEX used to avoid deadlocks.
 *
 * @param[in] i_opType - Operation Type - See DeviceFW::OperationType in
 *       driverif.H
@@ -572,8 +637,7 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
 
 
 /**
- * @brief This function will do the real work of reading from the I2C
- *      device.
+ * @brief Does the real work of reading from the I2C device.
  *
  * @param[in] i_target - The I2C master to source the read to the slave.
  *
@@ -594,7 +658,7 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
                      misc_args_t & i_args);
 
 /**
- * @brief This function will do the real work of writinging to the I2C
+ * @brief Does the real work of writing to the I2C
  *      device.
  *
  * @param[in] i_target - The I2C master to source the write to the slave.
@@ -618,7 +682,7 @@ errlHndl_t i2cWrite ( TARGETING::Target * i_target,
                       misc_args_t & i_args);
 
 /**
- * @brief This function will do the I2C setup of the Address/Command registers
+ * @brief does the I2C setup of the Address/Command registers
  *      before issuing the 'go' on the I2C bus.
  *
  * @param[in] i_target - The I2C master.
@@ -637,14 +701,15 @@ errlHndl_t i2cSetup ( TARGETING::Target * i_target,
 
 
 /**
- * @brief This function gets the appropriate engine mutex for a given target.
+ * @brief Gets the appropriate engine
+ * mutex for a given target.
  *
  * @param[in] i_target - The target to get the mutex for.
  *
  * @param[in] i_args - Structure containing arguments needed to determine
  *                     the correct engine mutex.
  *
- * @param[in/out] i_engineLock - The mutex.
+ * @param[in/out] i_engineLock - The engine mutex.
  *
  * @return bool - True if valid mutex is found, False otherwise.
  */
@@ -652,8 +717,26 @@ bool i2cGetEngineMutex( TARGETING::Target * i_target,
                         misc_args_t & i_args,
                         mutex_t *& i_engineLock );
 
+
 /**
- * @brief This function will wait for the command to be complete or
+ * @brief Gets the appropriate page mutex for the given i2c engine
+ *
+ * @param[in] i_target - The target to get the mutex for.
+ * @param[in] i_args - Structure containing arguments needed to determine
+ *                     the correct page mutex.
+ * @param[in/out] i_pageLock - The page mutex.
+ *
+ * @return bool - True if valid mutex is found, False otherwise.
+ */
+bool i2cGetPageMutex( TARGETING::Target * i_target,
+                      misc_args_t & i_args,
+                      mutex_t *& i_pageLock );
+
+
+
+
+/**
+ * @brief Wait for the command to be complete or
  *      timeout waiting before returning.
  *
  * @param[in] i_target - The I2C master target.

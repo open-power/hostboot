@@ -1547,8 +1547,15 @@
         </field>
         <field>
             <name>byteAddrOffset</name>
-            <description>The number of bytes a device requires to set its
-                         internal address/offset.</description>
+            <description>
+                The number of bytes a device requires to set its
+                internal address/offset. DDR4 DIMMs require a special EEPROM
+                page switching mechanic denoted here by a value of 1
+                0 = Zero Byte Addressing
+                1 = One Byte Addressing with page select
+                2 = Two Byte Addressing
+                3 = OneByte Addressing with no page select
+            </description>
             <type>uint8_t</type>
             <default>0x02</default>
         </field>

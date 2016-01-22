@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,6 +59,8 @@ enum i2cModuleId
     I2C_SEND_SLAVE_STOP                 = 0x09,
     I2C_PROCESS_ACTIVE_MASTERS          = 0x0A,
     I2C_FORCE_RESET_AND_UNLOCK          = 0x0B,
+    I2C_PAGE_LOCK_OP                    = 0x0C,
+    I2C_PAGE_UNLOCK_OP                  = 0x0D,
 };
 
 
@@ -86,6 +88,9 @@ enum i2cReasonCode
     I2C_RUNTIME_INTERFACE_ERR           = I2C_COMP_ID | 0x0D,   // Read/write unavailable at runtime
     I2C_RUNTIME_ERR                     = I2C_COMP_ID | 0x0E,   // Failed run-time operation
     I2C_RUNTIME_INVALID_OFFSET_LENGTH   = I2C_COMP_ID | 0x0F,   // Offset length of invalid size
+    I2C_INVALID_EEPROM_PAGE_MUTEX       = I2C_COMP_ID | 0x10,   // Error getting page mutex for i2c engine.
+    I2C_INVALID_EEPROM_PAGE_REQUEST     = I2C_COMP_ID | 0x11,   // Invalid EEPROM page request
+    I2C_FAILURE_UNLOCKING_EEPROM_PAGE   = I2C_COMP_ID | 0x12    // Error while attempting to unlock the eeprom page
 };
 
 
