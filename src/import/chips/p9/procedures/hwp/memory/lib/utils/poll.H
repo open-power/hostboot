@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,10 +39,40 @@ namespace mss
 {
 
 ///
+/// @class poll_probe
+/// @brief Structure to represent a vector of addresses to probe during the polling loop
+/// @tparam fapi2::TargetType, representing the target of the probe (does a getscom)
+///
+template< fapi2::TargetType T >
+struct poll_probe
+{
+    ///
+    /// @brief poll-probe constructor
+    /// @param[in] i_target, the target for the scom operation
+    /// @param[in] i_tag, some useful text to output with the register data
+    /// @param[in] i_register, the register for the scom operation
+    ///
+    poll_probe( const fapi2::Target<T>& i_target, const char* i_tag, const uint64_t i_register ):
+        iv_target(i_target),
+        iv_tag(i_tag),
+        iv_register(i_register)
+    {
+    }
+
+    fapi2::Target<T> iv_target;
+
+    // String to be output with the value of the register,
+    // Often is the name of the register
+    const char* iv_tag;
+    uint64_t iv_register;
+};
+
+///
 /// @brief Poll paramter data structure.
 /// Represents the parameters used to poll a register.
 /// _delays are in ns, _sim_delays are in sim_cycles
 /// See conversions.H for conversions.
+///
 struct poll_parameters
 {
     // We need to decide how long to wait before pounding the compeletion SCOM.
@@ -81,6 +111,7 @@ struct poll_parameters
 /// @brief Poll a scom, return whether the poll croteria were met or not
 /// @tparam T, the fapi2::TargetType
 /// @tparam L, a lambda representing the completion criteria - returns true
+/// @tparam P, the fapi2::TargetType of the target in the probe vector
 /// iff the poll criteria have been met (and the polling can stop)
 /// @param[in] i_target, target for the getScom
 /// @param[in] i_addr, the address for the scom
@@ -90,15 +121,17 @@ struct poll_parameters
 ///    {
 ///        return true;
 ///    }
+/// @param[in] i_probes, a vector of poll_probes to be used in the polling loop (optional)
 /// @return bool, true iff poll criteria was met before the number of iterations
 /// ran out.
 /// @warning If you want to handle a failure as an error, you need to wrap
 /// the call to poll() in a FAPI_ASSERT. FAPI_TRY is *not* the right mechanism
 /// as poll() does not return a fapi2::ReturnCode
 ///
-template< fapi2::TargetType T, typename L >
+template< fapi2::TargetType T, typename L, fapi2::TargetType P = fapi2::TARGET_TYPE_MCA >
 inline bool poll(const fapi2::Target<T>& i_target, const uint64_t i_addr,
-                 const poll_parameters i_params, L i_fn)
+                 const poll_parameters i_params, L i_fn,
+                 const std::vector< poll_probe<P> >& i_probes = std::vector< poll_probe<P> >() )
 {
     fapi2::buffer<uint64_t> l_reg;
 
@@ -111,6 +144,14 @@ inline bool poll(const fapi2::Target<T>& i_target, const uint64_t i_addr,
 
     for ( size_t l_poll_limit = i_params.iv_poll_count; l_poll_limit > 0; --l_poll_limit )
     {
+        // Output anything in the probes
+        for (auto p : i_probes)
+        {
+            fapi2::buffer<uint64_t> l_data;
+            FAPI_TRY( mss::getScom(p.iv_target, p.iv_register, l_data) );
+            FAPI_INF("%s: %s 0x%016llx 0x%016llx", mss::c_str(p.iv_target), p.iv_tag, p.iv_register, l_data);
+        }
+
         FAPI_TRY( mss::getScom(i_target, i_addr, l_reg) );
 
         if (i_fn(l_poll_limit, l_reg) == true)

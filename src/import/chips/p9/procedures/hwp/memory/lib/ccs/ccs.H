@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -277,8 +277,9 @@ class instruction_t
 /// @brief A class representing a series of CCS instructions, and the
 /// CCS engine parameters associated with running the instructions
 /// @tparam fapi2::TargetType T representing the fapi2 target which
+/// @tparam fapi2::TargetType P representing the port
 /// contains the CCS engine (e.g., fapi2::TARGET_TYPE_MCBIST)
-template< fapi2::TargetType T >
+template< fapi2::TargetType T, fapi2::TargetType P = fapi2::TARGET_TYPE_MCA >
 class program
 {
     public:
@@ -290,6 +291,9 @@ class program
         // Vector of instructions
         std::vector< instruction_t<T> > iv_instructions;
         poll_parameters                 iv_poll;
+
+        // Vector of polling probes
+        std::vector< poll_probe<P> >    iv_probes;
 };
 
 ///
@@ -583,6 +587,7 @@ inline fapi2::ReturnCode write_mode( const fapi2::Target<T>& i_target, const fap
 ///
 /// @brief Execute a set of CCS instructions - multiple ports
 /// @tparam T, the fapi2::TargetType - derived
+/// @tparam P, the fapi2::TargetType of the ports - derived
 /// @tparam TT, the ccsTraits associated with T - derived
 /// @param[in] the target to effect
 /// @param[in] the vector of instructions
@@ -592,11 +597,12 @@ inline fapi2::ReturnCode write_mode( const fapi2::Target<T>& i_target, const fap
 template< fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<T> >
 fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
                            ccs::program<T>& i_program,
-                           const std::vector< fapi2::Target<P> >& i_ports );
+                           const std::vector< fapi2::Target<P> >& i_ports);
 
 ///
 /// @brief Execute a set of CCS instructions - single port
 /// @tparam T, the fapi2::TargetType - derived
+/// @tparam P, the fapi2::TargetType of the ports - derived
 /// @tparam TT, the ccsTraits associated with T - derived
 /// @param[in] the target to effect
 /// @param[in] the vector of instructions
@@ -606,7 +612,7 @@ fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
 template< fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<T> >
 fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
                            ccs::program<T>& i_program,
-                           const fapi2::Target<P>& i_port )
+                           const fapi2::Target<P>& i_port)
 {
     // Mmm. Might want to find a better way to do this - seems expensive. BRS
     std::vector< fapi2::Target<P> > l_ports{ i_port };

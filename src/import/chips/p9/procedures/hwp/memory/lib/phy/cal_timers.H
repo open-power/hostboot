@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,7 +54,8 @@ uint64_t wr_lvl_cycles(const fapi2::Target<T>& i_target )
 
     const uint64_t l_wr_lvl_cycles = (80 + TWLO_TWLOE) * WR_LVL_NUM_VALID_SAMPLES * (384 / (WR_LVL_BIG_STEP + 1) +
                                      (2 * (WR_LVL_BIG_STEP + 1)) / (WR_LVL_SMALL_STEP + 1)) + 20;
-    FAPI_DBG("wr_lvl_cycles: %d(%dns) (%d, %d, %d, %d)", l_wr_lvl_cycles, mss::cycles_to_ns(i_target, l_wr_lvl_cycles),
+    FAPI_DBG("wr_lvl_cycles: %llu(%lluns) (%llu, %llu, %llu, %llu)", l_wr_lvl_cycles, mss::cycles_to_ns(i_target,
+             l_wr_lvl_cycles),
              TWLO_TWLOE, WR_LVL_NUM_VALID_SAMPLES, WR_LVL_BIG_STEP, WR_LVL_SMALL_STEP);
 
     return l_wr_lvl_cycles;
@@ -72,7 +73,7 @@ uint64_t dqs_align_cycles(const fapi2::Target<T>& i_target )
     // This step runs for approximately 6 x 600 x 4 DRAM clocks per rank pair.
     const uint64_t l_dqs_align_cycles = 6 * 600 * 4;
 
-    FAPI_DBG("dqs_align_cycles: %d(%dns)", l_dqs_align_cycles, mss::cycles_to_ns(i_target, l_dqs_align_cycles));
+    FAPI_DBG("dqs_align_cycles: %llu(%lluns)", l_dqs_align_cycles, mss::cycles_to_ns(i_target, l_dqs_align_cycles));
     return l_dqs_align_cycles;
 }
 
@@ -88,7 +89,7 @@ uint64_t rdclk_align_cycles(const fapi2::Target<T>& i_target )
     // This step runs for approximately 24 x ((1024/COARSE_CAL_STEP_SIZE + 4 x COARSE_CAL_STEP_SIZE) x 4 + 32) DRAM
     // clocks per rank pair
     const uint64_t l_rdclk_align_cycles = 24 * ((1024 / COARSE_CAL_STEP_SIZE + 4 * COARSE_CAL_STEP_SIZE) * 4 + 32);
-    FAPI_DBG("rdclk_align_cycles: %d(%dns) (%d)", l_rdclk_align_cycles,
+    FAPI_DBG("rdclk_align_cycles: %llu(%lluns) (%llu)", l_rdclk_align_cycles,
              mss::cycles_to_ns(i_target, l_rdclk_align_cycles), COARSE_CAL_STEP_SIZE);
     return l_rdclk_align_cycles;
 }
@@ -106,7 +107,7 @@ uint64_t read_ctr_cycles(const fapi2::Target<T>& i_target )
     // 4 x CONSEQ_PASS)) x 24 DRAM clocks per rank pair.
 
     const uint64_t l_read_ctr_cycles = 6 * (512 / COARSE_CAL_STEP_SIZE + 4 * (COARSE_CAL_STEP_SIZE + 4 * CONSEQ_PASS)) * 24;
-    FAPI_DBG("read_ctr_cycles %d(%dns) (%d, %d)", l_read_ctr_cycles, mss::cycles_to_ns(i_target, l_read_ctr_cycles),
+    FAPI_DBG("read_ctr_cycles %llu(%lluns) (%llu, %llu)", l_read_ctr_cycles, mss::cycles_to_ns(i_target, l_read_ctr_cycles),
              COARSE_CAL_STEP_SIZE, CONSEQ_PASS);
     return l_read_ctr_cycles;
 }
@@ -123,11 +124,11 @@ uint64_t write_ctr_cycles(const fapi2::Target<T>& i_target )
     // 1000 + (NUM_VALID_SAMPLES * (FW_WR_RD + FW_RD_WR + 16) *
     // (1024/(SMALL_STEP +1) + 128/(BIG_STEP +1)) + 2 * (BIG_STEP+1)/(SMALL_STEP+1)) x 24 DRAM
     // clocks per rank pair.
-    const uint64_t l_write_ctr_cycles = 1000 + (WR_LVL_NUM_VALID_SAMPLES * (WR_CNTR_FW_WR_RD + WR_CNTR_FW_RD_WR + 16) *
-                                        (1024 / (WR_LVL_SMALL_STEP + 1) + 128 / (WR_LVL_BIG_STEP + 1)) + 2 *
-                                        (WR_LVL_BIG_STEP + 1) / (WR_LVL_SMALL_STEP + 1)) * 24;
+    uint64_t l_write_ctr_cycles = 1000 + (WR_LVL_NUM_VALID_SAMPLES * (WR_CNTR_FW_WR_RD + WR_CNTR_FW_RD_WR + 16) *
+                                          (1024 / (WR_LVL_SMALL_STEP + 1) + 128 / (WR_LVL_BIG_STEP + 1)) + 2 *
+                                          (WR_LVL_BIG_STEP + 1) / (WR_LVL_SMALL_STEP + 1)) * 24;
 
-    FAPI_DBG("write_ctr_cycles: %d(%dns) (%d, %d, %d, %d, %d)",
+    FAPI_DBG("write_ctr_cycles: %lu(%luns) (%u, %u, %u, %u, %u)",
              l_write_ctr_cycles, mss::cycles_to_ns(i_target, l_write_ctr_cycles),
              WR_LVL_NUM_VALID_SAMPLES, WR_CNTR_FW_WR_RD, WR_CNTR_FW_RD_WR, WR_LVL_BIG_STEP, WR_LVL_SMALL_STEP);
 
@@ -146,7 +147,7 @@ uint64_t coarse_wr_cycles(const fapi2::Target<T>& i_target )
     // The run length given here is the maximum run length for this calibration algorithm.
     // This step runs for approximately 40 DRAM clocks per rank pair.
     static const uint64_t l_coarse_wr_cycles = 40;
-    FAPI_DBG("coarse_wr_cycles: %d(%dns)", l_coarse_wr_cycles, mss::cycles_to_ns(i_target, l_coarse_wr_cycles));
+    FAPI_DBG("coarse_wr_cycles: %llu(%lluns)", l_coarse_wr_cycles, mss::cycles_to_ns(i_target, l_coarse_wr_cycles));
     return l_coarse_wr_cycles;
 }
 
@@ -162,7 +163,7 @@ uint64_t coarse_rd_cycles(const fapi2::Target<T>& i_target )
     // The run length given here is the maximum run length for this calibration algorithm.
     // This step runs for approximately 32 DRAM clocks per rank pair.
     static const uint64_t l_coarse_rd_cycles = 32;
-    FAPI_DBG("coarse_rd_cycles: %d(%dns)", l_coarse_rd_cycles, mss::cycles_to_ns(i_target, l_coarse_rd_cycles));
+    FAPI_DBG("coarse_rd_cycles: %llu(%lluns)", l_coarse_rd_cycles, mss::cycles_to_ns(i_target, l_coarse_rd_cycles));
     return l_coarse_rd_cycles;
 }
 
@@ -203,11 +204,13 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
     i_poll.iv_delay = DELAY_1US;
     i_poll.iv_sim_delay = mss::cycles_to_simcycles(mss::ns_to_cycles(i_target, DELAY_1US));
 
-    i_poll.iv_poll_count = (mss::cycles_to_ns(i_target, l_total_cycles) - i_poll.iv_initial_delay) / i_poll.iv_delay;
+    // Round up to the cycles left after the initial delay
+    uint64_t l_ns_left = mss::cycles_to_ns(i_target, l_total_cycles) - i_poll.iv_initial_delay;
+    i_poll.iv_poll_count = l_ns_left / i_poll.iv_delay;
+    i_poll.iv_poll_count += l_ns_left % i_poll.iv_delay ? 0 : 1;
 
     // Don't let the poll count be 0 - that just makes for a bad day.
     i_poll.iv_poll_count = (i_poll.iv_poll_count == 0) ? 1 : i_poll.iv_poll_count;
-
 #else
 
     if (CAL_ABORT_ON_ERROR)
@@ -221,7 +224,10 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
         i_poll.iv_delay = DELAY_1US;
         i_poll.iv_sim_delay = mss::cycles_to_simcycles(mss::ns_to_cycles(i_target, DELAY_1US));
 
-        i_poll.iv_poll_count = (mss::cycles_to_ns(i_target, l_total_cycles) - i_poll.iv_initial_delay) / i_poll.iv_delay;
+        // Round up to the cycles left after the initial delay
+        uint64_t l_ns_left = mss::cycles_to_ns(i_target, l_total_cycles) - i_poll.iv_initial_delay;
+        i_poll.iv_poll_count = l_ns_left / i_poll.iv_delay;
+        i_poll.iv_poll_count += l_ns_left % i_poll.iv_delay ? 0 : 1;
 
         // Don't let the poll count be 0 - that just makes for a bad day.
         i_poll.iv_poll_count = (i_poll.iv_poll_count == 0) ? 1 : i_poll.iv_poll_count;
@@ -234,7 +240,7 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
 
 #endif
 
-    FAPI_DBG("cal abort on error? %s. tc: %dc, id: %dns(%dsc), d: %d(%dsc), pc: %d",
+    FAPI_DBG("cal abort on error? %s. tc: %lluc, id: %lluns(%llusc), d: %llu(%llusc), pc: %llu",
              (CAL_ABORT_ON_ERROR ? "yup" : "nope"), l_total_cycles, i_poll.iv_initial_delay,
              i_poll.iv_initial_sim_delay, i_poll.iv_delay, i_poll.iv_sim_delay, i_poll.iv_poll_count);
 

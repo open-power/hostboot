@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -108,7 +108,7 @@ inline uint64_t ps_to_cycles(const fapi2::Target<T>& i_target, const uint64_t i_
     l_remainder = i_ps % l_divisor;
 
     // Make sure we add a cycle if there wasn't an even number of cycles in the input
-    FAPI_DBG("converting %dps to %d cycles", i_ps, l_quotient + (l_remainder == 0 ? 0 : 1));
+    FAPI_DBG("converting %llups to %llu cycles", i_ps, l_quotient + (l_remainder == 0 ? 0 : 1));
 
     return l_quotient + (l_remainder == 0 ? 0 : 1);
 
@@ -136,7 +136,7 @@ inline uint64_t cycles_to_ps(const fapi2::Target<T>& i_target, const uint64_t i_
 
     FAPI_TRY( mss::freq( find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq) );
 
-    FAPI_DBG("converting %d cycles to %dps", i_cycles, i_cycles * mhz_to_ps(l_freq));
+    FAPI_DBG("converting %llu cycles to %llups", i_cycles, i_cycles * mhz_to_ps(l_freq));
     return i_cycles * mhz_to_ps(l_freq);
 
 fapi_try_exit:
@@ -203,7 +203,7 @@ template< fapi2::TargetType T >
 inline uint64_t cycles_to_ns(const fapi2::Target<T>& i_target, const uint64_t i_cycles)
 {
     uint64_t l_ns = cycles_to_time<T, CONVERT_PS_IN_A_NS>(i_target, i_cycles);
-    FAPI_DBG("converting %d cycles to %dns", i_cycles, l_ns);
+    FAPI_DBG("converting %llu cycles to %lluns", i_cycles, l_ns);
 
     return l_ns;
 }
@@ -218,7 +218,7 @@ template< fapi2::TargetType T >
 inline uint64_t cycles_to_us(const fapi2::Target<T>& i_target, const uint64_t i_cycles)
 {
     uint64_t l_us = cycles_to_time<T, CONVERT_PS_IN_A_US>(i_target, i_cycles);
-    FAPI_DBG("converting %d cycles to %dus", i_cycles, l_us);
+    FAPI_DBG("converting %llu cycles to %lluus", i_cycles, l_us);
 
     return l_us;
 }
