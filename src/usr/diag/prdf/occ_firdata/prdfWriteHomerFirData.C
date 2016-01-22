@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -660,7 +660,7 @@ errlHndl_t writeData( uint8_t * i_hBuf, size_t i_hBufSize,
         // Check Processor type
         bool isNaples = false;
         TargetHandleList list = getFunctionalTargetList( TYPE_PROC );
-        if (list.size() > 0 && MODEL_NAPLES == getProcModel(list[0]))
+        if ((list.size() > 0) && (MODEL_NAPLES == getProcModel(list[0])))
             isNaples = true;
 
         // Get the ultimate buffer size.
@@ -672,12 +672,12 @@ errlHndl_t writeData( uint8_t * i_hBuf, size_t i_hBufSize,
         size_t sz_data = sizeof(o_data);       sz_hBuf += sz_data;
         s[PROC][GLBL]  = sizeof(proc_glbl);  sz_hBuf += s[PROC][GLBL];
 
-        s[PROC][FIR]   = sizeof(proc_common_fir) +
-            isNaples ? sizeof(proc_naples_fir) : sizeof(proc_murano_venice_fir);
+        s[PROC][FIR]   = sizeof(proc_common_fir) + ( isNaples ?
+            sizeof(proc_naples_fir) : sizeof(proc_murano_venice_fir) );
         sz_hBuf += s[PROC][FIR];
 
-        s[PROC][REG]   = sizeof(proc_common_reg) +
-            isNaples ? sizeof(proc_naples_reg) : sizeof(proc_murano_venice_reg);
+        s[PROC][REG]   = sizeof(proc_common_reg) + ( isNaples ?
+            sizeof(proc_naples_reg) : sizeof(proc_murano_venice_reg) );
         sz_hBuf += s[PROC][REG];
 
         s[EX][GLBL]    = sizeof(ex_glbl);    sz_hBuf += s[EX][GLBL];
@@ -732,7 +732,7 @@ errlHndl_t writeData( uint8_t * i_hBuf, size_t i_hBufSize,
             o_data.counts[c][REG]   = s[c][REG]   / u32;
             o_data.counts[c][IDFIR] = s[c][IDFIR] / u64;
             o_data.counts[c][IDREG] = s[c][IDREG] / u64;
-}
+        }
 
         // Add everything to the buffer.
         uint32_t idx = 0;
