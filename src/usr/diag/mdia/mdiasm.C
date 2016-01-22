@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,8 +36,8 @@
 #include <stdio.h>
 #include <mdia/mdiamevent.H>
 #include <hbotcompid.H>
-#include <fapi.H>
-#include <fapiPlatHwpInvoker.H>
+//#include <fapi.H>  TODO RTC 145132
+//#include <fapiPlatHwpInvoker.H>  TODO RTC 145132
 #include <diag/prdf/prdfMain.H>
 #include <devicefw/userif.H>
 #include <targeting/common/utilFilter.H>
@@ -164,14 +164,15 @@ void addTimeoutFFDC(TargetHandle_t i_mba, errlHndl_t & io_log)
     // collect these traces for timeout debugging
     io_log->collectTrace("MDIA_FAST",512);
     io_log->collectTrace(PRDF_COMP_NAME,512);
-    io_log->collectTrace(FAPI_TRACE_NAME,512);
-    io_log->collectTrace(FAPI_IMP_TRACE_NAME,512);
+//    io_log->collectTrace(FAPI_TRACE_NAME,512);  TODO RTC 145132
+//    io_log->collectTrace(FAPI_IMP_TRACE_NAME,512);  TODO RTC 145132
 
 }
 // Do the setup for CE thresholds
 errlHndl_t ceErrorSetup( TargetHandle_t i_mba )
 {
     errlHndl_t err = NULL;
+/* TODO RTC 145132
     ecmdDataBufferBase buffer(64);
 
     do
@@ -222,6 +223,7 @@ errlHndl_t ceErrorSetup( TargetHandle_t i_mba )
             break;
         }
     } while(0);
+*/
 
     return err;
 }
@@ -229,6 +231,7 @@ errlHndl_t ceErrorSetup( TargetHandle_t i_mba )
 void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
 {
     MDIA_FAST("sm: processCommandTimeout");
+/*  TODO RTC 145132
     WorkFlowProperties *wkflprop = NULL;
     errlHndl_t err = NULL;
 
@@ -296,7 +299,7 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                         MDIA_FAST("sm: committing a SW timed out info log "
                                   "for %x", get_huid(target));
 
-                        /*@
+                        / *@
                          * @errortype
                          * @reasoncode       MDIA::MAINT_COMMAND_SW_TIMED_OUT
                          * @severity         ERRORLOG::ERRL_SEV_INFORMATIONAL
@@ -304,7 +307,7 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                          * @userData1        Associated memory diag work item
                          * @userData2        Target HUID
                          * @devdesc          A maint command SW timed out
-                         */
+                         * /
                         err = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                                             PROCESS_COMMAND_TIMEOUT,
                                             MAINT_COMMAND_SW_TIMED_OUT,
@@ -351,7 +354,7 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                         *((*wit)->workItem),
                         get_huid(target));
 
-                /*@
+                / *@
                  * @errortype
                  * @reasoncode       MDIA::MAINT_COMMAND_HW_TIMED_OUT
                  * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
@@ -359,7 +362,7 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                  * @userData1        Associated memory diag work item
                  * @userData2        Target HUID
                  * @devdesc          A maint command HW timed out
-                 */
+                 * /
                 err = new ErrlEntry(
                         ERRL_SEV_UNRECOVERABLE,
                         PROCESS_COMMAND_TIMEOUT,
@@ -426,6 +429,7 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
 
         delete (*cit);
     }
+*/
 }
 
 errlHndl_t StateMachine::run(const WorkFlowAssocMap & i_list)
@@ -795,6 +799,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
     // uint64_t timeout = i_wfp.memSize / 1024; // TODO RTC 47590
     errlHndl_t err = NULL;
 
+/* TODO RTC 145132
     uint64_t stopCondition =
                 mss_MaintCmd::STOP_END_OF_RANK                  |
                 mss_MaintCmd::STOP_ON_MPE                       |
@@ -1044,6 +1049,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
     {
         delete cmd;
     }
+*/
 
     return err;
 }
@@ -1075,6 +1081,7 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
 
     uint64_t flags = 0;
 
+/* TODO RTC 145132
     mss_MaintCmd * cmd = NULL;
     ReturnCode fapirc;
     errlHndl_t err = NULL;
@@ -1248,6 +1255,7 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
     {
         delete cmd;
     }
+*/
 
     return (flags & DISPATCHED);
 }
