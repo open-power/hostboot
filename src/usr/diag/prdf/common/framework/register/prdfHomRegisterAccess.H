@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -221,78 +223,6 @@ struct ScanRingField
   uint64_t registerId;
   uint32_t length;
 };
-/**
-    Access Scan ring registers via the HOM
-    @author Doug Gilbert
-    @par
-    @code
-    @endcode
-*/
-class HomRegisterAccessScan : public MopRegisterAccess
-{
-public:
-  /**
-   Constructor
-   @param
-   @returns
-   @pre
-   @post
-   @see
-   @note
-   */
-  HomRegisterAccessScan(TARGETING::TargetHandle_t i_ptargetHandle ,ScanRingField * start, ScanRingField * end);
-  inline HomRegisterAccessScan(void);
-
-  /*
-   Destructor
-   */
-  //  ~HomRegisterAccessScan();
-
-  /**
-   Access the scan com register
-   @param BIT_STRING_CLASS - holds data read or to write
-   @param register address
-   @param [READ|WRITE]
-   @returns [SUCCESS|FAIL]
-   @pre bs.Length() must be size of register data to read/write
-   @post For read operation, bs is modified to reflect hardware register state
-   @note
-   */
-  virtual uint32_t Access(BIT_STRING_CLASS & bs,
-                          uint64_t registerId,
-                          Operation operation) const;
-
-
-  /**
-   Get the Id(s) used to pass to access (obsolite???)
-   @param returnes number of targetHandle
-   @returns list of targetHandles
-   @pre none
-   @post none
-   @note  Can this be removed from the framework???
-   */
-  inline virtual const TARGETING::TargetHandle_t * GetChipIds(int & count) const { count = 0; return NULL;}
-
-  bool operator==(const HomRegisterAccessScan & hrm)
-  {
-    return (hrm.iv_punitHandle == iv_punitHandle);
-  }
-
-private:  // functions
-private:  // Data
-
-  typedef std::vector<ScanRingField> AliasIdList;
-
-  // maybe we should store the functionalUnitPtr instead
-  TARGETING::TargetHandle_t iv_punitHandle;
-
-  // list of fields to extract
-  AliasIdList iv_aliasIds;
-
-};
-
-
-
 
 inline HomRegisterAccessScom::HomRegisterAccessScom(TARGETING::TargetHandle_t i_ptargetHandle )
 : MopRegisterAccess(), iv_ptargetHandle(i_ptargetHandle )
@@ -300,10 +230,6 @@ inline HomRegisterAccessScom::HomRegisterAccessScom(TARGETING::TargetHandle_t i_
 
 inline HomRegisterAccessScom::HomRegisterAccessScom()
 : MopRegisterAccess(), iv_ptargetHandle(NULL)
-{}
-
-inline HomRegisterAccessScan::HomRegisterAccessScan()
-: MopRegisterAccess(),iv_punitHandle(NULL)
 {}
 
 } // End namespace PRDF
