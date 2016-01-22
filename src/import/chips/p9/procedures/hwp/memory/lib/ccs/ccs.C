@@ -122,7 +122,8 @@ fapi2::ReturnCode execute_inst_array(const fapi2::Target<TARGET_TYPE_MCBIST>& i_
         FAPI_DBG("ccs statq 0x%llx, remaining: %d", stat_reg, poll_remaining);
         status = stat_reg;
         return status.getBit<TT::CCS_IN_PROGRESS>() != 1;
-    });
+    },
+    i_program.iv_probes);
 
     // Check for done and success. DONE being the only bit set.
     if (status == STAT_QUERY_SUCCESS)
@@ -141,8 +142,6 @@ fapi_try_exit:
 
 ///
 /// @brief Execute a set of CCS instructions
-/// @tparam T, the fapi2::TargetType - derived
-/// @tparam TT, the ccsTraits associated with T - derived
 /// @param[in] the target to effect
 /// @param[in] the vector of instructions
 /// @param[in] the vector of ports
