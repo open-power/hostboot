@@ -115,6 +115,7 @@
     <hbOnly/>
 </attribute>
 
+
 <!-- For POD Testing -->
 <attribute>
     <id>HB_MUTEX_TEST_LOCK</id>
@@ -122,6 +123,48 @@
     <simpleType>
         <hbmutex>
         </hbmutex>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
+<attribute>
+    <id>I2C_PAGE_MUTEX_0</id>
+    <description>
+        Mutex to protect page select operations for I2C Master engine 0
+    </description>
+    <simpleType>
+        <hbmutex></hbmutex>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
+<attribute>
+    <id>I2C_PAGE_MUTEX_1</id>
+    <description>
+        Mutex to protect page select operations for I2C Master engine 1
+    </description>
+    <simpleType>
+        <hbmutex></hbmutex>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
+<attribute>
+    <id>I2C_PAGE_MUTEX_2</id>
+    <description>
+        Mutex to protect page select operations for I2C Master engine 2
+    </description>
+    <simpleType>
+        <hbmutex></hbmutex>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>

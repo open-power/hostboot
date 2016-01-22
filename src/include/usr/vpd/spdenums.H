@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -139,7 +139,7 @@ enum
     TRRDS_FINE_OFFSET                = SPD_FIRST_NORM_KEYWORD | 0x53,
     TCKMAX_FINE_OFFSET               = SPD_FIRST_NORM_KEYWORD | 0x54,
     BASE_CONFIG_CRC                  = SPD_FIRST_NORM_KEYWORD | 0x55,
-    MODULE_REVISION_CODE_DDR4        = SPD_FIRST_NORM_KEYWORD | 0x56,
+    MODULE_REVISION_CODE_DDR4        = MODULE_REVISION_CODE,
     DRAM_STEPPING                    = SPD_FIRST_NORM_KEYWORD | 0x57,
     MANUFACTURING_SECTION_CRC        = SPD_FIRST_NORM_KEYWORD | 0x58,
     SPD_LAST_NORM_KEYWORD            = SPD_FIRST_NORM_KEYWORD | 0x58,

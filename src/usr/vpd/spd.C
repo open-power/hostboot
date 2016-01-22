@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -258,8 +258,10 @@ errlHndl_t spdGetKeywordValue ( DeviceFW::OperationType i_opType,
         else
         {
             TRACFCOMP( g_trac_spd,
-                       ERR_MRK"Invalid Basic Memory Type (0x%04x)",
-                       memType );
+                       ERR_MRK"Invalid Basic Memory Type (0x%04x), "
+                       "target huid = 0x%x",
+                       memType,
+                       TARGETING::get_huid(i_target));
 
             /*@
              * @errortype
@@ -481,11 +483,14 @@ errlHndl_t spdFetchData ( uint64_t i_byteAddr,
                                           i_byteAddr ) );
             if( err )
             {
+                TRACFCOMP(g_trac_spd,
+                        "ERROR: failing out of deviceOp in spd.C");
                 break;
             }
         }
         else
         {
+            TRACFCOMP(g_trac_spd, "spdFetchData: vpd source incorrect!: %x", vpdSource);
             configError = true;
         }
 
@@ -2039,18 +2044,29 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
         }
 
         // Get the keyword sizes
-        size_t l_partDataSize = 0;
-        size_t l_serialDataSize = 0;
-        if( SPD_DDR3 == l_memType )
+        const KeywordData* entry = NULL;
+        l_err = getKeywordEntry( l_partKeyword,
+                                 l_memType,
+                                 i_target,
+                                 entry );
+        if( l_err )
         {
-            l_partDataSize = ddr3Data[l_partKeyword].length;
-            l_serialDataSize = ddr3Data[l_serialKeyword].length;
+            break;
         }
-        else
+        size_t l_partDataSize = entry->length;
+
+        entry = NULL;
+        l_err = getKeywordEntry( l_serialKeyword,
+                                 l_memType,
+                                 i_target,
+                                 entry );
+        if( l_err )
         {
-            l_partDataSize = ddr4Data[l_partKeyword].length;
-            l_serialDataSize = ddr4Data[l_serialKeyword].length;
+            break;
         }
+        size_t l_serialDataSize = entry->length;
+        TRACDCOMP(g_trac_spd,"l_partDataSize=%d,l_serialDataSize=%d\n",
+                l_partDataSize,l_serialDataSize);
 
         //read the keywords from SEEPROM since PNOR may not be loaded yet
         uint8_t l_partNumberData[l_partDataSize];
@@ -2079,7 +2095,7 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
 
         if( l_err )
         {
-            TRACDCOMP(g_trac_spd, ERR_MRK"spd.C::setPartAndSerialNumberAttributes(): Error after spdGetValue-> SERIAL_NUMBER");
+            TRACFCOMP(g_trac_spd, ERR_MRK"spd.C::setPartAndSerialNumberAttributes(): Error after spdGetValue-> SERIAL_NUMBER");
             errlCommit(l_err, VPD_COMP_ID);
             l_err = NULL;
             break;
@@ -2091,8 +2107,9 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
         size_t expectedSNSize = sizeof(l_SN);
         if(expectedPNSize < l_partDataSize)
         {
-            TRACFCOMP(g_trac_spd, "Part data size too large for attribute. Expected: %d Actual: %d",
-                        expectedPNSize, l_partDataSize);
+            TRACFCOMP(g_trac_spd, "Part data size too large for attribute. Expected: %d Actual: %d"
+                    "Keyword: %X",
+                    expectedPNSize, l_partDataSize, l_partKeyword);
         }
         else
         {
@@ -2143,16 +2160,18 @@ errlHndl_t cmpPnorToSeeprom ( TARGETING::Target * i_target,
             break;
         }
 
-        // Get the keyword size
-        size_t dataSize = 0;
-        if( SPD_DDR3 == memType )
+         // Get the keyword size
+        const KeywordData* entry = NULL;
+        err = getKeywordEntry( i_keyword,
+                                 memType,
+                                 i_target,
+                                 entry );
+        if( err )
         {
-            dataSize = ddr3Data[i_keyword].length;
+            break;
         }
-        else
-        {
-            dataSize = ddr4Data[i_keyword].length;
-        }
+        size_t dataSize = entry->length;
+
 
         // Read the keyword from PNOR
         size_t sizePnor = dataSize;
@@ -2211,8 +2230,9 @@ errlHndl_t cmpPnorToSeeprom ( TARGETING::Target * i_target,
 errlHndl_t loadPnor ( TARGETING::Target * i_target )
 {
     errlHndl_t err = NULL;
-
-    TRACSSCOMP( g_trac_spd, ENTER_MRK"loadPnorCache()" );
+    size_t writeDataSize = 0;
+    uint8_t spdEepromData[DIMM_SPD_SECTION_SIZE];
+    TRACSSCOMP( g_trac_spd, ENTER_MRK"loadPnor()" );
 
     do
     {
@@ -2225,13 +2245,40 @@ errlHndl_t loadPnor ( TARGETING::Target * i_target )
             break;
         }
 
-        // Load PNOR cache from SEEPROM
+        // Determine the memory type so we know if we need to read 256 or
+        // 512 from the eeprom
+        uint8_t memType = 0x0;
+        err = getMemType( memType,
+                          i_target,
+                          VPD::SEEPROM );
 
-        // Read the entire SPD section from SEEPROM
-        uint8_t writeData[DIMM_SPD_SECTION_SIZE];
+        if( err )
+        {
+            TRACFCOMP(g_trac_spd,
+                    "spd.C::loadPnor - Error getting memtype(0x%x) "
+                    "for target = 0x%x",
+                    memType,
+                    TARGETING::get_huid(i_target));
+            break;
+        }
+
+        // Load PNOR cache from SEEPROM
+        // Read entire EEPROM at one time
+        if( memType == SPD_DDR3 )
+        {
+            // EEPROM is only 256 bytes
+            writeDataSize = DIMM_SPD_SECTION_SIZE/2;
+        }
+        else if( memType == SPD_DDR4 )
+        {
+            // EEPROM is 512 bytes
+            writeDataSize = DIMM_SPD_SECTION_SIZE;
+        }
+
+        // Fetch the EEPROM daa
         err = spdFetchData ( 0x0,
-                             DIMM_SPD_SECTION_SIZE,
-                             writeData,
+                             writeDataSize,
+                             spdEepromData,
                              i_target,
                              VPD::SEEPROM );
         if( err )
@@ -2240,18 +2287,19 @@ errlHndl_t loadPnor ( TARGETING::Target * i_target )
                 ERR_MRK"loadPnorCache: Error reading SEEPROM SPD data" );
             break;
         }
-
         // Write the entire SPD section to PNOR
+        TRACDBIN(g_trac_spd, "ENTIRE EEPROM", spdEepromData, writeDataSize);
         err = spdWriteData( 0x0,
-                            DIMM_SPD_SECTION_SIZE,
-                            writeData,
+                            writeDataSize,
+                            spdEepromData,
                             i_target,
                             VPD::PNOR );
         if( err )
         {
-            TRACFCOMP( g_trac_spd,ERR_MRK"loadPnorCache: Error writing PNOR SPD data" );
+            TRACFCOMP( g_trac_spd,ERR_MRK"loadPnorCache: Error writing PNOR SPD data 2" );
             break;
         }
+
 
     } while(0);
 
