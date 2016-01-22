@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -103,23 +103,74 @@ enum TargetType
 ///
 enum TargetFilter
 {
-    TARGET_FILTER_TP          = 0x80000000,  // Pervasive 1
-    TARGET_FILTER_NEST_NORTH  = 0x40000000,  // Pervasive 2
-    TARGET_FILTER_NEST_SOUTH  = 0x20000000,  // Pervasive 3
-    TARGET_FILTER_NEST_EAST   = 0x10000000,  // Pervasive 4
-    TARGET_FILTER_NEST_WEST   = 0x08000000,  // Pervasive 5
-    TARGET_FILTER_XBUS        = 0x04000000,  // Pervasive 6
-    TARGET_FILTER_MC_WEST     = 0x02000000,  // Pervasive 7
-    TARGET_FILTER_MC_EAST     = 0x01000000,  // Pervasive 8
-    TARGET_FILTER_OBUS0       = 0x00800000,  // Pervasive 9
-    TARGET_FILTER_OBUS1       = 0x00400000,  // Pervasive 10
-    TARGET_FILTER_OBUS2       = 0x00200000,  // Pervasive 11
-    TARGET_FILTER_OBUS3       = 0x00100000,  // Pervasive 12
-    TARGET_FILTER_PCI0        = 0x00080000,  // Pervasive 13
-    TARGET_FILTER_PCI1        = 0x00040000,  // Pervasive 14
-    TARGET_FILTER_PCI2        = 0x00020000,  // Pervasive 15
+    TARGET_FILTER_TP          = 0x8000000000000000,  // Pervasive 1
+    TARGET_FILTER_NEST_NORTH  = 0x4000000000000000,  // Pervasive 2
+    TARGET_FILTER_NEST_SOUTH  = 0x2000000000000000,  // Pervasive 3
+    TARGET_FILTER_NEST_EAST   = 0x1000000000000000,  // Pervasive 4
+    TARGET_FILTER_NEST_WEST   = 0x0800000000000000,  // Pervasive 5
+    TARGET_FILTER_XBUS        = 0x0400000000000000,  // Pervasive 6
+    TARGET_FILTER_MC_WEST     = 0x0200000000000000,  // Pervasive 7
+    TARGET_FILTER_MC_EAST     = 0x0100000000000000,  // Pervasive 8
+    TARGET_FILTER_OBUS0       = 0x0080000000000000,  // Pervasive 9
+    TARGET_FILTER_OBUS1       = 0x0040000000000000,  // Pervasive 10
+    TARGET_FILTER_OBUS2       = 0x0020000000000000,  // Pervasive 11
+    TARGET_FILTER_OBUS3       = 0x0010000000000000,  // Pervasive 12
+    TARGET_FILTER_PCI0        = 0x0008000000000000,  // Pervasive 13
+    TARGET_FILTER_PCI1        = 0x0004000000000000,  // Pervasive 14
+    TARGET_FILTER_PCI2        = 0x0002000000000000,  // Pervasive 15
+    TARGET_FILTER_CACHE0      = 0x0001000000000000,  // Pervasive 16
+    TARGET_FILTER_CACHE1      = 0x0000800000000000,  // Pervasive 17
+    TARGET_FILTER_CACHE2      = 0x0000400000000000,  // Pervasive 18
+    TARGET_FILTER_CACHE3      = 0x0000200000000000,  // Pervasive 19
+    TARGET_FILTER_CACHE4      = 0x0000100000000000,  // Pervasive 20
+    TARGET_FILTER_CACHE5      = 0x0000080000000000,  // Pervasive 21
+    TARGET_FILTER_CORE0       = 0x0000040000000000,  // Pervasive 32
+    TARGET_FILTER_CORE1       = 0x0000020000000000,  // Pervasive 33
+    TARGET_FILTER_CORE2       = 0x0000010000000000,  // Pervasive 34
+    TARGET_FILTER_CORE3       = 0x0000008000000000,  // Pervasive 35
+    TARGET_FILTER_CORE4       = 0x0000004000000000,  // Pervasive 36
+    TARGET_FILTER_CORE5       = 0x0000002000000000,  // Pervasive 37
+    TARGET_FILTER_CORE6       = 0x0000001000000000,  // Pervasive 38
+    TARGET_FILTER_CORE7       = 0x0000000800000000,  // Pervasive 39
+    TARGET_FILTER_CORE8       = 0x0000000400000000,  // Pervasive 40
+    TARGET_FILTER_CORE9       = 0x0000000200000000,  // Pervasive 41
+    TARGET_FILTER_CORE10      = 0x0000000100000000,  // Pervasive 42
+    TARGET_FILTER_CORE11      = 0x0000000080000000,  // Pervasive 43
+    TARGET_FILTER_CORE12      = 0x0000000040000000,  // Pervasive 44
+    TARGET_FILTER_CORE13      = 0x0000000020000000,  // Pervasive 45
+    TARGET_FILTER_CORE14      = 0x0000000010000000,  // Pervasive 46
+    TARGET_FILTER_CORE15      = 0x0000000008000000,  // Pervasive 47
+    TARGET_FILTER_CORE16      = 0x0000000004000000,  // Pervasive 48
+    TARGET_FILTER_CORE17      = 0x0000000002000000,  // Pervasive 49
+    TARGET_FILTER_CORE18      = 0x0000000001000000,  // Pervasive 50
+    TARGET_FILTER_CORE19      = 0x0000000000800000,  // Pervasive 51
+    TARGET_FILTER_CORE20      = 0x0000000000400000,  // Pervasive 52
+    TARGET_FILTER_CORE21      = 0x0000000000200000,  // Pervasive 53
+    TARGET_FILTER_CORE22      = 0x0000000000100000,  // Pervasive 54
+    TARGET_FILTER_CORE23      = 0x0000000000080000,  // Pervasive 55
 
     // Composite filters follow
+
+    // Pervasive 32-55 (all cores)
+    TARGET_FILTER_ALL_CORES   = (TARGET_FILTER_CORE0 |
+                                 TARGET_FILTER_CORE1 | TARGET_FILTER_CORE2 |
+                                 TARGET_FILTER_CORE3 | TARGET_FILTER_CORE4 |
+                                 TARGET_FILTER_CORE5 | TARGET_FILTER_CORE6 |
+                                 TARGET_FILTER_CORE7 | TARGET_FILTER_CORE8 |
+                                 TARGET_FILTER_CORE9 | TARGET_FILTER_CORE10 |
+                                 TARGET_FILTER_CORE11 | TARGET_FILTER_CORE12 |
+                                 TARGET_FILTER_CORE13 | TARGET_FILTER_CORE14 |
+                                 TARGET_FILTER_CORE15 | TARGET_FILTER_CORE16 |
+                                 TARGET_FILTER_CORE17 | TARGET_FILTER_CORE18 |
+                                 TARGET_FILTER_CORE19 | TARGET_FILTER_CORE20 |
+                                 TARGET_FILTER_CORE21 | TARGET_FILTER_CORE22 |
+                                 TARGET_FILTER_CORE23),
+
+    // Pervasive 16-21 (all caches)
+    TARGET_FILTER_ALL_CACHES  = (TARGET_FILTER_CACHE0 |
+                                 TARGET_FILTER_CACHE1 | TARGET_FILTER_CACHE2 |
+                                 TARGET_FILTER_CACHE3 | TARGET_FILTER_CACHE4 |
+                                 TARGET_FILTER_CACHE5),
 
     // Pervasive 2-5 (eg N0-N3) < req'd
     TARGET_FILTER_ALL_NEST    = (TARGET_FILTER_NEST_NORTH |
@@ -154,6 +205,33 @@ enum TargetFilter
     // All IO Targets except NEST
     TARGET_FILTER_ALL_IO_EXCEPT_NEST =
         (TARGET_FILTER_XBUS | TARGET_FILTER_ALL_PCI | TARGET_FILTER_ALL_OBUS),
+
+    // All sync mode IO except NEST
+    TARGET_FILTER_SYNC_MODE_ALL_IO_EXCEPT_NEST =
+        (TARGET_FILTER_ALL_MC | TARGET_FILTER_XBUS | TARGET_FILTER_ALL_PCI |
+         TARGET_FILTER_ALL_OBUS),
+
+    // All sync mode NEST slaves
+    TARGET_FILTER_SYNC_MODE_NEST_SLAVES =
+        (TARGET_FILTER_ALL_MC | TARGET_FILTER_NEST_SLAVES),
+
+    // All sync mode IO
+    TARGET_FILTER_SYNC_MODE_ALL_IO =
+        (TARGET_FILTER_ALL_MC | TARGET_FILTER_ALL_NEST |
+         TARGET_FILTER_ALL_OBUS | TARGET_FILTER_ALL_PCI |
+         TARGET_FILTER_XBUS),
+
+    // All IO
+    TARGET_FILTER_ALL_IO = (TARGET_FILTER_ALL_NEST |
+                            TARGET_FILTER_ALL_OBUS | TARGET_FILTER_ALL_PCI |
+                            TARGET_FILTER_XBUS),
+
+    // All sync mode except TP
+    TARGET_FILTER_SYNC_MODE_ALL_EXCEPT_TP =
+        (TARGET_FILTER_ALL_MC | TARGET_FILTER_ALL_NEST |
+         TARGET_FILTER_ALL_OBUS | TARGET_FILTER_ALL_PCI |
+         TARGET_FILTER_XBUS | TARGET_FILTER_ALL_CORES |
+         TARGET_FILTER_ALL_CACHES),
 };
 
 
