@@ -24,7 +24,7 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../..
 
-#SUBDIRS += mdia.d
+SUBDIRS += mdia.d
 SUBDIRS += prdf.d
 SUBDIRS += attn.d
 
