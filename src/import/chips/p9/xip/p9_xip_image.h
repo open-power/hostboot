@@ -347,18 +347,21 @@ typedef struct
     /// Contains P9_XIP_MAGIC to identify a P9-XIP image
     uint64_t iv_magic;
 
-    /// The offset of the P9-XIP entry point from the start of the image
-    uint64_t iv_entryOffset;
+    /// The entry address of the L1 loader entry point in SEEPROM
+    uint64_t iv_L1LoaderAddr;
+
+    /// The entry address of the L2 loader entry point in SRAM
+    uint64_t iv_L2LoaderAddr;
+
+    /// The entry address of Kernel in SRAM
+    uint64_t iv_kernelAddr;
 
     /// The base address used to link the image, as a full relocatable image
     /// address
     uint64_t iv_linkAddress;
 
-    /// The entry address of base loader
-    uint64_t iv_entryAddressSBE;
-
     /// Reserved for future expansion
-    uint64_t iv_reserved64[4];
+    uint64_t iv_reserved64[3];
 
     //////////////////////////////////////////////////////////////////////
     // Section Table - 4-byte aligned; 16 entries

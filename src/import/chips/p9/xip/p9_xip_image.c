@@ -1452,7 +1452,6 @@ xipHeaderFind(void* i_image, const char* i_id, P9XipItem* o_item)
     {
 
         HEADER_TOC(magic,        iv_magic,       P9_XIP_UINT64),
-        HEADER_TOC(entry_offset, iv_entryOffset, P9_XIP_UINT64),
         HEADER_TOC(link_address, iv_linkAddress, P9_XIP_UINT64),
 
         HEADER_TOC(image_size, iv_imageSize, P9_XIP_UINT32),
@@ -2976,7 +2975,9 @@ p9_xip_translate_header(P9XipHeader* o_dest, const P9XipHeader* i_src)
 #endif
 
     o_dest->iv_magic = xipRevLe64(i_src->iv_magic);
-    o_dest->iv_entryOffset = xipRevLe64(i_src->iv_entryOffset);
+    o_dest->iv_L1LoaderAddr = xipRevLe64(i_src->iv_L1LoaderAddr);
+    o_dest->iv_L2LoaderAddr = xipRevLe64(i_src->iv_L2LoaderAddr);
+    o_dest->iv_kernelAddr   = xipRevLe64(i_src->iv_kernelAddr);
     o_dest->iv_linkAddress = xipRevLe64(i_src->iv_linkAddress);
 
     for (i = 0; i < 5; i++)
