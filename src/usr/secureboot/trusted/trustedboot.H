@@ -87,6 +87,15 @@ errlHndl_t tpmVerifyFunctionalTpmExists();
  */
 void tpmReplayLog(TRUSTEDBOOT::TpmTarget & io_target);
 
+/**
+ * @brief Send config entries to tpm
+ *
+ * @param[in/out] io_target Current TPM target structure
+ *
+ * @return errlHndl_t NULL if successful, otherwise a pointer to the
+ *       error log.
+ */
+errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget & io_target);
 
 } // end TRUSTEDBOOT namespace
 #endif
