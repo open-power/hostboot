@@ -25,7 +25,7 @@
 ROOTPATH = ../../..
 
 #SUBDIRS += mdia.d
-#SUBDIRS += prdf.d
+SUBDIRS += prdf.d
 SUBDIRS += attn.d
 
 include ${ROOTPATH}/config.mk
