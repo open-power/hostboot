@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -40,15 +42,18 @@ namespace SECUREBOOT
             /** @brief Determine if Secureboot is enabled. */
             bool getEnabled();
 
+            /** @brief Get security switch register value */
+            uint64_t getSecuritySwitch();
+
         private:
             void _init();
 
-                /** Cached register value. */
+            /** Cached register value. */
             uint64_t iv_regValue;
 
-                /** SCOM address for security settings. */
+            /** SCOM address for security settings. */
             static const uint64_t SECURITY_SWITCH_REGISTER;
-                /** Bitfield mask for Secureboot enable flag. */
+            /** Bitfield mask for Secureboot enable flag. */
             static const uint64_t SECURITY_SWITCH_TRUSTED_BOOT;
     };
 }

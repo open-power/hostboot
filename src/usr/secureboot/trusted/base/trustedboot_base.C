@@ -90,10 +90,8 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
 
     TRACDCOMP( g_trac_trustedboot, ENTER_MRK"pcrExtend()" );
     TRACUCOMP( g_trac_trustedboot,
-               ENTER_MRK"pcrExtend() pcr=%d msg='%s' digest=%016llX",
-               i_pcr,
-               i_logMsg,
-               *(reinterpret_cast<uint64_t*>(i_digest)));
+               ENTER_MRK"pcrExtend() pcr=%d msg='%s'", i_pcr, i_logMsg);
+    TRACFBIN(g_trac_trustedboot, "pcrExtend() digest:", i_digest, i_digestSize);
 
     // Ensure proper digest size
     uint8_t digestData[fullDigestSize];
@@ -108,6 +106,7 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
     memcpy(logMsg, i_logMsg,
            (strlen(i_logMsg) < MAX_TPM_LOG_MSG ? strlen(i_logMsg) :
             MAX_TPM_LOG_MSG));
+
 
     for (size_t idx = 0; idx < MAX_SYSTEM_TPMS; idx++)
     {

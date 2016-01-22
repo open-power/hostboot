@@ -41,12 +41,14 @@
 #include <targeting/common/targetservice.H>
 #include <secureboot/trustedbootif.H>
 #include <secureboot/trustedboot_reasoncodes.H>
+#include <sys/mmio.h>
 #include "trustedboot.H"
 #include "trustedTypes.H"
 #include "trustedbootCmds.H"
 #include "trustedbootUtils.H"
 #include "base/tpmLogMgr.H"
 #include "base/trustedboot_base.H"
+#include "../settings.H"
 
 namespace TRUSTEDBOOT
 {
@@ -149,7 +151,6 @@ void* host_update_master_tpm( void *io_pArgs )
             break;
         }
 
-
         // Lastly we will check on the backup TPM and see if it is enabled
         //  in the attributes at least
         TPMDD::tpm_info_t tpmInfo;
@@ -184,6 +185,11 @@ void* host_update_master_tpm( void *io_pArgs )
         mutex_unlock(&(systemTpms.tpm[TPM_MASTER_INDEX].tpmMutex));
     }
 
+    if (NULL == err)
+    {
+        // Log config entries to TPM - needs to be after mutex_unlock
+        err = tpmLogConfigEntries(systemTpms.tpm[TPM_MASTER_INDEX]);
+    }
 
     TRACDCOMP( g_trac_trustedboot,
                EXIT_MRK"host_update_master_tpm() - %s",
@@ -320,6 +326,82 @@ void tpmReplayLog(TRUSTEDBOOT::TpmTarget & io_target)
         delete err;
         err = NULL;
     }
+}
+
+errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget & io_target)
+{
+    TRACFCOMP(g_trac_trustedboot, ENTER_MRK"tpmLogConfigEntries()");
+
+    errlHndl_t l_err = NULL;
+
+    do
+    {
+        // Create digest buffer and set to largest config entry size.
+        uint8_t l_digest[sizeof(uint64_t)];
+        memset(l_digest, 0, sizeof(uint64_t));
+
+        // Security switches
+        uint64_t l_securitySwitchValue = Singleton<SECUREBOOT::Settings>::
+                                                instance().getSecuritySwitch();
+        TRACFCOMP(g_trac_trustedboot, "security switch value = 0x%X",
+                                l_securitySwitchValue);
+        // Extend to TPM - PCR_1
+        memcpy(l_digest, &l_securitySwitchValue, sizeof(l_securitySwitchValue));
+        l_err = pcrExtend(PCR_1, l_digest, sizeof(l_securitySwitchValue),
+                          "Security Switches");
+        if (l_err)
+        {
+            break;
+        }
+        memset(l_digest, 0, sizeof(uint64_t));
+
+        // Chip type and EC
+        // Fill in the actual PVR of chip
+        // Layout of the PVR is (32-bit): (see cpuid.C for latest format)
+        //     2 nibbles reserved.
+        //     2 nibbles chip type.
+        //     1 nibble technology.
+        //     1 nibble major DD.
+        //     1 nibble reserved.
+        //     1 nibble minor D
+        uint32_t l_pvr = mmio_pvr_read() & 0xFFFFFFFF;
+        TRACDCOMP(g_trac_trustedboot, "PVR of chip = 0x%X", l_pvr);
+        // Extend to TPM - PCR_1
+        memcpy(l_digest, &l_pvr, sizeof(l_pvr));
+        l_err = pcrExtend(PCR_1, l_digest, sizeof(l_pvr),"PVR of Chip");
+        if (l_err)
+        {
+            break;
+        }
+        memset(l_digest, 0, sizeof(uint64_t));
+
+        // Figure out which node we are running on
+        TARGETING::Target* l_masterProc = NULL;
+        TARGETING::targetService().masterProcChipTargetHandle(l_masterProc);
+        TARGETING::EntityPath l_entityPath =
+                        l_masterProc->getAttr<TARGETING::ATTR_PHYS_PATH>();
+        const TARGETING::EntityPath::PathElement l_pathElement =
+                        l_entityPath.pathElementOfType(TARGETING::TYPE_NODE);
+        uint64_t l_nodeid = l_pathElement.instance;
+        // Extend to TPM - PCR_1,4,5,6
+        memcpy(l_digest, &l_nodeid, sizeof(l_nodeid));
+        const TPM_Pcr l_pcrs[] = {PCR_1,PCR_4,PCR_5,PCR_6};
+        for (size_t i = 0; i < (sizeof(l_pcrs)/sizeof(TPM_Pcr)) ; ++i)
+        {
+            l_err = pcrExtend(l_pcrs[i], l_digest, sizeof(l_nodeid),"Node id");
+            if (l_err)
+            {
+                break;
+            }
+        }
+        if (l_err)
+        {
+            break;
+        }
+
+    } while(0);
+
+    return l_err;
 }
 
 } // end TRUSTEDBOOT
