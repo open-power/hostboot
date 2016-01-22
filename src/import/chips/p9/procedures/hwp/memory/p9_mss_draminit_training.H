@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,17 +31,20 @@
 
 #include <fapi2.H>
 
-typedef fapi2::ReturnCode (*p9_mss_draminit_training_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>&);
+typedef fapi2::ReturnCode (*p9_mss_draminit_training_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>&,
+        const uint16_t);
 
 extern "C"
 {
 
-///
-/// @brief Train dram, assumes effective config has run
-/// @param[in] i_target, the McBIST of the ports of the dram you're training
-/// @return FAPI2_RC_SUCCESS iff ok
-///
-    fapi2::ReturnCode p9_mss_draminit_training( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
+    ///
+    /// @brief Train dram, assumes effective config has run
+    /// @param[in] i_target, the McBIST of the ports of the dram you're training
+    /// @param[in] i_special_training, optional CAL_STEP_ENABLE override. Used in sim, debug
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
+    fapi2::ReturnCode p9_mss_draminit_training( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+            const uint16_t i_special_training = 0 );
 }
 
 

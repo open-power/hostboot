@@ -37,14 +37,16 @@ using fapi2::TARGET_TYPE_MCA;
 
 extern "C"
 {
-///
-/// @brief Train dram
-/// @param[in] i_target, the McBIST of the ports of the dram you're training
-/// @return FAPI2_RC_SUCCESS iff ok
-///
-    fapi2::ReturnCode p9_mss_draminit_training( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
+    ///
+    /// @brief Train dram
+    /// @param[in] i_target, the McBIST of the ports of the dram you're training
+    /// @param[in] i_special_training, optional CAL_STEP_ENABLE override. Used in sim, debug
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
+    fapi2::ReturnCode p9_mss_draminit_training( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
+            const uint16_t i_special_training )
     {
-        fapi2::buffer<uint16_t> l_cal_steps_enabled;
+        fapi2::buffer<uint16_t> l_cal_steps_enabled = i_special_training;
 
         FAPI_INF("Start draminit training");
 
@@ -77,7 +79,37 @@ extern "C"
 
         for( auto p : i_target.getChildren<TARGET_TYPE_MCA>())
         {
-            mss::ccs::program<TARGET_TYPE_MCBIST> l_program;
+            mss::ccs::program<TARGET_TYPE_MCBIST, TARGET_TYPE_MCA> l_program;
+
+            // Setup a series of register probes which we'll see during the polling loop
+            l_program.iv_probes =
+            {
+                // One block for each DP16
+                {p, "wr_cntr_status0 (dp16 0)", MCA_DDRPHY_DP16_WR_CNTR_STATUS0_P0_0},
+                {p, "wr_cntr_status1 (dp16 0)", MCA_DDRPHY_DP16_WR_CNTR_STATUS1_P0_0},
+                {p, "wr_cntr_status2 (dp16 0)", MCA_DDRPHY_DP16_WR_CNTR_STATUS2_P0_0},
+                {p, "wr_lvl_status (dp16 0)",   MCA_DDRPHY_DP16_WR_LVL_STATUS0_P0_0},
+
+                {p, "wr_cntr_status0 (dp16 1)", MCA_DDRPHY_DP16_WR_CNTR_STATUS0_P0_1},
+                {p, "wr_cntr_status1 (dp16 1)", MCA_DDRPHY_DP16_WR_CNTR_STATUS1_P0_1},
+                {p, "wr_cntr_status2 (dp16 1)", MCA_DDRPHY_DP16_WR_CNTR_STATUS2_P0_1},
+                {p, "wr_lvl_status (dp16 1)",   MCA_DDRPHY_DP16_WR_LVL_STATUS0_P0_1},
+
+                {p, "wr_cntr_status0 (dp16 2)", MCA_DDRPHY_DP16_WR_CNTR_STATUS0_P0_2},
+                {p, "wr_cntr_status1 (dp16 2)", MCA_DDRPHY_DP16_WR_CNTR_STATUS1_P0_2},
+                {p, "wr_cntr_status2 (dp16 2)", MCA_DDRPHY_DP16_WR_CNTR_STATUS2_P0_2},
+                {p, "wr_lvl_status (dp16 2)",   MCA_DDRPHY_DP16_WR_LVL_STATUS0_P0_2},
+
+                {p, "wr_cntr_status0 (dp16 3)", MCA_DDRPHY_DP16_WR_CNTR_STATUS0_P0_3},
+                {p, "wr_cntr_status1 (dp16 3)", MCA_DDRPHY_DP16_WR_CNTR_STATUS1_P0_3},
+                {p, "wr_cntr_status2 (dp16 3)", MCA_DDRPHY_DP16_WR_CNTR_STATUS2_P0_3},
+                {p, "wr_lvl_status (dp16 3)",   MCA_DDRPHY_DP16_WR_LVL_STATUS0_P0_3},
+
+                {p, "wr_cntr_status0 (dp16 4)", MCA_DDRPHY_DP16_WR_CNTR_STATUS0_P0_4},
+                {p, "wr_cntr_status1 (dp16 4)", MCA_DDRPHY_DP16_WR_CNTR_STATUS1_P0_4},
+                {p, "wr_cntr_status2 (dp16 4)", MCA_DDRPHY_DP16_WR_CNTR_STATUS2_P0_4},
+                {p, "wr_lvl_status (dp16 4)",   MCA_DDRPHY_DP16_WR_LVL_STATUS0_P0_4},
+            };
 
             // Delays in the CCS instruction ARR1 for training are supposed to be 0xFFFF,
             // and we're supposed to poll for the done or timeout bit. But we don't want
@@ -130,10 +162,17 @@ extern "C"
             // Setup the config register
             //
             // Grab the attribute which contains the information on what cal steps we should run
-            FAPI_TRY( mss::cal_step_enable(p, l_cal_steps_enabled) );
+            // if the i_specal_training bits have not been specified.
+            if (i_special_training == 0)
+            {
+                FAPI_TRY( mss::cal_step_enable(p, l_cal_steps_enabled) );
+            }
+
+            FAPI_DBG("cal steps enabled: 0x%x special training: 0x%x", l_cal_steps_enabled, i_special_training);
 
             // Check to see if we're supposed to reset the delay values before starting training
-            if (l_reset_disable == fapi2::ENUM_ATTR_MSS_DRAMINIT_RESET_DISABLE_ENABLE)
+            // don't reset if we're running special training - assumes there's a checkpoint which has valid state.
+            if ((l_reset_disable == fapi2::ENUM_ATTR_MSS_DRAMINIT_RESET_DISABLE_ENABLE) && (i_special_training == 0))
             {
                 FAPI_TRY( mss::dp16::reset_delay_values(p, l_pairs) );
             }
