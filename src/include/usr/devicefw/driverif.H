@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -131,6 +131,31 @@ namespace DeviceFW
      */
     #define DEVICE_I2C_ADDRESS_OFFSET( i_port, i_engine, i_devAddr, i_offset_len, i_offset)\
         DeviceFW::I2C,  DEVICE_I2C_PARMS(i_port, i_engine, i_devAddr, i_offset_len, i_offset)
+
+
+    /**
+     * Construct the device addressing parameters for locking the page
+     * attribute of an I2C master target
+     *
+     * @param[in] i_port - Which port to use from the I2C master.
+     * @param[in] i_engine - Which I2C master engine to use.
+     * @param[in] i_shouldLock - bool to determine whether we are
+     *                           attempting to lock or unlock the page.
+     * @param[in] i_desired_page - The EEPROM page we want to switch to
+     *                             iff a page switch is needed.
+     * @param[in] i_lockMutex - bool to determine whether we actually
+     *             want to lock the page mutex or not. This bool allows
+     *             us to switch pages mid read without hitting a deadlock.
+     */
+#define DEVICE_I2C_CONTROL_PAGE_OP( i_port, i_engine, i_shouldLock, i_desired_page, i_lockMutex )\
+            DeviceFW::I2C,\
+            static_cast<uint64_t>(i_port),\
+            static_cast<uint64_t>(i_engine),\
+            0xffffffff,\
+            static_cast<uint64_t>(i_shouldLock),\
+            static_cast<uint64_t>(i_desiredPage),\
+            static_cast<uint64_t>(i_lockMutex)
+
 
     /**
      * Construct the device addressing parameters for the Host I2C device ops.

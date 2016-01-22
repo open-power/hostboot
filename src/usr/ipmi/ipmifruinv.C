@@ -473,7 +473,8 @@ errlHndl_t isdimmIpmiFruInv::addVpdData(std::vector<uint8_t> &io_data,
         if (l_errl)
         {
             TRACFCOMP(g_trac_ipmi,"isdimmIpmiFruInv::addVpdData - "
-                      "Error while reading SPD keyword size");
+                      "Error while reading SPD keyword size for keyword 0x%x",
+                      i_keyword);
             break;
         }
 

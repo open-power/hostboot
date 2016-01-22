@@ -73,9 +73,11 @@ TRAC_INIT( & g_trac_i2cr, "I2CR", KILOBYTE );
 // Defines
 // ----------------------------------------------
 #define I2C_RESET_DELAY_NS (5 * NS_PER_MSEC)  // Sleep for 5 ms after reset
-#define P8_MASTER_ENGINES 2         // Number of Engines used in P8
-#define P8_MASTER_PORTS 3           // Number of Ports used in P8
-#define CENTAUR_MASTER_ENGINES 1    // Number of Engines in a Centaur
+#define P8_MASTER_ENGINES 2        // Number of Engines used in P8
+#define P8_MASTER_PORTS 3          // Number of Ports used in P8
+#define CENTAUR_MASTER_ENGINES 1   // Number of Engines in a Centaur
+#define MAX_NACK_RETRIES 3
+#define PAGE_OPERATION 0xffffffff  // Special value use to determine type of op
 
 // Derived from ATTR_I2C_BUS_SPEED_ARRAY[engine][port] attribute
 const TARGETING::ATTR_I2C_BUS_SPEED_ARRAY_type g_var = {{NULL}};
@@ -123,13 +125,6 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
     // These are additional parms in the case an offset is passed in
     // via va_list, as well
 
-    args.offset_length = va_arg( i_args, uint64_t);
-
-    if ( args.offset_length != 0 )
-    {
-        args.offset_buffer = reinterpret_cast<uint8_t*>
-                                             (va_arg(i_args, uint64_t));
-    }
 
     // Set both Host and FSI switches to 0 so that they get set later by
     // attribute in i2cCommonOp()
@@ -137,16 +132,90 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
     args.switches.useFsiI2C  = 0;
 
 
-    // Call common function
-    err = i2cCommonOp( i_opType,
-                       i_target,
-                       io_buffer,
-                       io_buflen,
-                       i_accessType,
-                       args );
+    // Decide if page select was requested (denoted with special device address)
+    if( args.devAddr == PAGE_OPERATION )
+    {
+
+        // since this was a page operation, next arg will be whether we want to
+        // lock the page, or unlock
+        bool l_lockOp = static_cast<bool>(va_arg(i_args, int));
+        if(l_lockOp)
+        {
+            //If page select requested, desired page would be passed in va_list
+            uint8_t l_desiredPage = static_cast<uint8_t>(va_arg(i_args, int ));
+
+            bool l_lockMutex = static_cast<bool>(va_arg(i_args, int));
+            err = i2cPageSwitchOp( i_opType,
+                                    i_target,
+                                    i_accessType,
+                                    l_desiredPage,
+                                    l_lockMutex,
+                                    args );
 
 
-    TRACDCOMP( g_trac_i2c,
+            if( err )
+            {
+                TRACFCOMP(g_trac_i2c, "Locking the page FAILED");
+                bool l_pageUnlockSuccess = false;
+                l_pageUnlockSuccess = i2cPageUnlockOp( i_target,
+                                                    args );
+                if( !l_pageUnlockSuccess )
+                {
+                    TRACFCOMP(g_trac_i2c,
+                        "An Error occurred when unlocking page after"
+                        " failure to lock the page!");
+                }
+            }
+        }
+        else
+        {
+            bool l_pageUnlockSuccess;
+            l_pageUnlockSuccess = i2cPageUnlockOp( i_target,
+                                                   args );
+            if( !l_pageUnlockSuccess )
+            {
+                TRACFCOMP(g_trac_i2c,"i2cPerformOp::i2cPageUnlockOp - Failure unlocking the page");
+                /*@
+                 * @errortype
+                 * @reasoncode      I2C_FAILURE_UNLOCKING_EEPROM_PAGE
+                 * @severity        ERRORLOG_SEV_UNRECOVERABLE
+                 * @moduleid        I2C_PERFORM_OP
+                 * @userdata1       Target Huid
+                 * @userdata2       <UNUSED>
+                 * @devdesc         I2C master encountered an error while
+                 *                  trying to unlock the eepromPage
+                 */
+                err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                               I2C_PERFORM_OP,
+                                               I2C_FAILURE_UNLOCKING_EEPROM_PAGE,
+                                               TARGETING::get_huid(i_target),
+                                               0x0,
+                                               true /*Add HB SW Callout*/ );
+                // TODO RTC 148705: Callout downstream DIMMs
+                err->collectTrace(I2C_COMP_NAME, 256 );
+            }
+        }
+
+    }
+    else
+    {
+        args.offset_length = va_arg( i_args, uint64_t);
+        if ( args.offset_length != 0 )
+        {
+            args.offset_buffer = reinterpret_cast<uint8_t*>
+                                                 (va_arg(i_args, uint64_t));
+        }
+            // Else, call the normal common function
+            err = i2cCommonOp( i_opType,
+                               i_target,
+                               io_buffer,
+                               io_buflen,
+                               i_accessType,
+                               args );
+    }
+
+
+    TRACUCOMP( g_trac_i2c,
                EXIT_MRK"i2cPerformOp() - %s",
                ((NULL == err) ? "No Error" : "With Error") );
 
@@ -283,6 +352,365 @@ errlHndl_t fsi_i2cPerformOp( DeviceFW::OperationType i_opType,
     return err;
 } // end fsi_i2cPerformOp
 
+
+// ------------------------------------------------------------------
+// i2cHandleError
+// ------------------------------------------------------------------
+void i2cHandleError( TARGETING::Target * i_target,
+                     errlHndl_t & i_err,
+                     misc_args_t & i_args )
+{
+    errlHndl_t err_reset = NULL;
+    TRACUCOMP(g_trac_i2c, ENTER_MRK"i2cHandlError()");
+    if( i_err )
+    {
+        // if it was a bus arbitration lost error set the
+        // the reset level so a force unlock reset can be performed
+        i2c_reset_level l_reset_level = BASIC_RESET;
+
+        if ( i_err->reasonCode() == I2C_ARBITRATION_LOST_ONLY_FOUND )
+        {
+
+            l_reset_level = FORCE_UNLOCK_RESET;
+        }
+
+        // Reset the I2C Master
+        err_reset = i2cReset( i_target,
+                              i_args,
+                              l_reset_level);
+
+        if( err_reset )
+        {
+            // 2 error logs, so commit the reset log here
+            TRACFCOMP( g_trac_i2c, ERR_MRK"i2cCommonOp() - "
+                    "Previous error (rc=0x%X, eid=0x%X) before "
+                    "i2cReset() failed.  Committing reset error "
+                    "(rc=0x%X, eid=0x%X) and returning original error",
+                    i_err->reasonCode(), i_err->eid(),
+                    err_reset->reasonCode(), err_reset->eid() );
+
+            errlCommit( err_reset, I2C_COMP_ID );
+
+       }
+
+        // Sleep to allow devices to recover from reset
+        nanosleep( 0, I2C_RESET_DELAY_NS );
+
+    }
+    TRACUCOMP(g_trac_i2c, EXIT_MRK"i2cHandlError()");
+}
+
+// ------------------------------------------------------------------
+// i2cPageSwitchOp
+// ------------------------------------------------------------------
+errlHndl_t i2cPageSwitchOp( DeviceFW::OperationType i_opType,
+                             TARGETING::Target * i_target,
+                             int64_t i_accessType,
+                             uint8_t i_desiredPage,
+                             bool i_lockMutex,
+                             misc_args_t & i_args )
+{
+    TRACUCOMP(g_trac_i2c, ENTER_MRK"i2cPageSwitchOp");
+
+    errlHndl_t l_err = NULL;
+    errlHndl_t l_err_NACK = NULL;
+    bool l_mutexSuccess = false;
+    bool l_pageSwitchNeeded = false;
+    bool l_mutex_needs_unlock = false;
+
+    bool l_error = false;
+    mutex_t * l_pageLock = NULL;
+
+    do
+    {
+
+        // Check for Master Sentinel chip
+        if( TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == i_target )
+        {
+            TRACFCOMP( g_trac_i2c,
+                       ERR_MRK"i2cPageSwitchOp() - Cannot target Master Sentinel "
+                       "Chip for an I2C Operation!" );
+
+            /*@
+             * @errortype
+             * @reasoncode     I2C_MASTER_SENTINEL_TARGET
+             * @severity       ERRORLOG_SEV_UNRECOVERABLE
+             * @moduleid       I2C_PAGE_LOCK_OP
+             * @userdata1      Operation Type requested
+             * @userdata2      <UNUSED>
+             * @devdesc        Master Sentinel chip was used as a target for an
+             *                 I2C operation.  This is not permitted.
+             */
+            l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           I2C_PERFORM_OP,
+                                           I2C_MASTER_SENTINEL_TARGET,
+                                           i_opType,
+                                           0x0,
+                                           true /*Add HB SW Callout*/ );
+
+            l_err->collectTrace( I2C_COMP_NAME, 256);
+
+            break;
+        }
+
+        //Set Host vs Fsi switches if not done already
+        i2cSetSwitches(i_target, i_args);
+
+
+
+        if(i_lockMutex)
+        {
+            //get page mutex
+            l_mutexSuccess = i2cGetPageMutex(i_target,
+                                           i_args,
+                                           l_pageLock );
+            if(!l_mutexSuccess)
+            {
+                TRACUCOMP(g_trac_i2c,
+                          ERR_MRK"Error in i2cPageSwitchOp::i2cGetPageMutex()");
+                /*@
+                 * @errortype
+                 * @reasoncode     I2C_INVALID_EEPROM_PAGE_MUTEX
+                 * @severity       ERRORLOG_SEV_UNRECOVERABLE
+                 * @moduleid       I2C_PAGE_LOCK_OP
+                 * @userdata1      Target Huid
+                 * @userdata2      <UNUSED>
+                 * @devdesc        There was an error retrieving the EEPROM page
+                 *                 mutex for this i2c master engine
+                 */
+                l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                 I2C_PERFORM_OP,
+                                                 I2C_INVALID_EEPROM_PAGE_MUTEX,
+                                                 TARGETING::get_huid(i_target),
+                                                 0x0,
+                                                 true /*Add HB SW Callout*/ );
+
+                l_err->collectTrace( I2C_COMP_NAME, 256 );
+                break;
+            }
+
+            (void)mutex_lock( l_pageLock );
+        }
+        // Calculate variables related to I2C Bus speed in 'args' struct
+        l_err = i2cSetBusVariables( i_target, I2C_BUS_SPEED_FROM_MRW, i_args);
+
+        if( l_err )
+        {
+            TRACFCOMP(g_trac_i2c,
+                    "Error in i2cPageSwitchOp::i2cSetBusVariables()");
+
+            // Error means we need to unlock the page mutex prematurely
+            l_mutex_needs_unlock = true;
+            // Skip performing actual I2C Operation
+            break;
+        }
+
+
+        // Set device address to switch to appropriate page
+        if( i_desiredPage == PAGE_ONE )
+        {
+            i_args.devAddr = PAGE_ONE_ADDR;
+        }
+        else if( i_desiredPage == PAGE_ZERO )
+        {
+            i_args.devAddr = PAGE_ZERO_ADDR;
+        }
+        l_pageSwitchNeeded = true;
+
+        //TODO: RTC 147385
+        //optimize to remember current page of i2c master device
+
+        if( l_pageSwitchNeeded )
+        {
+            // Perform the actual write operation to switch pages.
+            i_args.read_not_write  = false;
+            i_args.with_stop       = true;
+            i_args.skip_mode_setup = false;
+
+
+            //going to write 2 bytes of zeros to special device address
+            size_t l_zeroBuflen = 2;
+            uint8_t * l_zeroBuffer = static_cast<uint8_t*>(malloc(l_zeroBuflen));
+            memset(l_zeroBuffer, 0, l_zeroBuflen);
+
+
+            TRACUCOMP(g_trac_i2c,"i2cPageSwitchOp args! \n"
+                    "misc_args_t: port:%d / engine: %d: devAddr: %x: skip_mode_step(%d):\n"
+                    "with_stop(%d): read_not_write(%d): bus_speed: %d: bit_rate_divisor: %d:\n"
+                    "polling_interval_ns: %d: timeout_count: %d: offset_length: %d",
+                    i_args.port, i_args.engine, i_args.devAddr, i_args.skip_mode_setup,
+                    i_args.with_stop, i_args.read_not_write, i_args.bus_speed,
+                    i_args.bit_rate_divisor, i_args.polling_interval_ns, i_args.timeout_count,
+                    i_args.offset_length );
+
+
+            // Retry MAX_NACK_RETRIES so we can bypass nacks caused by a busy bus.
+            // Other Nack errors are expected and caused by the empty write
+            // associated with the page switch operation.
+            for(uint8_t retry = 0;
+                retry <= MAX_NACK_RETRIES;
+                retry++)
+            {
+                l_err = i2cWrite(i_target,
+                                 l_zeroBuffer,
+                                 l_zeroBuflen,
+                                 i_args);
+
+                if(l_err == NULL)
+                {
+                    // Operation completed successfully
+                    // set attribute, free memory and break from retry loop
+                    // TODO Set EEPROM_PAGE attribute to save page for
+                    // optimization
+                    TRACUCOMP(g_trac_i2c,"Set EEPROM_PAGE to %d", i_desiredPage);
+                    // i_target->setAttr<TARGETING::ATTR_EEPROM_PAGE>(l_newPage);
+                    free(l_zeroBuffer);
+                    break;
+                }
+                else if( l_err->reasonCode() != I2C_NACK_ONLY_FOUND)
+                {
+                    // Only retry on NACK failures. Break form retry loop
+                    TRACFCOMP(g_trac_i2c,
+                            ERR_MRK"i2cPageSwitchOp(): I2C Write "
+                            "Non-NACK fail %x", i_args.devAddr );
+                    l_err->collectTrace(I2C_COMP_NAME);
+                    l_mutex_needs_unlock = true;
+                    l_error = true;
+                    break;
+                }
+                else // Handle NACK error
+                {
+                    TRACFCOMP(g_trac_i2c,
+                       "i2cPageSwitchOp::Expected Nack error. Retrying in case "
+                       "this nack was caused by bus being busy "
+                       "loop = %d", retry);
+
+                    nanosleep( 0, i_args.polling_interval_ns );
+
+                    // Retry on NACKs just in case the cause was a busy i2c bus.
+                    if( retry < MAX_NACK_RETRIES )
+                    {
+                        if(l_err_NACK == NULL)
+                        {
+                            l_err_NACK = l_err;
+                          //  TRACFCOMP(g_trac_i2c,
+                            //        "Saving first Nack error and retry");
+                            nanosleep(0, i_args.polling_interval_ns);
+                            l_err_NACK->collectTrace(I2C_COMP_NAME);
+
+                        }
+                        else
+                        {
+                            // Delete this new NACK error
+                            delete l_err;
+                            nanosleep(0 ,i_args.polling_interval_ns);
+                            l_err = NULL;
+                        }
+                        // continue to retry
+                        continue;
+                    }
+                    else // no more retries: trace and break;
+                    {
+                        TRACFCOMP(g_trac_i2c,
+                                "Exiting Nack retry loop");
+                        break;
+                    }
+                }
+
+            } // end of retry loop
+
+            if(l_err_NACK)
+            {
+                if( l_err )
+                {
+                    i2cHandleError( i_target,
+                                    l_err,
+                                    i_args );
+                    delete l_err;
+                    l_err = NULL;
+
+                }
+                delete l_err_NACK;
+                l_err_NACK = NULL;
+            }
+        }
+
+        if( l_error )
+        {
+           //call i2cHandleError
+           i2cHandleError( i_target,
+                           l_err,
+                           i_args );
+           break;
+        }
+    }while( 0 );
+    if( l_mutex_needs_unlock )
+    {
+        TRACFCOMP(g_trac_i2c,
+                "Prematurely unlocking page mutex");
+        (void)mutex_unlock(l_pageLock);
+    }
+
+    TRACUCOMP(g_trac_i2c, EXIT_MRK"i2cPageSwitchOp()");
+
+    return l_err;
+}
+
+
+
+// ------------------------------------------------------------------
+// i2cPageUnlockOp
+// ------------------------------------------------------------------
+bool i2cPageUnlockOp( TARGETING::Target * i_target,
+                            misc_args_t & i_args )
+{
+    TRACUCOMP(g_trac_i2c, ENTER_MRK"i2cPageUnlockOp()");
+    bool l_mutexSuccess = false;
+    mutex_t * l_pageLock = NULL;
+    errlHndl_t l_err = NULL;
+
+    do
+    {
+        // Get the mutex for this target
+        l_mutexSuccess = i2cGetPageMutex( i_target,
+                                          i_args,
+                                          l_pageLock );
+
+        if( !l_mutexSuccess )
+        {
+            TRACUCOMP( g_trac_i2c,
+                   ERR_MRK"Error in i2cPageUnlockOp::i2cGetPageMutex()");
+            /*@
+             * @errortype
+             * @reasoncode     I2C_INVALID_EEPROM_PAGE_MUTEX
+             * @severity       ERRORLOG_SEV_UNRECOVERABLE
+             * @moduleid       I2C_PAGE_UNLOCK_OP
+             * @userdata1      Target Huid
+             * @userdata2      <UNUSED>
+             * @devdesc        There was an error retrieving the EEPROM page
+             *                 mutex for this i2c master engine
+             */
+            l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                             I2C_PERFORM_OP,
+                                             I2C_INVALID_EEPROM_PAGE_MUTEX,
+                                             TARGETING::get_huid(i_target),
+                                             0x0,
+                                             true /*Add HB SW Callout*/ );
+
+            l_err->collectTrace( I2C_COMP_NAME, 256 );
+            errlCommit(l_err, I2C_COMP_ID);
+            break;
+        }
+        //Unlock the page mutex
+        (void)mutex_unlock(l_pageLock);
+    }while( 0 );
+
+    TRACUCOMP(g_trac_i2c, EXIT_MRK"i2cPageUnlockOp()");
+    return l_mutexSuccess;
+}
+
+
+
 // ------------------------------------------------------------------
 // i2cSetSwitches
 // ------------------------------------------------------------------
@@ -316,22 +744,14 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
                         misc_args_t & i_args )
 {
     errlHndl_t err = NULL;
-    errlHndl_t err_reset = NULL;
     bool mutex_success = false;
 
     mutex_t * engineLock = NULL;
     bool mutex_needs_unlock = false;
 
-    TRACDCOMP( g_trac_i2c,
-               ENTER_MRK"i2cCommonOp(): i_opType=%d, aType=%d, "
-               "p/e/devAddr= %d/%d/0x%X, len=%d, offset=%d/%p",
-               (uint64_t) i_opType, i_accessType, i_args.port, i_args.engine,
-               i_args.devAddr, io_buflen, i_args.offset_length,
-               i_args.offset_buffer);
-
     TRACUCOMP( g_trac_i2c,
                ENTER_MRK"i2cCommonOp(): i_opType=%d, aType=%d, "
-               "p/e/devAddr= %d/%d/0x%x, len=%d, offset=%d/%p",
+               "p/e/devAddr= %d/%d/0x%x, len=%d, offset=%x/%p",
                (uint64_t) i_opType, i_accessType, i_args.port, i_args.engine,
                i_args.devAddr, io_buflen, i_args.offset_length,
                i_args.offset_buffer);
@@ -370,6 +790,7 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
         //Set Host vs Fsi switches if not done already
         i2cSetSwitches(i_target, i_args);
 
+
         // Get the mutex for the requested engine
         mutex_success = i2cGetEngineMutex( i_target,
                                        i_args,
@@ -383,14 +804,8 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
         }
 
         // Lock on this engine
-        TRACUCOMP( g_trac_i2c,
-                   INFO_MRK"Obtaining lock for engine: %d",
-                   i_args.engine );
         (void)mutex_lock( engineLock );
         mutex_needs_unlock = true;
-        TRACUCOMP( g_trac_i2c,
-                   INFO_MRK"Locked on engine: %d",
-                   i_args.engine );
 
 
         // Calculate variables related to I2C Bus Speed in 'args' struct
@@ -413,7 +828,6 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
         if( i_opType        == DeviceFW::READ &&
             i_args.offset_length != 0 )
         {
-
             // First WRITE offset to device without a stop
             i_args.read_not_write  = false;
             i_args.with_stop       = false;
@@ -447,7 +861,6 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
         else if( i_opType        == DeviceFW::WRITE &&
                  i_args.offset_length != 0 )
         {
-
             // Add the Offset Information to the start of the data and
             // then send as a single write operation
 
@@ -552,37 +965,9 @@ errlHndl_t i2cCommonOp( DeviceFW::OperationType i_opType,
         // Handle Error from I2C Operation
         if( err )
         {
-
-            // if it was a bus arbition lost error set the
-            // the reset level so a force unlock reset can be performed
-            i2c_reset_level l_reset_level = BASIC_RESET;
-
-            if ( err->reasonCode() == I2C_ARBITRATION_LOST_ONLY_FOUND )
-            {
-                l_reset_level = FORCE_UNLOCK_RESET;
-            }
-
-            // Reset the I2C Master
-            err_reset = i2cReset( i_target,
-                                  i_args,
-                                  l_reset_level);
-
-            if( err_reset )
-            {
-                // 2 error logs, so commit the reset log here
-                TRACFCOMP( g_trac_i2c, ERR_MRK"i2cCommonOp() - "
-                           "Previous error (rc=0x%X, eid=0x%X) before "
-                           "i2cReset() failed.  Committing reset error "
-                           "(rc=0x%X, eid=0x%X) and returning original error",
-                           err->reasonCode(), err->eid(),
-                           err_reset->reasonCode(), err_reset->eid() );
-
-                errlCommit( err_reset, I2C_COMP_ID );
-            }
-
-            // Sleep to allow devices to recover from reset
-            nanosleep( 0, I2C_RESET_DELAY_NS );
-
+            i2cHandleError( i_target,
+                            err,
+                            i_args );
             break;
         }
 
@@ -1066,7 +1451,7 @@ errlHndl_t i2cWrite ( TARGETING::Target * i_target,
     // Define regs we'll be using
     fifo_reg_t fifo;
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                ENTER_MRK"i2cWrite()" );
 
     TRACSCOMP( g_trac_i2cr,
@@ -1113,7 +1498,7 @@ errlHndl_t i2cWrite ( TARGETING::Target * i_target,
                 break;
             }
 
-            TRACUCOMP( g_trac_i2cr,
+            TRACSCOMP( g_trac_i2cr,
                        "I2C WRITE DATA  : engine %.2X : port %.2X : "
                        "devAddr %.2X : byte %d : %.2X (0x%lx)",
                        i_args.engine, i_args.port, i_args.devAddr,
@@ -1142,7 +1527,7 @@ errlHndl_t i2cWrite ( TARGETING::Target * i_target,
                "I2C WRITE END   : engine %.2X: port %.2X : devAddr %.2X : len %d",
                i_args.engine, i_args.port, i_args.devAddr, io_buflen );
 
-    TRACDCOMP( g_trac_i2c,
+    TRACUCOMP( g_trac_i2c,
                EXIT_MRK"i2cWrite()" );
 
     return err;
@@ -1276,7 +1661,7 @@ bool i2cGetEngineMutex( TARGETING::Target * i_target,
 
             default:
                 TRACFCOMP( g_trac_i2c,
-                           ERR_MRK"Invalid engine for getting Mutex! "
+                           ERR_MRK"i2cGetEngineMutex: Invalid engine for getting Mutex! "
                            "i_args.engine=%d", i_args.engine );
                 success = false;
                 assert(false, "i2c.C: Invalid engine for getting Mutex!"
@@ -1287,6 +1672,47 @@ bool i2cGetEngineMutex( TARGETING::Target * i_target,
 
     }while( 0 );
 
+    return success;
+}
+
+// ------------------------------------------------------------------
+// i2cGetPageMutex
+// ------------------------------------------------------------------
+bool i2cGetPageMutex( TARGETING::Target * i_target,
+                      misc_args_t & i_args,
+                      mutex_t *& i_pageLock )
+{
+    bool success = true;
+    do
+    {
+        switch( i_args.engine )
+        {
+            case 0:
+                i_pageLock = i_target->
+                    getHbMutexAttr<TARGETING::ATTR_I2C_PAGE_MUTEX_0>();
+                break;
+
+            case 1:
+                i_pageLock = i_target->
+                    getHbMutexAttr<TARGETING::ATTR_I2C_PAGE_MUTEX_1>();
+                break;
+
+            case 2:
+                i_pageLock = i_target->
+                    getHbMutexAttr<TARGETING::ATTR_I2C_PAGE_MUTEX_2>();
+                break;
+
+            default:
+                TRACFCOMP( g_trac_i2c,
+                        ERR_MRK"i2cGetPageMutex: Invalid engine for getting mutex!");
+                success = false;
+                assert(false, "i2c.C: Invalid engine for getting Mutex!"
+                        "i_args.engine=%d", i_args.engine );
+                break;
+
+        };
+
+    }while( 0 );
     return success;
 }
 
@@ -1326,6 +1752,7 @@ errlHndl_t i2cWaitForCmdComp ( TARGETING::Target * i_target,
 
             if( err )
             {
+                TRACFCOMP(g_trac_i2c, "Errored at i2cWaitForCmdComplete::i2cReadStatusReg");
                 break;
             }
 
@@ -1720,6 +2147,9 @@ errlHndl_t i2cWaitForFifoSpace ( TARGETING::Target * i_target,
 
         if( err )
         {
+            TRACFCOMP( g_trac_i2c,
+                    "Errored out at i2cReadStatusReg: statusreg = %016llx",
+                    status.value);
             break;
         }
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -112,6 +112,7 @@ const KeywordData ddr4Data[] =
     { DRAM_MANUFACTURER_ID,             0x15f,  0x02,   0x00,   0x00, true,  false, NA },
     { MANUFACTURER_SPECIFIC_DATA,       0x161,  0x1d,   0x00,   0x00, false, false, NA },
     { DIMM_BAD_DQ_DATA,                 0x180,  0x50,   0x00,   0x00, false, true,  NA },
+    { MODULE_REVISION_CODE,             0x15d,  0x01,   0x00,   0x00, false, false, NA },
     // Normal fields supported on DDR4 only
     { BANK_GROUP_BITS,                  0x04,   0x01,   0xC0,   0x06, false, false, NA },
     { BANK_ADDRESS_BITS_DDR4,           0x04,   0x01,   0x30,   0x04, false, false, NA },
@@ -132,7 +133,6 @@ const KeywordData ddr4Data[] =
     { TRRDS_FINE_OFFSET,                0x77,   0x01,   0x00,   0x00, false, false, NA },
     { TCKMAX_FINE_OFFSET,               0x7c,   0x01,   0x00,   0x00, false, false, NA },
     { BASE_CONFIG_CRC,                  0x7f,   0x02,   0x00,   0x00, true,  false, NA },
-    { MODULE_REVISION_CODE_DDR4,        0x15d,  0x01,   0x00,   0x00, false, false, NA },
     { DRAM_STEPPING,                    0x160,  0x01,   0x00,   0x00, false, false, NA },
     { MANUFACTURING_SECTION_CRC,        0x17f,  0x02,   0x00,   0x00, true,  false, NA },
     // Module Specific fields supported on both DDR3 and DDR4
