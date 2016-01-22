@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2002,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -88,25 +90,6 @@ SCAN_COMM_REGISTER_CLASS & ScanFacility::GetScanCommRegister( uint64_t address,
     regCreated.setAccessLevel( i_regOp );
     return regCreated;
 }
-//------------------------------------------------------------------------------
-
-#if 0
-SCAN_COMM_REGISTER_CLASS & ScanFacility::GetScanRingRegister(
-                                TARGETING::TargetHandle_t i_ptargetHandle,
-                                ScanRingField * start,
-                                ScanRingField * end)
-{
-  uint32_t bitLength = 0;
-  for(ScanRingField * srf = start; srf != end; ++srf)
-  {
-    bitLength += srf->length;
-  }
-  HomRegisterAccessScan hra(i_ptargetHandle,start,end);
-  iv_scanAccessList.push_back(hra);
-  ScanCommRegisterChip scrKey(start->registerId,bitLength,hra);
-  return iv_scomRegFw.get(scrKey);
-}
-#endif
 
 //------------------------------------------------------------------------------
 
