@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2016
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,7 +35,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwpf/hwp
 ##########################################################
 # Following is needed to include mss_maint_cmds.H
 ##########################################################
-EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp
+#EXTRAINCDIR += ${ROOTPATH}/src/usr/hwpf/hwp TODO RTC 145132
 
 MODULE = mdia
 

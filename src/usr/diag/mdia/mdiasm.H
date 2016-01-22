@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,7 +32,7 @@
 
 #include <vector>
 #include <util/threadpool.H>
-#include <utility_procedures/mss_maint_cmds.H>
+//#include <utility_procedures/mss_maint_cmds.H> TODO RTC 145132
 #include "sys/sync.h"
 #include "mdiafwd.H"
 #include "mdiaglobals.H"
@@ -55,14 +55,14 @@ static const uint64_t MBA_TIMEOUT_LOG =
  */
 enum WorkFlowPhase
 {
-    START_PATTERN_0 = mss_MaintCmd::PATTERN_0,
-    START_PATTERN_1 = mss_MaintCmd::PATTERN_1,
-    START_PATTERN_2 = mss_MaintCmd::PATTERN_2,
-    START_PATTERN_3 = mss_MaintCmd::PATTERN_3,
-    START_PATTERN_4 = mss_MaintCmd::PATTERN_4,
-    START_PATTERN_5 = mss_MaintCmd::PATTERN_5,
-    START_PATTERN_6 = mss_MaintCmd::PATTERN_6,
-    START_PATTERN_7 = mss_MaintCmd::PATTERN_7,
+    START_PATTERN_0 = 0, //mss_MaintCmd::PATTERN_0, TODO RTC 145132
+    START_PATTERN_1 = 1, //mss_MaintCmd::PATTERN_1, TODO RTC 145132
+    START_PATTERN_2 = 2, //mss_MaintCmd::PATTERN_2, TODO RTC 145132
+    START_PATTERN_3 = 3, //mss_MaintCmd::PATTERN_3, TODO RTC 145132
+    START_PATTERN_4 = 4, //mss_MaintCmd::PATTERN_4, TODO RTC 145132
+    START_PATTERN_5 = 5, //mss_MaintCmd::PATTERN_5, TODO RTC 145132
+    START_PATTERN_6 = 6, //mss_MaintCmd::PATTERN_6, TODO RTC 145132
+    START_PATTERN_7 = 7, //mss_MaintCmd::PATTERN_7, TODO RTC 145132
     START_RANDOM_PATTERN,
     DUMMY_SYNC_PHASE,
     DUMMY_ASYNC_PHASE,
