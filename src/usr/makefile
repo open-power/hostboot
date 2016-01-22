@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2015
+# Contributors Listed Below - COPYRIGHT 2010,2016
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -64,5 +64,6 @@ SUBDIRS += console.d
 SUBDIRS += errldisplay.d
 SUBDIRS += ipmi.d
 #SUBDIRS += htmgt.d
+SUBDIRS += diag.d
 
 include ${ROOTPATH}/config.mk
