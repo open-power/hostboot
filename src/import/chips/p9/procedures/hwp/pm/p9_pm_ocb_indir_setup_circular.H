@@ -31,7 +31,6 @@
 // *HWP Level           : 2
 // *HWP Consumed by     : HS
 
-
 #ifndef _P9_PM_OCB_INDIR_SETUP_CIRCULAR_H_
 #define _P9_PM_OCB_INDIR_SETUP_CIRCULAR_H_
 
