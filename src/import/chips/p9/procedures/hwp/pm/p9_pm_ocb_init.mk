@@ -7,7 +7,7 @@
 #
 # EKB Project
 #
-# COPYRIGHT 2015
+# COPYRIGHT 2015,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -18,3 +18,4 @@
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_pm_ocb_init
 $(call BUILD_PROCEDURE)
+
