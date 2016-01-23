@@ -32,7 +32,6 @@
 // *HWP Level           : 2
 // *HWP Consumed by     : HS
 
-
 /// High-level procedure flow:
 /// @verbatim
 ///  Setup specified channel to push or pull circular mode by calling
