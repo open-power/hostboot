@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,3 +72,4 @@ fapi2::ReturnCode p9_pm_ocb_indir_setup_linear(
     FAPI_IMP("p9_pm_ocb_indir_setup_linear Exit");
     return l_rc;
 }
+

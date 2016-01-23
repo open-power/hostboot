@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,7 +25,6 @@
 // *HWP Team            : PM
 // *HWP Level           : 2
 // *HWP Consumed by     : HS
-
 
 /// High-level procedure flow:
 /// @verbatim

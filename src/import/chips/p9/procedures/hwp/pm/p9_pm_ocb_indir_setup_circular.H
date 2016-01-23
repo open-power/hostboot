@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,7 +24,6 @@
 // *HWP Team            : PM
 // *HWP Level           : 2
 // *HWP Consumed by     : HS
-
 
 #ifndef _P9_PM_OCB_INDIR_SETUP_CIRCULAR_H_
 #define _P9_PM_OCB_INDIR_SETUP_CIRCULAR_H_
