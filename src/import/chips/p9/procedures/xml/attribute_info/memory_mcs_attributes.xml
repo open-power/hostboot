@@ -7,7 +7,7 @@
 <!--                                                                        -->
 <!-- EKB Project                                                            -->
 <!--                                                                        -->
-<!-- COPYRIGHT 2015                                                         -->
+<!-- COPYRIGHT 2015,2016                                                    -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -2005,7 +2005,6 @@
 
     <attribute>
         <id>ATTR_EFF_DRAM_BL</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Burst Length.
@@ -2021,8 +2020,7 @@
         <writeable/>
         <odmVisable/>
         <odmChangeable/>
-        <array>2 2</array>
-        <mssAccessor>PORT</mssAccessor>
+        <array>2</array>
         <mssAccessorName>eff_dram_burst_length</mssAccessorName>
     </attribute>
 
@@ -7285,4 +7283,17 @@
         <writeable/>
         <mssAccessorName>eff_dram_rtt_wr</mssAccessorName>
     </attribute>
+
+<attribute>
+    <id>ATTR_VPD_GPO</id>
+    <targetType>TARGET_TYPE_MCS</targetType>
+    <description>This value comes from the VPD keyword MT bytes 61 MT(61) for the Logical DIMM
+      associated with port A.  Bytes 125 for port B, 189 for port C and 253 for port D</description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <odmVisable/>
+    <array>2</array>
+    <writeable/>
+    <mssAccessorName>vpd_gpo</mssAccessorName>
+</attribute>
 </attributes>
