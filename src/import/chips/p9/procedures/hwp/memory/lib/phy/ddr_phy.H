@@ -344,83 +344,24 @@ fapi_try_exit:
 /// @tparam T, the target type of the MCA/MBA
 /// @param[in] the target associated with this cal setup
 /// @param[in] the vector of currently configured rank pairs
-/// @param[in] fapi2::buffer<uint8_t> representing the cal steps to enable
+/// @param[in] fapi2::buffer<uint16_t> representing the cal steps to enable
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template< fapi2::TargetType T >
-inline fapi2::ReturnCode setup_cal_config( const fapi2::Target<T>& i_target,
-        const std::vector<uint64_t> i_rank_pairs,
-        const fapi2::buffer<uint16_t> i_cal_steps_enabled);
-
-///
-/// @brief Setup all the cal config register
-/// @param[in] the MCA target associated with this cal setup
-/// @param[in] the vector of currently configured rank pairs
-/// @param[in] fapi2::buffer<uint8_t> representing the cal steps to enable
-/// @return FAPI2_RC_SUCCESS iff setup was successful
-///
-template<>
-inline fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        const std::vector<uint64_t> i_rank_pairs,
-        const fapi2::buffer<uint16_t> i_cal_steps_enabled)
-{
-    fapi2::buffer<uint64_t> l_cal_config;
-
-    // This is the buffer which will be written to CAL_CONFIG0. It starts
-    // life assuming no cal sequences, no rank pairs - but we set the abort-on-error
-    // bit ahead of time.
-    l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ABORT_ON_ERROR>(CAL_ABORT_ON_ERROR);
-
-    // Sadly, the bits in the register don't align directly with the bits in the attribute.
-    // So, arrange the bits accordingly and write the config register.
-    {
-        // Skip EXT_ZQCAL as it's not in the config register - we do it outside.
-        // Loop (unrolled because static) over the remaining bits.
-        l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_WR_LEVEL>(
-            i_cal_steps_enabled.getBit<WR_LEVEL>());
-        l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_DQS_ALIGN>(
-            i_cal_steps_enabled.getBit<DQS_ALIGN>());
-        l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_RDCLK_ALIGN>(
-            i_cal_steps_enabled.getBit<RDCLK_ALIGN>());
-        l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_READ_CTR>(
-            i_cal_steps_enabled.getBit<READ_CTR>());
-        l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_WRITE_CTR>(
-            i_cal_steps_enabled.getBit<WRITE_CTR>());
-        l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_INITIAL_COARSE_WR>(
-            i_cal_steps_enabled.getBit<COARSE_WR>());
-        l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_COARSE_RD>(
-            i_cal_steps_enabled.getBit<COARSE_RD>());
-    }
-
-    // Note: This rank encoding isn't used if the cal is initiated from the CCS engine
-    // as they use the recal inteface.
-    // Configure the rank pairs
-    for (auto rp : i_rank_pairs)
-    {
-        l_cal_config.setBit(MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_RANK_PAIR + rp);
-    }
-
-    FAPI_INF("cal_config for %s: 0x%llx", mss::c_str(i_target), l_cal_config);
-    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0, l_cal_config) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
+fapi2::ReturnCode setup_cal_config( const fapi2::Target<T>& i_target,
+                                    const std::vector<uint64_t> i_rank_pairs,
+                                    const fapi2::buffer<uint16_t> i_cal_steps_enabled);
 
 ///
 /// @brief Setup all the cal config register
 /// @param[in] the target associated with this cal setup
 /// @param[in] i_rank, one currently configured rank pairs
-/// @param[in] fapi2::buffer<uint8_t> representing the cal steps to enable
+/// @param[in] fapi2::buffer<uint16_t> representing the cal steps to enable
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
-inline fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        const uint64_t i_rank,
-        const fapi2::buffer<uint16_t> i_cal_steps_enabled)
-{
-    std::vector< uint64_t > l_ranks({i_rank});
-    return setup_cal_config(i_target, l_ranks, i_cal_steps_enabled);
-}
+fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                    const uint64_t i_rank,
+                                    const fapi2::buffer<uint16_t> i_cal_steps_enabled);
 
 ///
 /// @brief Setup wc_config0

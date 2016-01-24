@@ -34,6 +34,8 @@
 #include "../mss.H"
 
 #include "ddr_phy.H"
+#include "read_cntrl.H"
+
 #include "../utils/bit_count.H"
 
 using fapi2::TARGET_TYPE_MCBIST;
@@ -199,7 +201,7 @@ fapi_try_exit:
 /// @param[in] mss::HIGH or mss::LOW - desired state.
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode change_force_mclk_low (const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+fapi2::ReturnCode change_force_mclk_low (const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
         const mss::states i_state)
 {
 
@@ -878,10 +880,145 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
         // Section 5.2.4.8 DP16 Write Clock Enable & Clock Selection on page 301
         FAPI_TRY( mss::dp16::write_clock_enable(p, l_pairs) );
         FAPI_TRY( mss::dp16::read_clock_enable(p, l_pairs) );
+
+        // Read Control reset
+        FAPI_TRY( mss::rc<TARGET_TYPE_MCA>::reset_config0(p) );
+        FAPI_TRY( mss::rc<TARGET_TYPE_MCA>::reset_config1(p) );
+        FAPI_TRY( mss::rc<TARGET_TYPE_MCA>::reset_config2(p) );
+        FAPI_TRY( mss::rc<TARGET_TYPE_MCA>::reset_config3(p) );
+
+        FAPI_TRY( mss::rc<TARGET_TYPE_MCA>::reset_vref_config0(p) );
+        FAPI_TRY( mss::rc<TARGET_TYPE_MCA>::reset_vref_config1(p) );
     }
 
 fapi_try_exit:
     return fapi2::current_err;
+}
+
+///
+/// @brief Setup all the cal config register
+/// @param[in] the MCA target associated with this cal setup
+/// @param[in] the vector of currently configured rank pairs
+/// @param[in] fapi2::buffer<uint8_t> representing the cal steps to enable
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<>
+inline fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const std::vector<uint64_t> i_rank_pairs,
+        fapi2::buffer<uint16_t> i_cal_steps_enabled)
+{
+    fapi2::buffer<uint64_t> l_cal_config;
+    fapi2::buffer<uint64_t> l_vref_config;
+
+    // This is the buffer which will be written to CAL_CONFIG0. It starts
+    // life assuming no cal sequences, no rank pairs - but we set the abort-on-error
+    // bit ahead of time.
+    l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ABORT_ON_ERROR>(CAL_ABORT_ON_ERROR);
+
+    // Check the write centering bits - if write centering is defined, don't run 2D. Vice versa.
+    if (i_cal_steps_enabled.getBit<WRITE_CTR>() && i_cal_steps_enabled.getBit<WRITE_CTR_2D_VREF>())
+    {
+        FAPI_INF("Both 1D and 2D write centering were defined - only performing 2D");
+        i_cal_steps_enabled.clearBit<WRITE_CTR>();
+    }
+
+    // Sadly, the bits in the register don't align directly with the bits in the attribute.
+    // So, arrange the bits accordingly and write the config register.
+    {
+        // Skip EXT_ZQCAL as it's not in the config register - we do it outside.
+        // Loop (unrolled because static) over the remaining bits.
+        l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_WR_LEVEL>(
+            i_cal_steps_enabled.getBit<WR_LEVEL>());
+        l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_DQS_ALIGN>(
+            i_cal_steps_enabled.getBit<DQS_ALIGN>());
+        l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_RDCLK_ALIGN>(
+            i_cal_steps_enabled.getBit<RDCLK_ALIGN>());
+        l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_READ_CTR>(
+            i_cal_steps_enabled.getBit<READ_CTR>() || i_cal_steps_enabled.getBit<READ_CTR_2D_VREF>());
+        l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_WRITE_CTR>(
+            i_cal_steps_enabled.getBit<WRITE_CTR>() || i_cal_steps_enabled.getBit<WRITE_CTR_2D_VREF>());
+        l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_INITIAL_COARSE_WR>(
+            i_cal_steps_enabled.getBit<COARSE_WR>());
+        l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_COARSE_RD>(
+            i_cal_steps_enabled.getBit<COARSE_RD>());
+    }
+
+    // Blast the VREF config with the proper setting for these cal bits.
+    // Read Centering
+    {
+        fapi2::buffer<uint64_t> l_data;
+
+        // The two bits we care about are the calibration enable and skip read centering
+        // bits in rc_vref_config1. If CALIBRATION_ENABLE is set, the vref is run before
+        // read centering. If SKIPRDCENTERING is set, the cal stops after vref centering.
+        // So
+        // If READ_CNTR == 1 && READ_CTR_2D_VREF == 1, CALIBRATION_ENABLE = 1 and SKIP = 0
+        // If READ_CNTR == 0 && READ_CTR_2D_VREF == 1, CALIBRATION_ENABLE = 1 and SKIP = 1
+        // If READ_CNTR == 1 && READ_CTR_2D_VREF == 0, CALIBRATION_ENABLE = 0 and SKIP = don't care
+        // If READ_CNTR == 0 && READ_CTR_2D_VREF == 0, CALIBRATION_ENABLE = 0 and SKIP = don't care
+        FAPI_TRY( mss::rc<TARGET_TYPE_MCA>::read_vref_config1(i_target, l_data) );
+
+        l_data.writeBit<MCA_DDRPHY_RC_RDVREF_CONFIG1_P0_CALIBRATION_ENABLE>(
+            i_cal_steps_enabled.getBit<WRITE_CTR_2D_VREF>());
+        l_data.writeBit<MCA_DDRPHY_RC_RDVREF_CONFIG1_P0_SKIP_RDCENTERING>(
+            ! i_cal_steps_enabled.getBit<WRITE_CTR>());
+
+        FAPI_TRY( mss::rc<TARGET_TYPE_MCA>::write_vref_config1(i_target, l_data) );
+    }
+
+    // Write Centering
+    {
+        static const std::vector<uint64_t> l_vref_regs =
+        {
+            MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0, MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_1,
+            MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_2, MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_3,
+            MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_4
+        };
+
+        if (i_cal_steps_enabled.getBit<WRITE_CTR>())
+        {
+            l_vref_config.setBit<MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0_01_CTR_1D_CHICKEN_SWITCH>();
+        }
+
+        if (i_cal_steps_enabled.getBit<WRITE_CTR_2D_VREF>())
+        {
+            l_vref_config.clearBit<MCA_DDRPHY_DP16_WR_VREF_CONFIG0_P0_0_01_CTR_1D_CHICKEN_SWITCH>();
+            // TK: Other 2D config information
+        }
+
+        FAPI_DBG("wr_vref_config: 0x%016lu", l_vref_config);
+        FAPI_TRY( mss::scom_blastah(i_target, l_vref_regs, l_vref_config) );
+    }
+
+    // Note: This rank encoding isn't used if the cal is initiated from the CCS engine
+    // as they use the recal inteface.
+    // Configure the rank pairs
+    for (auto rp : i_rank_pairs)
+    {
+        l_cal_config.setBit(MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_RANK_PAIR + rp);
+    }
+
+    FAPI_INF("cal_config for %s: 0x%lx (steps: 0x%lx)",
+             mss::c_str(i_target), uint16_t(l_cal_config), uint16_t(i_cal_steps_enabled));
+    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0, l_cal_config) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Setup all the cal config register
+/// @param[in] the target associated with this cal setup
+/// @param[in] i_rank, one currently configured rank pairs
+/// @param[in] fapi2::buffer<uint16_t> representing the cal steps to enable
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                    const uint64_t i_rank,
+                                    const fapi2::buffer<uint16_t> i_cal_steps_enabled)
+{
+    std::vector< uint64_t > l_ranks({i_rank});
+    return setup_cal_config(i_target, l_ranks, i_cal_steps_enabled);
 }
 
 }
