@@ -155,7 +155,6 @@ extern "C"
                 // We need to figure out how long to wait before we start polling. Each cal step has an expected
                 // duration, so for each cal step which was enabled, we update the CCS program.
                 FAPI_TRY( mss::cal_timer_setup(p, l_program.iv_poll, l_cal_steps_enabled) );
-
                 FAPI_TRY( mss::setup_cal_config(p, rp, l_cal_steps_enabled) );
 
                 // In the event of an init cal hang, CCS_STATQ(2) will assert and CCS_STATQ(3:5) = “001” to indicate a
