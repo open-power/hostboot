@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,6 +54,13 @@
 //******************************************************************************
 // Forward declarations to allow friend functions to work
 //******************************************************************************
+#ifdef __HOSTBOOT_RUNTIME
+namespace RT_TARG
+{
+    void adjustTargeting4Runtime();
+}
+#endif
+
 namespace fapi
 {
     class ReturnCode;
@@ -573,6 +580,9 @@ class Target
         friend class AssociationManager;
         friend class AttributeTank;
 
+#ifdef __HOSTBOOT_RUNTIME
+        friend void RT_TARG::adjustTargeting4Runtime();
+#endif
         // Friend functions to allow FAPI Attribute code to directly call
         // _tryGetAttr and _trySetAttr for code size optimization
         friend fapi::ReturnCode fapi::platAttrSvc::getTargetingAttr(
