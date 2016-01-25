@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -185,21 +185,11 @@ void set_eff_config_attrs_helper( const EFF_CONFIG_ATTRIBUTES_BASE i_base,
                  nodeTgt->getAttr<
                  TARGETING::ATTR_MRW_DDR4_VDDR_MAX_LIMIT_POST_DRAM_INIT>();
 
-
-        // POST_DRAM_INIT VPP
-        pdi_vpp_slope =
-                 nodeTgt->getAttr<
-                 TARGETING::ATTR_MSS_VOLT_VPP_SLOPE_POST_DRAM_INIT>();
-
-        pdi_vpp_intercept =
-                 nodeTgt->getAttr<
-                 TARGETING::ATTR_MSS_VOLT_VPP_INTERCEPT_POST_DRAM_INIT>();
     }
     o_post_dram_inits_found = ( pdi_ddr3_vddr_slope || pdi_ddr3_vddr_intercept ||
                                 pdi_ddr3_vddr_max_limit ||
                                 pdi_ddr4_vddr_slope || pdi_ddr4_vddr_intercept ||
-                                pdi_ddr4_vddr_max_limit ||
-                                pdi_vpp_slope || pdi_vpp_intercept )
+                                pdi_ddr4_vddr_max_limit )
                               ? true : false;
 
     // -----------------------------------
@@ -284,7 +274,15 @@ void set_eff_config_attrs_helper( const EFF_CONFIG_ATTRIBUTES_BASE i_base,
 
     // -----------------------------------
     // EFF CONFIG: VPP
-    if ( o_post_dram_inits_found == false )
+
+    // VPP is only set once (before draminit), so ignore i_base arg
+    //  but we still need to check the vars for non-zero
+    pdi_vpp_slope =
+      nodeTgt->getAttr<TARGETING::ATTR_MSS_VOLT_VPP_SLOPE_POST_DRAM_INIT>();
+
+    pdi_vpp_intercept =
+      nodeTgt->getAttr<TARGETING::ATTR_MSS_VOLT_VPP_INTERCEPT_POST_DRAM_INIT>();
+    if ( (pdi_vpp_slope == 0) || (pdi_vpp_intercept == 0) )
     {
         // Use default system value
         eff_conf_vpp_slope =
