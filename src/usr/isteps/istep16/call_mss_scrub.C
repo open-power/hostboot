@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,7 +43,7 @@ namespace ISTEP_16
 void* call_mss_scrub (void *io_pArgs)
 {
     IStepError l_stepError;
-#if 0
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_scrub entry" );
 
     // There are performance issues and some functional deficiencies
@@ -54,7 +54,11 @@ void* call_mss_scrub (void *io_pArgs)
         return NULL;
     }
 
-    errlHndl_t l_errl = PRDF::startScrub();
+    errlHndl_t l_errl = NULL;
+
+//TODO RTC:147390 Enable background scrubbing
+//     errlHndl_t l_errl = PRDF::startScrub();
+
     if ( NULL != l_errl )
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -66,7 +70,6 @@ void* call_mss_scrub (void *io_pArgs)
     }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_scrub exit" );
-#endif
     // end task, returning any errorlogs to IStepDisp
     return l_stepError.getErrorHandle();
 }

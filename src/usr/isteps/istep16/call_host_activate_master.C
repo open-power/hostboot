@@ -23,46 +23,41 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include <errl/errlentry.H>
-#include    <stdint.h>
-#include    <errno.h>
-#include    <config.h>
-#include    <initservice/initserviceif.H>
-#include    <trace/interface.H>
-#include    <initservice/taskargs.H>
+
+// Error Handling
 #include    <errl/errlentry.H>
-
+#include    <errl/errlmanager.H>
 #include    <initservice/isteps_trace.H>
-#include    <initservice/istepdispatcherif.H>
-
 #include    <isteps/hwpisteperror.H>
 #include    <errl/errludtarget.H>
-
 #include    <intr/interrupt.H>
 #include    <console/consoleif.H>
 
 //  targeting support
-#include    <targeting/common/commontargeting.H>
-#include    <targeting/common/utilFilter.H>
 #include    <targeting/namedtarget.H>
 #include    <targeting/attrsync.H>
-#include    <runtime/runtime.H>
+#include    <fapi2/target.H>
 
-#include    <sys/task.h>
+//SBE interfacing
+#include    <sbeio/sbeioif.H>
 #include    <sys/misc.h>
 
-#include <util/misc.H>
+//Import directory (EKB)
+#include    <p9_block_wakeup_intr.H>
+#include    <p9_cpu_special_wakeup.H>
+
+//HWP invoker
+#include    <fapi2/plat_hwp_invoker.H>
 
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
+using   namespace   p9specialWakeup;
 
 
 namespace ISTEP_16
 {
-    //@TODO RTC:133832 call p9_sbe_trigger_stop15.C HWP
-    //@TODO RTC:133832 call p9_block_wakeup_intr.C HWP
 void* call_host_activate_master (void *io_pArgs)
 {
     IStepError  l_stepError;
@@ -72,11 +67,7 @@ void* call_host_activate_master (void *io_pArgs)
 
     errlHndl_t  l_errl  =   NULL;
 
-    // @@@@@    CUSTOM BLOCK:   @@@@@
-
     do  {
-
-#if 0
         // find the master core, i.e. the one we are running on
         TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "call_host_activate_master: Find master core: " );
@@ -84,48 +75,38 @@ void* call_host_activate_master (void *io_pArgs)
         const TARGETING::Target*  l_masterCore  = getMasterCore( );
         assert( l_masterCore != NULL );
 
-        TARGETING::Target* l_cpu_target = const_cast<TARGETING::Target *>
+        TARGETING::Target* l_core_target = const_cast<TARGETING::Target *>
                                           ( getParentChip( l_masterCore ) );
 
-        //@TODO RTC:133832
-        // Cast OUR type of target to a FAPI type of target.
-        //const fapi::Target l_fapi_cpu_target( TARGET_TYPE_PROC_CHIP,
-        //                   (const_cast<TARGETING::Target*> (l_cpu_target)) );
-
-        // Pass in Master EX target
-        const TARGETING::Target* l_masterEx = getExChiplet(l_masterCore);
-        assert(l_masterEx != NULL );
+        // Cast OUR type of target to a FAPI2 type of target.
+        const fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_coreTarget(
+                                const_cast<TARGETING::Target*> (l_core_target));
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "call_host_activate_master: call proc_prep_master_winkle. "
+                   "call_host_activate_master: About to start deadman loop... "
                    "Target HUID %.8X",
-                    TARGETING::get_huid(l_masterEx));
+                    TARGETING::get_huid(l_fapi2_coreTarget));
 
-        //@TODO RTC:133832
-        // cast OUR type of target to a FAPI type of target.
-        //const fapi::Target l_fapi_ex_target( TARGET_TYPE_EX_CHIPLET,
-        //                   (const_cast<TARGETING::Target*> (l_masterEx)) );
+// @TODO RTC:147553 Enable startDeadmanLoop
+//In the future possibly move default "waitTime" value to SBEIO code
+//          uint64_t waitTime = 10000;
+//          l_errl = SBEIO::startDeadmanLoop(waitTime);
 
-        //  call the HWP with each fapi::Target
-        //FAPI_INVOKE_HWP( l_errl,
-        //                 proc_prep_master_winkle,
-        //                 l_fapi_ex_target,
-        //                 true  );
         if ( l_errl )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "proc_prep_master_winkle ERROR : Returning errorlog, reason=0x%x",
+            "startDeadmanLoop ERROR : Returning errorlog, reason=0x%x",
                 l_errl->reasonCode() );
 
             // capture the target data in the elog
-            ErrlUserDetailsTarget(l_masterEx).addToLog( l_errl );
+            ErrlUserDetailsTarget(l_core_target).addToLog( l_errl );
 
             break;
         }
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "proc_prep_master_winkle SUCCESS"  );
+                       "startDeadManLoop SUCCESS"  );
         }
 
         //Because of a bug in how the SBE injects the IPI used to wake
@@ -140,63 +121,60 @@ void* call_host_activate_master (void *io_pArgs)
                        "call_host_activate_master ERROR : MBOX::suspend");
             break;
         }
+           //@TODO RTC:137564 Support for thread-specific interrupts
+//         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "draining interrupt Q");
+//         INTR::drainQueue();
 
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "draining interrupt Q");
-        INTR::drainQueue();
 
-
-        // Call p8_block_wakeup_intr to prevent stray interrupts from
+        // Call p9_block_wakeup_intr to prevent stray interrupts from
         // popping core out of winkle before SBE sees it.
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "call_host_activated_master: call p8_block_wakeup_intr(SET) "
+                   "call_host_activated_master: call p9_block_wakeup_intr(SET) "
                    "Target HUID %.8x",
-                   TARGETING::get_huid(l_masterEx) );
+                   TARGETING::get_huid(l_fapi2_coreTarget) );
 
-        //@TODO RTC:133832
-        //FAPI_INVOKE_HWP( l_errl,
-        //                 p8_block_wakeup_intr,
-        //                 l_fapi_ex_target,
-        //                 BLKWKUP_SET );
+        FAPI_INVOKE_HWP( l_errl,
+                        p9_block_wakeup_intr,
+                        l_fapi2_coreTarget,
+                        p9pmblockwkup::SET );
 
         if ( l_errl )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "p8_block_wakeup_intr ERROR : Returning errorlog, reason=0x%x",
+            "p9_block_wakeup_intr ERROR : Returning errorlog, reason=0x%x",
                 l_errl->reasonCode() );
 
             // capture the target data in the elog
-            ErrlUserDetailsTarget(l_masterEx).addToLog( l_errl );
+            ErrlUserDetailsTarget(l_core_target).addToLog( l_errl );
 
             break;
         }
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "p8_block_wakeup_intr SUCCESS"  );
+                       "p9_block_wakeup_intr SUCCESS"  );
         }
 
         // Clear special wakeup
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "Disable special wakeup on master core");
 
-        //@TODO RTC:133832
-        /*
-        FAPI_INVOKE_HWP(l_errl, p8_cpu_special_wakeup,
-                        l_fapi_ex_target,
+        FAPI_INVOKE_HWP(l_errl, p9_cpu_special_wakeup,
+                        l_fapi2_coreTarget,
                         SPCWKUP_DISABLE,
                         HOST);
-        */
+
 
         if(l_errl)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "Disable p8_cpu_special_wakeup ERROR : Returning errorlog,"
+            "Disable p9_cpu_special_wakeup ERROR : Returning errorlog,"
             " reason=0x%x",
                 l_errl->reasonCode() );
 
             // capture the target data in the elog
-            ErrlUserDetailsTarget(l_masterEx).addToLog( l_errl );
+            ErrlUserDetailsTarget(l_core_target).addToLog( l_errl );
 
             break;
         }
@@ -205,7 +183,6 @@ void* call_host_activate_master (void *io_pArgs)
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "Disable special wakeup on master core SUCCESS");
         }
-#endif
 
 
         //  put the master into winkle.
@@ -247,7 +224,6 @@ void* call_host_activate_master (void *io_pArgs)
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "Returned from Winkle." );
 
-#if (0)
         //Re-enable the mailbox
         l_errl = MBOX::resume();
         if (l_errl)
@@ -259,57 +235,49 @@ void* call_host_activate_master (void *io_pArgs)
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "Call proc_stop_deadman_timer. Target %.8X",
-                    TARGETING::get_huid(l_cpu_target) );
+                    TARGETING::get_huid(l_core_target) );
 
-        //  call the HWP with each fapi::Target
-        bool l_sbeIntrServiceActive = false;
-        //@TODO RTC:133832
-/*        FAPI_INVOKE_HWP( l_errl,
-                         proc_stop_deadman_timer,
-                         l_fapi_cpu_target,
-                         l_sbeIntrServiceActive  );
-*/
+// @TODO RTC:147553 Enable stopDeadmanLoop
+//         l_errl = SBEIO::stopDeadmanLoop();
+
         if ( l_errl )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "proc_stop_deadman_timer ERROR : "
+                       "stopDeadmanLoop ERROR : "
                        "Returning errorlog, reason=0x%x",
                        l_errl->reasonCode() );
 
             // capture the target data in the elog
-            ErrlUserDetailsTarget(l_cpu_target).addToLog( l_errl );
+            ErrlUserDetailsTarget(l_core_target).addToLog( l_errl );
 
             break;
         }
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "proc_prep_master_winkle SUCCESS"  );
+                       "stopDeadmanLoop SUCCESS"  );
         }
         TARGETING::Target* sys = NULL;
         TARGETING::targetService().getTopLevelTarget(sys);
-        sys->setAttr<ATTR_SBE_MASTER_INTR_SERVICE_ENABLED>
-                                                    (l_sbeIntrServiceActive);
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "Enable special wakeup on master core");
 
-        //@TODO RTC:133832
-        /*
-        FAPI_INVOKE_HWP(l_errl, p8_cpu_special_wakeup,
-                        l_fapi_ex_target,
+
+        FAPI_INVOKE_HWP(l_errl, p9_cpu_special_wakeup,
+                        l_fapi2_coreTarget,
                         SPCWKUP_ENABLE,
                         HOST);
-*/
+
         if(l_errl)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "Enable p8_cpu_special_wakeup ERROR : Returning errorlog, "
+            "Enable p9_cpu_special_wakeup ERROR : Returning errorlog, "
             "reason=0x%x",
                 l_errl->reasonCode() );
 
             // capture the target data in the elog
-            ErrlUserDetailsTarget(l_masterEx).addToLog( l_errl );
+            ErrlUserDetailsTarget(l_core_target).addToLog( l_errl );
 
             break;
         }
@@ -318,11 +286,9 @@ void* call_host_activate_master (void *io_pArgs)
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "Enable special wakeup on master core SUCCESS");
         }
-#endif
 
     }   while ( 0 );
 
-    // @@@@@    END CUSTOM BLOCK:   @@@@@
     if( l_errl )
     {
         // Create IStep error log and cross reference error that occurred
