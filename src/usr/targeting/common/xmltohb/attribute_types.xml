@@ -17024,4 +17024,268 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <writeable/>
 </attribute>
 
+<attribute>
+    <id>CPU_ATTR</id>
+    <description>CPU Attribute</description>
+    <simpleType>
+        <uint32_t>
+            <default>0x0000001D</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>ICACHE_LINE_SIZE</id>
+    <description>ICache Line Size in bytes</description>
+    <simpleType>
+        <uint32_t>
+            <default>128</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>ICACHE_BLOCK_SIZE</id>
+    <description>ICache Block Size in bytes</description>
+    <simpleType>
+        <uint32_t>
+            <default>128</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>ICACHE_SIZE</id>
+    <description>ICache Size in KB</description>
+    <simpleType>
+        <uint32_t>
+            <default>32</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>ICACHE_ASSOC_SETS</id>
+    <description>ICache Assoc Sets</description>
+    <simpleType>
+        <uint32_t>
+            <default>4</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>DCACHE_LINE_SIZE</id>
+    <description>DCache Line Size in bytes</description>
+    <simpleType>
+        <uint32_t>
+            <default>128</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>DCACHE_ASSOC_SETS</id>
+    <description>DCache Associative Sets</description>
+    <simpleType>
+        <uint32_t>
+            <default>8</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>L2_CACHE_LINE_SIZE</id>
+    <description>L2 Cache Line Size in bytes</description>
+    <simpleType>
+        <uint32_t>
+            <default>128</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>L2_CACHE_SIZE</id>
+    <description>L2 Cache Size in KB</description>
+    <simpleType>
+        <uint32_t>
+            <default>512</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>L2_CACHE_ASSOC_SETS</id>
+    <description>L2 Cache Assoc Sets</description>
+    <simpleType>
+        <uint32_t>
+            <default>8</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>L3_CACHE_LINE_SIZE</id>
+    <description>L3 Cache Line Size in bytes</description>
+    <simpleType>
+        <uint32_t>
+            <default>128</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>L3_CACHE_SIZE</id>
+    <description>L3 Cache Size in KB</description>
+    <simpleType>
+        <uint32_t>
+            <default>8192</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+ </attribute>
+
+ <attribute>
+     <id>TIME_BASE</id>
+     <description>Time Base frequency in MHZ</description>
+     <simpleType>
+         <uint32_t>
+            <default>0x800000</default>
+        </uint32_t>
+     </simpleType>
+     <persistency>non-volatile</persistency>
+     <readable/>
+</attribute>
+
+<attribute>
+    <id>TLB_DATA_ENTRIES</id>
+    <description>TLB Data Entries</description>
+    <simpleType>
+        <uint32_t>
+            <default>2048</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>TLB_DATA_ASSOC_SETS</id>
+    <description>TLB Data Associative Sets</description>
+    <simpleType>
+        <uint32_t>
+            <default>4</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>TLB_INSTR_ENTRIES</id>
+    <description>TLB Instruction Entries</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>TLB_INSTR_ASSOC_SETS</id>
+    <description>TLB Instruction Associative Sets</description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>TLB_RESERVE_SIZE</id>
+    <description>Reserve Size in bytes</description>
+    <simpleType>
+        <uint32_t>
+            <default>128</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>DATA_CACHE_SIZE</id>
+    <description>Data Cache Size in KB</description>
+    <simpleType>
+        <uint32_t>
+            <default>64</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>DATA_CACHE_LINE_SIZE</id>
+    <description>Data Cache Line Size in bytes</description>
+    <simpleType>
+        <uint32_t>
+            <default>128</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>THREAD_COUNT</id>
+    <description>Thread Count</description>
+    <simpleType>
+        <uint32_t>
+            <default>0x4</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>ORDINAL_ID</id>
+    <description>Ordinal ID of a target</description>
+    <simpleType>
+        <uint32_t>
+            <default>0xFFFFFFFF</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
 </attributes>

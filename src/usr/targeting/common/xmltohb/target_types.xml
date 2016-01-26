@@ -45,6 +45,7 @@
     <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id></attribute>
     <attribute><id>DECONFIG_GARDABLE</id><default>0</default></attribute>
     <attribute><id>RESOURCE_IS_CRITICAL</id><default>0</default></attribute>
+    <attribute><id>ORDINAL_ID</id></attribute>
 </targetType>
 
 <targetType>
@@ -541,6 +542,26 @@
     <attribute><id>PROC_R_DISTLOSS_VCS</id></attribute>
     <attribute><id>PROC_VRM_VOFFSET_VCS</id></attribute>
     <attribute><id>PROC_HTM_BAR_BASE_ADDR</id></attribute>
+    <attribute><id>ICACHE_LINE_SIZE</id></attribute>
+    <attribute><id>ICACHE_ASSOC_SETS</id></attribute>
+    <attribute><id>ICACHE_SIZE</id></attribute>
+    <attribute><id>ICACHE_BLOCK_SIZE</id></attribute>
+    <attribute><id>DCACHE_LINE_SIZE</id></attribute>
+    <attribute><id>DCACHE_ASSOC_SETS</id></attribute>
+    <attribute><id>DATA_CACHE_SIZE</id></attribute>
+    <attribute><id>DATA_CACHE_LINE_SIZE</id></attribute>
+    <attribute><id>L2_CACHE_LINE_SIZE</id></attribute>
+    <attribute><id>L2_CACHE_SIZE</id></attribute>
+    <attribute><id>L2_CACHE_ASSOC_SETS</id></attribute>
+    <attribute><id>L3_CACHE_LINE_SIZE</id></attribute>
+    <attribute><id>L3_CACHE_SIZE</id></attribute>
+    <attribute><id>TLB_DATA_ENTRIES</id></attribute>
+    <attribute><id>TLB_INSTR_ENTRIES</id></attribute>
+    <attribute><id>TLB_DATA_ASSOC_SETS</id></attribute>
+    <attribute><id>TLB_INSTR_ASSOC_SETS</id></attribute>
+    <attribute><id>TLB_RESERVE_SIZE</id></attribute>
+    <attribute><id>TIME_BASE</id></attribute>
+    <attribute><id>CPU_ATTR</id></attribute>
 </targetType>
 
 <targetType>
@@ -1997,6 +2018,7 @@
     <attribute><id>EFFECTIVE_EC</id></attribute>
     <attribute><id>HB_RSV_MEM_SIZE_MB</id></attribute>
     <attribute><id>FREQ_CORE_MAX</id></attribute>
+    <attribute><id>THREAD_COUNT</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->
