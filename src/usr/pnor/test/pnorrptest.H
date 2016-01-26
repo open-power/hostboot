@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -128,7 +128,7 @@ class PnorRpTest : public CxxTest::TestSuite
         const size_t ECC_PAGESIZE = (PAGESIZE*9)/8;
         const uint64_t LOG_OFFSET = PAGESIZE/4; //force a page crossing
         const uint64_t PART_OFFSET = PAGESIZE*2 + LOG_OFFSET;
-        const uint64_t TEST_PHYS_OFFSET = 0x3590000 //see defaultPnorLayout.xml
+        const uint64_t TEST_PHYS_OFFSET = 0x2415000 //see defaultPnorLayout.xml
           + (ECC_PAGESIZE*2) //matches PART_OFFSET
           + (LOG_OFFSET*9)/8;
 
