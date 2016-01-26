@@ -26,6 +26,10 @@
 
 echo "Creating ODE sandbox..."
 
+export CMVC_FAMILY=aix@aix.austin.ibm.com@2035
+export CMVC_BECOME=hostboot
+export CMVC_AUTH_METHOD=HOST
+
 # Ensure backing build is accessible.
 if [ ! -d "$BACKING_BUILD" ];
 then
