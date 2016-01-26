@@ -21,6 +21,258 @@
 <!-- XML file specifying attributes used by HW Procedures. Attributes are taken from model pervasive -->
 <!--pervasive_attributes.xml-->
 <attributes>
+
+<attribute>
+  <id>ATTR_I2C_BUS_DIV_REF</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Ref clock I2C bus divider consumed by code running out of OTPROM</description>
+  <valueType>uint32</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_FUNCTIONAL_EQ_EC_VALID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Indicates the validitiy of FW functional EQ/EQ register</description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x0,TRUE = 0x1</enum>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_EQ_GARD</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Capturing EQ Gard value</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_EC_GARD</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Capturing EC Gard Value</description>
+  <valueType>uint32</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_I2C_BUS_DIV_REF_VALID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Indicates the validity of ref clock I2C bus divider consumed by
+      code running out of OTPROM</description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x0,TRUE = 0x1</enum>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_FW_MODE_FLAGS_VALID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Indicates the validity of FW flags. Ex: ISTEP_MODE,
+      SBE_RUNTIME_MODE, MPIPL_MODE, SP_MODE, SBE_FFDC_ENABLE</description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x0,TRUE = 0x1</enum>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_ISTEP_MODE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Indicates istep IPL</description>
+  <valueType>uint8</valueType>
+  <enum>NON_IPL = 0x0,IPL = 0x1</enum>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_SBE_RUNTIME_MODE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Indicates that SBE should go directly to runtime functionality</description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x0,TRUE = 0x1</enum>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_IS_SP_MODE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Indicates whether we are connected to FSP or not</description>
+  <valueType>uint8</valueType>
+  <enum>FSP_LESS = 0x0,FSP = 0x1</enum>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_SBE_FFDC_ENABLE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Indicates whether SBE should collect FFDC</description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x0,TRUE = 0x1</enum>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_SBE_INTERNAL_FFDC_ENABLE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Indicates that the SBE should send back internal FFDC on any
+      chipOp failure response</description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x0,TRUE = 0x1</enum>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_BOOT_FREQUENCY_VALID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Indicates if BOOT_FREQ_MULT and NEST_PLL_BUCKET
+      are valid</description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x0,TRUE = 0x1</enum>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_NEST_PLL_BUCKET</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Select Nest I2C and pll setting from one of the supported frequencies</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_BOOT_FREQ_MULT</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>EQ boot frequency multiplier</description>
+  <valueType>uint16</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_HWP_CONTROL_FLAGS_VALID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Indicates if HWP control flags
+      are valid</description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x0,TRUE = 0x1</enum>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_SYS_FORCE_ALL_CORES</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Indicates that SBE should init all cores</description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x0,TRUE = 0x1</enum>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_RISK_LEVEL</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>HWP/Init "risk level" enabled. Used by HB to pass to HB driven
+      HWPs</description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x0,TRUE = 0x1</enum>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_DISABLE_HBBL_VECTORS</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>BootLoader HWP flag to not place 12K exception vectors.
+  This flag is only applicable when security is disabled.</description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x0,TRUE = 0x1</enum>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_CHIP_SELECTION_VALID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Indicates that master/slave, node/chip selection attributes
+  are valid</description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x0,TRUE = 0x1</enum>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_CHIP_SELECTION</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>master/slave bit</description>
+  <valueType>uint8</valueType>
+  <enum>MASTER = 0x0,SLAVE = 0x1</enum>
+  <persistRuntime/>
+  <platInit/>
+</attribute>
+
+<attribute>
+  <id>ATTR_NODE_POS</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Indicate the node position in FSP based systems (unused in Spless systems)</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_CHIP_POS</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Indicate the chip position</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_SCRATCH6_VALID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Indicate if scratch reg6 bits are valid</description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x0,TRUE = 0x1</enum>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_SCRATCH7_VALID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Indicate if scratch reg7 bits are valid</description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x0,TRUE = 0x1</enum>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+
 <attribute>
   <id>ATTR_BACKUP_SEEPROM_SELECT</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -70,16 +322,6 @@
 </attribute>
 
 <attribute>
-  <id>ATTR_CHIP_POS</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Indicate the chip position</description>
-  <valueType>uint8</valueType>
-  <persistRuntime/>
-  <platInit/>
-  <writeable/>
-</attribute>
-
-<attribute>
   <id>ATTR_CHIP_REGIONS_TO_ENABLE</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description></description>
@@ -103,42 +345,12 @@
 </attribute>
 
 <attribute>
-  <id>ATTR_EC_GARD</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Capturing EC Gard Value</description>
-  <valueType>uint32</valueType>
-  <persistRuntime/>
-  <platInit/>
-  <writeable/>
-</attribute>
-
-<attribute>
-  <id>ATTR_EQ_GARD</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Capturing EQ Gard value</description>
-  <valueType>uint8</valueType>
-  <persistRuntime/>
-  <platInit/>
-  <writeable/>
-</attribute>
-
-<attribute>
   <id>ATTR_I2C_BUS_DIV_NEST</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>I2C Bus speed based on nest freq, ref clock</description>
   <valueType>uint8</valueType>
   <persistRuntime/>
   <platInit/>
-</attribute>
-
-<attribute>
-  <id>ATTR_I2C_BUS_DIV_REF</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Ref clock I2C bus divider consumed by code running out of OTPROM</description>
-  <valueType>uint32</valueType>
-  <persistRuntime/>
-  <platInit/>
-  <writeable/>
 </attribute>
 
 <attribute>
@@ -175,26 +387,6 @@
   <valueType>uint8</valueType>
   <persistRuntime/>
   <platInit/>
-</attribute>
-
-<attribute>
-  <id>ATTR_NEST_PLL_BUCKET</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Select Nest I2C and pll setting from one of the supported frequencies</description>
-  <valueType>uint8</valueType>
-  <persistRuntime/>
-  <platInit/>
-  <writeable/>
-</attribute>
-
-<attribute>
-  <id>ATTR_NODE_POS</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>Indicate the node position in FSP based systems (unused in Spless systems)</description>
-  <valueType>uint8</valueType>
-  <persistRuntime/>
-  <platInit/>
-  <writeable/>
 </attribute>
 
 <attribute>
