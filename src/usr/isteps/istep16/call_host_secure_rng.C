@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,7 +32,8 @@ namespace ISTEP_16
 void* call_host_secure_rng (void *io_pArgs)
 {
     errlHndl_t l_err = NULL;
-    //@TODO RTC:133832 call p9_secure_rng.C HWP
+    //@TODO RTC:147388 call p9_secure_rng.C HWP
+    //Joe McGill not finished.
     return l_err;
 }
 
