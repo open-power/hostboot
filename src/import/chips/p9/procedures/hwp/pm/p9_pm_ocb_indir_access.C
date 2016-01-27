@@ -62,18 +62,17 @@ fapi2::ReturnCode p9_pm_ocb_indir_access(
     const bool                    i_oci_address_valid,
     const uint32_t                i_oci_address,
     uint32_t&                     o_ocb_act_length,
-    fapi2::variable_buffer&       io_ocb_buffer)
+    uint64_t*                     io_ocb_buffer)
 {
     FAPI_IMP("Enter p9_pm_ocb_indir_access...");
-    FAPI_DBG("i_target 0x%08llx, ocb_chan %d, ocb_op %d, ocb_req_length %d,"
-             " i_oci_address_valid %d, i_oci_address 0x%08X", i_target.get(),
-             i_ocb_chan, i_ocb_op, i_ocb_req_length, i_oci_address_valid,
-             i_oci_address);
+    FAPI_DBG("Channel : %d, Operation : %d, No.of 8B Blocks of Data: %d",
+             i_ocb_chan, i_ocb_op, i_ocb_req_length);
 
     uint64_t l_OCBAR_address   = 0;
     uint64_t l_OCBDR_address   = 0;
     uint64_t l_OCBCSR_address  = 0;
     uint64_t l_OCBSHCS_address = 0;
+    o_ocb_act_length = 0;
 
     FAPI_DBG("Checking channel validity");
 
@@ -83,62 +82,57 @@ fapi2::ReturnCode p9_pm_ocb_indir_access(
             l_OCBAR_address   = PU_OCB_PIB_OCBAR0;
             l_OCBDR_address   = PU_OCB_PIB_OCBDR0;
             l_OCBCSR_address  = PU_OCB_PIB_OCBCSR0_RO;
-            l_OCBSHCS_address = PU_OCB_OCI_OCBSHCS0_OCI;
+            l_OCBSHCS_address = PU_OCB_OCI_OCBSHCS0_SCOM;
             break;
 
         case p9ocb::OCB_CHAN1:
             l_OCBAR_address   = PU_OCB_PIB_OCBAR1;
             l_OCBDR_address   = PU_OCB_PIB_OCBDR1;
             l_OCBCSR_address  = PU_OCB_PIB_OCBCSR1_RO;
-            l_OCBSHCS_address = PU_OCB_OCI_OCBSHCS1_OCI;
+            l_OCBSHCS_address = PU_OCB_OCI_OCBSHCS1_SCOM;
             break;
 
         case p9ocb::OCB_CHAN2:
             l_OCBAR_address   = PU_OCB_PIB_OCBAR2;
             l_OCBDR_address   = PU_OCB_PIB_OCBDR2;
             l_OCBCSR_address  = PU_OCB_PIB_OCBCSR2_RO;
-            l_OCBSHCS_address = PU_OCB_OCI_OCBSHCS2_OCI;
+            l_OCBSHCS_address = PU_OCB_OCI_OCBSHCS2_SCOM;
             break;
 
         case p9ocb::OCB_CHAN3:
             l_OCBAR_address   = PU_OCB_PIB_OCBAR3;
             l_OCBDR_address   = PU_OCB_PIB_OCBDR3;
-            l_OCBCSR_address  = PU_OCB_PIB_OCBCSR0_RO;
-            l_OCBSHCS_address = PU_OCB_OCI_OCBSHCS3_OCI;
+            l_OCBCSR_address  = PU_OCB_PIB_OCBCSR3_RO;
+            l_OCBSHCS_address = PU_OCB_OCI_OCBSHCS3_SCOM;
             break;
     }
 
-    // Deal with oci_address_valid condition.
-    // If address is valid, write the relevant channel OCBAR
+    // Verify if a valid valid address provided
+    // If the address is provided
+    //     Use it for the Get / Put operation
+    //     The following cases apply:
+    //     Circular      : OCBAR is irrelevant; write it anyway
+    //     Linear        : OCBAR will set the accessed location
+    //     Linear Stream : OCBAR will establish the address from which
+    //                     auto-increment will commence after the first access
+    // Else
+    //     Circular      : OCBAR is irrelevant
+    //     Linear        : OCBAR will continue to access the same location
+    //     Linear Stream : OCBAR will auto-increment
     if ( i_oci_address_valid )
     {
-        // The following cases apply:
-        //    Circular Channel:   OCBAR is irrelevant; write it anyway
-        //    Linear:             OCBAR will set the accessed location
-        //    Linear Stream:      OCBAR will establish the address from which
-        //                            auto-increment will commence after
-        //                            the first access
+        FAPI_DBG(" OCI Address : 0x%08X", i_oci_address);
         fapi2::buffer<uint64_t> l_data64;
         l_data64.insert<0, 32>(i_oci_address);
 
         FAPI_TRY(fapi2::putScom(i_target, l_OCBAR_address, l_data64));
-
     }
 
-    //  The else case is to not touch the OCBAR.
-    //  The following cases apply:
-    //     Circular Channel:   OCBAR is irrelevant
-    //     Linear:             OCBAR will continue to access the same location
-    //     Linear Stream:      OCBAR will auto-increment
-
-    // Initialize output length
-    o_ocb_act_length = 0;
-
-    // Based on the op, perform the data access
+    // PUT Operation
     if ( i_ocb_op == p9ocb::OCB_PUT )
     {
         FAPI_INF("OCB access for data write operation");
-        FAPI_ASSERT(io_ocb_buffer.getLength<uint64_t>() != 0,
+        FAPI_ASSERT(io_ocb_buffer != NULL,
                     fapi2::PROCPM_OCB_PUT_NO_DATA_ERROR(),
                     "No data provided for PUT operation");
 
@@ -150,7 +144,6 @@ fapi2::ReturnCode p9_pm_ocb_indir_access(
         if (l_data64.getBit<4>() && l_data64.getBit<5>())
         {
             FAPI_DBG("Circular mode detected.");
-
             // Check if push queue is enabled. If not, let the store occur
             // anyway to let the PIB error response return occur. (that is
             // what will happen if this checking code were not here)
@@ -160,7 +153,6 @@ fapi2::ReturnCode p9_pm_ocb_indir_access(
             {
                 FAPI_DBG("Poll for a non-full condition to a push queue to "
                          "avoid data corruption problem");
-
                 bool l_push_ok_flag = false;
                 uint8_t l_counter = 0;
 
@@ -175,7 +167,7 @@ fapi2::ReturnCode p9_pm_ocb_indir_access(
                         break;
                     }
 
-                    // Point to put in any needed delay.
+                    // Delay, before next polling.
                     fapi2::delay(OCB_FULL_POLL_DELAY_HDW,
                                  OCB_FULL_POLL_DELAY_SIM);
 
@@ -183,7 +175,6 @@ fapi2::ReturnCode p9_pm_ocb_indir_access(
                                             l_OCBSHCS_address,
                                             l_data64));
                     l_counter++;
-
                 }
                 while (l_counter < OCB_FULL_POLL_MAX);
 
@@ -194,58 +185,43 @@ fapi2::ReturnCode p9_pm_ocb_indir_access(
             }
         }
 
-
         // Walk the input buffer (io_ocb_buffer) 8B (64bits) at a time to write
         // the channel data register
-        for(uint32_t l_bufferPtr = 0;
-            l_bufferPtr < (i_ocb_req_length * 64);
-            l_bufferPtr += 64)
+        for(uint32_t l_index = 0; l_index < i_ocb_req_length; l_index++)
         {
-            uint64_t l_buf64 = 0;
-
-            io_ocb_buffer.extract<uint64_t>(l_buf64, l_bufferPtr, 64);
-            l_data64.insertFromRight(l_buf64, 0, 64);
-            FAPI_TRY(fapi2::putScom(i_target, l_OCBDR_address, l_data64));
+            l_data64.insertFromRight(io_ocb_buffer[l_index], 0, 64);
+            FAPI_TRY(fapi2::putScom(i_target, l_OCBDR_address, l_data64),
+                     "ERROR:Failed to complete write to channel data register");
             o_ocb_act_length++;
-
-            FAPI_DBG("64 bits of input data:0x%08X from buffer location: 0x%X",
-                     l_buf64, l_bufferPtr);
+            FAPI_DBG("data(64 bits): 0x%016lX written to channel data register",
+                     io_ocb_buffer[l_index]);
         }
 
-        FAPI_DBG("Length of data put:0x%08X", o_ocb_act_length);
+        FAPI_DBG("%d blocks(64bits each) of data put", o_ocb_act_length);
     }
+    // GET Operation
     else if( i_ocb_op == p9ocb::OCB_GET )
     {
         FAPI_INF("OCB access for data read operation");
-        FAPI_DBG("Get: Setting the io_ocb_buffer size to %x bytes",
-                 i_ocb_req_length);
 
-        io_ocb_buffer.resize(i_ocb_req_length * 8);
+        fapi2::buffer<uint64_t> l_data64;
+        uint64_t l_data = 0;
 
-        for(uint32_t l_bufferPtr = 0;
-            l_bufferPtr < (i_ocb_req_length * 8);
-            l_bufferPtr += 64)
+        for (uint32_t l_loopCount = 0; l_loopCount < i_ocb_req_length;
+             l_loopCount++)
         {
-            fapi2::buffer<uint64_t> l_data64;
-            uint64_t l_data;
-
-            FAPI_TRY(fapi2::getScom(i_target, l_OCBDR_address, l_data64));
-            FAPI_DBG("64 bits of data retrieved:0x%X; to buffer location:0x%X",
-                     l_data64, l_bufferPtr);
+            FAPI_TRY(fapi2::getScom(i_target, l_OCBDR_address, l_data64),
+                     "ERROR: Failed to read data from channel %d", i_ocb_chan);
             l_data64.extract(l_data, 0, 64);
-            io_ocb_buffer.insertFromRight(l_data, l_bufferPtr, 64);
+            io_ocb_buffer[l_loopCount] = l_data;
             o_ocb_act_length++;
-            FAPI_DBG("Increment output length to %d ", o_ocb_act_length);
+            FAPI_DBG("data(64 bits): 0x%016lX read from channel data register",
+                     io_ocb_buffer[l_loopCount]);
         }
-    }
 
-    // If not non-zero SCOM rc, check that the lengths match.
-    FAPI_ASSERT((i_ocb_req_length == o_ocb_act_length),
-                fapi2::PROCPM_OCB_ACCESS_LENGTH_CHECK()
-                .set_LENGTH(i_ocb_req_length)
-                .set_ACTUALLENGTH(o_ocb_act_length),
-                "OCB access length check failure: input = %8X; output = %8X",
-                i_ocb_req_length, o_ocb_act_length);
+        FAPI_DBG("%d blocks(64bits each) of data retrieved",
+                 o_ocb_act_length);
+    }
 
     FAPI_IMP("Exit p9_pm_ocb_indir_access...");
 

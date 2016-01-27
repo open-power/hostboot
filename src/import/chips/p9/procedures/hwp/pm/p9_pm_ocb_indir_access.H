@@ -60,7 +60,7 @@ typedef fapi2::ReturnCode (*p9_pm_ocb_indir_access_FP_t)
  const bool,
  const uint32_t,
  uint32_t&,
- fapi2::variable_buffer&);
+ uint64_t*);
 
 //------------------------------------------------------------------------------
 // Function prototype
@@ -87,7 +87,10 @@ extern "C"
 ///                                    accessed (zero origin)
 ///                                    Number of bytes = (o_ocb_act_length+1) *
 ///                                    8B
-/// @param[in/out] &io_ocb_buffer      Reference to fapi2::variable_buffer
+/// @param[in/out] io_ocb_buffer       Pointer to a container of type uint64_t
+///                                    to store the data to be written into or
+///                                    obtained from OCC SRAM
+///
 /// @return FAPI2_RC_SUCCESS on success, else error.
 
     fapi2::ReturnCode p9_pm_ocb_indir_access(
@@ -98,7 +101,7 @@ extern "C"
         const bool                    i_oci_address_valid,
         const uint32_t                i_oci_address,
         uint32_t&                     o_ocb_act_length,
-        fapi2::variable_buffer&       io_ocb_buffer);
+        uint64_t*                     io_ocb_buffer);
 
 } // extern "C"
 
