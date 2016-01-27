@@ -21,7 +21,7 @@
 ///
 // *HWP HWP Owner       : Amit Kumar <akumar@us.ibm.com>
 // *HWP Backup HWP Owner: Greg Still <stillgs@us.ibm.com>
-// *HWP FW Owner        : Bilicon Patil <bilpatil@in.ibm.com>
+// *HWP FW Owner        : Sangeetha T S <sangeet2@in.ibm.com>
 // *HWP Team            : PM
 // *HWP Level           : 2
 // *HWP Consumed by     : HS
@@ -29,7 +29,7 @@
 /// High-level procedure flow:
 /// @verbatim
 ///  Setup specified channel to push or pull circular mode by calling
-///  proc proc_ocb_init
+///  p9_pm_ocb_init
 ///
 ///  Procedure Prereq:
 ///     - System clocks are running
@@ -45,22 +45,39 @@
 fapi2::ReturnCode p9_pm_ocb_indir_setup_circular(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const p9ocb::PM_OCB_CHAN_NUM i_ocb_chan,
-    const p9ocb::PM_OCB_CHAN_TYPE i_ocb_type)
+    const p9ocb::PM_OCB_CHAN_TYPE i_ocb_type,
+    const uint32_t i_ocb_bar,
+    const uint8_t i_ocb_q_len,
+    const p9ocb::PM_OCB_CHAN_OUFLOW i_ocb_flow,
+    const p9ocb::PM_OCB_ITPTYPE i_ocb_itp)
 {
     FAPI_IMP("p9_pm_ocb_indir_setup_circular Enter");
-    FAPI_DBG("For channel %x as type %x", i_ocb_chan, i_ocb_type);
+    FAPI_DBG("Channel: %d; Mode: %d; OCB BAR: 0x%08X; Queue length: %d;",
+             i_ocb_chan, i_ocb_type, i_ocb_bar, i_ocb_q_len);
+    FAPI_DBG("Flow Notification Mode: %d; Interrupt Behaviour: %d", i_ocb_flow,
+             i_ocb_itp);
 
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     FAPI_EXEC_HWP(l_rc,
                   p9_pm_ocb_init,
                   i_target,
-                  p9pm::PM_SETUP_PIB,
+                  p9pm::PM_SETUP_ALL,
                   i_ocb_chan,
                   i_ocb_type,
-                  0, // ocb_bar
-                  0, // ocb_q_len
-                  p9ocb::OCB_Q_OUFLOW_NULL,
-                  p9ocb::OCB_Q_ITPTYPE_NULL);
+                  i_ocb_bar,
+                  i_ocb_q_len,
+                  i_ocb_flow,
+                  i_ocb_itp);
+
+    if (l_rc == fapi2::FAPI2_RC_SUCCESS)
+    {
+        FAPI_INF("Circular setup of channel %d successful.", i_ocb_chan);
+    }
+    else
+    {
+        FAPI_ERR("ERROR: Failed to setup channel %d to circular mode.",
+                 i_ocb_chan);
+    }
 
     FAPI_IMP("p9_pm_ocb_indir_setup_circular Exit");
     return l_rc;

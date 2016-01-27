@@ -21,7 +21,7 @@
 
 // *HWP HWP Owner       : Amit Kumar <akumar3@us.ibm.com>
 // *HWP Backup HWP Owner: Greg Still <stillgs@us.ibm.com>
-// *HWP FW Owner        : Bilicon Patil <bilpatil@in.ibm.com>
+// *HWP FW Owner        : Sangeetha T S <sangeet2@in.ibm.com>
 // *HWP Team            : PM
 // *HWP Level           : 2
 // *HWP Consumed by     : HS
@@ -54,7 +54,7 @@ fapi2::ReturnCode p9_pm_ocb_indir_setup_linear(
     const uint32_t      i_ocb_bar)
 {
     FAPI_IMP("p9_pm_ocb_indir_setup_linear Enter");
-    FAPI_DBG("For channel %x as type %x, OCB Bar %x",
+    FAPI_DBG("For channel %d as type %d, OCB Bar 0x%x",
              i_ocb_chan, i_ocb_type, i_ocb_bar);
 
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
@@ -68,6 +68,16 @@ fapi2::ReturnCode p9_pm_ocb_indir_setup_linear(
                   0, // ocb_q_len
                   p9ocb::OCB_Q_OUFLOW_NULL,
                   p9ocb::OCB_Q_ITPTYPE_NULL);
+
+    if (l_rc == fapi2::FAPI2_RC_SUCCESS)
+    {
+        FAPI_INF("Linear setup of channel %d successful.", i_ocb_chan);
+    }
+    else
+    {
+        FAPI_ERR("ERROR: Failed to setup channel %d to linear mode.",
+                 i_ocb_chan);
+    }
 
     FAPI_IMP("p9_pm_ocb_indir_setup_linear Exit");
     return l_rc;

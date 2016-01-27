@@ -18,9 +18,9 @@
 /* IBM_PROLOG_END_TAG                                                     */
 /// @file  p9_pm_ocb_indir_setup_circular.H
 /// @brief  Configure OCB Channels for Circular Push or Pull Mode
-// *HWP HWP Owner       : Greg Still <stillgs@us.ibm.com>
-// *HWP Backup HWP Owner:
-// *HWP FW Owner        : Bilicon Patil <bilpatil@in.ibm.com>
+// *HWP HWP Owner       : Amit Kumar <akumar@us.ibm.com>
+// *HWP Backup HWP Owner: Greg Still <stillgs@us.ibm.com>
+// *HWP FW Owner        : Sangeetha T S <sangeet2@in.ibm.com>
 // *HWP Team            : PM
 // *HWP Level           : 2
 // *HWP Consumed by     : HS
@@ -35,7 +35,11 @@
 typedef fapi2::ReturnCode (*p9_pm_ocb_indir_setup_circular_FP_t)
 (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
  const p9ocb::PM_OCB_CHAN_NUM,
- const p9ocb::PM_OCB_CHAN_TYPE);
+ const p9ocb::PM_OCB_CHAN_TYPE,
+ const uint32_t,
+ const uint8_t,
+ const p9ocb::PM_OCB_CHAN_OUFLOW,
+ const p9ocb::PM_OCB_ITPTYPE);
 
 extern "C"
 {
@@ -52,7 +56,11 @@ extern "C"
     fapi2::ReturnCode p9_pm_ocb_indir_setup_circular(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         const p9ocb::PM_OCB_CHAN_NUM i_ocb_chan,
-        const p9ocb::PM_OCB_CHAN_TYPE i_ocb_type);
+        const p9ocb::PM_OCB_CHAN_TYPE i_ocb_type,
+        const uint32_t i_ocb_bar,
+        const uint8_t i_ocb_q_len,
+        const p9ocb::PM_OCB_CHAN_OUFLOW i_ocb_flow,
+        const p9ocb::PM_OCB_ITPTYPE i_ocb_itp);
 
 } // extern "C"
 
