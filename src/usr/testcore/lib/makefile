@@ -25,20 +25,8 @@
 ROOTPATH = ../../../..
 
 MODULE = testsyslib
-#TESTS = *.H
-#@TODO RTC 144346 Need fix to shared_ptr.H
-#TEST += shared_ptr.H
-TEST += fptest.H
-TEST += integral.H
-TEST += is_integral.H
-TEST += is_ptr.H
-TEST += is_same.H
-TEST += stl_functional.H
-TEST += stltest.H
-TEST += string.H
-TEST += synctest.H
-TEST += time.H
-TEST += tls.H
+TESTS = *.H
+
 
 SUBDIRS += runtime.d
 
