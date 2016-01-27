@@ -2980,7 +2980,7 @@ p9_xip_translate_header(P9XipHeader* o_dest, const P9XipHeader* i_src)
     o_dest->iv_kernelAddr   = xipRevLe64(i_src->iv_kernelAddr);
     o_dest->iv_linkAddress = xipRevLe64(i_src->iv_linkAddress);
 
-    for (i = 0; i < 5; i++)
+    for (i = 0; i < 3; i++)
     {
         o_dest->iv_reserved64[i] = 0;
     }
