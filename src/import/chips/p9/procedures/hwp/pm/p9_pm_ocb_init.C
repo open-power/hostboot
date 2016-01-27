@@ -73,12 +73,6 @@ const uint64_t OCBARn[4]       = {PU_OCB_PIB_OCBAR0,
                                   PU_OCB_PIB_OCBAR3
                                  };
 
-const uint64_t OCBCSRn_RO[4]   = {PU_OCB_PIB_OCBCSR0_RO,
-                                  PU_OCB_PIB_OCBCSR1_RO,
-                                  PU_OCB_PIB_OCBCSR2_RO,
-                                  PU_OCB_PIB_OCBCSR3_RO
-                                 };
-
 const uint64_t OCBCSRn_CLEAR[4]  = {PU_OCB_PIB_OCBCSR0_CLEAR,
                                     PU_OCB_PIB_OCBCSR1_CLEAR,
                                     PU_OCB_PIB_OCBCSR2_CLEAR,
@@ -103,22 +97,10 @@ const uint64_t OCBSLBRn[4]     = {PU_OCB_OCI_OCBSLBR0_SCOM,
                                   PU_OCB_OCI_OCBSLBR3_SCOM
                                  };
 
-const uint64_t OCBSLBRn_OCI[4] = {PU_OCB_OCI_OCBSLBR0_OCI,
-                                  PU_OCB_OCI_OCBSLBR1_OCI,
-                                  PU_OCB_OCI_OCBSLBR2_OCI,
-                                  PU_OCB_OCI_OCBSLBR3_OCI
-                                 };
-
 const uint64_t OCBSHBRn[4]     = {PU_OCB_OCI_OCBSHBR0_SCOM,
                                   PU_OCB_OCI_OCBSHBR1_SCOM,
                                   PU_OCB_OCI_OCBSHBR2_SCOM,
                                   PU_OCB_OCI_OCBSHBR3_SCOM
-                                 };
-
-const uint64_t OCBSHBRn_OCI[4] = {PU_OCB_OCI_OCBSHBR0_OCI,
-                                  PU_OCB_OCI_OCBSHBR1_OCI,
-                                  PU_OCB_OCI_OCBSHBR2_OCI,
-                                  PU_OCB_OCI_OCBSHBR3_OCI
                                  };
 
 const uint64_t OCBSLCSn[4]     = {PU_OCB_OCI_OCBSLCS0_SCOM,
@@ -127,23 +109,11 @@ const uint64_t OCBSLCSn[4]     = {PU_OCB_OCI_OCBSLCS0_SCOM,
                                   PU_OCB_OCI_OCBSLCS3_SCOM
                                  };
 
-const uint64_t OCBSLCSn_OCI[4] = {PU_OCB_OCI_OCBSLCS0_OCI,
-                                  PU_OCB_OCI_OCBSLCS1_OCI,
-                                  PU_OCB_OCI_OCBSLCS2_OCI,
-                                  PU_OCB_OCI_OCBSLCS3_OCI
-                                 };
-
 const uint64_t OCBSHCSn[4]     = {PU_OCB_OCI_OCBSHCS0_SCOM,
                                   PU_OCB_OCI_OCBSHCS1_SCOM,
                                   PU_OCB_OCI_OCBSHCS2_SCOM,
                                   PU_OCB_OCI_OCBSHCS3_SCOM
                                  };
-
-const uint64_t OCBSHCSn_OCI[4]  = {PU_OCB_OCI_OCBSHCS0_OCI,
-                                   PU_OCB_OCI_OCBSHCS1_OCI,
-                                   PU_OCB_OCI_OCBSHCS2_OCI,
-                                   PU_OCB_OCI_OCBSHCS3_OCI
-                                  };
 
 const uint64_t OCBSESn[4]      = {PU_OCB_OCI_OCBSES0_SCOM,
                                   PU_OCB_OCI_OCBSES1_SCOM,
@@ -151,38 +121,17 @@ const uint64_t OCBSESn[4]      = {PU_OCB_OCI_OCBSES0_SCOM,
                                   PU_OCB_OCI_OCBSES3_SCOM
                                  };
 
-const uint64_t OCBSESn_OCI[4]   = { PU_OCB_OCI_OCBSES0_OCI,
-                                    PU_OCB_OCI_OCBSES1_OCI,
-                                    PU_OCB_OCI_OCBSES2_OCI,
-                                    PU_OCB_OCI_OCBSES3_OCI
-                                  };
-
-// linear window write control
 const uint64_t OCBLWCRn[4]     = {PU_OCB_OCI_OCBLWCR0_SCOM,
                                   PU_OCB_OCI_OCBLWCR1_SCOM,
                                   PU_OCB_OCI_OCBLWCR2_SCOM,
                                   PU_OCB_OCI_OCBLWCR3_SCOM
                                  };
 
-const uint64_t OCBLWCRn_OCI[4] = {PU_OCB_OCI_OCBLWCR0_OCI,
-                                  PU_OCB_OCI_OCBLWCR1_OCI,
-                                  PU_OCB_OCI_OCBLWCR2_OCI,
-                                  PU_OCB_OCI_OCBLWCR3_OCI
-                                 };
-
-// linear window write base
 const uint64_t OCBLWSBRn[4]    = {PU_OCB_OCI_OCBLWSBR0_SCOM,
                                   PU_OCB_OCI_OCBLWSBR1_SCOM,
                                   PU_OCB_OCI_OCBLWSBR2_SCOM,
                                   PU_OCB_OCI_OCBLWSBR3_SCOM
                                  };
-
-const uint64_t OCBLWSBRn_OCI[4] =  {PU_OCB_OCI_OCBLWSBR0_OCI,
-                                    PU_OCB_OCI_OCBLWSBR1_OCI,
-                                    PU_OCB_OCI_OCBLWSBR2_OCI,
-                                    PU_OCB_OCI_OCBLWSBR3_OCI
-                                   };
-
 
 //------------------------------------------------------------------------------
 //  Function prototypes
@@ -292,12 +241,12 @@ fapi2::ReturnCode p9_pm_ocb_init(
             l_upd_reg = p9ocb::OCB_UPD_PIB_OCI_REG;
         }
 
-        // call function to setup ocb channel
         FAPI_TRY(pm_ocb_setup(i_target, i_ocb_chan, i_ocb_type, i_ocb_bar,
                               l_upd_reg, i_ocb_q_len, i_ocb_ouflow_en,
                               i_ocb_itp_type),
                  "ERROR: OCB Setup failed.");
     }
+    // Invalid Mode
     else
     {
         FAPI_ASSERT(false, fapi2::PM_OCBINIT_BAD_MODE().set_BADMODE(i_mode),
@@ -325,7 +274,7 @@ fapi2::ReturnCode pm_ocb_setup(
 
     uint32_t l_ocbase = 0x0;
     fapi2::buffer<uint64_t> l_mask_or(0);
-    fapi2::buffer<uint64_t> l_mask_and(0xFFFFFFFFFFFFFFFF);
+    fapi2::buffer<uint64_t> l_mask_clear(0);
     fapi2::buffer<uint64_t> l_data64;
 
     // Verify input queue length is valid
@@ -354,12 +303,12 @@ fapi2::ReturnCode pm_ocb_setup(
 
     if (i_ocb_type == p9ocb::OCB_TYPE_LIN) // linear non-streaming
     {
-        l_mask_and.clearBit<4, 2>();
+        l_mask_clear.setBit<4, 2>();
     }
     else if (i_ocb_type == p9ocb::OCB_TYPE_LINSTR) // linear streaming
     {
         l_mask_or.setBit<4>();
-        l_mask_and.clearBit<5>();
+        l_mask_clear.setBit<5>();
     }
     else if (i_ocb_type == p9ocb::OCB_TYPE_CIRC) // circular
     {
@@ -375,7 +324,7 @@ fapi2::ReturnCode pm_ocb_setup(
         }
         else if (i_ocb_ouflow_en == p9ocb::OCB_Q_OUFLOW_DIS)
         {
-            l_mask_and.clearBit<3>();
+            l_mask_clear.setBit<3>();
         }
     }
     else if (i_ocb_type == p9ocb::OCB_TYPE_PULLQ) // pull queue
@@ -388,7 +337,7 @@ fapi2::ReturnCode pm_ocb_setup(
         }
         else if (i_ocb_ouflow_en == p9ocb::OCB_Q_OUFLOW_DIS)
         {
-            l_mask_and.clearBit<2>();
+            l_mask_clear.setBit<2>();
         }
     }
 
@@ -400,31 +349,29 @@ fapi2::ReturnCode pm_ocb_setup(
              "ERROR: Unexpected error encountered in write to OCB Channel "
              "Status & Control using OR mask");
     // write using AND mask
-    FAPI_TRY(fapi2::putScom(i_target, OCBCSRn_CLEAR[i_ocb_chan], l_mask_and),
+    FAPI_TRY(fapi2::putScom(i_target, OCBCSRn_CLEAR[i_ocb_chan], l_mask_clear),
              "ERROR: Unexpected error encountered in write to OCB Channel "
              "Status & Control using and mask");
 
     //--------------------------------------------------------------------------
-    // set address base register for linear mode
-    //   bits 0:31  =>  32 bit base address
-    //                  bits 0:1   => OCI region  (00=PBA  01=Registers
-    //                                             10=reserved  11=SRAM)
-    //                  bits 29:31 => "000"
+    // set address base register for linear, pull queue or push queue
     //--------------------------------------------------------------------------
     //don't update bar if type null or circular
     if (!(i_ocb_type == p9ocb::OCB_TYPE_NULL ||
           i_ocb_type == p9ocb::OCB_TYPE_CIRC))
     {
+        // BAR for linear (streaming / non-streaming)
         if ((i_ocb_type == p9ocb::OCB_TYPE_LIN) ||
             (i_ocb_type == p9ocb::OCB_TYPE_LINSTR))
         {
             l_ocbase = OCBARn[i_ocb_chan];
         }
+        // BAR for push queue
         else if (i_ocb_type == p9ocb::OCB_TYPE_PUSHQ)
         {
             l_ocbase = OCBSHBRn[i_ocb_chan];
         }
-        // else PULL -- need Linear Window Type Implemented
+        // BAR for pull queue
         else
         {
             l_ocbase = OCBSLBRn[i_ocb_chan];
@@ -448,8 +395,8 @@ fapi2::ReturnCode pm_ocb_setup(
     //                   01=not full
     //                   10=empty
     //                   11=not empty
-    //    bits 6:8 => push queue length
-    //    bit 31   => push queue enable
+    //    bits 6:10 => push queue length
+    //    bit  31   => push queue enable
     // -------------------------------------------------------------------------
     if ((i_ocb_type == p9ocb::OCB_TYPE_PUSHQ) &&
         (i_ocb_upd_reg == p9ocb::OCB_UPD_PIB_OCI_REG))
@@ -472,8 +419,8 @@ fapi2::ReturnCode pm_ocb_setup(
     //                   01=not full
     //                   10=empty
     //                   11=not empty
-    //    bits 6:8 => pull queue length
-    //    bit 31   => pull queue enable
+    //    bits 6:10 => pull queue length
+    //    bit  31   => pull queue enable
     // -------------------------------------------------------------------------
     if ((i_ocb_type == p9ocb::OCB_TYPE_PULLQ) &&
         (i_ocb_upd_reg == p9ocb::OCB_UPD_PIB_OCI_REG))
@@ -511,7 +458,7 @@ fapi2::ReturnCode pm_ocb_setup(
         }
         else
         {
-            FAPI_IMP("  pull write overflow enable => %d ", i_ocb_ouflow_en);
+            FAPI_IMP("  pull write underflow enable => %d ", i_ocb_ouflow_en);
         }
     }
 
@@ -543,7 +490,7 @@ fapi2::ReturnCode pm_ocb_reset(
                  "Channel %d BAR Register", i);
 
         // Clear out OCB Channel control and status registers
-        //  - set bit 5 (circular mode) using OR  (for channels 0-3)
+        //  - set bit 5 (circular mode) using OR
         l_data64.setBit<5>();
         FAPI_TRY(fapi2::putScom(i_target, OCBCSRn_OR[i], l_data64),
                  "**** ERROR : Unexpected error encountered in write to OCB "
@@ -592,8 +539,8 @@ fapi2::ReturnCode pm_ocb_reset(
                  "Channel %d Linear Window Control Register", i);
 
         // Clear out Linear Window Base
-        //  - set bits 2:9
-        l_data64.setBit<2, 8>();
+        //  - set bits 3:9
+        l_data64.setBit<3, 7>();
         FAPI_TRY(fapi2::putScom(i_target, OCBLWSBRn[i], l_data64),
                  "**** ERROR : Unexpected error encountered in write to OCB "
                  "Channel %d Linear Window Base Register", i);
@@ -614,7 +561,7 @@ fapi2::ReturnCode pm_ocb_reset(
              "**** ERROR : Unexpected error encountered in write to OCC "
              "Interrupt Source Mask Register1 (OIMR1)");
 
-    // Clear OCC Interrupt Controller Registers 0 & 1
+    // Clear OCC Interrupt Type Registers 0 & 1
     FAPI_TRY(fapi2::putScom(i_target,
                             PU_OCB_OCI_OITR0_SCOM2,
                             0),
@@ -627,6 +574,7 @@ fapi2::ReturnCode pm_ocb_reset(
              "**** ERROR : Unexpected error encountered in write to OCC "
              "Interrupt Type Register1 (OITR1)");
 
+    // Clear OCC Interupt Edge/Polarity Registers 0 & 1
     FAPI_TRY(fapi2::putScom(i_target,
                             PU_OCB_OCI_OIEPR0_SCOM2,
                             0),
@@ -639,6 +587,7 @@ fapi2::ReturnCode pm_ocb_reset(
              "**** ERROR : Unexpected error encountered in write to OCC "
              "Interrupt Edge Polarity Register1 (OIEPR1)");
 
+    // Clear OCC Interrupt Source Registers 0 & 1
     FAPI_TRY(fapi2::putScom(i_target,
                             PU_OCB_OCI_OISR0_SCOM2,
                             0),
@@ -651,7 +600,7 @@ fapi2::ReturnCode pm_ocb_reset(
              "**** ERROR : Unexpected error encountered in write to OCC "
              "Interrupt Source Register1 (OISR1)");
 
-    // Clear Interrupt Route Registers
+    // Clear Interrupt Route (A, B, C) Registers 0 & 1
     FAPI_TRY(fapi2::putScom(i_target, PU_OCB_OCI_OIRR0A_SCOM, 0),
              "**** ERROR : Unexpected error encountered in write to OCC "
              "Interrupt 0 Route A Register (OIRR0A)");
@@ -687,7 +636,7 @@ fapi2::ReturnCode pm_ocb_reset(
              "Interrupt Timer0 Register (OTR0)");
 
     FAPI_TRY(fapi2::putScom(i_target,
-                            PU_OCB_OCI_OTR0_SCOM,
+                            PU_OCB_OCI_OTR1_SCOM,
                             l_buf64),
              "**** ERROR : Unexpected error encountered in write to OCC "
              "Interrupt Timer1 Register (OTR1)");
