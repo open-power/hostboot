@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015
+# Contributors Listed Below - COPYRIGHT 2015,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -451,7 +451,15 @@ sub processProcessor
        $targetObj->getTargetParent($target);
     $targetObj->copyAttribute($module_target,$target,"LOCATION_CODE");
 
+    ## Copy all attributes from module
+    foreach my $attr (sort (keys
+           %{ $targetObj->getTarget($module_target)->{TARGET}->{attribute} }))
+    {
+        $targetObj->copyAttribute($module_target,$target,$attr);
+    }
+
     ## Copy PCIE attributes from socket
+    ## Copy Position attribute from socket
     foreach my $attr (sort (keys
            %{ $targetObj->getTarget($socket_target)->{TARGET}->{attribute} }))
     {
@@ -459,13 +467,10 @@ sub processProcessor
         {
             $targetObj->copyAttribute($socket_target,$target,$attr);
         }
-    }
-
-    ## Copy all attributes from module
-    foreach my $attr (sort (keys
-           %{ $targetObj->getTarget($module_target)->{TARGET}->{attribute} }))
-    {
-        $targetObj->copyAttribute($module_target,$target,$attr);
+        elsif ($attr =~/POSITION/)
+        {
+            $targetObj->copyAttribute($socket_target,$target,$attr);
+        }
     }
 
     $targetObj->log($target, "Processing PROC");
