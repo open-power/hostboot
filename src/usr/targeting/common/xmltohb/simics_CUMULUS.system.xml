@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2017                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -129,11 +129,11 @@
     </attribute>
 
     <attribute>
-        <id>A_EREPAIR_THRESHOLD_FIELD</id>
+        <id>O_EREPAIR_THRESHOLD_FIELD</id>
         <default>1</default>
     </attribute>
     <attribute>
-        <id>A_EREPAIR_THRESHOLD_MNFG</id>
+        <id>O_EREPAIR_THRESHOLD_MNFG</id>
         <default>0</default>
     </attribute>
     <attribute>

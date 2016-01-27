@@ -1,0 +1,191 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p9/procedures/xml/error_info/p9_io_erepair_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- $Id: p9_io_erepair_errors.xml,v1.0 2015/15/01 14:00:44 sumit56 Exp $ -->
+<!-- Error definitions for p9_io_erepair_errors procedure -->
+<hwpErrors>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P9_EREPAIR_DIMM_TYPE_CHECK_ERR</rc>
+    <ffdc>ERROR</ffdc>
+    <description>Error during DIMM type check.
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_P9_EREPAIR_ACCESSOR_HWP_INVALID_MEM_VPD_SIZE_ERR</rc>
+    <ffdc>ERROR</ffdc>
+    <description>Invalid MEM VPD size has been returned by platform.
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_P9_EREPAIR_ACCESSOR_HWP_MEMORY_ALLOC_FAIL_ERR</rc>
+    <ffdc>BUF_SIZE</ffdc>
+    <description>Failed to allocate run time memory from the heap.
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_P9_EREPAIR_ACCESSOR_HWP_INVALID_FABRIC_VPD_SIZE_ERR</rc>
+    <ffdc>ERROR</ffdc>
+    <description>Invalid Fabric VPD size has been returned by platform.
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_P9_EREPAIR_CHILD_MBA_TARGETS_ERR</rc>
+    <ffdc>ERROR</ffdc>
+    <description>Error during get child MBA targets.
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_P9_EREPAIR_NO_RX_TX_FAILED_LANES_ERR</rc>
+    <ffdc>TX_LANE</ffdc>
+    <ffdc>RX_LANE</ffdc>
+    <description>ERROR: No Tx/Rx fail lanes were provided
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_P9_EREPAIR_MBVPD_FULL_ERR</rc>
+    <ffdc>ERROR</ffdc>
+    <description>ERROR: eRepair data limit in the Memory Buffer FRU VPD has been reached.
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_P9_EREPAIR_MVPD_FULL_ERR</rc>
+    <ffdc>VAL_BYTE_PARSED</ffdc>
+    <ffdc>VAL_BUF_SIZE</ffdc>
+    <ffdc>VAL_REPAIR_CNT</ffdc>
+    <ffdc>VAL_NUM_REPAIR</ffdc>
+    <description>ERROR: eRepair data limit in the Processor Module VPD has been reached.
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_P9_EREPAIR_INVALID_LANE_VALUE_ERR</rc>
+    <ffdc>ERROR</ffdc>
+    <ffdc>TARGET</ffdc>
+    <description>ERROR: Invalid erepair lane value
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_P9_EREPAIR_RESTORE_FIELD_VPD_NOT_CLEAR</rc>
+    <ffdc>TARGET1</ffdc>
+    <ffdc>TARGET2</ffdc>
+    <description>ERROR: mnfgCheckFieldVPD: Field VPD need to be clear during Mnfg mode IPL
+                 Invalid input parameter: Valid target pairs are: XBus-XBus, OBus-OBus, MCS-MEMBUF
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_P9_EREPAIR_RESTORE_INVALID_TARGET</rc>
+    <ffdc>TARGET</ffdc>
+    <description>ERROR:geteRepairThreshold: Invalid target type
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_P9_EREPAIR_THRESHOLD_EXCEED</rc>
+    <ffdc>TX_NUM_LANES</ffdc>
+    <ffdc>RX_NUM_LANES</ffdc>
+    <ffdc>THRESHOLD</ffdc>
+    <description>ERROR:The threshold limit for eRepair has been crossed.
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_P9_EREPAIR_RESTORE_FABRIC_DISABLED</rc>
+    <ffdc>VALUE1</ffdc>
+    <ffdc>VALUE2</ffdc>
+    <description>ERROR:erepairGetRestoreLanes: Fabric eRepair is disabled.
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_P9_EREPAIR_RESTORE_INVALID_TARGET_PAIR</rc>
+    <ffdc>TARGET1</ffdc>
+    <ffdc>TARGET2</ffdc>
+    <description>ERROR:geteRepairThreshold: Invalid target pair
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_P9_EREPAIR_RESTORE_MEMORY_DISABLED</rc>
+    <ffdc>VALUE1</ffdc>
+    <ffdc>VALUE2</ffdc>
+    <description>ERROR:erepairGetRestoreLanes: Memory eRepair is disabled.
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+</hwpErrors>
