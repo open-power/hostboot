@@ -881,10 +881,10 @@
     <attribute>
     <id>X_EREPAIR_THRESHOLD_FIELD</id>
   </attribute>
-  <attribute><id>A_EREPAIR_THRESHOLD_FIELD</id></attribute>
+  <attribute><id>O_EREPAIR_THRESHOLD_FIELD</id></attribute>
   <attribute><id>DMI_EREPAIR_THRESHOLD_FIELD</id></attribute>
   <attribute><id>X_EREPAIR_THRESHOLD_MNFG</id></attribute>
-  <attribute><id>A_EREPAIR_THRESHOLD_MNFG</id></attribute>
+  <attribute><id>O_EREPAIR_THRESHOLD_MNFG</id></attribute>
   <attribute><id>DMI_EREPAIR_THRESHOLD_MNFG</id></attribute>
   <attribute><id>MSS_MBA_ADDR_INTERLEAVE_BIT</id></attribute>
   <attribute><id>MSS_MBA_CACHELINE_INTERLEAVE_MODE</id></attribute>
