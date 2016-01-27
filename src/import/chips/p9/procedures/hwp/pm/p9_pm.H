@@ -46,10 +46,14 @@
 //------------------------------------------------------------------------------
 
 // Create a multi-bit mask of @a n bits starting at bit @a b
-#define BITS(b, n) ((0xffffffffffffffffull << (64 - (n))) >> (b))
+#ifndef BITS
+    #define BITS(b, n) ((0xffffffffffffffffull << (64 - (n))) >> (b))
+#endif
 
 // Create a single bit mask at bit @a b
-#define BIT(b) BITS((b), 1)
+#ifndef BIT
+    #define BIT(b) BITS((b), 1)
+#endif
 
 //------------------------------------------------------------------------------
 // Constant definitions
