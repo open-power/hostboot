@@ -7,7 +7,7 @@
 <!--                                                                        -->
 <!-- EKB Project                                                            -->
 <!--                                                                        -->
-<!-- COPYRIGHT 2015                                                         -->
+<!-- COPYRIGHT 2015,2016                                                    -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -23,7 +23,7 @@
 <!-- // *! BACKUP NAME :   -->
 
    <hwpError>
-    <rc>RC_MSS_VALID_VALUE</rc>
+    <rc>RC_MSS_SPD_DECODE_INVALID_VALUE</rc>
     <description>Invalid data returned.</description>
     <ffdc>VALUE</ffdc>
     <ffdc>BYTE</ffdc>
