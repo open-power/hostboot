@@ -124,6 +124,11 @@ namespace IPMISEL
         event_data1_trans_monitor               = 0x07,
         event_data1_trans_informational         = 0x08,
         event_data1_invalid_offset              = 0xFF,
+
+        // sel events for sensor specific offsets
+        mem_event_configuration_error           = 0x07,
+        proc_event_correctable_mach_check_err   = 0x0C,
+        mem_event_device_disabled               = 0x04,
     };
 
     enum sel_generator_id
@@ -145,11 +150,11 @@ namespace IPMISEL
         // Time when event was logged. LS byte first.
         uint32_t timestamp;
 
-        // Manufacturer ID 
+        // Manufacturer ID
         uint8_t manufactureId_data1;
         uint8_t manufactureId_data2;
         uint8_t manufactureId_data3;
-    
+
         // OEM defined
         uint8_t event_data1;
         uint8_t event_data2;
