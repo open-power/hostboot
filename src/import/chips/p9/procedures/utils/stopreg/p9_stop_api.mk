@@ -7,7 +7,7 @@
 #
 # EKB Project
 #
-# COPYRIGHT 2015
+# COPYRIGHT 2015,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -17,5 +17,8 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_stop_api
+STOP_UTIL=$(ROOTPATH)/chips/p9/procedures/utils/stopreg/
+STOP_UTIL+=$(ROOTPATH)/chips/p9/procedures/hwp/lib
 libp9_stop_util_DEPLIBS += p9_stop_util
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(STOP_UTIL))
 $(call BUILD_PROCEDURE)

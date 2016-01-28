@@ -1,13 +1,13 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: chips/p9/procedures/utils/stopreg/p9_stop_util.H $            */
+/* $Source: chips/p9/procedures/hwp/lib/p9_stop_util.H $                  */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,8 +40,10 @@
 // *HWP Team        :  PM
 // *HWP Level       :  2
 // *HWP Consumed by :  HB:HYP
+#ifndef __PPE_PLAT
 namespace stopImageSection
 {
+#endif  //__PPE_PLAT
 /**
  * @brief  helper function to swizzle given input data
  * @note   swizles bytes to handle endianess issue.
@@ -73,7 +75,7 @@ namespace stopImageSection
 #endif
 
 /**
- * @brief   describes details of start section of chip's HOMER image.
+ * @brief   describes details of CPMR header in HOMER.
  */
 typedef struct
 {
@@ -81,14 +83,19 @@ typedef struct
     uint64_t homerMagicNumber;
     uint32_t buildDate;
     uint32_t version;
-    uint8_t  reserve[7];
+    uint8_t  reserve1[7];
     uint8_t  fuseModeStatus;
-    uint32_t cmeHcodeOffset;
-    uint32_t cmeHcodeLength;
+    uint32_t cmeImgOffset;
+    uint32_t cmeImgLength;
     uint32_t cmeCommonRingOffset;
     uint32_t cmeCommonRingLength;
     uint32_t cmePstateOffset;
     uint32_t cmePstateLength;
+    uint32_t coreSpecRingOffset;
+    uint32_t coreSpecRingLen;
+    uint32_t coreScomOffset;
+    uint32_t coreScomLength;
+    uint32_t reserve2[184];
 } HomerImgDesc_t;
 
 /**
@@ -103,6 +110,7 @@ enum
     QUAD_BITS = 0x70
 };
 
+#ifndef __PPE_PLAT
 /**
  * @brief   returns core id and thread id by parsing a given PIR.
  * @param   i_pStopImage    points to STOP image associated with a proc chip.
@@ -117,6 +125,7 @@ StopReturnCode_t getCoreAndThread( void* const i_pStopImage,
 
 } // namespace stopImageSection ends
 
+#endif //__PPE_PLAT
 #endif
 
 

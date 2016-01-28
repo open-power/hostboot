@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,7 +51,7 @@ enum
     // start offset for SPR register restore, core scom or cache scom register
     // restore regions in homer image.
     CORE_SCOM_SECTN_START   = ( TWO_MB + ( 256 * ONE_KB )), //offset from start of chip HOMER
-    CACHE_SCOM_SECTN_START  = ( ONE_MB + ( 32 * ONE_KB )), // start of cache section
+    CACHE_SCOM_SECTN_START  = ( ONE_MB + ( 128 * ONE_KB )), // start of cache section
 
     //constants in HOMER's header area.
     REGULAR_MODE = 0xAA,

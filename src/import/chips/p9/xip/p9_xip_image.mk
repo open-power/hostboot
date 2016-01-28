@@ -16,6 +16,6 @@
 # deposited with the U.S. Copyright Office.
 #
 # IBM_PROLOG_END_TAG
- 
-PROCEDURE = p9_xip_image
+PROCEDURE=p9_xip_image
 $(call BUILD_PROCEDURE)
+

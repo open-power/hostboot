@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,13 +53,16 @@ StopReturnCode_t  isFusedMode( void* const i_pImage, bool& o_fuseMode )
             break;
         }
 
-        HomerImgDesc_t* pHomer =  (HomerImgDesc_t*)i_pImage;
+        HomerSection_t* pHomerDesc = ( HomerSection_t* ) i_pImage;
+        HomerImgDesc_t* pHomer =  (HomerImgDesc_t*)( pHomerDesc->interrruptHandler );
 
-        if( HOMER_MAGIC_WORD != pHomer->homerMagicNumber )
+        if( SWIZZLE_8_BYTE(HOMER_MAGIC_WORD) != pHomer->homerMagicNumber )
         {
-            MY_ERR("corrupt or invalid HOMER image location");
+            MY_ERR("corrupt or invalid HOMER image location 0x%016llx",
+                   pHomer->homerMagicNumber );
             break;
         }
+
 
         if( (uint8_t) FUSE_MODE == pHomer->fuseModeStatus )
         {

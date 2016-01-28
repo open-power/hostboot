@@ -1,0 +1,33 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/attribute_info/p9_hcode_image_build_attributes.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015,2016                                                    -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!--nest_attributes.xml-->
+<attributes>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_FUSED_CORE_MODE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Summarizes the fused status of cores. This is same for all P9 chips
+    in the system. If a core is in a fused state, attribute should read 1 
+    else zero. It needs to be populated during ipl but before istep 15.
+  </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+</attribute>
+</attributes>
