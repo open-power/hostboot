@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2012,2015                                                    */
+/* COPYRIGHT 2012,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,7 +63,7 @@ class ReturnCode : public FirstFailureData<ReturnCode>
         }
 
         ///
-        /// @brief Returns true iff iv_rc == SUCCESS
+        /// @brief Returns true iff iv_rc != SUCCESS
         /// @return true or false
         ///
         inline operator bool() const
@@ -75,8 +75,8 @@ class ReturnCode : public FirstFailureData<ReturnCode>
         /// @brief Assignement operator
         ///
 #ifdef DOXYGEN
-        inline ReturnCode& operator=(const uint64_t& rhs)
-        inline ReturnCode& operator=(const ReturnCodes& rhs)
+        inline ReturnCode& operator=(const uint64_t& rhs);
+        inline ReturnCode& operator=(const ReturnCodes& rhs);
 #endif
 
         inline bool operator==(const uint64_t& rhs) const
