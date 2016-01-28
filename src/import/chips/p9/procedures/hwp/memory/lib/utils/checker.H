@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -237,25 +237,26 @@ namespace spd
 ///
 /// @brief      Checks conditional passes and implements traces & exits if it fails
 /// @tparam     T spd_data, of any size
-/// @param[in]  const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target_dimm,
+/// @param[in]  const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 ///             bool conditional
-///             size_t spd_byte_inded
-///             char* err_str
+///             size_t spd_byte_index
+///             const char* err_str
 /// @return     ReturnCode
 ///
 template< typename T >
-inline fapi2::ReturnCode valid_value_fail(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target_dimm,
+inline fapi2::ReturnCode valid_value_fail(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         bool conditional,
         size_t spd_byte_index,
         T spd_data,
         const char* err_str)
 {
     FAPI_ASSERT(conditional,
-                fapi2::MSS_VALID_VALUE().
+                fapi2::MSS_SPD_DECODE_INVALID_VALUE().
                 set_VALUE(spd_data).
-                set_BYTE(spd_byte_index),
+                set_BYTE(spd_byte_index).
+                set_DIMM_TARGET(i_target),
                 "%s %s Byte %d, Data returned: %d.",
-                c_str(i_target_dimm),
+                c_str(i_target),
                 err_str,
                 spd_byte_index,
                 spd_data);
@@ -268,23 +269,24 @@ fapi_try_exit:
 ///
 /// @brief      Checks conditional passes and implements traces if it fails
 /// @tparam     T spd_data, of any size
-/// @param[in]  const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target_dimm,
+/// @param[in]  const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 ///             bool conditional
-///             size_t spd_byte_inded
-///             char* err_str
+///             size_t spd_byte_index
+///             const char* err_str
 /// @return     void
 ///
 template< typename T >
-inline void valid_value_warn(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target_dimm,
+inline void valid_value_warn(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                              bool conditional,
                              size_t spd_byte_index,
                              T spd_data,
                              const char* err_str)
 {
+    // Don't print warning conditional is true
     if(!conditional)
     {
         FAPI_IMP("%s. %s. Byte %d, Data returned: %d.",
-                 c_str(i_target_dimm),
+                 c_str(i_target),
                  err_str,
                  spd_byte_index,
                  spd_data );
