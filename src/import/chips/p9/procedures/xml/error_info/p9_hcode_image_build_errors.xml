@@ -1,0 +1,111 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p9/procedures/xml/error_info/p9_hcode_image_build_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- File: p9_hcode_image_build_errors.xml. -->
+<!-- Error definitions for p9_hcode_image_build.C -->
+<hwpErrors>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_IMG_PTR_ERROR</rc>
+    <description>Image pointers passed are either bad or point to same location.</description>
+    <ffdc>HW_IMG_BUF_PTR</ffdc>
+    <ffdc>HOMER_IMG_BUF_PTR</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_HW_IMAGE_INVALID_SIZE</rc>
+    <description>Hardware Image size is not in expected range </description>
+    <ffdc>HW_IMG_SIZE</ffdc>
+    <ffdc>MAX_HW_IMG_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_HCODE_INVALID_PHASE</rc>
+    <description>System phase is neither IPL nor Hypervisor</description>
+    <ffdc>SYS_PHASE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_HCODE_INVALID_TEMP_BUF</rc>
+    <description>Temporary buffer is invalid.</description>
+    <ffdc>TEMP_BUF_PTR</ffdc>
+    <ffdc>TEMP_BUF_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_HCODE_INVALID_IMG_TYPE</rc>
+    <description>Invalid image type passed for hcode image build.</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_SGPE_BUILD_FAIL</rc>
+    <description>hcode image build procedure failed to add sgpe image</description>
+    <ffdc>SGPE_FAIL_SECTN</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_SELF_RESTORE_BUILD_FAIL</rc>
+    <description>hcode image build procedure failed to add core self restore image</description>
+    <ffdc>SELF_RESTORE_FAIL_SECTN</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_CME_BUILD_FAIL</rc>
+    <description>hcode image build procedure failed to add CME image</description>
+    <ffdc>CME_FAIL_SECTN</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+</hwpErrors>
