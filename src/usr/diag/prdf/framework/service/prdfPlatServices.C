@@ -80,6 +80,7 @@ void milliSleep( uint32_t i_seconds, uint32_t i_milliseconds )
 
 //------------------------------------------------------------------------------
 
+/* TODO RTC 144705
 void initiateUnitDump( TargetHandle_t i_target,
                        errlHndl_t i_errl,
                        uint32_t i_errlActions )
@@ -91,6 +92,7 @@ void initiateUnitDump( TargetHandle_t i_target,
         PRDF_COMMIT_ERRL(i_errl, i_errlActions);
     }
 }
+*/
 
 //------------------------------------------------------------------------------
 

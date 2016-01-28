@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -314,6 +314,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         }
         else if ( PRDcalloutData::TYPE_MEMMRU == thiscallout.getType() )
         {
+/* TODO RTC 136125
             MemoryMru memMru (thiscallout.flatten());
             SrcWord9 = memMru.toUint32(); // Get MemMru value
 
@@ -327,6 +328,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             {
                 sappHwNoGardReq = true;
             }
+*/
         }
         else // PRDcalloutData::TYPE_TARGET
         {
@@ -590,6 +592,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         }
         else if ( PRDcalloutData::TYPE_MEMMRU == thiscallout.getType() )
         {
+/* TODO RTC 136125
             MemoryMru memMru (thiscallout.flatten());
 
             TargetHandleList partList = memMru.getCalloutList();
@@ -604,6 +607,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                                      errlSev,
                                      l_diagUpdate );
             }
+*/
         }
         else if ( PRDcalloutData::TYPE_SYMFRU == thiscallout.getType() )
         {
@@ -714,6 +718,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         // Operate only on MemoryMru callouts.
         if ( PRDcalloutData::TYPE_MEMMRU != it->callout.getType() ) continue;
 
+/* TODO RTC 136125
         // Only add single DIMM callouts. Otherwise, the parsed data is
         // redundant.
         MemoryMru memMru ( it->callout.flatten() );
@@ -721,6 +726,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 
         // Add the MemoryMru to the capture data.
         CenMbaCaptureData::addExtMemMruData( memMru, iv_errl );
+*/
     }
 
     // Note moved the code from here, that was associated with checking for the last
@@ -1088,6 +1094,7 @@ void ErrDataService::deallocateDimms( const SDC_MRU_LIST & i_mruList )
 {
     #define PRDF_FUNC "[ErrDataService::deallocateDimms] "
 
+/* TODO: RTC 136129
     #if !defined(__HOSTBOOT_MODULE) || defined(__HOSTBOOT_RUNTIME) // RT only
 
     do
@@ -1152,6 +1159,7 @@ void ErrDataService::deallocateDimms( const SDC_MRU_LIST & i_mruList )
     } while(0);
 
     #endif
+*/
 
     #undef PRDF_FUNC
 }

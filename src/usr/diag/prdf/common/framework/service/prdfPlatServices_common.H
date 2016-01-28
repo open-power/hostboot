@@ -117,9 +117,11 @@ bool isSmpCoherent();
  * @param i_errl   error handle
  * @param i_errlActions error action flags
  */
+/* TODO RTC 144705
 void initiateUnitDump( TARGETING::TargetHandle_t i_target,
                        errlHndl_t i_errl,
                        uint32_t i_errlActions);
+*/
 
 /**
  * @return True, if this system is using an FSP. False, otherwise (i.e. BMC

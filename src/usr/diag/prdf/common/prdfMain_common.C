@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -119,6 +119,7 @@ errlHndl_t noLock_initialize()
         // Perform platform specific initialization.
         initPlatSpecific();
 
+/* TODO: RTC 145445
         CcAutoDeletePointer<Configurator> configuratorPtr
                                           ( new PRDF::PegasusConfigurator() );
 
@@ -142,6 +143,7 @@ errlHndl_t noLock_initialize()
             systemPtr->Initialize(); // Hardware initialization
             g_initialized = true;
         }
+*/
 
         // Flush rule table cache since objects are all built.
         Prdr::LoadChipCache::flushCache();
@@ -360,7 +362,9 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_attentionType,
 
     if ( true == initiateHwudump )
     {
+/* TODO RTC 144705
         PlatServices::initiateUnitDump( dumpTrgt, dumpErrl, dumpErrlActions );
+*/
     }
 
     PRDF_EXIT( "PRDF::main()" );
