@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -605,7 +605,9 @@ class SensorModifier
      *  stored in the rightmost bit so it's mask is 0x0000000000000001.
      */
     enum {
-        memory_plugging_error_mask=0x0000000000000001
+        memory_plugging_error_mask=0x0000000000000001,
+        bus_error_mask=0x0000000000000002,
+        membus_error_mask=0x00000000000000004,
     };
 
 public:
@@ -637,13 +639,14 @@ public:
      *
      * @param [in]  i_sensorType Sensor type to be considered for modification
      * @param [out] o_eventDirType EventDirType to be modified based on sensor
-     * @param [out] o_specificOffset Offset to be modified based on sensor
+     * @param [out] o_specificOffset An array of offsets to modified based on
+     *              sensor.
      *
-     * @return  Returns a boolean, where a value of true indicates that the
-     * sensor was modified.
+     * @return      Returns a boolean, where a value of true indicates that the
+     *              sensor was modified.
      */
     bool modifySensor(uint8_t i_sensorType, uint8_t& o_eventDirType,
-                                            uint8_t& o_specificOffset);
+                      uint8_t& o_specificOffset);
 };
 #endif //CONFIG_BMC_IPMI
 
