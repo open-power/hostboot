@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -181,6 +181,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                 continue;
             }
 
+/* TODO: RTC 136052
             // Figure out which pcie osc is active for this proc
             uint32_t oscPos = getIoOscPos(l_chip, serviceData);
 
@@ -193,6 +194,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
                 PRDF_ERR(PRDF_FUNC "getOscPos returned error for chip: "
                          "0x%08x", l_chip->GetId());
             }
+*/
         }
         else if ( !PlatServices::isFunctional(l_chip->GetChipHandle()) )
         {
