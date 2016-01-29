@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -324,7 +324,7 @@ void memPowerThrottleRedPower(TargetHandleList & i_mbas,
 {
     Target* sys = NULL;
     TargetHandleList::iterator mba;
-    uint16_t power = 0;
+    uint32_t power = 0;
     uint32_t wattTarget = 0;
     uint32_t nChip = 0;
     uint32_t nMBA = 0;
@@ -337,10 +337,10 @@ void memPowerThrottleRedPower(TargetHandleList & i_mbas,
     power = sys->getAttr<ATTR_OPEN_POWER_N_PLUS_ONE_MAX_MEM_POWER_WATTS>();
     power *= 100; //centiWatts
 
-    //Account for the regulator efficiency, if supplied
+    //Account for the regulator efficiency (percentage), if supplied
     if (i_efficiency != 0)
     {
-        power *= i_efficiency;
+        power = (power * i_efficiency) / 100;
     }
 
     //Find the Watt target for each MBA
@@ -404,7 +404,7 @@ void memPowerThrottleOverSub(TargetHandleList & i_mbas,
 {
     Target* sys = NULL;
     TargetHandleList::iterator mba;
-    uint16_t power = 0;
+    uint32_t power = 0;
     uint32_t wattTarget = 0;
     uint32_t nChip = 0;
     uint32_t nMBA = 0;
@@ -417,10 +417,10 @@ void memPowerThrottleOverSub(TargetHandleList & i_mbas,
     power = sys->getAttr<ATTR_OPEN_POWER_N_MAX_MEM_POWER_WATTS>();
     power *= 100; //centiWatts
 
-    //Account for the regulator efficiency, if supplied
+    //Account for the regulator efficiency (percentage), if supplied
     if (i_efficiency != 0)
     {
-        power *= i_efficiency;
+        power = (power * i_efficiency) / 100;
     }
 
     //Find the Watt target for each MBA
@@ -487,7 +487,7 @@ void calcMemThrottles()
     TMGT_INF("calcMemThrottles: Using nSafeModeMBA=0x%X, nSafeModeChip=0x%X",
              nSafeModeMBA, nSafeModeChip);
 
-    TMGT_INF("calcMemThrottles: Using utilization=0x%X, efficiency=0x%X",
+    TMGT_INF("calcMemThrottles: Using utilization=%d, efficiency=%d percent",
              utilization, efficiency);
 
 
