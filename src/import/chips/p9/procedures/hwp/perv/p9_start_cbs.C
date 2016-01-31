@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +41,7 @@ enum P9_START_CBS_Private_Constants
     P9_CFAM_CBS_POLL_COUNT = 600, // Observed Number of times CBS read for CBS_INTERNAL_STATE_VECTOR
     CBS_IDLE_VALUE = 0x002, // Read the value of CBS_CS_INTERNAL_STATE_VECTOR
     P9_CBS_IDLE_HW_NS_DELAY = 100000, // unit is nano seconds
-    P9_CBS_IDLE_SIM_CYCLE_DELAY = 5000 // unit is sim cycles
+    P9_CBS_IDLE_SIM_CYCLE_DELAY = 250000 // unit is sim cycles
 };
 
 fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
