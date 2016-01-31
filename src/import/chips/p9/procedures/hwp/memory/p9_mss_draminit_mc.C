@@ -40,6 +40,7 @@
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
+using fapi2::TARGET_TYPE_MCS;
 
 extern "C"
 {
@@ -61,12 +62,18 @@ extern "C"
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
+        // Dump the registers of these MC
+        for (auto c : i_target.getChildren<TARGET_TYPE_MCS>())
+        {
+            FAPI_TRY( mss::dump_regs<TARGET_TYPE_MCS>(c) );
+        }
+
         for (auto p : l_mca)
         {
             // Set the IML Complete bit MBSSQ(3) (SCOM Addr: 0x02011417) to indicate that IML has completed
             // Can't find MBSSQ or the iml_complete bit - asked Steve BRS.
 
-            // Reset addr_mux_sel to “0” to allow the MBA to take control of the DDR interface over from CCS.
+            // Reset addr_mux_sel to “0” to allow the MCA to take control of the DDR interface over from CCS.
             // (Note: this step must remain in this procedure to ensure that data path is placed into mainline
             // mode prior to running memory diagnostics. When Advanced DRAM Training executes, this step
             // becomes superfluous but not harmful. However, it's not guaranteed that Advanced DRAM Training
