@@ -156,6 +156,8 @@ extern "C"
             // • Section 5.2.6.2 WC Configuration 1 Register on page 436
             // • Section 5.2.6.3 WC Configuration 2 Register on page 438
 
+            FAPI_TRY( mss::dump_regs<TARGET_TYPE_MCA>(p) );
+
             // Get our rank pairs.
             FAPI_TRY( mss::get_rank_pairs(p, l_pairs) );
 
@@ -176,8 +178,6 @@ extern "C"
             {
                 FAPI_TRY( mss::dp16::reset_delay_values(p, l_pairs) );
             }
-
-            FAPI_TRY( mss::dump_cal_registers(p) );
 
             FAPI_DBG("generating calibration CCS instructions: %d rank-pairs", l_pairs.size());
 
