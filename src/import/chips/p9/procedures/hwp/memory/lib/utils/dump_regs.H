@@ -1,13 +1,13 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: chips/p9/procedures/hwp/memory/lib/mss.H $                    */
+/* $Source: chips/p9/procedures/hwp/memory/lib/utils/dump_regs.H $        */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2016                                                         */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -18,49 +18,31 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-/// @file mss.H
-/// @brief Main include file for the Memory Subsystem
+/// @file dump_regs.H
+/// @brief Dump registers
 ///
 // *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
-// *HWP HWP Backup: Craig Hamilton <cchamilt@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: HB:FSP
 
-#ifndef _MSS_H_
-#define _MSS_H_
+#ifndef _MSS_DUMP_REGS_H_
+#define _MSS_DUMP_REGS_H_
 
 #include <fapi2.H>
-#include "utils/scom.H"
 
-#include <p9_mc_scom_addresses.H>
-#include <p9_mc_scom_addresses_fld.H>
+namespace mss
+{
 
-#include "shared/mss_const.H"
-#include "shared/mss_kind.H"
+///
+/// @brief Dump the registers of a target
+/// @tparam T, the fapi2::TargetType
+/// @param[in] i_target, the target in question
+/// @return fapi2::FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode dump_regs( const fapi2::Target<T>& i_target );
 
-#include "utils/index.H"
-#include "utils/c_str.H"
-
-#include "utils/pos.H"
-#include "utils/swizzle.H"
-#include "utils/conversions.H"
-#include "utils/find.H"
-#include "utils/poll.H"
-#include "utils/checker.H"
-#include "utils/dump_regs.H"
-
-#include "ccs/ccs.H"
-
-#include "port/port.H"
-
-
-#include "dimm/rcd_load.H"
-#include "dimm/mrs_load.H"
-#include "dimm/rank.H"
-
-#include "phy/ddr_phy.H"
-#include "phy/dp16.H"
-#include "phy/cal_timers.H"
-
+}
 #endif

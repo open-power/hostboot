@@ -205,7 +205,8 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
     i_poll.iv_sim_delay = mss::cycles_to_simcycles(mss::ns_to_cycles(i_target, DELAY_1US));
 
     // Round up to the cycles left after the initial delay
-    uint64_t l_ns_left = mss::cycles_to_ns(i_target, l_total_cycles) - i_poll.iv_initial_delay;
+    int64_t l_ns_left = std::max(0L,
+                                 (int64_t(mss::cycles_to_ns(i_target, l_total_cycles)) - int64_t(i_poll.iv_initial_delay)));
     i_poll.iv_poll_count = l_ns_left / i_poll.iv_delay;
     i_poll.iv_poll_count += l_ns_left % i_poll.iv_delay ? 0 : 1;
 
@@ -225,7 +226,8 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
         i_poll.iv_sim_delay = mss::cycles_to_simcycles(mss::ns_to_cycles(i_target, DELAY_1US));
 
         // Round up to the cycles left after the initial delay
-        uint64_t l_ns_left = mss::cycles_to_ns(i_target, l_total_cycles) - i_poll.iv_initial_delay;
+        int64_t l_ns_left = std::max(0L,
+                                     (int64_t(mss::cycles_to_ns(i_target, l_total_cycles)) - int64_t(i_poll.iv_initial_delay)));
         i_poll.iv_poll_count = l_ns_left / i_poll.iv_delay;
         i_poll.iv_poll_count += l_ns_left % i_poll.iv_delay ? 0 : 1;
 
@@ -240,7 +242,7 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
 
 #endif
 
-    FAPI_DBG("cal abort on error? %s. tc: %lluc, id: %lluns(%llusc), d: %llu(%llusc), pc: %llu",
+    FAPI_INF("cal abort on error? %s. tc: %luc, id: %luns(%lusc), d: %lu(%lusc), pc: %lu",
              (CAL_ABORT_ON_ERROR ? "yup" : "nope"), l_total_cycles, i_poll.iv_initial_delay,
              i_poll.iv_initial_sim_delay, i_poll.iv_delay, i_poll.iv_sim_delay, i_poll.iv_poll_count);
 
