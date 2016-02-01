@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2012,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2016                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -21,7 +23,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- XML file specifying DIMM attributes used by HW Procedures. -->
-<!-- $Id: dimm_attributes.xml,v 1.4 2013/10/03 20:40:52 dedahle Exp $ -->
+<!-- $Id: dimm_attributes.xml,v 1.5 2016/02/05 22:53:35 dcrowell Exp $ -->
 <attributes>
 
 <attribute>
@@ -96,6 +98,17 @@
     </enum>
     <array>2 2 4</array>
     <platInit/>
+</attribute>
+
+<attribute>
+    <id>ATTR_MBVPD_VERSION</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>
+       Memory Buffer VPD version, written and consumed by the MB vpd
+       accessor functions (see getMBvpdAttr.C).
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
 </attribute>
 
 </attributes>

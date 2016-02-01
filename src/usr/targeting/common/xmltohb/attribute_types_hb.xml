@@ -1309,6 +1309,25 @@ ID for the sensor number returned with the elog. -->
 </attribute>
 
 <attribute>
+    <id>MBVPD_VERSION</id>
+    <description>MBVPD Version
+    </description>
+    <simpleType>
+        <uint32_t>
+            <default>0</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MBVPD_VERSION</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <hbOnly/>
+</attribute>
+
+<attribute>
     <id>MSS_VOLT_VPP_SLOPE_EFF_CONFIG</id>
     <description>Units: uV/DRAM
     </description>

@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdAttr.C,v 1.11++ 2016/01/21 16:02:38 dcrowell Exp $
+// $Id: getMBvpdAttr.C,v 1.13 2016/03/04 19:29:51 dcrowell Exp $
 /**
  *  @file getMBvpdAttr.C
  *
@@ -382,7 +382,8 @@ fapi::ReturnCode findDimmInfo (const fapi::Target & i_mbaTarget,
     return l_fapirc;
 }
 
-// return version from keyword VM or VZ or VD
+// return version from fapi attribute if initialized.
+// If not , get it from keyword VM else VZ else VD
 fapi::ReturnCode getVersion  (const fapi::Target    & i_mbaTarget,
                               const DimmType        & i_dimmType,
                               VpdVersion            & o_version)
@@ -392,6 +393,7 @@ fapi::ReturnCode getVersion  (const fapi::Target    & i_mbaTarget,
     fapi::MBvpdKeyword l_keyword = fapi::MBVPD_KEYWORD_VM;  // try VM first
     fapi::MBvpdRecord  l_record  = fapi::MBVPD_RECORD_SPDX; // default to SPDX
     MBvpdVMKeyword l_vmVersionBuf={};
+    uint32_t l_version = 0;
     uint32_t l_vmBufSize = sizeof(MBvpdVMKeyword); // VM keyword is of 4 bytes.
     uint16_t l_versionBuf = 0;
     uint32_t l_bufSize = sizeof(l_versionBuf);
@@ -407,6 +409,27 @@ fapi::ReturnCode getVersion  (const fapi::Target    & i_mbaTarget,
             break;  //  break out with fapirc
         }
 
+        // First try to get the MBVPD version from attrib
+        // Proceed gracefully if the value is not initialized yet
+        l_fapirc = FAPI_ATTR_GET(ATTR_MBVPD_VERSION,
+                                 &l_mbTarget,
+                                 l_version);
+        if(l_fapirc)
+        {
+            FAPI_ERR("getVersion: read of MBVPD_VERSION attribute failed");
+            break;
+        }
+
+        // If the version has been set, just use it directly and leave
+        if( l_version != 0)
+        {
+            o_version = static_cast<VpdVersion>(l_version);
+            FAPI_DBG("getVersion: vpd version=0x%x,",o_version);
+            break;
+        }
+
+        // Couldn't  get the Version from attribute
+        // So proceed to find the version and update the attrib
         if (CDIMM == i_dimmType)
         {
             l_record = fapi::MBVPD_RECORD_VSPD;
@@ -527,9 +550,19 @@ fapi::ReturnCode getVersion  (const fapi::Target    & i_mbaTarget,
             break;  //  break out with fapirc
         }
 
-        FAPI_DBG("getVersion: vpd version=0x%x keyword=%d",
-                o_version,l_keyword);
+        FAPI_INF("getVersion: vpd version=0x%x keyword=%d",
+                 o_version, l_keyword);
 
+        // cache the version value by updating attribute
+        l_version = static_cast<uint32_t>(o_version);
+        l_fapirc = FAPI_ATTR_SET(ATTR_MBVPD_VERSION,
+                                 &l_mbTarget,
+                                 l_version);
+        if(l_fapirc)
+        {
+            FAPI_ERR("getVersion: Setting of MBVPD_VERSION attribute failed");
+            break; // break out with l_fapirc
+        }
     }
     while (0);
 

@@ -171,6 +171,7 @@
         <id>SCOM_IND_MUTEX</id>
     </attribute>
     <attribute><id>SCAN_MUTEX</id></attribute>
+    <attribute><id>MBVPD_VERSION</id></attribute>
     <attribute>
         <id>IBSCOM_VIRTUAL_ADDR</id>
     </attribute>
