@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,17 +33,15 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <p9_mss_setup_bars.H>
+#include <p9_mss_eff_grouping.H>
 
 ///----------------------------------------------------------------------------
 /// Constant definitions
 ///----------------------------------------------------------------------------
-//TODO: Move these same definitions from p9_mss_eff_grouping.C to
-//      p9_mss_eff_grouping.H, then include p9_mss_eff_grouping.H
-//      in this file.
-const uint8_t DATA_GROUPS   = 16;   // 8 regular groups, 8 mirrored groups
-const uint8_t MIRR_OFFSET   = 8;    // Start of mirrored offset in DATA_GROUPS
-const uint8_t DATA_ELEMENTS = 16;   // 16 items of data for each group
 
+///----------------------------------------------------------------------------
+/// Function definitions
+///----------------------------------------------------------------------------
 ///
 /// @brief Setup the non-mirrored BAR registers for an MC target
 ///

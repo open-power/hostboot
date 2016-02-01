@@ -7,7 +7,7 @@
 #
 # EKB Project
 #
-# COPYRIGHT 2015
+# COPYRIGHT 2015,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -17,4 +17,5 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_mss_eff_grouping
+OBJS+=p9_fbc_utils.o
 $(call BUILD_PROCEDURE)

@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,40 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <fapi2.H>
+
+///----------------------------------------------------------------------------
+/// Constant definitions
+///----------------------------------------------------------------------------
+
+// Constants used for EffGroupingData struct
+const uint8_t DATA_GROUPS   = 16;   // 8 regular groups, 8 mirrored groups
+const uint8_t MIRR_OFFSET   = 8;    // Start of mirrored offset in DATA_GROUPS
+const uint8_t DATA_ELEMENTS = 18;   // 18 items of data for each group
+
+// Indexes used for EffGroupingData::iv_data DATA ELEMENTS
+const uint8_t PORT_SIZE = 0;         // Memory size of each port in group (GB)
+const uint8_t PORTS_IN_GROUP = 1;    // Number of ports in group
+const uint8_t GROUP_SIZE = 2;        // Memory size of entire group (GB)
+const uint8_t BASE_ADDR = 3;         // Base Address
+#define MEMBER_IDX(X) ((X) + 4)      // List of MC ports in group
+#define ALT_VALID(X) ((X) + 12)      // Alt Memory valid (2 alt memory regions)
+#define ALT_SIZE(X) ((X) + 14)       // Alt Memory Size
+#define ALT_BASE_ADDR(X) ((X) + 16)  // Alt Base Address
+
+// Number of memory regions
+const uint8_t NUM_NON_MIRROR_REGIONS = 8;
+const uint8_t NUM_MIRROR_REGIONS = 4;
+const uint8_t NUM_OF_HTM_REGIONS = 2; // 2 HTM memory regions
+const uint8_t NUM_OF_ALT_MEM_REGIONS = 2; // 2 memory holes
+
+// ------------------------------------------------------
+// MC ports
+// Define the MC ports to be grouped.
+// For Nimbus, MC port is an MCA (8 MCAs)
+// For Cumulus, MC port is a DMI (8 DMIs)
+// -------------------------------------------------------
+const uint8_t NUM_MC_PORTS_PER_PROC = 8;
+const uint8_t NUM_DIMMS_PER_DRAM_PORT = 2; // 2 DIMMs per DRAM port
 
 /// Function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_mss_eff_grouping_FP_t)(
