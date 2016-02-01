@@ -7,7 +7,7 @@
 <!--                                                                        -->
 <!-- EKB Project                                                            -->
 <!--                                                                        -->
-<!-- COPYRIGHT 2015                                                         -->
+<!-- COPYRIGHT 2015,2016                                                    -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -527,8 +527,7 @@
                 manner from the chip's position in the fabric topology (i.e.
                 each chip will consume a fixed portion of the system address
                 map).
-                Set by p9_mss_eff_grouping TODO: is this correct?
-                Used by p9_mss_eff_grouping.
+                Set by p9_mss_eff_grouping.
   </description>
   <valueType>uint64</valueType>
   <writeable/>
@@ -572,8 +571,7 @@
                 manner from the chip's position in the fabric topology (i.e.
                 each chip will consume a fixed portion of the system address
                 map).
-                Set by p9_mss_eff_grouping TODO: is this correct?
-                Used by p9_mss_eff_grouping.
+                Set by p9_mss_eff_grouping.
   </description>
   <valueType>uint64</valueType>
   <writeable/>
@@ -656,18 +654,22 @@
        consumer:- mss_setup_bars
        Data Structure from eff grouping to setup bars to help determine
        different groups
-       Non- Mirroring array[0-7]
-       [0.7][0] -- MCS size // 1-- No of MCS/group //2-- Total group size of
-       non-mirroring  //3 -- Base address // 4-11 - MCS ID number// 12 --
-       Alter.Bar //13 - Alternate Group Size // 14 - Alternate Base address
-       Mirroring      array[8-15]
-       [8:15][0] -- MCS size // 1-- No of MCS/group // 2-- Total group size
-       of mirroring // 3 -- Base address // 4-11 - MCS ID number// 12 --
-       Alter.Bar //13 - Alternate Group Size // 14 - Alternate Base address
+       Non-Mirroring array[0-7]  [0.17]:  0-- Port size; 1-- No of ports in group; 2-- Total group size of non-mirroring;
+                                          3-- Base address; 4-11-- PortID number in group;
+                                         12-- Alt Memory valid(0); 13-- Alt Memory valid (1);
+                                         14-- Alt Group size (0); 15-- Alt Group size(1);
+                                         16-- Alt Base address (0); 17-- Alt Base address (1);
+                                         
+                                         13-- Alternate Group Size; 14-- Alternate Base address
+       Mirroring     array[8-15] [0:17]:  0-- Port size; 1-- No of ports in group; 2-- Total group size of mirroring;
+                                          3-- Base address; 4-11-- PortID number;
+                                         12-- Alt Memory valid(0); 13-- Alt Memory valid (1);
+                                         14-- Alt Group size (0); 15-- Alt Group size(1);
+                                         16-- Alt Base address (0); 17-- Alt Base address (1);
        Measured in GB
      </description>
     <valueType>uint32</valueType>
-    <array>16,16</array>
+    <array>16,18</array>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
@@ -864,4 +866,25 @@
   <persistRuntime/>
 </attribute>
 <!-- ********************************************************************* -->
+
+<!-- ********************************************************************* -->
+<!-- TODO: RTC 145692
+     Temporary attributes used for p9_mss_eff_grouping test cases
+     These attributes need to be removed and test cases need to use
+     (TBD) attributes that specify the DIMM sizes used to calculate the
+     result of getDimmSize() function called in p9_mss_eff_grouping -->
+<attribute>
+  <id>ATTR_UNIT_TEST_MCA_MEMORY_SIZES</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description> The memory sizes behind the MCAs used for p9_mss_eff_grouping
+                test case.
+                Array [Port][DIMM] where num of ports = 8, num of dimms = 2
+  </description>
+  <valueType>uint32</valueType>
+  <array>8,2</array>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+<!-- ********************************************************************* -->
+
 </attributes>
