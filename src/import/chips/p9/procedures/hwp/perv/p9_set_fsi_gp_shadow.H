@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -20,15 +20,13 @@
 /// @file  p9_set_fsi_gp_shadow.H
 ///
 /// @brief --IPL step 0.8 proc_prep_ipl
-// *!
-// *! OWNER NAME  : Abhishek Agarwal  Email: abagarw8@in.ibm.com
-// *! BACKUP NAME :                   Email:
 //------------------------------------------------------------------------------
-// *HWP HWP Owner   : Abhishek Agarwal <abagarw8@in.ibm.com>
-// *HWP FW Owner    : Brian Silver <bsilver@us.ibm.com>
-// *HWP Team        : Perv
-// *HWP Level       : 1
-// *HWP Consumed by : SBE
+// *HWP HW Owner        : Anusha Reddy Rangareddygari <anusrang@in.ibm.com>
+// *HWP HW Backup Owner : Srinivas V Naga <srinivan@in.ibm.com>
+// *HWP FW Owner        : Brian Silver <bsilver@us.ibm.com>
+// *HWP Team            : Perv
+// *HWP Level           : 2
+// *HWP Consumed by     : SBE
 //------------------------------------------------------------------------------
 
 
@@ -38,6 +36,24 @@
 
 #include <fapi2.H>
 
+
+namespace p9SetFsiGpShadow
+{
+enum P9_SET_FSI_GP_SHADOW_Public_Constants
+{
+    PERV_CTRL0_FLUSHVALUE = 0x7C0E2000,
+    PERV_CTRL1_FLUSHVALUE = 0x63C00000,
+    ROOT_CTRL1_FLUSHVALUE = 0x00180000,
+    ROOT_CTRL2_FLUSHVALUE = 0x0000E000,
+    ROOT_CTRL7_FLUSHVALUE = 0x0,
+    ROOT_CTRL8_FLUSHVALUE = 0xEEECF300,
+    ROOT_CTRL0_FLUSHVALUE = 0x80FF4003,
+    ROOT_CTRL3_FLUSHVALUE = 0x0080C000,
+    ROOT_CTRL4_FLUSHVALUE = 0x0,
+    ROOT_CTRL5_FLUSHVALUE = 0x0,
+    ROOT_CTRL6_FLUSHVALUE = 0x00800000
+};
+}
 
 typedef fapi2::ReturnCode (*p9_set_fsi_gp_shadow_FP_t)(const
         fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
