@@ -142,10 +142,11 @@ void test_fapi2GetChildren()
 //         l_actualSize = l_childMCAs.size();
 //
 //         //Set expected size to be the number of MCAs per MCBIST
-//         l_expectedSize = 2;
+//         l_expectedSize = MCA_PER_MCS * MCS_PER_PROC / MCBIST_PER_PROC;
 //         numTests++;
 //         if(l_actualSize != l_expectedSize)
 //         {
+//             FAPI_INF("fapi2TargetTest:: MCAs per MCBIST mismatch");
 //             numFails++;
 //             break;
 //         }
@@ -159,6 +160,7 @@ void test_fapi2GetChildren()
         numTests++;
         if(l_actualSize != l_expectedSize)
         {
+            FAPI_INF("fapi2TargetTest:: present cores per proc mismatch");
             numFails++;
             break;
         }
@@ -168,10 +170,11 @@ void test_fapi2GetChildren()
         l_actualSize = l_childCores.size();
 
         //Set expected size to be the number of cores per proc
-        l_expectedSize = 1;
+        l_expectedSize = EQ_PER_PROC * EX_PER_EQ * CORE_PER_EX;
         numTests++;
         if(l_actualSize != l_expectedSize)
         {
+            FAPI_INF("fapi2TargetTest:: functional cores per proc mismatch");
             numFails++;
             break;
         }
@@ -180,11 +183,12 @@ void test_fapi2GetChildren()
         l_targetHuid = TARGETING::get_huid(l_nimbusProc) ;
         l_actualSize = l_childMCAs.size();
 
-        //Set expected size to be the number of cores per proc
-        l_expectedSize = 8;
+        //Set expected size to be the number of MCAs per proc
+        l_expectedSize = MCA_PER_MCS * MCS_PER_PROC;
         numTests++;
         if(l_actualSize != l_expectedSize)
         {
+            FAPI_INF("fapi2TargetTest:: MCAs per proc mismatch");
             numFails++;
             break;
         }
@@ -198,6 +202,7 @@ void test_fapi2GetChildren()
         numTests++;
         if(l_actualSize != l_expectedSize)
         {
+            FAPI_INF("fapi2TargetTest:: cores per EX mismatch");
             numFails++;
             break;
         }
@@ -211,6 +216,7 @@ void test_fapi2GetChildren()
         numTests++;
         if(l_actualSize != l_expectedSize)
         {
+            FAPI_INF("fapi2TargetTest:: cores per EQ mismatch");
             numFails++;
             break;
         }
@@ -379,6 +385,7 @@ void test_fapi2GetChildren()
 
             if(candidateTarget == NULL)
             {
+                FAPI_INF("fapi2TargetTest:: candidateTarget not found");
                 numFails++;
                 break;
             }
@@ -392,6 +399,7 @@ void test_fapi2GetChildren()
 
             if(l_actualSize != l_expectedSize)
             {
+                FAPI_INF("fapi2TargetTest:: children of pervasive mismatch");
                 numFails++;
                 break;
             }

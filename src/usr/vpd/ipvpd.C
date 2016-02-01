@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1435,7 +1435,9 @@ errlHndl_t IpVpdFacade::retrieveKeyword ( const char * i_keywordName,
     errlHndl_t err = NULL;
 
     TRACSSCOMP( g_trac_vpd,
-                ENTER_MRK"IpVpdFacade::retrieveKeyword()" );
+                ENTER_MRK"IpVpdFacade::retrieveKeyword(%s, %s, . . .)",
+                i_keywordName,
+                i_recordName );
 
     do
     {
@@ -1641,7 +1643,9 @@ errlHndl_t IpVpdFacade::fetchDataFromPnor ( uint64_t i_byteAddr,
 {
     errlHndl_t err = NULL;
     TRACSSCOMP( g_trac_vpd,
-                ENTER_MRK"IpVpdFacade::fetchDataFromPnor()" );
+                ENTER_MRK"IpVpdFacade::fetchDataFromPnor(%ld, %d, . . .)",
+                i_byteAddr,
+                i_numBytes );
     do
     {
         // Call a function in the common VPD code
@@ -1679,7 +1683,9 @@ errlHndl_t IpVpdFacade::fetchDataFromEeprom ( uint64_t i_byteAddr,
 {
     errlHndl_t err = NULL;
     TRACSSCOMP( g_trac_vpd,
-                ENTER_MRK"IpVpdFacade::fetchDataFromEeprom()" );
+                ENTER_MRK"IpVpdFacade::fetchDataFromEeprom(%ld, %d, . . .)",
+                i_byteAddr,
+                i_numBytes );
 
     do
     {
@@ -1724,7 +1730,9 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
     int matchesFound = 0;
 
     TRACSSCOMP( g_trac_vpd,
-                ENTER_MRK"IpVpdFacade::findKeywordAddr()" );
+                ENTER_MRK"IpVpdFacade::findKeywordAddr(%s, %s, . . .)",
+                i_keywordName,
+                i_recordName );
 
     do
     {
