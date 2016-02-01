@@ -265,6 +265,9 @@ shutdown_status=`echo "obase=16; $temp" | bc`
 
 ##  note, don't use $VERBOSE here or you get all sorts of extra junk in the output file.
 echo "Wait for unit test completion."
+echo
+echo "==================================="
+echo
 declare -i timeout=0
 modsstarted=0
 modscompleted=0
@@ -272,10 +275,27 @@ loopcount=0
 while [ $(($modsstarted)) -lt 1 -o $(($modsstarted)) -ne $(($modscompleted)) ]; do
     sleep 10
     ((loopcount++))     # increment loopcount
-        autosim $NOWIN --simcmd   "print ((system_cmp0.phys_mem).read 0x$mods_completed_addr 0x08)"  1> $SBXHOME/modscompleted.log  2> /dev/null
-   modscompleted=`cat $SBXHOME/modscompleted.log | awk '/0x/ {print strtonum($1)}'`
+    echo "loopcount = $loopcount"
+
+    echo "modscompleted log command"
+    echo "autosim $NOWIN --simcmd \"print ((system_cmp0.phys_mem).read 0x$mods_completed_addr 0x08)\"  1> $SBXHOME/modscompleted.log  2> /dev/null"
+    autosim $NOWIN --simcmd   "print ((system_cmp0.phys_mem).read 0x$mods_completed_addr 0x08)"  1> $SBXHOME/modscompleted.log  2> /dev/null
+    echo
+
+    echo "modscompleted command"
+    echo "cat $SBXHOME/modscompleted.log | awk '/0x/ {print strtonum($1)}'"
+    modscompleted=`cat $SBXHOME/modscompleted.log | awk '/0x/ {print strtonum($1)}'`
+    echo
+
+    echo "modsstarted log command"
+    echo "autosim $NOWIN --simcmd   \"print ((system_cmp0.phys_mem).read 0x$mods_started_addr 0x08)\"     1> $SBXHOME/modsstarted.log  2> /dev/null"
     autosim $NOWIN --simcmd   "print ((system_cmp0.phys_mem).read 0x$mods_started_addr 0x08)"     1> $SBXHOME/modsstarted.log  2> /dev/null
+    echo
+
+    echo "modsstarted command"
+    echo "cat $SBXHOME/modsstarted.log |  awk '/0x/ {print strtonum($1)}'"
     modsstarted=`cat $SBXHOME/modsstarted.log |  awk '/0x/ {print strtonum($1)}'`
+    echo
 
     echo "ModulesStarted:ModulesCompleted  => $modsstarted:$modscompleted"
 
@@ -285,6 +305,9 @@ while [ $(($modsstarted)) -lt 1 -o $(($modsstarted)) -ne $(($modscompleted)) ]; 
         timeout=$(($modsstarted - $modscompleted))
         break
     fi
+    echo
+    echo "==================================="
+    echo
 done
 
 echo "====> waiting for shutdown..."
