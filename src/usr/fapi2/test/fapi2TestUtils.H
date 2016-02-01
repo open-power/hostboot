@@ -36,6 +36,9 @@
 #define EQ_PER_PROC 6
 #define EX_PER_EQ 2
 #define CORE_PER_EX 2
+#define MCS_PER_PROC 4
+#define MCA_PER_MCS 2
+#define MCBIST_PER_PROC 2
 
 #include <fapi2.H>
 

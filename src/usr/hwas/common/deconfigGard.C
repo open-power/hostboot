@@ -752,7 +752,7 @@ errlHndl_t DeconfigGard::processFieldCoreOverride()
             std::sort(pProcList.begin(), pProcList.end(),
                     compareTargetHuid);
 
-            // create list for restrictEXunits() function
+            // create list for restrictECunits() function
             procRestrict_t l_procEntry;
             std::vector <procRestrict_t> l_procRestrictList;
             for (TargetHandleList::const_iterator
@@ -764,22 +764,22 @@ errlHndl_t DeconfigGard::processFieldCoreOverride()
                 const TargetHandle_t pProc = *pProc_it;
 
                 // save info so that we can
-                //  restrict the number of EX units
+                //  restrict the number of EC units
                 HWAS_DBG("pProc %.8X - pushing to proclist",
                     get_huid(pProc));
                 l_procEntry.target = pProc;
                 l_procEntry.group = 0;
                 l_procEntry.procs = pProcList.size();
-                l_procEntry.maxEXs = l_fco;
+                l_procEntry.maxECs = l_fco;
                 l_procRestrictList.push_back(l_procEntry);
             } // for pProc_it
 
-            // restrict the EX units; units turned off are marked
+            // restrict the EC units; units turned off are marked
             //  present=true, functional=false, and marked with the
             //  appropriate deconfigure code.
-            HWAS_INF("FCO: calling restrictEXunits with %d entries",
+            HWAS_INF("FCO: calling restrictECunits with %d entries",
                     l_procRestrictList.size());
-            l_pErr = restrictEXunits(l_procRestrictList,
+            l_pErr = restrictECunits(l_procRestrictList,
                         true, DECONFIGURED_BY_FIELD_CORE_OVERRIDE);
             if (l_pErr)
             {

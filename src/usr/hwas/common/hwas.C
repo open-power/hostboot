@@ -52,7 +52,6 @@
 #include <hwas/common/hwas_reasoncodes.H>
 #include <targeting/common/utilFilter.H>
 
-
 namespace HWAS
 {
 
@@ -364,16 +363,16 @@ errlHndl_t discoverTargets()
                             l_procEntry.group = pTarget->getAttr<ATTR_FRU_ID>();
                             l_procEntry.procs =
                                         (prData[7] & VPD_VINI_PR_B7_MASK) + 1;
-                            l_procEntry.maxEXs = l_procEntry.procs *
+                            l_procEntry.maxECs = l_procEntry.procs *
                                         (prData[2] & VPD_VINI_PR_B2_MASK)
                                             >> VPD_VINI_PR_B2_SHIFT;
                             l_procPRList.push_back(l_procEntry);
 
-                            if (l_procEntry.maxEXs == 0)
+                            if (l_procEntry.maxECs == 0)
                             {
                                 // this is PROBABLY bad PR, so YELL...
                                 HWAS_ERR("pTarget %.8X - PR VPD says 0 CORES",
-                                   pTarget->getAttr<ATTR_HUID>());
+                                    pTarget->getAttr<ATTR_HUID>());
                             }
                         }
                       }
@@ -443,17 +442,17 @@ errlHndl_t discoverTargets()
             }
         }
 
-        // PR keyword processing - potentially reduce the number of ex/core
+        // PR keyword processing - potentially reduce the number of ec/core
         //  units that are functional based on what's in the PR keyword.
-        //  call to restrict EX units, marking bad units as present=false;
+        //  call to restrict EC units, marking bad units as present=false;
         //  deconfigReason = 0 because present is false so this is not a
         //  deconfigured event.
-#ifndef CONFIG_SKIP_RESTRICT_EX_UNITS
-        errl = restrictEXunits(l_procPRList, false, 0);
+#ifndef CONFIG_SKIP_RESTRICT_EC_UNITS
+        errl = restrictECunits(l_procPRList, false, 0);
 
         if (errl)
         {
-            HWAS_ERR("discoverTargets: restrictEXunits failed");
+            HWAS_ERR("discoverTargets: restrictECunits failed");
             break;
         }
 #endif
@@ -922,16 +921,14 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
 
 
 
-errlHndl_t restrictEXunits(
+errlHndl_t restrictECunits(
     std::vector <procRestrict_t> &i_procList,
     const bool i_present,
     const uint32_t i_deconfigReason)
 {
-    HWAS_INF("restrictEXunits entry, %d elements", i_procList.size());
+    HWAS_INF("restrictECunits entry, %d elements", i_procList.size());
     errlHndl_t errl = NULL;
 
-    // @todo RTC:145459 - P9 changes for PR core restriction
-    return errl;
     // sort by group so PROC# are in the right groupings.
     std::sort(i_procList.begin(), i_procList.end(),
                 compareProcGroup);
@@ -946,20 +943,23 @@ errlHndl_t restrictEXunits(
     {
         // determine the number of procs we should enable
         uint8_t procs = i_procList[procIdx].procs;
-        uint32_t maxEXs = i_procList[procIdx].maxEXs;
+        uint32_t maxECs = i_procList[procIdx].maxECs;
 
         // this procs number, used to determine groupings
         uint32_t thisGroup = i_procList[procIdx].group;
 
-        HWAS_INF("procRestrictList[%d] - maxEXs %d, procs %d, group %d",
-                procIdx, maxEXs, procs, thisGroup);
+        HWAS_INF("procRestrictList[%d] - maxECs %d, procs %d, group %d",
+                procIdx, maxECs, procs, thisGroup);
 
-        // exs and iters for each proc in this vpd set
+        // exs, ecs, and iters for each proc in this vpd set
         TargetHandleList pEXList[procs];
         TargetHandleList::const_iterator pEX_it[procs];
+        TargetHandleList pECList[procs][NUM_EX_PER_CHIP];
+        TargetHandleList::const_iterator pEC_it[procs][NUM_EX_PER_CHIP];
 
         // find the proc's that we think are in this group
-        uint32_t currentEXs = 0;
+        uint32_t currentPairedECs = 0;
+        uint32_t currentSingleECs = 0;
         for (uint32_t i = 0; i < procs; ) // increment in loop
         {
             TargetHandle_t pProc = i_procList[procIdx].target;
@@ -988,13 +988,47 @@ errlHndl_t restrictEXunits(
                 // sort the list by ATTR_HUID to ensure that we
                 //  start at the same place each time
                 std::sort(pEXList[i].begin(), pEXList[i].end(),
-                            compareTargetHuid);
+                          compareTargetHuid);
 
                 // keep a pointer into that list
                 pEX_it[i] = pEXList[i].begin();
 
-                // keep local count of current functional EX units
-                currentEXs += pEXList[i].size();
+                for (uint32_t j = 0;
+                     (j < NUM_EX_PER_CHIP) && (pEX_it[i] != pEXList[i].end());
+                     j++)
+                {
+                    TargetHandle_t pEX = *(pEX_it[i]);
+
+                    // get this EX's (CHILD) functional EC/core units
+                    getChildChiplets(pECList[i][j], pEX,
+                                     TYPE_CORE, true);
+
+                    if (!pECList[i][j].empty())
+                    {
+                        // sort the list by ATTR_HUID to ensure that we
+                        //  start at the same place each time
+                        std::sort(pECList[i][j].begin(), pECList[i][j].end(),
+                                  compareTargetHuid);
+
+                        // keep a pointer into that list
+                        pEC_it[i][j] = pECList[i][j].begin();
+
+                        // keep local count of current functional EC units
+                        if (pECList[i][j].size() == 2)
+                        {
+                            // track ECs that can make a fused-core pair
+                            currentPairedECs += pECList[i][j].size();
+                        }
+                        else
+                        {
+                            // track ECs without a pair for a fused-core
+                            currentSingleECs += pECList[i][j].size();
+                        }
+                    }
+
+                    // go to next EX
+                    (pEX_it[i])++;
+                } // for j < NUM_EX_PER_CHIP
 
                 // go to next proc
                 i++;
@@ -1008,88 +1042,99 @@ errlHndl_t restrictEXunits(
             // advance the outer loop as well since we're doing these
             //  procs together
             ++procIdx;
-        } // for
+        } // for i < procs
 
-        if (currentEXs <= maxEXs)
+        if ((currentPairedECs + currentSingleECs) <= maxECs)
         {
             // we don't need to restrict - we're done with this group.
-            HWAS_DBG("currentEXs %d <= maxEXs %d -- done",
-                    currentEXs, maxEXs);
+            HWAS_DBG("currentECs %d <= maxECs %d -- done",
+                    (currentPairedECs + currentSingleECs), maxECs);
             continue;
         }
 
-        HWAS_DBG("currentEXs %d > maxEXs %d -- restricting!",
-                currentEXs, maxEXs);
+        HWAS_DBG("currentECs %d > maxECs %d -- restricting!",
+                (currentPairedECs + currentSingleECs), maxECs);
 
-        // now need to find EX units that stay function, going
-        //  across the list of units for each proc we have, until
-        //  we get to the max or run out of EXs.
-        uint8_t procs_remaining = procs;
-        uint32_t goodEXs = 0;
-        HWAS_DBG("procs %d maxEXs %d", procs, maxEXs);
-        do
+        // now need to find EC units that stay functional, going
+        //  across the list of units for each proc and EX we have,
+        //  until we get to the max or run out of ECs, giving
+        //  preference to paired ECs and if we are in fused mode
+        //  excluding single, non-paired ECs.
+
+        // Use as many paired ECs as we can up to maxECs
+        uint32_t pairedECs_remaining =
+            (maxECs < currentPairedECs) ? maxECs : currentPairedECs;
+        // If not in fused mode, use single ECs as needed to get to maxECs
+        uint32_t singleECs_remaining =
+            ((maxECs > currentPairedECs) && !is_fused_mode())
+            ? (maxECs - currentPairedECs) : 0;
+        uint32_t goodECs = 0;
+        HWAS_DBG("procs %d maxECs %d", procs, maxECs);
+
+        // Each pECList has ECs for a given EX and proc.  Check each EC list to
+        //  determine if it has an EC pair or a single EC and if the remaining
+        //  count indicates the given EC from that list is to stay functional.
+
+        // Cycle through the procs
+        for (uint32_t i = 0; i < procs; i++)
         {
-            // now cycle thru the procs, stopping when we either hit
-            //  the end, or when we hit our maxEXs limit
-            for (uint32_t i = 0;(i < procs) && (goodEXs < maxEXs);i++)
+            // Cycle through the EXs for this proc
+            for (uint32_t j = 0; j < NUM_EX_PER_CHIP; j++)
             {
-                // if we have EX units still to process
-                //  from this processor
-                if (pEX_it[i] != pEXList[i].end())
+                // Walk through the EC list from this EX
+                while (pEC_it[i][j] != pECList[i][j].end())
                 {
-                    // got a functional EX
-                    goodEXs++;
-                    HWAS_DBG("pEX   %.8X - is good %d!",
-                        (*(pEX_it[i]))->getAttr<ATTR_HUID>(), goodEXs);
-
-                    (pEX_it[i])++; // next ex/core in this proc's list
-
-                    // check to see if we just hit the end of the list
-                    if (pEX_it[i] == pEXList[i].end())
+                    // Check if EC pair for this EX
+                    if ((pECList[i][j].size() == 2) &&
+                        (pairedECs_remaining != 0))
                     {
-                        procs_remaining--;
-                        continue;
+                        // got a functional EC that is part of a pair
+                        goodECs++;
+                        pairedECs_remaining--;
+                        HWAS_DBG("pEC   %.8X - is good %d!",
+                                 (*(pEC_it[i][j]))->getAttr<ATTR_HUID>(),
+                                 goodECs);
                     }
-                }
-            } // for
-        }
-        while ((goodEXs < maxEXs) && (procs_remaining != 0));
+                    // Check if single EC for this EX
+                    else if ((pECList[i][j].size() == 1) &&
+                             (singleECs_remaining != 0))
+                    {
+                        // got a functional EC without a pair
+                        goodECs++;
+                        singleECs_remaining--;
+                        HWAS_DBG("pEC   %.8X - is good %d!",
+                                 (*(pEC_it[i][j]))->getAttr<ATTR_HUID>(),
+                                 ++goodECs);
+                    }
+                    // Otherwise paired or single EC, but not needed for maxECs
+                    else
+                    {
+                        // got an EC to be restricted and marked not functional
+                        TargetHandle_t l_pEC = *(pEC_it[i][j]);
+                        enableHwasState(l_pEC, i_present,
+                                        false, i_deconfigReason);
+                        HWAS_INF("pEC   %.8X - marked %spresent,"
+                                 " NOT functional",
+                                 l_pEC->getAttr<ATTR_HUID>(),
+                                 i_present ? "" : "NOT ");
+                    }
 
-        // now mark the rest of the EXs as non-functional
-        for (uint32_t i = 0;i < procs;i++)
-        {
-            // walk thru the rest of the EX list
-            while (pEX_it[i] != pEXList[i].end())
-            {
-                TargetHandle_t l_pEX = *(pEX_it[i]);
-                enableHwasState(l_pEX, i_present, false, i_deconfigReason);
-                HWAS_INF("pEX   %.8X - marked %spresent, NOT functional",
-                        l_pEX->getAttr<ATTR_HUID>(),
-                        i_present ? "" : "NOT ");
-
-                // now need to mark the child CORE
-                TargetHandleList pCoreList;
-                getChildChiplets(pCoreList, l_pEX, TYPE_CORE, true);
-                enableHwasState(pCoreList[0], i_present, false,
-                        i_deconfigReason);
-                HWAS_INF("pCore %.8X - marked %spresent, NOT functional",
-                        l_pEX->getAttr<ATTR_HUID>(),
-                        i_present ? "" : "NOT ");
-                (pEX_it[i])++; // next ex/core in this proc's list
-            }
-        } // for making remaining non-functional
+                    (pEC_it[i][j])++; // next ec in this ex's list
+                } // while pEC_it[i][j] != pECList[i][j].end()
+            } // for j < NUM_EX_PER_CHIP
+        } // for i < procs
     } // for procIdx < l_ProcCount
 
     if (errl)
     {
-        HWAS_INF("restrictEXunits failed (plid 0x%X)", errl->plid());
+        HWAS_INF("restrictECunits failed (plid 0x%X)", errl->plid());
     }
     else
     {
-        HWAS_INF("restrictEXunits completed successfully");
+        HWAS_INF("restrictECunits completed successfully");
     }
     return errl;
-} // restrictEXunits
+} // restrictECunits
 
 
 void checkCriticalResources(uint32_t & io_commonPlid,
@@ -1339,9 +1384,9 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
         else
         {
             // we have a Master Proc and it's functional
-            // check for at least 1 functional ex/core on Master Proc
+            // check for at least 1 functional ec/core on Master Proc
             TargetHandleList l_cores;
-            PredicateCTM l_core(CLASS_UNIT, TYPE_EX);
+            PredicateCTM l_core(CLASS_UNIT, TYPE_CORE);
             PredicatePostfixExpr l_coresFunctional;
             l_coresFunctional.push(&l_core).push(&l_functional).And();
             targetService().getAssociated(l_cores, l_pMasterProc,

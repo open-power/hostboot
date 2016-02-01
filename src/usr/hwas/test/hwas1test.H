@@ -1236,6 +1236,73 @@ public:
         TS_TRACE( "testHWASisDescFunctional exit" );
     }
 
+    /**
+     * @brief   test restrictECunits
+     */
+    void testHWASrestrictECunits()
+    {
+        using namespace HWAS;
+        using namespace TARGETING;
+
+        errlHndl_t errl = NULL;
+
+        // list of procs and data that we'll need to look at the PR keyword
+        procRestrict_t l_procEntry;
+        std::vector <procRestrict_t> l_procPRList;
+
+        // Get list of present targets with type PROC
+        TargetHandleList pCheckPres;
+        getAllChips( pCheckPres, TYPE_PROC, true );
+
+        for (TargetHandleList::const_iterator pTarget_it = pCheckPres.begin();
+             pTarget_it != pCheckPres.end();
+             ++pTarget_it
+            )
+        {
+            TargetHandle_t pTarget = *pTarget_it;
+
+            // read the PR keywords that we need, so that if
+            //  we have errors, we can handle them as approprite.
+            uint8_t prData[VPD_VINI_PR_DATA_LENGTH/sizeof(uint8_t)];
+            bzero(prData, sizeof(prData));
+            errl = platReadPR(pTarget, prData);
+            if (errl != NULL)
+            {   // read of PR keyword failed
+                TS_FAIL("testHWASrestrictECunits>"
+                        "pTarget %.8X - read PR failed - bad",
+                        pTarget->getAttr<ATTR_HUID>());
+            }
+            else
+            {
+                // save info so that we can
+                //  process the PR keyword after this loop
+                l_procEntry.target = pTarget;
+                l_procEntry.group = pTarget->getAttr<ATTR_FRU_ID>();
+                l_procEntry.procs = (prData[7] & VPD_VINI_PR_B7_MASK) + 1;
+                l_procEntry.maxECs = l_procEntry.procs *
+                    (prData[2] & VPD_VINI_PR_B2_MASK) >> VPD_VINI_PR_B2_SHIFT;
+                l_procPRList.push_back(l_procEntry);
+
+                if (l_procEntry.maxECs == 0)
+                {
+                    // this is PROBABLY bad PR, so YELL...
+                    TS_FAIL("testHWASrestrictECunits>"
+                            "pTarget %.8X - PR VPD says 0 CORES",
+                            pTarget->getAttr<ATTR_HUID>());
+                }
+            }
+        } // for pTarget_it
+
+        // Call restrictECunits
+        errl = restrictECunits(l_procPRList, false, 0);
+        if (errl != NULL)
+        {   // restrict EC units failed
+            TS_FAIL("testHWASrestrictECunits> - restrict EC units failed");
+        }
+
+        TS_TRACE( "testHWASrestrictECunits exit" );
+    }
+
 };
 
 #endif //

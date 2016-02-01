@@ -306,11 +306,15 @@ sub createMVPDData
             {
                 $sourceFile = "$dataPath/$mvpdFile";
             }
+
+            debugMsg( "Using source $sourceFile for machine $machine\n" );
         }
         else
         {
             # No processor, use empty data chunk.
             $sourceFile = $emptyMVPD;
+
+            debugMsg( "Using source $sourceFile\n" );
         }
 
         $result = `dd if=$sourceFile of=$sysMVPDFile conv=notrunc oflag=append 2>&1 1>/dev/null`;
@@ -377,6 +381,8 @@ sub createCVPDData
                 $sourceFile = $emptyMemVPD;
             }
 
+            debugMsg( "Using source $sourceFile\n" );
+
             $result = `dd if=$sourceFile of=$sysMemVPDFile conv=notrunc oflag=append 2>&1 1>/dev/null`;
             if( $? )
             {
@@ -438,6 +444,8 @@ sub createSPDData
                     # No dimm, use empty data chunk
                     $sourceFile = $emptySPD;
                 }
+
+                debugMsg( "Using source $sourceFile\n" );
 
                 $result = `dd if=$sourceFile of=$sysSPDFile conv=notrunc oflag=append 2>&1 1>/dev/null`;
                 if( $? )

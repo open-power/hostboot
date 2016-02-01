@@ -81,31 +81,36 @@ errlHndl_t initHardware();
 errlHndl_t discoverTargets();
 
 /**
- * @brief   restrictEXunits   Internal HWAS function to restrict the EXs
+ * @brief   restrictECunits   Internal HWAS function to restrict the ECs
  *
- *  This routine will walk through the procs in the list, and turn EX
+ *  This routine will walk through the procs in the list, and turn EC
  *  units to not functional if the number of units is larger than the max
  *  given. This is used for PR keyword and Field Core Override (FCO)
  *  processing.
  *
  * @param[in] i_procRestrict   vector of procRestrict entries
  * @param[in] i_present    boolean for 'present' HWAS value for restricted
- *                          EX units
+ *                          EC units
  * @param[in] i_deconfigReason   DECONFIGURED_BY_ enum or 0
  *
  * @return errlHndl_t       valid errlHndl_t handle if there was an error
  *                          NULL if no errors;
  */
 
-// structure used to store proc information for EX restrict processing
+// Maximum number of EXs per proc
+#define NUM_EX_PER_EQ     2
+#define NUM_EQ_PER_CHIP   6
+#define NUM_EX_PER_CHIP   (NUM_EX_PER_EQ * NUM_EQ_PER_CHIP)
+
+// structure used to store proc information for EC restrict processing
 typedef struct {
     TARGETING::TargetHandle_t target;      // proc target
     uint32_t group;             // uniq id for this group - ie: FRUID, node
-    uint32_t maxEXs;            // max EX units for this group
+    uint32_t maxECs;            // max EC units for this group
     uint8_t procs;              // number of procs in the group
 } procRestrict_t;
 
-errlHndl_t restrictEXunits(
+errlHndl_t restrictECunits(
     std::vector <procRestrict_t> &i_procRestrict,
     const bool i_present,
     const uint32_t i_deconfigReason);
