@@ -7,7 +7,7 @@
 <!--                                                                        -->
 <!-- EKB Project                                                            -->
 <!--                                                                        -->
-<!-- COPYRIGHT 2015                                                         -->
+<!-- COPYRIGHT 2015,2016                                                    -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -27,11 +27,11 @@
       TARGET_TYPE_NV,
       TARGET_TYPE_SBE, TARGET_TYPE_PPE, TARGET_TYPE_PERV,
       TARGET_TYPE_PEC, TARGET_TYPE_PHB, TARGET_TYPE_CAPP,
-      TARGET_TYPE_MEMBUF_CHIP,
       TARGET_TYPE_MBA
     </targetType>
     <description>
       A unit's position within the chip with respect to similar units.
+      Note that this value is relative to the parent chip, not a parent unit.
       This data is from the MRW.
     </description>
     <valueType>uint8</valueType>

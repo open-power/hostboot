@@ -7,7 +7,7 @@
 <!--                                                                        -->
 <!-- EKB Project                                                            -->
 <!--                                                                        -->
-<!-- COPYRIGHT 2015                                                         -->
+<!-- COPYRIGHT 2015,2016                                                    -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -47,8 +47,36 @@
     <id>ATTR_POS</id>
     <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_MEMBUF_CHIP, TARGET_TYPE_DIMM</targetType>
     <description>
-      Position of chip/dimm within drawer
+      Physical position of chip/dimm within drawer
       This data is from the MRW.
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ******************************************************************************** -->
+  <attribute>
+    <id>ATTR_FAPI_POS</id>
+    <targetType>
+      TARGET_TYPE_PROC_CHIP, TARGET_TYPE_MEMBUF_CHIP, TARGET_TYPE_DIMM,
+      TARGET_TYPE_CORE, TARGET_TYPE_EX, TARGET_TYPE_EQ,
+      TARGET_TYPE_MCS, TARGET_TYPE_MCA, TARGET_TYPE_MCBIST, TARGET_TYPE_MI, TARGET_TYPE_DMI,
+      TARGET_TYPE_XBUS, TARGET_TYPE_OBUS,
+      TARGET_TYPE_NV,
+      TARGET_TYPE_SBE, TARGET_TYPE_PPE, TARGET_TYPE_PERV,
+      TARGET_TYPE_PEC, TARGET_TYPE_PHB, TARGET_TYPE_CAPP,
+      TARGET_TYPE_MBA
+    </targetType>
+    <description>
+      Logical position of target within a system. This is derived from the SMP location
+      of each processor and each target's relationship to a proc.
+      - PROC = based on SMP groupid+chipid
+      - MEMBUF = PROC:FAPI_POS * [max membuf per proc]
+      - 1st level child unit = [parent chip]:FAPI_POS * [max children of this type per chip]
+      - 2nd+ level child unit = [immediate parent unit]:FAPI_POS * [max units below parent]
+      Note: This should not be used algorithmically by HWPs directly.
+      Note: Value ignores physical drawer boundaries, the value is unique across the entire
+            system.
+      This data is derived from the MRW.
     </description>
     <valueType>uint32</valueType>
     <platInit/>
