@@ -77,7 +77,7 @@
 <hwpError>
     <rc>RC_MSS_EFF_GROUPING_NO_SPACE_FOR_HTM_OCC_BAR</rc>
     <description>
-        There is not enough memory availble for the requested HTM and OCC
+        There is not enough memory available for the requested HTM and OCC
         Sandbox bar sizes.
     </description>
     <ffdc>TOTAL_SIZE</ffdc>
