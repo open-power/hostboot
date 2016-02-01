@@ -4,9 +4,6 @@
 
 ($hb_masterproc).proc_fsi2host_mbox->responder_enable=1
 
-# @todo RTC:138068 Replace this when we get a working image
-$hb_pnor.sfc_master_mem.load-file $hb_pnor->flash_file
-
 # Preload VPD in PNOR
     try {
         run-python-file (lookup-file hbfw/hb-pnor-vpd-preload.py)
