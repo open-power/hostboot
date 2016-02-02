@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -525,29 +525,14 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                             err = failedDueToDeconfig(istep, substep,
                                                       newIstep, newSubstep);
                         }
-                        // Otherwise increment the reboot count and shutdown
+                        // Otherwise shut down. The BMC watchdog reset will
+                        // cause the system to reboot.  The BMC allows 2
+                        // boot attempts from the primary side of PNOR and 1
+                        // from the golden side. After that the system would
+                        // shut down and halt.
                         else
                         {
                             #ifdef CONFIG_BMC_IPMI
-                            uint16_t l_count = 0;
-                            SENSOR::RebootCountSensor l_sensor;
-
-                            // Read reboot count sensor
-                            err = l_sensor.getRebootCount(l_count);
-                            if (err)
-                            {
-                                TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: getRebootCount failed");
-                                break;
-                            }
-                            // Increment reboot count
-                            l_count++;
-                            err = l_sensor.setRebootCount(l_count);
-                            if (err)
-                            {
-                                TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: setRebootCount to %d failed", l_count);
-                                break;
-                            }
-
                             // @TODO RTC:124679 - Remove Once BMC Monitors
                             // Shutdown Attention
                             // Set Watchdog Timer before calling doShutdown()
