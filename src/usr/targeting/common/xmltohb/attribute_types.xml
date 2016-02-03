@@ -15914,6 +15914,8 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
+<!--TODO CQ:SW335069 - Change the default value back to 1 once procedure
+    fix is in place -->
 <attribute>
     <id>MSS_VREF_CAL_CNTL</id>
     <description>Training Control over IPL
@@ -15923,7 +15925,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </description>
     <simpleType>
         <uint8_t>
-            <default>0x01</default>
+            <default>0x00</default>
         </uint8_t>
     </simpleType>
     <persistency>volatile</persistency>
