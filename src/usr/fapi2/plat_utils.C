@@ -816,10 +816,9 @@ errlHndl_t rcToErrl(ReturnCode & io_rc,
         ReturnCode::returnCodeCreator l_creator = io_rc.getCreator();
         if (l_creator == ReturnCode::CREATOR_PLAT)
         {
-            // PLAT error. Release the errlHndl_t
+            // PLAT error, get the platform data from the return code
             FAPI_ERR("rcToErrl: PLAT error: 0x%08x", l_rcValue);
-            //@TODO RTC:143127
-            //l_pError = reinterpret_cast<errlHndl_t> (io_rc.releaseData());
+            l_pError = reinterpret_cast<errlHndl_t>(io_rc.getPlatDataPtr());
         }
         else if (l_creator == ReturnCode::CREATOR_HWP)
         {
@@ -836,7 +835,7 @@ errlHndl_t rcToErrl(ReturnCode & io_rc,
              * @custdesc     Error initializing processor/memory subsystem
              *               during boot. See FRU list for repair actions
              */
-            l_pError = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            l_pError = new ERRORLOG::ErrlEntry(i_sev,
                                                MOD_FAPI2_RC_TO_ERRL,
                                                RC_HWP_GENERATED_ERROR,
                                                l_rcValue);
@@ -901,20 +900,17 @@ errlHndl_t rcToErrl(ReturnCode & io_rc,
     return l_pError;
 }
 
-///
-/// @brief Log an error.
-///
-void logError(
-    fapi2::ReturnCode & io_rc,
-    fapi2::errlSeverity_t i_sev,
-    bool i_unitTestError )
+// Convert the RC passed in to a platform error log and
+// assign it to the platform data pointer of the RC
+void createPlatLog(
+        fapi2::ReturnCode & io_rc,
+        fapi2::errlSeverity_t i_sev
+        )
 {
-    FAPI_DBG("Entering logError");
 
-    // ENUM CONVERSION FAPI to PLATFORM
+    FAPI_DBG("Entering createLog");
+
     errlHndl_t l_pError = NULL;
-
-    FAPI_INF("logError");
 
     // Convert a FAPI severity to a ERRORLOG severity
     ERRORLOG::errlSeverity_t l_sev = ERRORLOG::ERRL_SEV_UNRECOVERABLE;
@@ -938,6 +934,25 @@ void logError(
     // This will set the return code to FAPI2_RC_SUCCESS and clear any
     // PLAT Data, HWP FFDC data, and Error Target associated with it.
     l_pError = rcToErrl(io_rc, l_sev);
+
+    io_rc.setPlatDataPtr(reinterpret_cast<void *>(l_pError));
+
+}
+
+///
+/// @brief Log an error - Create a platform error from the passed
+//                        RC passed in and commit it.
+///
+void logError(
+    fapi2::ReturnCode & io_rc,
+    fapi2::errlSeverity_t i_sev,
+    bool i_unitTestError )
+{
+    FAPI_DBG("Entering logError" );
+
+    createPlatLog( io_rc, i_sev );
+
+    errlHndl_t l_pError = reinterpret_cast<errlHndl_t>(io_rc.getPlatDataPtr());
 
     // Commit the error log. This will delete the error log and set the handle
     // to NULL.

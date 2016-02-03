@@ -92,9 +92,8 @@ inline ReturnCode platGetScom(const Target<K>& i_target,
         FAPI_ERR("platGetScom: deviceRead returns error!");
         FAPI_ERR("fapiGetScom failed - Target %s, Addr %.16llX",
                   tmpScomStr, i_address);
-// Add the error log pointer as data to the ReturnCode
-//@TODO RTC:143127 Need fapi2 support in ReturnCode class
-        //l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+        // Add the error log pointer as data to the ReturnCode
+        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
     }
 
     if (l_traceit)
@@ -148,9 +147,8 @@ inline ReturnCode platPutScom(const Target<K>& i_target,
         FAPI_ERR("platPutScom: deviceRead returns error!");
         FAPI_ERR("platPutScom failed - Target %s, Addr %.16llX",
                   tmpScomStr, i_address);
-// Add the error log pointer as data to the ReturnCode
-//@TODO RTC:143127 Need fapi2 support in ReturnCode class
-        //l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+        // Add the error log pointer as data to the ReturnCode
+        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
     }
 
     if (l_traceit)
@@ -205,9 +203,8 @@ inline ReturnCode platPutScomUnderMask(const Target<K>& i_target,
         if (l_err)
         {
             FAPI_ERR("platPutScomUnderMask: deviceRead returns error!");
-// Add the error log pointer as data to the ReturnCode
-//@TODO RTC:143127 Need fapi2 support in ReturnCode class
-        //l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+            // Add the error log pointer as data to the ReturnCode
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
             break;
         }
 
@@ -229,9 +226,8 @@ inline ReturnCode platPutScomUnderMask(const Target<K>& i_target,
         if (l_err)
         {
             FAPI_ERR("platPutScomUnderMask: deviceWrite returns error!");
-// Add the error log pointer as data to the ReturnCode
-//@TODO RTC:143127 Need fapi2 support in ReturnCode class
-            //l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+            // Add the error log pointer as data to the ReturnCode
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
             break;
         }
 
@@ -279,12 +275,10 @@ inline ReturnCode platModifyScom(const Target<K>& i_target,
 
     FAPI_DBG(ENTER_MRK "platModifyScom");
     ReturnCode l_rc;
-
+    errlHndl_t l_err = NULL;
     FAPI_ERR("platModifyScom: Error: Hostboot not yet support modifyScom function!");
 
-// Add the error log pointer as data to the ReturnCode
-//@TODO RTC:143127 Need fapi2 support in ReturnCode class
-        //l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+    // Add the error log pointer as data and set the ReturnCode as needed
 
     FAPI_DBG(EXIT_MRK "platModifyScom");
     return l_rc;
@@ -400,8 +394,7 @@ inline ReturnCode platGetCfamRegister(const Target<K>& i_target,
         {
             FAPI_ERR("platGetCfamRegister: verifyCfamAccessTarget returns error!");
             // Add the error log pointer as data to the ReturnCode
-            //TODO RTC:143127 Need fapi2 support in ReturnCode class
-            //l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
             break;
         }
 
@@ -418,8 +411,7 @@ inline ReturnCode platGetCfamRegister(const Target<K>& i_target,
             FAPI_ERR("fapiGetCfamRegister failed - Target %s, Addr %.8X",
                       tmpScomStr, i_address);
             // Add the error log pointer as data to the ReturnCode
-            //TODO RTC:143127: Need fapi2 support in ReturnCode class
-            //l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
             break;
         }
 
@@ -437,8 +429,7 @@ inline ReturnCode platGetCfamRegister(const Target<K>& i_target,
         {
             FAPI_ERR("platGetCfamRegister: deviceRead returns error!");
             // Add the error log pointer as data to the ReturnCode
-            //TODO RTC:143127: Need fapi2 support in ReturnCode class
-            //l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
             break;
         }
 
@@ -493,8 +484,7 @@ inline ReturnCode platPutCfamRegister(const Target<K>& i_target,
         {
             FAPI_ERR("platPutCfamRegister: verifyCfamAccessTarget returns error!");
             // Add the error log pointer as data to the ReturnCode
-            //TODO RTC:143127: Need fapi2 support in ReturnCode class
-            //l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
             break;
         }
 
@@ -509,8 +499,7 @@ inline ReturnCode platPutCfamRegister(const Target<K>& i_target,
         {
             FAPI_ERR("platPutCfamRegister: getCfamChipTarget returns error!");
             // Add the error log pointer as data to the ReturnCode
-            //TODO RTC:143127: Need fapi2 support in ReturnCode class
-            //l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
             break;
         }
 
@@ -529,8 +518,7 @@ inline ReturnCode platPutCfamRegister(const Target<K>& i_target,
         {
             FAPI_ERR("platPutCfamRegister: deviceWrite returns error!");
             // Add the error log pointer as data to the ReturnCode
-            //TODO RTC:143127: Need fapi2 support in ReturnCode class
-            //l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
             break;
         }
 
@@ -625,8 +613,7 @@ inline ReturnCode platModifyCfamRegister(const Target<K>& i_target,
         {
             FAPI_ERR("platModifyCfamRegister: verifyCfamAccessTarget returns error!");
             // Add the error log pointer as data to the ReturnCode
-            //TODO RTC:143127: Need fapi2 support in ReturnCode class
-            //l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
             break;
         }
 
@@ -641,8 +628,7 @@ inline ReturnCode platModifyCfamRegister(const Target<K>& i_target,
         {
             FAPI_ERR("platModifyCfamRegister: getCfamChipTarget returns error!");
             // Add the error log pointer as data to the ReturnCode
-            //TODO RTC:143127: Need fapi2 support in ReturnCode class
-            //l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
             break;
         }
 
@@ -661,8 +647,7 @@ inline ReturnCode platModifyCfamRegister(const Target<K>& i_target,
         {
             FAPI_ERR("platModifyCfamRegister: deviceRead returns error!");
             // Add the error log pointer as data to the ReturnCode
-            //TODO RTC:143127: Need fapi2 support in ReturnCode class
-            //l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
             break;
         }
 
@@ -678,8 +663,7 @@ inline ReturnCode platModifyCfamRegister(const Target<K>& i_target,
         {
             FAPI_ERR("platModifyCfamRegister: deviceWrite returns error!");
             // Add the error log pointer as data to the ReturnCode
-            //TODO RTC:143127: Need fapi2 support in ReturnCode class
-            //l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
             break;
         }
 
@@ -764,8 +748,7 @@ inline ReturnCode platGetRing(const Target<K>& i_target,
     if (l_err)
     {
         // Add the error log pointer as data to the ReturnCode
-        //TODO RTC:143127: Need fapi2 support in ReturnCode class
-        //l_rc.setPlatError(reinterpret_cast<void *> (l_err));
+        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
     }
 
     FAPI_DBG(EXIT_MRK "platGetRing");
