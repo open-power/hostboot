@@ -546,6 +546,7 @@ namespace SENSOR
         :SensorBase(TARGETING::SENSOR_NAME_REBOOT_COUNT, NULL)
     {
         // message buffer created and initialized in base object.
+
     }
 
     //
@@ -558,6 +559,9 @@ namespace SENSOR
     //
     errlHndl_t RebootCountSensor::setRebootCount( uint16_t i_count )
     {
+        // adjust the operation to overwrite the sensor reading
+        // to the value we send.
+        iv_msg->iv_operation = SET_SENSOR_VALUE_OPERATION;
 
         // the Reboot_count sensor is defined as a discrete sensor
         // but the assertion bytes are being used to transfer the count
@@ -659,8 +663,9 @@ namespace SENSOR
                 case NOT_PRESENT:
                     // turn off the present bit
                     iv_msg->iv_deassertion_mask = pres_mask;
-                    // turn on the disabled bit
-                    iv_msg->iv_assertion_mask = func_mask;
+
+                    // turn off the disabled bit in case it was on
+                    iv_msg->iv_deassertion_mask |= func_mask;
                     break;
 
                 case PRESENT:
@@ -795,6 +800,14 @@ namespace SENSOR
         // assert the specified state
         iv_msg->iv_assertion_mask = setMask(i_state);
 
+        // there are two offsets used with this sensor, when
+        // asserting one, we need to deassert the other as only
+        // one state is valid at any given time.
+        OccStateEnum other_state =
+            (i_state == OCC_ACTIVE) ? OCC_NOT_ACTIVE : OCC_ACTIVE;
+
+        iv_msg->iv_deassertion_mask = setMask( other_state );
+
         l_err = writeSensorData();
 
         return l_err;
@@ -858,6 +871,7 @@ namespace SENSOR
     //
     errlHndl_t HostStatusSensor::updateHostStatus( hostStatus status )
     {
+        iv_msg->iv_operation = SET_SENSOR_VALUE_OPERATION;
         iv_msg->iv_assertion_mask = setMask((uint8_t)status);
 
         return writeSensorData();
