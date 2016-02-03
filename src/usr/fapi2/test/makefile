@@ -48,6 +48,7 @@ TESTS += fapi2GetParentTest.H
 TESTS += fapi2GetChildrenTest.H
 TESTS += fapi2BasicTryTest.H
 TESTS += fapi2GetOtherEndTest.H
+TESTS += fapi2SpdTestCxx.H
 
 include ${ROOTPATH}/config.mk
 
