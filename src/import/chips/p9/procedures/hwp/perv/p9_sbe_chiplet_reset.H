@@ -32,6 +32,7 @@
 ///     4) Similar way,  Reset sys.config and OPCG setting for Nest and MC chiplet in sync mode
 ///
 /// Done
+///
 //------------------------------------------------------------------------------
 // *HWP HW Owner        : Abhishek Agarwal <abagarw8@in.ibm.com>
 // *HWP HW Backup Owner : Srinivas V. Naga <srinivan@in.ibm.com>
@@ -76,7 +77,10 @@ enum P9_SBE_CHIPLET_RESET_Public_Constants
     HANG_PULSE_0X01 = 0x01,
     HANG_PULSE_0X04 = 0x04,
     HANG_PULSE_0X1A = 0x1A,
-    NET_CNTL1_HW_INIT_VALUE = 0x7200000000000000ull
+    NET_CNTL1_HW_INIT_VALUE = 0x7200000000000000ull,
+    MCGR2_CACHE_CNFG_SETTINGS = 0xF0001C0000000000ull,
+    MCGR3_CACHE_CNFG_SETTINGS = 0xF4001C0000000000ull,
+    MCGR4_CACHE_CNFG_SETTINGS = 0xF8001C0000000000ull
 };
 }
 
