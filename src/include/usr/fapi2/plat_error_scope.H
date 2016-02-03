@@ -47,10 +47,13 @@
 ///
 /// @brief Assert a conditional is true.
 /// If it is not, the FFDC gathering function is called and the
-/// trace is output as a FAPI error trace.
+/// trace is output as a FAPI error trace. A platform error is
+/// created and commited.
 /// @param[in] __conditional__ the condition to assert
 /// @param[in] __ffdc__ the FFDC gathering function
 /// @param[in] ... varargs, as input to FAPI_ERR
+///
+/// @note: Plat error is stored in RC object
 ///
 #define PLAT_FAPI_ASSERT( __conditional__, __ffdc__, ... )      \
     if (! (__conditional__))                                    \
@@ -59,6 +62,27 @@
         FAPI_ERR(__VA_ARGS__);                                  \
         goto fapi_try_exit;                                     \
     }
+
+///
+/// @brief Assert a conditional is true.
+/// If it is not, the FFDC gathering function is called and the
+/// trace is output as a FAPI error trace. A platform error is
+/// created but will not be committed.
+/// @param[in] __conditional__ the condition to assert
+/// @param[in] __ffdc__ the FFDC gathering function
+/// @param[in] ... varargs, as input to FAPI_ERR
+///
+/// @note: Plat error, if supported, is stored in RC object. In
+///        addition, this assert does not cause a branch to the
+///        fapi_try_exit lable.
+///
+#define PLAT_FAPI_ASSERT_NOEXIT( __conditional__, __ffdc__, ... ) \
+    if (! (__conditional__))                                    \
+    {                                                           \
+        __ffdc__.execute(                                       \
+                fapi2::FAPI2_ERRL_SEV_UNDEFINED, false);    \
+        FAPI_ERR(__VA_ARGS__);                                  \
+    }                                                           \
 
 /// @endcond
 
