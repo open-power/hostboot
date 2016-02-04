@@ -67,15 +67,15 @@ class ScomAccessor
      * @param bs holds    data read or to write
      * @param registerId  register address
      * @param operation   [READ|WRITE]
-     * @returns NULL if Success, valid error handle otherwise.
+     * @returns SUCCESS or PRD_SCANCOM_FAILURE
      * @pre bs.Length() must be size of register data to read/write
      * @post For read operation, bs is modified to reflect hardware
      *       register state
      */
-    virtual errlHndl_t  Access( TARGETING::TargetHandle_t i_target,
-                                BIT_STRING_CLASS & bs,
-                                uint64_t registerId,
-                                MopRegisterAccess::Operation operation) const;
+    virtual uint32_t Access( TARGETING::TargetHandle_t i_target,
+                             BIT_STRING_CLASS & bs,
+                             uint64_t registerId,
+                             MopRegisterAccess::Operation operation) const;
 
   private:
 

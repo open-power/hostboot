@@ -40,13 +40,13 @@ SimScomAccessor::~SimScomAccessor()
 
 }
 
-errlHndl_t SimScomAccessor::Access(TARGETING::TargetHandle_t i_target,
+uint32_t SimScomAccessor::Access(TARGETING::TargetHandle_t i_target,
                                      BIT_STRING_CLASS & bs,
                                      uint64_t registerId,
                                      MopRegisterAccess::Operation operation) const
 {
     PRDF_DENTER("SimScomAccessor::Access()");
-    errlHndl_t errlH = NULL;
+    uint32_t rc = SUCCESS;
     ScrDB::SimOp l_op = ScrDB::MAX_OP;
 
     do
@@ -57,6 +57,7 @@ errlHndl_t SimScomAccessor::Access(TARGETING::TargetHandle_t i_target,
         case MopRegisterAccess::READ:  l_op = ScrDB::READ;  break;
         default:
             PRDF_ERR( "SimScomAccessor::Access() unsupported operation: 0x%X", operation );
+            rc = PRD_SCANCOM_FAILURE;
             break;
             }
         getSimServices().processCmd(i_target, bs, registerId, l_op);
@@ -65,7 +66,7 @@ errlHndl_t SimScomAccessor::Access(TARGETING::TargetHandle_t i_target,
 
     PRDF_DEXIT("SimScomAccessor::Access()");
 
-    return errlH;
+    return rc;
 }
 
 } // End namespace PRDF

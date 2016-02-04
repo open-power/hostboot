@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -472,6 +472,17 @@ public:
    */
   BitStringBuffer operator<<(uint32_t count) const;
 
+  /**
+   * @brief Gets the CPU_WORD bounded memory address and the relative bit offset
+   *  within the CPU_WORD that corresponds to the provided bit position in the
+   *  bit string
+   *
+   * @param iBitPos    Bit position in the bit string
+   * @param oBitOffset Relative bit offset in the CPU_WORD
+   *
+   * @return memory address of the CPU_WORD
+   */
+  virtual CPU_WORD * GetRelativePositionAlloc(uint32_t & oBitOffset, uint32_t iBitPos);//dg02a
 
 protected:
 
@@ -489,8 +500,6 @@ protected:
    \param iBitPos Bit position in the bit string
    */
   virtual CPU_WORD * GetRelativePosition(uint32_t & oBitOffset, uint32_t iBitPos) const;
-  virtual CPU_WORD * GetRelativePositionAlloc(uint32_t & oBitOffset, uint32_t iBitPos);//dg02a
-
 
   /*!
    Proides address of the bit string storage

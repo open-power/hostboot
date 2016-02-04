@@ -32,16 +32,6 @@
 //----------------------------------------------------------------------
 #define prdfHomRegisterAccess_C
 
-#ifdef __HOSTBOOT_MODULE
-//  #include <ecmdDataBufferBase.H> TODO RTC 144696
-  #include <ibscomreasoncodes.H>
-#else
-  #include <ecmdDataBuffer.H>
-  #include <hwsvExecutionService.H>
-  #include <hwco_service_codes.H>
-//  #include <p8_pore_table_gen_api.H> TODO RTC 136050
-#endif
-
 #include <prdfHomRegisterAccess.H>
 #include <prdf_service_codes.H>
 #include <iipbits.h>
@@ -125,61 +115,12 @@ uint32_t ScomService::Access(TargetHandle_t i_target,
                              MopRegisterAccess::Operation operation) const
 {
     PRDF_DENTER("ScomService::Access()");
-    int32_t rc = SUCCESS;
+    uint32_t rc = SUCCESS;
 
-    errlHndl_t errlH = iv_ScomAccessor->Access( i_target,
-                                          bs,
-                                          registerId,
-                                          operation);
-    #ifdef __HOSTBOOT_MODULE
-    if( ( NULL != errlH ) && ( MopRegisterAccess::READ == operation )
-        && ( IBSCOM::IBSCOM_BUS_FAILURE == errlH->reasonCode() ))
-    {
-        PRDF_SET_ERRL_SEV(errlH, ERRL_SEV_INFORMATIONAL);
-        PRDF_COMMIT_ERRL(errlH, ERRL_ACTION_HIDDEN);
-        PRDF_INF( "Register access failed with reason code IBSCOM_BUS_FAILURE."
-                  " Trying again, Target HUID:0x%08X Register 0x%016X Op:%u",
-                  PlatServices::getHuid( i_target), registerId, operation );
-
-        errlH = iv_ScomAccessor->Access( i_target,
-                                         bs,
-                                         registerId,
-                                         operation);
-    }
-    #endif
-
-    #ifndef __HOSTBOOT_MODULE
-    if (errlH != NULL && HWCO_SLW_IN_CHECKSTOP == errlH->getRC())
-    {
-        // We can get a flood of errors from a core in sleep/winkle at the
-        // time of a checkstop. An errorlog will already be committed for
-        // for this, so we will ignore these errors here.
-        delete errlH;
-        errlH = NULL;
-        rc = PRD_SCANCOM_FAILURE;
-        bs.Clear();
-    }
-    #endif
-
-    if(errlH)
-    {
-        rc = PRD_SCANCOM_FAILURE;
-        PRDF_ADD_SW_ERR(errlH, rc, PRDF_HOM_SCOM, __LINE__);
-        PRDF_ADD_PROCEDURE_CALLOUT(errlH, SRCI_PRIORITY_MED, EPUB_PRC_SP_CODE);
-
-        bool l_isAbort = false;
-        PRDF_ABORTING(l_isAbort);
-        if (!l_isAbort)
-        {
-            PRDF_SET_ERRL_SEV(errlH, ERRL_SEV_INFORMATIONAL);
-            PRDF_COMMIT_ERRL(errlH, ERRL_ACTION_HIDDEN);
-        }
-        else
-        {
-            delete errlH;
-            errlH = NULL;
-        }
-    }
+    rc = iv_ScomAccessor->Access( i_target,
+                                  bs,
+                                  registerId,
+                                  operation);
 
     PRDF_DEXIT("ScomService::Access(): rc=%d", rc);
 
@@ -187,47 +128,24 @@ uint32_t ScomService::Access(TargetHandle_t i_target,
 }
 
 
-errlHndl_t ScomAccessor::Access(TargetHandle_t i_target,
+uint32_t ScomAccessor::Access(TargetHandle_t i_target,
                                 BIT_STRING_CLASS & bs,
                                 uint64_t registerId,
                                 MopRegisterAccess::Operation operation) const
 {
     PRDF_DENTER("ScomAccessor::Access()");
 
-    errlHndl_t errH = NULL;
+    uint32_t rc = SUCCESS;
 
     if(i_target != NULL)
     {
-/* TODO RTC 144696
-        uint32_t bsize = bs.GetLength();
-
-        #ifdef __HOSTBOOT_MODULE
-
-        ecmdDataBufferBase buffer(bsize);
-
-        #else
-
-        ecmdDataBuffer buffer(bsize);
-
-        #endif
-
         switch (operation)
         {
             case MopRegisterAccess::WRITE:
             {
-                for(unsigned int i = 0; i < bsize; ++i)
-                {
-                    if(bs.IsSet(i)) buffer.setBit(i);
-                }
-
-                PRD_FAPI_TO_ERRL(errH,
-                                 fapiPutScom,
-                                 PlatServices::getFapiTarget(i_target),
-                                 registerId,
-                                 buffer);
+                rc = PRDF::PlatServices::putScom(i_target, bs, registerId);
 
                 #ifndef __HOSTBOOT_MODULE
-*/
 
 /* TODO RTC 136050
                 if( NULL != errH ) break;
@@ -276,7 +194,6 @@ errlHndl_t ScomAccessor::Access(TargetHandle_t i_target,
                 }
 */
 
-/* TODO RTC 144696
                 #endif // End of, not __HOSTBOOT_MODULE
 
                 break;
@@ -285,16 +202,7 @@ errlHndl_t ScomAccessor::Access(TargetHandle_t i_target,
             case MopRegisterAccess::READ:
                 bs.Pattern(0x00000000); // clear all bits
 
-                PRD_FAPI_TO_ERRL(errH,
-                                 fapiGetScom,
-                                 PlatServices::getFapiTarget(i_target),
-                                 registerId,
-                                 buffer);
-
-                for(unsigned int i = 0; i < bsize; ++i)
-                {
-                    if(buffer.isBitSet(i)) bs.Set(i);
-                }
+                rc = PRDF::PlatServices::getScom(i_target, bs, registerId);
 
                 break;
 
@@ -304,43 +212,16 @@ errlHndl_t ScomAccessor::Access(TargetHandle_t i_target,
                 break;
 
         } // end switch operation
-*/
 
     }
     else // Invalid target
     {
-        /*@
-         * @errortype
-         * @subsys     EPUB_FIRMWARE_SP
-         * @reasoncode PRDF_CODE_FAIL
-         * @moduleid   PRDF_HOM_SCOM
-         * @userdata1  PRD Return code =  SCR_ACCESS_FAILED
-         * @userdata2  The invalid ID causing the fail
-         * @devdesc    Access SCOM failed due to NULL target handle
-         * @custDesc   An internal firmware fault, access failed on hardware
-         *             register.
-         * @procedure  EPUB_PRC_SP_CODE
-         */
-
-        // create an error log
-        PRDF_CREATE_ERRL(errH,
-                         ERRL_SEV_PREDICTIVE,        // error on diagnostic
-                         ERRL_ETYPE_NOT_APPLICABLE,
-                         SRCI_MACH_CHECK,
-                         SRCI_NO_ATTR,
-                         PRDF_HOM_SCOM,              // module id
-                         FSP_DEFAULT_REFCODE,        // refcode What do we use??
-                         PRDF_CODE_FAIL,             // Reason code
-                         SCR_ACCESS_FAILED,          // user data word 1
-                         PlatServices::getHuid(i_target),   // user data word 2
-                         0x0000,                     // user data word 3
-                         0x0000                      // user data word 4
-                         );
+        rc = PRD_SCANCOM_FAILURE;
     }
 
     PRDF_DEXIT("ScomAccessor::Access()");
 
-    return errH;
+    return rc;
 }
 
 } // End namespace PRDF

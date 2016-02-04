@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -63,12 +65,12 @@ class SimScomAccessor : public ScomAccessor
      @param BIT_STRING_CLASS - holds data read or to write
      @param register address
      @param [READ|WRITE]
-     @returns NULL if success, valid error handle otherwise
+     @returns SUCCESS or PRD_SCANCOM_FAILURE
      @pre bs.Length() must be size of register data to read/write
      @post For read operation, bs is modified to reflect hardware register state
      @note
      */
-    virtual errlHndl_t Access(TARGETING::TargetHandle_t i_target,
+    virtual uint32_t Access(TARGETING::TargetHandle_t i_target,
                             BIT_STRING_CLASS & bs,
                             uint64_t registerId,
                             MopRegisterAccess::Operation operation) const;

@@ -48,6 +48,8 @@
   #include <prdfPlatServices_ipl.H>
 #endif
 
+#include <prdfBitString.H>
+
 //------------------------------------------------------------------------------
 
 namespace PRDF
@@ -73,6 +75,30 @@ inline bool atRuntime()
 }
 
 inline bool isSmpCoherent() { return false; }
+
+/**
+ * @brief Read data using SCOM
+ *
+ * @param i_target  Target to read from
+ * @param io_bs     Bit string that holds data that is read in
+ * @param i_address Address to read from
+ *
+ * @return SUCCESS or PRD_SCANCOM_FAILURE
+ */
+uint32_t getScom(TARGETING::TargetHandle_t i_target, BIT_STRING_CLASS& io_bs,
+                   uint64_t i_address);
+
+/**
+ * @brief Write data using SCOM
+ *
+ * @param i_target  Target to write data to
+ * @param io_bs     Bit string that holds data to write
+ * @param i_address Address to write data to
+ *
+ * @return SUCCESS or PRD_SCANCOM_FAILURE
+ */
+uint32_t putScom(TARGETING::TargetHandle_t i_target, BIT_STRING_CLASS& io_bs,
+                   uint64_t i_address);
 
 } // end namespace PlatServices
 
