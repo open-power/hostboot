@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2015
+# Contributors Listed Below - COPYRIGHT 2012,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -49,5 +49,6 @@ TESTS += prdfTest_WriteHomerFir.H
 endif
 
 TESTS += prdfTest_MfgSync.H
+TESTS += prdfTest_ScomAccessInterface.H
 
 include ${ROOTPATH}/config.mk

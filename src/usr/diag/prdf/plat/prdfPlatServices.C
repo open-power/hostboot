@@ -44,8 +44,10 @@
 #include <errno.h>
 #include <sys/time.h>
 #include <time.h>
-#include <targeting/common/targetservice.H>
 #include <initservice/initserviceif.H>
+#include <devicefw/userif.H>
+#include <iipMopRegisterAccess.h>
+#include <ibscomreasoncodes.H>
 
 using namespace TARGETING;
 
@@ -108,6 +110,94 @@ bool isSpConfigFsp()
 
     #endif
 }
+
+//------------------------------------------------------------------------------
+
+uint32_t getScom(TARGETING::TargetHandle_t i_target, BIT_STRING_CLASS& io_bs,
+                   uint64_t i_address)
+{
+    errlHndl_t errl = NULL;
+    uint32_t rc = SUCCESS;
+    uint32_t tempBitOffset;
+    size_t bsize = (io_bs.GetLength()+7)/8;
+    CPU_WORD* buffer = io_bs.GetRelativePositionAlloc(tempBitOffset, 0);
+
+    errl = deviceRead(i_target, buffer, bsize, DEVICE_SCOM_ADDRESS(i_address));
+
+    if(( NULL != errl ) && ( IBSCOM::IBSCOM_BUS_FAILURE == errl->reasonCode() ))
+    {
+        PRDF_SET_ERRL_SEV(errl, ERRL_SEV_INFORMATIONAL);
+        PRDF_COMMIT_ERRL(errl, ERRL_ACTION_HIDDEN);
+        PRDF_INF( "Register access failed with reason code IBSCOM_BUS_FAILURE."
+                  " Trying again, Target HUID:0x%08X Register 0x%016X Op:%u",
+                  PlatServices::getHuid( i_target), i_address,
+                  MopRegisterAccess::READ );
+
+        errl = deviceRead(i_target, buffer, bsize,
+                          DEVICE_SCOM_ADDRESS(i_address));
+    }
+
+    if( NULL != errl )
+    {
+        PRDF_ERR("[ScomAccessor::Access()] Error in "
+                 "PRDF::PlatServices::getScom");
+        rc = PRD_SCANCOM_FAILURE;
+        PRDF_ADD_SW_ERR(errl, rc, PRDF_HOM_SCOM, __LINE__);
+
+        bool l_isAbort = false;
+        PRDF_ABORTING(l_isAbort);
+        if (!l_isAbort)
+        {
+            PRDF_SET_ERRL_SEV(errl, ERRL_SEV_INFORMATIONAL);
+            PRDF_COMMIT_ERRL(errl, ERRL_ACTION_HIDDEN);
+        }
+        else
+        {
+            delete errl;
+            errl = NULL;
+        }
+    }
+
+    return rc;
+}
+
+//------------------------------------------------------------------------------
+
+uint32_t putScom(TARGETING::TargetHandle_t i_target, BIT_STRING_CLASS& io_bs,
+                   uint64_t i_address)
+{
+    errlHndl_t errl = NULL;
+    uint32_t rc = SUCCESS;
+    uint32_t tempBitOffset;
+    size_t bsize = (io_bs.GetLength()+7)/8;
+    CPU_WORD* buffer = io_bs.GetRelativePositionAlloc(tempBitOffset, 0);
+
+    errl = deviceWrite(i_target, buffer, bsize, DEVICE_SCOM_ADDRESS(i_address));
+
+    if( NULL != errl )
+    {
+        PRDF_ERR("[ScomAccessor::Access()] Error in "
+                 "PRDF::PlatServices::putScom");
+        rc = PRD_SCANCOM_FAILURE;
+        PRDF_ADD_SW_ERR(errl, rc, PRDF_HOM_SCOM, __LINE__);
+
+        bool l_isAbort = false;
+        PRDF_ABORTING(l_isAbort);
+        if (!l_isAbort)
+        {
+            PRDF_SET_ERRL_SEV(errl, ERRL_SEV_INFORMATIONAL);
+            PRDF_COMMIT_ERRL(errl, ERRL_ACTION_HIDDEN);
+        }
+        else
+        {
+            delete errl;
+            errl = NULL;
+        }
+    }
+
+    return rc;
+}
+
 
 //##############################################################################
 //##                       Processor specific functions
