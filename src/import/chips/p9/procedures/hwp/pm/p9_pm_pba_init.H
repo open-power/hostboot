@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,10 +55,7 @@ namespace p9pba
 // BCDE and BCUE Status registers bits
 enum PBA_BC_STAT
 {
-    PBA_BC_STAT_RUNNING = 0,
-    PBA_BC_STAT_STOPPED = 29,
-    PBA_BC_STAT_ERROR   = 30,
-    PBA_BC_STAT_DONE    = 31
+    PBA_BC_STAT_RUNNING = 0
 };
 
 // Valid command scope.
@@ -82,7 +79,14 @@ enum PBA_SLAVE_POLL
 enum PBA_BLOCK_COPY_POLL
 {
     MAX_PBA_BC_STOP_POLLS = 256 ,        // in microseconds
-    PBA_BC_STOP_POLL_DELAY = 10
+};
+
+const uint64_t PBA_SLVRESETs[4] =
+{
+    0x8000000000000000ull,
+    0xA000000000000000ull,
+    0xC000000000000000ull,
+    0xE000000000000000ull
 };
 
 // structure of values for cmd_scope, pba and pbabar initialization
@@ -91,58 +95,6 @@ struct pba_cmd_init
     CMD_SCOPE cmd_scope;
     uint64_t  addr;
     uint64_t  size;
-};
-
-struct pba_cmd_init_reg
-{
-    pba_cmd_init regs0;
-    pba_cmd_init regs1;
-    pba_cmd_init regs2;
-    pba_cmd_init regs3;
-};
-
-struct pba_bar_fields
-{
-    CMD_SCOPE cmd_scope;
-    uint8_t   reserved_1;
-    uint16_t  non_maskable_base_addr;
-    uint32_t  maskable_base_addr;
-    uint8_t   reserved_2;
-    uint16_t  vtarget;
-};
-
-struct pba_barmask_fields
-{
-    uint32_t reserved_1;
-    uint32_t mask;
-    uint32_t reserved_2;
-};
-
-struct pba_bar_init_type
-{
-    pba_bar_fields     bar_reg;
-    pba_barmask_fields barmsk_reg;
-};
-
-struct pba_bar_init_type_all
-{
-    pba_bar_init_type pba_bar0_init;
-    pba_bar_init_type pba_bar1_init;
-    pba_bar_init_type pba_bar2_init;
-    pba_bar_init_type pba_bar3_init;
-};
-
-typedef uint64_t pba_slvctl_type;
-
-struct pbax_config_fields
-{
-    uint32_t  reserved_0;
-    char      pm_pbax_pcv_reserv_timeout;
-    uint8_t   reserved_1;
-    char      pm_pbax_snd_retry_count_overcommit_enable;
-    uint8_t   pm_pbax_snd_retry_threshold;
-    uint8_t   pm_pbax_snd_reserv_timeout;
-    uint32_t  reserved_2;
 };
 } //namespace
 
