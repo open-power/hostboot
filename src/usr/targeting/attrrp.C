@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -272,6 +272,11 @@ namespace TARGETING
             // Validate eye catch.
             if (l_header->eyeCatcher != PNOR_TARG_EYE_CATCHER)
             {
+                TRACFCOMP(g_trac_targeting,
+                          "ATTR_DATA section in pnor header mismatch found"
+                          " header: %d expected header: %d",
+                          l_header->eyeCatcher,
+                          PNOR_TARG_EYE_CATCHER);
                 /*@
                  *   @errortype
                  *   @moduleid          TARG_MOD_ATTRRP
