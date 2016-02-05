@@ -617,11 +617,8 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
                                    != 0) ? true : false;
             o_info.readOnly = ((iv_TOC[id].misc & FFS_MISC_READ_ONLY)
                                    != 0) ? true : false;
-// TODO securebootp9 the following field does not exist in p9. If the field is
-// to be added to p9 we need to enable this line at that time, or remove and
-// replace with appropriate code.
-//            o_info.reprovision = ((iv_TOC[id].misc & FFS_MISC_REPROVISION)
-//                                   != 0) ? true : false;
+            o_info.reprovision = ((iv_TOC[id].misc & FFS_MISC_REPROVISION)
+                                   != 0) ? true : false;
         }
 
     } while(0);
