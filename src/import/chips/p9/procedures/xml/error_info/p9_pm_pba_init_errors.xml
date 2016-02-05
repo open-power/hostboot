@@ -1,0 +1,130 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/error_info/p9_pm_pba_init_errors.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015,2016                                                    -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Error definitions for p9_pm_pba_init procedure -->
+<hwpErrors>
+  <registerFfdc>
+    <id>REG_FFDC_PROC_PBA_REGISTERS</id>
+    <scomRegister>PU_PBAMODE_OCI</scomRegister>
+    <scomRegister>PU_PBACFG</scomRegister>
+    <scomRegister>PU_PBASLVCTL0_OCI</scomRegister>
+    <scomRegister>PU_PBASLVCTL1_OCI</scomRegister>
+    <scomRegister>PU_PBASLVCTL2_OCI</scomRegister>
+    <scomRegister>PU_PBASLVCTL3_OCI</scomRegister>
+    <scomRegister>PU_PBAFIR</scomRegister>
+    <scomRegister>PU_PBAERRRPT0</scomRegister>
+    <scomRegister>PU_PBAERRRPT1</scomRegister>
+    <scomRegister>PU_PBAERRRPT2</scomRegister>
+    <scomRegister>PU_BCDE_CTL_OCI</scomRegister>
+    <scomRegister>PU_BCDE_SET_OCI</scomRegister>
+    <scomRegister>PU_BCDE_STAT_OCI</scomRegister>
+    <scomRegister>PU_BCDE_PBADR_OCI</scomRegister>
+    <scomRegister>PU_BCDE_OCIBAR_OCI</scomRegister>
+    <scomRegister>PU_BCUE_CTL_OCI</scomRegister>
+    <scomRegister>PU_BCUE_SET_OCI</scomRegister>
+    <scomRegister>PU_BCUE_STAT_OCI</scomRegister>
+    <scomRegister>PU_BCUE_PBADR_OCI</scomRegister>
+    <scomRegister>PU_BCUE_OCIBAR_OCI</scomRegister>
+    <scomRegister>PU_PBAXSHBR0_OCI</scomRegister>
+    <scomRegister>PU_PBAXSHCS0_OCI</scomRegister>
+    <scomRegister>PU_PBAXSHBR1_OCI</scomRegister>
+    <scomRegister>PU_PBAXSHCS1_OCI</scomRegister>
+    <scomRegister>PU_PBAXCFG_OCI</scomRegister>
+    <scomRegister>PU_PBASLVRST_OCI</scomRegister>
+  </registerFfdc>
+  <!-- *********************************************************************-->
+  <hwpError>
+    <rc>RC_P9_PMPROC_PBA_INIT_INCORRECT_MODE</rc>
+    <description>Incorrect mode passed to pba init procedure.
+    </description>
+    <ffdc>PM_MODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************-->
+  <hwpError>
+    <rc>RC_P9_PMPROC_PBA_SLAVE_RESET_TIMEOUT</rc>
+    <description>pba_init timed out waiting for the PBA slave to reset.
+    </description>
+    <ffdc>POLLCOUNT</ffdc>
+    <ffdc>SLAVENUM</ffdc>
+    <ffdc>PBASLVREG</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_PBA_REGISTERS</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************-->
+  <hwpError>
+    <rc>RC_P9_PMPROC_PBA_SLAVE_BUSY_AFTER_RESET</rc>
+    <description>pba_init detected a busy PBA slave after the slave was reset.
+    </description>
+    <ffdc>POLLCOUNT</ffdc>
+    <ffdc>SLAVENUM</ffdc>
+    <ffdc>PBASLVREG</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_PBA_REGISTERS</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************-->
+  <hwpError>
+    <rc>RC_P9_PROCPM_PBA_BCDE_STOP_TIMEOUT</rc>
+    <description>pba_init timed out waiting to stop the Block Copy Download
+                 Engine.
+    </description>
+    <ffdc>POLLCOUNT</ffdc>
+    <ffdc>POLLVALUE</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_PBA_REGISTERS</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+    <!-- *******************************************************************-->
+  <hwpError>
+    <rc>RC_P9_PROCPM_PBA_BCUE_STOP_TIMEOUT</rc>
+    <description>pba_init timed out waiting to stop the Block Copy Upload
+                 Engine.
+    </description>
+    <ffdc>POLLCOUNT</ffdc>
+    <ffdc>POLLVALUE</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_PROC_PBA_REGISTERS</id>
+      <target>CHIP</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************-->
+</hwpErrors>
