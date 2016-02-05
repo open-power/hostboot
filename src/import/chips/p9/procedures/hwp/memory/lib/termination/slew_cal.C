@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,10 +74,10 @@ namespace mss
 
 ///
 /// @brief perform the slew calibration, store the result.
-/// @tparam T, the type of the slew table
-/// @param[in] MCA (port) target
-/// @param[in] a vector of the steps which came before me
-/// @param[in] the slew table to be operated on
+/// @tparam T the type of the slew table
+/// @param[in] i_target MCA (port) target
+/// @param[in] l_table a vector of the steps which came before me
+/// @param[in] o_cal_slew the slew table to be operated on
 /// @param[out] the array holding the results
 /// @return FAPI2_RC_SUCCESS, iff ok
 ///
@@ -102,8 +102,8 @@ fapi_try_exit:
 
 ///
 /// @brief perform the slew calibration, store the result.
-/// @param[in] MCA (port) target
-/// @param[in] a vector of the steps which came before me
+/// @param[in] i_target MCA (port) target
+/// @param[in] i_where_am_i a vector of the steps which came before me
 /// @param[in] a slew_table_t
 /// @param[out] the array holding the results
 /// @bote Prunes recursion based on frequency.
@@ -145,9 +145,9 @@ fapi_try_exit:
 
 ///
 /// @brief perform the slew calibration, store the result.
-/// @param[in] MCA (port) target
-/// @param[in] a vector of the steps which came before me
-/// @param[in] the slew rate to be calculated
+/// @param[in] i_target MCA (port) target
+/// @param[in] i_where_am_i a vector of the steps which came before me
+/// @param[in] l_slew_rate the slew rate to be calculated
 /// @param[out] the array holding the results
 /// @return FAPI2_RC_SUCCESS, iff ok
 ///
@@ -238,7 +238,7 @@ fapi_try_exit:
 
 ///
 /// @brief Run the slew calibration engine
-/// @param[in] i_target, the MCBIST
+/// @param[in] i_target the MCBIST
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 fapi2::ReturnCode slew_cal(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target)

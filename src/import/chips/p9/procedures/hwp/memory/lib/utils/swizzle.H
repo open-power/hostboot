@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,10 +37,10 @@ namespace mss
 
 ///
 /// @brief Swap two bits in a buffer
-/// @tparam TB, the bit in the buffer to move to SB
-/// @tparam SB, the bit in the buffer to move to TB
-/// @tparam T, integral type of the buffer
-/// @param[in,out] io_data, reference to the buffer
+/// @tparam TB the bit in the buffer to move to SB
+/// @tparam SB the bit in the buffer to move to TB
+/// @tparam T integral type of the buffer
+/// @param[in,out] i_data reference to the buffer
 /// @return reference to the input buffer (for chaining)
 ///
 template< uint64_t TB, uint64_t SB, typename T >
@@ -55,9 +55,9 @@ inline fapi2::buffer<T>& swap( fapi2::buffer<T>& i_data )
 
 ///
 /// @brief Invert (negate) one bit in a buffer
-/// @tparam TB, the bit in the buffer to negate
-/// @tparam T, integral type of the buffer
-/// @param[in,out] io_data, reference to the buffer
+/// @tparam TB the bit in the buffer to negate
+/// @tparam T integral type of the buffer
+/// @param[in,out] io_data reference to the buffer
 /// @return reference to the input buffer (for chaining)
 ///
 template< uint64_t TB, typename T >
@@ -97,11 +97,11 @@ static inline void reverse( T& io_buffer )
 
 ///
 /// @brief Swizzle bits between two fapi2 buffers, and insert from source to destination
-/// @tparam DS, the start bit in the destination buffer - swizzle will count up from here
-/// @tparam L, how many bits to swizzle
-/// @tparam SS, the start bit in the source buffer - swizzle will count down from here
-/// @param[in] source buffer - these bits will be decremented
-/// @param[in] destination buffer - these bits will be incremented
+/// @tparam DS the start bit in the destination buffer - swizzle will count up from here
+/// @tparam L how many bits to swizzle
+/// @tparam SS the start bit in the source buffer - swizzle will count down from here
+/// @param[in] i_source  source buffer - these bits will be decremented
+/// @param[in] o_destination destination buffer - these bits will be incremented
 /// @return reference to the destination
 ///
 template<uint64_t DS, uint64_t L, uint64_t SS, typename SB, typename DB>

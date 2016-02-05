@@ -52,7 +52,7 @@ template< fapi2::TargetType T >
 class mcTraits;
 
 ///
-/// @class rcTraits<fapi2::TARGET_TYPE_MEMBUF_CHIP>
+/// @class mcTraits
 /// @brief a collection of traits associated with the Centaur controller
 ///
 template<>
@@ -61,7 +61,7 @@ class mcTraits<fapi2::TARGET_TYPE_MEMBUF_CHIP>
 };
 
 ///
-/// @class rcTraits<fapi2::TARGET_TYPE_MCS>
+/// @class mcTraits
 /// @brief a collection of traits associated with the Nimbus controller
 ///
 template<>
@@ -151,7 +151,7 @@ enum
 ///
 /// @class mss::mc
 /// @brief The memory controller class
-/// @tparam T, the fapi2::TargetType of the controller
+/// @tparam T the fapi2::TargetType of the controller
 ///
 template< fapi2::TargetType T >
 class mc
@@ -160,17 +160,17 @@ class mc
     public:
         ///
         /// @brief Perform initializations for the MC
-        /// @tparam T, the fapi2::TargetType
-        /// @param[in] i_target, the target which has the MCs to initialize
+        /// @tparam T the fapi2::TargetType
+        /// @param[in] i_target the target which has the MCs to initialize
         /// @return FAPI2_RC_SUCCESS iff ok
         ///
         fapi2::ReturnCode scominit(const fapi2::Target<T>& i_target);
 
         ///
         /// @brief Perform initializations of the MC translation
-        /// @tparm P, the fapi2::TargetType of the port
-        /// @tparm TT, the typename of the traits
-        /// @param[in] i_target, the target which has the MCA to map
+        /// @tparam P the fapi2::TargetType of the port
+        /// @tparam TT the typename of the traits
+        /// @param[in] i_target the target which has the MCA to map
         /// @return FAPI2_RC_SUCCESS iff ok
         ///
         template< fapi2::TargetType P, typename TT = mcTraits<T> >

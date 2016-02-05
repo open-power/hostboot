@@ -48,9 +48,9 @@ struct poll_probe
 {
     ///
     /// @brief poll-probe constructor
-    /// @param[in] i_target, the target for the scom operation
-    /// @param[in] i_tag, some useful text to output with the register data
-    /// @param[in] i_register, the register for the scom operation
+    /// @param[in] i_target the target for the scom operation
+    /// @param[in] i_tag some useful text to output with the register data
+    /// @param[in] i_register the register for the scom operation
     ///
     poll_probe( const fapi2::Target<T>& i_target, const char* i_tag, const uint64_t i_register ):
         iv_target(i_target),
@@ -121,7 +121,7 @@ struct poll_parameters
 ///    {
 ///        return true;
 ///    }
-/// @param[in] i_probes, a vector of poll_probes to be used in the polling loop (optional)
+/// @param[in] i_probes a vector of poll_probes to be used in the polling loop (optional)
 /// @return bool, true iff poll criteria was met before the number of iterations
 /// ran out.
 /// @warning If you want to handle a failure as an error, you need to wrap

@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,7 +78,7 @@ namespace mss
 {
 ///
 /// @brief Given a DIMM, return it's port number.
-/// @param[in] the DIMM in question
+/// @param[in] i_target the DIMM in question
 /// @return the port number it's attached to
 ///
 // Note: Make this a template and dispatch at runtime to determine if the parent of
@@ -92,8 +92,8 @@ inline uint64_t port( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target )
 
 ///
 /// @brief Change the state of the addr_mux_sel bit
-/// @param[in] the target
-/// @param[in] the state
+/// @param[in] i_target the target
+/// @param[in] i_state the state
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template< fapi2::TargetType T, typename TT = portTraits<T> >
@@ -112,8 +112,8 @@ fapi_try_exit:
 
 ///
 /// @brief Change the state of the MC Refresh enable bit
-/// @param[in] the target
-/// @param[in] the state
+/// @param[in] i_target the target
+/// @param[in] i_state the state
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template< fapi2::TargetType T, typename TT = portTraits<T> >
@@ -132,7 +132,7 @@ fapi_try_exit:
 
 ///
 /// @brief Enable the MC Periodic calibration functionality
-/// @param[in] the target
+/// @param[in] i_target the target
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template< fapi2::TargetType T, typename TT = portTraits<T> >
@@ -144,7 +144,7 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<T>& i_target )
 
 ///
 /// @brief Enable Read ECC checking
-/// @param[in] the target
+/// @param[in] i_target the target
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template< fapi2::TargetType T, typename TT = portTraits<T> >
@@ -182,7 +182,7 @@ fapi_try_exit:
 //
 ///
 /// @brief Secure the entry criteria for draminit
-/// @param[in] A target representing a port
+/// @param[in] i_target A target representing a port
 /// @return FAPI2_RC_SUCCESS if and only if ok
 // This is in this header as it's hoped to be able to be shared. Seems to make more
 // Might make more sense in p9_mss_draminit.C ... BRS
@@ -208,9 +208,9 @@ fapi_try_exit:
 
 ///
 /// @brief Drive memory clocks
-/// @param[in] A target representing a port
-/// @param[in] phy p clock - right most 2 bits
-/// @param[in] phy n clock - right most 2 bits
+/// @param[in] i_target A target representing a port
+/// @param[in] i_pclk phy p clock - right most 2 bits
+/// @param[in] i_nclk phy n clock - right most 2 bits
 /// @return FAPI2_RC_SUCCESS if and only if ok
 /// @note this might need a port id added for Centaur/MBA controllers
 ///
@@ -236,8 +236,8 @@ fapi_try_exit:
 
 ///
 /// @brief Set DDR resetn
-/// @param[in] A target representing a port
-/// @param[in] high or low
+/// @param[in] i_target A target representing a port
+/// @param[in] i_state high or low
 /// @return FAPI2_RC_SUCCESS if and only if ok
 /// @note this might need a port id added for Centaur/MBA controllers
 ///

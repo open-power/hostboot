@@ -68,7 +68,8 @@ fapi_try_exit:
 ///
 /// @brief Determine the CCS failure type
 /// @tparam T the fapi2 target type of the target for this error
-/// @param[in] the failure type
+/// @param[in] i_target
+/// @param[in] i_type the failure type
 /// @return ReturnCode associated with the fail.
 /// @note FFDC is handled here, caller doesn't need to do it
 ///
@@ -97,7 +98,7 @@ fapi_try_exit:
 ///
 /// @brief Execute the contents of the CCS array
 /// @param[in] i_target The MCBIST containing the array
-/// @param[in] the MCBIST ccs program - to get the polling parameters
+/// @param[in] i_program the MCBIST ccs program - to get the polling parameters
 /// @return FAPI2_RC_SUCCESS iff success
 ///
 template<>
@@ -136,9 +137,9 @@ fapi_try_exit:
 
 ///
 /// @brief Execute a set of CCS instructions
-/// @param[in] the target to effect
-/// @param[in] the vector of instructions
-/// @param[in] the vector of ports
+/// @param[in] i_target the target to effect
+/// @param[in] i_program the vector of instructions
+/// @param[in] i_ports the vector of ports
 /// @return FAPI2_RC_SUCCSS iff ok
 /// @note assumes the CCS engine has been configured.
 ///
@@ -234,11 +235,11 @@ fapi_try_exit:
 
 ///
 /// @brief Nimbus specialization for modeq_copy_cke_to_spare_cke
-/// @tparam T, the fapi2::TargetType - derived
-/// @tparam TT, the ccsTraits associated with T - derived
-/// @param[in] the target to effect
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the ccsTraits associated with T - derived
+/// @param[in] fapi2::Target<TARGET_TYPE_MCBIST>& the target to effect
 /// @param[in] the buffer representing the mode register
-/// @param[in] bool, true iff Copy CKE signals to CKE Spare on both ports
+/// @param[in] bool true iff Copy CKE signals to CKE Spare on both ports
 /// @return void
 /// @note no-op for p9n
 ///

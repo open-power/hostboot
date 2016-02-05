@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,8 +64,8 @@ class posTraits<fapi2::TARGET_TYPE_PROC_CHIP>
 
 ///
 /// @brief Return a target's position from a fapi2 target
-/// @tparam T, the fapi2::TargetType
-/// @param[in] i_target, a DIMM target representing the DIMM in question
+/// @tparam T the fapi2::TargetType
+/// @param[in] i_target a DIMM target representing the DIMM in question
 /// @return The position
 ///
 template< fapi2::TargetType T, typename TT = posTraits<T> >

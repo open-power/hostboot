@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,7 +45,7 @@ namespace mss
 {
 ///
 /// @brief Perform the mrs_load operations - TARGET_TYPE_MCBIST specialization
-/// @param[in] i_target, a fapi2::Target<TARGET_TYPE_MCBIST>
+/// @param[in] i_target a fapi2::Target<TARGET_TYPE_MCBIST>
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template<>
@@ -77,8 +77,8 @@ fapi_try_exit:
 
 ///
 /// @brief Perform the mrs_load operations - unknown DIMM case
-/// @param[in] i_target, a fapi2::Target<TARGET_TYPE_DIMM>
-/// @param[in] a vector of CCS instructions we should add to (unused)
+/// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
+/// @param[in] i_inst a vector of CCS instructions we should add to (unused)
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template<>
@@ -107,8 +107,8 @@ fapi_try_exit:
 
 ///
 /// @brief Perform the mrs_load operations - RDIMM DDR4
-/// @param[in] i_target, a fapi2::Target<TARGET_TYPE_DIMM>
-/// @param[in] a vector of CCS instructions we should add to
+/// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
+/// @param[in] i_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template<>
@@ -124,8 +124,8 @@ fapi_try_exit:
 
 ///
 /// @brief Perform the mrs_load operations - LRDIMM DDR4
-/// @param[in] i_target, a fapi2::Target<TARGET_TYPE_DIMM>
-/// @param[in] a vector of CCS instructions we should add to
+/// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
+/// @param[in] i_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template<>
@@ -142,8 +142,8 @@ fapi_try_exit:
 
 ///
 /// @brief Perform the mrs_load operations - start the dispatcher
-/// @param[in] i_target, a fapi2::Target<TARGET_TYPE_DIMM>
-/// @param[in] a vector of CCS instructions we should add to
+/// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
+/// @param[in] i_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template<>

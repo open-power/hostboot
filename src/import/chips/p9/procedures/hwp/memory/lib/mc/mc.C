@@ -42,7 +42,7 @@ namespace mss
 
 ///
 /// @brief Dump the registers of the MC (MCA_MBA, MCS)
-/// @param[in] i_target, the MCS target
+/// @param[in] i_target the MCS target
 /// @return fapi2::FAPI2_RC_SUCCESS if ok
 ///
 template<>

@@ -44,7 +44,7 @@ namespace mss
 
 ///
 /// @brief Return the number of picoseconds taken by a certain mhz
-/// @param[in] i_mhz - the mhz of interest
+/// @param[in] i_mhz the mhz of interest
 /// @return the picoseconds
 ///
 inline uint64_t mhz_to_ps(const uint64_t i_mhz)
@@ -76,7 +76,7 @@ inline uint64_t mhz_to_ps(const uint64_t i_mhz)
 
 ///
 /// @brief Translate from cycles to sim cycles
-/// @param[in] i_cycles, the cycles to translate
+/// @param[in] i_cycles the cycles to translate
 /// @return uint64_t, the number of sim cycles.
 ///
 inline uint64_t cycles_to_simcycles( const uint64_t i_cycles )
@@ -87,8 +87,8 @@ inline uint64_t cycles_to_simcycles( const uint64_t i_cycles )
 
 ///
 /// @brief Return the number of cycles contained in a count of picoseconds
-/// @param[in] i_target, target for the frequency attribute
-/// @param[in] i_ps, the number of picoseconds to convert
+/// @param[in] i_target target for the frequency attribute
+/// @param[in] i_ps the number of picoseconds to convert
 /// @return uint64_t, the number of cycles
 ///
 template< fapi2::TargetType T >
@@ -124,8 +124,8 @@ fapi_try_exit:
 
 ///
 /// @brief Return the number of ps contained in a count of cycles
-/// @param[in] i_target, target for the frequency attribute
-/// @param[in] i_ps, the number of cycles to convert
+/// @param[in] i_target target for the frequency attribute
+/// @param[in] i_cycles the number of cycles to convert
 /// @return uint64_t, the number of picoseconds
 ///
 template< fapi2::TargetType T >
@@ -151,8 +151,8 @@ fapi_try_exit:
 
 ///
 /// @brief Return the number of cycles contained in a count of microseconds
-/// @param[in] i_target, target for the frequency attribute
-/// @param[in] i_ps, the number of microseconds to convert
+/// @param[in] i_target target for the frequency attribute
+/// @param[in] i_us the number of microseconds to convert
 /// @return uint64_t, the number of cycles
 ///
 template< fapi2::TargetType T >
@@ -163,8 +163,8 @@ inline uint64_t us_to_cycles(const fapi2::Target<T>& i_target, const uint64_t i_
 
 ///
 /// @brief Return the number of cycles contained in a count of nanoseconds
-/// @param[in] i_target, target for the frequency attribute
-/// @param[in] i_ps, the number of nanoseconds to convert
+/// @param[in] i_target target for the frequency attribute
+/// @param[in] i_ps the number of nanoseconds to convert
 /// @return uint64_t, the number of cycles
 ///
 template< fapi2::TargetType T >
@@ -175,10 +175,10 @@ inline uint64_t ns_to_cycles(const fapi2::Target<T>& i_target, const uint64_t i_
 
 ///
 /// @brief Return the number of microseconds contained in a count of cycles
-/// @tparam T, the target type
-/// @tparam D, the time conversion (NS_IN_PS, etc)
-/// @param[in] i_target, target for the frequency attribute
-/// @param[in] i_ps, the number of cycles to convert
+/// @tparam T the target type
+/// @tparam D the time conversion (NS_IN_PS, etc)
+/// @param[in] i_target target for the frequency attribute
+/// @param[in] i_cycles the number of cycles to convert
 /// @return uint64_t, the number of microseconds
 ///
 template< fapi2::TargetType T, uint64_t D >
@@ -195,8 +195,8 @@ inline uint64_t cycles_to_time(const fapi2::Target<T>& i_target, const uint64_t 
 
 ///
 /// @brief Return the number of nanoseconds contained in a count of cycles
-/// @param[in] i_target, target for the frequency attribute
-/// @param[in] i_cycles, the number of cycles to convert
+/// @param[in] i_target target for the frequency attribute
+/// @param[in] i_cycles the number of cycles to convert
 /// @return uint64_t, the number of nanoseconds
 ///
 template< fapi2::TargetType T >
@@ -210,8 +210,8 @@ inline uint64_t cycles_to_ns(const fapi2::Target<T>& i_target, const uint64_t i_
 
 ///
 /// @brief Return the number of microseconds contained in a count of cycles
-/// @param[in] i_target, target for the frequency attribute
-/// @param[in] i_cycles, the number of cycles to convert
+/// @param[in] i_target target for the frequency attribute
+/// @param[in] i_cycles the number of cycles to convert
 /// @return uint64_t, the number of microseconds
 ///
 template< fapi2::TargetType T >
@@ -225,8 +225,8 @@ inline uint64_t cycles_to_us(const fapi2::Target<T>& i_target, const uint64_t i_
 
 ///
 /// @brief Calculate TWLO_TWLOE - this needs to go in to eff_config and be an attribute
-/// @tparam fapi2::TargetType T of the target used to calculate cycles from ns
-/// @param[in] i_target, the target used to get DIMM clocks
+/// @tparam T fapi2::TargetType of the target used to calculate cycles from ns
+/// @param[in] i_target the target used to get DIMM clocks
 /// @return uint64_t, TWLO_TWLOE in cycles
 ///
 template< fapi2::TargetType T >
@@ -237,7 +237,7 @@ inline uint64_t twlo_twloe(const fapi2::Target<T>& i_target)
 
 ///
 /// @brief Convert nanoseconds to picoseconds
-/// @param[in] int64_t i_time_in_ns, time in nanoseconds
+/// @param[in] i_time_in_ns int64_t time in nanoseconds
 /// @return int64_t, time in picoseconds
 ///
 inline int64_t ns_to_ps(const int64_t& i_time_in_ns)
@@ -247,7 +247,7 @@ inline int64_t ns_to_ps(const int64_t& i_time_in_ns)
 
 ///
 /// @brief Convert nanoseconds to picoseconds
-/// @param[in] int64_t i_time_in_ps, time in picoseconds
+/// @param[in] i_time_in_ps int64_t  time in picoseconds
 /// @return int64_t, time in nanoseconds
 ///
 inline int64_t ps_to_ns(const int64_t& i_time_in_ps)

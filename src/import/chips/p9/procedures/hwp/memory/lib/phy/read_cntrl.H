@@ -18,7 +18,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-/// @file read_cntrl
+/// @file read_cntrl.H
 /// @brief Subroutines for the PHY read control registers
 ///
 // *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
@@ -48,7 +48,7 @@ template< fapi2::TargetType T >
 class rcTraits;
 
 ///
-/// @class rcTraits<fapi2::TARGET_TYPE_MBA>
+/// @class rcTraits
 /// @brief a collection of traits associated with the Centaur PHY
 ///
 template<>
@@ -57,7 +57,7 @@ class rcTraits<fapi2::TARGET_TYPE_MBA>
 };
 
 ///
-/// @class rcTraits<fapi2::TARGET_TYPE_MCA>
+/// @class rcTraits
 /// @brief a collection of traits associated with the Nimbus PHY read control
 ///
 template<>
@@ -123,8 +123,8 @@ class rcTraits<fapi2::TARGET_TYPE_MCA>
 ///
 /// @class mss::rc
 /// @brief Read Control reset config 0
-/// @tparam T, fapi2 Target Type - derived
-/// @tparam TT, traits type defaults to rcTraits<T>
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to rcTraits<T>
 ///
 template< fapi2::TargetType T, typename TT = rcTraits<T> >
 class rc
@@ -133,8 +133,8 @@ class rc
 
         ///
         /// @brief Read RC_VREF_CONFIG0
-        /// @param[in] i_target, the fapi2 target of the port
-        /// @param[out] o_data, the value of the register
+        /// @param[in] i_target the fapi2 target of the port
+        /// @param[out] o_data the value of the register
         /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS if ok
         ///
         static inline fapi2::ReturnCode read_vref_config0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
@@ -146,8 +146,8 @@ class rc
 
         ///
         /// @brief Write RC_VREF_CONFIG0
-        /// @param[in] i_target, the fapi2 target of the port
-        /// @param[in] i_data, the value of the register
+        /// @param[in] i_target the fapi2 target of the port
+        /// @param[in] i_data the value of the register
         /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS if ok
         ///
         static inline fapi2::ReturnCode write_vref_config0( const fapi2::Target<T>& i_target,
@@ -161,8 +161,8 @@ class rc
 
         ///
         /// @brief Read RC_VREF_CONFIG1
-        /// @param[in] i_target, the fapi2 target of the port
-        /// @param[out] o_data, the value of the register
+        /// @param[in] i_target the fapi2 target of the port
+        /// @param[out] o_data the value of the register
         /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS if ok
         ///
         static inline fapi2::ReturnCode read_vref_config1( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
@@ -174,8 +174,8 @@ class rc
 
         ///
         /// @brief Write RC_VREF_CONFIG1
-        /// @param[in] i_target, the fapi2 target of the port
-        /// @param[in] i_data, the value of the register
+        /// @param[in] i_target the fapi2 target of the port
+        /// @param[in] i_data the value of the register
         /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS if ok
         ///
         static inline fapi2::ReturnCode write_vref_config1( const fapi2::Target<T>& i_target,
@@ -190,8 +190,8 @@ class rc
 
         ///
         /// @brief Read RC_CONFIG0
-        /// @param[in] i_target, the fapi2 target of the port
-        /// @param[out] o_data, the value of the register
+        /// @param[in] i_target the fapi2 target of the port
+        /// @param[out] o_data the value of the register
         /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS if ok
         ///
         static inline fapi2::ReturnCode read_config0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
@@ -203,8 +203,8 @@ class rc
 
         ///
         /// @brief Write RC_CONFIG0
-        /// @param[in] i_target, the fapi2 target of the port
-        /// @param[in] i_data, the value of the register
+        /// @param[in] i_target the fapi2 target of the port
+        /// @param[in] i_data the value of the register
         /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS if ok
         ///
         static inline fapi2::ReturnCode write_config0( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
@@ -218,8 +218,8 @@ class rc
 
         ///
         /// @brief Read RC_CONFIG1
-        /// @param[in] i_target, the fapi2 target of the port
-        /// @param[out] o_data, the value of the register
+        /// @param[in] i_target the fapi2 target of the port
+        /// @param[out] o_data the value of the register
         /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS if ok
         ///
         static inline fapi2::ReturnCode read_config1( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
@@ -231,8 +231,8 @@ class rc
 
         ///
         /// @brief Write RC_CONFIG1
-        /// @param[in] i_target, the fapi2 target of the port
-        /// @param[in] i_data, the value of the register
+        /// @param[in] i_target the fapi2 target of the port
+        /// @param[in] i_data the value of the register
         /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS if ok
         ///
         static inline fapi2::ReturnCode write_config1( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
@@ -245,8 +245,8 @@ class rc
 
         ///
         /// @brief Read RC_CONFIG2
-        /// @param[in] i_target, the fapi2 target of the port
-        /// @param[out] o_data, the value of the register
+        /// @param[in] i_target the fapi2 target of the port
+        /// @param[out] o_data the value of the register
         /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS if ok
         ///
         static inline fapi2::ReturnCode read_config2( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
@@ -258,8 +258,8 @@ class rc
 
         ///
         /// @brief Write RC_CONFIG2
-        /// @param[in] i_target, the fapi2 target of the port
-        /// @param[in] i_data, the value of the register
+        /// @param[in] i_target the fapi2 target of the port
+        /// @param[in] i_data the value of the register
         /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS if ok
         ///
         static inline fapi2::ReturnCode write_config2( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
@@ -272,8 +272,8 @@ class rc
 
         ///
         /// @brief Read RC_CONFIG3
-        /// @param[in] i_target, the fapi2 target of the port
-        /// @param[out] o_data, the value of the register
+        /// @param[in] i_target the fapi2 target of the port
+        /// @param[out] o_data the value of the register
         /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS if ok
         ///
         static inline fapi2::ReturnCode read_config3( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
@@ -285,8 +285,8 @@ class rc
 
         ///
         /// @brief Write RC_CONFIG3
-        /// @param[in] i_target, the fapi2 target of the port
-        /// @param[in] i_data, the value of the register
+        /// @param[in] i_target the fapi2 target of the port
+        /// @param[in] i_data the value of the register
         /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS if ok
         ///
         static inline fapi2::ReturnCode write_config3( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
@@ -299,7 +299,7 @@ class rc
 
         ///
         /// @brief reset rc_config0
-        /// @param[in] i_target, fapi2 target of the port
+        /// @param[in] i_target fapi2 target of the port
         /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS if ok
         ///
         static inline fapi2::ReturnCode reset_config0( const fapi2::Target<T>& i_target )
@@ -322,7 +322,7 @@ class rc
 
         ///
         /// @brief reset rc_config1
-        /// @param[in] i_target, fapi2 target of the port
+        /// @param[in] i_target fapi2 target of the port
         /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS if ok
         ///
         static inline fapi2::ReturnCode reset_config1( const fapi2::Target<T>& i_target )
@@ -338,7 +338,7 @@ class rc
 
         ///
         /// @brief reset rc_config2
-        /// @param[in] i_target, fapi2 target of the port
+        /// @param[in] i_target fapi2 target of the port
         /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS if ok
         ///
         static inline fapi2::ReturnCode reset_config2( const fapi2::Target<T>& i_target )
@@ -374,7 +374,7 @@ class rc
 
         ///
         /// @brief reset rc_config3
-        /// @param[in] i_target, fapi2 target of the port
+        /// @param[in] i_target fapi2 target of the port
         /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS if ok
         ///
         static inline fapi2::ReturnCode reset_config3( const fapi2::Target<T>& i_target )
@@ -395,7 +395,7 @@ class rc
 
         ///
         /// @brief reset rc_vref_config0
-        /// @param[in] i_target, fapi2 target of the port
+        /// @param[in] i_target fapi2 target of the port
         /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS if ok
         ///
         static inline fapi2::ReturnCode reset_vref_config0( const fapi2::Target<T>& i_target )
@@ -431,7 +431,7 @@ class rc
 
         ///
         /// @brief reset rc_vref_config1
-        /// @param[in] i_target, fapi2 target of the port
+        /// @param[in] i_target fapi2 target of the port
         /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS if ok
         ///
         static inline fapi2::ReturnCode reset_vref_config1( const fapi2::Target<T>& i_target )

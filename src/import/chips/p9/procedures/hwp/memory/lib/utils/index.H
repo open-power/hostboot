@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,8 +38,8 @@ namespace mss
 {
 ///
 /// @brief Return an attribute array index from a fapi2 target
-/// @tparam T, the fapi2::TargetType
-/// @param[in] i_target, a DIMM target representing the DIMM in question
+/// @tparam T the fapi2::TargetType
+/// @param[in] i_target a DIMM target representing the DIMM in question
 /// @return size_t, the attribute array index.
 ///
 template< fapi2::TargetType T >
@@ -59,7 +59,7 @@ inline size_t index(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
 
 ///
 /// @brief Return an attribute array index from a rank number
-/// @param[in] uint64_t, a rank number DIMM0 {0, 1, 2, 3} DIMM1 {0, 1, 2, 3}
+/// @param[in] i_rank uint64_t a rank number DIMM0 {0, 1, 2, 3} DIMM1 {0, 1, 2, 3}
 /// @return size_t, the attribute array index.
 ///
 inline size_t index(const uint64_t i_rank)

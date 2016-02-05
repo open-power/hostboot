@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -18,7 +18,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-/// @file mss_utils.h.H
+/// @file mss_utils.H
 /// @brief Main include file for the Memory Subsystem
 ///
 // *HWP HWP Owner: Craig Hamilton <cchamilt@us.ibm.com>

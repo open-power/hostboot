@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,9 +73,9 @@ enum tags_t
 
 ///
 /// @brief find the attribute array index of a tag
-/// @parm[in] i_type, whether this is an adr or dq lookup
-/// @parm[in] tags_t, the tag to find the index of
-/// @return size_t, the attribute array index
+/// @param[in] i_type whether this is an adr or dq lookup
+/// @param[in] i_tag tags_t the tag to find the index of
+/// @return size_t the attribute array index
 ///
 inline size_t index(const tags_t& i_type, const tags_t& i_tag)
 {
@@ -121,18 +121,18 @@ typedef std::vector< std::pair<tags_t, slew_per_imp_t> > slew_table_t;
 
 ///
 /// @brief Run the sle calibration engine
-/// @param[in] i_target, the MCBIST
+/// @param[in] i_target the MCBIST
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 fapi2::ReturnCode slew_cal(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target);
 
 ///
 /// @brief Process FFDC for slew calibration
-/// @param[in] MCA (port) target
-/// @param[in] a vector of the steps which came before me
-/// @param[in] the slew table to be operated on
-/// @param[in] the calibration status
-/// @param[in] the register value
+/// @param[in] i_target MCA (port) target
+/// @param[in] -_where_am_i a vector of the steps which came before me
+/// @param[in] l_slew_rate the slew table to be operated on
+/// @param[in] i_status the calibration status
+/// @param[in] i_reg the register value
 /// @return A fapi2::ReturnCode, appropriate for the calibration status
 ///
 fapi2::ReturnCode slew_cal_status(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,

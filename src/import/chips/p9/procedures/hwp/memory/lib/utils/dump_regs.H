@@ -38,7 +38,7 @@ namespace mss
 ///
 /// @brief Dump the registers of a target
 /// @tparam T, the fapi2::TargetType
-/// @param[in] i_target, the target in question
+/// @param[in] i_target the target in question
 /// @return fapi2::FAPI2_RC_SUCCESS if ok
 ///
 template< fapi2::TargetType T >

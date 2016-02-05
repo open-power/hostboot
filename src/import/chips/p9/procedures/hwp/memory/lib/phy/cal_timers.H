@@ -40,8 +40,8 @@ namespace mss
 
 ///
 /// @brief Return the cycles taken for write leveling on a single rank
-/// @tparam T, the target type used to get attributes
-/// @param[in] i_target, used to get attributes
+/// @tparam T the target type used to get attributes
+/// @param[in] i_target used to get attributes
 /// @return uint64_t, the cycles taken for write leveling on a single rank
 ///
 template<fapi2::TargetType T>
@@ -63,8 +63,8 @@ uint64_t wr_lvl_cycles(const fapi2::Target<T>& i_target )
 
 ///
 /// @brief Return the cycles taken for DQS align on a single rank
-/// @tparam T, the target type used to get attributes
-/// @param[in] i_target, used to get attributes
+/// @tparam T the target type used to get attributes
+/// @param[in] i_target used to get attributes
 /// @return uint64_t, the cycles taken for DQS align on a single rank
 ///
 template<fapi2::TargetType T>
@@ -79,8 +79,8 @@ uint64_t dqs_align_cycles(const fapi2::Target<T>& i_target )
 
 ///
 /// @brief Return the cycles taken for RD clock align on a single rank
-/// @tparam T, the target type used to get attributes
-/// @param[in] i_target, used to get attributes
+/// @tparam T the target type used to get attributes
+/// @param[in] i_target used to get attributes
 /// @return uint64_t, the cycles taken for RD clock align on a single rank
 ///
 template<fapi2::TargetType T>
@@ -96,8 +96,8 @@ uint64_t rdclk_align_cycles(const fapi2::Target<T>& i_target )
 
 ///
 /// @brief Return the cycles taken for read centering on a single rank
-/// @tparam T, the target type used to get attributes
-/// @param[in] i_target, used to get attributes
+/// @tparam T the target type used to get attributes
+/// @param[in] i_target used to get attributes
 /// @return uint64_t, the cycles taken for read centering on a single rank
 ///
 template<fapi2::TargetType T>
@@ -114,8 +114,8 @@ uint64_t read_ctr_cycles(const fapi2::Target<T>& i_target )
 
 ///
 /// @brief Return the cycles taken for write centering on a single rank
-/// @tparam T, the target type used to get attributes
-/// @param[in] i_target, used to get attributes
+/// @tparam T the target type used to get attributes
+/// @param[in] i_target used to get attributes
 /// @return uint64_t, the cycles taken for write centering on a single rank
 ///
 template<fapi2::TargetType T>
@@ -137,8 +137,8 @@ uint64_t write_ctr_cycles(const fapi2::Target<T>& i_target )
 
 ///
 /// @brief Return the cycles taken for coarse write on a single rank
-/// @tparam T, the target type used to get attributes
-/// @param[in] i_target, used to get attributes
+/// @tparam T the target type used to get attributes
+/// @param[in] i_target used to get attributes
 /// @return uint64_t, the cycles taken for coarse write on a single rank
 ///
 template<fapi2::TargetType T>
@@ -153,8 +153,8 @@ uint64_t coarse_wr_cycles(const fapi2::Target<T>& i_target )
 
 ///
 /// @brief Return the cycles taken for coarse read on a single rank
-/// @tparam T, the target type used to get attributes
-/// @param[in] i_target, used to get attributes
+/// @tparam T the target type used to get attributes
+/// @param[in] i_target used to get attributes
 /// @return uint64_t, the cycles taken for coarse rd on a single rank
 ///
 template<fapi2::TargetType T>
@@ -169,10 +169,10 @@ uint64_t coarse_rd_cycles(const fapi2::Target<T>& i_target )
 
 ///
 /// @brief Configure the polling intervals with the proper timeings based on the cal steps enabled
-/// @tparam T, the fapi2::TargetType of the port
-/// @param[in] i_target, the port target
-/// @param[in] the poll_parameters to update
-/// @param[in] a fapi2::buffer<uint8_t> representing the cal steps enabled
+/// @tparam T the fapi2::TargetType of the port
+/// @param[in] i_target the port target
+/// @param[in] i_poll the poll_parameters to update
+/// @param[in] i_cal_steps_enabled a fapi2::buffer<uint8_t> representing the cal steps enabled
 /// @return FAPI2_RC_SUCCESS iff everything is OK
 ///
 template<fapi2::TargetType T>

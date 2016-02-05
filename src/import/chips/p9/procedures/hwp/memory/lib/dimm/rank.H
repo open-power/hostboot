@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,9 +38,9 @@ namespace mss
 
 ///
 /// @brief Return a vector of rank numbers which represent the ranks for this dimm
-/// @tparam T, the target type you'd like the associated ranks for
+/// @tparam T the target type you'd like the associated ranks for
 /// @param[in] i_target
-/// @param[out] o_ranks, a vector of ranks (numbers)
+/// @param[out] o_ranks a vector of ranks (numbers)
 /// @return FAPI2_RC_SUCCESS iff all is ok
 ///
 template< fapi2::TargetType T >
@@ -48,9 +48,9 @@ fapi2::ReturnCode ranks( const fapi2::Target<T>& i_target, std::vector< uint64_t
 
 ///
 /// @brief Return a vector of rank numbers which represent the primary rank pairs for this port or dimm
-/// @tparam T, the target type
-/// @param[in] TARGET_TYPE_MCA or TARGET_TYPEDIMM
-/// @param[out] a vector of rank_pairs
+/// @tparam T the target type
+/// @param[in] i_target TARGET_TYPE_MCA or TARGET_TYPEDIMM
+/// @param[out] o_rps a vector of rank_pairs
 /// @return FAPI@_RC_SUCCESS iff all is ok
 ///
 template< fapi2::TargetType T >
@@ -59,14 +59,14 @@ fapi2::ReturnCode primary_ranks( const fapi2::Target<T>& i_target, std::vector< 
 ///
 /// @brief Return true iff this rank is on thie DIMM
 /// @param[in] i_target representing the DIMM
-/// @param[in] i_rank, the rank number.
+/// @param[in] i_rank the rank number.
 /// @return true iff i_rank is a rank on i_target
 ///
 bool is_rank_on_dimm(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, const uint64_t i_rank);
 
 ///
 /// @brief Return the *port relative position* of the DIMM which posesses this rank
-/// @param[in] i_rank, the rank number.
+/// @param[in] i_rank the rank number.
 /// @return the relative position of the DIMM which contains this rank.
 ///
 size_t get_dimm_from_rank(const uint64_t i_rank);
@@ -74,7 +74,7 @@ size_t get_dimm_from_rank(const uint64_t i_rank);
 ///
 /// @brief Setup the rank information in the port
 /// @tparam T the fapi2::TargetType
-/// @param[in] the target (MCA or MBA?)
+/// @param[in] i_target the target (MCA or MBA?)
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template< fapi2::TargetType T>
@@ -83,8 +83,8 @@ fapi2::ReturnCode set_rank_pairs(const fapi2::Target<T>& i_target);
 ///
 /// @brief get the rank information related to the port
 /// @tparam T the fapi2::TargetType
-/// @param[in] the target (MCA or MBA?)
-/// @param[out] std::vector of rank pairs configured
+/// @param[in] i_target the target (MCA or MBA?)
+/// @param[out] o_pairs std::vector of rank pairs configured
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template< fapi2::TargetType T>

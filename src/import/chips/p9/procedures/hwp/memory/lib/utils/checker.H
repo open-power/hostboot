@@ -40,7 +40,7 @@ namespace check
 {
 ///
 /// @brief      Checks homogenous DDR4 dimm configuration (e.g. DDR4)
-/// @param[in]  const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target_mcs
+/// @param[in]  i_target_mcs  const fapi2::Target<fapi2::TARGET_TYPE_MCS>&
 /// @return     FAPI2_RC_SUCCESS iff ok
 ///
 inline fapi2::ReturnCode dram_type(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target_mcs)
@@ -83,8 +83,8 @@ fapi_try_exit:
 
 ///
 /// @brief Check if there is DIMM mixing (and deconfigures unsupported mixing <shrug> ?? - AAM)
-/// @param[in]  const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target_mcs
-/// @param[out] uint64_t& o_module_type (returns something ?? - AAM )
+/// @param[in]  i_target_mcs const fapi2::Target<fapi2::TARGET_TYPE_MCS>&
+/// @param[out] o_module_type uint64_t (returns something ?? - AAM )
 /// @return FAPI2_RC_SUCCESS iff ok
 /// @note Functionality currently unknown
 ///
@@ -138,9 +138,6 @@ inline fapi2::ReturnCode dimm_mixing(const fapi2::Target<fapi2::TARGET_TYPE_MCS>
 
 ///
 /// @brief Checks what type of system is configured (i.e., single drop, dual drop)
-/// @param[in] Unknown
-/// @param[out] Unknown
-/// @return FAPI2_RC_SUCCESS iff ok
 /// @note Functionality currently unknown
 ///
 inline fapi2::ReturnCode system_drop_type(void)
@@ -193,8 +190,8 @@ fapi_try_exit:
 
 ///
 /// @brief      Checks nominal voltage is correct for all DIMMs
-/// @param[in]  const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target_mcs,
-///             fapi2::TargetState dimm_state
+/// @param[in]  i_target_mcsi  const fapi2::Target<fapi2::TARGET_TYPE_MCS>&,
+///             dimm_state i fapi2::TargetState
 /// @return ReturnCode
 ///
 inline fapi2::ReturnCode module_nominal_voltage(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target_mcs,
@@ -236,11 +233,12 @@ namespace spd
 {
 ///
 /// @brief      Checks conditional passes and implements traces & exits if it fails
-/// @tparam     T spd_data, of any size
-/// @param[in]  const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-///             bool conditional
-///             size_t spd_byte_index
-///             const char* err_str
+/// @tparam     T spd_data of any size
+/// @param[in]  i_target const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& ,
+///             conditional bool,
+///             spd_byte_index size_t,
+//      spd_data T,
+///             err_str const char*
 /// @return     ReturnCode
 ///
 template< typename T >
@@ -268,11 +266,12 @@ fapi_try_exit:
 
 ///
 /// @brief      Checks conditional passes and implements traces if it fails
-/// @tparam     T spd_data, of any size
-/// @param[in]  const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-///             bool conditional
-///             size_t spd_byte_index
-///             const char* err_str
+/// @tparam     T spd_data of any size
+/// @param[in]  i_targeti const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& ,
+///             conditional bool,
+///             spd_byte_index size_t,
+//      spd_data T,
+///             err_str const char*
 /// @return     void
 ///
 template< typename T >

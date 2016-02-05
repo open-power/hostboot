@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -142,8 +142,7 @@ static std::vector< register_data_vector > rdclk_enable_spare_x4 =
 
 ///
 /// @brief Write the data bit enable registers
-/// @param[in] a port target
-/// @param[in] vector of rank pairs
+/// @param[in] i_target  a port target
 /// @return FAPI2_RC_SUCCES iff ok
 ///
 template<>
@@ -173,8 +172,8 @@ fapi_try_exit:
 
 ///
 /// @brief Write the clock enable registers
-/// @param[in] a port target
-/// @param[in] vector of rank pairs
+/// @param[in] i_target
+/// @param[in] l_rank_pairs
 /// @return FAPI2_RC_SUCCES iff ok
 ///
 template<>
@@ -207,8 +206,8 @@ fapi_try_exit:
 
 ///
 /// @brief Write the read clock enable registers
-/// @param[in] a port target
-/// @param[in] vector of rank pairs
+/// @param[in] i_target
+/// @param[in] l_rank_pairs
 /// @return FAPI2_RC_SUCCESs iff ok
 ///
 template<>
@@ -241,8 +240,8 @@ fapi_try_exit:
 
 ///
 /// @brief Reset the training delay configureation
-/// @param[in] the port target
-/// @param[in] vector of rank pairs
+/// @param[in] i_target the port target
+/// @param[in] l_rank_pairs vector of rank pairs
 /// @return FAPI2_RC_SUCCES iff ok
 ///
 template<>
@@ -285,7 +284,7 @@ fapi_try_exit:
 
 ///
 /// @brief Configure the DP16 sysclk
-/// @param[in] a MCBIST target
+/// @param[in] i_target a MCBIST target
 /// @return FAPI2_RC_SUCCESs iff ok
 ///
 template<>

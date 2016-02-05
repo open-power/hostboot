@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,9 +47,9 @@ namespace mss
 
 ///
 /// @brief Configure the ARR0 of the CCS isntruction for mrs00
-/// @param[in] i_target, a fapi2::Target<TARGET_TYPE_DIMM>
-/// @param[in,out] the instruction to fixup
-/// @param[in] ths rank in question
+/// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
+/// @param[in,out] io_inst the instruction to fixup
+/// @param[in] i_rank ths rank in question
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 static fapi2::ReturnCode ddr4_mrs00(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
@@ -127,8 +127,8 @@ fapi_try_exit:
 ///
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS0,
 /// decode and trace the contents
-/// @param[in] i_inst, the CCS instruction
-/// @param[in] ths rank in question
+/// @param[in] i_inst the CCS instruction
+/// @param[in] i_rank ths rank in question
 /// @return void
 ///
 static fapi2::ReturnCode ddr4_mrs00_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
@@ -171,9 +171,9 @@ static fapi2::ReturnCode ddr4_mrs00_decode(const ccs::instruction_t<TARGET_TYPE_
 
 ///
 /// @brief Configure the ARR0 of the CCS isntruction for mrs01
-/// @param[in] i_target, a fapi2::Target<TARGET_TYPE_DIMM>
-/// @param[in,out] the instruction to fixup
-/// @param[in] ths rank in question
+/// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
+/// @param[in,out] io_inst the instruction to fixup
+/// @param[in] i_rank ths rank in question
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 static fapi2::ReturnCode ddr4_mrs01(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
@@ -243,8 +243,8 @@ fapi_try_exit:
 ///
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS1,
 /// decode and trace the contents
-/// @param[in] i_inst, the CCS instruction
-/// @param[in] ths rank in question
+/// @param[in] i_inst the CCS instruction
+/// @param[in] i_rank ths rank in question
 /// @return void
 ///
 static fapi2::ReturnCode ddr4_mrs01_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
@@ -274,7 +274,7 @@ static fapi2::ReturnCode ddr4_mrs01_decode(const ccs::instruction_t<TARGET_TYPE_
 ///
 /// @brief Given a uint32_t, which contains address bits with an encoded MRS1,
 /// decode and trace the contents
-/// @param[in] i_value, ADR 17:0
+/// @param[in] i_value ADR 17:0
 /// @return void
 ///
 fapi2::ReturnCode ddr4_mrs01_decode(const uint32_t i_value)
@@ -306,9 +306,9 @@ fapi2::ReturnCode ddr4_mrs01_decode(const uint32_t i_value)
 
 ///
 /// @brief Configure the ARR0 of the CCS isntruction for mrs02
-/// @param[in] i_target, a fapi2::Target<TARGET_TYPE_DIMM>
-/// @param[in,out] the instruction to fixup
-/// @param[in] ths rank in question
+/// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
+/// @param[in,out] io_inst the instruction to fixup
+/// @param[in] i_rank ths rank in question
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 static fapi2::ReturnCode ddr4_mrs02(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
@@ -384,8 +384,8 @@ fapi_try_exit:
 ///
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS2,
 /// decode and trace the contents
-/// @param[in] i_inst, the CCS instruction
-/// @param[in] ths rank in question
+/// @param[in] i_inst the CCS instruction
+/// @param[in] i_rank ths rank in question
 /// @return void
 ///
 static fapi2::ReturnCode ddr4_mrs02_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
@@ -408,9 +408,9 @@ static fapi2::ReturnCode ddr4_mrs02_decode(const ccs::instruction_t<TARGET_TYPE_
 
 ///
 /// @brief Configure the ARR0 of the CCS isntruction for mrs03
-/// @param[in] i_target, a fapi2::Target<TARGET_TYPE_DIMM>
-/// @param[in,out] the instruction to fixup
-/// @param[in] ths rank in question
+/// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
+/// @param[in,out] io_inst the instruction to fixup
+/// @param[in] i_rank ths rank in question
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 static fapi2::ReturnCode ddr4_mrs03(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
@@ -465,8 +465,8 @@ fapi_try_exit:
 ///
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS3,
 /// decode and trace the contents
-/// @param[in] i_inst, the CCS instruction
-/// @param[in] ths rank in question
+/// @param[in] i_inst the CCS instruction
+/// @param[in] i_rank ths rank in question
 /// @return void
 ///
 static fapi2::ReturnCode ddr4_mrs03_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
@@ -498,9 +498,9 @@ static fapi2::ReturnCode ddr4_mrs03_decode(const ccs::instruction_t<TARGET_TYPE_
 
 ///
 /// @brief Configure the ARR0 of the CCS isntruction for mrs04
-/// @param[in] i_target, a fapi2::Target<TARGET_TYPE_DIMM>
-/// @param[in,out] the instruction to fixup
-/// @param[in] ths rank in question
+/// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
+/// @param[in,out] io_inst the instruction to fixup
+/// @param[in] i_rank ths rank in question
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 static fapi2::ReturnCode ddr4_mrs04(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
@@ -562,8 +562,8 @@ fapi_try_exit:
 ///
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS4,
 /// decode and trace the contents
-/// @param[in] i_inst, the CCS instruction
-/// @param[in] ths rank in question
+/// @param[in] i_inst the CCS instruction
+/// @param[in] i_rank ths rank in question
 /// @return void
 ///
 static fapi2::ReturnCode ddr4_mrs04_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
@@ -595,9 +595,9 @@ static fapi2::ReturnCode ddr4_mrs04_decode(const ccs::instruction_t<TARGET_TYPE_
 
 ///
 /// @brief Configure the ARR0 of the CCS isntruction for mrs05
-/// @param[in] i_target, a fapi2::Target<TARGET_TYPE_DIMM>
-/// @param[in,out] the instruction to fixup
-/// @param[in] ths rank in question
+/// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
+/// @param[in,out] io_inst the instruction to fixup
+/// @param[in] i_rank ths rank in question
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 static fapi2::ReturnCode ddr4_mrs05(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
@@ -673,8 +673,8 @@ fapi_try_exit:
 ///
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS5,
 /// decode and trace the contents
-/// @param[in] i_inst, the CCS instruction
-/// @param[in] ths rank in question
+/// @param[in] i_inst the CCS instruction
+/// @param[in] i_rank ths rank in question
 /// @return void
 ///
 static fapi2::ReturnCode ddr4_mrs05_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
@@ -706,9 +706,9 @@ static fapi2::ReturnCode ddr4_mrs05_decode(const ccs::instruction_t<TARGET_TYPE_
 
 ///
 /// @brief Configure the ARR0 of the CCS isntruction for mrs06
-/// @param[in] i_target, a fapi2::Target<TARGET_TYPE_DIMM>
-/// @param[in,out] the instruction to fixup
-/// @param[in] ths rank in question
+/// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
+/// @param[in,out] io_inst the instruction to fixup
+/// @param[in] i_rank ths rank in question
 /// @return FAPI2_RC_SUCCESS iff OK
 ///
 static fapi2::ReturnCode ddr4_mrs06(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
@@ -751,8 +751,8 @@ fapi_try_exit:
 ///
 /// @brief Given a CCS instruction which contains address bits with an encoded MRS6,
 /// decode and trace the contents
-/// @param[in] i_inst, the CCS instruction
-/// @param[in] ths rank in question
+/// @param[in] i_inst the CCS instruction
+/// @param[in] i_rank ths rank in question
 /// @return void
 ///
 static fapi2::ReturnCode ddr4_mrs06_decode(const ccs::instruction_t<TARGET_TYPE_MCBIST>& i_inst,
@@ -775,8 +775,8 @@ static fapi2::ReturnCode ddr4_mrs06_decode(const ccs::instruction_t<TARGET_TYPE_
 
 ///
 /// @brief Perform the mrs_load_ddr4 operations - TARGET_TYPE_DIMM specialization
-/// @param[in] i_target, a fapi2::Target<TARGET_TYPE_DIMM>
-/// @param[in] a vector of CCS instructions we should add to
+/// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
+/// @param[in] i_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 fapi2::ReturnCode mrs_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,

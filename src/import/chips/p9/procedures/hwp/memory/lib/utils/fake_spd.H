@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,26 +26,27 @@
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: HB:FSP
-
+#ifndef DOXYGEN
 #ifndef _MSS_FAKE_SPD_H_
-#define _MSS_FAKE_SPD_H_
+    #define _MSS_FAKE_SPD_H_
 
-#include <fapi2.H>
+    #include <fapi2.H>
 
-///
-/// @brief Return a blob of SPD data from a DIMM
-/// @param[in] i_target, a DIMM target representing the DIMM in question
-/// @param[out] o_blob, the blob of data from the DIMM - raw
-/// @param[out] o_size, o_size, the size of the blob
-/// @return FAPI2_RC_SUCCESS if there's no problem
-/// @note passing nullptr for o_blob will return the size of the blob
-///   size_t s;
-///   FAPI_TRY( getSPD(d->target(), nullptr, s) );
-///   {
-///       uint8_t blob[s];
-///       FAPI_TRY( getSPD(d->target(), blob, s) );
-///    }
-///
-fapi2::ReturnCode getSPD(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t* o_blob, size_t& s);
+    ///
+    /// @brief Return a blob of SPD data from a DIMM
+    /// @param[in] i_target, a DIMM target representing the DIMM in question
+    /// @param[out] o_blob, the blob of data from the DIMM - raw
+    /// @param[out] o_size, o_size, the size of the blob
+    /// @return FAPI2_RC_SUCCESS if there's no problem
+    /// @note passing nullptr for o_blob will return the size of the blob
+    ///   size_t s;
+    ///   FAPI_TRY( getSPD(d->target(), nullptr, s) );
+    ///   {
+    ///       uint8_t blob[s];
+    ///       FAPI_TRY( getSPD(d->target(), blob, s) );
+    ///    }
+    ///
+    fapi2::ReturnCode getSPD(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t* o_blob, size_t& s);
 
+#endif
 #endif

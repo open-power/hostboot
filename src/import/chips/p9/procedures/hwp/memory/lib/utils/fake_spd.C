@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,7 +28,7 @@
 // *HWP Consumed by: HB:FSP
 
 #include "fake_spd.H"
-
+#ifndef DOXYGEN
 /// DIMM data was taken from /afs/awd.austin.ibm.com/projects/eclipz/lab/p8/gsiexe/
 /// 78P0AAM_DDR4_8G1RX8_mu/MICRON_SPD_8G_1Rx8_DDR4_2400_RDIMM.hex on 7/31/2015.
 
@@ -92,4 +92,4 @@ fapi2::ReturnCode getSPD(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 
     return fapi2::FAPI2_RC_SUCCESS;
 }
-
+#endif

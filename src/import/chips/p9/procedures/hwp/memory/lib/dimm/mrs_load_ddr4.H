@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -68,8 +68,8 @@ enum address_bits
 
 ///
 /// @brief Perform the mrs_load_ddr4 operations - TARGET_TYPE_DIMM specialization
-/// @param[in] i_target, a fapi2::Target<TARGET_TYPE_DIMM>
-/// @param[in] a vector of CCS instructions we should add to
+/// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
+/// @param[in] i_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 fapi2::ReturnCode mrs_load_ddr4( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
@@ -77,8 +77,8 @@ fapi2::ReturnCode mrs_load_ddr4( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i
 
 ///
 /// @brief Mirror (front to back) the ADR bits of a CCS instruction - implementation
-/// @tparam T, typename of the ccs::instruction_t
-/// @param[in, out] io_inst, reference to a CCS instruction to be mirrored
+/// @tparam T typename of the ccs::instruction_t
+/// @param[in, out] io_inst reference to a CCS instruction to be mirrored
 /// @return FAPI2_RC_SUCESS iff ok
 /// @note written this way so this is easier to test
 ///
@@ -96,10 +96,10 @@ void address_mirror_impl(ccs::instruction_t<T>& io_inst)
 
 ///
 /// @brief Mirror (front to back) the ADR bits of a CCS instruction
-/// @tparam T, typename of the ccs::instruction_t
-/// @param[in] i_target, target to use to get mirroring attribute
-/// @param[in] i_rank, the rank in question
-/// @param[in, out] io_inst, reference to a CCS instruction to be mirrored
+/// @tparam T typename of the ccs::instruction_t
+/// @param[in] i_target target to use to get mirroring attribute
+/// @param[in] i_rank the rank in question
+/// @param[in, out] io_inst reference to a CCS instruction to be mirrored
 /// @return FAPI2_RC_SUCESS iff ok
 /// @note assumes the input is from an even number rank
 ///
@@ -123,7 +123,7 @@ fapi_try_exit:
 
 ///
 /// @brief Invert (side to side) the ADR bits of a CCS instruction
-/// @param[in] i_inst, const reference to a CCS instruction.
+/// @param[in] i_inst const reference to a CCS instruction.
 /// @return[out] ccs instruction with the ADR bits inverted (side-to-side)
 ///
 template<fapi2::TargetType T>

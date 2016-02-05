@@ -57,44 +57,44 @@ namespace mss
 
 ///
 /// @brief Perform initializations for the PHY
-/// @param[in] i_target, the MCBIST which has the PHYs to initialize
+/// @param[in] i_target the MCBIST which has the PHYs to initialize
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode phy_scominit(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target);
 
 ///
 /// @brief change resetn to the given state
-/// @param[in] i_target, the mcbist
-/// @param[in] the desired state
+/// @param[in] i_target the mcbist
+/// @param[in] i_state the desired state
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode change_resetn( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target, states i_state );
 
 ///
 /// @brief perform the zctl toggle process
-/// @param[in] i_target, the mcbist for the reset recover
+/// @param[in] i_target the mcbist for the reset recover
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode toggle_zctl( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
 
 /// @brief Change mclk low
-/// @param[in] mcbist target
-/// @param[in] mss::HIGH or mss::LOW - desired state.
+/// @param[in] i_target mcbist target
+/// @param[in] i_state mss::HIGH or mss::LOW - desired state.
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode change_force_mclk_low (const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
         const mss::states i_state);
 ///
 /// @brief Unset the PLL and check to see that the PLL's have started
-/// @param[in] the mcbist target
+/// @param[in] i_target the mcbist target
 /// @return FAPI2_RC_SUCCES iff ok
 ///
 fapi2::ReturnCode deassert_pll_reset( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
 
 ///
 /// @brief Setup the phase rotator control registers
-/// @param[in] the mcbist target
-/// @param[in] the value for the registers
+/// @param[in] i_target the mcbist target
+/// @param[in] i_data the value for the registers
 /// @return FAPI2_RC_SUCCES iff ok
 ///
 fapi2::ReturnCode setup_phase_rotator_control_registers( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
@@ -102,43 +102,43 @@ fapi2::ReturnCode setup_phase_rotator_control_registers( const fapi2::Target<fap
 
 ///
 /// @brief Deassetr the sys clk reset
-/// @param[in] the mcbist target
+/// @param[in] i_target the mcbist target
 /// @return FAPI2_RC_SUCCES iff ok
 ///
 fapi2::ReturnCode deassert_sysclk_reset( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
 
 ///
 /// @brief Flush the DDR PHY
-/// @param[in] the mcbist target
+/// @param[in] i_target the mcbist target
 /// @return FAPI2_RC_SUCCES iff ok
 ///
 fapi2::ReturnCode ddr_phy_flush( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
 
 ///
 /// @brief Reset the training delay configureation
-/// @param[in] the mcbist target
+/// @param[in] i_target the mcbist target
 /// @return FAPI2_RC_SUCCES iff ok
 ///
 fapi2::ReturnCode reset_delay_values( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
 
 ///
 /// @brief Lock dphy_gckn and sysclk
-/// @param[in] a MCBIST target
+/// @param[in] i_target a MCBIST target
 /// @return FAPI2_RC_SUCCESs iff ok
 ///
 fapi2::ReturnCode bang_bang_lock( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
 
 ///
 /// @brief Configure the DP16 sysclk
-/// @param[in] a MCBIST target
+/// @param[in] i_target a MCBIST target
 /// @return FAPI2_RC_SUCCESs iff ok
 ///
 fapi2::ReturnCode setup_dp16_sysclk( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
 
 ///
 /// @brief check and process initial cal errors
-/// @tparam T, the type of the target in question
-/// @param[in] the port in question
+/// @tparam T the type of the target in question
+/// @param[in] i_target the port in question
 /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff no error
 ///
 template< fapi2::TargetType T >
@@ -147,9 +147,9 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<T>& i_target )
 ///
 /// @brief Setup all the cal config register
 /// @tparam T, the target type of the MCA/MBA
-/// @param[in] the target associated with this cal setup
-/// @param[in] the vector of currently configured rank pairs
-/// @param[in] fapi2::buffer<uint16_t> representing the cal steps to enable
+/// @param[in] i_target the target associated with this cal setup
+/// @param[in] i_rank_pairs the vector of currently configured rank pairs
+/// @param[in] i_cal_steps_enabled fapi2::buffer<uint16_t> representing the cal steps to enable
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template< fapi2::TargetType T >
@@ -159,9 +159,9 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<T>& i_target,
 
 ///
 /// @brief Setup all the cal config register
-/// @param[in] the target associated with this cal setup
-/// @param[in] i_rank, one currently configured rank pairs
-/// @param[in] fapi2::buffer<uint16_t> representing the cal steps to enable
+/// @param[in] i_target the target associated with this cal setup
+/// @param[in] i_rank one currently configured rank pairs
+/// @param[in] i_cal_steps_enabled fapi2::buffer<uint16_t> representing the cal steps to enable
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
@@ -170,8 +170,8 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
 
 ///
 /// @brief Setup wc_config0
-/// @tparam T, the target type of the MCA/MBA
-/// @param[in] the target associated with this cal setup
+/// @tparam T the target type of the MCA/MBA
+/// @param[in] i_target the target associated with this cal setup
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template< fapi2::TargetType T >
@@ -179,7 +179,7 @@ inline fapi2::ReturnCode reset_wc_config0( const fapi2::Target<T>& i_target );
 
 ///
 /// @brief Setup wc_config0
-/// @param[in] the MCA target associated with this cal setup
+/// @param[in] i_target the MCA target associated with this cal setup
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template<>
@@ -221,8 +221,8 @@ fapi_try_exit:
 
 ///
 /// @brief Setup wc_config1
-/// @tparam T, the target type of the MCA/MBA
-/// @param[in] the target associated with this cal setup
+/// @tparam T the target type of the MCA/MBA
+/// @param[in] i_target the target associated with this cal setup
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template< fapi2::TargetType T >
@@ -230,7 +230,7 @@ inline fapi2::ReturnCode reset_wc_config1( const fapi2::Target<T>& i_target );
 
 ///
 /// @brief Setup wc_config1
-/// @param[in] the MCA target associated with this cal setup
+/// @param[in] i_target the MCA target associated with this cal setup
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template<>
@@ -253,8 +253,8 @@ fapi_try_exit:
 
 ///
 /// @brief Setup wc_config2
-/// @tparam T, the target type of the MCA/MBA
-/// @param[in] the target associated with this cal setup
+/// @tparam T the target type of the MCA/MBA
+/// @param[in] i_target the target associated with this cal setup
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template< fapi2::TargetType T >
@@ -262,7 +262,7 @@ inline fapi2::ReturnCode reset_wc_config2( const fapi2::Target<T>& i_target );
 
 ///
 /// @brief Setup wc_config2
-/// @param[in] the MCA target associated with this cal setup
+/// @param[in] i_target the MCA target associated with this cal setup
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template<>
@@ -286,8 +286,8 @@ fapi_try_exit:
 
 ///
 /// @brief Setup wc_config3
-/// @tparam T, the target type of the MCA/MBA
-/// @param[in] the target associated with this cal setup
+/// @tparam T the target type of the MCA/MBA
+/// @param[in] i_target the target associated with this cal setup
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template< fapi2::TargetType T >
@@ -295,7 +295,7 @@ inline fapi2::ReturnCode reset_wc_config3( const fapi2::Target<T>& i_target );
 
 ///
 /// @brief Setup wc_config3
-/// @param[in] the MCA target associated with this cal setup
+/// @param[in] i_target the MCA target associated with this cal setup
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template<>
@@ -324,8 +324,8 @@ fapi_try_exit:
 
 ///
 /// @brief Setup WC RTT Write Swap Enable Register
-/// @tparam T, the target type of the MCA/MBA
-/// @param[in] the target
+/// @tparam T the target type of the MCA/MBA
+/// @param[in] i_target the target
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template< fapi2::TargetType T >
@@ -333,7 +333,7 @@ inline fapi2::ReturnCode reset_wc_rtt_wr_swap_enable( const fapi2::Target<T>& i_
 
 ///
 /// @brief Setup WC RTT Write Swap Enable Register
-/// @param[in] the MCA target
+/// @param[in] i_target  the MCA target
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template<>
@@ -361,8 +361,8 @@ fapi_try_exit:
 
 ///
 /// @brief Setup seq_config0
-/// @tparam T, the target type of the MCA/MBA
-/// @param[in] the target associated with this cal setup
+/// @tparam T the target type of the MCA/MBA
+/// @param[in] i_target the target associated with this cal setup
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template< fapi2::TargetType T >
@@ -370,7 +370,7 @@ inline fapi2::ReturnCode reset_seq_config0( const fapi2::Target<T>& i_target );
 
 ///
 /// @brief Setup seq_config0
-/// @param[in] the MCA target associated with this cal setup
+/// @param[in] i_target the MCA target associated with this cal setup
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template<>
@@ -392,8 +392,8 @@ fapi_try_exit:
 
 ///
 /// @brief Setup odt_wr/rd_config
-/// @tparam T, the target type of the MCA/MBA
-/// @param[in] the target associated with this cal setup
+/// @tparam T the target type of the MCA/MBA
+/// @param[in] i_target the target associated with this cal setup
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template< fapi2::TargetType T >
@@ -401,7 +401,7 @@ inline fapi2::ReturnCode reset_odt_config( const fapi2::Target<T>& i_target );
 
 ///
 /// @brief Setup odt_wr/rd_config
-/// @param[in] the MCA target associated with this cal setup
+/// @param[in] i_target the MCA target associated with this cal setup
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template<>
@@ -544,8 +544,8 @@ fapi_try_exit:
 
 ///
 /// @brief Setup seq_rd_wr_data
-/// @tparam T, the target type of the MCA/MBA
-/// @param[in] the target associated with this cal setup
+/// @tparam T the target type of the MCA/MBA
+/// @param[in] i_target the target associated with this cal setup
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template< fapi2::TargetType T >
@@ -553,7 +553,7 @@ inline fapi2::ReturnCode reset_seq_rd_wr_data( const fapi2::Target<T>& i_target 
 
 ///
 /// @brief Setup seq_rd_wr_data
-/// @param[in] the MCA target associated with this cal setup
+/// @param[in] i_target the MCA target associated with this cal setup
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template<>
@@ -582,7 +582,7 @@ fapi_try_exit:
 ///
 /// @brief Setup the PC CONFIG0 register
 /// @tparam T the fapi2::TargetType
-/// @param[in] the target (MCA or MBA?)
+/// @param[in] i_target the target (MCA or MBA?)
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template< fapi2::TargetType T>
@@ -591,7 +591,7 @@ fapi2::ReturnCode set_pc_config0(const fapi2::Target<T>& i_target);
 ///
 /// @brief Setup the PC CONFIG1 register
 /// @tparam T the fapi2::TargetType
-/// @param[in] the target (MCA or MBA?)
+/// @param[in] i_target the target (MCA or MBA?)
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template< fapi2::TargetType T>
@@ -599,9 +599,9 @@ fapi2::ReturnCode set_pc_config1(const fapi2::Target<T>& i_target);
 
 ///
 /// @brief Return the DIMM target for the primary rank in the specificed rank pair
-/// @tparam T, fapi2::TargetType of the port target
-/// @param[in] the arget
-/// @param[in] the rank pair
+/// @tparam T fapi2::TargetType of the port target
+/// @param[in] i_target the target
+/// @param[in] i_rp the rank pair
 /// @param[out] fapi2::Target<fapi2::TARGET_TYPE_DIMM>
 /// @return FAPI2_RC_SUCCESS iff ok
 ///

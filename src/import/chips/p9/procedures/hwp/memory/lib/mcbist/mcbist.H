@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,7 +54,7 @@ template< fapi2::TargetType T >
 class mcbistTraits;
 
 ///
-/// @class mcbistTraits<fapi2::TARGET_TYPE_MEMBUF_CHIP>
+/// @class mcbistTraits
 /// @brief a collection of traits associated with the Centaur MCBIST engine or hardware
 ///
 template<>
@@ -63,7 +63,7 @@ class mcbistTraits<fapi2::TARGET_TYPE_MEMBUF_CHIP>
 };
 
 ///
-/// @class mcbistTraits<fapi2::TARGET_TYPE_MCBIST>
+/// @class mcbistTraits
 /// @brief a collection of traits associated with the Nimbus MCBIST engine or hardware
 ///
 template<>
@@ -109,7 +109,7 @@ class subtest_t
 ///
 /// @brief A class representing a series of MCBIST subtests, and the
 /// MCBIST engine parameters associated with running the subtests
-/// @tparam fapi2::TargetType T representing the fapi2 target which
+/// @tparam T fapi2::TargetType representing the fapi2 target which
 /// contains the MCBIST engine (e.g., fapi2::TARGET_TYPE_MCBIST)
 ///
 template< fapi2::TargetType T >
@@ -128,10 +128,10 @@ class program
 
 ///
 /// @brief Complement the data for the first subcommand
-/// @tparam T, fapi2::TargetType of the MCBIST engine
-/// @tparam TT, the mssTraits associtated with T
-/// @param[in,out] io_subtest, a subtest
-/// @param[in] i_state, the desired state of the function
+/// @tparam T fapi2::TargetType of the MCBIST engine
+/// @tparam TT the mssTraits associtated with T
+/// @param[in,out] io_subtest a subtest
+/// @param[in] i_state the desired state of the function
 /// @return void
 ///
 template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
@@ -143,10 +143,10 @@ void change_compliment_1st_cmd( subtest_t<T>& io_subtest, const mss::states i_st
 
 ///
 /// @brief Complement the data for the second subcommand
-/// @tparam T, fapi2::TargetType of the MCBIST engine
-/// @tparam TT, the mssTraits associtated with T
-/// @param[in,out] io_subtest, a subtest
-/// @param[in] i_state, the desired state of the function
+/// @tparam T fapi2::TargetType of the MCBIST engine
+/// @tparam TT the mssTraits associtated with T
+/// @param[in,out] io_subtest a subtest
+/// @param[in] i_state the desired state of the function
 /// @return void
 ///
 template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
@@ -158,10 +158,10 @@ void change_compliment_2nd_cmd( subtest_t<T>& io_subtest, const mss::states i_st
 
 ///
 /// @brief Complement the data for the third subcommand
-/// @tparam T, fapi2::TargetType of the MCBIST engine
-/// @tparam TT, the mssTraits associtated with T
-/// @param[in,out] io_subtest, a subtest
-/// @param[in] i_state, the desired state of the function
+/// @tparam T fapi2::TargetType of the MCBIST engine
+/// @tparam TT the mssTraits associtated with T
+/// @param[in,out] io_subtest a subtest
+/// @param[in] i_state the desired state of the function
 /// @return void
 ///
 template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
@@ -173,10 +173,10 @@ void change_compliment_3rd_cmd( subtest_t<T>& io_subtest, const mss::states i_st
 
 ///
 /// @brief Generate addresses in reverse order
-/// @tparam T, fapi2::TargetType of the MCBIST engine
-/// @tparam TT, the mssTraits associtated with T
-/// @param[in,out] io_subtest, a subtest
-/// @param[in] i_state, the desired state of the function
+/// @tparam T fapi2::TargetType of the MCBIST engine
+/// @tparam TT the mssTraits associtated with T
+/// @param[in,out] io_subtest a subtest
+/// @param[in] i_state the desired state of the function
 /// @return void
 ///
 template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
@@ -188,10 +188,10 @@ void change_addr_rev_mode( subtest_t<T>& io_subtest, const mss::states i_state )
 
 ///
 /// @brief Generate addresses in random order
-/// @tparam T, fapi2::TargetType of the MCBIST engine
-/// @tparam TT, the mssTraits associtated with T
-/// @param[in,out] io_subtest, a subtest
-/// @param[in] i_state, the desired state of the function
+/// @tparam T fapi2::TargetType of the MCBIST engine
+/// @tparam TT the mssTraits associtated with T
+/// @param[in,out] io_subtest a subtest
+/// @param[in] i_state the desired state of the function
 /// @return void
 ///
 template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
@@ -203,10 +203,10 @@ void change_addr_rand_mode( subtest_t<T>& io_subtest, const mss::states i_state 
 
 ///
 /// @brief Generate and check data with ECC
-/// @tparam T, fapi2::TargetType of the MCBIST engine
-/// @tparam TT, the mssTraits associtated with T
-/// @param[in,out] io_subtest, a subtest
-/// @param[in] i_state, the desired state of the function
+/// @tparam T fapi2::TargetType of the MCBIST engine
+/// @tparam TT the mssTraits associtated with T
+/// @param[in,out] io_subtest a subtest
+/// @param[in] i_state the desired state of the function
 /// @return void
 ///
 template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
@@ -218,10 +218,10 @@ void change_ecc_mode( subtest_t<T>& io_subtest, const mss::states i_state )
 
 ///
 /// @brief Set the data mode for this subtest
-/// @tparam T, fapi2::TargetType of the MCBIST engine
-/// @tparam TT, the mssTraits associtated with T
-/// @param[in,out] io_subtest, a subtest
-/// @param[in] i_mode, the desired mcbist::data_mode
+/// @tparam T fapi2::TargetType of the MCBIST engine
+/// @tparam TT the mssTraits associtated with T
+/// @param[in,out] io_subtest a subtest
+/// @param[in] i_mode the desired mcbist::data_mode
 /// @return void
 ///
 template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
@@ -233,10 +233,10 @@ void change_data_mode( subtest_t<T>& io_subtest, const data_mode i_mode )
 
 ///
 /// @brief Configure which address registers to use for this subtest
-/// @tparam T, fapi2::TargetType of the MCBIST engine
-/// @tparam TT, the mssTraits associtated with T
-/// @param[in,out] io_subtest, a subtest
-/// @param[in] i_index, 0 = MCBSA0Q, 1 = MCBSA1Q, ...
+/// @tparam T fapi2::TargetType of the MCBIST engine
+/// @tparam TT the mssTraits associtated with T
+/// @param[in,out] io_subtest a subtest
+/// @param[in] i_index 0 = MCBSA0Q, 1 = MCBSA1Q, ...
 /// @note wraps to 0-3 no matter what value you pass in.
 /// @return void
 ///

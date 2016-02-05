@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,8 +37,8 @@ namespace mss
 
 ///
 /// @brief Count the bits in a T which are set (1)
-/// @tparam T, an integral type. e.g., uint64_t, uint8_t
-/// @param[in] the value to check, count
+/// @tparam T an integral type. e.g., uint64_t, uint8_t
+/// @param[in] i_value the value to check, count
 /// @return uint64_t the number of bits set in the input
 ///
 template< typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
@@ -57,7 +57,7 @@ inline uint64_t bit_count(const T& i_value)
 ///
 /// @brief Return the bit position of the first bit set, from the left
 /// @tparam T, an integral type. e.g., uint64_t, uint8_t
-/// @param[in] the value to check
+/// @param[in] i_value the value to check
 /// @return uint64_t the bit position of the first set bit
 /// @bote assumes you checked to make sure there were bits set because it will return 0
 ///
