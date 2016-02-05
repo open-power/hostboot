@@ -42,7 +42,7 @@ using fapi2::FAPI2_RC_SUCCESS;
 
 ///
 /// @brief Calculate and save off DIMM frequencies
-/// @param[in] i_target, the controller (e.g., MCS)
+/// @param[in] i_target the controller (e.g., MCS)
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode p9_mss_freq( const fapi2::Target<TARGET_TYPE_MCS>& i_target )
