@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,7 +39,7 @@ extern "C"
 
 ///
 /// @brief SCOM inits for PHY, MC
-/// @param[in] i_target, the MCBIST
+/// @param[in] i_target the MCBIST
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
     fapi2::ReturnCode p9_mss_scominit( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
