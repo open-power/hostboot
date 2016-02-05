@@ -828,11 +828,11 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_PBAX_NODEID</id>
+    <id>ATTR_PBAX_GROUPID</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Receive PBAX Nodeid. Value that indicates this PBA's PBAX Node affinity.
-      This is matched to pbax_nodeid of the PMISC Address phase.
+      Receive PBAX Groupid. Value that indicates this PBA's PBAX Group affinity.
+      This is matched to pbax_groupid of the PMISC Address phase.
 
       Provided by the Machine Readable Workbook.
     </description>
