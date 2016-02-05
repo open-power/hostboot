@@ -41,7 +41,7 @@ using fapi2::FAPI2_RC_SUCCESS;
 
 ///
 /// @brief Begin background scrub
-/// @param[in] i_target, MCBIST
+/// @param[in] i_target MCBIST
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode p9_mss_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
