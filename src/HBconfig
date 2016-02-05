@@ -4,6 +4,11 @@ config VPO_COMPILE
     help
         Compile and build image for VPO environment
 
+config P9_VPO_COMPILE
+    default n
+    help
+        Compile and build image for VPO environment
+
 config BMC_AST2400
     default n
     help

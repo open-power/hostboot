@@ -651,6 +651,10 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
     // If the step has valid work to be done, then execute it.
     if(NULL != theStep)
     {
+#ifdef CONFIG_P9_VPO_COMPILE //extra traces to printk for vpo debug
+        printk("doIstep: step %d, substep %d, "
+                  "task %s\n", i_istep, i_substep, theStep->taskname);
+#endif
         TRACFCOMP(g_trac_initsvc,ENTER_MRK"doIstep: step %d, substep %d, "
                   "task %s", i_istep, i_substep, theStep->taskname);
 

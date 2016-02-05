@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,7 +43,7 @@ namespace SECUREBOOT
         {
 
 // Don't blind purge in VPO
-#ifndef CONFIG_VPO_COMPILE
+#ifndef CONFIG_P9_VPO_COMPILE
 
             // Load original secureboot header.
             if (enabled())
@@ -64,7 +64,7 @@ namespace SECUREBOOT
             assert(0 == mm_extend(MM_EXTEND_POST_SECUREBOOT));
 
 // Disable SecureROM in VPO
-#ifndef CONFIG_VPO_COMPILE
+#ifndef CONFIG_P9_VPO_COMPILE
             // Initialize the Secure ROM
             l_errl = initializeSecureROM();
             if (l_errl)

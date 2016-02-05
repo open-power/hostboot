@@ -51,6 +51,7 @@
 // Add P9 - Fake trigger for memory expansion
 #include <kernel/console.H>                  // printk status
 #include <devicefw/userif.H>
+#include <config.h>
 // @TODO RTC:134082 remove above block
 
 using   namespace   ISTEP;
@@ -245,7 +246,7 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
                        "SUCCESS : call_proc_exit_cache_contained on all procs" );
 
             // @TODO RTC:134082 remove below block
-#if 1
+#ifndef CONFIG_P9_VPO_COMPILE
             // Add P9 - Fake trigger for memory expansion
             TARGETING::Target* l_masterProc = NULL;
             TARGETING::targetService()
