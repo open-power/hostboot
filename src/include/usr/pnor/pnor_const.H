@@ -88,8 +88,9 @@ struct SectionInfo_t
     uint64_t size;      /**< Size of partition in bytes */
     bool eccProtected;  /**< Section is ECC protected */
     bool sha512Version; /**< Version Checking */
-    bool sha512perEC; /**< Version Checking perEC */
-    bool readOnly; /**< Section is read only */
+    bool sha512perEC;   /**< Version Checking perEC */
+    bool readOnly;      /**< Section is read only */
+    bool reprovision;   /**< Erase this section during a reprovision */
 #ifdef CONFIG_SECUREBOOT
     size_t secureProtectedPayloadSize; /**< Cache the secure payload size so
                                             that the secure container only
