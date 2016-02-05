@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/// @file p9_mss_powercleanup.H
+/// @file p9_mss_power_cleanup.H
 /// @brief Perform any necessary power cleanup
 ///
 // *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
@@ -43,7 +43,7 @@ extern "C"
 {
 ///
 /// @brief Perform any necessary power cleanup
-/// @param[in] i_target, the McBIST of the ports of the dram you're training
+/// @param[in] i_target the McBIST of the ports of the dram you're training
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
     fapi2::ReturnCode p9_mss_power_cleanup( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
