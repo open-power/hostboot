@@ -43,7 +43,7 @@ extern "C"
 {
 ///
 /// @brief Pattern test the DRAM
-/// @param[in] i_target, the McBIST of the ports of the dram you're training
+/// @param[in] i_target the McBIST of the ports of the dram you're training
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
     fapi2::ReturnCode p9_mss_memdiag( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
