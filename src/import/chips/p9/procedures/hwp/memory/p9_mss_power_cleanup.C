@@ -42,7 +42,7 @@ extern "C"
 {
 ///
 /// @brief Perform any necessary power cleanup
-/// @param[in] i_target, the McBIST of the ports of the dram you're training
+/// @param[in] i_target the McBIST of the ports of the dram you're training
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
     fapi2::ReturnCode p9_mss_power_cleanup( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
