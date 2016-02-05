@@ -66,7 +66,7 @@ enum frequencies : std::uint64_t
 ///
 /// @brief      Calculate frequency
 /// @tparam     T input
-/// @param[in]  T i_clock
+/// @param[in]  i_clock T
 /// @return     T (frequency)
 ///
 template<typename T>
@@ -83,7 +83,7 @@ inline T calc_freq(T i_clock)
 ///
 /// @brief  Calculate timing value (e.g.tCK, tAA, etc.)
 /// @tparam     T input
-/// @param[in]  T i_freq
+/// @param[in]  i_freq T
 /// @return     T (timing)
 ///
 template<typename T>
@@ -98,8 +98,8 @@ inline T calc_clock (T i_freq)
 
 ///
 /// @brief  Calculate CAS latency
-/// @tparam[in]  T tAA_max,
-///              T tCKmax
+/// @tparam[in]  T
+/// @param[in]   tAA_max T,tCKmax T
 /// @return      T cas_latency
 ///
 template<typename T>
@@ -122,7 +122,7 @@ extern "C"
 
     ///
     /// @brief Calculate and save off DIMM frequencies
-    /// @param[in] i_target, the controller (e.g., MCS)
+    /// @param[in] i_target the controller (e.g., MCS)
     /// @return FAPI2_RC_SUCCESS iff ok
     ///
     fapi2::ReturnCode p9_mss_freq( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target );
