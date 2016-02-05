@@ -59,9 +59,9 @@ namespace mss
 
 ///
 /// @brief Blast one peice of data across a vector of addresses
-/// @param[in] i_target, the target for the scom
-/// @param[in] const std::vector<uint64_t>&, addresses
-/// @param[in] const fapi2::buffer<uint64_t>&, the data to blast
+/// @param[in] i_target the target for the scom
+/// @param[in] i_addrs const std::vector<uint64_t>& addresses
+/// @param[in] i_data const fapi2::buffer<uint64_t>& the data to blast
 /// @return FAPI2_RC_SUCCESS iff ok
 /// @note Author is originally from Boston (Pahk mah cah in Havahd Yahd)
 
@@ -89,9 +89,9 @@ fapi_try_exit:
 
 ///
 /// @brief Blast one peice of data across a vector of targets
-/// @param[in] the vector of targets for the scom
-/// @param[in] the address
-/// @param[in] const fapi2::buffer<uint64_t>&, the data to blast
+/// @param[in]i_targets  the vector of targets for the scom
+/// @param[in] i_addr the address
+/// @param[in] i_data const fapi2::buffer<uint64_t>& the data to blast
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< fapi2::TargetType T >
@@ -115,9 +115,9 @@ fapi_try_exit:
 
 ///
 /// @brief Blast one peice of data across a vector of targets
-/// @param[in] the vector of targets for the scom
-/// @param[in] the vector of addresses
-/// @param[in] const fapi2::buffer<uint64_t>&, the data to blast
+/// @param[in]i_targets  the vector of targets for the scom
+/// @param[in] i_addrs the vector of addresses
+/// @param[in] i_data const fapi2::buffer<uint64_t>& the data to blast
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< fapi2::TargetType T >
@@ -142,8 +142,8 @@ fapi_try_exit:
 
 ///
 /// @brief change resetn to the given state
-/// @param[in] i_target, the mcbist
-/// @param[in] the desired state
+/// @param[in] i_target the mcbist
+/// @param[in] i_state the desired state
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode change_resetn( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target, states i_state )
@@ -165,7 +165,7 @@ fapi_try_exit:
 
 ///
 /// @brief perform the zctl toggle process
-/// @param[in] i_target, the mcbist for the reset recover
+/// @param[in] i_target the mcbist for the reset recover
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode toggle_zctl( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
@@ -204,8 +204,8 @@ fapi_try_exit:
 }
 
 /// @brief Change mclk low
-/// @param[in] mcbist target
-/// @param[in] mss::HIGH or mss::LOW - desired state.
+/// @param[in] i_target mcbist target
+/// @param[in] i_state mss::HIGH or mss::LOW - desired state.
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode change_force_mclk_low (const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
@@ -255,7 +255,7 @@ fapi_try_exit:
 
 ///
 /// @brief Unset the PLL and check to see that the PLL's have started
-/// @param[in] the mcbist target
+/// @param[in] i_target the mcbist target
 /// @return FAPI2_RC_SUCCES iff ok
 ///
 fapi2::ReturnCode deassert_pll_reset( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
@@ -354,8 +354,8 @@ fapi_try_exit:
 
 ///
 /// @brief Setup the phase rotator control registers
-/// @param[in] the mcbist target
-/// @param[in] the value for the registers
+/// @param[in] i_target the mcbist target
+/// @param[in] i_data the value for the registers
 /// @return FAPI2_RC_SUCCES iff ok
 ///
 fapi2::ReturnCode setup_phase_rotator_control_registers( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
@@ -379,7 +379,7 @@ fapi_try_exit:
 
 ///
 /// @brief Deassetr the sys clk reset
-/// @param[in] the mcbist target
+/// @param[in] i_target the mcbist target
 /// @return FAPI2_RC_SUCCES iff ok
 ///
 fapi2::ReturnCode deassert_sysclk_reset( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
@@ -393,7 +393,7 @@ fapi_try_exit:
 
 ///
 /// @brief Flush the DDR PHY
-/// @param[in] the mcbist target
+/// @param[in] i_target the mcbist target
 /// @return FAPI2_RC_SUCCES iff ok
 ///
 fapi2::ReturnCode ddr_phy_flush( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
@@ -430,9 +430,9 @@ fapi_try_exit:
 
 ///
 /// @brief Send a scom to all instances of a block on the phy.
-/// @param[in] the MCA target
-/// @param[in] the address
-/// @param[in] the value
+/// @param[in] i_target the MCA target
+/// @param[in] l_addr the address
+/// @param[in] i_data the value
 /// @note this iterates creating addresses - needs to change to use the
 /// braodcast bits in the phy when we can scom it directly.
 ///
@@ -458,7 +458,7 @@ fapi_try_exit:
 
 ///
 /// @brief Lock dphy_gckn and sysclk
-/// @param[in] a port target
+/// @param[in] i_target a port target
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode bang_bang_lock( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
@@ -527,9 +527,9 @@ fapi_try_exit:
 
 ///
 /// @brief Return the DIMM target for the primary rank in the specificed rank pair
-/// @param[in] the MCA target
-/// @param[in] the rank pair
-/// @param[out] fapi2::Target<TARGET_TYPE_DIMM>
+/// @param[in] i_target the MCA target
+/// @param[in] i_rp the rank pair
+/// @param[out] o_dimm fapi2::Target<TARGET_TYPE_DIMM>
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
@@ -596,7 +596,7 @@ fapi_try_exit:
 
 ///
 /// @brief check and process initial cal errors
-/// @param[in] the port in question
+/// @param[in] i_target the port in question
 /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff no error
 ///
 template<>
@@ -767,7 +767,7 @@ fapi_try_exit:
 ///
 /// @brief Setup the PC CONFIG0 register
 /// @tparam T the fapi2::TargetType
-/// @param[in] the target (MCA or MBA?)
+/// @param[in] i_target the target (MCA or MBA?)
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template<>
@@ -793,7 +793,7 @@ fapi_try_exit:
 ///
 /// @brief Setup the PC CONFIG1 register
 /// @tparam T the fapi2::TargetType
-/// @param[in] the target (MCA or MBA?)
+/// @param[in] i_target <the target (MCA or MBA?)
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template<>
@@ -855,7 +855,7 @@ fapi_try_exit:
 
 ///
 /// @brief Perform initializations for the PHY
-/// @param[in] i_target, the MCBIST which has the PHYs to initialize
+/// @param[in] i_target the MCBIST which has the PHYs to initialize
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target)
@@ -904,9 +904,9 @@ fapi_try_exit:
 
 ///
 /// @brief Setup all the cal config register
-/// @param[in] the MCA target associated with this cal setup
-/// @param[in] the vector of currently configured rank pairs
-/// @param[in] fapi2::buffer<uint8_t> representing the cal steps to enable
+/// @param[in] i_target the MCA target associated with this cal setup
+/// @param[in] i_rank_pairs the vector of currently configured rank pairs
+/// @param[in] i_cal_steps_enabled fapi2::buffer<uint8_t> representing the cal steps to enable
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template<>
@@ -1015,9 +1015,9 @@ fapi_try_exit:
 
 ///
 /// @brief Setup all the cal config register
-/// @param[in] the target associated with this cal setup
-/// @param[in] i_rank, one currently configured rank pairs
-/// @param[in] fapi2::buffer<uint16_t> representing the cal steps to enable
+/// @param[in] i_target the target associated with this cal setup
+/// @param[in] i_rank one currently configured rank pairs
+/// @param[in] i_cal_steps_enabled fapi2::buffer<uint16_t> representing the cal steps to enable
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
@@ -1031,7 +1031,7 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
 
 ///
 /// @brief Dump the registers of the PHY (MCA)
-/// @param[in] i_target, the MCA target
+/// @param[in] i_target the MCA target
 /// @return fapi2::FAPI2_RC_SUCCESS if ok
 ///
 template<>
