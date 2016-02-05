@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -441,6 +441,8 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
         o_info.sha512perEC = ((iv_TOC[id].version & FFS_VERS_SHA512_PER_EC)
                                != 0) ? true : false;
         o_info.readOnly = ((iv_TOC[id].misc & FFS_MISC_READ_ONLY)
+                               != 0) ? true : false;
+        o_info.reprovision = ((iv_TOC[id].misc & FFS_MISC_REPROVISION)
                                != 0) ? true : false;
     }
 
