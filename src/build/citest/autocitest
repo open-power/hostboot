@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2011,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -134,6 +134,14 @@ fi
 
 ##  Find the .syms file for the image.  Remove extension, add .syms.
 HBICORE_TEST_SYMS="${HBICORE_TEST%%.*}.syms"
+
+##  Create Simics swap space directory that will get cleaned up with the workspace
+SIMICS_SWAP_SPACE="${PROJECT_ROOT}/simics_swap_space/"
+mkdir -p $SIMICS_SWAP_SPACE
+
+##  Point Simics to use swap space created - 2 places required for some reason
+export GFW_MEM_LIMIT_PATH=$SIMICS_SWAP_SPACE
+export GFW_SIMICS_ENV_MEM_LIMIT_PATH=$SIMICS_SWAP_SPACE
 
 ## let's get set up
 cd $SBXHOME
