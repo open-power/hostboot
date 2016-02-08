@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/hwpf/hwp/occ/occAccess.H $                    */
+/* $Source: src/usr/isteps/istep18/TodAssert.H $                          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,51 +22,39 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef OCCACCESS_H_
-#define OCCACCESS_H_
+#ifndef TODASSERT_H
+#define TODASSERT_H
 
-#include <config.h>
-#include <errl/errlentry.H>
-#include <targeting/common/commontargeting.H>
-#include <fapi.H>
+/**
+ *  @file TodAssert.H
+ *
+ *  There are two different assert types provided:
+ *      Standard assert behavior:
+ *              assert(foo)
+ *
+ *      Standard assert behavior with a custom trace message:
+ *              assert(foo, "This is a trace %d", 1234)
+ */
 
-namespace HBOCC
+#include <assert.h>
+
+namespace TOD
 {
 
-    /**
-     * @brief Read OCC SRAM
-     *
-     * @param[in]     i_pTarget   PROC or OCC target pointer
-     * @param[in]     i_addr      OCI Address to be used for the operation
-     * @param[in,out] io_dataBuf  Reference to data buffer
-     * @return errlHndl_t   Error log if operation failed
-     */
-    errlHndl_t readSRAM(const TARGETING::Target*i_pTarget,
-                             const uint32_t i_addr,
-                             ecmdDataBufferBase & io_dataBuf);
+/**
+ *  @brief Forward common tod assert requests to platform specific handler
+ *
+ *  @par Detailed Description:
+ *      Forwards assert request to platform specific assert macro which verifies
+ *      condition, calls custom trace if provided, and ultimately calls platform
+ *      assert
+ *
+ *  @param[in] expr,...
+ *      Printf-like expression to act as the assert message
+ */
+#define TOD_ASSERT(expr,...) \
+    assert(expr,__VA_ARGS__)
 
-    /**
-     * @brief Write OCC SRAM
-     *
-     * @param[in]     i_pTarget   PROC or OCC target pointer
-     * @param[in]     i_addr      OCI Address to be used for the operation
-     * @param[in]     i_dataBuf   Reference to data buffer
-     * @return errlHndl_t   Error log if operation failed
-     */
-    errlHndl_t writeSRAM(const TARGETING::Target*i_pTarget,
-                              const uint32_t i_addr,
-                              ecmdDataBufferBase & io_dataBuf);
-
-    /**
-     * @brief Write OCC Circular Buffer
-     *
-     * @param[in]     i_pTarget   PROC or OCC target pointer
-     * @param[in]     i_dataBuf   Reference to data buffer
-     * @return errlHndl_t   Error log if operation failed
-     */
-    errlHndl_t writeCircularBuffer(const TARGETING::Target*i_pTarget,
-                              ecmdDataBufferBase & i_dataBuf);
-
-} //end OCC namespace
+}
 
 #endif

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,8 +40,6 @@
 #include    <initservice/initsvcreasoncodes.H>
 #include <config.h>
 
-//  include prototypes file
-#include    "../../../usr/hwpf/hwp/tod_init/tod_init.H"
 
 namespace   INITSERVICE
 {

@@ -54,33 +54,6 @@ XMLTOHB_SYSTEM_BINARIES += simics_NIMBUS_targeting.bin
 XMLTOHB_TARGETS += ${XMLTOHB_HEADER_TARGETS}
 XMLTOHB_TARGETS += ${XMLTOHB_SOURCE_TARGETS}
 
-FAPI_ATTR_SOURCES += memory_attributes.xml
-FAPI_ATTR_SOURCES += L2_L3_attributes.xml
-FAPI_ATTR_SOURCES += scratch_attributes.xml
-FAPI_ATTR_SOURCES += system_attributes.xml
-FAPI_ATTR_SOURCES += chip_attributes.xml
-FAPI_ATTR_SOURCES += $(if $(CONFIG_VPD_GETMACRO_USE_EFF_ATTR), lab_dimm_spd_attributes.xml, dimm_spd_attributes.xml)
-FAPI_ATTR_SOURCES += $(if $(CONFIG_VPD_GETMACRO_USE_EFF_ATTR), lab_dimm_attributes.xml, dimm_attributes.xml)
-FAPI_ATTR_SOURCES += unit_attributes.xml
-FAPI_ATTR_SOURCES += ei_bus_attributes.xml
-FAPI_ATTR_SOURCES += dram_initialization/proc_setup_bars/proc_setup_bars_l3_attributes.xml
-FAPI_ATTR_SOURCES += dram_initialization/proc_setup_bars/proc_setup_bars_mmio_attributes.xml
-FAPI_ATTR_SOURCES += activate_powerbus/proc_build_smp/proc_fab_smp_fabric_attributes.xml
-FAPI_ATTR_SOURCES += nest_chiplets/proc_pcie_scominit/proc_pcie_scominit_attributes.xml
-FAPI_ATTR_SOURCES += dmi_training/proc_cen_set_inband_addr/proc_cen_set_inband_addr_attributes.xml
-FAPI_ATTR_SOURCES += common_attributes.xml
-FAPI_ATTR_SOURCES += build_winkle_images/p8_slw_build/proc_pll_ring_attributes.xml
-FAPI_ATTR_SOURCES += build_winkle_images/p8_slw_build/p8_xip_customize_attributes.xml
-FAPI_ATTR_SOURCES += sync_attributes.xml
-FAPI_ATTR_SOURCES += poreve_memory_attributes.xml
-FAPI_ATTR_SOURCES += mcbist_attributes.xml
-FAPI_ATTR_SOURCES += proc_winkle_scan_override_attributes.xml
-FAPI_ATTR_SOURCES += erepair_thresholds.xml
-FAPI_ATTR_SOURCES += dram_training/mem_pll_setup/memb_pll_ring_attributes.xml
-FAPI_ATTR_SOURCES += runtime_attributes/memory_occ_attributes.xml
-FAPI_ATTR_SOURCES += proc_abus_dmi_xbus_scominit_attributes.xml
-FAPI_ATTR_SOURCES += pstate_attributes.xml
-
 # Temp defaults XML sources used by updatetempsxml.pl script
 TEMP_DEFAULTS_XML       += tempdefaults.xml
 HB_TEMP_DEFAULTS_XML    += hb_temp_defaults.xml
