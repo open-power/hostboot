@@ -45,6 +45,11 @@ OBJS += call_host_ipl_complete.o
 
 include ${ROOTPATH}/procedure.rules.mk
 include  ${PROCEDURES_PATH}/hwp/pm/p9_block_wakeup_intr.mk
+#TODO RTC:147383 Need to create a seperate module for cpu_special_wakeup
+include  ${PROCEDURES_PATH}/hwp/pm/p9_cpu_special_wakeup.mk
+include  ${PROCEDURES_PATH}/hwp/pm//p9_cpu_special_wakeup_core.mk
+include  ${PROCEDURES_PATH}/hwp/pm//p9_cpu_special_wakeup_ex.mk
+include  ${PROCEDURES_PATH}/hwp/pm//p9_cpu_special_wakeup_lib.mk
 include  ${PROCEDURES_PATH}/hwp/perv/p9_switch_cfsim.mk
 include  ${PROCEDURES_PATH}/hwp/perv/p9_switch_rec_attn.mk
 include ${ROOTPATH}/config.mk
