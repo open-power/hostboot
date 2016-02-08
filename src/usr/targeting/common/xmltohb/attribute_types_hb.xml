@@ -1698,4 +1698,22 @@ ID for the sensor number returned with the elog. -->
   </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+  <id>NEST_CAPABLE_FREQUENCIES_SYS</id>
+  <description>
+      The NEST frequencies that the system supports. Can be restricted
+      to less values than MRW_NEST_CAPABLE_FREQUENCIES_SYS based on processor
+      VPD. The MRW_NEST_CAPABLE_FREQUENCIES_SYS enumeration values are used.
+  </description>
+  <simpleType>
+    <uint32_t>
+      <default>0</default>
+    </uint32_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hbOnly/>
+</attribute>
+
 </attributes>

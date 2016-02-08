@@ -44,7 +44,7 @@ namespace SBE
     const size_t   SBE_MVPD_SHORT_IMAGE_VERSION_SIZE = 20;
 
     // Number of versions supported
-    const uint8_t SBE_SEEPROM_STRUCT_MAX_VERSIONS    = 0x05;
+    const uint8_t SBE_SEEPROM_STRUCT_MAX_VERSIONS    = 0x06;
 
     // Size of supported versions - must be 8-byte aligned
     const size_t  SBE_SEEPROM_STRUCT_SIZES[SBE_SEEPROM_STRUCT_MAX_VERSIONS] =
@@ -54,6 +54,7 @@ namespace SBE
                         80,  // ver2: size of struct is 80 bytes
                         80,  // ver3: size of struct is 80 bytes
                         80,  // ver4: size of struct is 80 bytes
+                        80,  // ver5: size of struct is 80 bytes
                       };
 
     // This enum provides the struct versions for sbeSeepromVersionInfo_t
@@ -63,9 +64,14 @@ namespace SBE
         STRUCT_VERSION_NEST_FREQ = 0x2,
         STRUCT_VERSION_ORIGIN_GOLD = 0x3,
         STRUCT_VERSION_HBB_FIXUP = 0x4,
-        STRUCT_VERSION_LATEST = 0x4,
+        STRUCT_VERSION_LOW_POWER_CHECK = 0x5,
+        STRUCT_VERSION_LATEST = 0x5,
         STRUCT_VERSION_SIMICS = 0x5A5A5A5A,
     };
+
+    // Nest frequencies
+    const uint32_t NEST_FREQ_2000 = 2000;
+    const uint32_t NEST_FREQ_2400 = 2400;
 
     // Constant written to SBE SEEPROM version struct to invalidate the
     // struct and the image - 'INVALID\0'

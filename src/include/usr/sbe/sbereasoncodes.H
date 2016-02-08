@@ -99,6 +99,8 @@ enum sbeReasonCode
     SBE_ERROR_ON_UPDATE                 = SBE_COMP_ID | 0x14,
     SBE_MASTER_VERSION_DOWNLEVEL        = SBE_COMP_ID | 0x15,
     SBE_IMAGE_GET_SET_SCALAR_FAIL       = SBE_COMP_ID | 0x16,
+    SBE_NO_2000_MHZ_NEST_FREQ_CAP       = SBE_COMP_ID | 0x17,
+    SBE_INCONSISTENT_NEST_FREQ          = SBE_COMP_ID | 0x18,
 
 };
 

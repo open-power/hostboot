@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2016                        -->
 <!-- [+] Google Inc.                                                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
@@ -83,6 +83,7 @@
     <attribute><id>WOF_PROC_SORT</id></attribute>
     <attribute><id>WOF_FREQUENCY_UPLIFT</id></attribute>
     <attribute><id>WOF_REGULATOR_EFFICIENCIES</id></attribute>
+    <attribute><id>NEST_CAPABLE_FREQUENCIES_SYS</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>

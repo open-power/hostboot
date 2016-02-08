@@ -76,7 +76,6 @@ TRAC_INIT( & g_trac_sbe, SBE_COMP_NAME, KILOBYTE );
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
 
-
 // ----------------------------------------
 // Global Variables for MBOX Ipl Query
 static bool g_mbox_query_done   = false;
@@ -2992,6 +2991,21 @@ namespace SBE
     }
 
 /////////////////////////////////////////////////////////////////////
+    void setNestFreqAttributes(uint32_t i_nestFreq)
+    {
+        // Call targeting function to update NEST_FREQ
+        TargetService& tS = targetService();
+        TARGETING::Target* sys = NULL;
+        (void) tS.getTopLevelTarget( sys );
+        assert(sys, "setNestFreqAttributes() system target is NULL");
+
+        TRACFCOMP(g_trac_sbe, "setNestFreqAttributes(): "
+                  "UPDATE_NEST_FREQ to %d ",
+                  i_nestFreq);
+
+        TARGETING::setFrequencyAttributes(sys, i_nestFreq);
+    }
+/////////////////////////////////////////////////////////////////////
     errlHndl_t performUpdateActions(sbeTargetState_t& io_sbeState)
     {
         TRACUCOMP( g_trac_sbe,
@@ -3013,19 +3027,8 @@ namespace SBE
             // This can only be set with Golden/READ-ONLY Seeprom situation
             if (l_actions & UPDATE_NEST_FREQ)
             {
-                // Call targeting function to update NEST_FREQ
-                TargetService& tS = targetService();
-                TARGETING::Target* sys = NULL;
-                (void) tS.getTopLevelTarget( sys );
-                assert(sys, "performUpdateActions() system target is NULL");
-
-                TRACFCOMP( g_trac_sbe, "performUpdateActions(): "
-                           "UPDATE_NEST_FREQ to %d ",
-                           io_sbeState.mproc_nest_freq_mhz);
-
-                TARGETING::setFrequencyAttributes(
-                                       sys,
-                                       io_sbeState.mproc_nest_freq_mhz);
+                // update nest frequency attributes
+                setNestFreqAttributes(io_sbeState.mproc_nest_freq_mhz);
 
                 // This opeation only done by itself and does not need
                 // an informational error log
@@ -4149,16 +4152,153 @@ namespace SBE
         return;
     }
 
+/////////////////////////////////////////////////////////////////////
+// Return power bus frequency for this processor from vpd
+    errlHndl_t getPowerBusFreq(TARGETING::Target* i_target,
+                               uint32_t & o_powerBusFreq)
+    {
+        errlHndl_t err = NULL;
+        uint32_t l_record = (uint32_t) MVPD::LRP1;
+        fapi::voltageBucketData_t l_poundVdata = {0};
+
+        //convert to fapi target
+        fapi::Target l_pFapiProc(fapi::TARGET_TYPE_PROC_CHIP,
+                         (const_cast<TARGETING::Target*>(i_target) ));
+
+        //Read #V vpd
+        fapi::ReturnCode l_rc = fapiGetPoundVBucketData(l_pFapiProc,
+                                                        l_record,
+                                                        l_poundVdata);
+        if (l_rc)
+        {
+            TRACFCOMP(g_trac_sbe,
+                      ERR_MRK"checkNestFreqSettings(): "
+                      "Error getting #V data for HUID:0x%08X",
+                      TARGETING::get_huid(i_target));
+            // Convert fapi returnCode to Error handle
+            err = fapiRcToErrl(l_rc);
+        }
+        else
+        {
+            TRACFCOMP(g_trac_sbe,
+                      "checkNestFreqSettings(): "
+                      "VPD #V Power Bus frequency = %d for HUID=%x",
+                       l_poundVdata.labFreq,
+                       TARGETING::get_huid(i_target));
+            o_powerBusFreq = l_poundVdata.labFreq;
+         }
+         return err;
+      }
 
 /////////////////////////////////////////////////////////////////////
+// Confirm system is capable of low power nest frequency,
+// if so, set the restricted value attriabute.
+// Return error if system is not capable of low power nest frequency
+    errlHndl_t restrictSystemLowPowerCapability(TARGETING::Target * i_target)
+    {
+        errlHndl_t err = NULL;
+
+        TARGETING::Target * l_sys = NULL;
+        targetService().getTopLevelTarget(l_sys);
+        assert(l_sys, "restrictSystemLowPowerCapability(): Null system target");
+
+        //Get the MRW capabilities that this system can support
+        TARGETING::ATTR_MRW_NEST_CAPABLE_FREQUENCIES_SYS_type
+             l_mrwFreqCap =
+             l_sys->getAttr<TARGETING::ATTR_MRW_NEST_CAPABLE_FREQUENCIES_SYS>();
+
+        //Confirm the system is capable of a 2000 nest frequency.
+        //"not supported" will be seen when an MRW does not supply a value.
+        if (! (TARGETING::MRW_NEST_CAPABLE_FREQUENCIES_SYS_2000_MHZ &
+                                                            l_mrwFreqCap) )
+        {
+            TRACFCOMP(g_trac_sbe,
+                      ERR_MRK"restrictSystemLowPowerCapability(): "
+                      "System does not have capability for "
+                      "2000 nest frequency",
+                      l_mrwFreqCap);
+
+            /*@
+             * @errortype
+             * @moduleid     SBE_GET_TARGET_INFO_STATE
+             * @reasoncode   SBE_NO_2000_MHZ_NEST_FREQ_CAP
+             * @userdata1    Processor HUID
+             * @userdata2    MRW nest frequency capabilities
+             * @devdesc      System does not support 2000 MHZ
+             *               nest frequency required for
+             *               Low power Turismo
+             * @custdesc     Unsupported system configuration
+             */
+            err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                SBE_GET_TARGET_INFO_STATE,
+                                SBE_NO_2000_MHZ_NEST_FREQ_CAP,
+                                TARGETING::get_huid(i_target),
+                                l_mrwFreqCap);
+            err->collectTrace(SBE_COMP_NAME);
+            err->addHwCallout( i_target,
+                               HWAS::SRCI_PRIORITY_HIGH,
+                               HWAS::NO_DECONFIG,
+                               HWAS::GARD_NULL );
+        }
+        else //Use 2000 as the restricted system capability
+        {
+            l_sys->setAttr<TARGETING::ATTR_NEST_CAPABLE_FREQUENCIES_SYS>
+                (TARGETING::MRW_NEST_CAPABLE_FREQUENCIES_SYS_2000_MHZ);
+        }
+        return err;
+    }
+
+/////////////////////////////////////////////////////////////////////
+// There is a low power Turismo whose nest frequency should only
+// be set to 2000. These parts are identified by a module vpd power
+// bus frequency value of 2000 (reuse lab frequency).
+//
+// If either of a Turismo part's seeproms has been updated to
+// 2400, then we know this proc is not a low power part. If neither
+// seeprom's nest frequency can be established (version < 2) or has
+// been updated to 2000, we need to read the vpd.
+//
+// If this is a low power Turismo, then 2000 should be used for the default
+// value instead of a possible 2400 MRW provided default. The default value
+// is used to "assume" the seeprom's programmed nest frequency when the
+// programmed value can not be established (we programmed it and set the
+// version to 2 or higher). The default is not only used for matching against
+// the current nest frequency (ATTR_NEST_FREQ_MHZ) but could also be used
+// to set the current frequency in the untypical case of booting from a
+// read only golden side seeprom if this is the master proc.
+//
+// If we discover this is a low power Turismo, then we need to confirm that
+// the MRW capabilities support 2000. We also need to restrict the capabilities
+// to 2000.
+//
+// A part that can support 2400 could have been updated to 2000
+// due to dimm configuration. If the established frequency is 2000, we still
+// need to read the vpd to see if the capabiltiy needs to be restricted
+// to 2000.
+//
+// If the current nest frequency is 2400, then we need to change the current
+// frequency to 2000. All the procs need to be updated to 2000.
+//
+// A mix of low power Turismo with other capabilities is not supported.
+
     errlHndl_t checkNestFreqSettings(sbeTargetState_t& io_sbeState)
     {
         TRACDCOMP( g_trac_sbe,
-                   ENTER_MRK"checkNestFreqSettings");
+                   ENTER_MRK"checkNestFreqSettings(): HUID:0x%08X",
+                   TARGETING::get_huid(io_sbeState.target));
 
         errlHndl_t err = NULL;
-
         uint32_t default_nest_freq = 0;
+
+        //Used to ensure no mix of 2000 MHZ nest Turismo parts with others
+        enum procNestFreqRestriction
+        {
+            UNITIALIZED      = 0,
+            RESTRICTED_2000  = 1,  //restricted nest 2000 MHZ Turismo
+            OTHER            = 2,  //2400 MHZ Turismo or other module
+        };
+        static procNestFreqRestriction l_allProcNestType  = UNITIALIZED;
+        procNestFreqRestriction        l_thisProcNestType = OTHER;
 
         do{
 
@@ -4166,13 +4306,134 @@ namespace SBE
             io_sbeState.seeprom_0_ver_Nest_Freq_Mismatch = false;
             io_sbeState.seeprom_1_ver_Nest_Freq_Mismatch = false;
 
-            // Get DEFAULT_PROC_MODULE_NEST_FREQ_MHZ attribute
+            // Get MRW DEFAULT_PROC_MODULE_NEST_FREQ_MHZ attribute
             default_nest_freq = io_sbeState.target->getAttr<
                          TARGETING::ATTR_DEFAULT_PROC_MODULE_NEST_FREQ_MHZ>();
 
-            TRACUCOMP( g_trac_sbe,"checkNestFreqSettings(): ATTR_NEST_FREQ_MHZ "
+            TRACUCOMP( g_trac_sbe,"checkNestFreqSettings(): ATTR_NEST_FREQ_MHZ"
                        "=%d, ATTR_DEFAULT_PROC_MODULE_NEST_FREQ_MHZ=%d",
                        g_current_nest_freq, default_nest_freq);
+            TRACUCOMP( g_trac_sbe,"checkNestFreqSettings(): "
+                       "seeprom0 ver=%d freq=%d seeprom1 ver=%d freq=%d",
+                       io_sbeState.seeprom_0_ver.struct_version,
+                       io_sbeState.seeprom_0_ver.nest_freq_mhz,
+                       io_sbeState.seeprom_1_ver.struct_version,
+                       io_sbeState.seeprom_1_ver.nest_freq_mhz);
+
+            // Check if we need to read module vpd to see if this is a
+            // low power Turismo.
+            if ( (MODEL_VENICE ==  //It is a Turismo
+                     io_sbeState.target->getAttr<TARGETING::ATTR_MODEL>()) &&
+               // neither seeprom established to be have been programmed to 2400
+               ! ( ((io_sbeState.seeprom_0_ver.struct_version >=
+                                 STRUCT_VERSION_LOW_POWER_CHECK   ) &&
+                    (io_sbeState.seeprom_0_ver.nest_freq_mhz ==
+                                               NEST_FREQ_2400)) ||
+                   ((io_sbeState.seeprom_1_ver.struct_version >=
+                                 STRUCT_VERSION_LOW_POWER_CHECK   ) &&
+                    (io_sbeState.seeprom_1_ver.nest_freq_mhz ==
+                                               NEST_FREQ_2400)) ) )
+            {
+                //Get the power bus frequency from proc module vpd
+                uint32_t l_powerBusFreq = 0;
+                err = getPowerBusFreq(io_sbeState.target, l_powerBusFreq);
+                if (err)
+                {
+                    break; //return with error
+                }
+
+                //If power bus is 2000, then it is a low power part.
+                //Any other value taken as a 2400 part.
+                if (NEST_FREQ_2000 == l_powerBusFreq)
+                {
+                    TRACUCOMP( g_trac_sbe,
+                           "checkNestFreqSettings(): "
+                           "2000 nest restriction determined from VPD");
+
+                    //confirm system has capability for low power nest freq
+                    //and restrict to low power
+                    err = restrictSystemLowPowerCapability(io_sbeState.target);
+                    if (err)
+                    {
+                        break; //return with error
+                    }
+
+                    //Since this processor is restricted to 2000,
+                    //all other processors must also be restricted to 2000
+                    l_thisProcNestType = RESTRICTED_2000;
+
+                    //Use 2000 as default for this proc instead of MRW attr.
+                    default_nest_freq = NEST_FREQ_2000;
+
+                    //Change current nest frequency to 2000 if needed
+                    if (NEST_FREQ_2000 != g_current_nest_freq)
+                    {
+                        TRACUCOMP( g_trac_sbe,
+                                   "checkNestFreqSettings(): "
+                                   "Changing Power Bus frequency to 2000");
+                        //set all the frequency attributes
+                        setNestFreqAttributes(NEST_FREQ_2000);
+
+                        //Update copy of ATTR_NEST_FREQ_MHZ
+                        g_current_nest_freq = NEST_FREQ_2000;
+                    }
+                    else
+                    {
+                        TRACUCOMP( g_trac_sbe,
+                                   "checkNestFreqSettings(): "
+                                   "Current nest frequency already 2000");
+                    }
+                }
+                else
+                {
+                    TRACUCOMP( g_trac_sbe,
+                           "checkNestFreqSettings(): "
+                           "2400 capable Turismo determined from VPD");
+                }
+            }
+            else
+            {
+                TRACUCOMP( g_trac_sbe,
+                           "checkNestFreqSettings(): "
+                           "Not low power Turismo, 2400 in seeprom header");
+            }
+
+            // Confirm that if any processor is a low power Turismo,
+            // then all processors are. A mix is not supported.
+            if (UNITIALIZED != l_allProcNestType) // this is not the first
+            {
+                if (l_allProcNestType != l_thisProcNestType) // mix detected
+                {
+                    TRACFCOMP( g_trac_sbe,
+                               ERR_MRK"checkNestFreqSettings(): "
+                               "System not can have mix of "
+                               "low and high power Turismo parts");
+                    /*@
+                     * @errortype
+                     * @moduleid     SBE_GET_TARGET_INFO_STATE
+                     * @reasoncode   SBE_INCONSISTENT_NEST_FREQ
+                     * @userdata1    Processor HUID
+                     * @devdesc      System not can have mix of
+                     *               low and high power Turismo parts
+                     * @custdesc     Unsupported system configuration
+                     */
+                    err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                    SBE_GET_TARGET_INFO_STATE,
+                                    SBE_INCONSISTENT_NEST_FREQ,
+                                    TARGETING::get_huid(io_sbeState.target),
+                                    0);
+                    err->collectTrace(SBE_COMP_NAME);
+                    err->addHwCallout(io_sbeState.target,
+                                   HWAS::SRCI_PRIORITY_HIGH,
+                                   HWAS::NO_DECONFIG,
+                                   HWAS::GARD_NULL );
+                    break; // return error
+                }
+            }
+            else //first proc, save to check the rest
+            {
+                l_allProcNestType = l_thisProcNestType;
+            }
 
             // Check Seeprom 0
             checkSeepromNestFreq(io_sbeState.target,

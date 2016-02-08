@@ -1085,7 +1085,9 @@ void findMinSpdAndDeconfigIncompatible(TargetHandleList::iterator i_iter,
 //
 errlHndl_t setNestBasedOffDimms()
 {
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ENTER_MRK"mc_config::setNestBasedOffDimms()");
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               ENTER_MRK"mc_config::setNestBasedOffDimms()");
+
     errlHndl_t l_err = NULL;
     bool l_isGoldenSide = false;
     ATTR_MRW_NEST_CAPABLE_FREQUENCIES_SYS_type l_capableNestFreq =
@@ -1119,7 +1121,8 @@ errlHndl_t setNestBasedOffDimms()
 
         if(l_err)
         {
-            // Error getting Golden side. Proceeding as if booting from safe Golden side
+            // Error getting Golden side. Proceeding as if booting from safe
+            // Golden side
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 ERR_MRK"setNestBasedOffDimms::isGoldenSide returned an error");
             errlCommit( l_err, HWPF_COMP_ID );
@@ -1128,18 +1131,36 @@ errlHndl_t setNestBasedOffDimms()
 
         if(!l_isGoldenSide)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    INFO_MRK"Booting from normal side. use "
-                    "MRW_NEST_CAPABLE_FREQUENCIES_SYS to calculate best freq "
-                    "across  membufs");
-            l_capableNestFreq = l_sys->getAttr
+            //Get the restricted capability and check if set up.
+            //If not, use the MRW capability. (has "MRW" in attribute name)
+            l_capableNestFreq = //cast to use the MRW attributes's enumeration
+                   (ATTR_MRW_NEST_CAPABLE_FREQUENCIES_SYS_type)
+                   l_sys->getAttr<ATTR_NEST_CAPABLE_FREQUENCIES_SYS>();
+            if (MRW_NEST_CAPABLE_FREQUENCIES_SYS_UNSUPPORTED_FREQ ==
+                    l_capableNestFreq) //Has not been set up. Get MRW capability
+            {
+                l_capableNestFreq = l_sys->getAttr
                                       <ATTR_MRW_NEST_CAPABLE_FREQUENCIES_SYS>();
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    INFO_MRK"Booting from normal side. use "
+                    "MRW_NEST_CAPABLE_FREQUENCIES_SYS "
+                    "to calculate best freq across membufs (%d)",
+                     l_capableNestFreq);
+            }
+            else //Use the restricted capability
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    INFO_MRK"Booting from normal side. use "
+                    "restricted NEST_CAPABLE_FREQUENCIES_SYS "
+                    "to calculate best freq across membufs (%d)",
+                     l_capableNestFreq);
+            }
         }
         else
         {
             // We booted using the Golden Side. Use NEST_FREQ_MHZ
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                   INFO_MRK"Booting from Golden Side. Use default NEST_FREQ"
+                   INFO_MRK"Booting from Golden Side. Use default NEST_FREQ "
                            "to calculate best freq across membufs");
             if(l_currentSysNestFreq == 2000)
             {
