@@ -70,6 +70,11 @@ include ${HWP_PATH}/p9_hcode_image_build.mk
 include ${HWP_PATH}/p9_pm_stop_gpe_init.mk
 include ${HWP_PATH}/p9_pm_pfet_init.mk
 include ${HWP_PATH}/p9_pm_reset.mk
+#TODO RTC:147383 Need to create a seperate module for cpu_special_wakeup
+include ${HWP_PATH}/p9_cpu_special_wakeup.mk
+include ${HWP_PATH}/p9_cpu_special_wakeup_core.mk
+include ${HWP_PATH}/p9_cpu_special_wakeup_ex.mk
+include ${HWP_PATH}/p9_cpu_special_wakeup_lib.mk
 include ${HWP_PATH}/p9_pm_occ_sram_init.mk
 include ${HWP_PATH}/p9_pm_occ_gpe_init.mk
 include ${HWP_PATH}/p9_pm_ppm_firinit.mk

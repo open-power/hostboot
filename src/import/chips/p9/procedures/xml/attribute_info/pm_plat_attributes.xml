@@ -943,8 +943,8 @@
     </description>
     <initToZero/>
     <valueType>uint8</valueType>
-    <platInit/>
-  </attribute>
+      <platInit/>
+  </attribute>    
   <!-- ********************************************************************* -->
   <attribute>
       <id>ATTR_POUNDV_BUCKET_NUM</id>
@@ -1421,6 +1421,6 @@
     </description>
     <valueType>uint16</valueType>
     <platInit/>
-  </attribute>
-  <!-- ********************************************************************* -->
+</attribute>
+   <!-- ********************************************************************* -->
 </attributes>

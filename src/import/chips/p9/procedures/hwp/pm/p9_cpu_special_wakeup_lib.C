@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/pm/p9_cpu_special_wakeup.C $ */
+/* $Source: src/import/chips/p9/procedures/hwp/pm/p9_cpu_special_wakeup_lib.C $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,35 +22,41 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#include <p9_cpu_special_wakeup_lib.H>
+#include <stdint.h>
 
-///
-///  @file          :    p9_cpu_special_wakeup_core.C
-///  @brief         :    HWP to perform special wakeup of a core
-
-// *HWP HW Owner    :    Greg Still <stillgs@us.ibm.com>
-// *HWP FW Owner    :    Prem S Jha <premjha2@in.ibm.com>
-// *HWP Team        :    PM
-// *HWP Level       :    2
-// *HWP Consumed by :    OCC:FSP:HOST:CRO
-
-// -----------------------------------------------------------------------------
-// Includes
-// -----------------------------------------------------------------------------
-#include <p9_cpu_special_wakeup.H>
-
-/// ----------------------------------------------------------------------------
-///
-/// @brief       Sets a normal core chiplet into special wakeup state.
-/// @note        Code added as a workaround to fix HB-CI failure. Will
-///              be removed eventually.
-///
-fapi2::ReturnCode p9_cpu_special_wakeup(
-    const fapi2::Target < fapi2::TARGET_TYPE_CORE>& i_target,
-    const p9specialWakeup::PROC_SPCWKUP_OPS i_operation,
-    const p9specialWakeup::PROC_SPCWKUP_ENTITY i_entity )
+namespace p9specialWakeup
 {
-    FAPI_DBG("> p9_cpu_special_wakeup");
+/**
+ * String names for the Entities.  These must match the PROC_SPCWKUP_ENTITY
+ * enum.
+ */
 
-    FAPI_INF("< p9_cpu_special_wakeup" );
-    return fapi2::FAPI2_RC_SUCCESS;
+/**
+ * Strings associated with special wake up.
+ */
+const char* SPWK_MSG_LIST[] =
+{
+    "Assert: ",
+    "Deassert",
+    "Clean-up Deassert"
+};
+
+/**
+ * String names for the Entities.  These must match the PROC_SPCWKUP_ENTITY
+ * enum.
+ */
+
+const char* PROC_SPCWKUP_ENTITY_NAMES[] =
+{
+    "OTHER",
+    "FSP",
+    "OCC",
+    "HYP",
+    "HOST",
+    "SPW_ALL"
+};
+
 }
+
+
