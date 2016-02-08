@@ -47,7 +47,6 @@
 #include <initservice/taskargs.H>        //  TASK_ENTRY_MACRO
 #include <targeting/common/targetservice.H>
 #include <targeting/attrsync.H>
-#include <establish_system_smp.H>
 //@TODO RTC:128106 port to fapi2 plat attribute service
 //#include <hwpf/plat/fapiPlatAttributeService.H>
 #include <mbox/mbox_queues.H>            // HB_ISTEP_MSGQ

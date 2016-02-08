@@ -168,41 +168,6 @@ HWP_ERROR_XML_FILES += hwp/tp_dbg_data_accessors/proc_tp_dbg_data_errors.xml
 HWP_ERROR_XML_FILES += hwp/secure_boot/proc_sbe_scan_service_errors.xml
 HWP_ERROR_XML_FILES += hwp/secure_boot/proc_stop_sbe_scan_service_errors.xml
 
-## these get generated into obj/genfiles/AttributeIds.H
-HWP_ATTR_XML_FILES += hwp/memory_attributes.xml
-HWP_ATTR_XML_FILES += hwp/L2_L3_attributes.xml
-HWP_ATTR_XML_FILES += hwp/scratch_attributes.xml
-HWP_ATTR_XML_FILES += hwp/system_attributes.xml
-HWP_ATTR_XML_FILES += hwp/chip_attributes.xml
-HWP_ATTR_XML_FILES += $(if $(CONFIG_VPD_GETMACRO_USE_EFF_ATTR), hwp/lab_dimm_spd_attributes.xml, hwp/dimm_spd_attributes.xml)
-HWP_ATTR_XML_FILES += $(if $(CONFIG_VPD_GETMACRO_USE_EFF_ATTR), hwp/lab_dimm_attributes.xml, hwp/dimm_attributes.xml)
-HWP_ATTR_XML_FILES += hwp/unit_attributes.xml
-HWP_ATTR_XML_FILES += hwp/freq_attributes.xml
-HWP_ATTR_XML_FILES += hwp/ei_bus_attributes.xml
-HWP_ATTR_XML_FILES += hwp/chip_ec_attributes.xml
-HWP_ATTR_XML_FILES += hwp/centaur_ec_attributes.xml
-HWP_ATTR_XML_FILES += hwp/common_attributes.xml
-HWP_ATTR_XML_FILES += hwp/sync_attributes.xml
-HWP_ATTR_XML_FILES += hwp/dram_initialization/proc_setup_bars/proc_setup_bars_l3_attributes.xml
-HWP_ATTR_XML_FILES += hwp/dram_initialization/proc_setup_bars/proc_setup_bars_mmio_attributes.xml
-HWP_ATTR_XML_FILES += hwp/activate_powerbus/proc_build_smp/proc_fab_smp_fabric_attributes.xml
-HWP_ATTR_XML_FILES += hwp/runtime_attributes/pm_plat_attributes.xml
-HWP_ATTR_XML_FILES += hwp/runtime_attributes/pm_hwp_attributes.xml
-HWP_ATTR_XML_FILES += hwp/nest_chiplets/proc_pcie_scominit/proc_pcie_scominit_attributes.xml
-HWP_ATTR_XML_FILES += hwp/dmi_training/proc_cen_set_inband_addr/proc_cen_set_inband_addr_attributes.xml
-HWP_ATTR_XML_FILES += hwp/build_winkle_images/p8_slw_build/proc_pll_ring_attributes.xml
-HWP_ATTR_XML_FILES += hwp/build_winkle_images/p8_slw_build/p8_xip_customize_attributes.xml
-HWP_ATTR_XML_FILES += hwp/poreve_memory_attributes.xml
-HWP_ATTR_XML_FILES += hwp/mcbist_attributes.xml
-HWP_ATTR_XML_FILES += hwp/proc_winkle_scan_override_attributes.xml
-HWP_ATTR_XML_FILES += hwp/erepair_thresholds.xml
-HWP_ATTR_XML_FILES += hwp/dram_training/mem_pll_setup/memb_pll_ring_attributes.xml
-HWP_ATTR_XML_FILES += hwp/proc_chip_ec_feature.xml
-HWP_ATTR_XML_FILES += hwp/proc_abus_dmi_xbus_scominit_attributes.xml
-HWP_ATTR_XML_FILES += hwp/runtime_attributes/memory_occ_attributes.xml
-HWP_ATTR_XML_FILES += hwp/pstate_attributes.xml
-HWP_ATTR_XML_FILES += hwp/slave_sbe/proc_tp_collect_dbg_data/proc_tp_collect_dbg_data_attributes.xml
-
 #------------------------------------------------------------------------------
 # PLL Ring Data files
 #------------------------------------------------------------------------------

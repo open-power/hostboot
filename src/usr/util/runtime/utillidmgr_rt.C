@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,6 @@
 #include <errl/errlmanager.H>
 #include <vfs/vfs.H>
 #include <runtime/interface.h>
-#include <hwpf/hwp/occ/occ_common.H>
 #include <initservice/initserviceif.H>
 
 UtilLidMgr::UtilLidMgr(uint32_t i_lidId) :
