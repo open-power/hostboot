@@ -24,34 +24,33 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-///  @file          :     p9_cpu_special_wakeup.C
-///  @brief         :     HWP to perform special wakeup of core, EQ or EX.
+///  @file          :    p9_cpu_special_wakeup_core.C
+///  @brief         :    HWP to perform special wakeup of a core
 
 // *HWP HW Owner    :    Greg Still <stillgs@us.ibm.com>
 // *HWP FW Owner    :    Prem S Jha <premjha2@in.ibm.com>
 // *HWP Team        :    PM
-// *HWP Level       :    1
-// *HWP Consumed by :    OCC:FSP:HOST
+// *HWP Level       :    2
+// *HWP Consumed by :    OCC:FSP:HOST:CRO
 
-// ---------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // Includes
-// ---------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 #include <p9_cpu_special_wakeup.H>
 
-using namespace p9specialWakeup;
-enum
+/// ----------------------------------------------------------------------------
+///
+/// @brief       Sets a normal core chiplet into special wakeup state.
+/// @note        Code added as a workaround to fix HB-CI failure. Will
+///              be removed eventually.
+///
+fapi2::ReturnCode p9_cpu_special_wakeup(
+    const fapi2::Target < fapi2::TARGET_TYPE_CORE>& i_target,
+    const p9specialWakeup::PROC_SPCWKUP_OPS i_operation,
+    const p9specialWakeup::PROC_SPCWKUP_ENTITY i_entity )
 {
-    NUM_SPCWKUP_ENTITIES = 4,
-    NUM_SPCWKUP_OPS = 3,
-};
+    FAPI_DBG("> p9_cpu_special_wakeup");
 
-fapi2::ReturnCode
-p9_cpu_special_wakeup(  const FAPI2_WAKEUP_CHIPLET& i_chipletTarget,
-                        const PROC_SPCWKUP_OPS i_operation,
-                        const PROC_SPCWKUP_ENTITY i_entity )
-{
-    FAPI_DBG("Entering p9_cpu_special_wakeup");
-
-    FAPI_DBG("Exit p9_cpu_special_wakeup" );
+    FAPI_INF("< p9_cpu_special_wakeup" );
     return fapi2::FAPI2_RC_SUCCESS;
 }
