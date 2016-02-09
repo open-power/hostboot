@@ -39,7 +39,7 @@
       CUMULUS = 0x6
     </enum>
     <platInit/>
-    <privledged/>
+    <privileged/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
