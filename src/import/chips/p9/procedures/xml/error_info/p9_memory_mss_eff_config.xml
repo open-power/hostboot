@@ -1,7 +1,7 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: chips/p9/procedures/xml/error_info/p9_memory_mss_spd_decode.xml $ -->
+<!-- $Source: chips/p9/procedures/xml/error_info/p9_memory_mss_eff_config.xml $ -->
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
@@ -18,8 +18,8 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 
 <!-- -->
-<!-- @file memory_mss_spd_decoder.xml -->
-<!-- @brief Error xml for spd_decoder -->
+<!-- @file memory_mss_timing.xml -->
+<!-- @brief Error xml for timing.H -->
 <!-- -->
 <!-- *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com> -->
 <!-- *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com> -->
@@ -31,29 +31,13 @@
 <hwpErrors>
 
    <hwpError>
-    <rc>RC_MSS_BAD_SPD</rc>
-    <description>Bad SPD data recieved.</description>
-    <ffdc>VALUE</ffdc>
-    <ffdc>BYTE</ffdc>
-    <callout>
-      <target>DIMM_TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>DIMM_TARGET</target>
-    </deconfigure>
-    </hwpError>
-
-   <hwpError>
-    <rc>RC_MSS_INVALID_DIMM_REV_COMBO</rc>
+    <rc>RC_MSS_INVALID_TEMP_REF_RANGE</rc>
     <description>
-      Recieved a dimm type (e.g. RDIMM, LRDIMM) and SPD revision
-      (e.g. 1.0, 1.1) combination unsupported by the spd_decoder
-      object "factory"
+      Invalid Temperature reference range recieved
+      from platform.
     </description>
-    <ffdc>DIMM_TYPE</ffdc>
+    <ffdc>TEMP_REF_RANGE</ffdc>
     <ffdc>ENCODING_REV</ffdc>
-    <ffdc>ADDITIONS_REV</ffdc>
     <callout>
       <target>DIMM_TARGET</target>
       <priority>HIGH</priority>

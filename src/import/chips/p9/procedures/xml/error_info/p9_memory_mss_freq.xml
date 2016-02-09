@@ -7,7 +7,7 @@
 <!--                                                                        -->
 <!-- EKB Project                                                            -->
 <!--                                                                        -->
-<!-- COPYRIGHT 2015                                                         -->
+<!-- COPYRIGHT 2015,2016                                                    -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -16,12 +16,21 @@
 <!-- deposited with the U.S. Copyright Office.                              -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<hwpErrors>
 
-<!-- $Id: memory_mss_freq.xml,v 1.2 2014/03/06 00:11:49 jdsloat Exp $ -->
-<!-- For file ../../ipl/fapi/mss_freq.C -->
-<!-- // *! OWNER NAME :   Jacob Sloat (jdsloat@us.ibm.com) -->
-<!-- // *! BACKUP NAME :   -->
+<!-- -->
+<!-- @file memory_mss_freq.xml -->
+<!-- @brief Error xml for mss_freq -->
+<!-- -->
+<!-- *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com> -->
+<!-- *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com> -->
+<!-- *HWP Team: Memory -->
+<!-- *HWP Level: 1 -->
+<!-- *HWP Consumed by: HB:FSP -->
+<!-- -->
+
+<!-- //TK - This needs to be cleaned up after mss_freq is refactored - AAM -->
+
+<hwpErrors>
 
 <!-- Original Source for RC_MSS_UNSUPPORTED_SPD_DATA_DDR4 memory_errors.xml -->
   <hwpError>
