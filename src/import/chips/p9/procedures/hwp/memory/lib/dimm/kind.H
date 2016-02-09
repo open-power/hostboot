@@ -57,7 +57,7 @@ class kind
             FAPI_TRY( mss::eff_dram_density(i_target, iv_dram_density) );
             FAPI_TRY( mss::eff_dram_width(i_target, iv_dram_width) );
             FAPI_TRY( mss::eff_num_master_ranks_per_dimm(i_target, iv_master_ranks) );
-            FAPI_TRY( mss::eff_dram_rows(i_target, iv_rows) );
+            FAPI_TRY( mss::eff_dram_row_bits(i_target, iv_rows) );
             FAPI_TRY( mss::eff_dimm_size(i_target, iv_size) );
 
             // TK: Attribute for slave ranks.

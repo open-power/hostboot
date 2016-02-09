@@ -43,17 +43,17 @@ namespace mss
 /// @return a vector of M targets.
 ///
 template< fapi2::TargetType M, fapi2::TargetType T >
-inline std::vector< fapi2::Target<M> > find_targets( const fapi2::Target<T>& );
+inline std::vector< fapi2::Target<M> > find_targets( const fapi2::Target<T>& i_target);
 
 ///
 /// @brief find an element based on a fapi2 target
 /// @tparam M the target type to be returned
 /// @tparam T the fapi2 target type of the argument
-/// @param[in] the fapi2 target T
+/// @param[in] i_target the fapi2 target T
 /// @return an M target.
 ///
 template< fapi2::TargetType M, fapi2::TargetType T >
-inline fapi2::Target<M> find_target( const fapi2::Target<T>& );
+inline fapi2::Target<M> find_target( const fapi2::Target<T>& i_target );
 
 ///
 /// @brief find the McBIST given a McBIST
@@ -181,6 +181,39 @@ inline fapi2::Target<fapi2::TARGET_TYPE_MCA> find_target( const fapi2::Target<fa
 {
     return i_target.getParent<fapi2::TARGET_TYPE_MCA>();
 }
+
+///
+/// @brief find a key value from a vector of STL pairs
+/// @tparam T  input type
+/// @tparam OT the output type to be returned
+/// @param[in] i_vector_of_pairs the input vector of pairs
+/// @param[in] i_key the "map" key
+/// @param[in] o_value the value found from given key
+/// @return the value corresponding to the key
+///
+template<typename T, typename OT>
+bool find_value_from_key(const std::vector<std::pair<T, OT> >& i_vector_of_pairs, const T& i_key, OT& o_value)
+{
+    // Comparator lambda expression
+    auto compare = [](const std::pair<T, OT>& i_lhs, const T & i_value)
+    {
+        return (i_lhs.first < i_value);
+    };
+
+    // Find iterator to matching key (if it exists)
+    auto l_value_iterator  =  std::lower_bound(i_vector_of_pairs.begin(), i_vector_of_pairs.end(), i_key, compare);
+
+    // Did you find it? Let me know.
+    if( (l_value_iterator == i_vector_of_pairs.end()) || (i_key != l_value_iterator->first) )
+    {
+        return false;
+    }
+
+    o_value = l_value_iterator->second;
+    return true;
+
+}
+
 
 }// mss
 

@@ -42,36 +42,40 @@ static const uint64_t SIM_CYCLES_PER_CYCLE = 8;
 namespace mss
 {
 
+
 ///
-/// @brief Return the number of picoseconds taken by a certain mhz
-/// @param[in] i_mhz the mhz of interest
-/// @return the picoseconds
+/// @brief     Return the number of picoseconds
+/// @tparam    T input and output type
+/// @param[in] i_transfer_rate input in MegaTransfers per second (MT/s)
+/// @return    timing in picoseconds
+/// @note      clock periods are defined to 1 ps of accuracy, so
+///            so 1.0714 ns is defined as 1071 ps as defined by JEDEC's
+///            SPD rounding algorithm. This concept is used for this calculation.
 ///
-inline uint64_t mhz_to_ps(const uint64_t i_mhz)
+template<typename T>
+inline T freq_to_ps(const T i_transfer_rate)
 {
-    // Just used for indexs into the array below
-    enum freqs { FREQ_2400 = 0, };
+    // ATTR_MSS_FREQ is in MT/s, and we know microsecond per clock is 1/(freq/2)
+    // actual dimm_freq is 1/2 of the speed bin
+    T l_dimm_freq = i_transfer_rate / 2;
 
-    // ATTR_MSS_FREQ is in mHZ, and we know us per clock is 1/(freq/2)
-    // We don't have many frequencies, so lets just make a little table.
-    static const uint64_t FREQ_TO_PS[MAX_SUPPORTED_FREQUENCIES] =
-    {
-        // 2400 is 833 picoseconds per clock
-        833
-    };
+    // ps per clock (note value is rounded down)
+    return CONVERT_PS_IN_A_US / l_dimm_freq;
+}
 
-    switch(i_mhz)
-    {
-        case 2400:
-            return FREQ_TO_PS[FREQ_2400];
-
-        default:
-            FAPI_ERR("unsupported frequency %llu", i_mhz);
-            fapi2::Assert(false);
-
-            // Keeps compiler happy
-            return 0;
-    }
+///
+/// @brief      Return the number in MT/s
+/// @tparam     T input and output type
+/// @param[in]  i_time_in_ps time in picoseconds
+/// @return     speed in MT/s
+///
+template<typename T>
+inline T ps_to_freq(const T i_time_in_ps)
+{
+    // reverse of freq_to_ps function, solving for freq
+    // since running at DDR, data is transferred on both rising & falling edges
+    // hence the 2X factor
+    return (2 * CONVERT_PS_IN_A_US) / i_time_in_ps;
 }
 
 ///
@@ -95,7 +99,7 @@ template< fapi2::TargetType T >
 inline uint64_t ps_to_cycles(const fapi2::Target<T>& i_target, const uint64_t i_ps)
 {
     // The frequency in mHZ
-    uint64_t l_freq;
+    uint64_t l_freq = 0;
     uint64_t l_divisor = 0;
     uint64_t l_quotient = 0;
     uint64_t l_remainder = 0;
@@ -103,7 +107,7 @@ inline uint64_t ps_to_cycles(const fapi2::Target<T>& i_target, const uint64_t i_
     FAPI_TRY( mss::freq( find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq) );
 
     // Hoping the compiler figures out how to do these together.
-    l_divisor = mhz_to_ps(l_freq);
+    l_divisor = freq_to_ps(l_freq);
     l_quotient = i_ps / l_divisor;
     l_remainder = i_ps % l_divisor;
 
@@ -132,12 +136,12 @@ template< fapi2::TargetType T >
 inline uint64_t cycles_to_ps(const fapi2::Target<T>& i_target, const uint64_t i_cycles)
 {
     // The frequency in mHZ
-    uint64_t l_freq;
+    uint64_t l_freq = 0;
 
     FAPI_TRY( mss::freq( find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq) );
 
-    FAPI_DBG("converting %llu cycles to %llups", i_cycles, i_cycles * mhz_to_ps(l_freq));
-    return i_cycles * mhz_to_ps(l_freq);
+    FAPI_DBG("converting %llu cycles to %llups", i_cycles, i_cycles * freq_to_ps(l_freq));
+    return i_cycles * freq_to_ps(l_freq);
 
 fapi_try_exit:
 
@@ -236,28 +240,33 @@ inline uint64_t twlo_twloe(const fapi2::Target<T>& i_target)
 }
 
 ///
-/// @brief Convert nanoseconds to picoseconds
-/// @param[in] i_time_in_ns int64_t time in nanoseconds
-/// @return int64_t, time in picoseconds
+/// @brief     Convert nanoseconds to picoseconds
+/// @tparam    T input and output type
+/// @param[in] i_time_in_ns time in nanoseconds
+/// @return    time in picoseconds
 ///
-inline int64_t ns_to_ps(const int64_t& i_time_in_ns)
+template<typename T>
+inline T ns_to_ps(const T i_time_in_ns)
 {
     return i_time_in_ns * CONVERT_PS_IN_A_NS;
 }
 
 ///
-/// @brief Convert nanoseconds to picoseconds
-/// @param[in] i_time_in_ps int64_t  time in picoseconds
-/// @return int64_t, time in nanoseconds
+/// @brief     Convert nanoseconds to picoseconds
+/// @tparam    T input and output type
+/// @param[in] i_time_in_ps time in picoseconds
+/// @return    time in nanoseconds
 ///
-inline int64_t ps_to_ns(const int64_t& i_time_in_ps)
+template<typename T>
+inline T ps_to_ns(const T i_time_in_ps)
 {
-    int64_t remainder = i_time_in_ps % CONVERT_PS_IN_A_NS;
-    int64_t l_time_in_ns = i_time_in_ps / CONVERT_PS_IN_A_NS;
+    T remainder = i_time_in_ps % CONVERT_PS_IN_A_NS;
+    T l_time_in_ns = i_time_in_ps / CONVERT_PS_IN_A_NS;
 
     // Round up if remainder isn't even
     return l_time_in_ns + ( remainder == 0 ? 0 : 1 );
 }
 
 };// mss namespace
+
 #endif

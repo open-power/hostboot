@@ -48,7 +48,7 @@ inline fapi2::ReturnCode dram_type(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& 
     uint8_t l_dram_gen[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {0};
 
     // Retrieve DDR4 dimm attributes
-    FAPI_TRY(spd_dram_device_type(i_target_mcs, &(l_dram_gen[0][0])));
+    FAPI_TRY(eff_dram_gen(i_target_mcs, &(l_dram_gen[0][0])));
 
     // Make sure all DRAMs are DDR4 or throw an error
     // Iterate through MCA's/ports
@@ -66,7 +66,7 @@ inline fapi2::ReturnCode dram_type(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& 
                      l_dram_gen[port_num][dimm_num]);
 
             // Nimbus supports only DDR4
-            FAPI_ASSERT(l_dram_gen[port_num][dimm_num] == fapi2::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR4,
+            FAPI_ASSERT(l_dram_gen[port_num][dimm_num] == fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
                         fapi2::MSS_UNSUPPORTED_DEV_TYPE().
                         set_DEV_TYPE(l_dram_gen[port_num][dimm_num]),
                         "%s Incorrect DRAM device generation, DRAM generation is %llx",
@@ -82,17 +82,14 @@ fapi_try_exit:
 
 
 ///
-/// @brief Check if there is DIMM mixing (and deconfigures unsupported mixing <shrug> ?? - AAM)
-/// @param[in]  i_target_mcs const fapi2::Target<fapi2::TARGET_TYPE_MCS>&
-/// @param[out] o_module_type uint64_t (returns something ?? - AAM )
+/// @brief Check if there is DIMM mixing (and deconfigures unsupported mixing ?? - AAM)
 /// @return FAPI2_RC_SUCCESS iff ok
 /// @note Functionality currently unknown
 ///
-inline fapi2::ReturnCode dimm_mixing(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target_mcs,
-                                     uint64_t& o_module_type)
+inline fapi2::ReturnCode dimm_mixing(void)
 {
-    //TODO
-    //Need to complete - AAM
+    //FIX p8 ported  code
+    //Need to complete and figure out how to implement for p9 - AAM
 
     // Anuwat pushed Warren to say IBM systems will not support DIMM mixing
     // Now DIMM deconfig rules? - AAM
@@ -137,12 +134,13 @@ inline fapi2::ReturnCode dimm_mixing(const fapi2::Target<fapi2::TARGET_TYPE_MCS>
 }// dimm_mixing
 
 ///
-/// @brief Checks what type of system is configured (i.e., single drop, dual drop)
-/// @note Functionality currently unknown
+/// @brief      Checks what type of system is configured (i.e., single drop, dual drop)
+/// @return     FAPI2_RC_SUCCESS iff ok
+/// @warning    Functionality currently unknown. Used in mss_freq
 ///
 inline fapi2::ReturnCode system_drop_type(void)
 {
-    //TODO
+
     //Update for P9, how will we check if a system is single/dual drop?? - AAM
 
 #if 0
@@ -190,12 +188,12 @@ fapi_try_exit:
 
 ///
 /// @brief      Checks nominal voltage is correct for all DIMMs
-/// @param[in]  i_target_mcsi  const fapi2::Target<fapi2::TARGET_TYPE_MCS>&,
-///             dimm_state i fapi2::TargetState
-/// @return ReturnCode
+/// @param[in]  i_target_mcs the fapi2 target
+/// @param[in]  i_dimm_state (i.e. functional or non-functional)
+/// @return     ReturnCode
 ///
 inline fapi2::ReturnCode module_nominal_voltage(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target_mcs,
-        fapi2::TargetState dimm_state)
+        fapi2::TargetState i_dimm_state)
 {
 
     uint64_t l_module_nom_voltage[mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {0};
@@ -207,7 +205,7 @@ inline fapi2::ReturnCode module_nominal_voltage(const fapi2::Target<fapi2::TARGE
         auto port_num = mss::index(p);
 
         // Iterate through DIMM targets
-        for (auto d : p.getChildren<fapi2::TARGET_TYPE_DIMM>(dimm_state))
+        for (auto d : p.getChildren<fapi2::TARGET_TYPE_DIMM>(i_dimm_state))
         {
             auto dimm_num = mss::index(d);
 
@@ -231,66 +229,98 @@ fapi_try_exit:
 
 namespace spd
 {
+
 ///
 /// @brief      Checks conditional passes and implements traces & exits if it fails
-/// @tparam     T spd_data of any size
-/// @param[in]  i_target const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& ,
-///             conditional bool,
-///             spd_byte_index size_t,
-//      spd_data T,
-///             err_str const char*
+/// @tparam     T input data of any size
+/// @param[in]  i_target fapi2 dimm target
+/// @param[in]  i_conditional conditional that we are testing against
+/// @param[in]  i_spd_byte_index current SPD byte
+/// @param[in]  i_spd_data debug data
+/// @param[in]  i_err_str error string to print out when conditional fails
 /// @return     ReturnCode
 ///
 template< typename T >
-inline fapi2::ReturnCode valid_value_fail(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        bool conditional,
-        size_t spd_byte_index,
-        T spd_data,
-        const char* err_str)
+inline fapi2::ReturnCode fail_for_invalid_value(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        bool i_conditional,
+        size_t i_spd_byte_index,
+        T i_spd_data,
+        const char* i_err_str)
 {
-    FAPI_ASSERT(conditional,
-                fapi2::MSS_SPD_DECODE_INVALID_VALUE().
-                set_VALUE(spd_data).
-                set_BYTE(spd_byte_index).
+    FAPI_ASSERT(i_conditional,
+                fapi2::MSS_BAD_SPD().
+                set_VALUE(i_spd_data).
+                set_BYTE(i_spd_byte_index).
                 set_DIMM_TARGET(i_target),
                 "%s %s Byte %d, Data returned: %d.",
                 c_str(i_target),
-                err_str,
-                spd_byte_index,
-                spd_data);
+                i_err_str,
+                i_spd_byte_index,
+                i_spd_data);
 
 fapi_try_exit:
     return fapi2::current_err;
 
-} // invalid_value_fail()
+} // fail_for_invalid_value()
 
 ///
-/// @brief      Checks conditional passes and implements traces if it fails
-/// @tparam     T spd_data of any size
-/// @param[in]  i_targeti const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& ,
-///             conditional bool,
-///             spd_byte_index size_t,
-//      spd_data T,
-///             err_str const char*
+/// @brief      Checks conditional passes and implements traces if it fails. No FFDC collected.
+/// @tparam     T input data of any size
+/// @param[in]  i_target fapi2 dimm target
+/// @param[in]  i_conditional that we are testing against
+/// @param[in]  i_spd_byte_index
+/// @param[in]  i_spd_data debug data
+/// @param[in]  i_err_str string to print out when conditional fails
 /// @return     void
 ///
 template< typename T >
-inline void valid_value_warn(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                             bool conditional,
-                             size_t spd_byte_index,
-                             T spd_data,
-                             const char* err_str)
+inline void warn_for_invalid_value(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                   bool i_conditional,
+                                   size_t i_spd_byte_index,
+                                   T i_spd_data,
+                                   const char* i_err_str)
 {
     // Don't print warning conditional is true
-    if(!conditional)
+    if(!i_conditional)
     {
         FAPI_IMP("%s. %s. Byte %d, Data returned: %d.",
                  c_str(i_target),
-                 err_str,
-                 spd_byte_index,
-                 spd_data );
+                 i_err_str,
+                 i_spd_byte_index,
+                 i_spd_data );
     }
-}// valid_value_warn
+}// warn_for_invalid_value
+
+///
+/// @brief      Checks if valid factory parameters are given
+/// @param[in]  i_target fapi2 dimm target
+/// @param[in]  i_dimm_type DIMM type enumeration
+/// @param[in]  i_encoding_rev SPD encoding level rev number
+/// @param[in]  i_additions_rev SPD additions level rev number
+/// @param[in]  i_err_str string to print out when conditional fails
+/// @return     fapi2::ReturnCode
+///
+inline fapi2::ReturnCode invalid_factory_sel(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        uint8_t i_dimm_type,
+        uint8_t i_encoding_rev,
+        uint8_t i_additions_rev,
+        const char* i_err_str)
+{
+    FAPI_ASSERT(false,
+                fapi2::MSS_INVALID_DIMM_REV_COMBO().
+                set_DIMM_TYPE(i_dimm_type).
+                set_ENCODING_REV(i_encoding_rev).
+                set_ADDITIONS_REV(i_additions_rev).
+                set_DIMM_TARGET(i_target),
+                "%s. %s. Invalid combination for dimm type: %d, rev: %d.%d",
+                c_str(i_target),
+                i_err_str,
+                i_dimm_type,
+                i_encoding_rev,
+                i_additions_rev);
+fapi_try_exit:
+    return fapi2::current_err;
+}// invalid_factory_sel
 
 }// spd
 }// check
