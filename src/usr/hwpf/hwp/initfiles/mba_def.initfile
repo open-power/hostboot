@@ -1,8 +1,9 @@
-/#-- $Id: mba_def.initfile,v 1.80 2016/01/20 15:03:25 yctschan Exp $
+/#-- $Id: mba_def.initfile,v 1.81 2016/01/29 15:28:12 yctschan Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.81|yctschan| 1/28/16| Updated TSV settings for DDR4 1600 13_12_11 parts
 #--     1.80|yctschan| 1/20/16| Updated more settings for DDR4 1600 13_12_11 parts
 #--     1.79|yctschan| 1/05/16| Updated DDR4 1600 13_12_11 parts for 2N mode
 #--     1.78|sglancy |11/13/15| Added masking of MCBIST done special attention bit
@@ -1966,6 +1967,7 @@ scom 0x03010432    {
      8:18   ,   def_mba23_refresh_interval,    1            ,    ATTR_CHIP_UNIT_POS == 1; # see calculation above
     19:29   ,   0b00011000010,           1            ,    any; # MBAREF0Q_refresh reset interval set to 194 decimal           32     ?		!!FIXME
     30:39   ,   ATTR_EFF_DRAM_TRFC,      1            ,    any; # MBAREF0Q_cfg_trfc   33
+    40:49   ,   0b0001100000 ,           1            ,    (def_ddr4_1600_13_12_11 == 1); # set TSV delay for 96 for 13_12_11 parts
     40:49   ,   0b0000100000 ,           1            ,    (def_MBAREF0Q_cfg_refr_tsv_stack_dly32 == 1); # MBAREF0Q_cfg_refr_tsv_stack   33
     40:49   ,   0b0000110000 ,           1            ,    (def_MBAREF0Q_cfg_refr_tsv_stack_dly48 == 1); # MBAREF0Q_cfg_refr_tsv_stack   33
     40:49   ,   0b0001000000 ,           1            ,    (def_MBAREF0Q_cfg_refr_tsv_stack_dly64 == 1); # MBAREF0Q_cfg_refr_tsv_stack   33
