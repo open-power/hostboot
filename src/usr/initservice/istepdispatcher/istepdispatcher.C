@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,6 +69,10 @@
 #include <ipmi/ipmipowerstate.H>    //IPMI System ACPI Power State
 #include <config.h>
 #include <ipmi/ipmisensor.H>
+
+#ifdef CONFIG_BMC_IPMI
+#include <ipmi/ipmisel.H>
+#endif
 
 #include <initservice/bootconfigif.H>
 
@@ -1318,6 +1322,12 @@ void IStepDispatcher::handleShutdownMsg(msg_t * & io_pMsg)
 // ----------------------------------------------------------------------------
 void IStepDispatcher::shutdownDuringIpl()
 {
+
+#ifdef CONFIG_BMC_IPMI
+    /* Ensure the ipmiSEL thread is running and registered with doShutdown. */
+    Singleton<IpmiSEL>::instance().msgQueue();
+#endif
+
     TRACFCOMP(g_trac_initsvc, ENTER_MRK"IStepDispatcher::shutdownDuringIpl");
 
     // Create and commit error log for FFDC and call doShutdown with the RC
@@ -1359,6 +1369,7 @@ void IStepDispatcher::shutdownDuringIpl()
             ISTEP_INITSVC_MOD_ID,
             SHUTDOWN_NOT_RECONFIG_LOOP,
             this->iv_curIStep, this->iv_curSubStep);
+
 
         errlCommit(err, INITSVC_COMP_ID);
         INITSERVICE::doShutdown(SHUTDOWN_NOT_RECONFIG_LOOP);
