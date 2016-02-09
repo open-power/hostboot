@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,7 +39,7 @@ extern "C"
 
 ///
 /// @brief Configure the attributes for each controller
-/// @param[in] i_target, the controller (e.g., MCS)
+/// @param[in] i_target the controller (e.g., MCS)
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
     fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target );
