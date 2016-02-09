@@ -7,7 +7,7 @@
 <!--                                                                        -->
 <!-- EKB Project                                                            -->
 <!--                                                                        -->
-<!-- COPYRIGHT 2015                                                         -->
+<!-- COPYRIGHT 2015,2016                                                    -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -16,12 +16,20 @@
 <!-- deposited with the U.S. Copyright Office.                              -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<hwpErrors>
 
-<!-- $Id: memory_mss_volt.xml,v 1.3 2014/06/19 18:41:16 jdsloat Exp $ -->
-<!-- For file ../../ipl/fapi/mss_volt.C -->
-<!-- // *! OWNER NAME :   Jacob Sloat (jdsloat@us.ibm.com) -->
-<!-- // *! BACKUP NAME : -->
+<!-- -->
+<!-- @file memory_mss_volt.xml -->
+<!-- @brief Error xml for mss_volt -->
+<!-- -->
+<!-- *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com> -->
+<!-- *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com> -->
+<!-- *HWP Team: Memory -->
+<!-- *HWP Level: 1 -->
+<!-- *HWP Consumed by: HB:FSP -->
+<!-- -->
+
+<!-- //TK This needs to be cleaned up after mss_volt is refactored, ported from p8 - AAM -->
+<hwpErrors>
 
 <!-- Original Source for RC_MSS_VOLT_UNRECOGNIZED_DRAM_DEVICE_TYPE memory_errors.xml -->
   <hwpError>
