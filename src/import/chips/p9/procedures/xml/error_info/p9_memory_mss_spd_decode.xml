@@ -22,17 +22,44 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+
+<!-- -->
+<!-- @file memory_mss_spd_decoder.xml -->
+<!-- @brief Error xml for spd_decoder -->
+<!-- -->
+<!-- *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com> -->
+<!-- *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com> -->
+<!-- *HWP Team: Memory -->
+<!-- *HWP Level: 1 -->
+<!-- *HWP Consumed by: HB:FSP -->
+<!-- -->
+
 <hwpErrors>
-<!-- $Id: memory_spd_decode.xml,v 1.2 2014/03/06 00:11:49 jdsloat Exp $ -->
-<!-- For file ../../ipl/fapi/mss_freq.C -->
-<!-- // *! OWNER NAME :   Jacob Sloat (jdsloat@us.ibm.com) -->
-<!-- // *! BACKUP NAME :   -->
 
    <hwpError>
-    <rc>RC_MSS_SPD_DECODE_INVALID_VALUE</rc>
-    <description>Invalid data returned.</description>
+    <rc>RC_MSS_BAD_SPD</rc>
+    <description>Bad SPD data recieved.</description>
     <ffdc>VALUE</ffdc>
     <ffdc>BYTE</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+    </hwpError>
+
+   <hwpError>
+    <rc>RC_MSS_INVALID_DIMM_REV_COMBO</rc>
+    <description>
+      Recieved a dimm type (e.g. RDIMM, LRDIMM) and SPD revision
+      (e.g. 1.0, 1.1) combination unsupported by the spd_decoder
+      object "factory"
+    </description>
+    <ffdc>DIMM_TYPE</ffdc>
+    <ffdc>ENCODING_REV</ffdc>
+    <ffdc>ADDITIONS_REV</ffdc>
     <callout>
       <target>DIMM_TARGET</target>
       <priority>HIGH</priority>
