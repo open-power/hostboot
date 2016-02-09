@@ -1,0 +1,368 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/attribute_info/memory_spd_attributes.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2016                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+
+<attributes>
+    <attribute>
+        <id>ATTR_EFF_DRAM_GEN</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          DRAM Device Type.
+          Decodes byte 2 of SPD.
+          Generation of memory: DDR3, DDR4.
+          creator: mss_eff_config
+          consumer: various
+          firmware notes: none
+        </description>
+        <valueType>uint8</valueType>
+        <enum>EMPTY = 0, DDR3 = 1, DDR4 = 2</enum>
+        <writeable/>
+        <odmVisable/>
+        <odmChangeable/>
+        <array>2 2</array>
+        <mssAccessor>PORT DIMM</mssAccessor>
+        <mssAccessorName>eff_dram_gen</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DIMM_TYPE</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Base Module Type.
+          Decodes SPD Byte 3 (bits 3~0)
+          Type of DIMM: RDIMM, UDIMM, LRDIMM as specified by the JEDIC standard.
+          creator: mss_eff_config
+          consumer: various
+          firmware notes: none
+        </description>
+        <valueType>uint8</valueType>
+        <enum> EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3</enum>
+        <writeable/>
+        <odmVisable/>
+        <odmChangeable/>
+        <array>2 2</array>
+        <persistRuntime/>
+        <mssAccessor>PORT DIMM</mssAccessor>
+        <mssAccessorName>eff_dimm_type</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_HYBRID_MEMORY_TYPE</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Hybrid Media.
+          Decodes SPD Byte 3 (bits 6~4)
+          creator: mss_eff_config
+          consumer: various
+          firmware notes: none
+        </description>
+        <valueType>uint8</valueType>
+        <enum> NONE = 0, NVDIMM = 1</enum>
+        <writeable/>
+        <odmVisable/>
+        <odmChangeable/>
+        <array>2 2</array>
+        <persistRuntime/>
+        <mssAccessor>PORT DIMM</mssAccessor>
+        <mssAccessorName>eff_hybrid_memory_type</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_HYBRID</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Hybrid.
+          Decodes SPD Byte 3 (bit 7)
+          creator: mss_eff_config
+          consumer: various
+          firmware notes: none
+        </description>
+        <valueType>uint8</valueType>
+        <enum> NOT_HYBRID = 0, IS_HYBRID= 1</enum>
+        <writeable/>
+        <odmVisable/>
+        <odmChangeable/>
+        <array>2 2</array>
+        <persistRuntime/>
+        <mssAccessor>PORT DIMM</mssAccessor>
+        <mssAccessorName>eff_hybrid</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_DENSITY</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            DRAM Density.
+            Decodes SPD Byte 4 (bits 3~0).
+            Total SDRAM capacity per die.
+            For multi-die stacks (DDP, QDP, or 3DS), this represents
+            the capacity of each DRAM die in the stack.
+            creator: mss_eff_config
+            consumer: various
+            firmware notes: none
+        </description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <odmVisable/>
+        <odmChangeable/>
+        <array>2 2</array>
+        <mssAccessor>PORT DIMM</mssAccessor>
+        <mssUnit>Gb</mssUnit>
+        <mssAccessorName>eff_dram_density</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_BANK_BITS</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Number of DRAM bank address bits.
+            Actual number of banks is 2^N, where
+            N is the number of bank address bits.
+            Decodes SPD Byte 4 (bits 5~4).
+            creator: spd_decoder
+            consumer: various
+            firmware notes: none
+        </description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <odmVisable/>
+        <odmChangeable/>
+        <array>2 2</array>
+        <mssAccessor>PORT DIMM</mssAccessor>
+        <mssAccessorName>eff_dram_bank_bits</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_BANK_GROUP_BITS</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Bank Groups Bits.
+            Decoded SPD Byte 4 (bits 7~6).
+            Actual number of bank groups is 2^N,
+            where N is the number of bank address bits.
+            This value represents the number of bank groups
+            into which the memory array is divided.
+            creator: mss_eff_config
+            consumer: various
+            firmware notes: none
+        </description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <odmVisable/>
+        <odmChangeable/>
+        <array>2 2</array>
+        <mssAccessor>PORT DIMM</mssAccessor>
+        <mssAccessorName>eff_dram_bank_group_bits</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_COLUMN_BITS</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Column Address Bits.
+            Decoded SPD Byte 5 (bits 2~0).
+            Actual number of DRAM columns is 2^N,
+            where N is the number of column address bits
+            creator: mss_eff_config
+            consumer: various
+            firmware notes: none
+        </description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <odmVisable/>
+        <odmChangeable/>
+        <array>2 2</array>
+        <mssAccessor>PORT DIMM</mssAccessor>
+        <mssAccessorName>eff_dram_columns_bits</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_ROW_BITS</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Row Address Bits.
+            Decodes Byte 5 (bits 5~3).
+            Number of DRAM column address bits.
+            Actual number of DRAM rows is 2^N,
+            where N is the number of row address bits
+            creator: mss_eff_config
+            consumer: various
+            firmware notes: none
+        </description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <odmVisable/>
+        <odmChangeable/>
+        <array>2 2</array>
+        <mssAccessor>PORT DIMM</mssAccessor>
+        <mssAccessorName>eff_dram_row_bits</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_PRIM_STACK_TYPE</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Primary SDRAM Package Type.
+            Decodes Byte 6.
+            This byte defines the primary set of SDRAMs.
+            Monolithic = SPD, Multi-load stack = DDP/QDP, Single-load stack = 3DS
+            creator: mss_eff_config
+            consumer: various
+            firmware notes: none
+        </description>
+        <valueType>uint8</valueType>
+        <enum> SDP = 0, DDP_QDP = 1, 3DS = 2</enum>
+        <writeable/>
+        <odmVisable/>
+        <odmChangeable/>
+        <array>2 2</array>
+        <mssAccessor>PORT DIMM</mssAccessor>
+        <mssAccessorName>eff_prim_stack_type</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_TEMP_REF_RANGE</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Temp ref range. This is for DDR4 MRS4.
+            creator: mss_eff_cnfg
+            consumer: various
+            firmware notes: none
+        </description>
+        <valueType>uint8</valueType>
+        <enum>NORMAL = 0, EXTEND = 1</enum>
+        <writeable/>
+        <odmVisable/>
+        <odmChangeable/>
+        <array>2</array>
+        <mssAccessor>PORT</mssAccessor>
+        <mssAccessorName>eff_temp_ref_range</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_FINE_REFRESH_MODE</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Fine refresh mode.
+            This is for DDR4 MRS3.
+            Computed in mss_eff_cnfg.
+            Each memory channel will have a value.
+            creator: mss_eff_cnfg
+            consumer: various
+            firmware notes: none
+        </description>
+        <valueType>uint8</valueType>
+        <enum>NORMAL = 0, FIXED_2X = 1, FIXED_4X = 2, FLY_2X = 5, FLY_4X = 6</enum>
+        <writeable/>
+        <odmVisable/>
+        <odmChangeable/>
+        <array>2</array>
+        <mssAccessor>PORT</mssAccessor>
+        <mssAccessorName>eff_fine_refresh_mode</mssAccessorName>
+    </attribute>
+
+    <attribute>
+      <id>ATTR_EFF_DRAM_TREFI</id>
+      <targetType>TARGET_TYPE_MCS</targetType>
+      <description>
+        Refresh Interval.
+        creator: mss_eff_config
+        consumer: various
+        firmware notes: none</description>
+      <valueType>uint8</valueType>
+      <writeable/>
+      <odmVisable/>
+      <odmChangeable/>
+      <array>2 2</array>
+      <mssAccessor>PORT DIMM</mssAccessor>
+      <mssUnits> picoseconds </mssUnits>
+      <mssAccessorName>eff_dram_trefi</mssAccessorName>
+    </attribute>
+
+
+    <attribute>
+      <id>ATTR_EFF_DRAM_TRFC</id>
+      <targetType>TARGET_TYPE_MCS</targetType>
+      <description>
+        Refresh Recovery Delay.
+        creator: mss_eff_config
+        consumer: various
+        firmware notes: none</description>
+      <valueType>uint32</valueType>
+      <writeable/>
+      <odmVisable/>
+      <odmChangeable/>
+      <array>2 2</array>
+      <mssAccessor>PORT</mssAccessor>
+      <mssAccessorName>eff_dram_trfc</mssAccessorName>
+    </attribute>
+
+<!-- These might not be necessary, eff_config depends on mss_freq, using spd_decoder directly in mss_freq?? - AAM -->
+    <attribute>
+        <id>ATTR_EFF_DRAM_TCKMIN</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Minimum cycle time (tCKmin) in ps.
+            Decoded using DDR4 SPD byte 18 and byte 125.
+            Right aligned. Bit 0 is rightmost.
+        </description>
+        <valueType>uint64</valueType>
+        <array> 2 2 </array>
+        <mssAccessor>PORT DIMM</mssAccessor>
+        <writeable/>
+        <mssUnits> picoseconds </mssUnits>
+        <mssAccessorName>eff_dram_tckmin</mssAccessorName>
+        <platInit/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_TCKMAX</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Maximum cycle time (tCKmax) in ps.
+            Decoded using DDR4 SPD byte 19 and byte 124.
+            Right aligned. Bit 0 is rightmost.
+        </description>
+        <valueType>uint64</valueType>
+        <array> 2 2 </array>
+        <mssAccessor>PORT DIMM</mssAccessor>
+        <writeable/>
+        <mssUnits> picoseconds </mssUnits>
+        <mssAccessorName>eff_dram_tckmax</mssAccessorName>
+        <platInit/>
+    </attribute>
+<!-- Close comment -->
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_TAAMIN</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Minimum CAS Latency Time (tAAmin) in nCK.
+            Decoded using DDR4 SPD byte 24 and byte 123.
+            Right aligned. Bit 0 is rightmost.
+        </description>
+        <valueType>uint8</valueType>
+        <array> 2 2 </array>
+        <mssAccessor>PORT DIMM</mssAccessor>
+        <mssUnits> nck </mssUnits>
+        <writeable/>
+        <mssAccessorName>eff_dram_taamin</mssAccessorName>
+        <platInit/>
+    </attribute>
+
+</attributes>
