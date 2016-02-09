@@ -641,7 +641,8 @@
         <id>ATTR_MSS_FREQ</id>
         <targetType>TARGET_TYPE_MCBIST</targetType>
         <description>
-            Frequency of this memory channel in MHz, comprising of three DIMMs.
+            Frequency of this memory channel in MT/s (Mega Transfers per second),
+            comprising of three DIMMs.
             Computed in mss_freq
             creator: mss_freq
             consumer: mss_eff_cnfg, others
@@ -652,6 +653,7 @@
         <odmVisable/>
         <odmChangeable/>
         <persistRuntime/>
+        <mssUnits> MT/s </mssUnits>
         <mssAccessorName>freq</mssAccessorName>
     </attribute>
 
@@ -761,29 +763,6 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_EFF_DIMM_TYPE</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Type of DIMM: RDIMM, UDIMM, LRDIMM as specified by the JEDIC standard.
-            Used in various locations and is computed in mss_eff_cnfg.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
-            creator: mss_eff_cnfg
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <enum> EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3</enum>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array>2 2</array>
-        <persistRuntime/>
-        <mssAccessor>PORT DIMM</mssAccessor>
-        <mssAccessorName>eff_dimm_type</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_EFF_CUSTOM_DIMM</id>
         <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
@@ -847,27 +826,6 @@
         <array>2 2</array>
         <mssAccessor>PORT DIMM</mssAccessor>
         <mssAccessorName>eff_dram_rank_mix</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_DRAM_GEN</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Generation of memory: DDR3, DDR4. Used in various locations
-            and is computed in mss_eff_cnfg - decodes byte 2 of SPD.
-            creator: mss_eff_cnfg
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <enum>EMPTY = 0, DDR3 = 1, DDR4 = 2</enum>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array>2 2</array>
-        <mssAccessor>PORT DIMM</mssAccessor>
-        <mssAccessorName>eff_dram_gen</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1699,94 +1657,6 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_EFF_DRAM_BANKS</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Number of DRAM banks.
-            Used in various locations and is computed in mss_eff_cnfg.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
-            Each memory channel will have a value.
-            creator: mss_eff_cnfg
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array>2 2</array>
-        <mssAccessor>PORT</mssAccessor>
-        <mssAccessorName>eff_dram_banks</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_DRAM_ROWS</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Number of DRAM rows.
-            Used in various locations and is computed in mss_eff_cnfg.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
-            Each memory channel will have a value.
-            creator: mss_eff_cnfg
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array>2 2</array>
-        <mssAccessor>PORT</mssAccessor>
-        <mssAccessorName>eff_dram_rows</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_DRAM_COLS</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Number of DRAM columns.
-            Used in various locations and is computed in mss_eff_cnfg.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
-            Each memory channel will have a value.
-            creator: mss_eff_cnfg
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array>2 2</array>
-        <mssAccessor>PORT</mssAccessor>
-        <mssAccessorName>eff_dram_cols</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_DRAM_DENSITY</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            DRAM Density.
-            Used in various locations and is computed in mss_eff_cnfg.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
-            Each memory channel will have a value.
-            creator: mss_eff_cnfg
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array>2 2</array>
-        <mssAccessor>PORT</mssAccessor>
-        <mssAccessorName>eff_dram_density</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_EFF_DRAM_TRCD</id>
         <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
@@ -1892,49 +1762,6 @@
         <array>2</array>
         <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_trc</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_DRAM_TRFI</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Refresh Interval.
-            Used in various locations and is computed in mss_eff_cnfg_timing.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  In unit clock.
-            creator: mss_eff_cnfg_timing
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint32</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
-        <mssAccessorName>eff_dram_trfi</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_DRAM_TRFC</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Refresh Recovery Delay.
-            Used in various locations and is computed in mss_eff_cnfg_timing.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
-            In unit clock.
-            creator: mss_eff_cnfg_timing
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint32</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
-        <mssAccessorName>eff_dram_trfc</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2167,7 +1994,7 @@
         <description>
             Write Recovery.
             Used in various locations and is computed in mss_eff_cnfg_timing.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+            Can be overwritten by ODM vendofrs if done from the PNOR or odm_eff_cnfg.
             Each memory channel will have a value.
             creator: mss_eff_cnfg_timing
             consumer: various
@@ -3121,20 +2948,6 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_EFF_STACK_TYPE</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Specifies the DRAM package type.</description>
-        <valueType>uint8</valueType>
-        <enum>SDP = 0, DDP_QDP = 1, 3DS = 2</enum>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array> 2 2</array>
-        <mssAccessor>PORT</mssAccessor>
-        <mssAccessorName>eff_stack_type</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM</id>
         <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
@@ -3727,29 +3540,6 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_EFF_FINE_REFRESH_MODE</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Fine refresh mode.
-            This is for DDR4 MRS3.
-            Computed in mss_eff_cnfg.
-            Each memory channel will have a value.
-            creator: mss_eff_cnfg
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <enum>NORMAL = 0, FIXED_2X = 1, FIXED_4X = 2, FLY_2X = 5, FLY_4X = 6</enum>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
-        <mssAccessorName>eff_fine_refresh_mode</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_EFF_CRC_WR_LATENCY</id>
         <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
@@ -3815,28 +3605,6 @@
         <array>2</array>
         <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_max_powerdown_mode</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_TEMP_REF_RANGE</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Temp ref range. This is for DDR4 MRS4.
-            Computed in mss_eff_cnfg.
-            Each memory channel will have a value.
-            creator: mss_eff_cnfg
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <enum>NORMAL = 0, EXTEND = 1</enum>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
-        <mssAccessorName>eff_temp_ref_range</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -4413,7 +4181,7 @@
             Additional types maybe defined if new boards have even different DQS swizzle features
         </description>
         <valueType>uint8</valueType>
-        <enum>NORMAL_TYPE_0 = 0, GLACIER_TYPE_1 = 1, ISDIMM_TYPE_2 = 2</enum>
+        <enum>NORMAL_TYPE_0 = 0, GLACIER_TYPE_1 = 1, ISDIMM_TYPE2 = 2</enum>
         <platInit/>
         <odmVisable/>
         <odmChangeable/>
@@ -5381,25 +5149,6 @@
         <array>2 2</array>
         <mssAccessor>PORT DIMM</mssAccessor>
         <mssAccessorName>eff_dram_soft_ppr</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_DRAM_BANK_GROUPS</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Bank Group Bits. Used in various locations and is evaluated in mss_eff_cnfg.
-            creator: mss_eff_cnfg
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array>2 2</array>
-        <mssAccessor>PORT</mssAccessor>
-        <mssAccessorName>eff_dram_bank_groups</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -7052,88 +6801,6 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_TIMING_TCKMIN</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Minimum cycle time (tCKmin) in picoseconds.
-            Decoded using DDR4 SPD byte 18 and byte 125.
-            Right aligned. Bit 0 is rightmost.
-        </description>
-        <valueType>int64</valueType>
-        <array> 2 2 </array>
-        <mssAccessor>PORT DIMM</mssAccessor>
-        <writeable/>
-        <mssUnits> picoseconds </mssUnits>
-        <mssAccessorName>spd_timing_tckmin</mssAccessorName>
-        <platInit/>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_TIMING_TCKMAX</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Maximum cycle time (tCKmax) in picoseconds.
-            Decoded using DDR4 SPD byte 19 and byte 124.
-            Right aligned. Bit 0 is rightmost.
-        </description>
-        <valueType>int64</valueType>
-        <array> 2 2 </array>
-        <mssAccessor>PORT DIMM</mssAccessor>
-        <writeable/>
-        <mssUnits> picoseconds </mssUnits>
-        <mssAccessorName>spd_timing_tckmax</mssAccessorName>
-        <platInit/>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_TIMING_TAAMIN</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Minimum CAS Latency Time (tAAmin) in picoseconds.
-            Decoded using DDR4 SPD byte 24 and byte 123.
-            Right aligned. Bit 0 is rightmost.
-        </description>
-        <valueType>int64</valueType>
-        <array> 2 2 </array>
-        <mssAccessor>PORT DIMM</mssAccessor>
-        <mssUnits> ps </mssUnits>
-        <writeable/>
-        <mssAccessorName>spd_timing_taamin</mssAccessorName>
-        <platInit/>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_SPD_MODULE_TYPE</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Module Type.
-            Located DDR4 SPD byte 3, bits 3-0.
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <array> 2 2 </array>
-        <mssAccessor>PORT DIMM</mssAccessor>
-        <mssAccessorName>spd_module_type</mssAccessorName>
-        <enum>RDIMM = 0x01, UDIMM = 0x02, SO_DIMM=0x03, LRDIMM = 0x0b</enum>
-        <platInit/>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_SPD_DRAM_DEVICE_TYPE</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            DRAM Device Type.
-            Located in DDR3/DDR4 SPD byte 2.
-        </description>
-        <valueType>uint8</valueType>
-        <array> 2 2 </array>
-        <mssAccessor>PORT DIMM</mssAccessor>
-        <mssAccessorName>spd_dram_device_type</mssAccessorName>
-        <enum>DDR3 = 0x0B, DDR4 = 0x0C</enum>
-        <platInit/>
-    </attribute>
-
-    <attribute>
         <id>ATTR_SPD_MODULE_THERMAL_SENSOR</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
@@ -7145,50 +6812,6 @@
         <writeable/>
         <enum>INCORPORATED = 0x80, NOT_INCORPORATED = 0x00</enum>
         <mssAccessorName>spd_module_thermal_sensor</mssAccessorName>
-        <platInit/>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_SPD_MEDIUM_TIMEBASE</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Defines a value in picoseconds that represents the fundamental timebase
-            for medium grain timing calculations. This value is used as a multiplier
-            for formulating subsequent timing parameters.
-            Located in DDR4 SPD byte 17, bits 3-2.
-
-            mss_eff_config should decode the meaning of byte 17 and convert the
-            MTB to  picoseconds (for DDR4 - 125 picoseconds)
-        </description>
-        <valueType>int64</valueType>
-        <array> 2 2 </array>
-        <mssAccessor>PORT DIMM</mssAccessor>
-        <mssAccessorName>spd_medium_timebase</mssAccessorName>
-        <enum>PS125 = 125</enum>
-        <writeable/>
-        <mssUnits> ps </mssUnits>
-        <platInit/>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_SPD_FINE_TIMEBASE</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            defines a value in picoseconds that represents the fundamental timebase
-            for fine grain timing calculations. This value is used as a multiplier
-            for formulating subsequent timing parameters.
-            Located in DDR4 SPD byte 17, bits 1-0.
-
-        mss_eff_config should decode the meaning of byte 17 and convert the
-            FTB to picoseconds (for DDR4 - 1 picosecond)
-        </description>
-        <valueType>int64</valueType>
-        <array> 2 2 </array>
-        <mssAccessor>PORT DIMM</mssAccessor>
-        <mssAccessorName>spd_fine_timebase</mssAccessorName>
-        <enum>PS1 = 1</enum>
-        <writeable/>
-        <mssUnits> ps </mssUnits>
         <platInit/>
     </attribute>
 
@@ -7293,16 +6916,17 @@
         <mssAccessorName>eff_dram_rtt_wr</mssAccessorName>
     </attribute>
 
-<attribute>
-    <id>ATTR_VPD_GPO</id>
-    <targetType>TARGET_TYPE_MCS</targetType>
-    <description>This value comes from the VPD keyword MT bytes 61 MT(61) for the Logical DIMM
-      associated with port A.  Bytes 125 for port B, 189 for port C and 253 for port D</description>
-    <valueType>uint8</valueType>
-    <platInit/>
-    <odmVisable/>
-    <array>2</array>
-    <writeable/>
-    <mssAccessorName>vpd_gpo</mssAccessorName>
-</attribute>
+    <attribute>
+        <id>ATTR_VPD_GPO</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>This value comes from the VPD keyword MT bytes 61 MT(61) for the Logical DIMM
+        associated with port A.  Bytes 125 for port B, 189 for port C and 253 for port D</description>
+        <valueType>uint8</valueType>
+        <platInit/>
+        <odmVisable/>
+        <array>2</array>
+        <writeable/>
+        <mssAccessorName>vpd_gpo</mssAccessorName>
+    </attribute>
+
 </attributes>
