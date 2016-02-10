@@ -42,7 +42,7 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-
+#include <fapi2.H>
 
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_pm_set_homer_bar_FP_t) (
