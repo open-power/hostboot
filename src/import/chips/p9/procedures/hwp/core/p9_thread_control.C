@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -21,7 +21,7 @@
 /// @brief Implementation of sreset, start, stop and step
 ///
 
-// *HWP HWP Owner: Michael Dye <dyem@us.ibm.com>
+// *HWP HWP Owner: Nick Klazynski <jklazyns@us.ibm.com>
 // *HWP FW Owner:  Brian Silver <bsilver@us.ibm.com>
 // *HWP Team:  Quad
 // *HWP Level: 2
@@ -326,7 +326,7 @@ fapi2::ReturnCode p9_thread_control_sreset(
                         fapi2::P9_THREAD_CONTROL_SRESET_FAIL()
                         .set_CORE_TARGET(i_target)
                         .set_THREAD(i_threads),
-                        "p9_thread_control_sreset: ERROR: Thread SReset issued, but the threads aren't running. "
+                        "p9_thread_control_sreset: ERROR: Thread SRESET issued, but the threads aren't running. "
                         "SReset might have failed for threads 0x%x", i_threads);
     }
 
@@ -365,8 +365,8 @@ fapi2::ReturnCode p9_thread_control_start(
                         fapi2::P9_THREAD_CONTROL_START_PRE_NOMAINT()
                         .set_CORE_TARGET(i_target)
                         .set_THREAD(i_threads),
-                        "p9_thread_control_start: ERROR: Cannot issue Thread Start because the threads aren't in maint mode. "
-                        "Start not attempted for threads 0x%x", i_threads);
+                        "p9_thread_control_start: ERROR: Cannot issue Thread Start because the threads aren't in maint mode (threads=%x).",
+                        i_threads);
     }
 
     // Start the threads
@@ -433,8 +433,7 @@ fapi2::ReturnCode p9_thread_control_stop(
                         fapi2::P9_THREAD_CONTROL_STOP_PRE_NOTRUNNING()
                         .set_CORE_TARGET(i_target)
                         .set_THREAD(i_threads),
-                        "p9_thread_control_stop: ERROR: Threads cannot be stopped because they aren't running "
-                        "Stop not attempted for threads 0x%x", i_threads);
+                        "p9_thread_control_stop: ERROR: Threads cannot be stopped because they aren't running (threads=%x).", i_threads);
     }
 
     // Stop the threads
@@ -498,8 +497,7 @@ fapi2::ReturnCode p9_thread_control_step(
                         fapi2::P9_THREAD_CONTROL_STEP_PRE_NOTSTOPPING()
                         .set_CORE_TARGET(i_target)
                         .set_THREAD(i_threads),
-                        "p9_thread_control_step: ERROR: Thread cannot be stepped because they are not ready to step "
-                        "Step not attempted for threads 0x%x", i_threads);
+                        "p9_thread_control_step: ERROR: Thread cannot be stepped because they are not ready to step (threads=%x).", i_threads);
     }
 
 

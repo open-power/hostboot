@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,11 +26,9 @@
 // *!               Use to start (start or sreset) thread instruction execution,
 // *!                 stop instruction execution, or single instruction step.
 // *!               Also used to query the state of a thread.
-// *! OWNER NAME  : Nick Klazynski      Email: jklazyns@us.ibm.com
-// *! BACKUP NAME : Sebastien Lafontant Email: slafont@us.ibm.com
 //------------------------------------------------------------------------------
 
-// *HWP HWP Owner: Michael Dye <dyem@us.ibm.com>
+// *HWP HWP Owner: Nick Klazynski <dyem@us.ibm.com>
 // *HWP FW Owner:  Brian Silver <bsilver@us.ibm.com>
 // *HWP Team:  Quad
 // *HWP Level: 2
@@ -45,6 +43,9 @@
 
 #include "p9_quad_scom_addresses.H"
 
+extern "C"
+{
+
 // A macro to wrap the warning check boiler plate
 // If the action failed and i_warncheck is set add a trace and continue anyway
 #define PTC_ASSERT_WARN( __conditional__, __warning__, __ffdc__, ... )  \
@@ -54,49 +55,57 @@
         {                                                               \
             FAPI_INF(__VA_ARGS__);                                      \
         }                                                               \
-        \
-        (__ffdc__).execute();                                           \
-        FAPI_ERR(__VA_ARGS__);                                          \
-        goto fapi_try_exit;                                             \
-    }
+        else                                                            \
+        {                                                               \
+            (__ffdc__).execute();                                       \
+            FAPI_ERR(__VA_ARGS__);                                      \
+            goto fapi_try_exit;                                         \
+        }                                                               \
+    }                                                                   \
 
 
 // ProcThreadControl input commands
 // If you make this an enum, the compiler can
 // check that a case statement has all the elements
 // covered.
-enum ThreadCommands
-{
-    PTC_CMD_SRESET            = 0,
-    PTC_CMD_STEP              = 1,
-    PTC_CMD_START             = 2,
-    PTC_CMD_STOP              = 3,
-};
+    enum ThreadCommands
+    {
+        PTC_CMD_SRESET            = 0,
+        PTC_CMD_STEP              = 1,
+        PTC_CMD_START             = 2,
+        PTC_CMD_STOP              = 3,
+    };
 
-enum ThreadRasStatus
-{
-    CORE_MAINT_MODE = 0,
-    THREAD_QUIESCED = 1,
-    ICT_EMPTY       = 2,
-    ISU_QUIESCED    = 3,
-    STEP_SUCCESS    = 4,
-};
+    enum ThreadRasStatus
+    {
+        CORE_MAINT_MODE = 0,
+        THREAD_QUIESCED = 1,
+        ICT_EMPTY       = 2,
+        ISU_QUIESCED    = 3,
+        STEP_SUCCESS    = 4,
+    };
 
-enum PTC_Constants
-{
-    RAS_MODE_STEP_SHIFT       = 52,
-    PTC_STEP_COMP_POLL_LIMIT  = 10,
-};
+    enum PTC_Constants
+    {
+        RAS_MODE_STEP_SHIFT       = 52,
+        PTC_STEP_COMP_POLL_LIMIT  = 10,
+    };
 
 // Bit positions in the DIRECT_CONTROL register
-enum ThreadControl
-{
-    CLEAR_MAINT      = 3,
-    SRESET_REQUEST   = 4,
-    CORE_STEP        = 5,
-    CORE_START       = 6,
-    CORE_STOP        = 7,
-};
+    enum ThreadControl
+    {
+        CLEAR_MAINT      = 3,
+        SRESET_REQUEST   = 4,
+        CORE_STEP        = 5,
+        CORE_START       = 6,
+        CORE_STOP        = 7,
+    };
+
+/// @typedef p9_thread_control_FP_t
+/// function pointer typedef definition for HWP call support
+    typedef fapi2::ReturnCode (*p9_thread_control_FP_t) (
+        const fapi2::Target<fapi2::TARGET_TYPE_CORE>&,
+        const uint8_t, const ThreadCommands, const bool);
 
 //--------------------------------------------------------------------------
 /// @brief p9_thread_control: utility subroutine to control thread state
@@ -113,9 +122,9 @@ enum ThreadControl
 ///         function-specific fail codes (see function definitions),
 ///         else error
 //-------------------------------------------------------------------------
-extern fapi2::ReturnCode p9_thread_control(const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
-        const uint8_t i_threads, const ThreadCommands i_command,
-        const bool i_warncheck);
+//fapi2::ReturnCode p9_thread_control(const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
+//        const uint8_t i_threads, const ThreadCommands i_command,
+//        const bool i_warncheck);
 
 
 //--------------------------------------------------------------------------
@@ -133,7 +142,9 @@ extern fapi2::ReturnCode p9_thread_control(const fapi2::Target<fapi2::TARGET_TYP
 ///         function-specific fail codes (see function definitions),
 ///         else error
 //--------------------------------------------------------------------------
-extern fapi2::ReturnCode p9_thread_control(const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
-        const uint8_t i_threads, const ThreadCommands i_command,
-        const bool i_warncheck);
+    fapi2::ReturnCode p9_thread_control(const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
+                                        const uint8_t i_threads, const ThreadCommands i_command,
+                                        const bool i_warncheck);
 #endif // _P9_THREAD_CONTROL_H_
+
+} // extern
