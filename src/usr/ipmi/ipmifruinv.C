@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +41,6 @@
 #include <pnor/pnorif.H>
 
 extern trace_desc_t * g_trac_ipmi;
-
 
 /**
  * @brief Compairs two pairs - used for std:sort
@@ -581,18 +580,37 @@ errlHndl_t procIpmiFruInv::buildBoardInfoArea(std::vector<uint8_t> &io_data)
         //Push Fru File ID Byte - NULL
         io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
 
+        //Get EC Data
+        TARGETING::ATTR_EC_type ecInfo;
+        bool getEC = iv_target->tryGetAttr<TARGETING::ATTR_EC>(ecInfo);
+
         //Get ECID Data
         TARGETING::ATTR_ECID_type ecidInfo;
         bool getEcid = iv_target->tryGetAttr<TARGETING::ATTR_ECID>(ecidInfo);
+
         //Only add ECID Data if in an update scenario
         if (getEcid && iv_isUpdate == true)
         {
             addEcidData(iv_target, ecidInfo, io_data);
         }
-        else
+        //Add in the EC Data whether we're in an update scenario or not.
+        //We have the EC info after discover_targets()
+        if (getEC)
         {
-            //Indicate no custom fields if ecid data not found
+            addECData(iv_target, ecInfo, io_data);
+        }
+
+        if(!getEC && !(getEcid && iv_isUpdate))
+        {
+            //Indicate no custom fields if ecid and ec data not found
             io_data.push_back(IPMIFRUINV::TYPELENGTH_BYTE_NULL);
+        }
+
+        if (iv_isUpdate == true)
+        {
+            std::vector<TARGETING::TargetHandle_t> l_procList;
+            l_procList.push_back(iv_target);
+            customData(l_procList, io_data);
         }
 
         //Indicate end of custom fields
@@ -1134,7 +1152,7 @@ errlHndl_t membufIpmiFruInv::buildBoardInfoArea(
         //Only set the ECID Data during an update scenario
         if (iv_isUpdate == true)
         {
-            customEcidData (iv_extraTargets, io_data);
+            customData (iv_extraTargets, io_data);
         }
 
         //Indicate End of Custom Fields
@@ -1186,7 +1204,7 @@ errlHndl_t membufIpmiFruInv::addVpdData(std::vector<uint8_t> &io_data,
     return l_errl;
 }
 //##############################################################################
-void IpmiFruInv::customEcidData(TARGETING::TargetHandleList i_extraTargets,
+void IpmiFruInv::customData(TARGETING::TargetHandleList i_extraTargets,
                      std::vector<uint8_t> &io_data)
 {
 
@@ -1200,7 +1218,7 @@ void IpmiFruInv::customEcidData(TARGETING::TargetHandleList i_extraTargets,
     {
         TARGETING::TargetHandle_t l_extraTarget = *extraTargets_it;
 
-        //Only set the ECID Data during an update scenario
+        //If we're in an update and the target is a membuf, we update the ecid.
         if ( l_extraTarget->getAttr<TARGETING::ATTR_TYPE>() ==
                                                         TARGETING::TYPE_MEMBUF)
         {
@@ -1249,6 +1267,30 @@ void IpmiFruInv::addEcidData(const TARGETING::TargetHandle_t& i_target,
 
     uint8_t* l_vDataPtr = (uint8_t*) &l_ecidAscii[0];
     io_data.insert(io_data.end(), &l_vDataPtr[0], &l_vDataPtr[0]+32);
+
+    return;
+}
+
+void IpmiFruInv::addECData(const TARGETING::TargetHandle_t& i_target,
+                           const TARGETING::ATTR_EC_type& i_ecInfo,
+                           std::vector<uint8_t> &io_data)
+{
+    // Create Custom EC Field
+    // - First put in 'EC:' to make it obvious what this is
+    uint8_t l_data[] = {IPMIFRUINV::TYPELENGTH_BYTE_ASCII + 5,'E','C',':'};
+
+    // @todo-RTC:124687 - Refactor multiple reallocations
+    io_data.insert( io_data.end(),
+                    &l_data[0],
+                    &l_data[0] + (uint8_t(sizeof(l_data) / sizeof(uint8_t))));
+
+    CPPASSERT(sizeof(ATTR_EC_type) == 1);
+    CPPASSERT((sizeof(i_ecInfo) / sizeof(ATTR_EC_type)) == 1);
+
+    char l_ecAscii[3];
+    sprintf(l_ecAscii,"%X",i_ecInfo);
+
+    io_data.insert(io_data.end(), &l_ecAscii[0],&l_ecAscii[2]);
 
     return;
 }

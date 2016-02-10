@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -187,12 +187,21 @@ class IpmiFruInv
                      std::vector<uint8_t> &io_data);
 
     /**
-      * @brief Adds Ecid attribute data from extra targets as custom data
+     * @brief Adds EC attribute data
+     * @param[in] target, The target to get the Sensor Number from
+     * @param[in] ecInfo, The EC attribute data
+     * @param[in/out] data, The container to put EC attribute data in
+     */
+    void addECData(const TARGETING::TargetHandle_t& i_target,
+                   const TARGETING::ATTR_EC_type& i_ecInfo,
+                   std::vector<uint8_t> &io_data);
+    /**
+      * @brief Adds Ecid and EC attribute data from extra targets as custom data
       * @param[in] TargetHandleList, Handle to list of extra
       *             targets associated with this FRU Record
       * @param[in/out] data, The container to put ECID attribute data in
       */
-    void customEcidData(TARGETING::TargetHandleList i_extraTargets,
+    void customData(TARGETING::TargetHandleList i_extraTargets,
                      std::vector<uint8_t> &io_data);
 
     /**
