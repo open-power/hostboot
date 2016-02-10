@@ -32,7 +32,6 @@
 ///     4) Similar way,  Reset sys.config and OPCG setting for Nest and MC chiplet in sync mode
 ///
 /// Done
-///
 //------------------------------------------------------------------------------
 // *HWP HW Owner        : Abhishek Agarwal <abagarw8@in.ibm.com>
 // *HWP HW Backup Owner : Srinivas V. Naga <srinivan@in.ibm.com>
