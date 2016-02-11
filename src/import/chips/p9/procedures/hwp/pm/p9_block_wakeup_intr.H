@@ -63,13 +63,6 @@ enum OP_TYPE
     CLEAR
 };
 
-// This must stay in sync with enum above
-const char* OP_TYPE_STRING[] =
-{
-    "SET",
-    "CLEAR"
-};
-
 } // namespace p9pmblockwkup
 
 // function pointer typedef definition for HWP call support
