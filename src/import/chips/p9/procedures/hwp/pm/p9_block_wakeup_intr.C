@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,6 +44,16 @@
 // ----------------------------------------------------------------------
 
 #include "p9_block_wakeup_intr.H"
+
+
+
+// This must stay in sync with enum OP_TYPE enum in header file
+const char* OP_TYPE_STRING[] =
+{
+    "SET",
+    "CLEAR"
+};
+
 
 // ----------------------------------------------------------------------
 // Procedure Function

@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,13 +55,6 @@ enum OP_TYPE
 {
     SET,
     CLEAR
-};
-
-// This must stay in sync with enum above
-const char* OP_TYPE_STRING[] =
-{
-    "SET",
-    "CLEAR"
 };
 
 } // namespace p9pmblockwkup
