@@ -1,0 +1,667 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/attribute_info/memory_mr_attributes.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2016                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<attributes>
+    <attribute>
+        <id>ATTR_VPD_MR_0_VERSION_LAYOUT</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>MR Keyword Layout Version Number.  Increases when attributes are added, removed, or redefined.  Does not reset.</description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits>num</mssUnits>
+        <mssBlobStart>0</mssBlobStart>
+        <mssBlobLength>1</mssBlobLength>
+        <mssAccessorName>vpd_mr_0_version_layout</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_1_VERSION_DATA</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>MR Keyword Data Version Number.  Increases when data changes with the above layout version.  Resets when layout version number increments.</description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits>num</mssUnits>
+        <mssBlobStart>1</mssBlobStart>
+        <mssBlobLength>1</mssBlobLength>
+        <mssAccessorName>vpd_mr_1_version_data</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_2_SIGNATURE_FREQ_DROP</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>MR Keyword type, nibble 0 = freq bin (0 = 1600, 1 = 1866, 2 = 2133, 3 = 2400, 4 = 2667, 5 = 2933, 6 = 3200), nibble 1 = num dimms per port (1 = single drop, 2 = dual drop)</description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits>encode</mssUnits>
+        <mssBlobStart>2</mssBlobStart>
+        <mssBlobLength>1</mssBlobLength>
+        <mssAccessorName>vpd_mr_2_signature_freq_drop</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_DRAM_2N_MODE</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>3</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_dram_2n_mode</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A00</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>5</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_addr_a00</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A01</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>7</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_addr_a01</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A02</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>9</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_addr_a02</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A03</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>11</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_addr_a03</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A04</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>13</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_addr_a04</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A05</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>15</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_addr_a05</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A06</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>17</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_addr_a06</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A07</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>19</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_addr_a07</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A08</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>21</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_addr_a08</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A09</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>23</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_addr_a09</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A10</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>25</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_addr_a10</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A11</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>27</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_addr_a11</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A12</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>29</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_addr_a12</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A13</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>31</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_addr_a13</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_A17</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>33</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_addr_a17</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_BA0</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>35</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_addr_ba0</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_BA1</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>37</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_addr_ba1</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_BG0</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>39</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_addr_bg0</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_BG1</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>41</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_addr_bg1</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_C0</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>43</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_addr_c0</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_C1</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>45</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_addr_c1</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_ADDR_C2</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>47</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_addr_c2</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_CLK_D0_P0</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>49</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_clk_d0_p0</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_CLK_D0_P1</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>51</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_clk_d0_p1</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_CLK_D1_P0</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>53</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_clk_d1_p0</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_CLK_D1_P1</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>55</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_clk_d1_p1</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_CMD_ACTN</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>57</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_cmd_actn</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_CMD_ADDR_CASN_A15</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>59</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_cmd_addr_casn_a15</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_CMD_ADDR_RASN_A16</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>61</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_cmd_addr_rasn_a16</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_CMD_ADDR_WEN_A14</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>63</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_cmd_addr_wen_a14</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_CMD_PAR</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>65</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_cmd_par</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_CKE0</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>67</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_cntl_cke0</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_CKE1</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>69</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_cntl_cke1</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_CKE2</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>71</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_cntl_cke2</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_CKE3</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>73</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_cntl_cke3</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_CSN0</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>75</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_cntl_csn0</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_CSN1</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>77</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_cntl_csn1</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_CSN2</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>79</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_cntl_csn2</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_CSN3</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>81</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_cntl_csn3</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_ODT0</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>83</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_cntl_odt0</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_ODT1</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>85</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_cntl_odt1</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_ODT2</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>87</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_cntl_odt2</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_MC_PHASE_ROT_CNTL_ODT3</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>89</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_mc_phase_rot_cntl_odt3</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_PERIODIC_MEMCAL_MODE_OPTIONS</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>91</mssBlobStart>
+        <mssBlobLength>4</mssBlobLength>
+        <mssAccessorName>vpd_mr_periodic_memcal_mode_options</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_TSYS_ADR</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>95</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_tsys_adr</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MR_TSYS_DATA</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>97</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mr_tsys_data</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+</attributes>

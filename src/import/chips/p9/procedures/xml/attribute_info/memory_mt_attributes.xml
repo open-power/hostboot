@@ -1,0 +1,407 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/attribute_info/memory_mt_attributes.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2016                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<attributes>
+    <attribute>
+        <id>ATTR_VPD_MT_0_VERSION_LAYOUT</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>0</mssBlobStart>
+        <mssBlobLength>1</mssBlobLength>
+        <mssAccessorName>vpd_mt_0_version_layout</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_1_VERSION_DATA</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>1</mssBlobStart>
+        <mssBlobLength>1</mssBlobLength>
+        <mssAccessorName>vpd_mt_1_version_data</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_2_SIGNATURE_DIMM0RANK_DIMM1RANK</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>2</mssBlobStart>
+        <mssBlobLength>1</mssBlobLength>
+        <mssAccessorName>vpd_mt_2_signature_dimm0rank_dimm1rank</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_CKE_PRI_MAP</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>3</mssBlobStart>
+        <mssBlobLength>4</mssBlobLength>
+        <mssAccessorName>vpd_mt_cke_pri_map</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_CKE_PWR_MAP</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint32</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>7</mssBlobStart>
+        <mssBlobLength>8</mssBlobLength>
+        <mssAccessorName>vpd_mt_cke_pwr_map</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_DIMM_RCD_IBT</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>15</mssBlobStart>
+        <mssBlobLength>4</mssBlobLength>
+        <mssAccessorName>vpd_mt_dimm_rcd_ibt</mssAccessorName>
+        <array>2 2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_DIMM_RCD_OUTPUT_TIMING</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>19</mssBlobStart>
+        <mssBlobLength>4</mssBlobLength>
+        <mssAccessorName>vpd_mt_dimm_rcd_output_timing</mssAccessorName>
+        <array>2 2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_DRAM_DRV_IMP_DQ_DQS</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>23</mssBlobStart>
+        <mssBlobLength>8</mssBlobLength>
+        <mssAccessorName>vpd_mt_dram_drv_imp_dq_dqs</mssAccessorName>
+        <array>2 2 2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_DRAM_RTT_NOM</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>31</mssBlobStart>
+        <mssBlobLength>8</mssBlobLength>
+        <mssAccessorName>vpd_mt_dram_rtt_nom</mssAccessorName>
+        <array>2 2 2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_DRAM_RTT_PARK</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>39</mssBlobStart>
+        <mssBlobLength>8</mssBlobLength>
+        <mssAccessorName>vpd_mt_dram_rtt_park</mssAccessorName>
+        <array>2 2 2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_DRAM_RTT_WR</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>47</mssBlobStart>
+        <mssBlobLength>8</mssBlobLength>
+        <mssAccessorName>vpd_mt_dram_rtt_wr</mssAccessorName>
+        <array>2 2 2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_MC_DRV_IMP_ADDR</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>55</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mt_mc_drv_imp_addr</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_MC_DRV_IMP_CLK</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>57</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mt_mc_drv_imp_clk</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_MC_DRV_IMP_CNTL</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>59</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mt_mc_drv_imp_cntl</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_MC_DRV_IMP_DQ_DQS</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>61</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mt_mc_drv_imp_dq_dqs</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_MC_DRV_IMP_SPCKE</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>63</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mt_mc_drv_imp_spcke</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_MC_RCV_IMP_DQ_DQS</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>65</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mt_mc_rcv_imp_dq_dqs</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_MC_SLEW_RATE_ADDR</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>67</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mt_mc_slew_rate_addr</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_MC_SLEW_RATE_CLK</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>69</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mt_mc_slew_rate_clk</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_MC_SLEW_RATE_CNTL</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>71</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mt_mc_slew_rate_cntl</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_MC_SLEW_RATE_DQ_DQS</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>73</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mt_mc_slew_rate_dq_dqs</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_MC_SLEW_RATE_SPCKE</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>75</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mt_mc_slew_rate_spcke</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_ODT_RD</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>77</mssBlobStart>
+        <mssBlobLength>8</mssBlobLength>
+        <mssAccessorName>vpd_mt_odt_rd</mssAccessorName>
+        <array>2 2 2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_ODT_WR</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>85</mssBlobStart>
+        <mssBlobLength>8</mssBlobLength>
+        <mssAccessorName>vpd_mt_odt_wr</mssAccessorName>
+        <array>2 2 2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_OFFSET_GPO</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>93</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mt_offset_gpo</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_OFFSET_RLO</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>95</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mt_offset_rlo</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_OFFSET_WLO</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>97</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mt_offset_wlo</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_VREF_DRAM_WR</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>99</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mt_vref_dram_wr</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_VREF_MC_RD</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>101</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mt_vref_mc_rd</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_MT_WINDAGE_RD_CTR</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description></description>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <mssUnits></mssUnits>
+        <mssBlobStart>103</mssBlobStart>
+        <mssBlobLength>4</mssBlobLength>
+        <mssAccessorName>vpd_mt_windage_rd_ctr</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+</attributes>
