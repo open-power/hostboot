@@ -2401,6 +2401,10 @@ sub generate_sys
     <id>sys$sys</id>
     <type>sys-sys-power9</type>
     <attribute>
+        <id>FAPI_NAME</id>
+        <default>k0</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys</default>
     </attribute>
@@ -2834,6 +2838,8 @@ sub generate_system_node
     # MRW parser handle that.
     if( !( ($sysname =~ /brazos/) && ($node == $MAXNODE) ) )
     {
+        my $fapi_name = "NA"; # node not FAPI target
+
         print "
 <!-- $SYSNAME System node $node -->
 
@@ -2841,6 +2847,7 @@ sub generate_system_node
     <id>sys${sys}node${node}</id>
     <type>enc-node-power9</type>
     <attribute><id>HUID</id><default>0x0${node}020000</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node</default>
@@ -2959,6 +2966,7 @@ sub generate_proc
     # If we don't have an FSP (open-power) then we want to use Xscom
     my $UseXscom   = $haveFSPs ? 0 : 1;
     my $UseFsiScom = $haveFSPs ? 1 : 0;
+    my $fapi_name = sprintf("pu:k0:n%d:s0:p%02d", $node, $proc);
     print "
     <!-- $SYSNAME n${node}p${proc} processor chip -->
 
@@ -2966,6 +2974,7 @@ sub generate_proc
     <id>sys${sys}node${node}proc${proc}</id>
     <type>chip-processor-$CHIPNAME</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute><id>POSITION</id><default>${position}</default></attribute>
     <attribute><id>SCOM_SWITCHES</id>
         <default>
@@ -3474,11 +3483,13 @@ sub generate_ex
     my $ex_orig = $ex;
     $ex = $ex % 2;
     my $mruData = get_mruid($ipath);
+    my $fapi_name = sprintf("pu.ex:k0:n%d:s0:p%02d:c%d", $node, $proc,$ex_orig);
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}eq${eq}ex$ex</id>
     <type>unit-ex-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/eq-$eq/ex-$ex</default>
@@ -3609,11 +3620,14 @@ sub generate_core
     $core = $core % 2;
     #Chiplet ID range for Cores start with 0x20
     my $chipletId = sprintf("0x%X",($core_orig + 0x20));
+    my $fapi_name = sprintf("pu.core:k0:n%d:s0:p%02d:c%d",
+                            $node, $proc, $core_orig);
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}eq${eq}ex${ex}core$core</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/eq-$eq/ex-$ex/core-$core</default>
@@ -3696,11 +3710,14 @@ sub generate_eq
     my ($proc, $eq, $ordinalId, $ipath) = @_;
     my $uidstr = sprintf("0x%02X23%04X",${node},$proc*MAX_EQ_PER_PROC + $eq);
     my $mruData = get_mruid($ipath);
+    my $fapi_name = sprintf("pu.eq:k0:n%d:s0:p%02d:c%d", $node, $proc, $eq);
+
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}eq$eq</id>
     <type>unit-eq-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/eq-$eq</default>
@@ -3779,11 +3796,13 @@ sub generate_mcs
         }
     }
 
+    my $fapi_name = sprintf("pu.mcs:k0:n%d:s0:p%02d:c%d", $node, $proc, $mcs);
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}mcs$mcs</id>
     <type>unit-mcs-$CHIPNAME</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/mcs-$mcs</default>
@@ -3848,12 +3867,15 @@ sub generate_mca
             last;
         }
     }
+    my $fapi_name = sprintf("pu.mca:k0:n%d:s0:p%02d:c%d",
+                            $node, $proc, $mca_orig);
 
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}mcs${mcs}mca$mca</id>
     <type>unit-mca-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/mcs-$mcs/mca-$mca</default>
@@ -3906,12 +3928,15 @@ sub generate_mcbist
             last;
         }
     }
+    my $fapi_name = sprintf("pu.mcbist:k0:n%d:s0:p%02d:c%d",
+                            $node, $proc, $mcbist);
 
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}mcbist$mcbist</id>
     <type>unit-mcbist-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/mcbist-$mcbist</default>
@@ -3964,12 +3989,14 @@ sub generate_pec
             last;
         }
     }
+    my $fapi_name = sprintf("pu.pec:k0:n%d:s0:p%02d:c%d", $node, $proc, $pec);
 
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}pec$pec</id>
     <type>unit-pec-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/pec-$pec</default>
@@ -4008,6 +4035,7 @@ sub generate_pec
 sub generate_phb_chiplet
 {
     my ($proc, $phb, $ordinalId, $ipath) = @_;
+    my $phb_orig = $phb;
     my $uidstr = sprintf("0x%02X0B%04X",${node},$proc*MAX_PHB_PER_PROC + $phb);
     my $mruData = get_mruid($ipath);
 
@@ -4036,11 +4064,15 @@ sub generate_phb_chiplet
         }
     }
 
+    my $fapi_name = sprintf("pu.phb:k0:n%d:s0:p%02d:c%d",
+                            $node, $proc, $phb_orig);
+
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}pec${pec}phb$phb</id>
     <type>unit-phb-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/pec-$pec/phb-$phb</default>
@@ -4093,12 +4125,14 @@ sub generate_ppe
             last;
         }
     }
+    my $fapi_name = sprintf("pu.ppe:k0:n%d:s0:p%02d:c%d", $node, $proc, $ppe);
 
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}ppe$ppe</id>
     <type>unit-ppe-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/ppe-$ppe</default>
@@ -4151,11 +4185,14 @@ sub generate_obus
         }
     }
 
+    my $fapi_name = sprintf("pu.obus:k0:n%d:s0:p%02d:c%d", $node, $proc, $obus);
+
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}obus$obus</id>
     <type>unit-obus-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/obus-$obus</default>
@@ -4209,11 +4246,13 @@ sub generate_xbus
         }
     }
 
+    my $fapi_name = sprintf("pu.xbus:k0:n%d:s0:p%02d:c%d", $node, $proc, $xbus);
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}xbus$xbus</id>
     <type>unit-xbus-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/xbus-$xbus</default>
@@ -4266,12 +4305,13 @@ sub generate_perv
             last;
         }
     }
-
+    my $fapi_name = sprintf("pu.perv:k0:n%d:s0:p%02d:c%d", $node, $proc,$perv);
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}perv$perv</id>
     <type>unit-perv-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/perv-$perv</default>
@@ -4323,11 +4363,13 @@ sub generate_capp
         }
     }
 
+    my $fapi_name = sprintf("pu.capp:k0:n%d:s0:p%02d:c%d", $node, $proc,$capp);
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}capp$capp</id>
     <type>unit-capp-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/capp-$capp</default>
@@ -4380,11 +4422,14 @@ sub generate_sbe
             last;
         }
     }
+    my $fapi_name = sprintf("pu.sbe:k0:n%d:s0:p%02d:c%d", $node, $proc,$sbe);
+
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}sbe$sbe</id>
     <type>unit-sbe-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/sbe-$sbe</default>
@@ -4491,11 +4536,14 @@ sub generate_a_pcie
         $phbInit = 1;
     }
 
+    my $fapi_name = "NA"; # pcie not FAPI target
+
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}pci${phb}</id>
     <type>unit-pci-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/pci-$phb</default>
@@ -4575,6 +4623,7 @@ sub generate_nx
 
     my $ipath = $nxList{$node}{$proc}->{'instancePath'};
     my $mruData = get_mruid($ipath);
+    my $fapi_name = "NA"; # nx not FAPI target
 
     print "\n<!-- $SYSNAME n${node}p$proc NX units -->\n";
     print "
@@ -4582,6 +4631,7 @@ sub generate_nx
     <id>sys${sys}node${node}proc${proc}nx0</id>
     <type>unit-nx-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/nx-0</default>
@@ -4629,6 +4679,7 @@ sub generate_pore
 
     my $ipath = $poreList{$node}{$proc}->{'instancePath'};
     my $mruData = get_mruid($ipath);
+    my $fapi_name = "NA"; # pore not FAPI target
 
     print "\n<!-- $SYSNAME n${node}p$proc PORE units -->\n";
     print "
@@ -4636,6 +4687,7 @@ sub generate_pore
     <id>sys${sys}node${node}proc${proc}pore0</id>
     <type>unit-pore-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc/pore-0</default>
@@ -4756,6 +4808,8 @@ sub generate_centaur
         $logicalDimmInit = 1;
     }
 
+    my $fapi_name = sprintf("pu.centaur:k0:n%d:s0:p%02d:c0",
+                            $node, $ctaur);
     print "
 <!-- $SYSNAME Centaur n${node}p${ctaur} : start -->
 
@@ -4763,6 +4817,7 @@ sub generate_centaur
     <id>sys${sys}node${node}membuf${ctaur}</id>
     <type>chip-membuf-centaur</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute><id>POSITION</id><default>$ctaur</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -4991,11 +5046,13 @@ sub generate_mba
                                    MAX_MBA_PER_MEMBUF + $mba);
     my $mruData = get_mruid($ipath);
 
+    my $fapi_name = sprintf("pu.mba:k0:n%d:s0:p%02d:c%d", $node, $proc, $mba);
     print "
 <targetInstance>
     <id>sys${sys}node${node}membuf${ctaur}mba$mba</id>
     <type>unit-mba-centaur</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/membuf-$ctaur/"
@@ -5040,12 +5097,14 @@ sub generate_l4
 
     my $uidstr = sprintf("0x%02X0A%04X",${node},$proc*MAX_MCS_PER_PROC + $mcs);
     my $mruData = get_mruid($ipath);
+    my $fapi_name = sprintf("pu.l4:k0:n%d:s0:p%02d:c0", $node, $proc, $l4);
 
     print "
 <targetInstance>
     <id>sys${sys}node${node}membuf${ctaur}l4${l4}</id>
     <type>unit-l4-centaur</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/membuf-$ctaur/"
@@ -5129,6 +5188,8 @@ sub generate_is_dimm
         $dimmPos =~ s/.*dimm-(.*)/$1/;
 
         my $uidstr = sprintf("0x%02X03%04X",${node},$dimm+${node}*512);
+        my $fapi_name = sprintf("pu.dimm:k0:n%d:s0:p%02d:c%d",
+                                $node, $proc, $dimm);
 
         print "\n<!-- DIMM n${node}:p${pos} -->\n";
         print "
@@ -5136,6 +5197,7 @@ sub generate_is_dimm
     <id>sys${sys}node${node}dimm$dimm</id>
     <type>lcard-dimm-jedec</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute><id>POSITION</id><default>$pos</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5305,11 +5367,13 @@ sub generate_dimm
     my $logicalDimmInstancePath = "instance:"
         . $logicalDimmList{$node}{$relativePos}{$mbanum}{$y}{$z}->{'logicalDimmIpath'};
 
+    my $fapi_name = sprintf("pu.dimm:k0:n%d:s0:p%02d:c%d", $node, $proc, $dimm);
     print "
 <targetInstance>
     <id>sys${sys}node${node}dimm$dimm</id>
     <type>lcard-dimm-cdimm</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute><id>POSITION</id><default>$position</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -5531,13 +5595,16 @@ sub generate_occ
     }
     my $mruData = get_mruid($occList{$node}{$proc}->{'instancePath'});
 
+    my $fapi_name = "NA"; # OCC not FAPI target
+
     print "
 <!-- $SYSNAME n${node}p${proc} OCC units -->
 
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}occ0</id>
     <type>occ</type>
-    <attribute><id>HUID</id><default>${uidstr}</default></attribute>";
+    <attribute><id>HUID</id><default>${uidstr}</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>";
 
     do_plugin('fsp_occ', $ordinalId );
 

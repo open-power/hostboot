@@ -740,32 +740,61 @@ Target<K, V>::getOtherEnd(const TargetState i_state) const
 /// @brief Return the string interpretation of this target
 /// @tparam T The type of the target
 /// @param[in] i_target Target<T>
-/// @param[in] i_buffer buffer to write in to
+/// @param[in/out] io_buffer buffer to write in to
 /// @param[in] i_bsize size of the buffer
 /// @return void
 /// @post The contents of the buffer is replaced with the string
 /// representation of the target
 ///
 template< TargetType T >
-inline void toString(const Target<T>& i_target, char* i_buffer, size_t i_bsize)
+inline void toString(const Target<T>& i_target, char* io_buffer, size_t i_bsize)
 {
-    snprintf(i_buffer, i_bsize, "Target 0x%lx/0x%x", i_target.get(), T);
+    TARGETING::ATTR_FAPI_NAME_type l_nameString = {0};
+    const TARGETING::Target * l_platTarget =
+                          static_cast<const TARGETING::Target*>(i_target.get());
+
+    if(!l_platTarget->tryGetAttr<TARGETING::ATTR_FAPI_NAME>(l_nameString))
+    {
+      FAPI_ERR("ERROR: Can not read FAPI_NAME attribute");
+      snprintf(io_buffer, i_bsize, "Target 0x%lx/0x%x", l_platTarget, T);
+    }
+    else
+    {
+      size_t needed_buffer_size = strlen((const char*)l_nameString) + 1;
+
+      // Is i_buffer large enough for the entire string + null
+      if (i_bsize < needed_buffer_size)
+      {
+        FAPI_INF("Should use a larger buffer size (%d instead of %d) for %s",
+                  needed_buffer_size, i_bsize, l_nameString);
+        memcpy(io_buffer, l_nameString, i_bsize);
+        if (i_bsize > 0)
+        {
+          io_buffer[i_bsize-1] = '\0';
+        }
+      }
+      else
+      {
+        // copy full attribute string + null character
+        memcpy(io_buffer, l_nameString, needed_buffer_size);
+      }
+    }
 }
 
 ///
 /// @brief Return the string interpretation of this target
 /// @tparam T The type of the target
 /// @param[in] A pointer to the Target<T>
-/// @param[in] i_buffer buffer to write in to
+/// @param[in/out] io_buffer buffer to write in to
 /// @param[in] i_bsize size of the buffer
 /// @return void
 /// @post The contents of the buffer is replaced with the string
 /// representation of the target
 ///
 template< TargetType T >
-inline void toString(const Target<T>* i_target, char* i_buffer, size_t i_bsize)
+inline void toString(const Target<T> *i_target, char* io_buffer, size_t i_bsize)
 {
-    snprintf(i_buffer, i_bsize, "Target 0x%lx/0x%x", i_target->get(), T);
+    toString(*i_target, io_buffer, i_bsize);
 }
 
 ///
