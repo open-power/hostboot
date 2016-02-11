@@ -2762,6 +2762,28 @@
 <!-- End attributes (4) to test string support -->
 
 <attribute>
+    <id>FAPI_NAME</id>
+    <description>Common name across FAPI environments
+    chip target -> pu:k0:n0:s0:p00
+    chip unit target -> pu.core:k0:n0:s0:p00:c0
+    cage/system target -> k0
+
+    (chip type).(unit type):k(cage,always zero for us):n(node/drawer)
+              :s(slot,always zero for us):p(chip position):c(core/unit position)
+    pu  = generic processor
+    </description>
+    <simpleType>
+        <string>
+            <default>unknown</default>
+            <sizeInclNull>64</sizeInclNull>
+        </string>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+
+<attribute>
     <id>VPD_REC_NUM</id>
     <description>Record offset for this target's VPD</description>
     <simpleType>
