@@ -23,4 +23,5 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_mem_startclocks
+OBJS+=p9_sbe_common.o
 $(call BUILD_PROCEDURE)
