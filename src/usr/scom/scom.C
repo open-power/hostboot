@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -632,6 +632,22 @@ void addScomFailFFDC( errlHndl_t i_err,
         for( size_t x = 0; x < (sizeof(ffdc_regs)/sizeof(ffdc_regs[0])); x++ )
         {
             l_scom_data.addData(DEVICE_SCOM_ADDRESS(ex_offset|ffdc_regs[x]));
+        }
+    }
+    //Scoms to the OCC circular buffer
+    else if( ((i_addr & 0xFFFFFFFF) == 0x0006B035)
+             && (TARGETING::TYPE_PROC == l_type) )
+    {
+        addit = true;
+        //grab some OCB regs to see how things are configured
+        uint64_t ffdc_regs[] = {
+            0x0006B030, //OCBAR1
+            0x0006B031, //OCBCSR1
+            0x0006B034, //OCBESR1
+        };
+        for( size_t x = 0; x < (sizeof(ffdc_regs)/sizeof(ffdc_regs[0])); x++ )
+        {
+            l_scom_data.addData(DEVICE_SCOM_ADDRESS(ffdc_regs[x]));
         }
     }
 
