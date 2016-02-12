@@ -136,9 +136,16 @@ class ReturnCode : public FirstFailureData<ReturnCode>
 /// This implementation assumes no exception handling and leverages thread-local
 /// storage. For platforms without thread support, a global variable will
 /// suffice for the error state.
-extern thread_local ReturnCode current_err;      /// the current error state
+
+
 extern thread_local uint64_t pib_error_mask;     /// the pib mask
 extern thread_local uint64_t operational_state;  /// the operational mode
+#ifndef PLAT_NO_THREAD_LOCAL_STORAGE
+    extern thread_local ReturnCode current_err;      /// the current error state
+#else
+    extern ReturnCode current_err;
+#endif
+
 }
 
 #endif
