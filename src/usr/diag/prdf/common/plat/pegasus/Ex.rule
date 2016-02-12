@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2015
+# Contributors Listed Below - COPYRIGHT 2012,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -1856,7 +1856,7 @@ group gNcuFir filter singlebit
     /** NCUFIR[9]
      *  STORE_TIMEOUT: Store timed out on PB.
      */
-    (NcuFir, bit(9)) ? calloutExLowSecLvlThr1MedDumpSh;
+    (NcuFir, bit(9)) ? callout2ndLvlMedThr1;
 
     /** NCUFIR[10]
      *  TLBIE_MASTER_TIMEOUT: TLBIE master timed out on PB.
