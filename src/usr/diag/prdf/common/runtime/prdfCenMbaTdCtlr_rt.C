@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,7 @@
 #include <prdfExtensibleChip.H>
 #include <prdfPlatServices.H>
 #include <UtilHash.H>
+#include <prdfRegisterCache.H>
 
 #ifndef __HOSTBOOT_RUNTIME
   #include <prdfSdcFileControl.H>
@@ -247,6 +248,64 @@ int32_t CenMbaTdCtlr::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
                 break;
             }
         }
+
+        // Since we had to manually stop the maintenance command we should
+        // refresh all relevant registers that may have changed state.
+
+        RegDataCache & cache = RegDataCache::getCachedRegisters();
+
+        const char * membRegs[2][18] =
+        {
+            { "MBA0_MBSECCFIR", "MBA0_MBSECCFIR_MASK",
+              "MBA0_MBSECCFIR_ACT0", "MBA0_MBSECCFIR_ACT1",
+              "MBA0_MBSECCERRPT_0","MBA0_MBSECCERRPT_1",
+              "MBA0_MBSEC0", "MBA0_MBSEC1", "MBA0_MBSTR",
+              "MBA0_MBSSYMEC0", "MBA0_MBSSYMEC1", "MBA0_MBSSYMEC2",
+              "MBA0_MBSSYMEC3", "MBA0_MBSSYMEC4", "MBA0_MBSSYMEC5",
+              "MBA0_MBSSYMEC6", "MBA0_MBSSYMEC7", "MBA0_MBSSYMEC8", },
+            { "MBA1_MBSECCFIR", "MBA1_MBSECCFIR_MASK",
+              "MBA1_MBSECCFIR_ACT0", "MBA1_MBSECCFIR_ACT1",
+              "MBA1_MBSECCERRPT_0","MBA1_MBSECCERRPT_1",
+              "MBA1_MBSEC0", "MBA1_MBSEC1", "MBA1_MBSTR",
+              "MBA1_MBSSYMEC0", "MBA1_MBSSYMEC1", "MBA1_MBSSYMEC2",
+              "MBA1_MBSSYMEC3", "MBA1_MBSSYMEC4", "MBA1_MBSSYMEC5",
+              "MBA1_MBSSYMEC6", "MBA1_MBSSYMEC7", "MBA1_MBSSYMEC8", },
+        };
+        for ( uint32_t i = 0; i < 18; i++ )
+        {
+            SCAN_COMM_REGISTER_CLASS * reg
+                           = iv_membChip->getRegister( membRegs[iv_mbaPos][i] );
+            cache.flush( iv_membChip, reg );
+        }
+
+        const char * mbaRegs[8] =
+        {
+            "MBASPA", "MBASPA_MASK", "MBMCT", "MBMSR", "MBMACA", "MBMEA",
+            "MBASCTL", "MBAECTL",
+        };
+        for ( uint32_t i = 0; i < 8; i++ )
+        {
+            SCAN_COMM_REGISTER_CLASS * reg
+                                    = iv_mbaChip->getRegister( mbaRegs[i] );
+            cache.flush( iv_mbaChip, reg );
+        }
+
+        // Now recapture those registers.
+
+        CaptureData & cd = io_sc.service_data->GetCaptureData();
+
+        if ( 0 == iv_mbaPos )
+        {
+            iv_membChip->CaptureErrorData(cd,
+                                        Util::hashString("MaintCmdRegs_mba0") );
+        }
+        else
+        {
+            iv_membChip->CaptureErrorData(cd,
+                                        Util::hashString("MaintCmdRegs_mba1") );
+        }
+
+        iv_mbaChip->CaptureErrorData(cd, Util::hashString("MaintCmdRegs"));
 
         // Start the next diagnostics procedure. It is possible that background
         // scrub could have found an ECC error before we had a chance to stop
