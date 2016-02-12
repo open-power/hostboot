@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -21,11 +21,11 @@
 ///
 /// @brief Enable RI/DI chip wide
 //------------------------------------------------------------------------------
-// *HWP HW Owner        : Anusha Reddy Rangareddygari <anusrang@in.ibm.com>
+// *HWP HW Owner        : Abhishek Agarwal <abagarw8@in.ibm.com>
 // *HWP HW Backup Owner : Srinivas V Naga <srinivan@in.ibm.com>
-// *HWP FW Owner        : Sunil Kumar <skumar8j@in.ibm.com>
+// *HWP FW Owner        : Sunil kumar <skumar8j@in.ibm.com>
 // *HWP Team            : Perv
-// *HWP Level           : 1
+// *HWP Level           : 2
 // *HWP Consumed by     : HB
 //------------------------------------------------------------------------------
 
@@ -37,15 +37,18 @@
 #include <fapi2.H>
 
 
-typedef fapi2::ReturnCode (*p9_chiplet_enable_ridi_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
+typedef fapi2::ReturnCode (*p9_chiplet_enable_ridi_FP_t)(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
 /// @brief Drop RI/DI for all chiplets being used (A, X, O, Pcie, DMI)
 ///
-/// @param[in]     i_target_chiplet   Reference to TARGET_TYPE_PROC_CHIP target
+/// @param[in]     i_target_chip   Reference to TARGET_TYPE_PROC_CHIP target
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
+
 extern "C"
 {
-    fapi2::ReturnCode p9_chiplet_enable_ridi(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chiplet);
+    fapi2::ReturnCode p9_chiplet_enable_ridi(const
+            fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip);
 }
 
 #endif
