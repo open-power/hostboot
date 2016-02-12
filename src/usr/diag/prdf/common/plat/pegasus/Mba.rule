@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2015
+# Contributors Listed Below - COPYRIGHT 2012,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -238,6 +238,7 @@ chip Mba
         mask        (|, 0x03010614);
         capture     group FirRegs;
         capture     group MemChipletRegs;
+        capture     group MaintCmdRegs;
     };
 
     register MBASPA_AND
@@ -254,6 +255,7 @@ chip Mba
         scomaddr    0x03010614;
         capture     group FirRegs;
         capture     group MemChipletRegs;
+        capture     group MaintCmdRegs;
     };
 
     ############################################################################
@@ -317,6 +319,7 @@ chip Mba
         name        "MBA Maintenance Command Type Register";
         scomaddr    0x0301060A;
         capture     group default;
+        capture     group MaintCmdRegs;
     };
 
     # NOTE: PRD doesn't use MBMCC directly and the bits are cleared by HW so I
@@ -327,6 +330,7 @@ chip Mba
         name        "MBA Maintenance Command Status Register";
         scomaddr    0x0301060C;
         capture     group default;
+        capture     group MaintCmdRegs;
     };
 
     register MBMACA
@@ -334,6 +338,7 @@ chip Mba
         name        "MBA Maintenance Command Start Address Register";
         scomaddr    0x0301060D;
         capture     group default;
+        capture     group MaintCmdRegs;
     };
 
     register MBMEA
@@ -341,6 +346,7 @@ chip Mba
         name        "MBA Maintenance Command End Address Register";
         scomaddr    0x0301060E;
         capture     group default;
+        capture     group MaintCmdRegs;
     };
 
     register MBASCTL
@@ -348,6 +354,7 @@ chip Mba
         name        "MBA Memory Scrub/Read Control Register";
         scomaddr    0x0301060F;
         capture     group default;
+        capture     group MaintCmdRegs;
     };
 
     register MBAECTL
@@ -355,6 +362,7 @@ chip Mba
         name        "MBA Error Control Register";
         scomaddr    0x03010610;
         capture     group default;
+        capture     group MaintCmdRegs;
     };
 
 };
