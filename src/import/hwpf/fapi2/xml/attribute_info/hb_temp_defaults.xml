@@ -63,6 +63,12 @@
     <attribute>
          <id>ATTR_PM_FIRINIT_DONE_ONCE_FLAG</id>
     </attribute>
+    <attribute>
+        <id>ATTR_VCS_AVSBUS_BUSNUM</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_VCS_AVSBUS_RAIL</id>
+    </attribute>
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->

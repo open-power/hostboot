@@ -119,6 +119,22 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_VCS_AVSBUS_BUSNUM</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Defines the AVSBus (0 or 1) which has the chip VCS rail VRM
+
+      Producer:  Machine Readable Workbook
+      Consumers: p9_set_evid;
+                 p9_set_voltage (tool);
+                 p9_build_pstate_datablock ->
+                        Pstate Parameter Block (PSPB) for PGPE
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_VDD_AVSBUS_RAIL</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -151,6 +167,23 @@
     <valueType>uint8</valueType>
     <platInit/>
   </attribute>
+  <!-- ********************************************************************* -->
+ <attribute>
+   <id>ATTR_VCS_AVSBUS_RAIL</id>
+   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+   <description>
+    Defines the AVSBus rail selector number (0 - 15) for the VCS VRM on the bus
+    defined by ATTR_AVSBUS_VDN_BUSNUM.
+
+     Producer:  Machine Readable Workbook
+     Consumers:
+     p9_set_avsbus_voltage (tool);
+ 	       p9_build_pstate_datablock ->
+ 		      Pstate Parameter Block (PSPB) for PGPE
+   </description>
+   <valueType>uint8</valueType>
+   <platInit/>
+ </attribute>
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_VCS_I2C_BUSNUM</id>
