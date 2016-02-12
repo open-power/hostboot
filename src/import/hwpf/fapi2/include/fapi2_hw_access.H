@@ -152,9 +152,9 @@ inline ReturnCode modifyCfamRegister(const Target<K>& i_target,
 /// @param[in] i_ringMode Ring operation mode.
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 template< TargetType K >
-inline ReturnCode putRing(const Target<K>& i_target,
-                          const RingID i_ringID,
-                          const RingMode i_ringMode = RING_MODE_HEADER_CHECK);
+ReturnCode putRing(const Target<K>& i_target,
+                   const RingID i_ringID,
+                   const RingMode i_ringMode = RING_MODE_HEADER_CHECK);
 
 // variable_buffer isn't supported on PPE
 #ifndef __PPE__
