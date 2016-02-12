@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -255,6 +255,7 @@
         mask        (|, 0x02011445);
         capture     group default;
         capture     group FirRegs;
+        capture     group MaintCmdRegs_mba0;
     };
 
     register MBA0_MBSECCFIR_AND
@@ -271,6 +272,7 @@
         scomaddr    0x02011443;
         capture     group default;
         capture     group FirRegs;
+        capture     group MaintCmdRegs_mba0;
     };
 
     register MBA0_MBSECCFIR_MASK_AND
@@ -296,6 +298,7 @@
         capture     type secondary;
         capture     group default;
         capture     group FirRegs;
+        capture     group MaintCmdRegs_mba0;
         capture     req nonzero("MBA0_MBSECCFIR");
     };
 
@@ -306,6 +309,7 @@
         capture     type secondary;
         capture     group default;
         capture     group FirRegs;
+        capture     group MaintCmdRegs_mba0;
         capture     req nonzero("MBA0_MBSECCFIR");
     };
 
@@ -321,6 +325,7 @@
         mask        (|, 0x02011485);
         capture     group default;
         capture     group FirRegs;
+        capture     group MaintCmdRegs_mba1;
     };
 
     register MBA1_MBSECCFIR_AND
@@ -337,6 +342,7 @@
         scomaddr    0x02011483;
         capture     group default;
         capture     group FirRegs;
+        capture     group MaintCmdRegs_mba1;
     };
 
     register MBA1_MBSECCFIR_MASK_AND
@@ -362,6 +368,7 @@
         capture     type secondary;
         capture     group default;
         capture     group FirRegs;
+        capture     group MaintCmdRegs_mba1;
         capture     req nonzero("MBA1_MBSECCFIR");
     };
 
@@ -372,6 +379,7 @@
         capture     type secondary;
         capture     group default;
         capture     group FirRegs;
+        capture     group MaintCmdRegs_mba1;
         capture     req nonzero("MBA1_MBSECCFIR");
     };
 
@@ -572,6 +580,7 @@
         scomaddr    0x02011466;
         capture     group default;
         capture     group CerrRegs;
+        capture     group MaintCmdRegs_mba0;
     };
 
     register MBA0_MBSECCERRPT_1
@@ -580,13 +589,16 @@
         scomaddr    0x02011467;
         capture     group default;
         capture     group CerrRegs;
+        capture     group MaintCmdRegs_mba0;
     };
+
     register MBA1_MBSECCERRPT_0
     {
         name        "MBU.MBS.ECC23.MBSECCERR0";
         scomaddr    0x020114A6;
         capture     group default;
         capture     group CerrRegs;
+        capture     group MaintCmdRegs_mba1;
     };
 
     register MBA1_MBSECCERRPT_1
@@ -595,6 +607,7 @@
         scomaddr    0x020114A7;
         capture     group default;
         capture     group CerrRegs;
+        capture     group MaintCmdRegs_mba1;
     };
 
     register MBA0_MBXERRSTAT
@@ -690,6 +703,7 @@
         name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSEC0Q";
         scomaddr    0x02011653;
         capture     group default;
+        capture     group MaintCmdRegs_mba0;
     };
 
     register MBA0_MBSEC1
@@ -697,6 +711,7 @@
         name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSEC1Q";
         scomaddr    0x02011654;
         capture     group default;
+        capture     group MaintCmdRegs_mba0;
     };
 
     register MBA1_MBSEC0
@@ -704,6 +719,7 @@
         name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSEC0Q";
         scomaddr    0x02011753;
         capture     group default;
+        capture     group MaintCmdRegs_mba1;
     };
 
     register MBA1_MBSEC1
@@ -711,6 +727,7 @@
         name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSEC1Q";
         scomaddr    0x02011754;
         capture     group default;
+        capture     group MaintCmdRegs_mba1;
     };
 
     ############################################################################
@@ -722,6 +739,7 @@
         name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSTRQ";
         scomaddr    0x02011655;
         capture     group default;
+        capture     group MaintCmdRegs_mba0;
     };
 
     register MBA1_MBSTR
@@ -729,6 +747,7 @@
         name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSTRQ";
         scomaddr    0x02011755;
         capture     group default;
+        capture     group MaintCmdRegs_mba1;
     };
 
     ############################################################################
@@ -740,6 +759,7 @@
         name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSSYMEC0Q";
         scomaddr    0x02011656;
         capture     group default;
+        capture     group MaintCmdRegs_mba0;
     };
 
     register MBA0_MBSSYMEC1
@@ -747,6 +767,7 @@
         name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSSYMEC1Q";
         scomaddr    0x02011657;
         capture     group default;
+        capture     group MaintCmdRegs_mba0;
     };
 
     register MBA0_MBSSYMEC2
@@ -754,6 +775,7 @@
         name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSSYMEC2Q";
         scomaddr    0x02011658;
         capture     group default;
+        capture     group MaintCmdRegs_mba0;
     };
 
     register MBA0_MBSSYMEC3
@@ -761,6 +783,7 @@
         name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSSYMEC3Q";
         scomaddr    0x02011659;
         capture     group default;
+        capture     group MaintCmdRegs_mba0;
     };
 
     register MBA0_MBSSYMEC4
@@ -768,6 +791,7 @@
         name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSSYMEC4Q";
         scomaddr    0x0201165a;
         capture     group default;
+        capture     group MaintCmdRegs_mba0;
     };
 
     register MBA0_MBSSYMEC5
@@ -775,6 +799,7 @@
         name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSSYMEC5Q";
         scomaddr    0x0201165b;
         capture     group default;
+        capture     group MaintCmdRegs_mba0;
     };
 
     register MBA0_MBSSYMEC6
@@ -782,6 +807,7 @@
         name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSSYMEC6Q";
         scomaddr    0x0201165c;
         capture     group default;
+        capture     group MaintCmdRegs_mba0;
     };
 
     register MBA0_MBSSYMEC7
@@ -789,6 +815,7 @@
         name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSSYMEC7Q";
         scomaddr    0x0201165d;
         capture     group default;
+        capture     group MaintCmdRegs_mba0;
     };
 
     register MBA0_MBSSYMEC8
@@ -796,6 +823,7 @@
         name        "MBU.MBS.MCBISTS01.SCOMFIR.MBSSYMEC8Q";
         scomaddr    0x0201165e;
         capture     group default;
+        capture     group MaintCmdRegs_mba0;
     };
 
     register MBA1_MBSSYMEC0
@@ -803,6 +831,7 @@
         name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSSYMEC0Q";
         scomaddr    0x02011756;
         capture     group default;
+        capture     group MaintCmdRegs_mba1;
     };
 
     register MBA1_MBSSYMEC1
@@ -810,6 +839,7 @@
         name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSSYMEC1Q";
         scomaddr    0x02011757;
         capture     group default;
+        capture     group MaintCmdRegs_mba1;
     };
 
     register MBA1_MBSSYMEC2
@@ -817,6 +847,7 @@
         name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSSYMEC2Q";
         scomaddr    0x02011758;
         capture     group default;
+        capture     group MaintCmdRegs_mba1;
     };
 
     register MBA1_MBSSYMEC3
@@ -824,6 +855,7 @@
         name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSSYMEC3Q";
         scomaddr    0x02011759;
         capture     group default;
+        capture     group MaintCmdRegs_mba1;
     };
 
     register MBA1_MBSSYMEC4
@@ -831,6 +863,7 @@
         name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSSYMEC4Q";
         scomaddr    0x0201175a;
         capture     group default;
+        capture     group MaintCmdRegs_mba1;
     };
 
     register MBA1_MBSSYMEC5
@@ -838,6 +871,7 @@
         name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSSYMEC5Q";
         scomaddr    0x0201175b;
         capture     group default;
+        capture     group MaintCmdRegs_mba1;
     };
 
     register MBA1_MBSSYMEC6
@@ -845,6 +879,7 @@
         name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSSYMEC6Q";
         scomaddr    0x0201175c;
         capture     group default;
+        capture     group MaintCmdRegs_mba1;
     };
 
     register MBA1_MBSSYMEC7
@@ -852,6 +887,7 @@
         name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSSYMEC7Q";
         scomaddr    0x0201175d;
         capture     group default;
+        capture     group MaintCmdRegs_mba1;
     };
 
     register MBA1_MBSSYMEC8
@@ -859,6 +895,7 @@
         name        "MBU.MBS.MCBISTS23.SCOMFIR.MBSSYMEC8Q";
         scomaddr    0x0201175e;
         capture     group default;
+        capture     group MaintCmdRegs_mba1;
     };
 
     ############################################################################
