@@ -256,34 +256,14 @@ HOSTBOOT_FAKEPNOR_SECTIONS = HBI=${EXT_FAKE_IMAGE},HBEL=${HBEL_IMAGE},MVPD=${MVP
 
 HBFW_OBJPATH = ${.PATH:M*obj*}
 ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
-MURANO_TARG_IMG = simics_MURANO_targeting.bin
-NAPLES_TARG_IMG = simics_NAPLES_targeting.bin
-VENICE_TARG_IMG = simics_VENICE_targeting.bin
 NIMBUS_TARG_IMG = simics_NIMBUS_targeting.bin
-MURANO_TARG_IMG_ECC = simics_MURANO_targeting.bin.ecc
-NAPLES_TARG_IMG_ECC = simics_NAPLES_targeting.bin.ecc
-VENICE_TARG_IMG_ECC = simics_VENICE_targeting.bin.ecc
 NIMBUS_TARG_IMG_ECC = simics_NIMBUS_targeting.bin.ecc
 NIMBUS_TARG_IMG_FAKE = simics_NIMBUS_targeting.bin.fake
-MURANO_SLW_IMG = ${ENGD_OBJPATH:Fs1.ref_image.hdr.bin}
-NAPLES_SLW_IMG = ${ENGD_OBJPATH:Fs1.ref_image.hdr.bin}
-VENICE_SLW_IMG = ${ENGD_OBJPATH:Fp8.ref_image.hdr.bin}
 NIMBUS_SLW_IMG = ${ENGD_OBJPATH:Fp8.ref_image.hdr.bin}
-MURANO_LOCAL_SLW_IMG = s1.ref_image.hdr.bin
-NAPLES_LOCAL_SLW_IMG = s1.ref_image.hdr.bin
-VENICE_LOCAL_SLW_IMG = p8.ref_image.hdr.bin
+#Using p8 images until we have something valid for p9...
 NIMBUS_LOCAL_SLW_IMG = p8.ref_image.hdr.bin
-MURANO_LOCAL_SLW_IMG_ECC = s1.ref_image.hdr.bin.ecc
-NAPLES_LOCAL_SLW_IMG_ECC = s1.ref_image.hdr.bin.ecc
-VENICE_LOCAL_SLW_IMG_ECC = p8.ref_image.hdr.bin.ecc
 NIMBUS_LOCAL_SLW_IMG_ECC = p8.ref_image.hdr.bin.ecc
-MURANO_SBE_IMG = s1SbePartition.bin
-NAPLES_SBE_IMG = s1SbePartition.bin
-VENICE_SBE_IMG = p8SbePartition.bin
 NIMBUS_SBE_IMG = p8SbePartition.bin
-MURANO_SBE_IMG_ECC = s1SbePartition.bin.ecc
-NAPLES_SBE_IMG_ECC = s1SbePartition.bin.ecc
-VENICE_SBE_IMG_ECC = p8SbePartition.bin.ecc
 NIMBUS_SBE_IMG_ECC = p8SbePartition.bin.ecc
 SBEC_IMG = centSbePartition.bin
 SBEC_IMG_ECC = centSbePartition.bin.ecc
@@ -291,47 +271,23 @@ TEMP_IMG = temp.bin
 
 inject_ecc: build_sbe_partitions
 	# cp file with full path to one with local path
-	cp ${MURANO_SLW_IMG} ${MURANO_LOCAL_SLW_IMG}
-	cp ${NAPLES_SLW_IMG} ${NAPLES_LOCAL_SLW_IMG}
-	cp ${VENICE_SLW_IMG} ${VENICE_LOCAL_SLW_IMG}
 	cp ${NIMBUS_SLW_IMG} ${NIMBUS_LOCAL_SLW_IMG}
 	# HBD partition
-	dd if=${${MURANO_TARG_IMG}:P} of=${TEMP_IMG} ibs=1024k conv=sync; \
-	ecc --inject ${TEMP_IMG} --output ${MURANO_TARG_IMG_ECC} --p8; \
-	dd if=${${NAPLES_TARG_IMG}:P} of=${TEMP_IMG} ibs=1024k conv=sync; \
-	ecc --inject ${TEMP_IMG} --output ${NAPLES_TARG_IMG_ECC} --p8; \
-	dd if=${${VENICE_TARG_IMG}:P} of=${TEMP_IMG} ibs=1024k conv=sync; \
-	ecc --inject ${TEMP_IMG} --output ${VENICE_TARG_IMG_ECC} --p8; \
 	dd if=${${NIMBUS_TARG_IMG}:P} of=${TEMP_IMG} ibs=1024k conv=sync; \
 	ecc --inject ${TEMP_IMG} --output ${NIMBUS_TARG_IMG_ECC} --p8; \
 	#for NIMBUS fake pnor skip version header
 	dd if=${${NIMBUS_TARG_IMG}:P} of=${NIMBUS_TARG_IMG_FAKE} ibs=4k count=32 skip=1 conv=sync; \
 	# SBE partition
-	dd if=${${MURANO_SBE_IMG}:P} of=${TEMP_IMG} ibs=256k conv=sync; \
-	ecc --inject ${TEMP_IMG} --output ${MURANO_SBE_IMG_ECC} --p8; \
-	dd if=${${NAPLES_SBE_IMG}:P} of=${TEMP_IMG} ibs=256k conv=sync; \
-	ecc --inject ${TEMP_IMG} --output ${NAPLES_SBE_IMG_ECC} --p8; \
-	dd if=${${VENICE_SBE_IMG}:P} of=${TEMP_IMG} ibs=256k conv=sync; \
-	ecc --inject ${TEMP_IMG} --output ${VENICE_SBE_IMG_ECC} --p8; \
 	dd if=${${NIMBUS_SBE_IMG}:P} of=${TEMP_IMG} ibs=256k conv=sync; \
 	ecc --inject ${TEMP_IMG} --output ${NIMBUS_SBE_IMG_ECC} --p8; \
 	# SBEC partition
 	dd if=${${SBEC_IMG}:P} of=${TEMP_IMG} ibs=512k conv=sync; \
 	ecc --inject ${TEMP_IMG} --output ${SBEC_IMG_ECC} --p8; \
 	# WINK partition
-	dd if=${${MURANO_LOCAL_SLW_IMG}:P} of=${TEMP_IMG} ibs=1024k conv=sync; \
-	ecc --inject ${TEMP_IMG} --output ${MURANO_LOCAL_SLW_IMG_ECC} --p8; \
-	dd if=${${NAPLES_LOCAL_SLW_IMG}:P} of=${TEMP_IMG} ibs=1024k conv=sync; \
-	ecc --inject ${TEMP_IMG} --output ${NAPLES_LOCAL_SLW_IMG_ECC} --p8; \
-	dd if=${${VENICE_LOCAL_SLW_IMG}:P} of=${TEMP_IMG} ibs=1024k conv=sync; \
-	ecc --inject ${TEMP_IMG} --output ${VENICE_LOCAL_SLW_IMG_ECC} --p8; \
 	dd if=${${NIMBUS_LOCAL_SLW_IMG}:P} of=${TEMP_IMG} ibs=1024k conv=sync; \
 	ecc --inject ${TEMP_IMG} --output ${NIMBUS_LOCAL_SLW_IMG_ECC} --p8; \
 	rm ${TEMP_IMG}
 
-MURANO_SECT = HBD=${MURANO_TARG_IMG_ECC},SBE=${MURANO_SBE_IMG_ECC},SBEC=${SBEC_IMG_ECC},WINK=${MURANO_LOCAL_SLW_IMG_ECC}
-NAPLES_SECT = HBD=${NAPLES_TARG_IMG_ECC},SBE=${NAPLES_SBE_IMG_ECC},SBEC=${SBEC_IMG_ECC},WINK=${NAPLES_LOCAL_SLW_IMG_ECC}
-VENICE_SECT = HBD=${VENICE_TARG_IMG_ECC},SBE=${VENICE_SBE_IMG_ECC},SBEC=${SBEC_IMG_ECC},WINK=${VENICE_LOCAL_SLW_IMG_ECC}
 NIMBUS_SECT = HBD=${NIMBUS_TARG_IMG_ECC},SBE=${NIMBUS_SBE_IMG_ECC},SBEC=${SBEC_IMG_ECC},WINK=${NIMBUS_LOCAL_SLW_IMG_ECC}
 FAKE_SECT = HBD=${NIMBUS_TARG_IMG_FAKE}
 
@@ -345,9 +301,6 @@ FAKE_SECT = HBD=${NIMBUS_TARG_IMG_FAKE}
 .endif
 
 PNOR_IMG_INFO = \
-   murano.pnor:defaultPnorLayout.xml:${MURANO_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
-   naples.pnor:defaultPnorLayout.xml:${NAPLES_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
-   venice.pnor:defaultPnorLayout.xml:${VENICE_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
    nimbus.pnor:defaultPnorLayout.xml:${NIMBUS_SECT},${HOSTBOOT_DEFAULT_SECTIONS} \
    ${FAKE_PNOR_IMG_INFO} \
    ${FIPS_PNOR_INFO}

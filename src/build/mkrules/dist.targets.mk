@@ -102,9 +102,7 @@ COPY_RENAME_FILES = \
     img/hostboot.bin:img/hbicore$(UNDERSCORE_TEST).bin:fsp,openpower \
     img/hostboot_extended.bin:img/hbicore$(UNDERSCORE_TEST)_extended.bin:fsp,openpower \
     img/hostboot_runtime.bin:img/hbirt$(UNDERSCORE_TEST).bin:fsp,openpower \
-    vbu_MURANO.pnor:img/vbu$(UNDERSCORE_TEST)_MURANO.pnor:vpo \
-    vbu_VENICE.pnor:img/vbu$(UNDERSCORE_TEST)_VENICE.pnor:vpo \
-    vbu_NAPLES.pnor:img/vbu$(UNDERSCORE_TEST)_NAPLES.pnor:vpo \
+    vbu_NIMBUS.pnor:img/vbu$(UNDERSCORE_TEST)_NIMBUS.pnor:vpo \
     hbicore.syms:img/hbicore$(UNDERSCORE_TEST).syms:tools,vpo,openpower \
     hbicore.list.bz2:img/hbicore$(UNDERSCORE_TEST).list.bz2:tools,vpo,openpower \
     hbicore.bin.modinfo:img/hbicore$(UNDERSCORE_TEST).bin.modinfo:tools,vpo,openpower \
@@ -206,9 +204,6 @@ fsp.tar_CONTENTS = \
     src/build/buildpnor/buildpnor.pl \
     src/build/buildpnor/defaultPnorLayout.xml \
     $(if $(FAKEPNOR), src/build/buildpnor/pnorLayoutFake.xml, ) \
-    img/simics_MURANO_targeting.bin \
-    img/simics_VENICE_targeting.bin \
-    img/simics_NAPLES_targeting.bin \
     img/simics_NIMBUS_targeting.bin \
     $(addsuffix :targeting/,\
 	$(call ROOTPATH_WILDCARD_RECURSIVE,src/usr/targeting/common))\
