@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2011,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -142,7 +142,7 @@ hb_helptext()
         echo "  Requires the hostboot image to be 'prime'd into the workspace."
         echo
         echo "  Environment Variables:"
-        echo "      MACHINE: Alternate simics machine type (default VENICE)"
+        echo "      MACHINE: Alternate simics machine type (default NIMBUS)"
         echo "      SIMICSOPTIONS: Additional options to always pass to the"
         echo "                     start simics script, such as '-nre'."
         echo
