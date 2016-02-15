@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2015
+# Contributors Listed Below - COPYRIGHT 2013,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -935,7 +935,8 @@ my $devpath = parse_xml_file($cec_chips_file,
                         KeyAttr=>'instance-path');
 
 my $pcie_busses_file = open_mrw_file($mrwdir, "${sysname}-pcie-busses.xml");
-my $pcie_buses = parse_xml_file($pcie_busses_file);
+my $pcie_buses = parse_xml_file($pcie_busses_file,
+                        forcearray=>['bifurcation-setting']);
 
 our %pcie_list;
 
