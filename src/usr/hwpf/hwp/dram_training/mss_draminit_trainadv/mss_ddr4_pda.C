@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_ddr4_pda.C,v 1.44 2015/10/23 15:11:24 sglancy Exp $
+// $Id: mss_ddr4_pda.C,v 1.51 2016/02/19 21:14:34 sglancy Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2013
 // *! All Rights Reserved -- Property of IBM
@@ -42,6 +42,12 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.16   | 02/19/16 | sglancy | Fixed B-side MRS inversion bug
+//  1.15   | 02/12/16 | sglancy | Addressed FW comments
+//  1.15   | 02/03/16 | sglancy | Fixed FW compile issues
+//  1.15   | 01/11/16 | sglancy | Fixed issue with PDA timings
+//  1.15   | 11/09/15 | sglancy | Patch to fix cronus compile issue
+//  1.14   | 11/03/15 | sglancy | Fixed attribute names for DDR4 RDIMM
 //  1.13   | 10/23/15 | sglancy | Changed attribute names
 //  1.12   | 10/21/15 | sglancy | Changed attribute names
 //  1.11   | 07/23/15 | sglancy | Changed code to address FW comments
@@ -63,6 +69,7 @@
 #include <fapi.H>
 #include <mss_ddr4_pda.H>
 #include <mss_funcs.H>
+#include <mss_ddr4_funcs.H>
 #include <cen_scom_addresses.H>
 #include <mss_access_delay_reg.H>
 #include <vector>
@@ -146,7 +153,17 @@ ReturnCode PDA_MRS_Storage::checkPDAValid(Target& i_target) {
    
    //now checks based upon attributes
    uint8_t num_ranks[2][2];
-   rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM,&i_target,num_ranks); 
+   uint8_t dram_stack[2][2];
+   rc = FAPI_ATTR_GET(ATTR_EFF_STACK_TYPE, &i_target, dram_stack);
+   if(rc) return rc;
+   //get num master ranks per dimm for 3DS
+   if(dram_stack[0][0] == ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS) {
+      rc = FAPI_ATTR_GET(ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, &i_target, num_ranks);
+   }
+   //get num ranks per dimm for non-3DS
+   else {
+      rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target, num_ranks);
+   }
    if(rc) return rc;
    
    //no ranks on the selected dimm
@@ -411,12 +428,14 @@ ReturnCode mss_ddr4_checksort_pda(Target& i_target, vector<PDA_MRS_Storage>& pda
 /////////////////////////////////////////////////////////////////////////////////
 ReturnCode mss_ddr4_setup_pda(
             Target& i_target,
-            uint32_t& io_ccs_inst_cnt
+            uint32_t& io_ccs_inst_cnt,
+	    uint8_t dimm_to_run,
+	    uint8_t rank_to_run
             )
 {
     uint32_t i_port_number=0;
-    uint32_t dimm_number;
-    uint32_t rank_number;
+    uint32_t dimm_number = dimm_to_run;
+    uint32_t rank_number = rank_to_run;
     const uint32_t NUM_POLL = 10;
     const uint32_t WAIT_TIMER = 1500;
     ReturnCode rc;  
@@ -451,12 +470,26 @@ ReturnCode mss_ddr4_setup_pda(
     
     uint8_t num_ranks_array[2][2]; //[port][dimm]
     
+    uint8_t dram_stack[2][2];
+    rc = FAPI_ATTR_GET(ATTR_EFF_STACK_TYPE, &i_target, dram_stack);
+    if(rc) return rc;
+    
     uint8_t dimm_type;
     rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target, dimm_type);
     if(rc) return rc;
     
-    uint8_t num_ranks;
-    rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target, num_ranks_array);
+    uint8_t dram_gen;
+    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN, &i_target, dram_gen);
+    if(rc) return rc;
+    
+    //get num master ranks per dimm for 3DS
+    if(dram_stack[dimm_to_run][rank_to_run] == ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS) {
+       rc = FAPI_ATTR_GET(ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, &i_target, num_ranks_array);
+    }
+    //get num ranks per dimm for non-3DS
+    else {
+       rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target, num_ranks_array);
+    }
     if(rc) return rc;
 
     uint8_t is_sim = 0;
@@ -464,7 +497,7 @@ ReturnCode mss_ddr4_setup_pda(
     if(rc) return rc;
 
     uint8_t address_mirror_map[2][2]; //address_mirror_map[port][dimm]
-    rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_ADDRESS_MIRRORING, &i_target, address_mirror_map);
+    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_ADDRESS_MIRRORING, &i_target, address_mirror_map);
     if(rc) return rc;
 
     // WORKAROUNDS 
@@ -472,6 +505,10 @@ ReturnCode mss_ddr4_setup_pda(
     if(rc) return rc;
     //Setting up CCS mode
     rc_num = rc_num | data_buffer.setBit(51);
+    //if in DDR4 mode, count the parity bit and set it
+    if((dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4) && (dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM || dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) ) {
+       rc_num = rc_num | data_buffer.insertFromRight( (uint8_t)0xff, 61, 1);
+    }
     
     if (rc_num)
     {
@@ -488,6 +525,11 @@ ReturnCode mss_ddr4_setup_pda(
        // Raise CKE high with NOPS, waiting min Reset CKE exit time (tXPR) - 400 cycles
        rc_num = rc_num | cke_4.setBit(0,4);
        rc_num = rc_num | csn_8.setBit(0,8);
+       
+       if(dram_stack[0][0] == ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS) {
+          rc_num = rc_num | csn_8.clearBit(2,2); 
+          rc_num = rc_num | csn_8.clearBit(6,2); 
+       }
        rc_num = rc_num | address_16.clearBit(0, 16);
        rc_num = rc_num | odt_4.clearBit(0,4);
        rc_num = rc_num | num_idles_16.insertFromRight((uint32_t) 400, 0, 16);
@@ -525,6 +567,15 @@ ReturnCode mss_ddr4_setup_pda(
        io_ccs_inst_cnt ++;
     }
     
+    //Does the RTT_WR to RTT_NOM swapping
+    //loops through all ports
+    for(i_port_number=0;i_port_number<MAX_NUM_PORTS;i_port_number++) {
+       uint8_t io_dram_rtt_nom_original = 0xff;
+       rc = mss_ddr4_rtt_nom_rtt_wr_swap(i_target,0,i_port_number,rank_to_run+dimm_to_run*4,0xFF,io_ccs_inst_cnt,io_dram_rtt_nom_original);
+       if(rc) return rc;
+       io_ccs_inst_cnt = 0;
+    }
+    
     
     //Sets up MRS3 -> the MRS that has PDA
     uint8_t mpr_op; // MPR Op
@@ -552,152 +603,145 @@ ReturnCode mss_ddr4_setup_pda(
     //enables PDA mode
     //loops through all ports
     for(i_port_number=0;i_port_number<MAX_NUM_PORTS;i_port_number++) {
-    	// Dimm 0-1
-    	for ( dimm_number = 0; dimm_number < MAX_NUM_DIMMS; dimm_number++)
-    	{
-    	    num_ranks = num_ranks_array[i_port_number][dimm_number];
+    	
+       // Only corresponding CS to rank
+       rc_num = rc_num | csn_8.setBit(0,8); 
+       if(dram_stack[0][0] == ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS) {
+          rc_num = rc_num | csn_8.clearBit(2,2); 
+          rc_num = rc_num | csn_8.clearBit(6,2); 
+       }
+       rc_num = rc_num | csn_8.clearBit(rank_number+4*dimm_number);
+    
+       rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 0, 1, 7);
+       rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 1, 1, 6);
+       rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 2, 1, 5);
+    
+       //sets up MRS3 ecmd buffer
+       rc_num = rc_num | mrs3.insert((uint8_t) mpr_page, 0, 2);
+       rc_num = rc_num | mrs3.insert((uint8_t) mpr_op, 2, 1);
+       rc_num = rc_num | mrs3.insert((uint8_t) geardown_mode, 3, 1);
+       rc_num = rc_num | mrs3.insert((uint8_t) 0xff, 4, 1); //enables PDA mode!!!!
+       rc_num = rc_num | mrs3.insert((uint8_t) temp_readout, 5, 1);
+       rc_num = rc_num | mrs3.insert((uint8_t) fine_refresh, 6, 3);
+       rc_num = rc_num | mrs3.insert((uint8_t) wr_latency, 9, 2);
+       rc_num = rc_num | mrs3.insert((uint8_t) read_format, 11, 2);
+       rc_num = rc_num | mrs3.insert((uint8_t) 0x00, 13, 2);
+       rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
+       rc_num = rc_num | num_idles_16.insertFromRight((uint32_t) 24, 0, 16);
+       rc_num = rc_num | address_16.insert(mrs3, 0, 16, 0);
 
-    	    if (num_ranks == 0)
-    	    {
-    		FAPI_INF( "PORT%d DIMM%d not configured. Num_ranks: %d ", i_port_number, dimm_number, num_ranks);
-    	    }
-    	    else
-    	    {
-    		// Rank 0-3
-    		for ( rank_number = 0; rank_number < num_ranks; rank_number++)
-    		{
-    		   // Only corresponding CS to rank
-    		   rc_num = rc_num | csn_8.setBit(0,8); 
-    		   rc_num = rc_num | csn_8.clearBit(rank_number+4*dimm_number);
-    			
-    		   rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 0, 1, 7);
-    		   rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 1, 1, 6);
-    		   rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 2, 1, 5);
-    		   
-		   //sets up MRS3 ecmd buffer
-	           rc_num = rc_num | mrs3.insert((uint8_t) mpr_page, 0, 2);
-	           rc_num = rc_num | mrs3.insert((uint8_t) mpr_op, 2, 1);
-	           rc_num = rc_num | mrs3.insert((uint8_t) geardown_mode, 3, 1);
-	           rc_num = rc_num | mrs3.insert((uint8_t) 0xff, 4, 1); //enables PDA mode!!!!
-	           rc_num = rc_num | mrs3.insert((uint8_t) temp_readout, 5, 1);
-	           rc_num = rc_num | mrs3.insert((uint8_t) fine_refresh, 6, 3);
-	           rc_num = rc_num | mrs3.insert((uint8_t) wr_latency, 9, 2);
-	           rc_num = rc_num | mrs3.insert((uint8_t) read_format, 11, 2);
-	           rc_num = rc_num | mrs3.insert((uint8_t) 0x00, 13, 2);
-	           rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
-	           rc_num = rc_num | num_idles_16.insertFromRight((uint32_t) 24, 0, 16);
-		   rc_num = rc_num | address_16.insert(mrs3, 0, 16, 0);
-		   
-    		   if (rc_num)
-    		   {
-    		       FAPI_ERR( "mss_ddr4_setup_pda: Error setting up buffers");
-    		       rc_buff.setEcmdError(rc_num);
-    		       return rc_buff;
-    		   }
-    		   
-	           
-    		   if (( address_mirror_map[i_port_number][dimm_number] & (0x08 >> rank_number) ) && (is_sim == 0))
-    		   {
-    		      rc = mss_address_mirror_swizzle(i_target, i_port_number, dimm_number, rank_number, address_16, bank_3);
-    		      if(rc) return rc;
-    		   }
-    		   
-    		   
-    		   // Send out to the CCS array 
-    		   rc = mss_ccs_inst_arry_0( i_target,
-    				     io_ccs_inst_cnt,
-    				     address_16,
-    				     bank_3,
-    				     activate_1,
-    				     rasn_1,
-    				     casn_1,
-    				     wen_1,
-    				     cke_4,
-    				     csn_8,
-    				     odt_4,
-    				     ddr_cal_type_4,
-    				     i_port_number);
-    		   if(rc) return rc;
-    		   rc = mss_ccs_inst_arry_1( i_target,
-    				     io_ccs_inst_cnt,
-    				     num_idles_16,
-    				     num_repeat_16,
-    				     data_20,
-    				     read_compare_1,
-    				     rank_cal_4,
-    				     ddr_cal_enable_1,
-    				     ccs_end_1);
-    		   if(rc) return rc;
-    		   io_ccs_inst_cnt ++;
-		   
-		   //if the DIMM is an R or LR DIMM, then run inverted for the B-Side DRAM
-                    if ( (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) || (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) ) 
-                    {
-		       //reload all MRS values (removes address swizzling)
-		       // Only corresponding CS to rank
-    		       rc_num = rc_num | csn_8.setBit(0,8); 
-    		       rc_num = rc_num | csn_8.clearBit(rank_number+4*dimm_number);
-    		    	    
-    		       rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 0, 1, 7);
-    		       rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 1, 1, 6);
-    		       rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 2, 1, 5);
-    		       
-		       //sets up MRS3 ecmd buffer
-		       rc_num = rc_num | address_16.insert(mrs3, 0, 16, 0);
-		       
-		       //FLIPS all necessary bits
-		       // Indicate B-Side DRAMS BG1=1 
-                       rc_num = rc_num | address_16.setBit(15);  // Set BG1 = 1
+       if (rc_num)
+       {
+           FAPI_ERR( "mss_ddr4_setup_pda: Error setting up buffers");
+           rc_buff.setEcmdError(rc_num);
+           return rc_buff;
+       }
+    
+
+       if (( address_mirror_map[i_port_number][dimm_number] & (0x08 >> rank_number) ) && (is_sim == 0))
+       {
+          rc = mss_address_mirror_swizzle(i_target, i_port_number, dimm_number, rank_number, address_16, bank_3);
+          if(rc) return rc;
+       }
+    
+    
+       // Send out to the CCS array 
+       rc = mss_ccs_inst_arry_0( i_target,
+    	    		 io_ccs_inst_cnt,
+    	    		 address_16,
+    	    		 bank_3,
+    	    		 activate_1,
+    	    		 rasn_1,
+    	    		 casn_1,
+    	    		 wen_1,
+    	    		 cke_4,
+    	    		 csn_8,
+    	    		 odt_4,
+    	    		 ddr_cal_type_4,
+    	    		 i_port_number);
+       if(rc) return rc;
+       rc = mss_ccs_inst_arry_1( i_target,
+    	    		 io_ccs_inst_cnt,
+    	    		 num_idles_16,
+    	    		 num_repeat_16,
+    	    		 data_20,
+    	    		 read_compare_1,
+    	    		 rank_cal_4,
+    	    		 ddr_cal_enable_1,
+    	    		 ccs_end_1);
+       if(rc) return rc;
+       io_ccs_inst_cnt ++;
+
+       //if the DIMM is an R or LR DIMM, then run inverted for the B-Side DRAM
+        if ( (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) || (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) ) 
+        {
+           //reload all MRS values (removes address swizzling)
+           // Only corresponding CS to rank
+           rc_num = rc_num | csn_8.setBit(0,8); 
+           if(dram_stack[0][0] == ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS) {
+              rc_num = rc_num | csn_8.clearBit(2,2); 
+              rc_num = rc_num | csn_8.clearBit(6,2); 
+           }
+           rc_num = rc_num | csn_8.clearBit(rank_number+4*dimm_number);
+        	
+           rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 0, 1, 7);
+           rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 1, 1, 6);
+           rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 2, 1, 5);
+           
+           //sets up MRS3 ecmd buffer
+           rc_num = rc_num | address_16.insert(mrs3, 0, 16, 0);
+           
+           //FLIPS all necessary bits
+           // Indicate B-Side DRAMS BG1=1 
+           rc_num = rc_num | address_16.setBit(15);  // Set BG1 = 1
  
-                       rc_num = rc_num | address_16.flipBit(3,7); // Invert A3:A9
-                       rc_num = rc_num | address_16.flipBit(11);  // Invert A11
-                       rc_num = rc_num | address_16.flipBit(13);  // Invert A13
-                       rc_num = rc_num | address_16.flipBit(14);  // Invert A17
-                       rc_num = rc_num | bank_3.flipBit(0,3);	  // Invert BA0,BA1,BG0
-		       
-		       if (rc_num)
-    		       {
-    		     	   FAPI_ERR( "mss_ddr4_setup_pda: Error setting up buffers");
-    		     	   rc_buff.setEcmdError(rc_num);
-    		     	   return rc_buff;
-    		       }
-		     	   
-		     	   if (( address_mirror_map[i_port_number][dimm_number] & (0x08 >> rank_number) ) && (is_sim == 0))
-    		       {
-    		     	  rc = mss_address_mirror_swizzle(i_target, i_port_number, dimm_number, rank_number, address_16, bank_3);
-    		     	  if(rc) return rc;
-    		       }
-    		       
-    		       // Send out to the CCS array 
-    		       rc = mss_ccs_inst_arry_0( i_target,
-    		     	 		 io_ccs_inst_cnt,
-    		     	 		 address_16,
-    		     	 		 bank_3,
-    		     	 		 activate_1,
-    		     	 		 rasn_1,
-    		     	 		 casn_1,
-    		     	 		 wen_1,
-    		     	 		 cke_4,
-    		     	 		 csn_8,
-    		     	 		 odt_4,
-    		     	 		 ddr_cal_type_4,
-    		     	 		 i_port_number);
-    		       if(rc) return rc;
-    		       rc = mss_ccs_inst_arry_1( i_target,
-    		     	 		 io_ccs_inst_cnt,
-    		     	 		 num_idles_16,
-    		     	 		 num_repeat_16,
-    		     	 		 data_20,
-    		     	 		 read_compare_1,
-    		     	 		 rank_cal_4,
-    		     	 		 ddr_cal_enable_1,
-    		     	 		 ccs_end_1);
-    		       if(rc) return rc;
-    		       io_ccs_inst_cnt ++;
-		    }
-    		}    
-    	    }
-    	}
+           rc_num = rc_num | address_16.flipBit(3,7); // Invert A3:A9
+           rc_num = rc_num | address_16.flipBit(11);  // Invert A11
+           rc_num = rc_num | address_16.flipBit(13);  // Invert A13
+           rc_num = rc_num | address_16.flipBit(14);  // Invert A17
+           rc_num = rc_num | bank_3.flipBit(0,3);     // Invert BA0,BA1,BG0
+           
+           if (rc_num)
+           {
+               FAPI_ERR( "mss_ddr4_setup_pda: Error setting up buffers");
+               rc_buff.setEcmdError(rc_num);
+               return rc_buff;
+           }
+               
+               if (( address_mirror_map[i_port_number][dimm_number] & (0x08 >> rank_number) ) && (is_sim == 0))
+           {
+              rc = mss_address_mirror_swizzle(i_target, i_port_number, dimm_number, rank_number, address_16, bank_3);
+              if(rc) return rc;
+           }
+           
+           // Send out to the CCS array 
+           rc = mss_ccs_inst_arry_0( i_target,
+        		     io_ccs_inst_cnt,
+        		     address_16,
+        		     bank_3,
+        		     activate_1,
+        		     rasn_1,
+        		     casn_1,
+        		     wen_1,
+        		     cke_4,
+        		     csn_8,
+        		     odt_4,
+        		     ddr_cal_type_4,
+        		     i_port_number);
+           if(rc) return rc;
+           rc = mss_ccs_inst_arry_1( i_target,
+        		     io_ccs_inst_cnt,
+        		     num_idles_16,
+        		     num_repeat_16,
+        		     data_20,
+        		     read_compare_1,
+        		     rank_cal_4,
+        		     ddr_cal_enable_1,
+        		     ccs_end_1);
+           if(rc) return rc;
+           io_ccs_inst_cnt ++;
+        }
+    
     }
     
     //runs a NOP command for 24 cycle
@@ -758,6 +802,10 @@ ReturnCode mss_ddr4_setup_pda(
    rc_num |= data_buffer.setBit(52);    //RAS high
    rc_num |= data_buffer.setBit(53);    //CAS high
    rc_num |= data_buffer.setBit(54);    //WE high
+   //if in DDR4 mode, count the parity bit and set it
+    if((dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4) && (dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM || dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) ) {
+       rc_num = rc_num | data_buffer.insertFromRight( (uint8_t)0xff, 61, 1);
+    }
    if (rc_num) {
       FAPI_ERR( "enable ccs setup: Error setting up buffers");
       rc.setEcmdError(rc_num);
@@ -791,10 +839,21 @@ ReturnCode mss_ddr4_setup_pda(
       }
    }
    
+   
+   //sets up the DRAM DQ drive time
+   uint8_t wl_launch_time;
+   uint8_t odt_hold_time;
+   uint8_t post_odt_nop_idle;
+   rc = mss_get_pda_odt_timings(i_target, wl_launch_time, odt_hold_time, post_odt_nop_idle);
+   if(rc) return rc;
+   wl_launch_time -= 7;
+   
    rc = fapiGetScom(i_target,  DPHY01_DDRPHY_WC_CONFIG3_P0_0x8000CC050301143F, data_buffer);
    if(rc) return rc;
    //Setting up CCS mode
    rc_num = rc_num | data_buffer.setBit(48);
+   rc_num = rc_num | data_buffer.insertFromRight((uint8_t)0x00,49,6);
+   rc_num = rc_num | data_buffer.insertFromRight((uint8_t)0xFF,55,6);
    if (rc_num)
    {
        FAPI_ERR( "mss_ddr4_setup_pda: Error setting up buffers");
@@ -808,6 +867,8 @@ ReturnCode mss_ddr4_setup_pda(
    if(rc) return rc;
    //Setting up CCS mode
    rc_num = rc_num | data_buffer.setBit(48);
+   rc_num = rc_num | data_buffer.insertFromRight((uint8_t)0x00,49,6);
+   rc_num = rc_num | data_buffer.insertFromRight((uint8_t)0xFF,55,6);
    if (rc_num)
    {
        FAPI_ERR( "mss_ddr4_setup_pda: Error setting up buffers");
@@ -833,10 +894,20 @@ ReturnCode mss_ddr4_pda(
     ReturnCode rc;
     uint8_t dram_loop_end;
     uint8_t dram_loop_end_with_spare;
-    
+    FAPI_INF("Commonly used PDA attributes: fapi::ATTR_EFF_VREF_DQ_TRAIN_ENABLE=0x%08x fapi::ATTR_EFF_VREF_DQ_TRAIN_VALUE=0x%08x",ATTR_EFF_VREF_DQ_TRAIN_ENABLE,ATTR_EFF_VREF_DQ_TRAIN_VALUE);
     //gets the rank information
     uint8_t num_ranks_array[2][2]; //[port][dimm]
-    rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target, num_ranks_array);
+    uint8_t dram_stack[2][2];
+    rc = FAPI_ATTR_GET(ATTR_EFF_STACK_TYPE, &i_target, dram_stack);
+    if(rc) return rc;
+    //get num master ranks per dimm for 3DS
+    if(dram_stack[0][0] == ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS) {
+       rc = FAPI_ATTR_GET(ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, &i_target, num_ranks_array);
+    }
+    //get num ranks per dimm for non-3DS
+    else {
+       rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target, num_ranks_array);
+    }
     if(rc) return rc;
     
     //gets the spare information
@@ -896,18 +967,62 @@ ReturnCode mss_ddr4_pda(
     return rc;
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-/// mss_ddr4_run_pda
-/// runs per-DRAM addressability funcitonality on both ports on the passed MBA
-/////////////////////////////////////////////////////////////////////////////////
+//loops through and runs PDA on all MBA's
 ReturnCode mss_ddr4_run_pda(
             Target& i_target,
 	    vector<PDA_MRS_Storage> pda
+            ) {
+   ReturnCode rc;  
+   if(pda.size() == 0) return rc;
+   
+   
+   uint8_t num_ranks_array[2][2]; //[port][dimm]
+   
+   uint8_t dram_stack[2][2];
+   rc = FAPI_ATTR_GET(ATTR_EFF_STACK_TYPE, &i_target, dram_stack);
+   if(rc) return rc;
+   
+   if(dram_stack[0][0]  == ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS) {
+      rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target, num_ranks_array);
+   }
+   else {
+      rc = FAPI_ATTR_GET(ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, &i_target, num_ranks_array);
+   }
+   if(rc) return rc;
+   
+   //loops through all DIMMs all Ranks
+   for(uint8_t dimm_to_run=0;dimm_to_run<2;dimm_to_run++) {
+      uint8_t largest_num_ranks = num_ranks_array[0][dimm_to_run];
+      if(largest_num_ranks < num_ranks_array[1][dimm_to_run]) largest_num_ranks = num_ranks_array[1][dimm_to_run];
+      
+      for(uint8_t rank_to_run=0;rank_to_run<largest_num_ranks;rank_to_run++) {
+         FAPI_INF("Running PDA on DIMM %d Rank %d!!",dimm_to_run, rank_to_run);
+         rc = mss_ddr4_run_pda_by_dimm_rank(i_target, pda, dimm_to_run, rank_to_run);
+	 if(rc) return rc;
+      }
+   }
+   
+   return rc;
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////
+/// mss_ddr4_run_pda_by_dimm_rank
+/// runs per-DRAM addressability funcitonality on both ports on the passed MBA by dimm and rank
+/////////////////////////////////////////////////////////////////////////////////
+ReturnCode mss_ddr4_run_pda_by_dimm_rank(
+            Target& i_target,
+	    vector<PDA_MRS_Storage> pda,
+	    uint8_t dimm_to_run,
+	    uint8_t rank_to_run
             )
 {
     ReturnCode rc;  
     //no PDA was entered, just exit
     if(pda.size() == 0) return rc;
+    
+    //DIMM/rank not found - exit
+    if(mss_ddr4_check_pda_empty_for_rank(pda,dimm_to_run,rank_to_run)) return rc;
     
     uint32_t io_ccs_inst_cnt = 0;
     const uint32_t NUM_POLL = 10;
@@ -918,11 +1033,23 @@ ReturnCode mss_ddr4_run_pda(
     ecmdDataBufferBase address_16(16);
     ecmdDataBufferBase address_16_backup(16);
     ecmdDataBufferBase bank_3(3);
+    ecmdDataBufferBase bank_3_backup(3);
     ecmdDataBufferBase activate_1(1);
     rc_num = rc_num | activate_1.setBit(0);
     ecmdDataBufferBase rasn_1(1);
     ecmdDataBufferBase casn_1(1);
     ecmdDataBufferBase wen_1(1);
+    ecmdDataBufferBase rasn_1_odt(1);
+    ecmdDataBufferBase casn_1_odt(1);
+    ecmdDataBufferBase wen_1_odt(1);
+    ecmdDataBufferBase num_repeat_16_odt(16);
+    ecmdDataBufferBase num_idles_16_odt(16);
+    ecmdDataBufferBase csn_8_odt(8);
+    rc_num = rc_num | rasn_1_odt.clearBit(0,1);
+    rc_num = rc_num | casn_1_odt.clearBit(0,1);
+    rc_num = rc_num | wen_1_odt.clearBit(0,1);
+    rc_num = rc_num | csn_8_odt.setBit(0,8);
+    rc_num = rc_num | csn_8_odt.clearBit(7,1);
     ecmdDataBufferBase cke_4(4);
     rc_num = rc_num | cke_4.setBit(0,4);
     ecmdDataBufferBase csn_8(8);
@@ -956,8 +1083,8 @@ ReturnCode mss_ddr4_run_pda(
     
     ecmdDataBufferBase data_buffer(64);
     
-    uint8_t num_ranks_array[2][2]; //[port][dimm]
-    rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target, num_ranks_array);
+    uint8_t dram_stack[2][2];
+    rc = FAPI_ATTR_GET(ATTR_EFF_STACK_TYPE, &i_target, dram_stack);
     if(rc) return rc;
 
     uint8_t is_sim = 0;
@@ -965,40 +1092,76 @@ ReturnCode mss_ddr4_run_pda(
     if(rc) return rc;
 
     uint8_t address_mirror_map[2][2]; //address_mirror_map[port][dimm]
-    rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_ADDRESS_MIRRORING, &i_target, address_mirror_map);
+    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_ADDRESS_MIRRORING, &i_target, address_mirror_map);
     if(rc) return rc;
 
-    rc = mss_ddr4_setup_pda(i_target, io_ccs_inst_cnt );
-    if(rc)  return rc;
-    
-    rc_num = rc_num | num_idles_16.insertFromRight((uint32_t) 100, 0, 16);
-   
-   
-   
-    rc_num = rc_num | cke_4.setBit(0,4);
-    rc_num = rc_num | csn_8.setBit(0,8);
-    rc_num = rc_num | address_16.clearBit(0, 16);
-    rc_num = rc_num | odt_4.clearBit(0,4);
-    rc_num = rc_num | rasn_1.clearBit(0,1);
-    rc_num = rc_num | casn_1.clearBit(0,1);
-    rc_num = rc_num | wen_1.clearBit(0,1);
-   
-   //gets the start PDA values
-   uint8_t prev_dram = pda[0].dram;
-   uint8_t prev_port = pda[0].port;
-   uint8_t prev_rank = pda[0].rank;
-   uint8_t prev_dimm = pda[0].dimm;
-   uint8_t prev_mrs  = pda[0].MRS;
-   rc = mss_ddr4_load_nominal_mrs_pda(i_target,bank_3,address_16, prev_mrs, prev_port, prev_dimm, prev_rank);
+   rc = mss_ddr4_setup_pda(i_target, io_ccs_inst_cnt, dimm_to_run,rank_to_run );
    if(rc) return rc;
    
+   uint8_t wl_launch_time;
+   uint8_t odt_hold_time;
+   uint8_t post_odt_nop_idle;
+   rc = mss_get_pda_odt_timings(i_target, wl_launch_time, odt_hold_time, post_odt_nop_idle);
+   
+   rc_num = rc_num | num_idles_16.insertFromRight((uint32_t) 0, 0, 16);
+   rc_num = rc_num | num_repeat_16.insertFromRight((uint32_t) 0, 0, 16);
+   
+   rc_num = rc_num | num_idles_16_odt.insertFromRight( post_odt_nop_idle, 0, 8);
+   rc_num = rc_num | num_repeat_16_odt.insertFromRight( odt_hold_time, 0, 8);
+   
+   
+   
+   rc_num = rc_num | cke_4.setBit(0,4);
+   rc_num = rc_num | csn_8.setBit(0,8);
+   rc_num = rc_num | address_16.clearBit(0, 16);
+   rc_num = rc_num | odt_4.clearBit(0,4);
+   rc_num = rc_num | rasn_1.clearBit(0,1);
+   rc_num = rc_num | casn_1.clearBit(0,1);
+   rc_num = rc_num | wen_1.clearBit(0,1);
+   
+   if(rc_num)
+   {
+       rc.setEcmdError(rc_num);
+       return rc;
+   }
+   
+   uint8_t odt_wr[2][2][4];
+   rc = FAPI_ATTR_GET(ATTR_VPD_ODT_WR,  &i_target, odt_wr);
+   if(rc) return rc;
+   
+   bool prev_dram_set = false;
    vector<PDA_Scom_Storage> scom_storage;
-   scom_storage.clear();
-   rc = mss_ddr4_add_dram_pda(i_target,prev_port,prev_dram,scom_storage);
-   if(rc) return rc;
-   
+   uint8_t prev_dram = 0;
+   uint8_t prev_port = 0;
+   uint8_t prev_rank = 0;
+   uint8_t prev_dimm = 0;
+   uint8_t prev_mrs  = 0;
+
    //runs through each PDA command
    for(uint32_t i=0;i<pda.size();i++) {
+      //did not find a PDA with the same DIMM and rank as requested
+      if(pda[i].rank != rank_to_run || pda[i].dimm != dimm_to_run) {
+         continue;
+      }
+      
+      //found a PDA of the same dimm and rank, but storage not set
+      if(!prev_dram_set) {
+         //gets the start PDA values
+         prev_dram = pda[i].dram;
+         prev_port = pda[i].port;
+         prev_rank = pda[i].rank;
+         prev_dimm = pda[i].dimm;
+         prev_mrs  = pda[i].MRS;
+	 prev_dram_set = true;
+	 
+         rc = mss_ddr4_load_nominal_mrs_pda(i_target,bank_3,address_16, prev_mrs, prev_port, prev_dimm, prev_rank);
+         if(rc) return rc;
+	 
+	 scom_storage.clear();
+	 rc = mss_ddr4_add_dram_pda(i_target,prev_port,prev_dram,scom_storage);
+	 if(rc) return rc;
+      }
+   
       FAPI_INF("Target %s On PDA %d is %s",i_target.toEcmdString(),i,pda[i].c_str());
       //dram, port, rank, dimm, and mrs are the same
       if(prev_dram == pda[i].dram && prev_port == pda[i].port && prev_rank == pda[i].rank && prev_dimm == pda[i].dimm && prev_mrs == pda[i].MRS) {
@@ -1010,8 +1173,15 @@ ReturnCode mss_ddr4_run_pda(
       else {
          
 	 //adds values to a backup address_16 before doing the mirroring
-	 address_16_backup.clearBit(0, 16);
+	 rc_num = rc_num | address_16_backup.clearBit(0, 16);
 	 rc_num = rc_num | address_16_backup.insert(address_16, 0, 16, 0);
+	 rc_num = rc_num | bank_3_backup.clearBit(0,3);
+	 rc_num = rc_num | bank_3_backup.insert(bank_3, 0, 3, 0);
+	 if(rc_num)
+         {
+             rc.setEcmdError(rc_num);
+             return rc;
+         }
 	 
          //loads the previous DRAM
          if (( address_mirror_map[prev_port][prev_dimm] & (0x08 >> prev_rank) ) && (is_sim == 0))
@@ -1024,6 +1194,16 @@ ReturnCode mss_ddr4_run_pda(
    	 rc_num = rc_num | csn_8.setBit(0,8); 
    	 rc_num = rc_num | csn_8.clearBit(prev_rank+4*prev_dimm);
 	 
+         if(dram_stack[0][0] == ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS) {
+            rc_num = rc_num | csn_8.clearBit(2,2); 
+            rc_num = rc_num | csn_8.clearBit(6,2); 
+         }
+	 rc_num = rc_num | odt_4.insert(odt_wr[prev_port][prev_dimm][prev_rank], 0, 4, 0);
+	 if(rc_num)
+    	 {
+    	     rc.setEcmdError(rc_num);
+    	     return rc;
+    	 }
    	 // Send out to the CCS array 
    	 rc = mss_ccs_inst_arry_0( i_target,
    	     	  io_ccs_inst_cnt,
@@ -1051,12 +1231,41 @@ ReturnCode mss_ddr4_run_pda(
    	 if(rc) return rc;
    	 io_ccs_inst_cnt ++;
 	 
+	 // Send out to the CCS array 
+   	 rc = mss_ccs_inst_arry_0( i_target,
+   	     	  io_ccs_inst_cnt,
+   	     	  address_16,
+   	     	  bank_3,
+   	     	  activate_1,
+   	     	  rasn_1_odt,
+   	     	  casn_1_odt,
+   	     	  wen_1_odt,
+   	     	  cke_4,
+   	     	  csn_8_odt,
+   	     	  odt_4,
+   	     	  ddr_cal_type_4,
+   	     	  prev_port);
+   	 if(rc) return rc;
+   	 rc = mss_ccs_inst_arry_1( i_target,
+   	     	  io_ccs_inst_cnt,
+   	     	  num_idles_16_odt,
+   	     	  num_repeat_16_odt,
+   	     	  data_20,
+   	     	  read_compare_1,
+   	     	  rank_cal_4,
+   	     	  ddr_cal_enable_1,
+   	     	  ccs_end_1);
+   	 if(rc) return rc;
+   	 io_ccs_inst_cnt ++;
+	 
 	 //is an R or LR DIMM -> do a B side MRS write
 	 if ( (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) || (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) ) {
 	    //takes values from the backup
-	    address_16.clearBit(0, 16);
+	    rc_num = rc_num | address_16.clearBit(0, 16);
 	    rc_num = rc_num | address_16.insert(address_16_backup, 0, 16, 0);
-	    
+	    rc_num = rc_num | bank_3.clearBit(0,3);
+	    rc_num = rc_num | bank_3.insert(bank_3_backup, 0, 3, 0);
+	 
 	    //FLIPS all necessary bits
 	    // Indicate B-Side DRAMS BG1=1 
             rc_num = rc_num | address_16.setBit(15);  // Set BG1 = 1
@@ -1066,6 +1275,11 @@ ReturnCode mss_ddr4_run_pda(
             rc_num = rc_num | address_16.flipBit(13);  // Invert A13
             rc_num = rc_num | address_16.flipBit(14);  // Invert A17
             rc_num = rc_num | bank_3.flipBit(0,3);     // Invert BA0,BA1,BG0
+	    if(rc_num)
+            {
+                rc.setEcmdError(rc_num);
+                return rc;
+            }
 	    
 	    //loads the previous DRAM
             if (( address_mirror_map[prev_port][prev_dimm] & (0x08 >> prev_rank) ) && (is_sim == 0))
@@ -1077,6 +1291,17 @@ ReturnCode mss_ddr4_run_pda(
 	    // Only corresponding CS to rank
    	    rc_num = rc_num | csn_8.setBit(0,8); 
    	    rc_num = rc_num | csn_8.clearBit(prev_rank+4*prev_dimm);
+	    
+            if(dram_stack[0][0] == ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS) {
+               rc_num = rc_num | csn_8.clearBit(2,2); 
+               rc_num = rc_num | csn_8.clearBit(6,2); 
+            }
+	    rc_num = rc_num | odt_4.insert(odt_wr[prev_port][prev_dimm][prev_rank], 0, 4, 0);
+	    if(rc_num)
+    	    {
+    	        rc.setEcmdError(rc_num);
+    	        return rc;
+    	    }
 	    
    	    // Send out to the CCS array 
    	    rc = mss_ccs_inst_arry_0( i_target,
@@ -1104,7 +1329,34 @@ ReturnCode mss_ddr4_run_pda(
    	   	     ccs_end_1);
    	    if(rc) return rc;
    	    io_ccs_inst_cnt ++;
-	 }
+	    
+	    // Send out to the CCS array 
+            rc = mss_ccs_inst_arry_0( i_target,
+            	     io_ccs_inst_cnt,
+            	     address_16,
+            	     bank_3,
+            	     activate_1,
+            	     rasn_1_odt,
+            	     casn_1_odt,
+            	     wen_1_odt,
+            	     cke_4,
+            	     csn_8_odt,
+            	     odt_4,
+            	     ddr_cal_type_4,
+            	     prev_port);
+            if(rc) return rc;
+            rc = mss_ccs_inst_arry_1( i_target,
+            	     io_ccs_inst_cnt,
+            	     num_idles_16_odt,
+            	     num_repeat_16_odt,
+            	     data_20,
+            	     read_compare_1,
+            	     rank_cal_4,
+            	     ddr_cal_enable_1,
+            	     ccs_end_1);
+            if(rc) return rc;
+            io_ccs_inst_cnt ++;
+         }
 	 
 	 //the DRAM are different, so kick off CCS, and clear out the MRS DRAMs and set up a new DRAM
 	 if(prev_dram != pda[i].dram) {
@@ -1115,6 +1367,13 @@ ReturnCode mss_ddr4_run_pda(
     	    rc_num = rc_num | rasn_1.setBit(0,1);
     	    rc_num = rc_num | casn_1.setBit(0,1);
     	    rc_num = rc_num | wen_1.setBit(0,1);
+	    rc_num = rc_num | odt_4.insert((uint8_t) 0, 0, 4, 0);
+	    
+	    if(rc_num)
+    	    {
+    	        rc.setEcmdError(rc_num);
+    	        return rc;
+    	    }
 	    
 	    // Send out to the CCS array 
             rc = mss_ccs_inst_arry_0( i_target,
@@ -1227,76 +1486,37 @@ ReturnCode mss_ddr4_run_pda(
       } 
    }      
    
-   //runs the last PDA command
-   //adds values to a backup address_16 before doing the mirroring
-   address_16_backup.clearBit(0, 16);
-   rc_num = rc_num | address_16_backup.insert(address_16, 0, 16, 0);
-
-   //loads the previous DRAM
-   if (( address_mirror_map[prev_port][prev_dimm] & (0x08 >> prev_rank) ) && (is_sim == 0))
-   {
-       rc = mss_address_mirror_swizzle(i_target, prev_port, prev_dimm, prev_rank, address_16, bank_3);
-       if(rc) return rc;
-   }
-
-   // Only corresponding CS to rank
-   rc_num = rc_num | csn_8.setBit(0,8); 
-   rc_num = rc_num | csn_8.clearBit(prev_rank+4*prev_dimm);
-
-   // Send out to the CCS array 
-   rc = mss_ccs_inst_arry_0( i_target,
-   	    io_ccs_inst_cnt,
-   	    address_16,
-   	    bank_3,
-   	    activate_1,
-   	    rasn_1,
-   	    casn_1,
-   	    wen_1,
-   	    cke_4,
-   	    csn_8,
-   	    odt_4,
-   	    ddr_cal_type_4,
-   	    prev_port);
-   if(rc) return rc;
-   rc = mss_ccs_inst_arry_1( i_target,
-   	    io_ccs_inst_cnt,
-   	    num_idles_16,
-   	    num_repeat_16,
-   	    data_20,
-   	    read_compare_1,
-   	    rank_cal_4,
-   	    ddr_cal_enable_1,
-   	    ccs_end_1);
-   if(rc) return rc;
-   io_ccs_inst_cnt ++;
-
-   //is an R or LR DIMM -> do a B side MRS write
-   if ( (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) || (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) ) {
-      //takes values from the backup
-      address_16.clearBit(0, 16);
-      rc_num = rc_num | address_16.insert(address_16_backup, 0, 16, 0);
+   //runs the last PDA command, if and only if a PDA of the desired rank and dimm was run
+   if(prev_dram_set) {
+      //adds values to a backup address_16 before doing the mirroring
+      rc_num = rc_num | address_16_backup.clearBit(0, 16);
+      rc_num = rc_num | address_16_backup.insert(address_16, 0, 16, 0);
+      rc_num = rc_num | bank_3_backup.clearBit(0, 3);
+      rc_num = rc_num | bank_3_backup.insert(bank_3, 0, 3, 0);
+      rc_num = rc_num | odt_4.insert(odt_wr[prev_port][prev_dimm][prev_rank], 0, 4, 0);
       
-      //FLIPS all necessary bits
-      // Indicate B-Side DRAMS BG1=1 
-      rc_num = rc_num | address_16.setBit(15);  // Set BG1 = 1
- 
-      rc_num = rc_num | address_16.flipBit(3,7); // Invert A3:A9
-      rc_num = rc_num | address_16.flipBit(11);  // Invert A11
-      rc_num = rc_num | address_16.flipBit(13);  // Invert A13
-      rc_num = rc_num | address_16.flipBit(14);  // Invert A17
-      rc_num = rc_num | bank_3.flipBit(0,3);	 // Invert BA0,BA1,BG0
-      
+      if(rc_num)
+      {
+          rc.setEcmdError(rc_num);
+          return rc;
+      }
+
       //loads the previous DRAM
       if (( address_mirror_map[prev_port][prev_dimm] & (0x08 >> prev_rank) ) && (is_sim == 0))
       {
    	  rc = mss_address_mirror_swizzle(i_target, prev_port, prev_dimm, prev_rank, address_16, bank_3);
    	  if(rc) return rc;
       }
-      
+
       // Only corresponding CS to rank
       rc_num = rc_num | csn_8.setBit(0,8); 
-      rc_num = rc_num | csn_8.clearBit(prev_rank+4*prev_dimm);
       
+      if(dram_stack[0][0] == ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS) {
+   	 rc_num = rc_num | csn_8.clearBit(2,2); 
+   	 rc_num = rc_num | csn_8.clearBit(6,2); 
+      }
+      rc_num = rc_num | csn_8.clearBit(prev_rank+4*prev_dimm);
+
       // Send out to the CCS array 
       rc = mss_ccs_inst_arry_0( i_target,
    	       io_ccs_inst_cnt,
@@ -1323,8 +1543,135 @@ ReturnCode mss_ddr4_run_pda(
    	       ccs_end_1);
       if(rc) return rc;
       io_ccs_inst_cnt ++;
+      
+      // Send out to the CCS array 
+      rc = mss_ccs_inst_arry_0( i_target,
+   	       io_ccs_inst_cnt,
+   	       address_16,
+   	       bank_3,
+   	       activate_1,
+   	       rasn_1_odt,
+   	       casn_1_odt,
+   	       wen_1_odt,
+   	       cke_4,
+   	       csn_8_odt,
+   	       odt_4,
+   	       ddr_cal_type_4,
+   	       prev_port);
+      if(rc) return rc;
+      rc = mss_ccs_inst_arry_1( i_target,
+   	       io_ccs_inst_cnt,
+   	       num_idles_16_odt,
+   	       num_repeat_16_odt,
+   	       data_20,
+   	       read_compare_1,
+   	       rank_cal_4,
+   	       ddr_cal_enable_1,
+   	       ccs_end_1);
+      if(rc) return rc;
+      io_ccs_inst_cnt ++;
+
+      //is an R or LR DIMM -> do a B side MRS write
+      if ( (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) || (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) ) {
+   	 //takes values from the backup
+	 rc_num = rc_num | address_16.clearBit(0, 16);
+	 rc_num = rc_num | address_16.insert(address_16_backup, 0, 16, 0);
+	 rc_num = rc_num | bank_3.clearBit(0,3);
+	 rc_num = rc_num | bank_3.insert(bank_3_backup, 0, 3, 0);
+   	 
+   	 //FLIPS all necessary bits
+   	 // Indicate B-Side DRAMS BG1=1 
+   	 rc_num = rc_num | address_16.setBit(15);  // Set BG1 = 1
+    
+   	 rc_num = rc_num | address_16.flipBit(3,7); // Invert A3:A9
+   	 rc_num = rc_num | address_16.flipBit(11);  // Invert A11
+   	 rc_num = rc_num | address_16.flipBit(13);  // Invert A13
+   	 rc_num = rc_num | address_16.flipBit(14);  // Invert A17
+   	 rc_num = rc_num | bank_3.flipBit(0,3);     // Invert BA0,BA1,BG0
+   	 
+	 if(rc_num)
+    	 {
+    	     rc.setEcmdError(rc_num);
+    	     return rc;
+    	 }
+	 
+   	 //loads the previous DRAM
+   	 if (( address_mirror_map[prev_port][prev_dimm] & (0x08 >> prev_rank) ) && (is_sim == 0))
+   	 {
+   	     rc = mss_address_mirror_swizzle(i_target, prev_port, prev_dimm, prev_rank, address_16, bank_3);
+   	     if(rc) return rc;
+   	 }
+   	 
+   	 // Only corresponding CS to rank
+   	 rc_num = rc_num | csn_8.setBit(0,8); 
+   	 
+   	 if(dram_stack[0][0] == ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS) {
+   	    rc_num = rc_num | csn_8.clearBit(2,2); 
+   	    rc_num = rc_num | csn_8.clearBit(6,2); 
+   	 }
+   	 rc_num = rc_num | csn_8.clearBit(prev_rank+4*prev_dimm);
+   	 
+	 if(rc_num)
+    	 {
+    	     rc.setEcmdError(rc_num);
+    	     return rc;
+    	 }
+	 
+   	 // Send out to the CCS array 
+   	 rc = mss_ccs_inst_arry_0( i_target,
+   		  io_ccs_inst_cnt,
+   		  address_16,
+   		  bank_3,
+   		  activate_1,
+   		  rasn_1,
+   		  casn_1,
+   		  wen_1,
+   		  cke_4,
+   		  csn_8,
+   		  odt_4,
+   		  ddr_cal_type_4,
+   		  prev_port);
+   	 if(rc) return rc;
+   	 rc = mss_ccs_inst_arry_1( i_target,
+   		  io_ccs_inst_cnt,
+   		  num_idles_16,
+   		  num_repeat_16,
+   		  data_20,
+   		  read_compare_1,
+   		  rank_cal_4,
+   		  ddr_cal_enable_1,
+   		  ccs_end_1);
+   	 if(rc) return rc;
+   	 io_ccs_inst_cnt ++;
+   	 
+   	 // Send out to the CCS array 
+   	 rc = mss_ccs_inst_arry_0( i_target,
+   		  io_ccs_inst_cnt,
+   		  address_16,
+   		  bank_3,
+   		  activate_1,
+   		  rasn_1_odt,
+   		  casn_1_odt,
+   		  wen_1_odt,
+   		  cke_4,
+   		  csn_8_odt,
+   		  odt_4,
+   		  ddr_cal_type_4,
+   		  prev_port);
+   	 if(rc) return rc;
+   	 rc = mss_ccs_inst_arry_1( i_target,
+   		  io_ccs_inst_cnt,
+   		  num_idles_16_odt,
+   		  num_repeat_16_odt,
+   		  data_20,
+   		  read_compare_1,
+   		  rank_cal_4,
+   		  ddr_cal_enable_1,
+   		  ccs_end_1);
+   	 if(rc) return rc;
+   	 io_ccs_inst_cnt ++;
+      }
    }
-   
    
    //sets a NOP as the last command
    rc_num = rc_num | cke_4.setBit(0,4);
@@ -1344,7 +1691,7 @@ ReturnCode mss_ddr4_run_pda(
    	    casn_1,
    	    wen_1,
    	    cke_4,
-   	    csn_8,
+   	    csn_8_odt,
    	    odt_4,
    	    ddr_cal_type_4,
    	    prev_port);
@@ -1387,7 +1734,7 @@ ReturnCode mss_ddr4_run_pda(
    //}
       
    io_ccs_inst_cnt = 0;
-   rc = mss_ddr4_disable_pda(i_target,io_ccs_inst_cnt);
+   rc = mss_ddr4_disable_pda(i_target,io_ccs_inst_cnt,dimm_to_run,rank_to_run);
    return rc;
 }
 
@@ -1432,7 +1779,7 @@ ReturnCode mss_ddr4_add_dram_pda(Target& i_target,uint8_t port,uint8_t dram,vect
       scom_start = 60 + (uint32_t)((phy_lane/8)*2);
       scom_len = 2;
    }
-   FAPI_INF("Enabling %016llx start at %d for %d bits",reg_address,scom_start,scom_len);
+   FAPI_INF("Enabling %016llx start at %d for %d bits for port %d dram %d",reg_address,scom_start,scom_len,port,dram);
    
    rc = fapiGetScom(i_target, reg_address, data_buffer);
    if(rc) return rc;
@@ -1455,10 +1802,10 @@ ReturnCode mss_ddr4_add_dram_pda(Target& i_target,uint8_t port,uint8_t dram,vect
 /// mss_ddr4_disable_pda
 /// disables per-DRAM addressability funcitonality on both ports on the passed MBA
 //////////////////////////////////////////////////////////////////////////////////
-ReturnCode mss_ddr4_disable_pda(Target& i_target,uint32_t& io_ccs_inst_cnt) {
+ReturnCode mss_ddr4_disable_pda(Target& i_target,uint32_t& io_ccs_inst_cnt, uint8_t dimm_to_run, uint8_t rank_to_run) {
     uint32_t i_port_number=0;
-    uint32_t dimm_number;
-    uint32_t rank_number;
+    uint32_t dimm_number = dimm_to_run;
+    uint32_t rank_number = rank_to_run;
     const uint32_t NUM_POLL = 10;
     const uint32_t WAIT_TIMER = 1500;
     ReturnCode rc;  
@@ -1488,14 +1835,38 @@ ReturnCode mss_ddr4_disable_pda(Target& i_target,uint32_t& io_ccs_inst_cnt) {
     ecmdDataBufferBase rank_cal_4(4);
     ecmdDataBufferBase ddr_cal_enable_1(1);
     ecmdDataBufferBase ccs_end_1(1);
+    
+    ecmdDataBufferBase rasn_1_odt(1);
+    ecmdDataBufferBase casn_1_odt(1);
+    ecmdDataBufferBase wen_1_odt(1);
+    ecmdDataBufferBase num_repeat_16_odt(16);
+    ecmdDataBufferBase num_idles_16_odt(16);
+    ecmdDataBufferBase csn_8_odt(8);
+    rc_num = rc_num | rasn_1_odt.clearBit(0,1);
+    rc_num = rc_num | casn_1_odt.clearBit(0,1);
+    rc_num = rc_num | wen_1_odt.clearBit(0,1);
+    rc_num = rc_num | csn_8_odt.setBit(0,8);
+    rc_num = rc_num | csn_8_odt.clearBit(7,1);
+    
+    if (rc_num) {
+       FAPI_ERR( "disable ccs setup: Error disabling up buffers");
+       rc_buff.setEcmdError(rc_num);
+       return rc_buff;
+    }
 
     ecmdDataBufferBase mrs3(16);
     uint16_t MRS3 = 0;
     
-    uint8_t num_ranks_array[2][2]; //[port][dimm]
+    uint8_t dram_gen;
+    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN, &i_target, dram_gen);
+    if(rc) return rc;
     
-    uint8_t num_ranks;
-    rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target, num_ranks_array);
+    uint8_t odt_wr[2][2][4];
+    rc = FAPI_ATTR_GET(ATTR_VPD_ODT_WR,  &i_target, odt_wr);
+    if(rc) return rc;
+    
+    uint8_t dram_stack[2][2];
+    rc = FAPI_ATTR_GET(ATTR_EFF_STACK_TYPE, &i_target, dram_stack);
     if(rc) return rc;
 
     uint8_t dimm_type;
@@ -1507,7 +1878,7 @@ ReturnCode mss_ddr4_disable_pda(Target& i_target,uint32_t& io_ccs_inst_cnt) {
     if(rc) return rc;
 
     uint8_t address_mirror_map[2][2]; //address_mirror_map[port][dimm]
-    rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_ADDRESS_MIRRORING, &i_target, address_mirror_map);
+    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_ADDRESS_MIRRORING, &i_target, address_mirror_map);
     if(rc) return rc;
 
     // WORKAROUNDS 
@@ -1515,6 +1886,10 @@ ReturnCode mss_ddr4_disable_pda(Target& i_target,uint32_t& io_ccs_inst_cnt) {
     if(rc) return rc;
     //Setting up CCS mode
     rc_num = rc_num | data_buffer.setBit(51);
+    //if in DDR4 mode, count the parity bit and set it
+    if((dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4) && (dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM || dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) ) {
+       rc_num = rc_num | data_buffer.insertFromRight( (uint8_t)0xff, 61, 1);
+    }
     if (rc_num) {
       FAPI_ERR( "disable ccs setup: Error disabling up buffers");
       rc_buff.setEcmdError(rc_num);
@@ -1587,6 +1962,19 @@ ReturnCode mss_ddr4_disable_pda(Target& i_target,uint32_t& io_ccs_inst_cnt) {
     rc = FAPI_ATTR_GET(ATTR_EFF_MPR_RD_FORMAT, &i_target, read_format);
     if(rc) return rc;
     
+    
+    //sets up the DRAM DQ drive time
+    uint8_t wl_launch_time;
+    uint8_t odt_hold_time;
+    uint8_t post_odt_nop_idle;
+    rc = mss_get_pda_odt_timings(i_target, wl_launch_time, odt_hold_time, post_odt_nop_idle);
+   
+    rc_num = rc_num | num_idles_16.insertFromRight((uint32_t) 0, 0, 16);
+    rc_num = rc_num | num_repeat_16.insertFromRight((uint32_t) 0, 0, 16);
+   
+    rc_num = rc_num | num_idles_16_odt.insertFromRight( post_odt_nop_idle, 0, 8);
+    rc_num = rc_num | num_repeat_16_odt.insertFromRight( odt_hold_time, 0, 8);
+    
     //exits PDA
     for(i_port_number=0;i_port_number<2;i_port_number++) {
     //loops through the DP18's and sets everything to 0's
@@ -1608,163 +1996,210 @@ ReturnCode mss_ddr4_disable_pda(Target& i_target,uint32_t& io_ccs_inst_cnt) {
     
     //exits PDA
     for(i_port_number=0;i_port_number<2;i_port_number++) {
-    	for ( dimm_number = 0; dimm_number < MAX_NUM_DIMMS; dimm_number++)
-    	{
-    	    num_ranks = num_ranks_array[i_port_number][dimm_number];
+       // Only corresponding CS to rank
+       rc_num = rc_num | csn_8.setBit(0,8); 
+       if(dram_stack[0][0] == ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS) {
+          rc_num = rc_num | csn_8.clearBit(2,2); 
+          rc_num = rc_num | csn_8.clearBit(6,2); 
+       }
+       rc_num = rc_num | csn_8.clearBit(rank_number+4*dimm_number);
+    
+       rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 0, 1, 7);
+       rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 1, 1, 6);
+       rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 2, 1, 5);
+    	    	    
+       //enables PDA
+       rc_num = rc_num | mrs3.insert((uint8_t) mpr_page, 0, 2);
+       rc_num = rc_num | mrs3.insert((uint8_t) mpr_op, 2, 1);
+       rc_num = rc_num | mrs3.insert((uint8_t) geardown_mode, 3, 1);
+       rc_num = rc_num | mrs3.insert((uint8_t) 0x00, 4, 1);
+       rc_num = rc_num | mrs3.insert((uint8_t) temp_readout, 5, 1);
+       rc_num = rc_num | mrs3.insert((uint8_t) fine_refresh, 6, 3);
+       rc_num = rc_num | mrs3.insert((uint8_t) wr_latency, 9, 2);
+       rc_num = rc_num | mrs3.insert((uint8_t) read_format, 11, 2);
+       rc_num = rc_num | mrs3.insert((uint8_t) 0x00, 13, 2);
+       rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
+       rc_num = rc_num | num_idles_16.insertFromRight((uint32_t) 100, 0, 16);
+       rc_num = rc_num | odt_4.insert(odt_wr[i_port_number][dimm_number][rank_number], 0, 4, 0);
 
-    	    if (num_ranks == 0)
-    	    {
-    		FAPI_INF( "PORT%d DIMM%d not configured. Num_ranks: %d ", i_port_number, dimm_number, num_ranks);
-    	    }
-    	    else
-    	    {
-    		// Rank 0-3
-    		for ( rank_number = 0; rank_number < num_ranks; rank_number++)
-    		{
-    		   // Only corresponding CS to rank
-    		   rc_num = rc_num | csn_8.setBit(0,8); 
-    		   rc_num = rc_num | csn_8.clearBit(rank_number+4*dimm_number);
-    			
-    		   rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 0, 1, 7);
-    		   rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 1, 1, 6);
-    		   rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 2, 1, 5);
-    				
-	           //enables PDA
-	           rc_num = rc_num | mrs3.insert((uint8_t) mpr_page, 0, 2);
-	           rc_num = rc_num | mrs3.insert((uint8_t) mpr_op, 2, 1);
-	           rc_num = rc_num | mrs3.insert((uint8_t) geardown_mode, 3, 1);
-	           rc_num = rc_num | mrs3.insert((uint8_t) 0x00, 4, 1);
-	           rc_num = rc_num | mrs3.insert((uint8_t) temp_readout, 5, 1);
-	           rc_num = rc_num | mrs3.insert((uint8_t) fine_refresh, 6, 3);
-	           rc_num = rc_num | mrs3.insert((uint8_t) wr_latency, 9, 2);
-	           rc_num = rc_num | mrs3.insert((uint8_t) read_format, 11, 2);
-	           rc_num = rc_num | mrs3.insert((uint8_t) 0x00, 13, 2);
-	           rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
-	           rc_num = rc_num | num_idles_16.insertFromRight((uint32_t) 100, 0, 16);
-		   
-		   //copies over values
-    		   rc_num = rc_num | address_16.insert(mrs3, 0, 16, 0);
-    		   if (rc_num)
-    		   {
-    		       FAPI_ERR( "mss_mrs_load: Error setting up buffers");
-    		       rc_buff.setEcmdError(rc_num);
-    		       return rc_buff;
-    		   }
-		   
-    		   if (( address_mirror_map[i_port_number][dimm_number] & (0x08 >> rank_number) ) && (is_sim == 0))
-    		   {
-    		      rc = mss_address_mirror_swizzle(i_target, i_port_number, dimm_number, rank_number, address_16, bank_3);
-    		      if(rc) return rc;
-    		   }
-		   
-    		   // Send out to the CCS array 
-    		   rc = mss_ccs_inst_arry_0( i_target,
-    				     io_ccs_inst_cnt,
-    				     address_16,
-    				     bank_3,
-    				     activate_1,
-    				     rasn_1,
-    				     casn_1,
-    				     wen_1,
-    				     cke_4,
-    				     csn_8,
-    				     odt_4,
-    				     ddr_cal_type_4,
-    				     i_port_number);
-    		   if(rc) return rc;
-    		   rc = mss_ccs_inst_arry_1( i_target,
-    				     io_ccs_inst_cnt,
-    				     num_idles_16,
-    				     num_repeat_16,
-    				     data_20,
-    				     read_compare_1,
-    				     rank_cal_4,
-    				     ddr_cal_enable_1,
-    				     ccs_end_1);
-    		   if(rc) return rc;
-    		   io_ccs_inst_cnt ++;
-		   
-		   //if the DIMM is an R or LR DIMM, then run inverted for the B-Side DRAM
-                   if ( (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) || (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) ) 
-		   {
-		   
-		       //reload all MRS values (removes address swizzling)
-		        // Only corresponding CS to rank
-    		       rc_num = rc_num | csn_8.setBit(0,8); 
-    		       rc_num = rc_num | csn_8.clearBit(rank_number+4*dimm_number);
-    		    	    
-    		       rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 0, 1, 7);
-    		       rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 1, 1, 6);
-    		       rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 2, 1, 5);
-    		    		    
-	               //enables PDA
-	               rc_num = rc_num | mrs3.insert((uint8_t) mpr_page, 0, 2);
-	               rc_num = rc_num | mrs3.insert((uint8_t) mpr_op, 2, 1);
-	               rc_num = rc_num | mrs3.insert((uint8_t) geardown_mode, 3, 1);
-	               rc_num = rc_num | mrs3.insert((uint8_t) 0x00, 4, 1);
-	               rc_num = rc_num | mrs3.insert((uint8_t) temp_readout, 5, 1);
-	               rc_num = rc_num | mrs3.insert((uint8_t) fine_refresh, 6, 3);
-	               rc_num = rc_num | mrs3.insert((uint8_t) wr_latency, 9, 2);
-	               rc_num = rc_num | mrs3.insert((uint8_t) read_format, 11, 2);
-	               rc_num = rc_num | mrs3.insert((uint8_t) 0x00, 13, 2);
-	               rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
-	               rc_num = rc_num | num_idles_16.insertFromRight((uint32_t) 100, 0, 16);
-		       //copies over values
-		       rc_num = rc_num | address_16.insert(mrs3, 0, 16, 0);
-		       
-		       //FLIPS all necessary bits
-		       // Indicate B-Side DRAMS BG1=1 
-                       rc_num = rc_num | address_16.setBit(15);  // Set BG1 = 1
+       //copies over values
+       rc_num = rc_num | address_16.insert(mrs3, 0, 16, 0);
+       if (rc_num)
+       {
+           FAPI_ERR( "mss_mrs_load: Error setting up buffers");
+           rc_buff.setEcmdError(rc_num);
+           return rc_buff;
+       }
+
+       if (( address_mirror_map[i_port_number][dimm_number] & (0x08 >> rank_number) ) && (is_sim == 0))
+       {
+          rc = mss_address_mirror_swizzle(i_target, i_port_number, dimm_number, rank_number, address_16, bank_3);
+          if(rc) return rc;
+       }
+
+       // Send out to the CCS array 
+       rc = mss_ccs_inst_arry_0( i_target,
+    	    		 io_ccs_inst_cnt,
+    	    		 address_16,
+    	    		 bank_3,
+    	    		 activate_1,
+    	    		 rasn_1,
+    	    		 casn_1,
+    	    		 wen_1,
+    	    		 cke_4,
+    	    		 csn_8,
+    	    		 odt_4,
+    	    		 ddr_cal_type_4,
+    	    		 i_port_number);
+       if(rc) return rc;
+       rc = mss_ccs_inst_arry_1( i_target,
+    	    		 io_ccs_inst_cnt,
+    	    		 num_idles_16,
+    	    		 num_repeat_16,
+    	    		 data_20,
+    	    		 read_compare_1,
+    	    		 rank_cal_4,
+    	    		 ddr_cal_enable_1,
+    	    		 ccs_end_1);
+       if(rc) return rc;
+       io_ccs_inst_cnt ++;
+
+       // Send out to the CCS array 
+       rc = mss_ccs_inst_arry_0( i_target,
+        	io_ccs_inst_cnt,
+        	address_16,
+        	bank_3,
+        	activate_1,
+        	rasn_1_odt,
+        	casn_1_odt,
+        	wen_1_odt,
+        	cke_4,
+        	csn_8_odt,
+        	odt_4,
+        	ddr_cal_type_4,
+        	i_port_number);
+       if(rc) return rc;
+       rc = mss_ccs_inst_arry_1( i_target,
+        	io_ccs_inst_cnt,
+        	num_idles_16_odt,
+        	num_repeat_16_odt,
+        	data_20,
+        	read_compare_1,
+        	rank_cal_4,
+        	ddr_cal_enable_1,
+        	ccs_end_1);
+       if(rc) return rc;
+       io_ccs_inst_cnt ++;
+
+       //if the DIMM is an R or LR DIMM, then run inverted for the B-Side DRAM
+       if ( (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) || (dimm_type == ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) ) 
+       {
+
+           //reload all MRS values (removes address swizzling)
+            // Only corresponding CS to rank
+           rc_num = rc_num | csn_8.setBit(0,8); 
+           if(dram_stack[0][0] == ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS) {
+              rc_num = rc_num | csn_8.clearBit(2,2); 
+              rc_num = rc_num | csn_8.clearBit(6,2); 
+           }
+           rc_num = rc_num | csn_8.clearBit(rank_number+4*dimm_number);
+        	
+           rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 0, 1, 7);
+           rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 1, 1, 6);
+           rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 2, 1, 5);
+        		
+           //enables PDA
+           rc_num = rc_num | mrs3.insert((uint8_t) mpr_page, 0, 2);
+           rc_num = rc_num | mrs3.insert((uint8_t) mpr_op, 2, 1);
+           rc_num = rc_num | mrs3.insert((uint8_t) geardown_mode, 3, 1);
+           rc_num = rc_num | mrs3.insert((uint8_t) 0x00, 4, 1);
+           rc_num = rc_num | mrs3.insert((uint8_t) temp_readout, 5, 1);
+           rc_num = rc_num | mrs3.insert((uint8_t) fine_refresh, 6, 3);
+           rc_num = rc_num | mrs3.insert((uint8_t) wr_latency, 9, 2);
+           rc_num = rc_num | mrs3.insert((uint8_t) read_format, 11, 2);
+           rc_num = rc_num | mrs3.insert((uint8_t) 0x00, 13, 2);
+           rc_num = rc_num | mrs3.extractPreserve(&MRS3, 0, 16, 0);
+           rc_num = rc_num | num_idles_16.insertFromRight((uint32_t) 100, 0, 16);
+           //copies over values
+           rc_num = rc_num | address_16.insert(mrs3, 0, 16, 0);
+           
+           //FLIPS all necessary bits
+           // Indicate B-Side DRAMS BG1=1 
+           rc_num = rc_num | address_16.setBit(15);  // Set BG1 = 1
  
-                       rc_num = rc_num | address_16.flipBit(3,7); // Invert A3:A9
-                       rc_num = rc_num | address_16.flipBit(11);  // Invert A11
-                       rc_num = rc_num | address_16.flipBit(13);  // Invert A13
-                       rc_num = rc_num | address_16.flipBit(14);  // Invert A17
-                       rc_num = rc_num | bank_3.flipBit(0,3);	  // Invert BA0,BA1,BG0
-		       
-		       if (rc_num)
-    		       {
-    		     	   FAPI_ERR( "mss_ddr4_setup_pda: Error setting up buffers");
-    		     	   rc_buff.setEcmdError(rc_num);
-    		     	   return rc_buff;
-    		       }
-		     	   
-		     	   if (( address_mirror_map[i_port_number][dimm_number] & (0x08 >> rank_number) ) && (is_sim == 0))
-    		       {
-    		     	  rc = mss_address_mirror_swizzle(i_target, i_port_number, dimm_number, rank_number, address_16, bank_3);
-    		     	  if(rc) return rc;
-    		       }
-    		       
-    		       // Send out to the CCS array 
-    		       rc = mss_ccs_inst_arry_0( i_target,
-    		     	 		 io_ccs_inst_cnt,
-    		     	 		 address_16,
-    		     	 		 bank_3,
-    		     	 		 activate_1,
-    		     	 		 rasn_1,
-    		     	 		 casn_1,
-    		     	 		 wen_1,
-    		     	 		 cke_4,
-    		     	 		 csn_8,
-    		     	 		 odt_4,
-    		     	 		 ddr_cal_type_4,
-    		     	 		 i_port_number);
-    		       if(rc) return rc;
-    		       rc = mss_ccs_inst_arry_1( i_target,
-    		     	 		 io_ccs_inst_cnt,
-    		     	 		 num_idles_16,
-    		     	 		 num_repeat_16,
-    		     	 		 data_20,
-    		     	 		 read_compare_1,
-    		     	 		 rank_cal_4,
-    		     	 		 ddr_cal_enable_1,
-    		     	 		 ccs_end_1);
-    		       if(rc) return rc;
-    		       io_ccs_inst_cnt ++;
-		    }
-    		}    
-    	    }
-    	}
+           rc_num = rc_num | address_16.flipBit(3,7); // Invert A3:A9
+           rc_num = rc_num | address_16.flipBit(11);  // Invert A11
+           rc_num = rc_num | address_16.flipBit(13);  // Invert A13
+           rc_num = rc_num | address_16.flipBit(14);  // Invert A17
+           rc_num = rc_num | bank_3.flipBit(0,3);     // Invert BA0,BA1,BG0
+           
+           if (rc_num)
+           {
+               FAPI_ERR( "mss_ddr4_setup_pda: Error setting up buffers");
+               rc_buff.setEcmdError(rc_num);
+               return rc_buff;
+           }
+               
+               if (( address_mirror_map[i_port_number][dimm_number] & (0x08 >> rank_number) ) && (is_sim == 0))
+           {
+              rc = mss_address_mirror_swizzle(i_target, i_port_number, dimm_number, rank_number, address_16, bank_3);
+              if(rc) return rc;
+           }
+           
+           // Send out to the CCS array 
+           rc = mss_ccs_inst_arry_0( i_target,
+        		     io_ccs_inst_cnt,
+        		     address_16,
+        		     bank_3,
+        		     activate_1,
+        		     rasn_1,
+        		     casn_1,
+        		     wen_1,
+        		     cke_4,
+        		     csn_8,
+        		     odt_4,
+        		     ddr_cal_type_4,
+        		     i_port_number);
+           if(rc) return rc;
+           rc = mss_ccs_inst_arry_1( i_target,
+        		     io_ccs_inst_cnt,
+        		     num_idles_16,
+        		     num_repeat_16,
+        		     data_20,
+        		     read_compare_1,
+        		     rank_cal_4,
+        		     ddr_cal_enable_1,
+        		     ccs_end_1);
+           if(rc) return rc;
+           io_ccs_inst_cnt ++;
+           
+           // Send out to the CCS array 
+           rc = mss_ccs_inst_arry_0( i_target,
+	    	    io_ccs_inst_cnt,
+	    	    address_16,
+	    	    bank_3,
+	    	    activate_1,
+	    	    rasn_1_odt,
+	    	    casn_1_odt,
+	    	    wen_1_odt,
+	    	    cke_4,
+	    	    csn_8_odt,
+	    	    odt_4,
+	    	    ddr_cal_type_4,
+	    	    i_port_number);
+           if(rc) return rc;
+           rc = mss_ccs_inst_arry_1( i_target,
+	    	    io_ccs_inst_cnt,
+	    	    num_idles_16_odt,
+	    	    num_repeat_16_odt,
+	    	    data_20,
+	    	    read_compare_1,
+	    	    rank_cal_4,
+	    	    ddr_cal_enable_1,
+	    	    ccs_end_1);
+           if(rc) return rc;
+           io_ccs_inst_cnt ++;
+       }
    }
    
    //Setup end bit for CCS
@@ -1820,1686 +2255,82 @@ ReturnCode mss_ddr4_disable_pda(Target& i_target,uint32_t& io_ccs_inst_cnt) {
    
    FAPI_INF("Successfully exited out of PDA mode.");
    io_ccs_inst_cnt = 0;
+   
+   //Does the RTT_WR to RTT_NOM swapping
+    //loops through all ports
+    for(i_port_number=0;i_port_number<MAX_NUM_PORTS;i_port_number++) {
+       uint8_t io_dram_rtt_nom_original = 0;
+       rc = mss_ddr4_rtt_nom_rtt_wr_swap(i_target,0,i_port_number,rank_number+dimm_number*4,0xFF,io_ccs_inst_cnt,io_dram_rtt_nom_original);
+       if(rc) return rc;
+       io_ccs_inst_cnt = 0;
+    }
+   
    return rc;
 }
 
-//////////////////////////////////////////////////////////////////////////////////
-/// mss_ddr4_modify_mrs_pda
-/// disables per-DRAM addressability funcitonality on both ports on the passed MBA
-//////////////////////////////////////////////////////////////////////////////////
-ReturnCode mss_ddr4_modify_mrs_pda(Target& i_target,ecmdDataBufferBase& address_16,uint32_t attribute_name,uint8_t attribute_data) {
-   ReturnCode rc;
-   uint32_t rc_num = 0;
-   uint8_t dram_bl = attribute_data;
-   uint8_t read_bt = attribute_data; //Read Burst Type 
-   uint8_t dram_cl = attribute_data;
-   uint8_t test_mode = attribute_data; //TEST MODE 
-   uint8_t dll_reset = attribute_data; //DLL Reset 
-   uint8_t dram_wr = attribute_data; //DRAM write recovery
-   uint8_t dram_rtp = attribute_data; //DRAM RTP - read to precharge
-   uint8_t dram_wr_rtp = attribute_data;
-   uint8_t dll_precharge = attribute_data; //DLL Control For Precharge if (dll_precharge == ENUM_ATTR_EFF_DRAM_DLL_PPD_SLOWEXIT)
-   uint8_t dll_enable = attribute_data; //DLL Enable 
-   uint8_t out_drv_imp_cntl = attribute_data;
-   uint8_t dram_rtt_nom = attribute_data;
-   uint8_t dram_al = attribute_data;
-   uint8_t wr_lvl = attribute_data; //write leveling enable
-   uint8_t tdqs_enable = attribute_data; //TDQS Enable 
-   uint8_t q_off = attribute_name; //Qoff - Output buffer Enable 
-   uint8_t lpasr = attribute_data; // Low Power Auto Self-Refresh -- new not yet supported
-   uint8_t cwl = attribute_data; // CAS Write Latency 
-   uint8_t dram_rtt_wr = attribute_data;
-   uint8_t mpr_op = attribute_data; // MPR Op
-   uint8_t mpr_page = attribute_data; // MPR Page Selection  
-   uint8_t geardown_mode = attribute_data; // Gear Down Mode  
-   uint8_t temp_readout = attribute_data; // Temperature sensor readout  
-   uint8_t fine_refresh = attribute_data; // fine refresh mode  
-   uint8_t wr_latency = attribute_data; // write latency for CRC and DM  
-   uint8_t write_crc = attribute_data; // CAS Write Latency 
-   uint8_t read_format = attribute_data; // MPR READ FORMAT  
-   uint8_t max_pd_mode = attribute_data; // Max Power down mode 
-   uint8_t temp_ref_range = attribute_data; // Temp ref range 
-   uint8_t temp_ref_mode = attribute_data; // Temp controlled ref mode 
-   uint8_t vref_mon = attribute_data; // Internal Vref Monitor 
-   uint8_t cs_cmd_latency = attribute_data; // CS to CMD/ADDR Latency 
-   uint8_t ref_abort = attribute_data; // Self Refresh Abort 
-   uint8_t rd_pre_train_mode = attribute_data; // Read Pre amble Training Mode 
-   uint8_t rd_preamble = attribute_data; // Read Pre amble 
-   uint8_t wr_preamble = attribute_data; // Write Pre amble 
-   uint8_t ca_parity_latency = attribute_data; //C/A Parity Latency Mode  
-   uint8_t crc_error_clear = attribute_data; //CRC Error Clear  
-   uint8_t ca_parity_error_status = attribute_data; //C/A Parity Error Status  
-   uint8_t odt_input_buffer = attribute_data; //ODT Input Buffer during power down  
-   uint8_t rtt_park = attribute_data; //RTT_Park value  
-   uint8_t ca_parity = attribute_data; //CA Parity Persistance Error  
-   uint8_t data_mask = attribute_data; //Data Mask  
-   uint8_t write_dbi = attribute_data; //Write DBI  
-   uint8_t read_dbi = attribute_data; //Read DBI  
-   uint8_t vrefdq_train_value = attribute_data; //vrefdq_train value   
-   uint8_t vrefdq_train_range = attribute_data; //vrefdq_train range   
-   uint8_t vrefdq_train_enable = attribute_data; //vrefdq_train enable  
-   uint8_t tccd_l = attribute_data; //tccd_l  
-   uint8_t dram_access;
 
-   switch (attribute_name) {
-       case ATTR_EFF_DRAM_BL:
-	   if (dram_bl == ENUM_ATTR_EFF_DRAM_BL_BL8)
-           {
-               dram_bl = 0x00;
-           }
-           else if (dram_bl == ENUM_ATTR_EFF_DRAM_BL_OTF)
-           {
-               dram_bl = 0x80;
-           }
-           else if (dram_bl == ENUM_ATTR_EFF_DRAM_BL_BC4)
-           {
-               dram_bl = 0x40;
-           }
-	   rc_num = rc_num | address_16.insert((uint8_t) dram_bl, 0, 2, 0);
-	   break;
-       case ATTR_EFF_DRAM_RBT:
-	   if (read_bt == ENUM_ATTR_EFF_DRAM_RBT_SEQUENTIAL)
-           {
-               read_bt = 0x00;
-           }
-           else if (read_bt == ENUM_ATTR_EFF_DRAM_RBT_INTERLEAVE)
-           {
-               read_bt = 0xFF;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) read_bt, 3, 1, 0);
-	   break;
-       case ATTR_EFF_DRAM_CL:
-	   if ((dram_cl > 8)&&(dram_cl < 17))
-           {
-               dram_cl = dram_cl - 9; 
-           }
-           else if ((dram_cl > 17)&&(dram_cl < 25))
-           {
-               dram_cl = (dram_cl >> 1) - 1;   
-           }
-           dram_cl = mss_reverse_8bits(dram_cl);
-           rc_num = rc_num | address_16.insert((uint8_t) dram_cl, 2, 1, 0);
-           rc_num = rc_num | address_16.insert((uint8_t) dram_cl, 4, 3, 1);
-	   break;
-       case ATTR_EFF_DRAM_TM:
-	   if (test_mode == ENUM_ATTR_EFF_DRAM_TM_NORMAL)
-           {
-               test_mode = 0x00;
-           }
-           else if (test_mode == ENUM_ATTR_EFF_DRAM_TM_TEST)
-           {
-               test_mode = 0xFF;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) test_mode, 7, 1);
-	   break;
-       case ATTR_EFF_DRAM_DLL_RESET:
-	   dll_reset = 0x00;
-	   FAPI_ERR( "ERROR: ATTR_EFF_DRAM_DLL_RESET accessed during PDA functionality, overwritten");
-           rc_num = rc_num | address_16.insert((uint8_t) dll_reset, 8, 1);
-	   break;
-       case ATTR_EFF_DRAM_WR:
-           if ( (dram_wr == 10) )//&& (dram_rtp == 5) )
-           {
-               dram_wr_rtp = 0x00;
-           }
-           else if ( (dram_wr == 12) )//&& (dram_rtp == 6) )
-           {
-               dram_wr_rtp = 0x80;
-           }
-           else if ( (dram_wr == 13) )//&& (dram_rtp == 7) )
-           {
-               dram_wr_rtp = 0x40;
-           }
-           else if ( (dram_wr == 14) )//&& (dram_rtp == 8) )
-           {
-               dram_wr_rtp = 0xC0;
-           }
-           else if ( (dram_wr == 18) )//&& (dram_rtp == 9) )
-           {
-               dram_wr_rtp = 0x20;
-           }
-           else if ( (dram_wr == 20) )//&& (dram_rtp == 10) )
-           {
-               dram_wr_rtp = 0xA0;
-           }
-           else if ( (dram_wr == 24) )//&& (dram_rtp == 12) )
-           {
-               dram_wr_rtp = 0x60;
-           }
-    	   rc_num = rc_num | address_16.insert((uint8_t) dram_wr_rtp, 9, 3);
-	   break;
-       case ATTR_EFF_DRAM_TRTP:
-           if ( (dram_rtp == 5) )
-           {
-               dram_wr_rtp = 0x00;
-           }
-           else if ( (dram_rtp == 6) )
-           {
-               dram_wr_rtp = 0x80;
-           }
-           else if ( (dram_rtp == 7) )
-           {
-               dram_wr_rtp = 0x40;
-           }
-           else if ( (dram_rtp == 8) )
-           {
-               dram_wr_rtp = 0xC0;
-           }
-           else if ( (dram_rtp == 9) )
-           {
-               dram_wr_rtp = 0x20;
-           }
-           else if ( (dram_rtp == 10) )
-           {
-               dram_wr_rtp = 0xA0;
-           }
-           else if ( (dram_rtp == 12) )
-           {
-               dram_wr_rtp = 0x60;
-           }
-    	   rc_num = rc_num | address_16.insert((uint8_t) dram_wr_rtp, 9, 3);
-	   break;
-       case ATTR_EFF_DRAM_DLL_PPD:
-           if (dll_precharge == ENUM_ATTR_EFF_DRAM_DLL_PPD_SLOWEXIT)
-	   {
-               dll_precharge = 0x00;
-           }
-           else if (dll_precharge == ENUM_ATTR_EFF_DRAM_DLL_PPD_FASTEXIT)
-           {
-               dll_precharge = 0xFF;
-           }
-	   FAPI_INF("ERROR: ATTR_EFF_DRAM_DLL_PPD is an unused MRS value!!! Skipping...");
-	   break;
-       case ATTR_EFF_DRAM_DLL_ENABLE:
-           if (dll_enable == ENUM_ATTR_EFF_DRAM_DLL_ENABLE_DISABLE)
-           {
-               dll_enable = 0x00;
-           }
-           else if (dll_enable == ENUM_ATTR_EFF_DRAM_DLL_ENABLE_ENABLE)
-           {
-               dll_enable = 0xFF;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) dll_enable, 0, 1, 0);
-	   break;
-       case ATTR_VPD_DRAM_RON:
-	   if (out_drv_imp_cntl == ENUM_ATTR_VPD_DRAM_RON_OHM34)
-           {
-               out_drv_imp_cntl = 0x00;
-           }
-    	   // Not currently supported
-           else if (out_drv_imp_cntl == ENUM_ATTR_VPD_DRAM_RON_OHM48) //not supported
-           {
-               out_drv_imp_cntl = 0x80;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) out_drv_imp_cntl, 1, 2, 0);
-	   break;
-       case ATTR_VPD_DRAM_RTT_NOM:
-	   if (dram_rtt_nom == ENUM_ATTR_VPD_DRAM_RTT_NOM_DISABLE)
-           {
-               dram_rtt_nom = 0x00;
-           }
-           else if (dram_rtt_nom == ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM240) //not supported
-           {
-               dram_rtt_nom = 0x20;
-           }
-           else if (dram_rtt_nom == ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM48) //not supported
-           {
-               dram_rtt_nom = 0xA0;
-           }
-           else if (dram_rtt_nom == ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM40)
-           {
-               dram_rtt_nom = 0xC0;
-           }
-           else if (dram_rtt_nom == ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM60)
-           {
-               dram_rtt_nom = 0x80;
-           }
-           else if (dram_rtt_nom == ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM120)
-           {
-               dram_rtt_nom = 0x40;
-           }
-           else if (dram_rtt_nom == ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM80) // not supported
-           {
-               dram_rtt_nom = 0x60;
-           }
-           else if (dram_rtt_nom == ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM34) // not supported
-           {
-               dram_rtt_nom = 0xE0;
-           }
-	   
-           rc_num = rc_num | address_16.insert((uint8_t) dram_rtt_nom, 8, 3, 0);
-	   break;
-       case ATTR_EFF_DRAM_AL:
-	   if (dram_al == ENUM_ATTR_EFF_DRAM_AL_DISABLE)
-           {
-               dram_al = 0x00;
-           }
-           else if (dram_al == ENUM_ATTR_EFF_DRAM_AL_CL_MINUS_1)
-           {
-               dram_al = 0x80;
-           }
-           else if (dram_al == ENUM_ATTR_EFF_DRAM_AL_CL_MINUS_2)
-           {
-               dram_al = 0x40;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) dram_al, 3, 2, 0);
-	   break;
-       case ATTR_EFF_DRAM_WR_LVL_ENABLE:
-	   if (wr_lvl == ENUM_ATTR_EFF_DRAM_WR_LVL_ENABLE_DISABLE)
-           {
-               wr_lvl = 0x00;
-           }
-           else if (wr_lvl == ENUM_ATTR_EFF_DRAM_WR_LVL_ENABLE_ENABLE)
-           {
-               wr_lvl = 0xFF;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) wr_lvl, 7, 1, 0);
-	   break;
-       case ATTR_EFF_DRAM_TDQS:
-	   if (tdqs_enable == ENUM_ATTR_EFF_DRAM_TDQS_DISABLE)
-           {
-               tdqs_enable = 0x00;
-           }
-           else if (tdqs_enable == ENUM_ATTR_EFF_DRAM_TDQS_ENABLE)
-           {
-               tdqs_enable = 0xFF;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) tdqs_enable, 11, 1, 0);
-	   break;
-       case ATTR_EFF_DRAM_OUTPUT_BUFFER:
-           if (q_off == ENUM_ATTR_EFF_DRAM_OUTPUT_BUFFER_DISABLE)
-           {
-               q_off = 0xFF;
-           }
-           else if (q_off == ENUM_ATTR_EFF_DRAM_OUTPUT_BUFFER_ENABLE)
-           {
-               q_off = 0x00;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) q_off, 12, 1, 0);
-	   break;
-       case ATTR_EFF_DRAM_LPASR:
-           if (lpasr == ENUM_ATTR_EFF_DRAM_LPASR_MANUAL_NORMAL)
-           {
-               lpasr = 0x00;
-           }
-           else if (lpasr == ENUM_ATTR_EFF_DRAM_LPASR_MANUAL_REDUCED)
-           {
-               lpasr = 0x80;
-           }
-           else if (lpasr == ENUM_ATTR_EFF_DRAM_LPASR_MANUAL_EXTENDED)
-           {
-               lpasr = 0x40;
-           }
-           else if (lpasr == ENUM_ATTR_EFF_DRAM_LPASR_ASR)
-           {
-               lpasr = 0xFF;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) lpasr, 6, 2);
-	   break;
-       case ATTR_EFF_DRAM_CWL:
-	   if ((cwl > 8)&&(cwl < 13))
-           {
-               cwl = cwl - 9; 
-           }
-           else if ((cwl > 13)&&(cwl < 19))
-           {
-               cwl = (cwl >> 1) - 3;   
-           }
-           else
-           {
-              //no correcct value for CWL was found
-              FAPI_INF("ERROR: Improper CWL value found. Setting CWL to 9 and continuing...");
-              cwl = 0;
-           }
-	   cwl = mss_reverse_8bits(cwl);
-	   rc_num = rc_num | address_16.insert((uint8_t) cwl, 3, 3);
-	   break;
-       case ATTR_VPD_DRAM_RTT_WR:
-	   if (dram_rtt_wr == ENUM_ATTR_VPD_DRAM_RTT_WR_DISABLE)
-           {
-               dram_rtt_wr = 0x00;
-           }
-           else if (dram_rtt_wr == ENUM_ATTR_VPD_DRAM_RTT_WR_OHM120)
-           {
-               dram_rtt_wr = 0x80;
-           }
-           else if (dram_rtt_wr == 240)//ENUM_ATTR_EFF_DRAM_RTT_WR_OHM240)
-           {
-               dram_rtt_wr = 0x40;
-           }
-           else if (dram_rtt_wr == 0xFF)//ENUM_ATTR_EFF_DRAM_RTT_WR_HIGHZ)
-           {
-               dram_rtt_wr = 0xFF;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) dram_rtt_wr, 9, 2);
-           break;
-       case ATTR_EFF_WRITE_CRC:
-	   if ( write_crc == ENUM_ATTR_EFF_WRITE_CRC_ENABLE)
-           {
-               write_crc = 0xFF;
-           }
-           else if (write_crc == ENUM_ATTR_EFF_WRITE_CRC_DISABLE)
-           {
-               write_crc = 0x00;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) write_crc, 12, 1);
-	   break;
-       case ATTR_EFF_MPR_MODE:
-	   if (mpr_op == ENUM_ATTR_EFF_MPR_MODE_ENABLE)
-           {
-               mpr_op = 0xFF;
-           }
-           else if (mpr_op == ENUM_ATTR_EFF_MPR_MODE_DISABLE)
-           {
-               mpr_op = 0x00;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) mpr_op, 2, 1);
-	   break;
-       case ATTR_EFF_MPR_PAGE:
-           mpr_page = mss_reverse_8bits(mpr_page);
-    	   rc_num = rc_num | address_16.insert((uint8_t) mpr_page, 0, 2);
-	   break;
-       case ATTR_EFF_GEARDOWN_MODE:
-	   if ( geardown_mode == ENUM_ATTR_EFF_GEARDOWN_MODE_HALF)
-           {
-        	geardown_mode = 0x00;
-           }
-           else if ( geardown_mode == ENUM_ATTR_EFF_GEARDOWN_MODE_QUARTER)
-           {
-        	geardown_mode = 0xFF;
-           }
-           
-           if (temp_readout == ENUM_ATTR_EFF_TEMP_READOUT_ENABLE)
-           {
-               temp_readout = 0xFF;
-           }
-           else if (temp_readout == ENUM_ATTR_EFF_TEMP_READOUT_DISABLE)
-           {
-               temp_readout = 0x00;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) geardown_mode, 3, 1);
-	   break;
-       case ATTR_EFF_TEMP_READOUT:
-	   if (temp_readout == ENUM_ATTR_EFF_TEMP_READOUT_ENABLE)
-    	   {
-    	       temp_readout = 0xFF;
-    	   }
-    	   else if (temp_readout == ENUM_ATTR_EFF_TEMP_READOUT_DISABLE)
-    	   {
-    	       temp_readout = 0x00;
-    	   }
-           rc_num = rc_num | address_16.insert((uint8_t) temp_readout, 5, 1);
-	   break;
-       case ATTR_EFF_FINE_REFRESH_MODE:
-	   if (fine_refresh == ENUM_ATTR_EFF_FINE_REFRESH_MODE_NORMAL)
-           {
-               fine_refresh = 0x00;
-           }
-           else if (fine_refresh == ENUM_ATTR_EFF_FINE_REFRESH_MODE_FIXED_2X)
-           {
-               fine_refresh = 0x80;
-           }
-           else if (fine_refresh == ENUM_ATTR_EFF_FINE_REFRESH_MODE_FIXED_4X)
-           {
-               fine_refresh = 0x40;
-           }
-           else if (fine_refresh == ENUM_ATTR_EFF_FINE_REFRESH_MODE_FLY_2X)
-           {
-               fine_refresh = 0xA0;
-           }
-           else if (fine_refresh == ENUM_ATTR_EFF_FINE_REFRESH_MODE_FLY_4X)
-           {
-               fine_refresh = 0x60;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) fine_refresh, 6, 3);
-	   break;
-       case ATTR_EFF_CRC_WR_LATENCY:
-           if (wr_latency == ENUM_ATTR_EFF_CRC_WR_LATENCY_4NCK)
-           {
-               wr_latency = 0x00;
-           }
-           else if (wr_latency == ENUM_ATTR_EFF_CRC_WR_LATENCY_5NCK)
-           {
-               wr_latency = 0x80;
-           }
-           else if (wr_latency == ENUM_ATTR_EFF_CRC_WR_LATENCY_6NCK)
-           {
-               wr_latency = 0xC0;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) wr_latency, 9, 2);
-	   break;
-       case ATTR_EFF_MPR_RD_FORMAT:
-           if (read_format == ENUM_ATTR_EFF_MPR_RD_FORMAT_SERIAL)
-           {
-               read_format = 0x00;
-           }
-           else if (read_format == ENUM_ATTR_EFF_MPR_RD_FORMAT_PARALLEL)
-           {
-               read_format = 0x80;
-           }
-           else if (read_format == ENUM_ATTR_EFF_MPR_RD_FORMAT_STAGGERED)
-           {
-               read_format = 0x40;
-           }
-           else if (read_format == ENUM_ATTR_EFF_MPR_RD_FORMAT_RESERVED_TEMP)
-           {
-               read_format = 0xC0;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) read_format, 11, 2);
-	   break;
-       case ATTR_EFF_PER_DRAM_ACCESS:
-           FAPI_INF("ERROR: ATTR_EFF_PER_DRAM_ACCESS selected.  Forcing PDA to be on for this function");
-	   dram_access = 0xFF;
-	   rc_num = rc_num | address_16.insert((uint8_t) dram_access, 4, 1);
-	   break;
-       case ATTR_EFF_MAX_POWERDOWN_MODE:
-	   if ( max_pd_mode == ENUM_ATTR_EFF_MAX_POWERDOWN_MODE_ENABLE)
-           {
-               max_pd_mode = 0xF0;
-           }
-           else if ( max_pd_mode == ENUM_ATTR_EFF_MAX_POWERDOWN_MODE_DISABLE)
-           {
-               max_pd_mode = 0x00;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) max_pd_mode, 1, 1);
-	   break;
-       case ATTR_EFF_TEMP_REF_RANGE:
-	   if (temp_ref_range == ENUM_ATTR_EFF_TEMP_REF_RANGE_NORMAL)
-           {
-               temp_ref_range = 0x00;
-           }
-           else if ( temp_ref_range== ENUM_ATTR_EFF_TEMP_REF_RANGE_EXTEND)
-           {
-               temp_ref_range = 0xFF;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) temp_ref_range, 2, 1);
-	   break;
-       case ATTR_EFF_TEMP_REF_MODE:
-	   if (temp_ref_mode == ENUM_ATTR_EFF_TEMP_REF_MODE_ENABLE)
-           {
-               temp_ref_mode = 0x80;
-           }
-           else if (temp_ref_mode == ENUM_ATTR_EFF_TEMP_REF_MODE_DISABLE)
-           {
-               temp_ref_mode = 0x00;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) temp_ref_mode, 3, 1);
-	   break;
-       case ATTR_EFF_INT_VREF_MON:
-	   if ( vref_mon == ENUM_ATTR_EFF_INT_VREF_MON_ENABLE)
-           {
-               vref_mon = 0xFF;
-           }
-           else if ( vref_mon == ENUM_ATTR_EFF_INT_VREF_MON_DISABLE)
-           {
-               vref_mon = 0x00;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) vref_mon, 4, 1);
-	   break;
-       case ATTR_EFF_CS_CMD_LATENCY:
-	   if ( cs_cmd_latency == 3)
-           {
-               cs_cmd_latency = 0x80;
-           }
-           else if (cs_cmd_latency == 4)
-           {
-               cs_cmd_latency = 0x40;
-           }
-           else if (cs_cmd_latency == 5)
-           {
-               cs_cmd_latency = 0xC0;
-           }
-           else if (cs_cmd_latency == 6)
-           {
-               cs_cmd_latency = 0x20;
-           }
-           else if (cs_cmd_latency == 8)
-           {
-               cs_cmd_latency = 0xA0;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) cs_cmd_latency, 6, 3);
-	   break;
-       case ATTR_EFF_SELF_REF_ABORT:
-	   if (ref_abort == ENUM_ATTR_EFF_SELF_REF_ABORT_ENABLE)
-           {
-               ref_abort = 0xFF;
-           }
-           else if (ref_abort == ENUM_ATTR_EFF_SELF_REF_ABORT_DISABLE)
-           {
-               ref_abort = 0x00;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) ref_abort, 9, 1);
-	   break;
-       case ATTR_EFF_RD_PREAMBLE_TRAIN:
-	   if (rd_pre_train_mode == ENUM_ATTR_EFF_RD_PREAMBLE_TRAIN_ENABLE)
-           {
-               rd_pre_train_mode = 0xFF;
-           }
-           else if (rd_pre_train_mode == ENUM_ATTR_EFF_RD_PREAMBLE_TRAIN_DISABLE)
-           {
-               rd_pre_train_mode = 0x00;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) rd_pre_train_mode, 10, 1);
-	   break;
-       case ATTR_EFF_RD_PREAMBLE:
-	   if (rd_preamble == ENUM_ATTR_EFF_RD_PREAMBLE_1NCLK)
-           {
-               rd_preamble = 0x00;
-           }
-           else if (rd_preamble == ENUM_ATTR_EFF_RD_PREAMBLE_2NCLK)
-           {
-               rd_preamble = 0xFF;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) rd_preamble, 11, 1);
-	   break;
-       case ATTR_EFF_WR_PREAMBLE:
-           if (wr_preamble == ENUM_ATTR_EFF_WR_PREAMBLE_1NCLK)
-           {
-               wr_preamble = 0x00;
-           }
-           else if (wr_preamble == ENUM_ATTR_EFF_WR_PREAMBLE_2NCLK)
-           {
-               wr_preamble = 0xFF;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) wr_preamble, 12, 1);
-	   break;
-       case ATTR_EFF_CA_PARITY_LATENCY:
-	   if (ca_parity_latency == 4)
-           {
-               ca_parity_latency = 0x80;
-           }
-           else if (ca_parity_latency == 5)
-           {
-               ca_parity_latency = 0x40;
-           }
-           else if (ca_parity_latency == 6)
-           {
-               ca_parity_latency = 0xC0;
-           }
-           else if (ca_parity_latency == 8)
-           {
-               ca_parity_latency = 0x20;
-           }
-           else if (ca_parity_latency == ENUM_ATTR_EFF_CA_PARITY_LATENCY_DISABLE)
-           {
-               ca_parity_latency = 0x00;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) ca_parity_latency, 0, 2);
-	   break;
-       case ATTR_EFF_CRC_ERROR_CLEAR:
-	   if (crc_error_clear == ENUM_ATTR_EFF_CRC_ERROR_CLEAR_ERROR)
-           {
-               crc_error_clear = 0xFF;
-           }
-           else if (crc_error_clear == ENUM_ATTR_EFF_CRC_ERROR_CLEAR_CLEAR)
-           {
-               crc_error_clear = 0x00;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) crc_error_clear, 3, 1);
-	   break;
-       case ATTR_EFF_CA_PARITY_ERROR_STATUS:
-	   if (ca_parity_error_status == ENUM_ATTR_EFF_CA_PARITY_ERROR_STATUS_ERROR)
-           {
-               ca_parity_error_status = 0xFF;
-           }
-           else if (ca_parity_error_status == ENUM_ATTR_EFF_CA_PARITY_ERROR_STATUS_CLEAR)
-           {
-               ca_parity_error_status = 0x00;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) ca_parity_error_status, 4, 1);
-	   break;
-       case ATTR_EFF_ODT_INPUT_BUFF:
-	   if (odt_input_buffer == ENUM_ATTR_EFF_ODT_INPUT_BUFF_ACTIVATED)
-           {
-               odt_input_buffer = 0x00;
-           }
-           else if (odt_input_buffer == ENUM_ATTR_EFF_ODT_INPUT_BUFF_DEACTIVATED)
-           {
-               odt_input_buffer = 0xFF;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) odt_input_buffer, 5, 1);
-	   break;
-       case ATTR_VPD_DRAM_RTT_PARK:
-	   if (rtt_park == ENUM_ATTR_VPD_DRAM_RTT_PARK_DISABLE)
-           {
-               rtt_park = 0x00;
-           }
-           else if (rtt_park == ENUM_ATTR_VPD_DRAM_RTT_PARK_60OHM)
-           {
-               rtt_park = 0x80;
-           }
-           else if (rtt_park == ENUM_ATTR_VPD_DRAM_RTT_PARK_40OHM)
-           {
-               rtt_park = 0xC0;
-           }
-           else if (rtt_park == ENUM_ATTR_VPD_DRAM_RTT_PARK_120OHM)
-           {
-               rtt_park = 0x40;
-           }
-           else if (rtt_park == ENUM_ATTR_VPD_DRAM_RTT_PARK_240OHM)
-           {
-               rtt_park = 0x20;
-           }
-           else if (rtt_park == ENUM_ATTR_VPD_DRAM_RTT_PARK_48OHM)
-           {
-               rtt_park = 0xA0;
-           }
-           else if (rtt_park == ENUM_ATTR_VPD_DRAM_RTT_PARK_80OHM)
-           {
-               rtt_park = 0x60;
-           }
-           else if (rtt_park == ENUM_ATTR_VPD_DRAM_RTT_PARK_34OHM)
-           {
-               rtt_park = 0xE0;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) rtt_park, 6, 3);
-	   break;
-       case ATTR_EFF_CA_PARITY:
-	   if (ca_parity == ENUM_ATTR_EFF_CA_PARITY_ENABLE)
-           {
-               ca_parity = 0xFF;
-           }
-           else if (ca_parity == ENUM_ATTR_EFF_CA_PARITY_DISABLE)
-           {
-               ca_parity = 0x00;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) ca_parity, 9, 1);
-	   break;
-       case ATTR_EFF_DATA_MASK:
-	   if (data_mask == ENUM_ATTR_EFF_DATA_MASK_DISABLE)
-           {
-               data_mask = 0x00;
-           }
-           else if (data_mask == ENUM_ATTR_EFF_DATA_MASK_ENABLE)
-           {
-               data_mask = 0xFF;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) data_mask, 10, 1);
-	   break;
-       case ATTR_EFF_WRITE_DBI:
-	   if (write_dbi == ENUM_ATTR_EFF_WRITE_DBI_DISABLE)
-           {
-               write_dbi = 0x00;
-           }
-           else if (write_dbi == ENUM_ATTR_EFF_WRITE_DBI_ENABLE)
-           {
-               write_dbi = 0xFF;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) write_dbi, 11, 1);
-	   break;
-       case ATTR_EFF_READ_DBI:
-           if (read_dbi == ENUM_ATTR_EFF_READ_DBI_DISABLE)
-           {
-               read_dbi = 0x00;
-           }
-           else if (read_dbi == ENUM_ATTR_EFF_READ_DBI_ENABLE)
-           {
-               read_dbi = 0xFF;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) read_dbi, 12, 1);
-	   break;
-       case ATTR_EFF_VREF_DQ_TRAIN_VALUE:
-	   vrefdq_train_value = mss_reverse_8bits(vrefdq_train_value);
-           rc_num = rc_num | address_16.insert((uint8_t) vrefdq_train_value, 0, 6);
-	   break;
-       case ATTR_EFF_VREF_DQ_TRAIN_RANGE:
-	   if (vrefdq_train_range == ENUM_ATTR_EFF_VREF_DQ_TRAIN_RANGE_RANGE1)
-           {
-               vrefdq_train_range = 0x00;
-           }
-           else if (vrefdq_train_range == ENUM_ATTR_EFF_VREF_DQ_TRAIN_RANGE_RANGE2)
-           {
-               vrefdq_train_range = 0xFF;
-           } 
-           rc_num = rc_num | address_16.insert((uint8_t) vrefdq_train_range, 6, 1);
-	   break;
-       case ATTR_EFF_VREF_DQ_TRAIN_ENABLE:
-	   if (vrefdq_train_enable == ENUM_ATTR_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE)
-           {
-               vrefdq_train_enable = 0xFF;
-           }
-           else if (vrefdq_train_enable == ENUM_ATTR_EFF_VREF_DQ_TRAIN_ENABLE_DISABLE)
-           {
-               vrefdq_train_enable = 0x00;
-           }   
-           rc_num = rc_num | address_16.insert((uint8_t) vrefdq_train_enable, 7, 1);
-	   break;
-       case ATTR_TCCD_L:
-           if (tccd_l == 4)
-           {
-               tccd_l = 0x00;
-           }
-           else if (tccd_l == 5)
-           {
-               tccd_l = 0x80;
-           }
-           else if (tccd_l == 6)
-           {
-               tccd_l = 0x40;
-           }	
-           else if (tccd_l == 7)
-           {
-               tccd_l = 0xC0;
-           }
-           else if (tccd_l == 8)
-           {
-               tccd_l = 0x20;
-           }
-           rc_num = rc_num | address_16.insert((uint8_t) tccd_l, 10, 3);
-	   break;
-	//MRS attribute not found, error out
-      default: 
-         const uint32_t NONMRS_ATTR_NAME = attribute_name;
-	 const fapi::Target & MBA_TARGET = i_target; 
-	 FAPI_SET_HWP_ERROR(rc, RC_MSS_PDA_NONMRS_ATTR_NAME);
-	 FAPI_ERR("ERROR!! Found attribute name not associated with an MRS! Exiting...");
-   }
-   if (rc_num)
-   {
-       FAPI_ERR( "mss_ddr4_modify_mrs_pda: Error setting up buffers");
-       rc.setEcmdError(rc_num);
-       return rc;
-   }
-   return rc;
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-/// mss_ddr4_load_nominal_mrs_pda
-/// disables per-DRAM addressability funcitonality on both ports on the passed MBA
-//////////////////////////////////////////////////////////////////////////////////
-ReturnCode mss_ddr4_load_nominal_mrs_pda(Target& i_target,ecmdDataBufferBase& bank_3,ecmdDataBufferBase& address_16,uint8_t MRS,uint8_t i_port_number, uint8_t dimm_number, uint8_t rank_number) {
+//sets up the ODT holdtime and number of idles to be issued after 
+ReturnCode mss_get_pda_odt_timings(Target& i_target,uint8_t & wl_launch_time,uint8_t & odt_hold_time,uint8_t & post_odt_nop_idle) {
     ReturnCode rc;  
     ReturnCode rc_buff;
     uint32_t rc_num = 0;
+    ecmdDataBufferBase data_buffer(64);
     
-    rc_num = rc_num | address_16.clearBit(0,16);
-    rc_num = rc_num | bank_3.clearBit(0,3);
-    if (rc_num)
+    //reads out the register values
+    rc = fapiGetScom(i_target, MBA01_MBA_DSM0_0x0301040a, data_buffer);
+    if(rc) return rc;
+    
+    //gets the hold time
+    uint8_t launch_delay;
+    rc_num = rc_num | data_buffer.extractToRight(&launch_delay,12,6);
+    rc_num = rc_num | data_buffer.extractToRight(&odt_hold_time,18,6);
+    
+    odt_hold_time = odt_hold_time + launch_delay;
+    
+    if(rc_num)
     {
-    	FAPI_ERR( "mss_mrs_load: Error setting up buffers");
-    	rc_buff.setEcmdError(rc_num);
-    	return rc_buff;
-    }
-
-    //Lines commented out in the following section are waiting for xml attribute adds
-    //MRS0
-    if(MRS == MRS0_BA) {
-    	uint8_t dram_bl;
-    	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_BL, &i_target, dram_bl);
-    	if(rc) return rc;
-    	uint8_t read_bt; //Read Burst Type 
-    	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_RBT, &i_target, read_bt);
-    	if(rc) return rc;
-    	uint8_t dram_cl;
-    	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_CL, &i_target, dram_cl);
-    	if(rc) return rc;
-    	uint8_t test_mode; //TEST MODE 
-    	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_TM, &i_target, test_mode);
-    	if(rc) return rc;
-    	uint8_t dll_reset; //DLL Reset 
-    	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_DLL_RESET, &i_target, dll_reset);
-    	if(rc) return rc;
-    	uint8_t dram_wr; //DRAM write recovery
-    	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WR, &i_target, dram_wr);
-    	if(rc) return rc;
-    	uint8_t dram_rtp; //DRAM RTP - read to precharge
-    	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_TRTP, &i_target, dram_rtp);
-    	if(rc) return rc;
-    	uint8_t dll_precharge; //DLL Control For Precharge 
-    	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_DLL_PPD, &i_target, dll_precharge);
-    	if(rc) return rc;
-
-    	if (dram_bl == ENUM_ATTR_EFF_DRAM_BL_BL8)
-    	{
-    	    dram_bl = 0x00;
-    	}
-    	else if (dram_bl == ENUM_ATTR_EFF_DRAM_BL_OTF)
-    	{
-    	    dram_bl = 0x80;
-    	}
-    	else if (dram_bl == ENUM_ATTR_EFF_DRAM_BL_BC4)
-    	{
-    	    dram_bl = 0x40;
-    	}
-
-    	uint8_t dram_wr_rtp = 0x00;
-    	if ( (dram_wr == 10) )//&& (dram_rtp == 5) )
-    	{
-    	    dram_wr_rtp = 0x00;
-    	}
-    	else if ( (dram_wr == 12) )//&& (dram_rtp == 6) )
-    	{
-    	    dram_wr_rtp = 0x80;
-    	}
-    	else if ( (dram_wr == 13) )//&& (dram_rtp == 7) )
-    	{
-    	    dram_wr_rtp = 0x40;
-    	}
-    	else if ( (dram_wr == 14) )//&& (dram_rtp == 8) )
-    	{
-    	    dram_wr_rtp = 0xC0;
-    	}
-    	else if ( (dram_wr == 18) )//&& (dram_rtp == 9) )
-    	{
-    	    dram_wr_rtp = 0x20;
-    	}
-    	else if ( (dram_wr == 20) )//&& (dram_rtp == 10) )
-    	{
-    	    dram_wr_rtp = 0xA0;
-    	}
-    	else if ( (dram_wr == 24) )//&& (dram_rtp == 12) )
-    	{
-    	    dram_wr_rtp = 0x60;
-    	}
-
-    	if (read_bt == ENUM_ATTR_EFF_DRAM_RBT_SEQUENTIAL)
-    	{
-    	    read_bt = 0x00;
-    	}
-    	else if (read_bt == ENUM_ATTR_EFF_DRAM_RBT_INTERLEAVE)
-    	{
-    	    read_bt = 0xFF;
-    	}
-
-    	if ((dram_cl > 8)&&(dram_cl < 17))
-    	{
-    	    dram_cl = dram_cl - 9; 
-    	}
-    	else if ((dram_cl > 17)&&(dram_cl < 25))
-    	{
-    	    dram_cl = (dram_cl >> 1) - 1;   
-    	}
-    	dram_cl = mss_reverse_8bits(dram_cl);
-
-    	if (test_mode == ENUM_ATTR_EFF_DRAM_TM_NORMAL)
-    	{
-    	    test_mode = 0x00;
-    	}
-    	else if (test_mode == ENUM_ATTR_EFF_DRAM_TM_TEST)
-    	{
-    	    test_mode = 0xFF;
-    	}
-	
-	FAPI_INF("Overwriting DLL reset with values to not reset the DRAM.");
-    	dll_reset = 0x00;
-
-    	if (dll_precharge == ENUM_ATTR_EFF_DRAM_DLL_PPD_SLOWEXIT)
-    	{
-    	    dll_precharge = 0x00;
-    	}
-    	else if (dll_precharge == ENUM_ATTR_EFF_DRAM_DLL_PPD_FASTEXIT)
-    	{
-    	    dll_precharge = 0xFF;
-    	}
-	//For DDR4:
-	//Address 14 = Address 17, Address 15 = BG1
-        rc_num = rc_num | address_16.insert((uint8_t) dram_bl, 0, 2, 0);
-        rc_num = rc_num | address_16.insert((uint8_t) dram_cl, 2, 1, 0);
-        rc_num = rc_num | address_16.insert((uint8_t) read_bt, 3, 1, 0);
-        rc_num = rc_num | address_16.insert((uint8_t) dram_cl, 4, 3, 1);
-        rc_num = rc_num | address_16.insert((uint8_t) test_mode, 7, 1);
-        rc_num = rc_num | address_16.insert((uint8_t) dll_reset, 8, 1);
-	rc_num = rc_num | address_16.insert((uint8_t) dram_wr_rtp, 9, 3);
-	rc_num = rc_num | address_16.insert((uint8_t) 0x00, 12, 4);
-	
-	rc_num = rc_num | bank_3.insert((uint8_t) MRS0_BA, 0, 1, 7);
-        rc_num = rc_num | bank_3.insert((uint8_t) MRS0_BA, 1, 1, 6);
-        rc_num = rc_num | bank_3.insert((uint8_t) MRS0_BA, 2, 1, 5);
-	if (rc_num)
-        {
-            FAPI_ERR( "mss_mrs_load: Error setting up buffers");
-            rc_buff.setEcmdError(rc_num);
-            return rc_buff;
-        }
+	rc.setEcmdError(rc_num);
+	return rc;
     }
     
-    //MRS1
-    else if(MRS == MRS1_BA) {
-    	uint8_t dll_enable; //DLL Enable 
-    	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_DLL_ENABLE, &i_target, dll_enable);
-    	if(rc) return rc;
-    	uint8_t out_drv_imp_cntl[2][2];
-    	rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_RON, &i_target, out_drv_imp_cntl);
-    	if(rc) return rc;
-    	uint8_t dram_rtt_nom[2][2][4];
-    	rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_RTT_NOM, &i_target, dram_rtt_nom);
-    	if(rc) return rc;
-    	uint8_t dram_al;
-    	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_AL, &i_target, dram_al);
-    	if(rc) return rc;
-    	uint8_t wr_lvl; //write leveling enable
-    	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WR_LVL_ENABLE, &i_target, wr_lvl);
-    	if(rc) return rc;
-    	uint8_t tdqs_enable; //TDQS Enable 
-    	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_TDQS, &i_target, tdqs_enable);
-    	if(rc) return rc;
-    	uint8_t q_off; //Qoff - Output buffer Enable 
-    	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_OUTPUT_BUFFER, &i_target, q_off);
-    	if(rc) return rc;
-
-    	if (dll_enable == ENUM_ATTR_EFF_DRAM_DLL_ENABLE_DISABLE)
-    	{
-    	    dll_enable = 0x00;
-    	}
-    	else if (dll_enable == ENUM_ATTR_EFF_DRAM_DLL_ENABLE_ENABLE)
-    	{
-    	    dll_enable = 0xFF;
-    	}
-
-    	if (dram_al == ENUM_ATTR_EFF_DRAM_AL_DISABLE)
-    	{
-    	    dram_al = 0x00;
-    	}
-    	else if (dram_al == ENUM_ATTR_EFF_DRAM_AL_CL_MINUS_1)
-    	{
-    	    dram_al = 0x80;
-    	}
-    	else if (dram_al == ENUM_ATTR_EFF_DRAM_AL_CL_MINUS_2)
-    	{
-    	    dram_al = 0x40;
-    	}
-
-    	if (wr_lvl == ENUM_ATTR_EFF_DRAM_WR_LVL_ENABLE_DISABLE)
-    	{
-    	    wr_lvl = 0x00;
-    	}
-    	else if (wr_lvl == ENUM_ATTR_EFF_DRAM_WR_LVL_ENABLE_ENABLE)
-    	{
-    	    wr_lvl = 0xFF;
-    	}
-
-    	if (tdqs_enable == ENUM_ATTR_EFF_DRAM_TDQS_DISABLE)
-    	{
-    	    tdqs_enable = 0x00;
-    	}
-    	else if (tdqs_enable == ENUM_ATTR_EFF_DRAM_TDQS_ENABLE)
-    	{
-    	    tdqs_enable = 0xFF;
-    	}
-
-    	if (q_off == ENUM_ATTR_EFF_DRAM_OUTPUT_BUFFER_DISABLE)
-    	{
-    	    q_off = 0xFF;
-    	}
-    	else if (q_off == ENUM_ATTR_EFF_DRAM_OUTPUT_BUFFER_ENABLE)
-    	{
-    	    q_off = 0x00;
-    	}
-        if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_NOM_DISABLE)
-        {
-            dram_rtt_nom[i_port_number][dimm_number][rank_number] = 0x00;
-        }
-        else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM240) //not supported
-        {
-            dram_rtt_nom[i_port_number][dimm_number][rank_number] = 0x20;
-        }
-        else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM48) //not supported
-        {
-            dram_rtt_nom[i_port_number][dimm_number][rank_number] = 0xA0;
-        }
-        else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM40)
-        {
-            dram_rtt_nom[i_port_number][dimm_number][rank_number] = 0xC0;
-        }
-        else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM60)
-        {
-            dram_rtt_nom[i_port_number][dimm_number][rank_number] = 0x80;
-        }
-        else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM120)
-        {
-            dram_rtt_nom[i_port_number][dimm_number][rank_number] = 0x40;
-        }
-        else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM80) // not supported
-        {
-            dram_rtt_nom[i_port_number][dimm_number][rank_number] = 0x60;
-        }
-        else if (dram_rtt_nom[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_NOM_OHM34) // not supported
-        {
-            dram_rtt_nom[i_port_number][dimm_number][rank_number] = 0xE0;
-        }
-
-        if (out_drv_imp_cntl[i_port_number][dimm_number] == ENUM_ATTR_VPD_DRAM_RON_OHM34)
-        {
-            out_drv_imp_cntl[i_port_number][dimm_number] = 0x00;
-        }
-	// Not currently supported
-        else if (out_drv_imp_cntl[i_port_number][dimm_number] == ENUM_ATTR_VPD_DRAM_RON_OHM48) //not supported
-        {
-            out_drv_imp_cntl[i_port_number][dimm_number] = 0x80;
-        }
-
-	//For DDR4:
-	//Address 14 = Address 17, Address 15 = BG1
-        rc_num = rc_num | address_16.insert((uint8_t) dll_enable, 0, 1, 0);
-        rc_num = rc_num | address_16.insert((uint8_t) out_drv_imp_cntl[i_port_number][dimm_number], 1, 2, 0);
-        rc_num = rc_num | address_16.insert((uint8_t) dram_al, 3, 2, 0);
-        rc_num = rc_num | address_16.insert((uint8_t) 0x00, 5, 2);
-        rc_num = rc_num | address_16.insert((uint8_t) wr_lvl, 7, 1, 0);
-        rc_num = rc_num | address_16.insert((uint8_t) dram_rtt_nom[i_port_number][dimm_number][rank_number], 8, 3, 0);
-        rc_num = rc_num | address_16.insert((uint8_t) tdqs_enable, 11, 1, 0);
-        rc_num = rc_num | address_16.insert((uint8_t) q_off, 12, 1, 0);
-        rc_num = rc_num | address_16.insert((uint8_t) 0x00, 13, 3);
-	
-	rc_num = rc_num | bank_3.insert((uint8_t) MRS1_BA, 0, 1, 7);
-        rc_num = rc_num | bank_3.insert((uint8_t) MRS1_BA, 1, 1, 6);
-        rc_num = rc_num | bank_3.insert((uint8_t) MRS1_BA, 2, 1, 5);
-	if (rc_num)
-        {
-            FAPI_ERR( "mss_mrs_load: Error setting up buffers");
-            rc_buff.setEcmdError(rc_num);
-            return rc_buff;
-        }
+    //gets write latency
+    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_CWL, &i_target, wl_launch_time);
+    if(rc) return rc;
+    
+    wl_launch_time += launch_delay;
+    
+    uint8_t dram_al;
+    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_AL, &i_target, dram_al);
+    if(rc) return rc;
+    
+    //Addative latency enabled - need to add CL-AL
+    if(dram_al != ENUM_ATTR_EFF_DRAM_AL_DISABLE) {
+       uint8_t dram_cl;
+       rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_CL, &i_target, dram_cl);
+       if(rc) return rc;
+       wl_launch_time += (dram_cl-dram_al);
     }
-    //MRS2
-    else if(MRS == MRS2_BA) {
-    	uint8_t lpasr; // Low Power Auto Self-Refresh -- new not yet supported
-    	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_LPASR, &i_target, lpasr);
-    	if(rc) return rc;
-    	uint8_t cwl; // CAS Write Latency 
-    	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_CWL, &i_target, cwl);
-    	if(rc) return rc;
-    	uint8_t dram_rtt_wr[2][2][4];
-    	rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_RTT_WR, &i_target, dram_rtt_wr);
-    	if(rc) return rc;
-    	uint8_t write_crc; // CAS Write Latency 
-    	rc = FAPI_ATTR_GET(ATTR_EFF_WRITE_CRC, &i_target, write_crc);
-    	if(rc) return rc;
-
-    	if (lpasr == ENUM_ATTR_EFF_DRAM_LPASR_MANUAL_NORMAL)
-    	{
-    	    lpasr = 0x00;
-    	}
-    	else if (lpasr == ENUM_ATTR_EFF_DRAM_LPASR_MANUAL_REDUCED)
-    	{
-    	    lpasr = 0x80;
-    	}
-    	else if (lpasr == ENUM_ATTR_EFF_DRAM_LPASR_MANUAL_EXTENDED)
-    	{
-    	    lpasr = 0x40;
-    	}
-    	else if (lpasr == ENUM_ATTR_EFF_DRAM_LPASR_ASR)
-    	{
-    	    lpasr = 0xFF;
-    	}
-
-    	if ((cwl > 8)&&(cwl < 13))
-    	{
-    	    cwl = cwl - 9; 
-    	}
-    	else if ((cwl > 13)&&(cwl < 19))
-    	{
-    	    cwl = (cwl >> 1) - 3;   
-    	}
-    	else
-    	{
-    	   //no correcct value for CWL was found
-    	   FAPI_INF("ERROR: Improper CWL value found. Setting CWL to 9 and continuing...");
-    	   cwl = 0;
-    	}
-    	cwl = mss_reverse_8bits(cwl);
-
-    	if ( write_crc == ENUM_ATTR_EFF_WRITE_CRC_ENABLE)
-    	{
-    	    write_crc = 0xFF;
-    	}
-    	else if (write_crc == ENUM_ATTR_EFF_WRITE_CRC_DISABLE)
-    	{
-    	    write_crc = 0x00;
-    	}
-	if (dram_rtt_wr[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_WR_DISABLE)
-        {
-            dram_rtt_wr[i_port_number][dimm_number][rank_number] = 0x00;
-        }
-        else if (dram_rtt_wr[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_WR_OHM120)
-        {
-            dram_rtt_wr[i_port_number][dimm_number][rank_number] = 0x80;
-        }
-        else if (dram_rtt_wr[i_port_number][dimm_number][rank_number] == 240)//ENUM_ATTR_EFF_DRAM_RTT_WR_OHM240)
-        {
-            dram_rtt_wr[i_port_number][dimm_number][rank_number] = 0x40;
-        }
-        else if (dram_rtt_wr[i_port_number][dimm_number][rank_number] == 0xFF)//ENUM_ATTR_EFF_DRAM_RTT_WR_HIGHZ)
-        {
-            dram_rtt_wr[i_port_number][dimm_number][rank_number] = 0xFF;
-        }
-
-        rc_num = rc_num | address_16.insert((uint8_t) 0x00, 0, 3);
-        rc_num = rc_num | address_16.insert((uint8_t) cwl, 3, 3);
-        rc_num = rc_num | address_16.insert((uint8_t) lpasr, 6, 2);
-        rc_num = rc_num | address_16.insert((uint8_t) 0x00, 8, 1);
-        rc_num = rc_num | address_16.insert((uint8_t) dram_rtt_wr[i_port_number][dimm_number][rank_number], 9, 2);
-        rc_num = rc_num | address_16.insert((uint8_t) 0x00, 11, 1);
-        rc_num = rc_num | address_16.insert((uint8_t) write_crc, 12, 1);
-        rc_num = rc_num | address_16.insert((uint8_t) 0x00, 13, 2);
-	
-	rc_num = rc_num | bank_3.insert((uint8_t) MRS2_BA, 0, 1, 7);
-        rc_num = rc_num | bank_3.insert((uint8_t) MRS2_BA, 1, 1, 6);
-        rc_num = rc_num | bank_3.insert((uint8_t) MRS2_BA, 2, 1, 5);
-	if (rc_num)
-        {
-            FAPI_ERR( "mss_mrs_load: Error setting up buffers");
-            rc_buff.setEcmdError(rc_num);
-            return rc_buff;
-        }
-    }
-    //MRS3
-    else if(MRS == MRS3_BA) {
-    	uint8_t mpr_op; // MPR Op
-    	rc = FAPI_ATTR_GET(ATTR_EFF_MPR_MODE, &i_target, mpr_op);
-    	if(rc) return rc;
-    	uint8_t mpr_page; // MPR Page Selection  - NEW
-    	rc = FAPI_ATTR_GET(ATTR_EFF_MPR_PAGE, &i_target, mpr_page);
-    	if(rc) return rc;
-    	uint8_t geardown_mode; // Gear Down Mode  - NEW
-    	rc = FAPI_ATTR_GET(ATTR_EFF_GEARDOWN_MODE, &i_target, geardown_mode);
-    	if(rc) return rc;
-    	uint8_t temp_readout; // Temperature sensor readout  - NEW
-    	rc = FAPI_ATTR_GET(ATTR_EFF_TEMP_READOUT, &i_target, temp_readout);
-    	if(rc) return rc;
-    	uint8_t fine_refresh; // fine refresh mode  - NEW
-    	rc = FAPI_ATTR_GET(ATTR_EFF_FINE_REFRESH_MODE, &i_target, fine_refresh);
-    	if(rc) return rc;
-    	uint8_t wr_latency; // write latency for CRC and DM  - NEW
-    	rc = FAPI_ATTR_GET(ATTR_EFF_CRC_WR_LATENCY, &i_target, wr_latency);
-    	if(rc) return rc;
-    	uint8_t read_format; // MPR READ FORMAT  - NEW
-    	rc = FAPI_ATTR_GET(ATTR_EFF_MPR_RD_FORMAT, &i_target, read_format);
-    	if(rc) return rc;
-
-    	if (mpr_op == ENUM_ATTR_EFF_MPR_MODE_ENABLE)
-    	{
-    	    mpr_op = 0xFF;
-    	}
-    	else if (mpr_op == ENUM_ATTR_EFF_MPR_MODE_DISABLE)
-    	{
-    	    mpr_op = 0x00;
-    	}
-
-    	mpr_page = mss_reverse_8bits(mpr_page);
-
-    	if ( geardown_mode == ENUM_ATTR_EFF_GEARDOWN_MODE_HALF)
-    	{
-    	     geardown_mode = 0x00;
-    	}
-    	else if ( geardown_mode == ENUM_ATTR_EFF_GEARDOWN_MODE_QUARTER)
-    	{
-    	     geardown_mode = 0xFF;
-    	}
-    	
-    	if (temp_readout == ENUM_ATTR_EFF_TEMP_READOUT_ENABLE)
-    	{
-    	    temp_readout = 0xFF;
-    	}
-    	else if (temp_readout == ENUM_ATTR_EFF_TEMP_READOUT_DISABLE)
-    	{
-    	    temp_readout = 0x00;
-    	}
-
-    	if (fine_refresh == ENUM_ATTR_EFF_FINE_REFRESH_MODE_NORMAL)
-    	{
-    	    fine_refresh = 0x00;
-    	}
-    	else if (fine_refresh == ENUM_ATTR_EFF_FINE_REFRESH_MODE_FIXED_2X)
-    	{
-    	    fine_refresh = 0x80;
-    	}
-    	else if (fine_refresh == ENUM_ATTR_EFF_FINE_REFRESH_MODE_FIXED_4X)
-    	{
-    	    fine_refresh = 0x40;
-    	}
-    	else if (fine_refresh == ENUM_ATTR_EFF_FINE_REFRESH_MODE_FLY_2X)
-    	{
-    	    fine_refresh = 0xA0;
-    	}
-    	else if (fine_refresh == ENUM_ATTR_EFF_FINE_REFRESH_MODE_FLY_4X)
-    	{
-    	    fine_refresh = 0x60;
-    	}
-
-    	if (wr_latency == ENUM_ATTR_EFF_CRC_WR_LATENCY_4NCK)
-    	{
-    	    wr_latency = 0x00;
-    	}
-    	else if (wr_latency == ENUM_ATTR_EFF_CRC_WR_LATENCY_5NCK)
-    	{
-    	    wr_latency = 0x80;
-    	}
-    	else if (wr_latency == ENUM_ATTR_EFF_CRC_WR_LATENCY_6NCK)
-    	{
-    	    wr_latency = 0xC0;
-    	}
-
-    	if (read_format == ENUM_ATTR_EFF_MPR_RD_FORMAT_SERIAL)
-    	{
-    	    read_format = 0x00;
-    	}
-    	else if (read_format == ENUM_ATTR_EFF_MPR_RD_FORMAT_PARALLEL)
-    	{
-    	    read_format = 0x80;
-    	}
-    	else if (read_format == ENUM_ATTR_EFF_MPR_RD_FORMAT_STAGGERED)
-    	{
-    	    read_format = 0x40;
-    	}
-    	else if (read_format == ENUM_ATTR_EFF_MPR_RD_FORMAT_RESERVED_TEMP)
-    	{
-    	    read_format = 0xC0;
-    	}
-	
-	rc_num = rc_num | address_16.insert((uint8_t) mpr_page, 0, 2);
-        rc_num = rc_num | address_16.insert((uint8_t) mpr_op, 2, 1);
-        rc_num = rc_num | address_16.insert((uint8_t) geardown_mode, 3, 1);
-        rc_num = rc_num | address_16.insert((uint8_t) 0xFF, 4, 1); //has PDA mode enabled!!!! just for this code!
-        rc_num = rc_num | address_16.insert((uint8_t) temp_readout, 5, 1);
-        rc_num = rc_num | address_16.insert((uint8_t) fine_refresh, 6, 3);
-        rc_num = rc_num | address_16.insert((uint8_t) wr_latency, 9, 2);
-        rc_num = rc_num | address_16.insert((uint8_t) read_format, 11, 2);
-        rc_num = rc_num | address_16.insert((uint8_t) 0x00, 13, 2);
-	
-	rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 0, 1, 7);
-        rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 1, 1, 6);
-        rc_num = rc_num | bank_3.insert((uint8_t) MRS3_BA, 2, 1, 5);
-	if (rc_num)
-        {
-            FAPI_ERR( "mss_mrs_load: Error setting up buffers");
-            rc_buff.setEcmdError(rc_num);
-            return rc_buff;
-        }
-    }
-    //MRS4
-    else if(MRS == MRS4_BA) {
-    	uint8_t max_pd_mode; // Max Power down mode -  NEW
-    	rc = FAPI_ATTR_GET(ATTR_EFF_MAX_POWERDOWN_MODE, &i_target, max_pd_mode);
-    	if(rc) return rc;
-    	uint8_t temp_ref_range; // Temp ref range -  NEW
-    	rc = FAPI_ATTR_GET(ATTR_EFF_TEMP_REF_RANGE, &i_target, temp_ref_range);
-    	if(rc) return rc;
-    	uint8_t temp_ref_mode; // Temp controlled ref mode -  NEW
-    	rc = FAPI_ATTR_GET(ATTR_EFF_TEMP_REF_MODE, &i_target, temp_ref_mode);
-    	if(rc) return rc;
-    	uint8_t vref_mon; // Internal Vref Monitor -  NEW
-    	rc = FAPI_ATTR_GET(ATTR_EFF_INT_VREF_MON, &i_target, vref_mon);
-    	if(rc) return rc;
-    	uint8_t cs_cmd_latency; // CS to CMD/ADDR Latency -  NEW
-    	rc = FAPI_ATTR_GET(ATTR_EFF_CS_CMD_LATENCY, &i_target, cs_cmd_latency);
-    	if(rc) return rc;
-    	uint8_t ref_abort; // Self Refresh Abort -  NEW
-    	rc = FAPI_ATTR_GET(ATTR_EFF_SELF_REF_ABORT, &i_target, ref_abort);
-    	if(rc) return rc;
-    	uint8_t rd_pre_train_mode; // Read Pre amble Training Mode -  NEW
-    	rc = FAPI_ATTR_GET(ATTR_EFF_RD_PREAMBLE_TRAIN, &i_target, rd_pre_train_mode);
-    	if(rc) return rc;
-    	uint8_t rd_preamble; // Read Pre amble -  NEW
-    	rc = FAPI_ATTR_GET(ATTR_EFF_RD_PREAMBLE, &i_target, rd_preamble);
-    	if(rc) return rc;
-    	uint8_t wr_preamble; // Write Pre amble -  NEW
-    	rc = FAPI_ATTR_GET(ATTR_EFF_WR_PREAMBLE, &i_target, wr_preamble);
-    	if(rc) return rc;
-
-    	if ( max_pd_mode == ENUM_ATTR_EFF_MAX_POWERDOWN_MODE_ENABLE)
-    	{
-    	    max_pd_mode = 0xF0;
-    	}
-    	else if ( max_pd_mode == ENUM_ATTR_EFF_MAX_POWERDOWN_MODE_DISABLE)
-    	{
-    	    max_pd_mode = 0x00;
-    	}
-
-    	if (temp_ref_range == ENUM_ATTR_EFF_TEMP_REF_RANGE_NORMAL)
-    	{
-    	    temp_ref_range = 0x00;
-    	}
-    	else if ( temp_ref_range== ENUM_ATTR_EFF_TEMP_REF_RANGE_EXTEND)
-    	{
-    	    temp_ref_range = 0xFF;
-    	}
-
-    	if (temp_ref_mode == ENUM_ATTR_EFF_TEMP_REF_MODE_ENABLE)
-    	{
-    	    temp_ref_mode = 0x80;
-    	}
-    	else if (temp_ref_mode == ENUM_ATTR_EFF_TEMP_REF_MODE_DISABLE)
-    	{
-    	    temp_ref_mode = 0x00;
-    	}
-
-    	if ( vref_mon == ENUM_ATTR_EFF_INT_VREF_MON_ENABLE)
-    	{
-    	    vref_mon = 0xFF;
-    	}
-    	else if ( vref_mon == ENUM_ATTR_EFF_INT_VREF_MON_DISABLE)
-    	{
-    	    vref_mon = 0x00;
-    	}
-
-
-    	if ( cs_cmd_latency == 3)
-    	{
-    	    cs_cmd_latency = 0x80;
-    	}
-    	else if (cs_cmd_latency == 4)
-    	{
-    	    cs_cmd_latency = 0x40;
-    	}
-    	else if (cs_cmd_latency == 5)
-    	{
-    	    cs_cmd_latency = 0xC0;
-    	}
-    	else if (cs_cmd_latency == 6)
-    	{
-    	    cs_cmd_latency = 0x20;
-    	}
-    	else if (cs_cmd_latency == 8)
-    	{
-    	    cs_cmd_latency = 0xA0;
-    	}
-
-    	if (ref_abort == ENUM_ATTR_EFF_SELF_REF_ABORT_ENABLE)
-    	{
-    	    ref_abort = 0xFF;
-    	}
-    	else if (ref_abort == ENUM_ATTR_EFF_SELF_REF_ABORT_DISABLE)
-    	{
-    	    ref_abort = 0x00;
-    	}
-
-    	if (rd_pre_train_mode == ENUM_ATTR_EFF_RD_PREAMBLE_TRAIN_ENABLE)
-    	{
-    	    rd_pre_train_mode = 0xFF;
-    	}
-    	else if (rd_pre_train_mode == ENUM_ATTR_EFF_RD_PREAMBLE_TRAIN_DISABLE)
-    	{
-    	    rd_pre_train_mode = 0x00;
-    	}
-
-    	if (rd_preamble == ENUM_ATTR_EFF_RD_PREAMBLE_1NCLK)
-    	{
-    	    rd_preamble = 0x00;
-    	}
-    	else if (rd_preamble == ENUM_ATTR_EFF_RD_PREAMBLE_2NCLK)
-    	{
-    	    rd_preamble = 0xFF;
-    	}
-
-    	if (wr_preamble == ENUM_ATTR_EFF_WR_PREAMBLE_1NCLK)
-    	{
-    	    wr_preamble = 0x00;
-    	}
-    	else if (wr_preamble == ENUM_ATTR_EFF_WR_PREAMBLE_2NCLK)
-    	{
-    	    wr_preamble = 0xFF;
-    	}
-    	rc_num = rc_num | address_16.insert((uint8_t) 0x00, 0, 1);
-    	rc_num = rc_num | address_16.insert((uint8_t) max_pd_mode, 1, 1);
-    	rc_num = rc_num | address_16.insert((uint8_t) temp_ref_range, 2, 1);
-    	rc_num = rc_num | address_16.insert((uint8_t) temp_ref_mode, 3, 1);
-    	rc_num = rc_num | address_16.insert((uint8_t) vref_mon, 4, 1);
-    	rc_num = rc_num | address_16.insert((uint8_t) 0x00, 5, 1);
-    	rc_num = rc_num | address_16.insert((uint8_t) cs_cmd_latency, 6, 3);
-    	rc_num = rc_num | address_16.insert((uint8_t) ref_abort, 9, 1);
-    	rc_num = rc_num | address_16.insert((uint8_t) rd_pre_train_mode, 10, 1);
-    	rc_num = rc_num | address_16.insert((uint8_t) rd_preamble, 11, 1);
-    	rc_num = rc_num | address_16.insert((uint8_t) wr_preamble, 12, 1);
-	
-	rc_num = rc_num | bank_3.insert((uint8_t) MRS4_BA, 0, 1, 7);
-        rc_num = rc_num | bank_3.insert((uint8_t) MRS4_BA, 1, 1, 6);
-        rc_num = rc_num | bank_3.insert((uint8_t) MRS4_BA, 2, 1, 5);
-	if (rc_num)
-        {
-            FAPI_ERR( "mss_mrs_load: Error setting up buffers");
-            rc_buff.setEcmdError(rc_num);
-            return rc_buff;
-        }
-    }
-    //MRS5
-    else if(MRS == MRS5_BA) {
-    	uint8_t ca_parity_latency; //C/A Parity Latency Mode  -  NEW
-    	rc = FAPI_ATTR_GET(ATTR_EFF_CA_PARITY_LATENCY , &i_target, ca_parity_latency);
-    	if(rc) return rc;
-    	uint8_t crc_error_clear; //CRC Error Clear  -  NEW
-    	rc = FAPI_ATTR_GET(ATTR_EFF_CRC_ERROR_CLEAR , &i_target, crc_error_clear);
-    	if(rc) return rc;
-    	uint8_t ca_parity_error_status; //C/A Parity Error Status  -  NEW
-    	rc = FAPI_ATTR_GET(ATTR_EFF_CA_PARITY_ERROR_STATUS , &i_target, ca_parity_error_status);
-    	if(rc) return rc;
-    	uint8_t odt_input_buffer; //ODT Input Buffer during power down  -  NEW
-    	rc = FAPI_ATTR_GET(ATTR_EFF_ODT_INPUT_BUFF , &i_target, odt_input_buffer);
-    	if(rc) return rc;
-    	uint8_t rtt_park[2][2][4]; //RTT_Park value  -  NEW
-    	rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_RTT_PARK , &i_target, rtt_park);
-    	if(rc) return rc;
-    	uint8_t ca_parity; //CA Parity Persistance Error  -  NEW
-    	rc = FAPI_ATTR_GET(ATTR_EFF_CA_PARITY , &i_target, ca_parity);
-    	if(rc) return rc;
-    	uint8_t data_mask; //Data Mask  -  NEW
-    	rc = FAPI_ATTR_GET(ATTR_EFF_DATA_MASK , &i_target, data_mask);
-    	if(rc) return rc;
-    	uint8_t write_dbi; //Write DBI  -  NEW
-    	rc = FAPI_ATTR_GET(ATTR_EFF_WRITE_DBI , &i_target, write_dbi);
-    	if(rc) return rc;
-    	uint8_t read_dbi; //Read DBI  -  NEW
-    	rc = FAPI_ATTR_GET(ATTR_EFF_READ_DBI , &i_target, read_dbi);
-    	if(rc) return rc;
-
-
-    	if (ca_parity_latency == 4)
-    	{
-    	    ca_parity_latency = 0x80;
-    	}
-    	else if (ca_parity_latency == 5)
-    	{
-    	    ca_parity_latency = 0x40;
-    	}
-    	else if (ca_parity_latency == 6)
-    	{
-    	    ca_parity_latency = 0xC0;
-    	}
-    	else if (ca_parity_latency == 8)
-    	{
-    	    ca_parity_latency = 0x20;
-    	}
-    	else if (ca_parity_latency == ENUM_ATTR_EFF_CA_PARITY_LATENCY_DISABLE)
-    	{
-    	    ca_parity_latency = 0x00;
-    	}
-
-    	if (crc_error_clear == ENUM_ATTR_EFF_CRC_ERROR_CLEAR_ERROR)
-    	{
-    	    crc_error_clear = 0xFF;
-    	}
-    	else if (crc_error_clear == ENUM_ATTR_EFF_CRC_ERROR_CLEAR_CLEAR)
-    	{
-    	    crc_error_clear = 0x00;
-    	}
-
-    	if (ca_parity_error_status == ENUM_ATTR_EFF_CA_PARITY_ERROR_STATUS_ERROR)
-    	{
-    	    ca_parity_error_status = 0xFF;
-    	}
-    	else if (ca_parity_error_status == ENUM_ATTR_EFF_CA_PARITY_ERROR_STATUS_CLEAR)
-    	{
-    	    ca_parity_error_status = 0x00;
-    	}
-
-    	if (odt_input_buffer == ENUM_ATTR_EFF_ODT_INPUT_BUFF_ACTIVATED)
-    	{
-    	    odt_input_buffer = 0x00;
-    	}
-    	else if (odt_input_buffer == ENUM_ATTR_EFF_ODT_INPUT_BUFF_DEACTIVATED)
-    	{
-    	    odt_input_buffer = 0xFF;
-    	}
-
-
-    	if (ca_parity == ENUM_ATTR_EFF_CA_PARITY_ENABLE)
-    	{
-    	    ca_parity = 0xFF;
-    	}
-    	else if (ca_parity == ENUM_ATTR_EFF_CA_PARITY_DISABLE)
-    	{
-    	    ca_parity = 0x00;
-    	}
-
-    	if (data_mask == ENUM_ATTR_EFF_DATA_MASK_DISABLE)
-    	{
-    	    data_mask = 0x00;
-    	}
-    	else if (data_mask == ENUM_ATTR_EFF_DATA_MASK_ENABLE)
-    	{
-    	    data_mask = 0xFF;
-    	}
-
-    	if (write_dbi == ENUM_ATTR_EFF_WRITE_DBI_DISABLE)
-    	{
-    	    write_dbi = 0x00;
-    	}
-    	else if (write_dbi == ENUM_ATTR_EFF_WRITE_DBI_ENABLE)
-    	{
-    	    write_dbi = 0xFF;
-    	}
-
-    	if (read_dbi == ENUM_ATTR_EFF_READ_DBI_DISABLE)
-    	{
-    	    read_dbi = 0x00;
-    	}
-    	else if (read_dbi == ENUM_ATTR_EFF_READ_DBI_ENABLE)
-    	{
-    	    read_dbi = 0xFF;
-    	}
-    	if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_PARK_DISABLE)
-    	{
-    	    rtt_park[i_port_number][dimm_number][rank_number] = 0x00;
-    	}
-    	else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_PARK_60OHM)
-    	{
-    	    rtt_park[i_port_number][dimm_number][rank_number] = 0x80;
-    	}
-    	else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_PARK_40OHM)
-    	{
-    	    rtt_park[i_port_number][dimm_number][rank_number] = 0xC0;
-    	}
-    	else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_PARK_120OHM)
-    	{
-    	    rtt_park[i_port_number][dimm_number][rank_number] = 0x40;
-    	}
-    	else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_PARK_240OHM)
-    	{
-    	    rtt_park[i_port_number][dimm_number][rank_number] = 0x20;
-    	}
-    	else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_PARK_48OHM)
-    	{
-    	    rtt_park[i_port_number][dimm_number][rank_number] = 0xA0;
-    	}
-    	else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_PARK_80OHM)
-    	{
-    	    rtt_park[i_port_number][dimm_number][rank_number] = 0x60;
-    	}
-    	else if (rtt_park[i_port_number][dimm_number][rank_number] == ENUM_ATTR_VPD_DRAM_RTT_PARK_34OHM)
-    	{
-    	    rtt_park[i_port_number][dimm_number][rank_number] = 0xE0;
-    	}
-
-    	rc_num = rc_num | address_16.insert((uint8_t) ca_parity_latency, 0, 2);
-    	rc_num = rc_num | address_16.insert((uint8_t) crc_error_clear, 3, 1);
-    	rc_num = rc_num | address_16.insert((uint8_t) ca_parity_error_status, 4, 1);
-    	rc_num = rc_num | address_16.insert((uint8_t) odt_input_buffer, 5, 1);
-    	rc_num = rc_num | address_16.insert((uint8_t) rtt_park[i_port_number][dimm_number][rank_number], 6, 3);
-    	rc_num = rc_num | address_16.insert((uint8_t) ca_parity, 9, 1);
-    	rc_num = rc_num | address_16.insert((uint8_t) data_mask, 10, 1);
-    	rc_num = rc_num | address_16.insert((uint8_t) write_dbi, 11, 1);
-    	rc_num = rc_num | address_16.insert((uint8_t) read_dbi, 12, 1);
-    	rc_num = rc_num | address_16.insert((uint8_t) 0x00, 13, 2);
-	
-	rc_num = rc_num | bank_3.insert((uint8_t) MRS5_BA, 0, 1, 7);
-        rc_num = rc_num | bank_3.insert((uint8_t) MRS5_BA, 1, 1, 6);
-        rc_num = rc_num | bank_3.insert((uint8_t) MRS5_BA, 2, 1, 5);
-	if (rc_num)
-        {
-            FAPI_ERR( "mss_mrs_load: Error setting up buffers");
-            rc_buff.setEcmdError(rc_num);
-            return rc_buff;
-        }
-    }
-    //MRS6
-    else if(MRS == MRS6_BA) {
-    	uint8_t vrefdq_train_value[2][2][4]; //vrefdq_train value   -  NEW
-    	rc = FAPI_ATTR_GET( ATTR_EFF_VREF_DQ_TRAIN_VALUE, &i_target, vrefdq_train_value);
-    	if(rc) return rc;
-    	uint8_t vrefdq_train_range[2][2][4]; //vrefdq_train range   -  NEW
-    	rc = FAPI_ATTR_GET( ATTR_EFF_VREF_DQ_TRAIN_RANGE, &i_target, vrefdq_train_range);
-    	if(rc) return rc;
-    	uint8_t vrefdq_train_enable[2][2][4]; //vrefdq_train enable  -  NEW
-    	rc = FAPI_ATTR_GET( ATTR_EFF_VREF_DQ_TRAIN_ENABLE, &i_target, vrefdq_train_enable);
-    	if(rc) return rc;
-    	uint8_t tccd_l; //tccd_l  -  NEW
-    	rc = FAPI_ATTR_GET( ATTR_TCCD_L, &i_target, tccd_l);
-    	if(rc) return rc;
-    	if (tccd_l == 4)
-    	{
-    	    tccd_l = 0x00;
-    	}
-    	else if (tccd_l == 5)
-    	{
-    	    tccd_l = 0x80;
-    	}
-    	else if (tccd_l == 6)
-    	{
-    	    tccd_l = 0x40;
-    	}    
-    	else if (tccd_l == 7)
-    	{
-    	    tccd_l = 0xC0;
-    	}
-    	else if (tccd_l == 8)
-    	{
-    	    tccd_l = 0x20;
-    	}
-
-    	vrefdq_train_value[i_port_number][dimm_number][rank_number] = mss_reverse_8bits(vrefdq_train_value[i_port_number][dimm_number][rank_number]);
-
-    	if (vrefdq_train_range[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_VREF_DQ_TRAIN_RANGE_RANGE1)
-    	{
-    	    vrefdq_train_range[i_port_number][dimm_number][rank_number] = 0x00;
-    	}
-    	else if (vrefdq_train_range[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_VREF_DQ_TRAIN_RANGE_RANGE2)
-    	{
-    	    vrefdq_train_range[i_port_number][dimm_number][rank_number] = 0xFF;
-    	}   
-
-    	if (vrefdq_train_enable[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE)
-    	{
-    	    vrefdq_train_enable[i_port_number][dimm_number][rank_number] = 0xFF;
-    	}
-    	else if (vrefdq_train_enable[i_port_number][dimm_number][rank_number] == ENUM_ATTR_EFF_VREF_DQ_TRAIN_ENABLE_DISABLE)
-    	{
-    	    vrefdq_train_enable[i_port_number][dimm_number][rank_number] = 0x00;
-    	}   
-
-    	rc_num = rc_num | address_16.insert((uint8_t) vrefdq_train_value[i_port_number][dimm_number][rank_number], 0, 6);
-    	rc_num = rc_num | address_16.insert((uint8_t) vrefdq_train_range[i_port_number][dimm_number][rank_number], 6, 1);
-    	rc_num = rc_num | address_16.insert((uint8_t) vrefdq_train_enable[i_port_number][dimm_number][rank_number], 7, 1);
-    	rc_num = rc_num | address_16.insert((uint8_t) 0x00, 8, 2);
-    	rc_num = rc_num | address_16.insert((uint8_t) tccd_l, 10, 3);
-    	rc_num = rc_num | address_16.insert((uint8_t) 0x00, 13, 2);
-	
-	rc_num = rc_num | bank_3.insert((uint8_t) MRS6_BA, 0, 1, 7);
-        rc_num = rc_num | bank_3.insert((uint8_t) MRS6_BA, 1, 1, 6);
-        rc_num = rc_num | bank_3.insert((uint8_t) MRS6_BA, 2, 1, 5);
-	if (rc_num)
-        {
-            FAPI_ERR( "mss_mrs_load: Error setting up buffers");
-            rc_buff.setEcmdError(rc_num);
-            return rc_buff;
-        }
-    }
-    else {
-        const uint32_t MRS_VALUE = MRS;
-	const fapi::Target & MBA_TARGET = i_target; 
-	FAPI_SET_HWP_ERROR(rc, RC_MSS_PDA_MRS_NOT_FOUND);
-	FAPI_ERR("ERROR!! Found attribute name not associated with an MRS! Exiting...");
-    }
+    
+    post_odt_nop_idle = wl_launch_time + odt_hold_time + 50;
     
     return rc;
+}
+
+//returns a 1 if the PDA is empty for the given DIMM rank - returns 0 if not empty
+uint32_t mss_ddr4_check_pda_empty_for_rank(
+	    vector<PDA_MRS_Storage> pda,
+	    uint8_t dimm_to_run,
+	    uint8_t rank_to_run
+            ) {
+   uint32_t rc = 1;
+   
+   for(uint32_t i=0;i<pda.size();i++) {
+      //found, return 0
+      if(pda[i].dimm == dimm_to_run && pda[i].rank == rank_to_run) return 0;
+   }
+   
+   //not found, return 1
+   return rc;
 }
 }
 

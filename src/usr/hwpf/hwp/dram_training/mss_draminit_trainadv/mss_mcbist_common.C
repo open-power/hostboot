@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist_common.C,v 1.76 2015/08/07 11:08:45 sasethur Exp $
+// $Id: mss_mcbist_common.C,v 1.79 2016/02/17 15:55:36 sglancy Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -40,6 +40,9 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
+//   1.79  |preeragh|02/17/16|Fixed WR VREF IPL issue
+//   1.78  |sglancy |02/03/16|Fixed FW compile issue
+//   1.77  |lapietra|12/08/15|Added Flag to exit MCBIST before start (for examing Regs)
 //   1.76  |preeragh|07/15/15|R_W Infinite Added
 //   1.75  |lapietra|06/26/15|added RMWFIX and RMWFIX_I tests
 //   1.74  |preeragh|06/15/15|o_error_map Correction
@@ -316,7 +319,7 @@ fapi::ReturnCode setup_mcbist(const fapi::Target & i_target_mba,
         rc.setEcmdError(rc_num);
         return rc;
     }
-    rc = fapiPutScom(i_target_centaur, 0x0201144a, l_data_buffer_64);
+    /*rc = fapiPutScom(i_target_centaur, 0x0201144a, l_data_buffer_64);
     if (rc) return rc;
 
     rc = fapiGetScom(i_target_centaur, 0x0201148a, l_data_buffer_64);
@@ -331,7 +334,9 @@ fapi::ReturnCode setup_mcbist(const fapi::Target & i_target_mba,
     }
     rc = fapiPutScom(i_target_centaur, 0x0201148a, l_data_buffer_64);
     if (rc) return rc;
-
+	*/
+	FAPI_IMP("Preet - Removed Power Bus Workaround - 201144a");
+	
     rc = fapiGetScom(i_target_mba, MBA01_CCS_MODEQ_0x030106a7, l_data_buffer_64);
     if (rc) return rc;
     rc_num = l_data_buffer_64.clearBit(29);
@@ -500,6 +505,7 @@ fapi::ReturnCode start_mcb(const fapi::Target & i_target_mba)
     ecmdDataBufferBase l_data_buffer_64(64);
     ecmdDataBufferBase l_data_buffer_trap_64(64);
     uint8_t l_num_ranks_per_dimm[2][2];
+    uint64_t l_time = 0;
     fapi::ReturnCode rc;
     uint32_t rc_num = 0;
     FAPI_DBG("%s:Function - start_mcb", i_target_mba.toEcmdString());
@@ -573,7 +579,18 @@ fapi::ReturnCode start_mcb(const fapi::Target & i_target_mba)
         rc.setEcmdError(rc_num);
         return rc;
     }
+    rc = FAPI_ATTR_GET(ATTR_MCBIST_MAX_TIMEOUT, &i_target_mba, l_time); 
+    if (rc) return rc;
 
+
+#ifdef FAPI_MSSLABONLY                  
+    if (l_time == 0xDEADBEEF00000000ull)
+    {
+
+         FAPI_INF("******* Forced Exiting Before MCBIST_START to collect Reg Info!!!!!");    
+         exit(99);
+    }
+#endif
     rc = fapiPutScom(i_target_mba, MBA01_MCBIST_MCB_CNTLQ_0x030106db, l_data_buffer_64);
     if (rc) return rc;
 

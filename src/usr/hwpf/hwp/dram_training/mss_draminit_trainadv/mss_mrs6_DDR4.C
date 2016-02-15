@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mrs6_DDR4.C,v 1.7 2015/10/23 15:12:05 sglancy Exp $
+// $Id: mss_mrs6_DDR4.C,v 1.10 2016/01/14 13:46:12 sglancy Exp $
 
 
 //------------------------------------------------------------------------------
@@ -38,7 +38,10 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//  1.06   |10-23-15  |sglancy | Fixed attribute names
+//  1.10   | 01-14-16 |sglancy | Fixed bug in parity code
+//  1.08   | 01-13-16 |sglancy | Added coverage for DDR4 parity bit
+//  1.07   | 11-03-15 |sglancy | Fixed attribute names for DDR4 RDIMM
+//  1.06   | 10-23-15 |sglancy | Fixed attribute names
 //  1.05   | 09/03/15 | kmack   | RC updates
 //  1.04   | 08/05/15 | sglancy | Fixed FW compile error
 //  1.03   | 08/04/15 | sglancy | Changed to address FW comments
@@ -251,7 +254,7 @@ ReturnCode mss_mr6_loader( fapi::Target& i_target,uint32_t i_port_number,uint32_
     if(rc) return rc;
 
     uint8_t address_mirror_map[2][2]; //address_mirror_map[port][dimm]
-    rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_ADDRESS_MIRRORING, &i_target, address_mirror_map);
+    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_ADDRESS_MIRRORING, &i_target, address_mirror_map);
     if(rc) return rc;
 
 
@@ -260,6 +263,8 @@ ReturnCode mss_mr6_loader( fapi::Target& i_target,uint32_t i_port_number,uint32_
     if(rc) return rc;
     //Setting up CCS mode
     rc_num = rc_num | data_buffer.setBit(51);
+    //set up parity bit manual computation - needed for DDR4
+    rc_num = rc_num | data_buffer.setBit(61);
     if (rc_num)
     {
         FAPI_ERR( "mss_mr6_loader: Error setting up buffers");

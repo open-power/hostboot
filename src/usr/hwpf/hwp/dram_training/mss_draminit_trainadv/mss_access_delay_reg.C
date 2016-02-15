@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_access_delay_reg.C,v 1.25 2014/04/18 19:23:36 jdsloat Exp $
+// $Id: mss_access_delay_reg.C,v 1.27 2016/02/12 19:45:56 sglancy Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -61,6 +61,8 @@
 //   1.23  | mjjones  |17-Jan-14| Fixed layout and error handling for RAS Review
 //   1.24  |sauchadh  |24-Jan-14| Added check for unused DQS 
 //   1.25  |sauchadh  |18-Apr-14| SW257010: mss_c4_phy: initialized dqs_lane array and verbose flag, used array indexes rather than counter
+//   1.26   |sauchadh  |30-Sep-15| Added functionality for CDIMM based registers and ATTR_VPD_ISDIMMTOC4DQS,ATTR_VPD_ISDIMMTOC4DQ in rosetta map
+//   1.27   |sglancy  |12-Feb-16| Addressed FW comments
 
 //----------------------------------------------------------------------
 //  My Includes
@@ -254,6 +256,38 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba,
       l_len=l_out.bit_length;
 	 
    }
+   
+   else if(i_input_type_e==RAW_CDIMM_WR_DQ || i_input_type_e==RAW_CDIMM_RD_DQ) 
+   {
+      l_type=CDIMM_DQ;
+         
+      if(i_input_index_u8>l_CDIMM_dqmax)    
+      {
+         FAPI_ERR("CDIMM_DQ: Wrong input index specified (%d, max %d)" ,
+         i_input_index_u8, l_CDIMM_dqmax);
+         FAPI_SET_HWP_ERROR(rc, RC_MSS_ACCESS_DELAY_REG_INVALID_INPUT);
+         return rc;
+      }
+     
+      rc=rosetta_map(i_target_mba,i_port_u8,l_type,i_input_index_u8,i_verbose,l_val); if(rc) return rc;
+      
+      if(i_verbose==1)
+      {
+         FAPI_INF("C4 value is=%d",l_val);
+      }   
+      rc=cross_coupled(i_target_mba,i_port_u8,l_rank_pair,i_input_type_e,l_val,i_verbose,l_out); if(rc) return rc;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_out.scom_addr);
+         FAPI_INF("start bit=%d",l_out.start_bit);
+         FAPI_INF("length=%d",l_out.bit_length);
+      }   
+      l_scom_add=l_out.scom_addr;
+      l_sbit=l_out.start_bit;
+      l_len=l_out.bit_length;
+	 
+   }
+   
    
    else if(i_input_type_e==ADDRESS)
    {
@@ -524,6 +558,30 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba,
       l_len=l_out.bit_length;   
          
    }
+   
+   else if (i_input_type_e==RAW_CDIMM_WR_DQS || i_input_type_e==RAW_CDIMM_RD_DQS || i_input_type_e==RAW_CDIMM_DQS_ALIGN ||  i_input_type_e==RAW_CDIMM_DQS_GATE || i_input_type_e==RAW_CDIMM_DQSCLK)	    
+   {
+     
+      l_type=CDIMM_DQS;
+      
+      rc=rosetta_map(i_target_mba,i_port_u8,l_type,i_input_index_u8,i_verbose,l_val); if(rc) return rc;
+      if(i_verbose==1)
+      {
+         FAPI_INF("C4 value is=%d",l_val);
+      }
+      rc=cross_coupled(i_target_mba,i_port_u8,l_rank_pair,i_input_type_e,l_val,i_verbose,l_out); if(rc) return rc;
+      if(i_verbose==1)
+      {
+         FAPI_INF("scom_address=%llX",l_out.scom_addr);
+         FAPI_INF("start bit=%d",l_out.start_bit);
+         FAPI_INF("length=%d",l_out.bit_length); 
+      }
+      l_scom_add=l_out.scom_addr;
+      l_sbit=l_out.start_bit;
+      l_len=l_out.bit_length;   
+         
+   }
+   
    
    
    else if(i_input_type_e==RAW_RDCLK_0 || i_input_type_e==RAW_RDCLK_1 || i_input_type_e==RAW_RDCLK_2 || i_input_type_e==RAW_RDCLK_3 || i_input_type_e==RAW_RDCLK_4) 
@@ -1131,21 +1189,21 @@ fapi::ReturnCode mss_access_delay_reg(const fapi::Target & i_target_mba,
       if(i_input_type_e==RD_DQ || i_input_type_e==RD_DQS || i_input_type_e==RAW_RD_DQ_0 || i_input_type_e==RAW_RD_DQ_1 || i_input_type_e==RAW_RD_DQ_2 || i_input_type_e==RAW_RD_DQ_3 || i_input_type_e==RAW_RD_DQ_4 || i_input_type_e==RAW_RD_DQS_0 || i_input_type_e==RAW_RD_DQS_1 || i_input_type_e==RAW_RD_DQS_2 || i_input_type_e==RAW_RD_DQS_3 || i_input_type_e==RAW_RD_DQS_4
       || i_input_type_e==RAW_SYS_ADDR_CLK || i_input_type_e==RAW_SYS_CLK_0 || i_input_type_e==RAW_SYS_CLK_1 || i_input_type_e==RAW_SYS_CLK_2 || i_input_type_e==RAW_SYS_CLK_3 || i_input_type_e==RAW_SYS_CLK_4 || i_input_type_e==RAW_WR_CLK_0 || i_input_type_e==RAW_WR_CLK_1 || i_input_type_e==RAW_WR_CLK_2 || i_input_type_e==RAW_WR_CLK_3 || i_input_type_e==RAW_WR_CLK_4
       || i_input_type_e==RAW_ADDR_0 || i_input_type_e==RAW_ADDR_1 || i_input_type_e==RAW_ADDR_2 || i_input_type_e==RAW_ADDR_3 || i_input_type_e==RAW_DQS_ALIGN_0 || i_input_type_e==RAW_DQS_ALIGN_1 || i_input_type_e==RAW_DQS_ALIGN_2 || i_input_type_e==RAW_DQS_ALIGN_3 || i_input_type_e==RAW_DQS_ALIGN_4
-      || i_input_type_e==DQS_ALIGN || i_input_type_e==COMMAND || i_input_type_e==ADDRESS || i_input_type_e==CONTROL || i_input_type_e==CLOCK )   
+      || i_input_type_e==DQS_ALIGN || i_input_type_e==COMMAND || i_input_type_e==ADDRESS || i_input_type_e==CONTROL || i_input_type_e==CLOCK || i_input_type_e==RAW_CDIMM_RD_DQ || i_input_type_e==RAW_CDIMM_RD_DQS || i_input_type_e==RAW_CDIMM_DQS_ALIGN)   
       {
          l_start=25;   // l_start is starting bit of delay value in the register. There are different registers and each register has a different field for delay
       }
-      else if(i_input_type_e==WR_DQ || i_input_type_e==WR_DQS || i_input_type_e==RAW_WR_DQ_0 || i_input_type_e==RAW_WR_DQ_1 || i_input_type_e==RAW_WR_DQ_2 || i_input_type_e==RAW_WR_DQ_3 || i_input_type_e==RAW_WR_DQ_4 || i_input_type_e==RAW_WR_DQS_0 || i_input_type_e==RAW_WR_DQS_1 || i_input_type_e==RAW_WR_DQS_2 || i_input_type_e==RAW_WR_DQS_3 || i_input_type_e==RAW_WR_DQS_4 )
+      else if(i_input_type_e==WR_DQ || i_input_type_e==WR_DQS || i_input_type_e==RAW_WR_DQ_0 || i_input_type_e==RAW_WR_DQ_1 || i_input_type_e==RAW_WR_DQ_2 || i_input_type_e==RAW_WR_DQ_3 || i_input_type_e==RAW_WR_DQ_4 || i_input_type_e==RAW_WR_DQS_0 || i_input_type_e==RAW_WR_DQS_1 || i_input_type_e==RAW_WR_DQS_2 || i_input_type_e==RAW_WR_DQS_3 || i_input_type_e==RAW_WR_DQS_4 || i_input_type_e==RAW_CDIMM_WR_DQ || i_input_type_e==RAW_CDIMM_WR_DQS )
       {
          l_start=22;
       }
    
-      else if(i_input_type_e==RAW_DQS_GATE_0 || i_input_type_e==RAW_DQS_GATE_1 || i_input_type_e==RAW_DQS_GATE_2 || i_input_type_e==RAW_DQS_GATE_3 || i_input_type_e==RAW_DQS_GATE_4 || i_input_type_e==DQS_GATE)
+      else if(i_input_type_e==RAW_DQS_GATE_0 || i_input_type_e==RAW_DQS_GATE_1 || i_input_type_e==RAW_DQS_GATE_2 || i_input_type_e==RAW_DQS_GATE_3 || i_input_type_e==RAW_DQS_GATE_4 || i_input_type_e==DQS_GATE || i_input_type_e==RAW_CDIMM_DQS_GATE)
       {
          l_start=29;
       }
       
-      else if(i_input_type_e==RAW_RDCLK_0 || i_input_type_e==RAW_RDCLK_1 || i_input_type_e==RAW_RDCLK_2 || i_input_type_e==RAW_RDCLK_3 || i_input_type_e==RAW_RDCLK_4 || i_input_type_e==RDCLK || i_input_type_e==RAW_DQSCLK_0 || i_input_type_e==RAW_DQSCLK_1 || i_input_type_e==RAW_DQSCLK_2 || i_input_type_e==RAW_DQSCLK_3 || i_input_type_e==RAW_DQSCLK_4 || i_input_type_e==DQSCLK)
+      else if(i_input_type_e==RAW_RDCLK_0 || i_input_type_e==RAW_RDCLK_1 || i_input_type_e==RAW_RDCLK_2 || i_input_type_e==RAW_RDCLK_3 || i_input_type_e==RAW_RDCLK_4 || i_input_type_e==RDCLK || i_input_type_e==RAW_DQSCLK_0 || i_input_type_e==RAW_DQSCLK_1 || i_input_type_e==RAW_DQSCLK_2 || i_input_type_e==RAW_DQSCLK_3 || i_input_type_e==RAW_DQSCLK_4 || i_input_type_e==DQSCLK || i_input_type_e==RAW_CDIMM_DQSCLK)
       {
          l_start=30;  
       }
@@ -1241,7 +1299,7 @@ fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,
    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target_mba, l_dram_width); if(rc) return rc;
    
       
-   if(i_input_type_e==RD_DQ || i_input_type_e==WR_DQ)
+   if(i_input_type_e==RD_DQ || i_input_type_e==WR_DQ || i_input_type_e==RAW_CDIMM_WR_DQ || i_input_type_e==RAW_CDIMM_RD_DQ )
    {
       if(i_port==0 && l_mbapos==0)
       {
@@ -1285,7 +1343,7 @@ fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,
       out.bit_length=l_len; 
    }
    
-   else if (i_input_type_e==WR_DQS ||  i_input_type_e==DQS_ALIGN)	    
+   else if (i_input_type_e==WR_DQS ||  i_input_type_e==DQS_ALIGN || i_input_type_e==RAW_CDIMM_WR_DQS || i_input_type_e==RAW_CDIMM_DQS_ALIGN)	    
    {
       if(i_port==0 && l_mbapos==0)
       {
@@ -1638,7 +1696,7 @@ fapi::ReturnCode cross_coupled(const fapi::Target & i_target_mba,
    }   
       
     
-   else if (i_input_type_e==RD_DQS || i_input_type_e==DQS_GATE || i_input_type_e==RDCLK || i_input_type_e==DQSCLK)	    
+   else if (i_input_type_e==RD_DQS || i_input_type_e==DQS_GATE || i_input_type_e==RDCLK || i_input_type_e==DQSCLK || i_input_type_e==RAW_CDIMM_DQS_GATE || i_input_type_e==RAW_CDIMM_DQSCLK || i_input_type_e==RAW_CDIMM_RD_DQS )	    
    {
       
       
@@ -1754,8 +1812,8 @@ fapi::ReturnCode rosetta_map(const fapi::Target & i_target_mba,
 
     fapi::ReturnCode rc;
    
-   const uint8_t l_ISDIMM_dqmax=71; 
-   const uint8_t l_CDIMM_dqmax=79;
+   //const uint8_t l_ISDIMM_dqmax=71; 
+   //const uint8_t l_CDIMM_dqmax=79;
    uint8_t l_mbapos = 0;
    uint8_t l_dimmtype=0;
    const uint8_t l_maxdq=72;
@@ -1774,11 +1832,30 @@ fapi::ReturnCode rosetta_map(const fapi::Target & i_target_mba,
    const uint8_t GL_DQS_p1_g2[l_maxdqs]={2,0,4,16,8,10,12,14,6,3,1,5,17,9,11,13,15,7};
    const uint8_t GL_DQS_p2[l_maxdqs]={2,0,4,16,8,10,12,14,6,3,1,5,17,9,11,13,15,7};
    const uint8_t GL_DQS_p3[l_maxdqs]={0,2,4,16,8,10,12,14,6,1,3,5,17,9,11,13,15,7};
-   
+   uint8_t l_isdm_c4_dq[4][80];
+   uint8_t l_isdm_c4_dqs[4][20];
+   /* uint8_t l_isdimm2c4dqp0[80]={0}; */
+      
+                
    rc = FAPI_ATTR_GET(ATTR_MSS_DQS_SWIZZLE_TYPE, &i_target_mba, l_swizzle); if(rc) return rc;
+   rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &i_target_mba, l_dimmtype); if(rc) return rc;
    
    
-   if(l_swizzle ==0 || l_swizzle ==1)
+   fapi::Target i_target_centaur;
+   rc = fapiGetParentChip(i_target_mba, i_target_centaur); 
+   if (rc)
+   {
+      FAPI_DBG("%s:Error in getting parent chip!",i_target_mba.toEcmdString()); return rc;
+   }
+   
+   if(l_dimmtype!=fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
+   {
+      rc = FAPI_ATTR_GET(ATTR_VPD_ISDIMMTOC4DQS, &i_target_centaur,l_isdm_c4_dqs); if(rc) return rc;
+      rc = FAPI_ATTR_GET(ATTR_VPD_ISDIMMTOC4DQ, &i_target_centaur,l_isdm_c4_dq); if(rc) return rc;
+   }   
+   
+   
+   if(l_swizzle ==0 || l_swizzle ==1 || l_swizzle ==2)  
    {
       if(i_verbose==1)
       {
@@ -1811,9 +1888,7 @@ fapi::ReturnCode rosetta_map(const fapi::Target & i_target_mba,
        return rc;
    }
    
-   rc = FAPI_ATTR_GET(ATTR_EFF_CUSTOM_DIMM, &i_target_mba, l_dimmtype); if(rc) return rc;
-   
-   if(l_dimmtype==fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
+      /*if(l_dimmtype==fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES)
    {
       if(i_input_index>l_CDIMM_dqmax)    
       {
@@ -1830,7 +1905,7 @@ fapi::ReturnCode rosetta_map(const fapi::Target & i_target_mba,
          FAPI_SET_HWP_ERROR(rc, RC_ROSETTA_MAP_INVALID_INPUT);
          return rc;
       }
-   }
+   } */
     	
    if(i_input_type_e ==ISDIMM_DQ)
    {
@@ -1840,11 +1915,15 @@ fapi::ReturnCode rosetta_map(const fapi::Target & i_target_mba,
          {
             o_value=GL_DQ_p0_g1[i_input_index];   
          }
-         else
+         else if(l_swizzle==0)
          {
             o_value=GL_DQ_p0_g2[i_input_index];    
          }
-            
+         else
+         {
+            o_value=l_isdm_c4_dq[i_port][i_input_index];  
+         }    
+          
       }
 	            
       else if(i_port==1 && l_mbapos==0)
@@ -1853,20 +1932,44 @@ fapi::ReturnCode rosetta_map(const fapi::Target & i_target_mba,
          {
             o_value=GL_DQ_p1_g1[i_input_index];
          }
-         else
+         
+         else if(l_swizzle==0)
          {
             o_value=GL_DQ_p1_g2[i_input_index];    
          }
+         
+         else
+         {
+            o_value=l_isdm_c4_dq[i_port][i_input_index];  
+         } 
+
       }
    
       else if(i_port==0 && l_mbapos==1)
       {
-         o_value=GL_DQ_p2[i_input_index];    
+         if(l_swizzle==1 || l_swizzle==0)
+         {
+            o_value=GL_DQ_p2[i_input_index];
+         }
+         else
+         {
+            o_value=l_isdm_c4_dq[i_port][i_input_index];      
+         }
       }
-      else 
+      
+      else
       {
-         o_value=GL_DQ_p3[i_input_index];    
+         if(l_swizzle==1 || l_swizzle==0)
+         {
+            o_value=GL_DQ_p3[i_input_index];
+         }
+         else
+         {
+            o_value=l_isdm_c4_dq[i_port][i_input_index];      
+         }
+         
       }
+
           
    }
       
@@ -1880,11 +1983,15 @@ fapi::ReturnCode rosetta_map(const fapi::Target & i_target_mba,
          {
             o_value=GL_DQS_p0_g1[i_input_index];
          }
-         else 
+         else if(l_swizzle==0) 
          {
             o_value=GL_DQS_p0_g2[i_input_index];    
          }
-            
+         else
+         {
+            o_value=l_isdm_c4_dqs[i_port][i_input_index];  
+         }  
+                    
       }    
       else if(i_port==1 && l_mbapos==0)
       {
@@ -1892,20 +1999,42 @@ fapi::ReturnCode rosetta_map(const fapi::Target & i_target_mba,
          {
             o_value=GL_DQS_p1_g1[i_input_index];
          }
-         else 
+         else if(l_swizzle==0)  
          {
             o_value=GL_DQS_p1_g2[i_input_index];    
          }
-            
+         else
+         {
+            o_value=l_isdm_c4_dqs[i_port][i_input_index];   
+         }  
+                 
       }
+
       else if(i_port==0 && l_mbapos==1)
       {
-         o_value=GL_DQS_p2[i_input_index];
+         if(l_swizzle==1 || l_swizzle==0)
+         {
+            o_value=GL_DQS_p2[i_input_index];
+         }
+         else
+         {
+            o_value=l_isdm_c4_dqs[i_port][i_input_index]; 
+         }  
       }
       else 
       {
-         o_value=GL_DQS_p3[i_input_index];
+         if(l_swizzle==1 || l_swizzle==0)
+         {
+            o_value=GL_DQS_p3[i_input_index];
+         }
+         
+         else
+         {
+             o_value=l_isdm_c4_dqs[i_port][i_input_index]; 
+         }
+         
       }
+
                     
    }      
    else if(i_input_type_e==CDIMM_DQS)
@@ -1966,7 +2095,7 @@ fapi::ReturnCode get_address(const fapi::Target & i_target_mba,
    uint8_t l_tmp=0;
    rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target_mba, l_mbapos); if(rc) return rc;
    
-   if(i_input_type_e==WR_DQ_t || i_input_type_e==RAW_WR_DQ)
+   if(i_input_type_e==WR_DQ_t || i_input_type_e==RAW_WR_DQ || i_input_type_e==RAW_CDIMM_WR_DQ_t )
    {
       if(i_lane > 7)
       {
@@ -1999,7 +2128,7 @@ fapi::ReturnCode get_address(const fapi::Target & i_target_mba,
      
    }
    
-   else if(i_input_type_e==RD_DQ_t || i_input_type_e==RAW_RD_DQ)
+   else if(i_input_type_e==RD_DQ_t || i_input_type_e==RAW_RD_DQ || i_input_type_e==RAW_CDIMM_RD_DQ_t)
    {
       l_scom_address_64|=0x00000050;       
       l_scom_address_64=l_scom_address_64<<32;
@@ -2066,7 +2195,7 @@ fapi::ReturnCode get_address(const fapi::Target & i_target_mba,
    }    
         
        
-   else if(i_input_type_e==WR_DQS_t  || i_input_type_e==RAW_WR_DQS)    
+   else if(i_input_type_e==WR_DQS_t  || i_input_type_e==RAW_WR_DQS || i_input_type_e==RAW_CDIMM_WR_DQS_t)    
    {
       
       if(i_input_type_e==RAW_WR_DQS)
@@ -2164,7 +2293,7 @@ fapi::ReturnCode get_address(const fapi::Target & i_target_mba,
       
    } 
             
-   else if(i_input_type_e==RD_DQS_t || i_input_type_e==RAW_RD_DQS) 
+   else if(i_input_type_e==RD_DQS_t || i_input_type_e==RAW_RD_DQS || i_input_type_e==RAW_CDIMM_RD_DQS_t) 
    {
       
       if(i_input_type_e==RAW_RD_DQS)
@@ -2283,7 +2412,7 @@ fapi::ReturnCode get_address(const fapi::Target & i_target_mba,
      
    }
    
-    else if(i_input_type_e==DQSCLK_t || i_input_type_e==RAW_DQSCLK) 
+    else if(i_input_type_e==DQSCLK_t || i_input_type_e==RAW_DQSCLK || i_input_type_e==RAW_CDIMM_DQSCLK_t) 
    {
       if(i_input_type_e==RAW_DQSCLK) 
       {
@@ -2341,7 +2470,7 @@ fapi::ReturnCode get_address(const fapi::Target & i_target_mba,
    }
    
      
-   else if(i_input_type_e==DQS_ALIGN_t || i_input_type_e==RAW_DQS_ALIGN) 
+   else if(i_input_type_e==DQS_ALIGN_t || i_input_type_e==RAW_DQS_ALIGN  || i_input_type_e==RAW_CDIMM_DQS_ALIGN_t) 
    {
       
       if(i_input_type_e==RAW_DQS_ALIGN)
@@ -2533,7 +2662,7 @@ fapi::ReturnCode get_address(const fapi::Target & i_target_mba,
      
    }    
    
-   else if(i_input_type_e==RAW_DQS_GATE ||  i_input_type_e==DQS_GATE_t)
+   else if(i_input_type_e==RAW_DQS_GATE ||  i_input_type_e==DQS_GATE_t || i_input_type_e==RAW_CDIMM_DQS_GATE_t)
    {
       if(i_input_type_e==RAW_DQS_GATE)
       {

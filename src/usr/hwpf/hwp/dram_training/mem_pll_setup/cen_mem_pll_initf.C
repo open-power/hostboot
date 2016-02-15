@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: cen_mem_pll_initf.C,v 1.13 2014/09/23 21:53:45 jmcgill Exp $
+// $Id: cen_mem_pll_initf.C,v 1.14 2016/02/17 16:00:45 sglancy Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/cen_mem_pll_initf.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2012
@@ -95,6 +95,9 @@ const uint32_t MEMB_TP_BNDY_PLL_RING_ADDR  = 0x01030088;
 const uint8_t PERV_LFIR_SCAN_COLLISION_BIT = 3;
 
 const bool MASK_SCAN_COLLISION  = true;
+
+
+
 
 extern "C" {
 
@@ -477,6 +480,30 @@ fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
             FAPI_ERR("Failed to get the PLL ring DATA attribute.");
             break;
         }
+	//Setup Frequency Biasing - Used to init the MEM PLL to a Bias Frequency
+	//Get the desired bias point.
+        uint32_t l_curr_freq_bias_tmp = 0;
+        int32_t l_curr_freq_bias = 0;
+        rc = FAPI_ATTR_GET(ATTR_MSS_FREQ_BIAS_PERCENTAGE, &i_target, l_curr_freq_bias_tmp); 
+        if(rc){
+           #ifdef FAPI_MSSLABONLY
+           //Initialize the attribute!
+           FAPI_INF("Attr ATTR_MSS_FREQ_BIAS_PERCENTAGE not found, initalizing on target %s",i_target.toEcmdString());
+           rc = FAPI_ATTR_SET(ATTR_MSS_FREQ_BIAS_PERCENTAGE, &i_target, l_curr_freq_bias_tmp);
+           if (rc) return rc;
+           #else
+           FAPI_ERR("mss_freq_drift: Failed getting ATTR_MSS_FREQ_BIAS_PERCENTAGE for target %s", i_target.toEcmdString());
+           return rc;
+           #endif
+
+        }
+   
+        l_curr_freq_bias = (int32_t) l_curr_freq_bias_tmp;
+        l_curr_freq_bias = l_curr_freq_bias/100;
+	
+	
+	
+
 
         // set DMI PFD360 bit for runtime
         uint32_t memb_dmi_cupll_pfd360_bit_offset;
@@ -512,9 +539,88 @@ fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
         {
             // Put the ring data from the attribute into the buffer
             rc_ecmd |= ring_data.insert(attrRingData, 0, ring_length, 0);
-
+	    
             // clamp PFD360 bit to 0 for runtime
             rc_ecmd |= ring_data.clearBit(memb_dmi_cupll_pfd360_bit_offset);
+	    
+	    //Frequency biasing.  Specifically call out which bits are adjusted
+	    //Support for 1600 0%, -4%, +4% ONLY
+	    if(mss_freq == 1600){
+	       if(l_curr_freq_bias == 4){
+	          FAPI_INF("Bias is 4");
+	          rc_ecmd |=ring_data.clearBit(376);
+		  rc_ecmd |=ring_data.clearBit(377);
+		  rc_ecmd |=ring_data.clearBit(378);
+		  rc_ecmd |=ring_data.setBit(379);
+		  rc_ecmd |=ring_data.setBit(380);
+		  rc_ecmd |=ring_data.clearBit(381);
+		  rc_ecmd |=ring_data.clearBit(382);
+		  rc_ecmd |=ring_data.setBit(383);
+		  rc_ecmd |=ring_data.clearBit(384);
+		  if (rc_ecmd)
+                  {
+                     FAPI_ERR("Error 0x%x Applying 4 bias at 1600.",  rc_ecmd);
+                     rc.setEcmdError(rc_ecmd);
+                     break;
+                  }
+
+	       }
+	       else if(l_curr_freq_bias == -4){
+	          FAPI_INF("Bias is -4");
+	          rc_ecmd |=ring_data.clearBit(376);
+		  rc_ecmd |=ring_data.clearBit(377);
+		  rc_ecmd |=ring_data.clearBit(378);
+		  rc_ecmd |=ring_data.setBit(379);
+		  rc_ecmd |=ring_data.clearBit(380);
+		  rc_ecmd |=ring_data.setBit(381);
+		  rc_ecmd |=ring_data.setBit(382);
+		  rc_ecmd |=ring_data.setBit(383);
+		  rc_ecmd |=ring_data.clearBit(384);
+		  if (rc_ecmd)
+                  {
+                     FAPI_ERR("Error 0x%x Applying -4 bias at 1600.",  rc_ecmd);
+                     rc.setEcmdError(rc_ecmd);
+                     break;
+                  }
+	       
+	       }
+	       else if(l_curr_freq_bias !=0){
+	          FAPI_ERR("Running at an unsupported bias");
+	       }
+	    }
+	       
+           //Print which mult bits are set regardless of if we are doing biasing
+	   if(ring_data.isBitSet(376)){
+	      FAPI_INF("Mult 8 is set");
+	   }
+	   if(ring_data.isBitSet(377)){
+	      FAPI_INF("Mult 7 is set");
+	   }
+	   if(ring_data.isBitSet(378)){
+	      FAPI_INF("Mult 6 is set");
+	   }
+	   if(ring_data.isBitSet(379)){
+	      FAPI_INF("Mult 5 is set");
+	   }
+	   if(ring_data.isBitSet(380)){
+	      FAPI_INF("Mult 4 is set");
+	   }
+	   if(ring_data.isBitSet(381)){
+	      FAPI_INF("Mult 3 is set");
+	   }
+	   if(ring_data.isBitSet(382)){
+	      FAPI_INF("Mult 2 is set");
+	   }
+	   if(ring_data.isBitSet(383)){
+	      FAPI_INF("Mult 1 is set");
+	   }
+	   if(ring_data.isBitSet(384)){
+	      FAPI_INF("Mult 0 is set");
+	   }
+	    
+	    
+	    //End Bias Code
+	    
 
             // force desired value of MEM PLLCTR1(44)
             if (scan_num % 2) {
@@ -557,6 +663,9 @@ fapi::ReturnCode cen_mem_pll_initf(const fapi::Target & i_target)
 This section is automatically updated by CVS when you check in this file.
 Be sure to create CVS comments when you commit so that they can be included here.
 $Log: cen_mem_pll_initf.C,v $
+Revision 1.14  2016/02/17 16:00:45  sglancy
+Added code update for manufacturing frequency slew support for garrison
+
 Revision 1.13  2014/09/23 21:53:45  jmcgill
 add explicit clear for DMI PFD360 bit, based on change in base attribute values (SW279708)
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_ddr4_funcs.H,v 1.5 2015/09/04 18:14:20 thi Exp $
+// $Id: mss_ddr4_funcs.H,v 1.6 2015/11/09 17:22:00 sglancy Exp $
 
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2013
@@ -105,6 +105,33 @@ fapi::ReturnCode mss_rcd_load_ddr4(
 //--------------------------------------------------------------
 fapi::ReturnCode mss_create_rcd_ddr4( const fapi::Target& i_target_mba);
 
+/**
+ * @loads in a nominal MRS value into the address_16 and bank_3
+ *
+ * @param[in]  target:  Reference to centaur.mba target, 
+ * @param[out]  ecmdDataBufferBase& bank_3:  bank bits to be issued during MRS
+ * @param[out]  ecmdDataBufferBase& address_16:  16 address lanes to be issued during MRS - setup during function
+ * @param[in]  uint8_t MRS:  which MRS to configure
+ * @param[in]  uint8_t i_port_number: the port on which to configure the MRS - used for ID'ing which attributes to use
+ * @param[in]  uint8_t dimm_number: the DIMM on which to configure the MRS - used for ID'ing which attributes to use
+ * @param[in]  uint8_t rank_number: the rank on which to configure the MRS - used for ID'ing which attributes to use
+ *
+ * @return ReturnCode
+ */
+fapi::ReturnCode mss_ddr4_load_nominal_mrs_pda(fapi::Target& i_target,ecmdDataBufferBase& bank_3,ecmdDataBufferBase& address_16,uint8_t MRS,uint8_t i_port_number, uint8_t dimm_number, uint8_t rank_number);
+/**
+ * @Modifies the passed in address_16 buffer based upon the given attribute and data
+ *
+ * @param[in]  target:  Reference to centaur.mba target, 
+ * @param[in/out]  ecmdDataBufferBase& address_16:  MRS values - this is modified by the given attribute name and data
+ * @param[in]  uint32_t attribute_name:  enumerated value containing the attribute name to be modified - attr_name tells the function which bits to modify
+ * @param[in]  uint8_t attribute_data:   data telss the function what values to set to the modified bits
+ *
+ * @return ReturnCode
+ */
+fapi::ReturnCode mss_ddr4_modify_mrs_pda(fapi::Target& i_target,ecmdDataBufferBase& address_16,uint32_t attribute_name,uint8_t attribute_data);
+
+fapi::ReturnCode mss_ddr4_rtt_nom_rtt_wr_swap(fapi::Target& i_target, uint8_t i_mbaPosition, uint32_t i_port_number, uint8_t i_rank, uint32_t i_rank_pair_group, uint32_t& io_ccs_inst_cnt, uint8_t& io_dram_rtt_nom_original);
 #endif /* _MSS_DDR4_FUNCS_H */
 
 

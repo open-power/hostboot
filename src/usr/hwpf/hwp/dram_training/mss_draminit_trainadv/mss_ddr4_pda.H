@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_ddr4_pda.H,v 1.38 2015/07/27 14:49:59 sglancy Exp $
+// $Id: mss_ddr4_pda.H,v 1.41 2016/02/12 19:45:54 sglancy Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2013
 // *! All Rights Reserved -- Property of IBM
@@ -42,6 +42,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.7    | 02/16/16 | sglancy | Addressed FW comments
+//  1.6    | 11/09/15 | sglancy | Added new function call
 //  1.5    | 05/13/15 | sglancy | Added dox and updated functions for better FFDC
 //  1.4    | 05/11/15 | sglancy | Addressed FW comments
 //  1.3    | 05/07/15 | sglancy | Updated Doxygen header
@@ -106,16 +108,23 @@ ReturnCode mss_ddr4_run_pda(Target& i_target,vector<PDA_MRS_Storage> pda);
  *
  * @return ReturnCode
  */
-ReturnCode mss_ddr4_setup_pda(Target& i_target,uint32_t& io_ccs_inst_cnt);
+ReturnCode mss_ddr4_setup_pda(
+            Target& i_target,
+            uint32_t& io_ccs_inst_cnt,
+	    uint8_t dimm_to_run,
+	    uint8_t rank_to_run
+            );
 /**
  * @Takes the DRAM out of per-DRAM addressability mode (PDA mode)
  *
  * @param[in]  target:  Reference to centaur.mba target, 
  * @param[in/out]  io_ccs_inst_cnt: starting point of CCS array - needed to properly setup CCS
+ * @param[in]  dimm_to_run: which DIMM to run PDA commands on 
+ * @param[in]  rank_to_run: which rank on which DIMM to run PDA commands on 
  *
  * @return ReturnCode
  */
-ReturnCode mss_ddr4_disable_pda(Target& i_target,uint32_t& io_ccs_inst_cnt);
+ReturnCode mss_ddr4_disable_pda(Target& i_target,uint32_t& io_ccs_inst_cnt, uint8_t dimm_to_run, uint8_t rank_to_run);
 /**
  * @called by wrapper - sets up a PDA vector if it's not already configured
  *
@@ -135,17 +144,6 @@ ReturnCode mss_ddr4_pda(Target& i_target,vector<PDA_MRS_Storage> pda);
  */
 ReturnCode mss_ddr4_checksort_pda(Target& i_target, vector<PDA_MRS_Storage>& pda);
 /**
- * @Modifies the passed in address_16 buffer based upon the given attribute and data
- *
- * @param[in]  target:  Reference to centaur.mba target, 
- * @param[in/out]  ecmdDataBufferBase& address_16:  MRS values - this is modified by the given attribute name and data
- * @param[in]  uint32_t attribute_name:  enumerated value containing the attribute name to be modified - attr_name tells the function which bits to modify
- * @param[in]  uint8_t attribute_data:   data telss the function what values to set to the modified bits
- *
- * @return ReturnCode
- */
-ReturnCode mss_ddr4_modify_mrs_pda(Target& i_target,ecmdDataBufferBase& address_16,uint32_t attribute_name,uint8_t attribute_data);
-/**
  * @Adds a given DRAM into the scom_storage vector
  *
  * @param[in]  target:  Reference to centaur.mba target, 
@@ -156,20 +154,31 @@ ReturnCode mss_ddr4_modify_mrs_pda(Target& i_target,ecmdDataBufferBase& address_
  * @return ReturnCode
  */
 ReturnCode mss_ddr4_add_dram_pda(Target& i_target,uint8_t port,uint8_t dram,vector<PDA_Scom_Storage> & scom_storage);
+
 /**
- * @loads in a nominal MRS value into the address_16 and bank_3
+ * @Adds a given DRAM into the scom_storage vector
  *
  * @param[in]  target:  Reference to centaur.mba target, 
- * @param[out]  ecmdDataBufferBase& bank_3:  bank bits to be issued during MRS
- * @param[out]  ecmdDataBufferBase& address_16:  16 address lanes to be issued during MRS - setup during function
- * @param[in]  uint8_t MRS:  which MRS to configure
- * @param[in]  uint8_t i_port_number: the port on which to configure the MRS - used for ID'ing which attributes to use
- * @param[in]  uint8_t dimm_number: the DIMM on which to configure the MRS - used for ID'ing which attributes to use
- * @param[in]  uint8_t rank_number: the rank on which to configure the MRS - used for ID'ing which attributes to use
+ * @param[out]  uint8_t wl_launch_time:  holds the number of cycles that the data must be launched after the PDA command is issued
+ * @param[out]  uint8_t odt_hold_time:  holds the number of cycles that the ODT must be held for PDA
+ * @param[out]  uint8_t post_odt_nop_idle:  holds the number of cycles that 
  *
  * @return ReturnCode
  */
-ReturnCode mss_ddr4_load_nominal_mrs_pda(Target& i_target,ecmdDataBufferBase& bank_3,ecmdDataBufferBase& address_16,uint8_t MRS,uint8_t i_port_number, uint8_t dimm_number, uint8_t rank_number);
+ReturnCode mss_get_pda_odt_timings(Target& i_target,uint8_t & wl_launch_time,uint8_t & odt_hold_time,uint8_t & post_odt_nop_idle);
+ReturnCode mss_ddr4_run_pda_by_dimm_rank(
+            Target& i_target,
+	    vector<PDA_MRS_Storage> pda,
+	    uint8_t dimm_to_run,
+	    uint8_t rank_to_run
+            );
+
+uint32_t mss_ddr4_check_pda_empty_for_rank(
+	    vector<PDA_MRS_Storage> pda,
+	    uint8_t dimm_to_run,
+	    uint8_t rank_to_run
+            );
+
 } // extern "C"
 
 #endif /* _MSS_DDR4_PDA_H */

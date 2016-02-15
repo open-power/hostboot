@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training.C,v 1.106 2015/10/23 16:28:15 sglancy Exp $
+// $Id: mss_draminit_training.C,v 1.107 2015/11/09 17:22:02 sglancy Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -30,6 +30,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|------------------------------------------------
+//  1.107  | sglancy  |03-NOV-15| Fixed attribute names for DDR4 RDIMM
 //  1.106  | sglancy  |23-OCT-15| Updated attribute names
 //  1.105  | rwheeler |20-OCT-15| updated the ifndef FAPI_LRDIMM.
 //  1.104  | rwheeler |19-OCT-15| Added support for the ddr4 lrdimm.
@@ -185,6 +186,7 @@
 //----------------------------------------------------------------------
 #include <cen_scom_addresses.H>
 #include <mss_funcs.H>
+#include <mss_ddr4_funcs.H>
 #include <dimmBadDqBitmapFuncs.H>
 #include <mss_unmask_errors.H>
 #include <mss_lrdimm_funcs.H>
@@ -192,7 +194,6 @@
 #include <mss_mrs6_DDR4.H>
 #ifdef FAPI_LRDIMM
 #include <mss_lrdimm_ddr4_funcs.H>
-#include <mss_ddr4_funcs.H>
 #endif
 
 #ifndef FAPI_LRDIMM
@@ -872,6 +873,23 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
 			       if(rc) return rc;
                             }
 			}
+			//DDR4 RDIMM, do the swap of the RTT_WR to RTT_NOM
+			if ( (cur_cal_step == 1) && (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4))
+			{
+                            if ( dimm_type != fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM )
+                            {
+
+			       dram_rtt_nom_original = 0xFF;
+			       rc = mss_ddr4_rtt_nom_rtt_wr_swap(i_target,
+			           			 mbaPosition,
+			           			 port,
+			           			 primary_ranks_array[group][port],
+			           			 group,
+			           			 instruction_number,
+			           			 dram_rtt_nom_original);
+			       if(rc) return rc;
+                            }
+			}
                         // Should only be called for DDR4 LRDIMMs, training code is in development. Does not effect any other configs
                         else if ( (group == 0) && (cur_cal_step == 1)
                                   && (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4)
@@ -1011,6 +1029,23 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
                             {
 
 			       rc = mss_rtt_nom_rtt_wr_swap(i_target,
+			           			 mbaPosition,
+			           			 port,
+			           			 primary_ranks_array[group][port],
+			           			 group,
+			           			 instruction_number,
+			           			 dram_rtt_nom_original);
+			       if(rc) return rc;
+                            }
+			}
+			
+			// Following WR_LVL -- Restore RTT_NOM to orignal value post-wr_lvl
+			if ((cur_cal_step == 1) && (dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4))
+			{
+                            if ( dimm_type != fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM )
+                            {
+
+			       rc = mss_ddr4_rtt_nom_rtt_wr_swap(i_target,
 			           			 mbaPosition,
 			           			 port,
 			           			 primary_ranks_array[group][port],
@@ -5344,7 +5379,7 @@ ReturnCode mss_rtt_nom_rtt_wr_swap(
     if(rc) return rc;
 
     uint8_t address_mirror_map[2][2]; //address_mirror_map[port][dimm]
-    rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_ADDRESS_MIRRORING, &i_target, address_mirror_map);
+    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_ADDRESS_MIRRORING, &i_target, address_mirror_map);
     if(rc) return rc;
 
 

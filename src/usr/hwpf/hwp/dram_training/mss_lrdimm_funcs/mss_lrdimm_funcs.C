@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_lrdimm_funcs.C,v 1.10 2015/03/16 21:37:44 jdsloat Exp $
+// $Id: mss_lrdimm_funcs.C,v 1.11 2015/11/09 17:22:07 sglancy Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2013
 // *! All Rights Reserved -- Property of IBM
@@ -42,6 +42,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.11   | sglancy  |03-NOV-15| Fixed attribute names for DDR4 RDIMM
 //  1.10   | jdsloat  |16-MAR-15| Fixed 2 declarations of ecmddatabuffer to ecmddatabufferbase
 //  1.8    | kcook    |13-FEB-14| More FW updates.
 //  1.7    | kcook    |12-FEB-14| Updated HWP_ERROR per RAS review to be used with memory_mss_lrdimm_funcs.xml
@@ -598,7 +599,7 @@ fapi::ReturnCode mss_lrdimm_mrs_load( fapi::Target& i_target , uint32_t i_port_n
         if(rc) return rc;
         rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_RCD_CNTL_WORD_0_15, &i_target, rcd_array);
         if(rc) return rc;
-        rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_ADDRESS_MIRRORING, &i_target, address_mirror_map);
+        rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_ADDRESS_MIRRORING, &i_target, address_mirror_map);
         if(rc) return rc;
         rc = FAPI_ATTR_GET(ATTR_IS_SIMULATION, NULL, is_sim);
         if(rc) return rc;

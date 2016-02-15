@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_termination.C,v 1.51 2015/09/04 18:16:24 thi Exp $
+// $Id: mss_eff_config_termination.C,v 1.54 2015/11/09 17:22:05 sglancy Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_eff_config_termination.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -44,6 +44,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.52  | sglancy  |03-NOV-15| Fixed attribute names for DDR4 RDIMM
+//   1.51  | sglancy  |10-Oct-15| Changed attribute names
 //   1.50  | sglancy  |28-Aug-15| Added RC checks - addressed FW comments
 //   1.49  | kmack    |05-Aug-15| Commented out FAPI_DDR4 code
 //   1.48  | asaetow  |01-OCT-14| Added setting for single-drop 4G1Rx8 and 16G2Rx4 from Ken/Anil for habanero at 1333Mbps under "rdimm_habanero_1333_r10_mba0", "rdimm_habanero_1333_r10_mba1", "rdimm_habanero_1333_r20_mba0", and "rdimm_habanero_1333_r20_mba1".
@@ -57,7 +59,7 @@
 //   1.41  | dcadiga  |13-JAN-14| Removed checking of dimm type attribute for CDIMM, replaced with custom dimm type attribute
 //   1.40  | bellows  |02-JAN-14| VPD attribute removal
 //   1.39  | bellows  |25-NOV-13| removed dimm spare temp, added using namespace fapi
-//   1.38  | dcadiga  |22-NOV-13| DDR4 ATTR_VREF_DQ_TRAIN_VALUE change for Menlo (0 to 16)
+//   1.38  | dcadiga  |22-NOV-13| DDR4 ATTR_EFF_VREF_DQ_TRAIN_VALUE change for Menlo (0 to 16)
 //   1.37  | dcadiga  |22-NOV-13| New Settings for RC/A and RC/C from Nov5/2013 Spreadsheet, DDR4 Enum Update
 //   1.36  | bellows  |19-SEP-13| Patched the AM keyword workaround.for >1 ranks
 //   1.35  | bellows  |16-SEP-13| Hostboot compile update.
@@ -1875,17 +1877,18 @@ extern "C" {
    uint8_t l_attr_tccd_l = 5;
 */
     uint8_t l_attr_eff_rtt_park[PORT_SIZE][DIMM_SIZE][RANK_SIZE];
-    uint8_t l_attr_vref_dq_train_value[PORT_SIZE][DIMM_SIZE][RANK_SIZE];
-    uint8_t l_attr_vref_dq_train_range[PORT_SIZE][DIMM_SIZE][RANK_SIZE];
-    uint8_t l_attr_vref_dq_train_enable[PORT_SIZE][DIMM_SIZE][RANK_SIZE];
+    uint8_t l_ATTR_EFF_VREF_DQ_TRAIN_value[PORT_SIZE][DIMM_SIZE][RANK_SIZE];
+    uint8_t l_ATTR_EFF_VREF_DQ_TRAIN_range[PORT_SIZE][DIMM_SIZE][RANK_SIZE];
+    uint8_t l_ATTR_EFF_VREF_DQ_TRAIN_enable[PORT_SIZE][DIMM_SIZE][RANK_SIZE];
 
     for( int l_port = 0; l_port < PORT_SIZE; l_port += 1 ) {
       for( int l_dimm = 0; l_dimm < DIMM_SIZE; l_dimm += 1 ) {
         for( int l_rank = 0; l_rank < RANK_SIZE; l_rank += 1 ) {
           l_attr_eff_rtt_park[l_port][l_dimm][l_rank] = 0;
-          l_attr_vref_dq_train_value[l_port][l_dimm][l_rank] = 16;
-          l_attr_vref_dq_train_range[l_port][l_dimm][l_rank] = 0;
-          l_attr_vref_dq_train_enable[l_port][l_dimm][l_rank] = ENUM_ATTR_VREF_DQ_TRAIN_ENABLE_DISABLE;
+          l_ATTR_EFF_VREF_DQ_TRAIN_value[l_port][l_dimm][l_rank] = 16;
+          l_ATTR_EFF_VREF_DQ_TRAIN_range[l_port][l_dimm][l_rank] = 0;
+          l_ATTR_EFF_VREF_DQ_TRAIN_enable[l_port][l_dimm][l_rank] = ENUM_ATTR_EFF_VREF_DQ_TRAIN_ENABLE_DISABLE;
+          FAPI_INF("AST:1 %d %d %d %d.", l_ATTR_EFF_VREF_DQ_TRAIN_value[l_port][l_dimm][l_rank], l_port, l_dimm, l_rank);
         }
       }
     }
@@ -2004,9 +2007,9 @@ extern "C" {
     rc = FAPI_ATTR_SET(ATTR_EFF_DATA_MASK, &i_target_mba, l_attr_eff_data_mask); if(rc) return rc;
     rc = FAPI_ATTR_SET(ATTR_EFF_WRITE_DBI, &i_target_mba, l_attr_eff_write_dbi); if(rc) return rc;
     rc = FAPI_ATTR_SET(ATTR_EFF_READ_DBI, &i_target_mba, l_attr_eff_read_dbi); if(rc) return rc;
-    rc = FAPI_ATTR_SET(ATTR_VREF_DQ_TRAIN_VALUE, &i_target_mba, l_attr_vref_dq_train_value); if(rc) return rc;
-    rc = FAPI_ATTR_SET(ATTR_VREF_DQ_TRAIN_RANGE, &i_target_mba, l_attr_vref_dq_train_range); if(rc) return rc;
-    rc = FAPI_ATTR_SET(ATTR_VREF_DQ_TRAIN_ENABLE, &i_target_mba, l_attr_vref_dq_train_enable); if(rc) return rc;
+    rc = FAPI_ATTR_SET(ATTR_EFF_VREF_DQ_TRAIN_VALUE, &i_target_mba, l_ATTR_EFF_VREF_DQ_TRAIN_value); if(rc) return rc;
+    rc = FAPI_ATTR_SET(ATTR_EFF_VREF_DQ_TRAIN_RANGE, &i_target_mba, l_ATTR_EFF_VREF_DQ_TRAIN_range); if(rc) return rc;
+    rc = FAPI_ATTR_SET(ATTR_EFF_VREF_DQ_TRAIN_ENABLE, &i_target_mba, l_ATTR_EFF_VREF_DQ_TRAIN_enable); if(rc) return rc;
    // rc = FAPI_ATTR_SET(ATTR_TCCD_L, &i_target_mba, l_attr_tccd_l); if(rc) return rc;
     FAPI_INF("Set some attributes, setting more\n");
 
@@ -2239,9 +2242,6 @@ extern "C" {
     const char * const PROCEDURE_NAME = "mss_eff_config_termination_vpd";
     FAPI_INF("*** Running %s on %s ... ***", PROCEDURE_NAME, i_target_mba.toEcmdString());
 
-   //for xml error usage
-   const fapi::Target& TARGET_MBA = i_target_mba;
-
     do {
       std::vector<fapi::Target> l_target_dimm_array;
       uint8_t spd_custom;
@@ -2353,8 +2353,8 @@ extern "C" {
         rc = FAPI_ATTR_SET(ATTR_VPD_CEN_SLEW_RATE_SPCKE,  &i_target_mba, attr_vpd_cen_slew_rate_spcke);
         if(rc) return rc;
 
-        uint8_t attr_vpd_dram_address_mirroring[2][2] = {{  0x00, 0x00 },{0x00, 0x00}};
-        rc = FAPI_ATTR_SET(ATTR_VPD_DRAM_ADDRESS_MIRRORING,  &i_target_mba, attr_vpd_dram_address_mirroring);
+        uint8_t ATTR_EFF_DRAM_ADDRESS_MIRRORING[2][2] = {{  0x00, 0x00 },{0x00, 0x00}};
+        rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_ADDRESS_MIRRORING,  &i_target_mba, ATTR_EFF_DRAM_ADDRESS_MIRRORING);
         if(rc) return rc;
 
  ////////////////////////////////////////////////////////////////////////////////////////////

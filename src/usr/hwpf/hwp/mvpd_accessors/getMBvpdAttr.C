@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdAttr.C,v 1.9 2015/10/06 15:17:45 dcrowell Exp $
+// $Id: getMBvpdAttr.C,v 1.11 2016/01/21 16:02:38 dcrowell Exp $
 /**
  *  @file getMBvpdAttr.C
  *
@@ -34,7 +34,6 @@
 //  fapi support
 #include    <fapi.H>
 #include    <getMBvpdAttr.H>
-#include    <getMBvpdVersion.H>
 
 // Used to ensure attribute enums are equal at compile time
 class Error_ConstantsDoNotMatch;
@@ -99,6 +98,8 @@ fapi::ReturnCode getVersion  (const fapi::Target    & i_mbaTarget,
 fapi::ReturnCode xlate_DRAM_RON (const fapi::AttributeId i_attr,
                                      uint8_t & io_value);
 fapi::ReturnCode xlate_RTT_NOM  (const fapi::AttributeId i_attr,
+                                     uint8_t & io_value);
+fapi::ReturnCode xlate_RTT_PARK  (const fapi::AttributeId i_attr,
                                      uint8_t & io_value);
 fapi::ReturnCode xlate_RTT_WR   (const fapi::AttributeId i_attr,
                                      uint8_t & io_value);
@@ -425,7 +426,7 @@ fapi::ReturnCode getVersion  (const fapi::Target    & i_mbaTarget,
 
         if((l_fapirc == 0) && (!l_sizeMismatch))
         {
-            FAPI_DBG("getVersion:"
+            FAPI_INF("getVersion:"
                      " returned vm data : 0x%x ",
                      l_vmVersionBuf.iv_version);
 
@@ -890,8 +891,7 @@ uint32_t getUint32 (const uint16_t & i_dataSpecial,
     }
     else
     {
-        memcpy(&o_val, i_pBuffer, sizeof(o_val));
-        o_val = FAPI_BE32TOH(o_val);
+        o_val  = FAPI_BE32TOH(*(uint32_t*) i_pBuffer);
     }
 
     return o_val;
@@ -1056,6 +1056,10 @@ fapi::ReturnCode returnValue (const MBvpdAttrDef*   i_pAttrDef,
                         {
                             case XLATE_RTT_NOM: // translate
                                 l_fapirc=xlate_RTT_NOM(i_pAttrDef->iv_attrId,
+                                                                       l_value);
+                                break;
+                            case XLATE_RTT_PARK: // translate
+                                l_fapirc=xlate_RTT_PARK(i_pAttrDef->iv_attrId,
                                                                        l_value);
                                 break;
                             case XLATE_RTT_WR: // translate
@@ -1313,6 +1317,61 @@ fapi::ReturnCode xlate_RTT_NOM (const fapi::AttributeId i_attr,
 
     return  l_fapirc;
 }
+
+// ----------------------------------------------------------------------------
+// Translate vpd values to attribute enumeration for ATTR_VPD_DRAM_RTT_PARK
+// ----------------------------------------------------------------------------
+fapi::ReturnCode xlate_RTT_PARK (const fapi::AttributeId i_attr,
+                                         uint8_t & io_value)
+{
+    fapi::ReturnCode l_fapirc;
+    const uint8_t DRAM_RTT_PARK_DISABLE = 0x00;
+    const uint8_t DRAM_RTT_PARK_OHM34 = 0x07;
+    const uint8_t DRAM_RTT_PARK_OHM40 = 0x03;
+    const uint8_t DRAM_RTT_PARK_OHM48 = 0x85;
+    const uint8_t DRAM_RTT_PARK_OHM60 = 0x01;
+    const uint8_t DRAM_RTT_PARK_OHM80 = 0x06;
+    const uint8_t DRAM_RTT_PARK_OHM120 = 0x02;
+    const uint8_t DRAM_RTT_PARK_OHM240 = 0x84;
+
+    switch(io_value)
+    {
+    case DRAM_RTT_PARK_DISABLE:
+        io_value=fapi::ENUM_ATTR_VPD_DRAM_RTT_PARK_DISABLE;
+        break;
+    case DRAM_RTT_PARK_OHM34:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_RTT_PARK_34OHM;
+        break;
+    case DRAM_RTT_PARK_OHM40:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_RTT_PARK_40OHM;
+        break;
+    case DRAM_RTT_PARK_OHM48:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_RTT_PARK_48OHM;
+        break;
+    case DRAM_RTT_PARK_OHM60:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_RTT_PARK_60OHM;
+        break;
+    case DRAM_RTT_PARK_OHM80:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_RTT_PARK_80OHM;
+        break;
+    case DRAM_RTT_PARK_OHM120:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_RTT_PARK_120OHM;
+        break;
+    case DRAM_RTT_PARK_OHM240:
+        io_value = fapi::ENUM_ATTR_VPD_DRAM_RTT_PARK_240OHM;
+        break;
+    default:
+        FAPI_ERR("Unsupported VPD encode for ATTR_VPD_DRAM_RTT_PARK 0x%02x",
+                    io_value);
+        const fapi::AttributeId & ATTR_ID = i_attr;
+        const uint8_t  & VPD_VALUE = io_value;
+        FAPI_SET_HWP_ERROR(l_fapirc, RC_MBVPD_TERM_DATA_UNSUPPORTED_VPD_ENCODE);
+        break;
+    }
+
+    return  l_fapirc;
+}
+
 
 // ----------------------------------------------------------------------------
 // Translate vpd values to attribute enumeration for ATTR_VPD_DRAM_RTT_WR

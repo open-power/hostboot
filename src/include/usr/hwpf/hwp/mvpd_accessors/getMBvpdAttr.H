@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdAttr.H,v 1.7 2015/10/06 18:04:03 janssens Exp $
+// $Id: getMBvpdAttr.H,v 1.8 2015/11/02 21:42:22 sglancy Exp $
 
 /**
  *  @file getMBvpdAttr.H
@@ -198,6 +198,7 @@ namespace getAttrData
     // for UNIT8_BY2_BY2_BY4 (all mutually exclusive)
         XLATE_RTT_NOM  = 0x0100,
         XLATE_RTT_WR   = 0x0200,
+        XLATE_RTT_PARK   = 0x0400,
 
     // for UINT32_BY2 (all mutually exclusive)
         XLATE_RD_VREF  = 0x0100,

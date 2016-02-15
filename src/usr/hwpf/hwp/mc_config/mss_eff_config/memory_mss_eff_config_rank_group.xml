@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2013,2016                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -20,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: memory_mss_eff_config_rank_group.xml,v 1.2 2014/04/01 17:06:22 asaetow Exp $ -->
+<!-- $Id: memory_mss_eff_config_rank_group.xml,v 1.3 2015/06/15 20:19:26 asaetow Exp $ -->
 <!-- For file ../../ipl/fapi/mss_eff_config_rank_group.C -->
 <!-- // *! OWNER NAME  : Anuwat Saetow     Email: asaetow@us.ibm.com -->
 <!-- // *! BACKUP NAME : Mark Bellows      Email: bellows@us.ibm.com -->
@@ -39,12 +41,18 @@
 	</callout>
 	
 	<callout>
-		<target>TARGET_MBA</target>
+        <childTargets>
+        <parent>TARGET_MBA</parent>
+        <childType>TARGET_TYPE_DIMM</childType>
+        </childTargets>
 		<priority>MEDIUM</priority>
 	</callout>
 	
 	<deconfigure>
-		<target>TARGET_MBA</target>
+        <childTargets>
+        <parent>TARGET_MBA</parent>
+        <childType>TARGET_TYPE_DIMM</childType>
+        </childTargets>
 	</deconfigure>
 </hwpError>
 
@@ -60,12 +68,18 @@
 	</callout>
 
 	<callout>
-		<target>TARGET_MBA</target>
+        <childTargets>
+        <parent>TARGET_MBA</parent>
+        <childType>TARGET_TYPE_DIMM</childType>
+        </childTargets>
 		<priority>MEDIUM</priority>
 	</callout>	
 
 	<deconfigure>
-		<target>TARGET_MBA</target>
+        <childTargets>
+        <parent>TARGET_MBA</parent>
+        <childType>TARGET_TYPE_DIMM</childType>
+        </childTargets>
 	</deconfigure>
 </hwpError>
 
@@ -81,12 +95,18 @@
 	</callout>
 
 	<callout>
-		<target>TARGET_MBA</target>
+        <childTargets>
+        <parent>TARGET_MBA</parent>
+        <childType>TARGET_TYPE_DIMM</childType>
+        </childTargets>
 		<priority>MEDIUM</priority>
 	</callout>	
 
 	<deconfigure>
-		<target>TARGET_MBA</target>
+        <childTargets>
+        <parent>TARGET_MBA</parent>
+        <childType>TARGET_TYPE_DIMM</childType>
+        </childTargets>
 	</deconfigure>
 </hwpError>
 <!-- *********************************************************************** -->

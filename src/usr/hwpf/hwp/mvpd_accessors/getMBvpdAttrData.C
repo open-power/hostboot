@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdAttrData.C,v 1.7 2015/09/30 20:44:12 janssens Exp $
+// $Id: getMBvpdAttrData.C,v 1.9 2015/11/02 21:42:23 sglancy Exp $
 /**
  *  @file getMBvpdAttrData.C
  *
@@ -61,11 +61,13 @@ const MBvpdAttrDef g_MBVPD_ATTR_DEF_array [] =
     {ATTR_VPD_MT_VERSION_BYTE,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,0,UINT8,0},
     {ATTR_VPD_MT_DATA_CONTROL_BYTE,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,1,UINT8,0},
     {ATTR_VPD_PERIODIC_MEMCAL_MODE_OPTIONS,ALL_DIMM,VM_01,MBVPD_KEYWORD_MR,50,UINT32_BY2|UINT16_DATA,0},
-    {ATTR_VPD_DRAM_RTT_PARK,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,10,UINT8_BY2_BY2_BY4|XLATE_RTT_WR,0},
+    {ATTR_VPD_DRAM_RTT_PARK,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,56,UINT8_BY2_BY2_BY4|XLATE_RTT_PARK,0},
     {ATTR_VPD_RD_CTR_WINDAGE_OFFSET,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,64,UINT32_BY2|UINT16_DATA,0},
 
-    {ATTR_VPD_DIMM_RCD_OUTPUT_TIMING,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,68,UINT8_BY2_BY2|DEFAULT_VALUE,0},
-    {ATTR_VPD_DIMM_RCD_IBT,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,66,UINT32_BY2_BY2|DEFAULT_VALUE,0},
+    {ATTR_VPD_DIMM_RCD_OUTPUT_TIMING,ISDIMM,VM_01,MBVPD_KEYWORD_MT,68,UINT8_BY2_BY2|BOTH_DIMMS,0},
+    {ATTR_VPD_DIMM_RCD_IBT,ISDIMM,VM_01,MBVPD_KEYWORD_MT,66,UINT32_BY2_BY2|UINT8_DATA,0},
+    {ATTR_VPD_DIMM_RCD_OUTPUT_TIMING,CDIMM,VM_01,MBVPD_KEYWORD_MT,68,UINT8_BY2_BY2|DEFAULT_VALUE,0},
+    {ATTR_VPD_DIMM_RCD_IBT,CDIMM,VM_01,MBVPD_KEYWORD_MT,66,UINT32_BY2_BY2|DEFAULT_VALUE,0},
     {ATTR_VPD_CEN_RD_VREF,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,34,UINT32_BY2|UINT8_DATA|XLATE_RD_VREF,0},
     {ATTR_VPD_DRAM_WR_VREF,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,35,UINT32_BY2|UINT8_DATA|XLATE_WR_VREF,0},
     {ATTR_VPD_DRAM_WRDDR4_VREF,ALL_DIMM,VM_01,MBVPD_KEYWORD_MT,36,UINT8_BY2,0},

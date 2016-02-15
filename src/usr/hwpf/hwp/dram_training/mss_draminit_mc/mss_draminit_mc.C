@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_mc.C,v 1.51 2015/03/19 16:48:09 dcadiga Exp $
+// $Id: mss_draminit_mc.C,v 1.54 2016/02/29 15:07:56 sglancy Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -38,6 +38,7 @@
 //Run cen_draminit_mc.C to complete the initialization sequence. This performs the steps of
 //***Set the IML Complete bit MBSSQ(2) (SCOM Addr: 0x02011417) to indicate that IML has completed
 //***Start the refresh engines
+
 //***Enabling periodic calibration and power management.
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
@@ -46,6 +47,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.54   | sglancy  |29-FEB-16| Addressed FW comments - on leap day!
+//  1.53   | sglancy  |12-FEB-16| Addressed FW comments
+//  1.52   | sglancy  |07-DEC-15| Temporary: commented out call to RCD check code to workaround DDR4 ISRDIMM bug
 //  1.51   | dcadiga  |18-MAR-15| Added function to enable address inversion on port 1
 //  1.50   | gollub   |12-FEB-15| Changed maint cmd delay from 100mSec to 1mSec
 //  1.49   | gollub   |12-FEB-15| Add check for RCD protect time on RDIMM and LRDIMM
@@ -162,14 +166,12 @@ ReturnCode mss_draminit_mc_cloned(Target& i_target)
     std::vector<fapi::Target> l_mbaChiplets;
     uint32_t rc_num  = 0;
     uint8_t scom_parity_fixed_dd2 = 0;
+    uint8_t dram_gen = 0;
     rc = FAPI_ATTR_GET(ATTR_CENTAUR_EC_SCOM_PARITY_ERROR_HW244827_FIXED, &i_target, scom_parity_fixed_dd2);
     if (rc) return rc;
     // Get associated MBA's on this centaur
     rc=fapiGetChildChiplets(i_target, fapi::TARGET_TYPE_MBA_CHIPLET, l_mbaChiplets);
     if (rc) return rc;
-
-
-
 
 
     // Step Zero: Turn Off Spare CKE - This needs to be off before IML complete 
@@ -220,7 +222,10 @@ ReturnCode mss_draminit_mc_cloned(Target& i_target)
     for (uint32_t i=0; i < l_mbaChiplets.size(); i++)
     {
         
-
+        
+        rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN, &l_mbaChiplets[i], dram_gen);
+        if (rc) return rc;
+	
         // Step Two: Disable CCS address lines
         FAPI_INF( "+++ Disabling CCS Address Lines +++");
         rc = mss_ccs_mode_reset(l_mbaChiplets[i]);
@@ -233,12 +238,15 @@ ReturnCode mss_draminit_mc_cloned(Target& i_target)
 
         // Step Two.1: Check RCD protect time on RDIMM and LRDIMM
         FAPI_INF( "+++ Check RCD protect time on RDIMM and LRDIMM +++");
-        rc = mss_check_RCD_protect_time(l_mbaChiplets[i]);
-        if(rc)
-        {
-           FAPI_ERR("---Error During Check RCD protect time rc = 0x%08X (creator = %d)---", uint32_t(rc), rc.getCreator());
-           return rc;
-        }
+	//forced this to only run if the test type is NOT DDR4 - as DDR4 ISRDIMMs are having IPL issues
+	if(dram_gen != ENUM_ATTR_EFF_DRAM_GEN_DDR4) {
+     	   rc = mss_check_RCD_protect_time(l_mbaChiplets[i]);
+     	   if(rc)
+     	   {
+     	      FAPI_ERR("---Error During Check RCD protect time rc = 0x%08X (creator = %d)---", uint32_t(rc), rc.getCreator());
+     	      return rc;
+     	   }
+	}
 	
 	//Step Two.2: Enable address inversion on each MBA for ALL CARDS
 	FAPI_INF("+++ Setting up adr inversion for port 1 +++");
@@ -249,6 +257,7 @@ ReturnCode mss_draminit_mc_cloned(Target& i_target)
            return rc;
         }
 	
+
 
         // Step Three: Enable Refresh
         FAPI_INF( "+++ Enabling Refresh +++");
@@ -1032,6 +1041,13 @@ ReturnCode mss_check_RCD_protect_time (Target& i_target)
                             return l_rc;
                         }
                     
+
+                        // DEBUG Read MBACALFIR
+                        l_rc = fapiGetScom(i_target, MBA01_MBACALFIR_0x03010400, l_mbacalfir); 
+                        if(l_rc) return l_rc;
+                        FAPI_DBG("DEBUG: MBACALFIR after RCD parity error inject = 0x%.8X 0x%.8X port%d, dimm%d, %s",
+                        l_mbacalfir.getWord(0), l_mbacalfir.getWord(1), l_port, l_dimm, i_target.toEcmdString());
+
 
                         //------------------------------------------------------ 
                         // Check for MBECCFIR bit 45: maint RCD parity error

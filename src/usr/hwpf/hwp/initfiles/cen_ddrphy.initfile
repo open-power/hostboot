@@ -1,4 +1,4 @@
-#-- $Id: cen_ddrphy.initfile,v 1.37 2015/11/16 17:07:27 dcrowell Exp $
+#-- $Id: cen_ddrphy.initfile,v 1.39 2015/12/10 21:57:02 sglancy Exp $
 #-- $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 #--          centaur/working/procedures/ec_ind/scoms/cen_ddrphy.initfile,v $
 #
@@ -6,6 +6,8 @@
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#  1.39     |sglancy |12/10/15| Updated to stop DDR3 RDIMM bug
+#  1.38     |jneaton |12/09/15| Changed DPHY01_DDRPHY_PC_CSID_CFG_P0 to 0x00 to support tsv_ddr4
 #  1.37     |dcrowell|11/16/15| Fix typo from v1.36 
 #  1.36     |dcrowell|09/23/15| Redefined interpretation of VPD_VERSION attribute 
 #  1.35     |asaetow |05/28/14| Removed v1.34 from working since we will not be GAing with those settings.
@@ -186,6 +188,10 @@ define def_val_qrg3_p1	= (ATTR_EFF_QUATERNARY_RANK_GROUP3[1] != ENUM_ATTR_EFF_QU
 # shorter test for DRAM gen
 #define def_is_empty	=	(ATTR_EFF_DRAM_GEN == ENUM_ATTR_EFF_DRAM_GEN_EMPTY)	;	# EMPTY, no dram?
 define def_is_ddr3	=	(ATTR_EFF_DRAM_GEN == ENUM_ATTR_EFF_DRAM_GEN_DDR3)	;	# DDR3 = 1
+define def_is_tsv_ddr4_p0	=	((ATTR_EFF_STACK_TYPE[0][0] == ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS) && (ATTR_EFF_DRAM_GEN == ENUM_ATTR_EFF_DRAM_GEN_DDR4))	;	# DDR4 and tsv_ddr4
+define def_is_tsv_ddr4_p1	=	((ATTR_EFF_STACK_TYPE[1][0] == ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS) && (ATTR_EFF_DRAM_GEN == ENUM_ATTR_EFF_DRAM_GEN_DDR4))	;	# DDR4 and tsv_ddr4
+define def_not_tsv_ddr4_p0	=	((ATTR_EFF_STACK_TYPE[0][0] != ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS) || (ATTR_EFF_DRAM_GEN != ENUM_ATTR_EFF_DRAM_GEN_DDR4))	;	# DDR4 and tsv_ddr4
+define def_not_tsv_ddr4_p1	=	((ATTR_EFF_STACK_TYPE[1][0] != ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS) || (ATTR_EFF_DRAM_GEN != ENUM_ATTR_EFF_DRAM_GEN_DDR4))	;	# DDR4 and tsv_ddr4
 define def_is_ddr4	=	(ATTR_EFF_DRAM_GEN == ENUM_ATTR_EFF_DRAM_GEN_DDR4)	;	# DDR4 = 2
 define def_not_ddr4	=	(ATTR_EFF_DRAM_GEN != ENUM_ATTR_EFF_DRAM_GEN_DDR4)	;	# not DDR4, (GEN != 2)
 
@@ -2795,7 +2801,7 @@ scom 0x8001c4010301143f {
 # 	ODT Default Configuration Register
 #
 # Determines the ODT values sent to all ranks during MRS commands
-# basically used when ODT pins used as CID (chip ID) for TSV DIMMs...
+# basically used when ODT pins used as CID (chip ID) for tsv_ddr4 DIMMs...
 #
 # DDRPHY_SEQ_ODT_DEFAULT_CONFIG		SEQ 0x024	0x...
 #
@@ -2944,19 +2950,28 @@ scom 0x8001C40D0301143F {
 # PHYW.PHYX.SYNTHX.D3SIDEA.PCX.REG28_RP0_L2
 
 # ---------------------------------------------------------------------------------------
-# PC Chip select ID configuration register	default=0		NEED to be programmed for DDR4/TSV dimms.
+# PC Chip select ID configuration register	default=0		NEED to be programmed for DDR4/tsv_ddr4 dimms.
 # 															HERE MW
 #
 # This register controls the value of Chip Select (CS) signals not selected
-# by any of the PC Rank Pair registers during initial calibration for DDR4 / TSV dimms.
+# by any of the PC Rank Pair registers during initial calibration for DDR4 / tsv_ddr4 dimms.
 #
 # DPHY01_DDRPHY_PC_CSID_CFG_P0		0x033	0x8000c0330301143f
 # PHYW.PHYX.SYNTHX.D3SIDEA.PCX.REG51_L2
-scom 0x800(0,1)c0330301143f {
-	bits	,	scom_data			;
-#	0:47	,	0x000000000000		;	# reserved
-	48:55	,	0xFF				;	# CS[0:7] level
-	56:63	,	0x00				;	# reserved
+scom 0x8000c0330301143f {
+	bits	,	scom_data	, expr		;
+#	0:47	,	0x000000000000	, any	;	# reserved
+	48:55	,	0x00		, def_is_tsv_ddr4_p0	;	# CS[0:7] level
+	48:55	,	0xff		, any	;	# CS[0:7] level
+	56:63	,	0x00		, any		;	# reserved
+}
+
+scom 0x8001c0330301143f {
+	bits	,	scom_data	, expr		;
+#	0:47	,	0x000000000000	, any	;	# reserved
+	48:55	,	0x00		, def_is_tsv_ddr4_p1	;	# CS[0:7] level
+	48:55	,	0xff		, any	;	# CS[0:7] level
+	56:63	,	0x00		, any		;	# reserved
 }
 
 # ---------------------------------------------------------------------------------------

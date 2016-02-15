@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2013,2016                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -21,7 +23,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-<!-- $Id: memory_mss_funcs.xml,v 1.3 2014/03/31 15:54:05 jdsloat Exp $ -->
+<!-- $Id: memory_mss_funcs.xml,v 1.4 2016/02/12 19:44:11 sglancy Exp $ -->
 <!-- For file ../../ipl/fapi/mss_funcs.C -->
 <!-- // *! OWNER NAME : jdsloat@us.ibm.com -->
 <!-- // *! BACKUP NAME : -->
@@ -161,6 +163,15 @@
     <target>TARGET_MBA_ERROR</target>
   </deconfigure>
 </hwpError>
-
+  
+  <hwpError>
+    <rc>RC_MSS_CCS_INDEX_OUT_OF_BOUNDS</rc>
+    <description>An invalid CCS array index was passsed to the function.</description>
+    <ffdc>INDEX_VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
 
 </hwpErrors>

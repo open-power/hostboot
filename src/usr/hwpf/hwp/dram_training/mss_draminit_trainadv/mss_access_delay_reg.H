@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-//$Id: mss_access_delay_reg.H,v 1.12 2014/01/24 17:22:16 sasethur Exp $
+//$Id: mss_access_delay_reg.H,v 1.13 2015/09/30 06:46:46 sasethur Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -42,6 +42,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.13  | sauchadh |30-sep-15| Added enums for CDIMM based registers 
 //   1.12  | mjjones  |20-Jan-14| RAS Review Updates
 //   1.1   | sauchadh |15-Oct-12| First Draft.
 //------------------------------------------------------------------------------
@@ -70,24 +71,28 @@ enum access_type_t {
 
 enum input_type_t {
    WR_DQ,
+   RAW_CDIMM_WR_DQ,
    RAW_WR_DQ_0,
    RAW_WR_DQ_1,
    RAW_WR_DQ_2,
    RAW_WR_DQ_3,
    RAW_WR_DQ_4,
    RD_DQ,
+   RAW_CDIMM_RD_DQ,
    RAW_RD_DQ_0,
    RAW_RD_DQ_1,
    RAW_RD_DQ_2,
    RAW_RD_DQ_3,
    RAW_RD_DQ_4,
    WR_DQS,
+   RAW_CDIMM_WR_DQS,
    RAW_WR_DQS_0,
    RAW_WR_DQS_1,
    RAW_WR_DQS_2,
    RAW_WR_DQS_3,
    RAW_WR_DQS_4,
    RD_DQS,
+   RAW_CDIMM_RD_DQS,
    RAW_RD_DQS_0,
    RAW_RD_DQS_1,
    RAW_RD_DQS_2,
@@ -109,12 +114,14 @@ enum input_type_t {
    RAW_ADDR_2,
    RAW_ADDR_3,
    DQS_GATE,
+   RAW_CDIMM_DQS_GATE,
    RAW_DQS_GATE_0,
    RAW_DQS_GATE_1,
    RAW_DQS_GATE_2,
    RAW_DQS_GATE_3,
    RAW_DQS_GATE_4,
    DQS_ALIGN,
+   RAW_CDIMM_DQS_ALIGN,
    RAW_DQS_ALIGN_0,
    RAW_DQS_ALIGN_1,
    RAW_DQS_ALIGN_2,
@@ -126,12 +133,13 @@ enum input_type_t {
    RAW_RDCLK_3,
    RAW_RDCLK_4,
    RDCLK,
+   DQSCLK,
+   RAW_CDIMM_DQSCLK,
    RAW_DQSCLK_0,
    RAW_DQSCLK_1,
    RAW_DQSCLK_2,
    RAW_DQSCLK_3,
    RAW_DQSCLK_4,
-   DQSCLK,
    COMMAND,
    CONTROL,
    CLOCK,
@@ -142,12 +150,16 @@ enum input_type_t {
 enum ip_type_t {
    WR_DQ_t,
    RAW_WR_DQ,
+   RAW_CDIMM_WR_DQ_t,
    RD_DQ_t,
    RAW_RD_DQ,
+   RAW_CDIMM_RD_DQ_t,
    WR_DQS_t,
    RAW_WR_DQS,
+   RAW_CDIMM_WR_DQS_t,
    RD_DQS_t,
    RAW_RD_DQS,
+   RAW_CDIMM_RD_DQS_t,
    RD_CLK_t,
    RAW_SYS_ADDR_CLKS0S1,
    RAW_SYS_CLK,
@@ -155,12 +167,15 @@ enum ip_type_t {
    RAW_ADDR,
    DQS_GATE_t,
    RAW_DQS_GATE,
+   RAW_CDIMM_DQS_GATE_t,
    DQS_ALIGN_t,
    RAW_DQS_ALIGN,
+   RAW_CDIMM_DQS_ALIGN_t,
    RDCLK_t,
    RAW_RDCLK,
    DQSCLK_t,
    RAW_DQSCLK,
+   RAW_CDIMM_DQSCLK_t,
    COMMAND_t,
    CONTROL_t,
    CLOCK_t,

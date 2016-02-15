@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit.C,v 1.70 2015/09/04 01:10:11 kmack Exp $
+// $Id: mss_draminit.C,v 1.71 2015/11/09 17:22:01 sglancy Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -30,6 +30,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.71   | sglancy  |03-NOV-15| Fixed attribute names for DDR4 RDIMM
 //  1.70   | kmack    |01-Sep-15| Fixed more RCs and removed extraneous comments
 //  1.69   | kmack    |28-Aug-15| Fixed an RC
 //  1.68   | kmack    |10-Aug-15| Moved the mss_lrdimm_ddr4_db_load call to the be included or not included based on def FAPI_LRDIMM
@@ -347,7 +348,7 @@ ReturnCode mss_draminit_cloned(Target& i_target)
     rc = FAPI_ATTR_GET(ATTR_IS_SIMULATION, NULL, is_sim);
     if(rc) return rc;
     uint8_t address_mirror_map[2][2]; //address_mirror_map[port][dimm]
-    rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_ADDRESS_MIRRORING, &i_target, address_mirror_map);
+    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_ADDRESS_MIRRORING, &i_target, address_mirror_map);
     if(rc) return rc;
 
 
@@ -1885,7 +1886,7 @@ ReturnCode mss_mrs_load(
     if(rc) return rc;
 
     uint8_t address_mirror_map[2][2]; //address_mirror_map[port][dimm]
-    rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_ADDRESS_MIRRORING, &i_target, address_mirror_map);
+    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_ADDRESS_MIRRORING, &i_target, address_mirror_map);
     if(rc) return rc;
 
 

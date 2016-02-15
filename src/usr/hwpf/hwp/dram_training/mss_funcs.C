@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,12 +22,13 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_funcs.C,v 1.43 2015/09/10 14:57:26 thi Exp $
+// $Id: mss_funcs.C,v 1.47 2016/02/15 18:36:59 sglancy Exp $
 /* File mss_funcs.C created by SLOAT JACOB D. (JAKE),2D3970 on Fri Apr 22 2011. */
 
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2007
 // *! All Rights Reserved -- Property of IBM
+// *! ***  ***
 //------------------------------------------------------------------------------
 // *! TITLE : mss_funcs.C
 // *! DESCRIPTION : Tools for centaur procedures
@@ -44,6 +45,10 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.46   | sglancy  |15-FEB-16| Fixed compile issue
+//  1.46   | sglancy  |12-FEB-16| Addresed FW comments
+//  1.45   | rwheeler |18-DEC-15| updated mss_ccs_inst_arry_0 function for 3ds support.
+//  1.44   | rwheeler |23-OCT-15| ccs toggle between ports bug 
 //  1.43   | thi      |10-SEP-15| Fixed more RC stuff
 //  1.42   | kmack    |03-SEP-15| Fixed up some RC stuff
 //  1.41   | sglancy  |21-AUG-15| Fixed ODT initialization bug - ODT must be held low through ZQ cal
@@ -135,7 +140,7 @@ ReturnCode mss_ccs_set_end_bit(
 
     i_instruction_number = i_instruction_number + 1;
 
-    FAPI_INF( "Setting End Bit on instruction (NOP): %d.", i_instruction_number);
+    FAPI_DBG( "Setting End Bit on instruction (NOP): %d.", i_instruction_number);
 
     // Single NOP with CKE raised high and the end bit set high
     rc_num = rc_num | csn_8.setBit(0,8);
@@ -209,9 +214,9 @@ ReturnCode mss_address_mirror_swizzle(
         FAPI_INF( "ADDRESS MIRRORING ON %s PORT%d DIMM%d RANK%d", i_target.toEcmdString(), i_port, i_dimm, i_rank);
 
         rc_num = rc_num | io_address.extractPreserve(&mirror_mode_ad, 0, 16, 0);
-        FAPI_INF( "PRE - MIRROR MODE ADDRESS: 0x%04X", mirror_mode_ad);
+        FAPI_DBG( "PRE - MIRROR MODE ADDRESS: 0x%04X", mirror_mode_ad);
         rc_num = rc_num | io_bank.extractPreserve(&mirror_mode_ba, 0, 3, 0);
-        FAPI_INF( "PRE - MIRROR MODE BANK ADDRESS: 0x%04X", mirror_mode_ba);
+        FAPI_DBG( "PRE - MIRROR MODE BANK ADDRESS: 0x%04X", mirror_mode_ba);
 
         //Initialize address and bank address as the same pre mirror mode swizzle
         rc_num = rc_num | address_post_swizzle_16.insert(io_address, 0, 16, 0);
@@ -283,9 +288,9 @@ ReturnCode mss_address_mirror_swizzle(
         }
 
         rc_num = rc_num | address_post_swizzle_16.extractPreserve(&mirror_mode_ad, 0, 16, 0);
-        FAPI_INF( "POST - MIRROR MODE ADDRESS: 0x%04X", mirror_mode_ad);
+        FAPI_DBG( "POST - MIRROR MODE ADDRESS: 0x%04X", mirror_mode_ad);
         rc_num = rc_num | bank_post_swizzle_3.extractPreserve(&mirror_mode_ba, 0, 3, 0);
-        FAPI_INF( "POST - MIRROR MODE BANK ADDRESS: 0x%04X", mirror_mode_ba);
+        FAPI_DBG( "POST - MIRROR MODE BANK ADDRESS: 0x%04X", mirror_mode_ba);
 
         //copy address and bank address back to the IO variables
         rc_num = rc_num | io_address.insert(address_post_swizzle_16, 0, 16, 0);
@@ -314,7 +319,7 @@ ReturnCode mss_ccs_inst_arry_0(
             ecmdDataBufferBase i_csn,
             ecmdDataBufferBase i_odt,
             ecmdDataBufferBase i_ddr_cal_type,
-            uint32_t i_port
+            uint32_t i_port	    
               )
 {
     //Example Use:
@@ -324,7 +329,14 @@ ReturnCode mss_ccs_inst_arry_0(
     uint32_t rc_num = 0;
     uint32_t reg_address = 0;
     ecmdDataBufferBase data_buffer(64);
+    uint8_t dimm_type;
+    uint8_t dram_gen = 0;
 
+    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN, &i_target, dram_gen);
+    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target, dimm_type);
+    if(rc) return rc;
+    
     if ((io_instruction_number >= 30)&&(i_port != 0xFFFFFFFF))
     {
         uint32_t num_retry = 10;
@@ -354,13 +366,22 @@ ReturnCode mss_ccs_inst_arry_0(
         rc_num = rc_num | data_buffer.insert(i_odt, 48, 4, 0);
         rc_num = rc_num | data_buffer.insertFromRight((uint8_t)0x00,52,4);
     }
-    else
+    else if (i_port == 1)
     {
         rc_num = rc_num | data_buffer.insert((uint8_t)0xFF,32,8);
         rc_num = rc_num | data_buffer.insert(i_csn, 40, 8, 0);
         rc_num = rc_num | data_buffer.insertFromRight((uint8_t)0x00,48,4);
         rc_num = rc_num | data_buffer.insert(i_odt, 52, 4, 0);
+    } 
+    else if (i_port == 3)
+    {
+        rc_num = rc_num | data_buffer.insert(i_csn, 32, 8, 0);
+        rc_num = rc_num | data_buffer.insert(i_csn, 40, 8, 0);
+        rc_num = rc_num | data_buffer.insert(i_odt, 48, 4, 0);
+        rc_num = rc_num | data_buffer.insert(i_odt, 52, 4, 0);
+
     }
+
 
     //Placing bits into the data buffer
     rc_num = rc_num | data_buffer.insert( i_address, 0, 16, 0);
@@ -370,14 +391,59 @@ ReturnCode mss_ccs_inst_arry_0(
     rc_num = rc_num | data_buffer.insert( i_casn, 22, 1, 0);
     rc_num = rc_num | data_buffer.insert( i_wen, 23, 1, 0);
     rc_num = rc_num | data_buffer.insert( i_ddr_cal_type, 56, 4, 0);
-
+    
+    //if in DDR4 mode, count the parity bit and set it
+    if((dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4) && (dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM || dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) ) {
+       
+       //Port A control signals - Port A chip select set
+       uint8_t cs_start;
+       uint8_t cke_start;
+       uint8_t odt_start;
+       if(data_buffer.getNumBitsSet(32,8) < 8) {
+          //DIMM0 - DIMM0 CS set
+          if(data_buffer.getNumBitsSet(32,4) < 4) {
+             cke_start = 24;
+             cs_start  = 32;
+             odt_start = 48;
+          }
+          //DIMM1
+          else {
+             cke_start = 26;
+             cs_start  = 36;
+             odt_start = 50;
+          }
+       }
+       //Port B control signals
+       else {
+          //DIMM0 - DIMM0 CS set
+          if(data_buffer.getNumBitsSet(32,4) < 4) {
+             cke_start = 28;
+             cs_start  = 40;
+             odt_start = 52;
+          }
+          //DIMM1
+          else {
+             cke_start = 30;
+             cs_start  = 44;
+             odt_start = 54;
+          }
+       }
+       //adds CIDs + 1 extra bit for CID2
+       uint8_t parity_bit = data_buffer.getNumBitsSet(0,16) + data_buffer.getNumBitsSet(17,7) + data_buffer.getNumBitsSet(cs_start+2,2)  ;
+       //data_buffer.getNumBitsSet(cke_start,2) + data_buffer.getNumBitsSet(odt_start,2) + data_buffer.getNumBitsSet(cs_start,4);
+       FAPI_DBG("Change took???");
+       uint8_t parity_bit_even = parity_bit % 2;
+       FAPI_DBG("Address %d BA/BG/CMD %d parity %d O/E %d - cke,cs,odt starts - %d,%d,%d",data_buffer.getNumBitsSet(0,16),data_buffer.getNumBitsSet(17,7),parity_bit,parity_bit_even,cke_start,cs_start,odt_start);
+       rc_num = rc_num | data_buffer.insertFromRight( parity_bit_even, 60, 1);
+    }
+    
     if (rc_num)
     {
         FAPI_ERR( "mss_ccs_inst_arry_0: Error setting up buffers");
         rc_buff.setEcmdError(rc_num);
         return rc_buff;
     }
-
+    
     rc = fapiPutScom(i_target, reg_address, data_buffer);
 
     return rc;
@@ -488,7 +554,10 @@ ReturnCode mss_ccs_load_data_pattern(
 
     if (io_instruction_number > 31)
     {
-        FAPI_INF("mss_ccs_load_data_pattern: CCS Instruction Array index out of bounds");
+        FAPI_ERR("mss_ccs_load_data_pattern: CCS Instruction Array index out of bounds");
+	const uint32_t INDEX_VALUE = io_instruction_number;
+	FAPI_SET_HWP_ERROR(rc, RC_MSS_CCS_INDEX_OUT_OF_BOUNDS);
+        return rc;
     }
     else
     {
@@ -551,6 +620,19 @@ ReturnCode mss_ccs_mode(
     rc_num = rc_num | data_buffer.insert( i_resetn, 24, 1, 0);
     rc_num = rc_num | data_buffer.insert( i_reset_recover, 25, 1, 0);
     rc_num = rc_num | data_buffer.insert( i_copy_spare_cke, 26, 1, 0);
+    
+    uint8_t dimm_type;
+    uint8_t dram_gen = 0;
+
+    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN, &i_target, dram_gen);
+    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_TYPE, &i_target, dimm_type);
+    if(rc) return rc;
+    
+    //if in DDR4 mode, count the parity bit and set it
+    if((dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4) && (dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM || dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) ) {
+       rc_num = rc_num | data_buffer.insertFromRight( (uint8_t)0xff, 61, 1);
+    }
 
     if (rc_num)
     {
@@ -582,12 +664,12 @@ ReturnCode mss_ccs_start_stop(
     if (i_start_stop == MSS_CCS_START)
     {
         rc_num = rc_num | data_buffer.setBit(0,1);
-        FAPI_INF(" Executing contents of CCS." );
+        FAPI_DBG(" Executing contents of CCS." );
     }
     else if (i_start_stop == MSS_CCS_STOP)
     {
         rc_num = rc_num | data_buffer.setBit(1,1);
-        FAPI_INF(" Halting execution of the CCS." );
+        FAPI_DBG(" Halting execution of the CCS." );
     }
 
     if (rc_num)
@@ -723,7 +805,7 @@ ReturnCode mss_execute_ccs_inst_array(
     }
     else if (status == MSS_STAT_QUERY_PASS)
     {
-        FAPI_INF("CCS Executed Successfully.");
+        FAPI_DBG("CCS Executed Successfully.");
     }
     else
     {
@@ -963,6 +1045,11 @@ ReturnCode mss_execute_zq_cal(
 
     rc_num = rc_num | data_buffer_64.insert(stop_on_err_buffer_1, 0, 1, 0);
     rc_num = rc_num | data_buffer_64.insert(resetn_buffer_1, 24, 1, 0);
+    //if in DDR4 mode, count the parity bit and set it
+    if((dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4) && (dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM || dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) ) {
+       rc_num = rc_num | data_buffer_64.insertFromRight( (uint8_t)0xff, 61, 1);
+    }
+    
     if(rc_num)
     {
         rc.setEcmdError(rc_num);

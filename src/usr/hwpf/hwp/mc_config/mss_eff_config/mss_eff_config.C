@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config.C,v 1.67 2016/01/13 15:55:46 sglancy Exp $
+// $Id: mss_eff_config.C,v 1.68 2016/01/19 23:38:13 rwheeler Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config.C,v $
 //------------------------------------------------------------------------------
@@ -45,6 +45,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.68  | rwheeler |19-JAN-16| Added support for the kg4 card type.
 //   1.67  | sglancy  |13-JAN-16| Added RC checks and fixed white space issues
 //   1.66  | preeragh |18-DEC-15| Change ATTR_EFF_TEMP_REF_MODE to Disable by default. SW331045
 //   1.65  | preeragh |16-DEC-15| Updated DIE Count Enums
@@ -2635,6 +2636,8 @@ FAPI_DBG("DDR4 Check:  SPD=0x%x, p_i_tFAWmin (nCK) = %i",
                   p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_TYPE_1B;
                } else if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 4) {
                   p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_TYPE_1D;
+               } else if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 8) {
+                  p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_TYPE_3A;
                } else {
                   p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_UNDEFINED;
                   FAPI_ERR("Currently unsupported IBM_TYPE on %s!", i_target_mba.toEcmdString());
