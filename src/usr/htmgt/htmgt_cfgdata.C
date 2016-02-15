@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -744,6 +744,48 @@ void getThermalControlMessageData(uint8_t* o_data,
 }
 
 
+// Determine if the BMC will allow turbo to be used.
+// Returns true if turbo is allowed, else false
+bool bmcAllowsTurbo(Target* i_sys)
+{
+    bool turboAllowed = true;
+
+    uint32_t sensorNum = UTIL::getSensorNumber(i_sys,
+                                               SENSOR_NAME_TURBO_ALLOWED);
+    // VALID IPMI sensors are 0-0xFE
+    if (sensorNum != 0xFF)
+    {
+        // Check if turbo frequency is allowed on BMC
+        SENSOR::getSensorReadingData turboSupportData;
+        SENSOR::SensorBase turboSensor(SENSOR_NAME_TURBO_ALLOWED, i_sys);
+        errlHndl_t err = turboSensor.readSensorData(turboSupportData);
+        if (NULL == err)
+        {
+            // 0x02 == Asserted bit (turbo frequency is allowed)
+            if ((turboSupportData.event_status & 0x02) == 0x02)
+            {
+                TMGT_INF("bmcAllowsTurbo: turbo is allowed");
+            }
+            else
+            {
+                turboAllowed = false;
+            }
+        }
+        else
+        {
+            // error reading sensor, assume turbo is allowed
+            TMGT_ERR("bmcAllowsTurbo: unable to read turbo support sensor "
+                     " from BMC, rc=0x%04X",
+                     err->reasonCode());
+            delete err;
+        }
+    }
+    // else, sensor not supported on this platform so turbo is allowed
+
+    return turboAllowed;
+}
+
+
 void getFrequencyPointMessageData(uint8_t* o_data,
                                   uint64_t & o_size)
 {
@@ -841,35 +883,47 @@ void getFrequencyPointMessageData(uint8_t* o_data,
     memcpy(&o_data[index], &nominal, 2);
     index += 2;
 
+    // Check if MRW allows turbo
     uint8_t turboAllowed =
         sys->getAttr<ATTR_OPEN_POWER_TURBO_MODE_SUPPORTED>();
     if (turboAllowed)
     {
-        turbo = sys->getAttr<ATTR_FREQ_CORE_MAX>();
-
-        //Ultra Turbo Frequency in MHz
-        const uint16_t wofSupported = sys->getAttr<ATTR_WOF_ENABLED>();
-        if (0 != wofSupported)
+        // Check if BMC allows turbo
+        if (bmcAllowsTurbo(sys))
         {
-            ultra = sys->getAttr<ATTR_ULTRA_TURBO_FREQ_MHZ>();
-            if (0 != ultra)
+            turbo = sys->getAttr<ATTR_FREQ_CORE_MAX>();
+
+            //Ultra Turbo Frequency in MHz
+            const uint16_t wofSupported = sys->getAttr<ATTR_WOF_ENABLED>();
+            if (0 != wofSupported)
             {
-                if (biasFactor)
+                ultra = sys->getAttr<ATTR_ULTRA_TURBO_FREQ_MHZ>();
+                if (0 != ultra)
                 {
-                    TMGT_INF("Pre-biased Ultra=%dMhz", ultra);
-                    // % change = (biasFactor/2) / 100
-                    ultra += ((ultra * biasFactor) / 200);
+                    if (biasFactor)
+                    {
+                        TMGT_INF("Pre-biased Ultra=%dMhz", ultra);
+                        // % change = (biasFactor/2) / 100
+                        ultra += ((ultra * biasFactor) / 200);
+                    }
+                }
+                else
+                {
+                    TMGT_INF("getFrequencyPoint: WOF enabled, but freq is 0");
+                    G_wofSupported = false;
                 }
             }
             else
             {
-                TMGT_INF("getFrequencyPoint: WOF enabled, but freq is 0");
+                TMGT_INF("getFrequencyPoint: WOF not enabled");
                 G_wofSupported = false;
             }
         }
         else
         {
-            TMGT_INF("getFrequencyPoint: WOF not enabled");
+            TMGT_INF("getFrequencyPoint: Turbo/WOF not allowed by BMC");
+            TMGT_CONSOLE("Turbo frequency not allowed due to BMC limit");
+            turbo = nominal;
             G_wofSupported = false;
         }
     }
@@ -878,6 +932,7 @@ void getFrequencyPointMessageData(uint8_t* o_data,
         // If turbo not supported, send nominal for turbo
         // and 0 for ultra-turbo (no WOF support)
         TMGT_INF("getFrequencyPoint: Turbo/WOF not supported");
+        TMGT_CONSOLE("Turbo frequency not supported");
         turbo = nominal;
         G_wofSupported = false;
     }

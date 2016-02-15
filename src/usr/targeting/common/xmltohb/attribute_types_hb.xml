@@ -1113,6 +1113,10 @@
         <name>REDUNDANT_PS_POLICY</name>
         <value>0xCA22</value>
     </enumerator>
+    <enumerator>
+        <name>TURBO_ALLOWED</name>
+        <value>0xCB03</value>
+    </enumerator>
 </enumerationType>
 
 <enumerationType>
