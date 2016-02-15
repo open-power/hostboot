@@ -527,11 +527,6 @@ public:
 //
 //   }
 
-
-  //@TODO RTC: 131502
-  //write tests to verify connection between XSCOM and FSISCOM
-  //write error path testcase for FSI scom using bad address
-
   void test_P9_ScomTranslations(void)
 {
     TRACFCOMP( g_trac_scom, "ScomTest::test_P9_ScomTranslations> Start" );
@@ -864,20 +859,6 @@ public:
     { scom_targets[myNVBUS1], 0x050110D4, 0x050110F4,false},
     { scom_targets[myNVBUS0], 0x12012826, 0x12012826, true},
     { scom_targets[myNVBUS1], 0x24030008, 0x24030008, true},
-// @TODO RTC 131502 Scom Translation Test Updates
-//      SBE TARGETS
-//     { scom_targets[mySBE0], 0x000D0060, 0x000D0060, false},
-//     { scom_targets[mySBE0], 0x12012826, 0x12012826, true},
-//     { scom_targets[mySBE0], 0x24030008, 0x24030008, true},
-//     PPE TARGETS
-//     { scom_targets[myPPE0], 0x00060010, 0x00060010, false},
-//     { scom_targets[myPPE1], 0x00060010, 0x00000000 ,false},
-//     { scom_targets[myPPE0], 0x12012826, 0x12012826, true},
-//     { scom_targets[myPPE1], 0x24030008, 0x24030008, true},
-//     Maybe OCC TARGETS?
-//     { scom_targets[myOCC0], 0x0006C070, 0x0006C070, false},
-//     { scom_targets[myOCC0], 0x12012826, 0x12012826, true},
-//     { scom_targets[myOCC0], 0x24030008, 0x24030008, true},
     };
 
     int numOfAddr = sizeof test_data / sizeof(test_data[0]);
