@@ -39,15 +39,27 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <vector>
-#include <fapi2_target.H>
 #include <target_types.H>
+#include <return_code_defs.H>
+#include <fapi2_target.H>
+
+#include <hwpf_fapi2_reasoncodes.H>
 
 
 // HB platform support
 #include <fapiPlatTrace.H>
 #include <targeting/common/target.H>
 #include <targeting/common/commontargeting.H>
+#include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
+#include <targeting/common/predicates/predicatectm.H>
+#include <targeting/common/predicates/predicateisfunctional.H>
+
+//@TODO RTC:150675 get error info from getOtherEnd fails
+//#include <errl/errlentry.H>
+//#include <errl/errlmanager.H>
+
+
 
 namespace PLAT_TARGET
 {
@@ -716,10 +728,10 @@ FAPI_DBG(ENTER_MRK "getChildren. Type 0x%08x State:0x%08x", T, i_state);
 
 ///
 /// @brief Get the target at the other end of a bus - dimm included
-/// @tparam T The type of the parent
+/// @tparam T The type of the the other end
 /// @tparam K The type of target of which this is called
 /// @tparam V the type of the target's Value
-/// @param[in] i_state The desired TargetState of the children
+/// @param[in] i_state The desired TargetState of the other end
 /// @return Target<T> a target representing the thing on the other end
 /// @note Can be easily changed to a vector if needed
 ///
@@ -728,11 +740,132 @@ template<TargetType T>
 inline Target<T>
 Target<K, V>::getOtherEnd(const TargetState i_state) const
 {
-    //@TODO RTC:129517
-    // Implementation note: cast to a composite of
-    // bus types and the compiler will check if this is
-    // a good function at compile time
-    return Target<T>();
+    fapi2::Target<T> l_target;
+    this->getOtherEnd<T>( l_target, i_state);
+
+    return l_target;
+
+}
+
+///
+/// @brief Get the target at the other end of a bus
+/// @tparam T The type of the target on the other end
+/// @param[out] o_target A target representing the thing on the other end
+/// @param[in] i_state The desired TargetState of the other end
+/// @return FAPI2_RC_SUCCESS if OK, platforms will return a non-success
+/// ReturnCode in the event of failure
+/// @note o_target is only valid if return is FAPI2_RC_SUCCESS
+///
+template<TargetType K, typename V>
+template<TargetType T>
+inline fapi2::ReturnCodes
+Target<K, V>::getOtherEnd(fapi2::Target<T>& o_target,
+                          const TargetState i_state) const
+{
+    ReturnCodes l_rc;
+//     errlHndl_t l_errl = NULL;
+    TARGETING::TargetHandleList l_peerTargetList;
+    TARGETING::TYPE requiredPeerType = fapi2::convertFapi2TypeToTargeting(T);
+    TARGETING::CLASS targetClass = TARGETING::CLASS_NA;
+
+    //TODO RTC:148934  add static_asserts for correct types
+    switch(requiredPeerType)
+    {
+        case TARGETING::TYPE_XBUS :
+            targetClass = TARGETING::CLASS_UNIT; break;
+        case TARGETING::TYPE_OBUS :
+              targetClass = TARGETING::CLASS_UNIT; break;
+        case TARGETING::TYPE_DMI :
+              targetClass = TARGETING::CLASS_UNIT; break;
+        case TARGETING::TYPE_DIMM :
+              targetClass = TARGETING::CLASS_LOGICAL_CARD; break;
+        case TARGETING::TYPE_MEMBUF :
+              targetClass = TARGETING::CLASS_CHIP; break;
+        default:
+          break;
+    }
+    TARGETING::PredicateCTM l_peerFilter(targetClass);
+
+    if(i_state == TARGET_STATE_FUNCTIONAL)
+    {
+        TARGETING::PredicateIsFunctional l_funcFilter;
+        TARGETING::PredicatePostfixExpr l_funcAndpeerFilter;
+        l_funcAndpeerFilter.push(&l_peerFilter).push(&l_funcFilter).And();
+        getPeerTargets( l_peerTargetList,    // list of targets on other end
+        static_cast<TARGETING::Target*>(this->get()),//To this target
+        NULL/*&l_peerFilter*/, // Don't need to filter peers
+        &l_funcAndpeerFilter);//filter results to be the right class & state
+    }
+    else if(i_state == TARGET_STATE_PRESENT)
+    {
+        TARGETING::PredicatePostfixExpr l_presAndpeerFilter;
+        l_presAndpeerFilter.push(&l_peerFilter);
+
+        getPeerTargets( l_peerTargetList,   // list of targets on other end
+        static_cast<TARGETING::Target*>(this->get()), //to this target
+        NULL,                               //No need to filter peers
+        &l_presAndpeerFilter);//filter results to be the right class & state
+    }
+
+    fapi2::Target<T> fapi2_peerTarget = NULL;
+
+    if(l_peerTargetList.size() == 0)
+    {
+        l_rc = FAPI2_RC_FALSE;
+        //@TODO RTC:150675 get error info from getOtherEnd fails
+#if 0
+        /*@
+        * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
+        * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_OTHER_END
+        * @reasoncode         fapi2::RC_FOUND_NO_PEERS
+        * @userdata1[0:31]    Unused
+        * @userdata1[32:63]   Unused
+        * @userdata2          Unused
+        * @devdesc            Unable to resolve other end of xbus
+        */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                      fapi2::MOD_FAPI2_PLAT_GET_OTHER_END,
+                                      fapi2::RC_FOUND_NO_PEERS,
+                                      NULL,
+                                      NULL,
+                                      true/*SW Error*/);
+        errlCommit(l_errl,FAPI2_COMP_ID);
+        // Add the error log pointer as data to the ReturnCode
+        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+#endif
+    }
+    else if(l_peerTargetList.size() > 1)
+    {
+        l_rc = FAPI2_RC_FALSE;
+        //@TODO RTC:150675 get error info from getOtherEnd fails
+#if 0
+        /*@
+        * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
+        * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_OTHER_END
+        * @reasoncode         fapi2::RC_FOUND_TOO_MANY_PEERS
+        * @userdata1[0:31]    Unused
+        * @userdata1[32:63]   Unused
+        * @userdata2          Unused
+        * @devdesc            Unable to resolve other end of xbus
+        */
+        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                      fapi2::MOD_FAPI2_PLAT_GET_OTHER_END,
+                                      fapi2::RC_FOUND_TOO_MANY_PEERS,
+                                      NULL,
+                                      NULL,
+                                      true/*SW Error*/);
+        errlCommit(l_errl,FAPI2_COMP_ID);
+        // Add the error log pointer as data to the ReturnCode
+        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+#endif
+    }
+    else
+    {
+        fapi2_peerTarget = fapi2::Target<T>(l_peerTargetList[0]);
+    }
+    o_target = fapi2_peerTarget;
+
+    return l_rc;
 }
 
 

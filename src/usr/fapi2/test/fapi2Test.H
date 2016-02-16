@@ -47,6 +47,7 @@
 #include "fapi2GetParentTest.C"
 #include "fapi2HwpTest.C"
 #include "fapi2GetChildrenTest.C"
+#include "fapi2GetOtherEnd.C"
 
 using namespace fapi2;
 
@@ -63,21 +64,22 @@ void test_fapi2Test(void)
 {
     FAPI_INF(">>>>>>test_fapi2Test starting...");
 
-    FAPI_INF(">>test_fapi2HwpTest starting...");
+    FAPI_INF(">>fapi2HwpTest starting...");
     fapi2HwpTest();
-    FAPI_INF("<<test_fapi2HwpTest exiting...");
+    FAPI_INF("<<fapi2HwpTest exiting...");
 
-    FAPI_INF(">>test_fapi2GetChildrenTest starting...");
+    FAPI_INF(">>fapi2GetChildren starting...");
     fapi2GetChildrenTest();
-    FAPI_INF("<<test_fapi2ChildTest exiting...");
+    FAPI_INF("<<fapi2GetChildren exiting...");
 
-    FAPI_INF(">>fapi2TargetTest::testFapi2GetParent starting...");
+    FAPI_INF(">>fapi2GetParent starting...");
     fapi2GetParentTest();
-    FAPI_INF("<<FAPI2: testFapi2GetParent exiting...");
+    FAPI_INF("<<fapi2GetParent exiting...");
 
-    FAPI_INF("<<<<<<test_fapi2Test exiting...");
+    FAPI_INF(">>fapi2GetOtherEnd starting...");
+    fapi2GetOtherEnd();
+    FAPI_INF(">>fapi2GetOtherEnd exiting...");
 }
-
 };
 
 #endif

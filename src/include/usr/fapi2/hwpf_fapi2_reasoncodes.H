@@ -48,6 +48,8 @@ namespace fapi2
         MOD_FAPI2_PLAT_GET_PARENT_TEST              = 0x05,
         MOD_FAPI2_PLAT_GET_CHILDREN_TEST            = 0x06,
         MOD_FAPI2_VERIFYCFAMACCESSTARGET            = 0x07,
+        MOD_FAPI2_PLAT_GET_OTHER_END_TEST           = 0x08,
+        MOD_FAPI2_PLAT_GET_OTHER_END                = 0x09,
     };
 
     /**
@@ -90,6 +92,9 @@ namespace fapi2
         RC_SBE_NO_PROC_FOUND           = FAPI2_COMP_ID | 0x21,
         RC_INVALID_CHILD_COUNT         = FAPI2_COMP_ID | 0x22,
         RC_UNIT_NO_PERV_FOUND          = FAPI2_COMP_ID | 0x23,
+        RC_INCORRECT_OTHER_END         = FAPI2_COMP_ID | 0x24,
+        RC_FOUND_TOO_MANY_PEERS        = FAPI2_COMP_ID | 0x25,
+        RC_FOUND_NO_PEERS              = FAPI2_COMP_ID | 0x26,
         // HWP generated errors
         RC_HWP_GENERATED_ERROR         = HWPF_COMP_ID | 0x0f,
 
