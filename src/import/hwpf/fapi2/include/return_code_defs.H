@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2012,2015                                                    */
+/* COPYRIGHT 2012,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,9 +74,6 @@ enum ReturnCodes
 
     FAPI2_RC_INVALID_CHIP_EC_FEATURE_GET = FAPI2_RC_FAPI2_MASK | 0x02,
     ///< HWP requested a chip EC feature with an invalid attribute ID
-
-    FAPI2_RC_INVALID_MULTISCOM_LENGTH    = FAPI2_RC_FAPI2_MASK | 0x03,
-    ///< Invalid multiscom parameters
 
     FAPI2_RC_INVALID_PARAMETER           = FAPI2_RC_FAPI2_MASK | 0x04,
     ///< Invalid parameters to a FAPI2 function
