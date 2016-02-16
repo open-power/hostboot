@@ -196,8 +196,17 @@ namespace SENSOR
     //                  the event deassertion bits, zeros are ignored.
     //      [0:1] 01b - write the given value to the sensor reading byte.
     //
+    //      Note: Per AMI implementation bits 0:1 will force the assertion
+    //            mask value as sent to be the new sensor value, all other bits
+    //            are ignored.
+    //
     //      default operation = 1010 1001
-    static const uint8_t DEFAULT_OPERATION = 0xA9;  // see IPMI Spec. "Set
+    static const uint8_t DEFAULT_OPERATION = 0xA8;  // see IPMI Spec. "Set
+
+    // use this value for sensors which use assertion fields for sensor values
+    // eg. Reboot count
+    static const uint8_t SET_SENSOR_VALUE_OPERATION = 0x01;
+
     // Sensor Reading and Event
     // Status command" for
     // details on this byte.
