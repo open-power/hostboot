@@ -1,0 +1,6610 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: chips/p9/procedures/hwp/initfiles/p9_xbus_g1_scom.C $         */
+/*                                                                        */
+/* IBM CONFIDENTIAL                                                       */
+/*                                                                        */
+/* EKB Project                                                            */
+/*                                                                        */
+/* COPYRIGHT 2016                                                         */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* The source code for this program is not published or otherwise         */
+/* divested of its trade secrets, irrespective of what has been           */
+/* deposited with the U.S. Copyright Office.                              */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+#include "p9_xbus_g1_scom.H"
+#include <stdint.h>
+#include <stddef.h>
+#include <fapi2.H>
+#include <attribute_ids.H>
+#include <target_types.H>
+#include <fapi2_attribute_service.H>
+using namespace fapi2;
+
+#define ATTR_IS_SIMULATION_ATTRIBUTE_VALUE_0    0
+#define ATTR_IS_SIMULATION_ATTRIBUTE_VALUE_1    1
+#define LITERAL_0b00    0b00
+#define LITERAL_0b0000    0b0000
+#define LITERAL_0b00000    0b00000
+#define LITERAL_0b000000    0b000000
+#define LITERAL_0b0000000    0b0000000
+#define LITERAL_0b0000000000000000    0b0000000000000000
+#define LITERAL_0b000001    0b000001
+#define LITERAL_0b0000011    0b0000011
+#define LITERAL_0b00001    0b00001
+#define LITERAL_0b0010000    0b0010000
+#define LITERAL_0b0010001    0b0010001
+#define LITERAL_0b01    0b01
+#define LITERAL_0b0110    0b0110
+#define LITERAL_0b01100    0b01100
+#define LITERAL_0b01111    0b01111
+#define LITERAL_0b01111111    0b01111111
+#define LITERAL_0b100111    0b100111
+#define LITERAL_0b1011    0b1011
+#define LITERAL_0b11    0b11
+#define LITERAL_DRV_0S    0x0
+#define LITERAL_ENABLED    0x0
+#define LITERAL_FENCED    0x80000000
+#define LITERAL_OFF    0x0
+#define LITERAL_ON    0x80000000
+#define LITERAL_PATTERN_24_A_0_15    0x10000000
+#define LITERAL_PATTERN_24_A_16_22    0x84000000
+#define LITERAL_PATTERN_24_B_0_15    0xf03e0000
+#define LITERAL_PATTERN_24_B_16_22    0x7c000000
+#define LITERAL_PATTERN_24_C_0_15    0x7bc0000
+#define LITERAL_PATTERN_24_C_12_ACGH_16_22    0x0
+#define LITERAL_PATTERN_24_D_0_15    0x7c70000
+#define LITERAL_PATTERN_24_D_16_22    0xc0000000
+#define LITERAL_PATTERN_24_EF_16_22    0x80000000
+#define LITERAL_PATTERN_24_E_0_15    0x3ef0000
+#define LITERAL_PATTERN_24_F_0_15    0x1f0f0000
+#define LITERAL_PATTERN_24_GH_16_22    0x6000000
+#define LITERAL_PATTERN_24_G_0_15    0x18000000
+#define LITERAL_PATTERN_24_H_0_15    0x9c000000
+#define LITERAL_PATTERN_TX_AB_HALF_A_0_15    0x0
+#define LITERAL_PATTERN_TX_A_16_22    0x2000000
+#define LITERAL_PATTERN_TX_B_16_22    0xf8000000
+#define LITERAL_PATTERN_TX_C_0_15    0x1e0000
+#define LITERAL_PATTERN_TX_C_16_22    0xf6000000
+#define LITERAL_PATTERN_TX_DG_16_22    0x18000000
+#define LITERAL_PATTERN_TX_D_0_15    0x1f0000
+#define LITERAL_PATTERN_TX_E_16_22    0xbc000000
+#define LITERAL_PATTERN_TX_E_HALF_B_0_15    0xf0000
+#define LITERAL_PATTERN_TX_F_0_15    0x7c0000
+#define LITERAL_PATTERN_TX_F_HALF_A_16_22    0x20000000
+#define LITERAL_PATTERN_TX_G_0_15    0xc630000
+#define LITERAL_PATTERN_TX_H_0_15    0xe730000
+#define LITERAL_PATTERN_TX_H_HALF_B_16_22    0x9c000000
+
+fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& TGT0,
+                                  const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1)
+{
+    fapi2::ReturnCode l_rc = 0;
+
+    do
+    {
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_BUS_ID_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800808200601103full, IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_BUS_ID_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800808200601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_BUS_ID_scom0.insert<uint64_t> (LITERAL_0b000001, 48, 6, 58 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_BUS_ID_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800c0c200601103full, IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_BUS_ID_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800c0c200601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_BUS_ID_scom0.insert<uint64_t> (LITERAL_0b000001, 48, 6, 58 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_START_LANE_ID_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800980200601103full, IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_START_LANE_ID_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800980200601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_START_LANE_ID_scom0.insert<uint64_t> (LITERAL_0b0000000, 49, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_START_LANE_ID_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800c84200601103full,
+                               IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_START_LANE_ID_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800c84200601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_START_LANE_ID_scom0.insert<uint64_t> (LITERAL_0b0000000, 49, 7, 57 );
+
+        IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_START_LANE_ID_scom0.insert<uint64_t> (LITERAL_0b0010000, 57, 7, 57 );
+
+        IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_START_LANE_ID_scom0.insert<uint64_t> (LITERAL_0b0010000, 57, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_TX_BUS_WIDTH_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8009b8200601103full, IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_TX_BUS_WIDTH_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8009b8200601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_TX_BUS_WIDTH_scom0.insert<uint64_t> (LITERAL_0b0010001, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_BUS_WIDTH_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800c1c200601103full, IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_BUS_WIDTH_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800c1c200601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_BUS_WIDTH_scom0.insert<uint64_t> (LITERAL_0b0010001, 56, 7, 57 );
+
+        IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_TX_BUS_WIDTH_scom0.insert<uint64_t> (LITERAL_0b0010001, 55, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_LANE_DISABLED_VEC_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8009e0200601103full,
+                               IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_LANE_DISABLED_VEC_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8009e0200601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_LANE_DISABLED_VEC_0_15_scom0.insert<uint64_t> (LITERAL_0b0000000000000000, 48,
+                16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_LANE_DISABLED_VEC_16_23_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8009e8200601103full,
+                               IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_LANE_DISABLED_VEC_16_23_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8009e8200601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_LANE_DISABLED_VEC_16_23_scom0.insert<uint64_t> (LITERAL_0b01111111, 48, 8,
+                56 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_LANE_DISABLED_VEC_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800cec200601103full,
+                               IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_LANE_DISABLED_VEC_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800cec200601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_LANE_DISABLED_VEC_0_15_scom0.insert<uint64_t>
+        (LITERAL_0b0000000000000000, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_LANE_DISABLED_VEC_16_23_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800cf4200601103full,
+                               IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_LANE_DISABLED_VEC_16_23_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800cf4200601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_LANE_DISABLED_VEC_16_23_scom0.insert<uint64_t> (LITERAL_0b01111111, 48,
+                8, 56 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800220200601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800220200601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0.insert<uint64_t> (LITERAL_OFF, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800220210601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800220210601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0.insert<uint64_t> (LITERAL_OFF, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800220220601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800220220601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0.insert<uint64_t> (LITERAL_OFF, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800220230601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800220230601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0.insert<uint64_t> (LITERAL_OFF, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800220240601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800220240601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0.insert<uint64_t> (LITERAL_OFF, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800220250601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800220250601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0.insert<uint64_t> (LITERAL_OFF, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800220260601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800220260601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0.insert<uint64_t> (LITERAL_OFF, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800220270601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800220270601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0.insert<uint64_t> (LITERAL_OFF, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800220280601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800220280601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0.insert<uint64_t> (LITERAL_OFF, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800220290601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800220290601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0.insert<uint64_t> (LITERAL_OFF, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002202a0601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002202a0601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0.insert<uint64_t> (LITERAL_OFF, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002202b0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002202b0601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0.insert<uint64_t> (LITERAL_OFF, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002202c0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002202c0601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0.insert<uint64_t> (LITERAL_OFF, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002202d0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002202d0601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0.insert<uint64_t> (LITERAL_OFF, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002202e0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002202e0601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0.insert<uint64_t> (LITERAL_OFF, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002202f0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002202f0601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0.insert<uint64_t> (LITERAL_OFF, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800220300601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800220300601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0.insert<uint64_t> (LITERAL_OFF, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800220310601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800220310601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0.insert<uint64_t> (LITERAL_ON, 48, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800008200601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800008200601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0.insert<uint64_t> (LITERAL_OFF,
+                54, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800008210601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800008210601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0.insert<uint64_t> (LITERAL_OFF,
+                54, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800008220601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800008220601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0.insert<uint64_t> (LITERAL_OFF,
+                54, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800008230601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800008230601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0.insert<uint64_t> (LITERAL_OFF,
+                54, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800008240601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800008240601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0.insert<uint64_t> (LITERAL_OFF,
+                54, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800008250601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800008250601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0.insert<uint64_t> (LITERAL_OFF,
+                54, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800008260601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800008260601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0.insert<uint64_t> (LITERAL_OFF,
+                54, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800008270601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800008270601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0.insert<uint64_t> (LITERAL_OFF,
+                54, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800008280601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800008280601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0.insert<uint64_t> (LITERAL_OFF,
+                54, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800008290601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800008290601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0.insert<uint64_t> (LITERAL_OFF,
+                54, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000082a0601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000082a0601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0.insert<uint64_t> (LITERAL_OFF,
+                54, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000082b0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000082b0601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0.insert<uint64_t> (LITERAL_OFF,
+                54, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000082c0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000082c0601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0.insert<uint64_t> (LITERAL_OFF,
+                54, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000082d0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000082d0601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0.insert<uint64_t> (LITERAL_OFF,
+                54, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000082e0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000082e0601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0.insert<uint64_t> (LITERAL_OFF,
+                54, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000082f0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000082f0601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0.insert<uint64_t> (LITERAL_OFF,
+                54, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800008300601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800008300601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0.insert<uint64_t> (LITERAL_OFF,
+                54, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800008310601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800008310601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0.insert<uint64_t> (LITERAL_ON, 54,
+                1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800404200601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800404200601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0.insert<uint64_t> (LITERAL_ENABLED, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800404210601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800404210601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0.insert<uint64_t> (LITERAL_ENABLED, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800404220601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800404220601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0.insert<uint64_t> (LITERAL_ENABLED, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800404230601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800404230601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0.insert<uint64_t> (LITERAL_ENABLED, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800404240601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800404240601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0.insert<uint64_t> (LITERAL_ENABLED, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800404250601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800404250601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0.insert<uint64_t> (LITERAL_ENABLED, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800404260601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800404260601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0.insert<uint64_t> (LITERAL_ENABLED, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800404270601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800404270601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0.insert<uint64_t> (LITERAL_ENABLED, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800404280601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800404280601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0.insert<uint64_t> (LITERAL_ENABLED, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800404290601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800404290601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0.insert<uint64_t> (LITERAL_ENABLED, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8004042a0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8004042a0601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0.insert<uint64_t> (LITERAL_ENABLED, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8004042b0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8004042b0601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0.insert<uint64_t> (LITERAL_ENABLED, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8004042c0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8004042c0601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0.insert<uint64_t> (LITERAL_ENABLED, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8004042d0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8004042d0601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0.insert<uint64_t> (LITERAL_ENABLED, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8004042e0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8004042e0601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0.insert<uint64_t> (LITERAL_ENABLED, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8004042f0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8004042f0601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0.insert<uint64_t> (LITERAL_ENABLED, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_4_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800404300601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_4_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800404300601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_4_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0.insert<uint64_t> (LITERAL_ENABLED, 48, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_CLKDIST_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800810200601103full, IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_CLKDIST_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800810200601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_CLKDIST_PDWN_scom0.insert<uint64_t> (LITERAL_OFF, 48, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_CLKDIST_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800c14200601103full, IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_CLKDIST_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800c14200601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_CLKDIST_PDWN_scom0.insert<uint64_t> (LITERAL_OFF, 48, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PDWN_LITE_DISABLE_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800990200601103full, IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PDWN_LITE_DISABLE_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800990200601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PDWN_LITE_DISABLE_scom0.insert<uint64_t> (LITERAL_ON, 58, 1, 63 );
+
+        IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_CLKDIST_PDWN_scom0.insert<uint64_t> (LITERAL_ON, 59, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c0200601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c0200601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_A_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c0210601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c0210601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_B_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c0220601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c0220601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_C_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c0230601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c0230601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_D_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c0240601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c0240601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_E_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c0250601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c0250601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_F_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c0260601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c0260601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_G_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c0270601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c0270601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_H_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c0280601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c0280601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_A_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c0290601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c0290601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_H_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c02a0601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c02a0601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_G_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c02b0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c02b0601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_F_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c02c0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c02c0601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_E_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c02d0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c02d0601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_D_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c02e0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c02e0601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_C_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c02f0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c02f0601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_B_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c0300601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c0300601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_A_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c8200601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c8200601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_A_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c8210601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c8210601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_B_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c8220601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c8220601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_C_12_ACGH_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c8230601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c8230601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_D_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c8240601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c8240601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_EF_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c8250601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c8250601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_EF_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c8260601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c8260601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_GH_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c8270601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c8270601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_GH_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c8280601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c8280601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_A_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c8290601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c8290601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_GH_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c82a0601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c82a0601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_GH_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c82b0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c82b0601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_EF_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c82c0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c82c0601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_EF_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c82d0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c82d0601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_D_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c82e0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c82e0601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_C_12_ACGH_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c82f0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c82f0601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_B_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8002c8300601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8002c8300601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_24_A_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80043c200601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80043c200601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_AB_HALF_A_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80043c210601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80043c210601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_AB_HALF_A_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80043c220601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80043c220601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_C_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80043c230601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80043c230601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_D_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80043c240601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80043c240601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_E_HALF_B_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80043c250601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80043c250601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_F_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80043c260601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80043c260601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_G_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80043c270601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80043c270601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_H_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80043c280601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80043c280601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_AB_HALF_A_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80043c290601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80043c290601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_H_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80043c2a0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80043c2a0601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_G_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80043c2b0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80043c2b0601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_F_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80043c2c0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80043c2c0601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_E_HALF_B_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80043c2d0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80043c2d0601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_D_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80043c2e0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80043c2e0601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_C_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80043c2f0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80043c2f0601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_AB_HALF_A_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_4_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80043c300601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_4_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80043c300601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_4_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_AB_HALF_A_0_15, 48, 16, 48 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800444200601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800444200601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_A_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800444210601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800444210601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_B_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800444220601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800444220601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_C_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800444230601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800444230601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_DG_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800444240601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800444240601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_E_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800444250601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800444250601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_F_HALF_A_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800444260601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800444260601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_DG_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800444270601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800444270601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_H_HALF_B_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800444280601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800444280601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_A_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800444290601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800444290601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_H_HALF_B_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8004442a0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8004442a0601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_DG_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8004442b0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8004442b0601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_F_HALF_A_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8004442c0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8004442c0601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_E_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8004442d0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8004442d0601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_DG_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8004442e0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8004442e0601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_C_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8004442f0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8004442f0601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_B_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_4_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800444300601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_4_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800444300601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_4_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0.insert<uint64_t>
+        (LITERAL_PATTERN_TX_A_16_22, 48, 7, 57 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_WTR_MAX_BAD_LANES_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800998200601103full, IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_WTR_MAX_BAD_LANES_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800998200601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_WTR_MAX_BAD_LANES_scom0.insert<uint64_t> (LITERAL_0b00001, 48, 5, 59 );
+
+        IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_CLKDIST_PDWN_scom0.insert<uint64_t> (LITERAL_0b00001, 53, 5, 59 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PEAK_TUNE_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8008c0200601103full, IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PEAK_TUNE_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8008c0200601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PEAK_TUNE_scom0.insert<uint64_t> (LITERAL_OFF, 55, 1, 63 );
+
+        IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PEAK_TUNE_scom0.insert<uint64_t> (LITERAL_OFF, 56, 1, 63 );
+
+        IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PEAK_TUNE_scom0.insert<uint64_t> (LITERAL_0b11, 57, 2, 62 );
+
+        IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PEAK_TUNE_scom0.insert<uint64_t> (LITERAL_ON, 59, 1, 63 );
+
+        IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PEAK_TUNE_scom0.insert<uint64_t> (LITERAL_ON, 60, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXCTL_DATASM_DATASM_REGS_RX_CTL_DATASM_CLKDIST_PDWN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800b80200601103full,
+                               IOF1_RX_RX1_RXCTL_DATASM_DATASM_REGS_RX_CTL_DATASM_CLKDIST_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800b80200601103f)");
+            break;
+        }
+
+        IOF1_RX_RX1_RXCTL_DATASM_DATASM_REGS_RX_CTL_DATASM_CLKDIST_PDWN_scom0.insert<uint64_t> (LITERAL_OFF, 60, 1, 63 );
+
+        ATTR_IS_SIMULATION_Type iv_TGT1_ATTR_IS_SIMULATION;
+        l_rc = FAPI_ATTR_GET(ATTR_IS_SIMULATION, TGT1, iv_TGT1_ATTR_IS_SIMULATION);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (iv_TGT1_ATTR_IS_SIMULATION)");
+            break;
+        }
+
+        auto iv_def_IS_HW = (iv_TGT1_ATTR_IS_SIMULATION == ATTR_IS_SIMULATION_ATTRIBUTE_VALUE_0);
+        auto iv_def_IS_SIM = (iv_TGT1_ATTR_IS_SIMULATION == ATTR_IS_SIMULATION_ATTRIBUTE_VALUE_1);
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_PG_SPARE_MODE_8_9_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800c04200601103full,
+                               IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_PG_SPARE_MODE_8_9_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800c04200601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_PG_SPARE_MODE_8_9_scom0.insert<uint64_t> (LITERAL_0b00, 56, 2, 62 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_PG_SPARE_MODE_8_9_scom0.insert<uint64_t> (LITERAL_0b01, 56, 2, 62 );
+        }
+
+        fapi2::buffer<uint64_t>
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800000210601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800000210601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_OFF, 53, 1, 63 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_ON, 53, 1, 63 );
+        }
+
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 54, 1, 63 );
+
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 55, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800028210601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800028210601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0000, 48, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0110, 48, 4, 60 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 52, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 52, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 57, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 57, 5, 59 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800030210601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800030210601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b00000,
+                    48, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b01100,
+                    48, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b0000,
+                    53, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b1011,
+                    53, 4, 60 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000c0210601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000c0210601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000000, 48, 7, 57 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000011, 48, 7, 57 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b000000, 55, 6, 58 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b100111, 55, 6, 58 );
+        }
+
+        fapi2::buffer<uint64_t>
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800000230601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800000230601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_OFF, 53, 1, 63 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_ON, 53, 1, 63 );
+        }
+
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 54, 1, 63 );
+
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 55, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800028230601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800028230601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0000, 48, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0110, 48, 4, 60 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 52, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 52, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 57, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 57, 5, 59 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800030230601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800030230601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b00000,
+                    48, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b01100,
+                    48, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b0000,
+                    53, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b1011,
+                    53, 4, 60 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000c0230601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000c0230601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000000, 48, 7, 57 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000011, 48, 7, 57 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b000000, 55, 6, 58 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b100111, 55, 6, 58 );
+        }
+
+        fapi2::buffer<uint64_t>
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800000200601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800000200601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_OFF, 53, 1, 63 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_ON, 53, 1, 63 );
+        }
+
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 54, 1, 63 );
+
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 55, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800028200601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800028200601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0000, 48, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0110, 48, 4, 60 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 52, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 52, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 57, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 57, 5, 59 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800030200601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800030200601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b00000,
+                    48, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b01100,
+                    48, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b0000,
+                    53, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b1011,
+                    53, 4, 60 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000c0200601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000c0200601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000000, 48, 7, 57 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000011, 48, 7, 57 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b000000, 55, 6, 58 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b100111, 55, 6, 58 );
+        }
+
+        fapi2::buffer<uint64_t>
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800000220601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800000220601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_OFF, 53, 1, 63 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_ON, 53, 1, 63 );
+        }
+
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 54, 1, 63 );
+
+        IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 55, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800028220601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800028220601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0000, 48, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0110, 48, 4, 60 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 52, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 52, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 57, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 57, 5, 59 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800030220601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800030220601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b00000,
+                    48, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b01100,
+                    48, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b0000,
+                    53, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b1011,
+                    53, 4, 60 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000c0220601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000c0220601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000000, 48, 7, 57 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000011, 48, 7, 57 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b000000, 55, 6, 58 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b100111, 55, 6, 58 );
+        }
+
+        fapi2::buffer<uint64_t>
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800000270601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800000270601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_OFF, 53, 1, 63 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_ON, 53, 1, 63 );
+        }
+
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 54, 1, 63 );
+
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 55, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800028270601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800028270601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0000, 48, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0110, 48, 4, 60 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 52, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 52, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 57, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 57, 5, 59 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800030270601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800030270601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b00000,
+                    48, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b01100,
+                    48, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b0000,
+                    53, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b1011,
+                    53, 4, 60 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000c0270601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000c0270601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000000, 48, 7, 57 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000011, 48, 7, 57 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b000000, 55, 6, 58 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b100111, 55, 6, 58 );
+        }
+
+        fapi2::buffer<uint64_t>
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800000250601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800000250601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_OFF, 53, 1, 63 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_ON, 53, 1, 63 );
+        }
+
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 54, 1, 63 );
+
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 55, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800028250601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800028250601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0000, 48, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0110, 48, 4, 60 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 52, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 52, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 57, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 57, 5, 59 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800030250601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800030250601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b00000,
+                    48, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b01100,
+                    48, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b0000,
+                    53, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b1011,
+                    53, 4, 60 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000c0250601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000c0250601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000000, 48, 7, 57 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000011, 48, 7, 57 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b000000, 55, 6, 58 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b100111, 55, 6, 58 );
+        }
+
+        fapi2::buffer<uint64_t>
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800000260601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800000260601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_OFF, 53, 1, 63 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_ON, 53, 1, 63 );
+        }
+
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 54, 1, 63 );
+
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 55, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800028260601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800028260601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0000, 48, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0110, 48, 4, 60 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 52, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 52, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 57, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 57, 5, 59 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800030260601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800030260601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b00000,
+                    48, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b01100,
+                    48, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b0000,
+                    53, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b1011,
+                    53, 4, 60 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000c0260601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000c0260601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000000, 48, 7, 57 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000011, 48, 7, 57 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b000000, 55, 6, 58 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b100111, 55, 6, 58 );
+        }
+
+        fapi2::buffer<uint64_t>
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800000240601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800000240601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_OFF, 53, 1, 63 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_ON, 53, 1, 63 );
+        }
+
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 54, 1, 63 );
+
+        IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 55, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800028240601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800028240601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0000, 48, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0110, 48, 4, 60 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 52, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 52, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 57, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 57, 5, 59 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800030240601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800030240601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b00000,
+                    48, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b01100,
+                    48, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b0000,
+                    53, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b1011,
+                    53, 4, 60 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000c0240601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000c0240601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000000, 48, 7, 57 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000011, 48, 7, 57 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b000000, 55, 6, 58 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b100111, 55, 6, 58 );
+        }
+
+        fapi2::buffer<uint64_t>
+        IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800000280601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800000280601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_OFF, 53, 1, 63 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_ON, 53, 1, 63 );
+        }
+
+        IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 54, 1, 63 );
+
+        IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 55, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800028280601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800028280601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0000, 48, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0110, 48, 4, 60 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 52, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 52, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 57, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 57, 5, 59 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800030280601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800030280601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b00000,
+                    48, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b01100,
+                    48, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b0000,
+                    53, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b1011,
+                    53, 4, 60 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000c0280601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000c0280601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000000, 48, 7, 57 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000011, 48, 7, 57 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b000000, 55, 6, 58 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b100111, 55, 6, 58 );
+        }
+
+        fapi2::buffer<uint64_t>
+        IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000002a0601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000002a0601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_OFF, 53, 1, 63 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_ON, 53, 1, 63 );
+        }
+
+        IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 54, 1, 63 );
+
+        IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 55, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000282a0601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000282a0601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0000, 48, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0110, 48, 4, 60 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 52, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 52, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 57, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 57, 5, 59 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000302a0601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000302a0601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b00000,
+                    48, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b01100,
+                    48, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b0000,
+                    53, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b1011,
+                    53, 4, 60 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000c02a0601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000c02a0601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000000, 48, 7, 57 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000011, 48, 7, 57 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b000000, 55, 6, 58 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b100111, 55, 6, 58 );
+        }
+
+        fapi2::buffer<uint64_t>
+        IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800000290601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800000290601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_OFF, 53, 1, 63 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_ON, 53, 1, 63 );
+        }
+
+        IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 54, 1, 63 );
+
+        IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 55, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800028290601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800028290601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0000, 48, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0110, 48, 4, 60 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 52, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 52, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 57, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 57, 5, 59 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800030290601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800030290601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b00000,
+                    48, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b01100,
+                    48, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b0000,
+                    53, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b1011,
+                    53, 4, 60 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000c0290601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000c0290601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000000, 48, 7, 57 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000011, 48, 7, 57 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b000000, 55, 6, 58 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b100111, 55, 6, 58 );
+        }
+
+        fapi2::buffer<uint64_t>
+        IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800000310601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800000310601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_OFF, 53, 1, 63 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_ON, 53, 1, 63 );
+        }
+
+        IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 54, 1, 63 );
+
+        IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 55, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800028310601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800028310601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0000, 48, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0110, 48, 4, 60 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 52, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 52, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 57, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 57, 5, 59 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800030310601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800030310601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b00000,
+                    48, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b01100,
+                    48, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b0000,
+                    53, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b1011,
+                    53, 4, 60 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000c0310601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000c0310601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000000, 48, 7, 57 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000011, 48, 7, 57 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b000000, 55, 6, 58 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b100111, 55, 6, 58 );
+        }
+
+        fapi2::buffer<uint64_t>
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000002e0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000002e0601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_OFF, 53, 1, 63 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_ON, 53, 1, 63 );
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 54, 1, 63 );
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 55, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000282e0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000282e0601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0000, 48, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0110, 48, 4, 60 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 52, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 52, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 57, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 57, 5, 59 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000302e0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000302e0601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b00000,
+                    48, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b01100,
+                    48, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b0000,
+                    53, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b1011,
+                    53, 4, 60 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000c02e0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000c02e0601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000000, 48, 7, 57 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000011, 48, 7, 57 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b000000, 55, 6, 58 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b100111, 55, 6, 58 );
+        }
+
+        fapi2::buffer<uint64_t>
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000002c0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000002c0601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_OFF, 53, 1, 63 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_ON, 53, 1, 63 );
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 54, 1, 63 );
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 55, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000282c0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000282c0601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0000, 48, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0110, 48, 4, 60 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 52, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 52, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 57, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 57, 5, 59 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000302c0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000302c0601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b00000,
+                    48, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b01100,
+                    48, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b0000,
+                    53, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b1011,
+                    53, 4, 60 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000c02c0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000c02c0601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000000, 48, 7, 57 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000011, 48, 7, 57 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b000000, 55, 6, 58 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b100111, 55, 6, 58 );
+        }
+
+        fapi2::buffer<uint64_t>
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000002d0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000002d0601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_OFF, 53, 1, 63 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_ON, 53, 1, 63 );
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 54, 1, 63 );
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 55, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000282d0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000282d0601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0000, 48, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0110, 48, 4, 60 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 52, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 52, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 57, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 57, 5, 59 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000302d0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000302d0601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b00000,
+                    48, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b01100,
+                    48, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b0000,
+                    53, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b1011,
+                    53, 4, 60 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000c02d0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000c02d0601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000000, 48, 7, 57 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000011, 48, 7, 57 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b000000, 55, 6, 58 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b100111, 55, 6, 58 );
+        }
+
+        fapi2::buffer<uint64_t>
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000002b0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000002b0601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_OFF, 53, 1, 63 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_ON, 53, 1, 63 );
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 54, 1, 63 );
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 55, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000282b0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000282b0601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0000, 48, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0110, 48, 4, 60 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 52, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 52, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 57, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 57, 5, 59 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000302b0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000302b0601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b00000,
+                    48, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b01100,
+                    48, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b0000,
+                    53, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b1011,
+                    53, 4, 60 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000c02b0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000c02b0601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000000, 48, 7, 57 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000011, 48, 7, 57 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b000000, 55, 6, 58 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b100111, 55, 6, 58 );
+        }
+
+        fapi2::buffer<uint64_t>
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000002f0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000002f0601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_OFF, 53, 1, 63 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_ON, 53, 1, 63 );
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 54, 1, 63 );
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 55, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000282f0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000282f0601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0000, 48, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0110, 48, 4, 60 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 52, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 52, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 57, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 57, 5, 59 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000302f0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000302f0601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b00000,
+                    48, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b01100,
+                    48, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b0000,
+                    53, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b1011,
+                    53, 4, 60 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000c02f0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000c02f0601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000000, 48, 7, 57 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000011, 48, 7, 57 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b000000, 55, 6, 58 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b100111, 55, 6, 58 );
+        }
+
+        fapi2::buffer<uint64_t>
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800000300601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800000300601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_OFF, 53, 1, 63 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+            (LITERAL_ON, 53, 1, 63 );
+        }
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 54, 1, 63 );
+
+        IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0.insert<uint64_t>
+        (LITERAL_OFF, 55, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800028300601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800028300601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0000, 48, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b0110, 48, 4, 60 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 52, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 52, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b00000, 57, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0.insert<uint64_t>
+            (LITERAL_0b01111, 57, 5, 59 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800030300601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800030300601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b00000,
+                    48, 5, 59 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b01100,
+                    48, 5, 59 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b0000,
+                    53, 4, 60 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0.insert<uint64_t> (LITERAL_0b1011,
+                    53, 4, 60 );
+        }
+
+        fapi2::buffer<uint64_t> IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x8000c0300601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x8000c0300601103f)");
+            break;
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000000, 48, 7, 57 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b0000011, 48, 7, 57 );
+        }
+
+        if (iv_def_IS_HW)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b000000, 55, 6, 58 );
+        }
+        else if (iv_def_IS_SIM)
+        {
+            IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0.insert<uint64_t>
+            (LITERAL_0b100111, 55, 6, 58 );
+        }
+
+        IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PDWN_LITE_DISABLE_scom0.insert<uint64_t> (LITERAL_FENCED, 57, 1, 63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_DRV_CLK_PATTERN_GCRMSG_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x800c24200601103full,
+                               IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_DRV_CLK_PATTERN_GCRMSG_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x800c24200601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_DRV_CLK_PATTERN_GCRMSG_scom0.insert<uint64_t> (LITERAL_DRV_0S, 48, 2,
+                62 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80040c200601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80040c200601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0.insert<uint64_t> (LITERAL_ON, 62, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80040c210601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80040c210601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0.insert<uint64_t> (LITERAL_ON, 62, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80040c220601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80040c220601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0.insert<uint64_t> (LITERAL_ON, 62, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80040c230601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80040c230601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0.insert<uint64_t> (LITERAL_ON, 62, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80040c240601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80040c240601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0.insert<uint64_t> (LITERAL_ON, 62, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80040c250601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80040c250601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0.insert<uint64_t> (LITERAL_ON, 62, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80040c260601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80040c260601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0.insert<uint64_t> (LITERAL_ON, 62, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80040c270601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80040c270601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0.insert<uint64_t> (LITERAL_ON, 62, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80040c280601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80040c280601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0.insert<uint64_t> (LITERAL_ON, 62, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80040c290601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80040c290601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0.insert<uint64_t> (LITERAL_ON, 62, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80040c2a0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80040c2a0601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0.insert<uint64_t> (LITERAL_ON, 62, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80040c2b0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80040c2b0601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0.insert<uint64_t> (LITERAL_ON, 62, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80040c2c0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80040c2c0601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0.insert<uint64_t> (LITERAL_ON, 62, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80040c2d0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80040c2d0601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0.insert<uint64_t> (LITERAL_ON, 62, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80040c2e0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80040c2e0601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0.insert<uint64_t> (LITERAL_ON, 62, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80040c2f0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80040c2f0601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0.insert<uint64_t> (LITERAL_ON, 62, 1,
+                63 );
+
+        fapi2::buffer<uint64_t> IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_4_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0;
+        l_rc = fapi2::getScom( TGT0, 0x80040c300601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_4_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: getScom (0x80040c300601103f)");
+            break;
+        }
+
+        IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_4_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0.insert<uint64_t> (LITERAL_ON, 62, 1,
+                63 );
+
+
+        l_rc = fapi2::putScom( TGT0, 0x800000200601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800000200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800000210601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800000210601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800000220601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800000220601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800000230601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800000230601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800000240601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800000240601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800000250601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800000250601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800000260601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800000260601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800000270601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800000270601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800000280601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800000280601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800000290601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800000290601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000002a0601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000002a0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000002b0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000002b0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000002c0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000002c0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000002d0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000002d0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000002e0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000002e0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000002f0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000002f0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800000300601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800000300601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800000310601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_PL_DATA_DAC_SPARE_MODE_5_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800000310601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800008200601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800008200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800008210601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800008210601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800008220601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800008220601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800008230601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800008230601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800008240601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800008240601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800008250601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800008250601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800008260601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800008260601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800008270601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800008270601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800008280601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800008280601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800008290601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800008290601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000082a0601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000082a0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000082b0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000082b0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000082c0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000082c0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000082d0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000082d0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000082e0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000082e0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000082f0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000082f0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800008300601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800008300601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800008310601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_LANE_ANA_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800008310601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800028200601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800028200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800028210601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800028210601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800028220601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800028220601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800028230601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800028230601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800028240601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800028240601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800028250601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800028250601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800028260601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800028260601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800028270601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800028270601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800028280601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800028280601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800028290601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800028290601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000282a0601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000282a0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000282b0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000282b0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000282c0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000282c0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000282d0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000282d0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000282e0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000282e0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000282f0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000282f0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800028300601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800028300601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800028310601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_INTEG_COARSE_GAIN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800028310601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800030200601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800030200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800030210601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800030210601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800030220601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800030220601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800030230601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800030230601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800030240601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800030240601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800030250601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800030250601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800030260601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800030260601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800030270601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800030270601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800030280601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800030280601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800030290601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800030290601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000302a0601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000302a0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000302b0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000302b0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000302c0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000302c0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000302d0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000302d0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000302e0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000302e0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000302f0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000302f0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800030300601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800030300601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800030310601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_CTLE_PEAK_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800030310601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000c0200601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000c0200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000c0210601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000c0210601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000c0220601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000c0220601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000c0230601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000c0230601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000c0240601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000c0240601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000c0250601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000c0250601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000c0260601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000c0260601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000c0270601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000c0270601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000c0280601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000c0280601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000c0290601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000c0290601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000c02a0601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000c02a0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000c02b0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000c02b0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000c02c0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000c02c0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000c02d0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000c02d0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000c02e0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000c02e0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000c02f0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000c02f0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000c0300601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000c0300601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8000c0310601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RX_DAC_REGS_RX_DAC_REGS_RX_A_H1ARATIO_VAL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8000c0310601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800220200601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800220200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800220210601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800220210601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800220220601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800220220601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800220230601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800220230601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800220240601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800220240601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800220250601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800220250601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800220260601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800220260601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800220270601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800220270601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800220280601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800220280601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800220290601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800220290601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002202a0601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002202a0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002202b0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002202b0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002202c0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002202c0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002202d0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002202d0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002202e0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002202e0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002202f0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002202f0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800220300601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800220300601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800220310601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_LANE_DIG_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800220310601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c0200601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c0200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c0210601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c0210601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c0220601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c0220601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c0230601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c0230601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c0240601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c0240601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c0250601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c0250601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c0260601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c0260601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c0270601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c0270601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c0280601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c0280601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c0290601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c0290601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c02a0601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c02a0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c02b0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c02b0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c02c0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c02c0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c02d0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c02d0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c02e0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c02e0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c02f0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c02f0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c0300601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c0300601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c8200601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c8200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c8210601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c8210601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c8220601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c8220601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c8230601103full,
+                               IOF1_RX_RX1_RXPACKS_0_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c8230601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c8240601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c8240601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c8250601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c8250601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c8260601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c8260601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c8270601103full,
+                               IOF1_RX_RX1_RXPACKS_1_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c8270601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c8280601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c8280601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c8290601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c8290601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c82a0601103full,
+                               IOF1_RX_RX1_RXPACKS_2_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c82a0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c82b0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_3_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c82b0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c82c0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_1_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c82c0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c82d0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_2_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c82d0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c82e0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_0_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c82e0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c82f0601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_4_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c82f0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8002c8300601103full,
+                               IOF1_RX_RX1_RXPACKS_3_RXPACK_RD_SLICE_5_RD_RX_BIT_REGS_RX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8002c8300601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800404200601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800404200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800404210601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800404210601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800404220601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800404220601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800404230601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800404230601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800404240601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800404240601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800404250601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800404250601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800404260601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800404260601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800404270601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800404270601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800404280601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800404280601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800404290601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800404290601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8004042a0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8004042a0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8004042b0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8004042b0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8004042c0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8004042c0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8004042d0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8004042d0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8004042e0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8004042e0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8004042f0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8004042f0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800404300601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_4_DD_TX_BIT_REGS_TX_LANE_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800404300601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80040c200601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80040c200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80040c210601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80040c210601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80040c220601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80040c220601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80040c230601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80040c230601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80040c240601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80040c240601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80040c250601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80040c250601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80040c260601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80040c260601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80040c270601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80040c270601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80040c280601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80040c280601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80040c290601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80040c290601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80040c2a0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80040c2a0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80040c2b0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80040c2b0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80040c2c0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80040c2c0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80040c2d0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80040c2d0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80040c2e0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80040c2e0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80040c2f0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80040c2f0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80040c300601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_4_DD_TX_BIT_REGS_TX_CAL_LANE_SEL_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80040c300601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80043c200601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80043c200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80043c210601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80043c210601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80043c220601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80043c220601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80043c230601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80043c230601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80043c240601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80043c240601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80043c250601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80043c250601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80043c260601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80043c260601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80043c270601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80043c270601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80043c280601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80043c280601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80043c290601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80043c290601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80043c2a0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80043c2a0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80043c2b0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80043c2b0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80043c2c0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80043c2c0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80043c2d0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80043c2d0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80043c2e0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80043c2e0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80043c2f0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80043c2f0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x80043c300601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_4_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x80043c300601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800444200601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800444200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800444210601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800444210601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800444220601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800444220601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800444230601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_0_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800444230601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800444240601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800444240601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800444250601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800444250601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800444260601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800444260601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800444270601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_1_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800444270601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800444280601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800444280601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800444290601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800444290601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8004442a0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8004442a0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8004442b0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_2_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8004442b0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8004442c0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_0_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8004442c0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8004442d0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_1_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8004442d0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8004442e0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_2_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8004442e0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8004442f0601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_3_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8004442f0601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800444300601103full,
+                               IOF1_TX_WRAP_TX1_TXPACKS_3_TXPACK_DD_SLICE_4_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800444300601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800808200601103full, IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_BUS_ID_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800808200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800810200601103full, IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_CLKDIST_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800810200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8008c0200601103full, IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PEAK_TUNE_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8008c0200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800980200601103full, IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_START_LANE_ID_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800980200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800990200601103full, IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PDWN_LITE_DISABLE_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800990200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800998200601103full, IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_WTR_MAX_BAD_LANES_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800998200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8009b8200601103full, IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_TX_BUS_WIDTH_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8009b8200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8009e0200601103full,
+                               IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_LANE_DISABLED_VEC_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8009e0200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x8009e8200601103full,
+                               IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_LANE_DISABLED_VEC_16_23_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x8009e8200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800b80200601103full,
+                               IOF1_RX_RX1_RXCTL_DATASM_DATASM_REGS_RX_CTL_DATASM_CLKDIST_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800b80200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800c04200601103full,
+                               IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_PG_SPARE_MODE_8_9_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800c04200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800c0c200601103full, IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_BUS_ID_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800c0c200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800c14200601103full, IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_CLKDIST_PDWN_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800c14200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800c1c200601103full, IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_BUS_WIDTH_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800c1c200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800c24200601103full,
+                               IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_DRV_CLK_PATTERN_GCRMSG_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800c24200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800c84200601103full,
+                               IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_START_LANE_ID_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800c84200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800cec200601103full,
+                               IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_LANE_DISABLED_VEC_0_15_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800cec200601103f)");
+            break;
+        }
+
+        l_rc = fapi2::putScom( TGT0, 0x800cf4200601103full,
+                               IOF1_TX_WRAP_TX1_TXCTL_CTL_REGS_TX_CTL_REGS_TX_LANE_DISABLED_VEC_16_23_scom0 );
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: putScom (0x800cf4200601103f)");
+            break;
+        }
+
+    }
+    while(0);
+
+    return l_rc;
+}
+
