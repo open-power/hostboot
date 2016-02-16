@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -85,7 +85,7 @@ class PredicateAttrVal : public PredicateBase
          *      Assuming the attribute is present, this determines what check 
          *      needs to be performed on i_value.
          *      If false (default), the predicate registers a match when the 
-         *      attribute's value is i_value; If false, the predicate registers
+         *      attribute's value is i_value; If true, the predicate registers
          *      a match when the attribute's value is != i_value
          */
         PredicateAttrVal(

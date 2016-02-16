@@ -4048,10 +4048,10 @@
         <id>CHIP_UNIT</id>
         <default>1</default>
     </attribute>
-<!--    <attribute> // @FIXME RTC 127337
+    <attribute>
         <id>PEER_TARGET</id>
         <default>physical:sys-0/node-0/proc-1/xbus-1</default>
-    </attribute>    // @FIXME RTC 127337  -->
+    </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-6</default>
@@ -4085,10 +4085,10 @@
         <id>CHIP_UNIT</id>
         <default>2</default>
     </attribute>
-<!--    <attribute> // @FIXME RTC 127337
+    <attribute>
         <id>PEER_TARGET</id>
         <default>physical:sys-0/node-0/proc-2/xbus-1</default>
-    </attribute>    // @FIXME RTC 127337  -->
+    </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-6</default>
