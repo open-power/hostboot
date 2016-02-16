@@ -51,11 +51,16 @@ enum ChipOpModifyMode
 ///
 enum RingMode
 {
-    RING_MODE_HEADER_CHECK    = 0x00000000, ///< Check header
-    RING_MODE_SET_PULSE       = 0x00000001, ///< Set pulse
-    RING_MODE_NO_HEADER_CHECK = 0x00000002, ///< Dont' check header
-    // FUTURE_MODE            = 0x00000004,
-    // FUTURE_MODE            = 0x00000008,
+    RING_MODE_HEADER_CHECK              = 0x00000000, ///< Check header
+    RING_MODE_SET_PULSE_NO_OPCG_COND    = 0x00000001, ///< Set pulse with
+    ///  no OPCG conditioning
+    RING_MODE_NO_HEADER_CHECK           = 0x00000002, ///< Don't check header
+    RING_MODE_SET_PULSE_NSL             = 0x00000004, ///< Set pulse with NSL
+    ///  pulse
+    RING_MODE_SET_PULSE_SL              = 0x00000008, ///< Set pulse with SL
+    ///  pulse
+    RING_MODE_SET_PULSE_ALL             = 0x00000010, ///< Set pulse with pulse
+    ///  to all hold types
 };
 
 /// @enum OpModes operational Mode Error Functions
