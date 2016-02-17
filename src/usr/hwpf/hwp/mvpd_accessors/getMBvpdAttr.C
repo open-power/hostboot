@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: getMBvpdAttr.C,v 1.11 2016/01/21 16:02:38 dcrowell Exp $
+// $Id: getMBvpdAttr.C,v 1.11++ 2016/01/21 16:02:38 dcrowell Exp $
 /**
  *  @file getMBvpdAttr.C
  *
@@ -269,6 +269,7 @@ fapi::ReturnCode getMBvpdAttr(const fapi::Target   &i_mbaTarget,
                 FAPI_SET_HWP_ERROR(l_fapirc,RC_MBVPD_UNEXPECTED_KEYWORD);
                 break;  //  break out with fapirc
             }               
+            delete l_kwLayout;
 
             l_pBuffer = new uint8_t[l_keywordsize];
             l_bufsize = l_keywordsize;
@@ -929,6 +930,7 @@ fapi::ReturnCode returnValue (const MBvpdAttrDef*   i_pAttrDef,
             i_pBuffer += l_kwLayout->getNonPortHeadSize();
             l_port_spec_sec_size = l_kwLayout->getPortSectionSize();
             l_mba_sec_size       = l_port_spec_sec_size * NUM_PORTS;
+            delete l_kwLayout;
         }
     }
        
