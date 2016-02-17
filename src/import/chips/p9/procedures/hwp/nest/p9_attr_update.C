@@ -32,7 +32,7 @@
 // *HWP HW Owner : Michael Dye <dyem@us.ibm.com>
 // *HWP FW Owner : Thi N. Tran <thi@us.ibm.com>
 // *HWP Team : Nest
-// *HWP Level : 1
+// *HWP Level : 2
 // *HWP Consumed by : HB
 //
 
