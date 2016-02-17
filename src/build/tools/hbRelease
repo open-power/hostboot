@@ -38,13 +38,30 @@ use Data::Dumper;
 my $debug = 0;
 my $help = 0;
 
-my %globals = ( "branch" => "master" );
+my %globals = ( branch => "master",
+                component => "esw_hbfw",
+                cmvcUser => "hostboot" );
 # Token used by git-CI-tool @execute_discover, update there too
-my $token = "!@#%^";
+my $TOKEN = "!@#%^";
+
+# List of files to check into CMVC separated by whitespace
+my $CMVC_FILES = "src/hbfw/img/hostboot.bin ",
+                 "src/hbfw/img/hostboot_extended.bin ",
+                 "src/hbfw/img/hostboot_runtime.bin ",
+                 "src/hbfw/img/makefile ",
+                 "src/hbfw/fsp.tar ",
+                 "src/hbfw/makefile ",
+                 "src/hbfw/releaseNotes.html ",
+                 "src/hbfw/simics.tar";
+# Directory to look up latest release tag for a specific release
+my $HOSTBOOT_GSA_HOME = "/gsa/ausgsa/home/h/o/hostboot";
+my $LATEST_BUILD_DIR = "$HOSTBOOT_GSA_HOME/auto-hb-release/latest-builds";
 
 GetOptions("debug!" => \$debug,
            "help" => \$help,
-           "branch:s" => \$globals{"branch"});
+           "branch:s" => \$globals{"branch"},
+           "component:s" => \$globals{"component"},
+           "cmvcUser:s" => \$globals{"cmvcUser"});
 
 my %commands = ( "define" => \&execute_define,
                  "undef" => \&execute_undef,
@@ -60,6 +77,8 @@ my %commands = ( "define" => \&execute_define,
                  "build-name" => \&execute_build_name,
                  "fsp-ci" => \&execute_fsp_ci,
                  "gerrit-commit" => \&execute_gerrit_commit,
+                 "pre-release" => \&execute_pre_release,
+                 "post-release" => \&execute_post_release,
                  "help" => \&execute_help,
                );
 
@@ -289,23 +308,7 @@ sub execute_publish_cq
 
     $released = $level_info->{released} if ($released eq "");
 
-    my $commits = git_commit_history($level, $released);
-
-    bq_add_releaseList($level,$track,$commits);
-
-    foreach my $commit (@{$commits})
-    {
-        my $changeid = gerrit_changeid_num($commit);
-        my $cq = cq_workitem_num($commit);
-        my $commitMessage = git_commit_msg($commit);
-        if ($cq ne "")
-        {
-            print "Change-Id: $changeid\n" if ($debug);
-            print "CQ: $cq\n" if ($debug);
-
-            bq_add_releasenote($cq, $changeid, $level, $track, $commitMessage);
-        }
-    }
+    publish_cq($level, $track, $released);
 }
 
 sub execute_build_name
@@ -370,7 +373,7 @@ sub execute_fsp_ci
                 # Print out CMVC dependencies
                 if ($line =~ m/cmvc-([a-zA-Z]+):/i)
                 {
-                    print "$token Need ".$line."\n";
+                    print "$TOKEN Need ".$line."\n";
                 }
             }
         }
@@ -402,6 +405,101 @@ sub execute_fsp_ci
         my $level_info = config_get_level($level{name});
         config_release($level_info,0);
     }
+}
+
+sub execute_pre_release
+{
+    my $release = "";
+    my $level = "";
+    my $checkInDir = "";
+
+    GetOptions("release:s" => \$release);
+    GetOptions("level:s" => \$level);
+    GetOptions("checkInDir:s" => \$checkInDir);
+
+    die "Missing release" if ($release eq "");
+    die "Missing level" if ($level eq "");
+    die "Missing check in directory" if ($checkInDir eq "");
+
+    #TODO enable this when the bootloader.bin is in CMVC
+    #if($release =~ m/fips9/)
+    #{
+    #$CMVC_FILES .= "src/hbfw/img/bootloader.bin";
+    #}
+
+    # CMVC open feature
+    my $open_feature = "Feature -open -component $globals{component}";
+    $open_feature .= " -remarks \"Hostboot Release - $level\" -verbose";
+    # Get the Feature number from the output, should be the only numbers.
+    my $feature = run_system_command($open_feature);
+    $feature =~ s/[^0-9]//g;
+
+    # CMVC assign feature
+    run_system_command("Feature -assign $feature -owner $globals{cmvcUser} -verbose");
+
+    # CMVC accept feature
+    run_system_command("Feature -accept $feature -verbose");
+
+    # CMVC create track
+    run_system_command("Track -create -release $release -feature $feature -verbose");
+
+    #Lock Files
+    run_system_command("File -lock $CMVC_FILES -release $release -feature $feature -verbose");
+
+    #Check In Files
+    chdir ($checkInDir);
+    run_system_command("File -checkin $CMVC_FILES -top $checkInDir -release $release -feature $feature -verbose");
+
+    my $featureFile = $ENV{CMVC_FEATURE_FILE};
+    open(CMVC_FEATURE,">",$featureFile)
+        or die("Cannot open: $featureFile: $!");
+    print CMVC_FEATURE "FEATURE=$feature";
+    close(CMVC_FEATURE);
+}
+
+sub execute_post_release
+{
+    my $feature = "";
+    my $release = "";
+    my $level = "";
+    my $released = "";
+
+    GetOptions("feature:s" => \$feature);
+    GetOptions("release:s" => \$release);
+    GetOptions("level:s" => \$level);
+
+    die "Missing feature" if ($feature eq "");
+    die "Missing release" if ($release eq "");
+    die "Missing level" if ($level eq "");
+
+    my $released_file = "$LATEST_BUILD_DIR/$release";
+    open(FILE,"<",$released_file)
+         or die "Could not open file '$released_file' $!";
+    $released = <FILE>;
+    close FILE;
+    chomp($released);
+
+    #complete fix records
+    run_system_command("Fix -complete -feature $feature -release $release -component esw_hbfw -verbose");
+
+    #Integrate the track
+    run_system_command("Track -integrate -feature $feature -release $release -verbose");
+
+    #Get ClearQuest ID
+    my $response = run_system_command("Feature -view $feature");
+    my ($cq_id) = $response =~ /CQID\s+(.*)/;
+    print $cq_id if $debug;
+
+    # Fetch level and Publish release notes to CQ
+    chdir($ENV{HOSTBOOT_WORKSPACE});
+    run_system_command("git fetch gerrit refs/tags/$level");
+    run_system_command("git checkout FETCH_HEAD");
+    publish_cq($level, $cq_id, $released);
+
+    #update $released tag file
+    open(FILE, ">", $released_file);
+    print FILE "$level\n";
+    close FILE;
 }
 
 sub execute_gerrit_commit
@@ -571,7 +669,33 @@ q(
     Options:
         --patches=<change-id:patchset>  CSV of change-id:patchset [required].
 ),
+            "pre-release" =>
+q(
+        This is used by the auto-release process and handles HostBoot release
+        steps required before FSP-CI is run. Steps include CMVC feature create
+        through file checkin
+
+    Options:
+        --level=<name>       The hostboot release tag name [required].
+        --release=<name>     Fips release (e.g fips860) [required].
+        --checkInDir=<name>  Top level CMVC checkout directory path [required].
+),
+            "post-release" =>
+q(
+        This is used by the auto-release process and handles HostBoot release
+        steps required after FSP-CI has passed. Steps include CMVC complete,
+        integrat and publishing releast notes to CQ
+
+    Options:
+        --level=<name>       The hostboot release tag name [required].
+        --release=<name>     Fips release (e.g fips860) [required].
+        --feature=<number>   CMVC feature associated with release [required].
+),
         );
+
+    my $release = "";
+    my $level = "";
+    my $checkInDir = "";
 
         print "hbRelease $command:";
         print $help{$command};
@@ -1471,7 +1595,7 @@ sub config_resolve_level_dep
             # Print out CMVC dependencies
             if ($line =~ m/cmvc-([a-zA-Z]+):/i)
             {
-                print "$token Need ".$line."\n";
+                print "$TOKEN Need ".$line."\n";
             }
         }
     }
@@ -1587,6 +1711,29 @@ sub config_release
     {
         print "\nCreating tag...\n";
         git_create_tag($level_info->{name}, $level_info);
+    }
+}
+
+sub publish_cq
+{
+    my ($level, $track, $released) = @_;
+
+    my $commits = git_commit_history($level, $released);
+
+    bq_add_releaseList($level, $track, $commits);
+
+    foreach my $commit (@{$commits})
+    {
+        my $changeid = gerrit_changeid_num($commit);
+        my $cq = cq_workitem_num($commit);
+        my $commitMessage = git_commit_msg($commit);
+        if ($cq ne "")
+        {
+            print "Change-Id: $changeid\n" if ($debug);
+            print "CQ: $cq\n" if ($debug);
+
+            bq_add_releasenote($cq, $changeid, $level, $track, $commitMessage);
+        }
     }
 }
 
@@ -2144,13 +2291,11 @@ sub bq_login
                      cqport => "6600" );
 
     # Read username / password.
-    print "BestQuest username: ";
-    chomp($bq_login_params{user} = ReadLine 0);
-    print "BestQuest password: ";
-    ReadMode 'noecho';
-    chomp($bq_login_params{passwd} = ReadLine 0);
-    ReadMode 'normal';
-    print "\n";
+    $bq_login_params{user} = "hostboot\@us.ibm.com";
+    my $password = `cat $HOSTBOOT_GSA_HOME/private/password`;
+    die $? if $?;
+    chomp($password);
+    $bq_login_params{passwd} = $password;
 
     # Create parameters.
     my $login_post = "verb=login_form_response";
@@ -2291,3 +2436,25 @@ sub bq_add_releaseList
 
 }
 
+# sub run_system_command
+#
+# Execute a system command, handle printing command and debug info, and return
+# system output for caller processing
+#
+# E.g. Execute a CMVC line command and return the results.
+#
+# @param[in] cmd - system command to be executed.
+#
+# @return string - output returned from running system command.
+#
+sub run_system_command
+{
+    my $cmd = shift;
+
+    print "$cmd\n";
+    my $output = `$cmd`;
+    die "failed running system command $cmd - $?" if ($?);
+    print $output if $debug;
+
+    return $output;
+}
