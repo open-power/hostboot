@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -187,6 +187,18 @@ namespace TRACE
      *  @param [in] i_td Trace descriptor to check for debug enable
      */
     bool isDebugEnabled(ComponentDesc * i_td);
+
+    /**
+     *  @brief Sets TraceLite as enabled or disabled.
+     *
+     *  @param [in] i_tlEnabled - 1 for enabled 0 for disabled.
+     */
+    void setTraceLite(uint8_t i_tlEnabled);
+
+    /** @brief Gets TraceLite setting (either enabled or disabled).
+     *  @return 1 for enabled, 0 for disabled
+     */
+    uint8_t getTraceLite();
 
 };
 

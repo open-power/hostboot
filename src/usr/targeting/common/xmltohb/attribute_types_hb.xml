@@ -32,6 +32,22 @@
      synced to/from FSP
      ================================================================= -->
 <attribute>
+    <id>OP_TRACE_LITE</id>
+    <description>
+        Enable Trace lite on openpower.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default></default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
+<attribute>
     <id>HIDDEN_ERRLOGS_ENABLE</id>
     <description>
         Used to decide whether or not to prevent INFORMATIONAL/RECOVERED error

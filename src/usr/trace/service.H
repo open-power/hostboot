@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -145,6 +145,16 @@ namespace TRACE
              */
             void flushBuffers();
 
+            /** @brief Sets TraceLite as enabled or disabled.
+             *  @param[in] i_isEnabled - 1 for enabled, 0 for disabled
+             */
+            void setTraceLite(uint8_t i_isEnabled);
+
+            /** @brief Gets TraceLite setting (either enabled or disabled).
+             *  @return 1 for enabled, 0 for disabled
+             */
+            uint8_t getTraceLite();
+
             friend class TRACEDAEMON::Daemon;
 
         private:
@@ -160,6 +170,8 @@ namespace TRACE
             static Service* getGlobalInstance();
                 /** Copy the current time into the timestamp. */
             void _createTimeStamp(trace_entry_stamp_t* o_entry);
+                /** tracelite enabled **/
+            uint8_t iv_traceLite;
 #endif
     };
 }

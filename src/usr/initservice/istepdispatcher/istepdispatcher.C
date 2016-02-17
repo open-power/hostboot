@@ -71,6 +71,7 @@
 #include <ipmi/ipmisensor.H>
 
 #include <initservice/bootconfigif.H>
+#include <trace/trace.H>
 
 namespace ISTEPS_TRACE
 {
@@ -128,6 +129,11 @@ IStepDispatcher::IStepDispatcher() :
 
     TARGETING::Target* l_pSys = NULL;
     TARGETING::targetService().getTopLevelTarget(l_pSys);
+
+    // Get tracelite setting from top level target attributes
+    uint8_t l_tlEnabled = l_pSys->getAttr<TARGETING::ATTR_OP_TRACE_LITE>();
+    TRACE::setTraceLite(l_tlEnabled);
+
     iv_mpiplMode = l_pSys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>();
     TRACFCOMP(g_trac_initsvc, "IStepDispatcher: MPIPL Mode: %d", iv_mpiplMode);
     iv_spBaseServicesEnabled = spBaseServicesEnabled();
