@@ -42,6 +42,7 @@
 
 <targetTypeExtension>
     <id>sys-sys-power9</id>
+    <attribute><id>OP_TRACE_LITE</id></attribute>
     <attribute><id>IS_MPIPL_HB</id></attribute>
     <attribute><id>IBSCOM_ENABLE_OVERRIDE</id></attribute>
     <attribute><id>HB_MUTEX_TEST_LOCK</id></attribute>

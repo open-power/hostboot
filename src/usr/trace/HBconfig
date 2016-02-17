@@ -4,6 +4,13 @@ config CONSOLE_OUTPUT_TRACE
     help
         Enables output of trace to console.
 
+config CONSOLE_TRACE_LITE
+    default n
+    depends on CONSOLE
+    help
+        Enables lightweight binary trace to console.
+        The binary data can be piped through a tool to make it readable.
+
 config CONSOLE_OUTPUT_TRACE_COMP_NAME
     default n
     depends on CONSOLE_OUTPUT_TRACE
