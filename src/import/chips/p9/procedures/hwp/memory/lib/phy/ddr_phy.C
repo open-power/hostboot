@@ -599,6 +599,7 @@ template<>
 fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
 {
     static const uint64_t init_cal_err_mask = 0x7FF;
+    static const uint64_t init_cal_pc_err_mask = 0xF800;
 
     uint64_t l_errors = 0;
     uint64_t l_rank_pairs = 0;
@@ -612,12 +613,40 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
 
     FAPI_DBG("initial cal FIR: 0x%016llx", uint64_t(l_fir_data));
 
-    if ((init_cal_err_mask & l_fir_data) == 0)
+    // If we have no errors, lets get out of here.
+    if (l_fir_data == 0)
     {
         return FAPI2_RC_SUCCESS;
     }
 
     // We have bits to check ...
+
+    // If we have PC error status bits on, lets handle those.
+    if ((l_fir_data & init_cal_pc_err_mask) != 0)
+    {
+        FAPI_TRY( mss::getScom(i_target, MCA_DDRPHY_PC_ERROR_STATUS0_P0, l_err_data) );
+        // Hm ... I don't see any explict error code for this - not sure if I should break
+        // out all the possible failures.
+        FAPI_ASSERT( l_err_data == 0,
+                     fapi2::MSS_DRAMINIT_TRAINING_PHY_CONTROL_ERROR()
+                     .set_PORT_POSITION(mss::pos(i_target))
+                     .set_TARGET_IN_ERROR(i_target),
+                     "PHY reported a control error during initial calibration port: %s, pc_error_status0 err: 0x%016llx",
+                     mss::c_str(i_target), uint64_t(l_err_data)
+                   );
+
+        // If we're here, odd things are happening. We saw an error in the FIR, but we don't see
+        // and error in the PC_ERROR_STATUS0 register. So note it and carry on.
+        FAPI_ERR("FIR lit after initial cal: 0x%016lx but nothing in PC_ERROR_STATUS0 (0x%016lx)", l_fir_data, l_err_data);
+    }
+
+    // If we have no init cal error bits, get out
+    if  ((l_fir_data & init_cal_err_mask) == 0)
+    {
+        return fapi2::current_err;
+    }
+
+    // If we're here, we have initial cal errors
     FAPI_TRY( mss::getScom(i_target, MCA_DDRPHY_PC_INIT_CAL_ERROR_P0, l_err_data) );
 
     l_err_data.extractToRight<MCA_DDRPHY_PC_INIT_CAL_ERROR_P0_WR_LEVEL, 11>(l_errors);
