@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,7 @@ namespace Util
         UTIL_LIDMGR_GETLIDSIZE  = 0x04,       // UtilLidMgr::getLidSize
         UTIL_LIDMGR_GETLIDPNOR  = 0x05,       // UtilLidMgr::getLidPnor
         UTIL_LIDMGR_RT          = 0x06,
+        UTIL_LIDMGR_CLEANUP     = 0x07,       // UtilLidMgr::cleanup
     };
 
     enum ReasonCode
@@ -52,6 +53,7 @@ namespace Util
         UTIL_LIDMGR_INVAL_SIZE_PNOR  = UTIL_COMP_ID | 0x08,
         UTIL_LIDMGR_UNLOAD_RC_FAIL   = UTIL_COMP_ID | 0x09,
         UTIL_LIDMGR_NOT_FOUND        = UTIL_COMP_ID | 0x0A,
+        UTIL_LIDMGR_MM_FAIL          = UTIL_COMP_ID | 0x0B,
     };
 };
 
