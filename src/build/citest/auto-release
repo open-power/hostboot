@@ -1,0 +1,156 @@
+#!/bin/bash
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/build/citest/auto-release $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2016
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+function setup {
+    cd $HOSTBOOT_WORKSPACE
+
+    # Set up environment
+    source "$HOSTBOOT_WORKSPACE/env.bash" || exit -1
+
+    # Create cmvc checkout directory
+    if [ -n "$CMVC_DIR" ]; then
+        mkdir -p $CMVC_DIR || exit -1
+    fi
+}
+
+function build {
+    ### Define and setup release branch
+    export PATH=${PATH}:$HOSTBOOT_WORKSPACE/src/build/tools
+    hbRelease define --level $RELEASE_NAME --released $PREVIOUS_RELEASE --base $BASE --branch $GIT_BRANCH || exit -1
+    hbRelease release --level $RELEASE_NAME || exit -1
+
+    ### Compile and provide binaries
+    setup
+    BUILD_MINIMAL=1 nice -+20 make -j16 || exit -1
+
+    # Run hb distribute to put binaries in cmvc checkout directory
+    export SANDBOXBASE=$WORKSPACE/$RELEASE_NAME
+    mkdir -p $SANDBOXBASE
+    hb prime --fsp $SANDBOXBASE || exit -1
+    mkdir -p $CMVC_DIR/src/hbfw
+    cp -rf $SANDBOXBASE/* $CMVC_DIR/src/hbfw
+
+    ### Push tag to gerrit, create track and checkin files
+    git push ssh://hostboot-us@gerrit-server/hostboot $RELEASE_NAME || exit -1
+    git checkout gerrit/master || exit -1
+    hbRelease pre-release --level $RELEASE_NAME --release $FIPS_RELEASE --checkInDir $CMVC_DIR || exit -1
+    # Check if feature was successfully created and if so set $FEATURE
+    if [ -f $CMVC_FEATURE_FILE ]; then
+        FEATURE=`cat $CMVC_FEATURE_FILE`;
+    else
+        echo "No feature created"
+        exit -1
+    fi
+
+}
+
+function fsp-ci-wait {
+    joburl=$1
+    echo "Waiting for $joburl build status..."
+    while true;
+    do
+        sleep 10
+        #TODO fix curl output, must be hidden
+        curl ${joburl}/api/json | grep building\":false >/dev/null 2>&1
+        if [ $? -eq 0 ];
+        then
+            break
+        fi
+    done
+#TODO handle ABORTED case
+    curl ${joburl}/api/json | grep result\":\"FAILURE
+    if [ $? -eq 0 ];
+    then
+        echo "Job $joburl failed."
+        return 1
+    else
+        echo "Job $joburl passed."
+        return 0
+    fi
+}
+
+function testr {
+    ### Call fsp-ci to test hostboot release
+    # Start fsp-CI job and set URL
+    #TODO add retry loop
+    OUTPUT="$(fsp-CI-jenkins -r $FIPS_RELEASE -t $FEATURE --force)";
+    # Check if fsp-CI-jenkins failed to start
+    if [ $? -eq 0 ]; then
+        URL="$(echo $OUTPUT | grep -o "Check status at .*" | sed -e "s/Check status at//")"
+    else
+        echo "fsp-CI-jenkins command failed returned $?"
+        exit -1
+    fi
+
+    ### Wait on fsp-CI job to complete, whether pass or fail
+    fsp-ci-wait $URL || exit -1
+
+    ### Handle cmvc final commands to integrate track, post notes to BQ
+    hbRelease post-release --level $RELEASE_NAME --released $PREVIOUS_RELEASE --feature $FEATURE --release $FIPS_RELEASE || exit -1
+}
+
+
+function usage {
+    echo "Usage: auto-release.sh [OPTIONS]"
+    echo "Runs the steps for Hostboot automated releases"
+    echo "OPTIONS:"
+    echo " -b   Run build phase"
+    echo " -t   Run test and release phase"
+    echo " -h   Help"
+    exit 1
+}
+
+# make sure arguments are provided
+if [ $# -eq 0 ]
+then
+    echo "No arguments provided."
+    usage
+    exit 1
+fi
+
+while getopts "bth" opt; do
+    case $opt in
+        b)
+            build
+            ;;
+        t)
+            setup
+            testr
+            ;;
+        h)
+            usage
+            ;;
+        \?)
+            echo "Invalid option: -$OPTARG" >&2
+            exit 1
+            ;;
+        :)
+            echo "Option -$OPTARG requires an argument." >&2
+            exit 1
+            ;;
+    esac
+done
+
