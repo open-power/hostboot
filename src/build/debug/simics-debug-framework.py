@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2016
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -47,6 +47,8 @@ import os
 import subprocess
 import re
 import random
+
+glob_memleak_enable = 0
 
 # @class DebugFrameworkIPCMessage
 # @brief Wrapper class for constructing a properly formed IPC message for the
@@ -452,6 +454,10 @@ def magic_memoryleak_stackdump(cpu, frame):
 #       cpu.r6 - pointer2 (original pointer for realloc).
 #
 def magic_memoryleak_function(cpu):
+
+    if glob_memleak_enable == 0:
+        return
+
     # Parse registers.
     function = ["MALLOC", "REALLOC", "FREE"][cpu.r3]
     size = cpu.r4
@@ -512,6 +518,10 @@ def magic_instruction_callback(user_arg, cpu, arg):
         print 'loading payload from', flash_file, 'to 0x%x' % load_addr
         cmd = 'shell "fcp --force -o0 -R %s:PAYLOAD simicsPayload.ecc; ecc --remove --p8 simicsPayload.ecc simicsPayload"; load-file simicsPayload 0x%x' % (flash_file, load_addr)
         SIM_run_alone( run_command, cmd )
+
+    if arg == 7014:  # MAGIC_MEMORYLEAK_ENABLE
+        global glob_memleak_enable
+        glob_memleak_enable = cpu.r3
 
     if arg == 7055:   # MAGIC_CONTINUOUS_TRACE
         hb_tracBinaryBuffer = cpu.r4

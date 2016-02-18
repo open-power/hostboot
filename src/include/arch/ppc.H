@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -417,6 +417,7 @@ enum
     MAGIC_FAKEPAYLOAD_ENTER   =  7010, // Entered the fake payload.
     MAGIC_SIMICS_CHECK        =  7011, // Check if system is running on simics
     MAGIC_LOAD_PAYLOAD        =  7012, // load payload from flash
+    MAGIC_MEMORYLEAK_ENABLE   =  7014, // enable/disable memoryleak function
     MAGIC_CONTINUOUS_TRACE    =  7055, // extract mixed trace buffer
 };
 

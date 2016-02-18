@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2014                   */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -40,6 +42,22 @@ bool isSimicsRunning()
     static bool simics = isSimics();
     return simics;
 }
+
+#ifdef HOSTBOOT_MEMORY_LEAKS
+void simicsMemLeakEnable() __attribute__((noinline));
+void simicsMemLeakEnable()
+{
+    asm volatile("li 3, 1");
+    MAGIC_INSTRUCTION(MAGIC_MEMORYLEAK_ENABLE);
+}
+
+void simicsMemLeakDisable() __attribute__((noinline));
+void simicsMemLeakDisable()
+{
+    asm volatile("li 3, 0");
+    MAGIC_INSTRUCTION(MAGIC_MEMORYLEAK_ENABLE);
+}
+#endif
 
 };
 

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2014                   */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -34,6 +36,26 @@ namespace Util
      * @return bool         true if running in simics; otherwise false
      */
     bool isSimicsRunning( void );
+
+#ifdef HOSTBOOT_MEMORY_LEAKS
+    /**
+     * @brief Enables collection of memory leak info in a simics environment
+     *
+     * @param[in] void
+     *
+     * @return void
+     */
+    void simicsMemLeakEnable( void );
+
+    /**
+     * @brief Disables collection of memory leak info in a simics environment
+     *
+     * @param[in] void
+     *
+     * @return void
+     */
+    void simicsMemLeakDisable( void );
+#endif
 };
 
 #endif
