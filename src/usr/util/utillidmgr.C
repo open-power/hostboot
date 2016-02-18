@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,7 @@
 #include "utillidmgrdefs.H"
 #include "utilbase.H"
 #include <initservice/initserviceif.H>
+#include <sys/mm.h>
 
 using namespace ERRORLOG;
 mutex_t UtilLidMgr::cv_mutex = MUTEX_INITIALIZER;
@@ -647,6 +648,37 @@ errlHndl_t UtilLidMgr::cleanup()
                     iv_lidFileName );
         }
     }
+
+    //force evict any pages that the PNOR RP might have
+    // laying around
+    if(iv_isLidInPnor)
+    {
+        int rc = mm_remove_pages( RELEASE,
+                                  reinterpret_cast<void *>(iv_lidPnorInfo.vaddr),
+                                  iv_lidPnorInfo.size );
+        if( rc )
+        {
+            UTIL_FT( ERR_MRK"rc=%d from mm_remove_pages(%llX,%llX)", iv_lidPnorInfo.vaddr, iv_lidPnorInfo.size );
+            /*@
+             *   @errortype
+             *   @moduleid      Util::UTIL_LIDMGR_CLEANUP
+             *   @reasoncode    Util::UTIL_LIDMGR_MM_FAIL
+             *   @userdata1[00:31]  LID ID
+             *   @userdata1[32:63]  rc from mm_remove_pages
+             *   @userdata2     Virtual address being removed
+             *   @devdesc       Error returned from mm_remove_pages
+             *                  when evicting lid from memory.
+             *   @custdesc      Firmware error during boot.
+             */
+            l_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                  Util::UTIL_LIDMGR_CLEANUP,
+                                  Util::UTIL_LIDMGR_MM_FAIL,
+                                  TWO_UINT32_TO_UINT64(iv_lidId,rc),
+                                  iv_lidPnorInfo.vaddr,
+                                  true /*sw fail*/);
+        }
+    }
+
 
     return l_err;
 }
