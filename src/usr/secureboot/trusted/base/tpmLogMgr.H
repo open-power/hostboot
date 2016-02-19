@@ -86,12 +86,17 @@ namespace TRUSTEDBOOT
     struct _TpmLogMgr
     {
         uint32_t logSize;        ///< Current byte size of log
-        uint8_t eventLog[TPMLOG_BUFFER_SIZE]; ///< EventLog Buffer
+        uint32_t logMaxSize;     ///< Space allocated for log entries
         uint8_t* newEventPtr;    ///< Pointer to location to add new event
+        uint8_t* eventLogInMem;  ///< Event log allocated from memory
+#ifdef __HOSTBOOT_MODULE
+        uint8_t eventLog[TPMLOG_BUFFER_SIZE]; ///< EventLog Buffer
+#endif
         mutex_t  logMutex;       ///< Log mutex
     };
     typedef struct _TpmLogMgr TpmLogMgr;
 
+#ifdef __HOSTBOOT_MODULE
     /**
      * @brief Initialize the log manager
      * @param[in/out] io_logMgr Return a pointer to the log manager
@@ -99,6 +104,19 @@ namespace TRUSTEDBOOT
      *       error log.
      */
     errlHndl_t TpmLogMgr_initialize(TpmLogMgr * io_logMgr);
+#endif
+
+    /**
+     * @brief Initialize the log manager to use a pre-existing buffer
+     * @param[in] val TpmLogMgr structure
+     * @param[in] eventLogPtr Pointer to event log to use
+     * @param[in] eventLogSize Allocated log buffer size
+     * @return errlHndl_t NULL if successful, otherwise a pointer to the
+     *       error log.
+     */
+    errlHndl_t TpmLogMgr_initializeUsingExistingLog(TpmLogMgr* val,
+                                                    uint8_t* eventLogPtr,
+                                                    uint32_t eventLogSize);
 
     /**
      * @brief Add a new event to the log
@@ -116,6 +134,12 @@ namespace TRUSTEDBOOT
      */
     uint32_t TpmLogMgr_getLogSize(TpmLogMgr* val);
 
+    /**
+     * @brief Calculate the log size in bytes by walking the log
+     * @param[in] val TpmLogMgr structure
+     * @return uint32_t Byte size of log
+     */
+    uint32_t TpmLogMgr_calcLogSize(TpmLogMgr* val);
 
     /**
      * @brief Get pointer to first event in eventLog past the header event
@@ -166,6 +190,13 @@ namespace TRUSTEDBOOT
      * @param[in] val TpmLogMgr structure
      */
     void TpmLogMgr_dumpLog(TpmLogMgr* val);
+
+    /**
+     * @brief Return a pointer to the start of the log
+     * @param[in] val TpmLogMgr structure
+     * @return uint8_t* Pointer to the start of the TPM log
+     */
+    uint8_t* TpmLogMgr_getLogStartPtr(TpmLogMgr* val);
 
 
 #ifdef __cplusplus

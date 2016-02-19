@@ -79,12 +79,15 @@ namespace TRUSTEDBOOT
     const uint8_t* TPMT_HA_logUnmarshal(TPMT_HA* val,
                                         const uint8_t* i_tpmBuf, bool* o_err)
     {
+        size_t size = 0;
+        uint16_t* field16 = NULL;
+
         do {
             *o_err = false;
 
             // algorithmId
-            size_t size = sizeof(val->algorithmId);
-            uint16_t* field16 = (uint16_t*)i_tpmBuf;
+            size = sizeof(val->algorithmId);
+            field16 = (uint16_t*)i_tpmBuf;
             val->algorithmId = le16toh(*field16);
             // Ensure a valid count
             if (val->algorithmId >= TPM_ALG_INVALID_ID)
@@ -168,12 +171,14 @@ namespace TRUSTEDBOOT
                                                    const uint8_t* i_tpmBuf,
                                                    bool* o_err)
     {
+        size_t size = 0;
+        uint32_t* field32 = NULL;
         do {
             *o_err = false;
 
             // count
-            size_t size = sizeof(val->count);
-            uint32_t* field32 = (uint32_t*)(i_tpmBuf);
+            size = sizeof(val->count);
+            field32 = (uint32_t*)(i_tpmBuf);
             val->count = le32toh(*field32);
             // Ensure a valid count
             if (val->count > HASH_COUNT)
@@ -350,12 +355,14 @@ namespace TRUSTEDBOOT
                                                 const uint8_t* i_tpmBuf,
                                                 bool* o_err)
     {
+        size_t size = 0;
+        uint32_t* field32 = NULL;
         do {
             *o_err = false;
 
             // Event size
-            size_t size = sizeof(val->eventSize);
-            uint32_t* field32 = (uint32_t*)(i_tpmBuf);
+            size = sizeof(val->eventSize);
+            field32 = (uint32_t*)(i_tpmBuf);
             val->eventSize = le32toh(*field32);
             i_tpmBuf += size;
 
@@ -453,7 +460,8 @@ namespace TRUSTEDBOOT
             field32 = (uint32_t*)(i_tpmBuf);
             val->eventType = le32toh(*field32);
             // Ensure a valid event type
-            if (val->eventType >= EV_INVALID)
+            if (val->eventType == 0 ||
+                val->eventType >= EV_INVALID)
             {
                 *o_err = true;
                 i_tpmBuf = NULL;
