@@ -81,22 +81,6 @@ errlHndl_t tpmTransmit(TpmTarget * io_target,
 }
 
 
-errlHndl_t tpmCreateErrorLog(const uint8_t i_modId,
-                             const uint16_t i_reasonCode,
-                             const uint64_t i_user1,
-                             const uint64_t i_user2)
-{
-    errlHndl_t err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    i_modId,
-                                    i_reasonCode,
-                                    i_user1,
-                                    i_user2,
-                                    true /*Add HB SW Callout*/ );
-    err->collectTrace( SECURE_COMP_NAME );
-    return err;
-}
-
-
 
 #ifdef __cplusplus
 } // end TRUSTEDBOOT

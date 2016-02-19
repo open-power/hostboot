@@ -34,6 +34,8 @@
 #include <util/align.H>
 #include <errl/errlmanager.H>
 #include <config.h>        // @FIXME RTC 132398
+#include <secureboot/trustedbootif.H>
+#include <devicefw/driverif.H>
 
 // Trace definition
 trace_desc_t* g_trac_pnor = NULL;
@@ -288,11 +290,26 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC)
 
             }
 
-            // TODO RTC:96009 handle version header w/secureboot
             if (o_TOC[l_secId].version == FFS_VERS_SHA512)
             {
               TRACFCOMP(g_trac_pnor, "PNOR::parseTOC: Incrementing"
                               " Flash Address for SHA Header");
+              uint32_t l_addr = o_TOC[l_secId].flashAddr;
+              size_t l_headerSize = 0;
+              if (o_TOC[l_secId].integrity == FFS_INTEG_ECC_PROTECT)
+              {
+                  l_headerSize = PAGESIZE_PLUS_ECC;
+              }
+              else
+              {
+                  l_headerSize = PAGESIZE;
+              }
+              l_errhdl = PNOR::extendHash(l_addr, l_headerSize,
+                                          cv_EYECATCHER[l_secId]);
+              if (l_errhdl)
+              {
+                  break;
+              }
             }
         }
         for(int tmpId = 0;
@@ -309,3 +326,36 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC)
     TRACUCOMP(g_trac_pnor, "< PNOR::parseTOC" );
     return l_errhdl;
 }
+
+errlHndl_t PNOR::extendHash(uint64_t i_addr, size_t i_size, const char* i_name)
+{
+    errlHndl_t l_errhdl = NULL;
+
+    do {
+        #ifndef __HOSTBOOT_RUNTIME
+        // Read data from the PNOR DD
+        uint8_t* l_buf = new uint8_t[i_size]();
+        TARGETING::Target* l_target = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+        l_errhdl = DeviceFW::deviceRead(l_target, l_buf, i_size,
+                                        DEVICE_PNOR_ADDRESS(0,i_addr));
+        if (l_errhdl)
+        {
+            break;
+        }
+
+        SHA512_t l_hash = {0};
+        SECUREBOOT::hashBlob(l_buf, i_size, l_hash);
+        l_errhdl = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_0, l_hash,
+                                          sizeof(SHA512_t), i_name);
+        delete[] l_buf;
+
+        if (l_errhdl)
+        {
+            break;
+        }
+        #endif
+    } while(0);
+
+    return l_errhdl;
+}
+

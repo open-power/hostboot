@@ -47,6 +47,35 @@ class TPMLogMgrTest: public CxxTest::TestSuite
     public:
 
         /**
+         * @brief Retrieve a Tpm log manager to test with
+         */
+        void getTestLogMgr(TpmLogMgr* logMgr)
+        {
+
+            errlHndl_t err = TpmLogMgr_initialize(logMgr);
+            if( NULL != err )
+            {
+                TS_FAIL( "getTestLogMgr - Error detected" );
+                errlCommit( err, SECURE_COMP_ID );
+                delete err;
+                err = NULL;
+            }
+            else if (TpmLogMgr_getLogSize(logMgr) != 69)
+                // 69 is size of header entry
+            {
+                TS_FAIL( "getTestLogMgr - Failed to find "
+                         "proper header log Len=%d",
+                         TpmLogMgr_getLogSize(logMgr));
+            }
+            else
+            {
+                TRACUCOMP(g_trac_trustedboot, "getTestLogMgr - "
+                          "Allocate returned as expected. Len=%d",
+                          TpmLogMgr_getLogSize(logMgr));
+            }
+        }
+
+        /**
          * @brief TPM Log Allocate Test
          */
         void testTPMLogMgrAllocate ( void )
@@ -61,38 +90,10 @@ class TPMLogMgrTest: public CxxTest::TestSuite
 
             do
             {
-
+                // Initialize logMgr
                 TpmLogMgr logMgr;
+                getTestLogMgr(&logMgr);
 
-                num_ops++;
-                err = TpmLogMgr_initialize(&logMgr);
-
-                if( NULL != err )
-                {
-                    fails++;
-                    TS_FAIL( "testTPMLogMgrAllocate - Error detected" );
-                    errlCommit( err,
-                                SECURE_COMP_ID );
-                    delete err;
-                    err = NULL;
-                    break;
-                }
-                else if (TpmLogMgr_getLogSize(&logMgr) != 69)
-                    // 69 is size of header entry
-                {
-                    fails++;
-                    TS_FAIL( "testTPMLogMgrAllocate - Failed to find "
-                             "proper header log Len=%d",
-                             TpmLogMgr_getLogSize(&logMgr));
-                    break;
-
-                }
-                else
-                {
-                    TRACUCOMP(g_trac_trustedboot, "testTPMLogMgrAllocate - "
-                              "Allocate returned as expected. Len=%d",
-                              TpmLogMgr_getLogSize(&logMgr));
-                }
                 // Bump full size by the header
                 totalLogSize = TpmLogMgr_getLogSize(&logMgr);
 
@@ -184,7 +185,6 @@ class TPMLogMgrTest: public CxxTest::TestSuite
 
                 } // End for
 
-
                 // Lastly dump the log to a trace so we can review it
                 TpmLogMgr_dumpLog(&logMgr);
 
@@ -194,7 +194,172 @@ class TPMLogMgrTest: public CxxTest::TestSuite
                        fails, num_ops );
         }
 
+        /**
+         * @brief Add generic test event to log and return the event added
+         */
+        TCG_PCR_EVENT2 addTestLogEvent(TpmLogMgr& i_logMgr,
+                                       const char* i_logMsg)
+        {
+            // Set components of TCG_PCR_EVENT2
+            TPM_Pcr pcr = PCR_0;
+            TPM_Alg_Id algId = TPM_ALG_SHA256;
+            size_t digestSize = TPM_ALG_SHA256_SIZE;
+            uint8_t digest[digestSize];
+            for (size_t idx = 0; idx < digestSize; idx++)
+            {
+                digest[idx] = idx+1;
+            }
 
+            // Get a TCG_PCR_EVENT2
+            TCG_PCR_EVENT2 eventLog = TpmLogMgr_genLogEventPcrExtend(
+                                        pcr, algId,
+                                        digest, digestSize, i_logMsg);
+
+            // Add event to log
+            errlHndl_t err = TpmLogMgr_addEvent(&i_logMgr, &eventLog);
+            if (err)
+            {
+                TS_FAIL("addTestLogEvent - Failed to addEvent with message = %s",
+                        i_logMsg);
+                errlCommit( err, SECURE_COMP_ID );
+                delete err;
+                err = NULL;
+            }
+
+            return eventLog;
+        }
+
+        /**
+         * @brief TPM Log read single entry test
+         */
+        void testTpmLogReadSingleEntry ( void )
+        {
+            TRACFCOMP( g_trac_trustedboot, "testTpmLogReadSingleEntry - Start" );
+
+            do {
+                // Initialize logMgr
+                TpmLogMgr logMgr;
+                getTestLogMgr(&logMgr);
+
+                // Add event to log
+                const char* logMsg = "testTpmLogReadSingleEntry";
+                TCG_PCR_EVENT2 eventLog = addTestLogEvent(logMgr, logMsg);
+
+                // Retrive event from log
+                TCG_PCR_EVENT2 resultEventLog;
+                const uint8_t* eventHndl = TpmLogMgr_getFirstEvent(&logMgr);
+                if (eventHndl == NULL)
+                {
+                    TS_FAIL( "testTpmLogReadSingleEntry - Log only contains header event" );
+                    break;
+                }
+                bool unMarshalError = false;
+                eventHndl = TpmLogMgr_getNextEvent(&logMgr, eventHndl,
+                                                   &resultEventLog,
+                                                   &unMarshalError);
+                if (unMarshalError)
+                {
+                    TS_FAIL( "testTpmLogReadSingleEntry - LogUnmarshall failed");
+                    break;
+                }
+                // Ensure getNextEvent returned NULL as there is only one entry
+                if (eventHndl != NULL)
+                {
+                    TS_FAIL( "testTpmLogReadSingleEntry - Unexpected entries in eventLog");
+                    break;
+                }
+
+                // Ensure == operator is correct
+                if (memcmp(&eventLog, &resultEventLog, sizeof(TCG_PCR_EVENT2))
+                    != 0)
+                {
+                    TS_FAIL( "testTpmLogReadSingleEntry - ==operator failed to compare events");
+                    break;
+                }
+
+                // Ensure what we read out matches what we put in
+                if ( eventLog == resultEventLog )
+                {
+                    TRACFCOMP( g_trac_trustedboot, "testTpmLogReadSingleEntry - Success read Event");
+                }
+                else
+                {
+                    TS_FAIL( "testTpmLogReadSingleEntry - Failed to read Event");
+                    break;
+                }
+
+            } while(0);
+
+            TRACFCOMP( g_trac_trustedboot, "testTpmLogReadSingleEntry - End" );
+        }
+
+        /**
+         * @brief TPM Log read empty log
+         */
+        void testTpmLogReadEmptyLog ( void )
+        {
+            TRACFCOMP( g_trac_trustedboot, "testTpmLogReadEmptyLog - Start" );
+
+            do {
+                // Initialize logMgr
+                TpmLogMgr logMgr;
+                getTestLogMgr(&logMgr);
+
+                // Ensure there is only a header event in the log
+                if (TpmLogMgr_getFirstEvent(&logMgr) != NULL)
+                {
+                    TS_FAIL( "testTpmLogReadEmptyLog - Read past actual eventLog");
+                    break;
+                }
+            }
+            while (0);
+        }
+
+        /**
+         * @brief TPM Log read past valid log test
+         */
+        void testTpmLogReadPastValidLog ( void )
+        {
+            TRACFCOMP( g_trac_trustedboot, "testTpmLogReadPastValidLog - Start" );
+
+            do {
+                // Initialize logMgr
+                TpmLogMgr logMgr;
+                getTestLogMgr(&logMgr);
+
+                // Add event to log
+                const char* logMsg = "testTpmLogReadPastValidLog";
+                addTestLogEvent(logMgr, logMsg);
+
+                // Retrive event from log
+                TCG_PCR_EVENT2 resultEventLog;
+                const uint8_t* eventHndl = TpmLogMgr_getFirstEvent(&logMgr);
+                if (eventHndl == NULL)
+                {
+                    TS_FAIL( "testTpmLogReadPastValidLog - Log only contains header event" );
+                    break;
+                }
+
+                // Try reading past a valid log
+                bool unMarshalError = false;
+                for (int i = 0; i < 2; ++i)
+                {
+                    eventHndl = TpmLogMgr_getNextEvent(&logMgr, eventHndl,
+                                                       &resultEventLog,
+                                                       &unMarshalError);
+                    if (i == 0 && unMarshalError)
+                    {
+                        TS_FAIL( "testTpmLogReadPastValidLog - LogUnmarshall failed");
+                        break;
+                    }
+                    if (i == 1 && (eventHndl != NULL || !unMarshalError ) )
+                    {
+                        TS_FAIL( "testTpmLogReadPastValidLog - Read past actual eventLog without posting error and returning NULL");
+                    }
+                }
+            }
+            while (0);
+        }
 };
 
 #endif
