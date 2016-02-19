@@ -285,6 +285,18 @@ foreach ( @Files )
     }
 
     ##
+    ##  We do not want to modify the prologs of files mirrored from EKB
+    ##  Eventually we will enhance to allow different prologs, but at the time
+    ##  this breaks the mirror tool.
+    if  (m/^src\/import/)
+    {
+        print STDOUT    "---------------------------------------------------------\n";
+        print STDOUT    "Skipping file mirrored from EKB: $_\n";
+        print STDOUT    "---------------------------------------------------------\n";
+        next;
+    }
+
+    ##
     ## Check if any parent directory below $projectRoot has a LICENSE_PROLOG file
     ## Backtrack from the directory where the file lives and find the first
     ## custom LICENSE_PROLOG file.
