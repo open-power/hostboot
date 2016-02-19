@@ -52,6 +52,7 @@ namespace TRUSTEDBOOT
         MOD_TPM_VERIFYFUNCTIONAL        = 0x06,
         MOD_TPM_CMD_PCREXTEND           = 0x07,
         MOD_TPM_CMD_PCRREAD             = 0x08,
+        MOD_TPM_REPLAY_LOG              = 0x09,
 
         MOD_TPMLOGMGR_INITIALIZE        = 0x10,
         MOD_TPMLOGMGR_ADDEVENT          = 0x11,

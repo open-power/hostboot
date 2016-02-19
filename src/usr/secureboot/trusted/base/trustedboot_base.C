@@ -88,8 +88,7 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
     size_t fullDigestSize = getDigestSize(algId);
     char logMsg[MAX_TPM_LOG_MSG];
 
-    TRACDCOMP( g_trac_trustedboot,
-               ENTER_MRK"pcrExtend()" );
+    TRACDCOMP( g_trac_trustedboot, ENTER_MRK"pcrExtend()" );
     TRACUCOMP( g_trac_trustedboot,
                ENTER_MRK"pcrExtend() pcr=%d msg='%s' digest=%016llX",
                i_pcr,
@@ -122,7 +121,6 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
                            logMsg);
     }
 
-
     // Lastly make sure we are in a state where we have a functional TPM
     err = tpmVerifyFunctionalTpmExists();
 
@@ -149,7 +147,6 @@ void pcrExtendSingleTpm(TpmTarget & io_target,
 
     do
     {
-
         mutex_lock( &io_target.tpmMutex );
         unlock = true;
 
@@ -175,22 +172,9 @@ void pcrExtendSingleTpm(TpmTarget & io_target,
              io_target.initAttempted &&
              !io_target.failed))
         {
-            memset(&eventLog, 0, sizeof(eventLog));
-            eventLog.pcrIndex = i_pcr;
-            eventLog.eventType = EV_ACTION;
-
-            // Update digest information, we only use 1 entry
-            eventLog.digests.count = 1;
-            eventLog.digests.digests[0].algorithmId = i_algId;
-            memcpy(eventLog.digests.digests[0].digest.bytes,
-                   i_digest, i_digestSize);
-
-            // Event field data
-            eventLog.event.eventSize = strlen(i_logMsg);
-            assert(eventLog.event.eventSize <= MAX_TPM_LOG_MSG,
-                   "TPM Log message too long");
-            memcpy(eventLog.event.event, i_logMsg, strlen(i_logMsg));
-
+            // Fill in TCG_PCR_EVENT2 and add to log
+            eventLog = TpmLogMgr_genLogEventPcrExtend(i_pcr, i_algId, i_digest,
+                                                      i_digestSize, i_logMsg);
             err = TpmLogMgr_addEvent(io_target.logMgr,&eventLog);
             if (NULL != err)
             {
@@ -215,7 +199,6 @@ void pcrExtendSingleTpm(TpmTarget & io_target,
                 break;
             }
         }
-
     } while ( 0 );
 
     if (NULL != err)
@@ -289,6 +272,22 @@ errlHndl_t tpmVerifyFunctionalTpmExists()
 
     return err;
 }
+
+errlHndl_t tpmCreateErrorLog(const uint8_t i_modId,
+                             const uint16_t i_reasonCode,
+                             const uint64_t i_user1,
+                             const uint64_t i_user2)
+{
+    errlHndl_t err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    i_modId,
+                                    i_reasonCode,
+                                    i_user1,
+                                    i_user2,
+                                    true /*Add HB SW Callout*/ );
+    err->collectTrace( SECURE_COMP_NAME );
+    return err;
+}
+
 #endif
 
 } // end TRUSTEDBOOT

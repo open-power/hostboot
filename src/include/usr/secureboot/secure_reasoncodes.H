@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@ namespace SECUREBOOT
         MOD_SECURE_ROM_INIT             = 0x02,
         MOD_SECURE_ROM_VERIFY           = 0x03,
         MOD_SECURE_ROM_CLEANUP          = 0x04,
+        MOD_SECURE_ROM_SHA512           = 0x05,
    };
 
     enum SECUREReasonCode
@@ -47,6 +48,7 @@ namespace SECUREBOOT
         RC_SET_PERMISSION_FAIL_EXE      = SECURE_COMP_ID | 0x05,
         RC_SET_PERMISSION_FAIL_WRITE    = SECURE_COMP_ID | 0x06,
         RC_ROM_VERIFY                   = SECURE_COMP_ID | 0x07,
+        RC_ROM_SHA512                   = SECURE_COMP_ID | 0x08,
 
         // Reason codes 0xA0 - 0xEF reserved for trustedboot_reasoncodes.H
     };

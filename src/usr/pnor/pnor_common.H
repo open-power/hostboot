@@ -29,6 +29,7 @@
 #include "ffs.h"
 #include <devicefw/driverif.H>
 #include <initservice/mboxRegs.H>
+#include <secureboot/service.H>
 
 namespace PNOR {
     /**
@@ -119,6 +120,18 @@ namespace PNOR {
      */
      void physicalToMmioOffset(uint64_t  i_hbbAddress,
                                uint64_t& o_mmioOffset);
+
+    /**
+     * @brief Reads version header of section, hashes it, and extends to tpm
+     *        buffer list.
+     *
+     * @parm i_addr  Offset into flash to read
+     * @parm i_size  Number of bytes to read
+     * @parm i_name  Name of PNOR section
+     *
+     * @return Error from operation
+     */
+    errlHndl_t extendHash(uint64_t i_addr, size_t i_size, const char* i_name);
 
     enum
     {

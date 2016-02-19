@@ -65,7 +65,7 @@ namespace TRUSTEDBOOT
         return ret;
     }
 
-    uint8_t* TPMT_HA_logMarshal(TPMT_HA* val, uint8_t* i_logBuf)
+    uint8_t* TPMT_HA_logMarshal(const TPMT_HA* val, uint8_t* i_logBuf)
     {
         uint16_t* field16 = (uint16_t*)i_logBuf;
         *field16 = htole16(val->algorithmId);
@@ -76,7 +76,64 @@ namespace TRUSTEDBOOT
         return i_logBuf;
     }
 
-    size_t TPML_DIGEST_VALUES_marshalSize(TPML_DIGEST_VALUES* val)
+    const uint8_t* TPMT_HA_logUnmarshal(TPMT_HA* val,
+                                        const uint8_t* i_tpmBuf, bool* o_err)
+    {
+        do {
+            *o_err = false;
+
+            // algorithmId
+            size_t size = sizeof(val->algorithmId);
+            uint16_t* field16 = (uint16_t*)i_tpmBuf;
+            val->algorithmId = le16toh(*field16);
+            // Ensure a valid count
+            if (val->algorithmId >= TPM_ALG_INVALID_ID)
+            {
+                *o_err = true;
+                i_tpmBuf = NULL;
+                TRACFCOMP(g_trac_trustedboot,"ERROR> TPMT_HA:logUnmarshal()"
+                          " invalid algorithmId %d",
+                          val->algorithmId);
+                break;
+            }
+            i_tpmBuf += size;
+
+            // digest
+            size = getDigestSize((TPM_Alg_Id)val->algorithmId);
+            // Ensure a valid count
+            if (size >= TPM_ALG_INVALID_SIZE)
+            {
+                *o_err = true;
+                i_tpmBuf = NULL;
+                TRACFCOMP(g_trac_trustedboot,"ERROR> TPMT_HA:logUnmarshal() "
+                          "invalid algorithm size of %d for algorithm id %d",
+                          (int)size, val->algorithmId);
+                break;
+            }
+
+            memcpy(&(val->digest.bytes), i_tpmBuf, size);
+            i_tpmBuf += size;
+        } while(0);
+
+        return i_tpmBuf;
+    }
+
+    size_t TPMT_HA_marshalSize(const TPMT_HA* val)
+    {
+        return (sizeof(val->algorithmId) +
+                getDigestSize((TPM_Alg_Id)(val->algorithmId)));
+    }
+
+#ifdef __cplusplus
+    bool TPMT_HA::operator==(const TPMT_HA& i_rhs) const
+    {
+        size_t digestSize = getDigestSize((TPM_Alg_Id)algorithmId);
+        return (algorithmId == i_rhs.algorithmId) &&
+               (memcmp(digest.bytes, i_rhs.digest.bytes, digestSize) == 0);
+    }
+#endif
+
+    size_t TPML_DIGEST_VALUES_marshalSize(const TPML_DIGEST_VALUES* val)
     {
         size_t ret = sizeof(val->count);
         for (size_t idx = 0; (idx < val->count && idx < HASH_COUNT); idx++)
@@ -86,7 +143,7 @@ namespace TRUSTEDBOOT
         return ret;
     }
 
-    uint8_t* TPML_DIGEST_VALUES_logMarshal(TPML_DIGEST_VALUES* val,
+    uint8_t* TPML_DIGEST_VALUES_logMarshal(const TPML_DIGEST_VALUES* val,
                                            uint8_t* i_logBuf)
     {
         uint32_t* field32 = (uint32_t*)i_logBuf;
@@ -107,10 +164,63 @@ namespace TRUSTEDBOOT
         return i_logBuf;
     }
 
-    uint8_t* TCG_PCR_EVENT_logUnmarshal(TCG_PCR_EVENT* val,
-                                        uint8_t* i_tpmBuf,
-                                        size_t i_bufSize,
-                                        bool* o_err)
+    const uint8_t* TPML_DIGEST_VALUES_logUnmarshal(TPML_DIGEST_VALUES* val,
+                                                   const uint8_t* i_tpmBuf,
+                                                   bool* o_err)
+    {
+        do {
+            *o_err = false;
+
+            // count
+            size_t size = sizeof(val->count);
+            uint32_t* field32 = (uint32_t*)(i_tpmBuf);
+            val->count = le32toh(*field32);
+            // Ensure a valid count
+            if (val->count > HASH_COUNT)
+            {
+                *o_err = true;
+                i_tpmBuf = NULL;
+                TRACFCOMP(g_trac_trustedboot,"ERROR> "
+                          "TPML_DIGEST_VALUES:logUnmarshal() "
+                          "invalid digest count %d",
+                          val->count);
+                break;
+            }
+            i_tpmBuf += size;
+
+            // Iterate all digests
+            for (size_t idx = 0; idx < val->count; idx++)
+            {
+                i_tpmBuf = TPMT_HA_logUnmarshal(&(val->digests[idx]),
+                                                i_tpmBuf, o_err);
+                    if (NULL == i_tpmBuf)
+                    {
+                        break;
+                    }
+            }
+        } while(0);
+
+        return i_tpmBuf;
+    }
+
+#ifdef __cplusplus
+    bool TPML_DIGEST_VALUES::operator==(const TPML_DIGEST_VALUES& i_rhs) const
+    {
+        bool result = (count == i_rhs.count);
+        // Iterate all digests
+        for (size_t idx = 0; idx < count; idx++)
+        {
+            result = (result && (digests[idx] == i_rhs.digests[idx]));
+        }
+
+        return result;
+    }
+#endif
+
+    const uint8_t* TCG_PCR_EVENT_logUnmarshal(TCG_PCR_EVENT* val,
+                                              const uint8_t* i_tpmBuf,
+                                              size_t i_bufSize,
+                                              bool* o_err)
     {
         size_t size = 0;
         uint32_t* field32;
@@ -186,7 +296,8 @@ namespace TRUSTEDBOOT
         return i_tpmBuf;
     }
 
-    uint8_t* TCG_PCR_EVENT_logMarshal(TCG_PCR_EVENT* val, uint8_t* i_logBuf)
+    uint8_t* TCG_PCR_EVENT_logMarshal(const TCG_PCR_EVENT* val,
+                                      uint8_t* i_logBuf)
     {
         uint32_t* field32 = (uint32_t*)(i_logBuf);
         *field32 = htole32(val->pcrIndex);
@@ -211,8 +322,12 @@ namespace TRUSTEDBOOT
         return i_logBuf;
     }
 
+    size_t TCG_PCR_EVENT_marshalSize(const TCG_PCR_EVENT* val)
+    {
+        return (sizeof(TCG_PCR_EVENT) + val->eventSize - MAX_TPM_LOG_MSG);
+    }
 
-    uint8_t* TPM_EVENT_FIELD_logMarshal(TPM_EVENT_FIELD* val,
+    uint8_t* TPM_EVENT_FIELD_logMarshal(const TPM_EVENT_FIELD* val,
                                         uint8_t* i_logBuf)
     {
         uint32_t* field32 = (uint32_t*)i_logBuf;
@@ -231,14 +346,56 @@ namespace TRUSTEDBOOT
         return i_logBuf;
     }
 
-    size_t TCG_PCR_EVENT2_marshalSize(TCG_PCR_EVENT2* val)
+    const uint8_t* TPM_EVENT_FIELD_logUnmarshal(TPM_EVENT_FIELD* val,
+                                                const uint8_t* i_tpmBuf,
+                                                bool* o_err)
+    {
+        do {
+            *o_err = false;
+
+            // Event size
+            size_t size = sizeof(val->eventSize);
+            uint32_t* field32 = (uint32_t*)(i_tpmBuf);
+            val->eventSize = le32toh(*field32);
+            i_tpmBuf += size;
+
+            // Event
+            size = val->eventSize;
+            if (size > MAX_TPM_LOG_MSG)
+            {
+                *o_err = true;
+                i_tpmBuf = NULL;
+                break;
+            }
+            memcpy(&val->event, i_tpmBuf, size);
+            i_tpmBuf += size;
+        } while(0);
+
+        return i_tpmBuf;
+    }
+    size_t TPM_EVENT_FIELD_marshalSize(const TPM_EVENT_FIELD* val)
+    {
+        return (sizeof(val->eventSize) + val->eventSize);
+    }
+
+
+#ifdef __cplusplus
+    bool TPM_EVENT_FIELD::operator==(const TPM_EVENT_FIELD& i_rhs) const
+    {
+        return (eventSize == i_rhs.eventSize) &&
+               (memcmp(event, i_rhs.event, eventSize) == 0);
+    }
+#endif
+
+
+    size_t TCG_PCR_EVENT2_marshalSize(const TCG_PCR_EVENT2* val)
     {
         return (sizeof(val->pcrIndex) + sizeof(val->eventType) +
                 TPML_DIGEST_VALUES_marshalSize(&(val->digests)) +
                 TPM_EVENT_FIELD_marshalSize(&(val->event)));
     }
 
-    uint8_t* TCG_PCR_EVENT2_logMarshal(TCG_PCR_EVENT2* val,
+    uint8_t* TCG_PCR_EVENT2_logMarshal(const TCG_PCR_EVENT2* val,
                                        uint8_t* i_logBuf)
     {
         uint32_t* field32 = (uint32_t*)i_logBuf;
@@ -256,6 +413,84 @@ namespace TRUSTEDBOOT
         return i_logBuf;
     }
 
+    const uint8_t* TCG_PCR_EVENT2_logUnmarshal(TCG_PCR_EVENT2* val,
+                                               const uint8_t* i_tpmBuf,
+                                               size_t i_bufSize,
+                                               bool* o_err)
+    {
+        size_t size = 0;
+        uint32_t* field32 = NULL;
+
+        do {
+            *o_err = false;
+
+            // Ensure enough space for unmarshalled data
+            if (sizeof(TCG_PCR_EVENT2) > i_bufSize)
+            {
+                *o_err = true;
+                i_tpmBuf = NULL;
+                break;
+            }
+
+            // pcrIndex
+            size = sizeof(val->pcrIndex);
+            field32 = (uint32_t*)(i_tpmBuf);
+            val->pcrIndex = le32toh(*field32);
+            // Ensure a valid pcr index
+            if (val->pcrIndex > IMPLEMENTATION_PCR)
+            {
+                *o_err = true;
+                i_tpmBuf = NULL;
+                TRACFCOMP(g_trac_trustedboot,"ERROR> TCG_PCR_EVENT2:"
+                          "logUnmarshal() invalid pcrIndex %d",
+                          val->pcrIndex);
+                break;
+            }
+            i_tpmBuf += size;
+
+            // eventType
+            size = sizeof(val->eventType);
+            field32 = (uint32_t*)(i_tpmBuf);
+            val->eventType = le32toh(*field32);
+            // Ensure a valid event type
+            if (val->eventType >= EV_INVALID)
+            {
+                *o_err = true;
+                i_tpmBuf = NULL;
+                TRACFCOMP(g_trac_trustedboot,"ERROR> TCG_PCR_EVENT2:"
+                          "logUnmarshal() invalid eventType %d",
+                          val->eventType);
+                break;
+            }
+            i_tpmBuf += size;
+
+            // TPML_DIGEST_VALUES
+            i_tpmBuf = TPML_DIGEST_VALUES_logUnmarshal(&(val->digests),
+                                                       i_tpmBuf, o_err);
+            if (i_tpmBuf == NULL)
+            {
+                break;
+            }
+
+            // TPM EVENT FIELD
+            i_tpmBuf = TPM_EVENT_FIELD_logUnmarshal(&(val->event),
+                                                    i_tpmBuf, o_err);
+            if (i_tpmBuf == NULL)
+            {
+                break;
+            }
+        } while(0);
+
+        return i_tpmBuf;
+    }
+
 #ifdef __cplusplus
+    bool TCG_PCR_EVENT2::operator==(const TCG_PCR_EVENT2& i_rhs) const
+    {
+        return (pcrIndex == i_rhs.pcrIndex) &&
+               (eventType == i_rhs.eventType) &&
+               (digests == i_rhs.digests) &&
+               (event == i_rhs.event);
+    }
 } // end TRUSTEDBOOT
 #endif

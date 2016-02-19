@@ -33,6 +33,7 @@
 #include <initservice/initserviceif.H>
 #include <util/align.H>
 #include <errl/errlmanager.H>
+#include <secureboot/trustedbootif.H>
 
 // Trace definition
 trace_desc_t* g_trac_pnor = NULL;
@@ -394,7 +395,7 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
                 {
                     //Figure out section enum
                     for(uint32_t eyeIndex=PNOR::TOC;eyeIndex<PNOR::NUM_SECTIONS;
-                                     eyeIndex++)
+                        eyeIndex++)
                     {
                         if(strcmp(cv_EYECATCHER[eyeIndex],cur_entry->name) == 0)
                         {
@@ -450,15 +451,28 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
                     {
                         TRACFCOMP(g_trac_pnor, "PNOR::parseTOC: Incrementing"
                                 " Flash Address for SHA Header");
+
+                        uint32_t l_addr = o_TOC[secId].flashAddr;
+                        size_t l_headerSize = 0;
                         if (o_TOC[secId].integrity == FFS_INTEG_ECC_PROTECT)
                         {
                             o_TOC[secId].flashAddr += PAGESIZE_PLUS_ECC;
+                            l_headerSize = PAGESIZE_PLUS_ECC;
                         }
                         else
                         {
                             o_TOC[secId].flashAddr += PAGESIZE;
+                            l_headerSize = PAGESIZE;
+                        }
+
+                        l_errhdl = PNOR::extendHash(l_addr, l_headerSize,
+                                                    cv_EYECATCHER[secId]);
+                        if (l_errhdl)
+                        {
+                            break;
                         }
                     }
+
 
                     if((o_TOC[secId].flashAddr + o_TOC[secId].size) >
                             (l_ffs_hdr->block_count*PAGESIZE))
@@ -602,6 +616,38 @@ errlHndl_t PNOR::parseTOC(uint8_t* i_toc0Buffer, uint8_t* i_toc1Buffer,
     }
 
     TRACUCOMP(g_trac_pnor, "< PNOR::parseTOC" );
+    return l_errhdl;
+}
+
+errlHndl_t PNOR::extendHash(uint64_t i_addr, size_t i_size, const char* i_name)
+{
+    errlHndl_t l_errhdl = NULL;
+
+    do {
+        #ifndef __HOSTBOOT_RUNTIME
+        // Read data from the PNOR DD
+        uint8_t* l_buf = new uint8_t[i_size]();
+        TARGETING::Target* l_target = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+        l_errhdl = DeviceFW::deviceRead(l_target, l_buf, i_size,
+                                        DEVICE_PNOR_ADDRESS(0,i_addr));
+        if (l_errhdl)
+        {
+            break;
+        }
+
+        SHA512_t l_hash = {0};
+        SECUREBOOT::hashBlob(l_buf, i_size, l_hash);
+        l_errhdl = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_0, l_hash,
+                                          sizeof(SHA512_t), i_name);
+        delete[] l_buf;
+
+        if (l_errhdl)
+        {
+            break;
+        }
+        #endif
+    } while(0);
+
     return l_errhdl;
 }
 

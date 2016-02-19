@@ -113,7 +113,11 @@ void* host_update_master_tpm( void *io_pArgs )
         }
 
         // Now we need to replay any existing entries in the log into the TPM
-        tpmReplayLog(systemTpms.tpm[TPM_MASTER_INDEX]);
+        if (!systemTpms.tpm[TPM_MASTER_INDEX].failed &&
+            systemTpms.tpm[TPM_MASTER_INDEX].available)
+        {
+            tpmReplayLog(systemTpms.tpm[TPM_MASTER_INDEX]);
+        }
 
         if (systemTpms.tpm[TPM_MASTER_INDEX].failed ||
             !systemTpms.tpm[TPM_MASTER_INDEX].available)
@@ -244,12 +248,78 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target,
 
 void tpmReplayLog(TRUSTEDBOOT::TpmTarget & io_target)
 {
-    ///@todo RTC:125288 Implement replay
-    // Function will walk existing entries in the TPM log and call
-    //   tpmCmdPcrExtend as required
-    // This function must commit any errors and call tpmMarkFailed if errors
-    //   are found
-}
+    TRACUCOMP(g_trac_trustedboot, ENTER_MRK"tpmReplayLog()");
+    errlHndl_t err = NULL;
+    bool unMarshalError = false;
 
+
+    // Create EVENT2 structure to be populated by getNextEvent()
+    TCG_PCR_EVENT2 l_eventLog;
+    // Move past header event to get a pointer to the first event
+    // If there are no events besides the header, l_eventHndl = NULL
+    const uint8_t* l_eventHndl = TpmLogMgr_getFirstEvent(io_target.logMgr);
+    while ( l_eventHndl != NULL )
+    {
+        // Get next event
+        l_eventHndl = TpmLogMgr_getNextEvent(io_target.logMgr,
+                                             l_eventHndl, &l_eventLog,
+                                             &unMarshalError);
+        if (unMarshalError)
+        {
+            /*@
+             * @errortype
+             * @reasoncode     RC_TPM_UNMARSHALING_FAIL
+             * @severity       ERRL_SEV_UNRECOVERABLE
+             * @moduleid       MOD_TPM_REPLAY_LOG
+             * @userdata1      Starting address of event that caused error
+             * @userdata2      0
+             * @devdesc        Unmarshal error while replaying tpm log.
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                        MOD_TPM_REPLAY_LOG,
+                                        RC_TPM_UNMARSHALING_FAIL,
+                                        reinterpret_cast<uint64_t>(l_eventHndl),
+                                        0,
+                                        true /*Add HB SW Callout*/ );
+
+            err->collectTrace( SECURE_COMP_NAME );
+            break;
+        }
+
+        // Extend to tpm
+        if (l_eventLog.eventType == EV_ACTION)
+        {
+            TRACUBIN(g_trac_trustedboot, "tpmReplayLog: Extending event:",
+                     &l_eventLog, sizeof(TCG_PCR_EVENT2));
+            for (size_t i = 0; i < l_eventLog.digests.count; i++)
+            {
+
+                TPM_Alg_Id l_algId = (TPM_Alg_Id)l_eventLog.digests.digests[i]
+                                                                .algorithmId;
+                err = tpmCmdPcrExtend(&io_target,
+                            (TPM_Pcr)l_eventLog.pcrIndex,
+                            l_algId,
+                            l_eventLog.digests.digests[i].digest.bytes,
+                            getDigestSize(l_algId));
+                if (err)
+                {
+                    break;
+                }
+            }
+            if (err)
+            {
+                break;
+            }
+        }
+    }
+    // If the TPM failed we will mark it not functional and commit errl
+    if (err)
+    {
+        tpmMarkFailed(&io_target);
+        errlCommit(err, SECURE_COMP_ID);
+        delete err;
+        err = NULL;
+    }
+}
 
 } // end TRUSTEDBOOT

@@ -94,7 +94,6 @@ namespace TRUSTEDBOOT
             mutex_init( &val->logMutex );
             mutex_lock( &val->logMutex );
 
-
             // Assign our new event pointer to the start
             val->newEventPtr = val->eventLog;
             memset(val->eventLog, 0, TPMLOG_BUFFER_SIZE);
@@ -120,13 +119,11 @@ namespace TRUSTEDBOOT
             eventData->digestSizes[0].digestSize = htole16(TPM_ALG_SHA256_SIZE);
             eventData->vendorInfoSize = sizeof(vendorInfo);
             memcpy(eventData->vendorInfo, vendorInfo, sizeof(vendorInfo));
-
             val->newEventPtr = TCG_PCR_EVENT_logMarshal(&eventLogEntry,
                                                         val->newEventPtr);
 
             // Done, move our pointers
             val->logSize += TCG_PCR_EVENT_marshalSize(&eventLogEntry);
-
 
             mutex_unlock( &val->logMutex );
 
@@ -139,7 +136,6 @@ namespace TRUSTEDBOOT
                        val->logSize,
                        ((TB_SUCCESS == err) ? "No Error" : "With Error") );
         }
-
         return err;
     }
 
@@ -247,6 +243,89 @@ namespace TRUSTEDBOOT
                   (int)val->logSize);
         TRACUBIN(g_trac_trustedboot, "tpmDumpLog",
                  val->eventLog, val->logSize);
+    }
+
+
+    const uint8_t* TpmLogMgr_getFirstEvent(TpmLogMgr* val)
+    {
+        TCG_PCR_EVENT event;
+        bool err = false;
+        const uint8_t* result = NULL;
+
+        // Header event in the log is always first, we skip over that
+        const uint8_t* firstEvent = val->eventLog;
+        memset(&event, 0, sizeof(TCG_PCR_EVENT));
+
+        firstEvent = TCG_PCR_EVENT_logUnmarshal(&event, firstEvent,
+                                                sizeof(TCG_PCR_EVENT),
+                                                &err);
+        if (NULL != firstEvent && !err &&
+            firstEvent < val->newEventPtr)
+        {
+            result = firstEvent;
+        }
+
+        return result;
+    }
+
+    const uint8_t* TpmLogMgr_getNextEvent(TpmLogMgr* val,
+                                          const uint8_t* i_handle,
+                                          TCG_PCR_EVENT2* i_eventLog,
+                                          bool* o_err)
+    {
+        const uint8_t* l_resultPtr = NULL;
+        if (NULL == i_handle)
+        {
+            *o_err = true;
+        }
+        else
+        {
+            memset(i_eventLog, 0, sizeof(TCG_PCR_EVENT2));
+            TRACUCOMP( g_trac_trustedboot, "TPM getNextEvent 0x%p", i_handle);
+            l_resultPtr = TCG_PCR_EVENT2_logUnmarshal(i_eventLog, i_handle,
+                                                      sizeof(TCG_PCR_EVENT2),
+                                                      o_err);
+            if (NULL == l_resultPtr)
+            {
+                // An error was detected, ensure o_err is set
+                *o_err = true;
+            }
+            else if (l_resultPtr >= val->newEventPtr)
+            {
+                l_resultPtr = NULL;
+            }
+        }
+
+        return l_resultPtr;
+    }
+
+    TCG_PCR_EVENT2 TpmLogMgr_genLogEventPcrExtend(TPM_Pcr i_pcr,
+                                                  TPM_Alg_Id i_algId,
+                                                  const uint8_t* i_digest,
+                                                  size_t i_digestSize,
+                                                  const char* i_logMsg)
+    {
+        TCG_PCR_EVENT2 eventLog;
+
+        memset(&eventLog, 0, sizeof(eventLog));
+        eventLog.pcrIndex = i_pcr;
+        eventLog.eventType = EV_ACTION;
+
+        // Update digest information, we only use 1 entry
+        eventLog.digests.count = 1;
+        eventLog.digests.digests[0].algorithmId = i_algId;
+        memcpy(eventLog.digests.digests[0].digest.bytes,
+               i_digest,
+               (i_digestSize > sizeof(TPMU_HA) ?
+                sizeof(TPMU_HA) : i_digestSize));
+
+        // Event field data
+        eventLog.event.eventSize = strlen(i_logMsg);
+        memcpy(eventLog.event.event, i_logMsg,
+               (strlen(i_logMsg) > MAX_TPM_LOG_MSG ?
+                MAX_TPM_LOG_MSG : strlen(i_logMsg)) );
+
+        return eventLog;
     }
 
 #ifdef __cplusplus
