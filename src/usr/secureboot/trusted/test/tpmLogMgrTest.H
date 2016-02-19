@@ -360,6 +360,210 @@ class TPMLogMgrTest: public CxxTest::TestSuite
             }
             while (0);
         }
+
+
+        /**
+         * @brief TPM Log calcLogSize tests
+         */
+        void testTpmLogCalcLogSize ( void )
+        {
+            TRACFCOMP( g_trac_trustedboot, "testTpmLogCalcLogSize - Start" );
+
+            do {
+                // Initialize logMgr
+                TpmLogMgr logMgr;
+                getTestLogMgr(&logMgr);
+
+                size_t firstEventSize = TpmLogMgr_getLogSize(&logMgr);
+
+                // No events beyond initial one
+                if ((TpmLogMgr_calcLogSize(&logMgr) !=
+                     TpmLogMgr_getLogSize(&logMgr)))
+                {
+                    TS_FAIL( "testTpmLogCalcLogSize - "
+                             "Invalid first event calc LS(%d) CS(%d)",
+                             TpmLogMgr_getLogSize(&logMgr),
+                             TpmLogMgr_calcLogSize(&logMgr));
+                    break;
+                }
+
+                // Add an event to log
+                TCG_PCR_EVENT2 eventLog = addTestLogEvent(logMgr,
+                                                          "CalcLog11");
+                if (TpmLogMgr_calcLogSize(&logMgr) !=
+                    TpmLogMgr_getLogSize(&logMgr) ||
+                    ((firstEventSize +
+                      TCG_PCR_EVENT2_marshalSize(&eventLog))
+                     != TpmLogMgr_getLogSize(&logMgr)) )
+                {
+                    TS_FAIL( "testTpmLogCalcLogSize - "
+                             "Invalid second event calc LS(%d) CS(%d)",
+                             TpmLogMgr_getLogSize(&logMgr),
+                             TpmLogMgr_calcLogSize(&logMgr));
+                    break;
+                }
+
+                // Add more events to log
+                for (int idx = 0; idx < 10; idx ++)
+                {
+                    eventLog = addTestLogEvent(logMgr,
+                                               "CalcLog3434");
+                    if (TpmLogMgr_calcLogSize(&logMgr) !=
+                        TpmLogMgr_getLogSize(&logMgr))
+                    {
+                        TS_FAIL( "testTpmLogCalcLogSize - IDX (%d) "
+                                 "Invalid additional event calc LS(%d) CS(%d)",
+                                 idx,
+                                 TpmLogMgr_getLogSize(&logMgr),
+                                 TpmLogMgr_calcLogSize(&logMgr));
+                        break;
+                    }
+                }
+            }
+            while (0);
+        }
+
+        /**
+         * @brief TPM Log initializeUsingExistingLog tests
+         */
+        void testTpmLogInitExisting ( void )
+        {
+            TRACFCOMP( g_trac_trustedboot, "testTpmLogInitExisting - Start" );
+            errlHndl_t err = NULL;
+            TCG_PCR_EVENT2 eventLog;
+
+            do {
+                // Initialize logMgr
+                TpmLogMgr logMgr;
+                getTestLogMgr(&logMgr);
+                // Create a logMgr clone
+                TpmLogMgr cloneMgr;
+
+                err = TpmLogMgr_initializeUsingExistingLog(&cloneMgr,
+                                           TpmLogMgr_getLogStartPtr(&logMgr),
+                                           logMgr.logMaxSize);
+
+                // No events beyond initial one
+                if (NULL != err ||
+                    TpmLogMgr_getLogSize(&logMgr) !=
+                    TpmLogMgr_getLogSize(&cloneMgr))
+                {
+                    TS_FAIL( "testTpmLogInitExisting - "
+                             "test fail on initial init "
+                             "err(%d) LMS(%d) CLS(%d)",
+                             (NULL == err) ? 0 : 1,
+                             TpmLogMgr_getLogSize(&logMgr),
+                             TpmLogMgr_getLogSize(&cloneMgr));
+                    break;
+                }
+
+
+                // Add more events to log
+                for (int idx = 0; idx < 10; idx ++)
+                {
+                    eventLog = addTestLogEvent(logMgr,
+                                               "CalcLog3434");
+                }
+
+                err = TpmLogMgr_initializeUsingExistingLog(&cloneMgr,
+                                           TpmLogMgr_getLogStartPtr(&logMgr),
+                                           logMgr.logMaxSize);
+
+                if (NULL != err ||
+                    TpmLogMgr_getLogSize(&logMgr) !=
+                    TpmLogMgr_getLogSize(&cloneMgr))
+                {
+                    TS_FAIL( "testTpmLogInitExisting - "
+                             "test fail on multiple log init "
+                             "err(%d) LMS(%d) CLS(%d)",
+                             (NULL == err) ? 0 : 1,
+                             TpmLogMgr_getLogSize(&logMgr),
+                             TpmLogMgr_getLogSize(&cloneMgr));
+                    break;
+                }
+
+                // Now try adding an event to the clone logMgr
+                eventLog = addTestLogEvent(cloneMgr, "Clone123 23434");
+                if (TpmLogMgr_getLogSize(&logMgr) ==
+                    TpmLogMgr_getLogSize(&cloneMgr))
+                {
+                    TS_FAIL( "testTpmLogInitExisting - "
+                             "test fail on addlog to clone"
+                             "LMS(%d) CLS(%d)",
+                             TpmLogMgr_getLogSize(&logMgr),
+                             TpmLogMgr_getLogSize(&cloneMgr));
+                    break;
+                }
+            }
+            while (0);
+            TRACFCOMP( g_trac_trustedboot, "testTpmLogInitExisting - End" );
+        }
+
+        /**
+         * @brief TPM Log initializeUsingExistingLog failing tests
+         */
+        void testTpmLogInitExistingFails ( void )
+        {
+            TRACFCOMP( g_trac_trustedboot,
+                       "testTpmLogInitExistingFails - Start" );
+            errlHndl_t err = NULL;
+
+            do {
+                // Initialize logMgr
+                TpmLogMgr logMgr;
+                getTestLogMgr(&logMgr);
+                // Create a logMgr clone
+                TpmLogMgr cloneMgr;
+                uint8_t logBuffer[256];
+
+                // Zero'd buffer without initial header entry
+                memset(logBuffer,0, sizeof(logBuffer));
+                err = TpmLogMgr_initializeUsingExistingLog(&cloneMgr,
+                                                           logBuffer,
+                                                           sizeof(logBuffer));
+
+                if (NULL == err)
+                {
+                    TS_FAIL( "testTpmLogInitExistingFails - "
+                             "test fail on initial init "
+                             "err(%d) LMS(%d) CLS(%d)",
+                             (NULL == err) ? 0 : 1,
+                             TpmLogMgr_getLogSize(&logMgr),
+                             TpmLogMgr_getLogSize(&cloneMgr));
+                    break;
+                }
+                else
+                {
+                    delete err;
+                    err = NULL;
+                }
+
+
+                // Buffer too small
+                err = TpmLogMgr_initializeUsingExistingLog(&cloneMgr,
+                                           TpmLogMgr_getLogStartPtr(&logMgr),
+                                           10);
+                if (NULL == err)
+                {
+                    TS_FAIL( "testTpmLogInitExistingFails - "
+                             "test fail on initial init buff too small"
+                             "err(%d) LMS(%d) CLS(%d)",
+                             (NULL == err) ? 0 : 1,
+                             TpmLogMgr_getLogSize(&logMgr),
+                             TpmLogMgr_getLogSize(&cloneMgr));
+                    break;
+                }
+                else
+                {
+                    delete err;
+                    err = NULL;
+                }
+            }
+            while (0);
+            TRACFCOMP( g_trac_trustedboot,
+                       "testTpmLogInitExistingFails - End" );
+        }
+
 };
 
 #endif

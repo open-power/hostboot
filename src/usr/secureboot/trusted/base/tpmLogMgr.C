@@ -58,6 +58,7 @@ namespace TRUSTEDBOOT
         return (sizeof(TCG_EfiSpecIdEventStruct) + val->vendorInfoSize);
     }
 
+#ifdef __HOSTBOOT_MODULE
     errlHndl_t TpmLogMgr_initialize(TpmLogMgr* val)
     {
         errlHndl_t err = TB_SUCCESS;
@@ -90,7 +91,9 @@ namespace TRUSTEDBOOT
         else
         {
 
-            val->logSize = 0;
+            memset(val, 0, sizeof(TpmLogMgr));
+            val->logMaxSize = TPMLOG_BUFFER_SIZE;
+
             mutex_init( &val->logMutex );
             mutex_lock( &val->logMutex );
 
@@ -138,6 +141,69 @@ namespace TRUSTEDBOOT
         }
         return err;
     }
+#endif
+
+    errlHndl_t TpmLogMgr_initializeUsingExistingLog(TpmLogMgr* val,
+                                                    uint8_t* eventLogPtr,
+                                                    uint32_t eventLogSize)
+    {
+        errlHndl_t err = TB_SUCCESS;
+        TRACUCOMP( g_trac_trustedboot,
+                   ">>initializeUsingExistingLog()");
+
+        do
+        {
+
+            mutex_init( &val->logMutex );
+            mutex_lock( &val->logMutex );
+            TRACUCOMP( g_trac_trustedboot,
+                   ">>initializeUsingExistingLog() 1");
+
+            val->logMaxSize = eventLogSize;
+            val->eventLogInMem = eventLogPtr;
+
+            // Ok, walk the log to figure out how big this is
+            val->logSize = TpmLogMgr_calcLogSize(val);
+            TRACUCOMP( g_trac_trustedboot,
+                   ">>initializeUsingExistingLog() 2");
+
+            if (0 == val->logSize)
+            {
+                TRACFCOMP( g_trac_trustedboot,
+                       "TPM LOG INIT WALK FAIL");
+                /*@
+                 * @errortype
+                 * @reasoncode     RC_TPMLOGMGR_LOGWALKFAIL
+                 * @severity       ERRL_SEV_UNRECOVERABLE
+                 * @moduleid       MOD_TPMLOGMGR_INITIALIZEEXISTLOG
+                 * @userdata1      0
+                 * @userdata2      0
+                 * @devdesc        TPM log header entry is missing.
+                 */
+                err = tpmCreateErrorLog(MOD_TPMLOGMGR_INITIALIZEEXISTLOG,
+                                        RC_TPMLOGMGR_LOGWALKFAIL,
+                                        0,
+                                        0);
+                break;
+            }
+            // We are good, let's move the newEventLogPtr
+            val->newEventPtr = val->eventLogInMem + val->logSize;
+
+        }
+        while(0);
+
+        if (TB_SUCCESS != err)
+        {
+            val->eventLogInMem = NULL;
+            val->newEventPtr = NULL;
+            val->logMaxSize = 0;
+            val->logSize = 0;
+        }
+
+        mutex_unlock( &val->logMutex );
+
+        return err;
+    }
 
     errlHndl_t TpmLogMgr_addEvent(TpmLogMgr* val,
                                   TCG_PCR_EVENT2* logEvent)
@@ -157,12 +223,14 @@ namespace TRUSTEDBOOT
             // Need to ensure we have room for the new event
             // We have to leave room for the log full event as well
             if (NULL == val->newEventPtr ||
-                val->logSize + newLogSize > TPMLOG_BUFFER_SIZE)
+                val->logSize + newLogSize > val->logMaxSize)
             {
                 TRACFCOMP( g_trac_trustedboot,
-                           "TPM LOG ADD FAIL PNULL(%d) LS(%d) New LS(%d)",
+                           "TPM LOG ADD FAIL PNULL(%d) LS(%d) New LS(%d)"
+                           " Max LS(%d)",
                            (NULL == val->newEventPtr ? 0 : 1),
-                           (int)val->logSize, (int)newLogSize);
+                           (int)val->logSize, (int)newLogSize,
+                           (int)val->logMaxSize);
 
                 /*@
                  * @errortype
@@ -233,10 +301,101 @@ namespace TRUSTEDBOOT
         // Debug display of raw data
         TRACUCOMP(g_trac_trustedboot, "tpmDumpLog Size : %d\n",
                   (int)val->logSize);
-        TRACUBIN(g_trac_trustedboot, "tpmDumpLog",
-                 val->eventLog, val->logSize);
+
+#ifdef __HOSTBOOT_MODULE
+        // Debug display of raw data
+        if (NULL == val->eventLogInMem)
+        {
+            TRACUBIN(g_trac_trustedboot, "tpmDumpLog",
+                     val->eventLog, val->logSize);
+        }
+        else
+        {
+#endif
+            TRACUBIN(g_trac_trustedboot, "tpmDumpLog From Memory",
+                     val->eventLogInMem, val->logSize);
+#ifdef __HOSTBOOT_MODULE
+        }
+#endif
     }
 
+    uint32_t TpmLogMgr_calcLogSize(TpmLogMgr* val)
+    {
+        uint32_t logSize = 0;
+        TCG_PCR_EVENT event;
+        TCG_PCR_EVENT2 event2;
+        bool errorFound = false;
+        const uint8_t* prevLogHandle = NULL;
+        const uint8_t* nextLogHandle = NULL;
+
+        TRACUCOMP( g_trac_trustedboot, ">>calcLogSize");
+
+        // Start walking events
+        prevLogHandle = TpmLogMgr_getLogStartPtr(val);
+        do
+        {
+
+            // First need to deal with the header entry
+            nextLogHandle = TCG_PCR_EVENT_logUnmarshal(&event,
+                                                       prevLogHandle,
+                                                       sizeof(TCG_PCR_EVENT),
+                                                       &errorFound);
+
+            if (NULL == nextLogHandle || errorFound ||
+                EV_NO_ACTION != event.eventType ||
+                0 == event.eventSize)
+            {
+                TRACFCOMP( g_trac_trustedboot, "Header Marshal Failure");
+                prevLogHandle = NULL;
+                break;
+            }
+
+            if (( nextLogHandle - TpmLogMgr_getLogStartPtr(val)) >
+                val->logMaxSize)
+            {
+                TRACFCOMP( g_trac_trustedboot, "calcLogSize overflow");
+                prevLogHandle = NULL;
+                break;
+            }
+            prevLogHandle = nextLogHandle;
+
+            // Now iterate through all the other events
+            while (NULL != prevLogHandle)
+            {
+                nextLogHandle = TCG_PCR_EVENT2_logUnmarshal(
+                                               &event2,
+                                               prevLogHandle,
+                                               sizeof(TCG_PCR_EVENT2),
+                                               &errorFound);
+                if (NULL == nextLogHandle || errorFound)
+                {
+                    // Failed parsing so we must have hit the end of log
+                    break;
+                }
+                if (( nextLogHandle - TpmLogMgr_getLogStartPtr(val)) >
+                    val->logMaxSize)
+                {
+                    TRACFCOMP( g_trac_trustedboot, "calcLogSize overflow");
+                    prevLogHandle = NULL;
+                    break;
+                }
+                prevLogHandle = nextLogHandle;
+            }
+        }
+        while (0);
+
+        if (NULL == prevLogHandle)
+        {
+            logSize = 0;
+        }
+        else
+        {
+            logSize = (prevLogHandle - TpmLogMgr_getLogStartPtr(val));
+        }
+        TRACUCOMP( g_trac_trustedboot, "<<calcLogSize : %d", logSize);
+
+        return logSize;
+    }
 
     const uint8_t* TpmLogMgr_getFirstEvent(TpmLogMgr* val)
     {
@@ -245,7 +404,7 @@ namespace TRUSTEDBOOT
         const uint8_t* result = NULL;
 
         // Header event in the log is always first, we skip over that
-        const uint8_t* firstEvent = val->eventLog;
+        const uint8_t* firstEvent = TpmLogMgr_getLogStartPtr(val);
         memset(&event, 0, sizeof(TCG_PCR_EVENT));
 
         firstEvent = TCG_PCR_EVENT_logUnmarshal(&event, firstEvent,
@@ -318,6 +477,17 @@ namespace TRUSTEDBOOT
                 MAX_TPM_LOG_MSG : strlen(i_logMsg)) );
 
         return eventLog;
+    }
+
+
+    uint8_t* TpmLogMgr_getLogStartPtr(TpmLogMgr* val)
+    {
+#ifdef __HOSTBOOT_MODULE
+        return (val->eventLogInMem == NULL ?
+           reinterpret_cast<uint8_t*>(&(val->eventLog)) : val->eventLogInMem);
+#else
+        return val->eventLogInMem;
+#endif
     }
 
 #ifdef __cplusplus

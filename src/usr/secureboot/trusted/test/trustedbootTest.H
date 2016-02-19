@@ -44,15 +44,6 @@
 #include "../base/trustedboot_base.H"
 #include "../base/tpmLogMgr.H"
 
-extern trace_desc_t* g_trac_trustedboot;
-
-// Easy macro replace for unit testing
-//#define TRACUCOMP(args...)  TRACFCOMP(args)
-#define TRACUCOMP(args...)
-//#define TRACUBIN(args...)  TRACFBIN(args)
-#define TRACUBIN(args...)
-
-
 using namespace TRUSTEDBOOT;
 
 

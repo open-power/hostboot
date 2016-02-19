@@ -56,6 +56,7 @@ namespace TRUSTEDBOOT
 
         MOD_TPMLOGMGR_INITIALIZE        = 0x10,
         MOD_TPMLOGMGR_ADDEVENT          = 0x11,
+        MOD_TPMLOGMGR_INITIALIZEEXISTLOG = 0x012,
    };
 
     enum TRUSTEDReasonCode
@@ -78,6 +79,7 @@ namespace TRUSTEDBOOT
         RC_TPM_NOFUNCTIONALTPM_FAIL     = SECURE_COMP_ID | 0xAD,
         RC_TPM_COMMAND_FAIL             = SECURE_COMP_ID | 0xAE,
         RC_TPM_INVALID_ARGS             = SECURE_COMP_ID | 0xAF,
+        RC_TPMLOGMGR_LOGWALKFAIL        = SECURE_COMP_ID | 0xB0,
     };
 #ifdef __cplusplus
 }
