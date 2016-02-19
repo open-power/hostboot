@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,9 +78,9 @@ errlHndl_t verifyContainer(void * i_container, size_t i_size)
  * @brief Hash Signed Blob
  *
  */
-errlHndl_t hashBlob(void * i_blob, size_t i_size)
+errlHndl_t hashBlob(void * i_blob, size_t i_size, SHA512_t io_buf)
 {
-    return Singleton<SecureROM>::instance().hashBlob(i_blob, i_size);
+    return Singleton<SecureROM>::instance().hashBlob(i_blob, i_size, io_buf);
 
 }
 
@@ -391,21 +391,43 @@ errlHndl_t SecureROM::verifyContainer(void * i_container, size_t i_size)
 /**
  * @brief Hash Blob
  */
-errlHndl_t SecureROM::hashBlob(void * i_blob, size_t i_size)
+errlHndl_t SecureROM::hashBlob(void * i_blob, size_t i_size, SHA512_t io_buf)
 {
 
     TRACDCOMP(g_trac_secure,INFO_MRK"SecureROM::hashBlob() NOT "
               "supported, but not returning error log");
 
-    // @todo RTC:34080 - Add support for this function
-
     errlHndl_t  l_errl      =   NULL;
 
-    TRACDCOMP(g_trac_secure,EXIT_MRK"SecureROM::hashBlob() - %s",
-              ((NULL == l_errl) ? "No Error" : "With Error") );
+    do{
+#ifdef CONFIG_ROM_CODE_PRESENT
+
+        // Check to see if ROM has already been initialized
+        // This should have been done early in IPL so assert if this
+        // is not the case as system is in a bad state
+        assert(iv_device_ptr != NULL);
+
+        // Set startAddr to ROM_SHA512() function at an offset of Secure ROM
+        uint64_t l_rom_SHA512_startAddr = reinterpret_cast<uint64_t>(
+                                                 iv_device_ptr)
+                                               + SHA512_HASH_FUNCTION_OFFSET;
+
+        call_rom_SHA512(reinterpret_cast<void*>(l_rom_SHA512_startAddr),
+                        reinterpret_cast<sha2_byte*>(i_blob),
+                        i_size,
+                        reinterpret_cast<sha2_hash_t*>(io_buf));
+
+        TRACUCOMP(g_trac_secure,"SecureROM::hashBlob(): "
+                  "call_rom_SHA512: blob=%p size=0x%X addr=%p (iv_d_p=%p)",
+                   i_blob, i_size, l_rom_SHA512_startAddr,
+                   iv_device_ptr);
+#endif
+    }while(0);
+
+
+    TRACDCOMP(g_trac_secure,EXIT_MRK"SecureROM::hashBlob()");
 
     return l_errl;
-
 }
 
 

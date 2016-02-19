@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -56,7 +58,8 @@ typedef uint8_t __attribute__((aligned(8))) sha2_hash_t[ \
 
 typedef uint8_t  sha2_byte;     /* Exactly 1 byte */
 
-void SHA512_Hash(const sha2_byte *data, size_t len, sha2_hash_t *result);
+// This is the interface that call_rom_SHA512 calls into
+// void SHA512_Hash(const sha2_byte *data, size_t len, sha2_hash_t *result);
 
 
 /*  From ROM.h */
@@ -145,13 +148,14 @@ class SecureROM
         /**
          * @brief Hash Blob
          *
-         * @param[in] i_blob    Void pointer to effective address
-         *                       of blob
-         * @param[in] i_size    Size of blob in bytes
+         * @param[in] i_blob        Void pointer to effective address
+         *                              of blob
+         * @param[in] i_size        Size of blob in bytes
+         * @param[in/out] io_buf    Resulting hash buffer
          *
          * @return errlHndl_t  NULL on success
          */
-        errlHndl_t hashBlob(void * i_blob, size_t i_size);
+        errlHndl_t hashBlob(void * i_blob, size_t i_size, SHA512_t io_buf);
 
 
     protected:

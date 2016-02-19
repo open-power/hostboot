@@ -116,6 +116,51 @@ namespace TRUSTEDBOOT
      */
     uint32_t TpmLogMgr_getLogSize(TpmLogMgr* val);
 
+
+    /**
+     * @brief Get pointer to first event in eventLog past the header event
+     * @param[in] val TpmLogMgr structure
+     * @return uint8_t First event handle
+     * @retval NULL On empty log
+     * @retval !NULL First event handle
+     */
+    const uint8_t* TpmLogMgr_getFirstEvent(TpmLogMgr* val);
+
+    /**
+     * @brief Get pointer to next event in log and unmarshal log contents
+     *        into i_eventLog
+     *
+     * @param[in] i_handle      Current event to unmarshal
+     * @param[in] i_eventLog    EVENT2 structure to populate
+     * @param[in] o_err         Indicates if an error occurred during
+     *                          LogUnmarshal.
+     *
+     * @return uint8_t*     Pointer to the next event after i_handle
+     * @retval NULL When val contains last entry in log
+     * @retval !NULL When addition log entries available
+     */
+    const uint8_t* TpmLogMgr_getNextEvent(TpmLogMgr* val,
+                                          const uint8_t* i_handle,
+                                          TCG_PCR_EVENT2* i_eventLog,
+                                          bool* o_err);
+
+    /**
+     * @brief Get a TCG_PCR_EVENT2 populated with required data
+     *
+     * @param[in] i_pcr PCR to write to
+     * @param[in] i_algId Algorithm to use
+     * @param[in] i_digest Digest value to write to PCR
+     * @param[in] i_digestSize Byte size of i_digest array
+     * @param[in] i_logMsg Null terminated Log message
+     *
+     * @return TCG_PCR_EVENT2   PCR event log
+     */
+    TCG_PCR_EVENT2 TpmLogMgr_genLogEventPcrExtend(TPM_Pcr i_pcr,
+                                                  TPM_Alg_Id i_algId,
+                                                  const uint8_t* i_digest,
+                                                  size_t i_digestSize,
+                                                  const char* i_logMsg);
+
     /**
      * @brief Dump contents of log to a trace
      * @param[in] val TpmLogMgr structure

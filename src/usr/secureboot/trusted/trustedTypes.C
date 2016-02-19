@@ -44,7 +44,7 @@ namespace TRUSTEDBOOT
 {
 #endif
 
-    uint8_t* unmarshalChunk(uint8_t* i_tpmBuf,
+    const uint8_t* unmarshalChunk(const uint8_t* i_tpmBuf,
                             size_t * io_tpmBufSize,
                             void* o_chunkPtr,
                             size_t i_chunkSize);
@@ -52,10 +52,10 @@ namespace TRUSTEDBOOT
     uint8_t* marshalChunk(uint8_t* o_tpmBuf,
                           size_t i_tpmBufSize,
                           size_t * io_cmdSize,
-                          void* i_chunkPtr,
+                          const void* i_chunkPtr,
                           size_t i_chunkSize);
 
-    uint8_t* unmarshalChunk(uint8_t* i_tpmBuf,
+    const uint8_t* unmarshalChunk(const uint8_t* i_tpmBuf,
                             size_t * io_tpmBufSize,
                             void* o_chunkPtr,
                             size_t i_chunkSize)
@@ -76,7 +76,7 @@ namespace TRUSTEDBOOT
     uint8_t* marshalChunk(uint8_t* o_tpmBuf,
                           size_t i_tpmBufSize,
                           size_t * io_cmdSize,
-                          void* i_chunkPtr,
+                          const void* i_chunkPtr,
                           size_t i_chunkSize)
     {
         if (NULL != o_tpmBuf)
@@ -92,9 +92,10 @@ namespace TRUSTEDBOOT
         return o_tpmBuf;
     }
 
-    uint8_t* TPML_TAGGED_TPM_PROPERTY_unmarshal(TPML_TAGGED_TPM_PROPERTY* val,
-                                                uint8_t* i_tpmBuf,
-                                                size_t* io_tpmBufSize)
+    const uint8_t* TPML_TAGGED_TPM_PROPERTY_unmarshal(
+                           TPML_TAGGED_TPM_PROPERTY* val,
+                           const uint8_t* i_tpmBuf,
+                           size_t* io_tpmBufSize)
     {
 
         i_tpmBuf = unmarshalChunk(i_tpmBuf, io_tpmBufSize,
@@ -108,9 +109,9 @@ namespace TRUSTEDBOOT
         return i_tpmBuf;
     }
 
-    uint8_t* TPMS_CAPABILITY_DATA_unmarshal(TPMS_CAPABILITY_DATA* val,
-                                            uint8_t* i_tpmBuf,
-                                            size_t * io_tpmBufSize)
+    const uint8_t* TPMS_CAPABILITY_DATA_unmarshal(TPMS_CAPABILITY_DATA* val,
+                                                  const uint8_t* i_tpmBuf,
+                                                  size_t * io_tpmBufSize)
     {
         i_tpmBuf = unmarshalChunk(i_tpmBuf, io_tpmBufSize,
                                   &(val->capability),
@@ -136,7 +137,7 @@ namespace TRUSTEDBOOT
         return NULL;
     }
 
-    uint8_t* TPMT_HA_marshal(TPMT_HA* val,
+    uint8_t* TPMT_HA_marshal(const TPMT_HA* val,
                              uint8_t* o_tpmBuf,
                              size_t i_tpmBufSize,
                              size_t * io_cmdSize)
@@ -153,24 +154,7 @@ namespace TRUSTEDBOOT
         return o_tpmBuf;
     }
 
-    size_t TCG_PCR_EVENT_marshalSize(TCG_PCR_EVENT* val)
-    {
-        return (sizeof(TCG_PCR_EVENT) + val->eventSize - MAX_TPM_LOG_MSG);
-    }
-
-    size_t TPMT_HA_marshalSize(TPMT_HA* val)
-    {
-        return (sizeof(val->algorithmId) +
-                getDigestSize((TPM_Alg_Id)(val->algorithmId)));
-    }
-
-    size_t TPM_EVENT_FIELD_marshalSize(TPM_EVENT_FIELD* val)
-    {
-        return (sizeof(val->eventSize) + val->eventSize);
-    }
-
-
-    uint8_t* TPML_DIGEST_VALUES_marshal(TPML_DIGEST_VALUES* val,
+    uint8_t* TPML_DIGEST_VALUES_marshal(const TPML_DIGEST_VALUES* val,
                                         uint8_t* o_tpmBuf,
                                         size_t i_tpmBufSize,
                                         size_t * io_cmdSize)
@@ -198,15 +182,17 @@ namespace TRUSTEDBOOT
         return o_tpmBuf;
     }
 
-    uint8_t* TPM2_BaseIn_marshal(TPM2_BaseIn* val, uint8_t* o_tpmBuf,
+    uint8_t* TPM2_BaseIn_marshal(const TPM2_BaseIn* val, uint8_t* o_tpmBuf,
                                  size_t i_tpmBufSize, size_t* io_cmdSize)
     {
         return marshalChunk(o_tpmBuf, i_tpmBufSize, io_cmdSize,
                             val, sizeof(TPM2_BaseIn));
     }
 
-    uint8_t* TPM2_BaseOut_unmarshal(TPM2_BaseOut* val, uint8_t* i_tpmBuf,
-                                    size_t* io_tpmBufSize, size_t i_outBufSize)
+    const uint8_t* TPM2_BaseOut_unmarshal(TPM2_BaseOut* val,
+                                          const uint8_t* i_tpmBuf,
+                                          size_t* io_tpmBufSize,
+                                          size_t i_outBufSize)
     {
         if (sizeof(TPM2_BaseOut) > i_outBufSize)
         {
@@ -216,7 +202,7 @@ namespace TRUSTEDBOOT
                               val, sizeof(TPM2_BaseOut));
     }
 
-    uint8_t* TPM2_2ByteIn_marshal(TPM2_2ByteIn* val,
+    uint8_t* TPM2_2ByteIn_marshal(const TPM2_2ByteIn* val,
                                   uint8_t* o_tpmBuf,
                                   size_t i_tpmBufSize,
                                   size_t* io_cmdSize)
@@ -226,7 +212,7 @@ namespace TRUSTEDBOOT
                             &(val->param), sizeof(val->param));
     }
 
-    uint8_t* TPM2_4ByteIn_marshal(TPM2_4ByteIn* val,
+    uint8_t* TPM2_4ByteIn_marshal(const TPM2_4ByteIn* val,
                                   uint8_t* o_tpmBuf,
                                   size_t i_tpmBufSize,
                                   size_t* io_cmdSize)
@@ -236,7 +222,7 @@ namespace TRUSTEDBOOT
                             &(val->param), sizeof(val->param));
     }
 
-    uint8_t* TPM2_GetCapabilityIn_marshal(TPM2_GetCapabilityIn* val,
+    uint8_t* TPM2_GetCapabilityIn_marshal(const TPM2_GetCapabilityIn* val,
                                           uint8_t* o_tpmBuf,
                                           size_t i_tpmBufSize,
                                           size_t* io_cmdSize)
@@ -254,10 +240,10 @@ namespace TRUSTEDBOOT
         return o_tpmBuf;
     }
 
-    uint8_t* TPM2_GetCapabilityOut_unmarshal(TPM2_GetCapabilityOut* val,
-                                             uint8_t* i_tpmBuf,
-                                             size_t* io_tpmBufSize,
-                                             size_t i_outBufSize)
+    const uint8_t* TPM2_GetCapabilityOut_unmarshal(TPM2_GetCapabilityOut* val,
+                                                   const uint8_t* i_tpmBuf,
+                                                   size_t* io_tpmBufSize,
+                                                   size_t i_outBufSize)
     {
         // Base has already been unmarshaled
         if (sizeof(TPM2_GetCapabilityOut) > i_outBufSize)
@@ -273,7 +259,7 @@ namespace TRUSTEDBOOT
 
     }
 
-    uint8_t* TPM2_ExtendIn_marshalHandle(TPM2_ExtendIn* val,
+    uint8_t* TPM2_ExtendIn_marshalHandle(const TPM2_ExtendIn* val,
                                          uint8_t* o_tpmBuf,
                                          size_t i_tpmBufSize,
                                          size_t* io_cmdSize)
@@ -284,7 +270,7 @@ namespace TRUSTEDBOOT
                             &(val->pcrHandle), sizeof(val->pcrHandle));
     }
 
-    uint8_t* TPM2_ExtendIn_marshalParms(TPM2_ExtendIn* val,
+    uint8_t* TPM2_ExtendIn_marshalParms(const TPM2_ExtendIn* val,
                                         uint8_t* o_tpmBuf,
                                         size_t i_tpmBufSize,
                                         size_t* io_cmdSize)
@@ -294,7 +280,7 @@ namespace TRUSTEDBOOT
                                            i_tpmBufSize, io_cmdSize));
     }
 
-    uint8_t* TPMS_PCR_SELECTION_marshal(TPMS_PCR_SELECTION* val,
+    uint8_t* TPMS_PCR_SELECTION_marshal(const TPMS_PCR_SELECTION* val,
                                         uint8_t* o_tpmBuf,
                                         size_t i_tpmBufSize,
                                         size_t* io_cmdSize)
@@ -315,9 +301,9 @@ namespace TRUSTEDBOOT
         return o_tpmBuf;
     }
 
-    uint8_t* TPMS_PCR_SELECTION_unmarshal(TPMS_PCR_SELECTION* val,
-                                          uint8_t* i_tpmBuf,
-                                          size_t* io_tpmBufSize)
+    const uint8_t* TPMS_PCR_SELECTION_unmarshal(TPMS_PCR_SELECTION* val,
+                                                const uint8_t* i_tpmBuf,
+                                                size_t* io_tpmBufSize)
     {
         i_tpmBuf = unmarshalChunk(i_tpmBuf, io_tpmBufSize,
                                   &(val->algorithmId),
@@ -336,8 +322,8 @@ namespace TRUSTEDBOOT
         return i_tpmBuf;
     }
 
-    uint8_t* TPM2B_DIGEST_unmarshal(TPM2B_DIGEST* val,
-                                    uint8_t* i_tpmBuf,
+    const uint8_t* TPM2B_DIGEST_unmarshal(TPM2B_DIGEST* val,
+                                    const uint8_t* i_tpmBuf,
                                     size_t* io_tpmBufSize)
     {
         i_tpmBuf = unmarshalChunk(i_tpmBuf, io_tpmBufSize,
@@ -355,8 +341,8 @@ namespace TRUSTEDBOOT
 
     }
 
-    uint8_t* TPML_DIGEST_unmarshal(TPML_DIGEST* val,
-                                   uint8_t* i_tpmBuf,
+    const uint8_t* TPML_DIGEST_unmarshal(TPML_DIGEST* val,
+                                   const uint8_t* i_tpmBuf,
                                    size_t* io_tpmBufSize)
     {
         i_tpmBuf = unmarshalChunk(i_tpmBuf, io_tpmBufSize,
@@ -384,7 +370,7 @@ namespace TRUSTEDBOOT
 
     }
 
-    uint8_t* TPML_PCR_SELECTION_marshal(TPML_PCR_SELECTION* val,
+    uint8_t* TPML_PCR_SELECTION_marshal(const TPML_PCR_SELECTION* val,
                                         uint8_t* o_tpmBuf,
                                         size_t i_tpmBufSize,
                                         size_t* io_cmdSize)
@@ -415,8 +401,8 @@ namespace TRUSTEDBOOT
         return o_tpmBuf;
     }
 
-    uint8_t* TPML_PCR_SELECTION_unmarshal(TPML_PCR_SELECTION* val,
-                                          uint8_t* i_tpmBuf,
+    const uint8_t* TPML_PCR_SELECTION_unmarshal(TPML_PCR_SELECTION* val,
+                                          const uint8_t* i_tpmBuf,
                                           size_t* io_tpmBufSize)
     {
         i_tpmBuf = unmarshalChunk(i_tpmBuf, io_tpmBufSize,
@@ -445,7 +431,7 @@ namespace TRUSTEDBOOT
 
     }
 
-    uint8_t* TPM2_PcrReadIn_marshal(TPM2_PcrReadIn* val,
+    uint8_t* TPM2_PcrReadIn_marshal(const TPM2_PcrReadIn* val,
                                     uint8_t* o_tpmBuf,
                                     size_t i_tpmBufSize,
                                     size_t* io_cmdSize)
@@ -455,8 +441,8 @@ namespace TRUSTEDBOOT
                                            i_tpmBufSize, io_cmdSize));
     }
 
-    uint8_t* TPM2_PcrReadOut_unmarshal(TPM2_PcrReadOut* val,
-                                       uint8_t* i_tpmBuf,
+    const uint8_t* TPM2_PcrReadOut_unmarshal(TPM2_PcrReadOut* val,
+                                       const uint8_t* i_tpmBuf,
                                        size_t* io_tpmBufSize,
                                        size_t i_outBufSize)
     {
@@ -474,7 +460,7 @@ namespace TRUSTEDBOOT
 
     }
 
-    uint8_t* TPMS_AUTH_COMMAND_marshal(TPMS_AUTH_COMMAND* val,
+    uint8_t* TPMS_AUTH_COMMAND_marshal(const TPMS_AUTH_COMMAND* val,
                                        uint8_t* o_tpmBuf,
                                        size_t i_tpmBufSize,
                                        size_t* io_cmdSize)

@@ -313,7 +313,7 @@ errlHndl_t tpmUnmarshalResponseData(uint32_t i_commandCode,
                                     size_t i_outBufSize)
 {
     errlHndl_t err = TB_SUCCESS;
-    uint8_t* sBuf = i_respBuf;
+    const uint8_t* sBuf = i_respBuf;
     int stage = 0;
 
     TRACDCOMP( g_trac_trustedboot,

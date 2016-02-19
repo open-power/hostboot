@@ -52,7 +52,6 @@ namespace TRUSTEDBOOT
 {
 #endif
 
-
     /// TPM Algorithm defines
     typedef enum
     {
@@ -80,7 +79,6 @@ namespace TRUSTEDBOOT
         HASH_COUNT            = 1,       ///< Maximum # of digests
 
         PCR_SELECT_MAX = (IMPLEMENTATION_PCR+7)/8, ///< PCR selection octet max
-
     };
 
     typedef enum
@@ -162,8 +160,10 @@ namespace TRUSTEDBOOT
         TPMS_TAGGED_PROPERTY tpmProperty[MAX_TPM_PROPERTIES];
     } PACKED;
     typedef struct _TPML_TAGGED_TPM_PROPERTY TPML_TAGGED_TPM_PROPERTY;
-    uint8_t* TPML_TAGGED_TPM_PROPERTY_unmarshal(TPML_TAGGED_TPM_PROPERTY* val,
-                       uint8_t* i_tpmBuf, size_t* io_tpmBufSize);
+    const uint8_t* TPML_TAGGED_TPM_PROPERTY_unmarshal(
+                                      TPML_TAGGED_TPM_PROPERTY* val,
+                                      const uint8_t* i_tpmBuf,
+                                      size_t* io_tpmBufSize);
 
     union _TPMU_CAPABILITIES
     {
@@ -178,8 +178,8 @@ namespace TRUSTEDBOOT
         TPMU_CAPABILITIES data; ///< The capability data
     } PACKED;
     typedef struct _TPMS_CAPABILITY_DATA TPMS_CAPABILITY_DATA;
-    uint8_t* TPMS_CAPABILITY_DATA_unmarshal(TPMS_CAPABILITY_DATA* val,
-                                            uint8_t* i_tpmBuf,
+    const uint8_t* TPMS_CAPABILITY_DATA_unmarshal(TPMS_CAPABILITY_DATA* val,
+                                            const uint8_t* i_tpmBuf,
                                             size_t * io_tpmBufSize);
 
 
@@ -193,10 +193,12 @@ namespace TRUSTEDBOOT
         uint8_t    event[MAX_TPM_LOG_MSG]; ///< The event data
     } PACKED;
     typedef struct _TCG_PCR_EVENT TCG_PCR_EVENT;
-    size_t TCG_PCR_EVENT_marshalSize(TCG_PCR_EVENT* val);
-    uint8_t* TCG_PCR_EVENT_logUnmarshal(TCG_PCR_EVENT* val, uint8_t* i_tpmBuf,
-                                        size_t i_bufSize, bool* o_err);
-    uint8_t* TCG_PCR_EVENT_logMarshal(TCG_PCR_EVENT* val, uint8_t* i_logBuf);
+    size_t TCG_PCR_EVENT_marshalSize(const TCG_PCR_EVENT* val);
+    const uint8_t* TCG_PCR_EVENT_logUnmarshal(TCG_PCR_EVENT* val,
+                                              const uint8_t* i_tpmBuf,
+                                              size_t i_bufSize, bool* o_err);
+    uint8_t* TCG_PCR_EVENT_logMarshal(const TCG_PCR_EVENT* val,
+                                      uint8_t* i_logBuf);
 
     /// Digest union
     union _TPMU_HA
@@ -212,11 +214,16 @@ namespace TRUSTEDBOOT
     {
         uint16_t   algorithmId; ///< ID of hashing algorithm
         TPMU_HA    digest;      ///< Digest, depends on algorithmid
+#ifdef __cplusplus
+        bool operator==(const _TPMT_HA& i_rhs) const;
+#endif
     } PACKED;
     typedef struct _TPMT_HA TPMT_HA;
-    size_t TPMT_HA_marshalSize(TPMT_HA* val);
-    uint8_t* TPMT_HA_logMarshal(TPMT_HA* val, uint8_t* i_logBuf);
-    uint8_t* TPMT_HA_marshal(TPMT_HA* val, uint8_t* o_tpmBuf,
+    size_t TPMT_HA_marshalSize(const TPMT_HA* val);
+    uint8_t* TPMT_HA_logMarshal(const TPMT_HA* val, uint8_t* i_logBuf);
+    const uint8_t* TPMT_HA_logUnmarshal(TPMT_HA* val,
+                                        const uint8_t* i_tpmBuf, bool* o_err);
+    uint8_t* TPMT_HA_marshal(const TPMT_HA* val, uint8_t* o_tpmBuf,
                              size_t i_tpmBufSize, size_t * io_cmdSize);
 
 
@@ -225,12 +232,18 @@ namespace TRUSTEDBOOT
     {
         uint32_t   count;                ///< Number of digests
         TPMT_HA    digests[HASH_COUNT];  ///< Digests
+#ifdef __cplusplus
+        bool operator==(const _TPML_DIGEST_VALUES& i_rhs) const;
+#endif
     } PACKED;
     typedef struct _TPML_DIGEST_VALUES TPML_DIGEST_VALUES;
-    size_t TPML_DIGEST_VALUES_marshalSize(TPML_DIGEST_VALUES* val);
-    uint8_t* TPML_DIGEST_VALUES_logMarshal(TPML_DIGEST_VALUES* val,
+    size_t TPML_DIGEST_VALUES_marshalSize(const TPML_DIGEST_VALUES* val);
+    uint8_t* TPML_DIGEST_VALUES_logMarshal(const TPML_DIGEST_VALUES* val,
                                            uint8_t* i_logBuf);
-    uint8_t* TPML_DIGEST_VALUES_marshal(TPML_DIGEST_VALUES* val,
+    const uint8_t* TPML_DIGEST_VALUES_logUnmarshal(TPML_DIGEST_VALUES* val,
+                                                   const uint8_t* i_tpmBuf,
+                                                   bool* o_err);
+    uint8_t* TPML_DIGEST_VALUES_marshal(const TPML_DIGEST_VALUES* val,
                                         uint8_t* o_tpmBuf, size_t i_tpmBufSize,
                                         size_t * io_cmdSize);
 
@@ -239,11 +252,17 @@ namespace TRUSTEDBOOT
     {
         uint32_t   eventSize;               ///< Size of event data
         uint8_t    event[MAX_TPM_LOG_MSG];  ///< The event data
+#ifdef __cplusplus
+        bool operator==(const _TPM_EVENT_FIELD& i_rhs) const;
+#endif
     } PACKED;
     typedef struct _TPM_EVENT_FIELD TPM_EVENT_FIELD;
-    size_t TPM_EVENT_FIELD_marshalSize(TPM_EVENT_FIELD* val);
-    uint8_t* TPM_EVENT_FIELD_logMarshal(TPM_EVENT_FIELD* val,
+    size_t TPM_EVENT_FIELD_marshalSize(const TPM_EVENT_FIELD* val);
+    uint8_t* TPM_EVENT_FIELD_logMarshal(const TPM_EVENT_FIELD* val,
                                         uint8_t* i_logBuf);
+    const uint8_t* TPM_EVENT_FIELD_logUnmarshal(TPM_EVENT_FIELD* val,
+                                                const uint8_t* i_tpmBuf,
+                                                bool* o_err);
 
     /// Crypto agile log entry format
     struct _TCG_PCR_EVENT2
@@ -252,11 +271,17 @@ namespace TRUSTEDBOOT
         uint32_t   eventType;   ///< Type of event
         TPML_DIGEST_VALUES digests; ///< List of digests extended to PCRIndex
         TPM_EVENT_FIELD event;      ///< Event information
+#ifdef __cplusplus
+        bool operator==(const _TCG_PCR_EVENT2& i_rhs) const;
+#endif
     } PACKED;
     typedef struct _TCG_PCR_EVENT2 TCG_PCR_EVENT2;
-    uint8_t* TCG_PCR_EVENT2_logMarshal(TCG_PCR_EVENT2* val,
+    uint8_t* TCG_PCR_EVENT2_logMarshal(const TCG_PCR_EVENT2* val,
                                        uint8_t* i_logBuf);
-    size_t TCG_PCR_EVENT2_marshalSize(TCG_PCR_EVENT2* val);
+    const uint8_t* TCG_PCR_EVENT2_logUnmarshal(TCG_PCR_EVENT2* val,
+                                               const uint8_t* i_tpmBuf,
+                                               size_t i_bufSize, bool* o_err);
+    size_t TCG_PCR_EVENT2_marshalSize(const TCG_PCR_EVENT2* val);
 
     struct _TPM2_BaseIn
     {
@@ -265,7 +290,7 @@ namespace TRUSTEDBOOT
         uint32_t      commandCode; ///< Type TPM_CC_xx
     } PACKED;
     typedef struct _TPM2_BaseIn TPM2_BaseIn;
-    uint8_t* TPM2_BaseIn_marshal(TPM2_BaseIn* val, uint8_t* o_tpmBuf,
+    uint8_t* TPM2_BaseIn_marshal(const TPM2_BaseIn* val, uint8_t* o_tpmBuf,
                                  size_t i_tpmBufSize, size_t* io_cmdSize);
 
     /// Base of all outgoing messages
@@ -276,7 +301,8 @@ namespace TRUSTEDBOOT
         uint32_t      responseCode; ///< The return code of the operation
     } PACKED;
     typedef struct _TPM2_BaseOut TPM2_BaseOut;
-    uint8_t* TPM2_BaseOut_unmarshal(TPM2_BaseOut* val, uint8_t* i_tpmBuf,
+    const uint8_t* TPM2_BaseOut_unmarshal(TPM2_BaseOut* val,
+                                    const uint8_t* i_tpmBuf,
                                     size_t* io_tpmBufSize, size_t i_outBufSize);
 
     /// Generic TPM Input Command structure with a 2 byte param
@@ -286,7 +312,7 @@ namespace TRUSTEDBOOT
         uint16_t     param;
     } PACKED;
     typedef struct _TPM2_2ByteIn TPM2_2ByteIn;
-    uint8_t* TPM2_2ByteIn_marshal(TPM2_2ByteIn* val, uint8_t* o_tpmBuf,
+    uint8_t* TPM2_2ByteIn_marshal(const TPM2_2ByteIn* val, uint8_t* o_tpmBuf,
                                   size_t i_tpmBufSize, size_t* io_cmdSize);
 
     /// Generic TPM Input Command structure with a 4 byte param
@@ -296,7 +322,7 @@ namespace TRUSTEDBOOT
         uint32_t     param;
     } PACKED;
     typedef struct _TPM2_4ByteIn TPM2_4ByteIn;
-    uint8_t* TPM2_4ByteIn_marshal(TPM2_4ByteIn* val, uint8_t* o_tpmBuf,
+    uint8_t* TPM2_4ByteIn_marshal(const TPM2_4ByteIn* val, uint8_t* o_tpmBuf,
                                   size_t i_tpmBufSize, size_t* io_cmdSize);
 
 
@@ -317,7 +343,7 @@ namespace TRUSTEDBOOT
         uint32_t    propertyCount;   ///< Number of properties to return
     } PACKED;
     typedef struct _TPM2_GetCapabilityIn TPM2_GetCapabilityIn;
-    uint8_t* TPM2_GetCapabilityIn_marshal(TPM2_GetCapabilityIn* val,
+    uint8_t* TPM2_GetCapabilityIn_marshal(const TPM2_GetCapabilityIn* val,
                                           uint8_t* o_tpmBuf,
                                           size_t i_tpmBufSize,
                                           size_t* io_cmdSize);
@@ -330,8 +356,8 @@ namespace TRUSTEDBOOT
         TPMS_CAPABILITY_DATA capData; ///< The capability response
     } PACKED;
     typedef struct _TPM2_GetCapabilityOut TPM2_GetCapabilityOut;
-    uint8_t* TPM2_GetCapabilityOut_unmarshal(TPM2_GetCapabilityOut* val,
-                                             uint8_t* i_tpmBuf,
+    const uint8_t* TPM2_GetCapabilityOut_unmarshal(TPM2_GetCapabilityOut* val,
+                                             const uint8_t* i_tpmBuf,
                                              size_t* io_tpmBufSize,
                                              size_t i_outBufSize);
 
@@ -343,10 +369,10 @@ namespace TRUSTEDBOOT
         TPML_DIGEST_VALUES digests; ///< Values to be extended
     } PACKED;
     typedef struct _TPM2_ExtendIn TPM2_ExtendIn;
-    uint8_t* TPM2_ExtendIn_marshalHandle(TPM2_ExtendIn* val,
+    uint8_t* TPM2_ExtendIn_marshalHandle(const TPM2_ExtendIn* val,
                                          uint8_t* o_tpmBuf, size_t i_tpmBufSize,
                                          size_t* io_cmdSize);
-    uint8_t* TPM2_ExtendIn_marshalParms(TPM2_ExtendIn* val,
+    uint8_t* TPM2_ExtendIn_marshalParms(const TPM2_ExtendIn* val,
                                         uint8_t* o_tpmBuf, size_t i_tpmBufSize,
                                         size_t* io_cmdSize);
 
@@ -357,11 +383,11 @@ namespace TRUSTEDBOOT
         uint8_t    pcrSelect[PCR_SELECT_MAX];
     } PACKED;
     typedef struct _TPMS_PCR_SELECTION TPMS_PCR_SELECTION;
-    uint8_t* TPMS_PCR_SELECTION_marshal(TPMS_PCR_SELECTION* val,
+    uint8_t* TPMS_PCR_SELECTION_marshal(const TPMS_PCR_SELECTION* val,
                                         uint8_t* o_tpmBuf, size_t i_tpmBufSize,
                                         size_t* io_cmdSize);
-    uint8_t* TPMS_PCR_SELECTION_unmarshal(TPMS_PCR_SELECTION* val,
-                                          uint8_t* i_tpmBuf,
+    const uint8_t* TPMS_PCR_SELECTION_unmarshal(TPMS_PCR_SELECTION* val,
+                                          const uint8_t* i_tpmBuf,
                                           size_t* io_tpmBufSize);
 
 
@@ -371,8 +397,9 @@ namespace TRUSTEDBOOT
         uint8_t  buffer[sizeof(TPMU_HA)];
     } PACKED;
     typedef struct _TPM2B_DIGEST TPM2B_DIGEST;
-    uint8_t* TPM2B_DIGEST_unmarshal(TPM2B_DIGEST* val,
-                                    uint8_t* i_tpmBuf, size_t* io_tpmBufSize);
+    const uint8_t* TPM2B_DIGEST_unmarshal(TPM2B_DIGEST* val,
+                                    const uint8_t* i_tpmBuf,
+                                    size_t* io_tpmBufSize);
 
     struct _TPML_DIGEST
     {
@@ -380,8 +407,9 @@ namespace TRUSTEDBOOT
         TPM2B_DIGEST digests[HASH_COUNT];
     } PACKED;
     typedef struct _TPML_DIGEST TPML_DIGEST;
-    uint8_t* TPML_DIGEST_unmarshal(TPML_DIGEST* val,
-                                   uint8_t* i_tpmBuf, size_t* io_tpmBufSize);
+    const uint8_t* TPML_DIGEST_unmarshal(TPML_DIGEST* val,
+                                   const uint8_t* i_tpmBuf,
+                                   size_t* io_tpmBufSize);
 
     struct _TPML_PCR_SELECTION
     {
@@ -389,11 +417,11 @@ namespace TRUSTEDBOOT
         TPMS_PCR_SELECTION pcrSelections[HASH_COUNT];
     } PACKED;
     typedef struct _TPML_PCR_SELECTION TPML_PCR_SELECTION;
-    uint8_t* TPML_PCR_SELECTION_marshal(TPML_PCR_SELECTION* val,
+    uint8_t* TPML_PCR_SELECTION_marshal(const TPML_PCR_SELECTION* val,
                                         uint8_t* o_tpmBuf, size_t i_tpmBufSize,
                                         size_t* io_cmdSize);
-    uint8_t* TPML_PCR_SELECTION_unmarshal(TPML_PCR_SELECTION* val,
-                                          uint8_t* i_tpmBuf,
+    const uint8_t* TPML_PCR_SELECTION_unmarshal(TPML_PCR_SELECTION* val,
+                                          const uint8_t* i_tpmBuf,
                                           size_t* io_tpmBufSize);
 
     /// Incoming PCR_Read structure
@@ -403,7 +431,7 @@ namespace TRUSTEDBOOT
         TPML_PCR_SELECTION pcrSelectionIn;
     } PACKED;
     typedef struct _TPM2_PcrReadIn TPM2_PcrReadIn;
-    uint8_t* TPM2_PcrReadIn_marshal(TPM2_PcrReadIn* val,
+    uint8_t* TPM2_PcrReadIn_marshal(const TPM2_PcrReadIn* val,
                                     uint8_t* o_tpmBuf, size_t i_tpmBufSize,
                                     size_t* io_cmdSize);
 
@@ -416,8 +444,8 @@ namespace TRUSTEDBOOT
         TPML_DIGEST  pcrValues;
     } PACKED;
     typedef struct _TPM2_PcrReadOut TPM2_PcrReadOut;
-    uint8_t* TPM2_PcrReadOut_unmarshal(TPM2_PcrReadOut* val,
-                                       uint8_t* i_tpmBuf,
+    const uint8_t* TPM2_PcrReadOut_unmarshal(TPM2_PcrReadOut* val,
+                                       const uint8_t* i_tpmBuf,
                                        size_t* io_tpmBufSize,
                                        size_t i_outBufSize);
 
@@ -431,7 +459,7 @@ namespace TRUSTEDBOOT
         uint16_t    hmacSize;         ///< Size of hmac structure, currently 0
     } PACKED;
     typedef struct _TPMS_AUTH_COMMAND TPMS_AUTH_COMMAND;
-    uint8_t* TPMS_AUTH_COMMAND_marshal(TPMS_AUTH_COMMAND* val,
+    uint8_t* TPMS_AUTH_COMMAND_marshal(const TPMS_AUTH_COMMAND* val,
                                        uint8_t* o_tpmBuf, size_t i_tpmBufSize,
                                        size_t* io_cmdSize);
 
