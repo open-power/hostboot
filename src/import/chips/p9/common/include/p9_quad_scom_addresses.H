@@ -1020,20 +1020,20 @@ REG64( EX_11_CME_LCL_DBG_PPE1                                  , RULL(0x10E02013
 REG64( EX_11_CME_LCL_DBG_PPE2                                  , RULL(0x10E020130), SH_UNT_EX_11    ,
        SH_ACS_PPE2      );
 
-REG64( EQ_CME_LCL_EIMR                                         , RULL(0x10012826), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012426,
-REG64( EQ_0_CME_LCL_EIMR                                       , RULL(0x10012826), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012426,
-REG64( EQ_1_CME_LCL_EIMR                                       , RULL(0x11012826), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 11012426,
-REG64( EQ_2_CME_LCL_EIMR                                       , RULL(0x12012826), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 12012426,
-REG64( EQ_3_CME_LCL_EIMR                                       , RULL(0x13012826), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 13012426,
-REG64( EQ_4_CME_LCL_EIMR                                       , RULL(0x14012826), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 14012426,
-REG64( EQ_5_CME_LCL_EIMR                                       , RULL(0x15012826), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 15012426,
+REG64( EQ_CME_LCL_EIMR                                         , RULL(0x10012426), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012026,
+REG64( EQ_0_CME_LCL_EIMR                                       , RULL(0x10012426), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012026,
+REG64( EQ_1_CME_LCL_EIMR                                       , RULL(0x11012426), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 11012026,
+REG64( EQ_2_CME_LCL_EIMR                                       , RULL(0x12012426), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 12012026,
+REG64( EQ_3_CME_LCL_EIMR                                       , RULL(0x13012426), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 13012026,
+REG64( EQ_4_CME_LCL_EIMR                                       , RULL(0x14012426), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 14012026,
+REG64( EQ_5_CME_LCL_EIMR                                       , RULL(0x15012426), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 15012026,
 REG64( EX_CME_LCL_EIMR_PPE                                     , RULL(0x109010020), SH_UNT_EX       ,
        SH_ACS_PPE       );
 REG64( EX_CME_LCL_EIMR_PPE1                                    , RULL(0x109010038), SH_UNT_EX       ,
@@ -1054,7 +1054,6 @@ REG64( EX_1_CME_LCL_EIMR_PPE1                                  , RULL(0x10902003
        SH_ACS_PPE1      );
 REG64( EX_1_CME_LCL_EIMR_PPE2                                  , RULL(0x109020030), SH_UNT_EX_1     ,
        SH_ACS_PPE2      );
-REG64( EX_1_CME_LCL_EIMR_SCOM                                  , RULL(0x10012826), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
 REG64( EX_2_CME_LCL_EIMR_PPE                                   , RULL(0x10A010020), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
 REG64( EX_2_CME_LCL_EIMR_PPE1                                  , RULL(0x10A010038), SH_UNT_EX_2     ,
@@ -1068,7 +1067,6 @@ REG64( EX_3_CME_LCL_EIMR_PPE1                                  , RULL(0x10A02003
        SH_ACS_PPE1      );
 REG64( EX_3_CME_LCL_EIMR_PPE2                                  , RULL(0x10A020030), SH_UNT_EX_3     ,
        SH_ACS_PPE2      );
-REG64( EX_3_CME_LCL_EIMR_SCOM                                  , RULL(0x11012826), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
 REG64( EX_4_CME_LCL_EIMR_PPE                                   , RULL(0x10B010020), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
 REG64( EX_4_CME_LCL_EIMR_PPE1                                  , RULL(0x10B010038), SH_UNT_EX_4     ,
@@ -1082,7 +1080,6 @@ REG64( EX_5_CME_LCL_EIMR_PPE1                                  , RULL(0x10B02003
        SH_ACS_PPE1      );
 REG64( EX_5_CME_LCL_EIMR_PPE2                                  , RULL(0x10B020030), SH_UNT_EX_5     ,
        SH_ACS_PPE2      );
-REG64( EX_5_CME_LCL_EIMR_SCOM                                  , RULL(0x12012826), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
 REG64( EX_6_CME_LCL_EIMR_PPE                                   , RULL(0x10C010020), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
 REG64( EX_6_CME_LCL_EIMR_PPE1                                  , RULL(0x10C010038), SH_UNT_EX_6     ,
@@ -1096,7 +1093,6 @@ REG64( EX_7_CME_LCL_EIMR_PPE1                                  , RULL(0x10C02003
        SH_ACS_PPE1      );
 REG64( EX_7_CME_LCL_EIMR_PPE2                                  , RULL(0x10C020030), SH_UNT_EX_7     ,
        SH_ACS_PPE2      );
-REG64( EX_7_CME_LCL_EIMR_SCOM                                  , RULL(0x13012826), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
 REG64( EX_8_CME_LCL_EIMR_PPE                                   , RULL(0x10D010020), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
 REG64( EX_8_CME_LCL_EIMR_PPE1                                  , RULL(0x10D010038), SH_UNT_EX_8     ,
@@ -1110,7 +1106,6 @@ REG64( EX_9_CME_LCL_EIMR_PPE1                                  , RULL(0x10D02003
        SH_ACS_PPE1      );
 REG64( EX_9_CME_LCL_EIMR_PPE2                                  , RULL(0x10D020030), SH_UNT_EX_9     ,
        SH_ACS_PPE2      );
-REG64( EX_9_CME_LCL_EIMR_SCOM                                  , RULL(0x14012826), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
 REG64( EX_10_CME_LCL_EIMR_PPE                                  , RULL(0x10E010020), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
 REG64( EX_10_CME_LCL_EIMR_PPE1                                 , RULL(0x10E010038), SH_UNT_EX_10    ,
@@ -1124,22 +1119,21 @@ REG64( EX_11_CME_LCL_EIMR_PPE1                                 , RULL(0x10E02003
        SH_ACS_PPE1      );
 REG64( EX_11_CME_LCL_EIMR_PPE2                                 , RULL(0x10E020030), SH_UNT_EX_11    ,
        SH_ACS_PPE2      );
-REG64( EX_11_CME_LCL_EIMR_SCOM                                 , RULL(0x15012826), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
 
-REG64( EQ_CME_LCL_EINR                                         , RULL(0x1001282A), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1001242A,
-REG64( EQ_0_CME_LCL_EINR                                       , RULL(0x1001282A), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1001242A,
-REG64( EQ_1_CME_LCL_EINR                                       , RULL(0x1101282A), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1101242A,
-REG64( EQ_2_CME_LCL_EINR                                       , RULL(0x1201282A), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1201242A,
-REG64( EQ_3_CME_LCL_EINR                                       , RULL(0x1301282A), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1301242A,
-REG64( EQ_4_CME_LCL_EINR                                       , RULL(0x1401282A), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1401242A,
-REG64( EQ_5_CME_LCL_EINR                                       , RULL(0x1501282A), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1501242A,
+REG64( EQ_CME_LCL_EINR                                         , RULL(0x1001242A), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1001202A,
+REG64( EQ_0_CME_LCL_EINR                                       , RULL(0x1001242A), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1001202A,
+REG64( EQ_1_CME_LCL_EINR                                       , RULL(0x1101242A), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1101202A,
+REG64( EQ_2_CME_LCL_EINR                                       , RULL(0x1201242A), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1201202A,
+REG64( EQ_3_CME_LCL_EINR                                       , RULL(0x1301242A), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1301202A,
+REG64( EQ_4_CME_LCL_EINR                                       , RULL(0x1401242A), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1401202A,
+REG64( EQ_5_CME_LCL_EINR                                       , RULL(0x1501242A), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1501202A,
 REG64( EX_CME_LCL_EINR_PPE                                     , RULL(0x1090100A0), SH_UNT_EX       ,
        SH_ACS_PPE       );
 REG64( EX_CME_LCL_EINR_SCOM                                    , RULL(0x1001242A), SH_UNT_EX       , SH_ACS_SCOM_RO   );
@@ -1148,52 +1142,46 @@ REG64( EX_0_CME_LCL_EINR_PPE                                   , RULL(0x1090100A
 REG64( EX_0_CME_LCL_EINR_SCOM                                  , RULL(0x1001242A), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
 REG64( EX_1_CME_LCL_EINR_PPE                                   , RULL(0x1090200A0), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_LCL_EINR_SCOM                                  , RULL(0x1001282A), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
 REG64( EX_2_CME_LCL_EINR_PPE                                   , RULL(0x10A0100A0), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
 REG64( EX_2_CME_LCL_EINR_SCOM                                  , RULL(0x1101242A), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
 REG64( EX_3_CME_LCL_EINR_PPE                                   , RULL(0x10A0200A0), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_LCL_EINR_SCOM                                  , RULL(0x1101282A), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
 REG64( EX_4_CME_LCL_EINR_PPE                                   , RULL(0x10B0100A0), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
 REG64( EX_4_CME_LCL_EINR_SCOM                                  , RULL(0x1201242A), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
 REG64( EX_5_CME_LCL_EINR_PPE                                   , RULL(0x10B0200A0), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_LCL_EINR_SCOM                                  , RULL(0x1201282A), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
 REG64( EX_6_CME_LCL_EINR_PPE                                   , RULL(0x10C0100A0), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
 REG64( EX_6_CME_LCL_EINR_SCOM                                  , RULL(0x1301242A), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
 REG64( EX_7_CME_LCL_EINR_PPE                                   , RULL(0x10C0200A0), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_LCL_EINR_SCOM                                  , RULL(0x1301282A), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
 REG64( EX_8_CME_LCL_EINR_PPE                                   , RULL(0x10D0100A0), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
 REG64( EX_8_CME_LCL_EINR_SCOM                                  , RULL(0x1401242A), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
 REG64( EX_9_CME_LCL_EINR_PPE                                   , RULL(0x10D0200A0), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_LCL_EINR_SCOM                                  , RULL(0x1401282A), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
 REG64( EX_10_CME_LCL_EINR_PPE                                  , RULL(0x10E0100A0), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
 REG64( EX_10_CME_LCL_EINR_SCOM                                 , RULL(0x1501242A), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
 REG64( EX_11_CME_LCL_EINR_PPE                                  , RULL(0x10E0200A0), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_LCL_EINR_SCOM                                 , RULL(0x1501282A), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
 
-REG64( EQ_CME_LCL_EIPR                                         , RULL(0x10012827), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012427,
-REG64( EQ_0_CME_LCL_EIPR                                       , RULL(0x10012827), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012427,
-REG64( EQ_1_CME_LCL_EIPR                                       , RULL(0x11012827), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 11012427,
-REG64( EQ_2_CME_LCL_EIPR                                       , RULL(0x12012827), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 12012427,
-REG64( EQ_3_CME_LCL_EIPR                                       , RULL(0x13012827), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 13012427,
-REG64( EQ_4_CME_LCL_EIPR                                       , RULL(0x14012827), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 14012427,
-REG64( EQ_5_CME_LCL_EIPR                                       , RULL(0x15012827), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 15012427,
+REG64( EQ_CME_LCL_EIPR                                         , RULL(0x10012427), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012027,
+REG64( EQ_0_CME_LCL_EIPR                                       , RULL(0x10012427), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012027,
+REG64( EQ_1_CME_LCL_EIPR                                       , RULL(0x11012427), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 11012027,
+REG64( EQ_2_CME_LCL_EIPR                                       , RULL(0x12012427), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 12012027,
+REG64( EQ_3_CME_LCL_EIPR                                       , RULL(0x13012427), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 13012027,
+REG64( EQ_4_CME_LCL_EIPR                                       , RULL(0x14012427), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 14012027,
+REG64( EQ_5_CME_LCL_EIPR                                       , RULL(0x15012427), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 15012027,
 REG64( EX_CME_LCL_EIPR_PPE                                     , RULL(0x109010040), SH_UNT_EX       ,
        SH_ACS_PPE       );
 REG64( EX_CME_LCL_EIPR_PPE1                                    , RULL(0x109010058), SH_UNT_EX       ,
@@ -1214,7 +1202,6 @@ REG64( EX_1_CME_LCL_EIPR_PPE1                                  , RULL(0x10902005
        SH_ACS_PPE1      );
 REG64( EX_1_CME_LCL_EIPR_PPE2                                  , RULL(0x109020050), SH_UNT_EX_1     ,
        SH_ACS_PPE2      );
-REG64( EX_1_CME_LCL_EIPR_SCOM                                  , RULL(0x10012827), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
 REG64( EX_2_CME_LCL_EIPR_PPE                                   , RULL(0x10A010040), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
 REG64( EX_2_CME_LCL_EIPR_PPE1                                  , RULL(0x10A010058), SH_UNT_EX_2     ,
@@ -1228,7 +1215,6 @@ REG64( EX_3_CME_LCL_EIPR_PPE1                                  , RULL(0x10A02005
        SH_ACS_PPE1      );
 REG64( EX_3_CME_LCL_EIPR_PPE2                                  , RULL(0x10A020050), SH_UNT_EX_3     ,
        SH_ACS_PPE2      );
-REG64( EX_3_CME_LCL_EIPR_SCOM                                  , RULL(0x11012827), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
 REG64( EX_4_CME_LCL_EIPR_PPE                                   , RULL(0x10B010040), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
 REG64( EX_4_CME_LCL_EIPR_PPE1                                  , RULL(0x10B010058), SH_UNT_EX_4     ,
@@ -1242,7 +1228,6 @@ REG64( EX_5_CME_LCL_EIPR_PPE1                                  , RULL(0x10B02005
        SH_ACS_PPE1      );
 REG64( EX_5_CME_LCL_EIPR_PPE2                                  , RULL(0x10B020050), SH_UNT_EX_5     ,
        SH_ACS_PPE2      );
-REG64( EX_5_CME_LCL_EIPR_SCOM                                  , RULL(0x12012827), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
 REG64( EX_6_CME_LCL_EIPR_PPE                                   , RULL(0x10C010040), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
 REG64( EX_6_CME_LCL_EIPR_PPE1                                  , RULL(0x10C010058), SH_UNT_EX_6     ,
@@ -1256,7 +1241,6 @@ REG64( EX_7_CME_LCL_EIPR_PPE1                                  , RULL(0x10C02005
        SH_ACS_PPE1      );
 REG64( EX_7_CME_LCL_EIPR_PPE2                                  , RULL(0x10C020050), SH_UNT_EX_7     ,
        SH_ACS_PPE2      );
-REG64( EX_7_CME_LCL_EIPR_SCOM                                  , RULL(0x13012827), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
 REG64( EX_8_CME_LCL_EIPR_PPE                                   , RULL(0x10D010040), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
 REG64( EX_8_CME_LCL_EIPR_PPE1                                  , RULL(0x10D010058), SH_UNT_EX_8     ,
@@ -1270,7 +1254,6 @@ REG64( EX_9_CME_LCL_EIPR_PPE1                                  , RULL(0x10D02005
        SH_ACS_PPE1      );
 REG64( EX_9_CME_LCL_EIPR_PPE2                                  , RULL(0x10D020050), SH_UNT_EX_9     ,
        SH_ACS_PPE2      );
-REG64( EX_9_CME_LCL_EIPR_SCOM                                  , RULL(0x14012827), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
 REG64( EX_10_CME_LCL_EIPR_PPE                                  , RULL(0x10E010040), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
 REG64( EX_10_CME_LCL_EIPR_PPE1                                 , RULL(0x10E010058), SH_UNT_EX_10    ,
@@ -1284,22 +1267,21 @@ REG64( EX_11_CME_LCL_EIPR_PPE1                                 , RULL(0x10E02005
        SH_ACS_PPE1      );
 REG64( EX_11_CME_LCL_EIPR_PPE2                                 , RULL(0x10E020050), SH_UNT_EX_11    ,
        SH_ACS_PPE2      );
-REG64( EX_11_CME_LCL_EIPR_SCOM                                 , RULL(0x15012827), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
 
-REG64( EQ_CME_LCL_EISR                                         , RULL(0x10012825), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012425,
-REG64( EQ_0_CME_LCL_EISR                                       , RULL(0x10012825), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012425,
-REG64( EQ_1_CME_LCL_EISR                                       , RULL(0x11012825), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 11012425,
-REG64( EQ_2_CME_LCL_EISR                                       , RULL(0x12012825), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 12012425,
-REG64( EQ_3_CME_LCL_EISR                                       , RULL(0x13012825), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 13012425,
-REG64( EQ_4_CME_LCL_EISR                                       , RULL(0x14012825), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 14012425,
-REG64( EQ_5_CME_LCL_EISR                                       , RULL(0x15012825), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 15012425,
+REG64( EQ_CME_LCL_EISR                                         , RULL(0x10012425), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012025,
+REG64( EQ_0_CME_LCL_EISR                                       , RULL(0x10012425), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012025,
+REG64( EQ_1_CME_LCL_EISR                                       , RULL(0x11012425), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 11012025,
+REG64( EQ_2_CME_LCL_EISR                                       , RULL(0x12012425), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 12012025,
+REG64( EQ_3_CME_LCL_EISR                                       , RULL(0x13012425), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 13012025,
+REG64( EQ_4_CME_LCL_EISR                                       , RULL(0x14012425), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 14012025,
+REG64( EQ_5_CME_LCL_EISR                                       , RULL(0x15012425), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 15012025,
 REG64( EX_CME_LCL_EISR_PPE                                     , RULL(0x109010000), SH_UNT_EX       ,
        SH_ACS_PPE       );
 REG64( EX_CME_LCL_EISR_PPE1                                    , RULL(0x109010018), SH_UNT_EX       ,
@@ -1320,7 +1302,6 @@ REG64( EX_1_CME_LCL_EISR_PPE1                                  , RULL(0x10902001
        SH_ACS_PPE1      );
 REG64( EX_1_CME_LCL_EISR_PPE2                                  , RULL(0x109020010), SH_UNT_EX_1     ,
        SH_ACS_PPE2      );
-REG64( EX_1_CME_LCL_EISR_SCOM                                  , RULL(0x10012825), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
 REG64( EX_2_CME_LCL_EISR_PPE                                   , RULL(0x10A010000), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
 REG64( EX_2_CME_LCL_EISR_PPE1                                  , RULL(0x10A010018), SH_UNT_EX_2     ,
@@ -1334,7 +1315,6 @@ REG64( EX_3_CME_LCL_EISR_PPE1                                  , RULL(0x10A02001
        SH_ACS_PPE1      );
 REG64( EX_3_CME_LCL_EISR_PPE2                                  , RULL(0x10A020010), SH_UNT_EX_3     ,
        SH_ACS_PPE2      );
-REG64( EX_3_CME_LCL_EISR_SCOM                                  , RULL(0x11012825), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
 REG64( EX_4_CME_LCL_EISR_PPE                                   , RULL(0x10B010000), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
 REG64( EX_4_CME_LCL_EISR_PPE1                                  , RULL(0x10B010018), SH_UNT_EX_4     ,
@@ -1348,7 +1328,6 @@ REG64( EX_5_CME_LCL_EISR_PPE1                                  , RULL(0x10B02001
        SH_ACS_PPE1      );
 REG64( EX_5_CME_LCL_EISR_PPE2                                  , RULL(0x10B020010), SH_UNT_EX_5     ,
        SH_ACS_PPE2      );
-REG64( EX_5_CME_LCL_EISR_SCOM                                  , RULL(0x12012825), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
 REG64( EX_6_CME_LCL_EISR_PPE                                   , RULL(0x10C010000), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
 REG64( EX_6_CME_LCL_EISR_PPE1                                  , RULL(0x10C010018), SH_UNT_EX_6     ,
@@ -1362,7 +1341,6 @@ REG64( EX_7_CME_LCL_EISR_PPE1                                  , RULL(0x10C02001
        SH_ACS_PPE1      );
 REG64( EX_7_CME_LCL_EISR_PPE2                                  , RULL(0x10C020010), SH_UNT_EX_7     ,
        SH_ACS_PPE2      );
-REG64( EX_7_CME_LCL_EISR_SCOM                                  , RULL(0x13012825), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
 REG64( EX_8_CME_LCL_EISR_PPE                                   , RULL(0x10D010000), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
 REG64( EX_8_CME_LCL_EISR_PPE1                                  , RULL(0x10D010018), SH_UNT_EX_8     ,
@@ -1376,7 +1354,6 @@ REG64( EX_9_CME_LCL_EISR_PPE1                                  , RULL(0x10D02001
        SH_ACS_PPE1      );
 REG64( EX_9_CME_LCL_EISR_PPE2                                  , RULL(0x10D020010), SH_UNT_EX_9     ,
        SH_ACS_PPE2      );
-REG64( EX_9_CME_LCL_EISR_SCOM                                  , RULL(0x14012825), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
 REG64( EX_10_CME_LCL_EISR_PPE                                  , RULL(0x10E010000), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
 REG64( EX_10_CME_LCL_EISR_PPE1                                 , RULL(0x10E010018), SH_UNT_EX_10    ,
@@ -1390,22 +1367,21 @@ REG64( EX_11_CME_LCL_EISR_PPE1                                 , RULL(0x10E02001
        SH_ACS_PPE1      );
 REG64( EX_11_CME_LCL_EISR_PPE2                                 , RULL(0x10E020010), SH_UNT_EX_11    ,
        SH_ACS_PPE2      );
-REG64( EX_11_CME_LCL_EISR_SCOM                                 , RULL(0x15012825), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
 
-REG64( EQ_CME_LCL_EISTR                                        , RULL(0x10012829), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012429,
-REG64( EQ_0_CME_LCL_EISTR                                      , RULL(0x10012829), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012429,
-REG64( EQ_1_CME_LCL_EISTR                                      , RULL(0x11012829), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 11012429,
-REG64( EQ_2_CME_LCL_EISTR                                      , RULL(0x12012829), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 12012429,
-REG64( EQ_3_CME_LCL_EISTR                                      , RULL(0x13012829), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 13012429,
-REG64( EQ_4_CME_LCL_EISTR                                      , RULL(0x14012829), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 14012429,
-REG64( EQ_5_CME_LCL_EISTR                                      , RULL(0x15012829), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 15012429,
+REG64( EQ_CME_LCL_EISTR                                        , RULL(0x10012429), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012029,
+REG64( EQ_0_CME_LCL_EISTR                                      , RULL(0x10012429), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012029,
+REG64( EQ_1_CME_LCL_EISTR                                      , RULL(0x11012429), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 11012029,
+REG64( EQ_2_CME_LCL_EISTR                                      , RULL(0x12012429), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 12012029,
+REG64( EQ_3_CME_LCL_EISTR                                      , RULL(0x13012429), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 13012029,
+REG64( EQ_4_CME_LCL_EISTR                                      , RULL(0x14012429), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 14012029,
+REG64( EQ_5_CME_LCL_EISTR                                      , RULL(0x15012429), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 15012029,
 REG64( EX_CME_LCL_EISTR_PPE                                    , RULL(0x109010080), SH_UNT_EX       ,
        SH_ACS_PPE       );
 REG64( EX_CME_LCL_EISTR_SCOM                                   , RULL(0x10012429), SH_UNT_EX       , SH_ACS_SCOM_RO   );
@@ -1414,52 +1390,46 @@ REG64( EX_0_CME_LCL_EISTR_PPE                                  , RULL(0x10901008
 REG64( EX_0_CME_LCL_EISTR_SCOM                                 , RULL(0x10012429), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
 REG64( EX_1_CME_LCL_EISTR_PPE                                  , RULL(0x109020080), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_LCL_EISTR_SCOM                                 , RULL(0x10012829), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
 REG64( EX_2_CME_LCL_EISTR_PPE                                  , RULL(0x10A010080), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
 REG64( EX_2_CME_LCL_EISTR_SCOM                                 , RULL(0x11012429), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
 REG64( EX_3_CME_LCL_EISTR_PPE                                  , RULL(0x10A020080), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_LCL_EISTR_SCOM                                 , RULL(0x11012829), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
 REG64( EX_4_CME_LCL_EISTR_PPE                                  , RULL(0x10B010080), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
 REG64( EX_4_CME_LCL_EISTR_SCOM                                 , RULL(0x12012429), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
 REG64( EX_5_CME_LCL_EISTR_PPE                                  , RULL(0x10B020080), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_LCL_EISTR_SCOM                                 , RULL(0x12012829), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
 REG64( EX_6_CME_LCL_EISTR_PPE                                  , RULL(0x10C010080), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
 REG64( EX_6_CME_LCL_EISTR_SCOM                                 , RULL(0x13012429), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
 REG64( EX_7_CME_LCL_EISTR_PPE                                  , RULL(0x10C020080), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_LCL_EISTR_SCOM                                 , RULL(0x13012829), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
 REG64( EX_8_CME_LCL_EISTR_PPE                                  , RULL(0x10D010080), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
 REG64( EX_8_CME_LCL_EISTR_SCOM                                 , RULL(0x14012429), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
 REG64( EX_9_CME_LCL_EISTR_PPE                                  , RULL(0x10D020080), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_LCL_EISTR_SCOM                                 , RULL(0x14012829), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
 REG64( EX_10_CME_LCL_EISTR_PPE                                 , RULL(0x10E010080), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
 REG64( EX_10_CME_LCL_EISTR_SCOM                                , RULL(0x15012429), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
 REG64( EX_11_CME_LCL_EISTR_PPE                                 , RULL(0x10E020080), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_LCL_EISTR_SCOM                                , RULL(0x15012829), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
 
-REG64( EQ_CME_LCL_EITR                                         , RULL(0x10012828), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012428,
-REG64( EQ_0_CME_LCL_EITR                                       , RULL(0x10012828), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012428,
-REG64( EQ_1_CME_LCL_EITR                                       , RULL(0x11012828), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 11012428,
-REG64( EQ_2_CME_LCL_EITR                                       , RULL(0x12012828), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 12012428,
-REG64( EQ_3_CME_LCL_EITR                                       , RULL(0x13012828), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 13012428,
-REG64( EQ_4_CME_LCL_EITR                                       , RULL(0x14012828), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 14012428,
-REG64( EQ_5_CME_LCL_EITR                                       , RULL(0x15012828), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 15012428,
+REG64( EQ_CME_LCL_EITR                                         , RULL(0x10012428), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012028,
+REG64( EQ_0_CME_LCL_EITR                                       , RULL(0x10012428), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012028,
+REG64( EQ_1_CME_LCL_EITR                                       , RULL(0x11012428), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 11012028,
+REG64( EQ_2_CME_LCL_EITR                                       , RULL(0x12012428), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 12012028,
+REG64( EQ_3_CME_LCL_EITR                                       , RULL(0x13012428), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 13012028,
+REG64( EQ_4_CME_LCL_EITR                                       , RULL(0x14012428), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 14012028,
+REG64( EQ_5_CME_LCL_EITR                                       , RULL(0x15012428), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 15012028,
 REG64( EX_CME_LCL_EITR_PPE                                     , RULL(0x109010060), SH_UNT_EX       ,
        SH_ACS_PPE       );
 REG64( EX_CME_LCL_EITR_PPE1                                    , RULL(0x109010078), SH_UNT_EX       ,
@@ -1480,7 +1450,6 @@ REG64( EX_1_CME_LCL_EITR_PPE1                                  , RULL(0x10902007
        SH_ACS_PPE1      );
 REG64( EX_1_CME_LCL_EITR_PPE2                                  , RULL(0x109020070), SH_UNT_EX_1     ,
        SH_ACS_PPE2      );
-REG64( EX_1_CME_LCL_EITR_SCOM                                  , RULL(0x10012828), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
 REG64( EX_2_CME_LCL_EITR_PPE                                   , RULL(0x10A010060), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
 REG64( EX_2_CME_LCL_EITR_PPE1                                  , RULL(0x10A010078), SH_UNT_EX_2     ,
@@ -1494,7 +1463,6 @@ REG64( EX_3_CME_LCL_EITR_PPE1                                  , RULL(0x10A02007
        SH_ACS_PPE1      );
 REG64( EX_3_CME_LCL_EITR_PPE2                                  , RULL(0x10A020070), SH_UNT_EX_3     ,
        SH_ACS_PPE2      );
-REG64( EX_3_CME_LCL_EITR_SCOM                                  , RULL(0x11012828), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
 REG64( EX_4_CME_LCL_EITR_PPE                                   , RULL(0x10B010060), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
 REG64( EX_4_CME_LCL_EITR_PPE1                                  , RULL(0x10B010078), SH_UNT_EX_4     ,
@@ -1508,7 +1476,6 @@ REG64( EX_5_CME_LCL_EITR_PPE1                                  , RULL(0x10B02007
        SH_ACS_PPE1      );
 REG64( EX_5_CME_LCL_EITR_PPE2                                  , RULL(0x10B020070), SH_UNT_EX_5     ,
        SH_ACS_PPE2      );
-REG64( EX_5_CME_LCL_EITR_SCOM                                  , RULL(0x12012828), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
 REG64( EX_6_CME_LCL_EITR_PPE                                   , RULL(0x10C010060), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
 REG64( EX_6_CME_LCL_EITR_PPE1                                  , RULL(0x10C010078), SH_UNT_EX_6     ,
@@ -1522,7 +1489,6 @@ REG64( EX_7_CME_LCL_EITR_PPE1                                  , RULL(0x10C02007
        SH_ACS_PPE1      );
 REG64( EX_7_CME_LCL_EITR_PPE2                                  , RULL(0x10C020070), SH_UNT_EX_7     ,
        SH_ACS_PPE2      );
-REG64( EX_7_CME_LCL_EITR_SCOM                                  , RULL(0x13012828), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
 REG64( EX_8_CME_LCL_EITR_PPE                                   , RULL(0x10D010060), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
 REG64( EX_8_CME_LCL_EITR_PPE1                                  , RULL(0x10D010078), SH_UNT_EX_8     ,
@@ -1536,7 +1502,6 @@ REG64( EX_9_CME_LCL_EITR_PPE1                                  , RULL(0x10D02007
        SH_ACS_PPE1      );
 REG64( EX_9_CME_LCL_EITR_PPE2                                  , RULL(0x10D020070), SH_UNT_EX_9     ,
        SH_ACS_PPE2      );
-REG64( EX_9_CME_LCL_EITR_SCOM                                  , RULL(0x14012828), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
 REG64( EX_10_CME_LCL_EITR_PPE                                  , RULL(0x10E010060), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
 REG64( EX_10_CME_LCL_EITR_PPE1                                 , RULL(0x10E010078), SH_UNT_EX_10    ,
@@ -1550,7 +1515,6 @@ REG64( EX_11_CME_LCL_EITR_PPE1                                 , RULL(0x10E02007
        SH_ACS_PPE1      );
 REG64( EX_11_CME_LCL_EITR_PPE2                                 , RULL(0x10E020070), SH_UNT_EX_11    ,
        SH_ACS_PPE2      );
-REG64( EX_11_CME_LCL_EITR_SCOM                                 , RULL(0x15012828), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
 
 REG64( EX_CME_LCL_ICCR_PPE                                     , RULL(0x109010700), SH_UNT_EX       ,
        SH_ACS_PPE       );
@@ -1631,59 +1595,53 @@ REG64( EX_11_CME_LCL_ICCR_PPE1                                 , RULL(0x10E02071
 REG64( EX_11_CME_LCL_ICCR_PPE2                                 , RULL(0x10E020710), SH_UNT_EX_11    ,
        SH_ACS_PPE2      );
 
-REG64( EQ_CME_LCL_ICRR                                         , RULL(0x1001282C), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1001242C,
-REG64( EQ_0_CME_LCL_ICRR                                       , RULL(0x1001282C), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1001242C,
-REG64( EQ_1_CME_LCL_ICRR                                       , RULL(0x1101282C), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1101242C,
-REG64( EQ_2_CME_LCL_ICRR                                       , RULL(0x1201282C), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1201242C,
-REG64( EQ_3_CME_LCL_ICRR                                       , RULL(0x1301282C), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1301242C,
-REG64( EQ_4_CME_LCL_ICRR                                       , RULL(0x1401282C), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1401242C,
-REG64( EQ_5_CME_LCL_ICRR                                       , RULL(0x1501282C), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1501242C,
+REG64( EQ_CME_LCL_ICRR                                         , RULL(0x1001244D), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1001204D,
+REG64( EQ_0_CME_LCL_ICRR                                       , RULL(0x1001244D), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1001204D,
+REG64( EQ_1_CME_LCL_ICRR                                       , RULL(0x1101244D), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1101204D,
+REG64( EQ_2_CME_LCL_ICRR                                       , RULL(0x1201244D), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1201204D,
+REG64( EQ_3_CME_LCL_ICRR                                       , RULL(0x1301244D), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1301204D,
+REG64( EQ_4_CME_LCL_ICRR                                       , RULL(0x1401244D), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1401204D,
+REG64( EQ_5_CME_LCL_ICRR                                       , RULL(0x1501244D), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1501204D,
 REG64( EX_CME_LCL_ICRR_PPE                                     , RULL(0x109010740), SH_UNT_EX       ,
        SH_ACS_PPE       );
-REG64( EX_CME_LCL_ICRR_SCOM                                    , RULL(0x1001242C), SH_UNT_EX       , SH_ACS_SCOM_RO   );
+REG64( EX_CME_LCL_ICRR_SCOM                                    , RULL(0x1001244D), SH_UNT_EX       , SH_ACS_SCOM_RO   );
 REG64( EX_0_CME_LCL_ICRR_PPE                                   , RULL(0x109010740), SH_UNT_EX_0     ,
        SH_ACS_PPE       );
-REG64( EX_0_CME_LCL_ICRR_SCOM                                  , RULL(0x1001242C), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
+REG64( EX_0_CME_LCL_ICRR_SCOM                                  , RULL(0x1001244D), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
 REG64( EX_1_CME_LCL_ICRR_PPE                                   , RULL(0x109020740), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_LCL_ICRR_SCOM                                  , RULL(0x1001282C), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
 REG64( EX_2_CME_LCL_ICRR_PPE                                   , RULL(0x10A010740), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
-REG64( EX_2_CME_LCL_ICRR_SCOM                                  , RULL(0x1101242C), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
+REG64( EX_2_CME_LCL_ICRR_SCOM                                  , RULL(0x1101244D), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
 REG64( EX_3_CME_LCL_ICRR_PPE                                   , RULL(0x10A020740), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_LCL_ICRR_SCOM                                  , RULL(0x1101282C), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
 REG64( EX_4_CME_LCL_ICRR_PPE                                   , RULL(0x10B010740), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
-REG64( EX_4_CME_LCL_ICRR_SCOM                                  , RULL(0x1201242C), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
+REG64( EX_4_CME_LCL_ICRR_SCOM                                  , RULL(0x1201244D), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
 REG64( EX_5_CME_LCL_ICRR_PPE                                   , RULL(0x10B020740), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_LCL_ICRR_SCOM                                  , RULL(0x1201282C), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
 REG64( EX_6_CME_LCL_ICRR_PPE                                   , RULL(0x10C010740), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
-REG64( EX_6_CME_LCL_ICRR_SCOM                                  , RULL(0x1301242C), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
+REG64( EX_6_CME_LCL_ICRR_SCOM                                  , RULL(0x1301244D), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
 REG64( EX_7_CME_LCL_ICRR_PPE                                   , RULL(0x10C020740), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_LCL_ICRR_SCOM                                  , RULL(0x1301282C), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
 REG64( EX_8_CME_LCL_ICRR_PPE                                   , RULL(0x10D010740), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
-REG64( EX_8_CME_LCL_ICRR_SCOM                                  , RULL(0x1401242C), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
+REG64( EX_8_CME_LCL_ICRR_SCOM                                  , RULL(0x1401244D), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
 REG64( EX_9_CME_LCL_ICRR_PPE                                   , RULL(0x10D020740), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_LCL_ICRR_SCOM                                  , RULL(0x1401282C), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
 REG64( EX_10_CME_LCL_ICRR_PPE                                  , RULL(0x10E010740), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
-REG64( EX_10_CME_LCL_ICRR_SCOM                                 , RULL(0x1501242C), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
+REG64( EX_10_CME_LCL_ICRR_SCOM                                 , RULL(0x1501244D), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
 REG64( EX_11_CME_LCL_ICRR_PPE                                  , RULL(0x10E020740), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_LCL_ICRR_SCOM                                 , RULL(0x1501282C), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
 
 REG64( EX_CME_LCL_ICSR_PPE                                     , RULL(0x109010720), SH_UNT_EX       ,
        SH_ACS_PPE       );
@@ -1793,59 +1751,53 @@ REG64( EX_10_CME_LCL_PECESR1_PPE                               , RULL(0x10E0102A
 REG64( EX_11_CME_LCL_PECESR1_PPE                               , RULL(0x10E0202A0), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
 
-REG64( EQ_CME_LCL_SISR                                         , RULL(0x1001282B), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1001242B,
-REG64( EQ_0_CME_LCL_SISR                                       , RULL(0x1001282B), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1001242B,
-REG64( EQ_1_CME_LCL_SISR                                       , RULL(0x1101282B), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1101242B,
-REG64( EQ_2_CME_LCL_SISR                                       , RULL(0x1201282B), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1201242B,
-REG64( EQ_3_CME_LCL_SISR                                       , RULL(0x1301282B), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1301242B,
-REG64( EQ_4_CME_LCL_SISR                                       , RULL(0x1401282B), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1401242B,
-REG64( EQ_5_CME_LCL_SISR                                       , RULL(0x1501282B), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1501242B,
+REG64( EQ_CME_LCL_SISR                                         , RULL(0x1001244C), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1001204C,
+REG64( EQ_0_CME_LCL_SISR                                       , RULL(0x1001244C), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1001204C,
+REG64( EQ_1_CME_LCL_SISR                                       , RULL(0x1101244C), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1101204C,
+REG64( EQ_2_CME_LCL_SISR                                       , RULL(0x1201244C), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1201204C,
+REG64( EQ_3_CME_LCL_SISR                                       , RULL(0x1301244C), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1301204C,
+REG64( EQ_4_CME_LCL_SISR                                       , RULL(0x1401244C), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1401204C,
+REG64( EQ_5_CME_LCL_SISR                                       , RULL(0x1501244C), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1501204C,
 REG64( EX_CME_LCL_SISR_PPE                                     , RULL(0x109010520), SH_UNT_EX       ,
        SH_ACS_PPE       );
-REG64( EX_CME_LCL_SISR_SCOM                                    , RULL(0x1001242B), SH_UNT_EX       , SH_ACS_SCOM_RO   );
+REG64( EX_CME_LCL_SISR_SCOM                                    , RULL(0x1001244C), SH_UNT_EX       , SH_ACS_SCOM_RO   );
 REG64( EX_0_CME_LCL_SISR_PPE                                   , RULL(0x109010520), SH_UNT_EX_0     ,
        SH_ACS_PPE       );
-REG64( EX_0_CME_LCL_SISR_SCOM                                  , RULL(0x1001242B), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
+REG64( EX_0_CME_LCL_SISR_SCOM                                  , RULL(0x1001244C), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
 REG64( EX_1_CME_LCL_SISR_PPE                                   , RULL(0x109020520), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_LCL_SISR_SCOM                                  , RULL(0x1001282B), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
 REG64( EX_2_CME_LCL_SISR_PPE                                   , RULL(0x10A010520), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
-REG64( EX_2_CME_LCL_SISR_SCOM                                  , RULL(0x1101242B), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
+REG64( EX_2_CME_LCL_SISR_SCOM                                  , RULL(0x1101244C), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
 REG64( EX_3_CME_LCL_SISR_PPE                                   , RULL(0x10A020520), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_LCL_SISR_SCOM                                  , RULL(0x1101282B), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
 REG64( EX_4_CME_LCL_SISR_PPE                                   , RULL(0x10B010520), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
-REG64( EX_4_CME_LCL_SISR_SCOM                                  , RULL(0x1201242B), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
+REG64( EX_4_CME_LCL_SISR_SCOM                                  , RULL(0x1201244C), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
 REG64( EX_5_CME_LCL_SISR_PPE                                   , RULL(0x10B020520), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_LCL_SISR_SCOM                                  , RULL(0x1201282B), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
 REG64( EX_6_CME_LCL_SISR_PPE                                   , RULL(0x10C010520), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
-REG64( EX_6_CME_LCL_SISR_SCOM                                  , RULL(0x1301242B), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
+REG64( EX_6_CME_LCL_SISR_SCOM                                  , RULL(0x1301244C), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
 REG64( EX_7_CME_LCL_SISR_PPE                                   , RULL(0x10C020520), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_LCL_SISR_SCOM                                  , RULL(0x1301282B), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
 REG64( EX_8_CME_LCL_SISR_PPE                                   , RULL(0x10D010520), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
-REG64( EX_8_CME_LCL_SISR_SCOM                                  , RULL(0x1401242B), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
+REG64( EX_8_CME_LCL_SISR_SCOM                                  , RULL(0x1401244C), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
 REG64( EX_9_CME_LCL_SISR_PPE                                   , RULL(0x10D020520), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_LCL_SISR_SCOM                                  , RULL(0x1401282B), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
 REG64( EX_10_CME_LCL_SISR_PPE                                  , RULL(0x10E010520), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
-REG64( EX_10_CME_LCL_SISR_SCOM                                 , RULL(0x1501242B), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
+REG64( EX_10_CME_LCL_SISR_SCOM                                 , RULL(0x1501244C), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
 REG64( EX_11_CME_LCL_SISR_PPE                                  , RULL(0x10E020520), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_LCL_SISR_SCOM                                 , RULL(0x1501282B), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
 
 REG64( EX_CME_LCL_TSEL_PPE                                     , RULL(0x109010100), SH_UNT_EX       ,
        SH_ACS_PPE       );
@@ -1874,294 +1826,306 @@ REG64( EX_10_CME_LCL_TSEL_PPE                                  , RULL(0x10E01010
 REG64( EX_11_CME_LCL_TSEL_PPE                                  , RULL(0x10E020100), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
 
-REG64( EQ_CME_SCOM_AFSR                                        , RULL(0x10012813), SH_UNT_EQ       ,
-       SH_ACS_SCOM      ); //DUPS: 10012413,
-REG64( EQ_0_CME_SCOM_AFSR                                      , RULL(0x10012813), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM      ); //DUPS: 10012413,
-REG64( EQ_1_CME_SCOM_AFSR                                      , RULL(0x11012813), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM      ); //DUPS: 11012413,
-REG64( EQ_2_CME_SCOM_AFSR                                      , RULL(0x12012813), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM      ); //DUPS: 12012413,
-REG64( EQ_3_CME_SCOM_AFSR                                      , RULL(0x13012813), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM      ); //DUPS: 13012413,
-REG64( EQ_4_CME_SCOM_AFSR                                      , RULL(0x14012813), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM      ); //DUPS: 14012413,
-REG64( EQ_5_CME_SCOM_AFSR                                      , RULL(0x15012813), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM      ); //DUPS: 15012413,
+REG64( EQ_CME_SCOM_AFSR                                        , RULL(0x10012433), SH_UNT_EQ       ,
+       SH_ACS_SCOM      ); //DUPS: 10012033,
+REG64( EQ_0_CME_SCOM_AFSR                                      , RULL(0x10012433), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM      ); //DUPS: 10012033,
+REG64( EQ_1_CME_SCOM_AFSR                                      , RULL(0x11012433), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM      ); //DUPS: 11012033,
+REG64( EQ_2_CME_SCOM_AFSR                                      , RULL(0x12012433), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM      ); //DUPS: 12012033,
+REG64( EQ_3_CME_SCOM_AFSR                                      , RULL(0x13012433), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM      ); //DUPS: 13012033,
+REG64( EQ_4_CME_SCOM_AFSR                                      , RULL(0x14012433), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM      ); //DUPS: 14012033,
+REG64( EQ_5_CME_SCOM_AFSR                                      , RULL(0x15012433), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM      ); //DUPS: 15012033,
 REG64( EX_CME_SCOM_AFSR_PPE                                    , RULL(0x109010160), SH_UNT_EX       ,
        SH_ACS_PPE       );
-REG64( EX_CME_SCOM_AFSR_SCOM                                   , RULL(0x10012413), SH_UNT_EX       , SH_ACS_SCOM      );
+REG64( EX_CME_SCOM_AFSR_SCOM                                   , RULL(0x10012433), SH_UNT_EX       , SH_ACS_SCOM      );
 REG64( EX_0_CME_SCOM_AFSR_PPE                                  , RULL(0x109010160), SH_UNT_EX_0     ,
        SH_ACS_PPE       );
-REG64( EX_0_CME_SCOM_AFSR_SCOM                                 , RULL(0x10012413), SH_UNT_EX_0     , SH_ACS_SCOM      );
+REG64( EX_0_CME_SCOM_AFSR_SCOM                                 , RULL(0x10012433), SH_UNT_EX_0     , SH_ACS_SCOM      );
 REG64( EX_1_CME_SCOM_AFSR_PPE                                  , RULL(0x109020160), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_SCOM_AFSR_SCOM                                 , RULL(0x10012813), SH_UNT_EX_1     , SH_ACS_SCOM      );
 REG64( EX_2_CME_SCOM_AFSR_PPE                                  , RULL(0x10A010160), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
-REG64( EX_2_CME_SCOM_AFSR_SCOM                                 , RULL(0x11012413), SH_UNT_EX_2     , SH_ACS_SCOM      );
+REG64( EX_2_CME_SCOM_AFSR_SCOM                                 , RULL(0x11012433), SH_UNT_EX_2     , SH_ACS_SCOM      );
 REG64( EX_3_CME_SCOM_AFSR_PPE                                  , RULL(0x10A020160), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_SCOM_AFSR_SCOM                                 , RULL(0x11012813), SH_UNT_EX_3     , SH_ACS_SCOM      );
 REG64( EX_4_CME_SCOM_AFSR_PPE                                  , RULL(0x10B010160), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
-REG64( EX_4_CME_SCOM_AFSR_SCOM                                 , RULL(0x12012413), SH_UNT_EX_4     , SH_ACS_SCOM      );
+REG64( EX_4_CME_SCOM_AFSR_SCOM                                 , RULL(0x12012433), SH_UNT_EX_4     , SH_ACS_SCOM      );
 REG64( EX_5_CME_SCOM_AFSR_PPE                                  , RULL(0x10B020160), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_SCOM_AFSR_SCOM                                 , RULL(0x12012813), SH_UNT_EX_5     , SH_ACS_SCOM      );
 REG64( EX_6_CME_SCOM_AFSR_PPE                                  , RULL(0x10C010160), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
-REG64( EX_6_CME_SCOM_AFSR_SCOM                                 , RULL(0x13012413), SH_UNT_EX_6     , SH_ACS_SCOM      );
+REG64( EX_6_CME_SCOM_AFSR_SCOM                                 , RULL(0x13012433), SH_UNT_EX_6     , SH_ACS_SCOM      );
 REG64( EX_7_CME_SCOM_AFSR_PPE                                  , RULL(0x10C020160), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_SCOM_AFSR_SCOM                                 , RULL(0x13012813), SH_UNT_EX_7     , SH_ACS_SCOM      );
 REG64( EX_8_CME_SCOM_AFSR_PPE                                  , RULL(0x10D010160), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
-REG64( EX_8_CME_SCOM_AFSR_SCOM                                 , RULL(0x14012413), SH_UNT_EX_8     , SH_ACS_SCOM      );
+REG64( EX_8_CME_SCOM_AFSR_SCOM                                 , RULL(0x14012433), SH_UNT_EX_8     , SH_ACS_SCOM      );
 REG64( EX_9_CME_SCOM_AFSR_PPE                                  , RULL(0x10D020160), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_SCOM_AFSR_SCOM                                 , RULL(0x14012813), SH_UNT_EX_9     , SH_ACS_SCOM      );
 REG64( EX_10_CME_SCOM_AFSR_PPE                                 , RULL(0x10E010160), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
-REG64( EX_10_CME_SCOM_AFSR_SCOM                                , RULL(0x15012413), SH_UNT_EX_10    , SH_ACS_SCOM      );
+REG64( EX_10_CME_SCOM_AFSR_SCOM                                , RULL(0x15012433), SH_UNT_EX_10    , SH_ACS_SCOM      );
 REG64( EX_11_CME_SCOM_AFSR_PPE                                 , RULL(0x10E020160), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_SCOM_AFSR_SCOM                                , RULL(0x15012813), SH_UNT_EX_11    , SH_ACS_SCOM      );
 
-REG64( EQ_CME_SCOM_AFTR                                        , RULL(0x10012814), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012414,
-REG64( EQ_0_CME_SCOM_AFTR                                      , RULL(0x10012814), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012414,
-REG64( EQ_1_CME_SCOM_AFTR                                      , RULL(0x11012814), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 11012414,
-REG64( EQ_2_CME_SCOM_AFTR                                      , RULL(0x12012814), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 12012414,
-REG64( EQ_3_CME_SCOM_AFTR                                      , RULL(0x13012814), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 13012414,
-REG64( EQ_4_CME_SCOM_AFTR                                      , RULL(0x14012814), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 14012414,
-REG64( EQ_5_CME_SCOM_AFTR                                      , RULL(0x15012814), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 15012414,
+REG64( EQ_CME_SCOM_AFTR                                        , RULL(0x10012434), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012034,
+REG64( EQ_0_CME_SCOM_AFTR                                      , RULL(0x10012434), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012034,
+REG64( EQ_1_CME_SCOM_AFTR                                      , RULL(0x11012434), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 11012034,
+REG64( EQ_2_CME_SCOM_AFTR                                      , RULL(0x12012434), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 12012034,
+REG64( EQ_3_CME_SCOM_AFTR                                      , RULL(0x13012434), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 13012034,
+REG64( EQ_4_CME_SCOM_AFTR                                      , RULL(0x14012434), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 14012034,
+REG64( EQ_5_CME_SCOM_AFTR                                      , RULL(0x15012434), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 15012034,
 REG64( EX_CME_SCOM_AFTR_PPE                                    , RULL(0x109010180), SH_UNT_EX       ,
        SH_ACS_PPE       );
-REG64( EX_CME_SCOM_AFTR_SCOM                                   , RULL(0x10012414), SH_UNT_EX       , SH_ACS_SCOM_RO   );
+REG64( EX_CME_SCOM_AFTR_SCOM                                   , RULL(0x10012434), SH_UNT_EX       , SH_ACS_SCOM_RO   );
 REG64( EX_0_CME_SCOM_AFTR_PPE                                  , RULL(0x109010180), SH_UNT_EX_0     ,
        SH_ACS_PPE       );
-REG64( EX_0_CME_SCOM_AFTR_SCOM                                 , RULL(0x10012414), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
+REG64( EX_0_CME_SCOM_AFTR_SCOM                                 , RULL(0x10012434), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
 REG64( EX_1_CME_SCOM_AFTR_PPE                                  , RULL(0x109020180), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_SCOM_AFTR_SCOM                                 , RULL(0x10012814), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
 REG64( EX_2_CME_SCOM_AFTR_PPE                                  , RULL(0x10A010180), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
-REG64( EX_2_CME_SCOM_AFTR_SCOM                                 , RULL(0x11012414), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
+REG64( EX_2_CME_SCOM_AFTR_SCOM                                 , RULL(0x11012434), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
 REG64( EX_3_CME_SCOM_AFTR_PPE                                  , RULL(0x10A020180), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_SCOM_AFTR_SCOM                                 , RULL(0x11012814), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
 REG64( EX_4_CME_SCOM_AFTR_PPE                                  , RULL(0x10B010180), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
-REG64( EX_4_CME_SCOM_AFTR_SCOM                                 , RULL(0x12012414), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
+REG64( EX_4_CME_SCOM_AFTR_SCOM                                 , RULL(0x12012434), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
 REG64( EX_5_CME_SCOM_AFTR_PPE                                  , RULL(0x10B020180), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_SCOM_AFTR_SCOM                                 , RULL(0x12012814), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
 REG64( EX_6_CME_SCOM_AFTR_PPE                                  , RULL(0x10C010180), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
-REG64( EX_6_CME_SCOM_AFTR_SCOM                                 , RULL(0x13012414), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
+REG64( EX_6_CME_SCOM_AFTR_SCOM                                 , RULL(0x13012434), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
 REG64( EX_7_CME_SCOM_AFTR_PPE                                  , RULL(0x10C020180), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_SCOM_AFTR_SCOM                                 , RULL(0x13012814), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
 REG64( EX_8_CME_SCOM_AFTR_PPE                                  , RULL(0x10D010180), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
-REG64( EX_8_CME_SCOM_AFTR_SCOM                                 , RULL(0x14012414), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
+REG64( EX_8_CME_SCOM_AFTR_SCOM                                 , RULL(0x14012434), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
 REG64( EX_9_CME_SCOM_AFTR_PPE                                  , RULL(0x10D020180), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_SCOM_AFTR_SCOM                                 , RULL(0x14012814), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
 REG64( EX_10_CME_SCOM_AFTR_PPE                                 , RULL(0x10E010180), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
-REG64( EX_10_CME_SCOM_AFTR_SCOM                                , RULL(0x15012414), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
+REG64( EX_10_CME_SCOM_AFTR_SCOM                                , RULL(0x15012434), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
 REG64( EX_11_CME_SCOM_AFTR_PPE                                 , RULL(0x10E020180), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_SCOM_AFTR_SCOM                                , RULL(0x15012814), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
 
-REG64( EQ_CME_SCOM_BCEBAR0                                     , RULL(0x10012810), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012410,
-REG64( EQ_0_CME_SCOM_BCEBAR0                                   , RULL(0x10012810), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012410,
-REG64( EQ_1_CME_SCOM_BCEBAR0                                   , RULL(0x11012810), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 11012410,
-REG64( EQ_2_CME_SCOM_BCEBAR0                                   , RULL(0x12012810), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 12012410,
-REG64( EQ_3_CME_SCOM_BCEBAR0                                   , RULL(0x13012810), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 13012410,
-REG64( EQ_4_CME_SCOM_BCEBAR0                                   , RULL(0x14012810), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 14012410,
-REG64( EQ_5_CME_SCOM_BCEBAR0                                   , RULL(0x15012810), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 15012410,
-REG64( EX_CME_SCOM_BCEBAR0                                     , RULL(0x10012410), SH_UNT_EX       , SH_ACS_SCOM_RW   );
-REG64( EX_0_CME_SCOM_BCEBAR0                                   , RULL(0x10012410), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
-REG64( EX_1_CME_SCOM_BCEBAR0                                   , RULL(0x10012810), SH_UNT_EX_1     , SH_ACS_SCOM_RW   );
-REG64( EX_2_CME_SCOM_BCEBAR0                                   , RULL(0x11012410), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
-REG64( EX_3_CME_SCOM_BCEBAR0                                   , RULL(0x11012810), SH_UNT_EX_3     , SH_ACS_SCOM_RW   );
-REG64( EX_4_CME_SCOM_BCEBAR0                                   , RULL(0x12012410), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
-REG64( EX_5_CME_SCOM_BCEBAR0                                   , RULL(0x12012810), SH_UNT_EX_5     , SH_ACS_SCOM_RW   );
-REG64( EX_6_CME_SCOM_BCEBAR0                                   , RULL(0x13012410), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
-REG64( EX_7_CME_SCOM_BCEBAR0                                   , RULL(0x13012810), SH_UNT_EX_7     , SH_ACS_SCOM_RW   );
-REG64( EX_8_CME_SCOM_BCEBAR0                                   , RULL(0x14012410), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
-REG64( EX_9_CME_SCOM_BCEBAR0                                   , RULL(0x14012810), SH_UNT_EX_9     , SH_ACS_SCOM_RW   );
-REG64( EX_10_CME_SCOM_BCEBAR0                                  , RULL(0x15012410), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
-REG64( EX_11_CME_SCOM_BCEBAR0                                  , RULL(0x15012810), SH_UNT_EX_11    , SH_ACS_SCOM_RW   );
+REG64( EQ_CME_SCOM_BCEBAR0                                     , RULL(0x10012430), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012030,
+REG64( EQ_0_CME_SCOM_BCEBAR0                                   , RULL(0x10012430), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012030,
+REG64( EQ_1_CME_SCOM_BCEBAR0                                   , RULL(0x11012430), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 11012030,
+REG64( EQ_2_CME_SCOM_BCEBAR0                                   , RULL(0x12012430), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 12012030,
+REG64( EQ_3_CME_SCOM_BCEBAR0                                   , RULL(0x13012430), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 13012030,
+REG64( EQ_4_CME_SCOM_BCEBAR0                                   , RULL(0x14012430), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 14012030,
+REG64( EQ_5_CME_SCOM_BCEBAR0                                   , RULL(0x15012430), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 15012030,
+REG64( EX_CME_SCOM_BCEBAR0                                     , RULL(0x10012430), SH_UNT_EX       , SH_ACS_SCOM_RW   );
+REG64( EX_0_CME_SCOM_BCEBAR0                                   , RULL(0x10012430), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
+REG64( EX_2_CME_SCOM_BCEBAR0                                   , RULL(0x11012430), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
+REG64( EX_4_CME_SCOM_BCEBAR0                                   , RULL(0x12012430), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
+REG64( EX_6_CME_SCOM_BCEBAR0                                   , RULL(0x13012430), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
+REG64( EX_8_CME_SCOM_BCEBAR0                                   , RULL(0x14012430), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
+REG64( EX_10_CME_SCOM_BCEBAR0                                  , RULL(0x15012430), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
 
-REG64( EQ_CME_SCOM_BCEBAR1                                     , RULL(0x10012811), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012411,
-REG64( EQ_0_CME_SCOM_BCEBAR1                                   , RULL(0x10012811), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012411,
-REG64( EQ_1_CME_SCOM_BCEBAR1                                   , RULL(0x11012811), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 11012411,
-REG64( EQ_2_CME_SCOM_BCEBAR1                                   , RULL(0x12012811), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 12012411,
-REG64( EQ_3_CME_SCOM_BCEBAR1                                   , RULL(0x13012811), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 13012411,
-REG64( EQ_4_CME_SCOM_BCEBAR1                                   , RULL(0x14012811), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 14012411,
-REG64( EQ_5_CME_SCOM_BCEBAR1                                   , RULL(0x15012811), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 15012411,
-REG64( EX_CME_SCOM_BCEBAR1                                     , RULL(0x10012411), SH_UNT_EX       , SH_ACS_SCOM_RW   );
-REG64( EX_0_CME_SCOM_BCEBAR1                                   , RULL(0x10012411), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
-REG64( EX_1_CME_SCOM_BCEBAR1                                   , RULL(0x10012811), SH_UNT_EX_1     , SH_ACS_SCOM_RW   );
-REG64( EX_2_CME_SCOM_BCEBAR1                                   , RULL(0x11012411), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
-REG64( EX_3_CME_SCOM_BCEBAR1                                   , RULL(0x11012811), SH_UNT_EX_3     , SH_ACS_SCOM_RW   );
-REG64( EX_4_CME_SCOM_BCEBAR1                                   , RULL(0x12012411), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
-REG64( EX_5_CME_SCOM_BCEBAR1                                   , RULL(0x12012811), SH_UNT_EX_5     , SH_ACS_SCOM_RW   );
-REG64( EX_6_CME_SCOM_BCEBAR1                                   , RULL(0x13012411), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
-REG64( EX_7_CME_SCOM_BCEBAR1                                   , RULL(0x13012811), SH_UNT_EX_7     , SH_ACS_SCOM_RW   );
-REG64( EX_8_CME_SCOM_BCEBAR1                                   , RULL(0x14012411), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
-REG64( EX_9_CME_SCOM_BCEBAR1                                   , RULL(0x14012811), SH_UNT_EX_9     , SH_ACS_SCOM_RW   );
-REG64( EX_10_CME_SCOM_BCEBAR1                                  , RULL(0x15012411), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
-REG64( EX_11_CME_SCOM_BCEBAR1                                  , RULL(0x15012811), SH_UNT_EX_11    , SH_ACS_SCOM_RW   );
+REG64( EQ_CME_SCOM_BCEBAR1                                     , RULL(0x10012431), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012031,
+REG64( EQ_0_CME_SCOM_BCEBAR1                                   , RULL(0x10012431), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012031,
+REG64( EQ_1_CME_SCOM_BCEBAR1                                   , RULL(0x11012431), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 11012031,
+REG64( EQ_2_CME_SCOM_BCEBAR1                                   , RULL(0x12012431), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 12012031,
+REG64( EQ_3_CME_SCOM_BCEBAR1                                   , RULL(0x13012431), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 13012031,
+REG64( EQ_4_CME_SCOM_BCEBAR1                                   , RULL(0x14012431), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 14012031,
+REG64( EQ_5_CME_SCOM_BCEBAR1                                   , RULL(0x15012431), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 15012031,
+REG64( EX_CME_SCOM_BCEBAR1                                     , RULL(0x10012431), SH_UNT_EX       , SH_ACS_SCOM_RW   );
+REG64( EX_0_CME_SCOM_BCEBAR1                                   , RULL(0x10012431), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
+REG64( EX_2_CME_SCOM_BCEBAR1                                   , RULL(0x11012431), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
+REG64( EX_4_CME_SCOM_BCEBAR1                                   , RULL(0x12012431), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
+REG64( EX_6_CME_SCOM_BCEBAR1                                   , RULL(0x13012431), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
+REG64( EX_8_CME_SCOM_BCEBAR1                                   , RULL(0x14012431), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
+REG64( EX_10_CME_SCOM_BCEBAR1                                  , RULL(0x15012431), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
 
-REG64( EQ_CME_SCOM_BCECSR                                      , RULL(0x1001280F), SH_UNT_EQ       ,
-       SH_ACS_SCOM      ); //DUPS: 1001240F,
-REG64( EQ_0_CME_SCOM_BCECSR                                    , RULL(0x1001280F), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM      ); //DUPS: 1001240F,
-REG64( EQ_1_CME_SCOM_BCECSR                                    , RULL(0x1101280F), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM      ); //DUPS: 1101240F,
-REG64( EQ_2_CME_SCOM_BCECSR                                    , RULL(0x1201280F), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM      ); //DUPS: 1201240F,
-REG64( EQ_3_CME_SCOM_BCECSR                                    , RULL(0x1301280F), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM      ); //DUPS: 1301240F,
-REG64( EQ_4_CME_SCOM_BCECSR                                    , RULL(0x1401280F), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM      ); //DUPS: 1401240F,
-REG64( EQ_5_CME_SCOM_BCECSR                                    , RULL(0x1501280F), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM      ); //DUPS: 1501240F,
-REG64( EX_CME_SCOM_BCECSR_PPE                                  , RULL(0x1090101F0), SH_UNT_EX       ,
+REG64( EQ_CME_SCOM_BCECSR                                      , RULL(0x1001240F), SH_UNT_EQ       ,
+       SH_ACS_SCOM      ); //DUPS: 1001200F,
+REG64( EQ_0_CME_SCOM_BCECSR                                    , RULL(0x1001240F), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM      ); //DUPS: 1001200F,
+REG64( EQ_1_CME_SCOM_BCECSR                                    , RULL(0x1101240F), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM      ); //DUPS: 1101200F,
+REG64( EQ_2_CME_SCOM_BCECSR                                    , RULL(0x1201240F), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM      ); //DUPS: 1201200F,
+REG64( EQ_3_CME_SCOM_BCECSR                                    , RULL(0x1301240F), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM      ); //DUPS: 1301200F,
+REG64( EQ_4_CME_SCOM_BCECSR                                    , RULL(0x1401240F), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM      ); //DUPS: 1401200F,
+REG64( EQ_5_CME_SCOM_BCECSR                                    , RULL(0x1501240F), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM      ); //DUPS: 1501200F,
+REG64( EX_CME_SCOM_BCECSR_PPE                                  , RULL(0x1090101E0), SH_UNT_EX       ,
        SH_ACS_PPE       );
 REG64( EX_CME_SCOM_BCECSR_SCOM                                 , RULL(0x1001240F), SH_UNT_EX       , SH_ACS_SCOM      );
-REG64( EX_0_CME_SCOM_BCECSR_PPE                                , RULL(0x1090101F0), SH_UNT_EX_0     ,
+REG64( EX_0_CME_SCOM_BCECSR_PPE                                , RULL(0x1090101E0), SH_UNT_EX_0     ,
        SH_ACS_PPE       );
 REG64( EX_0_CME_SCOM_BCECSR_SCOM                               , RULL(0x1001240F), SH_UNT_EX_0     , SH_ACS_SCOM      );
-REG64( EX_1_CME_SCOM_BCECSR_PPE                                , RULL(0x1090201F0), SH_UNT_EX_1     ,
+REG64( EX_1_CME_SCOM_BCECSR_PPE                                , RULL(0x1090201E0), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_SCOM_BCECSR_SCOM                               , RULL(0x1001280F), SH_UNT_EX_1     , SH_ACS_SCOM      );
-REG64( EX_2_CME_SCOM_BCECSR_PPE                                , RULL(0x10A0101F0), SH_UNT_EX_2     ,
+REG64( EX_2_CME_SCOM_BCECSR_PPE                                , RULL(0x10A0101E0), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
 REG64( EX_2_CME_SCOM_BCECSR_SCOM                               , RULL(0x1101240F), SH_UNT_EX_2     , SH_ACS_SCOM      );
-REG64( EX_3_CME_SCOM_BCECSR_PPE                                , RULL(0x10A0201F0), SH_UNT_EX_3     ,
+REG64( EX_3_CME_SCOM_BCECSR_PPE                                , RULL(0x10A0201E0), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_SCOM_BCECSR_SCOM                               , RULL(0x1101280F), SH_UNT_EX_3     , SH_ACS_SCOM      );
-REG64( EX_4_CME_SCOM_BCECSR_PPE                                , RULL(0x10B0101F0), SH_UNT_EX_4     ,
+REG64( EX_4_CME_SCOM_BCECSR_PPE                                , RULL(0x10B0101E0), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
 REG64( EX_4_CME_SCOM_BCECSR_SCOM                               , RULL(0x1201240F), SH_UNT_EX_4     , SH_ACS_SCOM      );
-REG64( EX_5_CME_SCOM_BCECSR_PPE                                , RULL(0x10B0201F0), SH_UNT_EX_5     ,
+REG64( EX_5_CME_SCOM_BCECSR_PPE                                , RULL(0x10B0201E0), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_SCOM_BCECSR_SCOM                               , RULL(0x1201280F), SH_UNT_EX_5     , SH_ACS_SCOM      );
-REG64( EX_6_CME_SCOM_BCECSR_PPE                                , RULL(0x10C0101F0), SH_UNT_EX_6     ,
+REG64( EX_6_CME_SCOM_BCECSR_PPE                                , RULL(0x10C0101E0), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
 REG64( EX_6_CME_SCOM_BCECSR_SCOM                               , RULL(0x1301240F), SH_UNT_EX_6     , SH_ACS_SCOM      );
-REG64( EX_7_CME_SCOM_BCECSR_PPE                                , RULL(0x10C0201F0), SH_UNT_EX_7     ,
+REG64( EX_7_CME_SCOM_BCECSR_PPE                                , RULL(0x10C0201E0), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_SCOM_BCECSR_SCOM                               , RULL(0x1301280F), SH_UNT_EX_7     , SH_ACS_SCOM      );
-REG64( EX_8_CME_SCOM_BCECSR_PPE                                , RULL(0x10D0101F0), SH_UNT_EX_8     ,
+REG64( EX_8_CME_SCOM_BCECSR_PPE                                , RULL(0x10D0101E0), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
 REG64( EX_8_CME_SCOM_BCECSR_SCOM                               , RULL(0x1401240F), SH_UNT_EX_8     , SH_ACS_SCOM      );
-REG64( EX_9_CME_SCOM_BCECSR_PPE                                , RULL(0x10D0201F0), SH_UNT_EX_9     ,
+REG64( EX_9_CME_SCOM_BCECSR_PPE                                , RULL(0x10D0201E0), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_SCOM_BCECSR_SCOM                               , RULL(0x1401280F), SH_UNT_EX_9     , SH_ACS_SCOM      );
-REG64( EX_10_CME_SCOM_BCECSR_PPE                               , RULL(0x10E0101F0), SH_UNT_EX_10    ,
+REG64( EX_10_CME_SCOM_BCECSR_PPE                               , RULL(0x10E0101E0), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
 REG64( EX_10_CME_SCOM_BCECSR_SCOM                              , RULL(0x1501240F), SH_UNT_EX_10    , SH_ACS_SCOM      );
-REG64( EX_11_CME_SCOM_BCECSR_PPE                               , RULL(0x10E0201F0), SH_UNT_EX_11    ,
+REG64( EX_11_CME_SCOM_BCECSR_PPE                               , RULL(0x10E0201E0), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_SCOM_BCECSR_SCOM                              , RULL(0x1501280F), SH_UNT_EX_11    , SH_ACS_SCOM      );
 
-REG64( EQ_CME_SCOM_EIIR                                        , RULL(0x10012819), SH_UNT_EQ       ,
-       SH_ACS_SCOM      ); //DUPS: 10012419,
-REG64( EQ_0_CME_SCOM_EIIR                                      , RULL(0x10012819), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM      ); //DUPS: 10012419,
-REG64( EQ_1_CME_SCOM_EIIR                                      , RULL(0x11012819), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM      ); //DUPS: 11012419,
-REG64( EQ_2_CME_SCOM_EIIR                                      , RULL(0x12012819), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM      ); //DUPS: 12012419,
-REG64( EQ_3_CME_SCOM_EIIR                                      , RULL(0x13012819), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM      ); //DUPS: 13012419,
-REG64( EQ_4_CME_SCOM_EIIR                                      , RULL(0x14012819), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM      ); //DUPS: 14012419,
-REG64( EQ_5_CME_SCOM_EIIR                                      , RULL(0x15012819), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM      ); //DUPS: 15012419,
-REG64( EX_CME_SCOM_EIIR                                        , RULL(0x10012419), SH_UNT_EX       , SH_ACS_SCOM      );
-REG64( EX_0_CME_SCOM_EIIR                                      , RULL(0x10012419), SH_UNT_EX_0     , SH_ACS_SCOM      );
-REG64( EX_1_CME_SCOM_EIIR                                      , RULL(0x10012819), SH_UNT_EX_1     , SH_ACS_SCOM      );
-REG64( EX_2_CME_SCOM_EIIR                                      , RULL(0x11012419), SH_UNT_EX_2     , SH_ACS_SCOM      );
-REG64( EX_3_CME_SCOM_EIIR                                      , RULL(0x11012819), SH_UNT_EX_3     , SH_ACS_SCOM      );
-REG64( EX_4_CME_SCOM_EIIR                                      , RULL(0x12012419), SH_UNT_EX_4     , SH_ACS_SCOM      );
-REG64( EX_5_CME_SCOM_EIIR                                      , RULL(0x12012819), SH_UNT_EX_5     , SH_ACS_SCOM      );
-REG64( EX_6_CME_SCOM_EIIR                                      , RULL(0x13012419), SH_UNT_EX_6     , SH_ACS_SCOM      );
-REG64( EX_7_CME_SCOM_EIIR                                      , RULL(0x13012819), SH_UNT_EX_7     , SH_ACS_SCOM      );
-REG64( EX_8_CME_SCOM_EIIR                                      , RULL(0x14012419), SH_UNT_EX_8     , SH_ACS_SCOM      );
-REG64( EX_9_CME_SCOM_EIIR                                      , RULL(0x14012819), SH_UNT_EX_9     , SH_ACS_SCOM      );
-REG64( EX_10_CME_SCOM_EIIR                                     , RULL(0x15012419), SH_UNT_EX_10    , SH_ACS_SCOM      );
-REG64( EX_11_CME_SCOM_EIIR                                     , RULL(0x15012819), SH_UNT_EX_11    , SH_ACS_SCOM      );
+REG64( EQ_CME_SCOM_CIDSR                                       , RULL(0x1001242E), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1001202E,
+REG64( EQ_0_CME_SCOM_CIDSR                                     , RULL(0x1001242E), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1001202E,
+REG64( EQ_1_CME_SCOM_CIDSR                                     , RULL(0x1101242E), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1101202E,
+REG64( EQ_2_CME_SCOM_CIDSR                                     , RULL(0x1201242E), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1201202E,
+REG64( EQ_3_CME_SCOM_CIDSR                                     , RULL(0x1301242E), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1301202E,
+REG64( EQ_4_CME_SCOM_CIDSR                                     , RULL(0x1401242E), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1401202E,
+REG64( EQ_5_CME_SCOM_CIDSR                                     , RULL(0x1501242E), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1501202E,
+REG64( EX_CME_SCOM_CIDSR_PPE                                   , RULL(0x1090106C0), SH_UNT_EX       ,
+       SH_ACS_PPE       );
+REG64( EX_CME_SCOM_CIDSR_SCOM                                  , RULL(0x1001242E), SH_UNT_EX       , SH_ACS_SCOM_RO   );
+REG64( EX_0_CME_SCOM_CIDSR_PPE                                 , RULL(0x1090106C0), SH_UNT_EX_0     ,
+       SH_ACS_PPE       );
+REG64( EX_0_CME_SCOM_CIDSR_SCOM                                , RULL(0x1001242E), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
+REG64( EX_1_CME_SCOM_CIDSR_PPE                                 , RULL(0x1090206C0), SH_UNT_EX_1     ,
+       SH_ACS_PPE       );
+REG64( EX_2_CME_SCOM_CIDSR_PPE                                 , RULL(0x10A0106C0), SH_UNT_EX_2     ,
+       SH_ACS_PPE       );
+REG64( EX_2_CME_SCOM_CIDSR_SCOM                                , RULL(0x1101242E), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
+REG64( EX_3_CME_SCOM_CIDSR_PPE                                 , RULL(0x10A0206C0), SH_UNT_EX_3     ,
+       SH_ACS_PPE       );
+REG64( EX_4_CME_SCOM_CIDSR_PPE                                 , RULL(0x10B0106C0), SH_UNT_EX_4     ,
+       SH_ACS_PPE       );
+REG64( EX_4_CME_SCOM_CIDSR_SCOM                                , RULL(0x1201242E), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
+REG64( EX_5_CME_SCOM_CIDSR_PPE                                 , RULL(0x10B0206C0), SH_UNT_EX_5     ,
+       SH_ACS_PPE       );
+REG64( EX_6_CME_SCOM_CIDSR_PPE                                 , RULL(0x10C0106C0), SH_UNT_EX_6     ,
+       SH_ACS_PPE       );
+REG64( EX_6_CME_SCOM_CIDSR_SCOM                                , RULL(0x1301242E), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
+REG64( EX_7_CME_SCOM_CIDSR_PPE                                 , RULL(0x10C0206C0), SH_UNT_EX_7     ,
+       SH_ACS_PPE       );
+REG64( EX_8_CME_SCOM_CIDSR_PPE                                 , RULL(0x10D0106C0), SH_UNT_EX_8     ,
+       SH_ACS_PPE       );
+REG64( EX_8_CME_SCOM_CIDSR_SCOM                                , RULL(0x1401242E), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
+REG64( EX_9_CME_SCOM_CIDSR_PPE                                 , RULL(0x10D0206C0), SH_UNT_EX_9     ,
+       SH_ACS_PPE       );
+REG64( EX_10_CME_SCOM_CIDSR_PPE                                , RULL(0x10E0106C0), SH_UNT_EX_10    ,
+       SH_ACS_PPE       );
+REG64( EX_10_CME_SCOM_CIDSR_SCOM                               , RULL(0x1501242E), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
+REG64( EX_11_CME_SCOM_CIDSR_PPE                                , RULL(0x10E0206C0), SH_UNT_EX_11    ,
+       SH_ACS_PPE       );
 
-REG64( EQ_CME_SCOM_FLAGS                                       , RULL(0x10012820), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012420,
-REG64( EQ_CME_SCOM_FLAGS_CLEAR                                 , RULL(0x10012821), SH_UNT_EQ       ,
-       SH_ACS_SCOM1_CLEAR ); //DUPS: 10012421,
-REG64( EQ_CME_SCOM_FLAGS_OR                                    , RULL(0x10012822), SH_UNT_EQ       ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 10012422,
-REG64( EQ_0_CME_SCOM_FLAGS                                     , RULL(0x10012820), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012420,
-REG64( EQ_0_CME_SCOM_FLAGS_CLEAR                               , RULL(0x10012821), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM1_CLEAR ); //DUPS: 10012421,
-REG64( EQ_0_CME_SCOM_FLAGS_OR                                  , RULL(0x10012822), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 10012422,
-REG64( EQ_1_CME_SCOM_FLAGS                                     , RULL(0x11012820), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 11012420,
-REG64( EQ_1_CME_SCOM_FLAGS_CLEAR                               , RULL(0x11012821), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM1_CLEAR ); //DUPS: 11012421,
-REG64( EQ_1_CME_SCOM_FLAGS_OR                                  , RULL(0x11012822), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 11012422,
-REG64( EQ_2_CME_SCOM_FLAGS                                     , RULL(0x12012820), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 12012420,
-REG64( EQ_2_CME_SCOM_FLAGS_CLEAR                               , RULL(0x12012821), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM1_CLEAR ); //DUPS: 12012421,
-REG64( EQ_2_CME_SCOM_FLAGS_OR                                  , RULL(0x12012822), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 12012422,
-REG64( EQ_3_CME_SCOM_FLAGS                                     , RULL(0x13012820), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 13012420,
-REG64( EQ_3_CME_SCOM_FLAGS_CLEAR                               , RULL(0x13012821), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM1_CLEAR ); //DUPS: 13012421,
-REG64( EQ_3_CME_SCOM_FLAGS_OR                                  , RULL(0x13012822), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 13012422,
-REG64( EQ_4_CME_SCOM_FLAGS                                     , RULL(0x14012820), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 14012420,
-REG64( EQ_4_CME_SCOM_FLAGS_CLEAR                               , RULL(0x14012821), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM1_CLEAR ); //DUPS: 14012421,
-REG64( EQ_4_CME_SCOM_FLAGS_OR                                  , RULL(0x14012822), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 14012422,
-REG64( EQ_5_CME_SCOM_FLAGS                                     , RULL(0x15012820), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 15012420,
-REG64( EQ_5_CME_SCOM_FLAGS_CLEAR                               , RULL(0x15012821), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM1_CLEAR ); //DUPS: 15012421,
-REG64( EQ_5_CME_SCOM_FLAGS_OR                                  , RULL(0x15012822), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 15012422,
+REG64( EQ_CME_SCOM_EIIR                                        , RULL(0x1001242B), SH_UNT_EQ       ,
+       SH_ACS_SCOM      ); //DUPS: 1001202B,
+REG64( EQ_0_CME_SCOM_EIIR                                      , RULL(0x1001242B), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM      ); //DUPS: 1001202B,
+REG64( EQ_1_CME_SCOM_EIIR                                      , RULL(0x1101242B), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM      ); //DUPS: 1101202B,
+REG64( EQ_2_CME_SCOM_EIIR                                      , RULL(0x1201242B), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM      ); //DUPS: 1201202B,
+REG64( EQ_3_CME_SCOM_EIIR                                      , RULL(0x1301242B), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM      ); //DUPS: 1301202B,
+REG64( EQ_4_CME_SCOM_EIIR                                      , RULL(0x1401242B), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM      ); //DUPS: 1401202B,
+REG64( EQ_5_CME_SCOM_EIIR                                      , RULL(0x1501242B), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM      ); //DUPS: 1501202B,
+REG64( EX_CME_SCOM_EIIR                                        , RULL(0x1001242B), SH_UNT_EX       , SH_ACS_SCOM      );
+REG64( EX_0_CME_SCOM_EIIR                                      , RULL(0x1001242B), SH_UNT_EX_0     , SH_ACS_SCOM      );
+REG64( EX_2_CME_SCOM_EIIR                                      , RULL(0x1101242B), SH_UNT_EX_2     , SH_ACS_SCOM      );
+REG64( EX_4_CME_SCOM_EIIR                                      , RULL(0x1201242B), SH_UNT_EX_4     , SH_ACS_SCOM      );
+REG64( EX_6_CME_SCOM_EIIR                                      , RULL(0x1301242B), SH_UNT_EX_6     , SH_ACS_SCOM      );
+REG64( EX_8_CME_SCOM_EIIR                                      , RULL(0x1401242B), SH_UNT_EX_8     , SH_ACS_SCOM      );
+REG64( EX_10_CME_SCOM_EIIR                                     , RULL(0x1501242B), SH_UNT_EX_10    , SH_ACS_SCOM      );
+
+REG64( EQ_CME_SCOM_FLAGS                                       , RULL(0x10012420), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012020,
+REG64( EQ_CME_SCOM_FLAGS_CLEAR                                 , RULL(0x10012421), SH_UNT_EQ       ,
+       SH_ACS_SCOM1_CLEAR ); //DUPS: 10012021,
+REG64( EQ_CME_SCOM_FLAGS_OR                                    , RULL(0x10012422), SH_UNT_EQ       ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 10012022,
+REG64( EQ_0_CME_SCOM_FLAGS                                     , RULL(0x10012420), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012020,
+REG64( EQ_0_CME_SCOM_FLAGS_CLEAR                               , RULL(0x10012421), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM1_CLEAR ); //DUPS: 10012021,
+REG64( EQ_0_CME_SCOM_FLAGS_OR                                  , RULL(0x10012422), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 10012022,
+REG64( EQ_1_CME_SCOM_FLAGS                                     , RULL(0x11012420), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 11012020,
+REG64( EQ_1_CME_SCOM_FLAGS_CLEAR                               , RULL(0x11012421), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM1_CLEAR ); //DUPS: 11012021,
+REG64( EQ_1_CME_SCOM_FLAGS_OR                                  , RULL(0x11012422), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 11012022,
+REG64( EQ_2_CME_SCOM_FLAGS                                     , RULL(0x12012420), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 12012020,
+REG64( EQ_2_CME_SCOM_FLAGS_CLEAR                               , RULL(0x12012421), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM1_CLEAR ); //DUPS: 12012021,
+REG64( EQ_2_CME_SCOM_FLAGS_OR                                  , RULL(0x12012422), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 12012022,
+REG64( EQ_3_CME_SCOM_FLAGS                                     , RULL(0x13012420), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 13012020,
+REG64( EQ_3_CME_SCOM_FLAGS_CLEAR                               , RULL(0x13012421), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM1_CLEAR ); //DUPS: 13012021,
+REG64( EQ_3_CME_SCOM_FLAGS_OR                                  , RULL(0x13012422), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 13012022,
+REG64( EQ_4_CME_SCOM_FLAGS                                     , RULL(0x14012420), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 14012020,
+REG64( EQ_4_CME_SCOM_FLAGS_CLEAR                               , RULL(0x14012421), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM1_CLEAR ); //DUPS: 14012021,
+REG64( EQ_4_CME_SCOM_FLAGS_OR                                  , RULL(0x14012422), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 14012022,
+REG64( EQ_5_CME_SCOM_FLAGS                                     , RULL(0x15012420), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 15012020,
+REG64( EQ_5_CME_SCOM_FLAGS_CLEAR                               , RULL(0x15012421), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM1_CLEAR ); //DUPS: 15012021,
+REG64( EQ_5_CME_SCOM_FLAGS_OR                                  , RULL(0x15012422), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 15012022,
 REG64( EX_CME_SCOM_FLAGS_PPE                                   , RULL(0x109010400), SH_UNT_EX       ,
        SH_ACS_PPE       );
 REG64( EX_CME_SCOM_FLAGS_PPE1                                  , RULL(0x109010418), SH_UNT_EX       ,
@@ -2188,10 +2152,6 @@ REG64( EX_1_CME_SCOM_FLAGS_PPE1                                , RULL(0x10902041
        SH_ACS_PPE1      );
 REG64( EX_1_CME_SCOM_FLAGS_PPE2                                , RULL(0x109020410), SH_UNT_EX_1     ,
        SH_ACS_PPE2      );
-REG64( EX_1_CME_SCOM_FLAGS_SCOM                                , RULL(0x10012820), SH_UNT_EX_1     , SH_ACS_SCOM_RW   );
-REG64( EX_1_CME_SCOM_FLAGS_SCOM1                               , RULL(0x10012821), SH_UNT_EX_1     ,
-       SH_ACS_SCOM1_CLEAR );
-REG64( EX_1_CME_SCOM_FLAGS_SCOM2                               , RULL(0x10012822), SH_UNT_EX_1     , SH_ACS_SCOM2_OR  );
 REG64( EX_2_CME_SCOM_FLAGS_PPE                                 , RULL(0x10A010400), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
 REG64( EX_2_CME_SCOM_FLAGS_PPE1                                , RULL(0x10A010418), SH_UNT_EX_2     ,
@@ -2208,10 +2168,6 @@ REG64( EX_3_CME_SCOM_FLAGS_PPE1                                , RULL(0x10A02041
        SH_ACS_PPE1      );
 REG64( EX_3_CME_SCOM_FLAGS_PPE2                                , RULL(0x10A020410), SH_UNT_EX_3     ,
        SH_ACS_PPE2      );
-REG64( EX_3_CME_SCOM_FLAGS_SCOM                                , RULL(0x11012820), SH_UNT_EX_3     , SH_ACS_SCOM_RW   );
-REG64( EX_3_CME_SCOM_FLAGS_SCOM1                               , RULL(0x11012821), SH_UNT_EX_3     ,
-       SH_ACS_SCOM1_CLEAR );
-REG64( EX_3_CME_SCOM_FLAGS_SCOM2                               , RULL(0x11012822), SH_UNT_EX_3     , SH_ACS_SCOM2_OR  );
 REG64( EX_4_CME_SCOM_FLAGS_PPE                                 , RULL(0x10B010400), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
 REG64( EX_4_CME_SCOM_FLAGS_PPE1                                , RULL(0x10B010418), SH_UNT_EX_4     ,
@@ -2228,10 +2184,6 @@ REG64( EX_5_CME_SCOM_FLAGS_PPE1                                , RULL(0x10B02041
        SH_ACS_PPE1      );
 REG64( EX_5_CME_SCOM_FLAGS_PPE2                                , RULL(0x10B020410), SH_UNT_EX_5     ,
        SH_ACS_PPE2      );
-REG64( EX_5_CME_SCOM_FLAGS_SCOM                                , RULL(0x12012820), SH_UNT_EX_5     , SH_ACS_SCOM_RW   );
-REG64( EX_5_CME_SCOM_FLAGS_SCOM1                               , RULL(0x12012821), SH_UNT_EX_5     ,
-       SH_ACS_SCOM1_CLEAR );
-REG64( EX_5_CME_SCOM_FLAGS_SCOM2                               , RULL(0x12012822), SH_UNT_EX_5     , SH_ACS_SCOM2_OR  );
 REG64( EX_6_CME_SCOM_FLAGS_PPE                                 , RULL(0x10C010400), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
 REG64( EX_6_CME_SCOM_FLAGS_PPE1                                , RULL(0x10C010418), SH_UNT_EX_6     ,
@@ -2248,10 +2200,6 @@ REG64( EX_7_CME_SCOM_FLAGS_PPE1                                , RULL(0x10C02041
        SH_ACS_PPE1      );
 REG64( EX_7_CME_SCOM_FLAGS_PPE2                                , RULL(0x10C020410), SH_UNT_EX_7     ,
        SH_ACS_PPE2      );
-REG64( EX_7_CME_SCOM_FLAGS_SCOM                                , RULL(0x13012820), SH_UNT_EX_7     , SH_ACS_SCOM_RW   );
-REG64( EX_7_CME_SCOM_FLAGS_SCOM1                               , RULL(0x13012821), SH_UNT_EX_7     ,
-       SH_ACS_SCOM1_CLEAR );
-REG64( EX_7_CME_SCOM_FLAGS_SCOM2                               , RULL(0x13012822), SH_UNT_EX_7     , SH_ACS_SCOM2_OR  );
 REG64( EX_8_CME_SCOM_FLAGS_PPE                                 , RULL(0x10D010400), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
 REG64( EX_8_CME_SCOM_FLAGS_PPE1                                , RULL(0x10D010418), SH_UNT_EX_8     ,
@@ -2268,10 +2216,6 @@ REG64( EX_9_CME_SCOM_FLAGS_PPE1                                , RULL(0x10D02041
        SH_ACS_PPE1      );
 REG64( EX_9_CME_SCOM_FLAGS_PPE2                                , RULL(0x10D020410), SH_UNT_EX_9     ,
        SH_ACS_PPE2      );
-REG64( EX_9_CME_SCOM_FLAGS_SCOM                                , RULL(0x14012820), SH_UNT_EX_9     , SH_ACS_SCOM_RW   );
-REG64( EX_9_CME_SCOM_FLAGS_SCOM1                               , RULL(0x14012821), SH_UNT_EX_9     ,
-       SH_ACS_SCOM1_CLEAR );
-REG64( EX_9_CME_SCOM_FLAGS_SCOM2                               , RULL(0x14012822), SH_UNT_EX_9     , SH_ACS_SCOM2_OR  );
 REG64( EX_10_CME_SCOM_FLAGS_PPE                                , RULL(0x10E010400), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
 REG64( EX_10_CME_SCOM_FLAGS_PPE1                               , RULL(0x10E010418), SH_UNT_EX_10    ,
@@ -2288,340 +2232,312 @@ REG64( EX_11_CME_SCOM_FLAGS_PPE1                               , RULL(0x10E02041
        SH_ACS_PPE1      );
 REG64( EX_11_CME_SCOM_FLAGS_PPE2                               , RULL(0x10E020410), SH_UNT_EX_11    ,
        SH_ACS_PPE2      );
-REG64( EX_11_CME_SCOM_FLAGS_SCOM                               , RULL(0x15012820), SH_UNT_EX_11    , SH_ACS_SCOM_RW   );
-REG64( EX_11_CME_SCOM_FLAGS_SCOM1                              , RULL(0x15012821), SH_UNT_EX_11    ,
-       SH_ACS_SCOM1_CLEAR );
-REG64( EX_11_CME_SCOM_FLAGS_SCOM2                              , RULL(0x15012822), SH_UNT_EX_11    , SH_ACS_SCOM2_OR  );
 
-REG64( EQ_CME_SCOM_FWMR                                        , RULL(0x1001281A), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1001241A,
-REG64( EQ_CME_SCOM_FWMR_CLEAR                                  , RULL(0x1001281B), SH_UNT_EQ       ,
-       SH_ACS_SCOM1_CLEAR ); //DUPS: 1001241B,
-REG64( EQ_CME_SCOM_FWMR_OR                                     , RULL(0x1001281C), SH_UNT_EQ       ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 1001241C,
-REG64( EQ_0_CME_SCOM_FWMR                                      , RULL(0x1001281A), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1001241A,
-REG64( EQ_0_CME_SCOM_FWMR_CLEAR                                , RULL(0x1001281B), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM1_CLEAR ); //DUPS: 1001241B,
-REG64( EQ_0_CME_SCOM_FWMR_OR                                   , RULL(0x1001281C), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 1001241C,
-REG64( EQ_1_CME_SCOM_FWMR                                      , RULL(0x1101281A), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1101241A,
-REG64( EQ_1_CME_SCOM_FWMR_CLEAR                                , RULL(0x1101281B), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM1_CLEAR ); //DUPS: 1101241B,
-REG64( EQ_1_CME_SCOM_FWMR_OR                                   , RULL(0x1101281C), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 1101241C,
-REG64( EQ_2_CME_SCOM_FWMR                                      , RULL(0x1201281A), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1201241A,
-REG64( EQ_2_CME_SCOM_FWMR_CLEAR                                , RULL(0x1201281B), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM1_CLEAR ); //DUPS: 1201241B,
-REG64( EQ_2_CME_SCOM_FWMR_OR                                   , RULL(0x1201281C), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 1201241C,
-REG64( EQ_3_CME_SCOM_FWMR                                      , RULL(0x1301281A), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1301241A,
-REG64( EQ_3_CME_SCOM_FWMR_CLEAR                                , RULL(0x1301281B), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM1_CLEAR ); //DUPS: 1301241B,
-REG64( EQ_3_CME_SCOM_FWMR_OR                                   , RULL(0x1301281C), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 1301241C,
-REG64( EQ_4_CME_SCOM_FWMR                                      , RULL(0x1401281A), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1401241A,
-REG64( EQ_4_CME_SCOM_FWMR_CLEAR                                , RULL(0x1401281B), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM1_CLEAR ); //DUPS: 1401241B,
-REG64( EQ_4_CME_SCOM_FWMR_OR                                   , RULL(0x1401281C), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 1401241C,
-REG64( EQ_5_CME_SCOM_FWMR                                      , RULL(0x1501281A), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1501241A,
-REG64( EQ_5_CME_SCOM_FWMR_CLEAR                                , RULL(0x1501281B), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM1_CLEAR ); //DUPS: 1501241B,
-REG64( EQ_5_CME_SCOM_FWMR_OR                                   , RULL(0x1501281C), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 1501241C,
-REG64( EX_CME_SCOM_FWMR                                        , RULL(0x1001241A), SH_UNT_EX       , SH_ACS_SCOM_RW   );
-REG64( EX_CME_SCOM_FWMR_CLEAR                                  , RULL(0x1001241B), SH_UNT_EX       ,
+REG64( EQ_CME_SCOM_FWMR                                        , RULL(0x1001243A), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1001203A,
+REG64( EQ_CME_SCOM_FWMR_CLEAR                                  , RULL(0x1001243B), SH_UNT_EQ       ,
+       SH_ACS_SCOM1_CLEAR ); //DUPS: 1001203B,
+REG64( EQ_CME_SCOM_FWMR_OR                                     , RULL(0x1001243C), SH_UNT_EQ       ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 1001203C,
+REG64( EQ_0_CME_SCOM_FWMR                                      , RULL(0x1001243A), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1001203A,
+REG64( EQ_0_CME_SCOM_FWMR_CLEAR                                , RULL(0x1001243B), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM1_CLEAR ); //DUPS: 1001203B,
+REG64( EQ_0_CME_SCOM_FWMR_OR                                   , RULL(0x1001243C), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 1001203C,
+REG64( EQ_1_CME_SCOM_FWMR                                      , RULL(0x1101243A), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1101203A,
+REG64( EQ_1_CME_SCOM_FWMR_CLEAR                                , RULL(0x1101243B), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM1_CLEAR ); //DUPS: 1101203B,
+REG64( EQ_1_CME_SCOM_FWMR_OR                                   , RULL(0x1101243C), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 1101203C,
+REG64( EQ_2_CME_SCOM_FWMR                                      , RULL(0x1201243A), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1201203A,
+REG64( EQ_2_CME_SCOM_FWMR_CLEAR                                , RULL(0x1201243B), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM1_CLEAR ); //DUPS: 1201203B,
+REG64( EQ_2_CME_SCOM_FWMR_OR                                   , RULL(0x1201243C), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 1201203C,
+REG64( EQ_3_CME_SCOM_FWMR                                      , RULL(0x1301243A), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1301203A,
+REG64( EQ_3_CME_SCOM_FWMR_CLEAR                                , RULL(0x1301243B), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM1_CLEAR ); //DUPS: 1301203B,
+REG64( EQ_3_CME_SCOM_FWMR_OR                                   , RULL(0x1301243C), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 1301203C,
+REG64( EQ_4_CME_SCOM_FWMR                                      , RULL(0x1401243A), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1401203A,
+REG64( EQ_4_CME_SCOM_FWMR_CLEAR                                , RULL(0x1401243B), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM1_CLEAR ); //DUPS: 1401203B,
+REG64( EQ_4_CME_SCOM_FWMR_OR                                   , RULL(0x1401243C), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 1401203C,
+REG64( EQ_5_CME_SCOM_FWMR                                      , RULL(0x1501243A), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1501203A,
+REG64( EQ_5_CME_SCOM_FWMR_CLEAR                                , RULL(0x1501243B), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM1_CLEAR ); //DUPS: 1501203B,
+REG64( EQ_5_CME_SCOM_FWMR_OR                                   , RULL(0x1501243C), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 1501203C,
+REG64( EX_CME_SCOM_FWMR                                        , RULL(0x1001243A), SH_UNT_EX       , SH_ACS_SCOM_RW   );
+REG64( EX_CME_SCOM_FWMR_CLEAR                                  , RULL(0x1001243B), SH_UNT_EX       ,
        SH_ACS_SCOM1_CLEAR );
-REG64( EX_CME_SCOM_FWMR_OR                                     , RULL(0x1001241C), SH_UNT_EX       , SH_ACS_SCOM2_OR  );
-REG64( EX_0_CME_SCOM_FWMR                                      , RULL(0x1001241A), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
-REG64( EX_0_CME_SCOM_FWMR_CLEAR                                , RULL(0x1001241B), SH_UNT_EX_0     ,
+REG64( EX_CME_SCOM_FWMR_OR                                     , RULL(0x1001243C), SH_UNT_EX       , SH_ACS_SCOM2_OR  );
+REG64( EX_0_CME_SCOM_FWMR                                      , RULL(0x1001243A), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
+REG64( EX_0_CME_SCOM_FWMR_CLEAR                                , RULL(0x1001243B), SH_UNT_EX_0     ,
        SH_ACS_SCOM1_CLEAR );
-REG64( EX_0_CME_SCOM_FWMR_OR                                   , RULL(0x1001241C), SH_UNT_EX_0     , SH_ACS_SCOM2_OR  );
-REG64( EX_1_CME_SCOM_FWMR                                      , RULL(0x1001281A), SH_UNT_EX_1     , SH_ACS_SCOM_RW   );
-REG64( EX_1_CME_SCOM_FWMR_CLEAR                                , RULL(0x1001281B), SH_UNT_EX_1     ,
+REG64( EX_0_CME_SCOM_FWMR_OR                                   , RULL(0x1001243C), SH_UNT_EX_0     , SH_ACS_SCOM2_OR  );
+REG64( EX_2_CME_SCOM_FWMR                                      , RULL(0x1101243A), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
+REG64( EX_2_CME_SCOM_FWMR_CLEAR                                , RULL(0x1101243B), SH_UNT_EX_2     ,
        SH_ACS_SCOM1_CLEAR );
-REG64( EX_1_CME_SCOM_FWMR_OR                                   , RULL(0x1001281C), SH_UNT_EX_1     , SH_ACS_SCOM2_OR  );
-REG64( EX_2_CME_SCOM_FWMR                                      , RULL(0x1101241A), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
-REG64( EX_2_CME_SCOM_FWMR_CLEAR                                , RULL(0x1101241B), SH_UNT_EX_2     ,
+REG64( EX_2_CME_SCOM_FWMR_OR                                   , RULL(0x1101243C), SH_UNT_EX_2     , SH_ACS_SCOM2_OR  );
+REG64( EX_4_CME_SCOM_FWMR                                      , RULL(0x1201243A), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
+REG64( EX_4_CME_SCOM_FWMR_CLEAR                                , RULL(0x1201243B), SH_UNT_EX_4     ,
        SH_ACS_SCOM1_CLEAR );
-REG64( EX_2_CME_SCOM_FWMR_OR                                   , RULL(0x1101241C), SH_UNT_EX_2     , SH_ACS_SCOM2_OR  );
-REG64( EX_3_CME_SCOM_FWMR                                      , RULL(0x1101281A), SH_UNT_EX_3     , SH_ACS_SCOM_RW   );
-REG64( EX_3_CME_SCOM_FWMR_CLEAR                                , RULL(0x1101281B), SH_UNT_EX_3     ,
+REG64( EX_4_CME_SCOM_FWMR_OR                                   , RULL(0x1201243C), SH_UNT_EX_4     , SH_ACS_SCOM2_OR  );
+REG64( EX_6_CME_SCOM_FWMR                                      , RULL(0x1301243A), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
+REG64( EX_6_CME_SCOM_FWMR_CLEAR                                , RULL(0x1301243B), SH_UNT_EX_6     ,
        SH_ACS_SCOM1_CLEAR );
-REG64( EX_3_CME_SCOM_FWMR_OR                                   , RULL(0x1101281C), SH_UNT_EX_3     , SH_ACS_SCOM2_OR  );
-REG64( EX_4_CME_SCOM_FWMR                                      , RULL(0x1201241A), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
-REG64( EX_4_CME_SCOM_FWMR_CLEAR                                , RULL(0x1201241B), SH_UNT_EX_4     ,
+REG64( EX_6_CME_SCOM_FWMR_OR                                   , RULL(0x1301243C), SH_UNT_EX_6     , SH_ACS_SCOM2_OR  );
+REG64( EX_8_CME_SCOM_FWMR                                      , RULL(0x1401243A), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
+REG64( EX_8_CME_SCOM_FWMR_CLEAR                                , RULL(0x1401243B), SH_UNT_EX_8     ,
        SH_ACS_SCOM1_CLEAR );
-REG64( EX_4_CME_SCOM_FWMR_OR                                   , RULL(0x1201241C), SH_UNT_EX_4     , SH_ACS_SCOM2_OR  );
-REG64( EX_5_CME_SCOM_FWMR                                      , RULL(0x1201281A), SH_UNT_EX_5     , SH_ACS_SCOM_RW   );
-REG64( EX_5_CME_SCOM_FWMR_CLEAR                                , RULL(0x1201281B), SH_UNT_EX_5     ,
+REG64( EX_8_CME_SCOM_FWMR_OR                                   , RULL(0x1401243C), SH_UNT_EX_8     , SH_ACS_SCOM2_OR  );
+REG64( EX_10_CME_SCOM_FWMR                                     , RULL(0x1501243A), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
+REG64( EX_10_CME_SCOM_FWMR_CLEAR                               , RULL(0x1501243B), SH_UNT_EX_10    ,
        SH_ACS_SCOM1_CLEAR );
-REG64( EX_5_CME_SCOM_FWMR_OR                                   , RULL(0x1201281C), SH_UNT_EX_5     , SH_ACS_SCOM2_OR  );
-REG64( EX_6_CME_SCOM_FWMR                                      , RULL(0x1301241A), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
-REG64( EX_6_CME_SCOM_FWMR_CLEAR                                , RULL(0x1301241B), SH_UNT_EX_6     ,
-       SH_ACS_SCOM1_CLEAR );
-REG64( EX_6_CME_SCOM_FWMR_OR                                   , RULL(0x1301241C), SH_UNT_EX_6     , SH_ACS_SCOM2_OR  );
-REG64( EX_7_CME_SCOM_FWMR                                      , RULL(0x1301281A), SH_UNT_EX_7     , SH_ACS_SCOM_RW   );
-REG64( EX_7_CME_SCOM_FWMR_CLEAR                                , RULL(0x1301281B), SH_UNT_EX_7     ,
-       SH_ACS_SCOM1_CLEAR );
-REG64( EX_7_CME_SCOM_FWMR_OR                                   , RULL(0x1301281C), SH_UNT_EX_7     , SH_ACS_SCOM2_OR  );
-REG64( EX_8_CME_SCOM_FWMR                                      , RULL(0x1401241A), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
-REG64( EX_8_CME_SCOM_FWMR_CLEAR                                , RULL(0x1401241B), SH_UNT_EX_8     ,
-       SH_ACS_SCOM1_CLEAR );
-REG64( EX_8_CME_SCOM_FWMR_OR                                   , RULL(0x1401241C), SH_UNT_EX_8     , SH_ACS_SCOM2_OR  );
-REG64( EX_9_CME_SCOM_FWMR                                      , RULL(0x1401281A), SH_UNT_EX_9     , SH_ACS_SCOM_RW   );
-REG64( EX_9_CME_SCOM_FWMR_CLEAR                                , RULL(0x1401281B), SH_UNT_EX_9     ,
-       SH_ACS_SCOM1_CLEAR );
-REG64( EX_9_CME_SCOM_FWMR_OR                                   , RULL(0x1401281C), SH_UNT_EX_9     , SH_ACS_SCOM2_OR  );
-REG64( EX_10_CME_SCOM_FWMR                                     , RULL(0x1501241A), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
-REG64( EX_10_CME_SCOM_FWMR_CLEAR                               , RULL(0x1501241B), SH_UNT_EX_10    ,
-       SH_ACS_SCOM1_CLEAR );
-REG64( EX_10_CME_SCOM_FWMR_OR                                  , RULL(0x1501241C), SH_UNT_EX_10    , SH_ACS_SCOM2_OR  );
-REG64( EX_11_CME_SCOM_FWMR                                     , RULL(0x1501281A), SH_UNT_EX_11    , SH_ACS_SCOM_RW   );
-REG64( EX_11_CME_SCOM_FWMR_CLEAR                               , RULL(0x1501281B), SH_UNT_EX_11    ,
-       SH_ACS_SCOM1_CLEAR );
-REG64( EX_11_CME_SCOM_FWMR_OR                                  , RULL(0x1501281C), SH_UNT_EX_11    , SH_ACS_SCOM2_OR  );
+REG64( EX_10_CME_SCOM_FWMR_OR                                  , RULL(0x1501243C), SH_UNT_EX_10    , SH_ACS_SCOM2_OR  );
 
-REG64( EQ_CME_SCOM_LFIR                                        , RULL(0x10012800), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012400,
-REG64( EQ_CME_SCOM_LFIR_AND                                    , RULL(0x10012801), SH_UNT_EQ       ,
-       SH_ACS_SCOM1_AND ); //DUPS: 10012401,
-REG64( EQ_CME_SCOM_LFIR_OR                                     , RULL(0x10012802), SH_UNT_EQ       ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 10012402,
-REG64( EQ_0_CME_SCOM_LFIR                                      , RULL(0x10012800), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012400,
-REG64( EQ_0_CME_SCOM_LFIR_AND                                  , RULL(0x10012801), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM1_AND ); //DUPS: 10012401,
-REG64( EQ_0_CME_SCOM_LFIR_OR                                   , RULL(0x10012802), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 10012402,
-REG64( EQ_1_CME_SCOM_LFIR                                      , RULL(0x11012800), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 11012400,
-REG64( EQ_1_CME_SCOM_LFIR_AND                                  , RULL(0x11012801), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM1_AND ); //DUPS: 11012401,
-REG64( EQ_1_CME_SCOM_LFIR_OR                                   , RULL(0x11012802), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 11012402,
-REG64( EQ_2_CME_SCOM_LFIR                                      , RULL(0x12012800), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 12012400,
-REG64( EQ_2_CME_SCOM_LFIR_AND                                  , RULL(0x12012801), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM1_AND ); //DUPS: 12012401,
-REG64( EQ_2_CME_SCOM_LFIR_OR                                   , RULL(0x12012802), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 12012402,
-REG64( EQ_3_CME_SCOM_LFIR                                      , RULL(0x13012800), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 13012400,
-REG64( EQ_3_CME_SCOM_LFIR_AND                                  , RULL(0x13012801), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM1_AND ); //DUPS: 13012401,
-REG64( EQ_3_CME_SCOM_LFIR_OR                                   , RULL(0x13012802), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 13012402,
-REG64( EQ_4_CME_SCOM_LFIR                                      , RULL(0x14012800), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 14012400,
-REG64( EQ_4_CME_SCOM_LFIR_AND                                  , RULL(0x14012801), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM1_AND ); //DUPS: 14012401,
-REG64( EQ_4_CME_SCOM_LFIR_OR                                   , RULL(0x14012802), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 14012402,
-REG64( EQ_5_CME_SCOM_LFIR                                      , RULL(0x15012800), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 15012400,
-REG64( EQ_5_CME_SCOM_LFIR_AND                                  , RULL(0x15012801), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM1_AND ); //DUPS: 15012401,
-REG64( EQ_5_CME_SCOM_LFIR_OR                                   , RULL(0x15012802), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 15012402,
+REG64( EQ_CME_SCOM_IDCR                                        , RULL(0x1001242D), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1001202D,
+REG64( EQ_0_CME_SCOM_IDCR                                      , RULL(0x1001242D), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1001202D,
+REG64( EQ_1_CME_SCOM_IDCR                                      , RULL(0x1101242D), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1101202D,
+REG64( EQ_2_CME_SCOM_IDCR                                      , RULL(0x1201242D), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1201202D,
+REG64( EQ_3_CME_SCOM_IDCR                                      , RULL(0x1301242D), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1301202D,
+REG64( EQ_4_CME_SCOM_IDCR                                      , RULL(0x1401242D), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1401202D,
+REG64( EQ_5_CME_SCOM_IDCR                                      , RULL(0x1501242D), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1501202D,
+REG64( EX_CME_SCOM_IDCR_PPE                                    , RULL(0x1090106A0), SH_UNT_EX       ,
+       SH_ACS_PPE       );
+REG64( EX_CME_SCOM_IDCR_SCOM                                   , RULL(0x1001242D), SH_UNT_EX       , SH_ACS_SCOM_RW   );
+REG64( EX_0_CME_SCOM_IDCR_PPE                                  , RULL(0x1090106A0), SH_UNT_EX_0     ,
+       SH_ACS_PPE       );
+REG64( EX_0_CME_SCOM_IDCR_SCOM                                 , RULL(0x1001242D), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
+REG64( EX_1_CME_SCOM_IDCR_PPE                                  , RULL(0x1090206A0), SH_UNT_EX_1     ,
+       SH_ACS_PPE       );
+REG64( EX_2_CME_SCOM_IDCR_PPE                                  , RULL(0x10A0106A0), SH_UNT_EX_2     ,
+       SH_ACS_PPE       );
+REG64( EX_2_CME_SCOM_IDCR_SCOM                                 , RULL(0x1101242D), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
+REG64( EX_3_CME_SCOM_IDCR_PPE                                  , RULL(0x10A0206A0), SH_UNT_EX_3     ,
+       SH_ACS_PPE       );
+REG64( EX_4_CME_SCOM_IDCR_PPE                                  , RULL(0x10B0106A0), SH_UNT_EX_4     ,
+       SH_ACS_PPE       );
+REG64( EX_4_CME_SCOM_IDCR_SCOM                                 , RULL(0x1201242D), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
+REG64( EX_5_CME_SCOM_IDCR_PPE                                  , RULL(0x10B0206A0), SH_UNT_EX_5     ,
+       SH_ACS_PPE       );
+REG64( EX_6_CME_SCOM_IDCR_PPE                                  , RULL(0x10C0106A0), SH_UNT_EX_6     ,
+       SH_ACS_PPE       );
+REG64( EX_6_CME_SCOM_IDCR_SCOM                                 , RULL(0x1301242D), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
+REG64( EX_7_CME_SCOM_IDCR_PPE                                  , RULL(0x10C0206A0), SH_UNT_EX_7     ,
+       SH_ACS_PPE       );
+REG64( EX_8_CME_SCOM_IDCR_PPE                                  , RULL(0x10D0106A0), SH_UNT_EX_8     ,
+       SH_ACS_PPE       );
+REG64( EX_8_CME_SCOM_IDCR_SCOM                                 , RULL(0x1401242D), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
+REG64( EX_9_CME_SCOM_IDCR_PPE                                  , RULL(0x10D0206A0), SH_UNT_EX_9     ,
+       SH_ACS_PPE       );
+REG64( EX_10_CME_SCOM_IDCR_PPE                                 , RULL(0x10E0106A0), SH_UNT_EX_10    ,
+       SH_ACS_PPE       );
+REG64( EX_10_CME_SCOM_IDCR_SCOM                                , RULL(0x1501242D), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
+REG64( EX_11_CME_SCOM_IDCR_PPE                                 , RULL(0x10E0206A0), SH_UNT_EX_11    ,
+       SH_ACS_PPE       );
+
+REG64( EQ_CME_SCOM_LFIR                                        , RULL(0x10012400), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012000,
+REG64( EQ_CME_SCOM_LFIR_AND                                    , RULL(0x10012401), SH_UNT_EQ       ,
+       SH_ACS_SCOM1_AND ); //DUPS: 10012001,
+REG64( EQ_CME_SCOM_LFIR_OR                                     , RULL(0x10012402), SH_UNT_EQ       ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 10012002,
+REG64( EQ_0_CME_SCOM_LFIR                                      , RULL(0x10012400), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012000,
+REG64( EQ_0_CME_SCOM_LFIR_AND                                  , RULL(0x10012401), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM1_AND ); //DUPS: 10012001,
+REG64( EQ_0_CME_SCOM_LFIR_OR                                   , RULL(0x10012402), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 10012002,
+REG64( EQ_1_CME_SCOM_LFIR                                      , RULL(0x11012400), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 11012000,
+REG64( EQ_1_CME_SCOM_LFIR_AND                                  , RULL(0x11012401), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM1_AND ); //DUPS: 11012001,
+REG64( EQ_1_CME_SCOM_LFIR_OR                                   , RULL(0x11012402), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 11012002,
+REG64( EQ_2_CME_SCOM_LFIR                                      , RULL(0x12012400), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 12012000,
+REG64( EQ_2_CME_SCOM_LFIR_AND                                  , RULL(0x12012401), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM1_AND ); //DUPS: 12012001,
+REG64( EQ_2_CME_SCOM_LFIR_OR                                   , RULL(0x12012402), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 12012002,
+REG64( EQ_3_CME_SCOM_LFIR                                      , RULL(0x13012400), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 13012000,
+REG64( EQ_3_CME_SCOM_LFIR_AND                                  , RULL(0x13012401), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM1_AND ); //DUPS: 13012001,
+REG64( EQ_3_CME_SCOM_LFIR_OR                                   , RULL(0x13012402), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 13012002,
+REG64( EQ_4_CME_SCOM_LFIR                                      , RULL(0x14012400), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 14012000,
+REG64( EQ_4_CME_SCOM_LFIR_AND                                  , RULL(0x14012401), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM1_AND ); //DUPS: 14012001,
+REG64( EQ_4_CME_SCOM_LFIR_OR                                   , RULL(0x14012402), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 14012002,
+REG64( EQ_5_CME_SCOM_LFIR                                      , RULL(0x15012400), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 15012000,
+REG64( EQ_5_CME_SCOM_LFIR_AND                                  , RULL(0x15012401), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM1_AND ); //DUPS: 15012001,
+REG64( EQ_5_CME_SCOM_LFIR_OR                                   , RULL(0x15012402), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 15012002,
 REG64( EX_CME_SCOM_LFIR                                        , RULL(0x10012400), SH_UNT_EX       , SH_ACS_SCOM_RW   );
 REG64( EX_CME_SCOM_LFIR_AND                                    , RULL(0x10012401), SH_UNT_EX       , SH_ACS_SCOM1_AND );
 REG64( EX_CME_SCOM_LFIR_OR                                     , RULL(0x10012402), SH_UNT_EX       , SH_ACS_SCOM2_OR  );
 REG64( EX_0_CME_SCOM_LFIR                                      , RULL(0x10012400), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
 REG64( EX_0_CME_SCOM_LFIR_AND                                  , RULL(0x10012401), SH_UNT_EX_0     , SH_ACS_SCOM1_AND );
 REG64( EX_0_CME_SCOM_LFIR_OR                                   , RULL(0x10012402), SH_UNT_EX_0     , SH_ACS_SCOM2_OR  );
-REG64( EX_1_CME_SCOM_LFIR                                      , RULL(0x10012800), SH_UNT_EX_1     , SH_ACS_SCOM_RW   );
-REG64( EX_1_CME_SCOM_LFIR_AND                                  , RULL(0x10012801), SH_UNT_EX_1     , SH_ACS_SCOM1_AND );
-REG64( EX_1_CME_SCOM_LFIR_OR                                   , RULL(0x10012802), SH_UNT_EX_1     , SH_ACS_SCOM2_OR  );
 REG64( EX_2_CME_SCOM_LFIR                                      , RULL(0x11012400), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
 REG64( EX_2_CME_SCOM_LFIR_AND                                  , RULL(0x11012401), SH_UNT_EX_2     , SH_ACS_SCOM1_AND );
 REG64( EX_2_CME_SCOM_LFIR_OR                                   , RULL(0x11012402), SH_UNT_EX_2     , SH_ACS_SCOM2_OR  );
-REG64( EX_3_CME_SCOM_LFIR                                      , RULL(0x11012800), SH_UNT_EX_3     , SH_ACS_SCOM_RW   );
-REG64( EX_3_CME_SCOM_LFIR_AND                                  , RULL(0x11012801), SH_UNT_EX_3     , SH_ACS_SCOM1_AND );
-REG64( EX_3_CME_SCOM_LFIR_OR                                   , RULL(0x11012802), SH_UNT_EX_3     , SH_ACS_SCOM2_OR  );
 REG64( EX_4_CME_SCOM_LFIR                                      , RULL(0x12012400), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
 REG64( EX_4_CME_SCOM_LFIR_AND                                  , RULL(0x12012401), SH_UNT_EX_4     , SH_ACS_SCOM1_AND );
 REG64( EX_4_CME_SCOM_LFIR_OR                                   , RULL(0x12012402), SH_UNT_EX_4     , SH_ACS_SCOM2_OR  );
-REG64( EX_5_CME_SCOM_LFIR                                      , RULL(0x12012800), SH_UNT_EX_5     , SH_ACS_SCOM_RW   );
-REG64( EX_5_CME_SCOM_LFIR_AND                                  , RULL(0x12012801), SH_UNT_EX_5     , SH_ACS_SCOM1_AND );
-REG64( EX_5_CME_SCOM_LFIR_OR                                   , RULL(0x12012802), SH_UNT_EX_5     , SH_ACS_SCOM2_OR  );
 REG64( EX_6_CME_SCOM_LFIR                                      , RULL(0x13012400), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
 REG64( EX_6_CME_SCOM_LFIR_AND                                  , RULL(0x13012401), SH_UNT_EX_6     , SH_ACS_SCOM1_AND );
 REG64( EX_6_CME_SCOM_LFIR_OR                                   , RULL(0x13012402), SH_UNT_EX_6     , SH_ACS_SCOM2_OR  );
-REG64( EX_7_CME_SCOM_LFIR                                      , RULL(0x13012800), SH_UNT_EX_7     , SH_ACS_SCOM_RW   );
-REG64( EX_7_CME_SCOM_LFIR_AND                                  , RULL(0x13012801), SH_UNT_EX_7     , SH_ACS_SCOM1_AND );
-REG64( EX_7_CME_SCOM_LFIR_OR                                   , RULL(0x13012802), SH_UNT_EX_7     , SH_ACS_SCOM2_OR  );
 REG64( EX_8_CME_SCOM_LFIR                                      , RULL(0x14012400), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
 REG64( EX_8_CME_SCOM_LFIR_AND                                  , RULL(0x14012401), SH_UNT_EX_8     , SH_ACS_SCOM1_AND );
 REG64( EX_8_CME_SCOM_LFIR_OR                                   , RULL(0x14012402), SH_UNT_EX_8     , SH_ACS_SCOM2_OR  );
-REG64( EX_9_CME_SCOM_LFIR                                      , RULL(0x14012800), SH_UNT_EX_9     , SH_ACS_SCOM_RW   );
-REG64( EX_9_CME_SCOM_LFIR_AND                                  , RULL(0x14012801), SH_UNT_EX_9     , SH_ACS_SCOM1_AND );
-REG64( EX_9_CME_SCOM_LFIR_OR                                   , RULL(0x14012802), SH_UNT_EX_9     , SH_ACS_SCOM2_OR  );
 REG64( EX_10_CME_SCOM_LFIR                                     , RULL(0x15012400), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
 REG64( EX_10_CME_SCOM_LFIR_AND                                 , RULL(0x15012401), SH_UNT_EX_10    , SH_ACS_SCOM1_AND );
 REG64( EX_10_CME_SCOM_LFIR_OR                                  , RULL(0x15012402), SH_UNT_EX_10    , SH_ACS_SCOM2_OR  );
-REG64( EX_11_CME_SCOM_LFIR                                     , RULL(0x15012800), SH_UNT_EX_11    , SH_ACS_SCOM_RW   );
-REG64( EX_11_CME_SCOM_LFIR_AND                                 , RULL(0x15012801), SH_UNT_EX_11    , SH_ACS_SCOM1_AND );
-REG64( EX_11_CME_SCOM_LFIR_OR                                  , RULL(0x15012802), SH_UNT_EX_11    , SH_ACS_SCOM2_OR  );
 
-REG64( EQ_CME_SCOM_LFIRACT0                                    , RULL(0x10012806), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012406,
-REG64( EQ_0_CME_SCOM_LFIRACT0                                  , RULL(0x10012806), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012406,
-REG64( EQ_1_CME_SCOM_LFIRACT0                                  , RULL(0x11012806), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 11012406,
-REG64( EQ_2_CME_SCOM_LFIRACT0                                  , RULL(0x12012806), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 12012406,
-REG64( EQ_3_CME_SCOM_LFIRACT0                                  , RULL(0x13012806), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 13012406,
-REG64( EQ_4_CME_SCOM_LFIRACT0                                  , RULL(0x14012806), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 14012406,
-REG64( EQ_5_CME_SCOM_LFIRACT0                                  , RULL(0x15012806), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 15012406,
+REG64( EQ_CME_SCOM_LFIRACT0                                    , RULL(0x10012406), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012006,
+REG64( EQ_0_CME_SCOM_LFIRACT0                                  , RULL(0x10012406), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012006,
+REG64( EQ_1_CME_SCOM_LFIRACT0                                  , RULL(0x11012406), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 11012006,
+REG64( EQ_2_CME_SCOM_LFIRACT0                                  , RULL(0x12012406), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 12012006,
+REG64( EQ_3_CME_SCOM_LFIRACT0                                  , RULL(0x13012406), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 13012006,
+REG64( EQ_4_CME_SCOM_LFIRACT0                                  , RULL(0x14012406), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 14012006,
+REG64( EQ_5_CME_SCOM_LFIRACT0                                  , RULL(0x15012406), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 15012006,
 REG64( EX_CME_SCOM_LFIRACT0                                    , RULL(0x10012406), SH_UNT_EX       , SH_ACS_SCOM_RW   );
 REG64( EX_0_CME_SCOM_LFIRACT0                                  , RULL(0x10012406), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
-REG64( EX_1_CME_SCOM_LFIRACT0                                  , RULL(0x10012806), SH_UNT_EX_1     , SH_ACS_SCOM_RW   );
 REG64( EX_2_CME_SCOM_LFIRACT0                                  , RULL(0x11012406), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
-REG64( EX_3_CME_SCOM_LFIRACT0                                  , RULL(0x11012806), SH_UNT_EX_3     , SH_ACS_SCOM_RW   );
 REG64( EX_4_CME_SCOM_LFIRACT0                                  , RULL(0x12012406), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
-REG64( EX_5_CME_SCOM_LFIRACT0                                  , RULL(0x12012806), SH_UNT_EX_5     , SH_ACS_SCOM_RW   );
 REG64( EX_6_CME_SCOM_LFIRACT0                                  , RULL(0x13012406), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
-REG64( EX_7_CME_SCOM_LFIRACT0                                  , RULL(0x13012806), SH_UNT_EX_7     , SH_ACS_SCOM_RW   );
 REG64( EX_8_CME_SCOM_LFIRACT0                                  , RULL(0x14012406), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
-REG64( EX_9_CME_SCOM_LFIRACT0                                  , RULL(0x14012806), SH_UNT_EX_9     , SH_ACS_SCOM_RW   );
 REG64( EX_10_CME_SCOM_LFIRACT0                                 , RULL(0x15012406), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
-REG64( EX_11_CME_SCOM_LFIRACT0                                 , RULL(0x15012806), SH_UNT_EX_11    , SH_ACS_SCOM_RW   );
 
-REG64( EQ_CME_SCOM_LFIRACT1                                    , RULL(0x10012807), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012407,
-REG64( EQ_0_CME_SCOM_LFIRACT1                                  , RULL(0x10012807), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012407,
-REG64( EQ_1_CME_SCOM_LFIRACT1                                  , RULL(0x11012807), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 11012407,
-REG64( EQ_2_CME_SCOM_LFIRACT1                                  , RULL(0x12012807), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 12012407,
-REG64( EQ_3_CME_SCOM_LFIRACT1                                  , RULL(0x13012807), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 13012407,
-REG64( EQ_4_CME_SCOM_LFIRACT1                                  , RULL(0x14012807), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 14012407,
-REG64( EQ_5_CME_SCOM_LFIRACT1                                  , RULL(0x15012807), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 15012407,
+REG64( EQ_CME_SCOM_LFIRACT1                                    , RULL(0x10012407), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012007,
+REG64( EQ_0_CME_SCOM_LFIRACT1                                  , RULL(0x10012407), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012007,
+REG64( EQ_1_CME_SCOM_LFIRACT1                                  , RULL(0x11012407), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 11012007,
+REG64( EQ_2_CME_SCOM_LFIRACT1                                  , RULL(0x12012407), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 12012007,
+REG64( EQ_3_CME_SCOM_LFIRACT1                                  , RULL(0x13012407), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 13012007,
+REG64( EQ_4_CME_SCOM_LFIRACT1                                  , RULL(0x14012407), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 14012007,
+REG64( EQ_5_CME_SCOM_LFIRACT1                                  , RULL(0x15012407), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 15012007,
 REG64( EX_CME_SCOM_LFIRACT1                                    , RULL(0x10012407), SH_UNT_EX       , SH_ACS_SCOM_RW   );
 REG64( EX_0_CME_SCOM_LFIRACT1                                  , RULL(0x10012407), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
-REG64( EX_1_CME_SCOM_LFIRACT1                                  , RULL(0x10012807), SH_UNT_EX_1     , SH_ACS_SCOM_RW   );
 REG64( EX_2_CME_SCOM_LFIRACT1                                  , RULL(0x11012407), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
-REG64( EX_3_CME_SCOM_LFIRACT1                                  , RULL(0x11012807), SH_UNT_EX_3     , SH_ACS_SCOM_RW   );
 REG64( EX_4_CME_SCOM_LFIRACT1                                  , RULL(0x12012407), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
-REG64( EX_5_CME_SCOM_LFIRACT1                                  , RULL(0x12012807), SH_UNT_EX_5     , SH_ACS_SCOM_RW   );
 REG64( EX_6_CME_SCOM_LFIRACT1                                  , RULL(0x13012407), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
-REG64( EX_7_CME_SCOM_LFIRACT1                                  , RULL(0x13012807), SH_UNT_EX_7     , SH_ACS_SCOM_RW   );
 REG64( EX_8_CME_SCOM_LFIRACT1                                  , RULL(0x14012407), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
-REG64( EX_9_CME_SCOM_LFIRACT1                                  , RULL(0x14012807), SH_UNT_EX_9     , SH_ACS_SCOM_RW   );
 REG64( EX_10_CME_SCOM_LFIRACT1                                 , RULL(0x15012407), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
-REG64( EX_11_CME_SCOM_LFIRACT1                                 , RULL(0x15012807), SH_UNT_EX_11    , SH_ACS_SCOM_RW   );
 
-REG64( EQ_CME_SCOM_LFIRMASK                                    , RULL(0x10012803), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012403,
-REG64( EQ_CME_SCOM_LFIRMASK_AND                                , RULL(0x10012804), SH_UNT_EQ       ,
-       SH_ACS_SCOM1_AND ); //DUPS: 10012404,
-REG64( EQ_CME_SCOM_LFIRMASK_OR                                 , RULL(0x10012805), SH_UNT_EQ       ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 10012405,
-REG64( EQ_0_CME_SCOM_LFIRMASK                                  , RULL(0x10012803), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012403,
-REG64( EQ_0_CME_SCOM_LFIRMASK_AND                              , RULL(0x10012804), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM1_AND ); //DUPS: 10012404,
-REG64( EQ_0_CME_SCOM_LFIRMASK_OR                               , RULL(0x10012805), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 10012405,
-REG64( EQ_1_CME_SCOM_LFIRMASK                                  , RULL(0x11012803), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 11012403,
-REG64( EQ_1_CME_SCOM_LFIRMASK_AND                              , RULL(0x11012804), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM1_AND ); //DUPS: 11012404,
-REG64( EQ_1_CME_SCOM_LFIRMASK_OR                               , RULL(0x11012805), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 11012405,
-REG64( EQ_2_CME_SCOM_LFIRMASK                                  , RULL(0x12012803), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 12012403,
-REG64( EQ_2_CME_SCOM_LFIRMASK_AND                              , RULL(0x12012804), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM1_AND ); //DUPS: 12012404,
-REG64( EQ_2_CME_SCOM_LFIRMASK_OR                               , RULL(0x12012805), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 12012405,
-REG64( EQ_3_CME_SCOM_LFIRMASK                                  , RULL(0x13012803), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 13012403,
-REG64( EQ_3_CME_SCOM_LFIRMASK_AND                              , RULL(0x13012804), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM1_AND ); //DUPS: 13012404,
-REG64( EQ_3_CME_SCOM_LFIRMASK_OR                               , RULL(0x13012805), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 13012405,
-REG64( EQ_4_CME_SCOM_LFIRMASK                                  , RULL(0x14012803), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 14012403,
-REG64( EQ_4_CME_SCOM_LFIRMASK_AND                              , RULL(0x14012804), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM1_AND ); //DUPS: 14012404,
-REG64( EQ_4_CME_SCOM_LFIRMASK_OR                               , RULL(0x14012805), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 14012405,
-REG64( EQ_5_CME_SCOM_LFIRMASK                                  , RULL(0x15012803), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 15012403,
-REG64( EQ_5_CME_SCOM_LFIRMASK_AND                              , RULL(0x15012804), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM1_AND ); //DUPS: 15012404,
-REG64( EQ_5_CME_SCOM_LFIRMASK_OR                               , RULL(0x15012805), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 15012405,
+REG64( EQ_CME_SCOM_LFIRMASK                                    , RULL(0x10012403), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012003,
+REG64( EQ_CME_SCOM_LFIRMASK_AND                                , RULL(0x10012404), SH_UNT_EQ       ,
+       SH_ACS_SCOM1_AND ); //DUPS: 10012004,
+REG64( EQ_CME_SCOM_LFIRMASK_OR                                 , RULL(0x10012405), SH_UNT_EQ       ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 10012005,
+REG64( EQ_0_CME_SCOM_LFIRMASK                                  , RULL(0x10012403), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012003,
+REG64( EQ_0_CME_SCOM_LFIRMASK_AND                              , RULL(0x10012404), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM1_AND ); //DUPS: 10012004,
+REG64( EQ_0_CME_SCOM_LFIRMASK_OR                               , RULL(0x10012405), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 10012005,
+REG64( EQ_1_CME_SCOM_LFIRMASK                                  , RULL(0x11012403), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 11012003,
+REG64( EQ_1_CME_SCOM_LFIRMASK_AND                              , RULL(0x11012404), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM1_AND ); //DUPS: 11012004,
+REG64( EQ_1_CME_SCOM_LFIRMASK_OR                               , RULL(0x11012405), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 11012005,
+REG64( EQ_2_CME_SCOM_LFIRMASK                                  , RULL(0x12012403), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 12012003,
+REG64( EQ_2_CME_SCOM_LFIRMASK_AND                              , RULL(0x12012404), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM1_AND ); //DUPS: 12012004,
+REG64( EQ_2_CME_SCOM_LFIRMASK_OR                               , RULL(0x12012405), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 12012005,
+REG64( EQ_3_CME_SCOM_LFIRMASK                                  , RULL(0x13012403), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 13012003,
+REG64( EQ_3_CME_SCOM_LFIRMASK_AND                              , RULL(0x13012404), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM1_AND ); //DUPS: 13012004,
+REG64( EQ_3_CME_SCOM_LFIRMASK_OR                               , RULL(0x13012405), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 13012005,
+REG64( EQ_4_CME_SCOM_LFIRMASK                                  , RULL(0x14012403), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 14012003,
+REG64( EQ_4_CME_SCOM_LFIRMASK_AND                              , RULL(0x14012404), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM1_AND ); //DUPS: 14012004,
+REG64( EQ_4_CME_SCOM_LFIRMASK_OR                               , RULL(0x14012405), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 14012005,
+REG64( EQ_5_CME_SCOM_LFIRMASK                                  , RULL(0x15012403), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 15012003,
+REG64( EQ_5_CME_SCOM_LFIRMASK_AND                              , RULL(0x15012404), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM1_AND ); //DUPS: 15012004,
+REG64( EQ_5_CME_SCOM_LFIRMASK_OR                               , RULL(0x15012405), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 15012005,
 REG64( EX_CME_SCOM_LFIRMASK                                    , RULL(0x10012403), SH_UNT_EX       , SH_ACS_SCOM_RW   );
 REG64( EX_CME_SCOM_LFIRMASK_AND                                , RULL(0x10012404), SH_UNT_EX       , SH_ACS_SCOM1_AND );
 REG64( EX_CME_SCOM_LFIRMASK_OR                                 , RULL(0x10012405), SH_UNT_EX       , SH_ACS_SCOM2_OR  );
 REG64( EX_0_CME_SCOM_LFIRMASK                                  , RULL(0x10012403), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
 REG64( EX_0_CME_SCOM_LFIRMASK_AND                              , RULL(0x10012404), SH_UNT_EX_0     , SH_ACS_SCOM1_AND );
 REG64( EX_0_CME_SCOM_LFIRMASK_OR                               , RULL(0x10012405), SH_UNT_EX_0     , SH_ACS_SCOM2_OR  );
-REG64( EX_1_CME_SCOM_LFIRMASK                                  , RULL(0x10012803), SH_UNT_EX_1     , SH_ACS_SCOM_RW   );
-REG64( EX_1_CME_SCOM_LFIRMASK_AND                              , RULL(0x10012804), SH_UNT_EX_1     , SH_ACS_SCOM1_AND );
-REG64( EX_1_CME_SCOM_LFIRMASK_OR                               , RULL(0x10012805), SH_UNT_EX_1     , SH_ACS_SCOM2_OR  );
 REG64( EX_2_CME_SCOM_LFIRMASK                                  , RULL(0x11012403), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
 REG64( EX_2_CME_SCOM_LFIRMASK_AND                              , RULL(0x11012404), SH_UNT_EX_2     , SH_ACS_SCOM1_AND );
 REG64( EX_2_CME_SCOM_LFIRMASK_OR                               , RULL(0x11012405), SH_UNT_EX_2     , SH_ACS_SCOM2_OR  );
-REG64( EX_3_CME_SCOM_LFIRMASK                                  , RULL(0x11012803), SH_UNT_EX_3     , SH_ACS_SCOM_RW   );
-REG64( EX_3_CME_SCOM_LFIRMASK_AND                              , RULL(0x11012804), SH_UNT_EX_3     , SH_ACS_SCOM1_AND );
-REG64( EX_3_CME_SCOM_LFIRMASK_OR                               , RULL(0x11012805), SH_UNT_EX_3     , SH_ACS_SCOM2_OR  );
 REG64( EX_4_CME_SCOM_LFIRMASK                                  , RULL(0x12012403), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
 REG64( EX_4_CME_SCOM_LFIRMASK_AND                              , RULL(0x12012404), SH_UNT_EX_4     , SH_ACS_SCOM1_AND );
 REG64( EX_4_CME_SCOM_LFIRMASK_OR                               , RULL(0x12012405), SH_UNT_EX_4     , SH_ACS_SCOM2_OR  );
-REG64( EX_5_CME_SCOM_LFIRMASK                                  , RULL(0x12012803), SH_UNT_EX_5     , SH_ACS_SCOM_RW   );
-REG64( EX_5_CME_SCOM_LFIRMASK_AND                              , RULL(0x12012804), SH_UNT_EX_5     , SH_ACS_SCOM1_AND );
-REG64( EX_5_CME_SCOM_LFIRMASK_OR                               , RULL(0x12012805), SH_UNT_EX_5     , SH_ACS_SCOM2_OR  );
 REG64( EX_6_CME_SCOM_LFIRMASK                                  , RULL(0x13012403), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
 REG64( EX_6_CME_SCOM_LFIRMASK_AND                              , RULL(0x13012404), SH_UNT_EX_6     , SH_ACS_SCOM1_AND );
 REG64( EX_6_CME_SCOM_LFIRMASK_OR                               , RULL(0x13012405), SH_UNT_EX_6     , SH_ACS_SCOM2_OR  );
-REG64( EX_7_CME_SCOM_LFIRMASK                                  , RULL(0x13012803), SH_UNT_EX_7     , SH_ACS_SCOM_RW   );
-REG64( EX_7_CME_SCOM_LFIRMASK_AND                              , RULL(0x13012804), SH_UNT_EX_7     , SH_ACS_SCOM1_AND );
-REG64( EX_7_CME_SCOM_LFIRMASK_OR                               , RULL(0x13012805), SH_UNT_EX_7     , SH_ACS_SCOM2_OR  );
 REG64( EX_8_CME_SCOM_LFIRMASK                                  , RULL(0x14012403), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
 REG64( EX_8_CME_SCOM_LFIRMASK_AND                              , RULL(0x14012404), SH_UNT_EX_8     , SH_ACS_SCOM1_AND );
 REG64( EX_8_CME_SCOM_LFIRMASK_OR                               , RULL(0x14012405), SH_UNT_EX_8     , SH_ACS_SCOM2_OR  );
-REG64( EX_9_CME_SCOM_LFIRMASK                                  , RULL(0x14012803), SH_UNT_EX_9     , SH_ACS_SCOM_RW   );
-REG64( EX_9_CME_SCOM_LFIRMASK_AND                              , RULL(0x14012804), SH_UNT_EX_9     , SH_ACS_SCOM1_AND );
-REG64( EX_9_CME_SCOM_LFIRMASK_OR                               , RULL(0x14012805), SH_UNT_EX_9     , SH_ACS_SCOM2_OR  );
 REG64( EX_10_CME_SCOM_LFIRMASK                                 , RULL(0x15012403), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
 REG64( EX_10_CME_SCOM_LFIRMASK_AND                             , RULL(0x15012404), SH_UNT_EX_10    , SH_ACS_SCOM1_AND );
 REG64( EX_10_CME_SCOM_LFIRMASK_OR                              , RULL(0x15012405), SH_UNT_EX_10    , SH_ACS_SCOM2_OR  );
-REG64( EX_11_CME_SCOM_LFIRMASK                                 , RULL(0x15012803), SH_UNT_EX_11    , SH_ACS_SCOM_RW   );
-REG64( EX_11_CME_SCOM_LFIRMASK_AND                             , RULL(0x15012804), SH_UNT_EX_11    , SH_ACS_SCOM1_AND );
-REG64( EX_11_CME_SCOM_LFIRMASK_OR                              , RULL(0x15012805), SH_UNT_EX_11    , SH_ACS_SCOM2_OR  );
 
-REG64( EQ_CME_SCOM_PMCRS0                                      , RULL(0x10012842), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012442,
-REG64( EQ_0_CME_SCOM_PMCRS0                                    , RULL(0x10012842), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012442,
-REG64( EQ_1_CME_SCOM_PMCRS0                                    , RULL(0x11012842), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 11012442,
-REG64( EQ_2_CME_SCOM_PMCRS0                                    , RULL(0x12012842), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 12012442,
-REG64( EQ_3_CME_SCOM_PMCRS0                                    , RULL(0x13012842), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 13012442,
-REG64( EQ_4_CME_SCOM_PMCRS0                                    , RULL(0x14012842), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 14012442,
-REG64( EQ_5_CME_SCOM_PMCRS0                                    , RULL(0x15012842), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 15012442,
+REG64( EQ_CME_SCOM_PMCRS0                                      , RULL(0x10012442), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012042,
+REG64( EQ_0_CME_SCOM_PMCRS0                                    , RULL(0x10012442), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012042,
+REG64( EQ_1_CME_SCOM_PMCRS0                                    , RULL(0x11012442), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 11012042,
+REG64( EQ_2_CME_SCOM_PMCRS0                                    , RULL(0x12012442), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 12012042,
+REG64( EQ_3_CME_SCOM_PMCRS0                                    , RULL(0x13012442), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 13012042,
+REG64( EQ_4_CME_SCOM_PMCRS0                                    , RULL(0x14012442), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 14012042,
+REG64( EQ_5_CME_SCOM_PMCRS0                                    , RULL(0x15012442), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 15012042,
 REG64( EX_CME_SCOM_PMCRS0_PPE                                  , RULL(0x109010240), SH_UNT_EX       ,
        SH_ACS_PPE       );
 REG64( EX_CME_SCOM_PMCRS0_SCOM                                 , RULL(0x10012442), SH_UNT_EX       , SH_ACS_SCOM_RW   );
@@ -2630,52 +2546,46 @@ REG64( EX_0_CME_SCOM_PMCRS0_PPE                                , RULL(0x10901024
 REG64( EX_0_CME_SCOM_PMCRS0_SCOM                               , RULL(0x10012442), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
 REG64( EX_1_CME_SCOM_PMCRS0_PPE                                , RULL(0x109020240), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_SCOM_PMCRS0_SCOM                               , RULL(0x10012842), SH_UNT_EX_1     , SH_ACS_SCOM_RW   );
 REG64( EX_2_CME_SCOM_PMCRS0_PPE                                , RULL(0x10A010240), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
 REG64( EX_2_CME_SCOM_PMCRS0_SCOM                               , RULL(0x11012442), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
 REG64( EX_3_CME_SCOM_PMCRS0_PPE                                , RULL(0x10A020240), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_SCOM_PMCRS0_SCOM                               , RULL(0x11012842), SH_UNT_EX_3     , SH_ACS_SCOM_RW   );
 REG64( EX_4_CME_SCOM_PMCRS0_PPE                                , RULL(0x10B010240), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
 REG64( EX_4_CME_SCOM_PMCRS0_SCOM                               , RULL(0x12012442), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
 REG64( EX_5_CME_SCOM_PMCRS0_PPE                                , RULL(0x10B020240), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_SCOM_PMCRS0_SCOM                               , RULL(0x12012842), SH_UNT_EX_5     , SH_ACS_SCOM_RW   );
 REG64( EX_6_CME_SCOM_PMCRS0_PPE                                , RULL(0x10C010240), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
 REG64( EX_6_CME_SCOM_PMCRS0_SCOM                               , RULL(0x13012442), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
 REG64( EX_7_CME_SCOM_PMCRS0_PPE                                , RULL(0x10C020240), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_SCOM_PMCRS0_SCOM                               , RULL(0x13012842), SH_UNT_EX_7     , SH_ACS_SCOM_RW   );
 REG64( EX_8_CME_SCOM_PMCRS0_PPE                                , RULL(0x10D010240), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
 REG64( EX_8_CME_SCOM_PMCRS0_SCOM                               , RULL(0x14012442), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
 REG64( EX_9_CME_SCOM_PMCRS0_PPE                                , RULL(0x10D020240), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_SCOM_PMCRS0_SCOM                               , RULL(0x14012842), SH_UNT_EX_9     , SH_ACS_SCOM_RW   );
 REG64( EX_10_CME_SCOM_PMCRS0_PPE                               , RULL(0x10E010240), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
 REG64( EX_10_CME_SCOM_PMCRS0_SCOM                              , RULL(0x15012442), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
 REG64( EX_11_CME_SCOM_PMCRS0_PPE                               , RULL(0x10E020240), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_SCOM_PMCRS0_SCOM                              , RULL(0x15012842), SH_UNT_EX_11    , SH_ACS_SCOM_RW   );
 
-REG64( EQ_CME_SCOM_PMCRS1                                      , RULL(0x10012843), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012443,
-REG64( EQ_0_CME_SCOM_PMCRS1                                    , RULL(0x10012843), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012443,
-REG64( EQ_1_CME_SCOM_PMCRS1                                    , RULL(0x11012843), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 11012443,
-REG64( EQ_2_CME_SCOM_PMCRS1                                    , RULL(0x12012843), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 12012443,
-REG64( EQ_3_CME_SCOM_PMCRS1                                    , RULL(0x13012843), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 13012443,
-REG64( EQ_4_CME_SCOM_PMCRS1                                    , RULL(0x14012843), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 14012443,
-REG64( EQ_5_CME_SCOM_PMCRS1                                    , RULL(0x15012843), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 15012443,
+REG64( EQ_CME_SCOM_PMCRS1                                      , RULL(0x10012443), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012043,
+REG64( EQ_0_CME_SCOM_PMCRS1                                    , RULL(0x10012443), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012043,
+REG64( EQ_1_CME_SCOM_PMCRS1                                    , RULL(0x11012443), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 11012043,
+REG64( EQ_2_CME_SCOM_PMCRS1                                    , RULL(0x12012443), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 12012043,
+REG64( EQ_3_CME_SCOM_PMCRS1                                    , RULL(0x13012443), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 13012043,
+REG64( EQ_4_CME_SCOM_PMCRS1                                    , RULL(0x14012443), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 14012043,
+REG64( EQ_5_CME_SCOM_PMCRS1                                    , RULL(0x15012443), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 15012043,
 REG64( EX_CME_SCOM_PMCRS1_PPE                                  , RULL(0x109010260), SH_UNT_EX       ,
        SH_ACS_PPE       );
 REG64( EX_CME_SCOM_PMCRS1_SCOM                                 , RULL(0x10012443), SH_UNT_EX       , SH_ACS_SCOM_RW   );
@@ -2684,52 +2594,46 @@ REG64( EX_0_CME_SCOM_PMCRS1_PPE                                , RULL(0x10901026
 REG64( EX_0_CME_SCOM_PMCRS1_SCOM                               , RULL(0x10012443), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
 REG64( EX_1_CME_SCOM_PMCRS1_PPE                                , RULL(0x109020260), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_SCOM_PMCRS1_SCOM                               , RULL(0x10012843), SH_UNT_EX_1     , SH_ACS_SCOM_RW   );
 REG64( EX_2_CME_SCOM_PMCRS1_PPE                                , RULL(0x10A010260), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
 REG64( EX_2_CME_SCOM_PMCRS1_SCOM                               , RULL(0x11012443), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
 REG64( EX_3_CME_SCOM_PMCRS1_PPE                                , RULL(0x10A020260), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_SCOM_PMCRS1_SCOM                               , RULL(0x11012843), SH_UNT_EX_3     , SH_ACS_SCOM_RW   );
 REG64( EX_4_CME_SCOM_PMCRS1_PPE                                , RULL(0x10B010260), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
 REG64( EX_4_CME_SCOM_PMCRS1_SCOM                               , RULL(0x12012443), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
 REG64( EX_5_CME_SCOM_PMCRS1_PPE                                , RULL(0x10B020260), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_SCOM_PMCRS1_SCOM                               , RULL(0x12012843), SH_UNT_EX_5     , SH_ACS_SCOM_RW   );
 REG64( EX_6_CME_SCOM_PMCRS1_PPE                                , RULL(0x10C010260), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
 REG64( EX_6_CME_SCOM_PMCRS1_SCOM                               , RULL(0x13012443), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
 REG64( EX_7_CME_SCOM_PMCRS1_PPE                                , RULL(0x10C020260), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_SCOM_PMCRS1_SCOM                               , RULL(0x13012843), SH_UNT_EX_7     , SH_ACS_SCOM_RW   );
 REG64( EX_8_CME_SCOM_PMCRS1_PPE                                , RULL(0x10D010260), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
 REG64( EX_8_CME_SCOM_PMCRS1_SCOM                               , RULL(0x14012443), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
 REG64( EX_9_CME_SCOM_PMCRS1_PPE                                , RULL(0x10D020260), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_SCOM_PMCRS1_SCOM                               , RULL(0x14012843), SH_UNT_EX_9     , SH_ACS_SCOM_RW   );
 REG64( EX_10_CME_SCOM_PMCRS1_PPE                               , RULL(0x10E010260), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
 REG64( EX_10_CME_SCOM_PMCRS1_SCOM                              , RULL(0x15012443), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
 REG64( EX_11_CME_SCOM_PMCRS1_PPE                               , RULL(0x10E020260), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_SCOM_PMCRS1_SCOM                              , RULL(0x15012843), SH_UNT_EX_11    , SH_ACS_SCOM_RW   );
 
-REG64( EQ_CME_SCOM_PMSRS0                                      , RULL(0x10012840), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012440,
-REG64( EQ_0_CME_SCOM_PMSRS0                                    , RULL(0x10012840), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012440,
-REG64( EQ_1_CME_SCOM_PMSRS0                                    , RULL(0x11012840), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 11012440,
-REG64( EQ_2_CME_SCOM_PMSRS0                                    , RULL(0x12012840), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 12012440,
-REG64( EQ_3_CME_SCOM_PMSRS0                                    , RULL(0x13012840), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 13012440,
-REG64( EQ_4_CME_SCOM_PMSRS0                                    , RULL(0x14012840), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 14012440,
-REG64( EQ_5_CME_SCOM_PMSRS0                                    , RULL(0x15012840), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 15012440,
+REG64( EQ_CME_SCOM_PMSRS0                                      , RULL(0x10012440), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012040,
+REG64( EQ_0_CME_SCOM_PMSRS0                                    , RULL(0x10012440), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012040,
+REG64( EQ_1_CME_SCOM_PMSRS0                                    , RULL(0x11012440), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 11012040,
+REG64( EQ_2_CME_SCOM_PMSRS0                                    , RULL(0x12012440), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 12012040,
+REG64( EQ_3_CME_SCOM_PMSRS0                                    , RULL(0x13012440), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 13012040,
+REG64( EQ_4_CME_SCOM_PMSRS0                                    , RULL(0x14012440), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 14012040,
+REG64( EQ_5_CME_SCOM_PMSRS0                                    , RULL(0x15012440), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 15012040,
 REG64( EX_CME_SCOM_PMSRS0_PPE                                  , RULL(0x109010200), SH_UNT_EX       ,
        SH_ACS_PPE       );
 REG64( EX_CME_SCOM_PMSRS0_SCOM                                 , RULL(0x10012440), SH_UNT_EX       , SH_ACS_SCOM_RW   );
@@ -2738,52 +2642,46 @@ REG64( EX_0_CME_SCOM_PMSRS0_PPE                                , RULL(0x10901020
 REG64( EX_0_CME_SCOM_PMSRS0_SCOM                               , RULL(0x10012440), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
 REG64( EX_1_CME_SCOM_PMSRS0_PPE                                , RULL(0x109020200), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_SCOM_PMSRS0_SCOM                               , RULL(0x10012840), SH_UNT_EX_1     , SH_ACS_SCOM_RW   );
 REG64( EX_2_CME_SCOM_PMSRS0_PPE                                , RULL(0x10A010200), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
 REG64( EX_2_CME_SCOM_PMSRS0_SCOM                               , RULL(0x11012440), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
 REG64( EX_3_CME_SCOM_PMSRS0_PPE                                , RULL(0x10A020200), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_SCOM_PMSRS0_SCOM                               , RULL(0x11012840), SH_UNT_EX_3     , SH_ACS_SCOM_RW   );
 REG64( EX_4_CME_SCOM_PMSRS0_PPE                                , RULL(0x10B010200), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
 REG64( EX_4_CME_SCOM_PMSRS0_SCOM                               , RULL(0x12012440), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
 REG64( EX_5_CME_SCOM_PMSRS0_PPE                                , RULL(0x10B020200), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_SCOM_PMSRS0_SCOM                               , RULL(0x12012840), SH_UNT_EX_5     , SH_ACS_SCOM_RW   );
 REG64( EX_6_CME_SCOM_PMSRS0_PPE                                , RULL(0x10C010200), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
 REG64( EX_6_CME_SCOM_PMSRS0_SCOM                               , RULL(0x13012440), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
 REG64( EX_7_CME_SCOM_PMSRS0_PPE                                , RULL(0x10C020200), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_SCOM_PMSRS0_SCOM                               , RULL(0x13012840), SH_UNT_EX_7     , SH_ACS_SCOM_RW   );
 REG64( EX_8_CME_SCOM_PMSRS0_PPE                                , RULL(0x10D010200), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
 REG64( EX_8_CME_SCOM_PMSRS0_SCOM                               , RULL(0x14012440), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
 REG64( EX_9_CME_SCOM_PMSRS0_PPE                                , RULL(0x10D020200), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_SCOM_PMSRS0_SCOM                               , RULL(0x14012840), SH_UNT_EX_9     , SH_ACS_SCOM_RW   );
 REG64( EX_10_CME_SCOM_PMSRS0_PPE                               , RULL(0x10E010200), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
 REG64( EX_10_CME_SCOM_PMSRS0_SCOM                              , RULL(0x15012440), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
 REG64( EX_11_CME_SCOM_PMSRS0_PPE                               , RULL(0x10E020200), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_SCOM_PMSRS0_SCOM                              , RULL(0x15012840), SH_UNT_EX_11    , SH_ACS_SCOM_RW   );
 
-REG64( EQ_CME_SCOM_PMSRS1                                      , RULL(0x10012841), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012441,
-REG64( EQ_0_CME_SCOM_PMSRS1                                    , RULL(0x10012841), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012441,
-REG64( EQ_1_CME_SCOM_PMSRS1                                    , RULL(0x11012841), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 11012441,
-REG64( EQ_2_CME_SCOM_PMSRS1                                    , RULL(0x12012841), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 12012441,
-REG64( EQ_3_CME_SCOM_PMSRS1                                    , RULL(0x13012841), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 13012441,
-REG64( EQ_4_CME_SCOM_PMSRS1                                    , RULL(0x14012841), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 14012441,
-REG64( EQ_5_CME_SCOM_PMSRS1                                    , RULL(0x15012841), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 15012441,
+REG64( EQ_CME_SCOM_PMSRS1                                      , RULL(0x10012441), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012041,
+REG64( EQ_0_CME_SCOM_PMSRS1                                    , RULL(0x10012441), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012041,
+REG64( EQ_1_CME_SCOM_PMSRS1                                    , RULL(0x11012441), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 11012041,
+REG64( EQ_2_CME_SCOM_PMSRS1                                    , RULL(0x12012441), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 12012041,
+REG64( EQ_3_CME_SCOM_PMSRS1                                    , RULL(0x13012441), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 13012041,
+REG64( EQ_4_CME_SCOM_PMSRS1                                    , RULL(0x14012441), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 14012041,
+REG64( EQ_5_CME_SCOM_PMSRS1                                    , RULL(0x15012441), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 15012041,
 REG64( EX_CME_SCOM_PMSRS1_PPE                                  , RULL(0x109010220), SH_UNT_EX       ,
        SH_ACS_PPE       );
 REG64( EX_CME_SCOM_PMSRS1_SCOM                                 , RULL(0x10012441), SH_UNT_EX       , SH_ACS_SCOM_RW   );
@@ -2792,52 +2690,46 @@ REG64( EX_0_CME_SCOM_PMSRS1_PPE                                , RULL(0x10901022
 REG64( EX_0_CME_SCOM_PMSRS1_SCOM                               , RULL(0x10012441), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
 REG64( EX_1_CME_SCOM_PMSRS1_PPE                                , RULL(0x109020220), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_SCOM_PMSRS1_SCOM                               , RULL(0x10012841), SH_UNT_EX_1     , SH_ACS_SCOM_RW   );
 REG64( EX_2_CME_SCOM_PMSRS1_PPE                                , RULL(0x10A010220), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
 REG64( EX_2_CME_SCOM_PMSRS1_SCOM                               , RULL(0x11012441), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
 REG64( EX_3_CME_SCOM_PMSRS1_PPE                                , RULL(0x10A020220), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_SCOM_PMSRS1_SCOM                               , RULL(0x11012841), SH_UNT_EX_3     , SH_ACS_SCOM_RW   );
 REG64( EX_4_CME_SCOM_PMSRS1_PPE                                , RULL(0x10B010220), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
 REG64( EX_4_CME_SCOM_PMSRS1_SCOM                               , RULL(0x12012441), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
 REG64( EX_5_CME_SCOM_PMSRS1_PPE                                , RULL(0x10B020220), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_SCOM_PMSRS1_SCOM                               , RULL(0x12012841), SH_UNT_EX_5     , SH_ACS_SCOM_RW   );
 REG64( EX_6_CME_SCOM_PMSRS1_PPE                                , RULL(0x10C010220), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
 REG64( EX_6_CME_SCOM_PMSRS1_SCOM                               , RULL(0x13012441), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
 REG64( EX_7_CME_SCOM_PMSRS1_PPE                                , RULL(0x10C020220), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_SCOM_PMSRS1_SCOM                               , RULL(0x13012841), SH_UNT_EX_7     , SH_ACS_SCOM_RW   );
 REG64( EX_8_CME_SCOM_PMSRS1_PPE                                , RULL(0x10D010220), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
 REG64( EX_8_CME_SCOM_PMSRS1_SCOM                               , RULL(0x14012441), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
 REG64( EX_9_CME_SCOM_PMSRS1_PPE                                , RULL(0x10D020220), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_SCOM_PMSRS1_SCOM                               , RULL(0x14012841), SH_UNT_EX_9     , SH_ACS_SCOM_RW   );
 REG64( EX_10_CME_SCOM_PMSRS1_PPE                               , RULL(0x10E010220), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
 REG64( EX_10_CME_SCOM_PMSRS1_SCOM                              , RULL(0x15012441), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
 REG64( EX_11_CME_SCOM_PMSRS1_PPE                               , RULL(0x10E020220), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_SCOM_PMSRS1_SCOM                              , RULL(0x15012841), SH_UNT_EX_11    , SH_ACS_SCOM_RW   );
 
-REG64( EQ_CME_SCOM_PSCRS00                                     , RULL(0x10012844), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012444,
-REG64( EQ_0_CME_SCOM_PSCRS00                                   , RULL(0x10012844), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012444,
-REG64( EQ_1_CME_SCOM_PSCRS00                                   , RULL(0x11012844), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 11012444,
-REG64( EQ_2_CME_SCOM_PSCRS00                                   , RULL(0x12012844), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 12012444,
-REG64( EQ_3_CME_SCOM_PSCRS00                                   , RULL(0x13012844), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 13012444,
-REG64( EQ_4_CME_SCOM_PSCRS00                                   , RULL(0x14012844), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 14012444,
-REG64( EQ_5_CME_SCOM_PSCRS00                                   , RULL(0x15012844), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 15012444,
+REG64( EQ_CME_SCOM_PSCRS00                                     , RULL(0x10012444), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012044,
+REG64( EQ_0_CME_SCOM_PSCRS00                                   , RULL(0x10012444), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012044,
+REG64( EQ_1_CME_SCOM_PSCRS00                                   , RULL(0x11012444), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 11012044,
+REG64( EQ_2_CME_SCOM_PSCRS00                                   , RULL(0x12012444), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 12012044,
+REG64( EQ_3_CME_SCOM_PSCRS00                                   , RULL(0x13012444), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 13012044,
+REG64( EQ_4_CME_SCOM_PSCRS00                                   , RULL(0x14012444), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 14012044,
+REG64( EQ_5_CME_SCOM_PSCRS00                                   , RULL(0x15012444), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 15012044,
 REG64( EX_CME_SCOM_PSCRS00_PPE                                 , RULL(0x109010300), SH_UNT_EX       ,
        SH_ACS_PPE       );
 REG64( EX_CME_SCOM_PSCRS00_SCOM                                , RULL(0x10012444), SH_UNT_EX       , SH_ACS_SCOM_RW   );
@@ -2846,52 +2738,46 @@ REG64( EX_0_CME_SCOM_PSCRS00_PPE                               , RULL(0x10901030
 REG64( EX_0_CME_SCOM_PSCRS00_SCOM                              , RULL(0x10012444), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
 REG64( EX_1_CME_SCOM_PSCRS00_PPE                               , RULL(0x109020300), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_SCOM_PSCRS00_SCOM                              , RULL(0x10012844), SH_UNT_EX_1     , SH_ACS_SCOM_RW   );
 REG64( EX_2_CME_SCOM_PSCRS00_PPE                               , RULL(0x10A010300), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
 REG64( EX_2_CME_SCOM_PSCRS00_SCOM                              , RULL(0x11012444), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
 REG64( EX_3_CME_SCOM_PSCRS00_PPE                               , RULL(0x10A020300), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_SCOM_PSCRS00_SCOM                              , RULL(0x11012844), SH_UNT_EX_3     , SH_ACS_SCOM_RW   );
 REG64( EX_4_CME_SCOM_PSCRS00_PPE                               , RULL(0x10B010300), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
 REG64( EX_4_CME_SCOM_PSCRS00_SCOM                              , RULL(0x12012444), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
 REG64( EX_5_CME_SCOM_PSCRS00_PPE                               , RULL(0x10B020300), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_SCOM_PSCRS00_SCOM                              , RULL(0x12012844), SH_UNT_EX_5     , SH_ACS_SCOM_RW   );
 REG64( EX_6_CME_SCOM_PSCRS00_PPE                               , RULL(0x10C010300), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
 REG64( EX_6_CME_SCOM_PSCRS00_SCOM                              , RULL(0x13012444), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
 REG64( EX_7_CME_SCOM_PSCRS00_PPE                               , RULL(0x10C020300), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_SCOM_PSCRS00_SCOM                              , RULL(0x13012844), SH_UNT_EX_7     , SH_ACS_SCOM_RW   );
 REG64( EX_8_CME_SCOM_PSCRS00_PPE                               , RULL(0x10D010300), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
 REG64( EX_8_CME_SCOM_PSCRS00_SCOM                              , RULL(0x14012444), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
 REG64( EX_9_CME_SCOM_PSCRS00_PPE                               , RULL(0x10D020300), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_SCOM_PSCRS00_SCOM                              , RULL(0x14012844), SH_UNT_EX_9     , SH_ACS_SCOM_RW   );
 REG64( EX_10_CME_SCOM_PSCRS00_PPE                              , RULL(0x10E010300), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
 REG64( EX_10_CME_SCOM_PSCRS00_SCOM                             , RULL(0x15012444), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
 REG64( EX_11_CME_SCOM_PSCRS00_PPE                              , RULL(0x10E020300), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_SCOM_PSCRS00_SCOM                             , RULL(0x15012844), SH_UNT_EX_11    , SH_ACS_SCOM_RW   );
 
-REG64( EQ_CME_SCOM_PSCRS01                                     , RULL(0x10012845), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012445,
-REG64( EQ_0_CME_SCOM_PSCRS01                                   , RULL(0x10012845), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012445,
-REG64( EQ_1_CME_SCOM_PSCRS01                                   , RULL(0x11012845), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 11012445,
-REG64( EQ_2_CME_SCOM_PSCRS01                                   , RULL(0x12012845), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 12012445,
-REG64( EQ_3_CME_SCOM_PSCRS01                                   , RULL(0x13012845), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 13012445,
-REG64( EQ_4_CME_SCOM_PSCRS01                                   , RULL(0x14012845), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 14012445,
-REG64( EQ_5_CME_SCOM_PSCRS01                                   , RULL(0x15012845), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 15012445,
+REG64( EQ_CME_SCOM_PSCRS01                                     , RULL(0x10012445), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012045,
+REG64( EQ_0_CME_SCOM_PSCRS01                                   , RULL(0x10012445), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012045,
+REG64( EQ_1_CME_SCOM_PSCRS01                                   , RULL(0x11012445), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 11012045,
+REG64( EQ_2_CME_SCOM_PSCRS01                                   , RULL(0x12012445), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 12012045,
+REG64( EQ_3_CME_SCOM_PSCRS01                                   , RULL(0x13012445), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 13012045,
+REG64( EQ_4_CME_SCOM_PSCRS01                                   , RULL(0x14012445), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 14012045,
+REG64( EQ_5_CME_SCOM_PSCRS01                                   , RULL(0x15012445), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 15012045,
 REG64( EX_CME_SCOM_PSCRS01_PPE                                 , RULL(0x109010320), SH_UNT_EX       ,
        SH_ACS_PPE       );
 REG64( EX_CME_SCOM_PSCRS01_SCOM                                , RULL(0x10012445), SH_UNT_EX       , SH_ACS_SCOM_RW   );
@@ -2900,52 +2786,46 @@ REG64( EX_0_CME_SCOM_PSCRS01_PPE                               , RULL(0x10901032
 REG64( EX_0_CME_SCOM_PSCRS01_SCOM                              , RULL(0x10012445), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
 REG64( EX_1_CME_SCOM_PSCRS01_PPE                               , RULL(0x109020320), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_SCOM_PSCRS01_SCOM                              , RULL(0x10012845), SH_UNT_EX_1     , SH_ACS_SCOM_RW   );
 REG64( EX_2_CME_SCOM_PSCRS01_PPE                               , RULL(0x10A010320), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
 REG64( EX_2_CME_SCOM_PSCRS01_SCOM                              , RULL(0x11012445), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
 REG64( EX_3_CME_SCOM_PSCRS01_PPE                               , RULL(0x10A020320), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_SCOM_PSCRS01_SCOM                              , RULL(0x11012845), SH_UNT_EX_3     , SH_ACS_SCOM_RW   );
 REG64( EX_4_CME_SCOM_PSCRS01_PPE                               , RULL(0x10B010320), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
 REG64( EX_4_CME_SCOM_PSCRS01_SCOM                              , RULL(0x12012445), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
 REG64( EX_5_CME_SCOM_PSCRS01_PPE                               , RULL(0x10B020320), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_SCOM_PSCRS01_SCOM                              , RULL(0x12012845), SH_UNT_EX_5     , SH_ACS_SCOM_RW   );
 REG64( EX_6_CME_SCOM_PSCRS01_PPE                               , RULL(0x10C010320), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
 REG64( EX_6_CME_SCOM_PSCRS01_SCOM                              , RULL(0x13012445), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
 REG64( EX_7_CME_SCOM_PSCRS01_PPE                               , RULL(0x10C020320), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_SCOM_PSCRS01_SCOM                              , RULL(0x13012845), SH_UNT_EX_7     , SH_ACS_SCOM_RW   );
 REG64( EX_8_CME_SCOM_PSCRS01_PPE                               , RULL(0x10D010320), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
 REG64( EX_8_CME_SCOM_PSCRS01_SCOM                              , RULL(0x14012445), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
 REG64( EX_9_CME_SCOM_PSCRS01_PPE                               , RULL(0x10D020320), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_SCOM_PSCRS01_SCOM                              , RULL(0x14012845), SH_UNT_EX_9     , SH_ACS_SCOM_RW   );
 REG64( EX_10_CME_SCOM_PSCRS01_PPE                              , RULL(0x10E010320), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
 REG64( EX_10_CME_SCOM_PSCRS01_SCOM                             , RULL(0x15012445), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
 REG64( EX_11_CME_SCOM_PSCRS01_PPE                              , RULL(0x10E020320), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_SCOM_PSCRS01_SCOM                             , RULL(0x15012845), SH_UNT_EX_11    , SH_ACS_SCOM_RW   );
 
-REG64( EQ_CME_SCOM_PSCRS02                                     , RULL(0x10012846), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012446,
-REG64( EQ_0_CME_SCOM_PSCRS02                                   , RULL(0x10012846), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012446,
-REG64( EQ_1_CME_SCOM_PSCRS02                                   , RULL(0x11012846), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 11012446,
-REG64( EQ_2_CME_SCOM_PSCRS02                                   , RULL(0x12012846), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 12012446,
-REG64( EQ_3_CME_SCOM_PSCRS02                                   , RULL(0x13012846), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 13012446,
-REG64( EQ_4_CME_SCOM_PSCRS02                                   , RULL(0x14012846), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 14012446,
-REG64( EQ_5_CME_SCOM_PSCRS02                                   , RULL(0x15012846), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 15012446,
+REG64( EQ_CME_SCOM_PSCRS02                                     , RULL(0x10012446), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012046,
+REG64( EQ_0_CME_SCOM_PSCRS02                                   , RULL(0x10012446), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012046,
+REG64( EQ_1_CME_SCOM_PSCRS02                                   , RULL(0x11012446), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 11012046,
+REG64( EQ_2_CME_SCOM_PSCRS02                                   , RULL(0x12012446), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 12012046,
+REG64( EQ_3_CME_SCOM_PSCRS02                                   , RULL(0x13012446), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 13012046,
+REG64( EQ_4_CME_SCOM_PSCRS02                                   , RULL(0x14012446), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 14012046,
+REG64( EQ_5_CME_SCOM_PSCRS02                                   , RULL(0x15012446), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 15012046,
 REG64( EX_CME_SCOM_PSCRS02_PPE                                 , RULL(0x109010340), SH_UNT_EX       ,
        SH_ACS_PPE       );
 REG64( EX_CME_SCOM_PSCRS02_SCOM                                , RULL(0x10012446), SH_UNT_EX       , SH_ACS_SCOM_RW   );
@@ -2954,52 +2834,46 @@ REG64( EX_0_CME_SCOM_PSCRS02_PPE                               , RULL(0x10901034
 REG64( EX_0_CME_SCOM_PSCRS02_SCOM                              , RULL(0x10012446), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
 REG64( EX_1_CME_SCOM_PSCRS02_PPE                               , RULL(0x109020340), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_SCOM_PSCRS02_SCOM                              , RULL(0x10012846), SH_UNT_EX_1     , SH_ACS_SCOM_RW   );
 REG64( EX_2_CME_SCOM_PSCRS02_PPE                               , RULL(0x10A010340), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
 REG64( EX_2_CME_SCOM_PSCRS02_SCOM                              , RULL(0x11012446), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
 REG64( EX_3_CME_SCOM_PSCRS02_PPE                               , RULL(0x10A020340), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_SCOM_PSCRS02_SCOM                              , RULL(0x11012846), SH_UNT_EX_3     , SH_ACS_SCOM_RW   );
 REG64( EX_4_CME_SCOM_PSCRS02_PPE                               , RULL(0x10B010340), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
 REG64( EX_4_CME_SCOM_PSCRS02_SCOM                              , RULL(0x12012446), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
 REG64( EX_5_CME_SCOM_PSCRS02_PPE                               , RULL(0x10B020340), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_SCOM_PSCRS02_SCOM                              , RULL(0x12012846), SH_UNT_EX_5     , SH_ACS_SCOM_RW   );
 REG64( EX_6_CME_SCOM_PSCRS02_PPE                               , RULL(0x10C010340), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
 REG64( EX_6_CME_SCOM_PSCRS02_SCOM                              , RULL(0x13012446), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
 REG64( EX_7_CME_SCOM_PSCRS02_PPE                               , RULL(0x10C020340), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_SCOM_PSCRS02_SCOM                              , RULL(0x13012846), SH_UNT_EX_7     , SH_ACS_SCOM_RW   );
 REG64( EX_8_CME_SCOM_PSCRS02_PPE                               , RULL(0x10D010340), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
 REG64( EX_8_CME_SCOM_PSCRS02_SCOM                              , RULL(0x14012446), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
 REG64( EX_9_CME_SCOM_PSCRS02_PPE                               , RULL(0x10D020340), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_SCOM_PSCRS02_SCOM                              , RULL(0x14012846), SH_UNT_EX_9     , SH_ACS_SCOM_RW   );
 REG64( EX_10_CME_SCOM_PSCRS02_PPE                              , RULL(0x10E010340), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
 REG64( EX_10_CME_SCOM_PSCRS02_SCOM                             , RULL(0x15012446), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
 REG64( EX_11_CME_SCOM_PSCRS02_PPE                              , RULL(0x10E020340), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_SCOM_PSCRS02_SCOM                             , RULL(0x15012846), SH_UNT_EX_11    , SH_ACS_SCOM_RW   );
 
-REG64( EQ_CME_SCOM_PSCRS03                                     , RULL(0x10012847), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012447,
-REG64( EQ_0_CME_SCOM_PSCRS03                                   , RULL(0x10012847), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012447,
-REG64( EQ_1_CME_SCOM_PSCRS03                                   , RULL(0x11012847), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 11012447,
-REG64( EQ_2_CME_SCOM_PSCRS03                                   , RULL(0x12012847), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 12012447,
-REG64( EQ_3_CME_SCOM_PSCRS03                                   , RULL(0x13012847), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 13012447,
-REG64( EQ_4_CME_SCOM_PSCRS03                                   , RULL(0x14012847), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 14012447,
-REG64( EQ_5_CME_SCOM_PSCRS03                                   , RULL(0x15012847), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 15012447,
+REG64( EQ_CME_SCOM_PSCRS03                                     , RULL(0x10012447), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012047,
+REG64( EQ_0_CME_SCOM_PSCRS03                                   , RULL(0x10012447), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012047,
+REG64( EQ_1_CME_SCOM_PSCRS03                                   , RULL(0x11012447), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 11012047,
+REG64( EQ_2_CME_SCOM_PSCRS03                                   , RULL(0x12012447), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 12012047,
+REG64( EQ_3_CME_SCOM_PSCRS03                                   , RULL(0x13012447), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 13012047,
+REG64( EQ_4_CME_SCOM_PSCRS03                                   , RULL(0x14012447), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 14012047,
+REG64( EQ_5_CME_SCOM_PSCRS03                                   , RULL(0x15012447), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 15012047,
 REG64( EX_CME_SCOM_PSCRS03_PPE                                 , RULL(0x109010360), SH_UNT_EX       ,
        SH_ACS_PPE       );
 REG64( EX_CME_SCOM_PSCRS03_SCOM                                , RULL(0x10012447), SH_UNT_EX       , SH_ACS_SCOM_RW   );
@@ -3008,52 +2882,46 @@ REG64( EX_0_CME_SCOM_PSCRS03_PPE                               , RULL(0x10901036
 REG64( EX_0_CME_SCOM_PSCRS03_SCOM                              , RULL(0x10012447), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
 REG64( EX_1_CME_SCOM_PSCRS03_PPE                               , RULL(0x109020360), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_SCOM_PSCRS03_SCOM                              , RULL(0x10012847), SH_UNT_EX_1     , SH_ACS_SCOM_RW   );
 REG64( EX_2_CME_SCOM_PSCRS03_PPE                               , RULL(0x10A010360), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
 REG64( EX_2_CME_SCOM_PSCRS03_SCOM                              , RULL(0x11012447), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
 REG64( EX_3_CME_SCOM_PSCRS03_PPE                               , RULL(0x10A020360), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_SCOM_PSCRS03_SCOM                              , RULL(0x11012847), SH_UNT_EX_3     , SH_ACS_SCOM_RW   );
 REG64( EX_4_CME_SCOM_PSCRS03_PPE                               , RULL(0x10B010360), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
 REG64( EX_4_CME_SCOM_PSCRS03_SCOM                              , RULL(0x12012447), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
 REG64( EX_5_CME_SCOM_PSCRS03_PPE                               , RULL(0x10B020360), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_SCOM_PSCRS03_SCOM                              , RULL(0x12012847), SH_UNT_EX_5     , SH_ACS_SCOM_RW   );
 REG64( EX_6_CME_SCOM_PSCRS03_PPE                               , RULL(0x10C010360), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
 REG64( EX_6_CME_SCOM_PSCRS03_SCOM                              , RULL(0x13012447), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
 REG64( EX_7_CME_SCOM_PSCRS03_PPE                               , RULL(0x10C020360), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_SCOM_PSCRS03_SCOM                              , RULL(0x13012847), SH_UNT_EX_7     , SH_ACS_SCOM_RW   );
 REG64( EX_8_CME_SCOM_PSCRS03_PPE                               , RULL(0x10D010360), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
 REG64( EX_8_CME_SCOM_PSCRS03_SCOM                              , RULL(0x14012447), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
 REG64( EX_9_CME_SCOM_PSCRS03_PPE                               , RULL(0x10D020360), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_SCOM_PSCRS03_SCOM                              , RULL(0x14012847), SH_UNT_EX_9     , SH_ACS_SCOM_RW   );
 REG64( EX_10_CME_SCOM_PSCRS03_PPE                              , RULL(0x10E010360), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
 REG64( EX_10_CME_SCOM_PSCRS03_SCOM                             , RULL(0x15012447), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
 REG64( EX_11_CME_SCOM_PSCRS03_PPE                              , RULL(0x10E020360), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_SCOM_PSCRS03_SCOM                             , RULL(0x15012847), SH_UNT_EX_11    , SH_ACS_SCOM_RW   );
 
-REG64( EQ_CME_SCOM_PSCRS10                                     , RULL(0x10012848), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012448,
-REG64( EQ_0_CME_SCOM_PSCRS10                                   , RULL(0x10012848), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012448,
-REG64( EQ_1_CME_SCOM_PSCRS10                                   , RULL(0x11012848), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 11012448,
-REG64( EQ_2_CME_SCOM_PSCRS10                                   , RULL(0x12012848), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 12012448,
-REG64( EQ_3_CME_SCOM_PSCRS10                                   , RULL(0x13012848), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 13012448,
-REG64( EQ_4_CME_SCOM_PSCRS10                                   , RULL(0x14012848), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 14012448,
-REG64( EQ_5_CME_SCOM_PSCRS10                                   , RULL(0x15012848), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 15012448,
+REG64( EQ_CME_SCOM_PSCRS10                                     , RULL(0x10012448), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012048,
+REG64( EQ_0_CME_SCOM_PSCRS10                                   , RULL(0x10012448), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012048,
+REG64( EQ_1_CME_SCOM_PSCRS10                                   , RULL(0x11012448), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 11012048,
+REG64( EQ_2_CME_SCOM_PSCRS10                                   , RULL(0x12012448), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 12012048,
+REG64( EQ_3_CME_SCOM_PSCRS10                                   , RULL(0x13012448), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 13012048,
+REG64( EQ_4_CME_SCOM_PSCRS10                                   , RULL(0x14012448), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 14012048,
+REG64( EQ_5_CME_SCOM_PSCRS10                                   , RULL(0x15012448), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 15012048,
 REG64( EX_CME_SCOM_PSCRS10_PPE                                 , RULL(0x109010380), SH_UNT_EX       ,
        SH_ACS_PPE       );
 REG64( EX_CME_SCOM_PSCRS10_SCOM                                , RULL(0x10012448), SH_UNT_EX       , SH_ACS_SCOM_RW   );
@@ -3062,52 +2930,46 @@ REG64( EX_0_CME_SCOM_PSCRS10_PPE                               , RULL(0x10901038
 REG64( EX_0_CME_SCOM_PSCRS10_SCOM                              , RULL(0x10012448), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
 REG64( EX_1_CME_SCOM_PSCRS10_PPE                               , RULL(0x109020380), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_SCOM_PSCRS10_SCOM                              , RULL(0x10012848), SH_UNT_EX_1     , SH_ACS_SCOM_RW   );
 REG64( EX_2_CME_SCOM_PSCRS10_PPE                               , RULL(0x10A010380), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
 REG64( EX_2_CME_SCOM_PSCRS10_SCOM                              , RULL(0x11012448), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
 REG64( EX_3_CME_SCOM_PSCRS10_PPE                               , RULL(0x10A020380), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_SCOM_PSCRS10_SCOM                              , RULL(0x11012848), SH_UNT_EX_3     , SH_ACS_SCOM_RW   );
 REG64( EX_4_CME_SCOM_PSCRS10_PPE                               , RULL(0x10B010380), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
 REG64( EX_4_CME_SCOM_PSCRS10_SCOM                              , RULL(0x12012448), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
 REG64( EX_5_CME_SCOM_PSCRS10_PPE                               , RULL(0x10B020380), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_SCOM_PSCRS10_SCOM                              , RULL(0x12012848), SH_UNT_EX_5     , SH_ACS_SCOM_RW   );
 REG64( EX_6_CME_SCOM_PSCRS10_PPE                               , RULL(0x10C010380), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
 REG64( EX_6_CME_SCOM_PSCRS10_SCOM                              , RULL(0x13012448), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
 REG64( EX_7_CME_SCOM_PSCRS10_PPE                               , RULL(0x10C020380), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_SCOM_PSCRS10_SCOM                              , RULL(0x13012848), SH_UNT_EX_7     , SH_ACS_SCOM_RW   );
 REG64( EX_8_CME_SCOM_PSCRS10_PPE                               , RULL(0x10D010380), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
 REG64( EX_8_CME_SCOM_PSCRS10_SCOM                              , RULL(0x14012448), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
 REG64( EX_9_CME_SCOM_PSCRS10_PPE                               , RULL(0x10D020380), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_SCOM_PSCRS10_SCOM                              , RULL(0x14012848), SH_UNT_EX_9     , SH_ACS_SCOM_RW   );
 REG64( EX_10_CME_SCOM_PSCRS10_PPE                              , RULL(0x10E010380), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
 REG64( EX_10_CME_SCOM_PSCRS10_SCOM                             , RULL(0x15012448), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
 REG64( EX_11_CME_SCOM_PSCRS10_PPE                              , RULL(0x10E020380), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_SCOM_PSCRS10_SCOM                             , RULL(0x15012848), SH_UNT_EX_11    , SH_ACS_SCOM_RW   );
 
-REG64( EQ_CME_SCOM_PSCRS11                                     , RULL(0x10012849), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012449,
-REG64( EQ_0_CME_SCOM_PSCRS11                                   , RULL(0x10012849), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012449,
-REG64( EQ_1_CME_SCOM_PSCRS11                                   , RULL(0x11012849), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 11012449,
-REG64( EQ_2_CME_SCOM_PSCRS11                                   , RULL(0x12012849), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 12012449,
-REG64( EQ_3_CME_SCOM_PSCRS11                                   , RULL(0x13012849), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 13012449,
-REG64( EQ_4_CME_SCOM_PSCRS11                                   , RULL(0x14012849), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 14012449,
-REG64( EQ_5_CME_SCOM_PSCRS11                                   , RULL(0x15012849), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 15012449,
+REG64( EQ_CME_SCOM_PSCRS11                                     , RULL(0x10012449), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012049,
+REG64( EQ_0_CME_SCOM_PSCRS11                                   , RULL(0x10012449), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012049,
+REG64( EQ_1_CME_SCOM_PSCRS11                                   , RULL(0x11012449), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 11012049,
+REG64( EQ_2_CME_SCOM_PSCRS11                                   , RULL(0x12012449), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 12012049,
+REG64( EQ_3_CME_SCOM_PSCRS11                                   , RULL(0x13012449), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 13012049,
+REG64( EQ_4_CME_SCOM_PSCRS11                                   , RULL(0x14012449), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 14012049,
+REG64( EQ_5_CME_SCOM_PSCRS11                                   , RULL(0x15012449), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 15012049,
 REG64( EX_CME_SCOM_PSCRS11_PPE                                 , RULL(0x1090103A0), SH_UNT_EX       ,
        SH_ACS_PPE       );
 REG64( EX_CME_SCOM_PSCRS11_SCOM                                , RULL(0x10012449), SH_UNT_EX       , SH_ACS_SCOM_RW   );
@@ -3116,52 +2978,46 @@ REG64( EX_0_CME_SCOM_PSCRS11_PPE                               , RULL(0x1090103A
 REG64( EX_0_CME_SCOM_PSCRS11_SCOM                              , RULL(0x10012449), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
 REG64( EX_1_CME_SCOM_PSCRS11_PPE                               , RULL(0x1090203A0), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_SCOM_PSCRS11_SCOM                              , RULL(0x10012849), SH_UNT_EX_1     , SH_ACS_SCOM_RW   );
 REG64( EX_2_CME_SCOM_PSCRS11_PPE                               , RULL(0x10A0103A0), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
 REG64( EX_2_CME_SCOM_PSCRS11_SCOM                              , RULL(0x11012449), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
 REG64( EX_3_CME_SCOM_PSCRS11_PPE                               , RULL(0x10A0203A0), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_SCOM_PSCRS11_SCOM                              , RULL(0x11012849), SH_UNT_EX_3     , SH_ACS_SCOM_RW   );
 REG64( EX_4_CME_SCOM_PSCRS11_PPE                               , RULL(0x10B0103A0), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
 REG64( EX_4_CME_SCOM_PSCRS11_SCOM                              , RULL(0x12012449), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
 REG64( EX_5_CME_SCOM_PSCRS11_PPE                               , RULL(0x10B0203A0), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_SCOM_PSCRS11_SCOM                              , RULL(0x12012849), SH_UNT_EX_5     , SH_ACS_SCOM_RW   );
 REG64( EX_6_CME_SCOM_PSCRS11_PPE                               , RULL(0x10C0103A0), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
 REG64( EX_6_CME_SCOM_PSCRS11_SCOM                              , RULL(0x13012449), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
 REG64( EX_7_CME_SCOM_PSCRS11_PPE                               , RULL(0x10C0203A0), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_SCOM_PSCRS11_SCOM                              , RULL(0x13012849), SH_UNT_EX_7     , SH_ACS_SCOM_RW   );
 REG64( EX_8_CME_SCOM_PSCRS11_PPE                               , RULL(0x10D0103A0), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
 REG64( EX_8_CME_SCOM_PSCRS11_SCOM                              , RULL(0x14012449), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
 REG64( EX_9_CME_SCOM_PSCRS11_PPE                               , RULL(0x10D0203A0), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_SCOM_PSCRS11_SCOM                              , RULL(0x14012849), SH_UNT_EX_9     , SH_ACS_SCOM_RW   );
 REG64( EX_10_CME_SCOM_PSCRS11_PPE                              , RULL(0x10E0103A0), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
 REG64( EX_10_CME_SCOM_PSCRS11_SCOM                             , RULL(0x15012449), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
 REG64( EX_11_CME_SCOM_PSCRS11_PPE                              , RULL(0x10E0203A0), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_SCOM_PSCRS11_SCOM                             , RULL(0x15012849), SH_UNT_EX_11    , SH_ACS_SCOM_RW   );
 
-REG64( EQ_CME_SCOM_PSCRS12                                     , RULL(0x1001284A), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1001244A,
-REG64( EQ_0_CME_SCOM_PSCRS12                                   , RULL(0x1001284A), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1001244A,
-REG64( EQ_1_CME_SCOM_PSCRS12                                   , RULL(0x1101284A), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1101244A,
-REG64( EQ_2_CME_SCOM_PSCRS12                                   , RULL(0x1201284A), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1201244A,
-REG64( EQ_3_CME_SCOM_PSCRS12                                   , RULL(0x1301284A), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1301244A,
-REG64( EQ_4_CME_SCOM_PSCRS12                                   , RULL(0x1401284A), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1401244A,
-REG64( EQ_5_CME_SCOM_PSCRS12                                   , RULL(0x1501284A), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1501244A,
+REG64( EQ_CME_SCOM_PSCRS12                                     , RULL(0x1001244A), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1001204A,
+REG64( EQ_0_CME_SCOM_PSCRS12                                   , RULL(0x1001244A), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1001204A,
+REG64( EQ_1_CME_SCOM_PSCRS12                                   , RULL(0x1101244A), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1101204A,
+REG64( EQ_2_CME_SCOM_PSCRS12                                   , RULL(0x1201244A), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1201204A,
+REG64( EQ_3_CME_SCOM_PSCRS12                                   , RULL(0x1301244A), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1301204A,
+REG64( EQ_4_CME_SCOM_PSCRS12                                   , RULL(0x1401244A), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1401204A,
+REG64( EQ_5_CME_SCOM_PSCRS12                                   , RULL(0x1501244A), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1501204A,
 REG64( EX_CME_SCOM_PSCRS12_PPE                                 , RULL(0x1090103C0), SH_UNT_EX       ,
        SH_ACS_PPE       );
 REG64( EX_CME_SCOM_PSCRS12_SCOM                                , RULL(0x1001244A), SH_UNT_EX       , SH_ACS_SCOM_RW   );
@@ -3170,52 +3026,46 @@ REG64( EX_0_CME_SCOM_PSCRS12_PPE                               , RULL(0x1090103C
 REG64( EX_0_CME_SCOM_PSCRS12_SCOM                              , RULL(0x1001244A), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
 REG64( EX_1_CME_SCOM_PSCRS12_PPE                               , RULL(0x1090203C0), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_SCOM_PSCRS12_SCOM                              , RULL(0x1001284A), SH_UNT_EX_1     , SH_ACS_SCOM_RW   );
 REG64( EX_2_CME_SCOM_PSCRS12_PPE                               , RULL(0x10A0103C0), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
 REG64( EX_2_CME_SCOM_PSCRS12_SCOM                              , RULL(0x1101244A), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
 REG64( EX_3_CME_SCOM_PSCRS12_PPE                               , RULL(0x10A0203C0), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_SCOM_PSCRS12_SCOM                              , RULL(0x1101284A), SH_UNT_EX_3     , SH_ACS_SCOM_RW   );
 REG64( EX_4_CME_SCOM_PSCRS12_PPE                               , RULL(0x10B0103C0), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
 REG64( EX_4_CME_SCOM_PSCRS12_SCOM                              , RULL(0x1201244A), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
 REG64( EX_5_CME_SCOM_PSCRS12_PPE                               , RULL(0x10B0203C0), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_SCOM_PSCRS12_SCOM                              , RULL(0x1201284A), SH_UNT_EX_5     , SH_ACS_SCOM_RW   );
 REG64( EX_6_CME_SCOM_PSCRS12_PPE                               , RULL(0x10C0103C0), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
 REG64( EX_6_CME_SCOM_PSCRS12_SCOM                              , RULL(0x1301244A), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
 REG64( EX_7_CME_SCOM_PSCRS12_PPE                               , RULL(0x10C0203C0), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_SCOM_PSCRS12_SCOM                              , RULL(0x1301284A), SH_UNT_EX_7     , SH_ACS_SCOM_RW   );
 REG64( EX_8_CME_SCOM_PSCRS12_PPE                               , RULL(0x10D0103C0), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
 REG64( EX_8_CME_SCOM_PSCRS12_SCOM                              , RULL(0x1401244A), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
 REG64( EX_9_CME_SCOM_PSCRS12_PPE                               , RULL(0x10D0203C0), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_SCOM_PSCRS12_SCOM                              , RULL(0x1401284A), SH_UNT_EX_9     , SH_ACS_SCOM_RW   );
 REG64( EX_10_CME_SCOM_PSCRS12_PPE                              , RULL(0x10E0103C0), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
 REG64( EX_10_CME_SCOM_PSCRS12_SCOM                             , RULL(0x1501244A), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
 REG64( EX_11_CME_SCOM_PSCRS12_PPE                              , RULL(0x10E0203C0), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_SCOM_PSCRS12_SCOM                             , RULL(0x1501284A), SH_UNT_EX_11    , SH_ACS_SCOM_RW   );
 
-REG64( EQ_CME_SCOM_PSCRS13                                     , RULL(0x1001284B), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1001244B,
-REG64( EQ_0_CME_SCOM_PSCRS13                                   , RULL(0x1001284B), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1001244B,
-REG64( EQ_1_CME_SCOM_PSCRS13                                   , RULL(0x1101284B), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1101244B,
-REG64( EQ_2_CME_SCOM_PSCRS13                                   , RULL(0x1201284B), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1201244B,
-REG64( EQ_3_CME_SCOM_PSCRS13                                   , RULL(0x1301284B), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1301244B,
-REG64( EQ_4_CME_SCOM_PSCRS13                                   , RULL(0x1401284B), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1401244B,
-REG64( EQ_5_CME_SCOM_PSCRS13                                   , RULL(0x1501284B), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1501244B,
+REG64( EQ_CME_SCOM_PSCRS13                                     , RULL(0x1001244B), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1001204B,
+REG64( EQ_0_CME_SCOM_PSCRS13                                   , RULL(0x1001244B), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1001204B,
+REG64( EQ_1_CME_SCOM_PSCRS13                                   , RULL(0x1101244B), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1101204B,
+REG64( EQ_2_CME_SCOM_PSCRS13                                   , RULL(0x1201244B), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1201204B,
+REG64( EQ_3_CME_SCOM_PSCRS13                                   , RULL(0x1301244B), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1301204B,
+REG64( EQ_4_CME_SCOM_PSCRS13                                   , RULL(0x1401244B), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1401204B,
+REG64( EQ_5_CME_SCOM_PSCRS13                                   , RULL(0x1501244B), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1501204B,
 REG64( EX_CME_SCOM_PSCRS13_PPE                                 , RULL(0x1090103E0), SH_UNT_EX       ,
        SH_ACS_PPE       );
 REG64( EX_CME_SCOM_PSCRS13_SCOM                                , RULL(0x1001244B), SH_UNT_EX       , SH_ACS_SCOM_RW   );
@@ -3224,266 +3074,284 @@ REG64( EX_0_CME_SCOM_PSCRS13_PPE                               , RULL(0x1090103E
 REG64( EX_0_CME_SCOM_PSCRS13_SCOM                              , RULL(0x1001244B), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
 REG64( EX_1_CME_SCOM_PSCRS13_PPE                               , RULL(0x1090203E0), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_SCOM_PSCRS13_SCOM                              , RULL(0x1001284B), SH_UNT_EX_1     , SH_ACS_SCOM_RW   );
 REG64( EX_2_CME_SCOM_PSCRS13_PPE                               , RULL(0x10A0103E0), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
 REG64( EX_2_CME_SCOM_PSCRS13_SCOM                              , RULL(0x1101244B), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
 REG64( EX_3_CME_SCOM_PSCRS13_PPE                               , RULL(0x10A0203E0), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_SCOM_PSCRS13_SCOM                              , RULL(0x1101284B), SH_UNT_EX_3     , SH_ACS_SCOM_RW   );
 REG64( EX_4_CME_SCOM_PSCRS13_PPE                               , RULL(0x10B0103E0), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
 REG64( EX_4_CME_SCOM_PSCRS13_SCOM                              , RULL(0x1201244B), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
 REG64( EX_5_CME_SCOM_PSCRS13_PPE                               , RULL(0x10B0203E0), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_SCOM_PSCRS13_SCOM                              , RULL(0x1201284B), SH_UNT_EX_5     , SH_ACS_SCOM_RW   );
 REG64( EX_6_CME_SCOM_PSCRS13_PPE                               , RULL(0x10C0103E0), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
 REG64( EX_6_CME_SCOM_PSCRS13_SCOM                              , RULL(0x1301244B), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
 REG64( EX_7_CME_SCOM_PSCRS13_PPE                               , RULL(0x10C0203E0), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_SCOM_PSCRS13_SCOM                              , RULL(0x1301284B), SH_UNT_EX_7     , SH_ACS_SCOM_RW   );
 REG64( EX_8_CME_SCOM_PSCRS13_PPE                               , RULL(0x10D0103E0), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
 REG64( EX_8_CME_SCOM_PSCRS13_SCOM                              , RULL(0x1401244B), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
 REG64( EX_9_CME_SCOM_PSCRS13_PPE                               , RULL(0x10D0203E0), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_SCOM_PSCRS13_SCOM                              , RULL(0x1401284B), SH_UNT_EX_9     , SH_ACS_SCOM_RW   );
 REG64( EX_10_CME_SCOM_PSCRS13_PPE                              , RULL(0x10E0103E0), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
 REG64( EX_10_CME_SCOM_PSCRS13_SCOM                             , RULL(0x1501244B), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
 REG64( EX_11_CME_SCOM_PSCRS13_PPE                              , RULL(0x10E0203E0), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_SCOM_PSCRS13_SCOM                             , RULL(0x1501284B), SH_UNT_EX_11    , SH_ACS_SCOM_RW   );
 
-REG64( EQ_CME_SCOM_QFMR                                        , RULL(0x10012812), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012412,
-REG64( EQ_0_CME_SCOM_QFMR                                      , RULL(0x10012812), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012412,
-REG64( EQ_1_CME_SCOM_QFMR                                      , RULL(0x11012812), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 11012412,
-REG64( EQ_2_CME_SCOM_QFMR                                      , RULL(0x12012812), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 12012412,
-REG64( EQ_3_CME_SCOM_QFMR                                      , RULL(0x13012812), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 13012412,
-REG64( EQ_4_CME_SCOM_QFMR                                      , RULL(0x14012812), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 14012412,
-REG64( EQ_5_CME_SCOM_QFMR                                      , RULL(0x15012812), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 15012412,
+REG64( EQ_CME_SCOM_QFMR                                        , RULL(0x10012432), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012032,
+REG64( EQ_0_CME_SCOM_QFMR                                      , RULL(0x10012432), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012032,
+REG64( EQ_1_CME_SCOM_QFMR                                      , RULL(0x11012432), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 11012032,
+REG64( EQ_2_CME_SCOM_QFMR                                      , RULL(0x12012432), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 12012032,
+REG64( EQ_3_CME_SCOM_QFMR                                      , RULL(0x13012432), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 13012032,
+REG64( EQ_4_CME_SCOM_QFMR                                      , RULL(0x14012432), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 14012032,
+REG64( EQ_5_CME_SCOM_QFMR                                      , RULL(0x15012432), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 15012032,
 REG64( EX_CME_SCOM_QFMR_PPE                                    , RULL(0x109010140), SH_UNT_EX       ,
        SH_ACS_PPE       );
-REG64( EX_CME_SCOM_QFMR_SCOM                                   , RULL(0x10012412), SH_UNT_EX       , SH_ACS_SCOM_RO   );
+REG64( EX_CME_SCOM_QFMR_SCOM                                   , RULL(0x10012432), SH_UNT_EX       , SH_ACS_SCOM_RO   );
 REG64( EX_0_CME_SCOM_QFMR_PPE                                  , RULL(0x109010140), SH_UNT_EX_0     ,
        SH_ACS_PPE       );
-REG64( EX_0_CME_SCOM_QFMR_SCOM                                 , RULL(0x10012412), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
+REG64( EX_0_CME_SCOM_QFMR_SCOM                                 , RULL(0x10012432), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
 REG64( EX_1_CME_SCOM_QFMR_PPE                                  , RULL(0x109020140), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_SCOM_QFMR_SCOM                                 , RULL(0x10012812), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
 REG64( EX_2_CME_SCOM_QFMR_PPE                                  , RULL(0x10A010140), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
-REG64( EX_2_CME_SCOM_QFMR_SCOM                                 , RULL(0x11012412), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
+REG64( EX_2_CME_SCOM_QFMR_SCOM                                 , RULL(0x11012432), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
 REG64( EX_3_CME_SCOM_QFMR_PPE                                  , RULL(0x10A020140), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_SCOM_QFMR_SCOM                                 , RULL(0x11012812), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
 REG64( EX_4_CME_SCOM_QFMR_PPE                                  , RULL(0x10B010140), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
-REG64( EX_4_CME_SCOM_QFMR_SCOM                                 , RULL(0x12012412), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
+REG64( EX_4_CME_SCOM_QFMR_SCOM                                 , RULL(0x12012432), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
 REG64( EX_5_CME_SCOM_QFMR_PPE                                  , RULL(0x10B020140), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_SCOM_QFMR_SCOM                                 , RULL(0x12012812), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
 REG64( EX_6_CME_SCOM_QFMR_PPE                                  , RULL(0x10C010140), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
-REG64( EX_6_CME_SCOM_QFMR_SCOM                                 , RULL(0x13012412), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
+REG64( EX_6_CME_SCOM_QFMR_SCOM                                 , RULL(0x13012432), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
 REG64( EX_7_CME_SCOM_QFMR_PPE                                  , RULL(0x10C020140), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_SCOM_QFMR_SCOM                                 , RULL(0x13012812), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
 REG64( EX_8_CME_SCOM_QFMR_PPE                                  , RULL(0x10D010140), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
-REG64( EX_8_CME_SCOM_QFMR_SCOM                                 , RULL(0x14012412), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
+REG64( EX_8_CME_SCOM_QFMR_SCOM                                 , RULL(0x14012432), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
 REG64( EX_9_CME_SCOM_QFMR_PPE                                  , RULL(0x10D020140), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_SCOM_QFMR_SCOM                                 , RULL(0x14012812), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
 REG64( EX_10_CME_SCOM_QFMR_PPE                                 , RULL(0x10E010140), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
-REG64( EX_10_CME_SCOM_QFMR_SCOM                                , RULL(0x15012412), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
+REG64( EX_10_CME_SCOM_QFMR_SCOM                                , RULL(0x15012432), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
 REG64( EX_11_CME_SCOM_QFMR_PPE                                 , RULL(0x10E020140), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_SCOM_QFMR_SCOM                                , RULL(0x15012812), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
 
-REG64( EQ_CME_SCOM_SICR_SCOM                                   , RULL(0x1001281D), SH_UNT_EQ       ,
-       SH_ACS_SCOM      ); //DUPS: 1001241D,
-REG64( EQ_CME_SCOM_SICR_SCOM1                                  , RULL(0x1001281E), SH_UNT_EQ       ,
-       SH_ACS_SCOM1     ); //DUPS: 1001241E,
-REG64( EQ_CME_SCOM_SICR_SCOM2                                  , RULL(0x1001281F), SH_UNT_EQ       ,
-       SH_ACS_SCOM2     ); //DUPS: 1001241F,
-REG64( EQ_0_CME_SCOM_SICR_SCOM                                 , RULL(0x1001281D), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM      ); //DUPS: 1001241D,
-REG64( EQ_0_CME_SCOM_SICR_SCOM1                                , RULL(0x1001281E), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM1     ); //DUPS: 1001241E,
-REG64( EQ_0_CME_SCOM_SICR_SCOM2                                , RULL(0x1001281F), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM2     ); //DUPS: 1001241F,
-REG64( EQ_1_CME_SCOM_SICR_SCOM                                 , RULL(0x1101281D), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM      ); //DUPS: 1101241D,
-REG64( EQ_1_CME_SCOM_SICR_SCOM1                                , RULL(0x1101281E), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM1     ); //DUPS: 1101241E,
-REG64( EQ_1_CME_SCOM_SICR_SCOM2                                , RULL(0x1101281F), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM2     ); //DUPS: 1101241F,
-REG64( EQ_2_CME_SCOM_SICR_SCOM                                 , RULL(0x1201281D), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM      ); //DUPS: 1201241D,
-REG64( EQ_2_CME_SCOM_SICR_SCOM1                                , RULL(0x1201281E), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM1     ); //DUPS: 1201241E,
-REG64( EQ_2_CME_SCOM_SICR_SCOM2                                , RULL(0x1201281F), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM2     ); //DUPS: 1201241F,
-REG64( EQ_3_CME_SCOM_SICR_SCOM                                 , RULL(0x1301281D), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM      ); //DUPS: 1301241D,
-REG64( EQ_3_CME_SCOM_SICR_SCOM1                                , RULL(0x1301281E), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM1     ); //DUPS: 1301241E,
-REG64( EQ_3_CME_SCOM_SICR_SCOM2                                , RULL(0x1301281F), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM2     ); //DUPS: 1301241F,
-REG64( EQ_4_CME_SCOM_SICR_SCOM                                 , RULL(0x1401281D), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM      ); //DUPS: 1401241D,
-REG64( EQ_4_CME_SCOM_SICR_SCOM1                                , RULL(0x1401281E), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM1     ); //DUPS: 1401241E,
-REG64( EQ_4_CME_SCOM_SICR_SCOM2                                , RULL(0x1401281F), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM2     ); //DUPS: 1401241F,
-REG64( EQ_5_CME_SCOM_SICR_SCOM                                 , RULL(0x1501281D), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM      ); //DUPS: 1501241D,
-REG64( EQ_5_CME_SCOM_SICR_SCOM1                                , RULL(0x1501281E), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM1     ); //DUPS: 1501241E,
-REG64( EQ_5_CME_SCOM_SICR_SCOM2                                , RULL(0x1501281F), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM2     ); //DUPS: 1501241F,
+REG64( EQ_CME_SCOM_QIDSR                                       , RULL(0x1001242F), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1001202F,
+REG64( EQ_0_CME_SCOM_QIDSR                                     , RULL(0x1001242F), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1001202F,
+REG64( EQ_1_CME_SCOM_QIDSR                                     , RULL(0x1101242F), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1101202F,
+REG64( EQ_2_CME_SCOM_QIDSR                                     , RULL(0x1201242F), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1201202F,
+REG64( EQ_3_CME_SCOM_QIDSR                                     , RULL(0x1301242F), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1301202F,
+REG64( EQ_4_CME_SCOM_QIDSR                                     , RULL(0x1401242F), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1401202F,
+REG64( EQ_5_CME_SCOM_QIDSR                                     , RULL(0x1501242F), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1501202F,
+REG64( EX_CME_SCOM_QIDSR_PPE                                   , RULL(0x1090106E0), SH_UNT_EX       ,
+       SH_ACS_PPE       );
+REG64( EX_CME_SCOM_QIDSR_SCOM                                  , RULL(0x1001242F), SH_UNT_EX       , SH_ACS_SCOM_RO   );
+REG64( EX_0_CME_SCOM_QIDSR_PPE                                 , RULL(0x1090106E0), SH_UNT_EX_0     ,
+       SH_ACS_PPE       );
+REG64( EX_0_CME_SCOM_QIDSR_SCOM                                , RULL(0x1001242F), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
+REG64( EX_1_CME_SCOM_QIDSR_PPE                                 , RULL(0x1090206E0), SH_UNT_EX_1     ,
+       SH_ACS_PPE       );
+REG64( EX_2_CME_SCOM_QIDSR_PPE                                 , RULL(0x10A0106E0), SH_UNT_EX_2     ,
+       SH_ACS_PPE       );
+REG64( EX_2_CME_SCOM_QIDSR_SCOM                                , RULL(0x1101242F), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
+REG64( EX_3_CME_SCOM_QIDSR_PPE                                 , RULL(0x10A0206E0), SH_UNT_EX_3     ,
+       SH_ACS_PPE       );
+REG64( EX_4_CME_SCOM_QIDSR_PPE                                 , RULL(0x10B0106E0), SH_UNT_EX_4     ,
+       SH_ACS_PPE       );
+REG64( EX_4_CME_SCOM_QIDSR_SCOM                                , RULL(0x1201242F), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
+REG64( EX_5_CME_SCOM_QIDSR_PPE                                 , RULL(0x10B0206E0), SH_UNT_EX_5     ,
+       SH_ACS_PPE       );
+REG64( EX_6_CME_SCOM_QIDSR_PPE                                 , RULL(0x10C0106E0), SH_UNT_EX_6     ,
+       SH_ACS_PPE       );
+REG64( EX_6_CME_SCOM_QIDSR_SCOM                                , RULL(0x1301242F), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
+REG64( EX_7_CME_SCOM_QIDSR_PPE                                 , RULL(0x10C0206E0), SH_UNT_EX_7     ,
+       SH_ACS_PPE       );
+REG64( EX_8_CME_SCOM_QIDSR_PPE                                 , RULL(0x10D0106E0), SH_UNT_EX_8     ,
+       SH_ACS_PPE       );
+REG64( EX_8_CME_SCOM_QIDSR_SCOM                                , RULL(0x1401242F), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
+REG64( EX_9_CME_SCOM_QIDSR_PPE                                 , RULL(0x10D0206E0), SH_UNT_EX_9     ,
+       SH_ACS_PPE       );
+REG64( EX_10_CME_SCOM_QIDSR_PPE                                , RULL(0x10E0106E0), SH_UNT_EX_10    ,
+       SH_ACS_PPE       );
+REG64( EX_10_CME_SCOM_QIDSR_SCOM                               , RULL(0x1501242F), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
+REG64( EX_11_CME_SCOM_QIDSR_PPE                                , RULL(0x10E0206E0), SH_UNT_EX_11    ,
+       SH_ACS_PPE       );
+
+REG64( EQ_CME_SCOM_SICR_SCOM                                   , RULL(0x1001243D), SH_UNT_EQ       ,
+       SH_ACS_SCOM      ); //DUPS: 1001203D,
+REG64( EQ_CME_SCOM_SICR_SCOM1                                  , RULL(0x1001243E), SH_UNT_EQ       ,
+       SH_ACS_SCOM1     ); //DUPS: 1001203E,
+REG64( EQ_CME_SCOM_SICR_SCOM2                                  , RULL(0x1001243F), SH_UNT_EQ       ,
+       SH_ACS_SCOM2     ); //DUPS: 1001203F,
+REG64( EQ_0_CME_SCOM_SICR_SCOM                                 , RULL(0x1001243D), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM      ); //DUPS: 1001203D,
+REG64( EQ_0_CME_SCOM_SICR_SCOM1                                , RULL(0x1001243E), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM1     ); //DUPS: 1001203E,
+REG64( EQ_0_CME_SCOM_SICR_SCOM2                                , RULL(0x1001243F), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM2     ); //DUPS: 1001203F,
+REG64( EQ_1_CME_SCOM_SICR_SCOM                                 , RULL(0x1101243D), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM      ); //DUPS: 1101203D,
+REG64( EQ_1_CME_SCOM_SICR_SCOM1                                , RULL(0x1101243E), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM1     ); //DUPS: 1101203E,
+REG64( EQ_1_CME_SCOM_SICR_SCOM2                                , RULL(0x1101243F), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM2     ); //DUPS: 1101203F,
+REG64( EQ_2_CME_SCOM_SICR_SCOM                                 , RULL(0x1201243D), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM      ); //DUPS: 1201203D,
+REG64( EQ_2_CME_SCOM_SICR_SCOM1                                , RULL(0x1201243E), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM1     ); //DUPS: 1201203E,
+REG64( EQ_2_CME_SCOM_SICR_SCOM2                                , RULL(0x1201243F), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM2     ); //DUPS: 1201203F,
+REG64( EQ_3_CME_SCOM_SICR_SCOM                                 , RULL(0x1301243D), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM      ); //DUPS: 1301203D,
+REG64( EQ_3_CME_SCOM_SICR_SCOM1                                , RULL(0x1301243E), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM1     ); //DUPS: 1301203E,
+REG64( EQ_3_CME_SCOM_SICR_SCOM2                                , RULL(0x1301243F), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM2     ); //DUPS: 1301203F,
+REG64( EQ_4_CME_SCOM_SICR_SCOM                                 , RULL(0x1401243D), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM      ); //DUPS: 1401203D,
+REG64( EQ_4_CME_SCOM_SICR_SCOM1                                , RULL(0x1401243E), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM1     ); //DUPS: 1401203E,
+REG64( EQ_4_CME_SCOM_SICR_SCOM2                                , RULL(0x1401243F), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM2     ); //DUPS: 1401203F,
+REG64( EQ_5_CME_SCOM_SICR_SCOM                                 , RULL(0x1501243D), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM      ); //DUPS: 1501203D,
+REG64( EQ_5_CME_SCOM_SICR_SCOM1                                , RULL(0x1501243E), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM1     ); //DUPS: 1501203E,
+REG64( EQ_5_CME_SCOM_SICR_SCOM2                                , RULL(0x1501243F), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM2     ); //DUPS: 1501203F,
 REG64( EX_CME_SCOM_SICR_PPE                                    , RULL(0x109010500), SH_UNT_EX       ,
        SH_ACS_PPE       );
 REG64( EX_CME_SCOM_SICR_PPE1                                   , RULL(0x109010518), SH_UNT_EX       ,
        SH_ACS_PPE1      );
 REG64( EX_CME_SCOM_SICR_PPE2                                   , RULL(0x109010510), SH_UNT_EX       ,
        SH_ACS_PPE2      );
-REG64( EX_CME_SCOM_SICR_SCOM                                   , RULL(0x1001241D), SH_UNT_EX       , SH_ACS_SCOM      );
-REG64( EX_CME_SCOM_SICR_SCOM1                                  , RULL(0x1001241E), SH_UNT_EX       , SH_ACS_SCOM1     );
-REG64( EX_CME_SCOM_SICR_SCOM2                                  , RULL(0x1001241F), SH_UNT_EX       , SH_ACS_SCOM2     );
+REG64( EX_CME_SCOM_SICR_SCOM                                   , RULL(0x1001243D), SH_UNT_EX       , SH_ACS_SCOM      );
+REG64( EX_CME_SCOM_SICR_SCOM1                                  , RULL(0x1001243E), SH_UNT_EX       , SH_ACS_SCOM1     );
+REG64( EX_CME_SCOM_SICR_SCOM2                                  , RULL(0x1001243F), SH_UNT_EX       , SH_ACS_SCOM2     );
 REG64( EX_0_CME_SCOM_SICR_PPE                                  , RULL(0x109010500), SH_UNT_EX_0     ,
        SH_ACS_PPE       );
 REG64( EX_0_CME_SCOM_SICR_PPE1                                 , RULL(0x109010518), SH_UNT_EX_0     ,
        SH_ACS_PPE1      );
 REG64( EX_0_CME_SCOM_SICR_PPE2                                 , RULL(0x109010510), SH_UNT_EX_0     ,
        SH_ACS_PPE2      );
-REG64( EX_0_CME_SCOM_SICR_SCOM                                 , RULL(0x1001241D), SH_UNT_EX_0     , SH_ACS_SCOM      );
-REG64( EX_0_CME_SCOM_SICR_SCOM1                                , RULL(0x1001241E), SH_UNT_EX_0     , SH_ACS_SCOM1     );
-REG64( EX_0_CME_SCOM_SICR_SCOM2                                , RULL(0x1001241F), SH_UNT_EX_0     , SH_ACS_SCOM2     );
+REG64( EX_0_CME_SCOM_SICR_SCOM                                 , RULL(0x1001243D), SH_UNT_EX_0     , SH_ACS_SCOM      );
+REG64( EX_0_CME_SCOM_SICR_SCOM1                                , RULL(0x1001243E), SH_UNT_EX_0     , SH_ACS_SCOM1     );
+REG64( EX_0_CME_SCOM_SICR_SCOM2                                , RULL(0x1001243F), SH_UNT_EX_0     , SH_ACS_SCOM2     );
 REG64( EX_1_CME_SCOM_SICR_PPE                                  , RULL(0x109020500), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
 REG64( EX_1_CME_SCOM_SICR_PPE1                                 , RULL(0x109020518), SH_UNT_EX_1     ,
        SH_ACS_PPE1      );
 REG64( EX_1_CME_SCOM_SICR_PPE2                                 , RULL(0x109020510), SH_UNT_EX_1     ,
        SH_ACS_PPE2      );
-REG64( EX_1_CME_SCOM_SICR_SCOM                                 , RULL(0x1001281D), SH_UNT_EX_1     , SH_ACS_SCOM      );
-REG64( EX_1_CME_SCOM_SICR_SCOM1                                , RULL(0x1001281E), SH_UNT_EX_1     , SH_ACS_SCOM1     );
-REG64( EX_1_CME_SCOM_SICR_SCOM2                                , RULL(0x1001281F), SH_UNT_EX_1     , SH_ACS_SCOM2     );
 REG64( EX_2_CME_SCOM_SICR_PPE                                  , RULL(0x10A010500), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
 REG64( EX_2_CME_SCOM_SICR_PPE1                                 , RULL(0x10A010518), SH_UNT_EX_2     ,
        SH_ACS_PPE1      );
 REG64( EX_2_CME_SCOM_SICR_PPE2                                 , RULL(0x10A010510), SH_UNT_EX_2     ,
        SH_ACS_PPE2      );
-REG64( EX_2_CME_SCOM_SICR_SCOM                                 , RULL(0x1101241D), SH_UNT_EX_2     , SH_ACS_SCOM      );
-REG64( EX_2_CME_SCOM_SICR_SCOM1                                , RULL(0x1101241E), SH_UNT_EX_2     , SH_ACS_SCOM1     );
-REG64( EX_2_CME_SCOM_SICR_SCOM2                                , RULL(0x1101241F), SH_UNT_EX_2     , SH_ACS_SCOM2     );
+REG64( EX_2_CME_SCOM_SICR_SCOM                                 , RULL(0x1101243D), SH_UNT_EX_2     , SH_ACS_SCOM      );
+REG64( EX_2_CME_SCOM_SICR_SCOM1                                , RULL(0x1101243E), SH_UNT_EX_2     , SH_ACS_SCOM1     );
+REG64( EX_2_CME_SCOM_SICR_SCOM2                                , RULL(0x1101243F), SH_UNT_EX_2     , SH_ACS_SCOM2     );
 REG64( EX_3_CME_SCOM_SICR_PPE                                  , RULL(0x10A020500), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
 REG64( EX_3_CME_SCOM_SICR_PPE1                                 , RULL(0x10A020518), SH_UNT_EX_3     ,
        SH_ACS_PPE1      );
 REG64( EX_3_CME_SCOM_SICR_PPE2                                 , RULL(0x10A020510), SH_UNT_EX_3     ,
        SH_ACS_PPE2      );
-REG64( EX_3_CME_SCOM_SICR_SCOM                                 , RULL(0x1101281D), SH_UNT_EX_3     , SH_ACS_SCOM      );
-REG64( EX_3_CME_SCOM_SICR_SCOM1                                , RULL(0x1101281E), SH_UNT_EX_3     , SH_ACS_SCOM1     );
-REG64( EX_3_CME_SCOM_SICR_SCOM2                                , RULL(0x1101281F), SH_UNT_EX_3     , SH_ACS_SCOM2     );
 REG64( EX_4_CME_SCOM_SICR_PPE                                  , RULL(0x10B010500), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
 REG64( EX_4_CME_SCOM_SICR_PPE1                                 , RULL(0x10B010518), SH_UNT_EX_4     ,
        SH_ACS_PPE1      );
 REG64( EX_4_CME_SCOM_SICR_PPE2                                 , RULL(0x10B010510), SH_UNT_EX_4     ,
        SH_ACS_PPE2      );
-REG64( EX_4_CME_SCOM_SICR_SCOM                                 , RULL(0x1201241D), SH_UNT_EX_4     , SH_ACS_SCOM      );
-REG64( EX_4_CME_SCOM_SICR_SCOM1                                , RULL(0x1201241E), SH_UNT_EX_4     , SH_ACS_SCOM1     );
-REG64( EX_4_CME_SCOM_SICR_SCOM2                                , RULL(0x1201241F), SH_UNT_EX_4     , SH_ACS_SCOM2     );
+REG64( EX_4_CME_SCOM_SICR_SCOM                                 , RULL(0x1201243D), SH_UNT_EX_4     , SH_ACS_SCOM      );
+REG64( EX_4_CME_SCOM_SICR_SCOM1                                , RULL(0x1201243E), SH_UNT_EX_4     , SH_ACS_SCOM1     );
+REG64( EX_4_CME_SCOM_SICR_SCOM2                                , RULL(0x1201243F), SH_UNT_EX_4     , SH_ACS_SCOM2     );
 REG64( EX_5_CME_SCOM_SICR_PPE                                  , RULL(0x10B020500), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
 REG64( EX_5_CME_SCOM_SICR_PPE1                                 , RULL(0x10B020518), SH_UNT_EX_5     ,
        SH_ACS_PPE1      );
 REG64( EX_5_CME_SCOM_SICR_PPE2                                 , RULL(0x10B020510), SH_UNT_EX_5     ,
        SH_ACS_PPE2      );
-REG64( EX_5_CME_SCOM_SICR_SCOM                                 , RULL(0x1201281D), SH_UNT_EX_5     , SH_ACS_SCOM      );
-REG64( EX_5_CME_SCOM_SICR_SCOM1                                , RULL(0x1201281E), SH_UNT_EX_5     , SH_ACS_SCOM1     );
-REG64( EX_5_CME_SCOM_SICR_SCOM2                                , RULL(0x1201281F), SH_UNT_EX_5     , SH_ACS_SCOM2     );
 REG64( EX_6_CME_SCOM_SICR_PPE                                  , RULL(0x10C010500), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
 REG64( EX_6_CME_SCOM_SICR_PPE1                                 , RULL(0x10C010518), SH_UNT_EX_6     ,
        SH_ACS_PPE1      );
 REG64( EX_6_CME_SCOM_SICR_PPE2                                 , RULL(0x10C010510), SH_UNT_EX_6     ,
        SH_ACS_PPE2      );
-REG64( EX_6_CME_SCOM_SICR_SCOM                                 , RULL(0x1301241D), SH_UNT_EX_6     , SH_ACS_SCOM      );
-REG64( EX_6_CME_SCOM_SICR_SCOM1                                , RULL(0x1301241E), SH_UNT_EX_6     , SH_ACS_SCOM1     );
-REG64( EX_6_CME_SCOM_SICR_SCOM2                                , RULL(0x1301241F), SH_UNT_EX_6     , SH_ACS_SCOM2     );
+REG64( EX_6_CME_SCOM_SICR_SCOM                                 , RULL(0x1301243D), SH_UNT_EX_6     , SH_ACS_SCOM      );
+REG64( EX_6_CME_SCOM_SICR_SCOM1                                , RULL(0x1301243E), SH_UNT_EX_6     , SH_ACS_SCOM1     );
+REG64( EX_6_CME_SCOM_SICR_SCOM2                                , RULL(0x1301243F), SH_UNT_EX_6     , SH_ACS_SCOM2     );
 REG64( EX_7_CME_SCOM_SICR_PPE                                  , RULL(0x10C020500), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
 REG64( EX_7_CME_SCOM_SICR_PPE1                                 , RULL(0x10C020518), SH_UNT_EX_7     ,
        SH_ACS_PPE1      );
 REG64( EX_7_CME_SCOM_SICR_PPE2                                 , RULL(0x10C020510), SH_UNT_EX_7     ,
        SH_ACS_PPE2      );
-REG64( EX_7_CME_SCOM_SICR_SCOM                                 , RULL(0x1301281D), SH_UNT_EX_7     , SH_ACS_SCOM      );
-REG64( EX_7_CME_SCOM_SICR_SCOM1                                , RULL(0x1301281E), SH_UNT_EX_7     , SH_ACS_SCOM1     );
-REG64( EX_7_CME_SCOM_SICR_SCOM2                                , RULL(0x1301281F), SH_UNT_EX_7     , SH_ACS_SCOM2     );
 REG64( EX_8_CME_SCOM_SICR_PPE                                  , RULL(0x10D010500), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
 REG64( EX_8_CME_SCOM_SICR_PPE1                                 , RULL(0x10D010518), SH_UNT_EX_8     ,
        SH_ACS_PPE1      );
 REG64( EX_8_CME_SCOM_SICR_PPE2                                 , RULL(0x10D010510), SH_UNT_EX_8     ,
        SH_ACS_PPE2      );
-REG64( EX_8_CME_SCOM_SICR_SCOM                                 , RULL(0x1401241D), SH_UNT_EX_8     , SH_ACS_SCOM      );
-REG64( EX_8_CME_SCOM_SICR_SCOM1                                , RULL(0x1401241E), SH_UNT_EX_8     , SH_ACS_SCOM1     );
-REG64( EX_8_CME_SCOM_SICR_SCOM2                                , RULL(0x1401241F), SH_UNT_EX_8     , SH_ACS_SCOM2     );
+REG64( EX_8_CME_SCOM_SICR_SCOM                                 , RULL(0x1401243D), SH_UNT_EX_8     , SH_ACS_SCOM      );
+REG64( EX_8_CME_SCOM_SICR_SCOM1                                , RULL(0x1401243E), SH_UNT_EX_8     , SH_ACS_SCOM1     );
+REG64( EX_8_CME_SCOM_SICR_SCOM2                                , RULL(0x1401243F), SH_UNT_EX_8     , SH_ACS_SCOM2     );
 REG64( EX_9_CME_SCOM_SICR_PPE                                  , RULL(0x10D020500), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
 REG64( EX_9_CME_SCOM_SICR_PPE1                                 , RULL(0x10D020518), SH_UNT_EX_9     ,
        SH_ACS_PPE1      );
 REG64( EX_9_CME_SCOM_SICR_PPE2                                 , RULL(0x10D020510), SH_UNT_EX_9     ,
        SH_ACS_PPE2      );
-REG64( EX_9_CME_SCOM_SICR_SCOM                                 , RULL(0x1401281D), SH_UNT_EX_9     , SH_ACS_SCOM      );
-REG64( EX_9_CME_SCOM_SICR_SCOM1                                , RULL(0x1401281E), SH_UNT_EX_9     , SH_ACS_SCOM1     );
-REG64( EX_9_CME_SCOM_SICR_SCOM2                                , RULL(0x1401281F), SH_UNT_EX_9     , SH_ACS_SCOM2     );
 REG64( EX_10_CME_SCOM_SICR_PPE                                 , RULL(0x10E010500), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
 REG64( EX_10_CME_SCOM_SICR_PPE1                                , RULL(0x10E010518), SH_UNT_EX_10    ,
        SH_ACS_PPE1      );
 REG64( EX_10_CME_SCOM_SICR_PPE2                                , RULL(0x10E010510), SH_UNT_EX_10    ,
        SH_ACS_PPE2      );
-REG64( EX_10_CME_SCOM_SICR_SCOM                                , RULL(0x1501241D), SH_UNT_EX_10    , SH_ACS_SCOM      );
-REG64( EX_10_CME_SCOM_SICR_SCOM1                               , RULL(0x1501241E), SH_UNT_EX_10    , SH_ACS_SCOM1     );
-REG64( EX_10_CME_SCOM_SICR_SCOM2                               , RULL(0x1501241F), SH_UNT_EX_10    , SH_ACS_SCOM2     );
+REG64( EX_10_CME_SCOM_SICR_SCOM                                , RULL(0x1501243D), SH_UNT_EX_10    , SH_ACS_SCOM      );
+REG64( EX_10_CME_SCOM_SICR_SCOM1                               , RULL(0x1501243E), SH_UNT_EX_10    , SH_ACS_SCOM1     );
+REG64( EX_10_CME_SCOM_SICR_SCOM2                               , RULL(0x1501243F), SH_UNT_EX_10    , SH_ACS_SCOM2     );
 REG64( EX_11_CME_SCOM_SICR_PPE                                 , RULL(0x10E020500), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
 REG64( EX_11_CME_SCOM_SICR_PPE1                                , RULL(0x10E020518), SH_UNT_EX_11    ,
        SH_ACS_PPE1      );
 REG64( EX_11_CME_SCOM_SICR_PPE2                                , RULL(0x10E020510), SH_UNT_EX_11    ,
        SH_ACS_PPE2      );
-REG64( EX_11_CME_SCOM_SICR_SCOM                                , RULL(0x1501281D), SH_UNT_EX_11    , SH_ACS_SCOM      );
-REG64( EX_11_CME_SCOM_SICR_SCOM1                               , RULL(0x1501281E), SH_UNT_EX_11    , SH_ACS_SCOM1     );
-REG64( EX_11_CME_SCOM_SICR_SCOM2                               , RULL(0x1501281F), SH_UNT_EX_11    , SH_ACS_SCOM2     );
 
-REG64( EQ_CME_SCOM_SRTCH0                                      , RULL(0x10012823), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012423,
-REG64( EQ_0_CME_SCOM_SRTCH0                                    , RULL(0x10012823), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012423,
-REG64( EQ_1_CME_SCOM_SRTCH0                                    , RULL(0x11012823), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 11012423,
-REG64( EQ_2_CME_SCOM_SRTCH0                                    , RULL(0x12012823), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 12012423,
-REG64( EQ_3_CME_SCOM_SRTCH0                                    , RULL(0x13012823), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 13012423,
-REG64( EQ_4_CME_SCOM_SRTCH0                                    , RULL(0x14012823), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 14012423,
-REG64( EQ_5_CME_SCOM_SRTCH0                                    , RULL(0x15012823), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 15012423,
+REG64( EQ_CME_SCOM_SRTCH0                                      , RULL(0x10012423), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012023,
+REG64( EQ_0_CME_SCOM_SRTCH0                                    , RULL(0x10012423), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012023,
+REG64( EQ_1_CME_SCOM_SRTCH0                                    , RULL(0x11012423), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 11012023,
+REG64( EQ_2_CME_SCOM_SRTCH0                                    , RULL(0x12012423), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 12012023,
+REG64( EQ_3_CME_SCOM_SRTCH0                                    , RULL(0x13012423), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 13012023,
+REG64( EQ_4_CME_SCOM_SRTCH0                                    , RULL(0x14012423), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 14012023,
+REG64( EQ_5_CME_SCOM_SRTCH0                                    , RULL(0x15012423), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 15012023,
 REG64( EX_CME_SCOM_SRTCH0_PPE                                  , RULL(0x109010420), SH_UNT_EX       ,
        SH_ACS_PPE       );
 REG64( EX_CME_SCOM_SRTCH0_SCOM                                 , RULL(0x10012423), SH_UNT_EX       , SH_ACS_SCOM_RW   );
@@ -3492,52 +3360,46 @@ REG64( EX_0_CME_SCOM_SRTCH0_PPE                                , RULL(0x10901042
 REG64( EX_0_CME_SCOM_SRTCH0_SCOM                               , RULL(0x10012423), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
 REG64( EX_1_CME_SCOM_SRTCH0_PPE                                , RULL(0x109020420), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_SCOM_SRTCH0_SCOM                               , RULL(0x10012823), SH_UNT_EX_1     , SH_ACS_SCOM_RW   );
 REG64( EX_2_CME_SCOM_SRTCH0_PPE                                , RULL(0x10A010420), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
 REG64( EX_2_CME_SCOM_SRTCH0_SCOM                               , RULL(0x11012423), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
 REG64( EX_3_CME_SCOM_SRTCH0_PPE                                , RULL(0x10A020420), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_SCOM_SRTCH0_SCOM                               , RULL(0x11012823), SH_UNT_EX_3     , SH_ACS_SCOM_RW   );
 REG64( EX_4_CME_SCOM_SRTCH0_PPE                                , RULL(0x10B010420), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
 REG64( EX_4_CME_SCOM_SRTCH0_SCOM                               , RULL(0x12012423), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
 REG64( EX_5_CME_SCOM_SRTCH0_PPE                                , RULL(0x10B020420), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_SCOM_SRTCH0_SCOM                               , RULL(0x12012823), SH_UNT_EX_5     , SH_ACS_SCOM_RW   );
 REG64( EX_6_CME_SCOM_SRTCH0_PPE                                , RULL(0x10C010420), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
 REG64( EX_6_CME_SCOM_SRTCH0_SCOM                               , RULL(0x13012423), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
 REG64( EX_7_CME_SCOM_SRTCH0_PPE                                , RULL(0x10C020420), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_SCOM_SRTCH0_SCOM                               , RULL(0x13012823), SH_UNT_EX_7     , SH_ACS_SCOM_RW   );
 REG64( EX_8_CME_SCOM_SRTCH0_PPE                                , RULL(0x10D010420), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
 REG64( EX_8_CME_SCOM_SRTCH0_SCOM                               , RULL(0x14012423), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
 REG64( EX_9_CME_SCOM_SRTCH0_PPE                                , RULL(0x10D020420), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_SCOM_SRTCH0_SCOM                               , RULL(0x14012823), SH_UNT_EX_9     , SH_ACS_SCOM_RW   );
 REG64( EX_10_CME_SCOM_SRTCH0_PPE                               , RULL(0x10E010420), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
 REG64( EX_10_CME_SCOM_SRTCH0_SCOM                              , RULL(0x15012423), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
 REG64( EX_11_CME_SCOM_SRTCH0_PPE                               , RULL(0x10E020420), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_SCOM_SRTCH0_SCOM                              , RULL(0x15012823), SH_UNT_EX_11    , SH_ACS_SCOM_RW   );
 
-REG64( EQ_CME_SCOM_SRTCH1                                      , RULL(0x10012824), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012424,
-REG64( EQ_0_CME_SCOM_SRTCH1                                    , RULL(0x10012824), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012424,
-REG64( EQ_1_CME_SCOM_SRTCH1                                    , RULL(0x11012824), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 11012424,
-REG64( EQ_2_CME_SCOM_SRTCH1                                    , RULL(0x12012824), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 12012424,
-REG64( EQ_3_CME_SCOM_SRTCH1                                    , RULL(0x13012824), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 13012424,
-REG64( EQ_4_CME_SCOM_SRTCH1                                    , RULL(0x14012824), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 14012424,
-REG64( EQ_5_CME_SCOM_SRTCH1                                    , RULL(0x15012824), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 15012424,
+REG64( EQ_CME_SCOM_SRTCH1                                      , RULL(0x10012424), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012024,
+REG64( EQ_0_CME_SCOM_SRTCH1                                    , RULL(0x10012424), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012024,
+REG64( EQ_1_CME_SCOM_SRTCH1                                    , RULL(0x11012424), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 11012024,
+REG64( EQ_2_CME_SCOM_SRTCH1                                    , RULL(0x12012424), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 12012024,
+REG64( EQ_3_CME_SCOM_SRTCH1                                    , RULL(0x13012424), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 13012024,
+REG64( EQ_4_CME_SCOM_SRTCH1                                    , RULL(0x14012424), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 14012024,
+REG64( EQ_5_CME_SCOM_SRTCH1                                    , RULL(0x15012424), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 15012024,
 REG64( EX_CME_SCOM_SRTCH1_PPE                                  , RULL(0x109010440), SH_UNT_EX       ,
        SH_ACS_PPE       );
 REG64( EX_CME_SCOM_SRTCH1_SCOM                                 , RULL(0x10012424), SH_UNT_EX       , SH_ACS_SCOM_RW   );
@@ -3546,471 +3408,529 @@ REG64( EX_0_CME_SCOM_SRTCH1_PPE                                , RULL(0x10901044
 REG64( EX_0_CME_SCOM_SRTCH1_SCOM                               , RULL(0x10012424), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
 REG64( EX_1_CME_SCOM_SRTCH1_PPE                                , RULL(0x109020440), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_SCOM_SRTCH1_SCOM                               , RULL(0x10012824), SH_UNT_EX_1     , SH_ACS_SCOM_RW   );
 REG64( EX_2_CME_SCOM_SRTCH1_PPE                                , RULL(0x10A010440), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
 REG64( EX_2_CME_SCOM_SRTCH1_SCOM                               , RULL(0x11012424), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
 REG64( EX_3_CME_SCOM_SRTCH1_PPE                                , RULL(0x10A020440), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_SCOM_SRTCH1_SCOM                               , RULL(0x11012824), SH_UNT_EX_3     , SH_ACS_SCOM_RW   );
 REG64( EX_4_CME_SCOM_SRTCH1_PPE                                , RULL(0x10B010440), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
 REG64( EX_4_CME_SCOM_SRTCH1_SCOM                               , RULL(0x12012424), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
 REG64( EX_5_CME_SCOM_SRTCH1_PPE                                , RULL(0x10B020440), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_SCOM_SRTCH1_SCOM                               , RULL(0x12012824), SH_UNT_EX_5     , SH_ACS_SCOM_RW   );
 REG64( EX_6_CME_SCOM_SRTCH1_PPE                                , RULL(0x10C010440), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
 REG64( EX_6_CME_SCOM_SRTCH1_SCOM                               , RULL(0x13012424), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
 REG64( EX_7_CME_SCOM_SRTCH1_PPE                                , RULL(0x10C020440), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_SCOM_SRTCH1_SCOM                               , RULL(0x13012824), SH_UNT_EX_7     , SH_ACS_SCOM_RW   );
 REG64( EX_8_CME_SCOM_SRTCH1_PPE                                , RULL(0x10D010440), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
 REG64( EX_8_CME_SCOM_SRTCH1_SCOM                               , RULL(0x14012424), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
 REG64( EX_9_CME_SCOM_SRTCH1_PPE                                , RULL(0x10D020440), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_SCOM_SRTCH1_SCOM                               , RULL(0x14012824), SH_UNT_EX_9     , SH_ACS_SCOM_RW   );
 REG64( EX_10_CME_SCOM_SRTCH1_PPE                               , RULL(0x10E010440), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
 REG64( EX_10_CME_SCOM_SRTCH1_SCOM                              , RULL(0x15012424), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
 REG64( EX_11_CME_SCOM_SRTCH1_PPE                               , RULL(0x10E020440), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_SCOM_SRTCH1_SCOM                              , RULL(0x15012824), SH_UNT_EX_11    , SH_ACS_SCOM_RW   );
 
-REG64( EQ_CME_SCOM_VDSR                                        , RULL(0x10012817), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012417,
-REG64( EQ_0_CME_SCOM_VDSR                                      , RULL(0x10012817), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012417,
-REG64( EQ_1_CME_SCOM_VDSR                                      , RULL(0x11012817), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 11012417,
-REG64( EQ_2_CME_SCOM_VDSR                                      , RULL(0x12012817), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 12012417,
-REG64( EQ_3_CME_SCOM_VDSR                                      , RULL(0x13012817), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 13012417,
-REG64( EQ_4_CME_SCOM_VDSR                                      , RULL(0x14012817), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 14012417,
-REG64( EQ_5_CME_SCOM_VDSR                                      , RULL(0x15012817), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 15012417,
+REG64( EQ_CME_SCOM_VCCR                                        , RULL(0x1001242C), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1001202C,
+REG64( EQ_0_CME_SCOM_VCCR                                      , RULL(0x1001242C), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1001202C,
+REG64( EQ_1_CME_SCOM_VCCR                                      , RULL(0x1101242C), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1101202C,
+REG64( EQ_2_CME_SCOM_VCCR                                      , RULL(0x1201242C), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1201202C,
+REG64( EQ_3_CME_SCOM_VCCR                                      , RULL(0x1301242C), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1301202C,
+REG64( EQ_4_CME_SCOM_VCCR                                      , RULL(0x1401242C), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1401202C,
+REG64( EQ_5_CME_SCOM_VCCR                                      , RULL(0x1501242C), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1501202C,
+REG64( EX_CME_SCOM_VCCR_PPE                                    , RULL(0x109010680), SH_UNT_EX       ,
+       SH_ACS_PPE       );
+REG64( EX_CME_SCOM_VCCR_SCOM                                   , RULL(0x1001242C), SH_UNT_EX       , SH_ACS_SCOM_RW   );
+REG64( EX_0_CME_SCOM_VCCR_PPE                                  , RULL(0x109010680), SH_UNT_EX_0     ,
+       SH_ACS_PPE       );
+REG64( EX_0_CME_SCOM_VCCR_SCOM                                 , RULL(0x1001242C), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
+REG64( EX_1_CME_SCOM_VCCR_PPE                                  , RULL(0x109020680), SH_UNT_EX_1     ,
+       SH_ACS_PPE       );
+REG64( EX_2_CME_SCOM_VCCR_PPE                                  , RULL(0x10A010680), SH_UNT_EX_2     ,
+       SH_ACS_PPE       );
+REG64( EX_2_CME_SCOM_VCCR_SCOM                                 , RULL(0x1101242C), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
+REG64( EX_3_CME_SCOM_VCCR_PPE                                  , RULL(0x10A020680), SH_UNT_EX_3     ,
+       SH_ACS_PPE       );
+REG64( EX_4_CME_SCOM_VCCR_PPE                                  , RULL(0x10B010680), SH_UNT_EX_4     ,
+       SH_ACS_PPE       );
+REG64( EX_4_CME_SCOM_VCCR_SCOM                                 , RULL(0x1201242C), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
+REG64( EX_5_CME_SCOM_VCCR_PPE                                  , RULL(0x10B020680), SH_UNT_EX_5     ,
+       SH_ACS_PPE       );
+REG64( EX_6_CME_SCOM_VCCR_PPE                                  , RULL(0x10C010680), SH_UNT_EX_6     ,
+       SH_ACS_PPE       );
+REG64( EX_6_CME_SCOM_VCCR_SCOM                                 , RULL(0x1301242C), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
+REG64( EX_7_CME_SCOM_VCCR_PPE                                  , RULL(0x10C020680), SH_UNT_EX_7     ,
+       SH_ACS_PPE       );
+REG64( EX_8_CME_SCOM_VCCR_PPE                                  , RULL(0x10D010680), SH_UNT_EX_8     ,
+       SH_ACS_PPE       );
+REG64( EX_8_CME_SCOM_VCCR_SCOM                                 , RULL(0x1401242C), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
+REG64( EX_9_CME_SCOM_VCCR_PPE                                  , RULL(0x10D020680), SH_UNT_EX_9     ,
+       SH_ACS_PPE       );
+REG64( EX_10_CME_SCOM_VCCR_PPE                                 , RULL(0x10E010680), SH_UNT_EX_10    ,
+       SH_ACS_PPE       );
+REG64( EX_10_CME_SCOM_VCCR_SCOM                                , RULL(0x1501242C), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
+REG64( EX_11_CME_SCOM_VCCR_PPE                                 , RULL(0x10E020680), SH_UNT_EX_11    ,
+       SH_ACS_PPE       );
+
+REG64( EQ_CME_SCOM_VCTR                                        , RULL(0x10012439), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012039,
+REG64( EQ_0_CME_SCOM_VCTR                                      , RULL(0x10012439), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012039,
+REG64( EQ_1_CME_SCOM_VCTR                                      , RULL(0x11012439), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 11012039,
+REG64( EQ_2_CME_SCOM_VCTR                                      , RULL(0x12012439), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 12012039,
+REG64( EQ_3_CME_SCOM_VCTR                                      , RULL(0x13012439), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 13012039,
+REG64( EQ_4_CME_SCOM_VCTR                                      , RULL(0x14012439), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 14012039,
+REG64( EQ_5_CME_SCOM_VCTR                                      , RULL(0x15012439), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 15012039,
+REG64( EX_CME_SCOM_VCTR                                        , RULL(0x10012439), SH_UNT_EX       , SH_ACS_SCOM_RW   );
+REG64( EX_0_CME_SCOM_VCTR                                      , RULL(0x10012439), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
+REG64( EX_2_CME_SCOM_VCTR                                      , RULL(0x11012439), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
+REG64( EX_4_CME_SCOM_VCTR                                      , RULL(0x12012439), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
+REG64( EX_6_CME_SCOM_VCTR                                      , RULL(0x13012439), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
+REG64( EX_8_CME_SCOM_VCTR                                      , RULL(0x14012439), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
+REG64( EX_10_CME_SCOM_VCTR                                     , RULL(0x15012439), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
+
+REG64( EQ_CME_SCOM_VDCR                                        , RULL(0x10012435), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012035,
+REG64( EQ_0_CME_SCOM_VDCR                                      , RULL(0x10012435), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012035,
+REG64( EQ_1_CME_SCOM_VDCR                                      , RULL(0x11012435), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 11012035,
+REG64( EQ_2_CME_SCOM_VDCR                                      , RULL(0x12012435), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 12012035,
+REG64( EQ_3_CME_SCOM_VDCR                                      , RULL(0x13012435), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 13012035,
+REG64( EQ_4_CME_SCOM_VDCR                                      , RULL(0x14012435), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 14012035,
+REG64( EQ_5_CME_SCOM_VDCR                                      , RULL(0x15012435), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 15012035,
+REG64( EX_CME_SCOM_VDCR_PPE                                    , RULL(0x109010600), SH_UNT_EX       ,
+       SH_ACS_PPE       );
+REG64( EX_CME_SCOM_VDCR_SCOM                                   , RULL(0x10012435), SH_UNT_EX       , SH_ACS_SCOM_RO   );
+REG64( EX_0_CME_SCOM_VDCR_PPE                                  , RULL(0x109010600), SH_UNT_EX_0     ,
+       SH_ACS_PPE       );
+REG64( EX_0_CME_SCOM_VDCR_SCOM                                 , RULL(0x10012435), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
+REG64( EX_1_CME_SCOM_VDCR_PPE                                  , RULL(0x109020600), SH_UNT_EX_1     ,
+       SH_ACS_PPE       );
+REG64( EX_2_CME_SCOM_VDCR_PPE                                  , RULL(0x10A010600), SH_UNT_EX_2     ,
+       SH_ACS_PPE       );
+REG64( EX_2_CME_SCOM_VDCR_SCOM                                 , RULL(0x11012435), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
+REG64( EX_3_CME_SCOM_VDCR_PPE                                  , RULL(0x10A020600), SH_UNT_EX_3     ,
+       SH_ACS_PPE       );
+REG64( EX_4_CME_SCOM_VDCR_PPE                                  , RULL(0x10B010600), SH_UNT_EX_4     ,
+       SH_ACS_PPE       );
+REG64( EX_4_CME_SCOM_VDCR_SCOM                                 , RULL(0x12012435), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
+REG64( EX_5_CME_SCOM_VDCR_PPE                                  , RULL(0x10B020600), SH_UNT_EX_5     ,
+       SH_ACS_PPE       );
+REG64( EX_6_CME_SCOM_VDCR_PPE                                  , RULL(0x10C010600), SH_UNT_EX_6     ,
+       SH_ACS_PPE       );
+REG64( EX_6_CME_SCOM_VDCR_SCOM                                 , RULL(0x13012435), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
+REG64( EX_7_CME_SCOM_VDCR_PPE                                  , RULL(0x10C020600), SH_UNT_EX_7     ,
+       SH_ACS_PPE       );
+REG64( EX_8_CME_SCOM_VDCR_PPE                                  , RULL(0x10D010600), SH_UNT_EX_8     ,
+       SH_ACS_PPE       );
+REG64( EX_8_CME_SCOM_VDCR_SCOM                                 , RULL(0x14012435), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
+REG64( EX_9_CME_SCOM_VDCR_PPE                                  , RULL(0x10D020600), SH_UNT_EX_9     ,
+       SH_ACS_PPE       );
+REG64( EX_10_CME_SCOM_VDCR_PPE                                 , RULL(0x10E010600), SH_UNT_EX_10    ,
+       SH_ACS_PPE       );
+REG64( EX_10_CME_SCOM_VDCR_SCOM                                , RULL(0x15012435), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
+REG64( EX_11_CME_SCOM_VDCR_PPE                                 , RULL(0x10E020600), SH_UNT_EX_11    ,
+       SH_ACS_PPE       );
+
+REG64( EQ_CME_SCOM_VDSR                                        , RULL(0x10012437), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012037,
+REG64( EQ_0_CME_SCOM_VDSR                                      , RULL(0x10012437), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012037,
+REG64( EQ_1_CME_SCOM_VDSR                                      , RULL(0x11012437), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 11012037,
+REG64( EQ_2_CME_SCOM_VDSR                                      , RULL(0x12012437), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 12012037,
+REG64( EQ_3_CME_SCOM_VDSR                                      , RULL(0x13012437), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 13012037,
+REG64( EQ_4_CME_SCOM_VDSR                                      , RULL(0x14012437), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 14012037,
+REG64( EQ_5_CME_SCOM_VDSR                                      , RULL(0x15012437), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 15012037,
 REG64( EX_CME_SCOM_VDSR_PPE                                    , RULL(0x109010640), SH_UNT_EX       ,
        SH_ACS_PPE       );
-REG64( EX_CME_SCOM_VDSR_SCOM                                   , RULL(0x10012417), SH_UNT_EX       , SH_ACS_SCOM_RO   );
+REG64( EX_CME_SCOM_VDSR_SCOM                                   , RULL(0x10012437), SH_UNT_EX       , SH_ACS_SCOM_RO   );
 REG64( EX_0_CME_SCOM_VDSR_PPE                                  , RULL(0x109010640), SH_UNT_EX_0     ,
        SH_ACS_PPE       );
-REG64( EX_0_CME_SCOM_VDSR_SCOM                                 , RULL(0x10012417), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
+REG64( EX_0_CME_SCOM_VDSR_SCOM                                 , RULL(0x10012437), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
 REG64( EX_1_CME_SCOM_VDSR_PPE                                  , RULL(0x109020640), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_SCOM_VDSR_SCOM                                 , RULL(0x10012817), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
 REG64( EX_2_CME_SCOM_VDSR_PPE                                  , RULL(0x10A010640), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
-REG64( EX_2_CME_SCOM_VDSR_SCOM                                 , RULL(0x11012417), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
+REG64( EX_2_CME_SCOM_VDSR_SCOM                                 , RULL(0x11012437), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
 REG64( EX_3_CME_SCOM_VDSR_PPE                                  , RULL(0x10A020640), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_SCOM_VDSR_SCOM                                 , RULL(0x11012817), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
 REG64( EX_4_CME_SCOM_VDSR_PPE                                  , RULL(0x10B010640), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
-REG64( EX_4_CME_SCOM_VDSR_SCOM                                 , RULL(0x12012417), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
+REG64( EX_4_CME_SCOM_VDSR_SCOM                                 , RULL(0x12012437), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
 REG64( EX_5_CME_SCOM_VDSR_PPE                                  , RULL(0x10B020640), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_SCOM_VDSR_SCOM                                 , RULL(0x12012817), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
 REG64( EX_6_CME_SCOM_VDSR_PPE                                  , RULL(0x10C010640), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
-REG64( EX_6_CME_SCOM_VDSR_SCOM                                 , RULL(0x13012417), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
+REG64( EX_6_CME_SCOM_VDSR_SCOM                                 , RULL(0x13012437), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
 REG64( EX_7_CME_SCOM_VDSR_PPE                                  , RULL(0x10C020640), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_SCOM_VDSR_SCOM                                 , RULL(0x13012817), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
 REG64( EX_8_CME_SCOM_VDSR_PPE                                  , RULL(0x10D010640), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
-REG64( EX_8_CME_SCOM_VDSR_SCOM                                 , RULL(0x14012417), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
+REG64( EX_8_CME_SCOM_VDSR_SCOM                                 , RULL(0x14012437), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
 REG64( EX_9_CME_SCOM_VDSR_PPE                                  , RULL(0x10D020640), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_SCOM_VDSR_SCOM                                 , RULL(0x14012817), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
 REG64( EX_10_CME_SCOM_VDSR_PPE                                 , RULL(0x10E010640), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
-REG64( EX_10_CME_SCOM_VDSR_SCOM                                , RULL(0x15012417), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
+REG64( EX_10_CME_SCOM_VDSR_SCOM                                , RULL(0x15012437), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
 REG64( EX_11_CME_SCOM_VDSR_PPE                                 , RULL(0x10E020640), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_SCOM_VDSR_SCOM                                , RULL(0x15012817), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
 
-REG64( EQ_CME_SCOM_VTSR0                                       , RULL(0x10012815), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012415,
-REG64( EQ_0_CME_SCOM_VTSR0                                     , RULL(0x10012815), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012415,
-REG64( EQ_1_CME_SCOM_VTSR0                                     , RULL(0x11012815), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 11012415,
-REG64( EQ_2_CME_SCOM_VTSR0                                     , RULL(0x12012815), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 12012415,
-REG64( EQ_3_CME_SCOM_VTSR0                                     , RULL(0x13012815), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 13012415,
-REG64( EQ_4_CME_SCOM_VTSR0                                     , RULL(0x14012815), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 14012415,
-REG64( EQ_5_CME_SCOM_VTSR0                                     , RULL(0x15012815), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 15012415,
-REG64( EX_CME_SCOM_VTSR0_PPE                                   , RULL(0x109010600), SH_UNT_EX       ,
+REG64( EQ_CME_SCOM_VECR                                        , RULL(0x10012438), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012038,
+REG64( EQ_0_CME_SCOM_VECR                                      , RULL(0x10012438), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012038,
+REG64( EQ_1_CME_SCOM_VECR                                      , RULL(0x11012438), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 11012038,
+REG64( EQ_2_CME_SCOM_VECR                                      , RULL(0x12012438), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 12012038,
+REG64( EQ_3_CME_SCOM_VECR                                      , RULL(0x13012438), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 13012038,
+REG64( EQ_4_CME_SCOM_VECR                                      , RULL(0x14012438), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 14012038,
+REG64( EQ_5_CME_SCOM_VECR                                      , RULL(0x15012438), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 15012038,
+REG64( EX_CME_SCOM_VECR_PPE                                    , RULL(0x109010660), SH_UNT_EX       ,
        SH_ACS_PPE       );
-REG64( EX_CME_SCOM_VTSR0_SCOM                                  , RULL(0x10012415), SH_UNT_EX       , SH_ACS_SCOM_RO   );
-REG64( EX_0_CME_SCOM_VTSR0_PPE                                 , RULL(0x109010600), SH_UNT_EX_0     ,
+REG64( EX_CME_SCOM_VECR_SCOM                                   , RULL(0x10012438), SH_UNT_EX       , SH_ACS_SCOM_RO   );
+REG64( EX_0_CME_SCOM_VECR_PPE                                  , RULL(0x109010660), SH_UNT_EX_0     ,
        SH_ACS_PPE       );
-REG64( EX_0_CME_SCOM_VTSR0_SCOM                                , RULL(0x10012415), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
-REG64( EX_1_CME_SCOM_VTSR0_PPE                                 , RULL(0x109020600), SH_UNT_EX_1     ,
+REG64( EX_0_CME_SCOM_VECR_SCOM                                 , RULL(0x10012438), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
+REG64( EX_1_CME_SCOM_VECR_PPE                                  , RULL(0x109020660), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_SCOM_VTSR0_SCOM                                , RULL(0x10012815), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
-REG64( EX_2_CME_SCOM_VTSR0_PPE                                 , RULL(0x10A010600), SH_UNT_EX_2     ,
+REG64( EX_2_CME_SCOM_VECR_PPE                                  , RULL(0x10A010660), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
-REG64( EX_2_CME_SCOM_VTSR0_SCOM                                , RULL(0x11012415), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
-REG64( EX_3_CME_SCOM_VTSR0_PPE                                 , RULL(0x10A020600), SH_UNT_EX_3     ,
+REG64( EX_2_CME_SCOM_VECR_SCOM                                 , RULL(0x11012438), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
+REG64( EX_3_CME_SCOM_VECR_PPE                                  , RULL(0x10A020660), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_SCOM_VTSR0_SCOM                                , RULL(0x11012815), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
-REG64( EX_4_CME_SCOM_VTSR0_PPE                                 , RULL(0x10B010600), SH_UNT_EX_4     ,
+REG64( EX_4_CME_SCOM_VECR_PPE                                  , RULL(0x10B010660), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
-REG64( EX_4_CME_SCOM_VTSR0_SCOM                                , RULL(0x12012415), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
-REG64( EX_5_CME_SCOM_VTSR0_PPE                                 , RULL(0x10B020600), SH_UNT_EX_5     ,
+REG64( EX_4_CME_SCOM_VECR_SCOM                                 , RULL(0x12012438), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
+REG64( EX_5_CME_SCOM_VECR_PPE                                  , RULL(0x10B020660), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_SCOM_VTSR0_SCOM                                , RULL(0x12012815), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
-REG64( EX_6_CME_SCOM_VTSR0_PPE                                 , RULL(0x10C010600), SH_UNT_EX_6     ,
+REG64( EX_6_CME_SCOM_VECR_PPE                                  , RULL(0x10C010660), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
-REG64( EX_6_CME_SCOM_VTSR0_SCOM                                , RULL(0x13012415), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
-REG64( EX_7_CME_SCOM_VTSR0_PPE                                 , RULL(0x10C020600), SH_UNT_EX_7     ,
+REG64( EX_6_CME_SCOM_VECR_SCOM                                 , RULL(0x13012438), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
+REG64( EX_7_CME_SCOM_VECR_PPE                                  , RULL(0x10C020660), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_SCOM_VTSR0_SCOM                                , RULL(0x13012815), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
-REG64( EX_8_CME_SCOM_VTSR0_PPE                                 , RULL(0x10D010600), SH_UNT_EX_8     ,
+REG64( EX_8_CME_SCOM_VECR_PPE                                  , RULL(0x10D010660), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
-REG64( EX_8_CME_SCOM_VTSR0_SCOM                                , RULL(0x14012415), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
-REG64( EX_9_CME_SCOM_VTSR0_PPE                                 , RULL(0x10D020600), SH_UNT_EX_9     ,
+REG64( EX_8_CME_SCOM_VECR_SCOM                                 , RULL(0x14012438), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
+REG64( EX_9_CME_SCOM_VECR_PPE                                  , RULL(0x10D020660), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_SCOM_VTSR0_SCOM                                , RULL(0x14012815), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
-REG64( EX_10_CME_SCOM_VTSR0_PPE                                , RULL(0x10E010600), SH_UNT_EX_10    ,
+REG64( EX_10_CME_SCOM_VECR_PPE                                 , RULL(0x10E010660), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
-REG64( EX_10_CME_SCOM_VTSR0_SCOM                               , RULL(0x15012415), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
-REG64( EX_11_CME_SCOM_VTSR0_PPE                                , RULL(0x10E020600), SH_UNT_EX_11    ,
+REG64( EX_10_CME_SCOM_VECR_SCOM                                , RULL(0x15012438), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
+REG64( EX_11_CME_SCOM_VECR_PPE                                 , RULL(0x10E020660), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_SCOM_VTSR0_SCOM                               , RULL(0x15012815), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
 
-REG64( EQ_CME_SCOM_VTSR1                                       , RULL(0x10012816), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012416,
-REG64( EQ_0_CME_SCOM_VTSR1                                     , RULL(0x10012816), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012416,
-REG64( EQ_1_CME_SCOM_VTSR1                                     , RULL(0x11012816), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 11012416,
-REG64( EQ_2_CME_SCOM_VTSR1                                     , RULL(0x12012816), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 12012416,
-REG64( EQ_3_CME_SCOM_VTSR1                                     , RULL(0x13012816), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 13012416,
-REG64( EQ_4_CME_SCOM_VTSR1                                     , RULL(0x14012816), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 14012416,
-REG64( EQ_5_CME_SCOM_VTSR1                                     , RULL(0x15012816), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 15012416,
-REG64( EX_CME_SCOM_VTSR1_PPE                                   , RULL(0x109010620), SH_UNT_EX       ,
+REG64( EQ_CME_SCOM_VNCR                                        , RULL(0x10012436), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012036,
+REG64( EQ_0_CME_SCOM_VNCR                                      , RULL(0x10012436), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012036,
+REG64( EQ_1_CME_SCOM_VNCR                                      , RULL(0x11012436), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 11012036,
+REG64( EQ_2_CME_SCOM_VNCR                                      , RULL(0x12012436), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 12012036,
+REG64( EQ_3_CME_SCOM_VNCR                                      , RULL(0x13012436), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 13012036,
+REG64( EQ_4_CME_SCOM_VNCR                                      , RULL(0x14012436), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 14012036,
+REG64( EQ_5_CME_SCOM_VNCR                                      , RULL(0x15012436), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 15012036,
+REG64( EX_CME_SCOM_VNCR_PPE                                    , RULL(0x109010620), SH_UNT_EX       ,
        SH_ACS_PPE       );
-REG64( EX_CME_SCOM_VTSR1_SCOM                                  , RULL(0x10012416), SH_UNT_EX       , SH_ACS_SCOM_RO   );
-REG64( EX_0_CME_SCOM_VTSR1_PPE                                 , RULL(0x109010620), SH_UNT_EX_0     ,
+REG64( EX_CME_SCOM_VNCR_SCOM                                   , RULL(0x10012436), SH_UNT_EX       , SH_ACS_SCOM_RO   );
+REG64( EX_0_CME_SCOM_VNCR_PPE                                  , RULL(0x109010620), SH_UNT_EX_0     ,
        SH_ACS_PPE       );
-REG64( EX_0_CME_SCOM_VTSR1_SCOM                                , RULL(0x10012416), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
-REG64( EX_1_CME_SCOM_VTSR1_PPE                                 , RULL(0x109020620), SH_UNT_EX_1     ,
+REG64( EX_0_CME_SCOM_VNCR_SCOM                                 , RULL(0x10012436), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
+REG64( EX_1_CME_SCOM_VNCR_PPE                                  , RULL(0x109020620), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_SCOM_VTSR1_SCOM                                , RULL(0x10012816), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
-REG64( EX_2_CME_SCOM_VTSR1_PPE                                 , RULL(0x10A010620), SH_UNT_EX_2     ,
+REG64( EX_2_CME_SCOM_VNCR_PPE                                  , RULL(0x10A010620), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
-REG64( EX_2_CME_SCOM_VTSR1_SCOM                                , RULL(0x11012416), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
-REG64( EX_3_CME_SCOM_VTSR1_PPE                                 , RULL(0x10A020620), SH_UNT_EX_3     ,
+REG64( EX_2_CME_SCOM_VNCR_SCOM                                 , RULL(0x11012436), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
+REG64( EX_3_CME_SCOM_VNCR_PPE                                  , RULL(0x10A020620), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_SCOM_VTSR1_SCOM                                , RULL(0x11012816), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
-REG64( EX_4_CME_SCOM_VTSR1_PPE                                 , RULL(0x10B010620), SH_UNT_EX_4     ,
+REG64( EX_4_CME_SCOM_VNCR_PPE                                  , RULL(0x10B010620), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
-REG64( EX_4_CME_SCOM_VTSR1_SCOM                                , RULL(0x12012416), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
-REG64( EX_5_CME_SCOM_VTSR1_PPE                                 , RULL(0x10B020620), SH_UNT_EX_5     ,
+REG64( EX_4_CME_SCOM_VNCR_SCOM                                 , RULL(0x12012436), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
+REG64( EX_5_CME_SCOM_VNCR_PPE                                  , RULL(0x10B020620), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_SCOM_VTSR1_SCOM                                , RULL(0x12012816), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
-REG64( EX_6_CME_SCOM_VTSR1_PPE                                 , RULL(0x10C010620), SH_UNT_EX_6     ,
+REG64( EX_6_CME_SCOM_VNCR_PPE                                  , RULL(0x10C010620), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
-REG64( EX_6_CME_SCOM_VTSR1_SCOM                                , RULL(0x13012416), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
-REG64( EX_7_CME_SCOM_VTSR1_PPE                                 , RULL(0x10C020620), SH_UNT_EX_7     ,
+REG64( EX_6_CME_SCOM_VNCR_SCOM                                 , RULL(0x13012436), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
+REG64( EX_7_CME_SCOM_VNCR_PPE                                  , RULL(0x10C020620), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_SCOM_VTSR1_SCOM                                , RULL(0x13012816), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
-REG64( EX_8_CME_SCOM_VTSR1_PPE                                 , RULL(0x10D010620), SH_UNT_EX_8     ,
+REG64( EX_8_CME_SCOM_VNCR_PPE                                  , RULL(0x10D010620), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
-REG64( EX_8_CME_SCOM_VTSR1_SCOM                                , RULL(0x14012416), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
-REG64( EX_9_CME_SCOM_VTSR1_PPE                                 , RULL(0x10D020620), SH_UNT_EX_9     ,
+REG64( EX_8_CME_SCOM_VNCR_SCOM                                 , RULL(0x14012436), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
+REG64( EX_9_CME_SCOM_VNCR_PPE                                  , RULL(0x10D020620), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_SCOM_VTSR1_SCOM                                , RULL(0x14012816), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
-REG64( EX_10_CME_SCOM_VTSR1_PPE                                , RULL(0x10E010620), SH_UNT_EX_10    ,
+REG64( EX_10_CME_SCOM_VNCR_PPE                                 , RULL(0x10E010620), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
-REG64( EX_10_CME_SCOM_VTSR1_SCOM                               , RULL(0x15012416), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
-REG64( EX_11_CME_SCOM_VTSR1_PPE                                , RULL(0x10E020620), SH_UNT_EX_11    ,
+REG64( EX_10_CME_SCOM_VNCR_SCOM                                , RULL(0x15012436), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
+REG64( EX_11_CME_SCOM_VNCR_PPE                                 , RULL(0x10E020620), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_SCOM_VTSR1_SCOM                               , RULL(0x15012816), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
 
-REG64( EQ_CME_SCOM_XIPCBMD0                                    , RULL(0x1001283C), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1001243C,
-REG64( EQ_0_CME_SCOM_XIPCBMD0                                  , RULL(0x1001283C), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1001243C,
-REG64( EQ_1_CME_SCOM_XIPCBMD0                                  , RULL(0x1101283C), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1101243C,
-REG64( EQ_2_CME_SCOM_XIPCBMD0                                  , RULL(0x1201283C), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1201243C,
-REG64( EQ_3_CME_SCOM_XIPCBMD0                                  , RULL(0x1301283C), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1301243C,
-REG64( EQ_4_CME_SCOM_XIPCBMD0                                  , RULL(0x1401283C), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1401243C,
-REG64( EQ_5_CME_SCOM_XIPCBMD0                                  , RULL(0x1501283C), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1501243C,
+REG64( EQ_CME_SCOM_XIPCBMD0                                    , RULL(0x1001241C), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1001201C,
+REG64( EQ_0_CME_SCOM_XIPCBMD0                                  , RULL(0x1001241C), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1001201C,
+REG64( EQ_1_CME_SCOM_XIPCBMD0                                  , RULL(0x1101241C), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1101201C,
+REG64( EQ_2_CME_SCOM_XIPCBMD0                                  , RULL(0x1201241C), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1201201C,
+REG64( EQ_3_CME_SCOM_XIPCBMD0                                  , RULL(0x1301241C), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1301201C,
+REG64( EQ_4_CME_SCOM_XIPCBMD0                                  , RULL(0x1401241C), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1401201C,
+REG64( EQ_5_CME_SCOM_XIPCBMD0                                  , RULL(0x1501241C), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1501201C,
 REG64( EX_CME_SCOM_XIPCBMD0_PPE                                , RULL(0x109010580), SH_UNT_EX       ,
        SH_ACS_PPE       );
-REG64( EX_CME_SCOM_XIPCBMD0_SCOM                               , RULL(0x1001243C), SH_UNT_EX       , SH_ACS_SCOM_RO   );
+REG64( EX_CME_SCOM_XIPCBMD0_SCOM                               , RULL(0x1001241C), SH_UNT_EX       , SH_ACS_SCOM_RO   );
 REG64( EX_0_CME_SCOM_XIPCBMD0_PPE                              , RULL(0x109010580), SH_UNT_EX_0     ,
        SH_ACS_PPE       );
-REG64( EX_0_CME_SCOM_XIPCBMD0_SCOM                             , RULL(0x1001243C), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
+REG64( EX_0_CME_SCOM_XIPCBMD0_SCOM                             , RULL(0x1001241C), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
 REG64( EX_1_CME_SCOM_XIPCBMD0_PPE                              , RULL(0x109020580), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_SCOM_XIPCBMD0_SCOM                             , RULL(0x1001283C), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
 REG64( EX_2_CME_SCOM_XIPCBMD0_PPE                              , RULL(0x10A010580), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
-REG64( EX_2_CME_SCOM_XIPCBMD0_SCOM                             , RULL(0x1101243C), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
+REG64( EX_2_CME_SCOM_XIPCBMD0_SCOM                             , RULL(0x1101241C), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
 REG64( EX_3_CME_SCOM_XIPCBMD0_PPE                              , RULL(0x10A020580), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_SCOM_XIPCBMD0_SCOM                             , RULL(0x1101283C), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
 REG64( EX_4_CME_SCOM_XIPCBMD0_PPE                              , RULL(0x10B010580), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
-REG64( EX_4_CME_SCOM_XIPCBMD0_SCOM                             , RULL(0x1201243C), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
+REG64( EX_4_CME_SCOM_XIPCBMD0_SCOM                             , RULL(0x1201241C), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
 REG64( EX_5_CME_SCOM_XIPCBMD0_PPE                              , RULL(0x10B020580), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_SCOM_XIPCBMD0_SCOM                             , RULL(0x1201283C), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
 REG64( EX_6_CME_SCOM_XIPCBMD0_PPE                              , RULL(0x10C010580), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
-REG64( EX_6_CME_SCOM_XIPCBMD0_SCOM                             , RULL(0x1301243C), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
+REG64( EX_6_CME_SCOM_XIPCBMD0_SCOM                             , RULL(0x1301241C), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
 REG64( EX_7_CME_SCOM_XIPCBMD0_PPE                              , RULL(0x10C020580), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_SCOM_XIPCBMD0_SCOM                             , RULL(0x1301283C), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
 REG64( EX_8_CME_SCOM_XIPCBMD0_PPE                              , RULL(0x10D010580), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
-REG64( EX_8_CME_SCOM_XIPCBMD0_SCOM                             , RULL(0x1401243C), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
+REG64( EX_8_CME_SCOM_XIPCBMD0_SCOM                             , RULL(0x1401241C), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
 REG64( EX_9_CME_SCOM_XIPCBMD0_PPE                              , RULL(0x10D020580), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_SCOM_XIPCBMD0_SCOM                             , RULL(0x1401283C), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
 REG64( EX_10_CME_SCOM_XIPCBMD0_PPE                             , RULL(0x10E010580), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
-REG64( EX_10_CME_SCOM_XIPCBMD0_SCOM                            , RULL(0x1501243C), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
+REG64( EX_10_CME_SCOM_XIPCBMD0_SCOM                            , RULL(0x1501241C), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
 REG64( EX_11_CME_SCOM_XIPCBMD0_PPE                             , RULL(0x10E020580), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_SCOM_XIPCBMD0_SCOM                            , RULL(0x1501283C), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
 
-REG64( EQ_CME_SCOM_XIPCBMD1                                    , RULL(0x1001283D), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1001243D,
-REG64( EQ_0_CME_SCOM_XIPCBMD1                                  , RULL(0x1001283D), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1001243D,
-REG64( EQ_1_CME_SCOM_XIPCBMD1                                  , RULL(0x1101283D), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1101243D,
-REG64( EQ_2_CME_SCOM_XIPCBMD1                                  , RULL(0x1201283D), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1201243D,
-REG64( EQ_3_CME_SCOM_XIPCBMD1                                  , RULL(0x1301283D), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1301243D,
-REG64( EQ_4_CME_SCOM_XIPCBMD1                                  , RULL(0x1401283D), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1401243D,
-REG64( EQ_5_CME_SCOM_XIPCBMD1                                  , RULL(0x1501283D), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1501243D,
+REG64( EQ_CME_SCOM_XIPCBMD1                                    , RULL(0x1001241D), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1001201D,
+REG64( EQ_0_CME_SCOM_XIPCBMD1                                  , RULL(0x1001241D), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1001201D,
+REG64( EQ_1_CME_SCOM_XIPCBMD1                                  , RULL(0x1101241D), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1101201D,
+REG64( EQ_2_CME_SCOM_XIPCBMD1                                  , RULL(0x1201241D), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1201201D,
+REG64( EQ_3_CME_SCOM_XIPCBMD1                                  , RULL(0x1301241D), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1301201D,
+REG64( EQ_4_CME_SCOM_XIPCBMD1                                  , RULL(0x1401241D), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1401201D,
+REG64( EQ_5_CME_SCOM_XIPCBMD1                                  , RULL(0x1501241D), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1501201D,
 REG64( EX_CME_SCOM_XIPCBMD1_PPE                                , RULL(0x1090105A0), SH_UNT_EX       ,
        SH_ACS_PPE       );
-REG64( EX_CME_SCOM_XIPCBMD1_SCOM                               , RULL(0x1001243D), SH_UNT_EX       , SH_ACS_SCOM_RO   );
+REG64( EX_CME_SCOM_XIPCBMD1_SCOM                               , RULL(0x1001241D), SH_UNT_EX       , SH_ACS_SCOM_RO   );
 REG64( EX_0_CME_SCOM_XIPCBMD1_PPE                              , RULL(0x1090105A0), SH_UNT_EX_0     ,
        SH_ACS_PPE       );
-REG64( EX_0_CME_SCOM_XIPCBMD1_SCOM                             , RULL(0x1001243D), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
+REG64( EX_0_CME_SCOM_XIPCBMD1_SCOM                             , RULL(0x1001241D), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
 REG64( EX_1_CME_SCOM_XIPCBMD1_PPE                              , RULL(0x1090205A0), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_SCOM_XIPCBMD1_SCOM                             , RULL(0x1001283D), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
 REG64( EX_2_CME_SCOM_XIPCBMD1_PPE                              , RULL(0x10A0105A0), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
-REG64( EX_2_CME_SCOM_XIPCBMD1_SCOM                             , RULL(0x1101243D), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
+REG64( EX_2_CME_SCOM_XIPCBMD1_SCOM                             , RULL(0x1101241D), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
 REG64( EX_3_CME_SCOM_XIPCBMD1_PPE                              , RULL(0x10A0205A0), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_SCOM_XIPCBMD1_SCOM                             , RULL(0x1101283D), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
 REG64( EX_4_CME_SCOM_XIPCBMD1_PPE                              , RULL(0x10B0105A0), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
-REG64( EX_4_CME_SCOM_XIPCBMD1_SCOM                             , RULL(0x1201243D), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
+REG64( EX_4_CME_SCOM_XIPCBMD1_SCOM                             , RULL(0x1201241D), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
 REG64( EX_5_CME_SCOM_XIPCBMD1_PPE                              , RULL(0x10B0205A0), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_SCOM_XIPCBMD1_SCOM                             , RULL(0x1201283D), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
 REG64( EX_6_CME_SCOM_XIPCBMD1_PPE                              , RULL(0x10C0105A0), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
-REG64( EX_6_CME_SCOM_XIPCBMD1_SCOM                             , RULL(0x1301243D), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
+REG64( EX_6_CME_SCOM_XIPCBMD1_SCOM                             , RULL(0x1301241D), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
 REG64( EX_7_CME_SCOM_XIPCBMD1_PPE                              , RULL(0x10C0205A0), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_SCOM_XIPCBMD1_SCOM                             , RULL(0x1301283D), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
 REG64( EX_8_CME_SCOM_XIPCBMD1_PPE                              , RULL(0x10D0105A0), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
-REG64( EX_8_CME_SCOM_XIPCBMD1_SCOM                             , RULL(0x1401243D), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
+REG64( EX_8_CME_SCOM_XIPCBMD1_SCOM                             , RULL(0x1401241D), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
 REG64( EX_9_CME_SCOM_XIPCBMD1_PPE                              , RULL(0x10D0205A0), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_SCOM_XIPCBMD1_SCOM                             , RULL(0x1401283D), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
 REG64( EX_10_CME_SCOM_XIPCBMD1_PPE                             , RULL(0x10E0105A0), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
-REG64( EX_10_CME_SCOM_XIPCBMD1_SCOM                            , RULL(0x1501243D), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
+REG64( EX_10_CME_SCOM_XIPCBMD1_SCOM                            , RULL(0x1501241D), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
 REG64( EX_11_CME_SCOM_XIPCBMD1_PPE                             , RULL(0x10E0205A0), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_SCOM_XIPCBMD1_SCOM                            , RULL(0x1501283D), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
 
-REG64( EQ_CME_SCOM_XIPCBMI0                                    , RULL(0x1001283E), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1001243E,
-REG64( EQ_0_CME_SCOM_XIPCBMI0                                  , RULL(0x1001283E), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1001243E,
-REG64( EQ_1_CME_SCOM_XIPCBMI0                                  , RULL(0x1101283E), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1101243E,
-REG64( EQ_2_CME_SCOM_XIPCBMI0                                  , RULL(0x1201283E), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1201243E,
-REG64( EQ_3_CME_SCOM_XIPCBMI0                                  , RULL(0x1301283E), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1301243E,
-REG64( EQ_4_CME_SCOM_XIPCBMI0                                  , RULL(0x1401283E), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1401243E,
-REG64( EQ_5_CME_SCOM_XIPCBMI0                                  , RULL(0x1501283E), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1501243E,
+REG64( EQ_CME_SCOM_XIPCBMI0                                    , RULL(0x1001241E), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1001201E,
+REG64( EQ_0_CME_SCOM_XIPCBMI0                                  , RULL(0x1001241E), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1001201E,
+REG64( EQ_1_CME_SCOM_XIPCBMI0                                  , RULL(0x1101241E), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1101201E,
+REG64( EQ_2_CME_SCOM_XIPCBMI0                                  , RULL(0x1201241E), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1201201E,
+REG64( EQ_3_CME_SCOM_XIPCBMI0                                  , RULL(0x1301241E), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1301201E,
+REG64( EQ_4_CME_SCOM_XIPCBMI0                                  , RULL(0x1401241E), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1401201E,
+REG64( EQ_5_CME_SCOM_XIPCBMI0                                  , RULL(0x1501241E), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1501201E,
 REG64( EX_CME_SCOM_XIPCBMI0_PPE                                , RULL(0x1090105C0), SH_UNT_EX       ,
        SH_ACS_PPE       );
-REG64( EX_CME_SCOM_XIPCBMI0_SCOM                               , RULL(0x1001243E), SH_UNT_EX       , SH_ACS_SCOM_RO   );
+REG64( EX_CME_SCOM_XIPCBMI0_SCOM                               , RULL(0x1001241E), SH_UNT_EX       , SH_ACS_SCOM_RO   );
 REG64( EX_0_CME_SCOM_XIPCBMI0_PPE                              , RULL(0x1090105C0), SH_UNT_EX_0     ,
        SH_ACS_PPE       );
-REG64( EX_0_CME_SCOM_XIPCBMI0_SCOM                             , RULL(0x1001243E), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
+REG64( EX_0_CME_SCOM_XIPCBMI0_SCOM                             , RULL(0x1001241E), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
 REG64( EX_1_CME_SCOM_XIPCBMI0_PPE                              , RULL(0x1090205C0), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_SCOM_XIPCBMI0_SCOM                             , RULL(0x1001283E), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
 REG64( EX_2_CME_SCOM_XIPCBMI0_PPE                              , RULL(0x10A0105C0), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
-REG64( EX_2_CME_SCOM_XIPCBMI0_SCOM                             , RULL(0x1101243E), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
+REG64( EX_2_CME_SCOM_XIPCBMI0_SCOM                             , RULL(0x1101241E), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
 REG64( EX_3_CME_SCOM_XIPCBMI0_PPE                              , RULL(0x10A0205C0), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_SCOM_XIPCBMI0_SCOM                             , RULL(0x1101283E), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
 REG64( EX_4_CME_SCOM_XIPCBMI0_PPE                              , RULL(0x10B0105C0), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
-REG64( EX_4_CME_SCOM_XIPCBMI0_SCOM                             , RULL(0x1201243E), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
+REG64( EX_4_CME_SCOM_XIPCBMI0_SCOM                             , RULL(0x1201241E), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
 REG64( EX_5_CME_SCOM_XIPCBMI0_PPE                              , RULL(0x10B0205C0), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_SCOM_XIPCBMI0_SCOM                             , RULL(0x1201283E), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
 REG64( EX_6_CME_SCOM_XIPCBMI0_PPE                              , RULL(0x10C0105C0), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
-REG64( EX_6_CME_SCOM_XIPCBMI0_SCOM                             , RULL(0x1301243E), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
+REG64( EX_6_CME_SCOM_XIPCBMI0_SCOM                             , RULL(0x1301241E), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
 REG64( EX_7_CME_SCOM_XIPCBMI0_PPE                              , RULL(0x10C0205C0), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_SCOM_XIPCBMI0_SCOM                             , RULL(0x1301283E), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
 REG64( EX_8_CME_SCOM_XIPCBMI0_PPE                              , RULL(0x10D0105C0), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
-REG64( EX_8_CME_SCOM_XIPCBMI0_SCOM                             , RULL(0x1401243E), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
+REG64( EX_8_CME_SCOM_XIPCBMI0_SCOM                             , RULL(0x1401241E), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
 REG64( EX_9_CME_SCOM_XIPCBMI0_PPE                              , RULL(0x10D0205C0), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_SCOM_XIPCBMI0_SCOM                             , RULL(0x1401283E), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
 REG64( EX_10_CME_SCOM_XIPCBMI0_PPE                             , RULL(0x10E0105C0), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
-REG64( EX_10_CME_SCOM_XIPCBMI0_SCOM                            , RULL(0x1501243E), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
+REG64( EX_10_CME_SCOM_XIPCBMI0_SCOM                            , RULL(0x1501241E), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
 REG64( EX_11_CME_SCOM_XIPCBMI0_PPE                             , RULL(0x10E0205C0), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_SCOM_XIPCBMI0_SCOM                            , RULL(0x1501283E), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
 
-REG64( EQ_CME_SCOM_XIPCBMI1                                    , RULL(0x1001283F), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1001243F,
-REG64( EQ_0_CME_SCOM_XIPCBMI1                                  , RULL(0x1001283F), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1001243F,
-REG64( EQ_1_CME_SCOM_XIPCBMI1                                  , RULL(0x1101283F), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1101243F,
-REG64( EQ_2_CME_SCOM_XIPCBMI1                                  , RULL(0x1201283F), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1201243F,
-REG64( EQ_3_CME_SCOM_XIPCBMI1                                  , RULL(0x1301283F), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1301243F,
-REG64( EQ_4_CME_SCOM_XIPCBMI1                                  , RULL(0x1401283F), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1401243F,
-REG64( EQ_5_CME_SCOM_XIPCBMI1                                  , RULL(0x1501283F), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1501243F,
+REG64( EQ_CME_SCOM_XIPCBMI1                                    , RULL(0x1001241F), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1001201F,
+REG64( EQ_0_CME_SCOM_XIPCBMI1                                  , RULL(0x1001241F), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1001201F,
+REG64( EQ_1_CME_SCOM_XIPCBMI1                                  , RULL(0x1101241F), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1101201F,
+REG64( EQ_2_CME_SCOM_XIPCBMI1                                  , RULL(0x1201241F), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1201201F,
+REG64( EQ_3_CME_SCOM_XIPCBMI1                                  , RULL(0x1301241F), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1301201F,
+REG64( EQ_4_CME_SCOM_XIPCBMI1                                  , RULL(0x1401241F), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1401201F,
+REG64( EQ_5_CME_SCOM_XIPCBMI1                                  , RULL(0x1501241F), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1501201F,
 REG64( EX_CME_SCOM_XIPCBMI1_PPE                                , RULL(0x1090105E0), SH_UNT_EX       ,
        SH_ACS_PPE       );
-REG64( EX_CME_SCOM_XIPCBMI1_SCOM                               , RULL(0x1001243F), SH_UNT_EX       , SH_ACS_SCOM_RO   );
+REG64( EX_CME_SCOM_XIPCBMI1_SCOM                               , RULL(0x1001241F), SH_UNT_EX       , SH_ACS_SCOM_RO   );
 REG64( EX_0_CME_SCOM_XIPCBMI1_PPE                              , RULL(0x1090105E0), SH_UNT_EX_0     ,
        SH_ACS_PPE       );
-REG64( EX_0_CME_SCOM_XIPCBMI1_SCOM                             , RULL(0x1001243F), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
+REG64( EX_0_CME_SCOM_XIPCBMI1_SCOM                             , RULL(0x1001241F), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
 REG64( EX_1_CME_SCOM_XIPCBMI1_PPE                              , RULL(0x1090205E0), SH_UNT_EX_1     ,
        SH_ACS_PPE       );
-REG64( EX_1_CME_SCOM_XIPCBMI1_SCOM                             , RULL(0x1001283F), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
 REG64( EX_2_CME_SCOM_XIPCBMI1_PPE                              , RULL(0x10A0105E0), SH_UNT_EX_2     ,
        SH_ACS_PPE       );
-REG64( EX_2_CME_SCOM_XIPCBMI1_SCOM                             , RULL(0x1101243F), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
+REG64( EX_2_CME_SCOM_XIPCBMI1_SCOM                             , RULL(0x1101241F), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
 REG64( EX_3_CME_SCOM_XIPCBMI1_PPE                              , RULL(0x10A0205E0), SH_UNT_EX_3     ,
        SH_ACS_PPE       );
-REG64( EX_3_CME_SCOM_XIPCBMI1_SCOM                             , RULL(0x1101283F), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
 REG64( EX_4_CME_SCOM_XIPCBMI1_PPE                              , RULL(0x10B0105E0), SH_UNT_EX_4     ,
        SH_ACS_PPE       );
-REG64( EX_4_CME_SCOM_XIPCBMI1_SCOM                             , RULL(0x1201243F), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
+REG64( EX_4_CME_SCOM_XIPCBMI1_SCOM                             , RULL(0x1201241F), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
 REG64( EX_5_CME_SCOM_XIPCBMI1_PPE                              , RULL(0x10B0205E0), SH_UNT_EX_5     ,
        SH_ACS_PPE       );
-REG64( EX_5_CME_SCOM_XIPCBMI1_SCOM                             , RULL(0x1201283F), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
 REG64( EX_6_CME_SCOM_XIPCBMI1_PPE                              , RULL(0x10C0105E0), SH_UNT_EX_6     ,
        SH_ACS_PPE       );
-REG64( EX_6_CME_SCOM_XIPCBMI1_SCOM                             , RULL(0x1301243F), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
+REG64( EX_6_CME_SCOM_XIPCBMI1_SCOM                             , RULL(0x1301241F), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
 REG64( EX_7_CME_SCOM_XIPCBMI1_PPE                              , RULL(0x10C0205E0), SH_UNT_EX_7     ,
        SH_ACS_PPE       );
-REG64( EX_7_CME_SCOM_XIPCBMI1_SCOM                             , RULL(0x1301283F), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
 REG64( EX_8_CME_SCOM_XIPCBMI1_PPE                              , RULL(0x10D0105E0), SH_UNT_EX_8     ,
        SH_ACS_PPE       );
-REG64( EX_8_CME_SCOM_XIPCBMI1_SCOM                             , RULL(0x1401243F), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
+REG64( EX_8_CME_SCOM_XIPCBMI1_SCOM                             , RULL(0x1401241F), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
 REG64( EX_9_CME_SCOM_XIPCBMI1_PPE                              , RULL(0x10D0205E0), SH_UNT_EX_9     ,
        SH_ACS_PPE       );
-REG64( EX_9_CME_SCOM_XIPCBMI1_SCOM                             , RULL(0x1401283F), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
 REG64( EX_10_CME_SCOM_XIPCBMI1_PPE                             , RULL(0x10E0105E0), SH_UNT_EX_10    ,
        SH_ACS_PPE       );
-REG64( EX_10_CME_SCOM_XIPCBMI1_SCOM                            , RULL(0x1501243F), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
+REG64( EX_10_CME_SCOM_XIPCBMI1_SCOM                            , RULL(0x1501241F), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
 REG64( EX_11_CME_SCOM_XIPCBMI1_PPE                             , RULL(0x10E0205E0), SH_UNT_EX_11    ,
        SH_ACS_PPE       );
-REG64( EX_11_CME_SCOM_XIPCBMI1_SCOM                            , RULL(0x1501283F), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
 
-REG64( EQ_CME_SCOM_XIPCBQ0                                     , RULL(0x1001283A), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1001243A,
-REG64( EQ_0_CME_SCOM_XIPCBQ0                                   , RULL(0x1001283A), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1001243A,
-REG64( EQ_1_CME_SCOM_XIPCBQ0                                   , RULL(0x1101283A), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1101243A,
-REG64( EQ_2_CME_SCOM_XIPCBQ0                                   , RULL(0x1201283A), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1201243A,
-REG64( EQ_3_CME_SCOM_XIPCBQ0                                   , RULL(0x1301283A), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1301243A,
-REG64( EQ_4_CME_SCOM_XIPCBQ0                                   , RULL(0x1401283A), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1401243A,
-REG64( EQ_5_CME_SCOM_XIPCBQ0                                   , RULL(0x1501283A), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1501243A,
-REG64( EX_CME_SCOM_XIPCBQ0                                     , RULL(0x1001243A), SH_UNT_EX       , SH_ACS_SCOM_RO   );
-REG64( EX_0_CME_SCOM_XIPCBQ0                                   , RULL(0x1001243A), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
-REG64( EX_1_CME_SCOM_XIPCBQ0                                   , RULL(0x1001283A), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
-REG64( EX_2_CME_SCOM_XIPCBQ0                                   , RULL(0x1101243A), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
-REG64( EX_3_CME_SCOM_XIPCBQ0                                   , RULL(0x1101283A), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
-REG64( EX_4_CME_SCOM_XIPCBQ0                                   , RULL(0x1201243A), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
-REG64( EX_5_CME_SCOM_XIPCBQ0                                   , RULL(0x1201283A), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
-REG64( EX_6_CME_SCOM_XIPCBQ0                                   , RULL(0x1301243A), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
-REG64( EX_7_CME_SCOM_XIPCBQ0                                   , RULL(0x1301283A), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
-REG64( EX_8_CME_SCOM_XIPCBQ0                                   , RULL(0x1401243A), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
-REG64( EX_9_CME_SCOM_XIPCBQ0                                   , RULL(0x1401283A), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
-REG64( EX_10_CME_SCOM_XIPCBQ0                                  , RULL(0x1501243A), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
-REG64( EX_11_CME_SCOM_XIPCBQ0                                  , RULL(0x1501283A), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
+REG64( EQ_CME_SCOM_XIPCBQ0                                     , RULL(0x1001241A), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1001201A,
+REG64( EQ_0_CME_SCOM_XIPCBQ0                                   , RULL(0x1001241A), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1001201A,
+REG64( EQ_1_CME_SCOM_XIPCBQ0                                   , RULL(0x1101241A), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1101201A,
+REG64( EQ_2_CME_SCOM_XIPCBQ0                                   , RULL(0x1201241A), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1201201A,
+REG64( EQ_3_CME_SCOM_XIPCBQ0                                   , RULL(0x1301241A), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1301201A,
+REG64( EQ_4_CME_SCOM_XIPCBQ0                                   , RULL(0x1401241A), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1401201A,
+REG64( EQ_5_CME_SCOM_XIPCBQ0                                   , RULL(0x1501241A), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1501201A,
+REG64( EX_CME_SCOM_XIPCBQ0                                     , RULL(0x1001241A), SH_UNT_EX       , SH_ACS_SCOM_RO   );
+REG64( EX_0_CME_SCOM_XIPCBQ0                                   , RULL(0x1001241A), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
+REG64( EX_2_CME_SCOM_XIPCBQ0                                   , RULL(0x1101241A), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
+REG64( EX_4_CME_SCOM_XIPCBQ0                                   , RULL(0x1201241A), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
+REG64( EX_6_CME_SCOM_XIPCBQ0                                   , RULL(0x1301241A), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
+REG64( EX_8_CME_SCOM_XIPCBQ0                                   , RULL(0x1401241A), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
+REG64( EX_10_CME_SCOM_XIPCBQ0                                  , RULL(0x1501241A), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
 
-REG64( EQ_CME_SCOM_XIPCBQ1                                     , RULL(0x1001283B), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1001243B,
-REG64( EQ_0_CME_SCOM_XIPCBQ1                                   , RULL(0x1001283B), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1001243B,
-REG64( EQ_1_CME_SCOM_XIPCBQ1                                   , RULL(0x1101283B), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1101243B,
-REG64( EQ_2_CME_SCOM_XIPCBQ1                                   , RULL(0x1201283B), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1201243B,
-REG64( EQ_3_CME_SCOM_XIPCBQ1                                   , RULL(0x1301283B), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1301243B,
-REG64( EQ_4_CME_SCOM_XIPCBQ1                                   , RULL(0x1401283B), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1401243B,
-REG64( EQ_5_CME_SCOM_XIPCBQ1                                   , RULL(0x1501283B), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 1501243B,
-REG64( EX_CME_SCOM_XIPCBQ1                                     , RULL(0x1001243B), SH_UNT_EX       , SH_ACS_SCOM_RO   );
-REG64( EX_0_CME_SCOM_XIPCBQ1                                   , RULL(0x1001243B), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
-REG64( EX_1_CME_SCOM_XIPCBQ1                                   , RULL(0x1001283B), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
-REG64( EX_2_CME_SCOM_XIPCBQ1                                   , RULL(0x1101243B), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
-REG64( EX_3_CME_SCOM_XIPCBQ1                                   , RULL(0x1101283B), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
-REG64( EX_4_CME_SCOM_XIPCBQ1                                   , RULL(0x1201243B), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
-REG64( EX_5_CME_SCOM_XIPCBQ1                                   , RULL(0x1201283B), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
-REG64( EX_6_CME_SCOM_XIPCBQ1                                   , RULL(0x1301243B), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
-REG64( EX_7_CME_SCOM_XIPCBQ1                                   , RULL(0x1301283B), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
-REG64( EX_8_CME_SCOM_XIPCBQ1                                   , RULL(0x1401243B), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
-REG64( EX_9_CME_SCOM_XIPCBQ1                                   , RULL(0x1401283B), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
-REG64( EX_10_CME_SCOM_XIPCBQ1                                  , RULL(0x1501243B), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
-REG64( EX_11_CME_SCOM_XIPCBQ1                                  , RULL(0x1501283B), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
+REG64( EQ_CME_SCOM_XIPCBQ1                                     , RULL(0x1001241B), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1001201B,
+REG64( EQ_0_CME_SCOM_XIPCBQ1                                   , RULL(0x1001241B), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1001201B,
+REG64( EQ_1_CME_SCOM_XIPCBQ1                                   , RULL(0x1101241B), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1101201B,
+REG64( EQ_2_CME_SCOM_XIPCBQ1                                   , RULL(0x1201241B), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1201201B,
+REG64( EQ_3_CME_SCOM_XIPCBQ1                                   , RULL(0x1301241B), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1301201B,
+REG64( EQ_4_CME_SCOM_XIPCBQ1                                   , RULL(0x1401241B), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1401201B,
+REG64( EQ_5_CME_SCOM_XIPCBQ1                                   , RULL(0x1501241B), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1501201B,
+REG64( EX_CME_SCOM_XIPCBQ1                                     , RULL(0x1001241B), SH_UNT_EX       , SH_ACS_SCOM_RO   );
+REG64( EX_0_CME_SCOM_XIPCBQ1                                   , RULL(0x1001241B), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
+REG64( EX_2_CME_SCOM_XIPCBQ1                                   , RULL(0x1101241B), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
+REG64( EX_4_CME_SCOM_XIPCBQ1                                   , RULL(0x1201241B), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
+REG64( EX_6_CME_SCOM_XIPCBQ1                                   , RULL(0x1301241B), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
+REG64( EX_8_CME_SCOM_XIPCBQ1                                   , RULL(0x1401241B), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
+REG64( EX_10_CME_SCOM_XIPCBQ1                                  , RULL(0x1501241B), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
 
 REG64( C_CONTROL_REG                                           , RULL(0x20050012), SH_UNT_C        , SH_ACS_SCOM      );
 REG64( C_0_CONTROL_REG                                         , RULL(0x20050012), SH_UNT_C_0      , SH_ACS_SCOM      );
@@ -8051,76 +7971,70 @@ REG64( EX_10_CPPM_PERRSUM                                      , RULL(0x340F0120
 REG64( EX_11_CPPM_PERRSUM                                      , RULL(0x360F0120), SH_UNT_EX_11    ,
        SH_ACS_SCOM_WCLEAR ); //DUPS: 370F0120,
 
-REG64( EQ_CSAR                                                 , RULL(0x1001280D), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1001240D,
-REG64( EQ_0_CSAR                                               , RULL(0x1001280D), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1001240D,
-REG64( EQ_1_CSAR                                               , RULL(0x1101280D), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1101240D,
-REG64( EQ_2_CSAR                                               , RULL(0x1201280D), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1201240D,
-REG64( EQ_3_CSAR                                               , RULL(0x1301280D), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1301240D,
-REG64( EQ_4_CSAR                                               , RULL(0x1401280D), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1401240D,
-REG64( EQ_5_CSAR                                               , RULL(0x1501280D), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1501240D,
+REG64( EQ_CSAR                                                 , RULL(0x1001240D), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1001200D,
+REG64( EQ_0_CSAR                                               , RULL(0x1001240D), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1001200D,
+REG64( EQ_1_CSAR                                               , RULL(0x1101240D), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1101200D,
+REG64( EQ_2_CSAR                                               , RULL(0x1201240D), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1201200D,
+REG64( EQ_3_CSAR                                               , RULL(0x1301240D), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1301200D,
+REG64( EQ_4_CSAR                                               , RULL(0x1401240D), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1401200D,
+REG64( EQ_5_CSAR                                               , RULL(0x1501240D), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1501200D,
 REG64( EX_CSAR                                                 , RULL(0x1001240D), SH_UNT_EX       , SH_ACS_SCOM_RW   );
 REG64( EX_0_CSAR                                               , RULL(0x1001240D), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
-REG64( EX_1_CSAR                                               , RULL(0x1001280D), SH_UNT_EX_1     , SH_ACS_SCOM_RW   );
 REG64( EX_2_CSAR                                               , RULL(0x1101240D), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
-REG64( EX_3_CSAR                                               , RULL(0x1101280D), SH_UNT_EX_3     , SH_ACS_SCOM_RW   );
 REG64( EX_4_CSAR                                               , RULL(0x1201240D), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
-REG64( EX_5_CSAR                                               , RULL(0x1201280D), SH_UNT_EX_5     , SH_ACS_SCOM_RW   );
 REG64( EX_6_CSAR                                               , RULL(0x1301240D), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
-REG64( EX_7_CSAR                                               , RULL(0x1301280D), SH_UNT_EX_7     , SH_ACS_SCOM_RW   );
 REG64( EX_8_CSAR                                               , RULL(0x1401240D), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
-REG64( EX_9_CSAR                                               , RULL(0x1401280D), SH_UNT_EX_9     , SH_ACS_SCOM_RW   );
 REG64( EX_10_CSAR                                              , RULL(0x1501240D), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
-REG64( EX_11_CSAR                                              , RULL(0x1501280D), SH_UNT_EX_11    , SH_ACS_SCOM_RW   );
 
-REG64( EQ_CSCR                                                 , RULL(0x1001280A), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1001240A,
-REG64( EQ_CSCR_CLEAR                                           , RULL(0x1001280B), SH_UNT_EQ       ,
-       SH_ACS_SCOM1_CLEAR ); //DUPS: 1001240B,
-REG64( EQ_CSCR_OR                                              , RULL(0x1001280C), SH_UNT_EQ       ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 1001240C,
-REG64( EQ_0_CSCR                                               , RULL(0x1001280A), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1001240A,
-REG64( EQ_0_CSCR_CLEAR                                         , RULL(0x1001280B), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM1_CLEAR ); //DUPS: 1001240B,
-REG64( EQ_0_CSCR_OR                                            , RULL(0x1001280C), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 1001240C,
-REG64( EQ_1_CSCR                                               , RULL(0x1101280A), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1101240A,
-REG64( EQ_1_CSCR_CLEAR                                         , RULL(0x1101280B), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM1_CLEAR ); //DUPS: 1101240B,
-REG64( EQ_1_CSCR_OR                                            , RULL(0x1101280C), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 1101240C,
-REG64( EQ_2_CSCR                                               , RULL(0x1201280A), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1201240A,
-REG64( EQ_2_CSCR_CLEAR                                         , RULL(0x1201280B), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM1_CLEAR ); //DUPS: 1201240B,
-REG64( EQ_2_CSCR_OR                                            , RULL(0x1201280C), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 1201240C,
-REG64( EQ_3_CSCR                                               , RULL(0x1301280A), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1301240A,
-REG64( EQ_3_CSCR_CLEAR                                         , RULL(0x1301280B), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM1_CLEAR ); //DUPS: 1301240B,
-REG64( EQ_3_CSCR_OR                                            , RULL(0x1301280C), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 1301240C,
-REG64( EQ_4_CSCR                                               , RULL(0x1401280A), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1401240A,
-REG64( EQ_4_CSCR_CLEAR                                         , RULL(0x1401280B), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM1_CLEAR ); //DUPS: 1401240B,
-REG64( EQ_4_CSCR_OR                                            , RULL(0x1401280C), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 1401240C,
-REG64( EQ_5_CSCR                                               , RULL(0x1501280A), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1501240A,
-REG64( EQ_5_CSCR_CLEAR                                         , RULL(0x1501280B), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM1_CLEAR ); //DUPS: 1501240B,
-REG64( EQ_5_CSCR_OR                                            , RULL(0x1501280C), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM2_OR  ); //DUPS: 1501240C,
+REG64( EQ_CSCR                                                 , RULL(0x1001240A), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1001200A,
+REG64( EQ_CSCR_CLEAR                                           , RULL(0x1001240B), SH_UNT_EQ       ,
+       SH_ACS_SCOM1_CLEAR ); //DUPS: 1001200B,
+REG64( EQ_CSCR_OR                                              , RULL(0x1001240C), SH_UNT_EQ       ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 1001200C,
+REG64( EQ_0_CSCR                                               , RULL(0x1001240A), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1001200A,
+REG64( EQ_0_CSCR_CLEAR                                         , RULL(0x1001240B), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM1_CLEAR ); //DUPS: 1001200B,
+REG64( EQ_0_CSCR_OR                                            , RULL(0x1001240C), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 1001200C,
+REG64( EQ_1_CSCR                                               , RULL(0x1101240A), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1101200A,
+REG64( EQ_1_CSCR_CLEAR                                         , RULL(0x1101240B), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM1_CLEAR ); //DUPS: 1101200B,
+REG64( EQ_1_CSCR_OR                                            , RULL(0x1101240C), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 1101200C,
+REG64( EQ_2_CSCR                                               , RULL(0x1201240A), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1201200A,
+REG64( EQ_2_CSCR_CLEAR                                         , RULL(0x1201240B), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM1_CLEAR ); //DUPS: 1201200B,
+REG64( EQ_2_CSCR_OR                                            , RULL(0x1201240C), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 1201200C,
+REG64( EQ_3_CSCR                                               , RULL(0x1301240A), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1301200A,
+REG64( EQ_3_CSCR_CLEAR                                         , RULL(0x1301240B), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM1_CLEAR ); //DUPS: 1301200B,
+REG64( EQ_3_CSCR_OR                                            , RULL(0x1301240C), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 1301200C,
+REG64( EQ_4_CSCR                                               , RULL(0x1401240A), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1401200A,
+REG64( EQ_4_CSCR_CLEAR                                         , RULL(0x1401240B), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM1_CLEAR ); //DUPS: 1401200B,
+REG64( EQ_4_CSCR_OR                                            , RULL(0x1401240C), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 1401200C,
+REG64( EQ_5_CSCR                                               , RULL(0x1501240A), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1501200A,
+REG64( EQ_5_CSCR_CLEAR                                         , RULL(0x1501240B), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM1_CLEAR ); //DUPS: 1501200B,
+REG64( EQ_5_CSCR_OR                                            , RULL(0x1501240C), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM2_OR  ); //DUPS: 1501200C,
 REG64( EX_CSCR                                                 , RULL(0x1001240A), SH_UNT_EX       , SH_ACS_SCOM_RW   );
 REG64( EX_CSCR_CLEAR                                           , RULL(0x1001240B), SH_UNT_EX       ,
        SH_ACS_SCOM1_CLEAR );
@@ -8129,78 +8043,48 @@ REG64( EX_0_CSCR                                               , RULL(0x1001240A
 REG64( EX_0_CSCR_CLEAR                                         , RULL(0x1001240B), SH_UNT_EX_0     ,
        SH_ACS_SCOM1_CLEAR );
 REG64( EX_0_CSCR_OR                                            , RULL(0x1001240C), SH_UNT_EX_0     , SH_ACS_SCOM2_OR  );
-REG64( EX_1_CSCR                                               , RULL(0x1001280A), SH_UNT_EX_1     , SH_ACS_SCOM_RW   );
-REG64( EX_1_CSCR_CLEAR                                         , RULL(0x1001280B), SH_UNT_EX_1     ,
-       SH_ACS_SCOM1_CLEAR );
-REG64( EX_1_CSCR_OR                                            , RULL(0x1001280C), SH_UNT_EX_1     , SH_ACS_SCOM2_OR  );
 REG64( EX_2_CSCR                                               , RULL(0x1101240A), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
 REG64( EX_2_CSCR_CLEAR                                         , RULL(0x1101240B), SH_UNT_EX_2     ,
        SH_ACS_SCOM1_CLEAR );
 REG64( EX_2_CSCR_OR                                            , RULL(0x1101240C), SH_UNT_EX_2     , SH_ACS_SCOM2_OR  );
-REG64( EX_3_CSCR                                               , RULL(0x1101280A), SH_UNT_EX_3     , SH_ACS_SCOM_RW   );
-REG64( EX_3_CSCR_CLEAR                                         , RULL(0x1101280B), SH_UNT_EX_3     ,
-       SH_ACS_SCOM1_CLEAR );
-REG64( EX_3_CSCR_OR                                            , RULL(0x1101280C), SH_UNT_EX_3     , SH_ACS_SCOM2_OR  );
 REG64( EX_4_CSCR                                               , RULL(0x1201240A), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
 REG64( EX_4_CSCR_CLEAR                                         , RULL(0x1201240B), SH_UNT_EX_4     ,
        SH_ACS_SCOM1_CLEAR );
 REG64( EX_4_CSCR_OR                                            , RULL(0x1201240C), SH_UNT_EX_4     , SH_ACS_SCOM2_OR  );
-REG64( EX_5_CSCR                                               , RULL(0x1201280A), SH_UNT_EX_5     , SH_ACS_SCOM_RW   );
-REG64( EX_5_CSCR_CLEAR                                         , RULL(0x1201280B), SH_UNT_EX_5     ,
-       SH_ACS_SCOM1_CLEAR );
-REG64( EX_5_CSCR_OR                                            , RULL(0x1201280C), SH_UNT_EX_5     , SH_ACS_SCOM2_OR  );
 REG64( EX_6_CSCR                                               , RULL(0x1301240A), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
 REG64( EX_6_CSCR_CLEAR                                         , RULL(0x1301240B), SH_UNT_EX_6     ,
        SH_ACS_SCOM1_CLEAR );
 REG64( EX_6_CSCR_OR                                            , RULL(0x1301240C), SH_UNT_EX_6     , SH_ACS_SCOM2_OR  );
-REG64( EX_7_CSCR                                               , RULL(0x1301280A), SH_UNT_EX_7     , SH_ACS_SCOM_RW   );
-REG64( EX_7_CSCR_CLEAR                                         , RULL(0x1301280B), SH_UNT_EX_7     ,
-       SH_ACS_SCOM1_CLEAR );
-REG64( EX_7_CSCR_OR                                            , RULL(0x1301280C), SH_UNT_EX_7     , SH_ACS_SCOM2_OR  );
 REG64( EX_8_CSCR                                               , RULL(0x1401240A), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
 REG64( EX_8_CSCR_CLEAR                                         , RULL(0x1401240B), SH_UNT_EX_8     ,
        SH_ACS_SCOM1_CLEAR );
 REG64( EX_8_CSCR_OR                                            , RULL(0x1401240C), SH_UNT_EX_8     , SH_ACS_SCOM2_OR  );
-REG64( EX_9_CSCR                                               , RULL(0x1401280A), SH_UNT_EX_9     , SH_ACS_SCOM_RW   );
-REG64( EX_9_CSCR_CLEAR                                         , RULL(0x1401280B), SH_UNT_EX_9     ,
-       SH_ACS_SCOM1_CLEAR );
-REG64( EX_9_CSCR_OR                                            , RULL(0x1401280C), SH_UNT_EX_9     , SH_ACS_SCOM2_OR  );
 REG64( EX_10_CSCR                                              , RULL(0x1501240A), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
 REG64( EX_10_CSCR_CLEAR                                        , RULL(0x1501240B), SH_UNT_EX_10    ,
        SH_ACS_SCOM1_CLEAR );
 REG64( EX_10_CSCR_OR                                           , RULL(0x1501240C), SH_UNT_EX_10    , SH_ACS_SCOM2_OR  );
-REG64( EX_11_CSCR                                              , RULL(0x1501280A), SH_UNT_EX_11    , SH_ACS_SCOM_RW   );
-REG64( EX_11_CSCR_CLEAR                                        , RULL(0x1501280B), SH_UNT_EX_11    ,
-       SH_ACS_SCOM1_CLEAR );
-REG64( EX_11_CSCR_OR                                           , RULL(0x1501280C), SH_UNT_EX_11    , SH_ACS_SCOM2_OR  );
 
-REG64( EQ_CSDR                                                 , RULL(0x1001280E), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1001240E,
-REG64( EQ_0_CSDR                                               , RULL(0x1001280E), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1001240E,
-REG64( EQ_1_CSDR                                               , RULL(0x1101280E), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1101240E,
-REG64( EQ_2_CSDR                                               , RULL(0x1201280E), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1201240E,
-REG64( EQ_3_CSDR                                               , RULL(0x1301280E), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1301240E,
-REG64( EQ_4_CSDR                                               , RULL(0x1401280E), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1401240E,
-REG64( EQ_5_CSDR                                               , RULL(0x1501280E), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 1501240E,
+REG64( EQ_CSDR                                                 , RULL(0x1001240E), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1001200E,
+REG64( EQ_0_CSDR                                               , RULL(0x1001240E), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1001200E,
+REG64( EQ_1_CSDR                                               , RULL(0x1101240E), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1101200E,
+REG64( EQ_2_CSDR                                               , RULL(0x1201240E), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1201200E,
+REG64( EQ_3_CSDR                                               , RULL(0x1301240E), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1301200E,
+REG64( EQ_4_CSDR                                               , RULL(0x1401240E), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1401200E,
+REG64( EQ_5_CSDR                                               , RULL(0x1501240E), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1501200E,
 REG64( EX_CSDR                                                 , RULL(0x1001240E), SH_UNT_EX       , SH_ACS_SCOM_RW   );
 REG64( EX_0_CSDR                                               , RULL(0x1001240E), SH_UNT_EX_0     , SH_ACS_SCOM_RW   );
-REG64( EX_1_CSDR                                               , RULL(0x1001280E), SH_UNT_EX_1     , SH_ACS_SCOM_RW   );
 REG64( EX_2_CSDR                                               , RULL(0x1101240E), SH_UNT_EX_2     , SH_ACS_SCOM_RW   );
-REG64( EX_3_CSDR                                               , RULL(0x1101280E), SH_UNT_EX_3     , SH_ACS_SCOM_RW   );
 REG64( EX_4_CSDR                                               , RULL(0x1201240E), SH_UNT_EX_4     , SH_ACS_SCOM_RW   );
-REG64( EX_5_CSDR                                               , RULL(0x1201280E), SH_UNT_EX_5     , SH_ACS_SCOM_RW   );
 REG64( EX_6_CSDR                                               , RULL(0x1301240E), SH_UNT_EX_6     , SH_ACS_SCOM_RW   );
-REG64( EX_7_CSDR                                               , RULL(0x1301280E), SH_UNT_EX_7     , SH_ACS_SCOM_RW   );
 REG64( EX_8_CSDR                                               , RULL(0x1401240E), SH_UNT_EX_8     , SH_ACS_SCOM_RW   );
-REG64( EX_9_CSDR                                               , RULL(0x1401280E), SH_UNT_EX_9     , SH_ACS_SCOM_RW   );
 REG64( EX_10_CSDR                                              , RULL(0x1501240E), SH_UNT_EX_10    , SH_ACS_SCOM_RW   );
-REG64( EX_11_CSDR                                              , RULL(0x1501280E), SH_UNT_EX_11    , SH_ACS_SCOM_RW   );
 
 REG64( C_CTRL                                                  , RULL(0x20010A85), SH_UNT_C        , SH_ACS_SCOM_NC   );
 REG64( C_0_CTRL                                                , RULL(0x20010A85), SH_UNT_C_0      , SH_ACS_SCOM_NC   );
@@ -8844,182 +8728,241 @@ REG64( EX_10_DBG_MODE_REG                                      , RULL(0x340107C0
 REG64( EX_11_DBG_MODE_REG                                      , RULL(0x360107C0), SH_UNT_EX_11    ,
        SH_ACS_SCOM      ); //DUPS: 370107C0,
 
-REG64( C_DBG_TRACE_MODE_REG_2                                  , RULL(0x200107CB), SH_UNT_C        , SH_ACS_SCOM      );
-REG64( C_0_DBG_TRACE_MODE_REG_2                                , RULL(0x200107CB), SH_UNT_C_0      , SH_ACS_SCOM      );
-REG64( C_1_DBG_TRACE_MODE_REG_2                                , RULL(0x210107CB), SH_UNT_C_1      , SH_ACS_SCOM      );
-REG64( C_2_DBG_TRACE_MODE_REG_2                                , RULL(0x220107CB), SH_UNT_C_2      , SH_ACS_SCOM      );
-REG64( C_3_DBG_TRACE_MODE_REG_2                                , RULL(0x230107CB), SH_UNT_C_3      , SH_ACS_SCOM      );
-REG64( C_4_DBG_TRACE_MODE_REG_2                                , RULL(0x240107CB), SH_UNT_C_4      , SH_ACS_SCOM      );
-REG64( C_5_DBG_TRACE_MODE_REG_2                                , RULL(0x250107CB), SH_UNT_C_5      , SH_ACS_SCOM      );
-REG64( C_6_DBG_TRACE_MODE_REG_2                                , RULL(0x260107CB), SH_UNT_C_6      , SH_ACS_SCOM      );
-REG64( C_7_DBG_TRACE_MODE_REG_2                                , RULL(0x270107CB), SH_UNT_C_7      , SH_ACS_SCOM      );
-REG64( C_8_DBG_TRACE_MODE_REG_2                                , RULL(0x280107CB), SH_UNT_C_8      , SH_ACS_SCOM      );
-REG64( C_9_DBG_TRACE_MODE_REG_2                                , RULL(0x290107CB), SH_UNT_C_9      , SH_ACS_SCOM      );
-REG64( C_10_DBG_TRACE_MODE_REG_2                               , RULL(0x2A0107CB), SH_UNT_C_10     , SH_ACS_SCOM      );
-REG64( C_11_DBG_TRACE_MODE_REG_2                               , RULL(0x2B0107CB), SH_UNT_C_11     , SH_ACS_SCOM      );
-REG64( C_12_DBG_TRACE_MODE_REG_2                               , RULL(0x2C0107CB), SH_UNT_C_12     , SH_ACS_SCOM      );
-REG64( C_13_DBG_TRACE_MODE_REG_2                               , RULL(0x2D0107CB), SH_UNT_C_13     , SH_ACS_SCOM      );
-REG64( C_14_DBG_TRACE_MODE_REG_2                               , RULL(0x2E0107CB), SH_UNT_C_14     , SH_ACS_SCOM      );
-REG64( C_15_DBG_TRACE_MODE_REG_2                               , RULL(0x2F0107CB), SH_UNT_C_15     , SH_ACS_SCOM      );
-REG64( C_16_DBG_TRACE_MODE_REG_2                               , RULL(0x300107CB), SH_UNT_C_16     , SH_ACS_SCOM      );
-REG64( C_17_DBG_TRACE_MODE_REG_2                               , RULL(0x310107CB), SH_UNT_C_17     , SH_ACS_SCOM      );
-REG64( C_18_DBG_TRACE_MODE_REG_2                               , RULL(0x320107CB), SH_UNT_C_18     , SH_ACS_SCOM      );
-REG64( C_19_DBG_TRACE_MODE_REG_2                               , RULL(0x330107CB), SH_UNT_C_19     , SH_ACS_SCOM      );
-REG64( C_20_DBG_TRACE_MODE_REG_2                               , RULL(0x340107CB), SH_UNT_C_20     , SH_ACS_SCOM      );
-REG64( C_21_DBG_TRACE_MODE_REG_2                               , RULL(0x350107CB), SH_UNT_C_21     , SH_ACS_SCOM      );
-REG64( C_22_DBG_TRACE_MODE_REG_2                               , RULL(0x360107CB), SH_UNT_C_22     , SH_ACS_SCOM      );
-REG64( C_23_DBG_TRACE_MODE_REG_2                               , RULL(0x370107CB), SH_UNT_C_23     , SH_ACS_SCOM      );
-REG64( EQ_DBG_TRACE_MODE_REG_2                                 , RULL(0x100107CB), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_DBG_TRACE_MODE_REG_2                               , RULL(0x100107CB), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_DBG_TRACE_MODE_REG_2                               , RULL(0x110107CB), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_DBG_TRACE_MODE_REG_2                               , RULL(0x120107CB), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_DBG_TRACE_MODE_REG_2                               , RULL(0x130107CB), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_DBG_TRACE_MODE_REG_2                               , RULL(0x140107CB), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_DBG_TRACE_MODE_REG_2                               , RULL(0x150107CB), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_DBG_TRACE_MODE_REG_2                                 , RULL(0x200107CB), SH_UNT_EX       ,
-       SH_ACS_SCOM      ); //DUPS: 210107CB,
-REG64( EX_0_DBG_TRACE_MODE_REG_2                               , RULL(0x200107CB), SH_UNT_EX_0     ,
-       SH_ACS_SCOM      ); //DUPS: 210107CB,
-REG64( EX_1_DBG_TRACE_MODE_REG_2                               , RULL(0x220107CB), SH_UNT_EX_1     ,
-       SH_ACS_SCOM      ); //DUPS: 230107CB,
-REG64( EX_2_DBG_TRACE_MODE_REG_2                               , RULL(0x240107CB), SH_UNT_EX_2     ,
-       SH_ACS_SCOM      ); //DUPS: 250107CB,
-REG64( EX_3_DBG_TRACE_MODE_REG_2                               , RULL(0x260107CB), SH_UNT_EX_3     ,
-       SH_ACS_SCOM      ); //DUPS: 270107CB,
-REG64( EX_4_DBG_TRACE_MODE_REG_2                               , RULL(0x280107CB), SH_UNT_EX_4     ,
-       SH_ACS_SCOM      ); //DUPS: 290107CB,
-REG64( EX_5_DBG_TRACE_MODE_REG_2                               , RULL(0x2A0107CB), SH_UNT_EX_5     ,
-       SH_ACS_SCOM      ); //DUPS: 2B0107CB,
-REG64( EX_6_DBG_TRACE_MODE_REG_2                               , RULL(0x2C0107CB), SH_UNT_EX_6     ,
-       SH_ACS_SCOM      ); //DUPS: 2D0107CB,
-REG64( EX_7_DBG_TRACE_MODE_REG_2                               , RULL(0x2E0107CB), SH_UNT_EX_7     ,
-       SH_ACS_SCOM      ); //DUPS: 2F0107CB,
-REG64( EX_8_DBG_TRACE_MODE_REG_2                               , RULL(0x300107CB), SH_UNT_EX_8     ,
-       SH_ACS_SCOM      ); //DUPS: 310107CB,
-REG64( EX_9_DBG_TRACE_MODE_REG_2                               , RULL(0x320107CB), SH_UNT_EX_9     ,
-       SH_ACS_SCOM      ); //DUPS: 330107CB,
-REG64( EX_10_DBG_TRACE_MODE_REG_2                              , RULL(0x340107CB), SH_UNT_EX_10    ,
-       SH_ACS_SCOM      ); //DUPS: 350107CB,
-REG64( EX_11_DBG_TRACE_MODE_REG_2                              , RULL(0x360107CB), SH_UNT_EX_11    ,
-       SH_ACS_SCOM      ); //DUPS: 370107CB,
+REG64( C_DBG_TRACE_MODE_REG_2                                  , RULL(0x200107CF), SH_UNT_C        , SH_ACS_SCOM      );
+REG64( C_0_DBG_TRACE_MODE_REG_2                                , RULL(0x200107CF), SH_UNT_C_0      , SH_ACS_SCOM      );
+REG64( C_1_DBG_TRACE_MODE_REG_2                                , RULL(0x210107CF), SH_UNT_C_1      , SH_ACS_SCOM      );
+REG64( C_2_DBG_TRACE_MODE_REG_2                                , RULL(0x220107CF), SH_UNT_C_2      , SH_ACS_SCOM      );
+REG64( C_3_DBG_TRACE_MODE_REG_2                                , RULL(0x230107CF), SH_UNT_C_3      , SH_ACS_SCOM      );
+REG64( C_4_DBG_TRACE_MODE_REG_2                                , RULL(0x240107CF), SH_UNT_C_4      , SH_ACS_SCOM      );
+REG64( C_5_DBG_TRACE_MODE_REG_2                                , RULL(0x250107CF), SH_UNT_C_5      , SH_ACS_SCOM      );
+REG64( C_6_DBG_TRACE_MODE_REG_2                                , RULL(0x260107CF), SH_UNT_C_6      , SH_ACS_SCOM      );
+REG64( C_7_DBG_TRACE_MODE_REG_2                                , RULL(0x270107CF), SH_UNT_C_7      , SH_ACS_SCOM      );
+REG64( C_8_DBG_TRACE_MODE_REG_2                                , RULL(0x280107CF), SH_UNT_C_8      , SH_ACS_SCOM      );
+REG64( C_9_DBG_TRACE_MODE_REG_2                                , RULL(0x290107CF), SH_UNT_C_9      , SH_ACS_SCOM      );
+REG64( C_10_DBG_TRACE_MODE_REG_2                               , RULL(0x2A0107CF), SH_UNT_C_10     , SH_ACS_SCOM      );
+REG64( C_11_DBG_TRACE_MODE_REG_2                               , RULL(0x2B0107CF), SH_UNT_C_11     , SH_ACS_SCOM      );
+REG64( C_12_DBG_TRACE_MODE_REG_2                               , RULL(0x2C0107CF), SH_UNT_C_12     , SH_ACS_SCOM      );
+REG64( C_13_DBG_TRACE_MODE_REG_2                               , RULL(0x2D0107CF), SH_UNT_C_13     , SH_ACS_SCOM      );
+REG64( C_14_DBG_TRACE_MODE_REG_2                               , RULL(0x2E0107CF), SH_UNT_C_14     , SH_ACS_SCOM      );
+REG64( C_15_DBG_TRACE_MODE_REG_2                               , RULL(0x2F0107CF), SH_UNT_C_15     , SH_ACS_SCOM      );
+REG64( C_16_DBG_TRACE_MODE_REG_2                               , RULL(0x300107CF), SH_UNT_C_16     , SH_ACS_SCOM      );
+REG64( C_17_DBG_TRACE_MODE_REG_2                               , RULL(0x310107CF), SH_UNT_C_17     , SH_ACS_SCOM      );
+REG64( C_18_DBG_TRACE_MODE_REG_2                               , RULL(0x320107CF), SH_UNT_C_18     , SH_ACS_SCOM      );
+REG64( C_19_DBG_TRACE_MODE_REG_2                               , RULL(0x330107CF), SH_UNT_C_19     , SH_ACS_SCOM      );
+REG64( C_20_DBG_TRACE_MODE_REG_2                               , RULL(0x340107CF), SH_UNT_C_20     , SH_ACS_SCOM      );
+REG64( C_21_DBG_TRACE_MODE_REG_2                               , RULL(0x350107CF), SH_UNT_C_21     , SH_ACS_SCOM      );
+REG64( C_22_DBG_TRACE_MODE_REG_2                               , RULL(0x360107CF), SH_UNT_C_22     , SH_ACS_SCOM      );
+REG64( C_23_DBG_TRACE_MODE_REG_2                               , RULL(0x370107CF), SH_UNT_C_23     , SH_ACS_SCOM      );
+REG64( EQ_DBG_TRACE_MODE_REG_2                                 , RULL(0x100107CF), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_DBG_TRACE_MODE_REG_2                               , RULL(0x100107CF), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_DBG_TRACE_MODE_REG_2                               , RULL(0x110107CF), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_DBG_TRACE_MODE_REG_2                               , RULL(0x120107CF), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_DBG_TRACE_MODE_REG_2                               , RULL(0x130107CF), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_DBG_TRACE_MODE_REG_2                               , RULL(0x140107CF), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_DBG_TRACE_MODE_REG_2                               , RULL(0x150107CF), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_DBG_TRACE_MODE_REG_2                                 , RULL(0x200107CF), SH_UNT_EX       ,
+       SH_ACS_SCOM      ); //DUPS: 210107CF,
+REG64( EX_0_DBG_TRACE_MODE_REG_2                               , RULL(0x200107CF), SH_UNT_EX_0     ,
+       SH_ACS_SCOM      ); //DUPS: 210107CF,
+REG64( EX_1_DBG_TRACE_MODE_REG_2                               , RULL(0x220107CF), SH_UNT_EX_1     ,
+       SH_ACS_SCOM      ); //DUPS: 230107CF,
+REG64( EX_2_DBG_TRACE_MODE_REG_2                               , RULL(0x240107CF), SH_UNT_EX_2     ,
+       SH_ACS_SCOM      ); //DUPS: 250107CF,
+REG64( EX_3_DBG_TRACE_MODE_REG_2                               , RULL(0x260107CF), SH_UNT_EX_3     ,
+       SH_ACS_SCOM      ); //DUPS: 270107CF,
+REG64( EX_4_DBG_TRACE_MODE_REG_2                               , RULL(0x280107CF), SH_UNT_EX_4     ,
+       SH_ACS_SCOM      ); //DUPS: 290107CF,
+REG64( EX_5_DBG_TRACE_MODE_REG_2                               , RULL(0x2A0107CF), SH_UNT_EX_5     ,
+       SH_ACS_SCOM      ); //DUPS: 2B0107CF,
+REG64( EX_6_DBG_TRACE_MODE_REG_2                               , RULL(0x2C0107CF), SH_UNT_EX_6     ,
+       SH_ACS_SCOM      ); //DUPS: 2D0107CF,
+REG64( EX_7_DBG_TRACE_MODE_REG_2                               , RULL(0x2E0107CF), SH_UNT_EX_7     ,
+       SH_ACS_SCOM      ); //DUPS: 2F0107CF,
+REG64( EX_8_DBG_TRACE_MODE_REG_2                               , RULL(0x300107CF), SH_UNT_EX_8     ,
+       SH_ACS_SCOM      ); //DUPS: 310107CF,
+REG64( EX_9_DBG_TRACE_MODE_REG_2                               , RULL(0x320107CF), SH_UNT_EX_9     ,
+       SH_ACS_SCOM      ); //DUPS: 330107CF,
+REG64( EX_10_DBG_TRACE_MODE_REG_2                              , RULL(0x340107CF), SH_UNT_EX_10    ,
+       SH_ACS_SCOM      ); //DUPS: 350107CF,
+REG64( EX_11_DBG_TRACE_MODE_REG_2                              , RULL(0x360107CF), SH_UNT_EX_11    ,
+       SH_ACS_SCOM      ); //DUPS: 370107CF,
 
-REG64( C_DBG_TRACE_REG_0                                       , RULL(0x200107C9), SH_UNT_C        , SH_ACS_SCOM      );
-REG64( C_0_DBG_TRACE_REG_0                                     , RULL(0x200107C9), SH_UNT_C_0      , SH_ACS_SCOM      );
-REG64( C_1_DBG_TRACE_REG_0                                     , RULL(0x210107C9), SH_UNT_C_1      , SH_ACS_SCOM      );
-REG64( C_2_DBG_TRACE_REG_0                                     , RULL(0x220107C9), SH_UNT_C_2      , SH_ACS_SCOM      );
-REG64( C_3_DBG_TRACE_REG_0                                     , RULL(0x230107C9), SH_UNT_C_3      , SH_ACS_SCOM      );
-REG64( C_4_DBG_TRACE_REG_0                                     , RULL(0x240107C9), SH_UNT_C_4      , SH_ACS_SCOM      );
-REG64( C_5_DBG_TRACE_REG_0                                     , RULL(0x250107C9), SH_UNT_C_5      , SH_ACS_SCOM      );
-REG64( C_6_DBG_TRACE_REG_0                                     , RULL(0x260107C9), SH_UNT_C_6      , SH_ACS_SCOM      );
-REG64( C_7_DBG_TRACE_REG_0                                     , RULL(0x270107C9), SH_UNT_C_7      , SH_ACS_SCOM      );
-REG64( C_8_DBG_TRACE_REG_0                                     , RULL(0x280107C9), SH_UNT_C_8      , SH_ACS_SCOM      );
-REG64( C_9_DBG_TRACE_REG_0                                     , RULL(0x290107C9), SH_UNT_C_9      , SH_ACS_SCOM      );
-REG64( C_10_DBG_TRACE_REG_0                                    , RULL(0x2A0107C9), SH_UNT_C_10     , SH_ACS_SCOM      );
-REG64( C_11_DBG_TRACE_REG_0                                    , RULL(0x2B0107C9), SH_UNT_C_11     , SH_ACS_SCOM      );
-REG64( C_12_DBG_TRACE_REG_0                                    , RULL(0x2C0107C9), SH_UNT_C_12     , SH_ACS_SCOM      );
-REG64( C_13_DBG_TRACE_REG_0                                    , RULL(0x2D0107C9), SH_UNT_C_13     , SH_ACS_SCOM      );
-REG64( C_14_DBG_TRACE_REG_0                                    , RULL(0x2E0107C9), SH_UNT_C_14     , SH_ACS_SCOM      );
-REG64( C_15_DBG_TRACE_REG_0                                    , RULL(0x2F0107C9), SH_UNT_C_15     , SH_ACS_SCOM      );
-REG64( C_16_DBG_TRACE_REG_0                                    , RULL(0x300107C9), SH_UNT_C_16     , SH_ACS_SCOM      );
-REG64( C_17_DBG_TRACE_REG_0                                    , RULL(0x310107C9), SH_UNT_C_17     , SH_ACS_SCOM      );
-REG64( C_18_DBG_TRACE_REG_0                                    , RULL(0x320107C9), SH_UNT_C_18     , SH_ACS_SCOM      );
-REG64( C_19_DBG_TRACE_REG_0                                    , RULL(0x330107C9), SH_UNT_C_19     , SH_ACS_SCOM      );
-REG64( C_20_DBG_TRACE_REG_0                                    , RULL(0x340107C9), SH_UNT_C_20     , SH_ACS_SCOM      );
-REG64( C_21_DBG_TRACE_REG_0                                    , RULL(0x350107C9), SH_UNT_C_21     , SH_ACS_SCOM      );
-REG64( C_22_DBG_TRACE_REG_0                                    , RULL(0x360107C9), SH_UNT_C_22     , SH_ACS_SCOM      );
-REG64( C_23_DBG_TRACE_REG_0                                    , RULL(0x370107C9), SH_UNT_C_23     , SH_ACS_SCOM      );
-REG64( EQ_DBG_TRACE_REG_0                                      , RULL(0x100107C9), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_DBG_TRACE_REG_0                                    , RULL(0x100107C9), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_DBG_TRACE_REG_0                                    , RULL(0x110107C9), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_DBG_TRACE_REG_0                                    , RULL(0x120107C9), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_DBG_TRACE_REG_0                                    , RULL(0x130107C9), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_DBG_TRACE_REG_0                                    , RULL(0x140107C9), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_DBG_TRACE_REG_0                                    , RULL(0x150107C9), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_DBG_TRACE_REG_0                                      , RULL(0x200107C9), SH_UNT_EX       ,
-       SH_ACS_SCOM      ); //DUPS: 210107C9,
-REG64( EX_0_DBG_TRACE_REG_0                                    , RULL(0x200107C9), SH_UNT_EX_0     ,
-       SH_ACS_SCOM      ); //DUPS: 210107C9,
-REG64( EX_1_DBG_TRACE_REG_0                                    , RULL(0x220107C9), SH_UNT_EX_1     ,
-       SH_ACS_SCOM      ); //DUPS: 230107C9,
-REG64( EX_2_DBG_TRACE_REG_0                                    , RULL(0x240107C9), SH_UNT_EX_2     ,
-       SH_ACS_SCOM      ); //DUPS: 250107C9,
-REG64( EX_3_DBG_TRACE_REG_0                                    , RULL(0x260107C9), SH_UNT_EX_3     ,
-       SH_ACS_SCOM      ); //DUPS: 270107C9,
-REG64( EX_4_DBG_TRACE_REG_0                                    , RULL(0x280107C9), SH_UNT_EX_4     ,
-       SH_ACS_SCOM      ); //DUPS: 290107C9,
-REG64( EX_5_DBG_TRACE_REG_0                                    , RULL(0x2A0107C9), SH_UNT_EX_5     ,
-       SH_ACS_SCOM      ); //DUPS: 2B0107C9,
-REG64( EX_6_DBG_TRACE_REG_0                                    , RULL(0x2C0107C9), SH_UNT_EX_6     ,
-       SH_ACS_SCOM      ); //DUPS: 2D0107C9,
-REG64( EX_7_DBG_TRACE_REG_0                                    , RULL(0x2E0107C9), SH_UNT_EX_7     ,
-       SH_ACS_SCOM      ); //DUPS: 2F0107C9,
-REG64( EX_8_DBG_TRACE_REG_0                                    , RULL(0x300107C9), SH_UNT_EX_8     ,
-       SH_ACS_SCOM      ); //DUPS: 310107C9,
-REG64( EX_9_DBG_TRACE_REG_0                                    , RULL(0x320107C9), SH_UNT_EX_9     ,
-       SH_ACS_SCOM      ); //DUPS: 330107C9,
-REG64( EX_10_DBG_TRACE_REG_0                                   , RULL(0x340107C9), SH_UNT_EX_10    ,
-       SH_ACS_SCOM      ); //DUPS: 350107C9,
-REG64( EX_11_DBG_TRACE_REG_0                                   , RULL(0x360107C9), SH_UNT_EX_11    ,
-       SH_ACS_SCOM      ); //DUPS: 370107C9,
+REG64( C_DBG_TRACE_REG_0                                       , RULL(0x200107CD), SH_UNT_C        , SH_ACS_SCOM      );
+REG64( C_0_DBG_TRACE_REG_0                                     , RULL(0x200107CD), SH_UNT_C_0      , SH_ACS_SCOM      );
+REG64( C_1_DBG_TRACE_REG_0                                     , RULL(0x210107CD), SH_UNT_C_1      , SH_ACS_SCOM      );
+REG64( C_2_DBG_TRACE_REG_0                                     , RULL(0x220107CD), SH_UNT_C_2      , SH_ACS_SCOM      );
+REG64( C_3_DBG_TRACE_REG_0                                     , RULL(0x230107CD), SH_UNT_C_3      , SH_ACS_SCOM      );
+REG64( C_4_DBG_TRACE_REG_0                                     , RULL(0x240107CD), SH_UNT_C_4      , SH_ACS_SCOM      );
+REG64( C_5_DBG_TRACE_REG_0                                     , RULL(0x250107CD), SH_UNT_C_5      , SH_ACS_SCOM      );
+REG64( C_6_DBG_TRACE_REG_0                                     , RULL(0x260107CD), SH_UNT_C_6      , SH_ACS_SCOM      );
+REG64( C_7_DBG_TRACE_REG_0                                     , RULL(0x270107CD), SH_UNT_C_7      , SH_ACS_SCOM      );
+REG64( C_8_DBG_TRACE_REG_0                                     , RULL(0x280107CD), SH_UNT_C_8      , SH_ACS_SCOM      );
+REG64( C_9_DBG_TRACE_REG_0                                     , RULL(0x290107CD), SH_UNT_C_9      , SH_ACS_SCOM      );
+REG64( C_10_DBG_TRACE_REG_0                                    , RULL(0x2A0107CD), SH_UNT_C_10     , SH_ACS_SCOM      );
+REG64( C_11_DBG_TRACE_REG_0                                    , RULL(0x2B0107CD), SH_UNT_C_11     , SH_ACS_SCOM      );
+REG64( C_12_DBG_TRACE_REG_0                                    , RULL(0x2C0107CD), SH_UNT_C_12     , SH_ACS_SCOM      );
+REG64( C_13_DBG_TRACE_REG_0                                    , RULL(0x2D0107CD), SH_UNT_C_13     , SH_ACS_SCOM      );
+REG64( C_14_DBG_TRACE_REG_0                                    , RULL(0x2E0107CD), SH_UNT_C_14     , SH_ACS_SCOM      );
+REG64( C_15_DBG_TRACE_REG_0                                    , RULL(0x2F0107CD), SH_UNT_C_15     , SH_ACS_SCOM      );
+REG64( C_16_DBG_TRACE_REG_0                                    , RULL(0x300107CD), SH_UNT_C_16     , SH_ACS_SCOM      );
+REG64( C_17_DBG_TRACE_REG_0                                    , RULL(0x310107CD), SH_UNT_C_17     , SH_ACS_SCOM      );
+REG64( C_18_DBG_TRACE_REG_0                                    , RULL(0x320107CD), SH_UNT_C_18     , SH_ACS_SCOM      );
+REG64( C_19_DBG_TRACE_REG_0                                    , RULL(0x330107CD), SH_UNT_C_19     , SH_ACS_SCOM      );
+REG64( C_20_DBG_TRACE_REG_0                                    , RULL(0x340107CD), SH_UNT_C_20     , SH_ACS_SCOM      );
+REG64( C_21_DBG_TRACE_REG_0                                    , RULL(0x350107CD), SH_UNT_C_21     , SH_ACS_SCOM      );
+REG64( C_22_DBG_TRACE_REG_0                                    , RULL(0x360107CD), SH_UNT_C_22     , SH_ACS_SCOM      );
+REG64( C_23_DBG_TRACE_REG_0                                    , RULL(0x370107CD), SH_UNT_C_23     , SH_ACS_SCOM      );
+REG64( EQ_DBG_TRACE_REG_0                                      , RULL(0x100107CD), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_DBG_TRACE_REG_0                                    , RULL(0x100107CD), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_DBG_TRACE_REG_0                                    , RULL(0x110107CD), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_DBG_TRACE_REG_0                                    , RULL(0x120107CD), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_DBG_TRACE_REG_0                                    , RULL(0x130107CD), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_DBG_TRACE_REG_0                                    , RULL(0x140107CD), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_DBG_TRACE_REG_0                                    , RULL(0x150107CD), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_DBG_TRACE_REG_0                                      , RULL(0x200107CD), SH_UNT_EX       ,
+       SH_ACS_SCOM      ); //DUPS: 210107CD,
+REG64( EX_0_DBG_TRACE_REG_0                                    , RULL(0x200107CD), SH_UNT_EX_0     ,
+       SH_ACS_SCOM      ); //DUPS: 210107CD,
+REG64( EX_1_DBG_TRACE_REG_0                                    , RULL(0x220107CD), SH_UNT_EX_1     ,
+       SH_ACS_SCOM      ); //DUPS: 230107CD,
+REG64( EX_2_DBG_TRACE_REG_0                                    , RULL(0x240107CD), SH_UNT_EX_2     ,
+       SH_ACS_SCOM      ); //DUPS: 250107CD,
+REG64( EX_3_DBG_TRACE_REG_0                                    , RULL(0x260107CD), SH_UNT_EX_3     ,
+       SH_ACS_SCOM      ); //DUPS: 270107CD,
+REG64( EX_4_DBG_TRACE_REG_0                                    , RULL(0x280107CD), SH_UNT_EX_4     ,
+       SH_ACS_SCOM      ); //DUPS: 290107CD,
+REG64( EX_5_DBG_TRACE_REG_0                                    , RULL(0x2A0107CD), SH_UNT_EX_5     ,
+       SH_ACS_SCOM      ); //DUPS: 2B0107CD,
+REG64( EX_6_DBG_TRACE_REG_0                                    , RULL(0x2C0107CD), SH_UNT_EX_6     ,
+       SH_ACS_SCOM      ); //DUPS: 2D0107CD,
+REG64( EX_7_DBG_TRACE_REG_0                                    , RULL(0x2E0107CD), SH_UNT_EX_7     ,
+       SH_ACS_SCOM      ); //DUPS: 2F0107CD,
+REG64( EX_8_DBG_TRACE_REG_0                                    , RULL(0x300107CD), SH_UNT_EX_8     ,
+       SH_ACS_SCOM      ); //DUPS: 310107CD,
+REG64( EX_9_DBG_TRACE_REG_0                                    , RULL(0x320107CD), SH_UNT_EX_9     ,
+       SH_ACS_SCOM      ); //DUPS: 330107CD,
+REG64( EX_10_DBG_TRACE_REG_0                                   , RULL(0x340107CD), SH_UNT_EX_10    ,
+       SH_ACS_SCOM      ); //DUPS: 350107CD,
+REG64( EX_11_DBG_TRACE_REG_0                                   , RULL(0x360107CD), SH_UNT_EX_11    ,
+       SH_ACS_SCOM      ); //DUPS: 370107CD,
 
-REG64( C_DBG_TRACE_REG_1                                       , RULL(0x200107CA), SH_UNT_C        , SH_ACS_SCOM      );
-REG64( C_0_DBG_TRACE_REG_1                                     , RULL(0x200107CA), SH_UNT_C_0      , SH_ACS_SCOM      );
-REG64( C_1_DBG_TRACE_REG_1                                     , RULL(0x210107CA), SH_UNT_C_1      , SH_ACS_SCOM      );
-REG64( C_2_DBG_TRACE_REG_1                                     , RULL(0x220107CA), SH_UNT_C_2      , SH_ACS_SCOM      );
-REG64( C_3_DBG_TRACE_REG_1                                     , RULL(0x230107CA), SH_UNT_C_3      , SH_ACS_SCOM      );
-REG64( C_4_DBG_TRACE_REG_1                                     , RULL(0x240107CA), SH_UNT_C_4      , SH_ACS_SCOM      );
-REG64( C_5_DBG_TRACE_REG_1                                     , RULL(0x250107CA), SH_UNT_C_5      , SH_ACS_SCOM      );
-REG64( C_6_DBG_TRACE_REG_1                                     , RULL(0x260107CA), SH_UNT_C_6      , SH_ACS_SCOM      );
-REG64( C_7_DBG_TRACE_REG_1                                     , RULL(0x270107CA), SH_UNT_C_7      , SH_ACS_SCOM      );
-REG64( C_8_DBG_TRACE_REG_1                                     , RULL(0x280107CA), SH_UNT_C_8      , SH_ACS_SCOM      );
-REG64( C_9_DBG_TRACE_REG_1                                     , RULL(0x290107CA), SH_UNT_C_9      , SH_ACS_SCOM      );
-REG64( C_10_DBG_TRACE_REG_1                                    , RULL(0x2A0107CA), SH_UNT_C_10     , SH_ACS_SCOM      );
-REG64( C_11_DBG_TRACE_REG_1                                    , RULL(0x2B0107CA), SH_UNT_C_11     , SH_ACS_SCOM      );
-REG64( C_12_DBG_TRACE_REG_1                                    , RULL(0x2C0107CA), SH_UNT_C_12     , SH_ACS_SCOM      );
-REG64( C_13_DBG_TRACE_REG_1                                    , RULL(0x2D0107CA), SH_UNT_C_13     , SH_ACS_SCOM      );
-REG64( C_14_DBG_TRACE_REG_1                                    , RULL(0x2E0107CA), SH_UNT_C_14     , SH_ACS_SCOM      );
-REG64( C_15_DBG_TRACE_REG_1                                    , RULL(0x2F0107CA), SH_UNT_C_15     , SH_ACS_SCOM      );
-REG64( C_16_DBG_TRACE_REG_1                                    , RULL(0x300107CA), SH_UNT_C_16     , SH_ACS_SCOM      );
-REG64( C_17_DBG_TRACE_REG_1                                    , RULL(0x310107CA), SH_UNT_C_17     , SH_ACS_SCOM      );
-REG64( C_18_DBG_TRACE_REG_1                                    , RULL(0x320107CA), SH_UNT_C_18     , SH_ACS_SCOM      );
-REG64( C_19_DBG_TRACE_REG_1                                    , RULL(0x330107CA), SH_UNT_C_19     , SH_ACS_SCOM      );
-REG64( C_20_DBG_TRACE_REG_1                                    , RULL(0x340107CA), SH_UNT_C_20     , SH_ACS_SCOM      );
-REG64( C_21_DBG_TRACE_REG_1                                    , RULL(0x350107CA), SH_UNT_C_21     , SH_ACS_SCOM      );
-REG64( C_22_DBG_TRACE_REG_1                                    , RULL(0x360107CA), SH_UNT_C_22     , SH_ACS_SCOM      );
-REG64( C_23_DBG_TRACE_REG_1                                    , RULL(0x370107CA), SH_UNT_C_23     , SH_ACS_SCOM      );
-REG64( EQ_DBG_TRACE_REG_1                                      , RULL(0x100107CA), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_DBG_TRACE_REG_1                                    , RULL(0x100107CA), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_DBG_TRACE_REG_1                                    , RULL(0x110107CA), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_DBG_TRACE_REG_1                                    , RULL(0x120107CA), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_DBG_TRACE_REG_1                                    , RULL(0x130107CA), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_DBG_TRACE_REG_1                                    , RULL(0x140107CA), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_DBG_TRACE_REG_1                                    , RULL(0x150107CA), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_DBG_TRACE_REG_1                                      , RULL(0x200107CA), SH_UNT_EX       ,
-       SH_ACS_SCOM      ); //DUPS: 210107CA,
-REG64( EX_0_DBG_TRACE_REG_1                                    , RULL(0x200107CA), SH_UNT_EX_0     ,
-       SH_ACS_SCOM      ); //DUPS: 210107CA,
-REG64( EX_1_DBG_TRACE_REG_1                                    , RULL(0x220107CA), SH_UNT_EX_1     ,
-       SH_ACS_SCOM      ); //DUPS: 230107CA,
-REG64( EX_2_DBG_TRACE_REG_1                                    , RULL(0x240107CA), SH_UNT_EX_2     ,
-       SH_ACS_SCOM      ); //DUPS: 250107CA,
-REG64( EX_3_DBG_TRACE_REG_1                                    , RULL(0x260107CA), SH_UNT_EX_3     ,
-       SH_ACS_SCOM      ); //DUPS: 270107CA,
-REG64( EX_4_DBG_TRACE_REG_1                                    , RULL(0x280107CA), SH_UNT_EX_4     ,
-       SH_ACS_SCOM      ); //DUPS: 290107CA,
-REG64( EX_5_DBG_TRACE_REG_1                                    , RULL(0x2A0107CA), SH_UNT_EX_5     ,
-       SH_ACS_SCOM      ); //DUPS: 2B0107CA,
-REG64( EX_6_DBG_TRACE_REG_1                                    , RULL(0x2C0107CA), SH_UNT_EX_6     ,
-       SH_ACS_SCOM      ); //DUPS: 2D0107CA,
-REG64( EX_7_DBG_TRACE_REG_1                                    , RULL(0x2E0107CA), SH_UNT_EX_7     ,
-       SH_ACS_SCOM      ); //DUPS: 2F0107CA,
-REG64( EX_8_DBG_TRACE_REG_1                                    , RULL(0x300107CA), SH_UNT_EX_8     ,
-       SH_ACS_SCOM      ); //DUPS: 310107CA,
-REG64( EX_9_DBG_TRACE_REG_1                                    , RULL(0x320107CA), SH_UNT_EX_9     ,
-       SH_ACS_SCOM      ); //DUPS: 330107CA,
-REG64( EX_10_DBG_TRACE_REG_1                                   , RULL(0x340107CA), SH_UNT_EX_10    ,
-       SH_ACS_SCOM      ); //DUPS: 350107CA,
-REG64( EX_11_DBG_TRACE_REG_1                                   , RULL(0x360107CA), SH_UNT_EX_11    ,
-       SH_ACS_SCOM      ); //DUPS: 370107CA,
+REG64( C_DBG_TRACE_REG_1                                       , RULL(0x200107CE), SH_UNT_C        , SH_ACS_SCOM      );
+REG64( C_0_DBG_TRACE_REG_1                                     , RULL(0x200107CE), SH_UNT_C_0      , SH_ACS_SCOM      );
+REG64( C_1_DBG_TRACE_REG_1                                     , RULL(0x210107CE), SH_UNT_C_1      , SH_ACS_SCOM      );
+REG64( C_2_DBG_TRACE_REG_1                                     , RULL(0x220107CE), SH_UNT_C_2      , SH_ACS_SCOM      );
+REG64( C_3_DBG_TRACE_REG_1                                     , RULL(0x230107CE), SH_UNT_C_3      , SH_ACS_SCOM      );
+REG64( C_4_DBG_TRACE_REG_1                                     , RULL(0x240107CE), SH_UNT_C_4      , SH_ACS_SCOM      );
+REG64( C_5_DBG_TRACE_REG_1                                     , RULL(0x250107CE), SH_UNT_C_5      , SH_ACS_SCOM      );
+REG64( C_6_DBG_TRACE_REG_1                                     , RULL(0x260107CE), SH_UNT_C_6      , SH_ACS_SCOM      );
+REG64( C_7_DBG_TRACE_REG_1                                     , RULL(0x270107CE), SH_UNT_C_7      , SH_ACS_SCOM      );
+REG64( C_8_DBG_TRACE_REG_1                                     , RULL(0x280107CE), SH_UNT_C_8      , SH_ACS_SCOM      );
+REG64( C_9_DBG_TRACE_REG_1                                     , RULL(0x290107CE), SH_UNT_C_9      , SH_ACS_SCOM      );
+REG64( C_10_DBG_TRACE_REG_1                                    , RULL(0x2A0107CE), SH_UNT_C_10     , SH_ACS_SCOM      );
+REG64( C_11_DBG_TRACE_REG_1                                    , RULL(0x2B0107CE), SH_UNT_C_11     , SH_ACS_SCOM      );
+REG64( C_12_DBG_TRACE_REG_1                                    , RULL(0x2C0107CE), SH_UNT_C_12     , SH_ACS_SCOM      );
+REG64( C_13_DBG_TRACE_REG_1                                    , RULL(0x2D0107CE), SH_UNT_C_13     , SH_ACS_SCOM      );
+REG64( C_14_DBG_TRACE_REG_1                                    , RULL(0x2E0107CE), SH_UNT_C_14     , SH_ACS_SCOM      );
+REG64( C_15_DBG_TRACE_REG_1                                    , RULL(0x2F0107CE), SH_UNT_C_15     , SH_ACS_SCOM      );
+REG64( C_16_DBG_TRACE_REG_1                                    , RULL(0x300107CE), SH_UNT_C_16     , SH_ACS_SCOM      );
+REG64( C_17_DBG_TRACE_REG_1                                    , RULL(0x310107CE), SH_UNT_C_17     , SH_ACS_SCOM      );
+REG64( C_18_DBG_TRACE_REG_1                                    , RULL(0x320107CE), SH_UNT_C_18     , SH_ACS_SCOM      );
+REG64( C_19_DBG_TRACE_REG_1                                    , RULL(0x330107CE), SH_UNT_C_19     , SH_ACS_SCOM      );
+REG64( C_20_DBG_TRACE_REG_1                                    , RULL(0x340107CE), SH_UNT_C_20     , SH_ACS_SCOM      );
+REG64( C_21_DBG_TRACE_REG_1                                    , RULL(0x350107CE), SH_UNT_C_21     , SH_ACS_SCOM      );
+REG64( C_22_DBG_TRACE_REG_1                                    , RULL(0x360107CE), SH_UNT_C_22     , SH_ACS_SCOM      );
+REG64( C_23_DBG_TRACE_REG_1                                    , RULL(0x370107CE), SH_UNT_C_23     , SH_ACS_SCOM      );
+REG64( EQ_DBG_TRACE_REG_1                                      , RULL(0x100107CE), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_DBG_TRACE_REG_1                                    , RULL(0x100107CE), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_DBG_TRACE_REG_1                                    , RULL(0x110107CE), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_DBG_TRACE_REG_1                                    , RULL(0x120107CE), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_DBG_TRACE_REG_1                                    , RULL(0x130107CE), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_DBG_TRACE_REG_1                                    , RULL(0x140107CE), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_DBG_TRACE_REG_1                                    , RULL(0x150107CE), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_DBG_TRACE_REG_1                                      , RULL(0x200107CE), SH_UNT_EX       ,
+       SH_ACS_SCOM      ); //DUPS: 210107CE,
+REG64( EX_0_DBG_TRACE_REG_1                                    , RULL(0x200107CE), SH_UNT_EX_0     ,
+       SH_ACS_SCOM      ); //DUPS: 210107CE,
+REG64( EX_1_DBG_TRACE_REG_1                                    , RULL(0x220107CE), SH_UNT_EX_1     ,
+       SH_ACS_SCOM      ); //DUPS: 230107CE,
+REG64( EX_2_DBG_TRACE_REG_1                                    , RULL(0x240107CE), SH_UNT_EX_2     ,
+       SH_ACS_SCOM      ); //DUPS: 250107CE,
+REG64( EX_3_DBG_TRACE_REG_1                                    , RULL(0x260107CE), SH_UNT_EX_3     ,
+       SH_ACS_SCOM      ); //DUPS: 270107CE,
+REG64( EX_4_DBG_TRACE_REG_1                                    , RULL(0x280107CE), SH_UNT_EX_4     ,
+       SH_ACS_SCOM      ); //DUPS: 290107CE,
+REG64( EX_5_DBG_TRACE_REG_1                                    , RULL(0x2A0107CE), SH_UNT_EX_5     ,
+       SH_ACS_SCOM      ); //DUPS: 2B0107CE,
+REG64( EX_6_DBG_TRACE_REG_1                                    , RULL(0x2C0107CE), SH_UNT_EX_6     ,
+       SH_ACS_SCOM      ); //DUPS: 2D0107CE,
+REG64( EX_7_DBG_TRACE_REG_1                                    , RULL(0x2E0107CE), SH_UNT_EX_7     ,
+       SH_ACS_SCOM      ); //DUPS: 2F0107CE,
+REG64( EX_8_DBG_TRACE_REG_1                                    , RULL(0x300107CE), SH_UNT_EX_8     ,
+       SH_ACS_SCOM      ); //DUPS: 310107CE,
+REG64( EX_9_DBG_TRACE_REG_1                                    , RULL(0x320107CE), SH_UNT_EX_9     ,
+       SH_ACS_SCOM      ); //DUPS: 330107CE,
+REG64( EX_10_DBG_TRACE_REG_1                                   , RULL(0x340107CE), SH_UNT_EX_10    ,
+       SH_ACS_SCOM      ); //DUPS: 350107CE,
+REG64( EX_11_DBG_TRACE_REG_1                                   , RULL(0x360107CE), SH_UNT_EX_11    ,
+       SH_ACS_SCOM      ); //DUPS: 370107CE,
+
+REG64( C_DEBUG_TRACE_CONTROL                                   , RULL(0x200107D0), SH_UNT_C        , SH_ACS_SCOM      );
+REG64( C_0_DEBUG_TRACE_CONTROL                                 , RULL(0x200107D0), SH_UNT_C_0      , SH_ACS_SCOM      );
+REG64( C_1_DEBUG_TRACE_CONTROL                                 , RULL(0x210107D0), SH_UNT_C_1      , SH_ACS_SCOM      );
+REG64( C_2_DEBUG_TRACE_CONTROL                                 , RULL(0x220107D0), SH_UNT_C_2      , SH_ACS_SCOM      );
+REG64( C_3_DEBUG_TRACE_CONTROL                                 , RULL(0x230107D0), SH_UNT_C_3      , SH_ACS_SCOM      );
+REG64( C_4_DEBUG_TRACE_CONTROL                                 , RULL(0x240107D0), SH_UNT_C_4      , SH_ACS_SCOM      );
+REG64( C_5_DEBUG_TRACE_CONTROL                                 , RULL(0x250107D0), SH_UNT_C_5      , SH_ACS_SCOM      );
+REG64( C_6_DEBUG_TRACE_CONTROL                                 , RULL(0x260107D0), SH_UNT_C_6      , SH_ACS_SCOM      );
+REG64( C_7_DEBUG_TRACE_CONTROL                                 , RULL(0x270107D0), SH_UNT_C_7      , SH_ACS_SCOM      );
+REG64( C_8_DEBUG_TRACE_CONTROL                                 , RULL(0x280107D0), SH_UNT_C_8      , SH_ACS_SCOM      );
+REG64( C_9_DEBUG_TRACE_CONTROL                                 , RULL(0x290107D0), SH_UNT_C_9      , SH_ACS_SCOM      );
+REG64( C_10_DEBUG_TRACE_CONTROL                                , RULL(0x2A0107D0), SH_UNT_C_10     , SH_ACS_SCOM      );
+REG64( C_11_DEBUG_TRACE_CONTROL                                , RULL(0x2B0107D0), SH_UNT_C_11     , SH_ACS_SCOM      );
+REG64( C_12_DEBUG_TRACE_CONTROL                                , RULL(0x2C0107D0), SH_UNT_C_12     , SH_ACS_SCOM      );
+REG64( C_13_DEBUG_TRACE_CONTROL                                , RULL(0x2D0107D0), SH_UNT_C_13     , SH_ACS_SCOM      );
+REG64( C_14_DEBUG_TRACE_CONTROL                                , RULL(0x2E0107D0), SH_UNT_C_14     , SH_ACS_SCOM      );
+REG64( C_15_DEBUG_TRACE_CONTROL                                , RULL(0x2F0107D0), SH_UNT_C_15     , SH_ACS_SCOM      );
+REG64( C_16_DEBUG_TRACE_CONTROL                                , RULL(0x300107D0), SH_UNT_C_16     , SH_ACS_SCOM      );
+REG64( C_17_DEBUG_TRACE_CONTROL                                , RULL(0x310107D0), SH_UNT_C_17     , SH_ACS_SCOM      );
+REG64( C_18_DEBUG_TRACE_CONTROL                                , RULL(0x320107D0), SH_UNT_C_18     , SH_ACS_SCOM      );
+REG64( C_19_DEBUG_TRACE_CONTROL                                , RULL(0x330107D0), SH_UNT_C_19     , SH_ACS_SCOM      );
+REG64( C_20_DEBUG_TRACE_CONTROL                                , RULL(0x340107D0), SH_UNT_C_20     , SH_ACS_SCOM      );
+REG64( C_21_DEBUG_TRACE_CONTROL                                , RULL(0x350107D0), SH_UNT_C_21     , SH_ACS_SCOM      );
+REG64( C_22_DEBUG_TRACE_CONTROL                                , RULL(0x360107D0), SH_UNT_C_22     , SH_ACS_SCOM      );
+REG64( C_23_DEBUG_TRACE_CONTROL                                , RULL(0x370107D0), SH_UNT_C_23     , SH_ACS_SCOM      );
+REG64( EQ_DEBUG_TRACE_CONTROL                                  , RULL(0x100107D0), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_DEBUG_TRACE_CONTROL                                , RULL(0x100107D0), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_DEBUG_TRACE_CONTROL                                , RULL(0x110107D0), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_DEBUG_TRACE_CONTROL                                , RULL(0x120107D0), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_DEBUG_TRACE_CONTROL                                , RULL(0x130107D0), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_DEBUG_TRACE_CONTROL                                , RULL(0x140107D0), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_DEBUG_TRACE_CONTROL                                , RULL(0x150107D0), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_DEBUG_TRACE_CONTROL                                  , RULL(0x200107D0), SH_UNT_EX       ,
+       SH_ACS_SCOM      ); //DUPS: 210107D0,
+REG64( EX_0_DEBUG_TRACE_CONTROL                                , RULL(0x200107D0), SH_UNT_EX_0     ,
+       SH_ACS_SCOM      ); //DUPS: 210107D0,
+REG64( EX_1_DEBUG_TRACE_CONTROL                                , RULL(0x220107D0), SH_UNT_EX_1     ,
+       SH_ACS_SCOM      ); //DUPS: 230107D0,
+REG64( EX_2_DEBUG_TRACE_CONTROL                                , RULL(0x240107D0), SH_UNT_EX_2     ,
+       SH_ACS_SCOM      ); //DUPS: 250107D0,
+REG64( EX_3_DEBUG_TRACE_CONTROL                                , RULL(0x260107D0), SH_UNT_EX_3     ,
+       SH_ACS_SCOM      ); //DUPS: 270107D0,
+REG64( EX_4_DEBUG_TRACE_CONTROL                                , RULL(0x280107D0), SH_UNT_EX_4     ,
+       SH_ACS_SCOM      ); //DUPS: 290107D0,
+REG64( EX_5_DEBUG_TRACE_CONTROL                                , RULL(0x2A0107D0), SH_UNT_EX_5     ,
+       SH_ACS_SCOM      ); //DUPS: 2B0107D0,
+REG64( EX_6_DEBUG_TRACE_CONTROL                                , RULL(0x2C0107D0), SH_UNT_EX_6     ,
+       SH_ACS_SCOM      ); //DUPS: 2D0107D0,
+REG64( EX_7_DEBUG_TRACE_CONTROL                                , RULL(0x2E0107D0), SH_UNT_EX_7     ,
+       SH_ACS_SCOM      ); //DUPS: 2F0107D0,
+REG64( EX_8_DEBUG_TRACE_CONTROL                                , RULL(0x300107D0), SH_UNT_EX_8     ,
+       SH_ACS_SCOM      ); //DUPS: 310107D0,
+REG64( EX_9_DEBUG_TRACE_CONTROL                                , RULL(0x320107D0), SH_UNT_EX_9     ,
+       SH_ACS_SCOM      ); //DUPS: 330107D0,
+REG64( EX_10_DEBUG_TRACE_CONTROL                               , RULL(0x340107D0), SH_UNT_EX_10    ,
+       SH_ACS_SCOM      ); //DUPS: 350107D0,
+REG64( EX_11_DEBUG_TRACE_CONTROL                               , RULL(0x360107D0), SH_UNT_EX_11    ,
+       SH_ACS_SCOM      ); //DUPS: 370107D0,
 
 REG64( C_DIRECT_CONTROLS                                       , RULL(0x20010A9C), SH_UNT_C        , SH_ACS_SCOM      );
 REG64( C_0_DIRECT_CONTROLS                                     , RULL(0x20010A9C), SH_UNT_C_0      , SH_ACS_SCOM      );
@@ -9219,33 +9162,33 @@ REG64( EX_10_DTS_TRC_RESULT                                    , RULL(0x34050003
 REG64( EX_11_DTS_TRC_RESULT                                    , RULL(0x36050003), SH_UNT_EX_11    ,
        SH_ACS_SCOM_RO   ); //DUPS: 37050003,
 
-REG64( EQ_EDRAM_BANK_FAIL                                      , RULL(0x1001181B), SH_UNT_EQ       ,
+REG64( EQ_EDRAM_BANK_FAIL_SCOM_RD                              , RULL(0x1001181B), SH_UNT_EQ       ,
        SH_ACS_SCOM      ); //DUPS: 10011C1B,
-REG64( EQ_0_EDRAM_BANK_FAIL                                    , RULL(0x1001181B), SH_UNT_EQ_0     ,
+REG64( EQ_0_EDRAM_BANK_FAIL_SCOM_RD                            , RULL(0x1001181B), SH_UNT_EQ_0     ,
        SH_ACS_SCOM      ); //DUPS: 10011C1B,
-REG64( EQ_1_EDRAM_BANK_FAIL                                    , RULL(0x1101181B), SH_UNT_EQ_1     ,
+REG64( EQ_1_EDRAM_BANK_FAIL_SCOM_RD                            , RULL(0x1101181B), SH_UNT_EQ_1     ,
        SH_ACS_SCOM      ); //DUPS: 11011C1B,
-REG64( EQ_2_EDRAM_BANK_FAIL                                    , RULL(0x1201181B), SH_UNT_EQ_2     ,
+REG64( EQ_2_EDRAM_BANK_FAIL_SCOM_RD                            , RULL(0x1201181B), SH_UNT_EQ_2     ,
        SH_ACS_SCOM      ); //DUPS: 12011C1B,
-REG64( EQ_3_EDRAM_BANK_FAIL                                    , RULL(0x1301181B), SH_UNT_EQ_3     ,
+REG64( EQ_3_EDRAM_BANK_FAIL_SCOM_RD                            , RULL(0x1301181B), SH_UNT_EQ_3     ,
        SH_ACS_SCOM      ); //DUPS: 13011C1B,
-REG64( EQ_4_EDRAM_BANK_FAIL                                    , RULL(0x1401181B), SH_UNT_EQ_4     ,
+REG64( EQ_4_EDRAM_BANK_FAIL_SCOM_RD                            , RULL(0x1401181B), SH_UNT_EQ_4     ,
        SH_ACS_SCOM      ); //DUPS: 14011C1B,
-REG64( EQ_5_EDRAM_BANK_FAIL                                    , RULL(0x1501181B), SH_UNT_EQ_5     ,
+REG64( EQ_5_EDRAM_BANK_FAIL_SCOM_RD                            , RULL(0x1501181B), SH_UNT_EQ_5     ,
        SH_ACS_SCOM      ); //DUPS: 15011C1B,
-REG64( EX_0_L3_EDRAM_BANK_FAIL                                 , RULL(0x1001181B), SH_UNT_EX_0_L3  , SH_ACS_SCOM      );
-REG64( EX_10_L3_EDRAM_BANK_FAIL                                , RULL(0x1501181B), SH_UNT_EX_10_L3 , SH_ACS_SCOM      );
-REG64( EX_11_L3_EDRAM_BANK_FAIL                                , RULL(0x15011C1B), SH_UNT_EX_11_L3 , SH_ACS_SCOM      );
-REG64( EX_1_L3_EDRAM_BANK_FAIL                                 , RULL(0x10011C1B), SH_UNT_EX_1_L3  , SH_ACS_SCOM      );
-REG64( EX_2_L3_EDRAM_BANK_FAIL                                 , RULL(0x1101181B), SH_UNT_EX_2_L3  , SH_ACS_SCOM      );
-REG64( EX_3_L3_EDRAM_BANK_FAIL                                 , RULL(0x11011C1B), SH_UNT_EX_3_L3  , SH_ACS_SCOM      );
-REG64( EX_4_L3_EDRAM_BANK_FAIL                                 , RULL(0x1201181B), SH_UNT_EX_4_L3  , SH_ACS_SCOM      );
-REG64( EX_5_L3_EDRAM_BANK_FAIL                                 , RULL(0x12011C1B), SH_UNT_EX_5_L3  , SH_ACS_SCOM      );
-REG64( EX_6_L3_EDRAM_BANK_FAIL                                 , RULL(0x1301181B), SH_UNT_EX_6_L3  , SH_ACS_SCOM      );
-REG64( EX_7_L3_EDRAM_BANK_FAIL                                 , RULL(0x13011C1B), SH_UNT_EX_7_L3  , SH_ACS_SCOM      );
-REG64( EX_8_L3_EDRAM_BANK_FAIL                                 , RULL(0x1401181B), SH_UNT_EX_8_L3  , SH_ACS_SCOM      );
-REG64( EX_9_L3_EDRAM_BANK_FAIL                                 , RULL(0x14011C1B), SH_UNT_EX_9_L3  , SH_ACS_SCOM      );
-REG64( EX_L3_EDRAM_BANK_FAIL                                   , RULL(0x1001181B), SH_UNT_EX_L3    , SH_ACS_SCOM      );
+REG64( EX_0_L3_EDRAM_BANK_FAIL_SCOM_RD                         , RULL(0x1001181B), SH_UNT_EX_0_L3  , SH_ACS_SCOM      );
+REG64( EX_10_L3_EDRAM_BANK_FAIL_SCOM_RD                        , RULL(0x1501181B), SH_UNT_EX_10_L3 , SH_ACS_SCOM      );
+REG64( EX_11_L3_EDRAM_BANK_FAIL_SCOM_RD                        , RULL(0x15011C1B), SH_UNT_EX_11_L3 , SH_ACS_SCOM      );
+REG64( EX_1_L3_EDRAM_BANK_FAIL_SCOM_RD                         , RULL(0x10011C1B), SH_UNT_EX_1_L3  , SH_ACS_SCOM      );
+REG64( EX_2_L3_EDRAM_BANK_FAIL_SCOM_RD                         , RULL(0x1101181B), SH_UNT_EX_2_L3  , SH_ACS_SCOM      );
+REG64( EX_3_L3_EDRAM_BANK_FAIL_SCOM_RD                         , RULL(0x11011C1B), SH_UNT_EX_3_L3  , SH_ACS_SCOM      );
+REG64( EX_4_L3_EDRAM_BANK_FAIL_SCOM_RD                         , RULL(0x1201181B), SH_UNT_EX_4_L3  , SH_ACS_SCOM      );
+REG64( EX_5_L3_EDRAM_BANK_FAIL_SCOM_RD                         , RULL(0x12011C1B), SH_UNT_EX_5_L3  , SH_ACS_SCOM      );
+REG64( EX_6_L3_EDRAM_BANK_FAIL_SCOM_RD                         , RULL(0x1301181B), SH_UNT_EX_6_L3  , SH_ACS_SCOM      );
+REG64( EX_7_L3_EDRAM_BANK_FAIL_SCOM_RD                         , RULL(0x13011C1B), SH_UNT_EX_7_L3  , SH_ACS_SCOM      );
+REG64( EX_8_L3_EDRAM_BANK_FAIL_SCOM_RD                         , RULL(0x1401181B), SH_UNT_EX_8_L3  , SH_ACS_SCOM      );
+REG64( EX_9_L3_EDRAM_BANK_FAIL_SCOM_RD                         , RULL(0x14011C1B), SH_UNT_EX_9_L3  , SH_ACS_SCOM      );
+REG64( EX_L3_EDRAM_BANK_FAIL_SCOM_RD                           , RULL(0x1001181B), SH_UNT_EX_L3    , SH_ACS_SCOM      );
 
 REG64( EQ_EDRAM_BANK_SOFT_DIS                                  , RULL(0x1001180B), SH_UNT_EQ       ,
        SH_ACS_SCOM      ); //DUPS: 10011C0B,
@@ -9910,57 +9853,57 @@ REG64( EX_9_L2_FIR_ERR_INJ                                     , RULL(0x32010A4D
 REG64( EX_L2_FIR_ERR_INJ                                       , RULL(0x20010A4D), SH_UNT_EX_L2    ,
        SH_ACS_SCOM_RW   ); //DUPS: 21010A4D,
 
-REG64( C_FIR_HOLD_OUT                                          , RULL(0x20010A53), SH_UNT_C        , SH_ACS_SCOM_RO   );
-REG64( C_0_FIR_HOLD_OUT                                        , RULL(0x20010A53), SH_UNT_C_0      , SH_ACS_SCOM_RO   );
-REG64( C_1_FIR_HOLD_OUT                                        , RULL(0x21010A53), SH_UNT_C_1      , SH_ACS_SCOM_RO   );
-REG64( C_2_FIR_HOLD_OUT                                        , RULL(0x22010A53), SH_UNT_C_2      , SH_ACS_SCOM_RO   );
-REG64( C_3_FIR_HOLD_OUT                                        , RULL(0x23010A53), SH_UNT_C_3      , SH_ACS_SCOM_RO   );
-REG64( C_4_FIR_HOLD_OUT                                        , RULL(0x24010A53), SH_UNT_C_4      , SH_ACS_SCOM_RO   );
-REG64( C_5_FIR_HOLD_OUT                                        , RULL(0x25010A53), SH_UNT_C_5      , SH_ACS_SCOM_RO   );
-REG64( C_6_FIR_HOLD_OUT                                        , RULL(0x26010A53), SH_UNT_C_6      , SH_ACS_SCOM_RO   );
-REG64( C_7_FIR_HOLD_OUT                                        , RULL(0x27010A53), SH_UNT_C_7      , SH_ACS_SCOM_RO   );
-REG64( C_8_FIR_HOLD_OUT                                        , RULL(0x28010A53), SH_UNT_C_8      , SH_ACS_SCOM_RO   );
-REG64( C_9_FIR_HOLD_OUT                                        , RULL(0x29010A53), SH_UNT_C_9      , SH_ACS_SCOM_RO   );
-REG64( C_10_FIR_HOLD_OUT                                       , RULL(0x2A010A53), SH_UNT_C_10     , SH_ACS_SCOM_RO   );
-REG64( C_11_FIR_HOLD_OUT                                       , RULL(0x2B010A53), SH_UNT_C_11     , SH_ACS_SCOM_RO   );
-REG64( C_12_FIR_HOLD_OUT                                       , RULL(0x2C010A53), SH_UNT_C_12     , SH_ACS_SCOM_RO   );
-REG64( C_13_FIR_HOLD_OUT                                       , RULL(0x2D010A53), SH_UNT_C_13     , SH_ACS_SCOM_RO   );
-REG64( C_14_FIR_HOLD_OUT                                       , RULL(0x2E010A53), SH_UNT_C_14     , SH_ACS_SCOM_RO   );
-REG64( C_15_FIR_HOLD_OUT                                       , RULL(0x2F010A53), SH_UNT_C_15     , SH_ACS_SCOM_RO   );
-REG64( C_16_FIR_HOLD_OUT                                       , RULL(0x30010A53), SH_UNT_C_16     , SH_ACS_SCOM_RO   );
-REG64( C_17_FIR_HOLD_OUT                                       , RULL(0x31010A53), SH_UNT_C_17     , SH_ACS_SCOM_RO   );
-REG64( C_18_FIR_HOLD_OUT                                       , RULL(0x32010A53), SH_UNT_C_18     , SH_ACS_SCOM_RO   );
-REG64( C_19_FIR_HOLD_OUT                                       , RULL(0x33010A53), SH_UNT_C_19     , SH_ACS_SCOM_RO   );
-REG64( C_20_FIR_HOLD_OUT                                       , RULL(0x34010A53), SH_UNT_C_20     , SH_ACS_SCOM_RO   );
-REG64( C_21_FIR_HOLD_OUT                                       , RULL(0x35010A53), SH_UNT_C_21     , SH_ACS_SCOM_RO   );
-REG64( C_22_FIR_HOLD_OUT                                       , RULL(0x36010A53), SH_UNT_C_22     , SH_ACS_SCOM_RO   );
-REG64( C_23_FIR_HOLD_OUT                                       , RULL(0x37010A53), SH_UNT_C_23     , SH_ACS_SCOM_RO   );
-REG64( EX_0_L2_FIR_HOLD_OUT                                    , RULL(0x20010A53), SH_UNT_EX_0_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 21010A53,
-REG64( EX_10_L2_FIR_HOLD_OUT                                   , RULL(0x34010A53), SH_UNT_EX_10_L2 ,
-       SH_ACS_SCOM_RO   ); //DUPS: 35010A53,
-REG64( EX_11_L2_FIR_HOLD_OUT                                   , RULL(0x36010A53), SH_UNT_EX_11_L2 ,
-       SH_ACS_SCOM_RO   ); //DUPS: 37010A53,
-REG64( EX_1_L2_FIR_HOLD_OUT                                    , RULL(0x22010A53), SH_UNT_EX_1_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 23010A53,
-REG64( EX_2_L2_FIR_HOLD_OUT                                    , RULL(0x24010A53), SH_UNT_EX_2_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 25010A53,
-REG64( EX_3_L2_FIR_HOLD_OUT                                    , RULL(0x26010A53), SH_UNT_EX_3_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 27010A53,
-REG64( EX_4_L2_FIR_HOLD_OUT                                    , RULL(0x28010A53), SH_UNT_EX_4_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 29010A53,
-REG64( EX_5_L2_FIR_HOLD_OUT                                    , RULL(0x2A010A53), SH_UNT_EX_5_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 2B010A53,
-REG64( EX_6_L2_FIR_HOLD_OUT                                    , RULL(0x2C010A53), SH_UNT_EX_6_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 2D010A53,
-REG64( EX_7_L2_FIR_HOLD_OUT                                    , RULL(0x2E010A53), SH_UNT_EX_7_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 2F010A53,
-REG64( EX_8_L2_FIR_HOLD_OUT                                    , RULL(0x30010A53), SH_UNT_EX_8_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 31010A53,
-REG64( EX_9_L2_FIR_HOLD_OUT                                    , RULL(0x32010A53), SH_UNT_EX_9_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 33010A53,
-REG64( EX_L2_FIR_HOLD_OUT                                      , RULL(0x20010A53), SH_UNT_EX_L2    ,
-       SH_ACS_SCOM_RO   ); //DUPS: 21010A53,
+REG64( C_FIR_HOLD_OUT                                          , RULL(0x20010A51), SH_UNT_C        , SH_ACS_SCOM_RO   );
+REG64( C_0_FIR_HOLD_OUT                                        , RULL(0x20010A51), SH_UNT_C_0      , SH_ACS_SCOM_RO   );
+REG64( C_1_FIR_HOLD_OUT                                        , RULL(0x21010A51), SH_UNT_C_1      , SH_ACS_SCOM_RO   );
+REG64( C_2_FIR_HOLD_OUT                                        , RULL(0x22010A51), SH_UNT_C_2      , SH_ACS_SCOM_RO   );
+REG64( C_3_FIR_HOLD_OUT                                        , RULL(0x23010A51), SH_UNT_C_3      , SH_ACS_SCOM_RO   );
+REG64( C_4_FIR_HOLD_OUT                                        , RULL(0x24010A51), SH_UNT_C_4      , SH_ACS_SCOM_RO   );
+REG64( C_5_FIR_HOLD_OUT                                        , RULL(0x25010A51), SH_UNT_C_5      , SH_ACS_SCOM_RO   );
+REG64( C_6_FIR_HOLD_OUT                                        , RULL(0x26010A51), SH_UNT_C_6      , SH_ACS_SCOM_RO   );
+REG64( C_7_FIR_HOLD_OUT                                        , RULL(0x27010A51), SH_UNT_C_7      , SH_ACS_SCOM_RO   );
+REG64( C_8_FIR_HOLD_OUT                                        , RULL(0x28010A51), SH_UNT_C_8      , SH_ACS_SCOM_RO   );
+REG64( C_9_FIR_HOLD_OUT                                        , RULL(0x29010A51), SH_UNT_C_9      , SH_ACS_SCOM_RO   );
+REG64( C_10_FIR_HOLD_OUT                                       , RULL(0x2A010A51), SH_UNT_C_10     , SH_ACS_SCOM_RO   );
+REG64( C_11_FIR_HOLD_OUT                                       , RULL(0x2B010A51), SH_UNT_C_11     , SH_ACS_SCOM_RO   );
+REG64( C_12_FIR_HOLD_OUT                                       , RULL(0x2C010A51), SH_UNT_C_12     , SH_ACS_SCOM_RO   );
+REG64( C_13_FIR_HOLD_OUT                                       , RULL(0x2D010A51), SH_UNT_C_13     , SH_ACS_SCOM_RO   );
+REG64( C_14_FIR_HOLD_OUT                                       , RULL(0x2E010A51), SH_UNT_C_14     , SH_ACS_SCOM_RO   );
+REG64( C_15_FIR_HOLD_OUT                                       , RULL(0x2F010A51), SH_UNT_C_15     , SH_ACS_SCOM_RO   );
+REG64( C_16_FIR_HOLD_OUT                                       , RULL(0x30010A51), SH_UNT_C_16     , SH_ACS_SCOM_RO   );
+REG64( C_17_FIR_HOLD_OUT                                       , RULL(0x31010A51), SH_UNT_C_17     , SH_ACS_SCOM_RO   );
+REG64( C_18_FIR_HOLD_OUT                                       , RULL(0x32010A51), SH_UNT_C_18     , SH_ACS_SCOM_RO   );
+REG64( C_19_FIR_HOLD_OUT                                       , RULL(0x33010A51), SH_UNT_C_19     , SH_ACS_SCOM_RO   );
+REG64( C_20_FIR_HOLD_OUT                                       , RULL(0x34010A51), SH_UNT_C_20     , SH_ACS_SCOM_RO   );
+REG64( C_21_FIR_HOLD_OUT                                       , RULL(0x35010A51), SH_UNT_C_21     , SH_ACS_SCOM_RO   );
+REG64( C_22_FIR_HOLD_OUT                                       , RULL(0x36010A51), SH_UNT_C_22     , SH_ACS_SCOM_RO   );
+REG64( C_23_FIR_HOLD_OUT                                       , RULL(0x37010A51), SH_UNT_C_23     , SH_ACS_SCOM_RO   );
+REG64( EX_0_L2_FIR_HOLD_OUT                                    , RULL(0x20010A51), SH_UNT_EX_0_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 21010A51,
+REG64( EX_10_L2_FIR_HOLD_OUT                                   , RULL(0x34010A51), SH_UNT_EX_10_L2 ,
+       SH_ACS_SCOM_RO   ); //DUPS: 35010A51,
+REG64( EX_11_L2_FIR_HOLD_OUT                                   , RULL(0x36010A51), SH_UNT_EX_11_L2 ,
+       SH_ACS_SCOM_RO   ); //DUPS: 37010A51,
+REG64( EX_1_L2_FIR_HOLD_OUT                                    , RULL(0x22010A51), SH_UNT_EX_1_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 23010A51,
+REG64( EX_2_L2_FIR_HOLD_OUT                                    , RULL(0x24010A51), SH_UNT_EX_2_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 25010A51,
+REG64( EX_3_L2_FIR_HOLD_OUT                                    , RULL(0x26010A51), SH_UNT_EX_3_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 27010A51,
+REG64( EX_4_L2_FIR_HOLD_OUT                                    , RULL(0x28010A51), SH_UNT_EX_4_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 29010A51,
+REG64( EX_5_L2_FIR_HOLD_OUT                                    , RULL(0x2A010A51), SH_UNT_EX_5_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 2B010A51,
+REG64( EX_6_L2_FIR_HOLD_OUT                                    , RULL(0x2C010A51), SH_UNT_EX_6_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 2D010A51,
+REG64( EX_7_L2_FIR_HOLD_OUT                                    , RULL(0x2E010A51), SH_UNT_EX_7_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 2F010A51,
+REG64( EX_8_L2_FIR_HOLD_OUT                                    , RULL(0x30010A51), SH_UNT_EX_8_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 31010A51,
+REG64( EX_9_L2_FIR_HOLD_OUT                                    , RULL(0x32010A51), SH_UNT_EX_9_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 33010A51,
+REG64( EX_L2_FIR_HOLD_OUT                                      , RULL(0x20010A51), SH_UNT_EX_L2    ,
+       SH_ACS_SCOM_RO   ); //DUPS: 21010A51,
 
 REG64( C_FIR_MASK                                              , RULL(0x20040002), SH_UNT_C        , SH_ACS_SCOM      );
 REG64( C_0_FIR_MASK                                            , RULL(0x20040002), SH_UNT_C_0      , SH_ACS_SCOM      );
@@ -10180,58 +10123,6 @@ REG64( EX_L2_FIR_MASK_REG_OR                                   , RULL(0x10010805
 REG64( EX_L3_FIR_MASK_REG                                      , RULL(0x10011803), SH_UNT_EX_L3    , SH_ACS_SCOM_RW   );
 REG64( EX_L3_FIR_MASK_REG_AND                                  , RULL(0x10011804), SH_UNT_EX_L3    , SH_ACS_SCOM1_AND );
 REG64( EX_L3_FIR_MASK_REG_OR                                   , RULL(0x10011805), SH_UNT_EX_L3    , SH_ACS_SCOM2_OR  );
-
-REG64( C_FIR_RANDOM_LFSR                                       , RULL(0x20010A4F), SH_UNT_C        , SH_ACS_SCOM      );
-REG64( C_0_FIR_RANDOM_LFSR                                     , RULL(0x20010A4F), SH_UNT_C_0      , SH_ACS_SCOM      );
-REG64( C_1_FIR_RANDOM_LFSR                                     , RULL(0x21010A4F), SH_UNT_C_1      , SH_ACS_SCOM      );
-REG64( C_2_FIR_RANDOM_LFSR                                     , RULL(0x22010A4F), SH_UNT_C_2      , SH_ACS_SCOM      );
-REG64( C_3_FIR_RANDOM_LFSR                                     , RULL(0x23010A4F), SH_UNT_C_3      , SH_ACS_SCOM      );
-REG64( C_4_FIR_RANDOM_LFSR                                     , RULL(0x24010A4F), SH_UNT_C_4      , SH_ACS_SCOM      );
-REG64( C_5_FIR_RANDOM_LFSR                                     , RULL(0x25010A4F), SH_UNT_C_5      , SH_ACS_SCOM      );
-REG64( C_6_FIR_RANDOM_LFSR                                     , RULL(0x26010A4F), SH_UNT_C_6      , SH_ACS_SCOM      );
-REG64( C_7_FIR_RANDOM_LFSR                                     , RULL(0x27010A4F), SH_UNT_C_7      , SH_ACS_SCOM      );
-REG64( C_8_FIR_RANDOM_LFSR                                     , RULL(0x28010A4F), SH_UNT_C_8      , SH_ACS_SCOM      );
-REG64( C_9_FIR_RANDOM_LFSR                                     , RULL(0x29010A4F), SH_UNT_C_9      , SH_ACS_SCOM      );
-REG64( C_10_FIR_RANDOM_LFSR                                    , RULL(0x2A010A4F), SH_UNT_C_10     , SH_ACS_SCOM      );
-REG64( C_11_FIR_RANDOM_LFSR                                    , RULL(0x2B010A4F), SH_UNT_C_11     , SH_ACS_SCOM      );
-REG64( C_12_FIR_RANDOM_LFSR                                    , RULL(0x2C010A4F), SH_UNT_C_12     , SH_ACS_SCOM      );
-REG64( C_13_FIR_RANDOM_LFSR                                    , RULL(0x2D010A4F), SH_UNT_C_13     , SH_ACS_SCOM      );
-REG64( C_14_FIR_RANDOM_LFSR                                    , RULL(0x2E010A4F), SH_UNT_C_14     , SH_ACS_SCOM      );
-REG64( C_15_FIR_RANDOM_LFSR                                    , RULL(0x2F010A4F), SH_UNT_C_15     , SH_ACS_SCOM      );
-REG64( C_16_FIR_RANDOM_LFSR                                    , RULL(0x30010A4F), SH_UNT_C_16     , SH_ACS_SCOM      );
-REG64( C_17_FIR_RANDOM_LFSR                                    , RULL(0x31010A4F), SH_UNT_C_17     , SH_ACS_SCOM      );
-REG64( C_18_FIR_RANDOM_LFSR                                    , RULL(0x32010A4F), SH_UNT_C_18     , SH_ACS_SCOM      );
-REG64( C_19_FIR_RANDOM_LFSR                                    , RULL(0x33010A4F), SH_UNT_C_19     , SH_ACS_SCOM      );
-REG64( C_20_FIR_RANDOM_LFSR                                    , RULL(0x34010A4F), SH_UNT_C_20     , SH_ACS_SCOM      );
-REG64( C_21_FIR_RANDOM_LFSR                                    , RULL(0x35010A4F), SH_UNT_C_21     , SH_ACS_SCOM      );
-REG64( C_22_FIR_RANDOM_LFSR                                    , RULL(0x36010A4F), SH_UNT_C_22     , SH_ACS_SCOM      );
-REG64( C_23_FIR_RANDOM_LFSR                                    , RULL(0x37010A4F), SH_UNT_C_23     , SH_ACS_SCOM      );
-REG64( EX_FIR_RANDOM_LFSR                                      , RULL(0x20010A4F), SH_UNT_EX       ,
-       SH_ACS_SCOM      ); //DUPS: 21010A4F,
-REG64( EX_0_FIR_RANDOM_LFSR                                    , RULL(0x20010A4F), SH_UNT_EX_0     ,
-       SH_ACS_SCOM      ); //DUPS: 21010A4F,
-REG64( EX_1_FIR_RANDOM_LFSR                                    , RULL(0x22010A4F), SH_UNT_EX_1     ,
-       SH_ACS_SCOM      ); //DUPS: 23010A4F,
-REG64( EX_2_FIR_RANDOM_LFSR                                    , RULL(0x24010A4F), SH_UNT_EX_2     ,
-       SH_ACS_SCOM      ); //DUPS: 25010A4F,
-REG64( EX_3_FIR_RANDOM_LFSR                                    , RULL(0x26010A4F), SH_UNT_EX_3     ,
-       SH_ACS_SCOM      ); //DUPS: 27010A4F,
-REG64( EX_4_FIR_RANDOM_LFSR                                    , RULL(0x28010A4F), SH_UNT_EX_4     ,
-       SH_ACS_SCOM      ); //DUPS: 29010A4F,
-REG64( EX_5_FIR_RANDOM_LFSR                                    , RULL(0x2A010A4F), SH_UNT_EX_5     ,
-       SH_ACS_SCOM      ); //DUPS: 2B010A4F,
-REG64( EX_6_FIR_RANDOM_LFSR                                    , RULL(0x2C010A4F), SH_UNT_EX_6     ,
-       SH_ACS_SCOM      ); //DUPS: 2D010A4F,
-REG64( EX_7_FIR_RANDOM_LFSR                                    , RULL(0x2E010A4F), SH_UNT_EX_7     ,
-       SH_ACS_SCOM      ); //DUPS: 2F010A4F,
-REG64( EX_8_FIR_RANDOM_LFSR                                    , RULL(0x30010A4F), SH_UNT_EX_8     ,
-       SH_ACS_SCOM      ); //DUPS: 31010A4F,
-REG64( EX_9_FIR_RANDOM_LFSR                                    , RULL(0x32010A4F), SH_UNT_EX_9     ,
-       SH_ACS_SCOM      ); //DUPS: 33010A4F,
-REG64( EX_10_FIR_RANDOM_LFSR                                   , RULL(0x34010A4F), SH_UNT_EX_10    ,
-       SH_ACS_SCOM      ); //DUPS: 35010A4F,
-REG64( EX_11_FIR_RANDOM_LFSR                                   , RULL(0x36010A4F), SH_UNT_EX_11    ,
-       SH_ACS_SCOM      ); //DUPS: 37010A4F,
 
 REG64( EQ_FIR_REG                                              , RULL(0x10010800), SH_UNT_EQ       ,
        SH_ACS_SCOM_RW   ); //DUPS: 10011800, 10011000, 10010C00, 10011C00, 10011400,
@@ -10629,57 +10520,57 @@ REG64( EX_10_GXSTOP_TRIG_REG                                   , RULL(0x34040013
 REG64( EX_11_GXSTOP_TRIG_REG                                   , RULL(0x36040013), SH_UNT_EX_11    ,
        SH_ACS_SCOM      ); //DUPS: 37040013,
 
-REG64( C_HANG_CONTROL                                          , RULL(0x20010A00), SH_UNT_C        , SH_ACS_SCOM      );
-REG64( C_0_HANG_CONTROL                                        , RULL(0x20010A00), SH_UNT_C_0      , SH_ACS_SCOM      );
-REG64( C_1_HANG_CONTROL                                        , RULL(0x21010A00), SH_UNT_C_1      , SH_ACS_SCOM      );
-REG64( C_2_HANG_CONTROL                                        , RULL(0x22010A00), SH_UNT_C_2      , SH_ACS_SCOM      );
-REG64( C_3_HANG_CONTROL                                        , RULL(0x23010A00), SH_UNT_C_3      , SH_ACS_SCOM      );
-REG64( C_4_HANG_CONTROL                                        , RULL(0x24010A00), SH_UNT_C_4      , SH_ACS_SCOM      );
-REG64( C_5_HANG_CONTROL                                        , RULL(0x25010A00), SH_UNT_C_5      , SH_ACS_SCOM      );
-REG64( C_6_HANG_CONTROL                                        , RULL(0x26010A00), SH_UNT_C_6      , SH_ACS_SCOM      );
-REG64( C_7_HANG_CONTROL                                        , RULL(0x27010A00), SH_UNT_C_7      , SH_ACS_SCOM      );
-REG64( C_8_HANG_CONTROL                                        , RULL(0x28010A00), SH_UNT_C_8      , SH_ACS_SCOM      );
-REG64( C_9_HANG_CONTROL                                        , RULL(0x29010A00), SH_UNT_C_9      , SH_ACS_SCOM      );
-REG64( C_10_HANG_CONTROL                                       , RULL(0x2A010A00), SH_UNT_C_10     , SH_ACS_SCOM      );
-REG64( C_11_HANG_CONTROL                                       , RULL(0x2B010A00), SH_UNT_C_11     , SH_ACS_SCOM      );
-REG64( C_12_HANG_CONTROL                                       , RULL(0x2C010A00), SH_UNT_C_12     , SH_ACS_SCOM      );
-REG64( C_13_HANG_CONTROL                                       , RULL(0x2D010A00), SH_UNT_C_13     , SH_ACS_SCOM      );
-REG64( C_14_HANG_CONTROL                                       , RULL(0x2E010A00), SH_UNT_C_14     , SH_ACS_SCOM      );
-REG64( C_15_HANG_CONTROL                                       , RULL(0x2F010A00), SH_UNT_C_15     , SH_ACS_SCOM      );
-REG64( C_16_HANG_CONTROL                                       , RULL(0x30010A00), SH_UNT_C_16     , SH_ACS_SCOM      );
-REG64( C_17_HANG_CONTROL                                       , RULL(0x31010A00), SH_UNT_C_17     , SH_ACS_SCOM      );
-REG64( C_18_HANG_CONTROL                                       , RULL(0x32010A00), SH_UNT_C_18     , SH_ACS_SCOM      );
-REG64( C_19_HANG_CONTROL                                       , RULL(0x33010A00), SH_UNT_C_19     , SH_ACS_SCOM      );
-REG64( C_20_HANG_CONTROL                                       , RULL(0x34010A00), SH_UNT_C_20     , SH_ACS_SCOM      );
-REG64( C_21_HANG_CONTROL                                       , RULL(0x35010A00), SH_UNT_C_21     , SH_ACS_SCOM      );
-REG64( C_22_HANG_CONTROL                                       , RULL(0x36010A00), SH_UNT_C_22     , SH_ACS_SCOM      );
-REG64( C_23_HANG_CONTROL                                       , RULL(0x37010A00), SH_UNT_C_23     , SH_ACS_SCOM      );
+REG64( C_HANG_CONTROL                                          , RULL(0x20010A00), SH_UNT_C        , SH_ACS_SCOM_RW   );
+REG64( C_0_HANG_CONTROL                                        , RULL(0x20010A00), SH_UNT_C_0      , SH_ACS_SCOM_RW   );
+REG64( C_1_HANG_CONTROL                                        , RULL(0x21010A00), SH_UNT_C_1      , SH_ACS_SCOM_RW   );
+REG64( C_2_HANG_CONTROL                                        , RULL(0x22010A00), SH_UNT_C_2      , SH_ACS_SCOM_RW   );
+REG64( C_3_HANG_CONTROL                                        , RULL(0x23010A00), SH_UNT_C_3      , SH_ACS_SCOM_RW   );
+REG64( C_4_HANG_CONTROL                                        , RULL(0x24010A00), SH_UNT_C_4      , SH_ACS_SCOM_RW   );
+REG64( C_5_HANG_CONTROL                                        , RULL(0x25010A00), SH_UNT_C_5      , SH_ACS_SCOM_RW   );
+REG64( C_6_HANG_CONTROL                                        , RULL(0x26010A00), SH_UNT_C_6      , SH_ACS_SCOM_RW   );
+REG64( C_7_HANG_CONTROL                                        , RULL(0x27010A00), SH_UNT_C_7      , SH_ACS_SCOM_RW   );
+REG64( C_8_HANG_CONTROL                                        , RULL(0x28010A00), SH_UNT_C_8      , SH_ACS_SCOM_RW   );
+REG64( C_9_HANG_CONTROL                                        , RULL(0x29010A00), SH_UNT_C_9      , SH_ACS_SCOM_RW   );
+REG64( C_10_HANG_CONTROL                                       , RULL(0x2A010A00), SH_UNT_C_10     , SH_ACS_SCOM_RW   );
+REG64( C_11_HANG_CONTROL                                       , RULL(0x2B010A00), SH_UNT_C_11     , SH_ACS_SCOM_RW   );
+REG64( C_12_HANG_CONTROL                                       , RULL(0x2C010A00), SH_UNT_C_12     , SH_ACS_SCOM_RW   );
+REG64( C_13_HANG_CONTROL                                       , RULL(0x2D010A00), SH_UNT_C_13     , SH_ACS_SCOM_RW   );
+REG64( C_14_HANG_CONTROL                                       , RULL(0x2E010A00), SH_UNT_C_14     , SH_ACS_SCOM_RW   );
+REG64( C_15_HANG_CONTROL                                       , RULL(0x2F010A00), SH_UNT_C_15     , SH_ACS_SCOM_RW   );
+REG64( C_16_HANG_CONTROL                                       , RULL(0x30010A00), SH_UNT_C_16     , SH_ACS_SCOM_RW   );
+REG64( C_17_HANG_CONTROL                                       , RULL(0x31010A00), SH_UNT_C_17     , SH_ACS_SCOM_RW   );
+REG64( C_18_HANG_CONTROL                                       , RULL(0x32010A00), SH_UNT_C_18     , SH_ACS_SCOM_RW   );
+REG64( C_19_HANG_CONTROL                                       , RULL(0x33010A00), SH_UNT_C_19     , SH_ACS_SCOM_RW   );
+REG64( C_20_HANG_CONTROL                                       , RULL(0x34010A00), SH_UNT_C_20     , SH_ACS_SCOM_RW   );
+REG64( C_21_HANG_CONTROL                                       , RULL(0x35010A00), SH_UNT_C_21     , SH_ACS_SCOM_RW   );
+REG64( C_22_HANG_CONTROL                                       , RULL(0x36010A00), SH_UNT_C_22     , SH_ACS_SCOM_RW   );
+REG64( C_23_HANG_CONTROL                                       , RULL(0x37010A00), SH_UNT_C_23     , SH_ACS_SCOM_RW   );
 REG64( EX_0_L2_HANG_CONTROL                                    , RULL(0x20010A00), SH_UNT_EX_0_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 21010A00,
+       SH_ACS_SCOM_RW   ); //DUPS: 21010A00,
 REG64( EX_10_L2_HANG_CONTROL                                   , RULL(0x34010A00), SH_UNT_EX_10_L2 ,
-       SH_ACS_SCOM      ); //DUPS: 35010A00,
+       SH_ACS_SCOM_RW   ); //DUPS: 35010A00,
 REG64( EX_11_L2_HANG_CONTROL                                   , RULL(0x36010A00), SH_UNT_EX_11_L2 ,
-       SH_ACS_SCOM      ); //DUPS: 37010A00,
+       SH_ACS_SCOM_RW   ); //DUPS: 37010A00,
 REG64( EX_1_L2_HANG_CONTROL                                    , RULL(0x22010A00), SH_UNT_EX_1_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 23010A00,
+       SH_ACS_SCOM_RW   ); //DUPS: 23010A00,
 REG64( EX_2_L2_HANG_CONTROL                                    , RULL(0x24010A00), SH_UNT_EX_2_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 25010A00,
+       SH_ACS_SCOM_RW   ); //DUPS: 25010A00,
 REG64( EX_3_L2_HANG_CONTROL                                    , RULL(0x26010A00), SH_UNT_EX_3_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 27010A00,
+       SH_ACS_SCOM_RW   ); //DUPS: 27010A00,
 REG64( EX_4_L2_HANG_CONTROL                                    , RULL(0x28010A00), SH_UNT_EX_4_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 29010A00,
+       SH_ACS_SCOM_RW   ); //DUPS: 29010A00,
 REG64( EX_5_L2_HANG_CONTROL                                    , RULL(0x2A010A00), SH_UNT_EX_5_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 2B010A00,
+       SH_ACS_SCOM_RW   ); //DUPS: 2B010A00,
 REG64( EX_6_L2_HANG_CONTROL                                    , RULL(0x2C010A00), SH_UNT_EX_6_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 2D010A00,
+       SH_ACS_SCOM_RW   ); //DUPS: 2D010A00,
 REG64( EX_7_L2_HANG_CONTROL                                    , RULL(0x2E010A00), SH_UNT_EX_7_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 2F010A00,
+       SH_ACS_SCOM_RW   ); //DUPS: 2F010A00,
 REG64( EX_8_L2_HANG_CONTROL                                    , RULL(0x30010A00), SH_UNT_EX_8_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 31010A00,
+       SH_ACS_SCOM_RW   ); //DUPS: 31010A00,
 REG64( EX_9_L2_HANG_CONTROL                                    , RULL(0x32010A00), SH_UNT_EX_9_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 33010A00,
+       SH_ACS_SCOM_RW   ); //DUPS: 33010A00,
 REG64( EX_L2_HANG_CONTROL                                      , RULL(0x20010A00), SH_UNT_EX_L2    ,
-       SH_ACS_SCOM      ); //DUPS: 21010A00,
+       SH_ACS_SCOM_RW   ); //DUPS: 21010A00,
 
 REG64( C_HANG_PULSE_0_REG                                      , RULL(0x200F0020), SH_UNT_C        , SH_ACS_SCOM_RW   );
 REG64( C_0_HANG_PULSE_0_REG                                    , RULL(0x200F0020), SH_UNT_C_0      , SH_ACS_SCOM_RW   );
@@ -11375,20 +11266,20 @@ REG64( EX_10_HOSTATTN_MASK                                     , RULL(0x3404001A
 REG64( EX_11_HOSTATTN_MASK                                     , RULL(0x3604001A), SH_UNT_EX_11    ,
        SH_ACS_SCOM      ); //DUPS: 3704001A,
 
-REG64( EQ_HTM_CTRL                                             , RULL(0x10012A05), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012B05, 10012605, 10012705,
-REG64( EQ_0_HTM_CTRL                                           , RULL(0x10012A05), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012B05, 10012605, 10012705,
-REG64( EQ_1_HTM_CTRL                                           , RULL(0x11012A05), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 11012B05, 11012605, 11012705,
-REG64( EQ_2_HTM_CTRL                                           , RULL(0x12012A05), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 12012B05, 12012605, 12012705,
-REG64( EQ_3_HTM_CTRL                                           , RULL(0x13012A05), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 13012B05, 13012605, 13012705,
-REG64( EQ_4_HTM_CTRL                                           , RULL(0x14012A05), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 14012B05, 14012605, 14012705,
-REG64( EQ_5_HTM_CTRL                                           , RULL(0x15012A05), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 15012B05, 15012605, 15012705,
+REG64( EQ_HTM_CTRL                                             , RULL(0x10012605), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012705, 10012205, 10012305,
+REG64( EQ_0_HTM_CTRL                                           , RULL(0x10012605), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012705, 10012205, 10012305,
+REG64( EQ_1_HTM_CTRL                                           , RULL(0x11012605), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 11012705, 11012205, 11012305,
+REG64( EQ_2_HTM_CTRL                                           , RULL(0x12012605), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 12012705, 12012205, 12012305,
+REG64( EQ_3_HTM_CTRL                                           , RULL(0x13012605), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 13012705, 13012205, 13012305,
+REG64( EQ_4_HTM_CTRL                                           , RULL(0x14012605), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 14012705, 14012205, 14012305,
+REG64( EQ_5_HTM_CTRL                                           , RULL(0x15012605), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 15012705, 15012205, 15012305,
 REG64( EX_0_CHTMLBS0_HTM_CTRL                                  , RULL(0x10012605), SH_UNT_EX_0_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_0_CHTMLBS1_HTM_CTRL                                  , RULL(0x10012705), SH_UNT_EX_0_CHTMLBS1,
@@ -11397,65 +11288,41 @@ REG64( EX_10_CHTMLBS0_HTM_CTRL                                 , RULL(0x15012605
        SH_ACS_SCOM_RW   );
 REG64( EX_10_CHTMLBS1_HTM_CTRL                                 , RULL(0x15012705), SH_UNT_EX_10_CHTMLBS1,
        SH_ACS_SCOM_RW   );
-REG64( EX_11_CHTMLBS0_HTM_CTRL                                 , RULL(0x15012A05), SH_UNT_EX_11_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_11_CHTMLBS1_HTM_CTRL                                 , RULL(0x15012B05), SH_UNT_EX_11_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
-REG64( EX_1_CHTMLBS0_HTM_CTRL                                  , RULL(0x10012A05), SH_UNT_EX_1_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_1_CHTMLBS1_HTM_CTRL                                  , RULL(0x10012B05), SH_UNT_EX_1_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
 REG64( EX_2_CHTMLBS0_HTM_CTRL                                  , RULL(0x11012605), SH_UNT_EX_2_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_2_CHTMLBS1_HTM_CTRL                                  , RULL(0x11012705), SH_UNT_EX_2_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
-REG64( EX_3_CHTMLBS0_HTM_CTRL                                  , RULL(0x11012A05), SH_UNT_EX_3_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_3_CHTMLBS1_HTM_CTRL                                  , RULL(0x11012B05), SH_UNT_EX_3_CHTMLBS1,
        SH_ACS_SCOM_RW   );
 REG64( EX_4_CHTMLBS0_HTM_CTRL                                  , RULL(0x12012605), SH_UNT_EX_4_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_4_CHTMLBS1_HTM_CTRL                                  , RULL(0x12012705), SH_UNT_EX_4_CHTMLBS1,
        SH_ACS_SCOM_RW   );
-REG64( EX_5_CHTMLBS0_HTM_CTRL                                  , RULL(0x12012A05), SH_UNT_EX_5_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_5_CHTMLBS1_HTM_CTRL                                  , RULL(0x12012B05), SH_UNT_EX_5_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
 REG64( EX_6_CHTMLBS0_HTM_CTRL                                  , RULL(0x13012605), SH_UNT_EX_6_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_6_CHTMLBS1_HTM_CTRL                                  , RULL(0x13012705), SH_UNT_EX_6_CHTMLBS1,
        SH_ACS_SCOM_RW   );
-REG64( EX_7_CHTMLBS0_HTM_CTRL                                  , RULL(0x13012A05), SH_UNT_EX_7_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_7_CHTMLBS1_HTM_CTRL                                  , RULL(0x13012B05), SH_UNT_EX_7_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
 REG64( EX_8_CHTMLBS0_HTM_CTRL                                  , RULL(0x14012605), SH_UNT_EX_8_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_8_CHTMLBS1_HTM_CTRL                                  , RULL(0x14012705), SH_UNT_EX_8_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
-REG64( EX_9_CHTMLBS0_HTM_CTRL                                  , RULL(0x14012A05), SH_UNT_EX_9_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_9_CHTMLBS1_HTM_CTRL                                  , RULL(0x14012B05), SH_UNT_EX_9_CHTMLBS1,
        SH_ACS_SCOM_RW   );
 REG64( EX_CHTMLBS0_HTM_CTRL                                    , RULL(0x10012605), SH_UNT_EX_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_CHTMLBS1_HTM_CTRL                                    , RULL(0x10012705), SH_UNT_EX_CHTMLBS1,
        SH_ACS_SCOM_RW   );
 
-REG64( EQ_HTM_IMA_PDBAR                                        , RULL(0x10012A0B), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012B0B, 1001260B, 1001270B,
-REG64( EQ_0_HTM_IMA_PDBAR                                      , RULL(0x10012A0B), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012B0B, 1001260B, 1001270B,
-REG64( EQ_1_HTM_IMA_PDBAR                                      , RULL(0x11012A0B), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 11012B0B, 1101260B, 1101270B,
-REG64( EQ_2_HTM_IMA_PDBAR                                      , RULL(0x12012A0B), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 12012B0B, 1201260B, 1201270B,
-REG64( EQ_3_HTM_IMA_PDBAR                                      , RULL(0x13012A0B), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 13012B0B, 1301260B, 1301270B,
-REG64( EQ_4_HTM_IMA_PDBAR                                      , RULL(0x14012A0B), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 14012B0B, 1401260B, 1401270B,
-REG64( EQ_5_HTM_IMA_PDBAR                                      , RULL(0x15012A0B), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 15012B0B, 1501260B, 1501270B,
+REG64( EQ_HTM_IMA_PDBAR                                        , RULL(0x1001260B), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1001270B, 1001220B, 1001230B,
+REG64( EQ_0_HTM_IMA_PDBAR                                      , RULL(0x1001260B), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1001270B, 1001220B, 1001230B,
+REG64( EQ_1_HTM_IMA_PDBAR                                      , RULL(0x1101260B), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1101270B, 1101220B, 1101230B,
+REG64( EQ_2_HTM_IMA_PDBAR                                      , RULL(0x1201260B), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1201270B, 1201220B, 1201230B,
+REG64( EQ_3_HTM_IMA_PDBAR                                      , RULL(0x1301260B), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1301270B, 1301220B, 1301230B,
+REG64( EQ_4_HTM_IMA_PDBAR                                      , RULL(0x1401260B), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1401270B, 1401220B, 1401230B,
+REG64( EQ_5_HTM_IMA_PDBAR                                      , RULL(0x1501260B), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 1501270B, 1501220B, 1501230B,
 REG64( EX_0_CHTMLBS0_HTM_IMA_PDBAR                             , RULL(0x1001260B), SH_UNT_EX_0_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_0_CHTMLBS1_HTM_IMA_PDBAR                             , RULL(0x1001270B), SH_UNT_EX_0_CHTMLBS1,
@@ -11464,65 +11331,41 @@ REG64( EX_10_CHTMLBS0_HTM_IMA_PDBAR                            , RULL(0x1501260B
        SH_ACS_SCOM_RW   );
 REG64( EX_10_CHTMLBS1_HTM_IMA_PDBAR                            , RULL(0x1501270B), SH_UNT_EX_10_CHTMLBS1,
        SH_ACS_SCOM_RW   );
-REG64( EX_11_CHTMLBS0_HTM_IMA_PDBAR                            , RULL(0x15012A0B), SH_UNT_EX_11_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_11_CHTMLBS1_HTM_IMA_PDBAR                            , RULL(0x15012B0B), SH_UNT_EX_11_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
-REG64( EX_1_CHTMLBS0_HTM_IMA_PDBAR                             , RULL(0x10012A0B), SH_UNT_EX_1_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_1_CHTMLBS1_HTM_IMA_PDBAR                             , RULL(0x10012B0B), SH_UNT_EX_1_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
 REG64( EX_2_CHTMLBS0_HTM_IMA_PDBAR                             , RULL(0x1101260B), SH_UNT_EX_2_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_2_CHTMLBS1_HTM_IMA_PDBAR                             , RULL(0x1101270B), SH_UNT_EX_2_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
-REG64( EX_3_CHTMLBS0_HTM_IMA_PDBAR                             , RULL(0x11012A0B), SH_UNT_EX_3_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_3_CHTMLBS1_HTM_IMA_PDBAR                             , RULL(0x11012B0B), SH_UNT_EX_3_CHTMLBS1,
        SH_ACS_SCOM_RW   );
 REG64( EX_4_CHTMLBS0_HTM_IMA_PDBAR                             , RULL(0x1201260B), SH_UNT_EX_4_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_4_CHTMLBS1_HTM_IMA_PDBAR                             , RULL(0x1201270B), SH_UNT_EX_4_CHTMLBS1,
        SH_ACS_SCOM_RW   );
-REG64( EX_5_CHTMLBS0_HTM_IMA_PDBAR                             , RULL(0x12012A0B), SH_UNT_EX_5_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_5_CHTMLBS1_HTM_IMA_PDBAR                             , RULL(0x12012B0B), SH_UNT_EX_5_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
 REG64( EX_6_CHTMLBS0_HTM_IMA_PDBAR                             , RULL(0x1301260B), SH_UNT_EX_6_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_6_CHTMLBS1_HTM_IMA_PDBAR                             , RULL(0x1301270B), SH_UNT_EX_6_CHTMLBS1,
        SH_ACS_SCOM_RW   );
-REG64( EX_7_CHTMLBS0_HTM_IMA_PDBAR                             , RULL(0x13012A0B), SH_UNT_EX_7_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_7_CHTMLBS1_HTM_IMA_PDBAR                             , RULL(0x13012B0B), SH_UNT_EX_7_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
 REG64( EX_8_CHTMLBS0_HTM_IMA_PDBAR                             , RULL(0x1401260B), SH_UNT_EX_8_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_8_CHTMLBS1_HTM_IMA_PDBAR                             , RULL(0x1401270B), SH_UNT_EX_8_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
-REG64( EX_9_CHTMLBS0_HTM_IMA_PDBAR                             , RULL(0x14012A0B), SH_UNT_EX_9_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_9_CHTMLBS1_HTM_IMA_PDBAR                             , RULL(0x14012B0B), SH_UNT_EX_9_CHTMLBS1,
        SH_ACS_SCOM_RW   );
 REG64( EX_CHTMLBS0_HTM_IMA_PDBAR                               , RULL(0x1001260B), SH_UNT_EX_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_CHTMLBS1_HTM_IMA_PDBAR                               , RULL(0x1001270B), SH_UNT_EX_CHTMLBS1,
        SH_ACS_SCOM_RW   );
 
-REG64( EQ_HTM_IMA_STATUS                                       , RULL(0x10012A0A), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012B0A, 1001260A, 1001270A,
-REG64( EQ_0_HTM_IMA_STATUS                                     , RULL(0x10012A0A), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012B0A, 1001260A, 1001270A,
-REG64( EQ_1_HTM_IMA_STATUS                                     , RULL(0x11012A0A), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 11012B0A, 1101260A, 1101270A,
-REG64( EQ_2_HTM_IMA_STATUS                                     , RULL(0x12012A0A), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 12012B0A, 1201260A, 1201270A,
-REG64( EQ_3_HTM_IMA_STATUS                                     , RULL(0x13012A0A), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 13012B0A, 1301260A, 1301270A,
-REG64( EQ_4_HTM_IMA_STATUS                                     , RULL(0x14012A0A), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 14012B0A, 1401260A, 1401270A,
-REG64( EQ_5_HTM_IMA_STATUS                                     , RULL(0x15012A0A), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 15012B0A, 1501260A, 1501270A,
+REG64( EQ_HTM_IMA_STATUS                                       , RULL(0x1001260A), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1001270A, 1001220A, 1001230A,
+REG64( EQ_0_HTM_IMA_STATUS                                     , RULL(0x1001260A), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1001270A, 1001220A, 1001230A,
+REG64( EQ_1_HTM_IMA_STATUS                                     , RULL(0x1101260A), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1101270A, 1101220A, 1101230A,
+REG64( EQ_2_HTM_IMA_STATUS                                     , RULL(0x1201260A), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1201270A, 1201220A, 1201230A,
+REG64( EQ_3_HTM_IMA_STATUS                                     , RULL(0x1301260A), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1301270A, 1301220A, 1301230A,
+REG64( EQ_4_HTM_IMA_STATUS                                     , RULL(0x1401260A), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1401270A, 1401220A, 1401230A,
+REG64( EQ_5_HTM_IMA_STATUS                                     , RULL(0x1501260A), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 1501270A, 1501220A, 1501230A,
 REG64( EX_0_CHTMLBS0_HTM_IMA_STATUS                            , RULL(0x1001260A), SH_UNT_EX_0_CHTMLBS0,
        SH_ACS_SCOM_RO   );
 REG64( EX_0_CHTMLBS1_HTM_IMA_STATUS                            , RULL(0x1001270A), SH_UNT_EX_0_CHTMLBS1,
@@ -11531,65 +11374,41 @@ REG64( EX_10_CHTMLBS0_HTM_IMA_STATUS                           , RULL(0x1501260A
        SH_ACS_SCOM_RO   );
 REG64( EX_10_CHTMLBS1_HTM_IMA_STATUS                           , RULL(0x1501270A), SH_UNT_EX_10_CHTMLBS1,
        SH_ACS_SCOM_RO   );
-REG64( EX_11_CHTMLBS0_HTM_IMA_STATUS                           , RULL(0x15012A0A), SH_UNT_EX_11_CHTMLBS0,
-       SH_ACS_SCOM_RO   );
-REG64( EX_11_CHTMLBS1_HTM_IMA_STATUS                           , RULL(0x15012B0A), SH_UNT_EX_11_CHTMLBS1,
-       SH_ACS_SCOM_RO   );
-REG64( EX_1_CHTMLBS0_HTM_IMA_STATUS                            , RULL(0x10012A0A), SH_UNT_EX_1_CHTMLBS0,
-       SH_ACS_SCOM_RO   );
-REG64( EX_1_CHTMLBS1_HTM_IMA_STATUS                            , RULL(0x10012B0A), SH_UNT_EX_1_CHTMLBS1,
-       SH_ACS_SCOM_RO   );
 REG64( EX_2_CHTMLBS0_HTM_IMA_STATUS                            , RULL(0x1101260A), SH_UNT_EX_2_CHTMLBS0,
        SH_ACS_SCOM_RO   );
 REG64( EX_2_CHTMLBS1_HTM_IMA_STATUS                            , RULL(0x1101270A), SH_UNT_EX_2_CHTMLBS1,
-       SH_ACS_SCOM_RO   );
-REG64( EX_3_CHTMLBS0_HTM_IMA_STATUS                            , RULL(0x11012A0A), SH_UNT_EX_3_CHTMLBS0,
-       SH_ACS_SCOM_RO   );
-REG64( EX_3_CHTMLBS1_HTM_IMA_STATUS                            , RULL(0x11012B0A), SH_UNT_EX_3_CHTMLBS1,
        SH_ACS_SCOM_RO   );
 REG64( EX_4_CHTMLBS0_HTM_IMA_STATUS                            , RULL(0x1201260A), SH_UNT_EX_4_CHTMLBS0,
        SH_ACS_SCOM_RO   );
 REG64( EX_4_CHTMLBS1_HTM_IMA_STATUS                            , RULL(0x1201270A), SH_UNT_EX_4_CHTMLBS1,
        SH_ACS_SCOM_RO   );
-REG64( EX_5_CHTMLBS0_HTM_IMA_STATUS                            , RULL(0x12012A0A), SH_UNT_EX_5_CHTMLBS0,
-       SH_ACS_SCOM_RO   );
-REG64( EX_5_CHTMLBS1_HTM_IMA_STATUS                            , RULL(0x12012B0A), SH_UNT_EX_5_CHTMLBS1,
-       SH_ACS_SCOM_RO   );
 REG64( EX_6_CHTMLBS0_HTM_IMA_STATUS                            , RULL(0x1301260A), SH_UNT_EX_6_CHTMLBS0,
        SH_ACS_SCOM_RO   );
 REG64( EX_6_CHTMLBS1_HTM_IMA_STATUS                            , RULL(0x1301270A), SH_UNT_EX_6_CHTMLBS1,
        SH_ACS_SCOM_RO   );
-REG64( EX_7_CHTMLBS0_HTM_IMA_STATUS                            , RULL(0x13012A0A), SH_UNT_EX_7_CHTMLBS0,
-       SH_ACS_SCOM_RO   );
-REG64( EX_7_CHTMLBS1_HTM_IMA_STATUS                            , RULL(0x13012B0A), SH_UNT_EX_7_CHTMLBS1,
-       SH_ACS_SCOM_RO   );
 REG64( EX_8_CHTMLBS0_HTM_IMA_STATUS                            , RULL(0x1401260A), SH_UNT_EX_8_CHTMLBS0,
        SH_ACS_SCOM_RO   );
 REG64( EX_8_CHTMLBS1_HTM_IMA_STATUS                            , RULL(0x1401270A), SH_UNT_EX_8_CHTMLBS1,
-       SH_ACS_SCOM_RO   );
-REG64( EX_9_CHTMLBS0_HTM_IMA_STATUS                            , RULL(0x14012A0A), SH_UNT_EX_9_CHTMLBS0,
-       SH_ACS_SCOM_RO   );
-REG64( EX_9_CHTMLBS1_HTM_IMA_STATUS                            , RULL(0x14012B0A), SH_UNT_EX_9_CHTMLBS1,
        SH_ACS_SCOM_RO   );
 REG64( EX_CHTMLBS0_HTM_IMA_STATUS                              , RULL(0x1001260A), SH_UNT_EX_CHTMLBS0,
        SH_ACS_SCOM_RO   );
 REG64( EX_CHTMLBS1_HTM_IMA_STATUS                              , RULL(0x1001270A), SH_UNT_EX_CHTMLBS1,
        SH_ACS_SCOM_RO   );
 
-REG64( EQ_HTM_LAST                                             , RULL(0x10012A03), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012B03, 10012603, 10012703,
-REG64( EQ_0_HTM_LAST                                           , RULL(0x10012A03), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012B03, 10012603, 10012703,
-REG64( EQ_1_HTM_LAST                                           , RULL(0x11012A03), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 11012B03, 11012603, 11012703,
-REG64( EQ_2_HTM_LAST                                           , RULL(0x12012A03), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 12012B03, 12012603, 12012703,
-REG64( EQ_3_HTM_LAST                                           , RULL(0x13012A03), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 13012B03, 13012603, 13012703,
-REG64( EQ_4_HTM_LAST                                           , RULL(0x14012A03), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 14012B03, 14012603, 14012703,
-REG64( EQ_5_HTM_LAST                                           , RULL(0x15012A03), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 15012B03, 15012603, 15012703,
+REG64( EQ_HTM_LAST                                             , RULL(0x10012603), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012703, 10012203, 10012303,
+REG64( EQ_0_HTM_LAST                                           , RULL(0x10012603), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012703, 10012203, 10012303,
+REG64( EQ_1_HTM_LAST                                           , RULL(0x11012603), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 11012703, 11012203, 11012303,
+REG64( EQ_2_HTM_LAST                                           , RULL(0x12012603), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 12012703, 12012203, 12012303,
+REG64( EQ_3_HTM_LAST                                           , RULL(0x13012603), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 13012703, 13012203, 13012303,
+REG64( EQ_4_HTM_LAST                                           , RULL(0x14012603), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 14012703, 14012203, 14012303,
+REG64( EQ_5_HTM_LAST                                           , RULL(0x15012603), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 15012703, 15012203, 15012303,
 REG64( EX_0_CHTMLBS0_HTM_LAST                                  , RULL(0x10012603), SH_UNT_EX_0_CHTMLBS0,
        SH_ACS_SCOM_RO   );
 REG64( EX_0_CHTMLBS1_HTM_LAST                                  , RULL(0x10012703), SH_UNT_EX_0_CHTMLBS1,
@@ -11598,65 +11417,41 @@ REG64( EX_10_CHTMLBS0_HTM_LAST                                 , RULL(0x15012603
        SH_ACS_SCOM_RO   );
 REG64( EX_10_CHTMLBS1_HTM_LAST                                 , RULL(0x15012703), SH_UNT_EX_10_CHTMLBS1,
        SH_ACS_SCOM_RO   );
-REG64( EX_11_CHTMLBS0_HTM_LAST                                 , RULL(0x15012A03), SH_UNT_EX_11_CHTMLBS0,
-       SH_ACS_SCOM_RO   );
-REG64( EX_11_CHTMLBS1_HTM_LAST                                 , RULL(0x15012B03), SH_UNT_EX_11_CHTMLBS1,
-       SH_ACS_SCOM_RO   );
-REG64( EX_1_CHTMLBS0_HTM_LAST                                  , RULL(0x10012A03), SH_UNT_EX_1_CHTMLBS0,
-       SH_ACS_SCOM_RO   );
-REG64( EX_1_CHTMLBS1_HTM_LAST                                  , RULL(0x10012B03), SH_UNT_EX_1_CHTMLBS1,
-       SH_ACS_SCOM_RO   );
 REG64( EX_2_CHTMLBS0_HTM_LAST                                  , RULL(0x11012603), SH_UNT_EX_2_CHTMLBS0,
        SH_ACS_SCOM_RO   );
 REG64( EX_2_CHTMLBS1_HTM_LAST                                  , RULL(0x11012703), SH_UNT_EX_2_CHTMLBS1,
-       SH_ACS_SCOM_RO   );
-REG64( EX_3_CHTMLBS0_HTM_LAST                                  , RULL(0x11012A03), SH_UNT_EX_3_CHTMLBS0,
-       SH_ACS_SCOM_RO   );
-REG64( EX_3_CHTMLBS1_HTM_LAST                                  , RULL(0x11012B03), SH_UNT_EX_3_CHTMLBS1,
        SH_ACS_SCOM_RO   );
 REG64( EX_4_CHTMLBS0_HTM_LAST                                  , RULL(0x12012603), SH_UNT_EX_4_CHTMLBS0,
        SH_ACS_SCOM_RO   );
 REG64( EX_4_CHTMLBS1_HTM_LAST                                  , RULL(0x12012703), SH_UNT_EX_4_CHTMLBS1,
        SH_ACS_SCOM_RO   );
-REG64( EX_5_CHTMLBS0_HTM_LAST                                  , RULL(0x12012A03), SH_UNT_EX_5_CHTMLBS0,
-       SH_ACS_SCOM_RO   );
-REG64( EX_5_CHTMLBS1_HTM_LAST                                  , RULL(0x12012B03), SH_UNT_EX_5_CHTMLBS1,
-       SH_ACS_SCOM_RO   );
 REG64( EX_6_CHTMLBS0_HTM_LAST                                  , RULL(0x13012603), SH_UNT_EX_6_CHTMLBS0,
        SH_ACS_SCOM_RO   );
 REG64( EX_6_CHTMLBS1_HTM_LAST                                  , RULL(0x13012703), SH_UNT_EX_6_CHTMLBS1,
        SH_ACS_SCOM_RO   );
-REG64( EX_7_CHTMLBS0_HTM_LAST                                  , RULL(0x13012A03), SH_UNT_EX_7_CHTMLBS0,
-       SH_ACS_SCOM_RO   );
-REG64( EX_7_CHTMLBS1_HTM_LAST                                  , RULL(0x13012B03), SH_UNT_EX_7_CHTMLBS1,
-       SH_ACS_SCOM_RO   );
 REG64( EX_8_CHTMLBS0_HTM_LAST                                  , RULL(0x14012603), SH_UNT_EX_8_CHTMLBS0,
        SH_ACS_SCOM_RO   );
 REG64( EX_8_CHTMLBS1_HTM_LAST                                  , RULL(0x14012703), SH_UNT_EX_8_CHTMLBS1,
-       SH_ACS_SCOM_RO   );
-REG64( EX_9_CHTMLBS0_HTM_LAST                                  , RULL(0x14012A03), SH_UNT_EX_9_CHTMLBS0,
-       SH_ACS_SCOM_RO   );
-REG64( EX_9_CHTMLBS1_HTM_LAST                                  , RULL(0x14012B03), SH_UNT_EX_9_CHTMLBS1,
        SH_ACS_SCOM_RO   );
 REG64( EX_CHTMLBS0_HTM_LAST                                    , RULL(0x10012603), SH_UNT_EX_CHTMLBS0,
        SH_ACS_SCOM_RO   );
 REG64( EX_CHTMLBS1_HTM_LAST                                    , RULL(0x10012703), SH_UNT_EX_CHTMLBS1,
        SH_ACS_SCOM_RO   );
 
-REG64( EQ_HTM_MEM                                              , RULL(0x10012A01), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012B01, 10012601, 10012701,
-REG64( EQ_0_HTM_MEM                                            , RULL(0x10012A01), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012B01, 10012601, 10012701,
-REG64( EQ_1_HTM_MEM                                            , RULL(0x11012A01), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 11012B01, 11012601, 11012701,
-REG64( EQ_2_HTM_MEM                                            , RULL(0x12012A01), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 12012B01, 12012601, 12012701,
-REG64( EQ_3_HTM_MEM                                            , RULL(0x13012A01), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 13012B01, 13012601, 13012701,
-REG64( EQ_4_HTM_MEM                                            , RULL(0x14012A01), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 14012B01, 14012601, 14012701,
-REG64( EQ_5_HTM_MEM                                            , RULL(0x15012A01), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 15012B01, 15012601, 15012701,
+REG64( EQ_HTM_MEM                                              , RULL(0x10012601), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012701, 10012201, 10012301,
+REG64( EQ_0_HTM_MEM                                            , RULL(0x10012601), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012701, 10012201, 10012301,
+REG64( EQ_1_HTM_MEM                                            , RULL(0x11012601), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 11012701, 11012201, 11012301,
+REG64( EQ_2_HTM_MEM                                            , RULL(0x12012601), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 12012701, 12012201, 12012301,
+REG64( EQ_3_HTM_MEM                                            , RULL(0x13012601), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 13012701, 13012201, 13012301,
+REG64( EQ_4_HTM_MEM                                            , RULL(0x14012601), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 14012701, 14012201, 14012301,
+REG64( EQ_5_HTM_MEM                                            , RULL(0x15012601), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 15012701, 15012201, 15012301,
 REG64( EX_0_CHTMLBS0_HTM_MEM                                   , RULL(0x10012601), SH_UNT_EX_0_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_0_CHTMLBS1_HTM_MEM                                   , RULL(0x10012701), SH_UNT_EX_0_CHTMLBS1,
@@ -11665,65 +11460,41 @@ REG64( EX_10_CHTMLBS0_HTM_MEM                                  , RULL(0x15012601
        SH_ACS_SCOM_RW   );
 REG64( EX_10_CHTMLBS1_HTM_MEM                                  , RULL(0x15012701), SH_UNT_EX_10_CHTMLBS1,
        SH_ACS_SCOM_RW   );
-REG64( EX_11_CHTMLBS0_HTM_MEM                                  , RULL(0x15012A01), SH_UNT_EX_11_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_11_CHTMLBS1_HTM_MEM                                  , RULL(0x15012B01), SH_UNT_EX_11_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
-REG64( EX_1_CHTMLBS0_HTM_MEM                                   , RULL(0x10012A01), SH_UNT_EX_1_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_1_CHTMLBS1_HTM_MEM                                   , RULL(0x10012B01), SH_UNT_EX_1_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
 REG64( EX_2_CHTMLBS0_HTM_MEM                                   , RULL(0x11012601), SH_UNT_EX_2_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_2_CHTMLBS1_HTM_MEM                                   , RULL(0x11012701), SH_UNT_EX_2_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
-REG64( EX_3_CHTMLBS0_HTM_MEM                                   , RULL(0x11012A01), SH_UNT_EX_3_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_3_CHTMLBS1_HTM_MEM                                   , RULL(0x11012B01), SH_UNT_EX_3_CHTMLBS1,
        SH_ACS_SCOM_RW   );
 REG64( EX_4_CHTMLBS0_HTM_MEM                                   , RULL(0x12012601), SH_UNT_EX_4_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_4_CHTMLBS1_HTM_MEM                                   , RULL(0x12012701), SH_UNT_EX_4_CHTMLBS1,
        SH_ACS_SCOM_RW   );
-REG64( EX_5_CHTMLBS0_HTM_MEM                                   , RULL(0x12012A01), SH_UNT_EX_5_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_5_CHTMLBS1_HTM_MEM                                   , RULL(0x12012B01), SH_UNT_EX_5_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
 REG64( EX_6_CHTMLBS0_HTM_MEM                                   , RULL(0x13012601), SH_UNT_EX_6_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_6_CHTMLBS1_HTM_MEM                                   , RULL(0x13012701), SH_UNT_EX_6_CHTMLBS1,
        SH_ACS_SCOM_RW   );
-REG64( EX_7_CHTMLBS0_HTM_MEM                                   , RULL(0x13012A01), SH_UNT_EX_7_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_7_CHTMLBS1_HTM_MEM                                   , RULL(0x13012B01), SH_UNT_EX_7_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
 REG64( EX_8_CHTMLBS0_HTM_MEM                                   , RULL(0x14012601), SH_UNT_EX_8_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_8_CHTMLBS1_HTM_MEM                                   , RULL(0x14012701), SH_UNT_EX_8_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
-REG64( EX_9_CHTMLBS0_HTM_MEM                                   , RULL(0x14012A01), SH_UNT_EX_9_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_9_CHTMLBS1_HTM_MEM                                   , RULL(0x14012B01), SH_UNT_EX_9_CHTMLBS1,
        SH_ACS_SCOM_RW   );
 REG64( EX_CHTMLBS0_HTM_MEM                                     , RULL(0x10012601), SH_UNT_EX_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_CHTMLBS1_HTM_MEM                                     , RULL(0x10012701), SH_UNT_EX_CHTMLBS1,
        SH_ACS_SCOM_RW   );
 
-REG64( EQ_HTM_MODE                                             , RULL(0x10012A00), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012B00, 10012600, 10012700,
-REG64( EQ_0_HTM_MODE                                           , RULL(0x10012A00), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012B00, 10012600, 10012700,
-REG64( EQ_1_HTM_MODE                                           , RULL(0x11012A00), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 11012B00, 11012600, 11012700,
-REG64( EQ_2_HTM_MODE                                           , RULL(0x12012A00), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 12012B00, 12012600, 12012700,
-REG64( EQ_3_HTM_MODE                                           , RULL(0x13012A00), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 13012B00, 13012600, 13012700,
-REG64( EQ_4_HTM_MODE                                           , RULL(0x14012A00), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 14012B00, 14012600, 14012700,
-REG64( EQ_5_HTM_MODE                                           , RULL(0x15012A00), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 15012B00, 15012600, 15012700,
+REG64( EQ_HTM_MODE                                             , RULL(0x10012600), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012700, 10012200, 10012300,
+REG64( EQ_0_HTM_MODE                                           , RULL(0x10012600), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012700, 10012200, 10012300,
+REG64( EQ_1_HTM_MODE                                           , RULL(0x11012600), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 11012700, 11012200, 11012300,
+REG64( EQ_2_HTM_MODE                                           , RULL(0x12012600), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 12012700, 12012200, 12012300,
+REG64( EQ_3_HTM_MODE                                           , RULL(0x13012600), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 13012700, 13012200, 13012300,
+REG64( EQ_4_HTM_MODE                                           , RULL(0x14012600), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 14012700, 14012200, 14012300,
+REG64( EQ_5_HTM_MODE                                           , RULL(0x15012600), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 15012700, 15012200, 15012300,
 REG64( EX_0_CHTMLBS0_HTM_MODE                                  , RULL(0x10012600), SH_UNT_EX_0_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_0_CHTMLBS1_HTM_MODE                                  , RULL(0x10012700), SH_UNT_EX_0_CHTMLBS1,
@@ -11732,65 +11503,41 @@ REG64( EX_10_CHTMLBS0_HTM_MODE                                 , RULL(0x15012600
        SH_ACS_SCOM_RW   );
 REG64( EX_10_CHTMLBS1_HTM_MODE                                 , RULL(0x15012700), SH_UNT_EX_10_CHTMLBS1,
        SH_ACS_SCOM_RW   );
-REG64( EX_11_CHTMLBS0_HTM_MODE                                 , RULL(0x15012A00), SH_UNT_EX_11_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_11_CHTMLBS1_HTM_MODE                                 , RULL(0x15012B00), SH_UNT_EX_11_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
-REG64( EX_1_CHTMLBS0_HTM_MODE                                  , RULL(0x10012A00), SH_UNT_EX_1_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_1_CHTMLBS1_HTM_MODE                                  , RULL(0x10012B00), SH_UNT_EX_1_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
 REG64( EX_2_CHTMLBS0_HTM_MODE                                  , RULL(0x11012600), SH_UNT_EX_2_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_2_CHTMLBS1_HTM_MODE                                  , RULL(0x11012700), SH_UNT_EX_2_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
-REG64( EX_3_CHTMLBS0_HTM_MODE                                  , RULL(0x11012A00), SH_UNT_EX_3_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_3_CHTMLBS1_HTM_MODE                                  , RULL(0x11012B00), SH_UNT_EX_3_CHTMLBS1,
        SH_ACS_SCOM_RW   );
 REG64( EX_4_CHTMLBS0_HTM_MODE                                  , RULL(0x12012600), SH_UNT_EX_4_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_4_CHTMLBS1_HTM_MODE                                  , RULL(0x12012700), SH_UNT_EX_4_CHTMLBS1,
        SH_ACS_SCOM_RW   );
-REG64( EX_5_CHTMLBS0_HTM_MODE                                  , RULL(0x12012A00), SH_UNT_EX_5_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_5_CHTMLBS1_HTM_MODE                                  , RULL(0x12012B00), SH_UNT_EX_5_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
 REG64( EX_6_CHTMLBS0_HTM_MODE                                  , RULL(0x13012600), SH_UNT_EX_6_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_6_CHTMLBS1_HTM_MODE                                  , RULL(0x13012700), SH_UNT_EX_6_CHTMLBS1,
        SH_ACS_SCOM_RW   );
-REG64( EX_7_CHTMLBS0_HTM_MODE                                  , RULL(0x13012A00), SH_UNT_EX_7_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_7_CHTMLBS1_HTM_MODE                                  , RULL(0x13012B00), SH_UNT_EX_7_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
 REG64( EX_8_CHTMLBS0_HTM_MODE                                  , RULL(0x14012600), SH_UNT_EX_8_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_8_CHTMLBS1_HTM_MODE                                  , RULL(0x14012700), SH_UNT_EX_8_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
-REG64( EX_9_CHTMLBS0_HTM_MODE                                  , RULL(0x14012A00), SH_UNT_EX_9_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_9_CHTMLBS1_HTM_MODE                                  , RULL(0x14012B00), SH_UNT_EX_9_CHTMLBS1,
        SH_ACS_SCOM_RW   );
 REG64( EX_CHTMLBS0_HTM_MODE                                    , RULL(0x10012600), SH_UNT_EX_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_CHTMLBS1_HTM_MODE                                    , RULL(0x10012700), SH_UNT_EX_CHTMLBS1,
        SH_ACS_SCOM_RW   );
 
-REG64( EQ_HTM_STAT                                             , RULL(0x10012A02), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012B02, 10012602, 10012702,
-REG64( EQ_0_HTM_STAT                                           , RULL(0x10012A02), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012B02, 10012602, 10012702,
-REG64( EQ_1_HTM_STAT                                           , RULL(0x11012A02), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 11012B02, 11012602, 11012702,
-REG64( EQ_2_HTM_STAT                                           , RULL(0x12012A02), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 12012B02, 12012602, 12012702,
-REG64( EQ_3_HTM_STAT                                           , RULL(0x13012A02), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 13012B02, 13012602, 13012702,
-REG64( EQ_4_HTM_STAT                                           , RULL(0x14012A02), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 14012B02, 14012602, 14012702,
-REG64( EQ_5_HTM_STAT                                           , RULL(0x15012A02), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 15012B02, 15012602, 15012702,
+REG64( EQ_HTM_STAT                                             , RULL(0x10012602), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012702, 10012202, 10012302,
+REG64( EQ_0_HTM_STAT                                           , RULL(0x10012602), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012702, 10012202, 10012302,
+REG64( EQ_1_HTM_STAT                                           , RULL(0x11012602), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 11012702, 11012202, 11012302,
+REG64( EQ_2_HTM_STAT                                           , RULL(0x12012602), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 12012702, 12012202, 12012302,
+REG64( EQ_3_HTM_STAT                                           , RULL(0x13012602), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 13012702, 13012202, 13012302,
+REG64( EQ_4_HTM_STAT                                           , RULL(0x14012602), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 14012702, 14012202, 14012302,
+REG64( EQ_5_HTM_STAT                                           , RULL(0x15012602), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 15012702, 15012202, 15012302,
 REG64( EX_0_CHTMLBS0_HTM_STAT                                  , RULL(0x10012602), SH_UNT_EX_0_CHTMLBS0,
        SH_ACS_SCOM_RO   );
 REG64( EX_0_CHTMLBS1_HTM_STAT                                  , RULL(0x10012702), SH_UNT_EX_0_CHTMLBS1,
@@ -11799,65 +11546,41 @@ REG64( EX_10_CHTMLBS0_HTM_STAT                                 , RULL(0x15012602
        SH_ACS_SCOM_RO   );
 REG64( EX_10_CHTMLBS1_HTM_STAT                                 , RULL(0x15012702), SH_UNT_EX_10_CHTMLBS1,
        SH_ACS_SCOM_RO   );
-REG64( EX_11_CHTMLBS0_HTM_STAT                                 , RULL(0x15012A02), SH_UNT_EX_11_CHTMLBS0,
-       SH_ACS_SCOM_RO   );
-REG64( EX_11_CHTMLBS1_HTM_STAT                                 , RULL(0x15012B02), SH_UNT_EX_11_CHTMLBS1,
-       SH_ACS_SCOM_RO   );
-REG64( EX_1_CHTMLBS0_HTM_STAT                                  , RULL(0x10012A02), SH_UNT_EX_1_CHTMLBS0,
-       SH_ACS_SCOM_RO   );
-REG64( EX_1_CHTMLBS1_HTM_STAT                                  , RULL(0x10012B02), SH_UNT_EX_1_CHTMLBS1,
-       SH_ACS_SCOM_RO   );
 REG64( EX_2_CHTMLBS0_HTM_STAT                                  , RULL(0x11012602), SH_UNT_EX_2_CHTMLBS0,
        SH_ACS_SCOM_RO   );
 REG64( EX_2_CHTMLBS1_HTM_STAT                                  , RULL(0x11012702), SH_UNT_EX_2_CHTMLBS1,
-       SH_ACS_SCOM_RO   );
-REG64( EX_3_CHTMLBS0_HTM_STAT                                  , RULL(0x11012A02), SH_UNT_EX_3_CHTMLBS0,
-       SH_ACS_SCOM_RO   );
-REG64( EX_3_CHTMLBS1_HTM_STAT                                  , RULL(0x11012B02), SH_UNT_EX_3_CHTMLBS1,
        SH_ACS_SCOM_RO   );
 REG64( EX_4_CHTMLBS0_HTM_STAT                                  , RULL(0x12012602), SH_UNT_EX_4_CHTMLBS0,
        SH_ACS_SCOM_RO   );
 REG64( EX_4_CHTMLBS1_HTM_STAT                                  , RULL(0x12012702), SH_UNT_EX_4_CHTMLBS1,
        SH_ACS_SCOM_RO   );
-REG64( EX_5_CHTMLBS0_HTM_STAT                                  , RULL(0x12012A02), SH_UNT_EX_5_CHTMLBS0,
-       SH_ACS_SCOM_RO   );
-REG64( EX_5_CHTMLBS1_HTM_STAT                                  , RULL(0x12012B02), SH_UNT_EX_5_CHTMLBS1,
-       SH_ACS_SCOM_RO   );
 REG64( EX_6_CHTMLBS0_HTM_STAT                                  , RULL(0x13012602), SH_UNT_EX_6_CHTMLBS0,
        SH_ACS_SCOM_RO   );
 REG64( EX_6_CHTMLBS1_HTM_STAT                                  , RULL(0x13012702), SH_UNT_EX_6_CHTMLBS1,
        SH_ACS_SCOM_RO   );
-REG64( EX_7_CHTMLBS0_HTM_STAT                                  , RULL(0x13012A02), SH_UNT_EX_7_CHTMLBS0,
-       SH_ACS_SCOM_RO   );
-REG64( EX_7_CHTMLBS1_HTM_STAT                                  , RULL(0x13012B02), SH_UNT_EX_7_CHTMLBS1,
-       SH_ACS_SCOM_RO   );
 REG64( EX_8_CHTMLBS0_HTM_STAT                                  , RULL(0x14012602), SH_UNT_EX_8_CHTMLBS0,
        SH_ACS_SCOM_RO   );
 REG64( EX_8_CHTMLBS1_HTM_STAT                                  , RULL(0x14012702), SH_UNT_EX_8_CHTMLBS1,
-       SH_ACS_SCOM_RO   );
-REG64( EX_9_CHTMLBS0_HTM_STAT                                  , RULL(0x14012A02), SH_UNT_EX_9_CHTMLBS0,
-       SH_ACS_SCOM_RO   );
-REG64( EX_9_CHTMLBS1_HTM_STAT                                  , RULL(0x14012B02), SH_UNT_EX_9_CHTMLBS1,
        SH_ACS_SCOM_RO   );
 REG64( EX_CHTMLBS0_HTM_STAT                                    , RULL(0x10012602), SH_UNT_EX_CHTMLBS0,
        SH_ACS_SCOM_RO   );
 REG64( EX_CHTMLBS1_HTM_STAT                                    , RULL(0x10012702), SH_UNT_EX_CHTMLBS1,
        SH_ACS_SCOM_RO   );
 
-REG64( EQ_HTM_TRIG                                             , RULL(0x10012A04), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012B04, 10012604, 10012704,
-REG64( EQ_0_HTM_TRIG                                           , RULL(0x10012A04), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 10012B04, 10012604, 10012704,
-REG64( EQ_1_HTM_TRIG                                           , RULL(0x11012A04), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 11012B04, 11012604, 11012704,
-REG64( EQ_2_HTM_TRIG                                           , RULL(0x12012A04), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 12012B04, 12012604, 12012704,
-REG64( EQ_3_HTM_TRIG                                           , RULL(0x13012A04), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 13012B04, 13012604, 13012704,
-REG64( EQ_4_HTM_TRIG                                           , RULL(0x14012A04), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 14012B04, 14012604, 14012704,
-REG64( EQ_5_HTM_TRIG                                           , RULL(0x15012A04), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RW   ); //DUPS: 15012B04, 15012604, 15012704,
+REG64( EQ_HTM_TRIG                                             , RULL(0x10012604), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012704, 10012204, 10012304,
+REG64( EQ_0_HTM_TRIG                                           , RULL(0x10012604), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 10012704, 10012204, 10012304,
+REG64( EQ_1_HTM_TRIG                                           , RULL(0x11012604), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 11012704, 11012204, 11012304,
+REG64( EQ_2_HTM_TRIG                                           , RULL(0x12012604), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 12012704, 12012204, 12012304,
+REG64( EQ_3_HTM_TRIG                                           , RULL(0x13012604), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 13012704, 13012204, 13012304,
+REG64( EQ_4_HTM_TRIG                                           , RULL(0x14012604), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 14012704, 14012204, 14012304,
+REG64( EQ_5_HTM_TRIG                                           , RULL(0x15012604), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 15012704, 15012204, 15012304,
 REG64( EX_0_CHTMLBS0_HTM_TRIG                                  , RULL(0x10012604), SH_UNT_EX_0_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_0_CHTMLBS1_HTM_TRIG                                  , RULL(0x10012704), SH_UNT_EX_0_CHTMLBS1,
@@ -11866,45 +11589,21 @@ REG64( EX_10_CHTMLBS0_HTM_TRIG                                 , RULL(0x15012604
        SH_ACS_SCOM_RW   );
 REG64( EX_10_CHTMLBS1_HTM_TRIG                                 , RULL(0x15012704), SH_UNT_EX_10_CHTMLBS1,
        SH_ACS_SCOM_RW   );
-REG64( EX_11_CHTMLBS0_HTM_TRIG                                 , RULL(0x15012A04), SH_UNT_EX_11_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_11_CHTMLBS1_HTM_TRIG                                 , RULL(0x15012B04), SH_UNT_EX_11_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
-REG64( EX_1_CHTMLBS0_HTM_TRIG                                  , RULL(0x10012A04), SH_UNT_EX_1_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_1_CHTMLBS1_HTM_TRIG                                  , RULL(0x10012B04), SH_UNT_EX_1_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
 REG64( EX_2_CHTMLBS0_HTM_TRIG                                  , RULL(0x11012604), SH_UNT_EX_2_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_2_CHTMLBS1_HTM_TRIG                                  , RULL(0x11012704), SH_UNT_EX_2_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
-REG64( EX_3_CHTMLBS0_HTM_TRIG                                  , RULL(0x11012A04), SH_UNT_EX_3_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_3_CHTMLBS1_HTM_TRIG                                  , RULL(0x11012B04), SH_UNT_EX_3_CHTMLBS1,
        SH_ACS_SCOM_RW   );
 REG64( EX_4_CHTMLBS0_HTM_TRIG                                  , RULL(0x12012604), SH_UNT_EX_4_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_4_CHTMLBS1_HTM_TRIG                                  , RULL(0x12012704), SH_UNT_EX_4_CHTMLBS1,
        SH_ACS_SCOM_RW   );
-REG64( EX_5_CHTMLBS0_HTM_TRIG                                  , RULL(0x12012A04), SH_UNT_EX_5_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_5_CHTMLBS1_HTM_TRIG                                  , RULL(0x12012B04), SH_UNT_EX_5_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
 REG64( EX_6_CHTMLBS0_HTM_TRIG                                  , RULL(0x13012604), SH_UNT_EX_6_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_6_CHTMLBS1_HTM_TRIG                                  , RULL(0x13012704), SH_UNT_EX_6_CHTMLBS1,
        SH_ACS_SCOM_RW   );
-REG64( EX_7_CHTMLBS0_HTM_TRIG                                  , RULL(0x13012A04), SH_UNT_EX_7_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_7_CHTMLBS1_HTM_TRIG                                  , RULL(0x13012B04), SH_UNT_EX_7_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
 REG64( EX_8_CHTMLBS0_HTM_TRIG                                  , RULL(0x14012604), SH_UNT_EX_8_CHTMLBS0,
        SH_ACS_SCOM_RW   );
 REG64( EX_8_CHTMLBS1_HTM_TRIG                                  , RULL(0x14012704), SH_UNT_EX_8_CHTMLBS1,
-       SH_ACS_SCOM_RW   );
-REG64( EX_9_CHTMLBS0_HTM_TRIG                                  , RULL(0x14012A04), SH_UNT_EX_9_CHTMLBS0,
-       SH_ACS_SCOM_RW   );
-REG64( EX_9_CHTMLBS1_HTM_TRIG                                  , RULL(0x14012B04), SH_UNT_EX_9_CHTMLBS1,
        SH_ACS_SCOM_RW   );
 REG64( EX_CHTMLBS0_HTM_TRIG                                    , RULL(0x10012604), SH_UNT_EX_CHTMLBS0,
        SH_ACS_SCOM_RW   );
@@ -12154,57 +11853,421 @@ REG64( EX_9_INJ_REG                                            , RULL(0x1401140D
 REG64( EX_10_INJ_REG                                           , RULL(0x1501100D), SH_UNT_EX_10    , SH_ACS_SCOM      );
 REG64( EX_11_INJ_REG                                           , RULL(0x1501140D), SH_UNT_EX_11    , SH_ACS_SCOM      );
 
-REG64( C_INV_ERATE                                             , RULL(0x20010ABA), SH_UNT_C        , SH_ACS_SCOM      );
-REG64( C_0_INV_ERATE                                           , RULL(0x20010ABA), SH_UNT_C_0      , SH_ACS_SCOM      );
-REG64( C_1_INV_ERATE                                           , RULL(0x21010ABA), SH_UNT_C_1      , SH_ACS_SCOM      );
-REG64( C_2_INV_ERATE                                           , RULL(0x22010ABA), SH_UNT_C_2      , SH_ACS_SCOM      );
-REG64( C_3_INV_ERATE                                           , RULL(0x23010ABA), SH_UNT_C_3      , SH_ACS_SCOM      );
-REG64( C_4_INV_ERATE                                           , RULL(0x24010ABA), SH_UNT_C_4      , SH_ACS_SCOM      );
-REG64( C_5_INV_ERATE                                           , RULL(0x25010ABA), SH_UNT_C_5      , SH_ACS_SCOM      );
-REG64( C_6_INV_ERATE                                           , RULL(0x26010ABA), SH_UNT_C_6      , SH_ACS_SCOM      );
-REG64( C_7_INV_ERATE                                           , RULL(0x27010ABA), SH_UNT_C_7      , SH_ACS_SCOM      );
-REG64( C_8_INV_ERATE                                           , RULL(0x28010ABA), SH_UNT_C_8      , SH_ACS_SCOM      );
-REG64( C_9_INV_ERATE                                           , RULL(0x29010ABA), SH_UNT_C_9      , SH_ACS_SCOM      );
-REG64( C_10_INV_ERATE                                          , RULL(0x2A010ABA), SH_UNT_C_10     , SH_ACS_SCOM      );
-REG64( C_11_INV_ERATE                                          , RULL(0x2B010ABA), SH_UNT_C_11     , SH_ACS_SCOM      );
-REG64( C_12_INV_ERATE                                          , RULL(0x2C010ABA), SH_UNT_C_12     , SH_ACS_SCOM      );
-REG64( C_13_INV_ERATE                                          , RULL(0x2D010ABA), SH_UNT_C_13     , SH_ACS_SCOM      );
-REG64( C_14_INV_ERATE                                          , RULL(0x2E010ABA), SH_UNT_C_14     , SH_ACS_SCOM      );
-REG64( C_15_INV_ERATE                                          , RULL(0x2F010ABA), SH_UNT_C_15     , SH_ACS_SCOM      );
-REG64( C_16_INV_ERATE                                          , RULL(0x30010ABA), SH_UNT_C_16     , SH_ACS_SCOM      );
-REG64( C_17_INV_ERATE                                          , RULL(0x31010ABA), SH_UNT_C_17     , SH_ACS_SCOM      );
-REG64( C_18_INV_ERATE                                          , RULL(0x32010ABA), SH_UNT_C_18     , SH_ACS_SCOM      );
-REG64( C_19_INV_ERATE                                          , RULL(0x33010ABA), SH_UNT_C_19     , SH_ACS_SCOM      );
-REG64( C_20_INV_ERATE                                          , RULL(0x34010ABA), SH_UNT_C_20     , SH_ACS_SCOM      );
-REG64( C_21_INV_ERATE                                          , RULL(0x35010ABA), SH_UNT_C_21     , SH_ACS_SCOM      );
-REG64( C_22_INV_ERATE                                          , RULL(0x36010ABA), SH_UNT_C_22     , SH_ACS_SCOM      );
-REG64( C_23_INV_ERATE                                          , RULL(0x37010ABA), SH_UNT_C_23     , SH_ACS_SCOM      );
-REG64( EX_0_L2_INV_ERATE                                       , RULL(0x20010ABA), SH_UNT_EX_0_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 21010ABA,
-REG64( EX_10_L2_INV_ERATE                                      , RULL(0x34010ABA), SH_UNT_EX_10_L2 ,
-       SH_ACS_SCOM      ); //DUPS: 35010ABA,
-REG64( EX_11_L2_INV_ERATE                                      , RULL(0x36010ABA), SH_UNT_EX_11_L2 ,
-       SH_ACS_SCOM      ); //DUPS: 37010ABA,
-REG64( EX_1_L2_INV_ERATE                                       , RULL(0x22010ABA), SH_UNT_EX_1_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 23010ABA,
-REG64( EX_2_L2_INV_ERATE                                       , RULL(0x24010ABA), SH_UNT_EX_2_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 25010ABA,
-REG64( EX_3_L2_INV_ERATE                                       , RULL(0x26010ABA), SH_UNT_EX_3_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 27010ABA,
-REG64( EX_4_L2_INV_ERATE                                       , RULL(0x28010ABA), SH_UNT_EX_4_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 29010ABA,
-REG64( EX_5_L2_INV_ERATE                                       , RULL(0x2A010ABA), SH_UNT_EX_5_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 2B010ABA,
-REG64( EX_6_L2_INV_ERATE                                       , RULL(0x2C010ABA), SH_UNT_EX_6_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 2D010ABA,
-REG64( EX_7_L2_INV_ERATE                                       , RULL(0x2E010ABA), SH_UNT_EX_7_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 2F010ABA,
-REG64( EX_8_L2_INV_ERATE                                       , RULL(0x30010ABA), SH_UNT_EX_8_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 31010ABA,
-REG64( EX_9_L2_INV_ERATE                                       , RULL(0x32010ABA), SH_UNT_EX_9_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 33010ABA,
-REG64( EX_L2_INV_ERATE                                         , RULL(0x20010ABA), SH_UNT_EX_L2    ,
-       SH_ACS_SCOM      ); //DUPS: 21010ABA,
+REG64( C_INV_ERATE                                             , RULL(0x20010AB4), SH_UNT_C        , SH_ACS_SCOM      );
+REG64( C_0_INV_ERATE                                           , RULL(0x20010AB4), SH_UNT_C_0      , SH_ACS_SCOM      );
+REG64( C_1_INV_ERATE                                           , RULL(0x21010AB4), SH_UNT_C_1      , SH_ACS_SCOM      );
+REG64( C_2_INV_ERATE                                           , RULL(0x22010AB4), SH_UNT_C_2      , SH_ACS_SCOM      );
+REG64( C_3_INV_ERATE                                           , RULL(0x23010AB4), SH_UNT_C_3      , SH_ACS_SCOM      );
+REG64( C_4_INV_ERATE                                           , RULL(0x24010AB4), SH_UNT_C_4      , SH_ACS_SCOM      );
+REG64( C_5_INV_ERATE                                           , RULL(0x25010AB4), SH_UNT_C_5      , SH_ACS_SCOM      );
+REG64( C_6_INV_ERATE                                           , RULL(0x26010AB4), SH_UNT_C_6      , SH_ACS_SCOM      );
+REG64( C_7_INV_ERATE                                           , RULL(0x27010AB4), SH_UNT_C_7      , SH_ACS_SCOM      );
+REG64( C_8_INV_ERATE                                           , RULL(0x28010AB4), SH_UNT_C_8      , SH_ACS_SCOM      );
+REG64( C_9_INV_ERATE                                           , RULL(0x29010AB4), SH_UNT_C_9      , SH_ACS_SCOM      );
+REG64( C_10_INV_ERATE                                          , RULL(0x2A010AB4), SH_UNT_C_10     , SH_ACS_SCOM      );
+REG64( C_11_INV_ERATE                                          , RULL(0x2B010AB4), SH_UNT_C_11     , SH_ACS_SCOM      );
+REG64( C_12_INV_ERATE                                          , RULL(0x2C010AB4), SH_UNT_C_12     , SH_ACS_SCOM      );
+REG64( C_13_INV_ERATE                                          , RULL(0x2D010AB4), SH_UNT_C_13     , SH_ACS_SCOM      );
+REG64( C_14_INV_ERATE                                          , RULL(0x2E010AB4), SH_UNT_C_14     , SH_ACS_SCOM      );
+REG64( C_15_INV_ERATE                                          , RULL(0x2F010AB4), SH_UNT_C_15     , SH_ACS_SCOM      );
+REG64( C_16_INV_ERATE                                          , RULL(0x30010AB4), SH_UNT_C_16     , SH_ACS_SCOM      );
+REG64( C_17_INV_ERATE                                          , RULL(0x31010AB4), SH_UNT_C_17     , SH_ACS_SCOM      );
+REG64( C_18_INV_ERATE                                          , RULL(0x32010AB4), SH_UNT_C_18     , SH_ACS_SCOM      );
+REG64( C_19_INV_ERATE                                          , RULL(0x33010AB4), SH_UNT_C_19     , SH_ACS_SCOM      );
+REG64( C_20_INV_ERATE                                          , RULL(0x34010AB4), SH_UNT_C_20     , SH_ACS_SCOM      );
+REG64( C_21_INV_ERATE                                          , RULL(0x35010AB4), SH_UNT_C_21     , SH_ACS_SCOM      );
+REG64( C_22_INV_ERATE                                          , RULL(0x36010AB4), SH_UNT_C_22     , SH_ACS_SCOM      );
+REG64( C_23_INV_ERATE                                          , RULL(0x37010AB4), SH_UNT_C_23     , SH_ACS_SCOM      );
+REG64( EX_0_L2_INV_ERATE                                       , RULL(0x20010AB4), SH_UNT_EX_0_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 21010AB4,
+REG64( EX_10_L2_INV_ERATE                                      , RULL(0x34010AB4), SH_UNT_EX_10_L2 ,
+       SH_ACS_SCOM      ); //DUPS: 35010AB4,
+REG64( EX_11_L2_INV_ERATE                                      , RULL(0x36010AB4), SH_UNT_EX_11_L2 ,
+       SH_ACS_SCOM      ); //DUPS: 37010AB4,
+REG64( EX_1_L2_INV_ERATE                                       , RULL(0x22010AB4), SH_UNT_EX_1_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 23010AB4,
+REG64( EX_2_L2_INV_ERATE                                       , RULL(0x24010AB4), SH_UNT_EX_2_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 25010AB4,
+REG64( EX_3_L2_INV_ERATE                                       , RULL(0x26010AB4), SH_UNT_EX_3_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 27010AB4,
+REG64( EX_4_L2_INV_ERATE                                       , RULL(0x28010AB4), SH_UNT_EX_4_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 29010AB4,
+REG64( EX_5_L2_INV_ERATE                                       , RULL(0x2A010AB4), SH_UNT_EX_5_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 2B010AB4,
+REG64( EX_6_L2_INV_ERATE                                       , RULL(0x2C010AB4), SH_UNT_EX_6_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 2D010AB4,
+REG64( EX_7_L2_INV_ERATE                                       , RULL(0x2E010AB4), SH_UNT_EX_7_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 2F010AB4,
+REG64( EX_8_L2_INV_ERATE                                       , RULL(0x30010AB4), SH_UNT_EX_8_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 31010AB4,
+REG64( EX_9_L2_INV_ERATE                                       , RULL(0x32010AB4), SH_UNT_EX_9_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 33010AB4,
+REG64( EX_L2_INV_ERATE                                         , RULL(0x20010AB4), SH_UNT_EX_L2    ,
+       SH_ACS_SCOM      ); //DUPS: 21010AB4,
+
+REG64( C_ISU_DEBUG_CTRL                                        , RULL(0x20010C46), SH_UNT_C        , SH_ACS_SCOM_RW   );
+REG64( C_0_ISU_DEBUG_CTRL                                      , RULL(0x20010C46), SH_UNT_C_0      , SH_ACS_SCOM_RW   );
+REG64( C_1_ISU_DEBUG_CTRL                                      , RULL(0x21010C46), SH_UNT_C_1      , SH_ACS_SCOM_RW   );
+REG64( C_2_ISU_DEBUG_CTRL                                      , RULL(0x22010C46), SH_UNT_C_2      , SH_ACS_SCOM_RW   );
+REG64( C_3_ISU_DEBUG_CTRL                                      , RULL(0x23010C46), SH_UNT_C_3      , SH_ACS_SCOM_RW   );
+REG64( C_4_ISU_DEBUG_CTRL                                      , RULL(0x24010C46), SH_UNT_C_4      , SH_ACS_SCOM_RW   );
+REG64( C_5_ISU_DEBUG_CTRL                                      , RULL(0x25010C46), SH_UNT_C_5      , SH_ACS_SCOM_RW   );
+REG64( C_6_ISU_DEBUG_CTRL                                      , RULL(0x26010C46), SH_UNT_C_6      , SH_ACS_SCOM_RW   );
+REG64( C_7_ISU_DEBUG_CTRL                                      , RULL(0x27010C46), SH_UNT_C_7      , SH_ACS_SCOM_RW   );
+REG64( C_8_ISU_DEBUG_CTRL                                      , RULL(0x28010C46), SH_UNT_C_8      , SH_ACS_SCOM_RW   );
+REG64( C_9_ISU_DEBUG_CTRL                                      , RULL(0x29010C46), SH_UNT_C_9      , SH_ACS_SCOM_RW   );
+REG64( C_10_ISU_DEBUG_CTRL                                     , RULL(0x2A010C46), SH_UNT_C_10     , SH_ACS_SCOM_RW   );
+REG64( C_11_ISU_DEBUG_CTRL                                     , RULL(0x2B010C46), SH_UNT_C_11     , SH_ACS_SCOM_RW   );
+REG64( C_12_ISU_DEBUG_CTRL                                     , RULL(0x2C010C46), SH_UNT_C_12     , SH_ACS_SCOM_RW   );
+REG64( C_13_ISU_DEBUG_CTRL                                     , RULL(0x2D010C46), SH_UNT_C_13     , SH_ACS_SCOM_RW   );
+REG64( C_14_ISU_DEBUG_CTRL                                     , RULL(0x2E010C46), SH_UNT_C_14     , SH_ACS_SCOM_RW   );
+REG64( C_15_ISU_DEBUG_CTRL                                     , RULL(0x2F010C46), SH_UNT_C_15     , SH_ACS_SCOM_RW   );
+REG64( C_16_ISU_DEBUG_CTRL                                     , RULL(0x30010C46), SH_UNT_C_16     , SH_ACS_SCOM_RW   );
+REG64( C_17_ISU_DEBUG_CTRL                                     , RULL(0x31010C46), SH_UNT_C_17     , SH_ACS_SCOM_RW   );
+REG64( C_18_ISU_DEBUG_CTRL                                     , RULL(0x32010C46), SH_UNT_C_18     , SH_ACS_SCOM_RW   );
+REG64( C_19_ISU_DEBUG_CTRL                                     , RULL(0x33010C46), SH_UNT_C_19     , SH_ACS_SCOM_RW   );
+REG64( C_20_ISU_DEBUG_CTRL                                     , RULL(0x34010C46), SH_UNT_C_20     , SH_ACS_SCOM_RW   );
+REG64( C_21_ISU_DEBUG_CTRL                                     , RULL(0x35010C46), SH_UNT_C_21     , SH_ACS_SCOM_RW   );
+REG64( C_22_ISU_DEBUG_CTRL                                     , RULL(0x36010C46), SH_UNT_C_22     , SH_ACS_SCOM_RW   );
+REG64( C_23_ISU_DEBUG_CTRL                                     , RULL(0x37010C46), SH_UNT_C_23     , SH_ACS_SCOM_RW   );
+REG64( EX_0_L2_ISU_DEBUG_CTRL                                  , RULL(0x20010C46), SH_UNT_EX_0_L2  ,
+       SH_ACS_SCOM_RW   ); //DUPS: 21010C46,
+REG64( EX_10_L2_ISU_DEBUG_CTRL                                 , RULL(0x34010C46), SH_UNT_EX_10_L2 ,
+       SH_ACS_SCOM_RW   ); //DUPS: 35010C46,
+REG64( EX_11_L2_ISU_DEBUG_CTRL                                 , RULL(0x36010C46), SH_UNT_EX_11_L2 ,
+       SH_ACS_SCOM_RW   ); //DUPS: 37010C46,
+REG64( EX_1_L2_ISU_DEBUG_CTRL                                  , RULL(0x22010C46), SH_UNT_EX_1_L2  ,
+       SH_ACS_SCOM_RW   ); //DUPS: 23010C46,
+REG64( EX_2_L2_ISU_DEBUG_CTRL                                  , RULL(0x24010C46), SH_UNT_EX_2_L2  ,
+       SH_ACS_SCOM_RW   ); //DUPS: 25010C46,
+REG64( EX_3_L2_ISU_DEBUG_CTRL                                  , RULL(0x26010C46), SH_UNT_EX_3_L2  ,
+       SH_ACS_SCOM_RW   ); //DUPS: 27010C46,
+REG64( EX_4_L2_ISU_DEBUG_CTRL                                  , RULL(0x28010C46), SH_UNT_EX_4_L2  ,
+       SH_ACS_SCOM_RW   ); //DUPS: 29010C46,
+REG64( EX_5_L2_ISU_DEBUG_CTRL                                  , RULL(0x2A010C46), SH_UNT_EX_5_L2  ,
+       SH_ACS_SCOM_RW   ); //DUPS: 2B010C46,
+REG64( EX_6_L2_ISU_DEBUG_CTRL                                  , RULL(0x2C010C46), SH_UNT_EX_6_L2  ,
+       SH_ACS_SCOM_RW   ); //DUPS: 2D010C46,
+REG64( EX_7_L2_ISU_DEBUG_CTRL                                  , RULL(0x2E010C46), SH_UNT_EX_7_L2  ,
+       SH_ACS_SCOM_RW   ); //DUPS: 2F010C46,
+REG64( EX_8_L2_ISU_DEBUG_CTRL                                  , RULL(0x30010C46), SH_UNT_EX_8_L2  ,
+       SH_ACS_SCOM_RW   ); //DUPS: 31010C46,
+REG64( EX_9_L2_ISU_DEBUG_CTRL                                  , RULL(0x32010C46), SH_UNT_EX_9_L2  ,
+       SH_ACS_SCOM_RW   ); //DUPS: 33010C46,
+REG64( EX_L2_ISU_DEBUG_CTRL                                    , RULL(0x20010C46), SH_UNT_EX_L2    ,
+       SH_ACS_SCOM_RW   ); //DUPS: 21010C46,
+
+REG64( C_ISU_REG0_HOLD_OUT                                     , RULL(0x20010C40), SH_UNT_C        , SH_ACS_SCOM      );
+REG64( C_0_ISU_REG0_HOLD_OUT                                   , RULL(0x20010C40), SH_UNT_C_0      , SH_ACS_SCOM      );
+REG64( C_1_ISU_REG0_HOLD_OUT                                   , RULL(0x21010C40), SH_UNT_C_1      , SH_ACS_SCOM      );
+REG64( C_2_ISU_REG0_HOLD_OUT                                   , RULL(0x22010C40), SH_UNT_C_2      , SH_ACS_SCOM      );
+REG64( C_3_ISU_REG0_HOLD_OUT                                   , RULL(0x23010C40), SH_UNT_C_3      , SH_ACS_SCOM      );
+REG64( C_4_ISU_REG0_HOLD_OUT                                   , RULL(0x24010C40), SH_UNT_C_4      , SH_ACS_SCOM      );
+REG64( C_5_ISU_REG0_HOLD_OUT                                   , RULL(0x25010C40), SH_UNT_C_5      , SH_ACS_SCOM      );
+REG64( C_6_ISU_REG0_HOLD_OUT                                   , RULL(0x26010C40), SH_UNT_C_6      , SH_ACS_SCOM      );
+REG64( C_7_ISU_REG0_HOLD_OUT                                   , RULL(0x27010C40), SH_UNT_C_7      , SH_ACS_SCOM      );
+REG64( C_8_ISU_REG0_HOLD_OUT                                   , RULL(0x28010C40), SH_UNT_C_8      , SH_ACS_SCOM      );
+REG64( C_9_ISU_REG0_HOLD_OUT                                   , RULL(0x29010C40), SH_UNT_C_9      , SH_ACS_SCOM      );
+REG64( C_10_ISU_REG0_HOLD_OUT                                  , RULL(0x2A010C40), SH_UNT_C_10     , SH_ACS_SCOM      );
+REG64( C_11_ISU_REG0_HOLD_OUT                                  , RULL(0x2B010C40), SH_UNT_C_11     , SH_ACS_SCOM      );
+REG64( C_12_ISU_REG0_HOLD_OUT                                  , RULL(0x2C010C40), SH_UNT_C_12     , SH_ACS_SCOM      );
+REG64( C_13_ISU_REG0_HOLD_OUT                                  , RULL(0x2D010C40), SH_UNT_C_13     , SH_ACS_SCOM      );
+REG64( C_14_ISU_REG0_HOLD_OUT                                  , RULL(0x2E010C40), SH_UNT_C_14     , SH_ACS_SCOM      );
+REG64( C_15_ISU_REG0_HOLD_OUT                                  , RULL(0x2F010C40), SH_UNT_C_15     , SH_ACS_SCOM      );
+REG64( C_16_ISU_REG0_HOLD_OUT                                  , RULL(0x30010C40), SH_UNT_C_16     , SH_ACS_SCOM      );
+REG64( C_17_ISU_REG0_HOLD_OUT                                  , RULL(0x31010C40), SH_UNT_C_17     , SH_ACS_SCOM      );
+REG64( C_18_ISU_REG0_HOLD_OUT                                  , RULL(0x32010C40), SH_UNT_C_18     , SH_ACS_SCOM      );
+REG64( C_19_ISU_REG0_HOLD_OUT                                  , RULL(0x33010C40), SH_UNT_C_19     , SH_ACS_SCOM      );
+REG64( C_20_ISU_REG0_HOLD_OUT                                  , RULL(0x34010C40), SH_UNT_C_20     , SH_ACS_SCOM      );
+REG64( C_21_ISU_REG0_HOLD_OUT                                  , RULL(0x35010C40), SH_UNT_C_21     , SH_ACS_SCOM      );
+REG64( C_22_ISU_REG0_HOLD_OUT                                  , RULL(0x36010C40), SH_UNT_C_22     , SH_ACS_SCOM      );
+REG64( C_23_ISU_REG0_HOLD_OUT                                  , RULL(0x37010C40), SH_UNT_C_23     , SH_ACS_SCOM      );
+REG64( EX_0_L2_ISU_REG0_HOLD_OUT                               , RULL(0x20010C40), SH_UNT_EX_0_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 21010C40,
+REG64( EX_10_L2_ISU_REG0_HOLD_OUT                              , RULL(0x34010C40), SH_UNT_EX_10_L2 ,
+       SH_ACS_SCOM      ); //DUPS: 35010C40,
+REG64( EX_11_L2_ISU_REG0_HOLD_OUT                              , RULL(0x36010C40), SH_UNT_EX_11_L2 ,
+       SH_ACS_SCOM      ); //DUPS: 37010C40,
+REG64( EX_1_L2_ISU_REG0_HOLD_OUT                               , RULL(0x22010C40), SH_UNT_EX_1_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 23010C40,
+REG64( EX_2_L2_ISU_REG0_HOLD_OUT                               , RULL(0x24010C40), SH_UNT_EX_2_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 25010C40,
+REG64( EX_3_L2_ISU_REG0_HOLD_OUT                               , RULL(0x26010C40), SH_UNT_EX_3_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 27010C40,
+REG64( EX_4_L2_ISU_REG0_HOLD_OUT                               , RULL(0x28010C40), SH_UNT_EX_4_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 29010C40,
+REG64( EX_5_L2_ISU_REG0_HOLD_OUT                               , RULL(0x2A010C40), SH_UNT_EX_5_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 2B010C40,
+REG64( EX_6_L2_ISU_REG0_HOLD_OUT                               , RULL(0x2C010C40), SH_UNT_EX_6_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 2D010C40,
+REG64( EX_7_L2_ISU_REG0_HOLD_OUT                               , RULL(0x2E010C40), SH_UNT_EX_7_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 2F010C40,
+REG64( EX_8_L2_ISU_REG0_HOLD_OUT                               , RULL(0x30010C40), SH_UNT_EX_8_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 31010C40,
+REG64( EX_9_L2_ISU_REG0_HOLD_OUT                               , RULL(0x32010C40), SH_UNT_EX_9_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 33010C40,
+REG64( EX_L2_ISU_REG0_HOLD_OUT                                 , RULL(0x20010C40), SH_UNT_EX_L2    ,
+       SH_ACS_SCOM      ); //DUPS: 21010C40,
+
+REG64( C_ISU_REG1_HOLD_OUT                                     , RULL(0x20010C41), SH_UNT_C        , SH_ACS_SCOM      );
+REG64( C_0_ISU_REG1_HOLD_OUT                                   , RULL(0x20010C41), SH_UNT_C_0      , SH_ACS_SCOM      );
+REG64( C_1_ISU_REG1_HOLD_OUT                                   , RULL(0x21010C41), SH_UNT_C_1      , SH_ACS_SCOM      );
+REG64( C_2_ISU_REG1_HOLD_OUT                                   , RULL(0x22010C41), SH_UNT_C_2      , SH_ACS_SCOM      );
+REG64( C_3_ISU_REG1_HOLD_OUT                                   , RULL(0x23010C41), SH_UNT_C_3      , SH_ACS_SCOM      );
+REG64( C_4_ISU_REG1_HOLD_OUT                                   , RULL(0x24010C41), SH_UNT_C_4      , SH_ACS_SCOM      );
+REG64( C_5_ISU_REG1_HOLD_OUT                                   , RULL(0x25010C41), SH_UNT_C_5      , SH_ACS_SCOM      );
+REG64( C_6_ISU_REG1_HOLD_OUT                                   , RULL(0x26010C41), SH_UNT_C_6      , SH_ACS_SCOM      );
+REG64( C_7_ISU_REG1_HOLD_OUT                                   , RULL(0x27010C41), SH_UNT_C_7      , SH_ACS_SCOM      );
+REG64( C_8_ISU_REG1_HOLD_OUT                                   , RULL(0x28010C41), SH_UNT_C_8      , SH_ACS_SCOM      );
+REG64( C_9_ISU_REG1_HOLD_OUT                                   , RULL(0x29010C41), SH_UNT_C_9      , SH_ACS_SCOM      );
+REG64( C_10_ISU_REG1_HOLD_OUT                                  , RULL(0x2A010C41), SH_UNT_C_10     , SH_ACS_SCOM      );
+REG64( C_11_ISU_REG1_HOLD_OUT                                  , RULL(0x2B010C41), SH_UNT_C_11     , SH_ACS_SCOM      );
+REG64( C_12_ISU_REG1_HOLD_OUT                                  , RULL(0x2C010C41), SH_UNT_C_12     , SH_ACS_SCOM      );
+REG64( C_13_ISU_REG1_HOLD_OUT                                  , RULL(0x2D010C41), SH_UNT_C_13     , SH_ACS_SCOM      );
+REG64( C_14_ISU_REG1_HOLD_OUT                                  , RULL(0x2E010C41), SH_UNT_C_14     , SH_ACS_SCOM      );
+REG64( C_15_ISU_REG1_HOLD_OUT                                  , RULL(0x2F010C41), SH_UNT_C_15     , SH_ACS_SCOM      );
+REG64( C_16_ISU_REG1_HOLD_OUT                                  , RULL(0x30010C41), SH_UNT_C_16     , SH_ACS_SCOM      );
+REG64( C_17_ISU_REG1_HOLD_OUT                                  , RULL(0x31010C41), SH_UNT_C_17     , SH_ACS_SCOM      );
+REG64( C_18_ISU_REG1_HOLD_OUT                                  , RULL(0x32010C41), SH_UNT_C_18     , SH_ACS_SCOM      );
+REG64( C_19_ISU_REG1_HOLD_OUT                                  , RULL(0x33010C41), SH_UNT_C_19     , SH_ACS_SCOM      );
+REG64( C_20_ISU_REG1_HOLD_OUT                                  , RULL(0x34010C41), SH_UNT_C_20     , SH_ACS_SCOM      );
+REG64( C_21_ISU_REG1_HOLD_OUT                                  , RULL(0x35010C41), SH_UNT_C_21     , SH_ACS_SCOM      );
+REG64( C_22_ISU_REG1_HOLD_OUT                                  , RULL(0x36010C41), SH_UNT_C_22     , SH_ACS_SCOM      );
+REG64( C_23_ISU_REG1_HOLD_OUT                                  , RULL(0x37010C41), SH_UNT_C_23     , SH_ACS_SCOM      );
+REG64( EX_0_L2_ISU_REG1_HOLD_OUT                               , RULL(0x20010C41), SH_UNT_EX_0_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 21010C41,
+REG64( EX_10_L2_ISU_REG1_HOLD_OUT                              , RULL(0x34010C41), SH_UNT_EX_10_L2 ,
+       SH_ACS_SCOM      ); //DUPS: 35010C41,
+REG64( EX_11_L2_ISU_REG1_HOLD_OUT                              , RULL(0x36010C41), SH_UNT_EX_11_L2 ,
+       SH_ACS_SCOM      ); //DUPS: 37010C41,
+REG64( EX_1_L2_ISU_REG1_HOLD_OUT                               , RULL(0x22010C41), SH_UNT_EX_1_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 23010C41,
+REG64( EX_2_L2_ISU_REG1_HOLD_OUT                               , RULL(0x24010C41), SH_UNT_EX_2_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 25010C41,
+REG64( EX_3_L2_ISU_REG1_HOLD_OUT                               , RULL(0x26010C41), SH_UNT_EX_3_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 27010C41,
+REG64( EX_4_L2_ISU_REG1_HOLD_OUT                               , RULL(0x28010C41), SH_UNT_EX_4_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 29010C41,
+REG64( EX_5_L2_ISU_REG1_HOLD_OUT                               , RULL(0x2A010C41), SH_UNT_EX_5_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 2B010C41,
+REG64( EX_6_L2_ISU_REG1_HOLD_OUT                               , RULL(0x2C010C41), SH_UNT_EX_6_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 2D010C41,
+REG64( EX_7_L2_ISU_REG1_HOLD_OUT                               , RULL(0x2E010C41), SH_UNT_EX_7_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 2F010C41,
+REG64( EX_8_L2_ISU_REG1_HOLD_OUT                               , RULL(0x30010C41), SH_UNT_EX_8_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 31010C41,
+REG64( EX_9_L2_ISU_REG1_HOLD_OUT                               , RULL(0x32010C41), SH_UNT_EX_9_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 33010C41,
+REG64( EX_L2_ISU_REG1_HOLD_OUT                                 , RULL(0x20010C41), SH_UNT_EX_L2    ,
+       SH_ACS_SCOM      ); //DUPS: 21010C41,
+
+REG64( C_ISU_REG2_HOLD_OUT                                     , RULL(0x20010C42), SH_UNT_C        , SH_ACS_SCOM      );
+REG64( C_0_ISU_REG2_HOLD_OUT                                   , RULL(0x20010C42), SH_UNT_C_0      , SH_ACS_SCOM      );
+REG64( C_1_ISU_REG2_HOLD_OUT                                   , RULL(0x21010C42), SH_UNT_C_1      , SH_ACS_SCOM      );
+REG64( C_2_ISU_REG2_HOLD_OUT                                   , RULL(0x22010C42), SH_UNT_C_2      , SH_ACS_SCOM      );
+REG64( C_3_ISU_REG2_HOLD_OUT                                   , RULL(0x23010C42), SH_UNT_C_3      , SH_ACS_SCOM      );
+REG64( C_4_ISU_REG2_HOLD_OUT                                   , RULL(0x24010C42), SH_UNT_C_4      , SH_ACS_SCOM      );
+REG64( C_5_ISU_REG2_HOLD_OUT                                   , RULL(0x25010C42), SH_UNT_C_5      , SH_ACS_SCOM      );
+REG64( C_6_ISU_REG2_HOLD_OUT                                   , RULL(0x26010C42), SH_UNT_C_6      , SH_ACS_SCOM      );
+REG64( C_7_ISU_REG2_HOLD_OUT                                   , RULL(0x27010C42), SH_UNT_C_7      , SH_ACS_SCOM      );
+REG64( C_8_ISU_REG2_HOLD_OUT                                   , RULL(0x28010C42), SH_UNT_C_8      , SH_ACS_SCOM      );
+REG64( C_9_ISU_REG2_HOLD_OUT                                   , RULL(0x29010C42), SH_UNT_C_9      , SH_ACS_SCOM      );
+REG64( C_10_ISU_REG2_HOLD_OUT                                  , RULL(0x2A010C42), SH_UNT_C_10     , SH_ACS_SCOM      );
+REG64( C_11_ISU_REG2_HOLD_OUT                                  , RULL(0x2B010C42), SH_UNT_C_11     , SH_ACS_SCOM      );
+REG64( C_12_ISU_REG2_HOLD_OUT                                  , RULL(0x2C010C42), SH_UNT_C_12     , SH_ACS_SCOM      );
+REG64( C_13_ISU_REG2_HOLD_OUT                                  , RULL(0x2D010C42), SH_UNT_C_13     , SH_ACS_SCOM      );
+REG64( C_14_ISU_REG2_HOLD_OUT                                  , RULL(0x2E010C42), SH_UNT_C_14     , SH_ACS_SCOM      );
+REG64( C_15_ISU_REG2_HOLD_OUT                                  , RULL(0x2F010C42), SH_UNT_C_15     , SH_ACS_SCOM      );
+REG64( C_16_ISU_REG2_HOLD_OUT                                  , RULL(0x30010C42), SH_UNT_C_16     , SH_ACS_SCOM      );
+REG64( C_17_ISU_REG2_HOLD_OUT                                  , RULL(0x31010C42), SH_UNT_C_17     , SH_ACS_SCOM      );
+REG64( C_18_ISU_REG2_HOLD_OUT                                  , RULL(0x32010C42), SH_UNT_C_18     , SH_ACS_SCOM      );
+REG64( C_19_ISU_REG2_HOLD_OUT                                  , RULL(0x33010C42), SH_UNT_C_19     , SH_ACS_SCOM      );
+REG64( C_20_ISU_REG2_HOLD_OUT                                  , RULL(0x34010C42), SH_UNT_C_20     , SH_ACS_SCOM      );
+REG64( C_21_ISU_REG2_HOLD_OUT                                  , RULL(0x35010C42), SH_UNT_C_21     , SH_ACS_SCOM      );
+REG64( C_22_ISU_REG2_HOLD_OUT                                  , RULL(0x36010C42), SH_UNT_C_22     , SH_ACS_SCOM      );
+REG64( C_23_ISU_REG2_HOLD_OUT                                  , RULL(0x37010C42), SH_UNT_C_23     , SH_ACS_SCOM      );
+REG64( EX_0_L2_ISU_REG2_HOLD_OUT                               , RULL(0x20010C42), SH_UNT_EX_0_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 21010C42,
+REG64( EX_10_L2_ISU_REG2_HOLD_OUT                              , RULL(0x34010C42), SH_UNT_EX_10_L2 ,
+       SH_ACS_SCOM      ); //DUPS: 35010C42,
+REG64( EX_11_L2_ISU_REG2_HOLD_OUT                              , RULL(0x36010C42), SH_UNT_EX_11_L2 ,
+       SH_ACS_SCOM      ); //DUPS: 37010C42,
+REG64( EX_1_L2_ISU_REG2_HOLD_OUT                               , RULL(0x22010C42), SH_UNT_EX_1_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 23010C42,
+REG64( EX_2_L2_ISU_REG2_HOLD_OUT                               , RULL(0x24010C42), SH_UNT_EX_2_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 25010C42,
+REG64( EX_3_L2_ISU_REG2_HOLD_OUT                               , RULL(0x26010C42), SH_UNT_EX_3_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 27010C42,
+REG64( EX_4_L2_ISU_REG2_HOLD_OUT                               , RULL(0x28010C42), SH_UNT_EX_4_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 29010C42,
+REG64( EX_5_L2_ISU_REG2_HOLD_OUT                               , RULL(0x2A010C42), SH_UNT_EX_5_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 2B010C42,
+REG64( EX_6_L2_ISU_REG2_HOLD_OUT                               , RULL(0x2C010C42), SH_UNT_EX_6_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 2D010C42,
+REG64( EX_7_L2_ISU_REG2_HOLD_OUT                               , RULL(0x2E010C42), SH_UNT_EX_7_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 2F010C42,
+REG64( EX_8_L2_ISU_REG2_HOLD_OUT                               , RULL(0x30010C42), SH_UNT_EX_8_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 31010C42,
+REG64( EX_9_L2_ISU_REG2_HOLD_OUT                               , RULL(0x32010C42), SH_UNT_EX_9_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 33010C42,
+REG64( EX_L2_ISU_REG2_HOLD_OUT                                 , RULL(0x20010C42), SH_UNT_EX_L2    ,
+       SH_ACS_SCOM      ); //DUPS: 21010C42,
+
+REG64( C_ISU_REG3_HOLD_OUT                                     , RULL(0x20010C43), SH_UNT_C        , SH_ACS_SCOM      );
+REG64( C_0_ISU_REG3_HOLD_OUT                                   , RULL(0x20010C43), SH_UNT_C_0      , SH_ACS_SCOM      );
+REG64( C_1_ISU_REG3_HOLD_OUT                                   , RULL(0x21010C43), SH_UNT_C_1      , SH_ACS_SCOM      );
+REG64( C_2_ISU_REG3_HOLD_OUT                                   , RULL(0x22010C43), SH_UNT_C_2      , SH_ACS_SCOM      );
+REG64( C_3_ISU_REG3_HOLD_OUT                                   , RULL(0x23010C43), SH_UNT_C_3      , SH_ACS_SCOM      );
+REG64( C_4_ISU_REG3_HOLD_OUT                                   , RULL(0x24010C43), SH_UNT_C_4      , SH_ACS_SCOM      );
+REG64( C_5_ISU_REG3_HOLD_OUT                                   , RULL(0x25010C43), SH_UNT_C_5      , SH_ACS_SCOM      );
+REG64( C_6_ISU_REG3_HOLD_OUT                                   , RULL(0x26010C43), SH_UNT_C_6      , SH_ACS_SCOM      );
+REG64( C_7_ISU_REG3_HOLD_OUT                                   , RULL(0x27010C43), SH_UNT_C_7      , SH_ACS_SCOM      );
+REG64( C_8_ISU_REG3_HOLD_OUT                                   , RULL(0x28010C43), SH_UNT_C_8      , SH_ACS_SCOM      );
+REG64( C_9_ISU_REG3_HOLD_OUT                                   , RULL(0x29010C43), SH_UNT_C_9      , SH_ACS_SCOM      );
+REG64( C_10_ISU_REG3_HOLD_OUT                                  , RULL(0x2A010C43), SH_UNT_C_10     , SH_ACS_SCOM      );
+REG64( C_11_ISU_REG3_HOLD_OUT                                  , RULL(0x2B010C43), SH_UNT_C_11     , SH_ACS_SCOM      );
+REG64( C_12_ISU_REG3_HOLD_OUT                                  , RULL(0x2C010C43), SH_UNT_C_12     , SH_ACS_SCOM      );
+REG64( C_13_ISU_REG3_HOLD_OUT                                  , RULL(0x2D010C43), SH_UNT_C_13     , SH_ACS_SCOM      );
+REG64( C_14_ISU_REG3_HOLD_OUT                                  , RULL(0x2E010C43), SH_UNT_C_14     , SH_ACS_SCOM      );
+REG64( C_15_ISU_REG3_HOLD_OUT                                  , RULL(0x2F010C43), SH_UNT_C_15     , SH_ACS_SCOM      );
+REG64( C_16_ISU_REG3_HOLD_OUT                                  , RULL(0x30010C43), SH_UNT_C_16     , SH_ACS_SCOM      );
+REG64( C_17_ISU_REG3_HOLD_OUT                                  , RULL(0x31010C43), SH_UNT_C_17     , SH_ACS_SCOM      );
+REG64( C_18_ISU_REG3_HOLD_OUT                                  , RULL(0x32010C43), SH_UNT_C_18     , SH_ACS_SCOM      );
+REG64( C_19_ISU_REG3_HOLD_OUT                                  , RULL(0x33010C43), SH_UNT_C_19     , SH_ACS_SCOM      );
+REG64( C_20_ISU_REG3_HOLD_OUT                                  , RULL(0x34010C43), SH_UNT_C_20     , SH_ACS_SCOM      );
+REG64( C_21_ISU_REG3_HOLD_OUT                                  , RULL(0x35010C43), SH_UNT_C_21     , SH_ACS_SCOM      );
+REG64( C_22_ISU_REG3_HOLD_OUT                                  , RULL(0x36010C43), SH_UNT_C_22     , SH_ACS_SCOM      );
+REG64( C_23_ISU_REG3_HOLD_OUT                                  , RULL(0x37010C43), SH_UNT_C_23     , SH_ACS_SCOM      );
+REG64( EX_0_L2_ISU_REG3_HOLD_OUT                               , RULL(0x20010C43), SH_UNT_EX_0_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 21010C43,
+REG64( EX_10_L2_ISU_REG3_HOLD_OUT                              , RULL(0x34010C43), SH_UNT_EX_10_L2 ,
+       SH_ACS_SCOM      ); //DUPS: 35010C43,
+REG64( EX_11_L2_ISU_REG3_HOLD_OUT                              , RULL(0x36010C43), SH_UNT_EX_11_L2 ,
+       SH_ACS_SCOM      ); //DUPS: 37010C43,
+REG64( EX_1_L2_ISU_REG3_HOLD_OUT                               , RULL(0x22010C43), SH_UNT_EX_1_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 23010C43,
+REG64( EX_2_L2_ISU_REG3_HOLD_OUT                               , RULL(0x24010C43), SH_UNT_EX_2_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 25010C43,
+REG64( EX_3_L2_ISU_REG3_HOLD_OUT                               , RULL(0x26010C43), SH_UNT_EX_3_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 27010C43,
+REG64( EX_4_L2_ISU_REG3_HOLD_OUT                               , RULL(0x28010C43), SH_UNT_EX_4_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 29010C43,
+REG64( EX_5_L2_ISU_REG3_HOLD_OUT                               , RULL(0x2A010C43), SH_UNT_EX_5_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 2B010C43,
+REG64( EX_6_L2_ISU_REG3_HOLD_OUT                               , RULL(0x2C010C43), SH_UNT_EX_6_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 2D010C43,
+REG64( EX_7_L2_ISU_REG3_HOLD_OUT                               , RULL(0x2E010C43), SH_UNT_EX_7_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 2F010C43,
+REG64( EX_8_L2_ISU_REG3_HOLD_OUT                               , RULL(0x30010C43), SH_UNT_EX_8_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 31010C43,
+REG64( EX_9_L2_ISU_REG3_HOLD_OUT                               , RULL(0x32010C43), SH_UNT_EX_9_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 33010C43,
+REG64( EX_L2_ISU_REG3_HOLD_OUT                                 , RULL(0x20010C43), SH_UNT_EX_L2    ,
+       SH_ACS_SCOM      ); //DUPS: 21010C43,
+
+REG64( C_ISU_REG4_HOLD_OUT                                     , RULL(0x20010C44), SH_UNT_C        , SH_ACS_SCOM      );
+REG64( C_0_ISU_REG4_HOLD_OUT                                   , RULL(0x20010C44), SH_UNT_C_0      , SH_ACS_SCOM      );
+REG64( C_1_ISU_REG4_HOLD_OUT                                   , RULL(0x21010C44), SH_UNT_C_1      , SH_ACS_SCOM      );
+REG64( C_2_ISU_REG4_HOLD_OUT                                   , RULL(0x22010C44), SH_UNT_C_2      , SH_ACS_SCOM      );
+REG64( C_3_ISU_REG4_HOLD_OUT                                   , RULL(0x23010C44), SH_UNT_C_3      , SH_ACS_SCOM      );
+REG64( C_4_ISU_REG4_HOLD_OUT                                   , RULL(0x24010C44), SH_UNT_C_4      , SH_ACS_SCOM      );
+REG64( C_5_ISU_REG4_HOLD_OUT                                   , RULL(0x25010C44), SH_UNT_C_5      , SH_ACS_SCOM      );
+REG64( C_6_ISU_REG4_HOLD_OUT                                   , RULL(0x26010C44), SH_UNT_C_6      , SH_ACS_SCOM      );
+REG64( C_7_ISU_REG4_HOLD_OUT                                   , RULL(0x27010C44), SH_UNT_C_7      , SH_ACS_SCOM      );
+REG64( C_8_ISU_REG4_HOLD_OUT                                   , RULL(0x28010C44), SH_UNT_C_8      , SH_ACS_SCOM      );
+REG64( C_9_ISU_REG4_HOLD_OUT                                   , RULL(0x29010C44), SH_UNT_C_9      , SH_ACS_SCOM      );
+REG64( C_10_ISU_REG4_HOLD_OUT                                  , RULL(0x2A010C44), SH_UNT_C_10     , SH_ACS_SCOM      );
+REG64( C_11_ISU_REG4_HOLD_OUT                                  , RULL(0x2B010C44), SH_UNT_C_11     , SH_ACS_SCOM      );
+REG64( C_12_ISU_REG4_HOLD_OUT                                  , RULL(0x2C010C44), SH_UNT_C_12     , SH_ACS_SCOM      );
+REG64( C_13_ISU_REG4_HOLD_OUT                                  , RULL(0x2D010C44), SH_UNT_C_13     , SH_ACS_SCOM      );
+REG64( C_14_ISU_REG4_HOLD_OUT                                  , RULL(0x2E010C44), SH_UNT_C_14     , SH_ACS_SCOM      );
+REG64( C_15_ISU_REG4_HOLD_OUT                                  , RULL(0x2F010C44), SH_UNT_C_15     , SH_ACS_SCOM      );
+REG64( C_16_ISU_REG4_HOLD_OUT                                  , RULL(0x30010C44), SH_UNT_C_16     , SH_ACS_SCOM      );
+REG64( C_17_ISU_REG4_HOLD_OUT                                  , RULL(0x31010C44), SH_UNT_C_17     , SH_ACS_SCOM      );
+REG64( C_18_ISU_REG4_HOLD_OUT                                  , RULL(0x32010C44), SH_UNT_C_18     , SH_ACS_SCOM      );
+REG64( C_19_ISU_REG4_HOLD_OUT                                  , RULL(0x33010C44), SH_UNT_C_19     , SH_ACS_SCOM      );
+REG64( C_20_ISU_REG4_HOLD_OUT                                  , RULL(0x34010C44), SH_UNT_C_20     , SH_ACS_SCOM      );
+REG64( C_21_ISU_REG4_HOLD_OUT                                  , RULL(0x35010C44), SH_UNT_C_21     , SH_ACS_SCOM      );
+REG64( C_22_ISU_REG4_HOLD_OUT                                  , RULL(0x36010C44), SH_UNT_C_22     , SH_ACS_SCOM      );
+REG64( C_23_ISU_REG4_HOLD_OUT                                  , RULL(0x37010C44), SH_UNT_C_23     , SH_ACS_SCOM      );
+REG64( EX_0_L2_ISU_REG4_HOLD_OUT                               , RULL(0x20010C44), SH_UNT_EX_0_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 21010C44,
+REG64( EX_10_L2_ISU_REG4_HOLD_OUT                              , RULL(0x34010C44), SH_UNT_EX_10_L2 ,
+       SH_ACS_SCOM      ); //DUPS: 35010C44,
+REG64( EX_11_L2_ISU_REG4_HOLD_OUT                              , RULL(0x36010C44), SH_UNT_EX_11_L2 ,
+       SH_ACS_SCOM      ); //DUPS: 37010C44,
+REG64( EX_1_L2_ISU_REG4_HOLD_OUT                               , RULL(0x22010C44), SH_UNT_EX_1_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 23010C44,
+REG64( EX_2_L2_ISU_REG4_HOLD_OUT                               , RULL(0x24010C44), SH_UNT_EX_2_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 25010C44,
+REG64( EX_3_L2_ISU_REG4_HOLD_OUT                               , RULL(0x26010C44), SH_UNT_EX_3_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 27010C44,
+REG64( EX_4_L2_ISU_REG4_HOLD_OUT                               , RULL(0x28010C44), SH_UNT_EX_4_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 29010C44,
+REG64( EX_5_L2_ISU_REG4_HOLD_OUT                               , RULL(0x2A010C44), SH_UNT_EX_5_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 2B010C44,
+REG64( EX_6_L2_ISU_REG4_HOLD_OUT                               , RULL(0x2C010C44), SH_UNT_EX_6_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 2D010C44,
+REG64( EX_7_L2_ISU_REG4_HOLD_OUT                               , RULL(0x2E010C44), SH_UNT_EX_7_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 2F010C44,
+REG64( EX_8_L2_ISU_REG4_HOLD_OUT                               , RULL(0x30010C44), SH_UNT_EX_8_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 31010C44,
+REG64( EX_9_L2_ISU_REG4_HOLD_OUT                               , RULL(0x32010C44), SH_UNT_EX_9_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 33010C44,
+REG64( EX_L2_ISU_REG4_HOLD_OUT                                 , RULL(0x20010C44), SH_UNT_EX_L2    ,
+       SH_ACS_SCOM      ); //DUPS: 21010C44,
+
+REG64( C_ISU_REG5_HOLD_OUT                                     , RULL(0x20010C45), SH_UNT_C        , SH_ACS_SCOM      );
+REG64( C_0_ISU_REG5_HOLD_OUT                                   , RULL(0x20010C45), SH_UNT_C_0      , SH_ACS_SCOM      );
+REG64( C_1_ISU_REG5_HOLD_OUT                                   , RULL(0x21010C45), SH_UNT_C_1      , SH_ACS_SCOM      );
+REG64( C_2_ISU_REG5_HOLD_OUT                                   , RULL(0x22010C45), SH_UNT_C_2      , SH_ACS_SCOM      );
+REG64( C_3_ISU_REG5_HOLD_OUT                                   , RULL(0x23010C45), SH_UNT_C_3      , SH_ACS_SCOM      );
+REG64( C_4_ISU_REG5_HOLD_OUT                                   , RULL(0x24010C45), SH_UNT_C_4      , SH_ACS_SCOM      );
+REG64( C_5_ISU_REG5_HOLD_OUT                                   , RULL(0x25010C45), SH_UNT_C_5      , SH_ACS_SCOM      );
+REG64( C_6_ISU_REG5_HOLD_OUT                                   , RULL(0x26010C45), SH_UNT_C_6      , SH_ACS_SCOM      );
+REG64( C_7_ISU_REG5_HOLD_OUT                                   , RULL(0x27010C45), SH_UNT_C_7      , SH_ACS_SCOM      );
+REG64( C_8_ISU_REG5_HOLD_OUT                                   , RULL(0x28010C45), SH_UNT_C_8      , SH_ACS_SCOM      );
+REG64( C_9_ISU_REG5_HOLD_OUT                                   , RULL(0x29010C45), SH_UNT_C_9      , SH_ACS_SCOM      );
+REG64( C_10_ISU_REG5_HOLD_OUT                                  , RULL(0x2A010C45), SH_UNT_C_10     , SH_ACS_SCOM      );
+REG64( C_11_ISU_REG5_HOLD_OUT                                  , RULL(0x2B010C45), SH_UNT_C_11     , SH_ACS_SCOM      );
+REG64( C_12_ISU_REG5_HOLD_OUT                                  , RULL(0x2C010C45), SH_UNT_C_12     , SH_ACS_SCOM      );
+REG64( C_13_ISU_REG5_HOLD_OUT                                  , RULL(0x2D010C45), SH_UNT_C_13     , SH_ACS_SCOM      );
+REG64( C_14_ISU_REG5_HOLD_OUT                                  , RULL(0x2E010C45), SH_UNT_C_14     , SH_ACS_SCOM      );
+REG64( C_15_ISU_REG5_HOLD_OUT                                  , RULL(0x2F010C45), SH_UNT_C_15     , SH_ACS_SCOM      );
+REG64( C_16_ISU_REG5_HOLD_OUT                                  , RULL(0x30010C45), SH_UNT_C_16     , SH_ACS_SCOM      );
+REG64( C_17_ISU_REG5_HOLD_OUT                                  , RULL(0x31010C45), SH_UNT_C_17     , SH_ACS_SCOM      );
+REG64( C_18_ISU_REG5_HOLD_OUT                                  , RULL(0x32010C45), SH_UNT_C_18     , SH_ACS_SCOM      );
+REG64( C_19_ISU_REG5_HOLD_OUT                                  , RULL(0x33010C45), SH_UNT_C_19     , SH_ACS_SCOM      );
+REG64( C_20_ISU_REG5_HOLD_OUT                                  , RULL(0x34010C45), SH_UNT_C_20     , SH_ACS_SCOM      );
+REG64( C_21_ISU_REG5_HOLD_OUT                                  , RULL(0x35010C45), SH_UNT_C_21     , SH_ACS_SCOM      );
+REG64( C_22_ISU_REG5_HOLD_OUT                                  , RULL(0x36010C45), SH_UNT_C_22     , SH_ACS_SCOM      );
+REG64( C_23_ISU_REG5_HOLD_OUT                                  , RULL(0x37010C45), SH_UNT_C_23     , SH_ACS_SCOM      );
+REG64( EX_0_L2_ISU_REG5_HOLD_OUT                               , RULL(0x20010C45), SH_UNT_EX_0_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 21010C45,
+REG64( EX_10_L2_ISU_REG5_HOLD_OUT                              , RULL(0x34010C45), SH_UNT_EX_10_L2 ,
+       SH_ACS_SCOM      ); //DUPS: 35010C45,
+REG64( EX_11_L2_ISU_REG5_HOLD_OUT                              , RULL(0x36010C45), SH_UNT_EX_11_L2 ,
+       SH_ACS_SCOM      ); //DUPS: 37010C45,
+REG64( EX_1_L2_ISU_REG5_HOLD_OUT                               , RULL(0x22010C45), SH_UNT_EX_1_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 23010C45,
+REG64( EX_2_L2_ISU_REG5_HOLD_OUT                               , RULL(0x24010C45), SH_UNT_EX_2_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 25010C45,
+REG64( EX_3_L2_ISU_REG5_HOLD_OUT                               , RULL(0x26010C45), SH_UNT_EX_3_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 27010C45,
+REG64( EX_4_L2_ISU_REG5_HOLD_OUT                               , RULL(0x28010C45), SH_UNT_EX_4_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 29010C45,
+REG64( EX_5_L2_ISU_REG5_HOLD_OUT                               , RULL(0x2A010C45), SH_UNT_EX_5_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 2B010C45,
+REG64( EX_6_L2_ISU_REG5_HOLD_OUT                               , RULL(0x2C010C45), SH_UNT_EX_6_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 2D010C45,
+REG64( EX_7_L2_ISU_REG5_HOLD_OUT                               , RULL(0x2E010C45), SH_UNT_EX_7_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 2F010C45,
+REG64( EX_8_L2_ISU_REG5_HOLD_OUT                               , RULL(0x30010C45), SH_UNT_EX_8_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 31010C45,
+REG64( EX_9_L2_ISU_REG5_HOLD_OUT                               , RULL(0x32010C45), SH_UNT_EX_9_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 33010C45,
+REG64( EX_L2_ISU_REG5_HOLD_OUT                                 , RULL(0x20010C45), SH_UNT_EX_L2    ,
+       SH_ACS_SCOM      ); //DUPS: 21010C45,
 
 REG64( EQ_L3TRA0_TR0_TRACE_HI_DATA_REG                         , RULL(0x10010400), SH_UNT_EQ       , SH_ACS_SCOM_RO   );
 REG64( EQ_0_L3TRA0_TR0_TRACE_HI_DATA_REG                       , RULL(0x10010400), SH_UNT_EQ_0     , SH_ACS_SCOM_RO   );
@@ -13544,193 +13607,71 @@ REG64( EX_9_L2_LSU_HOLD_OUT_REG3                               , RULL(0x32010C83
 REG64( EX_L2_LSU_HOLD_OUT_REG3                                 , RULL(0x20010C83), SH_UNT_EX_L2    ,
        SH_ACS_SCOM_RO   ); //DUPS: 21010C83,
 
-REG64( C_LSU_HOLD_OUT_REG4                                     , RULL(0x20010C84), SH_UNT_C        , SH_ACS_SCOM_RO   );
-REG64( C_0_LSU_HOLD_OUT_REG4                                   , RULL(0x20010C84), SH_UNT_C_0      , SH_ACS_SCOM_RO   );
-REG64( C_1_LSU_HOLD_OUT_REG4                                   , RULL(0x21010C84), SH_UNT_C_1      , SH_ACS_SCOM_RO   );
-REG64( C_2_LSU_HOLD_OUT_REG4                                   , RULL(0x22010C84), SH_UNT_C_2      , SH_ACS_SCOM_RO   );
-REG64( C_3_LSU_HOLD_OUT_REG4                                   , RULL(0x23010C84), SH_UNT_C_3      , SH_ACS_SCOM_RO   );
-REG64( C_4_LSU_HOLD_OUT_REG4                                   , RULL(0x24010C84), SH_UNT_C_4      , SH_ACS_SCOM_RO   );
-REG64( C_5_LSU_HOLD_OUT_REG4                                   , RULL(0x25010C84), SH_UNT_C_5      , SH_ACS_SCOM_RO   );
-REG64( C_6_LSU_HOLD_OUT_REG4                                   , RULL(0x26010C84), SH_UNT_C_6      , SH_ACS_SCOM_RO   );
-REG64( C_7_LSU_HOLD_OUT_REG4                                   , RULL(0x27010C84), SH_UNT_C_7      , SH_ACS_SCOM_RO   );
-REG64( C_8_LSU_HOLD_OUT_REG4                                   , RULL(0x28010C84), SH_UNT_C_8      , SH_ACS_SCOM_RO   );
-REG64( C_9_LSU_HOLD_OUT_REG4                                   , RULL(0x29010C84), SH_UNT_C_9      , SH_ACS_SCOM_RO   );
-REG64( C_10_LSU_HOLD_OUT_REG4                                  , RULL(0x2A010C84), SH_UNT_C_10     , SH_ACS_SCOM_RO   );
-REG64( C_11_LSU_HOLD_OUT_REG4                                  , RULL(0x2B010C84), SH_UNT_C_11     , SH_ACS_SCOM_RO   );
-REG64( C_12_LSU_HOLD_OUT_REG4                                  , RULL(0x2C010C84), SH_UNT_C_12     , SH_ACS_SCOM_RO   );
-REG64( C_13_LSU_HOLD_OUT_REG4                                  , RULL(0x2D010C84), SH_UNT_C_13     , SH_ACS_SCOM_RO   );
-REG64( C_14_LSU_HOLD_OUT_REG4                                  , RULL(0x2E010C84), SH_UNT_C_14     , SH_ACS_SCOM_RO   );
-REG64( C_15_LSU_HOLD_OUT_REG4                                  , RULL(0x2F010C84), SH_UNT_C_15     , SH_ACS_SCOM_RO   );
-REG64( C_16_LSU_HOLD_OUT_REG4                                  , RULL(0x30010C84), SH_UNT_C_16     , SH_ACS_SCOM_RO   );
-REG64( C_17_LSU_HOLD_OUT_REG4                                  , RULL(0x31010C84), SH_UNT_C_17     , SH_ACS_SCOM_RO   );
-REG64( C_18_LSU_HOLD_OUT_REG4                                  , RULL(0x32010C84), SH_UNT_C_18     , SH_ACS_SCOM_RO   );
-REG64( C_19_LSU_HOLD_OUT_REG4                                  , RULL(0x33010C84), SH_UNT_C_19     , SH_ACS_SCOM_RO   );
-REG64( C_20_LSU_HOLD_OUT_REG4                                  , RULL(0x34010C84), SH_UNT_C_20     , SH_ACS_SCOM_RO   );
-REG64( C_21_LSU_HOLD_OUT_REG4                                  , RULL(0x35010C84), SH_UNT_C_21     , SH_ACS_SCOM_RO   );
-REG64( C_22_LSU_HOLD_OUT_REG4                                  , RULL(0x36010C84), SH_UNT_C_22     , SH_ACS_SCOM_RO   );
-REG64( C_23_LSU_HOLD_OUT_REG4                                  , RULL(0x37010C84), SH_UNT_C_23     , SH_ACS_SCOM_RO   );
-REG64( EX_0_L2_LSU_HOLD_OUT_REG4                               , RULL(0x20010C84), SH_UNT_EX_0_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 21010C84,
-REG64( EX_10_L2_LSU_HOLD_OUT_REG4                              , RULL(0x34010C84), SH_UNT_EX_10_L2 ,
-       SH_ACS_SCOM_RO   ); //DUPS: 35010C84,
-REG64( EX_11_L2_LSU_HOLD_OUT_REG4                              , RULL(0x36010C84), SH_UNT_EX_11_L2 ,
-       SH_ACS_SCOM_RO   ); //DUPS: 37010C84,
-REG64( EX_1_L2_LSU_HOLD_OUT_REG4                               , RULL(0x22010C84), SH_UNT_EX_1_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 23010C84,
-REG64( EX_2_L2_LSU_HOLD_OUT_REG4                               , RULL(0x24010C84), SH_UNT_EX_2_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 25010C84,
-REG64( EX_3_L2_LSU_HOLD_OUT_REG4                               , RULL(0x26010C84), SH_UNT_EX_3_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 27010C84,
-REG64( EX_4_L2_LSU_HOLD_OUT_REG4                               , RULL(0x28010C84), SH_UNT_EX_4_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 29010C84,
-REG64( EX_5_L2_LSU_HOLD_OUT_REG4                               , RULL(0x2A010C84), SH_UNT_EX_5_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 2B010C84,
-REG64( EX_6_L2_LSU_HOLD_OUT_REG4                               , RULL(0x2C010C84), SH_UNT_EX_6_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 2D010C84,
-REG64( EX_7_L2_LSU_HOLD_OUT_REG4                               , RULL(0x2E010C84), SH_UNT_EX_7_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 2F010C84,
-REG64( EX_8_L2_LSU_HOLD_OUT_REG4                               , RULL(0x30010C84), SH_UNT_EX_8_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 31010C84,
-REG64( EX_9_L2_LSU_HOLD_OUT_REG4                               , RULL(0x32010C84), SH_UNT_EX_9_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 33010C84,
-REG64( EX_L2_LSU_HOLD_OUT_REG4                                 , RULL(0x20010C84), SH_UNT_EX_L2    ,
-       SH_ACS_SCOM_RO   ); //DUPS: 21010C84,
+REG64( EQ_MIB_XIICAC                                           , RULL(0x10012419), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012019,
+REG64( EQ_0_MIB_XIICAC                                         , RULL(0x10012419), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012019,
+REG64( EQ_1_MIB_XIICAC                                         , RULL(0x11012419), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 11012019,
+REG64( EQ_2_MIB_XIICAC                                         , RULL(0x12012419), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 12012019,
+REG64( EQ_3_MIB_XIICAC                                         , RULL(0x13012419), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 13012019,
+REG64( EQ_4_MIB_XIICAC                                         , RULL(0x14012419), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 14012019,
+REG64( EQ_5_MIB_XIICAC                                         , RULL(0x15012419), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 15012019,
+REG64( EX_MIB_XIICAC                                           , RULL(0x10012419), SH_UNT_EX       , SH_ACS_SCOM_RO   );
+REG64( EX_0_MIB_XIICAC                                         , RULL(0x10012419), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
+REG64( EX_2_MIB_XIICAC                                         , RULL(0x11012419), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
+REG64( EX_4_MIB_XIICAC                                         , RULL(0x12012419), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
+REG64( EX_6_MIB_XIICAC                                         , RULL(0x13012419), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
+REG64( EX_8_MIB_XIICAC                                         , RULL(0x14012419), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
+REG64( EX_10_MIB_XIICAC                                        , RULL(0x15012419), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
 
-REG64( C_LSU_HOLD_OUT_REG5                                     , RULL(0x20010C85), SH_UNT_C        , SH_ACS_SCOM_RO   );
-REG64( C_0_LSU_HOLD_OUT_REG5                                   , RULL(0x20010C85), SH_UNT_C_0      , SH_ACS_SCOM_RO   );
-REG64( C_1_LSU_HOLD_OUT_REG5                                   , RULL(0x21010C85), SH_UNT_C_1      , SH_ACS_SCOM_RO   );
-REG64( C_2_LSU_HOLD_OUT_REG5                                   , RULL(0x22010C85), SH_UNT_C_2      , SH_ACS_SCOM_RO   );
-REG64( C_3_LSU_HOLD_OUT_REG5                                   , RULL(0x23010C85), SH_UNT_C_3      , SH_ACS_SCOM_RO   );
-REG64( C_4_LSU_HOLD_OUT_REG5                                   , RULL(0x24010C85), SH_UNT_C_4      , SH_ACS_SCOM_RO   );
-REG64( C_5_LSU_HOLD_OUT_REG5                                   , RULL(0x25010C85), SH_UNT_C_5      , SH_ACS_SCOM_RO   );
-REG64( C_6_LSU_HOLD_OUT_REG5                                   , RULL(0x26010C85), SH_UNT_C_6      , SH_ACS_SCOM_RO   );
-REG64( C_7_LSU_HOLD_OUT_REG5                                   , RULL(0x27010C85), SH_UNT_C_7      , SH_ACS_SCOM_RO   );
-REG64( C_8_LSU_HOLD_OUT_REG5                                   , RULL(0x28010C85), SH_UNT_C_8      , SH_ACS_SCOM_RO   );
-REG64( C_9_LSU_HOLD_OUT_REG5                                   , RULL(0x29010C85), SH_UNT_C_9      , SH_ACS_SCOM_RO   );
-REG64( C_10_LSU_HOLD_OUT_REG5                                  , RULL(0x2A010C85), SH_UNT_C_10     , SH_ACS_SCOM_RO   );
-REG64( C_11_LSU_HOLD_OUT_REG5                                  , RULL(0x2B010C85), SH_UNT_C_11     , SH_ACS_SCOM_RO   );
-REG64( C_12_LSU_HOLD_OUT_REG5                                  , RULL(0x2C010C85), SH_UNT_C_12     , SH_ACS_SCOM_RO   );
-REG64( C_13_LSU_HOLD_OUT_REG5                                  , RULL(0x2D010C85), SH_UNT_C_13     , SH_ACS_SCOM_RO   );
-REG64( C_14_LSU_HOLD_OUT_REG5                                  , RULL(0x2E010C85), SH_UNT_C_14     , SH_ACS_SCOM_RO   );
-REG64( C_15_LSU_HOLD_OUT_REG5                                  , RULL(0x2F010C85), SH_UNT_C_15     , SH_ACS_SCOM_RO   );
-REG64( C_16_LSU_HOLD_OUT_REG5                                  , RULL(0x30010C85), SH_UNT_C_16     , SH_ACS_SCOM_RO   );
-REG64( C_17_LSU_HOLD_OUT_REG5                                  , RULL(0x31010C85), SH_UNT_C_17     , SH_ACS_SCOM_RO   );
-REG64( C_18_LSU_HOLD_OUT_REG5                                  , RULL(0x32010C85), SH_UNT_C_18     , SH_ACS_SCOM_RO   );
-REG64( C_19_LSU_HOLD_OUT_REG5                                  , RULL(0x33010C85), SH_UNT_C_19     , SH_ACS_SCOM_RO   );
-REG64( C_20_LSU_HOLD_OUT_REG5                                  , RULL(0x34010C85), SH_UNT_C_20     , SH_ACS_SCOM_RO   );
-REG64( C_21_LSU_HOLD_OUT_REG5                                  , RULL(0x35010C85), SH_UNT_C_21     , SH_ACS_SCOM_RO   );
-REG64( C_22_LSU_HOLD_OUT_REG5                                  , RULL(0x36010C85), SH_UNT_C_22     , SH_ACS_SCOM_RO   );
-REG64( C_23_LSU_HOLD_OUT_REG5                                  , RULL(0x37010C85), SH_UNT_C_23     , SH_ACS_SCOM_RO   );
-REG64( EX_0_L2_LSU_HOLD_OUT_REG5                               , RULL(0x20010C85), SH_UNT_EX_0_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 21010C85,
-REG64( EX_10_L2_LSU_HOLD_OUT_REG5                              , RULL(0x34010C85), SH_UNT_EX_10_L2 ,
-       SH_ACS_SCOM_RO   ); //DUPS: 35010C85,
-REG64( EX_11_L2_LSU_HOLD_OUT_REG5                              , RULL(0x36010C85), SH_UNT_EX_11_L2 ,
-       SH_ACS_SCOM_RO   ); //DUPS: 37010C85,
-REG64( EX_1_L2_LSU_HOLD_OUT_REG5                               , RULL(0x22010C85), SH_UNT_EX_1_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 23010C85,
-REG64( EX_2_L2_LSU_HOLD_OUT_REG5                               , RULL(0x24010C85), SH_UNT_EX_2_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 25010C85,
-REG64( EX_3_L2_LSU_HOLD_OUT_REG5                               , RULL(0x26010C85), SH_UNT_EX_3_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 27010C85,
-REG64( EX_4_L2_LSU_HOLD_OUT_REG5                               , RULL(0x28010C85), SH_UNT_EX_4_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 29010C85,
-REG64( EX_5_L2_LSU_HOLD_OUT_REG5                               , RULL(0x2A010C85), SH_UNT_EX_5_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 2B010C85,
-REG64( EX_6_L2_LSU_HOLD_OUT_REG5                               , RULL(0x2C010C85), SH_UNT_EX_6_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 2D010C85,
-REG64( EX_7_L2_LSU_HOLD_OUT_REG5                               , RULL(0x2E010C85), SH_UNT_EX_7_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 2F010C85,
-REG64( EX_8_L2_LSU_HOLD_OUT_REG5                               , RULL(0x30010C85), SH_UNT_EX_8_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 31010C85,
-REG64( EX_9_L2_LSU_HOLD_OUT_REG5                               , RULL(0x32010C85), SH_UNT_EX_9_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 33010C85,
-REG64( EX_L2_LSU_HOLD_OUT_REG5                                 , RULL(0x20010C85), SH_UNT_EX_L2    ,
-       SH_ACS_SCOM_RO   ); //DUPS: 21010C85,
+REG64( EQ_MIB_XIMEM                                            , RULL(0x10012417), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012017,
+REG64( EQ_0_MIB_XIMEM                                          , RULL(0x10012417), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012017,
+REG64( EQ_1_MIB_XIMEM                                          , RULL(0x11012417), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 11012017,
+REG64( EQ_2_MIB_XIMEM                                          , RULL(0x12012417), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 12012017,
+REG64( EQ_3_MIB_XIMEM                                          , RULL(0x13012417), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 13012017,
+REG64( EQ_4_MIB_XIMEM                                          , RULL(0x14012417), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 14012017,
+REG64( EQ_5_MIB_XIMEM                                          , RULL(0x15012417), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 15012017,
+REG64( EX_MIB_XIMEM                                            , RULL(0x10012417), SH_UNT_EX       , SH_ACS_SCOM_RO   );
+REG64( EX_0_MIB_XIMEM                                          , RULL(0x10012417), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
+REG64( EX_2_MIB_XIMEM                                          , RULL(0x11012417), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
+REG64( EX_4_MIB_XIMEM                                          , RULL(0x12012417), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
+REG64( EX_6_MIB_XIMEM                                          , RULL(0x13012417), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
+REG64( EX_8_MIB_XIMEM                                          , RULL(0x14012417), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
+REG64( EX_10_MIB_XIMEM                                         , RULL(0x15012417), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
 
-REG64( EQ_MIB_XIICAC                                           , RULL(0x10012839), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012439,
-REG64( EQ_0_MIB_XIICAC                                         , RULL(0x10012839), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012439,
-REG64( EQ_1_MIB_XIICAC                                         , RULL(0x11012839), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 11012439,
-REG64( EQ_2_MIB_XIICAC                                         , RULL(0x12012839), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 12012439,
-REG64( EQ_3_MIB_XIICAC                                         , RULL(0x13012839), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 13012439,
-REG64( EQ_4_MIB_XIICAC                                         , RULL(0x14012839), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 14012439,
-REG64( EQ_5_MIB_XIICAC                                         , RULL(0x15012839), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 15012439,
-REG64( EX_MIB_XIICAC                                           , RULL(0x10012439), SH_UNT_EX       , SH_ACS_SCOM_RO   );
-REG64( EX_0_MIB_XIICAC                                         , RULL(0x10012439), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
-REG64( EX_1_MIB_XIICAC                                         , RULL(0x10012839), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
-REG64( EX_2_MIB_XIICAC                                         , RULL(0x11012439), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
-REG64( EX_3_MIB_XIICAC                                         , RULL(0x11012839), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
-REG64( EX_4_MIB_XIICAC                                         , RULL(0x12012439), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
-REG64( EX_5_MIB_XIICAC                                         , RULL(0x12012839), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
-REG64( EX_6_MIB_XIICAC                                         , RULL(0x13012439), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
-REG64( EX_7_MIB_XIICAC                                         , RULL(0x13012839), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
-REG64( EX_8_MIB_XIICAC                                         , RULL(0x14012439), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
-REG64( EX_9_MIB_XIICAC                                         , RULL(0x14012839), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
-REG64( EX_10_MIB_XIICAC                                        , RULL(0x15012439), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
-REG64( EX_11_MIB_XIICAC                                        , RULL(0x15012839), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
-
-REG64( EQ_MIB_XIMEM                                            , RULL(0x10012837), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012437,
-REG64( EQ_0_MIB_XIMEM                                          , RULL(0x10012837), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012437,
-REG64( EQ_1_MIB_XIMEM                                          , RULL(0x11012837), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 11012437,
-REG64( EQ_2_MIB_XIMEM                                          , RULL(0x12012837), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 12012437,
-REG64( EQ_3_MIB_XIMEM                                          , RULL(0x13012837), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 13012437,
-REG64( EQ_4_MIB_XIMEM                                          , RULL(0x14012837), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 14012437,
-REG64( EQ_5_MIB_XIMEM                                          , RULL(0x15012837), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 15012437,
-REG64( EX_MIB_XIMEM                                            , RULL(0x10012437), SH_UNT_EX       , SH_ACS_SCOM_RO   );
-REG64( EX_0_MIB_XIMEM                                          , RULL(0x10012437), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
-REG64( EX_1_MIB_XIMEM                                          , RULL(0x10012837), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
-REG64( EX_2_MIB_XIMEM                                          , RULL(0x11012437), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
-REG64( EX_3_MIB_XIMEM                                          , RULL(0x11012837), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
-REG64( EX_4_MIB_XIMEM                                          , RULL(0x12012437), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
-REG64( EX_5_MIB_XIMEM                                          , RULL(0x12012837), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
-REG64( EX_6_MIB_XIMEM                                          , RULL(0x13012437), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
-REG64( EX_7_MIB_XIMEM                                          , RULL(0x13012837), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
-REG64( EX_8_MIB_XIMEM                                          , RULL(0x14012437), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
-REG64( EX_9_MIB_XIMEM                                          , RULL(0x14012837), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
-REG64( EX_10_MIB_XIMEM                                         , RULL(0x15012437), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
-REG64( EX_11_MIB_XIMEM                                         , RULL(0x15012837), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
-
-REG64( EQ_MIB_XISGB                                            , RULL(0x10012838), SH_UNT_EQ       ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012438,
-REG64( EQ_0_MIB_XISGB                                          , RULL(0x10012838), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 10012438,
-REG64( EQ_1_MIB_XISGB                                          , RULL(0x11012838), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 11012438,
-REG64( EQ_2_MIB_XISGB                                          , RULL(0x12012838), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 12012438,
-REG64( EQ_3_MIB_XISGB                                          , RULL(0x13012838), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 13012438,
-REG64( EQ_4_MIB_XISGB                                          , RULL(0x14012838), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 14012438,
-REG64( EQ_5_MIB_XISGB                                          , RULL(0x15012838), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 15012438,
-REG64( EX_MIB_XISGB                                            , RULL(0x10012438), SH_UNT_EX       , SH_ACS_SCOM_RO   );
-REG64( EX_0_MIB_XISGB                                          , RULL(0x10012438), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
-REG64( EX_1_MIB_XISGB                                          , RULL(0x10012838), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
-REG64( EX_2_MIB_XISGB                                          , RULL(0x11012438), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
-REG64( EX_3_MIB_XISGB                                          , RULL(0x11012838), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
-REG64( EX_4_MIB_XISGB                                          , RULL(0x12012438), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
-REG64( EX_5_MIB_XISGB                                          , RULL(0x12012838), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
-REG64( EX_6_MIB_XISGB                                          , RULL(0x13012438), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
-REG64( EX_7_MIB_XISGB                                          , RULL(0x13012838), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
-REG64( EX_8_MIB_XISGB                                          , RULL(0x14012438), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
-REG64( EX_9_MIB_XISGB                                          , RULL(0x14012838), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
-REG64( EX_10_MIB_XISGB                                         , RULL(0x15012438), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
-REG64( EX_11_MIB_XISGB                                         , RULL(0x15012838), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
+REG64( EQ_MIB_XISGB                                            , RULL(0x10012418), SH_UNT_EQ       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012018,
+REG64( EQ_0_MIB_XISGB                                          , RULL(0x10012418), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 10012018,
+REG64( EQ_1_MIB_XISGB                                          , RULL(0x11012418), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 11012018,
+REG64( EQ_2_MIB_XISGB                                          , RULL(0x12012418), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 12012018,
+REG64( EQ_3_MIB_XISGB                                          , RULL(0x13012418), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 13012018,
+REG64( EQ_4_MIB_XISGB                                          , RULL(0x14012418), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 14012018,
+REG64( EQ_5_MIB_XISGB                                          , RULL(0x15012418), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 15012018,
+REG64( EX_MIB_XISGB                                            , RULL(0x10012418), SH_UNT_EX       , SH_ACS_SCOM_RO   );
+REG64( EX_0_MIB_XISGB                                          , RULL(0x10012418), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
+REG64( EX_2_MIB_XISGB                                          , RULL(0x11012418), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
+REG64( EX_4_MIB_XISGB                                          , RULL(0x12012418), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
+REG64( EX_6_MIB_XISGB                                          , RULL(0x13012418), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
+REG64( EX_8_MIB_XISGB                                          , RULL(0x14012418), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
+REG64( EX_10_MIB_XISGB                                         , RULL(0x15012418), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
 
 REG64( C_MODE_REG                                              , RULL(0x20040008), SH_UNT_C        , SH_ACS_SCOM      );
 REG64( C_0_MODE_REG                                            , RULL(0x20040008), SH_UNT_C_0      , SH_ACS_SCOM      );
@@ -15327,57 +15268,57 @@ REG64( EX_10_PLL_LOCK_REG                                      , RULL(0x340F0019
 REG64( EX_11_PLL_LOCK_REG                                      , RULL(0x360F0019), SH_UNT_EX_11    ,
        SH_ACS_SCOM      ); //DUPS: 370F0019,
 
-REG64( C_PMU_HOLD_OUT                                          , RULL(0x20010ABC), SH_UNT_C        , SH_ACS_SCOM      );
-REG64( C_0_PMU_HOLD_OUT                                        , RULL(0x20010ABC), SH_UNT_C_0      , SH_ACS_SCOM      );
-REG64( C_1_PMU_HOLD_OUT                                        , RULL(0x21010ABC), SH_UNT_C_1      , SH_ACS_SCOM      );
-REG64( C_2_PMU_HOLD_OUT                                        , RULL(0x22010ABC), SH_UNT_C_2      , SH_ACS_SCOM      );
-REG64( C_3_PMU_HOLD_OUT                                        , RULL(0x23010ABC), SH_UNT_C_3      , SH_ACS_SCOM      );
-REG64( C_4_PMU_HOLD_OUT                                        , RULL(0x24010ABC), SH_UNT_C_4      , SH_ACS_SCOM      );
-REG64( C_5_PMU_HOLD_OUT                                        , RULL(0x25010ABC), SH_UNT_C_5      , SH_ACS_SCOM      );
-REG64( C_6_PMU_HOLD_OUT                                        , RULL(0x26010ABC), SH_UNT_C_6      , SH_ACS_SCOM      );
-REG64( C_7_PMU_HOLD_OUT                                        , RULL(0x27010ABC), SH_UNT_C_7      , SH_ACS_SCOM      );
-REG64( C_8_PMU_HOLD_OUT                                        , RULL(0x28010ABC), SH_UNT_C_8      , SH_ACS_SCOM      );
-REG64( C_9_PMU_HOLD_OUT                                        , RULL(0x29010ABC), SH_UNT_C_9      , SH_ACS_SCOM      );
-REG64( C_10_PMU_HOLD_OUT                                       , RULL(0x2A010ABC), SH_UNT_C_10     , SH_ACS_SCOM      );
-REG64( C_11_PMU_HOLD_OUT                                       , RULL(0x2B010ABC), SH_UNT_C_11     , SH_ACS_SCOM      );
-REG64( C_12_PMU_HOLD_OUT                                       , RULL(0x2C010ABC), SH_UNT_C_12     , SH_ACS_SCOM      );
-REG64( C_13_PMU_HOLD_OUT                                       , RULL(0x2D010ABC), SH_UNT_C_13     , SH_ACS_SCOM      );
-REG64( C_14_PMU_HOLD_OUT                                       , RULL(0x2E010ABC), SH_UNT_C_14     , SH_ACS_SCOM      );
-REG64( C_15_PMU_HOLD_OUT                                       , RULL(0x2F010ABC), SH_UNT_C_15     , SH_ACS_SCOM      );
-REG64( C_16_PMU_HOLD_OUT                                       , RULL(0x30010ABC), SH_UNT_C_16     , SH_ACS_SCOM      );
-REG64( C_17_PMU_HOLD_OUT                                       , RULL(0x31010ABC), SH_UNT_C_17     , SH_ACS_SCOM      );
-REG64( C_18_PMU_HOLD_OUT                                       , RULL(0x32010ABC), SH_UNT_C_18     , SH_ACS_SCOM      );
-REG64( C_19_PMU_HOLD_OUT                                       , RULL(0x33010ABC), SH_UNT_C_19     , SH_ACS_SCOM      );
-REG64( C_20_PMU_HOLD_OUT                                       , RULL(0x34010ABC), SH_UNT_C_20     , SH_ACS_SCOM      );
-REG64( C_21_PMU_HOLD_OUT                                       , RULL(0x35010ABC), SH_UNT_C_21     , SH_ACS_SCOM      );
-REG64( C_22_PMU_HOLD_OUT                                       , RULL(0x36010ABC), SH_UNT_C_22     , SH_ACS_SCOM      );
-REG64( C_23_PMU_HOLD_OUT                                       , RULL(0x37010ABC), SH_UNT_C_23     , SH_ACS_SCOM      );
-REG64( EX_0_L2_PMU_HOLD_OUT                                    , RULL(0x20010ABC), SH_UNT_EX_0_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 21010ABC,
-REG64( EX_10_L2_PMU_HOLD_OUT                                   , RULL(0x34010ABC), SH_UNT_EX_10_L2 ,
-       SH_ACS_SCOM      ); //DUPS: 35010ABC,
-REG64( EX_11_L2_PMU_HOLD_OUT                                   , RULL(0x36010ABC), SH_UNT_EX_11_L2 ,
-       SH_ACS_SCOM      ); //DUPS: 37010ABC,
-REG64( EX_1_L2_PMU_HOLD_OUT                                    , RULL(0x22010ABC), SH_UNT_EX_1_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 23010ABC,
-REG64( EX_2_L2_PMU_HOLD_OUT                                    , RULL(0x24010ABC), SH_UNT_EX_2_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 25010ABC,
-REG64( EX_3_L2_PMU_HOLD_OUT                                    , RULL(0x26010ABC), SH_UNT_EX_3_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 27010ABC,
-REG64( EX_4_L2_PMU_HOLD_OUT                                    , RULL(0x28010ABC), SH_UNT_EX_4_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 29010ABC,
-REG64( EX_5_L2_PMU_HOLD_OUT                                    , RULL(0x2A010ABC), SH_UNT_EX_5_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 2B010ABC,
-REG64( EX_6_L2_PMU_HOLD_OUT                                    , RULL(0x2C010ABC), SH_UNT_EX_6_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 2D010ABC,
-REG64( EX_7_L2_PMU_HOLD_OUT                                    , RULL(0x2E010ABC), SH_UNT_EX_7_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 2F010ABC,
-REG64( EX_8_L2_PMU_HOLD_OUT                                    , RULL(0x30010ABC), SH_UNT_EX_8_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 31010ABC,
-REG64( EX_9_L2_PMU_HOLD_OUT                                    , RULL(0x32010ABC), SH_UNT_EX_9_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 33010ABC,
-REG64( EX_L2_PMU_HOLD_OUT                                      , RULL(0x20010ABC), SH_UNT_EX_L2    ,
-       SH_ACS_SCOM      ); //DUPS: 21010ABC,
+REG64( C_PMU_HOLD_OUT                                          , RULL(0x20010AB6), SH_UNT_C        , SH_ACS_SCOM      );
+REG64( C_0_PMU_HOLD_OUT                                        , RULL(0x20010AB6), SH_UNT_C_0      , SH_ACS_SCOM      );
+REG64( C_1_PMU_HOLD_OUT                                        , RULL(0x21010AB6), SH_UNT_C_1      , SH_ACS_SCOM      );
+REG64( C_2_PMU_HOLD_OUT                                        , RULL(0x22010AB6), SH_UNT_C_2      , SH_ACS_SCOM      );
+REG64( C_3_PMU_HOLD_OUT                                        , RULL(0x23010AB6), SH_UNT_C_3      , SH_ACS_SCOM      );
+REG64( C_4_PMU_HOLD_OUT                                        , RULL(0x24010AB6), SH_UNT_C_4      , SH_ACS_SCOM      );
+REG64( C_5_PMU_HOLD_OUT                                        , RULL(0x25010AB6), SH_UNT_C_5      , SH_ACS_SCOM      );
+REG64( C_6_PMU_HOLD_OUT                                        , RULL(0x26010AB6), SH_UNT_C_6      , SH_ACS_SCOM      );
+REG64( C_7_PMU_HOLD_OUT                                        , RULL(0x27010AB6), SH_UNT_C_7      , SH_ACS_SCOM      );
+REG64( C_8_PMU_HOLD_OUT                                        , RULL(0x28010AB6), SH_UNT_C_8      , SH_ACS_SCOM      );
+REG64( C_9_PMU_HOLD_OUT                                        , RULL(0x29010AB6), SH_UNT_C_9      , SH_ACS_SCOM      );
+REG64( C_10_PMU_HOLD_OUT                                       , RULL(0x2A010AB6), SH_UNT_C_10     , SH_ACS_SCOM      );
+REG64( C_11_PMU_HOLD_OUT                                       , RULL(0x2B010AB6), SH_UNT_C_11     , SH_ACS_SCOM      );
+REG64( C_12_PMU_HOLD_OUT                                       , RULL(0x2C010AB6), SH_UNT_C_12     , SH_ACS_SCOM      );
+REG64( C_13_PMU_HOLD_OUT                                       , RULL(0x2D010AB6), SH_UNT_C_13     , SH_ACS_SCOM      );
+REG64( C_14_PMU_HOLD_OUT                                       , RULL(0x2E010AB6), SH_UNT_C_14     , SH_ACS_SCOM      );
+REG64( C_15_PMU_HOLD_OUT                                       , RULL(0x2F010AB6), SH_UNT_C_15     , SH_ACS_SCOM      );
+REG64( C_16_PMU_HOLD_OUT                                       , RULL(0x30010AB6), SH_UNT_C_16     , SH_ACS_SCOM      );
+REG64( C_17_PMU_HOLD_OUT                                       , RULL(0x31010AB6), SH_UNT_C_17     , SH_ACS_SCOM      );
+REG64( C_18_PMU_HOLD_OUT                                       , RULL(0x32010AB6), SH_UNT_C_18     , SH_ACS_SCOM      );
+REG64( C_19_PMU_HOLD_OUT                                       , RULL(0x33010AB6), SH_UNT_C_19     , SH_ACS_SCOM      );
+REG64( C_20_PMU_HOLD_OUT                                       , RULL(0x34010AB6), SH_UNT_C_20     , SH_ACS_SCOM      );
+REG64( C_21_PMU_HOLD_OUT                                       , RULL(0x35010AB6), SH_UNT_C_21     , SH_ACS_SCOM      );
+REG64( C_22_PMU_HOLD_OUT                                       , RULL(0x36010AB6), SH_UNT_C_22     , SH_ACS_SCOM      );
+REG64( C_23_PMU_HOLD_OUT                                       , RULL(0x37010AB6), SH_UNT_C_23     , SH_ACS_SCOM      );
+REG64( EX_0_L2_PMU_HOLD_OUT                                    , RULL(0x20010AB6), SH_UNT_EX_0_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 21010AB6,
+REG64( EX_10_L2_PMU_HOLD_OUT                                   , RULL(0x34010AB6), SH_UNT_EX_10_L2 ,
+       SH_ACS_SCOM      ); //DUPS: 35010AB6,
+REG64( EX_11_L2_PMU_HOLD_OUT                                   , RULL(0x36010AB6), SH_UNT_EX_11_L2 ,
+       SH_ACS_SCOM      ); //DUPS: 37010AB6,
+REG64( EX_1_L2_PMU_HOLD_OUT                                    , RULL(0x22010AB6), SH_UNT_EX_1_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 23010AB6,
+REG64( EX_2_L2_PMU_HOLD_OUT                                    , RULL(0x24010AB6), SH_UNT_EX_2_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 25010AB6,
+REG64( EX_3_L2_PMU_HOLD_OUT                                    , RULL(0x26010AB6), SH_UNT_EX_3_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 27010AB6,
+REG64( EX_4_L2_PMU_HOLD_OUT                                    , RULL(0x28010AB6), SH_UNT_EX_4_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 29010AB6,
+REG64( EX_5_L2_PMU_HOLD_OUT                                    , RULL(0x2A010AB6), SH_UNT_EX_5_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 2B010AB6,
+REG64( EX_6_L2_PMU_HOLD_OUT                                    , RULL(0x2C010AB6), SH_UNT_EX_6_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 2D010AB6,
+REG64( EX_7_L2_PMU_HOLD_OUT                                    , RULL(0x2E010AB6), SH_UNT_EX_7_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 2F010AB6,
+REG64( EX_8_L2_PMU_HOLD_OUT                                    , RULL(0x30010AB6), SH_UNT_EX_8_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 31010AB6,
+REG64( EX_9_L2_PMU_HOLD_OUT                                    , RULL(0x32010AB6), SH_UNT_EX_9_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 33010AB6,
+REG64( EX_L2_PMU_HOLD_OUT                                      , RULL(0x20010AB6), SH_UNT_EX_L2    ,
+       SH_ACS_SCOM      ); //DUPS: 21010AB6,
 
 REG64( C_PMU_SCOMC                                             , RULL(0x20010AB0), SH_UNT_C        , SH_ACS_SCOM_RW   );
 REG64( C_0_PMU_SCOMC                                           , RULL(0x20010AB0), SH_UNT_C_0      , SH_ACS_SCOM_RW   );
@@ -15567,173 +15508,137 @@ REG64( EX_8_L3_PM_PURGE_REG                                    , RULL(0x14011813
 REG64( EX_9_L3_PM_PURGE_REG                                    , RULL(0x14011C13), SH_UNT_EX_9_L3  , SH_ACS_SCOM      );
 REG64( EX_L3_PM_PURGE_REG                                      , RULL(0x10011813), SH_UNT_EX_L3    , SH_ACS_SCOM      );
 
-REG64( EQ_PPE_XIDBGPRO                                         , RULL(0x10012835), SH_UNT_EQ       ,
-       SH_ACS_SCOM      ); //DUPS: 10012435,
-REG64( EQ_0_PPE_XIDBGPRO                                       , RULL(0x10012835), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM      ); //DUPS: 10012435,
-REG64( EQ_1_PPE_XIDBGPRO                                       , RULL(0x11012835), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM      ); //DUPS: 11012435,
-REG64( EQ_2_PPE_XIDBGPRO                                       , RULL(0x12012835), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM      ); //DUPS: 12012435,
-REG64( EQ_3_PPE_XIDBGPRO                                       , RULL(0x13012835), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM      ); //DUPS: 13012435,
-REG64( EQ_4_PPE_XIDBGPRO                                       , RULL(0x14012835), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM      ); //DUPS: 14012435,
-REG64( EQ_5_PPE_XIDBGPRO                                       , RULL(0x15012835), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM      ); //DUPS: 15012435,
-REG64( EX_PPE_XIDBGPRO                                         , RULL(0x10012435), SH_UNT_EX       , SH_ACS_SCOM      );
-REG64( EX_0_PPE_XIDBGPRO                                       , RULL(0x10012435), SH_UNT_EX_0     , SH_ACS_SCOM      );
-REG64( EX_1_PPE_XIDBGPRO                                       , RULL(0x10012835), SH_UNT_EX_1     , SH_ACS_SCOM      );
-REG64( EX_2_PPE_XIDBGPRO                                       , RULL(0x11012435), SH_UNT_EX_2     , SH_ACS_SCOM      );
-REG64( EX_3_PPE_XIDBGPRO                                       , RULL(0x11012835), SH_UNT_EX_3     , SH_ACS_SCOM      );
-REG64( EX_4_PPE_XIDBGPRO                                       , RULL(0x12012435), SH_UNT_EX_4     , SH_ACS_SCOM      );
-REG64( EX_5_PPE_XIDBGPRO                                       , RULL(0x12012835), SH_UNT_EX_5     , SH_ACS_SCOM      );
-REG64( EX_6_PPE_XIDBGPRO                                       , RULL(0x13012435), SH_UNT_EX_6     , SH_ACS_SCOM      );
-REG64( EX_7_PPE_XIDBGPRO                                       , RULL(0x13012835), SH_UNT_EX_7     , SH_ACS_SCOM      );
-REG64( EX_8_PPE_XIDBGPRO                                       , RULL(0x14012435), SH_UNT_EX_8     , SH_ACS_SCOM      );
-REG64( EX_9_PPE_XIDBGPRO                                       , RULL(0x14012835), SH_UNT_EX_9     , SH_ACS_SCOM      );
-REG64( EX_10_PPE_XIDBGPRO                                      , RULL(0x15012435), SH_UNT_EX_10    , SH_ACS_SCOM      );
-REG64( EX_11_PPE_XIDBGPRO                                      , RULL(0x15012835), SH_UNT_EX_11    , SH_ACS_SCOM      );
+REG64( EQ_PPE_XIDBGPRO                                         , RULL(0x10012415), SH_UNT_EQ       ,
+       SH_ACS_SCOM      ); //DUPS: 10012015,
+REG64( EQ_0_PPE_XIDBGPRO                                       , RULL(0x10012415), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM      ); //DUPS: 10012015,
+REG64( EQ_1_PPE_XIDBGPRO                                       , RULL(0x11012415), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM      ); //DUPS: 11012015,
+REG64( EQ_2_PPE_XIDBGPRO                                       , RULL(0x12012415), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM      ); //DUPS: 12012015,
+REG64( EQ_3_PPE_XIDBGPRO                                       , RULL(0x13012415), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM      ); //DUPS: 13012015,
+REG64( EQ_4_PPE_XIDBGPRO                                       , RULL(0x14012415), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM      ); //DUPS: 14012015,
+REG64( EQ_5_PPE_XIDBGPRO                                       , RULL(0x15012415), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM      ); //DUPS: 15012015,
+REG64( EX_PPE_XIDBGPRO                                         , RULL(0x10012415), SH_UNT_EX       , SH_ACS_SCOM      );
+REG64( EX_0_PPE_XIDBGPRO                                       , RULL(0x10012415), SH_UNT_EX_0     , SH_ACS_SCOM      );
+REG64( EX_2_PPE_XIDBGPRO                                       , RULL(0x11012415), SH_UNT_EX_2     , SH_ACS_SCOM      );
+REG64( EX_4_PPE_XIDBGPRO                                       , RULL(0x12012415), SH_UNT_EX_4     , SH_ACS_SCOM      );
+REG64( EX_6_PPE_XIDBGPRO                                       , RULL(0x13012415), SH_UNT_EX_6     , SH_ACS_SCOM      );
+REG64( EX_8_PPE_XIDBGPRO                                       , RULL(0x14012415), SH_UNT_EX_8     , SH_ACS_SCOM      );
+REG64( EX_10_PPE_XIDBGPRO                                      , RULL(0x15012415), SH_UNT_EX_10    , SH_ACS_SCOM      );
 
-REG64( EQ_PPE_XIRAMDBG                                         , RULL(0x10012833), SH_UNT_EQ       ,
-       SH_ACS_SCOM      ); //DUPS: 10012433,
-REG64( EQ_0_PPE_XIRAMDBG                                       , RULL(0x10012833), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM      ); //DUPS: 10012433,
-REG64( EQ_1_PPE_XIRAMDBG                                       , RULL(0x11012833), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM      ); //DUPS: 11012433,
-REG64( EQ_2_PPE_XIRAMDBG                                       , RULL(0x12012833), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM      ); //DUPS: 12012433,
-REG64( EQ_3_PPE_XIRAMDBG                                       , RULL(0x13012833), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM      ); //DUPS: 13012433,
-REG64( EQ_4_PPE_XIRAMDBG                                       , RULL(0x14012833), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM      ); //DUPS: 14012433,
-REG64( EQ_5_PPE_XIRAMDBG                                       , RULL(0x15012833), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM      ); //DUPS: 15012433,
-REG64( EX_PPE_XIRAMDBG                                         , RULL(0x10012433), SH_UNT_EX       , SH_ACS_SCOM      );
-REG64( EX_0_PPE_XIRAMDBG                                       , RULL(0x10012433), SH_UNT_EX_0     , SH_ACS_SCOM      );
-REG64( EX_1_PPE_XIRAMDBG                                       , RULL(0x10012833), SH_UNT_EX_1     , SH_ACS_SCOM      );
-REG64( EX_2_PPE_XIRAMDBG                                       , RULL(0x11012433), SH_UNT_EX_2     , SH_ACS_SCOM      );
-REG64( EX_3_PPE_XIRAMDBG                                       , RULL(0x11012833), SH_UNT_EX_3     , SH_ACS_SCOM      );
-REG64( EX_4_PPE_XIRAMDBG                                       , RULL(0x12012433), SH_UNT_EX_4     , SH_ACS_SCOM      );
-REG64( EX_5_PPE_XIRAMDBG                                       , RULL(0x12012833), SH_UNT_EX_5     , SH_ACS_SCOM      );
-REG64( EX_6_PPE_XIRAMDBG                                       , RULL(0x13012433), SH_UNT_EX_6     , SH_ACS_SCOM      );
-REG64( EX_7_PPE_XIRAMDBG                                       , RULL(0x13012833), SH_UNT_EX_7     , SH_ACS_SCOM      );
-REG64( EX_8_PPE_XIRAMDBG                                       , RULL(0x14012433), SH_UNT_EX_8     , SH_ACS_SCOM      );
-REG64( EX_9_PPE_XIRAMDBG                                       , RULL(0x14012833), SH_UNT_EX_9     , SH_ACS_SCOM      );
-REG64( EX_10_PPE_XIRAMDBG                                      , RULL(0x15012433), SH_UNT_EX_10    , SH_ACS_SCOM      );
-REG64( EX_11_PPE_XIRAMDBG                                      , RULL(0x15012833), SH_UNT_EX_11    , SH_ACS_SCOM      );
+REG64( EQ_PPE_XIRAMDBG                                         , RULL(0x10012413), SH_UNT_EQ       ,
+       SH_ACS_SCOM      ); //DUPS: 10012013,
+REG64( EQ_0_PPE_XIRAMDBG                                       , RULL(0x10012413), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM      ); //DUPS: 10012013,
+REG64( EQ_1_PPE_XIRAMDBG                                       , RULL(0x11012413), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM      ); //DUPS: 11012013,
+REG64( EQ_2_PPE_XIRAMDBG                                       , RULL(0x12012413), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM      ); //DUPS: 12012013,
+REG64( EQ_3_PPE_XIRAMDBG                                       , RULL(0x13012413), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM      ); //DUPS: 13012013,
+REG64( EQ_4_PPE_XIRAMDBG                                       , RULL(0x14012413), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM      ); //DUPS: 14012013,
+REG64( EQ_5_PPE_XIRAMDBG                                       , RULL(0x15012413), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM      ); //DUPS: 15012013,
+REG64( EX_PPE_XIRAMDBG                                         , RULL(0x10012413), SH_UNT_EX       , SH_ACS_SCOM      );
+REG64( EX_0_PPE_XIRAMDBG                                       , RULL(0x10012413), SH_UNT_EX_0     , SH_ACS_SCOM      );
+REG64( EX_2_PPE_XIRAMDBG                                       , RULL(0x11012413), SH_UNT_EX_2     , SH_ACS_SCOM      );
+REG64( EX_4_PPE_XIRAMDBG                                       , RULL(0x12012413), SH_UNT_EX_4     , SH_ACS_SCOM      );
+REG64( EX_6_PPE_XIRAMDBG                                       , RULL(0x13012413), SH_UNT_EX_6     , SH_ACS_SCOM      );
+REG64( EX_8_PPE_XIRAMDBG                                       , RULL(0x14012413), SH_UNT_EX_8     , SH_ACS_SCOM      );
+REG64( EX_10_PPE_XIRAMDBG                                      , RULL(0x15012413), SH_UNT_EX_10    , SH_ACS_SCOM      );
 
-REG64( EQ_PPE_XIRAMEDR                                         , RULL(0x10012834), SH_UNT_EQ       ,
-       SH_ACS_SCOM      ); //DUPS: 10012434,
-REG64( EQ_0_PPE_XIRAMEDR                                       , RULL(0x10012834), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM      ); //DUPS: 10012434,
-REG64( EQ_1_PPE_XIRAMEDR                                       , RULL(0x11012834), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM      ); //DUPS: 11012434,
-REG64( EQ_2_PPE_XIRAMEDR                                       , RULL(0x12012834), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM      ); //DUPS: 12012434,
-REG64( EQ_3_PPE_XIRAMEDR                                       , RULL(0x13012834), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM      ); //DUPS: 13012434,
-REG64( EQ_4_PPE_XIRAMEDR                                       , RULL(0x14012834), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM      ); //DUPS: 14012434,
-REG64( EQ_5_PPE_XIRAMEDR                                       , RULL(0x15012834), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM      ); //DUPS: 15012434,
-REG64( EX_PPE_XIRAMEDR                                         , RULL(0x10012434), SH_UNT_EX       , SH_ACS_SCOM      );
-REG64( EX_0_PPE_XIRAMEDR                                       , RULL(0x10012434), SH_UNT_EX_0     , SH_ACS_SCOM      );
-REG64( EX_1_PPE_XIRAMEDR                                       , RULL(0x10012834), SH_UNT_EX_1     , SH_ACS_SCOM      );
-REG64( EX_2_PPE_XIRAMEDR                                       , RULL(0x11012434), SH_UNT_EX_2     , SH_ACS_SCOM      );
-REG64( EX_3_PPE_XIRAMEDR                                       , RULL(0x11012834), SH_UNT_EX_3     , SH_ACS_SCOM      );
-REG64( EX_4_PPE_XIRAMEDR                                       , RULL(0x12012434), SH_UNT_EX_4     , SH_ACS_SCOM      );
-REG64( EX_5_PPE_XIRAMEDR                                       , RULL(0x12012834), SH_UNT_EX_5     , SH_ACS_SCOM      );
-REG64( EX_6_PPE_XIRAMEDR                                       , RULL(0x13012434), SH_UNT_EX_6     , SH_ACS_SCOM      );
-REG64( EX_7_PPE_XIRAMEDR                                       , RULL(0x13012834), SH_UNT_EX_7     , SH_ACS_SCOM      );
-REG64( EX_8_PPE_XIRAMEDR                                       , RULL(0x14012434), SH_UNT_EX_8     , SH_ACS_SCOM      );
-REG64( EX_9_PPE_XIRAMEDR                                       , RULL(0x14012834), SH_UNT_EX_9     , SH_ACS_SCOM      );
-REG64( EX_10_PPE_XIRAMEDR                                      , RULL(0x15012434), SH_UNT_EX_10    , SH_ACS_SCOM      );
-REG64( EX_11_PPE_XIRAMEDR                                      , RULL(0x15012834), SH_UNT_EX_11    , SH_ACS_SCOM      );
+REG64( EQ_PPE_XIRAMEDR                                         , RULL(0x10012414), SH_UNT_EQ       ,
+       SH_ACS_SCOM      ); //DUPS: 10012014,
+REG64( EQ_0_PPE_XIRAMEDR                                       , RULL(0x10012414), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM      ); //DUPS: 10012014,
+REG64( EQ_1_PPE_XIRAMEDR                                       , RULL(0x11012414), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM      ); //DUPS: 11012014,
+REG64( EQ_2_PPE_XIRAMEDR                                       , RULL(0x12012414), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM      ); //DUPS: 12012014,
+REG64( EQ_3_PPE_XIRAMEDR                                       , RULL(0x13012414), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM      ); //DUPS: 13012014,
+REG64( EQ_4_PPE_XIRAMEDR                                       , RULL(0x14012414), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM      ); //DUPS: 14012014,
+REG64( EQ_5_PPE_XIRAMEDR                                       , RULL(0x15012414), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM      ); //DUPS: 15012014,
+REG64( EX_PPE_XIRAMEDR                                         , RULL(0x10012414), SH_UNT_EX       , SH_ACS_SCOM      );
+REG64( EX_0_PPE_XIRAMEDR                                       , RULL(0x10012414), SH_UNT_EX_0     , SH_ACS_SCOM      );
+REG64( EX_2_PPE_XIRAMEDR                                       , RULL(0x11012414), SH_UNT_EX_2     , SH_ACS_SCOM      );
+REG64( EX_4_PPE_XIRAMEDR                                       , RULL(0x12012414), SH_UNT_EX_4     , SH_ACS_SCOM      );
+REG64( EX_6_PPE_XIRAMEDR                                       , RULL(0x13012414), SH_UNT_EX_6     , SH_ACS_SCOM      );
+REG64( EX_8_PPE_XIRAMEDR                                       , RULL(0x14012414), SH_UNT_EX_8     , SH_ACS_SCOM      );
+REG64( EX_10_PPE_XIRAMEDR                                      , RULL(0x15012414), SH_UNT_EX_10    , SH_ACS_SCOM      );
 
-REG64( EQ_PPE_XIRAMGA                                          , RULL(0x10012832), SH_UNT_EQ       ,
-       SH_ACS_SCOM_WO   ); //DUPS: 10012432,
-REG64( EQ_0_PPE_XIRAMGA                                        , RULL(0x10012832), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_WO   ); //DUPS: 10012432,
-REG64( EQ_1_PPE_XIRAMGA                                        , RULL(0x11012832), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_WO   ); //DUPS: 11012432,
-REG64( EQ_2_PPE_XIRAMGA                                        , RULL(0x12012832), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_WO   ); //DUPS: 12012432,
-REG64( EQ_3_PPE_XIRAMGA                                        , RULL(0x13012832), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_WO   ); //DUPS: 13012432,
-REG64( EQ_4_PPE_XIRAMGA                                        , RULL(0x14012832), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_WO   ); //DUPS: 14012432,
-REG64( EQ_5_PPE_XIRAMGA                                        , RULL(0x15012832), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_WO   ); //DUPS: 15012432,
-REG64( EX_PPE_XIRAMGA                                          , RULL(0x10012432), SH_UNT_EX       , SH_ACS_SCOM_WO   );
-REG64( EX_0_PPE_XIRAMGA                                        , RULL(0x10012432), SH_UNT_EX_0     , SH_ACS_SCOM_WO   );
-REG64( EX_1_PPE_XIRAMGA                                        , RULL(0x10012832), SH_UNT_EX_1     , SH_ACS_SCOM_WO   );
-REG64( EX_2_PPE_XIRAMGA                                        , RULL(0x11012432), SH_UNT_EX_2     , SH_ACS_SCOM_WO   );
-REG64( EX_3_PPE_XIRAMGA                                        , RULL(0x11012832), SH_UNT_EX_3     , SH_ACS_SCOM_WO   );
-REG64( EX_4_PPE_XIRAMGA                                        , RULL(0x12012432), SH_UNT_EX_4     , SH_ACS_SCOM_WO   );
-REG64( EX_5_PPE_XIRAMGA                                        , RULL(0x12012832), SH_UNT_EX_5     , SH_ACS_SCOM_WO   );
-REG64( EX_6_PPE_XIRAMGA                                        , RULL(0x13012432), SH_UNT_EX_6     , SH_ACS_SCOM_WO   );
-REG64( EX_7_PPE_XIRAMGA                                        , RULL(0x13012832), SH_UNT_EX_7     , SH_ACS_SCOM_WO   );
-REG64( EX_8_PPE_XIRAMGA                                        , RULL(0x14012432), SH_UNT_EX_8     , SH_ACS_SCOM_WO   );
-REG64( EX_9_PPE_XIRAMGA                                        , RULL(0x14012832), SH_UNT_EX_9     , SH_ACS_SCOM_WO   );
-REG64( EX_10_PPE_XIRAMGA                                       , RULL(0x15012432), SH_UNT_EX_10    , SH_ACS_SCOM_WO   );
-REG64( EX_11_PPE_XIRAMGA                                       , RULL(0x15012832), SH_UNT_EX_11    , SH_ACS_SCOM_WO   );
+REG64( EQ_PPE_XIRAMGA                                          , RULL(0x10012412), SH_UNT_EQ       ,
+       SH_ACS_SCOM_WO   ); //DUPS: 10012012,
+REG64( EQ_0_PPE_XIRAMGA                                        , RULL(0x10012412), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_WO   ); //DUPS: 10012012,
+REG64( EQ_1_PPE_XIRAMGA                                        , RULL(0x11012412), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_WO   ); //DUPS: 11012012,
+REG64( EQ_2_PPE_XIRAMGA                                        , RULL(0x12012412), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_WO   ); //DUPS: 12012012,
+REG64( EQ_3_PPE_XIRAMGA                                        , RULL(0x13012412), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_WO   ); //DUPS: 13012012,
+REG64( EQ_4_PPE_XIRAMGA                                        , RULL(0x14012412), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_WO   ); //DUPS: 14012012,
+REG64( EQ_5_PPE_XIRAMGA                                        , RULL(0x15012412), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_WO   ); //DUPS: 15012012,
+REG64( EX_PPE_XIRAMGA                                          , RULL(0x10012412), SH_UNT_EX       , SH_ACS_SCOM_WO   );
+REG64( EX_0_PPE_XIRAMGA                                        , RULL(0x10012412), SH_UNT_EX_0     , SH_ACS_SCOM_WO   );
+REG64( EX_2_PPE_XIRAMGA                                        , RULL(0x11012412), SH_UNT_EX_2     , SH_ACS_SCOM_WO   );
+REG64( EX_4_PPE_XIRAMGA                                        , RULL(0x12012412), SH_UNT_EX_4     , SH_ACS_SCOM_WO   );
+REG64( EX_6_PPE_XIRAMGA                                        , RULL(0x13012412), SH_UNT_EX_6     , SH_ACS_SCOM_WO   );
+REG64( EX_8_PPE_XIRAMGA                                        , RULL(0x14012412), SH_UNT_EX_8     , SH_ACS_SCOM_WO   );
+REG64( EX_10_PPE_XIRAMGA                                       , RULL(0x15012412), SH_UNT_EX_10    , SH_ACS_SCOM_WO   );
 
-REG64( EQ_PPE_XIRAMRA                                          , RULL(0x10012831), SH_UNT_EQ       ,
-       SH_ACS_SCOM_WO   ); //DUPS: 10012431,
-REG64( EQ_0_PPE_XIRAMRA                                        , RULL(0x10012831), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_WO   ); //DUPS: 10012431,
-REG64( EQ_1_PPE_XIRAMRA                                        , RULL(0x11012831), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_WO   ); //DUPS: 11012431,
-REG64( EQ_2_PPE_XIRAMRA                                        , RULL(0x12012831), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_WO   ); //DUPS: 12012431,
-REG64( EQ_3_PPE_XIRAMRA                                        , RULL(0x13012831), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_WO   ); //DUPS: 13012431,
-REG64( EQ_4_PPE_XIRAMRA                                        , RULL(0x14012831), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_WO   ); //DUPS: 14012431,
-REG64( EQ_5_PPE_XIRAMRA                                        , RULL(0x15012831), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_WO   ); //DUPS: 15012431,
-REG64( EX_PPE_XIRAMRA                                          , RULL(0x10012431), SH_UNT_EX       , SH_ACS_SCOM_WO   );
-REG64( EX_0_PPE_XIRAMRA                                        , RULL(0x10012431), SH_UNT_EX_0     , SH_ACS_SCOM_WO   );
-REG64( EX_1_PPE_XIRAMRA                                        , RULL(0x10012831), SH_UNT_EX_1     , SH_ACS_SCOM_WO   );
-REG64( EX_2_PPE_XIRAMRA                                        , RULL(0x11012431), SH_UNT_EX_2     , SH_ACS_SCOM_WO   );
-REG64( EX_3_PPE_XIRAMRA                                        , RULL(0x11012831), SH_UNT_EX_3     , SH_ACS_SCOM_WO   );
-REG64( EX_4_PPE_XIRAMRA                                        , RULL(0x12012431), SH_UNT_EX_4     , SH_ACS_SCOM_WO   );
-REG64( EX_5_PPE_XIRAMRA                                        , RULL(0x12012831), SH_UNT_EX_5     , SH_ACS_SCOM_WO   );
-REG64( EX_6_PPE_XIRAMRA                                        , RULL(0x13012431), SH_UNT_EX_6     , SH_ACS_SCOM_WO   );
-REG64( EX_7_PPE_XIRAMRA                                        , RULL(0x13012831), SH_UNT_EX_7     , SH_ACS_SCOM_WO   );
-REG64( EX_8_PPE_XIRAMRA                                        , RULL(0x14012431), SH_UNT_EX_8     , SH_ACS_SCOM_WO   );
-REG64( EX_9_PPE_XIRAMRA                                        , RULL(0x14012831), SH_UNT_EX_9     , SH_ACS_SCOM_WO   );
-REG64( EX_10_PPE_XIRAMRA                                       , RULL(0x15012431), SH_UNT_EX_10    , SH_ACS_SCOM_WO   );
-REG64( EX_11_PPE_XIRAMRA                                       , RULL(0x15012831), SH_UNT_EX_11    , SH_ACS_SCOM_WO   );
+REG64( EQ_PPE_XIRAMRA                                          , RULL(0x10012411), SH_UNT_EQ       ,
+       SH_ACS_SCOM_WO   ); //DUPS: 10012011,
+REG64( EQ_0_PPE_XIRAMRA                                        , RULL(0x10012411), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_WO   ); //DUPS: 10012011,
+REG64( EQ_1_PPE_XIRAMRA                                        , RULL(0x11012411), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_WO   ); //DUPS: 11012011,
+REG64( EQ_2_PPE_XIRAMRA                                        , RULL(0x12012411), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_WO   ); //DUPS: 12012011,
+REG64( EQ_3_PPE_XIRAMRA                                        , RULL(0x13012411), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_WO   ); //DUPS: 13012011,
+REG64( EQ_4_PPE_XIRAMRA                                        , RULL(0x14012411), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_WO   ); //DUPS: 14012011,
+REG64( EQ_5_PPE_XIRAMRA                                        , RULL(0x15012411), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_WO   ); //DUPS: 15012011,
+REG64( EX_PPE_XIRAMRA                                          , RULL(0x10012411), SH_UNT_EX       , SH_ACS_SCOM_WO   );
+REG64( EX_0_PPE_XIRAMRA                                        , RULL(0x10012411), SH_UNT_EX_0     , SH_ACS_SCOM_WO   );
+REG64( EX_2_PPE_XIRAMRA                                        , RULL(0x11012411), SH_UNT_EX_2     , SH_ACS_SCOM_WO   );
+REG64( EX_4_PPE_XIRAMRA                                        , RULL(0x12012411), SH_UNT_EX_4     , SH_ACS_SCOM_WO   );
+REG64( EX_6_PPE_XIRAMRA                                        , RULL(0x13012411), SH_UNT_EX_6     , SH_ACS_SCOM_WO   );
+REG64( EX_8_PPE_XIRAMRA                                        , RULL(0x14012411), SH_UNT_EX_8     , SH_ACS_SCOM_WO   );
+REG64( EX_10_PPE_XIRAMRA                                       , RULL(0x15012411), SH_UNT_EX_10    , SH_ACS_SCOM_WO   );
 
-REG64( EQ_PPE_XIXCR                                            , RULL(0x10012830), SH_UNT_EQ       ,
-       SH_ACS_SCOM_WO   ); //DUPS: 10012430,
-REG64( EQ_0_PPE_XIXCR                                          , RULL(0x10012830), SH_UNT_EQ_0     ,
-       SH_ACS_SCOM_WO   ); //DUPS: 10012430,
-REG64( EQ_1_PPE_XIXCR                                          , RULL(0x11012830), SH_UNT_EQ_1     ,
-       SH_ACS_SCOM_WO   ); //DUPS: 11012430,
-REG64( EQ_2_PPE_XIXCR                                          , RULL(0x12012830), SH_UNT_EQ_2     ,
-       SH_ACS_SCOM_WO   ); //DUPS: 12012430,
-REG64( EQ_3_PPE_XIXCR                                          , RULL(0x13012830), SH_UNT_EQ_3     ,
-       SH_ACS_SCOM_WO   ); //DUPS: 13012430,
-REG64( EQ_4_PPE_XIXCR                                          , RULL(0x14012830), SH_UNT_EQ_4     ,
-       SH_ACS_SCOM_WO   ); //DUPS: 14012430,
-REG64( EQ_5_PPE_XIXCR                                          , RULL(0x15012830), SH_UNT_EQ_5     ,
-       SH_ACS_SCOM_WO   ); //DUPS: 15012430,
-REG64( EX_PPE_XIXCR                                            , RULL(0x10012430), SH_UNT_EX       , SH_ACS_SCOM_WO   );
-REG64( EX_0_PPE_XIXCR                                          , RULL(0x10012430), SH_UNT_EX_0     , SH_ACS_SCOM_WO   );
-REG64( EX_1_PPE_XIXCR                                          , RULL(0x10012830), SH_UNT_EX_1     , SH_ACS_SCOM_WO   );
-REG64( EX_2_PPE_XIXCR                                          , RULL(0x11012430), SH_UNT_EX_2     , SH_ACS_SCOM_WO   );
-REG64( EX_3_PPE_XIXCR                                          , RULL(0x11012830), SH_UNT_EX_3     , SH_ACS_SCOM_WO   );
-REG64( EX_4_PPE_XIXCR                                          , RULL(0x12012430), SH_UNT_EX_4     , SH_ACS_SCOM_WO   );
-REG64( EX_5_PPE_XIXCR                                          , RULL(0x12012830), SH_UNT_EX_5     , SH_ACS_SCOM_WO   );
-REG64( EX_6_PPE_XIXCR                                          , RULL(0x13012430), SH_UNT_EX_6     , SH_ACS_SCOM_WO   );
-REG64( EX_7_PPE_XIXCR                                          , RULL(0x13012830), SH_UNT_EX_7     , SH_ACS_SCOM_WO   );
-REG64( EX_8_PPE_XIXCR                                          , RULL(0x14012430), SH_UNT_EX_8     , SH_ACS_SCOM_WO   );
-REG64( EX_9_PPE_XIXCR                                          , RULL(0x14012830), SH_UNT_EX_9     , SH_ACS_SCOM_WO   );
-REG64( EX_10_PPE_XIXCR                                         , RULL(0x15012430), SH_UNT_EX_10    , SH_ACS_SCOM_WO   );
-REG64( EX_11_PPE_XIXCR                                         , RULL(0x15012830), SH_UNT_EX_11    , SH_ACS_SCOM_WO   );
+REG64( EQ_PPE_XIXCR                                            , RULL(0x10012410), SH_UNT_EQ       ,
+       SH_ACS_SCOM_WO   ); //DUPS: 10012010,
+REG64( EQ_0_PPE_XIXCR                                          , RULL(0x10012410), SH_UNT_EQ_0     ,
+       SH_ACS_SCOM_WO   ); //DUPS: 10012010,
+REG64( EQ_1_PPE_XIXCR                                          , RULL(0x11012410), SH_UNT_EQ_1     ,
+       SH_ACS_SCOM_WO   ); //DUPS: 11012010,
+REG64( EQ_2_PPE_XIXCR                                          , RULL(0x12012410), SH_UNT_EQ_2     ,
+       SH_ACS_SCOM_WO   ); //DUPS: 12012010,
+REG64( EQ_3_PPE_XIXCR                                          , RULL(0x13012410), SH_UNT_EQ_3     ,
+       SH_ACS_SCOM_WO   ); //DUPS: 13012010,
+REG64( EQ_4_PPE_XIXCR                                          , RULL(0x14012410), SH_UNT_EQ_4     ,
+       SH_ACS_SCOM_WO   ); //DUPS: 14012010,
+REG64( EQ_5_PPE_XIXCR                                          , RULL(0x15012410), SH_UNT_EQ_5     ,
+       SH_ACS_SCOM_WO   ); //DUPS: 15012010,
+REG64( EX_PPE_XIXCR                                            , RULL(0x10012410), SH_UNT_EX       , SH_ACS_SCOM_WO   );
+REG64( EX_0_PPE_XIXCR                                          , RULL(0x10012410), SH_UNT_EX_0     , SH_ACS_SCOM_WO   );
+REG64( EX_2_PPE_XIXCR                                          , RULL(0x11012410), SH_UNT_EX_2     , SH_ACS_SCOM_WO   );
+REG64( EX_4_PPE_XIXCR                                          , RULL(0x12012410), SH_UNT_EX_4     , SH_ACS_SCOM_WO   );
+REG64( EX_6_PPE_XIXCR                                          , RULL(0x13012410), SH_UNT_EX_6     , SH_ACS_SCOM_WO   );
+REG64( EX_8_PPE_XIXCR                                          , RULL(0x14012410), SH_UNT_EX_8     , SH_ACS_SCOM_WO   );
+REG64( EX_10_PPE_XIXCR                                         , RULL(0x15012410), SH_UNT_EX_10    , SH_ACS_SCOM_WO   );
 
 REG64( C_PPM_CGCR                                              , RULL(0x200F0164), SH_UNT_C        , SH_ACS_SCOM_RW   );
 REG64( C_0_PPM_CGCR                                            , RULL(0x200F0164), SH_UNT_C_0      , SH_ACS_SCOM_RW   );
@@ -18322,265 +18227,213 @@ REG64( EQ_3_QPPM_VOLT_CHAR                                     , RULL(0x130F01BB
 REG64( EQ_4_QPPM_VOLT_CHAR                                     , RULL(0x140F01BB), SH_UNT_EQ_4     , SH_ACS_SCOM_RO   );
 REG64( EQ_5_QPPM_VOLT_CHAR                                     , RULL(0x150F01BB), SH_UNT_EQ_5     , SH_ACS_SCOM_RO   );
 
-REG64( C_RAM_CTRL                                              , RULL(0x20010A51), SH_UNT_C        , SH_ACS_SCOM_RW   );
-REG64( C_0_RAM_CTRL                                            , RULL(0x20010A51), SH_UNT_C_0      , SH_ACS_SCOM_RW   );
-REG64( C_1_RAM_CTRL                                            , RULL(0x21010A51), SH_UNT_C_1      , SH_ACS_SCOM_RW   );
-REG64( C_2_RAM_CTRL                                            , RULL(0x22010A51), SH_UNT_C_2      , SH_ACS_SCOM_RW   );
-REG64( C_3_RAM_CTRL                                            , RULL(0x23010A51), SH_UNT_C_3      , SH_ACS_SCOM_RW   );
-REG64( C_4_RAM_CTRL                                            , RULL(0x24010A51), SH_UNT_C_4      , SH_ACS_SCOM_RW   );
-REG64( C_5_RAM_CTRL                                            , RULL(0x25010A51), SH_UNT_C_5      , SH_ACS_SCOM_RW   );
-REG64( C_6_RAM_CTRL                                            , RULL(0x26010A51), SH_UNT_C_6      , SH_ACS_SCOM_RW   );
-REG64( C_7_RAM_CTRL                                            , RULL(0x27010A51), SH_UNT_C_7      , SH_ACS_SCOM_RW   );
-REG64( C_8_RAM_CTRL                                            , RULL(0x28010A51), SH_UNT_C_8      , SH_ACS_SCOM_RW   );
-REG64( C_9_RAM_CTRL                                            , RULL(0x29010A51), SH_UNT_C_9      , SH_ACS_SCOM_RW   );
-REG64( C_10_RAM_CTRL                                           , RULL(0x2A010A51), SH_UNT_C_10     , SH_ACS_SCOM_RW   );
-REG64( C_11_RAM_CTRL                                           , RULL(0x2B010A51), SH_UNT_C_11     , SH_ACS_SCOM_RW   );
-REG64( C_12_RAM_CTRL                                           , RULL(0x2C010A51), SH_UNT_C_12     , SH_ACS_SCOM_RW   );
-REG64( C_13_RAM_CTRL                                           , RULL(0x2D010A51), SH_UNT_C_13     , SH_ACS_SCOM_RW   );
-REG64( C_14_RAM_CTRL                                           , RULL(0x2E010A51), SH_UNT_C_14     , SH_ACS_SCOM_RW   );
-REG64( C_15_RAM_CTRL                                           , RULL(0x2F010A51), SH_UNT_C_15     , SH_ACS_SCOM_RW   );
-REG64( C_16_RAM_CTRL                                           , RULL(0x30010A51), SH_UNT_C_16     , SH_ACS_SCOM_RW   );
-REG64( C_17_RAM_CTRL                                           , RULL(0x31010A51), SH_UNT_C_17     , SH_ACS_SCOM_RW   );
-REG64( C_18_RAM_CTRL                                           , RULL(0x32010A51), SH_UNT_C_18     , SH_ACS_SCOM_RW   );
-REG64( C_19_RAM_CTRL                                           , RULL(0x33010A51), SH_UNT_C_19     , SH_ACS_SCOM_RW   );
-REG64( C_20_RAM_CTRL                                           , RULL(0x34010A51), SH_UNT_C_20     , SH_ACS_SCOM_RW   );
-REG64( C_21_RAM_CTRL                                           , RULL(0x35010A51), SH_UNT_C_21     , SH_ACS_SCOM_RW   );
-REG64( C_22_RAM_CTRL                                           , RULL(0x36010A51), SH_UNT_C_22     , SH_ACS_SCOM_RW   );
-REG64( C_23_RAM_CTRL                                           , RULL(0x37010A51), SH_UNT_C_23     , SH_ACS_SCOM_RW   );
-REG64( EX_0_L2_RAM_CTRL                                        , RULL(0x20010A51), SH_UNT_EX_0_L2  ,
-       SH_ACS_SCOM_RW   ); //DUPS: 21010A51,
-REG64( EX_10_L2_RAM_CTRL                                       , RULL(0x34010A51), SH_UNT_EX_10_L2 ,
-       SH_ACS_SCOM_RW   ); //DUPS: 35010A51,
-REG64( EX_11_L2_RAM_CTRL                                       , RULL(0x36010A51), SH_UNT_EX_11_L2 ,
-       SH_ACS_SCOM_RW   ); //DUPS: 37010A51,
-REG64( EX_1_L2_RAM_CTRL                                        , RULL(0x22010A51), SH_UNT_EX_1_L2  ,
-       SH_ACS_SCOM_RW   ); //DUPS: 23010A51,
-REG64( EX_2_L2_RAM_CTRL                                        , RULL(0x24010A51), SH_UNT_EX_2_L2  ,
-       SH_ACS_SCOM_RW   ); //DUPS: 25010A51,
-REG64( EX_3_L2_RAM_CTRL                                        , RULL(0x26010A51), SH_UNT_EX_3_L2  ,
-       SH_ACS_SCOM_RW   ); //DUPS: 27010A51,
-REG64( EX_4_L2_RAM_CTRL                                        , RULL(0x28010A51), SH_UNT_EX_4_L2  ,
-       SH_ACS_SCOM_RW   ); //DUPS: 29010A51,
-REG64( EX_5_L2_RAM_CTRL                                        , RULL(0x2A010A51), SH_UNT_EX_5_L2  ,
-       SH_ACS_SCOM_RW   ); //DUPS: 2B010A51,
-REG64( EX_6_L2_RAM_CTRL                                        , RULL(0x2C010A51), SH_UNT_EX_6_L2  ,
-       SH_ACS_SCOM_RW   ); //DUPS: 2D010A51,
-REG64( EX_7_L2_RAM_CTRL                                        , RULL(0x2E010A51), SH_UNT_EX_7_L2  ,
-       SH_ACS_SCOM_RW   ); //DUPS: 2F010A51,
-REG64( EX_8_L2_RAM_CTRL                                        , RULL(0x30010A51), SH_UNT_EX_8_L2  ,
-       SH_ACS_SCOM_RW   ); //DUPS: 31010A51,
-REG64( EX_9_L2_RAM_CTRL                                        , RULL(0x32010A51), SH_UNT_EX_9_L2  ,
-       SH_ACS_SCOM_RW   ); //DUPS: 33010A51,
-REG64( EX_L2_RAM_CTRL                                          , RULL(0x20010A51), SH_UNT_EX_L2    ,
-       SH_ACS_SCOM_RW   ); //DUPS: 21010A51,
+REG64( C_RAM_CTRL                                              , RULL(0x20010A4F), SH_UNT_C        , SH_ACS_SCOM_RW   );
+REG64( C_0_RAM_CTRL                                            , RULL(0x20010A4F), SH_UNT_C_0      , SH_ACS_SCOM_RW   );
+REG64( C_1_RAM_CTRL                                            , RULL(0x21010A4F), SH_UNT_C_1      , SH_ACS_SCOM_RW   );
+REG64( C_2_RAM_CTRL                                            , RULL(0x22010A4F), SH_UNT_C_2      , SH_ACS_SCOM_RW   );
+REG64( C_3_RAM_CTRL                                            , RULL(0x23010A4F), SH_UNT_C_3      , SH_ACS_SCOM_RW   );
+REG64( C_4_RAM_CTRL                                            , RULL(0x24010A4F), SH_UNT_C_4      , SH_ACS_SCOM_RW   );
+REG64( C_5_RAM_CTRL                                            , RULL(0x25010A4F), SH_UNT_C_5      , SH_ACS_SCOM_RW   );
+REG64( C_6_RAM_CTRL                                            , RULL(0x26010A4F), SH_UNT_C_6      , SH_ACS_SCOM_RW   );
+REG64( C_7_RAM_CTRL                                            , RULL(0x27010A4F), SH_UNT_C_7      , SH_ACS_SCOM_RW   );
+REG64( C_8_RAM_CTRL                                            , RULL(0x28010A4F), SH_UNT_C_8      , SH_ACS_SCOM_RW   );
+REG64( C_9_RAM_CTRL                                            , RULL(0x29010A4F), SH_UNT_C_9      , SH_ACS_SCOM_RW   );
+REG64( C_10_RAM_CTRL                                           , RULL(0x2A010A4F), SH_UNT_C_10     , SH_ACS_SCOM_RW   );
+REG64( C_11_RAM_CTRL                                           , RULL(0x2B010A4F), SH_UNT_C_11     , SH_ACS_SCOM_RW   );
+REG64( C_12_RAM_CTRL                                           , RULL(0x2C010A4F), SH_UNT_C_12     , SH_ACS_SCOM_RW   );
+REG64( C_13_RAM_CTRL                                           , RULL(0x2D010A4F), SH_UNT_C_13     , SH_ACS_SCOM_RW   );
+REG64( C_14_RAM_CTRL                                           , RULL(0x2E010A4F), SH_UNT_C_14     , SH_ACS_SCOM_RW   );
+REG64( C_15_RAM_CTRL                                           , RULL(0x2F010A4F), SH_UNT_C_15     , SH_ACS_SCOM_RW   );
+REG64( C_16_RAM_CTRL                                           , RULL(0x30010A4F), SH_UNT_C_16     , SH_ACS_SCOM_RW   );
+REG64( C_17_RAM_CTRL                                           , RULL(0x31010A4F), SH_UNT_C_17     , SH_ACS_SCOM_RW   );
+REG64( C_18_RAM_CTRL                                           , RULL(0x32010A4F), SH_UNT_C_18     , SH_ACS_SCOM_RW   );
+REG64( C_19_RAM_CTRL                                           , RULL(0x33010A4F), SH_UNT_C_19     , SH_ACS_SCOM_RW   );
+REG64( C_20_RAM_CTRL                                           , RULL(0x34010A4F), SH_UNT_C_20     , SH_ACS_SCOM_RW   );
+REG64( C_21_RAM_CTRL                                           , RULL(0x35010A4F), SH_UNT_C_21     , SH_ACS_SCOM_RW   );
+REG64( C_22_RAM_CTRL                                           , RULL(0x36010A4F), SH_UNT_C_22     , SH_ACS_SCOM_RW   );
+REG64( C_23_RAM_CTRL                                           , RULL(0x37010A4F), SH_UNT_C_23     , SH_ACS_SCOM_RW   );
+REG64( EX_RAM_CTRL                                             , RULL(0x20010A4F), SH_UNT_EX       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 21010A4F,
+REG64( EX_0_RAM_CTRL                                           , RULL(0x20010A4F), SH_UNT_EX_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 21010A4F,
+REG64( EX_1_RAM_CTRL                                           , RULL(0x22010A4F), SH_UNT_EX_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 23010A4F,
+REG64( EX_2_RAM_CTRL                                           , RULL(0x24010A4F), SH_UNT_EX_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 25010A4F,
+REG64( EX_3_RAM_CTRL                                           , RULL(0x26010A4F), SH_UNT_EX_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 27010A4F,
+REG64( EX_4_RAM_CTRL                                           , RULL(0x28010A4F), SH_UNT_EX_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 29010A4F,
+REG64( EX_5_RAM_CTRL                                           , RULL(0x2A010A4F), SH_UNT_EX_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 2B010A4F,
+REG64( EX_6_RAM_CTRL                                           , RULL(0x2C010A4F), SH_UNT_EX_6     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 2D010A4F,
+REG64( EX_7_RAM_CTRL                                           , RULL(0x2E010A4F), SH_UNT_EX_7     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 2F010A4F,
+REG64( EX_8_RAM_CTRL                                           , RULL(0x30010A4F), SH_UNT_EX_8     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 31010A4F,
+REG64( EX_9_RAM_CTRL                                           , RULL(0x32010A4F), SH_UNT_EX_9     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 33010A4F,
+REG64( EX_10_RAM_CTRL                                          , RULL(0x34010A4F), SH_UNT_EX_10    ,
+       SH_ACS_SCOM_RW   ); //DUPS: 35010A4F,
+REG64( EX_11_RAM_CTRL                                          , RULL(0x36010A4F), SH_UNT_EX_11    ,
+       SH_ACS_SCOM_RW   ); //DUPS: 37010A4F,
 
-REG64( C_RAM_MODEREG                                           , RULL(0x20010A50), SH_UNT_C        , SH_ACS_SCOM_RW   );
-REG64( C_0_RAM_MODEREG                                         , RULL(0x20010A50), SH_UNT_C_0      , SH_ACS_SCOM_RW   );
-REG64( C_1_RAM_MODEREG                                         , RULL(0x21010A50), SH_UNT_C_1      , SH_ACS_SCOM_RW   );
-REG64( C_2_RAM_MODEREG                                         , RULL(0x22010A50), SH_UNT_C_2      , SH_ACS_SCOM_RW   );
-REG64( C_3_RAM_MODEREG                                         , RULL(0x23010A50), SH_UNT_C_3      , SH_ACS_SCOM_RW   );
-REG64( C_4_RAM_MODEREG                                         , RULL(0x24010A50), SH_UNT_C_4      , SH_ACS_SCOM_RW   );
-REG64( C_5_RAM_MODEREG                                         , RULL(0x25010A50), SH_UNT_C_5      , SH_ACS_SCOM_RW   );
-REG64( C_6_RAM_MODEREG                                         , RULL(0x26010A50), SH_UNT_C_6      , SH_ACS_SCOM_RW   );
-REG64( C_7_RAM_MODEREG                                         , RULL(0x27010A50), SH_UNT_C_7      , SH_ACS_SCOM_RW   );
-REG64( C_8_RAM_MODEREG                                         , RULL(0x28010A50), SH_UNT_C_8      , SH_ACS_SCOM_RW   );
-REG64( C_9_RAM_MODEREG                                         , RULL(0x29010A50), SH_UNT_C_9      , SH_ACS_SCOM_RW   );
-REG64( C_10_RAM_MODEREG                                        , RULL(0x2A010A50), SH_UNT_C_10     , SH_ACS_SCOM_RW   );
-REG64( C_11_RAM_MODEREG                                        , RULL(0x2B010A50), SH_UNT_C_11     , SH_ACS_SCOM_RW   );
-REG64( C_12_RAM_MODEREG                                        , RULL(0x2C010A50), SH_UNT_C_12     , SH_ACS_SCOM_RW   );
-REG64( C_13_RAM_MODEREG                                        , RULL(0x2D010A50), SH_UNT_C_13     , SH_ACS_SCOM_RW   );
-REG64( C_14_RAM_MODEREG                                        , RULL(0x2E010A50), SH_UNT_C_14     , SH_ACS_SCOM_RW   );
-REG64( C_15_RAM_MODEREG                                        , RULL(0x2F010A50), SH_UNT_C_15     , SH_ACS_SCOM_RW   );
-REG64( C_16_RAM_MODEREG                                        , RULL(0x30010A50), SH_UNT_C_16     , SH_ACS_SCOM_RW   );
-REG64( C_17_RAM_MODEREG                                        , RULL(0x31010A50), SH_UNT_C_17     , SH_ACS_SCOM_RW   );
-REG64( C_18_RAM_MODEREG                                        , RULL(0x32010A50), SH_UNT_C_18     , SH_ACS_SCOM_RW   );
-REG64( C_19_RAM_MODEREG                                        , RULL(0x33010A50), SH_UNT_C_19     , SH_ACS_SCOM_RW   );
-REG64( C_20_RAM_MODEREG                                        , RULL(0x34010A50), SH_UNT_C_20     , SH_ACS_SCOM_RW   );
-REG64( C_21_RAM_MODEREG                                        , RULL(0x35010A50), SH_UNT_C_21     , SH_ACS_SCOM_RW   );
-REG64( C_22_RAM_MODEREG                                        , RULL(0x36010A50), SH_UNT_C_22     , SH_ACS_SCOM_RW   );
-REG64( C_23_RAM_MODEREG                                        , RULL(0x37010A50), SH_UNT_C_23     , SH_ACS_SCOM_RW   );
-REG64( EX_0_L2_RAM_MODEREG                                     , RULL(0x20010A50), SH_UNT_EX_0_L2  ,
-       SH_ACS_SCOM_RW   ); //DUPS: 21010A50,
-REG64( EX_10_L2_RAM_MODEREG                                    , RULL(0x34010A50), SH_UNT_EX_10_L2 ,
-       SH_ACS_SCOM_RW   ); //DUPS: 35010A50,
-REG64( EX_11_L2_RAM_MODEREG                                    , RULL(0x36010A50), SH_UNT_EX_11_L2 ,
-       SH_ACS_SCOM_RW   ); //DUPS: 37010A50,
-REG64( EX_1_L2_RAM_MODEREG                                     , RULL(0x22010A50), SH_UNT_EX_1_L2  ,
-       SH_ACS_SCOM_RW   ); //DUPS: 23010A50,
-REG64( EX_2_L2_RAM_MODEREG                                     , RULL(0x24010A50), SH_UNT_EX_2_L2  ,
-       SH_ACS_SCOM_RW   ); //DUPS: 25010A50,
-REG64( EX_3_L2_RAM_MODEREG                                     , RULL(0x26010A50), SH_UNT_EX_3_L2  ,
-       SH_ACS_SCOM_RW   ); //DUPS: 27010A50,
-REG64( EX_4_L2_RAM_MODEREG                                     , RULL(0x28010A50), SH_UNT_EX_4_L2  ,
-       SH_ACS_SCOM_RW   ); //DUPS: 29010A50,
-REG64( EX_5_L2_RAM_MODEREG                                     , RULL(0x2A010A50), SH_UNT_EX_5_L2  ,
-       SH_ACS_SCOM_RW   ); //DUPS: 2B010A50,
-REG64( EX_6_L2_RAM_MODEREG                                     , RULL(0x2C010A50), SH_UNT_EX_6_L2  ,
-       SH_ACS_SCOM_RW   ); //DUPS: 2D010A50,
-REG64( EX_7_L2_RAM_MODEREG                                     , RULL(0x2E010A50), SH_UNT_EX_7_L2  ,
-       SH_ACS_SCOM_RW   ); //DUPS: 2F010A50,
-REG64( EX_8_L2_RAM_MODEREG                                     , RULL(0x30010A50), SH_UNT_EX_8_L2  ,
-       SH_ACS_SCOM_RW   ); //DUPS: 31010A50,
-REG64( EX_9_L2_RAM_MODEREG                                     , RULL(0x32010A50), SH_UNT_EX_9_L2  ,
-       SH_ACS_SCOM_RW   ); //DUPS: 33010A50,
-REG64( EX_L2_RAM_MODEREG                                       , RULL(0x20010A50), SH_UNT_EX_L2    ,
-       SH_ACS_SCOM_RW   ); //DUPS: 21010A50,
-
-REG64( C_RAM_STATUS                                            , RULL(0x20010A52), SH_UNT_C        , SH_ACS_SCOM      );
-REG64( C_0_RAM_STATUS                                          , RULL(0x20010A52), SH_UNT_C_0      , SH_ACS_SCOM      );
-REG64( C_1_RAM_STATUS                                          , RULL(0x21010A52), SH_UNT_C_1      , SH_ACS_SCOM      );
-REG64( C_2_RAM_STATUS                                          , RULL(0x22010A52), SH_UNT_C_2      , SH_ACS_SCOM      );
-REG64( C_3_RAM_STATUS                                          , RULL(0x23010A52), SH_UNT_C_3      , SH_ACS_SCOM      );
-REG64( C_4_RAM_STATUS                                          , RULL(0x24010A52), SH_UNT_C_4      , SH_ACS_SCOM      );
-REG64( C_5_RAM_STATUS                                          , RULL(0x25010A52), SH_UNT_C_5      , SH_ACS_SCOM      );
-REG64( C_6_RAM_STATUS                                          , RULL(0x26010A52), SH_UNT_C_6      , SH_ACS_SCOM      );
-REG64( C_7_RAM_STATUS                                          , RULL(0x27010A52), SH_UNT_C_7      , SH_ACS_SCOM      );
-REG64( C_8_RAM_STATUS                                          , RULL(0x28010A52), SH_UNT_C_8      , SH_ACS_SCOM      );
-REG64( C_9_RAM_STATUS                                          , RULL(0x29010A52), SH_UNT_C_9      , SH_ACS_SCOM      );
-REG64( C_10_RAM_STATUS                                         , RULL(0x2A010A52), SH_UNT_C_10     , SH_ACS_SCOM      );
-REG64( C_11_RAM_STATUS                                         , RULL(0x2B010A52), SH_UNT_C_11     , SH_ACS_SCOM      );
-REG64( C_12_RAM_STATUS                                         , RULL(0x2C010A52), SH_UNT_C_12     , SH_ACS_SCOM      );
-REG64( C_13_RAM_STATUS                                         , RULL(0x2D010A52), SH_UNT_C_13     , SH_ACS_SCOM      );
-REG64( C_14_RAM_STATUS                                         , RULL(0x2E010A52), SH_UNT_C_14     , SH_ACS_SCOM      );
-REG64( C_15_RAM_STATUS                                         , RULL(0x2F010A52), SH_UNT_C_15     , SH_ACS_SCOM      );
-REG64( C_16_RAM_STATUS                                         , RULL(0x30010A52), SH_UNT_C_16     , SH_ACS_SCOM      );
-REG64( C_17_RAM_STATUS                                         , RULL(0x31010A52), SH_UNT_C_17     , SH_ACS_SCOM      );
-REG64( C_18_RAM_STATUS                                         , RULL(0x32010A52), SH_UNT_C_18     , SH_ACS_SCOM      );
-REG64( C_19_RAM_STATUS                                         , RULL(0x33010A52), SH_UNT_C_19     , SH_ACS_SCOM      );
-REG64( C_20_RAM_STATUS                                         , RULL(0x34010A52), SH_UNT_C_20     , SH_ACS_SCOM      );
-REG64( C_21_RAM_STATUS                                         , RULL(0x35010A52), SH_UNT_C_21     , SH_ACS_SCOM      );
-REG64( C_22_RAM_STATUS                                         , RULL(0x36010A52), SH_UNT_C_22     , SH_ACS_SCOM      );
-REG64( C_23_RAM_STATUS                                         , RULL(0x37010A52), SH_UNT_C_23     , SH_ACS_SCOM      );
-REG64( EX_0_L2_RAM_STATUS                                      , RULL(0x20010A52), SH_UNT_EX_0_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 21010A52,
-REG64( EX_10_L2_RAM_STATUS                                     , RULL(0x34010A52), SH_UNT_EX_10_L2 ,
-       SH_ACS_SCOM      ); //DUPS: 35010A52,
-REG64( EX_11_L2_RAM_STATUS                                     , RULL(0x36010A52), SH_UNT_EX_11_L2 ,
-       SH_ACS_SCOM      ); //DUPS: 37010A52,
-REG64( EX_1_L2_RAM_STATUS                                      , RULL(0x22010A52), SH_UNT_EX_1_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 23010A52,
-REG64( EX_2_L2_RAM_STATUS                                      , RULL(0x24010A52), SH_UNT_EX_2_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 25010A52,
-REG64( EX_3_L2_RAM_STATUS                                      , RULL(0x26010A52), SH_UNT_EX_3_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 27010A52,
-REG64( EX_4_L2_RAM_STATUS                                      , RULL(0x28010A52), SH_UNT_EX_4_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 29010A52,
-REG64( EX_5_L2_RAM_STATUS                                      , RULL(0x2A010A52), SH_UNT_EX_5_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 2B010A52,
-REG64( EX_6_L2_RAM_STATUS                                      , RULL(0x2C010A52), SH_UNT_EX_6_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 2D010A52,
-REG64( EX_7_L2_RAM_STATUS                                      , RULL(0x2E010A52), SH_UNT_EX_7_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 2F010A52,
-REG64( EX_8_L2_RAM_STATUS                                      , RULL(0x30010A52), SH_UNT_EX_8_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 31010A52,
-REG64( EX_9_L2_RAM_STATUS                                      , RULL(0x32010A52), SH_UNT_EX_9_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 33010A52,
-REG64( EX_L2_RAM_STATUS                                        , RULL(0x20010A52), SH_UNT_EX_L2    ,
-       SH_ACS_SCOM      ); //DUPS: 21010A52,
-
-REG64( C_RANDOM_CTRL                                           , RULL(0x20010A4E), SH_UNT_C        , SH_ACS_SCOM_RW   );
-REG64( C_0_RANDOM_CTRL                                         , RULL(0x20010A4E), SH_UNT_C_0      , SH_ACS_SCOM_RW   );
-REG64( C_1_RANDOM_CTRL                                         , RULL(0x21010A4E), SH_UNT_C_1      , SH_ACS_SCOM_RW   );
-REG64( C_2_RANDOM_CTRL                                         , RULL(0x22010A4E), SH_UNT_C_2      , SH_ACS_SCOM_RW   );
-REG64( C_3_RANDOM_CTRL                                         , RULL(0x23010A4E), SH_UNT_C_3      , SH_ACS_SCOM_RW   );
-REG64( C_4_RANDOM_CTRL                                         , RULL(0x24010A4E), SH_UNT_C_4      , SH_ACS_SCOM_RW   );
-REG64( C_5_RANDOM_CTRL                                         , RULL(0x25010A4E), SH_UNT_C_5      , SH_ACS_SCOM_RW   );
-REG64( C_6_RANDOM_CTRL                                         , RULL(0x26010A4E), SH_UNT_C_6      , SH_ACS_SCOM_RW   );
-REG64( C_7_RANDOM_CTRL                                         , RULL(0x27010A4E), SH_UNT_C_7      , SH_ACS_SCOM_RW   );
-REG64( C_8_RANDOM_CTRL                                         , RULL(0x28010A4E), SH_UNT_C_8      , SH_ACS_SCOM_RW   );
-REG64( C_9_RANDOM_CTRL                                         , RULL(0x29010A4E), SH_UNT_C_9      , SH_ACS_SCOM_RW   );
-REG64( C_10_RANDOM_CTRL                                        , RULL(0x2A010A4E), SH_UNT_C_10     , SH_ACS_SCOM_RW   );
-REG64( C_11_RANDOM_CTRL                                        , RULL(0x2B010A4E), SH_UNT_C_11     , SH_ACS_SCOM_RW   );
-REG64( C_12_RANDOM_CTRL                                        , RULL(0x2C010A4E), SH_UNT_C_12     , SH_ACS_SCOM_RW   );
-REG64( C_13_RANDOM_CTRL                                        , RULL(0x2D010A4E), SH_UNT_C_13     , SH_ACS_SCOM_RW   );
-REG64( C_14_RANDOM_CTRL                                        , RULL(0x2E010A4E), SH_UNT_C_14     , SH_ACS_SCOM_RW   );
-REG64( C_15_RANDOM_CTRL                                        , RULL(0x2F010A4E), SH_UNT_C_15     , SH_ACS_SCOM_RW   );
-REG64( C_16_RANDOM_CTRL                                        , RULL(0x30010A4E), SH_UNT_C_16     , SH_ACS_SCOM_RW   );
-REG64( C_17_RANDOM_CTRL                                        , RULL(0x31010A4E), SH_UNT_C_17     , SH_ACS_SCOM_RW   );
-REG64( C_18_RANDOM_CTRL                                        , RULL(0x32010A4E), SH_UNT_C_18     , SH_ACS_SCOM_RW   );
-REG64( C_19_RANDOM_CTRL                                        , RULL(0x33010A4E), SH_UNT_C_19     , SH_ACS_SCOM_RW   );
-REG64( C_20_RANDOM_CTRL                                        , RULL(0x34010A4E), SH_UNT_C_20     , SH_ACS_SCOM_RW   );
-REG64( C_21_RANDOM_CTRL                                        , RULL(0x35010A4E), SH_UNT_C_21     , SH_ACS_SCOM_RW   );
-REG64( C_22_RANDOM_CTRL                                        , RULL(0x36010A4E), SH_UNT_C_22     , SH_ACS_SCOM_RW   );
-REG64( C_23_RANDOM_CTRL                                        , RULL(0x37010A4E), SH_UNT_C_23     , SH_ACS_SCOM_RW   );
-REG64( EX_RANDOM_CTRL                                          , RULL(0x20010A4E), SH_UNT_EX       ,
+REG64( C_RAM_MODEREG                                           , RULL(0x20010A4E), SH_UNT_C        , SH_ACS_SCOM_RW   );
+REG64( C_0_RAM_MODEREG                                         , RULL(0x20010A4E), SH_UNT_C_0      , SH_ACS_SCOM_RW   );
+REG64( C_1_RAM_MODEREG                                         , RULL(0x21010A4E), SH_UNT_C_1      , SH_ACS_SCOM_RW   );
+REG64( C_2_RAM_MODEREG                                         , RULL(0x22010A4E), SH_UNT_C_2      , SH_ACS_SCOM_RW   );
+REG64( C_3_RAM_MODEREG                                         , RULL(0x23010A4E), SH_UNT_C_3      , SH_ACS_SCOM_RW   );
+REG64( C_4_RAM_MODEREG                                         , RULL(0x24010A4E), SH_UNT_C_4      , SH_ACS_SCOM_RW   );
+REG64( C_5_RAM_MODEREG                                         , RULL(0x25010A4E), SH_UNT_C_5      , SH_ACS_SCOM_RW   );
+REG64( C_6_RAM_MODEREG                                         , RULL(0x26010A4E), SH_UNT_C_6      , SH_ACS_SCOM_RW   );
+REG64( C_7_RAM_MODEREG                                         , RULL(0x27010A4E), SH_UNT_C_7      , SH_ACS_SCOM_RW   );
+REG64( C_8_RAM_MODEREG                                         , RULL(0x28010A4E), SH_UNT_C_8      , SH_ACS_SCOM_RW   );
+REG64( C_9_RAM_MODEREG                                         , RULL(0x29010A4E), SH_UNT_C_9      , SH_ACS_SCOM_RW   );
+REG64( C_10_RAM_MODEREG                                        , RULL(0x2A010A4E), SH_UNT_C_10     , SH_ACS_SCOM_RW   );
+REG64( C_11_RAM_MODEREG                                        , RULL(0x2B010A4E), SH_UNT_C_11     , SH_ACS_SCOM_RW   );
+REG64( C_12_RAM_MODEREG                                        , RULL(0x2C010A4E), SH_UNT_C_12     , SH_ACS_SCOM_RW   );
+REG64( C_13_RAM_MODEREG                                        , RULL(0x2D010A4E), SH_UNT_C_13     , SH_ACS_SCOM_RW   );
+REG64( C_14_RAM_MODEREG                                        , RULL(0x2E010A4E), SH_UNT_C_14     , SH_ACS_SCOM_RW   );
+REG64( C_15_RAM_MODEREG                                        , RULL(0x2F010A4E), SH_UNT_C_15     , SH_ACS_SCOM_RW   );
+REG64( C_16_RAM_MODEREG                                        , RULL(0x30010A4E), SH_UNT_C_16     , SH_ACS_SCOM_RW   );
+REG64( C_17_RAM_MODEREG                                        , RULL(0x31010A4E), SH_UNT_C_17     , SH_ACS_SCOM_RW   );
+REG64( C_18_RAM_MODEREG                                        , RULL(0x32010A4E), SH_UNT_C_18     , SH_ACS_SCOM_RW   );
+REG64( C_19_RAM_MODEREG                                        , RULL(0x33010A4E), SH_UNT_C_19     , SH_ACS_SCOM_RW   );
+REG64( C_20_RAM_MODEREG                                        , RULL(0x34010A4E), SH_UNT_C_20     , SH_ACS_SCOM_RW   );
+REG64( C_21_RAM_MODEREG                                        , RULL(0x35010A4E), SH_UNT_C_21     , SH_ACS_SCOM_RW   );
+REG64( C_22_RAM_MODEREG                                        , RULL(0x36010A4E), SH_UNT_C_22     , SH_ACS_SCOM_RW   );
+REG64( C_23_RAM_MODEREG                                        , RULL(0x37010A4E), SH_UNT_C_23     , SH_ACS_SCOM_RW   );
+REG64( EX_RAM_MODEREG                                          , RULL(0x20010A4E), SH_UNT_EX       ,
        SH_ACS_SCOM_RW   ); //DUPS: 21010A4E,
-REG64( EX_0_RANDOM_CTRL                                        , RULL(0x20010A4E), SH_UNT_EX_0     ,
+REG64( EX_0_RAM_MODEREG                                        , RULL(0x20010A4E), SH_UNT_EX_0     ,
        SH_ACS_SCOM_RW   ); //DUPS: 21010A4E,
-REG64( EX_1_RANDOM_CTRL                                        , RULL(0x22010A4E), SH_UNT_EX_1     ,
+REG64( EX_1_RAM_MODEREG                                        , RULL(0x22010A4E), SH_UNT_EX_1     ,
        SH_ACS_SCOM_RW   ); //DUPS: 23010A4E,
-REG64( EX_2_RANDOM_CTRL                                        , RULL(0x24010A4E), SH_UNT_EX_2     ,
+REG64( EX_2_RAM_MODEREG                                        , RULL(0x24010A4E), SH_UNT_EX_2     ,
        SH_ACS_SCOM_RW   ); //DUPS: 25010A4E,
-REG64( EX_3_RANDOM_CTRL                                        , RULL(0x26010A4E), SH_UNT_EX_3     ,
+REG64( EX_3_RAM_MODEREG                                        , RULL(0x26010A4E), SH_UNT_EX_3     ,
        SH_ACS_SCOM_RW   ); //DUPS: 27010A4E,
-REG64( EX_4_RANDOM_CTRL                                        , RULL(0x28010A4E), SH_UNT_EX_4     ,
+REG64( EX_4_RAM_MODEREG                                        , RULL(0x28010A4E), SH_UNT_EX_4     ,
        SH_ACS_SCOM_RW   ); //DUPS: 29010A4E,
-REG64( EX_5_RANDOM_CTRL                                        , RULL(0x2A010A4E), SH_UNT_EX_5     ,
+REG64( EX_5_RAM_MODEREG                                        , RULL(0x2A010A4E), SH_UNT_EX_5     ,
        SH_ACS_SCOM_RW   ); //DUPS: 2B010A4E,
-REG64( EX_6_RANDOM_CTRL                                        , RULL(0x2C010A4E), SH_UNT_EX_6     ,
+REG64( EX_6_RAM_MODEREG                                        , RULL(0x2C010A4E), SH_UNT_EX_6     ,
        SH_ACS_SCOM_RW   ); //DUPS: 2D010A4E,
-REG64( EX_7_RANDOM_CTRL                                        , RULL(0x2E010A4E), SH_UNT_EX_7     ,
+REG64( EX_7_RAM_MODEREG                                        , RULL(0x2E010A4E), SH_UNT_EX_7     ,
        SH_ACS_SCOM_RW   ); //DUPS: 2F010A4E,
-REG64( EX_8_RANDOM_CTRL                                        , RULL(0x30010A4E), SH_UNT_EX_8     ,
+REG64( EX_8_RAM_MODEREG                                        , RULL(0x30010A4E), SH_UNT_EX_8     ,
        SH_ACS_SCOM_RW   ); //DUPS: 31010A4E,
-REG64( EX_9_RANDOM_CTRL                                        , RULL(0x32010A4E), SH_UNT_EX_9     ,
+REG64( EX_9_RAM_MODEREG                                        , RULL(0x32010A4E), SH_UNT_EX_9     ,
        SH_ACS_SCOM_RW   ); //DUPS: 33010A4E,
-REG64( EX_10_RANDOM_CTRL                                       , RULL(0x34010A4E), SH_UNT_EX_10    ,
+REG64( EX_10_RAM_MODEREG                                       , RULL(0x34010A4E), SH_UNT_EX_10    ,
        SH_ACS_SCOM_RW   ); //DUPS: 35010A4E,
-REG64( EX_11_RANDOM_CTRL                                       , RULL(0x36010A4E), SH_UNT_EX_11    ,
+REG64( EX_11_RAM_MODEREG                                       , RULL(0x36010A4E), SH_UNT_EX_11    ,
        SH_ACS_SCOM_RW   ); //DUPS: 37010A4E,
 
-REG64( C_RAS_MODEREG                                           , RULL(0x20010A9D), SH_UNT_C        , SH_ACS_SCOM      );
-REG64( C_0_RAS_MODEREG                                         , RULL(0x20010A9D), SH_UNT_C_0      , SH_ACS_SCOM      );
-REG64( C_1_RAS_MODEREG                                         , RULL(0x21010A9D), SH_UNT_C_1      , SH_ACS_SCOM      );
-REG64( C_2_RAS_MODEREG                                         , RULL(0x22010A9D), SH_UNT_C_2      , SH_ACS_SCOM      );
-REG64( C_3_RAS_MODEREG                                         , RULL(0x23010A9D), SH_UNT_C_3      , SH_ACS_SCOM      );
-REG64( C_4_RAS_MODEREG                                         , RULL(0x24010A9D), SH_UNT_C_4      , SH_ACS_SCOM      );
-REG64( C_5_RAS_MODEREG                                         , RULL(0x25010A9D), SH_UNT_C_5      , SH_ACS_SCOM      );
-REG64( C_6_RAS_MODEREG                                         , RULL(0x26010A9D), SH_UNT_C_6      , SH_ACS_SCOM      );
-REG64( C_7_RAS_MODEREG                                         , RULL(0x27010A9D), SH_UNT_C_7      , SH_ACS_SCOM      );
-REG64( C_8_RAS_MODEREG                                         , RULL(0x28010A9D), SH_UNT_C_8      , SH_ACS_SCOM      );
-REG64( C_9_RAS_MODEREG                                         , RULL(0x29010A9D), SH_UNT_C_9      , SH_ACS_SCOM      );
-REG64( C_10_RAS_MODEREG                                        , RULL(0x2A010A9D), SH_UNT_C_10     , SH_ACS_SCOM      );
-REG64( C_11_RAS_MODEREG                                        , RULL(0x2B010A9D), SH_UNT_C_11     , SH_ACS_SCOM      );
-REG64( C_12_RAS_MODEREG                                        , RULL(0x2C010A9D), SH_UNT_C_12     , SH_ACS_SCOM      );
-REG64( C_13_RAS_MODEREG                                        , RULL(0x2D010A9D), SH_UNT_C_13     , SH_ACS_SCOM      );
-REG64( C_14_RAS_MODEREG                                        , RULL(0x2E010A9D), SH_UNT_C_14     , SH_ACS_SCOM      );
-REG64( C_15_RAS_MODEREG                                        , RULL(0x2F010A9D), SH_UNT_C_15     , SH_ACS_SCOM      );
-REG64( C_16_RAS_MODEREG                                        , RULL(0x30010A9D), SH_UNT_C_16     , SH_ACS_SCOM      );
-REG64( C_17_RAS_MODEREG                                        , RULL(0x31010A9D), SH_UNT_C_17     , SH_ACS_SCOM      );
-REG64( C_18_RAS_MODEREG                                        , RULL(0x32010A9D), SH_UNT_C_18     , SH_ACS_SCOM      );
-REG64( C_19_RAS_MODEREG                                        , RULL(0x33010A9D), SH_UNT_C_19     , SH_ACS_SCOM      );
-REG64( C_20_RAS_MODEREG                                        , RULL(0x34010A9D), SH_UNT_C_20     , SH_ACS_SCOM      );
-REG64( C_21_RAS_MODEREG                                        , RULL(0x35010A9D), SH_UNT_C_21     , SH_ACS_SCOM      );
-REG64( C_22_RAS_MODEREG                                        , RULL(0x36010A9D), SH_UNT_C_22     , SH_ACS_SCOM      );
-REG64( C_23_RAS_MODEREG                                        , RULL(0x37010A9D), SH_UNT_C_23     , SH_ACS_SCOM      );
+REG64( C_RAM_STATUS                                            , RULL(0x20010A50), SH_UNT_C        , SH_ACS_SCOM      );
+REG64( C_0_RAM_STATUS                                          , RULL(0x20010A50), SH_UNT_C_0      , SH_ACS_SCOM      );
+REG64( C_1_RAM_STATUS                                          , RULL(0x21010A50), SH_UNT_C_1      , SH_ACS_SCOM      );
+REG64( C_2_RAM_STATUS                                          , RULL(0x22010A50), SH_UNT_C_2      , SH_ACS_SCOM      );
+REG64( C_3_RAM_STATUS                                          , RULL(0x23010A50), SH_UNT_C_3      , SH_ACS_SCOM      );
+REG64( C_4_RAM_STATUS                                          , RULL(0x24010A50), SH_UNT_C_4      , SH_ACS_SCOM      );
+REG64( C_5_RAM_STATUS                                          , RULL(0x25010A50), SH_UNT_C_5      , SH_ACS_SCOM      );
+REG64( C_6_RAM_STATUS                                          , RULL(0x26010A50), SH_UNT_C_6      , SH_ACS_SCOM      );
+REG64( C_7_RAM_STATUS                                          , RULL(0x27010A50), SH_UNT_C_7      , SH_ACS_SCOM      );
+REG64( C_8_RAM_STATUS                                          , RULL(0x28010A50), SH_UNT_C_8      , SH_ACS_SCOM      );
+REG64( C_9_RAM_STATUS                                          , RULL(0x29010A50), SH_UNT_C_9      , SH_ACS_SCOM      );
+REG64( C_10_RAM_STATUS                                         , RULL(0x2A010A50), SH_UNT_C_10     , SH_ACS_SCOM      );
+REG64( C_11_RAM_STATUS                                         , RULL(0x2B010A50), SH_UNT_C_11     , SH_ACS_SCOM      );
+REG64( C_12_RAM_STATUS                                         , RULL(0x2C010A50), SH_UNT_C_12     , SH_ACS_SCOM      );
+REG64( C_13_RAM_STATUS                                         , RULL(0x2D010A50), SH_UNT_C_13     , SH_ACS_SCOM      );
+REG64( C_14_RAM_STATUS                                         , RULL(0x2E010A50), SH_UNT_C_14     , SH_ACS_SCOM      );
+REG64( C_15_RAM_STATUS                                         , RULL(0x2F010A50), SH_UNT_C_15     , SH_ACS_SCOM      );
+REG64( C_16_RAM_STATUS                                         , RULL(0x30010A50), SH_UNT_C_16     , SH_ACS_SCOM      );
+REG64( C_17_RAM_STATUS                                         , RULL(0x31010A50), SH_UNT_C_17     , SH_ACS_SCOM      );
+REG64( C_18_RAM_STATUS                                         , RULL(0x32010A50), SH_UNT_C_18     , SH_ACS_SCOM      );
+REG64( C_19_RAM_STATUS                                         , RULL(0x33010A50), SH_UNT_C_19     , SH_ACS_SCOM      );
+REG64( C_20_RAM_STATUS                                         , RULL(0x34010A50), SH_UNT_C_20     , SH_ACS_SCOM      );
+REG64( C_21_RAM_STATUS                                         , RULL(0x35010A50), SH_UNT_C_21     , SH_ACS_SCOM      );
+REG64( C_22_RAM_STATUS                                         , RULL(0x36010A50), SH_UNT_C_22     , SH_ACS_SCOM      );
+REG64( C_23_RAM_STATUS                                         , RULL(0x37010A50), SH_UNT_C_23     , SH_ACS_SCOM      );
+REG64( EX_0_L2_RAM_STATUS                                      , RULL(0x20010A50), SH_UNT_EX_0_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 21010A50,
+REG64( EX_10_L2_RAM_STATUS                                     , RULL(0x34010A50), SH_UNT_EX_10_L2 ,
+       SH_ACS_SCOM      ); //DUPS: 35010A50,
+REG64( EX_11_L2_RAM_STATUS                                     , RULL(0x36010A50), SH_UNT_EX_11_L2 ,
+       SH_ACS_SCOM      ); //DUPS: 37010A50,
+REG64( EX_1_L2_RAM_STATUS                                      , RULL(0x22010A50), SH_UNT_EX_1_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 23010A50,
+REG64( EX_2_L2_RAM_STATUS                                      , RULL(0x24010A50), SH_UNT_EX_2_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 25010A50,
+REG64( EX_3_L2_RAM_STATUS                                      , RULL(0x26010A50), SH_UNT_EX_3_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 27010A50,
+REG64( EX_4_L2_RAM_STATUS                                      , RULL(0x28010A50), SH_UNT_EX_4_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 29010A50,
+REG64( EX_5_L2_RAM_STATUS                                      , RULL(0x2A010A50), SH_UNT_EX_5_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 2B010A50,
+REG64( EX_6_L2_RAM_STATUS                                      , RULL(0x2C010A50), SH_UNT_EX_6_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 2D010A50,
+REG64( EX_7_L2_RAM_STATUS                                      , RULL(0x2E010A50), SH_UNT_EX_7_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 2F010A50,
+REG64( EX_8_L2_RAM_STATUS                                      , RULL(0x30010A50), SH_UNT_EX_8_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 31010A50,
+REG64( EX_9_L2_RAM_STATUS                                      , RULL(0x32010A50), SH_UNT_EX_9_L2  ,
+       SH_ACS_SCOM      ); //DUPS: 33010A50,
+REG64( EX_L2_RAM_STATUS                                        , RULL(0x20010A50), SH_UNT_EX_L2    ,
+       SH_ACS_SCOM      ); //DUPS: 21010A50,
+
+REG64( C_RAS_MODEREG                                           , RULL(0x20010A9D), SH_UNT_C        , SH_ACS_SCOM_RW   );
+REG64( C_0_RAS_MODEREG                                         , RULL(0x20010A9D), SH_UNT_C_0      , SH_ACS_SCOM_RW   );
+REG64( C_1_RAS_MODEREG                                         , RULL(0x21010A9D), SH_UNT_C_1      , SH_ACS_SCOM_RW   );
+REG64( C_2_RAS_MODEREG                                         , RULL(0x22010A9D), SH_UNT_C_2      , SH_ACS_SCOM_RW   );
+REG64( C_3_RAS_MODEREG                                         , RULL(0x23010A9D), SH_UNT_C_3      , SH_ACS_SCOM_RW   );
+REG64( C_4_RAS_MODEREG                                         , RULL(0x24010A9D), SH_UNT_C_4      , SH_ACS_SCOM_RW   );
+REG64( C_5_RAS_MODEREG                                         , RULL(0x25010A9D), SH_UNT_C_5      , SH_ACS_SCOM_RW   );
+REG64( C_6_RAS_MODEREG                                         , RULL(0x26010A9D), SH_UNT_C_6      , SH_ACS_SCOM_RW   );
+REG64( C_7_RAS_MODEREG                                         , RULL(0x27010A9D), SH_UNT_C_7      , SH_ACS_SCOM_RW   );
+REG64( C_8_RAS_MODEREG                                         , RULL(0x28010A9D), SH_UNT_C_8      , SH_ACS_SCOM_RW   );
+REG64( C_9_RAS_MODEREG                                         , RULL(0x29010A9D), SH_UNT_C_9      , SH_ACS_SCOM_RW   );
+REG64( C_10_RAS_MODEREG                                        , RULL(0x2A010A9D), SH_UNT_C_10     , SH_ACS_SCOM_RW   );
+REG64( C_11_RAS_MODEREG                                        , RULL(0x2B010A9D), SH_UNT_C_11     , SH_ACS_SCOM_RW   );
+REG64( C_12_RAS_MODEREG                                        , RULL(0x2C010A9D), SH_UNT_C_12     , SH_ACS_SCOM_RW   );
+REG64( C_13_RAS_MODEREG                                        , RULL(0x2D010A9D), SH_UNT_C_13     , SH_ACS_SCOM_RW   );
+REG64( C_14_RAS_MODEREG                                        , RULL(0x2E010A9D), SH_UNT_C_14     , SH_ACS_SCOM_RW   );
+REG64( C_15_RAS_MODEREG                                        , RULL(0x2F010A9D), SH_UNT_C_15     , SH_ACS_SCOM_RW   );
+REG64( C_16_RAS_MODEREG                                        , RULL(0x30010A9D), SH_UNT_C_16     , SH_ACS_SCOM_RW   );
+REG64( C_17_RAS_MODEREG                                        , RULL(0x31010A9D), SH_UNT_C_17     , SH_ACS_SCOM_RW   );
+REG64( C_18_RAS_MODEREG                                        , RULL(0x32010A9D), SH_UNT_C_18     , SH_ACS_SCOM_RW   );
+REG64( C_19_RAS_MODEREG                                        , RULL(0x33010A9D), SH_UNT_C_19     , SH_ACS_SCOM_RW   );
+REG64( C_20_RAS_MODEREG                                        , RULL(0x34010A9D), SH_UNT_C_20     , SH_ACS_SCOM_RW   );
+REG64( C_21_RAS_MODEREG                                        , RULL(0x35010A9D), SH_UNT_C_21     , SH_ACS_SCOM_RW   );
+REG64( C_22_RAS_MODEREG                                        , RULL(0x36010A9D), SH_UNT_C_22     , SH_ACS_SCOM_RW   );
+REG64( C_23_RAS_MODEREG                                        , RULL(0x37010A9D), SH_UNT_C_23     , SH_ACS_SCOM_RW   );
 REG64( EX_0_L2_RAS_MODEREG                                     , RULL(0x20010A9D), SH_UNT_EX_0_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 21010A9D,
+       SH_ACS_SCOM_RW   ); //DUPS: 21010A9D,
 REG64( EX_10_L2_RAS_MODEREG                                    , RULL(0x34010A9D), SH_UNT_EX_10_L2 ,
-       SH_ACS_SCOM      ); //DUPS: 35010A9D,
+       SH_ACS_SCOM_RW   ); //DUPS: 35010A9D,
 REG64( EX_11_L2_RAS_MODEREG                                    , RULL(0x36010A9D), SH_UNT_EX_11_L2 ,
-       SH_ACS_SCOM      ); //DUPS: 37010A9D,
+       SH_ACS_SCOM_RW   ); //DUPS: 37010A9D,
 REG64( EX_1_L2_RAS_MODEREG                                     , RULL(0x22010A9D), SH_UNT_EX_1_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 23010A9D,
+       SH_ACS_SCOM_RW   ); //DUPS: 23010A9D,
 REG64( EX_2_L2_RAS_MODEREG                                     , RULL(0x24010A9D), SH_UNT_EX_2_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 25010A9D,
+       SH_ACS_SCOM_RW   ); //DUPS: 25010A9D,
 REG64( EX_3_L2_RAS_MODEREG                                     , RULL(0x26010A9D), SH_UNT_EX_3_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 27010A9D,
+       SH_ACS_SCOM_RW   ); //DUPS: 27010A9D,
 REG64( EX_4_L2_RAS_MODEREG                                     , RULL(0x28010A9D), SH_UNT_EX_4_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 29010A9D,
+       SH_ACS_SCOM_RW   ); //DUPS: 29010A9D,
 REG64( EX_5_L2_RAS_MODEREG                                     , RULL(0x2A010A9D), SH_UNT_EX_5_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 2B010A9D,
+       SH_ACS_SCOM_RW   ); //DUPS: 2B010A9D,
 REG64( EX_6_L2_RAS_MODEREG                                     , RULL(0x2C010A9D), SH_UNT_EX_6_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 2D010A9D,
+       SH_ACS_SCOM_RW   ); //DUPS: 2D010A9D,
 REG64( EX_7_L2_RAS_MODEREG                                     , RULL(0x2E010A9D), SH_UNT_EX_7_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 2F010A9D,
+       SH_ACS_SCOM_RW   ); //DUPS: 2F010A9D,
 REG64( EX_8_L2_RAS_MODEREG                                     , RULL(0x30010A9D), SH_UNT_EX_8_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 31010A9D,
+       SH_ACS_SCOM_RW   ); //DUPS: 31010A9D,
 REG64( EX_9_L2_RAS_MODEREG                                     , RULL(0x32010A9D), SH_UNT_EX_9_L2  ,
-       SH_ACS_SCOM      ); //DUPS: 33010A9D,
+       SH_ACS_SCOM_RW   ); //DUPS: 33010A9D,
 REG64( EX_L2_RAS_MODEREG                                       , RULL(0x20010A9D), SH_UNT_EX_L2    ,
-       SH_ACS_SCOM      ); //DUPS: 21010A9D,
+       SH_ACS_SCOM_RW   ); //DUPS: 21010A9D,
 
 REG64( C_RAS_STATUS                                            , RULL(0x20010A02), SH_UNT_C        , SH_ACS_SCOM      );
 REG64( C_0_RAS_STATUS                                          , RULL(0x20010A02), SH_UNT_C_0      , SH_ACS_SCOM      );
@@ -20218,109 +20071,109 @@ REG64( EX_10_SPA_MASK                                          , RULL(0x34040007
 REG64( EX_11_SPA_MASK                                          , RULL(0x36040007), SH_UNT_EX_11    ,
        SH_ACS_SCOM      ); //DUPS: 37040007,
 
-REG64( C_SPR_COMMON_HOLD_OUT                                   , RULL(0x20010ABE), SH_UNT_C        , SH_ACS_SCOM_RO   );
-REG64( C_0_SPR_COMMON_HOLD_OUT                                 , RULL(0x20010ABE), SH_UNT_C_0      , SH_ACS_SCOM_RO   );
-REG64( C_1_SPR_COMMON_HOLD_OUT                                 , RULL(0x21010ABE), SH_UNT_C_1      , SH_ACS_SCOM_RO   );
-REG64( C_2_SPR_COMMON_HOLD_OUT                                 , RULL(0x22010ABE), SH_UNT_C_2      , SH_ACS_SCOM_RO   );
-REG64( C_3_SPR_COMMON_HOLD_OUT                                 , RULL(0x23010ABE), SH_UNT_C_3      , SH_ACS_SCOM_RO   );
-REG64( C_4_SPR_COMMON_HOLD_OUT                                 , RULL(0x24010ABE), SH_UNT_C_4      , SH_ACS_SCOM_RO   );
-REG64( C_5_SPR_COMMON_HOLD_OUT                                 , RULL(0x25010ABE), SH_UNT_C_5      , SH_ACS_SCOM_RO   );
-REG64( C_6_SPR_COMMON_HOLD_OUT                                 , RULL(0x26010ABE), SH_UNT_C_6      , SH_ACS_SCOM_RO   );
-REG64( C_7_SPR_COMMON_HOLD_OUT                                 , RULL(0x27010ABE), SH_UNT_C_7      , SH_ACS_SCOM_RO   );
-REG64( C_8_SPR_COMMON_HOLD_OUT                                 , RULL(0x28010ABE), SH_UNT_C_8      , SH_ACS_SCOM_RO   );
-REG64( C_9_SPR_COMMON_HOLD_OUT                                 , RULL(0x29010ABE), SH_UNT_C_9      , SH_ACS_SCOM_RO   );
-REG64( C_10_SPR_COMMON_HOLD_OUT                                , RULL(0x2A010ABE), SH_UNT_C_10     , SH_ACS_SCOM_RO   );
-REG64( C_11_SPR_COMMON_HOLD_OUT                                , RULL(0x2B010ABE), SH_UNT_C_11     , SH_ACS_SCOM_RO   );
-REG64( C_12_SPR_COMMON_HOLD_OUT                                , RULL(0x2C010ABE), SH_UNT_C_12     , SH_ACS_SCOM_RO   );
-REG64( C_13_SPR_COMMON_HOLD_OUT                                , RULL(0x2D010ABE), SH_UNT_C_13     , SH_ACS_SCOM_RO   );
-REG64( C_14_SPR_COMMON_HOLD_OUT                                , RULL(0x2E010ABE), SH_UNT_C_14     , SH_ACS_SCOM_RO   );
-REG64( C_15_SPR_COMMON_HOLD_OUT                                , RULL(0x2F010ABE), SH_UNT_C_15     , SH_ACS_SCOM_RO   );
-REG64( C_16_SPR_COMMON_HOLD_OUT                                , RULL(0x30010ABE), SH_UNT_C_16     , SH_ACS_SCOM_RO   );
-REG64( C_17_SPR_COMMON_HOLD_OUT                                , RULL(0x31010ABE), SH_UNT_C_17     , SH_ACS_SCOM_RO   );
-REG64( C_18_SPR_COMMON_HOLD_OUT                                , RULL(0x32010ABE), SH_UNT_C_18     , SH_ACS_SCOM_RO   );
-REG64( C_19_SPR_COMMON_HOLD_OUT                                , RULL(0x33010ABE), SH_UNT_C_19     , SH_ACS_SCOM_RO   );
-REG64( C_20_SPR_COMMON_HOLD_OUT                                , RULL(0x34010ABE), SH_UNT_C_20     , SH_ACS_SCOM_RO   );
-REG64( C_21_SPR_COMMON_HOLD_OUT                                , RULL(0x35010ABE), SH_UNT_C_21     , SH_ACS_SCOM_RO   );
-REG64( C_22_SPR_COMMON_HOLD_OUT                                , RULL(0x36010ABE), SH_UNT_C_22     , SH_ACS_SCOM_RO   );
-REG64( C_23_SPR_COMMON_HOLD_OUT                                , RULL(0x37010ABE), SH_UNT_C_23     , SH_ACS_SCOM_RO   );
-REG64( EX_SPR_COMMON_HOLD_OUT                                  , RULL(0x21010ABE), SH_UNT_EX       ,
-       SH_ACS_SCOM_RO   ); //DUPS: 20010ABE,
-REG64( EX_0_SPR_COMMON_HOLD_OUT                                , RULL(0x21010ABE), SH_UNT_EX_0     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 20010ABE,
-REG64( EX_1_SPR_COMMON_HOLD_OUT                                , RULL(0x23010ABE), SH_UNT_EX_1     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 22010ABE,
-REG64( EX_2_SPR_COMMON_HOLD_OUT                                , RULL(0x25010ABE), SH_UNT_EX_2     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 24010ABE,
-REG64( EX_3_SPR_COMMON_HOLD_OUT                                , RULL(0x27010ABE), SH_UNT_EX_3     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 26010ABE,
-REG64( EX_4_SPR_COMMON_HOLD_OUT                                , RULL(0x29010ABE), SH_UNT_EX_4     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 28010ABE,
-REG64( EX_5_SPR_COMMON_HOLD_OUT                                , RULL(0x2B010ABE), SH_UNT_EX_5     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 2A010ABE,
-REG64( EX_6_SPR_COMMON_HOLD_OUT                                , RULL(0x2D010ABE), SH_UNT_EX_6     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 2C010ABE,
-REG64( EX_7_SPR_COMMON_HOLD_OUT                                , RULL(0x2F010ABE), SH_UNT_EX_7     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 2E010ABE,
-REG64( EX_8_SPR_COMMON_HOLD_OUT                                , RULL(0x31010ABE), SH_UNT_EX_8     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 30010ABE,
-REG64( EX_9_SPR_COMMON_HOLD_OUT                                , RULL(0x33010ABE), SH_UNT_EX_9     ,
-       SH_ACS_SCOM_RO   ); //DUPS: 32010ABE,
-REG64( EX_10_SPR_COMMON_HOLD_OUT                               , RULL(0x35010ABE), SH_UNT_EX_10    ,
-       SH_ACS_SCOM_RO   ); //DUPS: 34010ABE,
-REG64( EX_11_SPR_COMMON_HOLD_OUT                               , RULL(0x37010ABE), SH_UNT_EX_11    ,
-       SH_ACS_SCOM_RO   ); //DUPS: 36010ABE,
+REG64( C_SPR_COMMON_HOLD_OUT                                   , RULL(0x20010AB8), SH_UNT_C        , SH_ACS_SCOM_RO   );
+REG64( C_0_SPR_COMMON_HOLD_OUT                                 , RULL(0x20010AB8), SH_UNT_C_0      , SH_ACS_SCOM_RO   );
+REG64( C_1_SPR_COMMON_HOLD_OUT                                 , RULL(0x21010AB8), SH_UNT_C_1      , SH_ACS_SCOM_RO   );
+REG64( C_2_SPR_COMMON_HOLD_OUT                                 , RULL(0x22010AB8), SH_UNT_C_2      , SH_ACS_SCOM_RO   );
+REG64( C_3_SPR_COMMON_HOLD_OUT                                 , RULL(0x23010AB8), SH_UNT_C_3      , SH_ACS_SCOM_RO   );
+REG64( C_4_SPR_COMMON_HOLD_OUT                                 , RULL(0x24010AB8), SH_UNT_C_4      , SH_ACS_SCOM_RO   );
+REG64( C_5_SPR_COMMON_HOLD_OUT                                 , RULL(0x25010AB8), SH_UNT_C_5      , SH_ACS_SCOM_RO   );
+REG64( C_6_SPR_COMMON_HOLD_OUT                                 , RULL(0x26010AB8), SH_UNT_C_6      , SH_ACS_SCOM_RO   );
+REG64( C_7_SPR_COMMON_HOLD_OUT                                 , RULL(0x27010AB8), SH_UNT_C_7      , SH_ACS_SCOM_RO   );
+REG64( C_8_SPR_COMMON_HOLD_OUT                                 , RULL(0x28010AB8), SH_UNT_C_8      , SH_ACS_SCOM_RO   );
+REG64( C_9_SPR_COMMON_HOLD_OUT                                 , RULL(0x29010AB8), SH_UNT_C_9      , SH_ACS_SCOM_RO   );
+REG64( C_10_SPR_COMMON_HOLD_OUT                                , RULL(0x2A010AB8), SH_UNT_C_10     , SH_ACS_SCOM_RO   );
+REG64( C_11_SPR_COMMON_HOLD_OUT                                , RULL(0x2B010AB8), SH_UNT_C_11     , SH_ACS_SCOM_RO   );
+REG64( C_12_SPR_COMMON_HOLD_OUT                                , RULL(0x2C010AB8), SH_UNT_C_12     , SH_ACS_SCOM_RO   );
+REG64( C_13_SPR_COMMON_HOLD_OUT                                , RULL(0x2D010AB8), SH_UNT_C_13     , SH_ACS_SCOM_RO   );
+REG64( C_14_SPR_COMMON_HOLD_OUT                                , RULL(0x2E010AB8), SH_UNT_C_14     , SH_ACS_SCOM_RO   );
+REG64( C_15_SPR_COMMON_HOLD_OUT                                , RULL(0x2F010AB8), SH_UNT_C_15     , SH_ACS_SCOM_RO   );
+REG64( C_16_SPR_COMMON_HOLD_OUT                                , RULL(0x30010AB8), SH_UNT_C_16     , SH_ACS_SCOM_RO   );
+REG64( C_17_SPR_COMMON_HOLD_OUT                                , RULL(0x31010AB8), SH_UNT_C_17     , SH_ACS_SCOM_RO   );
+REG64( C_18_SPR_COMMON_HOLD_OUT                                , RULL(0x32010AB8), SH_UNT_C_18     , SH_ACS_SCOM_RO   );
+REG64( C_19_SPR_COMMON_HOLD_OUT                                , RULL(0x33010AB8), SH_UNT_C_19     , SH_ACS_SCOM_RO   );
+REG64( C_20_SPR_COMMON_HOLD_OUT                                , RULL(0x34010AB8), SH_UNT_C_20     , SH_ACS_SCOM_RO   );
+REG64( C_21_SPR_COMMON_HOLD_OUT                                , RULL(0x35010AB8), SH_UNT_C_21     , SH_ACS_SCOM_RO   );
+REG64( C_22_SPR_COMMON_HOLD_OUT                                , RULL(0x36010AB8), SH_UNT_C_22     , SH_ACS_SCOM_RO   );
+REG64( C_23_SPR_COMMON_HOLD_OUT                                , RULL(0x37010AB8), SH_UNT_C_23     , SH_ACS_SCOM_RO   );
+REG64( EX_SPR_COMMON_HOLD_OUT                                  , RULL(0x21010AB8), SH_UNT_EX       ,
+       SH_ACS_SCOM_RO   ); //DUPS: 20010AB8,
+REG64( EX_0_SPR_COMMON_HOLD_OUT                                , RULL(0x21010AB8), SH_UNT_EX_0     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 20010AB8,
+REG64( EX_1_SPR_COMMON_HOLD_OUT                                , RULL(0x23010AB8), SH_UNT_EX_1     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 22010AB8,
+REG64( EX_2_SPR_COMMON_HOLD_OUT                                , RULL(0x25010AB8), SH_UNT_EX_2     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 24010AB8,
+REG64( EX_3_SPR_COMMON_HOLD_OUT                                , RULL(0x27010AB8), SH_UNT_EX_3     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 26010AB8,
+REG64( EX_4_SPR_COMMON_HOLD_OUT                                , RULL(0x29010AB8), SH_UNT_EX_4     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 28010AB8,
+REG64( EX_5_SPR_COMMON_HOLD_OUT                                , RULL(0x2B010AB8), SH_UNT_EX_5     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 2A010AB8,
+REG64( EX_6_SPR_COMMON_HOLD_OUT                                , RULL(0x2D010AB8), SH_UNT_EX_6     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 2C010AB8,
+REG64( EX_7_SPR_COMMON_HOLD_OUT                                , RULL(0x2F010AB8), SH_UNT_EX_7     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 2E010AB8,
+REG64( EX_8_SPR_COMMON_HOLD_OUT                                , RULL(0x31010AB8), SH_UNT_EX_8     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 30010AB8,
+REG64( EX_9_SPR_COMMON_HOLD_OUT                                , RULL(0x33010AB8), SH_UNT_EX_9     ,
+       SH_ACS_SCOM_RO   ); //DUPS: 32010AB8,
+REG64( EX_10_SPR_COMMON_HOLD_OUT                               , RULL(0x35010AB8), SH_UNT_EX_10    ,
+       SH_ACS_SCOM_RO   ); //DUPS: 34010AB8,
+REG64( EX_11_SPR_COMMON_HOLD_OUT                               , RULL(0x37010AB8), SH_UNT_EX_11    ,
+       SH_ACS_SCOM_RO   ); //DUPS: 36010AB8,
 
-REG64( C_SPR_CORE_HOLD_OUT                                     , RULL(0x20010ABB), SH_UNT_C        , SH_ACS_SCOM_RO   );
-REG64( C_0_SPR_CORE_HOLD_OUT                                   , RULL(0x20010ABB), SH_UNT_C_0      , SH_ACS_SCOM_RO   );
-REG64( C_1_SPR_CORE_HOLD_OUT                                   , RULL(0x21010ABB), SH_UNT_C_1      , SH_ACS_SCOM_RO   );
-REG64( C_2_SPR_CORE_HOLD_OUT                                   , RULL(0x22010ABB), SH_UNT_C_2      , SH_ACS_SCOM_RO   );
-REG64( C_3_SPR_CORE_HOLD_OUT                                   , RULL(0x23010ABB), SH_UNT_C_3      , SH_ACS_SCOM_RO   );
-REG64( C_4_SPR_CORE_HOLD_OUT                                   , RULL(0x24010ABB), SH_UNT_C_4      , SH_ACS_SCOM_RO   );
-REG64( C_5_SPR_CORE_HOLD_OUT                                   , RULL(0x25010ABB), SH_UNT_C_5      , SH_ACS_SCOM_RO   );
-REG64( C_6_SPR_CORE_HOLD_OUT                                   , RULL(0x26010ABB), SH_UNT_C_6      , SH_ACS_SCOM_RO   );
-REG64( C_7_SPR_CORE_HOLD_OUT                                   , RULL(0x27010ABB), SH_UNT_C_7      , SH_ACS_SCOM_RO   );
-REG64( C_8_SPR_CORE_HOLD_OUT                                   , RULL(0x28010ABB), SH_UNT_C_8      , SH_ACS_SCOM_RO   );
-REG64( C_9_SPR_CORE_HOLD_OUT                                   , RULL(0x29010ABB), SH_UNT_C_9      , SH_ACS_SCOM_RO   );
-REG64( C_10_SPR_CORE_HOLD_OUT                                  , RULL(0x2A010ABB), SH_UNT_C_10     , SH_ACS_SCOM_RO   );
-REG64( C_11_SPR_CORE_HOLD_OUT                                  , RULL(0x2B010ABB), SH_UNT_C_11     , SH_ACS_SCOM_RO   );
-REG64( C_12_SPR_CORE_HOLD_OUT                                  , RULL(0x2C010ABB), SH_UNT_C_12     , SH_ACS_SCOM_RO   );
-REG64( C_13_SPR_CORE_HOLD_OUT                                  , RULL(0x2D010ABB), SH_UNT_C_13     , SH_ACS_SCOM_RO   );
-REG64( C_14_SPR_CORE_HOLD_OUT                                  , RULL(0x2E010ABB), SH_UNT_C_14     , SH_ACS_SCOM_RO   );
-REG64( C_15_SPR_CORE_HOLD_OUT                                  , RULL(0x2F010ABB), SH_UNT_C_15     , SH_ACS_SCOM_RO   );
-REG64( C_16_SPR_CORE_HOLD_OUT                                  , RULL(0x30010ABB), SH_UNT_C_16     , SH_ACS_SCOM_RO   );
-REG64( C_17_SPR_CORE_HOLD_OUT                                  , RULL(0x31010ABB), SH_UNT_C_17     , SH_ACS_SCOM_RO   );
-REG64( C_18_SPR_CORE_HOLD_OUT                                  , RULL(0x32010ABB), SH_UNT_C_18     , SH_ACS_SCOM_RO   );
-REG64( C_19_SPR_CORE_HOLD_OUT                                  , RULL(0x33010ABB), SH_UNT_C_19     , SH_ACS_SCOM_RO   );
-REG64( C_20_SPR_CORE_HOLD_OUT                                  , RULL(0x34010ABB), SH_UNT_C_20     , SH_ACS_SCOM_RO   );
-REG64( C_21_SPR_CORE_HOLD_OUT                                  , RULL(0x35010ABB), SH_UNT_C_21     , SH_ACS_SCOM_RO   );
-REG64( C_22_SPR_CORE_HOLD_OUT                                  , RULL(0x36010ABB), SH_UNT_C_22     , SH_ACS_SCOM_RO   );
-REG64( C_23_SPR_CORE_HOLD_OUT                                  , RULL(0x37010ABB), SH_UNT_C_23     , SH_ACS_SCOM_RO   );
-REG64( EX_0_L2_SPR_CORE_HOLD_OUT                               , RULL(0x20010ABB), SH_UNT_EX_0_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 21010ABB,
-REG64( EX_10_L2_SPR_CORE_HOLD_OUT                              , RULL(0x34010ABB), SH_UNT_EX_10_L2 ,
-       SH_ACS_SCOM_RO   ); //DUPS: 35010ABB,
-REG64( EX_11_L2_SPR_CORE_HOLD_OUT                              , RULL(0x36010ABB), SH_UNT_EX_11_L2 ,
-       SH_ACS_SCOM_RO   ); //DUPS: 37010ABB,
-REG64( EX_1_L2_SPR_CORE_HOLD_OUT                               , RULL(0x22010ABB), SH_UNT_EX_1_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 23010ABB,
-REG64( EX_2_L2_SPR_CORE_HOLD_OUT                               , RULL(0x24010ABB), SH_UNT_EX_2_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 25010ABB,
-REG64( EX_3_L2_SPR_CORE_HOLD_OUT                               , RULL(0x26010ABB), SH_UNT_EX_3_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 27010ABB,
-REG64( EX_4_L2_SPR_CORE_HOLD_OUT                               , RULL(0x28010ABB), SH_UNT_EX_4_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 29010ABB,
-REG64( EX_5_L2_SPR_CORE_HOLD_OUT                               , RULL(0x2A010ABB), SH_UNT_EX_5_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 2B010ABB,
-REG64( EX_6_L2_SPR_CORE_HOLD_OUT                               , RULL(0x2C010ABB), SH_UNT_EX_6_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 2D010ABB,
-REG64( EX_7_L2_SPR_CORE_HOLD_OUT                               , RULL(0x2E010ABB), SH_UNT_EX_7_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 2F010ABB,
-REG64( EX_8_L2_SPR_CORE_HOLD_OUT                               , RULL(0x30010ABB), SH_UNT_EX_8_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 31010ABB,
-REG64( EX_9_L2_SPR_CORE_HOLD_OUT                               , RULL(0x32010ABB), SH_UNT_EX_9_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 33010ABB,
-REG64( EX_L2_SPR_CORE_HOLD_OUT                                 , RULL(0x20010ABB), SH_UNT_EX_L2    ,
-       SH_ACS_SCOM_RO   ); //DUPS: 21010ABB,
+REG64( C_SPR_CORE_HOLD_OUT                                     , RULL(0x20010AB5), SH_UNT_C        , SH_ACS_SCOM_RO   );
+REG64( C_0_SPR_CORE_HOLD_OUT                                   , RULL(0x20010AB5), SH_UNT_C_0      , SH_ACS_SCOM_RO   );
+REG64( C_1_SPR_CORE_HOLD_OUT                                   , RULL(0x21010AB5), SH_UNT_C_1      , SH_ACS_SCOM_RO   );
+REG64( C_2_SPR_CORE_HOLD_OUT                                   , RULL(0x22010AB5), SH_UNT_C_2      , SH_ACS_SCOM_RO   );
+REG64( C_3_SPR_CORE_HOLD_OUT                                   , RULL(0x23010AB5), SH_UNT_C_3      , SH_ACS_SCOM_RO   );
+REG64( C_4_SPR_CORE_HOLD_OUT                                   , RULL(0x24010AB5), SH_UNT_C_4      , SH_ACS_SCOM_RO   );
+REG64( C_5_SPR_CORE_HOLD_OUT                                   , RULL(0x25010AB5), SH_UNT_C_5      , SH_ACS_SCOM_RO   );
+REG64( C_6_SPR_CORE_HOLD_OUT                                   , RULL(0x26010AB5), SH_UNT_C_6      , SH_ACS_SCOM_RO   );
+REG64( C_7_SPR_CORE_HOLD_OUT                                   , RULL(0x27010AB5), SH_UNT_C_7      , SH_ACS_SCOM_RO   );
+REG64( C_8_SPR_CORE_HOLD_OUT                                   , RULL(0x28010AB5), SH_UNT_C_8      , SH_ACS_SCOM_RO   );
+REG64( C_9_SPR_CORE_HOLD_OUT                                   , RULL(0x29010AB5), SH_UNT_C_9      , SH_ACS_SCOM_RO   );
+REG64( C_10_SPR_CORE_HOLD_OUT                                  , RULL(0x2A010AB5), SH_UNT_C_10     , SH_ACS_SCOM_RO   );
+REG64( C_11_SPR_CORE_HOLD_OUT                                  , RULL(0x2B010AB5), SH_UNT_C_11     , SH_ACS_SCOM_RO   );
+REG64( C_12_SPR_CORE_HOLD_OUT                                  , RULL(0x2C010AB5), SH_UNT_C_12     , SH_ACS_SCOM_RO   );
+REG64( C_13_SPR_CORE_HOLD_OUT                                  , RULL(0x2D010AB5), SH_UNT_C_13     , SH_ACS_SCOM_RO   );
+REG64( C_14_SPR_CORE_HOLD_OUT                                  , RULL(0x2E010AB5), SH_UNT_C_14     , SH_ACS_SCOM_RO   );
+REG64( C_15_SPR_CORE_HOLD_OUT                                  , RULL(0x2F010AB5), SH_UNT_C_15     , SH_ACS_SCOM_RO   );
+REG64( C_16_SPR_CORE_HOLD_OUT                                  , RULL(0x30010AB5), SH_UNT_C_16     , SH_ACS_SCOM_RO   );
+REG64( C_17_SPR_CORE_HOLD_OUT                                  , RULL(0x31010AB5), SH_UNT_C_17     , SH_ACS_SCOM_RO   );
+REG64( C_18_SPR_CORE_HOLD_OUT                                  , RULL(0x32010AB5), SH_UNT_C_18     , SH_ACS_SCOM_RO   );
+REG64( C_19_SPR_CORE_HOLD_OUT                                  , RULL(0x33010AB5), SH_UNT_C_19     , SH_ACS_SCOM_RO   );
+REG64( C_20_SPR_CORE_HOLD_OUT                                  , RULL(0x34010AB5), SH_UNT_C_20     , SH_ACS_SCOM_RO   );
+REG64( C_21_SPR_CORE_HOLD_OUT                                  , RULL(0x35010AB5), SH_UNT_C_21     , SH_ACS_SCOM_RO   );
+REG64( C_22_SPR_CORE_HOLD_OUT                                  , RULL(0x36010AB5), SH_UNT_C_22     , SH_ACS_SCOM_RO   );
+REG64( C_23_SPR_CORE_HOLD_OUT                                  , RULL(0x37010AB5), SH_UNT_C_23     , SH_ACS_SCOM_RO   );
+REG64( EX_0_L2_SPR_CORE_HOLD_OUT                               , RULL(0x20010AB5), SH_UNT_EX_0_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 21010AB5,
+REG64( EX_10_L2_SPR_CORE_HOLD_OUT                              , RULL(0x34010AB5), SH_UNT_EX_10_L2 ,
+       SH_ACS_SCOM_RO   ); //DUPS: 35010AB5,
+REG64( EX_11_L2_SPR_CORE_HOLD_OUT                              , RULL(0x36010AB5), SH_UNT_EX_11_L2 ,
+       SH_ACS_SCOM_RO   ); //DUPS: 37010AB5,
+REG64( EX_1_L2_SPR_CORE_HOLD_OUT                               , RULL(0x22010AB5), SH_UNT_EX_1_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 23010AB5,
+REG64( EX_2_L2_SPR_CORE_HOLD_OUT                               , RULL(0x24010AB5), SH_UNT_EX_2_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 25010AB5,
+REG64( EX_3_L2_SPR_CORE_HOLD_OUT                               , RULL(0x26010AB5), SH_UNT_EX_3_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 27010AB5,
+REG64( EX_4_L2_SPR_CORE_HOLD_OUT                               , RULL(0x28010AB5), SH_UNT_EX_4_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 29010AB5,
+REG64( EX_5_L2_SPR_CORE_HOLD_OUT                               , RULL(0x2A010AB5), SH_UNT_EX_5_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 2B010AB5,
+REG64( EX_6_L2_SPR_CORE_HOLD_OUT                               , RULL(0x2C010AB5), SH_UNT_EX_6_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 2D010AB5,
+REG64( EX_7_L2_SPR_CORE_HOLD_OUT                               , RULL(0x2E010AB5), SH_UNT_EX_7_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 2F010AB5,
+REG64( EX_8_L2_SPR_CORE_HOLD_OUT                               , RULL(0x30010AB5), SH_UNT_EX_8_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 31010AB5,
+REG64( EX_9_L2_SPR_CORE_HOLD_OUT                               , RULL(0x32010AB5), SH_UNT_EX_9_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 33010AB5,
+REG64( EX_L2_SPR_CORE_HOLD_OUT                                 , RULL(0x20010AB5), SH_UNT_EX_L2    ,
+       SH_ACS_SCOM_RO   ); //DUPS: 21010AB5,
 
 REG64( C_SPR_MODE                                              , RULL(0x20010A84), SH_UNT_C        , SH_ACS_SCOM      );
 REG64( C_0_SPR_MODE                                            , RULL(0x20010A84), SH_UNT_C_0      , SH_ACS_SCOM      );
@@ -20908,57 +20761,57 @@ REG64( EX_9_L2_T3_PMU_SCOM                                     , RULL(0x32010AAD
 REG64( EX_L2_T3_PMU_SCOM                                       , RULL(0x20010AAD), SH_UNT_EX_L2    ,
        SH_ACS_SCOM      ); //DUPS: 21010AAD,
 
-REG64( C_TFAC_HOLD_OUT                                         , RULL(0x20010ABD), SH_UNT_C        , SH_ACS_SCOM_RO   );
-REG64( C_0_TFAC_HOLD_OUT                                       , RULL(0x20010ABD), SH_UNT_C_0      , SH_ACS_SCOM_RO   );
-REG64( C_1_TFAC_HOLD_OUT                                       , RULL(0x21010ABD), SH_UNT_C_1      , SH_ACS_SCOM_RO   );
-REG64( C_2_TFAC_HOLD_OUT                                       , RULL(0x22010ABD), SH_UNT_C_2      , SH_ACS_SCOM_RO   );
-REG64( C_3_TFAC_HOLD_OUT                                       , RULL(0x23010ABD), SH_UNT_C_3      , SH_ACS_SCOM_RO   );
-REG64( C_4_TFAC_HOLD_OUT                                       , RULL(0x24010ABD), SH_UNT_C_4      , SH_ACS_SCOM_RO   );
-REG64( C_5_TFAC_HOLD_OUT                                       , RULL(0x25010ABD), SH_UNT_C_5      , SH_ACS_SCOM_RO   );
-REG64( C_6_TFAC_HOLD_OUT                                       , RULL(0x26010ABD), SH_UNT_C_6      , SH_ACS_SCOM_RO   );
-REG64( C_7_TFAC_HOLD_OUT                                       , RULL(0x27010ABD), SH_UNT_C_7      , SH_ACS_SCOM_RO   );
-REG64( C_8_TFAC_HOLD_OUT                                       , RULL(0x28010ABD), SH_UNT_C_8      , SH_ACS_SCOM_RO   );
-REG64( C_9_TFAC_HOLD_OUT                                       , RULL(0x29010ABD), SH_UNT_C_9      , SH_ACS_SCOM_RO   );
-REG64( C_10_TFAC_HOLD_OUT                                      , RULL(0x2A010ABD), SH_UNT_C_10     , SH_ACS_SCOM_RO   );
-REG64( C_11_TFAC_HOLD_OUT                                      , RULL(0x2B010ABD), SH_UNT_C_11     , SH_ACS_SCOM_RO   );
-REG64( C_12_TFAC_HOLD_OUT                                      , RULL(0x2C010ABD), SH_UNT_C_12     , SH_ACS_SCOM_RO   );
-REG64( C_13_TFAC_HOLD_OUT                                      , RULL(0x2D010ABD), SH_UNT_C_13     , SH_ACS_SCOM_RO   );
-REG64( C_14_TFAC_HOLD_OUT                                      , RULL(0x2E010ABD), SH_UNT_C_14     , SH_ACS_SCOM_RO   );
-REG64( C_15_TFAC_HOLD_OUT                                      , RULL(0x2F010ABD), SH_UNT_C_15     , SH_ACS_SCOM_RO   );
-REG64( C_16_TFAC_HOLD_OUT                                      , RULL(0x30010ABD), SH_UNT_C_16     , SH_ACS_SCOM_RO   );
-REG64( C_17_TFAC_HOLD_OUT                                      , RULL(0x31010ABD), SH_UNT_C_17     , SH_ACS_SCOM_RO   );
-REG64( C_18_TFAC_HOLD_OUT                                      , RULL(0x32010ABD), SH_UNT_C_18     , SH_ACS_SCOM_RO   );
-REG64( C_19_TFAC_HOLD_OUT                                      , RULL(0x33010ABD), SH_UNT_C_19     , SH_ACS_SCOM_RO   );
-REG64( C_20_TFAC_HOLD_OUT                                      , RULL(0x34010ABD), SH_UNT_C_20     , SH_ACS_SCOM_RO   );
-REG64( C_21_TFAC_HOLD_OUT                                      , RULL(0x35010ABD), SH_UNT_C_21     , SH_ACS_SCOM_RO   );
-REG64( C_22_TFAC_HOLD_OUT                                      , RULL(0x36010ABD), SH_UNT_C_22     , SH_ACS_SCOM_RO   );
-REG64( C_23_TFAC_HOLD_OUT                                      , RULL(0x37010ABD), SH_UNT_C_23     , SH_ACS_SCOM_RO   );
-REG64( EX_0_L2_TFAC_HOLD_OUT                                   , RULL(0x21010ABD), SH_UNT_EX_0_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 20010ABD,
-REG64( EX_10_L2_TFAC_HOLD_OUT                                  , RULL(0x35010ABD), SH_UNT_EX_10_L2 ,
-       SH_ACS_SCOM_RO   ); //DUPS: 34010ABD,
-REG64( EX_11_L2_TFAC_HOLD_OUT                                  , RULL(0x37010ABD), SH_UNT_EX_11_L2 ,
-       SH_ACS_SCOM_RO   ); //DUPS: 36010ABD,
-REG64( EX_1_L2_TFAC_HOLD_OUT                                   , RULL(0x23010ABD), SH_UNT_EX_1_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 22010ABD,
-REG64( EX_2_L2_TFAC_HOLD_OUT                                   , RULL(0x25010ABD), SH_UNT_EX_2_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 24010ABD,
-REG64( EX_3_L2_TFAC_HOLD_OUT                                   , RULL(0x27010ABD), SH_UNT_EX_3_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 26010ABD,
-REG64( EX_4_L2_TFAC_HOLD_OUT                                   , RULL(0x29010ABD), SH_UNT_EX_4_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 28010ABD,
-REG64( EX_5_L2_TFAC_HOLD_OUT                                   , RULL(0x2B010ABD), SH_UNT_EX_5_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 2A010ABD,
-REG64( EX_6_L2_TFAC_HOLD_OUT                                   , RULL(0x2D010ABD), SH_UNT_EX_6_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 2C010ABD,
-REG64( EX_7_L2_TFAC_HOLD_OUT                                   , RULL(0x2F010ABD), SH_UNT_EX_7_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 2E010ABD,
-REG64( EX_8_L2_TFAC_HOLD_OUT                                   , RULL(0x31010ABD), SH_UNT_EX_8_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 30010ABD,
-REG64( EX_9_L2_TFAC_HOLD_OUT                                   , RULL(0x33010ABD), SH_UNT_EX_9_L2  ,
-       SH_ACS_SCOM_RO   ); //DUPS: 32010ABD,
-REG64( EX_L2_TFAC_HOLD_OUT                                     , RULL(0x21010ABD), SH_UNT_EX_L2    ,
-       SH_ACS_SCOM_RO   ); //DUPS: 20010ABD,
+REG64( C_TFAC_HOLD_OUT                                         , RULL(0x20010AB7), SH_UNT_C        , SH_ACS_SCOM_RO   );
+REG64( C_0_TFAC_HOLD_OUT                                       , RULL(0x20010AB7), SH_UNT_C_0      , SH_ACS_SCOM_RO   );
+REG64( C_1_TFAC_HOLD_OUT                                       , RULL(0x21010AB7), SH_UNT_C_1      , SH_ACS_SCOM_RO   );
+REG64( C_2_TFAC_HOLD_OUT                                       , RULL(0x22010AB7), SH_UNT_C_2      , SH_ACS_SCOM_RO   );
+REG64( C_3_TFAC_HOLD_OUT                                       , RULL(0x23010AB7), SH_UNT_C_3      , SH_ACS_SCOM_RO   );
+REG64( C_4_TFAC_HOLD_OUT                                       , RULL(0x24010AB7), SH_UNT_C_4      , SH_ACS_SCOM_RO   );
+REG64( C_5_TFAC_HOLD_OUT                                       , RULL(0x25010AB7), SH_UNT_C_5      , SH_ACS_SCOM_RO   );
+REG64( C_6_TFAC_HOLD_OUT                                       , RULL(0x26010AB7), SH_UNT_C_6      , SH_ACS_SCOM_RO   );
+REG64( C_7_TFAC_HOLD_OUT                                       , RULL(0x27010AB7), SH_UNT_C_7      , SH_ACS_SCOM_RO   );
+REG64( C_8_TFAC_HOLD_OUT                                       , RULL(0x28010AB7), SH_UNT_C_8      , SH_ACS_SCOM_RO   );
+REG64( C_9_TFAC_HOLD_OUT                                       , RULL(0x29010AB7), SH_UNT_C_9      , SH_ACS_SCOM_RO   );
+REG64( C_10_TFAC_HOLD_OUT                                      , RULL(0x2A010AB7), SH_UNT_C_10     , SH_ACS_SCOM_RO   );
+REG64( C_11_TFAC_HOLD_OUT                                      , RULL(0x2B010AB7), SH_UNT_C_11     , SH_ACS_SCOM_RO   );
+REG64( C_12_TFAC_HOLD_OUT                                      , RULL(0x2C010AB7), SH_UNT_C_12     , SH_ACS_SCOM_RO   );
+REG64( C_13_TFAC_HOLD_OUT                                      , RULL(0x2D010AB7), SH_UNT_C_13     , SH_ACS_SCOM_RO   );
+REG64( C_14_TFAC_HOLD_OUT                                      , RULL(0x2E010AB7), SH_UNT_C_14     , SH_ACS_SCOM_RO   );
+REG64( C_15_TFAC_HOLD_OUT                                      , RULL(0x2F010AB7), SH_UNT_C_15     , SH_ACS_SCOM_RO   );
+REG64( C_16_TFAC_HOLD_OUT                                      , RULL(0x30010AB7), SH_UNT_C_16     , SH_ACS_SCOM_RO   );
+REG64( C_17_TFAC_HOLD_OUT                                      , RULL(0x31010AB7), SH_UNT_C_17     , SH_ACS_SCOM_RO   );
+REG64( C_18_TFAC_HOLD_OUT                                      , RULL(0x32010AB7), SH_UNT_C_18     , SH_ACS_SCOM_RO   );
+REG64( C_19_TFAC_HOLD_OUT                                      , RULL(0x33010AB7), SH_UNT_C_19     , SH_ACS_SCOM_RO   );
+REG64( C_20_TFAC_HOLD_OUT                                      , RULL(0x34010AB7), SH_UNT_C_20     , SH_ACS_SCOM_RO   );
+REG64( C_21_TFAC_HOLD_OUT                                      , RULL(0x35010AB7), SH_UNT_C_21     , SH_ACS_SCOM_RO   );
+REG64( C_22_TFAC_HOLD_OUT                                      , RULL(0x36010AB7), SH_UNT_C_22     , SH_ACS_SCOM_RO   );
+REG64( C_23_TFAC_HOLD_OUT                                      , RULL(0x37010AB7), SH_UNT_C_23     , SH_ACS_SCOM_RO   );
+REG64( EX_0_L2_TFAC_HOLD_OUT                                   , RULL(0x21010AB7), SH_UNT_EX_0_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 20010AB7,
+REG64( EX_10_L2_TFAC_HOLD_OUT                                  , RULL(0x35010AB7), SH_UNT_EX_10_L2 ,
+       SH_ACS_SCOM_RO   ); //DUPS: 34010AB7,
+REG64( EX_11_L2_TFAC_HOLD_OUT                                  , RULL(0x37010AB7), SH_UNT_EX_11_L2 ,
+       SH_ACS_SCOM_RO   ); //DUPS: 36010AB7,
+REG64( EX_1_L2_TFAC_HOLD_OUT                                   , RULL(0x23010AB7), SH_UNT_EX_1_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 22010AB7,
+REG64( EX_2_L2_TFAC_HOLD_OUT                                   , RULL(0x25010AB7), SH_UNT_EX_2_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 24010AB7,
+REG64( EX_3_L2_TFAC_HOLD_OUT                                   , RULL(0x27010AB7), SH_UNT_EX_3_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 26010AB7,
+REG64( EX_4_L2_TFAC_HOLD_OUT                                   , RULL(0x29010AB7), SH_UNT_EX_4_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 28010AB7,
+REG64( EX_5_L2_TFAC_HOLD_OUT                                   , RULL(0x2B010AB7), SH_UNT_EX_5_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 2A010AB7,
+REG64( EX_6_L2_TFAC_HOLD_OUT                                   , RULL(0x2D010AB7), SH_UNT_EX_6_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 2C010AB7,
+REG64( EX_7_L2_TFAC_HOLD_OUT                                   , RULL(0x2F010AB7), SH_UNT_EX_7_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 2E010AB7,
+REG64( EX_8_L2_TFAC_HOLD_OUT                                   , RULL(0x31010AB7), SH_UNT_EX_8_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 30010AB7,
+REG64( EX_9_L2_TFAC_HOLD_OUT                                   , RULL(0x33010AB7), SH_UNT_EX_9_L2  ,
+       SH_ACS_SCOM_RO   ); //DUPS: 32010AB7,
+REG64( EX_L2_TFAC_HOLD_OUT                                     , RULL(0x21010AB7), SH_UNT_EX_L2    ,
+       SH_ACS_SCOM_RO   ); //DUPS: 20010AB7,
 
 REG64( C_THERM_MODE_REG                                        , RULL(0x2005000F), SH_UNT_C        , SH_ACS_SCOM      );
 REG64( C_0_THERM_MODE_REG                                      , RULL(0x2005000F), SH_UNT_C_0      , SH_ACS_SCOM      );
@@ -21122,6 +20975,58 @@ REG64( EX_9_L2_THREAD_INFO                                     , RULL(0x33010A9B
        SH_ACS_SCOM      ); //DUPS: 32010A9B,
 REG64( EX_L2_THREAD_INFO                                       , RULL(0x21010A9B), SH_UNT_EX_L2    ,
        SH_ACS_SCOM      ); //DUPS: 20010A9B,
+
+REG64( C_THROTTLE_CONTROL                                      , RULL(0x20010A9E), SH_UNT_C        , SH_ACS_SCOM_RW   );
+REG64( C_0_THROTTLE_CONTROL                                    , RULL(0x20010A9E), SH_UNT_C_0      , SH_ACS_SCOM_RW   );
+REG64( C_1_THROTTLE_CONTROL                                    , RULL(0x21010A9E), SH_UNT_C_1      , SH_ACS_SCOM_RW   );
+REG64( C_2_THROTTLE_CONTROL                                    , RULL(0x22010A9E), SH_UNT_C_2      , SH_ACS_SCOM_RW   );
+REG64( C_3_THROTTLE_CONTROL                                    , RULL(0x23010A9E), SH_UNT_C_3      , SH_ACS_SCOM_RW   );
+REG64( C_4_THROTTLE_CONTROL                                    , RULL(0x24010A9E), SH_UNT_C_4      , SH_ACS_SCOM_RW   );
+REG64( C_5_THROTTLE_CONTROL                                    , RULL(0x25010A9E), SH_UNT_C_5      , SH_ACS_SCOM_RW   );
+REG64( C_6_THROTTLE_CONTROL                                    , RULL(0x26010A9E), SH_UNT_C_6      , SH_ACS_SCOM_RW   );
+REG64( C_7_THROTTLE_CONTROL                                    , RULL(0x27010A9E), SH_UNT_C_7      , SH_ACS_SCOM_RW   );
+REG64( C_8_THROTTLE_CONTROL                                    , RULL(0x28010A9E), SH_UNT_C_8      , SH_ACS_SCOM_RW   );
+REG64( C_9_THROTTLE_CONTROL                                    , RULL(0x29010A9E), SH_UNT_C_9      , SH_ACS_SCOM_RW   );
+REG64( C_10_THROTTLE_CONTROL                                   , RULL(0x2A010A9E), SH_UNT_C_10     , SH_ACS_SCOM_RW   );
+REG64( C_11_THROTTLE_CONTROL                                   , RULL(0x2B010A9E), SH_UNT_C_11     , SH_ACS_SCOM_RW   );
+REG64( C_12_THROTTLE_CONTROL                                   , RULL(0x2C010A9E), SH_UNT_C_12     , SH_ACS_SCOM_RW   );
+REG64( C_13_THROTTLE_CONTROL                                   , RULL(0x2D010A9E), SH_UNT_C_13     , SH_ACS_SCOM_RW   );
+REG64( C_14_THROTTLE_CONTROL                                   , RULL(0x2E010A9E), SH_UNT_C_14     , SH_ACS_SCOM_RW   );
+REG64( C_15_THROTTLE_CONTROL                                   , RULL(0x2F010A9E), SH_UNT_C_15     , SH_ACS_SCOM_RW   );
+REG64( C_16_THROTTLE_CONTROL                                   , RULL(0x30010A9E), SH_UNT_C_16     , SH_ACS_SCOM_RW   );
+REG64( C_17_THROTTLE_CONTROL                                   , RULL(0x31010A9E), SH_UNT_C_17     , SH_ACS_SCOM_RW   );
+REG64( C_18_THROTTLE_CONTROL                                   , RULL(0x32010A9E), SH_UNT_C_18     , SH_ACS_SCOM_RW   );
+REG64( C_19_THROTTLE_CONTROL                                   , RULL(0x33010A9E), SH_UNT_C_19     , SH_ACS_SCOM_RW   );
+REG64( C_20_THROTTLE_CONTROL                                   , RULL(0x34010A9E), SH_UNT_C_20     , SH_ACS_SCOM_RW   );
+REG64( C_21_THROTTLE_CONTROL                                   , RULL(0x35010A9E), SH_UNT_C_21     , SH_ACS_SCOM_RW   );
+REG64( C_22_THROTTLE_CONTROL                                   , RULL(0x36010A9E), SH_UNT_C_22     , SH_ACS_SCOM_RW   );
+REG64( C_23_THROTTLE_CONTROL                                   , RULL(0x37010A9E), SH_UNT_C_23     , SH_ACS_SCOM_RW   );
+REG64( EX_THROTTLE_CONTROL                                     , RULL(0x21010A9E), SH_UNT_EX       ,
+       SH_ACS_SCOM_RW   ); //DUPS: 20010A9E,
+REG64( EX_0_THROTTLE_CONTROL                                   , RULL(0x21010A9E), SH_UNT_EX_0     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 20010A9E,
+REG64( EX_1_THROTTLE_CONTROL                                   , RULL(0x23010A9E), SH_UNT_EX_1     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 22010A9E,
+REG64( EX_2_THROTTLE_CONTROL                                   , RULL(0x25010A9E), SH_UNT_EX_2     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 24010A9E,
+REG64( EX_3_THROTTLE_CONTROL                                   , RULL(0x27010A9E), SH_UNT_EX_3     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 26010A9E,
+REG64( EX_4_THROTTLE_CONTROL                                   , RULL(0x29010A9E), SH_UNT_EX_4     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 28010A9E,
+REG64( EX_5_THROTTLE_CONTROL                                   , RULL(0x2B010A9E), SH_UNT_EX_5     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 2A010A9E,
+REG64( EX_6_THROTTLE_CONTROL                                   , RULL(0x2D010A9E), SH_UNT_EX_6     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 2C010A9E,
+REG64( EX_7_THROTTLE_CONTROL                                   , RULL(0x2F010A9E), SH_UNT_EX_7     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 2E010A9E,
+REG64( EX_8_THROTTLE_CONTROL                                   , RULL(0x31010A9E), SH_UNT_EX_8     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 30010A9E,
+REG64( EX_9_THROTTLE_CONTROL                                   , RULL(0x33010A9E), SH_UNT_EX_9     ,
+       SH_ACS_SCOM_RW   ); //DUPS: 32010A9E,
+REG64( EX_10_THROTTLE_CONTROL                                  , RULL(0x35010A9E), SH_UNT_EX_10    ,
+       SH_ACS_SCOM_RW   ); //DUPS: 34010A9E,
+REG64( EX_11_THROTTLE_CONTROL                                  , RULL(0x37010A9E), SH_UNT_EX_11    ,
+       SH_ACS_SCOM_RW   ); //DUPS: 36010A9E,
 
 REG64( C_TIMEOUT_REG                                           , RULL(0x200F0010), SH_UNT_C        , SH_ACS_SCOM      );
 REG64( C_0_TIMEOUT_REG                                         , RULL(0x200F0010), SH_UNT_C_0      , SH_ACS_SCOM      );
@@ -21937,585 +21842,585 @@ REG64( EX_9_L2_TOD_SYNC111                                     , RULL(0x33010AA3
 REG64( EX_L2_TOD_SYNC111                                       , RULL(0x21010AA3), SH_UNT_EX_L2    ,
        SH_ACS_SCOM1_WO  ); //WARNING - VALUE SET SAME AS ANOTHER REG //DUPS: 20010AA3,
 
-REG64( EQ_TPLC20_TR0_TRACE_HI_DATA_REG                         , RULL(0x10012D00), SH_UNT_EQ       , SH_ACS_SCOM_RO   );
-REG64( EQ_0_TPLC20_TR0_TRACE_HI_DATA_REG                       , RULL(0x10012D00), SH_UNT_EQ_0     , SH_ACS_SCOM_RO   );
-REG64( EQ_1_TPLC20_TR0_TRACE_HI_DATA_REG                       , RULL(0x11012D00), SH_UNT_EQ_1     , SH_ACS_SCOM_RO   );
-REG64( EQ_2_TPLC20_TR0_TRACE_HI_DATA_REG                       , RULL(0x12012D00), SH_UNT_EQ_2     , SH_ACS_SCOM_RO   );
-REG64( EQ_3_TPLC20_TR0_TRACE_HI_DATA_REG                       , RULL(0x13012D00), SH_UNT_EQ_3     , SH_ACS_SCOM_RO   );
-REG64( EQ_4_TPLC20_TR0_TRACE_HI_DATA_REG                       , RULL(0x14012D00), SH_UNT_EQ_4     , SH_ACS_SCOM_RO   );
-REG64( EQ_5_TPLC20_TR0_TRACE_HI_DATA_REG                       , RULL(0x15012D00), SH_UNT_EQ_5     , SH_ACS_SCOM_RO   );
-REG64( EX_TPLC20_TR0_TRACE_HI_DATA_REG                         , RULL(0x10012D00), SH_UNT_EX       , SH_ACS_SCOM_RO   );
-REG64( EX_0_TPLC20_TR0_TRACE_HI_DATA_REG                       , RULL(0x10012D00), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
-REG64( EX_2_TPLC20_TR0_TRACE_HI_DATA_REG                       , RULL(0x11012D00), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
-REG64( EX_4_TPLC20_TR0_TRACE_HI_DATA_REG                       , RULL(0x12012D00), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
-REG64( EX_6_TPLC20_TR0_TRACE_HI_DATA_REG                       , RULL(0x13012D00), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
-REG64( EX_8_TPLC20_TR0_TRACE_HI_DATA_REG                       , RULL(0x14012D00), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
-REG64( EX_10_TPLC20_TR0_TRACE_HI_DATA_REG                      , RULL(0x15012D00), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
+REG64( EQ_TPLC20_TR0_TRACE_HI_DATA_REG                         , RULL(0x10012800), SH_UNT_EQ       , SH_ACS_SCOM_RO   );
+REG64( EQ_0_TPLC20_TR0_TRACE_HI_DATA_REG                       , RULL(0x10012800), SH_UNT_EQ_0     , SH_ACS_SCOM_RO   );
+REG64( EQ_1_TPLC20_TR0_TRACE_HI_DATA_REG                       , RULL(0x11012800), SH_UNT_EQ_1     , SH_ACS_SCOM_RO   );
+REG64( EQ_2_TPLC20_TR0_TRACE_HI_DATA_REG                       , RULL(0x12012800), SH_UNT_EQ_2     , SH_ACS_SCOM_RO   );
+REG64( EQ_3_TPLC20_TR0_TRACE_HI_DATA_REG                       , RULL(0x13012800), SH_UNT_EQ_3     , SH_ACS_SCOM_RO   );
+REG64( EQ_4_TPLC20_TR0_TRACE_HI_DATA_REG                       , RULL(0x14012800), SH_UNT_EQ_4     , SH_ACS_SCOM_RO   );
+REG64( EQ_5_TPLC20_TR0_TRACE_HI_DATA_REG                       , RULL(0x15012800), SH_UNT_EQ_5     , SH_ACS_SCOM_RO   );
+REG64( EX_1_TPLC20_TR0_TRACE_HI_DATA_REG                       , RULL(0x10012800), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
+REG64( EX_3_TPLC20_TR0_TRACE_HI_DATA_REG                       , RULL(0x11012800), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
+REG64( EX_5_TPLC20_TR0_TRACE_HI_DATA_REG                       , RULL(0x12012800), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
+REG64( EX_7_TPLC20_TR0_TRACE_HI_DATA_REG                       , RULL(0x13012800), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
+REG64( EX_9_TPLC20_TR0_TRACE_HI_DATA_REG                       , RULL(0x14012800), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
+REG64( EX_11_TPLC20_TR0_TRACE_HI_DATA_REG                      , RULL(0x15012800), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
 
-REG64( EQ_TPLC20_TR0_TRACE_LO_DATA_REG                         , RULL(0x10012D01), SH_UNT_EQ       , SH_ACS_SCOM_RO   );
-REG64( EQ_0_TPLC20_TR0_TRACE_LO_DATA_REG                       , RULL(0x10012D01), SH_UNT_EQ_0     , SH_ACS_SCOM_RO   );
-REG64( EQ_1_TPLC20_TR0_TRACE_LO_DATA_REG                       , RULL(0x11012D01), SH_UNT_EQ_1     , SH_ACS_SCOM_RO   );
-REG64( EQ_2_TPLC20_TR0_TRACE_LO_DATA_REG                       , RULL(0x12012D01), SH_UNT_EQ_2     , SH_ACS_SCOM_RO   );
-REG64( EQ_3_TPLC20_TR0_TRACE_LO_DATA_REG                       , RULL(0x13012D01), SH_UNT_EQ_3     , SH_ACS_SCOM_RO   );
-REG64( EQ_4_TPLC20_TR0_TRACE_LO_DATA_REG                       , RULL(0x14012D01), SH_UNT_EQ_4     , SH_ACS_SCOM_RO   );
-REG64( EQ_5_TPLC20_TR0_TRACE_LO_DATA_REG                       , RULL(0x15012D01), SH_UNT_EQ_5     , SH_ACS_SCOM_RO   );
-REG64( EX_TPLC20_TR0_TRACE_LO_DATA_REG                         , RULL(0x10012D01), SH_UNT_EX       , SH_ACS_SCOM_RO   );
-REG64( EX_0_TPLC20_TR0_TRACE_LO_DATA_REG                       , RULL(0x10012D01), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
-REG64( EX_2_TPLC20_TR0_TRACE_LO_DATA_REG                       , RULL(0x11012D01), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
-REG64( EX_4_TPLC20_TR0_TRACE_LO_DATA_REG                       , RULL(0x12012D01), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
-REG64( EX_6_TPLC20_TR0_TRACE_LO_DATA_REG                       , RULL(0x13012D01), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
-REG64( EX_8_TPLC20_TR0_TRACE_LO_DATA_REG                       , RULL(0x14012D01), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
-REG64( EX_10_TPLC20_TR0_TRACE_LO_DATA_REG                      , RULL(0x15012D01), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
+REG64( EQ_TPLC20_TR0_TRACE_LO_DATA_REG                         , RULL(0x10012801), SH_UNT_EQ       , SH_ACS_SCOM_RO   );
+REG64( EQ_0_TPLC20_TR0_TRACE_LO_DATA_REG                       , RULL(0x10012801), SH_UNT_EQ_0     , SH_ACS_SCOM_RO   );
+REG64( EQ_1_TPLC20_TR0_TRACE_LO_DATA_REG                       , RULL(0x11012801), SH_UNT_EQ_1     , SH_ACS_SCOM_RO   );
+REG64( EQ_2_TPLC20_TR0_TRACE_LO_DATA_REG                       , RULL(0x12012801), SH_UNT_EQ_2     , SH_ACS_SCOM_RO   );
+REG64( EQ_3_TPLC20_TR0_TRACE_LO_DATA_REG                       , RULL(0x13012801), SH_UNT_EQ_3     , SH_ACS_SCOM_RO   );
+REG64( EQ_4_TPLC20_TR0_TRACE_LO_DATA_REG                       , RULL(0x14012801), SH_UNT_EQ_4     , SH_ACS_SCOM_RO   );
+REG64( EQ_5_TPLC20_TR0_TRACE_LO_DATA_REG                       , RULL(0x15012801), SH_UNT_EQ_5     , SH_ACS_SCOM_RO   );
+REG64( EX_1_TPLC20_TR0_TRACE_LO_DATA_REG                       , RULL(0x10012801), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
+REG64( EX_3_TPLC20_TR0_TRACE_LO_DATA_REG                       , RULL(0x11012801), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
+REG64( EX_5_TPLC20_TR0_TRACE_LO_DATA_REG                       , RULL(0x12012801), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
+REG64( EX_7_TPLC20_TR0_TRACE_LO_DATA_REG                       , RULL(0x13012801), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
+REG64( EX_9_TPLC20_TR0_TRACE_LO_DATA_REG                       , RULL(0x14012801), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
+REG64( EX_11_TPLC20_TR0_TRACE_LO_DATA_REG                      , RULL(0x15012801), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
 
-REG64( EQ_TPLC20_TR0_TRACE_TRCTRL_CONFIG                       , RULL(0x10012D02), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC20_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x10012D02), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC20_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x11012D02), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC20_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x12012D02), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC20_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x13012D02), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC20_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x14012D02), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC20_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x15012D02), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_TPLC20_TR0_TRACE_TRCTRL_CONFIG                       , RULL(0x10012D02), SH_UNT_EX       , SH_ACS_SCOM      );
-REG64( EX_0_TPLC20_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x10012D02), SH_UNT_EX_0     , SH_ACS_SCOM      );
-REG64( EX_2_TPLC20_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x11012D02), SH_UNT_EX_2     , SH_ACS_SCOM      );
-REG64( EX_4_TPLC20_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x12012D02), SH_UNT_EX_4     , SH_ACS_SCOM      );
-REG64( EX_6_TPLC20_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x13012D02), SH_UNT_EX_6     , SH_ACS_SCOM      );
-REG64( EX_8_TPLC20_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x14012D02), SH_UNT_EX_8     , SH_ACS_SCOM      );
-REG64( EX_10_TPLC20_TR0_TRACE_TRCTRL_CONFIG                    , RULL(0x15012D02), SH_UNT_EX_10    , SH_ACS_SCOM      );
+REG64( EQ_TPLC20_TR0_TRACE_TRCTRL_CONFIG                       , RULL(0x10012802), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC20_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x10012802), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC20_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x11012802), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC20_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x12012802), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC20_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x13012802), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC20_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x14012802), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC20_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x15012802), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_1_TPLC20_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x10012802), SH_UNT_EX_1     , SH_ACS_SCOM      );
+REG64( EX_3_TPLC20_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x11012802), SH_UNT_EX_3     , SH_ACS_SCOM      );
+REG64( EX_5_TPLC20_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x12012802), SH_UNT_EX_5     , SH_ACS_SCOM      );
+REG64( EX_7_TPLC20_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x13012802), SH_UNT_EX_7     , SH_ACS_SCOM      );
+REG64( EX_9_TPLC20_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x14012802), SH_UNT_EX_9     , SH_ACS_SCOM      );
+REG64( EX_11_TPLC20_TR0_TRACE_TRCTRL_CONFIG                    , RULL(0x15012802), SH_UNT_EX_11    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC20_TR0_TRACE_TRDATA_CONFIG_0                     , RULL(0x10012D03), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC20_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x10012D03), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC20_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x11012D03), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC20_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x12012D03), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC20_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x13012D03), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC20_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x14012D03), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC20_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x15012D03), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_TPLC20_TR0_TRACE_TRDATA_CONFIG_0                     , RULL(0x10012D03), SH_UNT_EX       , SH_ACS_SCOM      );
-REG64( EX_0_TPLC20_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x10012D03), SH_UNT_EX_0     , SH_ACS_SCOM      );
-REG64( EX_2_TPLC20_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x11012D03), SH_UNT_EX_2     , SH_ACS_SCOM      );
-REG64( EX_4_TPLC20_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x12012D03), SH_UNT_EX_4     , SH_ACS_SCOM      );
-REG64( EX_6_TPLC20_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x13012D03), SH_UNT_EX_6     , SH_ACS_SCOM      );
-REG64( EX_8_TPLC20_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x14012D03), SH_UNT_EX_8     , SH_ACS_SCOM      );
-REG64( EX_10_TPLC20_TR0_TRACE_TRDATA_CONFIG_0                  , RULL(0x15012D03), SH_UNT_EX_10    , SH_ACS_SCOM      );
+REG64( EQ_TPLC20_TR0_TRACE_TRDATA_CONFIG_0                     , RULL(0x10012803), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC20_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x10012803), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC20_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x11012803), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC20_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x12012803), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC20_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x13012803), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC20_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x14012803), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC20_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x15012803), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_1_TPLC20_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x10012803), SH_UNT_EX_1     , SH_ACS_SCOM      );
+REG64( EX_3_TPLC20_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x11012803), SH_UNT_EX_3     , SH_ACS_SCOM      );
+REG64( EX_5_TPLC20_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x12012803), SH_UNT_EX_5     , SH_ACS_SCOM      );
+REG64( EX_7_TPLC20_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x13012803), SH_UNT_EX_7     , SH_ACS_SCOM      );
+REG64( EX_9_TPLC20_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x14012803), SH_UNT_EX_9     , SH_ACS_SCOM      );
+REG64( EX_11_TPLC20_TR0_TRACE_TRDATA_CONFIG_0                  , RULL(0x15012803), SH_UNT_EX_11    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC20_TR0_TRACE_TRDATA_CONFIG_1                     , RULL(0x10012D04), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC20_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x10012D04), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC20_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x11012D04), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC20_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x12012D04), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC20_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x13012D04), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC20_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x14012D04), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC20_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x15012D04), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_TPLC20_TR0_TRACE_TRDATA_CONFIG_1                     , RULL(0x10012D04), SH_UNT_EX       , SH_ACS_SCOM      );
-REG64( EX_0_TPLC20_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x10012D04), SH_UNT_EX_0     , SH_ACS_SCOM      );
-REG64( EX_2_TPLC20_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x11012D04), SH_UNT_EX_2     , SH_ACS_SCOM      );
-REG64( EX_4_TPLC20_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x12012D04), SH_UNT_EX_4     , SH_ACS_SCOM      );
-REG64( EX_6_TPLC20_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x13012D04), SH_UNT_EX_6     , SH_ACS_SCOM      );
-REG64( EX_8_TPLC20_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x14012D04), SH_UNT_EX_8     , SH_ACS_SCOM      );
-REG64( EX_10_TPLC20_TR0_TRACE_TRDATA_CONFIG_1                  , RULL(0x15012D04), SH_UNT_EX_10    , SH_ACS_SCOM      );
+REG64( EQ_TPLC20_TR0_TRACE_TRDATA_CONFIG_1                     , RULL(0x10012804), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC20_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x10012804), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC20_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x11012804), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC20_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x12012804), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC20_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x13012804), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC20_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x14012804), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC20_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x15012804), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_1_TPLC20_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x10012804), SH_UNT_EX_1     , SH_ACS_SCOM      );
+REG64( EX_3_TPLC20_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x11012804), SH_UNT_EX_3     , SH_ACS_SCOM      );
+REG64( EX_5_TPLC20_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x12012804), SH_UNT_EX_5     , SH_ACS_SCOM      );
+REG64( EX_7_TPLC20_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x13012804), SH_UNT_EX_7     , SH_ACS_SCOM      );
+REG64( EX_9_TPLC20_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x14012804), SH_UNT_EX_9     , SH_ACS_SCOM      );
+REG64( EX_11_TPLC20_TR0_TRACE_TRDATA_CONFIG_1                  , RULL(0x15012804), SH_UNT_EX_11    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC20_TR0_TRACE_TRDATA_CONFIG_2                     , RULL(0x10012D05), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC20_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x10012D05), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC20_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x11012D05), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC20_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x12012D05), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC20_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x13012D05), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC20_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x14012D05), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC20_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x15012D05), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_TPLC20_TR0_TRACE_TRDATA_CONFIG_2                     , RULL(0x10012D05), SH_UNT_EX       , SH_ACS_SCOM      );
-REG64( EX_0_TPLC20_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x10012D05), SH_UNT_EX_0     , SH_ACS_SCOM      );
-REG64( EX_2_TPLC20_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x11012D05), SH_UNT_EX_2     , SH_ACS_SCOM      );
-REG64( EX_4_TPLC20_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x12012D05), SH_UNT_EX_4     , SH_ACS_SCOM      );
-REG64( EX_6_TPLC20_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x13012D05), SH_UNT_EX_6     , SH_ACS_SCOM      );
-REG64( EX_8_TPLC20_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x14012D05), SH_UNT_EX_8     , SH_ACS_SCOM      );
-REG64( EX_10_TPLC20_TR0_TRACE_TRDATA_CONFIG_2                  , RULL(0x15012D05), SH_UNT_EX_10    , SH_ACS_SCOM      );
+REG64( EQ_TPLC20_TR0_TRACE_TRDATA_CONFIG_2                     , RULL(0x10012805), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC20_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x10012805), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC20_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x11012805), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC20_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x12012805), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC20_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x13012805), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC20_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x14012805), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC20_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x15012805), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_1_TPLC20_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x10012805), SH_UNT_EX_1     , SH_ACS_SCOM      );
+REG64( EX_3_TPLC20_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x11012805), SH_UNT_EX_3     , SH_ACS_SCOM      );
+REG64( EX_5_TPLC20_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x12012805), SH_UNT_EX_5     , SH_ACS_SCOM      );
+REG64( EX_7_TPLC20_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x13012805), SH_UNT_EX_7     , SH_ACS_SCOM      );
+REG64( EX_9_TPLC20_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x14012805), SH_UNT_EX_9     , SH_ACS_SCOM      );
+REG64( EX_11_TPLC20_TR0_TRACE_TRDATA_CONFIG_2                  , RULL(0x15012805), SH_UNT_EX_11    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC20_TR0_TRACE_TRDATA_CONFIG_3                     , RULL(0x10012D06), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC20_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x10012D06), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC20_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x11012D06), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC20_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x12012D06), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC20_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x13012D06), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC20_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x14012D06), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC20_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x15012D06), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_TPLC20_TR0_TRACE_TRDATA_CONFIG_3                     , RULL(0x10012D06), SH_UNT_EX       , SH_ACS_SCOM      );
-REG64( EX_0_TPLC20_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x10012D06), SH_UNT_EX_0     , SH_ACS_SCOM      );
-REG64( EX_2_TPLC20_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x11012D06), SH_UNT_EX_2     , SH_ACS_SCOM      );
-REG64( EX_4_TPLC20_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x12012D06), SH_UNT_EX_4     , SH_ACS_SCOM      );
-REG64( EX_6_TPLC20_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x13012D06), SH_UNT_EX_6     , SH_ACS_SCOM      );
-REG64( EX_8_TPLC20_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x14012D06), SH_UNT_EX_8     , SH_ACS_SCOM      );
-REG64( EX_10_TPLC20_TR0_TRACE_TRDATA_CONFIG_3                  , RULL(0x15012D06), SH_UNT_EX_10    , SH_ACS_SCOM      );
+REG64( EQ_TPLC20_TR0_TRACE_TRDATA_CONFIG_3                     , RULL(0x10012806), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC20_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x10012806), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC20_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x11012806), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC20_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x12012806), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC20_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x13012806), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC20_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x14012806), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC20_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x15012806), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_1_TPLC20_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x10012806), SH_UNT_EX_1     , SH_ACS_SCOM      );
+REG64( EX_3_TPLC20_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x11012806), SH_UNT_EX_3     , SH_ACS_SCOM      );
+REG64( EX_5_TPLC20_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x12012806), SH_UNT_EX_5     , SH_ACS_SCOM      );
+REG64( EX_7_TPLC20_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x13012806), SH_UNT_EX_7     , SH_ACS_SCOM      );
+REG64( EX_9_TPLC20_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x14012806), SH_UNT_EX_9     , SH_ACS_SCOM      );
+REG64( EX_11_TPLC20_TR0_TRACE_TRDATA_CONFIG_3                  , RULL(0x15012806), SH_UNT_EX_11    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC20_TR0_TRACE_TRDATA_CONFIG_4                     , RULL(0x10012D07), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC20_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x10012D07), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC20_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x11012D07), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC20_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x12012D07), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC20_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x13012D07), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC20_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x14012D07), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC20_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x15012D07), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_TPLC20_TR0_TRACE_TRDATA_CONFIG_4                     , RULL(0x10012D07), SH_UNT_EX       , SH_ACS_SCOM      );
-REG64( EX_0_TPLC20_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x10012D07), SH_UNT_EX_0     , SH_ACS_SCOM      );
-REG64( EX_2_TPLC20_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x11012D07), SH_UNT_EX_2     , SH_ACS_SCOM      );
-REG64( EX_4_TPLC20_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x12012D07), SH_UNT_EX_4     , SH_ACS_SCOM      );
-REG64( EX_6_TPLC20_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x13012D07), SH_UNT_EX_6     , SH_ACS_SCOM      );
-REG64( EX_8_TPLC20_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x14012D07), SH_UNT_EX_8     , SH_ACS_SCOM      );
-REG64( EX_10_TPLC20_TR0_TRACE_TRDATA_CONFIG_4                  , RULL(0x15012D07), SH_UNT_EX_10    , SH_ACS_SCOM      );
+REG64( EQ_TPLC20_TR0_TRACE_TRDATA_CONFIG_4                     , RULL(0x10012807), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC20_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x10012807), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC20_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x11012807), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC20_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x12012807), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC20_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x13012807), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC20_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x14012807), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC20_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x15012807), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_1_TPLC20_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x10012807), SH_UNT_EX_1     , SH_ACS_SCOM      );
+REG64( EX_3_TPLC20_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x11012807), SH_UNT_EX_3     , SH_ACS_SCOM      );
+REG64( EX_5_TPLC20_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x12012807), SH_UNT_EX_5     , SH_ACS_SCOM      );
+REG64( EX_7_TPLC20_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x13012807), SH_UNT_EX_7     , SH_ACS_SCOM      );
+REG64( EX_9_TPLC20_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x14012807), SH_UNT_EX_9     , SH_ACS_SCOM      );
+REG64( EX_11_TPLC20_TR0_TRACE_TRDATA_CONFIG_4                  , RULL(0x15012807), SH_UNT_EX_11    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC20_TR0_TRACE_TRDATA_CONFIG_5                     , RULL(0x10012D08), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC20_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x10012D08), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC20_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x11012D08), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC20_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x12012D08), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC20_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x13012D08), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC20_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x14012D08), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC20_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x15012D08), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_TPLC20_TR0_TRACE_TRDATA_CONFIG_5                     , RULL(0x10012D08), SH_UNT_EX       , SH_ACS_SCOM      );
-REG64( EX_0_TPLC20_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x10012D08), SH_UNT_EX_0     , SH_ACS_SCOM      );
-REG64( EX_2_TPLC20_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x11012D08), SH_UNT_EX_2     , SH_ACS_SCOM      );
-REG64( EX_4_TPLC20_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x12012D08), SH_UNT_EX_4     , SH_ACS_SCOM      );
-REG64( EX_6_TPLC20_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x13012D08), SH_UNT_EX_6     , SH_ACS_SCOM      );
-REG64( EX_8_TPLC20_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x14012D08), SH_UNT_EX_8     , SH_ACS_SCOM      );
-REG64( EX_10_TPLC20_TR0_TRACE_TRDATA_CONFIG_5                  , RULL(0x15012D08), SH_UNT_EX_10    , SH_ACS_SCOM      );
+REG64( EQ_TPLC20_TR0_TRACE_TRDATA_CONFIG_5                     , RULL(0x10012808), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC20_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x10012808), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC20_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x11012808), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC20_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x12012808), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC20_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x13012808), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC20_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x14012808), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC20_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x15012808), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_1_TPLC20_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x10012808), SH_UNT_EX_1     , SH_ACS_SCOM      );
+REG64( EX_3_TPLC20_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x11012808), SH_UNT_EX_3     , SH_ACS_SCOM      );
+REG64( EX_5_TPLC20_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x12012808), SH_UNT_EX_5     , SH_ACS_SCOM      );
+REG64( EX_7_TPLC20_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x13012808), SH_UNT_EX_7     , SH_ACS_SCOM      );
+REG64( EX_9_TPLC20_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x14012808), SH_UNT_EX_9     , SH_ACS_SCOM      );
+REG64( EX_11_TPLC20_TR0_TRACE_TRDATA_CONFIG_5                  , RULL(0x15012808), SH_UNT_EX_11    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC20_TR0_TRACE_TRDATA_CONFIG_9                     , RULL(0x10012D09), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC20_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x10012D09), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC20_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x11012D09), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC20_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x12012D09), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC20_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x13012D09), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC20_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x14012D09), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC20_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x15012D09), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_TPLC20_TR0_TRACE_TRDATA_CONFIG_9                     , RULL(0x10012D09), SH_UNT_EX       , SH_ACS_SCOM      );
-REG64( EX_0_TPLC20_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x10012D09), SH_UNT_EX_0     , SH_ACS_SCOM      );
-REG64( EX_2_TPLC20_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x11012D09), SH_UNT_EX_2     , SH_ACS_SCOM      );
-REG64( EX_4_TPLC20_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x12012D09), SH_UNT_EX_4     , SH_ACS_SCOM      );
-REG64( EX_6_TPLC20_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x13012D09), SH_UNT_EX_6     , SH_ACS_SCOM      );
-REG64( EX_8_TPLC20_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x14012D09), SH_UNT_EX_8     , SH_ACS_SCOM      );
-REG64( EX_10_TPLC20_TR0_TRACE_TRDATA_CONFIG_9                  , RULL(0x15012D09), SH_UNT_EX_10    , SH_ACS_SCOM      );
+REG64( EQ_TPLC20_TR0_TRACE_TRDATA_CONFIG_9                     , RULL(0x10012809), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC20_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x10012809), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC20_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x11012809), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC20_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x12012809), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC20_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x13012809), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC20_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x14012809), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC20_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x15012809), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_1_TPLC20_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x10012809), SH_UNT_EX_1     , SH_ACS_SCOM      );
+REG64( EX_3_TPLC20_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x11012809), SH_UNT_EX_3     , SH_ACS_SCOM      );
+REG64( EX_5_TPLC20_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x12012809), SH_UNT_EX_5     , SH_ACS_SCOM      );
+REG64( EX_7_TPLC20_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x13012809), SH_UNT_EX_7     , SH_ACS_SCOM      );
+REG64( EX_9_TPLC20_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x14012809), SH_UNT_EX_9     , SH_ACS_SCOM      );
+REG64( EX_11_TPLC20_TR0_TRACE_TRDATA_CONFIG_9                  , RULL(0x15012809), SH_UNT_EX_11    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC20_TR1_TRACE_HI_DATA_REG                         , RULL(0x10012D40), SH_UNT_EQ       , SH_ACS_SCOM_RO   );
-REG64( EQ_0_TPLC20_TR1_TRACE_HI_DATA_REG                       , RULL(0x10012D40), SH_UNT_EQ_0     , SH_ACS_SCOM_RO   );
-REG64( EQ_1_TPLC20_TR1_TRACE_HI_DATA_REG                       , RULL(0x11012D40), SH_UNT_EQ_1     , SH_ACS_SCOM_RO   );
-REG64( EQ_2_TPLC20_TR1_TRACE_HI_DATA_REG                       , RULL(0x12012D40), SH_UNT_EQ_2     , SH_ACS_SCOM_RO   );
-REG64( EQ_3_TPLC20_TR1_TRACE_HI_DATA_REG                       , RULL(0x13012D40), SH_UNT_EQ_3     , SH_ACS_SCOM_RO   );
-REG64( EQ_4_TPLC20_TR1_TRACE_HI_DATA_REG                       , RULL(0x14012D40), SH_UNT_EQ_4     , SH_ACS_SCOM_RO   );
-REG64( EQ_5_TPLC20_TR1_TRACE_HI_DATA_REG                       , RULL(0x15012D40), SH_UNT_EQ_5     , SH_ACS_SCOM_RO   );
-REG64( EX_TPLC20_TR1_TRACE_HI_DATA_REG                         , RULL(0x10012D40), SH_UNT_EX       , SH_ACS_SCOM_RO   );
-REG64( EX_0_TPLC20_TR1_TRACE_HI_DATA_REG                       , RULL(0x10012D40), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
-REG64( EX_2_TPLC20_TR1_TRACE_HI_DATA_REG                       , RULL(0x11012D40), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
-REG64( EX_4_TPLC20_TR1_TRACE_HI_DATA_REG                       , RULL(0x12012D40), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
-REG64( EX_6_TPLC20_TR1_TRACE_HI_DATA_REG                       , RULL(0x13012D40), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
-REG64( EX_8_TPLC20_TR1_TRACE_HI_DATA_REG                       , RULL(0x14012D40), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
-REG64( EX_10_TPLC20_TR1_TRACE_HI_DATA_REG                      , RULL(0x15012D40), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
+REG64( EQ_TPLC20_TR1_TRACE_HI_DATA_REG                         , RULL(0x10012840), SH_UNT_EQ       , SH_ACS_SCOM_RO   );
+REG64( EQ_0_TPLC20_TR1_TRACE_HI_DATA_REG                       , RULL(0x10012840), SH_UNT_EQ_0     , SH_ACS_SCOM_RO   );
+REG64( EQ_1_TPLC20_TR1_TRACE_HI_DATA_REG                       , RULL(0x11012840), SH_UNT_EQ_1     , SH_ACS_SCOM_RO   );
+REG64( EQ_2_TPLC20_TR1_TRACE_HI_DATA_REG                       , RULL(0x12012840), SH_UNT_EQ_2     , SH_ACS_SCOM_RO   );
+REG64( EQ_3_TPLC20_TR1_TRACE_HI_DATA_REG                       , RULL(0x13012840), SH_UNT_EQ_3     , SH_ACS_SCOM_RO   );
+REG64( EQ_4_TPLC20_TR1_TRACE_HI_DATA_REG                       , RULL(0x14012840), SH_UNT_EQ_4     , SH_ACS_SCOM_RO   );
+REG64( EQ_5_TPLC20_TR1_TRACE_HI_DATA_REG                       , RULL(0x15012840), SH_UNT_EQ_5     , SH_ACS_SCOM_RO   );
+REG64( EX_1_TPLC20_TR1_TRACE_HI_DATA_REG                       , RULL(0x10012840), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
+REG64( EX_3_TPLC20_TR1_TRACE_HI_DATA_REG                       , RULL(0x11012840), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
+REG64( EX_5_TPLC20_TR1_TRACE_HI_DATA_REG                       , RULL(0x12012840), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
+REG64( EX_7_TPLC20_TR1_TRACE_HI_DATA_REG                       , RULL(0x13012840), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
+REG64( EX_9_TPLC20_TR1_TRACE_HI_DATA_REG                       , RULL(0x14012840), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
+REG64( EX_11_TPLC20_TR1_TRACE_HI_DATA_REG                      , RULL(0x15012840), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
 
-REG64( EQ_TPLC20_TR1_TRACE_LO_DATA_REG                         , RULL(0x10012D41), SH_UNT_EQ       , SH_ACS_SCOM_RO   );
-REG64( EQ_0_TPLC20_TR1_TRACE_LO_DATA_REG                       , RULL(0x10012D41), SH_UNT_EQ_0     , SH_ACS_SCOM_RO   );
-REG64( EQ_1_TPLC20_TR1_TRACE_LO_DATA_REG                       , RULL(0x11012D41), SH_UNT_EQ_1     , SH_ACS_SCOM_RO   );
-REG64( EQ_2_TPLC20_TR1_TRACE_LO_DATA_REG                       , RULL(0x12012D41), SH_UNT_EQ_2     , SH_ACS_SCOM_RO   );
-REG64( EQ_3_TPLC20_TR1_TRACE_LO_DATA_REG                       , RULL(0x13012D41), SH_UNT_EQ_3     , SH_ACS_SCOM_RO   );
-REG64( EQ_4_TPLC20_TR1_TRACE_LO_DATA_REG                       , RULL(0x14012D41), SH_UNT_EQ_4     , SH_ACS_SCOM_RO   );
-REG64( EQ_5_TPLC20_TR1_TRACE_LO_DATA_REG                       , RULL(0x15012D41), SH_UNT_EQ_5     , SH_ACS_SCOM_RO   );
-REG64( EX_TPLC20_TR1_TRACE_LO_DATA_REG                         , RULL(0x10012D41), SH_UNT_EX       , SH_ACS_SCOM_RO   );
-REG64( EX_0_TPLC20_TR1_TRACE_LO_DATA_REG                       , RULL(0x10012D41), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
-REG64( EX_2_TPLC20_TR1_TRACE_LO_DATA_REG                       , RULL(0x11012D41), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
-REG64( EX_4_TPLC20_TR1_TRACE_LO_DATA_REG                       , RULL(0x12012D41), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
-REG64( EX_6_TPLC20_TR1_TRACE_LO_DATA_REG                       , RULL(0x13012D41), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
-REG64( EX_8_TPLC20_TR1_TRACE_LO_DATA_REG                       , RULL(0x14012D41), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
-REG64( EX_10_TPLC20_TR1_TRACE_LO_DATA_REG                      , RULL(0x15012D41), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
+REG64( EQ_TPLC20_TR1_TRACE_LO_DATA_REG                         , RULL(0x10012841), SH_UNT_EQ       , SH_ACS_SCOM_RO   );
+REG64( EQ_0_TPLC20_TR1_TRACE_LO_DATA_REG                       , RULL(0x10012841), SH_UNT_EQ_0     , SH_ACS_SCOM_RO   );
+REG64( EQ_1_TPLC20_TR1_TRACE_LO_DATA_REG                       , RULL(0x11012841), SH_UNT_EQ_1     , SH_ACS_SCOM_RO   );
+REG64( EQ_2_TPLC20_TR1_TRACE_LO_DATA_REG                       , RULL(0x12012841), SH_UNT_EQ_2     , SH_ACS_SCOM_RO   );
+REG64( EQ_3_TPLC20_TR1_TRACE_LO_DATA_REG                       , RULL(0x13012841), SH_UNT_EQ_3     , SH_ACS_SCOM_RO   );
+REG64( EQ_4_TPLC20_TR1_TRACE_LO_DATA_REG                       , RULL(0x14012841), SH_UNT_EQ_4     , SH_ACS_SCOM_RO   );
+REG64( EQ_5_TPLC20_TR1_TRACE_LO_DATA_REG                       , RULL(0x15012841), SH_UNT_EQ_5     , SH_ACS_SCOM_RO   );
+REG64( EX_1_TPLC20_TR1_TRACE_LO_DATA_REG                       , RULL(0x10012841), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
+REG64( EX_3_TPLC20_TR1_TRACE_LO_DATA_REG                       , RULL(0x11012841), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
+REG64( EX_5_TPLC20_TR1_TRACE_LO_DATA_REG                       , RULL(0x12012841), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
+REG64( EX_7_TPLC20_TR1_TRACE_LO_DATA_REG                       , RULL(0x13012841), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
+REG64( EX_9_TPLC20_TR1_TRACE_LO_DATA_REG                       , RULL(0x14012841), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
+REG64( EX_11_TPLC20_TR1_TRACE_LO_DATA_REG                      , RULL(0x15012841), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
 
-REG64( EQ_TPLC20_TR1_TRACE_TRCTRL_CONFIG                       , RULL(0x10012D42), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC20_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x10012D42), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC20_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x11012D42), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC20_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x12012D42), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC20_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x13012D42), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC20_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x14012D42), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC20_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x15012D42), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_TPLC20_TR1_TRACE_TRCTRL_CONFIG                       , RULL(0x10012D42), SH_UNT_EX       , SH_ACS_SCOM      );
-REG64( EX_0_TPLC20_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x10012D42), SH_UNT_EX_0     , SH_ACS_SCOM      );
-REG64( EX_2_TPLC20_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x11012D42), SH_UNT_EX_2     , SH_ACS_SCOM      );
-REG64( EX_4_TPLC20_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x12012D42), SH_UNT_EX_4     , SH_ACS_SCOM      );
-REG64( EX_6_TPLC20_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x13012D42), SH_UNT_EX_6     , SH_ACS_SCOM      );
-REG64( EX_8_TPLC20_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x14012D42), SH_UNT_EX_8     , SH_ACS_SCOM      );
-REG64( EX_10_TPLC20_TR1_TRACE_TRCTRL_CONFIG                    , RULL(0x15012D42), SH_UNT_EX_10    , SH_ACS_SCOM      );
+REG64( EQ_TPLC20_TR1_TRACE_TRCTRL_CONFIG                       , RULL(0x10012842), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC20_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x10012842), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC20_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x11012842), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC20_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x12012842), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC20_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x13012842), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC20_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x14012842), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC20_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x15012842), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_1_TPLC20_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x10012842), SH_UNT_EX_1     , SH_ACS_SCOM      );
+REG64( EX_3_TPLC20_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x11012842), SH_UNT_EX_3     , SH_ACS_SCOM      );
+REG64( EX_5_TPLC20_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x12012842), SH_UNT_EX_5     , SH_ACS_SCOM      );
+REG64( EX_7_TPLC20_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x13012842), SH_UNT_EX_7     , SH_ACS_SCOM      );
+REG64( EX_9_TPLC20_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x14012842), SH_UNT_EX_9     , SH_ACS_SCOM      );
+REG64( EX_11_TPLC20_TR1_TRACE_TRCTRL_CONFIG                    , RULL(0x15012842), SH_UNT_EX_11    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC20_TR1_TRACE_TRDATA_CONFIG_0                     , RULL(0x10012D43), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC20_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x10012D43), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC20_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x11012D43), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC20_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x12012D43), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC20_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x13012D43), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC20_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x14012D43), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC20_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x15012D43), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_TPLC20_TR1_TRACE_TRDATA_CONFIG_0                     , RULL(0x10012D43), SH_UNT_EX       , SH_ACS_SCOM      );
-REG64( EX_0_TPLC20_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x10012D43), SH_UNT_EX_0     , SH_ACS_SCOM      );
-REG64( EX_2_TPLC20_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x11012D43), SH_UNT_EX_2     , SH_ACS_SCOM      );
-REG64( EX_4_TPLC20_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x12012D43), SH_UNT_EX_4     , SH_ACS_SCOM      );
-REG64( EX_6_TPLC20_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x13012D43), SH_UNT_EX_6     , SH_ACS_SCOM      );
-REG64( EX_8_TPLC20_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x14012D43), SH_UNT_EX_8     , SH_ACS_SCOM      );
-REG64( EX_10_TPLC20_TR1_TRACE_TRDATA_CONFIG_0                  , RULL(0x15012D43), SH_UNT_EX_10    , SH_ACS_SCOM      );
+REG64( EQ_TPLC20_TR1_TRACE_TRDATA_CONFIG_0                     , RULL(0x10012843), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC20_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x10012843), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC20_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x11012843), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC20_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x12012843), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC20_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x13012843), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC20_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x14012843), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC20_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x15012843), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_1_TPLC20_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x10012843), SH_UNT_EX_1     , SH_ACS_SCOM      );
+REG64( EX_3_TPLC20_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x11012843), SH_UNT_EX_3     , SH_ACS_SCOM      );
+REG64( EX_5_TPLC20_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x12012843), SH_UNT_EX_5     , SH_ACS_SCOM      );
+REG64( EX_7_TPLC20_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x13012843), SH_UNT_EX_7     , SH_ACS_SCOM      );
+REG64( EX_9_TPLC20_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x14012843), SH_UNT_EX_9     , SH_ACS_SCOM      );
+REG64( EX_11_TPLC20_TR1_TRACE_TRDATA_CONFIG_0                  , RULL(0x15012843), SH_UNT_EX_11    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC20_TR1_TRACE_TRDATA_CONFIG_1                     , RULL(0x10012D44), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC20_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x10012D44), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC20_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x11012D44), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC20_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x12012D44), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC20_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x13012D44), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC20_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x14012D44), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC20_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x15012D44), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_TPLC20_TR1_TRACE_TRDATA_CONFIG_1                     , RULL(0x10012D44), SH_UNT_EX       , SH_ACS_SCOM      );
-REG64( EX_0_TPLC20_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x10012D44), SH_UNT_EX_0     , SH_ACS_SCOM      );
-REG64( EX_2_TPLC20_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x11012D44), SH_UNT_EX_2     , SH_ACS_SCOM      );
-REG64( EX_4_TPLC20_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x12012D44), SH_UNT_EX_4     , SH_ACS_SCOM      );
-REG64( EX_6_TPLC20_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x13012D44), SH_UNT_EX_6     , SH_ACS_SCOM      );
-REG64( EX_8_TPLC20_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x14012D44), SH_UNT_EX_8     , SH_ACS_SCOM      );
-REG64( EX_10_TPLC20_TR1_TRACE_TRDATA_CONFIG_1                  , RULL(0x15012D44), SH_UNT_EX_10    , SH_ACS_SCOM      );
+REG64( EQ_TPLC20_TR1_TRACE_TRDATA_CONFIG_1                     , RULL(0x10012844), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC20_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x10012844), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC20_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x11012844), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC20_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x12012844), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC20_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x13012844), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC20_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x14012844), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC20_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x15012844), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_1_TPLC20_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x10012844), SH_UNT_EX_1     , SH_ACS_SCOM      );
+REG64( EX_3_TPLC20_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x11012844), SH_UNT_EX_3     , SH_ACS_SCOM      );
+REG64( EX_5_TPLC20_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x12012844), SH_UNT_EX_5     , SH_ACS_SCOM      );
+REG64( EX_7_TPLC20_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x13012844), SH_UNT_EX_7     , SH_ACS_SCOM      );
+REG64( EX_9_TPLC20_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x14012844), SH_UNT_EX_9     , SH_ACS_SCOM      );
+REG64( EX_11_TPLC20_TR1_TRACE_TRDATA_CONFIG_1                  , RULL(0x15012844), SH_UNT_EX_11    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC20_TR1_TRACE_TRDATA_CONFIG_2                     , RULL(0x10012D45), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC20_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x10012D45), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC20_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x11012D45), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC20_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x12012D45), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC20_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x13012D45), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC20_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x14012D45), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC20_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x15012D45), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_TPLC20_TR1_TRACE_TRDATA_CONFIG_2                     , RULL(0x10012D45), SH_UNT_EX       , SH_ACS_SCOM      );
-REG64( EX_0_TPLC20_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x10012D45), SH_UNT_EX_0     , SH_ACS_SCOM      );
-REG64( EX_2_TPLC20_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x11012D45), SH_UNT_EX_2     , SH_ACS_SCOM      );
-REG64( EX_4_TPLC20_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x12012D45), SH_UNT_EX_4     , SH_ACS_SCOM      );
-REG64( EX_6_TPLC20_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x13012D45), SH_UNT_EX_6     , SH_ACS_SCOM      );
-REG64( EX_8_TPLC20_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x14012D45), SH_UNT_EX_8     , SH_ACS_SCOM      );
-REG64( EX_10_TPLC20_TR1_TRACE_TRDATA_CONFIG_2                  , RULL(0x15012D45), SH_UNT_EX_10    , SH_ACS_SCOM      );
+REG64( EQ_TPLC20_TR1_TRACE_TRDATA_CONFIG_2                     , RULL(0x10012845), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC20_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x10012845), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC20_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x11012845), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC20_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x12012845), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC20_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x13012845), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC20_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x14012845), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC20_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x15012845), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_1_TPLC20_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x10012845), SH_UNT_EX_1     , SH_ACS_SCOM      );
+REG64( EX_3_TPLC20_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x11012845), SH_UNT_EX_3     , SH_ACS_SCOM      );
+REG64( EX_5_TPLC20_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x12012845), SH_UNT_EX_5     , SH_ACS_SCOM      );
+REG64( EX_7_TPLC20_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x13012845), SH_UNT_EX_7     , SH_ACS_SCOM      );
+REG64( EX_9_TPLC20_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x14012845), SH_UNT_EX_9     , SH_ACS_SCOM      );
+REG64( EX_11_TPLC20_TR1_TRACE_TRDATA_CONFIG_2                  , RULL(0x15012845), SH_UNT_EX_11    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC20_TR1_TRACE_TRDATA_CONFIG_3                     , RULL(0x10012D46), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC20_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x10012D46), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC20_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x11012D46), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC20_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x12012D46), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC20_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x13012D46), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC20_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x14012D46), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC20_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x15012D46), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_TPLC20_TR1_TRACE_TRDATA_CONFIG_3                     , RULL(0x10012D46), SH_UNT_EX       , SH_ACS_SCOM      );
-REG64( EX_0_TPLC20_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x10012D46), SH_UNT_EX_0     , SH_ACS_SCOM      );
-REG64( EX_2_TPLC20_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x11012D46), SH_UNT_EX_2     , SH_ACS_SCOM      );
-REG64( EX_4_TPLC20_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x12012D46), SH_UNT_EX_4     , SH_ACS_SCOM      );
-REG64( EX_6_TPLC20_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x13012D46), SH_UNT_EX_6     , SH_ACS_SCOM      );
-REG64( EX_8_TPLC20_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x14012D46), SH_UNT_EX_8     , SH_ACS_SCOM      );
-REG64( EX_10_TPLC20_TR1_TRACE_TRDATA_CONFIG_3                  , RULL(0x15012D46), SH_UNT_EX_10    , SH_ACS_SCOM      );
+REG64( EQ_TPLC20_TR1_TRACE_TRDATA_CONFIG_3                     , RULL(0x10012846), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC20_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x10012846), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC20_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x11012846), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC20_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x12012846), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC20_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x13012846), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC20_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x14012846), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC20_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x15012846), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_1_TPLC20_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x10012846), SH_UNT_EX_1     , SH_ACS_SCOM      );
+REG64( EX_3_TPLC20_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x11012846), SH_UNT_EX_3     , SH_ACS_SCOM      );
+REG64( EX_5_TPLC20_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x12012846), SH_UNT_EX_5     , SH_ACS_SCOM      );
+REG64( EX_7_TPLC20_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x13012846), SH_UNT_EX_7     , SH_ACS_SCOM      );
+REG64( EX_9_TPLC20_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x14012846), SH_UNT_EX_9     , SH_ACS_SCOM      );
+REG64( EX_11_TPLC20_TR1_TRACE_TRDATA_CONFIG_3                  , RULL(0x15012846), SH_UNT_EX_11    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC20_TR1_TRACE_TRDATA_CONFIG_4                     , RULL(0x10012D47), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC20_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x10012D47), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC20_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x11012D47), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC20_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x12012D47), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC20_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x13012D47), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC20_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x14012D47), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC20_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x15012D47), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_TPLC20_TR1_TRACE_TRDATA_CONFIG_4                     , RULL(0x10012D47), SH_UNT_EX       , SH_ACS_SCOM      );
-REG64( EX_0_TPLC20_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x10012D47), SH_UNT_EX_0     , SH_ACS_SCOM      );
-REG64( EX_2_TPLC20_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x11012D47), SH_UNT_EX_2     , SH_ACS_SCOM      );
-REG64( EX_4_TPLC20_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x12012D47), SH_UNT_EX_4     , SH_ACS_SCOM      );
-REG64( EX_6_TPLC20_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x13012D47), SH_UNT_EX_6     , SH_ACS_SCOM      );
-REG64( EX_8_TPLC20_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x14012D47), SH_UNT_EX_8     , SH_ACS_SCOM      );
-REG64( EX_10_TPLC20_TR1_TRACE_TRDATA_CONFIG_4                  , RULL(0x15012D47), SH_UNT_EX_10    , SH_ACS_SCOM      );
+REG64( EQ_TPLC20_TR1_TRACE_TRDATA_CONFIG_4                     , RULL(0x10012847), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC20_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x10012847), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC20_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x11012847), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC20_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x12012847), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC20_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x13012847), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC20_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x14012847), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC20_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x15012847), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_1_TPLC20_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x10012847), SH_UNT_EX_1     , SH_ACS_SCOM      );
+REG64( EX_3_TPLC20_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x11012847), SH_UNT_EX_3     , SH_ACS_SCOM      );
+REG64( EX_5_TPLC20_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x12012847), SH_UNT_EX_5     , SH_ACS_SCOM      );
+REG64( EX_7_TPLC20_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x13012847), SH_UNT_EX_7     , SH_ACS_SCOM      );
+REG64( EX_9_TPLC20_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x14012847), SH_UNT_EX_9     , SH_ACS_SCOM      );
+REG64( EX_11_TPLC20_TR1_TRACE_TRDATA_CONFIG_4                  , RULL(0x15012847), SH_UNT_EX_11    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC20_TR1_TRACE_TRDATA_CONFIG_5                     , RULL(0x10012D48), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC20_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x10012D48), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC20_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x11012D48), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC20_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x12012D48), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC20_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x13012D48), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC20_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x14012D48), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC20_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x15012D48), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_TPLC20_TR1_TRACE_TRDATA_CONFIG_5                     , RULL(0x10012D48), SH_UNT_EX       , SH_ACS_SCOM      );
-REG64( EX_0_TPLC20_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x10012D48), SH_UNT_EX_0     , SH_ACS_SCOM      );
-REG64( EX_2_TPLC20_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x11012D48), SH_UNT_EX_2     , SH_ACS_SCOM      );
-REG64( EX_4_TPLC20_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x12012D48), SH_UNT_EX_4     , SH_ACS_SCOM      );
-REG64( EX_6_TPLC20_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x13012D48), SH_UNT_EX_6     , SH_ACS_SCOM      );
-REG64( EX_8_TPLC20_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x14012D48), SH_UNT_EX_8     , SH_ACS_SCOM      );
-REG64( EX_10_TPLC20_TR1_TRACE_TRDATA_CONFIG_5                  , RULL(0x15012D48), SH_UNT_EX_10    , SH_ACS_SCOM      );
+REG64( EQ_TPLC20_TR1_TRACE_TRDATA_CONFIG_5                     , RULL(0x10012848), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC20_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x10012848), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC20_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x11012848), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC20_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x12012848), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC20_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x13012848), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC20_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x14012848), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC20_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x15012848), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_1_TPLC20_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x10012848), SH_UNT_EX_1     , SH_ACS_SCOM      );
+REG64( EX_3_TPLC20_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x11012848), SH_UNT_EX_3     , SH_ACS_SCOM      );
+REG64( EX_5_TPLC20_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x12012848), SH_UNT_EX_5     , SH_ACS_SCOM      );
+REG64( EX_7_TPLC20_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x13012848), SH_UNT_EX_7     , SH_ACS_SCOM      );
+REG64( EX_9_TPLC20_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x14012848), SH_UNT_EX_9     , SH_ACS_SCOM      );
+REG64( EX_11_TPLC20_TR1_TRACE_TRDATA_CONFIG_5                  , RULL(0x15012848), SH_UNT_EX_11    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC20_TR1_TRACE_TRDATA_CONFIG_9                     , RULL(0x10012D49), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC20_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x10012D49), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC20_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x11012D49), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC20_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x12012D49), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC20_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x13012D49), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC20_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x14012D49), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC20_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x15012D49), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_TPLC20_TR1_TRACE_TRDATA_CONFIG_9                     , RULL(0x10012D49), SH_UNT_EX       , SH_ACS_SCOM      );
-REG64( EX_0_TPLC20_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x10012D49), SH_UNT_EX_0     , SH_ACS_SCOM      );
-REG64( EX_2_TPLC20_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x11012D49), SH_UNT_EX_2     , SH_ACS_SCOM      );
-REG64( EX_4_TPLC20_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x12012D49), SH_UNT_EX_4     , SH_ACS_SCOM      );
-REG64( EX_6_TPLC20_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x13012D49), SH_UNT_EX_6     , SH_ACS_SCOM      );
-REG64( EX_8_TPLC20_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x14012D49), SH_UNT_EX_8     , SH_ACS_SCOM      );
-REG64( EX_10_TPLC20_TR1_TRACE_TRDATA_CONFIG_9                  , RULL(0x15012D49), SH_UNT_EX_10    , SH_ACS_SCOM      );
+REG64( EQ_TPLC20_TR1_TRACE_TRDATA_CONFIG_9                     , RULL(0x10012849), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC20_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x10012849), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC20_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x11012849), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC20_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x12012849), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC20_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x13012849), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC20_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x14012849), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC20_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x15012849), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_1_TPLC20_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x10012849), SH_UNT_EX_1     , SH_ACS_SCOM      );
+REG64( EX_3_TPLC20_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x11012849), SH_UNT_EX_3     , SH_ACS_SCOM      );
+REG64( EX_5_TPLC20_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x12012849), SH_UNT_EX_5     , SH_ACS_SCOM      );
+REG64( EX_7_TPLC20_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x13012849), SH_UNT_EX_7     , SH_ACS_SCOM      );
+REG64( EX_9_TPLC20_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x14012849), SH_UNT_EX_9     , SH_ACS_SCOM      );
+REG64( EX_11_TPLC20_TR1_TRACE_TRDATA_CONFIG_9                  , RULL(0x15012849), SH_UNT_EX_11    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC21_TR0_TRACE_HI_DATA_REG                         , RULL(0x10013100), SH_UNT_EQ       , SH_ACS_SCOM_RO   );
-REG64( EQ_0_TPLC21_TR0_TRACE_HI_DATA_REG                       , RULL(0x10013100), SH_UNT_EQ_0     , SH_ACS_SCOM_RO   );
-REG64( EQ_1_TPLC21_TR0_TRACE_HI_DATA_REG                       , RULL(0x11013100), SH_UNT_EQ_1     , SH_ACS_SCOM_RO   );
-REG64( EQ_2_TPLC21_TR0_TRACE_HI_DATA_REG                       , RULL(0x12013100), SH_UNT_EQ_2     , SH_ACS_SCOM_RO   );
-REG64( EQ_3_TPLC21_TR0_TRACE_HI_DATA_REG                       , RULL(0x13013100), SH_UNT_EQ_3     , SH_ACS_SCOM_RO   );
-REG64( EQ_4_TPLC21_TR0_TRACE_HI_DATA_REG                       , RULL(0x14013100), SH_UNT_EQ_4     , SH_ACS_SCOM_RO   );
-REG64( EQ_5_TPLC21_TR0_TRACE_HI_DATA_REG                       , RULL(0x15013100), SH_UNT_EQ_5     , SH_ACS_SCOM_RO   );
-REG64( EX_1_TPLC21_TR0_TRACE_HI_DATA_REG                       , RULL(0x10013100), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
-REG64( EX_3_TPLC21_TR0_TRACE_HI_DATA_REG                       , RULL(0x11013100), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
-REG64( EX_5_TPLC21_TR0_TRACE_HI_DATA_REG                       , RULL(0x12013100), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
-REG64( EX_7_TPLC21_TR0_TRACE_HI_DATA_REG                       , RULL(0x13013100), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
-REG64( EX_9_TPLC21_TR0_TRACE_HI_DATA_REG                       , RULL(0x14013100), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
-REG64( EX_11_TPLC21_TR0_TRACE_HI_DATA_REG                      , RULL(0x15013100), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
+REG64( EQ_TPLC21_TR0_TRACE_HI_DATA_REG                         , RULL(0x10012C00), SH_UNT_EQ       , SH_ACS_SCOM_RO   );
+REG64( EQ_0_TPLC21_TR0_TRACE_HI_DATA_REG                       , RULL(0x10012C00), SH_UNT_EQ_0     , SH_ACS_SCOM_RO   );
+REG64( EQ_1_TPLC21_TR0_TRACE_HI_DATA_REG                       , RULL(0x11012C00), SH_UNT_EQ_1     , SH_ACS_SCOM_RO   );
+REG64( EQ_2_TPLC21_TR0_TRACE_HI_DATA_REG                       , RULL(0x12012C00), SH_UNT_EQ_2     , SH_ACS_SCOM_RO   );
+REG64( EQ_3_TPLC21_TR0_TRACE_HI_DATA_REG                       , RULL(0x13012C00), SH_UNT_EQ_3     , SH_ACS_SCOM_RO   );
+REG64( EQ_4_TPLC21_TR0_TRACE_HI_DATA_REG                       , RULL(0x14012C00), SH_UNT_EQ_4     , SH_ACS_SCOM_RO   );
+REG64( EQ_5_TPLC21_TR0_TRACE_HI_DATA_REG                       , RULL(0x15012C00), SH_UNT_EQ_5     , SH_ACS_SCOM_RO   );
+REG64( EX_TPLC21_TR0_TRACE_HI_DATA_REG                         , RULL(0x10012C00), SH_UNT_EX       , SH_ACS_SCOM_RO   );
+REG64( EX_0_TPLC21_TR0_TRACE_HI_DATA_REG                       , RULL(0x10012C00), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
+REG64( EX_2_TPLC21_TR0_TRACE_HI_DATA_REG                       , RULL(0x11012C00), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
+REG64( EX_4_TPLC21_TR0_TRACE_HI_DATA_REG                       , RULL(0x12012C00), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
+REG64( EX_6_TPLC21_TR0_TRACE_HI_DATA_REG                       , RULL(0x13012C00), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
+REG64( EX_8_TPLC21_TR0_TRACE_HI_DATA_REG                       , RULL(0x14012C00), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
+REG64( EX_10_TPLC21_TR0_TRACE_HI_DATA_REG                      , RULL(0x15012C00), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
 
-REG64( EQ_TPLC21_TR0_TRACE_LO_DATA_REG                         , RULL(0x10013101), SH_UNT_EQ       , SH_ACS_SCOM_RO   );
-REG64( EQ_0_TPLC21_TR0_TRACE_LO_DATA_REG                       , RULL(0x10013101), SH_UNT_EQ_0     , SH_ACS_SCOM_RO   );
-REG64( EQ_1_TPLC21_TR0_TRACE_LO_DATA_REG                       , RULL(0x11013101), SH_UNT_EQ_1     , SH_ACS_SCOM_RO   );
-REG64( EQ_2_TPLC21_TR0_TRACE_LO_DATA_REG                       , RULL(0x12013101), SH_UNT_EQ_2     , SH_ACS_SCOM_RO   );
-REG64( EQ_3_TPLC21_TR0_TRACE_LO_DATA_REG                       , RULL(0x13013101), SH_UNT_EQ_3     , SH_ACS_SCOM_RO   );
-REG64( EQ_4_TPLC21_TR0_TRACE_LO_DATA_REG                       , RULL(0x14013101), SH_UNT_EQ_4     , SH_ACS_SCOM_RO   );
-REG64( EQ_5_TPLC21_TR0_TRACE_LO_DATA_REG                       , RULL(0x15013101), SH_UNT_EQ_5     , SH_ACS_SCOM_RO   );
-REG64( EX_1_TPLC21_TR0_TRACE_LO_DATA_REG                       , RULL(0x10013101), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
-REG64( EX_3_TPLC21_TR0_TRACE_LO_DATA_REG                       , RULL(0x11013101), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
-REG64( EX_5_TPLC21_TR0_TRACE_LO_DATA_REG                       , RULL(0x12013101), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
-REG64( EX_7_TPLC21_TR0_TRACE_LO_DATA_REG                       , RULL(0x13013101), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
-REG64( EX_9_TPLC21_TR0_TRACE_LO_DATA_REG                       , RULL(0x14013101), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
-REG64( EX_11_TPLC21_TR0_TRACE_LO_DATA_REG                      , RULL(0x15013101), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
+REG64( EQ_TPLC21_TR0_TRACE_LO_DATA_REG                         , RULL(0x10012C01), SH_UNT_EQ       , SH_ACS_SCOM_RO   );
+REG64( EQ_0_TPLC21_TR0_TRACE_LO_DATA_REG                       , RULL(0x10012C01), SH_UNT_EQ_0     , SH_ACS_SCOM_RO   );
+REG64( EQ_1_TPLC21_TR0_TRACE_LO_DATA_REG                       , RULL(0x11012C01), SH_UNT_EQ_1     , SH_ACS_SCOM_RO   );
+REG64( EQ_2_TPLC21_TR0_TRACE_LO_DATA_REG                       , RULL(0x12012C01), SH_UNT_EQ_2     , SH_ACS_SCOM_RO   );
+REG64( EQ_3_TPLC21_TR0_TRACE_LO_DATA_REG                       , RULL(0x13012C01), SH_UNT_EQ_3     , SH_ACS_SCOM_RO   );
+REG64( EQ_4_TPLC21_TR0_TRACE_LO_DATA_REG                       , RULL(0x14012C01), SH_UNT_EQ_4     , SH_ACS_SCOM_RO   );
+REG64( EQ_5_TPLC21_TR0_TRACE_LO_DATA_REG                       , RULL(0x15012C01), SH_UNT_EQ_5     , SH_ACS_SCOM_RO   );
+REG64( EX_TPLC21_TR0_TRACE_LO_DATA_REG                         , RULL(0x10012C01), SH_UNT_EX       , SH_ACS_SCOM_RO   );
+REG64( EX_0_TPLC21_TR0_TRACE_LO_DATA_REG                       , RULL(0x10012C01), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
+REG64( EX_2_TPLC21_TR0_TRACE_LO_DATA_REG                       , RULL(0x11012C01), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
+REG64( EX_4_TPLC21_TR0_TRACE_LO_DATA_REG                       , RULL(0x12012C01), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
+REG64( EX_6_TPLC21_TR0_TRACE_LO_DATA_REG                       , RULL(0x13012C01), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
+REG64( EX_8_TPLC21_TR0_TRACE_LO_DATA_REG                       , RULL(0x14012C01), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
+REG64( EX_10_TPLC21_TR0_TRACE_LO_DATA_REG                      , RULL(0x15012C01), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
 
-REG64( EQ_TPLC21_TR0_TRACE_TRCTRL_CONFIG                       , RULL(0x10013102), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC21_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x10013102), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC21_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x11013102), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC21_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x12013102), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC21_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x13013102), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC21_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x14013102), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC21_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x15013102), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_1_TPLC21_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x10013102), SH_UNT_EX_1     , SH_ACS_SCOM      );
-REG64( EX_3_TPLC21_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x11013102), SH_UNT_EX_3     , SH_ACS_SCOM      );
-REG64( EX_5_TPLC21_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x12013102), SH_UNT_EX_5     , SH_ACS_SCOM      );
-REG64( EX_7_TPLC21_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x13013102), SH_UNT_EX_7     , SH_ACS_SCOM      );
-REG64( EX_9_TPLC21_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x14013102), SH_UNT_EX_9     , SH_ACS_SCOM      );
-REG64( EX_11_TPLC21_TR0_TRACE_TRCTRL_CONFIG                    , RULL(0x15013102), SH_UNT_EX_11    , SH_ACS_SCOM      );
+REG64( EQ_TPLC21_TR0_TRACE_TRCTRL_CONFIG                       , RULL(0x10012C02), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC21_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x10012C02), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC21_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x11012C02), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC21_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x12012C02), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC21_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x13012C02), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC21_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x14012C02), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC21_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x15012C02), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_TPLC21_TR0_TRACE_TRCTRL_CONFIG                       , RULL(0x10012C02), SH_UNT_EX       , SH_ACS_SCOM      );
+REG64( EX_0_TPLC21_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x10012C02), SH_UNT_EX_0     , SH_ACS_SCOM      );
+REG64( EX_2_TPLC21_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x11012C02), SH_UNT_EX_2     , SH_ACS_SCOM      );
+REG64( EX_4_TPLC21_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x12012C02), SH_UNT_EX_4     , SH_ACS_SCOM      );
+REG64( EX_6_TPLC21_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x13012C02), SH_UNT_EX_6     , SH_ACS_SCOM      );
+REG64( EX_8_TPLC21_TR0_TRACE_TRCTRL_CONFIG                     , RULL(0x14012C02), SH_UNT_EX_8     , SH_ACS_SCOM      );
+REG64( EX_10_TPLC21_TR0_TRACE_TRCTRL_CONFIG                    , RULL(0x15012C02), SH_UNT_EX_10    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC21_TR0_TRACE_TRDATA_CONFIG_0                     , RULL(0x10013103), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC21_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x10013103), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC21_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x11013103), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC21_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x12013103), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC21_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x13013103), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC21_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x14013103), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC21_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x15013103), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_1_TPLC21_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x10013103), SH_UNT_EX_1     , SH_ACS_SCOM      );
-REG64( EX_3_TPLC21_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x11013103), SH_UNT_EX_3     , SH_ACS_SCOM      );
-REG64( EX_5_TPLC21_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x12013103), SH_UNT_EX_5     , SH_ACS_SCOM      );
-REG64( EX_7_TPLC21_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x13013103), SH_UNT_EX_7     , SH_ACS_SCOM      );
-REG64( EX_9_TPLC21_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x14013103), SH_UNT_EX_9     , SH_ACS_SCOM      );
-REG64( EX_11_TPLC21_TR0_TRACE_TRDATA_CONFIG_0                  , RULL(0x15013103), SH_UNT_EX_11    , SH_ACS_SCOM      );
+REG64( EQ_TPLC21_TR0_TRACE_TRDATA_CONFIG_0                     , RULL(0x10012C03), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC21_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x10012C03), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC21_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x11012C03), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC21_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x12012C03), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC21_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x13012C03), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC21_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x14012C03), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC21_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x15012C03), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_TPLC21_TR0_TRACE_TRDATA_CONFIG_0                     , RULL(0x10012C03), SH_UNT_EX       , SH_ACS_SCOM      );
+REG64( EX_0_TPLC21_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x10012C03), SH_UNT_EX_0     , SH_ACS_SCOM      );
+REG64( EX_2_TPLC21_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x11012C03), SH_UNT_EX_2     , SH_ACS_SCOM      );
+REG64( EX_4_TPLC21_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x12012C03), SH_UNT_EX_4     , SH_ACS_SCOM      );
+REG64( EX_6_TPLC21_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x13012C03), SH_UNT_EX_6     , SH_ACS_SCOM      );
+REG64( EX_8_TPLC21_TR0_TRACE_TRDATA_CONFIG_0                   , RULL(0x14012C03), SH_UNT_EX_8     , SH_ACS_SCOM      );
+REG64( EX_10_TPLC21_TR0_TRACE_TRDATA_CONFIG_0                  , RULL(0x15012C03), SH_UNT_EX_10    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC21_TR0_TRACE_TRDATA_CONFIG_1                     , RULL(0x10013104), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC21_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x10013104), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC21_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x11013104), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC21_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x12013104), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC21_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x13013104), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC21_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x14013104), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC21_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x15013104), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_1_TPLC21_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x10013104), SH_UNT_EX_1     , SH_ACS_SCOM      );
-REG64( EX_3_TPLC21_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x11013104), SH_UNT_EX_3     , SH_ACS_SCOM      );
-REG64( EX_5_TPLC21_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x12013104), SH_UNT_EX_5     , SH_ACS_SCOM      );
-REG64( EX_7_TPLC21_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x13013104), SH_UNT_EX_7     , SH_ACS_SCOM      );
-REG64( EX_9_TPLC21_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x14013104), SH_UNT_EX_9     , SH_ACS_SCOM      );
-REG64( EX_11_TPLC21_TR0_TRACE_TRDATA_CONFIG_1                  , RULL(0x15013104), SH_UNT_EX_11    , SH_ACS_SCOM      );
+REG64( EQ_TPLC21_TR0_TRACE_TRDATA_CONFIG_1                     , RULL(0x10012C04), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC21_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x10012C04), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC21_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x11012C04), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC21_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x12012C04), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC21_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x13012C04), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC21_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x14012C04), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC21_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x15012C04), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_TPLC21_TR0_TRACE_TRDATA_CONFIG_1                     , RULL(0x10012C04), SH_UNT_EX       , SH_ACS_SCOM      );
+REG64( EX_0_TPLC21_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x10012C04), SH_UNT_EX_0     , SH_ACS_SCOM      );
+REG64( EX_2_TPLC21_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x11012C04), SH_UNT_EX_2     , SH_ACS_SCOM      );
+REG64( EX_4_TPLC21_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x12012C04), SH_UNT_EX_4     , SH_ACS_SCOM      );
+REG64( EX_6_TPLC21_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x13012C04), SH_UNT_EX_6     , SH_ACS_SCOM      );
+REG64( EX_8_TPLC21_TR0_TRACE_TRDATA_CONFIG_1                   , RULL(0x14012C04), SH_UNT_EX_8     , SH_ACS_SCOM      );
+REG64( EX_10_TPLC21_TR0_TRACE_TRDATA_CONFIG_1                  , RULL(0x15012C04), SH_UNT_EX_10    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC21_TR0_TRACE_TRDATA_CONFIG_2                     , RULL(0x10013105), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC21_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x10013105), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC21_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x11013105), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC21_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x12013105), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC21_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x13013105), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC21_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x14013105), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC21_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x15013105), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_1_TPLC21_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x10013105), SH_UNT_EX_1     , SH_ACS_SCOM      );
-REG64( EX_3_TPLC21_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x11013105), SH_UNT_EX_3     , SH_ACS_SCOM      );
-REG64( EX_5_TPLC21_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x12013105), SH_UNT_EX_5     , SH_ACS_SCOM      );
-REG64( EX_7_TPLC21_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x13013105), SH_UNT_EX_7     , SH_ACS_SCOM      );
-REG64( EX_9_TPLC21_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x14013105), SH_UNT_EX_9     , SH_ACS_SCOM      );
-REG64( EX_11_TPLC21_TR0_TRACE_TRDATA_CONFIG_2                  , RULL(0x15013105), SH_UNT_EX_11    , SH_ACS_SCOM      );
+REG64( EQ_TPLC21_TR0_TRACE_TRDATA_CONFIG_2                     , RULL(0x10012C05), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC21_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x10012C05), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC21_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x11012C05), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC21_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x12012C05), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC21_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x13012C05), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC21_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x14012C05), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC21_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x15012C05), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_TPLC21_TR0_TRACE_TRDATA_CONFIG_2                     , RULL(0x10012C05), SH_UNT_EX       , SH_ACS_SCOM      );
+REG64( EX_0_TPLC21_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x10012C05), SH_UNT_EX_0     , SH_ACS_SCOM      );
+REG64( EX_2_TPLC21_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x11012C05), SH_UNT_EX_2     , SH_ACS_SCOM      );
+REG64( EX_4_TPLC21_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x12012C05), SH_UNT_EX_4     , SH_ACS_SCOM      );
+REG64( EX_6_TPLC21_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x13012C05), SH_UNT_EX_6     , SH_ACS_SCOM      );
+REG64( EX_8_TPLC21_TR0_TRACE_TRDATA_CONFIG_2                   , RULL(0x14012C05), SH_UNT_EX_8     , SH_ACS_SCOM      );
+REG64( EX_10_TPLC21_TR0_TRACE_TRDATA_CONFIG_2                  , RULL(0x15012C05), SH_UNT_EX_10    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC21_TR0_TRACE_TRDATA_CONFIG_3                     , RULL(0x10013106), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC21_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x10013106), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC21_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x11013106), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC21_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x12013106), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC21_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x13013106), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC21_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x14013106), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC21_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x15013106), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_1_TPLC21_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x10013106), SH_UNT_EX_1     , SH_ACS_SCOM      );
-REG64( EX_3_TPLC21_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x11013106), SH_UNT_EX_3     , SH_ACS_SCOM      );
-REG64( EX_5_TPLC21_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x12013106), SH_UNT_EX_5     , SH_ACS_SCOM      );
-REG64( EX_7_TPLC21_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x13013106), SH_UNT_EX_7     , SH_ACS_SCOM      );
-REG64( EX_9_TPLC21_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x14013106), SH_UNT_EX_9     , SH_ACS_SCOM      );
-REG64( EX_11_TPLC21_TR0_TRACE_TRDATA_CONFIG_3                  , RULL(0x15013106), SH_UNT_EX_11    , SH_ACS_SCOM      );
+REG64( EQ_TPLC21_TR0_TRACE_TRDATA_CONFIG_3                     , RULL(0x10012C06), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC21_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x10012C06), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC21_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x11012C06), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC21_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x12012C06), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC21_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x13012C06), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC21_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x14012C06), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC21_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x15012C06), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_TPLC21_TR0_TRACE_TRDATA_CONFIG_3                     , RULL(0x10012C06), SH_UNT_EX       , SH_ACS_SCOM      );
+REG64( EX_0_TPLC21_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x10012C06), SH_UNT_EX_0     , SH_ACS_SCOM      );
+REG64( EX_2_TPLC21_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x11012C06), SH_UNT_EX_2     , SH_ACS_SCOM      );
+REG64( EX_4_TPLC21_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x12012C06), SH_UNT_EX_4     , SH_ACS_SCOM      );
+REG64( EX_6_TPLC21_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x13012C06), SH_UNT_EX_6     , SH_ACS_SCOM      );
+REG64( EX_8_TPLC21_TR0_TRACE_TRDATA_CONFIG_3                   , RULL(0x14012C06), SH_UNT_EX_8     , SH_ACS_SCOM      );
+REG64( EX_10_TPLC21_TR0_TRACE_TRDATA_CONFIG_3                  , RULL(0x15012C06), SH_UNT_EX_10    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC21_TR0_TRACE_TRDATA_CONFIG_4                     , RULL(0x10013107), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC21_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x10013107), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC21_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x11013107), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC21_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x12013107), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC21_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x13013107), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC21_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x14013107), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC21_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x15013107), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_1_TPLC21_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x10013107), SH_UNT_EX_1     , SH_ACS_SCOM      );
-REG64( EX_3_TPLC21_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x11013107), SH_UNT_EX_3     , SH_ACS_SCOM      );
-REG64( EX_5_TPLC21_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x12013107), SH_UNT_EX_5     , SH_ACS_SCOM      );
-REG64( EX_7_TPLC21_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x13013107), SH_UNT_EX_7     , SH_ACS_SCOM      );
-REG64( EX_9_TPLC21_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x14013107), SH_UNT_EX_9     , SH_ACS_SCOM      );
-REG64( EX_11_TPLC21_TR0_TRACE_TRDATA_CONFIG_4                  , RULL(0x15013107), SH_UNT_EX_11    , SH_ACS_SCOM      );
+REG64( EQ_TPLC21_TR0_TRACE_TRDATA_CONFIG_4                     , RULL(0x10012C07), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC21_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x10012C07), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC21_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x11012C07), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC21_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x12012C07), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC21_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x13012C07), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC21_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x14012C07), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC21_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x15012C07), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_TPLC21_TR0_TRACE_TRDATA_CONFIG_4                     , RULL(0x10012C07), SH_UNT_EX       , SH_ACS_SCOM      );
+REG64( EX_0_TPLC21_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x10012C07), SH_UNT_EX_0     , SH_ACS_SCOM      );
+REG64( EX_2_TPLC21_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x11012C07), SH_UNT_EX_2     , SH_ACS_SCOM      );
+REG64( EX_4_TPLC21_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x12012C07), SH_UNT_EX_4     , SH_ACS_SCOM      );
+REG64( EX_6_TPLC21_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x13012C07), SH_UNT_EX_6     , SH_ACS_SCOM      );
+REG64( EX_8_TPLC21_TR0_TRACE_TRDATA_CONFIG_4                   , RULL(0x14012C07), SH_UNT_EX_8     , SH_ACS_SCOM      );
+REG64( EX_10_TPLC21_TR0_TRACE_TRDATA_CONFIG_4                  , RULL(0x15012C07), SH_UNT_EX_10    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC21_TR0_TRACE_TRDATA_CONFIG_5                     , RULL(0x10013108), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC21_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x10013108), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC21_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x11013108), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC21_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x12013108), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC21_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x13013108), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC21_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x14013108), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC21_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x15013108), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_1_TPLC21_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x10013108), SH_UNT_EX_1     , SH_ACS_SCOM      );
-REG64( EX_3_TPLC21_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x11013108), SH_UNT_EX_3     , SH_ACS_SCOM      );
-REG64( EX_5_TPLC21_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x12013108), SH_UNT_EX_5     , SH_ACS_SCOM      );
-REG64( EX_7_TPLC21_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x13013108), SH_UNT_EX_7     , SH_ACS_SCOM      );
-REG64( EX_9_TPLC21_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x14013108), SH_UNT_EX_9     , SH_ACS_SCOM      );
-REG64( EX_11_TPLC21_TR0_TRACE_TRDATA_CONFIG_5                  , RULL(0x15013108), SH_UNT_EX_11    , SH_ACS_SCOM      );
+REG64( EQ_TPLC21_TR0_TRACE_TRDATA_CONFIG_5                     , RULL(0x10012C08), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC21_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x10012C08), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC21_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x11012C08), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC21_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x12012C08), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC21_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x13012C08), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC21_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x14012C08), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC21_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x15012C08), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_TPLC21_TR0_TRACE_TRDATA_CONFIG_5                     , RULL(0x10012C08), SH_UNT_EX       , SH_ACS_SCOM      );
+REG64( EX_0_TPLC21_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x10012C08), SH_UNT_EX_0     , SH_ACS_SCOM      );
+REG64( EX_2_TPLC21_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x11012C08), SH_UNT_EX_2     , SH_ACS_SCOM      );
+REG64( EX_4_TPLC21_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x12012C08), SH_UNT_EX_4     , SH_ACS_SCOM      );
+REG64( EX_6_TPLC21_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x13012C08), SH_UNT_EX_6     , SH_ACS_SCOM      );
+REG64( EX_8_TPLC21_TR0_TRACE_TRDATA_CONFIG_5                   , RULL(0x14012C08), SH_UNT_EX_8     , SH_ACS_SCOM      );
+REG64( EX_10_TPLC21_TR0_TRACE_TRDATA_CONFIG_5                  , RULL(0x15012C08), SH_UNT_EX_10    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC21_TR0_TRACE_TRDATA_CONFIG_9                     , RULL(0x10013109), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC21_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x10013109), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC21_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x11013109), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC21_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x12013109), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC21_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x13013109), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC21_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x14013109), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC21_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x15013109), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_1_TPLC21_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x10013109), SH_UNT_EX_1     , SH_ACS_SCOM      );
-REG64( EX_3_TPLC21_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x11013109), SH_UNT_EX_3     , SH_ACS_SCOM      );
-REG64( EX_5_TPLC21_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x12013109), SH_UNT_EX_5     , SH_ACS_SCOM      );
-REG64( EX_7_TPLC21_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x13013109), SH_UNT_EX_7     , SH_ACS_SCOM      );
-REG64( EX_9_TPLC21_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x14013109), SH_UNT_EX_9     , SH_ACS_SCOM      );
-REG64( EX_11_TPLC21_TR0_TRACE_TRDATA_CONFIG_9                  , RULL(0x15013109), SH_UNT_EX_11    , SH_ACS_SCOM      );
+REG64( EQ_TPLC21_TR0_TRACE_TRDATA_CONFIG_9                     , RULL(0x10012C09), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC21_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x10012C09), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC21_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x11012C09), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC21_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x12012C09), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC21_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x13012C09), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC21_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x14012C09), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC21_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x15012C09), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_TPLC21_TR0_TRACE_TRDATA_CONFIG_9                     , RULL(0x10012C09), SH_UNT_EX       , SH_ACS_SCOM      );
+REG64( EX_0_TPLC21_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x10012C09), SH_UNT_EX_0     , SH_ACS_SCOM      );
+REG64( EX_2_TPLC21_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x11012C09), SH_UNT_EX_2     , SH_ACS_SCOM      );
+REG64( EX_4_TPLC21_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x12012C09), SH_UNT_EX_4     , SH_ACS_SCOM      );
+REG64( EX_6_TPLC21_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x13012C09), SH_UNT_EX_6     , SH_ACS_SCOM      );
+REG64( EX_8_TPLC21_TR0_TRACE_TRDATA_CONFIG_9                   , RULL(0x14012C09), SH_UNT_EX_8     , SH_ACS_SCOM      );
+REG64( EX_10_TPLC21_TR0_TRACE_TRDATA_CONFIG_9                  , RULL(0x15012C09), SH_UNT_EX_10    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC21_TR1_TRACE_HI_DATA_REG                         , RULL(0x10013140), SH_UNT_EQ       , SH_ACS_SCOM_RO   );
-REG64( EQ_0_TPLC21_TR1_TRACE_HI_DATA_REG                       , RULL(0x10013140), SH_UNT_EQ_0     , SH_ACS_SCOM_RO   );
-REG64( EQ_1_TPLC21_TR1_TRACE_HI_DATA_REG                       , RULL(0x11013140), SH_UNT_EQ_1     , SH_ACS_SCOM_RO   );
-REG64( EQ_2_TPLC21_TR1_TRACE_HI_DATA_REG                       , RULL(0x12013140), SH_UNT_EQ_2     , SH_ACS_SCOM_RO   );
-REG64( EQ_3_TPLC21_TR1_TRACE_HI_DATA_REG                       , RULL(0x13013140), SH_UNT_EQ_3     , SH_ACS_SCOM_RO   );
-REG64( EQ_4_TPLC21_TR1_TRACE_HI_DATA_REG                       , RULL(0x14013140), SH_UNT_EQ_4     , SH_ACS_SCOM_RO   );
-REG64( EQ_5_TPLC21_TR1_TRACE_HI_DATA_REG                       , RULL(0x15013140), SH_UNT_EQ_5     , SH_ACS_SCOM_RO   );
-REG64( EX_1_TPLC21_TR1_TRACE_HI_DATA_REG                       , RULL(0x10013140), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
-REG64( EX_3_TPLC21_TR1_TRACE_HI_DATA_REG                       , RULL(0x11013140), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
-REG64( EX_5_TPLC21_TR1_TRACE_HI_DATA_REG                       , RULL(0x12013140), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
-REG64( EX_7_TPLC21_TR1_TRACE_HI_DATA_REG                       , RULL(0x13013140), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
-REG64( EX_9_TPLC21_TR1_TRACE_HI_DATA_REG                       , RULL(0x14013140), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
-REG64( EX_11_TPLC21_TR1_TRACE_HI_DATA_REG                      , RULL(0x15013140), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
+REG64( EQ_TPLC21_TR1_TRACE_HI_DATA_REG                         , RULL(0x10012C40), SH_UNT_EQ       , SH_ACS_SCOM_RO   );
+REG64( EQ_0_TPLC21_TR1_TRACE_HI_DATA_REG                       , RULL(0x10012C40), SH_UNT_EQ_0     , SH_ACS_SCOM_RO   );
+REG64( EQ_1_TPLC21_TR1_TRACE_HI_DATA_REG                       , RULL(0x11012C40), SH_UNT_EQ_1     , SH_ACS_SCOM_RO   );
+REG64( EQ_2_TPLC21_TR1_TRACE_HI_DATA_REG                       , RULL(0x12012C40), SH_UNT_EQ_2     , SH_ACS_SCOM_RO   );
+REG64( EQ_3_TPLC21_TR1_TRACE_HI_DATA_REG                       , RULL(0x13012C40), SH_UNT_EQ_3     , SH_ACS_SCOM_RO   );
+REG64( EQ_4_TPLC21_TR1_TRACE_HI_DATA_REG                       , RULL(0x14012C40), SH_UNT_EQ_4     , SH_ACS_SCOM_RO   );
+REG64( EQ_5_TPLC21_TR1_TRACE_HI_DATA_REG                       , RULL(0x15012C40), SH_UNT_EQ_5     , SH_ACS_SCOM_RO   );
+REG64( EX_TPLC21_TR1_TRACE_HI_DATA_REG                         , RULL(0x10012C40), SH_UNT_EX       , SH_ACS_SCOM_RO   );
+REG64( EX_0_TPLC21_TR1_TRACE_HI_DATA_REG                       , RULL(0x10012C40), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
+REG64( EX_2_TPLC21_TR1_TRACE_HI_DATA_REG                       , RULL(0x11012C40), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
+REG64( EX_4_TPLC21_TR1_TRACE_HI_DATA_REG                       , RULL(0x12012C40), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
+REG64( EX_6_TPLC21_TR1_TRACE_HI_DATA_REG                       , RULL(0x13012C40), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
+REG64( EX_8_TPLC21_TR1_TRACE_HI_DATA_REG                       , RULL(0x14012C40), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
+REG64( EX_10_TPLC21_TR1_TRACE_HI_DATA_REG                      , RULL(0x15012C40), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
 
-REG64( EQ_TPLC21_TR1_TRACE_LO_DATA_REG                         , RULL(0x10013141), SH_UNT_EQ       , SH_ACS_SCOM_RO   );
-REG64( EQ_0_TPLC21_TR1_TRACE_LO_DATA_REG                       , RULL(0x10013141), SH_UNT_EQ_0     , SH_ACS_SCOM_RO   );
-REG64( EQ_1_TPLC21_TR1_TRACE_LO_DATA_REG                       , RULL(0x11013141), SH_UNT_EQ_1     , SH_ACS_SCOM_RO   );
-REG64( EQ_2_TPLC21_TR1_TRACE_LO_DATA_REG                       , RULL(0x12013141), SH_UNT_EQ_2     , SH_ACS_SCOM_RO   );
-REG64( EQ_3_TPLC21_TR1_TRACE_LO_DATA_REG                       , RULL(0x13013141), SH_UNT_EQ_3     , SH_ACS_SCOM_RO   );
-REG64( EQ_4_TPLC21_TR1_TRACE_LO_DATA_REG                       , RULL(0x14013141), SH_UNT_EQ_4     , SH_ACS_SCOM_RO   );
-REG64( EQ_5_TPLC21_TR1_TRACE_LO_DATA_REG                       , RULL(0x15013141), SH_UNT_EQ_5     , SH_ACS_SCOM_RO   );
-REG64( EX_1_TPLC21_TR1_TRACE_LO_DATA_REG                       , RULL(0x10013141), SH_UNT_EX_1     , SH_ACS_SCOM_RO   );
-REG64( EX_3_TPLC21_TR1_TRACE_LO_DATA_REG                       , RULL(0x11013141), SH_UNT_EX_3     , SH_ACS_SCOM_RO   );
-REG64( EX_5_TPLC21_TR1_TRACE_LO_DATA_REG                       , RULL(0x12013141), SH_UNT_EX_5     , SH_ACS_SCOM_RO   );
-REG64( EX_7_TPLC21_TR1_TRACE_LO_DATA_REG                       , RULL(0x13013141), SH_UNT_EX_7     , SH_ACS_SCOM_RO   );
-REG64( EX_9_TPLC21_TR1_TRACE_LO_DATA_REG                       , RULL(0x14013141), SH_UNT_EX_9     , SH_ACS_SCOM_RO   );
-REG64( EX_11_TPLC21_TR1_TRACE_LO_DATA_REG                      , RULL(0x15013141), SH_UNT_EX_11    , SH_ACS_SCOM_RO   );
+REG64( EQ_TPLC21_TR1_TRACE_LO_DATA_REG                         , RULL(0x10012C41), SH_UNT_EQ       , SH_ACS_SCOM_RO   );
+REG64( EQ_0_TPLC21_TR1_TRACE_LO_DATA_REG                       , RULL(0x10012C41), SH_UNT_EQ_0     , SH_ACS_SCOM_RO   );
+REG64( EQ_1_TPLC21_TR1_TRACE_LO_DATA_REG                       , RULL(0x11012C41), SH_UNT_EQ_1     , SH_ACS_SCOM_RO   );
+REG64( EQ_2_TPLC21_TR1_TRACE_LO_DATA_REG                       , RULL(0x12012C41), SH_UNT_EQ_2     , SH_ACS_SCOM_RO   );
+REG64( EQ_3_TPLC21_TR1_TRACE_LO_DATA_REG                       , RULL(0x13012C41), SH_UNT_EQ_3     , SH_ACS_SCOM_RO   );
+REG64( EQ_4_TPLC21_TR1_TRACE_LO_DATA_REG                       , RULL(0x14012C41), SH_UNT_EQ_4     , SH_ACS_SCOM_RO   );
+REG64( EQ_5_TPLC21_TR1_TRACE_LO_DATA_REG                       , RULL(0x15012C41), SH_UNT_EQ_5     , SH_ACS_SCOM_RO   );
+REG64( EX_TPLC21_TR1_TRACE_LO_DATA_REG                         , RULL(0x10012C41), SH_UNT_EX       , SH_ACS_SCOM_RO   );
+REG64( EX_0_TPLC21_TR1_TRACE_LO_DATA_REG                       , RULL(0x10012C41), SH_UNT_EX_0     , SH_ACS_SCOM_RO   );
+REG64( EX_2_TPLC21_TR1_TRACE_LO_DATA_REG                       , RULL(0x11012C41), SH_UNT_EX_2     , SH_ACS_SCOM_RO   );
+REG64( EX_4_TPLC21_TR1_TRACE_LO_DATA_REG                       , RULL(0x12012C41), SH_UNT_EX_4     , SH_ACS_SCOM_RO   );
+REG64( EX_6_TPLC21_TR1_TRACE_LO_DATA_REG                       , RULL(0x13012C41), SH_UNT_EX_6     , SH_ACS_SCOM_RO   );
+REG64( EX_8_TPLC21_TR1_TRACE_LO_DATA_REG                       , RULL(0x14012C41), SH_UNT_EX_8     , SH_ACS_SCOM_RO   );
+REG64( EX_10_TPLC21_TR1_TRACE_LO_DATA_REG                      , RULL(0x15012C41), SH_UNT_EX_10    , SH_ACS_SCOM_RO   );
 
-REG64( EQ_TPLC21_TR1_TRACE_TRCTRL_CONFIG                       , RULL(0x10013142), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC21_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x10013142), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC21_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x11013142), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC21_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x12013142), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC21_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x13013142), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC21_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x14013142), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC21_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x15013142), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_1_TPLC21_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x10013142), SH_UNT_EX_1     , SH_ACS_SCOM      );
-REG64( EX_3_TPLC21_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x11013142), SH_UNT_EX_3     , SH_ACS_SCOM      );
-REG64( EX_5_TPLC21_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x12013142), SH_UNT_EX_5     , SH_ACS_SCOM      );
-REG64( EX_7_TPLC21_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x13013142), SH_UNT_EX_7     , SH_ACS_SCOM      );
-REG64( EX_9_TPLC21_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x14013142), SH_UNT_EX_9     , SH_ACS_SCOM      );
-REG64( EX_11_TPLC21_TR1_TRACE_TRCTRL_CONFIG                    , RULL(0x15013142), SH_UNT_EX_11    , SH_ACS_SCOM      );
+REG64( EQ_TPLC21_TR1_TRACE_TRCTRL_CONFIG                       , RULL(0x10012C42), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC21_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x10012C42), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC21_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x11012C42), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC21_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x12012C42), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC21_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x13012C42), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC21_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x14012C42), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC21_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x15012C42), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_TPLC21_TR1_TRACE_TRCTRL_CONFIG                       , RULL(0x10012C42), SH_UNT_EX       , SH_ACS_SCOM      );
+REG64( EX_0_TPLC21_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x10012C42), SH_UNT_EX_0     , SH_ACS_SCOM      );
+REG64( EX_2_TPLC21_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x11012C42), SH_UNT_EX_2     , SH_ACS_SCOM      );
+REG64( EX_4_TPLC21_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x12012C42), SH_UNT_EX_4     , SH_ACS_SCOM      );
+REG64( EX_6_TPLC21_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x13012C42), SH_UNT_EX_6     , SH_ACS_SCOM      );
+REG64( EX_8_TPLC21_TR1_TRACE_TRCTRL_CONFIG                     , RULL(0x14012C42), SH_UNT_EX_8     , SH_ACS_SCOM      );
+REG64( EX_10_TPLC21_TR1_TRACE_TRCTRL_CONFIG                    , RULL(0x15012C42), SH_UNT_EX_10    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC21_TR1_TRACE_TRDATA_CONFIG_0                     , RULL(0x10013143), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC21_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x10013143), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC21_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x11013143), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC21_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x12013143), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC21_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x13013143), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC21_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x14013143), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC21_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x15013143), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_1_TPLC21_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x10013143), SH_UNT_EX_1     , SH_ACS_SCOM      );
-REG64( EX_3_TPLC21_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x11013143), SH_UNT_EX_3     , SH_ACS_SCOM      );
-REG64( EX_5_TPLC21_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x12013143), SH_UNT_EX_5     , SH_ACS_SCOM      );
-REG64( EX_7_TPLC21_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x13013143), SH_UNT_EX_7     , SH_ACS_SCOM      );
-REG64( EX_9_TPLC21_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x14013143), SH_UNT_EX_9     , SH_ACS_SCOM      );
-REG64( EX_11_TPLC21_TR1_TRACE_TRDATA_CONFIG_0                  , RULL(0x15013143), SH_UNT_EX_11    , SH_ACS_SCOM      );
+REG64( EQ_TPLC21_TR1_TRACE_TRDATA_CONFIG_0                     , RULL(0x10012C43), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC21_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x10012C43), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC21_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x11012C43), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC21_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x12012C43), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC21_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x13012C43), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC21_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x14012C43), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC21_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x15012C43), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_TPLC21_TR1_TRACE_TRDATA_CONFIG_0                     , RULL(0x10012C43), SH_UNT_EX       , SH_ACS_SCOM      );
+REG64( EX_0_TPLC21_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x10012C43), SH_UNT_EX_0     , SH_ACS_SCOM      );
+REG64( EX_2_TPLC21_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x11012C43), SH_UNT_EX_2     , SH_ACS_SCOM      );
+REG64( EX_4_TPLC21_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x12012C43), SH_UNT_EX_4     , SH_ACS_SCOM      );
+REG64( EX_6_TPLC21_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x13012C43), SH_UNT_EX_6     , SH_ACS_SCOM      );
+REG64( EX_8_TPLC21_TR1_TRACE_TRDATA_CONFIG_0                   , RULL(0x14012C43), SH_UNT_EX_8     , SH_ACS_SCOM      );
+REG64( EX_10_TPLC21_TR1_TRACE_TRDATA_CONFIG_0                  , RULL(0x15012C43), SH_UNT_EX_10    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC21_TR1_TRACE_TRDATA_CONFIG_1                     , RULL(0x10013144), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC21_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x10013144), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC21_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x11013144), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC21_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x12013144), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC21_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x13013144), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC21_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x14013144), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC21_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x15013144), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_1_TPLC21_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x10013144), SH_UNT_EX_1     , SH_ACS_SCOM      );
-REG64( EX_3_TPLC21_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x11013144), SH_UNT_EX_3     , SH_ACS_SCOM      );
-REG64( EX_5_TPLC21_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x12013144), SH_UNT_EX_5     , SH_ACS_SCOM      );
-REG64( EX_7_TPLC21_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x13013144), SH_UNT_EX_7     , SH_ACS_SCOM      );
-REG64( EX_9_TPLC21_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x14013144), SH_UNT_EX_9     , SH_ACS_SCOM      );
-REG64( EX_11_TPLC21_TR1_TRACE_TRDATA_CONFIG_1                  , RULL(0x15013144), SH_UNT_EX_11    , SH_ACS_SCOM      );
+REG64( EQ_TPLC21_TR1_TRACE_TRDATA_CONFIG_1                     , RULL(0x10012C44), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC21_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x10012C44), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC21_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x11012C44), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC21_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x12012C44), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC21_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x13012C44), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC21_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x14012C44), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC21_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x15012C44), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_TPLC21_TR1_TRACE_TRDATA_CONFIG_1                     , RULL(0x10012C44), SH_UNT_EX       , SH_ACS_SCOM      );
+REG64( EX_0_TPLC21_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x10012C44), SH_UNT_EX_0     , SH_ACS_SCOM      );
+REG64( EX_2_TPLC21_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x11012C44), SH_UNT_EX_2     , SH_ACS_SCOM      );
+REG64( EX_4_TPLC21_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x12012C44), SH_UNT_EX_4     , SH_ACS_SCOM      );
+REG64( EX_6_TPLC21_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x13012C44), SH_UNT_EX_6     , SH_ACS_SCOM      );
+REG64( EX_8_TPLC21_TR1_TRACE_TRDATA_CONFIG_1                   , RULL(0x14012C44), SH_UNT_EX_8     , SH_ACS_SCOM      );
+REG64( EX_10_TPLC21_TR1_TRACE_TRDATA_CONFIG_1                  , RULL(0x15012C44), SH_UNT_EX_10    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC21_TR1_TRACE_TRDATA_CONFIG_2                     , RULL(0x10013145), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC21_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x10013145), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC21_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x11013145), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC21_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x12013145), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC21_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x13013145), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC21_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x14013145), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC21_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x15013145), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_1_TPLC21_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x10013145), SH_UNT_EX_1     , SH_ACS_SCOM      );
-REG64( EX_3_TPLC21_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x11013145), SH_UNT_EX_3     , SH_ACS_SCOM      );
-REG64( EX_5_TPLC21_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x12013145), SH_UNT_EX_5     , SH_ACS_SCOM      );
-REG64( EX_7_TPLC21_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x13013145), SH_UNT_EX_7     , SH_ACS_SCOM      );
-REG64( EX_9_TPLC21_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x14013145), SH_UNT_EX_9     , SH_ACS_SCOM      );
-REG64( EX_11_TPLC21_TR1_TRACE_TRDATA_CONFIG_2                  , RULL(0x15013145), SH_UNT_EX_11    , SH_ACS_SCOM      );
+REG64( EQ_TPLC21_TR1_TRACE_TRDATA_CONFIG_2                     , RULL(0x10012C45), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC21_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x10012C45), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC21_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x11012C45), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC21_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x12012C45), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC21_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x13012C45), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC21_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x14012C45), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC21_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x15012C45), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_TPLC21_TR1_TRACE_TRDATA_CONFIG_2                     , RULL(0x10012C45), SH_UNT_EX       , SH_ACS_SCOM      );
+REG64( EX_0_TPLC21_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x10012C45), SH_UNT_EX_0     , SH_ACS_SCOM      );
+REG64( EX_2_TPLC21_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x11012C45), SH_UNT_EX_2     , SH_ACS_SCOM      );
+REG64( EX_4_TPLC21_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x12012C45), SH_UNT_EX_4     , SH_ACS_SCOM      );
+REG64( EX_6_TPLC21_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x13012C45), SH_UNT_EX_6     , SH_ACS_SCOM      );
+REG64( EX_8_TPLC21_TR1_TRACE_TRDATA_CONFIG_2                   , RULL(0x14012C45), SH_UNT_EX_8     , SH_ACS_SCOM      );
+REG64( EX_10_TPLC21_TR1_TRACE_TRDATA_CONFIG_2                  , RULL(0x15012C45), SH_UNT_EX_10    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC21_TR1_TRACE_TRDATA_CONFIG_3                     , RULL(0x10013146), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC21_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x10013146), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC21_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x11013146), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC21_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x12013146), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC21_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x13013146), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC21_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x14013146), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC21_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x15013146), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_1_TPLC21_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x10013146), SH_UNT_EX_1     , SH_ACS_SCOM      );
-REG64( EX_3_TPLC21_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x11013146), SH_UNT_EX_3     , SH_ACS_SCOM      );
-REG64( EX_5_TPLC21_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x12013146), SH_UNT_EX_5     , SH_ACS_SCOM      );
-REG64( EX_7_TPLC21_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x13013146), SH_UNT_EX_7     , SH_ACS_SCOM      );
-REG64( EX_9_TPLC21_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x14013146), SH_UNT_EX_9     , SH_ACS_SCOM      );
-REG64( EX_11_TPLC21_TR1_TRACE_TRDATA_CONFIG_3                  , RULL(0x15013146), SH_UNT_EX_11    , SH_ACS_SCOM      );
+REG64( EQ_TPLC21_TR1_TRACE_TRDATA_CONFIG_3                     , RULL(0x10012C46), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC21_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x10012C46), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC21_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x11012C46), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC21_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x12012C46), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC21_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x13012C46), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC21_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x14012C46), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC21_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x15012C46), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_TPLC21_TR1_TRACE_TRDATA_CONFIG_3                     , RULL(0x10012C46), SH_UNT_EX       , SH_ACS_SCOM      );
+REG64( EX_0_TPLC21_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x10012C46), SH_UNT_EX_0     , SH_ACS_SCOM      );
+REG64( EX_2_TPLC21_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x11012C46), SH_UNT_EX_2     , SH_ACS_SCOM      );
+REG64( EX_4_TPLC21_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x12012C46), SH_UNT_EX_4     , SH_ACS_SCOM      );
+REG64( EX_6_TPLC21_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x13012C46), SH_UNT_EX_6     , SH_ACS_SCOM      );
+REG64( EX_8_TPLC21_TR1_TRACE_TRDATA_CONFIG_3                   , RULL(0x14012C46), SH_UNT_EX_8     , SH_ACS_SCOM      );
+REG64( EX_10_TPLC21_TR1_TRACE_TRDATA_CONFIG_3                  , RULL(0x15012C46), SH_UNT_EX_10    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC21_TR1_TRACE_TRDATA_CONFIG_4                     , RULL(0x10013147), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC21_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x10013147), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC21_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x11013147), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC21_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x12013147), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC21_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x13013147), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC21_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x14013147), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC21_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x15013147), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_1_TPLC21_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x10013147), SH_UNT_EX_1     , SH_ACS_SCOM      );
-REG64( EX_3_TPLC21_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x11013147), SH_UNT_EX_3     , SH_ACS_SCOM      );
-REG64( EX_5_TPLC21_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x12013147), SH_UNT_EX_5     , SH_ACS_SCOM      );
-REG64( EX_7_TPLC21_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x13013147), SH_UNT_EX_7     , SH_ACS_SCOM      );
-REG64( EX_9_TPLC21_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x14013147), SH_UNT_EX_9     , SH_ACS_SCOM      );
-REG64( EX_11_TPLC21_TR1_TRACE_TRDATA_CONFIG_4                  , RULL(0x15013147), SH_UNT_EX_11    , SH_ACS_SCOM      );
+REG64( EQ_TPLC21_TR1_TRACE_TRDATA_CONFIG_4                     , RULL(0x10012C47), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC21_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x10012C47), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC21_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x11012C47), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC21_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x12012C47), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC21_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x13012C47), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC21_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x14012C47), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC21_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x15012C47), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_TPLC21_TR1_TRACE_TRDATA_CONFIG_4                     , RULL(0x10012C47), SH_UNT_EX       , SH_ACS_SCOM      );
+REG64( EX_0_TPLC21_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x10012C47), SH_UNT_EX_0     , SH_ACS_SCOM      );
+REG64( EX_2_TPLC21_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x11012C47), SH_UNT_EX_2     , SH_ACS_SCOM      );
+REG64( EX_4_TPLC21_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x12012C47), SH_UNT_EX_4     , SH_ACS_SCOM      );
+REG64( EX_6_TPLC21_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x13012C47), SH_UNT_EX_6     , SH_ACS_SCOM      );
+REG64( EX_8_TPLC21_TR1_TRACE_TRDATA_CONFIG_4                   , RULL(0x14012C47), SH_UNT_EX_8     , SH_ACS_SCOM      );
+REG64( EX_10_TPLC21_TR1_TRACE_TRDATA_CONFIG_4                  , RULL(0x15012C47), SH_UNT_EX_10    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC21_TR1_TRACE_TRDATA_CONFIG_5                     , RULL(0x10013148), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC21_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x10013148), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC21_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x11013148), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC21_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x12013148), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC21_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x13013148), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC21_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x14013148), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC21_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x15013148), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_1_TPLC21_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x10013148), SH_UNT_EX_1     , SH_ACS_SCOM      );
-REG64( EX_3_TPLC21_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x11013148), SH_UNT_EX_3     , SH_ACS_SCOM      );
-REG64( EX_5_TPLC21_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x12013148), SH_UNT_EX_5     , SH_ACS_SCOM      );
-REG64( EX_7_TPLC21_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x13013148), SH_UNT_EX_7     , SH_ACS_SCOM      );
-REG64( EX_9_TPLC21_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x14013148), SH_UNT_EX_9     , SH_ACS_SCOM      );
-REG64( EX_11_TPLC21_TR1_TRACE_TRDATA_CONFIG_5                  , RULL(0x15013148), SH_UNT_EX_11    , SH_ACS_SCOM      );
+REG64( EQ_TPLC21_TR1_TRACE_TRDATA_CONFIG_5                     , RULL(0x10012C48), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC21_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x10012C48), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC21_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x11012C48), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC21_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x12012C48), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC21_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x13012C48), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC21_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x14012C48), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC21_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x15012C48), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_TPLC21_TR1_TRACE_TRDATA_CONFIG_5                     , RULL(0x10012C48), SH_UNT_EX       , SH_ACS_SCOM      );
+REG64( EX_0_TPLC21_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x10012C48), SH_UNT_EX_0     , SH_ACS_SCOM      );
+REG64( EX_2_TPLC21_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x11012C48), SH_UNT_EX_2     , SH_ACS_SCOM      );
+REG64( EX_4_TPLC21_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x12012C48), SH_UNT_EX_4     , SH_ACS_SCOM      );
+REG64( EX_6_TPLC21_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x13012C48), SH_UNT_EX_6     , SH_ACS_SCOM      );
+REG64( EX_8_TPLC21_TR1_TRACE_TRDATA_CONFIG_5                   , RULL(0x14012C48), SH_UNT_EX_8     , SH_ACS_SCOM      );
+REG64( EX_10_TPLC21_TR1_TRACE_TRDATA_CONFIG_5                  , RULL(0x15012C48), SH_UNT_EX_10    , SH_ACS_SCOM      );
 
-REG64( EQ_TPLC21_TR1_TRACE_TRDATA_CONFIG_9                     , RULL(0x10013149), SH_UNT_EQ       , SH_ACS_SCOM      );
-REG64( EQ_0_TPLC21_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x10013149), SH_UNT_EQ_0     , SH_ACS_SCOM      );
-REG64( EQ_1_TPLC21_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x11013149), SH_UNT_EQ_1     , SH_ACS_SCOM      );
-REG64( EQ_2_TPLC21_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x12013149), SH_UNT_EQ_2     , SH_ACS_SCOM      );
-REG64( EQ_3_TPLC21_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x13013149), SH_UNT_EQ_3     , SH_ACS_SCOM      );
-REG64( EQ_4_TPLC21_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x14013149), SH_UNT_EQ_4     , SH_ACS_SCOM      );
-REG64( EQ_5_TPLC21_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x15013149), SH_UNT_EQ_5     , SH_ACS_SCOM      );
-REG64( EX_1_TPLC21_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x10013149), SH_UNT_EX_1     , SH_ACS_SCOM      );
-REG64( EX_3_TPLC21_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x11013149), SH_UNT_EX_3     , SH_ACS_SCOM      );
-REG64( EX_5_TPLC21_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x12013149), SH_UNT_EX_5     , SH_ACS_SCOM      );
-REG64( EX_7_TPLC21_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x13013149), SH_UNT_EX_7     , SH_ACS_SCOM      );
-REG64( EX_9_TPLC21_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x14013149), SH_UNT_EX_9     , SH_ACS_SCOM      );
-REG64( EX_11_TPLC21_TR1_TRACE_TRDATA_CONFIG_9                  , RULL(0x15013149), SH_UNT_EX_11    , SH_ACS_SCOM      );
+REG64( EQ_TPLC21_TR1_TRACE_TRDATA_CONFIG_9                     , RULL(0x10012C49), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_TPLC21_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x10012C49), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_TPLC21_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x11012C49), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_TPLC21_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x12012C49), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_TPLC21_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x13012C49), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_TPLC21_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x14012C49), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_TPLC21_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x15012C49), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_TPLC21_TR1_TRACE_TRDATA_CONFIG_9                     , RULL(0x10012C49), SH_UNT_EX       , SH_ACS_SCOM      );
+REG64( EX_0_TPLC21_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x10012C49), SH_UNT_EX_0     , SH_ACS_SCOM      );
+REG64( EX_2_TPLC21_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x11012C49), SH_UNT_EX_2     , SH_ACS_SCOM      );
+REG64( EX_4_TPLC21_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x12012C49), SH_UNT_EX_4     , SH_ACS_SCOM      );
+REG64( EX_6_TPLC21_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x13012C49), SH_UNT_EX_6     , SH_ACS_SCOM      );
+REG64( EX_8_TPLC21_TR1_TRACE_TRDATA_CONFIG_9                   , RULL(0x14012C49), SH_UNT_EX_8     , SH_ACS_SCOM      );
+REG64( EX_10_TPLC21_TR1_TRACE_TRDATA_CONFIG_9                  , RULL(0x15012C49), SH_UNT_EX_10    , SH_ACS_SCOM      );
 
 REG64( C_V0_HMER_WAND                                          , RULL(0x20010A92), SH_UNT_C        ,
        SH_ACS_SCOM1_WAND );
@@ -23528,5 +23433,64 @@ REG64( EX_10_XSTOP_INTERRUPT_REG                               , RULL(0x340F001C
        SH_ACS_SCOM      ); //DUPS: 350F001C,
 REG64( EX_11_XSTOP_INTERRUPT_REG                               , RULL(0x360F001C), SH_UNT_EX_11    ,
        SH_ACS_SCOM      ); //DUPS: 370F001C,
+
+REG64( C_XTRA_TRACE_MODE                                       , RULL(0x200107D1), SH_UNT_C        , SH_ACS_SCOM      );
+REG64( C_0_XTRA_TRACE_MODE                                     , RULL(0x200107D1), SH_UNT_C_0      , SH_ACS_SCOM      );
+REG64( C_1_XTRA_TRACE_MODE                                     , RULL(0x210107D1), SH_UNT_C_1      , SH_ACS_SCOM      );
+REG64( C_2_XTRA_TRACE_MODE                                     , RULL(0x220107D1), SH_UNT_C_2      , SH_ACS_SCOM      );
+REG64( C_3_XTRA_TRACE_MODE                                     , RULL(0x230107D1), SH_UNT_C_3      , SH_ACS_SCOM      );
+REG64( C_4_XTRA_TRACE_MODE                                     , RULL(0x240107D1), SH_UNT_C_4      , SH_ACS_SCOM      );
+REG64( C_5_XTRA_TRACE_MODE                                     , RULL(0x250107D1), SH_UNT_C_5      , SH_ACS_SCOM      );
+REG64( C_6_XTRA_TRACE_MODE                                     , RULL(0x260107D1), SH_UNT_C_6      , SH_ACS_SCOM      );
+REG64( C_7_XTRA_TRACE_MODE                                     , RULL(0x270107D1), SH_UNT_C_7      , SH_ACS_SCOM      );
+REG64( C_8_XTRA_TRACE_MODE                                     , RULL(0x280107D1), SH_UNT_C_8      , SH_ACS_SCOM      );
+REG64( C_9_XTRA_TRACE_MODE                                     , RULL(0x290107D1), SH_UNT_C_9      , SH_ACS_SCOM      );
+REG64( C_10_XTRA_TRACE_MODE                                    , RULL(0x2A0107D1), SH_UNT_C_10     , SH_ACS_SCOM      );
+REG64( C_11_XTRA_TRACE_MODE                                    , RULL(0x2B0107D1), SH_UNT_C_11     , SH_ACS_SCOM      );
+REG64( C_12_XTRA_TRACE_MODE                                    , RULL(0x2C0107D1), SH_UNT_C_12     , SH_ACS_SCOM      );
+REG64( C_13_XTRA_TRACE_MODE                                    , RULL(0x2D0107D1), SH_UNT_C_13     , SH_ACS_SCOM      );
+REG64( C_14_XTRA_TRACE_MODE                                    , RULL(0x2E0107D1), SH_UNT_C_14     , SH_ACS_SCOM      );
+REG64( C_15_XTRA_TRACE_MODE                                    , RULL(0x2F0107D1), SH_UNT_C_15     , SH_ACS_SCOM      );
+REG64( C_16_XTRA_TRACE_MODE                                    , RULL(0x300107D1), SH_UNT_C_16     , SH_ACS_SCOM      );
+REG64( C_17_XTRA_TRACE_MODE                                    , RULL(0x310107D1), SH_UNT_C_17     , SH_ACS_SCOM      );
+REG64( C_18_XTRA_TRACE_MODE                                    , RULL(0x320107D1), SH_UNT_C_18     , SH_ACS_SCOM      );
+REG64( C_19_XTRA_TRACE_MODE                                    , RULL(0x330107D1), SH_UNT_C_19     , SH_ACS_SCOM      );
+REG64( C_20_XTRA_TRACE_MODE                                    , RULL(0x340107D1), SH_UNT_C_20     , SH_ACS_SCOM      );
+REG64( C_21_XTRA_TRACE_MODE                                    , RULL(0x350107D1), SH_UNT_C_21     , SH_ACS_SCOM      );
+REG64( C_22_XTRA_TRACE_MODE                                    , RULL(0x360107D1), SH_UNT_C_22     , SH_ACS_SCOM      );
+REG64( C_23_XTRA_TRACE_MODE                                    , RULL(0x370107D1), SH_UNT_C_23     , SH_ACS_SCOM      );
+REG64( EQ_XTRA_TRACE_MODE                                      , RULL(0x100107D1), SH_UNT_EQ       , SH_ACS_SCOM      );
+REG64( EQ_0_XTRA_TRACE_MODE                                    , RULL(0x100107D1), SH_UNT_EQ_0     , SH_ACS_SCOM      );
+REG64( EQ_1_XTRA_TRACE_MODE                                    , RULL(0x110107D1), SH_UNT_EQ_1     , SH_ACS_SCOM      );
+REG64( EQ_2_XTRA_TRACE_MODE                                    , RULL(0x120107D1), SH_UNT_EQ_2     , SH_ACS_SCOM      );
+REG64( EQ_3_XTRA_TRACE_MODE                                    , RULL(0x130107D1), SH_UNT_EQ_3     , SH_ACS_SCOM      );
+REG64( EQ_4_XTRA_TRACE_MODE                                    , RULL(0x140107D1), SH_UNT_EQ_4     , SH_ACS_SCOM      );
+REG64( EQ_5_XTRA_TRACE_MODE                                    , RULL(0x150107D1), SH_UNT_EQ_5     , SH_ACS_SCOM      );
+REG64( EX_XTRA_TRACE_MODE                                      , RULL(0x200107D1), SH_UNT_EX       ,
+       SH_ACS_SCOM      ); //DUPS: 210107D1,
+REG64( EX_0_XTRA_TRACE_MODE                                    , RULL(0x200107D1), SH_UNT_EX_0     ,
+       SH_ACS_SCOM      ); //DUPS: 210107D1,
+REG64( EX_1_XTRA_TRACE_MODE                                    , RULL(0x220107D1), SH_UNT_EX_1     ,
+       SH_ACS_SCOM      ); //DUPS: 230107D1,
+REG64( EX_2_XTRA_TRACE_MODE                                    , RULL(0x240107D1), SH_UNT_EX_2     ,
+       SH_ACS_SCOM      ); //DUPS: 250107D1,
+REG64( EX_3_XTRA_TRACE_MODE                                    , RULL(0x260107D1), SH_UNT_EX_3     ,
+       SH_ACS_SCOM      ); //DUPS: 270107D1,
+REG64( EX_4_XTRA_TRACE_MODE                                    , RULL(0x280107D1), SH_UNT_EX_4     ,
+       SH_ACS_SCOM      ); //DUPS: 290107D1,
+REG64( EX_5_XTRA_TRACE_MODE                                    , RULL(0x2A0107D1), SH_UNT_EX_5     ,
+       SH_ACS_SCOM      ); //DUPS: 2B0107D1,
+REG64( EX_6_XTRA_TRACE_MODE                                    , RULL(0x2C0107D1), SH_UNT_EX_6     ,
+       SH_ACS_SCOM      ); //DUPS: 2D0107D1,
+REG64( EX_7_XTRA_TRACE_MODE                                    , RULL(0x2E0107D1), SH_UNT_EX_7     ,
+       SH_ACS_SCOM      ); //DUPS: 2F0107D1,
+REG64( EX_8_XTRA_TRACE_MODE                                    , RULL(0x300107D1), SH_UNT_EX_8     ,
+       SH_ACS_SCOM      ); //DUPS: 310107D1,
+REG64( EX_9_XTRA_TRACE_MODE                                    , RULL(0x320107D1), SH_UNT_EX_9     ,
+       SH_ACS_SCOM      ); //DUPS: 330107D1,
+REG64( EX_10_XTRA_TRACE_MODE                                   , RULL(0x340107D1), SH_UNT_EX_10    ,
+       SH_ACS_SCOM      ); //DUPS: 350107D1,
+REG64( EX_11_XTRA_TRACE_MODE                                   , RULL(0x360107D1), SH_UNT_EX_11    ,
+       SH_ACS_SCOM      ); //DUPS: 370107D1,
 #endif
 
