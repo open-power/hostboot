@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,5 +52,24 @@ REG64_FLD( EQ_QPPM_QACCR_L2_EX0_CLKGLM_SEL                         , 19  , SH_UN
 
 REG64_FLD( EQ_QPPM_QACCR_L2_EX1_CLKGLM_SEL                         , 39  , SH_UNT_EQ       , SH_ACS_SCOM2    ,
            SH_FLD_L2_EX1_CLKGLM_SEL );
+
+REG64_FLD( EQ_CPLT_CTRL1_TC_REGION1_FENCE                          , 5   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TC_REGION1_FENCE );
+REG64_FLD( EQ_CPLT_CTRL1_TC_REGION2_FENCE                          , 6   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TC_REGION2_FENCE );
+REG64_FLD( EQ_CPLT_CTRL1_TC_REGION3_FENCE                          , 7   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TC_REGION3_FENCE );
+REG64_FLD( EQ_CPLT_CTRL1_TC_REGION4_FENCE                          , 8   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TC_REGION4_FENCE );
+REG64_FLD( EQ_CPLT_CTRL1_TC_REGION5_FENCE                          , 9   , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TC_REGION5_FENCE );
+REG64_FLD( EQ_CPLT_CTRL1_TC_REGION6_FENCE                          , 10  , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TC_REGION6_FENCE );
+REG64_FLD( EQ_CPLT_CTRL1_TC_REGION7_FENCE                          , 11  , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TC_REGION7_FENCE );
+REG64_FLD( EQ_CPLT_CTRL1_TC_REGION8_FENCE                          , 12  , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TC_REGION8_FENCE );
+REG64_FLD( EQ_CPLT_CTRL1_TC_REGION9_FENCE                          , 13  , SH_UNT_EQ       , SH_ACS_SCOM2_CLEAR,
+           SH_FLD_TC_REGION9_FENCE );
 
 #endif
