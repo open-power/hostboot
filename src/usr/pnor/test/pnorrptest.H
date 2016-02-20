@@ -506,7 +506,8 @@ class PnorRpTest : public CxxTest::TestSuite
      *        first entry because they are checked separately in pnorrp.C
      *
      */
-    void test_TOC(void)
+    //TODO RTC:146146 Re-enable test_TOC testcase in pnorrptest.H
+    void _test_TOC(void)
     {
         TRACFCOMP(g_trac_pnor, "PnorRpTest::test_TOC Start" );
 
@@ -597,6 +598,9 @@ class PnorRpTest : public CxxTest::TestSuite
             // Fix cur_TOC first entry
             PnorRP::getInstance().writeToDevice( offset + FFS_HDR_SIZE, 0,
                                                  false, tocEntry );
+            //Read the corrected entry into iv_TOC
+            PnorRP::getInstance().readTOC();
+
         }
 
         delete tocHeader;
