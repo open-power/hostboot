@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -425,6 +425,10 @@ const char* EntityPath::pathElementTypeAsString(
             return "PEC";
         case TYPE_PHB:
             return "PHB";
+        case TYPE_SYSREFCLKENDPT:
+            return "SYSREFCLKENDPT";
+        case TYPE_MFREFCLKENDPT:
+            return "MFREFCLKENDPT";
         default:
             return "Unknown path type";
     }
