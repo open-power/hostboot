@@ -7,7 +7,7 @@
 <!--                                                                        -->
 <!-- EKB Project                                                            -->
 <!--                                                                        -->
-<!-- COPYRIGHT 2015                                                         -->
+<!-- COPYRIGHT 2015,2016                                                    -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -310,10 +310,13 @@
       consumer: p9_setup_bars
       firmware notes:
         Array index: BAR number (0:2)
+        index 0~1 for BAR0/1
+        index 2 for PHB
+        index 3 for interrupt
     </description>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0x0, ENABLE = 0x1</enum>
-    <array>3</array>
+    <array>4</array>
     <platInit/>
     <persistRuntime/>
   </attribute>
@@ -330,9 +333,12 @@
         Array index: BAR number (0:2)
         NOTE: BAR0/1 registers cover RA 8:47
         NOTE: BAR2 registers covers RA 8:49
+        index 0~1 for BAR0/1
+        index 2 for PHB
+        index 3 for interrupt
     </description>
     <valueType>uint64</valueType>
-    <array>3</array>
+    <array>4</array>
     <platInit/>
     <persistRuntime/>
   </attribute>
@@ -347,7 +353,10 @@
       firmware notes:
         Array index: BAR number (0:2)
         NOTE: supported BAR0/1 sizes are from 64KB-32PB
-        NOTE: only supported BAR2 size is 4KB
+        NOTE: only supported BAR2 size is 16KB
+        index 0~1 for BAR0/1
+        index 2 for PHB, actually not used
+        index 3 for interrupt, actually not used
     </description>
     <valueType>uint64</valueType>
     <enum>
@@ -391,9 +400,9 @@
       256_KB = 0x000000FFFFFFFFFC,
       128_KB = 0x000000FFFFFFFFFE,
        64_KB = 0x000000FFFFFFFFFF,
-        4_KB = 0xFFFFFFFFFFFFFFFF
+       16_KB = 0xFFFFFFFFFFFFFFFF
     </enum>
-    <array>3</array>
+    <array>4</array>
     <platInit/>
     <persistRuntime/>
   </attribute>
@@ -497,4 +506,248 @@
     <persistRuntime/>
   </attribute>
   <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_PCS_RX_CDR_GAIN</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      PCS rx cdr gains
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        The value of rx cdr gains for PCS.
+        Array index: Configuration number
+        index 0~3 for CONFIG0~3
+    </description>
+    <valueType>uint8</valueType>
+    <array>4</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_PCS_RX_LOFF_CONTROL</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      PCS rx loff control
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        The value of rx loff control for PCS.
+        Array index: Configuration number
+        index 0~3 for CONFIG0~3
+    </description>
+    <valueType>uint16</valueType>
+    <array>4</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_PCS_RX_VGA_CONTRL_REGISTER3</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      PCS rx vga control register3
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        The value of rx vga control register3.
+        Array index: Configuration number
+        index 0~3 for CONFIG0~3
+    </description>
+    <valueType>uint16</valueType>
+    <array>4</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <attribute>
+    <id>ATTR_PROC_PCIE_PCS_RX_ROT_CDR_LOOKAHEAD</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      Value of PCS RX ROT CNTL CDR lookahead
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        0 for disable, 1 for enable
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <attribute>
+    <id>ATTR_PROC_PCIE_PCS_RX_ROT_CDR_SSC</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      Value of PCS RX ROT CNTL CDR ssc
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        0 for disable, 1 for enable
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <attribute>
+    <id>ATTR_PROC_PCIE_PCS_PCLCK_CNTL_PLLA</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      Value of PCS pclck control plla
+      creator: platform
+      consumer: p9_pcie_scominit
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <attribute>
+    <id>ATTR_PROC_PCIE_PCS_PCLCK_CNTL_PLLB</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      Value of PCS pclck control pllb
+      creator: platform
+      consumer: p9_pcie_scominit
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <attribute>
+    <id>ATTR_PROC_PCIE_PCS_TX_DCLCK_ROT</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      Value of PCS tx dclck rotator override
+      creator: platform
+      consumer: p9_pcie_scominit
+    </description>
+    <valueType>uint16</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <attribute>
+    <id>ATTR_PROC_PCIE_PCS_TX_FIFO_CONFIG_OFFSET</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      Value of PCS tx fifo config offset
+      creator: platform
+      consumer: p9_pcie_scominit
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <attribute>
+    <id>ATTR_PROC_PCIE_PCS_TX_PCIE_RECV_DETECT_CNTL_REG1</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      Value of PCS tx pcie receiver detect control register 1
+      creator: platform
+      consumer: p9_pcie_scominit
+    </description>
+    <valueType>uint16</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <attribute>
+    <id>ATTR_PROC_PCIE_PCS_TX_PCIE_RECV_DETECT_CNTL_REG2</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      Value of PCS tx pcie receiver detect control register 2
+      creator: platform
+      consumer: p9_pcie_scominit
+    </description>
+    <valueType>uint16</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <attribute>
+    <id>ATTR_PROC_PCIE_PCS_TX_POWER_SEQ_ENABLE</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      Value of PCS tx power sequence enable
+      creator: platform
+      consumer: p9_pcie_scominit
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <attribute>
+    <id>ATTR_PROC_PCIE_PCS_RX_PHASE_ROTATOR_CNTL</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      Value of PCS rx phase rotator control
+      creator: platform
+      consumer: p9_pcie_scominit
+    </description>
+    <valueType>uint16</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <attribute>
+    <id>ATTR_PROC_PCIE_PCS_RX_VGA_CNTL_REG1</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      Value of PCS rx vga control register 1
+      creator: platform
+      consumer: p9_pcie_scominit
+    </description>
+    <valueType>uint16</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <attribute>
+    <id>ATTR_PROC_PCIE_PCS_RX_VGA_CNTL_REG2</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      Value of PCS rx vga control register 2
+      creator: platform
+      consumer: p9_pcie_scominit
+    </description>
+    <valueType>uint16</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <attribute>
+    <id>ATTR_PROC_PCIE_PCS_RX_SIGDET_CNTL</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      Value of PCS rx sigdet control
+      creator: platform
+      consumer: p9_pcie_scominit
+    </description>
+    <valueType>uint16</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <attribute>
+    <id>ATTR_PROC_PCIE_PCS_SYSTEM_CNTL</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      Value of PCS system control
+      creator: platform
+      consumer: p9_pcie_scominit
+    </description>
+    <valueType>uint16</valueType>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <attribute>
+    <id>ATTR_PROC_PCIE_PCS_M_CNTL</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      Value of PCS m1-m4 control
+      creator: platform
+      consumer: p9_pcie_scominit
+      Array index: 
+          0 -> M1
+          1 -> M2
+          2 -> M3
+          3 -> M4
+    </description>
+    <valueType>uint16</valueType>
+    <array>4</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
 </attributes>
+
