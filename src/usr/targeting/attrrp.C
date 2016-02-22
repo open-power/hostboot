@@ -496,28 +496,49 @@ namespace TARGETING
         return Singleton<AttrRP>::instance()._save(io_addr);
     }
 
+
+    uint64_t  AttrRP::maxSize( )
+    {
+        // Find total size of the sections.
+        uint64_t l_size = 0;
+        for( size_t i = 0;
+             i < Singleton<AttrRP>::instance().iv_sectionCount;
+             ++i)
+        {
+            l_size += ALIGN_PAGE(Singleton<AttrRP>::
+                          instance().iv_sections[i].size);
+        }
+
+        return(l_size);
+
+    } // end maxSize
+
+
     void* AttrRP::_save(uint64_t& io_addr)
     {
         TRACDCOMP(g_trac_targeting, "AttrRP::save: top @ 0x%lx", io_addr);
-        io_addr = ALIGN_PAGE_DOWN(io_addr);
 
         // Find total size of the sections.
-        uint64_t l_size = 0;
-        for(size_t i = 0; i < iv_sectionCount; ++i)
-        {
-            l_size += ALIGN_PAGE(iv_sections[i].size);
-        }
+        uint64_t l_size = maxSize();
 
-        // Determine bottom of the address region.
-        io_addr = io_addr - l_size;
-        // Align to 64KB for Opal
-        io_addr = ALIGN_DOWN_X(io_addr,64*KILOBYTE);
-
-
-        // Map in region.
-        void* region = mm_block_map(reinterpret_cast<void*>(io_addr),
-                                    l_size);
+        void* region = reinterpret_cast<void*>(io_addr);
         uint8_t* pointer = reinterpret_cast<uint8_t*>(region);
+
+        // For PHYP adjunct partition, use HDAT ptr as is
+        bool  l_isPhyp = TARGETING::is_phyp_load();
+        if (!l_isPhyp)
+        {
+            io_addr = ALIGN_PAGE_DOWN(io_addr);
+            // Determine bottom of the address region.
+            io_addr = io_addr - l_size;
+            // Align to 64KB for Opal
+            io_addr = ALIGN_DOWN_X(io_addr,64*KILOBYTE);
+
+            // Map in region.
+            region = mm_block_map(reinterpret_cast<void*>(io_addr),l_size);
+            pointer = reinterpret_cast<uint8_t*>(region);
+
+        } // end if NOT PHYP
 
         // Copy content.
         for (size_t i = 0; i < iv_sectionCount; ++i)

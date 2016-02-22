@@ -34,6 +34,9 @@
 #include <runtime/runtime.H>
 #include <devtree/devtreeif.H>
 #include <runtime/customize_attrs_for_payload.H>
+#include <targeting/common/util.H>
+
+
 #include <hbotcompid.H>
 
 using   namespace   ERRORLOG;
@@ -85,6 +88,23 @@ void* call_host_runtime_setup (void *io_pArgs)
         {
             break;
         }
+
+        // Fill in Hostboot runtime data for all nodes
+        // (adjunct partition)
+        if( TARGETING::is_phyp_load() )
+        {
+            // Write the HB runtime data into mainstore
+            l_err = RUNTIME::populate_hbRuntimeData();
+            if ( l_err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "Failed hbRuntimeData setup" );
+                // break from do loop if error occured
+                break;
+            }
+
+        } // end if phyp load
+
 
         //@TODO RTC:133848
 /*

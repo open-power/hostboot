@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -169,6 +171,16 @@ class AttrRP
          *  @return Virtual address to the region.
          */
         static void* save(uint64_t& io_addr);
+
+        /**
+         *  @brief Returns size needed to save all attributes
+         *
+         *  HDAT requires up front knowledge of largest section
+         *
+         *
+         *  @return Size of all attribute sections
+         */
+        static uint64_t  maxSize( );
 #endif
 
     protected:

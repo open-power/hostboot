@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -108,22 +108,28 @@ errlHndl_t VPD::vpd_load_rt_image(uint64_t & o_vpd_addr)
 
     do
     {
-        uint64_t vpd_addr = TARGETING::get_top_mem_addr();
+        void* vptr = reinterpret_cast<void*>(o_vpd_addr);
+        uint8_t* vpd_ptr = reinterpret_cast<uint8_t*>(vptr);
 
-        assert (vpd_addr != 0,
-                "bld_devtree: Top of memory was 0!");
+        // OPAL builds everything at top of memory.
+        // PHYP adjunct partition will use HDAT memory ptrs
+        bool  l_isPhyp = TARGETING::is_phyp_load();
+        if (!l_isPhyp)
+        {
+            o_vpd_addr = TARGETING::get_top_mem_addr();
+            assert (o_vpd_addr != 0,
+                    "bld_devtree: Top of memory was 0!");
 
-        vpd_addr -= VMM_RT_VPD_OFFSET;
+            o_vpd_addr -= VMM_RT_VPD_OFFSET;
 
-        o_vpd_addr = vpd_addr;
+            vptr = mm_block_map(reinterpret_cast<void*>(o_vpd_addr),
+                                VMM_RT_VPD_SIZE);
+            vpd_ptr = reinterpret_cast<uint8_t*>(vptr);
 
-        uint8_t * vpd_ptr = reinterpret_cast<uint8_t*>(vpd_addr);
+            assert(vptr != NULL,"bld_devtree: Could not map VPD memory");
+        } // if NOT phyp
 
-        void * vptr = mm_block_map(vpd_ptr, VMM_RT_VPD_SIZE);
 
-        assert(vptr != NULL,"bld_devtree: Could not map VPD memory");
-
-        vpd_ptr = static_cast<uint8_t*>(vptr);
         err = bld_vpd_image(PNOR::DIMM_JEDEC_VPD,
                                  vpd_ptr,
                                  VMM_DIMM_JEDEC_VPD_SIZE);
@@ -150,7 +156,10 @@ errlHndl_t VPD::vpd_load_rt_image(uint64_t & o_vpd_addr)
             break;
         }
 
-        mm_block_unmap(vptr);
+        if (!l_isPhyp)
+        {
+            mm_block_unmap(vptr);
+        }
 
     } while( 0 );
 

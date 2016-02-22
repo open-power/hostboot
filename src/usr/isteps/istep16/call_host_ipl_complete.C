@@ -41,6 +41,9 @@
 #include   <p9_switch_rec_attn.H>
 #include   <p9_switch_cfsim.H>
 
+#include    <targeting/attrrp.H>
+#include    <sys/internode.h>
+#include    <runtime/runtime.H>
 
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
@@ -60,6 +63,39 @@ void* call_host_ipl_complete (void *io_pArgs)
                "call_host_ipl_complete entry" );
     do
     {
+        // Initialize the RUNTIME DATA attributes
+        // that HDAT needs to allocate memory for us.
+        // -----------------------------------------
+        TARGETING::Target * sys = NULL;
+        TARGETING::targetService().getTopLevelTarget( sys );
+        assert(sys != NULL);
+
+        // Set number of pointer pairs for HDAT
+        //@TODO RTC:142908 Support multiple nodes in HBRT
+        const uint32_t NUM_NODES = 1;
+        uint32_t  l_numSections = NUM_NODES * HBRT_NUM_PTRS;
+        sys->setAttr<ATTR_HDAT_HBRT_NUM_SECTIONS>(l_numSections);
+
+        uint64_t  l_maxSecSize  = VMM_RT_VPD_SIZE;
+
+        // Set max size of a section for HDAT
+        TARGETING::ATTR_HDAT_HBRT_SECTION_SIZE_type l_secSize = {0};
+        uint64_t *l_p_secSize =
+            reinterpret_cast<uint64_t *>(&l_secSize);
+
+        uint32_t l_attrArraySize =
+            sizeof(ATTR_HDAT_HBRT_SECTION_SIZE_type) / sizeof(l_secSize[0]);
+        assert(l_numSections <= l_attrArraySize);
+
+        uint64_t  l_attrSize = AttrRP::maxSize();
+        l_maxSecSize = (l_attrSize > l_maxSecSize) ? l_attrSize : l_maxSecSize;
+
+        for (uint32_t  l_sect=0; (l_sect < l_numSections); l_sect++)
+        {
+            l_p_secSize[l_sect] = l_maxSecSize;
+        }
+        sys->setAttr<ATTR_HDAT_HBRT_SECTION_SIZE>(l_secSize);
+
 
 //@TODO RTC:150266 HWPs for Centuar+Cumulus
 // Need cen_switch_rec_attn for mem_chips
