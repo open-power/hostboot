@@ -407,4 +407,141 @@ REG64( PU_BCDE_OCIBAR_SCOM, RULL(0x00068014), SH_UNT, SH_ACS_SCOM_RW);
 REG64( PU_BCDE_STAT_SCOM, RULL(0x00068012), SH_UNT, SH_ACS_SCOM_RO);
 //WARNING: This register is not defined anymore in the figtree.
 REG64( PU_PBAXCFG_SCOM, RULL(0x00068021), SH_UNT, SH_ACS_SCOM);
+
+REG64( PEC_PCS_RX_CONFIG_MODE_REG                              , RULL(0x800004800D010C3F), SH_UNT_PEC      ,
+       SH_ACS_SCOM      );
+REG64( PEC_0_PCS_RX_CONFIG_MODE_REG                            , RULL(0x800004800D010C3F), SH_UNT_PEC_0    ,
+       SH_ACS_SCOM      );
+REG64( PEC_1_PCS_RX_CONFIG_MODE_REG                            , RULL(0x800004800E010C3F), SH_UNT_PEC_1    ,
+       SH_ACS_SCOM      );
+REG64( PEC_2_PCS_RX_CONFIG_MODE_REG                            , RULL(0x800004800F010C3F), SH_UNT_PEC_2    ,
+       SH_ACS_SCOM      );
+
+REG64( PEC_PCS_RX_ROT_CNTL_REG                                 , RULL(0x800004820D010C3F), SH_UNT_PEC      ,
+       SH_ACS_SCOM      );
+REG64( PEC_0_PCS_RX_ROT_CNTL_REG                               , RULL(0x800004820D010C3F), SH_UNT_PEC_0    ,
+       SH_ACS_SCOM      );
+REG64( PEC_1_PCS_RX_ROT_CNTL_REG                               , RULL(0x800004820E010C3F), SH_UNT_PEC_1    ,
+       SH_ACS_SCOM      );
+REG64( PEC_2_PCS_RX_ROT_CNTL_REG                               , RULL(0x800004820F010C3F), SH_UNT_PEC_2    ,
+       SH_ACS_SCOM      );
+
+REG64( PEC_PCS_RX_CDR_GAIN_REG                                 , RULL(0x800004B30D010C3F), SH_UNT_PEC      ,
+       SH_ACS_SCOM      );
+REG64( PEC_0_PCS_RX_CDR_GAIN_REG                               , RULL(0x800004B30D010C3F), SH_UNT_PEC_0    ,
+       SH_ACS_SCOM      );
+REG64( PEC_1_PCS_RX_CDR_GAIN_REG                               , RULL(0x800004B30E010C3F), SH_UNT_PEC_1    ,
+       SH_ACS_SCOM      );
+REG64( PEC_2_PCS_RX_CDR_GAIN_REG                               , RULL(0x800004B30F010C3F), SH_UNT_PEC_2    ,
+       SH_ACS_SCOM      );
+
+REG64( PEC_PCS_RX_LOFF_CONTROL_REG                             , RULL(0x800004A60D010C3F), SH_UNT_PEC      ,
+       SH_ACS_SCOM      );
+REG64( PEC_0_PCS_RX_LOFF_CONTROL_REG                           , RULL(0x800004A60D010C3F), SH_UNT_PEC_0    ,
+       SH_ACS_SCOM      );
+REG64( PEC_1_PCS_RX_LOFF_CONTROL_REG                           , RULL(0x800004A60E010C3F), SH_UNT_PEC_1    ,
+       SH_ACS_SCOM      );
+REG64( PEC_2_PCS_RX_LOFF_CONTROL_REG                           , RULL(0x800004A60F010C3F), SH_UNT_PEC_2    ,
+       SH_ACS_SCOM      );
+
+REG64( PEC_PCS_RX_SIGDET_CONTROL_REG                           , RULL(0x800004A70D010C3F), SH_UNT_PEC      ,
+       SH_ACS_SCOM      );
+REG64( PEC_0_PCS_RX_SIGDET_CONTROL_REG                         , RULL(0x800004A70D010C3F), SH_UNT_PEC_0    ,
+       SH_ACS_SCOM      );
+REG64( PEC_1_PCS_RX_SIGDET_CONTROL_REG                         , RULL(0x800004A70E010C3F), SH_UNT_PEC_1    ,
+       SH_ACS_SCOM      );
+REG64( PEC_2_PCS_RX_SIGDET_CONTROL_REG                         , RULL(0x800004A70F010C3F), SH_UNT_PEC_2    ,
+       SH_ACS_SCOM      );
+
+REG64( PEC_PCS_RX_VGA_CONTROL1_REG                             , RULL(0x8000048B0D010C3F), SH_UNT_PEC      ,
+       SH_ACS_SCOM      );
+REG64( PEC_0_PCS_RX_VGA_CONTROL1_REG                           , RULL(0x8000048B0D010C3F), SH_UNT_PEC_0    ,
+       SH_ACS_SCOM      );
+REG64( PEC_1_PCS_RX_VGA_CONTROL1_REG                           , RULL(0x8000048B0E010C3F), SH_UNT_PEC_1    ,
+       SH_ACS_SCOM      );
+REG64( PEC_2_PCS_RX_VGA_CONTROL1_REG                           , RULL(0x8000048B0F010C3F), SH_UNT_PEC_2    ,
+       SH_ACS_SCOM      );
+
+REG64( PEC_PCS_RX_VGA_CONTROL2_REG                             , RULL(0x8000048C0D010C3F), SH_UNT_PEC      ,
+       SH_ACS_SCOM      );
+REG64( PEC_0_PCS_RX_VGA_CONTROL2_REG                           , RULL(0x8000048C0D010C3F), SH_UNT_PEC_0    ,
+       SH_ACS_SCOM      );
+REG64( PEC_1_PCS_RX_VGA_CONTROL2_REG                           , RULL(0x8000048C0E010C3F), SH_UNT_PEC_1    ,
+       SH_ACS_SCOM      );
+REG64( PEC_2_PCS_RX_VGA_CONTROL2_REG                           , RULL(0x8000048C0F010C3F), SH_UNT_PEC_2    ,
+       SH_ACS_SCOM      );
+
+REG64( PEC_PCS_RX_VGA_CONTROL3_REG                             , RULL(0x8000048D0D010C3F), SH_UNT_PEC      ,
+       SH_ACS_SCOM      );
+REG64( PEC_0_PCS_RX_VGA_CONTROL3_REG                           , RULL(0x8000048D0D010C3F), SH_UNT_PEC_0    ,
+       SH_ACS_SCOM      );
+REG64( PEC_1_PCS_RX_VGA_CONTROL3_REG                           , RULL(0x8000048D0E010C3F), SH_UNT_PEC_1    ,
+       SH_ACS_SCOM      );
+REG64( PEC_2_PCS_RX_VGA_CONTROL3_REG                           , RULL(0x8000048D0F010C3F), SH_UNT_PEC_2    ,
+       SH_ACS_SCOM      );
+
+REG64( PEC_PCS_TX_DCLCK_ROTATOR_REG                            , RULL(0x800004450D010C3F), SH_UNT_PEC      ,
+       SH_ACS_SCOM      );
+REG64( PEC_0_PCS_TX_DCLCK_ROTATOR_REG                          , RULL(0x800004450D010C3F), SH_UNT_PEC_0    ,
+       SH_ACS_SCOM      );
+REG64( PEC_1_PCS_TX_DCLCK_ROTATOR_REG                          , RULL(0x800004450E010C3F), SH_UNT_PEC_1    ,
+       SH_ACS_SCOM      );
+REG64( PEC_2_PCS_TX_DCLCK_ROTATOR_REG                          , RULL(0x800004450F010C3F), SH_UNT_PEC_2    ,
+       SH_ACS_SCOM      );
+
+REG64( PEC_PCS_TX_FIFO_CONFIG_OFFSET_REG                       , RULL(0x8000044F0D010C3F), SH_UNT_PEC      ,
+       SH_ACS_SCOM      );
+REG64( PEC_0_PCS_TX_FIFO_CONFIG_OFFSET_REG                     , RULL(0x8000044F0D010C3F), SH_UNT_PEC_0    ,
+       SH_ACS_SCOM      );
+REG64( PEC_1_PCS_TX_FIFO_CONFIG_OFFSET_REG                     , RULL(0x8000044F0E010C3F), SH_UNT_PEC_1    ,
+       SH_ACS_SCOM      );
+REG64( PEC_2_PCS_TX_FIFO_CONFIG_OFFSET_REG                     , RULL(0x8000044F0F010C3F), SH_UNT_PEC_2    ,
+       SH_ACS_SCOM      );
+
+REG64( PEC_PCS_TX_PCIE_REC_DETECT_CNTL1_REG                    , RULL(0x8000046C0D010C3F), SH_UNT_PEC      ,
+       SH_ACS_SCOM      );
+REG64( PEC_0_PCS_TX_PCIE_REC_DETECT_CNTL1_REG                  , RULL(0x8000046C0D010C3F), SH_UNT_PEC_0    ,
+       SH_ACS_SCOM      );
+REG64( PEC_1_PCS_TX_PCIE_REC_DETECT_CNTL1_REG                  , RULL(0x8000046C0E010C3F), SH_UNT_PEC_1    ,
+       SH_ACS_SCOM      );
+REG64( PEC_2_PCS_TX_PCIE_REC_DETECT_CNTL1_REG                  , RULL(0x8000046C0F010C3F), SH_UNT_PEC_2    ,
+       SH_ACS_SCOM      );
+
+REG64( PEC_PCS_TX_PCIE_REC_DETECT_CNTL2_REG                    , RULL(0x8000046D0D010C3F), SH_UNT_PEC      ,
+       SH_ACS_SCOM      );
+REG64( PEC_0_PCS_TX_PCIE_REC_DETECT_CNTL2_REG                  , RULL(0x8000046D0D010C3F), SH_UNT_PEC_0    ,
+       SH_ACS_SCOM      );
+REG64( PEC_1_PCS_TX_PCIE_REC_DETECT_CNTL2_REG                  , RULL(0x8000046D0E010C3F), SH_UNT_PEC_1    ,
+       SH_ACS_SCOM      );
+REG64( PEC_2_PCS_TX_PCIE_REC_DETECT_CNTL2_REG                  , RULL(0x8000046D0F010C3F), SH_UNT_PEC_2    ,
+       SH_ACS_SCOM      );
+
+REG64( PEC_PCS_TX_POWER_SEQ_ENABLE_REG                         , RULL(0x800004700D010C3F), SH_UNT_PEC      ,
+       SH_ACS_SCOM      );
+REG64( PEC_0_PCS_TX_POWER_SEQ_ENABLE_REG                       , RULL(0x800004700D010C3F), SH_UNT_PEC_0    ,
+       SH_ACS_SCOM      );
+REG64( PEC_1_PCS_TX_POWER_SEQ_ENABLE_REG                       , RULL(0x800004700E010C3F), SH_UNT_PEC_1    ,
+       SH_ACS_SCOM      );
+REG64( PEC_2_PCS_TX_POWER_SEQ_ENABLE_REG                       , RULL(0x800004700F010C3F), SH_UNT_PEC_2    ,
+       SH_ACS_SCOM      );
+
+REG64( PEC_PCS_PCLCK_CNTL_PLLA_REG                             , RULL(0x8000050F0D010C3F), SH_UNT_PEC      ,
+       SH_ACS_SCOM      );
+REG64( PEC_0_PCS_PCLCK_CNTL_PLLA_REG                           , RULL(0x8000050F0D010C3F), SH_UNT_PEC_0    ,
+       SH_ACS_SCOM      );
+REG64( PEC_1_PCS_PCLCK_CNTL_PLLA_REG                           , RULL(0x8000050F0E010C3F), SH_UNT_PEC_1    ,
+       SH_ACS_SCOM      );
+REG64( PEC_2_PCS_PCLCK_CNTL_PLLA_REG                           , RULL(0x8000050F0F010C3F), SH_UNT_PEC_2    ,
+       SH_ACS_SCOM      );
+
+REG64( PEC_PCS_PCLCK_CNTL_PLLB_REG                             , RULL(0x8000054F0D010C3F), SH_UNT_PEC      ,
+       SH_ACS_SCOM      );
+REG64( PEC_0_PCS_PCLCK_CNTL_PLLB_REG                           , RULL(0x8000054F0D010C3F), SH_UNT_PEC_0    ,
+       SH_ACS_SCOM      );
+REG64( PEC_1_PCS_PCLCK_CNTL_PLLB_REG                           , RULL(0x8000054F0E010C3F), SH_UNT_PEC_1    ,
+       SH_ACS_SCOM      );
+REG64( PEC_2_PCS_PCLCK_CNTL_PLLB_REG                           , RULL(0x8000054F0F010C3F), SH_UNT_PEC_2    ,
+       SH_ACS_SCOM      );
+
+
 #endif
