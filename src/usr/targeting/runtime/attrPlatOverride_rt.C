@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,7 @@
 //#include <hwpf/plat/fapiPlatAttrOverrideSync.H>
 #include <targeting/common/trace.H>
 #include <errl/errlmanager.H>
+#include <initservice/initserviceif.H>
 
 using namespace TARGETING;
 
@@ -92,6 +93,12 @@ int apply_attr_override(uint8_t* i_data,
 
 void applyTempOverrides()
 {
+    // With FSP, we can not access PNOR, just return
+    if(INITSERVICE::spBaseServicesEnabled())
+    {
+        return;
+    }
+
     TRACFCOMP(g_trac_targeting, ENTER_MRK"applyTempOverrides");
     errlHndl_t l_err = NULL;
     PNOR::SectionInfo_t l_info;

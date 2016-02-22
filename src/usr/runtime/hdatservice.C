@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,15 +52,9 @@ namespace RUNTIME
 /********************
  Local Constants used for sanity checks
  ********************/
-const hdatHeaderExp_t HSVC_NODE_DATA_HEADER = {
-    0xD1F0,   // id
-    "HS KID", // name
-    0x0020    //version
-};
-
-const hdatHeaderExp_t HSVC_DATA_HEADER = {
+const hdatHeaderExp_t HBRT_DATA_HEADER = {
     0xD1F0,   //id
-    "HOSTSR", //name
+    "HBRT  ", //name
     0x0010    //version
 };
 
@@ -79,7 +73,7 @@ const hdatHeaderExp_t SPIRAH_HEADER = {
 const hdatHeaderExp_t SPIRAS_HEADER = {
     0xD1F0,   //id
     "SPIRAS", //name
-    0x0040    //version
+    0x0050    //version
 };
 
 //big enough to hold all of PHYP
@@ -679,21 +673,24 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
                 o_dataSize = 0;
             }
         }
-        // Host Services System Data
-        else if( RUNTIME::HSVC_SYSTEM_DATA == i_section )
+        // HB Runtime Data
+        else if ( (RUNTIME::HBRT        == i_section) ||
+                  (RUNTIME::HBRT_DATA   == i_section) )
         {
+            // Data section requires drilling to dataBlob
+            bool l_needBlob = (RUNTIME::HBRT_DATA == i_section);
 
             // Find the right tuple and verify it makes sense
             hdat5Tuple_t* tuple = NULL;
             if( iv_spiraS )
             {
-                tuple = &(iv_spiraS->hdatDataArea[SPIRAS_HSVC_DATA]);
+                tuple = &(iv_spiraS->hdatDataArea[SPIRAS_HBRT_DATA]);
             }
             else if( unlikely(iv_spiraL != NULL) )
             {
-                tuple = &(iv_spiraL->hdatDataArea[SPIRAL_HSVC_DATA]);
+                tuple = &(iv_spiraL->hdatDataArea[SPIRAL_HBRT_DATA]);
             }
-            TRACUCOMP( g_trac_runtime, "HSVC_SYSTEM_DATA tuple=%p", tuple );
+            TRACUCOMP(g_trac_runtime, "HBRT_DATA tuple=%p", tuple);
             errhdl = check_tuple( i_section,
                                   tuple );
             if( errhdl ) { break; }
@@ -702,159 +699,38 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             errhdl = getSpiraTupleVA(tuple, base_addr);
             if( errhdl ) { break; }
 
-            hdatHDIF_t* hsvc_header =
+            hdatHDIF_t* hbrt_header =
               reinterpret_cast<hdatHDIF_t*>(base_addr);
-            TRACUCOMP( g_trac_runtime, "hsvc_header=%p", hsvc_header );
+            TRACUCOMP( g_trac_runtime, "hbrt_header=%p", hbrt_header );
 
             // Check the headers and version info
-            errhdl = check_header( hsvc_header,
-                                   HSVC_DATA_HEADER );
+            errhdl = check_header( hbrt_header,
+                                   HBRT_DATA_HEADER );
             if( errhdl ) { break; }
 
-            hdatHDIFDataHdr_t* sys_header =
+            hdatHDIFDataHdr_t* hbrt_data_header =
               reinterpret_cast<hdatHDIFDataHdr_t*>
-              (hsvc_header->hdatDataPtrOffset + base_addr);
-            TRACUCOMP( g_trac_runtime, "sys_header=%p", sys_header );
+              (hbrt_header->hdatDataPtrOffset + base_addr);
+
+            TRACUCOMP( g_trac_runtime, "hbrt_data_header=%p", hbrt_data_header );
             // Make sure the Data Header is pointing somewhere valid
-            errhdl = verify_hdat_address( sys_header,
+            errhdl = verify_hdat_address( (hbrt_data_header + i_instance),
                                           sizeof(hdatHDIFDataHdr_t) );
             if( errhdl ) { break; }
 
-            o_dataAddr = sys_header->hdatOffset + base_addr;
-            o_dataSize = sys_header->hdatSize;
+            o_dataAddr = hbrt_data_header[i_instance].hdatOffset + base_addr;
+            o_dataSize = hbrt_data_header[i_instance].hdatSize;
+
+            if (l_needBlob)
+            {
+                // For accessing pointer to various RT data
+                hdatHBRT_t* l_hbrtPtr =
+                    reinterpret_cast<hdatHBRT_t *>(o_dataAddr);
+                o_dataAddr = l_hbrtPtr->hdatDataBlob.hdatOffset + base_addr;
+                o_dataSize = l_hbrtPtr->hdatDataBlob.hdatSize;
+            } // end if getting dataBlob
         }
-        // Host Services Node Data
-        else if( RUNTIME::HSVC_NODE_DATA == i_section )
-        {
-            // Find the right tuple and verify it makes sense
-            hdat5Tuple_t* tuple = NULL;
-            if( iv_spiraS )
-            {
-                tuple = &(iv_spiraS->hdatDataArea[SPIRAS_HSVC_DATA]);
-            }
-            else if( unlikely(iv_spiraL != NULL) )
-            {
-                tuple = &(iv_spiraL->hdatDataArea[SPIRAL_HSVC_DATA]);
-            }
-            TRACUCOMP( g_trac_runtime, "HSVC_NODE_DATA tuple=%p", tuple );
-            errhdl = check_tuple( i_section,
-                                  tuple );
-            if( errhdl ) { break; }
 
-
-            uint64_t base_addr;
-            errhdl = getSpiraTupleVA(tuple, base_addr);
-            if( errhdl ) { break; }
-
-            hdatHDIF_t* hsvc_header =
-              reinterpret_cast<hdatHDIF_t*>(base_addr);
-            TRACUCOMP( g_trac_runtime, "hsvc_header=%p", hsvc_header );
-
-            // Check the headers and version info
-            errhdl = check_header( hsvc_header,
-                                   HSVC_DATA_HEADER );
-            if( errhdl ) { break; }
-
-            hdatHDIFChildHdr_t* node_header =
-              reinterpret_cast<hdatHDIFChildHdr_t*>
-              (hsvc_header->hdatChildStrOffset + base_addr);
-            uint64_t first_node_header =
-              mm_virt_to_phys(reinterpret_cast<void*>(node_header));
-            TRACUCOMP( g_trac_runtime, "first node_header=%X->%p", first_node_header, node_header );
-
-            // Make sure the Child Header is pointing somewhere valid
-            errhdl = verify_hdat_address( node_header,
-                                          sizeof(hdatHDIFChildHdr_t) );
-            if( errhdl ) { break; }
-
-            hdatHDIF_t* node_data_header =
-              reinterpret_cast<hdatHDIF_t*>
-              (node_header->hdatOffset + base_addr);
-
-            // Loop around all instances because the data
-            //   could be sparsely populated
-            TRACUCOMP( g_trac_runtime, "nodecount=%d", node_header->hdatCnt );
-            bool foundit = false;
-            uint32_t found_instances = 0;
-            for( uint8_t index = 0; index < node_header->hdatCnt; index++ )
-            {
-                // Make sure the headers are all in a valid range
-                errhdl = verify_hdat_address( node_data_header,
-                                              sizeof(hdatHDIF_t) );
-                if( errhdl ) { break; }
-
-                uint64_t phys_addr =
-                  mm_virt_to_phys(reinterpret_cast<void*>(node_data_header));
-                TRACFCOMP( g_trac_runtime, "index=%d, header=%p->%X", index, node_data_header, phys_addr );
-                // Check the headers and version info
-                errhdl = check_header( node_data_header,
-                                       HSVC_NODE_DATA_HEADER );
-                if( errhdl ) { break; }
-
-                TRACFCOMP( g_trac_runtime, "%d> hdatInstance=%d, hdatSize=%d", index, node_data_header->hdatInstance, node_data_header->hdatSize );
-                if( node_data_header->hdatInstance != i_instance )
-                {
-                    found_instances |=
-                      (0x80000000 >> node_data_header->hdatInstance);
-                    //increment to the next child section
-                    node_data_header =
-                      reinterpret_cast<hdatHDIF_t*>
-                      (reinterpret_cast<uint64_t>(node_data_header)
-                       + node_data_header->hdatSize);
-                    continue;
-                }
-                foundit = true;
-
-                uint64_t node_base_addr =
-                  reinterpret_cast<uint64_t>(node_data_header);
-
-                hdatHDIFDataHdr_t* local_node_header =
-                  reinterpret_cast<hdatHDIFDataHdr_t*>
-                  (node_data_header->hdatDataPtrOffset + node_base_addr);
-                TRACUCOMP( g_trac_runtime, "local_node_header=%p", local_node_header );
-                // Make sure the header is pointing somewhere valid
-                errhdl = verify_hdat_address( local_node_header,
-                                              sizeof(hdatHDIFDataHdr_t) );
-                if( errhdl ) { break; }
-
-                o_dataAddr = local_node_header->hdatOffset + node_base_addr;
-                o_dataSize = local_node_header->hdatSize;
-
-                break; // found it, stop the loop
-            }
-            if( errhdl ) { break; }
-
-            // Make sure we found something
-            if( !foundit )
-            {
-                TRACFCOMP( g_trac_runtime, "getHostDataSection> HSVC_NODE_DATA instance %d of section %d is unallocated", i_instance, i_section );
-
-                /*@
-                 * @errortype
-                 * @moduleid     RUNTIME::MOD_HDATSERVICE_GETHOSTDATASECTION
-                 * @reasoncode   RUNTIME::RC_NO_HSVC_NODE_DATA_FOUND
-                 * @userdata1    Mainstore address of first node_data_header
-                 * @userdata2[0:31]    Requested Instance
-                 * @userdata2[32:63]   Bitmask of discovered instances
-                 * @devdesc      Requested instance of HSVC_NODE_DATA is
-                 *               unallocated
-                 */
-                errhdl = new ERRORLOG::ErrlEntry(
-                                  ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                  RUNTIME::MOD_HDATSERVICE_GETHOSTDATASECTION,
-                                  RUNTIME::RC_NO_HSVC_NODE_DATA_FOUND,
-                                  first_node_header,
-                                  TWO_UINT32_TO_UINT64(i_instance,
-                                                       found_instances));
-                errhdl->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
-                                             HWAS::SRCI_PRIORITY_MED );
-                errhdl->addProcedureCallout( HWAS::EPUB_PRC_SP_CODE,
-                                             HWAS::SRCI_PRIORITY_MED );
-                errhdl->collectTrace(RUNTIME_COMP_NAME,KILOBYTE);
-                break;
-            }
-
-        }
         // IPL Parameters : System Parameters
         else if( RUNTIME::IPLPARMS_SYSTEM == i_section )
         {

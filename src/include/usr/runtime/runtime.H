@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,6 +62,28 @@ errlHndl_t populate_node_attributes( uint64_t i_nodeNum );
 errlHndl_t load_host_data( void );
 
 /**
+ * @brief Populate HB runtime data in mainstore
+ *
+ * @return errlHndl_t NULL on Success
+ */
+errlHndl_t populate_hbRuntimeData( void );
+
+/**
+ * @brief Fills in HBRT for given NODE
+ *
+ * @param[in] iNodeId : Node number from 0 to 7 ..etc...
+ *
+ * @return errlHndl_t NULL on Success
+ */
+errlHndl_t populate_RtDataByNode(uint64_t iNodeId);
+
+// How many pointers/sections there are in HB runtime data
+#define HBRT_NUM_PTRS        2
+// sections defined by above literal
+#define HBRT_VPD_SECTION     0
+#define HBRT_ATTRIB_SECTION  1
+
+/**
  * HDAT Sections
  */
 enum SectionId
@@ -77,7 +99,9 @@ enum SectionId
     SPIRA_H,              //< SPIRA-H
     SPIRA_L,              //< Legacy SPIRA
     NACA,                 //< NACA
-    LAST_SECTION = NACA   //< Placeholder for arrays
+    HBRT,                 //< Hostboot Runtime
+    HBRT_DATA,            //< Hostboot Runtime  Data
+    LAST_SECTION = HBRT_DATA   //< Placeholder for arrays
 };
 
 /**
@@ -85,7 +109,7 @@ enum SectionId
  *         the host data memory.
  *
  * @description  The returned pointer will not include any header hdat header
- *     information.  
+ *     information.
  *
  * @param[in] i_section  Chunk of data to find
  * @param[in] i_instance  Instance of section when there are multiple entries
@@ -101,7 +125,7 @@ errlHndl_t get_host_data_section( SectionId i_section,
 const size_t DATA_SIZE_UNKNOWN = 0xFFFFFFFFFFFFFFFF;
 
 /**
- * @brief  Store the actual count of a section in local memory.  
+ * @brief  Store the actual count of a section in local memory.
  *
  * @param[in] i_section  Chunk of data to update
  * @param[in] i_count   Actual number of entries
@@ -145,4 +169,4 @@ void rediscover_hdat( void );
 
 }
 
-#endif 
+#endif

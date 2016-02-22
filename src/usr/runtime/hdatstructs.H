@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -98,6 +100,7 @@ enum hdatSpiraLegacyDataAreas
     SPIRAL_PCIA             = 21,   // PCIA (Core information area)
     SPIRAL_PCRD             = 22,   // PCRD (Chip related data area)
     SPIRAL_HSVC_DATA        = 23,   // Host Services Data
+    SPIRAL_HBRT_DATA        = 24,   // Hostboot Runtime Data
     SPIRAL_LAST             = 24
 };
 
@@ -138,7 +141,8 @@ enum hdatSpiraSDataAreas
     SPIRAS_PCIA             = 12,   // PCIA (Core information area)
     SPIRAS_PCRD             = 13,   // PCRD (Chip related data area)
     SPIRAS_HSVC_DATA        = 14,   // Host Services Data
-    SPIRAS_LAST             = 14
+    SPIRAS_HBRT_DATA        = 15,   // Hostboot Runtime Data
+    SPIRAS_LAST             = 15
 };
 
 
@@ -278,4 +282,18 @@ struct hdatHeaderExp_t
         return retval;
      };
 };
+
+
+/**
+ * @brief Structure for HBRT Data -- PHYP adjunct partition
+ */
+struct hdatHBRT_t
+{
+    char                 hdatStringName[24];    // offset 0x0000
+    uint32_t             hdatInstance;          // offset 0x0018
+    hdatHDIFDataHdr_t    hdatDataBlob;          // offset 0x001C
+    uint8_t              hdatReservedHbrt[12];  // offset 0x0024
+} __attribute__ ((packed));
+
+
 #endif

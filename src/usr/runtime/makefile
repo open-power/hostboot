@@ -34,6 +34,7 @@ MODULE = runtime
 
 #@TODO RTC:132750
 #OBJS += populate_attributes.o
+OBJS += populate_hbruntime.o
 OBJS += hdatservice.o
 OBJS += fakepayload.o
 OBJS += tce.o
