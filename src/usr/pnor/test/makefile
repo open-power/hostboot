@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2016
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -27,10 +27,13 @@ ROOTPATH = ../../../..
 
 MODULE = testpnor
 
-TESTS = pnorddtest.H ecctest.H pnorrptest.H
+TESTS = pnorddtest.H
+TESTS += ecctest.H
+TESTS += pnorrptest.H
 
 #SFC Implementations
 TESTS += $(if $(CONFIG_SFC_IS_IBM_DPSS),sfc_ibmtest.H)
-TESTS += $(if $(CONFIG_SFC_IS_AST2400),sfc_ast2400test.H)
+#@fixme-RTC:146146-Reenable testcases once ECC issues are resolved
+#TESTS += $(if $(CONFIG_SFC_IS_AST2400),sfc_ast2400test.H)
 
 include ${ROOTPATH}/config.mk
