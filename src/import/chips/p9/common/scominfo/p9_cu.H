@@ -46,7 +46,6 @@ extern "C"
         PU_XBUS_CHIPUNIT,    ///< XBUS
         PU_OBUS_CHIPUNIT,    ///< OBUS
         PU_NV_CHIPUNIT,      ///< NV Link Brick
-        PU_NVBUS_CHIPUNIT,   ///< DO NOT USE!  TEMPORARY FOR CI ONLY
         PU_PEC_CHIPUNIT,     ///< PCIe (PEC)
         PU_PHB_CHIPUNIT,     ///< PCIe (PHB)
         PU_MI_CHIPUNIT,      ///< MI (Cumulus only)
@@ -59,7 +58,8 @@ extern "C"
         PU_PPE_CHIPUNIT,     ///< PPE
         PU_SBE_CHIPUNIT,     ///< SBE
         PU_CAPP_CHIPUNIT,    ///< CAPP
-        NONE                 ///< None/Invalid
+        NONE,                 ///< None/Invalid
+        PU_NVBUS_CHIPUNIT =  PU_NV_CHIPUNIT  ///< DO NOT USE!  TEMPORARY FOR CI ONLY
     } p9ChipUnits_t;
 
     /// P9 chip unit pairing struct
