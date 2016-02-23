@@ -45,6 +45,7 @@ namespace ISTEP
         MOD_DECONFIG_PHBS_BASED_ON_PCI_STATE              = 0x09,
         MOD_COMPUTE_PCIE_CONFIG_ATTRS                     = 0x0A,
         MOD_EXIT_CACHE_CONTAINED                          = 0x0B,
+        MOD_HOST_GARD                                     = 0x0C,
     };
 
     /**
@@ -68,6 +69,7 @@ namespace ISTEP
         RC_INVALID_ATTR_VALUE                    = ISTEP_COMP_ID | 0x0B,
         RC_INVALID_CONFIGURATION                 = ISTEP_COMP_ID | 0x0C,
         RC_INVALID_PCIE_IOP_LANE_CONFIG          = ISTEP_COMP_ID | 0x0D,
+        RC_MASTER_CORE_NULL                      = ISTEP_COMP_ID | 0x0E,
     };
 
 };

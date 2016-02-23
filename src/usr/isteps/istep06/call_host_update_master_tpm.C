@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/hwas/hwasplatreasoncodes.H $                  */
+/* $Source: src/usr/isteps/istep06/call_host_update_master_tpm.C $        */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,32 +22,39 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef HWASPLATREASONCODES_H
-#define HWASPLATREASONCODES_H
 
-namespace HWAS
+#include <stdint.h>
+#include <trace/interface.H>
+#include <errl/errlentry.H>
+#include <errl/errlmanager.H>
+#include <isteps/hwpisteperror.H>
+#include <trustedbootif.H>
+
+namespace ISTEP_06
 {
-    enum HwasPlatModuleID
-    {
-        //
-        // Code to identify discrete error locations/events
-        //
-        //  @note Must always start @ 0x80, since common module IDs occupy
-        //      0x00 -> 0x7F range
-        MOD_HOST_DISCOVER_TARGETS = 0x80,
-        MOD_PLAT_DECONFIG_GARD    = 0x81,
-        MOD_PLAT_READIDEC         = 0x82,
-    };
 
-    enum HwasPlatReasonCode
-    {
-        //  @note Must always start @ 0x80, since common reason codes occupy
-        //      0x00 -> 0x7F range
-        RC_TOP_LEVEL_TARGET_NULL            = HWAS_COMP_ID | 0x80,
-        RC_TARGET_NOT_GARDABLE              = HWAS_COMP_ID | 0x81,
-        RC_GARD_REPOSITORY_FULL             = HWAS_COMP_ID | 0x82,
-        RC_BAD_CHIPID                       = HWAS_COMP_ID | 0x83,
-    };
-};
+void* call_host_update_master_tpm( void *io_pArgs )
+{
+    ISTEP_ERROR::IStepError l_stepError;
 
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_host_update_master_tpm entry" );
+
+#ifdef CONFIG_TPMDD
+    errlHndl_t l_err = NULL;
+    // Initialize the master TPM
+    l_err = (errlHndl_t)TRUSTEDBOOT::host_update_master_tpm(io_pArgs);
+    if (l_err)
+    {
+        l_stepError.addErrorDetails(l_err);
+        errlCommit( l_err, SECURE_COMP_ID );
+    }
 #endif
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_host_update_master_tpm exit" );
+
+    return l_stepError.getErrorHandle();
+}
+
+};
