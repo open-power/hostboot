@@ -26,6 +26,7 @@
 
 #include <memory>
 #include <hwp_return_codes.H>
+#include <return_code_defs.H>
 #include <plat_trace.H>
 #include <error_info.H>
 #include <target.H>
@@ -192,6 +193,7 @@ class FirstFailureData
         ///
         inline void  setPlatDataPtr( void* i_ptr )
         {
+            static_cast<R*>(this)->operator=(FAPI2_RC_PLAT_ERR_SEE_DATA);
             iv_platDataPtr = i_ptr;
         };
 
