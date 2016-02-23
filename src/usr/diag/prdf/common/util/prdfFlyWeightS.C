@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -274,7 +274,7 @@ void FlyWeightS<T,S>::increaseSize()
             l_merged = false;
             i_next++;
 
-            while ((*i_next == NULL) && (i_next != iv_rows.end()))
+            while ( (iv_rows.end() != i_next) && (NULL == *i_next) )
                     i_next++;
 
             if (i_next == iv_rows.end())
