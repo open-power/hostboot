@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015
+# Contributors Listed Below - COPYRIGHT 2015,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -25,8 +25,31 @@
 ROOTPATH = ../../../..
 MODULE = istep06
 
-OBJS += istep06.o
+#Add all the object files required for istep06 module
+OBJS += host_init_fsi.o
+OBJS += host_set_ipl_parms.o
+OBJS += host_discover_targets.o
+OBJS += call_host_update_master_tpm.o
+OBJS += host_gard.o
+OBJS += call_proc_revert_sbe_mcs_setup.o
+OBJS += host_start_occ_xstop_handler.o
 
+HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest
+VPATH    += ${HWP_PATH}
+
+#Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/usr/sbe
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/secureboot
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
+
+#Required include before all the procedure.mk are included
+include ${ROOTPATH}/procedure.rules.mk
+
+#Include all the procedure makefiles
+include $(HWP_PATH)/p9_revert_sbe_mcs_setup.mk
 
 include ${ROOTPATH}/config.mk

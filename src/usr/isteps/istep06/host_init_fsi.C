@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/hwas/hwasplatreasoncodes.H $                  */
+/* $Source: src/usr/isteps/istep06/host_init_fsi.C $                      */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,32 +22,54 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef HWASPLATREASONCODES_H
-#define HWASPLATREASONCODES_H
 
-namespace HWAS
+#include <stdint.h>
+#include <list>
+#include <trace/interface.H>
+#include <errl/errlentry.H>
+#include <errl/errlmanager.H>
+#include <fsi/fsiif.H>
+#include <i2c/i2cif.H>
+#include <initservice/taskargs.H>
+#include <initservice/isteps_trace.H>
+#include <initservice/initserviceif.H>
+#include <isteps/hwpisteperror.H>
+
+namespace ISTEP_06
 {
-    enum HwasPlatModuleID
-    {
-        //
-        // Code to identify discrete error locations/events
-        //
-        //  @note Must always start @ 0x80, since common module IDs occupy
-        //      0x00 -> 0x7F range
-        MOD_HOST_DISCOVER_TARGETS = 0x80,
-        MOD_PLAT_DECONFIG_GARD    = 0x81,
-        MOD_PLAT_READIDEC         = 0x82,
-    };
 
-    enum HwasPlatReasonCode
+void* host_init_fsi( void *io_pArgs )
+{
+    errlHndl_t l_err = NULL;
+    ISTEP_ERROR::IStepError l_stepError;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_init_fsi entry" );
+    do
     {
-        //  @note Must always start @ 0x80, since common reason codes occupy
-        //      0x00 -> 0x7F range
-        RC_TOP_LEVEL_TARGET_NULL            = HWAS_COMP_ID | 0x80,
-        RC_TARGET_NOT_GARDABLE              = HWAS_COMP_ID | 0x81,
-        RC_GARD_REPOSITORY_FULL             = HWAS_COMP_ID | 0x82,
-        RC_BAD_CHIPID                       = HWAS_COMP_ID | 0x83,
-    };
+        l_err = FSI::initializeHardware( );
+        if (l_err)
+        {
+            // This error should get returned
+            l_stepError.addErrorDetails(l_err);
+            errlCommit( l_err, ISTEP_COMP_ID );
+            break;
+        }
+
+        // Only reset the I2C Masters if FSP is not running
+        if ( !INITSERVICE::spBaseServicesEnabled() )
+        {
+            l_err = I2C::i2cResetActiveMasters(I2C::I2C_ALL, false);
+            if (l_err)
+            {
+                // Commit this error
+                errlCommit( l_err, ISTEP_COMP_ID );
+            }
+        }
+
+    } while (0);
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_init_fsi exit" );
+    return l_stepError.getErrorHandle();
+}
+
 };
-
-#endif

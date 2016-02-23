@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,7 +49,7 @@
  *      :   Update master TPM
  *  06.8    host_gard
  *      :   Do Gard
- *  06.9    host_revert_sbe_mcs_setup
+ *  06.9    proc_revert_sbe_mcs_setup
  *      :   Clean up MCS extent regs
  *  06.10   host_start_occ_xstop_handler
  *      :
@@ -102,14 +102,14 @@ void* host_set_ipl_parms( void *io_pArgs );
 void* host_discover_targets( void *io_pArgs );
 
 /**
- * @brief   host_update_master_tpm (istep 6.7)
+ * @brief   call_host_update_master_tpm (istep 6.7)
  *
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
  *  return  any error logs to istep
  */
-void* host_update_master_tpm( void *io_pArgs );
+void* call_host_update_master_tpm( void *io_pArgs );
 
 /**
  * @brief   host_gard   Do Gard (istep 6.8)
@@ -123,13 +123,13 @@ void* host_update_master_tpm( void *io_pArgs );
 void* host_gard( void *io_pArgs );
 
 /**
- * @brief   host_revert_sbe_mcs_setup (istep 6.9)
+ * @brief   proc_revert_sbe_mcs_setup (istep 6.9)
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
  *  return  any error logs to istep
  */
-void* host_revert_sbe_mcs_setup (void * io_pArgs);
+void* call_proc_revert_sbe_mcs_setup (void * io_pArgs);
 
 /**
  * @brief   host_start_occ_xstop_handler (istep 6.10)
@@ -187,7 +187,7 @@ const   TaskInfo    g_istep06[]  =   {
         },
         {
                 ISTEPNAME(06,07,"host_update_master_tpm"),
-                ISTEP_06::host_update_master_tpm,
+                ISTEP_06::call_host_update_master_tpm,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
         {
@@ -196,8 +196,8 @@ const   TaskInfo    g_istep06[]  =   {
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
         {
-                ISTEPNAME(06,09,"host_revert_sbe_mcs_setup"),
-                ISTEP_06::host_revert_sbe_mcs_setup,
+                ISTEPNAME(06,09,"proc_revert_sbe_mcs_setup"),
+                ISTEP_06::call_proc_revert_sbe_mcs_setup,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
