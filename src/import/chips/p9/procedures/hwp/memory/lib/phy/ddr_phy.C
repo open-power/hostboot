@@ -885,13 +885,7 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
         FAPI_TRY( mss::dp16::read_clock_enable(p, l_pairs) );
 
         // Read Control reset
-        FAPI_TRY( mss::rc<TARGET_TYPE_MCA>::reset_config0(p) );
-        FAPI_TRY( mss::rc<TARGET_TYPE_MCA>::reset_config1(p) );
-        FAPI_TRY( mss::rc<TARGET_TYPE_MCA>::reset_config2(p) );
-        FAPI_TRY( mss::rc<TARGET_TYPE_MCA>::reset_config3(p) );
-
-        FAPI_TRY( mss::rc<TARGET_TYPE_MCA>::reset_vref_config0(p) );
-        FAPI_TRY( mss::rc<TARGET_TYPE_MCA>::reset_vref_config1(p) );
+        FAPI_TRY( mss::rc::reset(p) );
     }
 
 fapi_try_exit:
@@ -959,14 +953,14 @@ inline fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYP
         // If READ_CNTR == 0 && READ_CTR_2D_VREF == 1, CALIBRATION_ENABLE = 1 and SKIP = 1
         // If READ_CNTR == 1 && READ_CTR_2D_VREF == 0, CALIBRATION_ENABLE = 0 and SKIP = don't care
         // If READ_CNTR == 0 && READ_CTR_2D_VREF == 0, CALIBRATION_ENABLE = 0 and SKIP = don't care
-        FAPI_TRY( mss::rc<TARGET_TYPE_MCA>::read_vref_config1(i_target, l_data) );
+        FAPI_TRY( mss::rc::read_vref_config1(i_target, l_data) );
 
         l_data.writeBit<MCA_DDRPHY_RC_RDVREF_CONFIG1_P0_CALIBRATION_ENABLE>(
             i_cal_steps_enabled.getBit<WRITE_CTR_2D_VREF>());
         l_data.writeBit<MCA_DDRPHY_RC_RDVREF_CONFIG1_P0_SKIP_RDCENTERING>(
             ! i_cal_steps_enabled.getBit<WRITE_CTR>());
 
-        FAPI_TRY( mss::rc<TARGET_TYPE_MCA>::write_vref_config1(i_target, l_data) );
+        FAPI_TRY( mss::rc::write_vref_config1(i_target, l_data) );
     }
 
     // Write Centering

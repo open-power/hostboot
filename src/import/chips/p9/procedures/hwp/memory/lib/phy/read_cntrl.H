@@ -126,8 +126,8 @@ class rcTraits<fapi2::TARGET_TYPE_MCA>
 /// @tparam T fapi2 Target Type - derived
 /// @tparam TT traits type defaults to rcTraits<T>
 ///
-template< fapi2::TargetType T, typename TT = rcTraits<T> >
-class rc
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = rcTraits<T> >
+class rc_class
 {
     public:
 
@@ -140,6 +140,7 @@ class rc
         static inline fapi2::ReturnCode read_vref_config0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
         {
             FAPI_TRY( mss::getScom(i_target, TT::RC_VREF_CONFIG0_REG, o_data) );
+            FAPI_DBG("rc_vref_config0: 0x%016llx", o_data);
         fapi_try_exit:
             return fapi2::current_err;
         }
@@ -168,6 +169,7 @@ class rc
         static inline fapi2::ReturnCode read_vref_config1( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
         {
             FAPI_TRY( mss::getScom(i_target, TT::RC_VREF_CONFIG1_REG, o_data) );
+            FAPI_DBG("rc_vref_config1: 0x%016llx", o_data);
         fapi_try_exit:
             return fapi2::current_err;
         }
@@ -197,6 +199,7 @@ class rc
         static inline fapi2::ReturnCode read_config0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
         {
             FAPI_TRY( mss::getScom(i_target, TT::RC_CONFIG0_REG, o_data) );
+            FAPI_DBG("rc_config0: 0x%016llx", o_data);
         fapi_try_exit:
             return fapi2::current_err;
         }
@@ -225,6 +228,7 @@ class rc
         static inline fapi2::ReturnCode read_config1( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
         {
             FAPI_TRY( mss::getScom(i_target, TT::RC_CONFIG1_REG, o_data) );
+            FAPI_DBG("rc_config1: 0x%016llx", o_data);
         fapi_try_exit:
             return fapi2::current_err;
         }
@@ -252,6 +256,7 @@ class rc
         static inline fapi2::ReturnCode read_config2( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
         {
             FAPI_TRY( mss::getScom(i_target, TT::RC_CONFIG2_REG, o_data) );
+            FAPI_DBG("rc_config2: 0x%016llx", o_data);
         fapi_try_exit:
             return fapi2::current_err;
         }
@@ -279,6 +284,7 @@ class rc
         static inline fapi2::ReturnCode read_config3( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
         {
             FAPI_TRY( mss::getScom(i_target, TT::RC_CONFIG3_REG, o_data) );
+            FAPI_DBG("rc_config3: 0x%016llx", o_data);
         fapi_try_exit:
             return fapi2::current_err;
         }
@@ -452,7 +458,28 @@ class rc
             return fapi2::current_err;
         }
 
+        ///
+        /// @brief reset rc
+        /// @param[in] i_target fapi2 target of the port
+        /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS if ok
+        ///
+        static inline fapi2::ReturnCode reset( const fapi2::Target<T>& i_target )
+        {
+            FAPI_TRY( reset_config0(i_target) );
+            FAPI_TRY( reset_config1(i_target) );
+            FAPI_TRY( reset_config2(i_target) );
+            FAPI_TRY( reset_config3(i_target) );
+
+            FAPI_TRY( reset_vref_config0(i_target) );
+            FAPI_TRY( reset_vref_config1(i_target) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
 };
+
+using rc = rc_class<fapi2::TARGET_TYPE_MCA>;
 
 }
 
