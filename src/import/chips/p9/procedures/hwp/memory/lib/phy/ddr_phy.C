@@ -361,9 +361,11 @@ fapi2::ReturnCode setup_phase_rotator_control_registers( const fapi2::Target<TAR
     std::vector<uint64_t> addrs(
     {
         MCA_DDRPHY_ADR_SYSCLK_CNTL_PR_P0_ADR32S0, MCA_DDRPHY_ADR_SYSCLK_CNTL_PR_P0_ADR32S1,
-        MCA_DDRPHY_DP16_WRCLK_PR_P0_0, MCA_DDRPHY_DP16_WRCLK_PR_P0_1,
-        MCA_DDRPHY_DP16_WRCLK_PR_P0_2, MCA_DDRPHY_DP16_WRCLK_PR_P0_3, MCA_DDRPHY_DP16_WRCLK_PR_P0_4,
     } );
+
+    // Need to set these up for proper non-sim values, move to dp16 reset when it's written BRS
+    // MCA_DDRPHY_DP16_WRCLK_PR_P0_0, MCA_DDRPHY_DP16_WRCLK_PR_P0_1,
+    // MCA_DDRPHY_DP16_WRCLK_PR_P0_2, MCA_DDRPHY_DP16_WRCLK_PR_P0_3, MCA_DDRPHY_DP16_WRCLK_PR_P0_4,
 
     FAPI_TRY( mss::scom_blastah(i_target.getChildren<TARGET_TYPE_MCA>(), addrs, i_data) );
 
