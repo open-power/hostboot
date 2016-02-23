@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,7 @@
 #include "prdfsimMacros.H"
 #include <homerData_common.h>
 #include <prdfWriteHomerFirData.H>
+#include <prdfParserEnums.H>
 
 namespace PRDF
 {
