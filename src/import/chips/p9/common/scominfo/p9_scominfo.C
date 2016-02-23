@@ -97,7 +97,7 @@ extern "C"
 
                 break;
 
-            case PU_NVBUS_CHIPUNIT:
+            case PU_NV_CHIPUNIT:
                 l_scom.set_ring(4 + (i_chipUnitNum / 4));
                 l_scom.set_sat_id(((i_chipUnitNum == 2) || (i_chipUnitNum == 3)) ? 7 : 3);
                 l_scom.set_sat_offset(l_scom.get_sat_offset() + (32 * (i_chipUnitNum % 2)));
@@ -300,14 +300,14 @@ extern "C"
                                             (l_ring - MC_IOM01_0_RING_ID)));
             }
 
-            // PU_NVBUS_CHIPUNIT
+            // PU_NV_CHIPUNIT
             if ((l_chiplet_id == N3_CHIPLET_ID) &&
                 (l_port == UNIT_PORT_ID) &&
                 (((l_ring == N3_NPU_0_RING_ID) && ((l_sat_id == 3) || (l_sat_id == 7))) ||
                  ((l_ring == N3_NPU_1_RING_ID) && (l_sat_id == 3))))
             {
                 o_chipUnitRelated = true;
-                o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_NVBUS_CHIPUNIT,
+                o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_NV_CHIPUNIT,
                                             (4 * (l_ring - N3_NPU_0_RING_ID)) +
                                             (2 * (l_sat_id / 7)) +
                                             (l_sat_offset / 32)));

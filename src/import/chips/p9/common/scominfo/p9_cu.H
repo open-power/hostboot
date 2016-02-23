@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,7 +45,8 @@ extern "C"
         PU_EX_CHIPUNIT,      ///< EX
         PU_XBUS_CHIPUNIT,    ///< XBUS
         PU_OBUS_CHIPUNIT,    ///< OBUS
-        PU_NVBUS_CHIPUNIT,   ///< NV Link Brick
+        PU_NV_CHIPUNIT,      ///< NV Link Brick
+        PU_NVBUS_CHIPUNIT,   ///< DO NOT USE!  TEMPORARY FOR CI ONLY
         PU_PEC_CHIPUNIT,     ///< PCIe (PEC)
         PU_PHB_CHIPUNIT,     ///< PCIe (PHB)
         PU_MI_CHIPUNIT,      ///< MI (Cumulus only)
