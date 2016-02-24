@@ -134,13 +134,6 @@ extern "C"
             FAPI_TRY( mss::putScom(p, MCA_DDRPHY_PC_INIT_CAL_ERROR_P0, 0) );
             FAPI_TRY( mss::putScom(p, MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0, 0) );
 
-            // Hit the reset button for wr_lvl values. These won't reset until the next run of wr_lvl
-            FAPI_TRY( mss::reset_wc_config0(p) );
-            FAPI_TRY( mss::reset_wc_config1(p) );
-            FAPI_TRY( mss::reset_wc_config2(p) );
-
-            FAPI_TRY( mss::reset_wc_rtt_wr_swap_enable(p) );
-
             // The following registers must be configured to the correct operating environment:
 
             // Unclear, can probably be 0's for sim BRS
