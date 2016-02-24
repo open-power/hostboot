@@ -33,7 +33,8 @@
 //## auto_generated
 #include "p9_start_cbs.H"
 
-#include "p9_perv_scom_addresses.H"
+#include <p9_perv_scom_addresses.H>
+#include <p9_perv_scom_addresses_fld.H>
 
 
 enum P9_START_CBS_Private_Constants
@@ -45,14 +46,28 @@ enum P9_START_CBS_Private_Constants
 };
 
 fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                               & i_target_chip)
+                               & i_target_chip,
+                               const bool i_sbe_start)
 {
     fapi2::buffer<uint32_t> l_read_reg ;
     bool l_read_fsi2pib_status = false;
+    bool l_sbe_start_value = false;
     fapi2::buffer<uint32_t> l_data32;
     fapi2::buffer<uint32_t> l_data32_cbs_cs;
     int l_timeout = 0;
     FAPI_DBG("Entering ...");
+
+    l_sbe_start_value = !i_sbe_start;
+
+    FAPI_INF("Configuring Prevent SBE start option");
+    FAPI_IMP("SBE start value : %d", l_sbe_start_value);
+    //Setting CBS_CS register value
+    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_CBS_CS_FSI,
+                                    l_data32_cbs_cs));
+    //CFAM.CBS_CS.CBS_CS_PREVENT_SBE_START = l_sbe_start_value
+    l_data32_cbs_cs.writeBit<3>(l_sbe_start_value);
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_CBS_CS_FSI,
+                                    l_data32_cbs_cs));
 
     FAPI_INF("check for OSC ok");
     //Getting SNS1LTH register value
@@ -68,8 +83,8 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
     //Getting FSI2PIB_STATUS register value
     FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_FSI2PIB_STATUS_FSI,
                                     l_data32));
-    //l_read_fsi2pib_status = CFAM.FSI2PIB_STATUS.VDD_NEST_OBSERVE
-    l_read_fsi2pib_status = l_data32.getBit<16>();
+    l_read_fsi2pib_status =
+        l_data32.getBit<PERV_FSI2PIB_STATUS_VDD_NEST_OBSERVE>();  //l_read_fsi2pib_status = CFAM.FSI2PIB_STATUS.VDD_NEST_OBSERVE
 
     FAPI_ASSERT(l_read_fsi2pib_status,
                 fapi2::VDD_NEST_OBSERVE()

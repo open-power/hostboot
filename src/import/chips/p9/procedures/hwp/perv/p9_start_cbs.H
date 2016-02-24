@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,7 +26,7 @@
 // *HWP FW Owner        : sunil kumar <skumar8j@in.ibm.com>
 // *HWP Team            : Perv
 // *HWP Level           : 2
-// *HWP Consumed by     : SE
+// *HWP Consumed by     : SE:HB
 //------------------------------------------------------------------------------
 
 
@@ -38,7 +38,7 @@
 
 
 typedef fapi2::ReturnCode (*p9_start_cbs_FP_t)(const
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
+        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&, const bool);
 
 /// @brief --check/wait for VDN_PGOOD = 1
 /// --check for OSC ok
@@ -47,11 +47,13 @@ typedef fapi2::ReturnCode (*p9_start_cbs_FP_t)(const
 ///
 ///
 /// @param[in]     i_target_chip   Reference to TARGET_TYPE_PROC_CHIP target
+/// @param[in]     i_sbe_start     setting of PreventSbeStart
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
 extern "C"
 {
     fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                                   & i_target_chip);
+                                   & i_target_chip,
+                                   const bool i_sbe_start = 0);
 }
 
 #endif
