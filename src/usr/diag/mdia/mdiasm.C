@@ -705,7 +705,8 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
 
             case RESTORE_DRAM_REPAIRS:
 
-                rc = PRDF::restoreDramRepairs(getTarget(*i_wfp));
+                //TODO RTC 136126
+                //rc = PRDF::restoreDramRepairs(getTarget(*i_wfp));
 
                 break;
 

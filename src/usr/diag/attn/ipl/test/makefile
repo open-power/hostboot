@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/attn/hostboot/test/makefile $
+# $Source: src/usr/diag/attn/ipl/test/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014
+# Contributors Listed Below - COPYRIGHT 2014,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -43,6 +43,7 @@ OBJS += attnmeminject.o
 
 MODULE = testattn
 
-TESTS = *.H
+#TODO RTC 148565 reenable when test cases are updated for P9
+#TESTS = *.H
 
 include ${ROOTPATH}/config.mk
