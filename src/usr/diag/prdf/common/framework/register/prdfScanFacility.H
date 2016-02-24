@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,20 +54,6 @@ namespace PRDF
     @par    The Scan facility is used by PRD to access Scan and Scan Comm
     @       functions.It attempts to reduce duplicate objects and their
     @       aggragates as must as possible.
-    @code
-      ScanFacility & sf = ScanFacility::Access();
-      SCAN_COMM_REGISTER_CLASS & scr = sf.GetScanCommRegister(chipId,Address,bitLen);
-      scr.Read() ... see iipscr.h
-      ScanRingField srf[] =
-      {{hregAliasId1 , fieldBitLength1},
-       {hregAliasId2 , fieldBitLength2}};
-      SCAN_COMM_REGISTER_CLASS & sr = s.GetScanRingRegister(aTARGETING::
-      TargetHandle_t,srf,srf+2);
-      scr.Read() .... SCAN_COMM_REGISTER_CLASS
-      // Note you can't write a scan ring register from PRD
-      // you can only read scan ring registers from PRD if the global attention
-      // type is CHECK_STOP
-    @endcode
 */
 class ScanFacility
 {
