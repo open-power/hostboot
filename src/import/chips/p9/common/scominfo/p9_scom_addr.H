@@ -120,10 +120,10 @@ extern "C"
         EQ_NC_1_RING_ID = 0x5,      ///< NC_1
         EQ_L3_0_RING_ID = 0x6,      ///< L3_0
         EQ_L3_1_RING_ID = 0x7,      ///< L3_1
-        EQ_CME_0_RING_ID = 0x9,     ///< CME_0
-        EQ_CME_1_RING_ID = 0xA,     ///< CME_1
-        EQ_L2_0_TRA_RING_ID = 0xB,  ///< L2_0_TRA
-        EQ_L2_1_TRA_RING_ID = 0xC   ///< L2_1_TRA
+        EQ_CME_0_RING_ID = 0x8,     ///< CME_0
+        EQ_CME_1_RING_ID = 0x9,     ///< CME_1
+        EQ_L2_0_TRA_RING_ID = 0xA,  ///< L2_0_TRA
+        EQ_L2_1_TRA_RING_ID = 0xB   ///< L2_1_TRA
     } p9_eq_ring_id_t;
 
     /// P9 N0 chiplet SCOM ring ID enumeration
