@@ -64,6 +64,8 @@
 #include "phy/ddr_phy.H"
 #include "phy/dp16.H"
 #include "phy/cal_timers.H"
+#include "phy/write_cntrl.H"
+#include "phy/read_cntrl.H"
 
 #include "utils/dump_regs.H"
 

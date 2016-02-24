@@ -884,6 +884,9 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
         FAPI_TRY( mss::dp16::write_clock_enable(p, l_pairs) );
         FAPI_TRY( mss::dp16::read_clock_enable(p, l_pairs) );
 
+        // Write Control reset
+        FAPI_TRY( mss::wc::reset(p) );
+
         // Read Control reset
         FAPI_TRY( mss::rc::reset(p) );
     }
