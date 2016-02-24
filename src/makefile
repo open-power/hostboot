@@ -157,8 +157,9 @@ EXTENDED_MODULES += vpd
 EXTENDED_MODULES += util
 EXTENDED_MODULES += tracedaemon
 EXTENDED_MODULES += mbox
-#@TODO RTC:126631
-#EXTENDED_MODULES += attn
+EXTENDED_MODULES += attn
+EXTENDED_MODULES += prdf
+EXTENDED_MODULES += $(if $(CONFIG_VPO_COMPILE),,mdia)
 EXTENDED_MODULES += ibscom
 EXTENDED_MODULES += $(if $(CONFIG_VPO_COMPILE),,dump)
 EXTENDED_MODULES += $(if $(CONFIG_VPO_COMPILE),,runtime)
@@ -196,6 +197,8 @@ TESTCASE_MODULES += testxscom
 TESTCASE_MODULES += testkernel
 TESTCASE_MODULES += testtargeting
 TESTCASE_MODULES += testmemoize
+TESTCASE_MODULES += testprdf
+TESTCASE_MODULES += testattn
 
 #******************************************************************
 #KNOWN ISSUES (I might let these run but there is something wrong)
@@ -219,11 +222,6 @@ TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testruntime)
 TESTCASE_MODULES += testfapi2
 #TODO: Need to re-enable testmdia (RTC 135217)
 #TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testmdia)
-
-#@TODO RTC: 139904 need to reenable testattn and testprdf
-#TESTCASE_MODULES += testattn
-#Need PRD team to look at this
-#TESTCASE_MODULES += testprdf
 
 #@TODO RTC: 123019 (p9 work in progress)
 #TESTCASE_MODULES += testi2c

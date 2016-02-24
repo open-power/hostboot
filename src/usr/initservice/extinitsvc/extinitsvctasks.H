@@ -262,23 +262,21 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 }
         },
 
-
-        // @todo RTC:145354 Restore testprdf and testattn in p9 branch
-#if (0)
+//TODO RTC: 148566
 // No mdia in VPO
-#ifndef CONFIG_VPO_COMPILE
-        /**
-         * @brief MDIA code library
-         */
-        {
-            "libmdia.so" ,                        // taskname
-            NULL,                                 // no pointer to fn
-            {
-               INIT_TASK,                         // task type
-               EXT_IMAGE,                         // Extended Module
-            }
-        },
-#endif
+//#ifndef CONFIG_VPO_COMPILE
+//        /**
+//         * @brief MDIA code library
+//         */
+//        {
+//            "libmdia.so" ,                        // taskname
+//            NULL,                                 // no pointer to fn
+//            {
+//               INIT_TASK,                         // task type
+//               EXT_IMAGE,                         // Extended Module
+//            }
+//        },
+//#endif
 
         /**
          * @brief PRDF code library
@@ -304,7 +302,7 @@ const TaskInfo g_exttaskinfolist[]   =   {
             }
         },
 
-#endif
+
 #ifdef CONFIG_GPIODD
         /**
          * @brief GPIO code library
