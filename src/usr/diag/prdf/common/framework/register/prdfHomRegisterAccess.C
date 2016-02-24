@@ -343,22 +343,4 @@ errlHndl_t ScomAccessor::Access(TargetHandle_t i_target,
     return errH;
 }
 
-//------------------------------------------------------------------------------
-
-uint32_t HomRegisterAccessScom::Access( BIT_STRING_CLASS & bs,
-                                        uint64_t registerId,
-                                        Operation operation) const
-{
-    PRDF_DENTER("HomRegisterAccessScom::Access()");
-
-    uint32_t rc = getScomService().Access(iv_ptargetHandle,
-                                           bs,
-                                           registerId,
-                                           operation);
-
-    PRDF_DEXIT("HomRegisterAccessScom::Access() rc=%d", rc);
-
-    return rc;
-}
-
 } // End namespace PRDF
