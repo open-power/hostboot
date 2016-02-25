@@ -82,6 +82,9 @@ extern "C"
             mss::ccs::program<TARGET_TYPE_MCBIST, TARGET_TYPE_MCA> l_program;
 
             // Setup a series of register probes which we'll see during the polling loop
+            // Leaving these probes in here as we need them from time to time, but they
+            // take up a lot of sim time, so we like to remove them simply
+#ifdef TRAINING_POLLING_PROBES
             l_program.iv_probes =
             {
                 // One block for each DP16
@@ -110,7 +113,7 @@ extern "C"
                 {p, "wr_cntr_status2 (dp16 4)", MCA_DDRPHY_DP16_WR_CNTR_STATUS2_P0_4},
                 {p, "wr_lvl_status (dp16 4)",   MCA_DDRPHY_DP16_WR_LVL_STATUS0_P0_4},
             };
-
+#endif
             // Delays in the CCS instruction ARR1 for training are supposed to be 0xFFFF,
             // and we're supposed to poll for the done or timeout bit. But we don't want
             // to wait 0xFFFF cycles before we start polling - that's too long. So we put
