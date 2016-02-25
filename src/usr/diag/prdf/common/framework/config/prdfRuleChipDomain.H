@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2008,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -21,8 +23,8 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef PRDFRULECHIPDOMAIN_H
-#define PRDFRULECHIPDOMAIN_H
+#ifndef __prdfP9RuleChipDomain_H
+#define __prdfP9RuleChipDomain_H
 
 #include <iipDomainContainer.h>
 #include <prdfRuleChip.H>
@@ -36,20 +38,34 @@ class RuleChipDomain : public DomainContainer<RuleChip>
 
     enum DefaultDomainSize
     {
-        // At minimum, should allocate for a fully configured single P8 murano
+        // At minimum, should allocate for a fully configured single P9 Nimbus
         // system.
 
         PROC_DOMAIN_SIZE   = 1,
-        EX_DOMAIN_SIZE     = PROC_DOMAIN_SIZE * 6,
-        MCS_DOMAIN_SIZE    = PROC_DOMAIN_SIZE * 4,
+        EQ_DOMAIN_SIZE     = PROC_DOMAIN_SIZE * 6,
+        EX_DOMAIN_SIZE     = EQ_DOMAIN_SIZE * 2,
+        EC_DOMAIN_SIZE     = EX_DOMAIN_SIZE * 2,
+        OBUS_DOMAIN_SIZE   = PROC_DOMAIN_SIZE * 2,
+        XBUS_DOMAIN_SIZE   = PROC_DOMAIN_SIZE * 2,
+        PEC_DOMAIN_SIZE    = PROC_DOMAIN_SIZE * 3,
+        PHB_DOMAIN_SIZE    = PROC_DOMAIN_SIZE * 6,
+        CAPP_DOMAIN_SIZE   = PROC_DOMAIN_SIZE * 2,
+        MCBIST_DOMAIN_SIZE = PROC_DOMAIN_SIZE * 2,
+        MCS_DOMAIN_SIZE    = MCBIST_DOMAIN_SIZE * 2,
+        MCA_DOMAIN_SIZE    = MCS_DOMAIN_SIZE * 2,
 
         MEMBUF_DOMAIN_SIZE = MCS_DOMAIN_SIZE,
         MBA_DOMAIN_SIZE    = MEMBUF_DOMAIN_SIZE * 2,
 
-        TOTAL_CHIPS = PROC_DOMAIN_SIZE   + EX_DOMAIN_SIZE  + MCS_DOMAIN_SIZE +
+        TOTAL_CHIPS = PROC_DOMAIN_SIZE +
+                      EQ_DOMAIN_SIZE + EX_DOMAIN_SIZE + EC_DOMAIN_SIZE +
+                      OBUS_DOMAIN_SIZE + XBUS_DOMAIN_SIZE +
+                      PEC_DOMAIN_SIZE + PHB_DOMAIN_SIZE +
+                      CAPP_DOMAIN_SIZE +
+                      MCBIST_DOMAIN_SIZE + MCS_DOMAIN_SIZE + MCA_DOMAIN_SIZE +
                       MEMBUF_DOMAIN_SIZE + MBA_DOMAIN_SIZE,
 
-        TOTAL_DOMAINS = 5,
+        TOTAL_DOMAINS = 14,
     };
 
     /** @fn RuleChipDomain
@@ -79,4 +95,4 @@ class RuleChipDomain : public DomainContainer<RuleChip>
 
 } // end namespace PRDF
 
-#endif /* PRDFRULECHIPDOMAIN_H */
+#endif /* __prdfP9RuleChipDomain_H */
