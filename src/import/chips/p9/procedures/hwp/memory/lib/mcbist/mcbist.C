@@ -136,6 +136,7 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
 
     static const uint64_t l_done = fapi2::buffer<uint64_t>().setBit<TT::MCBIST_DONE>();
     static const uint64_t l_fail = fapi2::buffer<uint64_t>().setBit<TT::MCBIST_FAIL>();
+    static const uint64_t l_in_progress = fapi2::buffer<uint64_t>().setBit<TT::MCBIST_IN_PROGRESS>();
 
     fapi2::buffer<uint64_t> l_status;
 
@@ -170,22 +171,35 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
         return l_status.getBit<TT::MCBIST_IN_PROGRESS>() != 1;
     });
 
+    // Check to see if we're still in progress - meaning we timed out.
+    FAPI_ASSERT((l_status & l_in_progress) != l_in_progress,
+                fapi2::MSS_MCBIST_TIMEOUT().set_TARGET_IN_ERROR(i_target),
+                "MCBIST timed out %s", mss::c_str(i_target));
+
     // The control register has a bit for done-and-happy and a bit for done-and-unhappy
-    if ((l_status & l_done) == l_done)
+    if ( ((l_status & l_done) == l_done) || ((l_status & l_fail) == l_fail) )
     {
-        FAPI_DBG("MCBIST executed successfully.");
+        FAPI_INF("MCBIST completed, processing errors");
+
+        // We're done. It doesn't mean that there were no errors.
+        FAPI_TRY( i_program.process_errors(i_target) );
+
+        // If we're here there were no errors, but lets report if the fail bit was set anyway.
+        FAPI_ASSERT( (l_status & l_fail) != l_fail,
+                     fapi2::MSS_MCBIST_UNKNOWN_FAILURE()
+                     .set_TARGET_IN_ERROR(i_target)
+                     .set_STATUS_REGISTER(l_status),
+                     "MCBIST reported a fail, but process_errors didn't find it 0x%016llx", l_status );
+
+        // And if we're here all is good with the world.
         return fapi2::current_err;
     }
 
-    if ((l_status & l_fail) == l_fail)
-    {
-        FAPI_DBG("MCBIST failed execution.");
-        return fapi2::FAPI2_RC_FALSE;
-    }
-
-    // So something set more than one bit in the control register?
-    FAPI_DBG("MCBIST executed <shrug>. Something's not good 0x%016llx", l_status);
-    return fapi2::FAPI2_RC_FALSE;
+    FAPI_ASSERT(false,
+                fapi2::MSS_MCBIST_MULTIPLE_FAIL_BITS()
+                .set_TARGET_IN_ERROR(i_target)
+                .set_STATUS_REGISTER(l_status),
+                "MCBIST executed <shrug>. Something's not good 0x%016llx", l_status );
 
 fapi_try_exit:
     return fapi2::current_err;

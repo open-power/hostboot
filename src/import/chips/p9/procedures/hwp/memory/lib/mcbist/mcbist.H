@@ -76,8 +76,10 @@ class mcbistTraits<fapi2::TARGET_TYPE_MCBIST>
         static const uint64_t CFGQ_REG = MCBIST_MCBCFGQ;
         static const uint64_t CNTLQ_REG = MCBIST_MCB_CNTLQ;
         static const uint64_t STATQ_REG = MCBIST_MCB_CNTLSTATQ;
+        static const uint64_t MCBSTATQ_REG = MCBIST_MCBSTATQ;
         static const uint64_t MCBPARMQ_REG = MCBIST_MCBPARMQ;
         static const uint64_t MCBAGRAQ_REG = MCBIST_MCBAGRAQ;
+        static const uint64_t SRERR_REG = MCBIST_MBSEC1Q;
 
         static const uint64_t MCBAMR0A0Q_REG = MCBIST_MCBAMR0A0Q;
         static const uint64_t MCBAMR1A0Q_REG = MCBIST_MCBAMR1A0Q;
@@ -175,6 +177,11 @@ class mcbistTraits<fapi2::TARGET_TYPE_MCBIST>
             CFG_ENABLE_SPEC_ATTN = MCBIST_MCBCFGQ_CFG_ENABLE_SPEC_ATTN,
             CFG_ENABLE_HOST_ATTN = MCBIST_MCBCFGQ_CFG_ENABLE_HOST_ATTN,
 
+            LOGGED_ERROR_ON_PORT_INDICATOR = MCBIST_MCBSTATQ_MCBIST_LOGGED_ERROR_ON_PORT_INDICATOR,
+            LOGGED_ERROR_ON_PORT_INDICATOR_LEN = MCBIST_MCBSTATQ_MCBIST_LOGGED_ERROR_ON_PORT_INDICATOR_LEN,
+
+            UE_COUNT = MCBIST_MBSEC1Q_UE_COUNT,
+            UE_COUNT_LEN = MCBIST_MBSEC1Q_UE_COUNT_LEN,
         };
 
 };
@@ -759,6 +766,57 @@ class program
 
             return;
         }
+
+        ///
+        /// @brief Process mcbist errors
+        /// @param[in] i_target fapi2::Target<T> of the MCBIST
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+        ///
+        inline fapi2::ReturnCode process_errors( const fapi2::Target<T> i_target ) const
+        {
+            // TK: Check for more detailed errors
+
+            // Until reading the error array is documented, comparison errors 'just' result in
+            // a flag indicating there was a problem on port.
+            {
+                fapi2::buffer<uint64_t> l_data;
+                uint64_t l_read = 0;
+                FAPI_TRY( mss::getScom(i_target, TT::MCBSTATQ_REG, l_data) );
+                l_data.extractToRight<TT::LOGGED_ERROR_ON_PORT_INDICATOR, TT::LOGGED_ERROR_ON_PORT_INDICATOR_LEN>(l_read);
+
+                FAPI_ASSERT( l_read == 0,
+                             fapi2::MSS_MEMDIAGS_COMPARE_ERROR_IN_LAST_PATTERN()
+                             .set_TARGET(i_target)
+                             .set_PORT(mss::first_bit_set(l_read)),
+                             "MCBIST error on port %d", mss::first_bit_set(l_read) );
+            }
+
+            // Check for UE errors
+            {
+                fapi2::buffer<uint64_t> l_data;
+                uint64_t l_read = 0;
+                FAPI_TRY( mss::getScom(i_target, TT::SRERR_REG, l_data) );
+
+                // For now, lets catch anything in the scrub/read error reg - not just UE
+#ifdef CATCH_UE_ONLY
+                l_data.extractToRight<TT::UE_COUNT, TT::UE_COUNT_LEN>(l_read);
+#else
+                l_read = l_data;
+#endif
+
+                FAPI_ASSERT( l_read == 0,
+                             fapi2::MSS_MEMDIAGS_UE_OR_SUE_IN_LAST_PATTERN()
+                             .set_TARGET(i_target)
+                             .set_STATUS(l_read),
+                             "MCBIST scrub/read error 0x%016lx", l_read );
+            }
+
+            FAPI_INF("Execution success - no errors seen from MCBIST program");
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
 
         // Vector of subtests. Note the MCBIST subtests are spread across
         // 8 registers - 4 subtests fit in one 64b register
