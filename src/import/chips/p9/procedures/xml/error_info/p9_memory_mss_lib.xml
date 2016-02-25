@@ -107,6 +107,35 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_MCBIST_TIMEOUT</rc>
+    <description>MCBIST program failed to return in the time allowed</description>
+    <callout>
+      <target>TARGET_IN_ERROR</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MCBIST_MULTIPLE_FAIL_BITS</rc>
+    <description>MCBIST program appeared to have failed, but set conflicting bits in the status register</description>
+    <ffdc>STATUS_REGISTER</ffdc>
+    <callout>
+      <target>TARGET_IN_ERROR</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MCBIST_UNKNOWN_FAILURE</rc>
+    <description>MCBIST program reported a failure but no error status was found</description>
+    <ffdc>STATUS_REGISTER</ffdc>
+    <callout>
+      <target>TARGET_IN_ERROR</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_MCBIST_PROGRAM_TOO_BIG</rc>
     <description>MCBIST program larger than currently supported size</description>
     <ffdc>PROGRAM_LENGTH</ffdc>
