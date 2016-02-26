@@ -30,6 +30,14 @@
 </attribute>
 
 <attribute>
+  <id>ATTR_CLOCK_PLL_MUX0</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Clock Mux#0 settings</description>
+  <valueType>uint8</valueType>
+  <writeable/> 
+</attribute>
+
+<attribute>
   <id>ATTR_I2C_BUS_DIV_REF</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Ref clock I2C bus divider consumed by code running out of OTPROM</description>
