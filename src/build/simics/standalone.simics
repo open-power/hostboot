@@ -48,3 +48,9 @@ try {
       run-python-file (lookup-file hbfw/ipmi_bt_responder.py)
 } except { echo "ERROR: Failed to load IPMIresponder." }
 
+###################################
+#Enable SBE
+###################################
+echo "Enable the SBE"
+($hb_masterproc).sbe.mibo_space.write 0xc0000160 0x8000100000000000 8 -b
+($hb_masterproc).sbe.mibo_space.write 0xc00e0000 0x5000000000000000 8 -b
