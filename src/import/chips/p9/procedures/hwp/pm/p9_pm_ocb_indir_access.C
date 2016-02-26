@@ -133,7 +133,7 @@ fapi2::ReturnCode p9_pm_ocb_indir_access(
     {
         FAPI_INF("OCB access for data write operation");
         FAPI_ASSERT(io_ocb_buffer != NULL,
-                    fapi2::PROCPM_OCB_PUT_NO_DATA_ERROR(),
+                    fapi2::PM_OCB_PUT_NO_DATA_ERROR(),
                     "No data provided for PUT operation");
 
         fapi2::buffer<uint64_t> l_data64;
@@ -179,7 +179,7 @@ fapi2::ReturnCode p9_pm_ocb_indir_access(
                 while (l_counter < OCB_FULL_POLL_MAX);
 
                 FAPI_ASSERT((true == l_push_ok_flag),
-                            fapi2::PROCPM_OCB_PUT_DATA_POLL_NOT_FULL_ERROR().
+                            fapi2::PM_OCB_PUT_DATA_POLL_NOT_FULL_ERROR().
                             set_PUSHQ_STATE(l_data64),
                             "Polling timeout waiting on push non-full");
             }
