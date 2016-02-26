@@ -45,6 +45,7 @@
 #include <hwpf_fapi2_reasoncodes.H>
 
 #include "fapi2HwpTest.C"
+#include "fapi2GetChildrenTest.C"
 
 using namespace fapi2;
 
@@ -57,12 +58,17 @@ public:
 *        that runs through the FAPI2 macros
 *
 */
-void test_fapi2HwpTest(void)
+void test_fapi2Test(void)
 {
     FAPI_INF(">>test_fapi2HwpTest starting...");
     fapi2HwpTest();
-    FAPI_INF(">>test_fapi2HwpTest exiting...");
+    FAPI_INF("<<test_fapi2HwpTest exiting...");
+
+    FAPI_INF(">>test_fapi2GetChildrenTest starting...");
+    fapi2GetChildrenTest();
+    FAPI_INF("<<test_fapi2ChildTest exiting...");
 }
+
 };
 
 #endif

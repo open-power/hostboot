@@ -33,6 +33,10 @@
 #ifndef FAPI2TESTUTILS_H_
 #define FAPI2TESTUTILS_H_
 
+#define EQ_PER_PROC 6
+#define EX_PER_EQ 2
+#define CORE_PER_EX 2
+
 #include <fapi2.H>
 
 namespace fapi2

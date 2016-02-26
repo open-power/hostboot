@@ -1143,7 +1143,7 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0mcs1mca3</id>
+    <id>sys0node0proc0mcs1mca1</id>
     <type>unit-mca-nimbus</type>
     <attribute><id>HUID</id><default>0x000D0103</default></attribute>
     <attribute>

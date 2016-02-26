@@ -46,6 +46,7 @@ namespace fapi2
         MOD_FAPI2_PLAT_GET_TARGET_NAME              = 0x03,
         MOD_FAPI2_PLAT_HWP_TEST                     = 0x04,
         MOD_FAPI2_PLAT_GET_PARENT_TEST              = 0x05,
+        MOD_FAPI2_PLAT_GET_CHILDREN_TEST            = 0x06,
     };
 
     /**
@@ -86,7 +87,7 @@ namespace fapi2
         RC_PERV_NO_PROC_FOUND          = FAPI2_COMP_ID | 0x1f,
         RC_CAPP_NO_PROC_FOUND          = FAPI2_COMP_ID | 0x20,
         RC_SBE_NO_PROC_FOUND           = FAPI2_COMP_ID | 0x21,
-
+        RC_INVALID_CHILD_COUNT         = FAPI2_COMP_ID | 0x22,
         // HWP generated errors
         RC_HWP_GENERATED_ERROR         = HWPF_COMP_ID | 0x0f,
 
