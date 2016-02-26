@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,13 +22,25 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+/////////////////////////////////////////////////////////////////
+// NOTE: This file is exportable as TSS-Lite for skiboot/PHYP  //
+/////////////////////////////////////////////////////////////////
+
 #ifndef __TRUSTEDBOOT_REASONCODES_H
 #define __TRUSTEDBOOT_REASONCODES_H
 
+#ifdef __HOSTBOOT_MODULE
 #include <hbotcompid.H>
+#else
+#define SECURE_COMP_ID 0x1E00
+#endif
 
+#ifdef __cplusplus
 namespace TRUSTEDBOOT
 {
+#endif
+
     enum TRUSTEDModuleId
     {
         MOD_HOST_UPDATE_MASTER_TPM      = 0x00,
@@ -54,6 +66,8 @@ namespace TRUSTEDBOOT
         RC_TPM_UNMARSHAL_INVALID_CMD    = SECURE_COMP_ID | 0xA8,
         RC_TPM_UNMARSHALING_FAIL        = SECURE_COMP_ID | 0xA9,
     };
+#ifdef __cplusplus
 }
+#endif
 
 #endif

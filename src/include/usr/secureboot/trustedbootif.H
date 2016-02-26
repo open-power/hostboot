@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,7 @@
 // -----------------------------------------------
 // Includes
 // -----------------------------------------------
+#include <targeting/common/targetservice.H>
 #include <i2c/tpmddif.H>
 #include <errl/errlentry.H>
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,7 @@
 #include <secureboot/trustedbootif.H>
 #include "../trustedTypes.H"
 #include "../trustedboot.H"
+#include "../trustedbootCmds.H"
 
 extern trace_desc_t* g_trac_trustedboot;
 
@@ -74,7 +75,7 @@ class TrustedBootTest: public CxxTest::TestSuite
         err = tpmMarshalCommandData(i_cmd,
                                     o_outbuf,
                                     i_bufsize,
-                                    o_cmdSize);
+                                    &o_cmdSize);
         io_num_ops++;
         if (NULL == err)
         {
@@ -112,7 +113,7 @@ class TrustedBootTest: public CxxTest::TestSuite
             err = tpmMarshalCommandData(i_cmd,
                                         o_outbuf,
                                         i_bufsize,
-                                        o_cmdSize);
+                                        &o_cmdSize);
             io_num_ops++;
             if (NULL != err)
             {
@@ -141,7 +142,7 @@ class TrustedBootTest: public CxxTest::TestSuite
             err = tpmMarshalCommandData(i_cmd,
                                         o_outbuf,
                                         i_expSize-1,
-                                        o_cmdSize);
+                                        &o_cmdSize);
             io_num_ops++;
             if (NULL == err)
             {
@@ -159,7 +160,7 @@ class TrustedBootTest: public CxxTest::TestSuite
             err = tpmMarshalCommandData(i_cmd,
                                         o_outbuf,
                                         i_expSize/2,
-                                        o_cmdSize);
+                                        &o_cmdSize);
             io_num_ops++;
             if (NULL == err)
             {
@@ -177,7 +178,7 @@ class TrustedBootTest: public CxxTest::TestSuite
             err = tpmMarshalCommandData(i_cmd,
                                         o_outbuf,
                                         i_expSize/3,
-                                        o_cmdSize);
+                                        &o_cmdSize);
             io_num_ops++;
             if (NULL == err)
             {
