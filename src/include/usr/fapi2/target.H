@@ -171,7 +171,8 @@ inline TARGETING::TYPE convertFapi2TypeToTargeting(fapi2::TargetType i_T)
             o_targetingType = TARGETING::TYPE_PHB;
             break;
         default:
-            FAPI_ERR("Chiplet type not supported 0x%.8X!", i_T);
+            FAPI_ERR("convertFapi2TypeToTargeting:: Chiplet type not supported 0x%.8X!", i_T);
+            assert(false);
             break;
     }
 
@@ -207,42 +208,182 @@ template< TargetType T>
 inline std::vector<Target<T> >
     Target<K, V>::getChildren(const TargetState i_state) const
 {
+
+FAPI_DBG(ENTER_MRK "getChildren. Type 0x%08x State:0x%08x", T, i_state);
+        // FIXME check for MULTICAST
+#define INVALID_CHILD(PARENT, CHILD) \
+    static_assert(!((K == PARENT) && (T == CHILD)), \
+                  #CHILD " is not a child of " #PARENT );
+
+    // invalid children for proc
+    INVALID_CHILD(fapi2::TARGET_TYPE_PROC_CHIP, fapi2::TARGET_TYPE_NONE)
+    INVALID_CHILD(fapi2::TARGET_TYPE_PROC_CHIP, fapi2::TARGET_TYPE_SYSTEM)
+    INVALID_CHILD(fapi2::TARGET_TYPE_PROC_CHIP, fapi2::TARGET_TYPE_DIMM)
+    INVALID_CHILD(fapi2::TARGET_TYPE_PROC_CHIP, fapi2::TARGET_TYPE_PROC_CHIP)
+    INVALID_CHILD(fapi2::TARGET_TYPE_PROC_CHIP, fapi2::TARGET_TYPE_MEMBUF_CHIP)
+    INVALID_CHILD(fapi2::TARGET_TYPE_PROC_CHIP, fapi2::TARGET_TYPE_MBA)
+#undef INVALID_CHILD
+
+    // valid children for PERV
+    // PERV -> EQ
+    // PERV -> CORE
+    // PERV -> XBUS
+    // PERV -> OBUS
+    // PERV -> CAPP
+    // PERV -> NV
+    // PERV -> MCBIST
+    // PERV -> MCS
+    // PERV -> MCA
+    // PERV -> PEC
+    // PERV -> PHB
+    // PERV -> MI
+    // PERV -> DMI
+    static_assert(!((K == fapi2::TARGET_TYPE_PERV) &&
+                    (T != fapi2::TARGET_TYPE_EQ) &&
+                    (T != fapi2::TARGET_TYPE_CORE) &&
+                    (T != fapi2::TARGET_TYPE_XBUS) &&
+                    (T != fapi2::TARGET_TYPE_OBUS) &&
+                    (T != fapi2::TARGET_TYPE_CAPP) &&
+                    (T != fapi2::TARGET_TYPE_NV) &&
+                    (T != fapi2::TARGET_TYPE_MCBIST) &&
+                    (T != fapi2::TARGET_TYPE_MCS) &&
+                    (T != fapi2::TARGET_TYPE_MCA) &&
+                    (T != fapi2::TARGET_TYPE_PEC) &&
+                    (T != fapi2::TARGET_TYPE_PHB) &&
+                    (T != fapi2::TARGET_TYPE_MI) &&
+                    (T != fapi2::TARGET_TYPE_DMI)),
+                  "improper child of fapi2::TARGET_TYPE_PERV");
+
+    // valid children for MEMBUF
+    // MEMBUF -> L4
+    // MEMBUF -> MBA
+    static_assert(!((K == fapi2::TARGET_TYPE_MEMBUF_CHIP) &&
+                    (T != fapi2::TARGET_TYPE_L4) &&
+                    (T != fapi2::TARGET_TYPE_MBA)),
+                  "improper child of fapi2::TARGET_TYPE_MEMBUF_CHIP");
+
+    // valid children for system
+    // SYSTEM -> PROC
+    // SYSTEM -> MEMBUF
+    // SYSTEM -> DIMM ??? disabled for now
+    static_assert(!((K == fapi2::TARGET_TYPE_SYSTEM) &&
+                    (T != fapi2::TARGET_TYPE_PROC_CHIP) &&
+                    (T != fapi2::TARGET_TYPE_MEMBUF_CHIP)),
+                  "improper child of fapi2::TARGET_TYPE_SYSTEM");
+
+    // valid children for EQ
+    // EQ -> CORE
+    // EQ -> EX
+    static_assert(!((K == fapi2::TARGET_TYPE_EQ) &&
+                    (T != fapi2::TARGET_TYPE_CORE) &&
+                    (T != fapi2::TARGET_TYPE_EX)),
+                  "improper child of fapi2::TARGET_TYPE_EQ");
+
+    // valid children for EX
+    // EX -> CORE
+    static_assert(!((K == fapi2::TARGET_TYPE_EX) &&
+                    (T != fapi2::TARGET_TYPE_CORE)),
+                  "improper child of fapi2::TARGET_TYPE_EX");
+
+    // Nimbus Memory
+    // valid children for MCS
+    // MCS -> MCA
+    static_assert(!((K == fapi2::TARGET_TYPE_MCS) &&
+                    (T != fapi2::TARGET_TYPE_MCA)),
+                  "improper child of fapi2::TARGET_TYPE_MCS");
+
+    // valid children for MCA
+    // MCA -> DIMM
+    static_assert(!((K == fapi2::TARGET_TYPE_MCA) &&
+                    (T != fapi2::TARGET_TYPE_DIMM)),
+                  "improper child of fapi2::TARGET_TYPE_MCA");
+
+    // valid children for MCBIST
+    // MCBIST -> MCA
+    // MCBIST -> MCS
+    static_assert(!((K == fapi2::TARGET_TYPE_MCBIST) &&
+                    (T != fapi2::TARGET_TYPE_MCA) &&
+                    (T != fapi2::TARGET_TYPE_MCS)),
+                  "improper child of fapi2::TARGET_TYPE_MCBIST");
+
+    // Cumulus Memory
+    // valid children for MI
+    // MI -> DMI
+    static_assert(!((K == fapi2::TARGET_TYPE_MI) &&
+                    (T != fapi2::TARGET_TYPE_DMI)),
+                  "improper child of fapi2::TARGET_TYPE_MI");
+
+    // valid children for DMI
+    // DMI -> MEMBUF
+    static_assert(!((K == fapi2::TARGET_TYPE_DMI) &&
+                    (T != fapi2::TARGET_TYPE_MEMBUF_CHIP)),
+                  "improper child of fapi2::TARGET_TYPE_DMI");
+
+    // valid children for MBA
+    // MBA -> DIMM
+    static_assert(!((K == fapi2::TARGET_TYPE_MBA) &&
+                    (T != fapi2::TARGET_TYPE_DIMM)),
+                  "improper child of fapi2::TARGET_TYPE_MBA");
+
+    //Check that we are not calling this on a target with no children
+    static_assert((K != fapi2::TARGET_TYPE_NONE),
+                  "fapi2::TARGET_TYPE_NONE has no children");
+    static_assert((K != fapi2::TARGET_TYPE_XBUS),
+                  "fapi2::TARGET_TYPE_XBUS has no children");
+    static_assert((K != fapi2::TARGET_TYPE_ABUS),
+                  "fapi2::TARGET_TYPE_ABUS has no children");
+    static_assert((K != fapi2::TARGET_TYPE_L4),
+                  "fapi2::TARGET_TYPE_L4 has no children");
+    static_assert((K != fapi2::TARGET_TYPE_CORE),
+                  "fapi2::TARGET_TYPE_CORE has no children");
+    static_assert((K != fapi2::TARGET_TYPE_CAPP),
+                  "fapi2::TARGET_TYPE_CAPP has no children");
+    static_assert((K != fapi2::TARGET_TYPE_OBUS),
+                  "fapi2::TARGET_TYPE_OBUS has no children");
+    static_assert((K != fapi2::TARGET_TYPE_NV),
+                  "fapi2::TARGET_TYPE_NV has no children");
+    static_assert((K != fapi2::TARGET_TYPE_SBE),
+                  "fapi2::TARGET_TYPE_SBE has no children");
+    static_assert((K != fapi2::TARGET_TYPE_PPE),
+                  "fapi2::TARGET_TYPE_PPE has no children");
+    static_assert((K != fapi2::TARGET_TYPE_PEC),
+                  "fapi2::TARGET_TYPE_PEC has no children");
+    static_assert((K != fapi2::TARGET_TYPE_PHB),
+                  "fapi2::TARGET_TYPE_PHB has no children");
+
+
     std::vector<Target<T>> l_children;
-    TARGETING::TYPE l_type = TARGETING::TYPE_NA;
-    TARGETING::TargetHandleList l_chipletList;
+    //Get the platform target type of the current fapi2::target
+    TARGETING::TYPE l_type = fapi2::convertFapi2TypeToTargeting(T);
+    TARGETING::TargetHandleList l_childList;
     bool l_functional = (i_state & fapi2::TARGET_STATE_FUNCTIONAL)? true:false;
 
-    FAPI_INF(ENTER_MRK "getChildren. Type 0x%08x State:0x%08x", T, i_state);
 
-    switch (T)
+    if(!l_functional)
     {
-      //@TODO RTC:129517 to add the rest of the types
-        case TARGET_TYPE_EX_CHIPLET: l_type = TARGETING::TYPE_EX; break;
-        case TARGET_TYPE_MBA_CHIPLET: l_type = TARGETING::TYPE_MBA; break;
-        case TARGET_TYPE_MCS_CHIPLET: l_type = TARGETING::TYPE_MCS; break;
-        case TARGET_TYPE_XBUS_ENDPOINT: l_type = TARGETING::TYPE_XBUS; break;
-        case TARGET_TYPE_ABUS_ENDPOINT: l_type = TARGETING::TYPE_ABUS; break;
-        case TARGET_TYPE_L4: l_type = TARGETING::TYPE_L4; break;
-        default:
-             FAPI_ERR("getChildren: Chiplet type 0x%08x not supported 0x%08x",
-                       T);
-             assert(false);
-            break;
+        TARGETING::getChildAffinityTargetsByState(l_childList,
+                          static_cast<TARGETING::Target*>(this->get()),
+                          TARGETING::CLASS_NA,
+                          l_type,
+                          TARGETING::UTIL_FILTER_ALL);
+    }
+    else
+    {
+        TARGETING::getChildAffinityTargetsByState(l_childList,
+                          static_cast<TARGETING::Target*>(this->get()),
+                          TARGETING::CLASS_NA,
+                          l_type,
+                          TARGETING::UTIL_FILTER_FUNCTIONAL);
     }
 
-    TARGETING::getChildChiplets(l_chipletList,
-                       static_cast<TARGETING::Target*>(this->get()),
-                       l_type,
-                       l_functional);
-
-    FAPI_INF("getChildren: l_functional 0x%.8X, l_type = 0x%.8X, ChipUnitId 0x%.8X",
+    FAPI_DBG("getChildren: l_functional 0x%.8X, l_type = 0x%.8X, ChipUnitId 0x%.8X",
                 l_functional, l_type, TARGETING::get_huid(this->get()));
-    FAPI_INF("getChildren: l_chipletList size %d", l_chipletList.size());
+    FAPI_DBG("getChildren: l_childList size %d", l_childList.size());
 
-    // Return fapi::Targets to the caller
+    // Return fapi2::Targets to the caller
     for (TARGETING::TargetHandleList::const_iterator
-            chipletIter = l_chipletList.begin();
-            chipletIter != l_chipletList.end();
+            chipletIter = l_childList.begin();
+            chipletIter != l_childList.end();
             ++chipletIter)
     {
         TARGETING::HwasState l_state =
@@ -259,7 +400,7 @@ inline std::vector<Target<T> >
         fapi2::Target<T> l_target(*chipletIter);
         l_children.push_back(l_target);
     }
-    FAPI_INF(EXIT_MRK "getChildren. %d results", l_children.size());
+    FAPI_DBG(EXIT_MRK "getChildren. %d results", l_children.size());
 
     return l_children;
 }
