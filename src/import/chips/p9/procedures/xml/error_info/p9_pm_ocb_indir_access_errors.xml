@@ -20,24 +20,14 @@
 <hwpErrors>
     <!-- ******************************************************************* -->
     <hwpError>
-    <rc>RC_PROCPM_OCB_ACCESS_LENGTH_CHECK</rc>
-    <description>
-    Input length of data fetched from the data register and transfered via
-     indirect channel did not match the output length
-    </description>
-    <ffdc>LENGTH</ffdc>
-    <ffdc>ACTUALLENGTH</ffdc>
-    </hwpError>
-    <!-- ******************************************************************* -->
-    <hwpError>
-    <rc>RC_PROCPM_OCB_PUT_NO_DATA_ERROR</rc>
+    <rc>RC_PM_OCB_PUT_NO_DATA_ERROR</rc>
     <description>
     No data passed for Put operation.
     </description>
     </hwpError>
     <!-- ******************************************************************* -->
     <hwpError>
-    <rc>RC_PROCPM_OCB_PUT_DATA_POLL_NOT_FULL_ERROR</rc>
+    <rc>RC_PM_OCB_PUT_DATA_POLL_NOT_FULL_ERROR</rc>
     <description>
     Indicates that a timeout occured waiting for a push queue to be non-full
     before writing data. Is likely due to OCC firmware not pulling entries off
