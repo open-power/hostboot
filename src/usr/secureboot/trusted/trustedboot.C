@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,9 +40,10 @@
 #include <errl/errludstring.H>
 #include <targeting/common/targetservice.H>
 #include <secureboot/trustedbootif.H>
+#include <secureboot/trustedboot_reasoncodes.H>
 #include "trustedboot.H"
 #include "trustedTypes.H"
-#include <secureboot/trustedboot_reasoncodes.H>
+#include "trustedbootCmds.H"
 
 // ----------------------------------------------
 // Trace definitions
@@ -192,14 +193,14 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target,
         io_target.failed = false;
 
         // TPM_STARTUP
-        err = tpmCmdStartup(io_target);
+        err = tpmCmdStartup(&io_target);
         if (NULL != err)
         {
             break;
         }
 
         // TPM_GETCAPABILITY to read FW Version
-        err = tpmCmdGetCapFwVersion(io_target);
+        err = tpmCmdGetCapFwVersion(&io_target);
         if (NULL != err)
         {
             break;

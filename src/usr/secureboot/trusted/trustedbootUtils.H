@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/secureboot/trusted/trustedboot.H $                    */
+/* $Source: src/usr/secureboot/trusted/trustedbootUtils.H $               */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,62 +23,57 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
- * @file trustedboot.H
+ * @file trustedbootUtils.H
  *
- * @brief Trustedboot TPM interfaces
+ * @brief Trustedboot TPM utilities that must be implemented for each
+ *  unique implementation
  *
  */
-#ifndef __TRUSTEDBOOT_H
-#define __TRUSTEDBOOT_H
+
+/////////////////////////////////////////////////////////////////
+// NOTE: This file is exportable as TSS-Lite for skiboot/PHYP  //
+/////////////////////////////////////////////////////////////////
+
+#ifndef __TRUSTEDBOOTUTILS_H
+#define __TRUSTEDBOOTUTILS_H
 // -----------------------------------------------
 // Includes
 // -----------------------------------------------
-#include <secureboot/trustedbootif.H>
-#include <i2c/tpmddif.H>
-#include <trace/interface.H>
 #include "trustedTypes.H"
 
-// ----------------------------------------------
-// Trace definitions
-// ----------------------------------------------
-extern trace_desc_t* g_trac_trustedboot;
-
-// Easy macro replace for unit testing
-//#define TRACUCOMP(args...)  TRACFCOMP(args)
-#define TRACUCOMP(args...)
-//#define TRACUBIN(args...)  TRACFBIN(args)
-#define TRACUBIN(args...)
-
-#define TB_SUCCESS NULL
-
+#ifdef __cplusplus
 namespace TRUSTEDBOOT
 {
-
-/// Class object to store system TPM information
-class SystemTpms
-{
-public:
-    SystemTpms();
-
-    TpmTarget tpm[MAX_SYSTEM_TPMS];
-};
-
+#endif
 
 /**
- * @brief Initialize the targetted TPM
+ * @brief Transmit the command to the TPM
  * @param[in/out] io_target Current TPM target structure
- * @param[in] i_nodeTarget Node Target
- * @param[in] i_chip Chip to initialize
-*/
-void tpmInitialize(TRUSTEDBOOT::TpmTarget & io_target,
-                   TARGETING::Target* i_nodeTarget,
-                   TPMDD::tpm_chip_types_t i_chip);
-
-/**
- * @brief Mark the TPM as non-functional and take required steps
- * @param[in/out] io_target Current TPM target structure
+ * @param[in/out] io_buffer Input the command buffer to send, response on exit
+ * @param[in] i_cmdSize Size of provided command in bytes
+ * @param[in] i_bufsize Size of io_buffer in bytes
+ * @return errlHndl_t NULL if successful, otherwise a pointer to the
+ *       error log.
  */
-void tpmMarkFailed(TRUSTEDBOOT::TpmTarget & io_target);
+errlHndl_t tpmTransmit(TpmTarget * io_target,
+                       uint8_t* io_buffer,
+                       size_t i_cmdSize,
+                       size_t i_bufsize );
 
+/**
+ * @brief Create an error log entry for potential logging
+ * @param[in] i_modId Code Module ID
+ * @param[in] i_reasonCode Error Reason Code
+ * @param[in] i_user1 User data 1
+ * @param[in] i_user2 User data 2
+ */
+errlHndl_t tpmCreateErrorLog(const uint8_t i_modId,
+                             const uint16_t i_reasonCode,
+                             const uint64_t i_user1,
+                             const uint64_t i_user2);
+
+#ifdef __cplusplus
 } // end TRUSTEDBOOT namespace
+#endif
+
 #endif

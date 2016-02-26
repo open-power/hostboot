@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,24 +28,36 @@
  * @brief Trustedboot TPM Types
  *
  */
+
+/////////////////////////////////////////////////////////////////
+// NOTE: This file is exportable as TSS-Lite for skiboot/PHYP  //
+/////////////////////////////////////////////////////////////////
+
 #ifndef __TRUSTEDTYPES_H
 #define __TRUSTEDTYPES_H
 // -----------------------------------------------
 // Includes
 // -----------------------------------------------
+#include <stdint.h>
+#ifdef __HOSTBOOT_MODULE
 #include <secureboot/trustedbootif.H>
+#else
+#define PACKED __attribute__((__packed__))
+#include "trustedboot.H"
+#endif
 
+#ifdef __cplusplus
 namespace TRUSTEDBOOT
 {
-
+#endif
 
 
     /// TPM Algorithm defines
-    enum TPM_Alg_Id
+    typedef enum
     {
         TPM_ALG_SHA1    = 0x0004,
         TPM_ALG_SHA256  = 0x000B,
-    };
+    } TPM_Alg_Id;
 
     /// Common static values
     enum
@@ -65,21 +77,12 @@ namespace TRUSTEDBOOT
 
     };
 
-    /// Class object to store system TPM information
-    class SystemTpms
-    {
-        public:
-            SystemTpms();
-
-            TpmTarget tpm[MAX_SYSTEM_TPMS];
-    };
-
     /**
      * @brief Get the digest size of the selected hash algorithm
      * @param[in] i_algId Algorith ID to query
      * @returns digest length in bytes, 0 on invalid algorithm
      */
-    uint32_t getDigestSize(TPM_Alg_Id i_algId);
+    uint32_t getDigestSize(const TPM_Alg_Id i_algId)  __attribute__ ((const));
 
 
     /// Various static values
@@ -128,95 +131,89 @@ namespace TRUSTEDBOOT
     //    Commands Family "2.0"
 
     /// TPM capability response structure
-    struct TPMS_TAGGED_PROPERTY
+    struct _TPMS_TAGGED_PROPERTY
     {
         uint32_t property;  ///< TPM_PT_xx identifier
         uint32_t value;     ///< value of the property
     } PACKED;
+    typedef struct _TPMS_TAGGED_PROPERTY TPMS_TAGGED_PROPERTY;
 
-    struct TPML_TAGGED_TPM_PROPERTY
+    struct _TPML_TAGGED_TPM_PROPERTY
     {
         uint32_t count;   ///< Number of properties
         TPMS_TAGGED_PROPERTY tpmProperty[MAX_TPM_PROPERTIES];
-        uint8_t* unmarshal(uint8_t* i_tpmBuf, size_t & io_tpmBufSize,
-                           size_t i_outBufSize);
     } PACKED;
+    typedef struct _TPML_TAGGED_TPM_PROPERTY TPML_TAGGED_TPM_PROPERTY;
+    uint8_t* TPML_TAGGED_TPM_PROPERTY_unmarshal(TPML_TAGGED_TPM_PROPERTY* val,
+                       uint8_t* i_tpmBuf, size_t* io_tpmBufSize);
 
-    union TPMU_CAPABILITIES
+    union _TPMU_CAPABILITIES
     {
         // Currently only TPM properties supported
         TPML_TAGGED_TPM_PROPERTY tpmProperties;
     } PACKED;
+    typedef union _TPMU_CAPABILITIES TPMU_CAPABILITIES;
 
-    struct TPMS_CAPABILITY_DATA
+    struct _TPMS_CAPABILITY_DATA
     {
         uint32_t capability;    ///< The capability type
         TPMU_CAPABILITIES data; ///< The capability data
-        uint8_t* unmarshal(uint8_t* i_tpmBuf, size_t & io_tpmBufSize,
-                           size_t i_outBufSize);
     } PACKED;
+    typedef struct _TPMS_CAPABILITY_DATA TPMS_CAPABILITY_DATA;
+    uint8_t* TPMS_CAPABILITY_DATA_unmarshal(TPMS_CAPABILITY_DATA* val,
+                                            uint8_t* i_tpmBuf,
+                                            size_t * io_tpmBufSize);
 
 
     /// SHA1 Event log entry format
-    struct TCG_PCR_EVENT
+    struct _TCG_PCR_EVENT
     {
         uint32_t   pcrIndex;    ///< PCRIndex event extended to
         uint32_t   eventType;   ///< Type of event
         uint8_t    digest[20];  ///< Value extended into PCR index
         uint32_t   eventSize;   ///< Size of event data
-        uint8_t    event[0];    ///< The event data
-
-        inline size_t marshalSize() const
-            { return (sizeof(TCG_PCR_EVENT) + eventSize); }
-
+        uint8_t    event[MAX_TPM_LOG_MSG]; ///< The event data
     } PACKED;
+    typedef struct _TCG_PCR_EVENT TCG_PCR_EVENT;
+    size_t TCG_PCR_EVENT_marshalSize(TCG_PCR_EVENT* val);
 
     /// Digest union
-    union TPMU_HA
+    union _TPMU_HA
     {
         uint8_t sha1[TPM_ALG_SHA1_SIZE];
         uint8_t sha256[TPM_ALG_SHA256_SIZE];
     } PACKED;
+    typedef union _TPMU_HA TPMU_HA;
 
     /// Crypto agile digest
-    struct TPMT_HA
+    struct _TPMT_HA
     {
         uint16_t   algorithmId; ///< ID of hashing algorithm
         TPMU_HA    digest;      ///< Digest, depends on algorithmid
-        inline size_t marshalSize() const;
     } PACKED;
-
-    inline size_t TPMT_HA::marshalSize() const
-    {
-        return (sizeof(TPMT_HA) - sizeof(TPMU_HA) +
-                getDigestSize((TPM_Alg_Id)algorithmId));
-    }
+    typedef struct _TPMT_HA TPMT_HA;
+    size_t TPMT_HA_marshalSize(TPMT_HA* val);
 
     /// Crypto agile digests list
-    struct TPML_DIGEST_VALUES
+    struct _TPML_DIGEST_VALUES
     {
         uint32_t   count;                ///< Number of digests
         TPMT_HA    digests[HASH_COUNT];  ///< Digests
-        size_t marshalSize() const;
     } PACKED;
+    typedef struct _TPML_DIGEST_VALUES TPML_DIGEST_VALUES;
+    size_t TPML_DIGEST_VALUES_marshalSize(TPML_DIGEST_VALUES* val);
 
     /// Event field structure
-    struct TPM_EVENT_FIELD
+    struct _TPM_EVENT_FIELD
     {
         uint32_t   eventSize;               ///< Size of event data
         uint8_t    event[MAX_TPM_LOG_MSG];  ///< The event data
-        /**
-         * @brief Return size of entire structure
-         */
-        inline size_t marshalSize() const;
     } PACKED;
-    inline size_t TPM_EVENT_FIELD::marshalSize() const
-    {
-        return (sizeof(eventSize) + eventSize);
-    }
+    typedef struct _TPM_EVENT_FIELD TPM_EVENT_FIELD;
+    size_t TPM_EVENT_FIELD_marshalSize(TPM_EVENT_FIELD* val);
 
     /// Crypto agile log entry format
-    struct TCG_PCR_EVENT2
+    struct _TCG_PCR_EVENT2
     {
         uint32_t   pcrIndex;    ///< PCRIndex event extended to
         uint32_t   eventType;   ///< Type of event
@@ -224,74 +221,87 @@ namespace TRUSTEDBOOT
         TPM_EVENT_FIELD event;      ///< Event information
 
     } PACKED;
+    typedef struct _TCG_PCR_EVENT2 TCG_PCR_EVENT2;
 
-
-    struct TPM2_BaseIn
+    struct _TPM2_BaseIn
     {
         uint16_t      tag;         ///< Type TPM_ST_xx
         uint32_t      commandSize; ///< Total # output bytes incl cmdSize & tag
         uint32_t      commandCode; ///< Type TPM_CC_xx
-        uint8_t* marshal(uint8_t* o_tpmBuf, size_t i_tpmBufSize,
-                         size_t & io_cmdSize);
     } PACKED;
+    typedef struct _TPM2_BaseIn TPM2_BaseIn;
+    uint8_t* TPM2_BaseIn_marshal(TPM2_BaseIn* val, uint8_t* o_tpmBuf,
+                                 size_t i_tpmBufSize, size_t* io_cmdSize);
 
     /// Base of all outgoing messages
-    struct TPM2_BaseOut
+    struct _TPM2_BaseOut
     {
         uint16_t      tag;          ///< Type TPM_ST_xx
         uint32_t      responseSize; ///< Total # out bytes incl paramSize & tag
         uint32_t      responseCode; ///< The return code of the operation
-        uint8_t* unmarshal(uint8_t* i_tpmBuf, size_t & io_tpmBufSize,
-                           size_t i_outBufSize);
     } PACKED;
+    typedef struct _TPM2_BaseOut TPM2_BaseOut;
+    uint8_t* TPM2_BaseOut_unmarshal(TPM2_BaseOut* val, uint8_t* i_tpmBuf,
+                                    size_t* io_tpmBufSize, size_t i_outBufSize);
 
     /// Generic TPM Input Command structure with a 2 byte param
-    struct TPM2_2ByteIn
+    struct _TPM2_2ByteIn
     {
         TPM2_BaseIn  base;
         uint16_t     param;
-        uint8_t* marshal(uint8_t* o_tpmBuf, size_t i_tpmBufSize,
-                         size_t & io_cmdSize);
     } PACKED;
+    typedef struct _TPM2_2ByteIn TPM2_2ByteIn;
+    uint8_t* TPM2_2ByteIn_marshal(TPM2_2ByteIn* val, uint8_t* o_tpmBuf,
+                                  size_t i_tpmBufSize, size_t* io_cmdSize);
 
 
     /// Generic TPM Output Command structure with a 4 byte return data
-    struct TPM2_4ByteOut
+    struct _TPM2_4ByteOut
     {
         TPM2_BaseOut base;
         uint32_t     resp;
     } PACKED;
+    typedef struct _TPM2_4ByteOut TPM2_4ByteOut;
 
     /// Incoming TPM_GetCapability structure
-    struct TPM2_GetCapabilityIn
+    struct _TPM2_GetCapabilityIn
     {
         TPM2_BaseIn  base;
         uint32_t    capability;      ///< group selection
         uint32_t    property;        ///< Further definition
         uint32_t    propertyCount;   ///< Number of properties to return
-        uint8_t* marshal(uint8_t* o_tpmBuf, size_t i_tpmBufSize,
-                         size_t& io_cmdSize);
     } PACKED;
+    typedef struct _TPM2_GetCapabilityIn TPM2_GetCapabilityIn;
+    uint8_t* TPM2_GetCapabilityIn_marshal(TPM2_GetCapabilityIn* val,
+                                          uint8_t* o_tpmBuf,
+                                          size_t i_tpmBufSize,
+                                          size_t* io_cmdSize);
 
     /// Outgoing TPM_GetCapability structure
-    struct TPM2_GetCapabilityOut
+    struct _TPM2_GetCapabilityOut
     {
         TPM2_BaseOut base;
         uint8_t     moreData;    ///< Flag to indicate if more values available
         TPMS_CAPABILITY_DATA capData; ///< The capability response
-        uint8_t* unmarshal(uint8_t* i_tpmBuf, size_t & io_tpmBufSize,
-                           size_t i_outBufSize);
     } PACKED;
-
+    typedef struct _TPM2_GetCapabilityOut TPM2_GetCapabilityOut;
+    uint8_t* TPM2_GetCapabilityOut_unmarshal(TPM2_GetCapabilityOut* val,
+                                             uint8_t* i_tpmBuf,
+                                             size_t* io_tpmBufSize,
+                                             size_t i_outBufSize);
 
     /// Incoming TPM_EXTEND structure
-    struct TPM2_ExtendIn
+    struct _TPM2_ExtendIn
     {
         TPM2_BaseIn  base;
         uint32_t     pcrHandle;     ///< PCR number to extend
         TPML_DIGEST_VALUES digests; ///< Values to be extended
     } PACKED;
+    typedef struct _TPM2_ExtendIn TPM2_ExtendIn;
 
+#ifdef __cplusplus
 } // end TRUSTEDBOOT namespace
+#endif
+
 #endif
 

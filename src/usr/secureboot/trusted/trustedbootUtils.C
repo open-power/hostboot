@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/secureboot/trusted/base/trustedboot_base.C $          */
+/* $Source: src/usr/secureboot/trusted/trustedbootUtils.C $               */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,9 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
- * @file trustedboot_base.C
+ * @file trustedbootUtils.C
  *
- * @brief Trusted boot base interfaces
+ * @brief Trusted boot utility functions
  */
 
 // ----------------------------------------------
@@ -38,46 +38,77 @@
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
 #include <errl/errludstring.H>
+#include <targeting/common/targetservice.H>
+#include <devicefw/driverif.H>
+#include <i2c/tpmddif.H>
 #include <secureboot/trustedbootif.H>
-#include "../trustedboot.H"
+#include <i2c/tpmddreasoncodes.H>
 #include <secureboot/trustedboot_reasoncodes.H>
+#include "trustedbootUtils.H"
+#include "trustedbootCmds.H"
+#include "trustedboot.H"
+#include "trustedTypes.H"
 
 // ----------------------------------------------
 // Trace definitions
 // ----------------------------------------------
-#ifdef CONFIG_TPMDD
-trace_desc_t* g_trac_trustedboot = NULL;
-TRAC_INIT( & g_trac_trustedboot, "TRBOOT", KILOBYTE );
-#endif
+extern trace_desc_t* g_trac_trustedboot;
+
+// Easy macro replace for unit testing
+#define TRACUCOMP(args...)  TRACFCOMP(args)
+//#define TRACUCOMP(args...)
+#define TRACUBIN(args...)  TRACFBIN(args)
+//#define TRACUBIN(args...)
+
 
 namespace TRUSTEDBOOT
 {
 
-/// Global object to store TPM status
-SystemTpms systemTpms;
-
-SystemTpms::SystemTpms()
-{
-}
-
-TpmTarget::TpmTarget()
-{
-    memset(this, 0, sizeof(TpmTarget));
-    available = true; // Default to available until we know better
-    mutex_init(&tpmMutex);
-}
-
-errlHndl_t pcrExtend(TPM_Pcr i_pcr,
-                     uint8_t* i_digest,
-                     size_t  i_digestSize,
-                     const char* i_logMsg)
+errlHndl_t tpmTransmit(TpmTarget * io_target,
+                       uint8_t* io_buffer,
+                       size_t i_cmdSize,
+                       size_t i_bufsize )
 {
     errlHndl_t err = NULL;
-#ifdef CONFIG_TPMDD
-    /// @todo RTC:125288 Add call to extend the PCR
 
-#endif
+    do
+    {
+        // Send to the TPM
+        err = deviceRead(io_target->nodeTarget,
+                         io_buffer,
+                         i_bufsize,
+                         DEVICE_TPM_ADDRESS( io_target->chip,
+                                             TPMDD::TPM_OP_TRANSMIT,
+                                             i_cmdSize));
+        if (NULL != err)
+        {
+            break;
+        }
+
+
+    } while ( 0 );
+
     return err;
 }
 
+
+errlHndl_t tpmCreateErrorLog(const uint8_t i_modId,
+                             const uint16_t i_reasonCode,
+                             const uint64_t i_user1,
+                             const uint64_t i_user2)
+{
+    errlHndl_t err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    i_modId,
+                                    i_reasonCode,
+                                    i_user1,
+                                    i_user2,
+                                    true /*Add HB SW Callout*/ );
+    err->collectTrace( SECURE_COMP_NAME );
+    return err;
+}
+
+
+
+#ifdef __cplusplus
 } // end TRUSTEDBOOT
+#endif
