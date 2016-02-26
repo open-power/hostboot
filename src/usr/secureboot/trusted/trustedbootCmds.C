@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,82 +28,68 @@
  * @brief Trusted boot TPM command interfaces
  */
 
+/////////////////////////////////////////////////////////////////
+// NOTE: This file is exportable as TSS-Lite for skiboot/PHYP  //
+/////////////////////////////////////////////////////////////////
+
 // ----------------------------------------------
 // Includes
 // ----------------------------------------------
 #include <string.h>
-#include <sys/time.h>
-#include <trace/interface.H>
-#include <errl/errlentry.H>
-#include <errl/errlmanager.H>
-#include <errl/errludtarget.H>
-#include <errl/errludstring.H>
-#include <targeting/common/targetservice.H>
-#include <devicefw/driverif.H>
-#include <i2c/tpmddif.H>
-#include <secureboot/trustedbootif.H>
-#include <i2c/tpmddreasoncodes.H>
+#include <stdlib.h>
+#ifdef __HOSTBOOT_MODULE
+#include <secureboot/trustedboot_reasoncodes.H>
+#else
+#include "trustedboot_reasoncodes.H"
+#endif
+#include "trustedbootCmds.H"
+#include "trustedbootUtils.H"
 #include "trustedboot.H"
 #include "trustedTypes.H"
-#include <secureboot/trustedboot_reasoncodes.H>
 
-// ----------------------------------------------
-// Trace definitions
-// ----------------------------------------------
-extern trace_desc_t* g_trac_trustedboot;
-
-// Easy macro replace for unit testing
-//#define TRACUCOMP(args...)  TRACFCOMP(args)
-#define TRACUCOMP(args...)
-//#define TRACUBIN(args...)  TRACFBIN(args)
-#define TRACUBIN(args...)
-
+#ifdef __cplusplus
 namespace TRUSTEDBOOT
 {
+#endif
 
-
-errlHndl_t tpmTransmitCommand(TRUSTEDBOOT::TpmTarget & io_target,
+errlHndl_t tpmTransmitCommand(TpmTarget * io_target,
                               uint8_t* io_buffer,
                               size_t i_bufsize )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = TB_SUCCESS;
     uint8_t* transmitBuf = NULL;
     size_t cmdSize = 0;
     size_t dataSize = 0;
-    TRUSTEDBOOT::TPM2_BaseIn* cmd =
-        reinterpret_cast<TRUSTEDBOOT::TPM2_BaseIn*>(io_buffer);
-    TRUSTEDBOOT::TPM2_BaseOut* resp =
-        reinterpret_cast<TRUSTEDBOOT::TPM2_BaseOut*>(io_buffer);
+    TPM2_BaseIn* cmd = (TPM2_BaseIn*)io_buffer;
+    TPM2_BaseOut* resp = (TPM2_BaseOut*)io_buffer;
 
     TRACUCOMP( g_trac_trustedboot,
-               ENTER_MRK"TPM TRANSMIT CMD START : BufLen %d : %016llx",
+               ">>TPM TRANSMIT CMD START : BufLen %d : %016llx",
                i_bufsize,
-               *(reinterpret_cast<uint64_t*>(io_buffer))  );
+               *((uint64_t*)io_buffer)  );
 
     do
     {
-        transmitBuf = new uint8_t[MAX_TRANSMIT_SIZE];
+        transmitBuf = (uint8_t*)malloc(MAX_TRANSMIT_SIZE);
 
         // Marshal the data into a byte array for transfer to the TPM
         err = tpmMarshalCommandData(cmd,
                                     transmitBuf,
                                     MAX_TRANSMIT_SIZE,
-                                    cmdSize);
-        if (NULL != err)
+                                    &cmdSize);
+        if (TB_SUCCESS != err)
         {
             break;
         }
 
-
         // Send to the TPM
         dataSize = MAX_TRANSMIT_SIZE;
-        err = deviceRead(io_target.nodeTarget,
-                         transmitBuf,
-                         dataSize,
-                         DEVICE_TPM_ADDRESS( io_target.chip,
-                                             TPMDD::TPM_OP_TRANSMIT,
-                                             cmdSize));
-        if (NULL != err)
+        err = tpmTransmit(io_target,
+                          transmitBuf,
+                          cmdSize,
+                          dataSize);
+
+        if (TB_SUCCESS != err)
         {
             break;
         }
@@ -119,38 +105,38 @@ errlHndl_t tpmTransmitCommand(TRUSTEDBOOT::TpmTarget & io_target,
     } while ( 0 );
 
 
-    delete transmitBuf;
+    free(transmitBuf);
 
     TRACUCOMP( g_trac_trustedboot,
-               EXIT_MRK"tpmTransmitCommand() - %s",
-               ((NULL == err) ? "No Error" : "With Error") );
+               "<<tpmTransmitCommand() - %s",
+               ((TB_SUCCESS == err) ? "No Error" : "With Error") );
     return err;
 }
 
-errlHndl_t tpmMarshalCommandData(TRUSTEDBOOT::TPM2_BaseIn* i_cmd,
+errlHndl_t tpmMarshalCommandData(TPM2_BaseIn* i_cmd,
                                  uint8_t* o_outbuf,
                                  size_t i_bufsize,
-                                 size_t & o_cmdSize)
+                                 size_t* o_cmdSize)
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = TB_SUCCESS;
     uint8_t* sBuf = o_outbuf;
-    o_cmdSize = 0;
     int stage = 0;
-    TRUSTEDBOOT::TPM2_BaseIn* baseCmd =
-        reinterpret_cast<TRUSTEDBOOT::TPM2_BaseIn*>(o_outbuf);
+    TPM2_BaseIn* baseCmd =
+        (TPM2_BaseIn*)o_outbuf;
+    *o_cmdSize = 0;
 
     TRACDCOMP( g_trac_trustedboot,
-               ENTER_MRK"tpmMarshalCommandData()" );
+               ">>tpmMarshalCommandData()" );
     do
     {
 
         TRACUCOMP( g_trac_trustedboot,
                    "TPM MARSHAL START : BufLen %d : %016llx",
                    i_bufsize,
-                   *(reinterpret_cast<uint64_t*>(i_cmd))  );
+                   *((uint64_t*)i_cmd)  );
 
         // Start with the command header
-        sBuf = i_cmd->marshal(sBuf, i_bufsize, o_cmdSize);
+        sBuf = TPM2_BaseIn_marshal(i_cmd, sBuf, i_bufsize, o_cmdSize);
         if (NULL == sBuf)
         {
             break;
@@ -169,23 +155,21 @@ errlHndl_t tpmMarshalCommandData(TRUSTEDBOOT::TPM2_BaseIn* i_cmd,
         switch (i_cmd->commandCode)
         {
             // Two byte parm fields
-          case TRUSTEDBOOT::TPM_CC_Startup:
+          case TPM_CC_Startup:
               {
-                  TRUSTEDBOOT::TPM2_2ByteIn* cmdPtr =
-                      reinterpret_cast<TRUSTEDBOOT::TPM2_2ByteIn*>(i_cmd);
-                  sBuf = cmdPtr->marshal(sBuf,
-                                         i_bufsize,
-                                         o_cmdSize);
+                  TPM2_2ByteIn* cmdPtr =
+                      (TPM2_2ByteIn*)i_cmd;
+                  sBuf = TPM2_2ByteIn_marshal(cmdPtr, sBuf,
+                                              i_bufsize, o_cmdSize);
               }
               break;
 
-          case TRUSTEDBOOT::TPM_CC_GetCapability:
+          case TPM_CC_GetCapability:
               {
-                  TRUSTEDBOOT::TPM2_GetCapabilityIn* cmdPtr =
-                    reinterpret_cast<TRUSTEDBOOT::TPM2_GetCapabilityIn*>(i_cmd);
-                  sBuf = cmdPtr->marshal(sBuf,
-                                         i_bufsize,
-                                         o_cmdSize);
+                  TPM2_GetCapabilityIn* cmdPtr =
+                      (TPM2_GetCapabilityIn*)i_cmd;
+                  sBuf = TPM2_GetCapabilityIn_marshal(cmdPtr,sBuf,
+                                                      i_bufsize, o_cmdSize);
               }
               break;
 
@@ -205,31 +189,26 @@ errlHndl_t tpmMarshalCommandData(TRUSTEDBOOT::TPM2_BaseIn* i_cmd,
                    * @userdata2      0
                    * @devdesc        Unsupported command code during marshal
                    */
-                  err = new ERRORLOG::ErrlEntry(
-                                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           MOD_TPM_MARSHALCMDDATA,
-                                           RC_TPM_MARSHAL_INVALID_CMD,
-                                           i_cmd->commandCode,
-                                           0,
-                                           true /*Add HB SW Callout*/ );
-
-                  err->collectTrace( SECURE_COMP_NAME );
+                  err = tpmCreateErrorLog(MOD_TPM_MARSHALCMDDATA,
+                                          RC_TPM_MARSHAL_INVALID_CMD,
+                                          i_cmd->commandCode,
+                                          0);
               }
               break;
         };
 
-        if (NULL != err)
+        if (TB_SUCCESS != err)
         {
             break;
         }
 
 
         // Lastly now that we know the size update the byte stream
-        baseCmd->commandSize = o_cmdSize;
+        baseCmd->commandSize = *o_cmdSize;
 
     } while ( 0 );
 
-    if (NULL == sBuf && NULL == err)
+    if (NULL == sBuf && TB_SUCCESS == err)
     {
         TRACFCOMP( g_trac_trustedboot,
                    "TPM MARSHAL FAILURE : Stage %d", stage);
@@ -242,26 +221,22 @@ errlHndl_t tpmMarshalCommandData(TRUSTEDBOOT::TPM2_BaseIn* i_cmd,
          * @userdata2      0
          * @devdesc        Marshaling error detected
          */
-        err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                       MOD_TPM_MARSHALCMDDATA,
-                                       RC_TPM_MARSHALING_FAIL,
-                                       stage,
-                                       0,
-                                       true /*Add HB SW Callout*/ );
-
-        err->collectTrace( SECURE_COMP_NAME );
+        err = tpmCreateErrorLog(MOD_TPM_MARSHALCMDDATA,
+                                RC_TPM_MARSHALING_FAIL,
+                                stage,
+                                0 );
 
     }
 
     TRACUBIN(g_trac_trustedboot, "Marshal Out",
-             o_outbuf, o_cmdSize);
+             o_outbuf, *o_cmdSize);
 
     TRACUCOMP( g_trac_trustedboot,
-               "TPM MARSHAL END   : CmdSize: %d : %016llx ",  o_cmdSize,
-               *(reinterpret_cast<uint64_t*>(o_outbuf))  );
+               "TPM MARSHAL END   : CmdSize: %d : %016llx ",  *o_cmdSize,
+               *((uint64_t*)o_outbuf)  );
 
     TRACDCOMP( g_trac_trustedboot,
-               EXIT_MRK"tpmMarshalCommandData()" );
+               "<<tpmMarshalCommandData()" );
 
     return err;
 }
@@ -269,15 +244,15 @@ errlHndl_t tpmMarshalCommandData(TRUSTEDBOOT::TPM2_BaseIn* i_cmd,
 errlHndl_t tpmUnmarshalResponseData(uint32_t i_commandCode,
                                     uint8_t* i_respBuf,
                                     size_t i_respBufSize,
-                                    TRUSTEDBOOT::TPM2_BaseOut* o_outBuf,
+                                    TPM2_BaseOut* o_outBuf,
                                     size_t i_outBufSize)
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = TB_SUCCESS;
     uint8_t* sBuf = i_respBuf;
     int stage = 0;
 
     TRACDCOMP( g_trac_trustedboot,
-               ENTER_MRK"tpmUnmarshalResponseData()" );
+               ">>tpmUnmarshalResponseData()" );
 
     do {
 
@@ -290,7 +265,8 @@ errlHndl_t tpmUnmarshalResponseData(uint32_t i_commandCode,
 
         // Start with the response header
         stage = 1;
-        sBuf = o_outBuf->unmarshal(sBuf, i_respBufSize, i_outBufSize);
+        sBuf = TPM2_BaseOut_unmarshal(o_outBuf, sBuf,
+                                      &i_respBufSize, i_outBufSize);
         if (NULL == sBuf)
         {
             break;
@@ -298,7 +274,7 @@ errlHndl_t tpmUnmarshalResponseData(uint32_t i_commandCode,
 
         // If the TPM returned a failure it will not send the rest
         // Let the caller deal with the RC
-        if (TRUSTEDBOOT::TPM_SUCCESS != o_outBuf->responseCode)
+        if (TPM_SUCCESS != o_outBuf->responseCode)
         {
             break;
         }
@@ -309,16 +285,17 @@ errlHndl_t tpmUnmarshalResponseData(uint32_t i_commandCode,
         switch (i_commandCode)
         {
             // Empty response commands
-          case TRUSTEDBOOT::TPM_CC_Startup:
+          case TPM_CC_Startup:
             // Nothing to do
             break;
 
-          case TRUSTEDBOOT::TPM_CC_GetCapability:
+          case TPM_CC_GetCapability:
               {
-                  TRUSTEDBOOT::TPM2_GetCapabilityOut* respPtr =
-                    reinterpret_cast<TRUSTEDBOOT::TPM2_GetCapabilityOut*>
-                      (o_outBuf);
-                  sBuf = respPtr->unmarshal(sBuf, i_respBufSize, i_outBufSize);
+                  TPM2_GetCapabilityOut* respPtr =
+                      (TPM2_GetCapabilityOut*)o_outBuf;
+                  sBuf = TPM2_GetCapabilityOut_unmarshal(respPtr, sBuf,
+                                                         &i_respBufSize,
+                                                         i_outBufSize);
 
               }
               break;
@@ -340,15 +317,10 @@ errlHndl_t tpmUnmarshalResponseData(uint32_t i_commandCode,
                    * @userdata2      stage
                    * @devdesc        Unsupported command code during unmarshal
                    */
-                  err = new ERRORLOG::ErrlEntry(
-                                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           MOD_TPM_UNMARSHALRESPDATA,
-                                           RC_TPM_UNMARSHAL_INVALID_CMD,
-                                           i_commandCode,
-                                           stage,
-                                           true /*Add HB SW Callout*/ );
-
-                  err->collectTrace( SECURE_COMP_NAME );
+                  err = tpmCreateErrorLog(MOD_TPM_UNMARSHALRESPDATA,
+                                          RC_TPM_UNMARSHAL_INVALID_CMD,
+                                          i_commandCode,
+                                          stage);
               }
               break;
         }
@@ -356,7 +328,7 @@ errlHndl_t tpmUnmarshalResponseData(uint32_t i_commandCode,
 
     } while ( 0 );
 
-    if (NULL == sBuf && NULL == err)
+    if (NULL == sBuf && TB_SUCCESS == err)
     {
         TRACFCOMP( g_trac_trustedboot,
                    "TPM UNMARSHAL FAILURE : Stage %d", stage);
@@ -369,39 +341,38 @@ errlHndl_t tpmUnmarshalResponseData(uint32_t i_commandCode,
          * @userdata2      Remaining response buffer size
          * @devdesc        Unmarshaling error detected
          */
-        err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                       MOD_TPM_UNMARSHALRESPDATA,
-                                       RC_TPM_UNMARSHALING_FAIL,
-                                       stage,
-                                       i_respBufSize,
-                                       true /*Add HB SW Callout*/ );
+        err = tpmCreateErrorLog(MOD_TPM_UNMARSHALRESPDATA,
+                                RC_TPM_UNMARSHALING_FAIL,
+                                stage,
+                                i_respBufSize);
 
-        err->collectTrace( SECURE_COMP_NAME );
 
 
     }
 
     TRACUCOMP( g_trac_trustedboot,
                "TPM UNMARSHAL END   : %016llx ",
-               *(reinterpret_cast<uint64_t*>(o_outBuf))  );
+               *((uint64_t*)o_outBuf)  );
 
     TRACDCOMP( g_trac_trustedboot,
-               EXIT_MRK"tpmUnmarshalResponseData()" );
+               "<<tpmUnmarshalResponseData()" );
 
     return err;
 }
 
-errlHndl_t tpmCmdStartup(TRUSTEDBOOT::TpmTarget & io_target)
+errlHndl_t tpmCmdStartup(TpmTarget* io_target)
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = TB_SUCCESS;
     uint8_t dataBuf[BUFSIZE];
 
-    TRACDCOMP( g_trac_trustedboot,
-               ENTER_MRK"tpmCmdStartup()" );
+    TPM2_BaseOut* resp =
+        (TPM2_BaseOut*)(dataBuf);
+
+    TPM2_2ByteIn* cmd =
+        (TPM2_2ByteIn*)(dataBuf);
+
     TRACUCOMP( g_trac_trustedboot,
-               ENTER_MRK"tpmCmdStartup() tgt=0x%X chip=%d",
-               TARGETING::get_huid(io_target.nodeTarget),
-               io_target.chip);
+               ">>tpmCmdStartup()" );
 
     do
     {
@@ -409,29 +380,23 @@ errlHndl_t tpmCmdStartup(TRUSTEDBOOT::TpmTarget & io_target)
         // Build our command block for a startup
         memset(dataBuf, 0, sizeof(dataBuf));
 
-        TRUSTEDBOOT::TPM2_BaseOut* resp =
-            reinterpret_cast<TRUSTEDBOOT::TPM2_BaseOut*>(dataBuf);
 
-        TRUSTEDBOOT::TPM2_2ByteIn* cmd =
-            reinterpret_cast<TRUSTEDBOOT::TPM2_2ByteIn*>(dataBuf);
-
-        cmd->base.tag = TRUSTEDBOOT::TPM_ST_NO_SESSIONS;
-        cmd->base.commandCode = TRUSTEDBOOT::TPM_CC_Startup;
-        cmd->param = TRUSTEDBOOT::TPM_SU_CLEAR;
+        cmd->base.tag = TPM_ST_NO_SESSIONS;
+        cmd->base.commandCode = TPM_CC_Startup;
+        cmd->param = TPM_SU_CLEAR;
 
         err = tpmTransmitCommand(io_target,
                                  dataBuf,
                                  sizeof(dataBuf));
 
-        if (NULL != err)
+        if (TB_SUCCESS != err)
         {
             TRACFCOMP( g_trac_trustedboot,
-                       "TPM STARTUP transmit Fail %X : ",
-                       err->reasonCode() );
+                       "TPM STARTUP transmit Fail");
             break;
 
         }
-        else if (TRUSTEDBOOT::TPM_SUCCESS != resp->responseCode)
+        else if (TPM_SUCCESS != resp->responseCode)
         {
             TRACFCOMP( g_trac_trustedboot,
                        "TPM STARTUP OP Fail %X : ",
@@ -442,19 +407,15 @@ errlHndl_t tpmCmdStartup(TRUSTEDBOOT::TpmTarget & io_target)
              * @reasoncode     RC_TPM_START_FAIL
              * @severity       ERRL_SEV_UNRECOVERABLE
              * @moduleid       MOD_TPM_CMD_STARTUP
-             * @userdata1      node
-             * @userdata2      responseCode
+             * @userdata1      responseCode
+             * @userdata2      0
              * @devdesc        Invalid operation type.
              */
-            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           MOD_TPM_CMD_STARTUP,
-                                           RC_TPM_START_FAIL,
-                                           TARGETING::get_huid(
-                                              io_target.nodeTarget),
-                                           resp->responseCode,
-                                           true /*Add HB SW Callout*/ );
+            err = tpmCreateErrorLog(MOD_TPM_CMD_STARTUP,
+                                    RC_TPM_START_FAIL,
+                                    resp->responseCode,
+                                    0);
 
-            err->collectTrace( SECURE_COMP_NAME );
             break;
         }
 
@@ -463,24 +424,25 @@ errlHndl_t tpmCmdStartup(TRUSTEDBOOT::TpmTarget & io_target)
 
 
     TRACUCOMP( g_trac_trustedboot,
-               EXIT_MRK"tpmCmdStartup() - %s",
-               ((NULL == err) ? "No Error" : "With Error") );
+               "<<tpmCmdStartup() - %s",
+               ((TB_SUCCESS == err) ? "No Error" : "With Error") );
     return err;
 }
 
-errlHndl_t tpmCmdGetCapFwVersion(TRUSTEDBOOT::TpmTarget & io_target)
+errlHndl_t tpmCmdGetCapFwVersion(TpmTarget* io_target)
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = TB_SUCCESS;
     uint8_t dataBuf[BUFSIZE];
     size_t dataSize = BUFSIZE;
     uint16_t fwVersion[4] = {0xFF, 0xFF, 0xFF, 0xFF};
+    TPM2_GetCapabilityOut* resp =
+        (TPM2_GetCapabilityOut*)dataBuf;
+    TPM2_GetCapabilityIn* cmd =
+        (TPM2_GetCapabilityIn*)dataBuf;
 
-    TRACDCOMP( g_trac_trustedboot,
-               ENTER_MRK"tpmCmdGetCapFwVersion()" );
+
     TRACUCOMP( g_trac_trustedboot,
-               ENTER_MRK"tpmCmdGetCapFwVersion() tgt=0x%X chip=%d",
-               TARGETING::get_huid(io_target.nodeTarget),
-               io_target.chip);
+               ">>tpmCmdGetCapFwVersion()" );
 
     do
     {
@@ -488,31 +450,25 @@ errlHndl_t tpmCmdGetCapFwVersion(TRUSTEDBOOT::TpmTarget & io_target)
         // Build our command block for a get capability of the FW version
         memset(dataBuf, 0, dataSize);
 
-        TRUSTEDBOOT::TPM2_GetCapabilityOut* resp =
-            reinterpret_cast<TRUSTEDBOOT::TPM2_GetCapabilityOut*>(dataBuf);
-        TRUSTEDBOOT::TPM2_GetCapabilityIn* cmd =
-            reinterpret_cast<TRUSTEDBOOT::TPM2_GetCapabilityIn*>(dataBuf);
-
-        cmd->base.tag = TRUSTEDBOOT::TPM_ST_NO_SESSIONS;
-        cmd->base.commandCode = TRUSTEDBOOT::TPM_CC_GetCapability;
-        cmd->capability = TRUSTEDBOOT::TPM_CAP_TPM_PROPERTIES;
-        cmd->property = TRUSTEDBOOT::TPM_PT_FIRMWARE_VERSION_1;
+        cmd->base.tag = TPM_ST_NO_SESSIONS;
+        cmd->base.commandCode = TPM_CC_GetCapability;
+        cmd->capability = TPM_CAP_TPM_PROPERTIES;
+        cmd->property = TPM_PT_FIRMWARE_VERSION_1;
         cmd->propertyCount = 1;
 
         err = tpmTransmitCommand(io_target,
                                  dataBuf,
                                  sizeof(dataBuf));
 
-        if (NULL != err)
+        if (TB_SUCCESS != err)
         {
             TRACFCOMP( g_trac_trustedboot,
-                       "TPM GETCAP Transmit Fail %X : ",
-                       err->reasonCode() );
+                       "TPM GETCAP Transmit Fail");
             break;
 
         }
 
-        if (TRUSTEDBOOT::TPM_SUCCESS != resp->base.responseCode)
+        if (TPM_SUCCESS != resp->base.responseCode)
         {
             TRACFCOMP( g_trac_trustedboot,
                        "TPM GETCAP OP Fail %X Size(%d) ",
@@ -524,20 +480,15 @@ errlHndl_t tpmCmdGetCapFwVersion(TRUSTEDBOOT::TpmTarget & io_target)
              * @reasoncode     RC_TPM_GETCAP_FAIL
              * @severity       ERRL_SEV_UNRECOVERABLE
              * @moduleid       MOD_TPM_CMD_GETCAPFWVERSION
-             * @userdata1      node
-             * @userdata2[0:31] responseCode
-             * @userdata2[32:63] dataSize
+             * @userdata1      responseCode
+             * @userdata2      0
              * @devdesc        Command failure reading TPM FW version.
              */
-            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           MOD_TPM_CMD_GETCAPFWVERSION,
-                                           RC_TPM_GETCAP_FAIL,
-                                           TARGETING::get_huid(
-                                              io_target.nodeTarget),
-                                           resp->base.responseCode,
-                                           true /*Add HB SW Callout*/ );
+            err = tpmCreateErrorLog(MOD_TPM_CMD_GETCAPFWVERSION,
+                                    RC_TPM_GETCAP_FAIL,
+                                    resp->base.responseCode,
+                                    0);
 
-            err->collectTrace( SECURE_COMP_NAME );
             break;
         }
         else
@@ -562,22 +513,16 @@ errlHndl_t tpmCmdGetCapFwVersion(TRUSTEDBOOT::TpmTarget & io_target)
                  * @reasoncode     RC_TPM_GETCAP_FW_INVALID_RESP
                  * @severity       ERRL_SEV_UNRECOVERABLE
                  * @moduleid       MOD_TPM_CMD_GETCAPFWVERSION
-                 * @userdata1      node
-                 * @userdata2[0:31] capability
-                 * @userdata2[32:63] propery
+                 * @userdata1      capability
+                 * @userdata2      property
                  * @devdesc        Command failure reading TPM FW version.
                  */
-                err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                             MOD_TPM_CMD_GETCAPFWVERSION,
-                             RC_TPM_GETCAP_FW_INVALID_RESP,
-                             TARGETING::get_huid(
-                                  io_target.nodeTarget),
-                             ((uint64_t)resp->capData.capability << 32) |
-                                           resp->capData.data.tpmProperties.
-                                           tpmProperty[0].property,
-                             true /*Add HB SW Callout*/ );
+                err = tpmCreateErrorLog(MOD_TPM_CMD_GETCAPFWVERSION,
+                                        RC_TPM_GETCAP_FW_INVALID_RESP,
+                                        resp->capData.capability,
+                                        resp->capData.data.tpmProperties.
+                                        tpmProperty[0].property);
 
-                err->collectTrace( SECURE_COMP_NAME );
                 break;
             }
             else
@@ -596,10 +541,10 @@ errlHndl_t tpmCmdGetCapFwVersion(TRUSTEDBOOT::TpmTarget & io_target)
         dataSize = BUFSIZE;
         memset(dataBuf, 0, dataSize);
 
-        cmd->base.tag = TRUSTEDBOOT::TPM_ST_NO_SESSIONS;
-        cmd->base.commandCode = TRUSTEDBOOT::TPM_CC_GetCapability;
-        cmd->capability = TRUSTEDBOOT::TPM_CAP_TPM_PROPERTIES;
-        cmd->property = TRUSTEDBOOT::TPM_PT_FIRMWARE_VERSION_2;
+        cmd->base.tag = TPM_ST_NO_SESSIONS;
+        cmd->base.commandCode = TPM_CC_GetCapability;
+        cmd->capability = TPM_CAP_TPM_PROPERTIES;
+        cmd->property = TPM_PT_FIRMWARE_VERSION_2;
         cmd->propertyCount = 1;
 
 
@@ -607,17 +552,16 @@ errlHndl_t tpmCmdGetCapFwVersion(TRUSTEDBOOT::TpmTarget & io_target)
                                  dataBuf,
                                  sizeof(dataBuf));
 
-        if (NULL != err)
+        if (TB_SUCCESS != err)
         {
             TRACFCOMP( g_trac_trustedboot,
-                       "TPM GETCAP2 Transmit Fail %X : ",
-                       err->reasonCode() );
+                       "TPM GETCAP2 Transmit Fail %X");
             break;
 
         }
 
-        if ((sizeof(TRUSTEDBOOT::TPM2_GetCapabilityOut) > dataSize) ||
-            (TRUSTEDBOOT::TPM_SUCCESS != resp->base.responseCode))
+        if ((sizeof(TPM2_GetCapabilityOut) > dataSize) ||
+            (TPM_SUCCESS != resp->base.responseCode))
         {
             TRACFCOMP( g_trac_trustedboot,
                        "TPM GETCAP2 OP Fail %X Size(%d) ",
@@ -629,20 +573,15 @@ errlHndl_t tpmCmdGetCapFwVersion(TRUSTEDBOOT::TpmTarget & io_target)
              * @reasoncode     RC_TPM_GETCAP2_FAIL
              * @severity       ERRL_SEV_UNRECOVERABLE
              * @moduleid       MOD_TPM_CMD_GETCAPFWVERSION
-             * @userdata1      node
-             * @userdata2[0:31] responseCode
-             * @userdata2[32:63] dataSize
+             * @userdata1      responseCode
+             * @userdata2      0
              * @devdesc        Command failure reading TPM FW version.
              */
-            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           MOD_TPM_CMD_GETCAPFWVERSION,
-                                           RC_TPM_GETCAP2_FAIL,
-                                           TARGETING::get_huid(
-                                              io_target.nodeTarget),
-                                           resp->base.responseCode,
-                                           true /*Add HB SW Callout*/ );
+            err = tpmCreateErrorLog(MOD_TPM_CMD_GETCAPFWVERSION,
+                                    RC_TPM_GETCAP2_FAIL,
+                                    resp->base.responseCode,
+                                    0);
 
-            err->collectTrace( SECURE_COMP_NAME );
             break;
         }
         else
@@ -667,22 +606,15 @@ errlHndl_t tpmCmdGetCapFwVersion(TRUSTEDBOOT::TpmTarget & io_target)
                  * @reasoncode     RC_TPM_GETCAP2_FW_INVALID_RESP
                  * @severity       ERRL_SEV_UNRECOVERABLE
                  * @moduleid       MOD_TPM_CMD_GETCAPFWVERSION
-                 * @userdata1      node
-                 * @userdata2[0:31] capability
-                 * @userdata2[32:63] propery
+                 * @userdata1      capability
+                 * @userdata2      property
                  * @devdesc        Command failure reading TPM FW version.
                  */
-                err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                              MOD_TPM_CMD_GETCAPFWVERSION,
-                              RC_TPM_GETCAP2_FW_INVALID_RESP,
-                              TARGETING::get_huid(
-                                         io_target.nodeTarget),
-                              ((uint64_t)resp->capData.capability << 32) |
-                                resp->capData.data.tpmProperties.
-                                tpmProperty[0].property,
-                              true /*Add HB SW Callout*/ );
-
-                err->collectTrace( SECURE_COMP_NAME );
+                err = tpmCreateErrorLog(MOD_TPM_CMD_GETCAPFWVERSION,
+                                        RC_TPM_GETCAP2_FW_INVALID_RESP,
+                                        resp->capData.capability,
+                                        resp->capData.data.tpmProperties.
+                                        tpmProperty[0].property);
                 break;
             }
             else
@@ -706,12 +638,14 @@ errlHndl_t tpmCmdGetCapFwVersion(TRUSTEDBOOT::TpmTarget & io_target)
 
 
     TRACDCOMP( g_trac_trustedboot,
-               EXIT_MRK"tpmCmdGetCapFwVersion() - %s",
-               ((NULL == err) ? "No Error" : "With Error") );
+               "<<tpmCmdGetCapFwVersion() - %s",
+               ((TB_SUCCESS == err) ? "No Error" : "With Error") );
     return err;
 }
 
 
 
 
+#ifdef __cplusplus
 } // end TRUSTEDBOOT
+#endif

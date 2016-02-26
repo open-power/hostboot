@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015
+# Contributors Listed Below - COPYRIGHT 2015,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -28,6 +28,7 @@ MODULE = secureboot_trusted
 OBJS += $(if $(CONFIG_TPMDD),trustedboot.o,)
 OBJS += $(if $(CONFIG_TPMDD),trustedbootCmds.o,)
 OBJS += $(if $(CONFIG_TPMDD),trustedTypes.o,)
+OBJS += $(if $(CONFIG_TPMDD),trustedbootUtils.o,)
 
 SUBDIRS += $(if $(CONFIG_TPMDD),test.d,)
 
