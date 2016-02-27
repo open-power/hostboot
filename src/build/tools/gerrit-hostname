@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015
+# Contributors Listed Below - COPYRIGHT 2015,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -34,7 +34,7 @@ use strict;
 my $homeDir = $ENV{'HOME'};
 my $sshConfigFile = $homeDir."/.ssh/config";
 # If the server changes location these will change
-my $gerritHostname = "gfw160.aus.stglabs.ibm.com";
+my $gerritHostname = "ralgit01.raleigh.ibm.com";
 my $gerritPort = "29418";
 
 open(CONFIG, "< $sshConfigFile") or die " $? can't open $sshConfigFile: $!" ;
