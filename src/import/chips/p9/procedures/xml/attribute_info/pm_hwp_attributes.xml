@@ -46,4 +46,36 @@
       <valueType>uint32</valueType>
   </attribute> 
   <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_OCC_LFIR</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <description>The attribute stores the Local FIR value of OCC taken
+      during the reset phase.
+      </description>
+      <valueType>uint32</valueType>
+      <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_PBA_LFIR</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <description>The attribute stores the Local FIR value of PBA taken
+      during the reset phase.
+      </description>
+      <valueType>uint32</valueType>
+      <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_PM_FIRINIT_DONE_ONCE_FLAG</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <description>
+      0 = OCC has never been loaded and FIR Masks have never been initialized,
+      1 = FIR masks have been initialized and the hardware should reflect correct values,
+      2 = FIR masks have been initialized but the current hardware state is the reset value
+      </description>
+      <valueType>uint8</valueType>
+      <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>

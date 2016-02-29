@@ -50,12 +50,19 @@
 <!-- =====================================================================
      Start of temporary definitions
      ================================================================= -->
-     
      <attribute>
          <id>ATTR_CLOCK_PLL_MUX0</id>
          <default>0</default>
      </attribute>
-
+    <attribute>
+         <id>ATTR_OCC_LFIR</id>
+    </attribute>
+    <attribute>
+         <id>ATTR_PBA_LFIR</id>
+    </attribute>
+    <attribute>
+         <id>ATTR_PM_FIRINIT_DONE_ONCE_FLAG</id>
+    </attribute>
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->
