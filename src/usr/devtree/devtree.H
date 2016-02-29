@@ -202,6 +202,11 @@ typedef size_t dtOffset_t;
         */
         uint32_t getSize();
 
+        enum Public_Constants {
+            DT_INVALID_OFFSET   =0xFFFFFFFF,
+        };
+
+
 
       protected:
         /*Constructor*/
@@ -289,8 +294,6 @@ typedef size_t dtOffset_t;
             DT_PROP             =0x3,
             DT_NOP              =0x4,
             DT_END              =0x9,
-            DT_INVALID_OFFSET   =0xFFFFFFFF,
-
 
             DT_MAX_MEM_RESERVE  =16,
 

@@ -38,6 +38,8 @@ enum
 {
     SPD_FIRST_NORM_KEYWORD      = 0x0,
     SPD_FIRST_MOD_SPEC          = 0x8000,
+    SPD_DDR3 = 0xB,
+    SPD_DDR4 = 0xC,
 };
 
 /**

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,8 +50,6 @@ enum
     // Memory Type address/size/constants for both DDR3 and DDR4
     MEM_TYPE_ADDR = 0x2,
     MEM_TYPE_SZ = 0x1,
-    SPD_DDR3 = 0xB,
-    SPD_DDR4 = 0xC,
 
     // Module Type address/size/mask/constants for both DDR3 and DDR4
     MOD_TYPE_ADDR            = 0x03,

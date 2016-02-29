@@ -41,6 +41,7 @@
 #include <sys/mm.h>
 #include <util/align.H>
 #include <vector>
+#include <string.h>
 #include <vfs/vfs.H>
 #include <fsi/fsiif.H>
 #include <config.h>
@@ -55,6 +56,9 @@
 #include <fapi.H>
 #include <fapiPlatHwpInvoker.H> // for fapi::fapiRcToErrl()
 #include <vpd/mvpdenums.H>
+#include <vpd/cvpdenums.H>
+#include <vpd/spdenums.H>
+
 
 trace_desc_t *g_trac_devtree = NULL;
 TRAC_INIT(&g_trac_devtree, "DEVTREE", 4096);
@@ -94,6 +98,143 @@ enum BuildConstants
     CEN_ID_SHIFT        = 4,
     CEN_ID_TAG          = 0x80000000,
 };
+
+errlHndl_t readSPD(TARGETING::Target * i_dimm,
+                   std::vector<uint8_t> &io_data,
+                   uint8_t i_keyword)
+{
+    size_t     l_vpdSize = 0;
+    errlHndl_t l_errl = NULL;
+
+    do {
+        //First get size with NULL call:
+        l_errl = deviceRead(i_dimm,
+                            NULL,
+                            l_vpdSize,
+                            DEVICE_SPD_ADDRESS(i_keyword));
+
+        if (l_errl)
+        {
+            TRACFCOMP(g_trac_devtree,"devTree readSPD err getting SPD size");
+            break;
+        }
+
+        if (l_vpdSize > 0)
+        {
+            //Determine how big data is and expand it to handle the soon to
+            //be read VPD data
+            io_data.resize(l_vpdSize);
+
+            //Read the VPD data directly into fru inventory data buffer
+            l_errl = deviceRead(i_dimm,&io_data[0], l_vpdSize,
+                       DEVICE_SPD_ADDRESS(i_keyword));
+        }
+        else
+        {
+            TRACFCOMP(g_trac_devtree,"readSPD - "
+                      " No size returned for SPD keyword");
+        }
+
+    } while(0);
+
+    if (l_errl)
+    {
+        TRACFCOMP(g_trac_devtree, "readSPD -err getting data");
+    }
+
+    return l_errl;
+}
+
+errlHndl_t readSPD(TARGETING::Target * i_dimm,
+                   std::vector<uint32_t> &io_data,
+                   uint8_t i_keyword)
+{
+    errlHndl_t l_errl = NULL;
+    std::vector<uint8_t> l_buf;
+
+    l_errl = readSPD(i_dimm, l_buf, i_keyword);
+    if(!l_errl)
+    {
+        //round up size to nearest word boundary
+        const size_t WLEN = sizeof(uint32_t);
+        size_t l_size = l_buf.size()/WLEN;
+        if (l_buf.size() % WLEN) { l_size++;}
+        io_data.resize(l_size);
+
+        //Zero contents
+        for(size_t i = 0; i < io_data.size(); i++)
+        {
+            io_data[i] = 0x0;
+        }
+
+        //Right align values on word boundary
+        for( size_t wpos = 0; wpos < l_buf.size(); wpos++)
+        {
+            size_t l_wordIdx =  io_data.size() - (wpos/WLEN) -1;
+            size_t shiftBits = 8*(wpos % WLEN);
+            io_data[l_wordIdx] += l_buf[l_buf.size() - wpos -1] << shiftBits;
+        }
+    }
+
+    return l_errl;
+}
+
+errlHndl_t readVPD(TARGETING::Target * i_target,
+                   std::vector<uint8_t> &io_data,
+                   DeviceFW::AccessType i_accessType,
+                   uint8_t i_record,
+                   uint8_t i_keyword)
+{
+    size_t     l_vpdSize = 0;
+    errlHndl_t l_errl = NULL;
+
+    do {
+        //First get size with NULL call:
+        l_errl = deviceRead(i_target,
+                            NULL,
+                            l_vpdSize,
+                            i_accessType,
+                            i_record,
+                            i_keyword,
+                            VPD::AUTOSELECT);
+
+        if (l_errl)
+        {
+            TRACFCOMP(g_trac_devtree,"devTree readMVPD err getting MVPD size");
+            break;
+        }
+
+        if (l_vpdSize > 0)
+        {
+            //Determine how big data is and expand it to handle the soon to
+            //be read VPD data
+            io_data.resize(l_vpdSize);
+
+            //Read the VPD data directly into fru inventory data buffer
+            l_errl = deviceRead(i_target,
+                                &io_data[0],
+                                l_vpdSize,
+                                i_accessType,
+                                i_record,
+                                i_keyword,
+                                VPD::AUTOSELECT);
+        }
+        else
+        {
+            TRACFCOMP(g_trac_devtree,"readMVPD - "
+                      " No size returned for MVPD keyword");
+        }
+
+    } while(0);
+
+    if (l_errl)
+    {
+        TRACFCOMP(g_trac_devtree, "readMVPD -err getting data");
+    }
+
+    return l_errl;
+}
+
 
 //   Opal will set this FIR bit any time a non-checkstop hardware error
 //   leads to a crash.  PRD will use this FIR bit to analyze appropriately.
@@ -702,15 +843,17 @@ void bld_fdt_pnor(devTree *   i_dt,
     return;
 }
 
-void bld_xscom_node(devTree * i_dt, dtOffset_t & i_parentNode,
-                    const TARGETING::Target * i_pProc,
+errlHndl_t bld_xscom_node(devTree * i_dt, dtOffset_t & i_parentNode,
+                    TARGETING::Target * i_pProc,
                     uint32_t i_chipid,
                     bool i_smallTree)
 {
+    errlHndl_t errhdl = NULL;
     const char* xscomNodeName = "xscom";
     const char* todNodeName = "chiptod";
     const char* pciNodeName = "pbcq";
     const char* sbeTmrNodeName = "sbe-timer";
+    std::vector<uint8_t> l_data;
 
     // Grab a system object to work with
     TARGETING::Target* sys = NULL;
@@ -760,7 +903,7 @@ void bld_xscom_node(devTree * i_dt, dtOffset_t & i_parentNode,
     // Only add SBE interrupt timer for small tree
     if (i_smallTree)
     {
-        return;
+        return errhdl;
     }
 
     // Add proc chip ECIDs
@@ -770,6 +913,33 @@ void bld_xscom_node(devTree * i_dt, dtOffset_t & i_parentNode,
     sprintf(ecid_ascii, "%.16llX%.16llX", ecid[0], ecid[1]);
     i_dt->addPropertyString(xscomNode, "ecid", ecid_ascii);
     CPPASSERT(sizeof(ATTR_ECID_type) == 16);
+
+    //Add location string
+    TARGETING::EntityPath ep = i_pProc->getAttr<TARGETING::ATTR_PHYS_PATH>();
+    i_dt->addPropertyString(xscomNode, "location",ep.toString());
+
+    //Add Product Part Number
+    TARGETING::ATTR_PART_NUMBER_type l_pn = {'0'};
+    i_pProc->tryGetAttr<TARGETING::ATTR_PART_NUMBER>(l_pn);
+    i_dt->addPropertyString(xscomNode, "part-number",
+                            reinterpret_cast<char*>(&l_pn[0]));
+
+    //Add Product Serial Number
+    TARGETING::ATTR_SERIAL_NUMBER_type l_sn = {'0'};
+    i_pProc->tryGetAttr<TARGETING::ATTR_SERIAL_NUMBER>(l_sn);
+    i_dt->addPropertyString(xscomNode, "serial-number",
+                            reinterpret_cast<char*>(&l_sn[0]));
+
+    //Add Board Info
+    errhdl = readVPD(i_pProc, l_data,  DeviceFW::MVPD, MVPD::VINI, MVPD::DR);
+    if (errhdl) { return errhdl; }
+    l_data.push_back('\0');
+    i_dt->addPropertyString(xscomNode, "board-info",
+                            reinterpret_cast<char*>(&l_data[0]));
+
+    //Add Powerbus frequency
+    i_dt->addPropertyCell32(xscomNode, "powerbus-frequency-mhz",
+                            sys->getAttr<TARGETING::ATTR_FREQ_PB>());
 
     /*PSI Host Bridge*/
     uint32_t l_psiInfo = 0x2010900; /*PSI Host Bridge Scom addr*/
@@ -865,6 +1035,7 @@ void bld_xscom_node(devTree * i_dt, dtOffset_t & i_parentNode,
     /*I2C Masters*/
     add_i2c_info( i_pProc, i_dt, xscomNode, l_xscomAddr );
 
+    return errhdl;
 }
 
 uint32_t bld_l3_node(devTree * i_dt, dtOffset_t & i_parentNode,
@@ -1241,7 +1412,7 @@ void add_reserved_mem(devTree * i_dt,
     // added per comment from Dean Sanner
     // cell_count has limit of DT_MAX_MEM_RESERVE  = 16. Is this enough
     // for all processors + 1 vpd area + 1 target area?
-    i_dt->populateReservedMem(res_mem_addrs, res_mem_sizes, cell_count);
+    i_dt->populateReservedMem(res_mem_addrs, res_mem_sizes, cell_count/2);
 }
 
 void load_hbrt_image(uint64_t& io_address)
@@ -1566,6 +1737,19 @@ errlHndl_t bld_fdt_system(devTree * i_dt, bool i_smallTree)
                     i_dt->addPropertyString(rootNode, "system-id", ssBuf);
                 }
             }
+
+            //Add FRU info
+            //Add Product Part Number
+            TARGETING::ATTR_PART_NUMBER_type l_pn = {'0'};
+            l_pNode->tryGetAttr<TARGETING::ATTR_PART_NUMBER>(l_pn);
+            i_dt->addPropertyString(rootNode, "part-number",
+                                    reinterpret_cast<char*>(&l_pn[0]));
+
+            //Add Product Serial Number
+            TARGETING::ATTR_SERIAL_NUMBER_type l_sn = {'0'};
+            l_pNode->tryGetAttr<TARGETING::ATTR_SERIAL_NUMBER>(l_sn);
+            i_dt->addPropertyString(rootNode, "serial-number",
+                                    reinterpret_cast<char*>(&l_sn[0]));
         }
         // just delete any errors we get, this isn't critical
         if( errhdl )
@@ -1609,7 +1793,7 @@ errlHndl_t bld_fdt_cpu(devTree * i_dt,
 
     for (size_t proc = 0; (!errhdl) && (proc < l_procTargetList.size()); proc++)
     {
-        const TARGETING::Target * l_pProc = l_procTargetList[proc];
+        TARGETING::Target * l_pProc = l_procTargetList[proc];
 
         uint32_t l_chipid = getProcChipId(l_pProc);
 
@@ -1618,7 +1802,9 @@ errlHndl_t bld_fdt_cpu(devTree * i_dt,
         TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProc);
         if((!i_smallTree) || (l_pProc == l_pMasterProc) )
         {
-            bld_xscom_node(i_dt, rootNode, l_pProc, l_chipid, i_smallTree);
+            errhdl = bld_xscom_node(i_dt, rootNode, l_pProc,
+                                    l_chipid, i_smallTree);
+            if(errhdl) {break;}
         }
         if (i_smallTree) // nothing else for small tree
         {
@@ -1734,8 +1920,162 @@ errlHndl_t bld_fdt_reserved_mem(devTree * i_dt,
 
 }
 
+errlHndl_t bld_fdt_dimm(devTree * i_dt, dtOffset_t i_membNode, Target* i_memBuf)
+{
+    errlHndl_t errhdl = NULL;
+    std::vector<uint8_t> l_data;
+    std::vector<uint32_t> l_data32;
+    uint64_t l_totalMemSize = 0;
+
+    /*
+     * This function will tack on extra information about
+     * dimms under each memory buffer
+     */
+
+    do
+    {
+        //Loop through all of the MBAs on this memory buffer
+        //And then on each one, loop through all dimms
+        TARGETING::TargetHandleList l_mbaList;
+        getChildChiplets( l_mbaList, i_memBuf, TYPE_MBA, false);
+        for (TARGETING::TargetHandleList::const_iterator
+             mbaIter = l_mbaList.begin();
+             mbaIter != l_mbaList.end();
+             ++mbaIter)
+        {
+            //Basic Setup
+            TARGETING::Target * l_mba = (*mbaIter);
+            uint32_t l_mbaPos = l_mba->getAttr<ATTR_CHIP_UNIT>();
+            dtOffset_t mbaNode = i_dt->addNode(i_membNode, "mba", l_mbaPos);
+            uint32_t regCells[2] = {l_mbaPos,0};
+            const char* mba_compatStrs[] = {"ibm,centaur-mba",NULL};
+            i_dt->addPropertyStrings(mbaNode, "compatible", mba_compatStrs);
+            i_dt->addPropertyCells32(mbaNode, "reg", regCells, 2);
+            i_dt->addPropertyCell32(mbaNode, "#address-cells", 2);
+            i_dt->addPropertyCell32(mbaNode, "#size-cells", 2);
+
+            // Get all dimms below this memory buffer
+            TARGETING::PredicateCTM l_predicate(TARGETING::CLASS_LOGICAL_CARD,
+                                                TARGETING::TYPE_DIMM);
+            TARGETING::TargetHandleList l_dimmList;
+            TARGETING::targetService().
+              getAssociated(l_dimmList, l_mba,
+                            TARGETING::TargetService::CHILD_BY_AFFINITY,
+                            TARGETING::TargetService::ALL, &l_predicate);
+
+            for (TARGETING::TargetHandleList::const_iterator
+                 dimmIter = l_dimmList.begin();
+                 dimmIter != l_dimmList.end();
+                 ++dimmIter)
+            {
+                TARGETING::Target * l_dimm = (*dimmIter);
+                //Determine the effective dimm size
+                uint8_t l_mba_port = l_dimm->getAttr<ATTR_MBA_PORT>();
+                uint8_t l_mba_dimm = l_dimm->getAttr<ATTR_MBA_DIMM>();
+
+                //Set Dimm Size
+                ATTR_EFF_DIMM_SIZE_type l_eff_size;
+                l_mba->tryGetAttr<ATTR_EFF_DIMM_SIZE>(l_eff_size);
+                //convert from GB to bytes
+                uint64_t l_bytes= l_eff_size[l_mba_port][l_mba_dimm];
+                l_bytes *= GIGABYTE; //Convert from GB to bytes
+                l_totalMemSize += l_bytes;
+                uint64_t l_portdimm = l_mba_port;
+                l_portdimm = (l_portdimm<<32) | l_mba_dimm;
+
+                //Basic Setup
+                char dimmNodeName[64];
+                sprintf(dimmNodeName, "dimm@%d,%d", l_mba_port, l_mba_dimm);
+                dtOffset_t dimmNode = i_dt->addNode(mbaNode, dimmNodeName);
+                i_dt->addPropertyString(dimmNode, "device_type",
+                                        "memory-dimm-ddr");
+                uint64_t propertyCells[2] = {l_portdimm, l_bytes};
+                i_dt->addPropertyCells64(dimmNode, "reg", propertyCells, 2);
+
+
+                TARGETING::EntityPath ep =
+                  l_dimm->getAttr<TARGETING::ATTR_PHYS_PATH>();
+                i_dt->addPropertyString(dimmNode, "location",ep.toString());
+
+                if(l_dimm->getAttr<TARGETING::ATTR_HWAS_STATE>().present
+                   != true)
+                {
+                    //Can't get any of the other data
+                    continue;
+                }
+
+                i_dt->addProperty(dimmNode, "present");
+                //Set property to indicate fault (not using)
+                if(l_dimm->getAttr<TARGETING::ATTR_HWAS_STATE>().functional
+                   != true)
+                {
+                    i_dt->addProperty(dimmNode, "fault");
+                }
+
+                //Set Manufacturer's Name - Use JEDEC standard MFG ID
+                errhdl = readSPD(l_dimm, l_data32, SPD::MODULE_MANUFACTURER_ID);
+                if (errhdl) { break; }
+                i_dt->addPropertyCells32(dimmNode, "manufacturer-id",
+                                         &l_data32[0], l_data32.size() );
+
+                //Set DDR type - Use Basic SPD Memory Type
+                errhdl = readSPD(l_dimm, l_data,  SPD::BASIC_MEMORY_TYPE);
+                if (errhdl) { break; }
+                const char * ddr_type = "unknown";
+                if (SPD::SPD_DDR3 == l_data[0])
+                {
+                    ddr_type = "ddr3";
+                }else if (SPD::SPD_DDR4 == l_data[0])
+                {
+                    ddr_type = "ddr4";
+                }
+                i_dt->addPropertyString(dimmNode, "spd-memory-type", ddr_type);
+
+                //Set Product Part/Model Number
+                errhdl = readSPD(l_dimm, l_data,  SPD::MODULE_PART_NUMBER);
+                if (errhdl) { break; }
+                l_data.push_back('\0');
+                i_dt->addPropertyString(dimmNode, "part-number",
+                                        reinterpret_cast<char*>(&l_data[0]));
+
+                //Set Product Version
+                errhdl = readSPD(l_dimm, l_data32,  SPD::MODULE_REVISION_CODE);
+                if (errhdl) { break; }
+                i_dt->addPropertyCells32(dimmNode, "product-version",
+                                         &l_data32[0], l_data32.size() );
+
+                //Set Product Serial Number
+                errhdl = readSPD(l_dimm, l_data32,  SPD::MODULE_SERIAL_NUMBER);
+                if (errhdl) { break; }
+                i_dt->addPropertyCells32(dimmNode, "serial-number",
+                                         &l_data32[0], l_data32.size() );
+
+                //Set Configured Ranks
+                ATTR_EFF_DIMM_RANKS_CONFIGED_type l_rank_conf;
+                l_mba->tryGetAttr<ATTR_EFF_DIMM_RANKS_CONFIGED>(l_rank_conf);
+                i_dt->addPropertyCell32(dimmNode, "ranks-configured",
+                                        l_rank_conf[l_mba_port][l_mba_dimm]);
+
+                //Set Configured Ranks
+                ATTR_EFF_NUM_RANKS_PER_DIMM_type l_ranks;
+                l_mba->tryGetAttr<ATTR_EFF_NUM_RANKS_PER_DIMM>(l_ranks);
+                i_dt->addPropertyCell32(dimmNode, "ranks",
+                                        l_rank_conf[l_mba_port][l_mba_dimm]);
+            }
+            if(errhdl) {break;}
+        }
+
+        //Add some info to the memory buffer
+        i_dt->addPropertyCell64(i_membNode, "memory-size", l_totalMemSize);
+    }while(0);
+
+    return errhdl;
+}
+
+
 errlHndl_t bld_fdt_mem(devTree * i_dt, bool i_smallTree)
 {
+    std::vector<uint8_t> l_data;
     // Nothing to do for small trees currently.
     if (i_smallTree) { return NULL; }
 
@@ -1842,19 +2182,19 @@ errlHndl_t bld_fdt_mem(devTree * i_dt, bool i_smallTree)
 
         // Get all functional memb chip targets
         TARGETING::TargetHandleList l_memBufList;
-        getAllChips(l_memBufList, TYPE_MEMBUF);
+        getAllChips(l_memBufList, TYPE_MEMBUF, false);
 
         for ( size_t memb = 0;
               (!errhdl) && (memb < l_memBufList.size()); memb++ )
         {
-            TARGETING::Target * l_pMemB = l_memBufList[memb];
+            TARGETING::Target * l_mb = l_memBufList[memb];
 
             //Get MMIO Offset from parent MCS attribute.
             PredicateCTM l_mcs(CLASS_UNIT,TYPE_MCS, MODEL_NA);
 
             TargetHandleList mcs_list;
             targetService().getAssociated(mcs_list,
-                            l_pMemB,
+                            l_mb,
                             TargetService::PARENT_BY_AFFINITY,
                             TargetService::ALL,
                             &l_mcs);
@@ -1865,7 +2205,7 @@ errlHndl_t bld_fdt_mem(devTree * i_dt, bool i_smallTree)
                 //the inband Scom DD.... going to skip creating node
                 //if true
                 TRACFCOMP(g_trac_devtree,ERR_MRK" MCS for 0x%x not found",
-                          TARGETING::get_huid(l_pMemB));
+                          TARGETING::get_huid(l_mb));
                 continue;
             }
             Target* parentMCS = *(mcs_list.begin());
@@ -1880,14 +2220,85 @@ errlHndl_t bld_fdt_mem(devTree * i_dt, bool i_smallTree)
             i_dt->addPropertyCell32(membNode, "#address-cells", 1);
             i_dt->addPropertyCell32(membNode, "#size-cells", 1);
 
-            uint32_t l_ec = l_pMemB->getAttr<ATTR_EC>();
+            TARGETING::EntityPath ep =
+              l_mb->getAttr<TARGETING::ATTR_PHYS_PATH>();
+            i_dt->addPropertyString(membNode, "location",ep.toString());
+
+            // Add dimm info
+            errhdl = bld_fdt_dimm(i_dt, membNode, l_mb);
+            if(errhdl) {break;}
+
+            if(l_mb->getAttr<TARGETING::ATTR_HWAS_STATE>().present != true)
+            {
+                continue;
+            }
+
+            i_dt->addProperty(membNode, "present");
+
+            //Add some info to the memory buffer
+            i_dt->addPropertyCell32(membNode, "frequency-mhz",
+                                    l_mb->getAttr<TARGETING::ATTR_MSS_FREQ>());
+            i_dt->addPropertyCell32(membNode, "voltage-mV",
+                                    l_mb->getAttr<TARGETING::ATTR_MSS_VOLT>());
+
+            //If the CENTAUR_ECID_FRU_ID is 0xFF then this membuf is on a
+            //fru (riser card).  add part/serial #
+            if(l_mb->getAttr<TARGETING::ATTR_CENTAUR_ECID_FRU_ID>() == 0xFF)
+            {
+                //Add Product Part Number
+                TARGETING::ATTR_PART_NUMBER_type l_pn = {'0'};
+                l_mb->tryGetAttr<TARGETING::ATTR_PART_NUMBER>(l_pn);
+                i_dt->addPropertyString(membNode, "part-number",
+                                        reinterpret_cast<char*>(&l_pn[0]));
+
+                //Add Product Serial Number
+                TARGETING::ATTR_SERIAL_NUMBER_type l_sn = {'0'};
+                l_mb->tryGetAttr<TARGETING::ATTR_SERIAL_NUMBER>(l_sn);
+                i_dt->addPropertyString(membNode, "serial-number",
+                                        reinterpret_cast<char*>(&l_sn[0]));
+
+                //Add Board Info
+                errhdl = readVPD(l_mb, l_data,  DeviceFW::CVPD,
+                                 CVPD::OPFR, CVPD::DR);
+                if (errhdl) { break; }
+                l_data.push_back('\0');
+                i_dt->addPropertyString(membNode, "board-info",
+                                        reinterpret_cast<char*>(&l_data[0]));
+
+                //Add Vendor
+                errhdl = readVPD(l_mb, l_data,  DeviceFW::CVPD,
+                                 CVPD::OPFR, CVPD::VN);
+                if (errhdl) { break; }
+                l_data.push_back('\0');
+                i_dt->addPropertyString(membNode, "vendor",
+                                        reinterpret_cast<char*>(&l_data[0]));
+            }
+
+            //Set property to indicate fault (not using)
+            //and don't add anything else (OPAL keys off of it to
+            //actively use the chip)
+            if(l_mb->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
+            {
+                i_dt->addProperty(membNode, "fault");
+                continue;
+            }
+
+            // Add membuf ECIDs
+            ATTR_ECID_type ecid;
+            l_mb->tryGetAttr<ATTR_ECID>(ecid);
+            char ecid_ascii[33];
+            sprintf(ecid_ascii, "%.16llX%.16llX", ecid[0], ecid[1]);
+            i_dt->addPropertyString(membNode, "ecid", ecid_ascii);
+            CPPASSERT(sizeof(ATTR_ECID_type) == 16);
+
+            uint32_t l_ec = l_mb->getAttr<ATTR_EC>();
             char cenVerStr[32];
             snprintf(cenVerStr, 32, "ibm,centaur-v%.2x", l_ec);
             const char* intr_compatStrs[] = {"ibm,centaur", cenVerStr,NULL};
             i_dt->addPropertyStrings(membNode, "compatible", intr_compatStrs);
 
 
-            if(l_pMemB->
+            if(l_mb->
                getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useInbandScom == 0x0)
             {
                 i_dt->addProperty(membNode,"use-fsi");
@@ -1898,27 +2309,19 @@ errlHndl_t bld_fdt_mem(devTree * i_dt, bool i_smallTree)
             i_dt->addPropertyCell32(membNode, "ibm,fsi-master-chip-id",
                                     l_procId);
 
-            uint32_t l_cenId = getMembChipId(l_pMemB);
+            uint32_t l_cenId = getMembChipId(l_mb);
             i_dt->addPropertyCell32(membNode, "ibm,chip-id",l_cenId);
 
             //Add the CMFSI (which CMFSI 0 or 1) and port
             FSI::FsiLinkInfo_t linkinfo;
-            FSI::getFsiLinkInfo( l_pMemB, linkinfo );
+            FSI::getFsiLinkInfo( l_mb, linkinfo );
             uint32_t cmfsiCells[2] =
                            {linkinfo.mPort,linkinfo.link};
             i_dt->addPropertyCells32(membNode, "ibm,fsi-master-port",
                                      cmfsiCells, 2);
 
             //Add any I2C devices hanging off this chip
-            add_i2c_info( l_pMemB, i_dt, membNode, l_ibscomBase);
-
-            // Add membuf ECIDs
-            ATTR_ECID_type ecid;
-            l_pMemB->tryGetAttr<ATTR_ECID>(ecid);
-            char ecid_ascii[33];
-            sprintf(ecid_ascii, "%.16llX%.16llX", ecid[0], ecid[1]);
-            i_dt->addPropertyString(membNode, "ecid", ecid_ascii);
-            CPPASSERT(sizeof(ATTR_ECID_type) == 16);
+            add_i2c_info( l_mb, i_dt, membNode, l_ibscomBase);
         }
 
 
@@ -2084,13 +2487,21 @@ errlHndl_t bld_fdt_bmc(devTree * i_dt, bool i_smallTree)
     /* Nothing to do for small trees currently. */
     if (i_smallTree) { return NULL; }
 
-    /* Find the root node. */
-    dtOffset_t rootNode = i_dt->findNode("/");
-
+    //Attempt to find the bmc node -- might already
+    //be present if BMC inventory is there.  If not
+    //found then add it to the root node
+    dtOffset_t bmcNode = i_dt->findNode("/bmc");
     const char* bmcNodeName = "bmc";
+    if(bmcNode == devTree::DT_INVALID_OFFSET)
+    {
+        TRACFCOMP(g_trac_devtree,"bmc node not found, creating");
+        //Not found, so create it
+        /* Find the root node. */
+        dtOffset_t rootNode = i_dt->findNode("/");
 
-    /* add the BMC node under the root node */
-    dtOffset_t bmcNode = i_dt->addNode(rootNode, bmcNodeName);
+        /* add the BMC node under the root node */
+        bmcNode = i_dt->addNode(rootNode, bmcNodeName);
+    }
 
     /* Add the # address & size cell properties to /bmc node. */
     i_dt->addPropertyCell32(bmcNode, "#address-cells", 1);
@@ -2214,7 +2625,7 @@ errlHndl_t bld_fdt_vpd(devTree * i_dt, bool i_smallTree)
                 dtOffset_t exNode = i_dt->addNode(procNode, "cpu",
                                                     pir.word);
 
-                i_dt->addPropertyBytes(exNode, "frequency,voltage",
+                i_dt->addPropertyBytes(exNode, "frequency-voltage",
                                      reinterpret_cast<uint8_t*>( &l_poundVdata),
                                      sizeof(fapi::voltageBucketData_t));
             }
@@ -2228,7 +2639,6 @@ errlHndl_t bld_fdt_vpd(devTree * i_dt, bool i_smallTree)
             break;
         }
 
-#if 0   //TODO RTC123250 -- re-enable once fixed
         /***************************************************************/
         /* Now loop on all the dimms in the system and add their spd   */
         /***************************************************************/
@@ -2283,7 +2693,6 @@ errlHndl_t bld_fdt_vpd(devTree * i_dt, bool i_smallTree)
         {
             break;
         }
-#endif
 
     }while(0);
 
@@ -2353,6 +2762,72 @@ void bld_fdt_mnfgMode(devTree * i_dt, bool i_smallTree)
     return;
 }
 
+errlHndl_t bld_fdt_fw_info(devTree * i_dt, bool i_smallTree)
+{
+    // Nothing to do for small trees currently.
+    if (i_smallTree) { return NULL; }
+
+
+    errlHndl_t l_errl = NULL;
+    std::vector<uint8_t> l_data;
+
+    do
+    {
+        /* Find the / node and add a vpd node under it. */
+        dtOffset_t rootNode = i_dt->findNode("/");
+        dtOffset_t fwNode = i_dt->addNode(rootNode, "ibm,firmware");
+
+        // Grab a system object to work with
+        TARGETING::Target* sys = NULL;
+        TARGETING::targetService().getTopLevelTarget(sys);
+
+        //Get PNOR Version Here
+        PNOR::SectionInfo_t l_pnorInfo;
+        l_errl = getSectionInfo( PNOR::VERSION , l_pnorInfo);
+        if (l_errl) { break; }
+
+        uint8_t* l_versionData = reinterpret_cast<uint8_t*>( l_pnorInfo.vaddr );
+
+        //Walk the FW version strings.  '\n' separates each string
+        //'\0' is end of the list
+        size_t l_numBytes = 0;
+
+        while ((l_numBytes < l_pnorInfo.size)
+               && (((char)(l_versionData[l_numBytes])) != '\0'))
+        {
+            //Found end of version string
+            if (((char)(l_versionData[l_numBytes])) == '\n')
+            {
+                //Add existing version string
+                l_data.push_back('\0');
+                i_dt->addProperty(fwNode,reinterpret_cast<char*>(&l_data[0]));
+
+                //Clear for next version string
+                l_data.clear();
+            }
+            else if (((char)(l_versionData[l_numBytes])) == '\t')
+            {
+                //Do nothing, skip tabs
+            }
+            else
+            {
+                l_data.push_back(l_versionData[l_numBytes]);
+            }
+            l_numBytes++;
+        }
+
+        //Check to see if there is one last version string
+        if(l_data.size())
+        {
+            //Add existing version string
+            l_data.push_back('\0');
+            i_dt->addProperty(fwNode,reinterpret_cast<char*>(&l_data[0]));
+        }
+    }while(0);
+
+    return l_errl;
+}
+
 errlHndl_t build_flatdevtree( uint64_t i_dtAddr, size_t i_dtSize,
                               bool i_smallTree )
 {
@@ -2417,8 +2892,8 @@ errlHndl_t build_flatdevtree( uint64_t i_dtAddr, size_t i_dtSize,
             break;
         }
 
-        TRACFCOMP( g_trac_devtree, "---devtree secureboot ---" );
-        errhdl = bld_fdt_secureboot(dt, i_smallTree);
+        TRACFCOMP( g_trac_devtree, "---devtree firmware ---" );
+        errhdl = bld_fdt_fw_info(dt, i_smallTree);
         if(errhdl)
         {
             break;
@@ -2426,6 +2901,10 @@ errlHndl_t build_flatdevtree( uint64_t i_dtAddr, size_t i_dtSize,
 
         TRACFCOMP( g_trac_devtree, "---devtree mnfg mode ---" );
         bld_fdt_mnfgMode(dt, i_smallTree);
+
+        TRACFCOMP( g_trac_devtree, "---devtree secureboot ---" );
+        errhdl = bld_fdt_secureboot(dt, i_smallTree);
+
 
     }while(0);
 
