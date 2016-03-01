@@ -167,8 +167,16 @@ p9_common_poweronoff(
                      "getScom failed for address PPM_PFCS"); // poll
         }
         while ((l_data.getBit < VDD_PG_STATE_BIT + PG_STATE_IDLE_OFFSET > ()
-                != 0 ) && (--l_loopsPerMs != 0));
+                == 0 ) && (--l_loopsPerMs != 0));
 
+        /*
+                do
+                {
+                    FAPI_TRY(fapi2::getScom(i_target, PPM_PFSNS[l_type], l_data),
+                             "getScom failed for address PPM_PFSNS"); // poll
+                }
+                while ((l_data.getBit<0>() == 0 ) && (--l_loopsPerMs != 0));
+        */
         FAPI_ASSERT((l_loopsPerMs != 0),
                     fapi2::PMPROC_PFETLIB_TIMEOUT()
                     .set_ADDRESS(PPM_PFCS[l_type]),
@@ -201,8 +209,16 @@ p9_common_poweronoff(
             FAPI_DBG("timeout l_loopsPerMs. %x", l_loopsPerMs);
         }
         while ((l_data.getBit < VCS_PG_STATE_BIT + PG_STATE_IDLE_OFFSET > ()
-                != 0 ) && (--l_loopsPerMs != 0));
+                == 0 ) && (--l_loopsPerMs != 0));
 
+        /*
+                do
+                {
+                    FAPI_TRY(fapi2::getScom(i_target, PPM_PFSNS[l_type], l_data),
+                             "getScom failed for address PPM_PFSNS");  // poll
+                }
+                while ((l_data.getBit<2>() == 0 ) && (--l_loopsPerMs != 0));
+        */
         FAPI_ASSERT((l_loopsPerMs != 0),
                     fapi2::PMPROC_PFETLIB_TIMEOUT()
                     .set_ADDRESS(PPM_PFCS[l_type]),
