@@ -267,10 +267,10 @@ ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
 NIMBUS_TARG_IMG = simics_NIMBUS_targeting.bin
 NIMBUS_TARG_IMG_ECC = simics_NIMBUS_targeting.bin.ecc
 NIMBUS_TARG_IMG_FAKE = simics_NIMBUS_targeting.bin.fake
-NIMBUS_SLW_IMG = ${ENGD_OBJPATH:Fp8.ref_image.hdr.bin}
+NIMBUS_SLW_IMG = ${ENGD_OBJPATH:Fp9n.ref_image.hdr.bin}
 #Using p8 images until we have something valid for p9...
-NIMBUS_LOCAL_SLW_IMG = p8.ref_image.hdr.bin
-NIMBUS_LOCAL_SLW_IMG_ECC = p8.ref_image.hdr.bin.ecc
+NIMBUS_LOCAL_SLW_IMG = p9n.ref_image.hdr.bin
+NIMBUS_LOCAL_SLW_IMG_ECC = p9n.ref_image.hdr.bin.ecc
 NIMBUS_SBE_IMG = p8SbePartition.bin
 NIMBUS_SBE_IMG_ECC = p8SbePartition.bin.ecc
 SBEC_IMG = centSbePartition.bin
