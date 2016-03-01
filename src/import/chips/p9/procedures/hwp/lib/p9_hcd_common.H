@@ -19,7 +19,6 @@
 ///
 /// @file p9_hcd_common.H
 /// @brief common hcode includes
-///
 
 // *HWP HWP Owner          : David Du       <daviddu@us.ibm.com>
 // *HWP Backup HWP Owner   : Greg Still     <stillgs@us.ibm.com>
@@ -89,7 +88,6 @@
 // Constants
 //-------------------------
 
-
 namespace p9hcd
 {
 
@@ -110,26 +108,38 @@ enum P9_HCD_PCB_ARBITER_CTRL
 };
 
 // Constants to calculate hcd poll timeout intervals
-enum P9_HCD_COMMON_TIMEOUT_CONSTANTS
+enum P9_HCD_TIMEOUT_CONSTANTS
 {
     CYCLES_PER_MS       = 500000, // PPE FREQ 500MHZ
     INSTS_PER_POLL_LOOP = 8       //
 };
 
+// Constants to work with fapi2target
+enum P9_HCD_TARGET_CONSTANTS
+{
+    PERV_TO_EQ_POS_OFFSET   = 0x10,
+    PERV_TO_CORE_POS_OFFSET = 0x20
+};
+
 // Init Vectors for Register Setup
 enum P9_HCD_COMMON_INIT_VECTORS
 {
-    // 0     -  CHIPLET_ENABLE
     // 1     -  PCB_EP_RESET
+    // 2     -  SKEW_ADJUST_RESET
     // 3     -  PLL_TEST_EN
     // 4     -  PLLRST
     // 5     -  PLLBYP
+    // 11    -  EDIS
     // 12    -  VITL_MPW1
     // 13    -  VITL_MPW2
     // 14    -  VITL_MPW3
     // 18    -  FENCE_EN
-    NET_CTRL0_INIT_VECTOR = (BIT64(0) | BIT64(1) | BITS64(3, 3) | BITS64(12, 3) | BIT64(18)),
-    HANG_PULSE1_INIT_VECTOR = BIT64(5)
+    // 22    -  SKEW_ADJUST_FUNC_CLKSEL
+    // 26    -  LVLTRANS_FENCE
+    Q_NET_CTRL0_INIT_VECTOR = (BITS64(1, 5) | BITS64(11, 4) |
+                               BIT64(18) | BIT64(22) | BIT64(26)),
+    C_NET_CTRL0_INIT_VECTOR = (BIT64(1) | BITS64(3, 3) | BITS64(11, 4) |
+                               BIT64(18) | BIT64(22) | BIT64(26)),
 };
 
 // Clock Control Constants
@@ -141,9 +151,11 @@ enum P9_HCD_COMMON_CLK_CTRL_CONSTANTS
     CLK_MASTER_MODE                          = BIT64(3),
     CLK_REGION_ANEP                          = BIT64(10),
     CLK_REGION_DPLL                          = BIT64(14),
-    CLK_REGION_L2                            = BITS64(8, 2),
-    CLK_REGION_ALL_BUT_DPLL_L2               = BITS64(4, 4) | BITS64(10, 4),
+    CLK_REGION_ALL_BUT_EX_DPLL               = BITS64(4, 2) | BITS64(10, 2),
+    CLK_REGION_EX0_L2_L3_REFR                = BIT64(6) | BIT64(8) | BIT64(12),
+    CLK_REGION_EX1_L2_L3_REFR                = BIT64(7) | BIT64(9) | BIT64(13),
     CLK_REGION_ALL                           = BITS64(4, 11),
+    CLK_REGION_NONE                          = 0,
     CLK_THOLD_ALL                            = BITS64(48, 3),
     CLK_THOLD_NSL_ARY                        = BITS64(49, 2)
 };
@@ -155,14 +167,10 @@ enum P9_HCD_COMMON_CLK_CTRL_VECTORS
         (CLK_START_CMD | CLK_REGION_ALL | CLK_THOLD_NSL_ARY),
     CLK_START_REGION_ALL_THOLD_ALL =
         (CLK_START_CMD | CLK_REGION_ALL | CLK_THOLD_ALL),
-    CLK_START_REGION_ALL_BUT_DPLL_L2_THOLD_NSL_ARY =
-        (CLK_START_CMD | CLK_REGION_ALL_BUT_DPLL_L2 | CLK_THOLD_NSL_ARY),
-    CLK_START_REGION_ALL_BUT_DPLL_L2_THOLD_ALL =
-        (CLK_START_CMD | CLK_REGION_ALL_BUT_DPLL_L2 | CLK_THOLD_ALL),
-    CLK_START_REGION_L2_THOLD_NSL_ARY =
-        (CLK_START_CMD | CLK_REGION_L2 | CLK_THOLD_NSL_ARY),
-    CLK_START_REGION_L2_THOLD_ALL =
-        (CLK_START_CMD | CLK_REGION_L2 | CLK_THOLD_ALL),
+    CLK_START_REGION_NONE_THOLD_NSL_ARY =
+        (CLK_START_CMD | CLK_REGION_NONE | CLK_THOLD_NSL_ARY),
+    CLK_START_REGION_NONE_THOLD_ALL =
+        (CLK_START_CMD | CLK_REGION_NONE | CLK_THOLD_ALL),
     CLK_START_REGION_DPLL_THOLD_NSL_ARY =
         (CLK_START_CMD | CLK_REGION_DPLL | CLK_THOLD_NSL_ARY),
     CLK_START_REGION_DPLL_THOLD_ALL =
@@ -177,19 +185,24 @@ enum P9_HCD_COMMON_CLK_CTRL_VECTORS
 enum P9_HCD_COMMON_SCAN0_CONSTANTS
 {
     SCAN0_REGION_ALL                         = 0x7FF,
-    SCAN0_REGION_ALL_BUT_PLL                 = 0x7FE,
-    SCAN0_REGION_ALL_BUT_ANEP_PLL            = 0x7EE,
-    SCAN0_REGION_PLL                         = 0x001,
-    SCAN0_REGION_DPLL_ANEP                   = 0x011,
+    SCAN0_REGION_ALL_BUT_EX                  = 0x619,
+    SCAN0_REGION_ALL_BUT_EX_DPLL             = 0x618,
+    SCAN0_REGION_ALL_BUT_EX_ANEP_DPLL        = 0x608,
+    SCAN0_REGION_EX0_L2_L3_REFR              = 0x144,
+    SCAN0_REGION_EX1_L2_L3_REFR              = 0x0A2,
+    SCAN0_REGION_DPLL                        = 0x001,
+    SCAN0_REGION_ANEP_DPLL                   = 0x011,
     SCAN0_REGION_CORE_ONLY                   = 0x300,
     SCAN0_REGION_PERV_CORE                   = 0x700,
     SCAN0_TYPE_ALL_BUT_GPTR_REPR_TIME        = 0xDCF,
+    SCAN0_TYPE_ALL_BUT_GPTR                  = 0xDFF,
     SCAN0_TYPE_GPTR_REPR_TIME                = 0x230,
     SCAN0_TYPE_REPR_TIME                     = 0x030,
     SCAN0_TYPE_GPTR                          = 0x200,
     SCAN0_TYPE_FUNC                          = 0x800,
     SCAN0_TYPE_FUNC_BNDY                     = 0x808
 };
+
 //OCC FLag defines
 enum PM_GPE_OCCFLG_DEFS
 {
@@ -201,7 +214,6 @@ enum XSR_DEFS
 {
     HALTED_STATE    = 0
 };
-
 
 // XCR defines
 enum XCR_DEFS
