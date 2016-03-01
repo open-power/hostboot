@@ -26,10 +26,65 @@
 
 #include <stdint.h>
 #include <return_code.H>
-#include <error_info_defs.H>
+#include <target_types.H>
+#include <plat_utils.H>
+
 
 namespace fapi2
 {
+
+///
+/// @brief Enable/Disable special wakeup on processor chip core(s)
+///
+/// Special Wakeup Enable must be done when a HWP is doing an operation that
+/// requires core(s) to be awake (e.g. modifying the Hcode image). For
+/// each Special Wakeup Enable call, there must be a subsequent Special Wakeup
+/// Disable call.
+///
+/// This does not apply to SCOM operations, platforms must handle Special Wakeup
+/// for SCOM operations internally.
+///
+/// If Special Wakeup is enabled, a core will not go to sleep (if already
+/// sleeping, it is woken up). If Special Wakeup is disabled, if there are no
+/// other active Enables, the core is allowed to sleep.
+///
+/// @note Implemented by platform code calling the cpu special wakeup HWP.
+///       This is a FAPI2 function because each platform may do different things
+///         Hostboot: Does nothing (cores cannot sleep while Hostboot running)
+///         FSP: Uses an algorithm to decide when to disable special wakeup
+///         Cronus: Does Special Wakeup enable/disable as requested
+///
+/// @param[in] i_target
+///              TARGET_TYPE_PROC_CHIP: Enables/Disables Special Wakeup on all
+///                cores (EX,EQ chiplets) of the specified chip target.
+///              TARGET_TYPE_CORE: Enables/Disables Special Wakeup on the
+///                specified core target (EX,EQ chiplets)
+///              TARGET_TYPE_EX: Enables/Disables Special Wakeup on the
+///                specified EX target.
+///              TARGET_TYPE_EQ: Enables/Disables Special Wakeup on the
+///                specified EQ target.
+///
+/// @param[in] i_enable true = enable. false = disable.
+///
+/// @return ReturnCode. FAPI2_RC_SUCCESS on success, else platform specified error.
+///
+///
+template<TargetType T>
+inline ReturnCode specialWakeup(const Target<T>& i_target,
+                                const bool i_enable)
+{
+    // enforce the allowed target types
+    static_assert( ((T == fapi2::TARGET_TYPE_PROC_CHIP) ||
+                    (T == fapi2::TARGET_TYPE_CORE)      ||
+                    (T == fapi2::TARGET_TYPE_EX)        ||
+                    (T == fapi2::TARGET_TYPE_EQ)),
+                   "Invalid target type for this function");
+
+    ReturnCode l_rc = platSpecialWakeup( i_target, i_enable );
+
+    return l_rc;
+}
+
 ///
 /// @brief Log an error.
 ///
