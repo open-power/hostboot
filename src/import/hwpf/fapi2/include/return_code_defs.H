@@ -98,6 +98,16 @@ enum ReturnCodes : uint32_t
 
     FAPI2_RC_PLAT_NOT_SUPPORTED_AT_RUNTIME = FAPI2_RC_PLAT_MASK | 0x03,
     ///< Operation not supported by HB runtime
+
+    FAPI2_RC_PLAT_ERR_RING_HEADER_CHECK = FAPI2_RC_PLAT_MASK | 0x04,
+    //Operation on putring fail because of header data mismatch
+    //
+    FAPI2_RC_PLAT_RING_DECODE_LENGTH_EXCEEDED = FAPI2_RC_PLAT_MASK | 0x05,
+    //Operation on putring fail because of decode length greater than actual
+    //ring length.
+
+    FAPI2_RC_PLAT_RING_ID_NOT_FOUND_IN_RS4_IMAGE = FAPI2_RC_PLAT_MASK | 0x06,
+    //Operation on putring fail because of ringId not found in RS4 image
 };
 
 }
