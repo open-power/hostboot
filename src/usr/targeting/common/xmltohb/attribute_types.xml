@@ -5535,6 +5535,7 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
 <attribute>
     <id>PM_PBAX_NODEID</id>
     <description>
+      DEPRECATED!!!  Use PM_PBAX_GROUPID instead
       PROC_CHIP Attribute
       Receive PBAX Nodeid. Value that indicates this PBA's PBAX Node affinity.
       This is matched to pbax_nodeid of the PMISC Address phase.
@@ -5548,6 +5549,26 @@ Divider for the 1us PBAX hang pulse.  A hang is detected after two divided hang 
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PM_PBAX_NODEID</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PM_PBAX_GROUPID</id>
+    <description>
+      PROC_CHIP Attribute
+      Receive PBAX Nodeid. Value that indicates this PBA's PBAX Node affinity.
+      This is matched to pbax_nodeid of the PMISC Address phase.
+
+      Provided by the Machine Readable Workbook.
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PM_PBAX_GROUPID</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
