@@ -968,8 +968,20 @@ void logError(
     return;
 }
 
-ReturnCode delay(uint64_t i_nanoSeconds, uint64_t i_simCycles)
+///
+/// @brief Delay this thread. Hostboot will use the nanoseconds parameter
+/// and make a syscall to nanosleep. While in the syscall, the hostboot
+/// kernel will continue to consume CPU cycles as it looks for a runnable
+/// task.  When the delay time expires, the task becomes runnable and will soon
+/// return from the syscall.  Callers of delay() in the hostboot environment
+/// will likely have to know the mHz clock speed they are running on and
+/// compute a non-zero value for i_nanoSeconds.
+///
+ReturnCode delay(uint64_t i_nanoSeconds,
+                 uint64_t i_simCycles,
+                 bool i_fixed)
 {
+    //Note: i_fixed is deliberately ignored
     nanosleep( 0, i_nanoSeconds );
     return FAPI2_RC_SUCCESS;
 }
