@@ -45,13 +45,13 @@ my %globals = ( branch => "master",
 my $TOKEN = "!@#%^";
 
 # List of files to check into CMVC separated by whitespace
-my $CMVC_FILES = "src/hbfw/img/hostboot.bin ",
-                 "src/hbfw/img/hostboot_extended.bin ",
-                 "src/hbfw/img/hostboot_runtime.bin ",
-                 "src/hbfw/img/makefile ",
-                 "src/hbfw/fsp.tar ",
-                 "src/hbfw/makefile ",
-                 "src/hbfw/releaseNotes.html ",
+my $CMVC_FILES = "src/hbfw/img/hostboot.bin ".
+                 "src/hbfw/img/hostboot_extended.bin ".
+                 "src/hbfw/img/hostboot_runtime.bin ".
+                 "src/hbfw/img/makefile ".
+                 "src/hbfw/fsp.tar ".
+                 "src/hbfw/makefile ".
+                 "src/hbfw/releaseNotes.html ".
                  "src/hbfw/simics.tar";
 # Directory to look up latest release tag for a specific release
 my $HOSTBOOT_GSA_HOME = "/gsa/ausgsa/home/h/o/hostboot";
