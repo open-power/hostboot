@@ -1505,6 +1505,10 @@
     <persistency>non-volatile</persistency>
     <readable/>
     <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_ISTEP_MODE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
@@ -6578,24 +6582,10 @@ firmware notes: Used as override attribute for pstate procedure
     <id>CHIP_REGIONS_TO_ENABLE</id>
     <description>
       Called to get data to customize an IPL or SLW image with data indicating
-        which chip regions the SBE should enable
-      The data is in the format of the Module VPD PG (Partial Good Vector)
-        keyword which is an 32 entry array of 16bit words, each word
-        represents a chiplet and a defined set of bits within the word
-        represents regions that are good. The 16 bit word is embedded within
-        a 64bit word as described in the MVPD spec to reflect the clock
-        controller region register layout:
-          bits 0:3 are reserved -> set to 0
-          bits 4:19 are the 16 bit data word
-          bits 20:63 are reserved -> set to 0
-      A platform needs to return data indicating the chip regions to enable,
-      this may not be just the MVPD partial-good data, it may also not enable
-      other chips and chiplets it has decided are non-functional - this is
-      why it is not a standard MVPD query.
+       which chip regions the SBE should enable
     </description>
     <simpleType>
-        <uint64_t></uint64_t>
-        <array>32</array>
+        <uint32_t></uint32_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -10570,14 +10560,11 @@ Measured in GB</description>
 <attribute>
     <id>SBE_SEEPROM_I2C_DEVICE_ADDRESS</id>
     <description>
-      A 2-element array containing the I2C device address of the primary (0)
-      and secondary (1) SEEPROM devices containing SBE IPL code.
-      Provided by the Machine Readable Workbook
+        sbe seeprom iic device address
     </description>
     <simpleType>
-        <uint8_t>
-        </uint8_t>
-        <array>2</array>
+        <uint64_t>
+        </uint64_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -10591,14 +10578,11 @@ Measured in GB</description>
 <attribute>
     <id>SBE_SEEPROM_I2C_PORT</id>
     <description>
-      A 2-element array containing the I2C controller port number of the
-      primary (0) and secondary (1) SEEPROM devices containing SBE IPL code.
-      Provided by the Machine Readable Workbook
+        SBE seeprom iic port
     </description>
     <simpleType>
-        <uint8_t>
-        </uint8_t>
-        <array>2</array>
+        <uint64_t>
+        </uint64_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -12449,11 +12433,10 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 <attribute>
     <id>RISK_LEVEL</id>
     <description>
-        Defines risk level to consider for initialization values applied during IPL.
-        Risk level 0 should contain solutions for all known errata, and may sacrifice performance to avoid data integrity issue/error checking cases.
-        Risk level 0x100 may introduce data integrity/error scenarios to provide full performance or visibility to state space/coverage behind known issues.
+        HWP/Init "risk level" enabled. Used by HB to pass to HB driven HWPs.
+        FALSE = 0x0,TRUE = 0x1
     </description>
-    <simpleType><uint32_t></uint32_t></simpleType>
+    <simpleType><uint8_t></uint8_t></simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
@@ -19120,5 +19103,722 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <readable/>
 </attribute>
 
+<attribute>
+  <id>I2C_BUS_DIV_REF</id>
+  <description>
+      Ref clock I2C bus divider consumed by code running out of OTPROM
+  </description>
+  <simpleType>
+      <uint32_t>
+      </uint32_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <writeable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_I2C_BUS_DIV_REF</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>NEST_PLL_BUCKET</id>
+  <description>
+      Select Nest I2C and pll setting from one of the supported frequencies
+  </description>
+  <simpleType>
+      <uint8_t>
+      </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <writeable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_NEST_PLL_BUCKET</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>BOOT_FREQ</id>
+  <description>EQ boot frequency</description>
+  <simpleType>
+      <uint32_t>
+      </uint32_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <writeable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_BOOT_FREQ</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>BOOT_FLAGS</id>
+  <description>Switch to using a flag to indicate SEEPROM side SBE</description>
+  <simpleType>
+      <uint32_t>
+      </uint32_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <writeable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_BOOT_FLAGS</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+
+<attribute>
+  <id>NODE_POS</id>
+  <description>Indicate the node position in FSP based systems
+  (unused in Spless systems)</description>
+  <simpleType>
+      <uint8_t>
+      </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <writeable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_NODE_POS</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>CHIP_POS</id>
+  <description>Indicate the chip position</description>
+  <simpleType>
+      <uint8_t>
+      </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <writeable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_CHIP_POS</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+
+<attribute>
+  <id>FUNCTIONAL_EQ_EC_VALID</id>
+  <description>
+    Indicates the validitiy of FW functional EQ/EQ register
+    FALSE = 0x0, TRUE = 0x1
+  </description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_FUNCTIONAL_EQ_EC_VALID</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>EQ_GARD</id>
+  <description>Capturing EQ Gard value</description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_EQ_GARD</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>EC_GARD</id>
+  <description>Capturing EC Gard Value</description>
+  <simpleType>
+    <uint32_t>
+    </uint32_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_EC_GARD</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>I2C_BUS_DIV_REF_VALID</id>
+  <description>Indicates the validity of ref clock I2C bus divider consumed by
+      code running out of OTPROM
+      FALSE = 0x0,TRUE = 0x1
+  </description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_I2C_BUS_DIV_REF_VALID</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>FW_MODE_FLAGS_VALID</id>
+  <description>Indicates the validity of FW flags. Ex: ISTEP_MODE,
+      SBE_RUNTIME_MODE, MPIPL_MODE, SP_MODE, SBE_FFDC_ENABLE
+      FALSE = 0x0,TRUE = 0x1
+  </description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_FW_MODE_FLAGS_VALID</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+
+<attribute>
+  <id>SBE_RUNTIME_MODE</id>
+  <description>Indicates that SBE should go directly to runtime functionality
+    FALSE = 0x0, TRUE = 0x1
+  </description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_SBE_RUNTIME_MODE</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>IS_SP_MODE</id>
+  <description>Indicates whether we are connected to FSP or not
+    FSP_LESS = 0x0,FSP = 0x1
+  </description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_IS_SP_MODE</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>SBE_FFDC_ENABLE</id>
+  <description>Indicates whether SBE should collect FFDC
+    FALSE = 0x0,TRUE = 0x1
+  </description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_SBE_FFDC_ENABLE</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>SBE_INTERNAL_FFDC_ENABLE</id>
+  <description>Indicates that the SBE should send back internal FFDC on any
+      chipOp failure response
+      FALSE = 0x0,TRUE = 0x1</description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_SBE_INTERNAL_FFDC_ENABLE</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>BOOT_FREQUENCY_VALID</id>
+  <description>Indicates if BOOT_FREQ_MULT and NEST_PLL_BUCKET are valid
+      FALSE = 0x0,TRUE = 0x1</description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_BOOT_FREQUENCY_VALID</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>BOOT_FREQ_MULT</id>
+  <description>EQ boot frequency multiplier</description>
+  <simpleType>
+    <uint16_t>
+    </uint16_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_BOOT_FREQ_MULT</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>HWP_CONTROL_FLAGS_VALID</id>
+  <description>
+    Indicates if HWP control flags are valid
+    FALSE = 0x0,TRUE = 0x1
+  </description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_HWP_CONTROL_FLAGS_VALID</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>SYS_FORCE_ALL_CORES</id>
+  <description>Indicates that SBE should init all cores
+  FALSE = 0x0,TRUE = 0x1
+  </description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_SYS_FORCE_ALL_CORES</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>DISABLE_HBBL_VECTORS</id>
+  <description>BootLoader HWP flag to not place 12K exception vectors.
+  This flag is only applicable when security is disabled.
+  FALSE = 0x0,TRUE = 0x1
+  </description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_DISABLE_HBBL_VECTORS</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>CHIP_SELECTION_VALID</id>
+  <description>Indicates that master/slave, node/chip selection attributes
+  are valid
+  FALSE = 0x0,TRUE = 0x1
+  </description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_CHIP_SELECTION_VALID</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>CHIP_SELECTION</id>
+  <description>master/slave bit
+    MASTER = 0x0,SLAVE = 0x1
+  </description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_CHIP_SELECTION</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>SCRATCH6_VALID</id>
+  <description>Indicate if scratch reg6 bits are valid
+  FALSE = 0x0,TRUE = 0x1
+  </description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_SCRATCH6_VALID</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>SCRATCH7_VALID</id>
+  <description>Indicate if scratch reg7 bits are valid
+    FALSE = 0x0,TRUE = 0x1
+  </description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_SCRATCH7_VALID</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>BACKUP_SEEPROM_SELECT</id>
+  <description>Set with Primary SEEPROM</description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_BACKUP_SEEPROM_SELECT</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>BOOT_FMULT</id>
+  <description>EQ boot frequency multiplier</description>
+  <simpleType>
+    <uint16_t>
+    </uint16_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_BOOT_FMULT</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>BRANCH_PIBMEM_ADDR</id>
+  <description>Bransh Pibmem address</description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_BRANCH_PIBMEM_ADDR</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>DEVICE_ID</id>
+  <description>Device Identification</description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_DEVICE_ID</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>I2C_BUS_DIV_NEST</id>
+  <description>I2C Bus speed based on nest freq, ref clock</description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_I2C_BUS_DIV_NEST</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>LEN_OF_SEEPROM_DATA</id>
+  <description>Length of Seeprom data</description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_LEN_OF_SEEPROM_DATA</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>MB_BIT_RATE_DIVISOR_PLL</id>
+  <description>MN Bitrate divisor pll</description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_MB_BIT_RATE_DIVISOR_PLL</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>MB_BIT_RATE_DIVISOR_REFCLK</id>
+  <description>MB_BIT_RATE_DIVISOR_REFCLK</description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_MB_BIT_RATE_DIVISOR_REFCLK</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>MC_SYNC_MODE</id>
+  <description>MC mesh to use Nest mesh or not</description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_MC_SYNC_MODE</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PG</id>
+  <description>
+    Chiplet Partial good info attribute. Provided by Ring scans
+  </description>
+  <simpleType>
+    <uint32_t>
+    </uint32_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_PG</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PB_BNDY_DMIPLL_DATA</id>
+  <description>Ring image for pb_bndy_dmipll ring creator:
+    platform firmware notes:</description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_PROC_PB_BNDY_DMIPLL_DATA</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA</id>
+  <description>Ring image for pb_bndy_dmipll ring for DC cal creator:
+    platform firmware notes:</description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_PROC_PB_BNDY_DMIPLL_FOR_DCCAL_DATA</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PERV_BNDY_PLL_DATA</id>
+  <description>Ring image for perv_bndy_pll ring containing filter plls
+    and xb_pll,nest_pll creator: platform firmware notes:</description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_PROC_PERV_BNDY_PLL_DATA</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_SBE_MASTER_CHIP</id>
+  <description>
+    Indicates if SBE on this chip is serving as hosboot drawer master
+    FALSE = 0x0,TRUE = 0x1
+  </description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_PROC_SBE_MASTER_CHIP</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>START_PIBMEM_ADDR</id>
+  <description>Start of PIBMEM address</description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_START_PIBMEM_ADDR</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>START_SEEPROM_ADDR</id>
+  <description>Start of seeprom address</description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_START_SEEPROM_ADDR</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>WAIT_N0</id>
+  <description>Wait N0</description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_WAIT_N0</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>WAIT_N1</id>
+  <description>WAIT_N1</description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_WAIT_N1</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>WAIT_N2</id>
+  <description>WAIT_N2</description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_WAIT_N2</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>WAIT_N3</id>
+  <description>WAIT_N3</description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_WAIT_N3</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
 
 </attributes>
