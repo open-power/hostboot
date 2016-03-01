@@ -34,6 +34,22 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <rc>RC_PMPROC_QUADCPLTALIGN_FAILED</rc>
+    <description>
+        quad chiplets alignment failed.
+    </description>
+    <ffdc>QUADCPLTSTAT0</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_PMPROC_CORECPLTALIGN_FAILED</rc>
+    <description>
+        core chiplets alignment failed.
+    </description>
+    <ffdc>CORECPLTSTAT0</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
     <rc>RC_PMPROC_CORE_XSTOP</rc>
     <description>
         core checkstops.
