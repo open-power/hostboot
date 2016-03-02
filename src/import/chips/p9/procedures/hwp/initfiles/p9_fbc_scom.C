@@ -27,8 +27,21 @@ using namespace fapi2;
 
 #define ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_ATTRIBUTE_VALUE_0    0
 #define ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_ATTRIBUTE_VALUE_0    0
-#define LITERAL_0xFFFFFFFFFFFFFFFF    0xFFFFFFFFFFFFFFFF
-#define LITERAL_ON    0x80000000
+#define LITERAL_PB_IOE_LL0_CONFIG_LINK_PAIR_ON    0x80000000
+#define LITERAL_PB_IOE_LL0_IOEL_FIR_MASK_REG_0xFFFFFFFFFFFFFFFF    0xFFFFFFFFFFFFFFFF
+#define LITERAL_PB_IOE_LL1_CONFIG_LINK_PAIR_ON    0x80000000
+#define LITERAL_PB_IOE_LL1_IOEL_FIR_MASK_REG_0xFFFFFFFFFFFFFFFF    0xFFFFFFFFFFFFFFFF
+#define LITERAL_PB_IOE_LL2_CONFIG_LINK_PAIR_ON    0x80000000
+#define LITERAL_PB_IOE_LL2_IOEL_FIR_MASK_REG_0xFFFFFFFFFFFFFFFF    0xFFFFFFFFFFFFFFFF
+#define LITERAL_PB_IOE_SCOM_PB_CFG_IOE01_IS_LOGICAL_PAIR_ON    0x80000000
+#define LITERAL_PB_IOE_SCOM_PB_CFG_IOE23_IS_LOGICAL_PAIR_ON    0x80000000
+#define LITERAL_PB_IOE_SCOM_PB_CFG_IOE45_IS_LOGICAL_PAIR_ON    0x80000000
+#define LITERAL_PB_IOE_SCOM_PB_IOE_FIR_MASK_REG_0xFFFFFFFFFFFFFFFF    0xFFFFFFFFFFFFFFFF
+#define LITERAL_PB_IOO_SCOM_PB_CFG_IOO01_IS_LOGICAL_PAIR_ON    0x80000000
+#define LITERAL_PB_IOO_SCOM_PB_CFG_IOO23_IS_LOGICAL_PAIR_ON    0x80000000
+#define LITERAL_PB_IOO_SCOM_PB_CFG_IOO45_IS_LOGICAL_PAIR_ON    0x80000000
+#define LITERAL_PB_IOO_SCOM_PB_CFG_IOO67_IS_LOGICAL_PAIR_ON    0x80000000
+#define LITERAL_PB_IOO_SCOM_PB_IOO_FIR_MASK_REG_0xFFFFFFFFFFFFFFFF    0xFFFFFFFFFFFFFFFF
 
 fapi2::ReturnCode p9_fbc_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT0)
 {
@@ -58,7 +71,8 @@ fapi2::ReturnCode p9_fbc_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
 
         if (iv_def_X0_ENABLED)
         {
-            PB_IOE_SCOM_PB_CFG_IOE01_IS_LOGICAL_PAIR_scom0.insert<uint64_t> (LITERAL_ON, 0, 1, 63 );
+            PB_IOE_SCOM_PB_CFG_IOE01_IS_LOGICAL_PAIR_scom0.insert<uint64_t> (LITERAL_PB_IOE_SCOM_PB_CFG_IOE01_IS_LOGICAL_PAIR_ON, 0,
+                    1, 63 );
         }
 
         auto iv_def_X1_ENABLED = (iv_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[1] !=
@@ -66,7 +80,8 @@ fapi2::ReturnCode p9_fbc_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
 
         if (iv_def_X1_ENABLED)
         {
-            PB_IOE_SCOM_PB_CFG_IOE01_IS_LOGICAL_PAIR_scom0.insert<uint64_t> (LITERAL_ON, 1, 1, 63 );
+            PB_IOE_SCOM_PB_CFG_IOE01_IS_LOGICAL_PAIR_scom0.insert<uint64_t> (LITERAL_PB_IOE_SCOM_PB_CFG_IOE23_IS_LOGICAL_PAIR_ON, 1,
+                    1, 63 );
         }
 
         auto iv_def_X2_ENABLED = (iv_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[2] !=
@@ -74,7 +89,8 @@ fapi2::ReturnCode p9_fbc_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
 
         if (iv_def_X2_ENABLED)
         {
-            PB_IOE_SCOM_PB_CFG_IOE01_IS_LOGICAL_PAIR_scom0.insert<uint64_t> (LITERAL_ON, 2, 1, 63 );
+            PB_IOE_SCOM_PB_CFG_IOE01_IS_LOGICAL_PAIR_scom0.insert<uint64_t> (LITERAL_PB_IOE_SCOM_PB_CFG_IOE45_IS_LOGICAL_PAIR_ON, 2,
+                    1, 63 );
         }
 
         fapi2::buffer<uint64_t> PB_IOE_SCOM_PB_IOE_FIR_MASK_REG_scom0;
@@ -88,7 +104,8 @@ fapi2::ReturnCode p9_fbc_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
 
         if (((iv_def_X0_ENABLED || iv_def_X1_ENABLED) || iv_def_X2_ENABLED))
         {
-            PB_IOE_SCOM_PB_IOE_FIR_MASK_REG_scom0.insert<uint64_t> (LITERAL_0xFFFFFFFFFFFFFFFF, 0, 64, 0 );
+            PB_IOE_SCOM_PB_IOE_FIR_MASK_REG_scom0.insert<uint64_t> (LITERAL_PB_IOE_SCOM_PB_IOE_FIR_MASK_REG_0xFFFFFFFFFFFFFFFF, 0,
+                    64, 0 );
         }
 
         fapi2::buffer<uint64_t> PB_IOE_LL0_CONFIG_LINK_PAIR_scom0;
@@ -102,7 +119,7 @@ fapi2::ReturnCode p9_fbc_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
 
         if (iv_def_X0_ENABLED)
         {
-            PB_IOE_LL0_CONFIG_LINK_PAIR_scom0.insert<uint64_t> (LITERAL_ON, 0, 1, 63 );
+            PB_IOE_LL0_CONFIG_LINK_PAIR_scom0.insert<uint64_t> (LITERAL_PB_IOE_LL0_CONFIG_LINK_PAIR_ON, 0, 1, 63 );
         }
 
         fapi2::buffer<uint64_t> PB_IOE_LL0_IOEL_FIR_MASK_REG_scom0;
@@ -116,7 +133,8 @@ fapi2::ReturnCode p9_fbc_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
 
         if (iv_def_X0_ENABLED)
         {
-            PB_IOE_LL0_IOEL_FIR_MASK_REG_scom0.insert<uint64_t> (LITERAL_0xFFFFFFFFFFFFFFFF, 0, 64, 0 );
+            PB_IOE_LL0_IOEL_FIR_MASK_REG_scom0.insert<uint64_t> (LITERAL_PB_IOE_LL0_IOEL_FIR_MASK_REG_0xFFFFFFFFFFFFFFFF, 0, 64,
+                    0 );
         }
 
         fapi2::buffer<uint64_t> PB_IOE_LL1_CONFIG_LINK_PAIR_scom0;
@@ -130,7 +148,7 @@ fapi2::ReturnCode p9_fbc_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
 
         if (iv_def_X1_ENABLED)
         {
-            PB_IOE_LL1_CONFIG_LINK_PAIR_scom0.insert<uint64_t> (LITERAL_ON, 0, 1, 63 );
+            PB_IOE_LL1_CONFIG_LINK_PAIR_scom0.insert<uint64_t> (LITERAL_PB_IOE_LL1_CONFIG_LINK_PAIR_ON, 0, 1, 63 );
         }
 
         fapi2::buffer<uint64_t> PB_IOE_LL1_IOEL_FIR_MASK_REG_scom0;
@@ -144,7 +162,8 @@ fapi2::ReturnCode p9_fbc_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
 
         if (iv_def_X1_ENABLED)
         {
-            PB_IOE_LL1_IOEL_FIR_MASK_REG_scom0.insert<uint64_t> (LITERAL_0xFFFFFFFFFFFFFFFF, 0, 64, 0 );
+            PB_IOE_LL1_IOEL_FIR_MASK_REG_scom0.insert<uint64_t> (LITERAL_PB_IOE_LL1_IOEL_FIR_MASK_REG_0xFFFFFFFFFFFFFFFF, 0, 64,
+                    0 );
         }
 
         fapi2::buffer<uint64_t> PB_IOE_LL2_CONFIG_LINK_PAIR_scom0;
@@ -158,7 +177,7 @@ fapi2::ReturnCode p9_fbc_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
 
         if (iv_def_X2_ENABLED)
         {
-            PB_IOE_LL2_CONFIG_LINK_PAIR_scom0.insert<uint64_t> (LITERAL_ON, 0, 1, 63 );
+            PB_IOE_LL2_CONFIG_LINK_PAIR_scom0.insert<uint64_t> (LITERAL_PB_IOE_LL2_CONFIG_LINK_PAIR_ON, 0, 1, 63 );
         }
 
         fapi2::buffer<uint64_t> PB_IOE_LL2_IOEL_FIR_MASK_REG_scom0;
@@ -172,7 +191,8 @@ fapi2::ReturnCode p9_fbc_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
 
         if (iv_def_X2_ENABLED)
         {
-            PB_IOE_LL2_IOEL_FIR_MASK_REG_scom0.insert<uint64_t> (LITERAL_0xFFFFFFFFFFFFFFFF, 0, 64, 0 );
+            PB_IOE_LL2_IOEL_FIR_MASK_REG_scom0.insert<uint64_t> (LITERAL_PB_IOE_LL2_IOEL_FIR_MASK_REG_0xFFFFFFFFFFFFFFFF, 0, 64,
+                    0 );
         }
 
         ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_Type iv_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG;
@@ -199,7 +219,8 @@ fapi2::ReturnCode p9_fbc_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
 
         if ((iv_def_A0_ENABLED || iv_def_X3_ENABLED))
         {
-            PB_IOO_SCOM_PB_CFG_IOO01_IS_LOGICAL_PAIR_scom0.insert<uint64_t> (LITERAL_ON, 0, 1, 63 );
+            PB_IOO_SCOM_PB_CFG_IOO01_IS_LOGICAL_PAIR_scom0.insert<uint64_t> (LITERAL_PB_IOO_SCOM_PB_CFG_IOO01_IS_LOGICAL_PAIR_ON, 0,
+                    1, 63 );
         }
 
         auto iv_def_X4_ENABLED = (iv_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[4] !=
@@ -209,7 +230,8 @@ fapi2::ReturnCode p9_fbc_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
 
         if ((iv_def_A1_ENABLED || iv_def_X4_ENABLED))
         {
-            PB_IOO_SCOM_PB_CFG_IOO01_IS_LOGICAL_PAIR_scom0.insert<uint64_t> (LITERAL_ON, 1, 1, 63 );
+            PB_IOO_SCOM_PB_CFG_IOO01_IS_LOGICAL_PAIR_scom0.insert<uint64_t> (LITERAL_PB_IOO_SCOM_PB_CFG_IOO23_IS_LOGICAL_PAIR_ON, 1,
+                    1, 63 );
         }
 
         auto iv_def_X5_ENABLED = (iv_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[5] !=
@@ -219,7 +241,8 @@ fapi2::ReturnCode p9_fbc_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
 
         if ((iv_def_A2_ENABLED || iv_def_X5_ENABLED))
         {
-            PB_IOO_SCOM_PB_CFG_IOO01_IS_LOGICAL_PAIR_scom0.insert<uint64_t> (LITERAL_ON, 2, 1, 63 );
+            PB_IOO_SCOM_PB_CFG_IOO01_IS_LOGICAL_PAIR_scom0.insert<uint64_t> (LITERAL_PB_IOO_SCOM_PB_CFG_IOO45_IS_LOGICAL_PAIR_ON, 2,
+                    1, 63 );
         }
 
         auto iv_def_X6_ENABLED = (iv_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[6] !=
@@ -229,7 +252,8 @@ fapi2::ReturnCode p9_fbc_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
 
         if ((iv_def_A3_ENABLED || iv_def_X6_ENABLED))
         {
-            PB_IOO_SCOM_PB_CFG_IOO01_IS_LOGICAL_PAIR_scom0.insert<uint64_t> (LITERAL_ON, 3, 1, 63 );
+            PB_IOO_SCOM_PB_CFG_IOO01_IS_LOGICAL_PAIR_scom0.insert<uint64_t> (LITERAL_PB_IOO_SCOM_PB_CFG_IOO67_IS_LOGICAL_PAIR_ON, 3,
+                    1, 63 );
         }
 
         fapi2::buffer<uint64_t> PB_IOO_SCOM_PB_IOO_FIR_MASK_REG_scom0;
@@ -244,7 +268,8 @@ fapi2::ReturnCode p9_fbc_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
         if ((((((((iv_def_A0_ENABLED || iv_def_A1_ENABLED) || iv_def_A2_ENABLED) || iv_def_A3_ENABLED) || iv_def_X3_ENABLED)
                || iv_def_X4_ENABLED) || iv_def_X5_ENABLED) || iv_def_X6_ENABLED))
         {
-            PB_IOO_SCOM_PB_IOO_FIR_MASK_REG_scom0.insert<uint64_t> (LITERAL_0xFFFFFFFFFFFFFFFF, 0, 64, 0 );
+            PB_IOO_SCOM_PB_IOO_FIR_MASK_REG_scom0.insert<uint64_t> (LITERAL_PB_IOO_SCOM_PB_IOO_FIR_MASK_REG_0xFFFFFFFFFFFFFFFF, 0,
+                    64, 0 );
         }
 
 
