@@ -1,0 +1,58 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: hwpf/fapi2/xml/attribute_info/hb_temp_defaults.xml $          -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2015,2016                                                    -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+
+<attributes>
+
+<!-- =====================================================================
+     Contains the definition of temporary FW defaults for FAPI attributes
+     needing a default.
+     <attribute>
+         <id>...</id>
+         <default>...</default>
+     </attribute>
+
+     These definitions should be removed and replaced with permanent
+     definitions elsewhere prior to shipping code that uses them.
+
+     Examples:
+     <attribute>
+         <id>ATTR_NEW_FW_ATTR_DEF</id>
+         <default>5</default>
+     </attribute>
+
+     <attribute>
+         <id>ATTR_NEW_FW_ATTR_WO_DEFAULT_DEF</id>
+     </attribute>
+
+     <attribute>
+         <id>ATTR_NEW_FW_ATTR_ARRAY_DEF</id>
+         <default>9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20</default>
+     </attribute>
+     ================================================================= -->
+
+<!-- =====================================================================
+     Start of temporary definitions
+     ================================================================= -->
+
+
+<!-- =====================================================================
+     End of temporary definitions
+     ================================================================= -->
+
+</attributes>
