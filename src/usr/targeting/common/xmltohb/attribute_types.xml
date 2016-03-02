@@ -19930,4 +19930,22 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <writeable/>
 </attribute>
 
+<attribute>
+   <id>CHIPLET_ID</id>
+   <description>The address offset which each Chiplet types pervasive
+     address space used to represent the a chiplet.
+     0x00 to 0x0F => For P9 all non-core and non-cache chiplets
+     0x10 to 0x1F => All Cache Chiplets
+     0x20 to 0x37 => All Core Chiplets
+     0x38 to 0x3F => Multicast Operation
+   </description>
+   <simpleType>
+       <uint8_t>
+           <default>0xFF</default>
+       </uint8_t>
+   </simpleType>
+   <persistency>non-volatile</persistency>
+   <readable/>
+</attribute>
+
 </attributes>
