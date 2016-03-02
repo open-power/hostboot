@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2016                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -2716,19 +2716,6 @@ bits6:7  will be consumed together to form COARSE_LVL. </description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2 4 4</array>
-</attribute>
-
-<attribute>
-    <id>ATTR_ECID</id>
-    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-    <description>Bits 0 to 63 of the ECID in array entry 0 and bits 64 to 127 in ECID array entry 1
-Created from running the mss_get_cen_ecid.C
-Firmware shares some code with the processor, so the attribute is named so they can point at a target and have common function.</description>
-    <valueType>uint64</valueType>
-    <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-    <array> 2</array>
 </attribute>
 
 <attribute>

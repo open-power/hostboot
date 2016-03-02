@@ -19114,6 +19114,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <writeable/>
+  <readable/>
   <hwpfToHbAttrMap>
     <id>ATTR_I2C_BUS_DIV_REF</id>
     <macro>DIRECT</macro>
@@ -19131,6 +19132,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <writeable/>
+  <readable/>
   <hwpfToHbAttrMap>
     <id>ATTR_NEST_PLL_BUCKET</id>
     <macro>DIRECT</macro>
@@ -19146,6 +19148,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <writeable/>
+  <readable/>
   <hwpfToHbAttrMap>
     <id>ATTR_BOOT_FREQ</id>
     <macro>DIRECT</macro>
@@ -19161,6 +19164,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <writeable/>
+  <readable/>
   <hwpfToHbAttrMap>
     <id>ATTR_BOOT_FLAGS</id>
     <macro>DIRECT</macro>
@@ -19178,6 +19182,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <writeable/>
+  <readable/>
   <hwpfToHbAttrMap>
     <id>ATTR_NODE_POS</id>
     <macro>DIRECT</macro>
@@ -19193,6 +19198,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <writeable/>
+  <readable/>
   <hwpfToHbAttrMap>
     <id>ATTR_CHIP_POS</id>
     <macro>DIRECT</macro>
@@ -19213,6 +19219,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
   <persistency>volatile-zeroed</persistency>
   <readable/>
   <writeable/>
+  <readable/>
   <hwpfToHbAttrMap>
     <id>ATTR_FUNCTIONAL_EQ_EC_VALID</id>
     <macro>DIRECT</macro>
@@ -19229,6 +19236,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
   <persistency>volatile-zeroed</persistency>
   <readable/>
   <writeable/>
+  <readable/>
   <hwpfToHbAttrMap>
     <id>ATTR_EQ_GARD</id>
     <macro>DIRECT</macro>
@@ -19245,6 +19253,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
   <persistency>volatile-zeroed</persistency>
   <readable/>
   <writeable/>
+  <readable/>
   <hwpfToHbAttrMap>
     <id>ATTR_EC_GARD</id>
     <macro>DIRECT</macro>
@@ -19382,6 +19391,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
   <persistency>volatile-zeroed</persistency>
   <readable/>
   <writeable/>
+  <readable/>
   <hwpfToHbAttrMap>
     <id>ATTR_BOOT_FREQ_MULT</id>
     <macro>DIRECT</macro>
@@ -19488,6 +19498,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
   <persistency>volatile-zeroed</persistency>
   <readable/>
   <writeable/>
+  <readable/>
   <hwpfToHbAttrMap>
     <id>ATTR_SCRATCH6_VALID</id>
     <macro>DIRECT</macro>
@@ -19506,6 +19517,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
   <persistency>volatile-zeroed</persistency>
   <readable/>
   <writeable/>
+  <readable/>
   <hwpfToHbAttrMap>
     <id>ATTR_SCRATCH7_VALID</id>
     <macro>DIRECT</macro>
@@ -19537,6 +19549,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
   <persistency>volatile-zeroed</persistency>
   <readable/>
   <writeable/>
+  <readable/>
   <hwpfToHbAttrMap>
     <id>ATTR_BOOT_FMULT</id>
     <macro>DIRECT</macro>
@@ -19820,5 +19833,87 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <macro>DIRECT</macro>
   </hwpfToHbAttrMap>
 </attribute>
+
+<attribute>
+  <id>FABRIC_SYSTEM_ID</id>
+  <description>Logical fabric system ID associated with this chip. Provided by the MRW.</description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_FABRIC_SYSTEM_ID</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<!-- name changed in ekb, need to have both to push interim commits through -->
+<attribute>
+  <id>PROC_FABRIC_SYSTEM_ID</id>
+  <description>Logical fabric system ID associated with this chip. Provided by the MRW.</description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_PROC_FABRIC_SYSTEM_ID</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>CLOCK_PLL_MUX</id>
+  <description>setup clock mux settings</description>
+  <simpleType>
+    <uint32_t>
+    </uint32_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_CLOCK_PLL_MUX</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>MASTER_CORE</id>
+  <description>Indicates the master boot core chiplet selected by p9_sbe_select_ex.
+  </description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <writeable/>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_MASTER_CORE</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>MASTER_EX</id>
+  <description>Indicates the EX targert associated with the master boot core selected
+    by p9_sbe_select_ex.
+  </description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <writeable/>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_MASTER_EX</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
 
 </attributes>
