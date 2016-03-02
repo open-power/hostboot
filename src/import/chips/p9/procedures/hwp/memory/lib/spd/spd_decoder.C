@@ -544,14 +544,15 @@ fapi2::ReturnCode base_module_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_targ
     // Extracting desired bits
     l_spd_buffer.extractToRight<BASE_MODULE_START, BASE_MODULE_LEN>(l_field_bits);
 
-    FAPI_DBG("Field_Bits value: %d", l_field_bits);
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
-    FAPI_TRY( mss::check::spd::
-              fail_for_invalid_value(i_target,
-                                     mss::find_value_from_key(BASE_MODULE_TYPE_MAP, l_field_bits, o_value),
-                                     BYTE_INDEX,
-                                     l_field_bits,
-                                     "Failed check on Base Module Type") );
+    bool found_key = find_value_from_key(BASE_MODULE_TYPE_MAP, l_field_bits, o_value);
+
+    FAPI_TRY( check::spd::fail_for_invalid_value(i_target,
+              found_key,
+              BYTE_INDEX,
+              l_field_bits,
+              "Failed check on Base Module Type") );
 
     FAPI_DBG("%s. Base Module Type: %d",
              mss::c_str(i_target),
@@ -577,9 +578,12 @@ fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
     uint8_t l_additions_rev = 0;
 
     // Get dimm type & revision levels
-    FAPI_TRY(base_module_type(i_target, i_spd_data, l_dimm_type));
-    FAPI_TRY(rev_encoding_level(i_target, i_spd_data, l_encoding_rev));
-    FAPI_TRY(rev_additions_level(i_target, i_spd_data, l_additions_rev));
+    FAPI_TRY( base_module_type(i_target, i_spd_data, l_dimm_type),
+              "Failed to find base module type" );
+    FAPI_TRY( rev_encoding_level(i_target, i_spd_data, l_encoding_rev),
+              "Failed to find encoding level" );
+    FAPI_TRY( rev_additions_level(i_target, i_spd_data, l_additions_rev),
+              "Failed to find additons level" );
 
     // Get decoder object needed for current dimm type and spd rev
     switch(l_dimm_type)
@@ -597,40 +601,38 @@ fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
                     {
                         case 0:
                         case 1:
+                            // Rev 1.0 or Rev 1.1
                             o_fact_obj = std::make_shared<decoder>();
                             break;
 
                         default:
-                            FAPI_TRY( mss::check::spd::
-                                      invalid_factory_sel(i_target,
-                                                          l_dimm_type,
-                                                          l_encoding_rev,
-                                                          l_additions_rev,
-                                                          "Additions Level Unsupported!") );
+                            FAPI_TRY( check::spd::invalid_factory_sel(i_target,
+                                      l_dimm_type,
+                                      l_encoding_rev,
+                                      l_additions_rev,
+                                      "Additions Level Unsupported!") );
                             break;
                     }//end additions
 
                     break;
 
                 default:
-                    FAPI_TRY( mss::check::spd::
-                              invalid_factory_sel(i_target,
-                                                  l_dimm_type,
-                                                  l_encoding_rev,
-                                                  l_additions_rev,
-                                                  "Encoding Level Unsupported!") );
+                    FAPI_TRY( check::spd::invalid_factory_sel(i_target,
+                              l_dimm_type,
+                              l_encoding_rev,
+                              l_additions_rev,
+                              "Encoding Level Unsupported!") );
                     break;
             }// end encodings
 
             break;
 
         default:
-            FAPI_TRY( mss::check::spd::
-                      invalid_factory_sel(i_target,
-                                          l_dimm_type,
-                                          l_encoding_rev,
-                                          l_additions_rev,
-                                          "DIMM Type Unsupported!") );
+            FAPI_TRY( check::spd::invalid_factory_sel(i_target,
+                      l_dimm_type,
+                      l_encoding_rev,
+                      l_additions_rev,
+                      "DIMM Type Unsupported!") );
             break;
 
     } // end dimm type
@@ -645,21 +647,25 @@ fapi_try_exit:
 /// @brief       Creates factory object & SPD data caches
 /// @param[in]   i_target controller target
 /// @param[out]  o_factory_caches map of factory objects with a dimm pos. key
-/// @return      fapi2::ReturnCode
+/// @return      FAPI2_RC_SUCCESS if okay
+/// @note        This specialization is suited for creating a cache with platform
+///              SPD data.
 ///
+template<>
 fapi2::ReturnCode populate_decoder_caches( const fapi2::Target<TARGET_TYPE_MCS>& i_target,
-        std::map<uint32_t, std::shared_ptr<decoder> >& o_factory_caches)
+        std::map<uint32_t, std::shared_ptr<decoder> >& o_factory_caches,
+        const std::shared_ptr<decoder>& i_pDecoder)
 {
-    size_t l_spd_size = 0;
-    std::shared_ptr<decoder> l_pDecoder;
+    std::shared_ptr<decoder> l_pDecoder(i_pDecoder);
 
     for( const auto& l_mca : i_target.getChildren<TARGET_TYPE_MCA>() )
     {
         for( const auto& l_dimm : l_mca.getChildren<TARGET_TYPE_DIMM>() )
         {
+            size_t l_spd_size = 0;
+
             // Retrieve SPD size
             FAPI_TRY( getSPD(l_dimm, nullptr, l_spd_size) );
-
             {
                 // Retrieve SPD data
                 uint8_t* l_spd_data = new uint8_t[l_spd_size];
@@ -671,16 +677,41 @@ fapi2::ReturnCode populate_decoder_caches( const fapi2::Target<TARGET_TYPE_MCS>&
                 // Destructor for shared_ptr calls delete, has undefined behavior
                 // So we use a default destruction policy for array types that uses delete[]
                 // If F/W doesn't support this we can include a custom delete in lieu of default_delete
-                l_pDecoder->iv_spd_data = std::shared_ptr<uint8_t>(l_spd_data, std::default_delete<uint8_t[]>());
-
+                l_pDecoder->iv_spd_data = std::shared_ptr<uint8_t>( l_spd_data,
+                                          std::default_delete<uint8_t[]>() );
                 // Populate spd caches maps based on dimm pos
                 o_factory_caches.emplace(std::make_pair(mss::pos(l_dimm), l_pDecoder));
             }
-        }
-    }
+        }// end dimm
+    }// end mca
+
 
 fapi_try_exit:
     return fapi2::current_err;
+}
+
+
+///
+/// @brief       Creates factory object & SPD data caches
+/// @param[in]   i_target the dimm target
+/// @param[out]  o_factory_caches map of factory objects with a dimm pos. key
+/// @return      FAPI2_RC_SUCCESS if okay
+/// @note        This specialization is suited for creating a cache with custom
+///              SPD data.
+///
+template<>
+fapi2::ReturnCode populate_decoder_caches( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
+        std::map<uint32_t, std::shared_ptr<decoder> >& o_factory_caches,
+        const std::shared_ptr<decoder>& i_pDecoder)
+{
+    std::shared_ptr<decoder> l_pDecoder(i_pDecoder);
+
+    // Custom decoder provided (usually done for testing)
+    // Populate custom spd caches maps based internal dimm pos
+    o_factory_caches.emplace(std::make_pair( mss::pos(i_target), l_pDecoder) );
+
+    // TK - else what do we want here
+    return fapi2::FAPI2_RC_SUCCESS;
 }
 
 /////////////////////////
@@ -957,6 +988,8 @@ fapi2::ReturnCode decoder::sdram_density(const fapi2::Target<TARGET_TYPE_DIMM>& 
     // Extracting desired bits
     l_spd_buffer.extractToRight<SDRAM_CAPACITY_START, SDRAM_CAPACITY_LEN>(l_field_bits);
 
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
+
     // Check to assure SPD DRAM capacity (map) wont be at invalid values
     FAPI_TRY( mss::check::spd::
               fail_for_invalid_value(i_target,
@@ -1006,6 +1039,8 @@ fapi2::ReturnCode decoder::banks(const fapi2::Target<TARGET_TYPE_DIMM>& i_target
     // Extracting desired bits
     l_spd_buffer.extractToRight<SDRAM_BANKS_START, SDRAM_BANKS_LEN>(l_field_bits);
 
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
+
     // Check to assure SPD DRAM capacity (map) wont be at invalid values
     FAPI_TRY( mss::check::spd::
               fail_for_invalid_value(i_target,
@@ -1053,6 +1088,8 @@ fapi2::ReturnCode decoder::bank_groups(const fapi2::Target<TARGET_TYPE_DIMM>& i_
 
     // Extracting desired bits
     l_spd_buffer.extractToRight<BANK_GROUP_START, BANK_GROUP_LEN>(l_field_bits);
+
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     // Check to assure SPD DRAM capacity (map) wont be at invalid values
     FAPI_TRY( mss::check::spd::
@@ -1102,6 +1139,8 @@ fapi2::ReturnCode decoder::column_address_bits(const fapi2::Target<TARGET_TYPE_D
     // Extracting desired bits
     l_spd_buffer.extractToRight<COL_ADDRESS_START, COL_ADDRESS_LEN>(l_field_bits);
 
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
+
     // Check to assure SPD DRAM capacity (map) wont be at invalid values
     FAPI_TRY( mss::check::spd::
               fail_for_invalid_value(i_target,
@@ -1150,6 +1189,8 @@ fapi2::ReturnCode decoder::row_address_bits(const fapi2::Target<TARGET_TYPE_DIMM
     // Extracting desired bits
     l_spd_buffer.extractToRight<ROW_ADDRESS_START, ROW_ADDRESS_LEN>(l_field_bits);
 
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
+
     // Check to assure SPD DRAM capacity (map) wont be at invalid values
     FAPI_TRY( mss::check::spd::
               fail_for_invalid_value(i_target,
@@ -1183,7 +1224,7 @@ fapi2::ReturnCode decoder::prim_sdram_signal_loading(const fapi2::Target<TARGET_
         uint8_t& o_value)
 {
 
-    constexpr size_t BYTE_INDEX = 5;
+    constexpr size_t BYTE_INDEX = 6;
     uint8_t l_raw_byte  = i_spd_data[BYTE_INDEX];
     uint8_t l_field_bits = 0;
 
@@ -1198,6 +1239,8 @@ fapi2::ReturnCode decoder::prim_sdram_signal_loading(const fapi2::Target<TARGET_
 
     // Extracting desired bits
     l_spd_buffer.extractToRight<PRIM_SIGNAL_LOAD_START, PRIM_SIGNAL_LOAD_LEN>(l_field_bits);
+
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     FAPI_TRY( mss::check::spd::
               fail_for_invalid_value(i_target,
@@ -1230,7 +1273,7 @@ fapi2::ReturnCode decoder::prim_sdram_die_count(const fapi2::Target<TARGET_TYPE_
         uint8_t& o_value)
 {
 
-    constexpr size_t BYTE_INDEX = 5;
+    constexpr size_t BYTE_INDEX = 6;
     uint8_t l_raw_byte  = i_spd_data[BYTE_INDEX];
     uint8_t l_field_bits = 0;
 
@@ -1245,6 +1288,8 @@ fapi2::ReturnCode decoder::prim_sdram_die_count(const fapi2::Target<TARGET_TYPE_
 
     // Extracting desired bits
     l_spd_buffer.extractToRight<PRIM_DIE_COUNT_START, PRIM_DIE_COUNT_LEN>(l_field_bits);
+
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     FAPI_TRY( mss::check::spd::
               fail_for_invalid_value(i_target,
@@ -1277,7 +1322,7 @@ fapi2::ReturnCode decoder::prim_sdram_package_type(const fapi2::Target<TARGET_TY
         uint8_t& o_value)
 {
 
-    constexpr size_t BYTE_INDEX = 5;
+    constexpr size_t BYTE_INDEX = 6;
     uint8_t l_raw_byte  = i_spd_data[BYTE_INDEX];
     uint8_t l_field_bits = 0;
 
@@ -1292,6 +1337,8 @@ fapi2::ReturnCode decoder::prim_sdram_package_type(const fapi2::Target<TARGET_TY
 
     // Extracting desired bits
     l_spd_buffer.extractToRight<PRIM_PACKAGE_TYPE_START, PRIM_PACKAGE_TYPE_LEN>(l_field_bits);
+
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     FAPI_TRY( mss::check::spd::
               fail_for_invalid_value(i_target,
@@ -1341,6 +1388,8 @@ fapi2::ReturnCode decoder::maximum_activate_count(const fapi2::Target<TARGET_TYP
     // Extracting desired bits
     l_spd_buffer.extractToRight<MAC_START, MAC_LEN>(l_field_bits);
 
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
+
     FAPI_TRY( mss::check::spd::
               fail_for_invalid_value(i_target,
                                      mss::find_value_from_key(MAC_MAP, l_field_bits, o_value),
@@ -1387,6 +1436,8 @@ fapi2::ReturnCode decoder::maximum_activate_window_multiplier(const fapi2::Targe
 
     // Extracting desired bits
     l_spd_buffer.extractToRight<TMAW_START, TMAW_LEN>(l_field_bits);
+
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     FAPI_TRY( mss::check::spd::
               fail_for_invalid_value(i_target,
@@ -1435,6 +1486,8 @@ fapi2::ReturnCode decoder::soft_post_package_repair(const fapi2::Target<TARGET_T
     // Extracting desired bits
     l_spd_buffer.extractToRight<SOFT_PPR_START, SOFT_PPR_LEN>(l_field_bits);
 
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
+
     FAPI_TRY( mss::check::spd::
               fail_for_invalid_value(i_target,
                                      mss::find_value_from_key(SOFT_PPR_MAP, l_field_bits, o_value),
@@ -1481,6 +1534,8 @@ fapi2::ReturnCode decoder::post_package_repair(const fapi2::Target<TARGET_TYPE_D
 
     // Extracting desired bits
     l_spd_buffer.extractToRight<PPR_START, PPR_LEN>(l_field_bits);
+
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     FAPI_TRY( mss::check::spd::
               fail_for_invalid_value(i_target,
@@ -1529,6 +1584,8 @@ fapi2::ReturnCode decoder::sec_sdram_signal_loading(const fapi2::Target<TARGET_T
 
     // Extracting desired bits
     l_spd_buffer.extractToRight<SEC_SIGNAL_LOAD_START, SEC_SIGNAL_LOAD_LEN>(l_field_bits);
+
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     FAPI_TRY( mss::check::spd::
               fail_for_invalid_value(i_target,
@@ -1579,6 +1636,8 @@ fapi2::ReturnCode decoder::sec_dram_density_ratio(const fapi2::Target<TARGET_TYP
     // Extracting desired bits
     l_spd_buffer.extractToRight<DENSITY_RATIO_START, DENSITY_RATIO_LEN>(l_field_bits);
 
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
+
     FAPI_TRY( mss::check::spd::
               fail_for_invalid_value(i_target,
                                      l_field_bits != UNDEFINED,
@@ -1627,6 +1686,8 @@ fapi2::ReturnCode decoder::sec_sdram_die_count(const fapi2::Target<TARGET_TYPE_D
     // Extracting desired bits
     l_spd_buffer.extractToRight<SEC_DIE_COUNT_START, SEC_DIE_COUNT_LEN>(l_field_bits);
 
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
+
     FAPI_TRY( mss::check::spd::
               fail_for_invalid_value(i_target,
                                      mss::find_value_from_key(SEC_DIE_COUNT_MAP, l_field_bits, o_value),
@@ -1673,6 +1734,8 @@ fapi2::ReturnCode decoder::sec_sdram_package_type(const fapi2::Target<TARGET_TYP
 
     // Extracting desired bits
     l_spd_buffer.extractToRight<SEC_PACKAGE_TYPE_START, SEC_PACKAGE_TYPE_LEN>(l_field_bits);
+
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     FAPI_TRY( mss::check::spd::
               fail_for_invalid_value(i_target,
@@ -1722,6 +1785,8 @@ fapi2::ReturnCode decoder::operable_nominal_voltage(const fapi2::Target<TARGET_T
     // Extracting desired bits
     l_spd_buffer.extractToRight<OPERABLE_START, OPERABLE_LEN>(l_field_bits);
 
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
+
     FAPI_TRY( mss::check::spd::
               fail_for_invalid_value(i_target,
                                      mss::find_value_from_key(OPERABLE_MAP, l_field_bits, o_value),
@@ -1769,6 +1834,8 @@ fapi2::ReturnCode decoder::endurant_nominal_voltage(const fapi2::Target<TARGET_T
     // Extracting desired bits
     l_spd_buffer.extractToRight<ENDURANT_START, ENDURANT_LEN>(l_field_bits);
 
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
+
     FAPI_TRY( mss::check::spd::
               fail_for_invalid_value(i_target,
                                      mss::find_value_from_key(ENDURANT_MAP, l_field_bits, o_value),
@@ -1815,6 +1882,8 @@ fapi2::ReturnCode decoder::device_width(const fapi2::Target<TARGET_TYPE_DIMM>& i
 
     // Extracting desired bits
     l_spd_buffer.extractToRight<SDRAM_WIDTH_START, SDRAM_WIDTH_LEN>(l_field_bits);
+
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     FAPI_TRY( mss::check::spd::
               fail_for_invalid_value(i_target,
@@ -1864,6 +1933,8 @@ fapi2::ReturnCode decoder::num_package_ranks_per_dimm(const fapi2::Target<TARGET
     // Extracting desired bits
     l_spd_buffer.extractToRight<PACKAGE_RANKS_START, PACKAGE_RANKS_LEN>(l_field_bits);
 
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
+
     FAPI_TRY( mss::check::spd::
               fail_for_invalid_value(i_target,
                                      mss::find_value_from_key(NUM_PACKAGE_RANKS_MAP, l_field_bits, o_value),
@@ -1911,6 +1982,8 @@ fapi2::ReturnCode decoder::rank_mix(const fapi2::Target<TARGET_TYPE_DIMM>& i_tar
 
     // Extracting desired bits
     l_spd_buffer.extractToRight<RANK_MIX_START, RANK_MIX_LEN>(l_field_bits);
+
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     FAPI_TRY( mss::check::spd::
               fail_for_invalid_value(i_target,
@@ -1961,6 +2034,8 @@ fapi2::ReturnCode decoder::prim_bus_width(const fapi2::Target<TARGET_TYPE_DIMM>&
     // Extracting desired bits
     l_spd_buffer.extractToRight<BUS_WIDTH_START, BUS_WIDTH_LEN>(l_field_bits);
 
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
+
     FAPI_TRY( mss::check::spd::
               fail_for_invalid_value(i_target,
                                      mss::find_value_from_key(BUS_WIDTH_MAP, l_field_bits, o_value),
@@ -2006,6 +2081,8 @@ fapi2::ReturnCode decoder::bus_width_extension(const fapi2::Target<TARGET_TYPE_D
 
     // Extracting desired bits
     l_spd_buffer.extractToRight<BUS_EXT_WIDTH_START, BUS_EXT_WIDTH_LEN>(l_field_bits);
+
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     FAPI_TRY( mss::check::spd::
               fail_for_invalid_value(i_target,
@@ -2056,6 +2133,8 @@ fapi2::ReturnCode decoder::thermal_sensor(const fapi2::Target<TARGET_TYPE_DIMM>&
     // Extracting desired bits
     l_spd_buffer.extractToRight<THERM_SENSOR_START, THERM_SENSOR_LEN>(l_field_bits);
 
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
+
     FAPI_TRY( mss::check::spd::
               fail_for_invalid_value(i_target,
                                      l_field_bits < INVALID_VALUE,
@@ -2104,6 +2183,8 @@ fapi2::ReturnCode decoder::extended_base_module_type(const fapi2::Target<TARGET_
 
     // Extracting desired bits
     l_spd_buffer.extractToRight<EXT_MOD_TYPE_START, EXT_MOD_TYPE_LEN>(l_field_bits);
+
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     // Currently reserved to 0b000
     FAPI_TRY( mss::check::spd::
@@ -2155,6 +2236,8 @@ fapi2::ReturnCode decoder::fine_timebase(const fapi2::Target<TARGET_TYPE_DIMM>& 
     // Extracting desired bits
     l_spd_buffer.extractToRight<FINE_TIMEBASE_START, FINE_TIMEBASE_LEN>(l_field_bits);
 
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
+
     FAPI_TRY( mss::check::spd::
               fail_for_invalid_value(i_target,
                                      mss::find_value_from_key(FINE_TIMEBASE_MAP, l_field_bits, o_value),
@@ -2201,6 +2284,8 @@ fapi2::ReturnCode decoder::medium_timebase(const fapi2::Target<TARGET_TYPE_DIMM>
 
     // Extracting desired bits
     l_spd_buffer.extractToRight<MED_TIMEBASE_START, MED_TIMEBASE_LEN>(l_field_bits);
+
+    FAPI_DBG("Field Bits value: %d", l_field_bits);
 
     FAPI_TRY( mss::check::spd::
               fail_for_invalid_value(i_target,
@@ -2259,6 +2344,9 @@ fapi2::ReturnCode decoder::min_cycle_time(const fapi2::Target<fapi2::TARGET_TYPE
                                     l_timing_val,
                                     "Failed check on the min cycle time (tckmin) in MTB") );
 
+    // Update output after check passes
+    o_value = l_timing_val;
+
     FAPI_DBG("%s. Minimum Cycle Time (tCKmin) in MTB units: %d",
              mss::c_str(i_target),
              o_value);
@@ -2307,6 +2395,9 @@ fapi2::ReturnCode decoder::max_cycle_time(const fapi2::Target<fapi2::TARGET_TYPE
                                     BYTE_INDEX,
                                     l_timing_val,
                                     "Failed check on the max cycle time (tckmax) in MTB") );
+
+    // Update output after check passes
+    o_value = l_timing_val;
 
     FAPI_DBG("%s. Maximum Cycle Time (tCKmax) in MTB units: %d",
              mss::c_str(i_target),

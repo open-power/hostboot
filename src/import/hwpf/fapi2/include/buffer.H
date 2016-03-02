@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2012,2015                                                    */
+/* COPYRIGHT 2012,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -297,11 +297,27 @@ class buffer
         /// @tparam B Bit in buffer to get.
         /// @tparam C the count of bits to get, defaults to 1
         /// @return true if *any* bit is on, false if *every* bit is off
+        /// @note 0 is left-most
         ///
         template< bits_type B, bits_type C = 1>
         inline bool getBit(void) const
         {
             return buffer<T>().setBit<B, C>() & iv_data;
+        }
+
+        ///
+        /// @brief Get the value of a bit in the buffer
+        /// @param[in] i_bit the bit number to set.
+        /// @param[in] i_count the count of bits to set, defaults to 1
+        /// @return true if *any* bit is on, false if *every* bit is off
+        /// @note 0 is left-most
+        ///
+        inline bool getBit(const bits_type& i_bit,
+                           const bits_type& i_count = 1)
+        {
+            buffer<T> l_temp;
+            l_temp.setBit(i_bit, i_count);
+            return l_temp & iv_data;
         }
 
         ///

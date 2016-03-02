@@ -31,6 +31,8 @@
 #define _MSS_FIND_H
 
 #include <fapi2.H>
+#include <map>
+#include <vector>
 
 namespace mss
 {
@@ -192,7 +194,9 @@ inline fapi2::Target<fapi2::TARGET_TYPE_MCA> find_target( const fapi2::Target<fa
 /// @return the value corresponding to the key
 ///
 template<typename T, typename OT>
-bool find_value_from_key(const std::vector<std::pair<T, OT> >& i_vector_of_pairs, const T& i_key, OT& o_value)
+bool find_value_from_key(const std::vector<std::pair<T, OT> >& i_vector_of_pairs,
+                         const T& i_key,
+                         OT& o_value)
 {
     // Comparator lambda expression
     auto compare = [](const std::pair<T, OT>& i_lhs, const T & i_value)
@@ -201,7 +205,10 @@ bool find_value_from_key(const std::vector<std::pair<T, OT> >& i_vector_of_pairs
     };
 
     // Find iterator to matching key (if it exists)
-    auto l_value_iterator  =  std::lower_bound(i_vector_of_pairs.begin(), i_vector_of_pairs.end(), i_key, compare);
+    auto l_value_iterator  =  std::lower_bound(i_vector_of_pairs.begin(),
+                              i_vector_of_pairs.end(),
+                              i_key,
+                              compare);
 
     // Did you find it? Let me know.
     if( (l_value_iterator == i_vector_of_pairs.end()) || (i_key != l_value_iterator->first) )
@@ -212,8 +219,7 @@ bool find_value_from_key(const std::vector<std::pair<T, OT> >& i_vector_of_pairs
     o_value = l_value_iterator->second;
     return true;
 
-}
-
+}// find_value_from_key
 
 }// mss
 

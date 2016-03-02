@@ -33,51 +33,10 @@
 
 #include <fapi2.H>
 
-#include <mss.H>
-#include <lib/utils/find.H>
 
-using fapi2::TARGET_TYPE_DIMM;
 
 namespace mss
 {
-
-// { density in GBs, tREFI(base) in picoseconds }
-static const std::vector<std::pair<uint8_t, uint64_t> > TREFI_BASE =
-{
-    {2, 7800},
-    {4, 7800},
-    {8, 7800},
-    // 16Gb - TBD
-};
-
-// { density in GBs, tRFC1(min) in picoseconds }
-static const std::vector<std::pair<uint8_t, uint64_t> > TRFC1_MIN =
-{
-    {2, 160},
-    {4, 260},
-    {8, 350},
-    // 16Gb - TBD
-};
-
-
-// { density in GBs, tRFC2(min) in picoseconds }
-static const std::vector<std::pair<uint8_t, uint64_t> > TRFC2_MIN =
-{
-    {2, 110},
-    {4, 160},
-    {8, 260},
-    // 16Gb - TBD
-};
-
-
-// { density in GBs, tRFC4(min) in picoseconds }
-static const std::vector<std::pair<uint8_t, uint64_t> > TRFC4_MIN =
-{
-    {2, 90},
-    {4, 110},
-    {8, 160},
-    // 16Gb - TBD
-};
 
 enum GUARD_BAND
 {
@@ -89,7 +48,6 @@ enum GUARD_BAND
     INVERSE_DDR3_CORRECTION_FACTOR = 989,
     INVERSE_DDR4_CORRECTION_FACTOR = 974,
 };
-
 
 ///
 /// @brief      Calculates timing value
@@ -110,7 +68,6 @@ inline T calc_timing_from_timebase(const T i_timing_mtb,
     T l_timing_val = i_timing_mtb * i_mtb_multiplier;
     T l_fine_offset = i_timing_ftb * i_ftb_multiplier;
 
-    // Needed to do integer math but attribute is uint64
     return l_timing_val + l_fine_offset;
 }
 
@@ -137,158 +94,30 @@ inline T calc_nck(T timing_in_ps, T tck_in_ps, T inverse_corr_factor)
     return temp_nck / 1000;
 }
 
-
-//
-// TK - AAM
-// These are only used in eff_config, make them non-member non-friend functions in eff_config.C?
-//
-
 /// @brief Calculates refresh interval time 1 (tREFI 1)
 /// @param[in] i_target FAPI2 target
 /// @param[out] o_value timing val in ps
 /// @return fapi2::ReturnCode
 ///
-inline fapi2::ReturnCode calc_trefi1(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,  uint64_t& o_value)
-{
-    uint8_t  l_quotient = 0;
-    uint8_t l_remainder = 0;
-    uint64_t l_output = 0;
-    uint8_t l_temp_ref_range = 0;
-    uint8_t l_dram_density = 0;
-
-
-    FAPI_TRY(mss::eff_dram_density(i_target, l_dram_density));
-
-    switch(l_temp_ref_range)
-    {
-        case fapi2::ENUM_ATTR_EFF_TEMP_REF_RANGE_NORMAL:
-            mss::find_value_from_key(TREFI_BASE, l_dram_density, o_value);
-            break;
-
-        case fapi2::ENUM_ATTR_EFF_TEMP_REF_RANGE_EXTEND:
-            mss::find_value_from_key(TREFI_BASE, l_dram_density, l_output);
-            l_quotient = l_output / 2;
-            l_remainder = l_output % 2;
-            o_value = l_quotient + (l_remainder == 0 ? 0 : 1);
-            break;
-
-        default:
-            // l_temp_ref_range will be a platform attribute set by the MRW,
-            // which they "shouldn't" mess up as long as use "attribute" enums.
-            // if openpower messes this up we can at least catch it
-            FAPI_ASSERT(false,
-                        fapi2::MSS_INVALID_TEMP_REF_RANGE().
-                        set_TEMP_REF_RANGE(l_temp_ref_range),
-                        "%s Incorrect Temperature Ref. Range received: %d ",
-                        mss::c_str(i_target),
-                        l_temp_ref_range);
-
-            break;
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
+fapi2::ReturnCode calc_trefi1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                              uint64_t& o_value);
 
 /// @brief Calculates refresh interval time 2 (tREFI 2)
 /// @param[in] i_target FAPI2 target
 /// @param[out] o_value timing val in ps
 /// @return fapi2::ReturnCode
 ///
-inline fapi2::ReturnCode calc_trefi2(const fapi2::Target<TARGET_TYPE_DIMM>& i_target, uint64_t& o_value)
-{
-    uint8_t l_quotient = 0;
-    uint8_t l_remainder = 0;
-    uint64_t l_output = 0;
-    uint8_t l_temp_ref_range = 0;
-    uint8_t l_dram_density = 0;
-
-    FAPI_TRY(mss::eff_temp_ref_range(i_target, l_temp_ref_range));
-    FAPI_TRY(mss::eff_dram_density(i_target, l_dram_density));
-
-    switch(l_temp_ref_range)
-    {
-        case fapi2::ENUM_ATTR_EFF_TEMP_REF_RANGE_NORMAL:
-            mss::find_value_from_key(TREFI_BASE, l_dram_density, l_output);
-            l_quotient = l_output / 2;
-            l_remainder = l_output % 2;
-            o_value = l_quotient + (l_remainder == 0 ? 0 : 1);
-            break;
-
-        case fapi2::ENUM_ATTR_EFF_TEMP_REF_RANGE_EXTEND:
-            mss::find_value_from_key(TREFI_BASE, l_dram_density, l_output);
-            l_quotient = l_output / 4;
-            l_remainder = l_output % 4;
-            o_value = l_quotient + (l_remainder == 0 ? 0 : 1);
-            break;
-
-        default:
-            // l_temp_ref_range will be a platform attribute set by the MRW,
-            // which they "shouldn't" mess up as long as use "attribute" enums.
-            // if openpower messes this up we can at least catch it
-            FAPI_ASSERT(false,
-                        fapi2::MSS_INVALID_TEMP_REF_RANGE().
-                        set_TEMP_REF_RANGE(l_temp_ref_range),
-                        "%s Incorrect Temperature Ref. Range received: %d ",
-                        mss::c_str(i_target),
-                        l_temp_ref_range);
-
-            break;
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
+fapi2::ReturnCode calc_trefi2(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                              uint64_t& o_value);
 
 /// @brief Calculates refresh interval time 4 (tREFI 4)
 /// @param[in] i_target FAPI2 target
 /// @param[out] o_value timing val in ps
 /// @return fapi2::ReturnCode
 ///
-inline fapi2::ReturnCode calc_trefi4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target, uint64_t& o_value)
-{
-    uint8_t l_quotient = 0;
-    uint8_t l_remainder = 0;
-    uint64_t l_output = 0;
-    uint8_t l_temp_ref_range = 0;
-    uint8_t l_dram_density = 0;
+fapi2::ReturnCode calc_trefi4( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                               uint64_t& o_value);
 
-    FAPI_TRY(mss::eff_temp_ref_range(i_target, l_temp_ref_range));
-    FAPI_TRY(mss::eff_dram_density(i_target, l_dram_density));
-
-    switch(l_temp_ref_range)
-    {
-        case fapi2::ENUM_ATTR_EFF_TEMP_REF_RANGE_NORMAL:
-            mss::find_value_from_key(TREFI_BASE, l_dram_density, l_output);
-            l_quotient = l_output / 4;
-            l_remainder = l_output % 4;
-            o_value = l_quotient + (l_remainder == 0 ? 0 : 1);
-            break;
-
-        case fapi2::ENUM_ATTR_EFF_TEMP_REF_RANGE_EXTEND:
-            mss::find_value_from_key(TREFI_BASE, l_dram_density, l_output);
-            l_quotient = l_output / 8;
-            l_remainder = l_output % 8;
-            o_value = l_quotient + (l_remainder == 0 ? 0 : 1);
-            break;
-
-        default:
-            // l_temp_ref_range will be a platform attribute set by the MRW,
-            // which they "shouldn't" mess up as long as use "attribute" enums.
-            // if openpower messes this up we can at least catch it
-            FAPI_ASSERT(false,
-                        fapi2::MSS_INVALID_TEMP_REF_RANGE().
-                        set_TEMP_REF_RANGE(l_temp_ref_range),
-                        "%s Incorrect Temperature Ref. Range received: %d ",
-                        mss::c_str(i_target),
-                        l_temp_ref_range);
-
-            break;
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
 
 } // mss
 

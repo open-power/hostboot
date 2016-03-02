@@ -94,7 +94,7 @@ enum BYTE_EXTRACT : uint64_t
     ADDRESS_RESERVED_LEN = 2,
 
     // Byte 6
-    PRIM_SIGNAL_LOAD_START = 5,
+    PRIM_SIGNAL_LOAD_START = 6,
     PRIM_SIGNAL_LOAD_LEN = 2,
 
     PACKAGE_RESERVE_START = 4,
@@ -1292,12 +1292,14 @@ fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
 
 ///
 /// @brief       Creates factory object & SPD data caches
-/// @param[in]   i_target controller target
+/// @param[in]   i_target the fapi2 target
 /// @param[out]  o_factory_caches map of factory objects with a dimm pos key
-/// @return      fapi2::ReturnCode
+/// @return      FAPI2_RC_SUCCESS if okay
 ///
-fapi2::ReturnCode populate_decoder_caches(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-        std::map<uint32_t, std::shared_ptr<decoder> >& o_factory_caches);
+template<fapi2::TargetType T>
+fapi2::ReturnCode populate_decoder_caches(const fapi2::Target<T>& i_target,
+        std::map<uint32_t, std::shared_ptr<decoder> >& o_factory_caches,
+        const std::shared_ptr<decoder>& i_pDecoder = nullptr);
 
 
 }// spd
