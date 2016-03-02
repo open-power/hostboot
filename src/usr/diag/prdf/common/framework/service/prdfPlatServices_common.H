@@ -83,15 +83,6 @@ void getCurrentTime( Timer & o_timer );
 void milliSleep( uint32_t i_seconds, uint32_t i_milliseconds );
 
 /**
- * @brief   Convert a Targeting target to FAPI target
- * @param   i_target  Any target
- * @return  Returns the corresponding FAPI target for a given target
- */
-/* TODO RTC 144700
-fapi::Target getFapiTarget( TARGETING::TargetHandle_t i_target );
-*/
-
-/**
  * @brief Check SMGR runtime state
  * @return true if SMGR state is runtime, false in hostboot without checking
  */
