@@ -65,42 +65,26 @@ using namespace CEN_SYMBOL;
 namespace PlatServices
 {
 
-//##############################################################################
-//##                     Utility Functions (for this file only)
-//##############################################################################
+/*
+IMPORTANT - getFapiTarget NO LONGER IN USE
+Because of the new templatized format of fapi Targets with the changes in
+fapi2 we will no longer be able to dynamically convert a TARGETING::Target to
+a fapi2::Target. Fapi TargetTypes must be determined at compile time, as such,
+we will need to use the fapi2::TargetType constants in declarations of fapi
+Targets. For example:
 
-/* TODO RTC 144700
-fapi::TargetType getFapiType( TARGETING::TargetHandle_t i_target )
-{
-    fapi::TargetType o_type = fapi::TARGET_TYPE_NONE;
+Where we previously would have had:
+    fapi::Target fapiProc = getFapiTarget(i_proc);
 
-    switch ( getTargetType(i_target) )
-    {
-        case TYPE_PROC:   o_type = fapi::TARGET_TYPE_PROC_CHIP;     break;
-        case TYPE_EX:     o_type = fapi::TARGET_TYPE_EX_CHIPLET;    break;
-        case TYPE_ABUS:   o_type = fapi::TARGET_TYPE_ABUS_ENDPOINT; break;
-        case TYPE_XBUS:   o_type = fapi::TARGET_TYPE_XBUS_ENDPOINT; break;
-        case TYPE_MCS:    o_type = fapi::TARGET_TYPE_MCS_CHIPLET;   break;
-        case TYPE_MEMBUF: o_type = fapi::TARGET_TYPE_MEMBUF_CHIP;   break;
-        case TYPE_MBA:    o_type = fapi::TARGET_TYPE_MBA_CHIPLET;   break;
-        case TYPE_DIMM:   o_type = fapi::TARGET_TYPE_DIMM;          break;
-        default: ;
-    }
+We would now need:
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> fapiProc(i_proc);
 
-    return o_type;
-}
+If you would like to take a look at the changes to fapi Targets, their class
+definition is located in src/hwsv/server/hwpf2/fapi2/fapi2_target.H
+Note: the fapi2::TargetType enum is declared in
+src/hwsv/server/hwpf2/fapi2/target_types.H for a list of all the TargetTypes
 */
 
-//##############################################################################
-//##                     System Level Utility Functions
-//##############################################################################
-
-/* TODO RTC 144700
-fapi::Target getFapiTarget( TARGETING::TargetHandle_t i_target )
-{
-    return fapi::Target( getFapiType(i_target), i_target );
-}
-*/
 
 //##############################################################################
 //##                       Lane Repair functions
