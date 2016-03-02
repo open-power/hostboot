@@ -3677,6 +3677,8 @@ sub generate_core
     my $ex = (($core - ($core % 2))/2) % 2;
     my $eq = ($core - ($core % 4))/4;
     $core = $core % 2;
+    #Chiplet ID range for Cores start with 0x20
+    my $chipletId = sprintf("0x%X",($core_orig + 0x20));
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}eq${eq}ex${ex}core$core</id>
@@ -3701,6 +3703,10 @@ sub generate_core
     <attribute>
         <id>CHIP_UNIT</id>
         <default>$core_orig</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>$chipletId</default>
     </attribute>";
 
     # call to do any fsp per-ex_core attributes
