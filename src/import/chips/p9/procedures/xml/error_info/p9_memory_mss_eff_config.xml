@@ -47,4 +47,20 @@
     </deconfigure>
     </hwpError>
 
+   <hwpError>
+    <rc>RC_MSS_INVALID_KEY</rc>
+    <description>
+      Conditional that tests whether a certain key value is located in a map.
+    </description>
+    <ffdc>KEY</ffdc>
+    <ffdc>DATA</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+    </hwpError>
+
 </hwpErrors>

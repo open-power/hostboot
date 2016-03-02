@@ -30,7 +30,7 @@
 
 <hwpErrors>
 
-   <hwpError>
+  <hwpError>
     <rc>RC_MSS_BAD_SPD</rc>
     <description>Bad SPD data recieved.</description>
     <ffdc>VALUE</ffdc>
@@ -42,9 +42,9 @@
     <deconfigure>
       <target>DIMM_TARGET</target>
     </deconfigure>
-    </hwpError>
+  </hwpError>
 
-   <hwpError>
+  <hwpError>
     <rc>RC_MSS_INVALID_DIMM_REV_COMBO</rc>
     <description>
       Recieved a dimm type (e.g. RDIMM, LRDIMM) and SPD revision
@@ -61,6 +61,21 @@
     <deconfigure>
       <target>DIMM_TARGET</target>
     </deconfigure>
-    </hwpError>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_CACHE</rc>
+    <description>
+      Bad SPD cache. Unable to find decoder factory instance from dimm position.
+    </description>
+    <ffdc>DIMM_POS</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
 
 </hwpErrors>

@@ -32,12 +32,11 @@
 
 <hwpErrors>
 
-<!-- Original Source for RC_MSS_UNSUPPORTED_SPD_DATA_DDR4 memory_errors.xml -->
+
   <hwpError>
-    <rc>RC_MSS_UNSUPPORTED_SPD_DATA_DDR4</rc>
-    <description>Invalid SPD data returned.</description>
-    <ffdc>MTB_DDR4</ffdc>
-    <ffdc>FTB_DDR4</ffdc>
+    <rc>RC_MSS_INVALID_TIMING_VALUE</rc>
+    <description>Invalid value calculated for timing value based on MTB and FTB from SPD.</description>
+    <ffdc>VALUE</ffdc>
     <callout>
       <target>DIMM_TARGET</target>
       <priority>HIGH</priority>
@@ -45,73 +44,33 @@
     <deconfigure>
       <target>DIMM_TARGET</target>
     </deconfigure>
-</hwpError>
+  </hwpError>
 
-<!-- Original Source for RC_MSS_UNSUPPORTED_SPD_DATA_DDR3 memory_errors.xml -->
   <hwpError>
-    <rc>RC_MSS_UNSUPPORTED_SPD_DATA_DDR3</rc>
-    <description>Invalid SPD data returned.</description>
-    <ffdc>MTB_DIVIDEND</ffdc>
-    <ffdc>MTB_DIVISOR</ffdc>
-    <ffdc>FTB_DIVIDEND</ffdc>
-    <ffdc>FTB_DIVISOR</ffdc>
-    <callout>
-      <target>DIMM_TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>DIMM_TARGET</target>
-    </deconfigure>
-</hwpError>
+    <rc>RC_MSS_REACHED_HIGHEST_TCK</rc>
+    <description>
+      No valid tCK exists that would produce a CAS latency that is common among all dimms.
+    </description>
+    <ffdc>TCK</ffdc>
+  </hwpError>
 
-<!-- Original Source for RC_MSS_UNSUPPORTED_SPD_DATA_COMMON memory_errors.xml -->
-  <hwpError>
-    <rc>RC_MSS_UNSUPPORTED_SPD_DATA_COMMON</rc>
-    <description>Invalid SPD data returned.</description>
-    <ffdc>MIN_TCK</ffdc>
-    <ffdc>MIN_TAA</ffdc>
-    <callout>
-      <target>TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>DIMM_TARGET</target>
-    </deconfigure>
-</hwpError>
-
-<!-- Original Source for RC_MSS_MODULE_TYPE_MIX memory_errors.xml -->
-  <hwpError>
-    <rc>RC_MSS_MODULE_TYPE_MIX</rc>
-    <description>Differing DIMM types in the same configuration.</description>
-    <ffdc>MODULE_TYPE</ffdc>
-    <callout>
-      <target>DIMM_TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>DIMM_TARGET</target>
-    </deconfigure>
-</hwpError>
-
-<!-- Original Source for RC_MSS_NO_COMMON_SUPPORTED_CL memory_errors.xml -->
   <hwpError>
     <rc>RC_MSS_NO_COMMON_SUPPORTED_CL</rc>
-    <description>Current Configuration has no common supported CL Values.</description>
+    <description>Current Configuration has no common supported CL values.</description>
     <ffdc>CL_SUPPORTED</ffdc>
     <callout>
-      <target>DIMM_TARGET</target>
+      <target>MCS_TARGET</target>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
-      <target>DIMM_TARGET</target>
+      <target>MCS_TARGET</target>
     </deconfigure>
-</hwpError>
+  </hwpError>
 
-<!-- Original Source for RC_MSS_EXCEED_TAA_MAX_NO_CL memory_errors.xml -->
   <hwpError>
     <rc>RC_MSS_EXCEED_TAA_MAX_NO_CL</rc>
     <description>Exceeded TAA MAX with Lowest frequency.  No compatable CL.</description>
-    <ffdc>CL_SUPPORTED</ffdc>
+    <ffdc>CL</ffdc>
     <callout>
       <target>DIMM_TARGET</target>
       <priority>HIGH</priority>
@@ -119,28 +78,28 @@
     <deconfigure>
       <target>DIMM_TARGET</target>
     </deconfigure>
-</hwpError>
+  </hwpError>
 
-<!-- Original Source for RC_MSS_UNSUPPORTED_FREQ_CALCULATED memory_errors.xml -->
+  <!-- Original Source for RC_MSS_UNSUPPORTED_FREQ_CALCULATED memory_errors.xml -->
   <hwpError>
     <rc>RC_MSS_UNSUPPORTED_FREQ_CALCULATED</rc>
     <description>The frequency calculated with spd data is not supported by the jedec standards.</description>
     <ffdc>DIMM_MIN_FREQ</ffdc>
-</hwpError>
+  </hwpError>
 
-<!-- Original Source for RC_MSS_UNSUPPORTED_DEV_TYPE  memory_errors.xml -->
+  <!-- TK - I don't think this belongs in this file - AAM -->
   <hwpError>
-      <rc>RC_MSS_UNSUPPORTED_DEV_TYPE</rc>
-      <description>Device type is not DDR4.</description>
-      <ffdc>DEV_TYPE</ffdc>
-      <callout>
-        <target>DIMM_TARGET</target>
-        <priority>HIGH</priority>
-      </callout>
-      <deconfigure>
-        <target>DIMM_TARGET</target>
-      </deconfigure>
+    <rc>RC_MSS_UNSUPPORTED_DEV_TYPE</rc>
+    <description>Device type is not DDR4.</description>
+    <ffdc>DEV_TYPE</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
 
- </hwpError>
 
 </hwpErrors>
