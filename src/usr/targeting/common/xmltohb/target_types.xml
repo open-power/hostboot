@@ -2128,6 +2128,8 @@
     <attribute><id>PROC_PCIE_PHB_ACTIVE</id></attribute>
     <attribute><id>PROC_HTM_BAR_SIZE</id></attribute>
     <attribute><id>XSCOM_BASE_ADDRESS</id></attribute>
+    <attribute><id>PSTATEGPE_BOOT_COPIER_IVPR_OFFSET</id></attribute>
+    <attribute><id>STOPGPE_BOOT_COPIER_IVPR_OFFSET</id></attribute>
 </targetType>
 
 <!-- chip-processor-nimbus -->

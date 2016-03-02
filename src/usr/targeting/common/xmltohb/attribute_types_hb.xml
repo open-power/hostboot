@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2016                        -->
 <!-- [+] Google Inc.                                                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
@@ -209,13 +209,14 @@
 </attribute>
 
 <attribute>
-    <id>SLW_IMAGE_ADDR</id>
+    <id>HCODE_IMAGE_ADDR</id>
     <description>
-        Location of runtime winkle image for this processor chip.
-        Written by host_build_winkle (istep 15.1)
+        Address of HCODE Image
+        Written by host_build_stop_image (istep 15.1)
     </description>
     <simpleType>
-        <uint64_t></uint64_t>
+        <uint64_t>
+        </uint64_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -224,13 +225,14 @@
 </attribute>
 
 <attribute>
-    <id>SLW_IMAGE_SIZE</id>
+    <id>HCODE_IMAGE_SIZE</id>
     <description>
-        Size of runtime winkle image for this processor chip.
-        Written by host_build_winkle (istep 15.1)
+      Size of HCODE Image
+      Written by host_build_stop_image (istep 15.1)
     </description>
     <simpleType>
-        <uint64_t></uint64_t>
+        <uint64_t>
+        </uint64_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
