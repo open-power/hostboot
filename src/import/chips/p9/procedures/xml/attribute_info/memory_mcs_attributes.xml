@@ -633,7 +633,12 @@
         </description>
         <valueType>uint64</valueType>
         <!-- We rely on these being their actual MT/s for freq/time conversions -->
-        <enum>MT1866 = 1866, MT2400 = 2400, MT2133 = 2133, MT2666 = 2666</enum>
+        <enum>
+          MT1866 = 1866,
+          MT2133 = 2133,
+          MT2400 = 2400,
+          MT2666 = 2666
+        </enum>
         <writeable/>
         <odmVisable/>
         <odmChangeable/>
@@ -1782,14 +1787,11 @@
 
     <attribute>
         <id>ATTR_EFF_DRAM_CL</id>
-        <!-- P8 MBA level information, is this the right target? AAM -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             CAS Latency.
-            Used in various locations and is computed in mss_eff_cnfg_timing.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             Each memory channel will have a value.
-            creator: mss_eff_cnfg_timing
+            creator: mss_freq
             consumer: various
             firmware notes: none
         </description>
