@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2016                        -->
 <!-- [+] Google Inc.                                                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
@@ -97,10 +97,10 @@
     </attribute>
     <attribute><id>SCAN_MUTEX</id></attribute>
     <attribute>
-        <id>SLW_IMAGE_ADDR</id>
+        <id>HCODE_IMAGE_ADDR</id>
     </attribute>
     <attribute>
-        <id>SLW_IMAGE_SIZE</id>
+        <id>HCODE_IMAGE_SIZE</id>
     </attribute>
     <attribute>
         <id>HOMER_PHYS_ADDR</id>
@@ -213,16 +213,6 @@
 </targetTypeExtension>
 
 <targetTypeExtension>
-    <id>unit-mba-power8</id>
-    <attribute><id>OT_MIN_N_PER_MBA</id></attribute>
-    <attribute><id>N_PLUS_ONE_N_PER_MBA</id></attribute>
-    <attribute><id>N_PLUS_ONE_N_PER_CHIP</id></attribute>
-    <attribute><id>OVERSUB_N_PER_MBA</id></attribute>
-    <attribute><id>OVERSUB_N_PER_CHIP</id></attribute>
-    <attribute><id>HB_TARGET_SCOMABLE</id></attribute>
-</targetTypeExtension>
-
-<targetTypeExtension>
     <id>unit-mcs-nimbus</id>
     <attribute><id>HB_TARGET_SCOMABLE</id></attribute>
 </targetTypeExtension>
@@ -232,128 +222,23 @@
     <attribute><id>HB_TARGET_SCOMABLE</id></attribute>
 </targetType>
 
-<targetType>
-    <id>unit-abus-power8</id>
-    <attribute><id>HB_TARGET_SCOMABLE</id></attribute>
-</targetType>
-
 <targetTypeExtension>
-    <id>sys-sys-power8</id>
-    <attribute><id>IS_MPIPL_HB</id></attribute>
-    <attribute><id>IBSCOM_ENABLE_OVERRIDE</id></attribute>
-    <attribute><id>HB_MUTEX_TEST_LOCK</id></attribute>
-    <attribute><id>HB_EXISTING_IMAGE</id></attribute>
-    <attribute><id>ADC_CHANNEL_FUNC_IDS</id></attribute>
-    <attribute><id>ADC_CHANNEL_SENSOR_NUMBERS</id></attribute>
-    <attribute><id>ADC_CHANNEL_GNDS</id></attribute>
-    <attribute><id>ADC_CHANNEL_GAINS</id></attribute>
-    <attribute><id>ADC_CHANNEL_OFFSETS</id></attribute>
-    <attribute><id>APSS_GPIO_PORT_MODES</id></attribute>
-    <attribute><id>APSS_GPIO_PORT_PINS</id></attribute>
-    <attribute><id>OPEN_POWER_DIMM_THROTTLE_TEMP_DEG_C</id></attribute>
-    <attribute><id>OPEN_POWER_DIMM_ERROR_TEMP_DEG_C</id></attribute>
-    <attribute><id>OPEN_POWER_MEMCTRL_THROTTLE_TEMP_DEG_C</id></attribute>
-    <attribute><id>OPEN_POWER_PROC_DVFS_TEMP_DEG_C</id></attribute>
-    <attribute><id>OPEN_POWER_MEMCTRL_ERROR_TEMP_DEG_C</id></attribute>
-    <attribute><id>OPEN_POWER_N_BULK_POWER_LIMIT_WATTS</id></attribute>
-    <attribute><id>OPEN_POWER_N_MAX_MEM_POWER_WATTS</id></attribute>
-    <attribute><id>OPEN_POWER_MEMCTRL_READ_TIMEOUT_SEC</id></attribute>
-    <attribute><id>OPEN_POWER_DIMM_READ_TIMEOUT_SEC</id></attribute>
-    <attribute><id>OPEN_POWER_PROC_ERROR_TEMP_DEG_C</id></attribute>
-    <attribute><id>OPEN_POWER_MIN_MEM_UTILIZATION_THROTTLING</id></attribute>
-    <attribute><id>OPEN_POWER_PROC_READ_TIMEOUT_SEC</id></attribute>
-    <attribute><id>OPEN_POWER_REGULATOR_EFFICIENCY_FACTOR</id></attribute>
-    <attribute><id>OPEN_POWER_MIN_POWER_CAP_WATTS</id></attribute>
-    <attribute><id>OPEN_POWER_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS</id></attribute>
-    <attribute>
-        <id>OPEN_POWER_N_PLUS_ONE_HPC_BULK_POWER_LIMIT_WATTS</id>
-    </attribute>
-    <attribute><id>OPEN_POWER_N_PLUS_ONE_MAX_MEM_POWER_WATTS</id></attribute>
-    <attribute><id>OPEN_POWER_TURBO_MODE_SUPPORTED</id></attribute>
-    <attribute><id>OCC_CONTROL_DATA</id></attribute>
-    <attribute><id>OPAL_MODEL</id></attribute>
-    <attribute><id>HTMGT_SAFEMODE</id></attribute>
-    <attribute><id>IPMI_SENSORS</id></attribute>
-    <attribute><id>IPMI_MAX_BUFFER_SIZE</id></attribute>
-    <attribute><id>OCC_COMMON_AREA_PHYS_ADDR</id> </attribute>
-    <attribute><id>SBE_MASTER_INTR_SERVICE_ENABLED</id></attribute>
-    <attribute><id>WOF_PROC_SORT</id></attribute>
-    <attribute><id>WOF_FREQUENCY_UPLIFT</id></attribute>
-    <attribute><id>WOF_REGULATOR_EFFICIENCIES</id></attribute>
-</targetTypeExtension>
-
-<targetTypeExtension>
-    <id>enc-node-power8</id>
+    <id>lcard-dimm</id>
+    <attribute><id>VPD_SWITCHES</id></attribute>
     <attribute><id>IPMI_SENSORS</id></attribute>
     <attribute><id>PART_NUMBER</id></attribute>
     <attribute><id>SERIAL_NUMBER</id></attribute>
-    <attribute><id>MSS_VOLT_VPP_SLOPE_EFF_CONFIG</id></attribute>
-    <attribute><id>MSS_VOLT_VPP_INTERCEPT_EFF_CONFIG</id></attribute>
-    <attribute><id>MSS_VOLT_DDR3_VDDR_SLOPE_EFF_CONFIG</id></attribute>
-    <attribute><id>MSS_VOLT_DDR3_VDDR_INTERCEPT_EFF_CONFIG</id></attribute>
-    <attribute><id>MRW_DDR3_VDDR_MAX_LIMIT_EFF_CONFIG</id></attribute>
-    <attribute><id>MSS_VOLT_DDR4_VDDR_SLOPE_EFF_CONFIG</id></attribute>
-    <attribute><id>MSS_VOLT_DDR4_VDDR_INTERCEPT_EFF_CONFIG</id></attribute>
-    <attribute><id>MRW_DDR4_VDDR_MAX_LIMIT_EFF_CONFIG</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>
-    <id>chip-processor</id>
+    <id>occ</id>
     <attribute>
-        <id>FSI_MASTER_MUTEX</id>
+        <id>PSTATE_TABLE</id>
     </attribute>
     <attribute>
-        <id>FSI_SCOM_MUTEX</id>
-    </attribute>
-    <attribute>
-        <id>SCOM_IND_MUTEX</id>
-    </attribute>
-    <attribute><id>SCAN_MUTEX</id></attribute>
-    <attribute>
-        <id>SLW_IMAGE_ADDR</id>
-    </attribute>
-    <attribute>
-        <id>SLW_IMAGE_SIZE</id>
-    </attribute>
-    <attribute>
-        <id>HOMER_PHYS_ADDR</id>
-    </attribute>
-    <attribute>
-        <id>HOMER_VIRT_ADDR</id>
-    </attribute>
-    <attribute>
-        <id>VPD_SWITCHES</id>
-    </attribute>
-    <attribute>
-        <id>SERIAL_NUMBER</id>
-    </attribute>
-    <attribute>
-        <id>PART_NUMBER</id>
-    </attribute>
-    <attribute>
-        <id>WOF_FREQUENCY_UPLIFT_SELECTED</id>
-    </attribute>
-</targetTypeExtension>
-
-<targetTypeExtension>
-    <id>chip-processor-power8</id>
-    <attribute>
-        <id>I2C_ENGINE_MUTEX_0</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>I2C_ENGINE_MUTEX_1</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>I2C_ENGINE_MUTEX_2</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>XSCOM_VIRTUAL_ADDR</id>
+        <id>PSTATE_TABLE_MFG</id>
     </attribute>
     <attribute><id>IPMI_SENSORS</id></attribute>
-    <attribute><id>HB_TARGET_SCOMABLE</id></attribute>
 </targetTypeExtension>
 
 <!-- Centaur chip/DMI -->
@@ -392,64 +277,5 @@
     <attribute><id>PART_NUMBER</id></attribute>
     <attribute><id>SERIAL_NUMBER</id></attribute>
 </targetTypeExtension>
-
-<targetTypeExtension>
-    <id>unit-core-power8</id>
-    <attribute><id>IPMI_SENSORS</id></attribute>
-    <attribute><id>HB_TARGET_SCOMABLE</id></attribute>
-</targetTypeExtension>
-
-<targetTypeExtension>
-    <id>unit-ex-power8</id>
-    <attribute>
-        <id>HB_PM_SPWUP_OHA_FLAG</id>
-    </attribute>
-    <attribute><id>HB_TARGET_SCOMABLE</id></attribute>
-</targetTypeExtension>
-
-<targetTypeExtension>
-    <id>enc-node-power8</id>
-    <attribute><id>VPD_SWITCHES</id></attribute>
-</targetTypeExtension>
-
-<targetTypeExtension>
-    <id>lcard-dimm</id>
-    <attribute><id>VPD_SWITCHES</id></attribute>
-    <attribute><id>IPMI_SENSORS</id></attribute>
-    <attribute><id>PART_NUMBER</id></attribute>
-    <attribute><id>SERIAL_NUMBER</id></attribute>
-</targetTypeExtension>
-
-<targetTypeExtension>
-    <id>occ</id>
-    <attribute>
-        <id>PSTATE_TABLE</id>
-    </attribute>
-    <attribute>
-        <id>PSTATE_TABLE_MFG</id>
-    </attribute>
-    <attribute><id>IPMI_SENSORS</id></attribute>
-</targetTypeExtension>
-
-<targetTypeExtension>
-    <id>unit-mba-power8</id>
-    <attribute><id>OT_MIN_N_PER_MBA</id></attribute>
-    <attribute><id>N_PLUS_ONE_N_PER_MBA</id></attribute>
-    <attribute><id>N_PLUS_ONE_N_PER_CHIP</id></attribute>
-    <attribute><id>OVERSUB_N_PER_MBA</id></attribute>
-    <attribute><id>OVERSUB_N_PER_CHIP</id></attribute>
-    <attribute><id>HB_TARGET_SCOMABLE</id></attribute>
-</targetTypeExtension>
-
-<targetTypeExtension>
-    <id>unit-mcs-power8</id>
-    <attribute><id>HB_TARGET_SCOMABLE</id></attribute>
-</targetTypeExtension>
-
-<targetType>
-    <id>unit-xbus-power8</id>
-    <attribute><id>HB_TARGET_SCOMABLE</id></attribute>
-</targetType>
-
 
 </attributes>

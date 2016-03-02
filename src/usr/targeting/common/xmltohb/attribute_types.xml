@@ -17667,33 +17667,6 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
-<attribute>
-    <id>STOP_IMAGE_ADDR</id>
-    <description>
-        Addres of Stop Image
-    </description>
-    <simpleType>
-        <uint64_t>
-        </uint64_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>STOP_IMAGE_SIZE</id>
-    <description>
-      Address of Stop Image
-    </description>
-    <simpleType>
-        <uint64_t>
-        </uint64_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
 
 <!--<attribute>
     <id>FREQ_PROC_REFCLOCK_KHZ</id>
@@ -19915,5 +19888,46 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
   </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>STOPGPE_BOOT_COPIER_IVPR_OFFSET</id>
+    <description>Set by p9_hcode_image build with the offset value from
+    the HOMER base where the SGPE Boot Copier interrupt vectors reside.  This
+    value must be 512B aligned. The HOMER base address will be pre-establish
+    in PBABAR0 so the address needs to be off the form  0x8XXXXX00. The SGPE
+    will be Sreset after this value is established.
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_STOPGPE_BOOT_COPIER_IVPR_OFFSET</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>PSTATEGPE_BOOT_COPIER_IVPR_OFFSET</id>
+    <description>Set by p9_hcode_image build with the offset value from
+    the HOMER base where the PGPE Boot Copier interrupt vectors reside. This
+    value must be 512B aligned. The HOMER base address will be pre-establish
+    in PBABAR0 so the address needs to be off the form  0x8XXXXX00. The PGPE
+    will be Sreset after this value is established
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PSTATEGPE_BOOT_COPIER_IVPR_OFFSET</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
 
 </attributes>
