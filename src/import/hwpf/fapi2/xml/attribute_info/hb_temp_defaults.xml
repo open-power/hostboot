@@ -1,0 +1,64 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/hwpf/fapi2/xml/attribute_info/hb_temp_defaults.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+
+<attributes>
+
+<!-- =====================================================================
+     Contains the definition of temporary FW defaults for FAPI attributes
+     needing a default.
+     <attribute>
+         <id>...</id>
+         <default>...</default>
+     </attribute>
+
+     These definitions should be removed and replaced with permanent
+     definitions elsewhere prior to shipping code that uses them.
+
+     Examples:
+     <attribute>
+         <id>ATTR_NEW_FW_ATTR_DEF</id>
+         <default>5</default>
+     </attribute>
+
+     <attribute>
+         <id>ATTR_NEW_FW_ATTR_WO_DEFAULT_DEF</id>
+     </attribute>
+
+     <attribute>
+         <id>ATTR_NEW_FW_ATTR_ARRAY_DEF</id>
+         <default>9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20</default>
+     </attribute>
+     ================================================================= -->
+
+<!-- =====================================================================
+     Start of temporary definitions
+     ================================================================= -->
+
+
+<!-- =====================================================================
+     End of temporary definitions
+     ================================================================= -->
+
+</attributes>
