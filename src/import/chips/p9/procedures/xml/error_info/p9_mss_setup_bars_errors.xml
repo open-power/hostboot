@@ -1,0 +1,86 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/error_info/p9_mss_setup_bars_errors.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2016                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- File: p9_mss_setup_bars_errors.xml. -->
+<!-- Error definitions for p9_mss_setup_bars HWP. -->
+
+<hwpErrors>
+
+  <hwpError>
+    <rc>RC_MSS_SETUP_BARS_INVALID_MC_CHIPLETS_DETECTED</rc>
+    <description>Processor contains both MCS and MI chiplets.</description>
+    <ffdc>NUM_MCS</ffdc>
+    <ffdc>NUM_MI</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_SETUP_BARS_MULTIPLE_GROUP_ERR</rc>
+    <description>An MC port is grouped multiples times.</description>
+    <ffdc>PORT_ID</ffdc>
+    <ffdc>COUNTER</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_SETUP_BARS_MCS_MEMSIZE_DISCREPENCY</rc>
+    <description>The amount of memory behind an MCS calculated from Group Data
+                 doesn't agree with the amount of memory currently reported behind
+                 the same MCS.</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>MEMSIZE_GROUP_DATA</ffdc>
+    <ffdc>MEMSIZE_REPORTED</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_SETUP_BARS_INVALID_PORTS_CONFIG</rc>
+    <description>Invalid number in group for ports 0/1 of the MCS.
+                 The combination can not be found in the Channel Per Group
+                 table.</description>
+    <ffdc>PORT_0_PORTS_IN_GROUP</ffdc>
+    <ffdc>PORT_0_GROUP</ffdc>
+    <ffdc>PORT_1_PORTS_IN_GROUP</ffdc>
+    <ffdc>PORT_1_GROUP</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_SETUP_BARS_INVALID_GROUP_SIZE</rc>
+    <description>Can't locate givem Group size in the GROUP_SIZE_TABLE in order
+                 to determine MCFGP/MCFGPM Group size value (bits 13:23).</description>
+    <ffdc>GROUP_SIZE</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+</hwpErrors>
