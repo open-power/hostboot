@@ -58,9 +58,8 @@ prd_incpath += ${PRD_SRC_PATH}/plat/pegasus
 # External header paths
 prd_incpath += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 prd_incpath += ${ROOTPATH}/src/include/usr/errl
-#prd_incpath += ${ROOTPATH}/src/include/usr/hwpf/fapi
-#prd_incpath += ${ROOTPATH}/src/include/usr/hwpf/hwp
-#prd_incpath += ${ROOTPATH}/src/include/usr/hwpf/plat
+prd_incpath += ${ROOTPATH}/src/import/hwpf/fapi2/include
+prd_incpath += ${ROOTPATH}/src/include/usr/fapi2
 prd_incpath += ${ROOTPATH}/src/include/usr/ibscom
 prd_incpath += ${ROOTPATH}/src/include/usr/util
 #prd_incpath += ${ROOTPATH}/src/usr/hwpf/hwp/bus_training

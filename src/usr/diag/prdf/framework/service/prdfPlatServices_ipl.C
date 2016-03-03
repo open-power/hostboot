@@ -129,9 +129,9 @@ int32_t mssRestoreDramRepairs( TargetHandle_t i_mbaTarget,
 
     errlHndl_t errl = NULL;
 
-    PRD_FAPI_TO_ERRL( errl, mss_restore_DRAM_repairs,
-                      fapi::Target(fapi::TARGET_TYPE_MBA_CHIPLET, i_mbaTarget),
-                      o_repairedRankMask, o_badDimmMask );
+    FAPI_INVOKE_HWP( errl, mss_restore_DRAM_repairs,
+                     fapi::Target(fapi::TARGET_TYPE_MBA_CHIPLET, i_mbaTarget),
+                     o_repairedRankMask, o_badDimmMask );
 
     if ( NULL != errl )
     {
@@ -159,8 +159,8 @@ int32_t mssIplUeIsolation( TargetHandle_t i_mba, const CenRank & i_rank,
     uint8_t data[PORT_SLCT_PER_MBA][DIMM_DQ_RANK_BITMAP_SIZE];
 
     errlHndl_t errl = NULL;
-    PRD_FAPI_TO_ERRL( errl, mss_IPL_UE_isolation, getFapiTarget(i_mba),
-                      i_rank.getMaster(), data );
+    FAPI_INVOKE_HWP( errl, mss_IPL_UE_isolation, getFapiTarget(i_mba),
+                     i_rank.getMaster(), data );
     if ( NULL != errl )
     {
         PRDF_ERR( PRDF_FUNC "mss_IPL_UE_isolation() failed: MBA=0x%08x "
