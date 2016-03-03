@@ -1,0 +1,110 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p9/procedures/xml/error_info/p9_tod_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_TOD_SETUP_INVALID_NODE_DELAY</rc>
+    <description>
+      Procedure: p9_tod_setup
+      The delay is not between 0 and 255 
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>DELAY</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_TOD_SETUP_INVALID_TOPOLOGY</rc>
+    <description>
+      Procedure: p9_tod_setup
+      Either the oscilattor that is selected is NONE or 
+      the tx or rx bus is NONE 
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>OSCSEL</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_TOD_INIT_NOT_RUNNING</rc>
+    <description>
+      Procedure: p9_tod_init
+      TOD never asserted that TOD_FSM_REG tod is running and there was a timeout
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>COUNT</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_TOD_INIT_M_PATH_0_STEP_CHECK_ERROR</rc>
+    <description>
+      Procedure: p9_tod_init
+      There is a master path 0 step check error so the bit was set 
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>DATA</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_TOD_INIT_M_PATH_1_STEP_CHECK_ERROR</rc>
+    <description>
+      Procedure: p9_tod_init
+      There is a master path 1 step check error so the bit was set 
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>DATA</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_TOD_INIT_ERROR</rc>
+    <description>
+      Procedure: p9_tod_init
+      There is some error set in the TOD_ERROR_REG, check DATA to see what 
+      errors were set 
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>DATA</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_TOD_INIT_TIMEOUT</rc>
+    <description>
+      Procedure: p9_tod_move_tod_to_tb
+      There is a timeout going from one state to another 
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>COUNT</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_INVALID_THREAD_NUM</rc>
+    <description>
+      Procedure: p9_tod_utils
+      There is an invalid thread number
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>THREADNUMBER</ffdc>
+    </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>
+
