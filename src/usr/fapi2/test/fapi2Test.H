@@ -28,7 +28,7 @@
 /**
  *  @file fapi2Test.H
  *
- *  @brief Test case for SCOM code
+ *  @brief Test case for FAPI2 code
 */
 
 #include <cxxtest/TestSuite.H>

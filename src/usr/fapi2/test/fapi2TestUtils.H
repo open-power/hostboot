@@ -37,7 +37,9 @@
 
 namespace fapi2
 {
-// Setup some targets to use
+
+//Used by generateTargets to get a list of all platform target
+// types that directly relate to fapi2 target types
 enum{
     MY_EQ,
     MY_EX,
@@ -57,7 +59,13 @@ enum{
     NUM_TARGETS
 };
 
-
+///
+/// @brief Generates a list of platform targets of all differnt types.
+///        This comes in handy when testing out fapi2 target interfaces
+/// @param[in] i_pMasterProcChip Pointer to master proc chip
+/// @param[out] o_targetList     List of platform targets that gets generated
+///                              by this function
+///
 void generateTargets(TARGETING::Target* i_pMasterProcChip,
                                     TARGETING::Target* o_targetList[]);
 
