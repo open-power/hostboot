@@ -18,7 +18,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 ///
 /// @file p9_smp_link_layer.C
-/// @brief Start SMP link layer (FAPI2)
+/// @brief Start SMP DLL/link layer (FAPI2)
 ///
 /// @author Joe McGill <jmcgill@us.ibm.com>
 ///
@@ -35,26 +35,20 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <p9_smp_link_layer.H>
-#include <p9_fbc_utils.H>
-
-
-//------------------------------------------------------------------------------
-// Constant definitions
-//------------------------------------------------------------------------------
-// IOO/IOL control registers share common layout
-const uint32_t DLL_CONTROL_LINK0_STARTUP_BIT = XBUS_LL0_IOEL_CONTROL_LINK0_STARTUP;
-const uint32_t DLL_CONTROL_LINK1_STARTUP_BIT = XBUS_LL0_IOEL_CONTROL_LINK1_STARTUP;
+#include <p9_fbc_smp_utils.H>
 
 
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
 
+
 ///
-/// @brief Engage DLL/TL training for a single fabric link
+/// @brief Engage DLL/TL training for a single fabric link (X/A)
 ///
-/// @param[in] i_target Reference to processor chip target
-/// @param[in] i_ctl Reference to link control structure
+/// @param[in] i_target  Reference to processor chip target
+/// @param[in] i_ctl     Reference to link control structure
+///
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode
@@ -63,14 +57,14 @@ p9_smp_link_layer_train_link(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
 
 {
     FAPI_DBG("Start");
-
     fapi2::buffer<uint64_t> l_dll_control;
 
-    FAPI_TRY(fapi2::getScom(i_target, i_ctl.dll_control_addr, l_dll_control),
+    FAPI_TRY(fapi2::getScom(i_target, i_ctl.dl_control_addr, l_dll_control),
              "Error reading DLL control register!");
-    l_dll_control.setBit<DLL_CONTROL_LINK0_STARTUP_BIT>();
-    l_dll_control.setBit<DLL_CONTROL_LINK1_STARTUP_BIT>();
-    FAPI_TRY(fapi2::putScom(i_target, i_ctl.dll_control_addr, l_dll_control),
+    // optical (IOOOL)/electrical (IOEL) control registers share common bit layout
+    l_dll_control.setBit<XBUS_LL0_IOEL_CONTROL_LINK0_STARTUP>();
+    l_dll_control.setBit<XBUS_LL0_IOEL_CONTROL_LINK1_STARTUP>();
+    FAPI_TRY(fapi2::putScom(i_target, i_ctl.dl_control_addr, l_dll_control),
              "Error writing DLL control register!");
 
 fapi_try_exit:
@@ -79,85 +73,64 @@ fapi_try_exit:
 }
 
 
-
+// NOTE: see doxygen comments in header
 fapi2::ReturnCode
-p9_smp_link_layer(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+p9_smp_link_layer(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                  const bool i_train_electrical,
+                  const bool i_train_optical)
 {
     FAPI_INF("Start");
 
-    uint8_t l_x_en_attr[P9_FBC_UTILS_MAX_X_LINKS];
-    uint8_t l_a_en_attr[P9_FBC_UTILS_MAX_A_LINKS];
-    std::vector<std::pair<p9_fbc_link_t, uint8_t>> l_valid_links;
-    std::vector<p9_fbc_link_ctl_t> l_link_ctls(P9_FBC_LINK_CTL_ARR,
-            P9_FBC_LINK_CTL_ARR + (sizeof(P9_FBC_LINK_CTL_ARR) / sizeof(P9_FBC_LINK_CTL_ARR[0])));
-    bool l_ctl_match_found = false;
+    // logical link (X/A) configuration parameters
+    // enable on local end
+    uint8_t l_x_en[P9_FBC_UTILS_MAX_X_LINKS];
+    uint8_t l_a_en[P9_FBC_UTILS_MAX_A_LINKS];
 
-
-    // read X/A link enable attributes, extract set of valid links
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG,
-                           i_target,
-                           l_x_en_attr),
+    // process set of enabled links
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG, i_target, l_x_en),
              "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG");
 
-    for (uint8_t x = 0; x < P9_FBC_UTILS_MAX_X_LINKS; x++)
-    {
-        if (l_x_en_attr[x])
-        {
-            FAPI_DBG("Adding link X%d", x);
-            l_valid_links.push_back(std::make_pair(XBUS, x));
-        }
-        else
-        {
-            FAPI_DBG("Skipping link X%d", x);
-        }
-    }
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG,
-                           i_target,
-                           l_a_en_attr),
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG, i_target, l_a_en),
              "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG");
 
-    for (uint8_t a = 0; a < P9_FBC_UTILS_MAX_A_LINKS; a++)
+    for (uint8_t l_link = 0; l_link < P9_FBC_UTILS_MAX_X_LINKS; l_link++)
     {
-        if (l_a_en_attr[a])
+        if (l_x_en[l_link])
         {
-            FAPI_DBG("Adding link A%d", a);
-            l_valid_links.push_back(std::make_pair(ABUS, a));
+            if ((i_train_electrical &&
+                 (P9_FBC_XBUS_LINK_CTL_ARR[l_link].endp_type == ELECTRICAL)) ||
+                (i_train_optical &&
+                 (P9_FBC_XBUS_LINK_CTL_ARR[l_link].endp_type == OPTICAL)))
+            {
+                FAPI_DBG("Training link X%d", l_link);
+                FAPI_TRY(p9_smp_link_layer_train_link(i_target,
+                                                      P9_FBC_XBUS_LINK_CTL_ARR[l_link]),
+                         "Error from p9_smp_link_layer_train_link (X)");
+            }
         }
         else
         {
-            FAPI_DBG("Skipping link A%d", a);
+            FAPI_DBG("Skipping link X%d", l_link);
         }
     }
 
-    // for each valid link, search vector table & call link update routine
-    for (auto l_link_iter = l_valid_links.begin(); l_link_iter != l_valid_links.end(); l_link_iter++)
+    for (uint8_t l_link = 0; l_link < P9_FBC_UTILS_MAX_A_LINKS; l_link++)
     {
-        FAPI_DBG("Processing %s%d",
-                 (l_link_iter->first == XBUS) ? ("X") : ("A)"),
-                 l_link_iter->second);
-
-        l_ctl_match_found = false;
-
-        for (auto l_link_ctl_iter = l_link_ctls.begin();
-             (l_link_ctl_iter != l_link_ctls.end()) && (!l_ctl_match_found);
-             l_link_ctl_iter++)
+        if (l_a_en[l_link])
         {
-            if ((l_link_ctl_iter->link_type == l_link_iter->first) &&
-                (l_link_ctl_iter->link_id == l_link_iter->second))
+            if (i_train_optical &&
+                (P9_FBC_ABUS_LINK_CTL_ARR[l_link].endp_type == OPTICAL))
             {
-                l_ctl_match_found = true;
+                FAPI_DBG("Training link A%d", l_link);
                 FAPI_TRY(p9_smp_link_layer_train_link(i_target,
-                                                      *l_link_ctl_iter),
-                         "Error from p9_smp_link_layer_train_link");
+                                                      P9_FBC_ABUS_LINK_CTL_ARR[l_link]),
+                         "Error from p9_smp_link_layer_train_link (A)");
             }
         }
-
-        FAPI_ASSERT(l_ctl_match_found,
-                    fapi2::P9_SMP_LINK_LAYER_TABLE_ERR().set_TARGET(i_target).
-                    set_LINK(l_link_iter->first).
-                    set_LINK_ID(l_link_iter->second),
-                    "No match found for link");
+        else
+        {
+            FAPI_DBG("Skipping link A%d", l_link);
+        }
     }
 
 fapi_try_exit:

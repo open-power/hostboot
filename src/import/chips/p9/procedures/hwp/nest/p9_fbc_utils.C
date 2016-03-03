@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,7 +34,7 @@
 // *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 // *HWP Team: Nest
 // *HWP Level: 2
-// *HWP Consumed by: SBE,HB
+// *HWP Consumed by: SBE,HB,FSP
 //
 
 //------------------------------------------------------------------------------

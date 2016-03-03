@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,7 +40,7 @@
 #include <fapi2.H>
 
 // Function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*p9_exit_cache_contained_FP_t)();
+typedef fapi2::ReturnCode (*p9_exit_cache_contained_FP_t)(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
 //------------------------------------------------------------------------------
 // Function prototypes

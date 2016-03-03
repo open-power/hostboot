@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,10 +23,10 @@
 ///
 
 //
-// *HWP HW Owner : Michael Dye <dyem@us.ibm.com>
+// *HWP HW Owner : Joe McGill <jmcgill@us.ibm.com>
 // *HWP FW Owner : Thi N. Tran <thi@us.ibm.com>
 // *HWP Team : Nest
-// *HWP Level : 1
+// *HWP Level : 2
 // *HWP Consumed by : HB
 //
 
@@ -59,5 +59,5 @@ extern "C"
 
 } // extern "C"
 
-#endif // _P9_CHIPET_SCOMINIT_H_
+#endif // _P9_CHIPLET_SCOMINIT_H_
 

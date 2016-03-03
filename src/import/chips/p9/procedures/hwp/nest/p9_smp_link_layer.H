@@ -49,12 +49,17 @@
 //------------------------------------------------------------------------------
 #include <fapi2.H>
 
+
 //------------------------------------------------------------------------------
 // Structure definitions
 //------------------------------------------------------------------------------
 
 /// function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*p9_smp_link_layer_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
+typedef fapi2::ReturnCode (*p9_smp_link_layer_FP_t) (
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
+    const bool,
+    const bool);
+
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -66,11 +71,15 @@ extern "C"
 ///
 /// @brief Train fabric DLL/TL layers
 ///
-/// @param[in] i_target Reference to processor chip target
+/// @param[in] i_target            Reference to processor chip target
+/// @param[in] i_train_electrical  Train electrical links?
+/// @param[in] i_train_optical     Train optical links?
+///
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-    fapi2::ReturnCode p9_smp_link_layer(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
-
+    fapi2::ReturnCode p9_smp_link_layer(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                                        const bool i_train_electrical,
+                                        const bool i_train_optical);
 
 } // extern "C"
 

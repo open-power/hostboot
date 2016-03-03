@@ -56,8 +56,11 @@
 //------------------------------------------------------------------------------
 
 /// function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*p9_fab_iovalid_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
-        const bool);
+typedef fapi2::ReturnCode (*p9_fab_iovalid_FP_t) (
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
+    const bool,
+    const bool,
+    const bool);
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -69,12 +72,17 @@ extern "C"
 ///
 /// @brief Raise/lower iovalids for all logically enabled links on a single chip
 ///
-/// @param[in] i_target Reference to processor chip target
-/// @param[in] i_set_not_clear Define iovalid operation (true=set, false=clear)
+/// @param[in] i_target              Reference to processor chip target
+/// @param[in] i_set_not_clear       Define iovalid operation (true=set, false=clear)
+/// @param[in] i_manage_electrical   Manage electrical links?
+/// @param[in] i_manage_optical      Manage optical links?
+///
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
     fapi2::ReturnCode p9_fab_iovalid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                                     const bool i_set_not_clear);
+                                     const bool i_set_not_clear,
+                                     const bool i_manage_electrical,
+                                     const bool i_manage_optical);
 
 } // extern "C"
 

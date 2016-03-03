@@ -1,13 +1,13 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: chips/p9/procedures/xml/error_info/p9_fab_iovalid_errors.xml $ -->
+<!-- $Source: chips/p9/procedures/xml/error_info/p9_fbc_utils_errors.xml $  -->
 <!--                                                                        -->
 <!-- IBM CONFIDENTIAL                                                       -->
 <!--                                                                        -->
 <!-- EKB Project                                                            -->
 <!--                                                                        -->
-<!-- COPYRIGHT 2015,2016                                                    -->
+<!-- COPYRIGHT 2016                                                         -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -16,54 +16,37 @@
 <!-- deposited with the U.S. Copyright Office.                              -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- Error definitions for p9_fab_iovalid_errors -->
+<!-- Error definitions for p9_fbc_utils HWP -->
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_P9_FAB_IOVALID_REM_ENDP_TARGET_ERR</rc>
-    <description>
-      Procedure: p9_fab_iovalid
-      No matching remote endpoint target found
-    </description>
-    <ffdc>LOC_TARGET</ffdc>
-    <ffdc>LOC_ENDP_TYPE</ffdc>
-    <ffdc>LOC_ENDP_UNIT_ID</ffdc>
-    <ffdc>REM_ENDP_UNIT_ID</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_P9_FAB_IOVALID_LOC_ENDP_TARGET_ERR</rc>
-    <description>
-      Procedure: p9_fab_iovalid
-      No matching local endpoint target found
-    </description>
-    <ffdc>LOC_TARGET</ffdc>
-    <ffdc>LOC_ENDP_TYPE</ffdc>
-    <ffdc>LOC_ENDP_UNIT_ID</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_P9_FAB_IOVALID_DL_NOT_TRAINED_ERR</rc>
-    <description>
-      Procedure: p9_fab_iovalid
-      Link DL training did not complete successfully
-    </description>
+    <rc>RC_P9_FBC_UTILS_FABRIC_GROUP_ID_ATTR_ERR</rc>
+    <description>Invalid definition for fabric group ID attribute value.</description>
     <ffdc>TARGET</ffdc>
-    <ffdc>LOC_ENDP_TYPE</ffdc>
-    <ffdc>LOC_ENDP_UNIT_ID</ffdc>
-    <ffdc>DL_FIR_REG</ffdc>
+    <ffdc>ATTR_DATA</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_P9_FAB_IOVALID_TL_NOT_TRAINED_ERR</rc>
-    <description>
-      Procedure: p9_fab_iovalid
-      Link TL training did not complete successfully
-    </description>
+    <rc>RC_P9_FBC_UTILS_FABRIC_CHIP_ID_ATTR_ERR</rc>
+    <description>Invalid definition for fabric chip ID attribute value.</description>
     <ffdc>TARGET</ffdc>
-    <ffdc>LOC_ENDP_TYPE</ffdc>
-    <ffdc>LOC_ENDP_UNIT_ID</ffdc>
-    <ffdc>TL_FIR_REG</ffdc>
+    <ffdc>ATTR_DATA</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
+
+
+
+
+
+
+
+

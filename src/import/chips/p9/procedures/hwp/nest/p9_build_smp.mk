@@ -17,10 +17,9 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_build_smp
-OBJS+=p9_fab_smp_utils.o
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/initfiles)
+OBJS+=p9_fbc_smp_utils.o
 OBJS+=p9_build_smp_fbc_ab.o
-OBJS+=p9_build_smp_epsilon.o
-OBJS+=p9_build_smp_fbc_nohp.o
 OBJS+=p9_build_smp_fbc_cd.o
 OBJS+=p9_build_smp_adu.o
 OBJS+=p9_adu_coherent_utils.o
