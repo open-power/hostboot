@@ -30,6 +30,7 @@
 #include <target_types.H>
 #include <target_states.H>
 #include <plat_target.H>
+#include <return_code_defs.H>
 
 namespace fapi2
 {
@@ -277,6 +278,20 @@ class Target
         template<TargetType T>
         inline Target<T>
         getOtherEnd(const TargetState i_state = TARGET_STATE_FUNCTIONAL) const;
+
+        ///
+        /// @brief Get the target at the other end of a bus
+        /// @tparam T The type of the target on the other end
+        /// @param[out] o_target A target representing the thing on the other end
+        /// @param[in] i_state The desired TargetState of the other end
+        /// @return FAPI2_RC_SUCCESS if OK, platforms will return a non-success
+        /// ReturnCode in the event of failure
+        /// @note o_target is only valid if return is FAPI2_RC_SUCCESS
+        ///
+
+        template<TargetType T>
+        inline fapi2::ReturnCodes
+        getOtherEnd(Target<T>& o_target, const TargetState i_state = TARGET_STATE_FUNCTIONAL) const;
 
         ///
         /// @brief Copy from a Target<O> to a Target<K>
