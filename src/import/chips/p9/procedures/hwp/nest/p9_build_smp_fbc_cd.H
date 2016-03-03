@@ -40,16 +40,6 @@
 //------------------------------------------------------------------------------
 #include <p9_build_smp.H>
 
-//------------------------------------------------------------------------------
-// Constant definitions
-//------------------------------------------------------------------------------
-
-// TODO: RTC 147511 - Use SCOM register names from p9_misc_scom_addresses.H
-// Remove the reg addresses defined below and use the ones in
-// p9_misc_scom_addresses.H when available.
-const uint64_t PB_SCONFIG_LOAD_WEST = 0x05011811;
-const uint64_t PB_SCONFIG_LOAD_CENT = 0x05011C11;
-const uint64_t PB_SCONFIG_LOAD_EAST = 0x05012011;
 
 extern "C"
 {
@@ -60,6 +50,7 @@ extern "C"
 
 ///
 /// @brief Program fabric configuration register (hotplug, C/D set)
+///
 /// @param[in]   i_smp     Structure encapsulating SMP topology
 ///
 /// @return fapi2:ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
