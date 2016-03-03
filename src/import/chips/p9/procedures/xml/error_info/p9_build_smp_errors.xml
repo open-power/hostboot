@@ -16,114 +16,87 @@
 <!-- deposited with the U.S. Copyright Office.                              -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- File: p9_build_smp_errors.xml. -->
-<!-- Error definitions for p9_build_smp HWP. -->
-
+<!-- Error definitions for p9_build_smp HWP -->
 <hwpErrors>
-
+  <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_BUILD_SMP_CORE_FREQ_RANGE_ERR</rc>
-    <description>Invalid relationship between ceiling/nominal/floor core frequency attributes.</description>
-    <ffdc>FREQ_CORE_CEILING</ffdc>
-    <ffdc>FREQ_CORE_NOM</ffdc>
-    <ffdc>FREQ_CORE_FLOOR</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_P9_FAB_SMP_PUMP_MODE_ATTR_ERR</rc>
-    <description>Invalid definition for fabric pump mode attribute value.</description>
-    <ffdc>ATTR_DATA</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_P9_FAB_SMP_EPSILON_TABLE_TYPE_ATTR_ERR</rc>
-    <description>Invalid definition for epsilon table type attribute value.</description>
-    <ffdc>ATTR_DATA</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_PROC_BUILD_SMP_CORE_FLOOR_FREQ_RATIO_ERR</rc>
-    <description>Unsupported core floor to PB frequency ratio.</description>
-    <ffdc>FREQ_PB</ffdc>
-    <ffdc>FREQ_CORE_FLOOR</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_PROC_BUILD_SMP_CORE_CEILING_FREQ_RATIO_ERR</rc>
-    <description>Unsupported core ceiling to PB frequency ratio.</description>
-    <ffdc>FREQ_PB</ffdc>
-    <ffdc>FREQ_CORE_CEILING</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_PROC_FAB_SMP_FABRIC_GROUP_ID_ATTR_ERR</rc>
-    <description>Invalid definition for fabric group ID attribute value.</description>
+    <rc>RC_P9_BUILD_SMP_MASTER_DESIGNATION_ERR</rc>
+    <description>Node or system master chip designation error.</description>
     <ffdc>TARGET</ffdc>
-    <ffdc>ATTR_DATA</ffdc>
+    <ffdc>OP</ffdc>
+    <ffdc>MASTER_CHIP_SYS_CURR</ffdc>
+    <ffdc>MASTER_CHIP_GROUP_CURR</ffdc>
+    <ffdc>MASTER_CHIP_SYS_NEXT</ffdc>
+    <ffdc>MASTER_CHIP_GROUP_NEXT</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
-
+  <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_FAB_SMP_FABRIC_CHIP_ID_ATTR_ERR</rc>
-    <description>Invalid definition for fabric chip ID attribute value.</description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>ATTR_DATA</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_PROC_BUILD_SMP_NODE_ADD_INTERNAL_ERR</rc>
+    <rc>RC_P9_BUILD_SMP_GROUP_ADD_INTERNAL_ERR</rc>
     <description>Internal Error.  Error encountered adding node to SMP structure.</description>
     <ffdc>TARGET</ffdc>
-    <ffdc>NODE_ID</ffdc>
+    <ffdc>GROUP_ID</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
-
+  <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_BUILD_SMP_DUPLICATE_FABRIC_ID_ERR</rc>
+    <rc>RC_P9_BUILD_SMP_DUPLICATE_FABRIC_ID_ERR</rc>
     <description>Multiple chips found with identifcal fabric node/chip ID attribute values.</description>
     <ffdc>TARGET1</ffdc>
     <ffdc>TARGET2</ffdc>
-    <ffdc>NODE_ID</ffdc>
+    <ffdc>GROUP_ID</ffdc>
     <ffdc>CHIP_ID</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
-
+  <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_BUILD_SMP_HOTPLUG_SHADOW_ERR</rc>
+    <rc>RC_P9_BUILD_SMP_MULTIPLE_MASTER_DESIGNATION_ERR</rc>
+    <description>Input parameter designating master matches more than one chip in HWP input targets.</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>OP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_BUILD_SMP_NO_MASTER_SPECIFIED_ERR</rc>
+    <description>Input parameters do not specify a new fabric system master.</description>
+    <ffdc>OP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_BUILD_SMP_INVALID_TOPOLOGY</rc>
+    <description>Invalid fabric topology specified by input parameters.</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>A_CONNECTIONS_OK</ffdc>
+    <ffdc>A_CONNECTED_GROUP_IDS</ffdc>
+    <ffdc>X_CONNECTIONS_OK</ffdc>
+    <ffdc>X_CONNECTED_CHIP_IDS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_BUILD_SMP_HOTPLUG_SHADOW_ERR</rc>
     <description>Inconsistent state in hotplug (CURR) shadow copies.</description>
+    <ffdc>TARGET</ffdc>
     <ffdc>ADDRESS0</ffdc>
     <ffdc>ADDRESS1</ffdc>
     <ffdc>DATA0</ffdc>
@@ -133,101 +106,41 @@
       <priority>HIGH</priority>
     </callout>
   </hwpError>
-
+  <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_BUILD_SMP_INVALID_OPERATION_ERR</rc>
-    <description>Unsupported SMP build operation presented.</description>
+    <rc>RC_P9_BUILD_SMP_BAD_ADU_ACTION_ERR</rc>
+    <description>Invalid ADU action specified.</description>
     <ffdc>OP</ffdc>
+    <ffdc>ACTION</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
-
+  <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_PROC_BUILD_SMP_MASTER_DESIGNATION_ERR</rc>
-    <description>Node or system master chip designation error.</description>
+    <rc>RC_P9_BUILD_SMP_ADU_STATUS_MISMATCH_ERR</rc>
+    <description>Status mismatch detected on ADU operation execution for SMP configuration.</description>
     <ffdc>TARGET</ffdc>
-    <ffdc>OP</ffdc>
-    <ffdc>MASTER_CHIP_SYS_CURR</ffdc>
-    <ffdc>MASTER_CHIP_NODE_CURR</ffdc>
-    <ffdc>MASTER_CHIP_SYS_NEXT</ffdc>
-    <ffdc>MASTER_CHIP_NODE_NEXT</ffdc>
-    <ffdc>SYS_RECONFIG_MASTER_SET</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
+    <ffdc>ADU_NUM_POLLS</ffdc>
+    <ffdc>NUM_CHIPS</ffdc>
+    <ffdc>GROUP_IDS</ffdc>
+    <ffdc>CHIP_IDS</ffdc>
+    <ffdc>PB_CENT_MODE</ffdc>
+    <ffdc>PB_CENT_HP_MODE_CURR</ffdc>
+    <ffdc>PB_CENT_HP_MODE_NEXT</ffdc>
+    <ffdc>PB_CENT_HPX_MODE_CURR</ffdc>
+    <ffdc>PB_CENT_HPX_MODE_NEXT</ffdc>
+    <ffdc>PB_CENT_HPA_MODE_CURR</ffdc>
+    <ffdc>PB_CENT_HPA_MODE_NEXT</ffdc>
+    <ffdc>XB_CPLT_CONF1</ffdc>
+    <ffdc>PB_IOE_FIR_REG</ffdc>
+    <ffdc>OB0_CPLT_CONF1</ffdc>
+    <ffdc>OB1_CPLT_CONF1</ffdc>
+    <ffdc>OB2_CPLT_CONF1</ffdc>
+    <ffdc>OB3_CPLT_CONF1</ffdc>
+    <ffdc>IOE_PB_IOO_FIR_REG</ffdc>
+    <ffdc>ADU_SND_MODE_REG</ffdc>
   </hwpError>
-
-  <hwpError>
-    <rc>RC_PROC_BUILD_SMP_NO_MASTER_SPECIFIED_ERR</rc>
-    <description>Input parameters do not specify a new fabric system master.</description>
-    <ffdc>OP</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_PROC_BUILD_SMP_INVALID_TOPOLOGY</rc>
-    <description>Invalid fabric topology specified by input parameters.</description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>A_CONNECTIONS_OK</ffdc>
-    <ffdc>A_CONNECTED_NODE_IDS</ffdc>
-    <ffdc>X_CONNECTIONS_OK</ffdc>
-    <ffdc>X_CONNECTED_CHIP_IDS</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_PROC_BUILD_SMP_EPSILON_INVALID_TABLE_ERR</rc>
-    <description>Invalid epsilon table type or content detected.</description>
-    <ffdc>TABLE_TYPE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_PROC_BUILD_SMP_EPSILON_RANGE_ERR</rc>
-    <description>Target epsilon value exceeds maximum value supported by HW capabilities.</description>
-    <ffdc>VALUE</ffdc>
-    <ffdc>MAX_HW_VALUE</ffdc>
-    <ffdc>UNIT</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_PROC_BUILD_SMP_PACING_RATE_TABLE_ERR</rc>
-    <description>Command rate pacing table lookup error.</description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>GROUP_SIZE</ffdc>
-    <ffdc>NODE_ID</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_PROC_BUILD_SMP_INVALID_GROUP_SIZE_ERR</rc>
-    <description>Invalid chips per group configuration detected.</description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>GROUP_SIZE</ffdc>
-    <ffdc>NODE_ID</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
+  <!-- ******************************************************************** -->
 </hwpErrors>

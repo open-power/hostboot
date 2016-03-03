@@ -34,53 +34,39 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include <fapi2.H>
 #include <p9_build_smp.H>
 
+
 extern "C" {
+
+//------------------------------------------------------------------------------
+// Constant definitions
+//------------------------------------------------------------------------------
+
+    enum p9_build_smp_adu_action
+    {
+        SWITCH_AB = 1,
+        SWITCH_CD = 2,
+        QUIESCE   = 4
+    };
+
 
 //------------------------------------------------------------------------------
 // Function prototypes
 //------------------------------------------------------------------------------
 
 ///
-/// @brief Perform fabric C/D configuration switch on a single chip
+/// @brief Perform fabric quiesce/switch operation via ADU
 ///
-/// @param[in] i_smp_chip      Structure encapsulating single chip in SMP
-/// @param[in] i_smp           Structure encapsulating SMP topology
+/// @param[in] i_smp       Fully specified structure encapsulating SMP
+/// @param[in] i_op        Enumerated type representing SMP build phase (HB or FSP)
+/// @param[in] i_action    Enumerated type representing fabric operation
 ///
-/// @return fapi2:ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+/// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
-    fapi2::ReturnCode p9_build_smp_switch_cd(p9_build_smp_chip& i_smp_chip,
-            p9_build_smp_system& i_smp);
-
-///
-/// @brief Quiesce slave fabrics by issuing fabric quiesce operation on
-///        specified chips
-///        NOTE: ADU atomic lock will be obtained for all chips prior
-///              to issuing quiesce operation on specified chips
-///
-/// @param[in] i_smp       Structure encapsulating SMP topology
-/// @param[in] i_op        Enumerated type representing SMP build phase
-///
-/// @return fapi2:ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-///
-    fapi2::ReturnCode p9_build_smp_quiesce_pb(p9_build_smp_system& i_smp,
-            const p9_build_smp_operation i_op);
-
-
-///
-/// @brief Perform fabric A/B configuration switch on all chips present in SMP
-///        NOTE: ADU atomic lock will be obtained for all chips prior to
-///              issuing switch from master chip (defined by i_master_smp_chip)
-///
-/// @param[in] i_smp       Structure encapsulating SMP topology
-/// @param[in] i_op        Enumerated type representing SMP build phase
-///
-/// @return fapi2:ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-///
-    fapi2::ReturnCode p9_build_smp_switch_ab(p9_build_smp_system& i_smp,
-            const p9_build_smp_operation i_op);
+    fapi2::ReturnCode p9_build_smp_sequence_adu(p9_build_smp_system& i_smp,
+            const p9_build_smp_operation i_op,
+            const p9_build_smp_adu_action i_action);
 
 
 } // extern "C"

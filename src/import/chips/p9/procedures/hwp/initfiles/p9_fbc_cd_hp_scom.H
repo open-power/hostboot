@@ -1,13 +1,13 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: chips/p9/procedures/hwp/nest/p9_build_smp_fbc_cd.H $          */
+/* $Source: chips/p9/procedures/hwp/initfiles/p9_fbc_cd_hp_scom.H $       */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015,2016                                                    */
+/* COPYRIGHT 2016                                                         */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -16,42 +16,24 @@
 /* deposited with the U.S. Copyright Office.                              */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-///
-/// @file p9_build_smp_fbc_cd.H
-/// @brief  Fabric configuration (hotplug, CD) functions
-///
-/// *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
-/// *HWP FW Owner: Thi Tran <thi@us.ibm.com>
-/// *HWP Team: Nest
-/// *HWP Level: 2
-///
+#ifndef _INIT_P9_FBC_CD_HP_SCOM_PROCEDURE_H_
+#define _INIT_P9_FBC_CD_HP_SCOM_PROCEDURE_H_
 
-#ifndef _P9_BUILD_SMP_FBC_CD_H_
-#define _P9_BUILD_SMP_FBC_CD_H_
 
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
-#include <p9_build_smp.H>
+#include <stddef.h>
+#include <stdint.h>
+#include <fapi2.H>
 
+
+typedef fapi2::ReturnCode (*p9_fbc_cd_hp_scom_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
+        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>&);
 
 extern "C"
 {
 
-//------------------------------------------------------------------------------
-// Function prototypes
-//------------------------------------------------------------------------------
+    fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT0,
+                                        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1);
 
-///
-/// @brief Program fabric configuration register (hotplug, C/D set)
-///
-/// @param[in]   i_smp     Structure encapsulating SMP topology
-///
-/// @return fapi2:ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-///
-    fapi2::ReturnCode p9_build_smp_set_fbc_cd(p9_build_smp_system& i_smp);
+}
 
-
-} // extern "C"
-
-#endif // _P9_BUILD_SMP_FBC_CD_H_
+#endif
