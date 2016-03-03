@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -834,6 +834,10 @@ errlHndl_t doIBScom(DeviceFW::OperationType i_opType,
                 ffdc.addData(DEVICE_FSISCOM_ADDRESS(0x0104000A));
                 ffdc.addData(DEVICE_FSISCOM_ADDRESS(MBS_FIR));
                 ffdc.addData(DEVICE_FSISCOM_ADDRESS(MBSIBERR0));
+
+                //grabbing the error specifics for a scom fail
+                ffdc.addData(DEVICE_FSISCOM_ADDRESS(0x03010001));
+
                 ffdc.addToLog(l_err);
 
                 l_err->collectTrace(IBSCOM_COMP_NAME);
