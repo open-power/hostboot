@@ -22,19 +22,54 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- Halt codes for p9_fab_iovalid -->
+<!-- Error definitions for p9_fab_iovalid_errors -->
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_P9_FAB_IOVALID_TABLE_ERR</rc>
+    <rc>RC_P9_FAB_IOVALID_REM_ENDP_TARGET_ERR</rc>
     <description>
       Procedure: p9_fab_iovalid
-      Internal procedure error.
-      No match found for X/A link in procedure data structures.
+      No matching remote endpoint target found
+    </description>
+    <ffdc>LOC_TARGET</ffdc>
+    <ffdc>LOC_ENDP_TYPE</ffdc>
+    <ffdc>LOC_ENDP_UNIT_ID</ffdc>
+    <ffdc>REM_ENDP_UNIT_ID</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_FAB_IOVALID_LOC_ENDP_TARGET_ERR</rc>
+    <description>
+      Procedure: p9_fab_iovalid
+      No matching local endpoint target found
+    </description>
+    <ffdc>LOC_TARGET</ffdc>
+    <ffdc>LOC_ENDP_TYPE</ffdc>
+    <ffdc>LOC_ENDP_UNIT_ID</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_FAB_IOVALID_DL_NOT_TRAINED_ERR</rc>
+    <description>
+      Procedure: p9_fab_iovalid
+      Link DL training did not complete successfully
     </description>
     <ffdc>TARGET</ffdc>
-    <ffdc>LINK</ffdc>
-    <ffdc>LINK_ID</ffdc>
+    <ffdc>LOC_ENDP_TYPE</ffdc>
+    <ffdc>LOC_ENDP_UNIT_ID</ffdc>
+    <ffdc>DL_FIR_REG</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_FAB_IOVALID_TL_NOT_TRAINED_ERR</rc>
+    <description>
+      Procedure: p9_fab_iovalid
+      Link TL training did not complete successfully
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>LOC_ENDP_TYPE</ffdc>
+    <ffdc>LOC_ENDP_UNIT_ID</ffdc>
+    <ffdc>TL_FIR_REG</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
