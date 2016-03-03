@@ -1,0 +1,56 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/error_info/p9_fbc_eff_config_links_errors.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2016                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Error definitions for p9_fbc_eff_config_links -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_FBC_EFF_CONFIG_LINKS_CHIP_ID_ERR</rc>
+    <description>
+      Procedure: p9_fbc_eff_config_links
+      Two A connected chips do not have the same chip ID
+    </description>
+    <ffdc>LOC_TARGET</ffdc>
+    <ffdc>REM_TARGET</ffdc>
+    <ffdc>LOC_FBC_CHIP_ID</ffdc>
+    <ffdc>REM_FBC_CHIP_ID</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_FBC_EFF_CONFIG_LINKS_GROUP_ID_ERR</rc>
+    <description>
+      Procedure: p9_fbc_eff_config_links
+      Two X connected chips do not have the same group ID
+    </description>
+    <ffdc>LOC_TARGET</ffdc>
+    <ffdc>REM_TARGET</ffdc>
+    <ffdc>LOC_FBC_GROUP_ID</ffdc>
+    <ffdc>REM_FBC_GROUP_ID</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_FBC_EFF_CONFIG_LINKS_LOOKUP_ERR</rc>
+    <description>
+      Procedure: p9_fbc_eff_config_links
+      Unable to find matching X/A link for unit endpoint target
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>UNIT_ID</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>

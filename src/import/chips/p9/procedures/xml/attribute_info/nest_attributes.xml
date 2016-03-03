@@ -148,18 +148,54 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_PROC_FABRIC_CORE_FLOOR_RATIO</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Processor SMP core floor/nest frequency ratio
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    RATIO_8_8 = 0x0,
+    RATIO_7_8 = 0x1,
+    RATIO_6_8 = 0x2,
+    RATIO_5_8 = 0x3,
+    RATIO_4_8 = 0x4,
+    RATIO_2_8 = 0x5
+  </enum>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_CORE_CEILING_RATIO</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Processor SMP core celing/nest frequency ratio
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    RATIO_8_8 = 0x0,
+    RATIO_7_8 = 0x1,
+    RATIO_6_8 = 0x2,
+    RATIO_5_8 = 0x3,
+    RATIO_4_8 = 0x4,
+    RATIO_2_8 = 0x5
+  </enum>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_PROC_FABRIC_PUMP_MODE</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
     Processor SMP Fabric broadcast scope configuration.
-    MODE1 = default = chip_is_node
-    MODE2 = chip_is_group
+    CHIP_IS_NODE = MODE1 = default
+    CHIP_IS_GROUP = MODE2
     Provided by the MRW.
   </description>
   <valueType>uint8</valueType>
   <enum>
-    MODE1 = 0x01,
-    MODE2 = 0x02
+    CHIP_IS_NODE = 0x01,
+    CHIP_IS_GROUP = 0x02
   </enum>
   <platInit/>
 </attribute>
@@ -192,7 +228,6 @@
     Provided by the MRW.
   </description>
   <valueType>uint8</valueType>
-  <array>4</array>
   <enum>
     SMP = 0x0,
     CAPI = 0x1,
@@ -216,6 +251,25 @@
     OPTICS_IS_A_BUS = 0x1
   </enum>
   <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Per-link optics configuration
+    0 = default = SMP
+    1 = CAPI 2.0
+    2 = NV 2.0
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    SMP = 0x0,
+    CAPI = 0x1,
+    NV = 0x2
+  </enum>
+  <array>4</array>
+  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -293,7 +347,6 @@
     FALSE = 0x0,
     TRUE = 0x1
   </enum>
-  <platInit/>
   <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -308,7 +361,6 @@
     FALSE = 0x0,
     TRUE = 0x1
   </enum>
-  <platInit/>
   <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -358,6 +410,19 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_PROC_FABRIC_X_ATTACHED_LINK_ID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    For each fabric X link on this chip, specifies the link ID of the chip at the
+    receiving end of the link.  Should be considered valid only if corresponding
+    ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG index is true.
+  </description>
+  <valueType>uint8</valueType>
+  <array>7</array>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
@@ -367,6 +432,33 @@
   </description>
   <valueType>uint8</valueType>
   <array>4</array>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_A_ATTACHED_LINK_ID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    For each fabric A link on this chip, specifies the link ID of the chip at the
+    receiving end of the link.  Should be considered valid only if corresponding
+    ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG index is true.
+  </description>
+  <valueType>uint8</valueType>
+  <array>4</array>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_X_AGGREGATE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Indicates if X links on this chip should be configured in aggregate mode.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    OFF = 0x0,
+    ON = 0x1
+  </enum>
   <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -388,6 +480,38 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_PROC_FABRIC_X_LINK_DELAY</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Average of local/remote end link delay counter values.
+    Used to designate coherent link in aggregate configurations.
+    Should be considered valid only if corresponding ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG
+    index is true.
+  </description>
+  <valueType>uint32</valueType>
+  <array>7</array>
+  <enum>
+    OFF = 0x0,
+    ON = 0x1
+  </enum>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_A_AGGREGATE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Indicates if A links on this chip should be configured in aggregate mode.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    OFF = 0x0,
+    ON = 0x1
+  </enum>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_PROC_FABRIC_A_ADDR_DIS</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
@@ -396,6 +520,24 @@
     index is true.
   </description>
   <valueType>uint8</valueType>
+  <array>4</array>
+  <enum>
+    OFF = 0x0,
+    ON = 0x1
+  </enum>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_A_LINK_DELAY</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Average of local/remote end link delay counter values.
+    Used to designate coherent link in aggregate configurations.
+    Should be considered valid only if corresponding ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG
+    index is true.
+  </description>
+  <valueType>uint32</valueType>
   <array>4</array>
   <enum>
     OFF = 0x0,
@@ -450,7 +592,7 @@
     Counter tier is index.
   </description>
   <valueType>uint32</valueType>
-  <array>3</array>
+  <array>2</array>
   <writeable/>
 </attribute>
 <!-- ********************************************************************** -->

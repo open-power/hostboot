@@ -1,0 +1,66 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/error_info/p9_fbc_eff_config_errors.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2016                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Error definitions for p9_fbc_eff_config HWP -->
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_FBC_EFF_CONFIG_EPSILON_INVALID_TABLE_ERR</rc>
+    <description>Invalid epsilon table type or content detected.</description>
+    <ffdc>TABLE_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_FBC_EFF_CONFIG_CORE_FREQ_RANGE_ERR</rc>
+    <description>Invalid relationship between ceiling/nominal/floor core frequency attributes.</description>
+    <ffdc>FREQ_CORE_CEILING</ffdc>
+    <ffdc>FREQ_CORE_NOM</ffdc>
+    <ffdc>FREQ_CORE_FLOOR</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_FBC_EFF_CONFIG_CORE_FLOOR_FREQ_RATIO_ERR</rc>
+    <description>Unsupported core floor to PB frequency ratio.</description>
+    <ffdc>FREQ_PB</ffdc>
+    <ffdc>FREQ_CORE_FLOOR</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_FBC_EFF_CONFIG_CORE_CEILING_FREQ_RATIO_ERR</rc>
+    <description>Unsupported core ceiling to PB frequency ratio.</description>
+    <ffdc>FREQ_PB</ffdc>
+    <ffdc>FREQ_CORE_CEILING</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>
