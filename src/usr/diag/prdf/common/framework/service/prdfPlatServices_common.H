@@ -45,15 +45,7 @@
 
 //#include <dimmConsts.H>         // for DIMM_DQ_RANK_BITMAP_SIZE TODO RTC 136126
 
-/* TODO RTC 144699
-#include <fapiPlatHwpInvoker.H> // for fapi::fapiRcToErrl()
-
-#define PRD_FAPI_TO_ERRL(ERRHNDL, FUNC, _args_...) \
-    { \
-        fapi::ReturnCode l_rc = FUNC(_args_); \
-        ERRHNDL = fapi::fapiRcToErrl(l_rc);   \
-    }
-*/
+#include <plat_hwp_invoker.H>
 
 #include <errlentry.H>
 

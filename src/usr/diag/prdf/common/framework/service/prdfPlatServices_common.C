@@ -113,10 +113,10 @@ int32_t readErepair(TargetHandle_t i_rxBusTgt,
     int32_t o_rc = SUCCESS;
     errlHndl_t err = NULL;
 
-    PRD_FAPI_TO_ERRL(err,
-                     io_read_erepair,
-                     getFapiTarget(i_rxBusTgt),
-                     o_rxFailLanes);
+    FAPI_INVOKE_HWP(err,
+                    io_read_erepair,
+                    getFapiTarget(i_rxBusTgt),
+                    o_rxFailLanes);
 
     if(NULL != err)
     {
@@ -134,9 +134,9 @@ int32_t clearIOFirs(TargetHandle_t i_rxBusTgt)
     int32_t o_rc = SUCCESS;
     errlHndl_t err = NULL;
 
-    PRD_FAPI_TO_ERRL(err,
-                     io_clear_firs,
-                     getFapiTarget(i_rxBusTgt));
+    FAPI_INVOKE_HWP(err,
+                    io_clear_firs,
+                    getFapiTarget(i_rxBusTgt));
 
     if(NULL != err)
     {
@@ -156,11 +156,11 @@ int32_t powerDownLanes(TargetHandle_t i_rxBusTgt,
     int32_t o_rc = SUCCESS;
     errlHndl_t err = NULL;
 
-    PRD_FAPI_TO_ERRL(err,
-                     io_power_down_lanes,
-                     getFapiTarget(i_rxBusTgt),
-                     i_txFailLanes,
-                     i_rxFailLanes);
+    FAPI_INVOKE_HWP(err,
+                    io_power_down_lanes,
+                    getFapiTarget(i_rxBusTgt),
+                    i_txFailLanes,
+                    i_rxFailLanes);
 
     if(NULL != err)
     {
@@ -195,11 +195,11 @@ int32_t getVpdFailedLanes(TargetHandle_t i_rxBusTgt,
 #endif
 
         errlHndl_t err = NULL;
-        PRD_FAPI_TO_ERRL(err,
-                         erepairGetFailedLanes,
-                         getFapiTarget(i_rxBusTgt),
-                         o_txFailLanes,
-                         o_rxFailLanes);
+        FAPI_INVOKE_HWP(err,
+                        erepairGetFailedLanes,
+                        getFapiTarget(i_rxBusTgt),
+                        o_txFailLanes,
+                        o_rxFailLanes);
 
         if(NULL != err)
         {
@@ -239,12 +239,12 @@ int32_t setVpdFailedLanes(TargetHandle_t i_rxBusTgt,
 #endif
 
         errlHndl_t err = NULL;
-        PRD_FAPI_TO_ERRL(err,
-                         erepairSetFailedLanes,
-                         getFapiTarget(i_txBusTgt),
-                         getFapiTarget(i_rxBusTgt),
-                         i_rxFailLanes,
-                         o_thrExceeded);
+        FAPI_INVOKE_HWP(err,
+                        erepairSetFailedLanes,
+                        getFapiTarget(i_txBusTgt),
+                        getFapiTarget(i_rxBusTgt),
+                        i_rxFailLanes,
+                        o_thrExceeded);
         if(NULL != err)
         {
             PRDF_ERR( "[PlatServices::setVpdFailedLanes] rxHUID: 0x%08x "
@@ -265,7 +265,7 @@ int32_t erepairFirIsolation(TargetHandle_t i_rxBusTgt)
 
     errlHndl_t err = NULL;
 
-    PRD_FAPI_TO_ERRL(err, io_fir_isolation, getFapiTarget(i_rxBusTgt));
+    FAPI_INVOKE_HWP(err, io_fir_isolation, getFapiTarget(i_rxBusTgt));
 
     if(NULL != err)
     {
@@ -351,14 +351,14 @@ int32_t getMemAddrRange( TargetHandle_t i_mba, uint8_t i_mrank,
 
         if ( i_slaveOnly )
         {
-            PRD_FAPI_TO_ERRL( errl, mss_get_slave_address_range,
-                              getFapiTarget(i_mba),
-                              i_mrank, i_srank, o_startAddr, o_endAddr );
+            FAPI_INVOKE_HWP( errl, mss_get_slave_address_range,
+                             getFapiTarget(i_mba),
+                             i_mrank, i_srank, o_startAddr, o_endAddr );
         }
         else
         {
-            PRD_FAPI_TO_ERRL( errl, mss_get_address_range, getFapiTarget(i_mba),
-                              i_mrank, o_startAddr, o_endAddr );
+            FAPI_INVOKE_HWP( errl, mss_get_address_range, getFapiTarget(i_mba),
+                             i_mrank, o_startAddr, o_endAddr );
         }
 
         if ( NULL != errl )
@@ -458,9 +458,9 @@ int32_t setBadDqBitmap( TargetHandle_t i_mba, const CenRank & i_rank,
         for ( int32_t ps = 0; ps < PORT_SLCT_PER_MBA; ps++ )
         {
             errlHndl_t errl = NULL;
-            PRD_FAPI_TO_ERRL( errl, dimmSetBadDqBitmap, getFapiTarget(i_mba),
-                              ps, i_rank.getDimmSlct(), i_rank.getRankSlct(),
-                              data[ps] );
+            FAPI_INVOKE_HWP( errl, dimmSetBadDqBitmap, getFapiTarget(i_mba),
+                             ps, i_rank.getDimmSlct(), i_rank.getRankSlct(),
+                             data[ps] );
             if ( NULL != errl )
             {
                 PRDF_ERR( PRDF_FUNC "dimmSetBadDqBitmap() failed: MBA=0x%08x "
@@ -492,8 +492,8 @@ int32_t mssGetMarkStore( TargetHandle_t i_mba, const CenRank & i_rank,
     {
         errlHndl_t errl = NULL;
         uint8_t symbolMark, chipMark;
-        PRD_FAPI_TO_ERRL( errl, mss_get_mark_store, getFapiTarget(i_mba),
-                          i_rank.getMaster(), symbolMark, chipMark );
+        FAPI_INVOKE_HWP( errl, mss_get_mark_store, getFapiTarget(i_mba),
+                         i_rank.getMaster(), symbolMark, chipMark );
 
         if ( NULL != errl )
         {
@@ -615,8 +615,8 @@ int32_t mssGetSteerMux( TargetHandle_t i_mba, const CenRank & i_rank,
     errlHndl_t errl = NULL;
 
     uint8_t port0Spare, port1Spare, eccSpare;
-    PRD_FAPI_TO_ERRL( errl, mss_check_steering, getFapiTarget(i_mba),
-                      i_rank.getMaster(), port0Spare, port1Spare, eccSpare );
+    FAPI_INVOKE_HWP( errl, mss_check_steering, getFapiTarget(i_mba),
+                     i_rank.getMaster(), port0Spare, port1Spare, eccSpare );
 
     if ( NULL != errl )
     {
@@ -647,9 +647,9 @@ int32_t mssSetSteerMux( TargetHandle_t i_mba, const CenRank & i_rank,
 
     errlHndl_t errl = NULL;
 
-    PRD_FAPI_TO_ERRL( errl, mss_do_steering, getFapiTarget(i_mba),
-                      i_rank.getMaster(), i_symbol.getDramSymbol(),
-                      i_x4EccSpare );
+    FAPI_INVOKE_HWP( errl, mss_do_steering, getFapiTarget(i_mba),
+                     i_rank.getMaster(), i_symbol.getDramSymbol(),
+                     i_x4EccSpare );
 
     if ( NULL != errl )
     {
@@ -861,10 +861,10 @@ int32_t getMemBufRawCardType( TargetHandle_t i_mba,
         fapi::Target fapiDimm = getFapiTarget( l_dimmList[0] );
         uint8_t l_cardType = WIRING_INVALID;
 
-        PRD_FAPI_TO_ERRL( errl,
-                          fapi::platAttrSvc::fapiPlatGetSpdModspecComRefRawCard,
-                          &fapiDimm,
-                          l_cardType );
+        FAPI_INVOKE_HWP( errl,
+                         fapi::platAttrSvc::fapiPlatGetSpdModspecComRefRawCard,
+                         &fapiDimm,
+                         l_cardType );
 
         if ( NULL != errl )
         {

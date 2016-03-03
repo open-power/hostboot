@@ -168,11 +168,11 @@ int32_t getCfam( ExtensibleChip * i_chip,
         errlHndl_t errH = NULL;
         ecmdDataBufferBase cfamData(32);
 
-        PRD_FAPI_TO_ERRL(errH,
-                         fapiGetCfamRegister,
-                         PlatServices::getFapiTarget(l_procTgt),
-                         i_addr,
-                         cfamData);
+        FAPI_INVOKE_HWP(errH,
+                        fapiGetCfamRegister,
+                        PlatServices::getFapiTarget(l_procTgt),
+                        i_addr,
+                        cfamData);
 
         if ( NULL == errH )
         {
