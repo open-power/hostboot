@@ -1991,48 +1991,53 @@ void grouping_group2PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
 {
     FAPI_DBG("Entering");
 
-    // 2 adjacent MC ports are grouped if they have the same size
-    // 0/1, 2/3, 4/5, 6/7
+    // Any two ports with the same amount of memory can be grouped together
     FAPI_INF("grouping_group2PortsPerGroup: Attempting to group 2 MC ports");
     uint8_t& g = o_groupData.iv_numGroups;
     const uint8_t PORTS_PER_GROUP = 2;
 
-    for (uint8_t pos = 0; pos < NUM_MC_PORTS_PER_PROC - 1; pos = pos + 2)
+    for (uint8_t pos = 0; pos < NUM_MC_PORTS_PER_PROC; pos++)
     {
-        // Skip if port or adjacent port is already grouped,
-        // or port has no memory
+        // Skip if port is already grouped or has no memory
         if ( (o_groupData.iv_portGrouped[pos]) ||
-             (o_groupData.iv_portGrouped[pos + 1]) ||
              (i_memInfo.iv_portSize[pos] == 0) )
 
         {
-            FAPI_DBG("Skip this port because already grouped, its adjancent port is already grouped, or it doesn't have memory:");
+            FAPI_DBG("Skip this port because already grouped or it doesn't have memory:");
             FAPI_DBG("    o_groupData.iv_portGrouped[%d] = %d", pos, o_groupData.iv_portGrouped[pos]);
-            FAPI_DBG("    o_groupData.iv_portGrouped[%d + 1] = %d", pos, o_groupData.iv_portGrouped[pos + 1]);
             FAPI_DBG("    i_memInfo.iv_portSize[%d] = %d", pos, i_memInfo.iv_portSize[pos]);
-
             continue;
         }
 
-        // If adjacent port has the same amount of memory, group it
-        if ( i_memInfo.iv_portSize[pos] == i_memInfo.iv_portSize[pos + 1] )
+        // If any of the remaining ungrouped port has the same amount of memory, group it
+        for (uint8_t ii = pos + 1; ii < NUM_MC_PORTS_PER_PROC; ii++)
         {
-            // These 2 MC ports are not already grouped and have the same
-            // amount of memory
-            o_groupData.iv_data[g][PORT_SIZE] = i_memInfo.iv_portSize[pos];
-            o_groupData.iv_data[g][PORTS_IN_GROUP] = PORTS_PER_GROUP;
-            o_groupData.iv_data[g][GROUP_SIZE] =
-                PORTS_PER_GROUP * i_memInfo.iv_portSize[pos];
-            o_groupData.iv_data[g][MEMBER_IDX(0)] = pos;
-            o_groupData.iv_data[g][MEMBER_IDX(1)] = pos + 1;
-            g++;
+            if ( (o_groupData.iv_portGrouped[ii]) ||
+                 (i_memInfo.iv_portSize[ii] == 0) )
+            {
+                continue;
+            }
 
-            // Record which MC ports were grouped
-            o_groupData.iv_portGrouped[pos] = true;
-            o_groupData.iv_portGrouped[pos + 1] = true;
+            // Same amount of memory?
+            if (i_memInfo.iv_portSize[pos] == i_memInfo.iv_portSize[ii])
+            {
+                o_groupData.iv_data[g][PORT_SIZE] = i_memInfo.iv_portSize[pos];
+                o_groupData.iv_data[g][PORTS_IN_GROUP] = PORTS_PER_GROUP;
+                o_groupData.iv_data[g][GROUP_SIZE] =
+                    PORTS_PER_GROUP * i_memInfo.iv_portSize[pos];
+                o_groupData.iv_data[g][MEMBER_IDX(0)] = pos;
+                o_groupData.iv_data[g][MEMBER_IDX(1)] = ii;
+                g++;
 
-            FAPI_INF("grouping_group2PortsPerGroup: Successfully grouped 2 "
-                     "MC ports: %u, %u", pos, pos + 1);
+                // Record which MC ports were grouped
+                o_groupData.iv_portGrouped[pos] = true;
+                o_groupData.iv_portGrouped[ii] = true;
+
+                FAPI_INF("grouping_group2PortsPerGroup: Successfully grouped 2 "
+                         "MC ports: %u, %u", pos, ii);
+
+                break; // Break out of remaining port loop
+            }
         }
     }
 
@@ -2493,17 +2498,19 @@ void grouping_calcNonMirrorMemory(const EffGroupingProcAttrs& i_procAttrs,
     // Assign mirroring and non-mirroring base address for each group
     for (uint8_t pos = 0; pos < io_groupData.iv_numGroups; pos++)
     {
-        //TODO: Check 2nd memory hole
         if (pos == 0)
         {
             io_groupData.iv_data[pos][BASE_ADDR] =
                 (i_procAttrs.iv_memBaseAddr >> 30);
 
-            if (io_groupData.iv_data[pos][ALT_VALID(0)])
+            for (uint8_t ii = 0; ii < NUM_OF_ALT_MEM_REGIONS; ii++)
             {
-                io_groupData.iv_data[pos][ALT_BASE_ADDR(0)] =
-                    io_groupData.iv_data[pos][BASE_ADDR] +
-                    io_groupData.iv_data[pos][GROUP_SIZE] / 2;
+                if (io_groupData.iv_data[pos][ALT_VALID(ii)])
+                {
+                    io_groupData.iv_data[pos][ALT_BASE_ADDR(ii)] =
+                        io_groupData.iv_data[pos][GROUP_SIZE] -
+                        io_groupData.iv_data[pos][ALT_SIZE(ii)];
+                }
             }
         }
         else
@@ -2512,11 +2519,14 @@ void grouping_calcNonMirrorMemory(const EffGroupingProcAttrs& i_procAttrs,
                 io_groupData.iv_data[pos - 1][BASE_ADDR] +
                 io_groupData.iv_data[pos - 1][GROUP_SIZE];
 
-            if (io_groupData.iv_data[pos][ALT_VALID(0)])
+            for (uint8_t ii = 0; ii < NUM_OF_ALT_MEM_REGIONS; ii++)
             {
-                io_groupData.iv_data[pos][ALT_BASE_ADDR(0)] =
-                    io_groupData.iv_data[pos][BASE_ADDR] +
-                    io_groupData.iv_data[pos][GROUP_SIZE] / 2;
+                if (io_groupData.iv_data[pos][ALT_VALID(ii)])
+                {
+                    io_groupData.iv_data[pos][ALT_BASE_ADDR(ii)] =
+                        io_groupData.iv_data[pos][GROUP_SIZE] -
+                        io_groupData.iv_data[pos][ALT_SIZE(ii)];
+                }
             }
         }
     }
@@ -2802,4 +2812,3 @@ fapi_try_exit:
     FAPI_DBG("Exiting");
     return fapi2::current_err;
 }
-
