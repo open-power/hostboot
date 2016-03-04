@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/runtime/prdfCenMbaTdRankData.H $     */
+/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfCenMbaTdRankData_rt.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,10 +23,10 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __prdfCenMbaTdRankData_H
-#define __prdfCenMbaTdRankData_H
+#ifndef __prdfCenMbaTdRankData_rt_H
+#define __prdfCenMbaTdRankData_rt_H
 
-/** @file prdfCenMbaTdRankData.H */
+/** @file prdfCenMbaTdRankData_rt.H */
 
 // Framework includes
 #include <prdfPlatServices.H>
@@ -342,5 +342,5 @@ class TpsRankData
 
 } // end namespace PRDF
 
-#endif // __prdfCenMbaTdRankData_H
+#endif // __prdfCenMbaTdRankData_rt_H
 

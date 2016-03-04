@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/runtime/prdfCenMbaTdRankData.C $     */
+/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfCenMbaTdRankData_rt.C $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,9 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/** @file prdfCenMbaTdRankData.C */
+/** @file prdfCenMbaTdRankData_rt.C */
 
-#include <prdfCenMbaTdRankData.H>
+#include <prdfCenMbaTdRankData_rt.H>
 
 // Framework includes
 #include <prdfTrace.H>

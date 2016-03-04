@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2015
+# Contributors Listed Below - COPYRIGHT 2014,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -30,8 +30,6 @@ VPATH += ../../test
 
 #ROOTPATH must be defined before including prdf_hb_common_test.mk
 include ../../test/prdf_hb_common_test.mk
-
-EXTRAINCDIR += ${PRD_USR_PATH}/common/runtime
 
 #------------------------------------------------------------------------------
 # objects

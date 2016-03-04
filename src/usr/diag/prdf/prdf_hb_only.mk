@@ -132,10 +132,10 @@ ifeq (${HOSTBOOT_RUNTIME},1)
 # plat/
 prd_obj += prdfPlatServices_rt.o
 
-# common/runtime/
+# common/plat/pegasus/
 #prd_obj += prdfCenMbaDynMemDealloc_rt.o
 #prd_obj += prdfCenMbaTdCtlr_rt.o
-#prd_obj += prdfCenMbaTdRankData.o
+#prd_obj += prdfCenMbaTdRankData_rt.o
 
 endif
 
