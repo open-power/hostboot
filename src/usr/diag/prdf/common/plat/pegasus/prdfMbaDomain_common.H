@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/framework/config/prdfMbaDomain.C $          */
+/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfMbaDomain_common.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,55 +23,40 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include <prdfMbaDomain.H>
+#ifndef __prdfMbaDomain_common_H
+#define __prdfMbaDomain_common_H
 
-// Framework includes
-#include <prdfExtensibleChip.H>
-#include <prdfPlatServices.H>
-#include <prdfTrace.H>
-
-// Pegasus includes
-//#include <prdfCenMbaDataBundle.H> TODO RTC 136126
-
-using namespace TARGETING;
+#include <prdfRuleChipDomain.H>
 
 namespace PRDF
 {
 
-using namespace PlatServices;
-
-int32_t MbaDomain::startScrub()
+class MbaDomainCommon : public RuleChipDomain
 {
-    #define PRDF_FUNC "[MbaDomain::startScrub] "
+  public:
 
-    int32_t o_rc = SUCCESS;
+    /**
+     * @brief Constructor
+     * @param i_did  The domain ID
+     * @param i_size The projected size of the domain
+     */
+    MbaDomainCommon( DOMAIN_ID i_did, uint32_t i_size = MBA_DOMAIN_SIZE ) :
+        RuleChipDomain( i_did, i_size )
+    {}
 
-    do
-    {
-/* TODO RTC 136126
-        // Iterate all MBAs in the domain.
-        for ( uint32_t i = 0; i < GetSize(); ++i )
-        {
-            RuleChip * mbaChip = LookUp(i);
+    /**
+     * @brief  Query for an attention of a specific type in this domain
+     * @param  i_attnType [MACHINE_CHECK | RECOVERABLE | SPECIAL]
+     * @return false
+     * @note   This function will always return false. That way PRD will look
+     *         for the attention via the memory buffer chip.
+     */
+    virtual bool Query( ATTENTION_TYPE i_attnType )
+    {  return false;  }
 
-            // Start background scrub
-            CenMbaDataBundle * mbadb = getMbaDataBundle( mbaChip );
-            int32_t l_rc = mbadb->iv_tdCtlr.startInitialBgScrub();
-            if ( SUCCESS != l_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "startInitialBgScrub() failed: MBA=0x%08x",
-                          mbaChip->GetId() );
-                o_rc = FAIL; continue; // Keep going.
-            }
-        }
-*/
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
+};
 
 } // end namespace PRDF
+
+#endif /* __prdfMbaDomain_common_H */
 

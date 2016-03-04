@@ -96,9 +96,6 @@ ifneq (${HOSTBOOT_RUNTIME},1)
 # ./
 prd_obj += prdfMain_ipl.o
 
-# framework/config/
-prd_obj += prdfMbaDomain.o
-
 # framework/register
 prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfFileRegisterAccess.o)
 
@@ -117,6 +114,7 @@ prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfWriteHomerFirData.o)
 #prd_obj += prdfCenMbaIplCeStats.o
 #prd_obj += prdfCenMbaTdCtlr_ipl.o
 #prd_obj += prdfDramRepairs.o
+#prd_obj += prdfMbaDomain.o
 #prd_obj += prdfPlatCalloutUtil.o
 
 # plat/pegasus/ (rule plugin related)
