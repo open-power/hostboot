@@ -49,9 +49,18 @@ class ReturnCode : public FirstFailureData<ReturnCode>
         /// @brief Constructor.
         /// @param[in] i_rc the rc to set
         ///
-        ReturnCode(const uint64_t i_rc = FAPI2_RC_SUCCESS):
+        ReturnCode(const uint32_t i_rc = FAPI2_RC_SUCCESS):
             iv_rc(i_rc)
         {};
+
+        ///
+        /// @brief integral type conversion function. Returns the error code
+        /// @return The error code
+        ///
+        inline operator uint32_t() const
+        {
+            return iv_rc;
+        }
 
         ///
         /// @brief integral type conversion function. Returns the error code
@@ -75,11 +84,11 @@ class ReturnCode : public FirstFailureData<ReturnCode>
         /// @brief Assignement operator
         ///
 #ifdef DOXYGEN
-        inline ReturnCode& operator=(const uint64_t& rhs);
+        inline ReturnCode& operator=(const uint32_t& rhs);
         inline ReturnCode& operator=(const ReturnCodes& rhs);
 #endif
 
-        inline bool operator==(const uint64_t& rhs) const
+        inline bool operator==(const uint32_t& rhs) const
         {
             return rhs == iv_rc;
         }
@@ -89,7 +98,7 @@ class ReturnCode : public FirstFailureData<ReturnCode>
             return rhs == iv_rc;
         }
 
-        inline bool operator!=(const uint64_t& rhs) const
+        inline bool operator!=(const uint32_t& rhs) const
         {
             return rhs != iv_rc;
         }
@@ -130,7 +139,7 @@ class ReturnCode : public FirstFailureData<ReturnCode>
         }
 
     private:
-        uint64_t iv_rc;
+        uint32_t iv_rc;
 };
 
 /// This implementation assumes no exception handling and leverages thread-local
