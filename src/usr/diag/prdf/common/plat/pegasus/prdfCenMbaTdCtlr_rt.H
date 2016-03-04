@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/runtime/prdfCenMbaTdCtlr_rt.H $      */
+/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfCenMbaTdCtlr_rt.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,8 +31,8 @@
 #define __prdfCenMbaTdCtlr_rt_H
 
 // Pegasus includes
-#include <prdfCenMbaTdQueue.H>
-#include <prdfCenMbaTdRankData.H>
+#include <prdfCenMbaTdQueue_rt.H>
+#include <prdfCenMbaTdRankData_rt.H>
 
 // Should be included last in case there are any platform specific includes that
 // the common code needs.

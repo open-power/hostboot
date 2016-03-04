@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/runtime/prdfCenMbaTdQueue.H $        */
+/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfCenMbaTdQueue_rt.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,12 +23,12 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/** @file  prdfCenMbaTdQueue.H
+/** @file  prdfCenMbaTdQueue_rt.H
  *  @brief Support code for a Targeted Diagnostics weighted event queue.
  */
 
-#ifndef PRDF_CEN_MBA_TD_QUEUE_H
-#define PRDF_CEN_MBA_TD_QUEUE_H
+#ifndef PRDF_CEN_MBA_TD_QUEUE_RT_H
+#define PRDF_CEN_MBA_TD_QUEUE_RT_H
 
 // Framework includes
 #include <prdf_types.h>
@@ -178,4 +178,4 @@ class TdQueue
 
 } // end namespace PRDF
 
-#endif // PRDF_CEN_MBA_TD_QUEUE_H
+#endif // PRDF_CEN_MBA_TD_QUEUE_RT_H
