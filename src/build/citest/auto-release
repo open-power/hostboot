@@ -69,41 +69,95 @@ function build {
 
 function fsp-ci-wait {
     joburl=$1
+    build_result="unknown"
+    rc=1
+
+    if [ -z "$joburl" ];
+    then
+        echo "Invalid or empty job URL."
+        exit -1
+    fi
+
+    # No timeout is implemented here.  Timeout would happen at the Jenkins
+    # project level
     echo "Waiting for $joburl build status..."
     while true;
     do
         sleep 10
-        #TODO fix curl output, must be hidden
-        curl ${joburl}/api/json | grep building\":false >/dev/null 2>&1
+        # use silent flag (-s) to omit progress meter output
+        curl -s ${joburl}/api/json | grep building\":false >/dev/null 2>&1
         if [ $? -eq 0 ];
         then
             break
         fi
     done
-#TODO handle ABORTED case
-    curl ${joburl}/api/json | grep result\":\"FAILURE
+
+    # The job is not building anymore.  Check the build result.
+    CURL_OUT="$(curl -s ${joburl}/api/json)"
+    if [ $? -ne 0 ];
+    then
+        echo "Error verifying build result..."
+        echo "curl returned $?\n$CURL_OUT"
+        exit -1
+    fi
+
+    echo $CURL_OUT | grep result\":\"SUCCESS
     if [ $? -eq 0 ];
     then
-        echo "Job $joburl failed."
-        return 1
-    else
-        echo "Job $joburl passed."
-        return 0
+        echo "Build $joburl passed"
+        build_result="passed"
+        rc=0
     fi
+
+    echo $CURL_OUT | grep result\":\"FAILURE
+    if [ $? -eq 0 ];
+    then
+        echo "Build $joburl failed."
+        build_result="failed"
+        rc=1
+    fi
+
+    echo $CURL_OUT | grep result\":\"ABORTED
+    if [ $? -eq 0 ];
+    then
+        echo "Build $joburl aborted."
+        build_result="aborted"
+        rc=1
+    fi
+
+    if [ "$build_result" == "unknown" ];
+    then
+        echo "Build result for $joburl: unknown."
+        echo "curl output: $CURL_OUT"
+        rc=1
+    fi
+
+    return $rc
 }
 
 function testr {
     ### Call fsp-ci to test hostboot release
     # Start fsp-CI job and set URL
-    #TODO add retry loop
-    OUTPUT="$(fsp-CI-jenkins -r $FIPS_RELEASE -t $FEATURE --force)";
-    # Check if fsp-CI-jenkins failed to start
-    if [ $? -eq 0 ]; then
-        URL="$(echo $OUTPUT | grep -o "Check status at .*" | sed -e "s/Check status at//")"
-    else
-        echo "fsp-CI-jenkins command failed returned $?"
-        exit -1
-    fi
+    retries=3
+
+    # Retry loop for fsp-CI-jenkins
+    while true;
+    do
+        ((retries--))
+        OUTPUT="$(fsp-CI-jenkins -r $FIPS_RELEASE -t $FEATURE --force)";
+
+        # Check if fsp-CI-jenkins failed to start
+        if [ $? -eq 0 ]; then
+            URL="$(echo $OUTPUT | grep -o "Check status at .*" | sed -e "s/Check status at//")"
+            break
+        else
+            if [ $retries -lt 1 ]; then
+                exit -1
+            fi
+            echo "fsp-CI-jenkins command failed returned $?, retrying..."
+            sleep 66
+        fi
+    done
 
     ### Wait on fsp-CI job to complete, whether pass or fail
     fsp-ci-wait $URL || exit -1
