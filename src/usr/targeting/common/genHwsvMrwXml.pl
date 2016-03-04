@@ -1516,189 +1516,22 @@ for my $i ( 0 .. $#SortedTargets )
         my $node = $SortedTargets[$i][NODE_FIELD];
         my $position = $SortedTargets[$i][POS_FIELD];
 
-        for my $j ( 0 .. $#SortedTargets )
+        my @targetOrder = ("ex","eq","core","mcs","mca","mcbist","pec",
+                "phb","obus","xbus","ppe","perv","capp","sbe");
+        for my $m (0 .. $#targetOrder)
         {
-            if (($SortedTargets[$j][NAME_FIELD] eq "ex") &&
-                ($SortedTargets[$j][NODE_FIELD] eq $node) &&
-                ($SortedTargets[$j][POS_FIELD] eq $position))
+            for my $j ( 0 ..$#SortedTargets)
             {
-                for my $k ( 0 .. PLUG_POS )
+                if(($SortedTargets[$j][NAME_FIELD] eq $targetOrder[$m]) &&
+                   ($SortedTargets[$j][NODE_FIELD] eq $node) &&
+                   ($SortedTargets[$j][POS_FIELD] eq $position))
                 {
-                    $fields[$k] = $SortedTargets[$j][$k];
+                    for my $n ( 0 .. PLUG_POS )
+                    {
+                        $fields[$n] = $SortedTargets[$j][$n];
+                    }
+                    push @STargets, [@fields];
                 }
-                push @STargets, [ @fields ];
-            }
-        }
-
-        for my $j ( 0 .. $#SortedTargets )
-        {
-            if (($SortedTargets[$j][NAME_FIELD] eq "eq") &&
-                ($SortedTargets[$j][NODE_FIELD] eq $node) &&
-                ($SortedTargets[$j][POS_FIELD] eq $position))
-            {
-                for my $k ( 0 .. PLUG_POS )
-                {
-                    $fields[$k] = $SortedTargets[$j][$k];
-                }
-                push @STargets, [ @fields ];
-            }
-        }
-
-        for my $j ( 0 .. $#SortedTargets )
-        {
-            if (($SortedTargets[$j][NAME_FIELD] eq "core") &&
-                ($SortedTargets[$j][NODE_FIELD] eq $node) &&
-                ($SortedTargets[$j][POS_FIELD] eq $position))
-            {
-                for my $k ( 0 .. PLUG_POS )
-                {
-                    $fields[$k] = $SortedTargets[$j][$k];
-                }
-                push @STargets, [ @fields ];
-            }
-        }
-
-        for my $j ( 0 .. $#SortedTargets )
-        {
-            if (($SortedTargets[$j][NAME_FIELD] eq "mcs") &&
-                ($SortedTargets[$j][NODE_FIELD] eq $node) &&
-                ($SortedTargets[$j][POS_FIELD] eq $position))
-            {
-                for my $k ( 0 .. PLUG_POS )
-                {
-                    $fields[$k] = $SortedTargets[$j][$k];
-                }
-                push @STargets, [ @fields ];
-            }
-        }
-        for my $j ( 0 .. $#SortedTargets )
-        {
-            if (($SortedTargets[$j][NAME_FIELD] eq "mca") &&
-                ($SortedTargets[$j][NODE_FIELD] eq $node) &&
-                ($SortedTargets[$j][POS_FIELD] eq $position))
-            {
-                for my $k ( 0 .. PLUG_POS )
-                {
-                    $fields[$k] = $SortedTargets[$j][$k];
-                }
-                push @STargets, [ @fields ];
-            }
-        }
-        for my $j ( 0 .. $#SortedTargets )
-        {
-            if (($SortedTargets[$j][NAME_FIELD] eq "mcbist") &&
-                ($SortedTargets[$j][NODE_FIELD] eq $node) &&
-                ($SortedTargets[$j][POS_FIELD] eq $position))
-            {
-                for my $k ( 0 .. PLUG_POS )
-                {
-                    $fields[$k] = $SortedTargets[$j][$k];
-                }
-                push @STargets, [ @fields ];
-            }
-        }
-        for my $j ( 0 .. $#SortedTargets )
-        {
-            if (($SortedTargets[$j][NAME_FIELD] eq "pec") &&
-                ($SortedTargets[$j][NODE_FIELD] eq $node) &&
-                ($SortedTargets[$j][POS_FIELD] eq $position))
-            {
-                for my $k ( 0 .. PLUG_POS )
-                {
-                    $fields[$k] = $SortedTargets[$j][$k];
-                }
-                push @STargets, [@fields];
-            }
-        }
-        for my $j ( 0 .. $#SortedTargets )
-        {
-            if (($SortedTargets[$j][NAME_FIELD] eq "phb") &&
-                ($SortedTargets[$j][NODE_FIELD] eq $node) &&
-                ($SortedTargets[$j][POS_FIELD] eq $position))
-            {
-                for my $k ( 0 .. PLUG_POS )
-                {
-                    $fields[$k] = $SortedTargets[$j][$k];
-                }
-                push @STargets, [@fields];
-            }
-        }
-        for my $j ( 0 .. $#SortedTargets )
-        {
-            if (($SortedTargets[$j][NAME_FIELD] eq "obus") &&
-                ($SortedTargets[$j][NODE_FIELD] eq $node) &&
-                ($SortedTargets[$j][POS_FIELD] eq $position))
-            {
-                for my $k ( 0 .. PLUG_POS )
-                {
-                    $fields[$k] = $SortedTargets[$j][$k];
-                }
-                push @STargets, [@fields];
-            }
-        }
-        for my $j ( 0 .. $#SortedTargets )
-        {
-            if (($SortedTargets[$j][NAME_FIELD] eq "xbus") &&
-                ($SortedTargets[$j][NODE_FIELD] eq $node) &&
-                ($SortedTargets[$j][POS_FIELD] eq $position))
-            {
-                for my $k ( 0 .. PLUG_POS )
-                {
-                   $fields[$k] = $SortedTargets[$j][$k];
-                }
-                push @STargets, [@fields];
-            }
-        }
-        for my $j ( 0 .. $#SortedTargets )
-        {
-            if (($SortedTargets[$j][NAME_FIELD] eq "ppe") &&
-                ($SortedTargets[$j][NODE_FIELD] eq $node) &&
-                ($SortedTargets[$j][POS_FIELD] eq $position))
-            {
-                for my $k ( 0 .. PLUG_POS )
-                {
-                    $fields[$k] = $SortedTargets[$j][$k];
-                }
-                push @STargets, [@fields];
-            }
-        }
-        for my $j ( 0 .. $#SortedTargets )
-        {
-            if (($SortedTargets[$j][NAME_FIELD] eq "perv") &&
-                ($SortedTargets[$j][NODE_FIELD] eq $node) &&
-                ($SortedTargets[$j][POS_FIELD] eq $position))
-            {
-                for my $k ( 0 .. PLUG_POS )
-                {
-                    $fields[$k] = $SortedTargets[$j][$k];
-                }
-                push @STargets, [@fields];
-            }
-        }
-        for my $j ( 0 .. $#SortedTargets )
-        {
-            if (($SortedTargets[$j][NAME_FIELD] eq "capp") &&
-                ($SortedTargets[$j][NODE_FIELD] eq $node) &&
-                ($SortedTargets[$j][POS_FIELD] eq $position))
-            {
-                for my $k ( 0 .. PLUG_POS )
-                {
-                    $fields[$k] = $SortedTargets[$j][$k];
-                }
-                push @STargets, [@fields];
-            }
-        }
-        for my $j ( 0 .. $#SortedTargets )
-        {
-            if (($SortedTargets[$j][NAME_FIELD] eq "sbe") &&
-                ($SortedTargets[$j][NODE_FIELD] eq $node) &&
-                ($SortedTargets[$j][POS_FIELD] eq $position))
-            {
-                for my $k ( 0 .. PLUG_POS )
-                {
-                    $fields[$k] = $SortedTargets[$j][$k];
-                }
-                push @STargets, [@fields];
             }
         }
     }
@@ -1710,38 +1543,28 @@ for my $i ( 0 .. $#SortedTargets )
     {
         for my $k ( 0 .. PLUG_POS )
         {
-            $fields[$k] = $SortedTargets[$i][$k];
+           $fields[$k] = $SortedTargets[$i][$k];
         }
         push @STargets, [ @fields ];
 
         my $node = $SortedTargets[$i][NODE_FIELD];
         my $position = $SortedTargets[$i][POS_FIELD];
 
-        for my $j ( 0 .. $#SortedTargets )
+        my @targetOrder = ("mba","L4");
+        for my $m (0 .. $#targetOrder)
         {
-            if (($SortedTargets[$j][NAME_FIELD] eq "mba") &&
-                ($SortedTargets[$j][NODE_FIELD] eq $node) &&
-                ($SortedTargets[$j][POS_FIELD] eq $position))
+            for my $j ( 0 ..$#SortedTargets)
             {
-                for my $k ( 0 .. PLUG_POS )
+                if(($SortedTargets[$j][NAME_FIELD] eq $targetOrder[$m]) &&
+                   ($SortedTargets[$j][NODE_FIELD] eq $node) &&
+                   ($SortedTargets[$j][POS_FIELD] eq $position))
                 {
-                    $fields[$k] = $SortedTargets[$j][$k];
+                    for my $n ( 0 .. PLUG_POS )
+                    {
+                        $fields[$n] = $SortedTargets[$j][$n];
+                    }
+                    push @STargets, [@fields ];
                 }
-                push @STargets, [ @fields ];
-            }
-        }
-
-        for my $p ( 0 .. $#SortedTargets )
-        {
-            if (($SortedTargets[$p][NAME_FIELD] eq "L4") &&
-                ($SortedTargets[$p][NODE_FIELD] eq $node) &&
-                ($SortedTargets[$p][POS_FIELD] eq $position))
-            {
-                for my $q ( 0 .. PLUG_POS )
-                {
-                    $fields[$q] = $SortedTargets[$p][$q];
-                }
-                push @STargets, [ @fields ];
             }
         }
     }
