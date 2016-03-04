@@ -2509,6 +2509,7 @@
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
     <attribute><id>PARENT_PERVASIVE</id></attribute>
     <attribute><id>OPTICS_CONFIG_MODE</id></attribute>
+    <attribute><id>PEER_TARGET</id></attribute>
 </targetType>
 
 <targetType>

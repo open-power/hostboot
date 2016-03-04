@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,17 +51,17 @@
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 
+#include  <pbusLinkSvc.H>
+#include  <fapi2/target.H>
+#include  <fapi2/plat_hwp_invoker.H>
+
 //  MVPD
 #include <devicefw/userif.H>
 #include <vpd/mvpdenums.H>
 
 #include <config.h>
+//#include <p9_io_xbus_scominit.H> // TODO-RTC:149687 - enable when ready
 
-//  --  prototype   includes    --
-//  Add any customized routines that you don't want overwritten into
-//      "start_clocks_on_nest_chiplets_custom.C" and include
-//      the prototypes here.
-//  #include    "nest_chiplets_custom.H"
 namespace   ISTEP_08
 {
 
@@ -70,22 +70,18 @@ using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 
-//*****************************************************************************
+//******************************************************************************
 // wrapper function to call proc_xbus_scominit
 //******************************************************************************
-void* call_proc_xbus_scominit( void    *io_pArgs )
+void* call_proc_xbus_scominit( void *io_pArgs )
 {
-//    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = NULL;
     IStepError l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-        "call_proc_xbus_scominit entry" );
-
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+             "call_proc_xbus_scominit entry" );
     do
     {
-
-        /* @TODO RTC:134078
-
         EDI_EI_INITIALIZATION::TargetPairs_t l_XbusConnections;
         // Note:
         // i_noDuplicate parameter must be set to false because
@@ -98,9 +94,9 @@ void* call_proc_xbus_scominit( void    *io_pArgs )
                                           l_XbusConnections, TYPE_XBUS, false);
         if (l_err)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR 0x%.8X : getPbusConnections XBUS returns error",
-                    l_err->reasonCode());
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                     "ERROR 0x%.8X : getPbusConnections XBUS returns error",
+                     l_err->reasonCode() );
 
             // Create IStep error log and cross reference to error that occurred
             l_StepError.addErrorDetails( l_err );
@@ -112,38 +108,37 @@ void* call_proc_xbus_scominit( void    *io_pArgs )
             break;
         }
 
-        for (EDI_EI_INITIALIZATION::TargetPairs_t::const_iterator
-                        l_itr = l_XbusConnections.begin();
-             l_itr != l_XbusConnections.end(); ++l_itr)
+        for (const auto & l_XbusConnection: l_XbusConnections)
         {
-            const TARGETING::Target* l_thisXbusTarget = l_itr->first;
-            const TARGETING::Target* l_connectedXbusTarget = l_itr->second;
+            const TARGETING::Target* l_thisXbusTarget = l_XbusConnection.first;
+            const TARGETING::Target* l_connectedXbusTarget =
+                                                    l_XbusConnection.second;
 
-            // Call HW procedure
+            const fapi2::Target<fapi2::TARGET_TYPE_XBUS>
+                l_thisXbusFapi2Target(
+                (const_cast<TARGETING::Target*>(l_thisXbusTarget)));
+
+            const fapi2::Target<fapi2::TARGET_TYPE_XBUS>
+                l_connectedXbusFapi2Target(
+                (const_cast<TARGETING::Target*>(l_connectedXbusTarget)));
+
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running proc_xbus_scominit HWP on "
-                "This XBUS target %.8X - Connected XBUS target  %.8X",
-                TARGETING::get_huid(l_thisXbusTarget),
-                TARGETING::get_huid(l_connectedXbusTarget));
+                     "Running p9_io_xbus_scominit HWP on "
+                     "This XBUS target %.8X - Connected XBUS target %.8X",
+                     TARGETING::get_huid(l_thisXbusTarget),
+                     TARGETING::get_huid(l_connectedXbusTarget) );
 
-             const fapi::Target l_thisXbusFapiTarget(
-                       TARGET_TYPE_XBUS_ENDPOINT,
-                       (const_cast<TARGETING::Target*>(l_thisXbusTarget)));
-
-             const fapi::Target l_connectedXbusFapiTarget(
-                       TARGET_TYPE_XBUS_ENDPOINT,
-                       (const_cast<TARGETING::Target*>(l_connectedXbusTarget)));
-            //@TODO RTC:134078
-            //FAPI_INVOKE_HWP(l_err, p9_xbus_scominit,
-            //                l_thisXbusFapiTarget, l_connectedXbusFapiTarget);
+            // TODO-RTC:149687
+            //FAPI_INVOKE_HWP(l_err, p9_io_xbus_scominit,
+            //               l_thisXbusFapi2Target, l_connectedXbusFapi2Target);
             if (l_err)
             {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR 0x%.8X : proc_xbus_scominit HWP returns error. "
-                    "This XBUS target %.8X - Connected XBUS target  %.8X",
-                    l_err->reasonCode(),
-                    TARGETING::get_huid(l_thisXbusTarget),
-                    TARGETING::get_huid(l_connectedXbusTarget));
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "ERROR 0x%.8X : proc_xbus_scominit HWP returned error. "
+                        "This XBUS target %.8X - Connected XBUS target  %.8X",
+                        l_err->reasonCode(),
+                        TARGETING::get_huid(l_thisXbusTarget),
+                        TARGETING::get_huid(l_connectedXbusTarget) );
 
                 // capture the target data in the elog
                 ErrlUserDetailsTarget(l_thisXbusTarget).addToLog( l_err );
@@ -157,11 +152,14 @@ void* call_proc_xbus_scominit( void    *io_pArgs )
                 // after committing
                 errlCommit(l_err, HWPF_COMP_ID);
             }
+        } // end of going through pairs
 
-        }
-*/
     } while (0);
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+        "call_proc_xbus_scominit exit" );
 
     return l_StepError.getErrorHandle();
 }
+
 };

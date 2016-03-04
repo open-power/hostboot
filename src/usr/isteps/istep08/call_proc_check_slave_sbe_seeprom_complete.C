@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,6 +44,7 @@
 #include <sys/time.h>
 #include <devicefw/userif.H>
 #include <i2c/i2cif.H>
+#include <sbe/sbeif.H>
 
 //  targeting support
 #include <targeting/common/commontargeting.H>
@@ -54,12 +55,20 @@
 #include <isteps/hwpisteperror.H>
 #include <errl/errludtarget.H>
 
+#include <fapi2/target.H>
+#include <fapi2/plat_hwp_invoker.H>
+
+#include <p9_check_slave_sbe_seeprom_complete.H>
+#include <p9_extract_sbe_rc.H>
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
 using namespace ERRORLOG;
 using namespace TARGETING;
+using namespace fapi2;
 
+const uint64_t MS_TO_WAIT_FIRST = 2500; //(2.5 s)
+const uint64_t MS_TO_WAIT_OTHERS= 100; //(100 ms)
 namespace ISTEP_08
 {
 
@@ -69,23 +78,11 @@ namespace ISTEP_08
 void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
 {
     errlHndl_t  l_errl = NULL;
-    //@TODO RTC:134078
-/*    IStepError  l_stepError;
-    void* sbeImgPtr = NULL;
-    size_t sbeImgSize = 0;
-    //size_t l_wait_time = MS_TO_WAIT_OTHERS;
-
+    IStepError  l_stepError;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_check_slave_sbe_seeprom_complete entry" );
 
-    //If in FSPless environment -- give time for SBE to complete on first chip
-*/
-    /*if (!INITSERVICE::spBaseServicesEnabled())
-    {
-        l_wait_time = MS_TO_WAIT_FIRST;
-    }*/
-/*
     //
     //  get the master Proc target, we want to IGNORE this one.
     //
@@ -95,60 +92,57 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
     //
     //  get a list of all the procs in the system
     //
-    TARGETING::TargetHandleList l_procTargetList;
-    getAllChips(l_procTargetList, TYPE_PROC);
+    TARGETING::TargetHandleList l_cpuTargetList;
+    getAllChips(l_cpuTargetList, TYPE_PROC);
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
         "proc_check_slave_sbe_seeprom_complete: %d procs in the system.",
-        l_procTargetList.size() );
+        l_cpuTargetList.size() );
 
     // loop thru all the cpu's
-    for (TargetHandleList::const_iterator
-            l_proc_iter = l_procTargetList.begin();
-            l_proc_iter != l_procTargetList.end();
-            ++l_proc_iter)
+    for (const auto & l_cpu_target: l_cpuTargetList)
     {
-        //  make a local copy of the Processor target
-        TARGETING::Target* l_pProcTarget = *l_proc_iter;
-
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "target HUID %.8X",
-                TARGETING::get_huid(l_pProcTarget));
-
-        if ( l_pProcTarget  ==  l_pMasterProcTarget )
+        if ( l_cpu_target  ==  l_pMasterProcTarget )
         {
             // we are just checking the Slave SBE's, skip the master
             continue;
         }
 
-        l_errl = SBE::findSBEInPnor(l_pProcTarget,sbeImgPtr,sbeImgSize);
+        // TODO-RTC:138226
+        /*
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "Processor target HUID %.8X",
+                TARGETING::get_huid(l_cpu_target));
 
+        l_errl = SBE::findSBEInPnor(l_cpu_target,sbeImgPtr,sbeImgSize);
         if (l_errl)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "ERROR : proc_check_slave_sbe_seeprom_complete "
                   "Can't find SBE image in pnor");
-        }
+        } */
 
-        fapi::Target l_fapiProcTarget( fapi::TARGET_TYPE_PROC_CHIP,
-                                       l_pProcTarget    );
-        //@TODO RTC:134078
+
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2ProcTarget(
+                            const_cast<TARGETING::Target*> (l_cpu_target));
+
         // Invoke the HWP
-        fapi::ReturnCode rc_fapi = fapi::FAPI_RC_SUCCESS;
-    */    /*FAPI_EXEC_HWP(rc_fapi,
-                      p9_check_slave_sbe_seeprom_complete,
-                      l_fapiProcTarget,
-                      sbeImgPtr,
-                      l_wait_time);*/
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "Running p9_check_slave_sbe_seeprom_complete HWP"
+                " on processor target %.8X",
+                TARGETING::get_huid(l_cpu_target) );
 
+        FAPI_INVOKE_HWP(l_errl, p9_check_slave_sbe_seeprom_complete,
+                        l_fapi2ProcTarget);
+/* TODO-RTC:138226
         // check for re ipl request
-  /*      if(static_cast<uint32_t>(rc_fapi) ==
+        if(static_cast<uint32_t>(rc_fapi) ==
            fapi::RC_PROC_EXTRACT_SBE_RC_ENGINE_RETRY)
         {
             l_errl = fapi::fapiRcToErrl(rc_fapi);
 
             // capture the target data in the elog
-            ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_errl );
+            ErrlUserDetailsTarget(l_cpu_target).addToLog( l_errl );
 
             l_errl->setSev(ERRL_SEV_INFORMATIONAL);
 
@@ -168,15 +162,15 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
         {
             l_errl = fapi::fapiRcToErrl(rc_fapi);
         }
-
+*/
         if (l_errl)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR : proc_check_slave_sbe_seeprom_complete",
-                      "failed, returning errorlog" );
+                    "ERROR : call p9_check_slave_sbe_seeprom_complete, "
+                    "PLID=0x%x", l_errl->plid()  );
 
             // capture the target data in the elog
-            ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_errl );
+            ErrlUserDetailsTarget(l_cpu_target).addToLog( l_errl );
 
             // Create IStep error log and cross reference to error that occurred
             l_stepError.addErrorDetails( l_errl );
@@ -189,80 +183,94 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "SUCCESS : proc_check_slave_sbe_seeprom_complete",
                       "completed ok");
-
         }
 
-        //after first one default to quick check time
-        //l_wait_time = MS_TO_WAIT_OTHERS;
-    }   // endfor
+
+        // Not a way to pass in -soft_err, assuming that is default behavior
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "Running p9_extract_sbe_rc HWP"
+                " on processor target %.8X",
+                  TARGETING::get_huid(l_cpu_target) );
+
+        FAPI_INVOKE_HWP(l_errl, p9_extract_sbe_rc,
+                        l_fapi2ProcTarget);
+        if (l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "ERROR : proc_check_slave_sbe_seeprom_complete",
+                "failed, p9_extract_sbe_rc HWP returning errorlog PLID=0x%x",
+                l_errl->plid());
+
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_cpu_target).addToLog( l_errl );
+
+            // Create IStep error log and cross reference to error that occurred
+            l_stepError.addErrorDetails( l_errl );
+
+            // Commit error log
+            errlCommit( l_errl, HWPF_COMP_ID );
+        }
+    }   // end of going through all processors
 
 
     //  Once the sbe's are up correctly, fetch all the proc ECIDs and
     //  store them in an attribute.
-    for (TargetHandleList::const_iterator
-            l_proc_iter = l_procTargetList.begin();
-            l_proc_iter != l_procTargetList.end();
-            ++l_proc_iter)
+    for (const auto & l_cpu_target: l_cpuTargetList)
     {
-        //  make a local copy of the Processor target
-        TARGETING::Target* l_pProcTarget = *l_proc_iter;
+      const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2ProcTarget(
+                          const_cast<TARGETING::Target*> (l_cpu_target));
 
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "target HUID %.8X --> calling proc_getecid",
-                TARGETING::get_huid(l_pProcTarget));
+      TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+              "Running proc_getecid HWP"
+              " on processor target %.8X",
+              TARGETING::get_huid(l_cpu_target) );
 
-        fapi::Target l_fapiProcTarget( fapi::TARGET_TYPE_PROC_CHIP,
-                                       l_pProcTarget    );
+// TODO-RTC:149518
+/*
+      //  proc_getecid should set the fuse string to 112 bits long.
+      ecmdDataBufferBase  l_fuseString;
 
-        //  proc_getecid should set the fuse string to 112 bits long.
-        ecmdDataBufferBase  l_fuseString;
-        //@TODO RTC:134078
-        // Invoke the HWP
-        FAPI_INVOKE_HWP(l_errl,
-                        proc_getecid,
-                        l_fapiProcTarget,
-                        l_fuseString  );
-
-        if (l_errl)
-        {
-            if (l_procTargetList->getAttr<ATTR_HWAS_STATE>().functional)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "ERROR : proc_getecid",
-                        " failed, returning errorlog" );
-
-                // capture the target data in the elog
-                ErrlUserDetailsTarget(l_pProcTarget).addToLog( l_errl );
-
-                // Create IStep error log and cross reference error that
-                // occurred
-                l_stepError.addErrorDetails( l_errl );
-
-                // Commit error log
-                errlCommit( l_errl, HWPF_COMP_ID );
-            }
-            else // Not functional, proc deconfigured, don't report error
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "ERROR : proc_getecid",
-                        " failed, proc target deconfigured" );
-
-                delete l_errl;
-                l_errl = NULL;
-            }
-        }
-        else
+      // Invoke the HWP
+      FAPI_INVOKE_HWP(l_errl,
+                      proc_getecid,
+                      l_fapi2ProcTarget,
+                      l_fuseString  );
+*/
+      if (l_errl)
+      {
+        if (l_cpu_target->getAttr<ATTR_HWAS_STATE>().functional)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "SUCCESS : proc_getecid",
-                      " completed ok");
+                    "ERROR : proc_getecid",
+                    " failed, returning errorlog" );
 
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_cpu_target).addToLog( l_errl );
+
+            // Create IStep error log and cross reference error that
+            // occurred
+            l_stepError.addErrorDetails( l_errl );
+
+            // Commit error log
+            errlCommit( l_errl, HWPF_COMP_ID );
         }
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "target HUID %.8X --> after proc_getecid",
-                  TARGETING::get_huid(l_pProcTarget));
+        else // Not functional, proc deconfigured, don't report error
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR : proc_getecid",
+                    " failed, proc target deconfigured" );
+            delete l_errl;
+            l_errl = NULL;
+        }
+      }
+      else
+      {
+          TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "SUCCESS : proc_getecid",
+                    " completed ok");
 
-    }   // endfor
+      }
+    }  // end of going through all processors
 
 
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -270,7 +278,6 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
 
     // end task, returning any errorlogs to IStepDisp
     return l_stepError.getErrorHandle();
-    */
-        return l_errl;
 }
+
 };

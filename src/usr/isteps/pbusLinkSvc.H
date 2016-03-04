@@ -1,11 +1,13 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/hwpf/hwp/bus_training/pbusLinkSvc.H $                 */
+/* $Source: src/usr/isteps/pbusLinkSvc.H $                                */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -42,14 +44,11 @@
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/common/trace.H>
 
-//  fapi support
-#include    <fapi.H>
 
 namespace   EDI_EI_INITIALIZATION
 {
 
 using   namespace   TARGETING;
-using   namespace   fapi;
 
 typedef std::map<const TARGETING::Target*,
                  const TARGETING::Target*> TargetPairs_t;
@@ -72,7 +71,7 @@ public:
      *        it will perform the collection and save them into the vectors
      *        within the singleton. Then, it will make a copy into the
      *        caller's map whose reference is passed to this function.
-     *  
+     *
      * @parm[out] o_PbusConnections, reference of a map for getting a copy
      *            of the map of specified bus connections
      * @parm[in]  i_busType, type of bus connection, TYPE_XBUS or TYPE_ABUS
@@ -80,7 +79,7 @@ public:
      *            only (endpoint1,endpoint2) or (endpoint2,endpoint1) will
      *            be in the present in the map
      * @return    errlHndl_t if encountering an error, or NULL (no error)
-     *  
+     *
      */
 
     errlHndl_t getPbusConnections( TargetPairs_t & o_PbusConnections,
@@ -108,21 +107,24 @@ private:
     TargetPairs_t iv_abusConnections;
     TargetPairs_t iv_xbusUniqueConnections;
     TargetPairs_t iv_xbusConnections;
+    TargetPairs_t iv_obusUniqueConnections;
+    TargetPairs_t iv_obusConnections;
 
     // Mutex serializing changes to the above four maps
     mutex_t iv_mutex;
 
     /**
-     * @brief collectPbusConections() will collect all pbus connections of
+     * @brief collectPbusConnections() will collect all pbus connections of
      *        the specified bus type. It checks for mixed-type connection,
      *        conflicting connection, and invalid-same-chip connection.
      *        The connections are saved within the singleton.
-     *  
-     * @parm[in]  i_busType, type of bus connection, TYPE_XBUS or TYPE_ABUS
+     *
+     * @parm[in]  i_busType, type of bus connection,
+     *                      TYPE_XBUS, TYPE_OBUS or TYPE_ABUS
      * @return    errlHndl_t if encountering an error, or NULL (no error)
      *
      */
-    errlHndl_t collectPbusConections( TYPE i_busType );
+    errlHndl_t collectPbusConnections( TYPE i_busType );
 
 };
 

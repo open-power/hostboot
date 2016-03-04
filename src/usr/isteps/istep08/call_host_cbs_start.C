@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,6 +55,11 @@
 
 #include <errl/errludtarget.H>
 
+#include <fapi2/target.H>
+#include <fapi2/plat_hwp_invoker.H>
+#include <errl/errlmanager.H>
+
+#include <p9_start_cbs.H>
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -71,19 +76,47 @@ void* call_host_cbs_start(void *io_pArgs)
 {
     errlHndl_t l_errl = NULL;
     IStepError  l_stepError;
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_cbs_start entry" );
 
-    //@TODO RTC:134078
-    //call host_cbs_start
-    //FAPI_INVOKE_HWP(l_errl,p9_start_cbs);
-    if(l_errl)
+    //
+    //  get a list of all the procs in the system
+    //
+    TARGETING::TargetHandleList l_cpuTargetList;
+    getAllChips(l_cpuTargetList, TYPE_PROC);
+
+    //
+    //  Identify the master processor
+    //
+    TARGETING::Target* l_pMasterProcTarget = NULL;
+    TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProcTarget);
+
+    // loop thru all processors, only call procedure on non-master processors
+    for (const auto & l_cpu_target: l_cpuTargetList)
     {
-        l_stepError.addErrorDetails(l_errl);
-        errlCommit(l_errl, HWPF_COMP_ID);
+        if (l_cpu_target != l_pMasterProcTarget)
+        {
+            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                l_fapi2_proc_target (l_cpu_target);
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                     "Running p9_start_cbs HWP on processor target %.8X",
+                     TARGETING::get_huid(l_cpu_target) );
+
+            FAPI_INVOKE_HWP(l_errl, p9_start_cbs, l_fapi2_proc_target);
+            if(l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "ERROR : call p9_start_cbs, "
+                        "PLID=0x%x", l_errl->plid()  );
+                l_stepError.addErrorDetails(l_errl);
+                errlCommit(l_errl, HWPF_COMP_ID);
+            }
+        }
     }
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_cbs_start exit" );
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+             "call_host_cbs_start exit" );
     return l_stepError.getErrorHandle();
 }
 };

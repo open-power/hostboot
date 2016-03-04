@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,17 +51,17 @@
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 
+#include  <pbusLinkSvc.H>
+#include  <fapi2/target.H>
+#include  <fapi2/plat_hwp_invoker.H>
+
 //  MVPD
 #include <devicefw/userif.H>
 #include <vpd/mvpdenums.H>
 
 #include <config.h>
+//#include <p9_io_obus_scominit.H> // TODO-RTC:149687
 
-//  --  prototype   includes    --
-//  Add any customized routines that you don't want overwritten into
-//      "start_clocks_on_nest_chiplets_custom.C" and include
-//      the prototypes here.
-//  #include    "nest_chiplets_custom.H"
 namespace   ISTEP_08
 {
 
@@ -75,22 +75,79 @@ using   namespace   TARGETING;
 //******************************************************************************
 void* call_proc_obus_scominit( void *io_pArgs )
 {
-
     errlHndl_t l_err = NULL;
     IStepError l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_proc_obus_scominit entry" );
-    //@TODO RTC:134078 Call HWP
-    //FAPI_INVOKE_HWP(l_err,p9_obus_scominit);
-    if(l_err)
-    {
-        l_StepError.addErrorDetails(l_err);
-        errlCommit(l_err, HWPF_COMP_ID);
-    }
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+             "call_proc_obus_scominit entry" );
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_proc_obus_scominit exit");
+    do {
+        EDI_EI_INITIALIZATION::TargetPairs_t l_ObusConnections;
+        // Note:
+        // i_noDuplicate parameter must be set to false because
+        // two separate calls would be needed:
+        //    O0 <--> O1
+        //    O1 <--> O0
+        // only the first target is used to issue SCOMs
+        l_err =
+        EDI_EI_INITIALIZATION::PbusLinkSvc::getTheInstance().getPbusConnections(
+                                          l_ObusConnections, TYPE_OBUS, false);
+        if (l_err)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR 0x%.8X : getPbusConnections TYPE_OBUS returns error",
+                    l_err->reasonCode() );
+
+            // Create IStep error log and cross reference to error that occurred
+            l_StepError.addErrorDetails( l_err );
+            // Commit the error log
+            // Log should be deleted and set to NULL in errlCommit.
+            errlCommit(l_err, HWPF_COMP_ID);
+
+            // Shouldn't continue on this fatal error (no OBUS), break out
+            break;
+        }
+
+        for (const auto & l_ObusConnection: l_ObusConnections)
+        {
+            const TARGETING::Target* l_thisObusTarget = l_ObusConnection.first;
+            const TARGETING::Target* l_connectedObusTarget =
+                                                        l_ObusConnection.second;
+
+            const fapi2::Target<fapi2::TARGET_TYPE_OBUS>
+                l_thisObusFapi2Target(
+                (const_cast<TARGETING::Target*>(l_thisObusTarget)));
+
+            const fapi2::Target<fapi2::TARGET_TYPE_OBUS>
+                l_connectedObusFapi2Target(
+                (const_cast<TARGETING::Target*>(l_connectedObusTarget)));
+
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                     "Running p9_io_obus_scominit HWP on "
+                     "This OBUS target %.8X - Connected OBUS target %.8X",
+                     TARGETING::get_huid(l_thisObusTarget),
+                     TARGETING::get_huid(l_connectedObusTarget) );
+
+            //TODO-RTC:149687
+            //FAPI_INVOKE_HWP(l_err, p9_io_obus_scominit,
+            //      l_thisObusFapi2Target, l_connectedObusFapi2Target);
+
+            if(l_err)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                         "ERROR 0x%x: returned from p9_io_obus_scominit on "
+                         "OBUS target %.8X - connected target %.8X, PLID=0x%x",
+                         l_err->plid(),
+                         TARGETING::get_huid(l_thisObusTarget),
+                         TARGETING::get_huid(l_connectedObusTarget) );
+                l_StepError.addErrorDetails(l_err);
+                errlCommit(l_err, HWPF_COMP_ID);
+            }
+        } // end of looping through Obus pairs
+    } while (0);
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+             "call_proc_obus_scominit exit" );
 
     return l_StepError.getErrorHandle();
 }
