@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,17 +50,18 @@
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 
+#include <fapi2/target.H>
+#include <fapi2/plat_hwp_invoker.H>
+
 //  MVPD
 #include <devicefw/userif.H>
 #include <vpd/mvpdenums.H>
 
 #include <config.h>
 
-//  --  prototype   includes    --
-//  Add any customized routines that you don't want overwritten into
-//      "start_clocks_on_nest_chiplets_custom.C" and include
-//      the prototypes here.
-//  #include    "nest_chiplets_custom.H"
+//#include <p9_chiplet_scominit.H> //TODO-RTC:149687
+#include <p9_psi_scominit.H>
+
 namespace   ISTEP_08
 {
 
@@ -74,70 +75,73 @@ using   namespace   TARGETING;
 //******************************************************************************
 void*    call_proc_chiplet_scominit( void    *io_pArgs )
 {
-    //errlHndl_t l_err = NULL;
+    errlHndl_t l_err = NULL;
     IStepError l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                              "call_proc_chiplet_scominit entry" );
 
+    //
+    //  get a list of all the procs in the system
+    //
     TARGETING::TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC);
 
-    do
+    // Loop through all processors including master
+    for (const auto & l_cpu_target: l_cpuTargetList)
     {
-        // If running Sapphire, set sleep enable attribute here so
-        // initfile can be run correctly
-        if(is_sapphire_load())
+        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapi2_proc_target(
+            l_cpu_target);
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "Running p9_chiplet_scominit HWP on "
+            "target HUID %.8X", TARGETING::get_huid(l_cpu_target));
+
+        //TODO-RTC:149687
+        //FAPI_INVOKE_HWP(l_err, p9_chiplet_scominit, l_fapi2_proc_target);
+        if (l_err)
         {
-            TARGETING::Target* l_sys = NULL;
-            TARGETING::targetService().getTopLevelTarget(l_sys);
-            assert( l_sys != NULL );
-            uint8_t l_sleepEnable = 1;
-            l_sys->setAttr<TARGETING::ATTR_PM_SLEEP_ENABLE>(l_sleepEnable);
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : "
+             "p9_chiplet_scominit HWP returns error.  target HUID %.8X",
+                    l_err->reasonCode(), TARGETING::get_huid(l_cpu_target));
+
+            ErrlUserDetailsTarget(l_cpu_target).addToLog( l_err );
+
+            // Create IStep error log and cross ref to error that occurred
+            l_StepError.addErrorDetails( l_err );
+            // We want to continue to the next target instead of exiting,
+            // Commit the error log and move on
+            // Note: Error log should already be deleted and set to NULL
+            // after committing
+            errlCommit(l_err, HWPF_COMP_ID);
         }
 
-        // ----------------------------------------------
-        // Execute PROC_CHIPLET_SCOMINIT_FBC_IF initfile
-        // ----------------------------------------------
-
-        for (TARGETING::TargetHandleList::const_iterator
-             l_cpuIter = l_cpuTargetList.begin();
-             l_cpuIter != l_cpuTargetList.end();
-             ++l_cpuIter)
+        //call p9_psi_scominit
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "Running p9_psi_scominit HWP on "
+            "target HUID %.8X", TARGETING::get_huid(l_cpu_target));
+        FAPI_INVOKE_HWP(l_err,p9_psi_scominit, l_fapi2_proc_target);
+        if (l_err)
         {
-            /* @TODO: RTC:134078 Use fapi2 targets
-            const TARGETING::Target* l_cpu_target = *l_cpuIter;
-            const fapi::Target l_fapi_proc_target( TARGET_TYPE_PROC_CHIP,
-                    ( const_cast<TARGETING::Target*>(l_cpu_target) ) );
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : "
+             "proc_psi_scominit HWP returns error.  target HUID %.8X",
+                    l_err->reasonCode(), TARGETING::get_huid(l_cpu_target));
 
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running proc_chiplet_scominit HWP on "
-                "target HUID %.8X", TARGETING::get_huid(l_cpu_target));
+            ErrlUserDetailsTarget(l_cpu_target).addToLog( l_err );
 
-            // @TODO RTC:134078 call the HWP with each fapi::Target
-            //FAPI_INVOKE_HWP(l_err, p9_chiplet_scominit, l_fapi_proc_target);
-            if (l_err)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "ERROR 0x%.8X : "
-                 "proc_chiplet_scominit HWP returns error.  target HUID %.8X",
-                        l_err->reasonCode(), TARGETING::get_huid(l_cpu_target));
+            // Create IStep error log and cross ref to error that occurred
+            l_StepError.addErrorDetails( l_err );
 
-                ErrlUserDetailsTarget(l_cpu_target).addToLog( l_err );
-
-                // Create IStep error log and cross ref to error that occurred
-                l_StepError.addErrorDetails( l_err );
-                // We want to continue to the next target instead of exiting,
-                // Commit the error log and move on
-                // Note: Error log should already be deleted and set to NULL
-                // after committing
-                errlCommit(l_err, HWPF_COMP_ID);
-            }
-            //call p9_psi_scominit
-            //FAPI_INVOKE_HWP(l_err,p9_psi_scominit);
-            */
+            // We want to continue to the next target instead of exiting,
+            // Commit the error log and move on
+            // Note: Error log should already be deleted and set to NULL
+            // after committing
+            errlCommit(l_err, HWPF_COMP_ID);
         }
+    } // end of going through all processors
 
-    } while (0);
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                             "call_proc_chiplet_scominit exit" );
 
     return l_StepError.getErrorHandle();
 }

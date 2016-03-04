@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,9 +51,16 @@
 #include <targeting/namedtarget.H>
 #include <targeting/attrsync.H>
 
+#include <fapi2/target.H>
+#include <fapi2/plat_hwp_invoker.H>
+
+#include <errl/errlmanager.H>
+
 #include <isteps/hwpisteperror.H>
 
 #include <errl/errludtarget.H>
+
+#include <p9_set_fsi_gp_shadow.H>
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -70,19 +77,49 @@ void* call_host_setup_sbe(void *io_pArgs)
 {
     errlHndl_t l_errl = NULL;
     IStepError  l_stepError;
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_setup_sbe entry" );
 
-    //@TODO RTC:134078
-    //call host_setup_sbe
-    //FAPI_INVOKE_HWP(l_errl,p9_set_fsi_gp_shadow);
-    if(l_errl)
+    //
+    //  get a list of all the procs in the system
+    //
+    TARGETING::TargetHandleList l_cpuTargetList;
+    getAllChips(l_cpuTargetList, TYPE_PROC);
+
+    //
+    //  identify master processor target
+    //
+    TARGETING::Target* l_pMasterProcTarget = NULL;
+    TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProcTarget);
+
+    for (const auto & l_procChip: l_cpuTargetList)
     {
-        l_stepError.addErrorDetails(l_errl);
-        errlCommit(l_errl, HWPF_COMP_ID);
-    }
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_setup_sbe exit" );
+        // call only on non-master processor chips
+        if (l_procChip != l_pMasterProcTarget)
+        {
+            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                l_fapi2_proc_target (l_procChip);
+
+            //call p9_set_fsi_gp_shadow on non-master processors
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Running p9_set_fsi_gp_shadow HWP on processor target %.8X",
+                    TARGETING::get_huid(l_procChip) );
+
+            FAPI_INVOKE_HWP(l_errl,p9_set_fsi_gp_shadow, l_fapi2_proc_target);
+            if(l_errl)
+            {
+                l_stepError.addErrorDetails(l_errl);
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                         "ERROR : call p9_set_fsi_gp_shadow, PLID=0x%x",
+                         l_errl->plid() );
+                errlCommit(l_errl, HWPF_COMP_ID);
+            }
+        }
+
+    } // end of cycling through all processor chips
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "call_host_setup_sbe exit" );
     return l_stepError.getErrorHandle();
 }
 };

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,17 +50,17 @@
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 
+#include  <pbusLinkSvc.H>
+#include  <fapi2/target.H>
+#include  <fapi2/plat_hwp_invoker.H>
+
 //  MVPD
 #include <devicefw/userif.H>
 #include <vpd/mvpdenums.H>
 
 #include <config.h>
 
-//  --  prototype   includes    --
-//  Add any customized routines that you don't want overwritten into
-//      "start_clocks_on_nest_chiplets_custom.C" and include
-//      the prototypes here.
-//  #include    "nest_chiplets_custom.H"
+
 namespace   ISTEP_08
 {
 
@@ -74,22 +74,16 @@ using   namespace   TARGETING;
 //******************************************************************************
 void* call_proc_abus_scominit( void    *io_pArgs )
 {
-
-//    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = NULL;
     IStepError l_StepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
         "call_proc_abus_scominit entry" );
 
-    TARGETING::TargetHandleList l_cpuTargetList;
-    getAllChips(l_cpuTargetList, TYPE_PROC);
-
     do
     {
-
-        // @TODO RTC:134078
         /* TargetPairs_t is defined in pbusLinkSvc, which is used by
-         * other isteps too
+         * other isteps too */
         EDI_EI_INITIALIZATION::TargetPairs_t l_AbusConnections;
         // Note:
         // i_noDuplicate parameter must be set to false because
@@ -118,26 +112,22 @@ void* call_proc_abus_scominit( void    *io_pArgs )
         }
 
         // For each ABUS pair
-        for (EDI_EI_INITIALIZATION::TargetPairs_t::iterator
-                l_abusPairIter = l_AbusConnections.begin();
-                l_abusPairIter != l_AbusConnections.end();
-                ++l_abusPairIter)
+        for (const auto & l_AbusConnection: l_AbusConnections)
         {
             // Make local copies of ABUS targets for ease of use
             TARGETING::Target* l_thisAbusTarget =
-                 const_cast<TARGETING::Target*>(l_abusPairIter->first);
+                 const_cast<TARGETING::Target*>(l_AbusConnection.first);
             TARGETING::Target* l_connectedAbusTarget =
-                 const_cast<TARGETING::Target*>(l_abusPairIter->second);
+                 const_cast<TARGETING::Target*>(l_AbusConnection.second);
 
-            // Get this abus fapi taget
-            const fapi::Target l_fapi_this_abus_target(
-                   TARGET_TYPE_ABUS_ENDPOINT,
-                   const_cast<TARGETING::Target*>(l_thisAbusTarget));
+            // Get this abus fapi2 target
+            const fapi2::Target<fapi2::TARGET_TYPE_ABUS> l_thisAbusFapi2Target(
+                (const_cast<TARGETING::Target*>(l_thisAbusTarget)));
 
-            // Get connected abus fapi taget
-            const fapi::Target l_fapi_connected_abus_target(
-                   TARGET_TYPE_ABUS_ENDPOINT,
-                   const_cast<TARGETING::Target*>(l_connectedAbusTarget));
+            // Get connected abus fapi2 target
+            const fapi2::Target<fapi2::TARGET_TYPE_ABUS>
+                l_connectedAbusFapi2Target(
+                (const_cast<TARGETING::Target*>(l_connectedAbusTarget)));
 
             // Call HW procedure
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -145,10 +135,11 @@ void* call_proc_abus_scominit( void    *io_pArgs )
                 "Abus target HUID %.8X Connected Abus target HUID %.8X",
                 TARGETING::get_huid(l_thisAbusTarget),
                 TARGETING::get_huid(l_connectedAbusTarget));
+
             //@TODO RTC:134078
-            //FAPI_INVOKE_HWP(l_err, p9_abus_scominit,
-            //                l_fapi_this_abus_target,
-            //                l_fapi_connected_abus_target);
+            //FAPI_INVOKE_HWP(l_err, p9_io_abus_scominit,
+            //                l_thisAbusFapi2Target,
+            //                l_connectedAbusFapi2Target);
             if (l_err)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -170,8 +161,7 @@ void* call_proc_abus_scominit( void    *io_pArgs )
                 // after committing
                 errlCommit(l_err, HWPF_COMP_ID);
             }
-        } // End abus list loop
-     */
+        } // End abus pair list loop
     } while (0);
 
     return l_StepError.getErrorHandle();

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,16 +50,18 @@
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 
+#include    <fapi2/target.H>
+#include    <fapi2/plat_hwp_invoker.H>
+#include    <errl/errlmanager.H>
+
 //  MVPD
 #include <devicefw/userif.H>
 #include <vpd/mvpdenums.H>
 
 #include <config.h>
-//  --  prototype   includes    --
-//  Add any customized routines that you don't want overwritten into
-//      "start_clocks_on_nest_chiplets_custom.C" and include
-//      the prototypes here.
-//  #include    "nest_chiplets_custom.H"
+
+#include <p9_scomoverride_chiplets.H>
+
 
 namespace   ISTEP_08
 {
@@ -72,39 +74,54 @@ using   namespace   TARGETING;
 //*****************************************************************************
 // wrapper function to call proc_scomoverride_chiplets
 //*****************************************************************************
-void*    call_proc_scomoverride_chiplets( void    *io_pArgs )
+void* call_proc_scomoverride_chiplets( void *io_pArgs )
 {
-    errlHndl_t          l_errl      =   NULL;
+    errlHndl_t l_errl = NULL;
+    IStepError l_StepError;
 
-    IStepError          l_StepError;
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+             "call_proc_scomoverride_chiplets entry" );
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "call_proc_scomoverride_chiplets entry" );
+    //
+    //  get a list of all the procs in the system
+    //
+    TARGETING::TargetHandleList l_cpuTargetList;
+    getAllChips(l_cpuTargetList, TYPE_PROC);
 
-    //@TODO RTC:134078
-    //FAPI_INVOKE_HWP(l_errl, p9_scomoverride_chiplets);
-
-    if (l_errl)
+    // Loop through all processors, including master
+    for (const auto & l_cpu_target: l_cpuTargetList)
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "ERROR 0x%.8X : proc_scomoverride_chiplets "
-                  "HWP returns error",
-                  l_errl->reasonCode());
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+            l_fapi2_proc_target (l_cpu_target);
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "Running p9_scomoverride_chiplets HWP on processor target %.8X",
+                TARGETING::get_huid(l_cpu_target) );
+
+        FAPI_INVOKE_HWP(l_errl, p9_scomoverride_chiplets, l_fapi2_proc_target);
+
+        if (l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                     "ERROR 0x%.8X : proc_scomoverride_chiplets "
+                     "HWP returns error",
+                     l_errl->reasonCode() );
 
             // Create IStep error log and cross reference to error that occurred
             l_StepError.addErrorDetails( l_errl );
 
             // Commit Error
             errlCommit( l_errl, HWPF_COMP_ID );
-    }
-    else
-    {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "SUCCESS :  proc_scomoverride_chiplets HWP");
-    }
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                     "SUCCESS :  proc_scomoverride_chiplets HWP" );
+        }
+    } // end of going through all processors
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_proc_scomoverride_chiplets exit" );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+             "call_proc_scomoverride_chiplets exit" );
 
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();

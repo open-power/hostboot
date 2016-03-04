@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,17 +51,17 @@
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 
+#include <fapi2/target.H>
+#include <fapi2/plat_hwp_invoker.H>
+
 //  MVPD
 #include <devicefw/userif.H>
 #include <vpd/mvpdenums.H>
 
 #include <config.h>
 
-//  --  prototype   includes    --
-//  Add any customized routines that you don't want overwritten into
-//      "start_clocks_on_nest_chiplets_custom.C" and include
-//      the prototypes here.
-//  #include    "nest_chiplets_custom.H"
+#include <p9_npu_scominit.H>
+
 namespace   ISTEP_08
 {
 
@@ -79,18 +79,38 @@ void* call_proc_npu_scominit( void *io_pArgs )
     errlHndl_t l_err = NULL;
     IStepError l_StepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_proc_npu_scominit entry" );
-    //@TODO RTC:134078 Call HWP
-    //FAPI_INVOKE_HWP(l_err,p9_npu_scominit);
-    if(l_err)
-    {
-        l_StepError.addErrorDetails(l_err);
-        errlCommit(l_err, HWPF_COMP_ID);
-    }
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+             "call_proc_npu_scominit entry" );
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_proc_npu_scominit exit");
+    //
+    //  get a list of all the procs in the system
+    //
+    TARGETING::TargetHandleList l_cpuTargetList;
+    getAllChips(l_cpuTargetList, TYPE_PROC);
+
+    // Loop through all processors, including master
+    for (const auto & l_cpu_target: l_cpuTargetList)
+    {
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapi2_proc_target(
+                l_cpu_target);
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                 "Running p9_npu_scominit HWP on "
+                 "target HUID %.8X", TARGETING::get_huid(l_cpu_target) );
+        FAPI_INVOKE_HWP(l_err, p9_npu_scominit, l_fapi2_proc_target);
+        if(l_err)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                     "ERROR 0x%.8X : p9_npu_scominit "
+                     "HWP returns error for HUID %.8X",
+                     l_err->reasonCode(),
+                     TARGETING::get_huid(l_cpu_target) );
+            l_StepError.addErrorDetails(l_err);
+            errlCommit(l_err, HWPF_COMP_ID);
+        }
+    }
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+             "call_proc_npu_scominit exit" );
 
     return l_StepError.getErrorHandle();
 }

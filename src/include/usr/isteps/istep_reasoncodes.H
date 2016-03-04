@@ -46,6 +46,7 @@ namespace ISTEP
         MOD_COMPUTE_PCIE_CONFIG_ATTRS                     = 0x0A,
         MOD_EXIT_CACHE_CONTAINED                          = 0x0B,
         MOD_HOST_GARD                                     = 0x0C,
+        MOD_EDI_EI_IO_RUN_TRAINING                        = 0x0D,
     };
 
     /**
@@ -70,6 +71,9 @@ namespace ISTEP
         RC_INVALID_CONFIGURATION                 = ISTEP_COMP_ID | 0x0C,
         RC_INVALID_PCIE_IOP_LANE_CONFIG          = ISTEP_COMP_ID | 0x0D,
         RC_MASTER_CORE_NULL                      = ISTEP_COMP_ID | 0x0E,
+        RC_MIXED_PBUS_CONNECTION                 = ISTEP_COMP_ID | 0x0F,
+        RC_SAME_CHIP_PBUS_CONNECTION             = ISTEP_COMP_ID | 0x10,
+        RC_CONFLICT_PBUS_CONNECTION              = ISTEP_COMP_ID | 0x11,
     };
 
 };

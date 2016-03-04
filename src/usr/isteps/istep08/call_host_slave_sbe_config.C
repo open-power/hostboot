@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,11 +51,17 @@
 #include <targeting/namedtarget.H>
 #include <targeting/attrsync.H>
 
+#include <fapi2/target.H>
+#include <fapi2/plat_hwp_invoker.H>
+
+#include <errl/errlmanager.H>
+
 #include <isteps/hwpisteperror.H>
 
 #include <errl/errludtarget.H>
 
-using namespace ISTEP;
+#include <p9_setup_sbe_config.H>
+
 using namespace ISTEP_ERROR;
 using namespace ERRORLOG;
 using namespace TARGETING;
@@ -69,8 +75,8 @@ errlHndl_t set_proc_boot_voltage_vid()
 {
     errlHndl_t l_errl = NULL;
     IStepError l_stepError;
-    TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-            "ENTER set_proc_boot_voltage_vid()");
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+             "ENTER set_proc_boot_voltage_vid()");
     do
     {
         // Get the top level target/system target
@@ -79,7 +85,7 @@ errlHndl_t set_proc_boot_voltage_vid()
 
         // If there is no top level target, terminate
         assert(l_pTopLevelTarget, "ERROR: Top level "
-                   "target not found - slave_sbe.C::set_proc_boot_voltage_vid");
+              "target not found - slave_sbe.C::set_proc_boot_voltage_vid");
 
         // Get all Procs
         PredicateCTM l_proc(CLASS_CHIP, TYPE_PROC);
@@ -90,7 +96,7 @@ errlHndl_t set_proc_boot_voltage_vid()
 
         TargetRangeFilter l_filter( targetService().begin(),
                                     targetService().end(),
-                                    &l_procs);
+                                    &l_procs );
 
         //@TODO: RTC:133836 add this get ATTR
         /*
@@ -122,7 +128,10 @@ errlHndl_t set_proc_boot_voltage_vid()
         }
 */
 
-    }while( 0 );
+    } while( 0 );
+
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+             "EXIT set_proc_boot_voltage_vid()");
     return l_errl;
 }
 
@@ -133,18 +142,49 @@ void* call_host_slave_sbe_config(void *io_pArgs)
 {
     errlHndl_t l_errl = NULL;
     IStepError  l_stepError;
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_slave_sbe_config entry" );
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+             "call_host_slave_sbe_config entry" );
 
     //@TODO RTC:134078
-    // execute proc_read_nest_freq.C
-    // execute p9_setup_sbe_config.C
-    // FAPI_INVOKE_HWP(l_errl,p9_setup_sbe_config);
-    //if(l_errl)
-    //{
-    //    l_stepError.addErrorDetails(l_errl);
-    //    errlCommit(l_errl, HWPF_COMP_ID);
-    //}
+    // execute proc_read_nest_freq.C //NOTE: Is this needed?  Not documented
+
+    // execute p9_setup_sbe_config.C for non-primary processor targets
+    TARGETING::TargetHandleList l_cpuTargetList;
+    getAllChips(l_cpuTargetList, TYPE_PROC);
+
+    TARGETING::Target* l_pMasterProcTarget = NULL;
+    TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProcTarget);
+
+    for (const auto & l_cpu_target: l_cpuTargetList)
+    {
+        // do not call HWP on master processor
+        if (l_cpu_target != l_pMasterProcTarget)
+        {
+            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                l_fapi2_proc_target (l_cpu_target);
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                     "Running p9_setup_sbe_config HWP on processor target %.8X",
+                     TARGETING::get_huid(l_cpu_target) );
+
+            FAPI_INVOKE_HWP(l_errl, p9_setup_sbe_config, l_fapi2_proc_target);
+
+            if( l_errl )
+            {
+                ErrlUserDetailsTarget(l_cpu_target).addToLog( l_errl );
+
+                // Create IStep error log and cross ref error that occurred
+                l_stepError.addErrorDetails( l_errl );
+
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                         "ERROR : call p9_setup_sbe_config, "
+                         "PLID=0x%x", l_errl->plid() );
+
+                // Commit Error
+                errlCommit( l_errl, HWPF_COMP_ID );
+            }
+        }
+    } // end of cycling through all processor chips
 
 #ifdef CONFIG_HTMGT
     // Set system frequency attributes
@@ -165,15 +205,14 @@ void* call_host_slave_sbe_config(void *io_pArgs)
         l_errl = set_proc_boot_voltage_vid();
         if( l_errl )
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "Error setting PROC_BOOT_VOLTAGE_VID: "
-                        "slave_sbe.C::call_host_slave_sbe_config()");
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                     "Error setting PROC_BOOT_VOLTAGE_VID: "
+                     "slave_sbe.C::call_host_slave_sbe_config()" );
             // Create IStep error log
             l_stepError.addErrorDetails( l_errl );
 
             // Commit Error
             errlCommit( l_errl, HWPF_COMP_ID );
-
         }
 
         // Enable SBE interrupt for OP systems
@@ -188,7 +227,7 @@ void* call_host_slave_sbe_config(void *io_pArgs)
 
     // Resolve the side characteristics of the Processor SBE Seeproms
 #if 0
-    //@TODO RTC:142091
+    //@TODO-RTC:142091
     errlHndl_t err = SBE::resolveProcessorSbeSeeproms();
     if ( err )
     {
@@ -199,13 +238,12 @@ void* call_host_slave_sbe_config(void *io_pArgs)
         errlCommit( err, HWPF_COMP_ID );
     }
 #endif
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "call_host_slave_sbe_config exit" );
-
-
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+             "call_host_slave_sbe_config exit" );
 
     // end task, returning any errorlogs to IStepDisp
     return l_stepError.getErrorHandle();
 
 }
+
 };

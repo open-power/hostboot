@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2011,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -41,6 +41,7 @@ SUBDIRS+=istep21.d
 OBJS += hwpisteperror.o
 OBJS += hwpistepud.o
 OBJS += istepHelperFuncs.o
+OBJS += pbusLinkSvc.o
 
 EXTRAINCDIR += ${ROOTPATH}/src/usr/initservice/istepdispatcher
 
