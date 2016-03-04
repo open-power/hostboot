@@ -597,12 +597,9 @@ pba_slave_setup_boot_phase(
     // setup here.
     ps.value = 0;
     ps.fields.enable = 1;
-    ps.fields.mid_match_value = OCI_MASTER_ID_SGPE |
-                                OCI_MASTER_ID_DCU |
-                                OCI_MASTER_ID_ICU;
-    ps.fields.mid_care_mask =   OCI_MASTER_ID_SGPE |
-                                OCI_MASTER_ID_DCU |
-                                OCI_MASTER_ID_ICU;
+    ps.fields.mid_match_value = OCI_MASTER_ID_SGPE;
+    ps.fields.mid_care_mask   = OCI_MASTER_ID_MASK;
+
     ps.fields.read_ttype = PBA_READ_TTYPE_CL_RD_NC;
     ps.fields.read_prefetch_ctl = PBA_READ_PREFETCH_NONE;
     ps.fields.buf_alloc_a = 1;
@@ -626,7 +623,8 @@ pba_slave_setup_boot_phase(
     ps.value = 0;
     ps.fields.enable = 1;
     ps.fields.mid_match_value = OCI_MASTER_ID_PGPE;
-    ps.fields.mid_care_mask = OCI_MASTER_ID_PGPE;
+    ps.fields.mid_care_mask   = OCI_MASTER_ID_MASK;
+
     ps.fields.read_ttype = PBA_READ_TTYPE_CL_RD_NC;
     ps.fields.read_prefetch_ctl = PBA_READ_PREFETCH_NONE;
     ps.fields.write_ttype = PBA_WRITE_TTYPE_DMA_PR_WR;

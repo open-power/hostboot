@@ -69,6 +69,12 @@
 static const uint64_t PU_OCB_OCI_OCCFLG_CLEAR = PU_OCB_OCI_OCCFLG_SCOM1;
 static const uint64_t PU_OCB_OCI_OCCFLG_SET  = PU_OCB_OCI_OCCFLG_SCOM2;
 
+static const uint32_t SGPE_TIMEOUT_MS       = 500;      // Guess at this time
+static const uint32_t SGPE_TIMEOUT_MCYCLES  = 20;       // Guess at this time
+static const uint32_t SGPE_POLLTIME_MS      = 20;       // Guess at this time
+static const uint32_t SGPE_POLLTIME_MCYCLES = 2;        // Guess at this time
+static const uint32_t TIMEOUT_COUNT = SGPE_TIMEOUT_MS / SGPE_POLLTIME_MS;
+
 // -----------------------------------------------------------------------------
 //  Function prototypes
 // -----------------------------------------------------------------------------
@@ -131,6 +137,7 @@ fapi2::ReturnCode p9_pm_stop_gpe_init(
 
         // Boot the STOP GPE
         FAPI_TRY(stop_gpe_init(i_target), "ERROR: failed to initialize Stop GPE");
+
     }
 
     //-------------------------------
@@ -176,7 +183,7 @@ fapi2::ReturnCode stop_gpe_init(
     fapi2::buffer<uint64_t> l_xsr;
     fapi2::buffer<uint64_t> l_ivpr;
     uint32_t                l_ivpr_offset;
-    uint32_t                l_timeout_in_MS = 100;
+    uint32_t                l_timeout_in_MS = TIMEOUT_COUNT;
 
     FAPI_IMP(">> stop_gpe_init......");
 
@@ -185,7 +192,6 @@ fapi2::ReturnCode stop_gpe_init(
                             l_ivpr_offset),
               "Error getting ATTR_SGPE_BOOT_COPIER_IVPR_OFFSET");
 
-
     // Program SGPE IVPR
     l_ivpr.flush<0>().insertFromRight<0, 32>(l_ivpr_offset);
     FAPI_INF("   Writing IVPR with 0x%16llX", l_ivpr);
@@ -193,7 +199,11 @@ fapi2::ReturnCode stop_gpe_init(
 
     // Program XCR to ACTIVATE SGPE
     // @todo 146665 Operations to PPEs should use a p9ppe namespace when created
-    l_xcr.flush<0>().insertFromRight(p9hcd::HARD_RESET, 1, 3);
+    l_xcr.flush<0>().insertFromRight(p9hcd::HARD_RESET, 1 , 3);
+    FAPI_TRY(putScom(i_target, PU_GPE3_PPE_XIXCR, l_xcr));
+    l_xcr.flush<0>().insertFromRight(p9hcd::TOGGLE_XSR_TRH, 1 , 3);
+    FAPI_TRY(putScom(i_target, PU_GPE3_PPE_XIXCR, l_xcr));
+    l_xcr.flush<0>().insertFromRight(p9hcd::RESUME, 1 , 3);
     FAPI_TRY(putScom(i_target, PU_GPE3_PPE_XIXCR, l_xcr));
 
     // Now wait for SGPE to not be halted and for the HCode to indicate
@@ -205,10 +215,22 @@ fapi2::ReturnCode stop_gpe_init(
     {
         FAPI_TRY(getScom(i_target, PU_OCB_OCI_OCCFLG_SCOM, l_occ_flag));
         FAPI_TRY(getScom(i_target, PU_GPE3_GPEXIXSR_SCOM, l_xsr));
+        FAPI_DBG("   Poll content: OCC Flag: 0x%16llX; XSR: 0x%16llX Timeout: %d",
+                 l_occ_flag,
+                 l_xsr,
+                 l_timeout_in_MS);
+        fapi2::delay(SGPE_POLLTIME_MS * 1000, SGPE_POLLTIME_MCYCLES * 1000 * 1000);
+
+
     }
     while((l_occ_flag.getBit<p9hcd::SGPE_ACTIVE>() != 1) &&
           (l_xsr.getBit<p9hcd::HALTED_STATE>() != 1) &&
           (--l_timeout_in_MS != 0));
+
+    if((l_occ_flag.getBit<p9hcd::SGPE_ACTIVE>() == 1))
+    {
+        FAPI_INF("SGPE was activated successfully!!!!");
+    }
 
     // @todo 146665 Operations to PPEs should use a p9ppe namespace when created
 
