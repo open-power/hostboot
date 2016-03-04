@@ -25,6 +25,7 @@
 #include <fapi2_target.H>
 #include <fapi2.H>
 
+
 typedef fapi2::ReturnCode (*p9_fbc_scom_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
 extern "C"

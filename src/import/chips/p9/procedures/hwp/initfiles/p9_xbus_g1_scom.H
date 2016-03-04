@@ -25,6 +25,7 @@
 #include <fapi2_target.H>
 #include <fapi2.H>
 
+
 typedef fapi2::ReturnCode (*p9_xbus_g1_scom_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>&,
         const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>&);
 
