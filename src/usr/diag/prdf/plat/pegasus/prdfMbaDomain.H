@@ -1,11 +1,13 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/framework/config/prdfMembufDomain.H $ */
+/* $Source: src/usr/diag/prdf/plat/pegasus/prdfMbaDomain.H $              */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -21,30 +23,35 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __PRDFMEMBUFDOMAIN_H
-#define __PRDFMEMBUFDOMAIN_H
+#ifndef __prdfMbaDomain_H
+#define __prdfMbaDomain_H
 
-#include <prdfRuleChipDomain.H>
+#include <prdfMbaDomain_common.H>
 
 namespace PRDF
 {
 
-class MembufDomain : public RuleChipDomain
+class MbaDomain : public MbaDomainCommon
 {
   public:
 
-    /**
-     * @brief Constructor
-     * @param i_did  The domain ID
-     * @param i_size The projected size of the domain
-     */
-    MembufDomain( DOMAIN_ID i_did, uint32_t i_size = MEMBUF_DOMAIN_SIZE ) :
-        RuleChipDomain( i_did, i_size )
+    MbaDomain( DOMAIN_ID i_did, uint32_t i_size = MBA_DOMAIN_SIZE ) :
+        MbaDomainCommon( i_did, i_size )
     {}
+
+    #ifndef __HOSTBOOT_RUNTIME
+
+    /**
+     * @brief Starts memory background scrubbing for each MBA in the node.
+     * @param Non-SUCCESS if an internal function failed, SUCCESS otherwise.
+     */
+    int32_t startScrub();
+
+    #endif
 
 };
 
 } // end namespace PRDF
 
-#endif /* __PRDFMEMBUFDOMAIN_H */
+#endif /* __prdfMbaDomain_H */
 

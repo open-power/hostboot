@@ -71,10 +71,7 @@ prd_obj += iipDomain.o
 prd_obj += iipDomainContainer.o
 prd_obj += iipSystem.o
 prd_obj += prdfExtensibleDomain.o
-prd_obj += prdfFabricDomain.o
 prd_obj += prdfParentDomain.o
-prd_obj += prdfPciOscSwitchDomain.o
-prd_obj += prdfPllDomain.o
 prd_obj += prdfRuleChipDomain.o
 
 # common/framework/register/
@@ -134,10 +131,13 @@ prd_obj += prdfLineDelete.o
 #prd_obj += prdfCenMbaUeTable.o
 #prd_obj += prdfCenMemUtils.o
 #prd_obj += prdfCenSymbol.o
+#prd_obj += prdfFabricDomain.o
 #prd_obj += prdfFsiCapUtil.o
 #prd_obj += prdfLaneRepair.o
 #prd_obj += prdfMemoryMru.o
+#prd_obj += prdfPciOscSwitchDomain.o
 #prd_obj += prdfPegasusConfigurator.o
+#prd_obj += prdfPllDomain.o
 #prd_obj += prdfPhbUtils.o
 #prd_obj += prdfPlatUtil.o
 

@@ -1,11 +1,13 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/framework/config/prdfMbaDomain_common.H $ */
+/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfMembufDomain.H $    */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -21,15 +23,15 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __prdfMbaDomain_common_H
-#define __prdfMbaDomain_common_H
+#ifndef __PRDFMEMBUFDOMAIN_H
+#define __PRDFMEMBUFDOMAIN_H
 
 #include <prdfRuleChipDomain.H>
 
 namespace PRDF
 {
 
-class MbaDomainCommon : public RuleChipDomain
+class MembufDomain : public RuleChipDomain
 {
   public:
 
@@ -38,23 +40,13 @@ class MbaDomainCommon : public RuleChipDomain
      * @param i_did  The domain ID
      * @param i_size The projected size of the domain
      */
-    MbaDomainCommon( DOMAIN_ID i_did, uint32_t i_size = MBA_DOMAIN_SIZE ) :
+    MembufDomain( DOMAIN_ID i_did, uint32_t i_size = MEMBUF_DOMAIN_SIZE ) :
         RuleChipDomain( i_did, i_size )
     {}
-
-    /**
-     * @brief  Query for an attention of a specific type in this domain
-     * @param  i_attnType [MACHINE_CHECK | RECOVERABLE | SPECIAL]
-     * @return false
-     * @note   This function will always return false. That way PRD will look
-     *         for the attention via the memory buffer chip.
-     */
-    virtual bool Query( ATTENTION_TYPE i_attnType )
-    {  return false;  }
 
 };
 
 } // end namespace PRDF
 
-#endif /* __prdfMbaDomain_common_H */
+#endif /* __PRDFMEMBUFDOMAIN_H */
 
