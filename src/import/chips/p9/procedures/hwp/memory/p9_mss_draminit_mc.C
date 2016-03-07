@@ -147,7 +147,6 @@ extern "C"
                     l_program.iv_subtests.push_back(l_fr_subtest);
                 }
 
-
                 FAPI_TRY( mss::mcbist_start_addr(p, l_start) );
                 FAPI_TRY( mss::mcbist_end_addr(p, l_end) );
 
@@ -175,6 +174,13 @@ extern "C"
                 // By default we're in maint address mode so we do a start + len and the 'BIST increments for us.
                 // By default, the write subtest uses the 0'th address start/end registers.
                 mss::mcbist::config_address_range0(i_target, l_start, l_end - l_start);
+
+                // Setup the polling based on a heuristic <cough>guess</cough>
+                // Looks like 20ns per address for a write/read program, and add a long number of polls
+                l_program.iv_poll.iv_initial_delay = (l_end - l_start) * 2 * mss::DELAY_10NS;
+                l_program.iv_poll.iv_initial_sim_delay =
+                    mss::cycles_to_simcycles(mss::ns_to_cycles(i_target, l_program.iv_poll.iv_initial_delay));
+                l_program.iv_poll.iv_poll_count = 100;
 
                 // Just one port for now. Per Shelton we need to set this in maint adress mode
                 // even tho we specify the port/dimm in the subtest.
