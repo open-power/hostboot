@@ -33,6 +33,32 @@
 namespace fapi2
 {
 
+/// @brief  Specialized class representing required VPDInfo to be used
+///         in collecting VPD for the MCS target type.
+/// @tparam T fapi2::TARGET_TYPE_MCS
+template<>
+class VPDInfo<TARGET_TYPE_MCS>
+{
+    public:
+        // @brief VPDInfo constructor
+        VPDInfo( const fapi2::MemVpdData& i_vpd_type)
+            : iv_vpd_type(i_vpd_type),
+              iv_size(0), iv_freq(0), iv_rank_count_dimm_0(0),
+              iv_rank_count_dimm_1(0), iv_dimm_drop_per_port(0)
+        {};
+        // type of vpd field to return
+        fapi2::MemVpdData_t iv_vpd_type;
+
+        // size of the vpd data
+        size_t   iv_size;
+        uint64_t iv_freq;
+        uint64_t iv_rank_count_dimm_0;
+        uint64_t iv_rank_count_dimm_1;
+        uint64_t iv_dimm_drop_per_port;
+
+};
+
+
 /// @brief Return a blob of memory VPD data associated with the input target
 /// @param[in] i_target, a valid fapi2 target
 /// @param[in] io_vpd_info, fapi2::VPDInfo class that specifies which piece of data to return
