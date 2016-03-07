@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -26,6 +26,8 @@
 // Rhesus board-specific VDDR support.
 // VDDR is enabled/disabled via a GPIO on the hammock card.
 // A separate GPIO selects between 1.35V and 1.25V output from the VR.
+
+#include <config.h>
 
 #include "platform_vddr.H"
 
@@ -53,12 +55,21 @@ TRAC_INIT(&g_trac_vddr, "HB_VDDR",  KILOBYTE);
 // PCA95X internal register addresses
 enum
 {
+#ifdef CONFIG_PCA95X_8BIT
+    PCA95X_GPIO_REG_INPUT    = 0x0,
+    PCA95X_GPIO_REG_OUTPUT   = 0x1,
+    PCA95X_GPIO_REG_POLARITY = 0x2,
+    PCA95X_GPIO_REG_CONFIG   = 0x3,
+#endif
+#ifdef CONFIG_PCA95X_16BIT
     PCA95X_GPIO_REG_INPUT    = 0x0,
     PCA95X_GPIO_REG_OUTPUT   = 0x2,
     PCA95X_GPIO_REG_POLARITY = 0x4,
+    PCA95X_GPIO_REG_CONFIG   = 0x6,
+#endif
     PCA95X_GPIO_POLARITY_NORMAL = 0,
     PCA95X_GPIO_POLARITY_INVERTED = 1,
-    PCA95X_GPIO_REG_CONFIG   = 0x6,
+
 };
 
 #define    PCA95X_GPIO_CONFIG_OUTPUT false
