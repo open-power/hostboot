@@ -2,3 +2,15 @@ config PALMETTO_VDDR
     default n
     help
         Enable the Hostboot DRAM VDDR function for Palmetto
+
+config PCA95X_8BIT
+    default n
+    depends on (!PCA95X_16BIT)
+    help
+        Set the PCA95X support to an 8 bit chip.
+
+config PCA95X_16BIT
+    default y if (!PCA95X_8BIT)
+    depends on (!PCA95X_8BIT)
+    help
+        Set the PCA95X support to a 16 bit chip.
