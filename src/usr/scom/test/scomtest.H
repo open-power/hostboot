@@ -800,7 +800,8 @@ public:
     { scom_targets[myEX0], 0x0FFFFFFF, 0x0FFFFFFF, true},
     { scom_targets[myEX1], 0x21000000, 0x23000000, false},
     { scom_targets[myEX1], 0x0FFFFFFF, 0x0FFFFFFF ,true},
-    { scom_targets[myEX1], 0x10012400, 0x10012800, false},
+  //@TODO RTC:149140 RE-enable EX scom test address
+//     { scom_targets[myEX1], 0x10012400, 0x10012800, false},
     { scom_targets[myCORE0], 0x20010A46, 0x20010A46, false},
     { scom_targets[myCORE0], 0x0FFFFFFF, 0x0FFFFFFF, true},
     { scom_targets[myCORE1], 0x20010A46, 0x21010A46, false},
