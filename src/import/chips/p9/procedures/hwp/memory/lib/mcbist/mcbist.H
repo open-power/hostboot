@@ -822,7 +822,7 @@ template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
 inline fapi2::ReturnCode load_control( const fapi2::Target<T>& i_target, const mcbist::program<T>& i_program )
 {
     FAPI_DBG("loading MCBIST Control 0x%016lx", i_program.iv_control);
-    return mss::putScom(i_target, TT::CFGQ_REG, i_program.iv_control);
+    return mss::putScom(i_target, TT::CNTLQ_REG, i_program.iv_control);
 }
 
 
