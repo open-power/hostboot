@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2015
+# Contributors Listed Below - COPYRIGHT 2012,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -26,12 +26,7 @@
 ROOTPATH = ../../../..
 MODULE = prdf
 
-SUBDIRS += framework.d  # This will eventually compile the rule code. This only
-                        # needs to be done once and not for both IPL and RT
-						# compiles. This is because compiling the rule code only
-						# generates .prf files, which are compiler independent,
-						# and a few .C files needed for the error log parser,
-						# which is compiled elsewhere.
+SUBDIRS += rule.d
 SUBDIRS += runtime.d
 SUBDIRS += test.d
 

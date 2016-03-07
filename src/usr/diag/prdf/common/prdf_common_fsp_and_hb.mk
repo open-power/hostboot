@@ -34,12 +34,12 @@ prd_vpath += ${PRD_SRC_PATH}/common/include
 prd_vpath += ${PRD_SRC_PATH}/common/framework/config
 prd_vpath += ${PRD_SRC_PATH}/common/framework/register
 prd_vpath += ${PRD_SRC_PATH}/common/framework/resolution
-prd_vpath += ${PRD_SRC_PATH}/common/framework/rule
 prd_vpath += ${PRD_SRC_PATH}/common/framework/service
 prd_vpath += ${PRD_SRC_PATH}/common/mnfgtools
 prd_vpath += ${PRD_SRC_PATH}/common/plat
 prd_vpath += ${PRD_SRC_PATH}/common/plat/pegasus
 prd_vpath += ${PRD_SRC_PATH}/common/plugins
+prd_vpath += ${PRD_SRC_PATH}/common/rule
 prd_vpath += ${PRD_SRC_PATH}/common/runtime
 prd_vpath += ${PRD_SRC_PATH}/common/util
 
@@ -47,12 +47,12 @@ prd_incpath += ${PRD_SRC_PATH}/common
 prd_incpath += ${PRD_SRC_PATH}/common/framework/config
 prd_incpath += ${PRD_SRC_PATH}/common/framework/register
 prd_incpath += ${PRD_SRC_PATH}/common/framework/resolution
-prd_incpath += ${PRD_SRC_PATH}/common/framework/rule
 prd_incpath += ${PRD_SRC_PATH}/common/framework/service
 prd_incpath += ${PRD_SRC_PATH}/common/mnfgtools
 prd_incpath += ${PRD_SRC_PATH}/common/plat
 prd_incpath += ${PRD_SRC_PATH}/common/plat/pegasus
 prd_incpath += ${PRD_SRC_PATH}/common/plugins
+prd_incpath += ${PRD_SRC_PATH}/common/rule
 prd_incpath += ${PRD_SRC_PATH}/common/runtime
 prd_incpath += ${PRD_SRC_PATH}/common/util
 
@@ -94,16 +94,6 @@ prd_obj += prdfClockResolution.o
 prd_obj += prdfResolutionMap.o
 prd_obj += prdfThresholdResolutions.o
 prd_obj += xspprdFlagResolution.o
-
-# common/framework/rule/
-prd_obj += iipTemplates.o
-prd_obj += prdfGroup.o
-prd_obj += prdfPluginMap.o
-prd_obj += prdfRuleChip.o
-prd_obj += prdfRuleFiles.o
-prd_obj += prdfRuleMetaData.o
-prd_obj += prdrLoadChip.o
-prd_obj += prdrLoadChipCache.o
 
 # common/framework/service/
 prd_obj_no_sim += prdfPlatServices_common.o
@@ -154,6 +144,16 @@ prd_obj += prdfLineDelete.o
 
 # common/plugins/ (errl plugin related)
 prd_obj += prdfParserUtils.o
+
+# common/rule/
+prd_obj += iipTemplates.o
+prd_obj += prdfGroup.o
+prd_obj += prdfPluginMap.o
+prd_obj += prdfRuleChip.o
+prd_obj += prdfRuleFiles.o
+prd_obj += prdfRuleMetaData.o
+prd_obj += prdrLoadChip.o
+prd_obj += prdrLoadChipCache.o
 
 # common/util/
 prd_obj += iipdgtb.o
