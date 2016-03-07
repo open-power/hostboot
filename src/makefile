@@ -295,7 +295,7 @@ hbicore_EXTENDED_MODULES += ${EXTENDED_MODULES}
 hbicore_LDFILE = kernel.ld
 
 # for PRDR_RULE_TABLE_TARGETS
-include ${ROOTPATH}/src/usr/diag/prdf/common/framework/rule/prdf_rule.mk
+include ${ROOTPATH}/src/usr/diag/prdf/common/rule/prdf_rule.mk
 
 hbicore_test_OBJECTS += ${hbicore_OBJECTS}
 hbicore_test_MODULES += ${hbicore_MODULES}
