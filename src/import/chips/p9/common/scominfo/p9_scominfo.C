@@ -35,6 +35,7 @@
 
 extern "C"
 {
+
     uint64_t p9_scominfo_createChipUnitScomAddr(const p9ChipUnits_t i_p9CU, const uint8_t i_chipUnitNum,
             const uint64_t i_scomAddr, const uint32_t i_mode)
     {
@@ -52,14 +53,19 @@ extern "C"
                 break;
 
             case PU_EX_CHIPUNIT:
-                if (l_scom.get_chiplet_id() == EP00_CHIPLET_ID)
+                if (EP05_CHIPLET_ID >= l_scom.get_chiplet_id() &&
+                    l_scom.get_chiplet_id() >= EP00_CHIPLET_ID)
                 {
                     l_scom.set_chiplet_id(EP00_CHIPLET_ID + (i_chipUnitNum / 2));
-                    l_scom.set_ring(l_scom.get_ring() + (i_chipUnitNum % 2));
+                    l_scom.set_ring( ( l_scom.get_ring() - ( l_scom.get_ring() % 2 ) ) +
+                                     ( i_chipUnitNum % 2 ) );
                 }
-                else
+                else if (EC23_CHIPLET_ID >= l_scom.get_chiplet_id() &&
+                         l_scom.get_chiplet_id() >= EC00_CHIPLET_ID)
                 {
-                    l_scom.set_chiplet_id(l_scom.get_chiplet_id() + (i_chipUnitNum * 2));
+                    l_scom.set_chiplet_id( EC00_CHIPLET_ID +
+                                           (l_scom.get_chiplet_id() % 2) +
+                                           (i_chipUnitNum * 2));
                 }
 
                 break;
@@ -87,7 +93,8 @@ extern "C"
                 if (l_scom.get_ring() == MC_MC01_0_RING_ID)
                 {
                     // mc
-                    l_scom.set_sat_id(l_scom.get_sat_id() + (i_chipUnitNum % 4));
+                    l_scom.set_sat_id( ( l_scom.get_sat_id() - ( l_scom.get_sat_id() % 4 ) ) +
+                                       ( i_chipUnitNum % 4 ));
                 }
                 else
                 {
@@ -100,7 +107,8 @@ extern "C"
             case PU_NV_CHIPUNIT:
                 l_scom.set_ring(4 + (i_chipUnitNum / 4));
                 l_scom.set_sat_id(((i_chipUnitNum == 2) || (i_chipUnitNum == 3)) ? 7 : 3);
-                l_scom.set_sat_offset(l_scom.get_sat_offset() + (32 * (i_chipUnitNum % 2)));
+                l_scom.set_sat_offset( (l_scom.get_sat_offset() % 32) +
+                                       (32 * (i_chipUnitNum % 2)));
                 break;
 
             case PU_PEC_CHIPUNIT:
@@ -146,7 +154,18 @@ extern "C"
                 break;
 
             case PU_XBUS_CHIPUNIT:
-                l_scom.set_ring(l_scom.get_ring() + i_chipUnitNum);
+                if (XB_IOX_2_RING_ID >= l_scom.get_ring() &&
+                    l_scom.get_ring() >= XB_IOX_0_RING_ID)
+                {
+                    l_scom.set_ring(XB_IOX_0_RING_ID + i_chipUnitNum);
+                }
+
+                if (XB_PBIOX_2_RING_ID >= l_scom.get_ring() &&
+                    l_scom.get_ring() >= XB_PBIOX_0_RING_ID)
+                {
+                    l_scom.set_ring(XB_PBIOX_0_RING_ID + i_chipUnitNum);
+                }
+
                 break;
 
             default:
@@ -178,7 +197,8 @@ extern "C"
             // or by C/EX/EQ target types (by their associated pervasive chiplet instances)
             if (((l_port == GPREG_PORT_ID) ||
                  ((l_port >= CME_PORT_ID) && (l_port <= CPM_PORT_ID)) ||
-                 (l_port == PCBSLV_PORT_ID)))
+                 (l_port == PCBSLV_PORT_ID) ||
+                 (l_port == UNIT_PORT_ID && l_ring == EC_PSCM_RING_ID))) //Catches all PSCOM regs
             {
                 o_chipUnitRelated = true;
                 // PU_PERV_CHIPUNIT
@@ -203,6 +223,7 @@ extern "C"
             }
 
             // core registers which can be addressed by either C/EX target types
+            // c: 0..24
             if (((l_chiplet_id >= EC00_CHIPLET_ID) && (l_chiplet_id <= EC23_CHIPLET_ID)) &&
                 (l_port == UNIT_PORT_ID) &&
                 ((l_ring >= EC_PERV_RING_ID) && (l_ring <= EC_PC_3_RING_ID)))
@@ -217,6 +238,8 @@ extern "C"
             }
 
             // quad registers which can be addressed by either EQ/EX target types
+            // ex: 0..12
+            // eq: 0..6
             if (((l_chiplet_id >= EP00_CHIPLET_ID) && (l_chiplet_id <= EP05_CHIPLET_ID)) &&
                 (l_port == UNIT_PORT_ID) &&
                 (((l_ring >= EQ_PERV_RING_ID)  && (l_ring <= EQ_L3_1_RING_ID)) ||
@@ -244,6 +267,7 @@ extern "C"
             }
 
             // PU_CAPP_CHIPUNIT
+            // capp: 0..1
             if ((((l_chiplet_id == N0_CHIPLET_ID) && (l_ring == N0_CXA0_0_RING_ID)) ||
                  ((l_chiplet_id == N2_CHIPLET_ID) && (l_ring == N2_CXA1_0_RING_ID))) &&
                 (l_port == UNIT_PORT_ID))
@@ -254,6 +278,7 @@ extern "C"
             }
 
             // PU_MCS_CHIPUNIT (nest)
+            // mcs: 0..3
             if (((l_chiplet_id == N3_CHIPLET_ID) || (l_chiplet_id == N1_CHIPLET_ID)) &&
                 (l_port == UNIT_PORT_ID) &&
                 (l_ring == N3_MC01_0_RING_ID) &&
@@ -266,6 +291,7 @@ extern "C"
             }
 
             // PU_MCBIST_CHIPUNIT (mc)
+            // mcbist: 0..1
             if (((l_chiplet_id == MC01_CHIPLET_ID) || (l_chiplet_id == MC23_CHIPLET_ID)) &&
                 (l_port == UNIT_PORT_ID) &&
                 (l_ring == MC_MC01_1_RING_ID) &&
@@ -277,6 +303,7 @@ extern "C"
             }
 
             // PU_MCA_CHIPUNIT (mc)
+            // mca: 0..7
             if (((l_chiplet_id == MC01_CHIPLET_ID) || (l_chiplet_id == MC23_CHIPLET_ID)) &&
                 (l_port == UNIT_PORT_ID) &&
                 (l_ring == MC_MC01_0_RING_ID) &&
@@ -289,6 +316,7 @@ extern "C"
             }
 
             // PU_MCA_CHIPUNIT (iomc)
+            // mca: 0..7
             if (((l_chiplet_id == MC01_CHIPLET_ID) || (l_chiplet_id == MC23_CHIPLET_ID)) &&
                 (l_port == UNIT_PORT_ID) &&
                 ((l_ring >= MC_IOM01_0_RING_ID) && (l_ring <= MC_IOM23_1_RING_ID)) &&
@@ -301,6 +329,7 @@ extern "C"
             }
 
             // PU_NV_CHIPUNIT
+            // nv: 0..5
             if ((l_chiplet_id == N3_CHIPLET_ID) &&
                 (l_port == UNIT_PORT_ID) &&
                 (((l_ring == N3_NPU_0_RING_ID) && ((l_sat_id == 3) || (l_sat_id == 7))) ||
@@ -314,6 +343,7 @@ extern "C"
             }
 
             // PU_PEC_CHIPUNIT (nest)
+            // pec: 0..2
             if ((l_chiplet_id == N2_CHIPLET_ID) &&
                 (l_port == UNIT_PORT_ID) &&
                 ((l_ring >= N2_PCIS0_0_RING_ID) && (l_ring <= N2_PCIS2_0_RING_ID)) &&
@@ -326,6 +356,7 @@ extern "C"
 
             // PU_PEC_CHIPUNIT (iopci/pci)
             // source: iop_scom_cntl_rlm_mac.vhdl
+            // pec: 0..2
             if (((l_chiplet_id >= PCI0_CHIPLET_ID) && (l_chiplet_id <= PCI2_CHIPLET_ID)) &&
                 (l_port == UNIT_PORT_ID) &&
                 ((l_ring == PCI_IOPCI_0_RING_ID) || (l_ring == PCI_PE_0_RING_ID)) &&
@@ -337,6 +368,7 @@ extern "C"
             }
 
             // PU_PHB_CHIPUNIT (nest)
+            // phb: 0..5
             if ((l_chiplet_id == N2_CHIPLET_ID) &&
                 (l_port == UNIT_PORT_ID) &&
                 ((l_ring >= N2_PCIS0_0_RING_ID) && (l_ring <= N2_PCIS2_0_RING_ID)) &&
@@ -351,6 +383,7 @@ extern "C"
             }
 
             // PU_PHB_CHIPUNIT (pci)
+            // phb: 0..5
             if (((l_chiplet_id >= PCI0_CHIPLET_ID) && (l_chiplet_id <= PCI2_CHIPLET_ID)) &&
                 (l_port == UNIT_PORT_ID) &&
                 (l_ring == PCI_PE_0_RING_ID) &&
@@ -367,6 +400,7 @@ extern "C"
             }
 
             // PU_OBUS_CHIPUNIT
+            // obus: 0..3
             if (((l_chiplet_id >= OB0_CHIPLET_ID) && (l_chiplet_id <= OB3_CHIPLET_ID)) &&
                 (l_port == UNIT_PORT_ID) &&
                 (((l_ring == OB_PBIOA_0_RING_ID) && (l_sat_id == OB_PB_SAT_ID)) ||
@@ -378,6 +412,7 @@ extern "C"
             }
 
             // PU_XBUS_CHIPUNIT
+            // xbus: 0..2
             if ((l_chiplet_id == XB_CHIPLET_ID) &&
                 (l_port == UNIT_PORT_ID) &&
                 (((l_ring >= XB_IOX_0_RING_ID) && (l_ring <= XB_IOX_2_RING_ID) && (l_sat_id == XB_IOF_SAT_ID)) ||

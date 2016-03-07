@@ -102,6 +102,7 @@ extern "C"
     /// source: tpc_p9_core_top.vhdl
     typedef enum
     {
+        EC_PSCM_RING_ID = 0x0,      ///< PSCOM
         EC_PERV_RING_ID = 0x1,      ///< PERV
         EC_PC_0_RING_ID = 0x2,      ///< PC_0
         EC_PC_1_RING_ID = 0x3,      ///< PC_1
@@ -113,6 +114,7 @@ extern "C"
     /// source: tpc_p9_l3_top.vhdl
     typedef enum
     {
+        EQ_PSCM_RING_ID = 0x0,      ///< PSCOM
         EQ_PERV_RING_ID = 0x1,      ///< PERV
         EQ_L2_0_RING_ID = 0x2,      ///< L2_0
         EQ_L2_1_RING_ID = 0x3,      ///< L2_1
@@ -130,6 +132,7 @@ extern "C"
     /// source: tpc_p9_n0_top.vhdl
     typedef enum
     {
+        N0_PSCM_RING_ID = 0x0,      ///< PSCOM
         N0_PERV_RING_ID = 0x1,      ///< PERV
         N0_CXA0_0_RING_ID = 0x2,    ///< CXA0_0
         N0_NX_0_RING_ID = 0x4,      ///< NX_0
@@ -142,6 +145,7 @@ extern "C"
     /// source: tpc_p9_n1_top.vhdl
     typedef enum
     {
+        N1_PSCM_RING_ID = 0x0,      ///< PSCOM
         N1_PERV_RING_ID = 0x1,      ///< PERV
         N1_MC23_0_RING_ID = 0x2,    ///< MC23_0
         N1_MCD_0_RING_ID = 0x4,     ///< MCD_0
@@ -153,6 +157,7 @@ extern "C"
     /// source: tpc_p9_n2_top.vhdl
     typedef enum
     {
+        N2_PSCM_RING_ID = 0x0,      ///< PSCOM
         N2_PERV_RING_ID = 0x1,      ///< PERV
         N2_CXA1_0_RING_ID = 0x2,    ///< CXA1_0
         N2_PCIS0_0_RING_ID = 0x3,   ///< PCIS0_0
@@ -170,6 +175,7 @@ extern "C"
     /// source: tpc_p9_n3_top.vhdl
     typedef enum
     {
+        N3_PSCM_RING_ID = 0x0,      ///< PSCOM
         N3_PERV_RING_ID = 0x1,      ///< PERV
         N3_MC01_0_RING_ID = 0x2,    ///< MC01_0
         N3_NPU_0_RING_ID = 0x4,     ///< NPU_0
@@ -189,6 +195,7 @@ extern "C"
     /// source: tpc_p9_xb_top.vhdl
     typedef enum
     {
+        XB_PSCM_RING_ID = 0x0,      ///< PSCOM
         XB_PERV_RING_ID = 0x1,      ///< PERV
         XB_IOPPE_0_RING_ID = 0x2,   ///< IOPPE
         XB_IOX_0_RING_ID = 0x3,     ///< IOX_0
@@ -215,6 +222,7 @@ extern "C"
 #ifdef MC_E9022
     typedef enum
     {
+        MC_PSCM_RING_ID = 0x0,      ///< PSCOM
         MC_PERV_RING_ID = 0x1,      ///< PERV
         MC_MC01_0_RING_ID = 0x2,    ///< MC01_0 / MC23_0
         MC_MCTRA_0_RING_ID = 0x3,   ///< MCTRA01_0 / MCTRA23_0
@@ -230,6 +238,7 @@ extern "C"
 #else
     typedef enum
     {
+        MC_PSCM_RING_ID = 0x0,      ///< PSCOM
         MC_PERV_RING_ID = 0x1,      ///< PERV
         MC_MC01_0_RING_ID = 0x2,    ///< MC01_0 / MC23_0
         MC_MCTRA_0_RING_ID = 0x3,   ///< MCTRA01_0 / MCTRA23_0
@@ -269,6 +278,7 @@ extern "C"
     /// source: tpc_p9_ob_top.vhdl
     typedef enum
     {
+        OB_PSCM_RING_ID = 0x0,      ///< PSCOM
         OB_PERV_RING_ID = 0x1,      ///< PERV
         OB_PBIOA_0_RING_ID = 0x2,   ///< PBIOA_0
         OB_IOO_0_RING_ID = 0x3      ///< IOO_0
@@ -289,6 +299,7 @@ extern "C"
     /// source: tpc_p9_pci[012]_top.vhdl
     typedef enum
     {
+        PCI_PSCM_RING_ID = 0x0,      ///< PSCOM
         PCI_PERV_RING_ID = 0x1,      ///< TRA
         PCI_PE_0_RING_ID = 0x2,      ///< PE_0
         PCI_IOPCI_0_RING_ID = 0x3    ///< IOPCI_0
