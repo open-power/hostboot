@@ -5070,6 +5070,8 @@ sub getPnorBaseAddress {
         }
     }
 
+    close(VMM_CONSTS_FILE);
+
     if($pnorBaseAddress == 0)
     {
         fatal("PNOR base address was zero!");
