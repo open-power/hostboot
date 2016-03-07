@@ -28,6 +28,7 @@
 #include <fapi2.H>
 #include <hwpf_fapi2_reasoncodes.H>
 #include <fapi2TestUtils.H>
+#include <p9_hwtests.H>
 
 namespace fapi2
 {
@@ -149,6 +150,66 @@ errlHndl_t fapi2HwpTest()
           numFails++;
           TS_FAIL("Error occured in p9_sample_procedure_proc !!");
         }
+        numTests++;
+        FAPI_INVOKE_HWP(l_errl, p9_scomtest_getscom_fail, fapi2_procTarget);
+        if(l_errl != NULL)
+        {
+            delete l_errl; // delete expected error log
+        }
+        else
+        {
+            TS_FAIL("No error from p9_scomtest_getscom_fail !!");
+            numFails++;
+        }
+        numTests++;
+        FAPI_INVOKE_HWP(l_errl, p9_scomtest_putscom_fail, fapi2_procTarget);
+        if(l_errl != NULL)
+        {
+            delete l_errl; // delete expected error log
+        }
+        else
+        {
+            TS_FAIL("No error from p9_scomtest_putscom_fail !!");
+            numFails++;
+        }
+        numTests++;
+        FAPI_INVOKE_HWP(l_errl, p9_cfamtest_putcfam_fail, fapi2_procTarget);
+        if(l_errl != NULL)
+        {
+            delete l_errl; // delete expected error log
+        }
+        else
+        {
+            TS_FAIL("No error from p9_cfamtest_putcfam_fail !!");
+            numFails++;
+        }
+        numTests++;
+        FAPI_INVOKE_HWP(l_errl, p9_cfamtest_getcfam_fail, fapi2_procTarget);
+        if(l_errl != NULL)
+        {
+            delete l_errl; // delete expected error log
+        }
+        else
+        {
+            TS_FAIL("No error from p9_cfamtest_getcfam_fail !!");
+            numFails++;
+        }
+        numTests++;
+        FAPI_INVOKE_HWP(l_errl, p9_scomtest_getscom_pass, fapi2_procTarget);
+        if(l_errl)
+        {
+            TS_FAIL("Error from p9_scomtest_getscom_pass !!");
+            numFails++;
+        }
+        numTests++;
+        FAPI_INVOKE_HWP(l_errl, p9_scomtest_putscom_pass, fapi2_procTarget);
+        if(l_errl)
+        {
+            TS_FAIL("Error from p9_scomtest_putscom_pass !!");
+            numFails++;
+        }
+
+
         numTests++;
         FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_eq, fapi2_eqTarget, scratchWriteValue);
         if(l_errl != NULL)

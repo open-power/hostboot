@@ -37,6 +37,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 
 # Procedures
 OBJS += p9_sample_procedure.o
+OBJS += p9_hwtests.o
 OBJS += fapi2TestUtils.o
 
 TESTS += fapi2Test.H
