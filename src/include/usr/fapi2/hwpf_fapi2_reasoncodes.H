@@ -47,6 +47,7 @@ namespace fapi2
         MOD_FAPI2_PLAT_HWP_TEST                     = 0x04,
         MOD_FAPI2_PLAT_GET_PARENT_TEST              = 0x05,
         MOD_FAPI2_PLAT_GET_CHILDREN_TEST            = 0x06,
+        MOD_FAPI2_VERIFYCFAMACCESSTARGET            = 0x07,
     };
 
     /**

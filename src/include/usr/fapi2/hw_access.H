@@ -31,11 +31,6 @@
 #ifndef _FAPI2_HWACCESS_H_
 #define _FAPI2_HWACCESS_H_
 
-// Variable_buffer isn't supported on PPE
-#ifndef __PPE__
-#include <variable_buffer.H>
-#endif
-
 #include <plat_hw_access.H>
 #include <fapi2_hw_access.H>
 
