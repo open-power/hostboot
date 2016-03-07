@@ -183,13 +183,6 @@ extern "C"
 
                 // Kick it off, wait for a result
                 FAPI_TRY( mss::mcbist::execute(i_target, l_program) );
-
-                // Just because the program executed and no MCBIST failure was reported, it is poosible that
-                // there were address errors. An address error in the only address in a range causes the
-                // 'BIST to skip that command. Since it's the only address, the subtest (or program) can
-                // complete succedssfully even though nothing actually happend.
-                // For now, just dump the registers and vgrep for errors. BRS
-                FAPI_TRY( mss::dump_regs<TARGET_TYPE_MCBIST>(i_target) );
             }
         }
 
