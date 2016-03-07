@@ -299,6 +299,15 @@ while [ $(($modsstarted)) -lt 1 -o $(($modsstarted)) -ne $(($modscompleted)) ]; 
 
     echo "ModulesStarted:ModulesCompleted  => $modsstarted:$modscompleted"
 
+    # @TODO RTC:149210 temporary fix for autosim hangs on real code errors. For some reason
+    # when we hit an actual bug and simics halts, the autosim commands hang
+    # causing this loop to take >8 hours.
+    if [ -z $modsstarted ] && [ -z $modscompleted ]; then
+        echo "ERROR: autosim hanging on real code errors, temporarily catching early"
+        echo "See archived hbTracMerg for more info"
+        exit 1
+    fi
+
     if [ "$loopcount" -gt 90 ];   then
         echo    "ERROR: timed out after 15 minutes"
         autosim $NOWIN --simcmd   "hb-Ps"
