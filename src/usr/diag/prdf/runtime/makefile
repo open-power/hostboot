@@ -37,6 +37,8 @@ include ../prdf_hb_only.mk  # Will define PRD_SRC_PATH and PRD_INC_PATH
 # PRD_SRC_PATH and PRD_INC_PATH must be defined before including these files.
 include ../common/prdf_common_fsp_and_hb.mk
 include ../common/framework/prdf_framework.mk
+include ../common/plat/p9/prdf_plat_p9.mk
+include ../common/plat/cen/prdf_plat_cen.mk
 
 VPATH += ${prd_vpath}
 
