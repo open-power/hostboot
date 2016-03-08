@@ -19980,4 +19980,17 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
   <readable/>
 </attribute>
 
+<attribute>
+    <id>PARENT_PERVASIVE</id>
+    <description>
+        Physical entity path of the target's associated pervasive target
+    </description>
+    <nativeType>
+        <name>EntityPath</name>
+    </nativeType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <virtual/>
+</attribute>
+
 </attributes>

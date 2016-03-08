@@ -51,7 +51,8 @@ use strict;
 use XML::Simple;
 use Data::Dumper;
 
-
+# Enables the state variable feature
+use feature "state";
 
 ################################################################################
 # Set PREFERRED_PARSER to XML::Parser. Otherwise it uses XML::SAX which contains
@@ -79,13 +80,14 @@ use constant
     MAX_MCA_PER_PROC => 8,
     MAX_MCBIST_PER_PROC => 2,
     MAX_PEC_PER_PROC => 3,
-    MAX_PHB_PER_PROC => 18,
+    MAX_PHB_PER_PROC => 6,
     MAX_MBA_PER_MEMBUF => 2,
     MAX_OBUS_PER_PROC => 4,
     MAX_PPE_PER_PROC => 21,
     MAX_PERV_PER_PROC => 42,
     MAX_CAPP_PER_PROC => 2,
     MAX_SBE_PER_PROC => 1,
+    MAX_NV_PER_PROC => 2,
 };
 
 # for SPI connections in the @SPIs array
@@ -3494,6 +3496,91 @@ sub generate_ex
 ";
 }
 
+sub getPervasiveForUnit
+{
+    # Input should be of the form <type><chip unit>, example: "core0"
+    my ($unit) = @_;
+
+    # The mapping is a static variable that is preserved across new calls to
+    # the function to speed up the mapping performance
+    state %unitToPervasive;
+
+    if ( not %unitToPervasive )
+    {
+        for my $core (0..MAX_CORE_PER_PROC-1)
+        {
+            $unitToPervasive{"core$core"} = 32 + $core;
+        }
+        for my $eq (0..MAX_EQ_PER_PROC-1)
+        {
+            $unitToPervasive{"eq$eq"} = 16 + $eq;
+        }
+        for my $xbus (0..MAX_XBUS_PER_PROC-1)
+        {
+            $unitToPervasive{"xbus$xbus"} = 6;
+        }
+        for my $obus (0..MAX_OBUS_PER_PROC-1)
+        {
+            $unitToPervasive{"obus$obus"} = 9 + $obus;
+        }
+        for my $capp (0..MAX_CAPP_PER_PROC-1)
+        {
+            $unitToPervasive{"capp$capp"} = 2 * ($capp+1);
+        }
+        for my $mcbist (0..MAX_MCBIST_PER_PROC-1)
+        {
+            $unitToPervasive{"mcbist$mcbist"} = 7 + $mcbist;
+        }
+        for my $mcs (0..MAX_MCS_PER_PROC-1)
+        {
+            $unitToPervasive{"mcs$mcs"} = 7 + ($mcs > 1);
+        }
+        for my $mca (0..MAX_MCA_PER_PROC-1)
+        {
+            $unitToPervasive{"mca$mca"} = 7 + ($mca > 3);
+        }
+        for my $pec (0..MAX_PEC_PER_PROC-1)
+        {
+            $unitToPervasive{"pec$pec"} = 13 + $pec;
+        }
+        for my $phb (0..MAX_PHB_PER_PROC-1)
+        {
+            $unitToPervasive{"phb$phb"} = 13 + ($phb>0) + ($phb>2);
+        }
+        #TODO: RTC 149326 add calls to addPervasiveParentLink for nv
+        # in the generate_nv function when it gets created
+        for my $nv (0..MAX_NV_PER_PROC-1)
+        {
+            $unitToPervasive{"nv$nv"} = 5;
+        }
+    }
+
+    my $pervasive = "unknown";
+    if(exists $unitToPervasive{$unit})
+    {
+        $pervasive = $unitToPervasive{$unit};
+    }
+    else
+    {
+        die "Cannot find pervasive for $unit";
+    }
+
+    return $pervasive
+}
+
+sub addPervasiveParentLink
+{
+    my ($sys,$node,$proc,$unit,$type) = @_;
+
+    my $pervasive = getPervasiveForUnit("$type$unit");
+
+    print "
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-$sys/node-$node/proc-$proc/perv-$pervasive</default>
+    </attribute>";
+}
+
 sub generate_core
 {
     my ($proc, $core, $ordinalId, $ipath) = @_;
@@ -3535,6 +3622,8 @@ sub generate_core
         <id>CHIPLET_ID</id>
         <default>$chipletId</default>
     </attribute>";
+
+    addPervasiveParentLink($sys,$node,$proc,$core_orig,"core");
 
     # call to do any fsp per-ex_core attributes
     do_plugin('fsp_ex_core', $proc, $core, $ordinalId );
@@ -3612,6 +3701,8 @@ sub generate_eq
         <id>CHIP_UNIT</id>
         <default>$eq</default>
     </attribute>";
+
+    addPervasiveParentLink($sys,$node,$proc,$eq,"eq");
 
     # call to do any fsp per-eq attributes
     do_plugin('fsp_eq', $proc, $eq, $ordinalId );
@@ -3698,6 +3789,8 @@ sub generate_mcs
         <default>$msb_swap</default>
     </attribute>";
 
+    addPervasiveParentLink($sys,$node,$proc,$mcs,"mcs");
+
     # call to do any fsp per-mcs attributes
     do_plugin('fsp_mcs', $proc, $mcs, $ordinalId );
 
@@ -3753,6 +3846,8 @@ sub generate_mca
         <default>$mca_orig</default>
     </attribute>";
 
+    addPervasiveParentLink($sys,$node,$proc,$mca_orig,"mca");
+
     # call to do any fsp per-mca attributes
     do_plugin('fsp_mca', $proc, $mca, $ordinalId );
 
@@ -3804,6 +3899,8 @@ sub generate_mcbist
         <id>CHIP_UNIT</id>
         <default>$mcbist</default>
     </attribute>";
+
+    addPervasiveParentLink($sys,$node,$proc,$mcbist,"mcbist");
 
     # call to do any fsp per-mcbist attributes
     do_plugin('fsp_mcbist', $proc, $mcbist, $ordinalId );
@@ -3857,6 +3954,8 @@ sub generate_pec
         <default>$pec</default>
     </attribute>";
 
+    addPervasiveParentLink($sys,$node,$proc,$pec,"pec");
+
     # call to do any fsp per-pec attributes
     do_plugin('fsp_pec', $proc, $pec, $ordinalId );
 
@@ -3872,6 +3971,7 @@ sub generate_phb_chiplet
     my $mruData = get_mruid($ipath);
 
     my $pec = 0;
+    my $phbChipUnit = $phb;
     if($phb > 0 && $phb < 3)
     {
         $pec = 1;
@@ -3902,7 +4002,7 @@ sub generate_phb_chiplet
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-$sys/node-$node/proc-$proc/pec-$pec}phb-$phb</default>
+        <default>physical:sys-$sys/node-$node/proc-$proc/pec-$pec/phb-$phb</default>
     </attribute>
     <attribute>
         <id>MRU_ID</id>
@@ -3918,8 +4018,10 @@ sub generate_phb_chiplet
     </compileAttribute>
     <attribute>
         <id>CHIP_UNIT</id>
-        <default>$phb</default>
+        <default>$phbChipUnit</default>
     </attribute>";
+
+    addPervasiveParentLink($sys,$node,$proc,$phbChipUnit,"phb");
 
     # call to do any fsp per-phb attributes
     do_plugin('fsp_phb', $proc, $phb, $ordinalId );
@@ -4026,6 +4128,8 @@ sub generate_obus
         <default>$obus</default>
     </attribute>";
 
+    addPervasiveParentLink($sys,$node,$proc,$obus,"obus");
+
     # call to do any fsp per-obus attributes
     do_plugin('fsp_obus', $proc, $obus, $ordinalId );
 
@@ -4077,6 +4181,8 @@ sub generate_xbus
         <id>CHIP_UNIT</id>
         <default>$xbus</default>
     </attribute>";
+
+    addPervasiveParentLink($sys,$node,$proc,$xbus,"xbus");
 
     # call to do any fsp per-obus attributes
     do_plugin('fsp_xbus', $proc, $xbus, $ordinalId );
@@ -4181,6 +4287,8 @@ sub generate_capp
         <id>CHIP_UNIT</id>
         <default>$capp</default>
     </attribute>";
+
+    addPervasiveParentLink($sys,$node,$proc,$capp,"capp");
 
     # call to do any fsp per-capp attributes
     do_plugin('fsp_capp', $proc, $capp, $ordinalId );

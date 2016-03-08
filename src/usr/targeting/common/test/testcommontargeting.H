@@ -1960,7 +1960,110 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         TARG_TS_TRACE(EXIT_MRK "testL4s" );
     }
 
+    /**
+     *  @brief Tests pervasive associations
+     *
+     *  @par Detailed Description:
+     *    An applicable pervasive target has a "PERVASIVE_CHILD"
+     *    association that links it to a child unit target.  For
+     *    example, a pervasive target may have said link to a child
+     *    core target.  That child core target, in turn, will have
+     *    a "PARENT_PERVASIVE" association back to it's parent,
+     *    forming a bidirectional relationship, which can be navigated
+     *    with target service getAssociated() calls.  This test
+     *    verifies that pervasive target A links to child target B,
+     *    and that in turn, B links back to A.
+     */
+    void testPervasiveRelationship()
+    {
+        TARG_TS_TRACE(ENTER_MRK "testPervasiveRelationship" );
 
+        using namespace TARGETING;
+
+        // Get all pervasive targets in the model and loop through
+        // each one
+        PredicateCTM pervasiveUnit(CLASS_UNIT,TYPE_PERV);
+        TargetRangeFilter pervasiveUnitFilter(
+            targetService().begin(),
+            targetService().end(),
+            &pervasiveUnit);
+
+        size_t pervasives = 0;
+
+        for(;pervasiveUnitFilter;++pervasiveUnitFilter)
+        {
+            ++pervasives;
+
+            // For each pervasive target, find all its children
+            // using the special PERVASIVE_CHILD association type
+            TargetHandleList pervasiveChildren;
+            (void)targetService().getAssociated(
+                pervasiveChildren,
+                *pervasiveUnitFilter,
+                TARGETING::TargetService::PERVASIVE_CHILD,
+                TARGETING::TargetService::ALL);
+
+            ATTR_PHYS_PATH_type pervasivePath = (*pervasiveUnitFilter)->
+                getAttr<TARGETING::ATTR_PHYS_PATH>();
+
+            TARG_TS_TRACE("Found %d children for pervasive w/ "
+                "path %s",pervasiveChildren.size(),
+                pervasivePath.toString());
+
+            // Then for each child, navigate back to what should be the original
+            // pervasive target
+            for(TARGETING::TargetHandleList::const_iterator child
+                    = pervasiveChildren.begin();
+                child != pervasiveChildren.end();
+                ++child)
+            {
+                ATTR_PHYS_PATH_type childPath = (*child)->
+                    getAttr<TARGETING::ATTR_PHYS_PATH>();
+
+                TARG_TS_TRACE("Child path is %s",
+                    childPath.toString());
+
+                TargetHandleList parentPervasive;
+                (void)targetService().getAssociated(
+                    parentPervasive,
+                    *child,
+                    TARGETING::TargetService::PARENT_PERVASIVE,
+                    TARGETING::TargetService::ALL);
+
+                // Make sure every child has exactly one parent pervasive
+                if(parentPervasive.size() != 1)
+                {
+                    TARG_TS_FAIL("child of pervasive did not have exactly 1 "
+                        "parent pervasive (had %d)",parentPervasive.size());
+                }
+
+                // Make sure that the parent of 'the child of the parent' is the
+                // parent
+                if(*parentPervasive.begin() != *pervasiveUnitFilter)
+                {
+                    TARG_TS_FAIL("parent of child of pervasive was not the "
+                        "original pervasive");
+                }
+
+                // Make sure that the parent is not accidentally the child
+                if(*parentPervasive.begin() == *child)
+                {
+                    TARG_TS_FAIL("parent is equal to child");
+                }
+            }
+        }
+
+        if(!pervasives)
+        {
+            TARG_TS_FAIL("no pervasive units found in the model");
+        }
+        else
+        {
+            TARG_TS_TRACE("Found total of %d pervasive targets",pervasives);
+        }
+
+        TARG_TS_TRACE(EXIT_MRK "testPervasiveRelationship" );
+    }
 };
 
 #endif // __TARGETING_COMMON_TESTCOMMONTARGETING_H

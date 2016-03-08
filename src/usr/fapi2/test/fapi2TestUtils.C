@@ -45,7 +45,7 @@
 #define NUM_MCBISTS      2
 #define NUM_PECS         3
 #define NUM_PHBS         6
-#define NUM_XBUS         1
+#define NUM_XBUS         2
 #define NUM_OBUS         2
 #define NUM_NV           2
 #define NUM_PPES         21
@@ -195,7 +195,8 @@ void generateTargets(TARGETING::Target* i_pMasterProcChip,
     i_pMasterProcChip->tryGetAttr<TARGETING::ATTR_PHYS_PATH>(l_epath);
     for(int i = 0; i < NUM_XBUS; i++)
     {
-        l_epath.addLast(TARGETING::TYPE_XBUS, i);
+        // Nimbus doesn't have the 0th xbus, so index from 1 for now
+        l_epath.addLast(TARGETING::TYPE_XBUS, i+1);
         if(TARGETING::targetService().toTarget(l_epath) != NULL)
         {
             o_targetList[MY_XBUS] =

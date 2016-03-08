@@ -179,6 +179,10 @@ class TargetService
                                 ///< Hardware affinity.  For example the child
                                 ///< of a memory controller channel target might
                                 ///< be a DIMM target
+            PERVASIVE_CHILD,    ///< The result target(s) should be units
+                                ///< associated with a pervasive target
+            PARENT_PERVASIVE,   ///< The result target should be a pervasive
+                                ///< target
             MAX_ASSOCIATION_TYPES, ///< Number of types, must always be last
         };
 
