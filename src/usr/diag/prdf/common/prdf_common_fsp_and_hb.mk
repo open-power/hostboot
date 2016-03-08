@@ -96,10 +96,7 @@ prd_obj += prdfThresholdResolutions.o
 prd_obj += xspprdFlagResolution.o
 
 # common/framework/service/
-prd_obj_no_sim += prdfPlatServices_common.o
-prd_obj += prdfRasServices_common.o
 prd_obj += prdfServiceDataCollector.o
-prd_obj += prdfTargetServices.o
 prd_obj += xspprdsdbug.o
 
 # common/mnfgtools/
@@ -107,7 +104,9 @@ prd_obj += prdfMfgThreshold.o
 prd_obj += prdfMfgThresholdMgr.o
 
 # common/plat/
-prd_obj += prdfLineDelete.o
+prd_obj_no_sim += prdfPlatServices_common.o
+prd_obj += prdfRasServices_common.o
+prd_obj += prdfTargetServices.o
 
 # common/plat/pegasus/ (non-rule plugin related)
 #prd_obj += prdfCalloutUtil.o
@@ -124,6 +123,7 @@ prd_obj += prdfLineDelete.o
 #prd_obj += prdfFabricDomain.o
 #prd_obj += prdfFsiCapUtil.o
 #prd_obj += prdfLaneRepair.o
+#prd_obj += prdfLineDelete.o
 #prd_obj += prdfMemoryMru.o
 #prd_obj += prdfPciOscSwitchDomain.o
 #prd_obj += prdfPegasusConfigurator.o

@@ -53,6 +53,7 @@ prd_incpath += ${PRD_SRC_PATH}/framework/register
 prd_incpath += ${PRD_SRC_PATH}/framework/service
 prd_incpath += ${PRD_SRC_PATH}/mnfgtools
 prd_incpath += ${PRD_SRC_PATH}/occ_firdata
+prd_incpath += ${PRD_SRC_PATH}/plat
 prd_incpath += ${PRD_SRC_PATH}/plat/pegasus
 
 # External header paths
@@ -76,7 +77,7 @@ prd_obj += prdfMain.o
 # framework/resolution/
 prd_obj += prdfDumpResolution.o
 
-# framework/service/
+# plat/
 prd_obj += prdfPlatServices.o
 prd_obj += prdfRasServices.o
 
@@ -99,9 +100,6 @@ prd_obj += prdfMain_ipl.o
 # framework/register
 prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfFileRegisterAccess.o)
 
-# framework/service/
-prd_obj += prdfPlatServices_ipl.o
-
 # mnfgtools/
 prd_obj += prdfMfgSync.o
 
@@ -109,6 +107,9 @@ prd_obj += prdfMfgSync.o
 prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfPnorFirDataReader.o)
 prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfReadPnorFirData.o)
 prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfWriteHomerFirData.o)
+
+# plat/
+prd_obj += prdfPlatServices_ipl.o
 
 # plat/pegasus/ (non-rule plugin related)
 #prd_obj += prdfCenMbaIplCeStats.o
@@ -128,7 +129,7 @@ endif
 
 ifeq (${HOSTBOOT_RUNTIME},1)
 
-# runtime/
+# plat/
 prd_obj += prdfPlatServices_rt.o
 
 # common/runtime/

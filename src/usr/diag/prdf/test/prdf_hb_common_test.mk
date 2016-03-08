@@ -48,6 +48,7 @@ EXTRAINCDIR += ${PRD_USR_PATH}/common/mnfgtools
 EXTRAINCDIR += ${PRD_USR_PATH}/mnfgtools
 EXTRAINCDIR += ${PRD_USR_PATH}/framework/service
 EXTRAINCDIR += ${PRD_USR_PATH}/occ_firdata
+EXTRAINCDIR += ${PRD_USR_PATH}/plat
 EXTRAINCDIR += ${PRD_USR_PATH}/test
 
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
