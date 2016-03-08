@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/framework/service/prdfPlatServices_ipl.H $  */
+/* $Source: src/usr/diag/prdf/plat/prdfPlatServices_rt.C $                */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,18 +23,17 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __prdfPlatServices_ipl_H
-#define __prdfPlatServices_ipl_H
-
 /**
- * @file  prdfPlatServices_ipl.H
- * @brief Wrapper code for external interfaces used by PRD (IPL only).
+ * @file  prdfPlatServices_rt.C
+ * @brief Wrapper code for external interfaces used by PRD.
  *
  * This file contains code that is strictly specific to Hostboot. All code that
  * is common between FSP and Hostboot should be in the respective common file.
  */
 
-#include <diag/mdia/mdia.H>
+#include <prdfPlatServices.H>
+#include <prdfTrace.H>
+#include <runtime/interface.h>
 
 //------------------------------------------------------------------------------
 
@@ -48,51 +47,67 @@ namespace PlatServices
 //##                        Memory specific functions
 //##############################################################################
 
-/**
- * @brief  Checks if we are running in MDIA mode.
- * @return TRUE if in MDIA mode, FALSE otherwise.
- */
-bool isInMdiaMode();
+void sendPageGardRequest( uint64_t i_systemAddress )
+{
+    #define PRDF_FUNC "[PlatServices::sendPageGardRequest] "
 
-/**
- * @brief  Sends a maintenance command message to MDIA.
- * @param  i_mbaTarget An MBA target.
- * @param  i_eventType MDIA event type
- * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
- */
-int32_t mdiaSendEventMsg( TARGETING::TargetHandle_t i_mbaTarget,
-                          MDIA::MaintCommandEventType i_eventType );
+    do
+    {
+        if( !g_hostInterfaces || !g_hostInterfaces->memory_error )
+        {
+            PRDF_ERR(PRDF_FUNC " memory_error() interface is not defined");
+            break;
+        }
 
-/**
- * @brief  Invokes the restore DRAM repairs hardware procedure.
- * @param  i_mbaTarget
- * @param  o_repairedRankMask An encoded bitmask of repaired ranks.
- * @param  o_badDimm An encoded bitmask of bad DIMMs.
- * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
- */
-/* TODO RTC 136126
-int32_t mssRestoreDramRepairs( TARGETING::TargetHandle_t i_mbaTarget,
-                               uint8_t & o_repairedRankMask,
-                               uint8_t & o_badDimmMask );
-*/
+        int32_t rc = g_hostInterfaces->memory_error( i_systemAddress,
+                                                      i_systemAddress,
+                                                      MEMORY_ERROR_CE );
+        if( SUCCESS != rc )
+        {
+            PRDF_ERR(PRDF_FUNC " memory_error() failed");
+            break;
+        }
+    }while(0);
 
-/**
- * @brief  Invokes the mss_IPL_UE_isolation hardware procedure.
- *         This function will identify the bits that caused the UE.
- * @param  i_mba    Target MBA.
- * @param  i_rank   Target rank.
- * @param  o_bitmap DQ bitmap container.
- * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
- */
-/* TODO RTC 136126
-int32_t mssIplUeIsolation( TARGETING::TargetHandle_t i_mba,
-                           const CenRank & i_rank,
-                           CenDqBitmap & o_bitmap );
-*/
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+void sendLmbGardRequest( uint64_t i_systemAddress, bool i_isFetchUE )
+{
+    //NO-OP for OPAL
+}
+//------------------------------------------------------------------------------
+
+void sendDynMemDeallocRequest( uint64_t i_startAddr, uint64_t i_endAddr )
+{
+    #define PRDF_FUNC "[PlatServices::sendDynMemDeallocRequest] "
+
+    do
+    {
+        if( !g_hostInterfaces || !g_hostInterfaces->memory_error )
+        {
+            PRDF_ERR(PRDF_FUNC " memory_error() interface is not defined");
+            break;
+        }
+
+        int32_t rc = g_hostInterfaces->memory_error( i_startAddr,
+                                                     i_startAddr,
+                                                     MEMORY_ERROR_UE );
+        if( SUCCESS != rc )
+        {
+            PRDF_ERR(PRDF_FUNC " memory_error() failed");
+            break;
+        }
+    }while(0);
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
 
 } // end namespace PlatServices
 
 } // end namespace PRDF
-
-#endif // __prdfPlatServices_ipl_H
 

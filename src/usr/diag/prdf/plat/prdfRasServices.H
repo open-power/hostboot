@@ -1,11 +1,13 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/prdfTOD.H $                     */
+/* $Source: src/usr/diag/prdf/plat/prdfRasServices.H $                    */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -21,32 +23,22 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef PRDFTOD_H
-#define PRDFTOD_H
+#ifndef __prdfRasServices_H
+#define __prdfRasServices_H
+
+/** @file  prdfRasServices.H
+ *  @brief Utility code to parse an SDC and produce the appropriate error log.
+ */
+
+// This must be included after all external includes. This will take care of
+// cases where a file must be included in the common code, but the include paths
+// are different between FSP and Hostboot.
+#include <prdfRasServices_common.H>
 
 namespace PRDF
 {
 
-/** @struct PrdfTodFaultData
- *  TOD Fault isolation information from a chip.
- */
-struct PrdfTodFaultData
-{
-    TARGETING::TargetHandle_t source_chipHandle;
-    bool phyp_fault;
-    bool topo_fault[2];                  // 0 is active, 1 is backup
-    bool topo_fault_clock[2];
-    TARGETING::TargetHandle_t topo_fault_chip[2];
-};
-
-int32_t prdfP7_TodCaptureRegisters(STEP_CODE_DATA_STRUCT & i_stepcode);
-int32_t prdfP7_TodCleanUpErrors(STEP_CODE_DATA_STRUCT & i_stepcode);
-int32_t prdfP7_TodCollectFaultDataSys(vector<PrdfTodFaultData> & o_faults,
-                                      STEP_CODE_DATA_STRUCT & i_stepcode);
-int32_t prdfP7_TodCollectFaultDataChip(ExtensibleChip * i_chip,
-                                       vector<PrdfTodFaultData> & o_faults,
-                                       STEP_CODE_DATA_STRUCT & i_stepcode);
-
 } // end namespace PRDF
 
-#endif //PRDFTOD_H
+#endif // __prdfRasServices_H
+
