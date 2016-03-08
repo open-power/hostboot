@@ -31,10 +31,6 @@
 
 prd_vpath += ${PRD_SRC_PATH}/common
 prd_vpath += ${PRD_SRC_PATH}/common/include
-prd_vpath += ${PRD_SRC_PATH}/common/framework/config
-prd_vpath += ${PRD_SRC_PATH}/common/framework/register
-prd_vpath += ${PRD_SRC_PATH}/common/framework/resolution
-prd_vpath += ${PRD_SRC_PATH}/common/framework/service
 prd_vpath += ${PRD_SRC_PATH}/common/mnfgtools
 prd_vpath += ${PRD_SRC_PATH}/common/plat
 prd_vpath += ${PRD_SRC_PATH}/common/plat/pegasus
@@ -43,10 +39,6 @@ prd_vpath += ${PRD_SRC_PATH}/common/rule
 prd_vpath += ${PRD_SRC_PATH}/common/util
 
 prd_incpath += ${PRD_SRC_PATH}/common
-prd_incpath += ${PRD_SRC_PATH}/common/framework/config
-prd_incpath += ${PRD_SRC_PATH}/common/framework/register
-prd_incpath += ${PRD_SRC_PATH}/common/framework/resolution
-prd_incpath += ${PRD_SRC_PATH}/common/framework/service
 prd_incpath += ${PRD_SRC_PATH}/common/mnfgtools
 prd_incpath += ${PRD_SRC_PATH}/common/plat
 prd_incpath += ${PRD_SRC_PATH}/common/plat/pegasus
@@ -61,41 +53,6 @@ prd_incpath += ${PRD_SRC_PATH}/common/util
 # common/
 prd_obj += prdfMain_common.o
 prd_obj += prdfTrace.o
-
-# common/framework/config/
-prd_obj += iipchip.o
-prd_obj += iipConfigurator.o
-prd_obj += iipDomain.o
-prd_obj += iipDomainContainer.o
-prd_obj += iipSystem.o
-prd_obj += prdfExtensibleDomain.o
-prd_obj += prdfParentDomain.o
-prd_obj += prdfRuleChipDomain.o
-
-# common/framework/register/
-prd_obj += iipscr.o
-prd_obj += prdfCaptureData.o
-prd_obj += prdfErrorRegister.o
-prd_obj += prdfErrorRegisterMask.o
-prd_obj_no_sim += prdfHomRegisterAccess.o
-prd_obj += prdfRegisterCache.o
-prd_obj += prdfResetErrorRegister.o
-prd_obj += prdfScanFacility.o
-prd_obj += prdfScomRegisterAccess.o
-prd_obj += prdfScomRegister.o
-
-# common/framework/resolution/
-prd_obj += iipResolution.o
-prd_obj += iipResolutionFactory.o
-prd_obj += prdfCaptureResolution.o
-prd_obj += prdfClockResolution.o
-prd_obj += prdfResolutionMap.o
-prd_obj += prdfThresholdResolutions.o
-prd_obj += xspprdFlagResolution.o
-
-# common/framework/service/
-prd_obj += prdfServiceDataCollector.o
-prd_obj += xspprdsdbug.o
 
 # common/mnfgtools/
 prd_obj += prdfMfgThreshold.o

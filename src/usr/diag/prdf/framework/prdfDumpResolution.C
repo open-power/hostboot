@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/framework/register/prdfFileRegisterAccess.C $ */
+/* $Source: src/usr/diag/prdf/framework/prdfDumpResolution.C $            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,50 +23,25 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include "prdfFileRegisterAccess.H"
-#include <prdfTrace.H>
-#include <prdfPnorFirDataReader.H>
-#include <prdfBitString.H>
+/**
+ @file  prdfDumpResolution.C
+ @brief defines resolve action for dump resolution for hostboot platform
+ */
 
-using namespace TARGETING;
+//----------------------------------------------------------------------
+//  Includes
+//----------------------------------------------------------------------
+
+#include <prdDumpResolution.H>
+#include <iipServiceDataCollector.h>
 
 namespace PRDF
 {
 
-errlHndl_t FileScomAccessor::Access(
-                            TargetHandle_t i_target,
-                            BIT_STRING_CLASS & bs,
-                            uint64_t registerId,
-                            MopRegisterAccess::Operation operation) const
+int32_t DumpResolution::Resolve( STEP_CODE_DATA_STRUCT & io_serviceData )
 {
-    #define PRDF_FUNC "[FileScomAccessor::Access()] "
-
-    errlHndl_t errlH = NULL;
-
-    PnorFirDataReader & firData = PnorFirDataReader::getPnorFirDataReader();
-    uint64_t data = 0;
-
-    switch (operation)
-    {
-        case MopRegisterAccess::WRITE:
-            // TODO: RTC 62076 move BitString class to 64-bit
-            data = (((uint64_t)bs.GetFieldJustify( 0, 32)) << 32) |
-                    ((uint64_t)bs.GetFieldJustify(32, 32));
-            firData.putScom( i_target, registerId, data);
-            break;
-        case MopRegisterAccess::READ:
-            firData.getScom( i_target, registerId, data);
-            // TODO: RTC 62076 move BitString class to 64-bit
-            bs.SetFieldJustify( 0, 32, data >> 32);
-            bs.SetFieldJustify(32, 32, data      );
-            break;
-        default:
-            PRDF_ERR(PRDF_FUNC "Wrong Operation:%u", operation);
-    }
-
-    return errlH;
-
-    #undef PRDF_FUNC
+    // Note: Dump is not supported on hostboot.
+    return SUCCESS;
 }
 
-} // End namespace PRDF
+} // end namespace PRDF

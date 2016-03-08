@@ -35,8 +35,9 @@ SUBDIRS += test.d
 # ROOTPATH must be defined before including this file.
 include prdf_hb_only.mk # Will define PRD_SRC_PATH and PRD_INC_PATH
 
-# PRD_SRC_PATH and PRD_INC_PATH must be defined before including this file.
+# PRD_SRC_PATH and PRD_INC_PATH must be defined before including these files.
 include common/prdf_common_fsp_and_hb.mk
+include common/framework/prdf_framework.mk
 
 VPATH += ${prd_vpath}
 
