@@ -91,9 +91,7 @@ extern "C"
 
             // Reset addr_mux_sel to “0” to allow the MCA to take control of the DDR interface over from CCS.
             // (Note: this step must remain in this procedure to ensure that data path is placed into mainline
-            // mode prior to running memory diagnostics. When Advanced DRAM Training executes, this step
-            // becomes superfluous but not harmful. However, it's not guaranteed that Advanced DRAM Training
-            // will be executed on every system configuration.)
+            // mode prior to running memory diagnostics. This step maybe superfluous but not harmful.)
             // Note: addr_mux_sel is set low in p9_mss_draminit(), however that might be a work-around so we
             // set it low here kind of like belt-and-suspenders. BRS
             FAPI_TRY( mss::change_addr_mux_sel(p, mss::LOW) );
