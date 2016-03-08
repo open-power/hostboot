@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/makefile $
+# $Source: src/usr/diag/prdf/common/plat/cen/prdf_plat_cen.mk $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2016
+# Contributors Listed Below - COPYRIGHT 2016
 # [+] International Business Machines Corp.
 #
 #
@@ -23,32 +23,18 @@
 #
 # IBM_PROLOG_END_TAG
 
-ROOTPATH = ../../../..
-MODULE = prdf
-
-SUBDIRS += rule.d
-SUBDIRS += runtime.d
-SUBDIRS += test.d
+# NOTE: PRD_SRC_PATH must be defined before including this file.
 
 ################################################################################
-
-# ROOTPATH must be defined before including this file.
-include prdf_hb_only.mk # Will define PRD_SRC_PATH and PRD_INC_PATH
-
-# PRD_SRC_PATH and PRD_INC_PATH must be defined before including these files.
-include common/prdf_common_fsp_and_hb.mk
-include common/framework/prdf_framework.mk
-include common/plat/p9/prdf_plat_p9.mk
-include common/plat/cen/prdf_plat_cen.mk
-
-VPATH += ${prd_vpath}
-
-EXTRAINCDIR += ${prd_incpath}
-
-OBJS += ${prd_obj}
-OBJS += ${prd_obj_no_sim}
-OBJS += ${prd_rule_plugin}
-
+# Paths common to both FSP and Hostboot
 ################################################################################
 
-include ${ROOTPATH}/config.mk
+prd_vpath += ${PRD_SRC_PATH}/common/plat/cen
+
+prd_incpath += ${PRD_SRC_PATH}/common/plat/cen
+
+################################################################################
+# Object files common to both FSP and Hostboot
+################################################################################
+
+

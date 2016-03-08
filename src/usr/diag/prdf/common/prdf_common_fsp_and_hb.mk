@@ -33,7 +33,6 @@ prd_vpath += ${PRD_SRC_PATH}/common
 prd_vpath += ${PRD_SRC_PATH}/common/include
 prd_vpath += ${PRD_SRC_PATH}/common/mnfgtools
 prd_vpath += ${PRD_SRC_PATH}/common/plat
-prd_vpath += ${PRD_SRC_PATH}/common/plat/pegasus
 prd_vpath += ${PRD_SRC_PATH}/common/plugins
 prd_vpath += ${PRD_SRC_PATH}/common/rule
 prd_vpath += ${PRD_SRC_PATH}/common/util
@@ -41,7 +40,6 @@ prd_vpath += ${PRD_SRC_PATH}/common/util
 prd_incpath += ${PRD_SRC_PATH}/common
 prd_incpath += ${PRD_SRC_PATH}/common/mnfgtools
 prd_incpath += ${PRD_SRC_PATH}/common/plat
-prd_incpath += ${PRD_SRC_PATH}/common/plat/pegasus
 prd_incpath += ${PRD_SRC_PATH}/common/plugins
 prd_incpath += ${PRD_SRC_PATH}/common/rule
 prd_incpath += ${PRD_SRC_PATH}/common/util
@@ -62,40 +60,6 @@ prd_obj += prdfMfgThresholdMgr.o
 prd_obj_no_sim += prdfPlatServices_common.o
 prd_obj += prdfRasServices_common.o
 prd_obj += prdfTargetServices.o
-
-# common/plat/pegasus/ (non-rule plugin related)
-#prd_obj += prdfCalloutUtil.o
-#prd_obj += prdfCenAddress.o
-#prd_obj += prdfCenDqBitmap.o
-#prd_obj += prdfCenMbaCaptureData.o
-#prd_obj += prdfCenMbaCeTable.o
-#prd_obj += prdfCenMbaRceTable.o
-#prd_obj += prdfCenMbaTdCtlr_common.o
-#prd_obj += prdfCenMbaThresholds_common.o
-#prd_obj += prdfCenMbaUeTable.o
-#prd_obj += prdfCenMemUtils.o
-#prd_obj += prdfCenSymbol.o
-#prd_obj += prdfFabricDomain.o
-#prd_obj += prdfFsiCapUtil.o
-#prd_obj += prdfLaneRepair.o
-#prd_obj += prdfLineDelete.o
-#prd_obj += prdfMemoryMru.o
-#prd_obj += prdfPciOscSwitchDomain.o
-#prd_obj += prdfPegasusConfigurator.o
-#prd_obj += prdfPllDomain.o
-#prd_obj += prdfPhbUtils.o
-#prd_obj += prdfPlatUtil.o
-
-# common/plat/pegasus/ (rule plugin related)
-#prd_rule_plugin += prdfCenMba.o
-#prd_rule_plugin += prdfCenMembuf.o
-#prd_rule_plugin += prdfCenPll.o
-#prd_rule_plugin += prdfP8Ex.o
-#prd_rule_plugin += prdfP8Mcs.o
-#prd_rule_plugin += prdfP8Pll.o
-#prd_rule_plugin += prdfP8PllPcie.o
-#prd_rule_plugin += prdfP8Proc.o
-#prd_rule_plugin += prdfPllUtils.o
 
 # common/plugins/ (errl plugin related)
 prd_obj += prdfParserUtils.o

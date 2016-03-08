@@ -43,7 +43,6 @@ EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/resolution
 EXTRAINCDIR += ${PRD_USR_PATH}/common/framework/config
 EXTRAINCDIR += ${PRD_USR_PATH}/common/rule
 EXTRAINCDIR += ${PRD_USR_PATH}/common/plat
-EXTRAINCDIR += ${PRD_USR_PATH}/common/plat/pegasus
 EXTRAINCDIR += ${PRD_USR_PATH}/common/mnfgtools
 EXTRAINCDIR += ${PRD_USR_PATH}/mnfgtools
 EXTRAINCDIR += ${PRD_USR_PATH}/framework

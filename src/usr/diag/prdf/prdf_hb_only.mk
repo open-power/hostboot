@@ -38,7 +38,6 @@ prd_vpath += ${PRD_SRC_PATH}/framework
 prd_vpath += ${PRD_SRC_PATH}/mnfgtools
 prd_vpath += ${PRD_SRC_PATH}/occ_firdata
 prd_vpath += ${PRD_SRC_PATH}/plat
-prd_vpath += ${PRD_SRC_PATH}/plat/pegasus
 
 # Internal PRD header paths
 prd_incpath += ${PRD_INC_PATH}        # Stored differently in FSP
@@ -48,7 +47,6 @@ prd_incpath += ${PRD_SRC_PATH}/framework
 prd_incpath += ${PRD_SRC_PATH}/mnfgtools
 prd_incpath += ${PRD_SRC_PATH}/occ_firdata
 prd_incpath += ${PRD_SRC_PATH}/plat
-prd_incpath += ${PRD_SRC_PATH}/plat/pegasus
 
 # External header paths
 prd_incpath += ${ROOTPATH}/src/include/usr/ecmddatabuffer
@@ -75,13 +73,6 @@ prd_obj += prdfDumpResolution.o
 prd_obj += prdfPlatServices.o
 prd_obj += prdfRasServices.o
 
-# plat/pegasus/ (rule plugin related)
-#prd_rule_plugin += prdfP8TodPlugins.o
-#prd_rule_plugin += prdfPlatCenMemUtils.o
-#prd_rule_plugin += prdfPlatCenPll.o
-#prd_rule_plugin += prdfPlatP8Ex.o
-#prd_rule_plugin += prdfPlatP8Proc.o
-
 ################################################################################
 # Hostboot only object files (IPL only)
 ################################################################################
@@ -105,16 +96,6 @@ prd_obj += $(if $(CONFIG_ENABLE_CHECKSTOP_ANALYSIS), prdfWriteHomerFirData.o)
 # plat/
 prd_obj += prdfPlatServices_ipl.o
 
-# plat/pegasus/ (non-rule plugin related)
-#prd_obj += prdfCenMbaIplCeStats.o
-#prd_obj += prdfCenMbaTdCtlr_ipl.o
-#prd_obj += prdfDramRepairs.o
-#prd_obj += prdfMbaDomain.o
-#prd_obj += prdfPlatCalloutUtil.o
-
-# plat/pegasus/ (rule plugin related)
-#prd_rule_plugin += prdfPlatCenMba_ipl.o
-
 endif
 
 ################################################################################
@@ -125,11 +106,6 @@ ifeq (${HOSTBOOT_RUNTIME},1)
 
 # plat/
 prd_obj += prdfPlatServices_rt.o
-
-# common/plat/pegasus/
-#prd_obj += prdfCenMbaDynMemDealloc_rt.o
-#prd_obj += prdfCenMbaTdCtlr_rt.o
-#prd_obj += prdfCenMbaTdRankData_rt.o
 
 endif
 
