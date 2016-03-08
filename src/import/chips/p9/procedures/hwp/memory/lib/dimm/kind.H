@@ -63,6 +63,8 @@ class kind
             // TK: Attribute for slave ranks.
             iv_slave_ranks = 0;
 
+            return;
+
         fapi_try_exit:
             // Not 100% sure what to do here ...
             FAPI_ERR("error initializing DIMM structure: %s 0x%016lx", mss::c_str(i_target), uint64_t(fapi2::current_err));
