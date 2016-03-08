@@ -231,6 +231,10 @@
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-16</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -248,6 +252,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-17</default>
     </attribute>
 </targetInstance>
 
@@ -267,6 +275,10 @@
         <id>CHIP_UNIT</id>
         <default>2</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-18</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -284,6 +296,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>3</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-19</default>
     </attribute>
 </targetInstance>
 
@@ -303,6 +319,10 @@
         <id>CHIP_UNIT</id>
         <default>4</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-20</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -320,6 +340,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>5</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-21</default>
     </attribute>
 </targetInstance>
 
@@ -562,6 +586,10 @@
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-32</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -579,6 +607,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-33</default>
     </attribute>
 </targetInstance>
 
@@ -599,6 +631,10 @@
         <id>CHIP_UNIT</id>
         <default>2</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-34</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -616,6 +652,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>3</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-35</default>
     </attribute>
 </targetInstance>
 
@@ -636,6 +676,10 @@
         <id>CHIP_UNIT</id>
         <default>4</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-36</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -653,6 +697,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>5</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-37</default>
     </attribute>
 </targetInstance>
 
@@ -673,6 +721,10 @@
         <id>CHIP_UNIT</id>
         <default>6</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-38</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -690,6 +742,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>7</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-39</default>
     </attribute>
 </targetInstance>
 
@@ -710,6 +766,10 @@
         <id>CHIP_UNIT</id>
         <default>8</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-40</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -727,6 +787,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>9</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-41</default>
     </attribute>
 </targetInstance>
 
@@ -747,6 +811,10 @@
         <id>CHIP_UNIT</id>
         <default>10</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-42</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -764,6 +832,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>11</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-43</default>
     </attribute>
 </targetInstance>
 
@@ -784,6 +856,10 @@
         <id>CHIP_UNIT</id>
         <default>12</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-44</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -801,6 +877,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>13</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-45</default>
     </attribute>
 </targetInstance>
 
@@ -821,6 +901,10 @@
         <id>CHIP_UNIT</id>
         <default>14</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-46</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -838,6 +922,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>15</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-47</default>
     </attribute>
 </targetInstance>
 
@@ -858,6 +946,10 @@
         <id>CHIP_UNIT</id>
         <default>16</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-48</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -875,6 +967,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>17</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-49</default>
     </attribute>
 </targetInstance>
 
@@ -895,6 +991,10 @@
         <id>CHIP_UNIT</id>
         <default>18</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-50</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -912,6 +1012,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>19</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-51</default>
     </attribute>
 </targetInstance>
 
@@ -932,6 +1036,10 @@
         <id>CHIP_UNIT</id>
         <default>20</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-52</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -949,6 +1057,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>21</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-53</default>
     </attribute>
 </targetInstance>
 
@@ -969,6 +1081,10 @@
         <id>CHIP_UNIT</id>
         <default>22</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-54</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -986,6 +1102,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>23</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-55</default>
     </attribute>
 </targetInstance>
 
@@ -1012,6 +1132,10 @@
     <attribute><id>EI_BUS_TX_MSBSWAP</id>
         <default>1</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-7</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1035,6 +1159,10 @@
     </attribute>
     <attribute><id>EI_BUS_TX_MSBSWAP</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-7</default>
     </attribute>
 </targetInstance>
 
@@ -1060,6 +1188,10 @@
     <attribute><id>EI_BUS_TX_MSBSWAP</id>
         <default>1</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-8</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1084,6 +1216,10 @@
     <attribute><id>EI_BUS_TX_MSBSWAP</id>
         <default>1</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-8</default>
+    </attribute>
 </targetInstance>
 
 <!-- Nimbus n0p0mcs0 MCA units -->
@@ -1103,6 +1239,10 @@
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-7</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1120,6 +1260,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-7</default>
     </attribute>
 </targetInstance>
 
@@ -1140,10 +1284,14 @@
         <id>CHIP_UNIT</id>
         <default>2</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-7</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0mcs1mca3</id>
+    <id>sys0node0proc0mcs1mca1</id>
     <type>unit-mca-nimbus</type>
     <attribute><id>HUID</id><default>0x000D0103</default></attribute>
     <attribute>
@@ -1157,6 +1305,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>3</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-7</default>
     </attribute>
 </targetInstance>
 
@@ -1177,6 +1329,10 @@
         <id>CHIP_UNIT</id>
         <default>4</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-8</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1194,6 +1350,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>5</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-8</default>
     </attribute>
 </targetInstance>
 
@@ -1214,6 +1374,10 @@
         <id>CHIP_UNIT</id>
         <default>6</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-8</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1231,6 +1395,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>7</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-8</default>
     </attribute>
 </targetInstance>
 
@@ -1251,6 +1419,10 @@
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-7</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1268,6 +1440,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-8</default>
     </attribute>
 </targetInstance>
 
@@ -1288,6 +1464,10 @@
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-13</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1306,6 +1486,10 @@
         <id>CHIP_UNIT</id>
         <default>1</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-14</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1323,6 +1507,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-15</default>
     </attribute>
 </targetInstance>
 
@@ -1343,6 +1531,10 @@
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-13</default>
+    </attribute>
 </targetInstance>
 
 <!-- Nimbus n0p0pec1 PHB units -->
@@ -1362,6 +1554,10 @@
         <id>CHIP_UNIT</id>
         <default>1</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-14</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1379,6 +1575,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-14</default>
     </attribute>
 </targetInstance>
 
@@ -1399,6 +1599,10 @@
         <id>CHIP_UNIT</id>
         <default>3</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-15</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1417,6 +1621,10 @@
         <id>CHIP_UNIT</id>
         <default>4</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-15</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1434,6 +1642,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>5</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-15</default>
     </attribute>
 </targetInstance>
 
@@ -1454,6 +1666,10 @@
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-9</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1471,6 +1687,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>3</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-12</default>
     </attribute>
 </targetInstance>
 
@@ -1491,6 +1711,10 @@
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-5</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1508,6 +1732,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-5</default>
     </attribute>
 </targetInstance>
 
@@ -2500,31 +2728,9 @@
 
 <!-- nimbus n0p0 XBUS units -->
 <targetInstance>
-    <id>sys0node0proc0xbus0</id>
-    <type>unit-xbus-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0601</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/xbus-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/xbus-0</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>0</default>
-    </attribute>
-<!--    <attribute> // @FIXME RTC 127337
-        <id>PEER_TARGET</id>
-        <default>physical:sys-0/node-0/proc-1/xbus-1</default>
-    </attribute>    // @FIXME RTC 127337  -->
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0proc0xbus1</id>
     <type>unit-xbus-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0602</default></attribute>
+    <attribute><id>HUID</id><default>0x000E0601</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/xbus-1</default>
@@ -2535,12 +2741,42 @@
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
-        <default>0</default>
+        <default>1</default>
+    </attribute>
+<!--    <attribute> // @FIXME RTC 127337
+        <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-1/xbus-1</default>
+    </attribute>    // @FIXME RTC 127337  -->
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-6</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0xbus2</id>
+    <type>unit-xbus-nimbus</type>
+    <attribute><id>HUID</id><default>0x000E0602</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/xbus-2</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/xbus-2</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
     </attribute>
 <!--    <attribute> // @FIXME RTC 127337
         <id>PEER_TARGET</id>
         <default>physical:sys-0/node-0/proc-2/xbus-1</default>
     </attribute>    // @FIXME RTC 127337  -->
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-6</default>
+    </attribute>
 </targetInstance>
 
 <!-- nimbus n0p0 CAPP units -->
@@ -2560,6 +2796,10 @@
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -2577,6 +2817,10 @@
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-4</default>
     </attribute>
 </targetInstance>
 

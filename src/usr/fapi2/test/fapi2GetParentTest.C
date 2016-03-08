@@ -137,7 +137,7 @@ errlHndl_t fapi2GetParentTest()
                 targeting_targets[MY_XBUS]);
         Target<fapi2::TARGET_TYPE_OBUS> fapi2_obusTarget(
                 targeting_targets[MY_OBUS]);
-        Target<fapi2::TARGET_TYPE_NV> fapi2_nvbusTarget(
+        Target<fapi2::TARGET_TYPE_NV> fapi2_nvTarget(
                 targeting_targets[MY_NV]);
         Target<fapi2::TARGET_TYPE_PPE> fapi2_ppeTarget(
                 targeting_targets[MY_PPE]);
@@ -574,7 +574,7 @@ errlHndl_t fapi2GetParentTest()
             numFails++;
         }
 
-//         //Check PHB's parents
+        //Check PHB's parents
         l_tempTargetingParent =
             static_cast<TARGETING::Target*>(
                 fapi2_phbTarget.getParent<TARGET_TYPE_PROC_CHIP>());
@@ -741,10 +741,10 @@ errlHndl_t fapi2GetParentTest()
            numFails++;
         }
 
-        //Check NVBUS's parents
+        //Check NV's parents
         l_tempTargetingParent =
             static_cast<TARGETING::Target*>(
-                fapi2_nvbusTarget.getParent<TARGET_TYPE_PROC_CHIP>());
+                fapi2_nvTarget.getParent<TARGET_TYPE_PROC_CHIP>());
         numTests++;
         if(TARGETING::get_huid(l_nimbusProc) !=
            TARGETING::get_huid(l_tempTargetingParent))
@@ -758,10 +758,10 @@ errlHndl_t fapi2GetParentTest()
             * @reasoncode         fapi2::RC_NV_NO_PROC_FOUND
             * @userdata1[0:31]    Expected Parent HUID
             * @userdata1[32:63]   Actual Parent HUID
-            * @userdata2[0:31]    Instance of NVBUS
+            * @userdata2[0:31]    Instance of NV
             * @userdata2[32:63]   fapi2 Type of expected parent
             * @devdesc            Could not find the parent PROC of this
-            *                     NVBUS target
+            *                     NV target
             */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
@@ -778,7 +778,7 @@ errlHndl_t fapi2GetParentTest()
                                           TO_UINT32(TARGET_TYPE_PROC_CHIP)),
                                           true/*SW Error*/);
             errlCommit(l_err,HWPF_COMP_ID);
-            TS_FAIL( "fapi2TargetTest::Unable to find NVBUS's PROC parent!");
+            TS_FAIL( "fapi2TargetTest::Unable to find NV's PROC parent!");
             numFails++;
         }
 

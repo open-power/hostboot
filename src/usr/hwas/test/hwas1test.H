@@ -714,6 +714,12 @@ public:
                     switch(l_type)
                     {
                         case TYPE_XBUS:
+                            if((1 == l_chipUnit) || (2 == l_chipUnit))
+                            {
+                                // XBUS1 & XBUS2 should be functional on Nimbus
+                                continue;
+                            }
+
                             sprintf(l_type_str, "XBUS");
                             sprintf(l_pgData, ", pgData = 0x%04x",
                                 pgData[VPD_CP00_PG_XBUS_INDEX]);

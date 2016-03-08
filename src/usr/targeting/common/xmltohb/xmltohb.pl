@@ -50,6 +50,10 @@ use POSIX;
 use Env;
 use XML::LibXML;
 
+# Provides object deep copy capability to support virtual
+# attribute removal
+use Storable 'dclone';
+
 ################################################################################
 # Set PREFERRED_PARSER to XML::Parser. Otherwise it uses XML::SAX which contains
 # bugs that result in XML parse errors that can be fixed by adjusting white-
@@ -144,10 +148,14 @@ use constant PARENT_BY_CONTAINMENT => "ParentByContainment";
 use constant CHILD_BY_CONTAINMENT => "ChildByContainment";
 use constant PARENT_BY_AFFINITY => "ParentByAffinity";
 use constant CHILD_BY_AFFINITY => "ChildByAffinity";
+use constant PERVASIVE_CHILD => "PervasiveChild";
+use constant PARENT_PERVASIVE => "ParentPervasive";
 my @associationTypes = ( PARENT_BY_CONTAINMENT,
-    CHILD_BY_CONTAINMENT, PARENT_BY_AFFINITY, CHILD_BY_AFFINITY );
+    CHILD_BY_CONTAINMENT, PARENT_BY_AFFINITY, CHILD_BY_AFFINITY,
+    PERVASIVE_CHILD, PARENT_PERVASIVE );
 
 # Constants for attribute names (minus ATTR_ prefix)
+use constant ATTR_PARENT_PERVASIVE => "PARENT_PERVASIVE";
 use constant ATTR_PHYS_PATH => "PHYS_PATH";
 use constant ATTR_AFFINITY_PATH => "AFFINITY_PATH";
 use constant ATTR_UNKNOWN => "UnknownAttributeName";
@@ -175,9 +183,11 @@ use Digest::MD5 qw(md5_hex);
 # Until full machine parseable workbook parsing splits out all the input files,
 # use the intermediate representation containing the full host boot model.
 # Aborts application if file name not found.
-my $attributes = $xml->XMLin($cfgHbXmlFile,
+# NOTE: the attribute list initially contains both real and virtual attributes
+my $allAttributes = $xml->XMLin($cfgHbXmlFile,
     forcearray => ['enumerationType','attribute','hwpfToHbAttrMap',
                    'compileAttribute']);
+
 my $fapiAttributes = {};
 if ($cfgFapiAttributesXmlFile ne "")
 {
@@ -188,10 +198,47 @@ if ($cfgFapiAttributesXmlFile ne "")
 my %Target_t = ();
 
 # Perform some sanity validation of the model (so we don't have to later)
-validateAttributes($attributes);
-validateTargetInstances($attributes);
-validateTargetTypes($attributes);
-validateTargetTypesExtension($attributes);
+# Subject virtual attributes to same sanity checks
+validateAttributes($allAttributes);
+validateTargetInstances($allAttributes);
+validateTargetTypes($allAttributes);
+validateTargetTypesExtension($allAttributes);
+
+# Clone the attributes and strip out any references to virtual
+# attributes, then continue forward using the result as the typical
+# working attribute set.  The original set containing virtual attributes
+# will be used for very specific tasks, like computing associations
+my $attributes = dclone $allAttributes;
+my %virtualAttrIds = ();
+for my $attr (reverse 0..((scalar @{$attributes->{attribute}})-1) )
+{
+    if(exists $attributes->{attribute}[$attr]->{virtual})
+    {
+        # Found a virtual attribute; note it and remove
+        $virtualAttrIds{$attributes->{attribute}[$attr]->{id}} = 1;
+        splice @{$attributes->{attribute}}, $attr, 1;
+    }
+}
+
+foreach my $targetType (@{$attributes->{targetType}})
+{
+    if(exists $targetType->{attribute})
+    {
+        for my $attr (reverse 0..((scalar
+            @{$targetType->{attribute}})-1))
+        {
+            my $currentAttr = $targetType->{attribute}[$attr];
+            if(   exists $currentAttr->{id}
+               && exists $virtualAttrIds{$currentAttr->{id}} )
+            {
+                # A targetType refers to the virtual attribute
+                # so remove it
+                splice @{$targetType->{attribute}}, $attr, 1;
+            }
+        }
+    }
+}
+
 if($cfgIncludeFspAttributes)
 {
     handleTgtPtrAttributesFsp(\$attributes, \%Target_t);
@@ -377,7 +424,7 @@ if( !($cfgImgOutputDir =~ "none") )
     }
     #Pass the $addRO_Section_VerPage into the sub rotuine
     my $Data = generateTargetingImage($cfgVmmConstsFile,$attributes,\%Target_t,
-                                      $addRO_Section_VerPage);
+                                      $addRO_Section_VerPage,$allAttributes);
 
     open(PNOR_TARGETING_FILE,">$cfgImgOutputDir".$cfgImgOutputFile)
       or fatal ("Targeting image file: \"$cfgImgOutputDir"
@@ -486,6 +533,7 @@ sub validateAttributes {
     $elements{"hwpfToHbAttrMap"}
                              = { required => 0, isscalar => 0};
     $elements{"display-name"} = { required => 0, isscalar => 1};
+    $elements{"virtual"}     = { required => 0, isscalar => 0};
 
     foreach my $attribute (@{$attributes->{attribute}})
     {
@@ -5245,7 +5293,8 @@ sub serializeAssociations
 ################################################################################
 
 sub generateTargetingImage {
-    my($vmmConstsFile, $attributes, $Target_t,$addRO_Section_VerPage) = @_;
+    my($vmmConstsFile, $attributes,$Target_t,$addRO_Section_VerPage,
+        $allAttributes) = @_;
 
     # 128 MB virtual memory offset between sections
     my $vmmSectionOffset = 128 * 1024 * 1024; # 128MB
@@ -5466,6 +5515,8 @@ sub generateTargetingImage {
         my $ptrToChildByContainmentAssociations = INVALID_POINTER;
         my $ptrToParentByAffinityAssociations = INVALID_POINTER;
         my $ptrToChildByAffinityAssociations = INVALID_POINTER;
+        my $ptrToPervasiveChildAssociations = INVALID_POINTER;
+        my $ptrToParentPervasiveAssociations = INVALID_POINTER;
 
         my $id = $targetInstance->{id};
         $targetAddrHash{$id}{offsetToPtrToParentByContainmentAssociations} =
@@ -5484,10 +5535,20 @@ sub generateTargetingImage {
             $offsetWithinTargets + length $data;
         $data .= pack8byte($ptrToChildByAffinityAssociations);
 
+        $targetAddrHash{$id}{offsetToPtrToPervasiveChildAssociations} =
+            $offsetWithinTargets + length $data;
+        $data .= pack8byte($ptrToPervasiveChildAssociations);
+
+        $targetAddrHash{$id}{offsetToPtrToParentPervasiveAssociations} =
+            $offsetWithinTargets + length $data;
+        $data .= pack8byte($ptrToParentPervasiveAssociations);
+
         $targetAddrHash{$id}{ParentByContainmentAssociations} = [@NullPtrArray];
         $targetAddrHash{$id}{ChildByContainmentAssociations} = [@NullPtrArray];
         $targetAddrHash{$id}{ParentByAffinityAssociations} = [@NullPtrArray];
         $targetAddrHash{$id}{ChildByAffinityAssociations} = [@NullPtrArray];
+        $targetAddrHash{$id}{PervasiveChildAssociations} = [@NullPtrArray];
+        $targetAddrHash{$id}{ParentPervasiveAssociations} = [@NullPtrArray];
 
         if($id =~/^sys\d+$/)
         {
@@ -5513,6 +5574,10 @@ sub generateTargetingImage {
         . "$targetAddrHash{$id}{offsetToPtrToParentByAffinityAssociations}");
         ASSOC_DBG("Offset within targets to ptr to child affinity list = "
         . "$targetAddrHash{$id}{offsetToPtrToChildByAffinityAssociations}");
+        ASSOC_DBG("Offset within targets to ptr to pervasive child list = "
+        . "$targetAddrHash{$id}{offsetToPtrToPervasiveChildAssociations}");
+        ASSOC_DBG("Offset within targets to ptr to parent pervasive list = "
+        . "$targetAddrHash{$id}{offsetToPtrToParentPervasiveAssociations}");
 
         $attrAddr += $attributeListTypeHoH{$targetInstance->{type}}{elements}
             * (length pack8byte(0));
@@ -5529,8 +5594,16 @@ sub generateTargetingImage {
     my $attributesWritten = 0;
 
     my %biosData = ();
+    # Cache the attribute definitions for all attributes, including virtual
     my %attributeDefCache =
+        map { $_->{id} => $_} @{$allAttributes->{attribute}};
+
+    # Cache separate attribute definitions for all non-virtual attributes
+    my %attributeDefCacheNoVirtual =
         map { $_->{id} => $_} @{$attributes->{attribute}};
+
+    # For the main loop, use all attributes including virtual
+    my $attributeIdEnumerationAll = getAttributeIdEnumeration($allAttributes);
 
     foreach my $targetInstance (@targetsAoH)
     {
@@ -5541,7 +5614,8 @@ sub generateTargetingImage {
         # Ensure consistent ordering of attributes for each target type
         # Get the attribute list associated with each target type
         #@TODO Attributes must eventually be ordered correctly for code update
-        getTargetAttributes($targetInstance->{type}, $attributes,\%attrhash);
+        # Use all attributes including virtual for association processing
+        getTargetAttributes($targetInstance->{type}, $allAttributes,\%attrhash);
 
         # Update hash with any per-instance overrides, but only if that
         # attribute has already been defined
@@ -5574,10 +5648,11 @@ sub generateTargetingImage {
                 (keys %attrhash)
             )
         {
-            # Save each target's physical + affinity path for association
-            # processing later on
+            # Save each target's physical + affinity  + parent pervasive
+            # path for association processing later on
             if(   ($attributeId eq ATTR_PHYS_PATH)
-               || ($attributeId eq ATTR_AFFINITY_PATH) )
+               || ($attributeId eq ATTR_AFFINITY_PATH)
+               || ($attributeId eq ATTR_PARENT_PERVASIVE))
             {
                 $targetAddrHash{$targetInstance->{id}}{$attributeId} =
                     $attrhash{$attributeId}->{default};
@@ -5598,12 +5673,18 @@ sub generateTargetingImage {
             }
 
             my $attrValue =
-            enumNameToValue($attributeIdEnumeration,$attributeId);
+            enumNameToValue($attributeIdEnumerationAll,$attributeId);
             $attrValue = sprintf ("%0x", $attrValue);
             my $attributeDef = $attributeDefCache{$attributeId};
             if (not defined $attributeDef)
             {
                 fatal("Attribute $attributeId is not found.");
+            }
+
+            # Do not lay down virtual attributes into the binary
+            if(exists $attributeDef->{virtual})
+            {
+                next
             }
 
             my $ifFspOnlyTargetWithCommonAttr = "false";
@@ -6014,12 +6095,40 @@ sub generateTargetingImage {
     {
         my $phys_attr = ATTR_PHYS_PATH;
         my $affn_attr = ATTR_AFFINITY_PATH;
+        my $parent_pervasive = ATTR_PARENT_PERVASIVE;
 
         my $phys_path = $targetAddrHash{$id}{$phys_attr};
         my $parent_phys_path = substr $phys_path, 0, (rindex $phys_path, "/");
 
         my $affn_path = $targetAddrHash{$id}{$affn_attr};
         my $parent_affn_path = substr $affn_path, 0, (rindex $affn_path, "/");
+
+        # If this target has an associated pervasive target, create a
+        # bidirectional relationship between this target and the specified
+        # pervasive target.  This target will point to the pervasive target via
+        # a "PARENT_PERVASIVE" association, and the pervasive target will
+        # point to this target via a "PERVASIVE_CHILD" association.
+        if (defined $targetAddrHash{$id}{$parent_pervasive})
+        {
+            my $parent_pervasive_path =
+                $targetAddrHash{$id}{$parent_pervasive};
+
+            if(defined $targetPhysicalPath{$parent_pervasive_path})
+            {
+                my $parent = $targetPhysicalPath{$parent_pervasive_path};
+                unshift
+                    @ { $targetAddrHash{$id}
+                        {ParentPervasiveAssociations} },
+                    $firstTgtPtr + $targetAddrHash{$parent}
+                {OffsetToTargetWithinTargetList};
+
+                unshift
+                    @ { $targetAddrHash{$parent}
+                        {PervasiveChildAssociations} },
+                    $firstTgtPtr + $targetAddrHash{$id}
+                {OffsetToTargetWithinTargetList};
+            }
+        }
 
         if (defined $targetPhysicalPath{$parent_phys_path})
         {
@@ -6052,6 +6161,7 @@ sub generateTargetingImage {
                 $firstTgtPtr + $targetAddrHash{$id}
             {OffsetToTargetWithinTargetList};
         }
+
     }
 
     # Serialize the association lists into a blob
@@ -6326,7 +6436,8 @@ sub generateTargetingImage {
             Bios($cfgBiosXmlFile,$cfgBiosSchemaFile,$cfgBiosOutputFile);
         $bios->load();
         $bios->processBios(
-            \%attributeDefCache,\$attributes,\%biosData,%targetPhysicalPath);
+            \%attributeDefCacheNoVirtual,\$attributes,
+            \%biosData,%targetPhysicalPath);
         $bios->export();
     }
 
