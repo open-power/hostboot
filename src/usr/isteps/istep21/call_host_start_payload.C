@@ -27,7 +27,7 @@
 #include <errl/errlmanager.H>
 #include <initservice/isteps_trace.H>
 #include <isteps/hwpisteperror.H>
-#include <hwpf/istepreasoncodes.H>
+#include <isteps/istep_reasoncodes.H>
 #include <initservice/initserviceif.H>
 #include <initservice/istepdispatcherif.H>
 #include <sys/task.h>
@@ -369,9 +369,9 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
 
             /*@
              * @errortype
-             * @reasoncode       ISTEP_TARGET_NULL
+             * @reasoncode       RC_TARGET_NULL
              * @severity         ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM
-             * @moduleid         ISTEP_START_PAYLOAD_CALL_SHUTDOWN
+             * @moduleid         MOD_START_PAYLOAD_CALL_SHUTDOWN
              * @userdata1        <UNUSED>
              * @userdata2        <UNUSED>
              * @devdesc          System target was NULL!
@@ -379,8 +379,8 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
              *                   of the system.
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                                           ISTEP_START_PAYLOAD_CALL_SHUTDOWN,
-                                           ISTEP_TARGET_NULL,
+                                           MOD_START_PAYLOAD_CALL_SHUTDOWN,
+                                           RC_TARGET_NULL,
                                            0x0,
                                            0x0 );
 
@@ -584,8 +584,8 @@ errlHndl_t enableCoreCheckstops()
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Error from mm_block_map : phys=%.16X", l_physAddr );
             /*@
              * @errortype
-             * @reasoncode   ISTEP::ISTEP_MM_MAP_ERR
-             * @moduleid     ISTEP::ISTEP_ENABLE_CORE_CHECKSTOPS
+             * @reasoncode   RC_MM_MAP_ERR
+             * @moduleid     MOD_ENABLE_CORE_CHECKSTOPS
              * @severity     ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @userdata1    <unused>
              * @userdata2    Physical address
@@ -596,8 +596,8 @@ errlHndl_t enableCoreCheckstops()
             l_errl =
               new ERRORLOG::ErrlEntry(
                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                      ISTEP::ISTEP_ENABLE_CORE_CHECKSTOPS,
-                                      ISTEP::ISTEP_MM_MAP_ERR,
+                                      MOD_ENABLE_CORE_CHECKSTOPS,
+                                      RC_MM_MAP_ERR,
                                       0,
                                       l_physAddr);
         }
@@ -645,9 +645,9 @@ errlHndl_t enableCoreCheckstops()
                            get_huid(l_pChipTarget), l_coreId, l_rc );
                 /*@
                  * @errortype
-                 * @reasoncode  ISTEP_BAD_RC
+                 * @reasoncode  RC_BAD_RC
                  * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid    ISTEP_ENABLE_CORE_CHECKSTOPS
+                 * @moduleid    MOD_ENABLE_CORE_CHECKSTOPS
                  * @userdata1[00:31]  rc from p8_pore_gen_scom_fixed function
                  * @userdata1[32:63]  address being added to image
                  * @userdata2[00:31]  Failing Proc HUID
@@ -660,8 +660,8 @@ errlHndl_t enableCoreCheckstops()
                  */
                 l_errl = new ERRORLOG::ErrlEntry(
                                      ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                     ISTEP::ISTEP_ENABLE_CORE_CHECKSTOPS,
-                                     ISTEP::ISTEP_BAD_RC,
+                                     MOD_ENABLE_CORE_CHECKSTOPS,
+                                     RC_BAD_RC,
                                      TWO_UINT32_TO_UINT64(l_rc,
                                              EX_CORE_FIR_ACTION1_0x10013107),
                                      TWO_UINT32_TO_UINT64(
@@ -680,8 +680,8 @@ errlHndl_t enableCoreCheckstops()
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Error from mm_block_unmap : rc=%d, ptr=%p", mm_rc, l_slwPtr );
             /*@
              * @errortype
-             * @reasoncode   ISTEP::ISTEP_MM_UNMAP_ERR
-             * @moduleid     ISTEP::ISTEP_ENABLE_CORE_CHECKSTOPS
+             * @reasoncode   RC_MM_UNMAP_ERR
+             * @moduleid     MOD_ENABLE_CORE_CHECKSTOPS
              * @severity     ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @userdata1    Return Code
              * @userdata2    Unmap address
@@ -692,8 +692,8 @@ errlHndl_t enableCoreCheckstops()
             l_errl =
                 new ERRORLOG::ErrlEntry(
                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                      ISTEP::ISTEP_ENABLE_CORE_CHECKSTOPS,
-                                      ISTEP::ISTEP_MM_UNMAP_ERR,
+                                      MOD_ENABLE_CORE_CHECKSTOPS,
+                                      RC_MM_UNMAP_ERR,
                                       mm_rc,
                                       reinterpret_cast<uint64_t>
                                       (l_slwPtr));

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,9 +55,9 @@ void ISTEP_ERROR::IStepError::addErrorDetails( const errlHndl_t i_err )
 
         /*@
          * @errortype
-         * @reasoncode  ISTEP_FAILURE
+         * @reasoncode  RC_FAILURE
          * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid    ISTEP_REPORTING_ERROR
+         * @moduleid    MOD_REPORTING_ERROR
          * @userdata1[0:31] eid of first error
          * @userdata1[32:63] Reason code of first error
          * @userdata2[0:31] Total number of elogs included
@@ -67,8 +67,8 @@ void ISTEP_ERROR::IStepError::addErrorDetails( const errlHndl_t i_err )
          *
          */
         iv_eHandle = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                             ISTEP_REPORTING_ERROR,
-                                             ISTEP_FAILURE,
+                                             MOD_REPORTING_ERROR,
+                                             RC_FAILURE,
                                              data1, data2);
 
         // Set the PLID of this istep elog to match the first error
@@ -89,7 +89,7 @@ void ISTEP_ERROR::IStepError::addErrorDetails( const errlHndl_t i_err )
     // grab the istep's trace and add to the input elog
     i_err->collectTrace("ISTEPS_TRACE", 1024);
 
-    // the istep error is causing the IPL to fail (UNRECOVERABLE), so 
+    // the istep error is causing the IPL to fail (UNRECOVERABLE), so
     // if this error was less severe than UNRECOVERABLE (ie, INFORMATIONAL,
     //  RECOVERED, PREDICTIVE) change to UNRECOVERABLE so that it is
     // visible as well as the istep error log.
