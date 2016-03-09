@@ -1310,6 +1310,7 @@ void IStepDispatcher::handleShutdownMsg(msg_t * & io_pMsg)
 // ----------------------------------------------------------------------------
 void IStepDispatcher::shutdownDuringIpl()
 {
+
     TRACFCOMP(g_trac_initsvc, ENTER_MRK"IStepDispatcher::shutdownDuringIpl");
 
     // Create and commit error log for FFDC and call doShutdown with the RC

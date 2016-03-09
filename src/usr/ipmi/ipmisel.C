@@ -33,6 +33,7 @@
 #include "ipmiconfig.H"
 #include <ipmi/ipmi_reasoncodes.H>
 #include <ipmi/ipmisensor.H>
+#include <ipmi/ipmiif.H>
 
 #include <sys/task.h>
 #include <initservice/taskargs.H>
@@ -477,9 +478,7 @@ IpmiSEL::IpmiSEL(void)
     :iv_msgQ(msg_q_create())
 {
     IPMI_TRAC(ENTER_MRK "IpmiSEL ctor");
-    barrier_init(&iv_sync_start, 2);
-    task_create(&IpmiSEL::start, this);
-    barrier_wait(&iv_sync_start);
+    task_create(&IpmiSEL::start,NULL);
 }
 
 /**
@@ -490,9 +489,9 @@ IpmiSEL::~IpmiSEL(void)
     msg_q_destroy(iv_msgQ);
 }
 
-void* IpmiSEL::start(void* instance)
+void* IpmiSEL::start(void* unused)
 {
-    static_cast<IpmiSEL*>(instance)->execute();
+    Singleton<IpmiSEL>::instance().execute();
     return NULL;
 }
 
@@ -504,18 +503,6 @@ void IpmiSEL::execute(void)
 {
     //Mark as an independent daemon so if it crashes we terminate.
     task_detach();
-
-    // Register shutdown events with init service.
-    //      Done at the "end" of shutdown processesing.
-    //      This will flush out any IPMI messages which were sent as
-    //      part of the shutdown processing. We chose MBOX priority
-    //      as we don't want to accidentally get this message after
-    //      interrupt processing has stopped in case we need intr to
-    //      finish flushing the pipe.
-    INITSERVICE::registerShutdownEvent(iv_msgQ, IPMISEL::MSG_STATE_SHUTDOWN,
-                                       INITSERVICE::MBOX_PRIORITY);
-
-    barrier_wait(&iv_sync_start);
 
     while(true)
     {
@@ -541,6 +528,14 @@ void IpmiSEL::execute(void)
             case IPMISEL::MSG_STATE_SHUTDOWN:
                 IPMI_TRAC(INFO_MRK "ipmisel shutdown event");
 
+                //Respond that we are done shutting down.
+                msg_respond(iv_msgQ, msg);
+                break;
+
+            case IPMISEL::MSG_STATE_SHUTDOWN_SEL:
+                IPMI_TRAC(INFO_MRK "ipmisel "
+                   "shutdown message from ipmirp");
+                 msg->type = IPMI::MSG_STATE_SHUTDOWN_SEL;
                 //Respond that we are done shutting down.
                 msg_respond(iv_msgQ, msg);
                 break;
