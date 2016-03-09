@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -224,18 +224,18 @@ void* call_host_activate_master (void *io_pArgs)
                       l_rc  );
             /*@
              * @errortype
-             * @reasoncode  ISTEP_FAIL_MASTER_WINKLE_RC
+             * @reasoncode  RC_FAIL_MASTER_WINKLE
              * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_HOST_ACTIVATE_MASTER
+             * @moduleid    MOD_HOST_ACTIVATE_MASTER
              * @userdata1   return code from cpu_master_winkle
              * @userdata2   Fused core indicator
              *
-             * @devdesc cpu_master_winkle returned an error 
+             * @devdesc cpu_master_winkle returned an error
              */
             l_errl =
             new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    ISTEP_HOST_ACTIVATE_MASTER,
-                                    ISTEP_FAIL_MASTER_WINKLE_RC,
+                                    MOD_HOST_ACTIVATE_MASTER,
+                                    RC_FAIL_MASTER_WINKLE,
                                     l_rc, l_fusedCores );
             break;
         }

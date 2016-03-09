@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,7 +34,7 @@
  */
 
 #include <errl/errlentry.H>
-#include <hwpf/istepreasoncodes.H>
+#include <isteps/istep_reasoncodes.H>
 
 
 namespace ISTEP_ERROR

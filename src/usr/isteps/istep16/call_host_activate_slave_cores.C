@@ -165,9 +165,9 @@ void* call_host_activate_slave_cores (void *io_pArgs)
                             pir);
                     /*@
                      * @errortype
-                     * @reasoncode  ISTEP_BAD_RC
+                     * @reasoncode  RC_BAD_RC
                      * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                     * @moduleid    ISTEP_HOST_ACTIVATE_SLAVE_CORES
+                     * @moduleid    MOD_HOST_ACTIVATE_SLAVE_CORES
                      * @userdata1   PIR of failing core.
                      * @userdata2   rc of cpu_start_core().
                      *
@@ -177,8 +177,8 @@ void* call_host_activate_slave_cores (void *io_pArgs)
                     errlHndl_t l_errl =
                         new ERRORLOG::ErrlEntry(
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                ISTEP_HOST_ACTIVATE_SLAVE_CORES,
-                                ISTEP_BAD_RC,
+                                MOD_HOST_ACTIVATE_SLAVE_CORES,
+                                RC_BAD_RC,
                                 pir,
                                 rc );
 
@@ -237,9 +237,9 @@ void* call_host_activate_slave_cores (void *io_pArgs)
                             "returned %d instead of 1", targetList.size() );
                 /*@
                  * @errortype
-                 * @reasoncode  ISTEP_INCORRECT_TARGET_COUNT
+                 * @reasoncode  RC_INCORRECT_TARGET_COUNT
                  * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid    ISTEP_HOST_ACTIVATE_SLAVE_CORES
+                 * @moduleid    MOD_HOST_ACTIVATE_SLAVE_CORES
                  * @userdata1   PIR of failing core.
                  * @userdata2   number of targets returned
                  *
@@ -253,8 +253,8 @@ void* call_host_activate_slave_cores (void *io_pArgs)
                  */
                 l_errl =
                     new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                            ISTEP_HOST_ACTIVATE_SLAVE_CORES,
-                            ISTEP_INCORRECT_TARGET_COUNT,
+                            MOD_HOST_ACTIVATE_SLAVE_CORES,
+                            RC_INCORRECT_TARGET_COUNT,
                             pir,
                             targetList.size(), true);
                 // Create IStep error log and cross ref error that occurred

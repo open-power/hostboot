@@ -58,7 +58,7 @@
 #include "istep_mbox_msgs.H"
 #include "splesscommon.H"
 #include <diag/attn/attn.H>
-#include <hwpf/istepreasoncodes.H>
+#include <isteps/istep_reasoncodes.H>
 #include <hwas/common/deconfigGard.H>
 #include <hwas/common/hwas.H>
 #include <hwas/hwasPlat.H>
@@ -438,7 +438,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                             // the checkMinimumHardware error with the same
                             // plid that matches the real errors
                             const uint32_t l_plid = err->plid();
-                            if (ISTEP::ISTEP_FAILURE == err->reasonCode())
+                            if (ISTEP::RC_FAILURE == err->reasonCode())
                             {
                                 delete err;
                             }

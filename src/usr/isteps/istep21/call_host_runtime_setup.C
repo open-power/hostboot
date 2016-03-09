@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,7 +27,7 @@
 #include <errl/errlmanager.H>
 #include <initservice/isteps_trace.H>
 #include <isteps/hwpisteperror.H>
-#include <hwpf/istepreasoncodes.H>
+#include <isteps/istep_reasoncodes.H>
 #include <initservice/initserviceif.H>
 #include <initservice/istepdispatcherif.H>
 #include <vfs/vfs.H>

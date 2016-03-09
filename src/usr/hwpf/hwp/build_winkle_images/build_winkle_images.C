@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -121,34 +121,21 @@ errlHndl_t  loadPoreImage(  char                    *& o_rporeAddr,
             break;
         }
 
-        rc = sbe_xip_image_size(reinterpret_cast<void*>(l_info.vaddr),
-                                &o_rporeSize);
-        if((rc !=0) || (o_rporeSize == 0) || o_rporeSize > l_info.size)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "ERROR: invalid WINK image rc[%d] slwSize[%d] part size[%d]",
-                       rc, o_rporeSize, l_info.size);
-            /*@
-             * @errortype
-             * @reasoncode  ISTEP_LOAD_SLW_FROM_PNOR_FAILED
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid    ISTEP_BUILD_WINKLE_IMAGES
-             * @userdata1   Hi 32 bits: return code from sbe_xip_image_size
-             *              Lo 32 bits: Size of memory requested
-             * @userdata2   Size of WINK PNOR partition
-             * @devdesc     Image from PNOR WINK partition invalid, too small,
-             *              or too big
-             * @custdesc    A problem occurred during the IPL
-             *              of the system.
-             */
-            l_errl =
-              new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                       ISTEP::ISTEP_BUILD_WINKLE_IMAGES,
-                                       ISTEP::ISTEP_LOAD_SLW_FROM_PNOR_FAILED,
-                                       (rc<<32)|o_rporeSize,
-                                       l_info.size );
-            break;
-        }
+//         rc = sbe_xip_image_size(reinterpret_cast<void*>(l_info.vaddr),
+//                                 &o_rporeSize);
+//         if((rc !=0) || (o_rporeSize == 0) || o_rporeSize > l_info.size)
+//         {
+//             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+//                    "ERROR: invalid WINK image rc[%d] slwSize[%d] part size[%d]",
+//                        rc, o_rporeSize, l_info.size);
+//             l_errl =
+//               new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+//                                        ISTEP::ISTEP_BUILD_WINKLE_IMAGES,
+//                                        ISTEP::ISTEP_LOAD_SLW_FROM_PNOR_FAILED,
+//                                        (rc<<32)|o_rporeSize,
+//                                        l_info.size );
+//             break;
+//         }
 
         o_rporeAddr = reinterpret_cast<char*>(l_info.vaddr);
 
@@ -322,34 +309,19 @@ errlHndl_t  applyPoreGenCpuRegs(   TARGETING::Target *i_procChipTarg,
 
     }   // end for l_coreIds
 
-    if ( l_rc ){
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "ERROR: p8_pore_gen api fail core=0x%x, thread=0x%x, l_rc=0x%x",
-                   l_coreId, l_threadId, l_rc );
-        /*@
-         * @errortype
-         * @reasoncode  ISTEP_BAD_RC
-         * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-         * @moduleid    ISTEP_BUILD_WINKLE_IMAGES
-         * @userdata1[00:31]  return code from p8_pore_gen_xxx function
-         * @userdata1[32:63]  address being added to image
-         * @userdata2[00:31]  Failing Core Id
-         * @userdata2[32:63]  Failing Thread Id
-         *
-         * @devdesc p8_pore_gen_xxx returned an error when
-         *          attempting to change a reg value in the PORE image.
-         * @custdesc    A problem occurred during the IPL
-         *              of the system.
-         */
-        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                ISTEP::ISTEP_BUILD_WINKLE_IMAGES,
-                                ISTEP::ISTEP_BAD_RC,
-                                TWO_UINT32_TO_UINT64(l_rc,l_failAddr),
-                                TWO_UINT32_TO_UINT64(l_coreId,l_threadId) );
-        l_errl->collectTrace(FAPI_TRACE_NAME,256);
-        l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
-        l_errl->collectTrace("ISTEPS_TRACE",256);
-    }
+//     if ( l_rc ){
+//         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+//                    "ERROR: p8_pore_gen api fail core=0x%x, thread=0x%x, l_rc=0x%x",
+//                    l_coreId, l_threadId, l_rc );
+//         l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+//                                 ISTEP::ISTEP_BUILD_WINKLE_IMAGES,
+//                                 ISTEP::ISTEP_BAD_RC,
+//                                 TWO_UINT32_TO_UINT64(l_rc,l_failAddr),
+//                                 TWO_UINT32_TO_UINT64(l_coreId,l_threadId) );
+//         l_errl->collectTrace(FAPI_TRACE_NAME,256);
+//         l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
+//         l_errl->collectTrace("ISTEPS_TRACE",256);
+//     }
 
     return  l_errl;
 }
@@ -617,34 +589,23 @@ void*    call_host_build_winkle( void    *io_pArgs )
     {
         int rc = 0;
         rc =  mm_block_unmap(l_pVirtMemBase);
-        if (rc != 0)
-        {
-            /*@
-             * @errortype
-             * @reasoncode   ISTEP::ISTEP_MM_UNMAP_ERR
-             * @moduleid     ISTEP::ISTEP_BUILD_WINKLE_IMAGES
-             * @severity     ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @userdata1    Return Code
-             * @userdata2    Unmap address
-             * @devdesc      mm_block_unmap() returns error
-             * @custdesc    A problem occurred during the IPL
-             *              of the system.
-             */
-            l_errl =
-              new ERRORLOG::ErrlEntry(
-                                      ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                      ISTEP::ISTEP_BUILD_WINKLE_IMAGES,
-                                      ISTEP::ISTEP_MM_UNMAP_ERR,
-                                      rc,
-                                      reinterpret_cast<uint64_t>
-                                      (l_pVirtMemBase));
-
-            // Create IStep error log and cross reference error that occurred
-            l_StepError.addErrorDetails( l_errl );
-
-            // Commit error
-            errlCommit( l_errl, ISTEP_COMP_ID );
-        }
+//         if (rc != 0)
+//         {
+//             l_errl =
+//               new ERRORLOG::ErrlEntry(
+//                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+//                                       ISTEP::ISTEP_BUILD_WINKLE_IMAGES,
+//                                       ISTEP::ISTEP_MM_UNMAP_ERR,
+//                                       rc,
+//                                       reinterpret_cast<uint64_t>
+//                                       (l_pVirtMemBase));
+//
+//             // Create IStep error log and cross reference error that occurred
+//             l_StepError.addErrorDetails( l_errl );
+//
+//             // Commit error
+//             errlCommit( l_errl, ISTEP_COMP_ID );
+//         }
     }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -743,17 +704,6 @@ void*    call_proc_set_pore_bar( void    *io_pArgs )
                                            // ignore it if something else
                                            // happened.
         {
-            /*@
-             * @errortype
-             * @reasoncode   ISTEP::ISTEP_MM_UNMAP_ERR
-             * @moduleid     ISTEP::ISTEP_PROC_SET_PORE_BAR
-             * @severity     ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @userdata1    Return Code
-             * @userdata2    Unmap address
-             * @devdesc      mm_block_unmap() returns error
-             * @custdesc    A problem occurred during the IPL
-             *              of the system.
-             */
             l_errl =
               new ERRORLOG::ErrlEntry(
                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
