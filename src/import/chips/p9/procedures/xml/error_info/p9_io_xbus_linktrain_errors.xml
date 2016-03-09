@@ -7,7 +7,7 @@
 <!--                                                                        -->
 <!-- EKB Project                                                            -->
 <!--                                                                        -->
-<!-- COPYRIGHT 2015                                                         -->
+<!-- COPYRIGHT 2015,2016                                                    -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -22,7 +22,176 @@
         <rc>RC_IO_XBUS_NOT_MASTER</rc>
         <description>I/O Xbus Target was not a Master</description>
         <ffdc>TARGET</ffdc>
-        <ffdc>GROUP</ffdc>
+    </hwpError>
+    <!-- *********************************************************************** -->
+    <hwpError>
+        <rc>RC_IO_XBUS_LINKTRAIN_TIMEOUT</rc>
+        <description>I/O Xbus WDERF Timeout</description>
+        <ffdc>M_GROUP</ffdc>
+        <ffdc>S_GROUP</ffdc>
+        <ffdc>M_WDERF_START</ffdc>
+        <ffdc>M_WDERF_DONE</ffdc>
+        <ffdc>M_WDERF_FAILED</ffdc>
+        <ffdc>M_LANE_BAD_0_15</ffdc>
+        <ffdc>M_LANE_BAD_16_23</ffdc>
+        <ffdc>M_LANE_DISABLED_VEC_0_15</ffdc>
+        <ffdc>M_LANE_DISABLED_VEC_16_23</ffdc>
+        <ffdc>M_MAIN_INIT_STATE</ffdc>
+        <!-- Master Wiretest Info -->
+        <ffdc>M_WIRETEST_WTM_STATE</ffdc>
+        <ffdc>M_WIRETEST_WTR_STATE</ffdc>
+        <ffdc>M_WIRETEST_WTL_SM_STATUS</ffdc>
+        <ffdc>M_WTR_BAD_LANE_COUNT</ffdc>
+        <ffdc>M_CLK_LANE_BAD_CODE</ffdc>
+        <ffdc>M_WT_CLK_LANE_INVERTED</ffdc>
+        <!-- Master Deskew Info -->
+        <!-- Master Eye Opt Info -->
+        <ffdc>M_EYE_OPT_STATE</ffdc>
+        <ffdc>M_HIST_MIN_EYE_WIDTH</ffdc>
+        <ffdc>M_HIST_MIN_EYE_WIDTH_LANE</ffdc>
+        <ffdc>M_HIST_MIN_EYE_WIDTH_VALID</ffdc>
+        <!-- Master Repair Info -->
+        <ffdc>M_RPR_STATE</ffdc>
+        <ffdc>M_BAD_LANE1</ffdc>
+        <ffdc>M_BAD_LANE2</ffdc>
+        <ffdc>M_BAD_LANE_CODE</ffdc>
+        <!-- Master Func Mode Info -->
+        <ffdc>S_WDERF_START</ffdc>
+        <ffdc>S_WDERF_DONE</ffdc>
+        <ffdc>S_WDERF_FAILED</ffdc>
+        <ffdc>S_LANE_BAD_0_15</ffdc>
+        <ffdc>S_LANE_BAD_16_23</ffdc>
+        <ffdc>S_LANE_DISABLED_VEC_0_15</ffdc>
+        <ffdc>S_LANE_DISABLED_VEC_16_23</ffdc>
+        <ffdc>S_MAIN_INIT_STATE</ffdc>
+        <!-- Slave Wiretest Info -->
+        <ffdc>S_WIRETEST_WTM_STATE</ffdc>
+        <ffdc>S_WIRETEST_WTR_STATE</ffdc>
+        <ffdc>S_WIRETEST_WTL_SM_STATUS</ffdc>
+        <ffdc>S_WTR_BAD_LANE_COUNT</ffdc>
+        <ffdc>S_CLK_LANE_BAD_CODE</ffdc>
+        <ffdc>S_WT_CLK_LANE_INVERTED</ffdc>
+        <!-- Slave Deskew Info -->
+        <!-- Slave Eye Opt Info -->
+        <ffdc>S_EYE_OPT_STATE</ffdc>
+        <ffdc>S_HIST_MIN_EYE_WIDTH</ffdc>
+        <ffdc>S_HIST_MIN_EYE_WIDTH_LANE</ffdc>
+        <ffdc>S_HIST_MIN_EYE_WIDTH_VALID</ffdc>
+        <!-- Slave Repair Info -->
+        <ffdc>S_RPR_STATE</ffdc>
+        <ffdc>S_BAD_LANE1</ffdc>
+        <ffdc>S_BAD_LANE2</ffdc>
+        <ffdc>S_BAD_LANE_CODE</ffdc>
+        <!-- Slave Func Mode Info -->
+        <callout>
+            <target>M_TARGET</target>
+            <priority>MEDIUM</priority>
+        </callout>
+        <callout>
+            <target>S_TARGET</target>
+            <priority>MEDIUM</priority>
+        </callout>
+        <callout>
+            <bus>M_TARGET,S_TARGET</bus>
+            <priority>HIGH</priority>
+        </callout>
+        <deconfigure>
+            <target>M_TARGET</target>
+        </deconfigure>
+        <deconfigure>
+            <target>S_TARGET</target>
+        </deconfigure>
+        <gard>
+            <target>M_TARGET</target>
+        </gard>
+        <gard>
+            <target>S_TARGET</target>
+        </gard>
+    </hwpError>
+    <!-- *********************************************************************** -->
+    <hwpError>
+        <rc>RC_IO_XBUS_LINKTRAIN_FAIL</rc>
+        <description>I/O Xbus WDERF Training fail was reported.</description>
+        <ffdc>M_GROUP</ffdc>
+        <ffdc>S_GROUP</ffdc>
+        <ffdc>M_WDERF_START</ffdc>
+        <ffdc>M_WDERF_DONE</ffdc>
+        <ffdc>M_WDERF_FAILED</ffdc>
+        <ffdc>M_LANE_BAD_0_15</ffdc>
+        <ffdc>M_LANE_BAD_16_23</ffdc>
+        <ffdc>M_LANE_DISABLED_VEC_0_15</ffdc>
+        <ffdc>M_LANE_DISABLED_VEC_16_23</ffdc>
+        <ffdc>M_MAIN_INIT_STATE</ffdc>
+        <!-- Master Wiretest Info -->
+        <ffdc>M_WIRETEST_WTM_STATE</ffdc>
+        <ffdc>M_WIRETEST_WTR_STATE</ffdc>
+        <ffdc>M_WIRETEST_WTL_SM_STATUS</ffdc>
+        <ffdc>M_WTR_BAD_LANE_COUNT</ffdc>
+        <ffdc>M_CLK_LANE_BAD_CODE</ffdc>
+        <ffdc>M_WT_CLK_LANE_INVERTED</ffdc>
+        <!-- Master Deskew Info -->
+        <!-- Master Eye Opt Info -->
+        <ffdc>M_EYE_OPT_STATE</ffdc>
+        <ffdc>M_HIST_MIN_EYE_WIDTH</ffdc>
+        <ffdc>M_HIST_MIN_EYE_WIDTH_LANE</ffdc>
+        <ffdc>M_HIST_MIN_EYE_WIDTH_VALID</ffdc>
+        <!-- Master Repair Info -->
+        <ffdc>M_RPR_STATE</ffdc>
+        <ffdc>M_BAD_LANE1</ffdc>
+        <ffdc>M_BAD_LANE2</ffdc>
+        <ffdc>M_BAD_LANE_CODE</ffdc>
+        <!-- Master Func Mode Info -->
+        <ffdc>S_WDERF_START</ffdc>
+        <ffdc>S_WDERF_DONE</ffdc>
+        <ffdc>S_WDERF_FAILED</ffdc>
+        <ffdc>S_LANE_BAD_0_15</ffdc>
+        <ffdc>S_LANE_BAD_16_23</ffdc>
+        <ffdc>S_LANE_DISABLED_VEC_0_15</ffdc>
+        <ffdc>S_LANE_DISABLED_VEC_16_23</ffdc>
+        <ffdc>S_MAIN_INIT_STATE</ffdc>
+        <!-- Slave Wiretest Info -->
+        <ffdc>S_WIRETEST_WTM_STATE</ffdc>
+        <ffdc>S_WIRETEST_WTR_STATE</ffdc>
+        <ffdc>S_WIRETEST_WTL_SM_STATUS</ffdc>
+        <ffdc>S_WTR_BAD_LANE_COUNT</ffdc>
+        <ffdc>S_CLK_LANE_BAD_CODE</ffdc>
+        <ffdc>S_WT_CLK_LANE_INVERTED</ffdc>
+        <!-- Slave Deskew Info -->
+        <!-- Slave Eye Opt Info -->
+        <ffdc>S_EYE_OPT_STATE</ffdc>
+        <ffdc>S_HIST_MIN_EYE_WIDTH</ffdc>
+        <ffdc>S_HIST_MIN_EYE_WIDTH_LANE</ffdc>
+        <ffdc>S_HIST_MIN_EYE_WIDTH_VALID</ffdc>
+        <!-- Slave Repair Info -->
+        <ffdc>S_RPR_STATE</ffdc>
+        <ffdc>S_BAD_LANE1</ffdc>
+        <ffdc>S_BAD_LANE2</ffdc>
+        <ffdc>S_BAD_LANE_CODE</ffdc>
+        <!-- Slave Func Mode Info -->
+        <callout>
+            <target>M_TARGET</target>
+            <priority>MEDIUM</priority>
+        </callout>
+        <callout>
+            <target>S_TARGET</target>
+            <priority>MEDIUM</priority>
+        </callout>
+        <callout>
+            <bus>M_TARGET,S_TARGET</bus>
+            <priority>HIGH</priority>
+        </callout>
+        <deconfigure>
+            <target>M_TARGET</target>
+        </deconfigure>
+        <deconfigure>
+            <target>S_TARGET</target>
+        </deconfigure>
+        <gard>
+            <target>M_TARGET</target>
+        </gard>
+        <gard>
+            <target>S_TARGET</target>
+        </gard>
     </hwpError>
     <!-- *********************************************************************** -->
  </hwpErrors>
