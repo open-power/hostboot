@@ -44,6 +44,9 @@ function build {
 
     ### Compile and provide binaries
     setup
+    if echo $FIPS_RELEASE | grep -q fips9; then
+        export CONFIG_FILE="$HOSTBOOT_WORKSPACE/src/build/configs/fsprelease.config"
+    fi
     BUILD_MINIMAL=1 nice -+20 make -j16 || exit -1
 
     # Run hb distribute to put binaries in cmvc checkout directory
