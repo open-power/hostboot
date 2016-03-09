@@ -1635,24 +1635,17 @@
 
     <attribute>
         <id>ATTR_EFF_DIMM_SIZE</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
-            DIMM Size.
-            Used in various locations and is computed in mss_eff_cnfg.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
-            Each memory channel will have a value.
-            creator: mss_eff_cnfg
-            consumer: various
-            firmware notes: none
+            DIMM Size, in GB Used in various locations and is computed in mss_eff_cnfg.
         </description>
-        <valueType>uint8</valueType>
+        <valueType>uint32</valueType>
         <writeable/>
         <odmVisable/>
         <odmChangeable/>
         <array> 2 2</array>
+        <mssUnits>GB</mssUnits>
         <persistRuntime/>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dimm_size</mssAccessorName>
     </attribute>
 
