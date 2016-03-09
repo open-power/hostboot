@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2015
+# Contributors Listed Below - COPYRIGHT 2012,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -216,6 +216,14 @@ sub loadPnorLayout
         my $sha512perEC = (exists $sectionEl->{sha512perEC} ? "yes" : "no");
         my $preserved = (exists $sectionEl->{preserved} ? "yes" : "no");
         my $readOnly = (exists $sectionEl->{readOnly} ? "yes" : "no");
+        my $xz = "";
+        my $xzSize = 0;
+        if ((exists $sectionEl->{compressed}) &&
+            ($sectionEl->{compressed}[0]->{algorithm}[0] eq "xz"))
+        {
+            $xz = "xz";
+            $xzSize = $sectionEl->{compressed}[0]->{uncompressedSize}[0];
+        }
         if (($testRun == 0) && ($sectionEl->{testonly}[0] eq "yes"))
         {
             next;
@@ -236,6 +244,8 @@ sub loadPnorLayout
         $$i_pnorLayoutRef{sections}{$physicalOffset}{sha512perEC} = $sha512perEC;
         $$i_pnorLayoutRef{sections}{$physicalOffset}{preserved} = $preserved;
         $$i_pnorLayoutRef{sections}{$physicalOffset}{readOnly} = $readOnly;
+        $$i_pnorLayoutRef{sections}{$physicalOffset}{compressed}{algorithm} = $xz;
+        $$i_pnorLayoutRef{sections}{$physicalOffset}{compressed}{uncompressedSize} = $xzSize;
 
         #store the physical offsets of each section in a hash, so, it is easy
         #to search physicalOffsets based on the name of the section (eyecatch)
@@ -370,6 +380,7 @@ sub addUserData
     # User data Flags based on FFS entry user data (ffs_hb_user_t)
     my $chip = 0;
     my $compressType = 0;
+    my $compressSize = 0;
     my $dataInteg = 0;
     my $verCheck = 0;
     my $miscFlags = 0;
@@ -388,6 +399,13 @@ sub addUserData
     elsif( ($i_sectionHash{$i_key}{sha512perEC} eq "yes") )
     {
         $verCheck = 0x40;
+    }
+
+    # Compression Flag
+    if( ($i_sectionHash{$i_key}{compressed}{algorithm} eq "xz") )
+    {
+        $compressType = 0x80;
+        $compressSize = $i_sectionHash{$i_key}{compressed}{uncompressedSize};
     }
 
     # Misc Flags
@@ -411,12 +429,20 @@ sub addUserData
     my $userflags1 = ($verCheck << 24)
         | ($miscFlags << 16);
 
+    #Third User Data Word
+    #[1,2:compressSize]
+    my $userflags2 = hex($compressSize);
+
     trace(2, "$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --user 0 --name $eyeCatch --value userflags0=$userflags0");
     system("$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --user 0 --name $eyeCatch --value $userflags0");
     die "ERROR: $this_func: Call to add userdata to $eyeCatch failed. Aborting!" if($?);
 
     trace(2, "$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --user 1 --name $eyeCatch --value userflags1=$userflags1");
     system("$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --user 1 --name $eyeCatch --value $userflags1");
+    die "ERROR: $this_func: Call to add userdata to $eyeCatch failed. Aborting!" if($?);
+
+    trace(2, "$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --user 2 --name $eyeCatch --value userflags2=$userflags2");
+    system("$g_fpartCmd --target $i_pnorBinName --partition-offset $i_offset --user 2 --name $eyeCatch --value $userflags2");
     die "ERROR: $this_func: Call to add userdata to $eyeCatch failed. Aborting!" if($?);
 }
 

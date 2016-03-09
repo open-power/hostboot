@@ -441,6 +441,10 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
                                != 0) ? true : false;
         o_info.readOnly = ((iv_TOC[id].misc & FFS_MISC_READ_ONLY)
                                != 0) ? true : false;
+        o_info.xzCompressed = ((iv_TOC[id].compress & FFS_COMPRESS_XZ)
+                               != 0) ? true : false;
+        o_info.xzSize = ((iv_TOC[id].compress & FFS_COMPRESS_XZ) != 0) ?
+                          iv_TOC[id].xzDecompressSize : 0;
     }
 
     return l_errhdl;
