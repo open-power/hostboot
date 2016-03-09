@@ -35,9 +35,9 @@
 #include <prdfGlobal.H>
 #include <prdfErrlUtil.H>
 #include <prdfCallouts.H>
-#include <prdfMemoryMru.H>
+//#include <prdfMemoryMru.H> TODO: RTC 149314
 #include <prdfPlatServices.H>
-#include <prdfCenMbaCaptureData.H>
+//#include <prdfCenMbaCaptureData.H> TODO: RTC 136126
 
 // For compression routines
 #define PRDF_COMPRESSBUFFER_COMPRESS_FUNCTIONS
@@ -54,7 +54,7 @@
   #include <stdio.h>
 
   #ifdef __HOSTBOOT_RUNTIME
-    #include <prdfCenMbaDynMemDealloc_rt.H>
+//    #include <prdfCenMbaDynMemDealloc_rt.H> TODO: RTC 136129
   #else // Hostboot only
     #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
       #include <prdfPnorFirDataReader.H>
@@ -67,7 +67,7 @@
   #include <evenmgt.H>
   #include <rmgrBaseClientLib.H>  //for rmgrSyncFile
   #include <prdfSdcFileControl.H>
-  #include <prdfCenMbaDynMemDealloc_rt.H>
+//  #include <prdfCenMbaDynMemDealloc_rt.H> TODO: RTC 136129
 #endif
 
 using namespace TARGETING;

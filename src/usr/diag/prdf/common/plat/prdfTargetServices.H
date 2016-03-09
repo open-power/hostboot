@@ -47,7 +47,7 @@
 namespace PRDF
 {
 
-class CenRank;
+//class CenRank; TODO: RTC 136126
 
 namespace PlatServices
 {
@@ -305,9 +305,11 @@ uint32_t getPhbConfig( TARGETING::TargetHandle_t i_proc );
  *                    information for both DIMMS on this MBA.
  * @return  Non-SUCCESS if internal functions fail, SUCCESS otherwise.
  */
+/* TODO: RTC 136126
 int32_t getMasterRanks( TARGETING::TargetHandle_t i_memTrgt,
                         std::vector<CenRank> & o_ranks,
                         uint8_t i_ds = MAX_DIMM_PER_PORT );
+*/
 
 /**
  * @brief   Returns the DMI bus channel for the given memory target.

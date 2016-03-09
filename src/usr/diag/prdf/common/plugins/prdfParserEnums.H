@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,7 @@
 #ifndef __prdfParserEnums_H
 #define __prdfParserEnums_H
 
-#include <prdfCenConst.H>
+//#include <prdfCenConst.H> TODO: RTC 136126
 
 namespace PRDF
 {
@@ -138,6 +138,7 @@ namespace RCE_TABLE
 
 } // namespace RCE_TABLE
 
+/* TODO: RTC 136126
 namespace DQ_BITMAP
 {
     enum
@@ -147,6 +148,7 @@ namespace DQ_BITMAP
     };
 
 } // namespace DQ_BITMAP
+*/
 
 namespace CEN_SYMBOL
 {

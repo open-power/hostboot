@@ -43,7 +43,7 @@
 #include <targeting/common/utilFilter.H>
 
 // Pegasus includes
-#include <prdfCenAddress.H>
+//#include <prdfCenAddress.H> TODO: RTC 136126
 
 using namespace TARGETING;
 
@@ -1125,6 +1125,7 @@ uint32_t getPhbConfig( TARGETING::TargetHandle_t i_proc )
 //##
 //##############################################################################
 
+/* TODO: RTC 136126
 int32_t getMasterRanks( TargetHandle_t i_memTrgt,
                         std::vector<CenRank> & o_ranks,
                         uint8_t i_ds )
@@ -1199,6 +1200,7 @@ int32_t getMasterRanks( TargetHandle_t i_memTrgt,
 
     #undef PRDF_FUNC
 }
+*/
 
 //------------------------------------------------------------------------------
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,9 +48,10 @@
 #include <errlusrparser.H>
 #include <attributeenums.H>     // For TARGETING::TYPE enum
 
-#include <prdfCenLogParse.H>
-#include <prdfProcLogParse.H>
+//#include <prdfCenLogParse.H> TODO: RTC 136126
+//#include <prdfProcLogParse.H> TODO: RTC 136050
 #include <prdfParserEnums.H>
+#include <prdfMemoryMruData.H>
 
 #include <hwas/common/hwasCallout.H>
 
@@ -353,6 +354,7 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
             {
                 i_parser.PrintString( sigHeaderString, "No Data Found" );
             }
+/*  TODO: RTC 136126
             else if ( Util::hashString("MEM_UE_TABLE") == sigId )
             {
                  parseMemUeTable( sigData, sigDataSize, i_parser );
@@ -382,6 +384,8 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
             {
                  parseTdCtlrStateData( sigData, sigDataSize, i_parser, sigId );
             }
+*/
+/*TODO: RTC 136050
             else if ( Util::hashString(SLW_FFDC_DATA::title) == sigId )
             {
                  parseSlwFfdcData( sigData, sigDataSize, i_parser );
@@ -402,6 +406,7 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
             {
                 parsePnorFirData( sigData, sigDataSize, i_parser );
             }
+*/
             else if ( (0 != sigDataSize) && (sizeof(uint64_t) >= sigDataSize) )
             {
                 // Print one reg/line if the data size <= 8 bytes
@@ -600,12 +605,14 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
 
                 switch ( pfa.mruList[i].type )
                 {
+/* TODO: RTC 149314
                     case PRDcalloutData::TYPE_MEMMRU:
                         strcat( data, "(MemoryMru) " );
                         strcat( data, tmpStr );
                         i_parser.PrintString( header, data );
                         parseMemMruData( i_parser, pfa.mruList[i].callout );
                         break;
+*/
 
                     case PRDcalloutData::TYPE_SYMFRU:
                         strcat( data, "(SymbolicFru) " );
@@ -697,7 +704,9 @@ bool parseMemMru( void * i_buffer, uint32_t i_buflen, ErrlUsrParser & i_parser )
         i_parser.PrintHeading( heading );
         i_parser.PrintBlank();
 
+/* TODO: RTC 149314
         parseMemMruData( i_parser, memMru );
+*/
 
         i_parser.PrintBlank();
     }
@@ -743,7 +752,9 @@ bool parseExtMemMru( void * i_buffer, uint32_t i_buflen,
         i_parser.PrintHeading( heading );
         i_parser.PrintBlank();
 
+/* TODO: RTC 149314
         parseMemMruData( i_parser, extMemMru );
+*/
 
         i_parser.PrintBlank();
 
