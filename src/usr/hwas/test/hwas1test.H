@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1167,9 +1167,9 @@ public:
                             (uint16_t)VPD_CP00_PG_MCxx_GOOD;
                         break;
 
-                    case TYPE_NVBUS:
+                    case TYPE_NV:
                         TS_TRACE( "testHWASisDescFunctional: "
-                                  "NVBUS is not functional");
+                                  "NV is not functional");
                         pgData[VPD_CP00_PG_N3_INDEX] |=
                             (uint16_t)VPD_CP00_PG_N3_NPU;
 
@@ -1177,7 +1177,7 @@ public:
                         {
                             TS_FAIL("testHWASisDescFunctional>"
                                     "functional = 0x%x, should be false, "
-                                    "NVBUS = 0x%04x.",
+                                    "NV = 0x%04x.",
                                     isDescFunctional(pDesc, pgData),
                                     pgData[VPD_CP00_PG_N3_INDEX]);
                         }

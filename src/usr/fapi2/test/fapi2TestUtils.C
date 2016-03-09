@@ -47,7 +47,7 @@
 #define NUM_PHBS         6
 #define NUM_XBUS         1
 #define NUM_OBUS         2
-#define NUM_NVBUS        2
+#define NUM_NV           2
 #define NUM_PPES         21
 #define NUM_PERVS        55
 #define NUM_CAPPS        2
@@ -225,14 +225,14 @@ void generateTargets(TARGETING::Target* i_pMasterProcChip,
         }
     }
 
-    //Setup NVBUS
+    //Setup NV
     i_pMasterProcChip->tryGetAttr<TARGETING::ATTR_PHYS_PATH>(l_epath);
-    for(int i = 0; i < NUM_NVBUS; i++)
+    for(int i = 0; i < NUM_NV; i++)
     {
-        l_epath.addLast(TARGETING::TYPE_NVBUS, i);
+        l_epath.addLast(TARGETING::TYPE_NV, i);
         if(TARGETING::targetService().toTarget(l_epath) != NULL)
         {
-            o_targetList[MY_NVBUS] =
+            o_targetList[MY_NV] =
               TARGETING::targetService().toTarget(l_epath);
             break;
         }

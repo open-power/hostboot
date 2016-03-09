@@ -242,7 +242,7 @@
         <value>40</value>
     </enumerator>
     <enumerator>
-        <name>NVBUS</name>
+        <name>NV</name>
         <value>41</value>
     </enumerator>
     <enumerator>

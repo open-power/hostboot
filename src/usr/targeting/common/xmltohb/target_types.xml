@@ -2433,23 +2433,23 @@
     </attribute>
 </targetType>
 
-<!-- NVBUS
+<!-- NV
      Nimbus : 2 per chip
      Cumulus: 2  -->
 <targetType>
-    <id>unit-nvbus-power9</id>
+    <id>unit-nv-power9</id>
     <parent>unit</parent>
     <attribute>
         <id>TYPE</id>
-        <default>NVBUS</default>
+        <default>NV</default>
     </attribute>
     <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
 </targetType>
 
 <targetType>
-    <id>unit-nvbus-nimbus</id>
-    <parent>unit-nvbus-power9</parent>
+    <id>unit-nv-nimbus</id>
+    <parent>unit-nv-power9</parent>
     <attribute>
         <id>MODEL</id>
         <default>NIMBUS</default>
@@ -2457,8 +2457,8 @@
 </targetType>
 
 <targetType>
-    <id>unit-nvbus-cumulus</id>
-    <parent>unit-nvbus-power9</parent>
+    <id>unit-nv-cumulus</id>
+    <parent>unit-nv-power9</parent>
     <attribute>
         <id>MODEL</id>
         <default>CUMULUS</default>
