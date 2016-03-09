@@ -2619,4 +2619,22 @@
     </attribute>
 </targetInstance>
 
+<targetInstance>
+    <id>sys0node0proc0nx0</id>
+    <type>unit-nx-power9</type>
+    <attribute><id>HUID</id><default>0x001E0000</default></attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
 </attributes>

@@ -1798,6 +1798,12 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
 
         generate_occ($proc, $proc_ordinal_id);
 
+        generate_nx($proc,$proc_ordinal_id,$node);
+
+        #TODO-RTC:149326-Finish up the rest of the misc units
+        #generate_pcies($proc,$proc_ordinal_id);
+        #generate_pore($proc,$proc_ordinal_id,$node);
+
         # call to do any fsp per-proc targets (ie, occ, psi)
         do_plugin('fsp_proc_targets', $proc, $i, $proc_ordinal_id,
                     $STargets[$i][NODE_FIELD], $STargets[$i][POS_FIELD]);
@@ -1866,9 +1872,6 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
             ($STargets[$i+1][NAME_FIELD] eq "memb"))
         {
             $mcs_count = 0;
-            generate_pcies($proc,$proc_ordinal_id);
-            generate_nx($proc,$proc_ordinal_id,$node);
-            generate_pore($proc,$proc_ordinal_id,$node);
         }
     }
     elsif ( $STargets[$i][NAME_FIELD] eq "mca")
