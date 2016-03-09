@@ -5,7 +5,8 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -83,6 +84,7 @@ namespace fapi
         MOD_SET_NEST_FREQ                          = 0x2A,
         MOD_FIND_MIN_DMI_SPD                       = 0x2B,
         MOD_OCC_LOAD_HOST_DATA_TO_SRAM             = 0x2C,
+        MOD_START_XZ_PAYLOAD                       = 0x2D,
     };
 
     /**
@@ -144,6 +146,7 @@ namespace fapi
         RC_INVALID_ULTRA_TURBO_FREQ   = HWPF_COMP_ID | 0x3B,
         RC_INVALID_WOF_INDEX          = HWPF_COMP_ID | 0x3C,
         RC_ECMD_INSERT_FAILED         = HWPF_COMP_ID | 0x3D,
+        RC_INVALID_RETURN_XZ_CODE     = HWPF_COMP_ID | 0x3E,
     };
 
     /**

@@ -44,8 +44,8 @@
 #include <mbox/ipc_msg_types.H>
 #include <devicefw/userif.H>
 #include <arch/pirformat.H>
-
-
+#include <xz/xz.h>
+#include    <isteps/hwpf_reasoncodes.H>
 
 #include <errl/errludtarget.H>
 
@@ -127,26 +127,36 @@ static errlHndl_t load_pnor_section(PNOR::SectionId i_section,
     {
         return err;
     }
-    const uint32_t payloadSize = pnorSectionInfo.size;
+    uint32_t uncompressedPayloadSize = pnorSectionInfo.xzCompressed ?
+            pnorSectionInfo.xzSize : pnorSectionInfo.size;
+
+    const uint32_t originalPayloadSize = pnorSectionInfo.size;
 
     printk( "Loading PNOR section %d (%s) %d bytes @0x%lx\n",
             i_section,
             pnorSectionInfo.name,
-            payloadSize,
+            originalPayloadSize,
             i_physAddr );
 
+    uint64_t loadAddr = NULL;
     // Use simics optimization if we are running under simics which has very
     // slow PNOR access.
     if ( Util::isSimicsRunning()  )
     {
+        //TODO RTC:143500
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                  "If you are running simics, and have a xz compressed ",
+                  "payload image, you are going to fail. RTC 143500");
         simics_load_payload( i_physAddr );
     }
     else
     {
         // Map in the physical memory we are loading into.
+        // If we are not xz compressed, the uncompressedSize is
+        // equal to the original size.
         uint64_t loadAddr = reinterpret_cast<uint64_t>(
             mm_block_map( reinterpret_cast<void*>( i_physAddr ),
-                          payloadSize ) );
+                          uncompressedPayloadSize ) );
 
         // Print out inital progress bar.
 #ifdef CONFIG_CONSOLE
@@ -159,24 +169,96 @@ static errlHndl_t load_pnor_section(PNOR::SectionId i_section,
         printk( "\r" );
 #endif
 
-        // Load the data block by block and update the progress bar.
-        const uint32_t BLOCK_SIZE = 4096;
-        for ( uint32_t i = 0; i < payloadSize; i += BLOCK_SIZE )
+        if(!pnorSectionInfo.xzCompressed)
         {
-            memcpy( reinterpret_cast<void*>( loadAddr + i ),
-                    reinterpret_cast<void*>( pnorSectionInfo.vaddr + i ),
-                    std::min( payloadSize - i, BLOCK_SIZE ) );
-#ifdef CONFIG_CONSOLE
-            for ( int new_progress = (i * progressSteps) / payloadSize;
-                progress <= new_progress; progress++ )
+            // Load the data block by block and update the progress bar.
+            const uint32_t BLOCK_SIZE = 4096;
+            for ( uint32_t i = 0; i < originalPayloadSize; i += BLOCK_SIZE )
             {
-                printk( "=" );
+                memcpy( reinterpret_cast<void*>( loadAddr + i ),
+                        reinterpret_cast<void*>( pnorSectionInfo.vaddr + i ),
+                        std::min( originalPayloadSize - i, BLOCK_SIZE ) );
+#ifdef CONFIG_CONSOLE
+                for ( int new_progress = (i * progressSteps) /
+                                         originalPayloadSize;
+                    progress <= new_progress; progress++ )
+                {
+                    printk( "=" );
+                }
+#endif
             }
+#ifdef CONFIG_CONSOLE
+            printk( "\n" );
 #endif
         }
-#ifdef CONFIG_CONSOLE
-        printk( "\n" );
-#endif
+    }
+
+    if(pnorSectionInfo.xzCompressed)
+    {
+        struct xz_buf b;
+        struct xz_dec *s;
+        enum xz_ret ret;
+
+        xz_crc32_init();
+
+        s = xz_dec_init(XZ_SINGLE, 0);
+        if(s == NULL)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,ERR_MRK
+                     "load_pnor_section: XZ Embedded Initialization failed");
+            return err;
+        }
+
+        static const uint64_t compressed_SIZE = originalPayloadSize;
+        static const uint64_t decompressed_SIZE = uncompressedPayloadSize;
+
+        b.in = reinterpret_cast<uint8_t *>( pnorSectionInfo.vaddr);
+        b.in_pos = 0;
+        b.in_size = compressed_SIZE;
+        b.out = reinterpret_cast<uint8_t *>(loadAddr);
+        b.out_pos = 0;
+        b.out_size = decompressed_SIZE;
+
+        ret = xz_dec_run(s, &b);
+
+        if(ret == XZ_STREAM_END)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                     "load_pnor_section: The %s section was decompressed.",
+                     pnorSectionInfo.name);
+        }else
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,ERR_MRK
+                     "load_pnor_section: xz-embedded returned an error, ",
+                     "the ret is %d",ret);
+
+            //Clean up memory
+            xz_dec_end(s);
+
+            /*@
+             * @errortype
+             * @reasoncode       fapi::RC_INVALID_RETURN_XZ_CODE
+             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid         fapi::MOD_START_XZ_PAYLOAD
+             * @devdesc          xz-embedded has returned an error.
+             *                   the return code can be found in xz.h
+             * @custdesc         Error uncompressing payload image from
+             *                   boot flash
+             * @userdata1        Return code from xz-embedded
+             * @userdata2[0:31]  Original Payload Size
+             * @userdata2[32:63] Uncompressed Payload Size
+             */
+             err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           fapi::MOD_START_XZ_PAYLOAD,
+                                           fapi::RC_INVALID_RETURN_XZ_CODE,
+                                           ret,TWO_UINT32_TO_UINT64(
+                                                   originalPayloadSize,
+                                                   uncompressedPayloadSize));
+             err->addProcedureCallout(HWAS::EPUB_PRC_PHYP_CODE,
+                             HWAS::SRCI_PRIORITY_HIGH);
+             return err;
+         }
+         xz_dec_end(s);
     }
 
     return NULL;

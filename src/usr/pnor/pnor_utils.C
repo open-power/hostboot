@@ -314,6 +314,9 @@ void PNOR::parseEntries (ffs_hdr* i_ffs_hdr,
         io_TOC[secId].integrity = ffsUserData->dataInteg;
         io_TOC[secId].version = ffsUserData->verCheck;
         io_TOC[secId].misc = ffsUserData->miscFlags;
+        io_TOC[secId].compress = ffsUserData->compressType;
+        io_TOC[secId].xzDecompressSize =
+                (ffsUserData->decompressSize);
         if((io_TOC[secId].flashAddr + io_TOC[secId].size) >
                 (i_ffs_hdr->block_count*PAGESIZE))
         {

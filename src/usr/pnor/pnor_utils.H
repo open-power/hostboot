@@ -116,6 +116,8 @@ struct SectionData_t {
     uint8_t version; /**< Version Checking */
     uint16_t integrity; /**< Data Integrity */
     uint8_t misc; /**< Misc Flags */
+    uint8_t compress; /**< Compression Flags */
+    uint32_t xzDecompressSize; /**< Size of uncompressed image */
 } PACKED;
 
 /**

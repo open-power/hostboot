@@ -195,6 +195,11 @@ errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
             (iv_TOC[i_section].version & FFS_VERS_SHA512) ? true : false;
         o_info.sha512perEC  =
            (iv_TOC[i_section].version & FFS_VERS_SHA512_PER_EC) ? true : false;
+        o_info.xzCompressed =
+           ((iv_TOC[i_section].compress & FFS_COMPRESS_XZ) != 0) ? true : false;
+        o_info.xzSize =
+           ((iv_TOC[i_section].compress & FFS_COMPRESS_XZ) != 0) ?
+             iv_TOC[i_section].xzDecompressSize : 0;
     } while (0);
 
     TRACFCOMP(g_trac_pnor, EXIT_MRK"RtPnor::getSectionInfo");
