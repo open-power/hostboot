@@ -128,8 +128,8 @@ errlHndl_t fapi2HwpTest()
                 targeting_targets[MY_XBUS]);
         fapi2::Target<fapi2::TARGET_TYPE_OBUS> fapi2_obusTarget(
                 targeting_targets[MY_OBUS]);
-        fapi2::Target<fapi2::TARGET_TYPE_NV> fapi2_nvbusTarget(
-                targeting_targets[MY_NVBUS]);
+        fapi2::Target<fapi2::TARGET_TYPE_NV> fapi2_nvTarget(
+                targeting_targets[MY_NV]);
         fapi2::Target<fapi2::TARGET_TYPE_PPE> fapi2_ppeTarget(targeting_targets[MY_PPE]);
         fapi2::Target<fapi2::TARGET_TYPE_PERV> fapi2_pervTarget(
                 targeting_targets[MY_PERV]);
@@ -230,7 +230,7 @@ errlHndl_t fapi2HwpTest()
           TS_FAIL("Error occured in p9_sample_procedure_obus !!");
         }
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_nv, fapi2_nvbusTarget, scratchWriteValue);
+        FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_nv, fapi2_nvTarget, scratchWriteValue);
         if(l_errl != NULL)
         {
           l_errl = NULL;

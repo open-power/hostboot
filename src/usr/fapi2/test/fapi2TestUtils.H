@@ -55,7 +55,7 @@ enum{
     MY_PHB,
     MY_XBUS,
     MY_OBUS,
-    MY_NVBUS,
+    MY_NV,
     MY_PPE,
     MY_PERV,
     MY_CAPP,

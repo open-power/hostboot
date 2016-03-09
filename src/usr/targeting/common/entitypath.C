@@ -413,8 +413,8 @@ const char* EntityPath::pathElementTypeAsString(
             return "DMI";
         case TYPE_OBUS:
             return "OBUS";
-        case TYPE_NVBUS:
-            return "NVBUS";
+        case TYPE_NV:
+            return "NV";
         case TYPE_SBE:
             return "SBE";
         case TYPE_PPE:

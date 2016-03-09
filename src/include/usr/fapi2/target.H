@@ -161,7 +161,7 @@ inline TARGETING::TYPE convertFapi2TypeToTargeting(fapi2::TargetType i_T)
             o_targetingType = TARGETING::TYPE_OBUS;
             break;
         case fapi2::TARGET_TYPE_NV:
-            o_targetingType = TARGETING::TYPE_NVBUS;
+            o_targetingType = TARGETING::TYPE_NV;
             break;
         case fapi2::TARGET_TYPE_SBE:
             o_targetingType = TARGETING::TYPE_SBE;

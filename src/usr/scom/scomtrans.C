@@ -132,7 +132,7 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
 
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                     DeviceFW::SCOM,
-                    TARGETING::TYPE_NVBUS,
+                    TARGETING::TYPE_NV,
                     startScomProcess);
 
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
@@ -588,9 +588,9 @@ bool getChipUnit (TARGETING::TYPE i_type,
             o_chipUnit = PU_OBUS_CHIPUNIT;
             break;
         }
-        case(TARGETING::TYPE_NVBUS) :
+        case(TARGETING::TYPE_NV) :
         {
-            o_chipUnit = PU_NVBUS_CHIPUNIT;
+            o_chipUnit = PU_NV_CHIPUNIT;
             break;
         }
         case(TARGETING::TYPE_SBE) :

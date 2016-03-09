@@ -1789,7 +1789,13 @@ sub writeEnumFileAttrEnums {
             $enumName = $enumerationType->{id} . "_" . $enumerator->{name};
             write;
         }
-
+#@TODO RTC:149503 Remove hack that allows TYPE_NVBUS
+        if($enumerationType->{id} eq 'TYPE')
+          {
+              $enumHex = 'TYPE_NV';
+              $enumName = 'TYPE_NVBUS';
+              write;
+          }
         print $outFile "};\n\n";
     }
 }

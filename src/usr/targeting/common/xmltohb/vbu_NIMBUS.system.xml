@@ -42,7 +42,7 @@
      *     PEC 2 has 3 PHBs
      * Each Nimbus has 1 XBUS chiplet
      * Each Nimbus has 2 OBUS (OB0 and OB3)
-     * Each Nimbus has 2 NVBUS
+     * Each Nimbus has 2 NV
      * Each Nimbus has 21 PPE units (including the SBE):
      *    1 SBE, 1 Powerbus/Fabric PPE, 4 GPEs, 12 CMEs, and 3 IO PPEs.     *
      * Each chiplet existing in a Nimbus has 1 equivalent PERV unit
@@ -1474,18 +1474,18 @@
     </attribute>
 </targetInstance>
 
-<!-- Nimbus n0p0 NVBUS units -->
+<!-- Nimbus n0p0 NV units -->
 <targetInstance>
-    <id>sys0node0proc0nvbus0</id>
-    <type>unit-nvbus-nimbus</type>
+    <id>sys0node0proc0nv0</id>
+    <type>unit-nv-nimbus</type>
     <attribute><id>HUID</id><default>0x000E0300</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/nvbus-0</default>
+        <default>physical:sys-0/node-0/proc-0/nv-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/nvbus-0</default>
+        <default>affinity:sys-0/node-0/proc-0/nv-0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -1494,16 +1494,16 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0nvbus1</id>
-    <type>unit-nvbus-nimbus</type>
+    <id>sys0node0proc0nv1</id>
+    <type>unit-nv-nimbus</type>
     <attribute><id>HUID</id><default>0x000E0301</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/nvbus-1</default>
+        <default>physical:sys-0/node-0/proc-0/nv-1</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/nvbus-1</default>
+        <default>affinity:sys-0/node-0/proc-0/nv-1</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>

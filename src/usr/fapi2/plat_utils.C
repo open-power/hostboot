@@ -301,7 +301,7 @@ void xlateTargetType(const fapi2::TargetType i_targetType,
         break;
     case fapi2::TARGET_TYPE_NV:
         o_class = TARGETING::CLASS_UNIT;
-        o_type = TARGETING::TYPE_NVBUS;
+        o_type = TARGETING::TYPE_NV;
         break;
     case fapi2::TARGET_TYPE_SBE:
         o_class = TARGETING::CLASS_UNIT;

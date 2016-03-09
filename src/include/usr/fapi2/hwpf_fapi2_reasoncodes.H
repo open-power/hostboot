@@ -82,7 +82,7 @@ namespace fapi2
         RC_PEC_NO_PROC_FOUND           = FAPI2_COMP_ID | 0x1a,
         RC_XBUS_NO_PROC_FOUND          = FAPI2_COMP_ID | 0x1b,
         RC_OBUS_NO_PROC_FOUND          = FAPI2_COMP_ID | 0x1c,
-        RC_NVBUS_NO_PROC_FOUND         = FAPI2_COMP_ID | 0x1d,
+        RC_NV_NO_PROC_FOUND            = FAPI2_COMP_ID | 0x1d,
         RC_PPE_NO_PROC_FOUND           = FAPI2_COMP_ID | 0x1e,
         RC_PERV_NO_PROC_FOUND          = FAPI2_COMP_ID | 0x1f,
         RC_CAPP_NO_PROC_FOUND          = FAPI2_COMP_ID | 0x20,

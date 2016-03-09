@@ -558,8 +558,8 @@ public:
         myPHB5,
         myOBUS0,
         myOBUS3,
-        myNVBUS0,
-        myNVBUS1,
+        myNV0,
+        myNV1,
         myPPE0,
         myPPE1,
         myOCC0,
@@ -733,18 +733,18 @@ public:
     // remove OBUS3 target
     epath.removeLast();
 
-    //add NVBUS0 target
-    epath.addLast(TARGETING::TYPE_NVBUS,0);
-    scom_targets[myNVBUS0] = TARGETING::targetService().toTarget(epath);
+    //add NV0 target
+    epath.addLast(TARGETING::TYPE_NV,0);
+    scom_targets[myNV0] = TARGETING::targetService().toTarget(epath);
 
-    // remove NVBUS0 target
+    // remove NV0 target
     epath.removeLast();
 
-    // add NVBUS1 target.
-    epath.addLast(TARGETING::TYPE_NVBUS,1);
-    scom_targets[myNVBUS1] = TARGETING::targetService().toTarget(epath);
+    // add NV1 target.
+    epath.addLast(TARGETING::TYPE_NV,1);
+    scom_targets[myNV1] = TARGETING::targetService().toTarget(epath);
 
-    // remove NVBUS1 target
+    // remove NV1 target
     epath.removeLast();
 
     //add PPE0 target
@@ -856,10 +856,10 @@ public:
     { scom_targets[myOBUS3], 0x09010C55, 0x0C010C55 ,false},
     { scom_targets[myOBUS0], 0x12012826, 0x12012826, true},
     { scom_targets[myOBUS3], 0x24030008, 0x24030008, true},
-    { scom_targets[myNVBUS0], 0x050110D4, 0x050110D4, false},
-    { scom_targets[myNVBUS1], 0x050110D4, 0x050110F4,false},
-    { scom_targets[myNVBUS0], 0x12012826, 0x12012826, true},
-    { scom_targets[myNVBUS1], 0x24030008, 0x24030008, true},
+    { scom_targets[myNV0], 0x050110D4, 0x050110D4, false},
+    { scom_targets[myNV1], 0x050110D4, 0x050110F4,false},
+    { scom_targets[myNV0], 0x12012826, 0x12012826, true},
+    { scom_targets[myNV1], 0x24030008, 0x24030008, true},
     };
 
     int numOfAddr = sizeof test_data / sizeof(test_data[0]);
