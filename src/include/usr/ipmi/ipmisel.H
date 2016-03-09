@@ -34,7 +34,6 @@
 #include <stdint.h>
 #include <builtins.h>
 #include <ipmi/ipmiif.H>
-#include <sys/sync.h>
 
 
 /**
@@ -47,7 +46,8 @@ namespace IPMISEL
     {
         MSG_SEND_ESEL,
         MSG_STATE_SHUTDOWN,
-        MSG_LAST_TYPE = MSG_STATE_SHUTDOWN,
+        MSG_STATE_SHUTDOWN_SEL,
+        MSG_LAST_TYPE = MSG_STATE_SHUTDOWN_SEL,
     };
 
     typedef struct sel_info
@@ -321,9 +321,9 @@ class IpmiSEL
 
       /**
        * Thread start routine for the resource provider
-       * @param[in] void* instance - 'this' instance to start.
+       * @param[in] void*, unused
        */
-      static void* start(void* instance);
+      static void* start(void* unused);
 
       /**
        * Default constructor
@@ -350,7 +350,6 @@ class IpmiSEL
       void execute(void);
 
       msg_q_t           iv_msgQ;      //!< ipmi message queue
-      barrier_t         iv_sync_start;
 
       //Disallow copying of this class.
       IpmiSEL& operator=(const IpmiSEL&);

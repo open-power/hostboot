@@ -70,10 +70,6 @@
 #include <config.h>
 #include <ipmi/ipmisensor.H>
 
-#ifdef CONFIG_BMC_IPMI
-#include <ipmi/ipmisel.H>
-#endif
-
 #include <initservice/bootconfigif.H>
 
 namespace ISTEPS_TRACE
@@ -1307,11 +1303,6 @@ void IStepDispatcher::handleShutdownMsg(msg_t * & io_pMsg)
 // ----------------------------------------------------------------------------
 void IStepDispatcher::shutdownDuringIpl()
 {
-
-#ifdef CONFIG_BMC_IPMI
-    /* Ensure the ipmiSEL thread is running and registered with doShutdown. */
-    Singleton<IpmiSEL>::instance().msgQueue();
-#endif
 
     TRACFCOMP(g_trac_initsvc, ENTER_MRK"IStepDispatcher::shutdownDuringIpl");
 

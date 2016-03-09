@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,8 @@ namespace IPMI
         MSG_STATE_SEND,
 
         MSG_STATE_SHUTDOWN,
+
+        MSG_STATE_SHUTDOWN_SEL,
 
         MSG_STATE_GRACEFUL_SHUTDOWN,
 
