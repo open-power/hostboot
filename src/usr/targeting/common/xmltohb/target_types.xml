@@ -2699,6 +2699,29 @@
     </attribute>
 </targetType>
 
+<targetType>
+    <id>unit-nx-power9</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>NX</default>
+    </attribute>
+    <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
+    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+        <default>0x00000001</default> <!--GARD -->
+    </attribute>
+    <attribute>
+        <id>PRIMARY_CAPABILITIES</id>
+        <default>
+            <field><id>supportsFsiScom</id><value>0</value></field>
+            <field><id>supportsXscom</id><value>0</value></field>
+            <field><id>supportsInbandScom</id><value>0</value></field>
+            <field><id>reserved</id><value>0</value></field>
+        </default>
+    </attribute>
+    <attribute><id>CDM_DOMAIN</id><default>FABRIC</default></attribute>
+</targetType>
+
 <!-- End p9 sub-units -->
 
 </attributes>
