@@ -76,7 +76,7 @@ class kind
         uint8_t iv_dram_generation;
         uint8_t iv_dimm_type;
         uint8_t iv_rows;
-        uint8_t iv_size;
+        uint32_t iv_size;
 };
 
 }

@@ -44,7 +44,7 @@ namespace mss
 template<>
 fapi2::ReturnCode eff_memory_size( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, uint64_t& o_size )
 {
-    uint8_t l_sizes[PORTS_PER_MCS];
+    uint32_t l_sizes[PORTS_PER_MCS];
     o_size = 0;
 
     FAPI_TRY( mss::eff_dimm_size(i_target, &(l_sizes[0])) );
