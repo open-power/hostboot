@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -33,8 +33,8 @@ PRDR_ERRL_LIB = lib${RULE_LIBRARY_NAME}
 
 LIBRARY_OFILES += prdfLogParse.o
 LIBRARY_OFILES += prdfLogParse_common.o
-LIBRARY_OFILES += prdfCenLogParse.o
-LIBRARY_OFILES += prdfProcLogParse.o
+#LIBRARY_OFILES += prdfCenLogParse.o TODO RTC 136126
+#LIBRARY_OFILES += prdfProcLogParse.o TODO RTC 136050
 LIBRARY_OFILES += prdrErrlPluginsSupt.o
 LIBRARY_OFILES += prdfParserUtils.o
 

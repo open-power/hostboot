@@ -39,11 +39,11 @@
 #include <prdfTrace.H>
 #include <prdfErrlUtil.H>
 
-#include <prdfCenAddress.H>
-//#include <prdfCenDqBitmap.H>
-#include <prdfCenMarkstore.H>
+//#include <prdfCenAddress.H> TODO RTC 136126
+//#include <prdfCenDqBitmap.H> TODO RTC 136126
+//#include <prdfCenMarkstore.H> TODO RTC 136126
 
-//#include <dimmBadDqBitmapFuncs.H> // for dimm[S|G]etBadDqBitmap() TODO RTC
+//#include <dimmBadDqBitmapFuncs.H> // for dimm[S|G]etBadDqBitmap() TODO RTC 136126
 
 //#include <io_read_erepair.H> TODO RTC 136120
 //#include <io_power_down_lanes.H> TODO RTC 136120

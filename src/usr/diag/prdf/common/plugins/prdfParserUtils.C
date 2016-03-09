@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2014                   */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -22,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include <prdfParserUtils.H>
-#include <prdfCenConst.H>
+//#include <prdfCenConst.H> TODO: RTC 136126
 
 namespace PRDF
 {
@@ -40,6 +42,7 @@ namespace FSP
 namespace PARSERUTILS
 {
 
+/* TODO: RTC 136126
 uint8_t symbol2CenDq( uint8_t i_symbol )
 {
     uint8_t cenDq = DQS_PER_DIMM;
@@ -114,6 +117,7 @@ uint8_t symbol2Dram( uint8_t i_symbol, bool i_isX4Dram )
     return (SYMBOLS_PER_RANK > i_symbol) ? (i_symbol / symbolsPerDram)
                                          : dramsPerRank;
 }
+*/
 
 } // namespace PARSERUTILS
 

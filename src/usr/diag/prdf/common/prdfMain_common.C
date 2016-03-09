@@ -48,7 +48,7 @@
 #include <prdfSdcFileControl.H>
 #endif
 
-#include <prdfPegasusConfigurator.H>
+//#include <prdfPegasusConfigurator.H> TODO: RTC 145445
 
 namespace PRDF
 {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,7 +36,6 @@
 
 #include <prdfGlobal.H>
 #include <iipDomain.h>
-#include <prdfPllDomain.H>
 
 #include <prdfParentDomain.H>
 #include <prdfExtensibleDomain.H>
