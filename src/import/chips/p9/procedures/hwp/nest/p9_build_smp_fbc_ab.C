@@ -78,28 +78,31 @@ fapi2::ReturnCode p9_build_smp_query_link_state(
     }
 
     // TODO: RTC 147511 - Need to set enabled/disabled based on ATTR_PG attributes.
-    if (i_dest_target.get() == NULL)
-    {
-        FAPI_DBG("No target link");
-        o_link_is_enabled = false;
-        o_dest_target_node_id = FBC_NODE_ID_0;
-        o_dest_target_chip_id = FBC_CHIP_ID_0;
-    }
-    else
-    {
-        o_link_is_enabled = true;
+//TODO: Can not perform NULL check on the target.
+//     Temporarily comment out so Cronus can compile successfully.
+//     Need permanent fix.
+//    if (i_dest_target.get() == NULL)
+//    {
+//        FAPI_DBG("No target link");
+//        o_link_is_enabled = false;
+//        o_dest_target_node_id = FBC_NODE_ID_0;
+//        o_dest_target_chip_id = FBC_CHIP_ID_0;
+//    }
+//    else
+//    {
+    o_link_is_enabled = true;
 
-        // Extract chip/node ID from destination chip
-        FAPI_TRY(p9_fab_smp_get_node_id_attr(i_dest_target,
-                                             o_dest_target_node_id),
-                 "p9_fab_smp_get_node_id_attr() returns an error, l_rc 0x%.8X",
-                 (uint64_t)fapi2::current_err);
+    // Extract chip/node ID from destination chip
+    FAPI_TRY(p9_fab_smp_get_node_id_attr(i_dest_target,
+                                         o_dest_target_node_id),
+             "p9_fab_smp_get_node_id_attr() returns an error, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
 
-        FAPI_TRY(p9_fab_smp_get_chip_id_attr(i_dest_target,
-                                             o_dest_target_chip_id),
-                 "p9_fab_smp_get_chip_id_attr() returns an error, l_rc 0x%.8X",
-                 (uint64_t)fapi2::current_err);
-    }
+    FAPI_TRY(p9_fab_smp_get_chip_id_attr(i_dest_target,
+                                         o_dest_target_chip_id),
+             "p9_fab_smp_get_chip_id_attr() returns an error, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+//    }
 
 fapi_try_exit:
     FAPI_DBG("End");
