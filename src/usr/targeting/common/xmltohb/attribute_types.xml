@@ -13794,6 +13794,26 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>MRW_MCS_GROUP_ALLOW_ONLY_ADJ_PAIR</id>
+    <description>
+       The MRW for a system should be set to TRUE unless adjacent MCS pairs are not accessable for grouping of 2.
+       IBM systems, such as Tuleta, Brazos, Alpine, Firestone, ... should set this attribute to TRUE.
+       A FALSE setting would instruct the grouping code to attempt grouping of non-adjacent MCS into a pair.
+    </description>
+    <simpleType>
+        <uint8_t>
+        <default>1</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MRW_MCS_GROUP_ALLOW_ONLY_ADJ_PAIR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 <enumerationType>
     <id>TOD_ROLE</id>
     <description>

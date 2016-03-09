@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_grouping.C,v 1.34 2014/09/29 16:25:38 gpaulraj Exp $
+// $Id: mss_eff_grouping.C,v 1.37 2016/03/09 11:01:31 sasethur Exp $
 // Mike Jones - modified version from 1.28 to 1.00 because it is a sandbox version
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -41,6 +41,9 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.37   | sasethur | 03-03-16| Fixed FW review comments, initialized ATTR_PROC_MIRROR_BASES_ACK in EGNM mode
+//  1.36   | gpaulraj | 02-25-16| Fixed 0/1/4/5 2 MCS/G requirement
+//  1.35   | gpaulraj | 02-19-16| Fixed odd MCS grouping for Stradale
 //  1.34   |gpaulraj  | 09-23-14| fixed last check in issue
 //  1.33   |gpaulraj  | 09-23-14| fixed 2 MCS/group issue on starting with odd MCS grouping
 //  1.32   |gpaulraj  | 06-26-14| support MEM_MIRROR_PLACEMENT_POLICY_FLIPPED_DRAWER for Brazos
@@ -196,7 +199,8 @@ struct EffGroupingSysAttrs
      */
     EffGroupingSysAttrs() : iv_mcsInterleaveMode(0),
                             iv_selectiveMode(0),
-                            iv_enhancedNoMirrorMode(0) {}
+                            iv_enhancedNoMirrorMode(0) ,
+                            iv_mcs_group_with_adj_pair(0) {}
     /**
      * @brief Gets attributes
      */
@@ -206,6 +210,7 @@ struct EffGroupingSysAttrs
     uint8_t iv_mcsInterleaveMode;    // ATTR_ALL_MCS_IN_INTERLEAVING_GROUP
     uint8_t iv_selectiveMode;        // ATTR_MEM_MIRROR_PLACEMENT_POLICY
     uint8_t iv_enhancedNoMirrorMode; // ATTR_MRW_ENHANCED_GROUPING_NO_MIRRORING
+    uint8_t iv_mcs_group_with_adj_pair;    // ATTR_MRW_MCS_GROUP_ALLOW_ONLY_ADJ_PAIR 
 };
 
 /**
@@ -451,12 +456,23 @@ fapi::ReturnCode EffGroupingSysAttrs::getAttrs()
             break;
         }
 
+        rc = FAPI_ATTR_GET(ATTR_MRW_MCS_GROUP_ALLOW_ONLY_ADJ_PAIR, NULL,
+                           iv_mcs_group_with_adj_pair);
+        if (rc)
+        {
+            FAPI_ERR("Error querying sys ATTR_MRW_MCS_GROUP_ALLOW_ONLY_ADJ_PAIR");
+            break;
+        }
+
+
+
         FAPI_INF("mss_eff_grouping::EffGroupingSysAttrs: "
                  "ALL_MCS_IN_INTERLEAVING_GROUP 0x%02x, "
                  "MEM_MIRROR_PLACEMENT_POLICY 0x%02x, "
-                 "MRW_ENHANCED_GROUPING_NO_MIRRORING 0x%02x",
+                 "MRW_ENHANCED_GROUPING_NO_MIRRORING 0x%02x,"
+                 "ATTR_MRW_MCS_GROUP_ALLOW_ONLY_ADJ_PAIR 0x%02x",
                  iv_mcsInterleaveMode, iv_selectiveMode,
-                 iv_enhancedNoMirrorMode);
+                 iv_enhancedNoMirrorMode, iv_mcs_group_with_adj_pair);
     } while(0);
 
     return rc;
@@ -999,7 +1015,7 @@ void grouping_group2McsPerGroup(const EffGroupingMemInfo & i_memInfo,
     FAPI_INF("mss_eff_grouping: Attempting to group 2 MCSs per group");
     uint8_t & g = o_groupData.iv_numGroups;
 
-    for (uint8_t pos = 0; pos < NUM_MCS_PER_PROC - 1; pos = pos+2)
+    for (uint8_t pos = 0; pos < NUM_MCS_PER_PROC; pos = pos+2)
     {
         if ((!o_groupData.iv_mcsGrouped[pos]) &&
             (!o_groupData.iv_mcsGrouped[pos + 1]) &&
@@ -1035,6 +1051,127 @@ void grouping_group2McsPerGroup(const EffGroupingMemInfo & i_memInfo,
     }
 }
 
+/**
+ * @brief Attempts to group 2 MCSs per group for starting with odd group MCS
+ *
+ * If they can be grouped, fills in the following fields in o_groupData:
+ * - iv_data[<group>][MCS_SIZE]
+ * - iv_data[<group>][MCS_IN_GROUP]
+ * - iv_data[<group>][GROUP_SIZE]
+ * - iv_data[<group>][MEMBER_IDX(<members>)]
+ * - iv_data[<group>][LARGEST_MBA_SIZE]
+ * - iv_mcsGrouped[<group>]
+ * - iv_numGroups
+ *
+ * @param[in]  i_memInfo   Reference to EffGroupingMemInfo structure
+ * @param[out] o_groupData Reference to output data
+ */
+void grouping_group2McsPerGroup_oddpair(const EffGroupingMemInfo & i_memInfo,
+                                EffGroupingData & o_groupData)
+{
+    // 2 adjacent MCSs are grouped if they have the same size
+    // 1/2,3/4,5/6 
+    FAPI_INF("mss_eff_grouping: Attempting to group 2 MCSs per group");
+    uint8_t & g = o_groupData.iv_numGroups;
+    uint8_t ADJ_PAIR_ALLOWED_MCS_LOOP = 2;
+
+    for (uint8_t pos = 1; pos < NUM_MCS_PER_PROC - ADJ_PAIR_ALLOWED_MCS_LOOP; pos = pos+2)
+    {
+        if ((!o_groupData.iv_mcsGrouped[pos]) &&
+            (!o_groupData.iv_mcsGrouped[pos + 1]) &&
+            (i_memInfo.iv_mcsSize[pos] != 0) &&
+            (i_memInfo.iv_mcsSize[pos] == i_memInfo.iv_mcsSize[pos + 1]))
+        {
+            // These 2 MCSs are not already grouped and have the same amount of
+            // memory
+            FAPI_INF("mss_eff_grouping: Grouped MCSs %u and %u", pos, pos + 1);
+            o_groupData.iv_data[g][MCS_SIZE] = i_memInfo.iv_mcsSize[pos];
+            o_groupData.iv_data[g][MCS_IN_GROUP] = 2;
+            o_groupData.iv_data[g][GROUP_SIZE] = 2 * i_memInfo.iv_mcsSize[pos];
+            o_groupData.iv_data[g][MEMBER_IDX(0)] = pos;
+            o_groupData.iv_data[g][MEMBER_IDX(1)] = pos + 1;
+            if (i_memInfo.iv_largestMbaSize[pos] >
+                i_memInfo.iv_largestMbaSize[pos + 1])
+            {
+                o_groupData.iv_data[g][LARGEST_MBA_SIZE] =
+                    i_memInfo.iv_largestMbaSize[pos];
+            }
+            else
+            {
+                o_groupData.iv_data[g][LARGEST_MBA_SIZE] =
+                    i_memInfo.iv_largestMbaSize[pos + 1];
+            }
+            g++;
+
+            // Record which MCSs were grouped
+            o_groupData.iv_mcsGrouped[pos] = true;
+            o_groupData.iv_mcsGrouped[pos + 1] = true;
+           
+        }
+    }
+}
+/**
+ * @brief Attempts to group 2 MCSs per group for starting with use case group MCS
+ *
+ * If they can be grouped, fills in the following fields in o_groupData:
+ * - iv_data[<group>][MCS_SIZE]
+ * - iv_data[<group>][MCS_IN_GROUP]
+ * - iv_data[<group>][GROUP_SIZE]
+ * - iv_data[<group>][MEMBER_IDX(<members>)]
+ * - iv_data[<group>][LARGEST_MBA_SIZE]
+ * - iv_mcsGrouped[<group>]
+ * - iv_numGroups
+ *
+ * @param[in]  i_memInfo   Reference to EffGroupingMemInfo structure
+ * @param[out] o_groupData Reference to output data
+ */
+void grouping_group2McsPerGroup_usecase(const EffGroupingMemInfo & i_memInfo,
+                                EffGroupingData & o_groupData)
+{
+    // 2 adjacent MCSs are grouped if they have the same size
+    // 1/5, 1/4, 0/4, 0/5, 
+    FAPI_INF("mss_eff_grouping: Attempting to group 2 MCSs per group");
+    uint8_t & g = o_groupData.iv_numGroups;
+    uint8_t OP_MCS_ALLOWED_LIMIT = 6;
+    uint8_t OP_ALLOWED_MCS_LOOP = 2;
+    for (uint8_t pos = 0; pos < NUM_MCS_PER_PROC - OP_MCS_ALLOWED_LIMIT; pos = pos+1)
+    {
+	    for (uint8_t var = 4; var < NUM_MCS_PER_PROC - OP_ALLOWED_MCS_LOOP; var = var+1)
+	    {   
+            if ((!o_groupData.iv_mcsGrouped[pos]) &&
+                (!o_groupData.iv_mcsGrouped[var]) &&
+                (i_memInfo.iv_mcsSize[pos] != 0) &&
+                (i_memInfo.iv_mcsSize[pos] == i_memInfo.iv_mcsSize[var]))
+            {
+                // These 2 MCSs are not already grouped and have the same amount of
+                // memory
+                FAPI_INF("mss_eff_grouping: Grouped MCSs %u and %u", pos, var);
+                o_groupData.iv_data[g][MCS_SIZE] = i_memInfo.iv_mcsSize[pos];
+                o_groupData.iv_data[g][MCS_IN_GROUP] = 2;
+                o_groupData.iv_data[g][GROUP_SIZE] = 2 * i_memInfo.iv_mcsSize[pos];
+                o_groupData.iv_data[g][MEMBER_IDX(0)] = pos;
+                o_groupData.iv_data[g][MEMBER_IDX(1)] = var;
+                if (i_memInfo.iv_largestMbaSize[pos] >
+                    i_memInfo.iv_largestMbaSize[var])
+                {
+                    o_groupData.iv_data[g][LARGEST_MBA_SIZE] =
+                        i_memInfo.iv_largestMbaSize[pos];
+                }
+                else
+                {
+                    o_groupData.iv_data[g][LARGEST_MBA_SIZE] =
+                        i_memInfo.iv_largestMbaSize[var];
+                }
+                g++;
+            
+                // Record which MCSs were grouped
+                o_groupData.iv_mcsGrouped[pos] = true;
+                o_groupData.iv_mcsGrouped[var] = true;
+               
+            }
+        }    
+    }
+}
 /**
  * @brief Attempts to group 1 MCS per group
  *
@@ -1570,8 +1707,8 @@ fapi::ReturnCode grouping_setBaseSizeAttrs(
         l_memory_sizes_ack[6] = i_groupData.iv_data[6][GROUP_SIZE];
         l_memory_sizes_ack[7] = i_groupData.iv_data[7][GROUP_SIZE];
 
-        if (!i_sysAttrs.iv_enhancedNoMirrorMode)
-        {
+        //if (!i_sysAttrs.iv_enhancedNoMirrorMode)   //Commented to allow ACK attribute to be initialized in both cases
+       // {
             // Process mirrored ranges
             if (i_sysAttrs.iv_selectiveMode ==
                 fapi::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_SELECTIVE)
@@ -1668,7 +1805,7 @@ fapi::ReturnCode grouping_setBaseSizeAttrs(
             l_mirror_sizes_ack[1] = i_groupData.iv_data[9][GROUP_SIZE];
             l_mirror_sizes_ack[2] = i_groupData.iv_data[10][GROUP_SIZE];
             l_mirror_sizes_ack[3] = i_groupData.iv_data[11][GROUP_SIZE];
-        }
+      //  }
 
         mem_bases[0] = mem_bases[0] << 30;
         mem_bases[1] = mem_bases[1] << 30;
@@ -2158,21 +2295,54 @@ fapi::ReturnCode mss_eff_grouping(const fapi::Target & i_target,
         // grouped by the subsequent functions
         if (procAttrs.iv_groupsAllowed & MCS_GROUP_8)
         {
-            grouping_group8McsPerGroup(memInfo, groupData);
+	        if( !sysAttrs.iv_enhancedNoMirrorMode)
+	        {
+                grouping_group8McsPerGroup(memInfo, groupData);
+            }    
         }
         if (procAttrs.iv_groupsAllowed & MCS_GROUP_4)
         {
-            grouping_group4McsPerGroup(memInfo, groupData);
+	      if( !sysAttrs.iv_enhancedNoMirrorMode)
+	       {
+                grouping_group4McsPerGroup(memInfo, groupData);
+           }
         }
         if (procAttrs.iv_groupsAllowed & MCS_GROUP_2)
         {
-            grouping_group2McsPerGroup(memInfo, groupData);
+	      if(sysAttrs.iv_mcs_group_with_adj_pair)
+          {  
+             if( sysAttrs.iv_enhancedNoMirrorMode)
+	         {
+		        grouping_group2McsPerGroup(memInfo, groupData);
+                        grouping_group2McsPerGroup_oddpair(memInfo, groupData);
+	         }
+	         else
+	         {
+		        grouping_group2McsPerGroup(memInfo, groupData); 
+	         }
+          }   
+	  else
+          {
+	        if(sysAttrs.iv_enhancedNoMirrorMode)
+	        {
+	           grouping_group2McsPerGroup(memInfo, groupData);
+		   grouping_group2McsPerGroup_oddpair(memInfo, groupData);
+                   grouping_group2McsPerGroup_usecase(memInfo, groupData);
+                }
+                else
+                {
+	           grouping_group2McsPerGroup_usecase(memInfo, groupData);
+                   grouping_group2McsPerGroup(memInfo, groupData);
+                }
+          }
+
         }
         if (procAttrs.iv_groupsAllowed & MCS_GROUP_1)
         {
             // Note that grouping_checkValidAttributes() ensures that this is
             // only in checkerboard mode
-            grouping_group1McsPerGroup(memInfo, groupData);
+    	    grouping_group1McsPerGroup(memInfo, groupData);
+                
         }
 
         // Find the ungrouped MCSs and deconfigure their associated membuf chips

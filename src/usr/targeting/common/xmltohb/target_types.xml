@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2016                        -->
 <!-- [+] Google Inc.                                                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
@@ -254,6 +254,7 @@
     <attribute><id>MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL</id></attribute>
     <attribute><id>MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE</id></attribute>
     <attribute><id>MRW_CDIMM_SPARE_I2C_TEMP_SENSOR_ENABLE</id></attribute>
+    <attribute><id>MRW_MCS_GROUP_ALLOW_ONLY_ADJ_PAIR</id></attribute>
     <attribute><id>HB_RSV_MEM_SIZE_MB</id></attribute>
     <attribute><id>PM_HWP_ATTR_VERSION</id></attribute>
     <attribute><id>DO_ABUS_DECONFIG</id></attribute>
