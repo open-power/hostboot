@@ -7,7 +7,7 @@
 <!--                                                                        -->
 <!-- EKB Project                                                            -->
 <!--                                                                        -->
-<!-- COPYRIGHT 2015                                                         -->
+<!-- COPYRIGHT 2015,2016                                                    -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -30,8 +30,6 @@
     TX = 0x1,
     RX = 0x2
   </enum>
-  <persistRuntime/>
-  <platInit/>
   <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
@@ -47,6 +45,19 @@
     TRUE = 0x1
   </enum>
   <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IO_XBUS_MASTER_MODE</id>
+  <targetType>TARGET_TYPE_XBUS</targetType>
+  <description>
+    Flag to indicate if the target is a master.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    FALSE = 0x0,
+    TRUE = 0x1
+  </enum>
   <writeable/>
 </attribute>
 <!-- ********************************************************************** -->

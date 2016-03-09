@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,24 +40,29 @@
 //-----------------------------------------------------------------------------
 #include <fapi2.H>
 
-typedef fapi2::ReturnCode (*p9_io_xbus_linktrain_FP_t)
-(const fapi2::Target < fapi2::TARGET_TYPE_XBUS >&,
- const fapi2::Target < fapi2::TARGET_TYPE_XBUS >&);
+typedef fapi2::ReturnCode (*p9_io_xbus_linktrain_FP_t)(
+    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >&,
+    const uint8_t&,
+    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >&,
+    const uint8_t& );
 
 extern "C"
 {
 
     /**
      * @brief A HWP that runs on every instance of the XBUS(EDI+)
-     * @param[in] i_master Reference to the Master Target
-     * @param[in] i_slave  Reference to the Slave Target
-     * @retval ReturnCode
+     * @param[in] i_mtarget Reference to the Master Target
+     * @param[in] i_mgroup  Master Target Clock Group
+     * @param[in] i_starget Reference to the Slave Target
+     * @param[in] i_sgroup  Slave Target Clock Group
+     * @retval    ReturnCode
      */
-    fapi2::ReturnCode
-    p9_io_xbus_linktrain( const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_master,
-                          const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_slave );
+    fapi2::ReturnCode p9_io_xbus_linktrain(
+        const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_mtarget,
+        const uint8_t&                                   i_mgroup,
+        const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_starget,
+        const uint8_t&                                   i_sgroup );
 
 } // extern "C"
-
 
 #endif // _P9_IO_XBUS_TRAIN_H
