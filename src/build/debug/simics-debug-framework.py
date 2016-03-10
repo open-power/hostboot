@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2011,2016
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -512,22 +512,6 @@ def magic_instruction_callback(user_arg, cpu, arg):
         print 'loading payload from', flash_file, 'to 0x%x' % load_addr
         cmd = 'shell "fcp --force -o0 -R %s:PAYLOAD simicsPayload.ecc; ecc --remove --p8 simicsPayload.ecc simicsPayload"; load-file simicsPayload 0x%x' % (flash_file, load_addr)
         SIM_run_alone( run_command, cmd )
-
-    if arg == 7015:
-        print "Wake up master Thread CORE0 - 7015 start \n";
-
-        # If more than 1 thread, we only want to do
-        # this on 4th hit -- won't worry about it for now.
-        setIar0 = "system_cmp0.cpu0_0_00_0->iar=0x100"
-        SIM_run_alone(run_command, setIar0 )
-
-        # need to disable and then re-enable thread0 to
-        # make it appear to wake back up
-        disable0 = "system_cmp0.cpu0_0_00_0.disable"
-        SIM_run_alone(run_command, disable0 )
-        enable0 =  "system_cmp0.cpu0_0_00_0.enable"
-        SIM_run_alone(run_command, enable0 )
-        print "Master Thread should be awake now \n";
 
     if arg == 7016:
         print "Wake up rest of CORE0 - 7017 start \n";
