@@ -908,8 +908,6 @@ kernel_execute_stop:
 
     ;// Execute stop.
 1:
-    ;// Magic instruction(7015) to allow simics to trigger thread wakeup
-    rlwimi  r27,r27,0,6,23
     ;// When GCC supports 'stop', you can  use it
     .long 0x4C0002E4
 

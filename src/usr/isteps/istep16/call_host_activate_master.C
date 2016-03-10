@@ -87,10 +87,9 @@ void* call_host_activate_master (void *io_pArgs)
                    "Target HUID %.8X",
                     TARGETING::get_huid(l_fapi2_coreTarget));
 
-// @TODO RTC:147553 Enable startDeadmanLoop
-//In the future possibly move default "waitTime" value to SBEIO code
-//          uint64_t waitTime = 10000;
-//          l_errl = SBEIO::startDeadmanLoop(waitTime);
+         //In the future possibly move default "waitTime" value to SBEIO code
+         uint64_t waitTime = 10000;
+         l_errl = SBEIO::startDeadmanLoop(waitTime);
 
         if ( l_errl )
         {
@@ -237,8 +236,7 @@ void* call_host_activate_master (void *io_pArgs)
                    "Call proc_stop_deadman_timer. Target %.8X",
                     TARGETING::get_huid(l_core_target) );
 
-// @TODO RTC:147553 Enable stopDeadmanLoop
-//         l_errl = SBEIO::stopDeadmanLoop();
+        l_errl = SBEIO::stopDeadmanLoop();
 
         if ( l_errl )
         {
