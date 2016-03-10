@@ -43,6 +43,9 @@
 
 extern "C"
 {
+
+    static const uint32_t PPE_MODE = 1;
+
     typedef enum
     {
         STANDARD_MODE = 0
