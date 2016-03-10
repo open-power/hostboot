@@ -86,6 +86,17 @@ extern "C"
         EC23_CHIPLET_ID = 0x37      ///< Core23 chiplet (Quad5, EX11, C1)
     } p9_chiplet_id_t;
 
+    /// P9 Chiplet ID enumeration
+    typedef enum
+    {
+        PPE_EP00_CHIPLET_ID = 0x09,     ///< Quad0
+        PPE_EP01_CHIPLET_ID = 0x0A,     ///< Quad1
+        PPE_EP02_CHIPLET_ID = 0x0B,     ///< Quad2
+        PPE_EP03_CHIPLET_ID = 0x0C,     ///< Quad3
+        PPE_EP04_CHIPLET_ID = 0x0D,     ///< Quad4
+        PPE_EP05_CHIPLET_ID = 0x0E      ///< Quad5
+    } p9_ppe_chiplet_id_t;
+
     /// P9 SCOM port ID enumeration
     typedef enum
     {
@@ -281,7 +292,8 @@ extern "C"
         OB_PSCM_RING_ID = 0x0,      ///< PSCOM
         OB_PERV_RING_ID = 0x1,      ///< PERV
         OB_PBIOA_0_RING_ID = 0x2,   ///< PBIOA_0
-        OB_IOO_0_RING_ID = 0x3      ///< IOO_0
+        OB_IOO_0_RING_ID = 0x3,     ///< IOO_0
+        OB_PPE_RING_ID = 0x4        ///< PPE
     } p9_ob_ring_id_t;
 
     typedef enum
@@ -384,6 +396,15 @@ extern "C"
             inline uint8_t get_port() const
             {
                 return ((iv_addr >> 16) & 0xF);
+            }
+
+            /// @brief Modify the port field from SCOM address
+            /// @retval uint8_t Port field value
+            inline void set_port(const uint8_t i_port)
+            {
+                iv_addr &= 0xFFFFFFFFFFF0FFFFULL;
+                iv_addr |= ((i_port & 0xF) << 16);
+                return;
             }
 
             /// @brief Extract ring field from SCOM address
