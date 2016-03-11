@@ -7,7 +7,7 @@
 <!--                                                                        -->
 <!-- EKB Project                                                            -->
 <!--                                                                        -->
-<!-- COPYRIGHT 2015                                                         -->
+<!-- COPYRIGHT 2015,2016                                                    -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -33,35 +33,6 @@
         <gard>
             <target>TARGET</target>
         </gard>
-    </hwpError>
-    <!-- *********************************************************************** -->
-    <hwpError>
-        <rc>RC_IO_XBUS_TX_ZCAL_ERROR</rc>
-        <description>I/O EDI+ Xbus Zcal Error. Using Nominal Values</description>
-	   <callout>
-            <target>TARGET</target>
-            <priority>MEDIUM</priority>
-        </callout>
-    </hwpError>
-    <!-- *********************************************************************** -->
-    <hwpError>
-        <rc>RC_IO_XBUS_TX_ZCAL_TIMEOUT</rc>
-        <description>I/O EDI+ Xbus Zcal Timeout. Using Nominal Values</description>
-        <callout>
-            <target>TARGET</target>
-            <priority>MEDIUM</priority>
-        </callout>
-    </hwpError>
-    <!-- *********************************************************************** -->
-    <hwpError>
-        <rc>RC_IO_XBUS_TX_ZCAL_OUT_OF_RANGE</rc>
-        <ffdc>ZCAL_P</ffdc>
-        <ffdc>ZCAL_N</ffdc>
-        <description>I/O EDI+ Xbus Zcal Out of Range. Using Max/Min Values Depending on failure.</description>
-        <callout>
-            <target>TARGET</target>
-            <priority>MEDIUM</priority>
-        </callout>
     </hwpError>
     <!-- *********************************************************************** -->
 </hwpErrors>
