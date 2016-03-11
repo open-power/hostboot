@@ -55,6 +55,7 @@ namespace DeviceFW
         IBSCOM,
         HOSTI2C,
         FSI_I2C,
+        SBEFIFOSCOM,
 
         LAST_DRIVER_ACCESS_TYPE
     };
@@ -199,6 +200,12 @@ namespace DeviceFW
     #define DEVICE_FSI_I2C_ADDRESS_OFFSET( i_port, i_engine, i_devAddr, i_offset_len, i_offset)\
         DeviceFW::FSI_I2C, DEVICE_I2C_PARMS(i_port, i_engine, i_devAddr, i_offset_len, i_offset)
 
+    /** Construct the device addressing parameters for the SBE FIFO Scom
+     *  device ops.
+     *  @param[in] i_address - scom address to operate on.
+     */
+    #define DEVICE_SBEFIFOSCOM_ADDRESS(i_address) \
+        DeviceFW::SBEFIFOSCOM, static_cast<uint64_t>((i_address))
 
     /** @class InvalidParameterType
      *  @brief Unused type to cause compiler fails for invalid template types.

@@ -29,7 +29,6 @@
 
 namespace SBEIO
 {
-
     /**
      * @brief Start Deadman loop
      *
@@ -47,6 +46,49 @@ namespace SBEIO
      *
      */
     errlHndl_t stopDeadmanLoop( );
+
+    /**
+     * @brief Get SCOM via SBE FIFO
+     *
+     * @param[in]  i_target  Target to access
+     * @param[in]  i_addr    Requested register address
+     * @param[out] o_data    Returned data
+     *
+     * @return errlHndl_t Error log handle on failure.
+     *
+     */
+    errlHndl_t getFifoScom(TARGETING::Target * i_target,
+                           uint64_t            i_addr,
+                           uint64_t          & o_data);
+    /**
+     * @brief Put SCOM via SBE FIFO
+     *
+     * @param[in]  i_target  Target to access
+     * @param[in]  i_addr    Requested register address
+     * @param[in]  i_data    Data to write
+     *
+     * @return errlHndl_t Error log handle on failure.
+     *
+     */
+    errlHndl_t putFifoScom(TARGETING::Target * i_target,
+                           uint64_t            i_addr,
+                           uint64_t            i_data);
+
+    /**
+     * @brief Put SCOM under mask via SBE FIFO
+     *
+     * @param[in]  i_target  Target to access
+     * @param[in]  i_addr    Requested register address
+     * @param[in]  i_data    Data to write
+     * @param[in]  i_mask    SCOM mask
+     *
+     * @return errlHndl_t Error log handle on failure.
+     *
+     */
+    errlHndl_t putFifoScomUnderMask(TARGETING::Target * i_target,
+                                    uint64_t            i_addr,
+                                    uint64_t            i_data,
+                                    uint64_t            i_mask);
 
 } //end namespace SBEIO
 
