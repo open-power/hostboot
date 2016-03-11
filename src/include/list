@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -30,13 +32,14 @@
 #include <stdint.h>
 #include <new>
 #include <algorithm>
+#include <initializer_list>
 
 namespace std
 {
 
     /**
      * @class ListNode_t
-     * 
+     *
      * @note Non template dependent part of a list node. This code will not
      * get duplicated for each type T
      */
@@ -76,7 +79,7 @@ namespace std
             temp.unlink();              // take temp out of chain
         }
 
-        /** 
+        /**
          * link this node into the i_node chain just before i_node.
          * @param[in] A node in node chain to link this node into
          */
@@ -121,7 +124,7 @@ namespace std
             i_first->iv_prev = nodeP;
             i_last->iv_next = this;
         }
-            
+
         /**
          * Query if node is part of a chain
          */
@@ -133,7 +136,7 @@ namespace std
 
     /**
      * @class ListNodeData_t
-     * 
+     *
      * @note Template dependent part of a list node.
      */
     template <typename T>
@@ -218,9 +221,9 @@ namespace std
              * @return reference to iterator
              */
             __attribute__ ((always_inline)) inline
-            _This  operator++(int) 
+            _This  operator++(int)
             {
-                _This tmp = *this; 
+                _This tmp = *this;
                 iv_node = iv_node->iv_next;
                 return tmp;
             }
@@ -304,7 +307,7 @@ namespace std
              */
             __attribute__ ((always_inline)) inline
             ListConstIterator_t() : iv_node()
-            {} 
+            {}
 
             /**
              * Construct from a const node pointer
@@ -312,7 +315,7 @@ namespace std
              */
             __attribute__ ((always_inline)) inline
             explicit ListConstIterator_t(const ListNode_t* i_ln) : iv_node(i_ln)
-            {} 
+            {}
 
             /**
              * Construct from another const_iterator
@@ -338,7 +341,7 @@ namespace std
              */
             __attribute__ ((always_inline)) inline
             pointer   operator->() const
-            { 
+            {
                 return &static_cast<_Node*>(iv_node)->iv_data;
             }
 
@@ -350,19 +353,19 @@ namespace std
             _This& operator++()
             {
                 iv_node = iv_node->iv_next; return *this;
-            } 
+            }
 
             /**
              * Post Increment
              * @return reference to iterator
              */
             __attribute__ ((always_inline)) inline
-            _This  operator++(int) 
+            _This  operator++(int)
             {
-                _This tmp = *this; 
+                _This tmp = *this;
                 iv_node = iv_node->iv_next;
                 return tmp;
-            } 
+            }
 
             /**
              * Pre decrement
@@ -373,8 +376,8 @@ namespace std
             {
                 iv_node = iv_node->iv_prev;
                 return *this;
-            } 
-            
+            }
+
             /**
              * Post decrement
              * @return reference to iterator
@@ -385,7 +388,7 @@ namespace std
                 _This tmp = *this;
                 iv_node = iv_node->iv_prev;
                 return *this;
-            } 
+            }
 
             /**
              * Comparison
@@ -397,7 +400,7 @@ namespace std
             {
                 return iv_node == i_ln.iv_node;
             }
-            
+
             /**
              * Negative Comparison
              * @param[in] Itertor to compare
@@ -433,8 +436,8 @@ namespace std
 
     /**
      * @class std::list
-     * 
-     * @note 
+     *
+     * @note
      * <p>Does not support:
      * <ul>
      * <li> allocators </li>
@@ -528,6 +531,19 @@ namespace std
                 }
 
                 /**
+                 * ctor with input initialization_list
+                 * @param[in] init_list Initialization list to populate list with
+                 */
+                list(std::initializer_list<T> init_list)
+                {
+                    iv_node.reset();
+                    for (auto&& i: init_list)
+                    {
+                        push_back(i);
+                    }
+                }
+
+                /**
                  * ctor from InputTerator
                  * @param[i] first Iterator to first element to copy
                  * @param[i] last  Iterator to last element + 1 to copy.
@@ -536,7 +552,7 @@ namespace std
                 list ( InputIterator first, InputIterator last)
                 {
                     iv_node.reset();
-                    while(first != last) push_back(*first++);                   
+                    while(first != last) push_back(*first++);
                 }
 
                 /**
@@ -606,7 +622,7 @@ namespace std
                 //const_reverse_iterator rend() const;
 
                 // ---------------- Capacity
-                
+
                 /**
                  * Query for empty container
                  * @return bool, true if size()==0 else false.
@@ -793,7 +809,7 @@ namespace std
                 {
                     while(n--) insert ( pos, ref);
                 }
-                
+
 
                 /**
                  * Insert a copy of a container slice into this container
@@ -889,7 +905,7 @@ namespace std
                  * @param[in] x list object containing the same type of elements as this one.
                  * @param[in] i postion source in list x to move element from
                  * @pre x can be *this if pos != i
-                 * @post Iterators pointing to moved elements are no longer valid. 
+                 * @post Iterators pointing to moved elements are no longer valid.
                  *       this->size() += 1, if (x != *this) x.size() -= 1;
                  */
                 void splice ( iterator pos, list<T>& x, iterator i)

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,8 @@
 #include <cxxtest/TestSuite.H>
 #include <functional>
 #include <vector>
+#include <list>
+#include <initializer_list>
 
 static bool STLFunctionalTest__matches1(int i)
 {
@@ -42,7 +44,7 @@ static bool STLFunctionalTest__matches(int n, int m)
 class STLFunctionalTest : public CxxTest::TestSuite
 {
     public:
-        void testUnaryPtrFun()
+        void test_UnaryPtrFun()
         {
             using std::ptr_fun;
 
@@ -57,7 +59,7 @@ class STLFunctionalTest : public CxxTest::TestSuite
             }
         }
 
-        void testBinaryPtrFun()
+        void test_BinaryPtrFun()
         {
             using std::ptr_fun;
             using std::vector;
@@ -84,6 +86,89 @@ class STLFunctionalTest : public CxxTest::TestSuite
                 }
             }
         }
+
+        void test_InitializerListVectorFun()
+        {
+            using std::vector;
+
+            vector<uint32_t> v {0,1,2,3,4};
+            uint32_t VEC_SIZE = 5;
+
+            TS_TRACE("max size of vector v is %d",v.max_size());
+            TS_TRACE("BEGIN: size of vector v is %d",v.size());
+
+            if(v.size() != VEC_SIZE)
+            {
+                TS_FAIL("Size not equal to expected value expected:%d "
+                        "actual:%d!",
+                        VEC_SIZE,v.size());
+            }
+
+            for(uint32_t i=0;i<VEC_SIZE;i++)
+            {
+                if (v[i] != i)
+                {
+                    TS_FAIL("Vector array index %d is not equal to %d, "
+                            "it is %d",
+                            i,i,v[i]);
+                }
+            }
+
+            // Pop a couple off
+            v.pop_back();
+            v.pop_back();
+
+            if(v.size() != (VEC_SIZE-2))
+            {
+                TS_FAIL("pop_back did not reduce size as expected!");
+            }
+
+            // Add some back
+            v.push_back(100);
+            v.push_back(99);
+
+            if(v.size() != VEC_SIZE)
+            {
+                TS_FAIL("Size not equal to expected value expected:%d "
+                        "actual:%d after pop and push!",
+                        VEC_SIZE,v.size());
+            }
+
+            TS_TRACE("END: size of vector v is %d",v.size());
+        }
+
+        void test_InitializerListFun()
+        {
+            using std::list;
+            std::list<uint32_t> l = {0,1,2,3,4};
+
+            uint32_t LIST_SIZE = 5;
+            if(l.size() != LIST_SIZE)
+            {
+                TS_FAIL("Size not equal to expected value expected:%d "
+                        "actual:%d!",
+                        LIST_SIZE,l.size());
+            }
+
+            for(uint32_t i=0;i<LIST_SIZE;i++)
+            {
+                if (l.front() != i)
+                {
+                    TS_FAIL("Index %d is not equal to %d, "
+                            "it is %d",
+                            i,i,l.front());
+                }
+                l.pop_front();
+            }
+
+            if(l.size() != 0)
+            {
+                TS_FAIL("List size not equal to 0 like it should be! %d",
+                        l.size());
+            }
+
+        }
+
 };
 
 #endif
