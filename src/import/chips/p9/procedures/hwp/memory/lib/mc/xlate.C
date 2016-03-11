@@ -70,6 +70,14 @@ fapi2::ReturnCode mc<TARGET_TYPE_MCS>::setup_xlate_map(const fapi2::Target<TARGE
 
     FAPI_INF("Setting up xlate registers for MCA%d (%d)", mss::pos(i_target), mss::index(i_target));
 
+    // The addressing for the xlt registers is funky. We have a different unit0 address for units 0/2
+    // than we do for 1/3.
+    const uint64_t& l_t0_address = mss::pos(i_target) % 2 ? MCS_0_PORT13_MCP0XLT0 : MCS_0_PORT02_MCP0XLT0;
+    const uint64_t& l_t1_address = mss::pos(i_target) % 2 ? MCS_0_PORT13_MCP0XLT1 : MCS_0_PORT02_MCP0XLT1;
+    const uint64_t& l_t2_address = mss::pos(i_target) % 2 ? MCS_0_PORT13_MCP0XLT2 : MCS_0_PORT02_MCP0XLT2;
+
+    FAPI_DBG("xlate scoms registers 0x%016lx, 0x%016lx, 0x%016lx", l_t0_address, l_t1_address, l_t2_address);
+
     // We enable the DIMM select bit for slot1 if we have two DIMM installed
     l_xlate.writeBit<MCS_PORT13_MCP0XLT0_SLOT1_D_VALUE>(l_dimms.size() == 2);
 
@@ -202,9 +210,9 @@ fapi2::ReturnCode mc<TARGET_TYPE_MCS>::setup_xlate_map(const fapi2::Target<TARGE
     FAPI_DBG("HACK: Cramming 0x%016lx in for MCP0XLT1", l_xlate1);
     FAPI_DBG("HACK: Cramming 0x%016lx in for MCP0XLT2", l_xlate2);
 
-    FAPI_TRY( mss::putScom(i_target.getParent<TARGET_TYPE_MCS>(), MCS_0_PORT02_MCP0XLT0, l_xlate)  );
-    FAPI_TRY( mss::putScom(i_target.getParent<TARGET_TYPE_MCS>(), MCS_0_PORT02_MCP0XLT1, l_xlate1) );
-    FAPI_TRY( mss::putScom(i_target.getParent<TARGET_TYPE_MCS>(), MCS_0_PORT02_MCP0XLT2, l_xlate2) );
+    FAPI_TRY( mss::putScom(i_target.getParent<TARGET_TYPE_MCS>(), l_t0_address, l_xlate)  );
+    FAPI_TRY( mss::putScom(i_target.getParent<TARGET_TYPE_MCS>(), l_t1_address, l_xlate1) );
+    FAPI_TRY( mss::putScom(i_target.getParent<TARGET_TYPE_MCS>(), l_t2_address, l_xlate2) );
 
 fapi_try_exit:
     return fapi2::current_err;
