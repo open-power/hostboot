@@ -28,5 +28,8 @@ MODULE = sbeio
 
 OBJS += sbe_psudd.o
 OBJS += sbe_coreStateControl.o
+OBJS += sbe_fifodd.o
+OBJS += sbe_scomAccess.o
+OBJS += sbe_scomAccessdd.o
 
 include ${ROOTPATH}/config.mk
