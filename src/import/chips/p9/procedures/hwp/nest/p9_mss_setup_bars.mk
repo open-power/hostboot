@@ -23,4 +23,7 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_mss_setup_bars
+lib$(PROCEDURE)_DEPLIBS+=mss
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/memory/lib/)
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/memory/lib/eff_config/)
 $(call BUILD_PROCEDURE)
