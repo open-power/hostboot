@@ -40,46 +40,7 @@
 #include <p9_mss_eff_grouping.H>
 #include <p9_fbc_utils.H>
 #include <map>
-
-///
-/// @brief Gets the dimm size behind a port (MCA or MBA)
-///
-/// For MCA target, the output will be an array of 2 (DRAM ports)
-///      o_size[0] = DIMM size of DRAM port 0
-///            [1] = DIMM size of DRAM port 1
-///
-/// For MBA target, the output will be an array of [2][2]
-///                                          ([DRAM port][DIMM]])
-///     o_size[0][0] = DIMM size of DRAM port 0, DIMM 0
-///           [0][1] = DIMM size of DRAM port 0, DIMM 1
-///           [1][0] = DIMM size of DRAM port 1, DIMM 0
-///           [1][1] = DIMM size of DRAM port 1, DIMM 1
-///
-///
-/// @tparam T               Type of target (MCA or MBA)
-/// @param[in]  i_target    Reference to Processor Chip Target
-/// @param[out] o_size      Memory size behind memory port
-///
-/// @return FAPI2_RC_SUCCESS if success, else error code.
-///
-template< fapi2::TargetType T>
-fapi2::ReturnCode getDimmSize(const fapi2::Target<T>& i_target,
-                              void* o_size)
-{
-    fapi2::ReturnCode l_rc;
-
-    // TODO: RTC 145692
-    // Get the detailed 'eff_dimm_size' interface from Memory team
-    return l_rc;
-#if 0
-    FAPI_TRY(eff_dimm_size(i_target, o_size),
-             "getDimmSize: eff_dimm_size() returns an error, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
-}
+#include <memory_size.H>
 
 ///----------------------------------------------------------------------------
 /// Constant definitions
@@ -87,11 +48,6 @@ fapi_try_exit:
 // ------------------
 // System structure
 // ------------------
-// Cumulus system only
-const uint8_t NUM_DRAM_PORTS_PER_MBA  = 2; // 2 DRAM ports for each MBA
-const uint8_t NUM_MBA_PER_MC_PORT     = 2; // 2 MBAs per DMI
-const uint8_t NUM_MEMBUF_PER_MC_PORT  = 2; // 2 membuf chips per MC port
-
 // MC port position
 const uint8_t MCPORTID_0 = 0x0;
 const uint8_t MCPORTID_1 = 0x1;
@@ -122,9 +78,6 @@ enum GroupAllowed
                  GROUP_6 |
                  GROUP_8,
 };
-
-// Max number of ports allowed to be grouped together.
-const uint8_t MAX_GROUP_ALLOWED = 8;
 
 ///----------------------------------------------------------------------------
 /// struct EffGroupingSysAttrs
@@ -365,10 +318,7 @@ struct EffGroupingMcaAttrs
     uint8_t iv_unitPos = 0;
 
     // Dimm size behind this MCA
-    uint32_t iv_dimmSize = 0;
-
-    // Dimm sizes
-    uint32_t iv_effDimmSize[NUM_DIMMS_PER_DRAM_PORT] = { 0, 0 };
+    uint64_t iv_dimmSize = 0;
 
 };
 
@@ -379,200 +329,21 @@ fapi2::ReturnCode EffGroupingMcaAttrs::getAttrs(
     FAPI_DBG("Entering EffGroupingMcaAttrs::getAttrs");
     fapi2::ReturnCode l_rc;
 
-    // TODO: RTC 145692 ---------------
-    // Temp definitions for unit test
-    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_procTarget =
-        i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
-    uint32_t l_memSizes[NUM_MC_PORTS_PER_PROC][NUM_DIMMS_PER_DRAM_PORT];
-    // End TODO ----------------------------
+    // Get the amount of memory behind this MCA target
+    FAPI_TRY(mss::eff_memory_size(i_target, iv_dimmSize),
+             "Error returned from eff_memory_size, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
 
     // Get the MCA unit position
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, iv_unitPos),
              "Error getting MCA ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
-    // Get the DIMM size behind this MCA
-    FAPI_TRY(getDimmSize(i_target, iv_effDimmSize),
-             "getDimSize() returns error, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    //TODO: RTC 145692 -------------------------------------------
-    // Because getDimmSize() is not yet available from Memory team,
-    // This is to hard-code the DIMM sizes for SOA model:
-    // Begin hard-coded
-    l_rc = FAPI_ATTR_GET(fapi2::ATTR_UNIT_TEST_MCA_MEMORY_SIZES, l_procTarget,
-                         l_memSizes);
-
-    if (l_rc)
-    {
-        FAPI_ERR("Error getting ATTR_UNIT_TEST_MCA_MEMORY_SIZES");
-        return l_rc;
-    }
-
-    // Set the DIMM size (in GB) got from the test attributes
-    iv_effDimmSize[0] = l_memSizes[iv_unitPos][0];
-    iv_effDimmSize[1] = l_memSizes[iv_unitPos][1];
-    // End TODO ------------------------------------------
-
-    // Add up the amount of DIMM behind this MCA
-    // Also display size of dimm for verification
-    for (uint8_t l_dimm = 0; l_dimm < NUM_DIMMS_PER_DRAM_PORT; l_dimm++)
-    {
-        FAPI_INF("MCA %d: DIMM[%d] = %d GB",
-                 iv_unitPos, l_dimm, iv_effDimmSize[l_dimm]);
-        iv_dimmSize += iv_effDimmSize[l_dimm];
-    }
-
     // MCA's total dimm size
-    FAPI_INF("MCA %d: Total DIMM size %d GB", iv_unitPos, iv_dimmSize);
+    FAPI_INF("MCA %u: Total DIMM size %lu GB", iv_unitPos, iv_dimmSize);
 
 fapi_try_exit:
     FAPI_DBG("Exiting EffGroupingMcaAttrs::getAttrs");
-    return fapi2::current_err;
-}
-
-///----------------------------------------------------------------------------
-/// struct EffGroupingMembufAttrs
-///----------------------------------------------------------------------------
-///
-
-/// @struct EffGroupingMembufAttrs
-/// Contains attributes for a Membuf Chip
-///
-struct EffGroupingMembufAttrs
-{
-    ///
-    /// @brief Getting attribute of a membuf chip
-    ///
-    /// Function that reads the membuf target attributes and load their
-    /// values into the struct.
-    ///
-    /// @param[in] i_target Reference to membuf chip target
-    ///
-    /// @return FAPI2_RC_SUCCESS if success, else error code.
-    ///
-    fapi2::ReturnCode getAttrs(
-        const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target);
-
-    uint32_t iv_pos = 0;       // ATTR_POS (Membuf position)
-    uint32_t iv_mcPortPos = 0; // Associated MC port pos derived from iv_pos
-};
-
-
-// See doxygen in struct definition.
-fapi2::ReturnCode EffGroupingMembufAttrs::getAttrs(
-    const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target)
-{
-    FAPI_DBG("Entering EffGroupingMembufAttrs::getAttrs");
-    fapi2::ReturnCode l_rc;
-
-    // Get the membuf chip position
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_POS, i_target, iv_pos),
-             "Error getting ATTR_POS, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    // Assumption is that
-    // Proc pos 0: MC unit-pos 0: Membuf pos 0
-    // Proc pos 0: MC unit-pos 1: Membuf pos 1
-    // Proc pos 0: MC unit-pos 2: Membuf pos 2
-    // Proc pos 0: MC unit-pos 3: Membuf pos 3
-    // Proc pos 0: MC unit-pos 4: Membuf pos 4
-    // Proc pos 0: MC unit-pos 5: Membuf pos 5
-    // Proc pos 0: MC unit-pos 6: Membuf pos 6
-    // Proc pos 0: MC unit-pos 7: Membuf pos 7
-    //
-    // Proc pos 1: MC unit-pos 0: Membuf pos 8
-    // Proc pos 1: MC unit-pos 1: Membuf pos 9
-    // Proc pos 1: MC unit-pos 2: Membuf pos 10
-    // Proc pos 1: MC unit-pos 3: Membuf pos 11
-    // Proc pos 1: MC unit-pos 4: Membuf pos 12
-    // Proc pos 1: MC unit-pos 5: Membuf pos 13
-    // Proc pos 1: MC unit-pos 6: Membuf pos 14
-    // Proc pos 1: MC unit-pos 7: Membuf pos 15
-    // etc.
-    iv_mcPortPos = iv_pos % 8;
-
-    // Display attribute value
-    FAPI_INF("Membuf pos %d, MC port pos %d", iv_pos, iv_mcPortPos);
-
-fapi_try_exit:
-    FAPI_DBG("Exit EffGroupingMembufAttrs::getAttrs");
-    return fapi2::current_err;
-}
-
-///----------------------------------------------------------------------------
-/// struct EffGroupingMbaAttrs
-///----------------------------------------------------------------------------
-///
-/// @struct EffGroupingMbaAttrs
-///
-/// Contains attributes for an MBA Chiplet
-///
-struct EffGroupingMbaAttrs
-{
-    // Constructor
-    EffGroupingMbaAttrs()
-    {
-        memset(iv_effDimmSize, 0, sizeof(iv_effDimmSize));
-    }
-
-    ///
-    /// @brief Getting attribute of an MBA chiplet
-    ///
-    /// Function that reads the MBA target attributes and load their
-    /// values into the struct.
-    ///
-    /// @param[in] i_target Reference to MBA chiplet target
-    ///
-    /// @return FAPI2_RC_SUCCESS if success, else error code.
-    ///
-    fapi2::ReturnCode getAttrs(
-        const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target);
-
-    // Unit Position
-    uint8_t iv_unitPos = 0;
-
-    // Dimm size behind this MBA
-    uint32_t iv_dimmSize = 0;
-
-    // Dimm sizes
-    uint32_t iv_effDimmSize[NUM_DRAM_PORTS_PER_MBA][NUM_DIMMS_PER_DRAM_PORT];
-};
-
-// See doxygen in struct definition.
-fapi2::ReturnCode EffGroupingMbaAttrs::getAttrs(
-    const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target)
-{
-    FAPI_DBG("Entering EffGroupingMbaAttrs::getAttrs");
-    fapi2::ReturnCode l_rc;
-
-    // Get the MBA chiplet position
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, iv_unitPos),
-             "Error getting ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    // Get the DIMM size behind this MBA
-    FAPI_TRY(getDimmSize(i_target, iv_effDimmSize),
-             "getDimSize() returns error, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    // Add up the amount of DIMM behind this MBA
-    // Also display size of port/dimm for verification
-    for (uint8_t l_port = 0; l_port < NUM_DRAM_PORTS_PER_MBA; l_port++)
-    {
-        for (uint8_t l_dimm = 0; l_dimm < NUM_DIMMS_PER_DRAM_PORT; l_dimm++)
-        {
-            FAPI_INF("MBA %d: Iv_effDimmSize[%d][%d] %d GB",
-                     iv_unitPos, l_port, l_dimm, iv_effDimmSize[l_port][l_dimm]);
-            iv_dimmSize += iv_effDimmSize[l_port][l_dimm];
-        }
-    }
-
-    // Display this MBA's total dimm size
-    FAPI_INF("MBA %d: Iv_dimmSize %d GB", iv_unitPos, iv_dimmSize);
-
-fapi_try_exit:
-    FAPI_DBG("Exiting EffGroupingMbaAttrs::getAttrs");
     return fapi2::current_err;
 }
 
@@ -605,9 +376,6 @@ struct EffGroupingDmiAttrs
     // Dimm size behind this DMI
     uint32_t iv_dimmSize = 0;
 
-    // MBA memory sizes
-    uint32_t iv_mbaSize[NUM_MBA_PER_MC_PORT] = {0, 0};
-
     // The membuf chip associated with this DMI
     // (for deconfiguring if cannot group)
     fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> iv_membuf;
@@ -620,19 +388,28 @@ fapi2::ReturnCode EffGroupingDmiAttrs::getAttrs(
     FAPI_DBG("Entering EffGroupingDmiAttrs::getAttrs");
     fapi2::ReturnCode l_rc;
 
+    // Get the amount of memory behind this DMI target
+#if 0
+    // Note: For Cumulus, needs Memory team to support the function
+    //       to be called on DMI targets.
+    FAPI_TRY(mss::eff_memory_size(i_target, iv_dimmSize),
+             "Error returned from eff_memory_size, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
+#endif
+
     // Get the membufs attached to this DMI
+    // Note: For Cumulus, needs to have getAssociatedMembufs() supported
     //auto l_associatedMembufs = i_target.getAssociatedMembufs();
     fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_membuf1;
     fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_membuf2;
     auto l_associatedMembufs = {l_membuf1, l_membuf2};
-
 
     // Get the DMI unit position
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, iv_unitPos),
              "Error getting DMI ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
-    // For each membuf, get the mem size of its MBAs
+    // Set the membuf target associated with this DMI
     for (auto membuf_itr = l_associatedMembufs.begin();
          membuf_itr != l_associatedMembufs.end();
          ++membuf_itr)
@@ -641,29 +418,6 @@ fapi2::ReturnCode EffGroupingDmiAttrs::getAttrs(
 
         // Set the membuf associated with this DMI
         iv_membuf = l_membuf;
-
-        // Get the membuf attributes
-        EffGroupingMembufAttrs l_memBufAttrs;
-        FAPI_TRY(l_memBufAttrs.getAttrs(l_membuf),
-                 "l_memBufAttrs.getAttrs() returns error, l_rc 0x%.8X",
-                 (uint64_t)fapi2::current_err);
-
-        // Get this membuf MBAs
-        auto l_mbaChiplets = l_membuf.getChildren<fapi2::TARGET_TYPE_MBA>();
-
-        // Get mem size behind the MBAs
-        for (auto l_mba : l_mbaChiplets)
-        {
-            // Get the MBA attributes
-            EffGroupingMbaAttrs l_mbaAttrs;
-            FAPI_TRY(l_mbaAttrs.getAttrs(l_mba),
-                     "getAttrs() for MBA returns "
-                     "error, l_rc 0x%.8X", (uint64_t)fapi2::current_err);
-
-            // Add MBA dimm size to this DMI's iv_dimmSize
-            iv_dimmSize += l_mbaAttrs.iv_dimmSize;
-            iv_mbaSize[l_mbaAttrs.iv_unitPos] = l_mbaAttrs.iv_dimmSize;
-        }
     }
 
     // Display this DMI's attribute info
@@ -756,7 +510,6 @@ struct EffGroupingMemInfo
     EffGroupingMemInfo()
     {
         memset(iv_portSize, 0, sizeof(iv_portSize));
-        memset(iv_mbaSize, 0, sizeof(iv_mbaSize));
     }
 
     ///
@@ -774,9 +527,6 @@ struct EffGroupingMemInfo
 
     // Memory sizes behind MC ports
     uint32_t iv_portSize[NUM_MC_PORTS_PER_PROC];
-
-    // MBA memory sizes
-    uint32_t iv_mbaSize[NUM_MC_PORTS_PER_PROC][NUM_MBA_PER_MC_PORT];
 
 };
 
@@ -830,9 +580,6 @@ fapi2::ReturnCode EffGroupingMemInfo::getMemInfo (
 
                 // Fill in memory info
                 iv_portSize[l_dmiAttrs.iv_unitPos] = l_dmiAttrs.iv_dimmSize;
-                memcpy(&iv_mbaSize[l_dmiAttrs.iv_unitPos][0],
-                       &l_dmiAttrs.iv_mbaSize[0],
-                       sizeof(l_dmiAttrs.iv_mbaSize));
             }
         }
         else
@@ -2282,7 +2029,10 @@ void grouping_calcAltMemory(EffGroupingData& io_groupData)
         if ( !isPowerOf2(io_groupData.iv_data[pos][GROUP_SIZE]) )
         {
 
-            // TODO: How to determine 2nd memory hole?
+            // Note:
+            // The 2nd memory hole was intended for use with 12Gb DRAM parts,
+            // which we do not have to support - so it will not be used in Nimbus.
+
             // Memsize is not power of 2, needs ALT bar definition
             FAPI_INF("Group %u needs alt bars definition, group size %u GB",
                      pos, io_groupData.iv_data[pos][GROUP_SIZE]);
@@ -2424,7 +2174,9 @@ fapi2::ReturnCode grouping_calcMirrorMemory(
         {
             if (pos == 0)
             {
-                //TODO: Check for 2nd memory hole
+                // Note:
+                // The 2nd memory hole was intended for use with 12Gb DRAM parts,
+                // which we do not have to support - so it will not be used in Nimbus.
                 io_groupData.iv_data[pos][BASE_ADDR] = memBaseAddr_GB;
 
                 if (io_groupData.iv_data[pos][ALT_VALID(0)])

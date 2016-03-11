@@ -37,6 +37,7 @@
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 #include <map>
+#include <memory_size.H>
 
 ///----------------------------------------------------------------------------
 /// Constant definitions
@@ -262,7 +263,6 @@ fapi2::ReturnCode validateGroupData(
 {
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
-    uint32_t l_mcsSize[MAX_MCS_PER_PROC];
     uint8_t l_portFound[NUM_MC_PORTS_PER_PROC];
 
     // ------------------------------------------------------------
@@ -273,41 +273,33 @@ fapi2::ReturnCode validateGroupData(
     // ------------------------------------------------------------
 
     // Initialize local arrays
-    memset(l_mcsSize, 0, sizeof(l_mcsSize));
     memset(l_portFound, 0, sizeof(l_portFound));
-
-    //TODO: Use temporary dimm sizes from attribute --------------------------
-    // Because getDimmSize() is not yet available from Memory team,
-    // Use temporary DIMM sizes set in attribute files
-    // Begin workaround
-    uint32_t l_memSizes[NUM_MC_PORTS_PER_PROC][NUM_DIMMS_PER_DRAM_PORT];
-
-    for (auto l_mcs : i_mcTargets)
-    {
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_procChip;
-        l_procChip = l_mcs.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
-        l_rc = FAPI_ATTR_GET(fapi2::ATTR_UNIT_TEST_MCA_MEMORY_SIZES, l_procChip,
-                             l_memSizes);
-
-        if (l_rc)
-        {
-            FAPI_ERR("Error getting ATTR_UNIT_TEST_MCA_MEMORY_SIZES");
-            return l_rc;
-        }
-
-        break;
-    }
-
-    l_mcsSize[0] = l_memSizes[0][0] + l_memSizes[0][1] + l_memSizes[1][0] + l_memSizes[1][1];
-    l_mcsSize[1] = l_memSizes[2][0] + l_memSizes[2][1] + l_memSizes[3][0] + l_memSizes[3][1];
-    l_mcsSize[2] = l_memSizes[4][0] + l_memSizes[4][1] + l_memSizes[5][0] + l_memSizes[5][1];
-    l_mcsSize[3] = l_memSizes[6][0] + l_memSizes[6][1] + l_memSizes[7][0] + l_memSizes[7][1];
-
-    //  End workaround ----------------------------------
 
     // Loop thru each MCS
     for (auto l_mcs : i_mcTargets)
     {
+        // Figure out the amount of memory behind this MCS
+        // by adding up all memory from its MCA ports
+        auto l_mcaChiplets = l_mcs.getChildren<fapi2::TARGET_TYPE_MCA>();
+        uint64_t l_mcsSize = 0;
+        uint64_t l_mcaSize = 0;
+
+        for (auto l_mca : l_mcaChiplets)
+        {
+            uint8_t l_mcaPos = 0;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_mca, l_mcaPos),
+                     "Error getting ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
+                     (uint64_t)fapi2::current_err);
+
+            // Get the amount of memory behind this MCA target
+            FAPI_TRY(mss::eff_memory_size(l_mca, l_mcaSize),
+                     "Error returned from eff_memory_size, l_rc 0x%.8X",
+                     (uint64_t)fapi2::current_err);
+
+            FAPI_INF("MCA %u: Total DIMM size %lu GB", l_mcaPos, l_mcaSize);
+            l_mcsSize += l_mcaSize;
+        }
+
         // Get this MCS unit position
         uint8_t l_unitPos = 0;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_mcs, l_unitPos),
@@ -347,14 +339,14 @@ fapi2::ReturnCode validateGroupData(
 
         // Assert if MCS specified in Group data doesn't agree
         // with the amount gets from Memory interface.
-        FAPI_ASSERT(l_mcsSizeGroupData == l_mcsSize[l_unitPos],
+        FAPI_ASSERT(l_mcsSizeGroupData == l_mcsSize,
                     fapi2::MSS_SETUP_BARS_MCS_MEMSIZE_DISCREPENCY()
                     .set_TARGET(l_mcs)
                     .set_MEMSIZE_GROUP_DATA(l_mcsSizeGroupData)
-                    .set_MEMSIZE_REPORTED(l_mcsSize[l_unitPos]),
+                    .set_MEMSIZE_REPORTED(l_mcsSize),
                     "Error: MCS %u memory discrepancy: Group data size %u, "
                     "Current memory reported %u",
-                    l_unitPos, l_mcsSizeGroupData, l_mcsSize[l_unitPos]);
+                    l_unitPos, l_mcsSizeGroupData, l_mcsSize);
 
     } // MCS loop
 
@@ -382,7 +374,7 @@ fapi2::ReturnCode validateGroupData(
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
 
-    // TODO: Add code for Cumulus (MI) here.
+    // Note: Add code for Cumulus (MI) here.
 
     FAPI_DBG("Exit");
     return fapi2::current_err;
