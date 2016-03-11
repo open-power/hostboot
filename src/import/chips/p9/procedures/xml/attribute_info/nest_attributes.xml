@@ -867,24 +867,4 @@
 </attribute>
 <!-- ********************************************************************* -->
 
-<!-- ********************************************************************* -->
-<!-- TODO: RTC 145692
-     Temporary attributes used for p9_mss_eff_grouping test cases
-     These attributes need to be removed and test cases need to use
-     (TBD) attributes that specify the DIMM sizes used to calculate the
-     result of getDimmSize() function called in p9_mss_eff_grouping -->
-<attribute>
-  <id>ATTR_UNIT_TEST_MCA_MEMORY_SIZES</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description> The memory sizes behind the MCAs used for p9_mss_eff_grouping
-                test case.
-                Array [Port][DIMM] where num of ports = 8, num of dimms = 2
-  </description>
-  <valueType>uint32</valueType>
-  <array>8,2</array>
-  <writeable/>
-  <persistRuntime/>
-</attribute>
-<!-- ********************************************************************* -->
-
 </attributes>
