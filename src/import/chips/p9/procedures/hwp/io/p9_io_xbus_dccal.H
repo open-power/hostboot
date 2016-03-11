@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,8 @@
 
 
 typedef fapi2::ReturnCode (*p9_io_xbus_dccal_FP_t)
-(const fapi2::Target < fapi2::TARGET_TYPE_XBUS>&);
+( const fapi2::Target < fapi2::TARGET_TYPE_XBUS>&,
+  const uint8_t& );
 
 extern "C"
 {
@@ -50,7 +51,9 @@ extern "C"
      * @retval ReturnCode
      */
     fapi2::ReturnCode
-    p9_io_xbus_dccal(const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target);
+    p9_io_xbus_dccal(
+        const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target,
+        const uint8_t&                                   i_group );
 
 } // extern "C"
 
