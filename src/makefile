@@ -152,6 +152,7 @@ EXTENDED_MODULES += establish_system_smp
 EXTENDED_MODULES += occ
 EXTENDED_MODULES += nest_chiplets
 EXTENDED_MODULES += $(if $(CONFIG_VPO_COMPILE),,start_payload)
+EXTENDED_MODULES += $(if $(CONFIG_VPO_COMPILE),,load_payload)
 EXTENDED_MODULES += thread_activate
 EXTENDED_MODULES += slave_sbe
 EXTENDED_MODULES += attn

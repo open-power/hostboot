@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2011,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -51,6 +51,7 @@ SUBDIRS	+= occ.d
 SUBDIRS	+= tod_init.d
 SUBDIRS	+= nest_chiplets.d
 SUBDIRS	+= start_payload.d
+SUBDIRS += load_payload.d
 SUBDIRS	+= thread_activate.d
 SUBDIRS	+= slave_sbe.d
 SUBDIRS	+= pstates.d
