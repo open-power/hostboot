@@ -1,0 +1,127 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/error_info/p9_ram_errors.xml $        -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2016                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Error definitions for p9 ram procedures                                --> 
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_SPR_NAME_MAP_INIT_ERR</rc>
+    <description>
+      SPR name map is not empty while try to initialize
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_SPR_INVALID_RW_MODE_ACCESS_ERR</rc>
+    <description>
+      Illegal SPR read/write mode access
+    </description>
+    <ffdc>REGNAME</ffdc>
+    <ffdc>RWFLAG</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_SPR_INVALID_NAME_ACCESS_ERR</rc>
+    <description>
+      Illegal SPR name access
+    </description>
+    <ffdc>REGNAME</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_RAM_NOT_SETUP_ERR</rc>
+    <description>
+      RAM is not setup as active before doing ram or cleanup
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_RAM_THREAD_INACTIVE_ERR</rc>
+    <description>
+      The thread to perform ramming is not active
+    </description>
+    <ffdc>THREAD</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_RAM_STATUS_IN_RECOVERY_ERR</rc>
+    <description>
+      Attempt to perform ramming during recovery
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_RAM_STATUS_EXCEPTION_ERR</rc>
+    <description>
+      Exception or interrupt happened during ramming
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_RAM_STATUS_POLL_THRESHOLD_ERR</rc>
+    <description>
+      Polling for ram done reached threshold
+    </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_RAM_INVALID_REG_TYPE_ACCESS_ERR</rc>
+    <description>
+      Illegal reg type access
+    </description>
+    <ffdc>REGTYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>
+
