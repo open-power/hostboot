@@ -112,6 +112,97 @@
     <ffdc>PROGRAM_LENGTH</ffdc>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_APB_INVALID_ADDRESS</rc>
+    <description>PHY APB interface is reporting an invalid address was read or written</description>
+    <ffdc>PORT_POSITION</ffdc>
+    <callout>
+      <target>TARGET_IN_ERROR</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_APB_WR_PAR_ERR</rc>
+    <description>PHY APB interface is reporting a read/write parity error</description>
+    <ffdc>PORT_POSITION</ffdc>
+    <callout>
+      <target>TARGET_IN_ERROR</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_FATAL_FSM_PHYTOP</rc>
+    <description>Indicates a non-recoverable FSM state checker error in PHYTOP logic</description>
+    <ffdc>PORT_POSITION</ffdc>
+    <callout>
+      <target>TARGET_IN_ERROR</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_FATAL_PARITY_PHYTOP</rc>
+    <description>Indicates a non-recoverable parity error in PHYTOP logic</description>
+    <ffdc>PORT_POSITION</ffdc>
+    <callout>
+      <target>TARGET_IN_ERROR</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_FSM_PHYTOP</rc>
+    <description>Indicates a recoverable FSM state checker error in PHYTOP logic</description>
+    <ffdc>PORT_POSITION</ffdc>
+    <callout>
+      <target>TARGET_IN_ERROR</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_PARITY_PHYTOP</rc>
+    <description>Indicates a recoverable register parity error in PHYTOP logic</description>
+    <ffdc>PORT_POSITION</ffdc>
+    <callout>
+      <target>TARGET_IN_ERROR</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_FATAL_ADR52_MASTER</rc>
+    <description>Indicates a non-recoverable register parity error in ADR52 master side logic</description>
+    <ffdc>PORT_POSITION</ffdc>
+    <callout>
+      <target>TARGET_IN_ERROR</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_FATAL_ADR52_SLAVE</rc>
+    <description>Indicates a non-recoverable register parity error in ADR52 slave side logic</description>
+    <ffdc>PORT_POSITION</ffdc>
+    <callout>
+      <target>TARGET_IN_ERROR</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_FSM_DP16</rc>
+    <description>Indicates a recoverable FSM state checker error in a DP16</description>
+    <ffdc>PORT_POSITION</ffdc>
+    <ffdc>DP16_POSITION</ffdc>
+    <callout>
+      <target>TARGET_IN_ERROR</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
 </hwpErrors>
 
 
