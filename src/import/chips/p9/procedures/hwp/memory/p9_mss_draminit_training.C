@@ -134,6 +134,10 @@ extern "C"
             FAPI_TRY( mss::putScom(p, MCA_DDRPHY_PC_INIT_CAL_ERROR_P0, 0) );
             FAPI_TRY( mss::putScom(p, MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0, 0) );
 
+            // Disable port fails as it doesn't appear the MC handles initial cal timeouts
+            // correctly (cal_length.) BRS, see conversation with Brad Michael
+            FAPI_TRY( mss::change_port_fail_disable(p, mss::ON ) );
+
             // The following registers must be configured to the correct operating environment:
 
             // Unclear, can probably be 0's for sim BRS

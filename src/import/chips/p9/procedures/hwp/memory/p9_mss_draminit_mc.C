@@ -98,6 +98,9 @@ extern "C"
             // set it low here kind of like belt-and-suspenders. BRS
             FAPI_TRY( mss::change_addr_mux_sel(p, mss::LOW) );
 
+            // Re-enable port fails. Turned off in draminit_training
+            FAPI_TRY( mss::change_port_fail_disable(p, mss::OFF ) );
+
             // Step Two.1: Check RCD protect time on RDIMM and LRDIMM
             // Step Two.2: Enable address inversion on each MBA for ALL CARDS
 
