@@ -1515,8 +1515,9 @@ sub config_project
 # sub config_resolve_level_dep
 #
 # Resolves dependencies for patches by parsing the commit messages for the
-# depends-on tag. If a patch is dependent on a patch not already in the level,
-# the patch is added.
+# depends-on tag and checking if there are any open parents of a commit.
+# If a patch is dependent on a patch not already in the level, the patch is
+# added.
 #
 # @param[in] - level name
 # @param[in] - Array of patches to process.
@@ -1568,6 +1569,27 @@ sub config_resolve_level_dep
         my $patchInfo = gerrit_query_commit($patch);
         my @commitMsgArray = split(/\\n/,$patchInfo->{commitMessage});
         print Dumper @commitMsgArray if $debug;
+
+        # Check for OPEN parent
+        my $commit_info = gerrit_query_commit($patch);
+        my $parent_commit = $commit_info->{currentPatchSet}->{parents}[0];
+        my $parent_info = gerrit_query_commit($parent_commit);
+        if ($parent_info->{status} eq "NEW")
+        {
+            my $parent_id = $parent_info->{id};
+            # Add dependency if dependency is not already in base release
+            if(!git_log_changeId($base, $parent_id))
+            {
+                print "Adding forced dependency $patch:$parent_id\n" if $debug;
+                config_add_dep($level, $patch, $parent_id);
+            }
+
+            # Add dependent patch if not already added to level
+            if (!exists($level_patches{$parent_id}) )
+            {
+                push @patches, $parent_id;
+            }
+        }
 
         # Search commit message for dependencies
         foreach my $line (@commitMsgArray)
@@ -1812,9 +1834,21 @@ sub gerrit_query_commit
                                     "branch:".$globals{"branch"});
     foreach my $result (@{$query_result})
     {
-        if ($result->{id} eq $commit)
+        if ($result->{id} eq $commit  ||
+            $result->{currentPatchSet}->{revision} =~ m/$commit/)
         {
             return $result;
+        }
+        else
+        {
+            # If all patchsets queried, search all of them for the commit
+            foreach my $patchset (@{$result->{patchSets}})
+            {
+                if ($patchset->{revision} =~ m/$commit/)
+                {
+                    return $result;
+                }
+            }
         }
     }
 
