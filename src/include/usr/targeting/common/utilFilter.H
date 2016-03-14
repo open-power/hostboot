@@ -183,6 +183,26 @@ void getChildAffinityTargetsByState ( TARGETING::TargetHandleList& o_vector,
            ResourceState i_state );
 
 /**
+ * @brief Given an input target, finds all the targets linked to it via a
+ *   PERVASIVE_CHILD relationship and writes them to the output vector.
+ *   The class, type, and resource state further filter the set of results.
+ *
+ * @parm[out] o_vector, reference to vector of target pointers
+ * @parm[in]  i_target, source target to search from
+ * @parm[in]  i_class, class of the targets to be obtained
+ * @parm[in]  i_type, type of the targets to be obtained
+ * @parm[in]  i_state, specifies state the target should be in
+ *
+ * @return N/A
+ */
+void getPervasiveChildTargetsByState (
+          TARGETING::TargetHandleList& o_vector,
+    const Target*                      i_target,
+          CLASS                        i_class,
+          TYPE                         i_type,
+          ResourceState                i_state );
+
+/**
  * @brief Populate the o_vector with target object pointers which are
  *        affinity children of the input target
  *
@@ -221,6 +241,25 @@ void getChildAffinityTargets ( TARGETING::TargetHandleList& o_vector,
 void getParentAffinityTargetsByState ( TARGETING::TargetHandleList& o_vector,
            const Target * i_target, CLASS i_class, TYPE i_type,
            ResourceState i_state );
+/**
+ * @brief Given an input target, finds all the targets linked to it via a
+ *   PARENT_PERVASIVE relationship and writes them to the output vector.
+ *   The class, type, and resource state further filter the set of results.
+ *
+ * @parm[out] o_vector, reference to vector of target pointers
+ * @parm[in]  i_target, source target to search from
+ * @parm[in]  i_class, class of the targets to be obtained
+ * @parm[in]  i_type, type of the targets to be obtained
+ * @parm[in]  i_state, specifies state the target should be in
+ *
+ * @return N/A
+ */
+void getParentPervasiveTargetsByState (
+          TARGETING::TargetHandleList& o_vector,
+    const Target*                      i_target,
+          CLASS                        i_class,
+          TYPE                         i_type,
+          ResourceState                i_state);
 
 /**
  * @brief Populate the o_vector with target object pointers which are

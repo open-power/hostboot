@@ -456,11 +456,24 @@ inline Target<T> Target<K, V>::getParent(void) const
 
     TARGETING::TYPE requiredPType = fapi2::convertFapi2TypeToTargeting(T);
 
-    TARGETING::getParentAffinityTargetsByState(l_parentList,
-                                    static_cast<TARGETING::Target*>(this->get()),
-                                    TARGETING::CLASS_NA,
-                                    requiredPType,
-                                    TARGETING::UTIL_FILTER_ALL);
+    if(T == fapi2::TARGET_TYPE_PERV)
+    {
+        TARGETING::getParentPervasiveTargetsByState(
+            l_parentList,
+            static_cast<TARGETING::Target*>(this->get()),
+            TARGETING::CLASS_NA,
+            requiredPType,
+            TARGETING::UTIL_FILTER_ALL);
+    }
+    else
+    {
+        TARGETING::getParentAffinityTargetsByState(
+            l_parentList,
+            static_cast<TARGETING::Target*>(this->get()),
+            TARGETING::CLASS_NA,
+            requiredPType,
+            TARGETING::UTIL_FILTER_ALL);
+    }
 
     assert(l_parentList.size() == 1, "Found %d parents of the same type. Target HUID %x , \
           looking for parents of type %x", l_parentList.size(), TARGETING::get_huid(this->get()) , requiredPType);
@@ -642,22 +655,43 @@ FAPI_DBG(ENTER_MRK "getChildren. Type 0x%08x State:0x%08x", T, i_state);
     TARGETING::TargetHandleList l_childList;
     bool l_functional = (i_state & fapi2::TARGET_STATE_FUNCTIONAL)? true:false;
 
-
     if(!l_functional)
     {
-        TARGETING::getChildAffinityTargetsByState(l_childList,
+        if(K == fapi2::TARGET_TYPE_PERV)
+        {
+            TARGETING::getPervasiveChildTargetsByState(l_childList,
                           static_cast<TARGETING::Target*>(this->get()),
                           TARGETING::CLASS_NA,
                           l_type,
                           TARGETING::UTIL_FILTER_ALL);
+        }
+        else
+        {
+            TARGETING::getChildAffinityTargetsByState(l_childList,
+                          static_cast<TARGETING::Target*>(this->get()),
+                          TARGETING::CLASS_NA,
+                          l_type,
+                          TARGETING::UTIL_FILTER_ALL);
+        }
     }
     else
     {
-        TARGETING::getChildAffinityTargetsByState(l_childList,
+        if(K == fapi2::TARGET_TYPE_PERV)
+        {
+            TARGETING::getPervasiveChildTargetsByState(l_childList,
                           static_cast<TARGETING::Target*>(this->get()),
                           TARGETING::CLASS_NA,
                           l_type,
                           TARGETING::UTIL_FILTER_FUNCTIONAL);
+        }
+        else
+        {
+             TARGETING::getChildAffinityTargetsByState(l_childList,
+                          static_cast<TARGETING::Target*>(this->get()),
+                          TARGETING::CLASS_NA,
+                          l_type,
+                          TARGETING::UTIL_FILTER_FUNCTIONAL);
+        }
     }
 
     FAPI_DBG("getChildren: l_functional 0x%.8X, l_type = 0x%.8X, ChipUnitId 0x%.8X",

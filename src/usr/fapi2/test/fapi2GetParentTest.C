@@ -34,7 +34,26 @@ using namespace fapi2;
 namespace fapi2
 {
 
-//@TODO RTC:148577 need to add tests to get the PERV parent of targets
+/**
+ *  @brief Helper to get the parent pervasive of the given target
+ *
+ *  @tparam K Input target's FAPI2 type
+ *  @tparam V Platform target handle type
+ *
+ *  @param[in] i_pTarget Targeting target
+ *
+ *  @return Platform target handle giving the pervasive of the input target
+ *  @retval NULL No parent found
+ *  @retval !NULL Parent found, equal to the retval
+ */
+template< TargetType K, typename V = plat_target_handle_t >
+inline V getPervasiveParent(V i_pTarget)
+{
+    Target<K,V> fapi2_target(i_pTarget);
+    return static_cast<V>(
+        fapi2_target.template getParent<TARGET_TYPE_PERV>());
+}
+
 //******************************************************************************
 // fapi2GetParentTest
 //******************************************************************************
@@ -944,6 +963,119 @@ errlHndl_t fapi2GetParentTest()
             errlCommit(l_err,HWPF_COMP_ID);
             TS_FAIL( "fapi2TargetTest::UnAble to find SBE's PROC parent!");
             numFails++;
+        }
+
+        // Check units which have a pervasive parent
+
+        static struct pervasiveParentTestRec {
+
+            // Source unit from which to find parent pervasive
+            TARGETING::Target* pTarget;
+
+            // Lambda function taking a unit target and returning its
+            // parent pervasive target (if any)
+            TARGETING::Target* (*getParent)(TARGETING::Target* i_pTarget);
+
+        } pervasiveParentTests [] = {
+
+            {targeting_targets[MY_EQ],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_EQ>(i_pTarget); }},
+            {targeting_targets[MY_CORE],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_CORE>(i_pTarget); }},
+            {targeting_targets[MY_MCS],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_MCS>(i_pTarget); }},
+            {targeting_targets[MY_MCA],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_MCA>(i_pTarget); }},
+            {targeting_targets[MY_MCBIST],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_MCBIST>(i_pTarget);}},
+            {targeting_targets[MY_PEC],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_PEC>(i_pTarget); }},
+            {targeting_targets[MY_PHB],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_PHB>(i_pTarget); }},
+            {targeting_targets[MY_XBUS],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_XBUS>(i_pTarget); }},
+            {targeting_targets[MY_OBUS],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_OBUS>(i_pTarget); }},
+            {targeting_targets[MY_NV],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_NV>(i_pTarget); }},
+            {targeting_targets[MY_CAPP],
+             [](TARGETING::Target* i_pTarget)
+                 {return getPervasiveParent<TARGET_TYPE_CAPP>(i_pTarget); }},
+        };
+
+        // Test each type of target that can have exactly one pervasive parent
+        for(const pervasiveParentTestRec& pervasiveParentTest
+                : pervasiveParentTests)
+        {
+            numTests++;
+            l_tempTargetingParent = pervasiveParentTest.getParent(
+                pervasiveParentTest.pTarget);
+
+            // Result must be a non-NULL target of pervasive type, and its
+            // parent must be the same proc as the other tests above
+            TARGETING::Target* pPervasiveParent = NULL;
+            if(    l_tempTargetingParent
+               && (   l_tempTargetingParent->getAttr<TARGETING::ATTR_TYPE>()
+                   == TARGETING::TYPE_PERV))
+            {
+                Target<TARGET_TYPE_PERV> fapi2_pervTarg(l_tempTargetingParent);
+                pPervasiveParent = static_cast<TARGETING::Target*>(
+                    fapi2_pervTarg.getParent<TARGET_TYPE_PROC_CHIP>());
+            }
+
+            // If the parent of the target under test was NULL, or it was
+            // not a pervasive, or if the parent of the pervasive was NULL
+            // or was not the processor, fail the test
+            if(TARGETING::get_huid(l_nimbusProc) !=
+               TARGETING::get_huid(pPervasiveParent))
+            {
+                TARGETING::ATTR_CHIP_UNIT_type instance = 0;
+                TARGETING::ATTR_TYPE_type type = TARGETING::TYPE_NA;
+                pervasiveParentTest.pTarget->
+                    tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(instance);
+                pervasiveParentTest.pTarget->
+                    tryGetAttr<TARGETING::ATTR_TYPE>(type);
+
+                /*@
+                * @errortype         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                * @moduleid          fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
+                * @reasoncode        fapi2::RC_UNIT_NO_PERV_FOUND
+                * @userdata1[0:31]   Actual PROC HUID
+                * @userdata1[32:63]  Actual PERV HUID
+                * @userdata2[0:31]   Source unit's "chip unit"
+                * @userdata2[32:63]  Source unit's "targeting type"
+                * @devdesc           Could not find the parent PERV of this
+                *                    unit target or the pervasive did not
+                *                    map to expected PROC
+                */
+                l_err = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
+                    fapi2::RC_UNIT_NO_PERV_FOUND,
+                    TWO_UINT32_TO_UINT64(
+                        TO_UINT32(
+                            TARGETING::get_huid(pPervasiveParent)),
+                        TO_UINT32(
+                            TARGETING::get_huid(l_tempTargetingParent))),
+                    TWO_UINT32_TO_UINT64(
+                        TO_UINT32(instance),
+                        TO_UINT32(type)),
+                    true/*SW Error*/);
+
+                errlCommit(l_err,HWPF_COMP_ID);
+                TS_FAIL("fapi2TargetTest::Unable to find unit's pervasive!");
+                numFails++;
+            }
         }
 
     }while(0);

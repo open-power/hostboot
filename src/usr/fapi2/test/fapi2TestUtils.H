@@ -63,6 +63,51 @@ enum{
     NUM_TARGETS
 };
 
+/**
+ *  @brief Number of children of given type that applicable pervasive has
+ */
+enum PERVASIVE_CHILDREN {
+    PERV_EQ_CHILDREN       = 1,
+    PERV_CORE_CHILDREN     = 1,
+    PERV_XBUS_CHILDREN     = 2,
+    PERV_OBUS_CHILDREN     = 1,
+    PERV_CAPP_CHILDREN     = 1,
+    PERV_NV_CHILDREN       = 2,
+    PERV_MCBIST_CHILDREN   = 1,
+    PERV_MCS_CHILDREN      = 2,
+    PERV_MCA_CHILDREN      = 4,
+    PERV_PEC_CHILDREN      = 1,
+    PERV_PEC0_PHB_CHILDREN = 1,
+    PERV_PEC1_PHB_CHILDREN = 2,
+    PERV_PEC2_PHB_CHILDREN = 3,
+};
+
+/**
+ *  @brief Unit ranges for pervasive function
+ *
+ *  @par Detailed Description:
+ *      Maps pervasive target with chip unit X to one or more unit types.  For
+ *      example, a pervasive chip unit of 18 maps to EQ type because
+ *      EQ_LOW <= X <= EQ_HIGH .
+ */
+enum PERVASIVE_RANGE {
+    EQ_LOW            = 16,
+    EQ_HIGH           = 21,
+    CORE_LOW          = 32,
+    CORE_HIGH         = 55,
+    XBUS_RANGE        = 6,
+    OBUS_LOW          = 9,
+    OBUS_HIGH         = 12,
+    CAPP0_RANGE       = 2,
+    CAPP1_RANGE       = 4,
+    NV_RANGE          = 5,
+    MC_LOW            = 7,
+    MC_HIGH           = 8,
+    PEC_LOW           = 13,
+    PEC_MID           = 14,
+    PEC_HIGH          = 15,
+};
+
 ///
 /// @brief Generates a list of platform targets of all differnt types.
 ///        This comes in handy when testing out fapi2 target interfaces
