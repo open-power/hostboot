@@ -42,6 +42,7 @@
 #include <hwas/common/hwasCommon.H>
 #include <hwas/common/hwas_reasoncodes.H>
 #include <hwas/hwasPlat.H>
+#include <vpd/vpd_if.H>
 
 namespace ISTEP_06
 {
@@ -74,6 +75,16 @@ void* host_discover_targets( void *io_pArgs )
 
         l_err = HWAS::discoverTargets();
     }
+
+#if (defined(CONFIG_MEMVPD_READ_FROM_HW)&&defined(CONFIG_MEMVPD_READ_FROM_PNOR))
+    // Now that all targets have completed presence detect and vpd access,
+    // invalidate PNOR::CENTAUR_VPD sections where all the targets sharing a
+    // VPD_REC_NUM are invalid.
+    if (NULL == l_err) //discoverTargets worked
+    {
+        l_err = VPD::validateSharedPnorCache();
+    }
+#endif
 
     if (l_err)
     {

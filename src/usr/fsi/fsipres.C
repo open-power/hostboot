@@ -299,13 +299,14 @@ errlHndl_t membPresenceDetect(DeviceFW::OperationType i_opType,
     }
     else
     {
-        // FSI is not present, invalidate MVPD in the PNOR
-        l_errl = VPD::invalidatePnorCache(i_target);
-        if (l_errl)
-        {
-            TRACFCOMP( g_trac_fsi, "Error invalidating MVPD in PNOR" );
-            errlCommit( l_errl, FSI_COMP_ID );
-        }
+        // Defer invalidating CVPD in the PNOR in case another target might be
+        // sharing this VPD_REC_NUM. Check all targets sharing this
+        // VPD_REC_NUM after target discovery in VPD::validateSharedPnorCache.
+        // Ensure the VPD_SWITCHES cache valid bit is invalid at this point.
+        TARGETING::ATTR_VPD_SWITCHES_type vpdSwitches =
+        i_target->getAttr<TARGETING::ATTR_VPD_SWITCHES>();
+        vpdSwitches.pnorCacheValid = 0;
+        i_target->setAttr<TARGETING::ATTR_VPD_SWITCHES>( vpdSwitches );
     }
 #endif
 

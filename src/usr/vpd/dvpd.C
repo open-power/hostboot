@@ -265,13 +265,14 @@ errlHndl_t directMemoryPresenceDetect(DeviceFW::OperationType i_opType,
         TRACFCOMP(g_trac_vpd,
                   ERR_MRK "directMemoryPresenceDetect> failed presence detect");
 
-        // Invalidate DVPD in the PNOR
-        l_errl = VPD::invalidatePnorCache(i_target);
-        if (l_errl)
-        {
-            TRACFCOMP( g_trac_vpd, "Error invalidating DVPD in PNOR" );
-            errlCommit( l_errl, VPD_COMP_ID );
-        }
+        // Defer invalidating DVPD in the PNOR in case another target might be
+        // sharing this VPD_REC_NUM. Check all targets sharing this
+        // VPD_REC_NUM after target discovery in VPD::validateSharedPnorCache.
+        // Ensure the VPD_SWITCHES cache valid bit is invalid at this point.
+        TARGETING::ATTR_VPD_SWITCHES_type vpdSwitches =
+        i_target->getAttr<TARGETING::ATTR_VPD_SWITCHES>();
+        vpdSwitches.pnorCacheValid = 0;
+        i_target->setAttr<TARGETING::ATTR_VPD_SWITCHES>( vpdSwitches );
     }
 #endif
 

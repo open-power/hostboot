@@ -37,6 +37,7 @@
 #include "pvpd.H"
 #include "spd.H"
 #include "ipvpd.H"
+#include <map>
 
 // ----------------------------------------------
 // Trace - defined in vpd_common
@@ -833,5 +834,132 @@ errlHndl_t invalidateAllPnorCaches ( bool i_setHwOnly )
     return l_err;
 }
 
+typedef std::pair<TARGETING::Target *, bool> targetValidPair_t;
+typedef std::map<TARGETING::ATTR_VPD_REC_NUM_type,
+            targetValidPair_t> numRecValidMap_t;
+
+// For each target in list, either add a map entry for this VPD_REC_NUM
+// or OR in the cache valid bit if VPD_REC_NUM is already in the map.
+void addListToMap(numRecValidMap_t                  & i_recNumMap,
+                  const TARGETING::TargetHandleList & i_targetList)
+{
+    for (TARGETING::TargetHandleList::const_iterator
+                 targItr = i_targetList.begin();
+                 targItr != i_targetList.end();
+                 ++targItr)
+    {
+        TARGETING::Target * l_pTarg = *targItr;
+        TARGETING::ATTR_VPD_REC_NUM_type l_recNum =
+            l_pTarg->getAttr<TARGETING::ATTR_VPD_REC_NUM>();
+        TARGETING::ATTR_VPD_SWITCHES_type l_switches =
+            l_pTarg->getAttr<TARGETING::ATTR_VPD_SWITCHES>();
+
+        numRecValidMap_t::iterator itr = i_recNumMap.find(l_recNum);
+        if( itr != i_recNumMap.end() )
+        {
+            TRACDCOMP( g_trac_vpd, "addListToMap() "
+                       "OR in %d for VPD_REC_NUM %d HUID %.8X",
+                       l_switches.pnorCacheValid,
+                       l_recNum,
+                       TARGETING::get_huid(l_pTarg));
+
+            itr->second.second |= l_switches.pnorCacheValid;
+        }
+        else
+        {
+            TRACDCOMP( g_trac_vpd, "addListToMap() "
+                       "Set %d for VPD_REC_NUM %d HUID %.8X",
+                       l_switches.pnorCacheValid,
+                       l_recNum,
+                       TARGETING::get_huid(l_pTarg));
+
+            i_recNumMap[l_recNum] =
+                targetValidPair_t(l_pTarg,l_switches.pnorCacheValid);
+        }
+    }
+}
+
+// --------------------------------------------------------
+// This function validates targets sharing the PNOR::CENTAUR_VPD cache.
+// Invalidate sections where all of the targets sharing a VPD_REC_NUM
+// are invalid. Keep the section if any target is valid.
+//---------------------------------------------------------
+errlHndl_t validateSharedPnorCache()
+{
+    errlHndl_t errl = NULL;
+    std::map<TARGETING::ATTR_VPD_REC_NUM_type,targetValidPair_t> l_recNumMap;
+
+    TRACDCOMP( g_trac_vpd, ENTER_MRK"validateSharedPnorCache()");
+
+    do
+    {
+#if defined(CONFIG_PVPD_READ_FROM_HW) && defined(CONFIG_PVPD_READ_FROM_PNOR)
+        // Add cache status for the node
+        TARGETING::TargetHandleList l_nodeList;
+        getEncResources(l_nodeList,
+                        TARGETING::TYPE_NODE,
+                        TARGETING::UTIL_FILTER_ALL);
+        addListToMap( l_recNumMap, l_nodeList);
+#endif
+
+        // If this system has mem bufs, then gather all mem bufs.
+        // If there are no mem bufs, then gather the MCSs for direct memory.
+        TARGETING::TargetHandleList l_memBufList;
+        getChipResources(l_memBufList,
+                         TARGETING::TYPE_MEMBUF,
+                         TARGETING::UTIL_FILTER_ALL);
+        if (l_memBufList.size()) // system has mem bufs
+        {
+            addListToMap( l_recNumMap, l_memBufList);
+        }
+        else // Add cache status for all MCSs for direct memory
+        {
+            TARGETING::TargetHandleList l_mcsList;
+            getChipletResources(l_mcsList,
+                                TARGETING::TYPE_MCS,
+                                TARGETING::UTIL_FILTER_ALL);
+            addListToMap( l_recNumMap, l_mcsList);
+        }
+
+        // check for any section that is invalid for all that share it
+        for (numRecValidMap_t::iterator itr = l_recNumMap.begin();
+                 itr != l_recNumMap.end(); ++itr)
+        {
+            // The second.second is the accumulation of all pnorCacheValid
+            // bits. If true, then at least one target is using this
+            // VPD_REC_NUM section. Keep it.
+            if (itr->second.second)
+            {
+                TRACDCOMP( g_trac_vpd, "validateSharedPnorCache() "
+                           "valid is %d for VPD_REC_NUM %d HUID %.8X "
+                           "keep this section",
+                           itr->second.second,
+                           itr->first,
+                           TARGETING::get_huid(itr->second.first));
+            }
+            // if false, then all that share this section, none are valid.
+            // Invalidate this section.
+            else
+            {
+                TRACFCOMP( g_trac_vpd, "validateSharedPnorCache() "
+                           "valid is %d for VPD_REC_NUM %d HUID %.8X "
+                           "invalidate this section",
+                           itr->second.second,
+                           itr->first,
+                           TARGETING::get_huid(itr->second.first));
+
+                // invalidate cache section for this VPD_REC_NUM
+                errl = VPD::invalidatePnorCache(itr->second.first);
+                if (errl)
+                {
+                    // Just commit the log and move on. No need to terminate IPL
+                    errlCommit( errl, VPD_COMP_ID );
+                }
+            }
+        }
+    } while (0);
+
+    return errl;
+}
 
 }; //end VPD namespace

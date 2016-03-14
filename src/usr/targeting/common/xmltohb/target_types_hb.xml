@@ -225,6 +225,7 @@
 <targetTypeExtension>
     <id>unit-mcs-nimbus</id>
     <attribute><id>HB_TARGET_SCOMABLE</id></attribute>
+    <attribute><id>VPD_SWITCHES</id></attribute>
 </targetTypeExtension>
 
 <targetType>
