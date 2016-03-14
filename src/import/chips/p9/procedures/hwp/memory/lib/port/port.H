@@ -53,6 +53,7 @@ class portTraits<fapi2::TARGET_TYPE_MCA>
 {
     public:
         static const uint64_t FARB5Q_REG = MCA_MBA_FARB5Q;
+        static const uint64_t FARB0Q_REG = MCA_MBA_FARB0Q;
         static const uint64_t REFRESH_REG = MCA_MBAREF0Q;
         static const uint64_t ECC_REG = MCA_RECR;
 
@@ -70,6 +71,8 @@ class portTraits<fapi2::TARGET_TYPE_MCA>
 
             ECC_CHECK_DISABLE = MCA_RECR_MBSECCQ_DISABLE_MEMORY_ECC_CHECK_CORRECT,
             ECC_CORRECT_DISABLE = MCA_RECR_MBSECCQ_DISABLE_MEMORY_ECC_CORRECT,
+
+            PORT_FAIL_DISABLE = MCA_MBA_FARB0Q_CFG_PORT_FAIL_DISABLE,
         };
 };
 
@@ -91,6 +94,26 @@ inline uint64_t port( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target )
 }
 
 ///
+/// @brief Change the state of the port_fail_disable bit
+/// @param[in] i_target the target
+/// @param[in] i_state the state
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T, typename TT = portTraits<T> >
+fapi2::ReturnCode change_port_fail_disable( const fapi2::Target<T>& i_target, states i_state )
+{
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_DBG("Change port fail disable to %s %s", (i_state == HIGH ? "high" : "low"), mss::c_str(i_target));
+    FAPI_TRY( mss::getScom(i_target, TT::FARB0Q_REG, l_data) );
+    l_data.writeBit<TT::PORT_FAIL_DISABLE>(i_state);
+    FAPI_TRY( mss::putScom(i_target, TT::FARB0Q_REG, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Change the state of the addr_mux_sel bit
 /// @param[in] i_target the target
 /// @param[in] i_state the state
@@ -109,6 +132,7 @@ fapi2::ReturnCode change_addr_mux_sel( const fapi2::Target<T>& i_target, states 
 fapi_try_exit:
     return fapi2::current_err;
 }
+
 
 ///
 /// @brief Change the state of the MC Refresh enable bit
