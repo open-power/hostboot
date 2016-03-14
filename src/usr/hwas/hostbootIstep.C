@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,7 @@
 #include <ibscom/ibscomif.H>
 
 #include <i2c/i2cif.H>
+#include <vpd/vpd_if.H>
 
 #include <sbe/sbeif.H>
 #include <sbe_update.H>
@@ -169,6 +170,16 @@ void* host_discover_targets( void *io_pArgs )
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Normal IPL mode");
 
         errl = discoverTargets();
+
+#if defined(CONFIG_CVPD_READ_FROM_HW) && defined(CONFIG_CVPD_READ_FROM_PNOR)
+        // Now that all targets have completed presence detect and vpd access,
+        // invalidate Centaur Pnor sections where all the targets sharing a
+        // VPD_REC_NUM are invalid.
+        if (NULL == errl)
+        {
+            errl = VPD::validateCentaurPnorCache();
+        }
+#endif
     }
 
     // Put out some helpful messages that show which targets we actually found

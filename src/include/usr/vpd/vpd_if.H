@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -103,6 +103,15 @@ namespace VPD
      *      error log.
      */
     errlHndl_t invalidatePnorCache ( TARGETING::Target * i_target );
+
+    /**
+     * @brief This function validates the Centaur PNOR cache.
+     *        Invalidate sections where all of the targets sharing a VPD_REC_NUM
+     *        are invalid. Keep the section if any target is valid.
+     * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+     *      error log.
+     */
+    errlHndl_t validateCentaurPnorCache ( );
 
     /**
      * @brief This function invalidates all of the VPD data in the PNOR cache.
