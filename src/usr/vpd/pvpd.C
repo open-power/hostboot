@@ -262,14 +262,16 @@ errlHndl_t nodePresenceDetect(DeviceFW::OperationType i_opType,
         TRACFCOMP(g_trac_vpd,
                   ERR_MRK "nodePresenceDetect> failed presence detect");
 
-        // Invalidate PVPD in the PNOR
-        l_errl = VPD::invalidatePnorCache(i_target);
-        if (l_errl)
-        {
-            TRACFCOMP( g_trac_vpd, "Error invalidating PVPD in PNOR" );
-            errlCommit( l_errl, VPD_COMP_ID );
-        }
-        pvpd_present = true;
+        // Defer invalidating PVPD in the PNOR in case another target might be
+        // sharing this VPD_REC_NUM. Check all targets sharing this
+        // VPD_REC_NUM after target discovery in VPD::validateSharedPnorCache.
+        // Ensure the VPD_SWITCHES cache valid bit is invalid at this point.
+        TARGETING::ATTR_VPD_SWITCHES_type vpdSwitches =
+        i_target->getAttr<TARGETING::ATTR_VPD_SWITCHES>();
+        vpdSwitches.pnorCacheValid = 0;
+        i_target->setAttr<TARGETING::ATTR_VPD_SWITCHES>( vpdSwitches );
+
+        pvpd_present = true;  //node PVDP always returns present
     }
 #endif
 
