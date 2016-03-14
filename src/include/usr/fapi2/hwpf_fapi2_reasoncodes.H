@@ -88,6 +88,7 @@ namespace fapi2
         RC_CAPP_NO_PROC_FOUND          = FAPI2_COMP_ID | 0x20,
         RC_SBE_NO_PROC_FOUND           = FAPI2_COMP_ID | 0x21,
         RC_INVALID_CHILD_COUNT         = FAPI2_COMP_ID | 0x22,
+        RC_UNIT_NO_PERV_FOUND          = FAPI2_COMP_ID | 0x23,
         // HWP generated errors
         RC_HWP_GENERATED_ERROR         = HWPF_COMP_ID | 0x0f,
 
