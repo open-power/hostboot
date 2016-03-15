@@ -38,6 +38,7 @@ OBJS += attribute_service.o
 OBJS += plat_attribute_service.o
 OBJS += plat_attr_override_sync.o
 OBJS += plat_hwp_invoker.o
+OBJS += target.o
 
 
 #EKB Objects (mirrored in src/import)

@@ -49,8 +49,36 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
 
+namespace PLAT_TARGET
+{
+///
+/// @brief         Helper function for specialized system target allows
+///                for the constructor to call targetservice::getTopLevel
+/// @param[in/out] io_handle Reference to TARGETING::Target to assign
+///                iv_handle to.
+/// @return void
+///
+void systemTargCtorHelperFunc(fapi2::plat_target_handle_t& io_handle);
+}
+
 namespace fapi2
 {
+
+
+///
+/// @brief         Specialization for TARGET_TYPE_SYSTEM targets
+///                for the constructor to call targetservice::getTopLevel
+/// @param[in/out] io_handle Reference to TARGETING::Target to assign
+///                iv_handle to.
+/// @return void
+///
+/// @note          the default templated constructor is delagated to constructors
+///                take take in a plat_target_handle_t
+///
+template<> inline fapi2::Target<TARGET_TYPE_SYSTEM,  plat_target_handle_t>::Target(plat_target_handle_t v)
+{
+    PLAT_TARGET::systemTargCtorHelperFunc(iv_handle);
+}
 
 ///
 /// @brief Assignment Operator.
