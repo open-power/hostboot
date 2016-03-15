@@ -70,19 +70,19 @@ extern "C"
             FAPI_TRY( l_mc.setup_xlate_map(p) );
         }
 
-        // Setup the read_pointer_delay
-        // TK: Do we need to do this in general or is this a place holder until the
-        // init file gets here?
-        {
-            fapi2::buffer<uint64_t> l_data;
-            FAPI_TRY( mss::getScom(i_target, MCBIST_MBSEC0Q, l_data) );
-            l_data.insertFromRight<MCA_RECR_MBSECCQ_READ_POINTER_DELAY, MCA_RECR_MBSECCQ_READ_POINTER_DELAY_LEN>(0x1);
-            FAPI_DBG("writing read pointer delay 0x%016lx", l_data);
-            FAPI_TRY( mss::putScom(i_target, MCBIST_MBSEC0Q, l_data) );
-        }
-
         for (auto p : l_mca)
         {
+
+            // Setup the read_pointer_delay
+            // TK: Do we need to do this in general or is this a place holder until the
+            // init file gets here?
+            {
+                fapi2::buffer<uint64_t> l_data;
+                FAPI_TRY( mss::getScom(p, MCA_RECR, l_data) );
+                l_data.insertFromRight<MCA_RECR_MBSECCQ_READ_POINTER_DELAY, MCA_RECR_MBSECCQ_READ_POINTER_DELAY_LEN>(0x1);
+                FAPI_DBG("writing read pointer delay 0x%016lx %s", l_data, mss::c_str(p));
+                FAPI_TRY( mss::putScom(p, MCA_RECR, l_data) );
+            }
 
             // Set the IML Complete bit MBSSQ(3) (SCOM Addr: 0x02011417) to indicate that IML has completed
             // Can't find MBSSQ or the iml_complete bit - asked Steve. Gary VH created this bit as a scratch
