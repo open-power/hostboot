@@ -22,7 +22,7 @@
 /// @brief Class for mcbist related addresses (addresses below the hash translation)
 ///
 // *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
-// *HWP HWP Backup: Craig Hamilton <cchamilt@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: HB:FSP
@@ -31,6 +31,7 @@
 #define _MSS_MCBIST_ADDRESS_H_
 
 #include <fapi2.H>
+#include <utility>
 
 namespace mss
 {
@@ -53,6 +54,19 @@ namespace mcbist
 class address
 {
     public:
+
+        // first is the start bit of the field, second is the length
+        typedef std::pair<uint64_t, uint64_t> field;
+
+        constexpr static field PORT = {0, 2};
+        constexpr static field DIMM = {2, 1};
+        constexpr static field MRANK = {3, 2};
+        constexpr static field SRANK = {5, 3};
+        constexpr static field ROW = {8, 18};
+        constexpr static field COL = {26, 7};
+        constexpr static field BANK = {33, 3};
+        constexpr static field BANK_GROUP = {36, 2};
+        constexpr static field LAST_VALID = BANK_GROUP;
 
         address() = default;
 
@@ -86,12 +100,111 @@ class address
         }
 
         ///
+        /// @brief Set a field for an address
+        /// @tparam F the field to set
+        /// @param[in] i_value the value to set
+        ///
+        template< const field& F >
+        inline void set_field( const uint64_t i_value )
+        {
+            iv_address.insertFromRight<F.first, F.second>(i_value);
+        }
+
+        ///
+        /// @brief Get a field from an address
+        /// @tparam F the field to get
+        /// @return right-aligned uint64_t representing the value
+        ///
+        template< const field& F >
+        inline uint64_t get_field()
+        {
+            uint64_t l_value = 0;
+            iv_address.extractToRight<F.first, F.second>(l_value);
+            return l_value;
+        }
+
+        ///
+        /// @brief Get a range of addresses.
+        /// @tparam[in] F the left-most valid field. So, if the address was for master rank,
+        /// the left-most valid field would be MRANK
+        /// @param[out] o_end representing an address to end at
+        /// @note this pointer is the start address
+        ///
+        template< const field& F >
+        inline void get_range( address& o_end ) const
+        {
+            constexpr uint64_t START = F.first + F.second;
+            constexpr uint64_t LEN = (LAST_VALID.first + LAST_VALID.second) - START;
+
+            // All we need to do is fill in the bits to the right of the last valid field
+            o_end.iv_address = iv_address;
+            o_end.iv_address.setBit<START, LEN>();
+        }
+
+        ///
+        /// @brief Get a range of addresses given a master rank
+        /// @param[in] i_start representing an address to start from
+        /// @param[out] o_end representing an address to end at
+        ///
+        inline static void get_mrank_range( const address& i_start, address& o_end )
+        {
+            i_start.get_range<MRANK>(o_end);
+        }
+
+        ///
+        /// @brief Get a range of addresses given a master rank
+        /// @param[in] i_port representing the port for the starting address
+        /// @param[in] i_dimm representing the dimm for the starting address
+        /// @param[in] i_mrank representing the master rank for the starting address
+        /// @param[out] o_start representing an address to start from
+        /// @param[out] o_end representing an address to end at
+        ///
+        inline static void get_mrank_range( const uint64_t i_port, const uint64_t i_dimm, const uint64_t i_mrank,
+                                            address& o_start, address& o_end )
+        {
+            o_start.set_port(i_port);
+            o_start.set_dimm(i_dimm);
+            o_start.set_master_rank(i_mrank);
+            get_mrank_range(o_start, o_end);
+        }
+
+        ///
+        /// @brief Get a range of addresses given a slave rank
+        /// @param[in] i_start representing an address to start from
+        /// @param[out] o_end representing an address to end at
+        ///
+        inline static void get_srank_range( const address& i_start, address& o_end )
+        {
+            i_start.get_range<SRANK>(o_end);
+        }
+
+        ///
+        /// @brief Get a range of addresses given a slave rank
+        /// @param[in] i_port representing the port for the starting address
+        /// @param[in] i_dimm representing the dimm for the starting address
+        /// @param[in] i_mrank representing the master rank for the starting address
+        /// @param[in] i_srank representing the slave rank for the starting address
+        /// @param[out] o_start representing an address to start from
+        /// @param[out] o_end representing an address to end at
+        ///
+        inline static void get_srank_range( const uint64_t i_port, const uint64_t i_dimm,
+                                            const uint64_t i_mrank, const uint64_t i_srank,
+                                            address& o_start, address& o_end )
+        {
+            o_start.set_port(i_port);
+            o_start.set_dimm(i_dimm);
+            o_start.set_master_rank(i_mrank);
+            o_start.set_slave_rank(i_srank);
+            get_srank_range(o_start, o_end);
+        }
+
+        ///
         /// @brief Set the port value for an address
         /// @param[in] i_value the value to set
         ///
         inline void set_port( const uint64_t i_value )
         {
-            iv_address.insertFromRight<PORT, PORT_LEN>(i_value);
+            set_field<PORT>(i_value);
         }
 
         ///
@@ -100,9 +213,7 @@ class address
         ///
         inline uint64_t get_port()
         {
-            uint64_t l_value = 0;
-            iv_address.extractToRight<PORT, PORT_LEN>(l_value);
-            return l_value;
+            return get_field<PORT>();
         }
 
         ///
@@ -112,7 +223,7 @@ class address
         ///
         inline void set_dimm( const uint64_t i_value )
         {
-            iv_address.writeBit<DIMM>(i_value);
+            set_field<DIMM>(i_value);
         }
 
         ///
@@ -121,8 +232,7 @@ class address
         ///
         inline uint64_t get_dimm()
         {
-            bool l_value = iv_address.getBit<DIMM>();
-            return (l_value == true ? 1 : 0);
+            return (get_field<DIMM>() == true ? 1 : 0);
         }
 
         ///
@@ -131,7 +241,7 @@ class address
         ///
         inline void set_master_rank( const uint64_t i_value )
         {
-            iv_address.insertFromRight<MRANK, MRANK_LEN>(i_value);
+            set_field<MRANK>(i_value);
         }
 
         ///
@@ -140,9 +250,7 @@ class address
         ///
         inline uint64_t get_master_rank()
         {
-            uint64_t l_value = 0;
-            iv_address.extractToRight<MRANK, MRANK_LEN>(l_value);
-            return l_value;
+            return get_field<MRANK>();
         }
 
 
@@ -152,7 +260,7 @@ class address
         ///
         inline void set_slave_rank( const uint64_t i_value )
         {
-            iv_address.insertFromRight<SRANK, SRANK_LEN>(i_value);
+            set_field<SRANK>(i_value);
         }
 
         ///
@@ -161,9 +269,7 @@ class address
         ///
         inline uint64_t get_slave_rank()
         {
-            uint64_t l_value = 0;
-            iv_address.extractToRight<SRANK, SRANK_LEN>(l_value);
-            return l_value;
+            return get_field<SRANK>();
         }
 
 
@@ -173,7 +279,7 @@ class address
         ///
         inline void set_row( const uint64_t i_value )
         {
-            iv_address.insertFromRight<ROW, ROW_LEN>(i_value);
+            set_field<ROW>(i_value);
         }
 
         ///
@@ -182,9 +288,7 @@ class address
         ///
         inline uint64_t get_row()
         {
-            uint64_t l_value = 0;
-            iv_address.extractToRight<ROW, ROW_LEN>(l_value);
-            return l_value;
+            return get_field<ROW>();
         }
 
 
@@ -194,7 +298,7 @@ class address
         ///
         inline void set_column( const uint64_t i_value )
         {
-            iv_address.insertFromRight<COL, COL_LEN>(i_value);
+            set_field<COL>(i_value);
         }
 
         ///
@@ -203,9 +307,7 @@ class address
         ///
         inline uint64_t get_column()
         {
-            uint64_t l_value = 0;
-            iv_address.extractToRight<COL, COL_LEN>(l_value);
-            return l_value;
+            return get_field<COL>();
         }
 
 
@@ -215,7 +317,7 @@ class address
         ///
         inline void set_bank( const uint64_t i_value )
         {
-            iv_address.insertFromRight<BANK, BANK_LEN>(i_value);
+            set_field<BANK>(i_value);
         }
 
         ///
@@ -224,11 +326,8 @@ class address
         ///
         inline uint64_t get_bank()
         {
-            uint64_t l_value = 0;
-            iv_address.extractToRight<BANK, BANK_LEN>(l_value);
-            return l_value;
+            return get_field<BANK>();
         }
-
 
         ///
         /// @brief Set the bank group value for an address
@@ -236,7 +335,7 @@ class address
         ///
         inline void set_bank_group( const uint64_t i_value )
         {
-            iv_address.insertFromRight<BANK_GROUP, BANK_GROUP_LEN>(i_value);
+            set_field<BANK_GROUP>(i_value);
         }
 
         ///
@@ -245,32 +344,10 @@ class address
         ///
         inline uint64_t get_bank_group()
         {
-            uint64_t l_value = 0;
-            iv_address.extractToRight<BANK_GROUP, BANK_GROUP_LEN>(l_value);
-            return l_value;
+            return get_field<BANK_GROUP>();
         }
 
     private:
-        /// Start and length bits for address bit fields
-        enum start_and_length
-        {
-            PORT = 0,        ///< 0:1   port select
-            PORT_LEN = 2,
-            DIMM = 2,        ///< 2     dimm select
-            MRANK = 3,       ///< 3:4   mrank(0 to 1)
-            MRANK_LEN = 2,
-            SRANK = 5,       ///< 5:7   srank(0 to 2)
-            SRANK_LEN = 3,
-            ROW = 8,         ///< 8:25  row(0 to 17)
-            ROW_LEN = 18,
-            COL = 26,        ///< 26:32 col(3 to 9)
-            COL_LEN = 7,
-            BANK = 33,       ///< 33:35 bank(0 to 2)
-            BANK_LEN = 3,
-            BANK_GROUP = 36, ///< 36:37 bank_group(0 to 1)
-            BANK_GROUP_LEN = 2,
-        };
-
         // We use a fapi2 buffer as it has static compile-time support
         fapi2::buffer<uint64_t> iv_address;
 };
