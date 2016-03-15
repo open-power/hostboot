@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,6 +58,7 @@ enum istepModuleId
     ISTEP_ENABLE_CORE_CHECKSTOPS                        = 0x08,
     ISTEP_DECONFIG_PHBS_BASED_ON_PCI_STATE              = 0x09,
     ISTEP_COMPUTE_PCIE_CONFIG_ATTRS                     = 0x0A,
+    ISTEP_LOAD_PAYLOAD                                  = 0x0B,
 };
 
 /**
