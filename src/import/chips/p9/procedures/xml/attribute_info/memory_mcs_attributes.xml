@@ -17,6 +17,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes>
+
     <attribute>
         <id>ATTR_MCBIST_ADDR_MODES</id>
         <!-- P8 MBA level information -->
@@ -26,7 +27,6 @@
         <writeable/>
         <odmVisable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>mcbist_addr_modes</mssAccessorName>
     </attribute>
 
@@ -39,7 +39,6 @@
         <writeable/>
         <odmVisable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>mcbist_rank</mssAccessorName>
     </attribute>
 
@@ -52,7 +51,6 @@
         <writeable/>
         <odmVisable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>mcbist_start_addr</mssAccessorName>
     </attribute>
 
@@ -65,7 +63,6 @@
         <writeable/>
         <odmVisable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>mcbist_end_addr</mssAccessorName>
     </attribute>
 
@@ -78,7 +75,6 @@
         <writeable/>
         <odmVisable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>mcbist_error_capture</mssAccessorName>
     </attribute>
 
@@ -91,7 +87,6 @@
         <writeable/>
         <odmVisable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>mcbist_max_timeout</mssAccessorName>
     </attribute>
 
@@ -104,7 +99,6 @@
         <writeable/>
         <odmVisable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>mcbist_print_port</mssAccessorName>
     </attribute>
 
@@ -117,7 +111,6 @@
         <writeable/>
         <odmVisable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>mcbist_stop_on_error</mssAccessorName>
     </attribute>
 
@@ -130,7 +123,6 @@
         <writeable/>
         <odmVisable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>mcbist_data_seed</mssAccessorName>
     </attribute>
 
@@ -146,7 +138,6 @@
         <writeable/>
         <odmVisable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>mcbist_addr_inter</mssAccessorName>
     </attribute>
 
@@ -159,7 +150,6 @@
         <writeable/>
         <odmVisable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>mcbist_addr_num_rows</mssAccessorName>
     </attribute>
 
@@ -172,7 +162,6 @@
         <writeable/>
         <odmVisable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>mcbist_addr_num_cols</mssAccessorName>
     </attribute>
 
@@ -185,7 +174,6 @@
         <writeable/>
         <odmVisable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>mcbist_addr_rank</mssAccessorName>
     </attribute>
 
@@ -198,7 +186,6 @@
         <writeable/>
         <odmVisable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>mcbist_addr_bank</mssAccessorName>
     </attribute>
 
@@ -210,7 +197,6 @@
         <writeable/>
         <odmVisable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssUnits>count of groups</mssUnits>
         <mssAccessorName>mcbist_addr_bank_group</mssAccessorName>
     </attribute>
@@ -224,7 +210,6 @@
         <writeable/>
         <odmVisable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>mcbist_addr_slave_rank_on</mssAccessorName>
     </attribute>
 
@@ -237,7 +222,6 @@
         <writeable/>
         <odmVisable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>mcbist_addr_str_map</mssAccessorName>
     </attribute>
 
@@ -250,7 +234,6 @@
         <writeable/>
         <odmVisable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>mcbist_addr_rand</mssAccessorName>
     </attribute>
 
@@ -711,7 +694,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>dimm_mfg_id_code</mssAccessorName>
     </attribute>
 
@@ -735,7 +717,6 @@
         <odmChangeable/>
         <array> 2 2</array>
         <persistRuntime/>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dimm_ranks_configed</mssAccessorName>
     </attribute>
 
@@ -758,7 +739,6 @@
         <odmChangeable/>
         <array> 2 2</array>
         <persistRuntime/>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_num_ranks_per_dimm</mssAccessorName>
     </attribute>
 
@@ -780,7 +760,6 @@
         <odmChangeable/>
         <array>2 2 </array>
         <persistRuntime/>
-        <mssAccessor>PORT DIMM</mssAccessor>
         <mssAccessorName>eff_custom_dimm</mssAccessorName>
     </attribute>
 
@@ -802,7 +781,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2 2</array>
-        <mssAccessor>PORT DIMM</mssAccessor>
         <mssAccessorName>eff_dram_width</mssAccessorName>
     </attribute>
 
@@ -824,7 +802,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2 2</array>
-        <mssAccessor>PORT DIMM</mssAccessor>
         <mssAccessorName>eff_dram_rank_mix</mssAccessorName>
     </attribute>
 
@@ -845,7 +822,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_primary_rank_group0</mssAccessorName>
     </attribute>
 
@@ -866,7 +842,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_primary_rank_group1</mssAccessorName>
     </attribute>
 
@@ -887,7 +862,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_primary_rank_group2</mssAccessorName>
     </attribute>
 
@@ -908,7 +882,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_primary_rank_group3</mssAccessorName>
     </attribute>
 
@@ -929,7 +902,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_secondary_rank_group0</mssAccessorName>
     </attribute>
 
@@ -950,7 +922,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_secondary_rank_group1</mssAccessorName>
     </attribute>
 
@@ -971,7 +942,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_secondary_rank_group2</mssAccessorName>
     </attribute>
 
@@ -992,7 +962,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_secondary_rank_group3</mssAccessorName>
     </attribute>
 
@@ -1013,7 +982,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_tertiary_rank_group0</mssAccessorName>
     </attribute>
 
@@ -1034,7 +1002,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_tertiary_rank_group1</mssAccessorName>
     </attribute>
 
@@ -1055,7 +1022,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_tertiary_rank_group2</mssAccessorName>
     </attribute>
 
@@ -1076,7 +1042,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_tertiary_rank_group3</mssAccessorName>
     </attribute>
 
@@ -1097,7 +1062,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_quaternary_rank_group0</mssAccessorName>
     </attribute>
 
@@ -1118,7 +1082,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_quaternary_rank_group1</mssAccessorName>
     </attribute>
 
@@ -1139,7 +1102,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_quaternary_rank_group2</mssAccessorName>
     </attribute>
 
@@ -1160,7 +1122,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_quaternary_rank_group3</mssAccessorName>
     </attribute>
 
@@ -1180,7 +1141,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2 2 4</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dimm_spare</mssAccessorName>
     </attribute>
 
@@ -1238,7 +1198,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_wr_vref</mssAccessorName>
     </attribute>
 
@@ -1255,7 +1214,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_wr_vref_schmoo</mssAccessorName>
     </attribute>
 
@@ -1272,7 +1230,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_wrddr4_vref_schmoo</mssAccessorName>
     </attribute>
 
@@ -1312,7 +1269,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_cen_drv_imp_dq_dqs</mssAccessorName>
     </attribute>
 
@@ -1330,7 +1286,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2 </array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_cen_drv_imp_dq_dqs_schmoo</mssAccessorName>
     </attribute>
 
@@ -1348,7 +1303,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2 </array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_cen_drv_imp_clk_schmoo</mssAccessorName>
     </attribute>
 
@@ -1366,7 +1320,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_cen_drv_imp_spcke_schmoo</mssAccessorName>
     </attribute>
 
@@ -1386,7 +1339,6 @@
         <odmChangeable/>
         <array> 2</array>
         <persistRuntime/>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_cen_drv_imp_cntl_schmoo</mssAccessorName>
     </attribute>
 
@@ -1421,7 +1373,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_cen_rcv_imp_dq_dqs</mssAccessorName>
     </attribute>
 
@@ -1439,7 +1390,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_cen_rcv_imp_dq_dqs_schmoo</mssAccessorName>
     </attribute>
 
@@ -1470,7 +1420,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_cen_slew_rate_dq_dqs</mssAccessorName>
     </attribute>
 
@@ -1487,7 +1436,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_cen_slew_rate_dq_dqs_schmoo</mssAccessorName>
     </attribute>
 
@@ -1504,7 +1452,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_cen_slew_rate_clk_schmoo</mssAccessorName>
     </attribute>
 
@@ -1521,7 +1468,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_cen_slew_rate_spcke_schmoo</mssAccessorName>
     </attribute>
 
@@ -1538,7 +1484,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_cen_slew_rate_addr_schmoo</mssAccessorName>
     </attribute>
 
@@ -1555,7 +1500,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_cen_slew_rate_cntl_schmoo</mssAccessorName>
     </attribute>
 
@@ -1612,7 +1556,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_cen_rd_vref</mssAccessorName>
     </attribute>
 
@@ -1629,7 +1572,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_cen_rd_vref_schmoo</mssAccessorName>
     </attribute>
 
@@ -1667,7 +1609,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_trcd</mssAccessorName>
     </attribute>
 
@@ -1689,7 +1630,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_trrd</mssAccessorName>
     </attribute>
 
@@ -1710,7 +1650,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_trp</mssAccessorName>
     </attribute>
 
@@ -1731,7 +1670,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_tras</mssAccessorName>
     </attribute>
 
@@ -1753,7 +1691,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_trc</mssAccessorName>
     </attribute>
 
@@ -1775,7 +1712,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_twtr</mssAccessorName>
     </attribute>
 
@@ -1797,7 +1733,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_trtp</mssAccessorName>
     </attribute>
 
@@ -1819,7 +1754,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_tfaw</mssAccessorName>
     </attribute>
 
@@ -1862,7 +1796,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2 </array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_cas_latency</mssAccessorName>
     </attribute>
 
@@ -1885,7 +1818,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_al</mssAccessorName>
     </attribute>
 
@@ -1907,7 +1839,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_cwl</mssAccessorName>
     </attribute>
 
@@ -1930,7 +1861,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_read_burst_type</mssAccessorName>
     </attribute>
 
@@ -1953,7 +1883,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_tm</mssAccessorName>
     </attribute>
 
@@ -1976,7 +1905,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_dll_reset</mssAccessorName>
     </attribute>
 
@@ -1998,7 +1926,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_write_recovery</mssAccessorName>
     </attribute>
 
@@ -2021,7 +1948,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_dll_ppd</mssAccessorName>
     </attribute>
 
@@ -2044,7 +1970,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_dll_enable</mssAccessorName>
     </attribute>
 
@@ -2067,7 +1992,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_tdqs</mssAccessorName>
     </attribute>
 
@@ -2090,7 +2014,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_wr_lvl_enable</mssAccessorName>
     </attribute>
 
@@ -2113,7 +2036,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_output_buffer</mssAccessorName>
     </attribute>
 
@@ -2145,7 +2067,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_pasr</mssAccessorName>
     </attribute>
 
@@ -2168,7 +2089,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_asr</mssAccessorName>
     </attribute>
 
@@ -2191,7 +2111,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_srt</mssAccessorName>
     </attribute>
 
@@ -2213,7 +2132,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_mpr_loc</mssAccessorName>
     </attribute>
 
@@ -2236,7 +2154,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_mpr_mode</mssAccessorName>
     </attribute>
 
@@ -2682,7 +2599,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dimm_rcd_ibt</mssAccessorName>
     </attribute>
 
@@ -2703,7 +2619,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dimm_rcd_mirror_mode</mssAccessorName>
     </attribute>
 
@@ -2718,7 +2633,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_schmoo_mode</mssAccessorName>
     </attribute>
 
@@ -2733,7 +2647,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_schmoo_addr_mode</mssAccessorName>
     </attribute>
 
@@ -2755,7 +2668,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_schmoo_test_valid</mssAccessorName>
     </attribute>
 
@@ -2778,7 +2690,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_schmoo_param_valid</mssAccessorName>
     </attribute>
 
@@ -2792,7 +2703,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_schmoo_wr_eye_min_margin</mssAccessorName>
     </attribute>
 
@@ -2806,7 +2716,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_schmoo_rd_eye_min_margin</mssAccessorName>
     </attribute>
 
@@ -2820,7 +2729,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_schmoo_dqs_clk_min_margin</mssAccessorName>
     </attribute>
 
@@ -2834,7 +2742,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_schmoo_rd_gate_min_margin</mssAccessorName>
     </attribute>
 
@@ -2848,7 +2755,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_schmoo_addr_cmd_min_margin</mssAccessorName>
     </attribute>
 
@@ -2863,7 +2769,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_memcal_interval</mssAccessorName>
     </attribute>
 
@@ -2878,7 +2783,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_zqcal_interval</mssAccessorName>
     </attribute>
 
@@ -2921,7 +2825,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_ibm_type</mssAccessorName>
     </attribute>
 
@@ -2936,7 +2839,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_num_drops_per_port</mssAccessorName>
     </attribute>
 
@@ -2950,7 +2852,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_num_master_ranks_per_dimm</mssAccessorName>
     </attribute>
 
@@ -2963,7 +2864,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_num_packages_per_rank</mssAccessorName>
     </attribute>
 
@@ -2976,41 +2876,46 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2 2</array>
-        <mssAccessor>PORT DIMM</mssAccessor>
         <mssAccessorName>eff_prim_die_count</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_PORT</id>
+        <id>ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_PORT</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>This is the throttle numerator setting for cfg_nm_n_per_port</description>
+        <description>
+          This is the throttled N commands per window
+          of M DRAM clocks setting for cfg_nm_n_per_port.
+        </description>
         <valueType>uint32</valueType>
         <writeable/>
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
         <persistRuntime/>
-        <mssAccessorName>mem_throttle_numerator_per_port</mssAccessorName>
+        <mssAccessorName>mem_throttled_n_commands_per_port</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_MEM_THROTTLE_DENOMINATOR</id>
-        <!-- P8 MBA level information -->
+        <id>ATTR_MSS_MEM_M_DRAM_CLOCKS</id>
+        <!-- TK Verify creator and consumer is correct for p9 AAM -->
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>This is the throttle denominator setting for cfg_nm_m creator: mss_eff_cnfg consumer: mc_config  firmware notes: none</description>
+        <description>
+          This is the throttled M DRAM clocks setting for cfg_nm_m.
+          creator: mss_eff_cnfg
+          consumer: mc_config
+          firmware notes: none
+        </description>
         <valueType>uint32</valueType>
         <writeable/>
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
         <persistRuntime/>
-        <mssAccessor>PORT</mssAccessor>
-        <mssAccessorName>mem_throttle_denominator</mssAccessorName>
+        <mssAccessorName>mem_m_dram_clocks</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_SLOT</id>
-        <!-- P8 MBA level information -->
+        <id>ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>This is the throttle numerator setting for cfg_nm_n_per_slot</description>
         <valueType>uint32</valueType>
@@ -3019,27 +2924,31 @@
         <odmChangeable/>
         <array>2</array>
         <persistRuntime/>
-        <mssAccessorName>mem_throttle_numerator_per_slot</mssAccessorName>
+        <mssAccessorName>mem_throttled_n_commands_per_slot</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_MSS_MEM_WATT_TARGET</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Total memory power limit in cW for the dimms on the memory channel pair. Used to compute the throttles on the channel and/or dimms creator: unknown consumer: mss_eff_config firmware notes: none</description>
+        <description>
+          Total memory power limit in cW for the dimms on the memory channel pair.
+          Used to compute the throttles on the channel and/or dimms.
+          creator: unknown.
+          consumer: mss_eff_config.
+          firmware notes: none.
+        </description>
         <valueType>uint32</valueType>
         <writeable/>
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
         <persistRuntime/>
-        <mssAccessor>PORT</mssAccessor>
+
         <mssAccessorName>mem_watt_target</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_POWER_SLOPE</id>
-        <!-- P8 MBA level information -->
+        <id>ATTR_MSS_MASTER_PWR_SLOPE</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Master Power slope value for dimm</description>
         <valueType>uint32</valueType>
@@ -3048,13 +2957,11 @@
         <odmChangeable/>
         <array> 2 2</array>
         <persistRuntime/>
-        <mssAccessor>PORT</mssAccessor>
-        <mssAccessorName>power_slope</mssAccessorName>
+        <mssAccessorName>master_pwr_slope</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_POWER_SLOPE2</id>
-        <!-- P8 MBA level information -->
+        <id>ATTR_MSS_SUPPLIER_PWR_SLOPE</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Supplier Power slope value for dimm</description>
         <valueType>uint32</valueType>
@@ -3063,13 +2970,11 @@
         <odmChangeable/>
         <array> 2 2</array>
         <persistRuntime/>
-        <mssAccessor>PORT</mssAccessor>
-        <mssAccessorName>power_slope2</mssAccessorName>
+        <mssAccessorName>supplier_pwr_slope</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_POWER_INT</id>
-        <!-- P8 MBA level information -->
+        <id>ATTR_MSS_MASTER_PWR_INTERCEPT</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Master Power intercept value for dimm</description>
         <valueType>uint32</valueType>
@@ -3078,13 +2983,11 @@
         <odmChangeable/>
         <array> 2 2</array>
         <persistRuntime/>
-        <mssAccessor>PORT</mssAccessor>
-        <mssAccessorName>power_int</mssAccessorName>
+        <mssAccessorName>master_pwr_intercept</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_POWER_INT2</id>
-        <!-- P8 MBA level information -->
+        <id>ATTR_MSS_SUPPLIER_PWR_INTERCEPT</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Supplier Power intercept value for dimm</description>
         <valueType>uint32</valueType>
@@ -3093,8 +2996,7 @@
         <odmChangeable/>
         <array> 2 2</array>
         <persistRuntime/>
-        <mssAccessor>PORT</mssAccessor>
-        <mssAccessorName>power_int2</mssAccessorName>
+        <mssAccessorName>supplier_pwr_intercept</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -3108,7 +3010,6 @@
         <odmChangeable/>
         <array> 2 2</array>
         <persistRuntime/>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>dimm_maxbandwidth_gbs</mssAccessorName>
     </attribute>
 
@@ -3123,7 +3024,6 @@
         <odmChangeable/>
         <array> 2 2</array>
         <persistRuntime/>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>dimm_maxbandwidth_mrs</mssAccessorName>
     </attribute>
 
@@ -3138,7 +3038,6 @@
         <odmChangeable/>
         <array>2</array>
         <persistRuntime/>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>channel_pair_maxbandwidth_gbs</mssAccessorName>
     </attribute>
 
@@ -3153,7 +3052,6 @@
         <odmChangeable/>
         <array>2</array>
         <persistRuntime/>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>channel_pair_maxbandwidth_mrs</mssAccessorName>
     </attribute>
 
@@ -3168,7 +3066,6 @@
         <odmChangeable/>
         <array> 2 2</array>
         <persistRuntime/>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>dimm_maxpower</mssAccessorName>
     </attribute>
 
@@ -3183,42 +3080,42 @@
         <odmChangeable/>
         <array>2</array>
         <persistRuntime/>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>channel_pair_maxpower</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_PORT</id>
+        <id>ATTR_MSS_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT</id>
         <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Runtime throttle numerator setting for cfg_nm_n_per_port</description>
+        <description>
+          Runtime throttled N commands per
+          M DRAM clocks setting for cfg_nm_n_per_port.
+        </description>
         <valueType>uint32</valueType>
         <writeable/>
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
         <persistRuntime/>
-        <mssAccessor>PORT</mssAccessor>
-        <mssAccessorName>runtime_mem_throttle_numerator_per_port</mssAccessorName>
+        <mssAccessorName>runtime_mem_throttled_n_commands_per_port</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR</id>
+        <id>ATTR_MSS_RUNTIME_MEM_M_DRAM_CLOCKS</id>
         <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Runtime throttle denominator setting for cfg_nm_m</description>
+        <description>Runtime for M DRAM clocks setting for cfg_nm_m</description>
         <valueType>uint32</valueType>
         <writeable/>
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
         <persistRuntime/>
-        <mssAccessor>PORT</mssAccessor>
-        <mssAccessorName>runtime_mem_throttle_denominator</mssAccessorName>
+        <mssAccessorName>runtime_mem_m_dram_clocks</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_SLOT</id>
+        <id>ATTR_MSS_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_SLOT</id>
         <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Runtime throttle numerator setting for cfg_nm_n_per_slot</description>
@@ -3228,40 +3125,7 @@
         <odmChangeable/>
         <array>2</array>
         <persistRuntime/>
-        <mssAccessor>PORT</mssAccessor>
-        <mssAccessorName>runtime_mem_throttle_numerator_per_slot</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_PORT</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_port</description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <odmVisable/>
-        <persistRuntime/>
-        <mssAccessorName>mrw_safemode_mem_throttle_numerator_per_port</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_SLOT</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_slot</description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <odmVisable/>
-        <persistRuntime/>
-        <mssAccessorName>mrw_safemode_mem_throttle_numerator_per_slot</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MRW_THERMAL_MEMORY_POWER_LIMIT</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Machine Readable Workbook Thermal Memory Power Limit</description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>mrw_thermal_memory_power_limit</mssAccessorName>
+        <mssAccessorName>runtime_mem_throttled_n_commands_per_slot</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -3327,18 +3191,6 @@
         <odmVisable/>
         <odmChangeable/>
         <mssAccessorName>derived_mba_cacheline_interleave_mode</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>At a system level, this attribute controls if interleaving is required, requested or never.  The MRW.</description>
-        <valueType>uint8</valueType>
-        <enum>NEVER = 0, REQUIRED = 1, REQUESTED = 2</enum>
-        <platInit/>
-        <odmVisable/>
-        <odmChangeable/>
-        <mssAccessorName>mrw_mba_cacheline_interleave_mode_control</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -3414,7 +3266,6 @@
         <odmChangeable/>
         <array>2</array>
         <persistRuntime/>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dimm_functional_vector</mssAccessorName>
     </attribute>
 
@@ -3437,7 +3288,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_lpasr</mssAccessorName>
     </attribute>
 
@@ -3459,7 +3309,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_mpr_page</mssAccessorName>
     </attribute>
 
@@ -3482,7 +3331,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_geardown_mode</mssAccessorName>
     </attribute>
 
@@ -3505,7 +3353,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_per_dram_access</mssAccessorName>
     </attribute>
 
@@ -3528,7 +3375,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_temp_readout</mssAccessorName>
     </attribute>
 
@@ -3550,7 +3396,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_crc_wr_latency</mssAccessorName>
     </attribute>
 
@@ -3573,7 +3418,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_mpr_rd_format</mssAccessorName>
     </attribute>
 
@@ -3596,7 +3440,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_max_powerdown_mode</mssAccessorName>
     </attribute>
 
@@ -3618,7 +3461,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_temp_ref_mode</mssAccessorName>
     </attribute>
 
@@ -3641,7 +3483,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_int_vref_mon</mssAccessorName>
     </attribute>
 
@@ -3664,7 +3505,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_cs_cmd_latency</mssAccessorName>
     </attribute>
 
@@ -3687,7 +3527,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_self_ref_abort</mssAccessorName>
     </attribute>
 
@@ -3708,7 +3547,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_rd_preamble_train</mssAccessorName>
     </attribute>
 
@@ -3729,7 +3567,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_rd_preamble</mssAccessorName>
     </attribute>
 
@@ -3750,7 +3587,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_wr_preamble</mssAccessorName>
     </attribute>
 
@@ -3771,7 +3607,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_ca_parity_latency</mssAccessorName>
     </attribute>
 
@@ -3792,7 +3627,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_crc_error_clear</mssAccessorName>
     </attribute>
 
@@ -3813,7 +3647,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_ca_parity_error_status</mssAccessorName>
     </attribute>
 
@@ -3834,7 +3667,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_odt_input_buff</mssAccessorName>
     </attribute>
 
@@ -3855,7 +3687,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2 2 4</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_rtt_park</mssAccessorName>
     </attribute>
 
@@ -3876,7 +3707,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_ca_parity</mssAccessorName>
     </attribute>
 
@@ -3897,7 +3727,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_data_mask</mssAccessorName>
     </attribute>
 
@@ -3918,7 +3747,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_write_dbi</mssAccessorName>
     </attribute>
 
@@ -3939,7 +3767,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_read_dbi</mssAccessorName>
     </attribute>
 
@@ -3959,7 +3786,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2 2 4</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>vref_dq_train_value</mssAccessorName>
     </attribute>
 
@@ -3980,7 +3806,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2 2 4</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>vref_dq_train_range</mssAccessorName>
     </attribute>
 
@@ -4001,7 +3826,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2 2 4</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>vref_dq_train_enable</mssAccessorName>
     </attribute>
 
@@ -4022,7 +3846,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>tccd_l</mssAccessorName>
     </attribute>
 
@@ -4044,7 +3867,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_write_crc</mssAccessorName>
     </attribute>
 
@@ -4073,7 +3895,6 @@
         <odmChangeable/>
         <array>2</array>
         <persistRuntime/>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>cal_step_enable</mssAccessorName>
     </attribute>
 
@@ -4106,7 +3927,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2 4 4</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>slew_rate_data</mssAccessorName>
     </attribute>
 
@@ -4126,7 +3946,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2 4 4</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>slew_rate_adr</mssAccessorName>
     </attribute>
 
@@ -4160,7 +3979,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>allow_single_port</mssAccessorName>
     </attribute>
 
@@ -4179,7 +3997,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>dqs_swizzle_type</mssAccessorName>
     </attribute>
 
@@ -4226,7 +4043,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>mcbist_pattern</mssAccessorName>
     </attribute>
 
@@ -4251,7 +4067,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>mcbist_test_type</mssAccessorName>
     </attribute>
 
@@ -4265,7 +4080,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>mcbist_printing_disable</mssAccessorName>
     </attribute>
 
@@ -4279,7 +4093,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>mcbist_data_enable</mssAccessorName>
     </attribute>
 
@@ -4293,7 +4106,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>mcbist_user_rank</mssAccessorName>
     </attribute>
 
@@ -4307,7 +4119,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>mcbist_user_bank</mssAccessorName>
     </attribute>
 
@@ -4321,7 +4132,7 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
+
         <mssAccessorName>schmoo_multiple_setup_call</mssAccessorName>
     </attribute>
 
@@ -4339,7 +4150,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_buffer_latency</mssAccessorName>
     </attribute>
 
@@ -4354,7 +4164,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName> eff_lrdimm_word_x</mssAccessorName>
     </attribute>
 
@@ -4372,7 +4181,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>lrdimm_mr12_reg</mssAccessorName>
     </attribute>
 
@@ -4391,7 +4199,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array> 2 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>lrdimm_additional_cntl_words</mssAccessorName>
     </attribute>
 
@@ -4407,7 +4214,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>lrdimm_rank_mult_mode</mssAccessorName>
     </attribute>
 
@@ -4421,7 +4227,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>throttle_control_ras_weight</mssAccessorName>
     </attribute>
 
@@ -4435,7 +4240,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>throttle_control_cas_weight</mssAccessorName>
     </attribute>
 
@@ -4449,7 +4253,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>mcbist_random_seed_value</mssAccessorName>
     </attribute>
 
@@ -4463,7 +4266,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>mcbist_random_seed_type</mssAccessorName>
     </attribute>
 
@@ -4477,41 +4279,8 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
+
         <mssAccessorName> mcbist_ddr4_pda_enable</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Machine Readable Workbook DIMM power curve percent uplift for this system at max utilization.</description>
-        <valueType>uint8</valueType>
-        <platInit/>
-        <odmVisable/>
-        <persistRuntime/>
-        <mssAccessorName>mrw_dimm_power_curve_percent_uplift</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT_IDLE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Machine Readable Workbook DIMM power curve percent uplift for this system at idle utilization.</description>
-        <valueType>uint8</valueType>
-        <platInit/>
-        <odmVisable/>
-        <persistRuntime/>
-        <mssAccessorName>mrw_dimm_power_curve_percent_uplift_idle</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MRW_MEM_THROTTLE_DENOMINATOR</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Machine Readable Workbook throttle value for denominator cfg_nm_m</description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <odmVisable/>
-        <persistRuntime/>
-        <mssAccessorName>mrw_mem_throttle_denominator</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -4527,20 +4296,6 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_MRW_MAX_DRAM_DATABUS_UTIL</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-            Machine Readable Workbook value for maximum dram data bus utilization in centi percent (c%).
-            Used to determine memory throttle values.
-        </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <odmVisable/>
-        <persistRuntime/>
-        <mssAccessorName>mrw_max_dram_databus_util</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_MSS_EFF_VPD_VERSION</id>
         <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
@@ -4552,7 +4307,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_vpd_version</mssAccessorName>
     </attribute>
 
@@ -4571,41 +4325,6 @@
         <odmVisable/>
         <odmChangeable/>
         <mssAccessorName>nest_capable_frequencies</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MRW_STRICT_MBA_PLUG_RULE_CHECKING</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-           The MRW for a system should set this to TRUE for systems that must obey plug rules.
-           Lab environments should default this to off and allow the user to override using normal methods to test.
-        </description>
-        <valueType>uint8</valueType>
-        <enum>FALSE = 0, TRUE = 1</enum>
-        <platInit/>
-        <mssAccessorName>mrw_strict_mba_plug_rule_checking</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Used for Custom DIMMs to not enable the reading of the dimm temperature sensor on the master i2c bus</description>
-        <valueType>uint8</valueType>
-        <enum>OFF = 0, ON = 1</enum>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>mrw_cdimm_master_i2c_temp_sensor_enable</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MRW_CDIMM_SPARE_I2C_TEMP_SENSOR_ENABLE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Used for Custom DIMMs to not enable the reading of the dimm temperature sensor on the spare i2c bus</description>
-        <valueType>uint8</valueType>
-        <enum>OFF = 0, ON = 1</enum>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>mrw_cdimm_spare_i2c_temp_sensor_enable</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -4840,35 +4559,6 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_MRW_MCS_PREFETCH_RETRY_THRESHOLD</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-            Option to control MCS prefetch retry threshold, for performance optimization.
-            This attribute controls the number of retries in the prefetch engine.
-            Retry threshold available ranges from 16 to 30.
-            Note: Values outside those ranges will default to 30.
-            In MRW.
-        </description>
-        <valueType>uint8</valueType>
-        <platInit/>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <mssAccessorName>mrw_mcs_prefetch_retry_threshold</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MRW_POWER_CONTROL_REQUESTED</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Capable power control settings. In MRW.</description>
-        <valueType>uint8</valueType>
-        <enum>OFF = 0x00, SLOWEXIT = 0x01, FASTEXIT = 0x02</enum>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>mrw_power_control_requested</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_MSS_AVDD_OFFSET</id>
         <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
         <description>Dynamic VID offset applied to AVDD. In mV.</description>
@@ -4934,7 +4624,7 @@
         <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
         <description>
         ISDIMM DQ mapping that comes from QX keyword on the CDIMM VPD.
-    </description>
+        </description>
         <valueType>uint8</valueType>
         <platInit/>
         <array>4 80</array>
@@ -4946,7 +4636,7 @@
         <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
         <description>
         ISDIMM DQQ mapping that comes from QS keyword on the CDIMM VPD.
-    </description>
+        </description>
         <valueType>uint8</valueType>
         <platInit/>
         <array>4 20</array>
@@ -4956,46 +4646,14 @@
     <attribute>
         <id>ATTR_ISDIMM_POWER_CURVE_ALGORITHM_VERSION</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Version of algorithm and dependent attributes used to calculate ISDIMM power curve attributes</description>
+        <description>
+          Version of algorithm and dependent attributes used
+          to calculate ISDIMM power curve attributes
+        </description>
         <valueType>uint32</valueType>
         <platInit/>
         <writeable/>
         <mssAccessorName>isdimm_power_curve_algorithm_version</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MRW_DDR3_VDDR_MAX_LIMIT</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>Maximum voltage limit for the dynamic VID DDR3 VDDR voltage setpoint. In mV.</description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>mrw_ddr3_vddr_max_limit</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MRW_DDR4_VDDR_MAX_LIMIT</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>Maximum voltage limit for the dynamic VID DDR4 VDDR voltage setpoint. In mV.</description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>mrw_ddr4_vddr_max_limit</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MRW_MEM_SENSOR_CACHE_ADDR_MAP</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Machine Readable Workbook value detailing the wiring of the 8 dimm temperature
-            sensors for non custom dimms, in DIMM A0,A1,B0,B1,C0,C1,D0,D1 order. One nibble
-            per sensor where bit0 (MSB) is the i2c bus the sensor is attached to
-            (0 for master, 1 for spare) and bits 1:3 are for A2,A1,A0 of the sensor i2c address (where A2 is MSB)
-        </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>mrw_mem_sensor_cache_addr_map</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -5010,74 +4668,50 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Machine Readable Workbook enablement of the HWP code to adjust the VMEM regulator power limit based on number of installed DIMMs.</description>
-        <valueType>uint8</valueType>
-        <enum>FALSE = 0, TRUE = 1</enum>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>mrw_vmem_regulator_power_limit_per_dimm_adj_enable</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Machine Readable Workbook value for the maximum possible number of dimms that can be installed under any of the VMEM regulators.</description>
-        <valueType>uint8</valueType>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>mrw_max_number_dimms_possible_per_vmem_regulator</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Machine Readable Workbook VMEM regulator power limit per CDIMM assuming a full configuration. Units in cW.</description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>mrw_vmem_regulator_memory_power_limit_per_dimm</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_DATABUS_UTIL_PER_MBA</id>
-        <!-- P8 MBA level information -->
+        <id>ATTR_MSS_DATABUS_UTIL</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>MBA DRAM data bus utilization percent to use to determine cfg_nm_n_per_mba</description>
+        <description>
+          DRAM data bus utilization percent to use to determine ATTR_MSS_THROTTLED_N_COMMANDS
+          creator: f/w
+          consumer: mss_utils_to_throttle
+        </description>
         <valueType>uint8</valueType>
         <writeable/>
         <odmVisable/>
         <odmChangeable/>
-        <array>2</array>
+        <array>2 2</array>
         <persistRuntime/>
-        <mssAccessor>PORT</mssAccessor>
-        <mssAccessorName>databus_util_per_mba</mssAccessorName>
+        <mssAccessorName>databus_util</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_UTIL_N_PER_MBA</id>
-        <!-- P8 MBA level information -->
+        <id>ATTR_MSS_THROTTLED_N_COMMANDS</id>
+        <!-- TK  We can throuble per port/dimm slot will one attr suffice?  AAM  -->
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>cfg_nm_n_per_mba throttle N value that was calculated from MSS_DATABUS_UTIL_PER_MBA</description>
+        <description>
+          Throttled N commands (address operations) that are
+          allowed within a window of M DRAM clocks.
+          Nimbus workbook (Power and Thermal Controls).
+          creator: mss_utils_to_throttle
+        </description>
         <valueType>uint32</valueType>
         <writeable/>
         <odmVisable/>
         <odmChangeable/>
-        <array>2</array>
+        <array>2 2</array>
         <persistRuntime/>
-        <mssAccessor>PORT</mssAccessor>
-        <mssAccessorName>util_n_per_mba</mssAccessorName>
+        <mssAccessorName>throttled_n_commands</mssAccessorName>
     </attribute>
 
 
     <attribute>
         <id>ATTR_EFF_DRAM_MAC</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Maximum Activate Count. Used in various locations and is computed in mss_eff_cnfg.
-        creator: mss_eff_cnfg
-        consumer: various
-        firmware notes: none
+        <description>
+          Maximum Activate Count. Used in various locations and is computed in mss_eff_cnfg.
+          creator: mss_eff_cnfg
+          consumer: various
+          firmware notes: none
         </description>
         <valueType>uint16</valueType>
         <enum>UNTESTED = 0, 700K = 700, 600K = 600, 500K = 500, 400K = 400, 300K = 300, 200K = 200,  UNLIMITED = 8</enum>
@@ -5085,7 +4719,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2 2</array>
-        <mssAccessor>PORT DIMM</mssAccessor>
         <mssAccessorName>eff_dram_mac</mssAccessorName>
     </attribute>
 
@@ -5102,7 +4735,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2 2</array>
-        <mssAccessor>PORT DIMM</mssAccessor>
         <mssAccessorName>eff_dram_tmaw</mssAccessorName>
     </attribute>
 
@@ -5121,7 +4753,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2 2</array>
-        <mssAccessor>PORT DIMM</mssAccessor>
         <mssAccessorName>eff_dram_ppr</mssAccessorName>
     </attribute>
 
@@ -5140,7 +4771,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2 2</array>
-        <mssAccessor>PORT DIMM</mssAccessor>
         <mssAccessorName>eff_dram_soft_ppr</mssAccessorName>
     </attribute>
 
@@ -5159,7 +4789,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>layout_version</mssAccessorName>
     </attribute>
 
@@ -5178,7 +4807,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>data_version</mssAccessorName>
     </attribute>
 
@@ -5197,7 +4825,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_addr_a0</mssAccessorName>
     </attribute>
 
@@ -5216,7 +4843,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_addr_a1</mssAccessorName>
     </attribute>
 
@@ -5235,7 +4861,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_addr_a2</mssAccessorName>
     </attribute>
 
@@ -5254,7 +4879,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_addr_a3</mssAccessorName>
     </attribute>
 
@@ -5273,7 +4897,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_addr_a4</mssAccessorName>
     </attribute>
 
@@ -5292,7 +4915,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_addr_a5</mssAccessorName>
     </attribute>
 
@@ -5311,7 +4933,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_addr_a6</mssAccessorName>
     </attribute>
 
@@ -5330,7 +4951,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_addr_a7</mssAccessorName>
     </attribute>
 
@@ -5348,7 +4968,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_addr_a8</mssAccessorName>
     </attribute>
 
@@ -5367,7 +4986,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_addr_a9</mssAccessorName>
     </attribute>
 
@@ -5386,7 +5004,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_addr_a10</mssAccessorName>
     </attribute>
 
@@ -5405,7 +5022,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_addr_a11</mssAccessorName>
     </attribute>
 
@@ -5424,7 +5040,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_addr_a12</mssAccessorName>
     </attribute>
 
@@ -5443,7 +5058,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_addr_a13</mssAccessorName>
     </attribute>
 
@@ -5462,7 +5076,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_addr_a17</mssAccessorName>
     </attribute>
 
@@ -5481,7 +5094,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_addr_c0</mssAccessorName>
     </attribute>
 
@@ -5500,7 +5112,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_addr_c1</mssAccessorName>
     </attribute>
 
@@ -5519,7 +5130,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_addr_c2</mssAccessorName>
     </attribute>
 
@@ -5538,7 +5148,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_addr_ba0</mssAccessorName>
     </attribute>
 
@@ -5556,7 +5165,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_addr_ba1</mssAccessorName>
     </attribute>
 
@@ -5570,7 +5178,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_addr_bg0</mssAccessorName>
     </attribute>
 
@@ -5589,7 +5196,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_addr_bg1</mssAccessorName>
     </attribute>
 
@@ -5608,7 +5214,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_clk0</mssAccessorName>
     </attribute>
 
@@ -5627,7 +5232,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_clk1</mssAccessorName>
     </attribute>
 
@@ -5646,7 +5250,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_cmd_actn</mssAccessorName>
     </attribute>
 
@@ -5664,7 +5267,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_cmd_addr_wen_a14</mssAccessorName>
     </attribute>
 
@@ -5681,7 +5283,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_cmd_addr_casn_a15</mssAccessorName>
     </attribute>
 
@@ -5700,7 +5301,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_cmd_addr_rasn_a16</mssAccessorName>
     </attribute>
 
@@ -5718,7 +5318,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_cmd_par</mssAccessorName>
     </attribute>
 
@@ -5737,7 +5336,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_cntl_cke0</mssAccessorName>
     </attribute>
 
@@ -5756,7 +5354,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_cntl_cke1</mssAccessorName>
     </attribute>
 
@@ -5775,7 +5372,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_cntl_cke2</mssAccessorName>
     </attribute>
 
@@ -5794,7 +5390,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_cntl_cke3</mssAccessorName>
     </attribute>
 
@@ -5813,7 +5408,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_cntl_csn0</mssAccessorName>
     </attribute>
 
@@ -5831,7 +5425,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_cntl_csn1</mssAccessorName>
     </attribute>
 
@@ -5849,7 +5442,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_cntl_csn2</mssAccessorName>
     </attribute>
 
@@ -5868,7 +5460,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_cntl_csn3</mssAccessorName>
     </attribute>
 
@@ -5887,7 +5478,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_cntl_odt0</mssAccessorName>
     </attribute>
 
@@ -5905,7 +5495,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_cntl_odt1</mssAccessorName>
     </attribute>
 
@@ -5922,7 +5511,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_cntl_odt2</mssAccessorName>
     </attribute>
 
@@ -5940,7 +5528,6 @@
         <odmVisable />
         <odmChangeable />
         <array>2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>phase_rot_cntl_odt3</mssAccessorName>
     </attribute>
 
@@ -5991,7 +5578,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2 2</array>
-        <mssAccessor>PORT DIMM</mssAccessor>
         <mssAccessorName>eff_dram_module_bus_width</mssAccessorName>
     </attribute>
 
@@ -6011,7 +5597,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_min_cycle_time</mssAccessorName>
     </attribute>
 
@@ -6031,7 +5616,6 @@
         <odmVisable/>
         <odmChangeable/>
         <array>2 2</array>
-        <mssAccessor>PORT</mssAccessor>
         <mssAccessorName>eff_dram_max_cycle_time</mssAccessorName>
     </attribute>
 
@@ -6788,7 +6372,7 @@
         </description>
         <valueType>uint64</valueType>
         <array> 2 2 </array>
-        <mssAccessor>PORT DIMM</mssAccessor>
+
         <mssAccessorName>cas_latencies_supported</mssAccessorName>
         <platInit/>
     </attribute>
@@ -6817,7 +6401,6 @@
         </description>
         <valueType>uint64</valueType>
         <array> 2 2 </array>
-        <mssAccessor>PORT DIMM</mssAccessor>
         <mssAccessorName>spd_module_nominal_voltage</mssAccessorName>
         <!-- Note that current DDR4 spec has reserved bits for bits 2~7 -->
         <enum>OPERABLE = 1</enum>
