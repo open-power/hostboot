@@ -100,6 +100,13 @@ class Target
     public:
 
         ///
+        /// @brief Delagate default constructor to constructor
+        ///        that takes in a value as a param
+        ///
+        Target(): Target(V())
+        {};
+
+        ///
         /// @brief Create a Target, with a value
         /// @param[in] Value the value (i.e., specific element this
         /// target represents, or pointer)
@@ -107,9 +114,10 @@ class Target
         /// single uint64_t in value which represents all the information
         /// they might need. value( K | V ), for example
         ///
-        Target(V Value = 0):
+        Target(V Value):
             iv_handle(Value)
-        {}
+        {};
+
 
         ///
         /// @brief Assignment Operator.
