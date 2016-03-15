@@ -1,0 +1,281 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: chips/p9/procedures/xml/attribute_info/memory_mrw_attributes.xml $ -->
+<!--                                                                        -->
+<!-- IBM CONFIDENTIAL                                                       -->
+<!--                                                                        -->
+<!-- EKB Project                                                            -->
+<!--                                                                        -->
+<!-- COPYRIGHT 2016                                                         -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- The source code for this program is not published or otherwise         -->
+<!-- divested of its trade secrets, irrespective of what has been           -->
+<!-- deposited with the U.S. Copyright Office.                              -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+
+<attributes>
+
+    <attribute>
+        <id>ATTR_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+          Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_port
+        </description>
+        <valueType>uint32</valueType>
+        <platInit/>
+        <odmVisable/>
+        <persistRuntime/>
+        <mssAccessorName>mrw_safemode_mem_throttled_n_commands_per_port</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_SLOT</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+          Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_slot
+        </description>
+        <valueType>uint32</valueType>
+        <platInit/>
+        <odmVisable/>
+        <persistRuntime/>
+        <mssAccessorName>mrw_safemode_mem_throttled_n_commands_per_slot</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MRW_THERMAL_MEMORY_POWER_LIMIT</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>Machine Readable Workbook Thermal Memory Power Limit</description>
+        <valueType>uint32</valueType>
+        <platInit/>
+        <odmVisable/>
+        <mssAccessorName>mrw_thermal_memory_power_limit</mssAccessorName>
+    </attribute>
+
+
+    <attribute>
+        <id>ATTR_MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+          At a system level, this attribute controls if interleaving is required, requested or never.  The MRW.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>NEVER = 0, REQUIRED = 1, REQUESTED = 2</enum>
+        <platInit/>
+        <odmVisable/>
+        <odmChangeable/>
+        <mssAccessorName>mrw_mba_cacheline_interleave_mode_control</mssAccessorName>
+    </attribute>
+
+
+    <attribute>
+        <id>ATTR_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+          Machine Readable Workbook DIMM power curve percent uplift
+          for this system at max utilization.
+        </description>
+        <valueType>uint8</valueType>
+        <platInit/>
+        <odmVisable/>
+        <persistRuntime/>
+        <mssAccessorName>mrw_dimm_power_curve_percent_uplift</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT_IDLE</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+          Machine Readable Workbook DIMM power curve percent uplift
+          for this system at idle utilization.
+        </description>
+        <valueType>uint8</valueType>
+        <platInit/>
+        <odmVisable/>
+        <persistRuntime/>
+        <mssAccessorName>mrw_dimm_power_curve_percent_uplift_idle</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MRW_MEM_M_DRAM_CLOCKS</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+          Machine Readable Workbook for the number of M DRAM clocks.
+          One approach to curbing DRAM power usage is by throttling
+          traffic through a programmable N commands over M window.
+        </description>
+        <valueType>uint32</valueType>
+        <platInit/>
+        <odmVisable/>
+        <persistRuntime/>
+        <mssAccessorName>mrw_mem_m_dram_clocks</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MRW_MAX_DRAM_DATABUS_UTIL</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+            Machine Readable Workbook value for maximum dram data bus utilization in centi percent (c%).
+            Used to determine memory throttle values.
+        </description>
+        <valueType>uint32</valueType>
+        <platInit/>
+        <odmVisable/>
+        <persistRuntime/>
+        <mssAccessorName>mrw_max_dram_databus_util</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MRW_STRICT_MBA_PLUG_RULE_CHECKING</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+           The MRW for a system should set this to TRUE for systems that must obey plug rules.
+           Lab environments should default this to off and allow the user to override using normal methods to test.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>FALSE = 0, TRUE = 1</enum>
+        <platInit/>
+        <mssAccessorName>mrw_strict_mba_plug_rule_checking</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+          Used for Custom DIMMs to not enable the reading of the
+          dimm temperature sensor on the master i2c bus
+        </description>
+        <valueType>uint8</valueType>
+        <enum>OFF = 0, ON = 1</enum>
+        <platInit/>
+        <odmVisable/>
+        <mssAccessorName>mrw_cdimm_master_i2c_temp_sensor_enable</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MRW_CDIMM_SPARE_I2C_TEMP_SENSOR_ENABLE</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+          Used for Custom DIMMs to not enable the reading of the
+          dimm temperature sensor on the spare i2c bus
+        </description>
+        <valueType>uint8</valueType>
+        <enum>OFF = 0, ON = 1</enum>
+        <platInit/>
+        <odmVisable/>
+        <mssAccessorName>mrw_cdimm_spare_i2c_temp_sensor_enable</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MRW_MCS_PREFETCH_RETRY_THRESHOLD</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+            Option to control MCS prefetch retry threshold, for performance optimization.
+            This attribute controls the number of retries in the prefetch engine.
+            Retry threshold available ranges from 16 to 30.
+            Note: Values outside those ranges will default to 30.
+            In MRW.
+        </description>
+        <valueType>uint8</valueType>
+        <platInit/>
+        <writeable/>
+        <odmVisable/>
+        <odmChangeable/>
+        <mssAccessorName>mrw_mcs_prefetch_retry_threshold</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MRW_POWER_CONTROL_REQUESTED</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>Capable power control settings. In MRW.</description>
+        <valueType>uint8</valueType>
+        <enum>OFF = 0x00, SLOWEXIT = 0x01, FASTEXIT = 0x02</enum>
+        <platInit/>
+        <odmVisable/>
+        <mssAccessorName>mrw_power_control_requested</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MRW_DDR3_VDDR_MAX_LIMIT</id>
+        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+        <description>
+          Maximum voltage limit for the dynamic VID DDR3 VDDR voltage setpoint. In mV.
+        </description>
+        <valueType>uint32</valueType>
+        <platInit/>
+        <odmVisable/>
+        <mssAccessorName>mrw_ddr3_vddr_max_limit</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MRW_DDR4_VDDR_MAX_LIMIT</id>
+        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+        <description>
+          Maximum voltage limit for the dynamic VID DDR4 VDDR voltage setpoint. In mV.
+        </description>
+        <valueType>uint32</valueType>
+        <platInit/>
+        <odmVisable/>
+        <mssAccessorName>mrw_ddr4_vddr_max_limit</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MRW_MEM_SENSOR_CACHE_ADDR_MAP</id>
+        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+        <description>
+            Machine Readable Workbook value detailing the wiring of the 8 dimm temperature
+            sensors for non custom dimms, in DIMM A0,A1,B0,B1,C0,C1,D0,D1 order. One nibble
+            per sensor where bit0 (MSB) is the i2c bus the sensor is attached to
+            (0 for master, 1 for spare) and bits 1:3 are for A2,A1,A0 of the sensor i2c
+            address (where A2 is MSB)
+        </description>
+        <valueType>uint32</valueType>
+        <platInit/>
+        <odmVisable/>
+        <mssAccessorName>mrw_mem_sensor_cache_addr_map</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+          Machine Readable Workbook enablement of the HWP code to adjust the
+          VMEM regulator power limit based on number of installed DIMMs.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>FALSE = 0, TRUE = 1</enum>
+        <platInit/>
+        <odmVisable/>
+        <mssAccessorName>mrw_vmem_regulator_power_limit_per_dimm_adj_enable</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+          Machine Readable Workbook value for the maximum possible number
+          of dimms that can be installed under any of the VMEM regulators.
+        </description>
+        <valueType>uint8</valueType>
+        <platInit/>
+        <odmVisable/>
+        <mssAccessorName>mrw_max_number_dimms_possible_per_vmem_regulator</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+          Machine Readable Workbook VMEM regulator power limit
+          per CDIMM assuming a full configuration. Units in cW.
+        </description>
+        <valueType>uint32</valueType>
+        <platInit/>
+        <odmVisable/>
+        <mssAccessorName>mrw_vmem_regulator_memory_power_limit_per_dimm</mssAccessorName>
+    </attribute>
+
+</attributes>
