@@ -33,9 +33,7 @@
 #include <vfs/vfs.H>
 #include <runtime/runtime.H>
 #include <devtree/devtreeif.H>
-
-
-
+#include <runtime/customize_attrs_for_payload.H>
 #include <hbotcompid.H>
 
 using   namespace   ERRORLOG;
@@ -71,6 +69,14 @@ void* call_host_runtime_setup (void *io_pArgs)
                 // break from do loop if error occured
                 break;
             }
+        }
+
+        // Configure the ATTR_HBRT_HYP_ID attributes so that runtime code and
+        // whichever hypervisor is loaded can reference equivalent targets
+        l_err = RUNTIME::configureHbrtHypIds(TARGETING::is_phyp_load());
+        if(l_err)
+        {
+            break;
         }
 
         // Map the Host Data into the VMM if applicable

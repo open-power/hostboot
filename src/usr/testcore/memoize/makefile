@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/testcore/makefile $
+# $Source: src/usr/testcore/memoize/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2016
+# Contributors Listed Below - COPYRIGHT 2016
 # [+] International Business Machines Corp.
 #
 #
@@ -22,12 +22,10 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../..
 
-SUBDIRS += lib.d
-SUBDIRS += kernel.d
-SUBDIRS += rtloader.d
-SUBDIRS += memoize.d
+ROOTPATH = ../../../..
+
+MODULE = testmemoize
+TESTS = *.H
 
 include ${ROOTPATH}/config.mk
-

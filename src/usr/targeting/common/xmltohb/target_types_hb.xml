@@ -83,6 +83,7 @@
     <attribute><id>IPMI_SENSORS</id></attribute>
     <attribute><id>PART_NUMBER</id></attribute>
     <attribute><id>SERIAL_NUMBER</id></attribute>
+    <attribute><id>VPD_SWITCHES</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>
@@ -117,6 +118,9 @@
     </attribute>
     <attribute>
         <id>PART_NUMBER</id>
+    </attribute>
+    <attribute>
+        <id>HBRT_HYP_ID</id>
     </attribute>
 </targetTypeExtension>
 
@@ -176,12 +180,18 @@
     <attribute><id>IPMI_SENSORS</id></attribute>
     <attribute><id>PART_NUMBER</id></attribute>
     <attribute><id>SERIAL_NUMBER</id></attribute>
+    <attribute>
+        <id>HBRT_HYP_ID</id>
+    </attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>
     <id>unit-core-power9</id>
     <attribute><id>IPMI_SENSORS</id></attribute>
     <attribute><id>HB_TARGET_SCOMABLE</id></attribute>
+    <attribute>
+        <id>HBRT_HYP_ID</id>
+    </attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>
@@ -193,24 +203,11 @@
 </targetTypeExtension>
 
 <targetTypeExtension>
-    <id>enc-node-power9</id>
-    <attribute><id>VPD_SWITCHES</id></attribute>
-</targetTypeExtension>
-
-<targetTypeExtension>
     <id>lcard-dimm</id>
     <attribute><id>VPD_SWITCHES</id></attribute>
     <attribute><id>IPMI_SENSORS</id></attribute>
     <attribute><id>PART_NUMBER</id></attribute>
     <attribute><id>SERIAL_NUMBER</id></attribute>
-</targetTypeExtension>
-
-<targetTypeExtension>
-    <id>occ</id>
-    <attribute>
-        <id>PSTATE_TABLE</id>
-    </attribute>
-    <attribute><id>IPMI_SENSORS</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>
@@ -224,14 +221,6 @@
 </targetType>
 
 <targetTypeExtension>
-    <id>lcard-dimm</id>
-    <attribute><id>VPD_SWITCHES</id></attribute>
-    <attribute><id>IPMI_SENSORS</id></attribute>
-    <attribute><id>PART_NUMBER</id></attribute>
-    <attribute><id>SERIAL_NUMBER</id></attribute>
-</targetTypeExtension>
-
-<targetTypeExtension>
     <id>occ</id>
     <attribute>
         <id>PSTATE_TABLE</id>
@@ -240,43 +229,6 @@
         <id>PSTATE_TABLE_MFG</id>
     </attribute>
     <attribute><id>IPMI_SENSORS</id></attribute>
-</targetTypeExtension>
-
-<!-- Centaur chip/DMI -->
-
-<targetTypeExtension>
-    <id>chip-membuf-centaur</id>
-    <attribute>
-        <id>FSI_SCOM_MUTEX</id>
-    </attribute>
-    <attribute>
-        <id>SCOM_IND_MUTEX</id>
-    </attribute>
-    <attribute><id>SCAN_MUTEX</id></attribute>
-    <attribute>
-        <id>IBSCOM_VIRTUAL_ADDR</id>
-    </attribute>
-    <attribute>
-        <id>IBSCOM_MUTEX</id>
-    </attribute>
-    <attribute>
-        <id>I2C_ENGINE_MUTEX_0</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>I2C_ENGINE_MUTEX_1</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>GPIO_INFO</id>
-    </attribute>
-    <attribute><id>VPD_SWITCHES</id></attribute>
-    <attribute>
-        <id>ISDIMM_MBVPD_INDEX</id>
-    </attribute>
-    <attribute><id>IPMI_SENSORS</id></attribute>
-    <attribute><id>PART_NUMBER</id></attribute>
-    <attribute><id>SERIAL_NUMBER</id></attribute>
 </targetTypeExtension>
 
 </attributes>

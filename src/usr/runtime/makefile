@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2015
+# Contributors Listed Below - COPYRIGHT 2012,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -38,6 +38,7 @@ OBJS += hdatservice.o
 OBJS += fakepayload.o
 OBJS += tce.o
 OBJS += errlud_hdat.o
+OBJS += customize_attrs_for_payload.o
 
 SUBDIRS += test.d
 

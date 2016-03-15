@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2015
+# Contributors Listed Below - COPYRIGHT 2012,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -25,8 +25,18 @@
 ROOTPATH = ../../../..
 
 MODULE = testruntime
-TESTS += hdatservicetest.H
-TESTS += tcetest.H
+#@TODO RTC 132750
+#TESTS += hdatservicetest.H
+#TESTS += tcetest.H
+TESTS += test_customize_attrs_for_payload.H
+
+# The testcase depends on the following file, but it is typically only compiled
+# into the runtime code.  Pull it into just the test module so we can exercise
+# it
+OBJS += rt_targeting.o
+
+# Use a vpath to give access to the rt_targeting.C code
+vpath %.C ../../targeting/runtime
 
 #@TODO RTC:132750
 #TESTS += runtimeattrtest.H

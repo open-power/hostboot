@@ -194,6 +194,7 @@ TESTCASE_MODULES += testibscom
 TESTCASE_MODULES += testxscom
 TESTCASE_MODULES += testkernel
 TESTCASE_MODULES += testtargeting
+TESTCASE_MODULES += testmemoize
 
 #******************************************************************
 #KNOWN ISSUES (I might let these run but there is something wrong)
@@ -209,8 +210,7 @@ TESTCASE_MODULES += testscom
 #Requires main store memory @TODO RTC: 132577
 #TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testdump)
 
-#Need to remove HostServices related code @TODO RTC:132750
-#TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testruntime)
+TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testruntime)
 
 #@TODO RTC: 137561 Enable this test case when interupt story is complete
 #TESTCASE_MODULES += testintr
