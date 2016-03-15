@@ -145,6 +145,15 @@ class Target
         bool operator!=(const Target& i_right) const;
 
         ///
+        /// @brief Less Than Comparison Operator
+        /// @param[in] i_right Reference to Target to compare.
+        /// @return bool. True if less than i_right.
+        /// @note Platforms need to define this so that the physical
+        /// targets are determined to be less than rather than just the handles
+        ///
+        bool operator<(const Target& i_right) const;
+
+        ///
         /// @brief Get the handle.
         /// @return V The target's handle, or value
         ///
