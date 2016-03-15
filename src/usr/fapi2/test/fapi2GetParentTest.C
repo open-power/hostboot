@@ -138,7 +138,7 @@ errlHndl_t fapi2GetParentTest()
         Target<fapi2::TARGET_TYPE_OBUS> fapi2_obusTarget(
                 targeting_targets[MY_OBUS]);
         Target<fapi2::TARGET_TYPE_NV> fapi2_nvbusTarget(
-                targeting_targets[MY_NVBUS]);
+                targeting_targets[MY_NV]);
         Target<fapi2::TARGET_TYPE_PPE> fapi2_ppeTarget(
                 targeting_targets[MY_PPE]);
         Target<fapi2::TARGET_TYPE_PERV> fapi2_pervTarget(
@@ -750,12 +750,12 @@ errlHndl_t fapi2GetParentTest()
            TARGETING::get_huid(l_tempTargetingParent))
         {
             uint8_t l_instance = 0;
-            targeting_targets[MY_NVBUS]->
+            targeting_targets[MY_NV]->
             tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_instance);
             /*@
             * @errortype          ERRORLOG::ERRL_SEV_UNRECOVERABLE
             * @moduleid           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST
-            * @reasoncode         fapi2::RC_NVBUS_NO_PROC_FOUND
+            * @reasoncode         fapi2::RC_NV_NO_PROC_FOUND
             * @userdata1[0:31]    Expected Parent HUID
             * @userdata1[32:63]   Actual Parent HUID
             * @userdata2[0:31]    Instance of NVBUS
@@ -765,7 +765,7 @@ errlHndl_t fapi2GetParentTest()
             */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                           fapi2::MOD_FAPI2_PLAT_GET_PARENT_TEST,
-                                          fapi2::RC_NVBUS_NO_PROC_FOUND,
+                                          fapi2::RC_NV_NO_PROC_FOUND,
                                           TWO_UINT32_TO_UINT64(
                                           TO_UINT32(
                                           TARGETING::get_huid(
