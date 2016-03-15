@@ -7,7 +7,7 @@
 #
 # EKB Project
 #
-# COPYRIGHT 2015
+# COPYRIGHT 2015,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -17,4 +17,6 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_throttle_sync
+lib$(PROCEDURE)_DEPLIBS+=mss
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/memory/lib/utils/)
 $(call BUILD_PROCEDURE)
