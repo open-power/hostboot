@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -21,17 +21,16 @@
 ///
 /// @brief p9_throttle_sync HWP
 ///
-/// The purpose of this procedure is to triggers sync command from MC to
-/// actually load the throttle values into the Centaurs.
+/// The purpose of this procedure is to triggers sync command from a 'master'
+/// MC to other MCs that have attached memory in a processor.
 ///
 /// ----------------------------------------------------------------------------
 /// *HWP HWP Owner   : Joe McGill <jmcgill@us.ibm.com>
 /// *HWP FW Owner    : Thi Tran <thi@us.ibm.com>
 /// *HWP Team        : Nest
-/// *HWP Level       : 1
+/// *HWP Level       : 2
 /// *HWP Consumed by : HB
 /// ----------------------------------------------------------------------------
-
 #ifndef _P9_THROTTLE_SYNC_H_
 #define _P9_THROTTLE_SYNC_H_
 
@@ -39,15 +38,13 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <fapi2.H>
+#include <p9_nest_common_mc_def.H>
+#include <p9_mc_scom_addresses.H>
+#include <p9_mc_scom_addresses_fld.H>
 
 // Function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_throttle_sync_FP_t)(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
-
-//----------------------------------------------------------------------------
-// Constant definitions
-//----------------------------------------------------------------------------
-
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -55,8 +52,8 @@ typedef fapi2::ReturnCode (*p9_throttle_sync_FP_t)(
 ///
 /// @brief p9_throttle_sync procedure
 ///
-/// This HWP is to triggers sync command from MC to actually load the
-//  throttle values into the Centaurs.
+/// The purpose of this procedure is to triggers sync command from a 'master'
+/// MC to other MCs that have attached memory in a processor.
 ///
 /// @param[in]    i_target   Reference to TARGET_TYPE_PROC_CHIP target
 ///
