@@ -191,7 +191,7 @@ template<>
 fapi2::ReturnCode mc<TARGET_TYPE_MCA>::scominit(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
 {
     uint32_t l_throttle_denominator = 0;
-    FAPI_TRY( mss::runtime_mem_throttle_denominator(i_target, l_throttle_denominator) );
+    FAPI_TRY( mss::runtime_mem_m_dram_clocks(i_target, l_throttle_denominator) );
 
     // #Register Name  Final Arb Parms
     // #Mnemonic       MBA_FARB0Q
@@ -227,11 +227,11 @@ fapi2::ReturnCode mc<TARGET_TYPE_MCA>::scominit(const fapi2::Target<TARGET_TYPE_
     // #Mnemonic       MBA_FARB3Q
     // #Attributes     PAR:EVEN        Bit     Field Mnemonic  Attribute or Setting to use
     // #Description    N/M throttling control (Centaur only)
-    // #               0:14    cfg_nm_n_per_mba        MSS_MEM_THROTTLE_NUMERATOR_PER_MBA (Centaur)
-    // #               15:30   cfg_nm_n_per_chip       MSS_MEM_THROTTLE_NUMERATOR_PER_CHIP (Centaur)
-    // #               0:14    cfg_nm_n_per_slot       MSS_MEM_THROTTLE_NUMERATOR_PER_SLOT (Nimbus)
-    // #               15:30   cfg_nm_n_per_port       MSS_MEM_THROTTLE_NUMERATOR_PER_PORT (Nimbus)
-    // #               31:44   cfg_nm_m        MSS_MEM_THROTTLE_DENOMINATOR
+    // #               0:14    cfg_nm_n_per_mba        MSS_MEM_THROTTLED_N_COMMANDS_PER_MBA (Centaur)
+    // #               15:30   cfg_nm_n_per_chip       MSS_MEM_THROTTLED_N_COMMANDS_PER_CHIP (Centaur)
+    // #               0:14    cfg_nm_n_per_slot       MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT (Nimbus)
+    // #               15:30   cfg_nm_n_per_port       MSS_MEM_THROTTLED_N_COMMANDS_PER_PORT (Nimbus)
+    // #               31:44   cfg_nm_m        MSS_MEM_THROTTLED_M_DRAM_CLOCKS
     // #               51      cfg_nm_per_slot_enabled 1 (not on Nimbus?)
     // #               52      cfg_nm_count_other_mba_dis      Set to 0 for CDIMM, Set to 1 for everything else (not on Nimbus?)
     // #cfg_nm_ras_weight, bits 45:47 = ATTR_MSS_THROTTLE_CONTROL_RAS_WEIGHT
@@ -243,8 +243,8 @@ fapi2::ReturnCode mc<TARGET_TYPE_MCA>::scominit(const fapi2::Target<TARGET_TYPE_
         uint8_t l_ras_weight = 0;
         uint8_t l_cas_weight = 0;
 
-        FAPI_TRY( mss::runtime_mem_throttle_numerator_per_slot(i_target, l_throttle_per_slot) );
-        FAPI_TRY( mss::runtime_mem_throttle_numerator_per_port(i_target, l_throttle_per_port) );
+        FAPI_TRY( mss::runtime_mem_throttled_n_commands_per_slot(i_target, l_throttle_per_slot) );
+        FAPI_TRY( mss::runtime_mem_throttled_n_commands_per_port(i_target, l_throttle_per_port) );
         FAPI_TRY( mss::throttle_control_ras_weight(i_target, l_ras_weight) );
         FAPI_TRY( mss::throttle_control_cas_weight(i_target, l_cas_weight) );
 
@@ -258,13 +258,13 @@ fapi2::ReturnCode mc<TARGET_TYPE_MCA>::scominit(const fapi2::Target<TARGET_TYPE_
     }
 
     // Doesn't appear to be a row-hammer-mode in Nimbus
-    // #   -- bits 27:41 (cfg_emer_n) = ATTR_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_SLOT
-    // #   -- bits 42:55 (cfg_emer_m) = ATTR_MRW_MEM_THROTTLE_DENOMINATOR
+    // #   -- bits 27:41 (cfg_emer_n) = ATTR_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_SLOT
+    // #   -- bits 42:55 (cfg_emer_m) = ATTR_MRW_MEM_THROTTLED_M_DRAM_CLOCKS
     {
         fapi2::buffer<uint64_t> l_data;
         uint32_t l_throttle_per_slot = 0;
 
-        FAPI_TRY( mss::mrw_safemode_mem_throttle_numerator_per_slot(l_throttle_per_slot) );
+        FAPI_TRY( mss::mrw_safemode_mem_throttled_n_commands_per_slot(l_throttle_per_slot) );
 
         l_data.insertFromRight<MCA_MBA_FARB4Q_EMERGENCY_M, MCA_MBA_FARB4Q_EMERGENCY_M_LEN>(l_throttle_denominator);
         l_data.insertFromRight<MCA_MBA_FARB4Q_EMERGENCY_N, MCA_MBA_FARB4Q_EMERGENCY_N_LEN>(l_throttle_per_slot);
