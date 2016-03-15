@@ -19,10 +19,10 @@
 
 ///
 /// @file p9_mss_thermal_init.C
-/// @brief Initialize thermal sensors
+/// @brief configure and start the OCC and thermal cache
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
-// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 1
 // *HWP Consumed by: FSP:HB
@@ -30,16 +30,17 @@
 #include <fapi2.H>
 #include <p9_mss_thermal_init.H>
 
-using fapi2::TARGET_TYPE_MCBIST;
+using fapi2::TARGET_TYPE_MCS;
 
 extern "C"
 {
+
 ///
-/// @brief Initialize thermal sensors
-/// @param[in] i_target, the McBIST of the ports of the dram you're training
+/// @brief configure and start the OCC and thermal cache
+/// @param[in] i_target the controller target
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-    fapi2::ReturnCode p9_mss_thermal_init( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
+    fapi2::ReturnCode p9_mss_thermal_init( const fapi2::Target<TARGET_TYPE_MCS>& i_target )
     {
         FAPI_INF("Start thermal_init");
         FAPI_INF("End thermal_init");

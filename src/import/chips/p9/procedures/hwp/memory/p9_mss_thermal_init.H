@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -17,11 +17,12 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-/// @file p9_mss_thermal_init.H
-/// @brief Initialize thermal sensors
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
-// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+/// @file p9_mss_thermal_init.H
+/// @brief configure and start the OCC and thermal cache
+///
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 1
 // *HWP Consumed by: FSP:HB
@@ -31,16 +32,16 @@
 
 #include <fapi2.H>
 
-typedef fapi2::ReturnCode (*p9_mss_thermal_init_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>&);
+typedef fapi2::ReturnCode (*p9_mss_thermal_init_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_MCS>&);
 
 extern "C"
 {
 ///
-/// @brief Initialize thermal sensors
-/// @param[in] i_target, the McBIST of the ports of the dram you're training
+/// @brief configure and start the OCC and thermal cache
+/// @param[in] i_target the controller target
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-    fapi2::ReturnCode p9_mss_thermal_init( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
+    fapi2::ReturnCode p9_mss_thermal_init( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target );
 }
 
 #endif
