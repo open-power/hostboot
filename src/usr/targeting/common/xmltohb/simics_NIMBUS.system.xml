@@ -69,6 +69,10 @@
         <default>affinity:sys-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>EXECUTION_PLATFORM</id>
         <default>1</default>
     </attribute>
@@ -124,6 +128,10 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0</default>
     </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <!-- Nimbus n0p0 processor chip -->
@@ -147,6 +155,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>FRU_ID</id>
@@ -228,6 +240,10 @@
         <default>affinity:sys-0/node-0/proc-0/eq-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
@@ -248,6 +264,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -272,6 +292,10 @@
         <default>affinity:sys-0/node-0/proc-0/eq-2</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
     </attribute>
@@ -292,6 +316,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-3</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -316,6 +344,10 @@
         <default>affinity:sys-0/node-0/proc-0/eq-4</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>4</default>
     </attribute>
@@ -336,6 +368,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-5</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -361,6 +397,10 @@
         <default>affinity:sys-0/node-0/proc-0/eq-0/ex-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
@@ -377,6 +417,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-0/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -398,6 +442,10 @@
         <default>affinity:sys-0/node-0/proc-0/eq-1/ex-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
     </attribute>
@@ -414,6 +462,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-1/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -435,6 +487,10 @@
         <default>affinity:sys-0/node-0/proc-0/eq-2/ex-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>4</default>
     </attribute>
@@ -451,6 +507,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-2/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -472,6 +532,10 @@
         <default>affinity:sys-0/node-0/proc-0/eq-3/ex-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>6</default>
     </attribute>
@@ -488,6 +552,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-3/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>7</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -509,6 +577,10 @@
         <default>affinity:sys-0/node-0/proc-0/eq-4/ex-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>8</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>8</default>
     </attribute>
@@ -525,6 +597,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-4/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>9</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -546,6 +622,10 @@
         <default>affinity:sys-0/node-0/proc-0/eq-5/ex-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>10</default>
     </attribute>
@@ -562,6 +642,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-5/ex-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>11</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -581,6 +665,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-0/ex-0/core-0</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -603,6 +691,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-0/ex-0/core-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -628,6 +720,10 @@
         <default>affinity:sys-0/node-0/proc-0/eq-0/ex-1/core-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
     </attribute>
@@ -648,6 +744,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-0/ex-1/core-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -673,6 +773,10 @@
         <default>affinity:sys-0/node-0/proc-0/eq-1/ex-0/core-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>4</default>
     </attribute>
@@ -693,6 +797,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-1/ex-0/core-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -718,6 +826,10 @@
         <default>affinity:sys-0/node-0/proc-0/eq-1/ex-1/core-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>6</default>
     </attribute>
@@ -738,6 +850,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-1/ex-1/core-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>7</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -763,6 +879,10 @@
         <default>affinity:sys-0/node-0/proc-0/eq-2/ex-0/core-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>8</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>8</default>
     </attribute>
@@ -783,6 +903,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-2/ex-0/core-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>9</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -808,6 +932,10 @@
         <default>affinity:sys-0/node-0/proc-0/eq-2/ex-1/core-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>10</default>
     </attribute>
@@ -828,6 +956,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-2/ex-1/core-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>11</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -853,6 +985,10 @@
         <default>affinity:sys-0/node-0/proc-0/eq-3/ex-0/core-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>12</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>12</default>
     </attribute>
@@ -873,6 +1009,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-3/ex-0/core-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>13</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -898,6 +1038,10 @@
         <default>affinity:sys-0/node-0/proc-0/eq-3/ex-1/core-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>14</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>14</default>
     </attribute>
@@ -918,6 +1062,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-3/ex-1/core-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>15</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -943,6 +1091,10 @@
         <default>affinity:sys-0/node-0/proc-0/eq-4/ex-0/core-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>16</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>16</default>
     </attribute>
@@ -963,6 +1115,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-4/ex-0/core-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>17</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -988,6 +1144,10 @@
         <default>affinity:sys-0/node-0/proc-0/eq-4/ex-1/core-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>18</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>18</default>
     </attribute>
@@ -1008,6 +1168,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-4/ex-1/core-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>19</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -1033,6 +1197,10 @@
         <default>affinity:sys-0/node-0/proc-0/eq-5/ex-0/core-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>20</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>20</default>
     </attribute>
@@ -1053,6 +1221,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-5/ex-0/core-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>21</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -1078,6 +1250,10 @@
         <default>affinity:sys-0/node-0/proc-0/eq-5/ex-1/core-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>22</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>22</default>
     </attribute>
@@ -1098,6 +1274,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-5/ex-1/core-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>23</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -1121,6 +1301,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-0</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -1152,6 +1336,10 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-1</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
     </attribute>
@@ -1181,6 +1369,10 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-2</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
     </attribute>
@@ -1208,6 +1400,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-3</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -1240,6 +1436,10 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-0/mca-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
@@ -1260,6 +1460,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-0/mca-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -1285,6 +1489,10 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-1/mca-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
     </attribute>
@@ -1305,6 +1513,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-1/mca-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -1330,6 +1542,10 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-2/mca-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>4</default>
     </attribute>
@@ -1350,6 +1566,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-2/mca-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -1375,6 +1595,10 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-3/mca-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>6</default>
     </attribute>
@@ -1395,6 +1619,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-3/mca-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>7</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -1420,6 +1648,10 @@
         <default>affinity:sys-0/node-0/proc-0/mcbist-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
@@ -1440,6 +1672,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcbist-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -1465,6 +1701,10 @@
         <default>affinity:sys-0/node-0/proc-0/pec-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
@@ -1487,6 +1727,10 @@
         <default>affinity:sys-0/node-0/proc-0/pec-1</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
     </attribute>
@@ -1507,6 +1751,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/pec-2</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -1532,6 +1780,10 @@
         <default>affinity:sys-0/node-0/proc-0/pec-0/phb-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
@@ -1555,6 +1807,10 @@
         <default>affinity:sys-0/node-0/proc-0/pec-1/phb-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
     </attribute>
@@ -1575,6 +1831,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/pec-1/phb-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -1600,6 +1860,10 @@
         <default>affinity:sys-0/node-0/proc-0/pec-2/phb-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>3</default>
     </attribute>
@@ -1622,6 +1886,10 @@
         <default>affinity:sys-0/node-0/proc-0/pec-2/phb-1</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>4</default>
     </attribute>
@@ -1642,6 +1910,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/pec-2/phb-2</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -1667,6 +1939,10 @@
         <default>affinity:sys-0/node-0/proc-0/obus-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
@@ -1687,6 +1963,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/obus-3</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -1712,6 +1992,10 @@
         <default>affinity:sys-0/node-0/proc-0/nv-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
@@ -1732,6 +2016,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/nv-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -1758,6 +2046,10 @@
         <default>affinity:sys-0/node-0/proc-0/ppe-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
@@ -1774,6 +2066,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ppe-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -1800,6 +2096,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-1</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
     </attribute>
@@ -1820,6 +2120,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-2</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -1844,6 +2148,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-3</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>3</default>
     </attribute>
@@ -1864,6 +2172,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-4</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -1888,6 +2200,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-5</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>5</default>
     </attribute>
@@ -1908,6 +2224,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-6</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -1932,6 +2252,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-7</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>7</default>
     </attribute>
@@ -1952,6 +2276,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-8</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>7</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -1976,6 +2304,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-9</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>8</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>9</default>
     </attribute>
@@ -1996,6 +2328,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-12</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>9</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2020,6 +2356,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-13</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>13</default>
     </attribute>
@@ -2040,6 +2380,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-14</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>11</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2064,6 +2408,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-15</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>12</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>15</default>
     </attribute>
@@ -2084,6 +2432,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-16</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>13</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2108,6 +2460,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-17</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>14</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>17</default>
     </attribute>
@@ -2128,6 +2484,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-18</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>15</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2152,6 +2512,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-19</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>16</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>19</default>
     </attribute>
@@ -2172,6 +2536,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-20</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>17</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2196,6 +2564,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-21</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>18</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>21</default>
     </attribute>
@@ -2216,6 +2588,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-32</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>19</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2240,6 +2616,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-33</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>20</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>33</default>
     </attribute>
@@ -2260,6 +2640,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-34</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>21</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2284,6 +2668,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-35</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>22</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>35</default>
     </attribute>
@@ -2304,6 +2692,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-36</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>23</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2328,6 +2720,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-37</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>24</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>37</default>
     </attribute>
@@ -2348,6 +2744,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-38</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>25</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2372,6 +2772,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-39</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>26</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>39</default>
     </attribute>
@@ -2392,6 +2796,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-40</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>27</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2416,6 +2824,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-41</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>28</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>41</default>
     </attribute>
@@ -2436,6 +2848,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-42</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>29</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2460,6 +2876,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-43</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>30</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>43</default>
     </attribute>
@@ -2480,6 +2900,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-44</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>31</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2504,6 +2928,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-45</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>32</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>45</default>
     </attribute>
@@ -2524,6 +2952,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-46</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>33</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2548,6 +2980,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-47</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>34</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>47</default>
     </attribute>
@@ -2568,6 +3004,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-48</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>35</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2592,6 +3032,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-49</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>36</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>49</default>
     </attribute>
@@ -2612,6 +3056,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-50</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>37</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2636,6 +3084,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-51</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>38</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>51</default>
     </attribute>
@@ -2656,6 +3108,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-52</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>39</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2680,6 +3136,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-53</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>40</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>53</default>
     </attribute>
@@ -2700,6 +3160,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-54</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>41</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2724,6 +3188,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-55</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>42</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>55</default>
     </attribute>
@@ -2742,6 +3210,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/xbus-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2768,6 +3240,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/xbus-2</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2797,6 +3273,10 @@
         <default>affinity:sys-0/node-0/proc-0/capp-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
@@ -2817,6 +3297,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/capp-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2842,6 +3326,10 @@
         <default>affinity:sys-0/node-0/proc-0/sbe-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
     </attribute>
@@ -2862,6 +3350,10 @@
         <default>affinity:sys-0/node-0/proc-0/occ-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>OCC_MASTER_CAPABLE</id>
         <default>0</default>
     </attribute>
@@ -2878,6 +3370,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>physical:sys-0/node-0/proc-0/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -2901,6 +3397,10 @@
         <default>physical:sys-0/node-0/dimm-0</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-0/mca-0/dimm-0</default>
     </attribute>
@@ -2914,6 +3414,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -2931,6 +3435,10 @@
         <default>physical:sys-0/node-0/dimm-2</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-0/mca-0/dimm-2</default>
     </attribute>
@@ -2944,6 +3452,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-3</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -2961,6 +3473,10 @@
         <default>physical:sys-0/node-0/dimm-4</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-0/mca-1/dimm-0</default>
     </attribute>
@@ -2974,6 +3490,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-5</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -2991,6 +3511,10 @@
         <default>physical:sys-0/node-0/dimm-6</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-0/mca-1/dimm-2</default>
     </attribute>
@@ -3004,6 +3528,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-7</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>7</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -3021,6 +3549,10 @@
         <default>physical:sys-0/node-0/dimm-8</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>8</default>
+    </attribute>
+    <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-1/mca-0/dimm-0</default>
     </attribute>
@@ -3034,6 +3566,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-9</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>9</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -3051,6 +3587,10 @@
         <default>physical:sys-0/node-0/dimm-10</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-1/mca-0/dimm-2</default>
     </attribute>
@@ -3064,6 +3604,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-11</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>11</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -3081,6 +3625,10 @@
         <default>physical:sys-0/node-0/dimm-12</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>12</default>
+    </attribute>
+    <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-1/mca-1/dimm-0</default>
     </attribute>
@@ -3094,6 +3642,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-13</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>13</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -3111,6 +3663,10 @@
         <default>physical:sys-0/node-0/dimm-14</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>14</default>
+    </attribute>
+    <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-1/mca-1/dimm-2</default>
     </attribute>
@@ -3126,6 +3682,9 @@
         <default>physical:sys-0/node-0/dimm-15</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>15</default>
+    </attribute>    <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-1/mca-1/dimm-3</default>
     </attribute>
@@ -3139,6 +3698,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-16</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>16</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -3156,6 +3719,10 @@
         <default>physical:sys-0/node-0/dimm-17</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>17</default>
+    </attribute>
+    <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-2/mca-0/dimm-1</default>
     </attribute>
@@ -3169,6 +3736,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-18</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>18</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -3186,6 +3757,10 @@
         <default>physical:sys-0/node-0/dimm-19</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>19</default>
+    </attribute>
+    <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-2/mca-0/dimm-3</default>
     </attribute>
@@ -3199,6 +3774,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-20</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>20</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -3216,6 +3795,10 @@
         <default>physical:sys-0/node-0/dimm-21</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>21</default>
+    </attribute>
+    <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-2/mca-1/dimm-1</default>
     </attribute>
@@ -3229,6 +3812,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-22</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>22</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -3246,6 +3833,10 @@
         <default>physical:sys-0/node-0/dimm-23</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>23</default>
+    </attribute>
+    <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-2/mca-1/dimm-3</default>
     </attribute>
@@ -3259,6 +3850,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-24</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>24</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -3276,6 +3871,10 @@
         <default>physical:sys-0/node-0/dimm-25</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>25</default>
+    </attribute>
+    <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-3/mca-0/dimm-1</default>
     </attribute>
@@ -3289,6 +3888,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-26</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>26</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -3306,6 +3909,10 @@
         <default>physical:sys-0/node-0/dimm-27</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>27</default>
+    </attribute>
+    <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-3/mca-0/dimm-3</default>
     </attribute>
@@ -3319,6 +3926,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-28</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>28</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -3336,6 +3947,10 @@
         <default>physical:sys-0/node-0/dimm-29</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>29</default>
+    </attribute>
+    <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-3/mca-1/dimm-1</default>
     </attribute>
@@ -3351,6 +3966,10 @@
         <default>physical:sys-0/node-0/dimm-30</default>
     </attribute>
     <attribute>
+        <id>ORDINAL_ID</id>
+        <default>30</default>
+    </attribute>
+    <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-3/mca-1/dimm-2</default>
     </attribute>
@@ -3364,6 +3983,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-31</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>31</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>

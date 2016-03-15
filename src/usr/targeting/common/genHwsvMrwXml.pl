@@ -2408,6 +2408,10 @@ sub generate_sys
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys</default>
     </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
         <default>instance:sys-$sys</default>
@@ -2845,6 +2849,10 @@ sub generate_system_node
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node</default>
     </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$node</default>
+    </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
         <default>instance:$computeNodeList{$node}->{'instancePath'}</default>
@@ -2978,6 +2986,10 @@ sub generate_proc
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
     </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
@@ -3479,6 +3491,10 @@ sub generate_ex
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/eq-$eq/ex-$ex</default>
     </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
+    </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
         <default>instance:$ipath</default>
@@ -3610,6 +3626,10 @@ sub generate_core
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/eq-$eq/ex-$ex/core-$core</default>
     </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
+    </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
         <default>instance:$ipath</default>
@@ -3693,6 +3713,10 @@ sub generate_eq
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/eq-$eq</default>
     </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
+    </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
         <default>instance:$ipath</default>
@@ -3772,6 +3796,10 @@ sub generate_mcs
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs</default>
     </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
+    </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
         <default>instance:$ipath</default>
@@ -3838,6 +3866,10 @@ sub generate_mca
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/mca-$mca</default>
     </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
+    </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
         <default>instance:$ipath</default>
@@ -3892,6 +3924,10 @@ sub generate_mcbist
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/mcbist-$mcbist</default>
     </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
+    </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
         <default>instance:$ipath</default>
@@ -3945,6 +3981,10 @@ sub generate_pec
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/pec-$pec</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
     </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
@@ -4013,6 +4053,10 @@ sub generate_phb_chiplet
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/pec-$pec/phb-$phb</default>
     </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
+    </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
         <default>instance:$ipath</default>
@@ -4067,6 +4111,10 @@ sub generate_ppe
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/ppe-$ppe</default>
     </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
+    </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
         <default>instance:$ipath</default>
@@ -4119,6 +4167,10 @@ sub generate_obus
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/obus-$obus</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
     </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
@@ -4174,6 +4226,10 @@ sub generate_xbus
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/xbus-$xbus</default>
     </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
+    </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
         <default>instance:$ipath</default>
@@ -4228,6 +4284,10 @@ sub generate_perv
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/perv-$perv</default>
     </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
+    </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
         <default>instance:$ipath</default>
@@ -4279,6 +4339,10 @@ sub generate_capp
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/capp-$capp</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
     </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
@@ -4332,6 +4396,10 @@ sub generate_sbe
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/sbe-$sbe</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
     </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
@@ -4436,6 +4504,10 @@ sub generate_a_pcie
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/pci-$phb</default>
     </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
+    </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
         <default>instance:$phbList{$node}{$proc}{$phb}->{'phbIpath'}</default>
@@ -4522,6 +4594,10 @@ sub generate_nx
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/nx-0</default>
     </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
+    </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
         <default>instance:$ipath</default>
@@ -4571,6 +4647,10 @@ sub generate_pore
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/pore-0</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
     </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
@@ -4696,6 +4776,10 @@ sub generate_centaur
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
             . "membuf-$ctaur</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
     </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
@@ -4926,6 +5010,10 @@ sub generate_mba
         <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
             . "membuf-$ctaur/mba-$mba</default>
     </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
+    </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
         <default>instance:$ipath</default>
@@ -4967,6 +5055,10 @@ sub generate_l4
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
             . "membuf-$ctaur/l4-$l4</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
     </attribute>
     <attribute>
         <id>MRU_ID</id>
@@ -5053,6 +5145,10 @@ sub generate_is_dimm
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
             . "mca-$mca/dimm-$dimm</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$dimm</default>
     </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
@@ -5223,6 +5319,10 @@ sub generate_dimm
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
             . "membuf-$pos/mba-$x/dimm-$zz</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
     </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>
@@ -5453,6 +5553,10 @@ sub generate_occ
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-$sys/node-$node/proc-$proc/occ-0</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>$ordinalId</default>
     </attribute>
     <compileAttribute>
         <id>INSTANCE_PATH</id>

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -47,6 +49,10 @@ namespace RUNTIME
         MOD_HDATSERVICE_FINDSPIRA       = 0x0F, /** hdatservice.C */
         MOD_HDATSERVICE_UPDATE_SECTION_ACTUAL = 0x10, /**< hdatservice.C */
         MOD_HDATSERVICE_MAPREGION       = 0x11, /**< hdatservice.C */
+
+        // customize_attrs_for_payload.C
+        MOD_CUST_COMP_NON_PHYP_RT_TARGET = 0x12,
+        MOD_CUST_CONF_HBRT_HYP_IDS       = 0x13,
     };
 
     enum RuntimeReasonCode
@@ -76,6 +82,9 @@ namespace RUNTIME
         RC_NO_SPIRA                 = RUNTIME_COMP_ID | 0x16,
         RC_CANNOT_MAP_HDAT          = RUNTIME_COMP_ID | 0x17,
         RC_NOT_ENOUGH_SPACE         = RUNTIME_COMP_ID | 0x18,
+        RT_UNIT_TARGET_NOT_FOUND    = RUNTIME_COMP_ID | 0x19,
+        RT_TARGET_TYPE_NOT_SUPPORTED = RUNTIME_COMP_ID | 0x1A,
+        RT_NO_PROC_TARGET            = RUNTIME_COMP_ID | 0x1B
     };
 
     enum UserDetailsTypes

@@ -1574,6 +1574,26 @@ ID for the sensor number returned with the elog. -->
   <hbOnly/>
 </attribute>
 
+<!-- TODO RTC 122856 When support for HB only volatile attributes with non-zero
+     default is implemented, update default value to match the description,
+     Until that happens, code must set the appropriate default if needed. -->
+<attribute>
+  <id>HBRT_HYP_ID</id>
+  <description>
+      Effective ID used by the hypervisor to specify a given target. A value
+      of 0xFFFFFFFFFFFFFFFF means invalid/unknown.
+  </description>
+  <simpleType>
+      <uint64_t>
+          <default>0</default>
+      </uint64_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+  <hbOnly/>
+</attribute>
+
 <attribute>
   <id>WOF_REGULATOR_EFFICIENCIES</id>
   <description>
