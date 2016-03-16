@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -841,37 +841,48 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
     // check to see if we should skip info and recoverable errors?
     checkHiddenLogsEnable();
 
-    // If this error was a hardware callout, add the serial and part numbers
-    // to the log. FSP provides this data so if there is no FSP, get them here.
-    if(!INITSERVICE::spBaseServicesEnabled())
+    // Check to make sure targeting is initialized. If so, collect part and
+    // serial numbers
+    if( TARGETING::targetService().isInitialized() )
     {
-        for(size_t i = 0; i < iv_SectionVector.size(); i++)
+        // If this error was a hardware callout, add the serial and part numbers
+        // to the log. FSP provides this data so if there is no FSP, get them here.
+        if(!INITSERVICE::spBaseServicesEnabled())
         {
-            ErrlUD * l_udSection = iv_SectionVector[i];
-            HWAS::callout_ud_t * l_ud =
-                reinterpret_cast<HWAS::callout_ud_t*>(l_udSection->iv_pData);
-
-            if((ERRL_COMP_ID     == (l_udSection)->iv_header.iv_compId) &&
-               (1                == (l_udSection)->iv_header.iv_ver) &&
-               (ERRL_UDT_CALLOUT == (l_udSection)->iv_header.iv_sst) &&
-               (HWAS::HW_CALLOUT == l_ud->type))
+            for(size_t i = 0; i < iv_SectionVector.size(); i++)
             {
-                uint8_t * l_uData = (uint8_t *)(l_ud + 1);
-                TARGETING::Target * l_target = NULL;
+                ErrlUD * l_udSection = iv_SectionVector[i];
+                HWAS::callout_ud_t * l_ud =
+                    reinterpret_cast<HWAS::callout_ud_t*>(l_udSection->iv_pData);
 
-                bool l_err = HWAS::retrieveTarget(l_uData,
-                               l_target,
-                               this);
-                if(!l_err)
+                if((ERRL_COMP_ID     == (l_udSection)->iv_header.iv_compId) &&
+                   (1                == (l_udSection)->iv_header.iv_ver) &&
+                   (ERRL_UDT_CALLOUT == (l_udSection)->iv_header.iv_sst) &&
+                   (HWAS::HW_CALLOUT == l_ud->type))
                 {
-                    addPartAndSerialNumbersToErrLog( l_target );
-                }
-                else
-                {
-                    TRACFCOMP(g_trac_errl, "ErrlEntry::commit() - Error retrieving target");
+                    uint8_t * l_uData = (uint8_t *)(l_ud + 1);
+                    TARGETING::Target * l_target = NULL;
+
+                    bool l_err = HWAS::retrieveTarget(l_uData,
+                                                      l_target,
+                                                      this);
+                    if(!l_err)
+                    {
+                        addPartAndSerialNumbersToErrLog( l_target );
+                    }
+                    else
+                    {
+                        TRACFCOMP(g_trac_errl, "ErrlEntry::commit() - Error retrieving target");
+                    }
                 }
             }
         }
+    }
+    else
+    {
+        TRACFCOMP(g_trac_errl,
+                "TARGETING has not been initialized yet! Skipping serial/part "
+                "number collection!");
     }
 }
 
