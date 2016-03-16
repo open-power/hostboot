@@ -400,6 +400,66 @@ void i2cHandleError( TARGETING::Target * i_target,
     TRACUCOMP(g_trac_i2c, EXIT_MRK"i2cHandlError()");
 }
 
+
+errlHndl_t i2cChooseEepromPage(TARGETING::Target * i_target,
+                               uint8_t & i_currentPage,
+                               uint8_t & i_newPage,
+                               uint8_t i_desiredPage,
+                               misc_args_t & i_args,
+                               bool & i_pageSwitchNeeded )
+{
+    errlHndl_t l_err = NULL;
+    // Get EEPROM page attribute
+    TRACUCOMP(g_trac_i2c,
+            "i2cChooseEepromPage: current EEPROM page is %d for target(0x%x)",
+            i_currentPage,
+            TARGETING::get_huid(i_target) );
+    if( i_currentPage != i_desiredPage )
+    {
+        if( i_desiredPage == PAGE_ONE )
+        {
+            TRACUCOMP(g_trac_i2c, "i2cChooseEepromPage: Switching to page ONE");
+            i_args.devAddr = PAGE_ONE_ADDR;
+            i_newPage = PAGE_ONE;
+            i_pageSwitchNeeded = true;
+        }
+        else if( i_desiredPage == PAGE_ZERO )
+        {
+            TRACUCOMP(g_trac_i2c, "i2cChooseEepromPage: Switching to page ZERO");
+            i_args.devAddr = PAGE_ZERO_ADDR;
+            i_newPage = PAGE_ZERO;
+            i_pageSwitchNeeded = true;
+        }
+        else
+        {
+            TRACFCOMP(g_trac_i2c, ERR_MRK"i2cChooseEepromPage: Invalid page requested");
+            /*@
+             * @errortype
+             * @reasoncode      I2C_INVALID_EEPROM_PAGE_REQUEST
+             * @severity        ERRORLOG_SEV_UNRECOVERABLE
+             * @moduleid        I2C_CHOOSE_EEPROM_PAGE
+             * @userdata1       Target Huid
+             * @userdata2       Requested Page
+             * @devdesc         There was a request for an invalid
+             *                  EEPROM page
+             */
+            l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                             I2C_CHOOSE_EEPROM_PAGE,
+                                             I2C_INVALID_EEPROM_PAGE_REQUEST,
+                                             TARGETING::get_huid(i_target),
+                                             i_desiredPage,
+                                             true );
+            l_err->collectTrace( I2C_COMP_NAME, 256 );
+        }
+    }
+
+    return l_err;
+}
+
+
+
+
+
 // ------------------------------------------------------------------
 // i2cPageSwitchOp
 // ------------------------------------------------------------------
@@ -421,6 +481,10 @@ errlHndl_t i2cPageSwitchOp( DeviceFW::OperationType i_opType,
     bool l_error = false;
     mutex_t * l_pageLock = NULL;
 
+    uint8_t l_currentPage;
+    uint8_t l_newPage;
+    TARGETING::ATTR_EEPROM_PAGE_ARRAY_type page_array;
+
     do
     {
 
@@ -435,14 +499,14 @@ errlHndl_t i2cPageSwitchOp( DeviceFW::OperationType i_opType,
              * @errortype
              * @reasoncode     I2C_MASTER_SENTINEL_TARGET
              * @severity       ERRORLOG_SEV_UNRECOVERABLE
-             * @moduleid       I2C_PAGE_LOCK_OP
+             * @moduleid       I2C_PAGE_SWITCH_OP
              * @userdata1      Operation Type requested
              * @userdata2      <UNUSED>
              * @devdesc        Master Sentinel chip was used as a target for an
              *                 I2C operation.  This is not permitted.
              */
             l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           I2C_PERFORM_OP,
+                                           I2C_PAGE_SWITCH_OP,
                                            I2C_MASTER_SENTINEL_TARGET,
                                            i_opType,
                                            0x0,
@@ -472,14 +536,14 @@ errlHndl_t i2cPageSwitchOp( DeviceFW::OperationType i_opType,
                  * @errortype
                  * @reasoncode     I2C_INVALID_EEPROM_PAGE_MUTEX
                  * @severity       ERRORLOG_SEV_UNRECOVERABLE
-                 * @moduleid       I2C_PAGE_LOCK_OP
+                 * @moduleid       I2C_PAGE_SWITCH_OP
                  * @userdata1      Target Huid
                  * @userdata2      <UNUSED>
                  * @devdesc        There was an error retrieving the EEPROM page
                  *                 mutex for this i2c master engine
                  */
                 l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                                 I2C_PERFORM_OP,
+                                                 I2C_PAGE_SWITCH_OP,
                                                  I2C_INVALID_EEPROM_PAGE_MUTEX,
                                                  TARGETING::get_huid(i_target),
                                                  0x0,
@@ -505,21 +569,54 @@ errlHndl_t i2cPageSwitchOp( DeviceFW::OperationType i_opType,
             break;
         }
 
-
-        // Set device address to switch to appropriate page
-        if( i_desiredPage == PAGE_ONE )
+        //Get the i2c master page array attribute
+        if( !(i_target->tryGetAttr<TARGETING::ATTR_EEPROM_PAGE_ARRAY>
+                                            (page_array ) ) )
         {
-            i_args.devAddr = PAGE_ONE_ADDR;
+            TRACFCOMP(g_trac_i2c,
+                    "i2cPageSwitchOp() - Cannot find ATTR_EEPROM_PAGE_ARRAY");
+            /*@
+             * @errortype
+             * @reasoncode      I2C_ATTRIBUTE_NOT_FOUND
+             * @severity        ERRORLOG_SEV_UNRECOVERABLE
+             * @moduleid        I2C_PAGE_SWITCH_OP
+             * @userdata1       Target HUID for the attribute
+             * @userdata2       <UNUSED>
+             * @devdesc         ATTR_EEPROM_PAGE_ARRAY not found
+             * @custdesc        I2C configuration data missing
+             */
+            l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                             I2C_PAGE_SWITCH_OP,
+                                             I2C_ATTRIBUTE_NOT_FOUND,
+                                             TARGETING::get_huid(i_target),
+                                             0x0,
+                                             true );
+            l_err->collectTrace( I2C_COMP_NAME, 256 );
+            l_mutex_needs_unlock = true;
+            break;
         }
-        else if( i_desiredPage == PAGE_ZERO )
+
+        // Get the current page for this i2c bus
+        l_currentPage = page_array[i_args.engine][i_args.port];
+
+        // Choose the correct EEPROM page
+        l_err = i2cChooseEepromPage( i_target,
+                                     l_currentPage,
+                                     l_newPage,
+                                     i_desiredPage,
+                                     i_args,
+                                     l_pageSwitchNeeded );
+
+        if( l_err )
         {
-            i_args.devAddr = PAGE_ZERO_ADDR;
+            TRACFCOMP(g_trac_i2c,
+                 ERR_MRK"Error in i2cPageSwitchOp::i2cChooseEepromPage()");
+            l_mutex_needs_unlock = true;
+            break;
         }
-        l_pageSwitchNeeded = true;
 
-        //TODO: RTC 147385
-        //optimize to remember current page of i2c master device
-
+        // If we found that a page switch was needed, perform the
+        // necessary write operation to switch to the desired page
         if( l_pageSwitchNeeded )
         {
             // Perform the actual write operation to switch pages.
@@ -559,17 +656,15 @@ errlHndl_t i2cPageSwitchOp( DeviceFW::OperationType i_opType,
                 if(l_err == NULL)
                 {
                     // Operation completed successfully
-                    // set attribute, free memory and break from retry loop
-                    // TODO Set EEPROM_PAGE attribute to save page for
-                    // optimization
+                    // set attribute and break from retry loop
                     TRACUCOMP(g_trac_i2c,"Set EEPROM_PAGE to %d", i_desiredPage);
-                    // i_target->setAttr<TARGETING::ATTR_EEPROM_PAGE>(l_newPage);
-                    free(l_zeroBuffer);
+                    page_array[i_args.engine][i_args.port] = l_newPage;
+                    i_target->setAttr<TARGETING::ATTR_EEPROM_PAGE_ARRAY>(page_array);
                     break;
                 }
                 else if( l_err->reasonCode() != I2C_NACK_ONLY_FOUND)
                 {
-                    // Only retry on NACK failures. Break form retry loop
+                    // Only retry on NACK failures. Break from retry loop
                     TRACFCOMP(g_trac_i2c,
                             ERR_MRK"i2cPageSwitchOp(): I2C Write "
                             "Non-NACK fail %x", i_args.devAddr );
@@ -593,8 +688,8 @@ errlHndl_t i2cPageSwitchOp( DeviceFW::OperationType i_opType,
                         if(l_err_NACK == NULL)
                         {
                             l_err_NACK = l_err;
-                          //  TRACFCOMP(g_trac_i2c,
-                            //        "Saving first Nack error and retry");
+                            TRACUCOMP(g_trac_i2c,
+                                    "Saving first Nack error and retry");
                             nanosleep(0, i_args.polling_interval_ns);
                             l_err_NACK->collectTrace(I2C_COMP_NAME);
 
@@ -633,7 +728,16 @@ errlHndl_t i2cPageSwitchOp( DeviceFW::OperationType i_opType,
                 delete l_err_NACK;
                 l_err_NACK = NULL;
             }
+            //free zero buffer
+            free(l_zeroBuffer);
         }
+        else
+        {
+            TRACUCOMP(g_trac_i2c,
+                    "On correct page(%d). No page switch needed",
+                    l_currentPage);
+        }
+
 
         if( l_error )
         {

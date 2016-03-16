@@ -179,6 +179,10 @@
         <id>IBSCOM_MUTEX</id>
     </attribute>
     <attribute>
+        <id>EEPROM_PAGE_ARRAY</id>
+        <default>2,2,2,2,2,2</default>
+    </attribute>
+    <attribute>
         <id>I2C_ENGINE_MUTEX_0</id>
         <default>0</default>
     </attribute>
