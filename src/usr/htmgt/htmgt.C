@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -186,11 +186,12 @@ namespace HTMGT
 
         if (NULL != l_err)
         {
-            TMGT_ERR("OCCs not all active.  Attempting OCC Reset");
+            TMGT_ERR("OCCs not all active (rc=0x%04X).  Attempting OCC Reset",
+                     l_err->reasonCode());
             TMGT_CONSOLE("OCCs are not active (rc=0x%04X). "
                          "Attempting OCC Reset",
                          l_err->reasonCode());
-            TMGT_INF("Calling resetOccs");
+            TMGT_INF("processOccStartStatus: Calling resetOccs");
             errlHndl_t err2 = OccManager::resetOccs(NULL);
             if(err2)
             {

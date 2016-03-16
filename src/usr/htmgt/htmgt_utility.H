@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,7 @@
 #include <stdint.h>
 #include <trace/interface.H>
 #include <errl/errlmanager.H>
+#include <console/consoleif.H>
 #include "htmgt_occcmd.H"
 
 
