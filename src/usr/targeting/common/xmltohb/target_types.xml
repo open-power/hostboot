@@ -564,6 +564,7 @@
     <attribute><id>TLB_RESERVE_SIZE</id></attribute>
     <attribute><id>TIME_BASE</id></attribute>
     <attribute><id>CPU_ATTR</id></attribute>
+    <attribute><id>ADU_XSCOM_BAR_BASE_ADDR</id></attribute>
 </targetType>
 
 <targetType>
@@ -2025,6 +2026,7 @@
     <attribute><id>PFET_POWERDOWN_DELAY_NS</id></attribute>
     <attribute><id>PFET_VDD_VOFF_SEL</id></attribute>
     <attribute><id>PFET_VCS_VOFF_SEL</id></attribute>
+    <attribute><id>SYSTEM_IPL_PHASE</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->

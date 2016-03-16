@@ -19948,4 +19948,36 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
    <readable/>
 </attribute>
 
+<attribute>
+    <id>SYSTEM_IPL_PHASE</id>
+    <description>Define context for current phase of system IPL.
+      Provided by the platform.
+      HB_IPL = 0x1,HB_RUNTIME = 0x2,CACHE_CONTAINED = 0x4</description>
+  <simpleType>
+    <uint8_t></uint8_t>
+  </simpleType>
+  <hwpfToHbAttrMap>
+    <id>ATTR_SYSTEM_IPL_PHASE</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ADU_XSCOM_BAR_BASE_ADDR</id>
+  <description>Defines XSCOM base address on each processor level.
+        address provided by the MRW </description>
+  <simpleType>
+      <uint64_t></uint64_t>
+  </simpleType>
+  <hwpfToHbAttrMap>
+    <id>ATTR_ADU_XSCOM_BAR_BASE_ADDR</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+</attribute>
+
 </attributes>
