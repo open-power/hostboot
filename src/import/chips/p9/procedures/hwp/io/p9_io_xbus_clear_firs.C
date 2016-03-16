@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,7 +87,7 @@ fapi2::ReturnCode io_rx_fir_reset(
     const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target,
     const uint8_t& i_clock_group)
 {
-    Register < EDIP_RX_GLBSM_CNTL1_EO_PG > rx_fir_reg;
+    Register < EDIP_RX_GLBSM_CNTLX1_EO_PG > rx_fir_reg;
 
     FAPI_TRY(rx_fir_reg.read(i_target, i_clock_group),
              "Reading Rx Fir Reg Failed");
