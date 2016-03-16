@@ -38,6 +38,7 @@
 using namespace std;
 using namespace TARGETING;
 using namespace ATTN;
+using namespace PRDF;
 
 namespace ATTN_RT
 {
