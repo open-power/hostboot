@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/attn/hostboot/test/attntest.C $                  */
+/* $Source: src/usr/diag/attn/ipl/test/attntest.C $                       */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -92,14 +92,19 @@ ATTENTION_VALUE_TYPE getRandomAttentionType()
 {
     ATTENTION_VALUE_TYPE a;
 
-    switch (randint(1, 3))
+    switch (randint(1, 5))
     {
         case 2:
             a = RECOVERABLE;
             break;
         case 3:
-        default:
             a = SPECIAL;
+            break;
+        case 4:
+            a = UNIT_CS;
+            break;
+        default:
+            a = (ATTENTION_VALUE_TYPE)HOST_ATTN;
             break;
     };
 

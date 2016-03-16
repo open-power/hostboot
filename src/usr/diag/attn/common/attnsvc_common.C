@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,9 @@ using namespace ERRORLOG;
 
 namespace ATTN
 {
+//@TODO: RTC:149395  Runtime case has workaround
+//       in place using these regs to regenerate.
+//       interrupts. Delete these if not needed.
 const uint64_t MCIFIRACT0     = 0x02011846;
 const uint64_t MCIFIRACT1     = 0x02011847;
 
@@ -50,16 +53,13 @@ const uint64_t MCIFIRMASK     = 0x02011843;
 const uint64_t MCIFIRMASK_AND = 0x02011844;
 const uint64_t MCIFIRMASK_OR  = 0x02011845;
 
-
-void getPbGp2Mask(uint64_t i_pos, void * i_data)
+enum
 {
-    uint64_t & mask = *static_cast<uint64_t *>(i_data);
+    // interrupts to host bridge -IPOLL MASK
+    ROUTE_TO_HOST      = 0x0400000000000000ull
+};
 
-    uint64_t tmp = 0;
-    GP1::getCheckbits(i_pos, tmp);
 
-    mask |= tmp;
-}
 
 /**
  * @brief calculated mask cache for ipoll
@@ -71,7 +71,13 @@ class HostMask
 
     HostMask() : iv_hostMask(0), iv_nonHostMask(0)
     {
-        IPOLL::getCheckbits(HOST, iv_hostMask);
+        uint64_t  l_hostMask;
+
+        // Get attentions only reported on proc/host side
+        IPOLL::getCheckbits(UNIT_CS,   l_hostMask);
+        IPOLL::getCheckbits(HOST_ATTN, iv_hostMask);
+        iv_hostMask |= l_hostMask;
+
         IPOLL::forEach(~0, &iv_nonHostMask, &getIpollMask);
 
         iv_nonHostMask = iv_nonHostMask & ~iv_hostMask;
@@ -118,42 +124,14 @@ errlHndl_t ServiceCommon::configureInterrupts(
 
     while(it != procs.end())
     {
-        uint64_t mask = 0;
-
-        // clear GPIO interrupt type status register
-
-        if(i_mode == UP)
-        {
-            err = putScom(*it, INTR_TYPE_LCL_ERR_STATUS_AND_REG,
-                          0);
-        }
-
-        if(err)
-        {
-            break;
-        }
-
-        // unmask GPIO interrupt type
-
-        mask = 0x8000000000000000ull;
-
-        err = putScom(*it,
-                      (i_mode == UP
-                       ? INTR_TYPE_MASK_AND_REG
-                       : INTR_TYPE_MASK_OR_REG),
-                      i_mode == UP ? ~mask : mask);
-
-        if(err)
-        {
-            break;
-        }
-
         // set GPIO interrupt type mode - or
-
         if(i_mode == UP)
         {
-            err = putScom(*it, INTR_TYPE_CONFIG_AND_REG,
-                          ~mask);
+            //@TODO: RTC:149395  Shouldn't need this GPIO setting anymore
+            // but need to check MUX setting in bits 0:7 eventually
+            // (Seems FSP related and more interrupt driven)
+
+            //   err = putScom(*it, INTR_TYPE_CONFIG_AND_REG, ~mask);
         }
 
         if(err)
@@ -162,25 +140,19 @@ errlHndl_t ServiceCommon::configureInterrupts(
         }
 
         // enable/disable MCSes
+        //@TODO: RTC:149395  Do we need to enable/disable MCS ?
+        //       seems to be related strictly to that GPIO P8 workaround
 
-        mask = 0;
-
-        GP1::forEach(~0, &mask, &getPbGp2Mask);
-
-        err = modifyScom(*it,
-                         GP2_REG,
-                         i_mode == UP ? mask : ~mask,
-                         i_mode == UP ? SCOM_OR : SCOM_AND);
-
-        if(err)
-        {
-            break;
-        }
 
         #ifndef __HOSTBOOT_RUNTIME
+        uint64_t  mask = 0;
         // enable attentions in ipoll mask
         mask = HostMask::nonHost();
         mask |= HostMask::host();
+
+        // We never messed with FSP mask bits in P8, so
+        // not doing it on P9 either.
+        mask |= ATTN::ROUTE_TO_HOST;
 
         // this doesn't have an and/or reg for some reason...
         err = modifyScom(*it,
@@ -195,6 +167,11 @@ errlHndl_t ServiceCommon::configureInterrupts(
 
         #else  // HOSTBOOT_RUNTIME
 
+        //@TODO: RTC:149395
+        // We had a workaround for centaur/MCS related attns
+        // at runtime. Do we still need for P9?
+        // Kind of think we have to do this and maybe more
+        // since we now support recov/special/local xstop.
         if (i_mode == UP)
         {
             HwasState         l_functional;
@@ -301,19 +278,6 @@ void ServiceCommon::processAttnPreAck(const TargetHandle_t i_proc)
         data = hostMask | nonHostMask;
     }
 
-    if(data & hostMask)
-    {
-        // if host attention, clear the ITR macro gpio interrupt
-        // type status register.
-
-        err = putScom(i_proc, INTR_TYPE_LCL_ERR_STATUS_AND_REG, 0);
-
-        if(err)
-        {
-            errlCommit(err, ATTN_COMP_ID);
-        }
-    }
-
     if(data & nonHostMask)
     {
         // mask local proc xstp,rec and/or special attns if on.
@@ -355,7 +319,6 @@ void ServiceCommon::processAttentions(const TargetHandleList & i_procs)
         while(pit-- != i_procs.begin())
         {
             // enumerate proc local attentions (xstp,spcl,rec).
-
             err = procOps.resolveIpoll(*pit, attentions);
 
             if(err)
@@ -364,8 +327,7 @@ void ServiceCommon::processAttentions(const TargetHandleList & i_procs)
             }
 
             // enumerate host attentions and convert
-            // to centaur targets
-
+            // to centaur targets  (NOOP for now on P9)
             err = memOps.resolve(*pit, attentions);
 
             if(err)
@@ -443,7 +405,6 @@ errlHndl_t ServiceCommon::handleAttentions(const TargetHandle_t i_proc)
        attentions.clear();
 
        // query the proc resolver for active attentions
-
        err = procOps.resolve(i_proc, 0, attentions);
 
        if(err)
@@ -464,6 +425,7 @@ errlHndl_t ServiceCommon::handleAttentions(const TargetHandle_t i_proc)
            break;
        }
 
+       ATTN_TRACE("handleAttns %d active( PRD)", attentions.size() );
        if(!attentions.empty())
        {
            err = getPrdWrapper().callPrd(attentions);

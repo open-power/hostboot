@@ -43,7 +43,8 @@ OBJS += attnmeminject.o
 
 MODULE = testattn
 
-#TODO RTC 148565 reenable when test cases are updated for P9
+# asdf bjs @TODO: RTC:151004
 #TESTS = *.H
+TESTS = attntestipl.H
 
 include ${ROOTPATH}/config.mk

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,6 +53,9 @@ errlHndl_t ProcOps::query(const AttnData & i_attnToCheck, bool & o_active)
 
     err = getScom(i_attnToCheck.targetHndl, address, scomData);
 
+    ATTN_TRACE("procOpsQuery:Addr:%016llx ChkBits:%016llx Data:%016llx",
+               address, checkbits, scomData);
+
     if(!err)
     {
         if(scomData & checkbits)
@@ -82,7 +85,6 @@ errlHndl_t ProcOps::resolveIpoll(
     // supported bits on in the
     // status register, in case the other
     // thread hasn't masked it yet
-
     err = getScom(i_proc, IPOLL_STATUS_REG, on);
 
     if(err)
@@ -93,13 +95,15 @@ errlHndl_t ProcOps::resolveIpoll(
     // also look for any supported bits on in the
     // mask register, indicating that the other thread
     // saw the error and masked it.
-
     err = getScom(i_proc, IPOLL::address, observed);
 
     if(err)
     {
         errlCommit(err, ATTN_COMP_ID);
     }
+
+    ATTN_TRACE("resolveIpoll: Status:%016llx  Mask:%016llx",
+                 on, observed);
 
     for(uint64_t type = INVALID_ATTENTION_TYPE;
             type != END_ATTENTION_TYPE;
@@ -111,16 +115,15 @@ errlHndl_t ProcOps::resolveIpoll(
         {
             // this object doesn't support
             // this attention type
-
             continue;
         }
 
         // analysis should be done if the bit for this
         // attention type is either on in the status reg
         // or masked in the mask reg
-
         if(!(supported & (on | observed)))
         {
+            ATTN_TRACE("resolveIpoll: Skipping");
             continue;
         }
 
@@ -128,6 +131,7 @@ errlHndl_t ProcOps::resolveIpoll(
         d.targetHndl = i_proc;
 
         // to be sure, query corresponding GFIR
+        ATTN_TRACE("rslvIpoll: Qry type  :%016llx", d.attnType);
         err = query(d, active);
         if(err)
         {
@@ -143,6 +147,8 @@ errlHndl_t ProcOps::resolveIpoll(
     return err;
 }
 
+// @TODO RTC:149395  check into this when we handle 'interrupt driven' attns
+//   (One thing is 'Can we switch to pure Ipoll vs GFIR ??' )
 errlHndl_t ProcOps::resolve(
         TargetHandle_t i_proc,
         uint64_t i_typeMask,
@@ -156,6 +162,7 @@ errlHndl_t ProcOps::resolve(
 
     uint64_t ignored;
 
+    ATTN_TRACE("procOps::resolve");
     for(uint64_t type = INVALID_ATTENTION_TYPE;
             type != END_ATTENTION_TYPE;
             ++type)
@@ -165,6 +172,7 @@ errlHndl_t ProcOps::resolve(
             break;
         }
 
+        ATTN_TRACE("procOps::Validate attn types");
         if(!GFIR::getCheckbits(type, ignored))
         {
             // this object doesn't support
@@ -176,6 +184,8 @@ errlHndl_t ProcOps::resolve(
         uint64_t mask = 0;
 
         IPOLL::getCheckbits(type, mask);
+        ATTN_TRACE("procOps::Chkbits type:%016llx mask:%016llx iMask:%016llx",
+                    type, mask, i_typeMask);
 
         if(!(mask & ~i_typeMask))
         {
@@ -186,6 +196,7 @@ errlHndl_t ProcOps::resolve(
 
         d.attnType = static_cast<ATTENTION_VALUE_TYPE>(type);
 
+        ATTN_TRACE("procOps::Query type  :%016llx", d.attnType );
         err = query(d, active);
 
         if(err)

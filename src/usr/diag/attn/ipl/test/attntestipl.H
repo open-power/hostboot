@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/attn/hostboot/test/attntestipl.H $               */
+/* $Source: src/usr/diag/attn/ipl/test/attntestipl.H $                    */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,29 +73,23 @@ class AttnCheckForIplAttentionsTest : public CxxTest::TestSuite
 
             FakeGfir xstpGfir(CHECK_STOP),
                      spclGfir(SPECIAL),
-                     recGfir(RECOVERABLE);
+                     recGfir(RECOVERABLE),
+                     lxstpGfir(UNIT_CS),
+                     hostGfir((PRDF::ATTENTION_VALUE_TYPE)HOST_ATTN);
 
             xstpGfir.install(system);
             spclGfir.install(system);
             recGfir.install(system);
+            lxstpGfir.install(system);
+            hostGfir.install(system);
 
-            FakeMcs rec(RECOVERABLE), xstp(CHECK_STOP), special(SPECIAL);
-            FakeGp1 gp1;
-
-            xstp.install(system);
-            special.install(system);
-            rec.install(system);
-            gp1.install(system);
+            // No Centaurs to mess with for now
 
             system.installScomImpl();
+            FakeMemTargetService targetSvc(targetPoolSize);
 
-            FakeMemTargetService targetSvc(
-                    targetPoolSize);
-
-            TargetHandleList membufs, procs;
-
+            TargetHandleList  procs;
             targetSvc.getAllChips(procs, TYPE_PROC);
-            targetSvc.getAllChips(membufs, TYPE_MEMBUF);
 
             RandSource procSource(iterations,
                     maxAttnsPerIteration,
@@ -103,12 +97,6 @@ class AttnCheckForIplAttentionsTest : public CxxTest::TestSuite
                     &procs[0],
                     &procs[0] + procs.size());
 
-            RandSource memSource(
-                    iterations,
-                    maxAttnsPerIteration,
-                    system,
-                    &membufs[0],
-                    &membufs[0] + membufs.size());
 
             targetSvc.installTargetService();
 
@@ -119,7 +107,6 @@ class AttnCheckForIplAttentionsTest : public CxxTest::TestSuite
 
             do
             {
-                memSource.run();
                 procSource.run();
 
                 err = checkForIplAttentions();

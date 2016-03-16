@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,5 +46,17 @@ extern trace_desc_t * slowTd;
 #define ATTN_FAST( _fmt_, _args_...) TRACFCOMP( ATTN::fastTd, INFO_MRK _fmt_, ##_args_)
 #define ATTN_SLOW( _fmt_, _args_...) TRACFCOMP( ATTN::slowTd, INFO_MRK _fmt_, ##_args_)
 #define ATTN_ERR( _fmt_, _args_...) TRACFCOMP( ATTN::slowTd, ERR_MRK _fmt_, ##_args_)
+
+// If you want to see what is going on, uncomment and rebuild
+// #define ATTN_DEBUG
+
+// The ATTN_TRACE can be used to provide lots of debug help if compiled in.
+// However, normal compiles will have this completely out (so no affect).
+#ifdef ATTN_DEBUG
+  #define ATTN_TRACE( _fmt_, _args_...)  \
+          TRACFCOMP( ATTN::fastTd, INFO_MRK _fmt_, ##_args_)
+#else
+  #define ATTN_TRACE( _fmt_, _args_...)
+#endif
 
 #endif

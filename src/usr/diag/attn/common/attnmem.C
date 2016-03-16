@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,7 @@
 #include "common/attnmem.H"
 #include "common/attnlist.H"
 #include "common/attntarget.H"
+#include "attntrace.H"
 
 using namespace std;
 using namespace PRDF;
@@ -112,6 +113,11 @@ errlHndl_t MemOps::resolve(
 {
     errlHndl_t err = 0;
 
+    //@TODO: RTC:150944
+    // Don't need this for now as this is Centaur Chip related
+    ATTN_TRACE("MemOps::resolve - P9 Noop");
+
+#if 0
     uint64_t gp1ScomData = 0;
 
     do {
@@ -135,6 +141,7 @@ errlHndl_t MemOps::resolve(
         GP1::forEach(gp1ScomData, &args, &resolveMcs);
 
     } while(0);
+#endif
 
     return err;
 }

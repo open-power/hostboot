@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/attn/hostboot/test/attnfakeipoll.C $             */
+/* $Source: src/usr/diag/attn/ipl/test/attnfakeipoll.C $                  */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -187,7 +187,7 @@ FakeIpoll::FakeIpoll(
      iv_ipollbits(0),
      iv_presenter(&i_presenter)
 {
-    if(i_type == HOST)
+    if(i_type == HOST_ATTN)
     {
         // figure out what bits to monitor
         // in the nest gp1 register, if

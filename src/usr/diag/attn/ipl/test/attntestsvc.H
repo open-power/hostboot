@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -84,7 +84,7 @@ class AttnSvcTest: public CxxTest::TestSuite
             FakeIpoll xstpIpoll(CHECK_STOP, presenter),
                       spclIpoll(SPECIAL, presenter),
                       recIpoll(RECOVERABLE, presenter),
-                      hostIpoll(HOST, presenter);
+                      hostIpoll(HOST_ATTN, presenter);
 
             xstpIpoll.install(system);
             spclIpoll.install(system);
