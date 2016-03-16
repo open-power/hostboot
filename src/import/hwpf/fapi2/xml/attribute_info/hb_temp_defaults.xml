@@ -21,7 +21,8 @@
 
 <!-- =====================================================================
      Contains the definition of temporary FW defaults for FAPI attributes
-     needing a default.
+     needing a default.  Each FAPI attribute should already be defined
+     elsewhere in an attribute XML file.
      <attribute>
          <id>...</id>
          <default>...</default>
