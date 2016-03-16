@@ -192,6 +192,16 @@ ReturnCode platGetTargetPos(const Target<TARGET_TYPE_ALL>& i_pFapiTarget,
                                  uint32_t & o_pos);
 
 
+///
+/// @brief This function is called by the FAPI_ATTR_GET macro when getting
+/// ATTR_FUSED_CORE_MODE. It should not be called directly
+///
+///
+/// @param[out] o_isFused         0 if not fused
+/// @return void
+///
+void platGetFusedCoreMode(uint8_t & o_isFused);
+
 // -----------------------------------------------------------------------------
 // End TODO: End to be supported functions
 // -----------------------------------------------------------------------------
@@ -248,5 +258,13 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
     AttrOverrideSync::getAttrOverrideFunc(ID, PTARGET, &VAL)\
     ? fapi2::FAPI2_RC_SUCCESS : \
     fapi2::platAttrSvc::platGetTargetPos(PTARGET, VAL)
+
+//------------------------------------------------------------------------------
+// MACRO to route ATTR_FUSED_CORE access to the correct Hostboot function
+//------------------------------------------------------------------------------
+#define ATTR_FUSED_CORE_MODE_GETMACRO(ID, PTARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, PTARGET, &VAL)\
+    ? fapi2::FAPI2_RC_SUCCESS : \
+    fapi2::platAttrSvc::platGetFusedCoreMode(VAL)
 
 #endif // ATTRIBUTESERVICE_H_
