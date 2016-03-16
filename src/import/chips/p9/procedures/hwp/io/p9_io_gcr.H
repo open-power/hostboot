@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -70,7 +70,7 @@
  * @tparam[in] REG_WIDTH Size of the Register.  64 for flat scom register and 16 for
  * I/O GCR registers
  */
-template < uint16_t REG_ID, uint64_t SCOM_ADDR, uint8_t REG_WIDTH>
+template < uint64_t REG_ID, uint64_t SCOM_ADDR, uint8_t REG_WIDTH>
 class Register
 {
     public:
@@ -139,7 +139,7 @@ class Register
          * @tparam[in] WIDTH Represents the width of the field within the reg
          * @return Field Data
          */
-        template<uint16_t FIELD_ID, uint8_t START, uint8_t WIDTH>
+        template<uint64_t FIELD_ID, uint8_t START, uint8_t WIDTH>
         inline uint16_t get()
         {
             static_assert(FIELD_ID == REG_ID, "Field does not belong to Register");
@@ -156,7 +156,7 @@ class Register
          * @tparam[in] WIDTH Represents the width of the field within the reg
          * @return void
          */
-        template<uint16_t FIELD_ID, uint8_t START, uint8_t WIDTH>
+        template<uint64_t FIELD_ID, uint8_t START, uint8_t WIDTH>
         inline void set(const uint16_t i_data)
         {
             static_assert(FIELD_ID == REG_ID, "Field does not belong to Register");
