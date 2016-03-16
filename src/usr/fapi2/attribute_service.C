@@ -58,6 +58,7 @@
 #include <targeting/common/targetservice.H>
 #include <targeting/common/predicates/predicatectm.H>
 #include <targeting/common/utilFilter.H>
+#include <targeting/common/util.H>
 
 //******************************************************************************
 // Implementation
@@ -379,6 +380,16 @@ ReturnCode platGetTargetPos(const Target<TARGET_TYPE_ALL>& i_pFapiTarget,
     }
 
     return l_rc;
+}
+
+//******************************************************************************
+// fapi::platAttrSvc::platGetFusedCoreMode function
+//******************************************************************************
+void platGetFusedCoreMode(uint8_t & o_isFused)
+{
+
+    o_isFused = TARGETING::is_fused_mode();
+
 }
 
 } // End platAttrSvc namespace
