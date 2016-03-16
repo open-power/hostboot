@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,7 @@
 #define _MSS_SCOM_H_
 
 #include <fapi2.H>
+#include <utils/c_str.H>
 
 //
 // Wrapping scom operations: We wrap fapi2::get/putScom for two reasons. The
@@ -43,6 +44,7 @@
 
 namespace mss
 {
+
 /// @brief Reads a SCOM register from a chip.
 /// @tparam K template parameter, passed in target.
 /// @param[in]  i_target     HW target to operate on.
@@ -105,6 +107,90 @@ inline fapi2::ReturnCode putScomUnderMask(const fapi2::Target<K>& i_target,
     return fapi2::putScomUnderMask(i_target, i_address, i_data, i_mask);
 #endif
 }
+
+///
+/// @brief Blast one peice of data across a vector of addresses
+/// @param[in] i_target the target for the scom
+/// @param[in] i_addrs const std::vector<uint64_t>& addresses
+/// @param[in] i_data const fapi2::buffer<uint64_t>& the data to blast
+/// @return FAPI2_RC_SUCCESS iff ok
+/// @note Author is originally from Boston (Pahk mah cah in Havahd Yahd)
+
+/// @note std::transform might have been tidier, but because of the ReturnCode
+/// and the FAPI_TRY mechanism, this is the simplest.
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode scom_blastah( const fapi2::Target<T>& i_target, const std::vector<uint64_t>& i_addrs,
+                                const fapi2::buffer<uint64_t>& i_data )
+{
+    size_t count(0);
+
+    for (auto a : i_addrs)
+    {
+        FAPI_TRY( mss::putScom(i_target, a, i_data) );
+        ++count;
+    }
+
+    return fapi2::current_err;
+
+fapi_try_exit:
+    FAPI_ERR( "scom_blastah failed: %d of %d executed against %s", count, i_addrs.size(), mss::c_str(i_target));
+    return fapi2::current_err;
+}
+
+///
+/// @brief Blast one peice of data across a vector of targets
+/// @param[in]i_targets  the vector of targets for the scom
+/// @param[in] i_addr the address
+/// @param[in] i_data const fapi2::buffer<uint64_t>& the data to blast
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode scom_blastah( const std::vector<fapi2::Target<T> >& i_targets, const uint64_t i_addr,
+                                const fapi2::buffer<uint64_t>& i_data )
+{
+    size_t count(0);
+
+    for (auto t : i_targets)
+    {
+        FAPI_TRY( mss::putScom(t, i_addr, i_data) );
+        ++count;
+    }
+
+    return fapi2::current_err;
+
+fapi_try_exit:
+    FAPI_ERR( "scom_blastah failed: %d of %d written to 0x%llx", count, i_targets.size(), i_addr);
+    return fapi2::current_err;
+}
+
+///
+/// @brief Blast one peice of data across a vector of targets
+/// @param[in]i_targets  the vector of targets for the scom
+/// @param[in] i_addrs the vector of addresses
+/// @param[in] i_data const fapi2::buffer<uint64_t>& the data to blast
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode scom_blastah( const std::vector<fapi2::Target<T> >& i_targets,
+                                const std::vector<uint64_t>& i_addrs,
+                                const fapi2::buffer<uint64_t>& i_data )
+{
+    size_t count(0);
+
+    for (auto t : i_targets)
+    {
+        FAPI_TRY( mss::scom_blastah(t, i_addrs, i_data) );
+        ++count;
+    }
+
+    return fapi2::current_err;
+
+fapi_try_exit:
+    FAPI_ERR( "scom_blastah failed: %d of %dx%d", count, i_targets.size(), i_addrs.size() );
+    return fapi2::current_err;
+}
+
 
 }
 #endif

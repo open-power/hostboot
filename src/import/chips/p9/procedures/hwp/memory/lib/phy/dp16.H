@@ -39,6 +39,37 @@
 namespace mss
 {
 
+///
+/// @brief Given a mt/s, create a PHY 'standard' bit field for that freq.
+/// @param[in] i_freq the value from mss::freq for your target
+/// @return uint64_t a right-aligned bitfield which can be inserted in to a buffer
+///
+inline uint64_t freq_bitfield_helper( const uint64_t i_freq )
+{
+    fapi2::buffer<uint64_t> l_data(0b1000);
+
+    // Shift l_data over based on freq.
+    switch(i_freq)
+    {
+        // We don't support 1866 on Nimbus.
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT1866:
+            l_data >>= 3;
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2133:
+            l_data >>= 2;
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_FREQ_MT2400:
+            l_data >>= 1;
+            break;
+
+            // 2666 is >> 0
+    };
+
+    return l_data;
+}
+
 // I have a dream that the PHY code can be shared among controllers. So, I drive the
 // engine from a set of traits. This might be folly. Allow me to dream. BRS
 
@@ -135,6 +166,21 @@ class dp16
         ///
         inline fapi2::ReturnCode set_bad_bits(const fapi2::Target<T>& i_target);
 
+        ///
+        /// @brief Configure the DP16 io_tx config0 registers
+        /// @param[in] i_target a fapi2 target
+        /// @return FAPI2_RC_SUCCESs iff ok
+        ///
+        template< fapi2::TargetType K>
+        fapi2::ReturnCode setup_io_tx_config0( const fapi2::Target<K>& i_target );
+
+        ///
+        /// @brief Configure ADR DLL/VREG Config 1
+        /// @param[in] i_target a fapi2 target
+        /// @return FAPI2_RC_SUCCESs iff ok
+        ///
+        template<fapi2::TargetType K>
+        fapi2::ReturnCode setup_dll_vreg_config1( const fapi2::Target<K>& i_target );
 };
 
 ///
@@ -203,6 +249,25 @@ inline fapi2::ReturnCode dp16<fapi2::TARGET_TYPE_MCA>::set_bad_bits(
     return fapi2::FAPI2_RC_SUCCESS;
 }
 
+///
+/// @brief Configure the DP16 io_tx config0 registers
+/// @param[in] i_target a MCBIST target
+/// @return FAPI2_RC_SUCCESs iff ok
+///
+template<>
+template<>
+fapi2::ReturnCode dp16<fapi2::TARGET_TYPE_MCA>::setup_io_tx_config0(
+    const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
+
+///
+/// @brief Configure ADR DLL/VREG Config 1
+/// @param[in] i_target a MCBIST target
+/// @return FAPI2_RC_SUCCESs iff ok
+///
+template<>
+template<>
+fapi2::ReturnCode dp16<fapi2::TARGET_TYPE_MCA>::setup_dll_vreg_config1(
+    const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
 
 }
 

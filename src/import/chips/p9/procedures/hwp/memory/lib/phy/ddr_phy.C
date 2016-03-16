@@ -40,6 +40,7 @@
 
 #include <utils/bit_count.H>
 #include <utils/dump_regs.H>
+#include <utils/scom.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_PROC_CHIP;
@@ -52,89 +53,6 @@ using fapi2::FAPI2_RC_SUCCESS;
 
 namespace mss
 {
-
-///
-/// @brief Blast one peice of data across a vector of addresses
-/// @param[in] i_target the target for the scom
-/// @param[in] i_addrs const std::vector<uint64_t>& addresses
-/// @param[in] i_data const fapi2::buffer<uint64_t>& the data to blast
-/// @return FAPI2_RC_SUCCESS iff ok
-/// @note Author is originally from Boston (Pahk mah cah in Havahd Yahd)
-
-/// @note std::transform might have been tidier, but because of the ReturnCode
-/// and the FAPI_TRY mechanism, this is the simplest.
-///
-template< fapi2::TargetType T >
-fapi2::ReturnCode scom_blastah( const fapi2::Target<T>& i_target, const std::vector<uint64_t>& i_addrs,
-                                const fapi2::buffer<uint64_t>& i_data )
-{
-    size_t count(0);
-
-    for (auto a : i_addrs)
-    {
-        FAPI_TRY( mss::putScom(i_target, a, i_data) );
-        ++count;
-    }
-
-    return fapi2::current_err;
-
-fapi_try_exit:
-    FAPI_ERR( "scom_blastah failed: %d of %d executed against %s", count, i_addrs.size(), mss::c_str(i_target));
-    return fapi2::current_err;
-}
-
-///
-/// @brief Blast one peice of data across a vector of targets
-/// @param[in]i_targets  the vector of targets for the scom
-/// @param[in] i_addr the address
-/// @param[in] i_data const fapi2::buffer<uint64_t>& the data to blast
-/// @return FAPI2_RC_SUCCESS iff ok
-///
-template< fapi2::TargetType T >
-fapi2::ReturnCode scom_blastah( const std::vector<fapi2::Target<T> >& i_targets, const uint64_t i_addr,
-                                const fapi2::buffer<uint64_t>& i_data )
-{
-    size_t count(0);
-
-    for (auto t : i_targets)
-    {
-        FAPI_TRY( mss::putScom(t, i_addr, i_data) );
-        ++count;
-    }
-
-    return fapi2::current_err;
-
-fapi_try_exit:
-    FAPI_ERR( "scom_blastah failed: %d of %d written to 0x%llx", count, i_targets.size(), i_addr);
-    return fapi2::current_err;
-}
-
-///
-/// @brief Blast one peice of data across a vector of targets
-/// @param[in]i_targets  the vector of targets for the scom
-/// @param[in] i_addrs the vector of addresses
-/// @param[in] i_data const fapi2::buffer<uint64_t>& the data to blast
-/// @return FAPI2_RC_SUCCESS iff ok
-///
-template< fapi2::TargetType T >
-fapi2::ReturnCode scom_blastah( const std::vector<fapi2::Target<T> >& i_targets,
-                                const std::vector<uint64_t>& i_addrs,
-                                const fapi2::buffer<uint64_t>& i_data )
-{
-    size_t count(0);
-
-    for (auto t : i_targets)
-    {
-        FAPI_TRY( mss::scom_blastah(t, i_addrs, i_data) );
-        ++count;
-    }
-
-    return fapi2::current_err;
-
-fapi_try_exit:
-    FAPI_ERR( "scom_blastah failed: %d of %dx%d", count, i_targets.size(), i_addrs.size() );
-    return fapi2::current_err;
-}
 
 ///
 /// @brief change resetn to the given state
@@ -891,6 +809,10 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
 {
     // Returned from set_rank_pairs, it tells us how many rank pairs we configured on this port.
     std::vector<uint64_t> l_pairs;
+
+    // Setup the DP16 IO TX, DLL/VREG. They use freq which is an MCBIST attribute
+    FAPI_TRY( mss::dp16<TARGET_TYPE_MCA>().setup_io_tx_config0(i_target) );
+    FAPI_TRY( mss::dp16<TARGET_TYPE_MCA>().setup_dll_vreg_config1(i_target) );
 
     for( auto p : i_target.getChildren<TARGET_TYPE_MCA>())
     {

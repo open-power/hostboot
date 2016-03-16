@@ -31,14 +31,15 @@
 #include <utility>
 #include <vector>
 
-#include "../utils/scom.H"
-#include "dp16.H"
-
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
+#include <mss_attribute_accessors.H>
 
-#include "../utils/pos.H"
-#include "../utils/c_str.H"
+#include <phy/dp16.H>
+
+#include <utils/scom.H>
+#include <utils/pos.H>
+#include <utils/c_str.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCBIST;
@@ -319,6 +320,80 @@ fapi2::ReturnCode dp16<TARGET_TYPE_MCA>::setup_sysclk( const fapi2::Target<TARGE
             FAPI_TRY( mss::putScom(p, a.second, l_data) );
         }
     }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+///
+/// @brief Configure the DP16 io_tx config0 registers
+/// @param[in] i_target a MCBIST target
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<>
+template<>
+fapi2::ReturnCode dp16<TARGET_TYPE_MCA>::setup_io_tx_config0( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
+{
+    static const std::vector<uint64_t> l_addrs(
+    {
+        MCA_DDRPHY_DP16_IO_TX_CONFIG0_P0_0,
+        MCA_DDRPHY_DP16_IO_TX_CONFIG0_P0_1,
+        MCA_DDRPHY_DP16_IO_TX_CONFIG0_P0_2,
+        MCA_DDRPHY_DP16_IO_TX_CONFIG0_P0_3,
+        MCA_DDRPHY_DP16_IO_TX_CONFIG0_P0_4,
+    } );
+
+    fapi2::buffer<uint64_t> l_data;
+    uint64_t l_freq_bitfield;
+
+    // Right now freq is per MCBIST.
+    uint64_t l_freq;
+    FAPI_TRY( mss::freq(i_target, l_freq) );
+
+    l_freq_bitfield = freq_bitfield_helper(l_freq);
+
+    l_data.insertFromRight<MCA_DDRPHY_DP16_IO_TX_CONFIG0_P0_0_01_INTERP_SIG_SLEW,
+                           MCA_DDRPHY_DP16_IO_TX_CONFIG0_P0_0_01_INTERP_SIG_SLEW_LEN>(l_freq_bitfield);
+
+    FAPI_INF("blasting 0x%016lx to dp16 io_tx", l_data);
+
+    FAPI_TRY( mss::scom_blastah(i_target.getChildren<TARGET_TYPE_MCA>(), l_addrs, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Configure ADR DLL/VREG Config 1
+/// @param[in] i_target a MCBIST target
+/// @return FAPI2_RC_SUCCESs iff ok
+///
+template<>
+template<>
+fapi2::ReturnCode dp16<TARGET_TYPE_MCA>::setup_dll_vreg_config1( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
+{
+    static const std::vector<uint64_t> l_addrs(
+    {
+        MCA_DDRPHY_ADR_DLL_VREG_CONFIG_1_P0_ADR32S0,
+        MCA_DDRPHY_ADR_DLL_VREG_CONFIG_1_P0_ADR32S1,
+    } );
+
+    fapi2::buffer<uint64_t> l_data;
+    uint64_t l_freq_bitfield;
+
+    // Right now freq is per MCBIST.
+    uint64_t l_freq;
+    FAPI_TRY( mss::freq(i_target, l_freq) );
+
+    l_freq_bitfield = freq_bitfield_helper(l_freq);
+
+    l_data.insertFromRight<MCA_DDRPHY_ADR_DLL_VREG_CONFIG_1_P0_ADR32S1_ADR1_INTERP_SIG_SLEW,
+                           MCA_DDRPHY_ADR_DLL_VREG_CONFIG_1_P0_ADR32S1_ADR1_INTERP_SIG_SLEW_LEN>(l_freq_bitfield);
+
+    FAPI_INF("blasting 0x%016lx to dp16 DLL/VREG config 1", l_data);
+
+    FAPI_TRY( mss::scom_blastah(i_target.getChildren<TARGET_TYPE_MCA>(), l_addrs, l_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
