@@ -84,7 +84,7 @@ class AttnMemTest: public CxxTest::TestSuite
 
             targetSvc.getAllChips(membufs, TYPE_MEMBUF);
 
-            FakeIpoll hostIpoll(HOST_ATTN, presenter);
+            FakeIpoll hostIpoll(PRDF::HOST_ATTN, presenter);
             FakeMcs rec(RECOVERABLE), xstp(CHECK_STOP), special(SPECIAL);
             FakeGp1 gp1;
 

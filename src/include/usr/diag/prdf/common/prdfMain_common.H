@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,8 +55,10 @@ enum ATTENTION_VALUE_TYPE
     PROC_CS = UNIT_CS,
     RECOVERABLE = 3,
     SPECIAL = 4,
-    END_ATTENTION_TYPE = 5
+    HOST_ATTN = 5,
+    END_ATTENTION_TYPE = 6
 };
+
 
 // Move here from xspprdsdbug.C
 /**

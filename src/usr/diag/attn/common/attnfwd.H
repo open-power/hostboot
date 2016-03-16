@@ -64,22 +64,6 @@ class ScomImpl;
 class ProcOps;
 class MemOps;
 
-
-enum
-{
-    /**
-     * @brief HOST Represents host attentions,
-     *         distinct from the local error attentions.
-     */
-    HOST_ATTN = 5,
-    END_ATTENTION_TYPE = 6,
-    //@TODO: RTC:149395  These enums should be removed once
-    // the other commit from PRD makes it to hostboot code.
-    //   https://ralgit01.raleigh.ibm.com/gerrit1/#/c/22141/
-};
-
-
-
 /**
  * @brief MessageType Attention service message types.
  */
