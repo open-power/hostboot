@@ -59,8 +59,9 @@ enum i2cModuleId
     I2C_SEND_SLAVE_STOP                 = 0x09,
     I2C_PROCESS_ACTIVE_MASTERS          = 0x0A,
     I2C_FORCE_RESET_AND_UNLOCK          = 0x0B,
-    I2C_PAGE_LOCK_OP                    = 0x0C,
+    I2C_PAGE_SWITCH_OP                  = 0x0C,
     I2C_PAGE_UNLOCK_OP                  = 0x0D,
+    I2C_CHOOSE_EEPROM_PAGE              = 0x0E,
 };
 
 

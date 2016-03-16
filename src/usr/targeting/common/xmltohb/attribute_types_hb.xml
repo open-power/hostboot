@@ -115,6 +115,24 @@
     <hbOnly/>
 </attribute>
 
+<attribute>
+    <id>EEPROM_PAGE_ARRAY</id>
+    <description>
+        Used to keep track of which EEPROM page the current I2C master bus is set to
+        0 = PAGE_ZERO
+        1 = PAGE_ONE
+        2 = UNKNOWN_PAGE
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>2,2,2,2,2,2</default>
+        </uint8_t>
+        <array>2,3</array>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
 
 <!-- For POD Testing -->
 <attribute>
