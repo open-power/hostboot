@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/attn/hostboot/test/attntestmem.H $               */
+/* $Source: src/usr/diag/attn/ipl/test/attntestmem.H $                    */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -84,7 +84,7 @@ class AttnMemTest: public CxxTest::TestSuite
 
             targetSvc.getAllChips(membufs, TYPE_MEMBUF);
 
-            FakeIpoll hostIpoll(HOST, presenter);
+            FakeIpoll hostIpoll(HOST_ATTN, presenter);
             FakeMcs rec(RECOVERABLE), xstp(CHECK_STOP), special(SPECIAL);
             FakeGp1 gp1;
 

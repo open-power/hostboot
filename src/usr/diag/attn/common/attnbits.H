@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -176,14 +176,31 @@ bool getCheckbits(
  */
 enum
 {
-    INTR_TYPE_LCL_ERR_STATUS_AND_REG = 0x01020002,
-    INTR_TYPE_MASK_OR_REG            = 0x0102000d,
-    INTR_TYPE_MASK_AND_REG           = 0x0102000e,
-    INTR_TYPE_CONFIG_AND_REG         = 0x01020011,
+    // Interrupt Type Mask Register
+    INTR_TYPE_MASK_OR_REG            = 0x000F002D,
+    INTR_TYPE_MASK_AND_REG           = 0x000F002E,
+
+    // Interrupt Type Config Register
+    // (contains MUX'ing bits now)
+    INTR_TYPE_CONFIG_AND_REG         = 0x000F0031,
+
+    // This was for MCS usage, but not needed right now
     GP2_REG                          = 0x02000002,
-    IPOLL_STATUS_REG                 = 0x01020014,
-    INTR_TYPE_LCL_ERR_STATUS_OR_REG  = 0x01020001,
-    INTR_TYPE_LCL_ERR_STATUS_REG     = 0x01020000
+
+    // IPOLL MASK register
+    IPOLL_MASK_REG                   = 0x000F0033,
+    // (IPOLL) Error status reg
+    IPOLL_STATUS_REG                 = 0x000F0034,
+
+    // Interrupt Presentation Reg (IPR)
+    INTR_TYPE_LCL_ERR_STATUS_REG     = 0x000F0020,
+    INTR_TYPE_LCL_ERR_STATUS_OR_REG  = 0x000F0021,
+    INTR_TYPE_LCL_ERR_STATUS_AND_REG = 0x000F0022,
 };
+
+
+
+
+
 }
 #endif

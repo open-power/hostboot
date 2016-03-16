@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,7 @@
 #include "common/attnfwd.H"
 #include "common/attnlist.H"
 #include "common/attnops.H"
+#include "common/attntrace.H"
 #include <algorithm>
 
 using namespace std;
@@ -52,6 +53,7 @@ void AttentionList::getAttnList(PRDF::AttnList & o_dest) const
         sit->getData(d);
 
         o_dest.push_back(d);
+        ATTN_TRACE("getAttnList saving type: %d", d.attnType);
 
         ++sit;
     }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -91,7 +91,22 @@ void forEach(
 namespace IPOLL
 {
 
-const uint64_t address = 0x1020013;
+const uint64_t address = IPOLL_MASK_REG;
+
+// NOTE: This reg should get flushed to zeroes.
+//       Hence, the 'routing to host' and
+//       'routing to FSP' should be enabled.
+//      (along with all interrupt types to FSP)
+//  ---------------------------------------------
+//    {ROUTE_TO_HOST,    0x0400000000000000ull},
+//
+//    {TOSP_CHECK_STOP,  0x0200000000000000ull},
+//    {TOSP_RECOVERABLE, 0x0100000000000000ull},
+//    {TOSP_SPECIAL,     0x0080000000000000ull},
+//    {TOSP_UNIT_CS,     0x0040000000000000ull},
+//    {TOSP_HOST,        0x0020000000000000ull},
+//    {ROUTE_TO_SP,      0x0010000000000000ull},
+//  ---------------------------------------------
 
 void getCheckbitsAssociations(
         const RegAssoc * & o_first,
@@ -99,10 +114,11 @@ void getCheckbitsAssociations(
 {
     static const RegAssoc first[] = {
 
-        {CHECK_STOP, 0x8000000000000000ull},
+        {CHECK_STOP,  0x8000000000000000ull},
         {RECOVERABLE, 0x4000000000000000ull},
-        {SPECIAL, 0x2000000000000000ull},
-        {HOST, 0x1000000000000000ull},
+        {SPECIAL,     0x2000000000000000ull},
+        {UNIT_CS,     0x1000000000000000ull},
+        {HOST_ATTN,   0x0800000000000000ull},
     };
 
     static const RegAssoc * last = first +
@@ -145,9 +161,11 @@ bool getAddress(
 {
     static const RegAssoc first[] = {
 
-        {CHECK_STOP, 0x570f001c},
+        {CHECK_STOP,  0x570f001c},
         {RECOVERABLE, 0x570f001b},
-        {SPECIAL, 0x570f001a},
+        {SPECIAL,     0x570f001a},
+        {UNIT_CS,     0x57040018},
+        {HOST_ATTN,   0x57040009},
     };
 
     static const RegAssoc * last = first +
@@ -162,9 +180,11 @@ bool getCheckbits(
 {
     static const RegAssoc first[] = {
 
-        {CHECK_STOP, 0xffffffffffffffffull},
+        {CHECK_STOP,  0xffffffffffffffffull},
         {RECOVERABLE, 0xffffffffffffffffull},
-        {SPECIAL, 0xffffffffffffffffull},
+        {SPECIAL,     0xffffffffffffffffull},
+        {UNIT_CS,     0xffffffffffffffffull},
+        {HOST_ATTN,   0xffffffffffffffffull},
     };
 
     static const RegAssoc * last = first +
@@ -176,7 +196,7 @@ bool getCheckbits(
 
 namespace MCI
 {
-
+// Not valid / used for now on P9
 const uint64_t address = 0x2011840;
 
 void getCheckbitsAssociations(
@@ -222,7 +242,7 @@ void forEach(
 
 namespace GP1
 {
-
+// Not valid / used for now on P9
 const uint64_t address = 0x2000001ull;
 
 void getCheckbitsAssociations(

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -145,7 +145,7 @@ namespace ATTN_RT
             // get set and we will end up in infinite loop.
 
             uint64_t hostMask = 0;
-            IPOLL::getCheckbits(HOST, hostMask);
+            IPOLL::getCheckbits(HOST_ATTN, hostMask);
 
             if( i_ipollMask & hostMask)
             {
