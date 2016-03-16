@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -289,12 +289,12 @@ namespace HTMGT
     {
         errlHndl_t err = NULL;
         bool safeModeNeeded = false;
-        TMGT_INF("buildOccs called");
+        TMGT_INF("_buildOccs called");
 
         // Only build OCC objects once.
         if((iv_occArray.size() > 0) && (iv_occMaster != NULL))
         {
-            TMGT_INF("buildOccs: Existing OCC Targets kept = %d",
+            TMGT_INF("_buildOccs: Existing OCC Targets kept = %d",
                      iv_occArray.size());
             return err;
         }
@@ -317,13 +317,13 @@ namespace HTMGT
                 // Instance number for this Processor/OCC
                 const uint8_t instance =
                     (*proc)->getAttr<TARGETING::ATTR_POSITION>();
-                TMGT_INF("buildOccs: PROC%d is functional", instance);
+                TMGT_INF("_buildOccs: PROC%d is functional", instance);
                 // Get HOMER virtual address
                 uint8_t * homer = (uint8_t*)
                     ((*proc)->getAttr<TARGETING::ATTR_HOMER_VIRT_ADDR>());
                 const uint8_t * homerPhys = (uint8_t*)
                     ((*proc)->getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>());
-                TMGT_INF("buildOccs: homer = 0x%08llX (virt) / 0x%08llX (phys)"
+                TMGT_INF("_buildOccs: homer = 0x%08llX (virt) / 0x%08llX (phys)"
                          " for Proc%d", homer, homerPhys, instance);
 #ifdef SIMICS_TESTING
                 // Starting of OCCs is not supported in SIMICS, so fake out
@@ -339,7 +339,7 @@ namespace HTMGT
                             new uint8_t [OCC_CMD_ADDR+0x2000];
                     }
                     homer = G_simicsHomerBuffer;
-                    TMGT_ERR("buildOccs: Using hardcoded HOMER of 0x%08lX",
+                    TMGT_ERR("_buildOccs: Using hardcoded HOMER of 0x%08lX",
                              homer);
                 }
 #endif
@@ -357,21 +357,22 @@ namespace HTMGT
                             pOccs[0]->
                             getAttr<TARGETING::ATTR_OCC_MASTER_CAPABLE>();
 
-                        TMGT_INF("Found OCC%d - HUID: 0x%0lX, masterCapable:"
-                                 " %c, homer: 0x%0lX",
+                        TMGT_INF("_buildOccs: Found OCC%d - HUID: 0x%0lX, "
+                                 "masterCapable: %c, homer: 0x%0lX",
                                  instance, huid, masterCapable?'Y':'N', homer);
                         _addOcc(instance, masterCapable, homer, pOccs[0]);
                     }
                     else
                     {
                         // OCC must not be functional
-                        TMGT_ERR("OCC%d not functional", instance);
+                        TMGT_ERR("_buildOccs: OCC%d not functional", instance);
                     }
                 }
                 else
                 {
                     // OCC will not be functional with no HOMER address
-                    TMGT_ERR("HOMER address for OCC%d is NULL!", instance);
+                    TMGT_ERR("_buildOccs: HOMER address for OCC%d is NULL!",
+                             instance);
                     safeModeNeeded = true;
                     if (NULL == err)
                     {
@@ -408,12 +409,12 @@ namespace HTMGT
         }
         else
         {
-            TMGT_ERR("No functional processors found");
+            TMGT_ERR("_buildOccs: No functional processors found");
         }
 
         if (0 == _getNumOccs())
         {
-            TMGT_ERR("Unable to find any functional OCCs");
+            TMGT_ERR("_buildOccs: Unable to find any functional OCCs");
             if (NULL == err)
             {
                 /*@
@@ -442,7 +443,7 @@ namespace HTMGT
             }
 
             // Reset all OCCs
-            TMGT_INF("Calling HBOCC::stopAllOCCs");
+            TMGT_INF("_buildOccs: Calling HBOCC::stopAllOCCs");
             err2 = HBOCC::stopAllOCCs();
             if (NULL != err2)
             {
@@ -455,7 +456,7 @@ namespace HTMGT
             updateForSafeMode(err);
         }
 
-        TMGT_INF("buildOccs: OCC Targets found = %d", _getNumOccs());
+        TMGT_INF("_buildOccs: OCC Targets found = %d", _getNumOccs());
 
         return err;
 
@@ -710,8 +711,8 @@ namespace HTMGT
                 // No OCC has been marked failed, increment system reset count
                 ++iv_resetCount;
 
-                TMGT_INF("resetOCCs: Incrementing system OCC reset count to %d",
-                         iv_resetCount);
+                TMGT_INF("_resetOCCs: Incrementing system OCC reset count"
+                         " to %d", iv_resetCount);
 
                 if(iv_resetCount > OCC_RESET_COUNT_THRESHOLD)
                 {
@@ -724,7 +725,7 @@ namespace HTMGT
             while(retryCount)
             {
                 // Reset all OCCs
-                TMGT_INF("Calling HBOCC::stopAllOCCs");
+                TMGT_INF("_resetOccs: Calling HBOCC::stopAllOCCs");
                 err = HBOCC::stopAllOCCs();
                 if(!err)
                 {
@@ -756,7 +757,7 @@ namespace HTMGT
                     (*occ)->postResetClear();
                 }
 
-                TMGT_INF("Calling HBOCC::activateOCCs");
+                TMGT_INF("_resetOccs: Calling HBOCC::activateOCCs");
                 err = HBOCC::activateOCCs();
                 if(err)
                 {
