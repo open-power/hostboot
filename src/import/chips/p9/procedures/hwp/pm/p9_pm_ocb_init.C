@@ -479,7 +479,7 @@ fapi2::ReturnCode pm_ocb_reset(
     uint8_t i = 0;
 
     // -------------------------------------------------------------------------
-    // Loop over PIB Registers in Channels 0-3
+    // Loop over PIB Registers
     // -------------------------------------------------------------------------
     for (i = 0; i <= MAX_OCB_CHANNELS; i++)
     {
@@ -490,11 +490,17 @@ fapi2::ReturnCode pm_ocb_reset(
                  "Channel %d BAR Register", i);
 
         // Clear out OCB Channel control and status registers
-        //  - set bit 5 (circular mode) using OR
-        l_data64.setBit<5>();
+        l_data64.flush<1>();
+        FAPI_TRY(fapi2::putScom(i_target, OCBCSRn_CLEAR[i], l_data64),
+                 "**** ERROR : Unexpected error encountered in write to OCB "
+                 "Channel %d Control & Status Register Clear", i);
+
+        // Put channels in Circular mode
+        //  - set bits 4,5 (circular mode) using OR
+        l_data64.flush<0>().setBit<4>().setBit<5>();
         FAPI_TRY(fapi2::putScom(i_target, OCBCSRn_OR[i], l_data64),
                  "**** ERROR : Unexpected error encountered in write to OCB "
-                 "Channel %d Control & Status OR Register", i);
+                 "Channel %d Control & Status OR Register Set", i);
 
         // Clear out OCB Channel Error Status registers
         FAPI_TRY(fapi2::putScom(i_target, OCBESRn[i], 0),
@@ -503,7 +509,7 @@ fapi2::ReturnCode pm_ocb_reset(
     }
 
     // -------------------------------------------------------------------------
-    // Loop over OCI Registers in Channels 0-3
+    // Loop over OCI Registers
     // -------------------------------------------------------------------------
     for (i = 0; i <= MAX_OCB_CHANNELS; i++)
     {
