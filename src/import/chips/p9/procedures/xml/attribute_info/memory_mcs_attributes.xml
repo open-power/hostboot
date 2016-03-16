@@ -632,6 +632,8 @@
             firmware notes: none
         </description>
         <valueType>uint64</valueType>
+        <!-- We rely on these being their actual MT/s for freq/time conversions -->
+        <enum>MT1866 = 1866, MT2400 = 2400, MT2133 = 2133, MT2666 = 2666</enum>
         <writeable/>
         <odmVisable/>
         <odmChangeable/>
