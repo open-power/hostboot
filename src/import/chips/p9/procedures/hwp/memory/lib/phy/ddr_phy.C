@@ -35,6 +35,8 @@
 
 #include <phy/ddr_phy.H>
 #include <phy/read_cntrl.H>
+#include <phy/phy_cntrl.H>
+#include <phy/apb.H>
 
 #include <utils/bit_count.H>
 #include <utils/dump_regs.H>
@@ -598,6 +600,8 @@ fapi_try_exit:
 template<>
 fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
 {
+    typedef pcTraits<TARGET_TYPE_MCA> TT;
+
     static const uint64_t init_cal_err_mask = 0x7FF;
     static const uint64_t init_cal_pc_err_mask = 0xF800;
 
@@ -607,10 +611,12 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
     fapi2::buffer<uint64_t> l_fir_data;
     fapi2::buffer<uint64_t> l_err_data;
 
+    mss::apb<TARGET_TYPE_MCA> l_apb;
+    mss::pc<TARGET_TYPE_MCA>  l_pc;
+
     fapi2::Target<TARGET_TYPE_DIMM> l_failed_dimm;
 
-    FAPI_TRY( mss::getScom(i_target, MCA_DDRPHY_APB_FIR_ERR1_P0, l_fir_data) );
-
+    FAPI_TRY( l_apb.read_fir_err1(i_target, l_fir_data) );
     FAPI_DBG("initial cal FIR: 0x%016llx", uint64_t(l_fir_data));
 
     // If we have no errors, lets get out of here.
@@ -624,7 +630,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
     // If we have PC error status bits on, lets handle those.
     if ((l_fir_data & init_cal_pc_err_mask) != 0)
     {
-        FAPI_TRY( mss::getScom(i_target, MCA_DDRPHY_PC_ERROR_STATUS0_P0, l_err_data) );
+        FAPI_TRY( l_pc.read_error_status0(i_target, l_err_data) );
         // Hm ... I don't see any explict error code for this - not sure if I should break
         // out all the possible failures.
         FAPI_ASSERT( l_err_data == 0,
@@ -647,11 +653,10 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
     }
 
     // If we're here, we have initial cal errors
-    FAPI_TRY( mss::getScom(i_target, MCA_DDRPHY_PC_INIT_CAL_ERROR_P0, l_err_data) );
+    FAPI_TRY( l_pc.read_init_cal_error(i_target, l_err_data) );
 
-    l_err_data.extractToRight<MCA_DDRPHY_PC_INIT_CAL_ERROR_P0_WR_LEVEL, 11>(l_errors);
-    l_err_data.extractToRight<MCA_DDRPHY_PC_INIT_CAL_ERROR_P0_RANK_PAIR,
-                              MCA_DDRPHY_PC_INIT_CAL_ERROR_P0_RANK_PAIR_LEN>(l_rank_pairs);
+    l_err_data.extractToRight<TT::INIT_CAL_ERROR_WR_LEVEL, 11>(l_errors);
+    l_err_data.extractToRight<TT::INIT_CAL_ERROR_RANK_PAIR, TT::INIT_CAL_ERROR_RANK_PAIR_LEN>(l_rank_pairs);
     FAPI_DBG("initial cal err: 0x%016llx, rp: 0x%016llx (0x%016llx)", l_errors, l_rank_pairs, uint64_t(l_err_data));
 
     if ((l_rank_pairs == 0) || (l_errors == 0))
@@ -666,8 +671,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
     // fails ...) Note first_bit_set gives a bit position (0 being left most.) So, the rank
     // in question is the bit postion minus the position of the 0th rank in the register.
     // (the rank bits are bits 60:63, for example, so rank 0 is in position 60)
-    FAPI_TRY( mss::rank_pair_primary_to_dimm(i_target,
-              mss::first_bit_set(l_rank_pairs) - MCA_DDRPHY_PC_INIT_CAL_ERROR_P0_RANK_PAIR,
+    FAPI_TRY( mss::rank_pair_primary_to_dimm(i_target, mss::first_bit_set(l_rank_pairs) - TT::INIT_CAL_ERROR_RANK_PAIR,
               l_failed_dimm) );
     FAPI_ERR("initial cal failed for %s", mss::c_str(l_failed_dimm));
 
@@ -686,7 +690,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
                 mss::c_str(l_failed_dimm), uint64_t(l_err_data)
                );
 
-    FAPI_ASSERT( ! l_err_data.getBit<MCA_DDRPHY_PC_INIT_CAL_ERROR_P0_WR_LEVEL>(),
+    FAPI_ASSERT( ! l_err_data.getBit<TT::INIT_CAL_ERROR_WR_LEVEL>(),
                  fapi2::MSS_DRAMINIT_TRAINING_WR_LVL_ERROR()
                  .set_PORT_POSITION(mss::pos(i_target))
                  .set_RANKGROUP_POSITION(l_rank_pairs)
@@ -695,7 +699,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
                  mss::c_str(l_failed_dimm), uint64_t(l_err_data)
                );
 
-    FAPI_ASSERT( ! l_err_data.getBit<MCA_DDRPHY_PC_INIT_CAL_ERROR_P0_INITIAL_PAT_WRITE>(),
+    FAPI_ASSERT( ! l_err_data.getBit<TT::INIT_CAL_ERROR_INITIAL_PAT_WRITE>(),
                  fapi2::MSS_DRAMINIT_TRAINING_INITIAL_PAT_WRITE_ERROR()
                  .set_PORT_POSITION(mss::pos(i_target))
                  .set_RANKGROUP_POSITION(l_rank_pairs)
@@ -704,7 +708,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
                  mss::c_str(l_failed_dimm), uint64_t(l_err_data)
                );
 
-    FAPI_ASSERT( ! l_err_data.getBit<MCA_DDRPHY_PC_INIT_CAL_ERROR_P0_DQS_ALIGN>(),
+    FAPI_ASSERT( ! l_err_data.getBit<TT::INIT_CAL_ERROR_DQS_ALIGN>(),
                  fapi2::MSS_DRAMINIT_TRAINING_DQS_ALIGNMENT_ERROR()
                  .set_PORT_POSITION(mss::pos(i_target))
                  .set_RANKGROUP_POSITION(l_rank_pairs)
@@ -713,7 +717,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
                  mss::c_str(l_failed_dimm), uint64_t(l_err_data)
                );
 
-    FAPI_ASSERT( ! l_err_data.getBit<MCA_DDRPHY_PC_INIT_CAL_ERROR_P0_RDCLK_ALIGN>(),
+    FAPI_ASSERT( ! l_err_data.getBit<TT::INIT_CAL_ERROR_RDCLK_ALIGN>(),
                  fapi2::MSS_DRAMINIT_TRAINING_RD_CLK_SYS_CLK_ALIGNMENT_ERROR()
                  .set_PORT_POSITION(mss::pos(i_target))
                  .set_RANKGROUP_POSITION(l_rank_pairs)
@@ -722,7 +726,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
                  mss::c_str(l_failed_dimm), uint64_t(l_err_data)
                );
 
-    FAPI_ASSERT( ! l_err_data.getBit<MCA_DDRPHY_PC_INIT_CAL_ERROR_P0_READ_CTR>(),
+    FAPI_ASSERT( ! l_err_data.getBit<TT::INIT_CAL_ERROR_READ_CTR>(),
                  fapi2::MSS_DRAMINIT_TRAINING_RD_CENTERING_ERROR()
                  .set_PORT_POSITION(mss::pos(i_target))
                  .set_RANKGROUP_POSITION(l_rank_pairs)
@@ -731,7 +735,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
                  mss::c_str(l_failed_dimm), uint64_t(l_err_data)
                );
 
-    FAPI_ASSERT( ! l_err_data.getBit<MCA_DDRPHY_PC_INIT_CAL_ERROR_P0_WRITE_CTR>(),
+    FAPI_ASSERT( ! l_err_data.getBit<TT::INIT_CAL_ERROR_WRITE_CTR>(),
                  fapi2::MSS_DRAMINIT_TRAINING_WR_CENTERING_ERROR()
                  .set_PORT_POSITION(mss::pos(i_target))
                  .set_RANKGROUP_POSITION(l_rank_pairs)
@@ -740,7 +744,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
                  mss::c_str(l_failed_dimm), uint64_t(l_err_data)
                );
 
-    FAPI_ASSERT( ! l_err_data.getBit<MCA_DDRPHY_PC_INIT_CAL_ERROR_P0_INITIAL_COARSE_WR>(),
+    FAPI_ASSERT( ! l_err_data.getBit<TT::INIT_CAL_ERROR_INITIAL_COARSE_WR>(),
                  fapi2::MSS_DRAMINIT_TRAINING_INITIAL_COARSE_WR_ERROR()
                  .set_PORT_POSITION(mss::pos(i_target))
                  .set_RANKGROUP_POSITION(l_rank_pairs)
@@ -749,7 +753,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
                  mss::c_str(l_failed_dimm), uint64_t(l_err_data)
                );
 
-    FAPI_ASSERT( ! l_err_data.getBit<MCA_DDRPHY_PC_INIT_CAL_ERROR_P0_COARSE_RD>(),
+    FAPI_ASSERT( ! l_err_data.getBit<TT::INIT_CAL_ERROR_COARSE_RD>(),
                  fapi2::MSS_DRAMINIT_TRAINING_COARSE_RD_ERROR()
                  .set_PORT_POSITION(mss::pos(i_target))
                  .set_RANKGROUP_POSITION(l_rank_pairs)
@@ -758,7 +762,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
                  mss::c_str(l_failed_dimm), uint64_t(l_err_data)
                );
 
-    FAPI_ASSERT( ! l_err_data.getBit<MCA_DDRPHY_PC_INIT_CAL_ERROR_P0_CUSTOM_RD>(),
+    FAPI_ASSERT( ! l_err_data.getBit<TT::INIT_CAL_ERROR_CUSTOM_RD>(),
                  fapi2::MSS_DRAMINIT_TRAINING_CUSTOM_PATTERN_RD_ERROR()
                  .set_PORT_POSITION(mss::pos(i_target))
                  .set_RANKGROUP_POSITION(l_rank_pairs)
@@ -767,7 +771,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
                  mss::c_str(l_failed_dimm), uint64_t(l_err_data)
                );
 
-    FAPI_ASSERT( ! l_err_data.getBit<MCA_DDRPHY_PC_INIT_CAL_ERROR_P0_CUSTOM_WR>(),
+    FAPI_ASSERT( ! l_err_data.getBit<TT::INIT_CAL_ERROR_CUSTOM_WR>(),
                  fapi2::MSS_DRAMINIT_TRAINING_CUSTOM_PATTERN_WR_ERROR()
                  .set_PORT_POSITION(mss::pos(i_target))
                  .set_RANKGROUP_POSITION(l_rank_pairs)
@@ -776,7 +780,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
                  mss::c_str(l_failed_dimm), uint64_t(l_err_data)
                );
 
-    FAPI_ASSERT( ! l_err_data.getBit<MCA_DDRPHY_PC_INIT_CAL_ERROR_P0_DIGITAL_EYE>(),
+    FAPI_ASSERT( ! l_err_data.getBit<TT::INIT_CAL_ERROR_DIGITAL_EYE>(),
                  fapi2::MSS_DRAMINIT_TRAINING_DIGITAL_EYE_ERROR()
                  .set_PORT_POSITION(mss::pos(i_target))
                  .set_RANKGROUP_POSITION(l_rank_pairs)
@@ -890,6 +894,8 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
 
     for( auto p : i_target.getChildren<TARGET_TYPE_MCA>())
     {
+        mss::dp16<TARGET_TYPE_MCA> l_dp16;
+
         // The following registers must be configured to the correct operating environment:
 
         // Undocumented, noted by Bialas
@@ -904,14 +910,14 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
         // Section 5.2.4.2 DP16 Data Bit Enable 1 on page 285
         // Section 5.2.4.3 DP16 Data Bit Disable 0 on page 288
         // Section 5.2.4.4 DP16 Data Bit Disable 1 on page 289
-        FAPI_TRY( mss::dp16::write_data_bit_enable(p) );
-        FAPI_TRY( mss::dp16::set_bad_bits(p) );
+        FAPI_TRY( l_dp16.write_data_bit_enable(p) );
+        FAPI_TRY( l_dp16.set_bad_bits(p) );
 
         FAPI_TRY( mss::get_rank_pairs(p, l_pairs) );
 
         // Section 5.2.4.8 DP16 Write Clock Enable & Clock Selection on page 301
-        FAPI_TRY( mss::dp16::write_clock_enable(p, l_pairs) );
-        FAPI_TRY( mss::dp16::read_clock_enable(p, l_pairs) );
+        FAPI_TRY( l_dp16.write_clock_enable(p, l_pairs) );
+        FAPI_TRY( l_dp16.read_clock_enable(p, l_pairs) );
 
         // Write Control reset
         FAPI_TRY( mss::wc::reset(p) );
@@ -1050,6 +1056,186 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
     return setup_cal_config(i_target, l_ranks, i_cal_steps_enabled);
 }
 
+///
+/// @brief Setup seq_config0
+/// @param[in] i_target the MCA target associated with this cal setup
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<>
+inline fapi2::ReturnCode reset_seq_config0( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    fapi2::buffer<uint64_t> l_data;
+
+    // ATTR_VPD_DRAM_2N_MODE_ENABLED  49, 0b1, (def_2N_mode);       # enable 2 cycle addr mode BRS
+
+    FAPI_DBG("seq_config0 0x%llx", l_data);
+    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_CONFIG0_P0, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Setup odt_wr/rd_config
+/// @param[in] i_target the MCA target associated with this cal setup
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<>
+inline fapi2::ReturnCode reset_odt_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    uint8_t l_odt_rd[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
+    uint8_t l_odt_wr[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
+
+    FAPI_TRY( mss::eff_odt_rd(i_target, &(l_odt_rd[0][0])) );
+    FAPI_TRY( mss::eff_odt_wr(i_target, &(l_odt_wr[0][0])) );
+
+    // Nimbus PHY is more or less hard-wired for 2 DIMM/port 4R/DIMM
+    // So there's not much point in looping over DIMM or ranks.
+
+    //
+    // ODT Read
+    //
+    {
+        // DPHY01_DDRPHY_SEQ_ODT_RD_CONFIG0_P0
+        // 48:55, ATTR_VPD_ODT_RD[0][0][0]; # when Read of Rank0
+        // 56:63, ATTR_VPD_ODT_RD[0][0][1]; # when Read of Rank1
+        fapi2::buffer<uint64_t> l_data;
+
+        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG0_P0_VALUES0,
+                               MCA_DDRPHY_SEQ_ODT_RD_CONFIG0_P0_VALUES0_LEN>(l_odt_rd[0][0]);
+        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG0_P0_VALUES1,
+                               MCA_DDRPHY_SEQ_ODT_RD_CONFIG0_P0_VALUES1_LEN>(l_odt_rd[0][1]);
+        FAPI_DBG("odt_rd_config0: 0x%016llx", uint64_t(l_data));
+        FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_RD_CONFIG0_P0, l_data) );
+    }
+
+    {
+        // DPHY01_DDRPHY_SEQ_ODT_RD_CONFIG1_P0
+        // 48:55, ATTR_VPD_ODT_RD[0][0][2]; # when Read of Rank2
+        // 56:63, ATTR_VPD_ODT_RD[0][0][3]; # when Read of Rank3
+        fapi2::buffer<uint64_t> l_data;
+
+        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG1_P0_VALUES2,
+                               MCA_DDRPHY_SEQ_ODT_RD_CONFIG1_P0_VALUES2_LEN>(l_odt_rd[0][2]);
+        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG1_P0_VALUES3,
+                               MCA_DDRPHY_SEQ_ODT_RD_CONFIG1_P0_VALUES3_LEN>(l_odt_rd[0][3]);
+        FAPI_DBG("odt_rd_config1: 0x%016llx", uint64_t(l_data));
+        FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_RD_CONFIG1_P0, l_data) );
+    }
+
+    {
+        // DPHY01_DDRPHY_SEQ_ODT_RD_CONFIG2_P0
+        // 48:55, ATTR_VPD_ODT_RD[0][1][0]; # when Read of Rank4
+        // 56:63, ATTR_VPD_ODT_RD[0][1][1]; # when Read of Rank5
+        fapi2::buffer<uint64_t> l_data;
+
+        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG2_P0_VALUES4,
+                               MCA_DDRPHY_SEQ_ODT_RD_CONFIG2_P0_VALUES4_LEN>(l_odt_rd[1][0]);
+        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG2_P0_VALUES5,
+                               MCA_DDRPHY_SEQ_ODT_RD_CONFIG2_P0_VALUES5_LEN>(l_odt_rd[1][1]);
+        FAPI_DBG("odt_rd_config2: 0x%016llx", uint64_t(l_data));
+        FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_RD_CONFIG2_P0, l_data) );
+    }
+
+    {
+        // DPHY01_DDRPHY_SEQ_ODT_RD_CONFIG3_P0
+        // 48:55, ATTR_VPD_ODT_RD[0][1][2]; # when Read of Rank6
+        // 56:63, ATTR_VPD_ODT_RD[0][1][3]; # when Read of Rank7
+        fapi2::buffer<uint64_t> l_data;
+
+        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG3_P0_VALUES6,
+                               MCA_DDRPHY_SEQ_ODT_RD_CONFIG3_P0_VALUES6_LEN>(l_odt_rd[1][2]);
+        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG3_P0_VALUES7,
+                               MCA_DDRPHY_SEQ_ODT_RD_CONFIG3_P0_VALUES7_LEN>(l_odt_rd[1][3]);
+        FAPI_DBG("odt_rd_config3: 0x%016llx", uint64_t(l_data));
+        FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_RD_CONFIG3_P0, l_data) );
+    }
+
+    //
+    // ODT Write
+    //
+    {
+        // DPHY01_DDRPHY_SEQ_ODT_WR_CONFIG0_P0
+        // 48:55, ATTR_VPD_ODT_WR[0][0][0]; # when Read of Rank0
+        // 56:63, ATTR_VPD_ODT_WR[0][0][1]; # when Read of Rank1
+        fapi2::buffer<uint64_t> l_data;
+
+        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG0_P0_VALUES0,
+                               MCA_DDRPHY_SEQ_ODT_WR_CONFIG0_P0_VALUES0_LEN>(l_odt_wr[0][0]);
+        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG0_P0_VALUES1,
+                               MCA_DDRPHY_SEQ_ODT_WR_CONFIG0_P0_VALUES1_LEN>(l_odt_wr[0][1]);
+        FAPI_DBG("odt_wr_config0: 0x%016llx", uint64_t(l_data));
+        FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_WR_CONFIG0_P0, l_data) );
+    }
+
+    {
+        // DPHY01_DDRPHY_SEQ_ODT_WR_CONFIG1_P0
+        // 48:55, ATTR_VPD_ODT_WR[0][0][2]; # when Read of Rank2
+        // 56:63, ATTR_VPD_ODT_WR[0][0][3]; # when Read of Rank3
+        fapi2::buffer<uint64_t> l_data;
+
+        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG1_P0_VALUES2,
+                               MCA_DDRPHY_SEQ_ODT_WR_CONFIG1_P0_VALUES2_LEN>(l_odt_wr[0][2]);
+        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG1_P0_VALUES3,
+                               MCA_DDRPHY_SEQ_ODT_WR_CONFIG1_P0_VALUES3_LEN>(l_odt_wr[0][3]);
+        FAPI_DBG("odt_wr_config1: 0x%016llx", uint64_t(l_data));
+        FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_WR_CONFIG1_P0, l_data) );
+    }
+
+    {
+        // DPHY01_DDRPHY_SEQ_ODT_WR_CONFIG2_P0
+        // 48:55, ATTR_VPD_ODT_WR[0][1][0]; # when Read of Rank4
+        // 56:63, ATTR_VPD_ODT_WR[0][1][1]; # when Read of Rank5
+        fapi2::buffer<uint64_t> l_data;
+
+        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG2_P0_VALUES4,
+                               MCA_DDRPHY_SEQ_ODT_WR_CONFIG2_P0_VALUES4_LEN>(l_odt_wr[1][0]);
+        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG2_P0_VALUES5,
+                               MCA_DDRPHY_SEQ_ODT_WR_CONFIG2_P0_VALUES5_LEN>(l_odt_wr[1][1]);
+        FAPI_DBG("odt_wr_config2: 0x%016llx", uint64_t(l_data));
+        FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_WR_CONFIG2_P0, l_data) );
+    }
+
+    {
+        // DPHY01_DDRPHY_SEQ_ODT_WR_CONFIG3_P0
+        // 48:55, ATTR_VPD_ODT_WR[0][1][2]; # when Read of Rank6
+        // 56:63, ATTR_VPD_ODT_WR[0][1][3]; # when Read of Rank7
+        fapi2::buffer<uint64_t> l_data;
+
+        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG3_P0_VALUES6,
+                               MCA_DDRPHY_SEQ_ODT_WR_CONFIG3_P0_VALUES6_LEN>(l_odt_wr[1][2]);
+        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG3_P0_VALUES7,
+                               MCA_DDRPHY_SEQ_ODT_WR_CONFIG3_P0_VALUES7_LEN>(l_odt_wr[1][3]);
+        FAPI_DBG("odt_wr_config3: 0x%016llx", uint64_t(l_data));
+        FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_WR_CONFIG3_P0, l_data) );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Setup seq_rd_wr_data
+/// @param[in] i_target the MCA target associated with this cal setup
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<>
+inline fapi2::ReturnCode reset_seq_rd_wr_data( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    // MPR_PATTERN_BIT of 0F0F0F0F pattern
+    static const uint64_t MPR_PATTERN = 0x5555;
+    fapi2::buffer<uint64_t> l_data;
+
+    l_data.insertFromRight<MCA_DDRPHY_SEQ_RD_WR_DATA0_P0_DATA_REG0,
+                           MCA_DDRPHY_SEQ_RD_WR_DATA0_P0_DATA_REG0_LEN>(MPR_PATTERN);
+
+    FAPI_DBG("seq_rd_wr 0x%llx", l_data);
+    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_RD_WR_DATA0_P0, l_data) );
+    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_RD_WR_DATA1_P0, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Dump the registers of the PHY (MCA)

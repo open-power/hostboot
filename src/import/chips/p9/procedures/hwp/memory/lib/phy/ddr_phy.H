@@ -176,7 +176,7 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template< fapi2::TargetType T >
-inline fapi2::ReturnCode reset_seq_config0( const fapi2::Target<T>& i_target );
+fapi2::ReturnCode reset_seq_config0( const fapi2::Target<T>& i_target );
 
 ///
 /// @brief Setup seq_config0
@@ -184,20 +184,7 @@ inline fapi2::ReturnCode reset_seq_config0( const fapi2::Target<T>& i_target );
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template<>
-inline fapi2::ReturnCode reset_seq_config0( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
-{
-    fapi2::buffer<uint64_t> l_data;
-
-    // ATTR_VPD_DRAM_2N_MODE_ENABLED  49, 0b1, (def_2N_mode);       # enable 2 cycle addr mode BRS
-
-    FAPI_DBG("seq_config0 0x%llx", l_data);
-    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_CONFIG0_P0, l_data) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-
+fapi2::ReturnCode reset_seq_config0( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
 
 
 ///
@@ -207,7 +194,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template< fapi2::TargetType T >
-inline fapi2::ReturnCode reset_odt_config( const fapi2::Target<T>& i_target );
+fapi2::ReturnCode reset_odt_config( const fapi2::Target<T>& i_target );
 
 ///
 /// @brief Setup odt_wr/rd_config
@@ -215,142 +202,7 @@ inline fapi2::ReturnCode reset_odt_config( const fapi2::Target<T>& i_target );
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template<>
-inline fapi2::ReturnCode reset_odt_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
-{
-    uint8_t l_odt_rd[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
-    uint8_t l_odt_wr[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
-
-    FAPI_TRY( mss::eff_odt_rd(i_target, &(l_odt_rd[0][0])) );
-    FAPI_TRY( mss::eff_odt_wr(i_target, &(l_odt_wr[0][0])) );
-
-    // Nimbus PHY is more or less hard-wired for 2 DIMM/port 4R/DIMM
-    // So there's not much point in looping over DIMM or ranks.
-
-    //
-    // ODT Read
-    //
-    {
-        // DPHY01_DDRPHY_SEQ_ODT_RD_CONFIG0_P0
-        // 48:55, ATTR_VPD_ODT_RD[0][0][0]; # when Read of Rank0
-        // 56:63, ATTR_VPD_ODT_RD[0][0][1]; # when Read of Rank1
-        fapi2::buffer<uint64_t> l_data;
-
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG0_P0_VALUES0,
-                               MCA_DDRPHY_SEQ_ODT_RD_CONFIG0_P0_VALUES0_LEN>(l_odt_rd[0][0]);
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG0_P0_VALUES1,
-                               MCA_DDRPHY_SEQ_ODT_RD_CONFIG0_P0_VALUES1_LEN>(l_odt_rd[0][1]);
-        FAPI_DBG("odt_rd_config0: 0x%016llx", uint64_t(l_data));
-        FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_RD_CONFIG0_P0, l_data) );
-    }
-
-    {
-        // DPHY01_DDRPHY_SEQ_ODT_RD_CONFIG1_P0
-        // 48:55, ATTR_VPD_ODT_RD[0][0][2]; # when Read of Rank2
-        // 56:63, ATTR_VPD_ODT_RD[0][0][3]; # when Read of Rank3
-        fapi2::buffer<uint64_t> l_data;
-
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG1_P0_VALUES2,
-                               MCA_DDRPHY_SEQ_ODT_RD_CONFIG1_P0_VALUES2_LEN>(l_odt_rd[0][2]);
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG1_P0_VALUES3,
-                               MCA_DDRPHY_SEQ_ODT_RD_CONFIG1_P0_VALUES3_LEN>(l_odt_rd[0][3]);
-        FAPI_DBG("odt_rd_config1: 0x%016llx", uint64_t(l_data));
-        FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_RD_CONFIG1_P0, l_data) );
-    }
-
-    {
-        // DPHY01_DDRPHY_SEQ_ODT_RD_CONFIG2_P0
-        // 48:55, ATTR_VPD_ODT_RD[0][1][0]; # when Read of Rank4
-        // 56:63, ATTR_VPD_ODT_RD[0][1][1]; # when Read of Rank5
-        fapi2::buffer<uint64_t> l_data;
-
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG2_P0_VALUES4,
-                               MCA_DDRPHY_SEQ_ODT_RD_CONFIG2_P0_VALUES4_LEN>(l_odt_rd[1][0]);
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG2_P0_VALUES5,
-                               MCA_DDRPHY_SEQ_ODT_RD_CONFIG2_P0_VALUES5_LEN>(l_odt_rd[1][1]);
-        FAPI_DBG("odt_rd_config2: 0x%016llx", uint64_t(l_data));
-        FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_RD_CONFIG2_P0, l_data) );
-    }
-
-    {
-        // DPHY01_DDRPHY_SEQ_ODT_RD_CONFIG3_P0
-        // 48:55, ATTR_VPD_ODT_RD[0][1][2]; # when Read of Rank6
-        // 56:63, ATTR_VPD_ODT_RD[0][1][3]; # when Read of Rank7
-        fapi2::buffer<uint64_t> l_data;
-
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG3_P0_VALUES6,
-                               MCA_DDRPHY_SEQ_ODT_RD_CONFIG3_P0_VALUES6_LEN>(l_odt_rd[1][2]);
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_RD_CONFIG3_P0_VALUES7,
-                               MCA_DDRPHY_SEQ_ODT_RD_CONFIG3_P0_VALUES7_LEN>(l_odt_rd[1][3]);
-        FAPI_DBG("odt_rd_config3: 0x%016llx", uint64_t(l_data));
-        FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_RD_CONFIG3_P0, l_data) );
-    }
-
-    //
-    // ODT Write
-    //
-    {
-        // DPHY01_DDRPHY_SEQ_ODT_WR_CONFIG0_P0
-        // 48:55, ATTR_VPD_ODT_WR[0][0][0]; # when Read of Rank0
-        // 56:63, ATTR_VPD_ODT_WR[0][0][1]; # when Read of Rank1
-        fapi2::buffer<uint64_t> l_data;
-
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG0_P0_VALUES0,
-                               MCA_DDRPHY_SEQ_ODT_WR_CONFIG0_P0_VALUES0_LEN>(l_odt_wr[0][0]);
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG0_P0_VALUES1,
-                               MCA_DDRPHY_SEQ_ODT_WR_CONFIG0_P0_VALUES1_LEN>(l_odt_wr[0][1]);
-        FAPI_DBG("odt_wr_config0: 0x%016llx", uint64_t(l_data));
-        FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_WR_CONFIG0_P0, l_data) );
-    }
-
-    {
-        // DPHY01_DDRPHY_SEQ_ODT_WR_CONFIG1_P0
-        // 48:55, ATTR_VPD_ODT_WR[0][0][2]; # when Read of Rank2
-        // 56:63, ATTR_VPD_ODT_WR[0][0][3]; # when Read of Rank3
-        fapi2::buffer<uint64_t> l_data;
-
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG1_P0_VALUES2,
-                               MCA_DDRPHY_SEQ_ODT_WR_CONFIG1_P0_VALUES2_LEN>(l_odt_wr[0][2]);
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG1_P0_VALUES3,
-                               MCA_DDRPHY_SEQ_ODT_WR_CONFIG1_P0_VALUES3_LEN>(l_odt_wr[0][3]);
-        FAPI_DBG("odt_wr_config1: 0x%016llx", uint64_t(l_data));
-        FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_WR_CONFIG1_P0, l_data) );
-    }
-
-    {
-        // DPHY01_DDRPHY_SEQ_ODT_WR_CONFIG2_P0
-        // 48:55, ATTR_VPD_ODT_WR[0][1][0]; # when Read of Rank4
-        // 56:63, ATTR_VPD_ODT_WR[0][1][1]; # when Read of Rank5
-        fapi2::buffer<uint64_t> l_data;
-
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG2_P0_VALUES4,
-                               MCA_DDRPHY_SEQ_ODT_WR_CONFIG2_P0_VALUES4_LEN>(l_odt_wr[1][0]);
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG2_P0_VALUES5,
-                               MCA_DDRPHY_SEQ_ODT_WR_CONFIG2_P0_VALUES5_LEN>(l_odt_wr[1][1]);
-        FAPI_DBG("odt_wr_config2: 0x%016llx", uint64_t(l_data));
-        FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_WR_CONFIG2_P0, l_data) );
-    }
-
-    {
-        // DPHY01_DDRPHY_SEQ_ODT_WR_CONFIG3_P0
-        // 48:55, ATTR_VPD_ODT_WR[0][1][2]; # when Read of Rank6
-        // 56:63, ATTR_VPD_ODT_WR[0][1][3]; # when Read of Rank7
-        fapi2::buffer<uint64_t> l_data;
-
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG3_P0_VALUES6,
-                               MCA_DDRPHY_SEQ_ODT_WR_CONFIG3_P0_VALUES6_LEN>(l_odt_wr[1][2]);
-        l_data.insertFromRight<MCA_DDRPHY_SEQ_ODT_WR_CONFIG3_P0_VALUES7,
-                               MCA_DDRPHY_SEQ_ODT_WR_CONFIG3_P0_VALUES7_LEN>(l_odt_wr[1][3]);
-        FAPI_DBG("odt_wr_config3: 0x%016llx", uint64_t(l_data));
-        FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_ODT_WR_CONFIG3_P0, l_data) );
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-
-
-
+fapi2::ReturnCode reset_odt_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
 
 ///
 /// @brief Setup seq_rd_wr_data
@@ -359,7 +211,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template< fapi2::TargetType T >
-inline fapi2::ReturnCode reset_seq_rd_wr_data( const fapi2::Target<T>& i_target );
+fapi2::ReturnCode reset_seq_rd_wr_data( const fapi2::Target<T>& i_target );
 
 ///
 /// @brief Setup seq_rd_wr_data
@@ -367,27 +219,7 @@ inline fapi2::ReturnCode reset_seq_rd_wr_data( const fapi2::Target<T>& i_target 
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template<>
-inline fapi2::ReturnCode reset_seq_rd_wr_data( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
-{
-    // MPR_PATTERN_BIT of 0F0F0F0F pattern
-    static const uint64_t MPR_PATTERN = 0x5555;
-    fapi2::buffer<uint64_t> l_data;
-
-    l_data.insertFromRight<MCA_DDRPHY_SEQ_RD_WR_DATA0_P0_DATA_REG0,
-                           MCA_DDRPHY_SEQ_RD_WR_DATA0_P0_DATA_REG0_LEN>(MPR_PATTERN);
-
-    FAPI_DBG("seq_rd_wr 0x%llx", l_data);
-    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_RD_WR_DATA0_P0, l_data) );
-    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_SEQ_RD_WR_DATA1_P0, l_data) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-
-
-
-
+fapi2::ReturnCode reset_seq_rd_wr_data( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
 
 ///
 /// @brief Setup the PC CONFIG0 register

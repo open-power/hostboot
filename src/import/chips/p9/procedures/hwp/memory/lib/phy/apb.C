@@ -28,10 +28,10 @@
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
-#include "apb.H"
-#include "../lib/utils/scom.H"
-#include "../lib/utils/c_str.H"
-#include "../lib/utils/index.H"
+#include <phy/apb.H>
+#include <lib/utils/scom.H>
+#include <lib/utils/c_str.H>
+#include <lib/utils/index.H>
 
 namespace mss
 {
@@ -41,7 +41,7 @@ namespace mss
 /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS if no FIR
 ///
 template<>
-fapi2::ReturnCode apb_class<fapi2::TARGET_TYPE_MCA>::fir_check(
+fapi2::ReturnCode apb<fapi2::TARGET_TYPE_MCA>::fir_check(
     const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
 {
     typedef apbTraits<fapi2::TARGET_TYPE_MCA> TT;

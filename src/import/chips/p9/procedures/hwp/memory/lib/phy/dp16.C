@@ -46,8 +46,6 @@ using fapi2::TARGET_TYPE_SYSTEM;
 
 namespace mss
 {
-namespace dp16
-{
 
 typedef   std::pair< uint64_t, uint64_t >  register_data_pair;
 typedef std::vector< register_data_pair >  register_data_vector;
@@ -146,7 +144,7 @@ static std::vector< register_data_vector > rdclk_enable_spare_x4 =
 /// @return FAPI2_RC_SUCCES iff ok
 ///
 template<>
-fapi2::ReturnCode write_data_bit_enable( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+fapi2::ReturnCode dp16<TARGET_TYPE_MCA>::write_data_bit_enable( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
 {
     // Determine if we're running with spares or not. Once we know that, we can find the right vector to iterate over.
     // Note: Is this ATTR_EFF_DIMM_SPARE? Because that's per DIMM, but this is a port-level statement, right? BRS
@@ -177,8 +175,8 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCES iff ok
 ///
 template<>
-fapi2::ReturnCode read_clock_enable( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
-                                     const std::vector< uint64_t >& l_rank_pairs )
+fapi2::ReturnCode dp16<TARGET_TYPE_MCA>::read_clock_enable( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
+        const std::vector< uint64_t >& l_rank_pairs )
 {
     // Just slam something in here for now - we know the 'RIT DIMM' is x4, lets assume no cross-coupling for now
     bool l_using_spares = false;
@@ -211,8 +209,8 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESs iff ok
 ///
 template<>
-fapi2::ReturnCode write_clock_enable( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
-                                      const std::vector< uint64_t >& l_rank_pairs )
+fapi2::ReturnCode dp16<TARGET_TYPE_MCA>::write_clock_enable( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
+        const std::vector< uint64_t >& l_rank_pairs )
 {
     // Just slam something in here for now - we know the 'RIT DIMM' is x4, lets assume no cross-coupling for now
     bool l_using_spares = false;
@@ -245,8 +243,8 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCES iff ok
 ///
 template<>
-fapi2::ReturnCode reset_delay_values( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
-                                      const std::vector< uint64_t >& l_rank_pairs )
+fapi2::ReturnCode dp16<TARGET_TYPE_MCA>::reset_delay_values( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
+        const std::vector< uint64_t >& l_rank_pairs )
 {
     std::vector<uint64_t> l_addrs(
     {
@@ -288,7 +286,8 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESs iff ok
 ///
 template<>
-fapi2::ReturnCode setup_sysclk( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
+template<>
+fapi2::ReturnCode dp16<TARGET_TYPE_MCA>::setup_sysclk( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
 {
     std::vector< std::pair<uint64_t, uint64_t> > l_addrs(
     {
@@ -326,5 +325,4 @@ fapi_try_exit:
 }
 
 
-}
 }
