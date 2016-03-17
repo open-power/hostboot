@@ -30,7 +30,7 @@
 #include <fapi2.H>
 #include <mss.H>
 
-#include "p9_mss_draminit_mc.H"
+#include <p9_mss_draminit_mc.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;

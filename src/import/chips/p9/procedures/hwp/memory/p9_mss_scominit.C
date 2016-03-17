@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,7 +28,7 @@
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
-#include "p9_mss_scominit.H"
+#include <p9_mss_scominit.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::FAPI2_RC_SUCCESS;

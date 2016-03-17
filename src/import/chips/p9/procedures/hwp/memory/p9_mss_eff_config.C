@@ -28,7 +28,7 @@
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
-#include "p9_mss_eff_config.H"
+#include <p9_mss_eff_config.H>
 
 
 ///

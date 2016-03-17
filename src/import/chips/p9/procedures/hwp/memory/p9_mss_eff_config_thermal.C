@@ -28,7 +28,7 @@
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
-#include "p9_mss_eff_config_thermal.H"
+#include <p9_mss_eff_config_thermal.H>
 
 ///
 /// @brief Perform thermal calculations as part of the effective configuration
