@@ -1227,10 +1227,7 @@ sub getPluginDirsToParse
         {
             if ($dirEntryPath =~ /plugins/)
             {
-                # Found plugins directory
-                push(@pluginDirsToParse, $dirEntryPath)
-                    if (!($dirEntryPath =~ /hwpf/));
-                    # TODO RTC 124673 disable fapi1
+                push(@pluginDirsToParse, $dirEntryPath);
             }
             else
             {

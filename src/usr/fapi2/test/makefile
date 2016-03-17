@@ -31,6 +31,7 @@ MODULE = testfapi2
 
 include fapi2Test.mk
 
+
 include ${ROOTPATH}/config.mk
 
 vpath %.C ${GENDIR}
