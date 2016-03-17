@@ -198,9 +198,11 @@ ReturnCode platGetTargetPos(const Target<TARGET_TYPE_ALL>& i_pFapiTarget,
 ///
 ///
 /// @param[out] o_isFused         0 if not fused
-/// @return void
+/// @return ReturnCode           Always FAPI2_RC_SUCCESS, this cannot fail
+///                              if a toplevel target cannot be found then
+///                              an assert triggers in the platform call
 ///
-void platGetFusedCoreMode(uint8_t & o_isFused);
+ReturnCode platGetFusedCoreMode(uint8_t & o_isFused);
 
 // -----------------------------------------------------------------------------
 // End TODO: End to be supported functions
