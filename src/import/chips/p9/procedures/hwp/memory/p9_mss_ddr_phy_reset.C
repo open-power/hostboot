@@ -39,8 +39,7 @@
 #include <fapi2.H>
 #include <mss.H>
 
-
-#include "p9_mss_ddr_phy_reset.H"
+#include <p9_mss_ddr_phy_reset.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 
