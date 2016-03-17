@@ -79,7 +79,7 @@ print TGFILE "void parseHwpRc(ErrlUsrParser & i_parser,\n";
 print TGFILE "                    void * i_pBuffer,\n";
 print TGFILE "                    const uint32_t i_buflen)\n";
 print TGFILE "{\n";
-print TGFILE "        uint64_t l_rc_64 = ntohll(*(static_cast<uint64_t *>(i_pBuffer)));\n";
+print TGFILE "        uint32_t l_rc = ntohll(*(static_cast<uint32_t *>(i_pBuffer)));\n";
 print TGFILE "    switch(l_rc)\n";
 print TGFILE "    {\n";
 
