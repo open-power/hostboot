@@ -27,12 +27,15 @@
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: HB:FSP
+#include <map>
+#include <vector>
 
 #include <fapi2.H>
 #include <mss.H>
-#include "../utils/conversions.H"
-#include "../utils/find.H"
-#include "spd_decoder.H"
+#include <lib/spd/spd_decoder.H>
+#include <utils/conversions.H>
+#include <utils/find.H>
+#include <utils/fake_spd.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -44,8 +47,6 @@ namespace mss
 {
 namespace spd
 {
-
-// Note: IBM's implementation of std::map is not thread safe
 
 // =========================================================
 // Byte 0 maps
@@ -401,12 +402,18 @@ static const std::vector<std::pair<uint8_t, int64_t> > FINE_TIMEBASE_MAP =
 
 
 /////////////////////////
-// Static member functions implementation
+// Non-member function implementations
+/////////////////////////
+//
+//  Why not static member functions? Literature states
+//  that static member functions may reduce class
+//  encapsulation, hence, non-member functions are preferred.
+//  But I can be convinced otherwise - AAM
 /////////////////////////
 
 ///
 /// @brief       Decodes SPD Revision encoding level
-/// @param[in]   i_target FAPI2 DIMM target
+/// @param[in]   i_target dimm target
 /// @param[in]   i_spd_data SPD blob
 /// @param[out]  o_value revision number
 /// @return      fapi2::ReturnCode
@@ -415,9 +422,9 @@ static const std::vector<std::pair<uint8_t, int64_t> > FINE_TIMEBASE_MAP =
 /// @note        Page 14-15
 /// @note        DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::rev_encoding_level(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const uint8_t* i_spd_data,
-        uint8_t& o_value)
+fapi2::ReturnCode rev_encoding_level(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                     const uint8_t* i_spd_data,
+                                     uint8_t& o_value)
 {
     constexpr size_t BYTE_INDEX = 1;
     constexpr size_t UNDEFINED = 0xF; // per JEDEC spec this value is undefined
@@ -457,7 +464,7 @@ fapi_try_exit:
 
 ///
 /// @brief       Decodes SPD Revision additions level
-/// @param[in]   i_target FAPI2 DIMM target
+/// @param[in]   i_target dimm target
 /// @param[in]   i_spd_data SPD blob
 /// @param[out]  o_value revision number
 /// @return      fapi2::ReturnCode
@@ -466,9 +473,9 @@ fapi_try_exit:
 /// @note        Page 14-15
 /// @note        DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::rev_additions_level(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const uint8_t* i_spd_data,
-        uint8_t& o_value)
+fapi2::ReturnCode rev_additions_level(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                      const uint8_t* i_spd_data,
+                                      uint8_t& o_value)
 {
     constexpr size_t BYTE_INDEX = 1;
     constexpr size_t UNDEFINED = 0xF; // per JEDEC spec this value is undefined
@@ -508,8 +515,8 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes base module type (DIMM type) from SPD
-/// @param[in]  i_target
-/// @param[in]  i_spd_data PD blob
+/// @param[in]  i_target dimm target
+/// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value
 /// @return     fapi2::ReturnCode
 /// @note       Decodes SPD Byte 3 (bits 0~3)
@@ -517,9 +524,9 @@ fapi_try_exit:
 /// @note       Page 17
 /// @note       DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder::base_module_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        const uint8_t* i_spd_data,
-        uint8_t& o_value)
+fapi2::ReturnCode base_module_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
+                                   const uint8_t* i_spd_data,
+                                   uint8_t& o_value)
 {
     constexpr size_t BYTE_INDEX = 3;
     uint8_t l_raw_byte  = i_spd_data[BYTE_INDEX];
@@ -556,14 +563,14 @@ fapi_try_exit:
 
 ///
 /// @brief       Object factory to select correct decoder based on SPD revision & dimm type
-/// @param[in]   i_target FAPI2 DIMM target
-/// @param[in]   i_spd_data SPD blob
-/// @param[out]  o_value shared pointer to the factory object
+/// @param[in]   i_target dimm target
+/// @param[in]   i_spd_data SPD data
+/// @param[out]  o_fact_obj shared pointer to the factory object
 /// @return      fapi2::ReturnCode
 ///
-fapi2::ReturnCode decoder::factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                   const uint8_t* i_spd_data,
-                                   std::shared_ptr<decoder>& o_value)
+fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                          const uint8_t* i_spd_data,
+                          std::shared_ptr<decoder>& o_fact_obj)
 {
     uint8_t l_dimm_type = 0;
     uint8_t l_encoding_rev = 0;
@@ -590,7 +597,7 @@ fapi2::ReturnCode decoder::factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
                     {
                         case 0:
                         case 1:
-                            o_value = std::make_shared<decoder>();
+                            o_fact_obj = std::make_shared<decoder>();
                             break;
 
                         default:
@@ -634,13 +641,55 @@ fapi_try_exit:
 }
 
 
+///
+/// @brief       Creates factory object & SPD data caches
+/// @param[in]   i_target controller target
+/// @param[out]  o_factory_caches map of factory objects with a dimm pos. key
+/// @return      fapi2::ReturnCode
+///
+fapi2::ReturnCode populate_decoder_caches( const fapi2::Target<TARGET_TYPE_MCS>& i_target,
+        std::map<uint32_t, std::shared_ptr<decoder> >& o_factory_caches)
+{
+    size_t l_spd_size = 0;
+    std::shared_ptr<decoder> l_pDecoder;
+
+    for( const auto& l_mca : i_target.getChildren<TARGET_TYPE_MCA>() )
+    {
+        for( const auto& l_dimm : l_mca.getChildren<TARGET_TYPE_DIMM>() )
+        {
+            // Retrieve SPD size
+            FAPI_TRY( getSPD(l_dimm, nullptr, l_spd_size) );
+
+            {
+                // Retrieve SPD data
+                uint8_t* l_spd_data = new uint8_t[l_spd_size];
+                FAPI_TRY( getSPD(l_dimm, l_spd_data, l_spd_size) );
+
+                // Retrieve factory object instance & populate spd data for that instance
+                FAPI_TRY( factory(l_dimm, l_spd_data, l_pDecoder) );
+
+                // Destructor for shared_ptr calls delete, has undefined behavior
+                // So we use a default destruction policy for array types that uses delete[]
+                // If F/W doesn't support this we can include a custom delete in lieu of default_delete
+                l_pDecoder->iv_spd_data = std::shared_ptr<uint8_t>(l_spd_data, std::default_delete<uint8_t[]>());
+
+                // Populate spd caches maps based on dimm pos
+                o_factory_caches.emplace(std::make_pair(mss::pos(l_dimm), l_pDecoder));
+            }
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 /////////////////////////
 // Member Method implementation
 /////////////////////////
 
 ///
 /// @brief      Decodes number of used SPD bytes
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value number of SPD bytes used
 /// @return     fapi2::ReturnCode
@@ -692,7 +741,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes total number of SPD bytes
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value number of total SPD bytes
 /// @return     fapi2::ReturnCode
@@ -740,7 +789,7 @@ fapi_try_exit:
 
 ///
 /// @brief       Decodes DRAM Device Type
-/// @param[in]   i_target FAPI2 DIMM target
+/// @param[in]   i_target dimm target
 /// @param[in]   i_spd_data SPD blob
 /// @param[out]  o_value dram device type enumeration
 /// @return      fapi2::ReturnCode
@@ -753,7 +802,6 @@ fapi2::ReturnCode decoder::dram_device_type(const fapi2::Target<TARGET_TYPE_DIMM
         const uint8_t* i_spd_data,
         uint8_t& o_value)
 {
-
     constexpr size_t BYTE_INDEX = 2;
     uint8_t l_raw_byte = i_spd_data[BYTE_INDEX];
 
@@ -878,7 +926,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes SDRAM density from SPD
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value SDRAM density in GBs
 /// @return     fapi2::ReturnCode
@@ -927,7 +975,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes number of SDRAM banks from SPD
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value Number of SDRAM banks
 /// @return     fapi2::ReturnCode
@@ -976,7 +1024,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes number of SDRAM bank groups from SPD
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value Number of SDRAM bank groups
 /// @return     fapi2::ReturnCode
@@ -1024,7 +1072,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes number of SDRAM column address bits
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value number of column address bits
 /// @return     fapi2::ReturnCode
@@ -1072,7 +1120,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes number of SDRAM row address bits
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value number of row address bits
 /// @return     fapi2::ReturnCode
@@ -1121,7 +1169,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes Primary SDRAM signal loading
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value enum representing signal loading type
 /// @return     fapi2::ReturnCode
@@ -1168,7 +1216,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes Primary SDRAM die count
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value die count
 /// @return     fapi2::ReturnCode
@@ -1215,7 +1263,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes Primary SDRAM  package type
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value enum representing package type
 /// @return     fapi2::ReturnCode
@@ -1263,7 +1311,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decode SDRAM Maximum activate count
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value enum representing max activate count
 /// @return     fapi2::ReturnCode
@@ -1310,7 +1358,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decode SDRAM Maximum activate window (multiplier), tREFI uknown at this point
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value max activate window multiplier
 /// @return     fapi2::ReturnCode
@@ -1357,7 +1405,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decode Soft post package repair (soft PPR)
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value enum representing if soft PPR is supported
 /// @return     fapi2::ReturnCode
@@ -1404,7 +1452,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decode Post package repair (PPR)
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value enum representing if (hard) PPR is supported
 /// @return     fapi2::ReturnCode
@@ -1452,7 +1500,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes Secondary SDRAM signal loading
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value enum representing signal loading type
 /// @return     fapi2::ReturnCode
@@ -1499,7 +1547,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes Secondary DRAM Density Ratio
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value raw bits from SPD
 /// @return     fapi2::ReturnCode
@@ -1549,7 +1597,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes Secondary SDRAM die count
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value die count
 /// @return     fapi2::ReturnCode
@@ -1596,7 +1644,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes Secondary SDRAM package type
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value  enum representing package type
 /// @return     fapi2::ReturnCode
@@ -1644,7 +1692,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decode Module Nominal Voltage, VDD
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value enum representing if 1.2V is operable
 /// @return     fapi2::ReturnCode
@@ -1691,7 +1739,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decode Module Nominal Voltage, VDD
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value enum representing if 1.2V is endurant
 /// @return     fapi2::ReturnCode
@@ -1738,7 +1786,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes SDRAM device width
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value device width in bits
 /// @return     fapi2::ReturnCode
@@ -1786,7 +1834,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes number of package ranks per DIMM
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value number of package ranks per DIMM
 /// @return     fapi2::ReturnCode
@@ -1833,7 +1881,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes Rank Mix
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value rank mix value from SPD
 /// @return     fapi2::ReturnCode
@@ -1884,7 +1932,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes primary bus width
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value primary bus width in bits
 /// @return     fapi2::ReturnCode
@@ -1930,7 +1978,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes bus width extension
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value bus width extension in bits
 /// @return     fapi2::ReturnCode
@@ -1977,7 +2025,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decode Module Thermal Sensor
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value thermal sensor value from SPD
 /// @return     fapi2::ReturnCode
@@ -2026,7 +2074,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decode Extended Base Module Type
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value raw data from SPD
 /// @return     fapi2::ReturnCode
@@ -2077,7 +2125,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decode Fine Timebase
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value fine_timebase from SPD in picoseconds
 /// @return     fapi2::ReturnCode
@@ -2124,7 +2172,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decode Medium Timebase
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value  medium timebase from SPD in picoseconds
 /// @return     fapi2::ReturnCode
@@ -2172,7 +2220,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes SDRAM Minimum Cycle Time in MTB
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value tCKmin in MTB units
 /// @return     fapi2::ReturnCode
@@ -2221,7 +2269,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes SDRAM Maximum Cycle Time in MTB
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value tCKmax in MTB units
 /// @return     fapi2::ReturnCode
@@ -2271,7 +2319,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decode CAS Latencies Supported
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value bitmap of supported CAS latencies
 /// @return     fapi2::ReturnCode
@@ -2349,7 +2397,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes SDRAM Minimum CAS Latency Time in MTB
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value tAAmin in MTB units
 /// @return     fapi2::ReturnCode
@@ -2401,7 +2449,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes SDRAM Minimum RAS to CAS Delay Time in MTB
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value tRCDmin in MTB units
 /// @return     fapi2::ReturnCode
@@ -2453,7 +2501,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes SDRAM Minimum Row Precharge Delay Time in MTB
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value tRPmin in MTB units
 /// @return     fapi2::ReturnCode
@@ -2506,7 +2554,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes SDRAM Minimum Active to Precharge Delay Time in MTB
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value tRASmin in MTB units
 /// @return     fapi2::ReturnCode
@@ -2609,7 +2657,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes SDRAM Minimum Active to Active/Refresh Delay Time in MTB
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value tRCmin in MTB units
 /// @return     fapi2::ReturnCode
@@ -2715,7 +2763,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes SDRAM Minimum Refresh Recovery Delay Time 1
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value tRFC1min in MTB units
 /// @return     fapi2::ReturnCode
@@ -2816,7 +2864,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes SDRAM Minimum Refresh Recovery Delay Time 2
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value tRFC2min in MTB units
 /// @return     fapi2::ReturnCode
@@ -2917,7 +2965,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes SDRAM Minimum Refresh Recovery Delay Time 4
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value tRFC4min in MTB units
 /// @return     fapi2::ReturnCode
@@ -3018,7 +3066,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes SDRAM Minimum Four Activate Window Delay Time
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value tFAWmin in MTB units
 /// @return     fapi2::ReturnCode
@@ -3119,7 +3167,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes Minimum Activate to Activate Delay Time - Different Bank Group
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value tRRD_Smin MTB units
 /// @return     fapi2::ReturnCode
@@ -3172,7 +3220,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes Minimum Activate to Activate Delay Time - Same Bank Group
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value tRRD_Lmin MTB units
 /// @return     fapi2::ReturnCode
@@ -3225,7 +3273,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes Minimum CAS to CAS Delay Time - Same Bank Group
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value tCCD_Lmin MTB units
 /// @return     fapi2::ReturnCode
@@ -3278,7 +3326,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes Minimum Write Recovery Time
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value tWRmin in MTB units
 /// @return     fapi2::ReturnCode
@@ -3383,7 +3431,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes Minimum Write to Read Time - Different Bank Group
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value tWRT_Smin in MTB units
 /// @return     fapi2::ReturnCode
@@ -3488,7 +3536,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes Minimum Write to Read Time - Same Bank Group
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value tWRT_Lmin in MTB units
 /// @return     fapi2::ReturnCode
@@ -3591,7 +3639,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes Fine Offset for Minimum CAS to CAS Delay Time - Same Bank Group
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value tCCD_Lmin offset in FTB units
 /// @return     fapi2::ReturnCode
@@ -3640,7 +3688,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes Fine Offset for Minimum Activate to Activate Delay Time - Same Bank Group
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value tRRD_Lmin offset in FTB units
 /// @return     fapi2::ReturnCode
@@ -3689,7 +3737,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes Fine Offset for Minimum Activate to Activate Delay Time - Different Bank Group
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value tRRD_Smin offset in FTB units
 /// @return     fapi2::ReturnCode
@@ -3738,7 +3786,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes Fine Offset for Minimum Active to Active/Refresh Delay Time
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value tRCmin offset in FTB units
 /// @return     fapi2::ReturnCode
@@ -3787,7 +3835,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes Fine Offset for Minimum Row Precharge Delay Time
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value tRPmin offset in FTB units
 /// @return     fapi2::ReturnCode
@@ -3835,7 +3883,7 @@ fapi_try_exit:
 }
 ///
 /// @brief      Decodes Fine Offset for SDRAM Minimum RAS to CAS Delay Time
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value tRCDmin offset in FTB units
 /// @return     fapi2::ReturnCode
@@ -3884,7 +3932,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes Fine Offset for SDRAM Minimum CAS Latency Time
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value tAAmin offset in FTB units
 /// @return     fapi2::ReturnCode
@@ -3933,7 +3981,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes Fine Offset for SDRAM Maximum Cycle Time
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value tCKmax offset in FTB units
 /// @return     fapi2::ReturnCode
@@ -3983,7 +4031,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes Fine Offset for SDRAM Minimum Cycle Time
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value tCKmin offset in FTB units
 /// @return     fapi2::ReturnCode
@@ -4033,7 +4081,7 @@ fapi_try_exit:
 
 ///
 /// @brief      Decodes Cyclical Redundancy Code (CRC) for Base Configuration Section
-/// @param[in]  i_target FAPI2 DIMM target
+/// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD blob
 /// @param[out] o_value crc value from SPD
 /// @return     fapi2::ReturnCode

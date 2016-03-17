@@ -29,9 +29,8 @@
 
 #include <fapi2.H>
 #include <mss.H>
-#include "../spd/spd_decoder.H"
-#include "eff_config.H"
-#include "timing.H"
+#include <eff_config/eff_config.H>
+#include <eff_config/timing.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCS;
@@ -50,7 +49,7 @@ namespace mss
 ///
 fapi2::ReturnCode eff_config::dram_gen(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
                                        const uint8_t* i_spd_data,
-                                       std::shared_ptr<spd::decoder>& i_pDecoder)
+                                       const std::shared_ptr<spd::decoder>& i_pDecoder)
 {
     uint8_t l_decoder_val = 0;
     uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {0};
@@ -62,9 +61,6 @@ fapi2::ReturnCode eff_config::dram_gen(const fapi2::Target<TARGET_TYPE_DIMM>& i_
     // Current index
     const auto l_port_num = index(l_target_port);
     const auto l_dimm_num = index(i_target);
-
-    // factory selects correct SPD method dependent on rev & dimm type
-    FAPI_TRY( spd::decoder::factory(i_target, i_spd_data, i_pDecoder) );
 
     FAPI_TRY( i_pDecoder->dram_device_type(i_target, i_spd_data, l_decoder_val) );
 
@@ -98,7 +94,7 @@ fapi2::ReturnCode eff_config::dimm_type(const fapi2::Target<TARGET_TYPE_DIMM>& i
     const auto l_port_num = index(l_target_port);
     const auto l_dimm_num = index(i_target);
 
-    FAPI_TRY( spd::decoder::base_module_type(i_target, i_spd_data, l_decoder_val) );
+    FAPI_TRY( spd::base_module_type(i_target, i_spd_data, l_decoder_val) );
 
     // Get & update MCS attribute
     FAPI_TRY( eff_dimm_type(l_target_mcs, &l_mcs_attrs[0][0]) );
@@ -118,7 +114,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_config::hybrid_memory_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
         const uint8_t* i_spd_data,
-        std::shared_ptr<spd::decoder>& i_pDecoder)
+        const std::shared_ptr<spd::decoder>& i_pDecoder)
 {
     uint8_t l_decoder_val = 0;
     uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {0};
@@ -130,9 +126,6 @@ fapi2::ReturnCode eff_config::hybrid_memory_type(const fapi2::Target<TARGET_TYPE
     // Current index
     const auto l_port_num = index(l_target_port);
     const auto l_dimm_num = index(i_target);
-
-    // Factory selects correct SPD method dependent on rev & dimm type
-    FAPI_TRY( spd::decoder::factory(i_target, i_spd_data, i_pDecoder) );
 
     FAPI_TRY(i_pDecoder->hybrid_media(i_target, i_spd_data, l_decoder_val));
 

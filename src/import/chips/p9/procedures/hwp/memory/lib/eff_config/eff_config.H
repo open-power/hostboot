@@ -31,7 +31,7 @@
 
 #include <fapi2.H>
 #include <cstdint>
-#include "../spd/spd_decoder.H"
+#include <spd/spd_decoder.H>
 
 namespace mss
 {
@@ -62,7 +62,7 @@ class eff_config
         ///
         fapi2::ReturnCode dram_gen(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                    const uint8_t* i_spd_data,
-                                   std::shared_ptr<spd::decoder>& i_pDecoder);
+                                   const std::shared_ptr<spd::decoder>& i_pDecoder);
 
         ///
         /// @brief Determines & sets effective config for DIMM type
@@ -81,7 +81,7 @@ class eff_config
         ///
         fapi2::ReturnCode hybrid_memory_type(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                              const uint8_t* i_spd_data,
-                                             std::shared_ptr<spd::decoder>& i_pDecoder);
+                                             const std::shared_ptr<spd::decoder>& i_pDecoder);
         ///
         /// @brief Sets effective config for temperature controlled refresh mode
         /// @param[in] i_target FAPI2 target
