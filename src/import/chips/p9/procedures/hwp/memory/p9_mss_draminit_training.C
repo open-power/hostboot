@@ -171,7 +171,7 @@ extern "C"
             // don't reset if we're running special training - assumes there's a checkpoint which has valid state.
             if ((l_reset_disable == fapi2::ENUM_ATTR_MSS_DRAMINIT_RESET_DISABLE_ENABLE) && (i_special_training == 0))
             {
-                FAPI_TRY( mss::dp16::reset_delay_values(p, l_pairs) );
+                FAPI_TRY( mss::dp16<TARGET_TYPE_MCA>().reset_delay_values(p, l_pairs) );
             }
 
             FAPI_DBG("generating calibration CCS instructions: %d rank-pairs", l_pairs.size());

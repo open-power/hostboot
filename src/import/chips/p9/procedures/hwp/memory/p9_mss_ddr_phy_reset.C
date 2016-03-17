@@ -62,7 +62,7 @@ extern "C"
 
         //
         // 1. Drive all control signals to the PHY to their inactive state, idle state, or inactive value.
-        FAPI_TRY( mss::dp16::setup_sysclk(i_target) );
+        FAPI_TRY( mss::dp16<fapi2::TARGET_TYPE_MCA>().setup_sysclk(i_target) );
 
         //    (Note: The chip should already be in this state.)
         FAPI_DBG("All control signals to the PHYs should already be set to their inactive state, idle state, or inactive values");
