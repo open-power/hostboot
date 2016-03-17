@@ -34,7 +34,7 @@
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
-#include "p9_mss_thermal_init.H"
+#include <p9_mss_thermal_init.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 
