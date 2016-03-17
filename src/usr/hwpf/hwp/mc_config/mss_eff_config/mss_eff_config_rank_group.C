@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_rank_group.C,v 1.13 2015/10/21 10:42:37 sasethur Exp $
+// $Id: mss_eff_config_rank_group.C,v 1.14 2016/03/07 15:20:05 lapietra Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_eff_config_rank_group.C,v $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
@@ -48,6 +48,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.14  | jneaton  |07-MAR-16| Removed secondary-quaternary rank grouping for 2H & 4H TSV dual drop DIMMs
 //   1.13  |          |         | 
 //   1.12  | asaetow  |31-MAR-13| Added FFDC error callout from Andrea's FW RAS review. 
 //         |          |         | NOTE: Do NOT pickup without memory_mss_eff_config_rank_group.xml v1.2 
@@ -352,8 +353,8 @@ fapi::ReturnCode mss_eff_config_rank_group(const fapi::Target i_target_mba) {
 				primary_rank_group1_u8array[cur_port] = 4;
 				primary_rank_group2_u8array[cur_port] = INVALID;
 				primary_rank_group3_u8array[cur_port] = INVALID;
-				secondary_rank_group0_u8array[cur_port] = 1;
-				secondary_rank_group1_u8array[cur_port] = 5;
+				secondary_rank_group0_u8array[cur_port] = INVALID;
+				secondary_rank_group1_u8array[cur_port] = INVALID;
 				secondary_rank_group2_u8array[cur_port] = INVALID;
 				secondary_rank_group3_u8array[cur_port] = INVALID;
 			}
@@ -366,16 +367,16 @@ fapi::ReturnCode mss_eff_config_rank_group(const fapi::Target i_target_mba) {
 				primary_rank_group1_u8array[cur_port] = 4;
 				primary_rank_group2_u8array[cur_port] = INVALID;
 				primary_rank_group3_u8array[cur_port] = INVALID;
-				secondary_rank_group0_u8array[cur_port] = 1;
-				secondary_rank_group1_u8array[cur_port] = 5;
+				secondary_rank_group0_u8array[cur_port] = INVALID;
+				secondary_rank_group1_u8array[cur_port] = INVALID;
 				secondary_rank_group2_u8array[cur_port] = INVALID;
 				secondary_rank_group3_u8array[cur_port] = INVALID;
-				tertiary_rank_group0_u8array[cur_port] = 2;
-				tertiary_rank_group1_u8array[cur_port] = 6;
+				tertiary_rank_group0_u8array[cur_port] = INVALID;
+				tertiary_rank_group1_u8array[cur_port] = INVALID;
 			    tertiary_rank_group2_u8array[cur_port] = INVALID;
 				tertiary_rank_group3_u8array[cur_port] = INVALID;
-				quanternary_rank_group0_u8array[cur_port] = 3;
-				quanternary_rank_group1_u8array[cur_port] = 7;
+				quanternary_rank_group0_u8array[cur_port] = INVALID;
+				quanternary_rank_group1_u8array[cur_port] = INVALID;
 				quanternary_rank_group2_u8array[cur_port] = INVALID;
 				quanternary_rank_group3_u8array[cur_port] = INVALID;
 			}

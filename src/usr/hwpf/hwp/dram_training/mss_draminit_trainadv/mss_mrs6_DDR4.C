@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mrs6_DDR4.C,v 1.10 2016/01/14 13:46:12 sglancy Exp $
+// $Id: mss_mrs6_DDR4.C,v 1.11 2016/03/07 22:29:48 lapietra Exp $
 
 
 //------------------------------------------------------------------------------
@@ -36,17 +36,18 @@
 //------------------------------------------------------------------------------
 // CHANGE HISTORY:
 //------------------------------------------------------------------------------
-// Version:|  Author: |  Date:  | Comment:
-//---------|----------|---------|-----------------------------------------------
+// Version:|  Author: |  Date: | Comment:
+//---------|----------|--------|-----------------------------------------------
+//  1.11   | 03-07-16 |jneaton | Updated to run on master ranks only
 //  1.10   | 01-14-16 |sglancy | Fixed bug in parity code
 //  1.08   | 01-13-16 |sglancy | Added coverage for DDR4 parity bit
 //  1.07   | 11-03-15 |sglancy | Fixed attribute names for DDR4 RDIMM
 //  1.06   | 10-23-15 |sglancy | Fixed attribute names
-//  1.05   | 09/03/15 | kmack   | RC updates
-//  1.04   | 08/05/15 | sglancy | Fixed FW compile error
-//  1.03   | 08/04/15 | sglancy | Changed to address FW comments
-//  1.02   | 05/07/15 | sglancy | Fixed enable disable bug and added 3DS support
-//  1.00   | 06/27/14 | abhijsau | Initial Draft
+//  1.05   | 09/03/15 |kmack   | RC updates
+//  1.04   | 08/05/15 |sglancy | Fixed FW compile error
+//  1.03   | 08/04/15 |sglancy | Changed to address FW comments
+//  1.02   | 05/07/15 |sglancy | Fixed enable disable bug and added 3DS support
+//  1.00   | 06/27/14 |abhijsau| Initial Draft
 
 //----------------------------------------------------------------------
 //  Includes
@@ -242,7 +243,7 @@ ReturnCode mss_mr6_loader( fapi::Target& i_target,uint32_t i_port_number,uint32_
     FAPI_INF( "+++++++++++++++++++++ LOADING MRS SETTINGS FOR PORT %d +++++++++++++++++++++", i_port_number);
 
     uint8_t num_ranks_array[2][2]; //[port][dimm]
-    rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target, num_ranks_array);
+    rc = FAPI_ATTR_GET(ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, &i_target, num_ranks_array);
     if(rc) return rc;
 
     uint8_t dimm_type;

@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist_common.C,v 1.79 2016/02/17 15:55:36 sglancy Exp $
+// $Id: mss_mcbist_common.C,v 1.80 2016/03/07 18:27:15 lapietra Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -40,6 +40,7 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
+//   1.80  |jneaton |03/07/16|Updated mcb_error_map and mcb_error_map_print to use Master Ranks
 //   1.79  |preeragh|02/17/16|Fixed WR VREF IPL issue
 //   1.78  |sglancy |02/03/16|Fixed FW compile issue
 //   1.77  |lapietra|12/08/15|Added Flag to exit MCBIST before start (for examing Regs)
@@ -985,8 +986,22 @@ fapi::ReturnCode mcb_error_map_print(const fapi::Target & i_target_mba,
     uint8_t l_mbaPosition = 0;
     rc = FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS, &i_target_mba, l_mbaPosition);
     if (rc) return rc;
-    rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target_mba,
+    
+    uint8_t dram_stack[2][2];
+    rc = FAPI_ATTR_GET(ATTR_EFF_STACK_TYPE, &i_target_mba, dram_stack);
+    if(rc) return rc;
+
+    if (dram_stack[0][0] == ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS)
+    {
+        rc = FAPI_ATTR_GET(ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, &i_target_mba, 
                        l_num_ranks_per_dimm);
+    } 
+    else
+    {
+        rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target_mba, 
+                       l_num_ranks_per_dimm);
+    }
+    
     if (rc) return rc;
     l_max_rank = l_num_ranks_per_dimm[i_port][0] + l_num_ranks_per_dimm[i_port][1];
 
@@ -1256,8 +1271,21 @@ fapi::ReturnCode mcb_error_map(const fapi::Target & i_target_mba,
         return rc;
     }
 
-    rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target_mba,
+    uint8_t dram_stack[2][2];
+    rc = FAPI_ATTR_GET(ATTR_EFF_STACK_TYPE, &i_target_mba, dram_stack);
+    if(rc) return rc;
+
+    if (dram_stack[0][0] == ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS)
+    {
+        rc = FAPI_ATTR_GET(ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM, &i_target_mba, 
                        l_num_ranks_per_dimm);
+    } 
+    else
+    {
+        rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target_mba, 
+                       l_num_ranks_per_dimm);
+    }
+    
     if (rc) return rc;
 
     l_max_rank0 = l_num_ranks_per_dimm[0][0] + l_num_ranks_per_dimm[0][1];
