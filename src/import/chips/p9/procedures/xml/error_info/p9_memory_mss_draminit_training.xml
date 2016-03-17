@@ -75,7 +75,31 @@
   <scomRegister>MCA_1_DDRPHY_DP16_DATA_BIT_DISABLE0_RP3_P1_4</scomRegister>
 </registerFfdc>
 
+<registerFfdc>
+  <id>REG_FFDC_MSS_DRAMINIT_TRAINING_DP16_ERROR_STATUS</id>
+  <scomRegister>MCA_DDRPHY_DP16_RD_STATUS0_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_RD_STATUS0_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_RD_STATUS0_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_RD_STATUS0_P0_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_RD_STATUS0_P0_4</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_WR_ERROR0_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_WR_ERROR0_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_WR_ERROR0_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_WR_ERROR0_P0_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_WR_ERROR0_P0_4</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_WR_VREF_ERROR0_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_WR_VREF_ERROR0_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_WR_VREF_ERROR0_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_WR_VREF_ERROR0_P0_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_WR_VREF_ERROR0_P0_4</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_WR_VREF_ERROR1_P0_0</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_WR_VREF_ERROR1_P0_1</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_WR_VREF_ERROR1_P0_2</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_WR_VREF_ERROR1_P0_3</scomRegister>
+  <scomRegister>MCA_DDRPHY_DP16_WR_VREF_ERROR1_P0_4</scomRegister>
+</registerFfdc>
 <hwpError>
+
   <rc>RC_MSS_DRAMINIT_TRAINING_MULTIPLE_ERRORS</rc>
   <description>Multiple training stesp failed for a given position within this calibration.</description>
   <ffdc>FAILED_STEPS</ffdc>
@@ -83,6 +107,10 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
+    <target>TARGET_IN_ERROR</target>
+  </collectRegisterFfdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_DP16_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <callout>
@@ -104,6 +132,10 @@
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_DP16_ERROR_STATUS</id>
+    <target>TARGET_IN_ERROR</target>
+  </collectRegisterFfdc>
   <callout>
     <target>TARGET_IN_ERROR</target>
     <priority>LOW</priority>
@@ -121,6 +153,10 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
+    <target>TARGET_IN_ERROR</target>
+  </collectRegisterFfdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_DP16_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <callout>
@@ -142,6 +178,10 @@
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_DP16_ERROR_STATUS</id>
+    <target>TARGET_IN_ERROR</target>
+  </collectRegisterFfdc>
   <callout>
     <target>TARGET_IN_ERROR</target>
     <priority>LOW</priority>
@@ -159,6 +199,10 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
+    <target>TARGET_IN_ERROR</target>
+  </collectRegisterFfdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_DP16_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <callout>
@@ -180,6 +224,10 @@
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_DP16_ERROR_STATUS</id>
+    <target>TARGET_IN_ERROR</target>
+  </collectRegisterFfdc>
   <callout>
     <target>TARGET_IN_ERROR</target>
     <priority>LOW</priority>
@@ -197,6 +245,10 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
+    <target>TARGET_IN_ERROR</target>
+  </collectRegisterFfdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_DP16_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <callout>
@@ -218,6 +270,10 @@
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_DP16_ERROR_STATUS</id>
+    <target>TARGET_IN_ERROR</target>
+  </collectRegisterFfdc>
   <callout>
     <target>TARGET_IN_ERROR</target>
     <priority>LOW</priority>
@@ -235,6 +291,10 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
+    <target>TARGET_IN_ERROR</target>
+  </collectRegisterFfdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_DP16_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <callout>
@@ -256,6 +316,10 @@
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_DP16_ERROR_STATUS</id>
+    <target>TARGET_IN_ERROR</target>
+  </collectRegisterFfdc>
   <callout>
     <target>TARGET_IN_ERROR</target>
     <priority>LOW</priority>
@@ -273,6 +337,10 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
+    <target>TARGET_IN_ERROR</target>
+  </collectRegisterFfdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_DP16_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <callout>
@@ -294,6 +362,10 @@
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_DP16_ERROR_STATUS</id>
+    <target>TARGET_IN_ERROR</target>
+  </collectRegisterFfdc>
   <callout>
     <target>TARGET_IN_ERROR</target>
     <priority>LOW</priority>
@@ -311,6 +383,10 @@
   <ffdc>PORT_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
+    <target>TARGET_IN_ERROR</target>
+  </collectRegisterFfdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_DP16_ERROR_STATUS</id>
     <target>TARGET_IN_ERROR</target>
   </collectRegisterFfdc>
   <callout>
