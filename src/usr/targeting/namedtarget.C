@@ -43,6 +43,8 @@
 #include <targeting/common/utilFilter.H>
 #include <targeting/namedtarget.H>
 
+#include <arch/pirformat.H>
+
 #include <sys/task.h>           // task_getcpuid()
 
 
@@ -57,7 +59,7 @@ const TARGETING::Target *   getMasterCore( )
 {
     task_affinity_pin();
     task_affinity_migrate_to_master();
-    uint64_t l_masterCoreID                     =   task_getcpuid() & ~7;
+    uint64_t l_masterCoreID                     =   PIR_t::coreFromPir(task_getcpuid());
     task_affinity_unpin();
 
     const   TARGETING::Target * l_masterCore    =   NULL;
@@ -75,7 +77,7 @@ const TARGETING::Target *   getMasterCore( )
                       TYPE_CORE,
                       true );
 
-    TRACDCOMP( g_trac_targeting,
+    TRACFCOMP( g_trac_targeting,
                "getMasterCore: found %d cores on master proc, l_mastreCoreID:0x%X",
                l_cores.size(),l_masterCoreID   );
 
@@ -89,9 +91,7 @@ const TARGETING::Target *   getMasterCore( )
         CHIP_UNIT_ATTR l_coreId =
                     l_core->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
-        uint64_t pir = l_coreId << 3;
-        pir |= l_chipId << 7;
-        pir |= l_logicalGroupId << 10;
+        uint64_t pir =  PIR_t::createCoreId(l_logicalGroupId, l_chipId, l_coreId);
 
         if (pir == l_masterCoreID){
             TRACFCOMP( g_trac_targeting,
