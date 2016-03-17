@@ -132,7 +132,8 @@ void VmmManager::initPartitionTable()
 
     // Init the PTCR reg
     // PATB, PATS = 0 (4k table)
-    setPTCR( reinterpret_cast<uint64_t>(g_patb) + getHRMOR() );
+    // PATB, PATS = 4 (64k table)
+    setPTCR( reinterpret_cast<uint64_t>(g_patb) + getHRMOR() + 4 );
 }
 
 void VmmManager::initSDR1()

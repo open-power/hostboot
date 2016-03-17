@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -227,10 +227,10 @@ class VmmManager
     private:
 
         // Partition Table
-        // 4K-aligned, each entry is 2 double words
+        // 64K-aligned, each entry is 2 double words
         // We only need one entry in the table
-        // So just use a 4K-aligned variable
-        static uint64_t g_patb[2] __attribute__ ((aligned (4096)));
+        // So just use a 64K-aligned variable
+        static uint64_t g_patb[2] __attribute__ ((aligned (65536)));
 
         Spinlock lock;
 
