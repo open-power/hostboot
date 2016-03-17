@@ -729,7 +729,7 @@ sub createYearString
     ##  new files will not have a log, so the "git log" call above will
     #   return nothing.
     ##  Push any year we find onto the @years array
-    my  $cmd = "git log -- $filename | grep Date: | tail --line=1";
+    my  $cmd = "git log -- $filename | grep Date: | tail -n 1";
     ## print "run $cmd\n";
     my @logstrings = split( " ", `$cmd` );
     if ( $? )   {   die "ERROR $? : Could not run $cmd $!\n";   }
