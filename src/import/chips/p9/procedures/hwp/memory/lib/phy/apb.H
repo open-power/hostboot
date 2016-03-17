@@ -108,7 +108,7 @@ class apbTraits<fapi2::TARGET_TYPE_MCA>
 /// @tparam TT traits type defaults to apbTraits<T>
 ///
 template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = apbTraits<T> >
-class apb_class
+class apb
 {
     public:
 
@@ -118,7 +118,7 @@ class apb_class
         /// @param[out] o_data the value of the register
         /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
         ///
-        static inline fapi2::ReturnCode read_config0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+        inline fapi2::ReturnCode read_config0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
         {
             FAPI_TRY( mss::getScom(i_target, TT::APB_CONFIG0_REG, o_data) );
             FAPI_DBG("apb_config0: 0x%016lx", o_data);
@@ -132,7 +132,7 @@ class apb_class
         /// @param[in] i_data the value of the register
         /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
         ///
-        static inline fapi2::ReturnCode write_config0( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+        inline fapi2::ReturnCode write_config0( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
         {
             FAPI_DBG("apb_config0: 0x%016lx", i_data);
             FAPI_TRY( mss::putScom(i_target, TT::APB_CONFIG0_REG, i_data) );
@@ -146,7 +146,7 @@ class apb_class
         /// @param[out] o_data the value of the register
         /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
         ///
-        static inline fapi2::ReturnCode read_error_status0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+        inline fapi2::ReturnCode read_error_status0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
         {
             FAPI_TRY( mss::getScom(i_target, TT::APB_ERROR_STATUS0_REG, o_data) );
             FAPI_DBG("apb_error_status0: 0x%016lx", o_data);
@@ -160,7 +160,7 @@ class apb_class
         /// @param[in] i_data the value of the register
         /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
         ///
-        static inline fapi2::ReturnCode write_error_status0( const fapi2::Target<T>& i_target,
+        inline fapi2::ReturnCode write_error_status0( const fapi2::Target<T>& i_target,
                 const fapi2::buffer<uint64_t>& i_data )
         {
             FAPI_DBG("apb_error_status0: 0x%016lx", i_data);
@@ -175,7 +175,7 @@ class apb_class
         /// @param[out] o_data the value of the register
         /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
         ///
-        static inline fapi2::ReturnCode read_fir_err0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+        inline fapi2::ReturnCode read_fir_err0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
         {
             FAPI_TRY( mss::getScom(i_target, TT::APB_FIR_ERR0_REG, o_data) );
             FAPI_DBG("apb_fir_err0: 0x%016lx", o_data);
@@ -189,7 +189,7 @@ class apb_class
         /// @param[out] o_data the value of the register
         /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
         ///
-        static inline fapi2::ReturnCode read_fir_err1( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+        inline fapi2::ReturnCode read_fir_err1( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
         {
             FAPI_TRY( mss::getScom(i_target, TT::APB_FIR_ERR1_REG, o_data) );
             FAPI_DBG("apb_fir_err1: 0x%016lx", o_data);
@@ -203,7 +203,7 @@ class apb_class
         /// @param[out] o_data the value of the register
         /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
         ///
-        static inline fapi2::ReturnCode read_fir_err2( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+        inline fapi2::ReturnCode read_fir_err2( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
         {
             FAPI_TRY( mss::getScom(i_target, TT::APB_FIR_ERR2_REG, o_data) );
             FAPI_DBG("apb_fir_err2: 0x%016lx", o_data);
@@ -217,7 +217,7 @@ class apb_class
         /// @param[out] o_data the value of the register
         /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
         ///
-        static inline fapi2::ReturnCode read_fir_err3( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+        inline fapi2::ReturnCode read_fir_err3( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
         {
             FAPI_TRY( mss::getScom(i_target, TT::APB_FIR_ERR3_REG, o_data) );
             FAPI_DBG("apb_fir_err3: 0x%016lx", o_data);
@@ -230,7 +230,7 @@ class apb_class
         /// @param[in] i_target the fapi2 target of the port
         /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
         ///
-        static inline fapi2::ReturnCode reset_err( const fapi2::Target<T>& i_target )
+        inline fapi2::ReturnCode reset_err( const fapi2::Target<T>& i_target )
         {
             // DDRPHY_APB_CONFIG0_P0_RESET_ERR_RPT
             // Write this bit to '1'b then write this bit to '0'b (toggle) to reset the
@@ -255,7 +255,7 @@ class apb_class
         /// @param[in] i_target fapi2 target of the port
         /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
         ///
-        static inline fapi2::ReturnCode reset_config0( const fapi2::Target<T>& i_target )
+        inline fapi2::ReturnCode reset_config0( const fapi2::Target<T>& i_target )
         {
             FAPI_TRY( reset_err(i_target) );
 
@@ -268,7 +268,7 @@ class apb_class
         /// @param[in] i_target fapi2 target of the port
         /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS if ok
         ///
-        static inline fapi2::ReturnCode reset( const fapi2::Target<T>& i_target )
+        inline fapi2::ReturnCode reset( const fapi2::Target<T>& i_target )
         {
             FAPI_TRY( reset_config0(i_target) );
 
@@ -284,8 +284,6 @@ class apb_class
         fapi2::ReturnCode fir_check( const fapi2::Target<T>& i_target );
 
 };
-
-using apb = apb_class<fapi2::TARGET_TYPE_MCA>;
 
 }
 
