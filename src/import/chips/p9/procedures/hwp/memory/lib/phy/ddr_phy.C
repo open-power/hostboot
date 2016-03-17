@@ -31,13 +31,13 @@
 #include <initializer_list>
 
 #include <fapi2.H>
-#include "../mss.H"
+#include <mss.H>
 
-#include "ddr_phy.H"
-#include "read_cntrl.H"
+#include <phy/ddr_phy.H>
+#include <phy/read_cntrl.H>
 
-#include "../utils/bit_count.H"
-#include "../utils/dump_regs.H"
+#include <utils/bit_count.H>
+#include <utils/dump_regs.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_PROC_CHIP;
