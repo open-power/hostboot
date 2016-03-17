@@ -37,6 +37,7 @@
 #define __P9_MSS_ATTR_UPDATE__
 
 #include <fapi2.H>
+
 typedef fapi2::ReturnCode (*p9_mss_attr_update_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_MCS>&);
 
 extern "C"
