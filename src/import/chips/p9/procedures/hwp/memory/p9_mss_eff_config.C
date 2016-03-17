@@ -26,9 +26,13 @@
 // *HWP Team: Memory
 // *HWP Level: 1
 // *HWP Consumed by: FSP:HB
+#include <map>
+#include <vector>
 
 #include <fapi2.H>
 #include <p9_mss_eff_config.H>
+#include <lib/utils/pos.H>
+#include <lib/spd/spd_decoder.H>
 
 
 ///
@@ -38,7 +42,13 @@
 ///
 fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target )
 {
-    FAPI_INF("Start effective config");
+    // Caches
+    std::map<uint32_t, std::shared_ptr<mss::spd::decoder> > l_factory_caches;
+
+    FAPI_TRY( mss::spd::populate_decoder_caches(i_target, l_factory_caches) );
+
     FAPI_INF("End effective config");
-    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
