@@ -240,8 +240,8 @@ inline uint16_t getErrorInfoFfdcSize(const T*)
 ///
 /// @brief Get FFDC Size specialization for fapi2::Target
 ///
-template<fapi2::TargetType T>
-inline uint16_t getErrorInfoFfdcSize(const fapi2::Target<T>&)
+template<fapi2::TargetType T, typename V>
+inline uint16_t getErrorInfoFfdcSize(const fapi2::Target<T, V>&)
 {
     return EI_FFDC_SIZE_TARGET;
 }
