@@ -87,7 +87,9 @@ namespace fapi2
 /// @note          the default templated constructor is delagated to constructors
 ///                take take in a plat_target_handle_t
 ///
-template<> inline fapi2::Target<TARGET_TYPE_SYSTEM,  plat_target_handle_t>::Target(plat_target_handle_t v)
+template<>
+inline Target<TARGET_TYPE_SYSTEM, plat_target_handle_t>
+::Target(const plat_target_handle_t& v)
 {
     PLAT_TARGET::systemTargCtorHelperFunc(iv_handle);
 }
@@ -252,7 +254,7 @@ inline TARGETING::TYPE convertFapi2TypeToTargeting(fapi2::TargetType i_T)
 ///
 template<TargetType K, typename V>
 template<TargetType T>
-inline Target<T> Target<K, V>::getParent(void) const
+inline Target<T, V> Target<K, V>::getParent(void) const
 {
 
     FAPI_DBG(ENTER_MRK "getParent. Type of parent 0x%08x", T);
@@ -530,7 +532,7 @@ inline Target<T> Target<K, V>::getParent(void) const
 ///
 template<TargetType K, typename V>
 template< TargetType T>
-inline std::vector<Target<T> >
+inline std::vector<Target<T, V> >
     Target<K, V>::getChildren(const TargetState i_state) const
 {
 
@@ -752,7 +754,7 @@ FAPI_DBG(ENTER_MRK "getChildren. Type 0x%08x State:0x%08x", T, i_state);
 ///
 template<TargetType K, typename V>
 template< TargetType T>
-inline std::vector<Target<T> >
+inline std::vector<Target<T, V> >
     Target<K, V>::getChildren(const TargetFilter i_filter,
                               const TargetState i_state) const
 {
@@ -826,7 +828,7 @@ inline std::vector<Target<T> >
 template<TargetType K, typename V>
 template<TargetType T>
 inline fapi2::ReturnCodes
-Target<K, V>::getOtherEnd(fapi2::Target<T>& o_target,
+Target<K, V>::getOtherEnd(fapi2::Target<T, V>& o_target,
                           const TargetState i_state) const
 {
     ReturnCodes l_rc;
@@ -956,8 +958,8 @@ inline bool Target< K, V >::isFunctional(void) const
 /// @post The contents of the buffer is replaced with the string
 /// representation of the target
 ///
-template< TargetType T >
-inline void toString(const Target<T>& i_target, char* io_buffer, size_t i_bsize)
+template< TargetType T, typename V >
+inline void toString(const Target<T, V>& i_target, char* io_buffer, size_t i_bsize)
 {
     TARGETING::ATTR_FAPI_NAME_type l_nameString = {0};
     const TARGETING::Target * l_platTarget =
@@ -1001,8 +1003,8 @@ inline void toString(const Target<T>& i_target, char* io_buffer, size_t i_bsize)
 /// @post The contents of the buffer is replaced with the string
 /// representation of the target
 ///
-template< TargetType T >
-inline void toString(const Target<T> *i_target, char* io_buffer, size_t i_bsize)
+template< TargetType T, typename V >
+inline void toString(const Target<T, V> *i_target, char* io_buffer, size_t i_bsize)
 {
     toString(*i_target, io_buffer, i_bsize);
 }
@@ -1014,8 +1016,8 @@ inline void toString(const Target<T> *i_target, char* io_buffer, size_t i_bsize)
 /// the desired target
 /// @return Target<T> the target requested
 ///
-template<TargetType T>
-inline Target<T> getTarget(uint64_t Ordinal)
+template<TargetType T, typename V>
+inline Target<T, V> getTarget(uint64_t Ordinal)
 {
   //@TODO RTC:129517
     // For testing

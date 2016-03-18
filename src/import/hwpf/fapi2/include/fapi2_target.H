@@ -114,7 +114,7 @@ class Target
         /// single uint64_t in value which represents all the information
         /// they might need. value( K | V ), for example
         ///
-        Target(V Value):
+        Target(const V& Value):
             iv_handle(Value)
         {};
 
@@ -195,7 +195,7 @@ class Target
         /// @return Target<T> a target representing the parent
         ///
         template< TargetType T >
-        inline Target<T> getParent(void) const;
+        inline Target<T, V> getParent(void) const;
 
         ///
         /// @brief Is this target a chip?
@@ -263,13 +263,13 @@ class Target
         /// @brief Get this target's children
         /// @tparam T The type of the parent
         /// @param[in] i_state The desired TargetState of the children
-        /// @return std::vector<Target<T> > a vector of present/functional
+        /// @return std::vector<Target<T,V>> a vector of present/functional
         /// children
         /// @warning The children of EX's (cores) are expected to be returned
         /// in order. That is, core 0 is std::vector[0].
         ///
         template< TargetType T>
-        inline std::vector<Target<T> >
+        inline std::vector<Target<T, V> >
         getChildren(const TargetState i_state = TARGET_STATE_FUNCTIONAL) const;
 
         ///
@@ -277,11 +277,11 @@ class Target
         /// @tparam T The type of the parent
         /// @param[in] i_filter The desired chiplet filter
         /// @param[in] i_state The desired TargetState of the children
-        /// @return std::vector<Target<T> > a vector of present/functional
+        /// @return std::vector<Target<T,V>> a vector of present/functional
         /// children
         ///
         template< TargetType T>
-        inline std::vector<Target<T> >
+        inline std::vector<Target<T, V> >
         getChildren(const TargetFilter i_filter,
                     const TargetState i_state = TARGET_STATE_FUNCTIONAL) const;
 
@@ -297,7 +297,7 @@ class Target
 
         template<TargetType T>
         inline fapi2::ReturnCodes
-        getOtherEnd(Target<T>& o_target, const TargetState i_state = TARGET_STATE_FUNCTIONAL) const;
+        getOtherEnd(Target<T, V>& o_target, const TargetState i_state = TARGET_STATE_FUNCTIONAL) const;
 
         ///
         /// @brief Is the target functional?
@@ -321,8 +321,8 @@ class Target
         /// @brief Copy from a Target<O> to a Target<K>
         /// @tparam O the target type of the other
         ///
-        template<TargetType O>
-        inline Target( const Target<O>& Other ):
+        template<TargetType O, typename VO>
+        inline Target( const Target<O, VO>& Other ):
             Target<K, V>(Other.get())
         {
             // In case of recursion depth failure, use -ftemplate-depth=
@@ -460,29 +460,29 @@ inline uint8_t thread_bitset_f2n(const uint8_t i_ordinal, const uint8_t i_thread
 ///
 /// @brief Return the string interpretation of this target
 /// @tparam T The type of the target
-/// @param[in] i_target Target<T>
+/// @param[in] i_target Target<T,V>
 /// @param[in] i_buffer buffer to write in to
 /// @param[in] i_bsize size of the buffer
 /// @return void
 /// @post The contents of the buffer is replaced with the string
 /// representation of the target
 ///
-template< TargetType T >
-inline void toString(const Target<T>& i_target, char* i_buffer, size_t i_bsize);
+template< TargetType T, typename V >
+inline void toString(const Target<T, V>& i_target, char* i_buffer, size_t i_bsize);
 
 ///
 /// @brief Return the string interpretation of this target
 /// @tparam T The type of the target
 /// @tparam B The type of the buffer
-/// @param[in] i_target A pointer to the Target<T>
+/// @param[in] i_target A pointer to the Target<T,V>
 /// @param[in] i_buffer buffer to write in to
 /// @param[in] i_bsize  size of the buffer
 /// @return void
 /// @post The contents of the buffer is replaced with the string
 /// representation of the target
 ///
-template< TargetType T >
-inline void toString(const Target<T>* i_target, char* i_buffer, size_t i_bsize);
+template< TargetType T, typename V >
+inline void toString(const Target<T, V>* i_target, char* i_buffer, size_t i_bsize);
 
 ///
 /// @brief Get an enumerated target of a specific type
@@ -491,8 +491,8 @@ inline void toString(const Target<T>* i_target, char* i_buffer, size_t i_bsize);
 /// the desired target
 /// @return Target<T> the target requested
 ///
-template<TargetType T>
-inline Target<T> getTarget(uint64_t Ordinal);
+template<TargetType T, typename V>
+inline Target<T, V> getTarget(uint64_t Ordinal);
 
 // Why has the been removed? For starters, the API name
 // is probably wrong as it's already been confused with
@@ -503,14 +503,14 @@ inline Target<T> getTarget(uint64_t Ordinal);
 ///
 /// @brief Get the base target's children
 /// @tparam T The type of the target
-/// @return std::vector<Target<T> > a vector of present/functional
+/// @return std::vector<Target<T,V>> a vector of present/functional
 /// children
 ///
-template<TargetType T>
-inline std::vector<Target<T> > getChildren()
+template<TargetType T, typename V>
+inline std::vector<Target<T, V>> getChildren()
 {
     // For testing
-    return {Target<T>(), Target<T>()};
+    return {Target<T, V>(), Target<T, V>()};
 }
 #endif
 
@@ -518,14 +518,14 @@ inline std::vector<Target<T> > getChildren()
 /// @brief Return the string interpretation of this target
 /// @tparam T The type of the target
 /// @tparam B The type of the buffer
-/// @param[in] i_target Target<T>
+/// @param[in] i_target Target<T,V>
 /// @param[in] i_buffer buffer
 /// @return void
 /// @post The contents of the buffer is replaced with the string
 /// representation of the target
 ///
-template<TargetType T, typename B>
-inline void toString(const Target<T>& i_target, B& i_buffer);
+template<TargetType T, typename V, typename B>
+inline void toString(const Target<T, V>& i_target, B& i_buffer);
 
 ///
 /// @brief Check if the target is of a type, or in a type subset.
