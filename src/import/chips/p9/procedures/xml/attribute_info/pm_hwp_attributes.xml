@@ -33,7 +33,7 @@
       </description>
       <valueType>uint32</valueType>
   </attribute>
-   <!-- ********************************************************************* -->
+  <!-- ********************************************************************* -->
   <attribute>
       <id>ATTR_PSTATEGPE_BOOT_COPIER_IVPR_OFFSET</id>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -76,6 +76,41 @@
       </description>
       <valueType>uint8</valueType>
       <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+       <id>ATTR_QUAD_PPM_ERRMASK</id>
+       <targetType>TARGET_TYPE_EQ</targetType>
+       <description>The error mask value that has to be restored to the PPM
+       ERRMASK register for the Quad. This value will be stored during the
+       reset phase when the ERRMASK will be cleared as part of the
+       cleanup action.
+       </description>
+       <valueType>uint32</valueType>
+       <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+       <id>ATTR_CORE_PPM_ERRMASK</id>
+       <targetType>TARGET_TYPE_CORE</targetType>
+       <description>The error mask value that has to be restored to the PPM
+       ERRMASK register for the CORE. This value will be stored during the
+       reset phase when the ERRMASK will be cleared as part of the
+       cleanup action.
+       </description>
+       <valueType>uint32</valueType>
+       <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+       <id>ATTR_CME_LOCAL_FIRMASK</id>
+       <targetType>TARGET_TYPE_EX</targetType>
+       <description>The FIR mask value that has to be restored to the CME FIR
+       register. This value will be stored during the reset phase when the
+       FIRMASK will be cleared as part of the cleanup action.
+       </description>
+       <valueType>uint32</valueType>
+       <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
 </attributes>
