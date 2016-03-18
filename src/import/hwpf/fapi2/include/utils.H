@@ -69,8 +69,8 @@ namespace fapi2
 /// @return ReturnCode. FAPI2_RC_SUCCESS on success, else platform specified error.
 ///
 ///
-template<TargetType T>
-inline ReturnCode specialWakeup(const Target<T>& i_target,
+template<TargetType T, typename V>
+inline ReturnCode specialWakeup(const Target<T, V>& i_target,
                                 const bool i_enable)
 {
     // enforce the allowed target types

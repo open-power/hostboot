@@ -81,8 +81,8 @@ class VPDInfo<TARGET_TYPE_MCS>
 /// FAPI_TRY(getVPD( mcs, vpdInfo, blob ));
 /// blob now contains the VPD data for the MCS.
 ///
-template<TargetType T>
-ReturnCode getVPD(const Target<T>& i_target,
+template<TargetType T, typename V>
+ReturnCode getVPD(const Target<T, V>& i_target,
                   VPDInfo<T>& io_vpd_info,
                   uint8_t* o_blob);
 
