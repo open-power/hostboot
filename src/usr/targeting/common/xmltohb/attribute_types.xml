@@ -2352,13 +2352,15 @@
         Provided by the Machine Readable Workbook.
         Can vary across drawers.
     </description>
-    <simpleType><uint8_t>
-        <default>0</default>
-    </uint8_t></simpleType>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_FABRIC_GROUP_ID</id>
+        <id>ATTR_PROC_FABRIC_GROUP_ID</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -2371,13 +2373,15 @@
         Provided by the Machine Readable Workbook.
         Can vary across drawers.
     </description>
-    <simpleType><uint8_t>
-        <default>0</default>
-    </uint8_t></simpleType>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
     <hwpfToHbAttrMap>
-        <id>ATTR_FABRIC_CHIP_ID</id>
+        <id>ATTR_PROC_FABRIC_CHIP_ID</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -12305,6 +12309,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PROC_OCC_SANDBOX_SIZE</id>
         <macro>DIRECT</macro>
@@ -19992,5 +19997,425 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     <readable/>
     <virtual/>
 </attribute>
+
+<!-- ********************************************************************** -->
+<attribute>
+  <id>FREQ_CORE_CEILING_MHZ</id>
+  <!-- <targetType>TARGET_TYPE_SYSTEM</targetType> -->
+  <description>
+    The maximum core frequency in MHz.
+    This is the same for all cores in the system.
+    Provided by the MRW.
+  </description>
+  <simpleType>
+    <uint32_t></uint32_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+        <id>ATTR_FREQ_CORE_CEILING</id>
+        <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_FABRIC_A_BUS_WIDTH</id>
+  <!-- <targetType>TARGET_TYPE_SYSTEM</targetType> -->
+  <description>
+    Processor SMP A bus width.
+    Provided by the MRW.
+    2_BYTE = 0x01, 4_BYTE = 0x02
+  </description>
+  <simpleType><uint8_t></uint8_t></simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_PROC_FABRIC_A_BUS_WIDTH</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_FABRIC_X_BUS_WIDTH</id>
+  <!-- <targetType>TARGET_TYPE_SYSTEM</targetType> -->
+  <description>
+    Processor SMP X bus width.
+    Provided by the MRW.
+    2_BYTE = 0x01, 4_BYTE = 0x02
+  </description>
+  <simpleType>
+    <uint8_t></uint8_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_PROC_FABRIC_X_BUS_WIDTH</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_FABRIC_CCSM_MODE</id>
+  <!-- <targetType>TARGET_TYPE_SYSTEM</targetType> -->
+  <description>
+    Processor SMP topology configuration.
+    0 = default = 1 or 2 hop topology (PHYP image spans system)
+    1 = 3 hop topology (PHYP image spans group).
+    Provided by the MRW.
+    OFF = 0x0 (default), ON = 0x1
+  </description>
+  <simpleType>
+    <uint8_t>
+      <default>0</default>
+    </uint8_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_PROC_FABRIC_CCSM_MODE</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>OPTICS_CONFIG_MODE</id>
+  <!-- <targetType>TARGET_TYPE_OBUS</targetType> -->
+  <description>
+    Per-link optics configuration
+    0 = SMP (default)
+    1 = CAPI 2.0
+    2 = NV 2.0
+    Provided by the MRW.
+  </description>
+  <simpleType>
+    <uint8_t>
+      <default>0,0,0,0</default>
+    </uint8_t>
+    <array>4</array>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_OPTICS_CONFIG_MODE</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_FABRIC_SMP_OPTICS_MODE</id>
+  <!-- <targetType>TARGET_TYPE_SYSTEM</targetType> -->
+  <description>
+    Processor SMP optics mode.
+    0 = Optics_is_X_bus (default)
+    1 = Optics_is_A_bus
+    Provided by the MRW.
+    OPTICS_IS_X_BUS = 0x0, OPTICS_IS_A_BUS = 0x1
+  </description>
+  <simpleType>
+    <uint8_t>
+      <default>0</default>
+    </uint8_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_PROC_FABRIC_SMP_OPTICS_MODE</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_FABRIC_CAPI_MODE</id>
+  <!-- <targetType>TARGET_TYPE_SYSTEM</targetType> -->
+  <description>
+    Processor CAPI attachment protocol mode.
+    0 =  no: SMPA CAPI attachment (default)
+    1 = yes: SMPA CAPI attachment
+    Provided by the MRW.
+  </description>
+  <simpleType>
+    <uint8_t>
+      <default>0</default>
+    </uint8_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_PROC_FABRIC_CAPI_MODE</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_FABRIC_ADDR_BAR_MODE</id>
+  <!-- <targetType>TARGET_TYPE_SYSTEM</targetType> -->
+  <description>
+    Processor memory map configuration.
+    0 = large system address map (default)
+    1 = small system address map
+    Provided by the MRW.
+  </description>
+  <simpleType>
+    <uint8_t>
+      <default>0</default>
+    </uint8_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_PROC_FABRIC_ADDR_BAR_MODE</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+
+<attribute>
+  <id>PROC_FABRIC_SYSTEM_MASTER_CHIP</id>
+  <!-- <targetType>TARGET_TYPE_PROC_CHIP</targetType> -->
+  <description>
+    Indicates if the given chip should serve as the fabric system master.
+    FALSE = 0x0, TRUE = 0x1
+  </description>
+  <simpleType>
+    <uint8_t></uint8_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <writeable/>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_PROC_FABRIC_SYSTEM_MASTER_CHIP</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_FABRIC_GROUP_MASTER_CHIP</id>
+  <!-- <targetType>TARGET_TYPE_PROC_CHIP</targetType> -->
+  <description>
+    Indicates if the given chip should serve as the fabric group master.
+    FALSE = 0x0, TRUE = 0x1
+  </description>
+  <simpleType><uint8_t></uint8_t></simpleType>
+  <persistency>non-volatile</persistency>
+  <writeable/>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_PROC_FABRIC_GROUP_MASTER_CHIP</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_FABRIC_X_ATTACHED_CHIP_CNFG</id>
+  <!-- <targetType>TARGET_TYPE_PROC_CHIP</targetType> -->
+  <description>
+    For each fabric X link on this chip, specifies whether or not the chip at
+    the receiving end of the link is present and configured
+    FALSE = 0x0, TRUE = 0x1
+  </description>
+  <simpleType>
+    <uint8_t></uint8_t>
+    <array>7</array>
+  </simpleType>
+  <writeable/>
+  <readable/>
+  <persistency>volatile-zeroed</persistency>
+  <hwpfToHbAttrMap>
+    <id>ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_FABRIC_A_ATTACHED_CHIP_CNFG</id>
+  <!-- <targetType>TARGET_TYPE_PROC_CHIP</targetType> -->
+  <description>
+    For each fabric A link on this chip, specifies whether or not the chip at
+    the receiving end of the link is present and configured
+    FALSE = 0x0, TRUE = 0x1
+  </description>
+  <simpleType>
+    <uint8_t></uint8_t>
+    <array>4</array>
+  </simpleType>
+  <writeable/>
+  <readable/>
+  <persistency>volatile-zeroed</persistency>
+  <hwpfToHbAttrMap>
+    <id>ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_FABRIC_X_ATTACHED_CHIP_ID</id>
+  <!-- <targetType>TARGET_TYPE_PROC_CHIP</targetType> -->
+  <description>
+    For each fabric X link on this chip, specifies the fabric ID of the chip
+    at the receiving end of the link.  Should be considered valid only if
+    corresponding ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG index is true.
+  </description>
+  <simpleType>
+    <uint8_t></uint8_t>
+    <array>7</array>
+  </simpleType>
+  <writeable/>
+  <readable/>
+  <persistency>volatile-zeroed</persistency>
+  <hwpfToHbAttrMap>
+    <id>ATTR_PROC_FABRIC_X_ATTACHED_CHIP_ID</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_FABRIC_A_ATTACHED_CHIP_ID</id>
+  <!-- <targetType>TARGET_TYPE_PROC_CHIP</targetType> -->
+  <description>
+    For each fabric A link on this chip, specifies the fabric ID of the chip
+    at the receiving end of the link.  Should be considered valid only if
+    corresponding ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG index is true.
+  </description>
+  <simpleType>
+    <uint8_t></uint8_t>
+    <array>4</array>
+  </simpleType>
+  <writeable/>
+  <readable/>
+  <persistency>volatile-zeroed</persistency>
+  <hwpfToHbAttrMap>
+    <id>ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_FABRIC_X_ADDR_DIS</id>
+  <!-- <targetType>TARGET_TYPE_PROC_CHIP</targetType> -->
+  <description>
+    Indicates if link should be used to carry data only
+    (in aggregate configurations).
+    Should be considered valid only if corresponding
+    ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG index is true.
+    OFF = 0x0, ON = 0x1
+  </description>
+  <simpleType>
+    <uint8_t></uint8_t>
+    <array>7</array>
+  </simpleType>
+  <writeable/>
+  <readable/>
+  <persistency>volatile-zeroed</persistency>
+  <hwpfToHbAttrMap>
+    <id>ATTR_PROC_FABRIC_X_ADDR_DIS</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_FABRIC_A_ADDR_DIS</id>
+  <!-- <targetType>TARGET_TYPE_PROC_CHIP</targetType> -->
+  <description>
+    Indicates if link should be used to carry data only
+    (in aggregate configurations).
+    Should be considered valid only if corresponding
+    ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG index is true.
+    OFF = 0x0, ON = 0x1
+  </description>
+  <simpleType>
+    <uint8_t></uint8_t>
+    <array>4</array>
+  </simpleType>
+  <writeable/>
+  <readable/>
+  <persistency>volatile-zeroed</persistency>
+  <hwpfToHbAttrMap>
+    <id>ATTR_PROC_FABRIC_A_ADDR_DIS</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_EPS_READ_CYCLES</id>
+  <!-- <targetType>TARGET_TYPE_SYSTEM</targetType> -->
+  <description>
+    Calculated read epsilon protection count.
+    Counter tier is index.
+  </description>
+  <simpleType>
+    <uint32_t></uint32_t>
+    <array>3</array>
+  </simpleType>
+  <writeable/>
+  <readable/>
+  <persistency>volatile-zeroed</persistency>
+  <hwpfToHbAttrMap>
+    <id>ATTR_PROC_EPS_READ_CYCLES</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_EPS_WRITE_CYCLES</id>
+  <!-- <targetType>TARGET_TYPE_SYSTEM</targetType> -->
+  <description>
+    Calculated write epsilon protection count.
+    Counter tier is index.
+  </description>
+  <simpleType>
+    <uint32_t></uint32_t>
+    <array>3</array>
+  </simpleType>
+  <writeable/>
+  <readable/>
+  <persistency>volatile-zeroed</persistency>
+  <hwpfToHbAttrMap>
+    <id>ATTR_PROC_EPS_WRITE_CYCLES</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_HTM_BAR_SIZES</id>
+  <!-- <targetType>TARGET_TYPE_PROC_CHIP</targetType> -->
+  <description> The amount of memory a user can reserve to store HTM traces.
+                There are two different HTM trace areas, thus two different
+                sizes (For example, one to store NHTM0 and one for NHTM1).
+                Platform is to initialize this attribute to 0 (default).
+                Set by user via attribute override.
+                Used by p9_mss_eff_grouping.
+                256_GB = 0x0000004000000000,
+                128_GB = 0x0000002000000000,
+                 64_GB = 0x0000001000000000,
+                 32_GB = 0x0000000800000000,
+                 16_GB = 0x0000000400000000,
+                  8_GB = 0x0000000200000000,
+                  4_GB = 0x0000000100000000,
+                  2_GB = 0x0000000080000000,
+                  1_GB = 0x0000000040000000,
+                512_MB = 0x0000000020000000,
+                256_MB = 0x0000000010000000,
+                128_MB = 0x0000000008000000,
+                 64_MB = 0x0000000004000000,
+                 32_MB = 0x0000000002000000,
+                 16_MB = 0x0000000001000000,
+                  ZERO = 0x0000000000000000
+  </description>
+  <simpleType>
+    <uint64_t>
+      <default>0,0</default>
+    </uint64_t>
+    <array>2</array>
+  </simpleType>
+  <writeable/>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_PROC_HTM_BAR_SIZES</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<!-- ********************************************************************** -->
 
 </attributes>

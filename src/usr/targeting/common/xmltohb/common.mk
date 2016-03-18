@@ -63,7 +63,6 @@ FAPI_ATTR_SOURCES += $(if $(CONFIG_VPD_GETMACRO_USE_EFF_ATTR), lab_dimm_spd_attr
 FAPI_ATTR_SOURCES += $(if $(CONFIG_VPD_GETMACRO_USE_EFF_ATTR), lab_dimm_attributes.xml, dimm_attributes.xml)
 FAPI_ATTR_SOURCES += unit_attributes.xml
 FAPI_ATTR_SOURCES += ei_bus_attributes.xml
-FAPI_ATTR_SOURCES += dram_initialization/proc_setup_bars/proc_setup_bars_memory_attributes.xml
 FAPI_ATTR_SOURCES += dram_initialization/proc_setup_bars/proc_setup_bars_l3_attributes.xml
 FAPI_ATTR_SOURCES += dram_initialization/proc_setup_bars/proc_setup_bars_mmio_attributes.xml
 FAPI_ATTR_SOURCES += activate_powerbus/proc_build_smp/proc_fab_smp_fabric_attributes.xml
