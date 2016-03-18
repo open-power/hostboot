@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2011,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -183,7 +183,6 @@ HWP_ATTR_XML_FILES += hwp/chip_ec_attributes.xml
 HWP_ATTR_XML_FILES += hwp/centaur_ec_attributes.xml
 HWP_ATTR_XML_FILES += hwp/common_attributes.xml
 HWP_ATTR_XML_FILES += hwp/sync_attributes.xml
-HWP_ATTR_XML_FILES += hwp/dram_initialization/proc_setup_bars/proc_setup_bars_memory_attributes.xml
 HWP_ATTR_XML_FILES += hwp/dram_initialization/proc_setup_bars/proc_setup_bars_l3_attributes.xml
 HWP_ATTR_XML_FILES += hwp/dram_initialization/proc_setup_bars/proc_setup_bars_mmio_attributes.xml
 HWP_ATTR_XML_FILES += hwp/activate_powerbus/proc_build_smp/proc_fab_smp_fabric_attributes.xml

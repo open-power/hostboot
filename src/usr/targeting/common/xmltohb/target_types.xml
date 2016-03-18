@@ -566,6 +566,16 @@
     <attribute><id>TIME_BASE</id></attribute>
     <attribute><id>CPU_ATTR</id></attribute>
     <attribute><id>ADU_XSCOM_BAR_BASE_ADDR</id></attribute>
+    <attribute><id>PROC_OCC_SANDBOX_SIZE</id></attribute>
+    <attribute><id>PROC_FABRIC_SYSTEM_MASTER_CHIP</id></attribute>
+    <attribute><id>PROC_FABRIC_GROUP_MASTER_CHIP</id></attribute>
+    <attribute><id>PROC_FABRIC_A_ATTACHED_CHIP_CNFG</id></attribute>
+    <attribute><id>PROC_FABRIC_X_ATTACHED_CHIP_CNFG</id></attribute>
+    <attribute><id>PROC_FABRIC_A_ATTACHED_CHIP_ID</id></attribute>
+    <attribute><id>PROC_FABRIC_X_ATTACHED_CHIP_ID</id></attribute>
+    <attribute><id>PROC_FABRIC_A_ADDR_DIS</id></attribute>
+    <attribute><id>PROC_FABRIC_X_ADDR_DIS</id></attribute>
+    <attribute><id>PROC_HTM_BAR_SIZES</id></attribute>
 </targetType>
 
 <targetType>
@@ -654,7 +664,6 @@
     <attribute><id>ECID</id></attribute>
 
     <attribute><id>PROC_HTM_BAR_SIZE</id></attribute>
-    <attribute><id>PROC_OCC_SANDBOX_SIZE</id></attribute>
     <attribute><id>PROC_HTM_BAR_BASE_ADDR</id></attribute>
     <attribute><id>PROC_OCC_SANDBOX_BASE_ADDR</id></attribute>
     <attribute><id>PROC_AS_MMIO_BAR_BASE_ADDR</id></attribute>
@@ -2028,6 +2037,15 @@
     <attribute><id>PFET_VDD_VOFF_SEL</id></attribute>
     <attribute><id>PFET_VCS_VOFF_SEL</id></attribute>
     <attribute><id>SYSTEM_IPL_PHASE</id></attribute>
+    <attribute><id>FREQ_CORE_CEILING_MHZ</id></attribute>
+    <attribute><id>PROC_FABRIC_A_BUS_WIDTH</id></attribute>
+    <attribute><id>PROC_FABRIC_X_BUS_WIDTH</id></attribute>
+    <attribute><id>PROC_FABRIC_CCSM_MODE</id></attribute>
+    <attribute><id>PROC_FABRIC_SMP_OPTICS_MODE</id></attribute>
+    <attribute><id>PROC_FABRIC_CAPI_MODE</id></attribute>
+    <attribute><id>PROC_FABRIC_ADDR_BAR_MODE</id></attribute>
+    <attribute><id>PROC_EPS_READ_CYCLES</id></attribute>
+    <attribute><id>PROC_EPS_WRITE_CYCLES</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->
@@ -2432,6 +2450,7 @@
     <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
     <attribute><id>PARENT_PERVASIVE</id></attribute>
+    <attribute><id>OPTICS_CONFIG_MODE</id></attribute>
 </targetType>
 
 <targetType>
