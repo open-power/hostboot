@@ -86,7 +86,7 @@ extern "C"
     const uint32_t ALTD_CMD_TSIZE_NUM_BITS = (ALTD_CMD_TSIZE_END_BIT -
             ALTD_CMD_TSIZE_START_BIT) + 1;
 
-    const uint32_t ALTD_CMD_TTYPE_CL_DMA_RD   = 3;  //0b0000011
+    const uint32_t ALTD_CMD_TTYPE_CL_DMA_RD   = 6;  //0b0000110
     const uint32_t ALTD_CMD_TTYPE_DMA_PR_WR   = 38; //0b0100110
     const uint32_t ALTD_CMD_TTYPE_CI_PR_RD    = 52; //0b0110100
     const uint32_t ALTD_CMD_TTYPE_CI_PR_WR    = 55; //0b0110111
