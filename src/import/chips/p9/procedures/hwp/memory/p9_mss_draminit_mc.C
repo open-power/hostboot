@@ -130,7 +130,7 @@ extern "C"
                     // Uses address register set 0
                     mss::mcbist::subtest_t<TARGET_TYPE_MCBIST> l_fw_subtest =
                         mss::mcbist::write_subtest<TARGET_TYPE_MCBIST>();
-                    l_fw_subtest.enable_port(mss::index(p));
+                    l_fw_subtest.enable_port(mss::pos(p));
 
                     // HACK: We only need to worry about the DIMM in slot 0 right now
                     l_fw_subtest.enable_dimm(0);
@@ -142,7 +142,7 @@ extern "C"
                     // Uses address register set 0
                     mss::mcbist::subtest_t<TARGET_TYPE_MCBIST> l_fr_subtest =
                         mss::mcbist::read_subtest<TARGET_TYPE_MCBIST>();
-                    l_fr_subtest.enable_port(mss::index(p));
+                    l_fr_subtest.enable_port(mss::pos(p));
 
                     // HACK: We only need to worry about the DIMM in slot 0 right now
                     l_fr_subtest.enable_dimm(0);
