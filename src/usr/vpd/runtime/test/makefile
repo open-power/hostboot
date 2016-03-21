@@ -26,9 +26,6 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../../..
 
 MODULE = testvpd_rt
-#TESTS = ../../test/*.H
-TESTS = ../../test/spdtest.H ../../test/dimmPrestest.H ../../test/cvpdtest.H
-#@TODO: RTC 131121 Reenable mvpd test cases after mvpd available
-#TEST += mvpdtest.H
+TESTS = ../../test/*.H
 
 include ${ROOTPATH}/config.mk

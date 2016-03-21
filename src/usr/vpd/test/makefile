@@ -25,9 +25,6 @@
 ROOTPATH = ../../../..
 
 MODULE = testvpd
-#TESTS = *.H
+TESTS = *.H
 
-TESTS += spdtest.H dimmPrestest.H cvpdtest.H dvpdtest.H
-#@TODO: RTC 131121 Reenable mvpd test cases after mvpd available
-#TEST += mvpdtest.H
 include ${ROOTPATH}/config.mk

@@ -368,8 +368,7 @@ public:
         {
             ErrlUserDetailsLogRegister eudlr(c_target);
             eudlr.addData(DEVICE_SCOM_ADDRESS(0x000F000Full));
-         // Turn on MVPD Testing @TODO RTC 131121,
-         //   eudlr.addData(DEVICE_MVPD_ADDRESS(3,0));
+            eudlr.addData(DEVICE_MVPD_ADDRESS(3,0));
             // error:
             eudlr.addData(DEVICE_FSI_ADDRESS(0x01028));
             //TODO RTC: 123019 I2CM changes for P9
@@ -399,21 +398,20 @@ public:
         }
         ErrlUserDetailsLogRegister(c_target, &reg1_data, reg1_size,
                 DEVICE_SCOM_ADDRESS(0x000F000Full)).addToLog(errl);
-// Turn on MVPD Testing @TODO RTC 131121,
-//         uint64_t reg2_data = 0;
-//         size_t reg2_size = sizeof(reg2_data);
-//         errl_deviceRead = DeviceFW::deviceRead(c_target,
-//                         &reg2_data, reg2_size,
-//                         DEVICE_MVPD_ADDRESS(3,0));
-//
-//         if (errl_deviceRead != NULL)
-//         {
-//             TS_TRACE( "testLogRegister deviceRead return errl; deleting;");
-//             delete errl_deviceRead;
-//             reg2_size = 0;
-//         }
-//         ErrlUserDetailsLogRegister(c_target, &reg2_data, reg2_size,
-//                 DEVICE_MVPD_ADDRESS(3,0)).addToLog(errl);
+        uint64_t reg2_data = 0;
+        size_t reg2_size = sizeof(reg2_data);
+        errl_deviceRead = DeviceFW::deviceRead(c_target,
+                                               &reg2_data, reg2_size,
+                                               DEVICE_MVPD_ADDRESS(3,0));
+
+        if (errl_deviceRead != NULL)
+        {
+            TS_TRACE( "testLogRegister deviceRead return errl; deleting;");
+            delete errl_deviceRead;
+            reg2_size = 0;
+        }
+        ErrlUserDetailsLogRegister(c_target, &reg2_data, reg2_size,
+                                   DEVICE_MVPD_ADDRESS(3,0)).addToLog(errl);
 
         uint32_t reg3_data = 0;
         size_t reg3_size = sizeof(reg3_data);
@@ -439,9 +437,8 @@ public:
             ErrlUserDetailsLogRegister eudlr(c_target);
             eudlr.addDataBuffer(&reg1_data, reg1_size,
                     DEVICE_SCOM_ADDRESS(0x000F000Full));
-              // Turn on MVPD Testing @TODO RTC 131121,
- /*           eudlr.addDataBuffer(&reg2_data, reg2_size,
-                    DEVICE_MVPD_ADDRESS(3,0));*/
+            eudlr.addDataBuffer(&reg2_data, reg2_size,
+                    DEVICE_MVPD_ADDRESS(3,0));
              eudlr.addDataBuffer(&reg3_data, reg3_size,
                      DEVICE_FSI_ADDRESS(0x01028));
             eudlr.addToLog(errl);
