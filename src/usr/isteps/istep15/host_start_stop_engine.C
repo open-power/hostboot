@@ -65,16 +65,15 @@ void* host_start_stop_engine (void *io_pArgs)
         for (const auto & l_procChip: l_procChips)
         {
             //Convert the TARGETING::Target into a fapi2::Target by passing
-            //the const_casted l_procChip into the fapi::Target constructor
-            fapi2::Target<TARGET_TYPE_PROC_CHIP>l_fapi2_cpu_target(
+            //l_procChip into the fapi2::Target constructor
+            fapi2::Target<TARGET_TYPE_PROC_CHIP>l_fapi2CpuTarget(
                                                               (l_procChip));
 
-//RTC:149398 Re-enable when new vector constructor is implemented
-          //call p9_pm_stop_gpe_init.C HWP
-//               FAPI_INVOKE_HWP(l_errl,
-//                               p9_pm_stop_gpe_init,
-//                               l_fapi2_cpu_target,
-//                               PM_INIT);
+            //call p9_pm_stop_gpe_init.C HWP
+            FAPI_INVOKE_HWP(l_errl,
+                            p9_pm_stop_gpe_init,
+                            l_fapi2CpuTarget,
+                            PM_INIT);
             if(l_errl)
             {
                 ErrlUserDetailsTarget(l_procChip).addToLog(l_errl);

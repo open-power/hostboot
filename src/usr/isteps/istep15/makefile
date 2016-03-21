@@ -51,12 +51,12 @@ include ${ROOTPATH}/procedure.rules.mk
 include $(PROCEDURES_PATH)/hwp/pm/p9_pm_pfet_init.mk
 include $(PROCEDURES_PATH)/hwp/pm/p9_pm_pba_bar_config.mk
 include $(PROCEDURES_PATH)/hwp/pm/p9_pm_set_homer_bar.mk
-# include $(PROCEDURES_PATH)/hwp/pm/p9_pm_stop_gpe_init.mk
+include $(PROCEDURES_PATH)/hwp/pm/p9_pm_stop_gpe_init.mk
 include $(PROCEDURES_PATH)/hwp/pm/p9_pm_utils.mk
 include $(PROCEDURES_PATH)/hwp/pm/p9_update_ec_eq_state.mk
 include $(PROCEDURES_PATH)/hwp/pm/p9_hcode_image_build.mk
 include $(PROCEDURES_PATH)/utils/stopreg/p9_stop_api.mk
-# include $(PROCEDURES_PATH)/hwp/pm/p9_pm_pba_init.mk
+include $(PROCEDURES_PATH)/hwp/pm/p9_pm_pba_init.mk
 include ${ROOTPATH}/src/import/chips/p9/xip/p9_xip_image.mk
 
 
