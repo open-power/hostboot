@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -399,7 +399,7 @@ class MVPDTest: public CxxTest::TestSuite
                                    ERR_MRK"testMvpdReadRecords() - failure"
                                    " reading record size!!  rec: 0x%04x",
                                    theRecord);
-                        TS_FAIL("testMvpdReadRecords() -Failure reading keyword size!");
+                        TS_FAIL("testMvpdReadRecords() -Failure reading record size!");
                         errlCommit( err,
                                     VPD_COMP_ID );
                         continue;
@@ -413,7 +413,7 @@ class MVPDTest: public CxxTest::TestSuite
                                    ERR_MRK"testMvpdReadRecords() - failure"
                                    " reading record 0x%04x had size of zero!",
                                    theRecord);
-                        TS_FAIL("testMvpdReadRecords() -Failure on keyword size of zero!");
+                        TS_FAIL("testMvpdReadRecords() -Failure on record size of zero!");
                         continue;
                     }
 
