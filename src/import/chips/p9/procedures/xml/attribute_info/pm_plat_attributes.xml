@@ -32,6 +32,7 @@
       Platform default:  8
       </description>
       <valueType>uint32</valueType>
+    <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
