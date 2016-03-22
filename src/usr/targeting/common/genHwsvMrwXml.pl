@@ -361,6 +361,8 @@ $optSysPolicies{'MRW_DDR3_VDDR_MAX_LIMIT'}{MRW_NAME}
     = "mem_ddr3_vddr_max_limit" ;
 $optSysPolicies{'MRW_DDR4_VDDR_MAX_LIMIT'}{MRW_NAME}
     = "mem_ddr4_vddr_max_limit" ;
+$optSysPolicies{'MEM_VPP_SET'}{MRW_NAME}
+    = "mem_vpp_set" ;
 
 
 # Add the optional node-level attributes

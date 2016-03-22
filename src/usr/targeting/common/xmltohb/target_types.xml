@@ -131,6 +131,7 @@
     <attribute><id>MRW_POWER_CONTROL_REQUESTED</id></attribute>
     <attribute><id>MRW_DDR3_VDDR_MAX_LIMIT</id></attribute>
     <attribute><id>MRW_DDR4_VDDR_MAX_LIMIT</id></attribute>
+    <attribute><id>MEM_VPP_SET</id></attribute>
     <attribute><id>MSS_VMEM_REGULATOR_MAX_DIMM_COUNT</id></attribute>
     <attribute><id>MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE</id></attribute>
     <attribute><id>MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR</id></attribute>

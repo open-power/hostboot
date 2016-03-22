@@ -14547,6 +14547,20 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 </attribute>
 
 <attribute>
+    <id>MEM_VPP_SET</id>
+    <description>Indicates if system supports programming VPP. 0=no,1=yes.
+        Value from MRW.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>1</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
     <id>MSS_VOLT_DDR4_VDDR_SLOPE_POST_DRAM_INIT</id>
     <description>Units: 1/Amps
     </description>

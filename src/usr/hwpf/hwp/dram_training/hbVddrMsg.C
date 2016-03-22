@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -248,6 +248,16 @@ void HBVddrMsg::createVddrData(
             getAllChips(membufTargetList, TYPE_MEMBUF);
         }
 
+        // Grab indicator as to whether system supports VPP programming.
+        // Only send message to FSP when true.
+        TARGETING::Target* pSysTarget = NULL;
+        TARGETING::targetService().getTopLevelTarget(pSysTarget);
+        assert( (pSysTarget != NULL),
+                "HBVddrMsg::createVddrData: Code bug! "
+                "System target was NULL.");
+        ATTR_MEM_VPP_SET_type l_memVppSet =
+            pSysTarget->getAttr<ATTR_MEM_VPP_SET>();
+
         TARGETING::Target* pMembuf =NULL;
         for (TARGETING::TargetHandleList::const_iterator
                 ppMembuf = membufTargetList.begin();
@@ -282,13 +292,16 @@ void HBVddrMsg::createVddrData(
                         pMembuf,
                         io_request);
 
-                (void)addMemoryVoltageDomains<
-                    TARGETING::ATTR_MSS_VOLT_VPP_OFFSET_DISABLE,
-                    TARGETING::ATTR_MEM_VPP_OFFSET_MILLIVOLTS,
-                    TARGETING::ATTR_VPP_BASE,
-                    TARGETING::ATTR_VPP_ID>(
-                        pMembuf,
-                        io_request);
+                if (l_memVppSet) //System supports VPP programming
+                {
+                    (void)addMemoryVoltageDomains<
+                        TARGETING::ATTR_MSS_VOLT_VPP_OFFSET_DISABLE,
+                        TARGETING::ATTR_MEM_VPP_OFFSET_MILLIVOLTS,
+                        TARGETING::ATTR_VPP_BASE,
+                        TARGETING::ATTR_VPP_ID>(
+                            pMembuf,
+                            io_request);
+                }
             }
 
             (void)addMemoryVoltageDomains<
