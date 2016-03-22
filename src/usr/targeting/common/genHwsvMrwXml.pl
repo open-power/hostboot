@@ -1848,8 +1848,7 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
 
         generate_occ($proc, $proc_ordinal_id);
 
-        #TODO-RTC:149693-Turn this back on...
-        #generate_nx($proc,$proc_ordinal_id,$node);
+        generate_nx($proc,$proc_ordinal_id,$node);
 
         #TODO-RTC:149326-Finish up the rest of the misc units
         #generate_pcies($proc,$proc_ordinal_id);
