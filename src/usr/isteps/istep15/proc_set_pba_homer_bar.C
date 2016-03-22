@@ -70,17 +70,17 @@ void* proc_set_pba_homer_bar (void *io_pArgs)
         //Convert the TARGETING::Target into a fapi2::Target by passing
         //the const_casted l_procChip into the fapi::Target constructor
         const fapi2::Target<TARGET_TYPE_PROC_CHIP>
-            l_fapi_cpu_target((l_procChip));
+            l_fapiCpuTarget((l_procChip));
 
-          //call p9_pm_set_homer_bar.C HWP
-          //TODO RTC:147693
-          //Need to determine what address this procedures is actually expecting
-//         const uint64_t homerAddr = l_procChip->getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>();
-//         FAPI_INVOKE_HWP( l_errl,
-//                          p9_pm_set_homer_bar,
-//                          l_fapi_cpu_target,
-//                           homerAddr + HOMER_OFFSET_TO_OCC_IMG,
-//                          3);
+        const uint64_t homerAddr =
+            l_procChip->getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>();
+
+        //call p9_pm_set_homer_bar.C HWP
+        FAPI_INVOKE_HWP( l_errl,
+                        p9_pm_set_homer_bar,
+                        l_fapiCpuTarget,
+                        homerAddr,
+                        3);
 
         if(l_errl)
         {
