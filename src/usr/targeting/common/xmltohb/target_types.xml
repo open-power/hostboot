@@ -519,6 +519,8 @@
     <attribute><id>PROC_MEM_BASES_ACK</id></attribute>
     <attribute><id>PROC_MEM_SIZES_ACK</id></attribute>
     <attribute><id>CPM_INFLECTION_POINTS</id></attribute>
+    <attribute><id>PROC_SBE_MASTER_CHIP</id></attribute>
+    <attribute><id>BACKUP_SEEPROM_SELECT</id></attribute>
     <attribute><id>PROC_SELECT_BOOT_SEEPROM_IMAGE</id></attribute>
     <attribute><id>TOD_ROLE</id></attribute>
     <attribute><id>PM_OCC_LFIR_MASK</id></attribute>
