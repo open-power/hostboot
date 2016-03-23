@@ -47,9 +47,10 @@
 struct BootloaderConfigData_t
 {
     uint32_t version;  // Some kind of version field so we know if there is new data being added
-    uint8_t sbeBootSide;  // 0=SBE side 0, 1=SBE side 1   [ATTR_????]
+    uint8_t sbeBootSide;  // 0=SBE side 0, 1=SBE side 1   [ATTR_SBE_BOOT_SIDE]
     uint8_t pnorBootSide;  // 0=PNOR side A, 1=PNOR side B  [ATTR_PNOR_BOOT_SIDE]
     uint16_t pnorSizeMB;  // Size of PNOR in MB  [ATTR_PNOR_SIZE]
+    uint64_t blLoadSize;  // Size of Load (Exception vectors and Bootloader)
 };
 
 #endif
