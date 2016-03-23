@@ -25,6 +25,12 @@
 
 .include "kernel/ppcconsts.S"
 
+.set SBE_HB_VERSION,      sbe_hb_structures    ;// uint32_t
+.set SBE_HB_SBEBOOTSIDE,  sbe_hb_structures+4  ;// uint8_t
+.set SBE_HB_PNORBOOTSIDE, sbe_hb_structures+5  ;// uint8_t
+.set SBE_HB_PNORSIZEMB,   sbe_hb_structures+6  ;// uint16_t
+.set SBE_HB_BLLOADSIZE,   sbe_hb_structures+8  ;// uint64_t
+
 .section .text.bootloaderasm
 
 .global _start
@@ -70,18 +76,37 @@ _main:
     lis r1, _start@h
     addis r1, r1, 1 ;// 64k (1 * 0x10000)
 
-    ;// Zero space from end of load to bottom of stack
-    lis r3, end_load_address@h
-    ori r3, r3, end_load_address@l
-    li r4, 7
-    add r3, r3, r4
-    andc r3, r3, r4
-    li r4, 0
-_zero_space_loop:
-    std r4, 0(r3)
-    addi r3, r3, 8
-    cmpld cr7, r3, r1
-    blt cr7, _zero_space_loop
+    ;// Do dcbz from end of Bootloader load to end of HBB ECC working space
+_dcbz_after_bl:
+    lis r5, SBE_HB_BLLOADSIZE@h
+    ori r5, r5, SBE_HB_BLLOADSIZE@l
+    ld r5, 0(r5)       ;// get ending EA from SBE HB structure
+    lis r6, 0
+    addis r6, r6, 32   ;// 2M (32 * 0x10000)
+    addi r6, r6, -1    ;// end before 2M
+_dcbz_after_bl_loop:
+    dcbz 0,r5
+    addi r5, r5, 128
+    cmpld cr7, r5, r6
+    blt cr7, _dcbz_after_bl_loop
+
+    ;// Do dcbz from start of HBB running space to start of Bootloader load
+_dcbz_before_bl:
+    li r7, 1
+    rotldi r7, r7, 63  ;// set bit mask for ignoring HRMOR
+
+    lis r5, 0
+    addis r5, r5, 2048 ;// 128M (2048 * 0x10000) is start of HBB
+    or r5, r5, r7      ;// ignore HRMOR
+
+    mfspr r6, HRMOR    ;// use HRMOR as start of Bootloader
+    addi r6, r6, -1    ;// end before Bootloader
+    or r6, r6, r7      ;// ignore HRMOR
+_dcbz_before_bl_loop:
+    dcbz 0,r5
+    addi r5, r5, 128
+    cmpld cr7, r5, r6
+    blt cr7, _dcbz_before_bl_loop
 
     ;// Call main.
     bl main

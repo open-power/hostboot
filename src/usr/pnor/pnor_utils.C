@@ -260,7 +260,7 @@ void PNOR::getSectionEnum (ffs_entry* i_entry,
   */
 void PNOR::parseEntries (ffs_hdr* i_ffs_hdr,
                          uint32_t& io_errCode,
-                         SectionData_t *& io_TOC,
+                         SectionData_t * io_TOC,
                          ffs_entry*& o_err_entry)
 {
     //Walk through all the entries in the table and parse the data.
