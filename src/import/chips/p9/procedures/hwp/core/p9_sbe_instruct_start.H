@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -20,7 +20,7 @@
 /// @file p9_sbe_instruct_start.C
 /// @brief  Placeholder for overrides needed to step the core from cache-contained execution to expand to memory
 ///
-// *HWP HWP Owner: Michael Dye <dyem@us.ibm.com>
+// *HWP HWP Owner: Nick Klazynski <jklazyns@us.ibm.com>
 // *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 // *HWP Team: Nest
 // *HWP Level: 2
@@ -38,7 +38,7 @@
 
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode
-(*p9_sbe_instruct_start_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_CORE>& );
+(*p9_sbe_instruct_start_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_CORE>&);
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -49,12 +49,15 @@ extern "C"
 // Hardware Procedure
 //------------------------------------------------------------------------------
 ///
-/// @brief Calls thread_control to start thread 0
-/// @param[in] i_target Reference to core target
-/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, RC_P9_THREAD_CONTROL_START_FAIL if start command failed,
-///         else error code
+/// @brief Calls thread_control to start instruction on thread 0.
+///        This is to be called during IPL (istep 5.2)
 ///
-    fapi2::ReturnCode p9_sbe_instruct_start(const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target);
+/// @param[in] i_target   Reference to core target
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code
+///
+    fapi2::ReturnCode p9_sbe_instruct_start(
+        const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target);
 
 } // extern "C"
 

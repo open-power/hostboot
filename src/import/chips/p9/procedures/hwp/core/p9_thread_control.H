@@ -17,10 +17,6 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 //------------------------------------------------------------------------------
-// *! (C) Copyright International Business Machines Corp. 2012
-// *! All Rights Reserved -- Property of IBM
-// *! *** IBM Confidential ***
-//------------------------------------------------------------------------------
 // *! TITLE       : p9_thread_control
 // *! DESCRIPTION : Core Thread start/stop/step/query/activate operations
 // *!               Use to start (start or sreset) thread instruction execution,
@@ -29,7 +25,7 @@
 //------------------------------------------------------------------------------
 
 // *HWP HWP Owner: Nick Klazynski <dyem@us.ibm.com>
-// *HWP FW Owner:  Brian Silver <bsilver@us.ibm.com>
+// *HWP FW Owner:  Thi Tran <thi@us.ibm.com>
 // *HWP Team:  Quad
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB:HS
@@ -45,6 +41,21 @@
 
 extern "C"
 {
+
+//------------------------------------------------------------------------------
+// Constants
+//------------------------------------------------------------------------------
+    const uint8_t MAX_NUM_OF_THREADS = 4;
+
+// THREAD_STATE bit definitions
+    const uint64_t THREAD_STATE_RUNNING            = 0x8000000000000000ULL;
+    const uint64_t THREAD_STATE_STOP               = 0x4000000000000000ULL;
+    const uint64_t THREAD_STATE_QUIESCED           = 0x2000000000000000ULL;
+    const uint64_t THREAD_STATE_MAINT              = 0x1000000000000000ULL;
+    const uint64_t THREAD_STATE_ICT_EMPTY          = 0x0800000000000000ULL;
+    const uint64_t THREAD_STATE_LSU_QUIESCED       = 0x0400000000000000ULL;
+    const uint64_t THREAD_STATE_ISTEP_SUCCESS      = 0x0200000000000000ULL;
+    const uint64_t THREAD_STATE_ISTEP_READY        = 0x0100000000000000ULL;
 
 // A macro to wrap the warning check boiler plate
 // If the action failed and i_warncheck is set add a trace and continue anyway
@@ -74,6 +85,7 @@ extern "C"
         PTC_CMD_STEP              = 1,
         PTC_CMD_START             = 2,
         PTC_CMD_STOP              = 3,
+        PTC_CMD_QUERY             = 4,
     };
 
     enum ThreadRasStatus
@@ -81,7 +93,7 @@ extern "C"
         CORE_MAINT_MODE = 0,
         THREAD_QUIESCED = 1,
         ICT_EMPTY       = 2,
-        ISU_QUIESCED    = 3,
+        LSU_QUIESCED    = 3,
         STEP_SUCCESS    = 4,
     };
 
@@ -105,7 +117,8 @@ extern "C"
 /// function pointer typedef definition for HWP call support
     typedef fapi2::ReturnCode (*p9_thread_control_FP_t) (
         const fapi2::Target<fapi2::TARGET_TYPE_CORE>&,
-        const uint8_t, const ThreadCommands, const bool);
+        const uint8_t, const ThreadCommands, const bool,
+        fapi2::buffer<uint64_t>&, uint64_t&);
 
 //--------------------------------------------------------------------------
 /// @brief p9_thread_control: utility subroutine to control thread state
@@ -126,11 +139,17 @@ extern "C"
 //        const uint8_t i_threads, const ThreadCommands i_command,
 //        const bool i_warncheck);
 
-
 //--------------------------------------------------------------------------
 /// @brief p9_thread_control: utility subroutine to control thread state
+///
 /// @param[in] i_target core target
-/// @param[in] i_thread normal core thread bitset (0b0000..0b1111)
+/// @param[in] i_threads     Desired thread bit set, multiple thread settings
+///                          are allowed.
+///                             0b0000         No thread (No-op)
+///                             0b1000         Thread 0
+///                             0b0100         Thread 1
+///                             0b0010         Thread 2
+///                             0b0001         Thread 3
 /// @param[in] i_command  one of
 ///               PTC_CMD_SRESET => initiate sreset thread command
 ///               PTC_CMD_START  => initiate start thread command
@@ -138,13 +157,21 @@ extern "C"
 ///               PTC_CMD_STEP   => initiate step thread command
 ///               PTC_CMD_QUERY  => query and return thread state
 /// @param[in] i_warncheck convert pre/post checks errors to warnings
+/// @param[out] o_rasStatusReg  Complete RAS status reg 64-bit buffer after
+///                             executing command.
+/// @param[out] o_state Thread state, only valid for PTC_CMD_QUERY command.
+///                    See p9_thread_control.H for THREAD_STATE bit definitions.
+///
 /// @return FAPI_RC_SUCCESS if operation was successful,
 ///         function-specific fail codes (see function definitions),
 ///         else error
 //--------------------------------------------------------------------------
     fapi2::ReturnCode p9_thread_control(const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
                                         const uint8_t i_threads, const ThreadCommands i_command,
-                                        const bool i_warncheck);
-#endif // _P9_THREAD_CONTROL_H_
+                                        const bool i_warncheck,
+                                        fapi2::buffer<uint64_t>& o_rasStatusReg,
+                                        uint64_t& o_state);
 
 } // extern
+
+#endif // _P9_THREAD_CONTROL_H_
