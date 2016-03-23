@@ -274,7 +274,7 @@ class pnorutilsTest : public CxxTest::TestSuite
 
         //Mess up the checksum of an entry
         l_tocBuffer[208] = 0xFF;
-        PNOR::SectionData_t * l_TOC;
+        PNOR::SectionData_t l_TOC[PNOR::NUM_SECTIONS];
         ffs_hdr* l_ffs_hdr = NULL;
         PNOR::checkForNullBuffer(l_tocBuffer, l_errCode, l_ffs_hdr);
         PNOR::checkHeader(l_ffs_hdr, l_errCode);
@@ -315,7 +315,7 @@ class pnorutilsTest : public CxxTest::TestSuite
         l_tocBuffer[213] = 0xFF;
         l_tocBuffer[214] = 0xFF;
 
-        PNOR::SectionData_t * l_TOC;
+        PNOR::SectionData_t l_TOC[PNOR::NUM_SECTIONS];
         ffs_hdr* l_ffs_hdr = NULL;
         PNOR::checkForNullBuffer(l_tocBuffer, l_errCode, l_ffs_hdr);
         PNOR::checkHeader(l_ffs_hdr, l_errCode);
