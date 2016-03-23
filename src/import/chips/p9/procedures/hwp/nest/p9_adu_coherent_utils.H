@@ -189,11 +189,6 @@ extern"C"
             ///
             inline void setNumLockAttempts(uint8_t i_value)
             {
-                if (iv_lockPick == false)
-                {
-                    FAPI_ERR("WARNING: Set lock attempts value with lock pick = false");
-                }
-
                 iv_numLockAttempts = i_value;
                 return;
             }
@@ -205,11 +200,6 @@ extern"C"
             ///
             inline const uint8_t getNumLockAttempts(void)
             {
-                if (iv_lockPick == false)
-                {
-                    FAPI_ERR("WARNING: Lock control is not set, num of lock attempts setting is invalid.");
-                }
-
                 return iv_numLockAttempts;
             }
 
