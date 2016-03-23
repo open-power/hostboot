@@ -860,9 +860,9 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template<>
-inline fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        const std::vector<uint64_t> i_rank_pairs,
-        fapi2::buffer<uint16_t> i_cal_steps_enabled)
+fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                    const std::vector<uint64_t> i_rank_pairs,
+                                    fapi2::buffer<uint16_t> i_cal_steps_enabled)
 {
     fapi2::buffer<uint64_t> l_cal_config;
     fapi2::buffer<uint64_t> l_vref_config;
@@ -984,7 +984,7 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template<>
-inline fapi2::ReturnCode reset_seq_config0( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+fapi2::ReturnCode reset_seq_config0( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
 {
     fapi2::buffer<uint64_t> l_data;
 
@@ -1003,7 +1003,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template<>
-inline fapi2::ReturnCode reset_odt_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+fapi2::ReturnCode reset_odt_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
 {
     uint8_t l_odt_rd[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
     uint8_t l_odt_wr[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
@@ -1142,7 +1142,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 template<>
-inline fapi2::ReturnCode reset_seq_rd_wr_data( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+fapi2::ReturnCode reset_seq_rd_wr_data( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
 {
     // MPR_PATTERN_BIT of 0F0F0F0F pattern
     static const uint64_t MPR_PATTERN = 0x5555;
