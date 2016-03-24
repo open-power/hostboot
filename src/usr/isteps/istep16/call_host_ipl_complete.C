@@ -35,11 +35,11 @@
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
-
 #include    <fapi2/target.H>
 #include    <fapi2/plat_hwp_invoker.H>
 
 #include   <p9_switch_rec_attn.H>
+#include   <p9_switch_cfsim.H>
 
 
 using   namespace   ERRORLOG;
@@ -47,6 +47,7 @@ using   namespace   TARGETING;
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   fapi2;
+
 
 namespace ISTEP_16
 {
@@ -60,62 +61,8 @@ void* call_host_ipl_complete (void *io_pArgs)
     do
     {
 
-        // We only need to run cfsim on the master Processor.
-        TARGETING::Target * l_masterProc =   NULL;
-        (void)TARGETING::targetService().
-            masterProcChipTargetHandle( l_masterProc );
-
-//@TODO RTC:144076 L1 HWPs for Centuar+Cumulus
-//const fapi::Target l_fapi_proc_target( TARGET_TYPE_PROC_CHIP,
-//        ( const_cast<TARGETING::Target*>(l_masterProc) ) );
-//  call proc_switch_cfsim
-// TODO: RTC 64136 - Comment out to work around Centaur FSI scom issue
-// during BU
-// RTC 64136 is opened to undo this when in-band scoms are available.
-#if 0
-        FAPI_INVOKE_HWP(l_err, proc_switch_cfsim, l_fapi_proc_target,
-                        true, // RESET
-                        true, // RESET_OPB_SWITCH
-                        true, // FENCE_FSI0
-                        true, // FENCE_PIB_NH
-                        true, // FENCE_PIB_H
-                        true, // FENCE_FSI1
-                        true); // FENCE_PIB_SW1
-#endif
-
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running proc_switch_cfsim HWP on target HUID %.8X",
-                TARGETING::get_huid(l_masterProc) );
-
-
-
-        if (l_err)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR 0x%.8X: proc_switch_cfsim HWP returned error",
-                      l_err->reasonCode());
-
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_masterProc).addToLog( l_err );
-
-            // Create IStep error log and cross reference error that occurred
-            l_stepError.addErrorDetails( l_err );
-
-            // commit errorlog
-            errlCommit( l_err, HWPF_COMP_ID );
-
-            //break to end because if proc_switch_cfsim fails
-            //then FSP does not have FSI control again and system is toast
-            break;
-        }
-        else
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "SUCCESS: proc_switch_cfsim HWP( )" );
-        }
-
-//@TODO RTC:144076 L1 HWPs for Centuar+Cumulus
-// Need p9_switch_rec_attn for mem_chips
+//@TODO RTC:150266 HWPs for Centuar+Cumulus
+// Need cen_switch_rec_attn for mem_chips
 #if 0
         if ( INITSERVICE::spBaseServicesEnabled())
         {
@@ -137,12 +84,13 @@ void* call_host_ipl_complete (void *io_pArgs)
                          "Running cen_switch_rec_attn HWP on target HUID %.8X",
                          TARGETING::get_huid(l_memChip) );
 
-              const fapi2::Target<TARGET_TYPE_MEMBUF_CHIP> l_fap2_centTarget(
+
+                const fapi2::Target<TARGET_TYPE_MEMBUF_CHIP> l_fap2_centTarget(
                             const_cast<TARGETING::Target*> (l_memChip));
-//@TODO RTC:144076 L1 HWPs for Centuar+Cumulus
-//                 FAPI_INVOKE_HWP( l_err,
-//                                  p9_switch_rec_attn,
-//                                  l_fap2_centTarget );
+                FAPI_INVOKE_HWP( l_err,
+                                 cen_switch_rec_attn,
+                                 l_fap2_centTarget );
+
 
                 if (l_err)
                 {
@@ -172,7 +120,86 @@ void* call_host_ipl_complete (void *io_pArgs)
             }   // endfor
 
         } // end if ( INITSERVICE::spBaseServicesEnabled())
+
 #endif
+
+        TARGETING::TargetHandleList l_procChips;
+        //Use targeting code to get a list of all processors
+        getAllChips( l_procChips, TARGETING::TYPE_PROC   );
+
+        //Loop through all of the procs and call the HWP on each one
+        for (const auto & l_procChip: l_procChips)
+        {
+            const fapi2::Target<TARGET_TYPE_PROC_CHIP>
+                l_fapiProcTarget(l_procChip);
+
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            "Running p9_switch_rec_attn HWP on target HUID %.8X",
+            TARGETING::get_huid(l_procChip) );
+
+            //  call p9_switch_rec_attn
+            FAPI_INVOKE_HWP(l_err, p9_switch_rec_attn, l_fapiProcTarget);
+
+            if (l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR 0x%.8X: p9_switch_rec_attn HWP returned error",
+                          l_err->reasonCode());
+
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_procChip).addToLog( l_err );
+
+                //Create IStep error log and cross reference error that occurred
+                l_stepError.addErrorDetails( l_err );
+
+                //break to end because if p9_switch_rec_attn fails
+                //recoverable/special attentions control didnt make it back
+                // to the fsp, this is a fatal error
+                break;
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                      "SUCCESS: p9_switch_rec_attn HWP( ) on target HUID %.8X",
+                    TARGETING::get_huid(l_procChip) );
+            }
+
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Running proc_switch_cfsim HWP on target HUID %.8X",
+                    TARGETING::get_huid(l_procChip) );
+
+            FAPI_INVOKE_HWP(l_err, p9_switch_cfsim, l_fapiProcTarget);
+
+            if (l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR 0x%.8X: proc_switch_cfsim HWP returned error",
+                          l_err->reasonCode());
+
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_procChip).addToLog( l_err );
+
+                //Create IStep error log and cross reference error that occurred
+                l_stepError.addErrorDetails( l_err );
+
+
+                //break to end because if proc_switch_cfsim fails
+                //then FSP does not have FSI control again and system is toast
+                break;
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "SUCCESS: proc_switch_cfsim HWP( ) on target HUID %.8X",
+                    TARGETING::get_huid(l_procChip) );
+            }
+        }
+
+        //if an error occurred during for loop, break to error handling
+        if( l_err )
+        {
+            break;
+        }
 
         // Sync attributes to Fsp
         l_err = syncAllAttributesToFsp();
