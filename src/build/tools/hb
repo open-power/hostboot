@@ -189,7 +189,7 @@ hb_helptext()
         echo "  Usage:"
         echo "      hb copyright_check"
         echo
-        echo "  Executes addCopyright.pl in validate mode against the most"
+        echo "  Executes addCopyright in validate mode against the most"
         echo "  recent commit in your repository to ensure the prologs are"
         echo "  all added properly."
         ;;
@@ -483,7 +483,7 @@ hb_objsizes()
 
 hb_copyright_check()
 {
-    git diff HEAD~1 --name-only | xargs addCopyright.pl validate
+    git diff HEAD~1 --name-only | xargs addCopyright validate
 }
 
 hb_errlparser()

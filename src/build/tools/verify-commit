@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2015
+# Contributors Listed Below - COPYRIGHT 2013,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -193,7 +193,7 @@ sub verifyFileLine
     if ($line =~ m/Confidential/i && $projectName =~ m/HostBoot/i && !$mirror)
     {
         unless (($file =~ m/verify-commit/) ||
-                ($file =~ m/addCopyright.pl/))
+                ($file =~ m/addCopyright/))
         {
             error($file,$line,$count,
                   "File contains 'Confidential'.");

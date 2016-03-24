@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2016
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,19 +26,19 @@
 
 #
 #   From "git help githooks" :
-#   "This hook executes once for the receive operation. It takes no arguments, 
-#       but for each ref to be updated it receives on standard input a line of 
+#   "This hook executes once for the receive operation. It takes no arguments,
+#       but for each ref to be updated it receives on standard input a line of
 #       the format:
 #
 #       <old-value> SP <new-value> SP <ref-name> LF
 #
-#       where <old-value> is the old object name stored in the ref, 
-#       <new-value> is the new object name to be stored in the ref, 
-#       and <ref-name> is the full name of the ref. 
+#       where <old-value> is the old object name stored in the ref,
+#       <new-value> is the new object name to be stored in the ref,
+#       and <ref-name> is the full name of the ref.
 #       When creating a new ref, <old-value> is 40 0."
 #
 
-$COPYRIGHT_SCRIPT=".git/hooks/addCopyright.pl";
+$COPYRIGHT_SCRIPT=".git/hooks/addCopyright";
 
 print "Processing pre-receive script\n";
 

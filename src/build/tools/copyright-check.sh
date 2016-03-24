@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2011,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -25,12 +25,12 @@
 # IBM_PROLOG_END_TAG
 
 #
-#   Front end to addCopyright.pl - script to check for copyright block during
+#   Front end to addCopyright - script to check for copyright block during
 #   Gerrit checkin.
 #
 
 export WORKSPACE_DIR=`pwd`
-export ADDCOPYRIGHT=${WORKSPACE_DIR}/src/build/tools/addCopyright.pl
+export ADDCOPYRIGHT=${WORKSPACE_DIR}/src/build/tools/addCopyright
 
 ##  run git show to get a list of checked in files
 CHECKINFILES=`git show --pretty=format: --name-only -n1 | tr '\n' ' '`
