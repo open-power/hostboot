@@ -376,7 +376,7 @@ namespace SENSOR
              * @return Errorlog handle
              *
              */
-            virtual errlHndl_t sendSetSensorReading(
+            errlHndl_t sendSetSensorReading(
                     setSensorReadingRequest * i_data);
 
             /**
@@ -494,19 +494,6 @@ namespace SENSOR
              */
             errlHndl_t setBootProgressPhase(
                             INITSERVICE::firmwareProgressPhase i_phase);
-
-
-            /**
-             *
-             * @brief Synchronous implementation of sendSetSensor Reading used for
-             *      avoiding a race condition.
-             *
-             * @param[in] i_data - the ipmi message data
-             *
-             * @return Errorlog handle
-             */
-            errlHndl_t sendSetSensorReading(
-                            setSensorReadingRequest * i_data );
 
         private:
             // @enum firmwareProgressOfsets

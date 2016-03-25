@@ -540,45 +540,6 @@ namespace SENSOR
     };
 
     //
-    // sendSetSensorReading
-    //
-    errlHndl_t FirmwareProgressSensor::sendSetSensorReading(
-                                    setSensorReadingRequest * i_data )
-    {
-        size_t l_len = sizeof( setSensorReadingRequest );
-        IPMI::completion_code cc = IPMI::CC_UNKBAD;
-
-        //i_data will hold the response when this returns
-        errlHndl_t l_err = sendrecv(IPMI::set_sensor_reading(),
-                                    cc,
-                                    l_len,
-                                    (uint8_t*&)i_data );
-        // If no error, check completion code
-        if( (l_err == NULL) && (cc != IPMI::CC_OK) )
-        {
-                TRACFCOMP(g_trac_ipmi, "bad completion code from BMC=0x%x",cc);
-
-                /*@
-                 * @errortype       ERRL_SEV_INFORMATIONAL
-                 * @moduleid        IPMI::MOD_IPMI_PROG_SENSOR
-                 * @reasoncode      IPMI::RC_SET_SENSOR_FAILURE
-                 * @userdata1       BMC IPMI Completion code.
-                 * @devdesc         Request to set the firmware progress
-                 *                  sensor failed.
-                 */
-                l_err = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                            IPMI::MOD_IPMI_PROG_SENSOR,
-                            IPMI::RC_SET_SENSOR_FAILURE,
-                            static_cast<uint64_t>(cc),
-                            0,
-                            true );
-                l_err->collectTrace(IPMI_COMP_NAME);
-        }
-        return l_err;
-    }
-
-    //
     // RebootCountSensor constructor - uses system target
     //
     RebootCountSensor::RebootCountSensor()
