@@ -151,7 +151,7 @@ void directOverride()
                 l_targetType = TARGETING::TYPE_OBUS;
                 break;
             case fapi2::TARGET_TYPE_NV:
-                l_targetType = TARGETING::TYPE_NVBUS;
+                l_targetType = TARGETING::TYPE_NV;
                 break;
             case fapi2::TARGET_TYPE_SBE:
                 l_targetType = TARGETING::TYPE_SBE;
