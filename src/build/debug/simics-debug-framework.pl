@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2016
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -189,13 +189,12 @@ sub getEnv
 #        uint64_t mMmioAddress;          // mMmio address
 #        struct
 #        {
-#            uint64_t mReserved1:18;     // Not currently used (0:17)
-#            uint64_t mBaseAddress:5;    // Base address (18:22)
-#            uint64_t mNodeId:3;         // Node where target resides (23:25)
-#            uint64_t mChipId:3;         // Targeted chip ID (26:28)
-#            uint64_t mSComAddrHi:27;    // PCB Address High (29:55)
-#            uint64_t mCacheLine:1;      // Cached line (56)
-#            uint64_t mSComAddrLo:4;     // PCB Address low (57:60)
+#            uint64_t mReserved1:8;      // Not currently used (0:7)
+#            uint64_t mBaseAddrHi:7;     // Base address [8:14] (8:14)
+#            uint64_t mNodeId:4;         // Node where target resides (15:18)
+#            uint64_t mChipId:3;         // Targeted chip ID (19:21)
+#            uint64_t mBaseAddrLo:8;     // Base address [22:29] (22:29)
+#            uint64_t mSComAddr:31;      // PIB Address (30:60)
 #            uint64_t mAlign:3;          // Align (61:63)
 #        } mAddressParts;
 #
@@ -211,12 +210,8 @@ sub translateAddr
     my  $addr   =   shift;
     my  $simicsaddr =   0;
 
-    my  $mSComAddrHi    =   ( $addr >> 4 );
-    my  $mSComAddrLo    =   ( $addr & 0x000000000000000f ) ;
-
-    $simicsaddr =   (    0x0003FC0000000000                         ## Base addr
-                      | (($mSComAddrHi & 0x0000000007ffffff) << 8 ) ## 27 bits, shift 8
-                      | (($mSComAddrLo & 0x000000000000000f) << 3 ) ## 4 bits, shift 3
+    $simicsaddr =   (    0x000603fc00000000                         ## Base addr
+                      | (($addr & 0x000000007fffffff) << 3 ) ## 31 bits, shift 3
                     );
 
     return $simicsaddr;
