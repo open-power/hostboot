@@ -247,6 +247,12 @@ template< TargetType K >
 inline ReturnCode getSpy(const Target<K>& i_target,
                          const spyId_t i_spyId,
                          variable_buffer& o_data);
+
+template< TargetType K >
+inline ReturnCode getSpy(const Target<K>& i_target,
+                         const spyId_t i_spyId,
+                         variable_buffer& o_data,
+                         const RingMode i_ringMode);
 #endif
 
 #if defined(FAPI_SUPPORT_SPY_AS_STRING) || defined(DOXYGEN)
@@ -257,6 +263,12 @@ template< TargetType K >
 inline ReturnCode getSpy(const Target<K>& i_target,
                          const char* const i_spyId,
                          variable_buffer& o_data);
+
+template< TargetType K >
+inline ReturnCode getSpy(const Target<K>& i_target,
+                         const char* const i_spyId,
+                         variable_buffer& o_data,
+                         const RingMode i_ringMode);
 #endif
 
 /// @brief Writes a spy on a chip.
