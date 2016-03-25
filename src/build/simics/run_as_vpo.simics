@@ -1,0 +1,8 @@
+system_cmp0.phys_mem.del-map p9Proc0.l3_cache_ram
+($hb_cpu)->hrmor=0x00000000
+p9Proc0.p9_mem_map.host_xscom_device_mm.write 0x050000000 0x0
+p9Proc0.p9_mem_map.host_xscom_device_mm.write 0x050000010 0x800000000 -b  size=8
+p9Proc0.p9_mem_map.host_xscom_device_mm.write 0x050000020 0x1
+system_cmp0.phys_mem.load-file ../obj/ppc/hbfw/img/fake6m.pnor 0x00400000
+system_cmp0.phys_mem.load-file ../obj/ppc/hbfw/img/hostboot.bin 0x00000000
+system_cmp0.phys_mem.del-map p9Proc0.lpcm

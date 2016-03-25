@@ -60,6 +60,7 @@
         <id>MODEL</id>
         <default>POWER9</default>
     </attribute>
+    <attribute><id>FAPI_NAME</id><default>sys</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0</default>
@@ -113,6 +114,10 @@
         <attribute><id>XSCOM_BASE_ADDRESS</id>
         <default>0x000603FC00000000</default>
     </attribute>
+    <attribute>
+        <id>ISTEP_MODE</id>
+        <default>0x1</default>
+    </attribute>
 </targetInstance>
 
 <!-- System node 0 -->
@@ -124,6 +129,7 @@
         <default>POWER9</default>
     </attribute>
     <attribute><id>HUID</id><default>0x00020000</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>NA</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0</default>
@@ -147,13 +153,14 @@
     <id>sys0node0proc0</id>
     <type>chip-processor-nimbus</type>
     <attribute><id>HUID</id><default>0x00050000</default></attribute>
-    <attribute><id>POSITION</id><default>4</default></attribute>
+    <attribute><id>FAPI_NAME</id><default>pu:k0:n0:s0:p00</default></attribute>
+    <attribute><id>POSITION</id><default>0</default></attribute>
     <attribute><id>SCOM_SWITCHES</id>
         <default>
-            <field><id>useSbeScom</id><value>0</value></field>
             <field><id>useFsiScom</id><value>0</value></field>
             <field><id>useXscom</id><value>1</value></field>
             <field><id>useInbandScom</id><value>0</value></field>
+            <field><id>useSbeScom</id><value>0</value></field>
             <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>
@@ -222,10 +229,19 @@
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
     <attribute><id>FSP_BASE_ADDR</id>
-        <default>0x0000000000000000</default>
+        <default>0x0006030100000000</default>
     </attribute>
     <attribute><id>PSI_BRIDGE_BASE_ADDR</id>
-        <default>0x0000000000000000</default>
+        <default>0x0006030203000000</default>
+    </attribute>
+    <attribute><id>PSI_HB_ESB_ADDR</id>
+        <default>0x00060302031C0000</default>
+    </attribute>
+    <attribute><id>XIVE_CONTROLLER_BAR_ADDR</id>
+        <default>0x0006030203100000</default>
+    </attribute>
+    <attribute><id>XIVE_THREAD_MGMT1_BAR_ADDR</id>
+        <default>0x0006020000000000</default>
     </attribute>
     <attribute><id>INTP_BASE_ADDR</id>
         <default>0x0003FFFF80300000</default>
@@ -237,6 +253,9 @@
         <id>PROC_MASTER_TYPE</id>
         <default>ACTING_MASTER</default>
     </attribute>
+    <attribute><id>XSCOM_BASE_ADDRESS</id>
+        <default>0x000603FC00000000</default>
+    </attribute>
 </targetInstance>
 
 <!-- Nimbus n0p0 EQ units -->
@@ -244,6 +263,9 @@
     <id>sys0node0proc0eq0</id>
     <type>unit-eq-power9</type>
     <attribute><id>HUID</id><default>0x00230000</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.eq:k0:n0:s0:p00:c0</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-0</default>
@@ -268,12 +290,23 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-16</default>
     </attribute>
+    <attribute>
+        <id>POUNDV_BUCKET_NUM</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>POUNDV_BUCKET_NUM_OVERRIDE</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
     <id>sys0node0proc0eq1</id>
     <type>unit-eq-power9</type>
     <attribute><id>HUID</id><default>0x00230001</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.eq:k0:n0:s0:p00:c1</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-1</default>
@@ -298,12 +331,26 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-17</default>
     </attribute>
+<!--TODO RTC:144077  POUNDV ATTRs are temporarily set to 1 for testing
+    purposes if we have a way to do attr overrides during standalone simics
+    then we can get rid of these poundv attributes for this EQ-->
+    <attribute>
+        <id>POUNDV_BUCKET_NUM</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>POUNDV_BUCKET_NUM_OVERRIDE</id>
+        <default>1</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
     <id>sys0node0proc0eq2</id>
     <type>unit-eq-power9</type>
     <attribute><id>HUID</id><default>0x00230002</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.eq:k0:n0:s0:p00:c2</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-2</default>
@@ -335,6 +382,9 @@
     <type>unit-eq-power9</type>
     <attribute><id>HUID</id><default>0x00230003</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.eq:k0:n0:s0:p00:c3</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-3</default>
     </attribute>
@@ -365,6 +415,9 @@
     <type>unit-eq-power9</type>
     <attribute><id>HUID</id><default>0x00230004</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.eq:k0:n0:s0:p00:c4</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-4</default>
     </attribute>
@@ -394,6 +447,9 @@
     <id>sys0node0proc0eq5</id>
     <type>unit-eq-power9</type>
     <attribute><id>HUID</id><default>0x00230005</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.eq:k0:n0:s0:p00:c5</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-5</default>
@@ -426,6 +482,9 @@
     <type>unit-ex-power9</type>
     <attribute><id>HUID</id><default>0x00061000</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.ex:k0:n0:s0:p00:c0</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-0/ex-0</default>
     </attribute>
@@ -451,6 +510,9 @@
     <id>sys0node0proc0eq0ex1</id>
     <type>unit-ex-power9</type>
     <attribute><id>HUID</id><default>0x00061001</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.ex:k0:n0:s0:p00:c1</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-0/ex-1</default>
@@ -479,6 +541,9 @@
     <type>unit-ex-power9</type>
     <attribute><id>HUID</id><default>0x00061002</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.ex:k0:n0:s0:p00:c2</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-1/ex-2</default>
     </attribute>
@@ -504,6 +569,9 @@
     <id>sys0node0proc0eq1ex3</id>
     <type>unit-ex-power9</type>
     <attribute><id>HUID</id><default>0x00061003</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.ex:k0:n0:s0:p00:c3</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-1/ex-3</default>
@@ -532,6 +600,9 @@
     <type>unit-ex-power9</type>
     <attribute><id>HUID</id><default>0x00061004</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.ex:k0:n0:s0:p00:c4</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-2/ex-4</default>
     </attribute>
@@ -557,6 +628,9 @@
     <id>sys0node0proc0eq2ex5</id>
     <type>unit-ex-power9</type>
     <attribute><id>HUID</id><default>0x00061005</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.ex:k0:n0:s0:p00:c5</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-2/ex-5</default>
@@ -585,6 +659,9 @@
     <type>unit-ex-power9</type>
     <attribute><id>HUID</id><default>0x00061006</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.ex:k0:n0:s0:p00:c6</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-3/ex-6</default>
     </attribute>
@@ -610,6 +687,9 @@
     <id>sys0node0proc0eq3ex7</id>
     <type>unit-ex-power9</type>
     <attribute><id>HUID</id><default>0x00061007</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.ex:k0:n0:s0:p00:c7</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-3/ex-7</default>
@@ -638,6 +718,9 @@
     <type>unit-ex-power9</type>
     <attribute><id>HUID</id><default>0x00061008</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.ex:k0:n0:s0:p00:c8</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-4/ex-8</default>
     </attribute>
@@ -663,6 +746,9 @@
     <id>sys0node0proc0eq4ex9</id>
     <type>unit-ex-power9</type>
     <attribute><id>HUID</id><default>0x00061009</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.ex:k0:n0:s0:p00:c9</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-4/ex-9</default>
@@ -691,6 +777,9 @@
     <type>unit-ex-power9</type>
     <attribute><id>HUID</id><default>0x0006100A</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.ex:k0:n0:s0:p00:c10</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-5/ex-10</default>
     </attribute>
@@ -716,6 +805,9 @@
     <id>sys0node0proc0eq5ex11</id>
     <type>unit-ex-power9</type>
     <attribute><id>HUID</id><default>0x0006100B</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.ex:k0:n0:s0:p00:c11</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-5/ex-11</default>
@@ -743,6 +835,9 @@
     <id>sys0node0proc0eq0ex0core0</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071000</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c0</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-0/ex-0/core-0</default>
@@ -773,6 +868,9 @@
     <id>sys0node0proc0eq0ex0core1</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071001</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c1</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-0/ex-0/core-1</default>
@@ -805,6 +903,9 @@
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071002</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c2</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-0/ex-1/core-2</default>
     </attribute>
@@ -834,6 +935,9 @@
     <id>sys0node0proc0eq0ex1core3</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071003</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c3</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-0/ex-1/core-3</default>
@@ -866,6 +970,9 @@
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071004</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c4</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-1/ex-2/core-4</default>
     </attribute>
@@ -895,6 +1002,9 @@
     <id>sys0node0proc0eq1ex2core5</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071005</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c5</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-1/ex-2/core-5</default>
@@ -927,6 +1037,9 @@
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071006</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c6</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-1/ex-3/core-6</default>
     </attribute>
@@ -956,6 +1069,9 @@
     <id>sys0node0proc0eq1ex3core7</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071007</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c7</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-1/ex-3/core-7</default>
@@ -988,6 +1104,9 @@
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071008</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c8</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-2/ex-4/core-8</default>
     </attribute>
@@ -1017,6 +1136,9 @@
     <id>sys0node0proc0eq2ex4core9</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071009</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c9</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-2/ex-4/core-9</default>
@@ -1049,6 +1171,9 @@
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x0007100A</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c10</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-2/ex-5/core-10</default>
     </attribute>
@@ -1078,6 +1203,9 @@
     <id>sys0node0proc0eq2ex5core11</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x0007100B</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c11</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-2/ex-5/core-11</default>
@@ -1110,6 +1238,9 @@
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x0007100C</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c12</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-3/ex-6/core-12</default>
     </attribute>
@@ -1139,6 +1270,9 @@
     <id>sys0node0proc0eq3ex6core13</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x0007100D</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c13</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-3/ex-6/core-13</default>
@@ -1171,6 +1305,9 @@
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x0007100E</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c14</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-3/ex-7/core-14</default>
     </attribute>
@@ -1200,6 +1337,9 @@
     <id>sys0node0proc0eq3ex7core15</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x0007100F</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c15</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-3/ex-7/core-15</default>
@@ -1232,6 +1372,9 @@
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071010</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c16</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-4/ex-8/core-16</default>
     </attribute>
@@ -1261,6 +1404,9 @@
     <id>sys0node0proc0eq4ex8core17</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071011</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c17</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-4/ex-8/core-17</default>
@@ -1293,6 +1439,9 @@
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071012</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c18</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-4/ex-9/core-18</default>
     </attribute>
@@ -1322,6 +1471,9 @@
     <id>sys0node0proc0eq4ex9core19</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071013</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c19</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-4/ex-9/core-19</default>
@@ -1354,6 +1506,9 @@
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071014</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c20</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-5/ex-10/core-20</default>
     </attribute>
@@ -1383,6 +1538,9 @@
     <id>sys0node0proc0eq5ex10core21</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071015</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c21</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-5/ex-10/core-21</default>
@@ -1415,6 +1573,9 @@
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071016</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c22</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-5/ex-11/core-22</default>
     </attribute>
@@ -1445,6 +1606,9 @@
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071017</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.core:k0:n0:s0:p00:c23</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-5/ex-11/core-23</default>
     </attribute>
@@ -1470,72 +1634,14 @@
     </attribute>
 </targetInstance>
 
-<!-- Nimbus n0p0 MCBIST units -->
-<targetInstance>
-    <id>sys0node0proc0mcbist0</id>
-    <type>unit-mcbist-nimbus</type>
-    <attribute><id>HUID</id><default>0x00250000</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcbist-0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcbist-0</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-0/perv-7</default>
-    </attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc0mcbist1</id>
-    <type>unit-mcbist-nimbus</type>
-    <attribute><id>HUID</id><default>0x00250001</default></attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcbist-1</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcbist-1</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-0/perv-8</default>
-    </attribute>
-</targetInstance>
-
 <!-- nimbus n0p0 MCS units -->
 <targetInstance>
     <id>sys0node0proc0mcbist0mcs0</id>
     <type>unit-mcs-nimbus</type>
     <attribute><id>HUID</id><default>0x000B0100</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.mcs:k0:n0:s0:p00:c0</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcbist-0/mcs-0</default>
@@ -1574,6 +1680,9 @@
     <type>unit-mcs-nimbus</type>
     <attribute><id>HUID</id><default>0x000B0101</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.mcs:k0:n0:s0:p00:c1</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcbist-0/mcs-1</default>
     </attribute>
@@ -1611,6 +1720,9 @@
     <type>unit-mcs-nimbus</type>
     <attribute><id>HUID</id><default>0x000B0102</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.mcs:k0:n0:s0:p00:c2</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcbist-1/mcs-0</default>
     </attribute>
@@ -1647,6 +1759,9 @@
     <id>sys0node0proc0mcbist1mcs1</id>
     <type>unit-mcs-nimbus</type>
     <attribute><id>HUID</id><default>0x000B0103</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.mcs:k0:n0:s0:p00:c3</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcbist-1/mcs-1</default>
@@ -1686,6 +1801,9 @@
     <type>unit-mca-nimbus</type>
     <attribute><id>HUID</id><default>0x00240100</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.mca:k0:n0:s0:p00:c0</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcbist-0/mcs-0/mca-0</default>
     </attribute>
@@ -1715,6 +1833,9 @@
     <id>sys0node0proc0mcbist0mcs0mca1</id>
     <type>unit-mca-nimbus</type>
     <attribute><id>HUID</id><default>0x00240101</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.mca:k0:n0:s0:p00:c1</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcbist-0/mcs-0/mca-1</default>
@@ -1747,6 +1868,9 @@
     <type>unit-mca-nimbus</type>
     <attribute><id>HUID</id><default>0x00240102</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.mca:k0:n0:s0:p00:c2</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcbist-0/mcs-1/mca-0</default>
     </attribute>
@@ -1776,6 +1900,9 @@
     <id>sys0node0proc0mcbist0mcs1mca1</id>
     <type>unit-mca-nimbus</type>
     <attribute><id>HUID</id><default>0x00240103</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.mca:k0:n0:s0:p00:c3</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcbist-0/mcs-1/mca-1</default>
@@ -1808,6 +1935,9 @@
     <type>unit-mca-nimbus</type>
     <attribute><id>HUID</id><default>0x00240104</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.mca:k0:n0:s0:p00:c4</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcbist-1/mcs-0/mca-0</default>
     </attribute>
@@ -1837,6 +1967,9 @@
     <id>sys0node0proc0mcbist1mcs0mca1</id>
     <type>unit-mca-nimbus</type>
     <attribute><id>HUID</id><default>0x00240105</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.mca:k0:n0:s0:p00:c5</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcbist-1/mcs-0/mca-1</default>
@@ -1869,6 +2002,9 @@
     <type>unit-mca-nimbus</type>
     <attribute><id>HUID</id><default>0x00240106</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.mca:k0:n0:s0:p00:c6</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcbist-1/mcs-1/mca-0</default>
     </attribute>
@@ -1899,6 +2035,9 @@
     <type>unit-mca-nimbus</type>
     <attribute><id>HUID</id><default>0x00240107</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.mca:k0:n0:s0:p00:c7</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcbist-1/mcs-1/mca-1</default>
     </attribute>
@@ -1924,11 +2063,81 @@
     </attribute>
 </targetInstance>
 
+<!-- Nimbus n0p0 MCBIST units -->
+<targetInstance>
+    <id>sys0node0proc0mcbist0</id>
+    <type>unit-mcbist-nimbus</type>
+    <attribute><id>HUID</id><default>0x00250000</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.mcbist:k0:n0:s0:p00:c0</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcbist-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcbist-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-7</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0mcbist1</id>
+    <type>unit-mcbist-nimbus</type>
+    <attribute><id>HUID</id><default>0x00250001</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.mcbist:k0:n0:s0:p00:c1</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/mcbist-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mcbist-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-8</default>
+    </attribute>
+</targetInstance>
+
 <!-- Nimbus n0p0 PEC units -->
 <targetInstance>
     <id>sys0node0proc0pec0</id>
     <type>unit-pec-power9</type>
     <attribute><id>HUID</id><default>0x002D0000</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.pec:k0:n0:s0:p00:c0</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pec-0</default>
@@ -1960,6 +2169,9 @@
     <type>unit-pec-power9</type>
     <attribute><id>HUID</id><default>0x002D0001</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.pec:k0:n0:s0:p00:c1</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pec-1</default>
     </attribute>
@@ -1989,6 +2201,9 @@
     <id>sys0node0proc0pec2</id>
     <type>unit-pec-power9</type>
     <attribute><id>HUID</id><default>0x002D0002</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.pec:k0:n0:s0:p00:c2</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pec-2</default>
@@ -2021,6 +2236,9 @@
     <type>unit-phb-nimbus</type>
     <attribute><id>HUID</id><default>0x002E0100</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.phb:k0:n0:s0:p00:c0</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pec-0/phb-0</default>
     </attribute>
@@ -2052,6 +2270,9 @@
     <type>unit-phb-nimbus</type>
     <attribute><id>HUID</id><default>0x002E0101</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.phb:k0:n0:s0:p00:c1</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pec-1/phb-1</default>
     </attribute>
@@ -2081,6 +2302,9 @@
     <id>sys0node0proc0pec1phb2</id>
     <type>unit-phb-nimbus</type>
     <attribute><id>HUID</id><default>0x002E0102</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.phb:k0:n0:s0:p00:c2</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pec-1/phb-2</default>
@@ -2113,6 +2337,9 @@
     <type>unit-phb-nimbus</type>
     <attribute><id>HUID</id><default>0x002E0103</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.phb:k0:n0:s0:p00:c3</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pec-2/phb-3</default>
     </attribute>
@@ -2143,6 +2370,9 @@
     <type>unit-phb-nimbus</type>
     <attribute><id>HUID</id><default>0x002E0104</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.phb:k0:n0:s0:p00:c4</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pec-2/phb-4</default>
     </attribute>
@@ -2172,6 +2402,9 @@
     <id>sys0node0proc0pec2phb5</id>
     <type>unit-phb-nimbus</type>
     <attribute><id>HUID</id><default>0x002E0105</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.phb:k0:n0:s0:p00:c5</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pec-2/phb-5</default>
@@ -2204,6 +2437,9 @@
     <type>unit-obus-nimbus</type>
     <attribute><id>HUID</id><default>0x002E0200</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.obus:k0:n0:s0:p00:c0</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/obus-0</default>
     </attribute>
@@ -2233,6 +2469,9 @@
     <id>sys0node0proc0obus3</id>
     <type>unit-obus-nimbus</type>
     <attribute><id>HUID</id><default>0x002E0201</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.obus:k0:n0:s0:p00:c3</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/obus-3</default>
@@ -2265,6 +2504,9 @@
     <type>unit-nv-nimbus</type>
     <attribute><id>HUID</id><default>0x002E0300</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>NA</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/nv-0</default>
     </attribute>
@@ -2294,6 +2536,9 @@
     <id>sys0node0proc0nv1</id>
     <type>unit-nv-nimbus</type>
     <attribute><id>HUID</id><default>0x002E0301</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>NA</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/nv-1</default>
@@ -2327,6 +2572,9 @@
     <type>unit-ppe-nimbus</type>
     <attribute><id>HUID</id><default>0x002E0400</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.ppe:k0:n0:s0:p00:c0</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ppe-0</default>
     </attribute>
@@ -2352,6 +2600,9 @@
     <id>sys0node0proc0ppe1</id>
     <type>unit-ppe-nimbus</type>
     <attribute><id>HUID</id><default>0x002E0401</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.ppe:k0:n0:s0:p00:c1</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ppe-1</default>
@@ -2380,6 +2631,9 @@
     <id>sys0node0proc0perv1</id>
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0001</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c1</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-1</default>
@@ -2411,6 +2665,9 @@
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0002</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c2</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-2</default>
     </attribute>
@@ -2440,6 +2697,9 @@
     <id>sys0node0proc0perv3</id>
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0003</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c3</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-3</default>
@@ -2471,6 +2731,9 @@
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0004</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c4</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-4</default>
     </attribute>
@@ -2500,6 +2763,9 @@
     <id>sys0node0proc0perv5</id>
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0005</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c5</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-5</default>
@@ -2531,6 +2797,9 @@
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0006</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c6</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-6</default>
     </attribute>
@@ -2560,6 +2829,9 @@
     <id>sys0node0proc0perv7</id>
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0007</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c7</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-7</default>
@@ -2591,6 +2863,9 @@
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0008</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c8</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-8</default>
     </attribute>
@@ -2620,6 +2895,9 @@
     <id>sys0node0proc0perv9</id>
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0009</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c9</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-9</default>
@@ -2651,6 +2929,9 @@
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C000C</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c12</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-12</default>
     </attribute>
@@ -2680,6 +2961,9 @@
     <id>sys0node0proc0perv13</id>
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C000D</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c13</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-13</default>
@@ -2711,6 +2995,9 @@
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C000E</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c14</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-14</default>
     </attribute>
@@ -2740,6 +3027,9 @@
     <id>sys0node0proc0perv15</id>
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C000F</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c15</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-15</default>
@@ -2771,6 +3061,9 @@
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0010</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c16</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-16</default>
     </attribute>
@@ -2800,6 +3093,9 @@
     <id>sys0node0proc0perv17</id>
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0011</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c17</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-17</default>
@@ -2831,6 +3127,9 @@
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0012</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c18</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-18</default>
     </attribute>
@@ -2860,6 +3159,9 @@
     <id>sys0node0proc0perv19</id>
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0013</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c19</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-19</default>
@@ -2891,6 +3193,9 @@
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0014</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c20</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-20</default>
     </attribute>
@@ -2920,6 +3225,9 @@
     <id>sys0node0proc0perv21</id>
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0015</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c21</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-21</default>
@@ -2951,6 +3259,9 @@
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0020</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c32</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-32</default>
     </attribute>
@@ -2980,6 +3291,9 @@
     <id>sys0node0proc0perv33</id>
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0021</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c33</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-33</default>
@@ -3011,6 +3325,9 @@
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0022</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c34</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-34</default>
     </attribute>
@@ -3040,6 +3357,9 @@
     <id>sys0node0proc0perv35</id>
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0023</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c35</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-35</default>
@@ -3071,6 +3391,9 @@
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0024</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c36</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-36</default>
     </attribute>
@@ -3100,6 +3423,9 @@
     <id>sys0node0proc0perv37</id>
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0025</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c37</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-37</default>
@@ -3131,6 +3457,9 @@
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0026</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c38</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-38</default>
     </attribute>
@@ -3160,6 +3489,9 @@
     <id>sys0node0proc0perv39</id>
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0027</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c39</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-39</default>
@@ -3191,6 +3523,9 @@
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0028</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c40</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-40</default>
     </attribute>
@@ -3220,6 +3555,9 @@
     <id>sys0node0proc0perv41</id>
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0029</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c41</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-41</default>
@@ -3251,6 +3589,9 @@
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C002A</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c42</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-42</default>
     </attribute>
@@ -3280,6 +3621,9 @@
     <id>sys0node0proc0perv43</id>
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C002B</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c43</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-43</default>
@@ -3311,6 +3655,9 @@
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C002C</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c44</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-44</default>
     </attribute>
@@ -3340,6 +3687,9 @@
     <id>sys0node0proc0perv45</id>
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C002D</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c45</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-45</default>
@@ -3371,6 +3721,9 @@
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C002E</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c46</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-46</default>
     </attribute>
@@ -3400,6 +3753,9 @@
     <id>sys0node0proc0perv47</id>
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C002F</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c47</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-47</default>
@@ -3431,6 +3787,9 @@
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0030</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c48</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-48</default>
     </attribute>
@@ -3460,6 +3819,9 @@
     <id>sys0node0proc0perv49</id>
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0031</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c49</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-49</default>
@@ -3491,6 +3853,9 @@
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0032</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c50</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-50</default>
     </attribute>
@@ -3520,6 +3885,9 @@
     <id>sys0node0proc0perv51</id>
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0033</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c51</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-51</default>
@@ -3551,6 +3919,9 @@
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0034</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c52</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-52</default>
     </attribute>
@@ -3580,6 +3951,9 @@
     <id>sys0node0proc0perv53</id>
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0035</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c53</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-53</default>
@@ -3611,6 +3985,9 @@
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0036</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c54</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-54</default>
     </attribute>
@@ -3640,6 +4017,9 @@
     <id>sys0node0proc0perv55</id>
     <type>unit-perv-nimbus</type>
     <attribute><id>HUID</id><default>0x002C0037</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.perv:k0:n0:s0:p00:c55</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/perv-55</default>
@@ -3673,6 +4053,9 @@
     <type>unit-xbus-nimbus</type>
     <attribute><id>HUID</id><default>0x000E0601</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.xbus:k0:n0:s0:p00:c1</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/xbus-1</default>
     </attribute>
@@ -3692,10 +4075,10 @@
         <id>CHIP_UNIT</id>
         <default>1</default>
     </attribute>
-<!--    <attribute> // @FIXME RTC 127337
+    <attribute>
         <id>PEER_TARGET</id>
-        <default>physical:sys-0/node-0/proc-1/xbus-1</default>
-    </attribute>    // @FIXME RTC 127337  -->
+        <default>physical:sys-0/node-0/proc-3/xbus-1</default>
+    </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-6</default>
@@ -3706,6 +4089,9 @@
     <id>sys0node0proc0xbus2</id>
     <type>unit-xbus-nimbus</type>
     <attribute><id>HUID</id><default>0x000E0602</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.xbus:k0:n0:s0:p00:c2</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/xbus-2</default>
@@ -3726,10 +4112,10 @@
         <id>CHIP_UNIT</id>
         <default>2</default>
     </attribute>
-<!--    <attribute> // @FIXME RTC 127337
+    <attribute>
         <id>PEER_TARGET</id>
         <default>physical:sys-0/node-0/proc-2/xbus-1</default>
-    </attribute>    // @FIXME RTC 127337  -->
+    </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-6</default>
@@ -3741,6 +4127,9 @@
     <id>sys0node0proc0capp0</id>
     <type>unit-capp-nimbus</type>
     <attribute><id>HUID</id><default>0x00210000</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.capp:k0:n0:s0:p00:c0</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/capp-0</default>
@@ -3771,6 +4160,9 @@
     <id>sys0node0proc0capp1</id>
     <type>unit-capp-nimbus</type>
     <attribute><id>HUID</id><default>0x00210001</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.capp:k0:n0:s0:p00:c1</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/capp-1</default>
@@ -3803,6 +4195,9 @@
     <type>unit-sbe-nimbus</type>
     <attribute><id>HUID</id><default>0x002A0000</default></attribute>
     <attribute>
+        <id>FAPI_NAME</id><default>pu.sbe:k0:n0:s0:p00:c0</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/sbe-0</default>
     </attribute>
@@ -3829,8 +4224,11 @@
 <targetInstance>
     <id>sys0node0proc0occ0</id>
     <type>occ</type>
-        <attribute><id>HUID</id><default>0x00130000</default></attribute>
-        <attribute>
+    <attribute><id>HUID</id><default>0x00130000</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>NA</default>
+    </attribute>
+    <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/occ-0</default>
     </attribute>
@@ -3856,6 +4254,9 @@
     <id>sys0node0proc0nx0</id>
     <type>unit-nx-power9</type>
     <attribute><id>HUID</id><default>0x001E0000</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>NA</default>
+    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/nx-0</default>

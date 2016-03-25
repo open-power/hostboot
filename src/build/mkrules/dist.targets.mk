@@ -40,7 +40,7 @@ ROOTPATH = ../../..
 #
 
 # Content targets.
-VALID_TARGETS = fsp tools openpower
+VALID_TARGETS = fsp tools openpower vpo
 
 #
 # Files which are to be directly copied into content targets.
@@ -104,7 +104,6 @@ COPY_RENAME_FILES = \
     img/hostboot.bin:img/hbicore$(UNDERSCORE_TEST).bin:fsp,openpower \
     img/hostboot_extended.bin:img/hbicore$(UNDERSCORE_TEST)_extended.bin:fsp,openpower \
     img/hostboot_runtime.bin:img/hbirt$(UNDERSCORE_TEST).bin:fsp,openpower \
-    vbu_NIMBUS.pnor:img/vbu$(UNDERSCORE_TEST)_NIMBUS.pnor:vpo \
     hbicore.syms:img/hbicore$(UNDERSCORE_TEST).syms:tools,vpo,openpower \
     hbicore.list.bz2:img/hbicore$(UNDERSCORE_TEST).list.bz2:tools,vpo,openpower \
     hbicore.bin.modinfo:img/hbicore$(UNDERSCORE_TEST).bin.modinfo:tools,vpo,openpower \
@@ -168,6 +167,8 @@ simics.tar_CONTENTS = \
     src/build/simics/startup.simics \
     src/build/simics/standalone.simics \
     src/build/simics/combined.simics \
+    src/build/simics/run_as_vpo.simics \
+    src/build/simics/fake_mem.simics \
     src/build/simics/ipmi_bt_responder.py \
     src/build/simics/hb-simdebug.py \
     src/build/debug/hb-dump-debug \
@@ -212,6 +213,8 @@ fsp.tar_CONTENTS = \
     src/build/buildpnor/buildpnor.pl \
     src/build/buildpnor/defaultPnorLayout.xml \
     $(if $(FAKEPNOR), src/build/buildpnor/pnorLayoutFake.xml, ) \
+    $(if $(FAKEPNOR), img/vbu_NIMBUS_targeting.bin, ) \
+    $(if $(FAKEPNOR), img/vpo_sysmvpd.dat, ) \
     img/simics_NIMBUS_targeting.bin \
     obj/genfiles/fapiattrs.xml \
     obj/genfiles/hb_plat_attr_srvc.H \
