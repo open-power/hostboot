@@ -71,18 +71,14 @@ namespace ISTEP_15
  *  @brief Load HCODE image and return a pointer to it, or NULL
  *
  *  @param[out] -   address of the HCODE image
- *  @param[out] -   size of the HCODE image
  *
  *  @return      NULL if success, errorlog if failure
  *
  */
-errlHndl_t  loadHcodeImage(  char                    *& o_rHcodeAddr,
-                            uint32_t                 & o_rHcodeSize )
+errlHndl_t  loadHcodeImage(  char                    *& o_rHcodeAddr)
 {
     errlHndl_t l_errl = NULL;
     PNOR::SectionInfo_t l_info;
-//     uint64_t    rc        =   0;
-    o_rHcodeSize = 0;
 
     do
     {
@@ -90,47 +86,16 @@ errlHndl_t  loadHcodeImage(  char                    *& o_rHcodeAddr,
         l_errl = PNOR::getSectionInfo( PNOR::WINK, l_info );
         if( l_errl )
         {
+            //No need to commit error here, it gets handled later
+            //just break out to escape this function
             break;
         }
-
-//@TODO RTC: 147560 Enable checks and manipulation on the hcode image
-//         rc = p9_xip_image_size(reinterpret_cast<void*>(l_info.vaddr),
-//                                 &o_rHcodeSize);
-
-//         if((rc !=0) || (o_rHcodeSize == 0) || o_rHcodeSize > l_info.size)
-//         {
-//             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-//                    "ERROR: invalid WINK image rc[%d] hcodeSize[%d] part size[%d]",
-//                        rc, o_rHcodeSize, l_info.size);
-//             /*@
-//              * @errortype
-//              * @reasoncode  RC_LOAD_HCODE_FROM_PNOR_FAILED
-//              * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
-//              * @moduleid    MOD_BUILD_HCODE_IMAGES
-//              * @userdata1   Hi 32 bits: return code from sbe_xip_image_size
-//              *              Lo 32 bits: Size of memory requested
-//              * @userdata2   Size of WINK PNOR partition
-//              * @devdesc     Image from PNOR WINK partition invalid, too small,
-//              *              or too big
-//              * @custdesc    A problem occurred during the IPL
-//              *              of the system.
-//              */
-//             l_errl =
-//               new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-//                                        ISTEP::MOD_BUILD_HCODE_IMAGES,
-//                                        ISTEP::RC_LOAD_HCODE_FROM_PNOR_FAILED,
-//                                        (rc<<32)|o_rHcodeSize,
-//                                        l_info.size,
-//                                        true);
-//             break;
-//         }
 
         o_rHcodeAddr = reinterpret_cast<char*>(l_info.vaddr);
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "HCODE addr = 0x%p, size=0x%x",
-                   o_rHcodeAddr,
-                   o_rHcodeSize  );
+                   "HCODE addr = 0x%p ",
+                   o_rHcodeAddr);
 
     } while ( 0 );
 
@@ -357,7 +322,6 @@ void* host_build_stop_image (void *io_pArgs)
     ISTEP_ERROR::IStepError     l_StepError;
 
     char*       l_pHcodeImage     = NULL;
-    uint32_t    l_hcodeSize       = 0;
     void*       l_pRealMemBase   = NULL;
     void*       l_pVirtMemBase   = NULL;
 
@@ -407,8 +371,7 @@ void* host_build_stop_image (void *io_pArgs)
         //  Continue, build hcode images
 
         //Load the reference image from PNOR
-        l_errl  =   loadHcodeImage(  l_pHcodeImage,
-                                    l_hcodeSize );
+        l_errl  =   loadHcodeImage(  l_pHcodeImage );
         if ( l_errl )
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -471,19 +434,19 @@ void* host_build_stop_image (void *io_pArgs)
 
                 // cast OUR type of target to a FAPI2 type of target.
                 const fapi2::Target<TARGET_TYPE_PROC_CHIP>
-                l_fapi_cpu_target( const_cast<TARGETING::Target*>(l_procChip));
+                l_fapiCpuTarget( const_cast<TARGETING::Target*>(l_procChip));
 
                 ImageType_t img_type;
 
                 //Call p9_hcode_image_build.C HWP
-//                 FAPI_INVOKE_HWP( l_errl,
-//                                  p9_hcode_image_build,
-//                                  l_fapi_cpu_target, //Proc chip target.
-//                                  reinterpret_cast<void*>(l_pHcodeImage),
-//                                  l_pImageOut,
-//                                  PHASE_IPL, //sys_Phase
-//                                  img_type,
-//                                  l_temp_buffer)
+                FAPI_INVOKE_HWP( l_errl,
+                                 p9_hcode_image_build,
+                                 l_fapiCpuTarget, //Proc chip target.
+                                 reinterpret_cast<void*>(l_pHcodeImage),
+                                 l_pImageOut,
+                                 PHASE_IPL, //sys_Phase
+                                 img_type,
+                                 l_temp_buffer)
                 if ( l_errl )
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -499,10 +462,9 @@ void* host_build_stop_image (void *io_pArgs)
                 l_procChip->setAttr<TARGETING::ATTR_HCODE_IMAGE_SIZE>
                 ( l_sizeImageOut );
 
-//@TODO RTC: 147560 Enable checks and manipulation on the hcode image
-//                 l_errl =   applyHcodeGenCpuRegs( l_procChip,
-//                                                 l_pImageOut,
-//                                                 l_sizeImageOut );
+                l_errl =   applyHcodeGenCpuRegs( l_procChip,
+                                                l_pImageOut,
+                                                l_sizeImageOut );
                 if ( l_errl )
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
