@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -77,17 +77,50 @@ Layout Description
     </metadata>
     <section>
         <!-- NOTE: smaller than official layout  for fake-PNOR  -->
-        <description>Module VPD (256K) -only supports 4 processors</description>
+        <description>Module VPD (128K) -only supports 2 processors</description>
         <eyeCatch>MVPD</eyeCatch>
         <physicalOffset>0x2000</physicalOffset>
-        <physicalRegionSize>0x40000</physicalRegionSize>
+        <physicalRegionSize>0x20000</physicalRegionSize>
         <side>sideless</side>
     </section>
     <section>
         <!-- NOTE: smaller than official layout  for fake-PNOR  -->
-        <description>DIMM JEDEC (128K) -only supports 4 processors</description>
+        <description>DIMM JEDEC (32K) supports 2 * 16 *512 bytes</description>
         <eyeCatch>DJVPD</eyeCatch>
-        <physicalOffset>0x42000</physicalOffset>
+        <physicalOffset>0x22000</physicalOffset>
+        <physicalRegionSize>0x8000</physicalRegionSize>
+        <side>sideless</side>
+    </section>
+    <section>
+        <!-- NOTE: smaller than official layout  for fake-PNOR  -->
+        <description>Board/Centaur VPD (64K) - 1 board</description>
+        <eyeCatch>CVPD</eyeCatch>
+        <physicalOffset>0x2A000</physicalOffset>
+        <physicalRegionSize>0x10000</physicalRegionSize>
+        <side>sideless</side>
+    </section>
+    <section>
+        <!-- NOTE: smaller than official layout  for fake-PNOR  -->
+        <description>Hostboot Error Logs (64K)</description>
+        <eyeCatch>HBEL</eyeCatch>
+        <physicalOffset>0x3A000</physicalOffset>
+        <physicalRegionSize>0x10000</physicalRegionSize>
+        <side>sideless</side>
+    </section>
+    <section>
+        <!-- NOTE: smaller than official layout  for fake-PNOR  -->
+        <description>WINK (512K) </description>
+        <eyeCatch>WINK</eyeCatch>
+        <physicalOffset>0x4A000</physicalOffset>
+        <physicalRegionSize>0x80000</physicalRegionSize>
+        <sha512Version/>
+        <side>sideless</side>
+    </section>
+    <section>
+        <!-- NOTE: smaller than official layout  for fake-PNOR  -->
+        <description>Attribute Data (128k)</description>
+        <eyeCatch>HBD</eyeCatch>
+        <physicalOffset>0xCA000</physicalOffset>
         <physicalRegionSize>0x20000</physicalRegionSize>
         <side>sideless</side>
     </section>
@@ -95,24 +128,8 @@ Layout Description
         <!-- NOTE: smaller than official layout  for fake-PNOR  -->
         <description>Hostboot Extended image (3MB)</description>
         <eyeCatch>HBI</eyeCatch>
-        <physicalOffset>0x62000</physicalOffset>
+        <physicalOffset>0xEA000</physicalOffset>
         <physicalRegionSize>0x500000</physicalRegionSize>
-        <side>sideless</side>
-    </section>
-    <section>
-        <!-- NOTE: smaller than official layout  for fake-PNOR  -->
-        <description>Hostboot Error Logs (64K)</description>
-        <eyeCatch>HBEL</eyeCatch>
-        <physicalOffset>0x562000</physicalOffset>
-        <physicalRegionSize>0x10000</physicalRegionSize>
-        <side>sideless</side>
-    </section>
-    <section>
-        <!-- NOTE: smaller than official layout  for fake-PNOR  -->
-        <description>Attribute Data (128k)</description>
-        <eyeCatch>HBD</eyeCatch>
-        <physicalOffset>0x572000</physicalOffset>
-        <physicalRegionSize>0x20000</physicalRegionSize>
         <side>sideless</side>
     </section>
 </pnor>

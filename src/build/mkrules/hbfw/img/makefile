@@ -89,6 +89,8 @@ SECUREBOOT_SIGNED_CONTAINER = secureboot_signed_container
 # DEV_KEY_DIR set by env variable
 SIGN_PREFIX_PARAMS=-flag 0x80000000 -hka ${DEV_KEY_DIR}/hw_key_a -hkb ${DEV_KEY_DIR}/hw_key_b -hkc ${DEV_KEY_DIR}/hw_key_c -skp ${DEV_KEY_DIR}/sw_key_a
 SIGN_BUILD_PARAMS=-skp ${DEV_KEY_DIR}/sw_key_a
+VPO_FAKE_MVPD = vpo_sysmvpd.dat
+
 ALL_HB_IMAGES = ${BASE_IMAGES} \
                 ${BASE_W_HEADER_IMAGE} \
                 ${BASE_ECC_IMAGE} ${EXT_ECC_IMAGE} \
@@ -173,13 +175,13 @@ cp_hbfiles: .SPECTARG
 	dd if=/dev/zero bs=256K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
 	ecc --inject ${TEMP_IMAGE} --output ${DJVPD_ECC_IMAGE} --p8
         .if(${FAKEPNOR} != "")
-	dd if=/dev/zero bs=128K count=1 | tr "\000" "\377" > ${DJVPD_IMAGE}
+	dd if=/dev/zero bs=32K count=1 | tr "\000" "\377" > ${DJVPD_IMAGE}
         .endif
 	# MVPD partition
 	dd if=/dev/zero bs=512K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
 	ecc --inject ${TEMP_IMAGE} --output ${MVPD_ECC_IMAGE} --p8
         .if(${FAKEPNOR} != "")
-	dd if=/dev/zero bs=256K count=1 | tr "\000" "\377" > ${MVPD_IMAGE}
+	dd if=${${VPO_FAKE_MVPD}:P} bs=128K count=1 > ${MVPD_IMAGE}
         .endif
 	# CVPD partition
 	dd if=/dev/zero bs=256K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
@@ -268,8 +270,9 @@ HOSTBOOT_FAKEPNOR_SECTIONS = HBI=${EXT_FAKE_IMAGE},HBEL=${HBEL_IMAGE},MVPD=${MVP
 HBFW_OBJPATH = ${.PATH:M*obj*}
 ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
 NIMBUS_TARG_IMG = simics_NIMBUS_targeting.bin
+NIMBUS_VPO_TARG_IMG = vbu_NIMBUS_targeting.bin
 NIMBUS_TARG_IMG_ECC = simics_NIMBUS_targeting.bin.ecc
-NIMBUS_TARG_IMG_FAKE = simics_NIMBUS_targeting.bin.fake
+NIMBUS_TARG_IMG_FAKE = vbu_NIMBUS_targeting.bin.fake
 NIMBUS_SLW_IMG = ${ENGD_OBJPATH:Fp9n.hw_ref_image.hdr.bin}
 NIMBUS_LOCAL_SLW_IMG = p9n.hw_ref_image.hdr.bin
 NIMBUS_LOCAL_SLW_IMG_ECC = p9n.hw_ref_image.hdr.bin.ecc
@@ -286,7 +289,7 @@ inject_ecc: build_sbe_partitions
 	dd if=${${NIMBUS_TARG_IMG}:P} of=${TEMP_IMG} ibs=1024k conv=sync; \
 	ecc --inject ${TEMP_IMG} --output ${NIMBUS_TARG_IMG_ECC} --p8; \
 	#for NIMBUS fake pnor skip version header
-	dd if=${${NIMBUS_TARG_IMG}:P} of=${NIMBUS_TARG_IMG_FAKE} ibs=4k count=32 skip=1 conv=sync; \
+	dd if=${${NIMBUS_VPO_TARG_IMG}:P} of=${NIMBUS_TARG_IMG_FAKE} ibs=4k count=32 skip=1 conv=sync; \
 	# SBE partition
 	dd if=${${NIMBUS_SBE_IMG}:P} of=${TEMP_IMG} ibs=256k conv=sync; \
 	ecc --inject ${TEMP_IMG} --output ${NIMBUS_SBE_IMG_ECC} --p8; \
@@ -299,7 +302,7 @@ inject_ecc: build_sbe_partitions
 	rm ${TEMP_IMG}
 
 NIMBUS_SECT = HBD=${NIMBUS_TARG_IMG_ECC},SBE=${NIMBUS_SBE_IMG_ECC},SBEC=${SBEC_IMG_ECC},WINK=${NIMBUS_LOCAL_SLW_IMG_ECC}
-FAKE_SECT = HBD=${NIMBUS_TARG_IMG_FAKE}
+FAKE_SECT = HBD=${NIMBUS_TARG_IMG_FAKE},WINK=${NIMBUS_LOCAL_SLW_IMG}
 
 # To build fake PNOR, set FAKEPNOR to filename of file to build,
 #    ie, 'export FAKEPNOR=fake8m.pnor'

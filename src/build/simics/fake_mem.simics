@@ -1,0 +1,5 @@
+#Fake out memory map of 32GB in Simics
+p9Proc0.p9_mem_map.host_xscom_device_mm.write 0x050000000 0x0
+p9Proc0.p9_mem_map.host_xscom_device_mm.write 0x050000010 0x800000000 -b  size=8
+p9Proc0.p9_mem_map.host_xscom_device_mm.write 0x050000020 0x1
+p9Proc0.p9_mem_map.host_xscom_device_mm.write 0x050000030 0x1
