@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2015
+# Contributors Listed Below - COPYRIGHT 2012,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -869,7 +869,6 @@ sub setMode( $ )
 {
     my  ( $cmd )    =   @_;
     my  $count      =   0;
-    my  $expected   =   0;
     my  $readybit   =   0;
     my  $result     =   0;
 
@@ -880,7 +879,7 @@ sub setMode( $ )
         ::userDisplay  "Use attributes to enter SPLESS mode\n";
         ::userDisplay  "\tSP_FUNCTIONS:mailboxEnabled = 0b0\n";
         ::userDisplay  "\tISTEP_MODE = 0x1\n";
-        $expected    =   1;
+        ::userDisplay  "\n WAITING for readybit to come on";
     }
     else
     {
@@ -913,7 +912,12 @@ sub setMode( $ )
         if ( $opt_debug )   {   ::userDisplay   "=== isReadyBitOn\n";     }
         if ( isReadyBitOn() )
         {
+            ::userDisplay   "READY!\n";
             return  0;
+        }
+        else
+        {
+            ::userDisplay   ".";
         }
 
         if ( $count <= 0 )

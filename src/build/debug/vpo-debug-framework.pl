@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2016
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,7 +46,7 @@ use Hostboot::_DebugFramework;
 #-----------
 use constant CACHELINESIZE => 128;
 use constant CACHELINEMASK => 0xFFFFFF80;
-use constant NUMTHREADS => 8;
+use constant NUMTHREADS => 4;
 
 #------------------------------------------------------------
 # Common options for the different tools in VPO environment
@@ -82,7 +84,7 @@ my $cfgMan = 0;
 my $toolHelp = 0;
 my $debug = 0;
 my $mute = 0;
-my $nosavestates = 0;
+my $nosavestates = 1;  #Default to not saving state for P9
 my @ecmdOpt = ("-cft");
 my @threadState = ();
 my $l2Flushed = 0;
@@ -290,9 +292,9 @@ sub flushL2
         #stop instructions
         ## @todo problems with the model, just use thread 0 for now
         ## $$ stopInstructions("all");
-        stopInstructions("all");
+        stopInstructions("0");
 
-        my $command = "$vbuToolDir/proc_l2_flush_wrap.x86 @ecmdOpt $flag";
+        my $command = "$vbuToolDir/p9_l2_flush_wrap.exe @ecmdOpt $flag";
         die "ERROR: cannot flush L2" if (system("$command") != 0);
 
         $l2Flushed = 1;
@@ -318,7 +320,7 @@ sub readData
     $addr = translateHRMOR($addr);
 
     #flushL2
-    flushL2();
+    #flushL2(); -- Causing an error on P9, since using PBA, don't need
 
     #Compute the # of cache lines
     my $offset = $addr % CACHELINESIZE;
@@ -347,8 +349,13 @@ sub readData
     }
     else
     {
-        $command = sprintf ("$vbuToolDir/p8_dump_l3 %x $numCacheLines -f $fname -b @ecmdOpt",
-                               $addr);
+        #Commented commands are for using ADU... leave in for debug needs
+        #my $bytes = $numCacheLines * 16;
+        #$command = sprintf ("$vbuToolDir/p9_aduPba_coherent_wrap.exe %x $bytes -f $fname -binmode -rnw -aduNotPba @ecmdOpt",
+        #                    $addr);
+        my $bytes = $numCacheLines * 1;
+        $command = sprintf ("$vbuToolDir/p9_aduPba_coherent_wrap.exe %x $bytes -f $fname -binmode -rnw @ecmdOpt",
+                            $addr);
     }
 
     if ($debug)
@@ -357,7 +364,7 @@ sub readData
         print "$command\n";
     }
 
-    die "ERROR: cannot read memory: $command " if (system("$command") != 0);
+    die "ERROR: cannot read memory: $command " if (system("$command >tmp_readData") != 0);
 
     #Extract just the data requested from the cache lines read
     open FILE, $fname or die "ERROR: $fname not found : $!";
@@ -380,6 +387,9 @@ sub writeData
     my $value = shift;
 
     $addr = translateHRMOR($addr);
+
+    die "ERROR: cannot write L3 - not supported";
+
 
     #Compute the # of cache lines
     my $base = $addr & CACHELINEMASK;
@@ -443,7 +453,7 @@ sub stopInstructions
     my $thread = shift;
 
     #Stopping all threads
-    my $command = "$vbuToolDir/proc_thread_control_wrap.x86 @ecmdOpt -stop -t$thread $flag";
+    my $command = "$vbuToolDir/p9_thread_control_wrap.exe @ecmdOpt -stop -t$thread $flag";
 
     if ($debug)
     {
@@ -460,7 +470,7 @@ sub startInstructions
 
     ##
     #Starting all threads
-    my $command = "$vbuToolDir/proc_thread_control_wrap.x86 @ecmdOpt -start -t$thread -warncheck $flag ";
+    my $command = "$vbuToolDir/p9_thread_control_wrap.exe @ecmdOpt -start -t$thread $flag";
 
     if ($debug)
     {
@@ -587,8 +597,7 @@ sub executeInstrCycles
         $flag = "";
     }
 
-    #start instructions
-    startInstructions("all");
+    #For P9 VPO instructions are controlled externally
 
     # run clock cycles
     my $cycles = shift;
@@ -782,23 +791,23 @@ sub translateAddr
 
     if ( $addr == 0x00050038 )
     {
-        ## 50038 is mbox scratch 0 xscom addr
-        $vpoaddr    =   "GMB2E0";
+        ## CFAM 2838 is mbox scratch 1
+        $vpoaddr    =   "2838";
     }
     elsif ( $addr == 0x00050039 )
     {
-        ## 50039 is mbox scratch 1 xscom addr
-        $vpoaddr    =   "GMB2E4";
+        ## CFAM 2839 is mbox scratch 2
+        $vpoaddr    =   "2839";
     }
     elsif ( $addr == 0x0005003a )
     {
-        ## 5003a is mbox scratch 2 xscom addr
-        $vpoaddr    =   "GMB2E8";
+        ## CFAM 283a is mbox scratch 3
+        $vpoaddr    =   "283a";
     }
     elsif ( $addr == 0x0005003b )
     {
-        ## 5003b is mbox scratch 3 xscom addr
-        $vpoaddr    =   "GMB2EC";
+        ## CFAM283b is mbox scratch 4
+        $vpoaddr    =   "283b";
     }
     else
     {
@@ -825,10 +834,8 @@ sub readScom
 
     my  $vpoaddr    =   ::translateAddr( $addr );
 
-    # Use simGETFAC to speed up VPO
-    my  $cmd    =   "simGETFAC " .
-                    "B0.C0.S0.P0.E8.TPC.FSI.FSI_MAILBOX.FSXCOMP." .
-                    "FSXLOG.LBUS_MAILBOX.Q_$vpoaddr.NLC.L2  32";
+    # Use CFAM MMIO to speed up VPO
+    my $cmd = "getcfam pu $vpoaddr -quiet| sed -n 's/p9.*0x/0x/p'";
 
     my $result = `$cmd`;
 
@@ -842,9 +849,10 @@ sub readScom
     #    (sprintf("0x%x-->%s, %s", $addr,$vpoaddr,$result)), "\n";
 
     ##  comes in as a 32-bit #, need to shift 32 to match simics
-    my $scomvalue = "0x" . $result;
+    my $scomvalue =  $result;
     $scomvalue = hex($scomvalue);
     $scomvalue <<= 32;
+
     return ($scomvalue);
 }
 
@@ -861,6 +869,7 @@ sub readScom
 sub writeScom
 {
     my $addr = shift;
+    my $length = shift;
     my $value = shift;
 
     my  $addrstr = sprintf( "%08x", $addr );
@@ -881,10 +890,10 @@ sub writeScom
 ##
 sub checkContTrace()
 {
-    my  $SCRATCH_MBOX0  =   0x00050038;
+    my  $SCRATCH_MBOX1  =   0x00050038;
     my  $contTrace      =   "";
 
-    $contTrace  =   ::readScom( $SCRATCH_MBOX0 );
+    $contTrace  =   ::readScom( $SCRATCH_MBOX1 );
     if ( $contTrace != 0  )
     {
         ##  activate continuous trace
@@ -893,7 +902,7 @@ sub checkContTrace()
 
         ## ContTrace might leave instructions stopped, turn them
         ## back on here to make sure.
-        ::startInstructions("all");
+        ::startInstructions("0");
     }
 
 }
