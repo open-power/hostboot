@@ -66,8 +66,8 @@ COPY_FILES = \
     img/procmvpd.dat:vpo \
     img/cvpd.dat:vpo \
     img/dvpd.dat:vpo \
-    obj/genfiles/fapiAttrInfo.csv:vpo \
-    obj/genfiles/fapiAttrEnumInfo.csv:vpo \
+    obj/genfiles/attrInfo.csv:vpo \
+    obj/genfiles/attrEnumInfo.csv:vpo \
     obj/genfiles/targAttrInfo.csv:vpo \
     obj/genfiles/target_types_merged.xml:openpower \
     obj/genfiles/fapiattrs.xml:openpower \
@@ -196,9 +196,8 @@ simics.tar_CONTENTS = \
     img/procmvpd_p9n.dat \
     img/cvpd.dat \
     img/dvpd.dat \
-#@TODO RTC:142088
-#   obj/genfiles/fapiAttrInfo.csv \
-    obj/genfiles/fapiAttrEnumInfo.csv \
+    obj/genfiles/attrInfo.csv \
+    obj/genfiles/attrEnumInfo.csv \
     obj/genfiles/targAttrInfo.csv
 
 #
@@ -249,11 +248,10 @@ fsp.tar_CONTENTS = \
     src/build/debug/fsp-memdump.sh:src/build/debug/ \
     obj/genfiles/hbfw_term_rc.H \
     obj/genfiles/srcListing \
-#@TODO RTC:142088
-#   obj/genfiles/fapiAttrInfo.csv \
-    obj/genfiles/fapiAttrEnumInfo.csv \
+    obj/genfiles/attrInfo.csv \
+    obj/genfiles/attrEnumInfo.csv \
     obj/genfiles/targAttrInfo.csv\
-    obj/genfiles/plugins/fapiPlatHwpErrParser.H:plugins/
+    obj/genfiles/plugins/platHwpErrParser.H:plugins
 
 #
 # Portions of the FSP sandbox which must be rebuilt based on file changes.
