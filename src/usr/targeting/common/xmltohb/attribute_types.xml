@@ -2765,6 +2765,7 @@
     <id>FAPI_NAME</id>
     <description>Common name across FAPI environments
     chip target -> pu:k0:n0:s0:p00
+    DIMM target -> dimm:k0:n0:s0:p00
     chip unit target -> pu.core:k0:n0:s0:p00:c0
     cage/system target -> k0
 
@@ -19057,6 +19058,16 @@ DEPRECATED!!!!
     <writeable/>
 </attribute>
 
+<enumerationType>
+    <id>FAPI_POS</id>
+    <description>Enumeration defining special FAPI_POS values</description>
+    <enumerator>
+        <name>NA</name>
+        <value>0xFFFFFFFF</value>
+    </enumerator>
+    <default>NA</default>
+</enumerationType>
+
 <attribute>
     <id>FAPI_POS</id>
     <description>
@@ -19070,16 +19081,19 @@ DEPRECATED!!!!
       Note: Value ignores physical drawer boundaries, the value is unique across the entire
             system.
       This data is derived from the MRW.
+      Default of NA is 0xFFFFFFFF (to avoid confusion with legitimate 0
+         values)
     </description>
     <simpleType>
         <uint32_t>
+           <default>0xFFFFFFFF</default>
         </uint32_t>
     </simpleType>
     <hwpfToHbAttrMap>
         <id>ATTR_FAPI_POS</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
 
