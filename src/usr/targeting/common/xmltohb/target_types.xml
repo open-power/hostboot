@@ -130,6 +130,7 @@
     <attribute><id>MNFG_FLAGS</id></attribute>
     <attribute><id>FABRIC_TO_PHYSICAL_NODE_MAP</id></attribute>
     <attribute><id>MFG_TRACE_ENABLE</id></attribute>
+    <attribute><id>TPM_REQUIRED</id></attribute>
     <!-- Start memory_attributes.xml -->
     <attribute><id>MRW_POWER_CONTROL_REQUESTED</id></attribute>
     <attribute><id>MRW_DDR3_VDDR_MAX_LIMIT</id></attribute>
