@@ -939,7 +939,8 @@ errlHndl_t validateCentaurPnorCache()
                 errl = VPD::invalidatePnorCache(itr->second.first);
                 if (errl)
                 {
-                    break; //return with error
+                    // Just commit the log and move on. No need to terminate IPL
+                    errlCommit( errl, VPD_COMP_ID );
                 }
             }
         }
