@@ -69,6 +69,10 @@
         <default>affinity:sys-0</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>0xFFFFFFFF</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>0</default>
     </attribute>
@@ -129,6 +133,10 @@
         <default>affinity:sys-0/node-0</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>0xFFFFFFFF</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>0</default>
     </attribute>
@@ -155,6 +163,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -200,7 +212,7 @@
     </attribute>
     <!-- End FSI connections -->
     <attribute>
-        <id>FABRIC_NODE_ID</id>
+        <id>FABRIC_GROUP_ID</id>
         <default>0</default>
     </attribute>
     <attribute>
@@ -230,7 +242,7 @@
 <targetInstance>
     <id>sys0node0proc0eq0</id>
     <type>unit-eq-power9</type>
-    <attribute><id>HUID</id><default>0x00200000</default></attribute>
+    <attribute><id>HUID</id><default>0x00230000</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-0</default>
@@ -238,6 +250,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -256,7 +272,7 @@
 <targetInstance>
     <id>sys0node0proc0eq1</id>
     <type>unit-eq-power9</type>
-    <attribute><id>HUID</id><default>0x00200001</default></attribute>
+    <attribute><id>HUID</id><default>0x00230001</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-1</default>
@@ -264,6 +280,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -282,7 +302,7 @@
 <targetInstance>
     <id>sys0node0proc0eq2</id>
     <type>unit-eq-power9</type>
-    <attribute><id>HUID</id><default>0x00200002</default></attribute>
+    <attribute><id>HUID</id><default>0x00230002</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-2</default>
@@ -290,6 +310,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -308,7 +332,7 @@
 <targetInstance>
     <id>sys0node0proc0eq3</id>
     <type>unit-eq-power9</type>
-    <attribute><id>HUID</id><default>0x00200003</default></attribute>
+    <attribute><id>HUID</id><default>0x00230003</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-3</default>
@@ -316,6 +340,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -334,7 +362,7 @@
 <targetInstance>
     <id>sys0node0proc0eq4</id>
     <type>unit-eq-power9</type>
-    <attribute><id>HUID</id><default>0x00200004</default></attribute>
+    <attribute><id>HUID</id><default>0x00230004</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-4</default>
@@ -342,6 +370,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-4</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>4</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -360,7 +392,7 @@
 <targetInstance>
     <id>sys0node0proc0eq5</id>
     <type>unit-eq-power9</type>
-    <attribute><id>HUID</id><default>0x00200005</default></attribute>
+    <attribute><id>HUID</id><default>0x00230005</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-5</default>
@@ -368,6 +400,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-5</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -397,6 +433,10 @@
         <default>affinity:sys-0/node-0/proc-0/eq-0/ex-0</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>0</default>
     </attribute>
@@ -419,6 +459,10 @@
         <default>affinity:sys-0/node-0/proc-0/eq-0/ex-1</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>1</default>
     </attribute>
@@ -430,16 +474,20 @@
 
 <!-- nimbus n0p0eq1 EX units -->
 <targetInstance>
-    <id>sys0node0proc0eq1ex0</id>
+    <id>sys0node0proc0eq1ex2</id>
     <type>unit-ex-power9</type>
     <attribute><id>HUID</id><default>0x00061002</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-1/ex-0</default>
+        <default>physical:sys-0/node-0/proc-0/eq-1/ex-2</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-1/ex-0</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-1/ex-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -452,16 +500,20 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0eq1ex1</id>
+    <id>sys0node0proc0eq1ex3</id>
     <type>unit-ex-power9</type>
     <attribute><id>HUID</id><default>0x00061003</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-1/ex-1</default>
+        <default>physical:sys-0/node-0/proc-0/eq-1/ex-3</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-1/ex-1</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-1/ex-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -475,16 +527,20 @@
 
 <!-- nimbus n0p0eq2 EX units -->
 <targetInstance>
-    <id>sys0node0proc0eq2ex0</id>
+    <id>sys0node0proc0eq2ex4</id>
     <type>unit-ex-power9</type>
     <attribute><id>HUID</id><default>0x00061004</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-2/ex-0</default>
+        <default>physical:sys-0/node-0/proc-0/eq-2/ex-4</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-2/ex-0</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-2/ex-4</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>4</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -497,16 +553,20 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0eq2ex1</id>
+    <id>sys0node0proc0eq2ex5</id>
     <type>unit-ex-power9</type>
     <attribute><id>HUID</id><default>0x00061005</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-2/ex-1</default>
+        <default>physical:sys-0/node-0/proc-0/eq-2/ex-5</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-2/ex-1</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-2/ex-5</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -520,16 +580,20 @@
 
 <!-- nimbus n0p0eq3 EX units -->
 <targetInstance>
-    <id>sys0node0proc0eq3ex0</id>
+    <id>sys0node0proc0eq3ex6</id>
     <type>unit-ex-power9</type>
     <attribute><id>HUID</id><default>0x00061006</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-3/ex-0</default>
+        <default>physical:sys-0/node-0/proc-0/eq-3/ex-6</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-3/ex-0</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-3/ex-6</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>6</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -542,16 +606,20 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0eq3ex1</id>
+    <id>sys0node0proc0eq3ex7</id>
     <type>unit-ex-power9</type>
     <attribute><id>HUID</id><default>0x00061007</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-3/ex-1</default>
+        <default>physical:sys-0/node-0/proc-0/eq-3/ex-7</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-3/ex-1</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-3/ex-7</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>7</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -565,16 +633,20 @@
 
 <!-- nimbus n0p0eq4 EX units -->
 <targetInstance>
-    <id>sys0node0proc0eq4ex0</id>
+    <id>sys0node0proc0eq4ex8</id>
     <type>unit-ex-power9</type>
     <attribute><id>HUID</id><default>0x00061008</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-4/ex-0</default>
+        <default>physical:sys-0/node-0/proc-0/eq-4/ex-8</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-4/ex-0</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-4/ex-8</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>8</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -587,16 +659,20 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0eq4ex1</id>
+    <id>sys0node0proc0eq4ex9</id>
     <type>unit-ex-power9</type>
     <attribute><id>HUID</id><default>0x00061009</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-4/ex-1</default>
+        <default>physical:sys-0/node-0/proc-0/eq-4/ex-9</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-4/ex-1</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-4/ex-9</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>9</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -610,16 +686,20 @@
 
 <!-- nimbus n0p0eq5 EX units -->
 <targetInstance>
-    <id>sys0node0proc0eq5ex0</id>
+    <id>sys0node0proc0eq5ex10</id>
     <type>unit-ex-power9</type>
     <attribute><id>HUID</id><default>0x0006100A</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-5/ex-0</default>
+        <default>physical:sys-0/node-0/proc-0/eq-5/ex-10</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-5/ex-0</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-5/ex-10</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>10</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -632,16 +712,20 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0eq5ex1</id>
+    <id>sys0node0proc0eq5ex11</id>
     <type>unit-ex-power9</type>
     <attribute><id>HUID</id><default>0x0006100B</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-5/ex-1</default>
+        <default>physical:sys-0/node-0/proc-0/eq-5/ex-11</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-5/ex-1</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-5/ex-11</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>11</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -665,6 +749,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/eq-0/ex-0/core-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -693,6 +781,10 @@
         <default>affinity:sys-0/node-0/proc-0/eq-0/ex-0/core-1</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>1</default>
     </attribute>
@@ -708,16 +800,20 @@
 
 <!-- nimbus n0p0eq0ex1 CORE units -->
 <targetInstance>
-    <id>sys0node0proc0eq0ex1core0</id>
+    <id>sys0node0proc0eq0ex1core2</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071002</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-0/ex-1/core-0</default>
+        <default>physical:sys-0/node-0/proc-0/eq-0/ex-1/core-2</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-0/ex-1/core-0</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-0/ex-1/core-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -734,16 +830,20 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0eq0ex1core1</id>
+    <id>sys0node0proc0eq0ex1core3</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071003</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-0/ex-1/core-1</default>
+        <default>physical:sys-0/node-0/proc-0/eq-0/ex-1/core-3</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-0/ex-1/core-1</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-0/ex-1/core-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -759,18 +859,22 @@
     </attribute>
 </targetInstance>
 
-<!-- nimbus n0p0eq1ex0 CORE units -->
+<!-- nimbus n0p0eq1ex2 CORE units -->
 <targetInstance>
-    <id>sys0node0proc0eq1ex0core0</id>
+    <id>sys0node0proc0eq1ex2core4</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071004</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-1/ex-0/core-0</default>
+        <default>physical:sys-0/node-0/proc-0/eq-1/ex-2/core-4</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-1/ex-0/core-0</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-1/ex-2/core-4</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>4</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -787,16 +891,20 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0eq1ex0core1</id>
+    <id>sys0node0proc0eq1ex2core5</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071005</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-1/ex-0/core-1</default>
+        <default>physical:sys-0/node-0/proc-0/eq-1/ex-2/core-5</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-1/ex-0/core-1</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-1/ex-2/core-5</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -812,18 +920,22 @@
     </attribute>
 </targetInstance>
 
-<!-- nimbus n0p0eq1ex1 CORE units -->
+<!-- nimbus n0p0eq1ex3 CORE units -->
 <targetInstance>
-    <id>sys0node0proc0eq1ex1core0</id>
+    <id>sys0node0proc0eq1ex3core6</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071006</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-1/ex-1/core-0</default>
+        <default>physical:sys-0/node-0/proc-0/eq-1/ex-3/core-6</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-1/ex-1/core-0</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-1/ex-3/core-6</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>6</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -840,16 +952,20 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0eq1ex1core1</id>
+    <id>sys0node0proc0eq1ex3core7</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071007</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-1/ex-1/core-1</default>
+        <default>physical:sys-0/node-0/proc-0/eq-1/ex-3/core-7</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-1/ex-1/core-1</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-1/ex-3/core-7</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>7</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -865,18 +981,22 @@
     </attribute>
 </targetInstance>
 
-<!-- nimbus n0p0eq2ex0 CORE units -->
+<!-- nimbus n0p0eq2ex4 CORE units -->
 <targetInstance>
-    <id>sys0node0proc0eq2ex0core0</id>
+    <id>sys0node0proc0eq2ex4core8</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071008</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-2/ex-0/core-0</default>
+        <default>physical:sys-0/node-0/proc-0/eq-2/ex-4/core-8</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-2/ex-0/core-0</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-2/ex-4/core-8</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>8</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -893,16 +1013,20 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0eq2ex0core1</id>
+    <id>sys0node0proc0eq2ex4core9</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071009</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-2/ex-0/core-1</default>
+        <default>physical:sys-0/node-0/proc-0/eq-2/ex-4/core-9</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-2/ex-0/core-1</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-2/ex-4/core-9</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>9</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -918,18 +1042,22 @@
     </attribute>
 </targetInstance>
 
-<!-- nimbus n0p0eq2ex1 CORE units -->
+<!-- nimbus n0p0eq2ex5 CORE units -->
 <targetInstance>
-    <id>sys0node0proc0eq2ex1core0</id>
+    <id>sys0node0proc0eq2ex5core10</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x0007100A</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-2/ex-1/core-0</default>
+        <default>physical:sys-0/node-0/proc-0/eq-2/ex-5/core-10</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-2/ex-1/core-0</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-2/ex-5/core-10</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>10</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -946,16 +1074,20 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0eq2ex1core1</id>
+    <id>sys0node0proc0eq2ex5core11</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x0007100B</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-2/ex-1/core-1</default>
+        <default>physical:sys-0/node-0/proc-0/eq-2/ex-5/core-11</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-2/ex-1/core-1</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-2/ex-5/core-11</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>11</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -971,18 +1103,22 @@
     </attribute>
 </targetInstance>
 
-<!-- nimbus n0p0eq3ex0 CORE units -->
+<!-- nimbus n0p0eq3ex6 CORE units -->
 <targetInstance>
-    <id>sys0node0proc0eq3ex0core0</id>
+    <id>sys0node0proc0eq3ex6core12</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x0007100C</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-3/ex-0/core-0</default>
+        <default>physical:sys-0/node-0/proc-0/eq-3/ex-6/core-12</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-3/ex-0/core-0</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-3/ex-6/core-12</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>12</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -999,16 +1135,20 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0eq3ex0core1</id>
+    <id>sys0node0proc0eq3ex6core13</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x0007100D</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-3/ex-0/core-1</default>
+        <default>physical:sys-0/node-0/proc-0/eq-3/ex-6/core-13</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-3/ex-0/core-1</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-3/ex-6/core-13</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>13</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1024,18 +1164,22 @@
     </attribute>
 </targetInstance>
 
-<!-- nimbus n0p0eq3ex1 CORE units -->
+<!-- nimbus n0p0eq3ex7 CORE units -->
 <targetInstance>
-    <id>sys0node0proc0eq3ex1core0</id>
+    <id>sys0node0proc0eq3ex7core14</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x0007100E</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-3/ex-1/core-0</default>
+        <default>physical:sys-0/node-0/proc-0/eq-3/ex-7/core-14</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-3/ex-1/core-0</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-3/ex-7/core-14</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>14</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1052,16 +1196,20 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0eq3ex1core1</id>
+    <id>sys0node0proc0eq3ex7core15</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x0007100F</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-3/ex-1/core-1</default>
+        <default>physical:sys-0/node-0/proc-0/eq-3/ex-7/core-15</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-3/ex-1/core-1</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-3/ex-7/core-15</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>15</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1077,18 +1225,22 @@
     </attribute>
 </targetInstance>
 
-<!-- nimbus n0p0eq4ex0 CORE units -->
+<!-- nimbus n0p0eq4ex8 CORE units -->
 <targetInstance>
-    <id>sys0node0proc0eq4ex0core0</id>
+    <id>sys0node0proc0eq4ex8core16</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071010</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-4/ex-0/core-0</default>
+        <default>physical:sys-0/node-0/proc-0/eq-4/ex-8/core-16</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-4/ex-0/core-0</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-4/ex-8/core-16</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>16</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1105,16 +1257,20 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0eq4ex0core1</id>
+    <id>sys0node0proc0eq4ex8core17</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071011</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-4/ex-0/core-1</default>
+        <default>physical:sys-0/node-0/proc-0/eq-4/ex-8/core-17</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-4/ex-0/core-1</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-4/ex-8/core-17</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>17</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1130,18 +1286,22 @@
     </attribute>
 </targetInstance>
 
-<!-- nimbus n0p0eq4ex1 CORE units -->
+<!-- nimbus n0p0eq4ex9 CORE units -->
 <targetInstance>
-    <id>sys0node0proc0eq4ex1core0</id>
+    <id>sys0node0proc0eq4ex9core18</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071012</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-4/ex-1/core-0</default>
+        <default>physical:sys-0/node-0/proc-0/eq-4/ex-9/core-18</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-4/ex-1/core-0</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-4/ex-9/core-18</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>18</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1158,16 +1318,20 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0eq4ex1core1</id>
+    <id>sys0node0proc0eq4ex9core19</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071013</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-4/ex-1/core-1</default>
+        <default>physical:sys-0/node-0/proc-0/eq-4/ex-9/core-19</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-4/ex-1/core-1</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-4/ex-9/core-19</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>19</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1183,18 +1347,22 @@
     </attribute>
 </targetInstance>
 
-<!-- nimbus n0p0eq5ex0 CORE units -->
+<!-- nimbus n0p0eq5ex10 CORE units -->
 <targetInstance>
-    <id>sys0node0proc0eq5ex0core0</id>
+    <id>sys0node0proc0eq5ex10core20</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071014</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-5/ex-0/core-0</default>
+        <default>physical:sys-0/node-0/proc-0/eq-5/ex-10/core-20</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-5/ex-0/core-0</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-5/ex-10/core-20</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>20</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1211,16 +1379,20 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0eq5ex0core1</id>
+    <id>sys0node0proc0eq5ex10core21</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071015</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-5/ex-0/core-1</default>
+        <default>physical:sys-0/node-0/proc-0/eq-5/ex-10/core-21</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-5/ex-0/core-1</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-5/ex-10/core-21</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>21</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1236,18 +1408,22 @@
     </attribute>
 </targetInstance>
 
-<!-- nimbus n0p0eq5ex1 CORE units -->
+<!-- nimbus n0p0eq5ex11 CORE units -->
 <targetInstance>
-    <id>sys0node0proc0eq5ex1core0</id>
+    <id>sys0node0proc0eq5ex11core22</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071016</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-5/ex-1/core-0</default>
+        <default>physical:sys-0/node-0/proc-0/eq-5/ex-11/core-22</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-5/ex-1/core-0</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-5/ex-11/core-22</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>22</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1264,16 +1440,20 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0eq5ex1core1</id>
+    <id>sys0node0proc0eq5ex11core23</id>
     <type>unit-core-power9</type>
     <attribute><id>HUID</id><default>0x00071017</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/eq-5/ex-1/core-1</default>
+        <default>physical:sys-0/node-0/proc-0/eq-5/ex-11/core-23</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/eq-5/ex-1/core-1</default>
+        <default>affinity:sys-0/node-0/proc-0/eq-5/ex-11/core-23</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>23</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1303,6 +1483,10 @@
         <default>affinity:sys-0/node-0/proc-0/mcs-0</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>0</default>
     </attribute>
@@ -1320,6 +1504,7 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-7</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1333,6 +1518,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1352,6 +1541,7 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-7</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1365,6 +1555,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1384,6 +1578,7 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-8</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -1397,6 +1592,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1416,13 +1615,14 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-8</default>
     </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
 </targetInstance>
 
 <!-- Nimbus n0p0mcs0 MCA units -->
 <targetInstance>
     <id>sys0node0proc0mcs0mca0</id>
     <type>unit-mca-nimbus</type>
-    <attribute><id>HUID</id><default>0x000D0100</default></attribute>
+    <attribute><id>HUID</id><default>0x00240100</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcs-0/mca-0</default>
@@ -1430,6 +1630,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-0/mca-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1448,7 +1652,7 @@
 <targetInstance>
     <id>sys0node0proc0mcs0mca1</id>
     <type>unit-mca-nimbus</type>
-    <attribute><id>HUID</id><default>0x000D0101</default></attribute>
+    <attribute><id>HUID</id><default>0x00240101</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcs-0/mca-1</default>
@@ -1456,6 +1660,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcs-0/mca-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1473,16 +1681,20 @@
 
 <!-- Nimbus n0p0mcs1 MCA units -->
 <targetInstance>
-    <id>sys0node0proc0mcs1mca0</id>
+    <id>sys0node0proc0mcs1mca2</id>
     <type>unit-mca-nimbus</type>
-    <attribute><id>HUID</id><default>0x000D0102</default></attribute>
+    <attribute><id>HUID</id><default>0x00240102</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcs-1/mca-0</default>
+        <default>physical:sys-0/node-0/proc-0/mcs-1/mca-2</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-1/mca-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-1/mca-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1499,16 +1711,20 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0mcs1mca1</id>
+    <id>sys0node0proc0mcs1mca3</id>
     <type>unit-mca-nimbus</type>
-    <attribute><id>HUID</id><default>0x000D0103</default></attribute>
+    <attribute><id>HUID</id><default>0x00240103</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcs-1/mca-1</default>
+        <default>physical:sys-0/node-0/proc-0/mcs-1/mca-3</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-1/mca-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-1/mca-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1526,16 +1742,20 @@
 
 <!-- Nimbus n0p0mcs2 MCA units -->
 <targetInstance>
-    <id>sys0node0proc0mcs2mca0</id>
+    <id>sys0node0proc0mcs2mca4</id>
     <type>unit-mca-nimbus</type>
-    <attribute><id>HUID</id><default>0x000D0104</default></attribute>
+    <attribute><id>HUID</id><default>0x00240104</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcs-2/mca-0</default>
+        <default>physical:sys-0/node-0/proc-0/mcs-2/mca-4</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-2/mca-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-2/mca-4</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>4</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1552,16 +1772,20 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0mcs2mca1</id>
+    <id>sys0node0proc0mcs2mca5</id>
     <type>unit-mca-nimbus</type>
-    <attribute><id>HUID</id><default>0x000D0105</default></attribute>
+    <attribute><id>HUID</id><default>0x00240105</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcs-2/mca-1</default>
+        <default>physical:sys-0/node-0/proc-0/mcs-2/mca-5</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-2/mca-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-2/mca-5</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1579,16 +1803,20 @@
 
 <!-- Nimbus n0p0mcs3 MCA units -->
 <targetInstance>
-    <id>sys0node0proc0mcs3mca0</id>
+    <id>sys0node0proc0mcs3mca6</id>
     <type>unit-mca-nimbus</type>
-    <attribute><id>HUID</id><default>0x000D0106</default></attribute>
+    <attribute><id>HUID</id><default>0x00240106</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcs-3/mca-0</default>
+        <default>physical:sys-0/node-0/proc-0/mcs-3/mca-6</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-3/mca-0</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-3/mca-6</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>6</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1605,16 +1833,20 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0mcs3mca1</id>
+    <id>sys0node0proc0mcs3mca7</id>
     <type>unit-mca-nimbus</type>
-    <attribute><id>HUID</id><default>0x000D0107</default></attribute>
+    <attribute><id>HUID</id><default>0x00240107</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/mcs-3/mca-1</default>
+        <default>physical:sys-0/node-0/proc-0/mcs-3/mca-7</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mcs-3/mca-1</default>
+        <default>affinity:sys-0/node-0/proc-0/mcs-3/mca-7</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>7</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1634,7 +1866,7 @@
 <targetInstance>
     <id>sys0node0proc0mcbist0</id>
     <type>unit-mcbist-nimbus</type>
-    <attribute><id>HUID</id><default>0x000D0000</default></attribute>
+    <attribute><id>HUID</id><default>0x00250000</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcbist-0</default>
@@ -1642,6 +1874,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcbist-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1660,7 +1896,7 @@
 <targetInstance>
     <id>sys0node0proc0mcbist1</id>
     <type>unit-mcbist-nimbus</type>
-    <attribute><id>HUID</id><default>0x000D0001</default></attribute>
+    <attribute><id>HUID</id><default>0x00250001</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/mcbist-1</default>
@@ -1668,6 +1904,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mcbist-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1687,7 +1927,7 @@
 <targetInstance>
     <id>sys0node0proc0pec0</id>
     <type>unit-pec-power9</type>
-    <attribute><id>HUID</id><default>0x000E0000</default></attribute>
+    <attribute><id>HUID</id><default>0x002D0000</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pec-0</default>
@@ -1695,6 +1935,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/pec-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1713,7 +1957,7 @@
 <targetInstance>
     <id>sys0node0proc0pec1</id>
     <type>unit-pec-power9</type>
-    <attribute><id>HUID</id><default>0x000E0001</default></attribute>
+    <attribute><id>HUID</id><default>0x002D0001</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pec-1</default>
@@ -1721,6 +1965,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/pec-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1739,7 +1987,7 @@
 <targetInstance>
     <id>sys0node0proc0pec2</id>
     <type>unit-pec-power9</type>
-    <attribute><id>HUID</id><default>0x000E0002</default></attribute>
+    <attribute><id>HUID</id><default>0x002D0002</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pec-2</default>
@@ -1747,6 +1995,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/pec-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1766,7 +2018,7 @@
 <targetInstance>
     <id>sys0node0proc0pec0phb0</id>
     <type>unit-phb-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0100</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0100</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/pec-0/phb-0</default>
@@ -1774,6 +2026,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/pec-0/phb-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1791,16 +2047,20 @@
 
 <!-- Nimbus n0p0pec1 PHB units -->
 <targetInstance>
-    <id>sys0node0proc0pec1phb0</id>
+    <id>sys0node0proc0pec1phb1</id>
     <type>unit-phb-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0101</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0101</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/pec-1/phb-0</default>
+        <default>physical:sys-0/node-0/proc-0/pec-1/phb-1</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/pec-1/phb-0</default>
+        <default>affinity:sys-0/node-0/proc-0/pec-1/phb-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1817,16 +2077,20 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0pec1phb1</id>
+    <id>sys0node0proc0pec1phb2</id>
     <type>unit-phb-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0102</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0102</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/pec-1/phb-1</default>
+        <default>physical:sys-0/node-0/proc-0/pec-1/phb-2</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/pec-1/phb-1</default>
+        <default>affinity:sys-0/node-0/proc-0/pec-1/phb-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>4</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1844,16 +2108,20 @@
 
 <!-- Nimbus n0p0pec2 PHB units -->
 <targetInstance>
-    <id>sys0node0proc0pec2phb0</id>
+    <id>sys0node0proc0pec2phb3</id>
     <type>unit-phb-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0103</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0103</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/pec-2/phb-0</default>
+        <default>physical:sys-0/node-0/proc-0/pec-2/phb-3</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/pec-2/phb-0</default>
+        <default>affinity:sys-0/node-0/proc-0/pec-2/phb-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>6</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1870,16 +2138,20 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0pec2phb1</id>
+    <id>sys0node0proc0pec2phb4</id>
     <type>unit-phb-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0104</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0104</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/pec-2/phb-1</default>
+        <default>physical:sys-0/node-0/proc-0/pec-2/phb-4</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/pec-2/phb-1</default>
+        <default>affinity:sys-0/node-0/proc-0/pec-2/phb-4</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>7</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1896,16 +2168,20 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc0pec2phb2</id>
+    <id>sys0node0proc0pec2phb5</id>
     <type>unit-phb-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0105</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0105</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-0/pec-2/phb-2</default>
+        <default>physical:sys-0/node-0/proc-0/pec-2/phb-5</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/pec-2/phb-2</default>
+        <default>affinity:sys-0/node-0/proc-0/pec-2/phb-5</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>8</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1925,7 +2201,7 @@
 <targetInstance>
     <id>sys0node0proc0obus0</id>
     <type>unit-obus-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0200</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0200</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/obus-0</default>
@@ -1933,6 +2209,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/obus-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1951,7 +2231,7 @@
 <targetInstance>
     <id>sys0node0proc0obus3</id>
     <type>unit-obus-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0201</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0201</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/obus-3</default>
@@ -1959,6 +2239,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/obus-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -1978,7 +2262,7 @@
 <targetInstance>
     <id>sys0node0proc0nv0</id>
     <type>unit-nv-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0300</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0300</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/nv-0</default>
@@ -1986,6 +2270,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/nv-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -2004,7 +2292,7 @@
 <targetInstance>
     <id>sys0node0proc0nv1</id>
     <type>unit-nv-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0301</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0301</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/nv-1</default>
@@ -2012,6 +2300,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/nv-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -2032,7 +2324,7 @@
 <targetInstance>
     <id>sys0node0proc0ppe0</id>
     <type>unit-ppe-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0400</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0400</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ppe-0</default>
@@ -2040,6 +2332,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ppe-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -2054,7 +2350,7 @@
 <targetInstance>
     <id>sys0node0proc0ppe1</id>
     <type>unit-ppe-nimbus</type>
-    <attribute><id>HUID</id><default>0x000E0401</default></attribute>
+    <attribute><id>HUID</id><default>0x002E0401</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/ppe-1</default>
@@ -2062,6 +2358,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/ppe-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -2092,6 +2392,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-1</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>0</default>
     </attribute>
@@ -2116,6 +2420,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -2144,6 +2452,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-3</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>2</default>
     </attribute>
@@ -2168,6 +2480,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-4</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>4</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -2196,6 +2512,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-5</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>5</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>4</default>
     </attribute>
@@ -2220,6 +2540,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-6</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>6</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -2248,6 +2572,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-7</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>7</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>6</default>
     </attribute>
@@ -2272,6 +2600,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-8</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>8</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -2300,6 +2632,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-9</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>9</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>8</default>
     </attribute>
@@ -2324,6 +2660,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-12</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>12</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -2352,6 +2692,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-13</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>13</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>10</default>
     </attribute>
@@ -2376,6 +2720,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-14</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>14</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -2404,6 +2752,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-15</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>15</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>12</default>
     </attribute>
@@ -2428,6 +2780,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-16</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>16</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -2456,6 +2812,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-17</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>17</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>14</default>
     </attribute>
@@ -2480,6 +2840,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-18</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>18</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -2508,6 +2872,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-19</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>19</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>16</default>
     </attribute>
@@ -2532,6 +2900,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-20</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>20</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -2560,6 +2932,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-21</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>21</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>18</default>
     </attribute>
@@ -2584,6 +2960,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-32</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>32</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -2612,6 +2992,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-33</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>33</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>20</default>
     </attribute>
@@ -2636,6 +3020,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-34</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>34</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -2664,6 +3052,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-35</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>35</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>22</default>
     </attribute>
@@ -2688,6 +3080,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-36</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>36</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -2716,6 +3112,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-37</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>37</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>24</default>
     </attribute>
@@ -2740,6 +3140,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-38</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>38</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -2768,6 +3172,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-39</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>39</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>26</default>
     </attribute>
@@ -2792,6 +3200,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-40</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>40</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -2820,6 +3232,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-41</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>41</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>28</default>
     </attribute>
@@ -2844,6 +3260,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-42</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>42</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -2872,6 +3292,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-43</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>43</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>30</default>
     </attribute>
@@ -2896,6 +3320,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-44</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>44</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -2924,6 +3352,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-45</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>45</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>32</default>
     </attribute>
@@ -2948,6 +3380,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-46</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>46</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -2976,6 +3412,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-47</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>47</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>34</default>
     </attribute>
@@ -3000,6 +3440,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-48</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>48</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3028,6 +3472,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-49</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>49</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>36</default>
     </attribute>
@@ -3052,6 +3500,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-50</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>50</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3080,6 +3532,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-51</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>51</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>38</default>
     </attribute>
@@ -3104,6 +3560,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-52</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>52</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3132,6 +3592,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-53</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>53</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>40</default>
     </attribute>
@@ -3156,6 +3620,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/perv-54</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>54</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3184,6 +3652,10 @@
         <default>affinity:sys-0/node-0/proc-0/perv-55</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>55</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>42</default>
     </attribute>
@@ -3206,6 +3678,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/xbus-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3236,6 +3712,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/xbus-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3269,6 +3749,10 @@
         <default>affinity:sys-0/node-0/proc-0/capp-0</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>0</default>
     </attribute>
@@ -3295,6 +3779,10 @@
         <default>affinity:sys-0/node-0/proc-0/capp-1</default>
     </attribute>
     <attribute>
+        <id>FAPI_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>1</default>
     </attribute>
@@ -3312,7 +3800,7 @@
 <targetInstance>
     <id>sys0node0proc0sbe0</id>
     <type>unit-sbe-nimbus</type>
-    <attribute><id>HUID</id><default>0x00220000</default></attribute>
+    <attribute><id>HUID</id><default>0x002A0000</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/sbe-0</default>
@@ -3320,6 +3808,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/sbe-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3336,7 +3828,7 @@
 <targetInstance>
     <id>sys0node0proc0occ0</id>
     <type>occ</type>
-        <attribute><id>HUID</id><default>0x00230000</default></attribute>
+        <attribute><id>HUID</id><default>0x00130000</default></attribute>
         <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/occ-0</default>
@@ -3344,6 +3836,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/occ-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0xFFFFFFFF</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3366,6 +3862,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>physical:sys-0/node-0/proc-0/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0xFFFFFFFF</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>

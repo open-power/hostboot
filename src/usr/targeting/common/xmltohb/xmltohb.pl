@@ -185,7 +185,7 @@ use Digest::MD5 qw(md5_hex);
 # Aborts application if file name not found.
 # NOTE: the attribute list initially contains both real and virtual attributes
 my $allAttributes = $xml->XMLin($cfgHbXmlFile,
-    forcearray => ['enumerationType','attribute','hwpfToHbAttrMap',
+    forcearray => ['enumerationType','enumerator','attribute','hwpfToHbAttrMap',
                    'compileAttribute']);
 
 my $fapiAttributes = {};

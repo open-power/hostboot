@@ -88,6 +88,50 @@ use constant
     MAX_CAPP_PER_PROC => 2,
     MAX_SBE_PER_PROC => 1,
     MAX_NV_PER_PROC => 2,
+    MAX_MI_PER_PROC => 4,
+};
+
+# Architecture limits, for the purpose of calculating FAPI_POS.
+# This sometimes differs subtley from the max constants above
+# due to trying to account for worst case across all present and
+# future designs for a processor generation, as well as to account for
+# holes in the mapping.  It is also more geared towards parent/child
+# maxes. Some constants pass through to the above.
+use constant
+{
+    ARCH_LIMIT_DIMM_PER_MCA => 2,
+    ARCH_LIMIT_DIMM_PER_MBA => 4,
+    # Note: this is proc per fabric group, vs. physical node
+    ARCH_LIMIT_PROC_PER_FABRIC_GROUP => 8,
+    ARCH_LIMIT_MEMBUF_PER_DMI => 1,
+    ARCH_LIMIT_EX_PER_EQ => MAX_EX_PER_PROC / MAX_EQ_PER_PROC,
+    ARCH_LIMIT_MBA_PER_MEMBUF => MAX_MBA_PER_MEMBUF,
+    ARCH_LIMIT_MCS_PER_PROC => MAX_MCS_PER_PROC,
+    ARCH_LIMIT_XBUS_PER_PROC => MAX_XBUS_PER_PROC,
+    ARCH_LIMIT_ABUS_PER_PROC => MAX_ABUS_PER_PROC,
+    ARCH_LIMIT_L4_PER_MEMBUF => 1,
+    ARCH_LIMIT_CORE_PER_EX => MAX_CORE_PER_PROC / MAX_EX_PER_PROC,
+    ARCH_LIMIT_EQ_PER_PROC => MAX_EQ_PER_PROC,
+    ARCH_LIMIT_MCA_PER_MCS => MAX_MCA_PER_PROC / MAX_MCS_PER_PROC,
+    ARCH_LIMIT_MCBIST_PER_PROC => MAX_MCBIST_PER_PROC,
+    ARCH_LIMIT_MI_PER_PROC => MAX_MI_PER_PROC,
+    ARCH_LIMIT_CAPP_PER_PROC => MAX_CAPP_PER_PROC,
+    ARCH_LIMIT_DMI_PER_MI => 2,
+    ARCH_LIMIT_OBUS_PER_PROC => MAX_OBUS_PER_PROC,
+    ARCH_LIMIT_NV_PER_PROC => MAX_NV_PER_PROC,
+    ARCH_LIMIT_SBE_PER_PROC => MAX_SBE_PER_PROC,
+    # There are 20+ PPE, but lots of holes in the mapping.   Further the
+    # architecture supports potentially many more PPEs.  So, for now we'll pick
+    # power of 2 value larger than largest pervasive unit of 50
+    ARCH_LIMIT_PPE_PER_PROC => 64,
+    # Pervasives are numbered 1..55.  0 Is not possible but acts as a hole.
+    # Some pervasives within the range are holes as well
+    ARCH_LIMIT_PERV_PER_PROC => 56,
+    ARCH_LIMIT_PEC_PER_PROC => MAX_PEC_PER_PROC,
+    # There are only 6 PHBs per chip, but they are unbalanced across the 3
+    # PECs.  To make the math easy, we'll assume there are potentially 3 PHBs
+    # per PEC, but PEC0 and PEC1 will have 2 and 1 holes respectively
+    ARCH_LIMIT_PHB_PER_PEC => 3,
 };
 
 # for SPI connections in the @SPIs array
@@ -1518,7 +1562,7 @@ for my $i ( 0 .. $#SortedTargets )
         my $node = $SortedTargets[$i][NODE_FIELD];
         my $position = $SortedTargets[$i][POS_FIELD];
 
-        my @targetOrder = ("ex","eq","core","mcs","mca","mcbist","pec",
+        my @targetOrder = ("eq","ex","core","mcs","mca","mcbist","pec",
                 "phb","obus","xbus","ppe","perv","capp","sbe");
         for my $m (0 .. $#targetOrder)
         {
@@ -1701,6 +1745,9 @@ my $proc_ordinal_id =0;
 #my @fru_paths;
 my $hwTopology =0;
 
+# A hash mapping an affinity path to a FAPI_POS
+my %fapiPosH;
+
 for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
 {
     if ($STargets[$i][NODE_FIELD] != $node)
@@ -1796,7 +1843,8 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         }
 
         generate_proc($proc, $is_master, $ipath, $lognode, $logid,
-                      $proc_ordinal_id, \@fsi, \@altfsi, $fru_id, $hwTopology);
+                      $proc_ordinal_id, \@fsi, \@altfsi, $fru_id, $hwTopology,
+                      \%fapiPosH);
 
         generate_occ($proc, $proc_ordinal_id);
 
@@ -1820,7 +1868,8 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         {
             print "\n<!-- $SYSNAME n${node}p$proc EX units -->\n";
         }
-        generate_ex($proc, $ex, $STargets[$i][ORDINAL_FIELD], $ipath);
+        generate_ex($proc, $ex, $STargets[$i][ORDINAL_FIELD], $ipath,
+            \%fapiPosH);
         $ex_count++;
         if ($STargets[$i+1][NAME_FIELD] eq "core")
         {
@@ -1837,7 +1886,7 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
             print "\n<!-- $SYSNAME n${node}p$proc core units -->\n";
         }
         generate_core($proc,$core,$STargets[$i][ORDINAL_FIELD],
-                      $STargets[$i][PATH_FIELD]);
+                      $STargets[$i][PATH_FIELD],\%fapiPosH);
         $ex_core_count++;
         if ($STargets[$i+1][NAME_FIELD] eq "mcs")
         {
@@ -1853,7 +1902,8 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         {
             print "\n<!-- $SYSNAME n${node}p$proc EQ units -->\n";
         }
-        generate_eq($proc, $eq, $STargets[$i][ORDINAL_FIELD], $ipath);
+        generate_eq($proc, $eq, $STargets[$i][ORDINAL_FIELD], $ipath,
+            \%fapiPosH);
         $eq_count++;
         if ($STargets[$i+1][NAME_FIELD] eq "core")
         {
@@ -1869,7 +1919,8 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         {
             print "\n<!-- $SYSNAME n${node}p$proc MCS units -->\n";
         }
-        generate_mcs($proc,$mcs, $STargets[$i][ORDINAL_FIELD], $ipath);
+        generate_mcs($proc,$mcs, $STargets[$i][ORDINAL_FIELD],
+            $ipath,\%fapiPosH);
         $mcs_count++;
         if (($STargets[$i+1][NAME_FIELD] eq "pu") ||
             ($STargets[$i+1][NAME_FIELD] eq "memb"))
@@ -1885,7 +1936,8 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         {
             print "\n<!-- $SYSNAME n${node}p$proc MCA units -->\n";
         }
-        generate_mca($proc,$mca, $STargets[$i][ORDINAL_FIELD], $ipath);
+        generate_mca($proc,$mca, $STargets[$i][ORDINAL_FIELD], $ipath,
+            \%fapiPosH);
         $mca_count++;
         if ($STargets[$i+1][NAME_FIELD] eq "pu")
         {
@@ -1900,7 +1952,8 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         {
             print "\n<!-- $SYSNAME n${node}p$proc MCBIST units -->\n";
         }
-        generate_mcbist($proc,$mcbist,$STargets[$i][ORDINAL_FIELD],$ipath);
+        generate_mcbist($proc,$mcbist,$STargets[$i][ORDINAL_FIELD],$ipath,
+            \%fapiPosH);
         $mcbist_count++;
         if ($STargets[$i+1][NAME_FIELD] eq "pu")
         {
@@ -1915,7 +1968,8 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         {
             print "\n<!-- $SYSNAME n${node}p$proc PEC units -->\n";
         }
-        generate_pec($proc,$pec,$STargets[$i][ORDINAL_FIELD],$ipath);
+        generate_pec($proc,$pec,$STargets[$i][ORDINAL_FIELD],$ipath,
+            \%fapiPosH);
         $pec_count++;
         if ($STargets[$i+1][NAME_FIELD] eq "pu")
         {
@@ -1930,7 +1984,8 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         {
             print "\n<!-- $SYSNAME n${node}p$proc PHB units -->\n";
         }
-        generate_phb_chiplet($proc,$phb,$STargets[$i][ORDINAL_FIELD],$ipath);
+        generate_phb_chiplet($proc,$phb,$STargets[$i][ORDINAL_FIELD],$ipath,
+            \%fapiPosH);
         $phb_count++;
         if ($STargets[$i+1][NAME_FIELD] eq "pu")
         {
@@ -1945,7 +2000,8 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         {
             print "\n<!-- $SYSNAME n${node}p$proc OBUS units -->\n";
         }
-        generate_obus($proc,$obus,$STargets[$i][ORDINAL_FIELD],$ipath);
+        generate_obus($proc,$obus,$STargets[$i][ORDINAL_FIELD],$ipath,
+            \%fapiPosH);
         $obus_count++;
         if ($STargets[$i+1][NAME_FIELD] eq "pu")
         {
@@ -1960,7 +2016,8 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         {
            print "\n<!-- $SYSNAME n${node}p$proc XBUS units -->\n";
         }
-        generate_xbus($proc,$xbus,$STargets[$i][ORDINAL_FIELD],$ipath);
+        generate_xbus($proc,$xbus,$STargets[$i][ORDINAL_FIELD],$ipath,
+            \%fapiPosH);
         $xbus_count++;
         if ($STargets[$i+1][NAME_FIELD] eq "pu")
         {
@@ -1975,7 +2032,8 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         {
             print "\n<!-- $SYSNAME n${node}p$proc PPE units -->\n";
         }
-        generate_ppe($proc,$ppe,$STargets[$i][ORDINAL_FIELD],$ipath);
+        generate_ppe($proc,$ppe,$STargets[$i][ORDINAL_FIELD],$ipath,
+            \%fapiPosH);
         $ppe_count++;
         if ($STargets[$i+1][NAME_FIELD] eq "pu" )
         {
@@ -1990,7 +2048,8 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         {
             print "\n<!-- $SYSNAME n${node}p$proc PERV units -->\n";
         }
-        generate_perv($proc,$perv,$STargets[$i][ORDINAL_FIELD],$ipath);
+        generate_perv($proc,$perv,$STargets[$i][ORDINAL_FIELD],$ipath,
+            \%fapiPosH);
         $perv_count++;
         if ($STargets[$i+1][NAME_FIELD] eq "pu")
         {
@@ -2005,7 +2064,8 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         {
             print "\n<!-- $SYSNAME n${node}p$proc CAPP units -->\n";
         }
-        generate_capp($proc,$capp,$STargets[$i][ORDINAL_FIELD],$ipath);
+        generate_capp($proc,$capp,$STargets[$i][ORDINAL_FIELD],$ipath,
+            \%fapiPosH);
         $capp_count++;
         if ($STargets[$i+1][NAME_FIELD] eq "pu")
         {
@@ -2020,7 +2080,8 @@ for (my $do_core = 0, my $i = 0; $i <= $#STargets; $i++)
         {
             print "\n<!-- $SYSNAME n${node}p$proc SBE units -->\n";
         }
-        generate_sbe($proc,$sbe,$STargets[$i][ORDINAL_FIELD],$ipath);
+        generate_sbe($proc,$sbe,$STargets[$i][ORDINAL_FIELD],$ipath,
+            \%fapiPosH);
         $sbe_count++;
         if ($STargets[$i+1][NAME_FIELD] eq "pu")
         {
@@ -2096,7 +2157,8 @@ for my $i ( 0 .. $#STargets )
 
         generate_centaur( $memb, $membMcs, \@fsi, \@altfsi, $ipath,
                           $STargets[$i][ORDINAL_FIELD],$relativeCentaurRid,
-                          $ipath, $membufVrmUuidHash{"n${node}:p${memb}"});
+                          $ipath, $membufVrmUuidHash{"n${node}:p${memb}"},
+                          \%fapiPosH);
     }
     elsif ($STargets[$i][NAME_FIELD] eq "mba")
     {
@@ -2108,7 +2170,7 @@ for my $i ( 0 .. $#STargets )
         }
         my $mba = $STargets[$i][UNIT_FIELD];
         generate_mba( $memb, $membMcs, $mba,
-            $STargets[$i][ORDINAL_FIELD], $ipath);
+            $STargets[$i][ORDINAL_FIELD], $ipath,\%fapiPosH);
         $mba_count += 1;
         if ($mba_count == 2)
         {
@@ -2124,7 +2186,7 @@ for my $i ( 0 .. $#STargets )
 
         my $l4 = $STargets[$i][UNIT_FIELD];
         generate_l4( $memb, $membMcs, $l4, $STargets[$i][ORDINAL_FIELD],
-                     $ipath );
+                     $ipath,\%fapiPosH );
 
         print "\n<!-- $SYSNAME Centaur n${node}p${l4} : end -->\n"
     }
@@ -2132,8 +2194,8 @@ for my $i ( 0 .. $#STargets )
 
 # Sixth, generate DIMM targets
 
-generate_is_dimm() if ($isISDIMM);
-generate_centaur_dimm() if (!$isISDIMM);
+generate_is_dimm(\%fapiPosH) if ($isISDIMM);
+generate_centaur_dimm(\%fapiPosH) if (!$isISDIMM);
 
 
 # call to do pnor attributes
@@ -2884,11 +2946,109 @@ sub generate_system_node
     do_plugin('fsp_system_node_targets', $node);
 }
 
+sub calcAndAddFapiPos
+{
+    my ($type,$affinityPath,
+        $relativePos,$fapiPosHr,$parentFapiPosOverride) = @_;
+
+    # Uncomment to emit debug trace to STDERR
+    #print STDERR "$affinityPath,";
+
+    state %typeToLimit;
+    if(not %typeToLimit)
+    {
+        # FAPI types with FAPI_POS attribute
+        # none: NA
+        # system: NA
+        $typeToLimit{"isdimm"} = ARCH_LIMIT_DIMM_PER_MCA;
+        $typeToLimit{"cdimm"}  = ARCH_LIMIT_DIMM_PER_MBA;
+        $typeToLimit{"proc"}   = ARCH_LIMIT_PROC_PER_FABRIC_GROUP;
+        $typeToLimit{"membuf"} = ARCH_LIMIT_MEMBUF_PER_DMI;
+        $typeToLimit{"ex"}     = ARCH_LIMIT_EX_PER_EQ;
+        $typeToLimit{"mba"}    = ARCH_LIMIT_MBA_PER_MEMBUF;
+        $typeToLimit{"mcs"}    = ARCH_LIMIT_MCS_PER_PROC;
+        $typeToLimit{"xbus"}   = ARCH_LIMIT_XBUS_PER_PROC;
+        $typeToLimit{"abus"}   = ARCH_LIMIT_ABUS_PER_PROC;
+        $typeToLimit{"l4"}     = ARCH_LIMIT_L4_PER_MEMBUF;
+        $typeToLimit{"core"}   = ARCH_LIMIT_CORE_PER_EX;
+        $typeToLimit{"eq"}     = ARCH_LIMIT_EQ_PER_PROC;
+        $typeToLimit{"mca"}    = ARCH_LIMIT_MCA_PER_MCS;
+        $typeToLimit{"mcbist"} = ARCH_LIMIT_MCBIST_PER_PROC;
+        $typeToLimit{"mi"}     = ARCH_LIMIT_MI_PER_PROC;
+        $typeToLimit{"capp"}   = ARCH_LIMIT_CAPP_PER_PROC;
+        $typeToLimit{"dmi"}    = ARCH_LIMIT_DMI_PER_MI;
+        $typeToLimit{"obus"}   = ARCH_LIMIT_OBUS_PER_PROC;
+        $typeToLimit{"nv"}     = ARCH_LIMIT_NV_PER_PROC;
+        $typeToLimit{"sbe"}    = ARCH_LIMIT_SBE_PER_PROC;
+        $typeToLimit{"ppe"}    = ARCH_LIMIT_PPE_PER_PROC;
+        $typeToLimit{"perv"}   = ARCH_LIMIT_PERV_PER_PROC;
+        $typeToLimit{"pec"}    = ARCH_LIMIT_PEC_PER_PROC;
+        $typeToLimit{"phb"}    = ARCH_LIMIT_PHB_PER_PEC;
+
+        #TODO RTC 149326 Add calcAndAddFapiPos logic for NV unit
+        # when generate_nv is available
+    }
+
+    my $parentFapiPos = 0;
+    if(defined $parentFapiPosOverride)
+    {
+        $parentFapiPos = $parentFapiPosOverride;
+    }
+    else
+    {
+        my $parentAffinityPath = $affinityPath;
+        # Strip off the trailing affinity path component to get the
+        # affinity path of the parent.  For example,
+        # affinity:sys-0/proc-0/eq-0 becomes affinity:sys-0/proc-0
+        $parentAffinityPath =~ s/\/[a-zA-Z]+-[0-9]+$//;
+
+        if(!exists $fapiPosHr->{$parentAffinityPath} )
+        {
+            die "No record of affinity path $parentAffinityPath";
+        }
+        $parentFapiPos = $fapiPosHr->{$parentAffinityPath};
+    }
+
+    if(exists $typeToLimit{$type})
+    {
+        # Compute this target's FAPI_POS value.  We first take the parent's
+        # FAPI_POS and multiply by the max number of targets of this type that
+        # the parent's type can have. This yields the lower bound of this
+        # target's FAPI_POS.  Then we add in the relative position of this
+        # target with respect to the parent.  Typically this is done by passing
+        # in the chip unit, in which case (such as for cores) it can be much
+        # greater than the architecture limit ratio (there can be cores with
+        # chip units of 0..23, but only 2 cores per ex), so to normalize we
+        # have to take the value mod the architecture limit.  Note that this
+        # scheme only holds up because every parent also had the same type of
+        # calculation to compute its own FAPI_POS.
+        my $fapiPos = ($parentFapiPos
+            * $typeToLimit{$type}) + ($relativePos % $typeToLimit{$type});
+
+        $fapiPosHr->{$affinityPath} = $fapiPos;
+
+        # Uncomment to emit debug trace to STDERR
+        # print STDERR "$fapiPos\n";
+
+        # Indented oddly to get the output XML to line up in the final output
+        print "
+   <attribute>
+       <id>FAPI_POS</id>
+       <default>$fapiPos</default>
+   </attribute>";
+    }
+    else
+    {
+        die "Invalid type of $type specified";
+    }
+}
+
 sub generate_proc
 {
     my ($proc, $is_master, $ipath, $lognode, $logid, $ordinalId,
         $fsiA, $altfsiA,
-        $fruid, $hwTopology) = @_;
+        $fruid, $hwTopology, $fapiPosHr) = @_;
+
     my @fsi = @{$fsiA};
     my @altfsi = @{$altfsiA};
     my $uidstr = sprintf("0x%02X05%04X",${node},${proc});
@@ -2961,6 +3121,8 @@ sub generate_proc
         $dcm_installed = 1;
     }
 
+    my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc";
+
     my $mruData = get_mruid($ipath);
 
     # If we don't have an FSP (open-power) then we want to use Xscom
@@ -2994,7 +3156,7 @@ sub generate_proc
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc</default>
+        <default>$affinityPath</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3020,6 +3182,8 @@ sub generate_proc
     <attribute><id>PROC_DCM_INSTALLED</id>
         <default>$dcm_installed</default>
     </attribute>";
+
+    calcAndAddFapiPos("proc",$affinityPath,$logid,$fapiPosHr,$lognode);
 
     #For FSP-based systems, the default will always get overridden by the
     # the FSP code before it is used, based on which FSP is being used as
@@ -3483,13 +3647,14 @@ sub generate_proc
 
 sub generate_ex
 {
-    my ($proc, $ex, $ordinalId, $ipath) = @_;
+    my ($proc, $ex, $ordinalId, $ipath,$fapiPosHr) = @_;
     my $uidstr = sprintf("0x%02X06%04X",${node},$proc*MAX_EX_PER_PROC + $ex);
     my $eq = ($ex - ($ex%2))/2;
     my $ex_orig = $ex;
     $ex = $ex % 2;
     my $mruData = get_mruid($ipath);
     my $fapi_name = sprintf("pu.ex:k0:n%d:s0:p%02d:c%d", $node, $proc,$ex_orig);
+    my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc/eq-$eq/ex-$ex";
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}eq${eq}ex$ex</id>
@@ -3506,7 +3671,7 @@ sub generate_ex
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/eq-$eq/ex-$ex</default>
+        <default>$affinityPath</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3520,6 +3685,8 @@ sub generate_ex
         <id>CHIP_UNIT</id>
         <default>$ex_orig</default>
     </attribute>";
+
+    calcAndAddFapiPos("ex",$affinityPath,$ex_orig,$fapiPosHr);
 
     # call to do any fsp per-ex attributes
     do_plugin('fsp_ex', $proc, $ex, $ordinalId );
@@ -3616,7 +3783,7 @@ sub addPervasiveParentLink
 
 sub generate_core
 {
-    my ($proc, $core, $ordinalId, $ipath) = @_;
+    my ($proc, $core, $ordinalId, $ipath,$fapiPosHr) = @_;
     my $uidstr = sprintf("0x%02X07%04X",${node},
                          $proc*MAX_CORE_PER_PROC + $core);
     my $mruData = get_mruid($ipath);
@@ -3628,6 +3795,8 @@ sub generate_core
     my $chipletId = sprintf("0x%X",($core_orig + 0x20));
     my $fapi_name = sprintf("pu.core:k0:n%d:s0:p%02d:c%d",
                             $node, $proc, $core_orig);
+    my $affinityPath =
+        "affinity:sys-$sys/node-$node/proc-$proc/eq-$eq/ex-$ex/core-$core";
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}eq${eq}ex${ex}core$core</id>
@@ -3644,7 +3813,7 @@ sub generate_core
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/eq-$eq/ex-$ex/core-$core</default>
+        <default>$affinityPath</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3664,6 +3833,8 @@ sub generate_core
     </attribute>";
 
     addPervasiveParentLink($sys,$node,$proc,$core_orig,"core");
+
+    calcAndAddFapiPos("core",$affinityPath,$core_orig,$fapiPosHr);
 
     # call to do any fsp per-ex_core attributes
     do_plugin('fsp_ex_core', $proc, $core, $ordinalId );
@@ -3713,10 +3884,11 @@ sub generate_core
 
 sub generate_eq
 {
-    my ($proc, $eq, $ordinalId, $ipath) = @_;
+    my ($proc, $eq, $ordinalId, $ipath,$fapiPosHr) = @_;
     my $uidstr = sprintf("0x%02X23%04X",${node},$proc*MAX_EQ_PER_PROC + $eq);
     my $mruData = get_mruid($ipath);
     my $fapi_name = sprintf("pu.eq:k0:n%d:s0:p%02d:c%d", $node, $proc, $eq);
+    my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc/eq-$eq";
 
     print "
 <targetInstance>
@@ -3734,7 +3906,7 @@ sub generate_eq
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/eq-$eq</default>
+        <default>$affinityPath</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3751,6 +3923,8 @@ sub generate_eq
 
     addPervasiveParentLink($sys,$node,$proc,$eq,"eq");
 
+    calcAndAddFapiPos("eq",$affinityPath,$eq,$fapiPosHr);
+
     # call to do any fsp per-eq attributes
     do_plugin('fsp_eq', $proc, $eq, $ordinalId );
 
@@ -3762,7 +3936,7 @@ sub generate_eq
 
 sub generate_mcs
 {
-    my ($proc, $mcs, $ordinalId, $ipath) = @_;
+    my ($proc, $mcs, $ordinalId, $ipath,$fapiPosHr) = @_;
     my $uidstr = sprintf("0x%02X0B%04X",${node},$proc*MAX_MCS_PER_PROC + $mcs);
     my $mruData = get_mruid($ipath);
 
@@ -3801,6 +3975,7 @@ sub generate_mcs
             last;
         }
     }
+    my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs";
 
     my $fapi_name = sprintf("pu.mcs:k0:n%d:s0:p%02d:c%d", $node, $proc, $mcs);
     print "
@@ -3819,7 +3994,7 @@ sub generate_mcs
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs</default>
+        <default>$affinityPath</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3845,6 +4020,8 @@ sub generate_mcs
 
     addPervasiveParentLink($sys,$node,$proc,$mcs,"mcs");
 
+    calcAndAddFapiPos("mcs",$affinityPath,$mcs,$fapiPosHr);
+
     # call to do any fsp per-mcs attributes
     do_plugin('fsp_mcs', $proc, $mcs, $ordinalId );
 
@@ -3855,7 +4032,7 @@ sub generate_mcs
 
 sub generate_mca
 {
-    my ($proc, $mca, $ordinalId, $ipath) = @_;
+    my ($proc, $mca, $ordinalId, $ipath,$fapiPosHr) = @_;
     my $uidstr = sprintf("0x%02X24%04X",${node},$proc*MAX_MCA_PER_PROC + $mca);
     my $mruData = get_mruid($ipath);
     my $mcs = ($mca - ($mca%2))/2;
@@ -3876,15 +4053,20 @@ sub generate_mca
     my $fapi_name = sprintf("pu.mca:k0:n%d:s0:p%02d:c%d",
                             $node, $proc, $mca_orig);
 
+    my $affinityPath =
+        "affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/mca-$mca_orig";
+    my $physicalPath =
+        "physical:sys-$sys/node-$node/proc-$proc/mcs-$mcs/mca-$mca_orig";
+
     print "
 <targetInstance>
-    <id>sys${sys}node${node}proc${proc}mcs${mcs}mca$mca</id>
+    <id>sys${sys}node${node}proc${proc}mcs${mcs}mca$mca_orig</id>
     <type>unit-mca-power9</type>
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-$sys/node-$node/proc-$proc/mcs-$mcs/mca-$mca</default>
+        <default>$physicalPath</default>
     </attribute>
     <attribute>
         <id>MRU_ID</id>
@@ -3892,7 +4074,7 @@ sub generate_mca
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/mca-$mca</default>
+        <default>$affinityPath</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3909,8 +4091,10 @@ sub generate_mca
 
     addPervasiveParentLink($sys,$node,$proc,$mca_orig,"mca");
 
+    calcAndAddFapiPos("mca",$affinityPath,$mca_orig,$fapiPosHr);
+
     # call to do any fsp per-mca attributes
-    do_plugin('fsp_mca', $proc, $mca, $ordinalId );
+    do_plugin('fsp_mca', $proc, $mca_orig, $ordinalId );
 
     print "
 </targetInstance>
@@ -3919,7 +4103,7 @@ sub generate_mca
 
 sub generate_mcbist
 {
-    my ($proc, $mcbist, $ordinalId, $ipath) = @_;
+    my ($proc, $mcbist, $ordinalId, $ipath,$fapiPosHr) = @_;
     my $uidstr = sprintf("0x%02X25%04X",${node},$proc*MAX_MCBIST_PER_PROC + $mcbist);
     my $mruData = get_mruid($ipath);
 
@@ -3936,6 +4120,7 @@ sub generate_mcbist
     }
     my $fapi_name = sprintf("pu.mcbist:k0:n%d:s0:p%02d:c%d",
                             $node, $proc, $mcbist);
+    my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc/mcbist-$mcbist";
 
     print "
 <targetInstance>
@@ -3953,7 +4138,7 @@ sub generate_mcbist
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/mcbist-$mcbist</default>
+        <default>$affinityPath</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3970,6 +4155,8 @@ sub generate_mcbist
 
     addPervasiveParentLink($sys,$node,$proc,$mcbist,"mcbist");
 
+    calcAndAddFapiPos("mcbist",$affinityPath,$mcbist,$fapiPosHr);
+
     # call to do any fsp per-mcbist attributes
     do_plugin('fsp_mcbist', $proc, $mcbist, $ordinalId );
 
@@ -3980,7 +4167,7 @@ sub generate_mcbist
 
 sub generate_pec
 {
-    my ($proc, $pec, $ordinalId, $ipath) = @_;
+    my ($proc, $pec, $ordinalId, $ipath,$fapiPosHr) = @_;
     my $uidstr = sprintf("0x%02X0B%04X",${node},$proc*MAX_PEC_PER_PROC + $pec);
     my $mruData = get_mruid($ipath);
 
@@ -3996,6 +4183,8 @@ sub generate_pec
         }
     }
     my $fapi_name = sprintf("pu.pec:k0:n%d:s0:p%02d:c%d", $node, $proc, $pec);
+
+    my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc/pec-$pec";
 
     print "
 <targetInstance>
@@ -4013,7 +4202,7 @@ sub generate_pec
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/pec-$pec</default>
+        <default>$affinityPath</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -4030,6 +4219,8 @@ sub generate_pec
 
     addPervasiveParentLink($sys,$node,$proc,$pec,"pec");
 
+    calcAndAddFapiPos("pec",$affinityPath,$pec,$fapiPosHr);
+
     # call to do any fsp per-pec attributes
     do_plugin('fsp_pec', $proc, $pec, $ordinalId );
 
@@ -4040,11 +4231,10 @@ sub generate_pec
 
 sub generate_phb_chiplet
 {
-    my ($proc, $phb, $ordinalId, $ipath) = @_;
+    my ($proc, $phb, $ordinalId, $ipath,$fapiPosHr) = @_;
     my $phb_orig = $phb;
     my $uidstr = sprintf("0x%02X0B%04X",${node},$proc*MAX_PHB_PER_PROC + $phb);
     my $mruData = get_mruid($ipath);
-
     my $pec = 0;
     my $phbChipUnit = $phb;
     if($phb > 0 && $phb < 3)
@@ -4072,6 +4262,8 @@ sub generate_phb_chiplet
 
     my $fapi_name = sprintf("pu.phb:k0:n%d:s0:p%02d:c%d",
                             $node, $proc, $phb_orig);
+    my $affinityPath =
+        "affinity:sys-$sys/node-$node/proc-$proc/pec-$pec/phb-$phb";
 
     print "
 <targetInstance>
@@ -4089,7 +4281,7 @@ sub generate_phb_chiplet
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/pec-$pec/phb-$phb</default>
+        <default>$affinityPath</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -4106,6 +4298,8 @@ sub generate_phb_chiplet
 
     addPervasiveParentLink($sys,$node,$proc,$phbChipUnit,"phb");
 
+    calcAndAddFapiPos("phb",$affinityPath,$phb,$fapiPosHr);
+
     # call to do any fsp per-phb attributes
     do_plugin('fsp_phb', $proc, $phb, $ordinalId );
 
@@ -4116,7 +4310,7 @@ sub generate_phb_chiplet
 
 sub generate_ppe
 {
-    my ($proc, $ppe, $ordinalId, $ipath) = @_;
+    my ($proc, $ppe, $ordinalId, $ipath,$fapiPosHr) = @_;
     my $uidstr = sprintf("0x%02X0B%04X",${node},$proc*MAX_PPE_PER_PROC + $ppe);
     my $mruData = get_mruid($ipath);
 
@@ -4132,6 +4326,8 @@ sub generate_ppe
         }
     }
     my $fapi_name = sprintf("pu.ppe:k0:n%d:s0:p%02d:c%d", $node, $proc, $ppe);
+
+    my $affinityPath="affinity:sys-$sys/node-$node/proc-$proc/ppe-$ppe";
 
     print "
 <targetInstance>
@@ -4149,7 +4345,7 @@ sub generate_ppe
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/ppe-$ppe</default>
+        <default>$affinityPath</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -4164,6 +4360,8 @@ sub generate_ppe
         <default>$ppe</default>
     </attribute>";
 
+    calcAndAddFapiPos("ppe",$affinityPath,$ppe,$fapiPosHr);
+
     # call to do any fsp per-ppe attributes
     do_plugin('fsp_ppe', $proc, $ppe, $ordinalId );
 
@@ -4174,7 +4372,7 @@ sub generate_ppe
 
 sub generate_obus
 {
-    my ($proc, $obus, $ordinalId, $ipath) = @_;
+    my ($proc, $obus, $ordinalId, $ipath,$fapiPosHr) = @_;
     my $uidstr = sprintf("0x%02X28%04X",${node},
                          $proc*MAX_OBUS_PER_PROC + $obus);
     my $mruData = get_mruid($ipath);
@@ -4192,6 +4390,7 @@ sub generate_obus
     }
 
     my $fapi_name = sprintf("pu.obus:k0:n%d:s0:p%02d:c%d", $node, $proc, $obus);
+    my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc/obus-$obus";
 
     print "
 <targetInstance>
@@ -4209,7 +4408,7 @@ sub generate_obus
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/obus-$obus</default>
+        <default>$affinityPath</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -4226,6 +4425,8 @@ sub generate_obus
 
     addPervasiveParentLink($sys,$node,$proc,$obus,"obus");
 
+    calcAndAddFapiPos("obus",$affinityPath,$obus,$fapiPosHr);
+
     # call to do any fsp per-obus attributes
     do_plugin('fsp_obus', $proc, $obus, $ordinalId );
 
@@ -4236,7 +4437,7 @@ sub generate_obus
 
 sub generate_xbus
 {
-    my ($proc, $xbus, $ordinalId, $ipath) = @_;
+    my ($proc, $xbus, $ordinalId, $ipath,$fapiPosHr) = @_;
     my $mruData = get_mruid($ipath);
     my $uidstr = sprintf("0x%02X0E%04X",${node},$proc*MAX_XBUS_PER_PROC + $xbus);
 
@@ -4253,6 +4454,8 @@ sub generate_xbus
     }
 
     my $fapi_name = sprintf("pu.xbus:k0:n%d:s0:p%02d:c%d", $node, $proc, $xbus);
+    my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc/xbus-$xbus";
+
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}xbus$xbus</id>
@@ -4269,7 +4472,7 @@ sub generate_xbus
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/xbus-$xbus</default>
+        <default>$affinityPath</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -4286,6 +4489,8 @@ sub generate_xbus
 
     addPervasiveParentLink($sys,$node,$proc,$xbus,"xbus");
 
+    calcAndAddFapiPos("xbus",$affinityPath,$xbus,$fapiPosHr);
+
     # call to do any fsp per-obus attributes
     do_plugin('fsp_xbus', $proc, $xbus, $ordinalId );
 
@@ -4296,7 +4501,7 @@ sub generate_xbus
 
 sub generate_perv
 {
-    my ($proc, $perv, $ordinalId, $ipath) = @_;
+    my ($proc, $perv, $ordinalId, $ipath,$fapiPosHr) = @_;
     my $uidstr = sprintf("0x%02X2C%04X",${node},$proc*MAX_PERV_PER_PROC + $perv);
     my $mruData = get_mruid($ipath);
 
@@ -4312,6 +4517,8 @@ sub generate_perv
         }
     }
     my $fapi_name = sprintf("pu.perv:k0:n%d:s0:p%02d:c%d", $node, $proc,$perv);
+    my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc/perv-$perv";
+
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}perv$perv</id>
@@ -4328,7 +4535,7 @@ sub generate_perv
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/perv-$perv</default>
+        <default>$affinityPath</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -4343,6 +4550,8 @@ sub generate_perv
         <default>$perv</default>
     </attribute>";
 
+    calcAndAddFapiPos("perv",$affinityPath,$perv,$fapiPosHr);
+
     # call to do any fsp per-perv attributes
     do_plugin('fsp_perv', $proc, $perv, $ordinalId );
 
@@ -4353,7 +4562,7 @@ sub generate_perv
 
 sub generate_capp
 {
-    my ($proc, $capp, $ordinalId, $ipath) = @_;
+    my ($proc, $capp, $ordinalId, $ipath,$fapiPosHr) = @_;
     my $uidstr = sprintf("0x%02X21%04X",${node},$proc*MAX_CAPP_PER_PROC + $capp);
     my $mruData = get_mruid($ipath);
 
@@ -4370,6 +4579,8 @@ sub generate_capp
     }
 
     my $fapi_name = sprintf("pu.capp:k0:n%d:s0:p%02d:c%d", $node, $proc,$capp);
+    my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc/capp-$capp";
+
     print "
 <targetInstance>
     <id>sys${sys}node${node}proc${proc}capp$capp</id>
@@ -4386,7 +4597,7 @@ sub generate_capp
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/capp-$capp</default>
+        <default>$affinityPath</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -4403,6 +4614,8 @@ sub generate_capp
 
     addPervasiveParentLink($sys,$node,$proc,$capp,"capp");
 
+    calcAndAddFapiPos("capp",$affinityPath,$capp,$fapiPosHr);
+
     # call to do any fsp per-capp attributes
     do_plugin('fsp_capp', $proc, $capp, $ordinalId );
 
@@ -4413,7 +4626,7 @@ sub generate_capp
 
 sub generate_sbe
 {
-    my ($proc, $sbe, $ordinalId, $ipath) = @_;
+    my ($proc, $sbe, $ordinalId, $ipath,$fapiPosHr) = @_;
     my $uidstr = sprintf("0x%02X2A%04X",${node},$proc*MAX_SBE_PER_PROC + $sbe);
     my $mruData = get_mruid($ipath);
 
@@ -4429,6 +4642,7 @@ sub generate_sbe
         }
     }
     my $fapi_name = sprintf("pu.sbe:k0:n%d:s0:p%02d:c%d", $node, $proc,$sbe);
+    my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc/sbe-$sbe";
 
     print "
 <targetInstance>
@@ -4446,7 +4660,7 @@ sub generate_sbe
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/sbe-$sbe</default>
+        <default>$affinityPath</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -4460,6 +4674,8 @@ sub generate_sbe
         <id>CHIP_UNIT</id>
         <default>$sbe</default>
     </attribute>";
+
+    calcAndAddFapiPos("sbe",$affinityPath,$sbe,$fapiPosHr);
 
     # call to do any fsp per-sbe attributes
     do_plugin('fsp_sbe', $proc, $sbe, $ordinalId );
@@ -4764,7 +4980,7 @@ sub generate_logicalDimms
 sub generate_centaur
 {
     my ($ctaur, $mcs, $fsiA, $altfsiA, $ipath, $ordinalId, $relativeCentaurRid,
-        $ipath, $membufVrmUuidHash) = @_;
+        $ipath, $membufVrmUuidHash,$fapiPosHr) = @_;
 
     my @fsi = @{$fsiA};
     my @altfsi = @{$altfsiA};
@@ -4816,6 +5032,8 @@ sub generate_centaur
 
     my $fapi_name = sprintf("pu.centaur:k0:n%d:s0:p%02d:c0",
                             $node, $ctaur);
+    my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
+            . "membuf-$ctaur";
     print "
 <!-- $SYSNAME Centaur n${node}p${ctaur} : start -->
 
@@ -4835,8 +5053,7 @@ sub generate_centaur
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
-            . "membuf-$ctaur</default>
+        <default>$affinityPath</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -4850,6 +5067,8 @@ sub generate_centaur
         <id>EI_BUS_TX_MSBSWAP</id>
         <default>$msb_swap</default>
     </attribute>";
+
+    calcAndAddFapiPos("membuf",$affinityPath,0,$fapiPosHr);
 
     # FSI Connections #
     if( $#fsi <= 0 )
@@ -5042,7 +5261,7 @@ sub generate_centaur
 
 sub generate_mba
 {
-    my ($ctaur, $mcs, $mba, $ordinalId, $ipath) = @_;
+    my ($ctaur, $mcs, $mba, $ordinalId, $ipath,$fapiPosHr) = @_;
     my $proc = $mcs;
     $proc =~ s/.*:p(.*):.*/$1/g;
     $mcs =~ s/.*:.*:mcs(.*)/$1/g;
@@ -5053,6 +5272,9 @@ sub generate_mba
     my $mruData = get_mruid($ipath);
 
     my $fapi_name = sprintf("pu.mba:k0:n%d:s0:p%02d:c%d", $node, $proc, $mba);
+    my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
+            . "membuf-$ctaur/mba-$mba";
+
     print "
 <targetInstance>
     <id>sys${sys}node${node}membuf${ctaur}mba$mba</id>
@@ -5070,8 +5292,7 @@ sub generate_mba
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
-            . "membuf-$ctaur/mba-$mba</default>
+        <default>$affinityPath</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -5086,6 +5307,8 @@ sub generate_mba
         <default>$mba</default>
     </attribute>";
 
+    calcAndAddFapiPos("mba",$affinityPath,$mba,$fapiPosHr);
+
     # call to do any fsp per-mba attributes
     do_plugin('fsp_mba', $ctaur, $mba, $ordinalId );
 
@@ -5096,7 +5319,7 @@ sub generate_mba
 
 sub generate_l4
 {
-    my ($ctaur, $mcs, $l4, $ordinalId, $ipath) = @_;
+    my ($ctaur, $mcs, $l4, $ordinalId, $ipath,$fapiPosHr) = @_;
     my $proc = $mcs;
     $proc =~ s/.*:p(.*):.*/$1/g;
     $mcs =~ s/.*:.*:mcs(.*)/$1/g;
@@ -5104,6 +5327,9 @@ sub generate_l4
     my $uidstr = sprintf("0x%02X0A%04X",${node},$proc*MAX_MCS_PER_PROC + $mcs);
     my $mruData = get_mruid($ipath);
     my $fapi_name = sprintf("pu.l4:k0:n%d:s0:p%02d:c0", $node, $proc, $l4);
+
+    my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
+            . "membuf-$ctaur/l4-$l4";
 
     print "
 <targetInstance>
@@ -5118,8 +5344,7 @@ sub generate_l4
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
-            . "membuf-$ctaur/l4-$l4</default>
+        <default>$affinityPath</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -5138,6 +5363,8 @@ sub generate_l4
         <default>$l4</default>
     </attribute>";
 
+    calcAndAddFapiPos("l4",$affinityPath,$l4,$fapiPosHr);
+
     # call to do any fsp per-centaur_l4 attributes
     do_plugin('fsp_centaur_l4', $ctaur, $ordinalId );
 
@@ -5146,6 +5373,8 @@ sub generate_l4
 
 sub generate_is_dimm
 {
+    my ($fapiPosHr) = @_;
+
     # From the i2c busses, grab the information for the DIMMs, if any.
     my @dimmI2C;
     my $i2c_file = open_mrw_file($mrwdir, "${sysname}-i2c-busses.xml");
@@ -5194,8 +5423,11 @@ sub generate_is_dimm
         $dimmPos =~ s/.*dimm-(.*)/$1/;
 
         my $uidstr = sprintf("0x%02X03%04X",${node},$dimm+${node}*512);
-        my $fapi_name = sprintf("pu.dimm:k0:n%d:s0:p%02d:c%d",
-                                $node, $proc, $dimm);
+        my $fapi_name = sprintf("dimm:k0:n%d:s0:p%02d",
+                                $node, $dimm);
+
+        my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
+            . "mca-$mca/dimm-$dimm";
 
         print "\n<!-- DIMM n${node}:p${pos} -->\n";
         print "
@@ -5211,8 +5443,7 @@ sub generate_is_dimm
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
-            . "mca-$mca/dimm-$dimm</default>
+        <default>$affinityPath</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -5227,6 +5458,7 @@ sub generate_is_dimm
         <default>$pos</default>
     </attribute>";
 
+        calcAndAddFapiPos("isdimm",$affinityPath,$dimm,$fapiPosHr);
 
         # call to do any fsp per-dimm attributes
         my $dimmHex = sprintf("0xD0%02X",$dimmPos);
@@ -5271,6 +5503,8 @@ sub generate_is_dimm
 
 sub generate_centaur_dimm
 {
+    my ($fapiPosHr) = @_;
+
     print "\n<!-- $SYSNAME Centaur DIMMs -->\n";
 
     for my $i ( 0 .. $#SMembuses )
@@ -5306,7 +5540,8 @@ sub generate_centaur_dimm
             $dimmid = sprintf ("%d", $dimmid);
             generate_dimm( $proc, $mcs, $ctaur, $pos, $dimmid, $id,
                            ($SMembuses[$i][BUS_ORDINAL_FIELD]*8)+$id,
-                           $relativeDimmRid, $relativePos, $ipath);
+                           $relativeDimmRid, $relativePos, $ipath,
+                           $fapiPosHr);
         }
     }
 }
@@ -5315,7 +5550,8 @@ sub generate_centaur_dimm
 # of the MBA0 chiplet.
 sub generate_dimm
 {
-    my ($proc, $mcs, $ctaur, $pos, $dimm, $id, $ordinalId, $relativeDimmRid, $relativePos)
+    my ($proc, $mcs, $ctaur, $pos, $dimm, $id, $ordinalId, $relativeDimmRid,
+        $relativePos,$fapiPosHr)
         = @_;
 
     my $x = $id;
@@ -5373,7 +5609,10 @@ sub generate_dimm
     my $logicalDimmInstancePath = "instance:"
         . $logicalDimmList{$node}{$relativePos}{$mbanum}{$y}{$z}->{'logicalDimmIpath'};
 
-    my $fapi_name = sprintf("pu.dimm:k0:n%d:s0:p%02d:c%d", $node, $proc, $dimm);
+    my $fapi_name = sprintf("dimm:k0:n%d:s0:p%02d", $node, $dimm);
+    my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
+            . "membuf-$pos/mba-$x/dimm-$zz";
+
     print "
 <targetInstance>
     <id>sys${sys}node${node}dimm$dimm</id>
@@ -5387,8 +5626,7 @@ sub generate_dimm
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-$sys/node-$node/proc-$proc/mcs-$mcs/"
-            . "membuf-$pos/mba-$x/dimm-$zz</default>
+        <default>$affinityPath</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -5407,6 +5645,8 @@ sub generate_dimm
         <default>$y</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>$vpdRec</default></attribute>";
+
+    calcAndAddFapiPos("cdimm",$affinityPath,$y*$z,$fapiPosHr);
 
     # call to do any fsp per-dimm attributes
     do_plugin('fsp_dimm', $proc, $ctaur, $dimm, $ordinalId, $dimmHex );
