@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_mc.C,v 1.54 2016/02/29 15:07:56 sglancy Exp $
+// $Id: mss_draminit_mc.C,v 1.55 2016/03/07 20:29:20 sglancy Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -47,6 +47,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.55   | sglancy  |07-MAR-16| Updated for DDR4 RCD Parity
 //  1.54   | sglancy  |29-FEB-16| Addressed FW comments - on leap day!
 //  1.53   | sglancy  |12-FEB-16| Addressed FW comments
 //  1.52   | sglancy  |07-DEC-15| Temporary: commented out call to RCD check code to workaround DDR4 ISRDIMM bug
@@ -166,7 +167,6 @@ ReturnCode mss_draminit_mc_cloned(Target& i_target)
     std::vector<fapi::Target> l_mbaChiplets;
     uint32_t rc_num  = 0;
     uint8_t scom_parity_fixed_dd2 = 0;
-    uint8_t dram_gen = 0;
     rc = FAPI_ATTR_GET(ATTR_CENTAUR_EC_SCOM_PARITY_ERROR_HW244827_FIXED, &i_target, scom_parity_fixed_dd2);
     if (rc) return rc;
     // Get associated MBA's on this centaur
@@ -223,8 +223,6 @@ ReturnCode mss_draminit_mc_cloned(Target& i_target)
     {
         
         
-        rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN, &l_mbaChiplets[i], dram_gen);
-        if (rc) return rc;
 	
         // Step Two: Disable CCS address lines
         FAPI_INF( "+++ Disabling CCS Address Lines +++");
@@ -239,14 +237,12 @@ ReturnCode mss_draminit_mc_cloned(Target& i_target)
         // Step Two.1: Check RCD protect time on RDIMM and LRDIMM
         FAPI_INF( "+++ Check RCD protect time on RDIMM and LRDIMM +++");
 	//forced this to only run if the test type is NOT DDR4 - as DDR4 ISRDIMMs are having IPL issues
-	if(dram_gen != ENUM_ATTR_EFF_DRAM_GEN_DDR4) {
-     	   rc = mss_check_RCD_protect_time(l_mbaChiplets[i]);
-     	   if(rc)
-     	   {
-     	      FAPI_ERR("---Error During Check RCD protect time rc = 0x%08X (creator = %d)---", uint32_t(rc), rc.getCreator());
-     	      return rc;
-     	   }
-	}
+     	rc = mss_check_RCD_protect_time(l_mbaChiplets[i]);
+     	if(rc)
+     	{
+     	   FAPI_ERR("---Error During Check RCD protect time rc = 0x%08X (creator = %d)---", uint32_t(rc), rc.getCreator());
+     	   return rc;
+     	}
 	
 	//Step Two.2: Enable address inversion on each MBA for ALL CARDS
 	FAPI_INF("+++ Setting up adr inversion for port 1 +++");

@@ -1,8 +1,10 @@
-/#-- $Id: mba_def.initfile,v 1.81 2016/01/29 15:28:12 yctschan Exp $
+/#-- $Id: mba_def.initfile,v 1.83 2016/03/10 16:48:18 sglancy Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.83|sglancy |03/10/16| Fixed RCD parity bug
+#--     1.82|sglancy |03/07/16| Updated RDTAG timing for DDR4 RCD Parity
 #--     1.81|yctschan| 1/28/16| Updated TSV settings for DDR4 1600 13_12_11 parts
 #--     1.80|yctschan| 1/20/16| Updated more settings for DDR4 1600 13_12_11 parts
 #--     1.79|yctschan| 1/05/16| Updated DDR4 1600 13_12_11 parts for 2N mode
@@ -611,8 +613,8 @@ define  def_mba_dsm0q_cfg_rdtag_dly17  = (def_ddr3_1066_8_8_8R      ||def_ddr3_1
 define  def_mba_dsm0q_cfg_rdtag_dly18  = (def_ddr3_1066_7_7_7_L2    ||def_ddr3_1600_10_10_10    ||def_ddr3_1600_11_11_11_2N ||def_ddr3_1866_11_11_11_2N ||def_ddr3_1333_9_9_9R      ||def_ddr3_1333_8_8_8_L2    ||def_ddr4_1600_10_10_10);
 define  def_mba_dsm0q_cfg_rdtag_dly19  = (def_ddr3_1066_7_7_7_LR    ||def_ddr3_1066_8_8_8_L2    ||def_ddr3_1600_10_10_10R   ||def_ddr3_1333_8_8_8_LR    ||def_ddr3_1600_9_9_9_L2    ||def_ddr4_1600_11_11_11_2N ||def_ddr4_1866_11_11_11_2N ||def_ddr4_1600_10_10_10R   ||def_ddr4_1600_9_9_9_L2);
 define  def_mba_dsm0q_cfg_rdtag_dly20  = (def_ddr3_1066_8_8_8_LR    ||def_ddr3_1600_11_11_11    ||def_ddr3_1866_11_11_11    ||def_ddr3_1866_12_12_12_2N ||def_ddr3_1600_9_9_9_LR    ||def_ddr3_1333_9_9_9_L2    ||def_ddr4_1600_11_11_11    ||def_ddr4_1866_11_11_11    ||def_ddr4_1600_9_9_9_LR);
-define  def_mba_dsm0q_cfg_rdtag_dly21  = (def_ddr4_1600_12_12_12_2N ||def_ddr3_1600_11_11_11R   ||def_ddr3_1866_11_11_11R   ||def_ddr3_1333_9_9_9_LR    ||def_ddr3_1600_10_10_10_L2 ||def_ddr4_1866_12_12_12_2N ||def_ddr4_2133_12_12_12_2N ||def_ddr4_1600_11_11_11R   ||def_ddr4_1866_11_11_11R   ||def_ddr4_1600_10_10_10_L2);
-define  def_mba_dsm0q_cfg_rdtag_dly22  = (def_ddr4_1600_13_12_11_2N ||def_ddr4_1600_12_12_12    ||def_ddr3_1866_12_12_12    ||def_ddr3_1600_10_10_10_LR ||def_ddr4_1866_12_12_12    ||def_ddr4_2133_12_12_12    ||def_ddr4_2400_13_13_13_2N ||def_ddr4_1600_10_10_10_LR);
+define  def_mba_dsm0q_cfg_rdtag_dly21  = (def_ddr4_1600_12_12_12_2N ||def_ddr3_1600_11_11_11R   ||def_ddr3_1866_11_11_11R   ||def_ddr3_1333_9_9_9_LR    ||def_ddr3_1600_10_10_10_L2 ||def_ddr4_1866_12_12_12_2N ||def_ddr4_2133_12_12_12_2N ||def_ddr4_1866_11_11_11R   ||def_ddr4_1600_10_10_10_L2);
+define  def_mba_dsm0q_cfg_rdtag_dly22  = (def_ddr4_1600_13_12_11_2N ||def_ddr4_1600_12_12_12    ||def_ddr3_1866_12_12_12    ||def_ddr3_1600_10_10_10_LR ||def_ddr4_1866_12_12_12    ||def_ddr4_2133_12_12_12    ||def_ddr4_2400_13_13_13_2N ||def_ddr4_1600_10_10_10_LR ||def_ddr4_1600_11_11_11R   );
 define  def_mba_dsm0q_cfg_rdtag_dly23  = (def_ddr4_1600_13_12_11    ||def_ddr4_1866_13_13_13_2N ||def_ddr4_1600_12_12_12R   ||def_ddr3_1866_12_12_12R   ||def_ddr3_1600_11_11_11_L2 ||def_ddr3_1866_11_11_11_L2 ||def_ddr4_2400_13_13_13    ||def_ddr4_2133_13_13_13_2N ||def_ddr4_1866_12_12_12R   ||def_ddr4_2133_12_12_12R   ||def_ddr4_1600_11_11_11_L2 ||def_ddr4_1866_11_11_11_L2);
 define  def_mba_dsm0q_cfg_rdtag_dly24  = (def_ddr4_1866_13_13_13    ||def_ddr3_1600_11_11_11_LR ||def_ddr3_1866_11_11_11_LR ||def_ddr4_2133_13_13_13    ||def_ddr4_2400_14_14_14_2N ||def_ddr4_2400_13_13_13R   ||def_ddr4_1600_11_11_11_LR ||def_ddr4_1866_11_11_11_LR);
 define  def_mba_dsm0q_cfg_rdtag_dly25  = (def_ddr4_1600_13_12_11R   ||def_ddr4_1866_13_13_13R   ||def_ddr4_1600_12_12_12_L2 ||def_ddr3_1866_12_12_12_L2 ||def_ddr4_2400_14_14_14    ||def_ddr4_2133_13_13_13R   ||def_ddr4_1866_12_12_12_L2 ||def_ddr4_2133_12_12_12_L2);
@@ -1435,8 +1437,8 @@ scom 0x0301040E     {
 
 scom 0x03010413     {
     bits    ,   scom_data                                 ,       ATTR_FUNCTIONAL,     expr;
-    38      ,   0b1                                       ,            1            ,     (((ATTR_EFF_DIMM_TYPE == 1) || (ATTR_EFF_DIMM_TYPE == 3)) && (ATTR_EFF_DRAM_GEN == 1));
-    38      ,   0b0                                       ,            1            ,     (((ATTR_EFF_DIMM_TYPE == 1) || (ATTR_EFF_DIMM_TYPE == 3)) && (ATTR_EFF_DRAM_GEN == 2));
+    38      ,   0b1                                       ,            1            ,     (((ATTR_EFF_DIMM_TYPE == 1) || (ATTR_EFF_DIMM_TYPE == 3)));
+    38      ,   0b0                                       ,            1            ,     (((ATTR_EFF_DIMM_TYPE != 1) && (ATTR_EFF_DIMM_TYPE != 3)));
     60      ,   0b0                                       ,            1            ,     ((ATTR_EFF_DIMM_TYPE == 1) || (ATTR_EFF_DIMM_TYPE == 3));
     61      ,   0b1                                       ,            1            ,     ((ATTR_EFF_DIMM_TYPE == 1) || (ATTR_EFF_DIMM_TYPE == 3));
 }

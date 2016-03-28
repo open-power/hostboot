@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_ddr4_funcs.C,v 1.23 2016/02/19 21:14:32 sglancy Exp $
+// $Id: mss_ddr4_funcs.C,v 1.24 2016/03/07 20:24:32 sglancy Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2013
 // *! All Rights Reserved -- Property of IBM
@@ -43,6 +43,7 @@
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
 //         |          |         |
+//  1.24   | 03/07/16 | sglancy | Fixed on RCD Parity
 //  1.22   | 02/19/16 | sglancy | Fixed B-side MRS inversion bug
 //  1.21   | 02/12/16 | sglancy | Addressed FW comments
 //  1.20   | 01/14/16 | sglancy | Fixed bug in termination swap code
@@ -701,12 +702,12 @@ ReturnCode mss_create_rcd_ddr4(const Target& i_target_mba) {
 
          rc_num |= data_buffer_8.extractToRight( &l_rcd_cntl_word_13, 0, 4);
 
-         // Parity Control Word
-         l_rcd_cntl_word_14 = 0;
+         // Parity Control Word - turn on Parity, pulse alert_n, pulse according to the table
+         l_rcd_cntl_word_14 = 0x0D;
 
          // Command Latency Adder Control Word
          if ( l_dimm_type_u8 == fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM  ) {
-            l_rcd_cntl_word_15 = 4; // 0nCk latency adder
+            l_rcd_cntl_word_15 = 0; // 0nCk latency adder
          }
          else {
             l_rcd_cntl_word_15 = 0; // 1nCk latency adder with DB control bus

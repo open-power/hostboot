@@ -1,4 +1,4 @@
-#-- $Id: cen_ddrphy.initfile,v 1.39 2015/12/10 21:57:02 sglancy Exp $
+#-- $Id: cen_ddrphy.initfile,v 1.40 2016/03/07 20:07:45 sglancy Exp $
 #-- $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 #--          centaur/working/procedures/ec_ind/scoms/cen_ddrphy.initfile,v $
 #
@@ -6,6 +6,7 @@
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#  1.40     |sglancy |03/07/16| Updated to for RCD Parity
 #  1.39     |sglancy |12/10/15| Updated to stop DDR3 RDIMM bug
 #  1.38     |jneaton |12/09/15| Changed DPHY01_DDRPHY_PC_CSID_CFG_P0 to 0x00 to support tsv_ddr4
 #  1.37     |dcrowell|11/16/15| Fix typo from v1.36 
@@ -3975,7 +3976,8 @@ scom 0x800(0,1)C4020301143F {	# _P[0:1]
 	49		,	0b0				,	any				;	# disable 2 cycle addr mode
 
 	50:53	,	0b0000			,	any		;	# MR_MASK_EN (mode register[0:3] mask during calibration)
-	54		,	0b0				,	any		;	# DELAYED_PARITY (only for DDR4, DDR3 don't care)
+	54		,	0b1				,	def_is_ddr4		;	# DELAYED_PARITY (only for DDR4, DDR3 don't care)
+	54		,	0b0				,	def_not_ddr4		;	# DELAYED_PARITY (only for DDR4, DDR3 don't care)
 	55		,	0b0				,	any		;	# LRDIMM_CONTEXT
 	56		,	0b0				,	any		;	# FORCE_RESERVED	# for DDR4
 	57		,	0b0				,	any		;	# HALT_ROTATION, for DDR4 staggered pattern

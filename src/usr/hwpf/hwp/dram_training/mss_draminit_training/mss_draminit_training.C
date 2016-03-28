@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training.C,v 1.107 2015/11/09 17:22:02 sglancy Exp $
+// $Id: mss_draminit_training.C,v 1.108 2016/01/13 20:07:51 sglancy Exp $
 //------------------------------------------------------------------------------
 // Don't forget to create CVS comments when you check in your changes!
 //------------------------------------------------------------------------------
@@ -30,6 +30,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|------------------------------------------------
+//  1.108  | sglancy  |13-JAN-16| Added fix for DDR4 parity
 //  1.107  | sglancy  |03-NOV-15| Fixed attribute names for DDR4 RDIMM
 //  1.106  | sglancy  |23-OCT-15| Updated attribute names
 //  1.105  | rwheeler |20-OCT-15| updated the ifndef FAPI_LRDIMM.
@@ -538,6 +539,11 @@ ReturnCode mss_draminit_training_cloned(Target& i_target)
     rc_num = rc_num | data_buffer_64.insert(cal_timeout_cnt_buffer_16, 8, 16, 0);
     rc_num = rc_num | data_buffer_64.insert(resetn_buffer_1, 24, 1, 0);
     rc_num = rc_num | data_buffer_64.insert(cal_timeout_cnt_mult_buffer_2, 30, 2, 0);
+    
+    //if in DDR4 mode, count the parity bit and set it
+    if((dram_gen == ENUM_ATTR_EFF_DRAM_GEN_DDR4) && (dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM || dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) ) {
+       rc_num = rc_num | data_buffer_64.insertFromRight( (uint8_t)0xff, 61, 1);
+    }
     if(rc_num)
     {
         rc.setEcmdError(rc_num);
