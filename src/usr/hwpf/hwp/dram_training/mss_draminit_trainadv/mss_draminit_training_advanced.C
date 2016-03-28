@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training_advanced.C,v 1.60 2015/12/08 19:16:51 sglancy Exp $
+// $Id: mss_draminit_training_advanced.C,v 1.65 2016/03/25 14:20:21 sglancy Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur 29 Sept 2011. */
 
 //------------------------------------------------------------------------------
@@ -100,6 +100,12 @@
 //  1.57   |preeragh  |13-Nov-15| Mask MCBIT_DONE bit FIR before Schmoos
 //  1.58   |dcrowell  |13-Nov-15| Change allocation of generic_shmoo object
 //  1.59   |preeragh  |18-Nov-15| Update Nibble PDA while PDA_Storage
+//  1.60   |sglancy   |12-Feb-16| Addressed FW comments
+//  1.61   |kmack     |07-Mar-16| Fixed bug
+//  1.62   |sglancy   |07-Mar-16| Updated for box shmoo
+//  1.63   |sglancy   |08-Mar-16| Fixed compile error
+//  1.64   |sglancy   |18-Mar-16| Fixed bug for box shmoo
+//  1.65   |sglancy   |25-Mar-16| Addressed FW comments
 // This procedure Schmoo's DRV_IMP, SLEW, VREF (DDR, CEN), RCV_IMP based on attribute from effective config procedure
 // DQ & DQS Driver impedance, Slew rate, WR_Vref shmoo would call only write_eye shmoo for margin calculation
 // DQ & DQS VREF (rd_vref), RCV_IMP shmoo would call rd_eye for margin calculation
@@ -196,8 +202,8 @@ extern "C"
     //based on attribute definition and runs either mcbist/delay shmoo based on attribute
     //Also calls unmask function mss_unmask_draminit_training_advanced_errors()
     //Input : const fapi::Target MBA, i_pattern = pattern selection during mcbist @ lab,
-    //	l_test type  = test type selection during mcbist @ lab
-    //	Default vlaues are Zero
+    //  l_test type  = test type selection during mcbist @ lab
+    //  Default vlaues are Zero
     //-----------------------------------------------------------------------------------
 
     fapi::ReturnCode mss_draminit_training_advanced(const fapi::Target & i_target_mba)
@@ -1092,6 +1098,45 @@ fapi::ReturnCode wr_vref_shmoo_ddr4(const fapi::Target & i_target_mba)
     return rc;
 }
 
+fapi::ReturnCode latch_mrs6_val(const fapi::Target & i_target_mba) {
+    fapi::ReturnCode rc;
+    ecmdDataBufferBase l_data_buffer_64(64);
+    fapi::Target l_target_centaur=i_target_mba;
+    //array in terms of ports/dimms/ranks 
+    uint8_t vrefdq_train_enable[2][2][4];
+    rc = fapiGetScom(i_target_mba,0x03010432,l_data_buffer_64);
+    if(rc) return rc;
+    l_data_buffer_64.clearBit(0);
+    rc = fapiPutScom(i_target_mba,0x03010432,l_data_buffer_64);
+    if(rc) return rc;
+    
+    uint8_t latch_values[3] = {ENUM_ATTR_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE,ENUM_ATTR_EFF_VREF_DQ_TRAIN_ENABLE_ENABLE,ENUM_ATTR_EFF_VREF_DQ_TRAIN_ENABLE_DISABLE};
+    for(uint8_t latch_val=0;latch_val<3;latch_val++) {
+    	for(uint8_t port=0; port<MAX_PORT; port++) {
+    	    for(uint8_t dimm=0; dimm<MAX_DIMM; dimm++) {
+    		for(uint8_t rank=0; rank<4; rank++) {
+    		    vrefdq_train_enable[port][dimm][rank]=latch_values[latch_val];
+    		}
+    	    }
+    	}
+    	
+    	rc = FAPI_ATTR_SET( ATTR_EFF_VREF_DQ_TRAIN_ENABLE, &i_target_mba, vrefdq_train_enable);
+    	if(rc) return rc;
+    	rc = mss_mrs6_DDR4(l_target_centaur);
+    	if(rc)
+    	{
+    	    FAPI_ERR(" mrs_load Failed rc = 0x%08X (creator = %d)", uint32_t(rc), rc.getCreator());
+    	    return rc;
+    	}
+    }
+    
+    rc = fapiGetScom(i_target_mba,0x03010432,l_data_buffer_64);
+    if(rc) return rc;
+    l_data_buffer_64.setBit(0);
+    rc = fapiPutScom(i_target_mba,0x03010432,l_data_buffer_64);
+    if(rc) return rc;
+    return rc;
+}
 
 fapi::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi::Target & i_target_mba)
 {
@@ -1128,7 +1173,7 @@ fapi::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi::Target & i_target_mba)
     uint8_t l_dimm = 0;
     uint8_t i_port=0;
     uint8_t l_vref_mid = 0;
-    uint8_t imax = 	39;
+    uint8_t imax =      39;
     uint8_t imin = 13;
     uint8_t last_known_vref = 0;
     uint8_t l_loop_count = 0;
@@ -1155,8 +1200,6 @@ fapi::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi::Target & i_target_mba)
     rc = FAPI_ATTR_SET(ATTR_EFF_SCHMOO_TEST_VALID, &i_target_mba, l_attr_schmoo_test_type_u8);
     if(rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_VPD_DRAM_WRDDR4_VREF, &i_target_mba, vpd_wr_vref_value);
-    if(rc) return rc;
-    rc = FAPI_ATTR_GET( ATTR_MSS_VREF_CAL_CNTL, &l_target_centaur1, cal_control);
     if(rc) return rc;
     rc = FAPI_ATTR_GET( ATTR_MSS_VREF_CAL_CNTL, &l_target_centaur1, cal_control);
     if(rc) return rc;
@@ -1187,11 +1230,70 @@ fapi::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi::Target & i_target_mba)
 
     if(rc) return rc;
     FAPI_INF(" Setup and Sanity - Check disabled from now on..... Continuing .....");
-    FAPI_INF(" RUNNING GLANCY'S CODE UPDATES!!!!!!!!!!!!!!");
     rc = set_attribute(i_target_mba);
     if (rc) return rc;
+    
+    if(cal_control == 3) {
+        i_shmoo_type_valid = BOX;
+        FAPI_INF("Running cal control 3 - box shmoo!!!");
+        l_attr_schmoo_test_type_u8 = 0x20;
+        rc = FAPI_ATTR_SET(ATTR_EFF_SCHMOO_TEST_VALID, &i_target_mba, l_attr_schmoo_test_type_u8);
+	if(rc) return rc;
+	rc = FAPI_ATTR_GET( ATTR_EFF_VREF_DQ_TRAIN_VALUE, &i_target_mba, vrefdq_train_value);
+        if(rc) return rc;
+	uint8_t vrefdq_train_value_plus[2][2][4];
+	uint8_t vrefdq_train_value_minus[2][2][4];
+	uint8_t vref_train_step_size;
+	rc = FAPI_ATTR_GET( ATTR_MRW_WR_VREF_CHECK_VREF_STEP_SIZE, NULL, vref_train_step_size);
+        if(rc) return rc;
+	//sets up values
+	for(a=0; a < MAX_PORT; a++) //Port
+        {
+            for(l_dimm=0; l_dimm < MAX_DIMM; l_dimm++) //Max dimms
+            {
+        	for(c=0; c < 4; c++) //Ranks
+        	{
+                    //sets up +5%
+        	    vrefdq_train_value_plus[a][l_dimm][c] = vrefdq_train_value[a][l_dimm][c] + vref_train_step_size;
+		    //if over the max, then set to max val
+		    if(vrefdq_train_value_plus[a][l_dimm][c] > 0x32) vrefdq_train_value_plus[a][l_dimm][c] = 0x32;
+		    //sets up -5%
+		    if(vrefdq_train_value[a][l_dimm][c]<vref_train_step_size) vrefdq_train_value_minus[a][l_dimm][c] = 0x00;
+		    else vrefdq_train_value_minus[a][l_dimm][c] = vrefdq_train_value[a][l_dimm][c] - vref_train_step_size;
+        	}
+            }
+        }
+	rc = FAPI_ATTR_SET( ATTR_EFF_VREF_DQ_TRAIN_VALUE, &i_target_mba, vrefdq_train_value_minus);
+        if(rc) return rc;
+	rc = latch_mrs6_val(i_target_mba);
+	if(rc) return rc;
+	
+	//should run MCBIST -% VREF +/-X ticks write delay
+	rc = delay_shmoo(i_target_mba, i_port, i_shmoo_type_valid,
+                                 &l_left_margin, &l_right_margin,
+                                 (uint32_t)vref_train_step_size);
+	if(rc) return rc;
+	
+	rc = FAPI_ATTR_SET( ATTR_EFF_VREF_DQ_TRAIN_VALUE, &i_target_mba, vrefdq_train_value_plus);
+        if(rc) return rc;
+	rc = latch_mrs6_val(i_target_mba);
+	if(rc) return rc;
+	
+	//should run MCBIST +% VREF +/-X ticks write delay
+	
+	rc = delay_shmoo(i_target_mba, i_port, i_shmoo_type_valid,
+                                 &l_left_margin, &l_right_margin,
+                                 (uint32_t)(0xff-vref_train_step_size));
+	if(rc) return rc;
+	
+	rc = FAPI_ATTR_SET( ATTR_EFF_VREF_DQ_TRAIN_VALUE, &i_target_mba, vrefdq_train_value);
+        if(rc) return rc;
+	rc = latch_mrs6_val(i_target_mba);
+	if(rc) return rc;
+	
+    }
 
-    if (cal_control !=0)
+    else if (cal_control !=0)
     {
         i_shmoo_type_valid = WR_EYE;
         l_attr_schmoo_test_type_u8 = 2;
@@ -1200,7 +1302,7 @@ fapi::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi::Target & i_target_mba)
         //Initialize all to zero
         /*for(index = 0; index < 50;index++)
         {
-        	best_vref[index] = 0;
+                best_vref[index] = 0;
 
         }
         */
@@ -1466,7 +1568,7 @@ fapi::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi::Target & i_target_mba)
             rc = mss_ddr4_run_pda((fapi::Target &)i_target_mba,pda);
             if(rc) return rc;
             FAPI_INF("FINISHED RUNNING PDA FOR 1ST TIME");
-	    
+
             //issue call to run PDA again (latching good value in train mode)
             FAPI_INF("RUNNING PDA FOR 2ND TIME");
             rc = mss_ddr4_run_pda((fapi::Target &)i_target_mba,pda);
@@ -1616,12 +1718,12 @@ fapi::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi::Target & i_target_mba)
 //----------------------------------------------------------------------------------------------
 // Function name: rd_vref_shmoo()
 // Description: This function varies the Centaur IO vref in 16 steps
-// 		Calls write eye shmoo function
+//              Calls write eye shmoo function
 // Input param: const fapi::Target MBA, port = 0,1
-// 	Shmoo type: MCBIST, WR_EYE, RD_EYE, WR_DQS, RD_DQS
-// 	Shmoo param: PARAM_NONE, DRV_IMP, SLEW_RATE, WR_VREF, RD_VREF, RCV_IMP
-// 	Shmoo Mode: FEW_ADDR, QUARTER_ADDR, HALF_ADDR, FULL_ADDR
-// 	i_pattern, i_test_type : Default = 0, mcbist lab function would use this arg
+//      Shmoo type: MCBIST, WR_EYE, RD_EYE, WR_DQS, RD_DQS
+//      Shmoo param: PARAM_NONE, DRV_IMP, SLEW_RATE, WR_VREF, RD_VREF, RCV_IMP
+//      Shmoo Mode: FEW_ADDR, QUARTER_ADDR, HALF_ADDR, FULL_ADDR
+//      i_pattern, i_test_type : Default = 0, mcbist lab function would use this arg
 //----------------------------------------------------------------------------------------------
 
 fapi::ReturnCode rd_vref_shmoo(const fapi::Target & i_target_mba,
@@ -1984,6 +2086,7 @@ fapi::ReturnCode rd_vref_shmoo_ddr4(const fapi::Target & i_target_mba)
     uint32_t l_right_margin_rd_vref_array[16] = {0};
     uint32_t rc_num = 0;
     uint8_t l_vref_num = 0;
+    uint8_t l_vref_num_tmp = 0;
 
     FAPI_INF("+++++++++++++++++++++++++++++++++++++++++++++ Patch - Preet - RD_VREF - Check Sanity only - DDR4 +++++++++++++++++++++++++++");
     rc = delay_shmoo(i_target_mba, i_port, i_shmoo_type_valid,
@@ -2019,8 +2122,9 @@ fapi::ReturnCode rd_vref_shmoo_ddr4(const fapi::Target & i_target_mba)
     {
         FAPI_INF("\n Testing Range - DDR4 Range Only - Vrefs");
 
-        for(l_vref_num = 7; l_vref_num > 0 ; l_vref_num--)
+        for(l_vref_num_tmp = 8; l_vref_num_tmp > 0 ; l_vref_num_tmp--)
         {
+            l_vref_num = l_vref_num_tmp -1;
             l_rd_cen_vref_in = l_vref_num;
             vref_value_print = base - (l_vref_num*diff_value);
             FAPI_INF("Current Vref value is %d",vref_value_print);
@@ -2111,97 +2215,97 @@ fapi::ReturnCode rd_vref_shmoo_ddr4(const fapi::Target & i_target_mba)
         }
         // For base + values
 
-        for(l_vref_num = 0; l_vref_num < 9; l_vref_num++)
-        {
+      for(l_vref_num = 8; l_vref_num < 16; l_vref_num++)
+      {
 
-            l_rd_cen_vref_in = l_vref_num;
-            vref_value_print = base + (l_vref_num*diff_value);
-            FAPI_INF("Current Vref value is %d",vref_value_print);
-            FAPI_INF("Configuring Read Vref Registers:");
-            rc = fapiGetScom(i_target_mba,
-                             DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P0_0_0x800000060301143F,
-                             data_buffer);
-            if(rc) return rc;
-            rc_num = rc_num | data_buffer.insertFromRight(l_rd_cen_vref_in,56,4);
-            if (rc_num)
-            {
-                FAPI_ERR( "config_rd_vref: Error in setting up buffer ");
-                rc.setEcmdError(rc_num);
-                return rc;
-            }
-            rc_num = data_buffer.setBit(60);
-            if (rc_num)
-            {
-                FAPI_ERR( "config_rd_vref: Error in setting up buffer ");
-                rc.setEcmdError(rc_num);
-                return rc;
-            }
-            rc = fapiPutScom(i_target_mba,
-                             DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P0_0_0x800000060301143F,
-                             data_buffer);
-            if(rc) return rc;
-            rc = fapiPutScom(i_target_mba,
-                             DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P0_1_0x800004060301143F,
-                             data_buffer);
-            if(rc) return rc;
-            rc = fapiPutScom(i_target_mba,
-                             DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P0_2_0x800008060301143F,
-                             data_buffer);
-            if(rc) return rc;
-            rc = fapiPutScom(i_target_mba,
-                             DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P0_3_0x80000c060301143F,
-                             data_buffer);
-            if(rc) return rc;
-            rc = fapiPutScom(i_target_mba,
-                             DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P0_4_0x800010060301143F,
-                             data_buffer);
-            if(rc) return rc;
-            rc = fapiGetScom(i_target_mba,
-                             DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P1_0_0x800100060301143F,
-                             data_buffer);
-            if(rc) return rc;
-            rc_num = rc_num | data_buffer.insertFromRight(l_rd_cen_vref_in,56,4);
-            if (rc_num)
-            {
-                FAPI_ERR( "config_rd_vref: Error in setting up buffer ");
-                rc.setEcmdError(rc_num);
-                return rc;
-            }
-            rc_num = data_buffer.setBit(60);
-            if (rc_num)
-            {
-                FAPI_ERR( "config_rd_vref: Error in setting up buffer ");
-                rc.setEcmdError(rc_num);
-                return rc;
-            }
-            rc = fapiPutScom(i_target_mba,
-                             DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P1_0_0x800100060301143F,
-                             data_buffer);
-            if(rc) return rc;
-            rc = fapiPutScom(i_target_mba,
-                             DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P1_1_0x800104060301143F,
-                             data_buffer);
-            if(rc) return rc;
-            rc = fapiPutScom(i_target_mba,
-                             DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P1_2_0x800108060301143F,
-                             data_buffer);
-            if(rc) return rc;
-            rc = fapiPutScom(i_target_mba,
-                             DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P1_3_0x80010c060301143F,
-                             data_buffer);
-            if(rc) return rc;
-            rc = fapiPutScom(i_target_mba,
-                             DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P1_4_0x800110060301143F,
-                             data_buffer);
-            if(rc) return rc;
+          l_rd_cen_vref_in = l_vref_num;
+          vref_value_print = base + ((l_vref_num-7)*diff_value);
+          FAPI_INF("Current Vref value is %d",vref_value_print);
+          FAPI_INF("Configuring Read Vref Registers:");
+          rc = fapiGetScom(i_target_mba,
+                           DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P0_0_0x800000060301143F,
+                           data_buffer);
+          if(rc) return rc;
+          rc_num = rc_num | data_buffer.insertFromRight(l_rd_cen_vref_in,56,4);
+          if (rc_num)
+          {
+              FAPI_ERR( "config_rd_vref: Error in setting up buffer ");
+              rc.setEcmdError(rc_num);
+              return rc;
+          }
+          rc_num = data_buffer.setBit(60);
+          if (rc_num)
+          {
+              FAPI_ERR( "config_rd_vref: Error in setting up buffer ");
+              rc.setEcmdError(rc_num);
+              return rc;
+          }
+          rc = fapiPutScom(i_target_mba,
+                           DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P0_0_0x800000060301143F,
+                           data_buffer);
+          if(rc) return rc;
+          rc = fapiPutScom(i_target_mba,
+                           DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P0_1_0x800004060301143F,
+                           data_buffer);
+          if(rc) return rc;
+          rc = fapiPutScom(i_target_mba,
+                           DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P0_2_0x800008060301143F,
+                           data_buffer);
+          if(rc) return rc;
+          rc = fapiPutScom(i_target_mba,
+                           DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P0_3_0x80000c060301143F,
+                           data_buffer);
+          if(rc) return rc;
+          rc = fapiPutScom(i_target_mba,
+                           DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P0_4_0x800010060301143F,
+                           data_buffer);
+          if(rc) return rc;
+          rc = fapiGetScom(i_target_mba,
+                           DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P1_0_0x800100060301143F,
+                           data_buffer);
+          if(rc) return rc;
+          rc_num = rc_num | data_buffer.insertFromRight(l_rd_cen_vref_in,56,4);
+          if (rc_num)
+          {
+              FAPI_ERR( "config_rd_vref: Error in setting up buffer ");
+              rc.setEcmdError(rc_num);
+              return rc;
+          }
+          rc_num = data_buffer.setBit(60);
+          if (rc_num)
+          {
+              FAPI_ERR( "config_rd_vref: Error in setting up buffer ");
+              rc.setEcmdError(rc_num);
+              return rc;
+          }
+          rc = fapiPutScom(i_target_mba,
+                           DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P1_0_0x800100060301143F,
+                           data_buffer);
+          if(rc) return rc;
+          rc = fapiPutScom(i_target_mba,
+                           DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P1_1_0x800104060301143F,
+                           data_buffer);
+          if(rc) return rc;
+          rc = fapiPutScom(i_target_mba,
+                           DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P1_2_0x800108060301143F,
+                           data_buffer);
+          if(rc) return rc;
+          rc = fapiPutScom(i_target_mba,
+                           DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P1_3_0x80010c060301143F,
+                           data_buffer);
+          if(rc) return rc;
+          rc = fapiPutScom(i_target_mba,
+                           DPHY01_DDRPHY_DP18_RX_PEAK_AMP_P1_4_0x800110060301143F,
+                           data_buffer);
+          if(rc) return rc;
 
-            rc = delay_shmoo(i_target_mba, i_port, i_shmoo_type_valid,&l_left_margin, &l_right_margin,vref_value_print);
-            if (rc) return rc;
-            l_left_margin_rd_vref_array[l_vref_num] = l_left_margin;
-            l_right_margin_rd_vref_array[l_vref_num] = l_right_margin;
+          rc = delay_shmoo(i_target_mba, i_port, i_shmoo_type_valid,&l_left_margin, &l_right_margin,vref_value_print);
+          if (rc) return rc;
+          l_left_margin_rd_vref_array[l_vref_num] = l_left_margin;
+          l_right_margin_rd_vref_array[l_vref_num] = l_right_margin;
 
-            FAPI_INF("Read Vref = %d ; Min Setup time = %d; Min Hold time = %d",vref_value_print, l_left_margin_rd_vref_array[l_vref_num],l_right_margin_rd_vref_array[l_vref_num]);
-        }
+          FAPI_INF("Read Vref = %d ; Min Setup time = %d; Min Hold time = %d",vref_value_print, l_left_margin_rd_vref_array[l_vref_num],l_right_margin_rd_vref_array[l_vref_num]);
+      }
 
 
     }

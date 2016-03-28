@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_generic_shmoo.H,v 1.31 2015/10/20 12:14:43 sasethur Exp $
+// $Id: mss_generic_shmoo.H,v 1.33 2016/03/25 14:15:08 sglancy Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -41,9 +41,11 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
-// 	 1.31  |preeragh|20/10/15| Header Fix
-// 	 1.30  |preeragh|07/10/15| PDA Table Size
-// 	 1.29  |preeragh|30/07/15| Optimized for FW Linear/Composite/Bin
+//   1.33  |sglancy |25/03/16| Addressed FW comments
+//   1.32  |sglancy |07/03/16| Added Box shmoo
+//   1.31  |preeragh|20/10/15| Header Fix
+//   1.30  |preeragh|07/10/15| PDA Table Size
+//   1.29  |preeragh|30/07/15| Optimized for FW Linear/Composite/Bin
 //   1.28  |preeragh|06/22/14|DDR4 Mods
 //   1.27  |mjjones |01/24/14|RAS Review Updates
 //   1.26  |abhijit |01/17/14|enabled one more function
@@ -137,7 +139,16 @@ public:
 
     // generic Right bound
     fapi::ReturnCode find_bound(const fapi::Target & i_target,bound_t);
-
+    
+    /**
+     * @does the box shmoo
+     *
+     * @param[in]  target:  Reference to centaur.mba target, 
+     *
+     * @return ReturnCode
+     */
+    fapi::ReturnCode do_box_shmoo(const fapi::Target & i_target);
+    
     // Increment or decrement the knob
     fapi::ReturnCode knob_update(const fapi::Target & i_target,
                                  bound_t bound,

@@ -15792,6 +15792,38 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>MRW_WR_VREF_CHECK_VREF_STEP_SIZE</id>
+    <description>Machine Readable Workbook attribute that holds the step size of the VREF when doing a box shmoo</description>
+    <simpleType>
+        <uint8_t>
+            <default>0x08</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MRW_WR_VREF_CHECK_VREF_STEP_SIZE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>MRW_WR_VREF_CHECK_DELAY_STEP_SIZE</id>
+    <description>Machine Readable Workbook attribute that holds the step size of the delay when doing a box shmoo</description>
+    <simpleType>
+        <uint8_t>
+            <default>0x05</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_MRW_WR_VREF_CHECK_DELAY_STEP_SIZE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 <enumerationType>
     <id>MRW_NEST_CAPABLE_FREQUENCIES_SYS</id>
     <description>Enumeration of MRW_NEST_CAPABLE_FREQUENCIES_SYS</description>

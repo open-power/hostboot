@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_shmoo_common.H,v 1.21 2015/08/07 11:29:09 sasethur Exp $
+// $Id: mss_shmoo_common.H,v 1.22 2016/03/07 18:52:31 sglancy Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM 
@@ -40,6 +40,7 @@
 // CHANGE HISTORY:
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
+// 1.22    |sglancy | 07/03/16| Added box shmoo
 // 1.21    |preeragh| 30/07/15| Optimized for FW Linear/Composite/Bin
 // 1.20    |preeragh| 22/06/15| DDR4 - Mods
 // 1.18    |mjjones | 24/01/14| RAS Review Updates
@@ -59,7 +60,8 @@ enum shmoo_type_t
     WR_EYE    = 2,
     WRT_DQS   = 8,
     RD_EYE    = 4,
-    RD_GATE   = 16
+    RD_GATE   = 16,
+    BOX       = 32
 };
 
 enum shmoo_algorithm_t

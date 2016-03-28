@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_generic_shmoo.C,v 1.107 2015/11/13 10:01:29 sasethur Exp $
+// $Id: mss_generic_shmoo.C,v 1.111 2016/03/25 14:15:04 sglancy Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_generic_shmoo.C,v $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
@@ -42,6 +42,8 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
+//   1.109 |sglancy |08-MAR-16| Fixed compile error
+//   1.108 |sglancy |07-MAR-16| Updated for box shmoo
 //   1.107 |preeragh|13-Nov-15| Run Shmoos Only on Master Ranks 256GB 3DTSV
 //   1.106 |preeragh|02-Sep-15| Run Shmoos Only on Master Ranks!
 //   1.105 |sglancy| 10-Oct-15| Changed attribute names
@@ -313,6 +315,17 @@ extern "C"
                 return rc;
             }
         }
+	//runs the box shmoo
+	else if (l_attr_schmoo_test_type_u8 == BOX) {
+	    rc=get_all_noms(i_target);
+            if(rc) return rc;
+            if(l_attr_schmoo_multiple_setup_call_u8==0) {
+                rc=schmoo_setup_mcb(i_target);
+                if(rc) return rc;
+            }
+	    rc=do_box_shmoo(i_target);
+            if(rc) return rc;
+	}
         else if (l_attr_schmoo_test_type_u8 == 8)
         {
             if (l_rankpgrp0[0] != 255)
@@ -1352,7 +1365,135 @@ extern "C"
 
         return rc;
     }
+    
+    //runs the box shmoo going to +5 and -5 ticks
+    fapi::ReturnCode generic_shmoo::do_box_shmoo(const fapi::Target & i_target)
+    {
+        fapi::ReturnCode rc;
+        ecmdDataBufferBase data_buffer_64(64);
+	uint8_t l_p;
+	uint8_t l_rank;
+	uint8_t l_dq;
+	uint8_t l_n;
+	uint8_t rank=0;
+        uint8_t l_SCHMOO_NIBBLES=18;
+        input_type_t l_input_type_e = WR_DQ;
+        access_type_t l_access_type_e = WRITE;
+	
+	uint8_t delay_train_step_size;
+	rc = FAPI_ATTR_GET( ATTR_MRW_WR_VREF_CHECK_VREF_STEP_SIZE, NULL, delay_train_step_size);
+        if(rc) return rc;
+	
+	for(l_p = 0; l_p < MAX_PORT; l_p++) {
 
+             for (l_rank=0; l_rank<iv_MAX_RANKS[l_p]; l_rank++)
+             {
+            	 //l_dq+l_n*4=bit;
+            	 //////
+            	 rank=valid_rank1[l_p][l_rank];
+            	 //printf ("Current Rank : %d",rank );
+
+            	 for(l_dq = 0; l_dq < 4; l_dq++) {
+            	     for (l_n=0; l_n<l_SCHMOO_NIBBLES; l_n++) {
+            		SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq+l_n*4]=(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq+l_n*4]+delay_train_step_size);
+            		rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq+l_n*4,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq+l_n*4]);
+            		if(rc) return rc;
+            	     }
+            	 }
+             }
+       }
+
+       rc=do_mcbist_reset(i_target);
+       if(rc)
+       {
+           FAPI_INF("generic_shmoo::find_bound do_mcbist_reset failed");
+           return rc;
+       }
+       rc=do_mcbist_test(i_target);
+       if(rc)
+       {
+           FAPI_INF("generic_shmoo::find_bound do_mcbist_test failed");
+           return rc;
+       }
+
+       rc = fapiGetScom(i_target, 0x030106dc, data_buffer_64);
+       if (rc) return rc;
+       
+       if(data_buffer_64.isBitSet(2)) {
+          //I do want to send an error out here, because we want to just note the fail and move on in the IPL
+	  //this is a margins check - if we fail, that's ok we might have adequate margins to run, but we'll want to note it and move on
+          FAPI_ERR("FOUND FAILING MCBIST BIT AT + 0x%02x DELAY and VREF 0x%02x!!!",delay_train_step_size,iv_vref_mul);
+       }
+       else {
+          FAPI_INF("FOUND PASSING MCBIST BIT AT + 0x%02x DELAY and VREF 0x%02x!!!",delay_train_step_size,iv_vref_mul);
+       }
+       
+       for(l_p = 0; l_p < MAX_PORT; l_p++) {
+
+             for (l_rank=0; l_rank<iv_MAX_RANKS[l_p]; l_rank++)
+             {
+            	 //l_dq+l_n*4=bit;
+            	 //////
+            	 rank=valid_rank1[l_p][l_rank];
+            	 //printf ("Current Rank : %d",rank );
+
+            	 for(l_dq = 0; l_dq < 4; l_dq++) {
+            	     for (l_n=0; l_n<l_SCHMOO_NIBBLES; l_n++) {
+            		SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq+l_n*4]=(SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq+l_n*4]-delay_train_step_size);
+
+            		rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq+l_n*4,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.curr_val[l_dq+l_n*4]);
+            		if(rc) return rc;
+            	     }
+            	 }
+             }
+       }
+
+       
+       rc=do_mcbist_reset(i_target);
+       if(rc)
+       {
+           FAPI_INF("generic_shmoo::find_bound do_mcbist_reset failed");
+           return rc;
+       }
+       rc=do_mcbist_test(i_target);
+       if(rc)
+       {
+           FAPI_INF("generic_shmoo::find_bound do_mcbist_test failed");
+           return rc;
+       }
+		    
+       rc = fapiGetScom(i_target, 0x030106dc, data_buffer_64);
+       if (rc) return rc;
+       
+       if(data_buffer_64.isBitSet(2)) {
+          //I do want to send an error out here, because we want to just note the fail and move on in the IPL
+	  //this is a margins check - if we fail, that's ok we might have adequate margins to run, but we'll want to note it and move on
+          FAPI_ERR("FOUND FAILING MCBIST BIT AT - 0x%02x DELAY and VREF 0x%02x!!!",delay_train_step_size,iv_vref_mul);
+       }
+       else {
+          FAPI_INF("FOUND PASSING MCBIST BIT AT - 0x%02x DELAY and VREF 0x%02x!!!",delay_train_step_size,iv_vref_mul);
+       }
+	
+	for(l_p = 0; l_p < MAX_PORT; l_p++)
+        {
+            for (l_rank=0; l_rank<iv_MAX_RANKS[l_p]; l_rank++)
+            {
+        	//l_dq+l_n*4=bit;
+        	//////
+        	rank=valid_rank1[l_p][l_rank];
+        	//printf("Valid rank of %d %d %d %d %d %d %d %d",valid_rank1[0],valid_rank1[1],valid_rank1[2],valid_rank1[3],valid_rank1[4],valid_rank1[5],valid_rank1[6],valid_rank1[7]);
+        	for(l_dq = 0; l_dq < 4; l_dq++) {
+        	    for (l_n=0; l_n<l_SCHMOO_NIBBLES; l_n++) {
+        		rc=mss_access_delay_reg_schmoo(i_target,l_access_type_e,l_p,rank,l_input_type_e,l_dq+l_n*4,0,SHMOO[iv_SHMOO_ON].MBA.P[l_p].S[rank].K.nom_val[l_dq+l_n*4]);
+        		if(rc) return rc;
+        		//l_dq+l_n*4=l_dq+l_n*4+4;
+        	    }
+        	}
+            }
+        }
+	return rc;
+    }
+    
 
     fapi::ReturnCode generic_shmoo::knob_update_bin(const fapi::Target & i_target,bound_t bound,uint8_t scenario,uint8_t bit,uint8_t pass,bool &flag)
     {
@@ -3658,6 +3799,7 @@ fapi::ReturnCode generic_shmoo::print_report2(const fapi::Target & i_target)
     uint8_t l_attr_eff_dram_width_u8 = 0;
     uint16_t l_total_margin = 0;
 	uint8_t l_dq = 0;
+	uint8_t vrefdq_train_value[2][2][4];
 	char * l_pMike = new char[128];
     char * l_str = new char[128];
 	
@@ -3674,14 +3816,13 @@ fapi::ReturnCode generic_shmoo::print_report2(const fapi::Target & i_target)
 	
 	rc = FAPI_ATTR_GET( ATTR_EFF_VREF_DQ_TRAIN_RANGE, &i_target, vrefdq_train_range);if(rc) return rc;
 	rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_GEN, &i_target, l_dram_gen); if(rc) return rc;
-	
+	rc = FAPI_ATTR_GET( ATTR_EFF_VREF_DQ_TRAIN_VALUE, &i_target, vrefdq_train_value); if(rc) return rc;
 	if(vrefdq_train_range[0][0][0] == 1)
 	{
 	base_percent = 45000;
 	}
 	
-	vref_val_print = base_percent + (iv_vref_mul * index_mul_print);
-	
+	vref_val_print = base_percent + (vrefdq_train_value[0][0][0] * index_mul_print);
     rc = FAPI_ATTR_GET(ATTR_MSS_FREQ, &l_target_centaur, l_attr_mss_freq_u32);
     if (rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_MSS_VOLT, &l_target_centaur, l_attr_mss_volt_u32);
@@ -3780,12 +3921,12 @@ fapi::ReturnCode generic_shmoo::print_report2(const fapi::Target & i_target)
 								}
                         if (iv_shmoo_type == 2)
                         {
-                            FAPI_ERR("WR_EYE %s ", l_str);
+                            FAPI_IMP("WR_EYE %s ", l_str);
                             
                         }
                         if (iv_shmoo_type == 8)
                         {
-                            FAPI_ERR("RD_EYE %s ", l_str);
+                            FAPI_IMP("RD_EYE %s ", l_str);
                             
                         }
                     }
