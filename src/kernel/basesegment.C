@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -267,8 +267,9 @@ int BaseSegment::_mmExtend(void)
     // Now need to take the pages past the SPTE and add them to the heap.
 
     //get the number of pages needed to hold the SPTE entries.
-    uint64_t spte_pages = (ALIGN_PAGE(l_size)/PAGESIZE *
-                           sizeof(ShadowPTE))/PAGESIZE;
+    uint64_t spte_pages = (ALIGN_PAGE
+                           (ALIGN_PAGE(l_size)/PAGESIZE*sizeof(ShadowPTE)))
+                          /PAGESIZE;
 
     printkd("Number of SPTE pages %ld\n", spte_pages);
 
