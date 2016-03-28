@@ -15754,6 +15754,21 @@ DEPRECATED!!!!
 </attribute>
 
 <attribute>
+    <id>TPM_REQUIRED</id>
+    <description>
+        Setting to require(0x1) or not require(0x0) a functional TPM to
+        boot the system.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>1</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
   <id>PROC_PCIE_NUM_PHB</id>
   <description>
       creator: platform
