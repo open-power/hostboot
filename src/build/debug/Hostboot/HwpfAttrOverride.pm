@@ -82,8 +82,8 @@ my $overrideSymbol = 'fapi2::g_attrOverride';
 my $overrideFapiTankSymbol = 'fapi2::g_attrOverrideFapiTank';
 
 # Expected filenames
-my $fapiAttrInfoFileName = 'fapiAttrInfo.csv';
-my $fapiAttrEnumInfoFileName = 'fapiAttrEnumInfo.csv';
+my $fapiAttrInfoFileName = 'attrInfo.csv';
+my $fapiAttrEnumInfoFileName = 'attrEnumInfo.csv';
 my $targAttrInfoFileName = 'targAttrInfo.csv';
 my $overrideFileName = 'OverrideAttrs.txt';
 
@@ -118,16 +118,16 @@ sub main
 
     #--------------------------------------------------------------------------
     my $overrideSymAddr = (::findSymbolAddress("$overrideSymbol"))[0];
-    
+
     if (not defined $overrideSymAddr)
     {
         ::userDisplay "Cannot find Hostboot symbol '$overrideSymbol'\n";
         die;
     }
-    
+
     my $overrideAddr = Hostboot::_DebugFrameworkVMM::getPhysicalAddr(
         $overrideSymAddr, $debug, 0);
-    
+
     if ($overrideAddr eq Hostboot::_DebugFrameworkVMM::NotFound)
     {
         ::userDisplay "Cannot translate '$overrideSymbol' to a phys addr\n";
@@ -136,16 +136,16 @@ sub main
 
     #--------------------------------------------------------------------------
     my $overrideFapiTankSymAddr = (::findSymbolAddress("$overrideFapiTankSymbol"))[0];
-   
+
     if (not defined $overrideFapiTankSymAddr)
     {
         ::userDisplay "Cannot find Hostboot symbol '$overrideFapiTankSymbol'\n";
         die;
     }
-   
+
     my $overrideFapiTankAddr = Hostboot::_DebugFrameworkVMM::getPhysicalAddr(
         $overrideFapiTankSymAddr, $debug, 0);
-   
+
     if ($overrideFapiTankAddr eq Hostboot::_DebugFrameworkVMM::NotFound)
     {
         ::userDisplay "Cannot translate '$overrideFapiTankSymbol' to a phys addr\n";
@@ -276,10 +276,10 @@ sub main
     my $numOverrides = 0;
     my $attrString = "";
     my @attrLines;
-   
+
     #--------------------------------------------------------------------------
     # Iterate over all lines in the Attribute Overrides file
-    #-------------------------------------------------------------------------- 
+    #--------------------------------------------------------------------------
     open(OVFILE, "< $overrideFile") or die "Cannot open file '$overrideFile'";
     my $line = <OVFILE>;
     while ($line ne "")
@@ -397,7 +397,7 @@ sub main
                     else
                     {
                         ::userDisplay "Cannot find '$attrIdStr' in attribute info files\n";
-                        die; 
+                        die;
                     }
 
                     # Figure out the attribute element size
