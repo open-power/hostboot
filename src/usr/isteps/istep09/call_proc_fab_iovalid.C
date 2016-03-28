@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,6 +57,13 @@
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/common/trace.H>
 
+#include <fapi2/target.H>
+#include <fapi2/plat_hwp_invoker.H>
+#include <errl/errlmanager.H>
+
+// HWP
+#include <p9_fab_iovalid.H>
+
 namespace   ISTEP_09
 {
 
@@ -71,130 +78,48 @@ using   namespace   HWAS;
 void*    call_proc_fab_iovalid( void    *io_pArgs )
 {
     IStepError l_StepError;
-    //@TODO RTC:134079 port to fapi2
-/*    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = NULL;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_fab_iovalid entry" );
 
-    // Get all chip/chiplet targets
+    //
+    //  get a list of all the procs in the system
+    //
     TARGETING::TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC);
 
-    TargetPairs_t l_abusConnections;
-    TargetPairs_t l_xbusConnections;
-    l_errl = PbusLinkSvc::getTheInstance().getPbusConnections(
-                                 l_abusConnections, TYPE_ABUS, false );
-    if (!l_errl)
+    // Loop through all processors including master
+    for (const auto & l_cpu_target: l_cpuTargetList)
     {
-        l_errl = PbusLinkSvc::getTheInstance().getPbusConnections(
-                                 l_xbusConnections, TYPE_XBUS, false );
-    }
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapi2_proc_target(
+                  l_cpu_target);
 
-    if ( l_errl )
-    {
-        // Create IStep error log and cross reference error that occurred
-        l_StepError.addErrorDetails( l_errl );
-
-        // Commit Error
-        errlCommit( l_errl, HWPF_COMP_ID );
-    }
-
-    std::vector<proc_fab_iovalid_proc_chip> l_smp;
-
-    for (TargetHandleList::const_iterator l_cpu_iter = l_cpuTargetList.begin();
-         l_StepError.isNull() && (l_cpu_iter != l_cpuTargetList.end());
-         ++l_cpu_iter)
-    {
-        proc_fab_iovalid_proc_chip l_procEntry;
-
-        TARGETING::TargetHandle_t l_pTarget = *l_cpu_iter;
-        fapi::Target l_fapiproc_target( TARGET_TYPE_PROC_CHIP, l_pTarget);
-
-        l_procEntry.this_chip = l_fapiproc_target;
-        l_procEntry.a0 = false;
-        l_procEntry.a1 = false;
-        l_procEntry.a2 = false;
-        l_procEntry.x0 = false;
-        l_procEntry.x1 = false;
-        l_procEntry.x2 = false;
-        l_procEntry.x3 = false;
-
-        TARGETING::TargetHandleList l_abuses;
-        getChildChiplets( l_abuses, l_pTarget, TYPE_ABUS );
-
-        for (TargetHandleList::const_iterator l_abus_iter = l_abuses.begin();
-            l_abus_iter != l_abuses.end();
-            ++l_abus_iter)
-        {
-            TARGETING::TargetHandle_t l_target = *l_abus_iter;
-            uint8_t l_srcID = l_target->getAttr<ATTR_CHIP_UNIT>();
-            TargetPairs_t::iterator l_itr = l_abusConnections.find(l_target);
-            if ( l_itr == l_abusConnections.end() )
-            {
-                continue;
-            }
-            switch (l_srcID)
-            {
-                case 0: l_procEntry.a0 = true; break;
-                case 1: l_procEntry.a1 = true; break;
-                case 2: l_procEntry.a2 = true; break;
-               default: break;
-            }
-        }
-
-        TARGETING::TargetHandleList l_xbuses;
-        getChildChiplets( l_xbuses, l_pTarget, TYPE_XBUS );
-
-        for (TargetHandleList::const_iterator l_xbus_iter = l_xbuses.begin();
-            l_xbus_iter != l_xbuses.end();
-            ++l_xbus_iter)
-        {
-            TARGETING::TargetHandle_t l_target = *l_xbus_iter;
-            uint8_t l_srcID = l_target->getAttr<ATTR_CHIP_UNIT>();
-            TargetPairs_t::iterator l_itr = l_xbusConnections.find(l_target);
-            if ( l_itr == l_xbusConnections.end() )
-            {
-                continue;
-            }
-            switch (l_srcID)
-            {
-                case 0: l_procEntry.x0 = true; break;
-                case 1: l_procEntry.x1 = true; break;
-                case 2: l_procEntry.x2 = true; break;
-                case 3: l_procEntry.x3 = true; break;
-               default: break;
-            }
-        }
-
-        l_smp.push_back(l_procEntry);
-    }
-
-    if (!l_errl)
-    {
-        //@TODO RTC:133830
-        //FAPI_INVOKE_HWP( l_errl, p9_fab_iovalid, l_smp, true );
-
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "%s : proc_fab_iovalid HWP.",
-                (l_errl ? "ERROR" : "SUCCESS"));
-    }
-
-    if (l_errl)
-    {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR : call_proc_fab_iovalid encountered an error");
+                 "Running p9_fab_iovalid HWP on processor target %.8X",
+                 TARGETING::get_huid(l_cpu_target) );
 
-        // Create IStep error log and cross reference error that occurred
-        l_StepError.addErrorDetails( l_errl );
+        FAPI_INVOKE_HWP(l_errl, p9_fab_iovalid, l_fapi2_proc_target, true);
+        if(l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                     "ERROR 0x%.8X : p9_fab_iovalid "
+                     "HWP returns error for HUID %.8X",
+                     l_errl->reasonCode(),
+                     TARGETING::get_huid(l_cpu_target) );
 
-        // Commit Error
-        errlCommit( l_errl, HWPF_COMP_ID );
-    }
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_cpu_target).addToLog( l_errl );
+
+            l_StepError.addErrorDetails(l_errl);
+            errlCommit(l_errl, HWPF_COMP_ID);
+            l_errl = NULL;
+        }
+    } // end of going through all processors//
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_fab_iovalid exit" );
-*/
+
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();
 }

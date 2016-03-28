@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,6 +57,12 @@
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/common/trace.H>
 
+#include <fapi2/target.H>
+#include <fapi2/plat_hwp_invoker.H>
+#include <errl/errlmanager.H>
+
+#include <p9_smp_link_layer.H>
+
 namespace   ISTEP_09
 {
 
@@ -77,14 +83,38 @@ void*   call_proc_smp_link_layer( void    *io_pArgs )
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_smp_link_layer entry" );
-    //@TODO RTC:133830 call HWP
-    //FAPI_INVOKE_HWP(l_errl,p9_smp_link_layer);
-    if(l_errl)
-    {
-        l_StepError.addErrorDetails(l_errl);
-        errlCommit(l_errl, HWPF_COMP_ID);
-    }
-    return l_StepError.getErrorHandle();
 
+    //
+    //  get a list of all the procs in the system
+    //
+    TARGETING::TargetHandleList l_cpuTargetList;
+    getAllChips(l_cpuTargetList, TYPE_PROC);
+
+    for (const auto & l_cpu_target: l_cpuTargetList)
+    {
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                l_fapi2_proc_target (l_cpu_target);
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                     "Running p9_smp_link_layer HWP on processor target %.8X",
+                     TARGETING::get_huid(l_cpu_target) );
+
+        FAPI_INVOKE_HWP(l_errl,p9_smp_link_layer, l_fapi2_proc_target);
+        if(l_errl)
+        {
+          TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                     ERR_MRK "call_proc_smp_link_layer> Failed HWP call, "
+                     " HUID = 0x%08X",
+                     TARGETING::get_huid(l_cpu_target) );
+            l_StepError.addErrorDetails(l_errl);
+            errlCommit(l_errl, HWPF_COMP_ID);
+        }
+    }
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_proc_smp_link_layer exit" );
+
+    return l_StepError.getErrorHandle();
 }
+
 };
