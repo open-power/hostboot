@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_adu_utils.H,v 1.9 2014/09/11 21:57:13 aalugore Exp $
+// $Id: proc_adu_utils.H,v 1.10 2016/02/05 16:02:09 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/utils/proc_adu_utils.H,v $
 //------------------------------------------------------------------------------
 // *|
@@ -312,6 +312,8 @@ struct proc_adu_utils_adu_status {
 const uint32_t PROC_ADU_UTILS_ADU_HW_NS_DELAY = 10000;
 const uint32_t PROC_ADU_UTILS_ADU_SIM_CYCLE_DELAY = 10000;
 
+const uint32_t PROC_ADU_UTILS_ADU_MAX_BUSY_POLLS = 32;
+
 // field width definitions
 const uint32_t PROC_ADU_UTILS_ADU_MAX_POST_QUIESCE_DELAY = ((1 << 20)-1);
 const uint32_t PROC_ADU_UTILS_ADU_MAX_PRE_INIT_DELAY = ((1 << 10)-1);
@@ -470,12 +472,15 @@ fapi::ReturnCode proc_adu_utils_send_fbc_op(
 // function: read ADU Status register, return structure encapsulating
 //           error/status bits
 //           NOTE: intended to be run while holding ADU lock
-// parameters: i_target      => P8 chip target
-//             o_status_act  => struct defining state of status/error bits
+// parameters: i_target        => P8 chip target
+//             i_poll_busy_low => poll until busy indicator drops, then
+//                                return status?
+//             o_status_act    => struct defining state of status/error bits
 // returns: FAPI_RC_SUCCESS if status register read is successful,
 //          else error
 fapi::ReturnCode proc_adu_utils_get_adu_status(
     const fapi::Target& i_target,
+    const bool i_poll_busy_low,
     proc_adu_utils_adu_status& o_status_act);
 
 // function: write ADU Data & Force ECC registers (to set outbound data to be

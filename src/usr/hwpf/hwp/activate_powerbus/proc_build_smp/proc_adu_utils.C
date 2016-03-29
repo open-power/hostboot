@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_adu_utils.C,v 1.9 2014/02/12 05:13:49 jmcgill Exp $
+// $Id: proc_adu_utils.C,v 1.10 2016/02/05 16:02:04 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/utils/proc_adu_utils.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -491,17 +491,21 @@ fapi::ReturnCode proc_adu_utils_send_fbc_op(
 
 fapi::ReturnCode proc_adu_utils_get_adu_status(
     const fapi::Target& i_target,
+    const bool i_poll_busy_low,
     proc_adu_utils_adu_status& o_status_act)
 {
     fapi::ReturnCode rc;
     ecmdDataBufferBase status_data(64);
+    bool poll = false;
+    uint32_t poll_count = 0;
 
     FAPI_DBG("proc_adu_utils_get_adu_status: Start");
 
     do
     {
         // read ADU Status register
-        FAPI_DBG("proc_adu_utils_get_adu_status: Reading ADU Status register");
+        FAPI_DBG("proc_adu_utils_get_adu_status: Reading ADU Status register (poll_busy_low: %d, count: %d)",
+                 (i_poll_busy_low)?(1):(0), poll_count);
         rc = fapiGetScom(i_target, ADU_STATUS_0x02020002, status_data);
         if (!rc.ok())
         {
@@ -514,6 +518,10 @@ fapi::ReturnCode proc_adu_utils_get_adu_status(
             status_data.isBitSet(ADU_STATUS_FBC_ALTD_BUSY_BIT) ?
             ADU_STATUS_BIT_SET :
             ADU_STATUS_BIT_CLEAR;
+        poll = i_poll_busy_low &&
+            (o_status_act.busy == ADU_STATUS_BIT_SET);
+        poll_count++;
+
         o_status_act.wait_cmd_arbit =
             status_data.isBitSet(ADU_STATUS_FBC_ALTD_WAIT_CMD_ARBIT_BIT) ?
             ADU_STATUS_BIT_SET :
@@ -558,7 +566,7 @@ fapi::ReturnCode proc_adu_utils_get_adu_status(
             status_data.isBitSet(ADU_STATUS_FBC_ALTD_INIT_MISSING_BIT) ?
             ADU_STATUS_BIT_SET :
             ADU_STATUS_BIT_CLEAR;
-    } while(0);
+    } while(poll && (poll_count < PROC_ADU_UTILS_ADU_MAX_BUSY_POLLS));
 
     FAPI_DBG("proc_adu_utils_get_adu_status: End");
     return rc;

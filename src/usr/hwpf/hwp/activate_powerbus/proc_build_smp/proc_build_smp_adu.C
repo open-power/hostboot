@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: proc_build_smp_adu.C,v 1.11 2014/11/18 17:41:03 jmcgill Exp $
+// $Id: proc_build_smp_adu.C,v 1.12 2016/02/05 16:05:39 jmcgill Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/p8/working/procedures/ipl/fapi/proc_build_smp_adu.C,v $
 //------------------------------------------------------------------------------
 // *|
@@ -352,6 +352,7 @@ fapi::ReturnCode proc_build_smp_adu_check_status(
             FAPI_DBG("proc_build_smp_adu_check_status: Calling library to read ADU status (poll %d)",
                      num_polls+1);
             rc = proc_adu_utils_get_adu_status(i_target,
+                                               false,
                                                status);
             if (!rc.ok())
             {
