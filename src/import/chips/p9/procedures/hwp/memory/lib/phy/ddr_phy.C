@@ -49,8 +49,6 @@ using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCS;
 using fapi2::TARGET_TYPE_DIMM;
 
-using fapi2::FAPI2_RC_SUCCESS;
-
 namespace mss
 {
 
@@ -90,6 +88,7 @@ fapi2::ReturnCode toggle_zctl( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
     fapi2::buffer<uint64_t> l_data;
 
     const auto l_ports = i_target.getChildren<TARGET_TYPE_MCA>();
+
     //
     // 4. Write 0x0010 to PC IO PVT N/P FET driver control registers to assert ZCTL reset and enable the internal impedance controller.
     // (SCOM Addr: 0x8000C0140301143F,  0x8000C0140301183F, 0x8001C0140301143F, 0x8001C0140301183F)
@@ -148,8 +147,9 @@ fapi2::ReturnCode change_force_mclk_low (const fapi2::Target<TARGET_TYPE_MCBIST>
     // Might as well do this for all the ports while we're here.
     for (const auto& p : i_target.getChildren<TARGET_TYPE_MCA>())
     {
-        FAPI_TRY(mss::getScom( p, MCA_MBA_FARB5Q, l_data));
+        FAPI_TRY( mss::getScom(p, MCA_MBA_FARB5Q, l_data) );
 
+        // TK: use writeBit?
         if (i_state == mss::HIGH)
         {
             l_data.setBit<MCA_MBA_FARB5Q_CFG_FORCE_MCLK_LOW_N>();
@@ -421,10 +421,9 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
-fapi2::ReturnCode rank_pair_primary_to_dimm(
-    const fapi2::Target<TARGET_TYPE_MCA>& i_target,
-    const uint64_t i_rp,
-    fapi2::Target<TARGET_TYPE_DIMM>& o_dimm)
+fapi2::ReturnCode rank_pair_primary_to_dimm( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        fapi2::Target<TARGET_TYPE_DIMM>& o_dimm)
 {
     fapi2::buffer<uint64_t> l_data;
     fapi2::buffer<uint64_t> l_rank;
@@ -477,8 +476,6 @@ fapi2::ReturnCode rank_pair_primary_to_dimm(
 
     o_dimm = l_dimms[l_rank_on_dimm];
 
-    return FAPI2_RC_SUCCESS;
-
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -502,8 +499,6 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
     fapi2::buffer<uint64_t> l_fir_data;
     fapi2::buffer<uint64_t> l_err_data;
 
-    mss::pc<TARGET_TYPE_MCA>  l_pc;
-
     fapi2::Target<TARGET_TYPE_DIMM> l_failed_dimm;
 
     FAPI_TRY( mss::apb::read_fir_err1(i_target, l_fir_data) );
@@ -512,7 +507,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
     // If we have no errors, lets get out of here.
     if (l_fir_data == 0)
     {
-        return FAPI2_RC_SUCCESS;
+        return fapi2::current_err;
     }
 
     // We have bits to check ...
@@ -520,7 +515,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
     // If we have PC error status bits on, lets handle those.
     if ((l_fir_data & init_cal_pc_err_mask) != 0)
     {
-        FAPI_TRY( l_pc.read_error_status0(i_target, l_err_data) );
+        FAPI_TRY( pc::read_error_status0(i_target, l_err_data) );
         // Hm ... I don't see any explict error code for this - not sure if I should break
         // out all the possible failures.
         FAPI_ASSERT( l_err_data == 0,
@@ -543,7 +538,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
     }
 
     // If we're here, we have initial cal errors
-    FAPI_TRY( l_pc.read_init_cal_error(i_target, l_err_data) );
+    FAPI_TRY( pc::read_init_cal_error(i_target, l_err_data) );
 
     l_err_data.extractToRight<TT::INIT_CAL_ERROR_WR_LEVEL, 11>(l_errors);
     l_err_data.extractToRight<TT::INIT_CAL_ERROR_RANK_PAIR, TT::INIT_CAL_ERROR_RANK_PAIR_LEN>(l_rank_pairs);
@@ -553,7 +548,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
     {
         FAPI_INF("Initial CAL FIR is 0x%016llx but missing info in the error register: 0x%016llx",
                  l_fir_data, l_err_data);
-        return FAPI2_RC_SUCCESS;
+        return fapi2::current_err;
     }
 
     // Get the DIMM which failed. We should only have one rank pair as we calibrate the
@@ -783,13 +778,11 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
     std::vector<uint64_t> l_pairs;
 
     // Setup the DP16 IO TX, DLL/VREG. They use freq which is an MCBIST attribute
-    FAPI_TRY( mss::dp16<TARGET_TYPE_MCA>().setup_io_tx_config0(i_target) );
-    FAPI_TRY( mss::dp16<TARGET_TYPE_MCA>().setup_dll_vreg_config1(i_target) );
+    FAPI_TRY( mss::dp16::reset_io_tx_config0(i_target) );
+    FAPI_TRY( mss::dp16::reset_dll_vreg_config1(i_target) );
 
     for (const auto& p : i_target.getChildren<TARGET_TYPE_MCA>())
     {
-        mss::dp16<TARGET_TYPE_MCA> l_dp16;
-
         // The following registers must be configured to the correct operating environment:
 
         // Undocumented, noted by Bialas
@@ -804,14 +797,14 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
         // Section 5.2.4.2 DP16 Data Bit Enable 1 on page 285
         // Section 5.2.4.3 DP16 Data Bit Disable 0 on page 288
         // Section 5.2.4.4 DP16 Data Bit Disable 1 on page 289
-        FAPI_TRY( l_dp16.write_data_bit_enable(p) );
-        FAPI_TRY( l_dp16.set_bad_bits(p) );
+        FAPI_TRY( mss::dp16::reset_data_bit_enable(p) );
+        FAPI_TRY( mss::dp16::reset_bad_bits(p) );
 
         FAPI_TRY( mss::get_rank_pairs(p, l_pairs) );
 
         // Section 5.2.4.8 DP16 Write Clock Enable & Clock Selection on page 301
-        FAPI_TRY( l_dp16.write_clock_enable(p, l_pairs) );
-        FAPI_TRY( l_dp16.read_clock_enable(p, l_pairs) );
+        FAPI_TRY( mss::dp16::reset_write_clock_enable(p, l_pairs) );
+        FAPI_TRY( mss::dp16::reset_read_clock_enable(p, l_pairs) );
 
         // Write Control reset
         FAPI_TRY( mss::wc::reset(p) );

@@ -88,116 +88,116 @@ class pcTraits<fapi2::TARGET_TYPE_MCA>
 
 };
 
+namespace pc
+{
+
+
 ///
-/// @class mss::pc
-/// @brief Phy Control Class
-/// @tparam T fapi2 Target Type
-/// @tparam TT traits type defaults to pcTraits<T>
+/// @brief read PC_ERROR_STATUS0
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
 template< fapi2::TargetType T, typename TT = pcTraits<T> >
-class pc
+inline fapi2::ReturnCode read_error_status0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
-    public:
-
-        ///
-        /// @brief read PC_ERROR_STATUS0
-        /// @param[in] i_target the fapi2 target of the port
-        /// @param[out] o_data the value of the register
-        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-        ///
-        inline fapi2::ReturnCode read_error_status0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
-        {
-            FAPI_TRY( mss::getScom(i_target, TT::PC_ERROR_STATUS0_REG, o_data) );
-            FAPI_DBG("pc_error_status0: 0x%016llx", o_data);
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief Write PC_ERROR_STATUS0
-        /// @param[in] i_target the fapi2 target of the port
-        /// @param[in] i_data the value of the register
-        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-        ///
-        inline fapi2::ReturnCode write_error_status0( const fapi2::Target<T>& i_target,
-                const fapi2::buffer<uint64_t>& i_data )
-        {
-            FAPI_DBG("pc_error_status0: 0x%016llx", i_data);
-            FAPI_TRY( mss::putScom(i_target, TT::PC_ERROR_STATUS0_REG, i_data) );
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief reset pc_error_status0
-        /// @param[in] i_target fapi2 target of the port
-        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-        ///
-        inline fapi2::ReturnCode reset_error_status0( const fapi2::Target<T>& i_target )
-        {
-            FAPI_TRY( write_error_status0(i_target, 0) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief read PC_INIT_CAL_ERROR
-        /// @param[in] i_target the fapi2 target of the port
-        /// @param[out] o_data the value of the register
-        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-        ///
-        inline fapi2::ReturnCode read_init_cal_error( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
-        {
-            FAPI_TRY( mss::getScom(i_target, TT::PC_INIT_CAL_ERROR_REG, o_data) );
-            FAPI_DBG("pc_init_cal_error: 0x%016llx", o_data);
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief Write PC_INIT_CAL_ERROR
-        /// @param[in] i_target the fapi2 target of the port
-        /// @param[in] i_data the value of the register
-        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-        ///
-        inline fapi2::ReturnCode write_init_cal_error( const fapi2::Target<T>& i_target,
-                const fapi2::buffer<uint64_t>& i_data )
-        {
-            FAPI_DBG("pc_init_cal_error: 0x%016llx", i_data);
-            FAPI_TRY( mss::putScom(i_target, TT::PC_INIT_CAL_ERROR_REG, i_data) );
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief reset pc_init_cal_error
-        /// @param[in] i_target fapi2 target of the port
-        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-        ///
-        inline fapi2::ReturnCode reset_init_cal_error( const fapi2::Target<T>& i_target )
-        {
-            FAPI_TRY( write_init_cal_error(i_target, 0) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief reset rc
-        /// @param[in] i_target fapi2 target of the port
-        /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS if ok
-        ///
-        inline fapi2::ReturnCode reset( const fapi2::Target<T>& i_target )
-        {
-            FAPI_TRY( reset_error_status0(i_target) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-};
-
+    FAPI_TRY( mss::getScom(i_target, TT::PC_ERROR_STATUS0_REG, o_data) );
+    FAPI_DBG("pc_error_status0: 0x%016llx", o_data);
+fapi_try_exit:
+    return fapi2::current_err;
 }
+
+///
+/// @brief Write PC_ERROR_STATUS0
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = pcTraits<T> >
+inline fapi2::ReturnCode write_error_status0( const fapi2::Target<T>& i_target,
+        const fapi2::buffer<uint64_t>& i_data )
+{
+    FAPI_DBG("pc_error_status0: 0x%016llx", i_data);
+    FAPI_TRY( mss::putScom(i_target, TT::PC_ERROR_STATUS0_REG, i_data) );
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief reset pc_error_status0
+/// @param[in] i_target fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = pcTraits<T> >
+inline fapi2::ReturnCode reset_error_status0( const fapi2::Target<T>& i_target )
+{
+    FAPI_TRY( write_error_status0(i_target, 0) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief read PC_INIT_CAL_ERROR
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = pcTraits<T> >
+inline fapi2::ReturnCode read_init_cal_error( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    FAPI_TRY( mss::getScom(i_target, TT::PC_INIT_CAL_ERROR_REG, o_data) );
+    FAPI_DBG("pc_init_cal_error: 0x%016llx", o_data);
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write PC_INIT_CAL_ERROR
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = pcTraits<T> >
+inline fapi2::ReturnCode write_init_cal_error( const fapi2::Target<T>& i_target,
+        const fapi2::buffer<uint64_t>& i_data )
+{
+    FAPI_DBG("pc_init_cal_error: 0x%016llx", i_data);
+    FAPI_TRY( mss::putScom(i_target, TT::PC_INIT_CAL_ERROR_REG, i_data) );
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief reset pc_init_cal_error
+/// @param[in] i_target fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = pcTraits<T> >
+inline fapi2::ReturnCode reset_init_cal_error( const fapi2::Target<T>& i_target )
+{
+    FAPI_TRY( write_init_cal_error(i_target, 0) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief reset rc
+/// @param[in] i_target fapi2 target of the port
+/// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = pcTraits<T> >
+inline fapi2::ReturnCode reset( const fapi2::Target<T>& i_target )
+{
+    FAPI_TRY( reset_error_status0(i_target) );
+    FAPI_TRY( reset_init_cal_error(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+} // close namespace pc
+} // close namespace mss
 
 #endif

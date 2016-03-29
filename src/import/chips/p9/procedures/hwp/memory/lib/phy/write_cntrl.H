@@ -32,6 +32,8 @@
 
 #include <fapi2.H>
 #include <p9_mc_scom_addresses.H>
+#include <lib/utils/scom.H>
+#include <lib/utils/conversions.H>
 
 namespace mss
 {
@@ -152,7 +154,6 @@ inline fapi2::ReturnCode write_config0( const fapi2::Target<T>& i_target,
 fapi_try_exit:
     return fapi2::current_err;
 }
-
 
 ///
 /// @brief Read WC_CONFIG1
@@ -417,6 +418,26 @@ fapi_try_exit:
 
 }
 
+///
+/// @brief Set EN_RESET_WR_DELAY_WL
+/// @param[in] io_data buffer to set
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = wcTraits<T> >
+inline void set_reset_wr_delay_wl( fapi2::buffer<uint64_t>& io_data )
+{
+    io_data.setBit<TT::EN_RESET_WR_DELAY_WL>();
+}
+
+///
+/// @brief Get EN_RESET_WR_DELAY_WL
+/// @param[in] io_data buffer to get value from
+/// @return right-aligned uint64_t containing the contents of the field
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = wcTraits<T> >
+inline uint64_t get_reset_wr_delay_wl( fapi2::buffer<uint64_t>& io_data )
+{
+    return io_data.getBit<TT::EN_RESET_WR_DELAY_WL>() ? 1 : 0;
+}
 
 ///
 /// @brief reset wc_rtt_wr_swap_enable

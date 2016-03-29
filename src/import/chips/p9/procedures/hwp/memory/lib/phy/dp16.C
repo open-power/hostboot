@@ -36,6 +36,7 @@
 #include <mss_attribute_accessors.H>
 
 #include <phy/dp16.H>
+#include <phy/write_cntrl.H>
 
 #include <utils/scom.H>
 #include <utils/pos.H>
@@ -46,6 +47,9 @@ using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_SYSTEM;
 
 namespace mss
+{
+
+namespace dp16
 {
 
 typedef   std::pair< uint64_t, uint64_t >  register_data_pair;
@@ -140,12 +144,11 @@ static std::vector< register_data_vector > rdclk_enable_spare_x4 =
 };
 
 ///
-/// @brief Write the data bit enable registers
+/// @brief Reset the data bit enable registers
 /// @param[in] i_target  a port target
 /// @return FAPI2_RC_SUCCES iff ok
 ///
-template<>
-fapi2::ReturnCode dp16<TARGET_TYPE_MCA>::write_data_bit_enable( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+fapi2::ReturnCode reset_data_bit_enable( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
 {
     // Determine if we're running with spares or not. Once we know that, we can find the right vector to iterate over.
     // Note: Is this ATTR_EFF_DIMM_SPARE? Because that's per DIMM, but this is a port-level statement, right? BRS
@@ -158,7 +161,7 @@ fapi2::ReturnCode dp16<TARGET_TYPE_MCA>::write_data_bit_enable( const fapi2::Tar
 
     FAPI_DBG("reg/data vector %d", l_reg_data.size());
 
-    for (auto rdp : l_reg_data)
+    for (const auto& rdp : l_reg_data)
     {
         // This is probably important enough to be seen all the time, not just debug
         FAPI_INF( "Setting up DATA_BIT_ENABLE 0x%llx (0x%llx) %s", rdp.first, rdp.second, mss::c_str(i_target) );
@@ -170,22 +173,21 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Write the clock enable registers
+/// @brief Reset the read clock enable registers
 /// @param[in] i_target
 /// @param[in] l_rank_pairs
 /// @return FAPI2_RC_SUCCES iff ok
 ///
-template<>
-fapi2::ReturnCode dp16<TARGET_TYPE_MCA>::read_clock_enable( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
+fapi2::ReturnCode reset_read_clock_enable( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
         const std::vector< uint64_t >& l_rank_pairs )
 {
     // Just slam something in here for now - we know the 'RIT DIMM' is x4, lets assume no cross-coupling for now
     bool l_using_spares = false;
     auto l_reg_data = l_using_spares ? rdclk_enable_spare_x4[0] : rdclk_enable_no_spare_x4[0];
 
-    for (auto rp : l_rank_pairs)
+    for (const auto& rp : l_rank_pairs)
     {
-        for (auto rdp : l_reg_data)
+        for (const auto& rdp : l_reg_data)
         {
             // Grab the register and add the rank pair in
             fapi2::buffer<uint64_t> l_address(rdp.first);
@@ -204,22 +206,21 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Write the read clock enable registers
+/// @brief Resets the write clock enable registers
 /// @param[in] i_target
 /// @param[in] l_rank_pairs
 /// @return FAPI2_RC_SUCCESs iff ok
 ///
-template<>
-fapi2::ReturnCode dp16<TARGET_TYPE_MCA>::write_clock_enable( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
+fapi2::ReturnCode reset_write_clock_enable( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
         const std::vector< uint64_t >& l_rank_pairs )
 {
     // Just slam something in here for now - we know the 'RIT DIMM' is x4, lets assume no cross-coupling for now
     bool l_using_spares = false;
     auto l_reg_data = l_using_spares ? wrclk_enable_spare_x4[0] : wrclk_enable_no_spare_x4[0];
 
-    for (auto rp : l_rank_pairs)
+    for (const auto& rp : l_rank_pairs)
     {
-        for (auto rdp : l_reg_data)
+        for (const auto& rdp : l_reg_data)
         {
             // Grab the register and add the rank pair in
             fapi2::buffer<uint64_t> l_address(rdp.first);
@@ -243,9 +244,8 @@ fapi_try_exit:
 /// @param[in] l_rank_pairs vector of rank pairs
 /// @return FAPI2_RC_SUCCES iff ok
 ///
-template<>
-fapi2::ReturnCode dp16<TARGET_TYPE_MCA>::reset_delay_values( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
-        const std::vector< uint64_t >& l_rank_pairs )
+fapi2::ReturnCode reset_delay_values( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
+                                      const std::vector< uint64_t >& l_rank_pairs )
 {
     std::vector<uint64_t> l_addrs(
     {
@@ -260,13 +260,13 @@ fapi2::ReturnCode dp16<TARGET_TYPE_MCA>::reset_delay_values( const fapi2::Target
 
     // Reset the write level values
     FAPI_INF( "Resetting write level values %s", mss::c_str(i_target) );
-    FAPI_TRY( mss::getScom(i_target, MCA_DDRPHY_WC_CONFIG2_P0, l_data) );
-    l_data.setBit<MCA_DDRPHY_WC_CONFIG2_P0_EN_RESET_WR_DELAY_WL>();
-    FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_WC_CONFIG2_P0, l_data) );
+    FAPI_TRY( mss::wc::read_config2(i_target, l_data) );
+    mss::wc::set_reset_wr_delay_wl(l_data);
+    FAPI_TRY( mss::wc::write_config2(i_target, l_data) );
 
-    for (auto rp : l_rank_pairs)
+    for (const auto& rp : l_rank_pairs)
     {
-        for (auto a : l_addrs)
+        for (const auto& a : l_addrs)
         {
             // Add the rank pair into the register to get the actual address
             fapi2::buffer<uint64_t> l_address(a);
@@ -286,9 +286,7 @@ fapi_try_exit:
 /// @param[in] i_target a MCBIST target
 /// @return FAPI2_RC_SUCCESs iff ok
 ///
-template<>
-template<>
-fapi2::ReturnCode dp16<TARGET_TYPE_MCA>::setup_sysclk( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
+fapi2::ReturnCode reset_sysclk( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
 {
     std::vector< std::pair<uint64_t, uint64_t> > l_addrs(
     {
@@ -310,11 +308,11 @@ fapi2::ReturnCode dp16<TARGET_TYPE_MCA>::setup_sysclk( const fapi2::Target<TARGE
         l_data.setBit<MCA_DDRPHY_DP16_SYSCLK_PR0_P0_0_01_ROT_OVERRIDE_EN>();
     }
 
-    for (auto p : i_target.getChildren<TARGET_TYPE_MCA>())
+    for (const auto& p : i_target.getChildren<TARGET_TYPE_MCA>())
     {
         FAPI_DBG("set dp16_sysclk for %s", mss::c_str(p));
 
-        for (auto a : l_addrs)
+        for (const auto& a : l_addrs)
         {
             FAPI_TRY( mss::putScom(p, a.first, l_data) );
             FAPI_TRY( mss::putScom(p, a.second, l_data) );
@@ -331,9 +329,7 @@ fapi_try_exit:
 /// @param[in] i_target a MCBIST target
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-template<>
-template<>
-fapi2::ReturnCode dp16<TARGET_TYPE_MCA>::setup_io_tx_config0( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
+fapi2::ReturnCode reset_io_tx_config0( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
 {
     static const std::vector<uint64_t> l_addrs(
     {
@@ -369,9 +365,7 @@ fapi_try_exit:
 /// @param[in] i_target a MCBIST target
 /// @return FAPI2_RC_SUCCESs iff ok
 ///
-template<>
-template<>
-fapi2::ReturnCode dp16<TARGET_TYPE_MCA>::setup_dll_vreg_config1( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
+fapi2::ReturnCode reset_dll_vreg_config1( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
 {
     static const std::vector<uint64_t> l_addrs(
     {
@@ -400,4 +394,5 @@ fapi_try_exit:
 }
 
 
-}
+} // close namespace dp16
+} // close namespace mss
