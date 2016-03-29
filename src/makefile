@@ -239,8 +239,7 @@ TESTCASE_MODULES += testfapi2
 
 #TESTCASE_MODULES += testhwpf
 
-#@TODO RTC:138280 Need to enable Istep 21.1
-#TESTCASE_MODULES += testrtloader
+TESTCASE_MODULES += testrtloader
 
 RUNTIME_OBJECTS += rt_start.o
 RUNTIME_OBJECTS += rt_main.o

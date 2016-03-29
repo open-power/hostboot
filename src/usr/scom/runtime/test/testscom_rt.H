@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -90,7 +92,8 @@ public:
           {
               continue;
           }
-          else if (scom_targets[x]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          else if (scom_targets[x]->
+                getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
           {
               TRACDCOMP( g_trac_scom, "ScomTest::test_SCOMreadWrite_proc> Target %d is not functional", x );
               scom_targets[x] = NULL; //remove from our list
@@ -103,12 +106,10 @@ public:
           uint64_t addr;
           uint64_t data;
       } test_data[] = {
-          { scom_targets[PROC0], 0x120F0000 ,0xFEEDB0B000001234},
-          { scom_targets[PROC0], 0x120F0166, 0xFEDCBA9876543210},
-          { scom_targets[PROC0], 0x01010803, 0x0000000000000000},
-          { scom_targets[PROC0], 0x02040004, 0xFFFFFFFFFFFFFFFF},
-          { scom_targets[PROC1], 0x01010803, 0x1234567887654321},
-          { scom_targets[PROC1], 0x02040004, 0x1122334455667788},
+          { scom_targets[PROC0], 0x040110C4 ,0xFEEDB0B000001234},
+          { scom_targets[PROC0], 0x02040008, 0xFEDCBA9876543210},
+          { scom_targets[PROC1], 0x040110C4, 0x1234567887654321},
+          { scom_targets[PROC1], 0x02040008, 0x1122334455667788},
       };
       const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
 
@@ -251,7 +252,8 @@ public:
           {
               continue;
           }
-          else if (scom_targets[x]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          else if (scom_targets[x]->
+                getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
           {
               TRACDCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> Target %d is not functional", x );
               scom_targets[x] = NULL; //remove from our list
@@ -423,7 +425,8 @@ public:
               continue;
           }
           // check to see if the target is functional.. if not.. skip this target
-          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          else if (test_data[x].target->
+              getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
           {
               TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_EX> Target %d is not functional", x );
               continue;
@@ -518,14 +521,12 @@ public:
       {
            return;
       }
-        
+
       // Setup some targets to use
       enum {
           myProc0,
-          myMCS1,
-          myMCS2,
-          myMCS7,
-          myMCS4,
+          myMCS0,
+          myMCS3,
           NUM_TARGETS
       };
 
@@ -545,30 +546,16 @@ public:
 
       if (scom_targets[myProc0] != NULL)
       {
-          // Add the MCS(1) to the path and  create new target
-          epath.addLast(TARGETING::TYPE_MCS,1);
-          scom_targets[myMCS1] = TARGETING::targetService().toTarget(epath);
+          // Add the MCS(0) to the path and  create new target
+          epath.addLast(TARGETING::TYPE_MCS,0);
+          scom_targets[myMCS0] = TARGETING::targetService().toTarget(epath);
 
-          // remote MCS(1) (off of sys-0/node-0/proc-0/MCS1)
+          // remote MCS(0) (off of sys-0/node-0/proc-0/MCS0)
           epath.removeLast();
 
-          // add MCS4 target.
-          epath.addLast(TARGETING::TYPE_MCS,4);
-          scom_targets[myMCS4] = TARGETING::targetService().toTarget(epath);
-
-          // remote MCS4 target (off of sys-0/node-0/proc-0/MCS4)
-          epath.removeLast();
-
-          // add MCS2 target.
-          epath.addLast(TARGETING::TYPE_MCS,2);
-          scom_targets[myMCS2] = TARGETING::targetService().toTarget(epath);
-
-          // remove MCS2 target (off of sys-0/node-0/proc-0/MCS4)
-          epath.removeLast();
-
-          // add MCS7 target.
-          epath.addLast(TARGETING::TYPE_MCS,7);
-          scom_targets[myMCS7] = TARGETING::targetService().toTarget(epath);
+          // add MCS3 target.
+          epath.addLast(TARGETING::TYPE_MCS,3);
+          scom_targets[myMCS3] = TARGETING::targetService().toTarget(epath);
       }
 
       // scratch data to use
@@ -577,12 +564,10 @@ public:
           uint64_t addr;
           uint64_t data;
       } test_data[] = {
-          { scom_targets[myMCS1], 0x0201184A ,0x1111111122222222},
-          { scom_targets[myMCS4], 0x0201184A, 0x3333333344444444},
-          { scom_targets[myMCS2], 0x0201184A, 0x5555555566666666},
-          { scom_targets[myMCS7], 0x0201184A, 0x7777777788888888},
-          { scom_targets[myMCS4], 0x0601184A, 0x0101010101010101},  // invalid address range
-          { scom_targets[myMCS4], 0x0200184A, 0x2323232323232323},  // Invalid address range for target
+          { scom_targets[myMCS0], 0x05010800 ,0x1111111122222222},
+          { scom_targets[myMCS3], 0x05010800, 0x3333333344444444},
+          { scom_targets[myMCS0], 0x0601184A, 0x0101010101010101}, // invalid
+          { scom_targets[myMCS0], 0x0200184A, 0x2323232323232323}, // invalid
       };
       const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
 
@@ -596,10 +581,11 @@ public:
           {
               continue;
           }
-          // check to see if the target is functional.. if not.. skip this target
-          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          // check to see if the target is functional.. if not skip this target
+          else if (test_data[x].target->
+              getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
           {
-              TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_MCS> Target %d is not functional", x );
+              TRACDCOMP( g_trac_scom, "ScomTest::test_TranslateScom_MCS> Target %d is not functional", x );
               continue;
           }
 
@@ -614,12 +600,12 @@ public:
           {
               if ((x == NUM_ADDRS-1) || (x==NUM_ADDRS-2))
               {
-                  TRACDCOMP( g_trac_scom, "ScomTest::test_translate MCS.. Expected Error log returned> x = %d", x );
+                  TRACDCOMP( g_trac_scom, "ScomTest::test_TranslateScom_MCS.. Expected Error log returned> x = %d", x );
               }
               else
               {
-                  TRACFCOMP(g_trac_scom, "ScomTest::test_translate_Scom_MCS> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-                  TS_FAIL( "ScomTest::test_Translate_SCOM_mcs> ERROR : Unexpected error log from write1" );
+                  TRACFCOMP(g_trac_scom, "ScomTest::test_TranslateScom_MCS> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
+                  TS_FAIL( "ScomTest::test_TranslateScom_MCS> ERROR : Unexpected error log from write1" );
                   fails++;
                   errlCommit(l_err,SCOM_COMP_ID);
               }
@@ -661,7 +647,8 @@ public:
           {
               TRACFCOMP(g_trac_scom, "ScomTest::test_TranslateScom_MCS> [%d] Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
 
-              //temp workaround for MCSs that have been turned off (RTC Issue 84907)
+              //temp workaround for MCSs that have been turned off
+              // (RTC Issue 84907)
               if (read_data[x] != 0x0)
               {
                    TS_FAIL( "ScomTest::test_TranslateScom_MCS> ERROR : Data miss-match between read and expected data" );
@@ -671,7 +658,7 @@ public:
 
       }
 
-      TRACFCOMP( g_trac_scom, "ScomTest::test_translateScom_MCS> %d/%d fails", fails, total );
+      TRACFCOMP( g_trac_scom, "ScomTest::test_TranslateScom_MCS> %d/%d fails", fails, total );
 
  }
 
@@ -757,7 +744,8 @@ public:
           }
 
           // check to see if the target is functional.. if not.. skip this target
-          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          else if (test_data[x].target->
+              getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
           {
               TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_MBA_MBS> Target %d is not functional", x );
               continue;
@@ -803,7 +791,8 @@ public:
               continue;
           }
           // check to see if the target is functional.. if not.. skip this target
-          else if (test_data[x].target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          else if (test_data[x].target->
+              getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
           {
               TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_MBA_MBS> Target %d is not functional", x );
               continue;
@@ -857,7 +846,7 @@ public:
 
 
   /**
-   * @brief multi chip SCOM test 
+   * @brief multi chip SCOM test
    *
    */
   void test_MultiChipSCOMreadWrite_proc(void)
@@ -893,7 +882,8 @@ public:
           {
               continue;
           }
-          else if (scom_targets[x]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true) 
+          else if (scom_targets[x]->
+              getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
           {
               TRACDCOMP( g_trac_scom, "ScomTest::test_SCOMreadWrite_proc> Target %d is not functional", x );
               scom_targets[x] = NULL; //remove from our list
@@ -931,7 +921,7 @@ public:
                                test_data[x].target,
                                &(test_data[x].data),
                                op_size,
-                               DEVICE_XSCOM_ADDRESS(test_data[x].addr) );              
+                               DEVICE_XSCOM_ADDRESS(test_data[x].addr) );
 
           if( l_err )
           {
