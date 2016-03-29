@@ -2024,6 +2024,7 @@
     <attribute><id>ISTEP_PAUSE_ENABLE</id></attribute>
     <attribute><id>ISTEP_PAUSE_CONFIG</id></attribute>
     <attribute><id>CDM_POLICIES</id></attribute>
+    <attribute><id>HOSTSVC_PLID</id></attribute>
     <attribute><id>NOMINAL_FREQ_MHZ</id></attribute>
     <attribute><id>MNFG_FLAGS</id></attribute>
     <attribute><id>FABRIC_TO_PHYSICAL_NODE_MAP</id></attribute>
