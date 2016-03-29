@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2016
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -50,7 +52,7 @@ use constant SHOW_ONLYMISS   => 0x40;
 my @dirList = (
     "src/usr/hwpf",                 # hostboot
     "src/include/usr/hwpf",         # hostboot
-    "src/usr/pore/poreve/model",    # hostboot
+    "src/usr/pore",                 # hostboot
     "src/hwsv/server/hwpf/hwp",     # fsp, should be full tree
     "src/base.pgm/HostServices/hwpf/hwp",       # hostservices
     "src/base.pgm/HostServices/hwpf/shared_hwp",# hostservices
