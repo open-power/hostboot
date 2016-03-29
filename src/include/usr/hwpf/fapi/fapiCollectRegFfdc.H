@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiCollectRegFfdc.H,v 1.4 2013/10/31 19:48:22 dedahle Exp $
+// $Id: fapiCollectRegFfdc.H,v 1.5 2015/10/06 19:19:24 kahnevan Exp $
 /**
  *  @file fapiCollectRegFfdc.H
  *
@@ -29,7 +31,7 @@
  *         FAPI_SET_HWP_ERROR (when a HWP creates an error) and 
  *         FAPI_ADD_INFO_TO_HWP_ERROR (when an FFDC HWP adds error information
  *         to an existing error) if the error XML contains a
- *         <collectRegisterFfdc> element. This function should not be called
+ *         \<fapiCollectRegFfdc\> element. This function should not be called
  *         directly by any user code. The function implementation is
  *         automatically generated from FAPI Error XML files.
  */

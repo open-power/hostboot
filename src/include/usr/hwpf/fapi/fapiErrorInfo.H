@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiErrorInfo.H,v 1.18 2015/03/19 15:46:14 pragupta Exp $
+// $Id: fapiErrorInfo.H,v 1.19 2015/10/06 19:19:42 kahnevan Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/fapi/fapiErrorInfo.H,v $
 
 /**
@@ -142,7 +142,7 @@ enum CalloutPriority
 }
 
 /**
- * @enum Enumeration of firmware traces
+ * @enum CollectTrace
  *
  * This enumeration defines the possible firmware traces to collect
  */
@@ -449,8 +449,8 @@ struct ErrorInfoChildrenCDG
     /**
      * @brief Constructor.
      *
-     * @param[in] i_parent      Reference to the parent target
-     * @oaram[in] i_childType   Child target type to c/d/g
+     * @param[in] i_parentChip  Reference to the parent target
+     * @param[in] i_childType   Child target type to c/d/g
      * @param[in] i_callout     True if Target should be called out
      * @param[in] i_deconfigure True if Target should be deconfigured
      * @param[in] i_gard        True if Target should be GARDed
@@ -523,7 +523,7 @@ struct ErrorInfoCollectTrace
     /**
      * @brief Constructor.
      *
-     * @param[in] i_trace
+     * @param[in] i_traceId
      */
     ErrorInfoCollectTrace(CollectTraces::CollectTrace i_traceId);
 

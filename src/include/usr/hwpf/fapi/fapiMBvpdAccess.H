@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiMBvpdAccess.H,v 1.12 2015/09/29 15:59:29 dcrowell Exp $
+// $Id: fapiMBvpdAccess.H,v 1.13 2015/10/06 19:19:44 kahnevan Exp $
 /**
  *  @file fapiMBvpdAccess.H
  *
@@ -133,7 +133,7 @@ namespace fapi
         MBVPD_KEYWORD_PD5 = 0x43, //#5
         MBVPD_KEYWORD_PD6 = 0x44, //#6
         MBVPD_KEYWORD_PD8 = 0x45, //#8
-        MBVPD_KEYWORD_PDY = 0x46, //#Y
+        MBVPD_KEYWORD_PDY = 0x46, //#Y       
     };
 
 }
@@ -150,14 +150,14 @@ extern "C"
  *  pointer to to retrieve the size of the record, then allocate the proper
  *  size of the buffer and call again.
  *
- *  @param[in] i_record       Record enumerator
- *  @param[in] i_keyword      Keyword enumerator
- *  @param[in] i_memBufTarget Reference to memory buffer chip target for
+ *  @param[in]     i_record       Record enumerator
+ *  @param[in]     i_keyword      Keyword enumerator
+ *  @param[in]     i_memBufTarget Reference to memory buffer chip target for
  *                            the record
- *  @param[in] i_pBuffer      Pointer to buffer where record will be stored. If
- *                            NULL then the size of record will be stored in
- *                            io_fieldSize
- *  @param[io] io_fieldSize   Size of i_pBuffer in bytes
+ *  @param[in]     i_pBuffer      Pointer to buffer where record will be stored. If
+ *                                NULL then the size of record will be stored in
+ *                                io_fieldSize
+ *  @param[in,out] io_fieldSize   Size of i_pBuffer in bytes
  *
  *  @return fapi::ReturnCode. FAPI_RC_SUCCESS, or failure value.
  */
@@ -172,12 +172,12 @@ fapi::ReturnCode fapiGetMBvpdField(const fapi::MBvpdRecord i_record,
  *
  *  A Memory Buffer VPD field is specified using a record and keyword enumerator
  *
- *  @param[in] i_record       Record enumerator
- *  @param[in] i_keyword      Keyword enumerator
- *  @param[in] i_memBufTarget Reference to memory buffer chip target for
- *                            the record
- *  @param[in] i_pBuffer      Pointer to buffer where data to set is stored
- *  @param[io] i_fieldSize    Size of i_pBuffer in bytes
+ *  @param[in]     i_record       Record enumerator
+ *  @param[in]     i_keyword      Keyword enumerator
+ *  @param[in]     i_memBufTarget Reference to memory buffer chip target for
+ *                                the record
+ *  @param[in]     i_pBuffer      Pointer to buffer where data to set is stored
+ *  @param[in,out] i_fieldSize    Size of i_pBuffer in bytes
  *
  *  @return fapi::ReturnCode. FAPI_RC_SUCCESS, or failure value.
  */

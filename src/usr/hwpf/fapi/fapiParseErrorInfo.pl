@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2011,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -24,7 +24,7 @@
 #
 # IBM_PROLOG_END_TAG
 
-# $Id: fapiParseErrorInfo.pl,v 1.34 2015/05/27 17:10:16 rjknight Exp $
+# $Id: fapiParseErrorInfo.pl,v 1.36 2015/06/08 04:58:21 sangeet2 Exp $
 # Purpose:  This perl script will parse HWP Error XML files and create required
 #           FAPI code.
 #
@@ -579,22 +579,22 @@ foreach my $argnum (1 .. $#ARGV)
                 {
                     # Add the Targets to the objectlist if they don't already exist
                     my $objNum = addEntryToArray(\@eiObjects, $callout->{hw}->{refTarget});
-                    $eiEntryStr .= "  l_entries[$eiEntryCount].hw_callout.iv_refObjIndex = $objNum; \\\n";
+                    $eiEntryStr .= "  l_entries[$eiEntryCount].hw_callout.iv_refObjIndex=$objNum; \\\n";
                 }
                 else
                 {
-                    $eiEntryStr .= "  l_entries[$eiEntryCount].hw_callout.iv_refObjIndex = 0xff; \\\n";
+                    $eiEntryStr .= "  l_entries[$eiEntryCount].hw_callout.iv_refObjIndex=0xff; \\\n";
                 }
 
                 if (exists $callout->{hw}->{hwInstance})
                 {
                     # Add the Targets to the objectlist if they don't already exist
                     my $objNum = addEntryToArray(\@eiObjects, $callout->{hw}->{hwInstance});
-                    $eiEntryStr .= "  l_entries[$eiEntryCount].hw_callout.iv_objPosIndex = $objNum; \\\n";
+                    $eiEntryStr .= "  l_entries[$eiEntryCount].hw_callout.iv_objPosIndex=$objNum; \\\n";
                 }
                 else
                 {
-                    $eiEntryStr .= "  l_entries[$eiEntryCount].hw_callout.iv_objPosIndex = 0xff; \\\n"
+                    $eiEntryStr .= "  l_entries[$eiEntryCount].hw_callout.iv_objPosIndex=255; \\\n"
                 }
 
                 $eiEntryCount++;

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: fapiPlatHwAccess.H,v 1.10 2014/01/20 20:58:47 mjjones Exp $
+// $Id: fapiPlatHwAccess.H,v 1.11 2015/10/06 19:19:45 kahnevan Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/hwpf/working/fapi/fapiPlatHwAccess.H,v $
 
 /**
@@ -130,10 +132,10 @@ fapi::ReturnCode platPutScomUnderMask(const fapi::Target& i_target,
  * @brief Platform-level implementation called by fapiMultiScom()
  * Hardware procedures writers will not call this function.
  *
- * @param[in]    i_target         Target to operate on
- * @param[inout] io_multiScomList MultiScom object pre-populated with SCOMs to
- *                                be performed on i_target
- * @return       ReturnCode       Zero on success, else platform specified error
+ * @param[in]     i_target         Target to operate on
+ * @param[in,out] io_multiScomList MultiScom object pre-populated with SCOMs to
+ *                                 be performed on i_target
+ * @return        ReturnCode       Zero on success, else platform specified error
  */
 fapi::ReturnCode platMultiScom (const fapi::Target&    i_target,
                                       fapi::MultiScom& io_multiScomList);
@@ -223,11 +225,12 @@ fapi::ReturnCode platPutRing(const fapi::Target& i_target,
  * @brief Platform-level implementation called by fapiModifyRing()
  * Hardware procedures writers will not call this function.
  *
- * @param[in] i_target  Target to operate on
- * @param[in] i_address Ring address to modify
- * @param[in] i_data    ecmdDataBufferBase object that holds data to write into
- *                      address
- * @param[in] i_ringMode Any number of mode options from fapi::RingMode ORed
+ * @param[in] i_target     Target to operate on
+ * @param[in] i_address    Ring address to modify
+ * @param[in] i_data       ecmdDataBufferBase object that holds data to write into
+ *                         address
+ * @param[in] i_modifyMode The modify mode (or/and/xor)
+ * @param[in] i_ringMode   Any number of mode options from fapi::RingMode ORed
  * @return ReturnCode. Zero on success, else platform specified error
  */
 fapi::ReturnCode platModifyRing(const fapi::Target& i_target,
