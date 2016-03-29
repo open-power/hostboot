@@ -577,7 +577,17 @@
     <attribute><id>PROC_FABRIC_A_ADDR_DIS</id></attribute>
     <attribute><id>PROC_FABRIC_X_ADDR_DIS</id></attribute>
     <attribute><id>PROC_HTM_BAR_SIZES</id></attribute>
+
+    <attribute><id>PROC_PCIE_HOTPLUG_I2C_DEVICE_ADDRESS</id></attribute>
+    <attribute><id>PROC_PCIE_HOTPLUG_ENABLE_ACTIONS</id></attribute>
+    <attribute><id>PROC_PCIE_HOTPLUG_NUM_ENABLE_ACTIONS</id></attribute>
+    <attribute><id>PROC_PCIE_HOTPLUG_DISABLE_ACTIONS</id></attribute>
+    <attribute><id>PROC_PCIE_HOTPLUG_NUM_DISABLE_ACTIONS</id></attribute>
+
+    <attribute><id>UNIT_TEST_MCA_MEMORY_SIZES</id></attribute>
+
 </targetType>
+
 
 <targetType>
     <id>chip-processor-power8</id>
@@ -679,6 +689,7 @@
     <attribute><id>PROC_PCIE_NUM_PHB</id></attribute>
     <attribute><id>PROC_PCIE_NUM_IOP</id></attribute>
     <attribute><id>PROC_PCIE_NUM_LANES</id></attribute>
+
 </targetType>
 
 <targetType>
@@ -2400,6 +2411,44 @@
     <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
     <attribute><id>PARENT_PERVASIVE</id></attribute>
+
+    <attribute><id>PROC_PCIE_IOVALID_ENABLE</id></attribute>
+    <attribute><id>PROC_PCIE_PCS_RX_CDR_GAIN</id></attribute>
+    <attribute><id>PROC_PCIE_PCS_RX_LOFF_CONTROL</id></attribute>
+    <attribute><id>PROC_PCIE_PCS_RX_VGA_CONTRL_REGISTER3</id></attribute>
+    <attribute><id>PROC_PCIE_PCS_RX_ROT_CDR_LOOKAHEAD</id></attribute>
+    <attribute><id>PROC_PCIE_PCS_RX_ROT_CDR_SSC</id></attribute>
+    <attribute><id>PROC_PCIE_PCS_PCLCK_CNTL_PLLA</id></attribute>
+    <attribute><id>PROC_PCIE_PCS_PCLCK_CNTL_PLLB</id></attribute>
+    <attribute><id>PROC_PCIE_PCS_TX_DCLCK_ROT</id></attribute>
+    <attribute><id>PROC_PCIE_PCS_TX_FIFO_CONFIG_OFFSET</id></attribute>
+    <attribute><id>PROC_PCIE_PCS_TX_PCIE_RECV_DETECT_CNTL_REG1</id></attribute>
+    <attribute><id>PROC_PCIE_PCS_TX_PCIE_RECV_DETECT_CNTL_REG2</id></attribute>
+    <attribute><id>PROC_PCIE_PCS_TX_POWER_SEQ_ENABLE</id></attribute>
+    <attribute><id>PROC_PCIE_PCS_RX_PHASE_ROTATOR_CNTL</id></attribute>
+    <attribute><id>PROC_PCIE_PCS_RX_VGA_CNTL_REG1</id></attribute>
+    <attribute><id>PROC_PCIE_PCS_RX_VGA_CNTL_REG2</id></attribute>
+    <attribute><id>PROC_PCIE_PCS_RX_SIGDET_CNTL</id></attribute>
+    <attribute><id>PROC_PCIE_PCS_SYSTEM_CNTL</id></attribute>
+    <attribute><id>PROC_PCIE_PCS_M_CNTL</id></attribute>
+
+    <attribute><id>PROC_PCIE_IOP_SWAP_P9</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_G3_PLL_CONTROL0_P9</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_G2_PLL_CONTROL0_P9</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0_P9</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1_P9</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_PCS_CONTROL0_P9</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_PCS_CONTROL1_P9</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_TX_FIFO_OFFSET_P9</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_TX_RCVRDETCNTL_P9</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_TX_BWLOSS1_P9</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_RX_VGA_CONTROL2_P9</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_RX_PEAK_P9</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_RX_SDL_P9</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_ZCAL_CONTROL_P9</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_TX_FFE_GEN1_P9</id></attribute>
+    <attribute><id>PROC_PCIE_IOP_TX_FFE_GEN2_P9</id></attribute>
+
 </targetType>
 
 <!-- PHB
@@ -2419,6 +2468,12 @@
     <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
     <attribute><id>PARENT_PERVASIVE</id></attribute>
+
+    <attribute><id>PROC_PCIE_BAR_ENABLE</id></attribute>
+    <attribute><id>PROC_PCIE_BAR_BASE_ADDR</id></attribute>
+    <attribute><id>PROC_PCIE_BAR_SIZE</id></attribute>
+
+
 </targetType>
 
 <targetType>
