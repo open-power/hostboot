@@ -6166,6 +6166,7 @@ firmware notes: Used as override attribute for pstate procedure
 <attribute>
   <id>PROC_PCIE_IOP_SWAP</id>
   <description>PCIE IOP swap configuration
+      DEPRECATED!!!!
       creator: platform
       consumer: proc_pcie_scominit
       firmware notes:
@@ -6179,10 +6180,6 @@ firmware notes: Used as override attribute for pstate procedure
   <persistency>non-volatile</persistency>
   <readable/>
   <writeable/>
-  <hwpfToHbAttrMap>
-      <id>ATTR_PROC_PCIE_IOP_SWAP</id>
-      <macro>DIRECT</macro>
-  </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
@@ -6207,6 +6204,7 @@ firmware notes: Used as override attribute for pstate procedure
 <attribute>
   <id>PROC_PCIE_IOP_G3_PLL_CONTROL0</id>
   <description>
+      DEPRECATED!!!!
       creator: platform (MRW)
       consumer: proc_pcie_scominit
       firmware notes:
@@ -6220,15 +6218,12 @@ firmware notes: Used as override attribute for pstate procedure
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
-  <hwpfToHbAttrMap>
-      <id>ATTR_PROC_PCIE_IOP_G3_PLL_CONTROL0</id>
-      <macro>DIRECT</macro>
-  </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
   <id>PROC_PCIE_IOP_G2_PLL_CONTROL0</id>
   <description>
+      DEPRECATED!!!
       creator: platform (MRW)
       consumer: proc_pcie_scominit
       firmware notes:
@@ -6242,15 +6237,12 @@ firmware notes: Used as override attribute for pstate procedure
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
-  <hwpfToHbAttrMap>
-      <id>ATTR_PROC_PCIE_IOP_G2_PLL_CONTROL0</id>
-      <macro>DIRECT</macro>
-  </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
   <id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0</id>
   <description>
+      DEPRECATED!!!!
       creator: platform (MRW)
       consumer: proc_pcie_scominit
       notes:
@@ -6264,15 +6256,12 @@ firmware notes: Used as override attribute for pstate procedure
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
-  <hwpfToHbAttrMap>
-      <id>ATTR_PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0</id>
-      <macro>DIRECT</macro>
-  </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
   <id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1</id>
   <description>
+DEPRECATED!!!!
       creator: platform (MRW)
       consumer: proc_pcie_scominit
       notes:
@@ -6286,15 +6275,12 @@ firmware notes: Used as override attribute for pstate procedure
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
-  <hwpfToHbAttrMap>
-      <id>ATTR_PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1</id>
-      <macro>DIRECT</macro>
-  </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
   <id>PROC_PCIE_IOP_PCS_CONTROL0</id>
   <description>
+DEPRECATED!!!!
       creator: platform (MRW)
       consumer: proc_pcie_scominit
       notes:
@@ -6309,15 +6295,12 @@ firmware notes: Used as override attribute for pstate procedure
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
-  <hwpfToHbAttrMap>
-      <id>ATTR_PROC_PCIE_IOP_PCS_CONTROL0</id>
-      <macro>DIRECT</macro>
-  </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
   <id>PROC_PCIE_IOP_PCS_CONTROL1</id>
   <description>
+DEPRECATED!!!!
       creator: platform (MRW)
       consumer: proc_pcie_scominit
       notes:
@@ -6332,15 +6315,12 @@ firmware notes: Used as override attribute for pstate procedure
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
-  <hwpfToHbAttrMap>
-      <id>ATTR_PROC_PCIE_IOP_PCS_CONTROL1</id>
-      <macro>DIRECT</macro>
-  </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
   <id>PROC_PCIE_IOP_TX_FIFO_OFFSET</id>
   <description>
+DEPRECATED!!!!
       creator: platform (MRW)
       consumer: proc_pcie_scominit
       notes:
@@ -6355,15 +6335,12 @@ firmware notes: Used as override attribute for pstate procedure
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
-  <hwpfToHbAttrMap>
-      <id>ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET</id>
-      <macro>DIRECT</macro>
-  </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
   <id>PROC_PCIE_IOP_TX_RCVRDETCNTL</id>
   <description>
+DEPRECATED!!!!
       creator: platform (MRW)
       consumer: proc_pcie_scominit
       notes:
@@ -6378,15 +6355,12 @@ firmware notes: Used as override attribute for pstate procedure
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
-  <hwpfToHbAttrMap>
-      <id>ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL</id>
-      <macro>DIRECT</macro>
-  </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
   <id>PROC_PCIE_IOP_TX_BWLOSS1</id>
   <description>
+DEPRECATED!!!!
       creator: platform (MRW)
       consumer: proc_pcie_scominit
       notes:
@@ -6401,15 +6375,12 @@ firmware notes: Used as override attribute for pstate procedure
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
-  <hwpfToHbAttrMap>
-      <id>ATTR_PROC_PCIE_IOP_TX_BWLOSS1</id>
-      <macro>DIRECT</macro>
-  </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
   <id>PROC_PCIE_IOP_RX_VGA_CONTROL2</id>
   <description>
+DEPRECATED!!!!
       creator: platform (MRW)
       consumer: proc_pcie_scominit
       notes:
@@ -6424,15 +6395,12 @@ firmware notes: Used as override attribute for pstate procedure
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
-  <hwpfToHbAttrMap>
-      <id>ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2</id>
-      <macro>DIRECT</macro>
-  </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
   <id>PROC_PCIE_IOP_RX_PEAK</id>
   <description>
+DEPRECATED!!!!
       creator: platform (MRW)
       consumer: proc_pcie_scominit
       notes:
@@ -6447,15 +6415,12 @@ firmware notes: Used as override attribute for pstate procedure
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
-  <hwpfToHbAttrMap>
-      <id>ATTR_PROC_PCIE_IOP_RX_PEAK</id>
-      <macro>DIRECT</macro>
-  </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
   <id>PROC_PCIE_IOP_RX_SDL</id>
   <description>
+DEPRECATED!!!!
       creator: platform (MRW)
       consumer: proc_pcie_scominit
       notes:
@@ -6470,15 +6435,12 @@ firmware notes: Used as override attribute for pstate procedure
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
-  <hwpfToHbAttrMap>
-      <id>ATTR_PROC_PCIE_IOP_RX_SDL</id>
-      <macro>DIRECT</macro>
-  </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
   <id>PROC_PCIE_IOP_ZCAL_CONTROL</id>
   <description>
+DEPRECATED!!!!
       creator: platform (MRW)
       consumer: proc_pcie_scominit
       notes:
@@ -6492,10 +6454,6 @@ firmware notes: Used as override attribute for pstate procedure
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
-  <hwpfToHbAttrMap>
-      <id>ATTR_PROC_PCIE_IOP_ZCAL_CONTROL</id>
-      <macro>DIRECT</macro>
-  </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
@@ -13848,6 +13806,7 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
 <attribute>
   <id>PROC_PCIE_IOP_TX_FFE_GEN1</id>
     <description>
+DEPRECATED!!!!
       creator: platform (MRW)
       consumer: proc_pcie_scominit
       notes:
@@ -13861,15 +13820,12 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
-  <hwpfToHbAttrMap>
-      <id>ATTR_PROC_PCIE_IOP_TX_FFE_GEN1</id>
-      <macro>DIRECT</macro>
-  </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
   <id>PROC_PCIE_IOP_TX_FFE_GEN2</id>
     <description>
+DEPRECATED!!!!
       creator: platform (MRW)
       consumer: proc_pcie_scominit
       notes:
@@ -13883,10 +13839,6 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
   </simpleType>
   <persistency>non-volatile</persistency>
   <readable/>
-  <hwpfToHbAttrMap>
-      <id>ATTR_PROC_PCIE_IOP_TX_FFE_GEN2</id>
-      <macro>DIRECT</macro>
-  </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
@@ -20451,6 +20403,1000 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
   </hwpfToHbAttrMap>
 </attribute>
 
-<!-- ********************************************************************** -->
+
+<attribute>
+    <id>PROC_PCIE_IOVALID_ENABLE</id>
+    <!-- TARGET_TYPE_PEC -->
+    <description>
+        PCIE iovalid enable valid mask
+        creator: platform
+        consumer: p9_pcie_scominit
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_IOVALID_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <readable/>
+</attribute>
+<attribute>
+    <id>PROC_PCIE_BAR_ENABLE</id>
+    <!-- TARGET_TYPE_PHB -->
+    <description>
+        PCIE MMIO BAR enable
+        creator: platform
+        consumer: p9_setup_bars
+        firmware notes:
+          Array index: BAR number (0:2)
+          index 0~1 for BAR0/1
+          index 2 for PHB
+          index 3 for interrupt
+        DISABLE = 0x0, ENABLE = 0x1
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>4</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_BAR_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+<attribute>
+    <id>PROC_PCIE_BAR_BASE_ADDR</id>
+    <!-- TARGET_TYPE_PHB -->
+    <description>
+        PCIE MMIO BAR base address value
+        creator: platform
+        consumer: p9_setup_bars
+        firmware notes:
+        64-bit address representing BAR RA
+        Array index: BAR number (0:2)
+        NOTE: BAR0/1 registers cover RA 8:47
+        NOTE: BAR2 registers covers RA 8:49
+        index 0~1 for BAR0/1
+        index 2 for PHB
+        index 3 for interrupt
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+        <array>4</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_BAR_BASE_ADDR</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+<attribute>
+    <id>PROC_PCIE_BAR_SIZE</id>
+    <!-- TARGET_TYPE_PHB -->
+    <description>
+        PCIE MMIO BAR size value
+        creator: platform
+        consumer: p9_setup_bars
+        firmware notes:
+        Array index: BAR number (0:2)
+        NOTE: supported BAR0/1 sizes are from 64KB-32PB
+        NOTE: only supported BAR2 size is 16KB
+        index 0~1 for BAR0/1
+        index 2 for PHB, actually not used
+        index 3 for interrupt, actually not used
+
+        32_PB = 0x0000008000000000,
+        16_PB = 0x000000C000000000,
+        8_PB = 0x000000E000000000,
+        4_PB = 0x000000F000000000,
+        2_PB = 0x000000F800000000,
+        1_PB = 0x000000FC00000000,
+        512_TB = 0x000000FE00000000,
+        256_TB = 0x000000FF00000000,
+        128_TB = 0x000000FF80000000,
+        64_TB = 0x000000FFC0000000,
+        32_TB = 0x000000FFE0000000,
+        16_TB = 0x000000FFF0000000,
+        8_TB = 0x000000FFF8000000,
+        4_TB = 0x000000FFFC000000,
+        2_TB = 0x000000FFFE000000,
+        1_TB = 0x000000FFFF000000,
+        512_GB = 0x000000FFFF800000,
+        256_GB = 0x000000FFFFC00000,
+        128_GB = 0x000000FFFFE00000,
+        64_GB = 0x000000FFFFF00000,
+        32_GB = 0x000000FFFFF80000,
+        16_GB = 0x000000FFFFFC0000,
+        8_GB = 0x000000FFFFFE0000,
+        4_GB = 0x000000FFFFFF0000,
+        2_GB = 0x000000FFFFFF8000,
+        1_GB = 0x000000FFFFFFC000,
+        512_MB = 0x000000FFFFFFE000,
+        256_MB = 0x000000FFFFFFF000,
+        128_MB = 0x000000FFFFFFF800,
+        64_MB = 0x000000FFFFFFFC00,
+        32_MB = 0x000000FFFFFFFE00,
+        16_MB = 0x000000FFFFFFFF00,
+        8_MB = 0x000000FFFFFFFF80,
+        4_MB = 0x000000FFFFFFFFC0,
+        2_MB = 0x000000FFFFFFFFE0,
+        1_MB = 0x000000FFFFFFFFF0,
+        512_KB = 0x000000FFFFFFFFF8,
+        256_KB = 0x000000FFFFFFFFFC,
+        128_KB = 0x000000FFFFFFFFFE,
+        64_KB = 0x000000FFFFFFFFFF,
+        16_KB = 0xFFFFFFFFFFFFFFFF
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+        <array>4</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_BAR_SIZE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+<attribute>
+    <id>PROC_PCIE_HOTPLUG_I2C_DEVICE_ADDRESS</id>
+    <!-- TARGET_TYPE_PROC_CHIP -->
+    <description>
+        I2C device address for PCIE hotplug controller
+        creator: platform
+        consumer: p9_pcie_hotplug
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_HOTPLUG_I2C_DEVICE_ADDRESS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_HOTPLUG_ENABLE_ACTIONS</id>
+    <!-- TARGET_TYPE_PROC_CHIP -->
+    <description>
+        Sequence of PCIE hotplug controller register writes required to enable
+        slot power
+        creator: platform
+        consumer: p9_pcie_hotplug
+        firmware notes:
+        Primary array index: Sequence number
+        Secondary array index: Address (0) / Data (1)
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>8,2</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_HOTPLUG_ENABLE_ACTIONS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_HOTPLUG_NUM_ENABLE_ACTIONS</id>
+    <!-- TARGET_TYPE_PROC_CHIP -->
+    <description>
+        Number of valid entries in primary index of
+        ATTR_PROC_PCIE_HOTPLUG_ENABLE_ACTIONS
+        creator: platform
+        consumer: p9_pcie_hotplug
+        ZERO = 0x0,
+        ONE = 0x1,
+        TWO = 0x2,
+        THREE = 0x3,
+        FOUR = 0x4,
+        FIVE = 0x5,
+        SIX = 0x6,
+        SEVEN = 0x7,
+        EIGHT = 0x8
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_HOTPLUG_NUM_ENABLE_ACTIONS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_HOTPLUG_DISABLE_ACTIONS</id>
+    <!-- TARGET_TYPE_PROC_CHIP -->
+    <description>
+        Sequence of PCIE hotplug controller register writes required to disable
+        slot power
+        creator: platform
+        consumer: p9_pcie_hotplug
+        firmware notes:
+        Primary array index: Sequence number
+        Secondary array index: Address (0) / Data (1)
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>8,2</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_HOTPLUG_DISABLE_ACTIONS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_HOTPLUG_NUM_DISABLE_ACTIONS</id>
+    <!-- TARGET_TYPE_PROC_CHIP -->
+    <description>
+        Number of valid entries in primary index of
+        ATTR_PROC_PCIE_HOTPLUG_DISABLE_ACTIONS
+        creator: platform
+        consumer: p9_pcie_hotplug
+
+        ZERO = 0x0,
+        ONE = 0x1,
+        TWO = 0x2,
+        THREE = 0x3,
+        FOUR = 0x4,
+        FIVE = 0x5,
+        SIX = 0x6,
+        SEVEN = 0x7,
+        EIGHT = 0x8
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_HOTPLUG_NUM_DISABLE_ACTIONS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_PCS_RX_CDR_GAIN</id>
+    <!-- TARGET_TYPE_PEC -->
+    <description>
+        PCS rx cdr gains
+        creator: platform
+        consumer: p9_pcie_scominit
+        firmware notes:
+        The value of rx cdr gains for PCS.
+        Array index: Configuration number
+        index 0~3 for CONFIG0~3
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>4</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_PCS_RX_CDR_GAIN</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_PCS_RX_LOFF_CONTROL</id>
+    <!-- TARGET_TYPE_PEC -->
+    <description>
+        PCS rx loff control
+        creator: platform
+        consumer: p9_pcie_scominit
+        firmware notes:
+        The value of rx loff control for PCS.
+        Array index: Configuration number
+        index 0~3 for CONFIG0~3
+    </description>
+    <simpleType>
+        <uint16_t></uint16_t>
+        <array>4</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_PCS_RX_LOFF_CONTROL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_PCS_RX_VGA_CONTRL_REGISTER3</id>
+    <!-- TARGET_TYPE_PEC -->
+    <description>
+        PCS rx vga control register3
+        creator: platform
+        consumer: p9_pcie_scominit
+        firmware notes:
+        The value of rx vga control register3.
+        Array index: Configuration number
+        index 0~3 for CONFIG0~3
+    </description>
+    <simpleType>
+        <uint16_t></uint16_t>
+        <array>4</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_PCS_RX_VGA_CONTRL_REGISTER3</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_PCS_RX_ROT_CDR_LOOKAHEAD</id>
+    <!-- TARGET_TYPE_PEC -->
+    <description>
+        Value of PCS RX ROT CNTL CDR lookahead
+        creator: platform
+        consumer: p9_pcie_scominit
+        firmware notes:
+        0 for disable, 1 for enable
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_PCS_RX_ROT_CDR_LOOKAHEAD</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_PCS_RX_ROT_CDR_SSC</id>
+    <!-- TARGET_TYPE_PEC -->
+    <description>
+        Value of PCS RX ROT CNTL CDR ssc
+        creator: platform
+        consumer: p9_pcie_scominit
+        firmware notes:
+        0 for disable, 1 for enable
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_PCS_RX_ROT_CDR_SSC</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_PCS_PCLCK_CNTL_PLLA</id>
+    <!-- TARGET_TYPE_PEC -->
+    <description>
+        Value of PCS pclck control plla
+        creator: platform
+        consumer: p9_pcie_scominit
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_PCS_PCLCK_CNTL_PLLA</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_PCS_PCLCK_CNTL_PLLB</id>
+    <!-- TARGET_TYPE_PEC -->
+    <description>
+        Value of PCS pclck control pllb
+        creator: platform
+        consumer: p9_pcie_scominit
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_PCS_PCLCK_CNTL_PLLB</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_PCS_TX_DCLCK_ROT</id>
+    <!-- TARGET_TYPE_PEC -->
+    <description>
+        Value of PCS tx dclck rotator override
+        creator: platform
+        consumer: p9_pcie_scominit
+    </description>
+    <simpleType>
+        <uint16_t></uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_PCS_TX_DCLCK_ROT</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_PCS_TX_FIFO_CONFIG_OFFSET</id>
+    <!-- TARGET_TYPE_PEC -->
+    <description>
+        Value of PCS tx fifo config offset
+        creator: platform
+        consumer: p9_pcie_scominit
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_PCS_TX_FIFO_CONFIG_OFFSET</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_PCS_TX_PCIE_RECV_DETECT_CNTL_REG1</id>
+    <!-- TARGET_TYPE_PEC -->
+    <description>
+        Value of PCS tx pcie receiver detect control register 1
+        creator: platform
+        consumer: p9_pcie_scominit
+    </description>
+    <simpleType>
+        <uint16_t></uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_PCS_TX_PCIE_RECV_DETECT_CNTL_REG1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_PCS_TX_PCIE_RECV_DETECT_CNTL_REG2</id>
+    <!-- TARGET_TYPE_PEC -->
+    <description>
+        Value of PCS tx pcie receiver detect control register 2
+        creator: platform
+        consumer: p9_pcie_scominit
+    </description>
+    <simpleType>
+        <uint16_t></uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_PCS_TX_PCIE_RECV_DETECT_CNTL_REG2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_PCS_TX_POWER_SEQ_ENABLE</id>
+    <!-- TARGET_TYPE_PEC -->
+    <description>
+        Value of PCS tx power sequence enable
+        creator: platform
+        consumer: p9_pcie_scominit
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_PCS_TX_POWER_SEQ_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_PCS_RX_PHASE_ROTATOR_CNTL</id>
+    <!-- TARGET_TYPE_PEC -->
+    <description>
+        Value of PCS rx phase rotator control
+        creator: platform
+        consumer: p9_pcie_scominit
+    </description>
+    <simpleType>
+        <uint16_t></uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_PCS_RX_PHASE_ROTATOR_CNTL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_PCS_RX_VGA_CNTL_REG1</id>
+    <!-- TARGET_TYPE_PEC -->
+    <description>
+        Value of PCS rx vga control register 1
+        creator: platform
+        consumer: p9_pcie_scominit
+    </description>
+    <simpleType>
+        <uint16_t></uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_PCS_RX_VGA_CNTL_REG1</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_PCS_RX_VGA_CNTL_REG2</id>
+    <!-- TARGET_TYPE_PEC -->
+    <description>
+        Value of PCS rx vga control register 2
+        creator: platform
+        consumer: p9_pcie_scominit
+    </description>
+    <simpleType>
+        <uint16_t></uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_PCS_RX_VGA_CNTL_REG2</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_PCS_RX_SIGDET_CNTL</id>
+    <!-- TARGET_TYPE_PEC -->
+    <description>
+        Value of PCS rx sigdet control
+        creator: platform
+        consumer: p9_pcie_scominit
+    </description>
+    <simpleType>
+        <uint16_t></uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_PCS_RX_SIGDET_CNTL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_PCS_SYSTEM_CNTL</id>
+    <!-- TARGET_TYPE_PEC -->
+    <description>
+        Value of PCS system control
+        creator: platform
+        consumer: p9_pcie_scominit
+    </description>
+    <simpleType>
+        <uint16_t></uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_PCS_SYSTEM_CNTL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_PCIE_PCS_M_CNTL</id>
+    <!-- TARGET_TYPE_PEC -->
+    <description>
+        Value of PCS m1-m4 control
+        creator: platform
+        consumer: p9_pcie_scominit
+        Array index:
+        0 -> M1
+        1 -> M2
+        2 -> M3
+        3 -> M4
+    </description>
+    <simpleType>
+        <uint16_t></uint16_t>
+        <array>4</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PROC_PCIE_PCS_M_CNTL</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+
+<!-- TODO: RTC 145692
+     Temporary attributes used for p9_mss_eff_grouping test cases
+     These attributes need to be removed and test cases need to use
+     (TBD) attributes that specify the DIMM sizes used to calculate the
+     result of getDimmSize() function called in p9_mss_eff_grouping -->
+<attribute>
+    <id>UNIT_TEST_MCA_MEMORY_SIZES</id>
+    <!-- TARGET_TYPE_PROC_CHIP -->
+    <description> The memory sizes behind the MCAs used for p9_mss_eff_grouping
+                test case.
+                Array [Port][DIMM] where num of ports = 8, num of dimms = 2
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+        <array>8,2</array>
+    </simpleType>
+    <readable/>
+    <writeable/>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_UNIT_TEST_MCA_MEMORY_SIZES</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_SWAP_P9</id>
+  <description>PCIE IOP swap configuration
+      creator: platform
+      consumer: p9_pcie_scominit
+      firmware notes:
+        Encoded PCIE IOP swap configuration
+  </description>
+  <simpleType>
+      <uint8_t></uint8_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <writeable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_SWAP</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_G3_PLL_CONTROL0_P9</id>
+  <description>
+      creator: platform (MRW)
+      consumer: p9_pcie_scominit
+      firmware notes:
+        PCIe Gen3 PLL Control Register 0.
+        ATUNE/CPISEL.
+  </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_G3_PLL_CONTROL0</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_G2_PLL_CONTROL0_P9</id>
+  <description>
+      creator: platform (MRW)
+      consumer: p9_pcie_scominit
+      firmware notes:
+        PCIe Gen2/Gen1 PLL Control Register 0.
+        ATUNE/CPISEL.
+  </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_G2_PLL_CONTROL0</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0_P9</id>
+  <description>
+      creator: platform (MRW)
+      consumer: p9_pcie_scominit
+      notes:
+        PCIe PLL Global Control Register 0.
+        REFISRC/REFISINK.
+  </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_PLL_GLOBAL_CONTROL0</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1_P9</id>
+  <description>
+      creator: platform (MRW)
+      consumer: p9_pcie_scominit
+      notes:
+        PCIe PLL Global Control Register 1.
+    ENBGDOCPSRC/ENBGDOCAMP/REFVREG.
+  </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_PLL_GLOBAL_CONTROL1</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_PCS_CONTROL0_P9</id>
+  <description>
+      creator: platform (MRW)
+      consumer: p9_pcie_scominit
+      notes:
+        PCIe PCS Control Register 0.
+        BITLOCKTIME/ADDDREMDELTA_810_B/STARTUPDELTA_810_B/ADDDREMDELTA_810_A/
+        STARTUPDELTA_A/RXREJECTHANDLING/EQCOMLETERESPONSE.
+  </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_PCS_CONTROL0</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_PCS_CONTROL1_P9</id>
+  <description>
+      creator: platform (MRW)
+      consumer: p9_pcie_scominit
+      notes:
+        PCIe PCS Control Register 1.
+    RXSIGDETSETTING/ADDDREMDELTA_128130_B/STARTUPDELTA_128130_B/
+        ADDDREMDELTA_128130_A/STARTUPDELTA_128130_A.
+  </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_PCS_CONTROL1</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_TX_FIFO_OFFSET_P9</id>
+  <description>
+      creator: platform (MRW)
+      consumer: p9_pcie_scominit
+      notes:
+        PCIe TX FIFO Offset Register.
+    G3OFFSET/G2OFFSET/G1OFFSET.
+        Array index: Lane number (0:15)
+  </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+      <array>16</array>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_TX_FIFO_OFFSET</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_TX_RCVRDETCNTL_P9</id>
+  <description>
+      creator: platform (MRW)
+      consumer: p9_pcie_scominit
+      notes:
+        PCIe TX Receiver Detect Control Register.
+        VREFSEL/RCVRDETCNT/DETDRVC/PH1WAIT.
+        Array index: Lane number (0:15)
+  </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+      <array>16</array>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_TX_RCVRDETCNTL</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_TX_BWLOSS1_P9</id>
+  <description>
+      creator: platform (MRW)
+      consumer: p9_pcie_scominit
+      notes:
+        PCIe TX Bandwidth Loss Coefficient Register.
+        GEN3BWCOEFF/GEN2BWCOEFF/GEN1BWCOEFF.
+        Array index: Lane number (0:15)
+  </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+      <array>16</array>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_TX_BWLOSS1</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_RX_VGA_CONTROL2_P9</id>
+  <description>
+      creator: platform (MRW)
+      consumer: p9_pcie_scominit
+      notes:
+        PCIe RX VGA Control Register 2.
+        GAIN2/GAIN1.
+        Array index: Lane number (0:15)
+  </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+      <array>16</array>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_RX_VGA_CONTROL2</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_RX_PEAK_P9</id>
+  <description>
+      creator: platform (MRW)
+      consumer: p9_pcie_scominit
+      notes:
+        PCIe RX Receiver Peaking Value Register.
+    PEAK1/PEAK2/PEAK3.
+        Array index: Lane number (0:15)
+  </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+      <array>16</array>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_RX_PEAK</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_RX_SDL_P9</id>
+  <description>
+      creator: platform (MRW)
+      consumer: p9_pcie_scominit
+      notes:
+        PCIe RX Signal Detect Level Register.
+        SDLVL3/SDLVL2/SDLVL1.
+        Array index: Lane number (0:15)
+  </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+      <array>16</array>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_RX_SDL</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_ZCAL_CONTROL_P9</id>
+  <description>
+      creator: platform (MRW)
+      consumer: p9_pcie_scominit
+      notes:
+        PCIe ZCAL Control Register.
+        CMPEVALDLY.
+  </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_ZCAL_CONTROL</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_TX_FFE_GEN1_P9</id>
+    <description>
+      creator: platform (MRW)
+      consumer: p9_pcie_scominit
+      notes:
+        PCIe TX FFE (Gen1)
+        Array index: Lane number (0:15)
+    </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+      <array>16</array>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_TX_FFE_GEN1</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>PROC_PCIE_IOP_TX_FFE_GEN2_P9</id>
+    <description>
+      creator: platform (MRW)
+      consumer: p9_pcie_scominit
+      notes:
+        PCIe TX FFE (Gen2)
+        Array index: Lane number (0:15)
+    </description>
+  <simpleType>
+      <uint32_t></uint32_t>
+      <array>16</array>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_PROC_PCIE_IOP_TX_FFE_GEN2</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
 
 </attributes>
