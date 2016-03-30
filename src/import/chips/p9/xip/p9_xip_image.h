@@ -1477,8 +1477,7 @@ xipRevLe64(const uint64_t i_x);
 /// The \c .xip_toc macro creates a XIP Table of Contents (TOC) structure in
 /// the \c .toc section, as specified by the parameters.  This macro is
 /// typically not used directly in assembly code.  Instead programmers should
-/// use .xip_quad, .xip_quada, .xip_quadia, .xip_address, .xip_string or
-/// .xip_cvs_revision.
+/// use .xip_quad, .xip_quada, .xip_quadia, .xip_address or .xip_string
 
     .macro .xip_toc, index:req, type:req, address:req, elements=1
 
@@ -1658,32 +1657,6 @@ xipRevLe64(const uint64_t i_x);
     .endm
 
 
-/// Allocate and initialize a CVS Revison string in .strings
-///
-/// \param[in] index The string will be stored in the TOC using this index
-/// symbol.
-///
-/// \param[in] string A CVS revision string to be allocated in .strings.  CVS
-/// revision strings are formatted by stripping out and only storing the
-/// actual revision number :
-///
-/// \code
-///     "$Revision <n>.<m> $" -> "<n>.<m>"
-/// \endcode
-
-
-    .macro .xip_cvs_revision, index:req, string:req
-
-        .pushsection .strings
-7874647:
-        ..cvs_revision_string "\string"
-        .popsection
-
-        .xip_toc \index, P9_XIP_STRING, 7874647b
-
-    .endm
-
-
 /// Shorthand to create a TOC entry for an address
 ///
 /// \param[in] index The symbol will be indexed as this name
@@ -1701,43 +1674,6 @@ xipRevLe64(const uint64_t i_x);
 
     .endm
 
-
-/// Edit and allocate a CVS revision string
-///
-/// CVS revision strings are formatted by stripping out and only storing the
-/// actual revision number :
-/// \code
-///     "$Revision <n>.<m> $" -> "<n>.<m>"
-/// \endcode
-
-    .macro ..cvs_revision_string, rev:req
-        .irpc c, \rev
-            .ifnc "\c", "$"
-                .ifnc "\c", "R"
-                    .ifnc "\c", "e"
-                        .ifnc "\c", "v"
-                            .ifnc "\c", "i"
-                                .ifnc "\c", "s"
-                                    .ifnc "\c", "i"
-                                        .ifnc "\c", "o"
-                                            .ifnc "\c", "n"
-                                                .ifnc "\c", ":"
-                                                    .ifnc "\c", " "
-                                                        .ascii "\c"
-                                                    .endif
-                                                .endif
-                                            .endif
-                                        .endif
-                                    .endif
-                                .endif
-                            .endif
-                        .endif
-                    .endif
-                .endif
-            .endif
-        .endr
-        .byte 0
-    .endm
 
     .macro  .xip_section, s, alignment=1, empty=0
         .ifnb \s
