@@ -20,6 +20,7 @@ PROCEDURE=p9_hcode_image_build
 HCODE_UTIL=$(ROOTPATH)/chips/p9/procedures/utils/stopreg/
 HCODE_UTIL+=$(ROOTPATH)/chips/p9/xip/
 HCODE_UTIL+=$(ROOTPATH)/chips/p9/procedures/hwp/lib/
-libp9_hcode_image_build_DEPLIBS += p9_xip_image
+HCODE_UTIL+=$(ROOTPATH)/tools/imageProcs/
+$(PROCEDURE)_DEPLIBS+=p9_xip_image
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(HCODE_UTIL))
 $(call BUILD_PROCEDURE)

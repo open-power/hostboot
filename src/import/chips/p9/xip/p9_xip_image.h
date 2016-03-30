@@ -29,8 +29,6 @@
 #ifndef __P9_XIP_IMAGE_H
 #define __P9_XIP_IMAGE_H
 
-#include "fapi_sbe_common.H"
-
 /// Current version (fields, layout, sections) of the P9_XIP header
 ///
 /// If any changes are made to this file or to p9_xip_header.H, please update
@@ -45,6 +43,12 @@
 /// image, while the 4 low-order bytes identify the type of the image.
 ///
 /// @{
+
+#ifdef __ASSEMBLER__
+    #define ULL(x) x
+#else
+    #define ULL(x) x##ull
+#endif
 
 #define P9_XIP_MAGIC             0x58495020           // "XIP "
 #define P9_XIP_MAGIC_BASE    ULL(0x5849502042415345)  // "XIP BASE"
