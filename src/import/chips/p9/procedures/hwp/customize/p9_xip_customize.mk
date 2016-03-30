@@ -16,7 +16,8 @@
 # deposited with the U.S. Copyright Office.
 #
 # IBM_PROLOG_END_TAG
-PROCEDURE=p9_xip_customize
+PROCEDURE = p9_xip_customize
 lib$(PROCEDURE)_DEPLIBS+=p9_xip_image
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/xip)
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/tools/imageProcs)
 $(call BUILD_PROCEDURE)
