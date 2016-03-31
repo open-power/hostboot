@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2015                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2016                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -22,7 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- $Id: mvpd_errors.xml,v 1.23 2015/02/24 19:25:00 whs Exp $ -->
+<!-- $Id: mvpd_errors.xml,v 1.24 2015/09/29 15:59:45 dcrowell Exp $ -->
 <hwpErrors>
   <!-- ********************************************************************* -->
   <hwpError>
