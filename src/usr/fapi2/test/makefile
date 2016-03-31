@@ -42,7 +42,12 @@ OBJS += p9_sample_procedure.o
 OBJS += p9_hwtests.o
 OBJS += fapi2TestUtils.o
 
-TESTS += fapi2Test.H
+TESTS += fapi2HwpTest.H
+TESTS += fapi2HwAccessTest.H
+TESTS += fapi2GetParentTest.H
+TESTS += fapi2GetChildrenTest.H
+TESTS += fapi2BasicTryTest.H
+TESTS += fapi2GetOtherEndTest.H
 
 include ${ROOTPATH}/config.mk
 

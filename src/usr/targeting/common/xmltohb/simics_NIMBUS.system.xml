@@ -4050,7 +4050,7 @@
     </attribute>
     <attribute>
         <id>PEER_TARGET</id>
-        <default>physical:sys-0/node-0/proc-1/xbus-1</default>
+        <default>physical:sys-0/node-0/proc-3/xbus-1</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>

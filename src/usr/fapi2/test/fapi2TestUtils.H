@@ -118,6 +118,26 @@ enum PERVASIVE_RANGE {
 void generateTargets(TARGETING::Target* i_pMasterProcChip,
                                     TARGETING::Target* o_targetList[]);
 
+/**
+*  @brief Helper to get the parent pervasive of the given target
+*
+*  @tparam K Input target's FAPI2 type
+*  @tparam V Platform target handle type
+*
+*  @param[in] i_pTarget Targeting target
+*
+*  @return Platform target handle giving the pervasive of the input target
+*  @retval NULL No parent found
+*  @retval !NULL Parent found, equal to the retval
+ */
+template< TargetType K, typename V = plat_target_handle_t >
+inline V getPervasiveParent(V i_pTarget)
+{
+    Target<K,V> fapi2_target(i_pTarget);
+    return static_cast<V>(
+        fapi2_target.template getParent<TARGET_TYPE_PERV>());
+}
+
 } // End namespace fapi2
 
 #endif

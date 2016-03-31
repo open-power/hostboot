@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/fapi2/test/fapi2HwpTest.C $                           */
+/* $Source: src/usr/fapi2/test/fapi2HwpTest.H $                           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -28,16 +28,21 @@
 #include <fapi2.H>
 #include <hwpf_fapi2_reasoncodes.H>
 #include <fapi2TestUtils.H>
-#include <p9_hwtests.H>
+#include <p9_sample_procedure.H>
+#include <plat_hwp_invoker.H>
 
-namespace fapi2
+
+
+using namespace fapi2;
+
+
+class Fapi2HwpTest : public CxxTest::TestSuite
 {
-
-
+public:
 //******************************************************************************
-// fapi2HwpTest
+// test_fapi2Hwp
 //******************************************************************************
-errlHndl_t fapi2HwpTest()
+void test_fapi2Hwp()
 {
     int numTests = 0;
     int numFails = 0;
@@ -150,66 +155,6 @@ errlHndl_t fapi2HwpTest()
           numFails++;
           TS_FAIL("Error occured in p9_sample_procedure_proc !!");
         }
-        numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_scomtest_getscom_fail, fapi2_procTarget);
-        if(l_errl != NULL)
-        {
-            delete l_errl; // delete expected error log
-        }
-        else
-        {
-            TS_FAIL("No error from p9_scomtest_getscom_fail !!");
-            numFails++;
-        }
-        numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_scomtest_putscom_fail, fapi2_procTarget);
-        if(l_errl != NULL)
-        {
-            delete l_errl; // delete expected error log
-        }
-        else
-        {
-            TS_FAIL("No error from p9_scomtest_putscom_fail !!");
-            numFails++;
-        }
-        numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_cfamtest_putcfam_fail, fapi2_procTarget);
-        if(l_errl != NULL)
-        {
-            delete l_errl; // delete expected error log
-        }
-        else
-        {
-            TS_FAIL("No error from p9_cfamtest_putcfam_fail !!");
-            numFails++;
-        }
-        numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_cfamtest_getcfam_fail, fapi2_procTarget);
-        if(l_errl != NULL)
-        {
-            delete l_errl; // delete expected error log
-        }
-        else
-        {
-            TS_FAIL("No error from p9_cfamtest_getcfam_fail !!");
-            numFails++;
-        }
-        numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_scomtest_getscom_pass, fapi2_procTarget);
-        if(l_errl)
-        {
-            TS_FAIL("Error from p9_scomtest_getscom_pass !!");
-            numFails++;
-        }
-        numTests++;
-        FAPI_INVOKE_HWP(l_errl, p9_scomtest_putscom_pass, fapi2_procTarget);
-        if(l_errl)
-        {
-            TS_FAIL("Error from p9_scomtest_putscom_pass !!");
-            numFails++;
-        }
-
-
         numTests++;
         FAPI_INVOKE_HWP(l_errl, p9_sample_procedure_eq, fapi2_eqTarget, scratchWriteValue);
         if(l_errl != NULL)
@@ -331,8 +276,7 @@ errlHndl_t fapi2HwpTest()
           TS_FAIL("Error occured in p9_sample_procedure_capp !!");
         }
     }while(0);
-    FAPI_INF("test_sampleHWPs:: Test Complete. %d/%d fails",  numFails,numTests);
-    return l_errl;
+    FAPI_INF("test_fapiHWP:: Test Complete. %d/%d fails",  numFails,numTests);
 }
 
-}
+};
