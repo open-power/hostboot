@@ -21054,7 +21054,7 @@ DEPRECATED!!!!
     </simpleType>
     <readable/>
     <writeable/>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_UNIT_TEST_MCA_MEMORY_SIZES</id>
