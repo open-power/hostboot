@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,7 +89,7 @@ void pib_error_handler( TARGETING::Target* i_target,
         i_errlog->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
 
-        // callout this chip as Medium and deconfigure it
+        // callout this chip as Low and deconfigure it
         i_errlog->addHwCallout( i_target,
                                 HWAS::SRCI_PRIORITY_LOW,
                                 HWAS::DELAYED_DECONFIG,
@@ -106,7 +106,7 @@ void pib_error_handler( TARGETING::Target* i_target,
                          i_errlog,
                          i_target );
     }
-    else
+    else if( i_status & PIB_ERROR_BITS )
     {
         //Add the callouts for the specific PCB/PIB error
         //Take bits 17-19 from the 32-bit pib error data
@@ -124,7 +124,26 @@ void pib_error_handler( TARGETING::Target* i_target,
             FSI::getFsiFFDC( FSI::FFDC_PIB_FAIL,
                              i_errlog,
                              i_target );
+            FSI::getFsiFFDC( FSI::FFDC_OPB_FAIL_SLAVE,
+                             i_errlog,
+                             i_target );
         }
+    }
+    else if( i_status & PROTECTION_CHECK )
+    {
+        //Most likely a code error
+        i_errlog->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                      HWAS::SRCI_PRIORITY_HIGH);
+        //Any regs to grab related to secure mode?
+    }
+    else
+    {
+        //Some other hardware error, e.g. parity error
+        // callout this chip as High and deconfigure it
+        i_errlog->addHwCallout( i_target,
+                                HWAS::SRCI_PRIORITY_HIGH,
+                                HWAS::DELAYED_DECONFIG,
+                                HWAS::GARD_NULL );        
     }
 
     //Recovery sequence from Markus
@@ -290,8 +309,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
             }
 
             // Check the status reg for errors
-            if( (l_status & PIB_ERROR_BITS)      // PCB/PIB Errors
-                || (l_status & PIB_ABORT_BIT)  ) // PIB Abort
+            if( l_status & ANY_ERROR_BIT )
             {
                 TRACFCOMP( g_trac_fsiscom, ERR_MRK"fsiScomPerformOp:Write: PCB/PIB error received: l_status=0x%X)", l_status);
                 /*@
@@ -317,29 +335,6 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
 
                 // call common error handler to do callouts and recovery
                 pib_error_handler( i_target, l_err, l_status, l_scomAddr );
-
-                //Grab the PIB2OPB Status reg for a XSCOM Block error
-                if( (l_status & 0x00007000) == 0x00001000 ) //piberr=001
-                {
-                    //@todo: Switch to external FSI FFDC interfaces RTC:35064
-                    TARGETING::Target* l_master = NULL;
-                    TARGETING::targetService().
-                      masterProcChipTargetHandle(l_master);
-
-                    uint64_t scomdata = 0;
-                    size_t scomsize = sizeof(uint64_t);
-                    errlHndl_t l_err2 = DeviceFW::deviceOp( DeviceFW::READ,
-                                           l_master,
-                                           &scomdata,
-                                           scomsize,
-                                           DEVICE_XSCOM_ADDRESS(0x00020001));
-                    if( l_err2 ) {
-                        delete l_err2;
-                    } else {
-                        TRACFCOMP( g_trac_fsiscom, "PIB2OPB Status = %.16X", scomdata );
-                    }
-                }
-
                 break;
             }
 
@@ -380,8 +375,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
             }
 
             // Check the status reg for errors
-            if( (l_status & PIB_ERROR_BITS)      // PCB/PIB Errors
-                || (l_status & PIB_ABORT_BIT)  ) // PIB Abort
+            if( l_status & ANY_ERROR_BIT )
             {
                 TRACFCOMP( g_trac_fsiscom, ERR_MRK"fsiScomPerformOp:Read: PCB/PIB error received: l_status=0x%0.8X)", l_status);
 
