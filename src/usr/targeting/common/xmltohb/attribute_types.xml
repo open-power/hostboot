@@ -2359,6 +2359,7 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PROC_FABRIC_GROUP_ID</id>
         <macro>DIRECT</macro>
@@ -2380,6 +2381,7 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PROC_FABRIC_CHIP_ID</id>
         <macro>DIRECT</macro>
@@ -19284,6 +19286,7 @@ DEPRECATED!!!!
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <readable/>
+  <writeable/>
   <hwpfToHbAttrMap>
     <id>ATTR_FW_MODE_FLAGS_VALID</id>
     <macro>DIRECT</macro>
@@ -19319,6 +19322,7 @@ DEPRECATED!!!!
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <readable/>
+  <writeable/>
   <hwpfToHbAttrMap>
     <id>ATTR_IS_SP_MODE</id>
     <macro>DIRECT</macro>
@@ -19336,6 +19340,7 @@ DEPRECATED!!!!
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <readable/>
+  <writeable/>
   <hwpfToHbAttrMap>
     <id>ATTR_SBE_FFDC_ENABLE</id>
     <macro>DIRECT</macro>
@@ -19353,6 +19358,7 @@ DEPRECATED!!!!
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <readable/>
+  <writeable/>
   <hwpfToHbAttrMap>
     <id>ATTR_SBE_INTERNAL_FFDC_ENABLE</id>
     <macro>DIRECT</macro>
@@ -19421,6 +19427,7 @@ DEPRECATED!!!!
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <readable/>
+  <writeable/>
   <hwpfToHbAttrMap>
     <id>ATTR_SYS_FORCE_ALL_CORES</id>
     <macro>DIRECT</macro>
@@ -19439,6 +19446,7 @@ DEPRECATED!!!!
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <readable/>
+  <writeable/>
   <hwpfToHbAttrMap>
     <id>ATTR_DISABLE_HBBL_VECTORS</id>
     <macro>DIRECT</macro>
@@ -19732,6 +19740,7 @@ DEPRECATED!!!!
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <readable/>
+  <writeable/>
   <hwpfToHbAttrMap>
     <id>ATTR_PROC_SBE_MASTER_CHIP</id>
     <macro>DIRECT</macro>
@@ -19853,6 +19862,7 @@ DEPRECATED!!!!
   </simpleType>
   <persistency>volatile-zeroed</persistency>
   <readable/>
+  <writeable/>
   <hwpfToHbAttrMap>
     <id>ATTR_PROC_FABRIC_SYSTEM_ID</id>
     <macro>DIRECT</macro>
