@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -41,8 +43,14 @@ namespace FSISCOM
     STATUS_REG        = 0x101C,  /* STATUS Register (0x07) */
     PIB_RESET_REG     = 0x101C,  /* PIB Reset Register (0x07) */
 
+    PARITY_CHECK      = 0x04000000, /* 5= Parity check error */
+    PROTECTION_CHECK  = 0x01000000, /* 7= Blocked due to secure mode */
     PIB_ABORT_BIT     = 0x00100000, /* 12= PIB Abort */
     PIB_ERROR_BITS    = 0x00007000, /* 17:19= PCB/PIB Errors */
+    ANY_ERROR_BIT     = PARITY_CHECK |
+                        PROTECTION_CHECK |
+                        PIB_ABORT_BIT |
+                        PIB_ERROR_BITS
   };
 
 /**
