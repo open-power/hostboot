@@ -531,13 +531,93 @@ void SecureROM::_cleanup()
 errlHndl_t SecureROM::getHwHashKeys()
 {
 
-    errlHndl_t  l_errl      =   NULL;
+    errlHndl_t l_errl = NULL;
 
-    TRACFCOMP(g_trac_secure,INFO_MRK"SecureROM::getHwHashKeys() NOT supported");
+    TRACFCOMP(g_trac_secure,INFO_MRK"SecureROM::getHwHashKeys()");
 
-    // @todo RTC:34080 - Add support for getting HW Hash Keys from System
+    // The length of the hash is SHA512_DIGEST_LENGTH
+    // The data will be read from PIBMEM using SCOM addresses via deviceRead
+    // iv_hash_key is where the data will be copied.
+
+    // simplify notation below
+    using namespace TARGETING; // for MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
+    using namespace DeviceFW;  // for SCOM and deviceRead
+
+    // The upcoming for loop iterates through the PIBMEM to obtain the
+    // HW hash key.  The following variables set up the loop.
+
+    // grab 64-bits of data each iteration
+    size_t l_len = sizeof(uint64_t);
+
+    // allocate temp hash key on the stack in case of error during read
+    sha2_hash_t l_temp_hash;
+
+    // start filling with data at the base of l_temp_hash
+    uint64_t* l_hash = reinterpret_cast<uint64_t*>(l_temp_hash);
+
+    // and start the PIB mem pointer at the base pib hw hash key address
+    // This is NOT a pointer as it represents a SCOM address and not RAM.
+    uint32_t l_pibaddr = PIBMEM_HW_KEY_HASH;
+
+    // stop at the end of iv_hash_key, so get its end pointer
+    uint64_t* l_stop;
+    l_stop = reinterpret_cast<uint64_t*>(&l_temp_hash[SHA512_DIGEST_LENGTH]);
+
+    // loop until there's an error or the end is reached
+    // l_hash increments by 64-bits each time (the size of the
+    // type that l_hash points to). l_pibaddr increments by 1 because
+    // it is a value. This is by design since SCOM addresses hold 64-bits
+    // of information while RAM addresses hold only one byte.
+    // l_len is simply sizeof(uint64_t). The call to deviceRead reads
+    // only one SOM address at a time, hence, the loop is required.
+    for (; (l_hash < l_stop) && (l_errl == NULL); l_hash++)
+    {
+        size_t len = l_len;
+        l_errl = deviceRead(MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+            l_hash, len, DEVICE_SCOM_ADDRESS(l_pibaddr++));
+    }
+
+#ifdef HOSTBOOT_DEBUG
+    // print the hash key for debugging purposes but only print up to the
+    // last word read, in case there was an error
+    TRACDCOMP(g_trac_secure,"HW hash key data received from SBE:");
+    const uint64_t* i;
+    for (i=reinterpret_cast<const uint64_t*>(l_temp_hash); i < l_hash; i++)
+    {
+        TRACDCOMP(g_trac_secure,"0x%.16llX", *i);
+    }
+#endif
+
+    // if there was an error indicate it as a trace message
+    if (l_errl != NULL)
+    {
+        TRACFCOMP(g_trac_secure,ERR_MRK"SecureROM::getHwHashKeys():"
+        " Fail SCOM Read of hash key at PIBMEM address (0x%x)",
+        PIBMEM + (l_hash - reinterpret_cast<uint64_t*>(l_temp_hash)));
+    }
+    else
+    {
+        // copy the successfully retreived hash key to the member variable
+        memcpy(iv_hash_key, l_temp_hash, sizeof(sha2_hash_t));
+    }
 
     return l_errl;
+}
+
+/**
+ * @brief  Retrieve the internal hardware hash key from secure ROM object.
+ */
+void SecureROM::getHwHashKeys(sha2_hash_t o_hash)
+{
+    memcpy(o_hash, iv_hash_key, sizeof(sha2_hash_t));
+}
+
+/*
+ * @brief  Externally available hardware hash key function
+ */
+void getHwHashKeys(sha2_hash_t o_hash)
+{
+    return Singleton<SecureROM>::instance().getHwHashKeys(o_hash);
 }
 
 /**

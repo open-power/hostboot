@@ -43,19 +43,18 @@
 // and are needed to run functions in the SecureROM code stored in memory
 
 /* From hw_utils.h:  */
-#define ECID_SIZE            16
+#define ECID_SIZE 16
 
 
 /* From ecverify.h   */
-#define EC_COORDBYTES  66     /* P-521   */
+#define EC_COORDBYTES 66     /* P-521   */
 typedef uint8_t ecc_key_t[2*EC_COORDBYTES];
 
+/* From hw_utils.h */
+#define PIBMEM 0x00080000
+#define PIBMEM_HW_KEY_HASH (PIBMEM +0x0008)
 
 /* From sha512.h:  */
-#define SHA512_DIGEST_LENGTH            64
-typedef uint8_t __attribute__((aligned(8))) sha2_hash_t[ \
-                SHA512_DIGEST_LENGTH / sizeof(uint8_t) ];
-
 typedef uint8_t  sha2_byte;     /* Exactly 1 byte */
 
 // This is the interface that call_rom_SHA512 calls into
@@ -156,6 +155,15 @@ class SecureROM
          * @return errlHndl_t  NULL on success
          */
         errlHndl_t hashBlob(void * i_blob, size_t i_size, SHA512_t io_buf);
+
+        /**
+         * @brief Retrieve the internal hardware hash key from secure ROM
+         *        object.
+         *
+         * @param[out] o_hash  Reference to the sha2_hash_t array to copy the
+         *                     hash to.
+         */
+        void getHwHashKeys(sha2_hash_t o_hash);
 
 
     protected:

@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -49,6 +49,6 @@ grep -v "GFW_P8_HB_UNSECURE_OFFSET" \
     $sb/simu/configs/P8_VENICE.config
 echo "SETENV GFW_P8_HB_UNSECURE_OFFSET 58720256" >> \
     $sb/simu/configs/P8_VENICE.config
-
-
+echo "Applying workaround for get hardware hash key"
+sbex -t 991184 -r fips860
 
