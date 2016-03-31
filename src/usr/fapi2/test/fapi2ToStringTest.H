@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/fapi2/test/fapi2Test.H $                              */
+/* $Source: src/usr/fapi2/test/fapi2ToStringTest.H $                      */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,75 +22,62 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __FAPI2TEST_H__
-#define __FAPI2TEST_H__
 
-/**
- *  @file fapi2Test.H
- *
- *  @brief Test case for FAPI2 code
-*/
-
-#include <cxxtest/TestSuite.H>
-#include <errl/errlmanager.H>
-#include <errl/errlentry.H>
-#include <targeting/common/targetservice.H>
 #include <fapi2.H>
-#include <p9_sample_procedure.H>
-#include <hwp_executor.H>
-#include <plat_hwp_invoker.H>
-#include <pnor/pnorif.H>
-#include <targeting/common/utilFilter.H>
-#include <fapi2TestUtils.H>
-#include <hwpf_fapi2_reasoncodes.H>
 
-#include "fapi2GetParentTest.C"
-#include "fapi2HwpTest.C"
-#include "fapi2GetChildrenTest.C"
-#include "fapi2GetOtherEnd.C"
-#include "p9_basicTry.C"
 
 using namespace fapi2;
 
-class fapi2Test: public CxxTest::TestSuite
+
+class Fapi2ToStringTest : public CxxTest::TestSuite
 {
 public:
-
-/**
-* @brief Test some basic HWPs that hit all targets
-*        that runs through the FAPI2 macros
-*
-*/
-void test_fapi2Test(void)
+//******************************************************************************
+// test_fapi2ToString
+//******************************************************************************
+void test_fapi2ToString()
 {
-    FAPI_INF(">>>>>>test_fapi2Test starting...");
+    int numTests = 0;
+    int numFails = 0;
+    do
+    {
+        TARGETING::Target* l_pMasterProcChip = NULL;
+        TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProcChip);
 
-    FAPI_INF(">>fapi2HwpTest starting...");
-    fapi2HwpTest();
-    FAPI_INF("<<fapi2HwpTest exiting...");
+        assert(l_pMasterProcChip != NULL);
+        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                                            fapi2_procTarget(l_pMasterProcChip);
 
-    FAPI_INF(">>fapi2GetChildren starting...");
-    fapi2GetChildrenTest();
-    FAPI_INF("<<fapi2GetChildren exiting...");
+        TARGETING::ATTR_FAPI_NAME_type  tmpScomStr = {0};
+        fapi2::toString(fapi2_procTarget, tmpScomStr, sizeof(tmpScomStr));
+        numTests++;
+        if (tmpScomStr[0] == '\0')
+        {
+            numFails++;
+            TS_FAIL("toString failed to return data for processor chip !!");
+        }
+        else
+        {
+            numTests++;
+            if (strcmp(tmpScomStr, "pu:k0:n0:s0:p00"))
+            {
+                numFails++;
+                TS_FAIL("toString returned wrong processor chip string!!");
+            }
 
-    FAPI_INF(">>fapi2GetParent starting...");
-    fapi2GetParentTest();
-    FAPI_INF("<<fapi2GetParent exiting...");
-
-    //@TODO-Restore with RTC:151090
-    FAPI_INF(">>fapi2GetOtherEnd skipping!!!...");
-    //FAPI_INF(">>fapi2GetOtherEnd starting...");
-    //fapi2GetOtherEnd();
-    //FAPI_INF(">>fapi2GetOtherEnd exiting...");
-
-    FAPI_INF(">>test fapi2basicTry starting...");
-    fapi2basicTry();
-    FAPI_INF(">>test fapi2basicTry exiting...");
-
-    FAPI_INF("<<<<<<test_fapi2Test exiting...");
+            char smallName[5];
+            fapi2::toString(fapi2_procTarget, smallName, sizeof(smallName));
+            numTests++;
+            if (memcmp(smallName, tmpScomStr, sizeof(smallName)-1))
+            {
+                numFails++;
+                TS_FAIL("toString failed to fill in 5 character processor chip!!");
+            }
+        }
+    } while(0);
+    FAPI_INF("test_fapi2ToString Test Complete. %d/%d fails",  numFails , numTests);
 }
 
 
 };
 
-#endif

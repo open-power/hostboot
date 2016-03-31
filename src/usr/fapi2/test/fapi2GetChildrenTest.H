@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/fapi2/test/fapi2GetChildrenTest.C $                   */
+/* $Source: src/usr/fapi2/test/fapi2GetChildrenTest.H $                   */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -31,16 +31,17 @@
 #include <cxxtest/TestSuite.H>
 #include <functional>
 
-using namespace fapi2;
 
-namespace fapi2
+#include <error_scope.H>
+
+
+class Fapi2GetChildrenTest : public CxxTest::TestSuite
 {
-
-
+public:
 //******************************************************************************
-// fapi2GetParentTest
+// test_fapi2GetParent
 //******************************************************************************
-errlHndl_t fapi2GetChildrenTest()
+void test_fapi2GetChildren()
 {
     int numTests = 0;
     int numFails = 0;
@@ -139,7 +140,7 @@ errlHndl_t fapi2GetChildrenTest()
 //         l_childMCAs = fapi2_mcbistTarget.getChildren<fapi2::TARGET_TYPE_MCA>(TARGET_STATE_PRESENT);
 //         l_targetHuid = TARGETING::get_huid(targeting_targets[MY_MCBIST]) ;
 //         l_actualSize = l_childMCAs.size();
-// 
+//
 //         //Set expected size to be the number of MCAs per MCBIST
 //         l_expectedSize = 2;
 //         numTests++;
@@ -431,11 +432,10 @@ errlHndl_t fapi2GetChildrenTest()
         errlCommit(l_err,HWPF_COMP_ID);
         TS_FAIL("fapi2TargetTest Fail, for HUID: %d , expected %d children , found %d ", l_targetHuid,l_expectedSize,l_actualSize );
     }
-    FAPI_INF("fapi2TargetTest:: Test Complete. %d/%d fails",  numFails , numTests);
-    return l_err;
+    FAPI_INF("fapi2GetChildrenTest:: Test Complete. %d/%d fails",  numFails , numTests);
 }
 
 
 
 
-}
+};

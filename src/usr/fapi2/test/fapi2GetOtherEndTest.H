@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/fapi2/test/fapi2GetOtherEnd.C $                       */
+/* $Source: src/usr/fapi2/test/fapi2GetOtherEndTest.H $                   */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -36,15 +36,17 @@
 namespace fapi2
 {
 
+class Fapi2GetOtherEndTest : public CxxTest::TestSuite
+{
 
+public:
 //******************************************************************************
-// fapi2GetOtherEnd
+// test_fapi2GetOtherEnd
 //******************************************************************************
-errlHndl_t fapi2GetOtherEnd()
+void test_fapi2GetOtherEnd()
 {
     int numTests = 0;
     int numFails = 0;
-    errlHndl_t l_errl = NULL;
 
     do
     {
@@ -205,11 +207,12 @@ errlHndl_t fapi2GetOtherEnd()
             }
         }
 
-        FAPI_INF("fapi2TargetTest:: Test Complete. %d/%d fails", numFails, numTests);
+        FAPI_INF("fapi2GetOtherEndTest:: Test Complete. %d/%d fails", numFails, numTests);
 
     }while(0);
 
-    return l_errl;
 }
+
+};
 
 }
