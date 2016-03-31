@@ -71,14 +71,51 @@ namespace DeviceFW
     };
 
 #ifndef PARSER
+
+    /** Single argument version of the macro to provide the correct information
+    *   to perform a scomRead or scomWrite. Takes in a scom address
+    *
+    *  @param[in] i_address - scom address that you are writing to or reading from
+    */
+    #define DEVICE_SCOM_ADDRESS_1_ARGS(i_address)\
+        DeviceFW::SCOM, static_cast<uint64_t>((i_address)), static_cast<uint64_t>(0)
+
+    /** 2 argument version of the macro to provide the correct information to
+    *  preform a scomRead or scomWrite. Takes in a scom address and an opmode
+    *
+    *  @param[in] i_address - scom addr that you are writing to or reading from
+    *  @param[in] i_opMode -  fapi2 opMode used by HWPs to conduct scoms in a
+    *                         certain way
+    */
+    #define DEVICE_SCOM_ADDRESS_2_ARGS(i_address, i_opMode)\
+        DeviceFW::SCOM, static_cast<uint64_t>((i_address)), static_cast<uint64_t>(i_opMode)
+
+    /** This is the trick to figuring out if the second argument is there or not
+    *   by using this in conjunction with __VA_ARGS__ , which has variable length
+    *   you can select the appropriate macro for the number of arguments present
+    *
+    *  @param[in] arg1 - __VA_ARGS__ that you are trying to determine size of
+    *  @param[in] arg2 - 2 argument version of macro
+    *  @param[in] arg1 - 1 argument version of macro
+    */
+    #define GET_3RD_ARG(arg1, arg2, arg3, ...) arg3
+
+    /** This is the implementation GET_3RD_ARG macro that selects either
+    *   the 1 argument macro for scom address that only takes an addressing
+    *   or else use the 2 arg macro that takes in an address as well as an opmode
+    *
+    *  @param[in] _VA_ARGS__ - __VA_ARGS__ that you are trying to determine size of
+    */
+    #define DEVICE_SCOM_ADDRESS_MACRO_CHOOSER(...) \
+        GET_3RD_ARG(__VA_ARGS__,  DEVICE_SCOM_ADDRESS_2_ARGS, DEVICE_SCOM_ADDRESS_1_ARGS )
+
     /** Construct the device addressing parameters for SCOM device ops.
-     *  @param[in] i_address - Scom address to operate on.
-     */
-    #define DEVICE_SCOM_ADDRESS(i_address) \
-        DeviceFW::SCOM, static_cast<uint64_t>((i_address))
+    *  @param[in] i_address - Scom address to operate on.
+    */
+    #define DEVICE_SCOM_ADDRESS(...) DEVICE_SCOM_ADDRESS_MACRO_CHOOSER(__VA_ARGS__)(__VA_ARGS__)
 
     /** Construct the device addressing parameters for the PRESENT device ops.
-     */
+    */
     #define DEVICE_PRESENT_ADDRESS() \
         DeviceFW::PRESENT
 

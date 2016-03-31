@@ -48,7 +48,8 @@ namespace SCOM
 {
 extern errlHndl_t scomTranslate(TARGETING::Target* &i_target,
                          uint64_t &io_addr,
-                         TARGETING::Target* io_target_SW);
+                         TARGETING::Target* io_target_SW,
+                         uint64_t i_opMode = 0);
 }
 class ScomTest: public CxxTest::TestSuite
 {

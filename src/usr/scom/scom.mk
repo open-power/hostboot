@@ -26,7 +26,7 @@
 
 VPATH += ${ROOTPATH}/src/import/chips/p9/common/scominfo/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/scominfo/
-
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 # Local Objects
 OBJS += scom.o
 OBJS += scomtrans.o

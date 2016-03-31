@@ -52,6 +52,7 @@
 #include <initservice/initserviceif.H>
 #include <p9_scom_addr.H>
 #include <p9_scominfo.H>
+#include <hw_access_def.H>
 
 #if __HOSTBOOT_RUNTIME
   #include "handleSpecialWakeup.H"
@@ -179,8 +180,10 @@ errlHndl_t startScomProcess(DeviceFW::OperationType i_opType,
     TARGETING::Target* l_parentChip =
           const_cast<TARGETING::Target *>(TARGETING::getParentChip(i_target));
     uint64_t l_addr = va_arg(i_args,uint64_t);
+    //if opMode is not specified as an argument va_arg will return NULL which is 0
+    uint64_t l_opMode = va_arg(i_args,uint64_t);
 
-    l_err = scomTranslate(i_target, l_addr, l_target_SW);
+    l_err = scomTranslate(i_target, l_addr, l_target_SW, l_opMode);
 
 
     if (l_err == NULL)
@@ -198,7 +201,9 @@ errlHndl_t startScomProcess(DeviceFW::OperationType i_opType,
     // @todo RTC:124196 need to move this to a more general location so that
     //       the disable occurs after the HBRT is complete.
 #if __HOSTBOOT_RUNTIME
-    if(l_target_SW != NULL && !g_wakeupInProgress)
+    if(!(l_opMode & fapi2::DO_NOT_DO_WAKEUP) &&
+       (l_target_SW != NULL)          &&
+       !g_wakeupInProgress)
     {
         g_wakeupInProgress = true;
         errlHndl_t l_errSW = NULL;
@@ -207,7 +212,7 @@ errlHndl_t startScomProcess(DeviceFW::OperationType i_opType,
 
         if(l_err != NULL && l_errSW)
         {
-            TRACFCOMP(g_trac_scom,"Disable p8_cpu_special_wakeup ERROR");
+            TRACFCOMP(g_trac_scom,"Disable p9_cpu_special_wakeup ERROR");
 
             // capture the target data in the elog
             ERRORLOG::ErrlUserDetailsTarget(l_target_SW).addToLog(l_errSW);
@@ -227,7 +232,8 @@ errlHndl_t startScomProcess(DeviceFW::OperationType i_opType,
 //////////////////////////////////////////////////////////////////////////////
 errlHndl_t scomTranslate(TARGETING::Target * &i_target,
                         uint64_t & io_addr,
-                        TARGETING::Target * io_target_SW)
+                        TARGETING::Target * io_target_SW,
+                        uint64_t i_opMode)
 {
     errlHndl_t l_err = NULL;
 
@@ -239,7 +245,8 @@ errlHndl_t scomTranslate(TARGETING::Target * &i_target,
     l_err = p9_translation(i_target,
                           l_type,
                           io_addr,
-                          io_target_SW);
+                          io_target_SW,
+                          i_opMode);
 
     return l_err;
 }
@@ -249,7 +256,8 @@ errlHndl_t scomTranslate(TARGETING::Target * &i_target,
 errlHndl_t p9_translation (TARGETING::Target * &i_target,
                            TARGETING::TYPE i_type,
                            uint64_t &io_addr,
-                           TARGETING::Target * io_target_SW)
+                           TARGETING::Target * io_target_SW,
+                           uint64_t i_opMode)
 {
     errlHndl_t l_err = NULL;
     do  {
@@ -302,8 +310,9 @@ errlHndl_t p9_translation (TARGETING::Target * &i_target,
         bool isFSP_HBRT = INITSERVICE::spBaseServicesEnabled();
 
         if(((i_type == TARGETING::TYPE_EX) || (i_type == TARGETING::TYPE_CORE)) &&
-            (!g_wakeupInProgress) && (!isFSP_HBRT) )
+            (!g_wakeupInProgress) && (!isFSP_HBRT) && !(i_opMode & fapi2::DO_NOT_DO_WAKEUP) )
         {
+            TRACFCOMP(g_trac_scom,"Determining if Special Wakeup is needed..");
             bool l_needsWakeup = true;
             for(uint16_t i = 0; i < l_scomPairings.size(); i++)
             {
@@ -315,6 +324,7 @@ errlHndl_t p9_translation (TARGETING::Target * &i_target,
             }
             if(l_needsWakeup)
             {
+                TRACFCOMP(g_trac_scom,"Special wakeup required, starting now..");
                 g_wakeupInProgress = true;
 
                 l_err = handleSpecialWakeup(i_target,true);

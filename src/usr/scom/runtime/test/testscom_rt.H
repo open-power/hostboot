@@ -37,7 +37,7 @@
 #include <devicefw/userif.H>
 #include <fsi/fsiif.H>
 #include <targeting/common/util.H>
-
+#include <hw_access_def.H>
 #include <devicefw/driverif.H>
 
 
@@ -352,12 +352,18 @@ public:
   }
 
 
+// Currently this test can only be verified manually by looking at the traces
+// There is no way to tell if the requested deviceRead/deviceWrite followed the
+// opMode. For example you cannot know if the core skipped the wakeup when the
+// DO_NOT_DO_WAKEUP opMode is set unless you look at the traces to see if there
+// is traces from the wakeup code path. In the future when the wakeup is
+// implemented we may have the ability to know if a core has tried to wake or not.
+// @TODO RTC: 132413
 
-
- void test_TranslateScom_EX(void)
+ void test_opModes(void)
   {
 
-      TRACFCOMP( g_trac_scom, "ScomTest::test_TranslateScom> Start" );
+      TRACFCOMP( g_trac_scom, "ScomTest::test_opModes> Start" );
 
       uint64_t fails = 0;
       uint64_t total = 0;
@@ -383,6 +389,7 @@ public:
       epath.addLast(TARGETING::TYPE_SYS,0);
       epath.addLast(TARGETING::TYPE_NODE,0);
       epath.addLast(TARGETING::TYPE_PROC,0);
+      epath.addLast(TARGETING::TYPE_EQ,0);
 
       scom_targets[myProc0] = TARGETING::targetService().toTarget(epath);
 
@@ -393,9 +400,13 @@ public:
           epath.addLast(TARGETING::TYPE_EX,1);
           scom_targets[myEX1] = TARGETING::targetService().toTarget(epath);
 
-          // remote EX1 target (off of sys-0/node-0/proc-0/EX1)
+          // remove EX1 target (off of sys-0/node-0/proc-0/eq-0/EX1)
+          epath.removeLast();
+          // remove eq0 target (off of sys-0/node-0/proc-0/eq-0)
           epath.removeLast();
 
+          // add eq2 target.
+          epath.addLast(TARGETING::TYPE_EQ,2);
           // add EX5 target.
           epath.addLast(TARGETING::TYPE_EX,5);
           scom_targets[myEX5] = TARGETING::targetService().toTarget(epath);
@@ -406,11 +417,21 @@ public:
           TARGETING::Target* target;
           uint64_t addr;
           uint64_t data;
+          fapi2::OpModes mode;
+          bool     expectErr;
       } test_data[] = {
-          { scom_targets[myEX1], 0x10040000 ,0x7676767676767676},
-          { scom_targets[myEX5], 0x10040002, 0x9191919191919191},
-          { scom_targets[myEX5], 0x13040002, 0xabcdabcdabcdabcd},   // invalid unit 0 address
-          { scom_targets[myEX1], 0x000F0166, 0xabcdabcdabcdabcd},   // invalid address range for target
+          { scom_targets[myEX1], 0x21000000 ,0x7676767676767676,  fapi2::NORMAL, false},  // pervasive addr does not req wakeup
+          { scom_targets[myEX5], 0x20010A02, 0x9191919191919191,  fapi2::NORMAL, false},
+          { scom_targets[myEX5], 0x13040002, 0xabcdabcdabcdabcd,  fapi2::NORMAL, true},   // invalid unit 0 address
+          { scom_targets[myEX1], 0x000F0166, 0xabcdabcdabcdabcd,  fapi2::NORMAL, true},   // invalid address range for target
+          { scom_targets[myEX1], 0x21000000 ,0x7676767676767676,  fapi2::IGNORE_HW_ERROR, false},  // pervasive addr does not req wakeup
+          { scom_targets[myEX5], 0x20010A02, 0x9191919191919191,  fapi2::IGNORE_HW_ERROR, false},
+          { scom_targets[myEX5], 0x13040002, 0xabcdabcdabcdabcd,  fapi2::IGNORE_HW_ERROR, true},   // invalid unit 0 address
+          { scom_targets[myEX1], 0x000F0166, 0xabcdabcdabcdabcd,  fapi2::IGNORE_HW_ERROR, true},   // invalid address range for target
+          { scom_targets[myEX1], 0x21000000 ,0x7676767676767676,  fapi2::DO_NOT_DO_WAKEUP, false}, // pervasive addr does not req wakeup
+          { scom_targets[myEX5], 0x20010A02, 0x9191919191919191,  fapi2::DO_NOT_DO_WAKEUP, false},
+          { scom_targets[myEX5], 0x13040002, 0xabcdabcdabcdabcd,  fapi2::DO_NOT_DO_WAKEUP, true},   // invalid unit 0 address
+          { scom_targets[myEX1], 0x000F0166, 0xabcdabcdabcdabcd,  fapi2::DO_NOT_DO_WAKEUP, true},   // invalid address range for target
       };
       const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
 
@@ -422,13 +443,14 @@ public:
           //only run if the target exists
           if(test_data[x].target == NULL)
           {
+              TRACFCOMP( g_trac_scom, "ScomTest::test_opModes> test target is null, continuing" );
               continue;
           }
           // check to see if the target is functional.. if not.. skip this target
           else if (test_data[x].target->
               getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
           {
-              TRACDCOMP( g_trac_scom, "ScomTest::test_translate_scom_EX> Target %d is not functional", x );
+              TRACFCOMP( g_trac_scom, "ScomTest::test_opModes> Target %d is not functional", x );
               continue;
           }
 
@@ -439,24 +461,33 @@ public:
           l_err = deviceWrite( test_data[x].target,
                                &(test_data[x].data),
                                op_size,
-                               DEVICE_SCOM_ADDRESS(test_data[x].addr) );
-          if( l_err )
+                               DEVICE_SCOM_ADDRESS(test_data[x].addr, test_data[x].mode)
+                               );
+
+          if (!test_data[x].expectErr)
           {
-              // last 2 writes have expected failure conditions.
-              if ((x == NUM_ADDRS-1) || (x == NUM_ADDRS-2))
+              if( l_err )
               {
-                  TRACDCOMP( g_trac_scom, "ScomTest::test_translate_EX.. Expected Error log returned> " );
-              }
-              else
-              {
-                  TRACFCOMP(g_trac_scom, "ScomTest::test_translate_scom_EX> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-                  TS_FAIL( "ScomTest::test_translate_EX> ERROR : Unexpected error log from write1" );
+                  TRACFCOMP(g_trac_scom, "ScomTest::test_opModes> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
+                  TS_FAIL( "ScomTest::test_opModes> ERROR : Unexpected error log from write1" );
                   fails++;
                   errlCommit(l_err,SCOM_COMP_ID);
               }
-
-              delete l_err;
           }
+          else
+          {
+              if( l_err )
+              {
+                  TRACFCOMP( g_trac_scom, "ScomTest::test_opModes.. Expected Error log returned> " );
+              }
+              else
+              {
+                  TRACFCOMP( g_trac_scom, "ScomTest::test_opModes.. Expected Error log and did not get one for addr 0x%X " ,test_data[x].addr );
+                  TS_FAIL( "ScomTest::test_opModes> ERROR : Expected Error log and did not get one" );
+                  fails++;
+              }
+          }
+          delete l_err;
       }
 
       // allocate space for read data
@@ -466,11 +497,12 @@ public:
 
 
       // read all the test registers
-      for( uint64_t x = 0; x < NUM_ADDRS-2; x++ )
+      for( uint64_t x = 0; x < NUM_ADDRS; x++ )
       {
           //only run if the target exists
           if(test_data[x].target == NULL)
           {
+            TRACFCOMP( g_trac_scom, "ScomTest::test_opModes> test target is null, continueing" );
               continue;
           }
 
@@ -480,25 +512,40 @@ public:
           l_err = deviceRead( test_data[x].target,
                               &(read_data[x]),
                               op_size,
-                              DEVICE_SCOM_ADDRESS(test_data[x].addr) );
-
-          if( l_err )
+                              DEVICE_SCOM_ADDRESS(test_data[x].addr, test_data[x].mode));
+          if (!test_data[x].expectErr)
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_translate_scom_EX> [%d] Read: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-              TS_FAIL( "ScomTest::test_translate_scom_EX> ERROR : Unexpected error log from write1" );
-              fails++;
-              errlCommit(l_err,SCOM_COMP_ID);
+              if( l_err )
+              {
+                  TRACFCOMP(g_trac_scom, "ScomTest::test_opModes> [%d] Read: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
+                  TS_FAIL( "ScomTest::test_opModes> ERROR : Unexpected error log from write1" );
+                  fails++;
+                  errlCommit(l_err,SCOM_COMP_ID);
+              }
+              else if((read_data[x]) != (test_data[x].data))
+              {
+                  TRACFCOMP(g_trac_scom, "ScomTest::test_opModes> [%d] Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
+                  TS_FAIL( "ScomTest::test_opModes> ERROR : Data miss-match between read and expected data" );
+                  fails++;
+              }
           }
-          else if((read_data[x]) != (test_data[x].data))
+          else
           {
-              TRACFCOMP(g_trac_scom, "ScomTest::test_translate_scom_EX> [%d] Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
-              TS_FAIL( "ScomTest::test_translate_scom_EX> ERROR : Data miss-match between read and expected data" );
-              fails++;
+              if( l_err )
+              {
+                  TRACFCOMP( g_trac_scom, "ScomTest::test_opModes.. Expected Error log returned> " );
+              }
+              else
+              {
+                  TRACFCOMP( g_trac_scom, "ScomTest::test_opModes.. Expected Error log and did not get one for addr 0x%X " ,test_data[x].addr );
+                  TS_FAIL( "ScomTest::test_opModes> ERROR : Expected Error log and did not get one" );
+                  fails++;
+              }
           }
-
+          delete l_err;
       }
 
-      TRACFCOMP( g_trac_scom, "ScomTest::test_translateScom_EX> %d/%d fails", fails, total );
+      TRACFCOMP( g_trac_scom, "ScomTest::test_opModes> %d/%d fails", fails, total );
 
  }
 
