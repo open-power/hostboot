@@ -164,6 +164,8 @@ foreach my $TempAttr ( @{$fwDfltsXml->{attribute}} )
     $generic_id =~ s/ATTR_//;
     my $found = 0;
 
+    my $persistency = "volatile";
+
     # First, check if attribute definition exists in fapiattrs.xml
     foreach my $FapiAttr ( @{$fapiXml->{attribute}} )
     {
@@ -212,6 +214,13 @@ foreach my $TempAttr ( @{$fwDfltsXml->{attribute}} )
                         }
                     }
                 }
+            }
+
+            # Non-platInit attributes need to be volatile-zeroed
+            #  or xmltohb.pl will throw an error
+            if( !(exists $FapiAttr->{platInit}) )
+            {
+                $persistency = "volatile-zeroed";
             }
 
             last;
@@ -281,8 +290,6 @@ foreach my $TempAttr ( @{$fwDfltsXml->{attribute}} )
             $array .= ",$dimensions[$i]";
         }
     }
-
-    my $persistency = "volatile";
 
     # Create enumeration definition to support generic attribute if FAPI
     # attribute associated with temp FW default uses enum
