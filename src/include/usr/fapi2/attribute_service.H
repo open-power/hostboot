@@ -242,7 +242,7 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
 //------------------------------------------------------------------------------
 #define ATTR_NAME_GETMACRO(ID, PTARGET, VAL) \
     AttrOverrideSync::getAttrOverrideFunc(ID, PTARGET, &VAL)\
-    ? fapi2::FAPI2_RC_SUCCESS : \
+    ? fapi2::ReturnCode() : \
     fapi2::platAttrSvc::platGetTargetName(PTARGET, VAL)
 
 //------------------------------------------------------------------------------
@@ -250,7 +250,7 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
 //------------------------------------------------------------------------------
 #define ATTR_FUNCTIONAL_GETMACRO(ID, PTARGET, VAL) \
     AttrOverrideSync::getAttrOverrideFunc(ID, PTARGET, &VAL)\
-    ? fapi2::FAPI2_RC_SUCCESS : \
+    ? fapi2::ReturnCode() : \
     fapi2::platAttrSvc::platGetFunctional(PTARGET, VAL)
 
 //------------------------------------------------------------------------------
@@ -258,7 +258,7 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
 //------------------------------------------------------------------------------
 #define ATTR_POS_GETMACRO(ID, PTARGET, VAL) \
     AttrOverrideSync::getAttrOverrideFunc(ID, PTARGET, &VAL)\
-    ? fapi2::FAPI2_RC_SUCCESS : \
+    ? fapi2::ReturnCode() : \
     fapi2::platAttrSvc::platGetTargetPos(PTARGET, VAL)
 
 //------------------------------------------------------------------------------
@@ -266,7 +266,7 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
 //------------------------------------------------------------------------------
 #define ATTR_FUSED_CORE_MODE_GETMACRO(ID, PTARGET, VAL) \
     AttrOverrideSync::getAttrOverrideFunc(ID, PTARGET, &VAL)\
-    ? fapi2::FAPI2_RC_SUCCESS : \
+    ? fapi2::ReturnCode() : \
     fapi2::platAttrSvc::platGetFusedCoreMode(VAL)
 
 #endif // ATTRIBUTESERVICE_H_
