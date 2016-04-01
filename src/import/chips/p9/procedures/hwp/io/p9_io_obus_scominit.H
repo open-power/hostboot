@@ -28,10 +28,10 @@
 ///
 //----------------------------------------------------------------------------
 // *HWP HWP Owner       : Chris Steffen <cwsteffen@us.ibm.com>
-// *HWP HWP Backup Owner:
+// *HWP HWP Backup Owner: Gary Peterson <garyp@us.ibm.com>
 // *HWP FW Owner        : Sumit Kumar <sumit_kumar@in.ibm.com>
 // *HWP Team            : IO
-// *HWP Level           : 1
+// *HWP Level           : 2
 // *HWP Consumed by     : FSP:HB
 //----------------------------------------------------------------------------
 
