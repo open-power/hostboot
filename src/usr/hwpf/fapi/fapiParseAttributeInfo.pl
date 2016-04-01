@@ -23,7 +23,7 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-# $Id: fapiParseAttributeInfo.pl,v 1.21 2014/01/20 20:35:30 mjjones Exp $
+# $Id: fapiParseAttributeInfo.pl,v 1.23 2016/03/31 17:21:34 aalugore Exp $
 #
 # Purpose:  This perl script will parse HWP Attribute XML files
 # and add attribute information to a file called fapiAttributeIds.H
@@ -42,7 +42,7 @@
 #                  mjjones   06/10/11  Added "use strict;"
 #                  mjjones   06/23/11  Parse more info
 #                  mjjones   07/05/11  Take output dir as parameter
-#                  mjjones   09/06/11  Remove string/defaultVal support
+#                  mjjones   09/06/11  Remove string/defaultVal support 
 #                  mjjones   10/07/11  Create fapiAttributeService.C
 #                  mjjones   10/17/11  Support enums with values
 #                  mjjones   10/18/11  Support multiple attr files and
@@ -73,6 +73,7 @@
 #                  mjjones   04/11/13  Allow platform to override Chip EC Feature
 #                  mjjones   05/02/13  Allow Chip EC feature to be queried from
 #                                      chiplet
+#                  mklight   09/29/14  Handle initToZero tag
 #
 # End Change Log ******************************************************
 
@@ -532,6 +533,18 @@ foreach my $argnum (1 .. $#ARGV)
         }
 
         #----------------------------------------------------------------------
+        # Print if the attribute is a initToZero attribute
+        #----------------------------------------------------------------------
+        if (exists $attr->{initToZero})
+        {
+            print AIFILE "const bool $attr->{id}_InitToZero = true;\n";
+        }
+        else
+        {
+            print AIFILE "const bool $attr->{id}_InitToZero = false;\n";
+        }
+
+        #----------------------------------------------------------------------
         # Print the value enumeration (if specified) to fapiAttributeIds.H and
         # fapiAttributeEnums.txt
         #----------------------------------------------------------------------
@@ -568,11 +581,8 @@ foreach my $argnum (1 .. $#ARGV)
 
                 # Print the attribute enum to fapiAttrEnumInfo.csv
                 my $attrEnumTxt = "$attr->{id}_${val}\n";
-
-
                 $attrEnumTxt =~ s/ = /,/;
                 print ETFILE $attrEnumTxt;
-
 
                 if ($attr->{valueType} eq 'uint64')
                 {
