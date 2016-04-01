@@ -27,7 +27,7 @@
 ROOTPATH = ../../../../..
 
 # Relative path to root from OBJ_RULE
-OBJ_PLUG_LINK_PATH = ../../..
+OBJ_PLUG_LINK_PATH = ../../../..
 
 OBJ_RULE = obj/modules/prdf/rule
 OBJ_PLUG = obj/genfiles/plugins/prdf
