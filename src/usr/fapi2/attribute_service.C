@@ -387,9 +387,8 @@ ReturnCode platGetTargetPos(const Target<TARGET_TYPE_ALL>& i_pFapiTarget,
 //******************************************************************************
 ReturnCode platGetFusedCoreMode(uint8_t & o_isFused)
 {
-    ReturnCode l_rc;
     o_isFused = TARGETING::is_fused_mode();
-    return l_rc;
+    return fapi2::ReturnCode();
 }
 
 } // End platAttrSvc namespace
