@@ -31,22 +31,9 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_P9_SPR_INVALID_RW_MODE_ACCESS_ERR</rc>
+    <rc>RC_P9_SPR_NAME_MAP_ACCESS_ERR</rc>
     <description>
-      Illegal SPR read/write mode access
-    </description>
-    <ffdc>REGNAME</ffdc>
-    <ffdc>RWFLAG</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_P9_SPR_INVALID_NAME_ACCESS_ERR</rc>
-    <description>
-      Illegal SPR name access
+      Illegal SPR name or read/write mode access
     </description>
     <ffdc>REGNAME</ffdc>
     <callout>
@@ -60,6 +47,18 @@
     <description>
       RAM is not setup as active before doing ram or cleanup
     </description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_RAM_THREAD_NOT_STOP_ERR</rc>
+    <description>
+      The thread to perform ramming is not stopped
+    </description>
+    <ffdc>THREAD</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

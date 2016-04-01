@@ -24,7 +24,7 @@
 //-----------------------------------------------------------------------------------
 // *HWP HWP Owner        : Liu Yang Fan <shliuyf@cn.ibm.com>
 // *HWP HWP Backup Owner : Gou Peng Fei <shgoupf@cn.ibm.com>
-// *HWP FW Owner         : Sachin Gupta <sgupta2m@in.ibm.com>
+// *HWP FW Owner         : Thi Tran <thi@us.ibm.com>
 // *HWP Team             : Perv
 // *HWP Level            : 2
 // *HWP Consumed by      : SBE
@@ -132,11 +132,13 @@ class RamCore
 
     private:
         fapi2::Target<fapi2::TARGET_TYPE_CORE> iv_target;  // core target
-        uint8_t iv_thread;  // thread number
-        bool iv_ram_enable; // ram mode is enabled
-        bool iv_ram_setup;  // ram mode is enabled and register backup is done
-        bool iv_write_gpr0; // putGPR0 operation is executed
-        bool iv_write_gpr1; // putGPR1 operatoin is executed
+        uint8_t iv_thread;     // thread number
+        bool iv_ram_enable;    // ram mode is enabled
+        bool iv_ram_scr0_save; // SCR0 is saved when setup
+        bool iv_ram_setup;     // ram mode is enabled and register backup is done
+        bool iv_ram_err;       // error happened during ram
+        bool iv_write_gpr0;    // putGPR0 operation is executed
+        bool iv_write_gpr1;    // putGPR1 operatoin is executed
         fapi2::buffer<uint64_t> iv_backup_buf0;  // register backup data
         fapi2::buffer<uint64_t> iv_backup_buf1;  // register backup data
         fapi2::buffer<uint64_t> iv_backup_buf2;  // register backup data

@@ -36,26 +36,28 @@
 //-----------------------------------------------------------------------------------
 #include <p9_spr_name_map.H>
 
+std::map<std::string, SPRMapEntry> SPR_MAP;
+bool spr_map_initialized = false;
+
 //-----------------------------------------------------------------------------------
 // Function definitions
 //-----------------------------------------------------------------------------------
-std::map<std::string, SPRMapEntry> spr_map;
-
-fapi2::ReturnCode p9_spr_name_map_init()
+bool p9_spr_name_map_init()
 {
-    FAPI_INF("Start SPR name map init");
-
-    FAPI_ASSERT(spr_map.empty(),
-                fapi2::P9_SPR_NAME_MAP_INIT_ERR(),
-                "SPR name map is not empty when initialization");
-
+    if (spr_map_initialized)
     {
-        LIST_SPR_REG(DO_SPR_MAP)
+        return true;
     }
 
-fapi_try_exit:
-    FAPI_INF("Exiting SPR name map init");
-    return fapi2::current_err;
+    if (!SPR_MAP.empty())
+    {
+        return false;
+    }
+
+    LIST_SPR_REG(DO_SPR_MAP)
+    spr_map_initialized = true;
+
+    return true;
 }
 
 //-----------------------------------------------------------------------------------
@@ -67,33 +69,63 @@ bool p9_spr_name_map_check_flag(unsigned char i_reg_flag, bool i_write)
 }
 
 //-----------------------------------------------------------------------------------
-fapi2::ReturnCode p9_spr_name_map(const std::string i_name, const bool i_write, uint32_t& o_number)
+bool p9_spr_name_map(const std::string i_name, const bool i_write, uint32_t& o_number)
 {
-    FAPI_INF("Start SPR name map");
     bool l_check_flag = false;
 
-    if(spr_map.find(i_name) != spr_map.end())
+    if(SPR_MAP.find(i_name) != SPR_MAP.end())
     {
-        l_check_flag = p9_spr_name_map_check_flag(spr_map[i_name].flag, i_write);
+        l_check_flag = p9_spr_name_map_check_flag(SPR_MAP[i_name].flag, i_write);
 
-        FAPI_ASSERT(l_check_flag,
-                    fapi2::P9_SPR_INVALID_RW_MODE_ACCESS_ERR()
-                    .set_REGNAME(i_name)
-                    .set_RWFLAG(spr_map[i_name].flag),
-                    "SPR RW mode check failed");
-
-        o_number = spr_map[i_name].number;
-    }
-    else
-    {
-        FAPI_ASSERT(false,
-                    fapi2::P9_SPR_INVALID_NAME_ACCESS_ERR()
-                    .set_REGNAME(i_name),
-                    "SPR name is invalid");
+        if(l_check_flag)
+        {
+            o_number = SPR_MAP[i_name].number;
+        }
     }
 
-fapi_try_exit:
-    FAPI_INF("Exiting SPR name map");
-    return fapi2::current_err;
+    return l_check_flag;
 }
+
+//-----------------------------------------------------------------------------------
+bool p9_get_share_type(const std::string i_name, Enum_ShareType& o_share_type)
+{
+    bool l_rc = false;
+
+    if(SPR_MAP.find(i_name) != SPR_MAP.end())
+    {
+        o_share_type = SPR_MAP[i_name].share_type;
+        l_rc = true;
+    }
+
+    return l_rc;
+}
+
+//-----------------------------------------------------------------------------------
+bool p9_get_bit_length(const std::string i_name, uint8_t& o_bit_length)
+{
+    bool l_rc = false;
+
+    if(SPR_MAP.find(i_name) != SPR_MAP.end())
+    {
+        o_bit_length = SPR_MAP[i_name].bit_length;
+        l_rc = true;
+    }
+
+    return l_rc;
+}
+
+//-----------------------------------------------------------------------------------
+bool p9_get_spr_entry(const std::string i_name, SPRMapEntry& o_spr_entry)
+{
+    bool l_rc = false;
+
+    if(SPR_MAP.find(i_name) != SPR_MAP.end())
+    {
+        o_spr_entry = SPR_MAP[i_name];
+        l_rc = true;
+    }
+
+    return l_rc;
+}
+
 

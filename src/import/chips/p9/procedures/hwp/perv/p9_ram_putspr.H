@@ -62,8 +62,8 @@ extern "C" {
                                     const uint8_t i_thread,
                                     const std::string i_name,
                                     const fapi2::buffer<uint64_t>* i_buffer);
+
 } //extern"C"
 
 #endif //_P9_RAM_PUTSPR_H_
-
 

@@ -52,11 +52,11 @@ extern "C" {
 // Function prototype
 //-----------------------------------------------------------------------------------
 /// @brief Implement Put Register(GPR/FPR/VSR) by ramming
-/// @param[in] i_target   => core target
-/// @param[in] i_thread   => thread number
-/// @param[in] i_type     => register access type (REG_GPR/REG_FPR/REG_VSR)
-/// @param[in] i_reg_num  => register number
-/// @param[in] i_buffer   => register value
+/// @param[in] i_target     => core target
+/// @param[in] i_thread     => thread number
+/// @param[in] i_type       => register access type (REG_GPR/REG_FPR/REG_VSR)
+/// @param[in] i_reg_num    => register number
+/// @param[in] i_buffer     => register value
 /// @return FAPI_RC_SUCCESS if the setup completes successfully
 //
     fapi2::ReturnCode p9_ram_putreg(const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
@@ -68,6 +68,7 @@ extern "C" {
 } //extern"C"
 
 #endif //_P9_RAM_PUTREG_H_
+
 
 
 
