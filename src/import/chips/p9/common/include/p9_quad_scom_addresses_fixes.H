@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,5 +52,11 @@ REG64( C_PPM_CGCR_CLEAR                                        , RULL(0x200F0166
        SH_ACS_SCOM1_CLEAR );
 
 REG64( C_PPM_CGCR_OR                                           , RULL(0x200F0167), SH_UNT_C        , SH_ACS_SCOM2_OR  );
+
+FIXREG64( EQ_TPLC20_TR0_TRACE_HI_DATA_REG, RULL(0x10012800), SH_UNT_EQ, SH_ACS_SCOM_RO, RULL(0x10012900));
+FIXREG64( EQ_TPLC20_TR1_TRACE_HI_DATA_REG, RULL(0x10012840), SH_UNT_EQ, SH_ACS_SCOM_RO, RULL(0x10012940));
+FIXREG64( EQ_TPLC21_TR0_TRACE_HI_DATA_REG, RULL(0x10012C00), SH_UNT_EQ, SH_ACS_SCOM_RO, RULL(0x10012D00));
+FIXREG64( EQ_TPLC21_TR1_TRACE_HI_DATA_REG, RULL(0x10012C40), SH_UNT_EQ, SH_ACS_SCOM_RO, RULL(0x10012D40));
+
 
 #endif
