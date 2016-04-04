@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_generic_shmoo.C,v 1.111 2016/03/25 14:15:04 sglancy Exp $
+// $Id: mss_generic_shmoo.C,v 1.112 2016/03/30 13:58:40 sasethur Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_generic_shmoo.C,v $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
@@ -42,6 +42,7 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:   | Comment:
 // --------|--------|---------|--------------------------------------------------
+//   1.112 |preeragh|29-MAR-16| Print Target Info Sanity checks
 //   1.109 |sglancy |08-MAR-16| Fixed compile error
 //   1.108 |sglancy |07-MAR-16| Updated for box shmoo
 //   1.107 |preeragh|13-Nov-15| Run Shmoos Only on Master Ranks 256GB 3DTSV
@@ -616,7 +617,7 @@ extern "C"
         //////////////// changed the check condition ... The error call out need to gard the dimm=l_faulted_dimm(0 or 1) //// port=l_faulted_port(0 or 1) target=i_target ...
         if (l_memory_health)
         {
-            FAPI_INF("generic_shmoo:sanity_check failed !! MCBIST failed on intial run , memory is not in good state needs investigation port=%d rank=%d dimm=%d",
+            FAPI_INF("generic_shmoo:sanity_check failed !! MCBIST failed on %s initial run , memory is not in good state needs investigation port=%d rank=%d dimm=%d",i_target.toEcmdString(),
                      l_faulted_port, l_faulted_rank, l_faulted_dimm);
             const fapi::Target & MBA_CHIPLET = i_target;
             const uint8_t & MBA_PORT_NUMBER = l_faulted_port;
