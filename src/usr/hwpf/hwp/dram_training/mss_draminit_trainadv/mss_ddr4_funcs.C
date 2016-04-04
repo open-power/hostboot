@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_ddr4_funcs.C,v 1.24 2016/03/07 20:24:32 sglancy Exp $
+// $Id: mss_ddr4_funcs.C,v 1.27 2016/04/04 12:38:01 sglancy Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2013
 // *! All Rights Reserved -- Property of IBM
@@ -43,6 +43,9 @@
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
 //         |          |         |
+//  1.27   | 04/04/16 | sglancy | Addressed FW coments
+//  1.26   | 03/25/16 | sglancy | Fixed compile
+//  1.25   | 03/24/16 | sglancy | Fixed to use the proper attributes
 //  1.24   | 03/07/16 | sglancy | Fixed on RCD Parity
 //  1.22   | 02/19/16 | sglancy | Fixed B-side MRS inversion bug
 //  1.21   | 02/12/16 | sglancy | Addressed FW comments
@@ -580,15 +583,15 @@ ReturnCode mss_create_rcd_ddr4(const Target& i_target_mba) {
    rc = FAPI_ATTR_GET(ATTR_EFF_DRAM_WIDTH, &i_target_mba, l_dram_width_u8); if(rc) return rc;
 
    uint64_t l_attr_eff_dimm_cntl_word_x;
-
-   uint8_t l_rcd_cntl_word_1x;
-   uint8_t l_rcd_cntl_word_2x;
-   uint8_t l_rcd_cntl_word_3x;
-   uint8_t l_rcd_cntl_word_7x;
-   uint8_t l_rcd_cntl_word_8x;
-   uint8_t l_rcd_cntl_word_9x;
-   uint8_t l_rcd_cntl_word_Ax;
-   uint8_t l_rcd_cntl_word_Bx;
+   
+   uint8_t l_rcd_cntl_word_1x[PORT_SIZE][MAX_NUM_DIMMS];
+   uint8_t l_rcd_cntl_word_2x[PORT_SIZE][MAX_NUM_DIMMS];
+   uint8_t l_rcd_cntl_word_3x[PORT_SIZE][MAX_NUM_DIMMS];
+   uint8_t l_rcd_cntl_word_7x[PORT_SIZE][MAX_NUM_DIMMS];
+   uint8_t l_rcd_cntl_word_8x[PORT_SIZE][MAX_NUM_DIMMS];
+   uint8_t l_rcd_cntl_word_9x[PORT_SIZE][MAX_NUM_DIMMS];
+   uint8_t l_rcd_cntl_word_Ax[PORT_SIZE][MAX_NUM_DIMMS];
+   uint8_t l_rcd_cntl_word_Bx[PORT_SIZE][MAX_NUM_DIMMS];
 
    //FIXME: ATTR_MCBIST_MAX_TIMEOUT is being used until firmware is ready with a new attribute, ATTR_EFF_LRDIMM_WORD_X (subject to change)
    rc = FAPI_ATTR_GET(ATTR_MCBIST_MAX_TIMEOUT, &i_target_mba, l_attr_eff_dimm_cntl_word_x); if(rc) return rc;
@@ -753,47 +756,47 @@ l_rcd_cntl_word_15 );
          // Set RCD control word x
 
          // RC1x Internal VREF CW
-         l_rcd_cntl_word_1x = 0;
+         l_rcd_cntl_word_1x[l_port][l_dimm] = 0;
 
          // RC2x I2C Bus Control Word
-         l_rcd_cntl_word_2x = 0;
+         l_rcd_cntl_word_2x[l_port][l_dimm] = 0;
 
          // RC3x Fine Granularity  RDIMM Operating Speed Control Word
          if ( l_mss_freq > 1240 && l_mss_freq < 3200 ) {
-            l_rcd_cntl_word_3x = int ((l_mss_freq - 1250) / 20);
+            l_rcd_cntl_word_3x[l_port][l_dimm] = int ((l_mss_freq - 1250) / 20);
          } else {
             FAPI_ERR("Invalid DIMM ATTR_MSS_FREQ = %d on %s!", l_mss_freq, i_target_mba.toEcmdString());
             FAPI_SET_HWP_ERROR(rc, RC_MSS_PLACE_HOLDER_ERROR); return rc;
          }
 
          // RC7x IBT Control Word
-         l_rcd_cntl_word_7x = 0;
+         l_rcd_cntl_word_7x[l_port][l_dimm] = 0;
 
          // RC8x ODT Input Buffer/IBT, QxODT Output Buffer and Timing Control Word
-         l_rcd_cntl_word_8x = 0;
+         l_rcd_cntl_word_8x[l_port][l_dimm] = 0;
 
          // RC9x QxODT[1:0] Write Pattern CW
-         l_rcd_cntl_word_9x = 0;
+         l_rcd_cntl_word_9x[l_port][l_dimm] = 0;
 
          // RCAx QxODT[1:0] Read Pattern CW
-         l_rcd_cntl_word_Ax = 0;
+         l_rcd_cntl_word_Ax[l_port][l_dimm] = 0;
 
          // RCBx IBT and MRS Snoop CW
          if ( l_num_ranks_per_dimm_u8array[l_port][l_dimm] == 4 ) {
-            l_rcd_cntl_word_Bx = 4;
+            l_rcd_cntl_word_Bx[l_port][l_dimm] = 4;
          } else {
-            l_rcd_cntl_word_Bx = 7;
+            l_rcd_cntl_word_Bx[l_port][l_dimm] = 7;
          }
 
 
-         rc_num |= data_buffer_64.insertFromRight(&l_rcd_cntl_word_1x, 0 , 8);
-         rc_num |= data_buffer_64.insertFromRight(&l_rcd_cntl_word_2x, 8 , 8);
-         rc_num |= data_buffer_64.insertFromRight(&l_rcd_cntl_word_3x, 16, 8);
-         rc_num |= data_buffer_64.insertFromRight(&l_rcd_cntl_word_7x, 24, 8);
-         rc_num |= data_buffer_64.insertFromRight(&l_rcd_cntl_word_8x, 32, 8);
-         rc_num |= data_buffer_64.insertFromRight(&l_rcd_cntl_word_9x, 40, 8);
-         rc_num |= data_buffer_64.insertFromRight(&l_rcd_cntl_word_Ax, 48, 8);
-         rc_num |= data_buffer_64.insertFromRight(&l_rcd_cntl_word_Bx, 56, 8);
+         rc_num |= data_buffer_64.insertFromRight(&l_rcd_cntl_word_1x[l_port][l_dimm], 0 , 8);
+         rc_num |= data_buffer_64.insertFromRight(&l_rcd_cntl_word_2x[l_port][l_dimm], 8 , 8);
+         rc_num |= data_buffer_64.insertFromRight(&l_rcd_cntl_word_3x[l_port][l_dimm], 16, 8);
+         rc_num |= data_buffer_64.insertFromRight(&l_rcd_cntl_word_7x[l_port][l_dimm], 24, 8);
+         rc_num |= data_buffer_64.insertFromRight(&l_rcd_cntl_word_8x[l_port][l_dimm], 32, 8);
+         rc_num |= data_buffer_64.insertFromRight(&l_rcd_cntl_word_9x[l_port][l_dimm], 40, 8);
+         rc_num |= data_buffer_64.insertFromRight(&l_rcd_cntl_word_Ax[l_port][l_dimm], 48, 8);
+         rc_num |= data_buffer_64.insertFromRight(&l_rcd_cntl_word_Bx[l_port][l_dimm], 56, 8);
 	 if(rc_num)
          {
              rc.setEcmdError(rc_num);
@@ -808,9 +811,15 @@ l_rcd_cntl_word_15 );
 
    rc = FAPI_ATTR_SET(ATTR_EFF_DIMM_RCD_CNTL_WORD_0_15, &i_target_mba, l_attr_eff_dimm_rcd_cntl_word_0_15); if(rc) return rc;
 
-   //FIXME: ATTR_MCBIST_MAX_TIMEOUT is being used until firmware is ready with a new attribute, ATTR_EFF_LRDIMM_WORD_X (subject to change)
-   rc = FAPI_ATTR_SET(ATTR_MCBIST_MAX_TIMEOUT, &i_target_mba, l_attr_eff_dimm_cntl_word_x); if(rc) return rc;
-
+   rc = FAPI_ATTR_SET(ATTR_EFF_DIMM_DDR4_RC_1x,&i_target_mba,l_rcd_cntl_word_1x); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_EFF_DIMM_DDR4_RC_2x,&i_target_mba,l_rcd_cntl_word_2x); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_EFF_DIMM_DDR4_RC_3x,&i_target_mba,l_rcd_cntl_word_3x); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_EFF_DIMM_DDR4_RC_7x,&i_target_mba,l_rcd_cntl_word_7x); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_EFF_DIMM_DDR4_RC_8x,&i_target_mba,l_rcd_cntl_word_8x); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_EFF_DIMM_DDR4_RC_9x,&i_target_mba,l_rcd_cntl_word_9x); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_EFF_DIMM_DDR4_RC_Ax,&i_target_mba,l_rcd_cntl_word_Ax); if(rc) return rc;
+   rc = FAPI_ATTR_SET(ATTR_EFF_DIMM_DDR4_RC_Bx,&i_target_mba,l_rcd_cntl_word_Bx); if(rc) return rc;
+   
    return rc;
 
 }
@@ -879,13 +888,29 @@ ReturnCode mss_rcd_load_ddr4(
     if(rc) return rc;
 
     uint32_t cntlx_offset[]= {1,2,3,7,8,9,10,11};
+   
+    uint8_t l_rcd_cntl_word_1x[PORT_SIZE][MAX_NUM_DIMMS];
+    uint8_t l_rcd_cntl_word_2x[PORT_SIZE][MAX_NUM_DIMMS];
+    uint8_t l_rcd_cntl_word_3x[PORT_SIZE][MAX_NUM_DIMMS];
+    uint8_t l_rcd_cntl_word_7x[PORT_SIZE][MAX_NUM_DIMMS];
+    uint8_t l_rcd_cntl_word_8x[PORT_SIZE][MAX_NUM_DIMMS];
+    uint8_t l_rcd_cntl_word_9x[PORT_SIZE][MAX_NUM_DIMMS];
+    uint8_t l_rcd_cntl_word_Ax[PORT_SIZE][MAX_NUM_DIMMS];
+    uint8_t l_rcd_cntl_word_Bx[PORT_SIZE][MAX_NUM_DIMMS];
     // Dummy attribute for addtitional cntl words
-    uint64_t rcdx_array;
+    uint64_t rcdx_array=0;
     // uint64_t rcdx_array[2][2];
 
     //FIXME: ATTR_MCBIST_MAX_TIMEOUT is being used until firmware is ready with a new attribute, ATTR_EFF_LRDIMM_WORD_X (subject to change)
-    rc = FAPI_ATTR_GET(ATTR_MCBIST_MAX_TIMEOUT, &i_target, rcdx_array);
-    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_DDR4_RC_1x, &i_target, l_rcd_cntl_word_1x); if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_DDR4_RC_2x, &i_target, l_rcd_cntl_word_2x); if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_DDR4_RC_3x, &i_target, l_rcd_cntl_word_3x); if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_DDR4_RC_7x, &i_target, l_rcd_cntl_word_7x); if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_DDR4_RC_8x, &i_target, l_rcd_cntl_word_8x); if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_DDR4_RC_9x, &i_target, l_rcd_cntl_word_9x); if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_DDR4_RC_Ax, &i_target, l_rcd_cntl_word_Ax); if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_DDR4_RC_Bx, &i_target, l_rcd_cntl_word_Bx); if(rc) return rc;
+    
 
     // Raise CKE high with NOPS, waiting min Reset CKE exit time (tXPR) - 400 cycles
     rc_num = rc_num | address_16.clearBit(0, 16);
@@ -1033,10 +1058,34 @@ ReturnCode mss_rcd_load_ddr4(
                 //rc_num = rc_num | bank_3.clearBit(0, 3);
                 rc_num = rc_num | address_16.clearBit(0, 16);
 
-                //rc_num = rc_num | rcd_cntl_wrd_64.setDoubleWord(0, rcdx_array[i_port_number][dimm_number]);
-                rc_num = rc_num | rcd_cntl_wrd_64.setDoubleWord(0, rcdx_array);
-                rc_num = rc_num | rcd_cntl_wrd_64.extract(rcd_cntl_wrd_8, 8*rcd_number, 8);
-
+                switch(cntlx_offset[rcd_number]) {
+		   case 0x01:
+		      rc_num = rc_num | rcd_cntl_wrd_8.insert(l_rcd_cntl_word_1x[i_port_number][dimm_number],0,8,0);
+		      break;
+		   case 0x02:
+		      rc_num = rc_num | rcd_cntl_wrd_8.insert(l_rcd_cntl_word_2x[i_port_number][dimm_number],0,8,0);
+		      break;
+		   case 0x03:
+		      rc_num = rc_num | rcd_cntl_wrd_8.insert(l_rcd_cntl_word_3x[i_port_number][dimm_number],0,8,0);
+		      break;
+		   case 0x07:
+		      rc_num = rc_num | rcd_cntl_wrd_8.insert(l_rcd_cntl_word_7x[i_port_number][dimm_number],0,8,0);
+		      break;
+		   case 0x08:
+		      rc_num = rc_num | rcd_cntl_wrd_8.insert(l_rcd_cntl_word_8x[i_port_number][dimm_number],0,8,0);
+		      break;
+		   case 0x09:
+		      rc_num = rc_num | rcd_cntl_wrd_8.insert(l_rcd_cntl_word_9x[i_port_number][dimm_number],0,8,0);
+		      break;
+		   case 0x0a:
+		      rc_num = rc_num | rcd_cntl_wrd_8.insert(l_rcd_cntl_word_Ax[i_port_number][dimm_number],0,8,0);
+		      break;
+		   case 0x0b:
+		   default:
+		      rc_num = rc_num | rcd_cntl_wrd_8.insert(l_rcd_cntl_word_Bx[i_port_number][dimm_number],0,8,0);
+		      break;
+		}
+		
                 //control word number code bits A[11:8]
                 rc_num = rc_num | address_16.insert(cntlx_offset[rcd_number], 11, 1, 28);
                 rc_num = rc_num | address_16.insert(cntlx_offset[rcd_number], 10, 1, 29);
