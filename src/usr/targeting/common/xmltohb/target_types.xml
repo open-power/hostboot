@@ -580,6 +580,7 @@
     </attribute>
     <attribute><id>HB_HRMOR_NODAL_BASE</id></attribute>
     <attribute><id>TPM_REQUIRED</id></attribute>
+    <attribute><id>MEMVPD_FREQS_MHZ</id></attribute>
     <!-- Max/min config attributes -->
     <attribute><id>MAX_PROC_CHIPS_PER_NODE</id></attribute>
     <attribute><id>MAX_EXS_PER_PROC_CHIP</id></attribute>
@@ -1475,6 +1476,11 @@
     <attribute><id>EFF_DRAM_TMAW</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>MEM</default></attribute>
     <attribute><id>VMEM_ID</id></attribute>
+    <attribute><id>MEMVPD_POS</id></attribute>
+    <attribute><id>VPD_OVERRIDE_MT</id></attribute>
+    <attribute><id>VPD_OVERRIDE_MT_ENABLE</id></attribute>
+    <attribute><id>VPD_OVERRIDE_MR</id></attribute>
+    <attribute><id>VPD_OVERRIDE_MR_ENABLE</id></attribute>
 </targetType>
 
 <targetType>

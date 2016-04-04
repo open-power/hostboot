@@ -2491,6 +2491,17 @@ sub generate_sys
         <default>$plat</default>
     </attribute>\n";
 
+    #TODO CQ:SW352246 Replace hardcoded defaults with MRW values
+    print "    <attribute>
+      <id>MEMVPD_FREQS_MHZ</id>
+      <default>
+        1866,
+        2133,
+        2400,
+        2667,
+      </default>
+    </attribute>\n";
+
     print "    <!-- System Attributes from MRW -->\n";
     addSysAttrs();
 
@@ -3038,6 +3049,18 @@ sub calcAndAddFapiPos
        <id>FAPI_POS</id>
        <default>$fapiPos</default>
    </attribute>";
+
+        #mcs MEMVPD_POS is the same as FAPI_POS on single node systems.
+        if($type eq "mcs")
+        {
+            # Uncomment to emit debug trace to STDERR
+            # print STDERR "MEMVPD_POS=$fapiPos\n";
+        print "
+   <attribute>
+       <id>MEMVPD_POS</id>
+       <default>$fapiPos</default>
+   </attribute>";
+        }
     }
     else
     {

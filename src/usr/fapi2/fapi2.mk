@@ -29,11 +29,15 @@
 #
 GENPATH?=$(ROOTPATH)/obj/genfiles
 
+HWP_PATH   += ${ROOTPATH}/src/import/chips/p9/procedures
+
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/accessors/
 
 include ${ROOTPATH}/src/build/mkrules/verbose.rules.mk
 define __CLEAN_TARGET
@@ -50,6 +54,13 @@ OBJS += target.o
 OBJS += plat_hw_access.o
 OBJS += plat_spd_access.o
 OBJS += plat_mvpd_access.o
+OBJS += plat_vpd_access.o
+
+
+#Required include before all the procedure.mk are included
+include ${ROOTPATH}/procedure.rules.mk
+
+include ${HWP_PATH}/hwp/accessors/p9_get_mem_vpd_keyword.mk
 
 #EKB Objects (mirrored in src/import)
 OBJS += error_info.o
@@ -113,6 +124,7 @@ include ${ROOTPATH}/src/import/hwpf/fapi2/tools/createIfAttrService.mk
 include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundv_bucket.mk
 include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundv_bucket_attr.mk
 
+VPATH += ${HWP_PATH}/hwp/accessors
 VPATH += ${ROOTPATH}/src/import/hwpf/fapi2/src/
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
 VPATH += ${GENPATH}
