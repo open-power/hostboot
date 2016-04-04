@@ -130,9 +130,7 @@ extern "C"
                         mss::mcbist::write_subtest<TARGET_TYPE_MCBIST>();
                     l_fw_subtest.enable_port(mss::pos(p));
 
-                    // ECC mode off causes compares. Fixed mode data means it will
-                    // compare to the data in the MCBFD#Q registers.
-                    l_fw_subtest.change_ecc_mode(mss::OFF);
+                    // Run in ECC mode
 
                     // HACK: We only need to worry about the DIMM in slot 0 right now
                     l_fw_subtest.enable_dimm(0);
@@ -146,9 +144,7 @@ extern "C"
                         mss::mcbist::read_subtest<TARGET_TYPE_MCBIST>();
                     l_fr_subtest.enable_port(mss::pos(p));
 
-                    // ECC mode off causes compares. Fixed mode data means it will
-                    // compare to the data in the MCBFD#Q registers.
-                    l_fr_subtest.change_ecc_mode(mss::OFF);
+                    // Run in ECC mode
 
                     // HACK: We only need to worry about the DIMM in slot 0 right now
                     l_fr_subtest.enable_dimm(0);
