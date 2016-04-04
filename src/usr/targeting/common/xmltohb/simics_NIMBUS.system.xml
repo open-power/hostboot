@@ -122,6 +122,15 @@
         <id>PROC_EPS_TABLE_TYPE</id>
         <default>EPS_TYPE_LE</default>
     </attribute>
+    <attribute>
+      <id>MEMVPD_FREQS_MHZ</id>
+      <default>
+        1866,
+        2133,
+        2400,
+        2667,
+      </default>
+    </attribute>
 </targetInstance>
 
 <!-- System node 0 -->
@@ -1748,6 +1757,10 @@
         <default>0</default>
     </attribute>
     <attribute>
+        <id>MEMVPD_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>0</default>
     </attribute>
@@ -1785,6 +1798,10 @@
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>MEMVPD_POS</id>
         <default>1</default>
     </attribute>
     <attribute>
@@ -1828,6 +1845,10 @@
         <default>2</default>
     </attribute>
     <attribute>
+        <id>MEMVPD_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>2</default>
     </attribute>
@@ -1868,6 +1889,10 @@
         <default>3</default>
     </attribute>
     <attribute>
+        <id>MEMVPD_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>3</default>
     </attribute>
@@ -1888,10 +1913,10 @@
     <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
 </targetInstance>
 
-<!-- Nimbus n0p0mcs0 MCA units -->
+<!-- Power9 n0p0mcs0 MCA units -->
 <targetInstance>
     <id>sys0node0proc0mcbist0mcs0mca0</id>
-    <type>unit-mca-nimbus</type>
+    <type>unit-mca-power9</type>
     <attribute><id>HUID</id><default>0x00240100</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.mca:k0:n0:s0:p00:c0</default>
@@ -1924,7 +1949,7 @@
 
 <targetInstance>
     <id>sys0node0proc0mcbist0mcs0mca1</id>
-    <type>unit-mca-nimbus</type>
+    <type>unit-mca-power9</type>
     <attribute><id>HUID</id><default>0x00240101</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.mca:k0:n0:s0:p00:c1</default>
@@ -1955,10 +1980,10 @@
     </attribute>
 </targetInstance>
 
-<!-- Nimbus n0p0mcs1 MCA units -->
+<!-- Power9 n0p0mcs1 MCA units -->
 <targetInstance>
     <id>sys0node0proc0mcbist0mcs1mca0</id>
-    <type>unit-mca-nimbus</type>
+    <type>unit-mca-power9</type>
     <attribute><id>HUID</id><default>0x00240102</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.mca:k0:n0:s0:p00:c2</default>
@@ -1991,7 +2016,7 @@
 
 <targetInstance>
     <id>sys0node0proc0mcbist0mcs1mca1</id>
-    <type>unit-mca-nimbus</type>
+    <type>unit-mca-power9</type>
     <attribute><id>HUID</id><default>0x00240103</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.mca:k0:n0:s0:p00:c3</default>
@@ -2022,10 +2047,10 @@
     </attribute>
 </targetInstance>
 
-<!-- Nimbus n0p0mcs2 MCA units -->
+<!-- Power9 n0p0mcs2 MCA units -->
 <targetInstance>
     <id>sys0node0proc0mcbist1mcs0mca0</id>
-    <type>unit-mca-nimbus</type>
+    <type>unit-mca-power9</type>
     <attribute><id>HUID</id><default>0x00240104</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.mca:k0:n0:s0:p00:c4</default>
@@ -2058,7 +2083,7 @@
 
 <targetInstance>
     <id>sys0node0proc0mcbist1mcs0mca1</id>
-    <type>unit-mca-nimbus</type>
+    <type>unit-mca-power9</type>
     <attribute><id>HUID</id><default>0x00240105</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.mca:k0:n0:s0:p00:c5</default>
@@ -2089,10 +2114,10 @@
     </attribute>
 </targetInstance>
 
-<!-- Nimbus n0p0mcs3 MCA units -->
+<!-- Power9 n0p0mcs3 MCA units -->
 <targetInstance>
     <id>sys0node0proc0mcbist1mcs1mca0</id>
-    <type>unit-mca-nimbus</type>
+    <type>unit-mca-power9</type>
     <attribute><id>HUID</id><default>0x00240106</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.mca:k0:n0:s0:p00:c6</default>
@@ -2125,7 +2150,7 @@
 
 <targetInstance>
     <id>sys0node0proc0mcbist1mcs1mca1</id>
-    <type>unit-mca-nimbus</type>
+    <type>unit-mca-power9</type>
     <attribute><id>HUID</id><default>0x00240107</default></attribute>
     <attribute>
         <id>FAPI_NAME</id><default>pu.mca:k0:n0:s0:p00:c7</default>
@@ -6271,190 +6296,6 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc1mcbist0mcs0</id>
-    <type>unit-mcs-nimbus</type>
-    <attribute><id>HUID</id><default>0x000B0004</default></attribute>
-    <attribute>
-        <id>FAPI_NAME</id><default>pu.mcs:k0:n0:s0:p01:c0</default>
-    </attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-1/mcs-0</default>
-    </attribute>
-    <attribute>
-        <id>MRU_ID</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-0</default>
-    </attribute>
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>4</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>4</default>
-    </attribute>
-    <attribute>
-        <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-1/perv-7</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>0</default>
-    </attribute>
-    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
-        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
-        <default>0x0003E10000000000</default>
-    </attribute>
-    <attribute>
-        <id>EI_BUS_TX_MSBSWAP</id>
-        <default>0</default>
-    </attribute>
-    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc1mcbist0mcs1</id>
-    <type>unit-mcs-nimbus</type>
-    <attribute><id>HUID</id><default>0x000B0005</default></attribute>
-    <attribute>
-        <id>FAPI_NAME</id><default>pu.mcs:k0:n0:s0:p01:c1</default>
-    </attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-1/mcs-1</default>
-    </attribute>
-    <attribute>
-        <id>MRU_ID</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-1</default>
-    </attribute>
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>5</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>5</default>
-    </attribute>
-    <attribute>
-        <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-1/perv-7</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>1</default>
-    </attribute>
-    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
-        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
-        <default>0x0003E12000000000</default>
-    </attribute>
-    <attribute>
-        <id>EI_BUS_TX_MSBSWAP</id>
-        <default>0</default>
-    </attribute>
-    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc1mcbist1mcs0</id>
-    <type>unit-mcs-nimbus</type>
-    <attribute><id>HUID</id><default>0x000B0006</default></attribute>
-    <attribute>
-        <id>FAPI_NAME</id><default>pu.mcs:k0:n0:s0:p01:c2</default>
-    </attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-1/mcs-2</default>
-    </attribute>
-    <attribute>
-        <id>MRU_ID</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-2</default>
-    </attribute>
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>6</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>6</default>
-    </attribute>
-    <attribute>
-        <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-1/perv-8</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>2</default>
-    </attribute>
-    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
-        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
-        <default>0x0003E14000000000</default>
-    </attribute>
-    <attribute>
-        <id>EI_BUS_TX_MSBSWAP</id>
-        <default>0</default>
-    </attribute>
-    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
-</targetInstance>
-
-<targetInstance>
-    <id>sys0node0proc1mcbist1mcs1</id>
-    <type>unit-mcs-nimbus</type>
-    <attribute><id>HUID</id><default>0x000B0007</default></attribute>
-    <attribute>
-        <id>FAPI_NAME</id><default>pu.mcs:k0:n0:s0:p01:c3</default>
-    </attribute>
-    <attribute>
-        <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/proc-1/mcs-3</default>
-    </attribute>
-    <attribute>
-        <id>MRU_ID</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-1/mcs-3</default>
-    </attribute>
-    <attribute>
-        <id>ORDINAL_ID</id>
-        <default>7</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>7</default>
-    </attribute>
-    <attribute>
-        <id>PARENT_PERVASIVE</id>
-        <default>physical:sys-0/node-0/proc-1/perv-8</default>
-    </attribute>
-    <attribute>
-        <id>CHIP_UNIT</id>
-        <default>3</default>
-    </attribute>
-    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
-        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
-        <default>0x0003E16000000000</default>
-    </attribute>
-    <attribute>
-        <id>EI_BUS_TX_MSBSWAP</id>
-        <default>0</default>
-    </attribute>
-    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
-</targetInstance>
-
-<targetInstance>
     <id>sys0node0proc1mcbist0</id>
     <type>unit-mcbist-power9</type>
     <attribute><id>HUID</id><default>0x00250002</default></attribute>
@@ -6526,6 +6367,206 @@
         <id>CHIP_UNIT</id>
         <default>1</default>
     </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1mcbist0mcs0</id>
+    <type>unit-mcs-power9</type>
+    <attribute><id>HUID</id><default>0x000B0004</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.mcs:k0:n0:s0:p01:c0</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/mcs-0</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mcs-0</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
+        <id>MEMVPD_POS</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-1/perv-7</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
+        <default>0x0003E10000000000</default>
+    </attribute>
+    <attribute>
+        <id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1mcbist0mcs1</id>
+    <type>unit-mcs-power9</type>
+    <attribute><id>HUID</id><default>0x000B0005</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.mcs:k0:n0:s0:p01:c1</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/mcs-1</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mcs-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>5</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>5</default>
+    </attribute>
+    <attribute>
+        <id>MEMVPD_POS</id>
+        <default>5</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-1/perv-7</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
+        <default>0x0003E12000000000</default>
+    </attribute>
+    <attribute>
+        <id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1mcbist1mcs0</id>
+    <type>unit-mcs-power9</type>
+    <attribute><id>HUID</id><default>0x000B0006</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.mcs:k0:n0:s0:p01:c2</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/mcs-2</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mcs-2</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
+        <id>MEMVPD_POS</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-1/perv-8</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>2</default>
+    </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
+        <default>0x0003E14000000000</default>
+    </attribute>
+    <attribute>
+        <id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc1mcbist1mcs1</id>
+    <type>unit-mcs-power9</type>
+    <attribute><id>HUID</id><default>0x000B0007</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>pu.mcs:k0:n0:s0:p01:c3</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/mcs-3</default>
+    </attribute>
+    <attribute>
+        <id>MRU_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mcs-3</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>7</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>7</default>
+    </attribute>
+    <attribute>
+        <id>MEMVPD_POS</id>
+        <default>7</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-1/perv-8</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>3</default>
+    </attribute>
+    <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
+        <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
+        <default>0x0003E16000000000</default>
+    </attribute>
+    <attribute>
+        <id>EI_BUS_TX_MSBSWAP</id>
+        <default>0</default>
+    </attribute>
+    <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
 </targetInstance>
 
 <targetInstance>
@@ -6640,7 +6681,7 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0proc1mcbist0mcs1mca0</id>
+    <id>sys0node0proc1mcbist0mcs1mca1</id>
     <type>unit-mca-power9</type>
     <attribute><id>HUID</id><default>0x0024000B</default></attribute>
     <attribute>

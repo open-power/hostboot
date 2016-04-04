@@ -35,12 +35,14 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/accessors/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/targeting/common/
 
 # Procedures
 OBJS += p9_sample_procedure.o
 OBJS += p9_hwtests.o
 OBJS += fapi2TestUtils.o
+OBJS += getVpdTest.o
 
 TESTS += ${ROOTPATH}/src/usr/fapi2/test/*Test.H
 TESTS += ${ROOTPATH}/src/usr/fapi2/test/*TestCxx.H

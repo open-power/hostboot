@@ -47,6 +47,9 @@ extern trace_desc_t* g_trac_vpd;
 
 using namespace TARGETING;
 
+//Use this keyword for general testing where just some keyword is needed.
+constexpr uint64_t TSTKEYWD = DVPD::J4;
+
 /**
  * @brief Structure to define record/keyword pairs for DVPD tests.
  */
@@ -61,20 +64,8 @@ struct dvpdTestData
  */
 dvpdTestData dvpdData[] =
 {
-    { DVPD::VEIR, DVPD::pdI },
-    { DVPD::MER0, DVPD::pdI },
-    { DVPD::VSPD, DVPD::pdI },
-    { DVPD::VSPD, DVPD::MT },
-    { DVPD::VSPD, DVPD::MR },
-    { DVPD::VSPD, DVPD::pdA },
-    { DVPD::VSPD, DVPD::EL },
-    { DVPD::VSPD, DVPD::LM },
-    { DVPD::VSPD, DVPD::MW },
-    { DVPD::VSPD, DVPD::MV },
-    { DVPD::VSPD, DVPD::AM },
-    { DVPD::VINI, DVPD::VZ },
-    { DVPD::VSPD, DVPD::MX },
-
+    { DVPD::MEMD, DVPD::MR },
+    { DVPD::MEMD, DVPD::MT },
 };
 
 TARGETING::Target* getFunctionalMcsTarget()
@@ -239,13 +230,13 @@ class DVPDTest: public CxxTest::TestSuite
                 err = deviceRead( theTarget,
                                   testData,
                                   theSize,
-                                  DEVICE_DVPD_ADDRESS(DVPD::VEIR,DVPD::pdI) );
+                                  DEVICE_DVPD_ADDRESS(DVPD::MEMD,TSTKEYWD) );
                 if( err )
                 {
                     fails++;
                     TRACFCOMP( g_trac_vpd,
                                ERR_MRK"testDvpdWrite() - "
-                                     "failure getting size of VEIR/#I, RC=%.4X",
+                                     "failure getting size of MEMD/J4, RC=%.4X",
                                err->reasonCode() );
                     TS_FAIL( "testDvpdWrite() - Failure calling deviceRead!" );
                     errlCommit( err,
@@ -259,13 +250,13 @@ class DVPDTest: public CxxTest::TestSuite
                 err = deviceRead( theTarget,
                                   origData,
                                   theSize,
-                                  DEVICE_DVPD_ADDRESS(DVPD::VEIR,DVPD::pdI) );
+                                  DEVICE_DVPD_ADDRESS(DVPD::MEMD,TSTKEYWD) );
                 if( err )
                 {
                     fails++;
                     TRACFCOMP( g_trac_vpd,
                                ERR_MRK"testDvpdWrite() - "
-                                      "failure reading VEIR/#I, RC=%.4X",
+                                      "failure reading MEMD/J4, RC=%.4X",
                                err->reasonCode() );
                     TS_FAIL( "testDvpdWrite() - Failure calling deviceRead!" );
                     errlCommit( err,
@@ -287,13 +278,13 @@ class DVPDTest: public CxxTest::TestSuite
                 err = deviceWrite( theTarget,
                                    testData,
                                    theSize,
-                                   DEVICE_DVPD_ADDRESS(DVPD::VEIR,DVPD::pdI) );
+                                   DEVICE_DVPD_ADDRESS(DVPD::MEMD,TSTKEYWD) );
                 if( err )
                 {
                     fails++;
                     TRACFCOMP( g_trac_vpd,
                                ERR_MRK"testDvpdWrite() - "
-                                      "failure writing VEIR/#I, RC=%.4X",
+                                      "failure writing MEMD/J4, RC=%.4X",
                                err->reasonCode() );
                     TS_FAIL( "testDvpdWrite() - Failure calling deviceWrite!" );
                     errlCommit( err,
@@ -307,13 +298,13 @@ class DVPDTest: public CxxTest::TestSuite
                 err = deviceRead( theTarget,
                                   verifyData,
                                   theSize,
-                                  DEVICE_DVPD_ADDRESS(DVPD::VEIR,DVPD::pdI) );
+                                  DEVICE_DVPD_ADDRESS(DVPD::MEMD,TSTKEYWD) );
                 if( err )
                 {
                     fails++;
                     TRACFCOMP( g_trac_vpd,
                                ERR_MRK"testDvpdWrite() - "
-                                   "failure reading VEIR/#I to verify, RC=%.4X",
+                                   "failure reading MEMD/J4 to verify, RC=%.4X",
                                err->reasonCode() );
                     TS_FAIL( "testDvpdWrite() - Failure calling deviceRead!" );
                     errlCommit( err,
@@ -339,13 +330,13 @@ class DVPDTest: public CxxTest::TestSuite
                 err = deviceWrite( theTarget,
                                    origData,
                                    theSize,
-                                   DEVICE_DVPD_ADDRESS(DVPD::VEIR,DVPD::pdI) );
+                                   DEVICE_DVPD_ADDRESS(DVPD::MEMD,TSTKEYWD) );
                 if( err )
                 {
                     fails++;
                     TRACFCOMP( g_trac_vpd,
                                ERR_MRK"testDvpdWrite() - "
-                     "failure writing original data back into VEIR/#I, RC=%.4X",
+                     "failure writing original data back into MEMD/J4, RC=%.4X",
                                err->reasonCode() );
                     TS_FAIL( "testDvpdWrite() - Failure calling deviceRead!" );
                     errlCommit( err,
@@ -416,7 +407,7 @@ class DVPDTest: public CxxTest::TestSuite
                                   theData,
                                   theSize,
                                   DEVICE_DVPD_ADDRESS( DVPD::DVPD_LAST_RECORD,
-                                                       DVPD::pdI ) );
+                                                       TSTKEYWD ) );
 
                 if( NULL == err )
                 {
@@ -474,7 +465,7 @@ class DVPDTest: public CxxTest::TestSuite
                                   theData,
                                   theSize,
                                   DEVICE_DVPD_ADDRESS( DVPD::DVPD_TEST_RECORD,
-                                                       DVPD::pdI ) );
+                                                       TSTKEYWD ) );
 
                 if( NULL == err )
                 {
@@ -493,7 +484,6 @@ class DVPDTest: public CxxTest::TestSuite
                     theData = NULL;
                 }
             } while( 0 );
-
             TRACFCOMP( g_trac_vpd,
                        "testDvpdMissingRecord - %d/%d fails",
                        fails, cmds );
@@ -568,7 +558,6 @@ class DVPDTest: public CxxTest::TestSuite
 
             TRACFCOMP( g_trac_vpd,
                        ENTER_MRK"testDvpdInvalidKeyword()" );
-
             do
             {
                 TARGETING::Target * theTarget = getFunctionalMcsTarget();
@@ -585,7 +574,7 @@ class DVPDTest: public CxxTest::TestSuite
                 err = deviceRead(theTarget,
                                  theData,
                                  theSize,
-                                 DEVICE_DVPD_ADDRESS(DVPD::VEIR,
+                                 DEVICE_DVPD_ADDRESS(DVPD::MEMD,
                                                      DVPD::DVPD_LAST_KEYWORD));
 
                 if( NULL == err )
@@ -621,7 +610,7 @@ class DVPDTest: public CxxTest::TestSuite
          */
         void testDvpdInvalidBufferSize ( void )
         {
-            errlHndl_t err = NULL;
+           errlHndl_t err = NULL;
             uint64_t cmds = 0x0;
             uint64_t fails = 0x0;
 
@@ -644,8 +633,8 @@ class DVPDTest: public CxxTest::TestSuite
                 err = deviceRead( theTarget,
                                   theData,
                                   theSize,
-                                  DEVICE_DVPD_ADDRESS( DVPD::VEIR,
-                                                       DVPD::pdI ) );
+                                  DEVICE_DVPD_ADDRESS( DVPD::MEMD,
+                                                       TSTKEYWD ) );
 
                 if( NULL == err )
                 {
