@@ -31,12 +31,30 @@
 <attributes>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_CORE_TRACE_SCOMABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Returns true if the core trace arrays are dumpable via SCOM.
+      Nimbus EC 0x20 or greater
+    </description>
+    <chipEcFeature>
+      <chip>
+	<name>ENUM_ATTR_NAME_NIMBUS</name>
+	<ec>
+	  <value>0x20</value>
+	  <test>GREATER_THAN_OR_EQUAL</test>
+	</ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_TEST1</id>
     <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>
       Returns if a chip contains the TEST1 feature. True if either:
       Centaur EC 10
-      Venice EC greater than 30
+      Cumulus EC greater than 30
     </description>
     <chipEcFeature>
       <chip>
