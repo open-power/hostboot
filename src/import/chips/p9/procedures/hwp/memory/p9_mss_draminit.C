@@ -31,9 +31,11 @@
 #include <mss.H>
 
 #include <p9_mss_draminit.H>
+#include <lib/utils/count_dimm.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
+using fapi2::TARGET_TYPE_DIMM;
 using fapi2::FAPI2_RC_SUCCESS;
 
 extern "C"
@@ -62,7 +64,14 @@ extern "C"
         // If we don't have any ports, lets go.
         if (l_mca.size() == 0)
         {
-            FAPI_INF("No ports? %s", mss::c_str(i_target));
+            FAPI_INF("++++ No ports? %s ++++", mss::c_str(i_target));
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        // If we don't have any DIMM, lets go.
+        if (mss::count_dimm(i_target) == 0)
+        {
+            FAPI_INF("++++ NO DIMM on %s ++++", mss::c_str(i_target));
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
