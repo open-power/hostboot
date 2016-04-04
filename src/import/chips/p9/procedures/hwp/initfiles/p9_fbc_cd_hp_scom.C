@@ -20,9 +20,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <fapi2.H>
-#include <attribute_ids.H>
-#include <target_types.H>
-#include <fapi2_attribute_service.H>
+
 using namespace fapi2;
 
 
@@ -33,11 +31,10 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
 
     do
     {
-
+        fapi2::buffer<uint64_t> l_scom_buffer;
 
     }
-    while(0);
+    while (0);
 
     return l_rc;
 }
-
