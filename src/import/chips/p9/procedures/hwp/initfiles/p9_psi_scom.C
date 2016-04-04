@@ -20,16 +20,14 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <fapi2.H>
-#include <attribute_ids.H>
-#include <target_types.H>
-#include <fapi2_attribute_service.H>
+
 using namespace fapi2;
 
-#define LITERAL_BRIDGE_PSIHB_PSIHB_ERROR_MASK_REG_0b00000    0b00000
-#define LITERAL_BRIDGE_PSIHB_PSIHB_ERROR_MASK_REG_0x000    0x000
-#define LITERAL_BRIDGE_PSIHB_PSIHB_FIR_ACTION0_REG_0b00000000000000000000000000000    0b00000000000000000000000000000
-#define LITERAL_BRIDGE_PSIHB_PSIHB_FIR_ACTION1_REG_0b11000110001010010000000000000    0b11000110001010010000000000000
-#define LITERAL_BRIDGE_PSIHB_PSIHB_FIR_MASK_REG_0b00111001000000101111111111111    0b00111001000000101111111111111
+constexpr auto literal_0b00111001000000101111111111111 = 0b00111001000000101111111111111;
+constexpr auto literal_0b00000000000000000000000000000 = 0b00000000000000000000000000000;
+constexpr auto literal_0b11000110001010010000000000000 = 0b11000110001010010000000000000;
+constexpr auto literal_0x000 = 0x000;
+constexpr auto literal_0b00000 = 0b00000;
 
 fapi2::ReturnCode p9_psi_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT0)
 {
@@ -37,97 +35,86 @@ fapi2::ReturnCode p9_psi_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
 
     do
     {
-        fapi2::buffer<uint64_t> BRIDGE_PSIHB_PSIHB_ERROR_MASK_REG_scom0;
-        l_rc = fapi2::getScom( TGT0, 0x501290full, BRIDGE_PSIHB_PSIHB_ERROR_MASK_REG_scom0 );
-
-        if (l_rc)
+        fapi2::buffer<uint64_t> l_scom_buffer;
         {
-            FAPI_ERR("ERROR executing: getScom (0x501290f)");
-            break;
+            l_rc = fapi2::getScom( TGT0, 0x5012903ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5012903ull)");
+                break;
+            }
+
+            l_scom_buffer.insert<uint64_t> (literal_0b00111001000000101111111111111, 0, 29, 18 );
+            l_rc = fapi2::putScom(TGT0, 0x5012903ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5012903ull)");
+                break;
+            }
         }
-
-        BRIDGE_PSIHB_PSIHB_ERROR_MASK_REG_scom0.insert<uint64_t> (LITERAL_BRIDGE_PSIHB_PSIHB_ERROR_MASK_REG_0x000, 16, 12, 27 );
-        BRIDGE_PSIHB_PSIHB_ERROR_MASK_REG_scom0.insert<uint64_t> (LITERAL_BRIDGE_PSIHB_PSIHB_ERROR_MASK_REG_0x000, 32, 12, 43 );
-        BRIDGE_PSIHB_PSIHB_ERROR_MASK_REG_scom0.insert<uint64_t> (LITERAL_BRIDGE_PSIHB_PSIHB_ERROR_MASK_REG_0x000, 48, 5, 59 );
-        BRIDGE_PSIHB_PSIHB_ERROR_MASK_REG_scom0.insert<uint64_t> (LITERAL_BRIDGE_PSIHB_PSIHB_ERROR_MASK_REG_0b00000, 16, 12,
-                27 );
-        BRIDGE_PSIHB_PSIHB_ERROR_MASK_REG_scom0.insert<uint64_t> (LITERAL_BRIDGE_PSIHB_PSIHB_ERROR_MASK_REG_0b00000, 32, 12,
-                43 );
-        BRIDGE_PSIHB_PSIHB_ERROR_MASK_REG_scom0.insert<uint64_t> (LITERAL_BRIDGE_PSIHB_PSIHB_ERROR_MASK_REG_0b00000, 48, 5,
-                59 );
-
-        fapi2::buffer<uint64_t> BRIDGE_PSIHB_PSIHB_FIR_ACTION0_REG_scom0;
-        l_rc = fapi2::getScom( TGT0, 0x5012906ull, BRIDGE_PSIHB_PSIHB_FIR_ACTION0_REG_scom0 );
-
-        if (l_rc)
         {
-            FAPI_ERR("ERROR executing: getScom (0x5012906)");
-            break;
+            l_rc = fapi2::getScom( TGT0, 0x5012906ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5012906ull)");
+                break;
+            }
+
+            l_scom_buffer.insert<uint64_t> (literal_0b00000000000000000000000000000, 0, 29, 14 );
+            l_rc = fapi2::putScom(TGT0, 0x5012906ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5012906ull)");
+                break;
+            }
         }
-
-        BRIDGE_PSIHB_PSIHB_FIR_ACTION0_REG_scom0.insert<uint64_t>
-        (LITERAL_BRIDGE_PSIHB_PSIHB_FIR_ACTION0_REG_0b00000000000000000000000000000, 0, 29, 14 );
-
-        fapi2::buffer<uint64_t> BRIDGE_PSIHB_PSIHB_FIR_ACTION1_REG_scom0;
-        l_rc = fapi2::getScom( TGT0, 0x5012907ull, BRIDGE_PSIHB_PSIHB_FIR_ACTION1_REG_scom0 );
-
-        if (l_rc)
         {
-            FAPI_ERR("ERROR executing: getScom (0x5012907)");
-            break;
+            l_rc = fapi2::getScom( TGT0, 0x5012907ull, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x5012907ull)");
+                break;
+            }
+
+            l_scom_buffer.insert<uint64_t> (literal_0b11000110001010010000000000000, 0, 29, 14 );
+            l_rc = fapi2::putScom(TGT0, 0x5012907ull, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x5012907ull)");
+                break;
+            }
         }
-
-        BRIDGE_PSIHB_PSIHB_FIR_ACTION1_REG_scom0.insert<uint64_t>
-        (LITERAL_BRIDGE_PSIHB_PSIHB_FIR_ACTION1_REG_0b11000110001010010000000000000, 0, 29, 14 );
-
-        fapi2::buffer<uint64_t> BRIDGE_PSIHB_PSIHB_FIR_MASK_REG_scom0;
-        l_rc = fapi2::getScom( TGT0, 0x5012903ull, BRIDGE_PSIHB_PSIHB_FIR_MASK_REG_scom0 );
-
-        if (l_rc)
         {
-            FAPI_ERR("ERROR executing: getScom (0x5012903)");
-            break;
+            l_rc = fapi2::getScom( TGT0, 0x501290full, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x501290full)");
+                break;
+            }
+
+            l_scom_buffer.insert<uint64_t> (literal_0x000, 16, 12, 27 );
+            l_scom_buffer.insert<uint64_t> (literal_0x000, 32, 12, 43 );
+            l_scom_buffer.insert<uint64_t> (literal_0x000, 48, 5, 59 );
+            l_scom_buffer.insert<uint64_t> (literal_0b00000, 16, 12, 27 );
+            l_scom_buffer.insert<uint64_t> (literal_0b00000, 32, 12, 43 );
+            l_scom_buffer.insert<uint64_t> (literal_0b00000, 48, 5, 59 );
+            l_rc = fapi2::putScom(TGT0, 0x501290full, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x501290full)");
+                break;
+            }
         }
-
-        BRIDGE_PSIHB_PSIHB_FIR_MASK_REG_scom0.insert<uint64_t>
-        (LITERAL_BRIDGE_PSIHB_PSIHB_FIR_MASK_REG_0b00111001000000101111111111111, 0, 29, 18 );
-
-
-        l_rc = fapi2::putScom( TGT0, 0x5012903ull, BRIDGE_PSIHB_PSIHB_FIR_MASK_REG_scom0 );
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: putScom (0x5012903)");
-            break;
-        }
-
-        l_rc = fapi2::putScom( TGT0, 0x5012906ull, BRIDGE_PSIHB_PSIHB_FIR_ACTION0_REG_scom0 );
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: putScom (0x5012906)");
-            break;
-        }
-
-        l_rc = fapi2::putScom( TGT0, 0x5012907ull, BRIDGE_PSIHB_PSIHB_FIR_ACTION1_REG_scom0 );
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: putScom (0x5012907)");
-            break;
-        }
-
-        l_rc = fapi2::putScom( TGT0, 0x501290full, BRIDGE_PSIHB_PSIHB_ERROR_MASK_REG_scom0 );
-
-        if (l_rc)
-        {
-            FAPI_ERR("ERROR executing: putScom (0x501290f)");
-            break;
-        }
-
     }
-    while(0);
+    while (0);
 
     return l_rc;
 }
-
