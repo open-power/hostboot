@@ -19916,9 +19916,26 @@ DEPRECATED!!!!
     </uint32_t>
   </simpleType>
   <persistency>volatile-zeroed</persistency>
+  <writeable/>
   <readable/>
   <hwpfToHbAttrMap>
     <id>ATTR_CLOCK_PLL_MUX</id>
+    <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+  <id>CLOCK_PLL_MUX0</id>
+  <description>Clock Mux#0 settings</description>
+  <simpleType>
+    <uint8_t>
+    </uint8_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <writeable/>
+  <readable/>
+  <hwpfToHbAttrMap>
+    <id>ATTR_CLOCK_PLL_MUX0</id>
     <macro>DIRECT</macro>
   </hwpfToHbAttrMap>
 </attribute>

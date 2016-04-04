@@ -2185,6 +2185,8 @@
     <attribute><id>VCS_BOOT_VOLTAGE</id></attribute>
     <attribute><id>VDD_BOOT_VOLTAGE</id></attribute>
     <attribute><id>CHIP_POS</id></attribute>
+    <attribute><id>CLOCK_PLL_MUX</id></attribute>
+    <attribute><id>CLOCK_PLL_MUX0</id></attribute>
 </targetType>
 
 <!-- chip-processor-nimbus -->
