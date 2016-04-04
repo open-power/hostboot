@@ -52,7 +52,7 @@ my $CMVC_FILES = "src/hbfw/img/hostboot.bin ".
                  "src/hbfw/fsp.tar ".
                  "src/hbfw/makefile ".
                  "src/hbfw/releaseNotes.html ".
-                 "src/hbfw/simics.tar";
+                 "src/hbfw/simics.tar ";
 # Directory to look up latest release tag for a specific release
 my $HOSTBOOT_GSA_HOME = "/gsa/ausgsa/home/h/o/hostboot";
 my $LATEST_BUILD_DIR = "$HOSTBOOT_GSA_HOME/auto-hb-release/latest-builds";
@@ -423,7 +423,7 @@ sub execute_pre_release
 
     if($release =~ m/fips9/)
     {
-        $CMVC_FILES .= "src/hbfw/img/hostboot_bootloader.bin";
+        $CMVC_FILES .= "src/hbfw/img/hostboot_bootloader.bin ";
     }
 
     # CMVC open feature
