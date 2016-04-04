@@ -198,9 +198,9 @@ fi
 waitkb
 
 
-##  $$TODO Need to wait here for hostboot to finish
-##  for now just sleep for 20 seconds
-## sleep 20
+##  We need to be careful to get hostboot's HRMOR so
+##  allow SBE to boot and for hostboot to get started
+sleep 20
 
 
 waitkb
@@ -212,15 +212,8 @@ waitkb
 ##      V,000292c8,00000000,00000008,CxxTest::warnings
 ##      V,000292d0,00000000,00000008,CxxTest::failedtests
 
-##      V,00017888,00000000,00004000,kernel_printk_buffer
-
-
 ##  grep for the globals
 echo "find totaltests, etc in ${SBXHOME}/${HBICORE_TEST_SYMS}"
-printk_buffer_addr=`grep "kernel_printk_buffer" \
-        ${SBXHOME}/${HBICORE_TEST_SYMS} | awk '{split($0,a,","); print a[2]}'`
-printk_buffer_size=`grep "kernel_printk_buffer" \
-        ${SBXHOME}/${HBICORE_TEST_SYMS} | awk '{split($0,a,","); print a[4]}'`
 totaltests_addr=`grep "CxxTest::g_TotalTests" \
         ${SBXHOME}/${HBICORE_TEST_SYMS} | awk '{split($0,a,","); print a[2]}'`
 failedtests_addr=`grep "CxxTest::g_FailedTests" \
@@ -238,9 +231,6 @@ shutdown_status=`grep "CpuManager::cv_shutdown_status" \
 
 #Adjust addresses for HRMOR
 HRMOR=`autosim $NOWIN --simcmd   "python \"getHRMOR()\""| tr -d '\n\r'`
-
-temp=$(($HRMOR + 0x$printk_buffer_addr))
-printk_buffer_addr=`echo "obase=16; $temp" | bc`
 
 temp=$(($HRMOR + 0x$totaltests_addr))
 totaltests_addr=`echo "obase=16; $temp" | bc`
@@ -376,7 +366,7 @@ tracecalls=`cat $SBXHOME/tracecalls.log |  awk '/0x/ {print strtonum($1)}'`
 
 
 echo "====> dump printk buffer..."
-autosim $NOWIN --simcmd "(system_cmp0.phys_mem)->map[0][1]->image.save \"${SBXHOME}/testprintk.log\" 0x$printk_buffer_addr 0x$printk_buffer_size"  1> /dev/null 2> /dev/null
+autosim $NOWIN --simcmd   "pipe hb-printk \"cat > ${SBXHOME}/testprintk.log \"" --timeout 300
 if [ $? -ne 0 ] ; then
 echo "ERROR: Unable to run $?"
        stopsim

@@ -31,16 +31,6 @@ foreach $cc in (get-object-list p9_proc) {
     #echo "-Trigger power on"
     @mp="%s.proc_chip"%simenv.cc
     @SIM_get_interface(SIM_get_object(mp),"signal").signal_raise()
-
-    # @todo-RTC:130184 Add real SBE behavior
-    #Trigger the flush, load, and SBE start
-    #echo "-Trigger SBE"
-    #($cc).proc_lbus_map.write 0x28E0 0x0000F3FF  #NonFunc EX (only 4,5 is good)
-    #($cc).proc_lbus_map.write 0x2848 0x00000FFF  #GP3 0x2812 (flush)
-    #($cc).proc_lbus_map.write 0x2870 0xB0000000  #SBE Vital 0x281C (load)
-    #($cc).proc_lbus_map.write 0x2870 0x30000000  #SBE Vital 0x281C (start)
-    # workaround to trigger sbe start
-    ($cc).proc_chip.invoke parallel_store STARTSBEREGS 0 "80000000" 32
 }
 
 system_cmp0.cpu0_0_00_0.enable
@@ -57,5 +47,7 @@ try {
 #Enable SBE
 ###################################
 echo "Enable the SBE"
-($hb_masterproc).sbe.mibo_space.write 0xc0000160 0x8000100000000000 8 -b
-($hb_masterproc).sbe.mibo_space.write 0xc00e0000 0x5000000000000000 8 -b
+# Set mailbox scratch registers so that the SBE starts in plck mode
+($hb_masterproc).proc_chip.invoke parallel_store SCOM 0x5003F "20000000_00000000" 64
+($hb_masterproc).proc_chip.invoke parallel_store SCOM 0x5003A "00000000_00000000" 64
+($hb_masterproc).proc_chip.invoke parallel_store FSIMBOX 0x01 "80000000" 32
