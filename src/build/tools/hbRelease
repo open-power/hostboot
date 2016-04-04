@@ -421,11 +421,10 @@ sub execute_pre_release
     die "Missing level" if ($level eq "");
     die "Missing check in directory" if ($checkInDir eq "");
 
-    #TODO enable this when the bootloader.bin is in CMVC
-    #if($release =~ m/fips9/)
-    #{
-    #$CMVC_FILES .= "src/hbfw/img/bootloader.bin";
-    #}
+    if($release =~ m/fips9/)
+    {
+        $CMVC_FILES .= "src/hbfw/img/hostboot_bootloader.bin";
+    }
 
     # CMVC open feature
     my $open_feature = "Feature -open -component $globals{component}";
@@ -455,6 +454,9 @@ sub execute_pre_release
         or die("Cannot open: $featureFile: $!");
     print CMVC_FEATURE "FEATURE=$feature";
     close(CMVC_FEATURE);
+
+    #Complete Fix Records
+    run_system_command("Fix -complete -feature $feature -release $release -component esw_hbfw -verbose");
 }
 
 sub execute_post_release
@@ -478,9 +480,6 @@ sub execute_post_release
     $released = <FILE>;
     close FILE;
     chomp($released);
-
-    #complete fix records
-    run_system_command("Fix -complete -feature $feature -release $release -component esw_hbfw -verbose");
 
     #Integrate the track
     run_system_command("Track -integrate -feature $feature -release $release -verbose");
