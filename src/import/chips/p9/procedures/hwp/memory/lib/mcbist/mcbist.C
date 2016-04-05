@@ -39,6 +39,15 @@ namespace mss
 namespace mcbist
 {
 
+const std::pair<uint64_t, uint64_t> mcbistTraits<fapi2::TARGET_TYPE_MCBIST>::address_pairs[] =
+{
+    { START_ADDRESS_0, END_ADDRESS_0 },
+    { START_ADDRESS_1, END_ADDRESS_1 },
+    { START_ADDRESS_2, END_ADDRESS_2 },
+    { START_ADDRESS_3, END_ADDRESS_3 },
+};
+
+
 ///
 /// @brief Load a set of MCBIST subtests in to the MCBIST registers
 /// @tparam T, the fapi2::TargetType - derived
@@ -140,6 +149,12 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
 
     fapi2::buffer<uint64_t> l_status;
 
+    // A small vector of addresses to poll during the polling loop
+    static const std::vector<mss::poll_probe<fapi2::TARGET_TYPE_MCBIST>> l_probes =
+    {
+        {i_target, "mcbist current address", MCBIST_MCBMCATQ},
+    };
+
     // Slam the subtests in to the mcbist registers
     FAPI_TRY( load_mcbmr(i_target, i_program) );
 
@@ -169,7 +184,8 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
         FAPI_DBG("mcbist statq 0x%llx, remaining: %d", stat_reg, poll_remaining);
         l_status = stat_reg;
         return l_status.getBit<TT::MCBIST_IN_PROGRESS>() != 1;
-    });
+    },
+    l_probes);
 
     // Check to see if we're still in progress - meaning we timed out.
     FAPI_ASSERT((l_status & l_in_progress) != l_in_progress,

@@ -80,6 +80,7 @@ enum times
     DELAY_100NS             = 100,      ///< general purpose 100 ns delay for HW mode
     DELAY_1US               = 1000,     ///< general purpose 1 usec delay for HW mode
     DELAY_100US             = 100000,   ///< general purpose 100 usec delay for HW mode
+    DELAY_1MS               = 1000000,  ///< general purpose 1 ms delay for HW mode
 
     // From the DDR4spec 2400 speed - need to be changed to read attributes. BRS
     tWLO = 10,

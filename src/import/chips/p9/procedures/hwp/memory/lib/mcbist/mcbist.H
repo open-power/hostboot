@@ -96,6 +96,10 @@ class mcbistTraits<fapi2::TARGET_TYPE_MCBIST>
         static const uint64_t END_ADDRESS_2 = MCBIST_MCBEA2Q;
         static const uint64_t END_ADDRESS_3 = MCBIST_MCBEA3Q;
 
+        // Sometimes we want to access the start/end address registers based off
+        // of an index, like master rank. This allows us to do that.
+        static const std::pair<uint64_t, uint64_t> address_pairs[];
+
         enum
         {
             // Subtest control bits. These are the same in all '16 bit subtest' field
@@ -478,16 +482,17 @@ class program
             // Enable the maintenance mode addressing
             change_maint_address_mode(mss::ON);
 
-            // Enable 64b lengths, required in maint mode.
+            // Enable 64B lengths by default. Commands which need 128B (scrub, steer, alter, display)
+            // can change this to 128B (mss::OFF).
             change_len64(mss::ON);
 
-            // Turn on counting mode for all address configs
-            iv_addr_gen.insertFromRight<TT::ADDR_COUNTER_MODE, TT::ADDR_COUNTER_MODE_LEN>(0b1111);
+            // Turn off counting mode for all address configs
+            iv_addr_gen.insertFromRight<TT::ADDR_COUNTER_MODE, TT::ADDR_COUNTER_MODE_LEN>(0b0000);
         }
 
         ///
-        /// @brief Change the mcbist 64/128 bit control
-        /// @param[in] i_state mss::ON if you want 64b,mss::OFF if you want 128b
+        /// @brief Change the mcbist 64/128 byte control
+        /// @param[in] i_state mss::ON if you want 64B, mss::OFF if you want 128B
         /// @return void
         ///
         inline void change_len64( const mss::states i_state )
@@ -900,11 +905,35 @@ inline fapi2::ReturnCode load_addr_gen( const fapi2::Target<T>& i_target, const 
 }
 
 ///
+/// @brief Configure address range based on index
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
+/// @param[in] i_target the target to effect
+/// @param[in] i_start 64b right-aligned address
+/// @param[in] i_end 64b right-aligned address
+/// @param[in] i_index which start/end pair to effect
+/// @return FAPI2_RC_SUCCSS iff ok
+/// @note Only the right-most 37 bits of the start/end are used.
+/// @warn if address counting mode is enabled in the MCBIST program, these bits are start, len
+///
+template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
+inline fapi2::ReturnCode config_address_range( const fapi2::Target<T>& i_target, const uint64_t i_start,
+        const uint64_t i_end, const uint64_t i_index )
+{
+    FAPI_DBG("config MCBIST address range %d start: 0x%016lx (0x%016lx), end/len 0x%016lx (0x%016lx)",
+             i_index, i_start, (i_start << 26), i_end, (i_end << 26));
+    FAPI_TRY( mss::putScom(i_target, TT::address_pairs[i_index].first, i_start << 26) );
+    FAPI_TRY( mss::putScom(i_target, TT::address_pairs[i_index].second, i_end << 26) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Configure address range 0
 /// @tparam T the fapi2::TargetType - derived
 /// @tparam TT the mcbistTraits associated with T - derived
 /// @param[in] i_target the target to effect
-/// @param[in] i_program the mcbist::program
 /// @param[in] i_start 64b right-aligned address
 /// @param[in] i_end 64b right-aligned address
 /// @return FAPI2_RC_SUCCSS iff ok
@@ -915,13 +944,7 @@ template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
 inline fapi2::ReturnCode config_address_range0( const fapi2::Target<T>& i_target, const uint64_t i_start,
         const uint64_t i_end )
 {
-    FAPI_DBG("config MCBIST address range 0 start: 0x%016lx (0x%016lx), end/len 0x%016lx (0x%016lx)",
-             i_start, (i_start << 26), i_end, (i_end << 26));
-    FAPI_TRY( mss::putScom(i_target, TT::START_ADDRESS_0, i_start << 26) );
-    FAPI_TRY( mss::putScom(i_target, TT::END_ADDRESS_0, i_end << 26) );
-
-fapi_try_exit:
-    return fapi2::current_err;
+    return config_address_range(i_target, i_start, i_end, 0);
 }
 
 
@@ -930,7 +953,6 @@ fapi_try_exit:
 /// @tparam T the fapi2::TargetType - derived
 /// @tparam TT the mcbistTraits associated with T - derived
 /// @param[in] i_target the target to effect
-/// @param[in] i_program the mcbist::program
 /// @param[in] i_start 64b right-aligned address
 /// @param[in] i_end 64b right-aligned address
 /// @return FAPI2_RC_SUCCSS iff ok
@@ -941,13 +963,7 @@ template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
 inline fapi2::ReturnCode config_address_range1( const fapi2::Target<T>& i_target, const uint64_t i_start,
         const uint64_t i_end )
 {
-    FAPI_DBG("config MCBIST address range 1 start: 0x%016lx (0x%016lx), end/len 0x%016lx (0x%016lx)",
-             i_start, (i_start << 26), i_end, (i_end << 26));
-    FAPI_TRY( mss::putScom(i_target, TT::START_ADDRESS_1, i_start << 26) );
-    FAPI_TRY( mss::putScom(i_target, TT::END_ADDRESS_1, i_end << 26) );
-
-fapi_try_exit:
-    return fapi2::current_err;
+    return config_address_range(i_target, i_start, i_end, 1);
 }
 
 
@@ -956,7 +972,6 @@ fapi_try_exit:
 /// @tparam T the fapi2::TargetType - derived
 /// @tparam TT the mcbistTraits associated with T - derived
 /// @param[in] i_target the target to effect
-/// @param[in] i_program the mcbist::program
 /// @param[in] i_start 64b right-aligned address
 /// @param[in] i_end 64b right-aligned address
 /// @return FAPI2_RC_SUCCSS iff ok
@@ -967,13 +982,7 @@ template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
 inline fapi2::ReturnCode config_address_range2( const fapi2::Target<T>& i_target, const uint64_t i_start,
         const uint64_t i_end )
 {
-    FAPI_DBG("config MCBIST address range 2 start: 0x%016lx (0x%016lx), end/len 0x%016lx (0x%016lx)",
-             i_start, (i_start << 26), i_end, (i_end << 26));
-    FAPI_TRY( mss::putScom(i_target, TT::START_ADDRESS_2, i_start << 26) );
-    FAPI_TRY( mss::putScom(i_target, TT::END_ADDRESS_2, i_end << 26) );
-
-fapi_try_exit:
-    return fapi2::current_err;
+    return config_address_range(i_target, i_start, i_end, 2);
 }
 
 
@@ -982,7 +991,6 @@ fapi_try_exit:
 /// @tparam T the fapi2::TargetType - derived
 /// @tparam TT the mcbistTraits associated with T - derived
 /// @param[in] i_target the target to effect
-/// @param[in] i_program the mcbist::program
 /// @param[in] i_start 64b right-aligned address
 /// @param[in] i_end 64b right-aligned address
 /// @return FAPI2_RC_SUCCSS iff ok
@@ -992,13 +1000,7 @@ template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
 inline fapi2::ReturnCode config_address_range3( const fapi2::Target<T>& i_target, const uint64_t i_start,
         const uint64_t i_end )
 {
-    FAPI_DBG("config MCBIST address range 3 start: 0x%016lx (0x%016lx), end/len 0x%016lx (0x%016lx)",
-             i_start, (i_start << 26), i_end, (i_end << 26));
-    FAPI_TRY( mss::putScom(i_target, TT::START_ADDRESS_3, i_start << 26) );
-    FAPI_TRY( mss::putScom(i_target, TT::END_ADDRESS_3, i_end << 26) );
-
-fapi_try_exit:
-    return fapi2::current_err;
+    return config_address_range(i_target, i_start, i_end, 3);
 }
 
 ///
