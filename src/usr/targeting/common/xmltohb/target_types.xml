@@ -2648,6 +2648,8 @@
     <attribute><id>CDM_DOMAIN</id><default>FABRIC</default></attribute>
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
     <attribute><id>PARENT_PERVASIVE</id></attribute>
+    <attribute><id>IO_XBUS_DCCAL_FLAGS</id></attribute>
+    <attribute><id>IO_X_DEBUG</id></attribute>
 </targetType>
 
 <targetType>

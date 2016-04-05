@@ -21437,5 +21437,45 @@ DEPRECATED!!!!
   </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>IO_XBUS_DCCAL_FLAGS</id>
+    <!-- <targetType>TARGET_TYPE_XBUS</targetType> -->
+    <description>
+        Flags to indicate if rx / tx dccal has been run.
+        NONE = 0x0,
+          TX = 0x1,
+          RX = 0x2
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_IO_XBUS_DCCAL_FLAGS</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>IO_X_DEBUG</id>
+    <!-- <targetType>TARGET_TYPE_XBUS</targetType> -->
+    <description>
+        Indicate if debug data should be taken pre / post linktraining.
+        FALSE = 0x0,
+        TRUE = 0x1
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_IO_X_DEBUG</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
 
 </attributes>
