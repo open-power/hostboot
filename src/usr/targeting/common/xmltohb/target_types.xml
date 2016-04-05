@@ -2060,6 +2060,9 @@
     <attribute><id>PROC_FABRIC_ADDR_BAR_MODE</id></attribute>
     <attribute><id>PROC_EPS_READ_CYCLES</id></attribute>
     <attribute><id>PROC_EPS_WRITE_CYCLES</id></attribute>
+    <!-- HDAT Hostboot Runtime Data Info -->
+    <attribute><id>HDAT_HBRT_NUM_SECTIONS</id></attribute>
+    <attribute><id>HDAT_HBRT_SECTION_SIZE</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->
