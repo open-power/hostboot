@@ -17678,6 +17678,37 @@ DEPRECATED!!!!
 </attribute>
 
 
+<attribute>
+    <id>HDAT_HBRT_NUM_SECTIONS</id>
+    <description>
+        Number of internal data pointers we have in
+        the hostboot runtime data section.
+    </description>
+    <simpleType>
+        <uint32_t>
+        </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>HDAT_HBRT_SECTION_SIZE</id>
+    <description>
+        Biggest size for any of the hostboot
+        runtime data sections.
+    </description>
+    <simpleType>
+        <uint64_t>
+        </uint64_t>
+        <array>9</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
 <!--<attribute>
     <id>FREQ_PROC_REFCLOCK_KHZ</id>
     <description>
