@@ -59,6 +59,10 @@ namespace mcbist
 ///
 class address
 {
+    private:
+        // How far over we shift to align the address in either the register or a buffer
+        enum { MAGIC_PAD = 26 };
+
     public:
 
         // first is the start bit of the field, second is the length
@@ -84,36 +88,32 @@ class address
         /// structure, and this is presently not the case for the trap registers (3/16).
         /// These are presently unused, however. There is an open defect against the
         /// design team to correct this.
+        /// @warn Assumes right-aligned value; bit 63 is shifted to represent the Bank Group
         address( const uint64_t i_value ):
-            iv_address(i_value)
+            iv_address(i_value << MAGIC_PAD)
         {
         }
 
         ///
         /// @brief Conversion operator to uint64_t
+        /// @warn Right-aligns the address
         ///
         inline operator uint64_t() const
         {
-            return iv_address;
-        }
-
-        ///
-        /// @brief Conversion operator to uint64_t reference
-        ///
-        inline operator uint64_t& ()
-        {
-            return iv_address;
+            return iv_address >> MAGIC_PAD;
         }
 
         ///
         /// @brief Set a field for an address
         /// @tparam F the field to set
         /// @param[in] i_value the value to set
+        /// @return address& for method chaining
         ///
         template< const field& F >
-        inline void set_field( const uint64_t i_value )
+        inline address& set_field( const uint64_t i_value )
         {
             iv_address.insertFromRight<F.first, F.second>(i_value);
+            return *this;
         }
 
         ///
@@ -168,9 +168,7 @@ class address
         inline static void get_mrank_range( const uint64_t i_port, const uint64_t i_dimm, const uint64_t i_mrank,
                                             address& o_start, address& o_end )
         {
-            o_start.set_port(i_port);
-            o_start.set_dimm(i_dimm);
-            o_start.set_master_rank(i_mrank);
+            o_start.set_port(i_port).set_dimm(i_dimm).set_master_rank(i_mrank);
             get_mrank_range(o_start, o_end);
         }
 
@@ -197,20 +195,18 @@ class address
                                             const uint64_t i_mrank, const uint64_t i_srank,
                                             address& o_start, address& o_end )
         {
-            o_start.set_port(i_port);
-            o_start.set_dimm(i_dimm);
-            o_start.set_master_rank(i_mrank);
-            o_start.set_slave_rank(i_srank);
+            o_start.set_port(i_port).set_dimm(i_dimm).set_master_rank(i_mrank).set_slave_rank(i_srank);
             get_srank_range(o_start, o_end);
         }
 
         ///
         /// @brief Set the port value for an address
         /// @param[in] i_value the value to set
+        /// @return address& for method chaining
         ///
-        inline void set_port( const uint64_t i_value )
+        inline address& set_port( const uint64_t i_value )
         {
-            set_field<PORT>(i_value);
+            return set_field<PORT>(i_value);
         }
 
         ///
@@ -226,10 +222,11 @@ class address
         /// @brief Set the DIMM value for an address
         /// @param[in] i_value the value to set
         /// @note 0 is the DIMM[0] != 0 is DIMM[1]
+        /// @return address& for method chaining
         ///
-        inline void set_dimm( const uint64_t i_value )
+        inline address& set_dimm( const uint64_t i_value )
         {
-            set_field<DIMM>(i_value);
+            return set_field<DIMM>(i_value);
         }
 
         ///
@@ -244,10 +241,11 @@ class address
         ///
         /// @brief Set the master rank value for an address
         /// @param[in] i_value the value to set
+        /// @return address& for method chaining
         ///
-        inline void set_master_rank( const uint64_t i_value )
+        inline address& set_master_rank( const uint64_t i_value )
         {
-            set_field<MRANK>(i_value);
+            return set_field<MRANK>(i_value);
         }
 
         ///
@@ -282,10 +280,11 @@ class address
         ///
         /// @brief Set the row value for an address
         /// @param[in] i_value the value to set
+        /// @return address& for method chaining
         ///
-        inline void set_row( const uint64_t i_value )
+        inline address& set_row( const uint64_t i_value )
         {
-            set_field<ROW>(i_value);
+            return set_field<ROW>(i_value);
         }
 
         ///
@@ -301,10 +300,11 @@ class address
         ///
         /// @brief Set the column value for an address
         /// @param[in] i_value the value to set
+        /// @return address& for method chaining
         ///
-        inline void set_column( const uint64_t i_value )
+        inline address& set_column( const uint64_t i_value )
         {
-            set_field<COL>(i_value);
+            return set_field<COL>(i_value);
         }
 
         ///
@@ -320,10 +320,11 @@ class address
         ///
         /// @brief Set the bank value for an address
         /// @param[in] i_value the value to set
+        /// @return address& for method chaining
         ///
-        inline void set_bank( const uint64_t i_value )
+        inline address& set_bank( const uint64_t i_value )
         {
-            set_field<BANK>(i_value);
+            return set_field<BANK>(i_value);
         }
 
         ///
@@ -338,10 +339,11 @@ class address
         ///
         /// @brief Set the bank group value for an address
         /// @param[in] i_value the value to set
+        /// @return address& for method chaining
         ///
-        inline void set_bank_group( const uint64_t i_value )
+        inline address& set_bank_group( const uint64_t i_value )
         {
-            set_field<BANK_GROUP>(i_value);
+            return set_field<BANK_GROUP>(i_value);
         }
 
         ///
