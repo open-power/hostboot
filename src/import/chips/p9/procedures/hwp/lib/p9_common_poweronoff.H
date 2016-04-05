@@ -48,7 +48,71 @@ enum powerOperation_t
     POWER_ON_VDD  = 0x1,
     POWER_OFF_VDD = 0xFE
 };
-}
+
+
+
+// For SBE, the initial power-on times are not overly time critical so they are
+// hardcoded for the delay necessary when running with the fastest nest (2.4GHz).
+// When these same values are used with slower nest frequencies, the delays will
+// get longer (more conservative).
+//
+// For istep 15, the delay settings are computed based on the setting of
+// ATTR_FREQ_PB
+//
+// pfet_delay = (1/nest_frequency_mhz)*1000*4 (PPM clock period in ns) *
+//               2^(15-pfet_delay_value).
+//
+// or
+//
+//                                                pfet_delay
+// 2^(15-pfet_delay_value) =           ------------------------------
+//                                     (1/nest_frequency_mhz)*1000*4
+//
+//                                     pfet_delay * nest_frequency_mhz
+// 2^(15-pfet_delay_value  =           ------------------------------
+//                                                1000*4
+//
+//                                    ( pfet_delay * nest_frequency_mhz)
+// 15-pfet_delay_value     =      log2(  ------------------------------)
+//                                    (             1000*4             )
+//
+//                                    ( pfet_delay * nest_frequency_mhz)
+// pfet_delay_value        = 15 - log2(  ------------------------------)
+//                                    (             1000*4             )
+//
+//            ( pfet_delay * nest_frequency_mhz)
+// logexp   = (  ------------------------------)
+//            (             1000*4             )
+//
+//          = pfet_delay * nest_frequency_mhz / (1000 * 4)
+//          = pfet_delay * (nest_frequency_mhz / (1000 * 4))
+//          = pfet_delay * (2400 / (1000 * 4))
+//          = pfet_delay * (.6)
+//
+// For core delay of 250ns per step, logexp = 250 * .6 = 150
+//   --> log2(150) = 8 (rounded up to next integer)
+//  -- > pfet_delay_value = 15 - 8 = 7
+//
+// For EQ delay of 500ns per step, logexp = 500 * .6 = 300
+//   --> log2(150) = 9 (rounded up to next integer)
+//  -- > pfet_delay_value = 15 - 9 = 6
+
+
+enum pfetDelays
+{
+    PFET_DELAY_POWERDOWN_EQ     = 0x1,
+    PFET_DELAY_POWERDOWN_CORE   = 0x1,
+#ifndef PRODUCT_DEFAULT_PFET_DELAYS
+    PFET_DELAY_POWERUP_EQ       = 0x1,
+    PFET_DELAY_POWERUP_CORE     = 0x1
+#else
+    PFET_DELAY_POWERUP_EQ       = 0x6,
+    PFET_DELAY_POWERUP_CORE     = 0x7
+#endif
+};
+
+
+} // namespace
 
 /// @typedef p9_common_poweronoff_FP_t
 /// function pointer typedef definition for HWP call support
