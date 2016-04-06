@@ -559,7 +559,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
         // out all the possible failures.
         FAPI_ASSERT( l_err_data == 0,
                      fapi2::MSS_DRAMINIT_TRAINING_PHY_CONTROL_ERROR()
-                     .set_PORT_POSITION(mss::pos(i_target))
+                     .set_PORT_POSITION(mss::fapi_pos(i_target))
                      .set_TARGET_IN_ERROR(i_target),
                      "PHY reported a control error during initial calibration port: %s, pc_error_status0 err: 0x%016llx",
                      mss::c_str(i_target), uint64_t(l_err_data)
@@ -607,7 +607,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
     FAPI_ASSERT(mss::bit_count(l_errors) == 1,
                 fapi2::MSS_DRAMINIT_TRAINING_MULTIPLE_ERRORS()
                 .set_FAILED_STEPS(uint64_t(l_err_data))
-                .set_PORT_POSITION(mss::pos(i_target))
+                .set_PORT_POSITION(mss::fapi_pos(i_target))
                 .set_RANKGROUP_POSITION(l_rank_pairs)
                 .set_TARGET_IN_ERROR(l_failed_dimm),
                 "Initial CAL failed multiple training steps. dimm: %s, cal err: 0x%016llx",
@@ -616,7 +616,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
 
     FAPI_ASSERT( ! l_err_data.getBit<TT::INIT_CAL_ERROR_WR_LEVEL>(),
                  fapi2::MSS_DRAMINIT_TRAINING_WR_LVL_ERROR()
-                 .set_PORT_POSITION(mss::pos(i_target))
+                 .set_PORT_POSITION(mss::fapi_pos(i_target))
                  .set_RANKGROUP_POSITION(l_rank_pairs)
                  .set_TARGET_IN_ERROR(l_failed_dimm),
                  "Initial CAL failed write leveling. dimm: %s, cal err: 0x%016llx",
@@ -625,7 +625,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
 
     FAPI_ASSERT( ! l_err_data.getBit<TT::INIT_CAL_ERROR_INITIAL_PAT_WRITE>(),
                  fapi2::MSS_DRAMINIT_TRAINING_INITIAL_PAT_WRITE_ERROR()
-                 .set_PORT_POSITION(mss::pos(i_target))
+                 .set_PORT_POSITION(mss::fapi_pos(i_target))
                  .set_RANKGROUP_POSITION(l_rank_pairs)
                  .set_TARGET_IN_ERROR(l_failed_dimm),
                  "Initial CAL failed initial pattern write. dimm: %s, cal err: 0x%016llx",
@@ -634,7 +634,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
 
     FAPI_ASSERT( ! l_err_data.getBit<TT::INIT_CAL_ERROR_DQS_ALIGN>(),
                  fapi2::MSS_DRAMINIT_TRAINING_DQS_ALIGNMENT_ERROR()
-                 .set_PORT_POSITION(mss::pos(i_target))
+                 .set_PORT_POSITION(mss::fapi_pos(i_target))
                  .set_RANKGROUP_POSITION(l_rank_pairs)
                  .set_TARGET_IN_ERROR(l_failed_dimm),
                  "Initial CAL failed DQS alignenment. dimm: %s, cal err: 0x%016llx",
@@ -643,7 +643,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
 
     FAPI_ASSERT( ! l_err_data.getBit<TT::INIT_CAL_ERROR_RDCLK_ALIGN>(),
                  fapi2::MSS_DRAMINIT_TRAINING_RD_CLK_SYS_CLK_ALIGNMENT_ERROR()
-                 .set_PORT_POSITION(mss::pos(i_target))
+                 .set_PORT_POSITION(mss::fapi_pos(i_target))
                  .set_RANKGROUP_POSITION(l_rank_pairs)
                  .set_TARGET_IN_ERROR(l_failed_dimm),
                  "Initial CAL failed read clk alignenment. dimm: %s, cal err: 0x%016llx",
@@ -652,7 +652,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
 
     FAPI_ASSERT( ! l_err_data.getBit<TT::INIT_CAL_ERROR_READ_CTR>(),
                  fapi2::MSS_DRAMINIT_TRAINING_RD_CENTERING_ERROR()
-                 .set_PORT_POSITION(mss::pos(i_target))
+                 .set_PORT_POSITION(mss::fapi_pos(i_target))
                  .set_RANKGROUP_POSITION(l_rank_pairs)
                  .set_TARGET_IN_ERROR(l_failed_dimm),
                  "Initial CAL failed read centering. dimm: %s, cal err: 0x%016llx",
@@ -661,7 +661,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
 
     FAPI_ASSERT( ! l_err_data.getBit<TT::INIT_CAL_ERROR_WRITE_CTR>(),
                  fapi2::MSS_DRAMINIT_TRAINING_WR_CENTERING_ERROR()
-                 .set_PORT_POSITION(mss::pos(i_target))
+                 .set_PORT_POSITION(mss::fapi_pos(i_target))
                  .set_RANKGROUP_POSITION(l_rank_pairs)
                  .set_TARGET_IN_ERROR(l_failed_dimm),
                  "Initial CAL failed write centering. dimm: %s, cal err: 0x%016llx",
@@ -670,7 +670,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
 
     FAPI_ASSERT( ! l_err_data.getBit<TT::INIT_CAL_ERROR_INITIAL_COARSE_WR>(),
                  fapi2::MSS_DRAMINIT_TRAINING_INITIAL_COARSE_WR_ERROR()
-                 .set_PORT_POSITION(mss::pos(i_target))
+                 .set_PORT_POSITION(mss::fapi_pos(i_target))
                  .set_RANKGROUP_POSITION(l_rank_pairs)
                  .set_TARGET_IN_ERROR(l_failed_dimm),
                  "Initial CAL failed initial coarse write. dimm: %s, cal err: 0x%016llx",
@@ -679,7 +679,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
 
     FAPI_ASSERT( ! l_err_data.getBit<TT::INIT_CAL_ERROR_COARSE_RD>(),
                  fapi2::MSS_DRAMINIT_TRAINING_COARSE_RD_ERROR()
-                 .set_PORT_POSITION(mss::pos(i_target))
+                 .set_PORT_POSITION(mss::fapi_pos(i_target))
                  .set_RANKGROUP_POSITION(l_rank_pairs)
                  .set_TARGET_IN_ERROR(l_failed_dimm),
                  "Initial CAL failed coarse read. dimm: %s, cal err: 0x%016llx",
@@ -688,7 +688,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
 
     FAPI_ASSERT( ! l_err_data.getBit<TT::INIT_CAL_ERROR_CUSTOM_RD>(),
                  fapi2::MSS_DRAMINIT_TRAINING_CUSTOM_PATTERN_RD_ERROR()
-                 .set_PORT_POSITION(mss::pos(i_target))
+                 .set_PORT_POSITION(mss::fapi_pos(i_target))
                  .set_RANKGROUP_POSITION(l_rank_pairs)
                  .set_TARGET_IN_ERROR(l_failed_dimm),
                  "Initial CAL failed custom read. dimm: %s, cal err: 0x%016llx",
@@ -697,7 +697,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
 
     FAPI_ASSERT( ! l_err_data.getBit<TT::INIT_CAL_ERROR_CUSTOM_WR>(),
                  fapi2::MSS_DRAMINIT_TRAINING_CUSTOM_PATTERN_WR_ERROR()
-                 .set_PORT_POSITION(mss::pos(i_target))
+                 .set_PORT_POSITION(mss::fapi_pos(i_target))
                  .set_RANKGROUP_POSITION(l_rank_pairs)
                  .set_TARGET_IN_ERROR(l_failed_dimm),
                  "Initial CAL failed custom write. dimm: %s, cal err: 0x%016llx",
@@ -706,7 +706,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
 
     FAPI_ASSERT( ! l_err_data.getBit<TT::INIT_CAL_ERROR_DIGITAL_EYE>(),
                  fapi2::MSS_DRAMINIT_TRAINING_DIGITAL_EYE_ERROR()
-                 .set_PORT_POSITION(mss::pos(i_target))
+                 .set_PORT_POSITION(mss::fapi_pos(i_target))
                  .set_RANKGROUP_POSITION(l_rank_pairs)
                  .set_TARGET_IN_ERROR(l_failed_dimm),
                  "Initial CAL failed digital eye. dimm: %s, cal err: 0x%016llx",
