@@ -24,12 +24,15 @@
 // *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
 // *HWP HWP Backup: Craig Hamilton <cchamilt@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
 #include <p9_mss_scominit.H>
+#include <p9_mca_scom.H>
+#include <p9_ddrphy_scom.H>
 
+using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::FAPI2_RC_SUCCESS;
 
@@ -41,6 +44,31 @@ using fapi2::FAPI2_RC_SUCCESS;
 fapi2::ReturnCode p9_mss_scominit( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
 {
     FAPI_INF("Start MSS SCOM init");
+    auto l_mca_targets = i_target.getChildren<TARGET_TYPE_MCA>();
+
+    for (auto l_mca_target : l_mca_targets)
+    {
+        fapi2::ReturnCode l_rc;
+        FAPI_EXEC_HWP(l_rc, p9_mca_scom, l_mca_target);
+
+        if (l_rc)
+        {
+            FAPI_ERR("Error from p9.mca.scom.initfile");
+            fapi2::current_err = l_rc;
+            goto fapi_try_exit;
+        }
+
+        FAPI_EXEC_HWP(l_rc, p9_ddrphy_scom, l_mca_target);
+
+        if (l_rc)
+        {
+            FAPI_ERR("Error from p9.ddrphy.scom.initfile");
+            fapi2::current_err = l_rc;
+            goto fapi_try_exit;
+        }
+    }
+
+fapi_try_exit:
     FAPI_INF("End MSS SCOM init");
-    return FAPI2_RC_SUCCESS;
+    return fapi2::current_err;
 }
