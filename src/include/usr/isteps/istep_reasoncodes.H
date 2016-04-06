@@ -47,6 +47,7 @@ namespace ISTEP
         MOD_EXIT_CACHE_CONTAINED                          = 0x0B,
         MOD_HOST_GARD                                     = 0x0C,
         MOD_EDI_EI_IO_RUN_TRAINING                        = 0x0D,
+        MOD_LOAD_PAYLOAD                                  = 0x0E,
     };
 
     /**
