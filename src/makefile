@@ -200,6 +200,7 @@ TESTCASE_MODULES += testtargeting
 TESTCASE_MODULES += testmemoize
 TESTCASE_MODULES += testprdf
 TESTCASE_MODULES += testattn
+TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testmdia)
 
 #******************************************************************
 #KNOWN ISSUES (I might let these run but there is something wrong)
@@ -221,8 +222,6 @@ TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testruntime)
 #TESTCASE_MODULES += testintr
 
 TESTCASE_MODULES += testfapi2
-#TODO: Need to re-enable testmdia (RTC 135217)
-#TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testmdia)
 
 #@TODO RTC: 123019 (p9 work in progress)
 #TESTCASE_MODULES += testi2c
