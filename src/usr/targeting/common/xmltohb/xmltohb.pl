@@ -5787,9 +5787,9 @@ sub generateTargetingImage {
 
                     # Each target is 4 bytes # attributes, 8 bytes pointer
                     # to attribute list, 8 bytes pointer to attribute pointer
-                    # list, 4 x 8 byte pointers to association lists, for total
-                    # of 20 + 32 = 52 bytes per target
-                    $index *= (20 + 32); # length(N + quad + quad + 4x quad)
+                    # list, 6 x 8 byte pointers to association lists, for total
+                    # of 20 + 48 = 68 bytes per target
+                    $index *= (20 + 48); # length(N + quad + quad + 6x quad)
                     $attrhash{$attributeId}->{default} = $index + $firstTgtPtr;
                 }
 
