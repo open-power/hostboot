@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -76,7 +78,7 @@
 // istep 17, FSP only
 #include    "istep18list.H"
 // istep 19, FSP only
-// istep 20, FSP only
+#include    "istep20list.H"
 #include    "istep21list.H"
 
 namespace   INITSERVICE
@@ -104,7 +106,7 @@ const  ExtTaskInfo  g_isteps[]    =   {
         { NULL, 0, NULL},                               //  FSP   IStep 17
         INITSERVICE::g_istep18TaskList,                 //        IStep 18
         { NULL, 0, NULL },                              //  FSP   IStep 19
-        { NULL, 0, NULL },                              //  FSP   IStep 20
+        INITSERVICE::g_istep20TaskList,                 //        IStep 20
         INITSERVICE::g_istep21TaskList                  //        IStep 21
         //
         // add further istep lists at the end.
