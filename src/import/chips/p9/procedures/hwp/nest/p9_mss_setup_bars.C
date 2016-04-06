@@ -710,25 +710,22 @@ template<fapi2::TargetType T>
 fapi2::ReturnCode buildMCBarData(
     const std::vector< fapi2::Target<T> >& i_mcTargets,
     const uint32_t i_groupData[DATA_GROUPS][DATA_ELEMENTS],
-    std::map<fapi2::Target<T>, mcsBarData_t>& o_mcBarDataPair);
+    std::vector<std::pair<fapi2::Target<T>, mcsBarData_t>>& o_mcBarDataPair);
 
 template<> // TARGET_TYPE_MCS
 fapi2::ReturnCode buildMCBarData(
     const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> >& i_mcTargets,
     const uint32_t i_groupData[DATA_GROUPS][DATA_ELEMENTS],
-    std::map<fapi2::Target<fapi2::TARGET_TYPE_MCS>, mcsBarData_t>& o_mcBarDataPair)
+    std::vector<std::pair<fapi2::Target<fapi2::TARGET_TYPE_MCS>, mcsBarData_t>>& o_mcBarDataPair)
 {
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
-    mcsPortGroupInfo_t l_portInfo[MAX_MC_PORTS_PER_MCS];
-    mcsBarData_t l_mcsBarData;
     char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
 
     for (auto l_mcs : i_mcTargets)
     {
-
-        // Initialize
-        memset(&l_mcsBarData, 0, sizeof(l_mcsBarData));
+        mcsBarData_t l_mcsBarData;
+        mcsPortGroupInfo_t l_portInfo[MAX_MC_PORTS_PER_MCS];
 
         // Get this MCS unit position
         uint8_t l_unitPos = 0;
@@ -738,9 +735,6 @@ fapi2::ReturnCode buildMCBarData(
 
         fapi2::toString(l_mcs, l_targetStr, sizeof(l_targetStr));
         FAPI_INF("Build BAR data for MCS target: %s, UnitPos %u ", l_targetStr, l_unitPos);
-
-        // ---- Fill in group info for each port in this MCS ----
-        memset(l_portInfo, 0, sizeof(l_portInfo));
 
         // Loop thru non-mirror groups (0-7)
         for (uint8_t l_group = 0; l_group < (DATA_GROUPS / 2); l_group++)
@@ -802,8 +796,7 @@ fapi2::ReturnCode buildMCBarData(
             displayMCBarData(l_mcs, l_mcsBarData);
 
             // Add to output pair
-            o_mcBarDataPair.insert(std::pair<fapi2::Target<fapi2::TARGET_TYPE_MCS>, mcsBarData_t>
-                                   (l_mcs, l_mcsBarData));
+            o_mcBarDataPair.push_back(std::make_pair(l_mcs, l_mcsBarData));
         }
         else
         {
@@ -822,7 +815,7 @@ template<> // TARGET_TYPE_MI
 fapi2::ReturnCode buildMCBarData(
     const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MI> >& i_mcTargets,
     const uint32_t i_groupData[DATA_GROUPS][DATA_ELEMENTS],
-    std::map<fapi2::Target<fapi2::TARGET_TYPE_MI>, mcsBarData_t>& o_mcBarDataPair)
+    std::vector<std::pair<fapi2::Target<fapi2::TARGET_TYPE_MI>, mcsBarData_t>>& o_mcBarDataPair)
 {
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
@@ -843,11 +836,11 @@ fapi2::ReturnCode buildMCBarData(
 ///
 template<fapi2::TargetType T>
 fapi2::ReturnCode writeMCBarData(
-    const std::map<fapi2::Target<T>, mcsBarData_t> i_mcBarDataPair);
+    const std::vector<std::pair<fapi2::Target<T>, mcsBarData_t>>& i_mcBarDataPair);
 
 template<> // TARGET_TYPE_MCS
 fapi2::ReturnCode writeMCBarData(
-    const std::map<fapi2::Target<fapi2::TARGET_TYPE_MCS>, mcsBarData_t> i_mcBarDataPair)
+    const std::vector<std::pair<fapi2::Target<fapi2::TARGET_TYPE_MCS>, mcsBarData_t>>& i_mcBarDataPair)
 {
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
@@ -1021,7 +1014,7 @@ fapi_try_exit:
 
 template<> // TARGET_TYPE_MI
 fapi2::ReturnCode writeMCBarData(
-    const std::map<fapi2::Target<fapi2::TARGET_TYPE_MI>, mcsBarData_t> i_mcBarDataPair)
+    const std::vector<std::pair<fapi2::Target<fapi2::TARGET_TYPE_MI>, mcsBarData_t>>& i_mcBarDataPair)
 {
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
@@ -1047,9 +1040,9 @@ fapi2::ReturnCode p9_mss_setup_bars(
     // Stores data read from ATTR_MSS_MCS_GROUP_32
     uint32_t l_groupData[DATA_GROUPS][DATA_ELEMENTS];
     // std_pair<MCS target, MCS data>
-    std::map<fapi2::Target<fapi2::TARGET_TYPE_MCS>, mcsBarData_t> l_mcsBarDataPair;
+    std::vector<std::pair<fapi2::Target<fapi2::TARGET_TYPE_MCS>, mcsBarData_t>> l_mcsBarDataPair;
     // std_pair<MI target, MI data>
-    std::map<fapi2::Target<fapi2::TARGET_TYPE_MI>, mcsBarData_t> l_miBarDataPair;
+    std::vector<std::pair<fapi2::Target<fapi2::TARGET_TYPE_MI>, mcsBarData_t>> l_miBarDataPair;
 
     // Get functional MCS chiplets, should be none for Cumulus
     auto l_mcsChiplets = i_target.getChildren<fapi2::TARGET_TYPE_MCS>();
