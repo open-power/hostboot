@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config.C,v 1.68 2016/01/19 23:38:13 rwheeler Exp $
+// $Id: mss_eff_config.C,v 1.70 2016/04/01 17:06:39 asaetow Exp $
 // $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
 //          centaur/working/procedures/ipl/fapi/mss_eff_config.C,v $
 //------------------------------------------------------------------------------
@@ -45,6 +45,10 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.70  | asaetow  |01-APR-16| Fixed DDR4 tCCD_L = 5ck @1600Mbps and ignore SPD completely per Warren Maule.
+//         |          |         | Note: This is to always be in sync with mba_def.initfile since it's not using attributes for tCCD.
+//         |          |         | Note: Currently mba_def.initfile v1.83 has DDR4 tCCD_S = 4ck and tCCD_L = 5ck @1600Mbps&1866Mbps, 6ck @2133Mbps&2400Mbps. If that ever changes mss_eff_config.C will also need to change to match.
+//   1.69  | asaetow  |22-MAR-16| Fixed DDR4 tCCD >= 5ck @1600Mbps regardless of SPD calc per Warren Maule.
 //   1.68  | rwheeler |19-JAN-16| Added support for the kg4 card type.
 //   1.67  | sglancy  |13-JAN-16| Added RC checks and fixed white space issues
 //   1.66  | preeragh |18-DEC-15| Change ATTR_EFF_TEMP_REF_MODE to Disable by default. SW331045
@@ -2079,23 +2083,21 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
          }
 //------------------------------------------------------------------------------
          if (p_i_data->dram_device_type[0][0] == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR4) { 
-            p_i_mss_eff_config_data->dram_tccdl = calc_timing_in_clk
-                (
-                    p_i_mss_eff_config_data->mtb_in_ps_u32array[l_cur_mba_port]
-                    [l_cur_mba_dimm],
-                    p_i_mss_eff_config_data->ftb_in_fs_u32array[l_cur_mba_port]
-                    [l_cur_mba_dimm],
-                    p_i_data->tccdlmin[l_cur_mba_port]
-                    [l_cur_mba_dimm],
-                    0,
-                    p_i_mss_eff_config_data->mss_freq
-                );
-            if (p_i_mss_eff_config_data->dram_tccdl >
-                    p_o_atts->eff_dram_tccdl)
-            {
-                p_o_atts->eff_dram_tccdl =
-                    p_i_mss_eff_config_data->dram_tccdl;
+
+            //Fixed DDR4 tCCD_L = 5ck @1600Mbps and ignore SPD completely per Warren Maule.
+            //Note: This is to always be in sync with mba_def.initfile since it's not using attributes for tCCD.
+            //Note: Currently mba_def.initfile v1.83 has DDR4 tCCD_S = 4ck and tCCD_L = 5ck @1600Mbps&1866Mbps, 6ck @2133Mbps&2400Mbps. If that ever changes mss_eff_config.C will also need to change to match.
+            if ((p_i_mss_eff_config_data->mss_freq == 1600) || (p_i_mss_eff_config_data->mss_freq == 1866)) {
+                p_o_atts->eff_dram_tccdl = 5;
+            } else if ((p_i_mss_eff_config_data->mss_freq == 2133) || (p_i_mss_eff_config_data->mss_freq == 2400)) {
+                p_o_atts->eff_dram_tccdl = 6;
+            } else {
+               FAPI_ERR("Invalid ATTR_MSS_FREQ = %d on %s!", p_i_mss_eff_config_data->mss_freq, i_target_mba.toEcmdString());
+               uint32_t& FREQ_VAL = p_i_mss_eff_config_data->mss_freq;
+               FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_MSS_FREQ);
+               break;
             }
+
          }
 		 
 		 //Preet TCCD_S
