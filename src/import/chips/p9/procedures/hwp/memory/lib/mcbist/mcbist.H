@@ -149,9 +149,6 @@ class mcbistTraits<fapi2::TARGET_TYPE_MCBIST>
             MAINT_BROADCAST_MODE_EN = MCBIST_MCBAGRAQ_CFG_MAINT_BROADCAST_MODE_EN,
             MAINT_DETECT_SRANK_BOUNDARIES = MCBIST_MCBAGRAQ_CFG_MAINT_DETECT_SRANK_BOUNDARIES,
 
-            BROADCAST_SYNC_EN = MCBIST_MCBCFGQ_BROADCAST_SYNC_EN,
-            BROADCAST_SYNC_WAIT = MCBIST_MCBCFGQ_BROADCAST_SYNC_WAIT,
-            BROADCAST_SYNC_WAIT_LEN = MCBIST_MCBCFGQ_BROADCAST_SYNC_WAIT_LEN,
             CFG_CMD_TIMEOUT_MODE = MCBIST_MCBCFGQ_CFG_CMD_TIMEOUT_MODE,
             CFG_CMD_TIMEOUT_MODE_LEN = MCBIST_MCBCFGQ_CFG_CMD_TIMEOUT_MODE_LEN,
             RESET_KEEPER = MCBIST_MCBCFGQ_RESET_KEEPER,
@@ -200,7 +197,7 @@ class subtest_t
 
         ///
         /// @brief Complement the data for the first subcommand
-        /// @param[in] i_state, the desired state, mss::ON, mss::OFF
+        /// @param[in] i_state the desired state (mss::ON or mss::OFF)
         /// @return void
         ///
         inline void change_compliment_1st_cmd( const mss::states i_state )
@@ -211,7 +208,7 @@ class subtest_t
 
         ///
         /// @brief Complement the data for the second subcommand
-        /// @param[in] i_state, the desired state, mss::ON, mss::OFF
+        /// @param[in] i_state the desired state (mss::ON or mss::OFF)
         /// @return void
         ///
         inline void change_compliment_2nd_cmd( const mss::states i_state )
@@ -222,7 +219,7 @@ class subtest_t
 
         ///
         /// @brief Complement the data for the third subcommand
-        /// @param[in] i_state, the desired state, mss::ON, mss::OFF
+        /// @param[in] i_state the desired state (mss::ON or mss::OFF)
         /// @return void
         ///
         inline void change_compliment_3rd_cmd( const mss::states i_state )
@@ -233,7 +230,8 @@ class subtest_t
 
         ///
         /// @brief Enable a specific port for this test - maint address mode
-        /// @param[in] i_port, the port desired to be enabled - int 0, 1, 2, 3
+        /// @param[in] i_port the port desired to be enabled - int 0, 1, 2, 3
+        /// @note The port number is relative to the MCBIST
         /// @return void
         ///
         inline void enable_port( const uint64_t i_port )
@@ -245,7 +243,7 @@ class subtest_t
 
         ///
         /// @brief Enable a specific dimm for this test - maint address mode
-        /// @param[in] i_dimm, the dimm desired to be enabled - int 0, 1
+        /// @param[in] i_dimm the dimm desired to be enabled - int 0, 1
         /// @return void
         ///
         inline void enable_dimm( const uint64_t i_dimm )
@@ -257,7 +255,7 @@ class subtest_t
 
         ///
         /// @brief Generate addresses in reverse order
-        /// @param[in] i_state, the desired state of the function; mss:ON, mss::OFF
+        /// @param[in] i_state the desired state of the function; mss:ON, mss::OFF
         /// @return void
         ///
         inline void change_addr_rev_mode( const mss::states i_state )
@@ -268,7 +266,7 @@ class subtest_t
 
         ///
         /// @brief Generate addresses in random order
-        /// @param[in] i_state, the desired state of the function; mss:ON, mss::OFF
+        /// @param[in] i_state the desired state of the function; mss:ON, mss::OFF
         /// @return void
         ///
         inline void change_addr_rand_mode( const mss::states i_state )
@@ -279,7 +277,7 @@ class subtest_t
 
         ///
         /// @brief Generate and check data with ECC
-        /// @param[in] i_state, the desired state of the function; mss:ON, mss::OFF
+        /// @param[in] i_state the desired state of the function; mss:ON, mss::OFF
         /// @return void
         ///
         inline void change_ecc_mode( const mss::states i_state )
@@ -290,7 +288,7 @@ class subtest_t
 
         ///
         /// @brief Set the 'done after this test' bit
-        /// @param[in] i_state, the desired state of the function; mss:ON, mss::OFF
+        /// @param[in] i_state the desired state of the function; mss:ON, mss::OFF
         /// @return void
         ///
         inline void change_done( const mss::states i_state )
@@ -301,7 +299,7 @@ class subtest_t
 
         ///
         /// @brief Set the data mode for this subtest
-        /// @param[in] i_mode, the desired mcbist::data_mode
+        /// @param[in] i_mode the desired mcbist::data_mode
         /// @return void
         ///
         inline void change_data_mode( const data_mode i_mode )
@@ -312,7 +310,7 @@ class subtest_t
 
         ///
         /// @brief Set the operation type for this subtest
-        /// @param[in] i_mode, the desired mcbist::op_type
+        /// @param[in] i_mode the desired mcbist::op_type
         /// @return void
         ///
         inline void change_op_type( const op_type i_type )
@@ -323,7 +321,7 @@ class subtest_t
 
         ///
         /// @brief Configure which address registers to use for this subtest
-        /// @param[in] i_index, 0 = MCBSA0Q, 1 = MCBSA1Q, ...
+        /// @param[in] i_index 0 = MCBSA0Q, 1 = MCBSA1Q, ...
         /// @note wraps to 0-3 no matter what value you pass in.
         /// @return void
         ///
@@ -337,7 +335,7 @@ class subtest_t
 
         //
         // @brief operator== for mcbist subtests
-        // @param[in] i_rhs, the right hand side of the compare
+        // @param[in] i_rhs the right hand side of the compare
         // @return bool, true iff i_rhs == this
         inline bool operator==(const subtest_t<T>& i_rhs) const
         {
@@ -354,8 +352,8 @@ class subtest_t
 
 ///
 /// @brief Return a write subtest - configured simply
-/// @tparam T, the fapi2::TargetType - derived
-/// @tparam TT, the mcbistTraits associated with T - derived
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
 /// @return mss::mcbist::subtest_t
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
@@ -387,8 +385,8 @@ inline subtest_t<T> write_subtest()
 
 ///
 /// @brief Return a read subtest - configured simply
-/// @tparam T, the fapi2::TargetType - derived
-/// @tparam TT, the mcbistTraits associated with T - derived
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T - derived
 /// @return mss::mcbist::subtest_t
 /// @note Turns on ECC mode for the returned subtest - caller can turn it off
 /// @note Configures for start/end address select bit as address config register 0
@@ -489,7 +487,7 @@ class program
 
         ///
         /// @brief Change the mcbist 64/128 bit control
-        /// @param[in] i_state, mss::ON if you want 64b,mss::OFF if you want 128b
+        /// @param[in] i_state mss::ON if you want 64b,mss::OFF if you want 128b
         /// @return void
         ///
         inline void change_len64( const mss::states i_state )
@@ -537,7 +535,7 @@ class program
 
         ///
         /// @brief Change the mcbist gap timebase for blind steer
-        /// @param[in] i_program, the program in question
+        /// @param[in] i_program the program in question
         /// @param[in] i_tb When set to mss::ON and cfg_en_randcmd_gap is a 0, then the number of minimum
         /// cycles between commands will be cfg_min_cmd_gap multiplied by 2^13.
         /// @note Assumes data is right-aligned
@@ -563,7 +561,7 @@ class program
 
         ///
         /// @brief Change the weights for random mcbist command gaps
-        /// @param[in] i_program, the program in question
+        /// @param[in] i_program the program in question
         /// @param[in] i_weight
         /// @note Assumes data is right-aligned
         /// @return void
@@ -686,7 +684,7 @@ class program
 
         ///
         /// @brief Enable or disable maint address mode
-        /// @param[in] i_program, the program in question
+        /// @param[in] i_program the program in question
         /// @param[in] i_mode mss::ON to enable
         /// @warn Address counter modes must be 0 for this to work.
         /// @note When enabled subtest complement bits become 3-bit port-dimm selector field
@@ -702,7 +700,7 @@ class program
 
         ///
         /// @brief Enable or disable broadcast mode
-        /// @param[in] i_program, the program in question
+        /// @param[in] i_program the program in question
         /// @param[in] i_mode mss::ON to enable
         /// @warn Maint address mode must be enabled for this to work
         /// @return void
@@ -716,7 +714,7 @@ class program
 
         ///
         /// @brief Enable or disable slave rank boundary detect
-        /// @param[in] i_program, the program in question
+        /// @param[in] i_program the program in question
         /// @param[in] i_mode mss::ON to enable
         /// @return void
         ///
@@ -754,15 +752,17 @@ class program
             if (1 != mss::bit_count(i_ports))
             {
                 // We're in broadcast mode, so setup the broadcast inforamtion registers
-                FAPI_INF("mcbist select ports seeing broadcast requested: ports 0x%x", i_ports);
                 iv_config.setBit<TT::SYNC_EN>();
                 iv_config.insertFromRight<TT::SYNC_WAIT, TT::SYNC_WAIT_LEN>(i_wait);
+                FAPI_INF("mcbist select ports seeing broadcast requested: ports 0x%x, config 0x%016lx",
+                         i_ports, iv_config);
+
 
                 // Should we check for maint mode and set the MCBAGRAQ_CFG_MAINT_BROADCAST_MODE_EN? BRS
             }
 
             iv_control.insertFromRight<TT::PORT_SEL, TT::PORT_SEL_LEN>(i_ports);
-            FAPI_DBG("mcbist select ports: 0x%016lx (0x%x)", iv_control, i_ports);
+            FAPI_DBG("mcbist select ports: iv_control 0x%016lx (ports: 0x%x)", iv_control, i_ports);
 
             return;
         }

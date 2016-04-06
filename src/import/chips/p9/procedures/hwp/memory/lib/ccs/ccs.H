@@ -35,6 +35,7 @@
 #include <p9_mc_scom_addresses.H>
 
 #include "../utils/poll.H"
+#include "../utils/swizzle.H"
 #include "../port/port.H"
 #include "../shared/mss_const.H"
 
