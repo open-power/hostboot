@@ -33,6 +33,7 @@
 #include <fapi2.H>
 
 #include <p9_mc_scom_addresses.H>
+#include <p9_mc_scom_addresses_fld.H>
 
 // I have a dream that port code can be shared among controllers. So, I drive the
 // engine from a set of traits. This might be folly. Allow me to dream. BRS
@@ -79,19 +80,6 @@ class portTraits<fapi2::TARGET_TYPE_MCA>
 
 namespace mss
 {
-///
-/// @brief Given a DIMM, return it's port number.
-/// @param[in] i_target the DIMM in question
-/// @return the port number it's attached to
-///
-// Note: Make this a template and dispatch at runtime to determine if the parent of
-// the DIMM is an MBA or an MCA BRS
-//
-inline uint64_t port( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target )
-{
-    // Our port is the position of our MCA
-    return mss::pos( i_target.getParent<fapi2::TARGET_TYPE_MCA>() );
-}
 
 ///
 /// @brief Change the state of the port_fail_disable bit

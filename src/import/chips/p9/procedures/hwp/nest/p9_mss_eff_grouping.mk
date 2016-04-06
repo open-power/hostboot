@@ -19,6 +19,5 @@
 PROCEDURE=p9_mss_eff_grouping
 OBJS+=p9_fbc_utils.o
 lib$(PROCEDURE)_DEPLIBS+=mss
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/memory/lib/)
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/memory/lib/eff_config/)
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/memory/)
 $(call BUILD_PROCEDURE)

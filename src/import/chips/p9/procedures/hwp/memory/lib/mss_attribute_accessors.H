@@ -21,7 +21,7 @@
 #define MSS_ATTR_ACCESS_H_
 
 #include <fapi2.H>
-#include <mss_utils.H>
+#include <lib/mss_utils.H>
 
 
 

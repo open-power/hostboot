@@ -128,7 +128,7 @@ extern "C"
                     // Uses address register set 0
                     mss::mcbist::subtest_t<TARGET_TYPE_MCBIST> l_fw_subtest =
                         mss::mcbist::write_subtest<TARGET_TYPE_MCBIST>();
-                    l_fw_subtest.enable_port(mss::pos(p));
+                    l_fw_subtest.enable_port(mss::relative_pos<TARGET_TYPE_MCBIST>(p));
 
                     // Run in ECC mode
 
@@ -142,7 +142,7 @@ extern "C"
                     // Uses address register set 0
                     mss::mcbist::subtest_t<TARGET_TYPE_MCBIST> l_fr_subtest =
                         mss::mcbist::read_subtest<TARGET_TYPE_MCBIST>();
-                    l_fr_subtest.enable_port(mss::pos(p));
+                    l_fr_subtest.enable_port(mss::relative_pos<TARGET_TYPE_MCBIST>(p));
 
                     // Run in ECC mode
 
@@ -189,7 +189,7 @@ extern "C"
                 // Just one port for now. Per Shelton we need to set this in maint adress mode
                 // even tho we specify the port/dimm in the subtest.
                 fapi2::buffer<uint8_t> l_port;
-                l_port.setBit(mss::pos(p));
+                l_port.setBit(mss::relative_pos<TARGET_TYPE_MCBIST>(p));
                 l_program.select_ports(l_port >> 4);
 
                 // Kick it off, wait for a result

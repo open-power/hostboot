@@ -37,7 +37,7 @@
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 #include <map>
-#include <memory_size.H>
+#include <lib/eff_config/memory_size.H>
 
 ///----------------------------------------------------------------------------
 /// Constant definitions

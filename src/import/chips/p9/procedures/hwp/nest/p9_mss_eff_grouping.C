@@ -40,7 +40,7 @@
 #include <p9_mss_eff_grouping.H>
 #include <p9_fbc_utils.H>
 #include <map>
-#include <memory_size.H>
+#include <lib/eff_config/memory_size.H>
 
 ///----------------------------------------------------------------------------
 /// Constant definitions

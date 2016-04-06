@@ -31,6 +31,7 @@
 #define _MSS_POS_H_
 
 #include <fapi2.H>
+#include <lib/shared/mss_const.H>
 
 namespace mss
 {
@@ -48,6 +49,9 @@ class posTraits
         typedef uint8_t pos_type;
 };
 
+///
+/// @brief DIMM Trait class for the mss::pos functions
+///
 template<>
 class posTraits<fapi2::TARGET_TYPE_DIMM>
 {
@@ -55,6 +59,9 @@ class posTraits<fapi2::TARGET_TYPE_DIMM>
         typedef uint32_t pos_type;
 };
 
+///
+/// @brief Processor Trait class for the mss::pos functions
+///
 template<>
 class posTraits<fapi2::TARGET_TYPE_PROC_CHIP>
 {
@@ -65,8 +72,8 @@ class posTraits<fapi2::TARGET_TYPE_PROC_CHIP>
 ///
 /// @brief Return a target's position from a fapi2 target
 /// @tparam T the fapi2::TargetType
-/// @param[in] i_target a DIMM target representing the DIMM in question
-/// @return The position
+/// @param[in] i_target a target representing the target in question
+/// @return The position relative to the chip
 ///
 template< fapi2::TargetType T, typename TT = posTraits<T> >
 inline typename TT::pos_type pos(const fapi2::Target<T>& i_target)
@@ -89,6 +96,11 @@ fapi_try_exit:
     return 0;
 }
 
+///
+/// @brief Return a DIMM's position from a fapi2 target
+/// @param[in] i_target a target representing the target in question
+/// @return The position relative to the chip
+///
 template<>
 inline posTraits<fapi2::TARGET_TYPE_DIMM>::pos_type pos(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
 {
@@ -109,9 +121,14 @@ fapi_try_exit:
 
 }
 
+///
+/// @brief Return a processor's position from a fapi2 target
+/// @param[in] i_target a target representing the target in question
+/// @return The position relative to the chip
+///
 template<>
-inline posTraits<fapi2::TARGET_TYPE_PROC_CHIP>::pos_type pos(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
-        i_target)
+inline posTraits<fapi2::TARGET_TYPE_PROC_CHIP>::pos_type pos(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     posTraits<fapi2::TARGET_TYPE_PROC_CHIP>::pos_type i_pos = 0;
 
@@ -129,5 +146,60 @@ fapi_try_exit:
     return 0;
 
 }
+
+
+///
+/// @brief Return a target's relative position from a fapi2 target
+/// @tparam T the fapi2::TargetType
+/// @tparam R the fapi2::TargetType we want the position relative to
+/// @param[in] i_target a target representing the target in question
+/// @return The position relative to chiplet R
+///
+template< fapi2::TargetType R, fapi2::TargetType T, typename TT = posTraits<T> >
+inline typename TT::pos_type relative_pos(const fapi2::Target<T>& i_target);
+
+template<>
+inline uint8_t relative_pos<fapi2::TARGET_TYPE_MCBIST>(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
+{
+    return pos(i_target) % PORTS_PER_MCBIST;
+}
+
+
+
+///
+/// @brief Return a target's fapi position from a fapi2 target
+/// @tparam T the fapi2::TargetType
+/// @param[in] i_target a target representing the target in question
+/// @return The position relative to the system
+///
+template< fapi2::TargetType T, typename TT = posTraits<T> >
+inline uint32_t fapi_pos(const fapi2::Target<T>& i_target)
+{
+
+// Doesn't look like ATTR_FAPI_POS is supported in Cronus yet, so we'll
+// use our chip-relative position for the time being.
+#ifdef ATTR_FAPI_POS_SUPPORTED
+    uint32_t i_pos = 0;
+
+    // Don't use FAPI_TRY as you'll mess up fapi2::current_err which
+    // lmits where this can be used.
+    if (FAPI_ATTR_GET(fapi2::ATTR_FAPI_POS, i_target, i_pos) != fapi2::FAPI2_RC_SUCCESS)
+    {
+        goto fapi_try_exit;
+    }
+
+    return i_pos;
+
+fapi_try_exit:
+    // If we can't get our fapi position, we're in other trouble
+    FAPI_ERR("can't get our fapi position");
+    fapi2::Assert(false);
+    return 0;
+#else
+    return pos(i_target);
+#endif
+}
+
+
 }
 #endif
