@@ -262,21 +262,20 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 }
         },
 
-//TODO RTC: 148566
 // No mdia in VPO
-//#ifndef CONFIG_VPO_COMPILE
-//        /**
-//         * @brief MDIA code library
-//         */
-//        {
-//            "libmdia.so" ,                        // taskname
-//            NULL,                                 // no pointer to fn
-//            {
-//               INIT_TASK,                         // task type
-//               EXT_IMAGE,                         // Extended Module
-//            }
-//        },
-//#endif
+#ifndef CONFIG_VPO_COMPILE
+        /**
+         * @brief MDIA code library
+         */
+        {
+            "libmdia.so" ,                        // taskname
+            NULL,                                 // no pointer to fn
+            {
+               INIT_TASK,                         // task type
+               EXT_IMAGE,                         // Extended Module
+            }
+        },
+#endif
 
         /**
          * @brief PRDF code library
