@@ -95,190 +95,218 @@ class apbTraits<fapi2::TARGET_TYPE_MCA>
 
 };
 
+namespace apb
+{
+
 ///
-/// @class mss::apb
-/// @brief APB class
+/// @brief Read APB_CONFIG0
 /// @tparam T fapi2 Target Type - derived
 /// @tparam TT traits type defaults to apbTraits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
 template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = apbTraits<T> >
-class apb
+inline fapi2::ReturnCode read_config0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
-    public:
-
-        ///
-        /// @brief Read APB_CONFIG0
-        /// @param[in] i_target the fapi2 target of the port
-        /// @param[out] o_data the value of the register
-        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-        ///
-        inline fapi2::ReturnCode read_config0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
-        {
-            FAPI_TRY( mss::getScom(i_target, TT::APB_CONFIG0_REG, o_data) );
-            FAPI_DBG("apb_config0: 0x%016lx", o_data);
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief Write APB_CONFIG0
-        /// @param[in] i_target the fapi2 target of the port
-        /// @param[in] i_data the value of the register
-        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-        ///
-        inline fapi2::ReturnCode write_config0( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
-        {
-            FAPI_DBG("apb_config0: 0x%016lx", i_data);
-            FAPI_TRY( mss::putScom(i_target, TT::APB_CONFIG0_REG, i_data) );
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief Read APB_ERROR_STATUS0
-        /// @param[in] i_target the fapi2 target of the port
-        /// @param[out] o_data the value of the register
-        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-        ///
-        inline fapi2::ReturnCode read_error_status0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
-        {
-            FAPI_TRY( mss::getScom(i_target, TT::APB_ERROR_STATUS0_REG, o_data) );
-            FAPI_DBG("apb_error_status0: 0x%016lx", o_data);
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief Write APB_ERROR_STATUS0
-        /// @param[in] i_target the fapi2 target of the port
-        /// @param[in] i_data the value of the register
-        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-        ///
-        inline fapi2::ReturnCode write_error_status0( const fapi2::Target<T>& i_target,
-                const fapi2::buffer<uint64_t>& i_data )
-        {
-            FAPI_DBG("apb_error_status0: 0x%016lx", i_data);
-            FAPI_TRY( mss::putScom(i_target, TT::APB_ERROR_STATUS0_REG, i_data) );
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief Read APB_FIR_ERR0_REG
-        /// @param[in] i_target the fapi2 target of the port
-        /// @param[out] o_data the value of the register
-        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-        ///
-        inline fapi2::ReturnCode read_fir_err0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
-        {
-            FAPI_TRY( mss::getScom(i_target, TT::APB_FIR_ERR0_REG, o_data) );
-            FAPI_DBG("apb_fir_err0: 0x%016lx", o_data);
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief Read APB_FIR_ERR1_REG
-        /// @param[in] i_target the fapi2 target of the port
-        /// @param[out] o_data the value of the register
-        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-        ///
-        inline fapi2::ReturnCode read_fir_err1( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
-        {
-            FAPI_TRY( mss::getScom(i_target, TT::APB_FIR_ERR1_REG, o_data) );
-            FAPI_DBG("apb_fir_err1: 0x%016lx", o_data);
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief Read APB_FIR_ERR2_REG
-        /// @param[in] i_target the fapi2 target of the port
-        /// @param[out] o_data the value of the register
-        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-        ///
-        inline fapi2::ReturnCode read_fir_err2( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
-        {
-            FAPI_TRY( mss::getScom(i_target, TT::APB_FIR_ERR2_REG, o_data) );
-            FAPI_DBG("apb_fir_err2: 0x%016lx", o_data);
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief Read APB_FIR_ERR3_REG
-        /// @param[in] i_target the fapi2 target of the port
-        /// @param[out] o_data the value of the register
-        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-        ///
-        inline fapi2::ReturnCode read_fir_err3( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
-        {
-            FAPI_TRY( mss::getScom(i_target, TT::APB_FIR_ERR3_REG, o_data) );
-            FAPI_DBG("apb_fir_err3: 0x%016lx", o_data);
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief Reset the error state of the APB block
-        /// @param[in] i_target the fapi2 target of the port
-        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-        ///
-        inline fapi2::ReturnCode reset_err( const fapi2::Target<T>& i_target )
-        {
-            // DDRPHY_APB_CONFIG0_P0_RESET_ERR_RPT
-            // Write this bit to '1'b then write this bit to '0'b (toggle) to reset the
-            // APB error registers.
-            // Does this cover all of them? BRS
-            fapi2::buffer<uint64_t> l_data;
-            FAPI_TRY( read_config0(i_target, l_data) );
-            l_data.setBit<TT::RESET_ERR_RPT>();
-            FAPI_TRY( write_config0(i_target, l_data) );
-            l_data.clearBit<TT::RESET_ERR_RPT>();
-            FAPI_TRY( write_config0(i_target, l_data) );
-
-            // We have to read ERR_STATUS0. It resets when read.
-            FAPI_TRY( read_error_status0(i_target, l_data) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief reset apb_config0
-        /// @param[in] i_target fapi2 target of the port
-        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
-        ///
-        inline fapi2::ReturnCode reset_config0( const fapi2::Target<T>& i_target )
-        {
-            FAPI_TRY( reset_err(i_target) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief reset rc
-        /// @param[in] i_target fapi2 target of the port
-        /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS if ok
-        ///
-        inline fapi2::ReturnCode reset( const fapi2::Target<T>& i_target )
-        {
-            FAPI_TRY( reset_config0(i_target) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief APB block FIR check
-        /// @param[in] i_target fapi2 target of the port
-        /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS if no FIR
-        ///
-        fapi2::ReturnCode fir_check( const fapi2::Target<T>& i_target );
-
-};
-
+    FAPI_TRY( mss::getScom(i_target, TT::APB_CONFIG0_REG, o_data) );
+    FAPI_DBG("apb_config0: 0x%016lx", o_data);
+fapi_try_exit:
+    return fapi2::current_err;
 }
+
+///
+/// @brief Write APB_CONFIG0
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to apbTraits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = apbTraits<T> >
+inline fapi2::ReturnCode write_config0( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    FAPI_DBG("apb_config0: 0x%016lx", i_data);
+    FAPI_TRY( mss::putScom(i_target, TT::APB_CONFIG0_REG, i_data) );
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Read APB_ERROR_STATUS0
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to apbTraits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = apbTraits<T> >
+inline fapi2::ReturnCode read_error_status0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    FAPI_TRY( mss::getScom(i_target, TT::APB_ERROR_STATUS0_REG, o_data) );
+    FAPI_DBG("apb_error_status0: 0x%016lx", o_data);
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write APB_ERROR_STATUS0
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to apbTraits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = apbTraits<T> >
+inline fapi2::ReturnCode write_error_status0( const fapi2::Target<T>& i_target,
+        const fapi2::buffer<uint64_t>& i_data )
+{
+    FAPI_DBG("apb_error_status0: 0x%016lx", i_data);
+    FAPI_TRY( mss::putScom(i_target, TT::APB_ERROR_STATUS0_REG, i_data) );
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Read APB_FIR_ERR0_REG
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to apbTraits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = apbTraits<T> >
+inline fapi2::ReturnCode read_fir_err0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    FAPI_TRY( mss::getScom(i_target, TT::APB_FIR_ERR0_REG, o_data) );
+    FAPI_DBG("apb_fir_err0: 0x%016lx", o_data);
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Read APB_FIR_ERR1_REG
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to apbTraits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = apbTraits<T> >
+inline fapi2::ReturnCode read_fir_err1( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    FAPI_TRY( mss::getScom(i_target, TT::APB_FIR_ERR1_REG, o_data) );
+    FAPI_DBG("apb_fir_err1: 0x%016lx", o_data);
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Read APB_FIR_ERR2_REG
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to apbTraits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = apbTraits<T> >
+inline fapi2::ReturnCode read_fir_err2( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    FAPI_TRY( mss::getScom(i_target, TT::APB_FIR_ERR2_REG, o_data) );
+    FAPI_DBG("apb_fir_err2: 0x%016lx", o_data);
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Read APB_FIR_ERR3_REG
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to apbTraits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = apbTraits<T> >
+inline fapi2::ReturnCode read_fir_err3( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    FAPI_TRY( mss::getScom(i_target, TT::APB_FIR_ERR3_REG, o_data) );
+    FAPI_DBG("apb_fir_err3: 0x%016lx", o_data);
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reset the error state of the APB block
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to apbTraits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = apbTraits<T> >
+inline fapi2::ReturnCode reset_err( const fapi2::Target<T>& i_target )
+{
+    // DDRPHY_APB_CONFIG0_P0_RESET_ERR_RPT
+    // Write this bit to '1'b then write this bit to '0'b (toggle) to reset the
+    // APB error registers.
+    // Does this cover all of them? BRS
+    fapi2::buffer<uint64_t> l_data;
+    FAPI_TRY( read_config0(i_target, l_data) );
+    l_data.setBit<TT::RESET_ERR_RPT>();
+    FAPI_TRY( write_config0(i_target, l_data) );
+    l_data.clearBit<TT::RESET_ERR_RPT>();
+    FAPI_TRY( write_config0(i_target, l_data) );
+
+    // We have to read ERR_STATUS0. It resets when read.
+    FAPI_TRY( read_error_status0(i_target, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief reset apb_config0
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to apbTraits<T>
+/// @param[in] i_target fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = apbTraits<T> >
+inline fapi2::ReturnCode reset_config0( const fapi2::Target<T>& i_target )
+{
+    FAPI_TRY( reset_err(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief reset apb
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to apbTraits<T>
+/// @param[in] i_target fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = apbTraits<T> >
+inline fapi2::ReturnCode reset( const fapi2::Target<T>& i_target )
+{
+    FAPI_TRY( reset_config0(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief APB block FIR check
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to apbTraits<T>
+/// @param[in] i_target fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if no FIR
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = apbTraits<T> >
+fapi2::ReturnCode fir_check( const fapi2::Target<T>& i_target );
+
+} // close namespace apb
+
+} // close namespace mss
 
 #endif

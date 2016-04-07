@@ -64,7 +64,7 @@ fapi2::ReturnCode change_resetn( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targ
 {
     fapi2::buffer<uint64_t> l_data;
 
-    for (auto p : i_target.getChildren<TARGET_TYPE_MCA>())
+    for (const auto& p : i_target.getChildren<TARGET_TYPE_MCA>())
     {
         FAPI_DBG("Change reset to %s PHY: %s", (i_state == HIGH ? "high" : "low"), mss::c_str(p));
 
@@ -89,7 +89,7 @@ fapi2::ReturnCode toggle_zctl( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
 #if 0
     fapi2::buffer<uint64_t> l_data;
 
-    auto l_ports = i_target.getChildren<TARGET_TYPE_MCA>();
+    const auto l_ports = i_target.getChildren<TARGET_TYPE_MCA>();
     //
     // 4. Write 0x0010 to PC IO PVT N/P FET driver control registers to assert ZCTL reset and enable the internal impedance controller.
     // (SCOM Addr: 0x8000C0140301143F,  0x8000C0140301183F, 0x8001C0140301143F, 0x8001C0140301183F)
@@ -146,7 +146,7 @@ fapi2::ReturnCode change_force_mclk_low (const fapi2::Target<TARGET_TYPE_MCBIST>
     FAPI_DBG("force mclk %s for all ports", (i_state == mss::LOW ? "low" : "high") );
 
     // Might as well do this for all the ports while we're here.
-    for (auto p : i_target.getChildren<TARGET_TYPE_MCA>())
+    for (const auto& p : i_target.getChildren<TARGET_TYPE_MCA>())
     {
         FAPI_TRY(mss::getScom( p, MCA_MBA_FARB5Q, l_data));
 
@@ -324,9 +324,9 @@ fapi2::ReturnCode ddr_phy_flush( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targ
     l_data.setBit<48>().setBit<58>();
     l_mask.setBit<48>().setBit<58>();
 
-    auto l_ports = i_target.getChildren<TARGET_TYPE_MCA>();
+    const auto l_ports = i_target.getChildren<TARGET_TYPE_MCA>();
 
-    for (auto p : l_ports)
+    for (const auto& p : l_ports)
     {
         FAPI_TRY(mss::putScomUnderMask(p, MCA_DDRPHY_PC_POWERDOWN_1_P0, l_data, l_mask) );
     }
@@ -335,41 +335,13 @@ fapi2::ReturnCode ddr_phy_flush( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targ
 
     FAPI_INF("ADR/DP18 FLUSH: 2) clear PC_POWERDOWN_1 register, powerdown enable(48), flush bit(58)");
 
-    for (auto p : l_ports)
+    for (const auto& p : l_ports)
     {
         FAPI_TRY(mss::putScomUnderMask(p, MCA_DDRPHY_PC_POWERDOWN_1_P0, 0, l_mask) );
     }
 
 fapi_try_exit:
     return fapi2::current_err;
-}
-
-///
-/// @brief Send a scom to all instances of a block on the phy.
-/// @param[in] i_target the MCA target
-/// @param[in] l_addr the address
-/// @param[in] i_data the value
-/// @note this iterates creating addresses - needs to change to use the
-/// braodcast bits in the phy when we can scom it directly.
-///
-static inline fapi2::ReturnCode phy_block_broadcast( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
-        const uint64_t l_addr,
-        const fapi2::buffer<uint64_t> i_data)
-{
-#ifndef BROADSIDE_SCOM_ONLY
-    static const size_t PHY_INSTANCE_COUNT = 5;
-
-    // We have to use a dull knife since broadisde scom has to have the address in
-    // the scomdef. When we get a full system model (or the PIE driver supports scomming
-    // the PHY) we can use the broadcast bits and iterate over the DIMM ranks.
-    for (size_t i = 0; i < PHY_INSTANCE_COUNT; ++i)
-    {
-        FAPI_TRY( mss::putScom(i_target, l_addr | fapi2::buffer<uint64_t>().insertFromRight<18, 4>(i), i_data) );
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-#endif
 }
 
 ///
@@ -421,7 +393,7 @@ fapi2::ReturnCode bang_bang_lock( const fapi2::Target<TARGET_TYPE_MCBIST>& i_tar
     if (!is_sim)
     {
         // Check for BB lock.
-        for (auto p : i_target.getChildren<TARGET_TYPE_MCA>())
+        for (const auto& p : i_target.getChildren<TARGET_TYPE_MCA>())
         {
             FAPI_DBG("Wait for BB lock in status register, bit %u",
                      MCA_DDRPHY_ADR_SYSCLK_PR_VALUE_RO_P0_ADR32S0_ADR0_BB_LOCK);
@@ -457,7 +429,8 @@ fapi2::ReturnCode rank_pair_primary_to_dimm(
     fapi2::buffer<uint64_t> l_data;
     fapi2::buffer<uint64_t> l_rank;
     uint64_t l_rank_on_dimm;
-    auto l_dimms = i_target.getChildren<TARGET_TYPE_DIMM>();
+
+    const auto l_dimms = i_target.getChildren<TARGET_TYPE_DIMM>();
 
     // Sanity check the rank pair
     FAPI_INF("%s rank pair: %d", mss::c_str(i_target), i_rp);
@@ -529,12 +502,11 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
     fapi2::buffer<uint64_t> l_fir_data;
     fapi2::buffer<uint64_t> l_err_data;
 
-    mss::apb<TARGET_TYPE_MCA> l_apb;
     mss::pc<TARGET_TYPE_MCA>  l_pc;
 
     fapi2::Target<TARGET_TYPE_DIMM> l_failed_dimm;
 
-    FAPI_TRY( l_apb.read_fir_err1(i_target, l_fir_data) );
+    FAPI_TRY( mss::apb::read_fir_err1(i_target, l_fir_data) );
     FAPI_DBG("initial cal FIR: 0x%016llx", uint64_t(l_fir_data));
 
     // If we have no errors, lets get out of here.
@@ -814,7 +786,7 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
     FAPI_TRY( mss::dp16<TARGET_TYPE_MCA>().setup_io_tx_config0(i_target) );
     FAPI_TRY( mss::dp16<TARGET_TYPE_MCA>().setup_dll_vreg_config1(i_target) );
 
-    for( auto p : i_target.getChildren<TARGET_TYPE_MCA>())
+    for (const auto& p : i_target.getChildren<TARGET_TYPE_MCA>())
     {
         mss::dp16<TARGET_TYPE_MCA> l_dp16;
 
@@ -950,7 +922,7 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
     // Note: This rank encoding isn't used if the cal is initiated from the CCS engine
     // as they use the recal inteface.
     // Configure the rank pairs
-    for (auto rp : i_rank_pairs)
+    for (const auto& rp : i_rank_pairs)
     {
         l_cal_config.setBit(MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_RANK_PAIR + rp);
     }
@@ -2482,7 +2454,7 @@ fapi2::ReturnCode dump_regs( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
         {"MCA_DDRPHY_WC_RTT_WR_SWAP_ENABLE_P0", MCA_DDRPHY_WC_RTT_WR_SWAP_ENABLE_P0 },
     };
 
-    for (auto r : l_registers)
+    for (const auto& r : l_registers)
     {
         fapi2::buffer<uint64_t> l_data;
         FAPI_TRY( mss::getScom(i_target, r.second, l_data) );

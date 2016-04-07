@@ -35,14 +35,17 @@
 
 namespace mss
 {
+
+namespace apb
+{
+
 ///
 /// @brief APB block FIR check, MCA style
 /// @param[in] i_target fapi2 target of the port
-/// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS if no FIR
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if no FIR
 ///
 template<>
-fapi2::ReturnCode apb<fapi2::TARGET_TYPE_MCA>::fir_check(
-    const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+fapi2::ReturnCode fir_check(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
 {
     typedef apbTraits<fapi2::TARGET_TYPE_MCA> TT;
 
@@ -105,5 +108,5 @@ fapi2::ReturnCode apb<fapi2::TARGET_TYPE_MCA>::fir_check(
 fapi_try_exit:
     return fapi2::current_err;
 }
-
-}
+} // close namespace apb
+} // close namespace mss
