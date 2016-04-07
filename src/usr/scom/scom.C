@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,7 @@
 #include <xscom/piberror.H>
 #include <errl/errludtarget.H>
 #include <errl/errludlogregister.H>
+#include <hw_access_def.H>
 
 
 // Trace definition
@@ -89,7 +90,9 @@ errlHndl_t scomPerformOp(DeviceFW::OperationType i_opType,
 
 
     uint64_t l_scomAddr = va_arg(i_args,uint64_t);
-
+    // if opMode is not specified as an argument va_arg
+    // will return NULL which is 0
+    uint64_t l_opMode = va_arg(i_args,uint64_t);
 
 
     l_err = checkIndirectAndDoScom(i_opType,
@@ -97,7 +100,8 @@ errlHndl_t scomPerformOp(DeviceFW::OperationType i_opType,
                                    io_buffer,
                                    io_buflen,
                                    i_accessType,
-                                   l_scomAddr);
+                                   l_scomAddr,
+                                   l_opMode);
 
     return l_err;
 }
@@ -115,7 +119,9 @@ errlHndl_t scomMemBufPerformOp(DeviceFW::OperationType i_opType,
 
 
     uint64_t l_scomAddr = va_arg(i_args,uint64_t);
-
+    // if opMode is not specified as an argument va_arg
+    // will return NULL which is 0
+    uint64_t l_opMode = va_arg(i_args,uint64_t);
 
 
     l_err = checkIndirectAndDoScom(i_opType,
@@ -123,7 +129,8 @@ errlHndl_t scomMemBufPerformOp(DeviceFW::OperationType i_opType,
                                    io_buffer,
                                    io_buflen,
                                    i_accessType,
-                                   l_scomAddr);
+                                   l_scomAddr,
+                                   l_opMode);
 
     // Check for ATTR_CENTAUR_EC_ENABLE_RCE_WITH_OTHER_ERRORS_HW246685
     // if ATTR set and MBSECCQ being read then set bit 16
@@ -167,7 +174,8 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                                   void* io_buffer,
                                   size_t& io_buflen,
                                   int64_t i_accessType,
-                                  uint64_t i_addr)
+                                  uint64_t i_addr,
+                                  uint64_t i_opMode)
 {
 
     errlHndl_t l_err = NULL;
@@ -479,6 +487,12 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
         } // end of write
 #endif // __HOSTBOOT_RUNTIME
     } while(0);
+
+    if(i_opMode & fapi2::IGNORE_HW_ERROR)
+    {
+        TRACFCOMP(g_trac_scom, "IGNORE_HW_ERROR opmode detected for scom, any errors are being deleted");
+        delete l_err;
+    }
 
     if( need_unlock )
     {

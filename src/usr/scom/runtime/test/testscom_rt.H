@@ -426,8 +426,8 @@ public:
           { scom_targets[myEX1], 0x000F0166, 0xabcdabcdabcdabcd,  fapi2::NORMAL, true},   // invalid address range for target
           { scom_targets[myEX1], 0x21000000 ,0x7676767676767676,  fapi2::IGNORE_HW_ERROR, false},  // pervasive addr does not req wakeup
           { scom_targets[myEX5], 0x20010A02, 0x9191919191919191,  fapi2::IGNORE_HW_ERROR, false},
-          { scom_targets[myEX5], 0x13040002, 0xabcdabcdabcdabcd,  fapi2::IGNORE_HW_ERROR, true},   // invalid unit 0 address
-          { scom_targets[myEX1], 0x000F0166, 0xabcdabcdabcdabcd,  fapi2::IGNORE_HW_ERROR, true},   // invalid address range for target
+          { scom_targets[myEX5], 0x2E010010, 0xabcdabcdabcdabcd,  fapi2::IGNORE_HW_ERROR, true},   // invalid unit 0 address
+          { scom_targets[myEX1], 0x2E010009, 0xabcdabcdabcdabcd,  fapi2::IGNORE_HW_ERROR, true},   // invalid address range for target
           { scom_targets[myEX1], 0x21000000 ,0x7676767676767676,  fapi2::DO_NOT_DO_WAKEUP, false}, // pervasive addr does not req wakeup
           { scom_targets[myEX5], 0x20010A02, 0x9191919191919191,  fapi2::DO_NOT_DO_WAKEUP, false},
           { scom_targets[myEX5], 0x13040002, 0xabcdabcdabcdabcd,  fapi2::DO_NOT_DO_WAKEUP, true},   // invalid unit 0 address
@@ -453,8 +453,16 @@ public:
               TRACFCOMP( g_trac_scom, "ScomTest::test_opModes> Target %d is not functional", x );
               continue;
           }
-
-
+          if(test_data[x].expectErr)
+          {
+              TRACFCOMP(g_trac_scom, "ScomTest::test_opModes> Writing 0x%X to the addr: 0x%X with opMode: 0x%X and an error is expected",
+                        test_data[x].data,test_data[x].addr,test_data[x].mode);
+          }
+          else
+          {
+            TRACFCOMP(g_trac_scom, "ScomTest::test_opModes> Writing 0x%X to the addr: 0x%X with opMode: 0x%X and an error is NOT expected",
+                      test_data[x].data,test_data[x].addr,test_data[x].mode);
+          }
           op_size = sizeof(uint64_t);
 
           total++;
@@ -469,7 +477,7 @@ public:
               if( l_err )
               {
                   TRACFCOMP(g_trac_scom, "ScomTest::test_opModes> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-                  TS_FAIL( "ScomTest::test_opModes> ERROR : Unexpected error log from write1" );
+                  TS_FAIL( "ScomTest::test_opModes> ERROR : Unexpected error log from deviceWrite" );
                   fails++;
                   errlCommit(l_err,SCOM_COMP_ID);
               }
@@ -482,8 +490,8 @@ public:
               }
               else
               {
-                  TRACFCOMP( g_trac_scom, "ScomTest::test_opModes.. Expected Error log and did not get one for addr 0x%X " ,test_data[x].addr );
-                  TS_FAIL( "ScomTest::test_opModes> ERROR : Expected Error log and did not get one" );
+                  TRACFCOMP( g_trac_scom, "ScomTest::test_opModes.. Expected an error log and did not get one for addr 0x%X " ,test_data[x].addr );
+                  TS_FAIL( "ScomTest::test_opModes> ERROR : Expected an Error log and did not get one" );
                   fails++;
               }
           }
@@ -508,6 +516,17 @@ public:
 
           op_size = sizeof(uint64_t);
 
+          if(test_data[x].expectErr)
+          {
+              TRACFCOMP(g_trac_scom, "ScomTest::test_opModes> Reading from the addr: 0x%X with opMode: 0x%X and an error is expected",
+                        test_data[x].data,test_data[x].addr, test_data[x].mode);
+          }
+          else
+          {
+            TRACFCOMP(g_trac_scom, "ScomTest::test_opModes> Reading from the addr: 0x%X with opMode: 0x%X and an error is not expected",
+                      test_data[x].data,test_data[x].addr, test_data[x].mode);
+          }
+
           total++;
           l_err = deviceRead( test_data[x].target,
                               &(read_data[x]),
@@ -518,7 +537,7 @@ public:
               if( l_err )
               {
                   TRACFCOMP(g_trac_scom, "ScomTest::test_opModes> [%d] Read: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
-                  TS_FAIL( "ScomTest::test_opModes> ERROR : Unexpected error log from write1" );
+                  TS_FAIL( "ScomTest::test_opModes> ERROR : Unexpected error log from deviceRead" );
                   fails++;
                   errlCommit(l_err,SCOM_COMP_ID);
               }

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -161,6 +163,7 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
  * @param[in]   i_accessType    Select from DeviceFW::AccessType enum
  *                              @see usr/devicefw/userif.H
  * @param[in]   i_addr          Scom Address Value.
+ * @param[in]   i_opMode        the fapi2::OpMode for this scom operation
  *
  * @return  errlHndl_t
  */
@@ -169,7 +172,8 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                                   void* io_buffer,
                                   size_t& io_buflen,
                                   int64_t i_accessType,
-                                  uint64_t i_addr);
+                                  uint64_t i_addr,
+                                  uint64_t i_opMode);
 
 
 }; // End namespace
