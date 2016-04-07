@@ -77,7 +77,7 @@ FAPI2_ATTR_XML := $(filter-out ${HB_TEMP_DFLT_XML},$(FAPI2_ATTR_XML))
 
 # Chip SCOM address header files.
 FAPI2_PLAT_INCLUDE += $(addsuffix /common/include, \
-  $(addprefix $(ROOTPATH)/src/import/chips/$CHIPS))
+  $(addprefix $(ROOTPATH)/src/import/chips/, $(CHIPS)))
 
 #------------------------------------------------------------------------------
 # The PLAT HWP RC and FFDC parser file generated from Error XML files
