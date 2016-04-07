@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training_advanced.C,v 1.65 2016/03/25 14:20:21 sglancy Exp $
+// $Id: mss_draminit_training_advanced.C,v 1.67 2016/04/04 16:18:32 dcadiga Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur 29 Sept 2011. */
 
 //------------------------------------------------------------------------------
@@ -106,6 +106,8 @@
 //  1.63   |sglancy   |08-Mar-16| Fixed compile error
 //  1.64   |sglancy   |18-Mar-16| Fixed bug for box shmoo
 //  1.65   |sglancy   |25-Mar-16| Addressed FW comments
+//  1.66   |preeragh  |29-Mar-16| Disable Refresh after train_adv procedures (ddr4)
+//  1.67   |dcadiga   |04-APR-16| Code Review Updates
 // This procedure Schmoo's DRV_IMP, SLEW, VREF (DDR, CEN), RCV_IMP based on attribute from effective config procedure
 // DQ & DQS Driver impedance, Slew rate, WR_Vref shmoo would call only write_eye shmoo for margin calculation
 // DQ & DQS VREF (rd_vref), RCV_IMP shmoo would call rd_eye for margin calculation
@@ -263,8 +265,9 @@ fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_ta
     uint8_t temp_cal_control = 0;
     uint32_t int32_cal_control[2] = {0};
     uint64_t int64_cal_control = 0;
-
-
+	ecmdDataBufferBase l_data_buffer_64(64);
+	uint32_t rc_num = 0;
+	
     // Define local variables
     uint8_t l_shmoo_type_valid_t=0;
     uint8_t l_shmoo_param_valid_t=0;
@@ -280,7 +283,7 @@ fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_ta
     //Preet Add MSS_CAL control here
     rc = FAPI_ATTR_GET(ATTR_MSS_VREF_CAL_CNTL, &l_target_centaur, vref_cal_control);
     if(rc) return rc;
-    FAPI_INF("+++++++++++++++++++++++++++++ - DDR4 - CAL Control - %d +++++++++++++++++++++++++++++++++++++++++++++",vref_cal_control);
+    FAPI_INF("+++++++++++ - DDR4 - CAL Control - %d ++++++++++++++++++++",vref_cal_control);
 
 
     //const fapi::Target is centaur.mba
@@ -307,12 +310,26 @@ fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_ta
                      uint32_t(rc), rc.getCreator());
             return rc;
         }
+		// Disable Refresh DDR4 Requirement
+	if (l_dram_type == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+	{
+		FAPI_INF("************* Disabling Refresh - DDR4 **************");
+		rc = fapiGetScom(i_target_mba,0x03010432,l_data_buffer_64);
+        if(rc) return rc;
+        rc_num = rc_num | l_data_buffer_64.clearBit(0);
+        if(rc_num){
+           rc.setEcmdError(rc_num);
+           return rc;
+        }
+        rc = fapiPutScom(i_target_mba,0x03010432,l_data_buffer_64);
+        if(rc) return rc;
+	}
         return rc;
     }
 
     else if ((vref_cal_control != 0) && (l_dram_type == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4) && (bin_pda != 3))
     {
-        FAPI_INF("+++++++++++++++++++++++++++++ - DDR4 - CAL Control +++++++++++++++++++++++++++++++++++++++++++++");
+        FAPI_INF("+++++++++++++++++++++++++++++ - DDR4 - CAL Control +++++++++++ Training ++++++++++++ in Progress ++++++++++++++++");
 
         temp_cal_control = 8;
         rc = FAPI_ATTR_SET(ATTR_EFF_SCHMOO_PARAM_VALID, &i_target_mba, temp_cal_control);
@@ -490,6 +507,21 @@ fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_ta
             }
         }
     }
+	// Disable Refresh DDR4 Requirement
+	if (l_dram_type == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4)
+	{
+		FAPI_INF("************* Disabling Refresh - DDR4 **************");
+		rc = fapiGetScom(i_target_mba,0x03010432,l_data_buffer_64);
+        if(rc) return rc;
+        rc_num = rc_num | l_data_buffer_64.clearBit(0);
+        if(rc_num){
+           rc.setEcmdError(rc_num);
+           return rc;
+        }
+        rc = fapiPutScom(i_target_mba,0x03010432,l_data_buffer_64);
+        if(rc) return rc;
+	}
+
     return rc;
 }
 
@@ -1415,7 +1447,7 @@ fapi::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi::Target & i_target_mba)
             if (rc) return rc;
 
             total_val = l_right_margin+l_left_margin;
-            FAPI_INF("Preet2 - %d ; Wr Vref = %d ; Min Setup time = %d; Min Hold time = %d and Total = %d",vref_val,vref_val_print,l_left_margin,l_right_margin,total_val);
+            FAPI_INF("%s: Preet2 - %d ; Wr Vref = %d ; Min Setup time = %d; Min Hold time = %d and Total = %d",i_target_mba.toEcmdString(),vref_val,vref_val_print,l_left_margin,l_right_margin,total_val);
 
             if(total_val > last_total)
             {
@@ -1447,7 +1479,7 @@ fapi::ReturnCode wr_vref_shmoo_ddr4_bin(const fapi::Target & i_target_mba)
 
 
         vref_val_print = base_percent + (last_known_vref * index_mul_print);
-        FAPI_INF("Best V-Ref - %d - %d  ; Total Window = %d",last_known_vref,vref_val_print,last_total);
+        FAPI_INF("%s: Best V-Ref - %d - %d  ; Total Window = %d",i_target_mba.toEcmdString(),last_known_vref,vref_val_print,last_total);
         // What do we do Once we know best V-Ref
 
         rc = fapiGetScom( i_target_mba,  0x03010432,  refresh_reg);

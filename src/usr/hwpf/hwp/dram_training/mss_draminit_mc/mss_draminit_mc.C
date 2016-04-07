@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_mc.C,v 1.55 2016/03/07 20:29:20 sglancy Exp $
+// $Id: mss_draminit_mc.C,v 1.56 2016/04/07 15:22:26 gollub Exp $
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2011
 // *! All Rights Reserved -- Property of IBM
@@ -47,6 +47,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.56   | gollub   |07-APR-16| SW348920: Enable RCD recovery during RCD protect time test, which is needed for DDR4
 //  1.55   | sglancy  |07-MAR-16| Updated for DDR4 RCD Parity
 //  1.54   | sglancy  |29-FEB-16| Addressed FW comments - on leap day!
 //  1.53   | sglancy  |12-FEB-16| Addressed FW comments
@@ -736,6 +737,21 @@ ReturnCode mss_check_RCD_protect_time (Target& i_target)
         }
 
         //------------------------------------------------------    
+        // Enable RCD recovery
+        //------------------------------------------------------
+        l_ecmd_rc |= l_mba_farb0.clearBit(54);
+        if(l_ecmd_rc)
+        {
+            l_rc.setEcmdError(l_ecmd_rc);
+            return l_rc;
+        }
+        
+        // Write FARB0
+        l_rc = fapiPutScom(i_target, MBA01_MBA_FARB0Q_0x03010413, l_mba_farb0);
+        if(l_rc) return l_rc;
+
+
+        //------------------------------------------------------    
         // Get Centaur target for the given MBA
         //------------------------------------------------------
         l_rc = fapiGetParentChip(i_target, l_targetCentaur);
@@ -1200,27 +1216,32 @@ ReturnCode mss_check_RCD_protect_time (Target& i_target)
         if(l_rc) return l_rc;
 
 
+        // Read FARB0
+        l_rc = fapiGetScom(i_target, MBA01_MBA_FARB0Q_0x03010413, l_mba_farb0);
+        if(l_rc) return l_rc;        
+
         //------------------------------------------------------ 
         // Load l_highest_cfg_rcd_protection_time
         //------------------------------------------------------    
         // NOTE: We are loading highest_cfg_rcd_protection_time here just so we can stop after mss_draminit_mc and read out the values from the hw as a way to debug
         // NOTE: The final value we want to load is max_cfg_rcd_protection_time, which we will do in mss_thermal_init, before we enable RCD recovery.
-        // NOTE: If no DIMM on this MBA passed, highest_cfg_rcd_protection_time will be 0
-        
-        // Read FARB0
-        l_rc = fapiGetScom(i_target, MBA01_MBA_FARB0Q_0x03010413, l_mba_farb0);
-        if(l_rc) return l_rc;        
-        // Set highest_cfg_rcd_protection_time
+        // NOTE: If no DIMM on this MBA passed, highest_cfg_rcd_protection_time will be 0        
         l_ecmd_rc |= l_mba_farb0.insert( l_highest_cfg_rcd_protection_time, 48, 6, 8-6 );
+        
+        //------------------------------------------------------ 
+        // Disable RCD recovery
+        //------------------------------------------------------ 
+        l_ecmd_rc |= l_mba_farb0.setBit(54);
+
         if(l_ecmd_rc)
         {
             l_rc.setEcmdError(l_ecmd_rc);
             return l_rc;
         }
+
         // Write FARB0
         l_rc = fapiPutScom(i_target, MBA01_MBA_FARB0Q_0x03010413, l_mba_farb0);
         if(l_rc) return l_rc;
-
         
     } // End if RDIMM or LRDIMM
 
