@@ -50,11 +50,19 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <rc>RC_PMPROC_CACHECLKSTART_FAILED</rc>
+    <description>
+        cache clock start failed.
+    </description>
+    <ffdc>EQCLKSTAT</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
     <rc>RC_PMPROC_CACHECLKSTART_TIMEOUT</rc>
     <description>
         cache clock start timed out.
     </description>
-    <ffdc>EQCLKSTAT</ffdc>
+    <ffdc>EQCPLTSTAT</ffdc>
     <callout>
       <childTargets>
         <parent>PROC_CHIP_IN_ERROR</parent>
