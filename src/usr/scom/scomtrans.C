@@ -195,7 +195,8 @@ errlHndl_t startScomProcess(DeviceFW::OperationType i_opType,
                                             io_buffer,
                                             io_buflen,
                                             i_accessType,
-                                            l_addr);
+                                            l_addr,
+                                            l_opMode);
     }
 
     // @todo RTC:124196 need to move this to a more general location so that
@@ -225,6 +226,7 @@ errlHndl_t startScomProcess(DeviceFW::OperationType i_opType,
         g_wakeupInProgress = false;
     }
 #endif
+
     return l_err;
 }
 
