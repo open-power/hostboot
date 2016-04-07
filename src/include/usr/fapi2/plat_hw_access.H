@@ -41,6 +41,7 @@
 #include <target.H>
 #include <target_types.H>
 #include <hw_access_def.H>
+#include <p9_ringId.H>
 
 namespace fapi2
 {
@@ -103,7 +104,6 @@ ReturnCode platGetCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
 ///
 /// @brief Platform-level implementation called by putCfamRegister()
 /// Hardware procedures writers will not call this function.
-/// @Tparam K template parameter, passed in target.
 /// @param[in]  i_target   HW target to operate on.
 /// @param[in]  i_address  CFAM address to write to.
 /// @param[out] i_data     32-bit buffer that holds data to write into address.
@@ -117,7 +117,6 @@ ReturnCode platPutCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
 ///
 /// @brief Platform-level implementation of modifyCfamRegister()
 /// Hardware procedures writers will not call this function.
-/// @Tparam K template parameter, passed in target.
 /// @param[in]  i_target     HW target to operate on.
 /// @param[in]  i_address    CFAM register address to modify.
 /// @param[out] i_data       32-bit buffer that holds data to modify.
@@ -129,25 +128,20 @@ ReturnCode platModifyCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
                                   const buffer<uint32_t> i_data,
                                   const fapi2::ChipOpModifyMode i_modifyMode);
 
-//@TODO RTC:126630 getRing is not yet supported
 
-#if 0
 
 /// @brief Reads a ring from a chip.
-/// @tparam K template parameter, passed in target.
 /// @param[in]  i_target   Target to operate on.
 /// @param[in]  i_address  Ring address to read from.
 /// @param[out] o_data     Buffer that holds data read from HW target.
 /// @param[in]  i_ringMode Ring operation mode.
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-template< TargetType K >
-inline ReturnCode getRing(const Target<K>& i_target,
-                          const scanRingId_t i_address,
-                          variable_buffer& o_data,
-                          const RingMode i_ringMode = 0);
+ReturnCode platGetRing(const Target<TARGET_TYPE_ALL>& i_target,
+                              const scanRingId_t i_address,
+                              variable_buffer& o_data,
+                              const RingMode i_ringMode);
 
 /// @brief Read-modify-write a ring on a chip.
-/// @tparam K template parameter, passed in target.
 /// @param[in] i_target     Target to operate on.
 /// @param[in] i_address    Ring address to modify.
 /// @param[in] i_data       Buffer that contains RS4 compressed ring data
@@ -155,14 +149,34 @@ inline ReturnCode getRing(const Target<K>& i_target,
 /// @param[in] i_modifyMode The modify mode (or/and/xor)
 /// @param[in] i_ringMode   Ring operation mode.
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-template< TargetType K >
-inline ReturnCode modifyRing(const Target<K>& i_target,
+ReturnCode platModifyRing(const Target<TARGET_TYPE_ALL>& i_target,
                              const scanRingId_t i_address,
                              const variable_buffer& i_data,
                              const ChipOpModifyMode i_modifyMode,
-                             const RingMode i_ringMode = 0);
+                             const RingMode i_ringMode);
 
-#endif // End if 0
+
+// This will be used in future Cumulus code
+/// @brief Write a ring on a chip.
+/// @param[in] i_target     Target to operate on.
+/// @param[in] i_address    Ring address to modify.
+/// @param[in] i_data       Buffer that contains RS4 compressed ring data
+///                         to be written
+/// @param[in] i_ringMode   Ring operation mode.
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+ReturnCode platPutRing(const Target<TARGET_TYPE_ALL>& i_target,
+                       const scanRingId_t i_address,
+                       variable_buffer& i_data,
+                       const RingMode i_ringMode);
+
+/// @brief Writes a ring to a chip.
+/// @param[in] i_target   Target to operate on.
+/// @param[in] i_ringID   Ring ID that will identify the Ring in the image.
+/// @param[in] i_ringMode Ring operation mode.
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+ReturnCode platPutRing(const Target<TARGET_TYPE_ALL>& i_target,
+                       const RingID i_ringID,
+                       const RingMode i_ringMode);
 
 // --------------------------------------------------------------------------
 // NOTE:

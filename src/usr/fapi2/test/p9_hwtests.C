@@ -29,6 +29,7 @@
 //-----------------------------------------------------------------------------
 
 #include <fapi2.H>
+#include <fapi2_hw_access.H>
 
 
 fapi2::ReturnCode p9_scomtest_getscom_fail(
@@ -91,6 +92,7 @@ fapi2::ReturnCode p9_cfamtest_getcfam_fail(
 
 }
 
+
 fapi2::ReturnCode p9_cfamtest_putcfam_fail(
                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
@@ -110,6 +112,7 @@ fapi2::ReturnCode p9_cfamtest_putcfam_fail(
     return fapi2::current_err;
 
 }
+
 
 fapi2::ReturnCode p9_scomtest_getscom_pass(
                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
@@ -186,6 +189,106 @@ fapi2::ReturnCode p9_cfamtest_putcfam_pass(
  fapi_try_exit:
 
     FAPI_INF("Exiting p9_cfamtest_putcfam_pass...");
+
+    return fapi2::current_err;
+
+}
+
+
+fapi2::ReturnCode p9_ringtest_getring_fail(
+               fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    fapi2::variable_buffer l_ringdata;
+
+    FAPI_INF("Entering p9_ringtest_getring_fail...");
+
+    FAPI_INF("Do getring on proc target");
+    FAPI_TRY(fapi2::getRing(i_target,
+                            (scanRingId_t)(0x22334455),
+                            l_ringdata,
+                            fapi2::RING_MODE_HEADER_CHECK));
+
+ fapi_try_exit:
+
+    FAPI_INF("Exiting p9_ringtest_getring_fail...");
+
+    return fapi2::current_err;
+
+}
+
+
+fapi2::ReturnCode p9_ringtest_modring_fail(
+               fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    fapi2::variable_buffer l_ringdata;
+    l_ringdata.resize(861);
+
+    FAPI_INF("Entering p9_ringtest_modring_fail...");
+
+    FAPI_INF("Do modifyRing on proc target");
+    FAPI_TRY(fapi2::modifyRing(i_target,
+                               (scanRingId_t)0x22334455,
+                               l_ringdata,
+                               fapi2::CHIP_OP_MODIFY_MODE_OR,
+                               fapi2::RING_MODE_HEADER_CHECK));
+
+ fapi_try_exit:
+
+    FAPI_INF("Exiting p9_ringtest_modring_fail...");
+
+    return fapi2::current_err;
+
+}
+
+
+fapi2::ReturnCode p9_ringtest_getring_pass(
+               fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    fapi2::variable_buffer l_ringdata;
+    l_ringdata.resize(861);
+
+    FAPI_INF("Entering p9_ringtest_getring_pass...");
+
+    FAPI_INF("Do getring on proc target");
+    FAPI_TRY(fapi2::getRing(i_target,
+                            (scanRingId_t)0x00030088,
+                            l_ringdata,
+                            fapi2::RING_MODE_HEADER_CHECK));
+
+ fapi_try_exit:
+
+    FAPI_INF("Exiting p9_ringtest_getring_pass...");
+
+    return fapi2::current_err;
+
+}
+
+
+fapi2::ReturnCode p9_ringtest_modring_pass(
+               fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    uint32_t bit32_array[861];
+    uint32_t length;
+
+    for (length = 0; length < 861; length++)
+    {
+        bit32_array[length] = length;
+    }
+
+    fapi2::variable_buffer l_ringdata(bit32_array, length, 32 * 861);
+
+    FAPI_INF("Entering p9_ringtest_modring_pass...");
+
+    FAPI_INF("Do putring on proc target");
+    FAPI_TRY(fapi2::modifyRing(i_target,
+                               (scanRingId_t)0x00030088,
+                               l_ringdata,
+                               fapi2::CHIP_OP_MODIFY_MODE_OR,
+                               fapi2::RING_MODE_HEADER_CHECK));
+
+ fapi_try_exit:
+
+    FAPI_INF("Exiting p9_ringtest_modring_pass...");
 
     return fapi2::current_err;
 

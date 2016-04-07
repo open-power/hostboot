@@ -48,6 +48,15 @@ fapi2::ReturnCode p9_cfamtest_putcfam_fail(
                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 
+fapi2::ReturnCode p9_ringtest_getring_fail(
+               fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+
+
+fapi2::ReturnCode p9_ringtest_modring_fail(
+               fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+
+
+
 fapi2::ReturnCode p9_scomtest_getscom_pass(
                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
@@ -63,5 +72,16 @@ fapi2::ReturnCode p9_cfamtest_getcfam_pass(
 fapi2::ReturnCode p9_cfamtest_putcfam_pass(
                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
+
+/////////////
+//
+// TODO-RTC:151428 - need simics support for these ring functions to pass
+//
+fapi2::ReturnCode p9_ringtest_getring_pass(
+               fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+
+fapi2::ReturnCode p9_ringtest_modring_pass(
+               fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+/////////////
 
 #endif
