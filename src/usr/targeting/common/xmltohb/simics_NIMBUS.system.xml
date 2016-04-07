@@ -4082,7 +4082,7 @@
     </attribute>
     <attribute>
         <id>PEER_TARGET</id>
-        <default>physical:sys-0/node-0/proc-3/xbus-1</default>
+        <default>physical:sys-0/node-0/proc-1/xbus-1</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -4119,7 +4119,7 @@
     </attribute>
     <attribute>
         <id>PEER_TARGET</id>
-        <default>physical:sys-0/node-0/proc-2/xbus-1</default>
+        <default>physical:sys-0/node-0/proc-1/xbus-1</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -7275,6 +7275,10 @@
         <default>4</default>
     </attribute>
     <attribute>
+        <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-0/xbus-1</default>
+    </attribute>
+    <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-1/perv-6</default>
     </attribute>
@@ -7310,6 +7314,10 @@
     <attribute>
         <id>FAPI_POS</id>
         <default>5</default>
+    </attribute>
+    <attribute>
+        <id>PEER_TARGET</id>
+        <default>physical:sys-0/node-0/proc-0/xbus-1</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
