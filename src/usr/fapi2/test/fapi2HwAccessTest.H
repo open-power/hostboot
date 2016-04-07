@@ -157,6 +157,53 @@ void test_fapi2HwAccess()
             delete l_errl; // delete unexpected error log so we dont get
                           // a false negative on the next case (future?)
         }
+
+        numTests++;
+        FAPI_INVOKE_HWP(l_errl, p9_ringtest_getring_fail, fapi2_procTarget);
+        if(l_errl != NULL)
+        {
+            delete l_errl; // delete expected error log
+        }
+        else
+        {
+            TS_FAIL("No error from p9_ringtest_getring_fail !!");
+            numFails++;
+        }
+        numTests++;
+        FAPI_INVOKE_HWP(l_errl, p9_ringtest_modring_fail, fapi2_procTarget);
+        if(l_errl != NULL)
+        {
+            delete l_errl; // delete expected error log
+        }
+        else
+        {
+            TS_FAIL("No error from  p9_ringtest_modring_fail!!");
+            numFails++;
+        }
+
+#if 0 // TODO-RTC:151428 - need simics support for these to pass
+        numTests++;
+        FAPI_INVOKE_HWP(l_errl, p9_ringtest_getring_pass, fapi2_procTarget);
+        if (l_errl)
+        {
+            TS_FAIL("Error from  p9_ringtest_getring_pass!!");
+            numFails++;
+            errlCommit(l_errl,FAPI2_COMP_ID);
+            delete l_errl; // delete unexpected error log so we dont get
+                           // a false negative on the next case
+        }
+        numTests++;
+        FAPI_INVOKE_HWP(l_errl, p9_ringtest_modring_pass, fapi2_procTarget);
+        if (l_errl)
+        {
+            TS_FAIL("Error from  p9_ringtest_modring_pass!!");
+            numFails++;
+            errlCommit(l_errl,FAPI2_COMP_ID);
+            delete l_errl; // delete unexpected error log so we dont get
+                          // a false negative on the next case
+        }
+#endif
+
     }while(0);
 
     FAPI_INF("fapi2HwAccessTest Test Complete. %d/%d fails",  numFails , numTests);
