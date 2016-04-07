@@ -114,32 +114,42 @@ enum P9_HCD_TIMEOUT_CONSTANTS
     INSTS_PER_POLL_LOOP = 8       //
 };
 
-// Constants to work with fapi2 target
+// Constants to calculate the delay in nanoseconds or simcycles
+// Source | Domain | Freq    | cyc/ns | Period |
+// DPLL   | Core   | 4GHz    | 4      | 250ps  |
+//        | Cache  | 2GHz    | 2      | 500ps  |
+//        | PPE    | 500MHz  | 0.5    | 2ns    |
+// Refclk | Refclk | 100Mhz  | 0.1    | 10ns   |
+enum P9_HCD_DELAY_CONSTANTS
+{
+    SIM_CYCLE_1U1D        = 2,   // fastest internal oscillator
+    SIM_CYCLE_4U4D        = 8,   // 4Ghz   ideal dpll
+    SIM_CYCLE_150UD       = 300, // 133Mhz refclk
+    SIM_CYCLE_200UD       = 400, // 100Mhz refclk external oscillator
+    CLK_PERIOD_250PS      = 250, // 4GHZ dpll
+    CLK_PERIOD_10NS       = 10,  // 100Mhz refclk
+    CLK_PERIOD_CORE2CACHE = 2,
+    CLK_PERIOD_CORE2PPE   = 8,
+    CLK_PERIOD_CORE2REF   = 40
+};
+
+// FAPI2 Target Constants
 enum P9_HCD_TARGET_CONSTANTS
 {
     PERV_TO_EQ_POS_OFFSET   = 0x10,
     PERV_TO_CORE_POS_OFFSET = 0x20
 };
 
-// Init Vectors for Register Setup
-enum P9_HCD_COMMON_INIT_VECTORS
+// Multicast Group Constants
+enum P9_HCD_MULTICAST_GROUP_CONSTANTS
 {
-    // 1     -  PCB_EP_RESET
-    // 2     -  SKEW_ADJUST_RESET
-    // 3     -  PLL_TEST_EN
-    // 4     -  PLLRST
-    // 5     -  PLLBYP
-    // 11    -  EDIS
-    // 12    -  VITL_MPW1
-    // 13    -  VITL_MPW2
-    // 14    -  VITL_MPW3
-    // 18    -  FENCE_EN
-    // 22    -  SKEW_ADJUST_FUNC_CLKSEL
-    // 26    -  LVLTRANS_FENCE
-    Q_NET_CTRL0_INIT_VECTOR = (BITS64(1, 5) | BITS64(11, 4) |
-                               BIT64(18) | BIT64(22) | BIT64(26)),
-    C_NET_CTRL0_INIT_VECTOR = (BIT64(1) | BITS64(3, 3) | BITS64(11, 4) |
-                               BIT64(18) | BIT64(22) | BIT64(26)),
+    MULTICAST_GROUP_4       = 4,  // QUAD
+    MULTICAST_GROUP_5       = 5,  // EX0
+    MULTICAST_GROUP_6       = 6,  // EX1
+    QCSR_MASK_EX0           = (BIT64(0) | BIT64(2) | BIT64(4) |
+                               BIT64(6) | BIT64(8) | BIT64(10)),
+    QCSR_MASK_EX1           = (BIT64(1) | BIT64(3) | BIT64(5) |
+                               BIT64(7) | BIT64(9) | BIT64(11))
 };
 
 // Clock Control Constants
@@ -147,60 +157,27 @@ enum P9_HCD_COMMON_CLK_CTRL_CONSTANTS
 {
     CLK_STOP_CMD                             = BIT64(0),
     CLK_START_CMD                            = BIT64(1),
-    CLK_SLAVE_MODE                           = BIT64(2),
-    CLK_MASTER_MODE                          = BIT64(3),
     CLK_REGION_ANEP                          = BIT64(10),
     CLK_REGION_DPLL                          = BIT64(14),
-    CLK_REGION_ALL_BUT_EX_DPLL               = BITS64(4, 2) | BITS64(10, 2),
+    CLK_REGION_ALL_BUT_EX_ANEP_DPLL          = BITS64(4, 2) | BIT64(11),
     CLK_REGION_EX0_L2_L3_REFR                = BIT64(6) | BIT64(8) | BIT64(12),
     CLK_REGION_EX1_L2_L3_REFR                = BIT64(7) | BIT64(9) | BIT64(13),
-    CLK_REGION_ALL                           = BITS64(4, 11),
-    CLK_REGION_NONE                          = 0,
-    CLK_THOLD_ALL                            = BITS64(48, 3),
-    CLK_THOLD_NSL_ARY                        = BITS64(49, 2)
+    CLK_REGION_ALL_BUT_PLL                   = BITS64(4, 10),
+    CLK_THOLD_ALL                            = BITS64(48, 3)
 };
 
-// Clock Control Vectors
-enum P9_HCD_COMMON_CLK_CTRL_VECTORS
-{
-    CLK_START_REGION_ALL_THOLD_NSL_ARY =
-        (CLK_START_CMD | CLK_REGION_ALL | CLK_THOLD_NSL_ARY),
-    CLK_START_REGION_ALL_THOLD_ALL =
-        (CLK_START_CMD | CLK_REGION_ALL | CLK_THOLD_ALL),
-    CLK_START_REGION_NONE_THOLD_NSL_ARY =
-        (CLK_START_CMD | CLK_REGION_NONE | CLK_THOLD_NSL_ARY),
-    CLK_START_REGION_NONE_THOLD_ALL =
-        (CLK_START_CMD | CLK_REGION_NONE | CLK_THOLD_ALL),
-    CLK_START_REGION_DPLL_THOLD_NSL_ARY =
-        (CLK_START_CMD | CLK_REGION_DPLL | CLK_THOLD_NSL_ARY),
-    CLK_START_REGION_DPLL_THOLD_ALL =
-        (CLK_START_CMD | CLK_REGION_DPLL | CLK_THOLD_ALL),
-    CLK_START_REGION_ANEP_THOLD_NSL_ARY =
-        (CLK_START_CMD | CLK_REGION_ANEP | CLK_THOLD_NSL_ARY),
-    CLK_START_REGION_ANEP_THOLD_ALL =
-        (CLK_START_CMD | CLK_REGION_ANEP | CLK_THOLD_ALL)
-};
-
-// SCAN0 Constants
+// Scan Flush Constants
 enum P9_HCD_COMMON_SCAN0_CONSTANTS
 {
     SCAN0_REGION_ALL                         = 0x7FF,
+    SCAN0_REGION_ALL_BUT_PLL                 = 0x7FE,
     SCAN0_REGION_ALL_BUT_EX                  = 0x619,
     SCAN0_REGION_ALL_BUT_EX_DPLL             = 0x618,
     SCAN0_REGION_ALL_BUT_EX_ANEP_DPLL        = 0x608,
     SCAN0_REGION_EX0_L2_L3_REFR              = 0x144,
     SCAN0_REGION_EX1_L2_L3_REFR              = 0x0A2,
-    SCAN0_REGION_DPLL                        = 0x001,
-    SCAN0_REGION_ANEP_DPLL                   = 0x011,
-    SCAN0_REGION_CORE_ONLY                   = 0x300,
-    SCAN0_REGION_PERV_CORE                   = 0x700,
-    SCAN0_TYPE_ALL_BUT_GPTR_REPR_TIME        = 0xDCF,
-    SCAN0_TYPE_ALL_BUT_GPTR                  = 0xDFF,
     SCAN0_TYPE_GPTR_REPR_TIME                = 0x230,
-    SCAN0_TYPE_REPR_TIME                     = 0x030,
-    SCAN0_TYPE_GPTR                          = 0x200,
-    SCAN0_TYPE_FUNC                          = 0x800,
-    SCAN0_TYPE_FUNC_BNDY                     = 0x808
+    SCAN0_TYPE_ALL_BUT_GPTR_REPR_TIME        = 0xDCF
 };
 
 //OCC FLag defines
@@ -232,23 +209,17 @@ enum XCR_DEFS
 } // END OF NAMESPACE p9hcd
 
 
-/// @todo needs to review this
-/// SCAN Repeats(from P8)
-/*
-#define GENERIC_CC_SCAN0_MAXIMUM   8191
-#define SCAN0_FUNC_FLUSH_LENGTH    8000
-#define SCAN0_GPTR_FLUSH_LENGTH    14000
-#define P9_HCD_SCAN_FUNC_REPEAT    \
-    ((SCAN0_FUNC_FLUSH_LENGTH / GENERIC_CC_SCAN0_MAXIMUM)+1)
-#define P9_HCD_SCAN_GPTR_REPEAT    \
-    ((SCAN0_GPTR_FLUSH_LENGTH / GENERIC_CC_SCAN0_MAXIMUM)+1)
-*/
-#define P9_HCD_SCAN_FUNC_REPEAT 40
-#define P9_HCD_SCAN_GPTR_REPEAT 40
+#define P9_HCD_SCAN_FUNC_REPEAT 1
+#define P9_HCD_SCAN_GPTR_REPEAT 1
 
 /// @todo remove these once correct header contains them
 /// Scom addresses missing from p9_quad_scom_addresses.H
-#define EQ_QPPM_QCCR_WOR                 0x100F01BF
+#define EQ_QPPM_QCCR_WCLEAR              EQ_QPPM_QCCR_SCOM1
+#define EQ_QPPM_QCCR_WOR                 EQ_QPPM_QCCR_SCOM2
+#define EX_0_CME_SCOM_SICR_CLEAR         EX_0_CME_SCOM_SICR_SCOM1
+#define EX_1_CME_SCOM_SICR_CLEAR         EX_1_CME_SCOM_SICR_SCOM1
+#define EX_0_CME_SCOM_SICR_OR            EX_0_CME_SCOM_SICR_SCOM2
+#define EX_1_CME_SCOM_SICR_OR            EX_1_CME_SCOM_SICR_SCOM2
 #define CME_LCL_SICR_OR                  0xc0000510
 #define CME_LCL_SICR_CLR                 0xc0000518
 #define CME_LCL_SISR                     0xc0000520
