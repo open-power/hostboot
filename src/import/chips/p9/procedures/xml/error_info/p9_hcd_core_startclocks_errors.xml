@@ -66,11 +66,19 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <rc>RC_PMPROC_CORECLKSTART_FAILED</rc>
+    <description>
+        core clock start failed.
+    </description>
+    <ffdc>CORECLKSTAT</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
     <rc>RC_PMPROC_CORECLKSTART_TIMEOUT</rc>
     <description>
         core clock start timed out.
     </description>
-    <ffdc>CORECLKSTAT</ffdc>
+    <ffdc>CORECPLTSTAT</ffdc>
     <callout>
       <childTargets>
         <parent>PROC_CHIP_IN_ERROR</parent>
