@@ -163,6 +163,7 @@ template< fapi2::TargetType T, typename TT = portTraits<T> >
 fapi2::ReturnCode enable_read_ecc( const fapi2::Target<T>& i_target )
 {
     fapi2::buffer<uint64_t> l_data;
+    uint8_t is_sim = 0;
 
     FAPI_DBG("Enable Read ECC %s", mss::c_str(i_target));
 
@@ -173,7 +174,9 @@ fapi2::ReturnCode enable_read_ecc( const fapi2::Target<T>& i_target )
     // The preferred operating mode is 11 (INVERT_DATA_TOGGLE_CHECKS)   which stores data complemented
     // (because most bits are '0', and the dram bus pulls up, so transmitting 1s is least power)  but
     // still flips the inversion of check bits to aid RAS. Per Brad Michael 12/15
-    l_data.insertFromRight<MCA_RECR_MBSECCQ_DATA_INVERSION, MCA_RECR_MBSECCQ_DATA_INVERSION_LEN>(0b11);
+    // Leave un-inverted for sim. This allows the DIMM loader to write 0's and effect good ECC
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), is_sim) );
+    l_data.insertFromRight<MCA_RECR_MBSECCQ_DATA_INVERSION, MCA_RECR_MBSECCQ_DATA_INVERSION_LEN>(is_sim ? 0b00 : 0b11);
 
     // bits: 60 MBSTRQ_CFG_MAINT_RCE_WITH_CE
     // cfg_maint_rce_with_ce - not implemented. Need to investigate if needed for nimbus.
