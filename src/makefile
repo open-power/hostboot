@@ -208,7 +208,7 @@ TESTCASE_MODULES += testattn
 TESTCASE_MODULES += testerrl
 TESTCASE_MODULES += testhwas
 TESTCASE_MODULES += testvpd
-TESTCASE_MODULES += testsyslib
+#TESTCASE_MODULES += testsyslib   @TODO-RTC:151185-Turn this back on
 TESTCASE_MODULES += testscom
 
 #Requires main store memory @TODO RTC: 132577
@@ -268,7 +268,7 @@ RUNTIME_MODULES += pnor_rt
 
 RUNTIME_DATA_MODULES +=
 RUNTIME_TESTCASE_MODULES += cxxtest_rt
-RUNTIME_TESTCASE_MODULES += testsyslib_rt
+#RUNTIME_TESTCASE_MODULES += testsyslib_rt   @TODO-RTC:151185-Turn this back on
 RUNTIME_TESTCASE_MODULES += testxscom_rt
 RUNTIME_TESTCASE_MODULES += testerrl_rt
 RUNTIME_TESTCASE_MODULES += testdevicefw_rt
