@@ -1239,12 +1239,6 @@ void IntrRp::shutDown(uint64_t i_status)
 
     msg_free(rmsg);
 
-    //TODO FIXME RTC 149694 - Workaround to set proper PSIHB ESB BAR for PHYP
-    TARGETING::Target* procTarget = NULL;
-    TARGETING::targetService().masterProcChipTargetHandle( procTarget );
-    TRACDCOMP(g_trac_intr, "Disable PSIHB ESB BAR");
-    setPsiHbEsbBAR(procTarget, false);
-
     //Reset PSIHB Interrupt Space
     TRACDCOMP(g_trac_intr, "Reset PSIHB Interrupt Space");
     PSIHB_SW_INTERFACES_t * this_psihb_ptr = iv_psiHbBaseAddr;
