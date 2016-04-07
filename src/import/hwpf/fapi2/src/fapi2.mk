@@ -26,7 +26,6 @@
 FAPI2_MODULE_OBJS += error_info.o
 FAPI2_MODULE_OBJS += ffdc.o
 FAPI2_MODULE_OBJS += fapi2_attribute_service.o
-FAPI2_MODULE_OBJS += fapi2_chip_ec_feature.o
 
 # Define common source and include paths.
 define FAPI2_MODULE_INCLUDES

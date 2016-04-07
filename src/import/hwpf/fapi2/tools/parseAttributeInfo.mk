@@ -26,7 +26,7 @@ SOURCES += $(FAPI2_ATTR_XML)
 SOURCES += $(GENPATH)/empty_attribute.xml
 
 TARGETS += attribute_ids.H
-TARGETS += fapi2_chip_ec_feature.C
+TARGETS += fapi2_chip_ec_feature.H
 TARGETS += attribute_plat_check.H
 TARGETS += attributesSupported.html
 TARGETS += attrInfo.csv
