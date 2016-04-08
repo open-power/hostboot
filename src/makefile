@@ -188,6 +188,7 @@ TESTCASE_MODULES += testpnor
 TESTCASE_MODULES += testvfs
 TESTCASE_MODULES += testutil
 TESTCASE_MODULES += testscan
+TESTCASE_MODULES += $(if $(CONFIG_ROM_CODE_PRESENT),testsecureboot)
 TESTCASE_MODULES += testfsiscom
 TESTCASE_MODULES += testlpc
 TESTCASE_MODULES += $(if $(CONFIG_HTMGT),testhtmgt)
