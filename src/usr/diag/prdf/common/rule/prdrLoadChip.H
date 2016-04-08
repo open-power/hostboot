@@ -197,7 +197,7 @@ namespace Prdr
             uint16_t        cv_ruleCount;
             Expr *          cv_rules;
             uint16_t        cv_groupCount;
-            uint16_t        cv_groupAttn[NUM_GROUP_ATTN];
+            uint16_t        cv_groupAttn[MAX_NUM_ATTN_TYPES];
             uint16_t *      cv_groupSize;
             uint8_t *       cv_groupFlags;
             Expr **         cv_groupPriorityBits;

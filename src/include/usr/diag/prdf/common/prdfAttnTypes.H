@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/diag/prdf/prdfMain.H $                        */
+/* $Source: src/include/usr/diag/prdf/common/prdfAttnTypes.H $            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,35 +23,33 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __prdfMain_H
-#define __prdfMain_H
+#ifndef __prdfAttnTypes_H
+#define __prdfAttnTypes_H
 
-/**
- * @file  prdfMain.H
- * @brief PRD code used by external components (IPL and runtime).
- *
- * This file contains code that is strictly specific to Hostboot. All code that
- * is common between FSP and Hostboot should be in the respective common file.
- */
-
-#include <errl/errlmanager.H> // for errlHndl_t
-
-#include <diag/prdf/common/prdfAttnTypes.H>
-
-// This must be included after all Hostboot specific includes. This will take
-// care of cases where a file must be included in the common code, but the
-// include paths are different between FSP and Hostboot.
-#include <diag/prdf/common/prdfMain_common.H>
-
-// Must be included after including the common code.
-#ifndef __HOSTBOOT_RUNTIME
-  #include <diag/prdf/prdfMain_ipl.H>
-#endif
+/** @file  prdfAttnTypes.H */
 
 namespace PRDF
 {
 
+/**
+ * @brief Enum specifying supported attention types.
+ * @note  Order is important. The highest priority attention types should have a
+ *        lower value.
+ */
+enum ATTENTION_VALUE_TYPE
+{
+    INVALID_ATTENTION_TYPE  = 0,
+    MACHINE_CHECK           = 1,
+    CHECK_STOP              = MACHINE_CHECK,
+    UNIT_CS                 = 2,
+    PROC_CS                 = UNIT_CS,
+    RECOVERABLE             = 3,
+    SPECIAL                 = 4,
+    HOST_ATTN               = 5,
+    END_ATTENTION_TYPE      = 6
+};
+
 } // end namespace PRDF
 
-#endif // __prdfMain_H
+#endif // __prdfAttnTypes_H
 

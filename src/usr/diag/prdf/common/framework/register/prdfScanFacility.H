@@ -137,14 +137,15 @@ public:
 
   /**
    * @brief  Get a AttnTypeRegister
-   * @params 4 pointers to scr Registers
+   * @params 5 pointers to scr Registers
    * @post only one instance of the register with these SCR's will exist
    */
   SCAN_COMM_REGISTER_CLASS & GetAttnTypeRegister(
                                     SCAN_COMM_REGISTER_CLASS * i_check,
                                     SCAN_COMM_REGISTER_CLASS * i_recov,
                                     SCAN_COMM_REGISTER_CLASS * i_special,
-                                    SCAN_COMM_REGISTER_CLASS * i_proccs);
+                                    SCAN_COMM_REGISTER_CLASS * i_proccs,
+                                    SCAN_COMM_REGISTER_CLASS * i_hostattn );
 
   /**
    * @brief Get a PrdfConstantRegister

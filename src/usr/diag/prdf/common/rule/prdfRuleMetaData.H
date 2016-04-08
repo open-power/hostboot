@@ -222,7 +222,7 @@ class RuleMetaData
          SCAN_COMM_REGISTER_CLASS * getNullRegister( const char * i_reg,
                                                     bool i_expectNull );
 
-         ErrorRegisterType * cv_groupAttn[Prdr::NUM_GROUP_ATTN];
+         ErrorRegisterType * cv_groupAttn[Prdr::MAX_NUM_ATTN_TYPES];
 
     private:  // Data
 

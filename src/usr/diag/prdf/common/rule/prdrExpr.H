@@ -387,15 +387,15 @@ class ExprOp2 : public Expr
 class ExprAttnLink : public Expr
 {
     public:
-        static const int MAX_ATTNS = 4;
-        Expr *        cv_arg[MAX_ATTNS];
+        Expr * cv_arg[Prdr::MAX_NUM_ATTN_TYPES];
 
         ExprAttnLink(std::string * attn1, Expr * exp1,
                      std::string * attn2, Expr * exp2,
                      std::string * attn3, Expr * exp3,
-                     std::string * attn4, Expr * exp4)
+                     std::string * attn4, Expr * exp4,
+                     std::string * attn5, Expr * exp5)
         {
-            for (int i = 0; i < MAX_ATTNS; i++)
+            for (int i = 0; i < Prdr::MAX_NUM_ATTN_TYPES; i++)
                 cv_arg[i] = NULL;
 
             cv_arg[decodeAttnType(attn1)] = exp1;
@@ -405,6 +405,8 @@ class ExprAttnLink : public Expr
                 cv_arg[decodeAttnType(attn3)] = exp3;
             if (NULL != exp4)
                 cv_arg[decodeAttnType(attn4)] = exp4;
+            if (NULL != exp5)
+                cv_arg[decodeAttnType(attn5)] = exp5;
         };
 
         int output(FILE * i_file)
@@ -413,12 +415,12 @@ class ExprAttnLink : public Expr
             PRDR_FWRITE(&cv_op, 1, 1, i_file);
 
             cv_op = 0;
-            for (int i = 0; i < MAX_ATTNS; i++)
+            for (int i = 0; i < Prdr::MAX_NUM_ATTN_TYPES; i++)
                 if (NULL != cv_arg[i])
                     cv_op++;
             PRDR_FWRITE(&cv_op, 1, 1, i_file);
 
-            for (int i = 0; i < MAX_ATTNS; i++)
+            for (int i = 0; i < Prdr::MAX_NUM_ATTN_TYPES; i++)
                 if (NULL != cv_arg[i])
                 {
                     cv_op = i;
@@ -432,7 +434,7 @@ class ExprAttnLink : public Expr
         uint16_t getSignature()
         {
             uint16_t l_val = SignatureOp::DEFAULT_SIGNATURE;
-            for (int i = 0; i < MAX_ATTNS; i++)
+            for (int i = 0; i < Prdr::MAX_NUM_ATTN_TYPES; i++)
                 if (NULL != cv_arg[i])
                     l_val = SignatureOp::combineSig(l_val,
                                                     cv_arg[i]->getSignature());
@@ -465,9 +467,13 @@ class ExprAttnLink : public Expr
             {
                 return 3;
             }
-            else if ("UNIT_CS" == *attn) // @jl02 Add UNIT_CS check.
+            else if ("UNIT_CS" == *attn)
             {
-                return 3;                // @jl02
+                return 3;
+            }
+            else if ("HOST_ATTN" == *attn)
+            {
+                return 4;
             }
             else
             {
