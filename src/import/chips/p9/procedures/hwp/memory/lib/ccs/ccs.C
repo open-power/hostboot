@@ -35,8 +35,8 @@
 
 #include <fapi2.H>
 
-#include "../mss.H"
-#include "ccs.H"
+#include <mss.H>
+#include <lib/ccs/ccs.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
