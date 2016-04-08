@@ -279,7 +279,6 @@ errlHndl_t SecureROM::initialize()
 
     TRACDCOMP(g_trac_secure,EXIT_MRK"SecureROM::initialize() - %s",
               ((NULL == l_errl) ? "No Error" : "With Error") );
-
     return l_errl;
 
 }
@@ -314,7 +313,8 @@ errlHndl_t SecureROM::verifyContainer(void * i_container, size_t i_size)
 
         // Now set hw_key_hash, which is of type sha2_hash_t, to iv_hash_key
         memcpy (&l_hw_parms.hw_key_hash, &iv_hash_key, sizeof(sha2_hash_t));
-
+        TRACFBIN(g_trac_secure,"SecureROM::verifyContainer(): hw_key_hash",
+                 l_hw_parms.hw_key_hash, sizeof(sha2_hash_t));
 
         /*******************************************************************/
         /* Call ROM_verify() function via an assembly call                 */
@@ -332,10 +332,20 @@ errlHndl_t SecureROM::verifyContainer(void * i_container, size_t i_size)
                  iv_device_ptr);
 
 
+        ROM_container_raw* l_container = reinterpret_cast<ROM_container_raw*>(i_container);
+        TRACFCOMP(g_trac_secure,"magic_number 0x%X", l_container->magic_number);
+        TRACFCOMP(g_trac_secure,"version 0x%X", l_container->version);
+        TRACFCOMP(g_trac_secure,"container_size 0x%X", l_container->container_size);
+        TRACFCOMP(g_trac_secure,"target_hrmor 0x%X", l_container->target_hrmor);
+        TRACFCOMP(g_trac_secure,"stack_pointer 0x%X", l_container->stack_pointer);
+        TRACFBIN(g_trac_secure,"hw_pkey_a", l_container->hw_pkey_a, SHA512_DIGEST_LENGTH);
+        TRACFBIN(g_trac_secure,"hw_pkey_b", l_container->hw_pkey_b, SHA512_DIGEST_LENGTH);
+        TRACFBIN(g_trac_secure,"hw_pkey_c", l_container->hw_pkey_c, SHA512_DIGEST_LENGTH);
+        TRACFCOMP(g_trac_secure,"prefix 0x%X", l_container->prefix);
+
         l_rc = call_rom_verify(reinterpret_cast<void*>
-                                   (l_rom_verify_startAddr),
-                               reinterpret_cast<ROM_container_raw*>
-                                   (i_container),
+                               (l_rom_verify_startAddr),
+                               l_container,
                                &l_hw_parms);
 
 

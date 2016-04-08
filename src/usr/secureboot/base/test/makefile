@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2016
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +27,7 @@ ROOTPATH = ../../../../..
 MODULE = testsecureboot
 TESTS = *.H
 
-BINARY_FILES = $(IMGDIR)/test_signed_container:d0be6f0399eee8ecdc3ded896ecccd2551a439f3
+BINARY_FILES = $(IMGDIR)/secureboot_signed_container:7cff7a85f0db014016a61eac856c3775cd266240
 
 include ${ROOTPATH}/config.mk
 

@@ -77,7 +77,11 @@ DJVPD_ECC_IMAGE = djvpd.bin.ecc
 MVPD_ECC_IMAGE = mvpd.bin.ecc
 CVPD_ECC_IMAGE = cvpd.bin.ecc
 PAYLOAD_ECC_IMAGE = payload.bin.ecc
-
+SECUREBOOT_HEADER = secureboot.header
+SECUREBOOT_SIGNED_CONTAINER = secureboot_signed_container
+# DEV_KEY_DIR set by env variable
+SIGN_PREFIX_PARAMS=-flag 0x80000000 -hka ${DEV_KEY_DIR}/hw_key_a -hkb ${DEV_KEY_DIR}/hw_key_b -hkc ${DEV_KEY_DIR}/hw_key_c -skp ${DEV_KEY_DIR}/sw_key_a
+SIGN_BUILD_PARAMS=-skp ${DEV_KEY_DIR}/sw_key_a
 ALL_HB_IMAGES = ${BASE_IMAGES} \
                 ${BASE_W_HEADER_IMAGE} \
                 ${BASE_ECC_IMAGE} ${EXT_ECC_IMAGE} \
@@ -105,9 +109,6 @@ cp_hbfiles: .SPECTARG
 	currentsb -chain
 	ecc --inject ${BASE_IMAGE} --output ${BASE_ECC_IMAGE} --p8
 	ecc --inject ${BASE_W_HEADER_IMAGE} --output ${BASE_W_HEADER_ECC_IMAGE} --p8
-	# dd command will pad image up to the next 4K page
-	dd if=${EXT_IMAGE} of=${EXT_PAD_IMAGE} ibs=4k count=1280 conv=sync
-	ecc --inject ${EXT_PAD_IMAGE} --output ${EXT_ECC_IMAGE} --p8
 	# Add version header w/ HBRT sha hash
 	echo -en VERSION\\0 > ${HBRT_SHA_IMAGE}
 	sha512sum ${HBRT_IMAGE} | awk '{print $$1}' | xxd -pr -r >> ${HBRT_SHA_IMAGE}
@@ -131,6 +132,18 @@ cp_hbfiles: .SPECTARG
 		dd if=${TEMP_IMAGE} of=${EXT_HEADER_IMAGE} ibs=5120k conv=sync
 	.endif
 	ecc --inject ${EXT_HEADER_IMAGE} --output ${EXT_ECC_HEADER_IMAGE} --p8
+	dd if=${EXT_IMAGE} of=${EXT_PAD_IMAGE} ibs=4k count=1280 conv=sync
+	ecc --inject ${EXT_PAD_IMAGE} --output ${EXT_ECC_IMAGE} --p8
+
+	# Test signed container, SIGNING_DIR set by env variable
+	.if(${SECUREBOOT} && ${SIGNING_DIR})
+        # Key prefix used for all partitions
+		${SIGNING_DIR}/prefix -good -of ${SECUREBOOT_HEADER} ${SIGN_PREFIX_PARAMS}
+		dd if=/dev/zero count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
+		${SIGNING_DIR}/build -good -if ${SECUREBOOT_HEADER} -of ${SECUREBOOT_SIGNED_CONTAINER} -bin ${TEMP_IMAGE} ${SIGN_BUILD_PARAMS}
+	.endif
+
+	# Pad and add ECC to other partitions that do not need headers
 	# create data for a test partition in pnor
 	dd if=/dev/urandom of=${TESTDATA} count=1 bs=32K
 	ecc --inject ${TESTDATA} --output ${TESTDATA_ECC} --p8

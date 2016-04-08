@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -41,7 +43,6 @@ extern trace_desc_t* g_trac_secure;
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
 
-
 /**********************************************************************/
 /*  UTILITY FUNCTIONS                                                 */
 /*  -- note: these functions do not commit error logs                 */
@@ -56,17 +57,24 @@ errlHndl_t loadSignedFile( const char * i_signedFile_name,
 void unloadSignedFile( void * & io_signedFile_pageAddr,
                        size_t & io_signedFile_size     );
 
-
-// @todo RTC:34080 - In future key hash will come from HW, but
-// Get the software keys that match the signed container
-void useSwKeyHash(sha2_hash_t * o_sw_key_hash);
+// secureboot_signed_container was generated using this hw hash key. If another
+// key is in pibmem, this test will always fail.
+const uint64_t hw_hash_key[] =
+{
+    0x40d487ff7380ed6a,
+    0xd54775d5795fea0d,
+    0xe2f541fea9db06b8,
+    0x466a42a320e65f75,
+    0xb48665460017d907,
+    0x515dc2a5f9fc5095,
+    0x4d6ee0c9b67d219d,
+    0xfb7085351d01d6d1
+};
 
 
 /**********************************************************************/
 /*  End of UTILITY FUNCTIONS                                          */
 /**********************************************************************/
-
-
 
 class SecureROMTest : public CxxTest::TestSuite
 {
@@ -82,11 +90,11 @@ class SecureROMTest : public CxxTest::TestSuite
         errlHndl_t  l_errl  =   NULL;
 
         /*******************************************************************/
-        /* Load "test_signed_container" from PNOR to use for verification  */
+        /* Load "secureboot_signed_container" from PNOR to use for verification  */
         /*******************************************************************/
 
         // Signed file variables
-        const char * signedFile_name =   "test_signed_container";
+        const char * signedFile_name =   "secureboot_signed_container";
         void *  signedFile_pageAddr  =   NULL;
         size_t  signedFile_size      =   0;
 
@@ -106,14 +114,6 @@ class SecureROMTest : public CxxTest::TestSuite
                   "signedFile info: addr = %p, size=0x%x",
                   signedFile_pageAddr, signedFile_size);
 
-
-
-        /*******************************************************************/
-        /* @todo RTC:34080 - In future key hash will come from HW, but     */
-        /*  for now, create and initialize a local SecureROM class and     */
-        /*  and then override the hash key variable to use the SW Key Hash */
-        /*  for the test_signed_container                                  */
-        /*******************************************************************/
         SecureROM l_sRom;
 
         // Call initializeSecureROM()
@@ -126,9 +126,8 @@ class SecureROMTest : public CxxTest::TestSuite
             return;
         }
 
-        // Use Utility Function to load software keys into iv_hash_key
-        useSwKeyHash( & l_sRom.iv_hash_key);
-
+        // Set hw hash key
+        memcpy (& l_sRom.iv_hash_key, &hw_hash_key, sizeof(sha2_hash_t));
 
         /*******************************************************************/
         /* Call verify function                                            */
@@ -147,9 +146,8 @@ class SecureROMTest : public CxxTest::TestSuite
             return;
         }
 
-
         /*******************************************************************/
-        /* Unload "test_signed_container" from memory                      */
+        /* Unload "secureboot_signed_container" from memory                      */
         /*******************************************************************/
         if ( signedFile_pageAddr != NULL   )
         {
@@ -157,17 +155,14 @@ class SecureROMTest : public CxxTest::TestSuite
         }
 
         TRACFCOMP(g_trac_secure,EXIT_MRK"SecureROMTest::test_verify");
-
     };
-
 };
-
 
 /**********************************************************************/
 /*  UTILITY FUNCTIONS                                                 */
 /**********************************************************************/
 
-// Moved test_signed_container from PNOR to paged-in memory
+// Moved secureboot_signed_container from PNOR to paged-in memory
 errlHndl_t loadSignedFile( const char * i_signedFile_name,
                                 void * & o_signedFile_pageAddr,
                                 size_t & o_signedFile_size     )
@@ -175,7 +170,6 @@ errlHndl_t loadSignedFile( const char * i_signedFile_name,
 
         errlHndl_t  l_errl  =   NULL;
         const char * l_signedFile_virtAddr  =   NULL;
-
 
         /*******************************************************************/
         /* Load file from PNOR to use for verification                     */
@@ -203,7 +197,6 @@ errlHndl_t loadSignedFile( const char * i_signedFile_name,
             return l_errl;
         }
 
-
         // Request contiguous memory block to copy in file
         size_t l_num_pages = ALIGN_PAGE(o_signedFile_size)/PAGESIZE;
         bool l_isUserspace = true;
@@ -226,7 +219,6 @@ errlHndl_t loadSignedFile( const char * i_signedFile_name,
 void unloadSignedFile( void * & io_signedFile_pageAddr,
                        size_t & io_signedFile_size     )
 {
-
         // Determine number of pages to be freed
         size_t l_num_pages = ALIGN_PAGE(io_signedFile_size)/PAGESIZE;
 
@@ -239,35 +231,6 @@ void unloadSignedFile( void * & io_signedFile_pageAddr,
         TRACUCOMP(g_trac_secure, "unloadSignedFile()> "
                   "Info: sF_pA=%p, size=0x%x (pages=%d)",
                   io_signedFile_pageAddr, io_signedFile_size, l_num_pages);
-
 }
-
-
-// @todo RTC:34080 - In future key hash will come from HW, but
-// Get the software keys that match the signed container
-void useSwKeyHash(sha2_hash_t * o_sw_key_hash)
-{
-
-
-    /* On HW hw_key_hash will be pulled from SBE's SEEPROM or PIB Memory */
-
-    /* For simics/testing, we're hardcoding the value from Dale        */
-    /*  Peterson here, which I've stored here:                         */
-    /* /gsa/rchgsa-h1/00/baiocchi/HB/Story_Notes/Story_64764/          */
-    /*     Secure_ROM_Files/HB_SW_Files/hdwkeyHash                     */
-
-    /* Dale's files' hw-hash-key */
-    uint64_t l_hdwkeyHash[] = { 0x6c8206fa4f551088, 0xc8c23af693ed242d,
-                                0x96824dac71bccf07, 0x73abb342d4bb932f,
-                                0x9a9a8d72fbf28202, 0xd89fa8fad5658959,
-                                0xc89ccf0d0205b8ca, 0x2071ba27e18ae0f8
-                              };
-
-    // Copy l_hdwkeyHash into sha2_hash_t
-    memcpy (o_sw_key_hash, &l_hdwkeyHash, sizeof(sha2_hash_t));
-
-    return;
-}
-
 
 #endif
