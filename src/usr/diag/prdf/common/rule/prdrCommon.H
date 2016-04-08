@@ -48,7 +48,7 @@ namespace Prdr
 
     enum NumberOfAttentions
     {
-        NUM_GROUP_ATTN = 4,
+        MAX_NUM_ATTN_TYPES = 5,
     };
 
     /**

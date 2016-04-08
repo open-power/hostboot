@@ -173,9 +173,10 @@ int main(int argc, char ** argv)
     PRDR_FWRITE(&l_size, sizeof(l_size), 1, l_prfFile);
     l_size = htons((uint16_t)prdrGetRefId(&g_attentionStartGroup["SPECIAL"]));
     PRDR_FWRITE(&l_size, sizeof(l_size), 1, l_prfFile);
-    //@jl02 JL Adding this code to account for the new Attention entry type.
-    l_size = htons((uint16_t)prdrGetRefId(&g_attentionStartGroup["UNIT_CS"]));  // @jl02
-    PRDR_FWRITE(&l_size, sizeof(l_size), 1, l_prfFile);                              // @jl02
+    l_size = htons((uint16_t)prdrGetRefId(&g_attentionStartGroup["UNIT_CS"]));
+    PRDR_FWRITE(&l_size, sizeof(l_size), 1, l_prfFile);
+    l_size = htons((uint16_t)prdrGetRefId(&g_attentionStartGroup["HOST_ATTN"]));
+    PRDR_FWRITE(&l_size, sizeof(l_size), 1, l_prfFile);
 
     l_htmlFile << "<H2> Register Groups </H2>" << std::endl;
     l_htmlFile << "Generated from " << l_backingBuild << "<BR>" << std::endl;

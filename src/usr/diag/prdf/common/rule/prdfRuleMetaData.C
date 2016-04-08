@@ -379,7 +379,7 @@ errlHndl_t RuleMetaData::loadRuleFile( ScanFacility & i_scanFactory ,
             this->createGroup( (Group *) l_groupMap[i+l_vregMax+1],
                                 i,l_localData );
         }
-        for ( int i = 0; i < Prdr::NUM_GROUP_ATTN; i++ )
+        for ( int i = 0; i < Prdr::MAX_NUM_ATTN_TYPES; i++ )
             cv_groupAttn[i] = l_groupMap[l_chip->cv_groupAttn[i]];
 
     }
@@ -439,13 +439,13 @@ int32_t RuleMetaData::Analyze( STEP_CODE_DATA_STRUCT & i_serviceData,
             l_errReg = cv_groupAttn[2];
             break;
 
-        // @jl02 JL Added this code to support the new Unit Check Stop.
         case UNIT_CS:
-            // @jl02 JL I don't know if this is the correct cv_groupAttn to add
-            // here or if it's needed.
             l_errReg = cv_groupAttn[3];
             break;
 
+        case HOST_ATTN:
+            l_errReg = cv_groupAttn[4];
+            break;
     }
     if (NULL != l_errReg)
     {  //mp02 a Start
@@ -604,7 +604,7 @@ SCAN_COMM_REGISTER_CLASS * RuleMetaData::createVirtualRegister(
                                                     Prdr::Expr * i_vReg,
                                                     RuleFileData & i_data )
 {
-    SCAN_COMM_REGISTER_CLASS * l_arg[4] = { NULL };
+    SCAN_COMM_REGISTER_CLASS * l_arg[5] = { NULL };
     uint32_t l_tmp32 = 0;
     SCAN_COMM_REGISTER_CLASS * l_rc = NULL;
 
@@ -699,11 +699,17 @@ SCAN_COMM_REGISTER_CLASS * RuleMetaData::createVirtualRegister(
                 l_arg[3] = createVirtualRegister(i_vReg->cv_value[3].p, i_data);
             }
 
+            if ( NULL != i_vReg->cv_value[4].p )
+            {
+                l_arg[4] = createVirtualRegister(i_vReg->cv_value[4].p, i_data);
+            }
+
             // passing NULL objects in *l_arg[x]
             l_rc = &i_data.cv_scanFactory.GetAttnTypeRegister(l_arg[0],
                                                               l_arg[1],
                                                               l_arg[2],
-                                                              l_arg[3]);
+                                                              l_arg[3],
+                                                              l_arg[4]);
             break;
 
         case Prdr::BIT_STR:

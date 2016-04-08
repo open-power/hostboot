@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,6 +67,7 @@ bool RuleChipDomain::Query( ATTENTION_TYPE i_attnType )
                     funcName = "IgnoreRecoveredAttn";
                     break;
                 case SPECIAL:
+                case HOST_ATTN:
                     funcName = "IgnoreSpecialAttn";
                     break;
                 default:
@@ -118,6 +119,7 @@ void RuleChipDomain::Order( ATTENTION_TYPE i_attnType )
                     funcName = "IgnoreRecoveredAttn";
                     break;
                 case SPECIAL:
+                case HOST_ATTN:
                     funcName = "IgnoreSpecialAttn";
                     break;
                 default:

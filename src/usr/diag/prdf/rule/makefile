@@ -91,6 +91,7 @@ SOURCE_PLUGIN_FILES += ${SRC_USR}/common/util/UtilHash.H
 SOURCE_PLUGIN_FILES += ${SRC_USR}/common/iipconst.h
 SOURCE_PLUGIN_FILES += ${SRC_USR}/common/prdf_types.h
 SOURCE_PLUGIN_FILES += ${SRC_INC}/common/prdf_service_codes.H
+SOURCE_PLUGIN_FILES += ${SRC_INC}/common/prdfAttnTypes.H
 SOURCE_PLUGIN_FILES += $(foreach d, ${SOURCE_PLUGIN_DIRS}, $(addprefix $(d)/, $(notdir $(wildcard ${ROOTPATH}/$(d)/*))))
 
 LINK_PLUGIN_FILES += $(addprefix ${OBJ_PLUG_DIR}/,$(notdir ${SOURCE_PLUGIN_FILES}))

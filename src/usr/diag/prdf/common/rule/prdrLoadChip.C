@@ -223,7 +223,7 @@ errlHndl_t LoadChip(UtilStream & i_stream, Chip & o_chip)
 
         // read groups.
         i_stream >> o_chip.cv_groupCount;
-        for (int i = 0; i < NUM_GROUP_ATTN; i++) // @jl02 JL Added this enum type for the number of Attention types.
+        for (int i = 0; i < MAX_NUM_ATTN_TYPES; i++)
             i_stream >> o_chip.cv_groupAttn[i];
         if (o_chip.cv_groupCount != 0)
         {

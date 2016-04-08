@@ -507,7 +507,8 @@ class AttnTypeRegister : public SCAN_COMM_REGISTER_CLASS
   public:
     AttnTypeRegister() :
         SCAN_COMM_REGISTER_CLASS( ), iv_check(&cv_null), iv_recov(&cv_null),
-        iv_special(&cv_null), iv_proccs(&cv_null), iv_iBS(0)
+        iv_special(&cv_null), iv_proccs(&cv_null), iv_hostattn(&cv_null),
+        iv_iBS(0)
     {
         iv_bs = &iv_iBS;
     }
@@ -515,12 +516,14 @@ class AttnTypeRegister : public SCAN_COMM_REGISTER_CLASS
     AttnTypeRegister( SCAN_COMM_REGISTER_CLASS & i_check,
                       SCAN_COMM_REGISTER_CLASS & i_recov,
                       SCAN_COMM_REGISTER_CLASS & i_special,
-                      SCAN_COMM_REGISTER_CLASS & i_proccs ) :
+                      SCAN_COMM_REGISTER_CLASS & i_proccs,
+                      SCAN_COMM_REGISTER_CLASS & i_hostattn ) :
         SCAN_COMM_REGISTER_CLASS( ),
-        iv_check(  NULL == &i_check   ? &cv_null : &i_check),
-        iv_recov(  NULL == &i_recov   ? &cv_null : &i_recov),
-        iv_special(NULL == &i_special ? &cv_null : &i_special),
-        iv_proccs( NULL == &i_proccs  ? &cv_null : &i_proccs),
+        iv_check(    NULL == &i_check    ? &cv_null : &i_check),
+        iv_recov(    NULL == &i_recov    ? &cv_null : &i_recov),
+        iv_special(  NULL == &i_special  ? &cv_null : &i_special),
+        iv_proccs(   NULL == &i_proccs   ? &cv_null : &i_proccs),
+        iv_hostattn( NULL == &i_hostattn ? &cv_null : &i_hostattn),
         iv_iBS(0)         // will fully initialize this inside ctor.
     {
         uint32_t l_length = 1024;
@@ -528,6 +531,7 @@ class AttnTypeRegister : public SCAN_COMM_REGISTER_CLASS
         l_length = std::min(l_length, iv_recov->GetBitLength());
         l_length = std::min(l_length, iv_special->GetBitLength());
         l_length = std::min(l_length, iv_proccs->GetBitLength());
+        l_length = std::min(l_length, iv_hostattn->GetBitLength());
         iv_iBS = BitStringBuffer(l_length);
         iv_bs = &iv_iBS;
     }
@@ -535,10 +539,11 @@ class AttnTypeRegister : public SCAN_COMM_REGISTER_CLASS
     AttnTypeRegister & operator=(const AttnTypeRegister & r)
     {
         //iv_null = r.iv_null; <-- don't do this!
-        iv_check   = (r.iv_check   == &r.cv_null ? &cv_null : r.iv_check);
-        iv_recov   = (r.iv_recov   == &r.cv_null ? &cv_null : r.iv_recov);
-        iv_special = (r.iv_special == &r.cv_null ? &cv_null : r.iv_special);
-        iv_proccs  = (r.iv_proccs  == &r.cv_null ? &cv_null : r.iv_proccs);
+        iv_check    = (r.iv_check    == &r.cv_null ? &cv_null : r.iv_check);
+        iv_recov    = (r.iv_recov    == &r.cv_null ? &cv_null : r.iv_recov);
+        iv_special  = (r.iv_special  == &r.cv_null ? &cv_null : r.iv_special);
+        iv_proccs   = (r.iv_proccs   == &r.cv_null ? &cv_null : r.iv_proccs);
+        iv_hostattn = (r.iv_hostattn == &r.cv_null ? &cv_null : r.iv_hostattn);
         iv_iBS = r.iv_iBS;
         //iv_bs = r.iv_bs; <-- don't do this!
         return *this;
@@ -547,13 +552,15 @@ class AttnTypeRegister : public SCAN_COMM_REGISTER_CLASS
     virtual uint32_t Read() const
     {
         return iv_check->Read()   | iv_recov->Read() |
-               iv_special->Read() | iv_proccs->Read();
+               iv_special->Read() | iv_proccs->Read() |
+               iv_hostattn->Read();
     }
 
     virtual uint32_t Write()
     {
         return iv_check->Write()   | iv_recov->Write() |
-               iv_special->Write() | iv_proccs->Write();
+               iv_special->Write() | iv_proccs->Write() |
+               iv_hostattn->Write();
     }
 
     const BIT_STRING_CLASS * GetBitString(
@@ -580,6 +587,11 @@ class AttnTypeRegister : public SCAN_COMM_REGISTER_CLASS
                 (*iv_bs) = BIT_STRING_BUFFER_CLASS(
                                             *iv_proccs->GetBitString(i_type));
                 break;
+
+            case HOST_ATTN:
+                (*iv_bs) = BIT_STRING_BUFFER_CLASS(
+                                            *iv_hostattn->GetBitString(i_type));
+                break;
         }
 
         return iv_bs;
@@ -592,6 +604,7 @@ class AttnTypeRegister : public SCAN_COMM_REGISTER_CLASS
         l_rc = Prdr::SignatureOp::combineSig(l_rc, iv_recov->GetId());
         l_rc = Prdr::SignatureOp::combineSig(l_rc, iv_special->GetId());
         l_rc = Prdr::SignatureOp::combineSig(l_rc, iv_proccs->GetId());
+        l_rc = Prdr::SignatureOp::combineSig(l_rc, iv_hostattn->GetId());
         return l_rc;
     }
 
@@ -600,7 +613,8 @@ class AttnTypeRegister : public SCAN_COMM_REGISTER_CLASS
     bool operator==(const AttnTypeRegister & r) const
     {
         return (r.iv_check   == iv_check)   && (r.iv_recov  == iv_recov) &&
-               (r.iv_special == iv_special) && (r.iv_proccs == iv_proccs);
+               (r.iv_special == iv_special) && (r.iv_proccs == iv_proccs) &&
+               (r.iv_special == iv_hostattn);
     }
 
   protected:
@@ -614,6 +628,7 @@ class AttnTypeRegister : public SCAN_COMM_REGISTER_CLASS
     SCAN_COMM_REGISTER_CLASS * iv_recov;
     SCAN_COMM_REGISTER_CLASS * iv_special;
     SCAN_COMM_REGISTER_CLASS * iv_proccs;
+    SCAN_COMM_REGISTER_CLASS * iv_hostattn;
 
     BitStringBuffer * iv_bs;
     BitStringBuffer iv_iBS;

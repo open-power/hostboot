@@ -40,7 +40,7 @@
 #include <utilmem.H>
 
 #include <prdfCalloutsData.H>   // For MruType enum
-#include <prdfMain_common.H>    // For ATTENTION_VALUE_TYPE enum
+#include <prdfAttnTypes.H>      // For ATTENTION_VALUE_TYPE enum
 
 #include <srcisrc.H>
 
@@ -480,6 +480,7 @@ const char * attnTypeToStr( uint32_t i_attnType )
         case UNIT_CS:       return "UNIT_CS";
         case RECOVERABLE:   return "RECOVERABLE";
         case SPECIAL:       return "SPECIAL";
+        case HOST_ATTN:     return "HOST_ATTN";
         default:            return "";
     }
 }

@@ -684,7 +684,7 @@ rule: PRDR_RULE PRDR_ID '{' ruleexpr ';' '}' ';'
     | PRDR_RULE PRDR_ID '{' PRDR_ID ':' ruleexpr ';' '}' ';'
     {
         g_rules[*$2] = new ExprOp1(Prdr::RULE,
-                       new ExprAttnLink($4, $6, NULL, NULL, NULL, NULL, NULL, NULL));
+                       new ExprAttnLink($4, $6, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL));
         delete $2;
         delete $4;
     }
@@ -693,7 +693,7 @@ rule: PRDR_RULE PRDR_ID '{' ruleexpr ';' '}' ';'
                         '}' ';'
     {
         g_rules[*$2] = new ExprOp1(Prdr::RULE,
-                       new ExprAttnLink($4, $6, $8, $10, NULL, NULL, NULL, NULL));
+                       new ExprAttnLink($4, $6, $8, $10, NULL, NULL, NULL, NULL, NULL, NULL));
         delete $2;
         delete $4;
         delete $8;
@@ -704,7 +704,7 @@ rule: PRDR_RULE PRDR_ID '{' ruleexpr ';' '}' ';'
                         '}' ';'
     {
         g_rules[*$2] = new ExprOp1(Prdr::RULE,
-                       new ExprAttnLink($4, $6, $8, $10, $12, $14, NULL, NULL));
+                       new ExprAttnLink($4, $6, $8, $10, $12, $14, NULL, NULL, NULL, NULL));
         delete $2;
         delete $4;
         delete $8;
@@ -717,12 +717,28 @@ rule: PRDR_RULE PRDR_ID '{' ruleexpr ';' '}' ';'
                         '}' ';'
     {
         g_rules[*$2] = new ExprOp1(Prdr::RULE,
-                       new ExprAttnLink($4, $6, $8, $10, $12, $14, $16, $18));
+                       new ExprAttnLink($4, $6, $8, $10, $12, $14, $16, $18, NULL, NULL));
         delete $2;
         delete $4;
         delete $8;
         delete $12;
         delete $16;
+    }
+    | PRDR_RULE PRDR_ID '{' PRDR_ID ':' ruleexpr ';'
+                            PRDR_ID ':' ruleexpr ';'
+                            PRDR_ID ':' ruleexpr ';'
+                            PRDR_ID ':' ruleexpr ';'
+                            PRDR_ID ':' ruleexpr ';'
+                        '}' ';'
+    {
+        g_rules[*$2] = new ExprOp1(Prdr::RULE,
+                       new ExprAttnLink($4, $6, $8, $10, $12, $14, $16, $18, $20, $22));
+        delete $2;
+        delete $4;
+        delete $8;
+        delete $12;
+        delete $16;
+        delete $20;
     }
 ;
 

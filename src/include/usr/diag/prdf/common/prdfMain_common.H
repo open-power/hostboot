@@ -40,26 +40,6 @@
 namespace PRDF
 {
 
-// Move here from iipsdbug.h
-/**
- *  @brief Enum specifying attention type
- */
-// If changes are made to ATTENTION_VALUE_TYPE then subsequent changes need to be made to:
-// /prdf/sim/prdsimAttentionParser.C  and /prdf/sim/errl2tcd.C
-enum ATTENTION_VALUE_TYPE
-{
-    INVALID_ATTENTION_TYPE = 0,
-    MACHINE_CHECK = 1,
-    CHECK_STOP = MACHINE_CHECK,
-    UNIT_CS = 2,
-    PROC_CS = UNIT_CS,
-    RECOVERABLE = 3,
-    SPECIAL = 4,
-    HOST_ATTN = 5,
-    END_ATTENTION_TYPE = 6
-};
-
-
 // Move here from xspprdsdbug.C
 /**
  *  @brief Structure of target handle and its attention type
