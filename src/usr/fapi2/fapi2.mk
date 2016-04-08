@@ -56,7 +56,6 @@ OBJS += ffdc.o
 
 #Generated Objects
 OBJS += fapi2_attribute_service.o
-OBJS += fapi2_chip_ec_feature.o
 
 #------------------------------------------------------------------------------
 # Set fapi2 build environment
