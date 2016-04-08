@@ -37,10 +37,11 @@
 #define _MSS_RCD_LOAD_H_
 
 #include <fapi2.H>
-#include "../utils/c_str.H"
+
 #include <p9_mc_scom_addresses.H>
 
-#include "../shared/mss_kind.H"
+#include <lib/utils/c_str.H>
+#include <lib/shared/mss_kind.H>
 
 namespace mss
 {
