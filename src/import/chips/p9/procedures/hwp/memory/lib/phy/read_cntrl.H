@@ -31,7 +31,7 @@
 #define _MSS_READ_CNTRL_H_
 
 #include <fapi2.H>
-#include "p9_mc_scom_addresses.H"
+#include <p9_mc_scom_addresses.H>
 
 namespace mss
 {

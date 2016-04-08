@@ -30,9 +30,9 @@
 #include <fapi2.H>
 #include <p9_mc_scom_addresses.H>
 
-#include "../utils/dump_regs.H"
-#include "../utils/scom.H"
-#include "mc.H"
+#include <lib/utils/dump_regs.H>
+#include <lib/utils/scom.H>
+#include <lib/mc/mc.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCS;

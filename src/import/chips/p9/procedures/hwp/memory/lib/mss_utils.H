@@ -30,7 +30,9 @@
 #ifndef _MSS_P9_ATTR_UTILS_H_
 #define _MSS_P9_ATTR_UTILS_H_
 
-#include "utils/index.H"
-#include "utils/c_str.H"
+//TK: what is this for? BRS
+
+#include <lib/utils/index.H>
+#include <lib/utils/c_str.H>
 
 #endif // _MSS_P9_ATTR_UTILS_H_

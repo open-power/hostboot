@@ -29,14 +29,14 @@
 
 #include <fapi2.H>
 
-#include "p9_mc_scom_addresses.H"
-#include "p9_mc_scom_addresses_fld.H"
+#include <p9_mc_scom_addresses.H>
+#include <p9_mc_scom_addresses_fld.H>
 
-#include "mss_attribute_accessors.H"
+#include <mss_attribute_accessors.H>
 
-#include "mc.H"
-#include "../utils/scom.H"
-#include "../dimm/kind.H"
+#include <lib/mc/mc.H>
+#include <lib/utils/scom.H>
+#include <lib/dimm/kind.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_PROC_CHIP;

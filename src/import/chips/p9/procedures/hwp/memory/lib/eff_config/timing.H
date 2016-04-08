@@ -29,10 +29,12 @@
 #ifndef _MSS_TIMING_H_
 #define _MSS_TIMING_H_
 
-#include <mss.H>
-#include <fapi2.H>
 #include <cstdint>
-#include "../utils/find.H"
+
+#include <fapi2.H>
+
+#include <mss.H>
+#include <lib/utils/find.H>
 
 using fapi2::TARGET_TYPE_DIMM;
 

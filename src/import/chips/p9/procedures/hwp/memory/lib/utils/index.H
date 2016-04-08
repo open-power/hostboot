@@ -31,8 +31,9 @@
 #define _MSS_INDEX_H_
 
 #include <fapi2.H>
-#include "pos.H"
-#include "../shared/mss_const.H"
+
+#include <lib/utils/pos.H>
+#include <lib/shared/mss_const.H>
 
 namespace mss
 {

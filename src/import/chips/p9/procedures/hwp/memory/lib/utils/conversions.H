@@ -31,9 +31,10 @@
 #define _MSS_CONVERSIONS_H_
 
 #include <fapi2.H>
-#include <mss_attribute_accessors.H>
-#include "../shared/mss_const.H"
-#include "find.H"
+#include <lib/mss_attribute_accessors.H>
+
+#include <lib/shared/mss_const.H>
+#include <lib/utils/find.H>
 
 // Mutiplication factor to go from clocks to simcycles.
 // Is this just 2400 speed or does this hold for all? BRS

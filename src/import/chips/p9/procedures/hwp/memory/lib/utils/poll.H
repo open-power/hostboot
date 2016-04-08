@@ -31,9 +31,10 @@
 #define _MSS_POLL_H_
 
 #include <fapi2.H>
-#include "../utils/scom.H"
-#include "../shared/mss_const.H"
-#include "conversions.H"
+
+#include <lib/utils/scom.H>
+#include <lib/shared/mss_const.H>
+#include <lib/utils/conversions.H>
 
 namespace mss
 {

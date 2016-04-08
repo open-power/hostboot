@@ -28,8 +28,7 @@
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
-
-#include "../mss.H"
+#include <mss.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_DIMM;

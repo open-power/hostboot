@@ -28,8 +28,8 @@
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
-#include "mcbist.H"
-#include "../utils/dump_regs.H"
+#include <lib/mcbist/mcbist.H>
+#include <lib/utils/dump_regs.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;

@@ -27,7 +27,8 @@
 // *HWP Level: 2
 // *HWP Consumed by: HB:FSP
 
-#include "fake_spd.H"
+#include <lib/utils/fake_spd.H>
+
 #ifndef DOXYGEN
 /// DIMM data was taken from /afs/awd.austin.ibm.com/projects/eclipz/lab/p8/gsiexe/
 /// 78P0AAM_DDR4_8G1RX8_mu/MICRON_SPD_8G_1Rx8_DDR4_2400_RDIMM.hex on 7/31/2015.

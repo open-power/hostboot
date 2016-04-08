@@ -33,7 +33,7 @@
 #include <fapi2.H>
 
 #include <mss_attribute_accessors.H>
-#include "../utils/c_str.H"
+#include <lib/utils/c_str.H>
 
 namespace mss
 {

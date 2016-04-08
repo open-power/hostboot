@@ -31,9 +31,9 @@
 #define _MSS_APB_H_
 
 #include <fapi2.H>
-#include "p9_mc_scom_addresses.H"
-#include "p9_mc_scom_addresses_fld.H"
-#include "../lib/utils/scom.H"
+#include <p9_mc_scom_addresses.H>
+#include <p9_mc_scom_addresses_fld.H>
+#include <lib/utils/scom.H>
 
 namespace mss
 {

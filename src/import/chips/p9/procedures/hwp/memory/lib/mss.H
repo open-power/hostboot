@@ -31,44 +31,43 @@
 #define _MSS_H_
 
 #include <fapi2.H>
-#include "utils/scom.H"
+#include <lib/utils/scom.H>
 
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 
-#include "shared/mss_const.H"
-#include "shared/mss_kind.H"
+#include <lib/shared/mss_const.H>
+#include <lib/shared/mss_kind.H>
 
-#include "utils/index.H"
-#include "utils/c_str.H"
+#include <lib/utils/index.H>
+#include <lib/utils/c_str.H>
 
-#include "utils/pos.H"
-#include "utils/swizzle.H"
-#include "utils/conversions.H"
-#include "utils/find.H"
-#include "utils/poll.H"
-#include "utils/checker.H"
-#include "utils/dump_regs.H"
+#include <lib/utils/pos.H>
+#include <lib/utils/swizzle.H>
+#include <lib/utils/conversions.H>
+#include <lib/utils/find.H>
+#include <lib/utils/poll.H>
+#include <lib/utils/checker.H>
+#include <lib/utils/dump_regs.H>
 
-#include "ccs/ccs.H"
-#include "mcbist/mcbist.H"
+#include <lib/ccs/ccs.H>
+#include <lib/mcbist/mcbist.H>
 
-#include "port/port.H"
+#include <lib/port/port.H>
 
+#include <lib/dimm/rcd_load.H>
+#include <lib/dimm/mrs_load.H>
+#include <lib/dimm/rank.H>
+#include <lib/dimm/kind.H>
 
-#include "dimm/rcd_load.H"
-#include "dimm/mrs_load.H"
-#include "dimm/rank.H"
-#include "dimm/kind.H"
+#include <lib/phy/ddr_phy.H>
+#include <lib/phy/dp16.H>
+#include <lib/phy/cal_timers.H>
+#include <lib/phy/write_cntrl.H>
+#include <lib/phy/read_cntrl.H>
 
-#include "phy/ddr_phy.H"
-#include "phy/dp16.H"
-#include "phy/cal_timers.H"
-#include "phy/write_cntrl.H"
-#include "phy/read_cntrl.H"
+#include <lib/utils/dump_regs.H>
 
-#include "utils/dump_regs.H"
-
-#include "mc/mc.H"
+#include <lib/mc/mc.H>
 
 #endif

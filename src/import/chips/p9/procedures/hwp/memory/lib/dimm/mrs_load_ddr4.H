@@ -32,7 +32,7 @@
 #define _MSS_MRS_LOAD_DDR4_H_
 
 #include <fapi2.H>
-#include "../mss.H"
+#include <mss.H>
 
 namespace mss
 {

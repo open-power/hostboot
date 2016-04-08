@@ -31,9 +31,9 @@
 #define _MSS_CAL_TIMERS_H_
 
 #include <fapi2.H>
-#include "../shared/mss_const.H"
-#include "../utils/conversions.H"
-#include "../utils/poll.H"
+#include <lib/shared/mss_const.H>
+#include <lib/utils/conversions.H>
+#include <lib/utils/poll.H>
 
 namespace mss
 {

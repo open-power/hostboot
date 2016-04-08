@@ -35,9 +35,9 @@
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
 
-#include "../utils/poll.H"
-#include "../shared/mss_const.H"
-#include "../utils/bit_count.H"
+#include <lib/utils/poll.H>
+#include <lib/shared/mss_const.H>
+#include <lib/utils/bit_count.H>
 
 namespace mss
 {
