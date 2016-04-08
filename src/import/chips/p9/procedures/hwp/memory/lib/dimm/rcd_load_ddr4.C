@@ -35,8 +35,8 @@
 
 #include <fapi2.H>
 
-#include "../mss.H"
-#include "rcd_load_ddr4.H"
+#include <mss.H>
+#include <lib/dimm/rcd_load_ddr4.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
