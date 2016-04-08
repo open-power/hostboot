@@ -1,0 +1,463 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/p9/p9_xbus.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2016
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+chip p9_xbus
+{
+    name        "P9 XBUS chiplet";
+    targettype  TYPE_XBUS;
+    sigoff      0x9000;
+    dump        DUMP_CONTENT_HW;
+    scomlen     64;
+
+ #############################################################################
+ #                                                                           #
+ #  ######                                                                   #
+ #  #     #  ######   ####     ###    ####    #####  ######  #####    ####   #
+ #  #     #  #       #    #     #    #          #    #       #    #  #       #
+ #  ######   #####   #          #     ####      #    #####   #    #   ####   #
+ #  #   #    #       #  ###     #         #     #    #       #####        #  #
+ #  #    #   #       #    #     #    #    #     #    #       #   #   #    #  #
+ #  #     #  ######   ####     ###    ####      #    ######  #    #   ####   #
+ #                                                                           #
+ #############################################################################
+
+    ############################################################################
+    # P9 XBUS target IOELFIR
+    ############################################################################
+
+    register IOELFIR
+    {
+        name        "P9 XBUS target IOELFIR";
+        scomaddr    0x06011800;
+        reset       (&, 0x06011801);
+        mask        (|, 0x06011805);
+        capture     group default;
+    };
+
+    register IOELFIR_MASK
+    {
+        name        "P9 XBUS target IOELFIR MASK";
+        scomaddr    0x06011803;
+        capture     group default;
+    };
+
+    register IOELFIR_ACT0
+    {
+        name        "P9 XBUS target IOELFIR ACT0";
+        scomaddr    0x06011806;
+        capture     group default;
+        capture     req nonzero("IOELFIR");
+    };
+
+    register IOELFIR_ACT1
+    {
+        name        "P9 XBUS target IOELFIR ACT1";
+        scomaddr    0x06011807;
+        capture     group default;
+        capture     req nonzero("IOELFIR");
+    };
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ # ####                                 #                                     #
+ # #   # #   # #    #####  ###      #  # #    ##  ##### ###  ###  #   #  ###  #
+ # #   # #   # #    #     #        #  #   #  #  #   #    #  #   # ##  # #     #
+ # ####  #   # #    ####   ###    #  ####### #      #    #  #   # # # #  ###  #
+ # #  #  #   # #    #         #  #   #     # #  #   #    #  #   # #  ##     # #
+ # #   #  ###  #### #####  ###  #    #     #  ##    #   ###  ###  #   #  ###  #
+ #                                                                            #
+ ##############################################################################
+
+################################################################################
+# Summary for XBUS
+################################################################################
+
+rule rXBUS
+{
+  CHECK_STOP:
+    summary( 0, rIOELFIR );
+
+  RECOVERABLE:
+    summary( 0, rIOELFIR );
+
+};
+
+group gXBUS attntype CHECK_STOP, RECOVERABLE
+{
+    (rXBUS, bit(0)) ? analyze(gIOELFIR);
+};
+
+################################################################################
+# P9 XBUS target IOELFIR
+################################################################################
+
+rule rIOELFIR
+{
+  CHECK_STOP:
+    IOELFIR & ~IOELFIR_MASK & ~IOELFIR_ACT0 & ~IOELFIR_ACT1;
+  RECOVERABLE:
+    IOELFIR & ~IOELFIR_MASK & ~IOELFIR_ACT0 &  IOELFIR_ACT1;
+};
+
+group gIOELFIR filter singlebit
+{
+    /** IOELFIR[0]
+     *  
+     */
+    (rIOELFIR, bit(0)) ? TBDDefaultCallout;
+
+    /** IOELFIR[1]
+     *  
+     */
+    (rIOELFIR, bit(1)) ? TBDDefaultCallout;
+
+    /** IOELFIR[2]
+     *  
+     */
+    (rIOELFIR, bit(2)) ? TBDDefaultCallout;
+
+    /** IOELFIR[3]
+     *  
+     */
+    (rIOELFIR, bit(3)) ? TBDDefaultCallout;
+
+    /** IOELFIR[4]
+     *  
+     */
+    (rIOELFIR, bit(4)) ? TBDDefaultCallout;
+
+    /** IOELFIR[5]
+     *  
+     */
+    (rIOELFIR, bit(5)) ? TBDDefaultCallout;
+
+    /** IOELFIR[6]
+     *  
+     */
+    (rIOELFIR, bit(6)) ? TBDDefaultCallout;
+
+    /** IOELFIR[7]
+     *  
+     */
+    (rIOELFIR, bit(7)) ? TBDDefaultCallout;
+
+    /** IOELFIR[8]
+     *  
+     */
+    (rIOELFIR, bit(8)) ? TBDDefaultCallout;
+
+    /** IOELFIR[9]
+     *  
+     */
+    (rIOELFIR, bit(9)) ? TBDDefaultCallout;
+
+    /** IOELFIR[10]
+     *  
+     */
+    (rIOELFIR, bit(10)) ? TBDDefaultCallout;
+
+    /** IOELFIR[11]
+     *  
+     */
+    (rIOELFIR, bit(11)) ? TBDDefaultCallout;
+
+    /** IOELFIR[12]
+     *  
+     */
+    (rIOELFIR, bit(12)) ? TBDDefaultCallout;
+
+    /** IOELFIR[13]
+     *  
+     */
+    (rIOELFIR, bit(13)) ? TBDDefaultCallout;
+
+    /** IOELFIR[14]
+     *  
+     */
+    (rIOELFIR, bit(14)) ? TBDDefaultCallout;
+
+    /** IOELFIR[15]
+     *  
+     */
+    (rIOELFIR, bit(15)) ? TBDDefaultCallout;
+
+    /** IOELFIR[16]
+     *  
+     */
+    (rIOELFIR, bit(16)) ? TBDDefaultCallout;
+
+    /** IOELFIR[17]
+     *  
+     */
+    (rIOELFIR, bit(17)) ? TBDDefaultCallout;
+
+    /** IOELFIR[18]
+     *  
+     */
+    (rIOELFIR, bit(18)) ? TBDDefaultCallout;
+
+    /** IOELFIR[19]
+     *  
+     */
+    (rIOELFIR, bit(19)) ? TBDDefaultCallout;
+
+    /** IOELFIR[20]
+     *  
+     */
+    (rIOELFIR, bit(20)) ? TBDDefaultCallout;
+
+    /** IOELFIR[21]
+     *  
+     */
+    (rIOELFIR, bit(21)) ? TBDDefaultCallout;
+
+    /** IOELFIR[22]
+     *  
+     */
+    (rIOELFIR, bit(22)) ? TBDDefaultCallout;
+
+    /** IOELFIR[23]
+     *  
+     */
+    (rIOELFIR, bit(23)) ? TBDDefaultCallout;
+
+    /** IOELFIR[24]
+     *  
+     */
+    (rIOELFIR, bit(24)) ? TBDDefaultCallout;
+
+    /** IOELFIR[25]
+     *  
+     */
+    (rIOELFIR, bit(25)) ? TBDDefaultCallout;
+
+    /** IOELFIR[26]
+     *  
+     */
+    (rIOELFIR, bit(26)) ? TBDDefaultCallout;
+
+    /** IOELFIR[27]
+     *  
+     */
+    (rIOELFIR, bit(27)) ? TBDDefaultCallout;
+
+    /** IOELFIR[28]
+     *  
+     */
+    (rIOELFIR, bit(28)) ? TBDDefaultCallout;
+
+    /** IOELFIR[29]
+     *  
+     */
+    (rIOELFIR, bit(29)) ? TBDDefaultCallout;
+
+    /** IOELFIR[30]
+     *  
+     */
+    (rIOELFIR, bit(30)) ? TBDDefaultCallout;
+
+    /** IOELFIR[31]
+     *  
+     */
+    (rIOELFIR, bit(31)) ? TBDDefaultCallout;
+
+    /** IOELFIR[32]
+     *  
+     */
+    (rIOELFIR, bit(32)) ? TBDDefaultCallout;
+
+    /** IOELFIR[33]
+     *  
+     */
+    (rIOELFIR, bit(33)) ? TBDDefaultCallout;
+
+    /** IOELFIR[34]
+     *  
+     */
+    (rIOELFIR, bit(34)) ? TBDDefaultCallout;
+
+    /** IOELFIR[35]
+     *  
+     */
+    (rIOELFIR, bit(35)) ? TBDDefaultCallout;
+
+    /** IOELFIR[36]
+     *  
+     */
+    (rIOELFIR, bit(36)) ? TBDDefaultCallout;
+
+    /** IOELFIR[37]
+     *  
+     */
+    (rIOELFIR, bit(37)) ? TBDDefaultCallout;
+
+    /** IOELFIR[38]
+     *  
+     */
+    (rIOELFIR, bit(38)) ? TBDDefaultCallout;
+
+    /** IOELFIR[39]
+     *  
+     */
+    (rIOELFIR, bit(39)) ? TBDDefaultCallout;
+
+    /** IOELFIR[40]
+     *  
+     */
+    (rIOELFIR, bit(40)) ? TBDDefaultCallout;
+
+    /** IOELFIR[41]
+     *  
+     */
+    (rIOELFIR, bit(41)) ? TBDDefaultCallout;
+
+    /** IOELFIR[42]
+     *  
+     */
+    (rIOELFIR, bit(42)) ? TBDDefaultCallout;
+
+    /** IOELFIR[43]
+     *  
+     */
+    (rIOELFIR, bit(43)) ? TBDDefaultCallout;
+
+    /** IOELFIR[44]
+     *  
+     */
+    (rIOELFIR, bit(44)) ? TBDDefaultCallout;
+
+    /** IOELFIR[45]
+     *  
+     */
+    (rIOELFIR, bit(45)) ? TBDDefaultCallout;
+
+    /** IOELFIR[46]
+     *  
+     */
+    (rIOELFIR, bit(46)) ? TBDDefaultCallout;
+
+    /** IOELFIR[47]
+     *  
+     */
+    (rIOELFIR, bit(47)) ? TBDDefaultCallout;
+
+    /** IOELFIR[48]
+     *  
+     */
+    (rIOELFIR, bit(48)) ? TBDDefaultCallout;
+
+    /** IOELFIR[49]
+     *  
+     */
+    (rIOELFIR, bit(49)) ? TBDDefaultCallout;
+
+    /** IOELFIR[50]
+     *  
+     */
+    (rIOELFIR, bit(50)) ? TBDDefaultCallout;
+
+    /** IOELFIR[51]
+     *  
+     */
+    (rIOELFIR, bit(51)) ? TBDDefaultCallout;
+
+    /** IOELFIR[52]
+     *  
+     */
+    (rIOELFIR, bit(52)) ? TBDDefaultCallout;
+
+    /** IOELFIR[53]
+     *  
+     */
+    (rIOELFIR, bit(53)) ? TBDDefaultCallout;
+
+    /** IOELFIR[54]
+     *  
+     */
+    (rIOELFIR, bit(54)) ? TBDDefaultCallout;
+
+    /** IOELFIR[55]
+     *  
+     */
+    (rIOELFIR, bit(55)) ? TBDDefaultCallout;
+
+    /** IOELFIR[56]
+     *  
+     */
+    (rIOELFIR, bit(56)) ? TBDDefaultCallout;
+
+    /** IOELFIR[57]
+     *  
+     */
+    (rIOELFIR, bit(57)) ? TBDDefaultCallout;
+
+    /** IOELFIR[58]
+     *  
+     */
+    (rIOELFIR, bit(58)) ? TBDDefaultCallout;
+
+    /** IOELFIR[59]
+     *  
+     */
+    (rIOELFIR, bit(59)) ? TBDDefaultCallout;
+
+    /** IOELFIR[60]
+     *  
+     */
+    (rIOELFIR, bit(60)) ? TBDDefaultCallout;
+
+    /** IOELFIR[61]
+     *  
+     */
+    (rIOELFIR, bit(61)) ? TBDDefaultCallout;
+
+    /** IOELFIR[62]
+     *  
+     */
+    (rIOELFIR, bit(62)) ? TBDDefaultCallout;
+
+    /** IOELFIR[63]
+     *  
+     */
+    (rIOELFIR, bit(63)) ? TBDDefaultCallout;
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ #    #                                  ###                                  #
+ #   # #    ##  ##### ###  ###  #   #   #   # #     #    ###   ###  ###  ###  #
+ #  #   #  #  #   #    #  #   # ##  #   #     #    # #  #     #     #   #     #
+ # ####### #      #    #  #   # # # #   #     #   #####  ###   ###  ##   ###  #
+ # #     # #  #   #    #  #   # #  ##   #   # #   #   #     #     # #       # #
+ # #     #  ##    #   ###  ###  #   #    ###  ### #   #  ###   ###  ###  ###  #
+ #                                                                            #
+ ##############################################################################
+
+# Include the common action set.
+.include "p9_common_actions.rule";
+

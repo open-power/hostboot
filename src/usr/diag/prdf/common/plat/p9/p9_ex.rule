@@ -1,0 +1,1588 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/p9/p9_ex.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2016
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+chip p9_ex
+{
+    name        "P9 EX chiplet";
+    targettype  TYPE_EX;
+    sigoff      0x9000;
+    dump        DUMP_CONTENT_HW;
+    scomlen     64;
+
+ #############################################################################
+ #                                                                           #
+ #  ######                                                                   #
+ #  #     #  ######   ####     ###    ####    #####  ######  #####    ####   #
+ #  #     #  #       #    #     #    #          #    #       #    #  #       #
+ #  ######   #####   #          #     ####      #    #####   #    #   ####   #
+ #  #   #    #       #  ###     #         #     #    #       #####        #  #
+ #  #    #   #       #    #     #    #    #     #    #       #   #   #    #  #
+ #  #     #  ######   ####     ###    ####      #    ######  #    #   ####   #
+ #                                                                           #
+ #############################################################################
+
+    ############################################################################
+    # P9 EX target L2FIR
+    ############################################################################
+
+    register L2FIR
+    {
+        name        "P9 EX target L2FIR";
+        scomaddr    0x10010800;
+        reset       (&, 0x10010801);
+        mask        (|, 0x10010805);
+        capture     group default;
+    };
+
+    register L2FIR_MASK
+    {
+        name        "P9 EX target L2FIR MASK";
+        scomaddr    0x10010803;
+        capture     group default;
+    };
+
+    register L2FIR_ACT0
+    {
+        name        "P9 EX target L2FIR ACT0";
+        scomaddr    0x10010806;
+        capture     group default;
+        capture     req nonzero("L2FIR");
+    };
+
+    register L2FIR_ACT1
+    {
+        name        "P9 EX target L2FIR ACT1";
+        scomaddr    0x10010807;
+        capture     group default;
+        capture     req nonzero("L2FIR");
+    };
+
+    ############################################################################
+    # P9 EX target NCUFIR
+    ############################################################################
+
+    register NCUFIR
+    {
+        name        "P9 EX target NCUFIR";
+        scomaddr    0x10011000;
+        reset       (&, 0x10011001);
+        mask        (|, 0x10011005);
+        capture     group default;
+    };
+
+    register NCUFIR_MASK
+    {
+        name        "P9 EX target NCUFIR MASK";
+        scomaddr    0x10011003;
+        capture     group default;
+    };
+
+    register NCUFIR_ACT0
+    {
+        name        "P9 EX target NCUFIR ACT0";
+        scomaddr    0x10011006;
+        capture     group default;
+        capture     req nonzero("NCUFIR");
+    };
+
+    register NCUFIR_ACT1
+    {
+        name        "P9 EX target NCUFIR ACT1";
+        scomaddr    0x10011007;
+        capture     group default;
+        capture     req nonzero("NCUFIR");
+    };
+
+    ############################################################################
+    # P9 EX target L3FIR
+    ############################################################################
+
+    register L3FIR
+    {
+        name        "P9 EX target L3FIR";
+        scomaddr    0x10011800;
+        reset       (&, 0x10011801);
+        mask        (|, 0x10011805);
+        capture     group default;
+    };
+
+    register L3FIR_MASK
+    {
+        name        "P9 EX target L3FIR MASK";
+        scomaddr    0x10011803;
+        capture     group default;
+    };
+
+    register L3FIR_ACT0
+    {
+        name        "P9 EX target L3FIR ACT0";
+        scomaddr    0x10011806;
+        capture     group default;
+        capture     req nonzero("L3FIR");
+    };
+
+    register L3FIR_ACT1
+    {
+        name        "P9 EX target L3FIR ACT1";
+        scomaddr    0x10011807;
+        capture     group default;
+        capture     req nonzero("L3FIR");
+    };
+
+    ############################################################################
+    # P9 EX target CMEFIR
+    ############################################################################
+
+    register CMEFIR
+    {
+        name        "P9 EX target CMEFIR";
+        scomaddr    0x10012000;
+        reset       (&, 0x10012001);
+        mask        (|, 0x10012005);
+        capture     group default;
+    };
+
+    register CMEFIR_MASK
+    {
+        name        "P9 EX target CMEFIR MASK";
+        scomaddr    0x10012003;
+        capture     group default;
+    };
+
+    register CMEFIR_ACT0
+    {
+        name        "P9 EX target CMEFIR ACT0";
+        scomaddr    0x10012006;
+        capture     group default;
+        capture     req nonzero("CMEFIR");
+    };
+
+    register CMEFIR_ACT1
+    {
+        name        "P9 EX target CMEFIR ACT1";
+        scomaddr    0x10012007;
+        capture     group default;
+        capture     req nonzero("CMEFIR");
+    };
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ # ####                                 #                                     #
+ # #   # #   # #    #####  ###      #  # #    ##  ##### ###  ###  #   #  ###  #
+ # #   # #   # #    #     #        #  #   #  #  #   #    #  #   # ##  # #     #
+ # ####  #   # #    ####   ###    #  ####### #      #    #  #   # # # #  ###  #
+ # #  #  #   # #    #         #  #   #     # #  #   #    #  #   # #  ##     # #
+ # #   #  ###  #### #####  ###  #    #     #  ##    #   ###  ###  #   #  ###  #
+ #                                                                            #
+ ##############################################################################
+
+################################################################################
+# Summary for EX
+################################################################################
+
+rule rEX
+{
+  CHECK_STOP:
+    summary( 0, rL2FIR ) |
+    summary( 1, rNCUFIR ) |
+    summary( 2, rL3FIR ) |
+    summary( 3, rCMEFIR );
+
+  RECOVERABLE:
+    summary( 0, rL2FIR ) |
+    summary( 1, rNCUFIR ) |
+    summary( 2, rL3FIR ) |
+    summary( 3, rCMEFIR );
+
+};
+
+group gEX attntype CHECK_STOP, RECOVERABLE
+{
+    (rEX, bit(0)) ? analyze(gL2FIR);
+    (rEX, bit(1)) ? analyze(gNCUFIR);
+    (rEX, bit(2)) ? analyze(gL3FIR);
+    (rEX, bit(3)) ? analyze(gCMEFIR);
+};
+
+################################################################################
+# P9 EX target L2FIR
+################################################################################
+
+rule rL2FIR
+{
+  CHECK_STOP:
+    L2FIR & ~L2FIR_MASK & ~L2FIR_ACT0 & ~L2FIR_ACT1;
+  RECOVERABLE:
+    L2FIR & ~L2FIR_MASK & ~L2FIR_ACT0 &  L2FIR_ACT1;
+};
+
+group gL2FIR filter singlebit
+{
+    /** L2FIR[0]
+     *  
+     */
+    (rL2FIR, bit(0)) ? TBDDefaultCallout;
+
+    /** L2FIR[1]
+     *  
+     */
+    (rL2FIR, bit(1)) ? TBDDefaultCallout;
+
+    /** L2FIR[2]
+     *  
+     */
+    (rL2FIR, bit(2)) ? TBDDefaultCallout;
+
+    /** L2FIR[3]
+     *  
+     */
+    (rL2FIR, bit(3)) ? TBDDefaultCallout;
+
+    /** L2FIR[4]
+     *  
+     */
+    (rL2FIR, bit(4)) ? TBDDefaultCallout;
+
+    /** L2FIR[5]
+     *  
+     */
+    (rL2FIR, bit(5)) ? TBDDefaultCallout;
+
+    /** L2FIR[6]
+     *  
+     */
+    (rL2FIR, bit(6)) ? TBDDefaultCallout;
+
+    /** L2FIR[7]
+     *  
+     */
+    (rL2FIR, bit(7)) ? TBDDefaultCallout;
+
+    /** L2FIR[8]
+     *  
+     */
+    (rL2FIR, bit(8)) ? TBDDefaultCallout;
+
+    /** L2FIR[9]
+     *  
+     */
+    (rL2FIR, bit(9)) ? TBDDefaultCallout;
+
+    /** L2FIR[10]
+     *  
+     */
+    (rL2FIR, bit(10)) ? TBDDefaultCallout;
+
+    /** L2FIR[11]
+     *  
+     */
+    (rL2FIR, bit(11)) ? TBDDefaultCallout;
+
+    /** L2FIR[12]
+     *  
+     */
+    (rL2FIR, bit(12)) ? TBDDefaultCallout;
+
+    /** L2FIR[13]
+     *  
+     */
+    (rL2FIR, bit(13)) ? TBDDefaultCallout;
+
+    /** L2FIR[14]
+     *  
+     */
+    (rL2FIR, bit(14)) ? TBDDefaultCallout;
+
+    /** L2FIR[15]
+     *  
+     */
+    (rL2FIR, bit(15)) ? TBDDefaultCallout;
+
+    /** L2FIR[16]
+     *  
+     */
+    (rL2FIR, bit(16)) ? TBDDefaultCallout;
+
+    /** L2FIR[17]
+     *  
+     */
+    (rL2FIR, bit(17)) ? TBDDefaultCallout;
+
+    /** L2FIR[18]
+     *  
+     */
+    (rL2FIR, bit(18)) ? TBDDefaultCallout;
+
+    /** L2FIR[19]
+     *  
+     */
+    (rL2FIR, bit(19)) ? TBDDefaultCallout;
+
+    /** L2FIR[20]
+     *  
+     */
+    (rL2FIR, bit(20)) ? TBDDefaultCallout;
+
+    /** L2FIR[21]
+     *  
+     */
+    (rL2FIR, bit(21)) ? TBDDefaultCallout;
+
+    /** L2FIR[22]
+     *  
+     */
+    (rL2FIR, bit(22)) ? TBDDefaultCallout;
+
+    /** L2FIR[23]
+     *  
+     */
+    (rL2FIR, bit(23)) ? TBDDefaultCallout;
+
+    /** L2FIR[24]
+     *  
+     */
+    (rL2FIR, bit(24)) ? TBDDefaultCallout;
+
+    /** L2FIR[25]
+     *  
+     */
+    (rL2FIR, bit(25)) ? TBDDefaultCallout;
+
+    /** L2FIR[26]
+     *  
+     */
+    (rL2FIR, bit(26)) ? TBDDefaultCallout;
+
+    /** L2FIR[27]
+     *  
+     */
+    (rL2FIR, bit(27)) ? TBDDefaultCallout;
+
+    /** L2FIR[28]
+     *  
+     */
+    (rL2FIR, bit(28)) ? TBDDefaultCallout;
+
+    /** L2FIR[29]
+     *  
+     */
+    (rL2FIR, bit(29)) ? TBDDefaultCallout;
+
+    /** L2FIR[30]
+     *  
+     */
+    (rL2FIR, bit(30)) ? TBDDefaultCallout;
+
+    /** L2FIR[31]
+     *  
+     */
+    (rL2FIR, bit(31)) ? TBDDefaultCallout;
+
+    /** L2FIR[32]
+     *  
+     */
+    (rL2FIR, bit(32)) ? TBDDefaultCallout;
+
+    /** L2FIR[33]
+     *  
+     */
+    (rL2FIR, bit(33)) ? TBDDefaultCallout;
+
+    /** L2FIR[34]
+     *  
+     */
+    (rL2FIR, bit(34)) ? TBDDefaultCallout;
+
+    /** L2FIR[35]
+     *  
+     */
+    (rL2FIR, bit(35)) ? TBDDefaultCallout;
+
+    /** L2FIR[36]
+     *  
+     */
+    (rL2FIR, bit(36)) ? TBDDefaultCallout;
+
+    /** L2FIR[37]
+     *  
+     */
+    (rL2FIR, bit(37)) ? TBDDefaultCallout;
+
+    /** L2FIR[38]
+     *  
+     */
+    (rL2FIR, bit(38)) ? TBDDefaultCallout;
+
+    /** L2FIR[39]
+     *  
+     */
+    (rL2FIR, bit(39)) ? TBDDefaultCallout;
+
+    /** L2FIR[40]
+     *  
+     */
+    (rL2FIR, bit(40)) ? TBDDefaultCallout;
+
+    /** L2FIR[41]
+     *  
+     */
+    (rL2FIR, bit(41)) ? TBDDefaultCallout;
+
+    /** L2FIR[42]
+     *  
+     */
+    (rL2FIR, bit(42)) ? TBDDefaultCallout;
+
+    /** L2FIR[43]
+     *  
+     */
+    (rL2FIR, bit(43)) ? TBDDefaultCallout;
+
+    /** L2FIR[44]
+     *  
+     */
+    (rL2FIR, bit(44)) ? TBDDefaultCallout;
+
+    /** L2FIR[45]
+     *  
+     */
+    (rL2FIR, bit(45)) ? TBDDefaultCallout;
+
+    /** L2FIR[46]
+     *  
+     */
+    (rL2FIR, bit(46)) ? TBDDefaultCallout;
+
+    /** L2FIR[47]
+     *  
+     */
+    (rL2FIR, bit(47)) ? TBDDefaultCallout;
+
+    /** L2FIR[48]
+     *  
+     */
+    (rL2FIR, bit(48)) ? TBDDefaultCallout;
+
+    /** L2FIR[49]
+     *  
+     */
+    (rL2FIR, bit(49)) ? TBDDefaultCallout;
+
+    /** L2FIR[50]
+     *  
+     */
+    (rL2FIR, bit(50)) ? TBDDefaultCallout;
+
+    /** L2FIR[51]
+     *  
+     */
+    (rL2FIR, bit(51)) ? TBDDefaultCallout;
+
+    /** L2FIR[52]
+     *  
+     */
+    (rL2FIR, bit(52)) ? TBDDefaultCallout;
+
+    /** L2FIR[53]
+     *  
+     */
+    (rL2FIR, bit(53)) ? TBDDefaultCallout;
+
+    /** L2FIR[54]
+     *  
+     */
+    (rL2FIR, bit(54)) ? TBDDefaultCallout;
+
+    /** L2FIR[55]
+     *  
+     */
+    (rL2FIR, bit(55)) ? TBDDefaultCallout;
+
+    /** L2FIR[56]
+     *  
+     */
+    (rL2FIR, bit(56)) ? TBDDefaultCallout;
+
+    /** L2FIR[57]
+     *  
+     */
+    (rL2FIR, bit(57)) ? TBDDefaultCallout;
+
+    /** L2FIR[58]
+     *  
+     */
+    (rL2FIR, bit(58)) ? TBDDefaultCallout;
+
+    /** L2FIR[59]
+     *  
+     */
+    (rL2FIR, bit(59)) ? TBDDefaultCallout;
+
+    /** L2FIR[60]
+     *  
+     */
+    (rL2FIR, bit(60)) ? TBDDefaultCallout;
+
+    /** L2FIR[61]
+     *  
+     */
+    (rL2FIR, bit(61)) ? TBDDefaultCallout;
+
+    /** L2FIR[62]
+     *  
+     */
+    (rL2FIR, bit(62)) ? TBDDefaultCallout;
+
+    /** L2FIR[63]
+     *  
+     */
+    (rL2FIR, bit(63)) ? TBDDefaultCallout;
+
+};
+
+################################################################################
+# P9 EX target NCUFIR
+################################################################################
+
+rule rNCUFIR
+{
+  CHECK_STOP:
+    NCUFIR & ~NCUFIR_MASK & ~NCUFIR_ACT0 & ~NCUFIR_ACT1;
+  RECOVERABLE:
+    NCUFIR & ~NCUFIR_MASK & ~NCUFIR_ACT0 &  NCUFIR_ACT1;
+};
+
+group gNCUFIR filter singlebit
+{
+    /** NCUFIR[0]
+     *  
+     */
+    (rNCUFIR, bit(0)) ? TBDDefaultCallout;
+
+    /** NCUFIR[1]
+     *  
+     */
+    (rNCUFIR, bit(1)) ? TBDDefaultCallout;
+
+    /** NCUFIR[2]
+     *  
+     */
+    (rNCUFIR, bit(2)) ? TBDDefaultCallout;
+
+    /** NCUFIR[3]
+     *  
+     */
+    (rNCUFIR, bit(3)) ? TBDDefaultCallout;
+
+    /** NCUFIR[4]
+     *  
+     */
+    (rNCUFIR, bit(4)) ? TBDDefaultCallout;
+
+    /** NCUFIR[5]
+     *  
+     */
+    (rNCUFIR, bit(5)) ? TBDDefaultCallout;
+
+    /** NCUFIR[6]
+     *  
+     */
+    (rNCUFIR, bit(6)) ? TBDDefaultCallout;
+
+    /** NCUFIR[7]
+     *  
+     */
+    (rNCUFIR, bit(7)) ? TBDDefaultCallout;
+
+    /** NCUFIR[8]
+     *  
+     */
+    (rNCUFIR, bit(8)) ? TBDDefaultCallout;
+
+    /** NCUFIR[9]
+     *  
+     */
+    (rNCUFIR, bit(9)) ? TBDDefaultCallout;
+
+    /** NCUFIR[10]
+     *  
+     */
+    (rNCUFIR, bit(10)) ? TBDDefaultCallout;
+
+    /** NCUFIR[11]
+     *  
+     */
+    (rNCUFIR, bit(11)) ? TBDDefaultCallout;
+
+    /** NCUFIR[12]
+     *  
+     */
+    (rNCUFIR, bit(12)) ? TBDDefaultCallout;
+
+    /** NCUFIR[13]
+     *  
+     */
+    (rNCUFIR, bit(13)) ? TBDDefaultCallout;
+
+    /** NCUFIR[14]
+     *  
+     */
+    (rNCUFIR, bit(14)) ? TBDDefaultCallout;
+
+    /** NCUFIR[15]
+     *  
+     */
+    (rNCUFIR, bit(15)) ? TBDDefaultCallout;
+
+    /** NCUFIR[16]
+     *  
+     */
+    (rNCUFIR, bit(16)) ? TBDDefaultCallout;
+
+    /** NCUFIR[17]
+     *  
+     */
+    (rNCUFIR, bit(17)) ? TBDDefaultCallout;
+
+    /** NCUFIR[18]
+     *  
+     */
+    (rNCUFIR, bit(18)) ? TBDDefaultCallout;
+
+    /** NCUFIR[19]
+     *  
+     */
+    (rNCUFIR, bit(19)) ? TBDDefaultCallout;
+
+    /** NCUFIR[20]
+     *  
+     */
+    (rNCUFIR, bit(20)) ? TBDDefaultCallout;
+
+    /** NCUFIR[21]
+     *  
+     */
+    (rNCUFIR, bit(21)) ? TBDDefaultCallout;
+
+    /** NCUFIR[22]
+     *  
+     */
+    (rNCUFIR, bit(22)) ? TBDDefaultCallout;
+
+    /** NCUFIR[23]
+     *  
+     */
+    (rNCUFIR, bit(23)) ? TBDDefaultCallout;
+
+    /** NCUFIR[24]
+     *  
+     */
+    (rNCUFIR, bit(24)) ? TBDDefaultCallout;
+
+    /** NCUFIR[25]
+     *  
+     */
+    (rNCUFIR, bit(25)) ? TBDDefaultCallout;
+
+    /** NCUFIR[26]
+     *  
+     */
+    (rNCUFIR, bit(26)) ? TBDDefaultCallout;
+
+    /** NCUFIR[27]
+     *  
+     */
+    (rNCUFIR, bit(27)) ? TBDDefaultCallout;
+
+    /** NCUFIR[28]
+     *  
+     */
+    (rNCUFIR, bit(28)) ? TBDDefaultCallout;
+
+    /** NCUFIR[29]
+     *  
+     */
+    (rNCUFIR, bit(29)) ? TBDDefaultCallout;
+
+    /** NCUFIR[30]
+     *  
+     */
+    (rNCUFIR, bit(30)) ? TBDDefaultCallout;
+
+    /** NCUFIR[31]
+     *  
+     */
+    (rNCUFIR, bit(31)) ? TBDDefaultCallout;
+
+    /** NCUFIR[32]
+     *  
+     */
+    (rNCUFIR, bit(32)) ? TBDDefaultCallout;
+
+    /** NCUFIR[33]
+     *  
+     */
+    (rNCUFIR, bit(33)) ? TBDDefaultCallout;
+
+    /** NCUFIR[34]
+     *  
+     */
+    (rNCUFIR, bit(34)) ? TBDDefaultCallout;
+
+    /** NCUFIR[35]
+     *  
+     */
+    (rNCUFIR, bit(35)) ? TBDDefaultCallout;
+
+    /** NCUFIR[36]
+     *  
+     */
+    (rNCUFIR, bit(36)) ? TBDDefaultCallout;
+
+    /** NCUFIR[37]
+     *  
+     */
+    (rNCUFIR, bit(37)) ? TBDDefaultCallout;
+
+    /** NCUFIR[38]
+     *  
+     */
+    (rNCUFIR, bit(38)) ? TBDDefaultCallout;
+
+    /** NCUFIR[39]
+     *  
+     */
+    (rNCUFIR, bit(39)) ? TBDDefaultCallout;
+
+    /** NCUFIR[40]
+     *  
+     */
+    (rNCUFIR, bit(40)) ? TBDDefaultCallout;
+
+    /** NCUFIR[41]
+     *  
+     */
+    (rNCUFIR, bit(41)) ? TBDDefaultCallout;
+
+    /** NCUFIR[42]
+     *  
+     */
+    (rNCUFIR, bit(42)) ? TBDDefaultCallout;
+
+    /** NCUFIR[43]
+     *  
+     */
+    (rNCUFIR, bit(43)) ? TBDDefaultCallout;
+
+    /** NCUFIR[44]
+     *  
+     */
+    (rNCUFIR, bit(44)) ? TBDDefaultCallout;
+
+    /** NCUFIR[45]
+     *  
+     */
+    (rNCUFIR, bit(45)) ? TBDDefaultCallout;
+
+    /** NCUFIR[46]
+     *  
+     */
+    (rNCUFIR, bit(46)) ? TBDDefaultCallout;
+
+    /** NCUFIR[47]
+     *  
+     */
+    (rNCUFIR, bit(47)) ? TBDDefaultCallout;
+
+    /** NCUFIR[48]
+     *  
+     */
+    (rNCUFIR, bit(48)) ? TBDDefaultCallout;
+
+    /** NCUFIR[49]
+     *  
+     */
+    (rNCUFIR, bit(49)) ? TBDDefaultCallout;
+
+    /** NCUFIR[50]
+     *  
+     */
+    (rNCUFIR, bit(50)) ? TBDDefaultCallout;
+
+    /** NCUFIR[51]
+     *  
+     */
+    (rNCUFIR, bit(51)) ? TBDDefaultCallout;
+
+    /** NCUFIR[52]
+     *  
+     */
+    (rNCUFIR, bit(52)) ? TBDDefaultCallout;
+
+    /** NCUFIR[53]
+     *  
+     */
+    (rNCUFIR, bit(53)) ? TBDDefaultCallout;
+
+    /** NCUFIR[54]
+     *  
+     */
+    (rNCUFIR, bit(54)) ? TBDDefaultCallout;
+
+    /** NCUFIR[55]
+     *  
+     */
+    (rNCUFIR, bit(55)) ? TBDDefaultCallout;
+
+    /** NCUFIR[56]
+     *  
+     */
+    (rNCUFIR, bit(56)) ? TBDDefaultCallout;
+
+    /** NCUFIR[57]
+     *  
+     */
+    (rNCUFIR, bit(57)) ? TBDDefaultCallout;
+
+    /** NCUFIR[58]
+     *  
+     */
+    (rNCUFIR, bit(58)) ? TBDDefaultCallout;
+
+    /** NCUFIR[59]
+     *  
+     */
+    (rNCUFIR, bit(59)) ? TBDDefaultCallout;
+
+    /** NCUFIR[60]
+     *  
+     */
+    (rNCUFIR, bit(60)) ? TBDDefaultCallout;
+
+    /** NCUFIR[61]
+     *  
+     */
+    (rNCUFIR, bit(61)) ? TBDDefaultCallout;
+
+    /** NCUFIR[62]
+     *  
+     */
+    (rNCUFIR, bit(62)) ? TBDDefaultCallout;
+
+    /** NCUFIR[63]
+     *  
+     */
+    (rNCUFIR, bit(63)) ? TBDDefaultCallout;
+
+};
+
+################################################################################
+# P9 EX target L3FIR
+################################################################################
+
+rule rL3FIR
+{
+  CHECK_STOP:
+    L3FIR & ~L3FIR_MASK & ~L3FIR_ACT0 & ~L3FIR_ACT1;
+  RECOVERABLE:
+    L3FIR & ~L3FIR_MASK & ~L3FIR_ACT0 &  L3FIR_ACT1;
+};
+
+group gL3FIR filter singlebit
+{
+    /** L3FIR[0]
+     *  
+     */
+    (rL3FIR, bit(0)) ? TBDDefaultCallout;
+
+    /** L3FIR[1]
+     *  
+     */
+    (rL3FIR, bit(1)) ? TBDDefaultCallout;
+
+    /** L3FIR[2]
+     *  
+     */
+    (rL3FIR, bit(2)) ? TBDDefaultCallout;
+
+    /** L3FIR[3]
+     *  
+     */
+    (rL3FIR, bit(3)) ? TBDDefaultCallout;
+
+    /** L3FIR[4]
+     *  
+     */
+    (rL3FIR, bit(4)) ? TBDDefaultCallout;
+
+    /** L3FIR[5]
+     *  
+     */
+    (rL3FIR, bit(5)) ? TBDDefaultCallout;
+
+    /** L3FIR[6]
+     *  
+     */
+    (rL3FIR, bit(6)) ? TBDDefaultCallout;
+
+    /** L3FIR[7]
+     *  
+     */
+    (rL3FIR, bit(7)) ? TBDDefaultCallout;
+
+    /** L3FIR[8]
+     *  
+     */
+    (rL3FIR, bit(8)) ? TBDDefaultCallout;
+
+    /** L3FIR[9]
+     *  
+     */
+    (rL3FIR, bit(9)) ? TBDDefaultCallout;
+
+    /** L3FIR[10]
+     *  
+     */
+    (rL3FIR, bit(10)) ? TBDDefaultCallout;
+
+    /** L3FIR[11]
+     *  
+     */
+    (rL3FIR, bit(11)) ? TBDDefaultCallout;
+
+    /** L3FIR[12]
+     *  
+     */
+    (rL3FIR, bit(12)) ? TBDDefaultCallout;
+
+    /** L3FIR[13]
+     *  
+     */
+    (rL3FIR, bit(13)) ? TBDDefaultCallout;
+
+    /** L3FIR[14]
+     *  
+     */
+    (rL3FIR, bit(14)) ? TBDDefaultCallout;
+
+    /** L3FIR[15]
+     *  
+     */
+    (rL3FIR, bit(15)) ? TBDDefaultCallout;
+
+    /** L3FIR[16]
+     *  
+     */
+    (rL3FIR, bit(16)) ? TBDDefaultCallout;
+
+    /** L3FIR[17]
+     *  
+     */
+    (rL3FIR, bit(17)) ? TBDDefaultCallout;
+
+    /** L3FIR[18]
+     *  
+     */
+    (rL3FIR, bit(18)) ? TBDDefaultCallout;
+
+    /** L3FIR[19]
+     *  
+     */
+    (rL3FIR, bit(19)) ? TBDDefaultCallout;
+
+    /** L3FIR[20]
+     *  
+     */
+    (rL3FIR, bit(20)) ? TBDDefaultCallout;
+
+    /** L3FIR[21]
+     *  
+     */
+    (rL3FIR, bit(21)) ? TBDDefaultCallout;
+
+    /** L3FIR[22]
+     *  
+     */
+    (rL3FIR, bit(22)) ? TBDDefaultCallout;
+
+    /** L3FIR[23]
+     *  
+     */
+    (rL3FIR, bit(23)) ? TBDDefaultCallout;
+
+    /** L3FIR[24]
+     *  
+     */
+    (rL3FIR, bit(24)) ? TBDDefaultCallout;
+
+    /** L3FIR[25]
+     *  
+     */
+    (rL3FIR, bit(25)) ? TBDDefaultCallout;
+
+    /** L3FIR[26]
+     *  
+     */
+    (rL3FIR, bit(26)) ? TBDDefaultCallout;
+
+    /** L3FIR[27]
+     *  
+     */
+    (rL3FIR, bit(27)) ? TBDDefaultCallout;
+
+    /** L3FIR[28]
+     *  
+     */
+    (rL3FIR, bit(28)) ? TBDDefaultCallout;
+
+    /** L3FIR[29]
+     *  
+     */
+    (rL3FIR, bit(29)) ? TBDDefaultCallout;
+
+    /** L3FIR[30]
+     *  
+     */
+    (rL3FIR, bit(30)) ? TBDDefaultCallout;
+
+    /** L3FIR[31]
+     *  
+     */
+    (rL3FIR, bit(31)) ? TBDDefaultCallout;
+
+    /** L3FIR[32]
+     *  
+     */
+    (rL3FIR, bit(32)) ? TBDDefaultCallout;
+
+    /** L3FIR[33]
+     *  
+     */
+    (rL3FIR, bit(33)) ? TBDDefaultCallout;
+
+    /** L3FIR[34]
+     *  
+     */
+    (rL3FIR, bit(34)) ? TBDDefaultCallout;
+
+    /** L3FIR[35]
+     *  
+     */
+    (rL3FIR, bit(35)) ? TBDDefaultCallout;
+
+    /** L3FIR[36]
+     *  
+     */
+    (rL3FIR, bit(36)) ? TBDDefaultCallout;
+
+    /** L3FIR[37]
+     *  
+     */
+    (rL3FIR, bit(37)) ? TBDDefaultCallout;
+
+    /** L3FIR[38]
+     *  
+     */
+    (rL3FIR, bit(38)) ? TBDDefaultCallout;
+
+    /** L3FIR[39]
+     *  
+     */
+    (rL3FIR, bit(39)) ? TBDDefaultCallout;
+
+    /** L3FIR[40]
+     *  
+     */
+    (rL3FIR, bit(40)) ? TBDDefaultCallout;
+
+    /** L3FIR[41]
+     *  
+     */
+    (rL3FIR, bit(41)) ? TBDDefaultCallout;
+
+    /** L3FIR[42]
+     *  
+     */
+    (rL3FIR, bit(42)) ? TBDDefaultCallout;
+
+    /** L3FIR[43]
+     *  
+     */
+    (rL3FIR, bit(43)) ? TBDDefaultCallout;
+
+    /** L3FIR[44]
+     *  
+     */
+    (rL3FIR, bit(44)) ? TBDDefaultCallout;
+
+    /** L3FIR[45]
+     *  
+     */
+    (rL3FIR, bit(45)) ? TBDDefaultCallout;
+
+    /** L3FIR[46]
+     *  
+     */
+    (rL3FIR, bit(46)) ? TBDDefaultCallout;
+
+    /** L3FIR[47]
+     *  
+     */
+    (rL3FIR, bit(47)) ? TBDDefaultCallout;
+
+    /** L3FIR[48]
+     *  
+     */
+    (rL3FIR, bit(48)) ? TBDDefaultCallout;
+
+    /** L3FIR[49]
+     *  
+     */
+    (rL3FIR, bit(49)) ? TBDDefaultCallout;
+
+    /** L3FIR[50]
+     *  
+     */
+    (rL3FIR, bit(50)) ? TBDDefaultCallout;
+
+    /** L3FIR[51]
+     *  
+     */
+    (rL3FIR, bit(51)) ? TBDDefaultCallout;
+
+    /** L3FIR[52]
+     *  
+     */
+    (rL3FIR, bit(52)) ? TBDDefaultCallout;
+
+    /** L3FIR[53]
+     *  
+     */
+    (rL3FIR, bit(53)) ? TBDDefaultCallout;
+
+    /** L3FIR[54]
+     *  
+     */
+    (rL3FIR, bit(54)) ? TBDDefaultCallout;
+
+    /** L3FIR[55]
+     *  
+     */
+    (rL3FIR, bit(55)) ? TBDDefaultCallout;
+
+    /** L3FIR[56]
+     *  
+     */
+    (rL3FIR, bit(56)) ? TBDDefaultCallout;
+
+    /** L3FIR[57]
+     *  
+     */
+    (rL3FIR, bit(57)) ? TBDDefaultCallout;
+
+    /** L3FIR[58]
+     *  
+     */
+    (rL3FIR, bit(58)) ? TBDDefaultCallout;
+
+    /** L3FIR[59]
+     *  
+     */
+    (rL3FIR, bit(59)) ? TBDDefaultCallout;
+
+    /** L3FIR[60]
+     *  
+     */
+    (rL3FIR, bit(60)) ? TBDDefaultCallout;
+
+    /** L3FIR[61]
+     *  
+     */
+    (rL3FIR, bit(61)) ? TBDDefaultCallout;
+
+    /** L3FIR[62]
+     *  
+     */
+    (rL3FIR, bit(62)) ? TBDDefaultCallout;
+
+    /** L3FIR[63]
+     *  
+     */
+    (rL3FIR, bit(63)) ? TBDDefaultCallout;
+
+};
+
+################################################################################
+# P9 EX target CMEFIR
+################################################################################
+
+rule rCMEFIR
+{
+  CHECK_STOP:
+    CMEFIR & ~CMEFIR_MASK & ~CMEFIR_ACT0 & ~CMEFIR_ACT1;
+  RECOVERABLE:
+    CMEFIR & ~CMEFIR_MASK & ~CMEFIR_ACT0 &  CMEFIR_ACT1;
+};
+
+group gCMEFIR filter singlebit
+{
+    /** CMEFIR[0]
+     *  
+     */
+    (rCMEFIR, bit(0)) ? TBDDefaultCallout;
+
+    /** CMEFIR[1]
+     *  
+     */
+    (rCMEFIR, bit(1)) ? TBDDefaultCallout;
+
+    /** CMEFIR[2]
+     *  
+     */
+    (rCMEFIR, bit(2)) ? TBDDefaultCallout;
+
+    /** CMEFIR[3]
+     *  
+     */
+    (rCMEFIR, bit(3)) ? TBDDefaultCallout;
+
+    /** CMEFIR[4]
+     *  
+     */
+    (rCMEFIR, bit(4)) ? TBDDefaultCallout;
+
+    /** CMEFIR[5]
+     *  
+     */
+    (rCMEFIR, bit(5)) ? TBDDefaultCallout;
+
+    /** CMEFIR[6]
+     *  
+     */
+    (rCMEFIR, bit(6)) ? TBDDefaultCallout;
+
+    /** CMEFIR[7]
+     *  
+     */
+    (rCMEFIR, bit(7)) ? TBDDefaultCallout;
+
+    /** CMEFIR[8]
+     *  
+     */
+    (rCMEFIR, bit(8)) ? TBDDefaultCallout;
+
+    /** CMEFIR[9]
+     *  
+     */
+    (rCMEFIR, bit(9)) ? TBDDefaultCallout;
+
+    /** CMEFIR[10]
+     *  
+     */
+    (rCMEFIR, bit(10)) ? TBDDefaultCallout;
+
+    /** CMEFIR[11]
+     *  
+     */
+    (rCMEFIR, bit(11)) ? TBDDefaultCallout;
+
+    /** CMEFIR[12]
+     *  
+     */
+    (rCMEFIR, bit(12)) ? TBDDefaultCallout;
+
+    /** CMEFIR[13]
+     *  
+     */
+    (rCMEFIR, bit(13)) ? TBDDefaultCallout;
+
+    /** CMEFIR[14]
+     *  
+     */
+    (rCMEFIR, bit(14)) ? TBDDefaultCallout;
+
+    /** CMEFIR[15]
+     *  
+     */
+    (rCMEFIR, bit(15)) ? TBDDefaultCallout;
+
+    /** CMEFIR[16]
+     *  
+     */
+    (rCMEFIR, bit(16)) ? TBDDefaultCallout;
+
+    /** CMEFIR[17]
+     *  
+     */
+    (rCMEFIR, bit(17)) ? TBDDefaultCallout;
+
+    /** CMEFIR[18]
+     *  
+     */
+    (rCMEFIR, bit(18)) ? TBDDefaultCallout;
+
+    /** CMEFIR[19]
+     *  
+     */
+    (rCMEFIR, bit(19)) ? TBDDefaultCallout;
+
+    /** CMEFIR[20]
+     *  
+     */
+    (rCMEFIR, bit(20)) ? TBDDefaultCallout;
+
+    /** CMEFIR[21]
+     *  
+     */
+    (rCMEFIR, bit(21)) ? TBDDefaultCallout;
+
+    /** CMEFIR[22]
+     *  
+     */
+    (rCMEFIR, bit(22)) ? TBDDefaultCallout;
+
+    /** CMEFIR[23]
+     *  
+     */
+    (rCMEFIR, bit(23)) ? TBDDefaultCallout;
+
+    /** CMEFIR[24]
+     *  
+     */
+    (rCMEFIR, bit(24)) ? TBDDefaultCallout;
+
+    /** CMEFIR[25]
+     *  
+     */
+    (rCMEFIR, bit(25)) ? TBDDefaultCallout;
+
+    /** CMEFIR[26]
+     *  
+     */
+    (rCMEFIR, bit(26)) ? TBDDefaultCallout;
+
+    /** CMEFIR[27]
+     *  
+     */
+    (rCMEFIR, bit(27)) ? TBDDefaultCallout;
+
+    /** CMEFIR[28]
+     *  
+     */
+    (rCMEFIR, bit(28)) ? TBDDefaultCallout;
+
+    /** CMEFIR[29]
+     *  
+     */
+    (rCMEFIR, bit(29)) ? TBDDefaultCallout;
+
+    /** CMEFIR[30]
+     *  
+     */
+    (rCMEFIR, bit(30)) ? TBDDefaultCallout;
+
+    /** CMEFIR[31]
+     *  
+     */
+    (rCMEFIR, bit(31)) ? TBDDefaultCallout;
+
+    /** CMEFIR[32]
+     *  
+     */
+    (rCMEFIR, bit(32)) ? TBDDefaultCallout;
+
+    /** CMEFIR[33]
+     *  
+     */
+    (rCMEFIR, bit(33)) ? TBDDefaultCallout;
+
+    /** CMEFIR[34]
+     *  
+     */
+    (rCMEFIR, bit(34)) ? TBDDefaultCallout;
+
+    /** CMEFIR[35]
+     *  
+     */
+    (rCMEFIR, bit(35)) ? TBDDefaultCallout;
+
+    /** CMEFIR[36]
+     *  
+     */
+    (rCMEFIR, bit(36)) ? TBDDefaultCallout;
+
+    /** CMEFIR[37]
+     *  
+     */
+    (rCMEFIR, bit(37)) ? TBDDefaultCallout;
+
+    /** CMEFIR[38]
+     *  
+     */
+    (rCMEFIR, bit(38)) ? TBDDefaultCallout;
+
+    /** CMEFIR[39]
+     *  
+     */
+    (rCMEFIR, bit(39)) ? TBDDefaultCallout;
+
+    /** CMEFIR[40]
+     *  
+     */
+    (rCMEFIR, bit(40)) ? TBDDefaultCallout;
+
+    /** CMEFIR[41]
+     *  
+     */
+    (rCMEFIR, bit(41)) ? TBDDefaultCallout;
+
+    /** CMEFIR[42]
+     *  
+     */
+    (rCMEFIR, bit(42)) ? TBDDefaultCallout;
+
+    /** CMEFIR[43]
+     *  
+     */
+    (rCMEFIR, bit(43)) ? TBDDefaultCallout;
+
+    /** CMEFIR[44]
+     *  
+     */
+    (rCMEFIR, bit(44)) ? TBDDefaultCallout;
+
+    /** CMEFIR[45]
+     *  
+     */
+    (rCMEFIR, bit(45)) ? TBDDefaultCallout;
+
+    /** CMEFIR[46]
+     *  
+     */
+    (rCMEFIR, bit(46)) ? TBDDefaultCallout;
+
+    /** CMEFIR[47]
+     *  
+     */
+    (rCMEFIR, bit(47)) ? TBDDefaultCallout;
+
+    /** CMEFIR[48]
+     *  
+     */
+    (rCMEFIR, bit(48)) ? TBDDefaultCallout;
+
+    /** CMEFIR[49]
+     *  
+     */
+    (rCMEFIR, bit(49)) ? TBDDefaultCallout;
+
+    /** CMEFIR[50]
+     *  
+     */
+    (rCMEFIR, bit(50)) ? TBDDefaultCallout;
+
+    /** CMEFIR[51]
+     *  
+     */
+    (rCMEFIR, bit(51)) ? TBDDefaultCallout;
+
+    /** CMEFIR[52]
+     *  
+     */
+    (rCMEFIR, bit(52)) ? TBDDefaultCallout;
+
+    /** CMEFIR[53]
+     *  
+     */
+    (rCMEFIR, bit(53)) ? TBDDefaultCallout;
+
+    /** CMEFIR[54]
+     *  
+     */
+    (rCMEFIR, bit(54)) ? TBDDefaultCallout;
+
+    /** CMEFIR[55]
+     *  
+     */
+    (rCMEFIR, bit(55)) ? TBDDefaultCallout;
+
+    /** CMEFIR[56]
+     *  
+     */
+    (rCMEFIR, bit(56)) ? TBDDefaultCallout;
+
+    /** CMEFIR[57]
+     *  
+     */
+    (rCMEFIR, bit(57)) ? TBDDefaultCallout;
+
+    /** CMEFIR[58]
+     *  
+     */
+    (rCMEFIR, bit(58)) ? TBDDefaultCallout;
+
+    /** CMEFIR[59]
+     *  
+     */
+    (rCMEFIR, bit(59)) ? TBDDefaultCallout;
+
+    /** CMEFIR[60]
+     *  
+     */
+    (rCMEFIR, bit(60)) ? TBDDefaultCallout;
+
+    /** CMEFIR[61]
+     *  
+     */
+    (rCMEFIR, bit(61)) ? TBDDefaultCallout;
+
+    /** CMEFIR[62]
+     *  
+     */
+    (rCMEFIR, bit(62)) ? TBDDefaultCallout;
+
+    /** CMEFIR[63]
+     *  
+     */
+    (rCMEFIR, bit(63)) ? TBDDefaultCallout;
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ #    #                                  ###                                  #
+ #   # #    ##  ##### ###  ###  #   #   #   # #     #    ###   ###  ###  ###  #
+ #  #   #  #  #   #    #  #   # ##  #   #     #    # #  #     #     #   #     #
+ # ####### #      #    #  #   # # # #   #     #   #####  ###   ###  ##   ###  #
+ # #     # #  #   #    #  #   # #  ##   #   # #   #   #     #     # #       # #
+ # #     #  ##    #   ###  ###  #   #    ###  ### #   #  ###   ###  ###  ###  #
+ #                                                                            #
+ ##############################################################################
+
+# Include the common action set.
+.include "p9_common_actions.rule";
+
