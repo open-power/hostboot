@@ -800,8 +800,10 @@ public:
     { scom_targets[myEX0], 0x0FFFFFFF, 0x0FFFFFFF, true},
     { scom_targets[myEX1], 0x21000000, 0x23000000, false},
     { scom_targets[myEX1], 0x0FFFFFFF, 0x0FFFFFFF ,true},
-//@TODO RTC:149140 RE-enable scom test addresses
-//     { scom_targets[myEX1], 0x10012400, 0x10012800, false},
+    //This address is tricky, it is within EQ0 chip unit but
+    //the ring value puts it in the EX1 chip unit space,
+    // so you cannot use this address with EX targets
+    { scom_targets[myEX1], 0x10012400, 0x10012400, true},
     { scom_targets[myCORE0], 0x20010A46, 0x20010A46, false},
     { scom_targets[myCORE0], 0x0FFFFFFF, 0x0FFFFFFF, true},
     { scom_targets[myCORE1], 0x20010A46, 0x21010A46, false},
@@ -842,9 +844,8 @@ public:
     { scom_targets[myPERV32], 0x0D010400, 0x0D010400, true},
     { scom_targets[myPEC0], 0x04010C03, 0x04010C03, false},
     { scom_targets[myPEC1], 0x04010C03, 0x04011003 ,false},
-//@TODO RTC:149140 RE-enable scom test addresses
-//     { scom_targets[myPEC0], 0x0FFFFFFF, 0x0FFFFFFF, true},
-//     { scom_targets[myPEC1], 0x0FFFFFFF, 0x0FFFFFFF ,true},
+    { scom_targets[myPEC0], 0x0FFFFFFF, 0x0FFFFFFF, true},
+    { scom_targets[myPEC1], 0x0FFFFFFF, 0x0FFFFFFF ,true},
     { scom_targets[myPEC0], 0x12012826, 0x12012826, true},
     { scom_targets[myPEC1], 0x24030008, 0x24030008, true},
     { scom_targets[myPHB0], 0x04010C4E, 0x04010C4E, false},

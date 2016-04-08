@@ -418,7 +418,8 @@ errlHndl_t p9_translation (TARGETING::Target * &i_target,
         //check each scom pairing to make sure we have a match
         for(uint32_t i = 0; i < l_scomPairings.size(); i++)
         {
-            if( l_scomPairings[i].chipUnitType == l_chipUnit)
+            if( (l_scomPairings[i].chipUnitType == l_chipUnit) &&
+                (l_scomPairings[i].chipUnitNum == 0))
             {
                 l_scomAddrAndTargetTypeMatch = true;
                 break;
