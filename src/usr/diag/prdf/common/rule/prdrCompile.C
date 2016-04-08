@@ -435,17 +435,20 @@ uint32_t prdrActionArgMap(const std::string & i_arg)
 
         // Initialize target types.
         g_ActionArgMap["TYPE_PROC"]     = TARGETING::TYPE_PROC;
-        g_ActionArgMap["TYPE_NX"]       = TARGETING::TYPE_NX;
+        g_ActionArgMap["TYPE_EQ"]       = TARGETING::TYPE_EQ;
         g_ActionArgMap["TYPE_EX"]       = TARGETING::TYPE_EX;
+        g_ActionArgMap["TYPE_CORE"]     = TARGETING::TYPE_CORE;
+        g_ActionArgMap["TYPE_CAPP"]     = TARGETING::TYPE_CAPP;
+        g_ActionArgMap["TYPE_PEC"]      = TARGETING::TYPE_PEC;
+        g_ActionArgMap["TYPE_PHB"]      = TARGETING::TYPE_PHB;
+        g_ActionArgMap["TYPE_OBUS"]     = TARGETING::TYPE_OBUS;
         g_ActionArgMap["TYPE_XBUS"]     = TARGETING::TYPE_XBUS;
-        g_ActionArgMap["TYPE_ABUS"]     = TARGETING::TYPE_ABUS;
-        g_ActionArgMap["TYPE_PCI"]      = TARGETING::TYPE_PCI;
+        g_ActionArgMap["TYPE_MCBIST"]   = TARGETING::TYPE_MCBIST;
         g_ActionArgMap["TYPE_MCS"]      = TARGETING::TYPE_MCS;
+        g_ActionArgMap["TYPE_MCA"]      = TARGETING::TYPE_MCA;
         g_ActionArgMap["TYPE_MEMBUF"]   = TARGETING::TYPE_MEMBUF;
         g_ActionArgMap["TYPE_L4"]       = TARGETING::TYPE_L4;
         g_ActionArgMap["TYPE_MBA"]      = TARGETING::TYPE_MBA;
-        g_ActionArgMap["TYPE_OCC"]      = TARGETING::TYPE_OCC;
-        g_ActionArgMap["TYPE_PSI"]      = TARGETING::TYPE_PSI;
         g_ActionArgMap["TYPE_NA"]       = TARGETING::TYPE_NA;
 
         // Initialize symbolic callouts.

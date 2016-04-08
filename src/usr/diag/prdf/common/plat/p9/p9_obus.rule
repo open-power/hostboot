@@ -1,0 +1,1239 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/p9/p9_obus.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2016
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+chip p9_obus
+{
+    name        "P9 OBUS chiplet";
+    targettype  TYPE_OBUS;
+    sigoff      0x9000;
+    dump        DUMP_CONTENT_HW;
+    scomlen     64;
+
+ #############################################################################
+ #                                                                           #
+ #  ######                                                                   #
+ #  #     #  ######   ####     ###    ####    #####  ######  #####    ####   #
+ #  #     #  #       #    #     #    #          #    #       #    #  #       #
+ #  ######   #####   #          #     ####      #    #####   #    #   ####   #
+ #  #   #    #       #  ###     #         #     #    #       #####        #  #
+ #  #    #   #       #    #     #    #    #     #    #       #   #   #    #  #
+ #  #     #  ######   ####     ###    ####      #    ######  #    #   ####   #
+ #                                                                           #
+ #############################################################################
+
+    ############################################################################
+    # OB Chiplet FIR
+    ############################################################################
+
+    register OB_CHIPLET_CS_FIR
+    {
+        name        "OB Chiplet Checkstop FIR";
+        scomaddr    0x09040000;
+        capture     group default;
+    };
+
+    register OB_CHIPLET_RE_FIR
+    {
+        name        "OB Chiplet Recoverable FIR";
+        scomaddr    0x09040001;
+        capture     group default;
+    };
+
+    register OB_CHIPLET_FIR_MASK
+    {
+        name        "OB Chiplet FIR MASK";
+        scomaddr    0x09040002;
+        capture     group default;
+    };
+
+    ############################################################################
+    # P9 OBUS target OB_LFIR
+    ############################################################################
+
+    register OB_LFIR
+    {
+        name        "P9 OBUS target OB_LFIR";
+        scomaddr    0x0904000a;
+        reset       (&, 0x0904000b);
+        mask        (|, 0x0904000f);
+        capture     group default;
+    };
+
+    register OB_LFIR_MASK
+    {
+        name        "P9 OBUS target OB_LFIR MASK";
+        scomaddr    0x0904000d;
+        capture     group default;
+    };
+
+    register OB_LFIR_ACT0
+    {
+        name        "P9 OBUS target OB_LFIR ACT0";
+        scomaddr    0x09040010;
+        capture     group default;
+        capture     req nonzero("OB_LFIR");
+    };
+
+    register OB_LFIR_ACT1
+    {
+        name        "P9 OBUS target OB_LFIR ACT1";
+        scomaddr    0x09040011;
+        capture     group default;
+        capture     req nonzero("OB_LFIR");
+    };
+
+    ############################################################################
+    # P9 OBUS target IOOLFIR
+    ############################################################################
+
+    register IOOLFIR
+    {
+        name        "P9 OBUS target IOOLFIR";
+        scomaddr    0x09010800;
+        reset       (&, 0x09010801);
+        mask        (|, 0x09010805);
+        capture     group default;
+    };
+
+    register IOOLFIR_MASK
+    {
+        name        "P9 OBUS target IOOLFIR MASK";
+        scomaddr    0x09010803;
+        capture     group default;
+    };
+
+    register IOOLFIR_ACT0
+    {
+        name        "P9 OBUS target IOOLFIR ACT0";
+        scomaddr    0x09010806;
+        capture     group default;
+        capture     req nonzero("IOOLFIR");
+    };
+
+    register IOOLFIR_ACT1
+    {
+        name        "P9 OBUS target IOOLFIR ACT1";
+        scomaddr    0x09010807;
+        capture     group default;
+        capture     req nonzero("IOOLFIR");
+    };
+
+    ############################################################################
+    # P9 OBUS target IOOBFIR
+    ############################################################################
+
+    register IOOBFIR
+    {
+        name        "P9 OBUS target IOOBFIR";
+        scomaddr    0x09010c00;
+        reset       (&, 0x09010c01);
+        mask        (|, 0x09010c05);
+        capture     group default;
+    };
+
+    register IOOBFIR_MASK
+    {
+        name        "P9 OBUS target IOOBFIR MASK";
+        scomaddr    0x09010c03;
+        capture     group default;
+    };
+
+    register IOOBFIR_ACT0
+    {
+        name        "P9 OBUS target IOOBFIR ACT0";
+        scomaddr    0x09010c06;
+        capture     group default;
+        capture     req nonzero("IOOBFIR");
+    };
+
+    register IOOBFIR_ACT1
+    {
+        name        "P9 OBUS target IOOBFIR ACT1";
+        scomaddr    0x09010c07;
+        capture     group default;
+        capture     req nonzero("IOOBFIR");
+    };
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ # ####                                 #                                     #
+ # #   # #   # #    #####  ###      #  # #    ##  ##### ###  ###  #   #  ###  #
+ # #   # #   # #    #     #        #  #   #  #  #   #    #  #   # ##  # #     #
+ # ####  #   # #    ####   ###    #  ####### #      #    #  #   # # # #  ###  #
+ # #  #  #   # #    #         #  #   #     # #  #   #    #  #   # #  ##     # #
+ # #   #  ###  #### #####  ###  #    #     #  ##    #   ###  ###  #   #  ###  #
+ #                                                                            #
+ ##############################################################################
+
+################################################################################
+# OB Chiplet FIR
+################################################################################
+
+rule rOB_CHIPLET_FIR
+{
+  CHECK_STOP:
+     OB_CHIPLET_CS_FIR       & ~OB_CHIPLET_FIR_MASK & `1fffffffffffffff`;
+  RECOVERABLE:
+    (OB_CHIPLET_RE_FIR >> 2) & ~OB_CHIPLET_FIR_MASK & `1fffffffffffffff`;
+};
+
+group gOB_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE filter singlebit
+{
+    /** OB_CHIPLET_FIR[3]
+     *  Attention from OB_LFIR
+     */
+    (rOB_CHIPLET_FIR, bit(3)) ? analyze(gOB_LFIR);
+
+    /** OB_CHIPLET_FIR[4]
+     *  Attention from IOOLFIR
+     */
+    (rOB_CHIPLET_FIR, bit(4)) ? analyze(gIOOLFIR);
+
+};
+
+################################################################################
+# P9 OBUS target OB_LFIR
+################################################################################
+
+rule rOB_LFIR
+{
+  CHECK_STOP:
+    OB_LFIR & ~OB_LFIR_MASK & ~OB_LFIR_ACT0 & ~OB_LFIR_ACT1;
+  RECOVERABLE:
+    OB_LFIR & ~OB_LFIR_MASK & ~OB_LFIR_ACT0 &  OB_LFIR_ACT1;
+};
+
+group gOB_LFIR filter singlebit
+{
+    /** OB_LFIR[0]
+     *  
+     */
+    (rOB_LFIR, bit(0)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[1]
+     *  
+     */
+    (rOB_LFIR, bit(1)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[2]
+     *  
+     */
+    (rOB_LFIR, bit(2)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[3]
+     *  
+     */
+    (rOB_LFIR, bit(3)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[4]
+     *  
+     */
+    (rOB_LFIR, bit(4)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[5]
+     *  
+     */
+    (rOB_LFIR, bit(5)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[6]
+     *  
+     */
+    (rOB_LFIR, bit(6)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[7]
+     *  
+     */
+    (rOB_LFIR, bit(7)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[8]
+     *  
+     */
+    (rOB_LFIR, bit(8)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[9]
+     *  
+     */
+    (rOB_LFIR, bit(9)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[10]
+     *  
+     */
+    (rOB_LFIR, bit(10)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[11]
+     *  
+     */
+    (rOB_LFIR, bit(11)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[12]
+     *  
+     */
+    (rOB_LFIR, bit(12)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[13]
+     *  
+     */
+    (rOB_LFIR, bit(13)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[14]
+     *  
+     */
+    (rOB_LFIR, bit(14)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[15]
+     *  
+     */
+    (rOB_LFIR, bit(15)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[16]
+     *  
+     */
+    (rOB_LFIR, bit(16)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[17]
+     *  
+     */
+    (rOB_LFIR, bit(17)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[18]
+     *  
+     */
+    (rOB_LFIR, bit(18)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[19]
+     *  
+     */
+    (rOB_LFIR, bit(19)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[20]
+     *  
+     */
+    (rOB_LFIR, bit(20)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[21]
+     *  
+     */
+    (rOB_LFIR, bit(21)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[22]
+     *  
+     */
+    (rOB_LFIR, bit(22)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[23]
+     *  
+     */
+    (rOB_LFIR, bit(23)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[24]
+     *  
+     */
+    (rOB_LFIR, bit(24)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[25]
+     *  
+     */
+    (rOB_LFIR, bit(25)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[26]
+     *  
+     */
+    (rOB_LFIR, bit(26)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[27]
+     *  
+     */
+    (rOB_LFIR, bit(27)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[28]
+     *  
+     */
+    (rOB_LFIR, bit(28)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[29]
+     *  
+     */
+    (rOB_LFIR, bit(29)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[30]
+     *  
+     */
+    (rOB_LFIR, bit(30)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[31]
+     *  
+     */
+    (rOB_LFIR, bit(31)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[32]
+     *  
+     */
+    (rOB_LFIR, bit(32)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[33]
+     *  
+     */
+    (rOB_LFIR, bit(33)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[34]
+     *  
+     */
+    (rOB_LFIR, bit(34)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[35]
+     *  
+     */
+    (rOB_LFIR, bit(35)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[36]
+     *  
+     */
+    (rOB_LFIR, bit(36)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[37]
+     *  
+     */
+    (rOB_LFIR, bit(37)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[38]
+     *  
+     */
+    (rOB_LFIR, bit(38)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[39]
+     *  
+     */
+    (rOB_LFIR, bit(39)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[40]
+     *  
+     */
+    (rOB_LFIR, bit(40)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[41]
+     *  
+     */
+    (rOB_LFIR, bit(41)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[42]
+     *  
+     */
+    (rOB_LFIR, bit(42)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[43]
+     *  
+     */
+    (rOB_LFIR, bit(43)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[44]
+     *  
+     */
+    (rOB_LFIR, bit(44)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[45]
+     *  
+     */
+    (rOB_LFIR, bit(45)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[46]
+     *  
+     */
+    (rOB_LFIR, bit(46)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[47]
+     *  
+     */
+    (rOB_LFIR, bit(47)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[48]
+     *  
+     */
+    (rOB_LFIR, bit(48)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[49]
+     *  
+     */
+    (rOB_LFIR, bit(49)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[50]
+     *  
+     */
+    (rOB_LFIR, bit(50)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[51]
+     *  
+     */
+    (rOB_LFIR, bit(51)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[52]
+     *  
+     */
+    (rOB_LFIR, bit(52)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[53]
+     *  
+     */
+    (rOB_LFIR, bit(53)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[54]
+     *  
+     */
+    (rOB_LFIR, bit(54)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[55]
+     *  
+     */
+    (rOB_LFIR, bit(55)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[56]
+     *  
+     */
+    (rOB_LFIR, bit(56)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[57]
+     *  
+     */
+    (rOB_LFIR, bit(57)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[58]
+     *  
+     */
+    (rOB_LFIR, bit(58)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[59]
+     *  
+     */
+    (rOB_LFIR, bit(59)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[60]
+     *  
+     */
+    (rOB_LFIR, bit(60)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[61]
+     *  
+     */
+    (rOB_LFIR, bit(61)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[62]
+     *  
+     */
+    (rOB_LFIR, bit(62)) ? TBDDefaultCallout;
+
+    /** OB_LFIR[63]
+     *  
+     */
+    (rOB_LFIR, bit(63)) ? TBDDefaultCallout;
+
+};
+
+################################################################################
+# P9 OBUS target IOOLFIR
+################################################################################
+
+rule rIOOLFIR
+{
+  CHECK_STOP:
+    IOOLFIR & ~IOOLFIR_MASK & ~IOOLFIR_ACT0 & ~IOOLFIR_ACT1;
+  RECOVERABLE:
+    IOOLFIR & ~IOOLFIR_MASK & ~IOOLFIR_ACT0 &  IOOLFIR_ACT1;
+};
+
+group gIOOLFIR filter singlebit
+{
+    /** IOOLFIR[0]
+     *  
+     */
+    (rIOOLFIR, bit(0)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[1]
+     *  
+     */
+    (rIOOLFIR, bit(1)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[2]
+     *  
+     */
+    (rIOOLFIR, bit(2)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[3]
+     *  
+     */
+    (rIOOLFIR, bit(3)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[4]
+     *  
+     */
+    (rIOOLFIR, bit(4)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[5]
+     *  
+     */
+    (rIOOLFIR, bit(5)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[6]
+     *  
+     */
+    (rIOOLFIR, bit(6)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[7]
+     *  
+     */
+    (rIOOLFIR, bit(7)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[8]
+     *  
+     */
+    (rIOOLFIR, bit(8)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[9]
+     *  
+     */
+    (rIOOLFIR, bit(9)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[10]
+     *  
+     */
+    (rIOOLFIR, bit(10)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[11]
+     *  
+     */
+    (rIOOLFIR, bit(11)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[12]
+     *  
+     */
+    (rIOOLFIR, bit(12)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[13]
+     *  
+     */
+    (rIOOLFIR, bit(13)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[14]
+     *  
+     */
+    (rIOOLFIR, bit(14)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[15]
+     *  
+     */
+    (rIOOLFIR, bit(15)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[16]
+     *  
+     */
+    (rIOOLFIR, bit(16)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[17]
+     *  
+     */
+    (rIOOLFIR, bit(17)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[18]
+     *  
+     */
+    (rIOOLFIR, bit(18)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[19]
+     *  
+     */
+    (rIOOLFIR, bit(19)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[20]
+     *  
+     */
+    (rIOOLFIR, bit(20)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[21]
+     *  
+     */
+    (rIOOLFIR, bit(21)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[22]
+     *  
+     */
+    (rIOOLFIR, bit(22)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[23]
+     *  
+     */
+    (rIOOLFIR, bit(23)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[24]
+     *  
+     */
+    (rIOOLFIR, bit(24)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[25]
+     *  
+     */
+    (rIOOLFIR, bit(25)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[26]
+     *  
+     */
+    (rIOOLFIR, bit(26)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[27]
+     *  
+     */
+    (rIOOLFIR, bit(27)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[28]
+     *  
+     */
+    (rIOOLFIR, bit(28)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[29]
+     *  
+     */
+    (rIOOLFIR, bit(29)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[30]
+     *  
+     */
+    (rIOOLFIR, bit(30)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[31]
+     *  
+     */
+    (rIOOLFIR, bit(31)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[32]
+     *  
+     */
+    (rIOOLFIR, bit(32)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[33]
+     *  
+     */
+    (rIOOLFIR, bit(33)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[34]
+     *  
+     */
+    (rIOOLFIR, bit(34)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[35]
+     *  
+     */
+    (rIOOLFIR, bit(35)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[36]
+     *  
+     */
+    (rIOOLFIR, bit(36)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[37]
+     *  
+     */
+    (rIOOLFIR, bit(37)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[38]
+     *  
+     */
+    (rIOOLFIR, bit(38)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[39]
+     *  
+     */
+    (rIOOLFIR, bit(39)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[40]
+     *  
+     */
+    (rIOOLFIR, bit(40)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[41]
+     *  
+     */
+    (rIOOLFIR, bit(41)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[42]
+     *  
+     */
+    (rIOOLFIR, bit(42)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[43]
+     *  
+     */
+    (rIOOLFIR, bit(43)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[44]
+     *  
+     */
+    (rIOOLFIR, bit(44)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[45]
+     *  
+     */
+    (rIOOLFIR, bit(45)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[46]
+     *  
+     */
+    (rIOOLFIR, bit(46)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[47]
+     *  
+     */
+    (rIOOLFIR, bit(47)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[48]
+     *  
+     */
+    (rIOOLFIR, bit(48)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[49]
+     *  
+     */
+    (rIOOLFIR, bit(49)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[50]
+     *  
+     */
+    (rIOOLFIR, bit(50)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[51]
+     *  
+     */
+    (rIOOLFIR, bit(51)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[52]
+     *  
+     */
+    (rIOOLFIR, bit(52)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[53]
+     *  
+     */
+    (rIOOLFIR, bit(53)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[54]
+     *  
+     */
+    (rIOOLFIR, bit(54)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[55]
+     *  
+     */
+    (rIOOLFIR, bit(55)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[56]
+     *  
+     */
+    (rIOOLFIR, bit(56)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[57]
+     *  
+     */
+    (rIOOLFIR, bit(57)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[58]
+     *  
+     */
+    (rIOOLFIR, bit(58)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[59]
+     *  
+     */
+    (rIOOLFIR, bit(59)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[60]
+     *  
+     */
+    (rIOOLFIR, bit(60)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[61]
+     *  
+     */
+    (rIOOLFIR, bit(61)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[62]
+     *  
+     */
+    (rIOOLFIR, bit(62)) ? TBDDefaultCallout;
+
+    /** IOOLFIR[63]
+     *  
+     */
+    (rIOOLFIR, bit(63)) ? TBDDefaultCallout;
+
+};
+
+################################################################################
+# P9 OBUS target IOOBFIR
+################################################################################
+
+rule rIOOBFIR
+{
+  CHECK_STOP:
+    IOOBFIR & ~IOOBFIR_MASK & ~IOOBFIR_ACT0 & ~IOOBFIR_ACT1;
+  RECOVERABLE:
+    IOOBFIR & ~IOOBFIR_MASK & ~IOOBFIR_ACT0 &  IOOBFIR_ACT1;
+};
+
+group gIOOBFIR filter singlebit
+{
+    /** IOOBFIR[0]
+     *  
+     */
+    (rIOOBFIR, bit(0)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[1]
+     *  
+     */
+    (rIOOBFIR, bit(1)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[2]
+     *  
+     */
+    (rIOOBFIR, bit(2)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[3]
+     *  
+     */
+    (rIOOBFIR, bit(3)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[4]
+     *  
+     */
+    (rIOOBFIR, bit(4)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[5]
+     *  
+     */
+    (rIOOBFIR, bit(5)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[6]
+     *  
+     */
+    (rIOOBFIR, bit(6)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[7]
+     *  
+     */
+    (rIOOBFIR, bit(7)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[8]
+     *  
+     */
+    (rIOOBFIR, bit(8)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[9]
+     *  
+     */
+    (rIOOBFIR, bit(9)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[10]
+     *  
+     */
+    (rIOOBFIR, bit(10)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[11]
+     *  
+     */
+    (rIOOBFIR, bit(11)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[12]
+     *  
+     */
+    (rIOOBFIR, bit(12)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[13]
+     *  
+     */
+    (rIOOBFIR, bit(13)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[14]
+     *  
+     */
+    (rIOOBFIR, bit(14)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[15]
+     *  
+     */
+    (rIOOBFIR, bit(15)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[16]
+     *  
+     */
+    (rIOOBFIR, bit(16)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[17]
+     *  
+     */
+    (rIOOBFIR, bit(17)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[18]
+     *  
+     */
+    (rIOOBFIR, bit(18)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[19]
+     *  
+     */
+    (rIOOBFIR, bit(19)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[20]
+     *  
+     */
+    (rIOOBFIR, bit(20)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[21]
+     *  
+     */
+    (rIOOBFIR, bit(21)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[22]
+     *  
+     */
+    (rIOOBFIR, bit(22)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[23]
+     *  
+     */
+    (rIOOBFIR, bit(23)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[24]
+     *  
+     */
+    (rIOOBFIR, bit(24)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[25]
+     *  
+     */
+    (rIOOBFIR, bit(25)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[26]
+     *  
+     */
+    (rIOOBFIR, bit(26)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[27]
+     *  
+     */
+    (rIOOBFIR, bit(27)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[28]
+     *  
+     */
+    (rIOOBFIR, bit(28)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[29]
+     *  
+     */
+    (rIOOBFIR, bit(29)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[30]
+     *  
+     */
+    (rIOOBFIR, bit(30)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[31]
+     *  
+     */
+    (rIOOBFIR, bit(31)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[32]
+     *  
+     */
+    (rIOOBFIR, bit(32)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[33]
+     *  
+     */
+    (rIOOBFIR, bit(33)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[34]
+     *  
+     */
+    (rIOOBFIR, bit(34)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[35]
+     *  
+     */
+    (rIOOBFIR, bit(35)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[36]
+     *  
+     */
+    (rIOOBFIR, bit(36)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[37]
+     *  
+     */
+    (rIOOBFIR, bit(37)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[38]
+     *  
+     */
+    (rIOOBFIR, bit(38)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[39]
+     *  
+     */
+    (rIOOBFIR, bit(39)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[40]
+     *  
+     */
+    (rIOOBFIR, bit(40)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[41]
+     *  
+     */
+    (rIOOBFIR, bit(41)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[42]
+     *  
+     */
+    (rIOOBFIR, bit(42)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[43]
+     *  
+     */
+    (rIOOBFIR, bit(43)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[44]
+     *  
+     */
+    (rIOOBFIR, bit(44)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[45]
+     *  
+     */
+    (rIOOBFIR, bit(45)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[46]
+     *  
+     */
+    (rIOOBFIR, bit(46)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[47]
+     *  
+     */
+    (rIOOBFIR, bit(47)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[48]
+     *  
+     */
+    (rIOOBFIR, bit(48)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[49]
+     *  
+     */
+    (rIOOBFIR, bit(49)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[50]
+     *  
+     */
+    (rIOOBFIR, bit(50)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[51]
+     *  
+     */
+    (rIOOBFIR, bit(51)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[52]
+     *  
+     */
+    (rIOOBFIR, bit(52)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[53]
+     *  
+     */
+    (rIOOBFIR, bit(53)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[54]
+     *  
+     */
+    (rIOOBFIR, bit(54)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[55]
+     *  
+     */
+    (rIOOBFIR, bit(55)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[56]
+     *  
+     */
+    (rIOOBFIR, bit(56)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[57]
+     *  
+     */
+    (rIOOBFIR, bit(57)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[58]
+     *  
+     */
+    (rIOOBFIR, bit(58)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[59]
+     *  
+     */
+    (rIOOBFIR, bit(59)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[60]
+     *  
+     */
+    (rIOOBFIR, bit(60)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[61]
+     *  
+     */
+    (rIOOBFIR, bit(61)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[62]
+     *  
+     */
+    (rIOOBFIR, bit(62)) ? TBDDefaultCallout;
+
+    /** IOOBFIR[63]
+     *  
+     */
+    (rIOOBFIR, bit(63)) ? TBDDefaultCallout;
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ #    #                                  ###                                  #
+ #   # #    ##  ##### ###  ###  #   #   #   # #     #    ###   ###  ###  ###  #
+ #  #   #  #  #   #    #  #   # ##  #   #     #    # #  #     #     #   #     #
+ # ####### #      #    #  #   # # # #   #     #   #####  ###   ###  ##   ###  #
+ # #     # #  #   #    #  #   # #  ##   #   # #   #   #     #     # #       # #
+ # #     #  ##    #   ###  ###  #   #    ###  ### #   #  ###   ###  ###  ###  #
+ #                                                                            #
+ ##############################################################################
+
+# Include the common action set.
+.include "p9_common_actions.rule";
+

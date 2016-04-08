@@ -1,0 +1,867 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/p9/p9_ec.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2016
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+chip p9_ec
+{
+    name        "P9 EC chiplet";
+    targettype  TYPE_CORE;
+    sigoff      0x9000;
+    dump        DUMP_CONTENT_HW;
+    scomlen     64;
+
+ #############################################################################
+ #                                                                           #
+ #  ######                                                                   #
+ #  #     #  ######   ####     ###    ####    #####  ######  #####    ####   #
+ #  #     #  #       #    #     #    #          #    #       #    #  #       #
+ #  ######   #####   #          #     ####      #    #####   #    #   ####   #
+ #  #   #    #       #  ###     #         #     #    #       #####        #  #
+ #  #    #   #       #    #     #    #    #     #    #       #   #   #    #  #
+ #  #     #  ######   ####     ###    ####      #    ######  #    #   ####   #
+ #                                                                           #
+ #############################################################################
+
+    ############################################################################
+    # EC Chiplet FIR
+    ############################################################################
+
+    register EC_CHIPLET_CS_FIR
+    {
+        name        "EC Chiplet Checkstop FIR";
+        scomaddr    0x20040000;
+        capture     group default;
+    };
+
+    register EC_CHIPLET_RE_FIR
+    {
+        name        "EC Chiplet Recoverable FIR";
+        scomaddr    0x20040001;
+        capture     group default;
+    };
+
+    register EC_CHIPLET_FIR_MASK
+    {
+        name        "EC Chiplet FIR MASK";
+        scomaddr    0x20040002;
+        capture     group default;
+    };
+
+    ############################################################################
+    # P9 EC target EC_LFIR
+    ############################################################################
+
+    register EC_LFIR
+    {
+        name        "P9 EC target EC_LFIR";
+        scomaddr    0x2004000a;
+        reset       (&, 0x2004000b);
+        mask        (|, 0x2004000f);
+        capture     group default;
+    };
+
+    register EC_LFIR_MASK
+    {
+        name        "P9 EC target EC_LFIR MASK";
+        scomaddr    0x2004000d;
+        capture     group default;
+    };
+
+    register EC_LFIR_ACT0
+    {
+        name        "P9 EC target EC_LFIR ACT0";
+        scomaddr    0x20040010;
+        capture     group default;
+        capture     req nonzero("EC_LFIR");
+    };
+
+    register EC_LFIR_ACT1
+    {
+        name        "P9 EC target EC_LFIR ACT1";
+        scomaddr    0x20040011;
+        capture     group default;
+        capture     req nonzero("EC_LFIR");
+    };
+
+    ############################################################################
+    # P9 EC target COREFIR
+    ############################################################################
+
+    register COREFIR
+    {
+        name        "P9 EC target COREFIR";
+        scomaddr    0x20010a40;
+        reset       (&, 0x20010a41);
+        mask        (|, 0x20010a45);
+        capture     group default;
+    };
+
+    register COREFIR_MASK
+    {
+        name        "P9 EC target COREFIR MASK";
+        scomaddr    0x20010a43;
+        capture     group default;
+    };
+
+    register COREFIR_ACT0
+    {
+        name        "P9 EC target COREFIR ACT0";
+        scomaddr    0x20010a46;
+        capture     group default;
+        capture     req nonzero("COREFIR");
+    };
+
+    register COREFIR_ACT1
+    {
+        name        "P9 EC target COREFIR ACT1";
+        scomaddr    0x20010a47;
+        capture     group default;
+        capture     req nonzero("COREFIR");
+    };
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ # ####                                 #                                     #
+ # #   # #   # #    #####  ###      #  # #    ##  ##### ###  ###  #   #  ###  #
+ # #   # #   # #    #     #        #  #   #  #  #   #    #  #   # ##  # #     #
+ # ####  #   # #    ####   ###    #  ####### #      #    #  #   # # # #  ###  #
+ # #  #  #   # #    #         #  #   #     # #  #   #    #  #   # #  ##     # #
+ # #   #  ###  #### #####  ###  #    #     #  ##    #   ###  ###  #   #  ###  #
+ #                                                                            #
+ ##############################################################################
+
+################################################################################
+# EC Chiplet FIR
+################################################################################
+
+rule rEC_CHIPLET_FIR
+{
+  CHECK_STOP:
+     EC_CHIPLET_CS_FIR       & ~EC_CHIPLET_FIR_MASK & `1fffffffffffffff`;
+  RECOVERABLE:
+    (EC_CHIPLET_RE_FIR >> 2) & ~EC_CHIPLET_FIR_MASK & `1fffffffffffffff`;
+};
+
+group gEC_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE filter singlebit
+{
+    /** EC_CHIPLET_FIR[3]
+     *  Attention from EC_LFIR
+     */
+    (rEC_CHIPLET_FIR, bit(3)) ? analyze(gEC_LFIR);
+
+    /** EC_CHIPLET_FIR[4]
+     *  Attention from COREFIR
+     */
+    (rEC_CHIPLET_FIR, bit(4)) ? analyze(gCOREFIR);
+
+};
+
+################################################################################
+# P9 EC target EC_LFIR
+################################################################################
+
+rule rEC_LFIR
+{
+  CHECK_STOP:
+    EC_LFIR & ~EC_LFIR_MASK & ~EC_LFIR_ACT0 & ~EC_LFIR_ACT1;
+  RECOVERABLE:
+    EC_LFIR & ~EC_LFIR_MASK & ~EC_LFIR_ACT0 &  EC_LFIR_ACT1;
+};
+
+group gEC_LFIR filter singlebit
+{
+    /** EC_LFIR[0]
+     *  
+     */
+    (rEC_LFIR, bit(0)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[1]
+     *  
+     */
+    (rEC_LFIR, bit(1)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[2]
+     *  
+     */
+    (rEC_LFIR, bit(2)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[3]
+     *  
+     */
+    (rEC_LFIR, bit(3)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[4]
+     *  
+     */
+    (rEC_LFIR, bit(4)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[5]
+     *  
+     */
+    (rEC_LFIR, bit(5)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[6]
+     *  
+     */
+    (rEC_LFIR, bit(6)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[7]
+     *  
+     */
+    (rEC_LFIR, bit(7)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[8]
+     *  
+     */
+    (rEC_LFIR, bit(8)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[9]
+     *  
+     */
+    (rEC_LFIR, bit(9)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[10]
+     *  
+     */
+    (rEC_LFIR, bit(10)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[11]
+     *  
+     */
+    (rEC_LFIR, bit(11)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[12]
+     *  
+     */
+    (rEC_LFIR, bit(12)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[13]
+     *  
+     */
+    (rEC_LFIR, bit(13)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[14]
+     *  
+     */
+    (rEC_LFIR, bit(14)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[15]
+     *  
+     */
+    (rEC_LFIR, bit(15)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[16]
+     *  
+     */
+    (rEC_LFIR, bit(16)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[17]
+     *  
+     */
+    (rEC_LFIR, bit(17)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[18]
+     *  
+     */
+    (rEC_LFIR, bit(18)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[19]
+     *  
+     */
+    (rEC_LFIR, bit(19)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[20]
+     *  
+     */
+    (rEC_LFIR, bit(20)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[21]
+     *  
+     */
+    (rEC_LFIR, bit(21)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[22]
+     *  
+     */
+    (rEC_LFIR, bit(22)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[23]
+     *  
+     */
+    (rEC_LFIR, bit(23)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[24]
+     *  
+     */
+    (rEC_LFIR, bit(24)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[25]
+     *  
+     */
+    (rEC_LFIR, bit(25)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[26]
+     *  
+     */
+    (rEC_LFIR, bit(26)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[27]
+     *  
+     */
+    (rEC_LFIR, bit(27)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[28]
+     *  
+     */
+    (rEC_LFIR, bit(28)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[29]
+     *  
+     */
+    (rEC_LFIR, bit(29)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[30]
+     *  
+     */
+    (rEC_LFIR, bit(30)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[31]
+     *  
+     */
+    (rEC_LFIR, bit(31)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[32]
+     *  
+     */
+    (rEC_LFIR, bit(32)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[33]
+     *  
+     */
+    (rEC_LFIR, bit(33)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[34]
+     *  
+     */
+    (rEC_LFIR, bit(34)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[35]
+     *  
+     */
+    (rEC_LFIR, bit(35)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[36]
+     *  
+     */
+    (rEC_LFIR, bit(36)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[37]
+     *  
+     */
+    (rEC_LFIR, bit(37)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[38]
+     *  
+     */
+    (rEC_LFIR, bit(38)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[39]
+     *  
+     */
+    (rEC_LFIR, bit(39)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[40]
+     *  
+     */
+    (rEC_LFIR, bit(40)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[41]
+     *  
+     */
+    (rEC_LFIR, bit(41)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[42]
+     *  
+     */
+    (rEC_LFIR, bit(42)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[43]
+     *  
+     */
+    (rEC_LFIR, bit(43)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[44]
+     *  
+     */
+    (rEC_LFIR, bit(44)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[45]
+     *  
+     */
+    (rEC_LFIR, bit(45)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[46]
+     *  
+     */
+    (rEC_LFIR, bit(46)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[47]
+     *  
+     */
+    (rEC_LFIR, bit(47)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[48]
+     *  
+     */
+    (rEC_LFIR, bit(48)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[49]
+     *  
+     */
+    (rEC_LFIR, bit(49)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[50]
+     *  
+     */
+    (rEC_LFIR, bit(50)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[51]
+     *  
+     */
+    (rEC_LFIR, bit(51)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[52]
+     *  
+     */
+    (rEC_LFIR, bit(52)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[53]
+     *  
+     */
+    (rEC_LFIR, bit(53)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[54]
+     *  
+     */
+    (rEC_LFIR, bit(54)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[55]
+     *  
+     */
+    (rEC_LFIR, bit(55)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[56]
+     *  
+     */
+    (rEC_LFIR, bit(56)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[57]
+     *  
+     */
+    (rEC_LFIR, bit(57)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[58]
+     *  
+     */
+    (rEC_LFIR, bit(58)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[59]
+     *  
+     */
+    (rEC_LFIR, bit(59)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[60]
+     *  
+     */
+    (rEC_LFIR, bit(60)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[61]
+     *  
+     */
+    (rEC_LFIR, bit(61)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[62]
+     *  
+     */
+    (rEC_LFIR, bit(62)) ? TBDDefaultCallout;
+
+    /** EC_LFIR[63]
+     *  
+     */
+    (rEC_LFIR, bit(63)) ? TBDDefaultCallout;
+
+};
+
+################################################################################
+# P9 EC target COREFIR
+################################################################################
+
+rule rCOREFIR
+{
+  CHECK_STOP:
+    COREFIR & ~COREFIR_MASK & ~COREFIR_ACT0 & ~COREFIR_ACT1;
+  RECOVERABLE:
+    COREFIR & ~COREFIR_MASK & ~COREFIR_ACT0 &  COREFIR_ACT1;
+};
+
+group gCOREFIR filter singlebit
+{
+    /** COREFIR[0]
+     *  
+     */
+    (rCOREFIR, bit(0)) ? TBDDefaultCallout;
+
+    /** COREFIR[1]
+     *  
+     */
+    (rCOREFIR, bit(1)) ? TBDDefaultCallout;
+
+    /** COREFIR[2]
+     *  
+     */
+    (rCOREFIR, bit(2)) ? TBDDefaultCallout;
+
+    /** COREFIR[3]
+     *  
+     */
+    (rCOREFIR, bit(3)) ? TBDDefaultCallout;
+
+    /** COREFIR[4]
+     *  
+     */
+    (rCOREFIR, bit(4)) ? TBDDefaultCallout;
+
+    /** COREFIR[5]
+     *  
+     */
+    (rCOREFIR, bit(5)) ? TBDDefaultCallout;
+
+    /** COREFIR[6]
+     *  
+     */
+    (rCOREFIR, bit(6)) ? TBDDefaultCallout;
+
+    /** COREFIR[7]
+     *  
+     */
+    (rCOREFIR, bit(7)) ? TBDDefaultCallout;
+
+    /** COREFIR[8]
+     *  
+     */
+    (rCOREFIR, bit(8)) ? TBDDefaultCallout;
+
+    /** COREFIR[9]
+     *  
+     */
+    (rCOREFIR, bit(9)) ? TBDDefaultCallout;
+
+    /** COREFIR[10]
+     *  
+     */
+    (rCOREFIR, bit(10)) ? TBDDefaultCallout;
+
+    /** COREFIR[11]
+     *  
+     */
+    (rCOREFIR, bit(11)) ? TBDDefaultCallout;
+
+    /** COREFIR[12]
+     *  
+     */
+    (rCOREFIR, bit(12)) ? TBDDefaultCallout;
+
+    /** COREFIR[13]
+     *  
+     */
+    (rCOREFIR, bit(13)) ? TBDDefaultCallout;
+
+    /** COREFIR[14]
+     *  
+     */
+    (rCOREFIR, bit(14)) ? TBDDefaultCallout;
+
+    /** COREFIR[15]
+     *  
+     */
+    (rCOREFIR, bit(15)) ? TBDDefaultCallout;
+
+    /** COREFIR[16]
+     *  
+     */
+    (rCOREFIR, bit(16)) ? TBDDefaultCallout;
+
+    /** COREFIR[17]
+     *  
+     */
+    (rCOREFIR, bit(17)) ? TBDDefaultCallout;
+
+    /** COREFIR[18]
+     *  
+     */
+    (rCOREFIR, bit(18)) ? TBDDefaultCallout;
+
+    /** COREFIR[19]
+     *  
+     */
+    (rCOREFIR, bit(19)) ? TBDDefaultCallout;
+
+    /** COREFIR[20]
+     *  
+     */
+    (rCOREFIR, bit(20)) ? TBDDefaultCallout;
+
+    /** COREFIR[21]
+     *  
+     */
+    (rCOREFIR, bit(21)) ? TBDDefaultCallout;
+
+    /** COREFIR[22]
+     *  
+     */
+    (rCOREFIR, bit(22)) ? TBDDefaultCallout;
+
+    /** COREFIR[23]
+     *  
+     */
+    (rCOREFIR, bit(23)) ? TBDDefaultCallout;
+
+    /** COREFIR[24]
+     *  
+     */
+    (rCOREFIR, bit(24)) ? TBDDefaultCallout;
+
+    /** COREFIR[25]
+     *  
+     */
+    (rCOREFIR, bit(25)) ? TBDDefaultCallout;
+
+    /** COREFIR[26]
+     *  
+     */
+    (rCOREFIR, bit(26)) ? TBDDefaultCallout;
+
+    /** COREFIR[27]
+     *  
+     */
+    (rCOREFIR, bit(27)) ? TBDDefaultCallout;
+
+    /** COREFIR[28]
+     *  
+     */
+    (rCOREFIR, bit(28)) ? TBDDefaultCallout;
+
+    /** COREFIR[29]
+     *  
+     */
+    (rCOREFIR, bit(29)) ? TBDDefaultCallout;
+
+    /** COREFIR[30]
+     *  
+     */
+    (rCOREFIR, bit(30)) ? TBDDefaultCallout;
+
+    /** COREFIR[31]
+     *  
+     */
+    (rCOREFIR, bit(31)) ? TBDDefaultCallout;
+
+    /** COREFIR[32]
+     *  
+     */
+    (rCOREFIR, bit(32)) ? TBDDefaultCallout;
+
+    /** COREFIR[33]
+     *  
+     */
+    (rCOREFIR, bit(33)) ? TBDDefaultCallout;
+
+    /** COREFIR[34]
+     *  
+     */
+    (rCOREFIR, bit(34)) ? TBDDefaultCallout;
+
+    /** COREFIR[35]
+     *  
+     */
+    (rCOREFIR, bit(35)) ? TBDDefaultCallout;
+
+    /** COREFIR[36]
+     *  
+     */
+    (rCOREFIR, bit(36)) ? TBDDefaultCallout;
+
+    /** COREFIR[37]
+     *  
+     */
+    (rCOREFIR, bit(37)) ? TBDDefaultCallout;
+
+    /** COREFIR[38]
+     *  
+     */
+    (rCOREFIR, bit(38)) ? TBDDefaultCallout;
+
+    /** COREFIR[39]
+     *  
+     */
+    (rCOREFIR, bit(39)) ? TBDDefaultCallout;
+
+    /** COREFIR[40]
+     *  
+     */
+    (rCOREFIR, bit(40)) ? TBDDefaultCallout;
+
+    /** COREFIR[41]
+     *  
+     */
+    (rCOREFIR, bit(41)) ? TBDDefaultCallout;
+
+    /** COREFIR[42]
+     *  
+     */
+    (rCOREFIR, bit(42)) ? TBDDefaultCallout;
+
+    /** COREFIR[43]
+     *  
+     */
+    (rCOREFIR, bit(43)) ? TBDDefaultCallout;
+
+    /** COREFIR[44]
+     *  
+     */
+    (rCOREFIR, bit(44)) ? TBDDefaultCallout;
+
+    /** COREFIR[45]
+     *  
+     */
+    (rCOREFIR, bit(45)) ? TBDDefaultCallout;
+
+    /** COREFIR[46]
+     *  
+     */
+    (rCOREFIR, bit(46)) ? TBDDefaultCallout;
+
+    /** COREFIR[47]
+     *  
+     */
+    (rCOREFIR, bit(47)) ? TBDDefaultCallout;
+
+    /** COREFIR[48]
+     *  
+     */
+    (rCOREFIR, bit(48)) ? TBDDefaultCallout;
+
+    /** COREFIR[49]
+     *  
+     */
+    (rCOREFIR, bit(49)) ? TBDDefaultCallout;
+
+    /** COREFIR[50]
+     *  
+     */
+    (rCOREFIR, bit(50)) ? TBDDefaultCallout;
+
+    /** COREFIR[51]
+     *  
+     */
+    (rCOREFIR, bit(51)) ? TBDDefaultCallout;
+
+    /** COREFIR[52]
+     *  
+     */
+    (rCOREFIR, bit(52)) ? TBDDefaultCallout;
+
+    /** COREFIR[53]
+     *  
+     */
+    (rCOREFIR, bit(53)) ? TBDDefaultCallout;
+
+    /** COREFIR[54]
+     *  
+     */
+    (rCOREFIR, bit(54)) ? TBDDefaultCallout;
+
+    /** COREFIR[55]
+     *  
+     */
+    (rCOREFIR, bit(55)) ? TBDDefaultCallout;
+
+    /** COREFIR[56]
+     *  
+     */
+    (rCOREFIR, bit(56)) ? TBDDefaultCallout;
+
+    /** COREFIR[57]
+     *  
+     */
+    (rCOREFIR, bit(57)) ? TBDDefaultCallout;
+
+    /** COREFIR[58]
+     *  
+     */
+    (rCOREFIR, bit(58)) ? TBDDefaultCallout;
+
+    /** COREFIR[59]
+     *  
+     */
+    (rCOREFIR, bit(59)) ? TBDDefaultCallout;
+
+    /** COREFIR[60]
+     *  
+     */
+    (rCOREFIR, bit(60)) ? TBDDefaultCallout;
+
+    /** COREFIR[61]
+     *  
+     */
+    (rCOREFIR, bit(61)) ? TBDDefaultCallout;
+
+    /** COREFIR[62]
+     *  
+     */
+    (rCOREFIR, bit(62)) ? TBDDefaultCallout;
+
+    /** COREFIR[63]
+     *  
+     */
+    (rCOREFIR, bit(63)) ? TBDDefaultCallout;
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ #    #                                  ###                                  #
+ #   # #    ##  ##### ###  ###  #   #   #   # #     #    ###   ###  ###  ###  #
+ #  #   #  #  #   #    #  #   # ##  #   #     #    # #  #     #     #   #     #
+ # ####### #      #    #  #   # # # #   #     #   #####  ###   ###  ##   ###  #
+ # #     # #  #   #    #  #   # #  ##   #   # #   #   #     #     # #       # #
+ # #     #  ##    #   ###  ###  #   #    ###  ### #   #  ###   ###  ###  ###  #
+ #                                                                            #
+ ##############################################################################
+
+# Include the common action set.
+.include "p9_common_actions.rule";
+

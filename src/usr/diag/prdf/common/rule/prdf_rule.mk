@@ -24,12 +24,18 @@
 # IBM_PROLOG_END_TAG
 
 # Add Rule tables here:
-PRDR_RULE_TABLES += MuranoVeniceProc.prf
-PRDR_RULE_TABLES += NaplesProc.prf
-PRDR_RULE_TABLES += Ex.prf
-PRDR_RULE_TABLES += Mcs.prf
-PRDR_RULE_TABLES += Membuf.prf
-PRDR_RULE_TABLES += Mba.prf
+PRDR_RULE_TABLES += p9_nimbus.prf
+PRDR_RULE_TABLES += p9_eq.prf
+PRDR_RULE_TABLES += p9_ex.prf
+PRDR_RULE_TABLES += p9_ec.prf
+PRDR_RULE_TABLES += p9_capp.prf
+PRDR_RULE_TABLES += p9_pec.prf
+PRDR_RULE_TABLES += p9_phb.prf
+PRDR_RULE_TABLES += p9_obus.prf
+PRDR_RULE_TABLES += p9_xbus.prf
+PRDR_RULE_TABLES += p9_mcbist.prf
+PRDR_RULE_TABLES += p9_mcs.prf
+PRDR_RULE_TABLES += p9_mca.prf
 
 prd_rule_prf_targets  = ${PRDR_RULE_TABLES}
 prd_rule_err_targets  = ${PRDR_RULE_TABLES:.prf=.prf.err.C}

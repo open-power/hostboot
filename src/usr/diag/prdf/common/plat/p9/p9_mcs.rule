@@ -1,0 +1,463 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/p9/p9_mcs.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2016
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+chip p9_mcs
+{
+    name        "P9 MCS chiplet";
+    targettype  TYPE_MCS;
+    sigoff      0x9000;
+    dump        DUMP_CONTENT_HW;
+    scomlen     64;
+
+ #############################################################################
+ #                                                                           #
+ #  ######                                                                   #
+ #  #     #  ######   ####     ###    ####    #####  ######  #####    ####   #
+ #  #     #  #       #    #     #    #          #    #       #    #  #       #
+ #  ######   #####   #          #     ####      #    #####   #    #   ####   #
+ #  #   #    #       #  ###     #         #     #    #       #####        #  #
+ #  #    #   #       #    #     #    #    #     #    #       #   #   #    #  #
+ #  #     #  ######   ####     ###    ####      #    ######  #    #   ####   #
+ #                                                                           #
+ #############################################################################
+
+    ############################################################################
+    # P9 MCS target MCFIR
+    ############################################################################
+
+    register MCFIR
+    {
+        name        "P9 MCS target MCFIR";
+        scomaddr    0x03010800;
+        reset       (&, 0x03010801);
+        mask        (|, 0x03010805);
+        capture     group default;
+    };
+
+    register MCFIR_MASK
+    {
+        name        "P9 MCS target MCFIR MASK";
+        scomaddr    0x03010803;
+        capture     group default;
+    };
+
+    register MCFIR_ACT0
+    {
+        name        "P9 MCS target MCFIR ACT0";
+        scomaddr    0x03010806;
+        capture     group default;
+        capture     req nonzero("MCFIR");
+    };
+
+    register MCFIR_ACT1
+    {
+        name        "P9 MCS target MCFIR ACT1";
+        scomaddr    0x03010807;
+        capture     group default;
+        capture     req nonzero("MCFIR");
+    };
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ # ####                                 #                                     #
+ # #   # #   # #    #####  ###      #  # #    ##  ##### ###  ###  #   #  ###  #
+ # #   # #   # #    #     #        #  #   #  #  #   #    #  #   # ##  # #     #
+ # ####  #   # #    ####   ###    #  ####### #      #    #  #   # # # #  ###  #
+ # #  #  #   # #    #         #  #   #     # #  #   #    #  #   # #  ##     # #
+ # #   #  ###  #### #####  ###  #    #     #  ##    #   ###  ###  #   #  ###  #
+ #                                                                            #
+ ##############################################################################
+
+################################################################################
+# Summary for MCS
+################################################################################
+
+rule rMCS
+{
+  CHECK_STOP:
+    summary( 0, rMCFIR );
+
+  RECOVERABLE:
+    summary( 0, rMCFIR );
+
+};
+
+group gMCS attntype CHECK_STOP, RECOVERABLE
+{
+    (rMCS, bit(0)) ? analyze(gMCFIR);
+};
+
+################################################################################
+# P9 MCS target MCFIR
+################################################################################
+
+rule rMCFIR
+{
+  CHECK_STOP:
+    MCFIR & ~MCFIR_MASK & ~MCFIR_ACT0 & ~MCFIR_ACT1;
+  RECOVERABLE:
+    MCFIR & ~MCFIR_MASK & ~MCFIR_ACT0 &  MCFIR_ACT1;
+};
+
+group gMCFIR filter singlebit
+{
+    /** MCFIR[0]
+     *  
+     */
+    (rMCFIR, bit(0)) ? TBDDefaultCallout;
+
+    /** MCFIR[1]
+     *  
+     */
+    (rMCFIR, bit(1)) ? TBDDefaultCallout;
+
+    /** MCFIR[2]
+     *  
+     */
+    (rMCFIR, bit(2)) ? TBDDefaultCallout;
+
+    /** MCFIR[3]
+     *  
+     */
+    (rMCFIR, bit(3)) ? TBDDefaultCallout;
+
+    /** MCFIR[4]
+     *  
+     */
+    (rMCFIR, bit(4)) ? TBDDefaultCallout;
+
+    /** MCFIR[5]
+     *  
+     */
+    (rMCFIR, bit(5)) ? TBDDefaultCallout;
+
+    /** MCFIR[6]
+     *  
+     */
+    (rMCFIR, bit(6)) ? TBDDefaultCallout;
+
+    /** MCFIR[7]
+     *  
+     */
+    (rMCFIR, bit(7)) ? TBDDefaultCallout;
+
+    /** MCFIR[8]
+     *  
+     */
+    (rMCFIR, bit(8)) ? TBDDefaultCallout;
+
+    /** MCFIR[9]
+     *  
+     */
+    (rMCFIR, bit(9)) ? TBDDefaultCallout;
+
+    /** MCFIR[10]
+     *  
+     */
+    (rMCFIR, bit(10)) ? TBDDefaultCallout;
+
+    /** MCFIR[11]
+     *  
+     */
+    (rMCFIR, bit(11)) ? TBDDefaultCallout;
+
+    /** MCFIR[12]
+     *  
+     */
+    (rMCFIR, bit(12)) ? TBDDefaultCallout;
+
+    /** MCFIR[13]
+     *  
+     */
+    (rMCFIR, bit(13)) ? TBDDefaultCallout;
+
+    /** MCFIR[14]
+     *  
+     */
+    (rMCFIR, bit(14)) ? TBDDefaultCallout;
+
+    /** MCFIR[15]
+     *  
+     */
+    (rMCFIR, bit(15)) ? TBDDefaultCallout;
+
+    /** MCFIR[16]
+     *  
+     */
+    (rMCFIR, bit(16)) ? TBDDefaultCallout;
+
+    /** MCFIR[17]
+     *  
+     */
+    (rMCFIR, bit(17)) ? TBDDefaultCallout;
+
+    /** MCFIR[18]
+     *  
+     */
+    (rMCFIR, bit(18)) ? TBDDefaultCallout;
+
+    /** MCFIR[19]
+     *  
+     */
+    (rMCFIR, bit(19)) ? TBDDefaultCallout;
+
+    /** MCFIR[20]
+     *  
+     */
+    (rMCFIR, bit(20)) ? TBDDefaultCallout;
+
+    /** MCFIR[21]
+     *  
+     */
+    (rMCFIR, bit(21)) ? TBDDefaultCallout;
+
+    /** MCFIR[22]
+     *  
+     */
+    (rMCFIR, bit(22)) ? TBDDefaultCallout;
+
+    /** MCFIR[23]
+     *  
+     */
+    (rMCFIR, bit(23)) ? TBDDefaultCallout;
+
+    /** MCFIR[24]
+     *  
+     */
+    (rMCFIR, bit(24)) ? TBDDefaultCallout;
+
+    /** MCFIR[25]
+     *  
+     */
+    (rMCFIR, bit(25)) ? TBDDefaultCallout;
+
+    /** MCFIR[26]
+     *  
+     */
+    (rMCFIR, bit(26)) ? TBDDefaultCallout;
+
+    /** MCFIR[27]
+     *  
+     */
+    (rMCFIR, bit(27)) ? TBDDefaultCallout;
+
+    /** MCFIR[28]
+     *  
+     */
+    (rMCFIR, bit(28)) ? TBDDefaultCallout;
+
+    /** MCFIR[29]
+     *  
+     */
+    (rMCFIR, bit(29)) ? TBDDefaultCallout;
+
+    /** MCFIR[30]
+     *  
+     */
+    (rMCFIR, bit(30)) ? TBDDefaultCallout;
+
+    /** MCFIR[31]
+     *  
+     */
+    (rMCFIR, bit(31)) ? TBDDefaultCallout;
+
+    /** MCFIR[32]
+     *  
+     */
+    (rMCFIR, bit(32)) ? TBDDefaultCallout;
+
+    /** MCFIR[33]
+     *  
+     */
+    (rMCFIR, bit(33)) ? TBDDefaultCallout;
+
+    /** MCFIR[34]
+     *  
+     */
+    (rMCFIR, bit(34)) ? TBDDefaultCallout;
+
+    /** MCFIR[35]
+     *  
+     */
+    (rMCFIR, bit(35)) ? TBDDefaultCallout;
+
+    /** MCFIR[36]
+     *  
+     */
+    (rMCFIR, bit(36)) ? TBDDefaultCallout;
+
+    /** MCFIR[37]
+     *  
+     */
+    (rMCFIR, bit(37)) ? TBDDefaultCallout;
+
+    /** MCFIR[38]
+     *  
+     */
+    (rMCFIR, bit(38)) ? TBDDefaultCallout;
+
+    /** MCFIR[39]
+     *  
+     */
+    (rMCFIR, bit(39)) ? TBDDefaultCallout;
+
+    /** MCFIR[40]
+     *  
+     */
+    (rMCFIR, bit(40)) ? TBDDefaultCallout;
+
+    /** MCFIR[41]
+     *  
+     */
+    (rMCFIR, bit(41)) ? TBDDefaultCallout;
+
+    /** MCFIR[42]
+     *  
+     */
+    (rMCFIR, bit(42)) ? TBDDefaultCallout;
+
+    /** MCFIR[43]
+     *  
+     */
+    (rMCFIR, bit(43)) ? TBDDefaultCallout;
+
+    /** MCFIR[44]
+     *  
+     */
+    (rMCFIR, bit(44)) ? TBDDefaultCallout;
+
+    /** MCFIR[45]
+     *  
+     */
+    (rMCFIR, bit(45)) ? TBDDefaultCallout;
+
+    /** MCFIR[46]
+     *  
+     */
+    (rMCFIR, bit(46)) ? TBDDefaultCallout;
+
+    /** MCFIR[47]
+     *  
+     */
+    (rMCFIR, bit(47)) ? TBDDefaultCallout;
+
+    /** MCFIR[48]
+     *  
+     */
+    (rMCFIR, bit(48)) ? TBDDefaultCallout;
+
+    /** MCFIR[49]
+     *  
+     */
+    (rMCFIR, bit(49)) ? TBDDefaultCallout;
+
+    /** MCFIR[50]
+     *  
+     */
+    (rMCFIR, bit(50)) ? TBDDefaultCallout;
+
+    /** MCFIR[51]
+     *  
+     */
+    (rMCFIR, bit(51)) ? TBDDefaultCallout;
+
+    /** MCFIR[52]
+     *  
+     */
+    (rMCFIR, bit(52)) ? TBDDefaultCallout;
+
+    /** MCFIR[53]
+     *  
+     */
+    (rMCFIR, bit(53)) ? TBDDefaultCallout;
+
+    /** MCFIR[54]
+     *  
+     */
+    (rMCFIR, bit(54)) ? TBDDefaultCallout;
+
+    /** MCFIR[55]
+     *  
+     */
+    (rMCFIR, bit(55)) ? TBDDefaultCallout;
+
+    /** MCFIR[56]
+     *  
+     */
+    (rMCFIR, bit(56)) ? TBDDefaultCallout;
+
+    /** MCFIR[57]
+     *  
+     */
+    (rMCFIR, bit(57)) ? TBDDefaultCallout;
+
+    /** MCFIR[58]
+     *  
+     */
+    (rMCFIR, bit(58)) ? TBDDefaultCallout;
+
+    /** MCFIR[59]
+     *  
+     */
+    (rMCFIR, bit(59)) ? TBDDefaultCallout;
+
+    /** MCFIR[60]
+     *  
+     */
+    (rMCFIR, bit(60)) ? TBDDefaultCallout;
+
+    /** MCFIR[61]
+     *  
+     */
+    (rMCFIR, bit(61)) ? TBDDefaultCallout;
+
+    /** MCFIR[62]
+     *  
+     */
+    (rMCFIR, bit(62)) ? TBDDefaultCallout;
+
+    /** MCFIR[63]
+     *  
+     */
+    (rMCFIR, bit(63)) ? TBDDefaultCallout;
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ #    #                                  ###                                  #
+ #   # #    ##  ##### ###  ###  #   #   #   # #     #    ###   ###  ###  ###  #
+ #  #   #  #  #   #    #  #   # ##  #   #     #    # #  #     #     #   #     #
+ # ####### #      #    #  #   # # # #   #     #   #####  ###   ###  ##   ###  #
+ # #     # #  #   #    #  #   # #  ##   #   # #   #   #     #     # #       # #
+ # #     #  ##    #   ###  ###  #   #    ###  ### #   #  ###   ###  ###  ###  #
+ #                                                                            #
+ ##############################################################################
+
+# Include the common action set.
+.include "p9_common_actions.rule";
+

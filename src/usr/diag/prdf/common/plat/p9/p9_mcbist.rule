@@ -1,0 +1,463 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/p9/p9_mcbist.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2016
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+chip p9_mcbist
+{
+    name        "P9 MCBIST chiplet";
+    targettype  TYPE_MCBIST;
+    sigoff      0x9000;
+    dump        DUMP_CONTENT_HW;
+    scomlen     64;
+
+ #############################################################################
+ #                                                                           #
+ #  ######                                                                   #
+ #  #     #  ######   ####     ###    ####    #####  ######  #####    ####   #
+ #  #     #  #       #    #     #    #          #    #       #    #  #       #
+ #  ######   #####   #          #     ####      #    #####   #    #   ####   #
+ #  #   #    #       #  ###     #         #     #    #       #####        #  #
+ #  #    #   #       #    #     #    #    #     #    #       #   #   #    #  #
+ #  #     #  ######   ####     ###    ####      #    ######  #    #   ####   #
+ #                                                                           #
+ #############################################################################
+
+    ############################################################################
+    # P9 MCBIST target MCBISTFIR
+    ############################################################################
+
+    register MCBISTFIR
+    {
+        name        "P9 MCBIST target MCBISTFIR";
+        scomaddr    0x07012300;
+        reset       (&, 0x07012301);
+        mask        (|, 0x07012305);
+        capture     group default;
+    };
+
+    register MCBISTFIR_MASK
+    {
+        name        "P9 MCBIST target MCBISTFIR MASK";
+        scomaddr    0x07012303;
+        capture     group default;
+    };
+
+    register MCBISTFIR_ACT0
+    {
+        name        "P9 MCBIST target MCBISTFIR ACT0";
+        scomaddr    0x07012306;
+        capture     group default;
+        capture     req nonzero("MCBISTFIR");
+    };
+
+    register MCBISTFIR_ACT1
+    {
+        name        "P9 MCBIST target MCBISTFIR ACT1";
+        scomaddr    0x07012307;
+        capture     group default;
+        capture     req nonzero("MCBISTFIR");
+    };
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ # ####                                 #                                     #
+ # #   # #   # #    #####  ###      #  # #    ##  ##### ###  ###  #   #  ###  #
+ # #   # #   # #    #     #        #  #   #  #  #   #    #  #   # ##  # #     #
+ # ####  #   # #    ####   ###    #  ####### #      #    #  #   # # # #  ###  #
+ # #  #  #   # #    #         #  #   #     # #  #   #    #  #   # #  ##     # #
+ # #   #  ###  #### #####  ###  #    #     #  ##    #   ###  ###  #   #  ###  #
+ #                                                                            #
+ ##############################################################################
+
+################################################################################
+# Summary for MCBIST
+################################################################################
+
+rule rMCBIST
+{
+  CHECK_STOP:
+    summary( 0, rMCBISTFIR );
+
+  RECOVERABLE:
+    summary( 0, rMCBISTFIR );
+
+};
+
+group gMCBIST attntype CHECK_STOP, RECOVERABLE
+{
+    (rMCBIST, bit(0)) ? analyze(gMCBISTFIR);
+};
+
+################################################################################
+# P9 MCBIST target MCBISTFIR
+################################################################################
+
+rule rMCBISTFIR
+{
+  CHECK_STOP:
+    MCBISTFIR & ~MCBISTFIR_MASK & ~MCBISTFIR_ACT0 & ~MCBISTFIR_ACT1;
+  RECOVERABLE:
+    MCBISTFIR & ~MCBISTFIR_MASK & ~MCBISTFIR_ACT0 &  MCBISTFIR_ACT1;
+};
+
+group gMCBISTFIR filter singlebit
+{
+    /** MCBISTFIR[0]
+     *  
+     */
+    (rMCBISTFIR, bit(0)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[1]
+     *  
+     */
+    (rMCBISTFIR, bit(1)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[2]
+     *  
+     */
+    (rMCBISTFIR, bit(2)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[3]
+     *  
+     */
+    (rMCBISTFIR, bit(3)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[4]
+     *  
+     */
+    (rMCBISTFIR, bit(4)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[5]
+     *  
+     */
+    (rMCBISTFIR, bit(5)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[6]
+     *  
+     */
+    (rMCBISTFIR, bit(6)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[7]
+     *  
+     */
+    (rMCBISTFIR, bit(7)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[8]
+     *  
+     */
+    (rMCBISTFIR, bit(8)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[9]
+     *  
+     */
+    (rMCBISTFIR, bit(9)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[10]
+     *  
+     */
+    (rMCBISTFIR, bit(10)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[11]
+     *  
+     */
+    (rMCBISTFIR, bit(11)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[12]
+     *  
+     */
+    (rMCBISTFIR, bit(12)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[13]
+     *  
+     */
+    (rMCBISTFIR, bit(13)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[14]
+     *  
+     */
+    (rMCBISTFIR, bit(14)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[15]
+     *  
+     */
+    (rMCBISTFIR, bit(15)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[16]
+     *  
+     */
+    (rMCBISTFIR, bit(16)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[17]
+     *  
+     */
+    (rMCBISTFIR, bit(17)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[18]
+     *  
+     */
+    (rMCBISTFIR, bit(18)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[19]
+     *  
+     */
+    (rMCBISTFIR, bit(19)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[20]
+     *  
+     */
+    (rMCBISTFIR, bit(20)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[21]
+     *  
+     */
+    (rMCBISTFIR, bit(21)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[22]
+     *  
+     */
+    (rMCBISTFIR, bit(22)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[23]
+     *  
+     */
+    (rMCBISTFIR, bit(23)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[24]
+     *  
+     */
+    (rMCBISTFIR, bit(24)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[25]
+     *  
+     */
+    (rMCBISTFIR, bit(25)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[26]
+     *  
+     */
+    (rMCBISTFIR, bit(26)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[27]
+     *  
+     */
+    (rMCBISTFIR, bit(27)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[28]
+     *  
+     */
+    (rMCBISTFIR, bit(28)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[29]
+     *  
+     */
+    (rMCBISTFIR, bit(29)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[30]
+     *  
+     */
+    (rMCBISTFIR, bit(30)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[31]
+     *  
+     */
+    (rMCBISTFIR, bit(31)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[32]
+     *  
+     */
+    (rMCBISTFIR, bit(32)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[33]
+     *  
+     */
+    (rMCBISTFIR, bit(33)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[34]
+     *  
+     */
+    (rMCBISTFIR, bit(34)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[35]
+     *  
+     */
+    (rMCBISTFIR, bit(35)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[36]
+     *  
+     */
+    (rMCBISTFIR, bit(36)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[37]
+     *  
+     */
+    (rMCBISTFIR, bit(37)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[38]
+     *  
+     */
+    (rMCBISTFIR, bit(38)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[39]
+     *  
+     */
+    (rMCBISTFIR, bit(39)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[40]
+     *  
+     */
+    (rMCBISTFIR, bit(40)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[41]
+     *  
+     */
+    (rMCBISTFIR, bit(41)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[42]
+     *  
+     */
+    (rMCBISTFIR, bit(42)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[43]
+     *  
+     */
+    (rMCBISTFIR, bit(43)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[44]
+     *  
+     */
+    (rMCBISTFIR, bit(44)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[45]
+     *  
+     */
+    (rMCBISTFIR, bit(45)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[46]
+     *  
+     */
+    (rMCBISTFIR, bit(46)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[47]
+     *  
+     */
+    (rMCBISTFIR, bit(47)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[48]
+     *  
+     */
+    (rMCBISTFIR, bit(48)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[49]
+     *  
+     */
+    (rMCBISTFIR, bit(49)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[50]
+     *  
+     */
+    (rMCBISTFIR, bit(50)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[51]
+     *  
+     */
+    (rMCBISTFIR, bit(51)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[52]
+     *  
+     */
+    (rMCBISTFIR, bit(52)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[53]
+     *  
+     */
+    (rMCBISTFIR, bit(53)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[54]
+     *  
+     */
+    (rMCBISTFIR, bit(54)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[55]
+     *  
+     */
+    (rMCBISTFIR, bit(55)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[56]
+     *  
+     */
+    (rMCBISTFIR, bit(56)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[57]
+     *  
+     */
+    (rMCBISTFIR, bit(57)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[58]
+     *  
+     */
+    (rMCBISTFIR, bit(58)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[59]
+     *  
+     */
+    (rMCBISTFIR, bit(59)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[60]
+     *  
+     */
+    (rMCBISTFIR, bit(60)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[61]
+     *  
+     */
+    (rMCBISTFIR, bit(61)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[62]
+     *  
+     */
+    (rMCBISTFIR, bit(62)) ? TBDDefaultCallout;
+
+    /** MCBISTFIR[63]
+     *  
+     */
+    (rMCBISTFIR, bit(63)) ? TBDDefaultCallout;
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ #    #                                  ###                                  #
+ #   # #    ##  ##### ###  ###  #   #   #   # #     #    ###   ###  ###  ###  #
+ #  #   #  #  #   #    #  #   # ##  #   #     #    # #  #     #     #   #     #
+ # ####### #      #    #  #   # # # #   #     #   #####  ###   ###  ##   ###  #
+ # #     # #  #   #    #  #   # #  ##   #   # #   #   #     #     # #       # #
+ # #     #  ##    #   ###  ###  #   #    ###  ### #   #  ###   ###  ###  ###  #
+ #                                                                            #
+ ##############################################################################
+
+# Include the common action set.
+.include "p9_common_actions.rule";
+

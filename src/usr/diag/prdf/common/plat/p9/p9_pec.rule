@@ -1,0 +1,838 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/p9/p9_pec.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2016
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+chip p9_pec
+{
+    name        "P9 PEC chiplet";
+    targettype  TYPE_PEC;
+    sigoff      0x9000;
+    dump        DUMP_CONTENT_HW;
+    scomlen     64;
+
+ #############################################################################
+ #                                                                           #
+ #  ######                                                                   #
+ #  #     #  ######   ####     ###    ####    #####  ######  #####    ####   #
+ #  #     #  #       #    #     #    #          #    #       #    #  #       #
+ #  ######   #####   #          #     ####      #    #####   #    #   ####   #
+ #  #   #    #       #  ###     #         #     #    #       #####        #  #
+ #  #    #   #       #    #     #    #    #     #    #       #   #   #    #  #
+ #  #     #  ######   ####     ###    ####      #    ######  #    #   ####   #
+ #                                                                           #
+ #############################################################################
+
+    ############################################################################
+    # P9 PEC target PCI_LFIR
+    ############################################################################
+
+    register PCI_LFIR
+    {
+        name        "P9 PEC target PCI_LFIR";
+        scomaddr    0x0d04000a;
+        reset       (&, 0x0d04000b);
+        mask        (|, 0x0d04000f);
+        capture     group default;
+    };
+
+    register PCI_LFIR_MASK
+    {
+        name        "P9 PEC target PCI_LFIR MASK";
+        scomaddr    0x0d04000d;
+        capture     group default;
+    };
+
+    register PCI_LFIR_ACT0
+    {
+        name        "P9 PEC target PCI_LFIR ACT0";
+        scomaddr    0x0d040010;
+        capture     group default;
+        capture     req nonzero("PCI_LFIR");
+    };
+
+    register PCI_LFIR_ACT1
+    {
+        name        "P9 PEC target PCI_LFIR ACT1";
+        scomaddr    0x0d040011;
+        capture     group default;
+        capture     req nonzero("PCI_LFIR");
+    };
+
+    ############################################################################
+    # P9 PEC target IOPCIFIR
+    ############################################################################
+
+    register IOPCIFIR
+    {
+        name        "P9 PEC target IOPCIFIR";
+        scomaddr    0x0d010c00;
+        reset       (&, 0x0d010c01);
+        mask        (|, 0x0d010c05);
+        capture     group default;
+    };
+
+    register IOPCIFIR_MASK
+    {
+        name        "P9 PEC target IOPCIFIR MASK";
+        scomaddr    0x0d010c03;
+        capture     group default;
+    };
+
+    register IOPCIFIR_ACT0
+    {
+        name        "P9 PEC target IOPCIFIR ACT0";
+        scomaddr    0x0d010c06;
+        capture     group default;
+        capture     req nonzero("IOPCIFIR");
+    };
+
+    register IOPCIFIR_ACT1
+    {
+        name        "P9 PEC target IOPCIFIR ACT1";
+        scomaddr    0x0d010c07;
+        capture     group default;
+        capture     req nonzero("IOPCIFIR");
+    };
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ # ####                                 #                                     #
+ # #   # #   # #    #####  ###      #  # #    ##  ##### ###  ###  #   #  ###  #
+ # #   # #   # #    #     #        #  #   #  #  #   #    #  #   # ##  # #     #
+ # ####  #   # #    ####   ###    #  ####### #      #    #  #   # # # #  ###  #
+ # #  #  #   # #    #         #  #   #     # #  #   #    #  #   # #  ##     # #
+ # #   #  ###  #### #####  ###  #    #     #  ##    #   ###  ###  #   #  ###  #
+ #                                                                            #
+ ##############################################################################
+
+################################################################################
+# Summary for PEC
+################################################################################
+
+rule rPEC
+{
+  CHECK_STOP:
+    summary( 0, rPCI_LFIR ) |
+    summary( 1, rIOPCIFIR );
+
+  RECOVERABLE:
+    summary( 0, rPCI_LFIR ) |
+    summary( 1, rIOPCIFIR );
+
+};
+
+group gPEC attntype CHECK_STOP, RECOVERABLE
+{
+    (rPEC, bit(0)) ? analyze(gPCI_LFIR);
+    (rPEC, bit(1)) ? analyze(gIOPCIFIR);
+};
+
+################################################################################
+# P9 PEC target PCI_LFIR
+################################################################################
+
+rule rPCI_LFIR
+{
+  CHECK_STOP:
+    PCI_LFIR & ~PCI_LFIR_MASK & ~PCI_LFIR_ACT0 & ~PCI_LFIR_ACT1;
+  RECOVERABLE:
+    PCI_LFIR & ~PCI_LFIR_MASK & ~PCI_LFIR_ACT0 &  PCI_LFIR_ACT1;
+};
+
+group gPCI_LFIR filter singlebit
+{
+    /** PCI_LFIR[0]
+     *  
+     */
+    (rPCI_LFIR, bit(0)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[1]
+     *  
+     */
+    (rPCI_LFIR, bit(1)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[2]
+     *  
+     */
+    (rPCI_LFIR, bit(2)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[3]
+     *  
+     */
+    (rPCI_LFIR, bit(3)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[4]
+     *  
+     */
+    (rPCI_LFIR, bit(4)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[5]
+     *  
+     */
+    (rPCI_LFIR, bit(5)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[6]
+     *  
+     */
+    (rPCI_LFIR, bit(6)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[7]
+     *  
+     */
+    (rPCI_LFIR, bit(7)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[8]
+     *  
+     */
+    (rPCI_LFIR, bit(8)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[9]
+     *  
+     */
+    (rPCI_LFIR, bit(9)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[10]
+     *  
+     */
+    (rPCI_LFIR, bit(10)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[11]
+     *  
+     */
+    (rPCI_LFIR, bit(11)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[12]
+     *  
+     */
+    (rPCI_LFIR, bit(12)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[13]
+     *  
+     */
+    (rPCI_LFIR, bit(13)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[14]
+     *  
+     */
+    (rPCI_LFIR, bit(14)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[15]
+     *  
+     */
+    (rPCI_LFIR, bit(15)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[16]
+     *  
+     */
+    (rPCI_LFIR, bit(16)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[17]
+     *  
+     */
+    (rPCI_LFIR, bit(17)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[18]
+     *  
+     */
+    (rPCI_LFIR, bit(18)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[19]
+     *  
+     */
+    (rPCI_LFIR, bit(19)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[20]
+     *  
+     */
+    (rPCI_LFIR, bit(20)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[21]
+     *  
+     */
+    (rPCI_LFIR, bit(21)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[22]
+     *  
+     */
+    (rPCI_LFIR, bit(22)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[23]
+     *  
+     */
+    (rPCI_LFIR, bit(23)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[24]
+     *  
+     */
+    (rPCI_LFIR, bit(24)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[25]
+     *  
+     */
+    (rPCI_LFIR, bit(25)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[26]
+     *  
+     */
+    (rPCI_LFIR, bit(26)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[27]
+     *  
+     */
+    (rPCI_LFIR, bit(27)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[28]
+     *  
+     */
+    (rPCI_LFIR, bit(28)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[29]
+     *  
+     */
+    (rPCI_LFIR, bit(29)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[30]
+     *  
+     */
+    (rPCI_LFIR, bit(30)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[31]
+     *  
+     */
+    (rPCI_LFIR, bit(31)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[32]
+     *  
+     */
+    (rPCI_LFIR, bit(32)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[33]
+     *  
+     */
+    (rPCI_LFIR, bit(33)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[34]
+     *  
+     */
+    (rPCI_LFIR, bit(34)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[35]
+     *  
+     */
+    (rPCI_LFIR, bit(35)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[36]
+     *  
+     */
+    (rPCI_LFIR, bit(36)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[37]
+     *  
+     */
+    (rPCI_LFIR, bit(37)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[38]
+     *  
+     */
+    (rPCI_LFIR, bit(38)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[39]
+     *  
+     */
+    (rPCI_LFIR, bit(39)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[40]
+     *  
+     */
+    (rPCI_LFIR, bit(40)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[41]
+     *  
+     */
+    (rPCI_LFIR, bit(41)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[42]
+     *  
+     */
+    (rPCI_LFIR, bit(42)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[43]
+     *  
+     */
+    (rPCI_LFIR, bit(43)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[44]
+     *  
+     */
+    (rPCI_LFIR, bit(44)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[45]
+     *  
+     */
+    (rPCI_LFIR, bit(45)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[46]
+     *  
+     */
+    (rPCI_LFIR, bit(46)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[47]
+     *  
+     */
+    (rPCI_LFIR, bit(47)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[48]
+     *  
+     */
+    (rPCI_LFIR, bit(48)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[49]
+     *  
+     */
+    (rPCI_LFIR, bit(49)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[50]
+     *  
+     */
+    (rPCI_LFIR, bit(50)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[51]
+     *  
+     */
+    (rPCI_LFIR, bit(51)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[52]
+     *  
+     */
+    (rPCI_LFIR, bit(52)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[53]
+     *  
+     */
+    (rPCI_LFIR, bit(53)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[54]
+     *  
+     */
+    (rPCI_LFIR, bit(54)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[55]
+     *  
+     */
+    (rPCI_LFIR, bit(55)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[56]
+     *  
+     */
+    (rPCI_LFIR, bit(56)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[57]
+     *  
+     */
+    (rPCI_LFIR, bit(57)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[58]
+     *  
+     */
+    (rPCI_LFIR, bit(58)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[59]
+     *  
+     */
+    (rPCI_LFIR, bit(59)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[60]
+     *  
+     */
+    (rPCI_LFIR, bit(60)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[61]
+     *  
+     */
+    (rPCI_LFIR, bit(61)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[62]
+     *  
+     */
+    (rPCI_LFIR, bit(62)) ? TBDDefaultCallout;
+
+    /** PCI_LFIR[63]
+     *  
+     */
+    (rPCI_LFIR, bit(63)) ? TBDDefaultCallout;
+
+};
+
+################################################################################
+# P9 PEC target IOPCIFIR
+################################################################################
+
+rule rIOPCIFIR
+{
+  CHECK_STOP:
+    IOPCIFIR & ~IOPCIFIR_MASK & ~IOPCIFIR_ACT0 & ~IOPCIFIR_ACT1;
+  RECOVERABLE:
+    IOPCIFIR & ~IOPCIFIR_MASK & ~IOPCIFIR_ACT0 &  IOPCIFIR_ACT1;
+};
+
+group gIOPCIFIR filter singlebit
+{
+    /** IOPCIFIR[0]
+     *  
+     */
+    (rIOPCIFIR, bit(0)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[1]
+     *  
+     */
+    (rIOPCIFIR, bit(1)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[2]
+     *  
+     */
+    (rIOPCIFIR, bit(2)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[3]
+     *  
+     */
+    (rIOPCIFIR, bit(3)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[4]
+     *  
+     */
+    (rIOPCIFIR, bit(4)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[5]
+     *  
+     */
+    (rIOPCIFIR, bit(5)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[6]
+     *  
+     */
+    (rIOPCIFIR, bit(6)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[7]
+     *  
+     */
+    (rIOPCIFIR, bit(7)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[8]
+     *  
+     */
+    (rIOPCIFIR, bit(8)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[9]
+     *  
+     */
+    (rIOPCIFIR, bit(9)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[10]
+     *  
+     */
+    (rIOPCIFIR, bit(10)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[11]
+     *  
+     */
+    (rIOPCIFIR, bit(11)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[12]
+     *  
+     */
+    (rIOPCIFIR, bit(12)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[13]
+     *  
+     */
+    (rIOPCIFIR, bit(13)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[14]
+     *  
+     */
+    (rIOPCIFIR, bit(14)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[15]
+     *  
+     */
+    (rIOPCIFIR, bit(15)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[16]
+     *  
+     */
+    (rIOPCIFIR, bit(16)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[17]
+     *  
+     */
+    (rIOPCIFIR, bit(17)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[18]
+     *  
+     */
+    (rIOPCIFIR, bit(18)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[19]
+     *  
+     */
+    (rIOPCIFIR, bit(19)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[20]
+     *  
+     */
+    (rIOPCIFIR, bit(20)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[21]
+     *  
+     */
+    (rIOPCIFIR, bit(21)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[22]
+     *  
+     */
+    (rIOPCIFIR, bit(22)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[23]
+     *  
+     */
+    (rIOPCIFIR, bit(23)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[24]
+     *  
+     */
+    (rIOPCIFIR, bit(24)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[25]
+     *  
+     */
+    (rIOPCIFIR, bit(25)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[26]
+     *  
+     */
+    (rIOPCIFIR, bit(26)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[27]
+     *  
+     */
+    (rIOPCIFIR, bit(27)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[28]
+     *  
+     */
+    (rIOPCIFIR, bit(28)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[29]
+     *  
+     */
+    (rIOPCIFIR, bit(29)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[30]
+     *  
+     */
+    (rIOPCIFIR, bit(30)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[31]
+     *  
+     */
+    (rIOPCIFIR, bit(31)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[32]
+     *  
+     */
+    (rIOPCIFIR, bit(32)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[33]
+     *  
+     */
+    (rIOPCIFIR, bit(33)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[34]
+     *  
+     */
+    (rIOPCIFIR, bit(34)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[35]
+     *  
+     */
+    (rIOPCIFIR, bit(35)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[36]
+     *  
+     */
+    (rIOPCIFIR, bit(36)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[37]
+     *  
+     */
+    (rIOPCIFIR, bit(37)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[38]
+     *  
+     */
+    (rIOPCIFIR, bit(38)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[39]
+     *  
+     */
+    (rIOPCIFIR, bit(39)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[40]
+     *  
+     */
+    (rIOPCIFIR, bit(40)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[41]
+     *  
+     */
+    (rIOPCIFIR, bit(41)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[42]
+     *  
+     */
+    (rIOPCIFIR, bit(42)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[43]
+     *  
+     */
+    (rIOPCIFIR, bit(43)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[44]
+     *  
+     */
+    (rIOPCIFIR, bit(44)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[45]
+     *  
+     */
+    (rIOPCIFIR, bit(45)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[46]
+     *  
+     */
+    (rIOPCIFIR, bit(46)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[47]
+     *  
+     */
+    (rIOPCIFIR, bit(47)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[48]
+     *  
+     */
+    (rIOPCIFIR, bit(48)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[49]
+     *  
+     */
+    (rIOPCIFIR, bit(49)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[50]
+     *  
+     */
+    (rIOPCIFIR, bit(50)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[51]
+     *  
+     */
+    (rIOPCIFIR, bit(51)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[52]
+     *  
+     */
+    (rIOPCIFIR, bit(52)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[53]
+     *  
+     */
+    (rIOPCIFIR, bit(53)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[54]
+     *  
+     */
+    (rIOPCIFIR, bit(54)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[55]
+     *  
+     */
+    (rIOPCIFIR, bit(55)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[56]
+     *  
+     */
+    (rIOPCIFIR, bit(56)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[57]
+     *  
+     */
+    (rIOPCIFIR, bit(57)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[58]
+     *  
+     */
+    (rIOPCIFIR, bit(58)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[59]
+     *  
+     */
+    (rIOPCIFIR, bit(59)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[60]
+     *  
+     */
+    (rIOPCIFIR, bit(60)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[61]
+     *  
+     */
+    (rIOPCIFIR, bit(61)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[62]
+     *  
+     */
+    (rIOPCIFIR, bit(62)) ? TBDDefaultCallout;
+
+    /** IOPCIFIR[63]
+     *  
+     */
+    (rIOPCIFIR, bit(63)) ? TBDDefaultCallout;
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ #    #                                  ###                                  #
+ #   # #    ##  ##### ###  ###  #   #   #   # #     #    ###   ###  ###  ###  #
+ #  #   #  #  #   #    #  #   # ##  #   #     #    # #  #     #     #   #     #
+ # ####### #      #    #  #   # # # #   #     #   #####  ###   ###  ##   ###  #
+ # #     # #  #   #    #  #   # #  ##   #   # #   #   #     #     # #       # #
+ # #     #  ##    #   ###  ###  #   #    ###  ### #   #  ###   ###  ###  ###  #
+ #                                                                            #
+ ##############################################################################
+
+# Include the common action set.
+.include "p9_common_actions.rule";
+
