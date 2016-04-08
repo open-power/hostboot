@@ -304,7 +304,7 @@ hbicore_test_EXTENDED_MODULES += ${hbicore_EXTENDED_MODULES}
 hbicore_test_EXTENDED_MODULES += ${TESTCASE_MODULES}
 hbicore_test_DATA_MODULES += testdata
 ifndef SKIP_BINARY_FILES
-hbicore_test_DATA_MODULES += test_signed_container
+hbicore_test_DATA_MODULES += secureboot_signed_container
 endif
 hbicore_test_LDFILE = kernel.ld
 

@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2016
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -41,7 +43,7 @@ print_usage()
     echo "    --help: Prints usage information"
     echo
     echo "    --test: Includes test images and content instead of non-test."
-    echo 
+    echo
     echo "    --release: Create a full release distribution (all targets)."
     echo "    --vpo: Generate just 'vpo' content."
     echo "    --simics/--fsp: *default* Generate just 'fsp' content"
@@ -78,6 +80,10 @@ do
 
         "--debug")
             DEBUG="-d"
+        ;;
+
+        "--secureboot")
+            SECUREBOOT=1
         ;;
 
         --*)
@@ -118,6 +124,7 @@ fi
 mkdir -p $TARGET_DIR
 export TARGET_TEST
 export TARGET_DIR
+export SECUREBOOT
 cd $REPO_ROOT/src/build/mkrules
 make -rR ${DEBUG:=} -f dist.targets.mk $TARGET
 

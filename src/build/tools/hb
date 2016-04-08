@@ -241,6 +241,9 @@ hb_helptext()
         echo "      #!/bin/sh"
         echo "      export SANDBOXROOT=~/sandboxes"
         echo "      export SANDBOXNAME=hostboot"
+        echo "      # Dev key signing of images for secureboot"
+        echo "      export SIGNING_DIR=/esw/san2/hostboot/secure-boot/secure-boot-scripts/rom_new_header/sign/obj"
+        echo "      export DEV_KEY_DIR=/esw/san2/hostboot/secure-boot/dev_keys"
         echo
         echo "  See also:"
         echo "      All other sub-commands."
