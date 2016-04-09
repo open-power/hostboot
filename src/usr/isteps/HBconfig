@@ -1,0 +1,32 @@
+config NO_DMI_EREPAIR
+    default y if(!MEMVPD_WRITE || !MEMVPD_READ)
+    help
+        Do not apply erepair information on the DMI bus during boot
+
+config SET_NOMINAL_PSTATE
+    default n
+    depends on !HTMGT
+    help
+        Set the PState to Nominal just before starting the payload.
+
+config START_OCC_DURING_BOOT
+    default n
+    help
+        Activates all the OCCs during IPL
+
+config PALMETTO_VDDR
+    default n
+    help
+        Enable the Hostboot DRAM VDDR function for Palmetto
+
+config PCA95X_8BIT
+    default n
+    depends on (!PCA95X_16BIT)
+    help
+        Set the PCA95X support to an 8 bit chip.
+
+config PCA95X_16BIT
+    default y if (!PCA95X_8BIT)
+    depends on (!PCA95X_8BIT)
+    help
+        Set the PCA95X support to a 16 bit chip.
