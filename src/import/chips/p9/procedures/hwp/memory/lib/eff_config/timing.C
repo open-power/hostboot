@@ -24,18 +24,27 @@
 namespace mss
 {
 
-// { density in GBs, tREFI(base) in picoseconds }
+// Proposed DDR4 Full spec update(79-4A)
+// Item No. 1716.78C
+// pg.46
+// Table 24 - tREFI and tRFC parameters
 static const std::vector<std::pair<uint8_t, uint64_t> > TREFI_BASE =
 {
+    // { density in GBs, tREFI(base) in nanoseconds }
     {2, 7800},
     {4, 7800},
     {8, 7800},
     // 16Gb - TBD
 };
 
-// { density in GBs, tRFC1(min) in picoseconds }
+
+// Proposed DDR4 Full spec update(79-4A)
+// Item No. 1716.78C
+// pg.46
+// Table 24 - tREFI and tRFC parameters
 static const std::vector<std::pair<uint8_t, uint64_t> > TRFC1_MIN =
 {
+    // { density in GBs, tRFC1(min) in nanoseconds }
     {2, 160},
     {4, 260},
     {8, 350},
@@ -43,9 +52,13 @@ static const std::vector<std::pair<uint8_t, uint64_t> > TRFC1_MIN =
 };
 
 
-// { density in GBs, tRFC2(min) in picoseconds }
+// Proposed DDR4 Full spec update(79-4A)
+// Item No. 1716.78C
+// pg.46
+// Table 24 - tREFI and tRFC parameters
 static const std::vector<std::pair<uint8_t, uint64_t> > TRFC2_MIN =
 {
+    // { density in GBs, tRFC2(min) in nanoseconds }
     {2, 110},
     {4, 160},
     {8, 260},
@@ -53,19 +66,18 @@ static const std::vector<std::pair<uint8_t, uint64_t> > TRFC2_MIN =
 };
 
 
-// { density in GBs, tRFC4(min) in picoseconds }
+// Proposed DDR4 Full spec update(79-4A)
+// Item No. 1716.78C
+// pg.46
+// Table 24 - tREFI and tRFC parameters
 static const std::vector<std::pair<uint8_t, uint64_t> > TRFC4_MIN =
 {
+    // { density in GBs, tRFC4(min) in nanoseconds }
     {2, 90},
     {4, 110},
     {8, 160},
     // 16Gb - TBD
 };
-
-
-//
-// The following are only used in eff_config
-//
 
 /// @brief Calculates refresh interval time 1 (tREFI 1)
 /// @param[in] i_target FAPI2 target
