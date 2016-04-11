@@ -40,7 +40,6 @@ namespace mss
 namespace spd
 {
 
-using fapi2::TARGET_TYPE_DIMM;
 
 enum BYTE_EXTRACT : uint64_t
 {
@@ -345,7 +344,7 @@ class decoder
 {
 
     public:
-        std::shared_ptr<uint8_t> iv_spd_data;
+        std::vector<uint8_t> iv_spd_data;
 
         // Constructor
         decoder() = default;
@@ -360,449 +359,384 @@ class decoder
         ///
         /// @brief      Decodes number of used SPD bytes
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value number of SPD bytes used
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       Decodes SPD Byte 0 (3~0)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 14
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode number_of_used_bytes(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode number_of_used_bytes(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 uint16_t& o_value);
 
         ///
         /// @brief      Decodes total number of SPD bytes
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value number of total SPD bytes
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       Decodes SPD Byte 0 (bits 6~4)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 14
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode number_of_total_bytes(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode number_of_total_bytes(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 uint16_t& o_value);
 
         ///
         /// @brief       Decodes DRAM Device Type
         /// @param[in]   i_target dimm target
-        /// @param[in]   i_spd_data SPD blob
         /// @param[out]  o_value dram device type enumeration
-        /// @return      fapi2::ReturnCode
+        /// @return      FAPI2_RC_SUCCESS if okay
         /// @note        Decodes SPD Byte 2
         /// @note        Item JC-45-2220.01x
         /// @note        Page 16
         /// @note        DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode dram_device_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode dram_device_type(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 uint8_t& o_value);
 
         ///
         /// @brief      Decodes hybrid media field from SPD
         /// @param[in]  i_target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       Decodes SPD Byte 3 (bits 6~4)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 17
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode hybrid_media(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                               const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode hybrid_media(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                                uint8_t& o_value);
         ///
         /// @brief      Decodes hybrid field from SPD
         /// @param[in]  i_target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       Decodes SPD Byte 3 (bit 7)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 17
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode hybrid(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                         const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode hybrid(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                          uint8_t& o_value);
         ///
         /// @brief      Decodes SDRAM density from SPD
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value SDRAM density in GBs
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 4 (bits 3~0)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 18
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode sdram_density(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode sdram_density(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                                 uint8_t& o_value);
         ///
         /// @brief      Decodes number of SDRAM banks from SPD
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value Number of SDRAM banks
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 4 (bits 5~4)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 18
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode banks(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                        const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode banks(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                         uint8_t& o_value);
 
         ///
         /// @brief      Decodes number of SDRAM bank groups from SPD
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value Number of SDRAM bank groups
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 4 (bits 7~6)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 18
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode bank_groups(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                              const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode bank_groups(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                               uint8_t& o_value);
         ///
         /// @brief      Decodes number of SDRAM column address bits
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 5 (bits 2~0)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 18
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode column_address_bits(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode column_address_bits(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 uint8_t& o_value);
         ///
         /// @brief      Decodes number of SDRAM row address bits
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 5 (bits 5~3)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 18
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode row_address_bits(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode row_address_bits(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 uint8_t& o_value);
         ///
         /// @brief      Decodes Primary SDRAM signal loading
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 6 (bits 1~0)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 19
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode prim_sdram_signal_loading(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode prim_sdram_signal_loading(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 uint8_t& o_value);
         ///
         /// @brief      Decodes Primary SDRAM die count
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 6 (bits 6~4)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 19
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual  fapi2::ReturnCode prim_sdram_die_count(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual  fapi2::ReturnCode prim_sdram_die_count(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 uint8_t& o_value);
         ///
         /// @brief      Decodes Primary SDRAM package type
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 6 (bit 7)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 19
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode prim_sdram_package_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode prim_sdram_package_type(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 uint8_t& o_value);
         ///
         /// @brief      Decode SDRAM Maximum activate count
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 7 (bits 3~0)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 20
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode maximum_activate_count(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode maximum_activate_count(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 uint32_t& o_value);
         ///
         /// @brief      Decode SDRAM Maximum activate window (multiplier), tREFI uknown at this point
         /// @param[in]  i_target
-        /// @param[in]  i_spd_data
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 7 (bits 3~0)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 20
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode maximum_activate_window_multiplier(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode maximum_activate_window_multiplier(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 uint32_t& o_value);
         ///
         /// @brief      Decode Soft post package repair (soft PPR)
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 9 (bit 5)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 21
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode soft_post_package_repair(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode soft_post_package_repair(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 uint8_t& o_value);
         ///
         /// @brief      Decode Post package repair (PPR)
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 9 (bits 7~6)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 21
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode post_package_repair(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode post_package_repair(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 uint8_t& o_value);
         ///
         /// @brief      Decodes Secondary SDRAM signal loading
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 10 (bits 1~0)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 22
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode sec_sdram_signal_loading(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode sec_sdram_signal_loading(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 uint8_t& o_value);
         ///
         /// @brief      Decodes Secondary DRAM Density Ratio
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 10 (bits 3~2)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 22
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode sec_dram_density_ratio(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode sec_dram_density_ratio(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 uint8_t& o_value);
         ///
         /// @brief      Decodes Secondary SDRAM die count
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 10 (bits 6~4)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 22
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode sec_sdram_die_count(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode sec_sdram_die_count(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 uint8_t& o_value);
         ///
         /// @brief      Decodes Secondary SDRAM package type
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 10 (bit 7)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 22
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode sec_sdram_package_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode sec_sdram_package_type(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 uint8_t& o_value);
         ///
         /// @brief      Decode Module Nominal Voltage, VDD
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value enum representing if 1.2V is operable
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 11 (bit 0)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 23
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode operable_nominal_voltage(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode operable_nominal_voltage(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 uint8_t& o_value);
         ///
         /// @brief      Decode Module Nominal Voltage, VDD
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value enum representing if 1.2V is endurant
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 11 (bit 1)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 23
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode endurant_nominal_voltage(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode endurant_nominal_voltage(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 uint8_t& o_value);
         ///
         /// @brief      Decodes SDRAM device width
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value device width in bits
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 12 (bits 2~0)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 23
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode device_width(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                               const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode device_width(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                                uint8_t& o_value);
         ///
         /// @brief      Decodes number of package ranks per DIMM
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value number of package ranks per DIMM
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 12 (bits 5~3)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 23
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode num_package_ranks_per_dimm(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode num_package_ranks_per_dimm(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 uint8_t& o_value);
         ///
         /// @brief      Decodes Rank Mix
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value rank mix value from SPD
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 12 (bit 6)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 23
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode rank_mix(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                           const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode rank_mix(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                            uint8_t& o_value);
         ///
         /// @brief      Decodes primary bus width
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value primary bus width in bits
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 13 (bits 2~0)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 27
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode prim_bus_width(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode prim_bus_width(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 uint8_t& o_value);
         ///
         /// @brief      Decodes bus width extension
-        /// @param[in]  i_target dimm targetn
-        /// @param[in]  i_spd_data SPD blob
+        /// @param[in]  i_target dimm target
         /// @param[out] o_value bus width extension in bits
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 13 (bits 4~3)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 27
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode bus_width_extension(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode bus_width_extension(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 uint8_t& o_value);
         ///
         /// @brief      Decode Module Thermal Sensor
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value thermal sensor value from SPD
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 14 (bit 7)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 28
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode thermal_sensor(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode thermal_sensor(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 uint8_t& o_value);
         ///
         /// @brief      Decode Extended Base Module Type
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value extended base module type value from SPD
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 15 (bits 3~0)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 28
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode extended_base_module_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode extended_base_module_type(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 uint8_t& o_value);
         ///
         /// @brief      Decode Fine Timebase
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value fine_timebase from SPD in picoseconds
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 17 (bits 1~0)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 29
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode fine_timebase(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode fine_timebase(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                                 int64_t& o_value);
         ///
         /// @brief      Decode Medium Timebase
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value fine_timebase from SPD in picoseconds
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 17 (bits 3~2)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 29
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode medium_timebase(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode medium_timebase(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 int64_t& o_value);
         ///
         ///
         /// @brief      Decodes SDRAM Minimum Cycle Time in MTB
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value tCKmin in MTB units
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 18
         /// @note       Item JC-45-2220.01x
         /// @note       Page 31-32
@@ -813,15 +747,13 @@ class decoder
         ///             used for correction to get the actual value.
         ///
         virtual fapi2::ReturnCode min_cycle_time(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
                 int64_t& o_value);
 
         ///
         /// @brief      Decodes SDRAM Maximum Cycle Time in MTB
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value tCKmax in MTB units
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 19
         /// @note       Item JC-45-2220.01x
         /// @note       Page 32
@@ -832,28 +764,24 @@ class decoder
         ///             used for correction to get the actual value.
         ///
         virtual fapi2::ReturnCode max_cycle_time(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
                 int64_t& o_value);
         ///
         /// @brief      Decode CAS Latencies Supported
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value bitmap of supported CAS latencies
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Bytes 20-23
         /// @note       Item JC-45-2220.01x
         /// @note       Page 33-34
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode supported_cas_latencies(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode supported_cas_latencies(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 uint64_t& o_value);
         ///
         /// @brief      Decodes SDRAM Minimum CAS Latency Time in MTB
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value tAAmin in MTB units
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 24
         /// @note       Item JC-45-2220.01x
         /// @note       Page 34
@@ -864,14 +792,12 @@ class decoder
         ///             used for correction to get the actual value.
         ///
         virtual fapi2::ReturnCode min_cas_latency_time(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
                 int64_t& o_value);
         ///
         /// @brief      Decodes SDRAM Minimum RAS to CAS Delay Time in MTB
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value tRCDmin in MTB units
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 25
         /// @note       Item JC-45-2220.01x
         /// @note       Page 35
@@ -882,14 +808,12 @@ class decoder
         ///             used for correction to get the actual value
         ///
         virtual fapi2::ReturnCode min_ras_to_cas_delay_time(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
                 int64_t& o_value);
         ///
         /// @brief      Decodes SDRAM Minimum Row Precharge Delay Time in MTB
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value tRPmin in MTB units
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 26
         /// @note       Item JC-45-2220.01x
         /// @note       Page 36-37
@@ -900,28 +824,24 @@ class decoder
         ///             used for correction to get the actual value
         ///
         virtual fapi2::ReturnCode min_row_precharge_delay_time(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
                 int64_t& o_value);
         ///
         /// @brief      Decodes SDRAM Minimum Active to Precharge Delay Time in MTB
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value tRASmin in MTB units
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 28 (bits 7~4) & SPD Byte 27 (bits 3~0)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 38
         /// @note       DDR4 SPD Document Release 3
         ///
         virtual fapi2::ReturnCode min_active_to_precharge_delay_time(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
                 int64_t& o_value);
         ///
         /// @brief      Decodes SDRAM Minimum Active to Active/Refresh Delay Time in MTB
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value tRCmin in MTB units
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 27 (bits 7~4) & SPD Byte 29 (bits 7~0)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 38
@@ -931,71 +851,62 @@ class decoder
         ///             integer and the Fine Offset for tRCmin (SPD byte 120)
         ///             used for correction to get the actual value.
         ///
-        virtual fapi2::ReturnCode min_active_to_active_refresh_delay_time(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode min_active_to_active_refresh_delay_time(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
+                i_target,
                 int64_t& o_value);
         ///
         /// @brief      Decodes SDRAM Minimum Refresh Recovery Delay Time 1
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value tRFC1min in MTB units
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 30 & Byte 31
         /// @note       Item JC-45-2220.01x
         /// @note       Page 39-40
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode min_refresh_recovery_delay_time_1(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode min_refresh_recovery_delay_time_1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 int64_t& o_value);
         ///
         /// @brief      Decodes SDRAM Minimum Refresh Recovery Delay Time 2
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value tRFC2min in MTB units
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 32 & Byte 33
         /// @note       Item JC-45-2220.01x
         /// @note       Page 40
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode min_refresh_recovery_delay_time_2(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode min_refresh_recovery_delay_time_2(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 int64_t& o_value);
         ///
         /// @brief      Decodes SDRAM Minimum Refresh Recovery Delay Time 4
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value tRFC4min in MTB units
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 34 & Byte 35
         /// @note       Item JC-45-2220.01x
         /// @note       Page 40
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode min_refresh_recovery_delay_time_4(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode min_refresh_recovery_delay_time_4(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 int64_t& o_value);
         ///
         /// @brief      Decodes SDRAM Minimum Four Activate Window Delay Time
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value tFAWmin in MTB units
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 36 (bits 3~0) & Byte 37 (bits 7~0)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 42
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode min_tfaw(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                           const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode min_tfaw(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                            int64_t& o_value);
         ///
         /// @brief      Decodes Minimum Activate to Activate Delay Time - Different Bank Group
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value tRRD_Smin MTB units
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 38
         /// @note       Item JC-45-2220.01x
         /// @note       Page 43
@@ -1005,15 +916,13 @@ class decoder
         ///             integer and the Fine Offset for tRRD_Smin (SPD byte 119)
         ///             used for correction to get the actual value.
         ///
-        virtual fapi2::ReturnCode min_trrd_s(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                             const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode min_trrd_s(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                              int64_t& o_value);
         ///
         /// @brief      Decodes Minimum Activate to Activate Delay Time - Same Bank Group
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value tRRD_Lmin MTB units
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 39
         /// @note       Item JC-45-2220.01x
         /// @note       Page 43-44
@@ -1023,15 +932,13 @@ class decoder
         ///             integer and the Fine Offset for tRRD_Lmin (SPD byte 118)
         ///             used for correction to get the actual value.
         ///
-        virtual fapi2::ReturnCode min_trrd_l(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                             const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode min_trrd_l(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                              int64_t& o_value);
         ///
         /// @brief      Decodes Minimum CAS to CAS Delay Time - Same Bank Group
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value tCCD_Lmin MTB units
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 40
         /// @note       Item JC-45-2220.01x
         /// @note       Page 44-45
@@ -1041,192 +948,165 @@ class decoder
         ///             integer and the Fine Offset for tCCD_Lmin (SPD byte 117)
         ///             used for correction to get the actual value.
         ///
-        virtual fapi2::ReturnCode min_tccd_l(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                             const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode min_tccd_l(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                              int64_t& o_value);
         ///
         /// @brief      Decodes Minimum Write Recovery Time
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value tWRmin in MTB units
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 41 (bits 3~0) & Byte 42 (bits 7~0)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 40
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode min_write_recovery_time(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode min_write_recovery_time(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 int64_t& o_value);
         ///
         /// @brief      Decodes Minimum Write to Read Time - Different Bank Group
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value tWRT_Smin in MTB units
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 43 (bits 3~0) & Byte 44 (bits 7~0)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 40
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode min_twtr_s(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                             const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode min_twtr_s(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                              int64_t& o_value);
 
         ///
         /// @brief      Decodes Minimum Write to Read Time - Same Bank Group
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value tWRT_Lmin in MTB units
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 43 (bits 7~4) & Byte 45 (bits 7~0)
         /// @note       Item JC-45-2220.01x
         /// @note       Page 46
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode min_twtr_l(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                             const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode min_twtr_l(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                              int64_t& o_value);
         ///
         /// @brief      Decodes Fine Offset for Minimum CAS to CAS Delay Time - Same Bank Group
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value tCCD_Lmin offset in FTB units
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 117
         /// @note       Item JC-45-2220.01x
         /// @note       Page 52
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode fine_offset_min_tccd_l(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode fine_offset_min_tccd_l(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 int64_t& o_value);
         ///
         /// @brief      Decodes Fine Offset for Minimum Activate to Activate Delay Time - Same Bank Group
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value tRRD_Lmin offset in FTB units
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 118
         /// @note       Item JC-45-2220.01x
         /// @note       Page 52
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode fine_offset_min_trrd_l(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode fine_offset_min_trrd_l(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 int64_t& o_value);
         ///
         /// @brief      Decodes Fine Offset for Minimum Activate to Activate Delay Time - Different Bank Group
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value tRRD_Smin offset in FTB units
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 119
         /// @note       Item JC-45-2220.01x
         /// @note       Page 52
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode fine_offset_min_trrd_s(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode fine_offset_min_trrd_s(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 int64_t& o_value);
         ///
         /// @brief      Decodes Fine Offset for Minimum Active to Active/Refresh Delay Time
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value tRCmin offset in FTB units
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 120
         /// @note       Item JC-45-2220.01x
         /// @note       Page 52
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode fine_offset_min_trc(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode fine_offset_min_trc(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 int64_t& o_value);
         ///
         /// @brief      Decodes Fine Offset for Minimum Row Precharge Delay Time
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value tRPmin offset in FTB units
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 121
         /// @note       Item JC-45-2220.01x
         /// @note       Page 52
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode fine_offset_min_trp(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode fine_offset_min_trp(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 int64_t& o_value);
         ///
         /// @brief      Decodes Fine Offset for SDRAM Minimum RAS to CAS Delay Time
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value tRCDmin offset in FTB units
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 122
         /// @note       Item JC-45-2220.01x
         /// @note       Page 52
         /// @note       DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode fine_offset_min_trcd(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
+        virtual fapi2::ReturnCode fine_offset_min_trcd(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 int64_t& o_value);
         ///
         /// @brief      Decodes Fine Offset for SDRAM Minimum CAS Latency Time
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value tAAmin offset in FTB units
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 123
         /// @note       Item JC-45-2220.01x
         /// @note       Page 52
         /// @note       DDR4 SPD Document Release 3
         ///
         virtual fapi2::ReturnCode fine_offset_min_taa(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
                 int64_t& o_value);
         ///
         /// @brief      Decodes Fine Offset for SDRAM Maximum Cycle Time
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value tCKmax offset in FTB units
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 124
         /// @note       Item JC-45-2220.01x
         /// @note       Page 52
         /// @note       DDR4 SPD Document Release 3
         ///
         virtual fapi2::ReturnCode fine_offset_max_tck(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
                 int64_t& o_value);
         ///
         /// @brief      Decodes Fine Offset for SDRAM Minimum Cycle Time
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value tCKmin offset in FTB units
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 125
         /// @note       Item JC-45-2220.01x
         /// @note       Page 52
         /// @note       DDR4 SPD Document Release 3
         ///
         virtual fapi2::ReturnCode fine_offset_min_tck(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
                 int64_t& o_value);
 
         ///
         /// @brief      Decodes Cyclical Redundancy Code (CRC) for Base Configuration Section
         /// @param[in]  i_target dimm target
-        /// @param[in]  i_spd_data SPD blob
         /// @param[out] o_value crc value from SPD
-        /// @return     fapi2::ReturnCode
+        /// @return     FAPI2_RC_SUCCESS if okay
         /// @note       SPD Byte 127 & Byte 126
         /// @note       Item JC-45-2220.01x
         /// @note       Page 53
         /// @note       DDR4 SPD Document Release 3
         ///
         virtual fapi2::ReturnCode cyclical_redundancy_code(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                const uint8_t* i_spd_data,
                 uint16_t& o_value);
 };// decoder
 
@@ -1238,62 +1118,63 @@ class decoder
 ///
 /// @brief       Decodes SPD Revision encoding level
 /// @param[in]   i_target dimm target
-/// @param[in]   i_spd_data SPD blob
-/// @param[out]  o_value revision number
-/// @return      fapi2::ReturnCode
+/// @param[in]   i_spd_data SPD data
+/// @param[out]  o_value encoding revision num
+/// @return      FAPI2_RC_SUCCESS if okay
 /// @note        Decodes SPD Byte 1 (3~0).
 /// @note        Item JC-45-2220.01x
 /// @note        Page 14-15
 /// @note        DDR4 SPD Document Release 3
 ///
 fapi2::ReturnCode rev_encoding_level(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                     const uint8_t* i_spd_data,
+                                     const std::vector<uint8_t>& i_spd_data,
                                      uint8_t& o_value);
 ///
 /// @brief       Decodes SPD Revision additions level
 /// @param[in]   i_target dimm target
 /// @param[in]   i_spd_data SPD blob
-/// @param[out]  o_value revision number
-/// @return      fapi2::ReturnCode
+/// @param[out]  o_value additions revision num
+/// @return      FAPI2_RC_SUCCESS if okay
 /// @note        Decodes SPD Byte 1 (bits 7~4).
 /// @note        Item JC-45-2220.01x
 /// @note        Page 14-15
 /// @note        DDR4 SPD Document Release 3
 ///
 fapi2::ReturnCode rev_additions_level(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                      const uint8_t* i_spd_data,
+                                      const std::vector<uint8_t>& i_spd_data,
                                       uint8_t& o_value);
 
 ///
 /// @brief      Decodes base module type (DIMM type) from SPD
 /// @param[in]  i_target dimm target
-/// @param[in]  i_spd_data SPD blob
-/// @param[out] o_value
-/// @return     fapi2::ReturnCode
+/// @param[in]  i_spd_data SPD data
+/// @param[out] o_value base module type
+/// @return     FAPI2_RC_SUCCESS if okay
 /// @note       Decodes SPD Byte 3 (bits 3~0)
 /// @note       Item JC-45-2220.01x
 /// @note       Page 17
 /// @note       DDR4 SPD Document Release 3
 ///
 fapi2::ReturnCode base_module_type(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                   const uint8_t* i_spd_data,
+                                   const std::vector<uint8_t>& i_spd_data,
                                    uint8_t& o_value);
 
 ///
-/// @brief       Object factory to select correct decoder based on SPD revision & dimm type
+/// @brief       Object factory to select correct decoder
 /// @param[in]   i_target dimm target
 /// @param[in]   i_spd_data SPD data
 /// @param[out]  o_fact_obj shared pointer to the factory object
-/// @return      fapi2::ReturnCode
+/// @return      FAPI2_RC_SUCCESS if okay
+/// @note        Factory dependent on SPD revision & dimm type
 ///
 fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                          const uint8_t* i_spd_data,
+                          const std::vector<uint8_t>& i_spd_data,
                           std::shared_ptr<decoder>& o_fact_obj);
 
 ///
 /// @brief       Creates factory object & SPD data caches
 /// @param[in]   i_target the fapi2 target
-/// @param[out]  o_factory_caches map of factory objects with a dimm pos key
+/// @param[out]  o_factory_caches map of factory objects with a dimm position key
 /// @return      FAPI2_RC_SUCCESS if okay
 ///
 template<fapi2::TargetType T>

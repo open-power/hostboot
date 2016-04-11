@@ -43,31 +43,29 @@ namespace mss
 ///
 /// @brief Determines & sets effective config for DRAM generation from SPD
 /// @param[in] i_target FAPI2 target
-/// @param[in] i_spd_data SPD blob
 /// @param[in] i_pDecoder shared pointer to decoder factory
 /// @return fapi2::ReturnCode
 ///
 fapi2::ReturnCode eff_config::dram_gen(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                       const uint8_t* i_spd_data,
                                        const std::shared_ptr<spd::decoder>& i_pDecoder)
 {
     uint8_t l_decoder_val = 0;
     uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {0};
 
     // Targets
-    const auto l_target_mcs = find_target<TARGET_TYPE_MCS>(i_target);
-    const auto l_target_port = find_target<TARGET_TYPE_MCA>(i_target);
+    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
 
     // Current index
-    const auto l_port_num = index(l_target_port);
+    const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
-    FAPI_TRY( i_pDecoder->dram_device_type(i_target, i_spd_data, l_decoder_val) );
+    FAPI_TRY( i_pDecoder->dram_device_type(i_target, l_decoder_val) );
 
     // Get & update MCS attribute
-    FAPI_TRY( eff_dram_gen(l_target_mcs, &l_mcs_attrs[0][0]) );
+    FAPI_TRY( eff_dram_gen(l_mcs, &l_mcs_attrs[0][0]) );
     l_mcs_attrs[l_port_num][l_dimm_num] = l_decoder_val;
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_GEN, l_target_mcs, l_mcs_attrs) );
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_GEN, l_mcs, l_mcs_attrs) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -77,29 +75,28 @@ fapi_try_exit:
 ///
 /// @brief Determines & sets effective config for DIMM type from SPD
 /// @param[in] i_target FAPI2 target
-/// @param[in] i_spd_data SPD blob
 /// @return fapi2::ReturnCode
 ///
 fapi2::ReturnCode eff_config::dimm_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-                                        const uint8_t* i_spd_data)
+                                        const std::vector<uint8_t>& i_spd_data )
 {
     uint8_t l_decoder_val = 0;
     uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {0};
 
     // Targets
-    const auto l_target_mcs = find_target<TARGET_TYPE_MCS>(i_target);
-    const auto l_target_port = find_target<TARGET_TYPE_MCA>(i_target);
+    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
 
     // Current index
-    const auto l_port_num = index(l_target_port);
+    const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
     FAPI_TRY( spd::base_module_type(i_target, i_spd_data, l_decoder_val) );
 
     // Get & update MCS attribute
-    FAPI_TRY( eff_dimm_type(l_target_mcs, &l_mcs_attrs[0][0]) );
+    FAPI_TRY( eff_dimm_type(l_mcs, &l_mcs_attrs[0][0]) );
     l_mcs_attrs[l_port_num][l_dimm_num] = l_decoder_val;
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_TYPE, l_target_mcs, l_mcs_attrs) );
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_TYPE, l_mcs, l_mcs_attrs) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -108,31 +105,29 @@ fapi_try_exit:
 ///
 /// @brief Determines & sets effective config for Hybrid memory type from SPD
 /// @param[in] i_target FAPI2 target
-/// @param[in] i_spd_data SPD blob
 /// @param[in] i_pDecoder shared pointer to decoder factory
 /// @return fapi2::ReturnCode
 ///
 fapi2::ReturnCode eff_config::hybrid_memory_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        const uint8_t* i_spd_data,
         const std::shared_ptr<spd::decoder>& i_pDecoder)
 {
     uint8_t l_decoder_val = 0;
     uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {0};
 
     // Targets
-    const auto l_target_mcs = find_target<TARGET_TYPE_MCS>(i_target);
-    const auto l_target_port = find_target<TARGET_TYPE_MCA>(i_target);
+    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
 
     // Current index
-    const auto l_port_num = index(l_target_port);
+    const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
-    FAPI_TRY(i_pDecoder->hybrid_media(i_target, i_spd_data, l_decoder_val));
+    FAPI_TRY(i_pDecoder->hybrid_media(i_target, l_decoder_val));
 
     // Get & update MCS attribute
-    FAPI_TRY( eff_hybrid_memory_type(l_target_mcs, &l_mcs_attrs[0][0]) );
+    FAPI_TRY( eff_hybrid_memory_type(l_mcs, &l_mcs_attrs[0][0]) );
     l_mcs_attrs[l_port_num][l_dimm_num] = l_decoder_val;
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_HYBRID_MEMORY_TYPE, l_target_mcs, l_mcs_attrs) );
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_HYBRID_MEMORY_TYPE, l_mcs, l_mcs_attrs) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -151,20 +146,20 @@ fapi2::ReturnCode eff_config::temp_ref_range(const fapi2::Target<TARGET_TYPE_DIM
     uint8_t l_mcs_attrs[PORTS_PER_MCS] = {0};
 
     // Targets
-    const auto l_target_mcs = find_target<TARGET_TYPE_MCS>(i_target);
-    const auto l_target_port = find_target<TARGET_TYPE_MCA>(i_target);
+    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
 
     // Current index
-    const auto l_port_num = index(l_target_port);
+    const auto l_port_num = index(l_mca);
 
-    FAPI_TRY( mss::eff_temp_ref_range(l_target_mcs, &l_mcs_attrs[0]) );
+    FAPI_TRY( mss::eff_temp_ref_range(l_mcs, &l_mcs_attrs[0]) );
 
     // TK - I think this will become a platform attribute so this function
     // will eventuall get removed - AAM
 
     // This is defaulted to Extended temperature mode
     l_mcs_attrs[l_port_num] = fapi2::ENUM_ATTR_EFF_TEMP_REF_RANGE_EXTEND;
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_TEMP_REF_RANGE, l_target_mcs, l_mcs_attrs) );
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_TEMP_REF_RANGE, l_mcs, l_mcs_attrs) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -179,17 +174,17 @@ fapi2::ReturnCode eff_config::fine_refresh_mode(const fapi2::Target<TARGET_TYPE_
 {
     uint8_t l_mcs_attrs[PORTS_PER_MCS] = {0};
     // Targets
-    const auto l_target_mcs = find_target<TARGET_TYPE_MCS>(i_target);
-    const auto l_target_port = find_target<TARGET_TYPE_MCA>(i_target);
+    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
 
     // Current index
-    const auto l_port_num = index(l_target_port);
+    const auto l_port_num = index(l_mca);
 
     // Per Warren - should be in Normal mode, might change based on lab test results -  AAM
     // Get & update MCS attribute
-    FAPI_TRY( mss::eff_fine_refresh_mode(l_target_mcs, &l_mcs_attrs[0])) ;
+    FAPI_TRY( mss::eff_fine_refresh_mode(l_mcs, &l_mcs_attrs[0])) ;
     l_mcs_attrs[l_port_num] = fapi2::ENUM_ATTR_EFF_FINE_REFRESH_MODE_NORMAL;
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_FINE_REFRESH_MODE, l_target_mcs, l_mcs_attrs) );
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_FINE_REFRESH_MODE, l_mcs, l_mcs_attrs) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -213,17 +208,17 @@ fapi2::ReturnCode eff_config::refresh_interval_time(const fapi2::Target<TARGET_T
     uint64_t l_tCK_in_ps = 0;
 
     // Targets
-    const auto l_target_mcs = find_target<TARGET_TYPE_MCS>(i_target);
-    const auto l_target_port = find_target<TARGET_TYPE_MCA>(i_target);
+    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
     const auto l_target_mcbist = find_target<TARGET_TYPE_MCBIST>(i_target);
 
     // Current index
-    const auto l_port_num = index(l_target_port);
+    const auto l_port_num = index(l_mca);
     const auto l_dimm_num = index(i_target);
 
     // Retrieve attributes values
     FAPI_TRY( mss::freq(l_target_mcbist, l_mss_freq) );
-    FAPI_TRY ( mss::eff_fine_refresh_mode(l_target_mcs, &l_mcs_attrs_refresh[0]) );
+    FAPI_TRY ( mss::eff_fine_refresh_mode(l_mcs, &l_mcs_attrs_refresh[0]) );
 
     l_refresh_mode = l_mcs_attrs_refresh[l_port_num];
 
@@ -248,12 +243,12 @@ fapi2::ReturnCode eff_config::refresh_interval_time(const fapi2::Target<TARGET_T
     l_tCK_in_ps = freq_to_ps(l_mss_freq);
 
     // Get & update MCS attribute
-    FAPI_TRY( eff_dram_trefi(l_target_mcs, &l_mcs_attrs_trefi[0][0]) );
+    FAPI_TRY( eff_dram_trefi(l_mcs, &l_mcs_attrs_trefi[0][0]) );
 
     l_trefi_in_nck = calc_nck(l_trefi_in_ps, l_tCK_in_ps, uint64_t(INVERSE_DDR4_CORRECTION_FACTOR));
     l_mcs_attrs_trefi[l_port_num][l_dimm_num] = uint8_t(l_trefi_in_nck);
 
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TREFI, l_target_mcs, l_mcs_attrs_trefi) );
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TREFI, l_mcs, l_mcs_attrs_trefi) );
 
 fapi_try_exit:
     return fapi2::current_err;

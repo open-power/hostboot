@@ -56,32 +56,29 @@ class eff_config
         ///
         /// @brief Determines & sets effective config for DRAM generation from SPD
         /// @param[in] i_target FAPI2 target
-        /// @param[in] i_spd_data SPD blob
         /// @param[in] i_pDecoder shared pointer to decoder factory
         /// @return fapi2::ReturnCode
         ///
         fapi2::ReturnCode dram_gen(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                   const uint8_t* i_spd_data,
                                    const std::shared_ptr<spd::decoder>& i_pDecoder);
 
         ///
         /// @brief Determines & sets effective config for DIMM type
         /// @param[in] i_target FAPI2 target
-        /// @param[in] i_spd_data SPD blob
         /// @return fapi2::ReturnCode
         ///
         fapi2::ReturnCode dimm_type(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                    const uint8_t* i_spd_data);
+                                    const std::vector<uint8_t>& i_spd_data);
+
         ///
         /// @brief Determines & sets effective config for Hybrid memory type from SPD
         /// @param[in] i_target FAPI2 target
-        /// @param[in] i_spd_data SPD blob
         /// @param[in] i_pDecoder shared pointer to decoder factory
         /// @return fapi2::ReturnCode
         ///
         fapi2::ReturnCode hybrid_memory_type(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                             const uint8_t* i_spd_data,
                                              const std::shared_ptr<spd::decoder>& i_pDecoder);
+
         ///
         /// @brief Sets effective config for temperature controlled refresh mode
         /// @param[in] i_target FAPI2 target
@@ -90,9 +87,9 @@ class eff_config
         /// @note  Committee: JC42.3C
         /// @note  Committee Item Number: 1716.78C
         /// @note  4.8.2  Extended temperature mode (pg. 44)
+        ///
         fapi2::ReturnCode temp_ref_range(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target);
 
-        ///
         /// @brief Determines & sets effective config for Refresh Mode
         /// @param[in] i_target FAPI2 target
         /// @return fapi2::ReturnCode
