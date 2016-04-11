@@ -21480,7 +21480,7 @@ DEPRECATED!!!!
     <simpleType>
         <uint8_t></uint8_t>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
     <hwpfToHbAttrMap>
@@ -21505,6 +21505,23 @@ DEPRECATED!!!!
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_IO_X_DEBUG</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>IO_XBUS_MASTER_MODE</id>
+    <description>
+       Flag to indicate if the target is a master.
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_IO_XBUS_MASTER_MODE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
