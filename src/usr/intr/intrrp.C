@@ -358,16 +358,50 @@ errlHndl_t IntrRp::enableInterrupts()
         l_psihb_ptr->icr =
                       (l_psihb_ptr->icr | PSI_BRIDGE_INTP_STATUS_CTL_ENABLE);
 
-        //Set Physical Thread Enable register in the PC space
+        // This XIVE register supports both Normal and Fused core, but Normal
+        // Core mode can be safely assumed and the proper bits will be set.
+        //
+        //Set Physical Thread Enable register in the PC space for the master
+        //  core
+        PIR_t l_masterPir(task_getcpuid());
+        uint64_t l_masterCoreID = l_masterPir.coreId;
+        uint64_t l_masterThreadID = l_masterPir.threadId;
+
         uint64_t * l_ic_ptr = iv_xiveIcBarAddress;
         l_ic_ptr += XIVE_IC_BAR_INT_PC_MMIO_REG_OFFSET;
 
         XIVE_IC_THREAD_CONTEXT_t * l_xive_ic_ptr =
                 reinterpret_cast<XIVE_IC_THREAD_CONTEXT_t *>(l_ic_ptr);
-        l_xive_ic_ptr->phys_thread_enable0_set = XIVE_IC_THREAD0_ENABLE;
+
+        TRACFCOMP(g_trac_intr, INFO_MRK"IntrRp::enableInterrupts() "
+                    "Set Physical Thread Enable for master core: %lx, "
+                    "master thread: %lx ",
+                    l_masterCoreID,
+                    l_masterThreadID);
+
+        //Normal Cores 0-15 are handled in thread enable0 reg
+        if (l_masterCoreID < 16)
+        {
+            uint64_t l_enable =
+              (XIVE_IC_THREAD0_ENABLE >> ((4*l_masterCoreID)+l_masterThreadID));
+            TRACFCOMP(g_trac_intr, INFO_MRK"IntrRp::enableInterrupts() "
+                    " Set phys_thread_enable0_reg: 0x%016lx", l_enable);
+            l_xive_ic_ptr->phys_thread_enable0_set = l_enable;
+        }
+        else //Normal Cores 16-23 are handled in thread enable1 reg
+        {
+            //Shift offset as a second register is used for cores 16-23
+            // so core 16 in reg 1 is equivalent to core 0 in reg0
+            l_masterCoreID = l_masterCoreID - 16;
+            uint64_t l_enable =
+              (XIVE_IC_THREAD0_ENABLE >> ((4*l_masterCoreID)+l_masterThreadID));
+            TRACFCOMP(g_trac_intr, INFO_MRK"IntrRp::enableInterrupts() "
+                    " Set phys_thread_enable1_reg: 0x%016lx", l_enable);
+            l_xive_ic_ptr->phys_thread_enable1_set = l_enable;
+        }
 
         //Set bit to configure LSI mode for HB cec interrupts
-        XIVE_IVPE_THREAD_CONTEXT_t * this_ivpe_ptr =
+        volatile XIVE_IVPE_THREAD_CONTEXT_t * this_ivpe_ptr =
           reinterpret_cast<XIVE_IVPE_THREAD_CONTEXT_t *> (iv_xiveTmBar1Address);
         this_ivpe_ptr->cams_vt = XIVE_IVPE_QW3_LSI_ENABLE;
         eieio();
