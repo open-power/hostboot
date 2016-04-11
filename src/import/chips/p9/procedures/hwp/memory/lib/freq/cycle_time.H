@@ -127,7 +127,7 @@ fapi_try_exit:
 
 ///
 /// @brief         Determines next highest min cycle time (tCK)
-/// @param[in,out] io_tCKmin_in_ps min cycle time in ps
+/// @param[in,out] io_tCK_in_ps min cycle time in ps
 /// @return        fapi2::FAPI2_RC_SUCCESS if ok
 ///
 inline fapi2::ReturnCode select_higher_tck(uint64_t& io_tCK)

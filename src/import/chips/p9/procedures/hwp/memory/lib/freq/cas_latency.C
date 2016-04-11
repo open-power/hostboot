@@ -100,7 +100,6 @@ cas_latency::cas_latency(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
                 // Retrieve dimm supported cas latencies from SPD
                 uint64_t l_dimm_supported_CL = 0;
                 FAPI_TRY( l_it->second->supported_cas_latencies(l_dimm,
-                          l_it->second->iv_spd_data.get(),
                           l_dimm_supported_CL),
                           "Failed to get supported CAS latency");
 
@@ -182,10 +181,10 @@ fapi2::ReturnCode cas_latency::get_taamin(const fapi2::Target<TARGET_TYPE_DIMM>&
     int64_t l_fine_timebase = 0;
 
     // Retrieve timing parameters
-    FAPI_TRY( i_pDecoder->medium_timebase(i_target, i_pDecoder->iv_spd_data.get(), l_medium_timebase) );
-    FAPI_TRY( i_pDecoder->fine_timebase(i_target, i_pDecoder->iv_spd_data.get(), l_fine_timebase) );
-    FAPI_TRY( i_pDecoder->min_cas_latency_time(i_target, i_pDecoder->iv_spd_data.get(), l_timing_mtb) );
-    FAPI_TRY( i_pDecoder->fine_offset_min_taa(i_target, i_pDecoder->iv_spd_data.get(), l_timing_ftb) );
+    FAPI_TRY( i_pDecoder->medium_timebase(i_target, l_medium_timebase) );
+    FAPI_TRY( i_pDecoder->fine_timebase(i_target, l_fine_timebase) );
+    FAPI_TRY( i_pDecoder->min_cas_latency_time(i_target, l_timing_mtb) );
+    FAPI_TRY( i_pDecoder->fine_offset_min_taa(i_target, l_timing_ftb) );
 
     // Calculate timing value
     o_value = uint64_t(calc_timing_from_timebase(l_timing_mtb,
@@ -227,10 +226,10 @@ fapi2::ReturnCode cas_latency::get_tckmin(const fapi2::Target<TARGET_TYPE_DIMM>&
     int64_t l_fine_timebase = 0;
 
     // Retrieve timing parameters
-    FAPI_TRY( i_pDecoder->medium_timebase(i_target, i_pDecoder->iv_spd_data.get(), l_medium_timebase) );
-    FAPI_TRY( i_pDecoder->fine_timebase(i_target, i_pDecoder->iv_spd_data.get(), l_fine_timebase) );
-    FAPI_TRY( i_pDecoder->min_cycle_time(i_target, i_pDecoder->iv_spd_data.get(), l_timing_mtb) );
-    FAPI_TRY( i_pDecoder->fine_offset_min_tck(i_target, i_pDecoder->iv_spd_data.get(), l_timing_ftb) );
+    FAPI_TRY( i_pDecoder->medium_timebase(i_target, l_medium_timebase) );
+    FAPI_TRY( i_pDecoder->fine_timebase(i_target, l_fine_timebase) );
+    FAPI_TRY( i_pDecoder->min_cycle_time(i_target, l_timing_mtb) );
+    FAPI_TRY( i_pDecoder->fine_offset_min_tck(i_target, l_timing_ftb) );
 
     // Calculate timing value
     o_value = uint64_t( calc_timing_from_timebase(l_timing_mtb,
@@ -272,10 +271,10 @@ fapi2::ReturnCode cas_latency::get_tckmax(const fapi2::Target<TARGET_TYPE_DIMM>&
     int64_t l_fine_timebase = 0;
 
     // Retrieve timing parameters
-    FAPI_TRY( i_pDecoder->medium_timebase(i_target, i_pDecoder->iv_spd_data.get(), l_medium_timebase) );
-    FAPI_TRY( i_pDecoder->fine_timebase(i_target, i_pDecoder->iv_spd_data.get(), l_fine_timebase) );
-    FAPI_TRY( i_pDecoder->max_cycle_time(i_target, i_pDecoder->iv_spd_data.get(), l_timing_mtb) );
-    FAPI_TRY( i_pDecoder->fine_offset_max_tck(i_target, i_pDecoder->iv_spd_data.get(), l_timing_ftb) );
+    FAPI_TRY( i_pDecoder->medium_timebase(i_target, l_medium_timebase) );
+    FAPI_TRY( i_pDecoder->fine_timebase(i_target, l_fine_timebase) );
+    FAPI_TRY( i_pDecoder->max_cycle_time(i_target, l_timing_mtb) );
+    FAPI_TRY( i_pDecoder->fine_offset_max_tck(i_target, l_timing_ftb) );
 
     // Calculate timing value
     o_value = uint64_t(calc_timing_from_timebase(l_timing_mtb,
