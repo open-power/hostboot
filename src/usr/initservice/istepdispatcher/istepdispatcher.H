@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -196,6 +196,12 @@ public:
     bool isFutureShutdownRequested();
 
     void setAcceptIstepMessages(bool accept);
+
+    /**
+     * @brief This function will set a boolean true which states a new gard
+     * record has been written.
+     */
+    void setNewGardRecord();
 
 protected:
 
@@ -414,6 +420,9 @@ private:
     // Instance variable stating whether this istepdispatcher instance should
     //   accept istep messages or not
     bool iv_acceptIstepMessages;
+
+    // Instance variable to state if a new gard record was committed
+    bool iv_newGardRecord;
 
     // Message Queue for receiving message from SP or SPless user console
     msg_q_t iv_msgQ;

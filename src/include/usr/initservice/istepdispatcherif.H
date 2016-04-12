@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,6 +78,18 @@ bool isShutdownRequested ( void );
  * @return Nothing
  */
 void setAcceptIstepMessages ( bool i_accept );
+
+/**
+ * @brief This function will set a member class variable to state new gard
+ * records have been committed on this boot attempt.
+ *
+ * Gard records being created are an indication of forward progress.  Therefore
+ * if a gard record has been created we can issue a reboot that does not count
+ * towards the reboot count limit.
+ *
+ * @return None.
+ */
+void setNewGardRecord ( void );
 
 }
 
