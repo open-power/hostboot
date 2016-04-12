@@ -19565,6 +19565,7 @@ DEPRECATED!!!!
     </uint8_t>
   </simpleType>
   <persistency>volatile-zeroed</persistency>
+  <writeable/>
   <readable/>
   <hwpfToHbAttrMap>
     <id>ATTR_BACKUP_SEEPROM_SELECT</id>
