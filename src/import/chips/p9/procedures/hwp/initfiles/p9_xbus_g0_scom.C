@@ -32,7 +32,9 @@ constexpr auto literal_0b01100 = 0b01100;
 constexpr auto literal_0b0000000 = 0b0000000;
 constexpr auto literal_0b0000011 = 0b0000011;
 constexpr auto literal_0b000000 = 0b000000;
+constexpr auto literal_0b1010 = 0b1010;
 constexpr auto literal_0b00001 = 0b00001;
+constexpr auto literal_0b1011 = 0b1011;
 constexpr auto literal_0b0010001 = 0b0010001;
 constexpr auto literal_0b0000000000000000 = 0b0000000000000000;
 constexpr auto literal_0b01111111 = 0b01111111;
@@ -4626,6 +4628,43 @@ fapi2::ReturnCode p9_xbus_g0_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             }
         }
         {
+            l_rc = fapi2::getScom( TGT0, 0x8008300006010c3full, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x8008300006010c3full)");
+                break;
+            }
+
+            constexpr auto l_scom_buffer_TAP5 = 0x5;
+            l_scom_buffer.insert<uint64_t> (l_scom_buffer_TAP5, 51, 3, 61 );
+            l_rc = fapi2::putScom(TGT0, 0x8008300006010c3full, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x8008300006010c3full)");
+                break;
+            }
+        }
+        {
+            l_rc = fapi2::getScom( TGT0, 0x8008400006010c3full, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x8008400006010c3full)");
+                break;
+            }
+
+            l_scom_buffer.insert<uint64_t> (literal_0b1010, 60, 4, 60 );
+            l_rc = fapi2::putScom(TGT0, 0x8008400006010c3full, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x8008400006010c3full)");
+                break;
+            }
+        }
+        {
             l_rc = fapi2::getScom( TGT0, 0x8008c00006010c3full, l_scom_buffer );
 
             if (l_rc)
@@ -4662,6 +4701,16 @@ fapi2::ReturnCode p9_xbus_g0_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
                 break;
             }
         }
+        fapi2::ATTR_IO_XBUS_MASTER_MODE_Type l_TGT0_ATTR_IO_XBUS_MASTER_MODE;
+        l_rc = FAPI_ATTR_GET(fapi2::ATTR_IO_XBUS_MASTER_MODE, TGT0, l_TGT0_ATTR_IO_XBUS_MASTER_MODE);
+
+        if (l_rc)
+        {
+            FAPI_ERR("ERROR executing: FAPI_ATTR_GET (ATTR_IO_XBUS_MASTER_MODE)");
+            break;
+        }
+
+        auto l_def_is_master = (l_TGT0_ATTR_IO_XBUS_MASTER_MODE == literal_1);
         {
             l_rc = fapi2::getScom( TGT0, 0x8009900006010c3full, l_scom_buffer );
 
@@ -4671,8 +4720,12 @@ fapi2::ReturnCode p9_xbus_g0_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
                 break;
             }
 
-            constexpr auto l_scom_buffer_ON = 0x1;
-            l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 58, 1, 63 );
+            if (l_def_is_master)
+            {
+                constexpr auto l_scom_buffer_MASTER = 0x1;
+                l_scom_buffer.insert<uint64_t> (l_scom_buffer_MASTER, 48, 1, 63 );
+            }
+
             l_rc = fapi2::putScom(TGT0, 0x8009900006010c3full, l_scom_buffer);
 
             if (l_rc)
@@ -4696,6 +4749,24 @@ fapi2::ReturnCode p9_xbus_g0_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             if (l_rc)
             {
                 FAPI_ERR("ERROR executing: putScom (0x8009980006010c3full)");
+                break;
+            }
+        }
+        {
+            l_rc = fapi2::getScom( TGT0, 0x8009a00006010c3full, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x8009a00006010c3full)");
+                break;
+            }
+
+            l_scom_buffer.insert<uint64_t> (literal_0b1011, 48, 4, 60 );
+            l_rc = fapi2::putScom(TGT0, 0x8009a00006010c3full, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x8009a00006010c3full)");
                 break;
             }
         }
@@ -4750,6 +4821,25 @@ fapi2::ReturnCode p9_xbus_g0_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             if (l_rc)
             {
                 FAPI_ERR("ERROR executing: putScom (0x8009e80006010c3full)");
+                break;
+            }
+        }
+        {
+            l_rc = fapi2::getScom( TGT0, 0x800a800006010c3full, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x800a800006010c3full)");
+                break;
+            }
+
+            constexpr auto l_scom_buffer_ON = 0x1;
+            l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 50, 1, 63 );
+            l_rc = fapi2::putScom(TGT0, 0x800a800006010c3full, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x800a800006010c3full)");
                 break;
             }
         }
@@ -4887,6 +4977,25 @@ fapi2::ReturnCode p9_xbus_g0_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             if (l_rc)
             {
                 FAPI_ERR("ERROR executing: putScom (0x800c840006010c3full)");
+                break;
+            }
+        }
+        {
+            l_rc = fapi2::getScom( TGT0, 0x800c8c0006010c3full, l_scom_buffer );
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: getScom (0x800c8c0006010c3full)");
+                break;
+            }
+
+            constexpr auto l_scom_buffer_TAP5 = 0x5;
+            l_scom_buffer.insert<uint64_t> (l_scom_buffer_TAP5, 55, 3, 61 );
+            l_rc = fapi2::putScom(TGT0, 0x800c8c0006010c3full, l_scom_buffer);
+
+            if (l_rc)
+            {
+                FAPI_ERR("ERROR executing: putScom (0x800c8c0006010c3full)");
                 break;
             }
         }
