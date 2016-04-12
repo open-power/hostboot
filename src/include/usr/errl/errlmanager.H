@@ -176,6 +176,18 @@ public:
      static void errlAckErrorlog(uint32_t i_eid);
 
      /**
+      * @brief Calls flush error logs
+      *
+      * This is called by doIstep after every istep to ensure that the error
+      * logs have been cleared out before checking if a reconfigure loop
+      * is needed
+      *
+      * It is a static function because a module cannot call an interface on a
+      * singleton in another module
+      */
+      static void callFlushErrorLogs();
+
+     /**
       * @brief  Returns the HWAS ProcessCallout function pointer
       *
       * This is called by ErrlEntry::commit to get the HWAS ProcessCallout
@@ -242,6 +254,7 @@ private:
         ERRLOG_ACCESS_TARG_TYPE            = 0x00000036 | MBOX::FIRST_SECURE_MSG,
         ERRLOG_ACCESS_ERRLDISP_TYPE        = 0x00000037 | MBOX::FIRST_SECURE_MSG,
         ERRLOG_ACCESS_IPMI_TYPE            = 0x00000038 | MBOX::FIRST_SECURE_MSG,
+        ERRLOG_FLUSH_TYPE                  = 0x00000039 | MBOX::FIRST_SECURE_MSG,
     };
 
     /**
@@ -279,6 +292,15 @@ private:
       * called by static errlResourceReady function.
       */
      void sendResourcesMsg(errlManagerNeeds i_needs);
+
+     /**
+      * @brief Flushes out the error log queue before calling to process
+      * deferred deconfigs
+      *
+      * called by static callFlushErrorLogs function.
+      */
+
+     void flushErrorLogs();
 
      /**
       * @brief Sends msg to errlmanager telling which errlog to ack

@@ -42,6 +42,7 @@
 #include <sys/task.h>                    //  tid_t, task_create, etc
 #include <sys/misc.h>                    //  cpu_all_winkle
 #include <errl/errlentry.H>              //  errlHndl_t
+#include <errl/errlmanager.H>
 #include <initservice/isteps_trace.H>    //  ISTEPS_TRACE buffer
 #include <initservice/initsvcudistep.H>  //  InitSvcUserDetailsIstep
 #include <initservice/taskargs.H>        //  TASK_ENTRY_MACRO
@@ -120,7 +121,8 @@ IStepDispatcher::IStepDispatcher() :
     iv_futureShutdown(false),
     iv_istepToCompleteBeforeShutdown(0),
     iv_substepToCompleteBeforeShutdown(0),
-    iv_acceptIstepMessages(true)
+    iv_acceptIstepMessages(true),
+    iv_newGardRecord(false)
 
 {
     mutex_init(&iv_bkPtMutex);
@@ -538,6 +540,39 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                         else
                         {
                             #ifdef CONFIG_BMC_IPMI
+                            // Check the newGardRecord instance variable
+                            if(iv_newGardRecord)
+                            {
+                                // We have a new gard record committed. We need
+                                // to increment the reboot count
+                                uint16_t l_count = 0;
+                                SENSOR::RebootCountSensor l_sensor;
+                                // Read reboot count sensor
+                                err = l_sensor.getRebootCount(l_count);
+                                if (err)
+                                {
+                                    TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: getRebootCount failed");
+                                    break;
+                                }
+                                // Increment reboot count
+                                l_count++;
+                                err = l_sensor.setRebootCount(l_count);
+                                if (err)
+                                {
+                                    TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: setRebootCount failed");
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                // We are in a reconfig loop, but no new gard
+                                // records have been set. We will not increment
+                                // the reboot count.
+                                TRACFCOMP(g_trac_initsvc, "Reconfig loop needed "
+                                    "but no new gard records were commited. Do "
+                                    "not increment reboot count.");
+                            }
+
                             // @TODO RTC:124679 - Remove Once BMC Monitors
                             // Shutdown Attention
                             // Set Watchdog Timer before calling doShutdown()
@@ -776,6 +811,11 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
         {
             // There was no PLD, process any deferred deconfig records (i.e.
             // actually do the deconfigures)
+            // We need to flush the errl buffer first
+            ERRORLOG::ErrlManager::callFlushErrorLogs();
+
+            // Regardless of the way the flush came back, we need to try to
+            // process the deferred deconfigs
             HWAS::theDeconfigGard().processDeferredDeconfig();
         }
 
@@ -1402,6 +1442,20 @@ void IStepDispatcher::iStepBreakPoint(uint32_t i_info)
     TRACFCOMP(g_trac_initsvc, EXIT_MRK"IStepDispatcher::handleBreakpointMsg");
     mutex_unlock(&iv_bkPtMutex);
 }
+// -----------------------------------------------------------------------------
+// IStepDispatcher::setNewGardRecord()
+// -----------------------------------------------------------------------------
+void IStepDispatcher::setNewGardRecord()
+{
+    TRACDCOMP(g_trac_initsvc, ENTER_MRK"IStepDispatcher::setNewGardRecord");
+
+    mutex_lock(&iv_mutex);
+    iv_newGardRecord = true;
+    mutex_unlock(&iv_mutex);
+
+    TRACDCOMP(g_trac_initsvc, EXIT_MRK"IStepDispatcher::setNewGardRecord");
+    return;
+}
 
 // ----------------------------------------------------------------------------
 // IStepDispatcher::isShutdownRequested()
@@ -1973,6 +2027,11 @@ void setAcceptIstepMessages(bool i_accept)
 {
     return IStepDispatcher::getTheInstance().setAcceptIstepMessages(i_accept);
 }
+void setNewGardRecord()
+{
+    return IStepDispatcher::getTheInstance().setNewGardRecord();
+}
+
 // ----------------------------------------------------------------------------
 // IStepDispatcher::getIstepInfo()
 // ----------------------------------------------------------------------------
