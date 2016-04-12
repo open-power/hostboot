@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -42,6 +42,7 @@
 #include <stdio.h>
 #include <sys/mm.h>
 #include <config.h>
+#include <initservice/istepdispatcherif.H>
 
 #include <pnor/pnorif.H>
 
@@ -380,6 +381,17 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
         l_pRecord->iv_padding[5] = 0;
 
         _flush((void *)l_pRecord);
+
+        // We wrote a new gard record, we need to make sure to increment the
+        // reboot count so we can reconfigure and attempt to IPL
+        // Call setNewGardRecord in initservice.
+        #ifndef __HOSTBOOT_RUNTIME
+        #ifdef CONFIG_BMC_IPMI
+        HWAS_INF("New gard record committed, call INITSERVICE "
+            "::setNewGardRecord()");
+        INITSERVICE::setNewGardRecord();
+        #endif
+        #endif
     }
     while (0);
 

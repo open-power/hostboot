@@ -51,6 +51,7 @@
 #include <console/consoleif.H>
 #include <config.h>
 #include <functional>
+#include <hwas/common/deconfigGard.H>
 
 namespace ERRORLOG
 {
@@ -583,6 +584,13 @@ void ErrlManager::errlogMsgHndlr ()
                     }
                     break;
                 }
+            case ERRLOG_FLUSH_TYPE:
+                TRACFCOMP( g_trac_errl, INFO_MRK "Flush message received" );
+
+                // Since the errorlog is FIFO, all we need to do is respond
+                // to this message
+                msg_respond ( iv_msgQ, theMsg );
+                break;
             case ERRLOG_SHUTDOWN_TYPE:
                 TRACFCOMP( g_trac_errl, INFO_MRK "Shutdown event received" );
 
@@ -755,7 +763,42 @@ void ErrlManager::saveErrLogEntry( errlHndl_t& io_err )
 }
 #endif
 
+///////////////////////////////////////////////////////////////////////////////
+// ErrlManager::callFlushErrorLogs()
+///////////////////////////////////////////////////////////////////////////////
+void ErrlManager::callFlushErrorLogs()
+{
+    ERRORLOG::theErrlManager::instance().flushErrorLogs();
+    return;
+}
+///////////////////////////////////////////////////////////////////////////////
+// ErrlManager::flushErrorLogs()
+///////////////////////////////////////////////////////////////////////////////
+void ErrlManager::flushErrorLogs()
+{
+    TRACDCOMP( g_trac_errl, ENTER_MRK "ErrlManager::flushErrorLogs" );
 
+    // Create message to send to msg handler
+    msg_t *msg = NULL;
+    msg = msg_allocate();
+    msg->type = ERRLOG_FLUSH_TYPE;
+    do{
+        // Send message to msg handler, get msg back on l_RecvMsgQ
+        int rc = msg_sendrecv(iv_msgQ,msg);
+
+        if(rc)
+        {
+            TRACFCOMP(g_trac_errl, "Error sending error log flush message. "
+                "RC= %d",rc);
+            break;
+        }
+        // Msg_sendrecv doesn't return until the message has been responded
+        // to. So we do not need to check message type back.
+    }while(0);
+
+    TRACDCOMP( g_trac_errl, EXIT_MRK"ErrlManager::flushErrorLogs" );
+    return;
+}
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 void ErrlManager::setHwasProcessCalloutFn(HWAS::processCalloutFn i_fn)
