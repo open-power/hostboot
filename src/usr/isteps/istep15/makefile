@@ -36,7 +36,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
-EXTRAINCDIR += ${PROCEDURES_PATH}/ppe/include/registers/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/pmlib/include/registers/
 
 OBJS += host_build_stop_image.o
 OBJS += proc_set_pba_homer_bar.o
