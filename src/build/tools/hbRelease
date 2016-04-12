@@ -469,17 +469,12 @@ sub execute_post_release
     GetOptions("feature:s" => \$feature);
     GetOptions("release:s" => \$release);
     GetOptions("level:s" => \$level);
+    GetOptions("released:s" => \$released);
 
     die "Missing feature" if ($feature eq "");
     die "Missing release" if ($release eq "");
     die "Missing level" if ($level eq "");
-
-    my $released_file = "$LATEST_BUILD_DIR/$release";
-    open(FILE,"<",$released_file)
-         or die "Could not open file '$released_file' $!";
-    $released = <FILE>;
-    close FILE;
-    chomp($released);
+    die "Missing released" if ($released eq "");
 
     #Integrate the track
     run_system_command("Track -integrate -feature $feature -release $release -verbose");
@@ -495,10 +490,6 @@ sub execute_post_release
     run_system_command("git checkout FETCH_HEAD");
     publish_cq($level, $cq_id, $released);
 
-    #update $released tag file
-    open(FILE, ">", $released_file);
-    print FILE "$level\n";
-    close FILE;
 }
 
 sub execute_gerrit_commit
