@@ -156,8 +156,8 @@ fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
         FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_CPLT_CTRL0_OR, l_buf));
 
         // Phase1 init step 4 (PMA reset)
-        l_buf = ~0;
-        FAPI_TRY(l_buf.insertFromRight(0, PEC_IOP_PMA_RESET_START_BIT, 1));
+        l_buf = 0;
+        FAPI_TRY(l_buf.insertFromRight(1, PEC_IOP_PMA_RESET_START_BIT, 1));
         FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
         FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_CPLT_CONF1_CLEAR, l_buf));
 
@@ -283,8 +283,8 @@ fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
                                        PEC_PCS_RX_SIGDET_CONTROL_REG,
                                        48, 16);
         // Phase1 init step 25
-        l_buf = ~0;
-        FAPI_TRY(l_buf.insertFromRight(0, PEC_IOP_PIPE_RESET_START_BIT, 1));
+        l_buf = 0;
+        FAPI_TRY(l_buf.insertFromRight(1, PEC_IOP_PIPE_RESET_START_BIT, 1));
         FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
         FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_CPLT_CONF1_CLEAR, l_buf));
 
