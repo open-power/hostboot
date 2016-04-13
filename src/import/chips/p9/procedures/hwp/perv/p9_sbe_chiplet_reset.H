@@ -84,7 +84,9 @@ enum P9_SBE_CHIPLET_RESET_Public_Constants
     SCAN_TYPES_EXCEPT_TIME_GPTR_REPR = 0xDCE,
     SCAN_TYPES_TIME_GPTR_REPR = 0x230,
     SCAN_RATIO_0X0 = 0x0,
-    SYNC_CONFIG_4TO1 = 0X0800000000000000
+    SYNC_CONFIG_4TO1 = 0X0800000000000000,
+    HW_NS_DELAY = 200000, // unit is nano seconds
+    SIM_CYCLE_DELAY = 10000 // unit is cycles
 };
 }
 
@@ -114,5 +116,8 @@ extern "C"
     fapi2::ReturnCode p9_sbe_chiplet_reset(const
                                            fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip);
 }
+
+fapi2::ReturnCode p9_sbe_chiplet_reset_pcie_iop_logic_setup(
+    const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_target_chip);
 
 #endif
