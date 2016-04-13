@@ -340,7 +340,8 @@ bool tpmPresence ( TARGETING::Target * i_target,
 
         err = tpmRead( &vendorId,
                        vendorIdSize,
-                       tpmInfo );
+                       tpmInfo,
+                       true /* silent */ );
 
         if ( NULL != err )
         {
@@ -391,7 +392,8 @@ bool tpmPresence ( TARGETING::Target * i_target,
 
         err = tpmRead( &familyId,
                        familyIdSize,
-                       tpmInfo );
+                       tpmInfo,
+                       true /* silent */);
 
         if ( NULL != err )
         {
@@ -463,7 +465,8 @@ bool tpmPresence ( TARGETING::Target * i_target,
 // ------------------------------------------------------------------
 errlHndl_t tpmRead ( void * o_buffer,
                      size_t i_buflen,
-                     tpm_info_t i_tpmInfo )
+                     tpm_info_t i_tpmInfo,
+                     bool i_silent)
 {
     errlHndl_t err = NULL;
     errlHndl_t err_NACK = NULL;
@@ -654,16 +657,19 @@ errlHndl_t tpmRead ( void * o_buffer,
         {
             if (err)
             {
-                // commit original NACK error with new err PLID
-                err_NACK->plid(err->plid());
-                TRACFCOMP(g_trac_tpmdd, "tpmRead(): Committing saved NACK "
-                          "err eid=0x%X with plid of returned err: 0x%X",
-                          err_NACK->eid(), err_NACK->plid());
+                if (!i_silent)
+                {
+                    // commit original NACK error with new err PLID
+                    err_NACK->plid(err->plid());
+                    TRACFCOMP(g_trac_tpmdd, "tpmRead(): Committing saved NACK "
+                              "err eid=0x%X with plid of returned err: 0x%X",
+                              err_NACK->eid(), err_NACK->plid());
 
-                ERRORLOG::ErrlUserDetailsTarget(i_tpmInfo.i2cTarget)
-                                               .addToLog(err_NACK);
+                    ERRORLOG::ErrlUserDetailsTarget(i_tpmInfo.i2cTarget)
+                        .addToLog(err_NACK);
 
-                errlCommit(err_NACK, TPMDD_COMP_ID);
+                    errlCommit(err_NACK, TPMDD_COMP_ID);
+                }
             }
             else
             {
