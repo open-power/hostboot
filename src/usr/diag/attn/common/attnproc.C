@@ -147,8 +147,6 @@ errlHndl_t ProcOps::resolveIpoll(
     return err;
 }
 
-// @TODO RTC:149395  check into this when we handle 'interrupt driven' attns
-//   (One thing is 'Can we switch to pure Ipoll vs GFIR ??' )
 errlHndl_t ProcOps::resolve(
         TargetHandle_t i_proc,
         uint64_t i_typeMask,
