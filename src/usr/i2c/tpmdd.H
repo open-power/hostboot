@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -158,12 +158,15 @@ errlHndl_t tpmPerformOp( DeviceFW::OperationType i_opType,
  * @param[in] i_tpmInfo Structure of I2C parameters needed to execute
  *      the command to the I2C device driver.
  *
+ * @param[in] i_silent Don't log any error logs on failure
+ *
  * @return errlHndl_t NULL if successful, otherwise a pointer to the
  *      error log.
  */
 errlHndl_t tpmRead ( void * o_buffer,
                      size_t i_buflen,
-                     tpm_info_t i_tpmInfo );
+                     tpm_info_t i_tpmInfo,
+                     bool i_silent = false);
 
 /**
  * @brief This function peforms the sequencing to do a write of the

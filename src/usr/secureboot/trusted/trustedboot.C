@@ -39,6 +39,7 @@
 #include <errl/errludtarget.H>
 #include <errl/errludstring.H>
 #include <targeting/common/targetservice.H>
+#include <secureboot/service.H>
 #include <secureboot/trustedbootif.H>
 #include <secureboot/trustedboot_reasoncodes.H>
 #include <sys/mmio.h>
@@ -182,6 +183,8 @@ void* host_update_master_tpm( void *io_pArgs )
         }
         else
         {
+            // TPM doesn't exist in the system
+            systemTpms.tpm[TPM_MASTER_INDEX].initAttempted = true;
             systemTpms.tpm[TPM_MASTER_INDEX].available = false;
         }
 
@@ -209,43 +212,48 @@ void* host_update_master_tpm( void *io_pArgs )
             TRACFCOMP( g_trac_trustedboot,
                        "Master TPM Existence Fail");
 
-            /*@
-             * @errortype
-             * @reasoncode     RC_TPM_EXISTENCE_FAIL
-             * @severity       ERRL_SEV_UNRECOVERABLE
-             * @moduleid       MOD_HOST_UPDATE_MASTER_TPM
-             * @userdata1      node
-             * @userdata2      0
-             * @devdesc        No TPMs found in system.
-             */
-            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           MOD_HOST_UPDATE_MASTER_TPM,
-                                           RC_TPM_EXISTENCE_FAIL,
-                                           TARGETING::get_huid(nodeTarget),
-                                           0,
-                                           true /*Add HB SW Callout*/ );
+            systemTpms.failedTpmsPosted = true;
+            if (isTpmRequired())
+            {
+                /*@
+                 * @errortype
+                 * @reasoncode     RC_TPM_EXISTENCE_FAIL
+                 * @severity       ERRL_SEV_UNRECOVERABLE
+                 * @moduleid       MOD_HOST_UPDATE_MASTER_TPM
+                 * @userdata1      node
+                 * @userdata2      0
+                 * @devdesc        No TPMs found in system.
+                 */
+                err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                               MOD_HOST_UPDATE_MASTER_TPM,
+                                               RC_TPM_EXISTENCE_FAIL,
+                                               TARGETING::get_huid(nodeTarget),
+                                               0,
+                                               true /*Add HB SW Callout*/ );
 
-            err->collectTrace( SECURE_COMP_NAME );
-            break;
+                err->collectTrace( SECURE_COMP_NAME );
+            }
+
         }
 
         // Lastly we will check on the backup TPM and see if it is enabled
         //  in the attributes at least
         TPMDD::tpm_info_t tpmInfo;
         tpmInfo.chip = TPMDD::TPM_BACKUP;
-        err = TPMDD::tpmReadAttributes(nodeTarget, tpmInfo);
-        if (NULL != err)
+        errlHndl_t tmpErr = TPMDD::tpmReadAttributes(nodeTarget, tpmInfo);
+        if (NULL != tmpErr)
         {
             // We don't want to log this error we will just assume
             //   the backup doesn't exist
-            delete err;
-            err = NULL;
+            delete tmpErr;
+            tmpErr = NULL;
             TRACUCOMP( g_trac_trustedboot,
                        "host_update_master_tpm() tgt=0x%X "
-                       "Marking backup TPM unavailable due to attribute fail",
+                       "Marking backup TPM unavailable "
+                       "due to attribute fail",
                        TARGETING::get_huid(nodeTarget));
             systemTpms.tpm[TPM_BACKUP_INDEX].available = false;
-            break;
+            systemTpms.tpm[TPM_BACKUP_INDEX].initAttempted = true;
         }
         else if (!tpmInfo.tpmEnabled)
         {
@@ -254,6 +262,7 @@ void* host_update_master_tpm( void *io_pArgs )
                        "Marking backup TPM unavailable",
                        TARGETING::get_huid(nodeTarget));
             systemTpms.tpm[TPM_BACKUP_INDEX].available = false;
+            systemTpms.tpm[TPM_BACKUP_INDEX].initAttempted = true;
         }
 
     } while ( 0 );
@@ -274,6 +283,19 @@ void* host_update_master_tpm( void *io_pArgs )
         // Log config entries to TPM - needs to be after mutex_unlock
         err = tpmLogConfigEntries(systemTpms.tpm[TPM_MASTER_INDEX]);
     }
+
+    TRACUCOMP( g_trac_trustedboot,
+               EXIT_MRK"host_update_master_tpm() - "
+               "Master A:%d F:%d I:%d",
+               systemTpms.tpm[TPM_MASTER_INDEX].available,
+               systemTpms.tpm[TPM_MASTER_INDEX].failed,
+               systemTpms.tpm[TPM_MASTER_INDEX].initAttempted);
+    TRACUCOMP( g_trac_trustedboot,
+               EXIT_MRK"host_update_master_tpm() - "
+               "Backup A:%d F:%d I:%d",
+               systemTpms.tpm[TPM_BACKUP_INDEX].available,
+               systemTpms.tpm[TPM_BACKUP_INDEX].failed,
+               systemTpms.tpm[TPM_BACKUP_INDEX].initAttempted);
 
     TRACDCOMP( g_trac_trustedboot,
                EXIT_MRK"host_update_master_tpm() - %s",
@@ -483,6 +505,27 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget & io_target)
             break;
         }
 
+        // TPM Required
+        memset(l_digest, 0, sizeof(uint64_t));
+        bool l_tpmRequired = isTpmRequired();
+        l_digest[0] = static_cast<uint8_t>(l_tpmRequired);
+        l_err = pcrExtend(PCR_1, l_digest, sizeof(l_tpmRequired),
+                          "Tpm Required");
+        if (l_err)
+        {
+            break;
+        }
+
+        // HW Key Hash
+        sha2_hash_t l_hw_key_hash;
+        SECUREBOOT::getHwHashKeys(l_hw_key_hash);
+        l_err = pcrExtend(PCR_1, l_hw_key_hash,
+                          sizeof(sha2_hash_t),"HW KEY HASH");
+        if (l_err)
+        {
+            break;
+        }
+
     } while(0);
 
     return l_err;
@@ -559,7 +602,6 @@ void pcrExtendSingleTpm(TpmTarget & io_target,
 
         // Log this failure
         errlCommit(err, SECURE_COMP_ID);
-        err = NULL;
     }
 
     if (unlock)
@@ -598,33 +640,40 @@ errlHndl_t tpmVerifyFunctionalTpmExists()
         }
     }
 
-    if (!foundFunctional)
+    if (!foundFunctional && !systemTpms.failedTpmsPosted)
     {
+        systemTpms.failedTpmsPosted = true;
         TRACFCOMP( g_trac_trustedboot,
                    "NO FUNCTIONAL TPM FOUND");
+        if (isTpmRequired())
+        {
+            /*@
+             * @errortype
+             * @reasoncode     RC_TPM_NOFUNCTIONALTPM_FAIL
+             * @severity       ERRL_SEV_UNRECOVERABLE
+             * @moduleid       MOD_TPM_VERIFYFUNCTIONAL
+             * @userdata1      0
+             * @userdata2      0
+             * @devdesc        No functional TPMs exist in the system
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           MOD_TPM_VERIFYFUNCTIONAL,
+                                           RC_TPM_NOFUNCTIONALTPM_FAIL,
+                                           0, 0,
+                                           true /*Add HB SW Callout*/ );
 
-        /*@
-         * @errortype
-         * @reasoncode     RC_TPM_NOFUNCTIONALTPM_FAIL
-         * @severity       ERRL_SEV_UNRECOVERABLE
-         * @moduleid       MOD_TPM_VERIFYFUNCTIONAL
-         * @userdata1      0
-         * @userdata2      0
-         * @devdesc        No functional TPMs exist in the system
-         */
-        err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                       MOD_TPM_VERIFYFUNCTIONAL,
-                                       RC_TPM_NOFUNCTIONALTPM_FAIL,
-                                       0, 0,
-                                       true /*Add HB SW Callout*/ );
-
-        err->collectTrace( SECURE_COMP_NAME );
+            err->collectTrace( SECURE_COMP_NAME );
+        }
+        else
+        {
+            TRACUCOMP( g_trac_trustedboot,
+                       "No functional TPM's found but TPM not Required");
+        }
 
     }
 
     return err;
 }
-
 
 void* tpmDaemon(void* unused)
 {
@@ -659,6 +708,10 @@ void* tpmDaemon(void* unused)
           case TRUSTEDBOOT::MSG_TYPE_SHUTDOWN:
               {
                   shutdownPending = true;
+
+                  // Un-register message queue from the shutdown
+                  INITSERVICE::unregisterShutdownEvent(systemTpms.msgQ);
+
               }
               break;
           case TRUSTEDBOOT::MSG_TYPE_PCREXTEND:
@@ -746,10 +799,25 @@ void* tpmDaemon(void* unused)
             break;
         }
     }
-    // Daemon is shutting down we can't handle any requests after this
-    systemTpms.tpmDaemonShutdown = true;
+
     TRACUCOMP( g_trac_trustedboot, EXIT_MRK "TpmDaemon Thread Terminate");
     return NULL;
 }
+
+bool isTpmRequired()
+{
+
+    TARGETING::Target* pTopLevel = NULL;
+    (void)TARGETING::targetService().getTopLevelTarget(pTopLevel);
+    assert(pTopLevel != NULL, "Unable to get top level target");
+
+    TARGETING::ATTR_TPM_REQUIRED_type tpmRequired =
+        pTopLevel->getAttr<TARGETING::ATTR_TPM_REQUIRED>();
+    TRACFCOMP( g_trac_trustedboot,
+               "Tpm Required: %s",(tpmRequired ? "Yes" : "No"));
+
+    return tpmRequired;
+}
+
 
 } // end TRUSTEDBOOT
