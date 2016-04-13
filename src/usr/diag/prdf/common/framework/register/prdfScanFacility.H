@@ -107,7 +107,15 @@ public:
   SCAN_COMM_REGISTER_CLASS & GetRightShiftRegister(
                         SCAN_COMM_REGISTER_CLASS & i_arg, uint16_t i_amount);
 
-
+  /**
+   * @brief  Get a register for the summary construct
+   * @param  SCAN_COMM_REGISTER_CLASS source
+   * @param  uint16_t i_bit  bit to set if any attentions found in i_arg
+   * @post   Only one instance of the register with this SCR parameter and
+   *         amount will exist
+   */
+  SCAN_COMM_REGISTER_CLASS & GetSummaryRegister(
+                        SCAN_COMM_REGISTER_CLASS & i_arg, uint16_t i_bit);
 
   /**
    * @brief  Get a register that bit-wise ANDs the bitstring of two register
@@ -197,6 +205,7 @@ private:  // Data
   typedef FlyWeightS<NotRegister,50>            NotRegisters;
   typedef FlyWeightS<LeftShiftRegister,10>      LeftShiftRegisters;
   typedef FlyWeightS<RightShiftRegister, 10>    RightShiftRegisters;
+  typedef FlyWeightS<SummaryRegister,10>        SummaryRegisters;
   typedef FlyWeight<ConstantRegister, 10>       ConstantRegisters;
   typedef FlyWeightS<ScomRegisterAccess, 10>    PluginRegisters;
 
@@ -206,6 +215,7 @@ private:  // Data
   OrRegisters           iv_orRegFw;
   NotRegisters          iv_notRegFw;
   LeftShiftRegisters    iv_leftRegFw;
+  SummaryRegisters      iv_sumRegFw;
   RightShiftRegisters   iv_rightRegFw;
   ConstantRegisters     iv_constRegFw;
   PluginRegisters       iv_pluginRegFw;

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2004,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -84,6 +86,82 @@ class NotRegister : public SCAN_COMM_REGISTER_CLASS
 
   private:
     SCAN_COMM_REGISTER_CLASS * iv_child;
+
+    BitStringBuffer * iv_bs;
+    BitStringBuffer iv_iBS;
+};
+
+class SummaryRegister : public SCAN_COMM_REGISTER_CLASS
+{
+  public:
+    SummaryRegister() :
+        SCAN_COMM_REGISTER_CLASS( ), iv_child(NULL), iv_amount(0), iv_iBS(0)
+    {
+        iv_bs = &iv_iBS;
+    }
+
+    SummaryRegister(SCAN_COMM_REGISTER_CLASS & i_arg, uint16_t i_amount) :
+        SCAN_COMM_REGISTER_CLASS( ), iv_child(&i_arg), iv_amount(i_amount),
+        iv_iBS(i_arg.GetBitLength())
+    {
+        iv_bs = &iv_iBS;
+    }
+
+    SummaryRegister & operator=(const SummaryRegister & r)
+    {
+        iv_child = r.iv_child;
+        iv_amount = r.iv_amount;
+        iv_iBS = r.iv_iBS;
+        //iv_bs = r.iv_bs; <-- don't do this!
+        return *this;
+    }
+
+    virtual uint32_t Read() const { return iv_child->Read();  }
+    virtual uint32_t Write()      { return iv_child->Write(); }
+
+    const BIT_STRING_CLASS * GetBitString(
+                    ATTENTION_TYPE i_type = INVALID_ATTENTION_TYPE) const
+    {
+        iv_bs->Clear();
+
+        PRDF::BitString tmp = *iv_child->GetBitString(i_type);
+
+        //if any bits are set in iv_child, then set the iv_amount bit
+        if (0 != tmp.GetSetCount())
+        {
+            iv_bs->Set(0);
+            *iv_bs = *iv_bs >> iv_amount;
+        }
+        return iv_bs;
+    }
+
+    virtual uint16_t GetId() const { return iv_child->GetId(); }
+    virtual void SetId(uint16_t i_id) {}
+
+    bool operator==(const SummaryRegister & r) const
+    { return (r.iv_child == iv_child) && (r.iv_amount == iv_amount); }
+
+    bool operator<(const SummaryRegister & r) const
+    {
+        if (iv_child == r.iv_child)
+            return iv_amount < r.iv_amount;
+        return iv_child < r.iv_child;
+    }
+
+    bool operator>=(const SummaryRegister & r) const
+    {
+        if (iv_child == r.iv_child)
+            return iv_amount >= r.iv_amount;
+        return iv_child >= r.iv_child;
+    }
+
+  protected:
+    BIT_STRING_CLASS & AccessBitString(void) { return iv_iBS; }
+    void SetBitString(const BIT_STRING_CLASS *) {}
+
+  private:
+    SCAN_COMM_REGISTER_CLASS * iv_child;
+    uint16_t iv_amount;
 
     BitStringBuffer * iv_bs;
     BitStringBuffer iv_iBS;

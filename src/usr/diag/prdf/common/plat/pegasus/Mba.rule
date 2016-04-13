@@ -396,77 +396,31 @@ chip Mba
 #       though none of these registers will trigger a special attention. This
 #       should change the hash enough to make a unique signature.
 
-rule tmpMbaFir
+
+rule rMBA
 {
-  CHECK_STOP:  MBAFIR & ~MBAFIR_MASK & ~MBAFIR_ACT0 & ~MBAFIR_ACT1;
-  UNIT_CS:     MBAFIR & ~MBAFIR_MASK & ~MBAFIR_ACT0 & ~MBAFIR_ACT1;
-  RECOVERABLE: MBAFIR & ~MBAFIR_MASK & ~MBAFIR_ACT0 &  MBAFIR_ACT1;
-  SPECIAL:     MBAFIR; # See note above.
+    CHECK_STOP:  summary( 0, MbaFir )       |
+                 summary( 1, MbaSecureFir ) |
+                 summary( 2, MbaDdrPhyFir ) |
+                 summary( 3, MbaCalFir );
+
+    UNIT_CS:     summary( 0, MbaFir )       |
+                 summary( 1, MbaSecureFir ) |
+                 summary( 2, MbaDdrPhyFir ) |
+                 summary( 3, MbaCalFir );
+
+    RECOVERABLE: summary( 0, MbaFir )       |
+                 summary( 1, MbaSecureFir ) |
+                 summary( 2, MbaDdrPhyFir ) |
+                 summary( 3, MbaCalFir );
 };
 
-rule tmpMbaSecureFir
+group gMBA attntype CHECK_STOP, UNIT_CS, RECOVERABLE filter priority( 3 )
 {
-  # NOTE: This secure FIR will only report checkstop attentions.
-  CHECK_STOP: MBASECUREFIR;
-  UNIT_CS:    MBASECUREFIR;
-  SPECIAL:    MBASECUREFIR; # See note above.
-};
-
-rule tmpMbaCalFir
-{
-  CHECK_STOP:  MBACALFIR & ~MBACALFIR_MASK & ~MBACALFIR_ACT0 & ~MBACALFIR_ACT1;
-  UNIT_CS:     MBACALFIR & ~MBACALFIR_MASK & ~MBACALFIR_ACT0 & ~MBACALFIR_ACT1;
-  RECOVERABLE: MBACALFIR & ~MBACALFIR_MASK & ~MBACALFIR_ACT0 &  MBACALFIR_ACT1;
-  SPECIAL:     MBACALFIR; # See note above.
-};
-
-rule tmpMbaDdrPhyFir
-{
-  CHECK_STOP:
-    MBADDRPHYFIR & ~MBADDRPHYFIR_MASK & ~MBADDRPHYFIR_ACT0 & ~MBADDRPHYFIR_ACT1;
-  UNIT_CS:
-    MBADDRPHYFIR & ~MBADDRPHYFIR_MASK & ~MBADDRPHYFIR_ACT0 & ~MBADDRPHYFIR_ACT1;
-  RECOVERABLE:
-    MBADDRPHYFIR & ~MBADDRPHYFIR_MASK & ~MBADDRPHYFIR_ACT0 &  MBADDRPHYFIR_ACT1;
-  SPECIAL:
-    MBADDRPHYFIR; # See note above.
-};
-
-group gMBA attntype CHECK_STOP, RECOVERABLE, UNIT_CS filter singlebit
-{
-    # MbaCalFir analyzed first to check for RCD parity error before potential
-    # side effects in MbaFir
-    (tmpMbaCalFir,    bit( 0| 1| 2| 3| 4| 5| 6| 7| 8| 9|
-                          10|11|12|13|14|15|16|17|18|19|
-                          20|21|22|23|24|25|26|27|28|29|
-                          30|31|32|33|34|35|36|37|38|39|
-                          40|41|42|43|44|45|46|47|48|49|
-                          50|51|52|53|54|55|56|57|58|59|
-                          60|61|62|63 ))               ? analyze(gMbaCalFir);
-
-    (tmpMbaFir,       bit( 0| 1| 2| 3| 4| 5| 6| 7| 8| 9|
-                          10|11|12|13|14|15|16|17|18|19|
-                          20|21|22|23|24|25|26|27|28|29|
-                          30|31|32|33|34|35|36|37|38|39|
-                          40|41|42|43|44|45|46|47|48|49|
-                          50|51|52|53|54|55|56|57|58|59|
-                          60|61|62|63 ))               ? analyze(gMbaFir);
-
-    (tmpMbaSecureFir, bit( 0| 1| 2| 3| 4| 5| 6| 7| 8| 9|
-                          10|11|12|13|14|15|16|17|18|19|
-                          20|21|22|23|24|25|26|27|28|29|
-                          30|31|32|33|34|35|36|37|38|39|
-                          40|41|42|43|44|45|46|47|48|49|
-                          50|51|52|53|54|55|56|57|58|59|
-                          60|61|62|63 ))               ? analyze(gMbaSecureFir);
-
-    (tmpMbaDdrPhyFir, bit( 0| 1| 2| 3| 4| 5| 6| 7| 8| 9|
-                          10|11|12|13|14|15|16|17|18|19|
-                          20|21|22|23|24|25|26|27|28|29|
-                          30|31|32|33|34|35|36|37|38|39|
-                          40|41|42|43|44|45|46|47|48|49|
-                          50|51|52|53|54|55|56|57|58|59|
-                          60|61|62|63 ))               ? analyze(gMbaDdrPhyFir);
+    (rMBA, bit(0)) ? analyze(gMbaFir);
+    (rMBA, bit(1)) ? analyze(gMbaSecureFir);
+    (rMBA, bit(2)) ? analyze(gMbaDdrPhyFir);
+    (rMBA, bit(3)) ? analyze(gMbaCalFir);
 };
 
 ################################################################################
