@@ -256,7 +256,7 @@ extern "C"
                                              (INIT_SWITCH_WAIT_COUNT);
 
         // Write to ADU option reg
-        FAPI_INF("OPTION reg value 0x%016llX", altd_option_reg_data);
+        FAPI_DBG("OPTION reg value 0x%016llX", altd_option_reg_data);
         FAPI_TRY(fapi2::putScom(i_target, PU_ALTD_OPTION_REG, altd_option_reg_data),
                  "Error writing to PU_ALTD_OPTION_REG register");
 
@@ -484,7 +484,7 @@ extern "C"
         }
 
         //This sets everything that should be set for the ALTD_CMD_Register
-        FAPI_INF("CMD reg value 0x%016llX", altd_cmd_reg_data);
+        FAPI_DBG("CMD reg value 0x%016llX", altd_cmd_reg_data);
 
         FAPI_TRY(fapi2::putScom(i_target, PU_ALTD_CMD_REG, altd_cmd_reg_data),
                  "Error writing to ALTD_CMD Register");
