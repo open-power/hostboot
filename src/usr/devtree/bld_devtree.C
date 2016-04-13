@@ -549,8 +549,8 @@ void add_i2c_info( const TARGETING::Target* i_targ,
               status = "ok"; << Opal fills in
               phandle = <0x10000065>; << auto-filled
               linux,phandle = <0x10000065>; << Opal fills in
-              sml-get-allocated-size = <size of buffer allocated for event log>
-              sml-handover = <ptr to event log>
+              linux,sml-size = <size of buffer allocated for event log>
+              linux,sml-base = <ptr to event log>
               }
             */
             dtOffset_t l_tpmNode = i_dt->addNode( l_busNode,
@@ -581,8 +581,8 @@ void add_i2c_info( const TARGETING::Target* i_targ,
             // Placeholders for the tpm log which will be filled in later
             // We store info away so we can look up this devtree node later
             TRUSTEDBOOT::setTpmDevtreeInfo(*tpm, i_xscomAddr, i2cm->scomAddr);
-            i_dt->addPropertyCell32(l_tpmNode, "sml-get-allocated-size", 0);
-            i_dt->addPropertyCell64(l_tpmNode, "sml-handover", 0);
+            i_dt->addPropertyCell32(l_tpmNode, "linux,sml-size", 0);
+            i_dt->addPropertyCell64(l_tpmNode, "linux,sml-base", 0);
 
             // now remove the device we added so we don't add it again
             tpm = l_tpmTarget.erase(tpm);
@@ -1214,7 +1214,7 @@ void add_reserved_mem(devTree * i_dt,
         }
         else
         {
-            cell_count -= sizeof(ranges[0]);
+            cell_count -= sizeof(ranges[0]) / sizeof(uint64_t);
         }
     }
     // add node style occ common node
@@ -1355,10 +1355,10 @@ void load_tpmlog(devTree * i_dt, uint64_t& io_address)
 
             l_propAllocSize = reinterpret_cast<uint32_t*>(
                                           i_dt->findProperty(l_tpmNode,
-                                          "sml-get-allocated-size"));
+                                          "linux,sml-size"));
             l_propAddr = reinterpret_cast<uint64_t*>(
                                      i_dt->findProperty(l_tpmNode,
-                                     "sml-handover"));
+                                     "linux,sml-base"));
 
             if (NULL == l_propAllocSize ||
                 NULL == l_propAddr)
@@ -1695,6 +1695,10 @@ errlHndl_t bld_fdt_reserved_mem(devTree * i_dt,
     uint64_t l_tpmlog_size = 0;
     load_tpmlog(i_dt, l_tpmlog_addr);
     l_tpmlog_size = l_hbrt_addr - l_tpmlog_addr;
+    if (0 == l_tpmlog_size)
+    {
+        l_tpmlog_addr = 0;
+    }
 #endif
 
     uint64_t l_extra_addrs[] = { l_vpd_addr, l_targ_addr, l_hbrt_addr

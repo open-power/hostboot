@@ -61,12 +61,13 @@ class SystemTpms
 public:
     SystemTpms():
         msgQ(msg_q_create()),
-        tpmDaemonShutdown(false)
+        failedTpmsPosted(false)
     { }
 
+    // NOTE: No destructor implemented to destroy msgQ as required for shutdown
 
     msg_q_t   msgQ;        ///< TrustedBootRp message queue
-    bool      tpmDaemonShutdown;  ///< Has the TPM Daemon already been shutdown
+    bool failedTpmsPosted; ///< Have we already posted
     TpmTarget tpm[MAX_SYSTEM_TPMS];
 };
 

@@ -71,6 +71,7 @@ TpmTarget::TpmTarget()
     mutex_init(&tpmMutex);
 
 }
+
 #endif
 
 
@@ -83,8 +84,6 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
     errlHndl_t err = NULL;
 #ifdef CONFIG_TPMDD
     MessageMode mode = MSG_MODE_ASYNC;
-
-    assert(!systemTpms.tpmDaemonShutdown, "TPM Daemon shutdown");
 
     TRACDCOMP( g_trac_trustedboot, ENTER_MRK"pcrExtend()" );
     TRACUCOMP( g_trac_trustedboot,
