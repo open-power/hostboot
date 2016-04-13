@@ -43,16 +43,6 @@ using namespace ERRORLOG;
 
 namespace ATTN
 {
-//@TODO: RTC:149395  Runtime case has workaround
-//       in place using these regs to regenerate.
-//       interrupts. Delete these if not needed.
-const uint64_t MCIFIRACT0     = 0x02011846;
-const uint64_t MCIFIRACT1     = 0x02011847;
-
-const uint64_t MCIFIRMASK     = 0x02011843;
-const uint64_t MCIFIRMASK_AND = 0x02011844;
-const uint64_t MCIFIRMASK_OR  = 0x02011845;
-
 enum
 {
     // interrupts to host bridge -IPOLL MASK
@@ -124,24 +114,9 @@ errlHndl_t ServiceCommon::configureInterrupts(
 
     while(it != procs.end())
     {
-        // set GPIO interrupt type mode - or
-        if(i_mode == UP)
-        {
-            //@TODO: RTC:149395  Shouldn't need this GPIO setting anymore
-            // but need to check MUX setting in bits 0:7 eventually
-            // (Seems FSP related and more interrupt driven)
-
-            //   err = putScom(*it, INTR_TYPE_CONFIG_AND_REG, ~mask);
-        }
-
-        if(err)
-        {
-            break;
-        }
-
         // enable/disable MCSes
-        //@TODO: RTC:149395  Do we need to enable/disable MCS ?
-        //       seems to be related strictly to that GPIO P8 workaround
+        //@TODO: RTC:150944  Do we need to enable/disable MCS ? Doubt it
+        //       Seems to be related strictly to that GPIO P8 workaround
 
 
         #ifndef __HOSTBOOT_RUNTIME
@@ -165,81 +140,7 @@ errlHndl_t ServiceCommon::configureInterrupts(
             break;
         }
 
-        #else  // HOSTBOOT_RUNTIME
-
-        //@TODO: RTC:149395
-        // We had a workaround for centaur/MCS related attns
-        // at runtime. Do we still need for P9?
-        // Kind of think we have to do this and maybe more
-        // since we now support recov/special/local xstop.
-        if (i_mode == UP)
-        {
-            HwasState         l_functional;
-            uint64_t          l_mciAct0 = 0;
-            uint64_t          l_mciAct1 = 0;
-            uint64_t          l_mciBitMask = 0;
-            TargetHandleList  l_mcsList;
-            // Get list of MCS units associated with this proc
-            getTargetService().getMcsList( *it, l_mcsList );
-
-            // We need to set/clear mask bits in the MCIFIRs that
-            // are associated with host attentions.  This should
-            // cause interrupts to re-occur if they had happened
-            // prior to starting the opal-prd application.
-            TargetHandleList::iterator  l_mcsIt = l_mcsList.begin();
-
-            while(l_mcsIt != l_mcsList.end())
-            {
-                // Make sure functional prior to using
-                if (!((*l_mcsIt)->tryGetAttr<ATTR_HWAS_STATE>(l_functional)))
-                {
-                    // Can't tell if functional so skip this MCS
-                    break;
-                }
-
-                if ( !(l_functional.functional) )
-                {
-                    // Not functional MCS so skip it
-                    break;
-                }
-
-                // Read ACTION registers to see if HOST ATTN
-                err = getScom(*l_mcsIt, MCIFIRACT0, l_mciAct0);
-
-                if (NULL == err)
-                {
-                    err = getScom(*l_mcsIt, MCIFIRACT1, l_mciAct1);
-                }
-
-                if (NULL == err)
-                {
-                    // Create bit mask we will use to write to MCIFIR
-                    // (ACT0=1, ACT1=0) indicate bits we want
-                    l_mciBitMask = l_mciAct0 & ~l_mciAct1;
-                    // Set mask bits
-                    err = putScom(*l_mcsIt, MCIFIRMASK_OR, l_mciBitMask);
-                }
-
-                if (NULL == err)
-                {
-                    // Clear mask bits
-                    err = putScom(*l_mcsIt, MCIFIRMASK_AND, ~l_mciBitMask);
-                }
-
-                // Commit any failure we had and move to next MCS unit
-                if (NULL != err)
-                {
-                    errlCommit(err, ATTN_COMP_ID);
-                }
-
-                l_mcsIt++;
-
-            } // end while on MCS units
-
-            l_mcsList.clear();
-        } // end if UP MODE -- enabling
-
-        #endif //__HOSTBOOT_RUNTIME
+        #endif // NOT  __HOSTBOOT_RUNTIME
 
         ++it;
     }

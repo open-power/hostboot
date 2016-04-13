@@ -117,7 +117,6 @@ namespace ATTN_RT
         errlHndl_t err = NULL;
         AttentionList attentions;
         MemOps & memOps = getMemOps();
-        uint64_t l_iprScomData = 0;
 
 
         do
@@ -141,73 +140,18 @@ namespace ATTN_RT
                 break;
             }
 
+            // On P8,
             // For host attentions, clear gpio interrupt type register.
             // If we do not clear gpio register, ipoll status will again
             // get set and we will end up in infinite loop.
 
-            uint64_t hostMask = 0;
-            IPOLL::getCheckbits(HOST_ATTN, hostMask);
+            // For P9,
+            // Host attentions should be coming thru the
+            // normal (IPOLL) Error status reg. Hence, we shouldn't
+            // have to play with the IPR (interrupt presentation register)
+            // which was involved with the gpio/gpin register where
+            // centaur routed its attentions.
 
-            if( i_ipollMask & hostMask)
-            {
-                // After handling attn, check GP1 for more attns
-                // as there could be additional memory units with attns.
-                attentions.clear();
-
-                err = memOps.resolve(proc, attentions);
-
-                if(err)
-                {
-                    ATTN_ERR("RT GP1 Chk:memOps  returned error.HUID:0X%08X ",
-                              get_huid( proc ));
-                    break;
-                }
-
-
-                // Save the IPR if any attns still active on Centaurs
-                if (!attentions.empty())
-                {
-                    err = getScom(proc, INTR_TYPE_LCL_ERR_STATUS_REG,
-                                  l_iprScomData);
-
-                    if(err)
-                    {
-                        ATTN_ERR("RT SaveIPR returned error.HUID:0X%08X ",
-                                  get_huid( proc ));
-                        break;
-                    }
-
-                } // end if any attentions
-
-
-                // Clear the IPR (interrupt presentation register)
-                err = putScom(proc, INTR_TYPE_LCL_ERR_STATUS_AND_REG, 0);
-
-                if(err)
-                {
-                    ATTN_ERR("ATTN_RT::handleAttns putscom failed for "
-                             "RtProc: %llx address:0x%08X", i_proc,
-                              INTR_TYPE_LCL_ERR_STATUS_AND_REG);
-                    break;
-                }
-
-
-                // Restore the IPR if any attns still active in Centaurs
-                if (!attentions.empty())
-                {
-                    err = putScom(proc, INTR_TYPE_LCL_ERR_STATUS_OR_REG,
-                                  l_iprScomData);
-
-                    if(err)
-                    {
-                        ATTN_ERR("RT RestoreIPR returned error.HUID:0X%08X ",
-                                  get_huid( proc ));
-                        break;
-                    }
-
-                } // end if any attentions
-
-            } // end if i_ipollMask & hostMask)
 
         } while(0);
 
