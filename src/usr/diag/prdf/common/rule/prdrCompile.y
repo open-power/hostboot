@@ -129,6 +129,7 @@ using namespace PRDR_COMPILER;
 %token PRDR_BIT_KW
 %token PRDR_OP_LEFTSHIFT
 %token PRDR_OP_RIGHTSHIFT
+%token PRDR_SUMMARY
 
 %token PRDR_ACT_THRESHOLD
 %token PRDR_ACT_ANALYSE
@@ -169,7 +170,7 @@ using namespace PRDR_COMPILER;
 %type <reg> register reglines regline
 %type <reg_mask> register_mask
 %type <chip> chiplines chipline
-%type <expr> ruleexpr ruleexpr_small ruleexpr_shift ruleop1 ruleop2
+%type <expr> ruleexpr ruleexpr_small ruleexpr_shift ruleop1 ruleop2 summary
 %type <expr> bitgroup bitandlist bitorlist
 %type <expr> time_units
 %type <grp> grouplines groupline
@@ -750,6 +751,18 @@ ruleexpr_small: '(' ruleexpr ')'        { $$ = $2; }
     {
         $$ = new ExprBitString(*$1);
         delete $1;
+    }
+        | summary
+    {
+        $$ = $1;
+    }
+;
+
+summary: PRDR_SUMMARY '(' PRDR_INTEGER ',' PRDR_ID ')'
+    {
+        $$ = new ExprOp2(Prdr::SUMMARY, new ExprInt($3, Prdr::INT_SHORT),
+                new ExprRef($5));
+        g_references.push_front(RefPair("r", *$5));
     }
 ;
 

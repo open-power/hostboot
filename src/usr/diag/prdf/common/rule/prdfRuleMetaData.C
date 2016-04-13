@@ -723,6 +723,17 @@ SCAN_COMM_REGISTER_CLASS * RuleMetaData::createVirtualRegister(
             }
             break;
 
+        case Prdr::SUMMARY:
+
+            l_arg[0] = createVirtualRegister(i_vReg->cv_value[1].p, i_data);
+
+            l_tmp32 = i_vReg->cv_value[0].p->cv_value[0].i;
+
+            l_rc =  &i_data.cv_scanFactory.GetSummaryRegister(*l_arg[0],
+                l_tmp32);
+
+            break;
+
     }
 
     return l_rc;

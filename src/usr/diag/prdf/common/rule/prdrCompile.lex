@@ -117,6 +117,7 @@ group       { return PRDR_GROUP; }
 type        { return PRDR_TYPE; }  /* @jl04 a Add this for primary/secondary type.*/
 actionclass { return PRDR_ACTIONCLASS; }
 rule        { return PRDR_RULE; }
+summary     { return PRDR_SUMMARY; }
 
 threshold   { return PRDR_ACT_THRESHOLD; }
 analyse     { return PRDR_ACT_ANALYSE; }

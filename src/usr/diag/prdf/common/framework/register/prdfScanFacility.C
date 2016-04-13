@@ -110,6 +110,16 @@ SCAN_COMM_REGISTER_CLASS &  ScanFacility::GetLeftShiftRegister(
   return iv_leftRegFw.get(r);
 }
 
+//-----------------------------------------------------------------------------
+
+SCAN_COMM_REGISTER_CLASS &  ScanFacility::GetSummaryRegister(
+                                    SCAN_COMM_REGISTER_CLASS & i_arg,
+                                     uint16_t i_bit )
+{
+  SummaryRegister r(i_arg, i_bit);
+  return iv_sumRegFw.get(r);
+}
+
 //------------------------------------------------------------------------------
 
 SCAN_COMM_REGISTER_CLASS &  ScanFacility::GetRightShiftRegister(

@@ -338,6 +338,7 @@ void ReadExpr(UtilStream & i_stream, Expr & o_expr)
         case XOR:
         case LSHIFT:
         case RSHIFT:
+        case SUMMARY:
         case ACT_TRY:
             o_expr.cv_value[0].p = new Expr();
             o_expr.cv_deletePtr[0] = true;

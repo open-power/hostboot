@@ -129,6 +129,7 @@ namespace Prdr
         RULE      = 'R',
         GROUP     = 'G',
         ACTION    = 'A',
+        SUMMARY   = 'S',
 
         ATTNLINK  = 'L',
 
