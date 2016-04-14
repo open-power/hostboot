@@ -38,8 +38,7 @@ VPATH += ../fsp
 DEFAULT_PATH = ${.PATH}
 SRCPATH = ${DEFAULT_PATH:M*src*}
 
-build_all: cp_hbfiles
-install_all: inject_ecc build_sbe_partitions build_pnor_images
+build_all: cp_hbfiles inject_ecc build_sbe_partitions build_pnor_images
 
 #Some useful search paths
 HBFW_OBJPATH = ${.PATH:M*obj*}
@@ -62,11 +61,6 @@ BASE_W_HEADER_IMAGE = hostboot.header.bin
 BASE_W_HEADER_ECC_IMAGE = hostboot.header.bin.ecc
 BASE_ECC_IMAGE = hostboot.bin.ecc
 BASE_SHA_IMAGE = hostboot.sha.bin
-EXT_PAD_IMAGE = hostboot_extended.bin.pad
-EXT_ECC_IMAGE = hostboot_extended.bin.ecc
-EXT_ECC_HEADER_IMAGE = hostboot_extended.header.bin.ecc
-EXT_SHA_IMAGE = hostboot_extended.sha.bin
-EXT_HEADER_IMAGE = hostboot_extended.header.bin
 TEMP_IMAGE = hostboot.temp.bin
 TESTDATA = hbtestdata.bin
 TESTDATA_ECC = hbtestdata.bin.ecc
@@ -84,13 +78,10 @@ SIGN_PREFIX_PARAMS=-flag 0x80000000 -hka ${DEV_KEY_DIR}/hw_key_a -hkb ${DEV_KEY_
 SIGN_BUILD_PARAMS=-skp ${DEV_KEY_DIR}/sw_key_a
 ALL_HB_IMAGES = ${BASE_IMAGES} \
                 ${BASE_W_HEADER_IMAGE} \
-                ${BASE_ECC_IMAGE} ${EXT_ECC_IMAGE} \
+                ${BASE_ECC_IMAGE}\
                 ${BASE_W_HEADER_ECC_IMAGE} ${BASE_SHA_IMAGE}\
                 ${HBRT_SHA_IMAGE} \
                 ${HBRT_HEADER_IMAGE} ${HBRT_ECC_HEADER_IMAGE} \
-                ${EXT_PAD_IMAGE} \
-                ${EXT_SHA_IMAGE} ${EXT_HEADER_IMAGE} \
-                ${EXT_ECC_HEADER_IMAGE} \
                 ${TESTDATA} ${TESTDATA_ECC} \
                 ${HBEL_ECC_IMAGE} ${GUARD_ECC_IMAGE} ${GLOBAL_ECC_IMAGE} \
                 ${DJVPD_ECC_IMAGE} ${MVPD_ECC_IMAGE} ${CVPD_ECC_IMAGE} \
@@ -114,26 +105,9 @@ cp_hbfiles: .SPECTARG
 	sha512sum ${HBRT_IMAGE} | awk '{print $$1}' | xxd -pr -r >> ${HBRT_SHA_IMAGE}
 	dd if=${HBRT_SHA_IMAGE} of=${TEMP_IMAGE} ibs=4k conv=sync
 	cat ${HBRT_IMAGE} >> ${TEMP_IMAGE}
-	# HBRT partition size w/o ECC = 2MB (2048K)
-	dd if=${TEMP_IMAGE} of=${HBRT_HEADER_IMAGE} ibs=2048K conv=sync
+	# HBRT partition
+	dd if=${TEMP_IMAGE} of=${HBRT_HEADER_IMAGE} ibs=3072K conv=sync
 	ecc --inject ${HBRT_HEADER_IMAGE} --output ${HBRT_ECC_HEADER_IMAGE} --p8
-	# Add version header w/ HBI sha hash
-	echo -en VERSION\\0 > ${EXT_SHA_IMAGE}
-	sha512sum ${EXT_IMAGE} | awk '{print $$1}' | xxd -pr -r >> ${EXT_SHA_IMAGE}
-	dd if=${EXT_SHA_IMAGE} of=${TEMP_IMAGE} ibs=4k conv=sync
-	cat ${EXT_IMAGE} >> ${TEMP_IMAGE}
-	# HBI partition size w/o ECC = 5MB (5120K)
-	# If "--test" flag set do not pad to ibs=5120k, as the test HBI images is
-	# possibly larger than parition size and does not need to be fully padded.
-	# Size adjustments made in buildpnor.pl
-	.if(${TARGET_TEST})
-		dd if=${TEMP_IMAGE} of=${EXT_HEADER_IMAGE} ibs=4k conv=sync
-	.else
-		dd if=${TEMP_IMAGE} of=${EXT_HEADER_IMAGE} ibs=5120k conv=sync
-	.endif
-	ecc --inject ${EXT_HEADER_IMAGE} --output ${EXT_ECC_HEADER_IMAGE} --p8
-	dd if=${EXT_IMAGE} of=${EXT_PAD_IMAGE} ibs=4k count=1280 conv=sync
-	ecc --inject ${EXT_PAD_IMAGE} --output ${EXT_ECC_IMAGE} --p8
 
 	# Test signed container, SIGNING_DIR set by env variable
 	.if(${SECUREBOOT} && ${SIGNING_DIR})
@@ -143,7 +117,6 @@ cp_hbfiles: .SPECTARG
 		${SIGNING_DIR}/build -good -if ${SECUREBOOT_HEADER} -of ${SECUREBOOT_SIGNED_CONTAINER} -bin ${TEMP_IMAGE} ${SIGN_BUILD_PARAMS}
 	.endif
 
-	# Pad and add ECC to other partitions that do not need headers
 	# create data for a test partition in pnor
 	dd if=/dev/urandom of=${TESTDATA} count=1 bs=32K
 	ecc --inject ${TESTDATA} --output ${TESTDATA_ECC} --p8
@@ -245,7 +218,7 @@ PNOR_BUILD_SCRIPT = ${buildpnor.pl:P}
 #so need to use tryinclude for now.
 .tryinclude <${.PATH:Ffips_pnor.mk}>
 
-HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_W_HEADER_ECC_IMAGE},HBI=${EXT_ECC_HEADER_IMAGE},HBRT=${HBRT_ECC_HEADER_IMAGE},TEST=${TESTDATA_ECC},TESTRO=${TESTDATA_ECC},HBEL=${HBEL_ECC_IMAGE},GUARD=${GUARD_ECC_IMAGE},GLOBAL=${GLOBAL_ECC_IMAGE},PAYLOAD=${PAYLOAD_ECC_IMAGE},CVPD=${CVPD_ECC_IMAGE},MVPD=${MVPD_ECC_IMAGE},DJVPD=${DJVPD_ECC_IMAGE}
+HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_W_HEADER_ECC_IMAGE},HBI=${EXT_IMAGE},HBRT=${HBRT_ECC_HEADER_IMAGE},TEST=${TESTDATA_ECC},TESTRO=${TESTDATA_ECC},HBEL=${HBEL_ECC_IMAGE},GUARD=${GUARD_ECC_IMAGE},GLOBAL=${GLOBAL_ECC_IMAGE},PAYLOAD=${PAYLOAD_ECC_IMAGE},CVPD=${CVPD_ECC_IMAGE},MVPD=${MVPD_ECC_IMAGE},DJVPD=${DJVPD_ECC_IMAGE}
 
 
 HBFW_OBJPATH = ${.PATH:M*obj*}
@@ -334,12 +307,13 @@ BUILD_SPECIFIC_IMAGE: .SPECTARG ${IMAGE_TARGET}
 	#@echo BINARIES ${IMAGE_BINS}
 	#@echo BIN_OPTION ${IMAGE_BIN_OPTION}
 
-
+# @TODO RTC:155374 remove --refactor-supported
 ${IMAGE_TARGET}: ${IMAGE_LAYOUT} ${IMAGE_BINS} ${PNOR_BUILD_SCRIPT}
 	.if(${PNOR} == ${IMAGE_TARGET} || ${PNOR} == "")
 		${PNOR_BUILD_SCRIPT} --pnorOutBin ${IMAGE_TARGET} \
 			${TARGET_TEST:b--test} --pnorLayout ${IMAGE_LAYOUT} \
-			${IMAGE_BIN_OPTION} --fpartCmd "fpart" --fcpCmd "fcp"
+			${IMAGE_BIN_OPTION} --fpartCmd "fpart" --fcpCmd "fcp" \
+			--binDir ${PWD} --refactor-supported
 	.endif
 .endif
 
@@ -361,6 +335,5 @@ update_images_for_sandbox: inject_ecc build_sbe_partitions build_pnor_images
 	${FLASH_IMG:@image@${baseimg:!cd ${FLASH_DEST}; cp -f ${.PATH:F${image}} ${image};!e}@}
 	#Copy pnor images to flash dir
 	${PNOR_IMG_INFO:@image@${pnorimg:!cd ${FLASH_DEST}; if [ "${PNOR}" == "${image:s/:/ /g:xs/ .*//}" ] || [ "${PNOR}" == "" ]; then cp -f ${.PATH:F${image:s/:/ /g:xs/ .*//}} ${image:s/:/ /g:xs/ .*//}; fi !e}@}
-
 .endif
 

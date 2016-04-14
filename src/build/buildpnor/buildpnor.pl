@@ -35,6 +35,16 @@ use strict;
 use XML::Simple;
 use Data::Dumper;
 use File::Basename;
+################################################################################
+# Be explicit with POSIX
+# Everything is exported by default (with a handful of exceptions). This is an
+# unfortunate backwards compatibility feature and its use is strongly discouraged.
+# You should either prevent the exporting (by saying use POSIX (); , as usual)
+# and then use fully qualified names (e.g. POSIX::SEEK_END ), or give an explicit
+# import list. If you do neither and opt for the default (as in use POSIX; ),
+# you will import hundreds and hundreds of symbols into your namespace.
+################################################################################
+use POSIX ();
 
 # Digest::SHA1 module is now Digest::SHA in newer version of perl.  Need to
 # do the below eval blocks to support both modules.
@@ -63,11 +73,14 @@ my $programName = File::Basename::basename $0;
 my %pnorLayout;
 my %PhysicalOffsets;
 my %binFiles;
+my %finalBinFiles=();
 my $pnorLayoutFile;
 my $pnorBinName = "";
 my $tocVersion = 0x1;
 my $g_TOCEyeCatch = "part";
 my $testRun = 0;
+# @TODO RTC:155374 remove refactor supported
+my $refactor_supported = 0;
 my $g_fpartCmd = "";
 my $g_fcpCmd = "";
 my %sidelessSecFilled = ();
@@ -76,6 +89,7 @@ my %SideOptions = (
         B => "B",
         sideless => "sideless",
     );
+my $bin_dir;
 use constant PAGE_SIZE => 4096;
 
 if ($#ARGV < 0) {
@@ -116,6 +130,13 @@ for (my $i=0; $i < $#ARGV + 1; $i++)
     elsif($ARGV[$i] =~ /--test/) {
         $testRun = 1;
     }
+    elsif($ARGV[$i] =~ /--binDir/) {
+        $bin_dir = $ARGV[++$i];
+    }
+    # @TODO RTC:155374 remove refactor supported
+    elsif($ARGV[$i] =~ /--refactor-supported/) {
+        $refactor_supported = 1;
+    }
     else {
         traceErr("Unrecognized Input: $ARGV[$i]");
         exit 1;
@@ -132,6 +153,9 @@ if (-e $pnorBinName)
     unlink $pnorBinName or warn "Could not unlink $pnorBinName: $!";
 }
 
+my $image_target = basename($pnorBinName);
+$image_target =~ s/.pnor//;
+
 #Load PNOR Layout XML file
 loadPnorLayout($pnorLayoutFile, \%pnorLayout, \%PhysicalOffsets);
 
@@ -139,9 +163,16 @@ loadPnorLayout($pnorLayoutFile, \%pnorLayout, \%PhysicalOffsets);
 verifyFilesExist(\%pnorLayout, \%binFiles);
 
 #Perform any data integrity manipulation (ECC, shaw-hash, etc)
-robustifyImgs(\%pnorLayout, \%binFiles);
-
-checkSpaceConstraints(\%pnorLayout, \%binFiles);
+# @TODO RTC:155374 remove this check
+if ($refactor_supported)
+{
+    manipulateImages(\%pnorLayout, \%binFiles, \%finalBinFiles);
+    checkSpaceConstraints(\%pnorLayout, \%finalBinFiles);
+}
+else
+{
+    checkSpaceConstraints(\%pnorLayout, \%binFiles);
+}
 trace(1, "Done checkSpaceConstraints");
 
 # Create all Partition Tables at each TOC offset
@@ -176,8 +207,17 @@ foreach my $sideId ( keys %{$pnorLayout{metadata}{sides}} )
 {
     my $tocOffset = $pnorLayout{metadata}{sides}{$sideId}{toc}{primary};
 
-    fillPnorImage($pnorBinName, \%pnorLayout, \%binFiles, $sideId,
-                        $tocOffset);
+    # @TODO RTC:155374 remove this check
+    if ($refactor_supported)
+    {
+        fillPnorImage($pnorBinName, \%pnorLayout, \%finalBinFiles, $sideId,
+                            $tocOffset);
+    }
+    else
+    {
+        fillPnorImage($pnorBinName, \%pnorLayout, \%binFiles, $sideId,
+                            $tocOffset);
+    }
 }
 
 exit 0;
@@ -597,18 +637,140 @@ sub addTOCInfo
         $sideShift = $sideShift + $numOfTOCs;
     }
 }
+
 ################################################################################
-# robustifyImgs - Perform any ECC or ShawHash manipulations
+# manipulateImages - Perform any ECC/padding/sha/signing manipulations
 ################################################################################
-sub robustifyImgs
+sub manipulateImages
 {
-    my ($i_pnorLayoutRef, $i_binFiles) = @_;
+    my ($i_pnorLayoutRef, $i_binFiles, $o_finalBinFiles) = @_;
     my $this_func = (caller(0))[3];
 
-    #@TODO: ECC Correction
-    #@TODO: maybe a little SHA hashing?
+    my %sectionHash = %{$$i_pnorLayoutRef{sections}};
+    trace(1, "manipulateImages");
+
+    my %tempImages = (
+        HDR_PHASE => "$bin_dir/$image_target.temp.hdr.bin",
+        TEMP_SHA_IMG => "$bin_dir/$image_target.temp.sha.bin",
+        PAD_PHASE => "$bin_dir/$image_target.temp.pad.bin",
+        ECC_PHASE => "$bin_dir/$image_target.temp.bin.ecc"
+    );
+
+    # @TODO RTC:155374 Remove when all partitions supported by secureboot
+    # Partitions that are now handled in this script. Some partitions are still
+    # handled in their respective makefiles(FSP) scripts(OP). Eventually this
+    # structure should not be needed.
+    my %supportedPartitions = (
+        HBI => 1,
+    );
+
+    foreach my $key ( keys %sectionHash)
+    {
+        my $eyeCatch = $sectionHash{$key}{eyeCatch};
+        my $size = $sectionHash{$key}{physicalRegionSize};
+        my $bin_file = "";
+        my $final_bin_file = "$bin_dir/$eyeCatch.$image_target.bin";
+        if(exists $$i_binFiles{$eyeCatch})
+        {
+            $bin_file = $$i_binFiles{$eyeCatch};
+        }
+
+        # @TODO RTC:155374 Remove after all partitions supported
+        if (exists $supportedPartitions{$eyeCatch})
+        {
+            # FSP workaround to keep original bin names
+            my $fsp_file = $bin_file;
+            my $fsp_prefix = "";
+            # Header Phase
+            if( ($sectionHash{$key}{sha512Version} eq "yes") )
+            {
+                $fsp_prefix.=".header";
+                run_command("env echo -en VERSION\\\\0 > $tempImages{TEMP_SHA_IMG}");
+                run_command("sha512sum $bin_file | awk \'{print \$1}\' | xxd -pr -r >> $tempImages{TEMP_SHA_IMG}");
+                run_command("dd if=$tempImages{TEMP_SHA_IMG} of=$tempImages{HDR_PHASE} ibs=4k conv=sync");
+                run_command("cat $bin_file >> $tempImages{HDR_PHASE}");
+            }
+            elsif( ($sectionHash{$key}{sha512perEC} eq "yes") )
+            {
+                # Placeholder for sha512perEC partitions
+            }
+            else
+            {
+                run_command("cp $bin_file $tempImages{HDR_PHASE}");
+            }
+
+
+            # Padding Phase
+            if ($sectionHash{$key}{ecc} eq "yes")
+            {
+                $size = page_aligned_size_wo_ecc($size);
+            }
+
+            if ($eyeCatch eq "HBI" && $testRun)
+            {
+                # If "--test" flag set do not pad as the test HBI images is
+                # possibly larger than parition size and does not need to be
+                # fully padded. Size adjustments made in checkSpaceConstraints
+                run_command("dd if=$tempImages{HDR_PHASE} of=$tempImages{PAD_PHASE} ibs=4k conv=sync");
+            }
+            else
+            {
+                run_command("dd if=$tempImages{HDR_PHASE} of=$tempImages{PAD_PHASE} ibs=$size conv=sync");
+            }
+
+            # Create .header.bin file for FSP
+            $fsp_file =~ s/.bin/$fsp_prefix.bin/;
+            run_command("cp $tempImages{PAD_PHASE} $fsp_file");
+
+            # ECC Phase
+            if( ($sectionHash{$key}{ecc} eq "yes") )
+            {
+                run_command("ecc --inject $tempImages{PAD_PHASE} --output $tempImages{ECC_PHASE} --p8");
+                # Create .bin.ecc file for FSP
+                run_command("cp $tempImages{ECC_PHASE} $fsp_file.ecc");
+            }
+            else
+            {
+                run_command("cp $tempImages{PAD_PHASE} $tempImages{ECC_PHASE}");
+            }
+
+            # Compression phase
+            if( ($sectionHash{$key}{compressed}{algorithm} eq "xz"))
+            {
+                # Placeholder for compression partitions
+            }
+
+            # Move content to final bin filename
+            run_command("cp $tempImages{ECC_PHASE} $final_bin_file");
+            $$o_finalBinFiles{$eyeCatch} = $final_bin_file;
+        }
+        else
+        {
+            $$o_finalBinFiles{$eyeCatch} = $bin_file;
+        }
+
+    }
+
+    # Clean up temp images
+    foreach my $image (keys %tempImages)
+    {
+        system("rm -f $tempImages{$image}");
+        die $? if ($?);
+    }
 
     return 0;
+}
+
+################################################################################
+# page_aligned_size_wo_ecc : Size of partition without ECC, rounded down to
+#                            nearest multiple of PAGE_SIZE.
+################################################################################
+sub page_aligned_size_wo_ecc
+{
+    my ($size) = @_;
+
+    die "Size must be at least (9/8)*PAGE_SIZE" if ($size < ((9/8)*PAGE_SIZE));
+    return POSIX::floor((($size * 8) / 9) / PAGE_SIZE) * PAGE_SIZE;
 }
 
 ################################################################################
@@ -694,7 +856,7 @@ sub checkSpaceConstraints
         my $layoutKey = findLayoutKeyByEyeCatch($key, \%$i_pnorLayoutRef);
         if( $layoutKey == -1)
         {
-            die "ERROR: $this_func: entry not found in PNOR layout for file $$i_binFiles{$key}, under eyecatcher $key" if($?);
+            die "ERROR: $this_func: entry not found in PNOR layout for file $$i_binFiles{$key}, under eyecatcher $key";
         }
 
         my $eyeCatch = $sectionHash{$layoutKey}{eyeCatch};
@@ -945,6 +1107,17 @@ sub getOtherSide
     return $other_side;
 }
 
+################################################################################
+# run_command - First print, and then run a system command, erroring out if the
+#               command does not complete successfully
+################################################################################
+sub run_command
+{
+    my $command = shift;
+    trace(1, "$command");
+    my $rc = system($command);
+    die "Error running command: $command. Nonzero return code of ($rc) returned.\n" if ($rc !=0);
+}
 
 ################################################################################
 # print usage instructions
