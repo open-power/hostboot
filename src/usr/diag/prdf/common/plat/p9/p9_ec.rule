@@ -112,7 +112,6 @@ chip p9_ec
     {
         name        "P9 EC target COREFIR";
         scomaddr    0x20010a40;
-        reset       (&, 0x20010a41);
         mask        (|, 0x20010a45);
         capture     group default;
     };
@@ -129,7 +128,6 @@ chip p9_ec
         name        "P9 EC target COREFIR ACT0";
         scomaddr    0x20010a46;
         capture     group default;
-        capture     req nonzero("COREFIR");
     };
 
     register COREFIR_ACT1
@@ -137,7 +135,14 @@ chip p9_ec
         name        "P9 EC target COREFIR ACT1";
         scomaddr    0x20010a47;
         capture     group default;
-        capture     req nonzero("COREFIR");
+    };
+
+    register COREFIR_WOF
+    {
+        name        "P9 EC target COREFIR WOF";
+        scomaddr    0x20010a48;
+        reset       (&, 0x20010a41);
+        capture     group default;
     };
 
 };
@@ -524,7 +529,7 @@ rule rCOREFIR
   CHECK_STOP:
     COREFIR & ~COREFIR_MASK & ~COREFIR_ACT0 & ~COREFIR_ACT1;
   RECOVERABLE:
-    COREFIR & ~COREFIR_MASK & ~COREFIR_ACT0 &  COREFIR_ACT1;
+    COREFIR_WOF & ~COREFIR_MASK & ~COREFIR_ACT0 &  COREFIR_ACT1;
 };
 
 group gCOREFIR filter singlebit
