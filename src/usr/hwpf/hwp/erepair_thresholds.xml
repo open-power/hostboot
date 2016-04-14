@@ -5,7 +5,9 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- COPYRIGHT International Business Machines Corp. 2013,2014              -->
+<!-- Contributors Listed Below - COPYRIGHT 2013,2016                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
 <!--                                                                        -->
 <!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
 <!-- you may not use this file except in compliance with the License.       -->
@@ -96,6 +98,18 @@
         Firmware specified eRepair threshold limit of Memory Bus for MNFG usage
         This value must be initialized by platforms by reading the value
         from System Model - dmi_threshold_mnfg of system_policy_table
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CLEAR_EREPAIR_VPD_DATA</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      This attribute indicates to clear the vpd data or not and it will be used
+      only for testing purpose.
+      1 - represents to clear and 0 - represents not to clear.
     </description>
     <valueType>uint8</valueType>
     <platInit/>

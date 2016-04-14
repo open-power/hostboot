@@ -1813,4 +1813,25 @@ ID for the sensor number returned with the elog. -->
   <hbOnly/>
 </attribute>
 
+<attribute>
+    <id>CLEAR_EREPAIR_VPD_DATA</id>
+    <description>
+      This attribute indicates to clear the vpd data or not and it will be used
+      only for testing purpose.
+      1 - represents to clear and 0 - represents not to clear.
+    </description>
+    <simpleType>
+      <uint8_t>
+            <default>0x0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_CLEAR_EREPAIR_VPD_DATA</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <hbOnly/>
+</attribute>
+
 </attributes>

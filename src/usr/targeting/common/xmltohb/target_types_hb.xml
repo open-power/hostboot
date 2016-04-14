@@ -85,6 +85,7 @@
     <attribute><id>WOF_FREQUENCY_UPLIFT</id></attribute>
     <attribute><id>WOF_REGULATOR_EFFICIENCIES</id></attribute>
     <attribute><id>NEST_CAPABLE_FREQUENCIES_SYS</id></attribute>
+    <attribute><id>CLEAR_EREPAIR_VPD_DATA</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>

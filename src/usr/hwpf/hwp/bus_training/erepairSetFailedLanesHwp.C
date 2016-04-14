@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: erepairSetFailedLanesHwp.C,v 1.5 2015/02/23 16:46:15 bilicon Exp $
+// $Id: erepairSetFailedLanesHwp.C,v 1.6 2016/04/22 19:13:07 dcrowell Exp $
 /**
  *  @file erepairSetFailedLanesHwp.C
  *
@@ -709,13 +709,33 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
 
         l_vpdDataPtr  = l_vpdPtr;
         l_repairCnt   = 0;
+        fapi::ReturnCode l_rc;
+        uint8_t l_clearVpdState = 0;
+        l_rc = FAPI_ATTR_GET(ATTR_CLEAR_EREPAIR_VPD_DATA,
+                        NULL,
+                        l_clearVpdState);
+
+        if(l_rc)
+        {
+            FAPI_ERR("invalidateNonMatchingFailLanes: Unable to read attribute"
+                     "ATTR_CLEAR_EREPAIR_VPD_DATA");
+            l_clearVpdState = 0;
+        }
+
 
         // Pick each faillane for copying into buffer
         for(l_it  = i_failLanes.begin();
             l_it != i_failLanes.end();
             l_it++, (l_vpdDataPtr += l_repairDataSz))
         {
-            l_repairLane  = *l_it;
+            if ( l_clearVpdState)
+            {
+                l_repairLane  = 0;
+            }
+            else
+            {
+                l_repairLane = *l_it;
+            }
             l_overWrite   = false;
             l_vpdWritePtr = NULL;
 
@@ -932,7 +952,15 @@ ReturnCode updateRepairLanesToBuf(const Target               &i_tgtHandle,
         } // end of for(failLanes)
 
         // Update the eRepair count
-        l_vpdHeadPtr->numRecords = l_newNumRepairs;
+        if (l_clearVpdState)
+        {
+            l_vpdHeadPtr->numRecords = 0;
+        }
+        else
+        {
+            l_vpdHeadPtr->numRecords = l_newNumRepairs;
+        }
+        FAPI_IMP(" Setting l_vpdHeadPtr->numRecords = 0", l_repairLane);
 
     }while(0);
 

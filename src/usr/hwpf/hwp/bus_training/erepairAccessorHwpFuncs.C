@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: erepairAccessorHwpFuncs.C,v 1.2 2014/04/29 11:58:49 bilicon Exp $
+// $Id: erepairAccessorHwpFuncs.C,v 1.3 2016/04/22 19:13:08 dcrowell Exp $
 /**
  *  @file erepairAccessorHwpFuncs.C
  *
@@ -1050,6 +1052,19 @@ void invalidateNonMatchingFailLanes(std::vector<uint8_t> &io_endp1_txFaillanes,
     std::sort(io_endp1_txFaillanes.begin(), io_endp1_txFaillanes.end());
     std::sort(io_endp2_rxFaillanes.begin(), io_endp2_rxFaillanes.end());
 
+    uint8_t l_clearVpdState = 0;
+    fapi::ReturnCode l_rc;
+    l_rc = FAPI_ATTR_GET(ATTR_CLEAR_EREPAIR_VPD_DATA,
+                        NULL,
+                        l_clearVpdState);
+
+    if(l_rc)
+    {
+        FAPI_ERR("invalidateNonMatchingFailLanes: Unable to read attribute"
+                     "ATTR_CLEAR_EREPAIR_VPD_DATA");
+        l_clearVpdState = 0;
+    }
+
     // Start with drive side fail lanes and check for matching lanes
     // on the recieve side
     l_itTmp = io_endp2_rxFaillanes.begin();
@@ -1063,7 +1078,8 @@ void invalidateNonMatchingFailLanes(std::vector<uint8_t> &io_endp1_txFaillanes,
 
         // If matching fail lane is not found on the receive side,
         // invalidate the drive side fail lane number
-        if((l_it == io_endp2_rxFaillanes.end()) || (*l_it > *l_itDrv))
+        if(l_clearVpdState || (l_it == io_endp2_rxFaillanes.end()) || 
+                        (*l_it > *l_itDrv))
         {
             *l_itDrv = INVALID_FAIL_LANE_NUMBER;
             o_invalidFails_inTx_Ofendp1 = true;
@@ -1090,7 +1106,8 @@ void invalidateNonMatchingFailLanes(std::vector<uint8_t> &io_endp1_txFaillanes,
 
         // If matching lane is not found on the driver side,
         // invalidate the receive side fail lane number
-        if((l_it == io_endp1_txFaillanes.end()) || (*l_it > *l_itRcv))
+        if(l_clearVpdState || (l_it == io_endp1_txFaillanes.end()) ||
+             (*l_it > *l_itRcv))
         {
             *l_itRcv = INVALID_FAIL_LANE_NUMBER;
             o_invalidFails_inRx_Ofendp2 = true;
