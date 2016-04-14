@@ -165,7 +165,8 @@ namespace INTR
 
                 IPI_USR_PRIO        = 0x2,   //<! IPI priority from USR space
 
-                LSI_INTERRUPT = 0xC000,
+                LSI_SOURCE_MASK = 0xFFFF,
+                LSI_INTERRUPT   = 0xC000,
 
                 //PSI Host Bridge Constants
                 PSI_BRIDGE_BAR_SCOM_ADDR = 0x0501290A,
