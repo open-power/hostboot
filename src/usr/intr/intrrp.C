@@ -180,6 +180,7 @@ errlHndl_t IntrRp::_init()
         //  so unmask those interrupts
         l_err = unmaskInterruptSource(LSI_PSU);
 
+
     } while(0);
 
     return l_err;
@@ -590,7 +591,7 @@ void IntrRp::msgHandler()
                     msg_q_t l_msgQ = reinterpret_cast<msg_q_t>(msg->data[0]);
                     uint64_t l_type = msg->data[1];
                     LSIvalue_t l_intr_type = static_cast<LSIvalue_t>
-                      (l_type & 0xFFFF);
+                      (l_type & LSI_SOURCE_MASK);
 
                     errlHndl_t err = registerInterruptXISR(l_msgQ, l_type >> 32,
                                                                    l_intr_type);
@@ -620,7 +621,30 @@ void IntrRp::msgHandler()
                 }
                 break;
             case MSG_INTR_UNREGISTER_MSGQ:
-                //TODO RTC 150260 add functionality
+                {
+                    TRACDCOMP(g_trac_intr,
+                           "INTR remove registration of interrupt type = 0x%lx",
+                            msg->data[0]);
+                    LSIvalue_t l_type = static_cast<LSIvalue_t>(msg->data[0]);
+                    LSIvalue_t l_intr_type = static_cast<LSIvalue_t>
+                      (l_type & LSI_SOURCE_MASK);
+
+                    // Mask the interrupt source prior to unregistering
+                    errlHndl_t err = maskInterruptSource(l_intr_type);
+                    if(err)
+                    {
+                        TRACFCOMP(g_trac_intr,
+                             "IntrRp::msgHandler MSG_INTR_UNREGISTER_MSGQ error"
+                             " masking interrupt type: %lx",
+                             l_intr_type);
+                        errlCommit(err,INTR_COMP_ID);
+                    }
+
+                    // Unregister for this source and return rc in response
+                    msg_q_t msgQ = unregisterInterruptXISR(l_type);
+                    msg->data[1] = reinterpret_cast<uint64_t>(msgQ);
+                    msg_respond(iv_msgQ, msg);
+                }
                 break;
             case MSG_INTR_ENABLE:
                 {
@@ -1163,6 +1187,8 @@ msg_q_t IntrRp::unregisterInterruptXISR(ext_intr_t i_xisr)
     Registry_t::iterator r = iv_registry.find(i_xisr);
     if(r != iv_registry.end())
     {
+        TRACFCOMP(g_trac_intr,INFO_MRK "Removing interrupt listener: %lx",
+                     i_xisr);
         msgQ = r->second.msgQ;
         iv_registry.erase(r);
     }
