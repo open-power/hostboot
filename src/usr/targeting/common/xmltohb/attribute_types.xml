@@ -20244,7 +20244,7 @@ DEPRECATED!!!!
   <simpleType>
     <uint8_t></uint8_t>
   </simpleType>
-  <persistency>non-volatile</persistency>
+  <persistency>volatile-zeroed</persistency>
   <writeable/>
   <readable/>
   <hwpfToHbAttrMap>
@@ -20261,7 +20261,7 @@ DEPRECATED!!!!
     FALSE = 0x0, TRUE = 0x1
   </description>
   <simpleType><uint8_t></uint8_t></simpleType>
-  <persistency>non-volatile</persistency>
+  <persistency>volatile-zeroed</persistency>
   <writeable/>
   <readable/>
   <hwpfToHbAttrMap>
@@ -21574,6 +21574,185 @@ DEPRECATED!!!!
     <readable/>
     <hwpfToHbAttrMap>
       <id>ATTR_POUNDV_BUCKET_NUM</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_FABRIC_CORE_FLOOR_RATIO</id>
+    <description>
+      Processor SMP core floor/nest frequency ratio
+    </description>
+    <simpleType>
+      <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_PROC_FABRIC_CORE_FLOOR_RATIO</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_FABRIC_CORE_CEILING_RATIO</id>
+    <description>
+      Processor SMP core celing/nest frequency ratio
+    </description>
+    <simpleType>
+      <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_PROC_FABRIC_CORE_CEILING_RATIO</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_FABRIC_OPTICS_CONFIG_MODE</id>
+    <description>
+        Per-link optics configuration
+        0 = default = SMP
+        1 = CAPI 2.0
+        2 = NV 2.0
+    </description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>4</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_FABRIC_X_ATTACHED_LINK_ID</id>
+    <description>
+      For each fabric X link on this chip, specifies the link ID of the chip at the
+      receiving end of the link.  Should be considered valid only if corresponding
+      ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG index is true.
+    </description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>7</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_PROC_FABRIC_X_ATTACHED_LINK_ID</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_FABRIC_A_ATTACHED_LINK_ID</id>
+    <description>
+      For each fabric A link on this chip, specifies the link ID of the chip at the
+      receiving end of the link.  Should be considered valid only if corresponding
+      ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG index is true.
+    </description>
+    <simpleType>
+      <uint8_t></uint8_t>
+      <array>4</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_PROC_FABRIC_A_ATTACHED_LINK_ID</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_FABRIC_X_AGGREGATE</id>
+    <description>
+      Indicates if X links on this chip should be configured in aggregate mode.
+      OFF = 0x0,
+      ON = 0x1
+    </description>
+    <simpleType>
+      <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_PROC_FABRIC_X_AGGREGATE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_FABRIC_X_LINK_DELAY</id>
+    <description>
+      Average of local/remote end link delay counter values.
+      Used to designate coherent link in aggregate configurations.
+      Should be considered valid only if corresponding ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG
+      index is true.
+      OFF = 0x0,
+      ON = 0x1
+    </description>
+    <simpleType>
+      <uint32_t></uint32_t>
+      <array>4</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_PROC_FABRIC_X_LINK_DELAY</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_FABRIC_A_AGGREGATE</id>
+    <description>
+      Indicates if A links on this chip should be configured in aggregate mode.
+      OFF = 0x0,
+      ON = 0x1
+    </description>
+    <simpleType>
+      <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_PROC_FABRIC_A_AGGREGATE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>PROC_FABRIC_A_LINK_DELAY</id>
+    <description>
+      Average of local/remote end link delay counter values.
+      Used to designate coherent link in aggregate configurations.
+      Should be considered valid only if corresponding ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG
+      index is true.
+      OFF = 0x0,
+      ON = 0x1
+    </description>
+    <simpleType>
+      <uint32_t></uint32_t>
+      <array>4</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_PROC_FABRIC_A_LINK_DELAY</id>
       <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
