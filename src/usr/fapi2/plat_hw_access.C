@@ -46,6 +46,12 @@
 namespace fapi2
 {
 
+// Bits 7-15 are address portion
+const uint32_t CFAM_ADDRESS_MASK = 0x1FF;
+
+// Bits 0-6 are engine offset
+const uint32_t CFAM_ENGINE_OFFSET = 0xFE00;
+
 //------------------------------------------------------------------------------
 // HW Communication Functions to be implemented at the platform layer.
 //------------------------------------------------------------------------------
@@ -347,7 +353,8 @@ ReturnCode platGetCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
         // Address needs to be multiply by 4 because register addresses are
         //  word offsets but the FSI addresses are byte offsets.
         // However, we need to preserve the engine's offset in the top byte
-        uint64_t l_addr = ((i_address & 0x003F) << 2) | (i_address & 0xFF00);
+        uint64_t l_addr = ((i_address & CFAM_ADDRESS_MASK) << 2) |
+            (i_address & CFAM_ENGINE_OFFSET);
         size_t l_size = sizeof(uint32_t);
         l_err = deviceRead(l_myChipTarget,
                            &o_data(),
@@ -424,7 +431,8 @@ ReturnCode platPutCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
         // Address needs to be multiply by 4 because register addresses are word
         // offsets but the FSI addresses are byte offsets
         // However, we need to preserve the engine's offset in the top byte
-        uint64_t l_addr = ((i_address & 0x003F) << 2) | (i_address & 0xFF00);
+        uint64_t l_addr = ((i_address & CFAM_ADDRESS_MASK) << 2) |
+            (i_address & CFAM_ENGINE_OFFSET);
         size_t l_size = sizeof(uint32_t);
         uint32_t l_data  = static_cast<uint32_t>(i_data);
         l_err = deviceWrite(l_myChipTarget,
@@ -556,7 +564,8 @@ ReturnCode platModifyCfamRegister(const Target<TARGET_TYPE_ALL>& i_target,
         // Address needs to be multiply by 4 because register addresses are word
         // offsets but the FSI addresses are byte offsets.
         // However, we need to preserve the engine's offset of 0x0C00 and 0x1000
-        uint64_t l_addr = ((i_address & 0x003F) << 2) | (i_address & 0xFF00);
+        uint64_t l_addr = ((i_address & CFAM_ADDRESS_MASK) << 2) |
+            (i_address & CFAM_ENGINE_OFFSET);
         buffer<uint32_t> l_data = 0;
         size_t l_size = sizeof(uint32_t);
         l_err = deviceRead(l_myChipTarget,
