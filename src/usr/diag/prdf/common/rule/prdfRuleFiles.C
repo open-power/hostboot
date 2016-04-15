@@ -28,21 +28,30 @@
 
 /**
  * @file prdfRuleFiles.C
- * @brief Contains the name of each chip's associated  file.
+ * @brief Contains the name of each chip's associated .prf file.
  */
 
 namespace PRDF
 {
-    // Pegasus P8 Chip
-    const char * MuranoVeniceProc = "MuranoVeniceProc";
-    const char * NaplesProc = "NaplesProc";
-    const char * Ex   = "Ex";
-    const char * Mcs  = "Mcs";
+    // P9 Chip
+    const char * p9_nimbus  = "p9_nimbus";
+    const char * p9_eq      = "p9_eq";
+    const char * p9_ex      = "p9_ex";
+    const char * p9_ec      = "p9_ec";
+    const char * p9_capp    = "p9_capp";
+    const char * p9_pec     = "p9_pec";
+    const char * p9_phb     = "p9_phb";
+    const char * p9_xbus    = "p9_xbus";
+    const char * p9_obus    = "p9_obus";
+    const char * p9_mcbist  = "p9_mcbist";
+    const char * p9_mcs     = "p9_mcs";
+    const char * p9_mca     = "p9_mca";
 
     // Pegasus Centaur Chip
-    const char * Membuf = "Membuf";
-    const char * Mba    = "Mba";
+//    const char * Membuf     = "Membuf";
+//    const char * Mba        = "Mba";
 
 } // end namespace PRDF
 
 #endif
+

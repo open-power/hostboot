@@ -34,15 +34,23 @@
 namespace PRDF
 {
 
-    // Pegasus P8 Chip
-    extern const char * MuranoVeniceProc;
-    extern const char * NaplesProc;
-    extern const char * Ex;
-    extern const char * Mcs;
+    // P9 Chip
+    extern const char * p9_nimbus;
+    extern const char * p9_eq;
+    extern const char * p9_ex;
+    extern const char * p9_ec;
+    extern const char * p9_capp;
+    extern const char * p9_pec;
+    extern const char * p9_phb;
+    extern const char * p9_xbus;
+    extern const char * p9_obus;
+    extern const char * p9_mcbist;
+    extern const char * p9_mcs;
+    extern const char * p9_mca;
 
-    // Pegasus Centaur Chip
-    extern const char * Membuf;
-    extern const char * Mba;
+    // Centaur Chip
+//    extern const char * Membuf;
+//    extern const char * Mba;
 
 } // end namespace PRDF
 

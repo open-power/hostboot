@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfPegasusConfigurator.H $ */
+/* $Source: src/usr/diag/prdf/common/plat/prdfPlatConfigurator.H $        */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,32 +23,33 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef prdfPegasusConfigurator_H
-#define prdfPegasusConfigurator_H
+#ifndef __prdfPlatConfigurator_H
+#define __prdfPlatConfigurator_H
 
-/** @file  prdfPegasusConfigurator.H
- *  @brief Builds the PRD system model for Pegasus (P8 based systems).
+/** @file  prdfPlatConfigurator.H
+ *  @brief Builds the PRD system model.
  */
+
+#include <vector>
+#include <map>
 
 #include <iipConfigurator.h>
 #include <iipCallAttnResolution.h> // For CallAttnResolution
 #include <prdfPllDomain.H>
+#include <prdfRuleChipDomain.H>
 
 namespace PRDF
 {
 
-class RuleChipDomain;
-typedef std::vector< PllDomain  *> PllDomainList;
-typedef std::vector< CHIP_CLASS *> PllChipList;
-/** @brief PRD configurator for Pegasus (P8 systems) */
-class PegasusConfigurator : public Configurator
+/** @brief PRD configurator */
+class PlatConfigurator : public Configurator
 {
   public:
 
     /**
      * @brief Constructor
      */
-    PegasusConfigurator() :
+    PlatConfigurator() :
         Configurator( RuleChipDomain::TOTAL_CHIPS,
                       RuleChipDomain::TOTAL_DOMAINS )
     {}
@@ -58,7 +59,7 @@ class PegasusConfigurator : public Configurator
      * @note  This configurator does not delete the objects it created during
      *        build(); that is the responsibility of the system object.
      */
-    ~PegasusConfigurator() {}
+    ~PlatConfigurator() {}
 
     /**
      * @brief  Create the PRD system object, all chip instances, and all domain
@@ -67,60 +68,59 @@ class PegasusConfigurator : public Configurator
      * @note   The caller of this function owns the responsibility of deleting
      *         the system object created.
      */
-    virtual errlHndl_t   build();
+    virtual errlHndl_t build();
+
+  private: // data
+
+    typedef std::map<uint32_t, PllDomain *> PllDomainMap;
+    typedef std::vector<PllDomainMap> PllDomainMapList;
 
   private: // functions
 
     /** @brief Copy not allowed. */
-    PegasusConfigurator( const PegasusConfigurator & right );
+    PlatConfigurator( const PlatConfigurator & right );
 
     /** @brief Assignment not allowed. */
-    const PegasusConfigurator & operator=( const PegasusConfigurator & right );
+    const PlatConfigurator & operator=( const PlatConfigurator & right );
 
     /**
-     * @brief Will add all chips of a given type to a domain.
-     * @parm    i_type    The specified target type.
-     * @parm    io_domain The associated domain.
-     * @parm    io_pllDomains The associated PLL domain (optional for some)
-     * @parm    io_pllDomains2 The associated PLL domain (optional for some)
-     * @return  error log handle
+     * @brief  Adds all chips of a given target type to a domain.
+     * @parm   i_type       The specified target type.
+     * @parm   io_domain    The associated domain.
+     * @parm   io_pllDmnLst The PLL domain map list.
+     * @return An error log on error, otherwise NULL.
      */
     errlHndl_t addDomainChips( TARGETING::TYPE  i_type,
-                            RuleChipDomain * io_domain,
-                            PllDomainList  * io_pllDomains = NULL,
-                            PllDomainList  * io_pllDomains2 = NULL);
+                               RuleChipDomain * io_domain,
+                               PllDomainMapList & io_pllDmnLst );
 
     /**
-     *  @brief  Add chip to its Pll Domain.
-     *  @param i_domainId          - Domain Id (CLOCK_DOMAIN_FAB/_MEMBUF)
-     *  @param i_fabricPllDomains  - List of Pll Domains
-     *  @param i_chip              - Pointer to chip.
-     *  @param i_pTarget           - chip target.
-     *  @param i_scanFac           - Scan Facility.
-     *  @param i_resFac            - Resolution Factory.
+     * @brief Adds a chip to its Pll Domain.
+     * @param i_domainId   PLL Domain ID (CLOCK_DOMAIN_FAB/_MEMBUF)
+     * @param io_pllDmnMap PLL domain map for this clock type.
+     * @param i_chip       Chip to add.
+     * @param i_trgt       Chip's target handle.
+     * @param i_type       Clock type.
+     * @param i_scanFac    Scan Facility.
+     * @param i_resFac     Resolution Factory.
      */
-    void addChipsToPllDomain(
-         DOMAIN_ID                    i_domainId,
-         PllDomainList              * io_fabricPllDomains,
-         RuleChip                   * i_chip,
-         TARGETING::TargetHandle_t    i_pTarget,
-         ScanFacility               & i_scanFac,
-         ResolutionFactory          & i_resFac);
+    void addChipToPllDomain( DOMAIN_ID                   i_domainId,
+                             PllDomainMap              & io_pllDmnMap,
+                             RuleChip                  * i_chip,
+                             TARGETING::TargetHandle_t   i_trgt,
+                             TARGETING::TYPE             i_type,
+                             ScanFacility              & i_scanFac,
+                             ResolutionFactory         & i_resFac );
 
-  /**
-   *  @brief Add Pll Domains to the System.
-   *  @param i_fabricPllDomains  - List of Fabric Pll Domains
-   *  @param i_pciePllDomains    - List of Pcie Pll Domains
-   *  @param i_membPllDomains    - List of Membuf Pll Domains
-   */
-  void addPllDomainsToSystem(
-        PllDomainList  & i_fabricPllDomains,
-        PllDomainList  & i_pciePllDomains,
-        PllDomainList  & i_membPllDomains );
+    /**
+     *  @brief Add PLL all of the PLL domains to System.
+     *  @param i_list List of PLL domain maps to add to System.
+     */
+    void addPllDomainsToSystem( const PllDomainMapList & i_list );
 
   private: // data
 
-    static CallAttnResolution noAttnResolution;
+    static CallAttnResolution cv_noAttnResolution;
 };
 
 } // end namespace PRDF

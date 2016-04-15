@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/pegasus/prdfPllDomain.C $       */
+/* $Source: src/usr/diag/prdf/common/plat/p9/prdfP9PllDomain.C $          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -27,27 +27,29 @@
  *  @brief Definition of PllDomain class
  */
 
+#include <prdfPllDomain.H>
+
 #include <CcAutoDeletePointer.h>
 #include <iipscr.h>
 #include <iipsdbug.h>
 #include <iipServiceDataCollector.h>
 #include <prdfErrorSignature.H>
-#include <prdfPllDomain.H>
 #include <iipResolution.h>
 #include <prdfPlatServices.H>
 #include <prdfPluginDef.H>
 #include <prdfGlobal.H>
 #include <iipSystem.h>
 #include <UtilHash.H>
-#include <prdfP8PllPcie.H>
-#include <prdfP8ProcMbCommonExtraSig.H>
+
+//#include <prdfP8PllPcie.H> TODO RTC 136052
+//#include <prdfP8ProcMbCommonExtraSig.H> TODO RTC 136052
 
 using namespace TARGETING;
 
 namespace PRDF
 {
 
-using namespace PLL;
+//using namespace PLL; TODO RTC 136052
 using namespace PlatServices;
 
 //------------------------------------------------------------------------------
@@ -321,7 +323,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
     }
     // Set Signature
     serviceData.service_data->GetErrorSignature()->setChipId(chip()[0]->GetId());
-    serviceData.service_data->SetErrorSig( PRDFSIG_PLL_ERROR );
+//    serviceData.service_data->SetErrorSig( PRDFSIG_PLL_ERROR ); TODO RTC 136052
 
 #ifndef __HOSTBOOT_MODULE
     // Set dump flag dg09a
