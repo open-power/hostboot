@@ -896,4 +896,47 @@
     <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_POUNDV_BUCKET_NUM_OVERRIDE</id>
+    <targetType>TARGET_TYPE_EQ</targetType>
+    <description>
+        1 if override of poundv bucket num is available.
+        0 if override is unavailable.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_POUNDV_BUCKET_NUM</id>
+      <targetType>TARGET_TYPE_EQ</targetType>
+      <description>
+          Attribute in place to allow override of which POUNDV
+          bucket to use to set power management data.
+          1 = Bucket A
+          2 = Bucket B
+          3 = Bucket C
+          4 = Bucket D
+          5 = Bucket E
+          6 = Bucket F
+      </description>
+      <valueType>uint8</valueType>
+      <platInit/>
+</attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+      <id>ATTR_POUNDV_BUCKET_DATA</id>
+      <targetType>TARGET_TYPE_EQ</targetType>
+      <description>
+          Power Management data for Quad targets. Stored as an array of bytes.
+          The data is read directly from VPD and stored in this attribute without
+          being altered.
+          NOTE: you may need to handle correcting endianness
+          if you are using this attribute.
+      </description>
+      <valueType>uint8</valueType>
+      <array>51</array>
+      <writeable/>
+      <platInit/>
+  </attribute>
 </attributes>

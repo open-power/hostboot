@@ -69,6 +69,9 @@
     <attribute>
         <id>ATTR_VCS_AVSBUS_RAIL</id>
     </attribute>
+    <attribute>
+        <id>ATTR_POUNDV_BUCKET_DATA</id>
+    </attribute>
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->
