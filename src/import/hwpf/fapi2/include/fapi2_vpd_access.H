@@ -60,9 +60,9 @@ class VPDInfo<TARGET_TYPE_MCS>
 
 
 /// @brief Return a blob of memory VPD data associated with the input target
-/// @param[in] i_target, a valid fapi2 target
-/// @param[in] io_vpd_info, fapi2::VPDInfo class that specifies which piece of data to return
-/// @param[out] o_blob, the blob of raw data from the vpd
+/// @param[in] i_target     a valid fapi2 target
+/// @param[in] io_vpd_info  fapi2::VPDInfo class that specifies which piece of data to return
+/// @param[out] o_blob      the blob of raw data from the vpd
 /// @return FAPI2_RC_SUCCESS if there's no problem
 /// @note passing nullptr for o_blob will return the size of the keyword
 ///

@@ -17,7 +17,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
-/// @file spd_access.H
+/// @file fapi2_spd_access.H
 ///
 /// @brief Defines the SPD functions that platform must implement
 ///
@@ -34,9 +34,9 @@ namespace fapi2
 {
 ///
 /// @brief Return a blob of SPD data from a DIMM
-/// @param[in] i_target, a DIMM target representing the DIMM in question
-/// @param[out] o_blob, the blob of data from the DIMM - raw
-/// @param[out] o_size, o_size, the size of the blob
+/// @param[in] i_target  a DIMM target representing the DIMM in question
+/// @param[out] o_blob   the blob of data from the DIMM - raw
+/// @param[out] s        the size of the blob
 /// @return FAPI2_RC_SUCCESS if there's no problem
 /// @note passing nullptr for o_blob will return the size of the blob
 ///   size_t s;
