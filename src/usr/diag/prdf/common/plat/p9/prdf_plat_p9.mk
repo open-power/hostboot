@@ -37,4 +37,6 @@ prd_incpath += ${PRD_SRC_PATH}/common/plat/p9
 # Object files common to both FSP and Hostboot
 ################################################################################
 
+prd_obj += prdfP9Configurator.o
+prd_obj += prdfP9PllDomain.o
 

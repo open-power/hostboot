@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -68,24 +68,30 @@ namespace PRDF
 
 enum DOMAIN_ID
 {
-  UKNOWN_DOMAIN = 0,
+    UKNOWN_DOMAIN = 0,
 
-  FABRIC_DOMAIN = 0x71,
-  EX_DOMAIN     = 0x72,
-  MCS_DOMAIN    = 0x73,
-  MEMBUF_DOMAIN = 0x74,
-  MBA_DOMAIN    = 0x75,
-  XBUS_DOMAIN   = 0x76,
-  ABUS_DOMAIN   = 0x77,
-  NV_DOMAIN     = 0x78,
+    PROC_DOMAIN   = 0x71,
+    EQ_DOMAIN     = 0x72,
+    EX_DOMAIN     = 0x73,
+    EC_DOMAIN     = 0x74,
+    CAPP_DOMAIN   = 0x75,
+    PEC_DOMAIN    = 0x76,
+    PHB_DOMAIN    = 0x77,
+    XBUS_DOMAIN   = 0x78,
+    OBUS_DOMAIN   = 0x79,
+    MCBIST_DOMAIN = 0x7A,
+    MCS_DOMAIN    = 0x7B,
+    MCA_DOMAIN    = 0x7C,
 
-  CLOCK_DOMAIN_FAB          = 0x90,
-  CLOCK_DOMAIN_MCS          = 0x91,
-  CLOCK_DOMAIN_MEMBUF       = 0x92,
-  CLOCK_DOMAIN_IO           = 0x93,
-  PCI_OSC_SWITCH_DOMAIN     = 0x94,
+    MEMBUF_DOMAIN = 0x80,
+    MBA_DOMAIN    = 0x81,
 
-  END_DOMAIN_ID
+    CLOCK_DOMAIN_FAB          = 0x90,
+    CLOCK_DOMAIN_MCS          = 0x91,
+    CLOCK_DOMAIN_MEMBUF       = 0x92,
+    CLOCK_DOMAIN_IO           = 0x93,
+
+    END_DOMAIN_ID
 };
 
 } // end namespace PRDF

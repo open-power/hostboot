@@ -48,7 +48,7 @@
 #include <prdfSdcFileControl.H>
 #endif
 
-//#include <prdfPegasusConfigurator.H> TODO: RTC 145445
+#include <prdfPlatConfigurator.H>
 
 namespace PRDF
 {
@@ -119,9 +119,8 @@ errlHndl_t noLock_initialize()
         // Perform platform specific initialization.
         initPlatSpecific();
 
-/* TODO: RTC 145445
         CcAutoDeletePointer<Configurator> configuratorPtr
-                                          ( new PRDF::PegasusConfigurator() );
+                                          ( new PRDF::PlatConfigurator() );
 
         errlHndl_t l_errBuild = configuratorPtr->build();//build object model
         if( NULL != l_errBuild )
@@ -143,7 +142,6 @@ errlHndl_t noLock_initialize()
             systemPtr->Initialize(); // Hardware initialization
             g_initialized = true;
         }
-*/
 
         // Flush rule table cache since objects are all built.
         Prdr::LoadChipCache::flushCache();

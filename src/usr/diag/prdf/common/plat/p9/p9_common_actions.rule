@@ -25,9 +25,11 @@
 
 ################################################################################
 # This file is intended to create a common set of actionclasses for all rule
-# files. These actionclasses will be created for all rule files, regardless if
-# they are actually used. Please limit this file to relatively common actions.
-# Otherwise, it will cause unwanted code size and memory usage.
+# files.
+#
+# NOTE: THESE ACTIONCLASSES WILL BE CREATED FOR ALL RULE FILES, REGARDLESS IF
+#       THEY ARE ACTUALLY USED. PLEASE LIMIT THIS FILE TO RELATIVELY COMMON
+#       ACTIONS. OTHERWISE, IT WILL CAUSE UNWANTED CODE BLOAT AND MEMORY USAGE.
 #
 # Simply add the following line at the top the actionclass section of each rule
 # file:
@@ -69,28 +71,10 @@ actionclass thresholdPll
     threshold( field(2 / 5 min) );
 };
 
-/** Threshold of 2 per day */
-actionclass threshold2pday
-{
-    threshold( field(2 / day) );
-};
-
 /** Threshold of 32 per day */
 actionclass threshold32pday
 {
     threshold( field(32 / day) );
-};
-
-/** Threshold of 5 per hour */
-actionclass threshold5phour
-{
-    threshold( field(5 / hour) );
-};
-
-/** Threshold of 5 per day */
-actionclass threshold5pday
-{
-    threshold( field(5 / day) );
 };
 
 ################################################################################
@@ -101,18 +85,18 @@ actionclass threshold5pday
  * Threshold 32/day (field) and 1 (mnfg). Do not predictively callout on
  * threshold in the field, instead just mask.
  */
-actionclass thresholdAndMask
-{
-    threshold32pday;
-    funccall("ClearServiceCallFlag");
-};
-
-/** Callout self with "Threshold and Mask" policy. */
-actionclass thresholdAndMask_self
-{
-    calloutSelfMed;
-    thresholdAndMask;
-};
+#actionclass thresholdAndMask
+#{
+#    threshold32pday;
+#    funccall("ClearServiceCallFlag");
+#};
+#
+#/** Callout self with "Threshold and Mask" policy. */
+#actionclass thresholdAndMask_self
+#{
+#    calloutSelfMed;
+#    thresholdAndMask;
+#};
 
 ################################################################################
 #                               Special Flags                                  #
@@ -153,120 +137,19 @@ actionclass calloutSelfLowNoGard
 #                           Callouts with thresholds                           #
 ################################################################################
 
-actionclass calloutParentProcMedThr1
-{
-    callout(connected(TYPE_PROC),MRU_MED);
-    threshold1;
-};
 
-actionclass calloutParentProcHighThr1
-{
-    callout(connected(TYPE_PROC),MRU_HIGH );
-    threshold1;
-};
-
-actionclass callout2ndLvlMedThr1
-{
-    callout2ndLvlMed;
-    threshold1;
-};
-
-actionclass SelfMedThr1
+actionclass calloutSelfMedThr1
 {
     calloutSelfMed;
     threshold1;
 };
 
-actionclass SelfMedThr1NoGard
-{
-    calloutSelfMedNoGard;
-    threshold1;
-};
-
-actionclass SelfHighThr1
-{
-    calloutSelfHigh;
-    threshold1;
-};
-
-actionclass SelfMedThr1UE
-{
-    SelfMedThr1;
-    SUEGenerationPoint;
-};
-
-actionclass SelfHighThr1UE
-{
-    SelfHighThr1;
-    SUEGenerationPoint;
-};
-
-actionclass SelfLowLevel2MedThr1
-{
-    calloutSelfLow;
-    callout2ndLvlMed;
-    threshold1;
-};
-
-actionclass SelfMedThr32PerDay
+actionclass calloutSelfMedThr32PerDay
 {
     calloutSelfMed;
     threshold32pday;
 };
 
-actionclass SelfMedThr5PerHour
-{
-    calloutSelfMed;
-    threshold5phour;
-};
-
-actionclass SelfHighThr5PerHour
-{
-    calloutSelfHigh;
-    threshold5phour;
-};
-
-actionclass SelfHighThr32PerDay
-{
-    calloutSelfHigh;
-    threshold32pday;
-};
-
-actionclass calloutSelfAndLevel2MedThr1
-{
-    calloutSelfMed;
-    callout2ndLvlMed;
-    threshold1;
-};
-
-
-/** Callout 2nd level support of afer 32 events per day */
-actionclass callout2ndLvlMedThr32
-{
-    callout2ndLvlMed;
-    threshold32pday;
-};
-
-/** Callout 2nd Level support on first occurrence */
-actionclass callout2ndLvlMedThr1
-{
-    callout2ndLvlMed;
-    threshold1;
-};
-
-/** Callout 2nd Level Medium,  set SUE generation point*/
-actionclass callout2ndLvlMedThr1UE
-{
-    callout2ndLvlMedThr1;
-    SUEGenerationPoint;
-};
-
-/** Callout 2nd Level Medium, initiate SH dump */
-actionclass callout2ndLvlMedThr1dumpSh
-{
-    callout2ndLvlMedThr1;
-    dumpSH;
-};
 ################################################################################
 #                               Dump Types                                     #
 ################################################################################
@@ -283,23 +166,6 @@ actionclass dumpSW
     dump(DUMP_CONTENT_SW);
 };
 
-################################################################################
-#                              Callout sec lvl support with dump               #
-################################################################################
-
-/** callout second lvl on first instance, initiaite SH dump */
-actionclass callout2ndLvlDumpSh
-{
-    callout2ndLvlMedThr1;
-    dumpSH;
-};
-
-/** Callout 2nd Level and dump SW */
-actionclass callout2ndLvlDumpSw
-{
-    callout2ndLvlMedThr1;
-    dumpSW;
-};
 ################################################################################
 #                               Default callouts                               #
 ################################################################################
