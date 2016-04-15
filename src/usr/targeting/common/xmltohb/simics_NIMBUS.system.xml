@@ -282,6 +282,14 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-16</default>
     </attribute>
+    <attribute>
+        <id>POUNDV_BUCKET_NUM</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>POUNDV_BUCKET_NUM_OVERRIDE</id>
+        <default>0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -314,6 +322,17 @@
     <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-17</default>
+    </attribute>
+<!--TODO RTC:144077  POUNDV ATTRs are temporarily set to 1 for testing
+	purposes if we have a way to do attr overrides during standalone simics
+    then we can get rid of these poundv attributes for this EQ-->
+    <attribute>
+        <id>POUNDV_BUCKET_NUM</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>POUNDV_BUCKET_NUM_OVERRIDE</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 

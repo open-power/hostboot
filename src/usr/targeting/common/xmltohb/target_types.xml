@@ -2253,6 +2253,8 @@
     </attribute>
     <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
     <attribute><id>SCRATCH_UINT8_1</id><default>5</default></attribute>
+    <attribute><id>POUNDV_BUCKET_NUM</id><default>0</default></attribute>
+    <attribute><id>POUNDV_BUCKET_NUM_OVERRIDE</id><default>0</default></attribute>
     <attribute><id>PARENT_PERVASIVE</id></attribute>
 </targetType>
 

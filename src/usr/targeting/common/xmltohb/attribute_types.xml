@@ -21534,4 +21534,48 @@ DEPRECATED!!!!
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+  <id>POUNDV_BUCKET_NUM_OVERRIDE</id>
+  <description>
+      1 if override of poundv bucket num is available.
+      0 if override is unavailable.
+  </description>
+  <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+  </simpleType>
+<!--TODO RTC:144077  This should be volatile-zeroed but cannot test
+    without a way to do attribute overrides so we have to edit the system xml
+    to have one of the EQ's have override set-->
+  <persistency>volatile</persistency>
+  <readable/>
+  <hwpfToHbAttrMap>
+      <id>ATTR_POUNDV_BUCKET_NUM_OVERRIDE</id>
+      <macro>DIRECT</macro>
+  </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>POUNDV_BUCKET_NUM</id>
+    <description>
+        Attribute in place to allow override of which POUNDV
+        bucket to use to set power management data.
+    </description>
+    <simpleType>
+      <uint64_t>
+        <default>0</default>
+      </uint64_t>
+    </simpleType>
+<!--TODO RTC:144077  This should be volatile-zeroed but cannot test
+    without a way to do attribute overrides so we have to edit the system xml
+    to have one of the EQ's have override set-->
+    <persistency>volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+      <id>ATTR_POUNDV_BUCKET_NUM</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>
