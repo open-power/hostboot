@@ -383,19 +383,6 @@ class decoder
                 uint16_t& o_value);
 
         ///
-        /// @brief       Decodes DRAM Device Type
-        /// @param[in]   i_target dimm target
-        /// @param[out]  o_value dram device type enumeration
-        /// @return      FAPI2_RC_SUCCESS if okay
-        /// @note        Decodes SPD Byte 2
-        /// @note        Item JC-45-2220.01x
-        /// @note        Page 16
-        /// @note        DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode dram_device_type(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                uint8_t& o_value);
-
-        ///
         /// @brief      Decodes hybrid media field from SPD
         /// @param[in]  i_target
         /// @param[out] o_value
@@ -1156,6 +1143,19 @@ fapi2::ReturnCode rev_additions_level(const fapi2::Target<fapi2::TARGET_TYPE_DIM
 /// @note       DDR4 SPD Document Release 3
 ///
 fapi2::ReturnCode base_module_type(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                   const std::vector<uint8_t>& i_spd_data,
+                                   uint8_t& o_value);
+///
+/// @brief       Decodes DRAM Device Type
+/// @param[in]   i_target dimm target
+/// @param[out]  o_value dram device type enumeration
+/// @return      FAPI2_RC_SUCCESS if okay
+/// @note        Decodes SPD Byte 2
+/// @note        Item JC-45-2220.01x
+/// @note        Page 16
+/// @note        DDR4 SPD Document Release 3
+///
+fapi2::ReturnCode dram_device_type(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                    const std::vector<uint8_t>& i_spd_data,
                                    uint8_t& o_value);
 

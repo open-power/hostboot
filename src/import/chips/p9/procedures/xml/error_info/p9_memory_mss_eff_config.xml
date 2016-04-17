@@ -33,11 +33,26 @@
    <hwpError>
     <rc>RC_MSS_INVALID_TEMP_REF_RANGE</rc>
     <description>
-      Invalid Temperature reference range recieved
+      Invalid Temperature refresh range recieved
       from platform.
     </description>
     <ffdc>TEMP_REF_RANGE</ffdc>
-    <ffdc>ENCODING_REV</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+    </hwpError>
+
+   <hwpError>
+    <rc>RC_MSS_INVALID_FINE_REFRESH_MODE</rc>
+    <description>
+      Invalid fine refresh mode recieved
+      from platform.
+    </description>
+    <ffdc>FINE_REF_MODE</ffdc>
     <callout>
       <target>DIMM_TARGET</target>
       <priority>HIGH</priority>

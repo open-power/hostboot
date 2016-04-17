@@ -372,7 +372,7 @@ inline fapi2::ReturnCode reset_config2( const fapi2::Target<T>& i_target )
     {
         uint8_t l_bl = 0;
 
-        FAPI_TRY( mss::eff_dram_burst_length(i_target, l_bl) );
+        FAPI_TRY( mss::eff_dram_bl(i_target, l_bl) );
         l_data.insertFromRight<TT::CONSEQ_PASS, TT::CONSEQ_PASS_LEN>(
             l_bl == fapi2::ENUM_ATTR_EFF_DRAM_BL_BL8 ? 0b01000 : 0b01111);
     }

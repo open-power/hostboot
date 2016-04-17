@@ -65,6 +65,7 @@ enum constants : std::uint64_t
 class cas_latency
 {
     public:
+        bool iv_dimm_list_empty;
 
         /////////////////////////
         // Public Member Methods

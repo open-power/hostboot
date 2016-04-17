@@ -87,12 +87,12 @@ static fapi2::ReturnCode ddr4_mrs00(const fapi2::Target<TARGET_TYPE_DIMM>& i_tar
     fapi2::buffer<uint8_t> l_cl;
     fapi2::buffer<uint8_t> l_wr;
 
-    FAPI_TRY( mss::eff_dram_burst_length(i_target, l_burst_length) );
-    FAPI_TRY( mss::eff_dram_read_burst_type(i_target, l_read_burst_type) );
-    FAPI_TRY( mss::eff_dram_cas_latency(i_target, l_cas_latency) );
+    FAPI_TRY( mss::eff_dram_bl(i_target, l_burst_length) );
+    FAPI_TRY( mss::eff_dram_rbt(i_target, l_read_burst_type) );
+    FAPI_TRY( mss::eff_dram_cl(i_target, l_cas_latency) );
     FAPI_TRY( mss::eff_dram_dll_reset(i_target, l_dll_reset) );
     FAPI_TRY( mss::eff_dram_tm(i_target, l_test_mode) );
-    FAPI_TRY( mss::eff_dram_write_recovery(i_target, l_write_recovery) );
+    FAPI_TRY( mss::eff_dram_twr(i_target, l_write_recovery) );
 
     FAPI_DBG("MR0 Attributes: BL: 0x%x, RBT: 0x%x, CL: 0x%x(0x%x), TM: 0x%x, DLL_RESET: 0x%x, WR: 0x%x(0x%x)",
              l_burst_length, l_read_burst_type, l_cas_latency, cl_map[l_cas_latency],
@@ -511,7 +511,7 @@ static fapi2::ReturnCode ddr4_mrs04(const fapi2::Target<TARGET_TYPE_DIMM>& i_tar
     static const uint8_t cs_cmd_latency_map[9] = { 0b000, 0, 0, 0b001, 0b010, 0b011, 0b100, 0, 0b101 };
 
     uint8_t l_max_pd_mode = 0;
-    uint8_t l_temp_ref_range = 0;
+    uint8_t l_temp_refresh_range = 0;
     uint8_t l_temp_ref_mode = 0;
     uint8_t l_vref_mon = 0;
     uint8_t l_cs_cmd_latency = 0;
@@ -524,9 +524,9 @@ static fapi2::ReturnCode ddr4_mrs04(const fapi2::Target<TARGET_TYPE_DIMM>& i_tar
     fapi2::buffer<uint8_t> l_cs_cmd_latency_buffer;
 
     FAPI_TRY( mss::eff_max_powerdown_mode(i_target, l_max_pd_mode) );
-    FAPI_TRY( mss::mrw_temp_ref_range(l_temp_ref_range) );
-    FAPI_TRY( mss::eff_temp_ref_mode(i_target, l_temp_ref_mode) );
-    FAPI_TRY( mss::eff_int_vref_mon(i_target, l_vref_mon) );
+    FAPI_TRY( mss::mrw_temp_refresh_range(l_temp_refresh_range) );
+    FAPI_TRY( mss::eff_temp_refresh_mode(i_target, l_temp_ref_mode) );
+    FAPI_TRY( mss::eff_internal_vref_monitor(i_target, l_vref_mon) );
     FAPI_TRY( mss::eff_cs_cmd_latency(i_target, l_cs_cmd_latency) );
     FAPI_TRY( mss::eff_self_ref_abort(i_target, l_ref_abort) );
     FAPI_TRY( mss::eff_rd_preamble_train(i_target, l_rd_pre_train_mode) );
@@ -536,15 +536,15 @@ static fapi2::ReturnCode ddr4_mrs04(const fapi2::Target<TARGET_TYPE_DIMM>& i_tar
 
     l_cs_cmd_latency_buffer = cs_cmd_latency_map[l_cs_cmd_latency];
 
-    FAPI_INF("MR4 rank %d attributes: MAX_PD: 0x%x, TEMP_REF_RANGE: 0x%x, TEMP_REF_MODE: 0x%x "
+    FAPI_INF("MR4 rank %d attributes: MAX_PD: 0x%x, TEMP_REFRESH_RANGE: 0x%x, TEMP_REF_MODE: 0x%x "
              "VREF_MON: 0x%x, CSL: 0x%x(0x%x), REF_ABORT: 0x%x, RD_PTM: 0x%x, RD_PRE: 0x%x, "
              "WR_PRE: 0x%x, PPR: 0x%x", i_rank,
-             l_max_pd_mode, l_temp_ref_range, l_temp_ref_mode, l_vref_mon,
+             l_max_pd_mode, l_temp_refresh_range, l_temp_ref_mode, l_vref_mon,
              l_cs_cmd_latency, uint8_t(l_cs_cmd_latency_buffer), l_ref_abort,
              l_rd_pre_train_mode, l_rd_preamble, l_wr_preamble, l_ppr);
 
     io_inst.arr0.writeBit<A1>(l_max_pd_mode);
-    io_inst.arr0.writeBit<A2>(l_temp_ref_range);
+    io_inst.arr0.writeBit<A2>(l_temp_refresh_range);
     io_inst.arr0.writeBit<A3>(l_temp_ref_mode);
     io_inst.arr0.writeBit<A4>(l_vref_mon);
 
@@ -570,7 +570,7 @@ static fapi2::ReturnCode ddr4_mrs04_decode(const ccs::instruction_t<TARGET_TYPE_
         const uint64_t i_rank)
 {
     uint8_t l_max_pd_mode = i_inst.arr0.getBit<A1>();
-    uint8_t l_temp_ref_range = i_inst.arr0.getBit<A2>();
+    uint8_t l_temp_refresh_range = i_inst.arr0.getBit<A2>();
     uint8_t l_temp_ref_mode = i_inst.arr0.getBit<A3>();
     uint8_t l_vref_mon = i_inst.arr0.getBit<A4>();
 
@@ -583,10 +583,10 @@ static fapi2::ReturnCode ddr4_mrs04_decode(const ccs::instruction_t<TARGET_TYPE_
     uint8_t l_wr_preamble = i_inst.arr0.getBit<A12>();
     uint8_t l_ppr = i_inst.arr0.getBit<A13>();
 
-    FAPI_INF("MR4 rank %d decode: MAX_PD: 0x%x, TEMP_REF_RANGE: 0x%x, TEMP_REF_MODE: 0x%x "
+    FAPI_INF("MR4 rank %d decode: MAX_PD: 0x%x, TEMP_REFRESH_RANGE: 0x%x, TEMP_REF_MODE: 0x%x "
              "VREF_MON: 0x%x, CSL: 0x%x, REF_ABORT: 0x%x, RD_PTM: 0x%x, RD_PRE: 0x%x, "
              "WR_PRE: 0x%x, PPR: 0x%x", i_rank,
-             l_max_pd_mode, l_temp_ref_range, l_temp_ref_mode, l_vref_mon,
+             l_max_pd_mode, l_temp_refresh_range, l_temp_ref_mode, l_vref_mon,
              uint8_t(l_cs_cmd_latency_buffer), l_ref_abort,
              l_rd_pre_train_mode, l_rd_preamble, l_wr_preamble, l_ppr);
 
@@ -726,9 +726,9 @@ static fapi2::ReturnCode ddr4_mrs06(const fapi2::Target<TARGET_TYPE_DIMM>& i_tar
     fapi2::buffer<uint8_t> l_tccd_l_buffer;
     fapi2::buffer<uint8_t> l_vrefdq_train_value_buffer;
 
-    FAPI_TRY( mss::vref_dq_train_value(i_target, l_vrefdq_train_value) );
-    FAPI_TRY( mss::vref_dq_train_range(i_target, l_vrefdq_train_range) );
-    FAPI_TRY( mss::vref_dq_train_enable(i_target, l_vrefdq_train_enable) );
+    FAPI_TRY( mss::eff_vref_dq_train_value(i_target, l_vrefdq_train_value) );
+    FAPI_TRY( mss::eff_vref_dq_train_range(i_target, l_vrefdq_train_range) );
+    FAPI_TRY( mss::eff_vref_dq_train_enable(i_target, l_vrefdq_train_enable) );
     FAPI_TRY( mss::eff_dram_tccd_l(i_target, l_tccd_l) );
 
     l_tccd_l_buffer = tccd_l_map[l_tccd_l];

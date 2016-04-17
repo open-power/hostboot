@@ -40,6 +40,7 @@
 #include <lib/freq/cas_latency.H>
 #include <lib/utils/c_str.H>
 #include <lib/freq/cycle_time.H>
+#include <lib/utils/find.H>
 
 using fapi2::TARGET_TYPE_MCS;
 using fapi2::TARGET_TYPE_MCA;
@@ -56,10 +57,6 @@ extern "C"
     ///
     fapi2::ReturnCode p9_mss_freq( const fapi2::Target<TARGET_TYPE_MCS>& i_target )
     {
-        uint64_t l_tCKmin = 0;
-        uint64_t l_min_dimm_freq = 0;
-        uint64_t l_desired_cas_latency = 0;
-
         // Get cached decoder
         std::map<uint32_t, std::shared_ptr<mss::spd::decoder> > l_factory_caches;
         FAPI_TRY( mss::spd::populate_decoder_caches(i_target, l_factory_caches),
@@ -84,26 +81,38 @@ extern "C"
                      "Failed check for freq_override()");
 
 #endif
+            uint64_t l_min_dimm_freq = 0;
+            uint64_t l_desired_cas_latency = 0;
 
-            // Find CAS latency using JEDEC algorithm
-            l_cas_latency.find_CL(i_target,
-                                  l_desired_cas_latency,
-                                  l_tCKmin);
+            if(!l_cas_latency.iv_dimm_list_empty)
+            {
+                uint64_t l_tCKmin = 0;
 
-            // Find dimm transfer speed from selected tCK
-            l_min_dimm_freq = mss::ps_to_freq(l_tCKmin);
-            FAPI_TRY(mss::select_supported_freq(l_min_dimm_freq),
-                     "Failed select_supported_freq()");
+                // Find CAS latency using JEDEC algorithm
+                l_cas_latency.find_CL(i_target,
+                                      l_desired_cas_latency,
+                                      l_tCKmin);
 
-            // Set attributes
-            FAPI_TRY(mss::set_freq_attrs(i_target, l_min_dimm_freq),
-                     "Failed set_freq_attrs()");
+                // Find dimm transfer speed from selected tCK
+                l_min_dimm_freq = mss::ps_to_freq(l_tCKmin);
 
-            FAPI_TRY(mss::set_CL_attr(i_target, l_desired_cas_latency ),
-                     "Failed set_CL_attr()");
+                FAPI_TRY(mss::select_supported_freq(l_min_dimm_freq),
+                         "Failed select_supported_freq()");
+
+                // TK - RIT PROTECT - NEED TO CHANGE
+                l_min_dimm_freq = 2400;
+
+                // Set attributes
+                FAPI_TRY(mss::set_freq_attrs(i_target, l_min_dimm_freq),
+                         "Failed set_freq_attrs()");
+
+                FAPI_TRY(mss::set_CL_attr(i_target, l_desired_cas_latency ),
+                         "Failed set_CL_attr()");
+            }// end if
 
             FAPI_DBG( "Final Chosen Frequency: %d",  l_min_dimm_freq);
             FAPI_DBG( "Final Chosen CL: %d",  l_desired_cas_latency);
+
         }
 
     fapi_try_exit:

@@ -27,8 +27,6 @@
         </description>
         <valueType>uint32</valueType>
         <platInit/>
-        <odmVisable/>
-        <persistRuntime/>
         <mssAccessorName>mrw_safemode_mem_throttled_n_commands_per_port</mssAccessorName>
     </attribute>
 
@@ -40,8 +38,6 @@
         </description>
         <valueType>uint32</valueType>
         <platInit/>
-        <odmVisable/>
-        <persistRuntime/>
         <mssAccessorName>mrw_safemode_mem_throttled_n_commands_per_slot</mssAccessorName>
     </attribute>
 
@@ -51,7 +47,6 @@
         <description>Machine Readable Workbook Thermal Memory Power Limit</description>
         <valueType>uint32</valueType>
         <platInit/>
-        <odmVisable/>
         <mssAccessorName>mrw_thermal_memory_power_limit</mssAccessorName>
     </attribute>
 
@@ -64,8 +59,6 @@
         </description>
         <valueType>uint8</valueType>
         <platInit/>
-        <odmVisable/>
-        <persistRuntime/>
         <mssAccessorName>mrw_dimm_power_curve_percent_uplift</mssAccessorName>
     </attribute>
 
@@ -78,8 +71,6 @@
         </description>
         <valueType>uint8</valueType>
         <platInit/>
-        <odmVisable/>
-        <persistRuntime/>
         <mssAccessorName>mrw_dimm_power_curve_percent_uplift_idle</mssAccessorName>
     </attribute>
 
@@ -93,8 +84,6 @@
         </description>
         <valueType>uint32</valueType>
         <platInit/>
-        <odmVisable/>
-        <persistRuntime/>
         <mssAccessorName>mrw_mem_m_dram_clocks</mssAccessorName>
     </attribute>
 
@@ -107,8 +96,6 @@
         </description>
         <valueType>uint32</valueType>
         <platInit/>
-        <odmVisable/>
-        <persistRuntime/>
         <mssAccessorName>mrw_max_dram_databus_util</mssAccessorName>
     </attribute>
 
@@ -124,9 +111,6 @@
         </description>
         <valueType>uint8</valueType>
         <platInit/>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <mssAccessorName>mrw_mcs_prefetch_retry_threshold</mssAccessorName>
     </attribute>
 
@@ -137,7 +121,6 @@
         <valueType>uint8</valueType>
         <enum>OFF = 0x00, SLOWEXIT = 0x01, FASTEXIT = 0x02</enum>
         <platInit/>
-        <odmVisable/>
         <mssAccessorName>mrw_power_control_requested</mssAccessorName>
     </attribute>
 
@@ -151,7 +134,6 @@
         <valueType>uint8</valueType>
         <enum>FALSE = 0, TRUE = 1</enum>
         <platInit/>
-        <odmVisable/>
         <mssAccessorName>mrw_vmem_regulator_power_limit_per_dimm_adj_enable</mssAccessorName>
     </attribute>
 
@@ -164,7 +146,6 @@
         </description>
         <valueType>uint8</valueType>
         <platInit/>
-        <odmVisable/>
         <mssAccessorName>mrw_max_number_dimms_possible_per_vmem_regulator</mssAccessorName>
     </attribute>
 
@@ -239,9 +220,8 @@
         <mssAccessorName>mrw_fine_refresh_mode</mssAccessorName>
     </attribute>
 
-
     <attribute>
-        <id>ATTR_MRW_TEMP_REF_RANGE</id>
+        <id>ATTR_MRW_TEMP_REFRESH_RANGE</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
         <description>
           Temp ref range.
@@ -250,8 +230,42 @@
         </description>
         <valueType>uint8</valueType>
         <enum>NORMAL = 0, EXTEND = 1</enum>
-        <writeable/>
-        <mssAccessorName>mrw_temp_ref_range</mssAccessorName>
+        <platInit/>
+        <mssAccessorName>mrw_temp_refresh_range</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MRW_DRAMINIT_RESET_DISABLE</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>A disable switch for resetting the phy delay values at the beginning of calling mss_draminit_training.</description>
+        <valueType>uint8</valueType>
+        <enum>DISABLE = 1, ENABLE = 0</enum>
+        <platInit/>
+        <mssAccessorName>mrw_draminit_reset_disable</mssAccessorName>
+    </attribute>
+
+    <attribute>
+      <id>ATTR_MRW_PREFETCH_ENABLE</id>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <description>Value of on or off.  Determines if prefetching enabled or not. See chapter 7 of the Centaur Workbook.</description>
+      <valueType>uint8</valueType>
+      <enum>OFF = 0, ON = 1</enum>
+      <platInit/>
+      <mssAccessorName>mrw_prefetch_enable</mssAccessorName>
+    </attribute>
+
+    <attribute>
+      <id>ATTR_MRW_CLEANER_ENABLE</id>
+      <targetType>TARGET_TYPE_SYSTEM</targetType>
+      <description>
+        Value of on or off.
+        Determines if the cleaner of the L4 cache (write modified entries to memory on idle cycles)
+        enabled or not. See chapter 7 of the Centaur Workbook.
+      </description>
+      <valueType>uint8</valueType>
+      <enum>OFF = 0, ON = 1</enum>
+      <platInit/>
+      <mssAccessorName>mrw_cleaner_enable</mssAccessorName>
     </attribute>
 
 </attributes>

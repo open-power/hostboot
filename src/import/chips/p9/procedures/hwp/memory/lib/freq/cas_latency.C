@@ -37,6 +37,7 @@
 #include <lib/utils/conversions.H>
 #include <lib/utils/fake_spd.H>
 #include <lib/eff_config/timing.H>
+#include <lib/utils/find.H>
 
 using fapi2::TARGET_TYPE_DIMM;
 using fapi2::TARGET_TYPE_MCS;
@@ -57,57 +58,63 @@ namespace mss
 cas_latency::cas_latency(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
                          const std::map<uint32_t, std::shared_ptr<spd::decoder> >& i_caches)
 {
+    iv_dimm_list_empty = false;
     iv_common_CL = UINT64_MAX; // Masks out supported CLs
     iv_largest_taamin = 0;
     iv_proposed_tck = 0;
 
-    for (const auto& l_port : i_target.getChildren<TARGET_TYPE_MCA>())
+    const auto l_dimm_list = find_targets<TARGET_TYPE_DIMM>(i_target);
+
+    if(l_dimm_list.empty())
     {
-        for (const auto& l_dimm : l_port.getChildren<TARGET_TYPE_DIMM>())
+        iv_dimm_list_empty = true;
+        return;
+    }
+
+    for ( const auto& l_dimm : l_dimm_list )
+    {
+        const auto l_dimm_pos = pos(l_dimm);
+
+        // Find decoder factory for this dimm position
+        auto l_it = i_caches.find(l_dimm_pos);
+        FAPI_TRY( check::spd::invalid_cache(l_dimm,
+                                            l_it != i_caches.end(),
+                                            l_dimm_pos),
+                  "Failed to get valid cache");
+
         {
-            const auto& l_dimm_pos = pos(l_dimm);
+            // Retrive timing values from the SPD
+            uint64_t l_tAAmin_in_ps = 0;
+            uint64_t l_tCKmax_in_ps = 0;
+            uint64_t l_tCKmin_in_ps = 0;
 
-            // Find decoder factory for this dimm position
-            auto l_it = i_caches.find(l_dimm_pos);
-            FAPI_TRY( check::spd::invalid_cache(l_dimm,
-                                                l_it != i_caches.end(),
-                                                l_dimm_pos),
-                      "Failed to get valid cache");
+            FAPI_TRY( get_taamin(l_dimm, l_it->second, l_tAAmin_in_ps),
+                      "Failed to get tAAmin");
+            FAPI_TRY( get_tckmax(l_dimm, l_it->second, l_tCKmax_in_ps),
+                      "Failed to get tCKmax" );
+            FAPI_TRY( get_tckmin(l_dimm, l_it->second, l_tCKmin_in_ps),
+                      "Failed to get tCKmin");
 
-            {
-                // Retrive timing values from the SPD
-                uint64_t l_tAAmin_in_ps = 0;
-                uint64_t l_tCKmax_in_ps = 0;
-                uint64_t l_tCKmin_in_ps = 0;
+            // Determine largest tAAmin value
+            iv_largest_taamin = std::max(iv_largest_taamin, l_tAAmin_in_ps);
 
-                FAPI_TRY( get_taamin(l_dimm, l_it->second, l_tAAmin_in_ps),
-                          "Failed to get tAAmin");
-                FAPI_TRY( get_tckmax(l_dimm, l_it->second, l_tCKmax_in_ps),
-                          "Failed to get tCKmax" );
-                FAPI_TRY( get_tckmin(l_dimm, l_it->second, l_tCKmin_in_ps),
-                          "Failed to get tCKmin");
+            // Determine a proposed tCK value that is greater than or equal tCKmin
+            // But less than tCKmax
+            iv_proposed_tck = std::max(iv_proposed_tck, l_tCKmin_in_ps);
+            iv_proposed_tck = std::min(iv_proposed_tck, l_tCKmax_in_ps);
+        }
 
-                // Determine largest tAAmin value
-                iv_largest_taamin = std::max(iv_largest_taamin, l_tAAmin_in_ps);
+        {
+            // Retrieve dimm supported cas latencies from SPD
+            uint64_t l_dimm_supported_CL = 0;
+            FAPI_TRY( l_it->second->supported_cas_latencies(l_dimm,
+                      l_dimm_supported_CL),
+                      "Failed to get supported CAS latency");
 
-                // Determine a proposed tCK value that is greater than or equal tCKmin
-                // But less than tCKmax
-                iv_proposed_tck = std::max(iv_proposed_tck, l_tCKmin_in_ps);
-                iv_proposed_tck = std::min(iv_proposed_tck, l_tCKmax_in_ps);
-            }
-
-            {
-                // Retrieve dimm supported cas latencies from SPD
-                uint64_t l_dimm_supported_CL = 0;
-                FAPI_TRY( l_it->second->supported_cas_latencies(l_dimm,
-                          l_dimm_supported_CL),
-                          "Failed to get supported CAS latency");
-
-                // ANDing bitmap from all modules creates a bitmap w/a common CL
-                iv_common_CL &= l_dimm_supported_CL;
-            }
-        }// dimm
-    }// port
+            // ANDing bitmap from all modules creates a bitmap w/a common CL
+            iv_common_CL &= l_dimm_supported_CL;
+        }
+    }// dimm
 
     // Why didn't I encapsulate common CL operations and checking in a function
     // like the timing params? Well, I want to check the "final" common CL and
@@ -141,24 +148,31 @@ fapi2::ReturnCode cas_latency::find_CL(const fapi2::Target<fapi2::TARGET_TYPE_MC
                                        uint64_t& o_cas_latency,
                                        uint64_t& o_tCK)
 {
-    // Create a vector filled with common CLs from buffer
-    std::vector<uint64_t> l_supported_CLs = create_common_cl_vector(iv_common_CL);
+    uint64_t l_desired_cas_latency = 0;
 
-    //For a proposed tCK value between tCKmin(all) and tCKmax, determine the desired CAS Latency.
-    uint64_t l_desired_cas_latency = calc_cas_latency(iv_largest_taamin, iv_proposed_tck);
+    if(!iv_dimm_list_empty)
+    {
+        // Create a vector filled with common CLs from buffer
+        std::vector<uint64_t> l_supported_CLs = create_common_cl_vector(iv_common_CL);
 
-    //Chose an actual CAS Latency (CLactual) that is greater than or equal to CLdesired
-    //and is supported by all modules on the memory channel
-    FAPI_TRY( choose_actual_CL(l_supported_CLs, iv_largest_taamin, iv_proposed_tck, l_desired_cas_latency),
-              "Failed choose_actual_CL()");
+        //For a proposed tCK value between tCKmin(all) and tCKmax, determine the desired CAS Latency.
+        l_desired_cas_latency = calc_cas_latency(iv_largest_taamin, iv_proposed_tck);
 
-    // Once the calculation of CLactual is completed, the BIOS must also
-    // verify that this CAS Latency value does not exceed tAAmax.
-    //If not, choose a lower CL value and repeat until a solution is found.
-    FAPI_TRY( validate_valid_CL(l_supported_CLs, iv_largest_taamin, iv_proposed_tck, l_desired_cas_latency),
-              "Failed validate_valid_CL()");
+        //Chose an actual CAS Latency (CLactual) that is greater than or equal to CLdesired
+        //and is supported by all modules on the memory channel
+        FAPI_TRY( choose_actual_CL(l_supported_CLs, iv_largest_taamin, iv_proposed_tck, l_desired_cas_latency),
+                  "Failed choose_actual_CL()");
+
+        // Once the calculation of CLactual is completed, the BIOS must also
+        // verify that this CAS Latency value does not exceed tAAmax.
+        //If not, choose a lower CL value and repeat until a solution is found.
+        FAPI_TRY( validate_valid_CL(l_supported_CLs, iv_largest_taamin, iv_proposed_tck, l_desired_cas_latency),
+                  "Failed validate_valid_CL()");
+    }
 
     // Update output values after all criteria is met
+    // If the MCS has no dimm configured than both
+    // l_desired_latency & iv_proposed_tck is 0 by initialization
     o_cas_latency = l_desired_cas_latency;
     o_tCK = iv_proposed_tck;
 

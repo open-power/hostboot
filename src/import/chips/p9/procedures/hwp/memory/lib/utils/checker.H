@@ -31,7 +31,7 @@
 #define _CHECKER_H_
 
 #include <fapi2.H>
-#include <mss_attribute_accessors.H>
+#include <lib/mss_attribute_accessors.H>
 #include <lib/shared/mss_const.H>
 
 namespace mss

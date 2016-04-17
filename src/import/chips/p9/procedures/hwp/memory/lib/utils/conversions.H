@@ -41,10 +41,35 @@
 //  and casts it to uint8_t[Y] that FAPI_ATTR_SET is expecting by deduction
 /// @param[in] X is the input vector
 /// @param[in] Y is the size of the vector
+/// @warn compiler doesn't like the use of vector method size() for the second param
 ///
 #define UINT8_VECTOR_TO_1D_ARRAY(X, Y)\
     {\
         reinterpret_cast<uint8_t(&)[Y]>(*X.data())\
+    }
+
+///
+/// @brief Dereferences pointer of the vector's underlying data
+//  and casts it to uint16_t[Y] that FAPI_ATTR_SET is expecting by deduction
+/// @param[in] X is the input vector
+/// @param[in] Y is the size of the vector
+/// @warn compiler doesn't like the use of vector method size() for the second param
+///
+#define UINT16_VECTOR_TO_1D_ARRAY(X, Y)\
+    {\
+        reinterpret_cast<uint16_t(&)[Y]>(*X.data())\
+    }
+
+///
+/// @brief Dereferences pointer of the vector's underlying data
+//  and casts it to uint32_t[Y] that FAPI_ATTR_SET is expecting by deduction
+/// @param[in] X is the input vector
+/// @param[in] Y is the size of the vector
+/// @warn compiler doesn't like the use of vector method size() for the second param
+///
+#define UINT32_VECTOR_TO_1D_ARRAY(X, Y)\
+    {\
+        reinterpret_cast<uint32_t(&)[Y]>(*X.data())\
     }
 
 // Mutiplication factor to go from clocks to simcycles.

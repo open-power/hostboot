@@ -58,11 +58,9 @@
           Consumed by mss_freq.
           The default of AUTO means mss_freq will find the best frequencies given the DIMMs plugged in and other rules.
           Otherwise, this is the system frequency.
-          firmware notes: Platforms should initialize this attribute to AUTO (0)
         </description>
         <valueType>uint64</valueType>
         <enum>AUTO = 0</enum>
-        <platInit/>
         <writeable/>
         <mssAccessorName>freq_override</mssAccessorName>
     </attribute>
@@ -87,7 +85,6 @@
           MT2666 = 2666
         </enum>
         <writeable/>
-        <persistRuntime/>
         <mssUnits> MT/s </mssUnits>
         <mssAccessorName>freq</mssAccessorName>
     </attribute>
@@ -106,7 +103,6 @@
         </description>
         <valueType>uint32</valueType>
         <writeable/>
-        <persistRuntime/>
         <mssAccessorName>freq_bias_percentage</mssAccessorName>
     </attribute>
 
@@ -134,7 +130,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
-        <persistRuntime/>
         <mssAccessorName>eff_num_ranks_per_dimm</mssAccessorName>
     </attribute>
 
@@ -152,7 +147,6 @@
         <enum>NO = 0, YES = 1</enum>
         <writeable/>
         <array>2 2 </array>
-        <persistRuntime/>
         <mssAccessorName>eff_custom_dimm</mssAccessorName>
     </attribute>
 
@@ -190,262 +184,6 @@
         <writeable/>
         <array>2 2</array>
         <mssAccessorName>eff_dram_rank_mix</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_PRIMARY_RANK_GROUP0</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            creator: mss_eff_cnfg_rank_group
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <enum>INVALID = 255</enum>
-        <writeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_primary_rank_group0</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_PRIMARY_RANK_GROUP1</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            creator: mss_eff_cnfg_rank_group
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <enum>INVALID = 255</enum>
-        <writeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_primary_rank_group1</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_PRIMARY_RANK_GROUP2</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            creator: mss_eff_cnfg_rank_group
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <enum>INVALID = 255</enum>
-        <writeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_primary_rank_group2</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_PRIMARY_RANK_GROUP3</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            creator: mss_eff_cnfg_rank_group
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <enum>INVALID = 255</enum>
-        <writeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_primary_rank_group3</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_SECONDARY_RANK_GROUP0</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            creator: mss_eff_cnfg_rank_group
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <enum>INVALID = 255</enum>
-        <writeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_secondary_rank_group0</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_SECONDARY_RANK_GROUP1</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            creator: mss_eff_cnfg_rank_group
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <enum>INVALID = 255</enum>
-        <writeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_secondary_rank_group1</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_SECONDARY_RANK_GROUP2</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            creator: mss_eff_cnfg_rank_group
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <enum>INVALID = 255</enum>
-        <writeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_secondary_rank_group2</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_SECONDARY_RANK_GROUP3</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            creator: mss_eff_cnfg_rank_group
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <enum>INVALID = 255</enum>
-        <writeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_secondary_rank_group3</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_TERTIARY_RANK_GROUP0</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            creator: mss_eff_cnfg_rank_group
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <enum>INVALID = 255</enum>
-        <writeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_tertiary_rank_group0</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_TERTIARY_RANK_GROUP1</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            creator: mss_eff_cnfg_rank_group
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <enum>INVALID = 255</enum>
-        <writeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_tertiary_rank_group1</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_TERTIARY_RANK_GROUP2</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            creator: mss_eff_cnfg_rank_group
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <enum>INVALID = 255</enum>
-        <writeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_tertiary_rank_group2</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_TERTIARY_RANK_GROUP3</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            creator: mss_eff_cnfg_rank_group
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <enum>INVALID = 255</enum>
-        <writeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_tertiary_rank_group3</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_QUATERNARY_RANK_GROUP0</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            creator: mss_eff_cnfg_rank_group
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <enum>INVALID = 255</enum>
-        <writeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_quaternary_rank_group0</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_QUATERNARY_RANK_GROUP1</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            creator: mss_eff_cnfg_rank_group
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <enum>INVALID = 255</enum>
-        <writeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_quaternary_rank_group1</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_QUATERNARY_RANK_GROUP2</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            creator: mss_eff_cnfg_rank_group
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <enum>INVALID = 255</enum>
-        <writeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_quaternary_rank_group2</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_QUATERNARY_RANK_GROUP3</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            creator: mss_eff_cnfg_rank_group
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <enum>INVALID = 255</enum>
-        <writeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_quaternary_rank_group3</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -551,7 +289,6 @@
         <writeable/>
         <array> 2 2</array>
         <mssUnits>GB</mssUnits>
-        <persistRuntime/>
         <mssAccessorName>eff_dimm_size</mssAccessorName>
     </attribute>
 
@@ -570,7 +307,7 @@
         <enum>BL8 = 0, OTF = 1, BC4 = 2</enum>
         <writeable/>
         <array>2</array>
-        <mssAccessorName>eff_dram_burst_length</mssAccessorName>
+        <mssAccessorName>eff_dram_bl</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -586,7 +323,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 </array>
-        <mssAccessorName>eff_dram_cas_latency</mssAccessorName>
+        <mssAccessorName>eff_dram_cl</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -639,7 +376,7 @@
         <enum>SEQUENTIAL = 0, INTERLEAVE = 1</enum>
         <writeable/>
         <array>2 2</array>
-        <mssAccessorName>eff_dram_read_burst_type</mssAccessorName>
+        <mssAccessorName>eff_dram_rbt</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -966,7 +703,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
-        <mssAccessorName>eff_dimm_ddr4_rc67</mssAccessorName>
+        <mssAccessorName>eff_dimm_ddr4_rc06_07</mssAccessorName>
         </attribute>
 
     <attribute>
@@ -1089,7 +826,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
-        <mssAccessorName>eff_dimm_ddr4_rc1x</mssAccessorName>
+        <mssAccessorName>eff_dimm_ddr4_rc_1x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1102,7 +839,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
-        <mssAccessorName>eff_dimm_ddr4_rc2x</mssAccessorName>
+        <mssAccessorName>eff_dimm_ddr4_rc_2x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1115,7 +852,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
-        <mssAccessorName>eff_dimm_ddr4_rc3x</mssAccessorName>
+        <mssAccessorName>eff_dimm_ddr4_rc_3x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1128,7 +865,7 @@
        <valueType>uint8</valueType>
        <writeable/>
        <array> 2 2</array>
-       <mssAccessorName>eff_dimm_ddr4_rc4x</mssAccessorName>
+       <mssAccessorName>eff_dimm_ddr4_rc_4x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1141,7 +878,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
-        <mssAccessorName>eff_dimm_ddr4_rc5x</mssAccessorName>
+        <mssAccessorName>eff_dimm_ddr4_rc_5x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1154,7 +891,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
-        <mssAccessorName>eff_dimm_ddr4_rc6x</mssAccessorName>
+        <mssAccessorName>eff_dimm_ddr4_rc_6x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1167,7 +904,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
-        <mssAccessorName>eff_dimm_ddr4_rc7x</mssAccessorName>
+        <mssAccessorName>eff_dimm_ddr4_rc_7x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1180,7 +917,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
-        <mssAccessorName>eff_dimm_ddr4_rc8x</mssAccessorName>
+        <mssAccessorName>eff_dimm_ddr4_rc_8x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1193,7 +930,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
-        <mssAccessorName>eff_dimm_ddr4_rc9x</mssAccessorName>
+        <mssAccessorName>eff_dimm_ddr4_rc_9x</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1210,7 +947,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
-        <mssAccessorName>eff_dimm_ddr4_rcax</mssAccessorName>
+        <mssAccessorName>eff_dimm_ddr4_rc_ax</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1227,7 +964,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2</array>
-        <mssAccessorName>eff_dimm_ddr4_rcbx</mssAccessorName>
+        <mssAccessorName>eff_dimm_ddr4_rc_bx</mssAccessorName>
     </attribute>
 
 
@@ -1486,7 +1223,6 @@
         <valueType>uint32</valueType>
         <writeable/>
         <array>2</array>
-        <persistRuntime/>
         <mssAccessorName>mem_throttled_n_commands_per_port</mssAccessorName>
     </attribute>
 
@@ -1503,7 +1239,6 @@
         <valueType>uint32</valueType>
         <writeable/>
         <array>2</array>
-        <persistRuntime/>
         <mssAccessorName>mem_m_dram_clocks</mssAccessorName>
     </attribute>
 
@@ -1514,7 +1249,6 @@
         <valueType>uint32</valueType>
         <writeable/>
         <array>2</array>
-        <persistRuntime/>
         <mssAccessorName>mem_throttled_n_commands_per_slot</mssAccessorName>
     </attribute>
 
@@ -1531,7 +1265,6 @@
         <valueType>uint32</valueType>
         <writeable/>
         <array>2</array>
-        <persistRuntime/>
 
         <mssAccessorName>mem_watt_target</mssAccessorName>
     </attribute>
@@ -1543,7 +1276,6 @@
         <valueType>uint32</valueType>
         <writeable/>
         <array> 2 2</array>
-        <persistRuntime/>
         <mssAccessorName>master_pwr_slope</mssAccessorName>
     </attribute>
 
@@ -1554,7 +1286,6 @@
         <valueType>uint32</valueType>
         <writeable/>
         <array> 2 2</array>
-        <persistRuntime/>
         <mssAccessorName>supplier_pwr_slope</mssAccessorName>
     </attribute>
 
@@ -1565,7 +1296,6 @@
         <valueType>uint32</valueType>
         <writeable/>
         <array> 2 2</array>
-        <persistRuntime/>
         <mssAccessorName>master_pwr_intercept</mssAccessorName>
     </attribute>
 
@@ -1576,7 +1306,6 @@
         <valueType>uint32</valueType>
         <writeable/>
         <array> 2 2</array>
-        <persistRuntime/>
         <mssAccessorName>supplier_pwr_intercept</mssAccessorName>
     </attribute>
 
@@ -1587,7 +1316,6 @@
         <valueType>uint32</valueType>
         <writeable/>
         <array> 2 2</array>
-        <persistRuntime/>
         <mssAccessorName>dimm_maxbandwidth_gbs</mssAccessorName>
     </attribute>
 
@@ -1598,7 +1326,6 @@
         <valueType>uint32</valueType>
         <writeable/>
         <array> 2 2</array>
-        <persistRuntime/>
         <mssAccessorName>dimm_maxbandwidth_mrs</mssAccessorName>
     </attribute>
 
@@ -1609,7 +1336,6 @@
         <valueType>uint32</valueType>
         <writeable/>
         <array>2</array>
-        <persistRuntime/>
         <mssAccessorName>channel_pair_maxbandwidth_gbs</mssAccessorName>
     </attribute>
 
@@ -1620,7 +1346,6 @@
         <valueType>uint32</valueType>
         <writeable/>
         <array>2</array>
-        <persistRuntime/>
         <mssAccessorName>channel_pair_maxbandwidth_mrs</mssAccessorName>
     </attribute>
 
@@ -1631,7 +1356,6 @@
         <valueType>uint32</valueType>
         <writeable/>
         <array> 2 2</array>
-        <persistRuntime/>
         <mssAccessorName>dimm_maxpower</mssAccessorName>
     </attribute>
 
@@ -1642,7 +1366,6 @@
         <valueType>uint32</valueType>
         <writeable/>
         <array>2</array>
-        <persistRuntime/>
         <mssAccessorName>channel_pair_maxpower</mssAccessorName>
     </attribute>
 
@@ -1656,7 +1379,6 @@
         <valueType>uint32</valueType>
         <writeable/>
         <array>2</array>
-        <persistRuntime/>
         <mssAccessorName>runtime_mem_throttled_n_commands_per_port</mssAccessorName>
     </attribute>
 
@@ -1667,7 +1389,6 @@
         <valueType>uint32</valueType>
         <writeable/>
         <array>2</array>
-        <persistRuntime/>
         <mssAccessorName>runtime_mem_m_dram_clocks</mssAccessorName>
     </attribute>
 
@@ -1678,32 +1399,7 @@
         <valueType>uint32</valueType>
         <writeable/>
         <array>2</array>
-        <persistRuntime/>
         <mssAccessorName>runtime_mem_throttled_n_commands_per_slot</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_PREFETCH_ENABLE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Value of on or off.  Determines if prefetching enabled or not. See chapter 7 of the Centaur Workbook.</description>
-        <valueType>uint8</valueType>
-        <enum>OFF = 0, ON = 1</enum>
-        <platInit/>
-        <mssAccessorName>prefetch_enable</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_CLEANER_ENABLE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-            Value of on or off.
-            Determines if the cleaner of the L4 cache (write modified entries to memory on idle cycles)
-            enabled or not. See chapter 7 of the Centaur Workbook.
-        </description>
-        <valueType>uint8</valueType>
-        <enum>OFF = 0, ON = 1</enum>
-        <platInit/>
-        <mssAccessorName>cleaner_enable</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1722,7 +1418,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array>2</array>
-        <persistRuntime/>
         <mssAccessorName>eff_dimm_functional_vector</mssAccessorName>
     </attribute>
 
@@ -1877,7 +1572,7 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_EFF_TEMP_REF_MODE</id>
+        <id>ATTR_EFF_TEMP_REFRESH_MODE</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Temp controlled ref mode. This is for DDR4 MRS4.
@@ -1891,11 +1586,11 @@
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
         <array>2</array>
-        <mssAccessorName>eff_temp_ref_mode</mssAccessorName>
+        <mssAccessorName>eff_temp_refresh_mode</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_EFF_INT_VREF_MON</id>
+        <id>ATTR_EFF_INTERNAL_VREF_MONITOR</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Internal Vref Monitor.
@@ -1910,7 +1605,7 @@
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
         <array>2</array>
-        <mssAccessorName>eff_int_vref_mon</mssAccessorName>
+        <mssAccessorName>eff_internal_vref_monitor</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2156,7 +1851,7 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_VREF_DQ_TRAIN_VALUE</id>
+        <id>ATTR_EFF_VREF_DQ_TRAIN_VALUE</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             vrefdq_train value. This is for DDR4 MRS6.
@@ -2168,11 +1863,11 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array> 2 2 4</array>
-        <mssAccessorName>vref_dq_train_value</mssAccessorName>
+        <mssAccessorName>eff_vref_dq_train_value</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_VREF_DQ_TRAIN_RANGE</id>
+        <id>ATTR_EFF_VREF_DQ_TRAIN_RANGE</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             vrefdq_train range. This is for DDR4 MRS6.
@@ -2185,11 +1880,11 @@
         <enum>RANGE1 = 0, RANGE2 = 1</enum>
         <writeable/>
         <array> 2 2 4</array>
-        <mssAccessorName>vref_dq_train_range</mssAccessorName>
+        <mssAccessorName>eff_vref_dq_train_range</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_VREF_DQ_TRAIN_ENABLE</id>
+        <id>ATTR_EFF_VREF_DQ_TRAIN_ENABLE</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             vrefdq_train enable. This is for DDR4 MRS6.
@@ -2202,7 +1897,7 @@
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
         <array> 2 2 4</array>
-        <mssAccessorName>vref_dq_train_enable</mssAccessorName>
+        <mssAccessorName>eff_vref_dq_train_enable</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2244,19 +1939,7 @@
         <valueType>uint16</valueType>
         <writeable/>
         <array>2</array>
-        <persistRuntime/>
         <mssAccessorName>cal_step_enable</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_DRAMINIT_RESET_DISABLE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>A disable switch for resetting the phy delay values at the beginning of calling mss_draminit_training.</description>
-        <valueType>uint8</valueType>
-        <enum>DISABLE = 1, ENABLE = 0</enum>
-        <platInit/>
-        <persistRuntime/>
-        <mssAccessorName>draminit_reset_disable</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2289,35 +1972,6 @@
         <writeable/>
         <array> 2 4 4</array>
         <mssAccessorName>slew_rate_adr</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_ALLOW_SINGLE_PORT</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            When this value is true, then mss_eff config will allow a single port to have one dimm and will allow ports to have different sizes.
-            Used in eff_config
-        </description>
-        <valueType>uint8</valueType>
-        <enum>FALSE = 0, TRUE = 1</enum>
-        <platInit/>
-        <array>2</array>
-        <mssAccessorName>allow_single_port</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_DQS_SWIZZLE_TYPE</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            DQS Swizzle type is set by the platform to describe what kind of DQS connection is being used for register acceses.
-            Type 0 is normal, type 1 is for systems with wiring like glacier 1, type 2 is for Pallmeto.
-            Additional types maybe defined if new boards have even different DQS swizzle features
-        </description>
-        <valueType>uint8</valueType>
-        <enum>NORMAL_TYPE_0 = 0, GLACIER_TYPE_1 = 1, ISDIMM_TYPE2 = 2</enum>
-        <platInit/>
-        <array>2</array>
-        <mssAccessorName>dqs_swizzle_type</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2447,36 +2101,23 @@
         <id>ATTR_MSS_VOLT_OVERRIDE</id>
         <targetType>TARGET_TYPE_MCBIST</targetType>
         <description>
-	  Possible DRAM voltage override.
-	  Firmware notes: Default should be NONE (0x00).
-	</description>
+          Possible DRAM voltage override.
+          Firmware notes: Default should be NONE (0x00).
+        </description>
         <valueType>uint8</valueType>
         <enum>NONE = 0x00, VOLT_120 = 0x02</enum>
-        <platInit/>
+        <writeable/>
         <mssAccessorName>volt_override</mssAccessorName>
     </attribute>
 
-    <attribute>
+   <attribute>
         <id>ATTR_MSS_VDDR_OVERIDE_SPD</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
         <description>Possible VDDR voltage override.</description>
         <valueType>uint8</valueType>
         <enum>NONE = 0x00, VOLT_1350 = 0x01, VOLT_1200 = 0x02</enum>
-        <platInit/>
-        <mssAccessorName>vddr_overide_spd</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_ISDIMM_POWER_CURVE_ALGORITHM_VERSION</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-          Version of algorithm and dependent attributes used
-          to calculate ISDIMM power curve attributes
-        </description>
-        <valueType>uint32</valueType>
-        <platInit/>
         <writeable/>
-        <mssAccessorName>isdimm_power_curve_algorithm_version</mssAccessorName>
+        <mssAccessorName>vddr_overide_spd</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -2499,7 +2140,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array>2 2</array>
-        <persistRuntime/>
         <mssAccessorName>databus_util</mssAccessorName>
     </attribute>
 
@@ -2516,7 +2156,6 @@
         <valueType>uint32</valueType>
         <writeable/>
         <array>2 2</array>
-        <persistRuntime/>
         <mssAccessorName>throttled_n_commands</mssAccessorName>
     </attribute>
 
@@ -3208,6 +2847,7 @@
         firmware notes: none</description>
       <valueType>uint8</valueType>
       <array>2 2 4</array>
+      <writeable/>
       <mssAccessorName>eff_odt_rd</mssAccessorName>
     </attribute>
 
@@ -3222,6 +2862,7 @@
         firmware notes: none</description>
       <valueType>uint8</valueType>
       <array>2 2 4</array>
+      <writeable/>
       <mssAccessorName>eff_odt_wr</mssAccessorName>
     </attribute>
 
@@ -3236,6 +2877,7 @@
         <valueType>uint8</valueType>
         <enum>INVALID = 0, OHM34 = 34, OHM40 = 40, OHM48 = 48</enum>
         <array>2 2</array>
+        <writeable/>
         <mssAccessorName>eff_dram_ron</mssAccessorName>
     </attribute>
 
@@ -3260,6 +2902,7 @@
           OHM240 = 240
         </enum>
         <array> 2 2 4</array>
+        <writeable/>
         <mssAccessorName>eff_dram_rtt_nom</mssAccessorName>
     </attribute>
 
@@ -3318,7 +2961,7 @@
         consumer: various
         firmware notes: none
       </description>
-      <valueType>uint8</valueType>
+      <valueType>uint16</valueType>
       <writeable/>
       <array> 2 </array>
       <mssUnits> nck </mssUnits>

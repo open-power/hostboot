@@ -51,7 +51,6 @@
         <enum> EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3</enum>
         <writeable/>
         <array>2 2</array>
-        <persistRuntime/>
         <mssAccessorName>eff_dimm_type</mssAccessorName>
     </attribute>
 
@@ -69,7 +68,6 @@
         <enum> NONE = 0, NVDIMM = 1</enum>
         <writeable/>
         <array>2 2</array>
-        <persistRuntime/>
         <mssAccessorName>eff_hybrid_memory_type</mssAccessorName>
     </attribute>
 
@@ -87,7 +85,6 @@
         <enum> NOT_HYBRID = 0, IS_HYBRID= 1</enum>
         <writeable/>
         <array>2 2</array>
-        <persistRuntime/>
         <mssAccessorName>eff_hybrid</mssAccessorName>
     </attribute>
 
@@ -326,7 +323,7 @@
         creator: eff_config
         consumer: various
         firmware notes: none</description>
-      <valueType>uint8</valueType>
+      <valueType>uint16</valueType>
       <writeable/>
       <array> 2 </array>
       <mssUnits> nck </mssUnits>
@@ -438,7 +435,7 @@
         <writeable/>
         <array> 2 </array>
         <mssUnits> nck </mssUnits>
-        <mssAccessorName>eff_dram_write_recovery</mssAccessorName>
+        <mssAccessorName>eff_dram_twr</mssAccessorName>
     </attribute>
 
     <attribute>

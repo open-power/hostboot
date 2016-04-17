@@ -51,7 +51,7 @@ extern "C"
         FAPI_INF("Start draminit training");
 
         uint8_t l_reset_disable = 0;
-        FAPI_TRY( mss::draminit_reset_disable(l_reset_disable) );
+        FAPI_TRY( mss::mrw_draminit_reset_disable(l_reset_disable) );
 
         // Configure the CCS engine.
         {
@@ -172,7 +172,7 @@ extern "C"
 
             // Check to see if we're supposed to reset the delay values before starting training
             // don't reset if we're running special training - assumes there's a checkpoint which has valid state.
-            if ((l_reset_disable == fapi2::ENUM_ATTR_MSS_DRAMINIT_RESET_DISABLE_ENABLE) && (i_special_training == 0))
+            if ((l_reset_disable == fapi2::ENUM_ATTR_MRW_DRAMINIT_RESET_DISABLE_ENABLE) && (i_special_training == 0))
             {
                 FAPI_TRY( mss::dp16::reset_delay_values(p, l_pairs) );
             }

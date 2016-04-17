@@ -82,7 +82,7 @@ inline T calc_timing_from_timebase(const T i_timing_mtb,
 template<typename T>
 inline T calc_nck(T timing_in_ps, T tck_in_ps, T inverse_corr_factor)
 {
-    // Preliminary nCK calculation, scaled by 1000
+    // Preliminary nCK calculation, scaled by 1000 per JDEC algorithm
     T temp_nck = timing_in_ps * 1000 / tck_in_ps;
 
     // Apply inverse of correction factor percentage
@@ -98,14 +98,12 @@ inline T calc_nck(T timing_in_ps, T tck_in_ps, T inverse_corr_factor)
 /// @param[out] o_tCK_in_ps application period in ps
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
-template< typename T>
+template<typename T>
 inline fapi2::ReturnCode clock_period(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                       T& o_tCK_in_ps)
 {
     uint64_t l_dimm_transfer_rate = 0;
-
-    FAPI_TRY( freq(find_target<fapi2::TARGET_TYPE_MCBIST>(i_target),
-                   l_dimm_transfer_rate) );
+    FAPI_TRY( freq(find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_dimm_transfer_rate) );
 
     o_tCK_in_ps = freq_to_ps(l_dimm_transfer_rate);
 

@@ -560,6 +560,48 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+
+///
+/// @brief       Decodes DRAM Device Type
+/// @param[in]   i_target dimm target
+/// @param[in]   i_spd_data SPD data
+/// @param[out]  o_value dram device type enumeration
+/// @return      FAPI2_RC_SUCCESS if okay
+/// @note        Decodes SPD Byte 2
+/// @note        Item JC-45-2220.01x
+/// @note        Page 16
+/// @note        DDR4 SPD Document Release 3
+///
+fapi2::ReturnCode dram_device_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
+                                   const std::vector<uint8_t>& i_spd_data,
+                                   uint8_t& o_value)
+{
+    constexpr size_t BYTE_INDEX = 2;
+    uint8_t l_raw_byte = i_spd_data[BYTE_INDEX];
+
+    // Trace in the front assists w/ debug
+    FAPI_DBG("%s SPD data at Byte %d: 0x%llX.",
+             mss::c_str(i_target),
+             BYTE_INDEX,
+             l_raw_byte);
+
+    // Find map value
+    bool l_is_val_found = mss::find_value_from_key(DRAM_GEN_MAP, l_raw_byte, o_value);
+
+    FAPI_TRY( mss::check::spd:: fail_for_invalid_value(i_target,
+              l_is_val_found,
+              BYTE_INDEX,
+              l_raw_byte,
+              "Failed check on SPD dram device type") );
+    // Print decoded info
+    FAPI_DBG("%s Device type : %d",
+             c_str(i_target),
+             o_value);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 ///
 /// @brief       Object factory to select correct decoder
 /// @param[in]   i_target dimm target
@@ -573,8 +615,15 @@ fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
                           std::shared_ptr<decoder>& o_fact_obj)
 {
     uint8_t l_dimm_type = 0;
+    uint8_t l_dimm_types_mcs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+    uint8_t l_dram_gen = 0;
+    uint8_t l_dram_gen_mcs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     uint8_t l_encoding_rev = 0;
     uint8_t l_additions_rev = 0;
+
+    const auto l_mcs = mss::find_target<TARGET_TYPE_MCS>(i_target);
+    const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
+    const auto l_dimm_num = index(i_target);
 
     if( i_spd_data.empty() )
     {
@@ -582,9 +631,23 @@ fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
         return fapi2::FAPI2_RC_INVALID_PARAMETER;
     }
 
-    // Get dimm type & revision levels
+    // Get dimm type & set attribute (needed by c_str)
     FAPI_TRY( base_module_type(i_target, i_spd_data, l_dimm_type),
               "Failed to find base module type" );
+    FAPI_TRY( eff_dimm_type(l_mcs, &l_dimm_types_mcs[0][0]) );
+
+    l_dimm_types_mcs[l_port_num][l_dimm_num] = l_dimm_type;
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_TYPE, l_mcs, l_dimm_types_mcs) );
+
+    // Get dram generation & set attribute (needed by c_str)
+    FAPI_TRY( eff_dram_gen(l_mcs, &l_dram_gen_mcs[0][0]) );
+    FAPI_TRY( dram_device_type(i_target, i_spd_data, l_dram_gen),
+              "Failed to find base module type" );
+
+    l_dram_gen_mcs[l_port_num][l_dimm_num] = l_dram_gen;
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_GEN, l_mcs, l_dram_gen_mcs) );
+
+    // Get revision levels
     FAPI_TRY( rev_encoding_level(i_target, i_spd_data, l_encoding_rev),
               "Failed to find encoding level" );
     FAPI_TRY( rev_additions_level(i_target, i_spd_data,  l_additions_rev),
@@ -820,45 +883,6 @@ fapi2::ReturnCode decoder::number_of_total_bytes(const fapi2::Target<TARGET_TYPE
 
     FAPI_DBG("%s. Total Bytes: %d",
              mss::c_str(i_target),
-             o_value);
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief       Decodes DRAM Device Type
-/// @param[in]   i_target dimm target
-/// @param[out]  o_value dram device type enumeration
-/// @return      FAPI2_RC_SUCCESS if okay
-/// @note        Decodes SPD Byte 2
-/// @note        Item JC-45-2220.01x
-/// @note        Page 16
-/// @note        DDR4 SPD Document Release 3
-///
-fapi2::ReturnCode decoder::dram_device_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
-        uint8_t& o_value)
-{
-    constexpr size_t BYTE_INDEX = 2;
-    uint8_t l_raw_byte = iv_spd_data[BYTE_INDEX];
-
-    // Trace in the front assists w/ debug
-    FAPI_DBG("%s SPD data at Byte %d: 0x%llX.",
-             mss::c_str(i_target),
-             BYTE_INDEX,
-             l_raw_byte);
-
-    // Find map value
-    bool l_is_val_found = mss::find_value_from_key(DRAM_GEN_MAP, l_raw_byte, o_value);
-
-    FAPI_TRY( mss::check::spd:: fail_for_invalid_value(i_target,
-              l_is_val_found,
-              BYTE_INDEX,
-              l_raw_byte,
-              "Failed check on SPD dram device type") );
-    // Print decoded info
-    FAPI_DBG("%s Device type : %d",
-             c_str(i_target),
              o_value);
 
 fapi_try_exit:
@@ -1735,7 +1759,7 @@ fapi2::ReturnCode decoder::operable_nominal_voltage(const fapi2::Target<TARGET_T
               l_is_val_found,
               BYTE_INDEX,
               l_field_bits,
-              "Failed check for Endur") );
+              "Failed check for Operable nominal voltage") );
 
     FAPI_DBG("%s. Operable: %d",
              mss::c_str(i_target),
@@ -1781,7 +1805,7 @@ fapi2::ReturnCode decoder::endurant_nominal_voltage(const fapi2::Target<TARGET_T
               l_is_val_found,
               BYTE_INDEX,
               l_field_bits,
-              "Failed check for Endurant") );
+              "Failed check for Endurant nominal voltage") );
 
     FAPI_DBG("%s. Endurant: %d",
              mss::c_str(i_target),
