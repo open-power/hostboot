@@ -72,6 +72,14 @@
     <attribute>
         <id>ATTR_POUNDV_BUCKET_DATA</id>
     </attribute>
+    <attribute>
+        <id>ATTR_IO_XBUS_TX_MARGIN_RATIO</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>ATTR_IO_XBUS_TX_FFE_PRECURSOR</id>
+        <default>6</default>
+    </attribute>
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->

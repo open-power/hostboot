@@ -61,4 +61,24 @@
   <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IO_XBUS_TX_MARGIN_RATIO</id>
+  <targetType>TARGET_TYPE_XBUS</targetType>
+  <description>
+    Value to select amount of margin to be applied.
+  </description>
+  <valueType>uint8</valueType>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IO_XBUS_TX_FFE_PRECURSOR</id>
+  <targetType>TARGET_TYPE_XBUS</targetType>
+  <description>
+    Value to select amount of tx ffe precusor to apply.
+  </description>
+  <valueType>uint8</valueType>
+  <platinit/>
+</attribute>
+<!-- ********************************************************************** -->
 </attributes>

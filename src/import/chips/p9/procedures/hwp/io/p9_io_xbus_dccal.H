@@ -24,7 +24,7 @@
 /// *HWP HWP Backup Owner : Gary Peterson <garyp@us.ibm.com>
 /// *HWP FW Owner         : Jamie Knight <rjknight@us.ibm.com>
 /// *HWP Team             : IO
-/// *HWP Level            : 2
+/// *HWP Level            : 3
 /// *HWP Consumed by      : FSP:HB
 ///-----------------------------------------------------------------------------
 
@@ -38,20 +38,18 @@
 
 
 typedef fapi2::ReturnCode (*p9_io_xbus_dccal_FP_t)
-( const fapi2::Target < fapi2::TARGET_TYPE_XBUS>&,
-  const uint8_t& );
+( const fapi2::Target < fapi2::TARGET_TYPE_XBUS>&, const uint8_t& );
 
 extern "C"
 {
 
     /**
      * @brief A I/O EDI+ Procedure that runs Rx Dccal and Tx Z Impedance calibration
-     * on every instance of the EDI+ XBUS.
+     * on every group of the EDI+ XBUS.
      * @param[in] i_target FAPI2 Target
      * @retval ReturnCode
      */
-    fapi2::ReturnCode
-    p9_io_xbus_dccal(
+    fapi2::ReturnCode p9_io_xbus_dccal(
         const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target,
         const uint8_t&                                   i_group );
 

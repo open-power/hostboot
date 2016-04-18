@@ -35,6 +35,23 @@
         </gard>
     </hwpError>
     <!-- *********************************************************************** -->
+    <hwpError>
+        <rc>RC_IO_XBUS_RX_CLEANUP_PLL_NOT_LOCKED</rc>
+        <ffdc>GROUP</ffdc>
+        <ffdc>TARGET</ffdc>
+        <description>I/O EDI+ Xbus Rx Dccal Cleanup Pll Not Locked</description>
+        <callout>
+            <target>TARGET</target>
+            <priority>MEDIUM</priority>
+        </callout>
+        <deconfigure>
+            <target>TARGET</target>
+        </deconfigure>
+        <gard>
+            <target>TARGET</target>
+        </gard>
+    </hwpError>
+    <!-- *********************************************************************** -->
 </hwpErrors>
 
 
