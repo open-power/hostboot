@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -20,10 +20,10 @@
 /// @file p9_pm_occ_firinit.C
 /// @brief Configures the OCC LFIR Mask and Action
 ///
-/// *HWP HWP Owner: Jim Yacynych <jimyac@us.ibm.com>
-/// *HWP FW  Owner: Sunil Kumar  <skumar8j@in.ibm.com>
+/// *HWP HWP Owner: Greg Still <stillgs@us.ibm.com>
+/// *HWP FW  Owner: Sangeetha T S <sangeet2@in.ibm.com>
 /// *HWP Team: PM
-/// *HWP Level: 1
+/// *HWP Level: 2
 /// *HWP Consumed by: HS
 ///
 
@@ -32,11 +32,12 @@
 
 #include <fapi2.H>
 #include <p9_pm.H>
+#include <p9_pm_fir_class.H>
 
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_pm_occ_firinit_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
-    const p9pm::P9_PM_FLOW_MODE mode);
+    const p9pm::PM_FLOW_MODE);
 
 extern "C" {
 //------------------------------------------------------------------------------
@@ -49,7 +50,7 @@ extern "C" {
 
     fapi2::ReturnCode p9_pm_occ_firinit(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        const p9pm::P9_PM_FLOW_MODE i_mode);
+        const p9pm::PM_FLOW_MODE i_mode);
 
 } // extern "C"
 

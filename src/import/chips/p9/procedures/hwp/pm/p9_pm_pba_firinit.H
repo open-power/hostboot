@@ -20,7 +20,7 @@
 /// @file p9_pm_pba_firinit.C
 /// @brief Configures the PBA LFIR, Mask and Action
 ///
-/// *HWP HWP Owner: Jim Yacynych <jimyac@us.ibm.com>
+/// *HWP HWP Owner: Greg Still <stillgs@us.ibm.com>
 /// *HWP FW  Owner: Sangeetha T S <sangeet2@in.ibm.com>
 /// *HWP Team: PM
 /// *HWP Level: 2
