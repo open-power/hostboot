@@ -48,11 +48,14 @@ extern "C"
 {
     /**
      * @brief A HWP that runs Read eRepair. This procedure reads the current bad
-     * lanes and passes by reference the lane numbers in a vector
-     * @param[in] i_target        Reference to Target
-     * @param[in] i_clock_group   Clock Group of Target
-     * @param[out] o_bad_lanes    Vector of bad lanes
-     * @retval ReturnCode
+     * lanes and passes by reference the lane numbers in a vector.  The rx vectors
+     * will return to the caller ( PRD or e-repair ) the bad lane numbers on this
+     * endpoint.  The caller will duplicate the found rx bad lanes to the
+     * corresponding tx bad lanes on the connected target.
+     * @param[in]  i_target        Reference to Target
+     * @param[in]  i_clock_group   Clock Group of Target
+     * @param[out] o_bad_lanes     Vector of bad lanes
+     * @retval     ReturnCode
      */
     fapi2::ReturnCode
     p9_io_xbus_read_erepair(const fapi2::Target< fapi2::TARGET_TYPE_XBUS >& i_target,
