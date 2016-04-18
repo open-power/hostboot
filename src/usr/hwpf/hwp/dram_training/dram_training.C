@@ -134,7 +134,7 @@ class dramTPool
         {
             iv_errList.push_back(i_err);
         }
-        mutex_lock(&iv_mutex);
+        mutex_unlock(&iv_mutex);
     }
 
     /**
@@ -370,6 +370,8 @@ void*    call_mem_pll_initf( void *io_pArgs )
     TARGETING::TargetHandleList l_membufTargetList;
     getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
+    dramTPool l_dramTp;
+
     for (TargetHandleList::const_iterator
             l_membuf_iter = l_membufTargetList.begin();
             l_membuf_iter != l_membufTargetList.end();
@@ -383,16 +385,16 @@ void*    call_mem_pll_initf( void *io_pArgs )
                 "target HUID %.8X", TARGETING::get_huid(l_pCentaur));
 
         //  call cen_mem_pll_initf to do pll init
-        draminitTask * l_task = new draminitTask(& Singleton<dramTPool>::instance(),
+        draminitTask * l_task = new draminitTask(& l_dramTp,
                                                cen_mem_pll_initf, l_pCentaur, false);
-        Singleton<dramTPool>::instance().dispatch(l_task);
+        l_dramTp.dispatch(l_task);
         
     }
 
     //Wait for completion
-    Singleton<dramTPool>::instance().waitForCompletion();
+    l_dramTp.waitForCompletion();
     errList l_errors;
-    Singleton<dramTPool>::instance().getErrors(l_errors);
+    l_dramTp.getErrors(l_errors);
     for(errList::const_iterator errItr= l_errors.begin();
         errItr != l_errors.end(); ++errItr)
     {
@@ -929,6 +931,8 @@ void*    call_mss_draminit_training( void *io_pArgs )
     TARGETING::TargetHandleList l_membufTargetList;
     getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
+    dramTPool l_dramTp;
+
     for (TargetHandleList::const_iterator
          l_membuf_iter = l_membufTargetList.begin();
          l_membuf_iter != l_membufTargetList.end();
@@ -942,16 +946,16 @@ void*    call_mss_draminit_training( void *io_pArgs )
                    "Running mss_draminit_training HWP on "
                    "target HUID %.8X", TARGETING::get_huid(l_pCentaur));
 
-        draminitTask * l_task = new draminitTask(& Singleton<dramTPool>::instance(),
+        draminitTask * l_task = new draminitTask(& l_dramTp,
                                                  mss_draminit_training,
                                                  l_pCentaur, true);
-        Singleton<dramTPool>::instance().dispatch(l_task);
+        l_dramTp.dispatch(l_task);
     }
 
     //Wait for completion
-    Singleton<dramTPool>::instance().waitForCompletion();
+    l_dramTp.waitForCompletion();
     errList l_errors;
-    Singleton<dramTPool>::instance().getErrors(l_errors);
+    l_dramTp.getErrors(l_errors);
     for(errList::const_iterator errItr= l_errors.begin();
         errItr != l_errors.end(); ++errItr)
     {
@@ -998,6 +1002,8 @@ void*    call_mss_draminit_trainadv( void *io_pArgs )
     TARGETING::TargetHandleList l_membufTargetList;
     getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
+    dramTPool l_dramTp;
+
     for (TargetHandleList::const_iterator
          l_membuf_iter = l_membufTargetList.begin();
          l_membuf_iter != l_membufTargetList.end();
@@ -1011,16 +1017,16 @@ void*    call_mss_draminit_trainadv( void *io_pArgs )
                    "Running mss_draminit_training_advanced HWP on "
                    "target HUID %.8X", TARGETING::get_huid(l_pCentaur));
 
-        draminitTask * l_task = new draminitTask(& Singleton<dramTPool>::instance(),
+        draminitTask * l_task = new draminitTask(& l_dramTp,
                                                  mss_draminit_training_advanced,
                                                  l_pCentaur, true);
-        Singleton<dramTPool>::instance().dispatch(l_task);
+        l_dramTp.dispatch(l_task);
     }
 
     //Wait for completion
-    Singleton<dramTPool>::instance().waitForCompletion();
+    l_dramTp.waitForCompletion();
     errList l_errors;
-    Singleton<dramTPool>::instance().getErrors(l_errors);
+    l_dramTp.getErrors(l_errors);
     for(errList::const_iterator errItr= l_errors.begin();
         errItr != l_errors.end(); ++errItr)
     {
