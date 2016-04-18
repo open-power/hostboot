@@ -291,8 +291,8 @@ fapi2::ReturnCode stop_gpe_reset(
                 "STOP GPE Init timeout");
 
     FAPI_INF("   Clear SGPE_ACTIVE in OCC Flag Register...");
-    l_data64.setBit<p9hcd::SGPE_ACTIVE>();
-    FAPI_TRY(putScom(i_target, PU_OCB_OCI_OCCFLG_CLEAR, l_data64));
+    l_data64.flush<0>().setBit<p9hcd::SGPE_ACTIVE>();
+    FAPI_TRY(putScom(i_target, PU_OCB_OCI_OCCFLG_SCOM1, l_data64));
 
 fapi_try_exit:
     FAPI_IMP("<< stop_gpe_reset...");
