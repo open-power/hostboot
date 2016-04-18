@@ -52,7 +52,8 @@ extern "C"
 {
 
     /**
-     * @brief Clears PHY Rx/Tx FIRs on a the XBUS(EDI+) instance.
+     * @brief Clears PHY Rx/Tx FIRs on the XBUS(EDI+) specified target.  The FIRs
+     *   are cleared by toggling a rx & tx fir reset bit.
      * @param[in] i_target         FAPI2 Target
      * @param[in] i_clock_group    Clock Group
      * @retval ReturnCode
