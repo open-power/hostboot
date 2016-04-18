@@ -50,7 +50,7 @@
 // Includes
 // ----------------------------------------------------------------------------
 #include "p9_io_xbus_read_erepair.H"
-#include "p9_io_gcr.H"
+#include "p9_io_scom.H"
 #include "p9_io_regs.H"
 
 // ----------------------------------------------------------------------------
@@ -60,43 +60,51 @@
 
 /**
  * @brief A HWP that runs Read eRepair. This procedure reads the current bad
- * lanes and passes by reference the lane numbers in a vector.
- * @param[in] i_target        Reference to Target
- * @param[in] i_clock_group   Clock Group of Target
- * @param[out] o_bad_lanes    Vector of bad lanes
- * @retval ReturnCode
+ * lanes and passes by reference the lane numbers in a vector.  The rx vectors
+ * will return to the caller ( PRD or e-repair ) the bad lane numbers on this
+ * endpoint.  The caller will duplicate the found rx bad lanes to the
+ * corresponding tx bad lanes on the connected target.
+ * @param[in]  i_target        Reference to Target
+ * @param[in]  i_clock_group   Clock Group of Target
+ * @param[out] o_bad_lanes     Vector of bad lanes
+ * @retval     ReturnCode
  */
-fapi2::ReturnCode
-p9_io_xbus_read_erepair(const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target,
-                        const uint8_t& i_clock_group,
-                        std::vector< uint8_t >& o_bad_lanes)
+fapi2::ReturnCode p9_io_xbus_read_erepair(
+    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target,
+    const uint8_t&                                   i_clock_group,
+    std::vector< uint8_t >&                          o_bad_lanes )
 {
-    FAPI_IMP("Entering...");
+    FAPI_IMP("p9_io_xbus_read_erepair: Entering.");
 
-    fapi2::ReturnCode rc           = fapi2::FAPI2_RC_SUCCESS;
+    const uint8_t  LANE_00         = 0;
     const uint16_t BAD_LANES_3PLUS = 3;
     const uint16_t BAD_LANES_2     = 2;
     const uint16_t BAD_LANES_1     = 1;
     const uint16_t BAD_LANES_0     = 0;
-    Register < EDIP_RX_GLBSM_STAT9_E_PG > rx_bad_lanes_reg;
+    uint64_t       l_data          = 0;
 
     o_bad_lanes.clear();
 
-    FAPI_TRY(rx_bad_lanes_reg.read(i_target, i_clock_group), "Reading Bad Lane Code Failed.");
-    FAPI_DBG( "Bad Lane Code: %d", rx_bad_lanes_reg.get<EDIP_RX_BAD_LANE_CODE>() );
 
-    switch( rx_bad_lanes_reg.get<EDIP_RX_BAD_LANE_CODE>() )
+    FAPI_TRY(io::read( EDIP_RX_GLBSM_STAT9_E_PG, i_target, i_clock_group, LANE_00, l_data),
+             "Reading Bad Lane Code Failed.");
+
+    FAPI_DBG( "Bad Lane Code: %d", io::get( EDIP_RX_BAD_LANE_CODE, l_data ) );
+
+    switch( io::get( EDIP_RX_BAD_LANE_CODE, l_data ) )
     {
         case BAD_LANES_3PLUS:
             FAPI_DBG( "Bad Lane: Three or more bad lanes found." );
 
+        // We will intentionally fall through to collect bad lane 1 & 2.
         case BAD_LANES_2:
-            FAPI_DBG( "Bad Lane 2: %d", rx_bad_lanes_reg.get<EDIP_RX_BAD_LANE2>() );
-            o_bad_lanes.push_back( (uint8_t)rx_bad_lanes_reg.get<EDIP_RX_BAD_LANE2>() );
+            FAPI_DBG( "Bad Lane 2: %d", io::get( EDIP_RX_BAD_LANE2, l_data ) );
+            o_bad_lanes.push_back( (uint8_t)io::get( EDIP_RX_BAD_LANE2, l_data ) );
 
+        // We will intentionally fall through to collect bad lane 1.
         case BAD_LANES_1:
-            FAPI_DBG( "Bad Lane 1: %d", rx_bad_lanes_reg.get<EDIP_RX_BAD_LANE1>() );
-            o_bad_lanes.push_back( (uint8_t)rx_bad_lanes_reg.get<EDIP_RX_BAD_LANE1>() );
+            FAPI_DBG( "Bad Lane 1: %d", io::get( EDIP_RX_BAD_LANE1, l_data ) );
+            o_bad_lanes.push_back( (uint8_t)io::get( EDIP_RX_BAD_LANE1, l_data ) );
             break;
 
         case BAD_LANES_0:
@@ -107,7 +115,7 @@ p9_io_xbus_read_erepair(const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_targe
     }
 
 fapi_try_exit:
-    FAPI_IMP("Exiting...");
+    FAPI_IMP("p9_io_xbus_read_erepair: Exiting.");
     return fapi2::current_err;
 }
 
