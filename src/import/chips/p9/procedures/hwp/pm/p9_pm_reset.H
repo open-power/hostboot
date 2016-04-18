@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,9 +23,9 @@
 ///
 // *HWP HWP Owner        : Greg Still <stillgs@us.ibm.com>
 // *HWP HWP Backup Owner :
-// *HWP FW Owner         : Bilicon Patil <bilpatil@in.ibm.com>
+// *HWP FW Owner         : Sangeetha T S <sangeet2@in.ibm.com>
 // *HWP Team             : PM
-// *HWP Level            : 1
+// *HWP Level            : 2
 // *HWP Consumed by      : HS
 
 #ifndef _P9_PM_RESET_H
@@ -38,26 +38,39 @@
 // -----------------------------------------------------------------------------
 // Includes
 // -----------------------------------------------------------------------------
-#include <p9_pm.H>
 #include <fapi2.H>
+#include <p9_pm.H>
+#include <p9_pm_utils.H>
+#include <p9_misc_scom_addresses.H>
+#include <p9_pm_firinit.H>
+#include <p9_pm_occ_control.H>
+#include <p9_cpu_special_wakeup.H>
+#include <p9_pm_stop_gpe_init.H>
+#include <p9_pm_occ_gpe_init.H>
+#include <p9_pm_corequad_init.H>
+#include <p9_pm_pba_init.H>
+#include <p9_pm_occ_sram_init.H>
+#include <p9_pm_ocb_init.H>
+#include <p9_pm_pss_init.H>
 
+typedef fapi2::ReturnCode (*p9_pm_reset_FP_t) (
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
+
+// -----------------------------------------------------------------------------
+// Function Prototype
+// -----------------------------------------------------------------------------
 extern "C"
 {
 //------------------------------------------------------------------------------
 ///
-/// p9_pm_reset Call underlying unit procedures to perform readiness for
-///             reinitialization of PM complex.
+/// @brief Call underlying unit procedures to reset PM complex
 ///
-/// @param[in] i_target Primary Chip target which will be passed
-///                     to all the procedures
-/// @param[in] i_mode (PM_RESET (hard - will kill the PMC);
-///                    PM_RESET_SOFT (will not fully reset the PMC))
+/// @param[in] i_target Proc Chip target
 ///
 /// @return FAPI2_RC_SUCCESS on success, else error code.
 ///
     fapi2::ReturnCode p9_pm_reset(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        const uint32_t i_mode);
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 }
 
 #endif // _P9_PM_RESET_H
