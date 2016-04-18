@@ -5,8 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
-/* [+] Google Inc.                                                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,10 +28,17 @@
 #include <isteps/hwpisteperror.H>
 #include <initservice/isteps_trace.H>
 
+//HWP Invoker
+#include    <fapi2/plat_hwp_invoker.H>
+
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/util.H>
 #include    <targeting/common/utilFilter.H>
+#include    <fapi2/target.H>
+
+//From Import Directory (EKB Repository)
+#include    <p9_mem_pll_initf.H>
 
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
@@ -48,38 +54,30 @@ void* call_mem_pll_initf (void *io_pArgs)
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_pll_initf entry" );
 
-    // Get all Centaur targets
-    TARGETING::TargetHandleList l_membufTargetList;
-    getAllChips(l_membufTargetList, TYPE_MEMBUF);
+    // Get all Proc targets
+    TARGETING::TargetHandleList l_procTargetList;
+    getAllChips(l_procTargetList, TYPE_PROC);
 
-    for (TargetHandleList::const_iterator
-            l_membuf_iter = l_membufTargetList.begin();
-            l_membuf_iter != l_membufTargetList.end();
-            ++l_membuf_iter)
+    for (const auto & l_procChip: l_procTargetList)
     {
-        //  make a local copy of the target for ease of use
-        const TARGETING::Target* l_pCentaur = *l_membuf_iter;
-
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running cen_mem_pll_initf HWP on "
-                "target HUID %.8X", TARGETING::get_huid(l_pCentaur));
+                "Running p9_mem_pll_initf HWP on "
+                "target HUID %.8X", TARGETING::get_huid(l_procChip));
 
-        //@TODO RTC:133831 use fapi2 targets
-        // Cast to a FAPI type of target.
-        //const fapi::Target l_fapi_centaur( TARGET_TYPE_MEMBUF_CHIP,
-        //         (const_cast<TARGETING::Target*>(l_pCentaur)));
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+          l_fapi2_procChip( l_procChip);
 
-        //call cen_mem_pll_initf to do pll init
-        //FAPI_INVOKE_HWP(l_err, cen_mem_pll_initf, l_fapi_centaur);
+        //call cen_mem_pll_initf to do pll l_fapi2_memChip
+        FAPI_INVOKE_HWP(l_err, p9_mem_pll_initf, l_fapi2_procChip);
 
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR 0x%.8X: cen_mem_pll_initf HWP returns error",
+                      "ERROR 0x%.8X: p9_mem_pll_initf HWP returns error",
                       l_err->reasonCode());
 
             // capture the target data in the elog
-            ErrlUserDetailsTarget(l_pCentaur).addToLog(l_err );
+            ErrlUserDetailsTarget(l_procChip).addToLog(l_err );
 
             //Create IStep error log and cross reference to error that occurred
             l_StepError.addErrorDetails(l_err);
@@ -90,7 +88,7 @@ void* call_mem_pll_initf (void *io_pArgs)
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "SUCCESS: cen_mem_pll_initf HWP( )" );
+                        "SUCCESS: p9_mem_pll_initf HWP( )" );
         }
     }
 
