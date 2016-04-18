@@ -7,7 +7,7 @@
 #
 # EKB Project
 #
-# COPYRIGHT 2015
+# COPYRIGHT 2015,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -17,5 +17,5 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_pm_firinit
-libp9_pm_firinit_DEPLIBS += p9_pm_utils
+#libp9_pm_firinit_DEPLIBS += p9_pm_occ_firinit p9_pm_pba_firinit p9_pm_ppm_firinit p9_pm_cme_firinit
 $(call BUILD_PROCEDURE)
