@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,6 +26,10 @@
 #include <errl/errlmanager.H>
 #include <isteps/hwpisteperror.H>
 #include <initservice/isteps_trace.H>
+#include <targeting/common/utilFilter.H>
+#include <diag/attn/attn.H>
+#include <diag/mdia/mdia.H>
+#include <targeting/namedtarget.H>
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -33,38 +37,73 @@ using   namespace   ERRORLOG;
 
 namespace ISTEP_14
 {
-void* call_mss_memdiag (void *io_pArgs)
+void* call_mss_memdiag (void* io_pArgs)
 {
-    errlHndl_t  l_errl  =   NULL;
+    errlHndl_t l_errl = NULL;
 
-    IStepError  l_stepError;
+    IStepError l_stepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "call_mss_extent_setup entry" );
+    TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+              "call_mss_memdiag entry");
 
-    //@TODO RTC:133831 call the HWP
-    //FAPI_INVOKE_HWP( l_errl, mss_extent_setup );
+    TARGETING::TargetHandleList l_targetList;
+    TARGETING::TYPE targetType;
 
-    if ( l_errl )
+    // we need to check the model of the master core
+    // if it is Cumulus then we will use TYPE_MBA for targetType
+    // else it is Nimbus so then we will use TYPE_MCBIST for targetType
+    const TARGETING::Target* masterCore = TARGETING::getMasterCore();
+
+    if ( TARGETING::MODEL_CUMULUS ==
+         masterCore->getAttr<TARGETING::ATTR_MODEL>() )
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR : failed executing mss_extent_setup returning error" );
-
-        // Create IStep error log and cross reference to error that occurred
-        l_stepError.addErrorDetails( l_errl );
-
-        // Commit Error
-        errlCommit( l_errl, HWPF_COMP_ID );
+        targetType = TARGETING::TYPE_MBA;
     }
     else
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "SUCCESS : mss_extent_setup completed ok" );
+        targetType = TARGETING::TYPE_MCBIST;
     }
 
+    getAllChiplets(l_targetList, targetType);
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "call_mss_extent_setup exit" );
+    do
+    {
+        l_errl = ATTN::startService();
+        if( NULL != l_errl )
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ATTN startService failed");
+            break;
+        }
+
+        l_errl = MDIA::runStep(l_targetList);
+        if( NULL != l_errl )
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "MDIA subStep failed");
+            break;
+        }
+
+        l_errl = ATTN::stopService();
+        if( NULL != l_errl )
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ATTN stopService failed");
+            break;
+        }
+
+    }while( 0 );
+
+    if( NULL != l_errl )
+    {
+        // Create IStep error log and cross reference to error that occurred
+        l_stepError.addErrorDetails(l_errl);
+
+        // Commit Error
+        errlCommit(l_errl, HWPF_COMP_ID);
+    }
+
+    TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+              "call_mss_memdiag exit");
 
     // end task, returning any errorlogs to IStepDisp
     return l_stepError.getErrorHandle();
