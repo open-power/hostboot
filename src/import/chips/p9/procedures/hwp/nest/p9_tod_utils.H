@@ -262,7 +262,8 @@ extern "C" {
         TOD_STATUS,
         TOD_CLEANUP,
         TOD_CHECK_OSC,
-        TOD_MOVE_TOD_TO_TB
+        TOD_MOVE_TOD_TO_TB,
+        TOD_SAVE_CONFIG
     };
 
     // Input which determines the master oscillator to use
