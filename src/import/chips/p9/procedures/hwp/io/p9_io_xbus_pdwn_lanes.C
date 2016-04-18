@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,7 +44,7 @@
 // Includes
 // ----------------------------------------------------------------------------
 #include "p9_io_xbus_pdwn_lanes.H"
-#include "p9_io_gcr.H"
+#include "p9_io_scom.H"
 #include "p9_io_regs.H"
 
 // ----------------------------------------------------------------------------
@@ -61,32 +61,29 @@ fapi2::ReturnCode tx_pdwn_lanes(
 
 
 /**
- * @brief A HWP that powers down the specified lanes.
- * @param[in] i_rx_target        FAPI2 Rx Target
- * @param[in] i_rx_clock_group   Clock Group of Rx Target
- * @param[in] i_rx_bad_lanes     Vector of Rx Bad Lanes
- * @param[in] i_tx_target        FAPI2 Tx Target
- * @param[in] i_tx_clock_group   Clock Group of Tx Target
- * @param[in] i_tx_bad_lanes     Vector of Tx Bad Lanes
+ * @brief A HWP that powers down the specified lanes on a given EDI+ Xbus
+ *   target.  The rx & tx lanes in the vectors will be powered down on the
+ *   given target.  Note: This procedure does not power down any lanes on the
+ *   connected target of the link.
+ * @param[in] i_target        FAPI2 Target
+ * @param[in] i_group         Clock Group of Target
+ * @param[in] i_rx_bad_lanes  Vector of Rx Bad Lanes
+ * @param[in] i_tx_bad_lanes  Vector of Tx Bad Lanes
  * @retval ReturnCode
  */
-fapi2::ReturnCode
-p9_io_xbus_pdwn_lanes(
-    const fapi2::Target< fapi2::TARGET_TYPE_XBUS >& i_rx_target,
-    const uint8_t& i_rx_clock_group,
-    const std::vector< uint8_t >& i_rx_bad_lanes,
-    const fapi2::Target< fapi2::TARGET_TYPE_XBUS >& i_tx_target,
-    const uint8_t& i_tx_clock_group,
-    const std::vector< uint8_t >& i_tx_bad_lanes)
+fapi2::ReturnCode p9_io_xbus_pdwn_lanes(
+    const fapi2::Target< fapi2::TARGET_TYPE_XBUS >& i_target,
+    const uint8_t&                                  i_group,
+    const std::vector< uint8_t >&                   i_rx_bad_lanes,
+    const std::vector< uint8_t >&                   i_tx_bad_lanes)
 {
     FAPI_IMP("Entering...");
-    fapi2::ReturnCode rc = fapi2::FAPI2_RC_SUCCESS;
 
     FAPI_DBG("Rx Bad Lanes Size: %d", i_rx_bad_lanes.size());
 
     if( !i_rx_bad_lanes.empty() )
     {
-        FAPI_TRY(rx_pdwn_lanes( i_rx_target, i_rx_clock_group, i_rx_bad_lanes),
+        FAPI_TRY(rx_pdwn_lanes( i_target, i_group, i_rx_bad_lanes),
                  "Rx Power Down Lanes Failed");
     }
 
@@ -94,7 +91,7 @@ p9_io_xbus_pdwn_lanes(
 
     if( !i_tx_bad_lanes.empty() )
     {
-        FAPI_TRY(tx_pdwn_lanes( i_tx_target, i_tx_clock_group, i_tx_bad_lanes),
+        FAPI_TRY(tx_pdwn_lanes( i_target, i_group, i_tx_bad_lanes),
                  "Tx Power Down Lanes Failed");
     }
 
@@ -104,84 +101,112 @@ fapi_try_exit:
 }
 
 /**
- * @brief Powers down Rx Lanes
- * @param[in] i_target           FAPI2 Rx Target
- * @param[in] i_clock_group      Clock Group of Target
- * @param[in] i_bad_lanes        Vector of Bad Lanes
+ * @brief A HWP that powers down the specified lanes on a given EDI+ Xbus
+ *   target.  The rx lanes in the vector will be powered down on the
+ *   given target.  Note: This procedure does not power down any lanes on the
+ *   connected target of the link.
+ * @param[in] i_target        FAPI2 Target
+ * @param[in] i_clock_group   Clock Group of Target
+ * @param[in] i_bad_lanes     Vector of Bad Lanes
+ * @retval ReturnCode
  */
 fapi2::ReturnCode rx_pdwn_lanes(
     const fapi2::Target< fapi2::TARGET_TYPE_XBUS >& i_target,
-    const uint8_t i_clock_group,
-    const std::vector< uint8_t >& i_bad_lanes)
+    const uint8_t&                                  i_clock_group,
+    const std::vector< uint8_t >&                   i_bad_lanes )
 {
-    FAPI_IMP("Entering...");
-    fapi2::ReturnCode rc = fapi2::FAPI2_RC_SUCCESS;
+    FAPI_DBG( "rx_pdwn_lanes: Enter Size(%d)", i_bad_lanes.size() );
     char target_string[fapi2::MAX_ECMD_STRING_LEN];
-    Register < EDIP_RX_BIT_MODE1_EO_PL > rx_dig_pdwn_reg;
-    Register < EDIP_RX_DAC_CNTL1_EO_PL > rx_ana_pdwn_reg;
+    fapi2::toString( i_target, target_string, fapi2::MAX_ECMD_STRING_LEN );
 
-    fapi2::toString(i_target, target_string, fapi2::MAX_ECMD_STRING_LEN);
-
-    for(uint8_t index = 0; index < i_bad_lanes.size(); ++index)
+    if( !i_bad_lanes.empty() )
     {
-        FAPI_DBG("Powering Down Lane[%d/%d]: Target(%s:g%d:l%d)",
-                 index,
-                 i_bad_lanes.size() - 1,
-                 target_string,
-                 i_clock_group,
-                 i_bad_lanes[index]);
+        for( uint8_t index = 0; index < i_bad_lanes.size(); ++index )
+        {
+            FAPI_DBG("Powering Down Rx Lane[%d/%d]: Target(%s:g%d:l%d)",
+                     index,
+                     i_bad_lanes.size() - 1,
+                     target_string,
+                     i_clock_group,
+                     i_bad_lanes[index] );
 
-        FAPI_TRY(rx_dig_pdwn_reg.read(i_target, i_clock_group, i_bad_lanes[index]),
-                 "Failed reading rx dig pdwn reg");
-        rx_dig_pdwn_reg.set<EDIP_RX_LANE_DIG_PDWN>(0x1);
-        FAPI_TRY(rx_dig_pdwn_reg.write(i_target, i_clock_group, i_bad_lanes[index]),
-                 "Failed writing rx dig pdwn reg");
+            FAPI_TRY( io::rmw( EDIP_RX_LANE_DIG_PDWN, i_target, i_clock_group, i_bad_lanes[index], 1 ),
+                      "Failed rmw rx dig pdwn reg" );
 
-        FAPI_TRY(rx_ana_pdwn_reg.read(i_target, i_clock_group, i_bad_lanes[index]),
-                 "Failed reading rx ana pdwn reg");
-        rx_ana_pdwn_reg.set<EDIP_RX_LANE_ANA_PDWN>(0x1);
-        FAPI_TRY(rx_ana_pdwn_reg.write(i_target, i_clock_group, i_bad_lanes[index]),
-                 "Failed writing rx ana pdwn reg");
+            FAPI_TRY( io::rmw( EDIP_RX_LANE_ANA_PDWN, i_target, i_clock_group, i_bad_lanes[index], 1 ),
+                      "Failed rmw rx ana pdwn reg" );
+
+        }
     }
 
 fapi_try_exit:
-    FAPI_IMP("Exiting...");
+    FAPI_IMP( "rx_pdwn_lanes: Exiting." );
     return fapi2::current_err;
 }
 
 /**
- * @brief Powers down Tx Lanes
- * @param[in] i_target           FAPI2 Rx Target
- * @param[in] i_clock_group      Clock Group of Target
- * @param[in] i_bad_lanes        Vector of Bad Lanes
+ * @brief A HWP that powers down the specified lanes on a given EDI+ Xbus
+ *   target.  The tx lanes in the vector will be powered down on the
+ *   given target.  Note: This procedure does not power down any lanes on the
+ *   connected target of the link.
+ * @param[in] i_target        FAPI2 Target
+ * @param[in] i_group         Clock Group of Target
+ * @param[in] i_bad_lanes     Vector of Bad Lanes
+ * @retval ReturnCode
  */
 fapi2::ReturnCode tx_pdwn_lanes(
     const fapi2::Target< fapi2::TARGET_TYPE_XBUS >& i_target,
-    const uint8_t i_clock_group,
-    const std::vector< uint8_t >& i_bad_lanes)
+    const uint8_t&                                  i_group,
+    const std::vector< uint8_t >&                   i_bad_lanes )
 {
-    FAPI_IMP("Entering...");
-    fapi2::ReturnCode rc = fapi2::FAPI2_RC_SUCCESS;
+    FAPI_IMP( "tx_pdwn_lanes: Enter Size(%d)", i_bad_lanes.size() );
+    const uint8_t LANE_00 = 0;
+    uint8_t l_msbswap = 0;
+    uint8_t l_end_lane = 0;
+    uint8_t l_lane = 0;
+    uint64_t l_data = 0;
     char target_string[fapi2::MAX_ECMD_STRING_LEN];
-    Register < EDIP_TX_MODE1_PL > tx_pdwn_reg;
+    fapi2::toString( i_target, target_string, fapi2::MAX_ECMD_STRING_LEN );
 
-    fapi2::toString(i_target, target_string, fapi2::MAX_ECMD_STRING_LEN);
-
-    for(uint8_t index = 0; index < i_bad_lanes.size(); ++index)
+    if( !i_bad_lanes.empty() )
     {
-        FAPI_DBG("Powering Down Lane[%d/%d]: Target(%s:g%d:l%d)",
-                 index,
-                 i_bad_lanes.size() - 1,
-                 target_string,
-                 i_clock_group,
-                 i_bad_lanes[index]);
+        FAPI_TRY( io::read( EDIP_TX_MSBSWAP, i_target, i_group, LANE_00, l_data ),
+                  "Failed read edip_tx_msbswap");
+        l_msbswap = io::get(EDIP_TX_MSBSWAP, l_data );
 
-        FAPI_TRY(tx_pdwn_reg.read(i_target, i_clock_group, i_bad_lanes[index]), "Failed reading tx pdwn reg");
-        tx_pdwn_reg.set<EDIP_TX_LANE_PDWN>(0x1);
-        FAPI_TRY(tx_pdwn_reg.write(i_target, i_clock_group, i_bad_lanes[index]), "Failed writing tx pdwn reg");
+        if( l_msbswap == 0x1 )
+        {
+            FAPI_TRY( io::read( EDIP_TX_END_LANE_ID, i_target, i_group, LANE_00, l_data ),
+                      "Failed read edip_tx_end_lane_id");
+            l_end_lane = io::get(EDIP_TX_END_LANE_ID, l_data );
+            FAPI_DBG( "edip_tx_msbswap: tx_end_lane_id(%d).", l_end_lane );
+        }
+
+        for(uint8_t index = 0; index < i_bad_lanes.size(); ++index )
+        {
+            l_lane = i_bad_lanes[index];
+
+            if( l_msbswap == 0x1 )
+            {
+                l_lane = l_end_lane - i_bad_lanes[index];
+                FAPI_DBG( "edip_tx_msbswap: tx_end_lane_id(%d) lane(%d -> %d).",
+                          l_end_lane, i_bad_lanes[index], l_lane );
+            }
+
+            FAPI_DBG("Powering Down Tx Lane[%d/%d]: Target(%s:g%d:l%d)",
+                     index,
+                     i_bad_lanes.size() - 1,
+                     target_string,
+                     i_group,
+                     l_lane );
+
+            FAPI_TRY( io::rmw( EDIP_TX_LANE_PDWN, i_target, i_group, l_lane, 1 ),
+                      "Failed rmw tx pdwn");
+
+        }
     }
 
 fapi_try_exit:
-    FAPI_IMP("Exiting...");
+    FAPI_IMP( "tx_pdwn_lanes: Exiting" );
     return fapi2::current_err;
 }

@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,8 +38,6 @@ typedef fapi2::ReturnCode (*p9_io_xbus_restore_erepair_FP_t) (
     const fapi2::Target < fapi2::TARGET_TYPE_XBUS >&,
     const uint8_t&,
     const std::vector< uint8_t >&,
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >&,
-    const uint8_t&,
     const std::vector< uint8_t >&);
 
 extern "C"
@@ -47,23 +45,23 @@ extern "C"
 
     /**
      * @brief A HWP that runs Restore eRepair.  This procedure should update the
-     * bad lane vector and power down the bad lanes.
-     * @param[in] i_rx_target        FAPI2 Rx Target
-     * @param[in] i_rx_clock_group   Rx Clock Group of Rx Target
-     * @param[in] i_rx_bad_lanes     Vector of Rx Bad Lanes
-     * @param[in] i_tx_target FAPI2  Tx Target
-     * @param[in] i_tx_clock_group   Tx Clock Group of Tx Target
-     * @param[in] i_tx_bad_lanes     Vector of Tx Bad Lanes
-     * @retval ReturnCode
+     * bad lane vector and power down the bad lanes.  The rx bad lanes will update
+     * the bad lane vector of the passed target.  The lanes specified in the
+     * i_rx_bad_lanes and in the i_tx_bad_lanes vectors will be powered down on the
+     * target that is passed in.  Note: This procedure does not power down any
+     * bad lanes on the connected target.
+     * @param[in] i_target        FAPI2 Target
+     * @param[in] i_group         Clock Group of Target
+     * @param[in] i_rx_bad_lanes  Vector of Rx Bad Lanes
+     * @param[in] i_tx_bad_lanes  Vector of Tx Bad Lanes
+     * @retval    ReturnCode
      */
     fapi2::ReturnCode
     p9_io_xbus_restore_erepair(
-        const fapi2::Target< fapi2::TARGET_TYPE_XBUS >& i_rx_target,
-        const uint8_t& i_rx_clock_group,
-        const std::vector< uint8_t >& i_rx_bad_lanes,
-        const fapi2::Target< fapi2::TARGET_TYPE_XBUS >& i_tx_target,
-        const uint8_t& i_tx_clock_group,
-        const std::vector< uint8_t >& i_tx_bad_lanes);
+        const fapi2::Target< fapi2::TARGET_TYPE_XBUS >& i_target,
+        const uint8_t&                                  i_group,
+        const std::vector< uint8_t >&                   i_rx_bad_lanes,
+        const std::vector< uint8_t >&                   i_tx_bad_lanes );
 
 } // extern "C"
 

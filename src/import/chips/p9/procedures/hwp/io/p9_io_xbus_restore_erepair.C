@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,7 +44,7 @@
 // Includes
 // ----------------------------------------------------------------------------
 #include "p9_io_xbus_restore_erepair.H"
-#include "p9_io_gcr.H"
+#include "p9_io_scom.H"
 #include "p9_io_regs.H"
 #include "p9_io_xbus_pdwn_lanes.H"
 
@@ -53,56 +53,52 @@
 // ----------------------------------------------------------------------------
 fapi2::ReturnCode set_rx_bad_lane_vectors(
     const fapi2::Target< fapi2::TARGET_TYPE_XBUS >& i_rx_target,
-    const uint8_t& i_rx_clock_group,
-    const std::vector< uint8_t >& i_rx_bad_lanes);
+    const uint8_t&                                  i_rx_clock_group,
+    const std::vector< uint8_t >&                   i_rx_bad_lanes );
 
 
 /**
  * @brief A HWP that runs Restore eRepair.  This procedure should update the
- * bad lane vector and power down the bad lanes. If either rx_bad_lanes or
- * tx_bad_lanes are empty, the corresponding [rx/tx] target will not be
- * worked on.
- * @param[in] i_rx_target        FAPI2 Rx Target
- * @param[in] i_rx_clock_group   Rx Clock Group of Rx Target
- * @param[in] i_rx_bad_lanes     Vector of Rx Bad Lanes
- * @param[in] i_tx_target        FAPI2  Tx Target
- * @param[in] i_tx_clock_group   Tx Clock Group of Tx Target
- * @param[in] i_tx_bad_lanes     Vector of Tx Bad Lanes
- * @retval ReturnCode
+ * bad lane vector and power down the bad lanes.  The rx bad lanes will update
+ * the bad lane vector of the passed target.  The lanes specified in the
+ * i_rx_bad_lanes and in the i_tx_bad_lanes vectors will be powered down on the
+ * target that is passed in.  Note: This procedure does not power down any
+ * bad lanes on the connected target.
+ * @param[in] i_target        FAPI2 Target
+ * @param[in] i_group         Clock Group of Target
+ * @param[in] i_rx_bad_lanes  Vector of Rx Bad Lanes
+ * @param[in] i_tx_bad_lanes  Vector of Tx Bad Lanes
+ * @retval    ReturnCode
  */
 fapi2::ReturnCode
 p9_io_xbus_restore_erepair(
-    const fapi2::Target< fapi2::TARGET_TYPE_XBUS >& i_rx_target,
-    const uint8_t& i_rx_clock_group,
-    const std::vector< uint8_t >& i_rx_bad_lanes,
-    const fapi2::Target< fapi2::TARGET_TYPE_XBUS >& i_tx_target,
-    const uint8_t& i_tx_clock_group,
-    const std::vector< uint8_t >& i_tx_bad_lanes)
+    const fapi2::Target< fapi2::TARGET_TYPE_XBUS >& i_target,
+    const uint8_t&                                  i_clock_group,
+    const std::vector< uint8_t >&                   i_rx_bad_lanes,
+    const std::vector< uint8_t >&                   i_tx_bad_lanes )
 {
-    FAPI_IMP("Entering...");
-    fapi2::ReturnCode rc = fapi2::FAPI2_RC_SUCCESS;
+    FAPI_IMP( "Entering..." );
 
-    FAPI_DBG("Rx Bad Lanes Size: %d", i_rx_bad_lanes.size());
-    FAPI_DBG("Tx Bad Lanes Size: %d", i_tx_bad_lanes.size());
+    FAPI_DBG( "Rx Bad Lanes Size: %d", i_rx_bad_lanes.size() );
+    FAPI_DBG( "Tx Bad Lanes Size: %d", i_tx_bad_lanes.size() );
 
     if( !i_rx_bad_lanes.empty() )
     {
-        FAPI_TRY(set_rx_bad_lane_vectors(i_rx_target, i_rx_clock_group, i_rx_bad_lanes),
-                 "Setting Rx Bad Lane Vectors Failed");
+        FAPI_TRY( set_rx_bad_lane_vectors( i_target, i_clock_group, i_rx_bad_lanes ),
+                  "Setting Rx Bad Lane Vectors Failed" );
     }
 
-    FAPI_EXEC_HWP(rc,
-                  p9_io_xbus_pdwn_lanes,
-                  i_rx_target,
-                  i_rx_clock_group,
-                  i_rx_bad_lanes,
-                  i_tx_target,
-                  i_tx_clock_group,
-                  i_tx_bad_lanes);
-
+    // This function will power down the rx & tx lanes specified in the vectors
+    //   on the target that is passed in.
+    FAPI_EXEC_HWP( fapi2::current_err,
+                   p9_io_xbus_pdwn_lanes,
+                   i_target,
+                   i_clock_group,
+                   i_rx_bad_lanes,
+                   i_tx_bad_lanes );
 
 fapi_try_exit:
-    FAPI_IMP("Exiting...");
+    FAPI_IMP( "Exiting..." );
     return fapi2::current_err;
 }
 
@@ -113,49 +109,48 @@ fapi_try_exit:
  * @param[in] i_rx_bad_lanes     Vector of Bad Lanes
  */
 fapi2::ReturnCode set_rx_bad_lane_vectors(
-    const fapi2::Target< fapi2::TARGET_TYPE_XBUS >& i_rx_target,
-    const uint8_t& i_rx_clock_group,
-    const std::vector< uint8_t >& i_rx_bad_lanes)
+    const fapi2::Target< fapi2::TARGET_TYPE_XBUS >& i_target,
+    const uint8_t&                                  i_group,
+    const std::vector< uint8_t >&                   i_bad_lanes )
 {
     FAPI_IMP("Entering...");
-    fapi2::ReturnCode rc                = fapi2::FAPI2_RC_SUCCESS;
-    const uint8_t IO_GCR_REG_WIDTH      = 16;
-    uint8_t bad_lane                    = 0;
+    const uint8_t LANE_00          = 0;
+    const uint8_t IO_GCR_REG_WIDTH = 16;
+    uint8_t bad_lane               = 0;
+    uint64_t l_data                = 0;
     char target_string[fapi2::MAX_ECMD_STRING_LEN];
 
-    Register < EDIP_RX_CTL_STAT2_E_PG > rx_bad_lane_0_15_reg;
-    Register < EDIP_RX_CTL_STAT4_E_PG > rx_bad_lane_16_31_reg;
+    fapi2::toString(i_target, target_string, fapi2::MAX_ECMD_STRING_LEN);
 
-    fapi2::toString(i_rx_target, target_string, fapi2::MAX_ECMD_STRING_LEN);
-
-    for(uint8_t index = 0; index < i_rx_bad_lanes.size(); ++index)
+    for(uint8_t index = 0; index < i_bad_lanes.size(); ++index)
     {
-        bad_lane = i_rx_bad_lanes[index];
-        FAPI_DBG("Setting Bad Lane[%d/%d]:%d Target(%s:g%d)",
-                 index,
-                 i_rx_bad_lanes.size() - 1,
-                 bad_lane,
-                 target_string,
-                 i_rx_clock_group);
+        bad_lane = i_bad_lanes[index];
+        FAPI_DBG( "Setting Bad Lane[%d/%d]:%d Target(%s:g%d)",
+                  index,
+                  i_bad_lanes.size() - 1,
+                  bad_lane,
+                  target_string,
+                  i_group );
 
         // For each group, the bad lane vector is split up into 2 registers due
         //   to GCR registers only being 16 bits wide.
-        if( i_rx_bad_lanes[index] < IO_GCR_REG_WIDTH )
+        if( i_bad_lanes[index] < IO_GCR_REG_WIDTH )
         {
-            FAPI_TRY( rx_bad_lane_0_15_reg.read(i_rx_target, i_rx_clock_group),
-                      "Reading rx_bad_lane_0_15_reg failed" );
-            rx_bad_lane_0_15_reg.set( ( 0x8000 >> bad_lane ) | rx_bad_lane_0_15_reg.get() );
-            FAPI_TRY( rx_bad_lane_0_15_reg.write(i_rx_target, i_rx_clock_group),
-                      "Writing rx_bad_lane_0_15_reg failed" );
+            FAPI_TRY( io::read( EDIP_RX_LANE_BAD_VEC_0_15, i_target, i_group, LANE_00, l_data ),
+                      "RMW rx_bad_lane_0_15_reg failed" );
+            l_data |= ( 0x8000 >> bad_lane );
+            FAPI_TRY( io::write( EDIP_RX_LANE_BAD_VEC_0_15, i_target, i_group, LANE_00, l_data ),
+                      "RMW rx_bad_lane_0_15_reg failed" );
         }
         else
         {
             bad_lane -= IO_GCR_REG_WIDTH;
-            FAPI_TRY( rx_bad_lane_16_31_reg.read(i_rx_target, i_rx_clock_group),
-                      "Reading rx_bad_lane_16_31_reg failed" );
-            rx_bad_lane_16_31_reg.set( ( 0x8000 >> bad_lane ) | rx_bad_lane_16_31_reg.get() );
-            FAPI_TRY( rx_bad_lane_16_31_reg.write(i_rx_target, i_rx_clock_group),
-                      "Writing rx_bad_lane_16_31_reg failed" );
+
+            FAPI_TRY( io::read( EDIP_RX_LANE_BAD_VEC_16_23, i_target, i_group, LANE_00, l_data ),
+                      "RMW rx_bad_lane_16_23_reg failed" );
+            l_data |= ( 0x8000 >> bad_lane );
+            FAPI_TRY( io::write( EDIP_RX_LANE_BAD_VEC_16_23, i_target, i_group, LANE_00, l_data ),
+                      "RMW rx_bad_lane_16_23_reg failed" );
         }
 
     }

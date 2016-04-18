@@ -7,7 +7,7 @@
 #
 # EKB Project
 #
-# COPYRIGHT 2015
+# COPYRIGHT 2015,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -17,5 +17,6 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_io_xbus_restore_erepair
-p9_io_xbus_restore_erepair_USELIBS += p9_io_xbus_pdwn_lanes
+p9_io_xbus_restore_erepair_USELIBS += p9_io_xbus_rx_pdwn_lanes
+p9_io_xbus_restore_erepair_USELIBS += p9_io_xbus_tx_pdwn_lanes
 $(call BUILD_PROCEDURE)
