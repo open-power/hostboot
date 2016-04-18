@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,13 @@
 #include    <targeting/common/util.H>
 #include    <targeting/common/utilFilter.H>
 
+#include    <config.h>
+#include    <fapi2.H>
+#include    <fapi2/plat_hwp_invoker.H>
+//@TODO RTC:152210 Enable Istep 13 HWPs that are waiting on mirrored files
+// #include    <p9_mss_scominit.H>
+#include    <p9_throttle_sync.H>
+
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -50,38 +57,32 @@ void* call_mss_scominit (void *io_pArgs)
 
     do
     {
-        // Get all Centaur targets
-        TARGETING::TargetHandleList l_membufTargetList;
-        getAllChips(l_membufTargetList, TYPE_MEMBUF);
+        // Get all MCBIST targets
+        TARGETING::TargetHandleList l_mcbistTargetList;
+        getAllChiplets(l_mcbistTargetList, TYPE_MCBIST);
 
-        for (TargetHandleList::const_iterator
-                l_membuf_iter = l_membufTargetList.begin();
-                l_membuf_iter != l_membufTargetList.end();
-                ++l_membuf_iter)
+        for (const auto & l_target : l_mcbistTargetList)
         {
-            //  make a local copy of the target for ease of use
-            const TARGETING::Target* l_pCentaur = *l_membuf_iter;
-
             // Dump current run on target
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Running mss_scominit HWP on "
-                    "target HUID %.8X", TARGETING::get_huid(l_pCentaur));
+                    "Running p9_mss_scominit HWP on "
+                    "target HUID %.8X",
+                    TARGETING::get_huid(l_target));
 
-            //@TODO RTC:133831 Cast to a FAPI type of target.
-            //const fapi::Target l_fapi_centaur( TARGET_TYPE_MEMBUF_CHIP,
-            //        (const_cast<TARGETING::Target*>(l_pCentaur)) );
-
-            //  call the HWP with each fapi::Target
-            //FAPI_INVOKE_HWP(l_err, mss_scominit, l_fapi_centaur);
+            fapi2::Target <fapi2::TARGET_TYPE_MCBIST> l_fapi_target
+                (l_target);
+            //@TODO RTC:152210 Enable Istep 13 HWPs that are waiting on mirrored files
+            //  call the HWP with each fapi2::Target
+//             FAPI_INVOKE_HWP(l_err, p9_mss_scominit, l_fapi_target);
 
             if (l_err)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR 0x%.8X: mss_scominit HWP returns error",
+                          "ERROR 0x%.8X: p9_mss_scominit HWP returns error",
                           l_err->reasonCode());
 
                 // capture the target data in the elog
-                ErrlUserDetailsTarget(l_pCentaur).addToLog(l_err);
+                ErrlUserDetailsTarget(l_target).addToLog(l_err);
 
                 // Create IStep error log and cross reference to error that
                 // occurred
@@ -93,7 +94,7 @@ void* call_mss_scominit (void *io_pArgs)
             else
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "SUCCESS :  mss_scominit HWP( )" );
+                           "SUCCESS :  p9_mss_scominit HWP( )" );
             }
         }
         if (!l_stepError.isNull())
@@ -106,31 +107,27 @@ void* call_mss_scominit (void *io_pArgs)
         TARGETING::TargetHandleList l_cpuTargetList;
         getAllChips(l_cpuTargetList, TYPE_PROC);
 
-        for (TARGETING::TargetHandleList::const_iterator
-             l_cpuIter = l_cpuTargetList.begin();
-             l_cpuIter != l_cpuTargetList.end();
-             ++l_cpuIter)
+        for (const auto & l_procChip: l_cpuTargetList)
         {
-            const TARGETING::Target* l_pTarget = *l_cpuIter;
-            //@TODO RTC:133831
-            //fapi::Target l_fapiproc_target( TARGET_TYPE_PROC_CHIP,
-            //     (const_cast<TARGETING::Target*>(l_pTarget)));
+            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                l_fapi_cpu_target(l_procChip);
 
-            //TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            //        "Running proc_throttle_sync HWP on "
-            //        "target HUID %.8X", TARGETING::get_huid(l_pTarget));
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Running p9_throttle_sync HWP on "
+                   "target HUID %.8X", TARGETING::get_huid(l_procChip));
 
+//@TODO RTC:152210 Enable Istep 13 HWPs that are waiting on mirrored files
             // Call proc_throttle_sync
-            //FAPI_INVOKE_HWP( l_err, proc_throttle_sync, l_fapiproc_target );
+//             FAPI_INVOKE_HWP( l_err, p9_throttle_sync, l_fapi_cpu_target );
 
             if (l_err)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR 0x%.8X: proc_throttle_sync HWP returns error",
+                          "ERROR 0x%.8X: p9_throttle_sync HWP returns error",
                           l_err->reasonCode());
 
                 // Capture the target data in the elog
-                ErrlUserDetailsTarget(l_pTarget).addToLog(l_err);
+                ErrlUserDetailsTarget(l_procChip).addToLog(l_err);
 
                 // Create IStep error log and cross reference
                 // to error that occurred
@@ -142,14 +139,13 @@ void* call_mss_scominit (void *io_pArgs)
             else
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "SUCCESS :  proc_throttle_sync HWP( )" );
+                           "SUCCESS :  p9_throttle_sync HWP( )" );
             }
         }
 
     } while (0);
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_scominit exit" );
-
     return l_stepError.getErrorHandle();
 }
 

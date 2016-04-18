@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,7 @@
 #include <isteps/hwpisteperror.H>
 #include <initservice/isteps_trace.H>
 #include <initservice/initserviceif.H>
+#include <plat_trace.H>
 
 //  targeting support
 #include <targeting/common/commontargeting.H>
@@ -35,6 +36,11 @@
 #include <targeting/common/utilFilter.H>
 #include "istep13consts.H"
 #include "platform_vddr.H"
+
+#include    <fapi2.H>
+#include    <fapi2/plat_hwp_invoker.H>
+//TODO RTC:152209 Implement std::enable_if in HB
+// #include    <p9_mss_draminit.H>
 
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
@@ -53,7 +59,7 @@ void   mss_post_draminit( IStepError & l_stepError )
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "mss_post_draminit entry" );
 
-    //@TODO RTC: 133831. The helper function is currently commented out because
+    //@TODO RTC: 134081. The helper function is currently commented out because
     //some of the attributes don't exist. uncomment it once attribute support is
     //in place
 //    set_eff_config_attrs_helper(ISTEP_07::POST_DRAM_INIT, rerun_vddr);
@@ -66,7 +72,7 @@ void   mss_post_draminit( IStepError & l_stepError )
     }
 
     // Call mss_volt_vddr_offset to recalculate VDDR voltage
-    // @TODO RTC: 133831 Uncomment once attribute support is in place
+    // @TODO RTC: 152294 Uncomment once attribute support is in place
     /*
     l_err = ISTEP_07::setMemoryVoltageDomainOffsetVoltage<
         TARGETING::ATTR_MSS_VOLT_VDDR_OFFSET_DISABLE,
@@ -121,42 +127,31 @@ void* call_mss_draminit (void *io_pArgs)
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_draminit entry" );
 
-    // Get all MBA targets
-    TARGETING::TargetHandleList l_mbaTargetList;
-    getAllChiplets(l_mbaTargetList, TYPE_MBA);
+    // Get all MCBIST targets
+    TARGETING::TargetHandleList l_mcbistTargetList;
+    getAllChiplets(l_mcbistTargetList, TYPE_MCBIST);
 
-    // Limit the number of MBAs to run in VPO environment to save time.
-    uint8_t l_mbaLimit = l_mbaTargetList.size();
-    if (TARGETING::is_vpo() && (VPO_NUM_OF_MBAS_TO_RUN < l_mbaLimit))
+    for (const auto & l_mcbist_target : l_mcbistTargetList)
     {
-        l_mbaLimit = VPO_NUM_OF_MBAS_TO_RUN;
-    }
-
-    for ( uint8_t l_mbaNum=0; l_mbaNum < l_mbaLimit; l_mbaNum++ )
-    {
-        // Make a local copy of the target for ease of use
-        const TARGETING::Target*  l_mba_target = l_mbaTargetList[l_mbaNum];
-
         // Dump current run on target
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running mss_draminit HWP on "
-                "target HUID %.8X", TARGETING::get_huid(l_mba_target));
+                "Running p9_mss_draminit HWP on "
+                "target HUID %.8X", TARGETING::get_huid(l_mcbist_target));
 
-        //@TODO RTC:133831 Cast to a FAPI type of target.
-        //const fapi::Target l_fapi_mba_target( TARGET_TYPE_MBA_CHIPLET,
-        //        (const_cast<TARGETING::Target*>(l_mba_target)) );
+        fapi2::Target<fapi2::TARGET_TYPE_MCBIST> l_fapi_mcbist_target
+            (l_mcbist_target);
 
-        //  call the HWP with each fapi::Target
-        //FAPI_INVOKE_HWP(l_err, mss_draminit, l_fapi_mba_target);
+//TODO RTC:152209 Implement std::enable_if in HB
+//         FAPI_INVOKE_HWP(l_err, p9_mss_draminit, l_fapi_mcbist_target);
 
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR 0x%.8X : mss_draminit HWP returns error",
+                    "ERROR 0x%.8X : p9_mss_draminit HWP returns error",
                     l_err->reasonCode());
 
             // capture the target data in the elog
-            ErrlUserDetailsTarget(l_mba_target).addToLog(l_err);
+            ErrlUserDetailsTarget(l_mcbist_target).addToLog(l_err);
 
             // Create IStep error log and cross reference to error that occurred
             l_stepError.addErrorDetails( l_err );
@@ -170,7 +165,7 @@ void* call_mss_draminit (void *io_pArgs)
                     "SUCCESS :  mss_draminit HWP( )" );
         }
 
-    }   // endfor   mba's
+    }   // endfor   mcbist's
 
     // call POST_DRAM_INIT function
     if(INITSERVICE::spBaseServicesEnabled())

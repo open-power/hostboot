@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,13 @@
 #include <targeting/common/utilFilter.H>
 #include "istep13consts.H"
 
+#include    <config.h>
+#include    <fapi2.H>
+#include    <fapi2/plat_hwp_invoker.H>
+//TODO RTC:152209 Implement std::enable_if in HB
+// #include    <p9_mss_draminit_training.H>
+
+
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -50,43 +57,30 @@ void* call_mss_draminit_training (void *io_pArgs)
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                         "call_mss_draminit_training entry" );
 
-    // Get all MBA targets
-    TARGETING::TargetHandleList l_mbaTargetList;
-    getAllChiplets(l_mbaTargetList, TYPE_MBA);
+    // Get all MCBIST targets
+    TARGETING::TargetHandleList l_mcbistTargetList;
+    getAllChiplets(l_mcbistTargetList, TYPE_MCBIST);
 
-    // Limit the number of MBAs to run in VPO environment to save time.
-    uint8_t l_mbaLimit = l_mbaTargetList.size();
-    if (TARGETING::is_vpo() && (VPO_NUM_OF_MBAS_TO_RUN < l_mbaLimit))
+    for (const auto & l_mcbist_target : l_mcbistTargetList)
     {
-        l_mbaLimit = VPO_NUM_OF_MBAS_TO_RUN;
-    }
-
-    for ( uint8_t l_mbaNum=0; l_mbaNum < l_mbaLimit; l_mbaNum++ )
-    {
-        //  make a local copy of the target for ease of use
-        const TARGETING::Target*  l_mba_target = l_mbaTargetList[l_mbaNum];
-
         // Dump current run on target
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running mss_draminit_training HWP on "
-                "target HUID %.8X", TARGETING::get_huid(l_mba_target));
+                "Running p9_mss_draminit_training HWP on "
+                "target HUID %.8X", TARGETING::get_huid(l_mcbist_target));
 
-        //@TODO RTC:133831 Cast to a FAPI type of target.
-        //const fapi::Target l_fapi_mba_target( TARGET_TYPE_MBA_CHIPLET,
-        //                (const_cast<TARGETING::Target*>(l_mba_target)) );
-
-
-        //  call the HWP with each fapi::Target
-        //FAPI_INVOKE_HWP(l_err, mss_draminit_training, l_fapi_mba_target);
+        fapi2::Target <fapi2::TARGET_TYPE_MCBIST> l_fapi_mcbist_target
+            (l_mcbist_target);
+//TODO RTC:152209 Implement std::enable_if in HB
+//         FAPI_INVOKE_HWP(l_err, p9_mss_draminit_training, l_fapi_mcbist_target);
 
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR 0x%.8X : mss_draminit_training HWP returns error",
+                    "ERROR 0x%.8X : p9_mss_draminit_training HWP returns error",
                     l_err->reasonCode());
 
             // capture the target data in the elog
-            ErrlUserDetailsTarget(l_mba_target).addToLog( l_err );
+            ErrlUserDetailsTarget(l_mcbist_target).addToLog( l_err );
 
             // Create IStep error log and cross reference to error that occurred
             l_stepError.addErrorDetails( l_err );
@@ -97,7 +91,7 @@ void* call_mss_draminit_training (void *io_pArgs)
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "SUCCESS :  mss_draminit_training HWP( )" );
+                    "SUCCESS :  p9_mss_draminit_training HWP( )" );
         }
 
     }

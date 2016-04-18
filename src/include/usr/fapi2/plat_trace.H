@@ -37,9 +37,8 @@
 
 // Use the same macro from FAPI1
 #include <fapiPlatTrace.H>
-
 namespace fapi2
 {
-  static const uint32_t MAX_ECMD_STRING_LEN = 64;
+static const uint32_t MAX_ECMD_STRING_LEN = 64;
 }
 #endif // PLAT_TRACE_H_
