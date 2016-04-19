@@ -662,6 +662,15 @@ sub manipulateImages
     # structure should not be needed.
     my %supportedPartitions = (
         HBI => 1,
+        GUARD => 1,
+        HBEL => 1,
+        GLOBAL => 1,
+        DJVPD => 1,
+        MVPD => 1,
+        CVPD => 1,
+        PAYLOAD => 1,
+        TEST => 1,
+        TESTRO => 1
     );
 
     foreach my $key ( keys %sectionHash)
@@ -670,6 +679,7 @@ sub manipulateImages
         my $size = $sectionHash{$key}{physicalRegionSize};
         my $bin_file = "";
         my $final_bin_file = "$bin_dir/$eyeCatch.$image_target.bin";
+
         if(exists $$i_binFiles{$eyeCatch})
         {
             $bin_file = $$i_binFiles{$eyeCatch};
@@ -681,24 +691,26 @@ sub manipulateImages
             # FSP workaround to keep original bin names
             my $fsp_file = $bin_file;
             my $fsp_prefix = "";
-            # Header Phase
-            if( ($sectionHash{$key}{sha512Version} eq "yes") )
+            # Header Phase - only necessary if bin file passed in
+            if ($bin_file ne "")
             {
-                $fsp_prefix.=".header";
-                run_command("env echo -en VERSION\\\\0 > $tempImages{TEMP_SHA_IMG}");
-                run_command("sha512sum $bin_file | awk \'{print \$1}\' | xxd -pr -r >> $tempImages{TEMP_SHA_IMG}");
-                run_command("dd if=$tempImages{TEMP_SHA_IMG} of=$tempImages{HDR_PHASE} ibs=4k conv=sync");
-                run_command("cat $bin_file >> $tempImages{HDR_PHASE}");
+                if( ($sectionHash{$key}{sha512Version} eq "yes") )
+                {
+                    $fsp_prefix.=".header";
+                    run_command("env echo -en VERSION\\\\0 > $tempImages{TEMP_SHA_IMG}");
+                    run_command("sha512sum $bin_file | awk \'{print \$1}\' | xxd -pr -r >> $tempImages{TEMP_SHA_IMG}");
+                    run_command("dd if=$tempImages{TEMP_SHA_IMG} of=$tempImages{HDR_PHASE} ibs=4k conv=sync");
+                    run_command("cat $bin_file >> $tempImages{HDR_PHASE}");
+                }
+                elsif( ($sectionHash{$key}{sha512perEC} eq "yes") )
+                {
+                    # Placeholder for sha512perEC partitions
+                }
+                else
+                {
+                    run_command("cp $bin_file $tempImages{HDR_PHASE}");
+                }
             }
-            elsif( ($sectionHash{$key}{sha512perEC} eq "yes") )
-            {
-                # Placeholder for sha512perEC partitions
-            }
-            else
-            {
-                run_command("cp $bin_file $tempImages{HDR_PHASE}");
-            }
-
 
             # Padding Phase
             if ($sectionHash{$key}{ecc} eq "yes")
@@ -713,21 +725,40 @@ sub manipulateImages
                 # fully padded. Size adjustments made in checkSpaceConstraints
                 run_command("dd if=$tempImages{HDR_PHASE} of=$tempImages{PAD_PHASE} ibs=4k conv=sync");
             }
+            elsif ($bin_file eq "")
+            {
+                # Test partitions have random data
+                if ($eyeCatch eq "TEST" || $eyeCatch eq "TESTRO")
+                {
+                    run_command("dd if=/dev/urandom of=$tempImages{PAD_PHASE} count=1 bs=$size");
+                }
+                # Other partitions fill with FF's if no bin file provided
+                else
+                {
+                    run_command("dd if=/dev/zero bs=$size count=1 | tr \"\\000\" \"\\377\" > $tempImages{PAD_PHASE}");
+                }
+            }
             else
             {
                 run_command("dd if=$tempImages{HDR_PHASE} of=$tempImages{PAD_PHASE} ibs=$size conv=sync");
             }
 
             # Create .header.bin file for FSP
-            $fsp_file =~ s/.bin/$fsp_prefix.bin/;
-            run_command("cp $tempImages{PAD_PHASE} $fsp_file");
+            if ($fsp_file ne "")
+            {
+                $fsp_file =~ s/.bin/$fsp_prefix.bin/;
+                run_command("cp $tempImages{PAD_PHASE} $fsp_file");
+            }
 
             # ECC Phase
             if( ($sectionHash{$key}{ecc} eq "yes") )
             {
                 run_command("ecc --inject $tempImages{PAD_PHASE} --output $tempImages{ECC_PHASE} --p8");
                 # Create .bin.ecc file for FSP
-                run_command("cp $tempImages{ECC_PHASE} $fsp_file.ecc");
+                if ($fsp_file ne "")
+                {
+                    run_command("cp $tempImages{ECC_PHASE} $fsp_file.ecc");
+                }
             }
             else
             {

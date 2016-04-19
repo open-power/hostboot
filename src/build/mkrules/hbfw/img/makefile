@@ -62,15 +62,6 @@ BASE_W_HEADER_ECC_IMAGE = hostboot.header.bin.ecc
 BASE_ECC_IMAGE = hostboot.bin.ecc
 BASE_SHA_IMAGE = hostboot.sha.bin
 TEMP_IMAGE = hostboot.temp.bin
-TESTDATA = hbtestdata.bin
-TESTDATA_ECC = hbtestdata.bin.ecc
-HBEL_ECC_IMAGE = hbel.bin.ecc
-GUARD_ECC_IMAGE = guard.bin.ecc
-GLOBAL_ECC_IMAGE = global.bin.ecc
-DJVPD_ECC_IMAGE = djvpd.bin.ecc
-MVPD_ECC_IMAGE = mvpd.bin.ecc
-CVPD_ECC_IMAGE = cvpd.bin.ecc
-PAYLOAD_ECC_IMAGE = payload.bin.ecc
 SECUREBOOT_HEADER = secureboot.header
 SECUREBOOT_SIGNED_CONTAINER = secureboot_signed_container
 # DEV_KEY_DIR set by env variable
@@ -117,30 +108,6 @@ cp_hbfiles: .SPECTARG
 		${SIGNING_DIR}/build -good -if ${SECUREBOOT_HEADER} -of ${SECUREBOOT_SIGNED_CONTAINER} -bin ${TEMP_IMAGE} ${SIGN_BUILD_PARAMS}
 	.endif
 
-	# create data for a test partition in pnor
-	dd if=/dev/urandom of=${TESTDATA} count=1 bs=32K
-	ecc --inject ${TESTDATA} --output ${TESTDATA_ECC} --p8
-	# Fill the following partitions with FF's and then ECC them
-	dd if=/dev/zero bs=128K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
-	ecc --inject ${TEMP_IMAGE} --output ${HBEL_ECC_IMAGE} --p8
-	# GUARD partition
-	dd if=/dev/zero bs=16K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
-	ecc --inject ${TEMP_IMAGE} --output ${GUARD_ECC_IMAGE} --p8
-	# GLOBAL partition
-	dd if=/dev/zero bs=32K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
-	ecc --inject ${TEMP_IMAGE} --output ${GLOBAL_ECC_IMAGE} --p8
-	# DJVPD partition
-	dd if=/dev/zero bs=256K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
-	ecc --inject ${TEMP_IMAGE} --output ${DJVPD_ECC_IMAGE} --p8
-	# MVPD partition
-	dd if=/dev/zero bs=512K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
-	ecc --inject ${TEMP_IMAGE} --output ${MVPD_ECC_IMAGE} --p8
-	# CVPD partition
-	dd if=/dev/zero bs=256K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
-	ecc --inject ${TEMP_IMAGE} --output ${CVPD_ECC_IMAGE} --p8
-	# PAYLOAD partition
-	dd if=/dev/zero bs=20480K count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
-	ecc --inject ${TEMP_IMAGE} --output ${PAYLOAD_ECC_IMAGE} --p8
 	rm ${TEMP_IMAGE}
 
 clobber_cp_hbfiles:
@@ -218,7 +185,7 @@ PNOR_BUILD_SCRIPT = ${buildpnor.pl:P}
 #so need to use tryinclude for now.
 .tryinclude <${.PATH:Ffips_pnor.mk}>
 
-HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_W_HEADER_ECC_IMAGE},HBI=${EXT_IMAGE},HBRT=${HBRT_ECC_HEADER_IMAGE},TEST=${TESTDATA_ECC},TESTRO=${TESTDATA_ECC},HBEL=${HBEL_ECC_IMAGE},GUARD=${GUARD_ECC_IMAGE},GLOBAL=${GLOBAL_ECC_IMAGE},PAYLOAD=${PAYLOAD_ECC_IMAGE},CVPD=${CVPD_ECC_IMAGE},MVPD=${MVPD_ECC_IMAGE},DJVPD=${DJVPD_ECC_IMAGE}
+HOSTBOOT_DEFAULT_SECTIONS = HBB=${BASE_W_HEADER_ECC_IMAGE},HBI=${EXT_IMAGE},HBRT=${HBRT_ECC_HEADER_IMAGE}
 
 
 HBFW_OBJPATH = ${.PATH:M*obj*}
