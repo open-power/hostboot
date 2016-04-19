@@ -62,11 +62,6 @@ BASE_W_HEADER_ECC_IMAGE = hostboot.header.bin.ecc
 BASE_ECC_IMAGE = hostboot.bin.ecc
 BASE_SHA_IMAGE = hostboot.sha.bin
 TEMP_IMAGE = hostboot.temp.bin
-SECUREBOOT_HEADER = secureboot.header
-SECUREBOOT_SIGNED_CONTAINER = secureboot_signed_container
-# DEV_KEY_DIR set by env variable
-SIGN_PREFIX_PARAMS=-flag 0x80000000 -hka ${DEV_KEY_DIR}/hw_key_a -hkb ${DEV_KEY_DIR}/hw_key_b -hkc ${DEV_KEY_DIR}/hw_key_c -skp ${DEV_KEY_DIR}/sw_key_a
-SIGN_BUILD_PARAMS=-skp ${DEV_KEY_DIR}/sw_key_a
 ALL_HB_IMAGES = ${BASE_IMAGES} \
                 ${BASE_W_HEADER_IMAGE} \
                 ${BASE_ECC_IMAGE}\
@@ -99,14 +94,6 @@ cp_hbfiles: .SPECTARG
 	# HBRT partition
 	dd if=${TEMP_IMAGE} of=${HBRT_HEADER_IMAGE} ibs=3072K conv=sync
 	ecc --inject ${HBRT_HEADER_IMAGE} --output ${HBRT_ECC_HEADER_IMAGE} --p8
-
-	# Test signed container, SIGNING_DIR set by env variable
-	.if(${SECUREBOOT} && ${SIGNING_DIR})
-        # Key prefix used for all partitions
-		${SIGNING_DIR}/prefix -good -of ${SECUREBOOT_HEADER} ${SIGN_PREFIX_PARAMS}
-		dd if=/dev/zero count=1 | tr "\000" "\377" > ${TEMP_IMAGE}
-		${SIGNING_DIR}/build -good -if ${SECUREBOOT_HEADER} -of ${SECUREBOOT_SIGNED_CONTAINER} -bin ${TEMP_IMAGE} ${SIGN_BUILD_PARAMS}
-	.endif
 
 	rm ${TEMP_IMAGE}
 
@@ -280,7 +267,7 @@ ${IMAGE_TARGET}: ${IMAGE_LAYOUT} ${IMAGE_BINS} ${PNOR_BUILD_SCRIPT}
 		${PNOR_BUILD_SCRIPT} --pnorOutBin ${IMAGE_TARGET} \
 			${TARGET_TEST:b--test} --pnorLayout ${IMAGE_LAYOUT} \
 			${IMAGE_BIN_OPTION} --fpartCmd "fpart" --fcpCmd "fcp" \
-			--binDir ${PWD} --refactor-supported
+			--binDir ${PWD} --refactor-supported ${SECUREBOOT:b--secureboot}
 	.endif
 .endif
 
