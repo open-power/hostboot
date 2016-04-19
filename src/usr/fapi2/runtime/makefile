@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/fapi2/test/makefile $
+# $Source: src/usr/fapi2/runtime/makefile $
 #
 # OpenPOWER HostBoot Project
 #
@@ -22,16 +22,21 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-# @file src/usr/fapi2/test/makefile
 #
-# @brief Makefile for fapi2 test case directory
+# @file src/usr/fapi2/runtime/makefile
 #
-ROOTPATH = ../../../..
-MODULE = testfapi2
+# @brief Makefile rule for runtime fapi2 module
+#
 
-include fapi2Test.mk
+HOSTBOOT_RUNTIME = 1
+ROOTPATH = ../../../..
+
+MODULE = fapi2_rt
+
+SUBDIRS += test.d
+
+include ../fapi2.mk
 
 include ${ROOTPATH}/config.mk
 
-vpath %.C ${GENDIR}
-
+VPATH += ..

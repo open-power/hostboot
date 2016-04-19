@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -212,6 +212,15 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 *data64 = 0;
             }
 
+            // Fail on these addresses
+            // On real HW they would cause an error
+            // The test that sends these expects an error
+            if( addr == 0x11223344 ||
+                addr == 0x22334455 )
+            {
+                rc = 1;
+            }
+
             return rc;
         }
 
@@ -230,6 +239,15 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
 
             SCOM_KEY scomKey(chipid,addr);
             cv_scomMap[scomKey] = *data64;
+
+            // Fail on these addresses
+            // On real HW they would cause an error
+            // The test that sends these expects an error
+            if( addr == 0x11223344 ||
+                addr == 0x22334455 )
+            {
+                rc = 1;
+            }
 
             return rc;
         }

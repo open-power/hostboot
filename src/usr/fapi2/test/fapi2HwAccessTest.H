@@ -43,6 +43,7 @@
 #include <hwpf_fapi2_reasoncodes.H>
 #include <fapi2TestUtils.H>
 #include <p9_hwtests.H>
+#include <plat_hwp_invoker.H>
 
 
 
