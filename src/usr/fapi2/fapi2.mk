@@ -27,10 +27,17 @@
 #
 # @brief Makefile for fapi2 module
 #
+GENPATH?=$(ROOTPATH)/obj/genfiles
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
+EXTRAINCDIR += $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/
+
+include ${ROOTPATH}/src/build/mkrules/verbose.rules.mk
+define __CLEAN_TARGET
+CLEAN_TARGETS += $(1)
+endef
 
 #Hostboot objects
 OBJS += plat_utils.o
@@ -97,5 +104,14 @@ $(call GENPLUGINTARGET, ${PLAT_HWP_ERR_PARSER}) : \
 GEN_PASS_BODY += $(GEN_TARGETS)
 CLEAN_TARGETS += $(GEN_TARGETS)
 
+include ${ROOTPATH}/procedure.rules.mk
+include ${ROOTPATH}/src/import/tools/build/common.dir/script.rules.mk
+include ${ROOTPATH}/src/import/hwpf/fapi2/tools/parseErrorInfo.mk
+include ${ROOTPATH}/src/import/hwpf/fapi2/tools/parseAttributeInfo.mk
+include ${ROOTPATH}/src/import/hwpf/fapi2/tools/createIfAttrService.mk
+include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundv_bucket.mk
+include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundv_bucket_attr.mk
+
 VPATH += ${ROOTPATH}/src/import/hwpf/fapi2/src/
+VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
 VPATH += ${GENPATH}

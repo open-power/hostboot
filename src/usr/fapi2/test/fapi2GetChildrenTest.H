@@ -35,6 +35,9 @@
 #include <error_scope.H>
 
 
+namespace fapi2
+{
+
 class Fapi2GetChildrenTest : public CxxTest::TestSuite
 {
 public:
@@ -92,10 +95,10 @@ void test_fapi2GetChildren()
             break;
         }
 
-        TARGETING::Target* targeting_targets[NUM_TARGETS];
+        TARGETING::Target* targeting_targets[fapi2::NUM_TARGETS];
         generateTargets(l_nimbusProc, targeting_targets);
 
-        for( uint64_t x = 0; x < NUM_TARGETS; x++ )
+        for( uint64_t x = 0; x < fapi2::NUM_TARGETS; x++ )
         {
             if(targeting_targets[x] == NULL)
             {
@@ -448,3 +451,5 @@ void test_fapi2GetChildren()
 
 
 };
+
+} // namespace fapi2
