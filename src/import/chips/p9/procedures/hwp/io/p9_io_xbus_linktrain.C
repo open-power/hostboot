@@ -54,6 +54,7 @@
 //  Includes
 //-----------------------------------------------------------------------------
 #include <p9_io_xbus_linktrain.H>
+#include <p9_io_xbus_clear_firs.H>
 #include <p9_io_scom.H>
 #include <p9_io_regs.H>
 
@@ -140,51 +141,164 @@ fapi2::ReturnCode add_linktrain_timeout_ffdc(
     const uint8_t&                                   i_sgroup );
 
 /**
- * @brief Checks if the Xbus target is set to Master Mode
- * @param[in] i_target  Fapi2 Target
- * @retval    ReturnCode
+ * @brief Find which target is the master target.  If neither target is the master,
+ *   then we will throw an error.  The master / slave target will be set and passed
+ *   by reference.
+ * @param[in]  i_target            Fapi2 Target
+ * @param[in]  i_group             Clock Group
+ * @param[in]  i_connected_target  Connected Fapi2 Target
+ * @param[in]  i_connected_group   Connected Clock Group
+ * @param[out] o_mtarget           Master Fapi2 Target
+ * @param[out] o_mgroup            Master Clock Group
+ * @param[out] o_starget           Slave Fapi2 Target
+ * @param[out] o_sgroup            Slave Clock Group
+ * @retval     ReturnCode
  */
-fapi2::ReturnCode verify_master_mode( const fapi2::Target <fapi2::TARGET_TYPE_XBUS >& i_target );
+fapi2::ReturnCode find_master_endpoint(
+    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target,
+    const uint8_t&                                   i_group,
+    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_connected_target,
+    const uint8_t&                                   i_connected_group,
+    fapi2::Target < fapi2::TARGET_TYPE_XBUS >&       o_mtarget,
+    uint8_t&                                         o_mgroup,
+    fapi2::Target < fapi2::TARGET_TYPE_XBUS >&       o_starget,
+    uint8_t&                                         o_sgroup );
 
+/**
+ * @brief Enables the Tx Serializer Sync on Xbus (EDI Plus).
+ * @param[in]  i_mtarget   Master Fapi2 Target
+ * @param[in]  i_mgroup    Master clock group
+ * @param[in]  i_mtarget   Slave Fapi2 Target
+ * @param[in]  i_mgroup    Slave clock group
+ * @retval     fapi2::ReturnCode
+ */
+fapi2::ReturnCode tx_serializer_sync_power_on(
+    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_mtarget,
+    const uint8_t&                                   i_mgroup,
+    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_starget,
+    const uint8_t&                                   i_sgroup );
 
+/**
+ * @brief Disables the Tx Serializer Sync on Xbus (EDI Plus).
+ * @param[in]  i_mtarget   Master Fapi2 Target
+ * @param[in]  i_mgroup    Master clock group
+ * @param[in]  i_mtarget   Slave Fapi2 Target
+ * @param[in]  i_mgroup    Slave clock group
+ * @retval     fapi2::ReturnCode
+ */
+fapi2::ReturnCode tx_serializer_sync_power_off(
+    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_mtarget,
+    const uint8_t&                                   i_mgroup,
+    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_starget,
+    const uint8_t&                                   i_sgroup );
+
+/**
+ * @brief Reads bad lane vector data from the
+ *   passed target and stores the data in the vector.
+ * @param[in]  i_target     Fapi2 Target
+ * @param[in]  i_group      Clock Group
+ * @param[out] o_data       Data Vector of bad lane vector data
+ * @retval     ReturnCode
+ */
+fapi2::ReturnCode set_bad_lane_data(
+    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target,
+    const uint8_t&                                   i_group,
+    std::vector< uint8_t >&                          io_data );
+
+/**
+ * @brief Copmares the bad lane vector pre and post training.  If the data is
+ *   the same, then we will want to clear the firs, since the firs have already
+ *   been recorded.
+ * @param[in]  i_target     Fapi2 Target
+ * @param[in]  i_group      Clock Group
+ * @param[out] o_data       Data Vector of bad lane vector data
+ * @retval     ReturnCode
+ */
+fapi2::ReturnCode evaluate_bad_lane_data(
+    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target,
+    const uint8_t&                                   i_group,
+    std::vector< uint8_t >&                          io_data );
 
 
 /**
  * @brief A HWP that runs on every instance of the XBUS(EDI+)
- * @param[in] i_mtarget Reference to the Master Target
- * @param[in] i_mgroup  Master Target Clock Group
- * @param[in] i_starget Reference to the Slave Target
- * @param[in] i_sgroup  Slave Target Clock Group
+ * @param[in] i_target Reference to the Master Target
+ * @param[in] i_group  Master Target Clock Group
+ * @param[in] i_ctarget Reference to the Slave Target
+ * @param[in] i_cgroup  Slave Target Clock Group
  * @retval    ReturnCode
  */
 fapi2::ReturnCode p9_io_xbus_linktrain(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_mtarget,
-    const uint8_t&                                   i_mgroup,
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_starget,
-    const uint8_t&                                   i_sgroup )
+    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target,
+    const uint8_t&                                   i_group,
+    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_ctarget,
+    const uint8_t&                                   i_cgroup )
 {
     FAPI_IMP( "p9_io_xbus_linktrain: P9 I/O EDI+ Xbus Entering" );
+    fapi2::Target < fapi2::TARGET_TYPE_XBUS > l_mtarget;
+    fapi2::Target < fapi2::TARGET_TYPE_XBUS > l_starget;
+    uint8_t                                   l_mgroup                 = 0;
+    uint8_t                                   l_sgroup                 = 0;
+    std::vector < uint8_t >                   l_master_bad_lane_vector = { 0, 0, 0, 0 };
+    std::vector < uint8_t >                   l_slave_bad_lane_vector  = { 0, 0, 0, 0 };
+    char l_target_string[fapi2::MAX_ECMD_STRING_LEN];
+    char l_ctarget_string[fapi2::MAX_ECMD_STRING_LEN];
+    fapi2::toString( i_target,  l_target_string,  fapi2::MAX_ECMD_STRING_LEN );
+    fapi2::toString( i_ctarget, l_ctarget_string, fapi2::MAX_ECMD_STRING_LEN );
 
-    char l_mstring[fapi2::MAX_ECMD_STRING_LEN];
-    char l_sstring[fapi2::MAX_ECMD_STRING_LEN];
-    fapi2::toString( i_mtarget, l_mstring, fapi2::MAX_ECMD_STRING_LEN );
-    fapi2::toString( i_starget, l_sstring, fapi2::MAX_ECMD_STRING_LEN );
+    FAPI_DBG( "I/O Xbus Targets: Target(%s:g%d) Connected(%s:g%d)",
+              l_target_string, i_group,
+              l_ctarget_string, i_cgroup );
 
-    FAPI_DBG( "I/O Xbus Targets: Master(%s:g%d) Slave(%s:g%d)",
-              l_mstring, i_mgroup,
-              l_sstring, i_sgroup );
+    // Find which target is the master target.  If neither target is the master,
+    //   then we will throw an error.  The master / slave target will be set
+    //   and passed by reference.
+    FAPI_TRY( find_master_endpoint(
+                  i_target,  i_group,
+                  i_ctarget, i_cgroup,
+                  l_mtarget, l_mgroup,
+                  l_starget, l_sgroup ),
+              "Find Master Endpoint Failed" );
 
-    // Check if master target is actually master.
-    FAPI_TRY( verify_master_mode( i_mtarget ) );
+    FAPI_TRY( set_bad_lane_data( l_mtarget, l_mgroup, l_master_bad_lane_vector ),
+              "Pre Training: Get Bad Lane Vector Failed on Master" );
+
+    FAPI_TRY( set_bad_lane_data( l_starget, l_sgroup, l_slave_bad_lane_vector ),
+              "Pre Training: Get Bad Lane Vector Failed on Slave" );
+
+    // Clock Serializer Init -- isn't strictly necessary but does line up the
+    //   clock serializer counter wit the data slices.
+    FAPI_TRY( tx_serializer_sync_power_on( l_mtarget, l_mgroup, l_starget, l_sgroup ),
+              "tx_serializer_sync_power_on Failed." );
 
     // Start Slave Target Link Training
-    FAPI_TRY( linktrain_start( i_starget, i_sgroup, State::WDERF ), "Start Slave Training Failed" );
+    FAPI_TRY( linktrain_start( l_starget, l_sgroup, State::WDERF ),
+              "P9 IO Xbus Linktrain Start Slave Training Failed" );
 
     // Start Master Target Link Training
-    FAPI_TRY( linktrain_start( i_mtarget, i_mgroup, State::WDERF ), "Start Master Training Failed." );
+    FAPI_TRY( linktrain_start( l_mtarget, l_mgroup, State::WDERF ),
+              "P9 IO Xbus Linktrain Start Master Training Failed." );
 
     // Poll for Training to Complete on Master Target
-    FAPI_TRY( linktrain_poll( i_mtarget, i_mgroup, i_starget, i_sgroup, State::WDERF ), "Polling Failed" );
+    FAPI_TRY( linktrain_poll( l_mtarget, l_mgroup, l_starget, l_sgroup, State::WDERF ),
+              "P9 IO Xbus Linktrain Polling Failed" );
+
+    // Disable the Tx Serializer Sync
+    FAPI_TRY( tx_serializer_sync_power_off( l_mtarget, l_mgroup, l_starget, l_sgroup ),
+              "tx_serializer_sync_power_off Failed.");
+
+    FAPI_TRY( set_bad_lane_data( l_mtarget, l_mgroup, l_master_bad_lane_vector ),
+              "Post Training: Get Bad Lane Vector Failed on Master" );
+
+    FAPI_TRY( set_bad_lane_data( l_starget, l_sgroup, l_slave_bad_lane_vector ),
+              "Post Training: Get Bad Lane Vector Failed on Master" );
+
+    FAPI_TRY( evaluate_bad_lane_data( l_mtarget, l_mgroup, l_master_bad_lane_vector ),
+              "Post Training: Evaluate Firs Failed on Master" );
+
+    FAPI_TRY( evaluate_bad_lane_data( l_starget, l_sgroup, l_slave_bad_lane_vector ),
+              "Post Training: Evaluate Firs Failed on Slave" );
+
 
 fapi_try_exit:
     FAPI_IMP( "p9_io_xbus_linktrain: P9 I/O EDI+ Xbus Exiting" );
@@ -192,24 +306,232 @@ fapi_try_exit:
 }
 
 /**
- * @brief Checks if the Xbus target is set to Master Mode
- * @param[in] i_target  Fapi2 Target
- * @retval    ReturnCode
+ * @brief Find which target is the master target.  If neither target is the master,
+ *   then we will throw an error.  The master / slave target will be set and passed
+ *   by reference.
+ * @param[in]  i_target            Fapi2 Target
+ * @param[in]  i_group             Clock Group
+ * @param[in]  i_connected_target  Connected Fapi2 Target
+ * @param[in]  i_connected_group   Connected Clock Group
+ * @param[out] o_mtarget           Master Fapi2 Target
+ * @param[out] o_mgroup            Master Clock Group
+ * @param[out] o_starget           Slave Fapi2 Target
+ * @param[out] o_sgroup            Slave Clock Group
+ * @retval     ReturnCode
  */
-fapi2::ReturnCode verify_master_mode( const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target )
+fapi2::ReturnCode find_master_endpoint(
+    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target,
+    const uint8_t&                                   i_group,
+    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_connected_target,
+    const uint8_t&                                   i_connected_group,
+    fapi2::Target < fapi2::TARGET_TYPE_XBUS >&       o_mtarget,
+    uint8_t&                                         o_mgroup,
+    fapi2::Target < fapi2::TARGET_TYPE_XBUS >&       o_starget,
+    uint8_t&                                         o_sgroup )
 {
     uint8_t l_master_mode = 0;
+    uint8_t l_cmaster_mode = 0;
 
-    FAPI_IMP( "verify_master_mode: P9 I/O EDI+ Xbus Entering" );
+    FAPI_IMP( "find_master_endpoint: P9 I/O EDI+ Xbus Entering" );
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IO_XBUS_MASTER_MODE, i_target, l_master_mode) );
 
-    FAPI_ASSERT( ( l_master_mode == fapi2::ENUM_ATTR_IO_XBUS_MASTER_MODE_TRUE ),
-                 fapi2::IO_XBUS_NOT_MASTER().set_TARGET( i_target ),
-                 "I/O Xbus Target is not Master" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IO_XBUS_MASTER_MODE, i_connected_target, l_cmaster_mode) );
+
+    if( l_master_mode == fapi2::ENUM_ATTR_IO_XBUS_MASTER_MODE_TRUE )
+    {
+        FAPI_DBG( "find_master_endpoint: Target is Master" );
+        o_mtarget = i_target;
+        o_mgroup  = i_group;
+        o_starget = i_connected_target;
+        o_sgroup  = i_connected_group;
+    }
+    else if( l_cmaster_mode == fapi2::ENUM_ATTR_IO_XBUS_MASTER_MODE_TRUE )
+    {
+        FAPI_DBG( "find_master_endpoint: Connected target is Master" );
+        o_mtarget = i_connected_target;
+        o_mgroup  = i_connected_group;
+        o_starget = i_target;
+        o_sgroup  = i_group;
+    }
+    else
+    {
+        FAPI_ASSERT( false, fapi2::IO_XBUS_NOT_MASTER()
+                     .set_TARGET( i_target )
+                     .set_CTARGET( i_connected_target ),
+                     "find_master_endpoint: Neither target or connected target is master." );
+    }
 
 fapi_try_exit:
-    FAPI_IMP( "verify_master_mode: P9 I/O EDI+ Xbus Exiting" );
+    FAPI_IMP( "find_master_endpoint: P9 I/O EDI+ Xbus Exiting" );
+    return fapi2::current_err;
+}
+
+/**
+ * @brief Reads bad lane vector data from the
+ *   passed target and stores the data in the vector.
+ * @param[in]  i_target     Fapi2 Target
+ * @param[in]  i_group      Clock Group
+ * @param[out] o_data       Data Vector of bad lane vector data
+ * @retval     ReturnCode
+ */
+fapi2::ReturnCode set_bad_lane_data(
+    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target,
+    const uint8_t&                                   i_group,
+    std::vector< uint8_t >&                          io_data )
+{
+    FAPI_IMP( "set_bad_lane_data: P9 I/O EDI+ Xbus Entering" );
+    const uint8_t LANE_00                = 0;
+    const uint8_t LAST_BAD_LANE_0_15     = 0;
+    const uint8_t LAST_BAD_LANE_16_23    = 1;
+    const uint8_t CURRENT_BAD_LANE_0_15  = 2;
+    const uint8_t CURRENT_BAD_LANE_16_23 = 3;
+    uint64_t      l_data                 = 0;
+
+    FAPI_TRY( io::read( EDIP_RX_LANE_BAD_VEC_0_15, i_target, i_group, LANE_00, l_data ),
+              "rmw to edip_rx_lane_bad_vec_0_15 failed." );
+
+    io_data[LAST_BAD_LANE_0_15]    = io_data[CURRENT_BAD_LANE_0_15];
+    io_data[CURRENT_BAD_LANE_0_15] = io::get( EDIP_RX_LANE_BAD_VEC_0_15, l_data );
+
+    FAPI_TRY( io::read( EDIP_RX_LANE_BAD_VEC_16_23, i_target, i_group, LANE_00, l_data ),
+              "rmw to edip_rx_lane_bad_vec_16_23 failed." );
+
+    io_data[LAST_BAD_LANE_16_23]    = io_data[CURRENT_BAD_LANE_16_23];
+    io_data[CURRENT_BAD_LANE_16_23] = io::get( EDIP_RX_LANE_BAD_VEC_16_23, l_data );
+
+fapi_try_exit:
+    FAPI_IMP( "set_bad_lane_data: P9 I/O EDI+ Xbus Exiting" );
+    return fapi2::current_err;
+}
+
+
+/**
+ * @brief Copmares the bad lane vector pre and post training.  If the data is
+ *   the same, then we will want to clear the firs, since the firs have already
+ *   been recorded.
+ * @param[in]  i_target     Fapi2 Target
+ * @param[in]  i_group      Clock Group
+ * @param[out] o_data       Data Vector of bad lane vector data
+ * @retval     ReturnCode
+ */
+fapi2::ReturnCode evaluate_bad_lane_data(
+    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_target,
+    const uint8_t&                                   i_group,
+    std::vector< uint8_t >&                          io_data )
+{
+    FAPI_IMP( "evaluate_bad_lane_data: P9 I/O EDI+ Xbus Entering" );
+    const uint8_t LANE_00         = 0;
+    const uint8_t PRE_LANE_0_15   = 0;
+    const uint8_t PRE_LANE_16_23  = 1;
+    const uint8_t POST_LANE_0_15  = 2;
+    const uint8_t POST_LANE_16_23 = 3;
+    uint64_t      l_data          = 0;
+
+    // If the bad lane vector matches pre to post training, then the same bad
+    //   lanes that were previously found, were found again.  These bad lanes have
+    //   already been reported.  So we will clear the first related to these bad
+    //   lanes
+    if( ( io_data[PRE_LANE_0_15] == io_data[POST_LANE_0_15] ) &&
+        ( io_data[PRE_LANE_16_23] == io_data[POST_LANE_16_23] ) )
+    {
+        // If the entire bad lane vector equals 0, then we don't need to clear
+        //   any firs.
+        if(  io_data[POST_LANE_0_15] != 0 || io_data[POST_LANE_16_23] != 0 )
+        {
+            FAPI_TRY( p9_io_xbus_clear_firs( i_target, i_group ) );
+
+            // Clear BUS0_SPARE_DEPLOYED ( Bit 9 ).
+            FAPI_TRY( io::read( EDIP_SCOM_FIR_PB, i_target, i_group, LANE_00, l_data ) );
+            l_data &= 0xFF7FFFFFFFFFFFFFull;
+            FAPI_TRY( io::write( EDIP_SCOM_FIR_PB, i_target, i_group, LANE_00, l_data ) );
+        }
+    }
+
+fapi_try_exit:
+    FAPI_IMP( "evaluate_bad_lane_data: P9 I/O EDI+ Xbus Exiting" );
+    return fapi2::current_err;
+}
+
+
+/**
+ * @brief Enables the Tx Serializer Sync on Xbus (EDI Plus).
+ * @param[in]  i_mtarget   Master Fapi2 Target
+ * @param[in]  i_mgroup    Master clock group
+ * @param[in]  i_mtarget   Slave Fapi2 Target
+ * @param[in]  i_mgroup    Slave clock group
+ * @retval     fapi2::ReturnCode
+ */
+fapi2::ReturnCode tx_serializer_sync_power_on(
+    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_mtarget,
+    const uint8_t&                                   i_mgroup,
+    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_starget,
+    const uint8_t&                                   i_sgroup )
+{
+    FAPI_IMP( "tx_serializer_sync_power_on: I/O EDI+ Xbus Entering" );
+    const uint8_t XBUS_LANES = 17;
+    const uint8_t LANE_00 = 0;
+
+    FAPI_TRY( io::rmw( EDIP_TX_CLK_UNLOAD_CLK_DISABLE, i_mtarget, i_mgroup, LANE_00, 0 ),
+              "master rmw to edip_tx_clk_unload_clk_disable failed." );
+    FAPI_TRY( io::rmw( EDIP_TX_CLK_UNLOAD_CLK_DISABLE, i_starget, i_sgroup, LANE_00, 0 ),
+              "slave rmw to edip_tx_clk_unload_clk_disable failed." );
+
+    FAPI_TRY( io::rmw( EDIP_TX_CLK_RUN_COUNT, i_mtarget, i_mgroup, LANE_00, 0 ),
+              "master rmw to edip_tx_clk_run_count failed." );
+    FAPI_TRY( io::rmw( EDIP_TX_CLK_RUN_COUNT, i_starget, i_sgroup, LANE_00, 0 ),
+              "slave rmw to edip_tx_clk_run_count failed." );
+
+    FAPI_TRY( io::rmw( EDIP_TX_CLK_RUN_COUNT, i_mtarget, i_mgroup, LANE_00, 1 ),
+              "master rmw to edip_tx_clk_run_count failed." );
+    FAPI_TRY( io::rmw( EDIP_TX_CLK_RUN_COUNT, i_starget, i_sgroup, LANE_00, 1 ),
+              "slave rmw to edip_tx_clk_run_count failed." );
+
+    FAPI_TRY( io::rmw( EDIP_TX_CLK_UNLOAD_CLK_DISABLE, i_mtarget, i_mgroup, LANE_00, 1 ),
+              "master rmw to edip_tx_clk_unload_clk_disable failed." );
+    FAPI_TRY( io::rmw( EDIP_TX_CLK_UNLOAD_CLK_DISABLE, i_starget, i_sgroup, LANE_00, 1 ),
+              "slave rmw to edip_tx_clk_unload_clk_disable failed." );
+
+    for( uint8_t lane = 0; lane < XBUS_LANES; ++lane )
+    {
+        FAPI_TRY( io::rmw( EDIP_TX_UNLOAD_CLK_DISABLE, i_mtarget, i_mgroup, lane, 0x0 ),
+                  "master rmw to edip_tx_unload_clk_disable Failed" );
+        FAPI_TRY( io::rmw( EDIP_TX_UNLOAD_CLK_DISABLE, i_starget, i_sgroup, lane, 0x0 ),
+                  "slave rmw to edip_tx_unload_clk_disable Failed" );
+    }
+
+fapi_try_exit:
+    FAPI_IMP( "tx_serializer_sync_power_on: I/O EDI+ Xbus Exiting" );
+    return fapi2::current_err;
+}
+
+/**
+ * @brief Disables the Tx Serializer Sync on Xbus (EDI Plus).
+ * @param[in]  i_mtarget   Master Fapi2 Target
+ * @param[in]  i_mgroup    Master clock group
+ * @param[in]  i_mtarget   Slave Fapi2 Target
+ * @param[in]  i_mgroup    Slave clock group
+ * @retval     fapi2::ReturnCode
+ */
+fapi2::ReturnCode tx_serializer_sync_power_off(
+    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_mtarget,
+    const uint8_t&                                   i_mgroup,
+    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >& i_starget,
+    const uint8_t&                                   i_sgroup )
+{
+    FAPI_IMP( "tx_serializer_sync_power_off: I/O EDI+ Xbus Entering" );
+    const uint8_t XBUS_LANES = 17;
+
+    for( uint8_t lane = 0; lane < XBUS_LANES; ++lane )
+    {
+        FAPI_TRY( io::rmw( EDIP_TX_UNLOAD_CLK_DISABLE, i_mtarget, i_mgroup, lane, 0x1 ),
+                  "master rmw to edip_tx_unload_clk_disable Failed" );
+        FAPI_TRY( io::rmw( EDIP_TX_UNLOAD_CLK_DISABLE, i_starget, i_sgroup, lane, 0x1 ),
+                  "slave rmw to edip_tx_unload_clk_disable Failed" );
+    }
+
+fapi_try_exit:
+    FAPI_IMP( "tx_serializer_sync_power_off: I/O EDI+ Xbus Exiting" );
     return fapi2::current_err;
 }
 
@@ -273,6 +595,9 @@ fapi2::ReturnCode linktrain_poll(
     State          l_done_state     = State::NONE;
     State          l_failed_state   = State::NONE;
 
+
+    // In the P9 EDI+ Xbus unit model, polling finishes in
+    //   17 loops @ 20 million cycles = 340 million cycles
     while( ++l_loops < MAXLOOPS )
     {
         // Get Done/Failed WDERF Status

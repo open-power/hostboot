@@ -20,8 +20,9 @@
     <!-- *********************************************************************** -->
     <hwpError>
         <rc>RC_IO_XBUS_NOT_MASTER</rc>
-        <description>I/O Xbus Target was not a Master</description>
+        <description>I/O Xbus Target and Connected Target was not a Master</description>
         <ffdc>TARGET</ffdc>
+        <ffdc>CTARGET</ffdc>
     </hwpError>
     <!-- *********************************************************************** -->
     <hwpError>
