@@ -41,12 +41,12 @@
 namespace mss
 {
 
-enum throttle_multiplier : uint64_t
+enum THROTTLE_UTILS : uint64_t
 {
     // Dram data bus utilization is 4X the address bus utilization
     DRAM_BUS_UTILS = 4,
-    PERCENT_CONVERSION = 100;
-}
+    PERCENT_CONVERSION = 100,
+};
 
 ///
 /// @brief Calculate N (address operations) allowed within a window of M DRAM clocks
@@ -56,10 +56,10 @@ enum throttle_multiplier : uint64_t
 ///
 inline uint32_t commands_allowed_over_clock_window(uint8_t databus_util, uint32_t num_dram_clocks)
 {
-    divisor = DRAM_BUS_UTILS * PERCENT_CONVERSION;
-    divident = databus_utilization * dram_clocks;
-    quotient = divident / divisor;
-    remainder = divident % divisor;
+    uint32_t divisor = DRAM_BUS_UTILS * PERCENT_CONVERSION;
+    uint32_t divident = databus_util * num_dram_clocks;
+    uint32_t quotient = divident / divisor;
+    uint32_t remainder = divident % divisor;
 
     return quotient + (remainder == 0  ? 0 : 1);
 }
