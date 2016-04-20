@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2015
+# Contributors Listed Below - COPYRIGHT 2012,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -125,7 +125,7 @@ cp_hbfiles: .SPECTARG
 	# If "--test" flag set do not pad to ibs=5120k, as the test HBI images is
 	# possibly larger than parition size and does not need to be fully padded.
 	# Size adjustments made in buildpnor.pl
-	.if($TARGET_TEST)
+	.if(${TARGET_TEST})
 		dd if=${TEMP_IMAGE} of=${EXT_HEADER_IMAGE} ibs=4k conv=sync
 	.else
 		dd if=${TEMP_IMAGE} of=${EXT_HEADER_IMAGE} ibs=5120k conv=sync
