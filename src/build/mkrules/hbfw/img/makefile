@@ -197,18 +197,10 @@ clobber_cp_hbfiles:
 #################################################
 SBE_BUILD_SCRIPT = ${buildSbePart.pl:P}
 
-S1_EC13_BIN = ${ENGD_OBJPATH:Fs1_13.sbe_seeprom.hdr.bin}
-S1_EC20_BIN = ${ENGD_OBJPATH:Fs1_20.sbe_seeprom.hdr.bin}
-S1_EC21_BIN = ${ENGD_OBJPATH:Fs1_21.sbe_seeprom.hdr.bin}
-P8_EC10_BIN = ${ENGD_OBJPATH:Fp8_10.sbe_seeprom.hdr.bin}
-P8_EC20_BIN = ${ENGD_OBJPATH:Fp8_20.sbe_seeprom.hdr.bin}
-CENT_EC10_BIN = ${ENGD_OBJPATH:Fcentaur_10.sbe_seeprom.hdr.bin}
-CENT_EC20_BIN = ${ENGD_OBJPATH:Fcentaur_20.sbe_seeprom.hdr.bin}
+P9N_EC10_BIN = ${ENGD_OBJPATH:Fp9n_10.sbe_seeprom.hdr.bin}
 
 SBE_PART_INFO = \
-  s1SbePartition.bin:13=${S1_EC13_BIN},20=${S1_EC20_BIN},21=${S1_EC21_BIN} \
-  p8SbePartition.bin:10=${P8_EC10_BIN},20=${P8_EC20_BIN} \
-  centSbePartition.bin:10=${CENT_EC10_BIN},20=${CENT_EC20_BIN}
+  p9nSbePartition.bin:10=${P9N_EC10_BIN}
 
 
 __SBE_PART_BUILD/% : .SPECTARG .PMAKE
@@ -267,12 +259,11 @@ ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
 NIMBUS_TARG_IMG = simics_NIMBUS_targeting.bin
 NIMBUS_TARG_IMG_ECC = simics_NIMBUS_targeting.bin.ecc
 NIMBUS_TARG_IMG_FAKE = simics_NIMBUS_targeting.bin.fake
-NIMBUS_SLW_IMG = ${ENGD_OBJPATH:Fp9n.ref_image.hdr.bin}
-#Using p8 images until we have something valid for p9...
-NIMBUS_LOCAL_SLW_IMG = p9n.ref_image.hdr.bin
-NIMBUS_LOCAL_SLW_IMG_ECC = p9n.ref_image.hdr.bin.ecc
-NIMBUS_SBE_IMG = p8SbePartition.bin
-NIMBUS_SBE_IMG_ECC = p8SbePartition.bin.ecc
+NIMBUS_SLW_IMG = ${ENGD_OBJPATH:Fp9n.hw_ref_image.hdr.bin}
+NIMBUS_LOCAL_SLW_IMG = p9n.hw_ref_image.hdr.bin
+NIMBUS_LOCAL_SLW_IMG_ECC = p9n.hw_ref_image.hdr.bin.ecc
+NIMBUS_SBE_IMG = p9nSbePartition.bin
+NIMBUS_SBE_IMG_ECC = p9nSbePartition.bin.ecc
 SBEC_IMG = centSbePartition.bin
 SBEC_IMG_ECC = centSbePartition.bin.ecc
 TEMP_IMG = temp.bin
