@@ -30,10 +30,7 @@
 #define _MSS_TIMING_H_
 
 #include <cstdint>
-
 #include <fapi2.H>
-
-
 
 namespace mss
 {
@@ -50,13 +47,13 @@ enum GUARD_BAND
 };
 
 ///
-/// @brief      Calculates timing value
-/// @tparam     T input and output type
-/// @param[in]  i_timing_mtb timing value in MTB units
-/// @param[in]  i_mtb_multiplier SPD medium timebase
-/// @param[in]  i_timing_ftb fine offset of timing value
-/// @param[in]  i_ftb_multiplier SPD fine timebase
-/// @return     the timing value in picoseconds
+/// @brief Calculates timing value
+/// @tparam T input and output type
+/// @param[in] i_timing_mtb timing value in MTB units
+/// @param[in] i_mtb_multiplier SPD medium timebase
+/// @param[in] i_timing_ftb fine offset of timing value
+/// @param[in] i_ftb_multiplier SPD fine timebase
+/// @return the timing value in picoseconds
 ///
 template<typename T>
 inline T calc_timing_from_timebase(const T i_timing_mtb,
@@ -73,14 +70,14 @@ inline T calc_timing_from_timebase(const T i_timing_mtb,
 
 
 ///
-/// @brief      Returns clock cycles
-/// @tparam     T input and output type
-/// @param[in]  timing_in_ps timing parameter in ps
-/// @param[in]  tck_in_ps  clock period in ps
-/// @param[in]  inverse_corr_factor inverse correction factor  (defined by JEDEC)
-/// @return     the clock cycles of timing parameter (provided in ps)
-/// @note       DDR4 SPD Contents Rounding Algorithm
-/// @note       Item 2220.46
+/// @brief Returns clock cycles
+/// @tparam T input and output type
+/// @param[in] timing_in_ps timing parameter in ps
+/// @param[in] tck_in_ps  clock period in ps
+/// @param[in] inverse_corr_factor inverse correction factor  (defined by JEDEC)
+/// @return the clock cycles of timing parameter (provided in ps)
+/// @note DDR4 SPD Contents Rounding Algorithm
+/// @note Item 2220.46
 ///
 template<typename T>
 inline T calc_nck(T timing_in_ps, T tck_in_ps, T inverse_corr_factor)
@@ -92,6 +89,28 @@ inline T calc_nck(T timing_in_ps, T tck_in_ps, T inverse_corr_factor)
     temp_nck += inverse_corr_factor;
 
     return temp_nck / 1000;
+}
+
+///
+/// @brief Returns application clock period (tCK) based on dimm transfer rate
+/// @tparam T output type
+/// @param[in] i_target FAPI2 target
+/// @param[out] o_tCK_in_ps application period in ps
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+template< typename T>
+inline fapi2::ReturnCode clock_period(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                      T& o_tCK_in_ps)
+{
+    uint64_t l_dimm_transfer_rate = 0;
+
+    FAPI_TRY( freq(find_target<fapi2::TARGET_TYPE_MCBIST>(i_target),
+                   l_dimm_transfer_rate) );
+
+    o_tCK_in_ps = freq_to_ps(l_dimm_transfer_rate);
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 /// @brief Calculates refresh interval time 1 (tREFI 1)

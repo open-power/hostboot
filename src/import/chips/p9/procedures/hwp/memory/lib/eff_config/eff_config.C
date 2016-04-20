@@ -44,7 +44,7 @@ namespace mss
 /// @brief Determines & sets effective config for DRAM generation from SPD
 /// @param[in] i_target FAPI2 target
 /// @param[in] i_pDecoder shared pointer to decoder factory
-/// @return fapi2::ReturnCode
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
 fapi2::ReturnCode eff_config::dram_gen(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
                                        const std::shared_ptr<spd::decoder>& i_pDecoder)
@@ -75,7 +75,7 @@ fapi_try_exit:
 ///
 /// @brief Determines & sets effective config for DIMM type from SPD
 /// @param[in] i_target FAPI2 target
-/// @return fapi2::ReturnCode
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
 fapi2::ReturnCode eff_config::dimm_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
                                         const std::vector<uint8_t>& i_spd_data )
@@ -106,7 +106,7 @@ fapi_try_exit:
 /// @brief Determines & sets effective config for Hybrid memory type from SPD
 /// @param[in] i_target FAPI2 target
 /// @param[in] i_pDecoder shared pointer to decoder factory
-/// @return fapi2::ReturnCode
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
 fapi2::ReturnCode eff_config::hybrid_memory_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
         const std::shared_ptr<spd::decoder>& i_pDecoder)
@@ -131,129 +131,132 @@ fapi2::ReturnCode eff_config::hybrid_memory_type(const fapi2::Target<TARGET_TYPE
 
 fapi_try_exit:
     return fapi2::current_err;
+
 }// dimm_type
 
 ///
-/// @brief Sets effective config for temperature controlled refresh mode
-/// @param[in] i_target FAPI2 target
-/// @return fapi2::ReturnCode
-/// @note Proposed DDR4 Full spec update(79-4A)
-/// @note  Committee: JC42.3C
-/// @note  Committee Item Number: 1716.78C
-/// @note  4.8.2  Extended temperature mode (pg. 44)
-fapi2::ReturnCode eff_config::temp_ref_range(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
-{
-    uint8_t l_mcs_attrs[PORTS_PER_MCS] = {0};
-
-    // Targets
-    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
-    const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
-
-    // Current index
-    const auto l_port_num = index(l_mca);
-
-    FAPI_TRY( mss::eff_temp_ref_range(l_mcs, &l_mcs_attrs[0]) );
-
-    // TK - I think this will become a platform attribute so this function
-    // will eventuall get removed - AAM
-
-    // This is defaulted to Extended temperature mode
-    l_mcs_attrs[l_port_num] = fapi2::ENUM_ATTR_EFF_TEMP_REF_RANGE_EXTEND;
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_TEMP_REF_RANGE, l_mcs, l_mcs_attrs) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}// temp_ref_range
-
-///
-/// @brief Determines & sets effective config for Refresh Mode
-/// @param[in] i_target FAPI2 target
-/// @return fapi2::ReturnCode
-///
-fapi2::ReturnCode eff_config::fine_refresh_mode(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
-{
-    uint8_t l_mcs_attrs[PORTS_PER_MCS] = {0};
-    // Targets
-    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
-    const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
-
-    // Current index
-    const auto l_port_num = index(l_mca);
-
-    // Per Warren - should be in Normal mode, might change based on lab test results -  AAM
-    // Get & update MCS attribute
-    FAPI_TRY( mss::eff_fine_refresh_mode(l_mcs, &l_mcs_attrs[0])) ;
-    l_mcs_attrs[l_port_num] = fapi2::ENUM_ATTR_EFF_FINE_REFRESH_MODE_NORMAL;
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_FINE_REFRESH_MODE, l_mcs, l_mcs_attrs) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}// refresh_mode
-
-
 /// @brief Determines & sets effective config for refresh interval time (tREFI)
 /// @param[in] i_target FAPI2 target
-/// @return fapi2::ReturnCode
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
 fapi2::ReturnCode eff_config::refresh_interval_time(const fapi2::Target<TARGET_TYPE_DIMM>& i_target)
 {
-    uint8_t l_mcs_attrs_refresh[PORTS_PER_MCS] = {0};
     uint8_t l_refresh_mode = 0;
-
-    uint8_t l_mcs_attrs_trefi[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {0};
     uint64_t l_trefi_in_ps = 0;
-    uint8_t l_trefi_in_nck = 0;
 
-    uint64_t l_mss_freq = 0;
-    uint64_t l_tCK_in_ps = 0;
-
-    // Targets
-    const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
-    const auto l_mca = find_target<TARGET_TYPE_MCA>(i_target);
-    const auto l_target_mcbist = find_target<TARGET_TYPE_MCBIST>(i_target);
-
-    // Current index
-    const auto l_port_num = index(l_mca);
-    const auto l_dimm_num = index(i_target);
-
-    // Retrieve attributes values
-    FAPI_TRY( mss::freq(l_target_mcbist, l_mss_freq) );
-    FAPI_TRY ( mss::eff_fine_refresh_mode(l_mcs, &l_mcs_attrs_refresh[0]) );
-
-    l_refresh_mode = l_mcs_attrs_refresh[l_port_num];
+    FAPI_TRY ( mss::mrw_fine_refresh_mode(l_refresh_mode) );
 
     switch(l_refresh_mode)
     {
-        case fapi2::ENUM_ATTR_EFF_FINE_REFRESH_MODE_NORMAL:
+        case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_NORMAL:
             calc_trefi1(i_target, l_trefi_in_ps);
             break;
 
-        case fapi2::ENUM_ATTR_EFF_FINE_REFRESH_MODE_FIXED_2X:
-        case fapi2::ENUM_ATTR_EFF_FINE_REFRESH_MODE_FLY_2X:
+        case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_FIXED_2X:
+        case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_FLY_2X:
             calc_trefi2(i_target, l_trefi_in_ps);
             break;
 
-        case fapi2::ENUM_ATTR_EFF_FINE_REFRESH_MODE_FIXED_4X:
-        case fapi2::ENUM_ATTR_EFF_FINE_REFRESH_MODE_FLY_4X:
+        case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_FIXED_4X:
+        case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_FLY_4X:
             calc_trefi4(i_target, l_trefi_in_ps);
             break;
     }
 
-    // Calculate clock period (tCK) from selected freq from mss_freq
-    l_tCK_in_ps = freq_to_ps(l_mss_freq);
+    {
+        // Calculate clock period (tCK) from selected freq from mss_freq
+        uint64_t l_tCK_in_ps = 0;
+        FAPI_TRY( clock_period(i_target, l_tCK_in_ps) );
 
-    // Get & update MCS attribute
-    FAPI_TRY( eff_dram_trefi(l_mcs, &l_mcs_attrs_trefi[0][0]) );
+        {
+            // Calculate refresh cycle time in nCK & set attribute
+            const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+            const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
 
-    l_trefi_in_nck = calc_nck(l_trefi_in_ps, l_tCK_in_ps, uint64_t(INVERSE_DDR4_CORRECTION_FACTOR));
-    l_mcs_attrs_trefi[l_port_num][l_dimm_num] = uint8_t(l_trefi_in_nck);
+            std::vector<uint8_t> l_mcs_attrs_trefi(PORTS_PER_MCS, 0);
+            uint8_t l_trefi_in_nck ;
 
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TREFI, l_mcs, l_mcs_attrs_trefi) );
+            // Get & update MCS attribute
+            FAPI_TRY( eff_dram_trefi(l_mcs, &l_mcs_attrs_trefi[0]) );
+
+            l_trefi_in_nck = calc_nck(l_trefi_in_ps, l_tCK_in_ps, uint64_t(INVERSE_DDR4_CORRECTION_FACTOR));
+            l_mcs_attrs_trefi[l_port_num] = uint8_t(l_trefi_in_nck);
+
+            // casts vector into the type FAPI_ATTR_SET is expecting by deduction
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TREFI,
+                                    l_mcs,
+                                    UINT8_VECTOR_TO_1D_ARRAY(l_mcs_attrs_trefi, PORTS_PER_MCS)),
+                      "Failed to set tREFI attribute");
+        }
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
+
 }// refresh_interval
 
+///
+/// @brief Determines & sets effective config for refresh cycle time (tRFC)
+/// @param[in] i_target FAPI2 target
+/// @param[in] i_pDecoder shared pointer to decoder factory
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_config::refresh_cycle_time(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
+        const std::shared_ptr<spd::decoder>& i_pDecoder)
+{
+    uint8_t l_refresh_mode = 0;
+    int64_t l_trfc_in_ps = 0;
 
+    FAPI_TRY ( mss::mrw_fine_refresh_mode(l_refresh_mode) );
 
+    switch(l_refresh_mode)
+    {
+        case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_NORMAL:
+            i_pDecoder->min_refresh_recovery_delay_time_1(i_target, l_trfc_in_ps);
+            break;
+
+        case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_FIXED_2X:
+        case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_FLY_2X:
+            i_pDecoder->min_refresh_recovery_delay_time_2(i_target, l_trfc_in_ps);
+            break;
+
+        case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_FIXED_4X:
+        case fapi2::ENUM_ATTR_MRW_FINE_REFRESH_MODE_FLY_4X:
+            i_pDecoder->min_refresh_recovery_delay_time_4(i_target, l_trfc_in_ps);
+            break;
+    }
+
+    {
+        // Calculate clock period (tCK) from selected freq from mss_freq
+        int64_t l_tCK_in_ps = 0;
+        FAPI_TRY( clock_period(i_target, l_tCK_in_ps) );
+
+        {
+            // Calculate refresh cycle time in nCK & set attribute
+            const auto l_mcs = find_target<TARGET_TYPE_MCS>(i_target);
+            const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
+
+            uint8_t l_trfc_in_nck = 0;
+            std::vector<uint8_t> l_mcs_attrs_trfc(PORTS_PER_MCS, 0);
+
+            // Retrieve MCS attribute data
+            FAPI_TRY( eff_dram_trfc(l_mcs, l_mcs_attrs_trfc.data()) );
+
+            // Calculate nck
+            l_trfc_in_nck = calc_nck(l_trfc_in_ps, l_tCK_in_ps, int64_t(INVERSE_DDR4_CORRECTION_FACTOR));
+
+            // Update MCS attribute
+            l_mcs_attrs_trfc[l_port_num] = uint8_t(l_trfc_in_nck);
+
+            // casts vector into the type FAPI_ATTR_SET is expecting by deduction
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_TRFC,
+                                    l_mcs,
+                                    UINT8_VECTOR_TO_1D_ARRAY(l_mcs_attrs_trfc, PORTS_PER_MCS)),
+                      "Failed to set tRFC attribute");
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 }// mss

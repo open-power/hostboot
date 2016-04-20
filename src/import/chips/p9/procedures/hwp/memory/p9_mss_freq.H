@@ -71,18 +71,15 @@ fapi_try_exit:
 inline fapi2::ReturnCode set_CL_attr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
                                      uint64_t i_cas_latency)
 {
-    // TK - Not sure if we still want this set at a port level - AAM
-
     // Declaration of the vector correctly initializes it to the right size
     // in the case the enum for PORTS_PER_MCS changes
-    std::vector<uint64_t> l_cls_vect(mss::PORTS_PER_MCS, i_cas_latency);
+    std::vector<uint8_t> l_cls_vect(PORTS_PER_MCS, uint8_t(i_cas_latency) );
 
     // set CAS latency attribute
-    // Dereferences pointer of the vector's underlying data
-    // and casts it to uint64_t[2] that FAPI_ATTR_SET is expecting by deduction
+    // casts vector into the type FAPI_ATTR_SET is expecting by deduction
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_CL,
                             i_target,
-                            reinterpret_cast<uint64_t(&)[2]>(*l_cls_vect.data()) ) ,
+                            UINT8_VECTOR_TO_1D_ARRAY(l_cls_vect, PORTS_PER_MCS)) ,
               "Failed to set CAS latency attribute");
 
 fapi_try_exit:

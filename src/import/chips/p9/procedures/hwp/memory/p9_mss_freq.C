@@ -99,7 +99,7 @@ extern "C"
             FAPI_TRY(mss::set_freq_attrs(i_target, l_min_dimm_freq),
                      "Failed set_freq_attrs()");
 
-            FAPI_TRY(mss::set_CL_attr(i_target, l_desired_cas_latency),
+            FAPI_TRY(mss::set_CL_attr(i_target, l_desired_cas_latency ),
                      "Failed set_CL_attr()");
 
             FAPI_DBG( "Final Chosen Frequency: %d",  l_min_dimm_freq);

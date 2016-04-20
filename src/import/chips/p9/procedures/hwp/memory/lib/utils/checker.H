@@ -79,49 +79,6 @@ fapi_try_exit:
 
 }// dram_type
 
-
-///
-/// @brief      Checks nominal voltage is correct for all DIMMs
-/// @param[in]  i_target the fapi2 target
-/// @param[in]  i_dimm_state (i.e. functional or non-functional)
-/// @return     ReturnCode
-///
-inline fapi2::ReturnCode module_nominal_voltage(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-        fapi2::TargetState i_dimm_state)
-{
-
-    uint64_t l_module_nom_voltage[mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {0};
-
-    FAPI_TRY(mss::spd_module_nominal_voltage(i_target, &l_module_nom_voltage[0][0]));
-
-    for (const auto& l_mca : i_target.getChildren<fapi2::TARGET_TYPE_MCA>())
-    {
-        const auto l_port_num = mss::index(l_mca);
-
-        for (const auto& l_dimm : l_mca.getChildren<fapi2::TARGET_TYPE_DIMM>(i_dimm_state))
-        {
-            const auto l_dimm_num = mss::index(l_dimm);
-
-            FAPI_INF("%s DRAM nominal voltage (in milliseconds) is %d",
-                     mss::c_str(l_dimm),
-                     l_module_nom_voltage[l_port_num][l_dimm_num]);
-
-            // All DIMMs have to be operable at 1.2 V, else don't IPL (according to Warren)
-            FAPI_ASSERT( l_module_nom_voltage[l_port_num][l_dimm_num] == fapi2::ENUM_ATTR_SPD_MODULE_NOMINAL_VOLTAGE_OPERABLE,
-                         fapi2::MSS_VOLT_DDR_TYPE_REQUIRED_VOLTAGE().
-                         set_DIMM_VOLTAGE(l_module_nom_voltage[l_port_num][l_dimm_num]),
-                         "%s.Failed conditional, data returned:o %d.",
-                         mss::c_str(l_dimm),
-                         l_module_nom_voltage[l_port_num][l_dimm_num] );
-        }
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-
-}// module_nominal_voltage
-
-
 ///
 /// @brief      Checks conditional and implements traces & exits if it fails
 /// @param[in]  i_target the dimm target

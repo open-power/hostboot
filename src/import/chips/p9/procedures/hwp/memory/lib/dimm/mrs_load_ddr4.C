@@ -82,7 +82,7 @@ static fapi2::ReturnCode ddr4_mrs00(const fapi2::Target<TARGET_TYPE_DIMM>& i_tar
     uint8_t l_dll_reset = 0;
     uint8_t l_test_mode = 0;
     uint8_t l_write_recovery = 0;
-    uint64_t l_cas_latency = 0;
+    uint8_t l_cas_latency = 0;
 
     fapi2::buffer<uint8_t> l_cl;
     fapi2::buffer<uint8_t> l_wr;
@@ -425,9 +425,9 @@ static fapi2::ReturnCode ddr4_mrs03(const fapi2::Target<TARGET_TYPE_DIMM>& i_tar
     uint8_t l_pda = 0;
     uint8_t l_crc_wr_latency = 0;
     uint8_t l_temp_readout = 0;
+    uint8_t l_fine_refresh;
 
     fapi2::buffer<uint8_t> l_mpr_mode;
-    fapi2::buffer<uint8_t> l_fine_refresh;
     fapi2::buffer<uint8_t> l_crc_wr_latency_buffer;
     fapi2::buffer<uint8_t> l_read_format;
 
@@ -436,7 +436,7 @@ static fapi2::ReturnCode ddr4_mrs03(const fapi2::Target<TARGET_TYPE_DIMM>& i_tar
     FAPI_TRY( mss::eff_geardown_mode(i_target, l_geardown) );
     FAPI_TRY( mss::eff_per_dram_access(i_target, l_pda) );
     FAPI_TRY( mss::eff_temp_readout(i_target, l_temp_readout) );
-    FAPI_TRY( mss::eff_fine_refresh_mode(i_target, l_fine_refresh) );
+    FAPI_TRY( mss::mrw_fine_refresh_mode(l_fine_refresh) );
     FAPI_TRY( mss::eff_crc_wr_latency(i_target, l_crc_wr_latency) );
     FAPI_TRY( mss::eff_mpr_rd_format(i_target, l_read_format) );
 
@@ -454,7 +454,7 @@ static fapi2::ReturnCode ddr4_mrs03(const fapi2::Target<TARGET_TYPE_DIMM>& i_tar
     io_inst.arr0.writeBit<A4>(l_pda);
     io_inst.arr0.writeBit<A5>(l_temp_readout);
 
-    mss::swizzle<A6 , 3, 7>(l_fine_refresh, io_inst.arr0);
+    mss::swizzle<A6 , 3, 7>(fapi2::buffer<uint8_t>(l_fine_refresh), io_inst.arr0);
     mss::swizzle<A9 , 2, 7>(l_crc_wr_latency_buffer, io_inst.arr0);
     mss::swizzle<A11, 2, 7>(l_read_format, io_inst.arr0);
 
@@ -524,7 +524,7 @@ static fapi2::ReturnCode ddr4_mrs04(const fapi2::Target<TARGET_TYPE_DIMM>& i_tar
     fapi2::buffer<uint8_t> l_cs_cmd_latency_buffer;
 
     FAPI_TRY( mss::eff_max_powerdown_mode(i_target, l_max_pd_mode) );
-    FAPI_TRY( mss::eff_temp_ref_range(i_target, l_temp_ref_range) );
+    FAPI_TRY( mss::mrw_temp_ref_range(l_temp_ref_range) );
     FAPI_TRY( mss::eff_temp_ref_mode(i_target, l_temp_ref_mode) );
     FAPI_TRY( mss::eff_int_vref_mon(i_target, l_vref_mon) );
     FAPI_TRY( mss::eff_cs_cmd_latency(i_target, l_cs_cmd_latency) );
@@ -729,7 +729,7 @@ static fapi2::ReturnCode ddr4_mrs06(const fapi2::Target<TARGET_TYPE_DIMM>& i_tar
     FAPI_TRY( mss::vref_dq_train_value(i_target, l_vrefdq_train_value) );
     FAPI_TRY( mss::vref_dq_train_range(i_target, l_vrefdq_train_range) );
     FAPI_TRY( mss::vref_dq_train_enable(i_target, l_vrefdq_train_enable) );
-    FAPI_TRY( mss::tccd_l(i_target, l_tccd_l) );
+    FAPI_TRY( mss::eff_dram_tccd_l(i_target, l_tccd_l) );
 
     l_tccd_l_buffer = tccd_l_map[l_tccd_l];
     l_vrefdq_train_value_buffer = l_vrefdq_train_value[mss::index(i_rank)];

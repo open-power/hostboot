@@ -851,8 +851,8 @@ class decoder
         ///             integer and the Fine Offset for tRCmin (SPD byte 120)
         ///             used for correction to get the actual value.
         ///
-        virtual fapi2::ReturnCode min_active_to_active_refresh_delay_time(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
-                i_target,
+        virtual
+        fapi2::ReturnCode min_active_to_active_refresh_delay_time(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 int64_t& o_value);
         ///
         /// @brief      Decodes SDRAM Minimum Refresh Recovery Delay Time 1

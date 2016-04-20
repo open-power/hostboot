@@ -30,11 +30,22 @@
 #ifndef _MSS_CONVERSIONS_H_
 #define _MSS_CONVERSIONS_H_
 
+#include <vector>
 #include <fapi2.H>
 #include <lib/mss_attribute_accessors.H>
-
 #include <lib/shared/mss_const.H>
 #include <lib/utils/find.H>
+
+///
+/// @brief Dereferences pointer of the vector's underlying data
+//  and casts it to uint8_t[Y] that FAPI_ATTR_SET is expecting by deduction
+/// @param[in] X is the input vector
+/// @param[in] Y is the size of the vector
+///
+#define UINT8_VECTOR_TO_1D_ARRAY(X, Y)\
+    {\
+        reinterpret_cast<uint8_t(&)[Y]>(*X.data())\
+    }
 
 // Mutiplication factor to go from clocks to simcycles.
 // Is this just 2400 speed or does this hold for all? BRS
@@ -267,6 +278,7 @@ inline T ps_to_ns(const T i_time_in_ps)
     // Round up if remainder isn't even
     return l_time_in_ns + ( remainder == 0 ? 0 : 1 );
 }
+
 
 };// mss namespace
 
