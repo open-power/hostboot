@@ -125,6 +125,13 @@ enum cal_steps
     COARSE_RD         = 9,
 };
 
+// Static consts for DDR4 voltages used in p9_mss_volt
+enum voltages : uint64_t
+{
+    DDR4_NOMINAL_VOLTAGE = 1200,
+    DDR4_VPP_VOLTAGE = 2500,
+};
+
 namespace mcbist
 {
 enum data_mode
