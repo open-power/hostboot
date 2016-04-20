@@ -65,11 +65,11 @@
     <description>One or more DIMMs do not support required voltage for DDR type.</description>
     <ffdc>DIMM_VOLTAGE</ffdc>
     <callout>
-      <target>DIMM_UV_TARGET</target>
+      <target>DIMM_TARGET</target>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
-      <target>DIMM_UV_TARGET</target>
+      <target>DIMM_TARGET</target>
     </deconfigure>
   </hwpError>
 
