@@ -55,22 +55,6 @@
         <mssAccessorName>mrw_thermal_memory_power_limit</mssAccessorName>
     </attribute>
 
-
-    <attribute>
-        <id>ATTR_MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-          At a system level, this attribute controls if interleaving is required, requested or never.  The MRW.
-        </description>
-        <valueType>uint8</valueType>
-        <enum>NEVER = 0, REQUIRED = 1, REQUESTED = 2</enum>
-        <platInit/>
-        <odmVisable/>
-        <odmChangeable/>
-        <mssAccessorName>mrw_mba_cacheline_interleave_mode_control</mssAccessorName>
-    </attribute>
-
-
     <attribute>
         <id>ATTR_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -129,47 +113,6 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_MRW_STRICT_MBA_PLUG_RULE_CHECKING</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-           The MRW for a system should set this to TRUE for systems that must obey plug rules.
-           Lab environments should default this to off and allow the user to override using normal methods to test.
-        </description>
-        <valueType>uint8</valueType>
-        <enum>FALSE = 0, TRUE = 1</enum>
-        <platInit/>
-        <mssAccessorName>mrw_strict_mba_plug_rule_checking</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-          Used for Custom DIMMs to not enable the reading of the
-          dimm temperature sensor on the master i2c bus
-        </description>
-        <valueType>uint8</valueType>
-        <enum>OFF = 0, ON = 1</enum>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>mrw_cdimm_master_i2c_temp_sensor_enable</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MRW_CDIMM_SPARE_I2C_TEMP_SENSOR_ENABLE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-          Used for Custom DIMMs to not enable the reading of the
-          dimm temperature sensor on the spare i2c bus
-        </description>
-        <valueType>uint8</valueType>
-        <enum>OFF = 0, ON = 1</enum>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>mrw_cdimm_spare_i2c_temp_sensor_enable</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_MRW_MCS_PREFETCH_RETRY_THRESHOLD</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
         <description>
@@ -199,46 +142,6 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_MRW_DDR3_VDDR_MAX_LIMIT</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-          Maximum voltage limit for the dynamic VID DDR3 VDDR voltage setpoint. In mV.
-        </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>mrw_ddr3_vddr_max_limit</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MRW_DDR4_VDDR_MAX_LIMIT</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-          Maximum voltage limit for the dynamic VID DDR4 VDDR voltage setpoint. In mV.
-        </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>mrw_ddr4_vddr_max_limit</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MRW_MEM_SENSOR_CACHE_ADDR_MAP</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Machine Readable Workbook value detailing the wiring of the 8 dimm temperature
-            sensors for non custom dimms, in DIMM A0,A1,B0,B1,C0,C1,D0,D1 order. One nibble
-            per sensor where bit0 (MSB) is the i2c bus the sensor is attached to
-            (0 for master, 1 for spare) and bits 1:3 are for A2,A1,A0 of the sensor i2c
-            address (where A2 is MSB)
-        </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>mrw_mem_sensor_cache_addr_map</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
         <description>
@@ -265,17 +168,90 @@
         <mssAccessorName>mrw_max_number_dimms_possible_per_vmem_regulator</mssAccessorName>
     </attribute>
 
+
     <attribute>
-        <id>ATTR_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM</id>
+        <id>ATTR_MRW_AVDD_OFFSET_DISABLE</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>Used for to determine whether to apply an offset to AVDD. Supplied by MRW.</description>
+        <valueType>uint8</valueType>
+        <enum>DISABLE = 1, ENABLE = 0</enum>
+        <platInit/>
+        <mssAccessorName>mrw_avdd_offset_disable</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MRW_VDD_OFFSET_DISABLE</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>Used for to determine whether to apply an offset to VDD. Supplied by MRW.</description>
+        <valueType>uint8</valueType>
+        <enum>DISABLE = 1, ENABLE = 0</enum>
+        <platInit/>
+        <mssAccessorName>mrw_vdd_offset_disable</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MRW_VCS_OFFSET_DISABLE</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>Used for to determine whether to apply an offset to VCS. Supplied by MRW.</description>
+        <valueType>uint8</valueType>
+        <enum>DISABLE = 1, ENABLE = 0</enum>
+        <platInit/>
+        <mssAccessorName>mrw_vcs_offset_disable</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MRW_VPP_OFFSET_DISABLE</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>Used for to determine whether to apply an offset to VCS. Supplied by MRW.</description>
+        <valueType>uint8</valueType>
+        <enum>DISABLE = 1, ENABLE = 0</enum>
+        <platInit/>
+        <mssAccessorName>mrw_vpp_offset_disable</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MRW_VDDR_OFFSET_DISABLE</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>Used for to determine whether to apply an offset to VDDR. Supplied by MRW.</description>
+        <valueType>uint8</valueType>
+        <enum>DISABLE = 1, ENABLE = 0</enum>
+        <platInit/>
+        <mssAccessorName>mrw_vddr_offset_disable</mssAccessorName>
+    </attribute>
+
+    <attribute>
+      <id>ATTR_MRW_FINE_REFRESH_MODE</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
         <description>
-          Machine Readable Workbook VMEM regulator power limit
-          per CDIMM assuming a full configuration. Units in cW.
+          Fine refresh mode.
+          Should be defaulted to normal mode.
+          This is for DDR4 MRS3.
         </description>
-        <valueType>uint32</valueType>
+        <valueType>uint8</valueType>
+        <enum>
+          NORMAL = 0,
+          FIXED_2X = 1,
+          FIXED_4X = 2,
+          FLY_2X = 5,
+          FLY_4X = 6
+        </enum>
         <platInit/>
-        <odmVisable/>
-        <mssAccessorName>mrw_vmem_regulator_memory_power_limit_per_dimm</mssAccessorName>
+        <mssAccessorName>mrw_fine_refresh_mode</mssAccessorName>
+    </attribute>
+
+
+    <attribute>
+        <id>ATTR_MRW_TEMP_REF_RANGE</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+          Temp ref range.
+          Should be defaulted to extended range.
+          This is for DDR4 MRS4.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>NORMAL = 0, EXTEND = 1</enum>
+        <writeable/>
+        <mssAccessorName>mrw_temp_ref_range</mssAccessorName>
     </attribute>
 
 </attributes>
