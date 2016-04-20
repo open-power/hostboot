@@ -52,26 +52,27 @@ extern "C"
     fapi2::ReturnCode p9_mss_utils_to_throttle( const fapi2::Target<TARGET_TYPE_MCS>& i_target )
     {
         uint8_t l_databus_util[mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {0};
-        uint32_t l_dram_clocks[mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {0};
-        uint32_t l_num_commands_allowed[mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = 0;
+        uint32_t l_dram_clocks = 0;
+        uint32_t l_num_commands_allowed[mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
 
         FAPI_TRY( mss::databus_util(i_target, &l_databus_util[0][0]) );
-        FAPI_TRY( mss::mrw_mem_m_dram_clocks(fapi2::Target<TARGET_TYPE_SYSTEM>(), &l_dram_clocks[0][0]) );
+        FAPI_TRY( mss::mrw_mem_m_dram_clocks(l_dram_clocks) );
 
         for( const auto& l_mca : i_target.getChildren<TARGET_TYPE_MCA>() )
         {
-            l_port_num = mss::index(l_mca);
+            const auto l_port_num = mss::index(l_mca);
 
-            for( const auto& l_dimm : i_target.getChildren<TARGET_TYPE_DIMM>() )
+            for( const auto& l_dimm : l_mca.getChildren<TARGET_TYPE_DIMM>() )
             {
-                l_dimm_num = mss::index(l_dimm);
+                const auto l_dimm_num = mss::index(l_dimm);
 
-                l_num_commands_allowed = mss::commands_allowed_over_clock_window(l_databus_util[l_port_num][l_dimm_num],
-                                         l_dram_clocks[l_port_num][l_dimm_num]);
+                l_num_commands_allowed[l_port_num][l_dimm_num] = mss::commands_allowed_over_clock_window(
+                            l_databus_util[l_port_num][l_dimm_num],
+                            l_dram_clocks);
             }
         }
 
-        FAPI_ATTR_SET(fapi2::ATTR_MSS_THROTTLED_N_COMMANDS, i_target, l_num_commands_allowed)
+        FAPI_ATTR_SET(fapi2::ATTR_MSS_THROTTLED_N_COMMANDS, i_target, l_num_commands_allowed);
 
         FAPI_INF("End utils_to_throttle");
     fapi_try_exit:
