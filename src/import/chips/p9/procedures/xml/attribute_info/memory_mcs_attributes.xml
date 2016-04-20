@@ -19,337 +19,6 @@
 <attributes>
 
     <attribute>
-        <id>ATTR_MEMB_TP_BNDY_PLL_DATA</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Ring image for Centaur tp_bndy_pll ring
-            creator: platform
-            firmware notes:
-        </description>
-        <valueType>uint8</valueType>
-        <platInit/>
-        <array>80</array>
-        <persistRuntime/>
-        <mssAccessorName>memb_tp_bndy_pll_data</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEMB_TP_BNDY_PLL_LENGTH</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Length of data in ring image for Centaur tp_bndy_pll ring
-            creator: platform
-            firmware notes:
-        </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <persistRuntime/>
-        <mssAccessorName>memb_tp_bndy_pll_length</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEMB_TP_BNDY_PLL_FLUSH</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Ring flush image for Centaur tp_bndy_pll ring
-            creator: platform
-            firmware notes:
-        </description>
-        <valueType>uint8</valueType>
-        <platInit/>
-        <array>80</array>
-        <persistRuntime/>
-        <mssAccessorName>memb_tp_bndy_pll_flush</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEMB_TP_BNDY_PLL_SCAN_SELECT</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Scan select for ring image for Centaur tp_bndy_pll ring
-            creator: platform
-            firmware notes:
-        </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <persistRuntime/>
-        <mssAccessorName>memb_tp_bndy_pll_scan_select</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_DATA</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Ring image for Centaur tp_bndy_pll ring for nest=4000 mem=1066
-            creator: platform
-            firmware notes:
-        </description>
-        <valueType>uint8</valueType>
-        <platInit/>
-        <array>80</array>
-        <persistRuntime/>
-        <mssAccessorName>memb_tp_bndy_pll_nest4000_mem1066_data</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1066_LENGTH</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Length of data in ring image for Centaur tp_bndy_pll ring
-            creator: platform
-            firmware notes:
-        </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <persistRuntime/>
-        <mssAccessorName>memb_tp_bndy_pll_nest4000_mem1066_length</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_DATA</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Ring image for Centaur tp_bndy_pll ring for nest=4000 mem=1333
-            creator: platform
-            firmware notes:
-        </description>
-        <valueType>uint8</valueType>
-        <platInit/>
-        <array>80</array>
-        <persistRuntime/>
-        <mssAccessorName>memb_tp_bndy_pll_nest4000_mem1333_data</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1333_LENGTH</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Length of data in ring image for Centaur tp_bndy_pll ring
-            creator: platform
-            firmware notes:
-        </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <persistRuntime/>
-        <mssAccessorName>memb_tp_bndy_pll_nest4000_mem1333_length</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_DATA</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Ring image for Centaur tp_bndy_pll ring for nest=4000 mem=1600
-            creator: platform
-            firmware notes:
-        </description>
-        <valueType>uint8</valueType>
-        <platInit/>
-        <array>80</array>
-        <persistRuntime/>
-        <mssAccessorName>memb_tp_bndy_pll_nest4000_mem1600_data</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1600_LENGTH</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>Length of data in ring image for Centaur tp_bndy_pll ring
-            creator: platform
-            firmware notes:
-        </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <persistRuntime/>
-        <mssAccessorName>memb_tp_bndy_pll_nest4000_mem1600_length</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_DATA</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Ring image for Centaur tp_bndy_pll ring for nest=4000 mem=1866
-            creator: platform
-            firmware notes:
-        </description>
-        <valueType>uint8</valueType>
-        <platInit/>
-        <array>80</array>
-        <persistRuntime/>
-        <mssAccessorName>memb_tp_bndy_pll_nest4000_mem1866_data</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4000_MEM1866_LENGTH</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Length of data in ring image for Centaur tp_bndy_pll ring
-            creator: platform
-            firmware notes:
-        </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <persistRuntime/>
-        <mssAccessorName>memb_tp_bndy_pll_nest4000_mem1866_length</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_DATA</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Ring image for Centaur tp_bndy_pll ring for nest=4800 mem=1066
-            creator: platform
-            firmware notes:
-        </description>
-        <valueType>uint8</valueType>
-        <platInit/>
-        <array>80</array>
-        <persistRuntime/>
-        <mssAccessorName>memb_tp_bndy_pll_nest4800_mem1066_data</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1066_LENGTH</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Length of data in ring image for Centaur tp_bndy_pll ring
-            creator: platform
-            firmware notes:
-        </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <persistRuntime/>
-        <mssAccessorName>memb_tp_bndy_pll_nest4800_mem1066_length</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_DATA</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Ring image for Centaur tp_bndy_pll ring for nest=4800 mem=1333
-            creator: platform
-            firmware notes:
-        </description>
-        <valueType>uint8</valueType>
-        <platInit/>
-        <array>80</array>
-        <persistRuntime/>
-        <mssAccessorName>memb_tp_bndy_pll_nest4800_mem1333_data</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1333_LENGTH</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Length of data in ring image for Centaur tp_bndy_pll ring
-            creator: platform
-            firmware notes:
-        </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <persistRuntime/>
-        <mssAccessorName>memb_tp_bndy_pll_nest4800_mem1333_length</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_DATA</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Ring image for Centaur tp_bndy_pll ring for nest=4800 mem=1600
-            creator: platform
-            firmware notes:
-    </description>
-        <valueType>uint8</valueType>
-        <platInit/>
-        <array>80</array>
-        <persistRuntime/>
-        <mssAccessorName>memb_tp_bndy_pll_nest4800_mem1600_data</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1600_LENGTH</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Length of data in ring image for Centaur tp_bndy_pll ring
-            creator: platform
-            firmware notes:
-    </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <persistRuntime/>
-        <mssAccessorName>memb_tp_bndy_pll_nest4800_mem1600_length</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_DATA</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Ring image for Centaur tp_bndy_pll ring for nest=4800 mem=1866
-            creator: platform
-            firmware notes:
-    </description>
-        <valueType>uint8</valueType>
-        <platInit/>
-        <array>80</array>
-        <persistRuntime/>
-        <mssAccessorName>memb_tp_bndy_pll_nest4800_mem1866_data</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEMB_TP_BNDY_PLL_NEST4800_MEM1866_LENGTH</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Length of data in ring image for Centaur tp_bndy_pll ring
-            creator: platform
-            firmware notes:
-    </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <persistRuntime/>
-        <mssAccessorName>memb_tp_bndy_pll_nest4800_mem1866_length</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEMB_DMI_CUPLL_PFD360_OFFSET</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Scan chain position of CU PLL PDF360 bit in tp_pll_bndy chain (Offset from beginning of chain)
-            creator: platform
-            firmware notes:
-        </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <persistRuntime/>
-        <mssAccessorName>memb_dmi_cupll_pfd360_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEMB_DMI_CUPLL_REFCLKSEL_OFFSET</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Scan chain position of CU PLL REFCLKSEL bit in tp_pll_bndy chain (Offset from beginning of chain)
-            creator: platform
-            firmware notes:
-        </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <persistRuntime/>
-        <mssAccessorName>memb_dmi_cupll_refclksel_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEMB_MEM_PLL_CFG_UPDATE_OFFSET</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Scan chain position of MEM PLL PLLCTRL1(44) bit in tp_pll_bndy chain (Offset from beginning of chain)
-            creator: platform
-            firmware notes:
-    </description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <persistRuntime/>
-        <mssAccessorName>memb_mem_pll_cfg_update_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_MSS_VOLT</id>
         <targetType>TARGET_TYPE_MCBIST</targetType>
         <description>
@@ -361,7 +30,6 @@
         </description>
         <valueType>uint64</valueType>
         <writeable/>
-        <odmVisable/>
         <mssAccessorName>volt</mssAccessorName>
     </attribute>
 
@@ -377,7 +45,6 @@
         </description>
         <valueType>uint64</valueType>
         <writeable/>
-        <odmVisable/>
         <mssAccessorName>volt_vpp</mssAccessorName>
     </attribute>
 
@@ -385,19 +52,18 @@
         <id>ATTR_MSS_FREQ_OVERRIDE</id>
        <targetType>TARGET_TYPE_MCBIST</targetType>
         <description>
-            FOR LAB USE ONLY: Frequency override of this memory channel in MHz, comprising of up to three DIMMs.
-            Set by config file or an attribute writing program.
-            Consumed by mss_freq.
-            The default of AUTO means mss_freq will find the best frequencies given the DIMMs plugged in and other rules.
-            Otherwise, this is the system frequency.
-            firmware notes: Platforms should initialize this attribute to AUTO (0)
+          FOR LAB USE ONLY: Frequency override of this memory channel in MT/s
+	  comprising of up to three DIMMs.
+          Set by config file or an attribute writing program.
+          Consumed by mss_freq.
+          The default of AUTO means mss_freq will find the best frequencies given the DIMMs plugged in and other rules.
+          Otherwise, this is the system frequency.
+          firmware notes: Platforms should initialize this attribute to AUTO (0)
         </description>
         <valueType>uint64</valueType>
         <enum>AUTO = 0</enum>
         <platInit/>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <mssAccessorName>freq_override</mssAccessorName>
     </attribute>
 
@@ -421,8 +87,6 @@
           MT2666 = 2666
         </enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <persistRuntime/>
         <mssUnits> MT/s </mssUnits>
         <mssAccessorName>freq</mssAccessorName>
@@ -441,81 +105,27 @@
             Set by: PLL settings written by Dave Cadigan
         </description>
         <valueType>uint32</valueType>
-        <platInit/>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <persistRuntime/>
         <mssAccessorName>freq_bias_percentage</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_VREF_CAL_CNTL</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Training Control over IPL
-            ENUM:
-            0x00=DISABLE /Skip V-ref Train;
-            0x01=DRAM - Enable V-Ref Train DRAM Level;
-            0x02=RANK Level Training;
-            0x03=PORT Level Training;
-            0x04=MBA Level;
-            0x05=CENTAUR level;
-           Default Value = 0x01;
-        </description>
-        <valueType>uint8</valueType>
-        <platInit/>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <persistRuntime/>
-        <mssAccessorName>vref_cal_cntl</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_MSS_DIMM_MFG_ID_CODE</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Manufacturer ID Code RCD: bits(31:16), Module: bits(15:0)</description>
         <valueType>uint32</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>dimm_mfg_id_code</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_EFF_DIMM_RANKS_CONFIGED</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Bit wise representation of master ranks in each DIMM that are used for reads and writes.
-            Used in various locations and is computed in mss_eff_cnfg.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
-            Dimensions are [port][dimm]  A/B=Mba_0 C/D=Mba_1
-            There are only two DIMM ranks: DIMM0 and DIMM1 where DIMM0 is the furthest from the centaur.
-            creator: mss_eff_cnfg
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array> 2 2</array>
-        <persistRuntime/>
-        <mssAccessorName>eff_dimm_ranks_configed</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_EFF_NUM_RANKS_PER_DIMM</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Number of ranks in each DIMM.
             Used in various locations and is computed in mss_eff_cnfg.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             values are 0,1,2, 4 up to 32
             creator: mss_eff_cnfg
             consumer: various
@@ -523,8 +133,6 @@
         </description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <persistRuntime/>
         <mssAccessorName>eff_num_ranks_per_dimm</mssAccessorName>
@@ -532,7 +140,6 @@
 
     <attribute>
         <id>ATTR_EFF_CUSTOM_DIMM</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             DIMM is a custom DIMM. This is commonly known as a CDIMM,
@@ -544,8 +151,6 @@
         <valueType>uint8</valueType>
         <enum>NO = 0, YES = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2 2 </array>
         <persistRuntime/>
         <mssAccessorName>eff_custom_dimm</mssAccessorName>
@@ -553,7 +158,6 @@
 
     <attribute>
         <id>ATTR_EFF_DRAM_WIDTH</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             DRAM Device Width: X4, X8, X16, X32.
@@ -566,15 +170,12 @@
         <enum>X4 = 4, X8 = 8, X16 = 16, X32 = 32</enum>
         <mssUnit>bits</mssUnit>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2 2</array>
         <mssAccessorName>eff_dram_width</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_DRAM_RANK_MIX</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             DRAM Device Rank Mix
@@ -587,19 +188,15 @@
         <enum>SYMMETRICAL = 0, ASYMMETICAL = 1</enum>
         <mssUnit>bits</mssUnit>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2 2</array>
         <mssAccessorName>eff_dram_rank_mix</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_PRIMARY_RANK_GROUP0</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             creator: mss_eff_cnfg_rank_group
             consumer: various
             firmware notes: none
@@ -607,19 +204,15 @@
         <valueType>uint8</valueType>
         <enum>INVALID = 255</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2</array>
         <mssAccessorName>eff_primary_rank_group0</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_PRIMARY_RANK_GROUP1</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             creator: mss_eff_cnfg_rank_group
             consumer: various
             firmware notes: none
@@ -627,19 +220,15 @@
         <valueType>uint8</valueType>
         <enum>INVALID = 255</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2</array>
         <mssAccessorName>eff_primary_rank_group1</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_PRIMARY_RANK_GROUP2</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             creator: mss_eff_cnfg_rank_group
             consumer: various
             firmware notes: none
@@ -647,19 +236,15 @@
         <valueType>uint8</valueType>
         <enum>INVALID = 255</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2</array>
         <mssAccessorName>eff_primary_rank_group2</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_PRIMARY_RANK_GROUP3</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             creator: mss_eff_cnfg_rank_group
             consumer: various
             firmware notes: none
@@ -667,19 +252,15 @@
         <valueType>uint8</valueType>
         <enum>INVALID = 255</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2</array>
         <mssAccessorName>eff_primary_rank_group3</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_SECONDARY_RANK_GROUP0</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             creator: mss_eff_cnfg_rank_group
             consumer: various
             firmware notes: none
@@ -687,19 +268,15 @@
         <valueType>uint8</valueType>
         <enum>INVALID = 255</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2</array>
         <mssAccessorName>eff_secondary_rank_group0</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_SECONDARY_RANK_GROUP1</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             creator: mss_eff_cnfg_rank_group
             consumer: various
             firmware notes: none
@@ -707,19 +284,15 @@
         <valueType>uint8</valueType>
         <enum>INVALID = 255</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2</array>
         <mssAccessorName>eff_secondary_rank_group1</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_SECONDARY_RANK_GROUP2</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             creator: mss_eff_cnfg_rank_group
             consumer: various
             firmware notes: none
@@ -727,19 +300,15 @@
         <valueType>uint8</valueType>
         <enum>INVALID = 255</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2</array>
         <mssAccessorName>eff_secondary_rank_group2</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_SECONDARY_RANK_GROUP3</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             creator: mss_eff_cnfg_rank_group
             consumer: various
             firmware notes: none
@@ -747,19 +316,15 @@
         <valueType>uint8</valueType>
         <enum>INVALID = 255</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2</array>
         <mssAccessorName>eff_secondary_rank_group3</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_TERTIARY_RANK_GROUP0</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             creator: mss_eff_cnfg_rank_group
             consumer: various
             firmware notes: none
@@ -767,19 +332,15 @@
         <valueType>uint8</valueType>
         <enum>INVALID = 255</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2</array>
         <mssAccessorName>eff_tertiary_rank_group0</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_TERTIARY_RANK_GROUP1</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             creator: mss_eff_cnfg_rank_group
             consumer: various
             firmware notes: none
@@ -787,19 +348,15 @@
         <valueType>uint8</valueType>
         <enum>INVALID = 255</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2</array>
         <mssAccessorName>eff_tertiary_rank_group1</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_TERTIARY_RANK_GROUP2</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             creator: mss_eff_cnfg_rank_group
             consumer: various
             firmware notes: none
@@ -807,19 +364,15 @@
         <valueType>uint8</valueType>
         <enum>INVALID = 255</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2</array>
         <mssAccessorName>eff_tertiary_rank_group2</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_TERTIARY_RANK_GROUP3</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             creator: mss_eff_cnfg_rank_group
             consumer: various
             firmware notes: none
@@ -827,19 +380,15 @@
         <valueType>uint8</valueType>
         <enum>INVALID = 255</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2</array>
         <mssAccessorName>eff_tertiary_rank_group3</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_QUATERNARY_RANK_GROUP0</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             creator: mss_eff_cnfg_rank_group
             consumer: various
             firmware notes: none
@@ -847,19 +396,15 @@
         <valueType>uint8</valueType>
         <enum>INVALID = 255</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2</array>
         <mssAccessorName>eff_quaternary_rank_group0</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_QUATERNARY_RANK_GROUP1</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             creator: mss_eff_cnfg_rank_group
             consumer: various
             firmware notes: none
@@ -867,19 +412,15 @@
         <valueType>uint8</valueType>
         <enum>INVALID = 255</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2</array>
         <mssAccessorName>eff_quaternary_rank_group1</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_QUATERNARY_RANK_GROUP2</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             creator: mss_eff_cnfg_rank_group
             consumer: various
             firmware notes: none
@@ -887,19 +428,15 @@
         <valueType>uint8</valueType>
         <enum>INVALID = 255</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2</array>
         <mssAccessorName>eff_quaternary_rank_group2</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_QUATERNARY_RANK_GROUP3</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             RankGroup. Used in various locations and is computed in mss_eff_cnfg_rank_group.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             creator: mss_eff_cnfg_rank_group
             consumer: various
             firmware notes: none
@@ -907,39 +444,31 @@
         <valueType>uint8</valueType>
         <enum>INVALID = 255</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2</array>
         <mssAccessorName>eff_quaternary_rank_group3</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_DIMM_SPARE</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Spare DRAM availability. Used in various locations and is computed in mss_eff_cnfg.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             creator: mss_eff_cnfg consumer: various firmware notes: load from spd
             OBSOLETE: Use ATTR_VPD_DIMM_SPARE
         </description>
         <valueType>uint8</valueType>
         <enum>NO_SPARE = 0, LOW_NIBBLE = 1, HIGH_NIBBLE = 2, FULL_BYTE = 3</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2 4</array>
         <mssAccessorName>eff_dimm_spare</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_DRAM_WR_VREF</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             DRAM Write Vref.
             Used in various locations and comes from the MT keyword of the VPD or is computed in mss_eff_cnfg_termination.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             creator: VPD(MT) or mss_eff_cnfg_termination
             consumer: various.C and initfile
             firmware notes: none
@@ -981,17 +510,13 @@
             VDD570 = 570,
             VDD575 = 575
         </enum>
-        <platInit/>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2</array>
         <mssAccessorName>eff_dram_wr_vref</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_DRAM_WR_VREF_SCHMOO</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Enables for which VREF to use on the WR Schmoo.
@@ -999,15 +524,12 @@
         </description>
         <valueType>uint32</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2</array>
         <mssAccessorName>eff_dram_wr_vref_schmoo</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_DRAM_WRDDR4_VREF_SCHMOO</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Enables for which VREF to use on the WR Schmoo.
@@ -1015,352 +537,8 @@
         </description>
         <valueType>uint32</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2</array>
         <mssAccessorName>eff_dram_wrddr4_vref_schmoo</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_CEN_DRV_IMP_DQ_DQS</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Centaur DQ and DQS Drive Impedance Used in various locations and comes from the MT Keyword of the VPD or is computed in mss_eff_cnfg_termination.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
-            creator: VPD(MT)/mss_eff_cnfg_termination
-            consumer: initfile,various.C files
-            firmware notes: none
-            This is the nominal value
-        </description>
-        <valueType>uint8</valueType>
-        <enum>
-            OHM24_FFE0 = 0x0A,
-            OHM30_FFE0 = 0x08,
-            OHM30_FFE480 = 0x48,
-            OHM30_FFE240 = 0x38,
-            OHM30_FFE160 = 0x28,
-            OHM30_FFE120 = 0x18,
-            OHM34_FFE0 = 0x07,
-            OHM34_FFE480 = 0x47,
-            OHM34_FFE240 = 0x37,
-            OHM34_FFE160 = 0x27,
-            OHM34_FFE120 = 0x17,
-            OHM40_FFE0 = 0x06,
-            OHM40_FFE480 = 0x46,
-            OHM40_FFE240 = 0x36,
-            OHM40_FFE160 = 0x26,
-            OHM40_FFE120 = 0x16
-        </enum>
-        <platInit/>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_cen_drv_imp_dq_dqs</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_CEN_DRV_IMP_DQ_DQS_SCHMOO</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Enables for which impedance values can be used and tested in a timing test.
-            The bits have a one to one correspondence to the possible driver strengths and
-            start with the first value down to the last (largest) impedance as the LSB of the 8 bit field.
-        </description>
-        <valueType>uint32</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array> 2 </array>
-        <mssAccessorName>eff_cen_drv_imp_dq_dqs_schmoo</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_CEN_DRV_IMP_CLK_SCHMOO</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Enables for which impedance values can be used and tested in a timing test.
-            The bits have a one to one correspondence to the possible driver strengths and
-            start with the first value down to the last (largest) impedance as the LSB of the 8 bit field.
-        </description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array> 2 </array>
-        <mssAccessorName>eff_cen_drv_imp_clk_schmoo</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_CEN_DRV_IMP_SPCKE_SCHMOO</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Enables for which impedance values can be used and tested in a timing test.
-            The bits have a one to one correspondence to the possible driver strengths and
-            start with the first value down to the last (largest) impedance as the LSB of the 8 bit field.
-        </description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_cen_drv_imp_spcke_schmoo</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_CEN_DRV_IMP_CNTL_SCHMOO</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Enables for which impedance values can be used and tested in a timing test.
-            The bits have a one to one correspondence to the possible driver strengths and
-            start with the first value down to the last (largest) impedance as the LSB of the 8 bit field.
-            This is the nominal value
-        </description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array> 2</array>
-        <persistRuntime/>
-        <mssAccessorName>eff_cen_drv_imp_cntl_schmoo</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_CEN_RCV_IMP_DQ_DQS</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Centaur DQ and DQS Receiver Impedance Used in various locations and
-            it comes from the VPD MT keyword for custom DIMMs or is computed in mss_eff_cnfg_termination.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
-            creator: VPD, mss_eff_cnfg_termination
-            Consumer: initfile + C code
-            firmware notes: none
-            This is the nominal value
-        </description>
-        <valueType>uint8</valueType>
-        <enum>
-            OHM15 = 15,
-            OHM20 = 20,
-            OHM30 = 30,
-            OHM40 = 40,
-            OHM48 = 48,
-            OHM60 = 60,
-            OHM80 = 80,
-            OHM120 = 120,
-            OHM160 = 160,
-            OHM240 = 240
-        </enum>
-        <platInit/>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_cen_rcv_imp_dq_dqs</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_CEN_RCV_IMP_DQ_DQS_SCHMOO</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Enables for which impedance values can be used and tested in a timing test.
-            The bits have a one to one correspondence to the possible receiver termination and
-            start with the first value down to the last (largest) impedance as the LSB of the 32 bit field.
-        </description>
-        <valueType>uint32</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_cen_rcv_imp_dq_dqs_schmoo</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_CEN_SLEW_RATE_DQ_DQS</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Centaur DQ and DQS Slew Rate Used in various locations and comes from the MT keyword of the VPD or
-            is computed in mss_eff_cnfg_termination. Slowest slew rate is 0, incrementing by one.
-            The lower the number the slower the slew rate the higher the faster.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
-            creator: VPD(MT), mss_eff_cnfg_termination
-            consumer: initfiles,various.C
-            firmware notes: none
-            This is the nominal value
-        </description>
-        <valueType>uint8</valueType>
-        <enum>
-            SLEW_3V_NS = 3,
-            SLEW_4V_NS = 4,
-            SLEW_5V_NS = 5,
-            SLEW_6V_NS = 6,
-            SLEW_MAXV_NS = 7
-        </enum>
-        <platInit/>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_cen_slew_rate_dq_dqs</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_CEN_SLEW_RATE_DQ_DQS_SCHMOO</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Slew Rates that can be selected during timing adjustments.
-            The fastest rate is the LSB
-        </description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_cen_slew_rate_dq_dqs_schmoo</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_CEN_SLEW_RATE_CLK_SCHMOO</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Slew Rates that can be selected during timing adjustments.
-            The fastest rate is the LSB
-        </description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_cen_slew_rate_clk_schmoo</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_CEN_SLEW_RATE_SPCKE_SCHMOO</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Slew Rates that can be selected during timing adjustments.
-            The fastest rate is the LSB
-        </description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_cen_slew_rate_spcke_schmoo</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_CEN_SLEW_RATE_ADDR_SCHMOO</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Slew Rates that can be selected during timing adjustments.
-            The fastest rate is the LSB
-        </description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_cen_slew_rate_addr_schmoo</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_CEN_SLEW_RATE_CNTL_SCHMOO</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Slew Rates that can be selected during timing adjustments.
-            The fastest rate is the LSB
-        </description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_cen_slew_rate_cntl_schmoo</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_CEN_RD_VREF</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Centaur Read Vref.
-            Used in various locations and comes from the MT keyword of the VPD or is computed in mss_eff_cnfg_termination.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
-            Creator: VPD(MT) or mss_eff_cnfg_termination
-            consumer: various.C and initfiles
-            firmware notes: none
-            This is the nominal value
-        </description>
-        <valueType>uint32</valueType>
-        <enum>
-            VDD40375 = 40375,
-            VDD41750 = 41750,
-            VDD43125 = 43125,
-            VDD44500 = 44500,
-            VDD45875 = 45875,
-            VDD47250 = 47250,
-            VDD48625 = 48625,
-            VDD50000 = 50000,
-            VDD51375 = 51375,
-            VDD52750 = 52750,
-            VDD54125 = 54125,
-            VDD55500 = 55500,
-            VDD56875 = 56875,
-            VDD58250 = 58250,
-            VDD59625 = 59625,
-            VDD61000 = 61000,
-            VDD60375 = 60375,
-            VDD61750 = 61750,
-            VDD63125 = 63125,
-            VDD64500 = 64500,
-            VDD65875 = 65875,
-            VDD67250 = 67250,
-            VDD68625 = 68625,
-            VDD70000 = 70000,
-            VDD71375 = 71375,
-            VDD72750 = 72750,
-            VDD74125 = 74125,
-            VDD75500 = 75500,
-            VDD76875 = 76875,
-            VDD78250 = 78250,
-            VDD79625 = 79625,
-            VDD81000 = 81000
-         </enum>
-        <platInit/>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_cen_rd_vref</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_CEN_RD_VREF_SCHMOO</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Enables for which VREF value can be used in timing adjustments.
-            The highest voltage corresponds to the LSB
-        </description>
-        <valueType>uint32</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array> 2</array>
-        <mssAccessorName>eff_cen_rd_vref_schmoo</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1371,178 +549,10 @@
         </description>
         <valueType>uint32</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssUnits>GB</mssUnits>
         <persistRuntime/>
         <mssAccessorName>eff_dimm_size</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_DRAM_TRCD</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            RAS to CAS Delay.
-            Used in various locations and is computed in mss_eff_cnfg_timing.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
-            Each memory channel will have a value.
-            creator: mss_eff_cnfg_timing
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array>2 2</array>
-        <mssAccessorName>eff_dram_trcd</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_DRAM_TRRD</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Row ACT to Row ACT Delay.
-            Used in various locations and is computed in mss_eff_cnfg_timing.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
-            Each memory channel will have a value.
-            creator: mss_eff_cnfg_timing
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array>2</array>
-        <mssAccessorName>eff_dram_trrd</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_DRAM_TRP</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Row Precharge Delay.
-            Used in various locations and is computed in mss_eff_cnfg_timing.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
-            Each memory channel will have a value.
-            creator: mss_eff_cnfg_timing
-            consumer: various
-        </description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array>2 2</array>
-        <mssAccessorName>eff_dram_trp</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_DRAM_TRAS</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            ACT to Precharge Delay.
-            Used in various locations and is computed in mss_eff_cnfg_timing.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
-            Each memory channel will have a value.
-            creator: mss_eff_cnfg_timing
-            consumer: various
-        </description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array>2</array>
-        <mssAccessorName>eff_dram_tras</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_DRAM_TRC</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            ACT to ACT/Refresh Delay.
-            Used in various locations and is computed in mss_eff_cnfg_timing.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
-            Each memory channel will have a value.
-            creator: mss_eff_cnfg_timing
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array>2</array>
-        <mssAccessorName>eff_dram_trc</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_DRAM_TWTR</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Internal Write to Read Delay.
-            Used in various locations and is computed in mss_eff_cnfg_timing.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
-            Each memory channel will have a value.
-            creator: mss_eff_cnfg_timing
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array>2</array>
-        <mssAccessorName>eff_dram_twtr</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_DRAM_TRTP</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Internal Read to Precharge Delay.
-            Used in various locations and is computed in mss_eff_cnfg_timing.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
-            Each memory channel will have a value.
-            creator: mss_eff_cnfg_timing
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array>2</array>
-        <mssAccessorName>eff_dram_trtp</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_DRAM_TFAW</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Four ACT Window Delay.
-            Used in various locations and is computed in mss_eff_cnfg_timing.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
-            Each memory channel will have a value.
-            creator: mss_eff_cnfg_timing
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array>2</array>
-        <mssAccessorName>eff_dram_tfaw</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1551,7 +561,6 @@
         <description>
             Burst Length.
             Used in various locations and is computed in mss_eff_cnfg.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             Each memory channel will have a value.
             creator: mss_eff_cnfg
             consumer: various
@@ -1560,8 +569,6 @@
         <valueType>uint8</valueType>
         <enum>BL8 = 0, OTF = 1, BC4 = 2</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_dram_burst_length</mssAccessorName>
     </attribute>
@@ -1576,22 +583,18 @@
             consumer: various
             firmware notes: none
         </description>
-        <valueType>uint64</valueType>
+        <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 </array>
         <mssAccessorName>eff_dram_cas_latency</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_DRAM_AL</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Additive Latency.
             Used in various locations and is computed in mss_eff_cnfg_timing.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             Each memory channel will have a value.
             creator: mss_eff_cnfg_timing
             consumer: various
@@ -1600,20 +603,16 @@
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, CL_MINUS_1 = 1, CL_MINUS_2 = 2</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_dram_al</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_DRAM_CWL</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             CAS Write Latency.
             Used in various locations and is computed in mss_eff_cnfg_timing.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             Each memory channel will have a value.
             creator: mss_eff_cnfg_timing
             consumer: various
@@ -1621,20 +620,16 @@
         </description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_dram_cwl</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_DRAM_RBT</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Read Burst Type.
             Used in various locations and is computed in mss_eff_cnfg.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             Each memory channel will have a value.
             creator: mss_eff_cnfg
             consumer: various
@@ -1643,20 +638,16 @@
         <valueType>uint8</valueType>
         <enum>SEQUENTIAL = 0, INTERLEAVE = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2 2</array>
         <mssAccessorName>eff_dram_read_burst_type</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_DRAM_TM</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Test Mode.
             Used in various locations and is computed in mss_eff_cnfg.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             Each memory channel will have a value.
             creator: mss_eff_cnfg
             consumer: various
@@ -1665,20 +656,16 @@
         <valueType>uint8</valueType>
         <enum>NORMAL= 0, TEST = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2 2</array>
         <mssAccessorName>eff_dram_tm</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_DRAM_DLL_RESET</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             DLL Reset.
             Used in various locations and is computed in mss_eff_cnfg.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             Each memory channel will have a value.
             creator: mss_eff_cnfg
             consumer: various
@@ -1687,41 +674,16 @@
         <valueType>uint8</valueType>
         <enum>NO = 0, YES = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2 2</array>
         <mssAccessorName>eff_dram_dll_reset</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_EFF_DRAM_WR</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Write Recovery.
-            Used in various locations and is computed in mss_eff_cnfg_timing.
-            Can be overwritten by ODM vendofrs if done from the PNOR or odm_eff_cnfg.
-            Each memory channel will have a value.
-            creator: mss_eff_cnfg_timing
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array>2 2</array>
-        <mssAccessorName>eff_dram_write_recovery</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_EFF_DRAM_DLL_PPD</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             DLL Precharge PD.
             Used in various locations and is computed in mss_eff_cnfg.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             Each memory channel will have a value.
             creator: mss_eff_cnfg
             consumer: various
@@ -1730,20 +692,16 @@
         <valueType>uint8</valueType>
         <enum>SLOWEXIT = 0, FASTEXIT = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_dram_dll_ppd</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_DRAM_DLL_ENABLE</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             DLL Enable.
             Used in various locations and is computed in mss_eff_cnfg.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             Each memory channel will have a value.
             creator: mss_eff_cnfg
             consumer: various
@@ -1752,42 +710,16 @@
         <valueType>uint8</valueType>
         <enum>ENABLE = 0, DISABLE = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2 2</array>
         <mssAccessorName>eff_dram_dll_enable</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_EFF_DRAM_TDQS</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            TDQS.
-            Used in various locations and is computed in mss_eff_cnfg.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
-            Each memory channel will have a value.
-            creator: mss_eff_cnfg
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <enum>DISABLE = 0, ENABLE = 1</enum>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array>2</array>
-        <mssAccessorName>eff_dram_tdqs</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_EFF_DRAM_WR_LVL_ENABLE</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Write Level Enable.
             Used in various locations and is computed in mss_eff_cnfg.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             Each memory channel will have a value.
             creator: mss_eff_cnfg
             consumer: various
@@ -1796,21 +728,17 @@
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_dram_wr_lvl_enable</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_DRAM_OUTPUT_BUFFER</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             DRAM Qoff.
             Enables or disables DRAM output.
             Used in various locations and is computed in mss_eff_cnfg.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             Each memory channel will have a value.
             creator: mss_eff_cnfg
             consumer: various
@@ -1818,20 +746,16 @@
         <valueType>uint8</valueType>
         <enum>ENABLE = 0, DISABLE = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_dram_output_buffer</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_DRAM_PASR</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Partial Array Self-Refresh.
             Used in various locations and is computed in mss_eff_cnfg.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             Each memory channel will have a value.
             creator: mss_eff_cnfg
             consumer: various
@@ -1849,20 +773,16 @@
             LAST_EIGHTH = 7
         </enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_dram_pasr</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_DRAM_ASR</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Auto Self-Refresh.
             Used in various locations and is computed in mss_eff_cnfg.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             Each memory channel will have a value.
             creator: mss_eff_cnfg
             consumer: various
@@ -1871,20 +791,16 @@
         <valueType>uint8</valueType>
         <enum>SRT = 0, ASR = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_dram_asr</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_DRAM_SRT</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Self-Refresh Temperature Range.
             Used in various locations and is computed in mss_eff_cnfg.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             Each memory channel will have a value.
             creator: mss_eff_cnfg
             consumer: various
@@ -1893,20 +809,16 @@
         <valueType>uint8</valueType>
         <enum>NORMAL = 0, EXTEND = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_dram_srt</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_MPR_LOC</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Multi Purpose Register Location.
             Used in various locations and is computed in mss_eff_cnfg.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             Each memory channel will have a value.
             creator: mss_eff_cnfg
             consumer: various
@@ -1914,20 +826,16 @@
         </description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_mpr_loc</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_MPR_MODE</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Multi Purpose Register Mode.
             Used in various locations and is computed in mss_eff_cnfg.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             Each memory channel will have a value.
             creator: mss_eff_cnfg
             consumer: various
@@ -1936,8 +844,6 @@
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_mpr_mode</mssAccessorName>
     </attribute>
@@ -1958,8 +864,6 @@
         </description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_dimm_ddr4_rc00</mssAccessorName>
     </attribute>
@@ -1978,8 +882,6 @@
         </description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_dimm_ddr4_rc01</mssAccessorName>
     </attribute>
@@ -1997,8 +899,6 @@
         </description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_dimm_ddr4_rc02</mssAccessorName>
     </attribute>
@@ -2015,8 +915,6 @@
         </description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_dimm_ddr4_rc03</mssAccessorName>
     </attribute>
@@ -2034,8 +932,6 @@
         </description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_dimm_ddr4_rc04</mssAccessorName>
     </attribute>
@@ -2053,8 +949,6 @@
         </description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_dimm_ddr4_rc05</mssAccessorName>
     </attribute>
@@ -2071,8 +965,6 @@
         </description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_dimm_ddr4_rc67</mssAccessorName>
         </attribute>
@@ -2092,8 +984,6 @@
         </description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_dimm_ddr4_rc08</mssAccessorName>
     </attribute>
@@ -2107,8 +997,6 @@
         firmware notes: none</description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_dimm_ddr4_rc09</mssAccessorName>
     </attribute>
@@ -2122,8 +1010,6 @@
         firmware notes: none</description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_dimm_ddr4_rc10</mssAccessorName>
     </attribute>
@@ -2137,8 +1023,6 @@
         firmware notes: none</description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_dimm_ddr4_rc11</mssAccessorName>
     </attribute>
@@ -2152,8 +1036,6 @@
         firmware notes: none</description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_dimm_ddr4_rc12</mssAccessorName>
     </attribute>
@@ -2167,8 +1049,6 @@
         firmware notes: none</description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_dimm_ddr4_rc13</mssAccessorName>
     </attribute>
@@ -2182,8 +1062,6 @@
         firmware notes: none</description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_dimm_ddr4_rc14</mssAccessorName>
     </attribute>
@@ -2197,8 +1075,6 @@
         firmware notes: none</description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_dimm_ddr4_rc15</mssAccessorName>
     </attribute>
@@ -2212,8 +1088,6 @@
         firmware notes: none</description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_dimm_ddr4_rc1x</mssAccessorName>
     </attribute>
@@ -2227,8 +1101,6 @@
         firmware notes: none</description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_dimm_ddr4_rc2x</mssAccessorName>
     </attribute>
@@ -2242,8 +1114,6 @@
         firmware notes: none</description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_dimm_ddr4_rc3x</mssAccessorName>
     </attribute>
@@ -2257,8 +1127,6 @@
         firmware notes: none</description>
        <valueType>uint8</valueType>
        <writeable/>
-       <odmVisable/>
-       <odmChangeable/>
        <array> 2 2</array>
        <mssAccessorName>eff_dimm_ddr4_rc4x</mssAccessorName>
     </attribute>
@@ -2272,8 +1140,6 @@
         firmware notes: none</description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_dimm_ddr4_rc5x</mssAccessorName>
     </attribute>
@@ -2287,8 +1153,6 @@
         firmware notes: none</description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_dimm_ddr4_rc6x</mssAccessorName>
     </attribute>
@@ -2302,8 +1166,6 @@
         firmware notes: none</description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_dimm_ddr4_rc7x</mssAccessorName>
     </attribute>
@@ -2317,8 +1179,6 @@
         firmware notes: none</description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_dimm_ddr4_rc8x</mssAccessorName>
     </attribute>
@@ -2332,8 +1192,6 @@
         firmware notes: none</description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_dimm_ddr4_rc9x</mssAccessorName>
     </attribute>
@@ -2341,14 +1199,16 @@
     <attribute>
         <id>ATTR_EFF_DIMM_DDR4_RC_Ax</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>F0RCAx1: QxODT[1:0] Read Pattern Control Word; Default value - 00. Values Range from 00 to FF. No need to calculate; User can override with desired experimental value.
-        creator: mss_eff_cnfg
-        consumer: mss_dram_init
-        firmware notes: none</description>
+        <description>
+          F0RCAx1: QxODT[1:0] Read Pattern Control Word; Default value - 00.
+          Values Range from 00 to FF. No need to calculate;
+          User can override with desired experimental value.
+          creator: mss_eff_cnfg
+          consumer: mss_dram_init
+          firmware notes: none
+        </description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_dimm_ddr4_rcax</mssAccessorName>
     </attribute>
@@ -2356,14 +1216,16 @@
     <attribute>
         <id>ATTR_EFF_DIMM_DDR4_RC_Bx</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>F0RCBx: IBT and MRS Snoop Control Word;  Default value - 07. Values Range from 00 to FF. No need to calculate; User can override with desired experimental value.
-        creator: mss_eff_cnfg
-        consumer: mss_dram_init
-        firmware notes: none</description>
+        <description>
+          F0RCBx: IBT and MRS Snoop Control Word;  Default value - 07.
+          Values Range from 00 to FF. No need to calculate;
+          User can override with desired experimental value.
+          creator: mss_eff_cnfg
+          consumer: mss_dram_init
+          firmware notes: none
+        </description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_dimm_ddr4_rcbx</mssAccessorName>
     </attribute>
@@ -2371,28 +1233,26 @@
 
     <attribute>
         <id>ATTR_EFF_DIMM_RCD_IBT</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>RCD IBT. Used in mss_dram_init and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.  Each memory channel will have a value.
-        creator: mss_eff_cnfg
-        consumer: mss_dram_init
-        firmware notes: none
+        <description>
+          RCD IBT. Used in mss_dram_init and is computed in mss_eff_cnfg.
+          Each memory channel will have a value.
+          creator: mss_eff_cnfg
+          consumer: mss_dram_init
+          firmware notes: none
         </description>
         <valueType>uint32</valueType>
         <enum>IBT_OFF = 0, IBT_100 = 100, IBT_150 = 150, IBT_200 = 200, IBT_300 = 300</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_dimm_rcd_ibt</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_DIMM_RCD_MIRROR_MODE</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
-            RCD Mirroring. Used in mss_dram_init and is computed in mss_eff_cnfg. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+          RCD Mirroring. Used in mss_dram_init and is computed in mss_eff_cnfg.
             Each memory channel will have a value.
             creator: mss_eff_cnfg
             consumer: mss_dram_init
@@ -2401,43 +1261,34 @@
         <valueType>uint8</valueType>
         <enum>OFF = 0, ON = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_dimm_rcd_mirror_mode</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_SCHMOO_MODE</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the schmoo mode to use during draminit_train_adv.</description>
         <valueType>uint8</valueType>
         <enum>FAST = 0, ONE_SLOW = 1, QUARTER_SLOW = 2, HALF_SLOW = 3, FULL_SLOW = 4, ONE_CHAR = 5, QUARTER_CHAR = 6, HALF_CHAR = 7, FULL_CHAR = 8</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_schmoo_mode</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_SCHMOO_ADDR_MODE</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the schmoo mode to use during draminit_train_adv</description>
         <valueType>uint8</valueType>
         <enum>FEW_ADDR= 0, QUARTER_ADDR = 1, HALF_ADDR = 2, FULL_ADDR = 3</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_schmoo_addr_mode</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_SCHMOO_TEST_VALID</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the schmoo test to run during draminit_train_adv. Bit wise.</description>
         <valueType>uint8</valueType>
@@ -2450,15 +1301,12 @@
             RD_DQS = 0x10
         </enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_schmoo_test_valid</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_SCHMOO_PARAM_VALID</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the schmoo parameters to use during draminit_train_adv. Bit wise.</description>
         <valueType>uint8</valueType>
@@ -2472,108 +1320,84 @@
              RCV_IMP = 0x20
          </enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_schmoo_param_valid</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_SCHMOO_WR_EYE_MIN_MARGIN</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_schmoo_wr_eye_min_margin</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_SCHMOO_RD_EYE_MIN_MARGIN</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_schmoo_rd_eye_min_margin</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_SCHMOO_DQS_CLK_MIN_MARGIN</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_schmoo_dqs_clk_min_margin</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_SCHMOO_RD_GATE_MIN_MARGIN</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_schmoo_rd_gate_min_margin</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_SCHMOO_ADDR_CMD_MIN_MARGIN</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the schmoo minimum margin to use during draminit_train_adv. Used to signal possible SI issues in memory.</description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_schmoo_addr_cmd_min_margin</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_MEMCAL_INTERVAL</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the memcal interval in clocks.</description>
         <valueType>uint32</valueType>
         <enum>DISABLE = 0</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_memcal_interval</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_ZQCAL_INTERVAL</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the zqcal interval in clocks.</description>
         <valueType>uint32</valueType>
         <enum>DISABLE = 0</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_zqcal_interval</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_IBM_TYPE</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the memory topology type. See centaur workbook.</description>
         <valueType>uint8</valueType>
@@ -2607,35 +1431,27 @@
             TYPE_8C = 26
         </enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_ibm_type</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_NUM_DROPS_PER_PORT</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the number of DIMM dimensions that are valid per port. </description>
         <valueType>uint8</valueType>
         <enum>EMPTY = 0, SINGLE = 1, DUAL = 2</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_num_drops_per_port</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Specifies the number of master ranks per DIMM.</description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_num_master_ranks_per_dimm</mssAccessorName>
     </attribute>
@@ -2646,8 +1462,6 @@
         <description>Specifies the number of DRAM packages per rank.</description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_num_packages_per_rank</mssAccessorName>
     </attribute>
@@ -2658,8 +1472,6 @@
         <description>Specifies the number of DRAM dies per package.</description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>eff_prim_die_count</mssAccessorName>
     </attribute>
@@ -2673,8 +1485,6 @@
         </description>
         <valueType>uint32</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <persistRuntime/>
         <mssAccessorName>mem_throttled_n_commands_per_port</mssAccessorName>
@@ -2692,8 +1502,6 @@
         </description>
         <valueType>uint32</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <persistRuntime/>
         <mssAccessorName>mem_m_dram_clocks</mssAccessorName>
@@ -2705,8 +1513,6 @@
         <description>This is the throttle numerator setting for cfg_nm_n_per_slot</description>
         <valueType>uint32</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <persistRuntime/>
         <mssAccessorName>mem_throttled_n_commands_per_slot</mssAccessorName>
@@ -2724,8 +1530,6 @@
         </description>
         <valueType>uint32</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <persistRuntime/>
 
@@ -2738,8 +1542,6 @@
         <description>Master Power slope value for dimm</description>
         <valueType>uint32</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <persistRuntime/>
         <mssAccessorName>master_pwr_slope</mssAccessorName>
@@ -2751,8 +1553,6 @@
         <description>Supplier Power slope value for dimm</description>
         <valueType>uint32</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <persistRuntime/>
         <mssAccessorName>supplier_pwr_slope</mssAccessorName>
@@ -2764,8 +1564,6 @@
         <description>Master Power intercept value for dimm</description>
         <valueType>uint32</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <persistRuntime/>
         <mssAccessorName>master_pwr_intercept</mssAccessorName>
@@ -2777,8 +1575,6 @@
         <description>Supplier Power intercept value for dimm</description>
         <valueType>uint32</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <persistRuntime/>
         <mssAccessorName>supplier_pwr_intercept</mssAccessorName>
@@ -2786,13 +1582,10 @@
 
     <attribute>
         <id>ATTR_MSS_DIMM_MAXBANDWIDTH_GBS</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>DIMM Max Bandwidth in GBs output from thermal procedures</description>
         <valueType>uint32</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <persistRuntime/>
         <mssAccessorName>dimm_maxbandwidth_gbs</mssAccessorName>
@@ -2800,13 +1593,10 @@
 
     <attribute>
         <id>ATTR_MSS_DIMM_MAXBANDWIDTH_MRS</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>DIMM Max Bandwidth in MRs output from thermal procedures</description>
         <valueType>uint32</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <persistRuntime/>
         <mssAccessorName>dimm_maxbandwidth_mrs</mssAccessorName>
@@ -2814,13 +1604,10 @@
 
     <attribute>
         <id>ATTR_MSS_CHANNEL_PAIR_MAXBANDWIDTH_GBS</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Channel Pair Max Bandwidth in GBs output from thermal procedures</description>
         <valueType>uint32</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <persistRuntime/>
         <mssAccessorName>channel_pair_maxbandwidth_gbs</mssAccessorName>
@@ -2828,13 +1615,10 @@
 
     <attribute>
         <id>ATTR_MSS_CHANNEL_PAIR_MAXBANDWIDTH_MRS</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Channel Pair Max Bandwidth MRs output from thermal procedures</description>
         <valueType>uint32</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <persistRuntime/>
         <mssAccessorName>channel_pair_maxbandwidth_mrs</mssAccessorName>
@@ -2842,13 +1626,10 @@
 
     <attribute>
         <id>ATTR_MSS_DIMM_MAXPOWER</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>DIMM Max Power output from thermal procedures</description>
         <valueType>uint32</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <persistRuntime/>
         <mssAccessorName>dimm_maxpower</mssAccessorName>
@@ -2856,13 +1637,10 @@
 
     <attribute>
         <id>ATTR_MSS_CHANNEL_PAIR_MAXPOWER</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Channel Pair Max Power output from thermal procedures</description>
         <valueType>uint32</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <persistRuntime/>
         <mssAccessorName>channel_pair_maxpower</mssAccessorName>
@@ -2870,7 +1648,6 @@
 
     <attribute>
         <id>ATTR_MSS_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
           Runtime throttled N commands per
@@ -2878,8 +1655,6 @@
         </description>
         <valueType>uint32</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <persistRuntime/>
         <mssAccessorName>runtime_mem_throttled_n_commands_per_port</mssAccessorName>
@@ -2887,13 +1662,10 @@
 
     <attribute>
         <id>ATTR_MSS_RUNTIME_MEM_M_DRAM_CLOCKS</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Runtime for M DRAM clocks setting for cfg_nm_m</description>
         <valueType>uint32</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <persistRuntime/>
         <mssAccessorName>runtime_mem_m_dram_clocks</mssAccessorName>
@@ -2901,105 +1673,13 @@
 
     <attribute>
         <id>ATTR_MSS_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_SLOT</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Runtime throttle numerator setting for cfg_nm_n_per_slot</description>
         <valueType>uint32</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <persistRuntime/>
         <mssAccessorName>runtime_mem_throttled_n_commands_per_slot</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_MBA_ADDR_INTERLEAVE_BIT</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-            This dial sets the Centaur address bits used to interleave addresses between MBA01 and MBA23.
-            Valid values are 23 through 32.  See Centaur Spec Chapter 5 for details.
-            Used in the intifile. Will be obsolete when the MSS_DERIVED_MBA_ADDR_INTERLEAVE_BIT is set
-            This attribute will only be found in a Tuelta system.
-        </description>
-        <valueType>uint8</valueType>
-        <platInit/>
-        <odmVisable/>
-        <odmChangeable/>
-        <mssAccessorName>mba_addr_interleave_bit</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_DERIVED_MBA_ADDR_INTERLEAVE_BIT</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            This dial sets the Centaur address bits used to interleave addresses between MBA01 and MBA23.
-            Valid values are 23 through 32.  See Centaur Spec Chapter 5 for details.
-            Used in the intifile
-        </description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <mssAccessorName>derived_mba_addr_interleave_bit</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_MBA_CACHELINE_INTERLEAVE_MODE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-            Value of on or off.  On is 256 bit interleave.
-            Off, the translation is on 128  bit interleave mode.
-            See centaur workbook chapter 5.
-            Will be obsolete when MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE is set.
-            This attribute will only be alive in the Tuelta system.
-        </description>
-        <valueType>uint8</valueType>
-        <enum>OFF = 0, ON = 1</enum>
-        <platInit/>
-        <odmVisable/>
-        <odmChangeable/>
-        <mssAccessorName>mba_cacheline_interleave_mode</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Value of on or off.  On is 256 bit interleave.
-            Off, the translation is on 128  bit interleave mode.
-            See centaur workbook chapter 5.
-        </description>
-        <valueType>uint8</valueType>
-        <enum>OFF = 0, ON = 1</enum>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <mssAccessorName>derived_mba_cacheline_interleave_mode</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_CACHE_ENABLE</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Reflects the functionality of the L4 Cache.
-            Determines if the L4 is enabled or not.
-            See chapter 6 of the Centaur Workbook.
-            On means the full cache is enabled.
-            HALF_A (EVEN) means only A is enabled and HALF_B (ODD) means only B is enabled.
-            For DD1X, the values of UNK_OFF, UNK_ON, UNK_HALF_A and UNK_HALFB were added because
-            early parts did not have the fuses blown correctly, so the cache repairs may not have worked.
-            This value is set by the platform which can get the chips value by running the mss_cen_get_ecid function.
-
-            Note: Cronus and Firmware plus our initfiles do not really support any of the UNK values.
-            It is the responsibility of the platform to map the UNK values to the appropriate value of OFF/ON/HALF_A/HALF_B
-        </description>
-        <valueType>uint8</valueType>
-        <enum>OFF = 0, ON = 1, HALF_A = 3, HALF_B = 5, UNK_OFF = 8, UNK_ON = 9, UNK_HALF_A = 0xB, UNK_HALF_B = 0xD</enum>
-        <platInit/>
-        <odmVisable/>
-        <odmChangeable/>
-        <mssAccessorName>cache_enable</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -3009,8 +1689,6 @@
         <valueType>uint8</valueType>
         <enum>OFF = 0, ON = 1</enum>
         <platInit/>
-        <odmVisable/>
-        <odmChangeable/>
         <mssAccessorName>prefetch_enable</mssAccessorName>
     </attribute>
 
@@ -3025,14 +1703,11 @@
         <valueType>uint8</valueType>
         <enum>OFF = 0, ON = 1</enum>
         <platInit/>
-        <odmVisable/>
-        <odmChangeable/>
         <mssAccessorName>cleaner_enable</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_MSS_EFF_DIMM_FUNCTIONAL_VECTOR</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             A bit vector (per Dean's request) specifying if a DIMM is functional.
@@ -3041,14 +1716,11 @@
             0x08 means port 1, DIMM 0 is functional and 0x04 means port 1 DIMM 1 is functional.
             A fully populated system would have the value of 0xCC.
             Used in various locations and is computed in mss_eff_cnfg.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
             Each memory channel will have a value. creator: mss_eff_cnfg consumer: various firmware notes: none
             This factors in functionality
         </description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <persistRuntime/>
         <mssAccessorName>eff_dimm_functional_vector</mssAccessorName>
@@ -3056,7 +1728,6 @@
 
     <attribute>
         <id>ATTR_EFF_DRAM_LPASR</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Low Power Auto Self-Refresh.
@@ -3070,15 +1741,12 @@
         <valueType>uint8</valueType>
         <enum>MANUAL_NORMAL =0, MANUAL_REDUCED = 1, MANUAL_EXTENDED = 2, ASR = 3</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_dram_lpasr</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_MPR_PAGE</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             MPR Page Selection This is for DDR4 MRS3.
@@ -3091,15 +1759,12 @@
         <valueType>uint8</valueType>
         <enum>PG0 = 0, PG1 = 1, PG2 = 2, PG3 = 3</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_mpr_page</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_GEARDOWN_MODE</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Gear Down Mode.
@@ -3113,15 +1778,12 @@
         <valueType>uint8</valueType>
         <enum>HALF =0, QUARTER=1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_geardown_mode</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_PER_DRAM_ACCESS</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Per DRAM accessibility.
@@ -3135,15 +1797,12 @@
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_per_dram_access</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_TEMP_READOUT</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Temperature sensor readout.
@@ -3157,15 +1816,12 @@
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_temp_readout</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_CRC_WR_LATENCY</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             write latency for CRC and DM. This is for DDR4 MRS3.
@@ -3178,15 +1834,12 @@
         <valueType>uint8</valueType>
         <enum>4NCK = 4, 5NCK = 5, 6NCK = 6</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_crc_wr_latency</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_MPR_RD_FORMAT</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             MPR READ FORMAT.
@@ -3200,15 +1853,12 @@
         <valueType>uint8</valueType>
         <enum>SERIAL = 0, PARALLEL = 1, STAGGERED = 2, RESERVED_TEMP= 3</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_mpr_rd_format</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_MAX_POWERDOWN_MODE</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Max Power down mode.
@@ -3222,15 +1872,12 @@
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_max_powerdown_mode</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_TEMP_REF_MODE</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Temp controlled ref mode. This is for DDR4 MRS4.
@@ -3243,15 +1890,12 @@
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_temp_ref_mode</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_INT_VREF_MON</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Internal Vref Monitor.
@@ -3265,15 +1909,12 @@
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_int_vref_mon</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_CS_CMD_LATENCY</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             CS to CMD/ADDR Latency.
@@ -3287,15 +1928,12 @@
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, 3CYC = 3, 4CYC = 4, 5CYC = 5, 6CYC = 6, 8CYC = 8</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_cs_cmd_latency</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_SELF_REF_ABORT</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Self Refresh Abort.
@@ -3309,15 +1947,12 @@
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_self_ref_abort</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_RD_PREAMBLE_TRAIN</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Read Pre amble Training Mode. This is for DDR4 MRS4.
@@ -3329,15 +1964,12 @@
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_rd_preamble_train</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_RD_PREAMBLE</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Read Pre amble. This is for DDR4 MRS4.
@@ -3349,15 +1981,12 @@
         <valueType>uint8</valueType>
         <enum>1NCLK = 1, 2NCLK = 2</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_rd_preamble</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_WR_PREAMBLE</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Write Pre amble. This is for DDR4 MRS4.
@@ -3369,15 +1998,12 @@
         <valueType>uint8</valueType>
         <enum>1NCLK = 1, 2NCLK = 2</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_wr_preamble</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_CA_PARITY_LATENCY</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             C/A Parity Latency Mode. This is for DDR4 MRS5.
@@ -3389,15 +2015,12 @@
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, PL4 = 4, PL5 = 5, PL6 = 6, PL8 = 8</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_ca_parity_latency</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_CRC_ERROR_CLEAR</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             CRC Error Clear. This is for DDR4 MRS5.
@@ -3409,15 +2032,12 @@
         <valueType>uint8</valueType>
         <enum>CLEAR = 0, ERROR = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_crc_error_clear</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_CA_PARITY_ERROR_STATUS</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             C/A Parity Error Status. This is for DDR4 MRS5.
@@ -3429,15 +2049,12 @@
         <valueType>uint8</valueType>
         <enum>CLEAR = 0, ERROR = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_ca_parity_error_status</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_ODT_INPUT_BUFF</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             ODT Input Buffer during power down. This is for DDR4 MRS5.
@@ -3449,15 +2066,12 @@
         <valueType>uint8</valueType>
         <enum>DEACTIVATED = 0, ACTIVATED = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_odt_input_buff</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_RTT_PARK</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             RTT_Park value. This is for DDR4 MRS5.
@@ -3469,15 +2083,12 @@
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, 60OHM = 60, 120OHM = 120, 40OHM = 40, 240OHM = 240, 48OHM = 48, 80OHM = 80, 34OHM = 34</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2 4</array>
         <mssAccessorName>eff_rtt_park</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_CA_PARITY</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             CA Parity Persistance Error. This is for DDR4 MRS5.
@@ -3489,15 +2100,12 @@
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_ca_parity</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_DATA_MASK</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Data Mask. This is for DDR4 MRS5.
@@ -3509,15 +2117,12 @@
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_data_mask</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_WRITE_DBI</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Write DBI. This is for DDR4 MRS5.
@@ -3529,15 +2134,12 @@
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_write_dbi</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_EFF_READ_DBI</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Read DBI. This is for DDR4 MRS5.
@@ -3549,15 +2151,12 @@
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_read_dbi</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_VREF_DQ_TRAIN_VALUE</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             vrefdq_train value. This is for DDR4 MRS6.
@@ -3568,15 +2167,12 @@
         </description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2 4</array>
         <mssAccessorName>vref_dq_train_value</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_VREF_DQ_TRAIN_RANGE</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             vrefdq_train range. This is for DDR4 MRS6.
@@ -3588,15 +2184,12 @@
         <valueType>uint8</valueType>
         <enum>RANGE1 = 0, RANGE2 = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2 4</array>
         <mssAccessorName>vref_dq_train_range</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_VREF_DQ_TRAIN_ENABLE</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             vrefdq_train enable. This is for DDR4 MRS6.
@@ -3608,35 +2201,12 @@
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2 4</array>
         <mssAccessorName>vref_dq_train_enable</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_TCCD_L</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            tccd_l. This is for DDR4 MRS6.
-            Computed in mss_eff_cnfg. Each memory channel will have a value.
-            Creator: mss_eff_cnfg
-            Consumer:various
-            Firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <enum>4NCK = 4, 5NCK = 5, 6NCK = 6, 7NCK = 7, 8NCK = 8</enum>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array>2</array>
-        <mssAccessorName>tccd_l</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_EFF_WRITE_CRC</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Write CRC control for DDR4 in MRS2.
@@ -3649,15 +2219,12 @@
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_write_crc</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_MSS_CAL_STEP_ENABLE</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             A bit vector denoting valid cal steps to run (0 is left most bit)
@@ -3676,8 +2243,6 @@
         </description>
         <valueType>uint16</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <persistRuntime/>
         <mssAccessorName>cal_step_enable</mssAccessorName>
@@ -3690,15 +2255,12 @@
         <valueType>uint8</valueType>
         <enum>DISABLE = 1, ENABLE = 0</enum>
         <platInit/>
-        <odmVisable/>
-        <odmChangeable/>
         <persistRuntime/>
         <mssAccessorName>draminit_reset_disable</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_MSS_SLEW_RATE_DATA</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             The 4 bit result of running the slew calibration algorithm at various rates and impedances.
@@ -3709,15 +2271,12 @@
         </description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 4 4</array>
         <mssAccessorName>slew_rate_data</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_MSS_SLEW_RATE_ADR</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             The 4 bit result of running the slew calibration algorithm at various rates and impedances.
@@ -3728,31 +2287,12 @@
         </description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 4 4</array>
         <mssAccessorName>slew_rate_adr</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_ECID</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-            Bits 0 to 63 of the ECID in array entry 0 and bits 64 to 127 in ECID array entry 1
-            Created from running the mss_get_cen_ecid.C
-            Firmware shares some code with the processor, so the attribute is named so they can point at a target and have common function.
-        </description>
-        <valueType>uint64</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array> 2</array>
-        <mssAccessorName>ecid</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_MSS_ALLOW_SINGLE_PORT</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             When this value is true, then mss_eff config will allow a single port to have one dimm and will allow ports to have different sizes.
@@ -3761,15 +2301,12 @@
         <valueType>uint8</valueType>
         <enum>FALSE = 0, TRUE = 1</enum>
         <platInit/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>allow_single_port</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_MSS_DQS_SWIZZLE_TYPE</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             DQS Swizzle type is set by the platform to describe what kind of DQS connection is being used for register acceses.
@@ -3779,54 +2316,16 @@
         <valueType>uint8</valueType>
         <enum>NORMAL_TYPE_0 = 0, GLACIER_TYPE_1 = 1, ISDIMM_TYPE2 = 2</enum>
         <platInit/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>dqs_swizzle_type</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_PSRO</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>Set by the centaur mss_get_cen_ecid function used diagnostic and chip characterization reporting</description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <odmVisable/>
-        <mssAccessorName>psro</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_NWELL_MISPLACEMENT</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>Set by the platform depending on DD1 vs DD1.01.  If true, then SI settings affected by the NWELL problem are adjusted.  Used in eff_config</description>
-        <valueType>uint8</valueType>
-        <enum>FALSE = 0, TRUE = 1</enum>
-        <writeable/>
-        <odmVisable/>
-        <mssAccessorName>nwell_misplacement</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_BLUEWATERFALL_BROKEN</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>Set by the platform depending on DD1.0X vs DD1.03 or newer.  If true, then draminit_train will modify dqs_clk_ps and gate to work around the issue. Set in get ecid which determines if we are at 1.03</description>
-        <valueType>uint8</valueType>
-        <enum>FALSE = 0, TRUE = 1</enum>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <mssAccessorName>bluewaterfall_broken</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_SCHMOO_MULTIPLE_SETUP_CALL</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>MCBIST for multiple setup</description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
 
         <mssAccessorName>schmoo_multiple_setup_call</mssAccessorName>
@@ -3834,38 +2333,29 @@
 
     <attribute>
         <id>ATTR_EFF_BUFFER_LATENCY</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Additional buffer latency in the case of RDIMMs and LRDIMMs.
             It is expected that this value will come from the VPD
         </description>
         <valueType>uint8</valueType>
-        <platInit/>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_buffer_latency</mssAccessorName>
     </attribute>
 
     <attribute>
         <id> ATTR_EFF_LRDIMM_WORD_X</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>Additional buffer control word for LRDIMM building of the BCW</description>
         <valueType>uint64</valueType>
-        <platInit/>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName> eff_lrdimm_word_x</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_LRDIMM_MR12_REG</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             LRDIMM MR1,2 register.
@@ -3874,15 +2364,12 @@
         </description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>lrdimm_mr12_reg</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_LRDIMM_ADDITIONAL_CNTL_WORDS</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             LRDIMM additional RCD control words as set by DIMM SPD:
@@ -3892,76 +2379,51 @@
         </description>
         <valueType>uint64</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array> 2 2</array>
         <mssAccessorName>lrdimm_additional_cntl_words</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_LRDIMM_RANK_MULT_MODE</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>LRDIMM rank multiplication mode.
-        Will be set at an MBA level with one policy to be used</description>
+        <description>
+          LRDIMM rank multiplication mode.
+        </description>
         <valueType>uint8</valueType>
         <enum>NORMAL = 0, 2X_MULT = 2, 4X_MULT = 4</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>lrdimm_rank_mult_mode</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_MSS_THROTTLE_CONTROL_RAS_WEIGHT</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>RAS weight to use for memory throttle control - set in thermal procedures</description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>throttle_control_ras_weight</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_MSS_THROTTLE_CONTROL_CAS_WEIGHT</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>CAS weight to use for memory throttle control - set in thermal procedures</description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>throttle_control_cas_weight</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_INIT_STATE</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>How far into the ipl istep the centaur has been brought up</description>
-        <valueType>uint8</valueType>
-        <enum>COLD = 0, CLOCKS_ON = 1, DMI_ACTIVE = 2</enum>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <mssAccessorName>init_state</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_MSS_EFF_VPD_VERSION</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
         The lowest VPD Version of the DIMMs attached to the MBA. Comes directly (in ASCII) of the VINI VZ keyword
     </description>
         <valueType>uint32</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2</array>
         <mssAccessorName>eff_vpd_version</mssAccessorName>
     </attribute>
@@ -3978,290 +2440,20 @@
         <valueType>uint64</valueType>
         <enum>8_0G = 1, 9_6G = 2</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <mssAccessorName>nest_capable_frequencies</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_AVDD_OFFSET_DISABLE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Used for to determine whether to apply an offset to AVDD. Supplied by MRW.</description>
-        <valueType>uint8</valueType>
-        <enum>DISABLE = 1, ENABLE = 0</enum>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>avdd_offset_disable</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_VDD_OFFSET_DISABLE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Used for to determine whether to apply an offset to VDD. Supplied by MRW.</description>
-        <valueType>uint8</valueType>
-        <enum>DISABLE = 1, ENABLE = 0</enum>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>vdd_offset_disable</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_VCS_OFFSET_DISABLE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Used for to determine whether to apply an offset to VCS. Supplied by MRW.</description>
-        <valueType>uint8</valueType>
-        <enum>DISABLE = 1, ENABLE = 0</enum>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>vcs_offset_disable</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_VPP_OFFSET_DISABLE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Used for to determine whether to apply an offset to VCS. Supplied by MRW.</description>
-        <valueType>uint8</valueType>
-        <enum>DISABLE = 1, ENABLE = 0</enum>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>vpp_offset_disable</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_VDDR_OFFSET_DISABLE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Used for to determine whether to apply an offset to VDDR. Supplied by MRW.</description>
-        <valueType>uint8</valueType>
-        <enum>DISABLE = 1, ENABLE = 0</enum>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>vddr_offset_disable</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_AVDD_SLOPE_ACTIVE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Slope value used to determine the dynamic VID AVDD adjustment for ACTIVE parts. In uV/Centaur.</description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>avdd_slope_active</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_AVDD_SLOPE_INACTIVE</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Slope value used to determine the dynamic VID AVDD adjustment for INACTIVE parts. In uV/Centaur.</description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>avdd_slope_inactive</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_AVDD_SLOPE_INTERCEPT</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Intercept value used to determine the dynamic VID AVDD adjustment for all parts. In mV.</description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>avdd_slope_intercept</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_VDD_SLOPE_ACTIVE</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>Slope value used to determine the dynamic VID VDD adjustment for ACTIVE parts. In uV/Centaur.</description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>vdd_slope_active</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_VDD_SLOPE_INACTIVE</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>Slope value used to determine the dynamic VID VDD adjustment for INACTIVE parts. In uV/Centaur.</description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>vdd_slope_inactive</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_VDD_SLOPE_INTERCEPT</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>Intercept value used to determine the dynamic VID VDD adjustment for all parts. In mV.</description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>vdd_slope_intercept</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_VCS_SLOPE_ACTIVE</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>Slope value used to determine the dynamic VID VCS adjustment for ACTIVE parts. In uV/Centaur.</description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>vcs_slope_active</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_VCS_SLOPE_INACTIVE</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>Slope value used to determine the dynamic VID VCS adjustment for INACTIVE parts. In uV/Centaur.</description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>vcs_slope_inactive</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_VCS_SLOPE_INTERCEPT</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>Intercept value used to determine the dynamic VID VCS adjustment for all parts. In mV.</description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>vcs_slope_intercept</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_VPP_SLOPE</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>Slope value used to determine the dynamic VID VPP adjustment for all parts. In uV/Centaur.</description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>vpp_slope</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_VPP_SLOPE_INTERCEPT</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>Intercept value used to determine the dynamic VID VPP adjustment for all parts. In mV.</description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>vpp_slope_intercept</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_DDR3_VDDR_SLOPE</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>Slope value used to determine the dynamic VID DDR3 VDDR adjustment for all parts. In uV/Centaur.</description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>ddr3_vddr_slope</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_DDR3_VDDR_INTERCEPT</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>Intercept value used to determine the dynamic VID DDR3 VDDR adjustment for all parts. In mV.</description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>ddr3_vddr_intercept</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_DDR4_VDDR_SLOPE</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>Slope value used to determine the dynamic VID DDR3 VDDR adjustment for all parts. In uV/Centaur.</description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>ddr4_vddr_slope</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_DDR4_VDDR_INTERCEPT</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>Intercept value used to determine the dynamic VID DDR3 VDDR adjustment for all parts. In mV.</description>
-        <valueType>uint32</valueType>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>ddr4_vddr_intercept</mssAccessorName>
     </attribute>
 
     <attribute>
         <id>ATTR_MSS_VOLT_OVERRIDE</id>
         <targetType>TARGET_TYPE_MCBIST</targetType>
-        <description>Possible DRAM voltage override.</description>
-        <valueType>uint8</valueType>
-        <enum>NONE = 0x00, VOLT_135 = 0x01, VOLT_120 = 0x02</enum>
-        <platInit/>
-        <odmVisable/>
-        <mssAccessorName>volt_override</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_VOLT_COMPLIANT_DIMMS</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
         <description>
-            List of Voltages that are compliant with the system.
-            DIMMs that do not have voltages listed in their SPD as supported are errored out.
-            Procedure defined is currently 1.2V and 1.35V only.
-        </description>
+	  Possible DRAM voltage override.
+	  Firmware notes: Default should be NONE (0x00).
+	</description>
         <valueType>uint8</valueType>
-        <enum> PROCEDURE_DEFINED = 0x00, ALL_VOLTAGES = 0x01</enum>
+        <enum>NONE = 0x00, VOLT_120 = 0x02</enum>
         <platInit/>
-        <odmVisable/>
-        <mssAccessorName>volt_compliant_dimms</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_AVDD_OFFSET</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>Dynamic VID offset applied to AVDD. In mV.</description>
-        <valueType>uint32</valueType>
-        <writeable/>
-        <odmVisable/>
-        <mssAccessorName>avdd_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_VDD_OFFSET</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>Dynamic VID offset applied to VDD. In mV.</description>
-        <valueType>uint32</valueType>
-        <writeable/>
-        <odmVisable/>
-        <mssAccessorName>vdd_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_VCS_OFFSET</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>Dynamic VID offset applied to VCS. In mV.</description>
-        <valueType>uint32</valueType>
-        <writeable/>
-        <odmVisable/>
-        <mssAccessorName>vcs_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_VPP_OFFSET</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>Dynamic VID offset applied to VPP. In mV.</description>
-        <valueType>uint32</valueType>
-        <writeable/>
-        <odmVisable/>
-        <mssAccessorName>vpp_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_VDDR_OFFSET</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>Dynamic VID offset applied to VDDR. In mV.</description>
-        <valueType>uint32</valueType>
-        <writeable/>
-        <odmVisable/>
-        <mssAccessorName>vddr_offset</mssAccessorName>
+        <mssAccessorName>volt_override</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -4271,32 +2463,7 @@
         <valueType>uint8</valueType>
         <enum>NONE = 0x00, VOLT_1350 = 0x01, VOLT_1200 = 0x02</enum>
         <platInit/>
-        <odmVisable/>
         <mssAccessorName>vddr_overide_spd</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_ISDIMMTOC4DQ</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-        ISDIMM DQ mapping that comes from QX keyword on the CDIMM VPD.
-        </description>
-        <valueType>uint8</valueType>
-        <platInit/>
-        <array>4 80</array>
-        <mssAccessorName>vpd_isdimmtoc4dq</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_ISDIMMTOC4DQS</id>
-        <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-        <description>
-        ISDIMM DQQ mapping that comes from QS keyword on the CDIMM VPD.
-        </description>
-        <valueType>uint8</valueType>
-        <platInit/>
-        <array>4 20</array>
-        <mssAccessorName>vpd_isdimmtoc4dqs</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -4318,8 +2485,6 @@
         <description>Maximum number of installed DIMMs per VMEM regulator for all VMEM regulators in the system.</description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <mssAccessorName>vmem_regulator_max_dimm_count</mssAccessorName>
     </attribute>
 
@@ -4333,8 +2498,6 @@
         </description>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2 2</array>
         <persistRuntime/>
         <mssAccessorName>databus_util</mssAccessorName>
@@ -4342,7 +2505,7 @@
 
     <attribute>
         <id>ATTR_MSS_THROTTLED_N_COMMANDS</id>
-        <!-- TK  We can throuble per port/dimm slot will one attr suffice?  AAM  -->
+        <!-- TK  We can throttle per port/dimm slot will one attr suffice?  AAM  -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
           Throttled N commands (address operations) that are
@@ -4352,8 +2515,6 @@
         </description>
         <valueType>uint32</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2 2</array>
         <persistRuntime/>
         <mssAccessorName>throttled_n_commands</mssAccessorName>
@@ -4372,819 +2533,8 @@
         <valueType>uint16</valueType>
         <enum>UNTESTED = 0, 700K = 700, 600K = 600, 500K = 500, 400K = 400, 300K = 300, 200K = 200,  UNLIMITED = 8</enum>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2 2</array>
         <mssAccessorName>eff_dram_mac</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_DRAM_TMAW</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>Maximum Activate Window. Used in various locations and is computed in mss_eff_cnfg.
-        creator: mss_eff_cnfg
-        consumer: various
-        firmware notes: none
-        </description>
-        <valueType>uint16</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array>2 2</array>
-        <mssAccessorName>eff_dram_tmaw</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_DRAM_PPR</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Post Package Repair. Used in various locations and is evaluated in mss_eff_cnfg.
-            creator: mss_eff_cnfg
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <enum>NOT_SUPPORTED = 0, SUPPORTED = 1</enum>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array>2 2</array>
-        <mssAccessorName>eff_dram_ppr</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_DRAM_SOFT_PPR</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Soft Post Package Repair. Used in various locations and is evaluated in mss_eff_cnfg.
-            creator: mss_eff_cnfg
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <enum>NOT_SUPPORTED = 0, SUPPORTED = 1</enum>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array>2 2</array>
-        <mssAccessorName>eff_dram_soft_ppr</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_MR_LAYOUT_VERSION</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>layout_version</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_MR_DATA_VERSION</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>data_version</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_ADDR_A0</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_ADDR_A0
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_addr_a0</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_ADDR_A1</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_ADDR_A1
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_addr_a1</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_ADDR_A2</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_ADDR_A2
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_addr_a2</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_ADDR_A3</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_ADDR_A3
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_addr_a3</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_ADDR_A4</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_ADDR_A4
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_addr_a4</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_ADDR_A5</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_ADDR_A5
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_addr_a5</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_ADDR_A6</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_ADDR_A6
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_addr_a6</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_ADDR_A7</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_ADDR_A7
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_addr_a7</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_ADDR_A8</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description> Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_ADDR_A8
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_addr_a8</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_ADDR_A9</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_ADDR_A9
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_addr_a9</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_ADDR_A10</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_ADDR_A10
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_addr_a10</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_ADDR_A11</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_ADDR_A11
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_addr_a11</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_ADDR_A12</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_ADDR_A12
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_addr_a12</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_ADDR_A13</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_ADDR_A13
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_addr_a13</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_ADDR_A17</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_ADDR_A17
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_addr_a17</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_ADDR_C0</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_ADDR_C0
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_addr_c0</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_ADDR_C1</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_ADDR_C1
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_addr_c1</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_ADDR_C2</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_ADDR_C2
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_addr_c2</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_ADDR_BA0</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_ADDR_BA0
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_addr_ba0</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_ADDR_BA1</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description> Phase rotator value that comes from MR keyword on the CDIMM VPD.
-         This controls the IO PHASE_ROT_ADDR_BA1
-         creator:vpd
-         consumer: various
-         fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_addr_ba1</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_ADDR_BG0</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description> Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_ADDR_BG0    creator:vpd  consumer: various fw notes: </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_addr_bg0</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_ADDR_BG1</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_ADDR_BG1
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_addr_bg1</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_CLK0</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_CLK0
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2 2</array>
-        <mssAccessorName>phase_rot_clk0</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_CLK1</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_CLK1
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2 2</array>
-        <mssAccessorName>phase_rot_clk1</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_CMD_ACTN</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_CMD_ACTN
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_cmd_actn</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_CMD_ADDR_WEN_A14</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description> Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_CMD_ADDR_WEN_A14
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_cmd_addr_wen_a14</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_CMD_ADDR_CASN_A15</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_CMD_ADDR_CASN_A15
-            creator:vpd  consumer: various fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_cmd_addr_casn_a15</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_CMD_ADDR_RASN_A16</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_CMD_ADDR_RASN_A16
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_cmd_addr_rasn_a16</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_CMD_PAR</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description> Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_CMD_PAR
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_cmd_par</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_CNTL_CKE0</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_CNTL_CKE0
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_cntl_cke0</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_CNTL_CKE1</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_CNTL_CKE1
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_cntl_cke1</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_CNTL_CKE2</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_CNTL_CKE2
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_cntl_cke2</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_CNTL_CKE3</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_CNTL_CKE3
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_cntl_cke3</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_CNTL_CSN0</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_CNTL_CSN0
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_cntl_csn0</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_CNTL_CSN1</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_CNTL_CSN1
-            creator:vpd  consumer:
-            various fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_cntl_csn1</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_CNTL_CSN2</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_CNTL_CSN2
-            creator:vpd  consumer:
-            various fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_cntl_csn2</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_CNTL_CSN3</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_CNTL_CSN3
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_cntl_csn3</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_CNTL_ODT0</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_CNTL_ODT0
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_cntl_odt0</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_CNTL_ODT1</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description> Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_CNTL_ODT1
-            creator:vpd
-            consumer: various
-            fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_cntl_odt1</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_CNTL_ODT2</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_CNTL_ODT2
-            creator:vpd  consumer: various fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_cntl_odt2</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_VPD_CEN_PHASE_ROT_CNTL_ODT3</id>
-            <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Phase rotator value that comes from MR keyword on the CDIMM VPD.
-            This controls the IO PHASE_ROT_CNTL_ODT3
-            creator:vpd
-            consumer: various fw notes:
-        </description>
-        <valueType>uint8</valueType>
-        <writeable />
-        <odmVisable />
-        <odmChangeable />
-        <array>2</array>
-        <mssAccessorName>phase_rot_cntl_odt3</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -5195,8 +2545,6 @@
             Byte 124 bits 4:7 for port B, 188 bits 4:7 for port C and 252 bits 4:7 for port D
         </description>
         <valueType>uint8</valueType>
-        <platInit/>
-        <odmVisable/>
         <array>2</array>
         <mssAccessorName>vpd_rlo</mssAccessorName>
         <writeable/>
@@ -5210,8 +2558,6 @@
             Byte 124 bits 0:3 for port B, 188 bits 0:3 for port C and 252 bits 0:3 for port D
         </description>
         <valueType>uint8</valueType>
-        <platInit/>
-        <odmVisable/>
         <array>2</array>
         <mssAccessorName>vpd_wlo</mssAccessorName>
         <writeable/>
@@ -5219,7 +2565,6 @@
 
     <attribute>
         <id>ATTR_EFF_DRAM_MODULE_BUS_WIDTH</id>
-        <!-- P8 MBA level information -->
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Module Memory Bus Width.
@@ -5231,48 +2576,8 @@
         <mssUnit>bits</mssUnit>
         <valueType>uint8</valueType>
         <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2 2</array>
         <mssAccessorName>eff_dram_module_bus_width</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_DRAM_MIN_CYCLE_TIME</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Minimum Cycle time for SDRAM module.
-            Used in various locations and is evaluated in mss_eff_cnfg.
-            creator: mss_eff_cnfg
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array>2 2</array>
-        <mssAccessorName>eff_dram_min_cycle_time</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_EFF_DRAM_MAX_CYCLE_TIME</id>
-        <!-- P8 MBA level information -->
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Maximum Cycle time for SDRAM module.
-            Used in various locations and is evaluated in mss_eff_cnfg.
-            creator: mss_eff_cnfg
-            consumer: various
-            firmware notes: none
-        </description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <odmVisable/>
-        <odmChangeable/>
-        <array>2 2</array>
-        <mssAccessorName>eff_dram_max_cycle_time</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -5281,8 +2586,6 @@
         <description>F0BCW00 Host Interface DQ RTT_NOM Control</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_bc00</mssAccessorName>
     </attribute>
@@ -5293,8 +2596,6 @@
         <description>F0BCW01 Host Interface DQ RTT_WR Control</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_bc01</mssAccessorName>
     </attribute>
@@ -5305,8 +2606,6 @@
         <description>F0BCW02 Host Interface DQ RTT_PARK Control</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_bc02</mssAccessorName>
     </attribute>
@@ -5317,8 +2616,6 @@
         <description>F0BCW03 Host Interface DQ Driver Control Word</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_bc03</mssAccessorName>
     </attribute>
@@ -5329,8 +2626,6 @@
         <description>F0BCW04 DRAM Interface MDQ RTT Control Word</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_bc04</mssAccessorName>
     </attribute>
@@ -5341,8 +2636,6 @@
         <description>F0BCW05 DRAM Interface MDQ Driver Control Word</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_bc05</mssAccessorName>
     </attribute>
@@ -5353,8 +2646,6 @@
         <description>F0BCW06 Command Space Control Word</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_bc06</mssAccessorName>
     </attribute>
@@ -5365,8 +2656,6 @@
         <description>F0BCW07 Rank Presence Control Word</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_bc07</mssAccessorName>
     </attribute>
@@ -5377,8 +2666,6 @@
         <description>F0BCW08 RankSelection Control Word</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_bc08</mssAccessorName>
     </attribute>
@@ -5389,8 +2676,6 @@
         <description>F0BCW09 Power Saving Settings Control Word</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_bc09</mssAccessorName>
     </attribute>
@@ -5401,8 +2686,6 @@
         <description>F0BCW0A LRDIMM Operating Speed </description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_bc0a</mssAccessorName>
     </attribute>
@@ -5413,8 +2696,6 @@
         <description>F0BCW0B Operating Voltage Control Word</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_bc0b</mssAccessorName>
     </attribute>
@@ -5425,8 +2706,6 @@
         <description>F0BCW0C Buffer Training Mode Control Word</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_bc0c</mssAccessorName>
     </attribute>
@@ -5437,8 +2716,6 @@
         <description>F0BCW0D Reserved for future use</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_bc0d</mssAccessorName>
     </attribute>
@@ -5449,8 +2726,6 @@
         <description>F0BCW0E Parity Control Word</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_bc0e</mssAccessorName>
     </attribute>
@@ -5461,8 +2736,6 @@
         <description>F0BCW0F Error Status Word</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_bc0f</mssAccessorName>
     </attribute>
@@ -5473,8 +2746,6 @@
         <description>F0BCW1x Buffer Configuration Control Word</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f0bc1x</mssAccessorName>
     </attribute>
@@ -5485,8 +2756,6 @@
         <description>F30BCW2x Lower Nibble DRAM Interface Receive Enable Training Control Word for ranks 0 to 3</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f30bc2x</mssAccessorName>
     </attribute>
@@ -5497,8 +2766,6 @@
         <description>F30BCW3x Lower Nibble DRAM Interface Receive Enable Training Control Word for ranks 0 to 3</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f30bc3x</mssAccessorName>
     </attribute>
@@ -5509,8 +2776,6 @@
         <description>F30BCW4x Lower Nibble MDQS Read Delay Control Word for ranks 0 to 3</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f30bc4x</mssAccessorName>
     </attribute>
@@ -5521,8 +2786,6 @@
         <description>F30BCW5x Upper Nibble MDQS Read Delay Control Word for ranks 0 to 3</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f30bc5x</mssAccessorName>
     </attribute>
@@ -5533,8 +2796,6 @@
         <description>F0BCW6x Fine Granularity Frequency Operating Speed Control Word</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f0bc6x</mssAccessorName>
     </attribute>
@@ -5545,8 +2806,6 @@
         <description>F70BCW7x Function Space Selector Control Word</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f70bc7x</mssAccessorName>
     </attribute>
@@ -5557,8 +2816,6 @@
         <description>F30BCW8x Lower Nibble MDQ-MDQS Write Delay Control Word for ranks 0 to 3</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f30bc8x</mssAccessorName>
     </attribute>
@@ -5569,8 +2826,6 @@
         <description>F30BCW9x Upper Nibble MDQ-MDQS Write Delay Control Word for ranks 0 to 3</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f30bc9x</mssAccessorName>
     </attribute>
@@ -5581,8 +2836,6 @@
         <description>F30BCWAx Lower Nibble DRAM Interface Write Leveling Control Word for ranks 0 to 3</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f30bcax</mssAccessorName>
     </attribute>
@@ -5593,8 +2846,6 @@
         <description>F30BCWBx Upper Nibble DRAM Interface Write Leveling Control Word for ranks 0 to 3</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f30bcbx</mssAccessorName>
     </attribute>
@@ -5605,8 +2856,6 @@
         <description>F0BCWCx Lower/Upper Nibble Additional Cycles of DRAM Interface Receive Enable Control Word for rank 0</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f0bccx</mssAccessorName>
     </attribute>
@@ -5617,8 +2866,6 @@
         <description>F0BCWDx Lower/Upper Nibble Additional Cycles of DRAM Interface Write Leveling Control Word for rank 0</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f0bcdx</mssAccessorName>
     </attribute>
@@ -5629,8 +2876,6 @@
         <description>F0BCWEx Lower/Upper Nibble Additional Cycles of DRAM Interface Write Leveling Control Word for rank 0</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f0bcex</mssAccessorName>
     </attribute>
@@ -5641,8 +2886,6 @@
         <description>F0BCWFx Lower/Upper Nibble Additional Cycles of DRAM Interface Write Leveling Control Word for rank 2</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f0bcfx</mssAccessorName>
     </attribute>
@@ -5653,8 +2896,6 @@
         <description>F1BCWCx Lower/Upper Nibble Additional Cycles of DRAM Interface Receive Enable Control Word for rank 1</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f1bccx</mssAccessorName>
         </attribute>
@@ -5664,8 +2905,6 @@
         <description>F1BCWDx Lower/Upper Nibble Additional Cycles of DRAM Interface Write Leveling Control Word for rank 1</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f1bcdx</mssAccessorName>
         </attribute>
@@ -5675,8 +2914,6 @@
         <description>F1BCWEx Lower/Upper Nibble Additional Cycles of DRAM Interface Receive Enable Control Word for rank 3</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f1bcex</mssAccessorName>
         </attribute>
@@ -5686,8 +2923,6 @@
         <description>F1BCWFx Lower/Upper Nibble Additional Cycles of DRAM Interface Write Leveling Control Word for rank 3</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f1bcfx</mssAccessorName>
         </attribute>
@@ -5698,8 +2933,6 @@
         <description>F4BCW0x MRS0 snooped settings</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f4bc0x</mssAccessorName>
     </attribute>
@@ -5710,8 +2943,6 @@
         <description>F4BCW1x MRS1 snooped settings</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f4bc1x</mssAccessorName>
     </attribute>
@@ -5722,8 +2953,6 @@
         <description>F4BCW2x MRS2 snooped settings</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f4bc2x</mssAccessorName>
     </attribute>
@@ -5734,8 +2963,6 @@
         <description>F4BCW3x MRS3 snooped settings</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f4bc3x</mssAccessorName>
     </attribute>
@@ -5746,8 +2973,6 @@
         <description>F4BCW4x MRS4 snooped settings</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f4bc4x</mssAccessorName>
     </attribute>
@@ -5758,8 +2983,6 @@
         <description>F4BCW5x MRS5 snooped settings</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f4bc5x</mssAccessorName>
     </attribute>
@@ -5770,8 +2993,6 @@
         <description>F4BCW6x MRS6 snooped settings</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f4bc6x</mssAccessorName>
     </attribute>
@@ -5782,8 +3003,6 @@
         <description>F5BCW0x Upper and Lower MPR bits[7:0] for U0</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f5bc0x</mssAccessorName>
     </attribute>
@@ -5794,8 +3013,6 @@
         <description>F5BCW1x Upper and Lower MPR bits[15:8] for U1</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f5bc1x</mssAccessorName>
     </attribute>
@@ -5806,8 +3023,6 @@
         <description>F5BCW2x Upper and Lower MPR bits[23:16] for U2</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f5bc2x</mssAccessorName>
     </attribute>
@@ -5818,8 +3033,6 @@
         <description>F5BCW3x Upper and Lower MPR bits[31:24] for U3</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f5bc3x</mssAccessorName>
     </attribute>
@@ -5830,8 +3043,6 @@
         <description>F5BCW5x Host Interface Vref Control Word</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f5bc5x</mssAccessorName>
     </attribute>
@@ -5842,8 +3053,6 @@
         <description>F5BCW6x DRAM Interface Vref Control Word</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f5bc6x</mssAccessorName>
     </attribute>
@@ -5854,8 +3063,6 @@
         <description>F6BCW0x Upper and Lower MPR bits[39:32] for U4</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f6bc0x</mssAccessorName>
     </attribute>
@@ -5866,8 +3073,6 @@
         <description>F6BCW1x Upper and Lower MPR bits[47:40] for U5</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f6bc1x</mssAccessorName>
     </attribute>
@@ -5878,8 +3083,6 @@
         <description>F6BCW2x Upper and Lower MPR bits[55:48] for U6</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f6bc2x</mssAccessorName>
     </attribute>
@@ -5890,8 +3093,6 @@
         <description>F6BCW3x Upper and Lower MPR bits[63:56] for U7</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f6bc3x</mssAccessorName>
     </attribute>
@@ -5902,8 +3103,6 @@
         <description>F6BCW4x Buffer Training Configuration Control Word</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f6bc4x</mssAccessorName>
     </attribute>
@@ -5914,8 +3113,6 @@
         <description>F6BCW5x Buffer Training Status Word</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f6bc5x</mssAccessorName>
     </attribute>
@@ -5926,8 +3123,6 @@
         <description>F74BCW8x MDQ0/4 -Read Delay Control Word for ranks 0 to 3</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f74bc8x</mssAccessorName>
     </attribute>
@@ -5938,8 +3133,6 @@
         <description>F74BCW9x MDQ1/5 -Read Delay Control Word for ranks 0 to 3</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f74bc9x</mssAccessorName>
     </attribute>
@@ -5950,8 +3143,6 @@
         <description>F74BCWAx MDQ2/6 -Read Delay Control Word for ranks 0 to 3</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f74bcax</mssAccessorName>
     </attribute>
@@ -5962,8 +3153,6 @@
         <description>F74BCWBx MDQ3/7 -Read Delay Control Word for ranks 0 to 3</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f74bcbx</mssAccessorName>
     </attribute>
@@ -5974,8 +3163,6 @@
         <description>F74BCWCx MDQ0/4-MDQS Write Delay Control Word for ranks 0 to 3</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f74bccx</mssAccessorName>
     </attribute>
@@ -5986,8 +3173,6 @@
         <description>F74BCWDx MDQ1/5-MDQS Write Delay Control Word for ranks 0 to 3</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f74bcdx</mssAccessorName>
     </attribute>
@@ -5998,8 +3183,6 @@
         <description>F74BCWEx MDQ2/6-MDQS Write Delay Control Word for ranks 0 to 3</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f74bcex</mssAccessorName>
     </attribute>
@@ -6010,72 +3193,20 @@
         <description>F74BCWFx MDQ3/7-MDQS Write Delay Control Word for ranks 0 to 3</description>
         <valueType>uint8</valueType>
         <writeable />
-        <odmVisable />
-        <odmChangeable />
         <array> 2 2 </array>
         <mssAccessorName>eff_dimm_ddr4_f74bcfx</mssAccessorName>
     </attribute>
 
     <attribute>
-        <id>ATTR_SPD_CAS_LATENCIES_SUPPORTED</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            CAS Latencies supported (bitmap).
-            Located in DDR4 SPD byte 20 (LSB) through byte 23
-            The raw data has different meanings for DDR3 and DDR4.
-            HWPs must use this DDR neutral enumeration to decode.
-            Platform support must call an Accessor HWP.
-        </description>
-        <valueType>uint64</valueType>
-        <array> 2 2 </array>
-
-        <mssAccessorName>cas_latencies_supported</mssAccessorName>
-        <platInit/>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_SPD_MODULE_THERMAL_SENSOR</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            Module Thermal Sensor.
-            Located in DDR4 SPD byte 14.
-        </description>
-        <valueType>uint8</valueType>
-        <array> 2 2 </array>
-        <writeable/>
-        <enum>INCORPORATED = 0x80, NOT_INCORPORATED = 0x00</enum>
-        <mssAccessorName>spd_module_thermal_sensor</mssAccessorName>
-        <platInit/>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_SPD_MODULE_NOMINAL_VOLTAGE</id>
-        <targetType>TARGET_TYPE_MCS</targetType>
-        <description>
-            mss_eff_config should decode the nominal voltage
-            in milivolts and write out the value
-        </description>
-        <valueType>uint64</valueType>
-        <array> 2 2 </array>
-        <mssAccessorName>spd_module_nominal_voltage</mssAccessorName>
-        <!-- Note that current DDR4 spec has reserved bits for bits 2~7 -->
-        <enum>OPERABLE = 1</enum>
-        <writeable />
-        <mssUnits> mV </mssUnits>
-        <platInit/>
-    </attribute>
-
-    <attribute>
       <id>ATTR_EFF_ODT_RD</id>
       <targetType>TARGET_TYPE_MCS</targetType>
-      <description>Read ODT. Used in various locations and comes from the MT keyword of the VPD or is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
-        creator: VPD(MT),mss_eff_cnfg_termination
-        consumer: various.C files and initfiles
+      <description>
+        Read ODT.
+        Used in various locations and comes from the MT keyword of the VPD
+        creator: eff_config
+        consumer: various and initfiles
         firmware notes: none</description>
       <valueType>uint8</valueType>
-      <platInit/>
-      <odmVisable/>
-      <odmChangeable/>
       <array>2 2 4</array>
       <mssAccessorName>eff_odt_rd</mssAccessorName>
     </attribute>
@@ -6083,14 +3214,13 @@
     <attribute>
       <id>ATTR_EFF_ODT_WR</id>
       <targetType>TARGET_TYPE_MCS</targetType>
-      <description>Write ODT. Used in various locations and comes from the MT keyword of the VPD or is computed in mss_eff_cnfg_termination. Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
-        Creator: VPD(MT)/ mss_eff_cnfg_termination
-        consumer: various.C and initfile
+      <description>
+        Write ODT.
+        Used in various locations and comes from the MT keyword of the VPD
+        Creator: mss_eff_config
+        consumer: various and initfile
         firmware notes: none</description>
       <valueType>uint8</valueType>
-      <platInit/>
-      <odmVisable/>
-      <odmChangeable/>
       <array>2 2 4</array>
       <mssAccessorName>eff_odt_wr</mssAccessorName>
     </attribute>
@@ -6100,14 +3230,11 @@
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             DRAM Ron.
-            Used in various locations and comes from the MT keyword of the VPD or is computed in mss_eff_cnfg_termination.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg. OHM48 is for DDR4.
+            Used in various locations and comes from the MT keyword of the VPD
+            OHM48 is for DDR4.
         </description>
         <valueType>uint8</valueType>
         <enum>INVALID = 0, OHM34 = 34, OHM40 = 40, OHM48 = 48</enum>
-        <platInit/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2 2</array>
         <mssAccessorName>eff_dram_ron</mssAccessorName>
     </attribute>
@@ -6117,14 +3244,21 @@
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             DRAM Rtt_Nom.
-            Used in various locations and comes from the MT keyword of the VPD or is computed in mss_eff_cnfg_termination.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+            Used in various locations and comes from the MT keyword of the VPD
         </description>
         <valueType>uint8</valueType>
-        <enum>DISABLE = 0, OHM20 = 20, OHM30 = 30, OHM34 = 34, OHM40 = 40, OHM48 = 48, OHM60 = 60, OHM80 = 80, OHM120 = 120, OHM240 = 240</enum>
-        <platInit/>
-        <odmVisable/>
-        <odmChangeable/>
+        <enum>
+          DISABLE = 0,
+          OHM20 = 20,
+          OHM30 = 30,
+          OHM34 = 34,
+          OHM40 = 40,
+          OHM48 = 48,
+          OHM60 = 60,
+          OHM80 = 80,
+          OHM120 = 120,
+          OHM240 = 240
+        </enum>
         <array> 2 2 4</array>
         <mssAccessorName>eff_dram_rtt_nom</mssAccessorName>
     </attribute>
@@ -6135,14 +3269,10 @@
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             DRAM Rtt_WR.
-            Used in various locations and comes from the MT keyword of the VPD or is computed in mss_eff_cnfg_termination.
-            Can be overwritten by ODM vendors if done from the PNOR or odm_eff_cnfg.
+            Used in various locations and comes from the MT keyword of the VPD
         </description>
         <valueType>uint8</valueType>
         <enum>DISABLE = 0, OHM60 = 60, OHM120 = 120, OHM240 = 240, HIGHZ = 1</enum>
-        <platInit/>
-        <odmVisable/>
-        <odmChangeable/>
         <array>2 2 4</array>
         <writeable/>
         <mssAccessorName>eff_dram_rtt_wr</mssAccessorName>
@@ -6151,14 +3281,122 @@
     <attribute>
         <id>ATTR_VPD_GPO</id>
         <targetType>TARGET_TYPE_MCS</targetType>
-        <description>This value comes from the VPD keyword MT bytes 61 MT(61) for the Logical DIMM
-        associated with port A.  Bytes 125 for port B, 189 for port C and 253 for port D</description>
+        <description>
+          This value comes from the VPD keyword MT bytes 61 MT(61) for the Logical DIMM
+          associated with port A.  Bytes 125 for port B, 189 for port C and 253 for port D
+        </description>
         <valueType>uint8</valueType>
-        <platInit/>
-        <odmVisable/>
         <array>2</array>
         <writeable/>
         <mssAccessorName>vpd_gpo</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_TDQS</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            TDQS.
+            Used in various locations and is computed in mss_eff_cnfg.
+            Each memory channel will have a value.
+            creator: mss_eff_cnfg
+            consumer: various
+            firmware notes: none
+        </description>
+        <valueType>uint8</valueType>
+        <enum>DISABLE = 0, ENABLE = 1</enum>
+        <writeable/>
+        <array> 2 </array>
+        <mssAccessorName>eff_dram_tdqs</mssAccessorName>
+    </attribute>
+
+    <attribute>
+      <id>ATTR_EFF_DRAM_TREFI</id>
+      <targetType>TARGET_TYPE_MCS</targetType>
+      <description>
+        Average Refresh Interval (tREFI) in nck (number of clock cycles).
+        creator: mss_eff_config
+        consumer: various
+        firmware notes: none
+      </description>
+      <valueType>uint8</valueType>
+      <writeable/>
+      <array> 2 </array>
+      <mssUnits> nck </mssUnits>
+      <mssAccessorName>eff_dram_trefi</mssAccessorName>
+    </attribute>
+
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_TRTP</id>
+        <!-- Not an SPD byte - how to find this?? -AM -->
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Internal Read to Precharge Delay.
+            Each memory channel will have a value.
+            creator: mss_eff_cnfg_timing
+            consumer: various
+            firmware notes: none
+        </description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array> 2 </array>
+        <mssAccessorName>eff_dram_trtp</mssAccessorName>
+    </attribute>
+
+    <attribute>
+      <id>ATTR_EFF_DRAM_TRFC_DLR</id>
+      <targetType>TARGET_TYPE_MCS</targetType>
+      <description>
+        Minimum Refresh Recovery Delay Time
+        in nck (number of clock cyles).
+        Selected tRFC value (tRFC_dl1, tRFC_dl2, or tRFC_dl4)
+        depends on MRW attribute that selects fine refresh mode (x1, x2, x4).
+        For 3DS, The tRFC time to different logical ranks are defined as tRFC_dlr
+        creator: eff_config
+        consumer: various
+        firmware notes: none</description>
+      <valueType>uint8</valueType>
+      <writeable/>
+      <array> 2 </array>
+      <mssUnits> nck </mssUnits>
+      <mssAccessorName>eff_dram_trfc_dlr</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_TFAW_DLR</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Minimum Four Activate Window Delay Time
+          in nck (number of clock cycles).
+          For 3DS, the tFAW time to different logical ranks are defined as tFAW_dlr
+          Each memory channel will have a value.
+          creator: eff_cnfg
+          consumer: various
+          firmware notes: none
+        </description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array> 2 </array>
+        <mssUnits> nck </mssUnits>
+        <mssAccessorName>eff_dram_tfaw_dlr</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_DRAM_TXS</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Exit Self-Refresh to commands not requiring a locked DLL.
+          In nck (number of clock cycles).
+          Each memory channel will have a value.
+          creator: eff_config
+          consumer: various
+          firmware notes: none
+        </description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array> 2 </array>
+        <mssUnits> nck </mssUnits>
+        <mssAccessorName>eff_dram_txs</mssAccessorName>
     </attribute>
 
 </attributes>
