@@ -28,6 +28,7 @@ MODULE = istep08
 
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/pm/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/perv/
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/sbe/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/io/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/initfiles/
@@ -56,6 +57,7 @@ OBJS += call_host_rng_bist.o
 
 VPATH += ${PROCEDURES_PATH}/hwp/perv/ ${PROCEDURES_PATH}/hwp/nest/
 VPATH += ${PROCEDURES_PATH}/hwp/io/ ${PROCEDURES_PATH}/hwp/initfiles/
+VPATH += ${PROCEDURES_PATH}/hwp/sbe/
 
 
 include ${ROOTPATH}/procedure.rules.mk
@@ -71,6 +73,7 @@ include ${PROCEDURES_PATH}/hwp/perv/p9_start_cbs.mk
 # 8.4 proc_check_slave_sbe_seeprom_complete : Check Slave SBE Complete
 include ${PROCEDURES_PATH}/hwp/perv/p9_check_slave_sbe_seeprom_complete.mk
 include ${PROCEDURES_PATH}/hwp/perv/p9_extract_sbe_rc.mk
+include ${PROCEDURES_PATH}/hwp/sbe/p9_get_sbe_msg_register.mk
 
 # 8.5 proc_cen_ref_clk_enable
 # Cummulus only -- p9_cen_ref_clk_enable.mk not defined yet

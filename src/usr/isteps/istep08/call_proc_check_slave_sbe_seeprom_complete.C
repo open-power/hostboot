@@ -58,8 +58,8 @@
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
 
-#include <p9_check_slave_sbe_seeprom_complete.H>
 #include <p9_extract_sbe_rc.H>
+#include <p9_get_sbe_msg_register.H>
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -126,14 +126,88 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2ProcTarget(
                             const_cast<TARGETING::Target*> (l_cpu_target));
 
-        // Invoke the HWP
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running p9_check_slave_sbe_seeprom_complete HWP"
-                " on processor target %.8X",
-                TARGETING::get_huid(l_cpu_target) );
+        // Each slave sbe gets 1s to respond with the fact that it's
+        // booted and at runtime (stable state)
+        const uint32_t SLAVE_SBE_TIMEOUT_1S = 1000000000;
+        const uint32_t SLAVE_SBE_WAIT_SLEEP = (SLAVE_SBE_TIMEOUT_1S/10);
+        uint32_t l_time = 0;
+        sbeMsgReg_t l_sbeReg;
 
-        FAPI_INVOKE_HWP(l_errl, p9_check_slave_sbe_seeprom_complete,
-                        l_fapi2ProcTarget);
+        for(l_time=0; l_time<SLAVE_SBE_TIMEOUT_1S; l_time+=SLAVE_SBE_WAIT_SLEEP)
+        {
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Running p9_get_sbe_msg_register HWP"
+                    " on processor target %.8X",
+                    TARGETING::get_huid(l_cpu_target));
+
+            l_sbeReg.reg = 0;
+            FAPI_INVOKE_HWP(l_errl, p9_get_sbe_msg_register,
+                            l_fapi2ProcTarget,l_sbeReg);
+            if (l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "ERROR : call p9_get_sbe_msg_register, "
+                        "PLID=0x%x", l_errl->plid()  );
+
+                break;
+            }
+            else if(l_sbeReg.currState == SBE_STATE_RUNTIME)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                            "SBE 0x%.8X booted and at runtime, l_sbeReg=0x%.8X",
+                            TARGETING::get_huid(l_cpu_target),l_sbeReg.reg);
+                break;
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                            "SBE 0x%.8X NOT booted yet, l_sbeReg=0x%.8X",
+                            TARGETING::get_huid(l_cpu_target),l_sbeReg.reg);
+
+                nanosleep(0,SLAVE_SBE_WAIT_SLEEP);
+            }
+        }
+        if((!l_errl) && (l_time == SLAVE_SBE_TIMEOUT_1S))
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        ERR_MRK"Timeout hit waiting for sbe slave 0x%.8X",
+                        TARGETING::get_huid(l_cpu_target));
+            /*@
+             * @errortype
+             * @reasoncode  RC_SBE_SLAVE_TIMEOUT
+             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid    MOD_CHECK_SLAVE_SBE_SEEPROM_COMPLETE
+             * @userdata1   HUID of proc which had SBE timeout
+             * @userdata2   SBE MSG Register
+             *
+             * @devdesc Slave SBE did not get to ready state within
+             *          allotted time
+             *
+             * @custdesc A processor in the system has failed to initialize
+             */
+            l_errl = new ErrlEntry(
+                    ERRL_SEV_UNRECOVERABLE,
+                    MOD_CHECK_SLAVE_SBE_SEEPROM_COMPLETE,
+                    RC_SBE_SLAVE_TIMEOUT,
+                    TARGETING::get_huid(l_cpu_target),
+                    l_sbeReg.reg);
+
+            l_errl->collectTrace( "ISTEPS_TRACE", 256);
+
+            // TODO-RTC:152203
+            //l_errl->addHwCallout( l_cpu_target,
+            //                      HWAS::SRCI_PRIORITY_HIGH,
+            //                      HWAS::DECONFIG,
+            //                      HWAS::GARD_NULL );
+            // Create IStep error log and cross reference to error that occurred
+            //l_stepError.addErrorDetails( l_errl );
+
+            // Commit error and continue, this is not terminating since
+            // we can still at least boot with master proc
+            errlCommit(l_errl,ISTEP_COMP_ID);
+        }
+
 /* TODO-RTC:138226
         // check for re ipl request
         if(static_cast<uint32_t>(rc_fapi) ==
@@ -178,11 +252,13 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
             // Commit error log
             errlCommit( l_errl, HWPF_COMP_ID );
         }
-        else
+        // No error and still functional
+        else if(l_cpu_target->getAttr<ATTR_HWAS_STATE>().functional)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "SUCCESS : proc_check_slave_sbe_seeprom_complete",
-                      "completed ok");
+                      "completed ok for proc 0x%.8X",
+                      TARGETING::get_huid(l_cpu_target));
         }
 
 
@@ -265,9 +341,10 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
       }
       else
       {
-          TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "SUCCESS : proc_getecid",
-                    " completed ok");
+          // TODO-RTC:149518
+          //TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+          //          "SUCCESS : proc_getecid",
+          //          " completed ok");
 
       }
     }  // end of going through all processors

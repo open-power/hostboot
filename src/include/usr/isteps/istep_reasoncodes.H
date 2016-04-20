@@ -50,6 +50,7 @@ namespace ISTEP
         MOD_LOAD_PAYLOAD                                  = 0x0E,
         MOD_GET_CACHE_DECONFIG                            = 0x0F,
         MOD_THREAD_ACTIVATE                               = 0x10,
+        MOD_CHECK_SLAVE_SBE_SEEPROM_COMPLETE              = 0x11,
     };
 
     /**
@@ -80,6 +81,7 @@ namespace ISTEP
         RC_INVALID_RECORD                        = ISTEP_COMP_ID | 0x12,
         RC_INCORRECT_KEWORD_SIZE                 = ISTEP_COMP_ID | 0x13,
         RC_NO_MASTER_CORE_TARGET                 = ISTEP_COMP_ID | 0x14,
+        RC_SBE_SLAVE_TIMEOUT                     = ISTEP_COMP_ID | 0x15,
     };
 
 };
