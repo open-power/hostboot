@@ -181,13 +181,13 @@ class cas_latency
                                            const uint64_t i_tCK) const;
 
         ///
-        /// @brief         Helper function to determines next lowest CAS latency (CL)
-        /// @param[in]     i_common_CLs vector of common CAS latencies
-        /// @param[in,out] io_desired_cas_latency current CAS latency
-        /// @return        the next lowest CL
+        /// @brief Helper function to determines next lowest CAS latency (CL)
+        /// @param[in] i_common_CLs vector of common CAS latencies
+        /// @param[in] i_desired_cas_latency current CAS latency
+        /// @return the next lowest CL
         ///
         inline uint64_t next_lowest_CL(const std::vector<uint64_t>& i_common_CLs,
-                                       uint64_t& io_desired_cas_latency);
+                                       const uint64_t i_desired_cas_latency);
 
         ///
         /// @brief          Checks that CAS latency (CL) is supported among all dimms

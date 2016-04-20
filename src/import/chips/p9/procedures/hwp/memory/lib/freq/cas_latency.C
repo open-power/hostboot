@@ -149,12 +149,14 @@ fapi2::ReturnCode cas_latency::find_CL(const fapi2::Target<fapi2::TARGET_TYPE_MC
 
     //Chose an actual CAS Latency (CLactual) that is greater than or equal to CLdesired
     //and is supported by all modules on the memory channel
-    FAPI_TRY( choose_actual_CL(l_supported_CLs, iv_largest_taamin, iv_proposed_tck, l_desired_cas_latency) );
+    FAPI_TRY( choose_actual_CL(l_supported_CLs, iv_largest_taamin, iv_proposed_tck, l_desired_cas_latency),
+              "Failed choose_actual_CL()");
 
     // Once the calculation of CLactual is completed, the BIOS must also
     // verify that this CAS Latency value does not exceed tAAmax.
     //If not, choose a lower CL value and repeat until a solution is found.
-    FAPI_TRY( validate_valid_CL(l_supported_CLs, iv_largest_taamin, iv_proposed_tck, l_desired_cas_latency) );
+    FAPI_TRY( validate_valid_CL(l_supported_CLs, iv_largest_taamin, iv_proposed_tck, l_desired_cas_latency),
+              "Failed validate_valid_CL()");
 
     // Update output values after all criteria is met
     o_cas_latency = l_desired_cas_latency;
@@ -420,21 +422,16 @@ inline bool cas_latency::is_CL_exceeding_tAAmax(const uint64_t i_cas_latency,
 
 
 ///
-/// @brief         Helper function to determines next lowest CAS latency (CL)
-/// @param[in]     i_common_CLs vector of common CAS latencies
-/// @param[in,out] io_desired_cas_latency current CAS latency
-/// @return        the next lowest CL
+/// @brief Helper function to determines next lowest CAS latency (CL)
+/// @param[in] i_common_CLs vector of common CAS latencies
+/// @param[in] i_desired_cas_latency current CAS latency
+/// @return the next lowest CL
 ///
 inline uint64_t cas_latency::next_lowest_CL(const std::vector<uint64_t>& i_common_CLs,
-        uint64_t& io_desired_cas_latency)
+        const uint64_t i_desired_cas_latency)
 {
-    auto iterator = std::lower_bound(i_common_CLs.begin(),
-                                     i_common_CLs.end(),
-                                     io_desired_cas_latency);
-
-    io_desired_cas_latency = *(--iterator);
-
-    return  io_desired_cas_latency;
+    auto iterator = std::lower_bound(i_common_CLs.begin(), i_common_CLs.end(), i_desired_cas_latency);
+    return  *(--iterator);
 }
 
 ///
@@ -453,6 +450,7 @@ fapi2::ReturnCode cas_latency::choose_actual_CL (const std::vector<uint64_t>& i_
 {
     if( i_common_CLs.empty() )
     {
+        FAPI_ERR("Common CAS latency vector is empty!");
         return fapi2::FAPI2_RC_INVALID_PARAMETER;
     }
 
@@ -471,6 +469,9 @@ fapi2::ReturnCode cas_latency::choose_actual_CL (const std::vector<uint64_t>& i_
         io_desired_cas_lat = calc_cas_latency(i_tAA, io_tCK);
         l_is_CL_supported = is_CL_supported_in_common(i_common_CLs, io_desired_cas_lat);
     }
+
+    // If we reach here everything is okay
+    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -492,6 +493,7 @@ fapi2::ReturnCode cas_latency::validate_valid_CL (const std::vector<uint64_t>& i
 {
     if( i_common_CLs.empty() )
     {
+        FAPI_ERR("Common CAS latency vector is empty!");
         return fapi2::FAPI2_RC_INVALID_PARAMETER;
     }
 
@@ -504,10 +506,11 @@ fapi2::ReturnCode cas_latency::validate_valid_CL (const std::vector<uint64_t>& i
         // Decrement CL to next lowest supported CL
         // And try again
         io_desired_cas_lat = next_lowest_CL(i_common_CLs, io_desired_cas_lat);
-        FAPI_DBG("Next lowest supported CL: %d", io_desired_cas_lat);
+        FAPI_DBG("Next lowest CAS latency %d", io_desired_cas_lat);
 
         FAPI_TRY( choose_actual_CL(i_common_CLs, i_tAA, io_tCK, io_desired_cas_lat),
                   "Failed choose_actual_CL()");
+
         l_is_CL_violating_spec = is_CL_exceeding_tAAmax (io_desired_cas_lat, io_tCK);
     }
 
