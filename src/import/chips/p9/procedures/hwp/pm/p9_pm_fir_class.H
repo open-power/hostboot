@@ -51,16 +51,19 @@ enum FIRType
 {
     FIRTYPE_OCC_LFIR = 0x00000001, // OCC LFIR
     FIRTYPE_PBA_LFIR = 0x00000002, // PBA LFIR
-    FIRTYPE_CME_LFIR = 0x00000003  // CME LFIR
+    FIRTYPE_CME_LFIR = 0x00000003, // CME LFIR
+    FIRTYPE_PPM_LFIR = 0x00000004  // PPM LFIR
 };
 
+// Register
 enum regType
 {
     REG_ACTION0,
     REG_ACTION1,
     REG_FIR,
     REG_FIRMASK,
-    REG_ALL
+    REG_ALL,
+    REG_ERRMASK
 };
 
 //FIR register offset from base
@@ -73,6 +76,15 @@ enum FIROffset
     MASK_WOR_INCR   = 5,
     ACTION0_INCR    = 6,
     ACTION1_INCR    = 7
+};
+
+// Target type
+enum Target
+{
+    PROC_TARGET,
+    EX_TARGET,
+    EQ_TARGET,
+    CORE_TARGET
 };
 /*
 
@@ -94,7 +106,11 @@ typedef struct FIRDef_t
 template <FIRType Ftype>
 class PMFir
 {
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> iv_target;
+        // Fapi Targets for the FIRs and Error masks
+        fapi2::Target < fapi2::TARGET_TYPE_PROC_CHIP > iv_proc;
+        fapi2::Target < fapi2::TARGET_TYPE_EX > iv_ex;
+        fapi2::Target < fapi2::TARGET_TYPE_EQ > iv_eq;
+        fapi2::Target < fapi2::TARGET_TYPE_CORE > iv_core;
 
         // Buffers to hold the FIR, masks and action register data
         fapi2::buffer<uint64_t> iv_fir;
@@ -114,9 +130,14 @@ class PMFir
         bool iv_action1_write;
         bool iv_mask_write;
 
+        uint8_t iv_targetType;
+
     public:
 
-        PMFir(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+        PMFir(const fapi2::Target < fapi2::TARGET_TYPE_PROC_CHIP >& i_target);
+        PMFir(const fapi2::Target < fapi2::TARGET_TYPE_EX >& i_target);
+        PMFir(const fapi2::Target < fapi2::TARGET_TYPE_EQ >& i_target);
+        PMFir(const fapi2::Target < fapi2::TARGET_TYPE_CORE >& i_target);
 
         fapi2::ReturnCode get(const regType i_reg);
 
@@ -152,7 +173,7 @@ class PMFir
 ///
 template < FIRType Ftype >
 PMFir<Ftype>::PMFir(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+    const fapi2::Target < fapi2::TARGET_TYPE_PROC_CHIP >& i_target)
 {
 }
 
@@ -163,13 +184,14 @@ PMFir<Ftype>::PMFir(
 ///
 template <>
 PMFir<FIRTYPE_OCC_LFIR>::PMFir(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+    const fapi2::Target < fapi2::TARGET_TYPE_PROC_CHIP >& i_target)
 {
     iv_fir_address = PERV_TP_OCC_SCOM_OCCLFIR;
     iv_action0_address = iv_fir_address + ACTION0_INCR;
     iv_action1_address = iv_fir_address + ACTION1_INCR;
     iv_mask_address = iv_fir_address + MASK_INCR;
-    iv_target = i_target;
+    iv_proc = i_target;
+    iv_targetType = PROC_TARGET;
     iv_fir_write = false;
     iv_action0_write = false;
     iv_action1_write = false;
@@ -183,13 +205,125 @@ PMFir<FIRTYPE_OCC_LFIR>::PMFir(
 ///
 template <>
 PMFir<FIRTYPE_PBA_LFIR>::PMFir(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+    const fapi2::Target < fapi2::TARGET_TYPE_PROC_CHIP >& i_target)
 {
     iv_fir_address = PU_PBAFIR;
     iv_action0_address = iv_fir_address + ACTION0_INCR;
     iv_action1_address = iv_fir_address + ACTION1_INCR;
     iv_mask_address = iv_fir_address + MASK_INCR;
-    iv_target = i_target;
+    iv_proc = i_target;
+    iv_targetType = PROC_TARGET;
+    iv_fir_write = false;
+    iv_action0_write = false;
+    iv_action1_write = false;
+    iv_mask_write = false;
+}
+
+/// @brief Base constructor for FIR class to build object based on FIR type
+///
+/// @param [in] <F>              FIR type (template parameter)
+/// @param [in] i_target         EX Target
+///
+template < FIRType Ftype >
+PMFir<Ftype>::PMFir(
+    const fapi2::Target < fapi2::TARGET_TYPE_EX >& i_target)
+{
+}
+
+/// @brief The constructor for FIR class for CME FIR
+///
+/// @param [in] <FIRTYPE_CME_LFIR>  FIR Type for CME
+/// @param [in] i_target            EX Target
+///
+template <>
+PMFir<FIRTYPE_CME_LFIR>::PMFir(
+    const fapi2::Target < fapi2::TARGET_TYPE_EX >& i_target)
+{
+    uint8_t l_chpltNumber = 0;
+
+    // Fetch the position of the EX Target
+    fapi2::ReturnCode l_rc = FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target,
+                                           l_chpltNumber);
+    FAPI_DBG("EX number = %d", l_chpltNumber);
+
+    iv_fir_address =  EX_CME_SCOM_LFIR;
+    iv_action0_address = iv_fir_address + ACTION0_INCR;
+    iv_action1_address = iv_fir_address + ACTION1_INCR;
+    iv_mask_address = iv_fir_address + MASK_INCR;
+    iv_ex = i_target;
+    iv_targetType = EX_TARGET;
+    iv_fir_write = false;
+    iv_action0_write = false;
+    iv_action1_write = false;
+    iv_mask_write = false;
+}
+
+/// @brief Base constructor for FIR class to build object based on FIR type
+///
+/// @param [in] <F>              FIR type (template parameter)
+/// @param [in] i_target         EQ Target
+///
+template < FIRType Ftype >
+PMFir<Ftype>::PMFir(
+    const fapi2::Target < fapi2::TARGET_TYPE_EQ >& i_target)
+{
+}
+
+/// @brief The constructor for FIR class for PPM Error
+///
+/// @param [in] <FIRTYPE_PPM_LFIR>  FIR Type for PPM
+/// @param [in] i_target            EQ Target
+///
+template <>
+PMFir<FIRTYPE_PPM_LFIR>::PMFir(
+    const fapi2::Target < fapi2::TARGET_TYPE_EQ >& i_target)
+{
+    uint8_t l_chpltNumber = 0;
+
+    // Fetch the position of the EQ Target
+    fapi2::ReturnCode l_rc = FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target,
+                                           l_chpltNumber);
+    FAPI_DBG("EQ number = %d", l_chpltNumber);
+
+    iv_mask_address = EQ_QPPM_ERRMSK;
+    iv_eq = i_target;
+    iv_targetType = EQ_TARGET;
+    iv_fir_write = false;
+    iv_action0_write = false;
+    iv_action1_write = false;
+    iv_mask_write = false;
+}
+
+/// @brief Base constructor for FIR class to build object based on FIR type
+///
+/// @param [in] <F>              FIR type (template parameter)
+/// @param [in] i_target         Core Target
+///
+template < FIRType Ftype >
+PMFir<Ftype>::PMFir(
+    const fapi2::Target < fapi2::TARGET_TYPE_CORE >& i_target)
+{
+}
+
+/// @brief The constructor for FIR class for PPM Error
+///
+/// @param [in] <FIRTYPE_PPM_LFIR>  FIR Type for PPM
+/// @param [in] i_target            Core Target
+///
+template <>
+PMFir<FIRTYPE_PPM_LFIR>::PMFir(
+    const fapi2::Target < fapi2::TARGET_TYPE_CORE >& i_target)
+{
+    uint8_t l_chpltNumber = 0;
+
+    // Fetch the position of the CORE Target
+    fapi2::ReturnCode l_rc = FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target,
+                                           l_chpltNumber);
+    FAPI_DBG("CORE number = %d", l_chpltNumber);
+
+    iv_mask_address = C_CPPM_ERRMSK;
+    iv_core = i_target;
+    iv_targetType = CORE_TARGET;
     iv_fir_write = false;
     iv_action0_write = false;
     iv_action1_write = false;
@@ -203,29 +337,76 @@ PMFir<FIRTYPE_PBA_LFIR>::PMFir(
 template <FIRType Ftype>
 fapi2::ReturnCode PMFir<Ftype>::get(const regType i_reg)
 {
-
-    if (i_reg == REG_FIR || i_reg == REG_ALL)
+    if (iv_targetType == PROC_TARGET)
     {
-        FAPI_TRY(fapi2::getScom(iv_target, iv_fir_address, iv_fir));
-        iv_fir_write = false;
+        if (i_reg == REG_FIR || i_reg == REG_ALL)
+        {
+            FAPI_TRY(fapi2::getScom(iv_proc, iv_fir_address, iv_fir));
+            iv_fir_write = false;
+        }
+
+        if(i_reg == REG_ACTION0 || i_reg == REG_ALL)
+        {
+            FAPI_TRY(fapi2::getScom(iv_proc, iv_action0_address, iv_action0));
+            iv_action0_write = false;
+        }
+
+        if(i_reg == REG_ACTION1 || i_reg == REG_ALL)
+        {
+            FAPI_TRY(fapi2::getScom(iv_proc, iv_action1_address, iv_action1));
+            iv_action1_write = false;
+        }
+
+        if(i_reg == REG_FIRMASK || i_reg == REG_ALL)
+        {
+            FAPI_TRY(fapi2::getScom(iv_proc, iv_mask_address, iv_mask));
+            iv_mask_write = false;
+        }
     }
 
-    if(i_reg == REG_ACTION0 || i_reg == REG_ALL)
+    else if (iv_targetType == EX_TARGET)
     {
-        FAPI_TRY(fapi2::getScom(iv_target, iv_action0_address, iv_action0));
-        iv_action0_write = false;
+        if (i_reg == REG_FIR || i_reg == REG_ALL)
+        {
+            FAPI_TRY(fapi2::getScom(iv_ex, iv_fir_address, iv_fir));
+            iv_fir_write = false;
+        }
+
+        if(i_reg == REG_ACTION0 || i_reg == REG_ALL)
+        {
+            FAPI_TRY(fapi2::getScom(iv_ex, iv_action0_address, iv_action0));
+            iv_action0_write = false;
+        }
+
+        if(i_reg == REG_ACTION1 || i_reg == REG_ALL)
+        {
+            FAPI_TRY(fapi2::getScom(iv_ex, iv_action1_address, iv_action1));
+            iv_action1_write = false;
+        }
+
+        if(i_reg == REG_FIRMASK || i_reg == REG_ALL)
+        {
+            FAPI_TRY(fapi2::getScom(iv_ex, iv_mask_address, iv_mask));
+            iv_mask_write = false;
+        }
     }
 
-    if(i_reg == REG_ACTION1 || i_reg == REG_ALL)
+    else if (iv_targetType == EQ_TARGET)
     {
-        FAPI_TRY(fapi2::getScom(iv_target, iv_action1_address, iv_action1));
-        iv_action1_write = false;
+        if (i_reg == REG_ERRMASK)
+        {
+            FAPI_TRY(fapi2::getScom(iv_eq, iv_mask_address, iv_mask));
+            iv_mask_write = false;
+        }
     }
 
-    if(i_reg == REG_FIRMASK || i_reg == REG_ALL)
+    else if (iv_targetType == CORE_TARGET)
     {
-        FAPI_TRY(fapi2::getScom(iv_target, iv_mask_address, iv_mask));
-        iv_mask_write = false;
+        if (i_reg == REG_ERRMASK)
+        {
+            FAPI_TRY(fapi2::getScom(iv_core, iv_mask_address, iv_mask));
+            iv_mask_write = false;
+        }
     }
 
 fapi_try_exit:
@@ -242,28 +423,70 @@ fapi2::ReturnCode PMFir<Ftype>::put()
 {
     uint64_t l_address = 0;
 
-    if (iv_fir_write == true)
+    if (iv_targetType == PROC_TARGET)
     {
-        l_address = iv_fir_address + BASE_WOR_INCR;
-        FAPI_TRY(putScom(iv_target, l_address, iv_fir));
+        if (iv_fir_write == true)
+        {
+            l_address = iv_fir_address + BASE_WOR_INCR;
+            FAPI_TRY(putScom(iv_proc, l_address, iv_fir));
+        }
+
+        if (iv_action0_write == true)
+        {
+            FAPI_TRY(putScom(iv_proc, iv_action0_address, iv_action0));
+        }
+
+        if (iv_action1_write == true)
+        {
+            FAPI_TRY(putScom(iv_proc, iv_action1_address, iv_action1));
+        }
+
+        if (iv_mask_write == true)
+        {
+            l_address = iv_fir_address + MASK_WOR_INCR;
+            FAPI_TRY(putScom(iv_proc, l_address, iv_mask));
+        }
     }
 
-    if (iv_action0_write == true)
+    else if (iv_targetType == EX_TARGET)
     {
-        FAPI_TRY(putScom(iv_target, iv_action0_address,
-                         iv_action0));
+        if (iv_fir_write == true)
+        {
+            l_address = iv_fir_address + BASE_WOR_INCR;
+            FAPI_TRY(putScom(iv_ex, l_address, iv_fir));
+        }
+
+        if (iv_action0_write == true)
+        {
+            FAPI_TRY(putScom(iv_ex, iv_action0_address, iv_action0));
+        }
+
+        if (iv_action1_write == true)
+        {
+            FAPI_TRY(putScom(iv_ex, iv_action1_address, iv_action1));
+        }
+
+        if (iv_mask_write == true)
+        {
+            l_address = iv_fir_address + MASK_WOR_INCR;
+            FAPI_TRY(putScom(iv_ex, l_address, iv_mask));
+        }
     }
 
-    if (iv_action1_write == true)
+    else if (iv_targetType == EQ_TARGET)
     {
-        FAPI_TRY(putScom(iv_target, iv_action1_address,
-                         iv_action1));
+        if (iv_mask_write == true)
+        {
+            FAPI_TRY(fapi2::putScom(iv_eq, iv_mask_address, iv_mask));
+        }
     }
 
-    if (iv_mask_write == true)
+    else if (iv_targetType == CORE_TARGET)
     {
-        l_address = iv_fir_address + MASK_WOR_INCR;
-        FAPI_TRY(putScom(iv_target, l_address, iv_mask));
+        if (iv_mask_write == true)
+        {
+            FAPI_TRY(fapi2::putScom(iv_core, iv_mask_address, iv_mask));
+        }
     }
 
 fapi_try_exit:
@@ -407,7 +630,7 @@ fapi2::ReturnCode PMFir<Ftype>::setAllRegBits(const regType i_reg)
         iv_action1_write = true;
     }
 
-    if(i_reg == REG_FIRMASK || i_reg == REG_ALL)
+    if(i_reg == REG_FIRMASK || i_reg == REG_ERRMASK || i_reg == REG_ALL)
     {
         iv_mask.flush<1>();
         iv_mask_write = true;
@@ -441,7 +664,7 @@ fapi2::ReturnCode PMFir<Ftype>::clearAllRegBits(const regType i_reg)
         iv_action1_write = true;
     }
 
-    if(i_reg == REG_FIRMASK || i_reg == REG_ALL)
+    if(i_reg == REG_FIRMASK || i_reg == REG_ERRMASK || i_reg == REG_ALL)
     {
         iv_mask.flush<0>();
         iv_mask_write = true;
@@ -473,14 +696,14 @@ fapi2::ReturnCode PMFir<FIRTYPE_OCC_LFIR>::saveMask()
 {
     uint32_t l_mask;
     iv_mask.extract<0, 32>(l_mask);
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_OCC_LFIR, iv_target, l_mask),
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_OCC_LFIR, iv_proc, l_mask),
              "ERROR: Failed to save OCC LFIR");
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
-/// @brief Save the present PBAC LFIR mask into attribute
+/// @brief Save the present PBA LFIR mask into attribute
 ///
 /// @param [in] <FIRTYPE_PBA_LFIR> PBA FIR Type
 ///
@@ -491,8 +714,52 @@ fapi2::ReturnCode PMFir<FIRTYPE_PBA_LFIR>::saveMask()
 {
     uint32_t l_mask;
     iv_mask.extract<0, 32>(l_mask);
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PBA_LFIR, iv_target, l_mask),
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PBA_LFIR, iv_proc, l_mask),
              "ERROR: Failed to save PBA LFIR");
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+/// @brief Save the present CME LFIR mask into attribute
+///
+/// @param [in] <FIRTYPE_CME_LFIR> CME FIR Type
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code
+///
+template <>
+fapi2::ReturnCode PMFir<FIRTYPE_CME_LFIR>::saveMask()
+{
+    uint32_t l_mask;
+    iv_mask.extract<0, 32>(l_mask);
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CME_LOCAL_FIRMASK, iv_ex, l_mask),
+             "ERROR: Failed to save CME LFIR");
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+/// @brief Save the present PPM Error mask into attribute
+///
+/// @param [in] <FIRTYPE_PPM_LFIR> PPM FIR Type
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code
+///
+template <>
+fapi2::ReturnCode PMFir<FIRTYPE_PPM_LFIR>::saveMask()
+{
+    uint32_t l_mask;
+    iv_mask.extract<0, 32>(l_mask);
+
+    if (iv_targetType == EQ_TARGET)
+    {
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_QUAD_PPM_ERRMASK, iv_eq, l_mask),
+                 "ERROR: Failed to save Quad Error mask");
+    }
+    else if (iv_targetType == CORE_TARGET)
+    {
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CORE_PPM_ERRMASK, iv_core, l_mask),
+                 "ERROR: Failed to save Core Error mask");
+    }
+
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -521,7 +788,7 @@ fapi2::ReturnCode PMFir<FIRTYPE_OCC_LFIR>::restoreSavedMask()
     uint32_t l_mask;
     uint32_t l_tempMask;
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCC_LFIR, iv_target, l_mask),
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCC_LFIR, iv_proc, l_mask),
              "ERROR: Failed to retrieve saved OCC LFIR");
     iv_mask.extract<0, 32>(l_tempMask);
     l_mask |= l_tempMask;
@@ -544,8 +811,63 @@ fapi2::ReturnCode PMFir<FIRTYPE_PBA_LFIR>::restoreSavedMask()
     uint32_t l_mask;
     uint32_t l_tempMask;
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PBA_LFIR, iv_target, l_mask),
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PBA_LFIR, iv_proc, l_mask),
              "ERROR: Failed to retrieve saved PBA LFIR");
+    iv_mask.extract<0, 32>(l_tempMask);
+    l_mask |= l_tempMask;
+    iv_mask.insertFromRight<0, 32>(l_mask);
+    iv_mask_write = true;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+/// @brief Restore saved CME LFIR Mask
+///
+/// @param [in] <FIRTYPE_CME_LFIR> CME LFIR type
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code
+///
+template <>
+fapi2::ReturnCode PMFir<FIRTYPE_CME_LFIR>::restoreSavedMask()
+{
+    uint32_t l_mask;
+    uint32_t l_tempMask;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CME_LOCAL_FIRMASK, iv_ex, l_mask),
+             "ERROR: Failed to retrieve saved CME LFIR mask");
+    iv_mask.extract<0, 32>(l_tempMask);
+    l_mask |= l_tempMask;
+    iv_mask.insertFromRight<0, 32>(l_mask);
+    iv_mask_write = true;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+/// @brief Restore saved PPM Error Mask
+///
+/// @param [in] <FIRTYPE_PPM_LFIR> PPM LFIR type
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code
+///
+template <>
+fapi2::ReturnCode PMFir<FIRTYPE_PPM_LFIR>::restoreSavedMask()
+{
+    uint32_t l_mask;
+    uint32_t l_tempMask;
+
+    if (iv_targetType == EQ_TARGET)
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_QUAD_PPM_ERRMASK, iv_eq, l_mask),
+                 "ERROR: Failed to retrieve saved Quad Error Mask");
+    }
+    else if (iv_targetType == CORE_TARGET)
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CORE_PPM_ERRMASK, iv_core, l_mask),
+                 "ERROR: Failed to retrieve saved Core Error Mask");
+    }
+
     iv_mask.extract<0, 32>(l_tempMask);
     l_mask |= l_tempMask;
     iv_mask.insertFromRight<0, 32>(l_mask);
