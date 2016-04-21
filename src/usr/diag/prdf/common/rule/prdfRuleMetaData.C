@@ -317,7 +317,17 @@ errlHndl_t RuleMetaData::loadRuleFile( ScanFacility & i_scanFactory ,
             }
         }
 
-        for (int i = 0; i < l_chip->cv_ruleCount; i++)
+        // Populate iv_ruleIndexes for each of the entries in l_chip->cv_rules.
+        // Do not modify l_id otherwise it will mess up the indexes.
+        uint32_t tmp_id = l_id;
+        for ( uint32_t i = 0; i < l_chip->cv_ruleCount; i++ )
+        {
+            iv_ruleIndexes[tmp_id] = i;
+            tmp_id++;
+        }
+
+        // Now, create virtual registers for each rule.
+        for ( uint32_t i = 0; i < l_chip->cv_ruleCount; i++ )
         {
             if (l_regMap[l_id]) // check if it already exists.
             {
@@ -334,6 +344,9 @@ errlHndl_t RuleMetaData::loadRuleFile( ScanFacility & i_scanFactory ,
             l_resetMap[l_id] = l_currentResets;
             l_vregMax = l_id++;
         };
+
+        // iv_ruleIndexes is no longer needed. Empty it to save memory space.
+        iv_ruleIndexes.clear();
 
         // initialize all the pointers for the groups, but don't construct their
         // data yet.
@@ -653,9 +666,11 @@ SCAN_COMM_REGISTER_CLASS * RuleMetaData::createVirtualRegister(
 
             if (NULL == i_data.cv_regMap[i_vReg->cv_value[0].i])
             {
+                l_tmp32 = iv_ruleIndexes[i_vReg->cv_value[0].i];
+
                 i_data.cv_regMap[i_vReg->cv_value[0].i] =
                     createVirtualRegister(
-                        &i_data.cv_loadChip->cv_rules[i_vReg->cv_value[0].i],
+                        &i_data.cv_loadChip->cv_rules[l_tmp32],
                         i_data );
             }
             l_rc = i_data.cv_regMap[i_vReg->cv_value[0].i];

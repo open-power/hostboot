@@ -251,6 +251,14 @@ class RuleMetaData
                                                             HwCaptureNonzero_t;
         HwCaptureNonzero_t cv_hwCaptureNonzero;
 
+        // This is temporary container used during loadRuleFile() to solve an
+        // indexing issue with cv_loadChip->cv_rules, which is an array indexed
+        // 0 to the size of the array. The problem is that when the data is
+        // needed in createVirtualRegister(), the index stored in the input
+        // Expr is the index for RuleFileData::cv_regMap. So we will need to
+        // map the cv_regMap indexes to the cv_rules indexes.
+        std::map<uint32_t, uint32_t> iv_ruleIndexes;
+
     private: //operations
 
         /**
