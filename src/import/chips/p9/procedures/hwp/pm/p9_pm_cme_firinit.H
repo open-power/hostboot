@@ -1,13 +1,13 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: chips/p9/procedures/hwp/pm/p9_pm_ppm_firinit.H $              */
+/* $Source: chips/p9/procedures/hwp/pm/p9_pm_cme_firinit.H $              */
 /*                                                                        */
 /* IBM CONFIDENTIAL                                                       */
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015,2016                                                    */
+/* COPYRIGHT 2016                                                         */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -17,8 +17,8 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
-/// @file p9_pm_ppm_firinit.H
-/// @brief  Configures the PPM FIRs, Mask & actions
+/// @file p9_pm_cme_firinit.H
+/// @brief  Configures the CME FIRs, Mask & actions
 ///
 // *HWP HW Owner: Amit Kumar <akumar3@us.ibm.com>
 // *HWP Backup HWP Owner: Greg Still <stillgs@us.ibm.com>
@@ -27,8 +27,8 @@
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HS
 
-#ifndef _P9_PM_PPM_FIRINIT_H_
-#define _P9_PM_PPM_FIRINIT_H_
+#ifndef _P9_PM_CME_FIRINIT_H_
+#define _P9_PM_CME_FIRINIT_H_
 
 //------------------------------------------------------------------------------
 // Includes
@@ -39,7 +39,7 @@
 #include <p9_quad_scom_addresses.H>
 
 // function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*p9_pm_ppm_firinit_FP_t) (
+typedef fapi2::ReturnCode (*p9_pm_cme_firinit_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
     const p9pm::PM_FLOW_MODE);
 
@@ -52,7 +52,7 @@ extern "C"
 
 //------------------------------------------------------------------------------
 ///
-/// @brief Reset/init the PPM FIRs, Actions and Masks
+/// @brief Reset/init the CME FIRs, Actions and Masks
 ///
 /// @param[in] i_target   Chip target
 /// @param[in] i_mode     Control mode for the procedure
@@ -60,10 +60,10 @@ extern "C"
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
 
-    fapi2::ReturnCode p9_pm_ppm_firinit(
+    fapi2::ReturnCode p9_pm_cme_firinit(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         const p9pm::PM_FLOW_MODE i_mode);
 
 } // extern "C"
 
-#endif // _P9_PM_PPM_FIRINIT_H_
+#endif // _P9_PM_CME_FIRINIT_H_
