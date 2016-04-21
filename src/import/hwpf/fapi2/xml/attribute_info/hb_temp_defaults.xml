@@ -137,16 +137,22 @@
         <id>ATTR_SPD_OVERRIDE_ENABLE</id>
     </attribute>
     <attribute>
-         <id>ATTR_SECURITY_ENABLE</id>
+        <id>ATTR_SECURITY_ENABLE</id>
     </attribute>
-     <attribute>
-         <id>ATTR_SECURITY_MODE</id>
+    <attribute>
+        <id>ATTR_SECURITY_MODE</id>
     </attribute>
     <attribute>
         <id>ATTR_CORE_PPM_ERRMASK</id>
     </attribute>
     <attribute>
         <id>ATTR_QUAD_PPM_ERRMASK</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_SECURITY_ENABLE</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_SECURITY_MODE</id>
     </attribute>
     <attribute>
         <id>ATTR_CME_LOCAL_FIRMASK</id>
