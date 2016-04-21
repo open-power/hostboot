@@ -4146,10 +4146,14 @@ sub generate_centaur
         <default>instance:$ipath</default>
     </compileAttribute>
     <attribute>
+        <id>MSS_VREF_CAL_CNTL</id>
+        <default>0x01</default>
+    </attribute>
+    <attribute>
         <id>EI_BUS_TX_MSBSWAP</id>
         <default>$msb_swap</default>
     </attribute>";
-
+    
     # FSI Connections #
     if( $#fsi <= 0 )
     {

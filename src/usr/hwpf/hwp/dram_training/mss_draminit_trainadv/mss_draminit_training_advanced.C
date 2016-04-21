@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_draminit_training_advanced.C,v 1.67 2016/04/04 16:18:32 dcadiga Exp $
+// $Id: mss_draminit_training_advanced.C,v 1.69 2016/04/21 11:05:04 sasethur Exp $
 /* File is created by SARAVANAN SETHURAMAN on Thur 29 Sept 2011. */
 
 //------------------------------------------------------------------------------
@@ -108,6 +108,8 @@
 //  1.65   |sglancy   |25-Mar-16| Addressed FW comments
 //  1.66   |preeragh  |29-Mar-16| Disable Refresh after train_adv procedures (ddr4)
 //  1.67   |dcadiga   |04-APR-16| Code Review Updates
+//  1.68   |preeragh  |20-APR-16| Compatible for fw840 only
+//  1.69   |preeragh  |20-APR-16| Compatible for fw860 onwards (not reverse compatible)
 // This procedure Schmoo's DRV_IMP, SLEW, VREF (DDR, CEN), RCV_IMP based on attribute from effective config procedure
 // DQ & DQS Driver impedance, Slew rate, WR_Vref shmoo would call only write_eye shmoo for margin calculation
 // DQ & DQS VREF (rd_vref), RCV_IMP shmoo would call rd_eye for margin calculation
@@ -300,10 +302,12 @@ fapi::ReturnCode mss_draminit_training_advanced_cloned(const fapi::Target & i_ta
     {
         FAPI_INF("+++++++++++++++++++++++++++++ - DDR4 - Skipping - V-Ref CAL Control +++++++++++++++++++++++++++++++++++++++++++++");
         int32_cal_control[0] = 37;
+		l_shmoo_param_valid_t = 1;
+        rc = FAPI_ATTR_SET(ATTR_EFF_SCHMOO_ADDR_MODE, &i_target_mba, l_shmoo_param_valid_t);
+        if(rc) return rc;
         rc = FAPI_ATTR_SET(ATTR_MCBIST_TEST_TYPE, &i_target_mba, int32_cal_control[0]);
         if(rc) return rc;
-
-        rc = wr_vref_shmoo_ddr4_bin(i_target_mba);
+		rc = wr_vref_shmoo_ddr4_bin(i_target_mba);
         if (rc)
         {
             FAPI_ERR("Write Vref Schmoo Function is Failed rc = 0x%08X (creator = %d)",

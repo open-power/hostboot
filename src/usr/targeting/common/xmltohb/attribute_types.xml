@@ -16002,23 +16002,21 @@ firmware notes: Platforms should initialize this attribute to AUTO (0)</descript
     </hwpfToHbAttrMap>
 </attribute>
 
-<!--TODO CQ:SW335069 - Change the default value back to 1 once procedure
-    fix is in place -->
 <attribute>
     <id>MSS_VREF_CAL_CNTL</id>
     <description>Training Control over IPL
          - ENUM - 0x00=DISABLE /Skip V-ref Train; 0x01=DRAM - Enable V-Ref Train DRAM Level; 0x02=RANK Level Training;
                   0x03=PORT Level Training; 0x04=MBA Level; 0x05=CENTAUR level;
-         Default Value = 0x01;
+        Default Value = 0x03 for OpenPower platforms
+                      = 0x01 for others (TULETA, BRAZOS, ALPINE).
     </description>
     <simpleType>
         <uint8_t>
-            <default>0x00</default>
+            <default>0x03</default>
         </uint8_t>
     </simpleType>
-    <persistency>volatile</persistency>
+    <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_MSS_VREF_CAL_CNTL</id>
         <macro>DIRECT</macro>

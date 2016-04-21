@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mcbist_common.C,v 1.80 2016/03/07 18:27:15 lapietra Exp $
+// $Id: mss_mcbist_common.C,v 1.81 2016/04/21 08:37:25 sasethur Exp $
 // *!***************************************************************************
 // *! (C) Copyright International Business Machines Corp. 1997, 1998
 // *!           All Rights Reserved -- Property of IBM
@@ -40,6 +40,7 @@
 //------------------------------------------------------------------------------
 // Version:|Author: | Date:  | Comment:
 // --------|--------|--------|--------------------------------------------------
+//   1.81  |preeragh|04/20/16|Increased MCBIST_TIMEOUT Counter
 //   1.80  |jneaton |03/07/16|Updated mcb_error_map and mcb_error_map_print to use Master Ranks
 //   1.79  |preeragh|02/17/16|Fixed WR VREF IPL issue
 //   1.78  |sglancy |02/03/16|Fixed FW compile issue
@@ -137,7 +138,7 @@ const uint8_t MAX_BYTE = 10;
 const uint8_t MAX_RANK = 8;
 const uint8_t MAX_NIBBLES = 2;
 const uint8_t MCB_TEST_NUM = 16;
-const uint64_t MCB_MAX_TIMEOUT = 0000000000060000ull;
+const uint64_t MCB_MAX_TIMEOUT = 0000000600000000ull;
 const uint64_t DELAY_100US = 100000; // general purpose 100 usec delay for HW mode (2000000 sim cycles if simclk = 20ghz)
 const uint64_t DELAY_2000SIMCYCLES = 2000; // general purpose 2000 sim cycle delay for sim mode     (100 ns if simclk = 20Ghz)
 
