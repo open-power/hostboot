@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,6 +50,37 @@
 #define SET_MALF_ALERT(b){SET_FIR_ACTION(b, 1, 1);}
 #define SET_FIR_MASKED(b){mask.setBit<b>();}
 #define CLEAR_FIR_MASK(b){mask.clearBit<b>()}
+
+
+/**
+ * @brief  helper function to swizzle given input data
+ * @note   swizles bytes to handle endianess issue.
+ */
+#if( __BYTE_ORDER == __BIG_ENDIAN )
+
+// NOP if it is a big endian system
+#define RevLe16(WORD) WORD
+#define RevLe32(WORD) WORD
+#define RevLe64(WORD) WORD
+
+#else
+#define RevLe16(WORD) \
+    ( (((WORD) >> 8) & 0x00FF) | (((WORD) << 8) & 0xFF00) )
+
+#define RevLe32(WORD) \
+    ( (((WORD) >> 24) & 0x000000FF) | (((WORD) >>  8) & 0x0000FF00) | \
+      (((WORD) <<  8) & 0x00FF0000) | (((WORD) << 24) & 0xFF000000) )
+
+#define RevLe64(WORD) \
+    ( (((WORD) >> 56) & 0x00000000000000FF) |  \
+      (((WORD) >> 40) & 0x000000000000FF00)| \
+      (((WORD) >> 24) & 0x0000000000FF0000) |  \
+      (((WORD) >>  8) & 0x00000000FF000000) |  \
+      (((WORD) <<  8) & 0x000000FF00000000) |  \
+      (((WORD) << 24) & 0x0000FF0000000000) | \
+      (((WORD) << 40) & 0x00FF000000000000) |  \
+      (((WORD) << 56) & 0xFF00000000000000) )
+#endif
 
 //------------------------------------------------------------------------------
 // Function prototype
