@@ -222,8 +222,8 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
         // Kick off the CCS engine - per port. No broadcast mode for CCS (per Shelton 9/23/15)
         for (auto p : i_ports)
         {
-            FAPI_DBG("executing CCS array for port %d (%s)", mss::pos(p), mss::c_str(p));
-            FAPI_TRY( select_ports( i_target, mss::pos(p)) );
+            FAPI_DBG("executing CCS array for port %d (%s)", mss::relative_pos<TARGET_TYPE_MCBIST>(p), mss::c_str(p));
+            FAPI_TRY( select_ports( i_target, mss::relative_pos<TARGET_TYPE_MCBIST>(p)) );
             FAPI_TRY( execute_inst_array(i_target, i_program) );
         }
     }
