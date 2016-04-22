@@ -34,4 +34,14 @@
     </description>
     <ffdc>JTAGCFG</ffdc>
   </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_OCC_CONTROL_MEM_BOOT_LENGTH_MISMATCH</rc>
+    <description>
+    The OCC PPC405 memory boot launcher length written did not match the expected
+    value.
+    </description>
+    <ffdc>ACTLENGTH</ffdc>
+    <ffdc>LENGTH</ffdc>
+  </hwpError>
 </hwpErrors>
