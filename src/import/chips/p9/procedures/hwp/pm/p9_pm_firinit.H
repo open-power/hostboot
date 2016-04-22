@@ -7,7 +7,7 @@
 /*                                                                        */
 /* EKB Project                                                            */
 /*                                                                        */
-/* COPYRIGHT 2015                                                         */
+/* COPYRIGHT 2015,2016                                                    */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,8 @@
 //------------------------------------------------------------------------------
 #include <fapi2.H>
 #include <p9_pm.H>
+#include <p9_perv_scom_addresses.H>
+#include <p9_misc_scom_addresses.H>
 
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_pm_firinit_FP_t) (
