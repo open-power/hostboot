@@ -160,9 +160,15 @@ class Register
         inline void set(const uint16_t i_data)
         {
             static_assert(FIELD_ID == REG_ID, "Field does not belong to Register");
-            const uint8_t shift = REG_WIDTH - START - WIDTH;
-            const uint64_t mask = ( (0x1 << WIDTH) - 1) << shift;
-            set((_shadow & ~mask) | ((i_data << shift) & mask));
+            uint8_t shift = REG_WIDTH - START - WIDTH;
+
+            // Boundary check to avoid shifting off the edge compiler warning
+            if ( (shift + WIDTH) < 64 )
+            {
+                const uint64_t mask = ((0x1 << WIDTH) - 1) << shift;
+                set((_shadow & ~mask) | ((i_data << shift) & mask));
+            }
+
             return;
         }
 
