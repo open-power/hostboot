@@ -384,7 +384,7 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
             }
             else
             {
-                TRACDCOMP( g_fapiTd,
+                TRACFCOMP( g_fapiTd,
                            "activate_threads enabling thread=%d", thread );
 
                 thread_bitset |= fapi2::thread_id2bitset(thread);
@@ -406,12 +406,20 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         //                                 return data in o_ras_status
         //             i_warncheck => convert pre/post checks errors to
         //                            warnings
-//        // @TODO RTC:134077
-//        FAPI_INVOKE_HWP( l_errl, p9_thread_control,
-//                         l_fapiCore,      //i_target
-//                         thread_bitset,   //i_threads
-//                         PTC_CMD_SRESET,  //i_command
-//                         false);          //i_warncheck
+        //             o_rasStatusReg => Complete RAS status reg 64-bit buffer
+        //             o_state        => N/A - Output state not used for
+        //                               PTC_CMD_SRESET command
+        //
+        //TODO RTC 134077 Revisit use of status and threadState
+        fapi2::buffer<uint64_t> l_status = 0;
+        uint64_t l_threadState = 0;
+        FAPI_INVOKE_HWP( l_errl, p9_thread_control,
+                         l_fapiCore,      //i_target
+                         thread_bitset,   //i_threads
+                         PTC_CMD_SRESET,  //i_command
+                         false,           //i_warncheck
+                         l_status,        //o_rasStatusReg
+                         l_threadState);  //o_state
 
         if ( l_errl != NULL )
         {
