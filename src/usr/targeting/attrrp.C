@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -118,7 +118,7 @@ namespace TARGETING
             uint64_t vAddr = msg->data[0];
             void*    pAddr = reinterpret_cast<void*>(msg->data[1]);
 
-            TRACFCOMP(g_trac_targeting, INFO_MRK "AttrRP: Message recv'd: "
+            TRACDCOMP(g_trac_targeting, INFO_MRK "AttrRP: Message recv'd: "
                       "0x%x, 0x%lx 0x%p", msg->type, vAddr, pAddr);
 
             // Locate corresponding attribute section for message.
