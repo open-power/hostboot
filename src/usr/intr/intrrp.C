@@ -182,7 +182,7 @@ errlHndl_t IntrRp::_init()
 
         //Set value for enabled threads
         uint64_t l_en_threads = get_enabled_threads();
-        TRACDCOMP(g_trac_intr, "IntrRp::_init() Threads enabled:"
+        TRACFCOMP(g_trac_intr, "IntrRp::_init() Threads enabled:"
                                 " %lx", l_en_threads);
     } while(0);
 
@@ -198,7 +198,7 @@ void IntrRp::acknowledgeInterrupt()
     l_ack_int_ptr += ACK_HYPERVISOR_INT_REG_OFFSET;
 
     uint16_t l_ackRead = *l_ack_int_ptr;
-    TRACDCOMP(g_trac_intr, "IntrRp::acknowledgeInterrupt(), read result: %16x", l_ackRead);
+    TRACFCOMP(g_trac_intr, "IntrRp::acknowledgeInterrupt(), read result: %16x", l_ackRead);
 }
 
 errlHndl_t IntrRp::resetIntUnit()
@@ -404,12 +404,12 @@ void IntrRp::msgHandler()
                     //Check if LSI-Based Interrupt
                     if ((ackResponse & LSI_INTERRUPT) == LSI_INTERRUPT)
                     {
-                        TRACDCOMP(g_trac_intr, "IntrRp::msgHandler() "
+                        TRACFCOMP(g_trac_intr, "IntrRp::msgHandler() "
                                                  "- LSI Interrupt Detected");
                         //Read LSI Interrupt Status register
                         PSIHB_SW_INTERFACES_t * l_psihb_ptr = iv_psiHbBaseAddr;
                         uint64_t lsiIntStatus = l_psihb_ptr->lsiintstatus;
-                        TRACDCOMP(g_trac_intr, "IntrRp::msgHandler() "
+                        TRACFCOMP(g_trac_intr, "IntrRp::msgHandler() "
                                          "lsiIntStatus 0x%016lx", lsiIntStatus);
                         LSIvalue_t l_intrType = static_cast<LSIvalue_t>
                              (__builtin_clzl(lsiIntStatus));
@@ -424,7 +424,7 @@ void IntrRp::msgHandler()
                     uint64_t l_data0 = (l_xirr_pir & 0xFFFFFFFF);
                     PIR_t pir = static_cast<PIR_t>(l_data0);
 
-                    TRACDCOMP(g_trac_intr,
+                    TRACFCOMP(g_trac_intr,
                               "External Interrupt received. XIRR=%x, PIR=%x",
                               xirr,pir.word);
                     //An external interrupt comes from two paths
@@ -468,7 +468,7 @@ void IntrRp::msgHandler()
                     }
                     else if (type == LSI_PSU)
                     {
-                        TRACDCOMP(g_trac_intr, "PSU Interrupt Detected");
+                        TRACFCOMP(g_trac_intr, "PSU Interrupt Detected");
                         handlePsuInterrupt(type);
                     }
                     else  // no queue registered for this interrupt type
@@ -601,7 +601,7 @@ void IntrRp::msgHandler()
                 break;
             case MSG_INTR_UNREGISTER_MSGQ:
                 {
-                    TRACDCOMP(g_trac_intr,
+                    TRACFCOMP(g_trac_intr,
                            "INTR remove registration of interrupt type = 0x%lx",
                             msg->data[0]);
                     LSIvalue_t l_type = static_cast<LSIvalue_t>(msg->data[0]);
@@ -710,7 +710,7 @@ void IntrRp::msgHandler()
                     }
                     else // Ended successfully.
                     {
-                        TRACDCOMP(g_trac_intr,
+                        TRACFCOMP(g_trac_intr,
                                   INFO_MRK "Cpu wakeup completed on %x",
                                   pir.word);
                         // Tell child thread to exit.
@@ -1063,7 +1063,7 @@ errlHndl_t IntrRp::handlePsuInterrupt(ext_intr_t i_type)
 
         //Issue standard EOI for the PSU Interupt
         uint64_t intSource = i_type;
-        TRACDCOMP(g_trac_intr, "Sending PSU EOI");
+        TRACFCOMP(g_trac_intr, "Sending PSU EOI");
         sendEOI(intSource);
 
     } while(0);

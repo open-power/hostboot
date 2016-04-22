@@ -165,6 +165,7 @@ class CpuManager
 
         /** Desired value for LPCR after wakeup.
          *
+         *  bit 48 - Wake-up from hyp doorbell
          *  bit 49 - Wake-up from external interrupt.
          *  bit 50 - Wake-up from decrementer.
          *  bit 51 - Wake-up from machine check.
@@ -172,7 +173,7 @@ class CpuManager
          *  bit 61 - LPES(1) = 0 (P8 RFC02204 forces to 0)
          *  bit 62 - HVICE - Hypervisor Virt Interrupt Conditionally Enable
          */
-        static const uint64_t WAKEUP_LPCR_VALUE =   0x000000000000700A;
+        static const uint64_t WAKEUP_LPCR_VALUE =   0x000000000000F00A;
 
         /** Desired value for RPR after wakeup.
          *

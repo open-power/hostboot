@@ -182,7 +182,6 @@ namespace KernelMisc
                             KernelMemState::MEM_CONTAINED_NR,
                             KernelMemState::NO_MEM);
 
-
                     // add this nodes cpu_count to the system cpu_count
                     __sync_add_and_fetch(&(p_spda->cpu_count),
                                          CpuManager::getCpuCount());
@@ -269,6 +268,7 @@ namespace KernelMisc
             // Tell SIMICS we expect more threads (one more core)
             // to appear after doing the 'stop' instruction.
             MAGIC_INSTRUCTION(MAGIC_SIMICS_FUSEDCOREWAKE);
+
         } // end if fused core mode
     }
 
@@ -277,8 +277,7 @@ namespace KernelMisc
     void WinkleCore::activeMainWork()
     {
         cpu_t* cpu = CpuManager::getCurrentCPU();
-        ssize_t  l_numThreads = CpuManager::getThreadCount();
-        printk("%d", static_cast<int>(cpu->cpu & (l_numThreads-1)));
+        printk("%d.", static_cast<int>(cpu->cpu));
 
         // Return current task to run-queue so it isn't lost.
         cpu->scheduler->returnRunnable();
@@ -301,6 +300,7 @@ namespace KernelMisc
         // Set register to indicate we want a 'stop 15' to occur (state loss)
         uint64_t l_psscr_saved = getPSSCR();
         setPSSCR( 0x00000000003F00FF );
+
         // Execute winkle.
         kernel_execute_stop(saveArea);
 
@@ -310,6 +310,22 @@ namespace KernelMisc
         cpu->winkled = false;
         CpuManager::activateCPU(cpu);
         VmmManager::init_slb();
+
+        if(cpu->master)
+        {
+            // NOTE: The cpu_t structures for theads 1:3 were created
+            //       during init (CpuManager::init).
+            // Start with a base PIR of thread 0 + 1 (Thread 1) as thread 0
+            // doesn't need to be woken up as it is already running.
+            uint64_t l_pir = getPIR() + 1;
+            for(size_t i = 0; i < CpuManager::getThreadCount()-1; i++)
+            {
+                // NOTE: The deferred work container verifies master core
+                // threads 1-3 wake up so a direct doorbell can be sent. For
+                // threads on other cores send_doorbell_wakeup() is used.
+                doorbell_send(l_pir + i);
+            }
+        }
 
         // Select a new task if not the master CPU.  Master CPU will resume
         // the code that called cpu_master_winkle().
@@ -340,43 +356,6 @@ namespace KernelMisc
 
         //Issue sbe master workaround
         InterruptMsgHdlr::issueSbeMboxWA();
-
-        // NOTE: The cpu_t structures for theads 1:3 were created
-        //       during init (CpuManager::init).
-        //
-
-        #ifdef HOSTBOOT_REAL_WINKLE
-        // @todo- RTC 141924 Start the other threads 1:3 in a new manner
-        //  SBE won't start them and we can't use normal instruction start.
-        //  Maybe something like:   sendIPI(..) or  addCpuCore(..)
-        //  Need interrupt code in place for this.
-
-
-        #else
-        // get other 3 threads going in SIMICs for now
-        MAGIC_INSTRUCTION(MAGIC_WAKE_OTHER_THREADS);
-        #endif
-
-        if (true == iv_fusedCores)
-        {
-            // If using FUSED cores, we need to essentially
-            // treat this as a new core appearing.
-
-            #ifdef HOSTBOOT_REAL_WINKLE
-            ssize_t  l_numThreads = CpuManager::getThreadCount();
-            cpu_t*   l_cpuPtr = CpuManager::getCurrentCPU();
-            cpuid_t  l_startPir = l_cpuPtr->cpu  & (~(l_numThreads - 1));
-
-            // New core should have threads just past current ones
-            CpuManager::startCore(l_startPir + l_numThreads,
-                                  0xF000000000000000);  // all 4 threads
-            #else
-            // get new core going in SIMICS
-            MAGIC_INSTRUCTION(MAGIC_WAKE_FUSED_THREADS);
-            #endif
-
-        } // end if fused core mode
-
     }
 
     void WinkleCore::nonactiveMainWork()

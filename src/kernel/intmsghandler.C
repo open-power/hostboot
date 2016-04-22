@@ -171,8 +171,6 @@ void InterruptMsgHdlr::addCpuCore(uint64_t i_pir)
         cv_instance->sendMessage(MSG_INTR_ADD_CPU,
                                  (void*)pir_key,(void *)i_pir,t);
         cv_instance->iv_lock.unlock();
-        printkd("InterruptMsgHdlr::addCpuCore MSG_INTR_ADD_CPU message "
-               "sent for pir: %lx\n", i_pir);
     }
 }
 
