@@ -35,10 +35,12 @@
 ///     - Initialize SRBV0 per passed parameter (i_ppc405_boot_ctrl)
 ///       - If (i_ppc405_boot_ctrl = PPC405_BOOT_SRAM)
 ///            Initialize to Branch Absolute 0xFFF80010
-///       - If (i_ppc405_boot_ctrl = PPC405_BOOT_MEM)
-///            Initialize to Branch Absolute 0x00000010
-///       - If (i_ppc405_boot_ctrl = PPC405_BOOT_OLD)
+///       - Else If (i_ppc405_boot_ctrl = PPC405_BOOT_OLD)
 ///            initialize to Branch Relative -16
+///       - Else (i_ppc405_boot_ctrl = PPC405_BOOT_MEM || NULL)
+///             Load branch formation code into OCC SRAM at 0xFFF40000
+///             to branch to 0x80000010 (HOMER + 0x40)
+///            Initialize to Branch Absolute  0xFFF40000
 /// - Write PPC405 reset/halt bits based on i_ppc405_reset_ctrl (OCR, OJCFG)
 ///     - if PPC405_RESET_NULL , do nothing
 ///     - if PPC405_RESET_OFF  , write reset bit to 0 (PPC405 not reset)
