@@ -692,7 +692,8 @@ fapi2::ReturnCode set_pc_config0(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
 
     // Note: This needs to get the DRAM gen from an attribute. - 0x1 is DDR4 Note for Nimbus PHY
     // this is ignored and hard-wired to DDR4, per John Bialas 10/15 BRS
-    l_data.insertFromRight<MCA_DDRPHY_PC_CONFIG0_P0_PROTOCOL, MCA_DDRPHY_PC_CONFIG0_P0_PROTOCOL_LEN>(0x1);
+    // repurposed to pda_enable_override, so zero per John Bialas 4/16 JJM
+    l_data.insertFromRight<MCA_DDRPHY_PC_CONFIG0_P0_PROTOCOL, MCA_DDRPHY_PC_CONFIG0_P0_PROTOCOL_LEN>(0x0);
 
     l_data.setBit<MCA_DDRPHY_PC_CONFIG0_P0_DDR4_CMD_SIG_REDUCTION>();
     l_data.setBit<MCA_DDRPHY_PC_CONFIG0_P0_DDR4_VLEVEL_BANK_GROUP>();
