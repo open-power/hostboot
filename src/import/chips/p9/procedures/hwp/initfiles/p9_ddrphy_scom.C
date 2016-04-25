@@ -49,9 +49,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x0120, 48, 16, 48 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0x0120, 48, 16, 48 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800000030701103full, l_scom_buffer);
@@ -71,9 +73,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x6000, 49, 7, 49 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0x6000, 49, 7, 49 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800000740701103full, l_scom_buffer);
@@ -93,9 +97,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x4000, 48, 12, 48 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0x4000, 48, 12, 48 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800000750701103full, l_scom_buffer);
@@ -115,9 +121,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x7F7F, 48, 16, 48 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0x7F7F, 48, 16, 48 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800000780701103full, l_scom_buffer);
@@ -137,9 +145,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x0120, 48, 16, 48 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0x0120, 48, 16, 48 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800004030701103full, l_scom_buffer);
@@ -159,9 +169,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x6000, 49, 7, 49 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0x6000, 49, 7, 49 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800004740701103full, l_scom_buffer);
@@ -181,9 +193,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x4000, 48, 12, 48 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0x4000, 48, 12, 48 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800004750701103full, l_scom_buffer);
@@ -203,9 +217,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x7F7F, 48, 16, 48 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0x7F7F, 48, 16, 48 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800004780701103full, l_scom_buffer);
@@ -225,9 +241,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x0120, 48, 16, 48 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0x0120, 48, 16, 48 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800008030701103full, l_scom_buffer);
@@ -247,9 +265,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x6000, 49, 7, 49 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0x6000, 49, 7, 49 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800008740701103full, l_scom_buffer);
@@ -269,9 +289,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x4000, 48, 12, 48 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0x4000, 48, 12, 48 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800008750701103full, l_scom_buffer);
@@ -291,9 +313,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x7F7F, 48, 16, 48 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0x7F7F, 48, 16, 48 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800008780701103full, l_scom_buffer);
@@ -313,9 +337,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x0120, 48, 16, 48 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0x0120, 48, 16, 48 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80000c030701103full, l_scom_buffer);
@@ -335,9 +361,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x6000, 49, 7, 49 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0x6000, 49, 7, 49 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80000c740701103full, l_scom_buffer);
@@ -357,9 +385,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x4000, 48, 12, 48 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0x4000, 48, 12, 48 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80000c750701103full, l_scom_buffer);
@@ -379,9 +409,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x7F7F, 48, 16, 48 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0x7F7F, 48, 16, 48 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80000c780701103full, l_scom_buffer);
@@ -401,9 +433,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x0120, 48, 16, 48 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0x0120, 48, 16, 48 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800010030701103full, l_scom_buffer);
@@ -423,9 +457,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x6000, 49, 7, 49 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0x6000, 49, 7, 49 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800010740701103full, l_scom_buffer);
@@ -445,9 +481,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x4000, 48, 12, 48 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0x4000, 48, 12, 48 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800010750701103full, l_scom_buffer);
@@ -467,9 +505,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x7F7F, 48, 16, 48 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0x7F7F, 48, 16, 48 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800010780701103full, l_scom_buffer);
@@ -489,9 +529,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0xFFFF, 48, 16, 48 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0xFFFF, 48, 16, 48 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800040000701103full, l_scom_buffer);
@@ -511,9 +553,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0xFFFF, 48, 16, 48 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0xFFFF, 48, 16, 48 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800044000701103full, l_scom_buffer);
@@ -533,9 +577,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x5000, 48, 16, 48 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0x5000, 48, 16, 48 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800044010701103full, l_scom_buffer);
@@ -555,9 +601,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x4040, 48, 16, 48 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0x4040, 48, 16, 48 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800044050701103full, l_scom_buffer);
@@ -577,9 +625,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x4040, 48, 16, 48 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0x4040, 48, 16, 48 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800044070701103full, l_scom_buffer);
@@ -599,9 +649,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0xFFFF, 48, 16, 48 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0xFFFF, 48, 16, 48 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800048000701103full, l_scom_buffer);
@@ -621,9 +673,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0xFFFF, 48, 16, 48 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0xFFFF, 48, 16, 48 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x80004c000701103full, l_scom_buffer);
@@ -643,9 +697,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0xE058, 48, 16, 48 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0xE058, 48, 16, 48 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800080310701103full, l_scom_buffer);
@@ -665,9 +721,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x6000, 48, 16, 48 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0x6000, 48, 16, 48 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800080330701103full, l_scom_buffer);
@@ -687,9 +745,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0xE058, 48, 16, 48 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0xE058, 48, 16, 48 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800084310701103full, l_scom_buffer);
@@ -709,9 +769,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x6000, 48, 16, 48 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0x6000, 48, 16, 48 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x800084330701103full, l_scom_buffer);
@@ -731,9 +793,11 @@ fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TG
                 break;
             }
 
-            if (( true ))
             {
-                l_scom_buffer.insert<uint64_t> (literal_0x4770, 48, 16, 48 );
+                if (( true ))
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0x4770, 48, 16, 48 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x8000c4140701103full, l_scom_buffer);
