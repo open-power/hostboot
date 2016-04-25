@@ -51,9 +51,11 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
                 break;
             }
 
-            if (l_def_OBUS_FBC_ENABLED)
             {
-                l_scom_buffer.insert<uint64_t> (literal_0xFFFFFFFFFFFFFFFF, 0, 64, 0 );
+                if (l_def_OBUS_FBC_ENABLED)
+                {
+                    l_scom_buffer.insert<uint64_t> (literal_0xFFFFFFFFFFFFFFFF, 0, 64, 0 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x9010800ull, l_scom_buffer);
@@ -73,10 +75,12 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
                 break;
             }
 
-            if (l_def_OBUS_FBC_ENABLED)
             {
-                constexpr auto l_scom_buffer_ON = 0x1;
-                l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 0, 1, 63 );
+                if (l_def_OBUS_FBC_ENABLED)
+                {
+                    constexpr auto l_scom_buffer_ON = 0x1;
+                    l_scom_buffer.insert<uint64_t> (l_scom_buffer_ON, 0, 1, 63 );
+                }
             }
 
             l_rc = fapi2::putScom(TGT0, 0x901080aull, l_scom_buffer);
