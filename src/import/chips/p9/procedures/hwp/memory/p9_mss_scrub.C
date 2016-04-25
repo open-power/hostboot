@@ -73,6 +73,9 @@ fapi2::ReturnCode p9_mss_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
             // Setup l_start to represent this rank, and then make the end address from that.
             l_start.set_master_rank(r);
 
+            // For checking 8Gb DRAM, add row 16 to the mix - should see valid traffic in the AET
+            l_start.set_row(0b10);
+
             // l_end starts like as the max as we want to scrub the entire thing. If we're in sim,
             // we'll wratchet that back.
             l_start.get_range<mss::mcbist::address::MRANK>(l_end);
@@ -86,7 +89,8 @@ fapi2::ReturnCode p9_mss_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
 
             // By default we're in maint address mode, not address counting mode. So we give it a start and end, and ignore
             // anything invalid - that's what maint address mode is all about
-            mss::mcbist::config_address_range(i_target, l_start, l_end, r);
+//            mss::mcbist::config_address_range(i_target, l_start, l_end, r);
+            mss::mcbist::config_address_range(i_target, l_start, l_start + 4, r);
 
             // Write
             {
@@ -116,15 +120,15 @@ fapi2::ReturnCode p9_mss_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
             }
         }
 
-        // Write 0's
-        FAPI_TRY( mss::putScom(i_target, MCBIST_MCBFD0Q, 0) );
-        FAPI_TRY( mss::putScom(i_target, MCBIST_MCBFD1Q, 0) );
-        FAPI_TRY( mss::putScom(i_target, MCBIST_MCBFD2Q, 0) );
-        FAPI_TRY( mss::putScom(i_target, MCBIST_MCBFD3Q, 0) );
-        FAPI_TRY( mss::putScom(i_target, MCBIST_MCBFD4Q, 0) );
-        FAPI_TRY( mss::putScom(i_target, MCBIST_MCBFD5Q, 0) );
-        FAPI_TRY( mss::putScom(i_target, MCBIST_MCBFD6Q, 0) );
-        FAPI_TRY( mss::putScom(i_target, MCBIST_MCBFD7Q, 0) );
+        // Write pattern
+        FAPI_TRY( mss::putScom(i_target, MCBIST_MCBFD0Q, 0x1234567890ABCDEF) );
+        FAPI_TRY( mss::putScom(i_target, MCBIST_MCBFD1Q, 0x1234567890ABCDEF) );
+        FAPI_TRY( mss::putScom(i_target, MCBIST_MCBFD2Q, 0x1234567890ABCDEF) );
+        FAPI_TRY( mss::putScom(i_target, MCBIST_MCBFD3Q, 0x1234567890ABCDEF) );
+        FAPI_TRY( mss::putScom(i_target, MCBIST_MCBFD4Q, 0x1234567890ABCDEF) );
+        FAPI_TRY( mss::putScom(i_target, MCBIST_MCBFD5Q, 0x1234567890ABCDEF) );
+        FAPI_TRY( mss::putScom(i_target, MCBIST_MCBFD6Q, 0x1234567890ABCDEF) );
+        FAPI_TRY( mss::putScom(i_target, MCBIST_MCBFD7Q, 0x1234567890ABCDEF) );
 
         // Setup the sim polling based on a heuristic <cough>guess</cough>
         // Looks like ~250ck per address for a write/read program on the sim-dimm, and add a long number of polls

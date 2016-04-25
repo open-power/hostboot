@@ -94,8 +94,6 @@ fapi2::ReturnCode mc<TARGET_TYPE_MCS>::setup_xlate_map(const fapi2::Target<TARGE
         // Get the translation array, based on this specific DIMM's config
         dimm::kind l_dimm(d);
 
-        // TK: Get the information from the translation table for this DIMM.
-
         FAPI_DBG("address translation for DIMM %s %dR %dgbx%d in slot %d",
                  mss::c_str(d), l_dimm.iv_master_ranks, l_dimm.iv_dram_density, l_dimm.iv_dram_width, l_slot);
 
@@ -142,20 +140,26 @@ fapi2::ReturnCode mc<TARGET_TYPE_MCS>::setup_xlate_map(const fapi2::Target<TARGE
         }
 
 
-        // Tell the MC which of the row bits are valid.
+        // Tell the MC which of the row bits are valid, and map the DIMM selector
         if (l_dimm.iv_rows >= 16)
         {
             l_xlate.setBit(MCS_PORT02_MCP0XLT0_SLOT0_ROW15_VALID + l_slot_offset);
+            l_xlate.insertFromRight<MCS_PORT02_MCP0XLT0_R15_BIT_MAP, MCS_PORT02_MCP0XLT0_R15_BIT_MAP_LEN>(0b00110);
+            l_xlate.insertFromRight<MCS_PORT02_MCP0XLT0_D_BIT_MAP, MCS_PORT02_MCP0XLT0_D_BIT_MAP_LEN>(0b00101);
         }
 
         if (l_dimm.iv_rows >= 17)
         {
             l_xlate.setBit(MCS_PORT02_MCP0XLT0_SLOT0_ROW16_VALID + l_slot_offset);
+            l_xlate.insertFromRight<MCS_PORT02_MCP0XLT0_R16_BIT_MAP, MCS_PORT02_MCP0XLT0_R16_BIT_MAP_LEN>(0b00101);
+            l_xlate.insertFromRight<MCS_PORT02_MCP0XLT0_D_BIT_MAP, MCS_PORT02_MCP0XLT0_D_BIT_MAP_LEN>(0b00100);
         }
 
         if (l_dimm.iv_rows >= 18)
         {
             l_xlate.setBit(MCS_PORT02_MCP0XLT0_SLOT0_ROW17_VALID + l_slot_offset);
+            l_xlate.insertFromRight<MCS_PORT02_MCP0XLT0_R17_BIT_MAP, MCS_PORT02_MCP0XLT0_R17_BIT_MAP_LEN>(0b00100);
+            l_xlate.insertFromRight<MCS_PORT02_MCP0XLT0_D_BIT_MAP, MCS_PORT02_MCP0XLT0_D_BIT_MAP_LEN>(0b00011);
         }
 
     }
@@ -172,8 +176,7 @@ fapi2::ReturnCode mc<TARGET_TYPE_MCS>::setup_xlate_map(const fapi2::Target<TARGE
     // Master rank 0, 1 bit maps are ignored.
     // Row 16,17 bit maps are ignored.
     // Row 15 maps to Port Address bit 6
-    l_xlate.insertFromRight<MCS_PORT02_MCP0XLT0_D_BIT_MAP, MCS_PORT02_MCP0XLT0_D_BIT_MAP_LEN>(0b00101);
-    l_xlate.insertFromRight<MCS_PORT02_MCP0XLT0_R15_BIT_MAP, MCS_PORT02_MCP0XLT0_R15_BIT_MAP_LEN>(0b00110);
+
 
     // Drop down the column assignments
     l_xlate1.insertFromRight<MCS_PORT02_MCP0XLT1_COL4_BIT_MAP,
