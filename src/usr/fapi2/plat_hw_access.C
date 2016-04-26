@@ -734,6 +734,11 @@ ReturnCode platModifyRing(const Target<TARGET_TYPE_ALL>& i_target,
                           const RingMode i_ringMode)
 {
     FAPI_DBG(ENTER_MRK "platModifyRing");
+
+    // TODO RTC:152489 - story to finish this modifyRing
+    FAPI_ERR("platModifyRing: not supported yet");
+    assert(0,"platModifyRing not supported yet.");
+
     ReturnCode l_rc;
     errlHndl_t l_err = NULL;
     variable_buffer l_current_data(i_data);
