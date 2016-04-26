@@ -1108,10 +1108,18 @@
             <default>0</default>
         </field>
         <field>
+            <name>useSbeScom</name>
+            <description>0b0: Do not use SBE SCOM at this time.  0b1: Use
+            SBE SCOM at this time</description>
+            <type>uint8_t</type>
+            <bits>1</bits>
+            <default>0</default>
+        </field>
+        <field>
             <name>reserved</name>
             <description>Reserved for future expansion</description>
             <type>uint8_t</type>
-            <bits>5</bits>
+            <bits>4</bits>
             <default>0</default>
         </field>
     </complexType>

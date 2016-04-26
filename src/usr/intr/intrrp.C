@@ -1731,6 +1731,7 @@ errlHndl_t IntrRp::findProcs_Cores(TARGETING::TargetHandleList & o_procs,
                     ScomSwitches l_switches =
                                      (*proc)->getAttr<ATTR_SCOM_SWITCHES>();
 
+                    l_switches.useSbeScom = 0;
                     l_switches.useFsiScom = 0;
                     l_switches.useXscom = 1;
 

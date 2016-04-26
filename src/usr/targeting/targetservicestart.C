@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -229,6 +229,7 @@ static void initializeAttributes(TargetService& i_targetService)
               l_pMasterProcChip->getAttr<ATTR_SCOM_SWITCHES>();
             l_switches.useXscom = 1;
             l_switches.useFsiScom = 0;
+            l_switches.useSbeScom = 0;
             l_pMasterProcChip->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
 
 

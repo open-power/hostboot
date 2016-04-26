@@ -1009,6 +1009,7 @@ void TargetService::dump() const
             TARG_INF("Use FSI SCOM = %d",l_switches.useFsiScom);
             TARG_INF("Use XSCOM = %d",l_switches.useXscom);
             TARG_INF("Use inband SCOM = %d",l_switches.useInbandScom);
+            TARG_INF("Use SBE SCOM = %d",l_switches.useSbeScom);
         }
 
         uint64_t l_xscomBaseAddr = 0;

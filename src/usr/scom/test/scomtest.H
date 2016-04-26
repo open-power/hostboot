@@ -56,7 +56,7 @@ class ScomTest: public CxxTest::TestSuite
 public:
 
   /**
-   * @brief SCOM test via FSISCOM to Venice
+   * @brief SCOM test via FSISCOM
    *
    */
   void test_FSISCOMreadWrite_proc(void)
@@ -1152,6 +1152,141 @@ public:
           }
       }
 */
+  }
+
+
+  /**
+   * @brief SCOM test via SBESCOM
+   *
+   */
+  void test_SBESCOMreadWrite_proc(void)
+  {
+      TRACFCOMP( g_trac_scom, "ScomTest::test_SBESCOMreadWrite_proc> Start" );
+
+      uint64_t fails = 0;
+      uint64_t total = 0;
+      errlHndl_t l_err = NULL;
+
+      // Setup some targets to use
+      enum {
+          PROC1,
+          NUM_TARGETS
+      };
+      TARGETING::Target* scom_targets[NUM_TARGETS];
+      for( uint64_t x = 0; x < NUM_TARGETS; x++ )
+      {
+          scom_targets[x] = NULL;
+      }
+
+      // processor target (physical:sys-0/node-0/proc-1)
+      TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
+      epath.addLast(TARGETING::TYPE_SYS,0);
+      epath.addLast(TARGETING::TYPE_NODE,0);
+      epath.addLast(TARGETING::TYPE_PROC,1);
+      scom_targets[PROC1] = TARGETING::targetService().toTarget(epath);
+
+      for( uint64_t x = 0; x < NUM_TARGETS; x++ )
+      {
+          //only run if the target exists
+          if(scom_targets[x] == NULL)
+          {
+              TRACFCOMP(g_trac_scom, "test_SBESCOMreadWrite_proc> Target %d does NOT exist to read", x);
+              continue;
+          }
+          // skip the sentinel
+          else if((TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == scom_targets[x]))
+          {
+              TRACFCOMP( g_trac_scom, "ScomTest::test_SBESCOMreadWrite_proc> Target %d is the MASTER Sentinal, exiting test", x );
+              scom_targets[x] = NULL; //remove from our list
+          }
+          // skip if sbe scom is not enabled
+          else if(0 == scom_targets[x]->getAttr<TARGETING::ATTR_SCOM_SWITCHES>().useSbeScom)
+          {
+              TRACFCOMP( g_trac_scom, "ScomTest::test_SBESCOMreadWrite_proc> useSbeScom set to zero on target %d", x );
+              scom_targets[x] = NULL; //remove from our list
+          }
+          else if (scom_targets[x]->getAttr<TARGETING::ATTR_HWAS_STATE>().functional != true)
+          {
+              // NIMBUS model falls through here
+              TRACDCOMP( g_trac_scom, "ScomTest::test_SBESCOMreadWrite_proc> Target %d is not functional", x );
+              scom_targets[x] = NULL; //remove from our list
+          }
+      }
+
+      // scratch data to use
+      struct {
+          TARGETING::Target* target;
+          uint64_t addr;
+          uint64_t data;
+      } test_data[] = {
+          { scom_targets[PROC1],    0x02010803, 0x1234567887654321}, // addr: CXA FIR Mask Register
+          { scom_targets[PROC1],    0x02011083, 0x1122334455667788}, // addr: PBI CQ FIR Mask Register
+      };
+      const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
+
+      // allocate space for read data
+      uint64_t read_data[NUM_ADDRS];
+      size_t op_size = sizeof(uint32_t);
+
+      // write all the test registers
+      for( uint64_t x = 0; x < NUM_ADDRS; x++ )
+      {
+          //only run if the target exists
+          if(test_data[x].target == NULL)
+          {
+              TRACFCOMP(g_trac_scom, "test_SBESCOMreadWrite_proc> Target %d does NOT exist to write", x);
+              continue;
+          }
+
+          op_size = sizeof(uint64_t);
+
+          total++;
+
+          l_err = deviceWrite( test_data[x].target,
+                               &(test_data[x].data),
+                               op_size,
+                               DEVICE_SCOM_ADDRESS(test_data[x].addr) );
+          if( l_err )
+          {
+              TRACFCOMP(g_trac_scom, "ScomTest::test_SBESCOMreadWrite_proc> [%d] Write: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
+              TS_FAIL( "ScomTest::test_SBESCOMreadWrite_proc> ERROR : Unexpected error log from write1" );
+              fails++;
+              errlCommit(l_err,SCOM_COMP_ID);
+          }
+      }
+
+      // read all the test registers
+      for( uint64_t x = 0; x < NUM_ADDRS; x++ )
+      {
+          //only run if the target exists
+          if(test_data[x].target == NULL)
+          {
+              continue;
+          }
+
+          op_size = sizeof(uint64_t);
+
+          total++;
+          l_err = deviceRead( test_data[x].target,
+                              &(read_data[x]),
+                              op_size,
+                              DEVICE_SCOM_ADDRESS(test_data[x].addr) );
+          if( l_err )
+          {
+              TRACFCOMP(g_trac_scom, "ScomTest::test_SBESCOMreadWrite_proc> [%d] Read: Error from device : addr=0x%X, RC=%X", x,  test_data[x].addr, l_err->reasonCode() );
+              TS_FAIL( "ScomTest::test_SBESCOMreadWrite_proc> ERROR : Unexpected error log from write1" );
+              fails++;
+              errlCommit(l_err,SCOM_COMP_ID);
+          }
+          else if(read_data[x] != test_data[x].data)
+          {
+              TRACFCOMP(g_trac_scom, "ScomTest::test_SBESCOMreadWrite_proc> [%d] Read: Data miss-match : addr=0x%X, read_data=0x%llx, write_data=0x%llx", x, test_data[x].addr, read_data[x], test_data[x].data);
+              TS_FAIL( "ScomTest::test_SBESCOMreadWrite_proc> ERROR : Data miss-match between read and expected data" );
+              fails++;
+          }
+      }
+
+      TRACFCOMP( g_trac_scom, "ScomTest::test_SBESCOMreadWrite_proc> %d/%d fails", fails, total );
   }
 
 };

@@ -111,11 +111,12 @@ class CommonTargetingTestSuite: public CxxTest::TestSuite
         if(   l_switches.useFsiScom != 0
               || l_switches.useXscom != 1
               || l_switches.useInbandScom != 0
+              || l_switches.useSbeScom != 0
               || l_switches.reserved != 0)
         {
-            TARG_TS_FAIL("SCOM Switches stuct was not correct (%d, %d, %d, %d)",
+            TARG_TS_FAIL("SCOM Switches stuct was not correct (%d, %d, %d, %d, %d)",
                     l_switches.useFsiScom, l_switches.useXscom,
-                    l_switches.useInbandScom ,
+                    l_switches.useInbandScom,l_switches.useSbeScom,
                     l_switches.reserved);
         }
 

@@ -336,11 +336,11 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
                 }
                 else
                 {
-                    //Add the callouts for the specific PCB/PIB error
-                    PIB::addFruCallouts( i_target,
-                                         scomout.piberr,
-                                         i_addr,
-                                         l_err );
+                //Add the callouts for the specific PCB/PIB error
+                PIB::addFruCallouts( i_target,
+                                     scomout.piberr,
+                                     i_addr,
+                                     l_err );
                 }
 
                 //Add this target to the FFDC
@@ -555,6 +555,15 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
                              io_buflen,
                              DEVICE_XSCOM_ADDRESS(i_addr));
             break;
+        }
+        else if(scomSetting.useSbeScom)
+        {   //do SBESCOM
+            l_err = deviceOp(i_opType,
+                             i_target,
+                             io_buffer,
+                             io_buflen,
+                             DEVICE_SBEFIFOSCOM_ADDRESS(i_addr));
+            if( l_err ) { break; }
         }
         else if(scomSetting.useInbandScom)
         {   //do IBSCOM
