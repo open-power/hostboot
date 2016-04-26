@@ -150,6 +150,7 @@
     <attribute><id>POSITION</id><default>4</default></attribute>
     <attribute><id>SCOM_SWITCHES</id>
         <default>
+            <field><id>useSbeScom</id><value>0</value></field>
             <field><id>useFsiScom</id><value>0</value></field>
             <field><id>useXscom</id><value>1</value></field>
             <field><id>useInbandScom</id><value>0</value></field>

@@ -228,7 +228,7 @@ void* call_proc_build_smp (void *io_pArgs)
         }
 
         // At the point where we can now change the proc chips to use
-        // XSCOM rather than FSISCOM which is the default.
+        // XSCOM rather than SBESCOM which is the default.
 
         TARGETING::TargetHandleList procChips;
         getAllChips(procChips, TYPE_PROC);
@@ -248,16 +248,16 @@ void* call_proc_build_smp (void *io_pArgs)
                   l_proc_target->getAttr<ATTR_SCOM_SWITCHES>();
 
                 // If Xscom is not already enabled.
-                if ((l_switches.useXscom != 1) || (l_switches.useFsiScom != 0))
+                if ((l_switches.useXscom != 1) || (l_switches.useSbeScom != 0))
                 {
-                    l_switches.useFsiScom = 0;
+                    l_switches.useSbeScom = 0;
                     l_switches.useXscom = 1;
 
-                    // Turn off FSI scom and turn on Xscom.
+                    // Turn off SBE scom and turn on Xscom.
                     l_proc_target->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
 
-                    // Reset the FSI2OPB logic on the new chips
-                    l_errl = FSI::resetPib2Opb(l_proc_target);
+                    // Reset the FSI2OPB logic on the new chips                    
+                    l_errl = FSI::resetPib2Opb(l_proc_target); // An SBE reset equivalent?
                     if(l_errl)
                     {
                         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,

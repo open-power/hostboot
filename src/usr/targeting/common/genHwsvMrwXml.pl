@@ -3123,10 +3123,7 @@ sub generate_proc
     my $affinityPath = "affinity:sys-$sys/node-$node/proc-$proc";
 
     my $mruData = get_mruid($ipath);
-
-    # If we don't have an FSP (open-power) then we want to use Xscom
-    my $UseXscom   = $haveFSPs ? 0 : 1;
-    my $UseFsiScom = $haveFSPs ? 1 : 0;
+    
     my $fapi_name = sprintf("pu:k0:n%d:s0:p%02d", $node, $proc);
     print "
     <!-- $SYSNAME n${node}p${proc} processor chip -->
@@ -3137,14 +3134,6 @@ sub generate_proc
     <attribute><id>HUID</id><default>${uidstr}</default></attribute>
     <attribute><id>FAPI_NAME</id><default>$fapi_name</default></attribute>
     <attribute><id>POSITION</id><default>${position}</default></attribute>
-    <attribute><id>SCOM_SWITCHES</id>
-        <default>
-            <field><id>useFsiScom</id><value>$UseFsiScom</value></field>
-            <field><id>useXscom</id><value>$UseXscom</value></field>
-            <field><id>useInbandScom</id><value>0</value></field>
-            <field><id>reserved</id><value>0</value></field>
-        </default>
-    </attribute>
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-$sys/node-$node/proc-$proc</default>

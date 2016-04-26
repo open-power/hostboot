@@ -549,7 +549,8 @@ sub processProcessor
 
     ## these are hardcoded because code sets them properly
     $targetObj->setAttributeField($target, "SCOM_SWITCHES", "reserved",   "0");
-    $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useFsiScom", "1");
+    $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useSbeScom", "1");
+    $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useFsiScom", "0");
     $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useInbandScom",
         "0");
     $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useXscom", "0");
