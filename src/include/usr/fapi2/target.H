@@ -765,26 +765,24 @@ Target<K, V>::getOtherEnd(fapi2::Target<T>& o_target,
     ReturnCodes l_rc;
 //     errlHndl_t l_errl = NULL;
     TARGETING::TargetHandleList l_peerTargetList;
-    TARGETING::TYPE requiredPeerType = fapi2::convertFapi2TypeToTargeting(T);
     TARGETING::CLASS targetClass = TARGETING::CLASS_NA;
 
-    //TODO RTC:148934  add static_asserts for correct types
-    switch(requiredPeerType)
-    {
-        case TARGETING::TYPE_XBUS :
-            targetClass = TARGETING::CLASS_UNIT; break;
-        case TARGETING::TYPE_OBUS :
-              targetClass = TARGETING::CLASS_UNIT; break;
-        case TARGETING::TYPE_DMI :
-              targetClass = TARGETING::CLASS_UNIT; break;
-        case TARGETING::TYPE_DIMM :
-              targetClass = TARGETING::CLASS_LOGICAL_CARD; break;
-        case TARGETING::TYPE_MEMBUF :
-              targetClass = TARGETING::CLASS_CHIP; break;
-        default:
-          break;
-    }
-    TARGETING::PredicateCTM l_peerFilter(targetClass);
+    // Only supporting these relationships:
+    //  XBUS <-> XBUS
+    //  ABUS <-> ABUS
+    //  OBUS <-> OBUS
+
+    static_assert( K==T, "both ends must be of same fapi2::TARGET_TYPE");
+    static_assert ( ( (K==fapi2::TARGET_TYPE_XBUS) ||
+                      (K==fapi2::TARGET_TYPE_ABUS) ||
+                      (K==fapi2::TARGET_TYPE_OBUS) ),
+                    "Only types of XBUS, ABUS, and OBUS are supported");
+
+    // for the supported types above, only one option supported
+    targetClass = TARGETING::CLASS_UNIT;
+
+    TARGETING::PredicateCTM l_peerFilter(targetClass,
+                                         fapi2::convertFapi2TypeToTargeting(T));
 
     if(i_state == TARGET_STATE_FUNCTIONAL)
     {
