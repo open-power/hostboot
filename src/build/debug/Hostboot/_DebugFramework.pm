@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2011,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -43,7 +43,8 @@ use strict;
 package Hostboot::_DebugFramework;
 use Exporter 'import';
 
-our @EXPORT = ( 'callToolModule', 'callToolModuleHelp', 'callToolModuleHelpInfo',
+our @EXPORT = ( 'setBootloader', 'clearBootloader', 'callToolModule',
+                'callToolModuleHelp', 'callToolModuleHelpInfo',
                 'parseToolOpts', 'determineImagePath',
                 'findSymbolAddress', 'findSymbolTOCAddress',
                 'findSymbolByAddress',
@@ -60,6 +61,7 @@ our ($parsedSymbolFile, %symbolAddress, %symbolTOC,
      %addressSymbol, %symbolSize, %addrRangeHash);
 our ($parsedModuleFile, %moduleAddress);
 our (%toolOpts);
+our ($bootloaderDebug);
 
 BEGIN
 {
@@ -75,8 +77,32 @@ BEGIN
     %moduleAddress = ();
 
     %toolOpts = ();
+
+    $bootloaderDebug = 0;
 }
 return 1;
+
+# @sub setBootloader
+#
+# Sets flag for running Bootloader tool.
+#
+sub setBootloader
+{
+    $bootloaderDebug = 1;
+
+    return;
+}
+
+# @sub clearBootloader
+#
+# Clears flag for running Bootloader tool.
+#
+sub clearBootloader
+{
+    $bootloaderDebug = 0;
+
+    return;
+}
 
 # @sub callToolModule
 #
@@ -266,7 +292,11 @@ sub parseSymbolFile
     if ($parsedSymbolFile) { return; }
 
     my $symsFile = ::getImgPath();
-    if (::getIsTest())
+    if ($bootloaderDebug == 1)
+    {
+        $symsFile = $symsFile."hbibl.syms";
+    }
+    elsif (::getIsTest())
     {
         $symsFile = $symsFile."hbicore_test.syms";
     }

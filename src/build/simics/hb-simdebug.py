@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2011,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -36,6 +36,26 @@ import random
 #===============================================================================
 default_syms  = "hbicore.syms"
 default_stringFile = "hbotStringFile"
+
+#------------------------------------------------
+#------------------------------------------------
+new_command("hb-bltrace",
+    lambda: run_hb_debug_framework("BlTrace", outputFile = "hb-bltrace.output"),
+    #alias = "hbt",
+    type = ["hostboot-commands"],
+    #see_also = ["hb-trace"],
+    see_also = [ ],
+    short = "Display the Bootloader trace buffer",
+    doc = """
+Parameters: \n
+
+Defaults: \n
+        'syms' = './hbibl.syms' \n\n
+
+Examples: \n
+    hb-bltrace \n\n
+    NOTE: Results are unpredictable after control is passed to Hostboot Base.\n
+    """)
 
 #------------------------------------------------
 #------------------------------------------------
