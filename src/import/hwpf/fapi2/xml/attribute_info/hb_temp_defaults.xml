@@ -103,6 +103,30 @@
     <attribute>
         <id>ATTR_SDISN_SETUP</id>
     </attribute>
+    <attribute>
+        <id>ATTR_VPD_OVERRIDE_MT</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_VPD_OVERRIDE_MT_ENABLE</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_VPD_OVERRIDE_MR</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_VPD_OVERRIDE_MR_ENABLE</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_VPD_OVERRIDE_MW</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_VPD_OVERRIDE_MW_ENABLE</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_SPD_OVERRIDE</id>
+    </attribute>
+    <attribute>
+        <id>ATTR_SPD_OVERRIDE_ENABLE</id>
+    </attribute>
 <!-- =====================================================================
      End of temporary definitions
      ================================================================= -->

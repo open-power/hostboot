@@ -3399,4 +3399,108 @@
         <mssAccessorName>eff_dram_txs</mssAccessorName>
     </attribute>
 
+    <attribute>
+        <id>ATTR_VPD_OVERRIDE_MT</id>
+        <targetType>TARGET_TYPE_MCA</targetType>
+        <description>
+            Byte-for-byte override for the bucket of MT data that would
+            normally come from VPD.  If ATTR_VPD_OVERRIDE_MT_ENABLE!=0 then
+            the value of this attribute will be returned to callers of
+            fapi2::getVPD() instead of the actual VPD contents.
+        </description>
+        <valueType>uint8</valueType>
+        <array>255</array>
+        <platInit/>
+        <overrideOnly/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_OVERRIDE_MT_ENABLE</id>
+        <targetType>TARGET_TYPE_MCA</targetType>
+        <description>
+            Set equal to 1 to activate the use of ATTR_VPD_OVERRIDE_MT.
+        </description>
+        <valueType>uint8</valueType>
+        <platInit/>
+        <overrideOnly/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_OVERRIDE_MR</id>
+        <targetType>TARGET_TYPE_MCA</targetType>
+        <description>
+            Byte-for-byte override for the bucket of MR data that would
+            normally come from VPD.  If ATTR_VPD_OVERRIDE_MR_ENABLE!=0 then
+            the value of this attribute will be returned to callers of
+            fapi2::getVPD() instead of the actual VPD contents.
+        </description>
+        <valueType>uint8</valueType>
+        <array>255</array>
+        <platInit/>
+        <overrideOnly/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_OVERRIDE_MR_ENABLE</id>
+        <targetType>TARGET_TYPE_MCA</targetType>
+        <description>
+            Set equal to 1 to activate the use of ATTR_VPD_OVERRIDE_MR.
+        </description>
+        <valueType>uint8</valueType>
+        <platInit/>
+        <overrideOnly/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_OVERRIDE_MW</id>
+        <targetType>TARGET_TYPE_MCA</targetType>
+        <description>
+            Byte-for-byte override for the bucket of MW data that would
+            normally come from VPD.  If ATTR_VPD_OVERRIDE_MW_ENABLE!=0 then
+            the value of this attribute will be returned to callers of
+            fapi2::getVPD() instead of the actual VPD contents.
+        </description>
+        <valueType>uint8</valueType>
+        <array>255</array>
+        <platInit/>
+        <overrideOnly/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_VPD_OVERRIDE_MW_ENABLE</id>
+        <targetType>TARGET_TYPE_MCA</targetType>
+        <description>
+            Set equal to 1 to activate the use of ATTR_VPD_OVERRIDE_MW.
+        </description>
+        <valueType>uint8</valueType>
+        <platInit/>
+        <overrideOnly/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_SPD_OVERRIDE</id>
+        <targetType>TARGET_TYPE_DIMM</targetType>
+        <description>
+            Byte-for-byte override for the bucket of data that would
+            normally come from SPD.  If ATTR_SPD_OVERRIDE_ENABLE!=0 then
+            the value of this attribute will be returned to callers of
+            fapi2::getSPD() instead of the actual SPD contents.
+        </description>
+        <valueType>uint8</valueType>
+        <array>512</array>
+        <platInit/>
+        <overrideOnly/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_SPD_OVERRIDE_ENABLE</id>
+        <targetType>TARGET_TYPE_DIMM</targetType>
+        <description>
+            Set equal to 1 to activate the use of ATTR_SPD_OVERRIDE.
+        </description>
+        <valueType>uint8</valueType>
+        <platInit/>
+        <overrideOnly/>
+    </attribute>
+
 </attributes>
