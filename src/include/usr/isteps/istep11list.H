@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,7 +27,7 @@
 
 /**
  * list of functions called for ISTEP 11 according to Dean's
- *  IPL Flow Doc        v0.67 (11/11/15)
+ *  IPL FLow Doc        v0.93 (04/04/16)
  *
  */
 
@@ -60,71 +60,6 @@ namespace   ISTEP_11
 void*  call_host_prd_hwreconfig( void    *io_pArgs );
 
 
-
-/**
- *  @brief   cen sbe tp chiplet init1
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  any errlogs to istep 
- *
- */
-void*    call_cen_sbe_tp_chiplet_init1( void    *io_pArgs );
-
-
-
-/**
- *  @brief   cen sbe pll initf
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  any errlogs to istep 
- *
- */
-void*    call_cen_sbe_pll_initf( void    *io_pArgs );
-
-/**
- *  @brief   cen sbe pll setup
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  any errlogs to istep 
- *
- */
-void*    call_cen_sbe_pll_setup( void    *io_pArgs );
-
-
-/**
- *  @brief   cen sbe tp chiplet init2
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  any errlogs to istep 
- *
- */
-void*    call_cen_sbe_tp_chiplet_init2( void    *io_pArgs );
-
-/**
- *  @brief   cen sbe tp arrayinit
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  any errlogs to istep 
- *
- */
-void*    call_cen_sbe_tp_arrayinit( void    *io_pArgs );
-
-/**
- *  @brief   cen sbe tp chiplet init3
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  any errlogs to istep 
- *
- */
-void*    call_cen_sbe_tp_chiplet_init3( void    *io_pArgs );
-
-
 };
 
 
@@ -142,36 +77,7 @@ const   TaskInfo    g_istep11[]  =   {
                 ISTEP_11::call_host_prd_hwreconfig,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
-        {
-                ISTEPNAME(11,02,"cen_sbe_tp_chiplet_init1"),
-                ISTEP_11::call_cen_sbe_tp_chiplet_init1,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(11,03,"cen_sbe_pll_initf"),
-                ISTEP_11::call_cen_sbe_pll_initf,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(11,04,"cen_sbe_pll_setup"),
-                ISTEP_11::call_cen_sbe_pll_setup,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(11,05,"cen_sbe_tp_chiplet_init2"),
-                ISTEP_11::call_cen_sbe_tp_chiplet_init2,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(11,06,"cen_sbe_tp_arrayinit"),
-                ISTEP_11::call_cen_sbe_tp_arrayinit,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
-        {
-                ISTEPNAME(11,07,"cen_sbe_tp_chiplet_init3"),
-                ISTEP_11::call_cen_sbe_tp_chiplet_init3,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
-        },
+
 };
 
 const DepModInfo g_istep11Dependancies = {

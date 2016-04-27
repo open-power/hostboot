@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -31,7 +31,7 @@
  * @file    istep13list.H
  *
  *  IStep 13    Step 13
- *  IPL FLow Doc        v0.67 (11/11/15)
+ *  IPL FLow Doc        v0.93 (04/04/16)
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -48,14 +48,26 @@ namespace   ISTEP_13
 {
 
 /**
- *  @brief   host_disable_vddr
+ *  @brief   host_disable_memvolt
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return any errlogs to istep
  *
  */
-void*  call_host_disable_vddr( void    *io_pArgs );
+void*  call_host_disable_memvolt( void    *io_pArgs );
+
+
+
+/**
+ *  @brief   mem_pll_reset
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep
+ *
+ */
+void*    call_mem_pll_reset( void    *io_pArgs );
 
 
 
@@ -103,14 +115,14 @@ void*    call_proc_mcs_skewadjust( void    *io_pArgs );
 void*    call_mem_startclocks( void    *io_pArgs );
 
 /**
- *  @brief   host_enable_vddr
+ *  @brief   host_enable_memvolt
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return  any errlogs to istep
  *
  */
-void*    call_host_enable_vddr( void    *io_pArgs );
+void*    call_host_enable_memvolt( void    *io_pArgs );
 
 /**
  *  @brief   mss_scominit
@@ -188,62 +200,67 @@ const   TaskInfo    g_istep13[]  =   {
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
-                ISTEPNAME(13,01,"host_disable_vddr"),
-                ISTEP_13::call_host_disable_vddr,
+                ISTEPNAME(13,01,"host_disable_memvolt"),
+                ISTEP_13::call_host_disable_memvolt,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(13,02,"mem_pll_initf"),
+                ISTEPNAME(13,02,"mem_pll_reset"),
+                ISTEP_13::call_mem_pll_reset,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+        },
+        {
+                ISTEPNAME(13,03,"mem_pll_initf"),
                 ISTEP_13::call_mem_pll_initf,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(13,03,"mem_pll_setup"),
+                ISTEPNAME(13,04,"mem_pll_setup"),
                 ISTEP_13::call_mem_pll_setup,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(13,04,"proc_mcs_skewadjust"),
+                ISTEPNAME(13,05,"proc_mcs_skewadjust"),
                 ISTEP_13::call_proc_mcs_skewadjust,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(13,05,"mem_startclocks"),
+                ISTEPNAME(13,06,"mem_startclocks"),
                 ISTEP_13::call_mem_startclocks,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(13,06,"host_enable_vddr"),
-                ISTEP_13::call_host_enable_vddr,
+                ISTEPNAME(13,07,"host_enable_memvolt"),
+                ISTEP_13::call_host_enable_memvolt,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(13,07,"mss_scominit"),
+                ISTEPNAME(13,08,"mss_scominit"),
                 ISTEP_13::call_mss_scominit,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(13,08,"mss_ddr_phy_reset"),
+                ISTEPNAME(13,09,"mss_ddr_phy_reset"),
                 ISTEP_13::call_mss_ddr_phy_reset,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(13,09,"mss_draminit"),
+                ISTEPNAME(13,10,"mss_draminit"),
                 ISTEP_13::call_mss_draminit,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(13,10,"mss_draminit_training"),
+                ISTEPNAME(13,11,"mss_draminit_training"),
                 ISTEP_13::call_mss_draminit_training,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(13,11,"mss_draminit_trainadv"),
+                ISTEPNAME(13,12,"mss_draminit_trainadv"),
                 ISTEP_13::call_mss_draminit_trainadv,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
-                ISTEPNAME(13,12,"mss_draminit_mc"),
+                ISTEPNAME(13,13,"mss_draminit_mc"),
                 ISTEP_13::call_mss_draminit_mc,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },

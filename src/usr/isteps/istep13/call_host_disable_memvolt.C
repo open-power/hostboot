@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep13/call_host_disable_vddr.C $             */
+/* $Source: src/usr/isteps/istep13/call_host_disable_memvolt.C $          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,13 +35,13 @@ using   namespace   ISTEP_ERROR;
 namespace ISTEP_13
 {
 
-void* call_host_disable_vddr (void *io_pArgs)
+void* call_host_disable_memvolt (void *io_pArgs)
 {
     errlHndl_t l_err = NULL;
     IStepError l_StepError;
 
     TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-              ENTER_MRK"call_host_disable_vddr");
+              ENTER_MRK"call_host_disable_memvolt");
 
     // This function has Compile-time binding for desired platform
     l_err = platform_disable_vddr();
@@ -49,7 +49,7 @@ void* call_host_disable_vddr (void *io_pArgs)
     if(l_err)
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "ERROR 0x%.8X: call_host_disable_vddr returns error",
+                  "ERROR 0x%.8X: call_host_disable_memvolt returns error",
                   l_err->reasonCode());
         // Create IStep error log and cross reference to error that occurred
         l_StepError.addErrorDetails( l_err );
@@ -59,7 +59,7 @@ void* call_host_disable_vddr (void *io_pArgs)
     }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               EXIT_MRK"call_host_disable_vddr");
+               EXIT_MRK"call_host_disable_memvolt");
 
     return l_StepError.getErrorHandle();
 }

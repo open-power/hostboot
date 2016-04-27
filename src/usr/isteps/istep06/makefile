@@ -33,6 +33,7 @@ OBJS += call_host_update_master_tpm.o
 OBJS += host_gard.o
 OBJS += call_proc_revert_sbe_mcs_setup.o
 OBJS += host_start_occ_xstop_handler.o
+OBJS += call_host_setup_voltages.o
 
 SUBDIRS	+= thread_activate.d
 

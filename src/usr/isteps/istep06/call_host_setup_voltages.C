@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep11/call_cen_sbe_tp_chiplet_init2.C $      */
+/* $Source: src/usr/isteps/istep06/call_host_setup_voltages.C $           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,17 +22,28 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#include <stdint.h>
+#include <trace/interface.H>
 #include <errl/errlentry.H>
+#include <errl/errlmanager.H>
+#include <isteps/hwpisteperror.H>
 
-using namespace ERRORLOG;
+namespace ISTEP_06
+{
 
-namespace ISTEP_11
+void* call_host_setup_voltages( void *io_pArgs )
 {
-void* call_cen_sbe_tp_chiplet_init2 (void *io_pArgs)
-{
-    errlHndl_t l_err = NULL;
-    //@TODO call cen_sbe_tp_chiplet_init2.C HWP
-    return l_err;
+    ISTEP_ERROR::IStepError l_stepError;
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_host_setup_voltages entry" );
+
+    // TODO-RTC: 144620
+
+    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "call_host_setup_voltages exit" );
+
+    return l_stepError.getErrorHandle();
 }
 
 };
