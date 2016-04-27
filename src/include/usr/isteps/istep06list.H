@@ -31,7 +31,7 @@
  * @note    IStep definition for Hostboot - Slave SBE
  *
  *  IStep 06    Slave SBE
- *  IPL FLow Doc        v0.67 (11/02/15)
+ *  IPL FLow Doc        v0.93 (04/04/16)
  *
  *  06.1    host_bootloader
  *        : Host Bootloader (non-executable istep)
@@ -39,20 +39,24 @@
  *        : Setup host environment (non-executable istep)
  *  06.3    host_istep_enable
  *        : Hostboot istep ready (non-executable istep)
- *  06.4    host_init_fsi
+ *  06.4    host_init_bmc_pcie
+ *        : Setup the PCIE to the BMC chip
+ *  06.5    host_init_fsi
  *        : Setup the FSI links to slave chips
- *  06.5    host_set_ipl_parms
+ *  06.6    host_set_ipl_parms
  *        : Build ipl parameters
- *  06.6    host_discover_targets
+ *  06.7    host_discover_targets
  *      :   Builds targeting
- *  06.7    host_update_master_tpm
+ *  06.8    host_update_master_tpm
  *      :   Update master TPM
- *  06.8    host_gard
+ *  06.9    host_gard
  *      :   Do Gard
- *  06.9    proc_revert_sbe_mcs_setup
+ *  06.10   proc_revert_sbe_mcs_setup
  *      :   Clean up MCS extent regs
- *  06.10   host_start_occ_xstop_handler
- *      :
+ *  06.11   host_start_occ_xstop_handler
+ *      :   Start OpenPOWER xstop
+ *  06.12   host_setup_voltages
+ *      :   Set correct chip voltage
  *
  */
 
@@ -61,8 +65,9 @@
 
 namespace ISTEP_06
 {
+
 /**
- * @brief   host_init_fsi   Setup the FSI links to slave chips (istep 6.4)
+ * @brief   host_init_fsi   Setup the FSI links to slave chips (istep 6.5)
  *
  *  Call into the hwas platform-specific initHardware() function
  *  to init the FSI hardware.
@@ -74,7 +79,7 @@ namespace ISTEP_06
 void* host_init_fsi( void *io_pArgs );
 
 /**
- * @brief   host_set_ipl_parms  Build ipl parameters (istep 6.5)
+ * @brief   host_set_ipl_parms  Build ipl parameters (istep 6.6)
  *
  *  TBD
  *
@@ -85,7 +90,7 @@ void* host_init_fsi( void *io_pArgs );
 void* host_set_ipl_parms( void *io_pArgs );
 
 /**
- * @brief   host_discover_targets   Builds targeting (istep 6.6)
+ * @brief   host_discover_targets   Builds targeting (istep 6.7)
  *
  *  This routine will walk through all the targets and initialize HWAS STATE
  *  to a known default value.
@@ -102,7 +107,7 @@ void* host_set_ipl_parms( void *io_pArgs );
 void* host_discover_targets( void *io_pArgs );
 
 /**
- * @brief   call_host_update_master_tpm (istep 6.7)
+ * @brief   call_host_update_master_tpm (istep 6.8)
  *
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
@@ -112,7 +117,7 @@ void* host_discover_targets( void *io_pArgs );
 void* call_host_update_master_tpm( void *io_pArgs );
 
 /**
- * @brief   host_gard   Do Gard (istep 6.8)
+ * @brief   host_gard   Do Gard (istep 6.9)
  *
  * Collect GARD information and apply it to the target states.
  *
@@ -123,7 +128,7 @@ void* call_host_update_master_tpm( void *io_pArgs );
 void* host_gard( void *io_pArgs );
 
 /**
- * @brief   proc_revert_sbe_mcs_setup (istep 6.9)
+ * @brief   proc_revert_sbe_mcs_setup (istep 6.10)
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -132,7 +137,7 @@ void* host_gard( void *io_pArgs );
 void* call_proc_revert_sbe_mcs_setup (void * io_pArgs);
 
 /**
- * @brief   host_start_occ_xstop_handler (istep 6.10)
+ * @brief   host_start_occ_xstop_handler (istep 6.11)
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
@@ -140,6 +145,14 @@ void* call_proc_revert_sbe_mcs_setup (void * io_pArgs);
  */
 void* host_start_occ_xstop_handler (void * io_pArgs);
 
+/**
+ * @brief   host_setup_voltages (istep 6.12)
+ *
+ *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
+ *                              or NULL.
+ *  return  any error logs to istep
+ */
+void* call_host_setup_voltages (void * io_pArgs);
 
 
 };
@@ -170,39 +183,49 @@ const   TaskInfo    g_istep06[]  =   {
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
-                ISTEPNAME(06,04,"host_init_fsi"),
+                ISTEPNAME(06,04,""),        // No support for now. init bmc pcie
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
+        },
+        {
+                ISTEPNAME(06,05,"host_init_fsi"),
                 ISTEP_06::host_init_fsi,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false,
                         BASE_INITIALIZATION }
         },
         {
-                ISTEPNAME(06,05,"host_set_ipl_parms"),
+                ISTEPNAME(06,06,"host_set_ipl_parms"),
                 ISTEP_06::host_set_ipl_parms,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
         {
-                ISTEPNAME(06,06,"host_discover_targets"),
+                ISTEPNAME(06,07,"host_discover_targets"),
                 ISTEP_06::host_discover_targets,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
         {
-                ISTEPNAME(06,07,"host_update_master_tpm"),
+                ISTEPNAME(06,08,"host_update_master_tpm"),
                 ISTEP_06::call_host_update_master_tpm,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
         {
-                ISTEPNAME(06,08, "host_gard"),
+                ISTEPNAME(06,09, "host_gard"),
                 ISTEP_06::host_gard,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
         {
-                ISTEPNAME(06,09,"proc_revert_sbe_mcs_setup"),
+                ISTEPNAME(06,10,"proc_revert_sbe_mcs_setup"),
                 ISTEP_06::call_proc_revert_sbe_mcs_setup,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
-                ISTEPNAME(06,10,"host_start_occ_xstop_handler"),
+                ISTEPNAME(06,11,"host_start_occ_xstop_handler"),
                 ISTEP_06::host_start_occ_xstop_handler,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+        {
+                ISTEPNAME(06,12,"host_setup_voltages"),
+                ISTEP_06::call_host_setup_voltages,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,10 +29,10 @@
  * @file    istep07list.H
  *
  *  IStep 07    Nest Chiplets
- *  IPL FLow Doc        v0.67 (11/02/15)
+ *  IPL FLow Doc        v0.93 (04/04/16)
  *
- *    07.1    host_collect_dimm_spd
- *          : Collect Master dimm SPD
+ *    07.1    host_mss_attr_cleanup
+ *          : Clean up attributes
  *    07.2    mss_volt
  *          : Calc dimm voltage
  *    07.3    mss_freq
@@ -54,16 +54,18 @@
 namespace   ISTEP_07
 {
 /**
- *  @brief   host_collect_dimm_spd
+ *  @brief   host_mss_attr_cleanup
  *
- *           Collect Master dimm SPD
+ *           Clean up attributes on reconfig loops
  *
  *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
  *                              or NULL.
  *  return  any error logs to istep
  *
  */
-void*    call_host_collect_dimm_spd( void * io_pArgs );
+void*    call_host_mss_attr_cleanup( void * io_pArgs );
+
+
 
 /**
  *  @brief   mss_volt
@@ -131,9 +133,9 @@ namespace   INITSERVICE
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
-                ISTEPNAME(07,01,"host_collect_dimm_spd"),
-                ISTEP_07::call_host_collect_dimm_spd,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+                ISTEPNAME(07,01,""),
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
                 ISTEPNAME(07,02,"mss_volt"),

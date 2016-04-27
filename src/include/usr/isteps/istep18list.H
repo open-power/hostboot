@@ -29,7 +29,7 @@
  * @file    istep18list.H
  *
  *  IStep 18    Establish System SMP
- *  IPL FLow Doc        v0.60 (06/02/15)
+ *  IPL FLow Doc        v0.93 (04/04/16)
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
@@ -102,6 +102,21 @@ namespace   INITSERVICE
         },
         {
                 ISTEPNAME(18,12,""),
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
+        },
+        {
+                ISTEPNAME(18,13,""),
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
+        },
+        {
+                ISTEPNAME(18,14,""),
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
+        },
+        {
+                ISTEPNAME(18,15,""),
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },

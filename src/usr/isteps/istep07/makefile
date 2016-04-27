@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015
+# Contributors Listed Below - COPYRIGHT 2015,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -25,7 +25,6 @@
 ROOTPATH = ../../../..
 MODULE = istep07
 
-OBJS += host_collect_dimm_spd.o
 OBJS += call_mss_volt.o
 OBJS += call_mss_freq.o
 OBJS += call_mss_eff_config.o

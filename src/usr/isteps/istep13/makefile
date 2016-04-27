@@ -39,12 +39,13 @@ EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/perv
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 
-OBJS += call_host_disable_vddr.o
+OBJS += call_host_disable_memvolt.o
+OBJS += call_mem_pll_reset.o
 OBJS += call_mem_pll_initf.o
 OBJS += call_mem_pll_setup.o
 OBJS += call_proc_mcs_skewadjust.o
 OBJS += call_mem_startclocks.o
-OBJS += call_host_enable_vddr.o
+OBJS += call_host_enable_memvolt.o
 OBJS += call_mss_scominit.o
 OBJS += call_mss_ddr_phy_reset.o
 OBJS += call_mss_draminit.o

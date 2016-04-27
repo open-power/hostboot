@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep11/call_cen_sbe_tp_chiplet_init3.C $      */
+/* $Source: src/usr/isteps/istep13/call_mem_pll_reset.C $                 */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2016                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,16 +23,27 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 #include <errl/errlentry.H>
+#include <errl/errlmanager.H>
+#include <errl/errludtarget.H>
+#include <isteps/hwpisteperror.H>
+#include <initservice/isteps_trace.H>
 
-using namespace ERRORLOG;
 
-namespace ISTEP_11
+using   namespace   ISTEP_ERROR;
+
+namespace ISTEP_13
 {
-void* call_cen_sbe_tp_chiplet_init3 (void *io_pArgs)
+void* call_mem_pll_reset (void *io_pArgs)
 {
-    errlHndl_t l_err = NULL;
-    //@TODO call cen_sbe_tp_chiplet_init3.C HWP
-    return l_err;
+    IStepError l_StepError;
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_pll_reset entry" );
+
+    // TODO-RTC: 134081
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mem_pll_reset exit" );
+
+    return l_StepError.getErrorHandle();
 }
 
 };

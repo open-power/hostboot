@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015
+# Contributors Listed Below - COPYRIGHT 2015,2016
 # [+] International Business Machines Corp.
 #
 #
@@ -26,10 +26,5 @@ ROOTPATH = ../../../..
 MODULE = istep12
 
 OBJS += call_mss_getecid.o
-OBJS += call_dmi_attr_update.o
-OBJS += call_proc_dmi_scominit.o
-OBJS += call_dmi_scominit.o
-OBJS += call_dmi_erepair.o
-OBJS += call_dmi_io_dccal.o
 
 include ${ROOTPATH}/config.mk
